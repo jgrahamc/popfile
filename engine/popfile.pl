@@ -514,15 +514,22 @@ sub flush_extra
         if ( $mail->connected )
         {
             my $selector = new IO::Select( $mail );
-            
-            my ($ready) = $selector->can_read(0.01);
-            
-            while ( $ready == $mail ) 
+            my $buf = "";
+            my $max_length = 8192;
+
+            while( 1 )
             {
-                my $line;
-                $line = <$mail>;
-                print $client $line;
-                ($ready) = $selector->can_read(0.01);
+                last unless () = $selector->can_read(0.1);
+                unless( my $n = sysread( $mail, $buf, $max_length, length $buf ) )
+                {
+                    last;
+                }
+                
+                while( $buf =~ s/^.*?$eol//s )
+                {
+                    my $line = $&;
+                    print $client $line;
+                }
             }
         }
     }
