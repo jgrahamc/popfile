@@ -618,7 +618,7 @@ sub add_url
 
     # Extract authorization information from the URL (e.g. http://foo@bar.com)
 
-    $authinfo = $1 if ( $url =~ s/^([[:alpha:]0-9\-_\.\;\:\&\=\+\$\,]+)(\@|\%40)// );
+    $authinfo = $1 if ( $url =~ s/^(([[:alpha:]0-9\-_\.\;\:\&\=\+\$\,]+)(\@|\%40))+// );
 
     if ( $url =~ s/^(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro|[[:alpha:]]{2})([^[:alpha:]0-9\-_\.]|$)/$4/i ) {
         $host = "$1$3";
