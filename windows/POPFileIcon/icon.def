@@ -1,6 +1,0 @@
-LIBRARY	POPFileIcon
-
-EXPORTS
-	GetMenuMessage	@1
-	HideIcon        @2
-	
