@@ -73,7 +73,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.0"
+  !define C_PFI_VERSION  "0.1.1"
 
   ; Mention the version number in the window title
 
@@ -178,10 +178,10 @@
 
   !define MUI_LANGDLL_WINDOWTITLE "Language Selection"
 
-  ; Use same language setting as the installer (assumes "POPFile 0.21.0_Test_x" installer)
+  ; Use same language setting as the installer
 
   !define MUI_LANGDLL_REGISTRY_ROOT "HKLM"
-  !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\POPFileTest"
+  !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\POPFile"
   !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
 
 #--------------------------------------------------------------------------
@@ -748,10 +748,11 @@ SectionEnd
 #         (top of stack)     - all of the parameters supplied on the command line (may be "")
 #
 # Usage:
+#
 #         Call GetParameters
 #         Pop $R0
 #
-#         (if 'setup.exe /outlook' was used to start the installer, $R0 will hold '/outlook')
+#        ($R0 will hold everything found on the command-line after the 'monitorcc.exe' part)
 #
 #--------------------------------------------------------------------------
 
@@ -807,6 +808,7 @@ FunctionEnd
 #         (top of stack)     - current local time in 0.01 minute units (Int64)
 #
 # Usage:
+#
 #         Call GetLocalTimeAsMin100
 #         Pop $R0
 #
@@ -868,13 +870,13 @@ FunctionEnd
 # Outputs:
 #         (top of stack)          - output string
 #
-#  Usage Example:
+# Usage:
 #
-#    Push "C:\PROGRA~1\SQLPFILE"
-#    Call StrLower
-#    Pop $R0
+#         Push "C:\PROGRA~1\SQLPFILE"
+#         Call StrLower
+#         Pop $R0
 #
-#   ($R0 at this point is "c:\progra~1\sqlpfile")
+#         ($R0 at this point is "c:\progra~1\sqlpfile")
 #
 #--------------------------------------------------------------------------
 
