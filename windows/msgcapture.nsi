@@ -93,13 +93,13 @@
   ; (two commonly used exceptions to this rule are 'IO_NL' and 'MB_NL')
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION             "0.0.59"
+  !define C_VERSION             "0.0.60"
 
   !define C_OUTFILE             "msgcapture.exe"
 
   ; The timeout used when the installer calls this utility to monitor the SQL database upgrade
 
-  !define C_INSTALLER_TIMEOUT   30
+  !define C_INSTALLER_TIMEOUT   15
 
   ;--------------------------------------------------------------------------
   ; The default NSIS caption is "$(^Name) Setup" so we override it here
@@ -373,7 +373,7 @@ Section default
   !define L_TEMP          $R6
   !define L_TRAYICON      $R5   ; system tray icon enabled ("i" ) or disabled ("") flag
   !define L_OPTIONS       $R4   ; POPFile 0.23.0 no longer displays startup messages by default
-                                ; so we use the --verbose=1 option to turn them back on
+                                ; so we use the --verbose option to turn them back on
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_MSGCAP_RIGHTCLICK)"
@@ -437,7 +437,7 @@ found_cfg:
 
   StrCpy ${L_OPTIONS} ""
   IfFileExists "${L_PFI_ROOT}\POPFile\Database.pm" 0 look_for_exe
-  StrCpy ${L_OPTIONS} "--verbose=1"
+  StrCpy ${L_OPTIONS} "--verbose"
 
 look_for_exe:
   IfFileExists "${L_PFI_ROOT}\popfile${L_TRAYICON}f.exe" found_exe
