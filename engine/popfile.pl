@@ -73,7 +73,7 @@ sub aborting
 # Called to fork POPFile.  Calls every module's forked function in the child process to give
 # then a chance to clean up
 #
-# Returns the return value from fork() and a pair of file handles that form a pipe in the
+# Returns the return value from fork() and a file handle that form a pipe in the
 # direction child to parent.  There is no need to close the file handles that are unused as
 # would normally be the case with a pipe and fork as forker takes care that in each process
 # only one file handle is open (be it the reader or the writer)
@@ -81,17 +81,38 @@ sub aborting
 # ---------------------------------------------------------------------------------------------
 sub forker
 {
+    # Create the pipe that will be used to send data from the child to the parent process, 
+    # WRITER will be returned to the child process and READER to the parent process
+    
+    pipe( READER, WRITER );
     my $pid = fork();
     
-    if ( defined( $pid ) ) {
-        if ( $pid == 0 ) {
-            for my $c (sort keys %components) {
-                $components{$c}->forked();
-            }
+    # If fork() returns an undefined value then we failed to fork and are
+    # in serious trouble (probably out of resources) so we return undef
+    
+    if ( !defined( $pid ) ) {
+        return (undef, undef);
+    }
+
+    # If fork returns a PID of 0 then we are in the child process so close the
+    # reading pipe file handle, inform all modules that are fork has occurred and 
+    # then return 0 as the PID so that the caller knows that we are in the child
+    
+    if ( $pid == 0 ) {
+        for my $c (sort keys %components) {
+            $components{$c}->forked();
         }
+        
+        close READER;
+        return (0, \*WRITER);
     }
     
-    return $pid;
+    # Reach here because we are in the parent process, close out the writer pipe
+    # file handle and return our PID (non-zero) indicating that this is the parent
+    # process
+    
+    close WRITER;
+    return ($pid, \*READER);
 }
 
 #

@@ -630,6 +630,8 @@ sub classify_file
 # $nosave   - indicates that the message downloaded should not be saved in the history
 # $class    - if we already know the classification
 #
+# Returns a classification if it worked, otherwise returns an empty string
+#
 # ---------------------------------------------------------------------------------------------
 sub classify_and_modify
 {
@@ -660,8 +662,6 @@ sub classify_and_modify
 
     my $temp_file  = "messages/popfile$dcount" . "=$mcount.msg";
     my $class_file = "messages/popfile$dcount" . "=$mcount.cls";
-    $self->{configuration}->{configuration}{mcount}     += 1 if ( !$nosave );
-    $self->{ui}->{history_invalid}                       = 1 if ( !$nosave );
 
     $self->{logger}->debug( "Writing $temp_file" );
 
@@ -729,9 +729,6 @@ sub classify_and_modify
     # Do the text classification and update the counter for that bucket that we just downloaded
     # an email of that type
     $classification = ($class ne '')?$class:$self->classify_file($temp_file);
-    if ( !$nosave ) {
-        $self->{parameters}{$classification}{count} += 1 if ( $classification ne 'unclassified' );
-    }
 
     # Add the Subject line modification or the original line back again
     if ( $self->{configuration}->{configuration}{subject} && ( $msg_subject ne '' ) ) {
@@ -783,6 +780,8 @@ sub classify_and_modify
         }
         close CLASS;
     }
+    
+    return $classification;
 }
 
 1;

@@ -46,6 +46,9 @@ sub new
     
     # Just our hostname
     $self->{hostname}        = '';
+
+    # List of file handles to read from active children
+    $self->{children}        = (undef);
     
     return bless $self, $type;
 }
@@ -147,8 +150,14 @@ sub start
 sub stop
 {
     my ( $self ) = @_;
-    
+
+    # Need to close all the duplicated file handles, this include the POP3 listener
+    # and all the reading ends of pipes to active children
     close $self->{server} if ( defined( $self->{server} ) );
+    
+    for my $pipe (@{$self->{children}}) {
+        close $pipe;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -178,16 +187,62 @@ sub service
             if  ( ( $self->{configuration}->{configuration}{localpop} == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
                 # Now that we have a good connection to the client fork a subprocess to handle the communication
                 $self->{configuration}->{configuration}{download_count} += 1;
-                my $pid = &{$self->{forker}};
-                
+                my ($pid,$pipe) = &{$self->{forker}};
+
+                # If we are in the parent process then push the pipe handle onto the children list
+                if ( ( defined( $pid ) ) && ( $pid != 0 ) ) {
+                    $pipe->blocking( 0 );
+                    push @{$self->{children}}, ($pipe);
+                }
+
                 # If we fail to fork, or are in the child process then process this request
                 if ( !defined( $pid ) || ( $pid == 0 ) ) {
-                    child( $self, $client, $self->{configuration}->{configuration}{download_count} );
+                    child( $self, $client, $self->{configuration}->{configuration}{download_count}, $pipe );
                     exit(0) if ( defined( $pid ) );
                 }
             }
 
             close $client;
+        }
+    }
+
+    # Now see if any of our children have data ready to read from their pipes, the data returned is
+    # a line containing just the name of a bucket for which we have done a classification.  Increment
+    # the statistics for that bucket and the total message count
+
+    my @pipes;
+    
+    if ( $#{$self->{children}} >= 0 ) {
+        debug( $self, "There are $#{$self->{children}}+1 children running$eol" );
+        @pipes = @{$self->{children}};
+    }
+    $self->{children} = ();
+    
+    for my $pipe (@pipes) {
+        my $class = <$pipe>;
+        
+        while ( defined( $class ) ) {
+            $class =~ s/[\r\n]//g;
+
+            if ( $class eq '__popfile__pipe__done__' ) {
+                debug( $self, "Closing $pipe$eol" );
+                close $pipe;
+                $pipe = undef;
+                last;
+            }            
+            
+            $self->{classifier}->{parameters}{$class}{count} += 1;
+            $self->{configuration}->{configuration}{mcount}  += 1;
+
+            debug( $self, "Incrementing $class$eol" );
+
+            $class = <$pipe>;
+        }
+        
+        # If the pipe is still open when we reach here then we need to keep it
+        # around for next time
+        if ( defined( $pipe ) ) {
+            push @{$self->{children}}, ($pipe);
         }
     }
     
@@ -206,6 +261,10 @@ sub forked
     my ( $self ) = @_;
 
     close $self->{server};
+
+    for my $pipe (@{$self->{children}}) {
+        close $pipe;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -220,7 +279,7 @@ sub forked
 # ---------------------------------------------------------------------------------------------
 sub child
 {
-    my ( $self, $client, $download_count ) = @_;
+    my ( $self, $client, $download_count, $pipe ) = @_;
 
     # Number of messages downloaded in this session
     my $count = 0;
@@ -357,6 +416,9 @@ sub child
                         my $class = $self->{classifier}->classify_and_modify( $mail, $client, $download_count, $count, 1, '' );
                         if ( echo_response( $self, $mail, $client, $command ) ) {
                             $self->{classifier}->classify_and_modify( $mail, $client, $download_count, $count, 0, $class );
+
+                            # Tell the parent that we just handled a mail                            
+                            print $pipe "$class$eol";
                         }
                     }
                 } else {
@@ -410,7 +472,11 @@ sub child
             # we echo each line of the message until we hit the . at the end
             if ( echo_response( $self, $mail, $client, $command ) ) {
                 $count += 1;
-                $self->{classifier}->classify_and_modify( $mail, $client, $download_count, $count, 0, '' );
+                my $class = $self->{classifier}->classify_and_modify( $mail, $client, $download_count, $count, 0, '' );
+
+                # Tell the parent that we just handled a mail                            
+                print $pipe "$class$eol";
+
                 flush_extra( $self, $mail, $client, 0 );
                 next;
             }
@@ -442,7 +508,9 @@ sub child
 
     close $mail if defined( $mail );
     close $client;
-    
+    print $pipe "__popfile__pipe__done__$eol";
+    close $pipe;
+ 
     debug( $self, "POP3 forked child done" );
 }
 
