@@ -592,8 +592,8 @@ sub parse_stream
                             print "$from -> $to\n" if $self->{debug};
                          } 
                      }
-                     while ( $line =~ /(\&\#([\d]{3})\;)/ ) {
-                         if ( ( $1 < 255 ) && ( $1 > 159 ) ) {
+                     while ( $line =~ m/\G(\&\#([\d]{3})\;)/g ) {
+                         if ( ( $1 < 255 ) && ( $1 > 127 ) ) {
                             my $from = $1;
                             my $to   = chr($2);
                             if ( defined( $to ) &&  ( $to ne '' ) ) {
