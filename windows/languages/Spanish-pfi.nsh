@@ -89,7 +89,7 @@
 
 ; Banner message displayed whilst uninstalling old version
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1     "Removing previous version"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1     "Please be patient."
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "This may take a few seconds..."
 
 #--------------------------------------------------------------------------
