@@ -2071,6 +2071,9 @@ Section /o "XMLRPC" SecXMLRPC
   SetOutPath $G_MPLIBDIR\LWP
   File /r "${C_PERL_DIR}\site\lib\LWP\*"
 
+  SetOutPath $G_MPLIBDIR\Net
+  File /r "${C_PERL_DIR}\site\lib\Net\*"
+
   SetOutPath $G_MPLIBDIR\SOAP
   File /r "${C_PERL_DIR}\site\lib\SOAP\*"
 
