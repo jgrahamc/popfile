@@ -2317,7 +2317,7 @@
   FunctionEnd
 !macroend
 
-!ifdef BACKUP | RUNSQLITE
+!ifdef BACKUP | RUNSQLITE | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: GetSQLiteFormat
     #
@@ -2377,14 +2377,16 @@
 !macro GetSQLiteSchemaVersion UN
   Function ${UN}GetSQLiteSchemaVersion
 
-    !define L_DATABASE   $R9   ; name of the SQLite database file
-    !define L_RESULT     $R8   ; string returned on top of the stack
-    !define L_SQLITEUTIL $R7   ; used to run relevant SQLite utility
-    !define L_STATUS     $R6   ; status code returned by SQLite utility
+    !define L_DATABASE    $R9   ; name of the SQLite database file
+    !define L_RESULT      $R8   ; string returned on top of the stack
+    !define L_SQLITEPATH  $R7   ; path to sqlite.exe utility
+    !define L_SQLITEUTIL  $R6   ; used to run relevant SQLite utility
+    !define L_STATUS      $R5   ; status code returned by SQLite utility
 
     Exch ${L_DATABASE}
     Push ${L_RESULT}
     Exch
+    Push ${L_SQLITEPATH}
     Push ${L_SQLITEUTIL}
     Push ${L_STATUS}
 
@@ -2398,12 +2400,15 @@
     Goto exit
 
   look_for_sqlite:
-    IfFileExists "$EXEDIR\${L_SQLITEUTIL}" run_sqlite
-    StrCpy ${L_RESULT} "(cannot find '$EXEDIR\${L_SQLITEUTIL}')"
+    StrCpy ${L_SQLITEPATH} "$EXEDIR"
+    IfFileExists "${L_SQLITEPATH}\${L_SQLITEUTIL}" run_sqlite
+    StrCpy ${L_SQLITEPATH} "$PLUGINSDIR"
+    IfFileExists "${L_SQLITEPATH}\${L_SQLITEUTIL}" run_sqlite
+    StrCpy ${L_RESULT} "(cannot find '${L_SQLITEUTIL}' in '$EXEDIR' or '$PLUGINSDIR')"
     Goto exit
 
   run_sqlite:
-    nsExec::ExecToStack '"$EXEDIR\${L_SQLITEUTIL}" "${L_DATABASE}" "select version from popfile;"'
+    nsExec::ExecToStack '"${L_SQLITEPATH}\${L_SQLITEUTIL}" "${L_DATABASE}" "select version from popfile;"'
     Pop ${L_STATUS}
     Call ${UN}TrimNewlines
     Pop ${L_RESULT}
@@ -2413,18 +2418,20 @@
   exit:
     Pop ${L_STATUS}
     Pop ${L_SQLITEUTIL}
+    Pop ${L_SQLITEPATH}
     Pop ${L_DATABASE}
     Exch ${L_RESULT}
 
     !undef L_DATABASE
     !undef L_RESULT
+    !undef L_SQLITEPATH
     !undef L_SQLITEUTIL
     !undef L_STATUS
 
   FunctionEnd
 !macroend
 
-!ifdef BACKUP | RUNSQLITE
+!ifdef BACKUP | RUNSQLITE | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: GetSQLiteSchemaVersion
     #
