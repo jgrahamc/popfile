@@ -751,5 +751,84 @@ test_assert_equal( $magnet, '' );
 # and $
 
 # TODO test that stop writes the parameters to disk
+# Test Japanese mode
+
+$b->module_config_( 'html', 'language', 'Nihongo' );
+
+# Test Japanese magnet. GOMI means "trash" in Japanese.
+
+$b->create_bucket( 'gomi' );
+
+# create_magnet
+
+$b->clear_magnets();
+$b->create_magnet( 'gomi', 'subject', chr(0xcc) . chr(0xa4) );
+test_assert_equal( $b->classify( 'TestMailParse026.msg' ), 'gomi' );
+
+test_assert_equal( $b->magnet_count(), 1 );
+$b->create_magnet( 'gomi', 'subject', chr(0xa5) . chr(0xc6) . chr(0xa5) . chr(0xb9) . chr(0xa5) . chr(0xc8));
+test_assert_equal( $b->magnet_count(), 2 );
+
+# get_magnets
+
+my @magnets = $b->get_magnets( 'gomi', 'subject' );
+test_assert_equal( $#magnets, 1 );
+test_assert_equal( $magnets[0], chr(0xa5) . chr(0xc6) . chr(0xa5) . chr(0xb9) . chr(0xa5) . chr(0xc8) );
+test_assert_equal( $magnets[1], chr(0xcc) . chr(0xa4) );
+
+# Test whether Japanese mail are splitted into words by Kakasi filter
+
+open CLIENT, ">temp.tmp";
+open MAIL, "<TestMailParse026.msg";
+my ( $class, $nopath ) = $b->classify_and_modify( \*MAIL, \*CLIENT, 0, 0, 0, '', 1 );
+close CLIENT;
+close MAIL;
+
+open MSG, "<messages/popfile0=0.msg";
+open KKS, "<TestMailParse026.kks";
+while ( <MSG> ) {
+    my $msg = $_;
+    my $kks = <KKS>;
+    $msg =~ s/[\r\n]//g;
+    $kks =~ s/[\r\n]//g;
+    test_assert_equal( $msg, $kks );
+}
+close MSG;
+close KKS;
+unlink( 'messages/popfile0=0.msg' );
+unlink( 'messages/popfile0=0.cls' );
+unlink( 'temp.out' );
+
+# add_message_to_bucket
+
+my %words;
+
+open WORDS, "<TestMailParse026.wrd";
+while ( <WORDS> ) {
+    if ( /(.+) (\d+)/ ) {
+        $words{$1} = $2;
+    }
+}
+close WORDS;
+
+test_assert( $b->add_message_to_bucket( 'gomi', 'TestMailParse026.kks' ) );
+
+foreach my $word (keys %words) {
+    test_assert_equal( $b->get_base_value_( 'gomi', $word ), $words{$word}, "gomi: $word $words{$word}" );
+}
+
+# get_bucket_word_prefixes
+
+my @words = $b->get_bucket_word_prefixes( 'gomi' );
+test_assert_equal( $#words, 19 );
+test_assert_equal( $words[17], chr(0xa4) . chr(0xb3) );
+test_assert_equal( $words[18], chr(0xa4) . chr(0xc7) );
+test_assert_equal( $words[19], chr(0xa5) . chr(0xb9) );
+
+# remove_message_from_bucket
+
+test_assert( $b->remove_message_from_bucket( 'gomi', 'TestMailParse026.kks' ) );
+test_assert_equal( $b->get_bucket_word_count( 'gomi' ), 0 );
+
 
 $b->stop();
