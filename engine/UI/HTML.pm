@@ -2509,13 +2509,18 @@ sub history_page
                      my $v = '?';
                      if ( defined $size ) {
                          if ( $size >= 1024 * 1024 ) {
-                             $v = sprintf $self->{language__}{History_Cell_Value_MegaBytes}, $size / ( 1024 * 1024 );
+                             $v = sprintf $self->{language__}{History_Size_MegaBytes}, $size / ( 1024 * 1024 );
                          } elsif ( $size >= 1024 ) {
-                             $v = sprintf $self->{language__}{History_Cell_Value_KiloBytes}, $size / 1024;
+                             $v = sprintf $self->{language__}{History_Size_KiloBytes}, $size / 1024;
                          } else {
-                             $v =sprintf $self->{language__}{History_Cell_Value_Bytes}, $size;
+                             $v =sprintf $self->{language__}{History_Size_Bytes}, $size;
                          }
                      }
+                     # Replace any &nbsp; entities from the language files with
+                     # the corresponding character (\xa0). Otherwise HTML::Template
+                     # would escape the & with &amp;
+                     $v =~ s/&nbsp;/\xA0/g;
+
                      $col_data{History_Cell_Value} = $v;
                      $col_data{History_Cell_Title} =
                          $col_data{History_Cell_Value};
