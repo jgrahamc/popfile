@@ -39,7 +39,15 @@ Rename                                  Renombrar
 Frequency                               Frecuencia
 Probability                             Probabilidad
 Score                                   Puntuación
+Scores                                  Puntuaciones
 Lookup                                  Búsqueda
+Cc                                      Cc
+Count                                   Contadas
+Word                                    Palabra
+Refresh                                 Recargar
+Update                                  Actualizar
+QuickMagnets                            Iman Rapido
+
 
 # The header and footer that appear on every UI page
 Header_Title                            Centro de Control POPFile
@@ -64,10 +72,9 @@ Configuration_Error3                    El puerto de escucha POP3 debe ser un nú
 Configuration_Error4                    El tamaño de página debe ser un número entre 1 y 1000
 Configuration_Error5                    El número de días en la Historia debe ser un número entre 1 and 366
 Configuration_Error6                    El tiempo límite de TCP debe ser un número entre 10 y 300
+Configuration_Error7                    El puerto de XML RPC debe ser un número entre 1 y 65535
 Configuration_POP3Port                  Puerto de escucha POP3
-Configuration_POP3Update                Actualizado el puerto a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
-Configuration_Separator                 Caracter separador 
-Configuration_SepUpdate                 Caracter separador actualizado a %s
+Configuration_POP3Update                Actualizado el puerto POP3 a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
 Configuration_UI                        Puerto de la interfaz de usuario
 Configuration_UIUpdate                  Puerto de la interfaz de usuario actualizado a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
 Configuration_History                   Número de correos por página
@@ -78,7 +85,7 @@ Configuration_UserInterface             Interfaz de usuario
 Configuration_Skins                     Skins
 Configuration_SkinsChoose               Elegir skin
 Configuration_Language                  Languaje
-Configuration_LanguageChoose            Escoger language
+Configuration_LanguageChoose            Escoger languaje
 Configuration_ListenPorts               Puertos de escucha
 Configuration_HistoryView               Vista de la Historia
 Configuration_TCPTimeout                Tiempo límite de la conexión TCP
@@ -87,8 +94,9 @@ Configuration_TCPTimeoutUpdate          Tiempo límite de la conexión TCP actuali
 Configuration_ClassificationInsertion   Inserción de la Clasificación
 Configuration_SubjectLine               Modificación del Asunto
 Configuration_XTCInsertion              Añadir cabecera X-Text-Classification
-Configuration_XPLInsertion              Añadir cabecera X-POPFile-Link Header
+Configuration_XPLInsertion              Añadir cabecera X-POPFile-Link
 Configuration_Logging                   Logging
+ Configuration_CurrentLogFile           &lt;fichero actual de log&gt;
 Configuration_None                      Ninguna
 Configuration_ToScreen                  En pantalla
 Configuration_ToFile                    En un fichero
@@ -97,6 +105,16 @@ Configuration_LoggerOutput              Salida del Logger
 Configuration_GeneralSkins              Skins
 Configuration_SmallSkins                Small Skins
 Configuration_TinySkins                 Tiny Skins
+Configuration_NNTPPort                  Puerto de escucha NNTP
+Configuration_NNTPSepUpdate             Caracter separador NNTP actualizado a %s
+Configuration_NNTPSeparator             Caracter separador en servidor:puerto:usuario para NNTP
+Configuration_NNTPUpdate                Actualizado el puerto NNTP a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
+Configuration_POP3SepUpdate             Caracter separador POP3 actualizado a %s
+Configuration_POP3Separator             Caracter separador en servidor:puerto:usuario para POP3
+Configuration_SMTPPort                  Puerto de escucha SMTP
+Configuration_SMTPUpdate                Actualizado el puerto SMTP a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
+Configuration_XMLRPCPort                Puerto de escucha XML RPC
+Configuration_XMLRPCUpdate              Actualizado el puerto XML RPC a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
 
 Advanced_Error1                         '%s' ya está en la lista de Palabras a Ignorar
 Advanced_Error2                         Las Palabras a Ignorar sólo pueden incluir caracteres alfanuméricos, ., _, -, o @
@@ -129,6 +147,9 @@ History_NoMessages                      Ningún Correo
 History_ShowMagnet                      Magnetizado
 History_Magnet                          &nbsp;(Mostrando sólo mensajes magnetizados)
 History_ResetSearch                     Reiniciar
+History_MagnetBecause                   <b>Imán Usado</b><p>Clasificado en <font color="%s">%s</font> debido al Imán %s </p>
+History_NoMagnet                        &nbsp;(Mostrando sólo mensajes no magnetizados)
+History_ShowNoMagnet                    No Magnetizado 
 
 Password_Title                          Contraseña
 Password_Enter                          Introduzca contraseña
@@ -144,16 +165,23 @@ Security_PasswordTitle                  Contraseña de la Interfaz de Usuario
 Security_Password                       Contraseña
 Security_PasswordUpdate                 Contraseña actualizada a %s
 Security_AUTHTitle                      Autentificación segura de Contraseña/AUTH
-Security_SecureServer                   Sevidor Seguro
-Security_SecureServerUpdate             Sevidor Seguro actualizado a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
-Security_SecurePort                     Puerto seguro
-Security_SecurePortUpdate               Puerto seguro actualizado a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
+Security_SecureServer                   Sevidor POP3 SPA/AUTH seguro
+Security_SecureServerUpdate             Sevidor POP3 SPA/AUTH seguro actualizado a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
+Security_SecurePort                     Puerto POP3 SPA/AUTH
+Security_SecurePortUpdate               Puerto POP3 SPA/AUTH seguro actualizado a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
 Security_POP3                           Aceptar conexiones POP3 de máquinas remotas (hay que reiniciar POPFile)
 Security_UI                             Aceptar conexiones HTTP (Interfaz de Usuario) de máquinas remotas (hay que reiniciar POPFile)
 Security_UpdateTitle                    Comprobación de Actualizaciones
 Security_Update                         Comprobar diariamente si hay actualizaciones de POPFile
 Security_StatsTitle                     Enviar Stadísticas
 Security_Stats                          Enviar Stadísticas diariamente
+Security_NNTP                           Aceptar conexiones NNTP de máquinas remotas (hay que reiniciar POPFile)
+Security_SMTP                           Aceptar conexiones SMTP de máquinas remotas (hay que reiniciar POPFile)
+Security_SMTPPort                       SMTP chain port
+Security_SMTPPortUpdate                 SMTP chain port actualizado a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
+Security_SMTPServer                     SMTP chain server
+Security_SMTPServerUpdate               SMTP chain server actualizado a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
+Security_XMLRPC                         Aceptar conexiones POP3 de máquinas remotas (hay que reiniciar POPFile)
 
 Magnet_Error1                           El Imán '%s' ya existe en la Categoría '%s'
 Magnet_Error2                           El nuevo Imán '%s' colisiona con el '%s' en la Categoría '%s' y podría causar resultados ambiguos.  Nuevo Imán no añadido.
@@ -165,6 +193,7 @@ Magnet_Explanation                      Hay tres tipos de Imán:</b> <ul><li><b>N
 Magnet_MagnetType                       Tipo de Imán
 Magnet_Value                            Valor
 Magnet_Always                           Clasificar siempre en
+Magnet_Jump                             Ir a página de Imanes
 
 Bucket_Error1                           Los nombres de Categorías sólo pueden contener las letras de la a a la z en minúsculas mas - y _
 Bucket_Error2                           Ya existe una Categoría llamada %s
@@ -200,8 +229,10 @@ Bucket_LookupMessage2                   Resultados de la búsqueda para
 Bucket_LookupMostLikely                 La palabra <b>%s</b> es más probable que aparezca en <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> no aparece en ninguna de las Categorías
 Bucket_DisabledGlobally                 Deshabilitado Globalmente
-Bucket_To                               a
+Bucket_To                               A
 Bucket_Quarantine                       Cuarentena
+Bucket_ClassificationFN                 Falsos Negativos
+Bucket_ClassificationFP                 Falsos Positivos
 
 SingleBucket_Title                      Detalles para %s
 SingleBucket_WordCount                  Conteo de palabras de la Categoría
@@ -210,10 +241,12 @@ SingleBucket_Percentage                 Porcentaje del total
 SingleBucket_WordTable                  Tabla de palabras para %s
 SingleBucket_Message1                   Las palabras marcadas con (*) han sido usadas para la Categoría en esta sesión de POPFile.  "Pincha" en cualquier palabra para conocer su probabilidad en todas las Categorías.
 SingleBucket_Unique                     %s únicas
+SingleBucket_ClearBucket                Borrar todas las Palabras
 
 Session_Title                           Ha expirado la sesión de POPFile
 Session_Error                           Ha expirado tu sesión de POPFile.  Esto puede ser debido a que haya dejado su navegador abierto mientras reiniciaba POPFile.  Por favor, pinche en uno de los enlaces superiores para continuar usando POPFile.
 
+View_Title                              Vista de un solo mensaje
 
 Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.
 History_MainTableSummary                This table shows the sender and subject of recently received messages and allows them to be reviewed and reclassified.  Clicking on the subject line will show the full message text, along with information about why it was classified as it was.  The 'Should be' column allows you to specify which bucket the message belongs in, or to undo that change.  The 'Delete' column allows you to delete specific messages from the history if you don't need them anymore.
