@@ -2016,7 +2016,8 @@ sub sort_filter_history
         foreach my $file (sort compare_mf keys %{$self->{history__}}) {
             if ( ( $filter eq '' ) ||
                  ( $self->{history__}{$file}{bucket} eq $filter ) ||
-                 ( ( $filter eq '__filter__magnet' ) && ( $self->{history__}{$file}{magnet} ne '' ) ) ) {
+                 ( ( $filter eq '__filter__magnet' ) && ( $self->{history__}{$file}{magnet} ne '' ) ) || 
+                 ( ( $filter eq '__filter__no__magnet' ) && ( $self->{history__}{$file}{magnet} eq '' ) ) ) {
                 if ( ( $search eq '' ) ||
                    ( $self->{history__}{$file}{from}    =~ /\Q$search\E/i ) ||
                    ( $self->{history__}{$file}{subject} =~ /\Q$search\E/i ) ) {
@@ -2542,6 +2543,7 @@ sub get_search_filter_widget
         $body .= ">$abucket</option>\n";
     }
     $body .= "<option value=\"__filter__magnet\"" . ($self->{form_}{filter} eq '__filter__magnet'?' selected':'') . ">&lt;$self->{language__}{History_ShowMagnet}&gt;</option>\n";
+    $body .= "<option value=\"__filter__no__magnet\"" . ($self->{form_}{filter} eq '__filter__no__magnet'?' selected':'') . ">&lt;$self->{language__}{History_ShowNoMagnet}&gt;</option>\n";
     $body .= "<option value=\"unclassified\"" . ($self->{form_}{filter} eq 'unclassified'?' selected':'') . ">&lt;unclassified&gt;</option>\n";
     $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language__}{Filter}\" />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"reset_filter_search\" value=\"$self->{language__}{History_ResetSearch}\" />\n";
@@ -2598,10 +2600,13 @@ sub history_page
     # Set up the text that will appear at the top of the history page
     # indicating the current filter and search settings
 
+    my $filter = $self->{form_}{filter};
     my $filtered = '';
-    if ( !( $self->{form_}{filter} eq '' ) ) {
-        if ( $self->{form_}{filter} eq '__filter__magnet' ) {
+    if ( !( $filter eq '' ) ) {
+        if ( $filter eq '__filter__magnet' ) {
             $filtered .= $self->{language__}{History_Magnet};
+        } elsif ( $filter eq '__filter__no__magnet' ) {
+            $filtered .= $self->{language__}{History_NoMagnet};
         } else {
             $filtered = sprintf( $self->{language__}{History_Filter}, $self->{classifier__}->get_bucket_color($self->{form_}{filter}), $self->{form_}{filter} ) if ( $self->{form_}{filter} ne '' );
         }

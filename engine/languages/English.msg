@@ -142,7 +142,9 @@ History_Remove                          To remove entries in the history click
 History_SearchMessage                   Search From/Subject
 History_NoMessages                      No messages
 History_ShowMagnet                      magnetized
+History_ShowNoMagnet                    unmagnetized
 History_Magnet                          &nbsp;(just showing magnet classified messages)
+History_NoMagnet                        &nbsp;(just showing non-magnet classified messages)
 History_ResetSearch                     Reset
 
 Password_Title                          Password
