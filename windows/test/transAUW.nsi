@@ -5,7 +5,7 @@
 #                  any POPFile configuration - it only displays the screens and
 #                  messages of the real wizard (to help test the translations).
 #
-# Copyright (c) 2004 John Graham-Cumming
+# Copyright (c) 2004-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -95,7 +95,7 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT      "PFI Testbed"
-  !define C_PFI_VERSION      "0.1.18"
+  !define C_PFI_VERSION      "0.1.19"
 
   !ifndef ENGLISH_MODE
     !define C_PFI_VERSION_ID "${C_PFI_VERSION} (ML)"
@@ -197,28 +197,41 @@
   !include "MUI.nsh"
 
 #--------------------------------------------------------------------------
+# Include private library functions and macro definitions
+#--------------------------------------------------------------------------
+
+  ; Avoid compiler warnings by disabling the functions and definitions we do not use
+
+  !define TRANSLATOR_AUW
+
+  !include "..\pfi-library.nsh"
+
+#--------------------------------------------------------------------------
 # Version Information settings (for the wizard's EXE and the uninstaller EXE)
 #--------------------------------------------------------------------------
 
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion                  "${C_PFI_VERSION}.0"
+  VIProductVersion                          "${C_PFI_VERSION}.0"
 
-  VIAddVersionKey "ProductName"     "POPFile 'Add/Remove User' Language Testbed"
-  VIAddVersionKey "Comments"        "POPFile Homepage: http://getpopfile.org"
-  VIAddVersionKey "CompanyName"     "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"  "Copyright (c) 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription" "POPFile 'Add/Remove User' Testbed"
-  VIAddVersionKey "FileVersion"     "${C_PFI_VERSION_ID}"
+  VIAddVersionKey "ProductName"             "POPFile 'Add/Remove User' Language Testbed"
+  VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
+  VIAddVersionKey "CompanyName"             "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"         "POPFile 'Add/Remove User' Testbed"
+  VIAddVersionKey "FileVersion"             "${C_PFI_VERSION_ID}"
 
-  VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"    "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Date/Time" "       ${__DATE__} @ ${__TIME__}"
+  !ifdef C_PFI_LIBRARY_VERSION
+    VIAddVersionKey "Build Library Version" "${C_PFI_LIBRARY_VERSION}"
+  !endif
+  VIAddVersionKey "Build Script"            "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
   !ifndef ENGLISH_MODE
-    VIAddVersionKey "Build Type"    "Multi-Language 'Add/Remove User' Translation Testbed"
+    VIAddVersionKey "Build Type"            "Multi-Language 'Add/Remove User' Translation Testbed"
   !else
-    VIAddVersionKey "Build Type"    "English-Only 'Add/Remove User' Testbed"
+    VIAddVersionKey "Build Type"            "English-Only 'Add/Remove User' Testbed"
   !endif
 
 #----------------------------------------------------------------------------------------
@@ -254,16 +267,6 @@
 #----------------------------------------------------------------------------------------
 
   !include "..\CBP.nsh"
-
-#--------------------------------------------------------------------------
-# Include private library functions and macro definitions
-#--------------------------------------------------------------------------
-
-  ; Avoid compiler warnings by disabling the functions and definitions we do not use
-
-  !define TRANSLATOR_AUW
-
-  !include "..\pfi-library.nsh"
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages
@@ -992,13 +995,26 @@ show_defaults:
 
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioA.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
+  
+  !ifndef ENGLISH_MODE
+  
+    ; Do not attempt to display "bold" text when using Chinese, Japanese or Korean
+    
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_JAPANESE} show_page
+    StrCmp $LANGUAGE ${LANG_KOREAN} show_page
+  !endif
 
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
-  GetDlgItem $G_DLGITEM $G_HWND 1204            ; Field 5 = 'Run POPFile at startup' checkbox
-  CreateFont $G_FONT "MS Shell Dlg" 10 700      ; use larger & bolder version of the font in use
+  GetDlgItem $G_DLGITEM $G_HWND 1204           ; Field 5 = 'Run POPFile at startup' checkbox
+  CreateFont $G_FONT "MS Shell Dlg" 10 700     ; use larger & bolder version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
+  !ifndef ENGLISH_MODE
+    show_page:
+  !endif
   !insertmacro MUI_INSTALLOPTIONS_SHOW
 
   Pop ${L_RESULT}
@@ -1531,13 +1547,26 @@ display_list:
 
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
+  
+  !ifndef ENGLISH_MODE
+  
+    ; Do not attempt to display "bold" text when using Chinese, Japanese or Korean
+    
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_JAPANESE} show_page
+    StrCmp $LANGUAGE ${LANG_KOREAN} show_page
+  !endif
 
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
-  GetDlgItem $G_DLGITEM $G_HWND 1200            ; Field 1 = IDENTITY label (above the box)
-  CreateFont $G_FONT "MS Shell Dlg" 8 700       ; use a 'bolder' version of the font in use
+  GetDlgItem $G_DLGITEM $G_HWND 1200               ; Field 1 = IDENTITY label (above the box)
+  CreateFont $G_FONT "MS Shell Dlg" 8 700          ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
+  !ifndef ENGLISH_MODE
+    show_page:
+  !endif
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
@@ -1562,13 +1591,26 @@ display_list_again:
 
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
+  
+  !ifndef ENGLISH_MODE
+  
+    ; Do not attempt to display "bold" text when using Chinese, Japanese or Korean
+    
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} show_page_again
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} show_page_again
+    StrCmp $LANGUAGE ${LANG_JAPANESE} show_page_again
+    StrCmp $LANGUAGE ${LANG_KOREAN} show_page_again
+  !endif
 
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
-  GetDlgItem $G_DLGITEM $G_HWND 1200              ; Field 1 = IDENTITY label (above the box)
-  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  GetDlgItem $G_DLGITEM $G_HWND 1200               ; Field 1 = IDENTITY label (above the box)
+  CreateFont $G_FONT "MS Shell Dlg" 8 700          ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
+  !ifndef ENGLISH_MODE
+    show_page_again:
+  !endif
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
@@ -2178,13 +2220,26 @@ display_list:
 
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
+  
+  !ifndef ENGLISH_MODE
+  
+    ; Do not attempt to display "bold" text when using Chinese, Japanese or Korean
+    
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_JAPANESE} show_page
+    StrCmp $LANGUAGE ${LANG_KOREAN} show_page
+  !endif
 
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
-  GetDlgItem $G_DLGITEM $G_HWND 1200            ; Field 1 = 'Outlook User' label (above the box)
-  CreateFont $G_FONT "MS Shell Dlg" 8 700       ; use a 'bolder' version of the font in use
+  GetDlgItem $G_DLGITEM $G_HWND 1200           ; Field 1 = 'Outlook User' label (above the box)
+  CreateFont $G_FONT "MS Shell Dlg" 8 700      ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
+  !ifndef ENGLISH_MODE
+    show_page:
+  !endif
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
@@ -2210,13 +2265,26 @@ display_list_again:
 
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
+  
+  !ifndef ENGLISH_MODE
+  
+    ; Do not attempt to display "bold" text when using Chinese, Japanese or Korean
+    
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} show_page_again
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} show_page_again
+    StrCmp $LANGUAGE ${LANG_JAPANESE} show_page_again
+    StrCmp $LANGUAGE ${LANG_KOREAN} show_page_again
+  !endif
 
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
-  GetDlgItem $G_DLGITEM $G_HWND 1200            ; Field 1 = 'Outlook User' label (above the box)
-  CreateFont $G_FONT "MS Shell Dlg" 8 700       ; use a 'bolder' version of the font in use
+  GetDlgItem $G_DLGITEM $G_HWND 1200           ; Field 1 = 'Outlook User' label (above the box)
+  CreateFont $G_FONT "MS Shell Dlg" 8 700      ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
+  !ifndef ENGLISH_MODE
+    show_page_again:
+  !endif
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
@@ -2582,13 +2650,26 @@ write_intro:
 
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioE.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
+  
+  !ifndef ENGLISH_MODE
+  
+    ; Do not attempt to display "bold" text when using Chinese, Japanese or Korean
+    
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_JAPANESE} show_page
+    StrCmp $LANGUAGE ${LANG_KOREAN} show_page
+  !endif
 
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
-  GetDlgItem $G_DLGITEM $G_HWND 1203             ; Field 4 = PERSONA (text in groupbox frame)
-  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  GetDlgItem $G_DLGITEM $G_HWND 1203               ; Field 4 = PERSONA (text in groupbox frame)
+  CreateFont $G_FONT "MS Shell Dlg" 8 700          ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
+  !ifndef ENGLISH_MODE
+    show_page:
+  !endif
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_STATUS}
   StrCmp ${L_STATUS} "back" abort_eudora_config
