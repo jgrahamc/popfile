@@ -1,1 +1,1 @@
-other
+spam

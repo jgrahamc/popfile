@@ -7,6 +7,8 @@
 #
 # ---------------------------------------------------------------------------------------------
 
+use strict;
+
 # Look for all the TST files in the tests/ subfolder and run
 # each of them by including them in this file with the use statement
 
@@ -86,7 +88,7 @@ sub test_assert_equal
 	my ( $file, $line, $test, $expected, $context ) = @_;
 	my $result;
 
-	if ( $expected =~ /[^0-9]/ ) {
+	if ( !( $expected =~ /[^0-9]/ ) ) {
 	
 		# This int() and is so that we don't get bitten by odd
 		# floating point problems
