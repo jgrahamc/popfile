@@ -38,27 +38,6 @@ my $fail_messages = '';
 my $last_spin     = '';
 my $last_symbol   = 0;
 
-# ---------------------------------------------------------------------------------------------
-#
-# clear_spin - Clear the last spinner drawn with spin
-#
-# ---------------------------------------------------------------------------------------------
-
-sub clear_spin
-{
-    for my $i (1..length($last_spin)) {
-        print "\b";
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# spin - Output a simple spinner on the screen with a message after it
-#
-# $msg                  The message to output
-#
-# ---------------------------------------------------------------------------------------------
-
 sub spin
 {
     my ( $msg ) = @_;
@@ -67,7 +46,9 @@ sub spin
 
     my @symbols = ('-','/','|','\\');
 
-    clear_spin();
+    for my $i (1..length($last_spin)) {
+        print "\b";
+    }
 
     print $symbols[$last_symbol % 4] . " " . $msg;
 
@@ -78,49 +59,44 @@ sub spin
 
 # ---------------------------------------------------------------------------------------------
 #
-# test_report__   -        Report whether a test passed or not
+# test_report   -        Report whether a test passed or not
 #
-# $ok                   Boolean indicating whether the test passed
+# $ok           Boolean indicating whether the test passed
 # $test                 String containing the test executed
+# $file                 The name of the file invoking the test
+# $line                 The line in the $file where the test can be found
 # $context              (Optional) String containing extra context information
-#
-# DON'T call this from inside a test script, call one of the other test_assert functions
 #
 # ---------------------------------------------------------------------------------------------
 
-sub test_report__
+sub test_report
 {
-    my ( $ok, $test, $context ) = @_;
+        my ( $ok, $test, $file, $line, $context ) = @_;
 
-    # The actual tests were included using the 'do' statement and test_report__
-    # has been called from at least one other test_X function, so we need to
-    # get the stack frame one level up from where we are now (i.e. the caller of
-    # our caller).
+        spin( $line );
 
-    my ( $package, $file, $line ) = caller(4);  
+        $test_count += 1;
 
-    spin( $line );
-
-    $test_count += 1;
-
-    if ( !$ok ) {
-        $fail_messages .= "\n    $file:$line failed '$test'";
-        if ( defined( $context ) ) {
-            $fail_messages .= " ($context)";
+        if ( !$ok ) {
+                $fail_messages .= "\n    $file:$line failed '$test'";
+                if ( defined( $context ) ) {
+                        $fail_messages .= " ($context)";
+                }
+                $test_failures += 1;
+            print "Test fail at $file:$line ($test) ($context)\n";
+        } else {
+#            print "Test pass at $file:$line ($test) ($context)\n";
         }
-        $test_failures += 1;
-#        print "Test fail at $file:$line ($test) ($context)\n";
-    } else {
-#       print "Test pass at $file:$line ($test) ($context)\n";
-    }
 
-    flush STDOUT;
+        flush STDOUT;
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # test_assert   -        Perform a test and assert that its result must be true
 #
+# $file                 The name of the file invoking the test
+# $line                 The line in the $file where the test can be found
 # $test                 String containing the test to be executed
 # $context              (Optional) String containing extra context information
 #
@@ -131,15 +107,17 @@ sub test_report__
 
 sub test_assert
 {
-    my ( $test, $context ) = @_;
+        my ( $file, $line,  $test, $context ) = @_;
 
-    test_report__( eval( $test ), $test, $context );
+        test_report( eval( $test ), $test, $file, $line, $context );
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # test_assert_equal     -        Perform a test and assert that its result is equal an expected result
 #
+# $file                 The name of the file invoking the test
+# $line                 The line in the $file where the test can be found
 # $test                 The result of the test that was just run
 # $expected             The expected result
 # $context              (Optional) String containing extra context information
@@ -147,11 +125,13 @@ sub test_assert
 # Example: test_assert_equal( function(parameter), 'result' )
 # Example: test_assert_equal( function(parameter), 3, 'Banana wumpus subsystem' )
 #
+# YOU DO NOT NEED TO GIVE THE $file and $line parameters as this script supplies them
+# automatically
 # ---------------------------------------------------------------------------------------------
 
 sub test_assert_equal
 {
-    my ( $test, $expected, $context ) = @_;
+    my ( $file, $line, $test, $expected, $context ) = @_;
     my $result;
 
     $test = '' unless (defined($test));
@@ -168,7 +148,7 @@ sub test_assert_equal
         $result = ( $test eq $expected );
     }
 
-    test_report__( $result, "expecting [$expected] and got [$test]", $context );
+    test_report( $result, "expecting [$expected] and got [$test]", $file, $line, $context );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -176,28 +156,33 @@ sub test_assert_equal
 # test_assert_regexp    -  Perform a test and assert that its result matches a regexp
 # test_assert_not_regexp - Perform a test and assert that the regexp does not match
 #
+# $file                 The name of the file invoking the test
+# $line                 The line in the $file where the test can be found
 # $test                 The result of the test that was just run
 # $expected             The expected result in the form of a regexp
 # $context              (Optional) String containing extra context information
 #
 # Example: test_assert_regexp( function(parameter), '^result' )
 # Example: test_assert_regexp( function(parameter), 3, 'Banana.+subsystem' )
+#
+# YOU DO NOT NEED TO GIVE THE $file and $line parameters as this script supplies them
+# automatically
 # ---------------------------------------------------------------------------------------------
 
 sub test_assert_regexp
 {
-    my ( $test, $expected, $context ) = @_;
+    my ( $file, $line, $test, $expected, $context ) = @_;
     my $result = ( $test =~ /$expected/m );
 
-    test_report__( $result, "expecting to match [$expected] and got [$test]", $context );
+    test_report( $result, "expecting to match [$expected] and got [$test]", $file, $line, $context );
 }
 
 sub test_assert_not_regexp
 {
-    my ( $test, $expected, $context ) = @_;
+    my ( $file, $line, $test, $expected, $context ) = @_;
     my $result = !( $test =~ /$expected/m );
 
-    test_report__( $result, "unexpected match of [$expected]", $context );
+    test_report( $result, "unexpected match of [$expected]", $file, $line, $context );
 }
 
 # MAIN
@@ -226,15 +211,35 @@ foreach my $test (@tests) {
      }
 
      if ( $runit ) {
+
+        # This works by reading the entire suite into the $suite variable
+        # and then changing calls to test_assert_equal so that they include
+        # the line number and the file they are from, then the $suite is
+        # evaluated
+
         my $current_test_count  = $test_count;
         my $current_error_count = $test_failures;
 
         print "\nRunning $test... at line: ";
         flush STDOUT;
         $fail_messages = '';
-        my $ran = do $test;
+        my $suite;
+        my $ln   = 0;
+        open SUITE, "<$test";
+        while (<SUITE>) {
+                my $line = $_;
+                $ln += 1;
+                $line =~ s/(test_assert_not_regexp\()/$1 '$test', $ln,/g;
+                $line =~ s/(test_assert_regexp\()/$1 '$test', $ln,/g;
+                $line =~ s/(test_assert_equal\()/$1 '$test', $ln,/g;
+                $line =~ s/(test_assert\()/$1 '$test', $ln,/g;
+                $suite .= $line;
+        }
+        close SUITE;
 
-        clear_spin();
+        my $ran = eval( $suite );
+
+        print "\b";
 
         if ( !defined( $ran ) ) {
             print "Error in $test: $@";
