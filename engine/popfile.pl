@@ -2059,9 +2059,10 @@ sub run_popfile
                                 }
                                 
                                 # Check to see if too much time has passed and we need to keep the mail client happy
-                                if ( time > $last_timeout )
+                                if ( time > ( $last_timeout + 10 ) )
                                 {
                                     print $client "X-POPFile-TimeoutPrevention: $timeout_count$eol";
+                                    debug( "Sending timeout prevention header" );
                                     $timeout_count += 1;
                                     $last_timeout = time;
                                 }
@@ -2077,7 +2078,10 @@ sub run_popfile
                             # Add the spam header
                             if ( $configuration{subject} ) 
                             {
-                                $msg_headers .= "Subject: [$classification] $msg_subject$eol";
+                                # Don't add the classification unless it is not present
+                                if ( !( $msg_subject =~ /\[$classification\]/ ) ) {
+                                    $msg_headers .= "Subject: [$classification] $msg_subject$eol";
+                                }
                             }
 
                             $msg_headers .= "X-Text-Classification: $classification";
