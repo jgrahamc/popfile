@@ -471,8 +471,7 @@
   ; configure POPFile for the user running the installer.
 
   ; For this build we skip our own FINISH page and disable the wizard's language selection
-  ; dialog and WELCOME page to make the wizard appear as an extension of the main 'setup.exe'
-  ; installer.
+  ; dialog to make the wizard appear as an extension of the main 'setup.exe' installer.
 
   !define MUI_PAGE_CUSTOMFUNCTION_PRE         "InstallUserData"
 
@@ -717,17 +716,9 @@ Section "POPFile" SecPOPFile
 
   SectionIn RO
 
-  !define L_CFG           $R9   ; file handle
-  !define L_POPFILE_ROOT  $R8   ; path to popfile.pl (used in environment variable)
-  !define L_POPFILE_USER  $R7   ; path to popfile.cfg (used in environment variable)
-  !define L_TEMP          $R6
-  !define L_RESERVED      $0    ; reserved for use in system.dll calls
+  !define L_TEMP          $R9
 
-  Push ${L_CFG}
-  Push ${L_POPFILE_ROOT}
-  Push ${L_POPFILE_USER}
   Push ${L_TEMP}
-  Push ${L_RESERVED}
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_UPGRADE) $(PFI_LANG_TAKE_A_FEW_SECONDS)"
@@ -888,6 +879,8 @@ save_HKCU_root_sfn:
   SetOutPath "$G_ROOTDIR\UI"
   File "..\engine\UI\HTML.pm"
   File "..\engine\UI\HTTP.pm"
+
+  ; 'English' version of the manual
 
   SetOutPath "$G_ROOTDIR\manual"
   File "..\engine\manual\*.gif"
@@ -1176,17 +1169,9 @@ end_section:
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
 
-  Pop ${L_RESERVED}
   Pop ${L_TEMP}
-  Pop ${L_POPFILE_USER}
-  Pop ${L_POPFILE_ROOT}
-  Pop ${L_CFG}
 
-  !undef L_CFG
-  !undef L_POPFILE_ROOT
-  !undef L_POPFILE_USER
   !undef L_TEMP
-  !undef L_RESERVED
 
 SectionEnd
 
