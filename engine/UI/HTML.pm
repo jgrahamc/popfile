@@ -2856,7 +2856,12 @@ sub handle_url
     		}
     	}
 
-    	$self->{history_invalid} = 1 if ( !$found && glob "$self->{configuration}->{configuration}{msgdir}$file" );
+        # Force a history_reload if we did not find this file in the history cache
+        # but we do find it on disk using perl's -e file test operator (returns  
+        # true if the file exists).
+
+        $self->{history_invalid} = 1 if ( !$found && ( -e ("$self->{configuration}->{configuration}{msgdir}$file") ) );      
+
         $self->http_redirect( $client, "/history?session=$self->{session_key}&start_message=0&view=$self->{form}{view}#$self->{form}{view}" );
         return 1;
     }
