@@ -1478,7 +1478,7 @@ sub bucket_page
     $body .= sprintf( $self->{language__}{SingleBucket_WordTable},  "<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form__}{showbucket}) . "\">$self->{form__}{showbucket}" ) ;
     $body .= "</font>\n</h2>\n$self->{language__}{SingleBucket_Message1}\n<br /><br />\n<table summary=\"$self->{language__}{Bucket_WordListTableSummary}\">\n";
 
-    for my $i (@{$self->{classifier__}->{matrix}{$self->{form__}{showbucket}}}) {
+    for my $i (@{$self->{classifier__}->get_bucket_word_list($self->{form__}{showbucket})}) {
         if ( defined($i) )  {
             my $j = $i;
 
@@ -1622,13 +1622,7 @@ sub corpus_page
             if ( ( defined($self->{classifier__}->get_bucket_word_count($self->{form__}{cname})) ) && ( $self->{classifier__}->get_bucket_word_count($self->{form__}{cname}) > 0 ) )  {
                 $create_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error2}, $self->{form__}{cname} ) . "</b></blockquote>";
             } else {
-                mkdir( $self->config_( 'corpus' ) );
-                mkdir( $self->config_( 'corpus' ) . "/$self->{form__}{cname}" );
-                open NEW, ">$self->config_( 'corpus' )/$self->{form__}{cname}/table";
-                print NEW "\n";
-                close NEW;
-                $self->{classifier__}->load_word_matrix();
-
+                $self->{classifier__}->create_bucket( $self->{form__}{cname} );
                 $create_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error3}, $self->{form__}{cname} ) . "</b></blockquote>";
             }
        }
@@ -2431,14 +2425,6 @@ sub history_reclassify
             }
         }
 
-        # The temp_corpus hash has two levels of keys: $temp_corpus{bucket}{word}
-        # where bucket is the name of one of the current buckets and word is a word
-        # in that bucket.  The value stored in the hash is the word count.
-        #
-        # TODO: this needs factoring out of here and into Classifier::Bayes
-
-        my %temp_corpus;
-
         # At this point %messages maps that files that need reclassifying to their
         # new bucket classification
 
@@ -2451,39 +2437,8 @@ sub history_reclassify
             # Only reclassify messages that havn't been reclassified before
 
             if ( !$reclassified ) {
-
-                # load the bucket corpus once
-
-                if (!defined( $temp_corpus{$newbucket} ) ) {
-                    if ( open WORDS, "<$self->config_( 'corpus' )/$newbucket/table" ) {
-                        while (<WORDS>) {
-                            if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
-                                if ( $1 != 1 )  {
-                                    print "Incompatible corpus version in $newbucket\n";
-                                    return;
-                                }
-
-                                next;
-                            }
-
-                            $temp_corpus{$newbucket}{$1} = $2 if ( /([^\s]+) (\d+)/ );
-                        }
-                        close WORDS;
-                    }
-                }
-
-                # Parse the messages and tally the word-count
-
-                $self->{classifier__}->{parser}->parse_stream( $self->global_config_( 'msgdir' ) . "$mail_file" );
-
-                foreach my $word (keys %{$self->{classifier__}->{parser}->{words}}) {
-                    $self->{classifier__}->get_word_count()   += $self->{classifier__}->{parser}->{words}{$word};
-                    $temp_corpus{$newbucket}{$word}     += $self->{classifier__}->{parser}->{words}{$word};
-                }
-
-                # Update statistics
-
-                $self->config_( 'ecount' ) += 1 if ( $newbucket ne $bucket );
+		$self->{classifier__}->add_message_to_bucket( $self->global_config_( 'msgdir' ) . $mail_file, $newbucket );
+                # TODO $self->config_( 'ecount' ) += 1 if ( $newbucket ne $bucket );
 
                 $self->{logger}->debug( "Reclassifying $mail_file from $bucket to $newbucket" );
 
@@ -2504,27 +2459,10 @@ sub history_reclassify
                 # Add message feedback
 
                 $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, $self->{classifier__}->get_bucket_color($newbucket), $newbucket )
+
+# TODO		$self->{configuration}->save_configuration();
             }
         }
-
-        # Commit the buckets
-
-        $self->{classifier__}->update_constants();
-        $self->{classifier__}->write_parameters();
-
-        foreach my $abucket ( keys %temp_corpus ) {
-            if ( open WORDS, ">$self->config_( 'corpus' )/$abucket/table" ) {
-                print WORDS "__CORPUS__ __VERSION__ 1\n";
-                foreach my $word ( keys %{$temp_corpus{$abucket}} ) {
-                    print WORDS "$word $temp_corpus{$abucket}{$word}\n" if ( $temp_corpus{$abucket}{$word} > 0 );
-                }
-                close WORDS;
-            }
-
-            $self->{classifier__}->load_bucket($self->config_( 'corpus' ) . "/$abucket");
-        }
-
-        $self->{configuration}->save_configuration();
     }
 }
 
@@ -2549,36 +2487,7 @@ sub history_undo
             # Only undo if the message has been classified...
 
             if ( defined( $usedtobe ) ) {
-                if (!defined( $temp_corpus{bucket} ) ) {
-                    if ( open WORDS, "<$self->config_( 'corpus' )/$bucket/table" ) {
-                        while (<WORDS>) {
-                            if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
-                                if ( $1 != 1 )  {
-                                    print "Incompatible corpus version in $bucket\n";
-                                    return;
-                                }
-
-                                next;
-                            }
-
-                            $temp_corpus{$bucket}{$1} = $2 if ( /([^\s]+) (\d+)/ );
-                        }
-                        close WORDS;
-                    }
-                }
-
-                $self->{classifier__}->{parser}->parse_stream($self->global_config_( 'msgdir' ) . "$mail_file");
-
-                # Tally the words
-
-                foreach my $word (keys %{$self->{classifier__}->{parser}->{words}}) {
-                    $self->{classifier__}->get_word_count() -= $self->{classifier__}->{parser}->{words}{$word};
-                    $temp_corpus{$bucket}{$word}      -= $self->{classifier__}->{parser}->{words}{$word};
-
-                    delete $temp_corpus{$bucket}{$word} if ( $temp_corpus{$bucket}{$word} <= 0 );
-                }
-
-                # Update statistics
+                $self->{classifier__}->remove_message_from_bucket($self->global_config_( 'msgdir' ) . $mail_file);
 
                 $self->log_( "Undoing $mail_file from $bucket to $usedtobe" );
 
@@ -2603,25 +2512,6 @@ sub history_undo
 
                 $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, ($self->{classifier__}->get_bucket_color($usedtobe) || ''), $usedtobe );
             }
-
-            # Commit the buckets
-
-            $self->{classifier__}->write_parameters();
-            $self->{configuration}->save_configuration();
-
-            foreach my $abucket ( keys %temp_corpus ) {
-                if ( open WORDS, ">$self->config_( 'corpus' )/$abucket/table" ) {
-                    print WORDS "__CORPUS__ __VERSION__ 1\n";
-                    foreach my $word ( keys %{$temp_corpus{$abucket}} ) {
-                        print WORDS "$word $temp_corpus{$abucket}{$word}\n" if ( $temp_corpus{$abucket}{$word} > 0 );
-                    }
-                    close WORDS;
-                }
-
-                $self->{classifier__}->load_bucket($self->config_( 'corpus' ) . "/$abucket");
-            }
-
-            $self->{classifier__}->update_constants();
         }
     }
 }

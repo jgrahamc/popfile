@@ -877,7 +877,7 @@ sub classify_and_modify
     }
 
     if ( $got_full_body == 0 )    {
-        echo_to_dot( $self, $mail, $client ) if ( !$nosave );
+        $self->echo_to_dot_( $mail, $client ) if ( !$nosave );
     } else {
         print $client ".$eol" if ( !$nosave );
     }
@@ -958,6 +958,23 @@ sub get_bucket_unique_count
     my ( $self, $bucket ) = @_;
 
     return $self->{unique__}{$bucket};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_bucket_word_list
+#
+# Returns a list of the words in a bucket
+#
+# $bucket      The name of the bucket for which the list is to be obtained
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_bucket_word_list
+{
+    my ( $self, $bucket ) = @_;
+
+    return sort keys %{$self->{matrix__}{$bucket}};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1053,6 +1070,110 @@ sub get_html_colored_message
     $self->{parser__}->{color__} = 0;	
 
     return $result;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# create_bucket
+#
+# Creates a new bucket
+#
+# $bucket          Name for the new bucket
+#
+# ---------------------------------------------------------------------------------------------
+
+sub create_bucket
+{
+    my ( $self, $bucket ) = @_;
+
+    mkdir( $self->config_( 'corpus' ) );
+    mkdir( $self->config_( 'corpus' ) . "/$bucket" );
+
+    if ( open NEW, '>' . $self->config_( 'corpus' ) . "/$bucket/table" ) {
+	print NEW "\n";
+	close NEW;
+    }
+
+    $self->load_word_matrix_();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# add_message_to_bucket
+#
+# Parses a mail message and updates the statistics in the specified bucket
+#
+# $file            Name of file containing mail message to parse
+# $bucket          Name of the bucket to be updated
+#
+# ---------------------------------------------------------------------------------------------
+
+sub add_message_to_bucket
+{
+    my ( $self, $file, $bucket ) = @_;
+
+    $self->{parser__}->parse_stream( $file );
+
+    foreach my $word (keys %{$self->{parser__}->{words__}}) {
+# TODO	$self->set_value_( $bucket, $word, $ += $self->{parser__}->{words__}{$word};
+	$self->{total__}{$bucket}         += $self->{parser__}->{words__}{$word};
+    }
+
+    $self->update_constants_();
+    $self->write_parameters();
+    $self->save_bucket_( $bucket );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# save_bucket_
+#
+# Save the current word scores in a bucket to disk
+#
+# $bucket          Name for the bucket to save
+#
+# ---------------------------------------------------------------------------------------------
+
+sub save_bucket_
+{
+    my ( $self, $bucket ) = @_;
+
+    if ( open WORDS, '>' . $self->config_( 'corpus' ) . "/$bucket/table" ) {
+        print WORDS "__CORPUS__ __VERSION__ 1\n";
+        foreach my $word ( keys %{$self->{matrix__}{$bucket}}) {
+            print WORDS "$word $self->{matrix__}{$bucket}{$word}\n";
+        }
+        close WORDS;
+    }
+
+    $self->load_bucket_($self->config_( 'corpus' ) . "/$bucket");
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# echo_to_dot_
+#
+# $mail     The stream (created with IO::) to send the message to (the remote mail server)
+# $client   The local mail client (created with IO::) that needs the response
+#
+# echo all information from the $mail server until a single line with a . is seen
+#
+# ---------------------------------------------------------------------------------------------
+sub echo_to_dot_
+{
+    my ( $self, $mail, $client ) = @_;
+
+    while ( <$mail> ) {
+        # Check for an abort
+        last if ( $self->{alive_} == 0 );
+
+        print $client $_;
+
+        # The termination has to be a single line with exactly a dot on it and nothing
+        # else other than line termination characters.  This is vital so that we do
+        # not mistake a line beginning with . as the end of the block
+        last if ( /^\.(\r\n|\r|\n)$/ );
+    }
 }
 
 1;
