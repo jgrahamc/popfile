@@ -4,7 +4,7 @@
 #                     used by 'installer.nsi' when installing/uninstalling the
 #                     'Kakasi' package.
 #
-# Copyright (c) 2003-2004 John Graham-Cumming
+# Copyright (c) 2003-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -43,7 +43,7 @@
 
 !ifndef ADDUSER & NO_KAKASI
     #--------------------------------------------------------------------------
-    # Installer Function: WriteEnv
+    # Installer Function: PFI_WriteEnv
     #
     # Writes an environment variable which is available to the 'current user' on a modern OS.
     # On Win9x systems, AUTOEXEC.BAT is updated and the Reboot flag is set to request a reboot
@@ -59,11 +59,11 @@
     # Usage:
     #         Push "HOMEDIR"
     #         Push "C:\New Home Dir"
-    #         Call WriteEnvStr
+    #         Call PFI_WriteEnvStr
     #
     #--------------------------------------------------------------------------
 
-    Function WriteEnvStr
+    Function PFI_WriteEnvStr
 
       ; Registers common to Win9x and non-Win9x processing
 
@@ -86,7 +86,7 @@
       Exch ${ENV_NAME}
       Push ${TEMP}
 
-      Call IsNT
+      Call PFI_IsNT
       Pop ${TEMP}
       StrCmp ${TEMP} 1 WriteEnvStr_NT
 
@@ -114,7 +114,7 @@
       FileRead ${SOURCE} ${LINE}            ; Read line from AUTOEXEC.BAT
       StrCmp ${LINE} "" eof_found
       Push ${LINE}
-      Call TrimNewlines
+      Call PFI_TrimNewlines
       Pop ${LINE}
       StrCmp ${LINE} "" copy_line           ; Blank lines are preserved in the copy we make
       StrCpy ${TEMP} ${LINE} ${ENV_SETLEN}
@@ -189,7 +189,7 @@
 
 
     #--------------------------------------------------------------------------
-    # Installer Function: WriteEnvNTAU
+    # Installer Function: PFI_WriteEnvNTAU
     #
     # Writes an environment variable which is available to all users on a modern OS.
     # On Win9x systems, AUTOEXEC.BAT is updated and the Reboot flag is set to request a reboot
@@ -205,11 +205,11 @@
     # Usage:
     #         Push "HOMEDIR"
     #         Push "C:\New Home Dir"
-    #         Call WriteEnvStrNTAU
+    #         Call PFI_WriteEnvStrNTAU
     #
     #--------------------------------------------------------------------------
 
-    Function WriteEnvStrNTAU
+    Function PFI_WriteEnvStrNTAU
 
       ; Registers common to Win9x and non-Win9x processing
 
@@ -232,7 +232,7 @@
       Exch ${ENV_NAME}
       Push ${TEMP}
 
-      Call IsNT
+      Call PFI_IsNT
       Pop ${TEMP}
       StrCmp ${TEMP} 1 WriteEnvStr_NT
 
@@ -260,7 +260,7 @@
       FileRead ${SOURCE} ${LINE}            ; Read line from AUTOEXEC.BAT
       StrCmp ${LINE} "" eof_found
       Push ${LINE}
-      Call TrimNewlines
+      Call PFI_TrimNewlines
       Pop ${LINE}
       StrCmp ${LINE} "" copy_line           ; Blank lines are preserved in the copy we make
       StrCpy ${TEMP} ${LINE} ${ENV_SETLEN}
@@ -337,7 +337,7 @@
 
 !ifndef ADDUSER
     #--------------------------------------------------------------------------
-    # Uninstaller Function: un.DeleteEnvStr
+    # Uninstaller Function: un.PFI_DeleteEnvStr
     #
     # Removes an environment variable defined for the current user on a modern OS.
     # On Win9x systems, AUTOEXEC.BAT is updated and the Reboot flag is set to request a reboot.
@@ -350,11 +350,11 @@
     #
     # Usage:
     #         Push "HOMEDIR"
-    #         Call un.DeleteEnvStr
+    #         Call un.PFI_DeleteEnvStr
     #
     #--------------------------------------------------------------------------
 
-    Function un.DeleteEnvStr
+    Function un.PFI_DeleteEnvStr
       Exch $0       ; $0 now has the name of the variable
       Push $1
       Push $2
@@ -362,7 +362,7 @@
       Push $4
       Push $5
 
-      Call un.IsNT
+      Call un.PFI_IsNT
       Pop $1
       StrCmp $1 1 DeleteEnvStr_NT
 
@@ -419,7 +419,7 @@
 
 
     #--------------------------------------------------------------------------
-    # Uninstaller Function: un.DeleteEnvStrNTAU
+    # Uninstaller Function: un.PFI_DeleteEnvStrNTAU
     #
     # Removes an environment variable defined for all users on a modern OS.
     # On Win9x systems, AUTOEXEC.BAT is updated and the Reboot flag is set to request a reboot.
@@ -432,11 +432,11 @@
     #
     # Usage:
     #         Push "HOMEDIR"
-    #         Call un.DeleteEnvStrNTAU
+    #         Call un.PFI_DeleteEnvStrNTAU
     #
     #--------------------------------------------------------------------------
 
-    Function un.DeleteEnvStrNTAU
+    Function un.PFI_DeleteEnvStrNTAU
       Exch $0       ; $0 now has the name of the variable
       Push $1
       Push $2
@@ -444,7 +444,7 @@
       Push $4
       Push $5
 
-      Call un.IsNT
+      Call un.PFI_IsNT
       Pop $1
       StrCmp $1 1 DeleteEnvStr_NT
 
@@ -507,7 +507,7 @@
 #==============================================================================================
 
 #--------------------------------------------------------------------------
-# Macro: IsNT
+# Macro: PFI_IsNT
 #
 # The installation process and the uninstall process both use a function which checks if
 # the installer is running on a Win9x system or a more modern OS. This macro makes maintenance
@@ -517,8 +517,8 @@
 # Returns 0 if running on a Win9x system, otherwise returns 1
 #
 # NOTE:
-# The !insertmacro IsNT "" and !insertmacro IsNT "un." commands are included in this file so
-# 'installer.nsi' can use 'Call IsNT' and 'Call un.IsNT' without additional preparation.
+# The !insertmacro PFI_IsNT "" and !insertmacro PFI_IsNT "un." commands are included in this file so
+# 'installer.nsi' can use 'Call PFI_IsNT' and 'Call un.PFI_IsNT' without additional preparation.
 #
 # Inputs:
 #         None
@@ -528,15 +528,15 @@
 #
 #  Usage (after macro has been 'inserted'):
 #
-#         Call un.IsNT
+#         Call un.PFI_IsNT
 #         Pop $R0
 #
 #         ($R0 at this point is 0 if installer is running on a Win9x system)
 #
 #--------------------------------------------------------------------------
 
-!macro IsNT UN
-  Function ${UN}IsNT
+!macro PFI_IsNT UN
+  Function ${UN}PFI_IsNT
     Push $0
     ReadRegStr $0 HKLM \
       "SOFTWARE\Microsoft\Windows NT\CurrentVersion" CurrentVersion
@@ -554,20 +554,20 @@
 !macroend
 
 #--------------------------------------------------------------------------
-# Installer Function: IsNT
+# Installer Function: PFI_IsNT
 #
 # This function is used during the installation process
 #--------------------------------------------------------------------------
 
-!insertmacro IsNT ""
+!insertmacro PFI_IsNT ""
 
 #--------------------------------------------------------------------------
-# Uninstaller Function: un.IsNT
+# Uninstaller Function: un.PFI_IsNT
 #
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-!insertmacro IsNT "un."
+!insertmacro PFI_IsNT "un."
 
 #--------------------------------------------------------------------------
 # End of 'WriteEnvStr.nsh'
