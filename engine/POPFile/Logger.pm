@@ -32,7 +32,12 @@ sub new
     my $self = POPFile::Module->new();
 
     # The name of the debug file
+
     $self->{debug_filename__} = '';
+
+    # The last ten lines sent to the logger
+
+    $self->{last_ten__} = ();
 
     bless($self, $class);
 
@@ -157,6 +162,16 @@ sub debug
         }
 
         print $msg if ( $self->global_config_( 'debug' ) & 2 );
+
+        # Add the line to the in memory collection of the last ten
+        # logger entries and then remove the first one if we now have
+        # more than 10
+
+        push @{$self->{last_ten__}}, ($msg);
+
+	if ( $#{$self->{last_ten__}} > 9 ) {
+            shift @{$self->{last_ten__}};
+	}
     }
 }
 
@@ -167,6 +182,13 @@ sub debug_filename
     my ( $self ) = @_;
 
     return $self->{debug_filename__};
+}
+
+sub last_ten
+{
+    my ( $self ) = @_;
+
+    return $self->{last_ten__};
 }
 
 1;
