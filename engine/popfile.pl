@@ -66,7 +66,7 @@ my $header = "<html><head><title>POPFile Control Center</title><style type=text/
 <link rel=stylesheet type=text/css href='CURRENT_SKIN' title=main></link> \
 <META HTTP-EQUIV=Pragma CONTENT=no-cache>\
 <META HTTP-EQUIV=Expires CONTENT=0>\
-<META HTTP-EQUIV=Cache-Control CONTENT=no-cache></head>\
+<META HTTP-EQUIV=Cache-Control CONTENT=no-cache><META HTTP-EQUIV=Refresh CONTENT=600></head>\
 <body><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr> \
 <td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>\
 <table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;POPFile Control Center<td align=right><a href=/shutdown?session=SESSKEY>Shutdown</a>&nbsp;<tr height=3><td colspan=2></td></tr></table>\
@@ -1125,6 +1125,9 @@ sub corpus_page
     {
         $form{name} = lc($form{name});
         unlink( "$configuration{corpus}/$form{name}/table" );
+        unlink( "$configuration{corpus}/$form{name}/params" );
+        unlink( "$configuration{corpus}/$form{name}/magnets" );
+        unlink( "$configuration{corpus}/$form{name}/color" );
         rmdir( "$configuration{corpus}/$form{name}" );
 
         $delete_message = "<blockquote><b>Deleted bucket $form{name}</b></blockquote>";
@@ -2433,7 +2436,7 @@ calculate_today();
 
 # Set up reasonable defaults for the configuration parameters.  These may be 
 # overwritten immediately when we read the configuration file
-$configuration{debug}        = 0;
+$configuration{debug}        = 1;
 $configuration{port}         = 110;
 $configuration{ui_port}      = 8080;
 $configuration{subject}      = 1;
