@@ -44,14 +44,22 @@
         </td>
    </tr>
    <tr>
-        <td valign="top" align="center" colspan="2">
+        <td valign="top" align="center" valign="middle" colspan="2">
                 <label class="configurationLabel" for="configUIPort">
                     <TMPL_VAR NAME="Localize_Configuration_Fields">:
                 </label>
 
                 <TMPL_LOOP NAME="Configuration_Loop_History_Columns">
 
-                <input type="checkbox" id="<TMPL_VAR NAME="Configuration_Field_Name">" class="checkbox" name="<TMPL_VAR NAME="Configuration_Field_Name">" <TMPL_VAR NAME="Configuration_Field_Value">>&nbsp;<TMPL_VAR NAME="Configuration_Localized_Field_Name">
+                <TMPL_IF NAME="Configuration_Field_Visible">
+
+<span class="addHistory"><input type="checkbox" id="<TMPL_VAR NAME="Configuration_Field_Name">" class="checkbox" name="<TMPL_VAR NAME="Configuration_Field_Name">">&nbsp;<TMPL_VAR NAME="Configuration_Localized_Field_Name">&nbsp;</span> 
+
+                <TMPL_ELSE>
+
+                <input type="hidden" id="<TMPL_VAR NAME="Configuration_Field_Name">" class="checkbox" name="<TMPL_VAR NAME="Configuration_Field_Name">">
+
+                </TMPL_IF>
 
                 </TMPL_LOOP>
                 <input type="submit" class="submit" name="update_fields" value="<TMPL_VAR NAME="Localize_Apply">" />

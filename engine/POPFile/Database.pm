@@ -9,7 +9,7 @@ use POPFile::Module;
 # This module handles POPFile's database.  It maintains all database
 # connections
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2001-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -76,12 +76,12 @@ sub initialize
     # database, if you decide to change from using SQLite to some
     # other database (e.g. MySQL, Oracle, ... ) this *should* be all
     # you need to change.  The additional parameters user and auth are
-    # needed for some databases. 
+    # needed for some databases.
     #
-    # Note that the dbconnect string
-    # will be interpolated before being passed to DBI and the variable
-    # $dbname can be used within it and it resolves to the full path
-    # to the database named in the database parameter above.
+    # Note that the dbconnect string will be interpolated before being
+    # passed to DBI and the variable $dbname can be used within it and
+    # it resolves to the full path to the database named in the
+    # database parameter above.
 
     $self->config_( 'dbconnect', 'dbi:SQLite:dbname=$dbname' );
     $self->config_( 'dbuser', '' ); $self->config_( 'dbauth', '' );
@@ -452,6 +452,10 @@ sub db_connect_helper__
             }
             close INSERT;
             $db->commit;
+
+            # Now write the current version to the database
+
+            $db->do( "insert into popfile ( version ) values ( $version ); " );
 
             unlink $ins_file;
             print "\nDatabase upgrade complete\n\n";

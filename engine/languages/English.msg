@@ -78,6 +78,7 @@ Arrived                                 Arrived
 Size                                    Size
 Up                                      Up
 Down                                    Down
+Go                                      Go
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this
@@ -172,7 +173,7 @@ Configuration_SOCKSServer               SOCKS V proxy host
 Configuration_SOCKSPort                 SOCKS V proxy port
 Configuration_SOCKSPortUpdate           Updated SOCKS V proxy port to %s
 Configuration_SOCKSServerUpdate         Updated SOCKS V proxy host to %s
-Configuration_Fields                    History Columns
+Configuration_Fields                    Add history columns
 
 Advanced_Error1                         '%s' already in the Ignored Words list
 Advanced_Error2                         Ignored words can only contain alphanumeric, ., _, -, or @ characters
@@ -199,6 +200,9 @@ History_ShouldBe                        Should be
 History_NoFrom                          no from line
 History_NoSubject                       no subject line
 History_ClassifyAs                      Classify as
+History_RemoveColumn                    Remove column
+History_MoveLeft                        Move left
+History_MoveRight                       Move right
 History_MagnetUsed                      Magnet used
 History_MagnetBecause                   <b>Magnet Used</b><p>Classified to <font color="%s">%s</font> because of magnet %s </p>
 History_ChangedTo                       Changed to <font color="%s">%s</font>
@@ -224,6 +228,7 @@ History_Reclassified                    Reclassified
 History_Size_Bytes                      %d&nbsp;B
 History_Size_KiloBytes                  %.1f&nbsp;KB
 History_Size_MegaBytes                  %.1f&nbsp;MB
+History_Click_To_Sort                   Click to sort on this column
 
 Password_Title                          Password
 Password_Enter                          Enter password

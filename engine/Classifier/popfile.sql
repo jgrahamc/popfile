@@ -1,9 +1,9 @@
--- POPFILE SCHEMA 4
+-- POPFILE SCHEMA 5
 -- ---------------------------------------------------------------------------
 --
 -- popfile.schema - POPFile's database schema
 --
--- Copyright (c) 2003-2004 John Graham-Cumming
+-- Copyright (c) 2003-2005 John Graham-Cumming
 --
 --   This file is part of POPFile
 --
@@ -72,6 +72,10 @@
 --          | inserted   |
 --          |    hash    |
 --          | committed  |
+--          | sort_from  |
+--          | sort_cc    |
+--          | sort_to    |
+--          |sort_subject|
 --          |    size    |
 --          +------------+
 --
@@ -285,9 +289,10 @@ create table history( id integer primary key,    -- unique ID for this entry
                       bucketid integer,          -- Current classification
                       usedtobe integer,          -- Previous classification
                       magnetid integer,          -- If classified with magnet
-                      sort_from   varchar(255),  -- The From: header 
-                      sort_to     varchar(255),  -- The To: header            
-                      sort_cc     varchar(255),  -- The Cc: header            
+                      sort_from    varchar(255),  -- The From: header 
+                      sort_to      varchar(255),  -- The To: header            
+                      sort_cc      varchar(255),  -- The Cc: header            
+                      sort_subject varchar(255),  -- The Subject: header
                       size        integer        -- Size of the message (bytes)
                     );
 
@@ -401,10 +406,6 @@ create trigger delete_bucket_template delete on bucket_template
              end;
 
 -- Default data
-
--- This is schema version 4
-
-insert into popfile ( version ) values ( 4 );
 
 -- There's always a user called 'admin'
 

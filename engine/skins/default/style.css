@@ -241,3 +241,7 @@ table.historyWidgetsBottom {
 .advancedWidgets {
   margin-top: 1em;
 }
+
+.addHistory { 
+  border: 1px solid #CCCC99;
+}

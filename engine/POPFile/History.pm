@@ -9,7 +9,7 @@ use POPFile::Module;
 # This module handles POPFile's history.  It manages entries in the POPFile
 # database and on disk that store messages previously classified by POPFile.
 #
-# Copyright (c) 2004 John Graham-Cumming
+# Copyright (c) 2004-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -503,15 +503,15 @@ sub commit_history__
                                             ${$header{'received'}}[0] );
         $hash = $self->db_()->quote( $hash );
 
-        # For sorting purposes the From, To and CC headers have special
-        # cleaned up versions of themselves in the database.  The idea
-        # is that case and certain characters should be ignored when
-        # sorting these fields
+        # For sorting purposes the From, To, CC, Subject headers have
+        # special cleaned up versions of themselves in the database.
+        # The idea is that case and certain characters should be
+        # ignored when sorting these fields
         #
         # "John Graham-Cumming" <spam@jgc.org> maps to
         #     john graham-cumming spam@jgc.org
 
-        my @sortable = ( 'from', 'to', 'cc' );
+        my @sortable = ( 'from', 'to', 'cc', 'subject' );
         my %sort_headers;
 
         foreach my $h (@sortable) {
@@ -522,6 +522,15 @@ sub commit_history__
             $sort_headers{$h} =~ s/[\"<>]//g;
             $sort_headers{$h} =~ s/^[ \t]+//g;
             $sort_headers{$h} =~ s/\0//g;
+
+            if ( $h eq 'subject' ) {
+
+                # Strip "re: " from the start of the subject field
+                # used for sorting
+
+                $sort_headers{$h} =~ s/^re: *//;
+            }
+
             $sort_headers{$h} = $self->db_()->quote(
                 $sort_headers{$h} );
         }
@@ -532,7 +541,6 @@ sub commit_history__
         my @required = ( 'from', 'to', 'cc', 'subject' );
 
         foreach my $h (@required) {
-
             ${$header{$h}}[0] =
                  $self->classifier_()->{parser__}->decode_string(
                      ${$header{$h}}[0] );
@@ -576,20 +584,21 @@ sub commit_history__
 
         if ( defined( $bucketid ) ) {
             my $result = $self->db_()->do(
-                "update history set hdr_from    = ${$header{from}}[0],
-                                    hdr_to      = ${$header{to}}[0],
-                                    hdr_date    = ${$header{date}}[0],
-                                    hdr_cc      = ${$header{cc}}[0],
-                                    hdr_subject = ${$header{subject}}[0],
-                                    sort_from   = $sort_headers{from},
-                                    sort_to     = $sort_headers{to},
-                                    sort_cc     = $sort_headers{cc},
-                                    committed   = 1,
-                                    bucketid    = $bucketid,
-                                    usedtobe    = 0,
-                                    magnetid    = $magnet,
-                                    hash        = $hash,
-                                    size        = $msg_size
+                "update history set hdr_from     = ${$header{from}}[0],
+                                    hdr_to       = ${$header{to}}[0],
+                                    hdr_date     = ${$header{date}}[0],
+                                    hdr_cc       = ${$header{cc}}[0],
+                                    hdr_subject  = ${$header{subject}}[0],
+                                    sort_from    = $sort_headers{from},
+                                    sort_to      = $sort_headers{to},
+                                    sort_cc      = $sort_headers{cc},
+                                    sort_subject = $sort_headers{subject},
+                                    committed    = 1,
+                                    bucketid     = $bucketid,
+                                    usedtobe     = 0,
+                                    magnetid     = $magnet,
+                                    hash         = $hash,
+                                    size         = $msg_size
                                     where id = $slot;" );
         } else {
             $self->log_( 0, "Couldn't find bucket ID for bucket $bucket when committing $slot" );
@@ -940,7 +949,7 @@ sub set_query
         if ( $sort eq 'bucket' ) {
             $sort = 'buckets.name';
         } else {
-            if ( $sort =~ /from|to|cc/ ) {
+            if ( $sort =~ /from|to|cc|subject/ ) {
                 $sort = "sort_$sort";
             } else {
                 if ( $sort ne 'inserted' && $sort ne 'size' ) {
@@ -948,7 +957,13 @@ sub set_query
                 }
             }
         }
-        $self->{queries__}{$id}{base} .= " order by $sort $direction;";
+        $self->{queries__}{$id}{base} .= " order by $sort $direction";
+
+        if ( $sort ne 'inserted' ) {
+            $self->{queries__}{$id}{base} .= ', inserted asc;';
+        } else {
+            $self->{queries__}{$id}{base} .= ';';
+        }
     } else {
         $self->{queries__}{$id}{base} .= ' order by inserted desc;';
     }

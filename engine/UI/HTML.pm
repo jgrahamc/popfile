@@ -5,7 +5,7 @@ package UI::HTML;
 #
 # This package contains an HTML UI for POPFile
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2001-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -61,14 +61,16 @@ my $three_bytes_euc_jp = '(?:\x8F[\xA1-\xFE][\xA1-\xFE])';
 # EUC-JP characters
 my $euc_jp = "(?:$ascii|$two_bytes_euc_jp|$three_bytes_euc_jp)";
 
-my %headers_table = ( 'from',    'From',            # PROFILE BLOCK START
-                      'to',      'To',
-                      'cc',      'Cc',
-                      'subject', 'Subject',
-                      'date',    'Date',
-                      'inserted', 'Arrived',
-                      'size',    'Size',
-                      'bucket',  'Classification'); # PROFILE BLOCK STOP
+my %headers_table = ( 'from',       'From',            # PROFILE BLOCK START
+                      'to',         'To',
+                      'cc',         'Cc',
+                      'subject',    'Subject',
+                      'date',       'Date',
+                      'inserted',   'Arrived',
+                      'size',       'Size',
+                      'bucket',     'Classification',
+                      'id',         'ID',
+                      'reclassify', 'Reclassify' ); # PROFILE BLOCK STOP
 
 
 #----------------------------------------------------------------------------
@@ -370,7 +372,7 @@ sub url_handler__
     }
 
     if ( $url =~ /(popfile.*\.log)/ ) {
-        $self->http_file_( $client, $self->logger()->debug_filename(),
+        $self->http_file_( $client, $self->logger_()->debug_filename(),
             'text/plain' );
         return 1;
     }
@@ -638,6 +640,12 @@ sub handle_history_bar__
         }
     }
 
+    if ( defined( $self->{form_}{removecolumn} ) ) {
+        my $columns = $self->user_config_( 1, 'columns' );
+        $columns =~ s/\+$self->{form_}{removecolumn}/-$self->{form_}{removecolumn}/;
+        $self->user_config_( 1, 'columns', $columns );
+    }
+
     $templ->param( 'Configuration_History_Days' => $self->user_module_config_( 1, 'history', 'history_days' ) );
     if ( defined( $self->{form_}{update_fields} ) ) {
         my @columns = split(',', $self->user_config_( 1, 'columns' ));
@@ -660,15 +668,46 @@ sub handle_history_bar__
     foreach my $column (@columns) {
         my %row;
         $column =~ /(\+|\-)/;
+        $row{Configuration_Field_Visible} = ( $1 eq '-' );
         my $selected = ($1 eq '+')?'checked':'';
         $column =~ s/^.//;
         $row{Configuration_Field_Name} = $column;
         $row{Configuration_Localized_Field_Name} =
-            $self->{language__}{$headers_table{$column}};
-        $row{Configuration_Field_Value} = $selected;
+           $self->{language__}{$headers_table{$column}};
         push ( @column_data, \%row );
     }
     $templ->param( 'Configuration_Loop_History_Columns' => \@column_data );
+
+    # Handle move left or right of columns
+
+    if ( defined( $self->{form_}{moveleft} ) ) {
+        my $col = '+' . $self->{form_}{moveleft};
+        my @cols = split( ',', $self->user_config_( 1, 'columns' ) );
+
+        for my $i (1..$#cols) {
+            if ( $cols[$i] eq $col ) {
+                my $t = $cols[$i];
+                $cols[$i] = $cols[$i-1];
+                $cols[$i-1] = $t;
+                last;
+            }
+        }
+        $self->user_config_( 1, 'columns', join( ',', @cols ) );
+    }
+    if ( defined( $self->{form_}{moveright} ) ) {
+        my $col = '+' . $self->{form_}{moveright};
+        my @cols = split( ',', $self->user_config_( 1, 'columns' ) );
+
+        for my $i (0..$#cols-1) {
+            if ( $cols[$i] eq $col ) {
+                my $t = $cols[$i];
+                $cols[$i] = $cols[$i+1];
+                $cols[$i+1] = $t;
+                last;
+            }
+        }
+        $self->user_config_( 1, 'columns', join( ',', @cols ) );
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -1740,9 +1779,8 @@ sub corpus_page
     $templ->param( 'Corpus_Accuracy' => $accuracy );
     $templ->param( 'Corpus_If_Last_Reset' => 1 );
     $templ->param( 'Corpus_Last_Reset' => $self->user_config_( 1, 'last_reset' ) );
-    my $days = ( str2time( localtime ) - str2time( $self->user_config_( 1, 'last_reset' ) ) ) / ( 60 * 60 * 24 );
-
-print ctime( str2time( $self->user_config_( 1, 'last_reset' ) ) ), "\n";
+    my $now = localtime;
+    my $days = ( str2time( $now ) - str2time( $self->user_config_( 1, 'last_reset' ) ) ) / ( 60 * 60 * 24 );
 
     if ( ( $self->mcount__() > 0 ) && ( $days > 0 ) ) {
         $templ->param( 'Corpus_PerDay_Count' => int( $self->mcount__() / $days ) );
@@ -2061,6 +2099,12 @@ sub history_page
 {
     my ( $self, $client, $templ, $template, $page ) = @_;
 
+    # Handle the jump to page functionality
+
+    if ( defined( $self->{form_}{gopage} ) ) {
+        return $self->http_redirect_( $client, "/history?start_message=" . ( ( $self->{form_}{jumptopage} - 1 ) * $self->user_config_( 1, 'page_size' ) ) . '&' . $self->print_form_fields_(1,0,('filter','search','sort','session','negate') ) );
+    }
+
     $self->handle_history_bar__( $client, $templ, $template, $page );
     $templ = $self->handle_configuration_bar__( $client, $templ, $template,
                                                     $page );
@@ -2122,9 +2166,6 @@ sub history_page
         # the hidden input, so this is not a "clean" visit
         $self->{old_negate__} = $self->{form_}{negate};
     }
-
-
-
 
     # Information from submit buttons isn't always preserved if the
     # buttons aren't pressed. This compares values in some fields and
@@ -2283,6 +2324,7 @@ sub history_page
         my @header_data;
         my $colspan = 1;
         my $length = 90;
+
         foreach my $header (@columns) {
             my %row_data;
             $header =~ /^(.)/;
@@ -2307,6 +2349,13 @@ sub history_page
                 ( $self->{form_}{sort} =~ /^\-?\Q$header\E$/ );
             $row_data{History_If_Sorted_Ascending} =
                 ( $self->{form_}{sort} !~ /^-/ );
+            $row_data{Session_Key} = $self->{session_key__};
+            $row_data{History_If_MoveLeft} = ( $header ne $columns[0] );
+            $row_data{History_If_MoveRight} = ( $header ne $columns[$#columns] );
+            $row_data{Localize_History_RemoveColumn} = $self->{language__}{History_RemoveColumn};
+            $row_data{Localize_History_Click_To_Sort} = $self->{language__}{History_Click_To_Sort};
+            $row_data{Localize_History_MoveLeft} = $self->{language__}{History_MoveLeft};
+            $row_data{Localize_History_MoveRight} = $self->{language__}{History_MoveRight};
             push ( @header_data, \%row_data );
             $length -= 10;
         }
@@ -2338,66 +2387,116 @@ sub history_page
             }
             $self->user_config_( 1, 'column_characters', $length );
         }
+
         foreach my $row (@rows) {
             my %row_data;
             my $mail_file = $row_data{History_Mail_File} = $$row[0];
-            foreach my $header (@columns) {
-                $header =~ /(.)(.+)/;
-                $row_data{"History_If_$2"} = ( $1 eq '+')?1:0;
+            my @column_data;
+            my @cols = split(',', $self->user_config_( 1, 'columns' ));
+            foreach my $header (@cols) {
+                my %col_data;
+                $header =~ /^(.)/;
+                next if ( $1 eq '-' );
+                $header =~ s/^.//;
+
+                $col_data{History_If_Subject_Column} = 0;
+                $col_data{History_If_Bucket_Column} = 0;
+
+                my %dates = ( 'inserted' => 7, 'date' => 5 );
+
+                if ( defined( $dates{$header} ) ) {
+                    $col_data{History_Cell_Title} =
+                        $self->pretty_date__( $$row[$dates{$header}], 1 );
+                    $col_data{History_Cell_Value} =
+                        $self->pretty_date__( $$row[$dates{$header}] );
+                    push ( @column_data, \%col_data );
+                    next;
+                }
+
+                my %addresses = ( 'from' => 1, 'to' => 2 , 'cc' => 4 );
+
+                 if ( defined( $addresses{$header} ) ) {
+                     $col_data{History_Cell_Title} =$$row[$addresses{$header}];
+                     $col_data{History_Cell_Value} =
+                         $self->shorten__( $col_data{History_Cell_Title},
+                                           $length );
+                     push ( @column_data, \%col_data );
+                     next;
+                 }
+
+                 if ($header eq 'subject') {
+                     $col_data{History_If_Subject_Column} = 1;
+                     $col_data{History_Cell_Title}    = $$row[4];
+                     $col_data{History_Cell_Value} =
+                         $self->shorten__( $$row[4], $length );
+                     $col_data{History_Mail_File}     = $$row[0];
+                     $col_data{History_Fields}        =
+                         $self->print_form_fields_(0,1,
+                           ('start_message','session','filter','search',
+                            'sort','negate' ) );
+                     push ( @column_data, \%col_data );
+                     next;
+                 }
+
+                 if ($header eq 'size') {
+                     my $size = $$row[12];
+                     my $v = '?';
+                     if ( defined $size ) {
+                         if ( $size >= 1024 * 1024 ) {
+                             $v = sprintf $self->{language__}{History_Cell_Value_MegaBytes}, $size / ( 1024 * 1024 );
+                         } elsif ( $size >= 1024 ) {
+                             $v = sprintf $self->{language__}{History_Cell_Value_KiloBytes}, $size / 1024;
+                         } else {
+                             $v =sprintf $self->{language__}{History_Cell_Value_Bytes}, $size;
+                         }
+                     }
+                     $col_data{History_Cell_Value} = $v;
+                     $col_data{History_Cell_Title} =
+                         $col_data{History_Cell_Value};
+                     push ( @column_data, \%col_data );
+                     next;
+                 }
+
+                 if ($header eq 'bucket') {
+                     $col_data{History_If_Bucket_Column} = 1;
+                     my $bucket = $col_data{History_Bucket} = $$row[8];
+                     $col_data{History_If_Magnetized} = ($$row[11] ne '');
+                     $col_data{History_Magnet}        = $$row[11];
+                     $col_data{History_If_Not_Pseudo} =
+                         !$self->classifier_()->is_pseudo_bucket(
+                                          $self->{api_session__}, $bucket );
+                     $col_data{Session_Key} = $self->{session_key__};
+                     $col_data{History_Bucket_Color}  =
+                         $self->classifier_()->get_bucket_parameter(
+                             $self->{api_session__}, $bucket, 'color' );
+                     push ( @column_data, \%col_data );
+                     next;
+                 }
             }
-            $row_data{History_Arrived}       = $self->pretty_date__( $$row[7] );
-            $row_data{History_From}          = $$row[1];
-            $row_data{History_To}            = $$row[2];
-            $row_data{History_Cc}            = $$row[3];
-            $row_data{History_Date}          = $self->pretty_date__( $$row[5] );
-            $row_data{History_Subject}       = $$row[4];
-            $row_data{History_Short_From}    = $self->shorten__( $$row[1], $length );
-            $row_data{History_Short_To}      = $self->shorten__( $$row[2], $length );
-            $row_data{History_Short_Cc}      = $self->shorten__( $$row[3], $length );
-            $row_data{History_Short_Subject} = $self->shorten__( $$row[4], $length );
-            my $bucket = $row_data{History_Bucket} = $$row[8];
-            $row_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $self->{api_session__},
-                                                                          $bucket,
-                                                                          'color' );
+
+            $row_data{History_Loop_Loop_Cells} = \@column_data;
             $row_data{History_If_Reclassified} = ( $$row[9] != 0 );
             $row_data{History_I}             = $$row[0];
             $row_data{History_I1}            = $$row[0];
-            $row_data{History_Fields}        = $self->print_form_fields_(0,1,('start_message','session','filter','search','sort','negate' ) );
-            $row_data{History_If_Not_Pseudo} = !$self->classifier_()->is_pseudo_bucket( $self->{api_session__},
-                                                                           $bucket );
-            $row_data{History_If_Magnetized} = ($$row[11] ne '');
-            $row_data{History_Magnet}        = $$row[11];
-            my $size = $$row[12];
-            if ( defined $size ) {
-                if ( $size >= 1024 * 1024 ) {
-                    $row_data{History_Size} = sprintf $self->{language__}{History_Size_MegaBytes}, $size / ( 1024 * 1024 );
-                }
-                elsif ( $size >= 1024 ) {
-                    $row_data{History_Size} = sprintf $self->{language__}{History_Size_KiloBytes}, $size / 1024;
-                }
-                else {
-                    $row_data{History_Size} = sprintf $self->{language__}{History_Size_Bytes}, $size;
-                }
-            }
-            else {
-                $row_data{History_Size} = "?";
-            }
             $row_data{History_Loop_Loop_Buckets} = \@bucket_data;
             if ( defined $self->{feedback}{$mail_file} ) {
                 $row_data{History_If_Feedback} = 1;
                 $row_data{History_Feedback} = $self->{feedback}{$mail_file};
                 delete $self->{feedback}{$mail_file};
             }
-            $row_data{Session_Key} = $self->{session_key__};
 
-            if ( ( $last != -1 ) && ( $self->{form_}{sort} =~ /inserted/ ) && ( $self->user_config_( 1, 'session_dividers' ) ) ) {
-                $row_data{History_If_Session} = ( abs( $$row[7] - $last ) > 300 );
+            if ( ( $last != -1 ) &&
+                 ( $self->{form_}{sort} =~ /inserted/ ) &&
+                 ( $self->user_config_( 1, 'session_dividers' ) ) ) {
+                $row_data{History_If_Session} = ( abs( $$row[7] - $last ) >
+                                                  300 );
                 $row_data{History_Colspan} = $colspan+1;
             }
 
             $last = $$row[7];
 
-            $row_data{Localize_History_Reclassified} = $self->{language__}{History_Reclassified};
+            $row_data{Localize_History_Reclassified} =
+                $self->{language__}{History_Reclassified};
             $row_data{Localize_Undo} = $self->{language__}{Undo};
             push ( @history_data, \%row_data );
         }

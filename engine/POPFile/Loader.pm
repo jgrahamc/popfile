@@ -11,7 +11,7 @@ package POPFile::Loader;
 # Subroutines not so marked are suitable for use by POPFile-based
 # utilities to assist in loading and executing modules
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2001-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -556,7 +556,7 @@ sub CORE_load
     # HTML based), and the proxies.
 
     if ( $self->{debug__} ) {
-        print "\n    POPFile ", $self->{version_string__}, "\n";
+        print "\nPOPFile ", $self->{version_string__}, "\n";
         print "\n    Loading... ";
     }
 
@@ -685,7 +685,9 @@ sub CORE_start
         }
     }
 
-    print "\n" if $self->{debug__};
+    if ( $self->{debug__} ) {
+        print "\n\nPOPFile ", $self->{version_string__}, " Running\n";
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -780,7 +782,9 @@ sub CORE_stop
         }
     }
 
-    print "\n" if $self->{debug__};
+    if ( $self->{debug__} ) {
+        print "\n\nPOPFile ", $self->{version_string__}, " Terminated\n";
+    }
 }
 
 #----------------------------------------------------------------------------

@@ -96,14 +96,22 @@
     <input type="hidden" name="filter" value="<TMPL_VAR NAME="History_Field_Filter">" />
 
     <table class="historyTable" width="100%" summary="<TMPL_VAR NAME="Localize_History_MainTableSummary">">
-        <tr valign="bottom">
+        <tr class="rowOdd">
 
             <th></th>
 
             <TMPL_LOOP NAME="History_Loop_Headers">
 
             <th class="historyLabel" scope="col" align="left">
-                <a href="/history?<TMPL_VAR NAME="History_Fields">&amp;setsort=<TMPL_VAR NAME="History_Sort"><TMPL_VAR NAME="History_Header">">
+
+                <table width="100%">
+                <tr>
+                <td align="left">
+                    <a href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;removecolumn=<TMPL_VAR NAME="History_Header">">
+                    <img title="<TMPL_VAR NAME="Localize_History_RemoveColumn">" src="x.gif" border="0">
+                    </a> 
+
+                <a href="/history?<TMPL_VAR NAME="History_Fields">&amp;setsort=<TMPL_VAR NAME="History_Sort"><TMPL_VAR NAME="History_Header">" title="<TMPL_VAR NAME="Localize_History_Click_To_Sort">">
 
                     <TMPL_IF NAME="History_If_Sorted">
 
@@ -111,11 +119,11 @@
 
                         <TMPL_IF NAME="History_If_Sorted_Ascending">
 
-                        &gt;&nbsp;<TMPL_VAR NAME="History_Label">
+                        &gt;&nbsp;<TMPL_VAR NAME="History_Label"></a>
 
                         <TMPL_ELSE>
 
-                        &lt;&nbsp;<TMPL_VAR NAME="History_Label">
+                        &lt;&nbsp;<TMPL_VAR NAME="History_Label"></a>
 
                         </TMPL_IF>
 
@@ -123,16 +131,31 @@
 
                     <TMPL_ELSE>
 
-                    <TMPL_VAR NAME="History_Label">
+                    <TMPL_VAR NAME="History_Label"></a>
 
                     </TMPL_IF>
 
-                </a>
+                    </td>
+                    <td align="right">
+
+                    <TMPL_IF NAME="History_If_MoveLeft">
+                    <a href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveleft=<TMPL_VAR NAME="History_Header">">
+                    <img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="left.gif" border="0">
+                    </a>
+                    </TMPL_IF>
+                    <TMPL_IF NAME="History_If_MoveRight">
+                    <a href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveright=<TMPL_VAR NAME="History_Header">">
+                    <img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="right.gif" border="0">
+                    </a>
+                    </TMPL_IF>
+                    </td>
+                    </tr>
+                    </table>
             </th>
 
             </TMPL_LOOP>
 
-            <td class="historyLabel" scope="col" align="left">
+            <td class="historyLabel" scope="col" align="center">
                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
             </td>
         </tr>
@@ -144,58 +167,21 @@
             </TMPL_IF>
 
             <TMPL_IF NAME="__odd__">
-            <tr class="rowOdd">
-            <TMPL_ELSE>
             <tr class="rowEven">
+            <TMPL_ELSE>
+            <tr class="rowOdd">
             </TMPL_IF>
 
             <td>
                 <input type="checkbox" id="remove_<TMPL_VAR NAME="History_I1">" class="checkbox" name="remove_<TMPL_VAR NAME="History_I1">"/>
                 <input type="hidden" id="rowid_<TMPL_VAR NAME="History_I1">" name="rowid_<TMPL_VAR NAME="History_I1">" value="<TMPL_VAR NAME="History_I1">"/>
             </td>
-            <TMPL_IF NAME="History_If_inserted">
-            <td>
-                <span title="<TMPL_VAR NAME="History_Arrived" ESCAPE=HTML>"><TMPL_VAR NAME="History_Arrived" ESCAPE=HTML></span>
-            </td>
-            </TMPL_IF>
-            <TMPL_IF NAME="History_If_from">
-            <td>
-                <span title="<TMPL_VAR NAME="History_From" ESCAPE=HTML>"><TMPL_VAR NAME="History_Short_From" ESCAPE=HTML></span>
-            </td>
-            </TMPL_IF>
-            <TMPL_IF NAME="History_If_to">
-            <td>
-                <span title="<TMPL_VAR NAME="History_To" ESCAPE=HTML>"><TMPL_VAR NAME="History_Short_To" ESCAPE=HTML></span>
-            </td>
-            </TMPL_IF>
-            <TMPL_IF NAME="History_If_cc">
-            <td>
-                <span title="<TMPL_VAR NAME="History_Cc" ESCAPE=HTML>"><TMPL_VAR NAME="History_Short_Cc" ESCAPE=HTML></span>
-            </td>
-            </TMPL_IF>
-            <TMPL_IF NAME="History_If_subject">
-            <td>
-                <a class="messageLink" title="<TMPL_VAR NAME="History_Subject" ESCAPE=HTML>" href="/view?view=<TMPL_VAR NAME="History_Mail_File"><TMPL_VAR NAME="History_Fields">">
-                    <TMPL_VAR NAME="History_Short_Subject" ESCAPE=HTML>
-                </a>
-            </td>
-            </TMPL_IF>
-            <TMPL_IF NAME="History_If_date">
-            <td>
-                <span title="<TMPL_VAR NAME="History_Date" ESCAPE=HTML>"><TMPL_VAR NAME="History_Date"></span>
-            </td>
-            </TMPL_IF>
-            <TMPL_IF NAME="History_If_size">
-            <td>
-                <span title="<TMPL_VAR NAME="History_Size">"><TMPL_VAR NAME="History_Size"></span>
-            </td>
-            </TMPL_IF>
-
-            <TMPL_IF NAME="History_If_bucket">
+ 
+            <TMPL_LOOP NAME="History_Loop_Loop_Cells">
+            <TMPL_IF NAME="History_If_Bucket_Column">
             <td>
 
                 <TMPL_IF NAME="History_If_Magnetized">
-
 
                 </TMPL_IF>
 
@@ -216,7 +202,21 @@
                 </TMPL_IF>
 
             </td>
+            <TMPL_ELSE>
+            <TMPL_IF NAME="History_If_Subject_Column">
+            <td>    
+                <a class="messageLink" title="<TMPL_VAR NAME="History_Cell_Title" ESCAPE=HTML>" href="/view?view=<TMPL_VAR NAME="History_Mail_File"><TMPL_VAR NAME="History_Fields">">
+            <span title="<TMPL_VAR NAME="History_Cell_Title" ESCAPE=HTML>"><TMPL_VAR NAME="History_Cell_Value" ESCAPE=HTML></span>
+</a>
+            </td>
+            <TMPL_ELSE>
+            <td>    
+            <span title="<TMPL_VAR NAME="History_Cell_Title" ESCAPE=HTML>"><TMPL_VAR NAME="History_Cell_Value" ESCAPE=HTML></span>
+            </td>
             </TMPL_IF>
+            </TMPL_IF>
+            </TMPL_LOOP>
+
             <td>
 
                 <TMPL_IF NAME="History_If_Reclassified">
@@ -271,7 +271,7 @@
                 <input type="submit" class="submit removeButton" name="clearchecked" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" />
                 <input type="submit" class="submit removeButton" name="clearpage" value="<TMPL_VAR NAME="Localize_History_RemovePage">" />
             </td>
-            <td>
+            <td align="center">
                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
             </td>
         </tr>
@@ -286,7 +286,6 @@
             </td>
         </tr>
     </table>
-</form>
 
 <TMPL_IF "History_If_MultiPage">
 
@@ -294,11 +293,15 @@
     <tr>
         <td class="historyNavigatorBottom">
             <TMPL_INCLUDE NAME="history-navigator-widget.thtml">
+            &nbsp;<input type="text" name="jumptopage" value="" size="4">
+            <input type="submit" class="submit" name="gopage" value="<TMPL_VAR NAME="Localize_Go">" />
         </td>
     </tr>
 </table>
 
 </TMPL_IF>
+
+</form>
 
 <TMPL_ELSE> <!-- if some messages -->
 
