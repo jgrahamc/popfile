@@ -40,68 +40,16 @@ use warnings;
 use locale;
 
 my $eol = "\015\012";
+my $cfg_separator = "-->";
 
 #############################################################################################
 # ToDo:
 #
 # * the password is stored in plain text in popfile.cfg.
 # * Improve handling of errors. What shall we do with failed connections, denied logins, etc?
-# * We need a way for users to remove watched folders
 # * Implement forking.
 # * Move hash values to db.
 #############################################################################################
-# Changes in v 6
-#
-# * Changed from BODY to BODY.PEEK. It's now no longer necessary to set or unset the
-#   /Seen flag.
-# * Service will now store the current time even if the connection failed. Before that
-#   we had failing connection attempts repeating themselves very, very often
-# * UI: Merged configuration items for hostname, login, port, and password. Only a single
-#   apply button now for all of these.
-# * search_for_messages will now only search for messages that are NOT flagged as /Deleted
-#   I didn't see any use for information about /Deleted messages and at the same time
-#   I did see the danger of classifying or reclassifying messages that the user deleted, but
-#   that were not yet expunged.
-# * get_response is now a little more clever: It keeps an eye on what the server is
-#   telling us about octet counts. The contents of messages can now no longer make
-#   us stop looking for new lines.
-# * The same goes for fetch_message_part
-# * fetch_message_part is a new function that can fetch complete messages or only parts.
-# * Cleaned up the UI a bit more.
-# * Added the utility function get_uids_ge to retrieve a list of uids that
-#   are Greater than or Equal to the supplied argument. This is good for finding new messages.
-# * Used the new return value of Bayes::classify_and_modify and made check_for_new_messages
-#   download the header first and try to classify it based on a magnet.
-# * Got rid of imap.cfg by storing multiple values in single variables that can be
-#   initialized without accessing the db first.
-# * We no longer LOGOUT each time through service. Only if an invalid connection is
-#   detected, we connect and LOGIN. Otherwise, we try to stay connected and logged in.
-#   LOGOUT will only be issued by stop()
-# * The logic of service() changed. service now only calls check_for_new_messages() and
-#   reclassify_on_move(). Both functions iterate over their folder lists and just
-#   before they select a folder, they check the UIDVALIDITY. If this hasn't changed,
-#   they look at the internally stored UIDNEXT value
-# * Fixed a bug that ate empty lines at the beginning or end of messages.
-# * All imap functions now work with UIDS. No more sequence numbers.
-# * Added a debug variable to control the amount of logging. See new()
-# * Added functions to set and retrieve the contents of our config variables. These
-#   functions are: uid_next(), uid_validity(), watched_folders(), and folder_for_bucket()
-# * Implemented functions to read and write history class files to retrieve or set
-#   hash values
-# * Information from the class files is internally kept in a number of hashes that can
-#   be read and set by a number of functions. These functions are:
-#   can_classify()      getter
-#   can_reclassify()    getter
-#   was_classified()    setter
-#   was_reclassified()  setter
-#   change_cls_file()   setter
-#   get_msg_file()      getter
-#   read_cls_files()    setter by get
-# * The values in those internal hashes are currently only synchronized with the history
-#   when POPFile starts up. This means that message retrieved via POP3 will be unknown
-#   to the imap module. This also means that those hashes will never be purged/reset
-#   even if POPFile runs for weeks. Unless of course, POPFile is stopped.
-##############################################################################################
 
 
 
@@ -180,6 +128,7 @@ sub initialize
     $self->config_( 'password', '' );
     $self->config_( 'update_interval', 20 );
     $self->config_( 'byte_limit', 0 );
+    $self->config_( 'debug_level', $self->{debug__} );
 
     # Those next variables have getter/setter functions and should
     # not be used directly:
@@ -227,6 +176,7 @@ sub start
     $self->register_configuration_item_( 'configuration', 'imap_4_update_mailbox_list', $self );
     $self->register_configuration_item_( 'configuration', 'imap_5_update_interval', $self );
     $self->register_configuration_item_( 'configuration', 'imap_6_byte_limit', $self );
+    $self->register_configuration_item_( 'configuration', 'imap_7_debug_level', $self );
 
     $self->{imap__} = $self->connect();
 
@@ -242,7 +192,6 @@ sub start
     else {
         $self->{imap__} = '';
     }
-
 
     return $self->SUPER::start();
 }
@@ -293,6 +242,9 @@ sub service
         if ( $self->{api_session__} eq '' ) {
             $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
         }
+        
+        # Update the cached debug_level value
+        $self->{debug__} = $self->config_( 'debug_level' );
 
         # Check whether we already have an open connection. If not, connect and login
         if ( $self->{imap__} eq '' ) {
@@ -307,21 +259,33 @@ sub service
                 $self->{imap__} = '';
             }
         }
-
-        # Do the real job now that we have a connection
-        if ( $self->{imap__} ne '' ) {
-
-            # First classfiy messages found in one of our watched folders
-            $self->check_for_new_messages( $self->{imap__} );
-
-            # Now check for messages that might have to be reclassified.
-            $self->reclassify_on_move( $self->{imap__} );
+        # Since say() as well as get_response() can throw an exception, i.e. die if
+        # they detect a lost connection, we eval the following code to be able 
+        # to catch the exception
+        eval {
+            local $SIG{'__DIE__'};
+            # Do the real job now that we have a connection
+            if ( $self->{imap__} ne '' ) {
+    
+                # First classfiy messages found in one of our watched folders
+                $self->check_for_new_messages( $self->{imap__} );
+    
+                # Now check for messages that might have to be reclassified.
+                $self->reclassify_on_move( $self->{imap__} );
+            }
+            # Or complain
+            else {
+                $self->log_( "No valid IMAP connection; cannot check for new messages." );
+            }
+        };
+        if ( $@ ) {
+            if ( $@ =~ /The connection to the IMAP server was lost/ ) {
+                $self->log_( $@ );
+            }
+            else {
+                die $@;
+            }
         }
-        # Or complain
-        else {
-            $self->log_( "No valid IMAP connection; cannot check for new messages." );
-        }
-
         # Save the current time.
         $self->{last_update__} = time;
     }
@@ -512,7 +476,7 @@ sub reclassify_on_move
 
         my $folder = $self->folder_for_bucket( $bucket );
 
-        # If the user has not yet configure a folder for this bucket, do nothing
+        # If the user has not yet configured a folder for this bucket, do nothing
         if ( ! defined $folder ) {
             next;
         }
@@ -527,7 +491,10 @@ sub reclassify_on_move
 
         my $old_next = $self->uid_next( $folder );
         $self->say( $imap, "SELECT \"$folder\"" );
-        $self->get_response( $imap );
+        unless ( $self->get_response( $imap ) == 1 ) {
+            $self->log_( "Could not SELECT folder $folder!" );
+            next;
+        }
 
         # Get a list of UIDs greater than our old_next value.
         my @uids = $self->get_uids_ge( $imap, $old_next );
@@ -676,9 +643,11 @@ sub folder_uid_status
             $self->log_( "Updated folder status (UIDVALIDITY and UIDNEXT for folder $folder." );
             return;
         }
+
+        return 1;
     }
 
-    return 1;
+    return;
 }
 
 
@@ -806,7 +775,10 @@ sub say
 
     my $cmdstr = sprintf "A%02d %s", $self->{tag__}, $command;
 
-    print $imap $cmdstr, $eol;
+    unless( print $imap $cmdstr, $eol ) {
+        $self->{imap__} = '';
+        die( "The connection to the IMAP server was lost. Could not talk to the server." );
+    }
 
     # Log command
     if ( $self->{debug__} ) {
@@ -845,6 +817,12 @@ sub get_response
 
     # Slurp until we find a reason to quit
     while ( my $buf = $self->slurp_( $imap ) ) {
+
+        # Check for lost connections:
+        if ( $response eq '' && ! defined $buf ) {
+            $self->{imap__} = '';
+            die( "The connection to the IMAP server was lost. Could not listen to the server." );
+        }
 
         # If this is the first line of the response and
         # if we find an octet count in curlies before the
@@ -1230,7 +1208,7 @@ sub folder_for_bucket
     my ( $self, $bucket, $folder ) = @_;
 
     my $all = $self->config_( 'bucket_folder_mappings' );
-    my %mapping = split /\t/, $all;
+    my %mapping = split /$cfg_separator/, $all;
 
     # set
     if ( $folder ) {
@@ -1238,7 +1216,7 @@ sub folder_for_bucket
 
         $all = '';
         while ( my ( $k, $v ) = each %mapping ) {
-            $all .= "$k\t$v\t";
+            $all .= "$k$cfg_separator$v$cfg_separator";
         }
         $self->config_( 'bucket_folder_mappings', $all );
     }
@@ -1269,13 +1247,13 @@ sub watched_folders
     if ( @folders ) {
         $all = '';
         foreach ( @folders ) {
-            $all .= "$_\t";
+            $all .= "$_$cfg_separator";
         }
         $self->config_( 'watched_folders', $all );
     }
     # get
     else {
-        return split /\t/, $all;
+        return split /$cfg_separator/, $all;
     }
 }
 
@@ -1297,7 +1275,7 @@ sub uid_validity
     my %hash;
 
     if ( defined $all ) {
-        %hash = split /\t/, $all;
+        %hash = split /$cfg_separator/, $all;
     }
 
 
@@ -1306,7 +1284,7 @@ sub uid_validity
         $hash{$folder} = $uidval;
         $all = '';
         while ( my ( $key, $value ) = each %hash ) {
-            $all .= "$key\t$value\t";
+            $all .= "$key$cfg_separator$value$cfg_separator";
         }
         $self->config_( 'uidvalidities', $all );
     }
@@ -1340,7 +1318,7 @@ sub uid_next
     my %hash;
 
     if ( defined $all ) {
-        %hash = split /\t/, $all;
+        %hash = split /$cfg_separator/, $all;
     }
 
 
@@ -1349,7 +1327,7 @@ sub uid_next
         $hash{$folder} = $uidnext;
         $all = '';
         while ( my ( $key, $value ) = each %hash ) {
-            $all .= "$key\t$value\t";
+            $all .= "$key$cfg_separator$value$cfg_separator";
         }
         $self->config_( 'uidnexts', $all );
     }
@@ -1775,6 +1753,11 @@ sub configure_item
                 my $output = $self->folder_for_bucket( $bucket );
                 $body .= "<label class=\"configurationLabel\">Mail for bucket $bucket goes to folder</label><br />\n";
                 $body .= "<select name=\"imap_folder_for_$bucket\">\n";
+
+                # default to an empty selection
+                if ( ! defined $output ) {
+                    $body .= "<option selected=\"selected\"></option>";
+                }
                 foreach my $mailbox ( @{$self->{mailboxes__}} ) {
                     if ( defined $output && $output eq $mailbox ) {
                         $body .= "<option value=\"$mailbox\" selected=\"selected\">$mailbox</option>\n";
@@ -1832,6 +1815,28 @@ sub configure_item
             $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
         }
     }
+    
+    # How noisy should the log file be?
+    if ( $name eq 'imap_7_debug_level' ) {
+        $body .= "<form action=\"configuration\">\n";
+        $body .= "<label class=\"configurationLabel\">Debug level:</label><br />\n";
+        $body .= "<select name=\"imap_debug_level\">";
+        
+        for my $i ( 0 .. 3 ) {
+            if ( $i == $self->{debug__} ) {
+                $body .= "<option value=\"$i\" selected=\"selected\">$i</option>\n";
+            }
+            else {
+                $body .= "<option value=\"$i\">$i</option>\n";
+            }
+        }
+        $body .= "</select><br />\n";
+        
+        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_$name\" value=\"$$language{Apply}\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+    }
+         
+   
 
 
     return $body;
@@ -1892,11 +1897,13 @@ sub validate_item
         if ( defined $$form{update_imap_1_watch_folders} ) {
 
             my $i = 1;
-            my @folders;
+            my %folders;
             foreach ( $self->watched_folders() ) {
-                push @folders, $$form{"imap_folder_$i"};
+                $folders{ $$form{"imap_folder_$i"} }++;
                 $i++;
             }
+
+            $self->watched_folders ( sort keys %folders );
         }
     }
 
@@ -1912,10 +1919,41 @@ sub validate_item
     # map buckets to folders
     if ( $name eq 'imap_3_bucket_folders' ) {
         if ( defined $$form{imap_3_bucket_folders} ) {
+
+            # We have to make sure that there is only one bucket per folder
+            # Multiple buckets cannot map to the same folder because how
+            # could we reliably reclassify on move then?
+
+            my %bucket2folder;
+            my %folders;
+
             foreach my $key ( keys %$form ) {
+                # match bucket name:
                 if ( $key =~ /^imap_folder_for_(.+)$/ ) {
-                    $self->folder_for_bucket( $1, $$form{$key} );
+                    my $bucket = $1;
+                    my $folder = $$form{ $key };
+
+                    $bucket2folder{ $bucket } = $folder;
+
+                    # pseudo buckets are free to map wherever they like since
+                    # we will never reclassify to them anyway
+                    unless ( $self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) {
+                        $folders{ $folder }++;
+                    }
                 }
+            }
+
+            my $bad = 0;
+            while ( my ( $bucket, $folder ) = each %bucket2folder ) {
+                if ( exists $folders{$folder} && $folders{ $folder } > 1 ) {
+                    $bad = 1;
+                }
+                else {
+                    $self->folder_for_bucket( $bucket, $folder );
+                }
+            }
+            if ( $bad ) {
+                return "<blockquote><div class=\"error01\">You cannot map more than one bucket to a single folder!</div></blockquote>";
             }
         }
     }
@@ -1968,7 +2006,13 @@ sub validate_item
         }
     }
 
-
+    # How noisy should the log file be?
+    if ( $name eq 'imap_7_debug_level' ) {
+        if ( defined $$form{imap_debug_level} ) {
+            $self->{debug__} = $$form{imap_debug_level};
+            $self->config_( 'debug_level', $self->{debug__} );
+        }
+    }
 
     return '';
 }
