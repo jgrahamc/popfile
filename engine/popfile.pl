@@ -2407,19 +2407,14 @@ sub flush_extra
 #
 # run_popfile - a POP3 proxy server 
 #
-# $listen_port    (optional) the port to listen on
-# $connect_server Hostname of server to connect to if AUTH used
-# $connect_port   Port on $connect_server to connect to
-# $ui_port        Port to run the UI on
-#
 # ---------------------------------------------------------------------------------------------
 sub run_popfile
 {
     # Listen for connections on our port 110 (or a user specific port)
-    my $listen_port    = shift;
-    my $connect_server = shift;
-    my $connect_port   = shift;
-    my $ui_port        = shift;
+    my $listen_port    = $configuration{port};
+    my $connect_server = $configuration{server};
+    my $connect_port   = $configuration{sport};
+    my $ui_port        = $configuration{ui_port};
     
     my $server = IO::Socket::INET->new( Proto     => 'tcp',
                                     $configuration{localpop} == 1 ? (LocalAddr => 'localhost') : (), 
@@ -2537,11 +2532,17 @@ sub run_popfile
                     next;
                 }
 
-                # In the case of a PASS or NOOP command we simply pass it through the the real
-                # mail server for processing and echo the response back to the client
-                if ( ( $command =~ /PASS (.*)/i ) || ( $command =~ /NOOP/i ) )
+                # In the case of PASS, NOOP, XSENDER, STAT, DELE and RSET commands we simply pass it through to 
+                # the real mail server for processing and echo the response back to the client
+                if ( ( $command =~ /PASS (.*)/i )    || 
+                     ( $command =~ /NOOP/i )         ||
+                     ( $command =~ /STAT/i )         ||
+                     ( $command =~ /XSENDER (.*)/i ) ||
+                     ( $command =~ /DELE (.*)/i )    ||
+                     ( $command =~ /RSET/i ) )
                 {
                     echo_response( $mail, $client, $command );
+                    flush_extra( $mail, $client, 0 );
                     next;
                 }
 
@@ -2664,35 +2665,13 @@ sub run_popfile
                     next;
                 }
 
-                # The STAT command returns the number of available messages and the total size in octets
-                if ( $command =~ /STAT/i )
-                {
-                    echo_response( $mail, $client, $command );
-                    flush_extra( $mail, $client, 0 );
-                    next;
-                }
-
-                # The client is requesting a LIST of the messages
-                if ( $command =~ /LIST ?(.*)?/i )
+                # The client is requesting a LIST/UIDL of the messages
+                if ( ( $command =~ /LIST ?(.*)?/i ) ||
+                     ( $command =~ /UIDL ?(.*)?/i ) )
                 {
                     if ( echo_response( $mail, $client, $command ) )
                     {
                         if ( $1 eq '' ) 
-                        {
-                            echo_to_dot( $mail, $client );
-                        }
-                    }
-
-                    flush_extra( $mail, $client, 0 );
-                    next;
-                }
-
-                # The client is requesting a UIDL list of the messages
-                if ( $command =~ /UIDL ?(.*)?/i )
-                {
-                    if ( echo_response( $mail, $client, $command ) )
-                    {
-                        if ( $1 eq '' )
                         {
                             echo_to_dot( $mail, $client );
                         }
@@ -2718,14 +2697,6 @@ sub run_popfile
                     }
                 }
 
-                # The XSENDER command
-                if ( $command =~ /XSENDER (.*)/i )
-                {
-                    echo_response( $mail, $client, $command );
-                    flush_extra( $mail, $client, 0 );
-                    next;
-                }
-                
                 # The CAPA command
                 if ( $command =~ /CAPA/i )
                 {
@@ -2910,15 +2881,6 @@ sub run_popfile
                     }
                 }
 
-                # Handle the deletion of a message, pass the delete on to the remote server and see if it works.  
-                if ( $command =~ /DELE (.*)/i )
-                {
-                    # Try the delete on the real server and if it successful then mark it as deleted
-                    echo_response( $mail, $client, $command );
-                    flush_extra( $mail, $client, 0 );
-                    next;
-                }
-
                 # The mail client wants to stop using the server, so send that message through to the
                 # real mail server, echo the response back up to the client and exit the while.  We will
                 # close the connection immediately
@@ -2936,17 +2898,7 @@ sub run_popfile
                     last;
                 }
 
-                # The mail client wants to restart and so we mark all messages as undeleted and recalculate the
-                # size of all the messages $total_size and the number $message_count
-                if ( $command =~ /RSET/i )
-                {
-                    echo_response( $mail, $client, $command );
-                    flush_extra( $mail, $client, 0 );
-                    next;
-                }
-
                 # Don't know what this is so let's just pass it through and hope for the best
-                # Perform a LIST command on the remote server
                 if ( $mail && $mail->connected ) 
                 {
                     if ( echo_response( $mail, $client, $command ) )
@@ -3089,7 +3041,7 @@ debug( "We are $hostname" );
 debug( "POPFile Engine v$major_version.$minor_version.$build_version running" );
 
 # Run the POP server and handle requests
-run_popfile($configuration{port}, $configuration{server}, $configuration{sport}, $configuration{ui_port});
+run_popfile();
 
 print "    Saving configuration\n";
 
