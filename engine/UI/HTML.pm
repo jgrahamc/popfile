@@ -1695,7 +1695,7 @@ sub load_history_cache
     }
     
     if ( $sort ne '' ) {
-        @{$self->{history_keys}} = sort { my ($a1,$b1) = ($self->{history}{$a}{$sort}, $self->{history}{$b}{$sort}); $a1 =~ s/[^A-Z]//ig; $b1 =~ s/[^A-Z]//ig; return ( $a1 cmp $b1 ); } keys %{$self->{history}};
+        @{$self->{history_keys}} = sort { my ($a1,$b1) = ($self->{history}{$a}{$sort}, $self->{history}{$b}{$sort}); $a1 =~ s/[^A-Z0-9]//ig; $b1 =~ s/[^A-Z0-9]//ig; return ( $a1 cmp $b1 ); } keys %{$self->{history}};
     } else {
         @{$self->{history_keys}} = sort { $a <=> $b } keys %{$self->{history}};
     }
