@@ -626,8 +626,9 @@ sub classify_message
     # open a temporary file that the classifier will
     # use to read the message in binary, read-write mode:
     my $pseudo_mailer;
-    unless ( open $pseudo_mailer, "+>imap.tmp" ) {
-        $self->log_( 0, "Unable to open temporary file. Nothing done to message $msg." );
+    my $file = $self->get_user_path_( 'imap.tmp' );
+    unless ( open $pseudo_mailer, "+>$file" ) {
+        $self->log_( 0, "Unable to open temporary file $file. Nothing done to message $msg." );
 
         return;
     }
@@ -751,8 +752,9 @@ sub reclassify_message
     # We have to write the message to a temporary file.
     # I simply use "imap.tmp" as the file name here.
 
-    unless ( open TMP, ">imap.tmp" ) {
-        $self->log_( 0, "Cannot open temp file imap.tmp" );
+    my $file = $self->get_user_path_( 'imap.tmp' );
+    unless ( open TMP, ">$file" ) {
+        $self->log_( 0, "Cannot open temp file $file" );
 
         return;
     };
@@ -2337,8 +2339,9 @@ sub train_on_archive__
                 next;
             }
 
-            unless ( open TMP, ">imap.tmp" ) {
-                $self->log_( 0, "Cannot open temp file imap.tmp" );
+            my $file = $self->get_user_path_( 'imap.tmp' );
+            unless ( open TMP, ">$file" ) {
+                $self->log_( 0, "Cannot open temp file $file" );
                 next;
             };
 
