@@ -945,7 +945,7 @@ sub history_page
         my $class_file = $form{file};
         $class_file =~ s/msg$/cls/;
         open CLASS, ">$class_file";
-        print CLASS "$form{shouldbe}$eol";
+        print CLASS "RECLASSIFIED$eol$form{shouldbe}$eol";
         close CLASS;
         
         $classifier->load_word_matrix();
@@ -993,14 +993,27 @@ sub history_page
         $class_file =~ s/msg$/cls/;
         open CLASS, "<$class_file";
         my $bucket = <CLASS>;
+        my $reclassified = 0;
+        if ( $bucket =~ /RECLASSIFIED/ ) {
+            $bucket = <CLASS>;
+            $reclassified = 1;
+        }
         $bucket =~ s/[\r\n]//g;
         close CLASS;
-        $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Reclassify as: ";
-        foreach my $abucket (keys %{$classifier->{total}})
+        if ( $reclassified ) 
         {
-            if ( $abucket ne $bucket ) 
+            $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified";
+        } 
+        else
+        {
+            $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Reclassify as: ";
+            
+            foreach my $abucket (keys %{$classifier->{total}})
             {
-                $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file><font color=$classifier->{colors}{$abucket}>$abucket</font></a> ";
+                if ( $abucket ne $bucket ) 
+                {
+                    $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file><font color=$classifier->{colors}{$abucket}>$abucket</font></a> ";
+                }
             }
         }
         $body .= "</td>";
