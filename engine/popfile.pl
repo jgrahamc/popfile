@@ -1446,15 +1446,38 @@ sub history_page
         }
         $body .= "</select><input type=submit class=submit name=setfilter value=Filter></form><b>Classification</b><td><b>Should be</b>";            
         my $start_message = 0;
-        if ( ( defined($form{start_message}) ) && ($form{start_message} > 0 ) )
+        $start_message = $form{start_message} if ( ( defined($form{start_message}) ) && ($form{start_message} > 0 ) );
+        my $stop_message  = $start_message + $configuration{page_size} - 1;
+
+        # Verify that a message we are being asked to view (perhaps from a /jump_to_message URL) is actually between
+        # the $start_message and $stop_message, if it is not then move to that message
+        if ( defined($form{view}) )
         {
-            $start_message = $form{start_message};
+            my $found = 0;
+            foreach my $i ($start_message ..  $stop_message)
+            {
+                if ( $form{view} eq $history_cache[$i] ) 
+                {
+                    $found = 1;
+                    last;
+                }
+            }
+            
+            if ( $found == 0 )
+            {
+                foreach my $i ( 0 .. $#history_cache ) 
+                {
+                    if ( $form{view} eq $history_cache[$i] )
+                    {
+                        $start_message = $i;
+                        $stop_message  = $i + $configuration{page_size} - 1;
+                        last;
+                    }
+                }
+            }
         }
-        my $stop_message = $start_message + $configuration{page_size} - 1;
-        if ( $stop_message >= $#history_cache ) 
-        {
-            $stop_message = $#history_cache;
-        }
+        
+        $stop_message  = $#history_cache if ( $stop_message >= $#history_cache );
 
         my $stripe = 0;
 
