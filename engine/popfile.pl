@@ -173,6 +173,7 @@ sub http_file
     my $contents = '';
     if ( open FILE, "<$file" )
     {
+        binmode FILE;
         while (<FILE>)
         {
             $contents .= $_;
