@@ -752,7 +752,7 @@ sub html_common_middle
 
     # History menu item
     $result .= "<td class=\"$tab[2]\" align=\"center\">\n";
-    $result .= "<a class=\"menuLink\" href=\"/history?session=$self->{session_key__}&amp;setfilter=\">";
+    $result .= "<a class=\"menuLink\" href=\"/history?session=$self->{session_key__}\">";
     $result .= "\n$self->{language__}{Header_History}</a>\n";
     $result .= "</td>\n<td class=\"menuSpacer\"></td>\n";
 
@@ -1802,7 +1802,7 @@ sub bar_chart_100
                 }
             }
 
-            if ( ( $s == 2 ) && 
+            if ( ( $s == 2 ) &&
                  ( $self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) ) {
 	        $count = '';
 		$percent = '';
@@ -3138,9 +3138,19 @@ sub history_page
     # in or not so that we don't have to worry about undefined values later
     # on in the function
 
-    $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
-    $self->{form_}{search} = '' if ( !defined( $self->{form_}{search} ) );
-    $self->{form_}{filter} = '' if ( !defined( $self->{form_}{filter} ) );
+    $self->{form_}{sort}   = $self->{old_sort__} || '' if ( !defined( $self->{form_}{sort}   ) );
+    $self->{form_}{search} = (!defined($self->{form_}{setsearch})?$self->{old_search__}:'') || '' if ( !defined( $self->{form_}{search} ) );
+    $self->{form_}{filter} = (!defined($self->{form_}{setfilter})?$self->{old_filter__}:'') || '' if ( !defined( $self->{form_}{filter} ) );
+
+    # If the user is asking for a new sort option then it needs to get
+    # stored in the sort form variable so that it can be used for subsequent
+    # page views of the History to keep the sort in place
+
+    $self->{form_}{sort} = $self->{form_}{setsort} if ( defined( $self->{form_}{setsort} ) );
+
+    # Cache some values to keep interface widgets updated if history is re-accessed without parameters
+
+    $self->{old_sort__} = $self->{form_}{sort};
 
     # Information from submit buttons isn't always preserved if the buttons aren't
     # pressed. This compares values in some fields and sets the button-values as
@@ -3150,12 +3160,9 @@ sub history_page
     $self->{form_}{setsearch} = 'on' if ( ( ( !defined($self->{old_search__}) && ($self->{form_}{search} ne '') ) || ( defined($self->{old_search__}) && ( $self->{old_search__} ne $self->{form_}{search} ) ) ) && !defined($self->{form_}{setsearch} ) );
     $self->{old_search__} = $self->{form_}{search};
 
-
-    # If the user is asking for a new sort option then it needs to get
-    # stored in the sort form variable so that it can be used for subsequent
-    # page views of the History to keep the sort in place
-
-    $self->{form_}{sort} = $self->{form_}{setsort} if ( defined( $self->{form_}{setsort} ) );
+    # Set setfilter if filter changed and setfilter is undefined
+    $self->{form_}{setfilter} = 'Filter' if ( ( ( !defined($self->{old_filter__}) && ($self->{form_}{filter} ne '') ) || ( defined($self->{old_filter__}) && ( $self->{old_filter__} ne $self->{form_}{filter} ) ) ) && !defined($self->{form_}{setfilter} ) );
+    $self->{old_filter__} = $self->{form_}{filter};
 
     # If the user hits the Reset button on a search then we need to clear
     # the search value but make it look as though they hit the search button
