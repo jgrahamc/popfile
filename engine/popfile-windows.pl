@@ -54,6 +54,7 @@ $l->mq( $mq );
 $w->logger( $l );
 $mq->logger( $l );
 $c->logger( $l );
+$c->mq( $mq );
 
 $c->initialize();
 $w->initialize();
