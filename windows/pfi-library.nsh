@@ -4,7 +4,7 @@
 #                     definitions used by 'installer.nsi', the NSIS script
 #                     used to create the Windows installer for POPFile.
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -94,7 +94,7 @@
     !insertmacro PFI_UNIQUE_ID
 
     StrCmp $LANGUAGE ${LANG_${PFI_SETTING}} 0 skip_${PFI_UNIQUE_ID}
-      IfFileExists "$INSTDIR\languages\${UI_SETTING}.msg" 0 lang_done
+      IfFileExists "$G_ROOTDIR\languages\${UI_SETTING}.msg" 0 lang_done
       StrCpy ${L_LANG} "${UI_SETTING}"
       Goto lang_save
     skip_${PFI_UNIQUE_ID}:
@@ -177,63 +177,6 @@ Label_C_${PFI_UNIQUE_ID}:
 #
 #==============================================================================================
 
-#--------------------------------------------------------------------------
-# Installer Function: GetParameters
-#
-# Returns the command-line parameters (if any) supplied when the installer was started
-#
-# Inputs:
-#         none
-# Outputs:
-#         (top of stack)     - all of the parameters supplied on the command line (may be "")
-#
-# Usage:
-#         Call GetParameters
-#         Pop $R0
-#
-#         (if 'setup.exe /outlook' was used to start the installer, $R0 will hold '/outlook')
-#
-#--------------------------------------------------------------------------
- 
-Function GetParameters
-
-  Push $R0
-  Push $R1
-  Push $R2
-  Push $R3
-
-  StrCpy $R2 1
-  StrLen $R3 $CMDLINE
-
-  ; Check for quote or space
-
-  StrCpy $R0 $CMDLINE $R2
-  StrCmp $R0 '"' 0 +3
-  StrCpy $R1 '"'
-  Goto loop
-
-  StrCpy $R1 " "
-
-loop:
-  IntOp $R2 $R2 + 1
-  StrCpy $R0 $CMDLINE 1 $R2
-  StrCmp $R0 $R1 get
-  StrCmp $R2 $R3 get
-  Goto loop
-
-get:
-  IntOp $R2 $R2 + 1
-  StrCpy $R0 $CMDLINE 1 $R2
-  StrCmp $R0 " " get
-  StrCpy $R0 $CMDLINE "" $R2
- 
-  Pop $R3
-  Pop $R2
-  Pop $R1
-  Exch $R0
-
-FunctionEnd
-
 
 #--------------------------------------------------------------------------
 # Installer Function: GetSeparator
@@ -270,7 +213,7 @@ Function GetSeparator
 
   ClearErrors
 
-  FileOpen  ${L_CFG} "$INSTDIR\popfile.cfg" r
+  FileOpen  ${L_CFG} "$G_USERDIR\popfile.cfg" r
 
 loop:
   FileRead   ${L_CFG} ${L_LNE}
@@ -345,7 +288,7 @@ Function SetConsoleMode
   Push ${L_PARAM}
 
   ClearErrors
-  FileOpen  ${L_OLD_CFG} "$INSTDIR\popfile.cfg" r
+  FileOpen  ${L_OLD_CFG} "$G_USERDIR\popfile.cfg" r
   FileOpen  ${L_NEW_CFG} "$PLUGINSDIR\new.cfg" w
 
 loop:
@@ -365,8 +308,8 @@ copy_done:
   FileClose ${L_OLD_CFG}
   FileClose ${L_NEW_CFG}
 
-  Delete "$INSTDIR\popfile.cfg"
-  Rename "$PLUGINSDIR\new.cfg" "$INSTDIR\popfile.cfg"
+  Delete "$G_USERDIR\popfile.cfg"
+  Rename "$PLUGINSDIR\new.cfg" "$G_USERDIR\popfile.cfg"
 
   Pop ${L_PARAM}
   Pop ${L_LNE}
@@ -427,6 +370,63 @@ done:
 
   !undef L_CHAR
   !undef L_STRING
+
+FunctionEnd
+
+
+#--------------------------------------------------------------------------
+# Installer Function: GetFileSize
+#
+# Returns the size (in bytes) of the filename passed on the stack
+# (if file not found, returns -1)
+#
+# Inputs:
+#         (top of stack)     - filename of file to be checked
+# Outputs:
+#         (top of stack)     - length of the file (in bytes)
+#                              or '-1' if file not found
+#                              or '-2' if error occurred
+#
+# Usage:
+#         Push "corpus\spam\table"
+#         Call GetFileSize
+#         Pop $R0
+#
+#         ($R0 now holds the size (in bytes) of the 'spam' bucket's 'table' file)
+#
+#--------------------------------------------------------------------------
+
+Function GetFileSize
+
+  !define L_FILENAME  $R9
+  !define L_RESULT    $R8
+
+  Exch ${L_FILENAME}
+  Push ${L_RESULT}
+  Exch
+
+  IfFileExists ${L_FILENAME} find_size
+  StrCpy ${L_RESULT} "-1"
+  Goto exit
+
+find_size:
+  ClearErrors
+  FileOpen ${L_RESULT} ${L_FILENAME} r
+  FileSeek ${L_RESULT} 0 END ${L_FILENAME}
+  FileClose ${L_RESULT}
+  IfErrors 0 return_size
+  StrCpy ${L_RESULT} "-2"
+  Goto exit
+
+return_size:
+  StrCpy ${L_RESULT} ${L_FILENAME}
+
+exit:
+  Pop ${L_FILENAME}
+  Exch ${L_RESULT}
+
+  !undef L_FILENAME
+  !undef L_RESULT
 
 FunctionEnd
 
@@ -1031,10 +1031,11 @@ FunctionEnd
 # the only difference being their names.
 #
 # The 'popfile.cfg' file is used to determine the full path of the directory where the corpus
-# files are stored. By default POPFile stores the corpus in the '$INSTDIR\corpus' directory but
-# the 'popfile.cfg' file can define a different location, using a variety of paths (eg relative,
-# absolute, local or even remote). If the path specified in 'popfile.cfg' end with a trailing
-# slash, the trailing slash is stripped.
+# files are stored. By default the flat file and BerkeleyDB versions of POPFile (i.e. versions
+# prior to 0.21.0) store the corpus in the '$G_USERDIR\corpus' directory but the 'popfile.cfg'
+# file can define a different location, using a variety of paths (eg relative, absolute, local
+# or even remote). If the path specified in 'popfile.cfg' ends with a trailing slash, the
+# trailing slash is stripped.
 #
 # If 'popfile.cfg' is found in the specified folder, we use the corpus parameter (if present)
 # otherwise we assume the default location is to be used (the sub-folder called 'corpus').
@@ -1052,7 +1053,7 @@ FunctionEnd
 #
 #  Usage (after macro has been 'inserted'):
 #
-#         Push $INSTDIR
+#         Push $G_USERDIR
 #         Call un.GetCorpusPath
 #         Pop $R0
 #
@@ -1186,12 +1187,12 @@ FunctionEnd
 #
 #  Usage (after macro has been 'inserted'):
 #
-#         Push $INSTDIR
+#         Push $G_USERDIR
 #         Push "../../corpus"
 #         Call un.GetDataPath
 #         Pop $R0
 #
-#         ($R0 will be "C:\corpus", assuming $INSTDIR was "C:\Program Files\POPFile")
+#         ($R0 will be "C:\corpus", assuming $G_USERDIR was "C:\Program Files\POPFile")
 #--------------------------------------------------------------------------
 
 !macro GetDataPath UN
@@ -1710,12 +1711,12 @@ FunctionEnd
 #
 #  Usage (after macro has been 'inserted'):
 #
-#         Push "$INSTDIR\wperl.exe"
+#         Push "$G_MPBINDIR\wperl.exe"
 #         Call CheckIfLocked
 #         Pop $R0
 #
 #        (if the file is no longer in use, $R0 will be "")
-#        (if the file is still being used, $R0 will be "$INSTDIR\wperl.exe")
+#        (if the file is still being used, $R0 will be "$G_MPBINDIR\wperl.exe")
 #--------------------------------------------------------------------------
 
 !macro CheckIfLocked UN
@@ -1781,7 +1782,7 @@ FunctionEnd
 #
 #  Usage (after macro has been 'inserted'):
 #
-#         Push "$INSTDIR\wperl.exe"
+#         Push "$G_MPBINDIR\wperl.exe"
 #         Call WaitUntilUnlocked
 #
 #--------------------------------------------------------------------------
