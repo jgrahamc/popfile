@@ -129,13 +129,16 @@
 ; Page Title and Sub-title displayed in the page header
 
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_TITLE       "Out-of-date System Components Detected"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_SUBTITLE    "The version of Perl used by POPFile may not work properly on this system"
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1   "When POPFile displays its User Interface, the current default browser will be used.\r\n\r\nPOPFile does not require a specific browser, it will work with almost any browser.\r\n\r\nPOPFile is written in Perl so a minimal version of Perl is installed which uses some components distributed with Internet Explorer."
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2   "The installer has detected that this system has Internet Explorer"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3   "The version of Perl supplied with POPFile requires Internet Explorer 5.5 (or later).\r\n\r\nIt is recommended that this system is upgraded to use Internet Explorer 5.5 or a later version."
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1   "The default browser is used to display the POPFile User Interface (its control centre).\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2   "POPFile does not require a specific browser, it will work with almost any browser.\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3   "A minimal version of Perl is about to be installed (POPFile is written in Perl).\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4   "The Perl supplied with POPFile makes use of some Internet Explorer components and requires Internet Explorer 5.5 (or a later version).\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_5   "The installer has detected that this system has Internet Explorer"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6   "It is possible that some features of POPFile may not work properly on this system.\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_7   "If you have any problems with POPFile, an upgrade to a newer version of Internet Explorer may help."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Choose Components
