@@ -1,0 +1,60 @@
+<TMPL_LOOP NAME="bar_loop_xaxis">
+<tr>
+    <td align="left">
+        <font color="<TMPL_VAR NAME="bar_bucket_color">">
+            <TMPL_VAR NAME="bar_bucket_name">
+        </font>
+    </td>
+    <td>
+        &nbsp;
+    </td>
+
+    <TMPL_LOOP NAME="bar_loop_series">
+
+    <td align="right">
+        <TMPL_VAR NAME="bar_count"><TMPL_VAR NAME="bar_percent">
+    </td>
+
+    </TMPL_LOOP>
+
+</tr>
+
+</TMPL_LOOP>
+
+<tr>
+    <td colspan="<TMPL_VAR NAME="bar_colspan">">
+        &nbsp;
+    </td>
+</tr>
+
+<TMPL_IF NAME="bar_if_total_count">
+
+<tr>
+    <td colspan="<TMPL_VAR NAME="bar_colspan">">
+
+        <table class="barChart" width="100%" summary="<TMPL_VAR NAME="Localize_Bucket_BarChartSummary">">
+            <tr>
+
+                <TMPL_LOOP NAME="bar_loop_total_xaxis">
+                <TMPL_IF NAME="bar_if_percent">
+
+                <td bgcolor="<TMPL_VAR NAME="bar_bucket_color">" title="<TMPL_VAR NAME="bar_bucket_name2"> (<TMPL_VAR NAME="bar_width">)" width="<TMPL_VAR NAME="bar_width">%">
+                    <img src="pix.gif" alt="" height="20" width="1" />
+                </td>
+
+                </TMPL_IF>
+                </TMPL_LOOP>
+
+            </tr>
+        </table>
+    </td>
+</tr>
+<tr>
+    <td colspan="<TMPL_VAR NAME="bar_colspan">" align="right">
+        <span class="graphFont">
+            100%
+        </span>
+    </td>
+</tr>
+
+</TMPL_IF>

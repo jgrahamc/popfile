@@ -1585,7 +1585,8 @@ sub bucket_page
 sub bar_chart_100
 {
     my ( $self, %values ) = @_;
-    my $body = '';
+
+    my $templ = $self->load_template__( 'bar-chart-widget.thtml' );
     my $total_count = 0;
     my @xaxis = sort {
         if ( $self->{c__}->is_pseudo_bucket( $self->{api_session__}, $a ) == $self->{c__}->is_pseudo_bucket( $self->{api_session__}, $b ) ) {
@@ -1603,10 +1604,17 @@ sub bar_chart_100
         $total_count += $values{$bucket}{0};
     }
 
+    my @bucket_data;
     for my $bucket (@xaxis)  {
-        $body .= "<tr>\n<td align=\"left\"><font color=\"". $self->{c__}->get_bucket_color( $self->{api_session__}, $bucket ) . "\">$bucket</font></td>\n<td>&nbsp;</td>";
+        my %bucket_row_data;
 
+        $bucket_row_data{bar_bucket_color} = $self->{c__}->get_bucket_color( $self->{api_session__}, $bucket );
+        $bucket_row_data{bar_bucket_name}  = $bucket;
+
+
+        my @series_data;
         for my $s (@series) {
+            my %series_row_data;
             my $value = $values{$bucket}{$s} || 0;
             my $count   = $self->pretty_number( $value );
             my $percent = '';
@@ -1627,35 +1635,43 @@ sub bar_chart_100
                 $percent = '';
             }
 
-            $body .= "\n<td align=\"right\">$count$percent</td>";
+            $series_row_data{bar_count}   = $count;
+            $series_row_data{bar_percent} = $percent;
+
+            push @series_data, \%series_row_data;
         }
-        $body .= "\n</tr>\n";
+        $bucket_row_data{bar_loop_series} = \@series_data;
+        push @bucket_data, \%bucket_row_data;
     }
 
-    my $colspan = 3 + $#series;
+    $templ->param( 'bar_loop_xaxis' => \@bucket_data );
 
-    $body .= "<tr>\n<td colspan=\"$colspan\">&nbsp;</td>\n</tr>\n<tr>\n<td colspan=\"$colspan\">\n";
+    $templ->param( 'bar_colspan' => 3 + $#series );
 
     if ( $total_count != 0 ) {
-        $body .= "<table class=\"barChart\" width=\"100%\" summary=\"$self->{language__}{Bucket_BarChartSummary}\">\n<tr>\n";
+        $templ->param( 'bar_if_total_count' => 1 );
+        @bucket_data = ();
         foreach my $bucket (@xaxis) {
-            my $percent = int( $values{$bucket}{0} * 10000 / $total_count ) / 100;
+            my %bucket_row_data;
+            my $percent = sprintf "%.2f", ( $values{$bucket}{0} * 10000 / $total_count ) / 100;
             if ( $percent != 0 )  {
-                $body .= "<td bgcolor=\"" . $self->{c__}->get_bucket_color( $self->{api_session__}, $bucket ) . "\" title=\"$bucket ($percent%)\" width=\"";
-                $body .= (int($percent)<1)?1:int($percent);
-                $body .= "%\"><img src=\"pix.gif\" alt=\"\" height=\"20\" width=\"1\" /></td>\n";
+                $bucket_row_data{bar_if_percent}   = 1;
+                $bucket_row_data{bar_bucket_color} = $self->{c__}->get_bucket_color( $self->{api_session__}, $bucket );
+                $bucket_row_data{bar_bucket_name2} = $bucket;
+                $bucket_row_data{bar_width}        = $percent;
             }
+            else {
+                $bucket_row_data{bar_if_percent} = 0;
+            }
+            push @bucket_data, \%bucket_row_data;
         }
-        $body .= "</tr>\n</table>";
+        $templ->param( 'bar_loop_total_xaxis' => \@bucket_data );
+    }
+    else {
+        $templ->param( 'bar_if_total_count' => 0 );
     }
 
-    $body .= "</td>\n</tr>\n";
-
-    if ( $total_count != 0 )  {
-        $body .= "<tr>\n<td colspan=\"$colspan\" align=\"right\"><span class=\"graphFont\">100%</span></td>\n</tr>\n";
-    }
-
-    return $body;
+    return $templ->output();
 }
 
 #----------------------------------------------------------------------------
