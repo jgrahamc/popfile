@@ -27,6 +27,9 @@ LanguageDirection                       ltr
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          br
 
+# This is where to find the FAQ on the Wiki
+FAQLink                                 FrequentlyAskedQuestions
+
 # Common words that are used on their own all over the interface
 Apply                                   Aplicar
 On                                      Ligado
@@ -107,7 +110,7 @@ Footer_Forums                           Forums
 Footer_FeedMe                           Contribua
 Footer_RequestFeature                   Pedir uma Característica
 Footer_MailingList                      Lista de Email
-Footer_Wiki                             Documentação Adicional
+Footer_Wiki                             Documentação
 
 Configuration_Error1                    O caracter separador deve ser um único caracter
 Configuration_Error2                    O porta da interface de usuário deve ser um número entre 1 e 65535
@@ -204,7 +207,7 @@ History_Remove                          Para remover entradas do histórico cliqu
 History_SearchMessage                   Procurar Remetente/Assunto
 History_NoMessages                      Nenhuma mensagem
 History_ShowMagnet                      magnetizado
-History_Negate_Search                   Negar procura/filtro
+History_Negate_Search                   Inverter procura/filtro
 History_Magnet                          &nbsp;(mostrando apenas mensagens classificadas por ímã)
 History_NoMagnet                        &nbsp;(mostrando apenas mensagens não classificadas por ímã)
 History_ResetSearch                     Limpar
@@ -234,10 +237,10 @@ Security_PasswordTitle                  Senha da Interface de Usuário
 Security_Password                       Senha
 Security_PasswordUpdate                 Alterada a senha
 Security_AUTHTitle                      Servidores Remotos
-Security_SecureServer                   Servidor POP3 SPA/AUTH
-Security_SecureServerUpdate             Alterado o servidor seguro POP3 SPA/AUTH para %s; esta alteração não terá efeito até que você reinicie o POPFile
-Security_SecurePort                     Porta POP3 SPA/AUTH
-Security_SecurePortUpdate               Alterada a porta POP3 SPA/AUTH para %s; esta alteração não terá efeito até que você reinicie o POPFile
+Security_SecureServer                   Servidor POP3 remoto (SPA/AUTH ou proxy transparente)
+Security_SecureServerUpdate             Alterado o servidor POP3 remoto para %s
+Security_SecurePort                     Porta POP3 remota (SPA/AUTH ou proxy transparente)
+Security_SecurePortUpdate               Alterada a porta do servidor POP3 remoto para %s
 Security_SMTPServer                     Servidor da cadeia SMTP
 Security_SMTPServerUpdate               Alterado o servidor da cadeia SMTP para %s; esta alteração não terá efeito até que você reinicie o POPFile
 Security_SMTPPort                       Porta da cadeia SMTP
