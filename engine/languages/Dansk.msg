@@ -5,7 +5,7 @@ LanguageCode                            da
 LanguageCharset                         ISO-8859-1
 
 # This is used to get the appropriate subdirectory for the manual
-ManualLanguage                          en
+ManualLanguage                          da
 
 # Common words that are used on their own all over the interface
 Apply                                   Anvend
