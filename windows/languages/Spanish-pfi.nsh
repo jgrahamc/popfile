@@ -237,6 +237,12 @@
 !insertmacro PFI_LANG_STRING DESC_SecPOPFile               "Instalar los archivos esenciales de POPFile, incluyendo una versión mínima de Perl."
 !insertmacro PFI_LANG_STRING DESC_SecSkins                 "Instalar skins de POPFile que le permitirán cambiar el aspecto del interface de usuario de POPFile."
 !insertmacro PFI_LANG_STRING DESC_SecLangs                 "Instalar versiones de idiomas no-Ingleses para el IU de POPFile."
+
+!insertmacro PFI_LANG_STRING DESC_SubSecOptional           "Extra POPFile components (for advanced users)"
+!insertmacro PFI_LANG_STRING DESC_SecIMAP                  "Installs the POPFile IMAP module"
+!insertmacro PFI_LANG_STRING DESC_SecNNTP                  "Installs POPFile's NNTP proxy"
+!insertmacro PFI_LANG_STRING DESC_SecSMTP                  "Installs POPFile's SMTP proxy"
+!insertmacro PFI_LANG_STRING DESC_SecSOCKS                 "Installs extra Perl components which allow the POPFile proxies to use SOCKS"
 !insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Installs the POPFile XMLRPC module (for access to the POPFile API) and the Perl support it requires."
 
 #--------------------------------------------------------------------------

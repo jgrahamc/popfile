@@ -236,6 +236,12 @@
 !insertmacro PFI_LANG_STRING DESC_SecPOPFile               " ‰’Ì» «·„·›«  «·√”«”Ì… «·„Õ «Ã… „‰ ﬁˆ»· POPFile° »«·≈÷«›… ≈·Ï ‰”Œ… „’€—… „‰ Perl."
 !insertmacro PFI_LANG_STRING DESC_SecSkins                 " ‰’Ì» ”„«  POPFile «· Ì  ”„Õ » €ÌÌ— ‘ﬂ· Ê«ÃÂ… «·„” Œœ„."
 !insertmacro PFI_LANG_STRING DESC_SecLangs                 " ‰’Ì» ·€«  √Œ—Ï €Ì— «·≈‰Ã·Ì“Ì… „‰ Ê«ÃÂ… ≈” Œœ«„ POPFile."
+
+!insertmacro PFI_LANG_STRING DESC_SubSecOptional           "Extra POPFile components (for advanced users)"
+!insertmacro PFI_LANG_STRING DESC_SecIMAP                  "Installs the POPFile IMAP module"
+!insertmacro PFI_LANG_STRING DESC_SecNNTP                  "Installs POPFile's NNTP proxy"
+!insertmacro PFI_LANG_STRING DESC_SecSMTP                  "Installs POPFile's SMTP proxy"
+!insertmacro PFI_LANG_STRING DESC_SecSOCKS                 "Installs extra Perl components which allow the POPFile proxies to use SOCKS"
 !insertmacro PFI_LANG_STRING DESC_SecXMLRPC                " ‰’Ì» »—Ì„Ã XMLRPC (··‰›«– ≈·Ï Ê«ÃÂ… »—„Ã… «·»—‰«„Ã (API) ·‹ˆ POPFile) Ê«·œ⁄„ «·„Õ «Ã ·‹ˆ Perl."
 
 #--------------------------------------------------------------------------
