@@ -92,10 +92,10 @@ sub update_word
         }
         else
         {
-            $self->{words}{$word} += 1;
-            $self->{msg_total}    += 1;
+            $self->{words}{$mword} += 1;
+            $self->{msg_total}     += 1;
 
-            print "--- $word ($self->{words}{$word})\n" if ($self->{debug});
+            print "--- $word ($self->{words}{$mword})\n" if ($self->{debug});
         }
     }
 }
