@@ -2079,8 +2079,13 @@ sub run_popfile
                             if ( $configuration{subject} ) 
                             {
                                 # Don't add the classification unless it is not present
-                                if ( !( $msg_subject =~ /\[$classification\]/ ) ) {
+                                if ( !( $msg_subject =~ /\[$classification\]/ ) ) 
+                                {
                                     $msg_headers .= "Subject: [$classification] $msg_subject$eol";
+                                } 
+                                else
+                                {
+                                    $msg_headers .= "Subject: $msg_subject$eol";
                                 }
                             }
 
