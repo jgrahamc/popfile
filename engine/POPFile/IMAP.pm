@@ -28,7 +28,7 @@ use POPFile::Module;
 #
 #   Originally created by   Manni Heumann (mannih2001@users.sourceforge.net)
 #   Modified by             Sam Schinke (sschinke@users.sourceforge.net)
-#   many helpful hints by   David Lang (davidlang@users.sourceforge.net)
+#   Patches by              David Lang (davidlang@users.sourceforge.net)
 #
 # ---------------------------------------------------------------------------------------------
 
@@ -42,14 +42,6 @@ use locale;
 my $eol = "\015\012";
 my $cfg_separator = "-->";
 
-#############################################################################################
-# ToDo:
-#
-# * the password is stored in plain text in popfile.cfg.
-# * Improve handling of errors. What shall we do with failed connections, denied logins, etc?
-# * Implement forking.
-# * Move hash values to db.
-#############################################################################################
 
 
 
@@ -77,7 +69,7 @@ sub new
     $self->{last_response__} = '';
 
     # The tag that preceeds any command we sent, actually just a simple counter var
-    $self->{tag__} = '';
+    $self->{tag__} = 0;
 
     # A list of mailboxes on the server:
     $self->{mailboxes__} = [];
@@ -88,7 +80,8 @@ sub new
     # An object var to hold our socket object
     # This will only get used in service(), start(), and stop()
     # All other functions will use their own variables/copies.
-    $self->{imap__} = '';
+        #changed to a hash by David Lang to support seperate connections per folder
+    $self->{imap__} = ();
 
     # A hash to map hash values of messages to buckets.
     $self->{hash_to_bucket__} = ();
@@ -106,6 +99,9 @@ sub new
     # 2: + untagged server responses
     # 3: + each server response
     $self->{debug__} = 0;
+
+    # A hash to hold per-folder data
+    $self->{folders__} = ();
 
     return $self;
 }
@@ -208,16 +204,6 @@ sub start
     # and retrieve hashes and classifications
     $self->read_cls_files__();
 
-    $self->{imap__} = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
-
-    if ( defined $self->{imap__} ) {
-        if ( $self->login( $self->{imap__} ) ) {
-            $self->get_mailbox_list( $self->{imap__} );
-        }
-    }
-    else {
-        $self->{imap__} = '';
-    }
 
     return $self->SUPER::start();
 }
@@ -235,10 +221,12 @@ sub stop
 {
     my ( $self ) = @_;
 
-    # Logout
-    if ( $self->{imap__} ne '' ) {
-        $self->say( $self->{imap__}, "LOGOUT" );
-        $self->get_response( $self->{imap__} );
+    # Logout for each connected folder
+
+    foreach my $folder ( keys %{$self->{folders__}} ) {
+        if ( $self->{imap__}{$folder} ne '' ) {
+            $self->logout( $self->{imap__}{$folder} );
+        }
     }
 
     if ( $self->{api_session__} ne '' ) {
@@ -272,34 +260,36 @@ sub service
         # Update the cached debug_level value
         $self->{debug__} = $self->config_( 'debug_level' );
 
-        # Check whether we already have an open connection. If not, connect and login
-        if ( $self->{imap__} eq '' ) {
-            $self->{imap__} = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
+        # Check whether we already have open connections.
+        # If not, connect and login for each of our folders
 
-            if ( defined $self->{imap__} ) {
-                unless ( $self->login( $self->{imap__} ) ) {
-                    $self->{imap__} = '';
-                }
-            }
-            else {
-                $self->{imap__} = '';
-            }
+        if ( ( keys %{$self->{folders__}} ) == 0 ) {
+            $self->connect_folders__();
         }
+
         # Since say() as well as get_response() can throw an exception, i.e. die if
         # they detect a lost connection, we eval the following code to be able
         # to catch the exception. We also tell Perl to ignore broken pipes.
+
         eval {
             local $SIG{'PIPE'} = 'IGNORE';
             local $SIG{'__DIE__'};
             # Do the real job now that we have a connection
-            if ( $self->{imap__} ne '' ) {
 
-                $self->scan_folders( $self->{imap__} );
 
-            }
-            # Or complain
-            else {
-                $self->log_( "No valid IMAP connection; cannot check for new messages." );
+            # Loop over all our folders:
+
+            foreach my $folder ( keys %{$self->{folders__}} ) {
+
+                if ( $self->{imap__}{$folder} ne '' ) {
+
+                    $self->scan_folder( $self->{imap__}{$folder}, $folder );
+
+                }
+                # Or complain
+                else {
+                    $self->log_( "No valid IMAP connection for $folder; cannot check for new messages." );
+                }
             }
         };
         if ( $@ ) {
@@ -319,10 +309,102 @@ sub service
 
 
 
+#----------------------------------------------------------------------------
+# connect_folders__
+#
+#   This function will first build a hash containing all our serviced
+#   folders as keys. The value will be another hash, that tells us
+#   about the flags associated with each folder.
+#   The hash will be stored in %{$self->{folders__}}
+#   When the list is ready, the function iterates over each folder and
+#   tries to establish an IMAP connection for each folder. The 
+#   corresponding sockect object, will be stored in $self->{imap__}{$folder}
+#
+# arguments:
+#   none.
+#
+# return value:
+#   none.
+#----------------------------------------------------------------------------
+
+sub connect_folders__
+{
+    my ( $self ) = @_;
+
+
+    # Built a list of folders and their flags
+
+    # watched folders
+    foreach ( $self->watched_folders__() ) {
+        $self->{folders__}{$_}{watched} = 1;
+    }
+
+    # output folders
+    foreach my $bucket ( $self->{classifier__}->get_all_buckets( $self->{api_session__} ) ) {
+
+        my $folder = $self->folder_for_bucket__( $bucket );
+
+        if ( defined $folder ) {
+            $self->{folders__}{$folder}{output} = $bucket;
+        }
+    }
+
+    # If this is a new POPFile installation that isn't yet
+    # configured, our hash will have exactly one key now
+    # which will point to the INBOX. Since this isn't enough
+    # to do anything meaningful, we simply reset the hash:
+
+    if ( ( keys %{$self->{folders__}} ) == 1 ) {
+        %{$self->{folders__}} = ();
+    }
+
+    # Now establish a connection for each folder in the hash
+
+    foreach my $folder ( keys %{$self->{folders__}} ) {
+
+        if ( (! exists $self->{imap__}{$folder} ) || $self->{imap__}{$folder} eq '' ) {
+
+            my $error = '';
+
+            $self->{imap__}{$folder} = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
+
+            if ( defined $self->{imap__}{$folder} ) {
+                if ( $self->login( $self->{imap__}{$folder} ) ) {
+
+                    # Build a list of IMAP mailboxes if we haven't already got one:
+
+                    unless ( @{$self->{mailboxes__}} ) {
+                        $self->get_mailbox_list( $self->{imap__}{$folder} );
+                    }
+
+                    # Change to folder
+
+                    $self->say( $self->{imap__}{$folder}, "SELECT \"$folder\"" );
+                    if ( $self->get_response( $self->{imap__}{$folder} ) != 1 ) {
+                        $error = "Could not SELECT folder $folder.";
+                    }
+
+                } else {
+                    $error = "Could not LOGIN for folder $folder.";
+                }
+            }
+            else {
+                $error = "Could not CONNECT for folder $folder.";
+            }
+
+            if ( $error ne '' ) {
+                $self->{imap__}{$folder} = '';
+                $self->log_( $error );
+            }
+        }
+    }
+}
+
+
 
 # ---------------------------------------------------------------------------------------------
 #
-# scan_folders
+# scan_folder
 #
 #   This function scans all of the folders on the IMAP server that are relevant for
 #   POPFile. Currently, these are the watched folders where we look for incoming
@@ -342,98 +424,71 @@ sub service
 #
 # ---------------------------------------------------------------------------------------------
 
-sub scan_folders
+sub scan_folder
 {
-    my ( $self, $imap ) = @_;
+    my ( $self, $imap ,$folder) = @_;
 
-    # Built a list of folders and their flags
+    # make the flags more accessible.
+    my $is_watched = ( exists $self->{folders__}{$folder}{watched} ) ? 1 : 0;
+    my $is_output = ( exists $self->{folders__}{$folder}{output} ) ? $self->{folders__}{$folder}{output} : '';
 
-    my %folders;
+    $self->log_( "Looking for new messages in folder $folder." );
 
-    foreach ( $self->watched_folders__() ) {
-        $folders{$_}{watched} = 1;
+    # First, check that our UIDs are valid
+
+    unless ( $self->folder_uid_status__( $imap, $folder ) ) {
+        $self->log_( "Changed UIDVALIDITY, will not check for new messages in folder $folder." );
+        return;
     }
 
-    foreach my $bucket ( $self->{classifier__}->get_all_buckets( $self->{api_session__} ) ) {
-        my $folder = $self->folder_for_bucket__( $bucket );
-        $folders{$folder}{output} = $bucket;
+    my $moved_message = 0;
+    my @uids = $self->get_uids_ge( $imap, $self->uid_next__( $folder ) );
+
+    # We now have a list of messages with UIDs greater than or equal
+    # to our last stored UIDNEXT value (of course, the list might be
+    # empty). Let's iterate over that list.
+
+    MESSAGE:
+    foreach my $msg ( @uids ) {
+        $self->log_( "" );
+        $self->log_( "Found new message in folder $folder (UID: $msg)" );
+
+        my $hash = $self->get_hash( $imap, $msg );
+
+        $self->uid_next__( $folder, $self->uid_next__( $folder ) + 1 );
+
+        # Find out what we are dealing with here:
+
+        if ( $is_watched ) {
+            if ( $self->can_classify__( $hash ) ) {
+
+                my $result = $self->classify_message( $imap, $msg, $hash, $folder );
+
+                if ( defined $result ) {
+                    $moved_message = $result;
+                }
+
+                next MESSAGE;
+            }
+        }
+
+        if ( my $bucket = $is_output ) {
+            if ( my $old_bucket = $self->can_reclassify__( $hash, $bucket ) ) {
+
+                my $result = $self->reclassify_message( $imap, $msg, $bucket, $old_bucket, $hash );
+
+                next MESSAGE;
+            }
+        }
+
+        # If we get here despite all those next statements, we do nothing and say so
+        $self->log_( "Ignoring message $msg" );
     }
-
-
-    # Loop over all our folders:
 
     FOLDER:
-    foreach my $folder ( keys %folders ) {
-
-        # make the flags more accessible.
-        my $is_watched = ( exists $folders{$folder}{watched} ) ? 1 : 0;
-        my $is_output = ( exists $folders{$folder}{output} ) ? $folders{$folder}{output} : '';
-
-        $self->log_( "Looking for new messages in folder $folder." );
-
-        # First, check that our UIDs are valid
-
-        unless ( $self->folder_uid_status__( $imap, $folder ) ) {
-            $self->log_( "Changed UIDVALIDITY, will not check for new messages in folder $folder." );
-            next FOLDER;
-        }
-
-        # Change to folder and search for new messages
-
-        $self->say( $imap, "SELECT \"$folder\"" );
-        if ( $self->get_response( $imap ) != 1 ) {
-            $self->log_( "Could not SELECT folder $folder." );
-            next FOLDER;
-        }
-
-        my $moved_message = 0;
-        my @uids = $self->get_uids_ge( $imap, $self->uid_next__( $folder ) );
-
-        # We now have a list of messages with UIDs greater than or equal
-        # to our last stored UIDNEXT value (of course, the list might be
-        # empty). Let's iterate over that list.
-
-        MESSAGE:
-        foreach my $msg ( @uids ) {
-            $self->log_( "" );
-            $self->log_( "Found new message in folder $folder (UID: $msg)" );
-
-            my $hash = $self->get_hash( $imap, $msg );
-
-            $self->uid_next__( $folder, $self->uid_next__( $folder ) + 1 );
-
-            # Find out what we are dealing with here:
-
-            if ( $is_watched ) {
-                if ( $self->can_classify__( $hash ) ) {
-
-                    my $result = $self->classify_message( $imap, $msg, $hash, $folder );
-
-                    if ( defined $result ) {
-                        $moved_message = $result;
-                    }
-
-                    next MESSAGE;
-                }
-            }
-
-            if ( my $bucket = $is_output ) {
-                if ( my $old_bucket = $self->can_reclassify__( $hash, $bucket ) ) {
-
-                    my $result = $self->reclassify_message( $imap, $msg, $bucket, $old_bucket, $hash );
-
-                    next MESSAGE;
-                }
-            }
-
-            # If we get here despite all those next statements, we do nothing and say so
-            $self->log_( "Ignoring message $msg" );
-        }
-
-        if ( $moved_message && $self->config_( 'expunge' ) ) {
-            $self->say( $imap, "EXPUNGE" );
-            $self->get_response( $imap );
-        }
+    if ( $moved_message && $self->config_( 'expunge' ) ) {
+        $self->say( $imap, "EXPUNGE" );
+        $self->get_response( $imap );
     }
 }
 
@@ -551,9 +606,6 @@ sub classify_message
 
             # Housekeeping:
 
-            $self->log_( "Message $history_file was classified as $class." );
-            $self->log_( "" );
-
             # Update the UIDNEXT value for this folder. Since $msg contains
             # the uid of the message we just classified, we simply set that
             # value to $msg+1
@@ -561,6 +613,10 @@ sub classify_message
 
             # Remember hash of this message in history, etc:
             $self->was_classified__( $hash, $class, $history_file );
+
+            $self->log_( "Message $history_file was classified as $class." );
+            $self->log_( "" );
+
         }
     }
 
@@ -791,8 +847,8 @@ sub connect
 #   $imap: a valid socket object
 #
 # Return values:
-#  0 on failure
-#  1 on success
+#   0 on failure
+#   1 on success
 # ---------------------------------------------------------------------------------------------
 
 sub login
@@ -802,7 +858,6 @@ sub login
 
     $self->log_( "logging in" );
 
-    $self->{tag__} = 0;
     $self->say( $imap, "LOGIN \"$login\" \"$pass\"" );
 
     if ( $self->get_response( $imap ) == 1 ) {
@@ -814,6 +869,35 @@ sub login
 }
 
 
+# ---------------------------------------------------------------------------------------------
+#
+# logout
+#
+#   log out of the the server we are currently connected to.
+#
+# Arguments:
+#   $imap: a valid socket object
+#
+# Return values:
+#   0 on failure
+#   1 on success
+# ---------------------------------------------------------------------------------------------
+
+sub logout
+{
+    my ( $self, $imap ) = @_;
+
+    $self->log_( "logging out" );
+
+    $self->say( $imap, "LOGOUT" );
+
+    if ( $self->get_response( $imap ) == 1 ) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
 
 
 
@@ -836,7 +920,7 @@ sub say
 {
     my ( $self, $imap, $command ) = @_;
 
-    my $cmdstr = sprintf "A%02d %s", $self->{tag__}, $command;
+    my $cmdstr = sprintf "A%05d %s", $self->{tag__}, $command;
 
     unless( print $imap $cmdstr, $eol ) {
         $self->{imap__} = '';
@@ -872,7 +956,7 @@ sub get_response
     my ( $self, $imap ) = @_;
 
     # What is the actual tag we have to look for?
-    my $actualTag = sprintf "A%02d", $self->{tag__};
+    my $actualTag = sprintf "A%05d", $self->{tag__};
 
     my $response = '';
     my $count_octets = 0;
@@ -953,6 +1037,10 @@ sub get_response
         # Increment tag for the next command/reply sequence:
         $self->{tag__}++;
 
+        if ( $self->{tag__} == 10000 ) {
+            $self->{tag__} = 0;
+        }
+
         # We got 'OK' and the correct tag.
         if ( $response =~ /^$actualTag OK/m ) {
             return 1;
@@ -1015,9 +1103,9 @@ sub get_mailbox_list
         push @mailboxes, $1;
     }
 
-    @{$self->{mailboxes__}} = @mailboxes;
+    @{$self->{mailboxes__}} = sort @mailboxes;
 
-    return @mailboxes;
+    return @{$self->{mailboxes__}};
 }
 
 
@@ -1438,7 +1526,9 @@ sub classifier
 
 ######################################################################################
 # A temporary solution to find out about known messages.
-# This will have to go one day or change or something.
+# This will be replaced by something less hacky, once the
+# history is in the database and I know how to communicate with
+# the history.
 
 
 #----------------------------------------------------------------------------
@@ -1559,8 +1649,8 @@ sub get_hash
 #----------------------------------------------------------------------------
 #   can_classify__
 #
-# This function is a decider. It decides whether a message can be
-# classified if found in one of our watched folders or not.
+#   This function is a decider. It decides whether a message can be
+#   classified if found in one of our watched folders or not.
 #
 # arguments:
 #   $hash: The hash value for this message
@@ -2112,8 +2202,7 @@ sub validate_item
                     if ( defined $imap ) {
                         if ( $self->login( $imap ) ) {;
                             $self->get_mailbox_list( $imap );
-                            $self->say( $imap, 'LOGOUT' );
-                            $self->get_response( $imap );
+                            $self->logout( $imap );
                             $template->param( IMAP_update_list_failed => '' );
                         }
                         else {
@@ -2179,7 +2268,5 @@ sub validate_item
 
     $self->SUPER::validate_item( $name, $template, $language, $form );
 }
-
-
 
 1;
