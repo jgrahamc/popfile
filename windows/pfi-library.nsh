@@ -204,7 +204,7 @@ FunctionEnd
 # otherwise we assume the default location is to be used (the sub-folder called 'corpus').
 #
 # Inputs:
-#         (top of stack)          - the path where 'popfile.cfg' it to be found
+#         (top of stack)          - the path where 'popfile.cfg' is to be found
 #
 # Outputs:
 #         (top of stack)          - string containing the full (unambiguous) path to the corpus
@@ -235,7 +235,6 @@ Function un.GetCorpusPath
   StrCpy ${L_CORPUS} ""
 
   IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default_locn
-
   ClearErrors
   FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
 
@@ -258,74 +257,22 @@ got_new_corpus:
 
 cfg_file_done:
   FileClose ${L_FILE_HANDLE}
-
   Push ${L_CORPUS}
   Call un.TrimNewlines
   Pop ${L_CORPUS}
-  StrCmp ${L_CORPUS} "" use_default_locn
-
-  ; A non-null corpus parameter has been found in 'popfile.cfg'
-  ; Strip leading/trailing quotes, if any
-
-  StrCpy ${L_TEMP} ${L_CORPUS} 1
-  StrCmp ${L_TEMP} '"' 0 slashconversion
-  StrCpy ${L_CORPUS} ${L_CORPUS} "" 1
-  StrCpy ${L_TEMP} ${L_CORPUS} 1 -1
-  StrCmp ${L_TEMP} '"' 0 slashconversion
-  StrCpy ${L_CORPUS} ${L_CORPUS} -1
-
-slashconversion:
-  Push ${L_CORPUS}
-  Call un.StrBackSlash            ; ensure corpus path uses backslashes
-  Pop ${L_CORPUS}
-
-  StrCpy ${L_TEMP} ${L_CORPUS} 2
-  StrCmp ${L_TEMP} ".\" sub_folder
-  StrCmp ${L_TEMP} "\\" got_path
-
-  StrCpy ${L_TEMP} ${L_CORPUS} 3
-  StrCmp ${L_TEMP} "..\" relative_folder
-
-  StrCpy ${L_TEMP} ${L_CORPUS} 1
-  StrCmp ${L_TEMP} "\" instdir_drive
-
-  StrCpy ${L_TEMP} ${L_CORPUS} 1 1
-  StrCmp ${L_TEMP} ":" got_path
-
-  ; Assume path can be safely added to $INSTDIR
-
-  StrCpy ${L_CORPUS} $INSTDIR\${L_CORPUS}
-  Goto got_path
-
-sub_folder:
-  StrCpy ${L_CORPUS} ${L_CORPUS} "" 2
-  StrCpy ${L_CORPUS} $INSTDIR\${L_CORPUS}
-  Goto got_path
-
-relative_folder:
-  StrCpy ${L_RESULT} $INSTDIR
-
-relative_again:
-  StrCpy ${L_CORPUS} ${L_CORPUS} "" 3
-  Push ${L_RESULT}
-  Call un.GetParent
-  Pop ${L_RESULT}
-  StrCpy ${L_TEMP} ${L_CORPUS} 3
-  StrCmp ${L_TEMP} "..\" relative_again
-  StrCpy ${L_CORPUS} ${L_RESULT}\${L_CORPUS}
-  Goto got_path
-
-instdir_drive:
-  StrCpy ${L_TEMP} $INSTDIR 2
-  StrCpy ${L_CORPUS} ${L_TEMP}${L_CORPUS}
-  Goto got_path
+  StrCmp ${L_CORPUS} "" use_default_locn use_cfg_data
 
 use_default_locn:
-  StrCpy ${L_CORPUS} ${L_SOURCE}\corpus
+  StrCpy ${L_RESULT} ${L_SOURCE}\corpus
+  Goto got_result
 
-got_path:
-  StrCpy ${L_RESULT} ${L_CORPUS}
-
+use_cfg_data:
+  Push ${L_SOURCE}
+  Push ${L_CORPUS}
+  Call un.GetDataPath
+  Pop ${L_RESULT}
+  
+got_result:
   Pop ${L_TEMP}
   Pop ${L_FILE_HANDLE}
   Pop ${L_CORPUS}
@@ -336,6 +283,121 @@ got_path:
   !undef L_FILE_HANDLE
   !undef L_RESULT
   !undef L_SOURCE
+  !undef L_TEMP
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Function: un.GetDataPath
+#
+# This function is used to convert a 'base directory' and a 'data folder' parameter (usually
+# relative to the 'base directory') into a single, absolute path. For example, it will convert
+# 'C:\Program Files\POPFile' and 'corpus' into 'C:\Program Files\POPFile\corpus'.
+#
+# It is assumed that the 'base directory' is in standard Windows format.
+#
+# The 'data folder' may be supplied in a variety of different formats, for example:
+# corpus, ./corpus, "..\..\corpus", Z:/Data/corpus or even "\\server\share\corpus".
+#
+# Inputs:
+#         (top of stack)          - the 'data folder' parameter (eg "../../corpus")
+#         (top of stack - 1)      - the 'base directory' parameter
+#
+# Outputs:
+#         (top of stack)          - string containing the full (unambiguous) path to the data
+#                                   (the string "" is returned if input data was null)
+#
+#  Usage Example:
+#         Push $INSTDIR
+#         Push "../../corpus"
+#         Call un.GetDataPath
+#         Pop $R0
+#
+#         ($R0 will be "C:\corpus", assuming $INSTDIR was "C:\Program Files\POPFile")
+#--------------------------------------------------------------------------
+
+Function un.GetDataPath
+
+  !define L_BASEDIR     $R9
+  !define L_DATA        $R8
+  !define L_RESULT      $R7
+  !define L_TEMP        $R6
+
+  Exch ${L_DATA}        ; the 'data folder' parameter (often a relative path)
+  Exch
+  Exch ${L_BASEDIR}      ; the 'base directory' used for cases where 'data folder' is relative
+  Push ${L_RESULT}
+  Push ${L_TEMP}
+  
+  StrCmp ${L_DATA} "" 0 strip_quotes
+  StrCpy ${L_DATA} ${L_BASEDIR}
+  Goto got_path
+
+strip_quotes:
+
+  ; Strip leading/trailing quotes, if any
+
+  StrCpy ${L_TEMP} ${L_DATA} 1
+  StrCmp ${L_TEMP} '"' 0 slashconversion
+  StrCpy ${L_DATA} ${L_DATA} "" 1
+  StrCpy ${L_TEMP} ${L_DATA} 1 -1
+  StrCmp ${L_TEMP} '"' 0 slashconversion
+  StrCpy ${L_DATA} ${L_DATA} -1
+
+slashconversion:
+  Push ${L_DATA}
+  Call un.StrBackSlash            ; ensure parameter uses backslashes
+  Pop ${L_DATA}
+
+  StrCpy ${L_TEMP} ${L_DATA} 2
+  StrCmp ${L_TEMP} ".\" sub_folder
+  StrCmp ${L_TEMP} "\\" got_path
+
+  StrCpy ${L_TEMP} ${L_DATA} 3
+  StrCmp ${L_TEMP} "..\" relative_folder
+
+  StrCpy ${L_TEMP} ${L_DATA} 1
+  StrCmp ${L_TEMP} "\" basedir_drive
+
+  StrCpy ${L_TEMP} ${L_DATA} 1 1
+  StrCmp ${L_TEMP} ":" got_path
+
+  ; Assume path can be safely added to 'base directory'
+
+  StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
+  Goto got_path
+
+sub_folder:
+  StrCpy ${L_DATA} ${L_DATA} "" 2
+  StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
+  Goto got_path
+
+relative_folder:
+  StrCpy ${L_RESULT} ${L_BASEDIR}
+
+relative_again:
+  StrCpy ${L_DATA} ${L_DATA} "" 3
+  Push ${L_RESULT}
+  Call un.GetParent
+  Pop ${L_RESULT}
+  StrCpy ${L_TEMP} ${L_DATA} 3
+  StrCmp ${L_TEMP} "..\" relative_again
+  StrCpy ${L_DATA} ${L_RESULT}\${L_DATA}
+  Goto got_path
+
+basedir_drive:
+  StrCpy ${L_TEMP} ${L_BASEDIR} 2
+  StrCpy ${L_DATA} ${L_TEMP}${L_DATA}
+
+got_path:
+  Pop ${L_TEMP}
+  Pop ${L_RESULT}
+  Pop ${L_BASEDIR}
+  Exch ${L_DATA}  ; place full path to the data directory on top of the stack
+
+  !undef L_BASEDIR
+  !undef L_DATA
+  !undef L_RESULT
   !undef L_TEMP
 
 FunctionEnd
