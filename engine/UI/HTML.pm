@@ -55,7 +55,7 @@ sub new
     # The history hash contains information about ALL the files stored in the history
     # folder (by default messages/) and is updated by the load_history_cache__ method
     #
-    # Access to the history cache is formatted $self->{history}{file}{subkey} where
+    # Access to the history cache is formatted $self->{history__}{file}{subkey} where
     # the file is the name of the file that is related to this history entry.
     #
     # The subkeys are
@@ -70,7 +70,7 @@ sub new
     #   reclassified    1 if the mail has already been reclassified
     #
     # The history_keys array stores the list of keys in the history hash and are a
-    # (perhaps strict) subset of the keys of $self->{history} set by calls to
+    # (perhaps strict) subset of the keys of $self->{history__} set by calls to
     # sory_filter_history.  history_keys references the elements on history that are
     # in the current filter, sort or search set.
     #
@@ -116,62 +116,80 @@ sub initialize
     $self->config_( 'port', 8080 );
 
     # Checking for updates if off by default
+
     $self->config_( 'update_check', 0 );
 
     # Sending of statistics is off
+
     $self->config_( 'send_stats', 0 );
 
     # The size of a history page
+
     $self->config_( 'page_size', 20 );
 
     # Only accept connections from the local machine for the UI
+
     $self->config_( 'local', 1 );
 
     # Use the default skin
+
     $self->config_( 'skin', 'SimplyBlue' );
 
     # Keep the history for two days
+
     $self->config_( 'history_days', 2 );
 
     # The last time we checked for an update using the local epoch
+
     $self->config_( 'last_update_check', 0 );
 
     # The user interface password
+
     $self->config_( 'password', '' );
 
     # The last time (textual) that the statistics were reset
+
     $self->config_( 'last_reset', localtime );
 
     # We start by assuming that the user speaks English like the
     # perfidious Anglo-Saxons that we are... :-)
+
     $self->config_( 'language', 'English' );
 
     # If this is 1 then when the language is loaded we will use the language string identifier as the
     # string shown in the UI.  This is used to test whether which identifiers are used where.
+
     $self->config_( 'test_language', 0 );
 
     # If 1, Messages are saved to an archive when they are removed or expired from the history cache
+
     $self->config_( 'archive', 0, 1 );
 
     # The directory where messages will be archived to, in sub-directories for each bucket
+
     $self->config_( 'archive_dir', 'archive' );
 
     # This is an advanced setting which will save archived files to a randomly numbered
     # sub-directory, if set to greater than zero, otherwise messages will be saved in the
     # bucket directory
     # 0 <= directory name < archive_classes
+
     $self->config_( 'archive_classes', 0 );
 
     # Load skins
+
     load_skins($self);
 
     # Load the list of available user interface languages
+
     load_languages($self);
 
     # Calculate a session key
+
     change_session_key($self);
 
     # The parent needs a reference to the url handler function
+
     $self->{url_handler_} = \&url_handler__;
 
     return 1;
@@ -303,6 +321,9 @@ sub url_handler__
             $self->{form_}{session} = $self->{session_key__};
             if ( defined( $self->{form_}{redirect} ) ) {
                 $url = $self->{form_}{redirect};
+                if ( $url =~ s/\?(.*)// )  {
+                    $self->parse_form__( $1 );
+                }
             } else {
                 $url = '/';
             }
@@ -316,7 +337,41 @@ sub url_handler__
     # session key, if they don't then drop to the password screen
 
     if ( ( (!defined($self->{form_}{session})) || ($self->{form_}{session} eq '' ) || ( $self->{form_}{session} ne $self->{session_key__} ) ) && ( $self->config_( 'password' ) ne '' ) ) {
-        password_page( $self, $client, 0, $url );
+
+        # Since the URL that has caused us to hit the password page might have information stored in the
+        # form hash we need to extract it out (except for the session key) and package it up so that
+        # the password page can redirect to the right place if the correct password is entered. This
+        # is especially important for the XPL functionality.
+
+        my $redirect_url = $url . '?';
+
+        foreach my $k (keys %{$self->{form_}}) {
+
+            # Skip the session key since we are in the process of
+            # assigning a new one through the password page
+
+	    if ( $k ne 'session' ) {
+
+                # If we are dealing with an array of values (see parse_form__
+                # for details) then we need to unpack it into separate entries),
+                # we ignore non-array values since all values have an array equivalent
+
+	        if ( $k =~ /^(.+)_array$/ ) {
+                    my $field = $1;
+
+                    foreach my $v (@{$self->{form_}{$k}}) {
+                        $redirect_url .= "$field=$v&"
+		    }
+	        }
+	    }
+        }
+
+        $redirect_url =~ s/&$//;
+
+        $self->log_( "Correct password will redirect to $redirect_url" );
+
+        password_page( $self, $client, 0, $redirect_url );
+
         return 1;
     }
 
@@ -959,6 +1014,24 @@ sub configuration_page
 
     if ( $self->global_config_( 'debug' ) & 1 ) {
         $body .= "<p><a href=\"" . $self->logger()->debug_filename() . "?session=$self->{session_key__}\">$self->{language__}{Configuration_CurrentLogFile}</a>";
+    }
+
+    if ( $self->global_config_( 'debug' ) != 0 ) {
+        my @log_entries = @{$self->last_ten_log_entries()};
+
+        if ( $#log_entries >= -1 ) {
+            $body .= '<p><tt>';
+            foreach my $line (@log_entries) {
+                 $line =~ s/[\"\r\n]//g;
+                 my $full_line = $line;
+                 $line =~ /^(.{0,80})/;
+                 $line = "$1...";
+
+                 $body .= "<a title=\"$full_line\">$line</a><br>";
+   	    }
+
+            $body .= '</tt>';
+        }
     }
 
     $body .= "</td>\n</tr>\n</table>\n";
@@ -2549,7 +2622,7 @@ sub history_load_class {
         close CLASS;
         $bucket =~ s/[\r\n]//g;
     } else {
-        print "Error: " . $self->global_config_( 'msgdir' ) . "$filename: $!\n";
+        $self->log_( "Error: " . $self->global_config_( 'msgdir' ) . "$filename: $!" );
     }
     return ( $reclassified, $bucket, $usedtobe, $magnet );
 }
@@ -3343,16 +3416,38 @@ sub load_languages
 #
 # change_session_key
 #
-# Changes the session key
+# Changes the session key, the session key is a randomly chosen 6 to 10 character key that
+# protects and identifies sessions with the POPFile user interface.  At the current time
+# it is primarily used for two purposes: to prevent a malicious user telling the browser to
+# hit a specific URL causing POPFile to do something undesirable (like shutdown) and to
+# handle the password mechanism: if the session key is wrong the password challenge is
+# made.
+#
+# The characters valid in the session key are A-Z, a-z and 0-9
 #
 # ---------------------------------------------------------------------------------------------
 sub change_session_key
 {
     my ( $self ) = @_;
 
+    my @chars = ( 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+                  'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'U', 'V', 'W', 'X', 'Y',
+                  'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A' );
+
     $self->{session_key__} = '';
-    for my $i (0 .. 7) {
-        $self->{session_key__} .= chr(rand(1)*26+65);
+
+    my $length = int( 6 + rand(4) );
+
+    for my $i (0 .. $length) {
+        my $random = $chars[int( rand(36) )];
+
+        # Just to add spice to things we sometimes lowercase the value
+
+        if ( rand(1) < rand(1) ) {
+            $random = lc($random);
+	}
+
+        $self->{session_key__} .= $random;
     }
 }
 
@@ -3373,7 +3468,7 @@ sub load_language
         while ( <LANG> ) {
             next if ( /[ \t]*#/ );
 
-            if ( /([^ ]+)[ \t]+(.+)/ ) {
+            if ( /([^\t ]+)[ \t]+(.+)/ ) {
                 my $id  = $1;
                 my $msg = ($self->config_( 'test_language' ))?$1:$2;
                 $msg =~ s/[\r\n]//g;
