@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+	<key>Restarting mail filter</key>
+	<string>„Postfilters“ werden neu gestartet</string>
+	<key>Starting mail filter</key>
+	<string>„Postfilters“ werden gestartet</string>
+	<key>Stopping mail filter</key>
+	<string>„Postfilters“ werden gestoppt</string>
+</dict>
+</plist>

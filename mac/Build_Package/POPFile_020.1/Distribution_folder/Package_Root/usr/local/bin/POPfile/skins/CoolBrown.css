@@ -1,0 +1,302 @@
+body {
+  background-color: #FFFFFF;
+  border: none;
+  font-family: tahoma, arial, sans-serif;
+  color: black;
+  margin: 10px 20px 20px 20px; 
+  font-size: 10pt;}
+
+h2
+{
+	font-size: 11pt;
+	font-weight: bold;
+}
+
+.shell, .shellTop
+{
+	border-right: #000000 2px solid;
+	border-top: #000000 2px solid;
+	margin: 0px;
+	border-left: #000000 2px solid;
+	color: #000000;
+	border-bottom: #000000 2px solid;
+	background-color: #deb887;
+}
+
+input, select
+{
+	border-right: #000000 1px solid;
+	border-top: #000000 1px solid;
+	border-left: #000000 1px solid;
+	color: #000000;
+	border-bottom: #000000 1px solid;
+	font-family: tahoma, arial, serif;
+	background-color: #ffdead;
+}
+
+.menu {
+  font-size: 10pt;
+  font-weight: bold;
+  width: 100%;
+}
+
+.menuSelected
+{
+	border-right: #000000 2px solid;
+	border-top: #000000 2px solid;
+	border-left: #000000 2px solid;
+	width: 16%;
+	color: black;
+	background-color: #cd853f;
+	font-size: 10pt;
+}
+
+.menuStandard
+{
+	border-right: #000000 2px solid;
+	border-top: #000000 2px solid;
+	border-left: #000000 2px solid;
+	width: 16%;
+	color: black;
+	background-color: #deb887;
+	font-size: 10pt;
+}
+
+tr.rowEven
+{
+	border-right: #000000 2px solid;
+	border-top: #000000 2px solid;
+	border-left: #000000 2px solid;
+	color: black;
+	border-bottom: #000000 2px solid;
+	background-color: #deb887;
+}
+
+tr.rowOdd
+{
+	border-right: #000000 1px solid;
+	border-top: #000000 1px solid;
+	border-left: #000000 1px solid;
+	color: black;
+	border-bottom: #000000 1px solid;
+	background-color: #cd853f;
+}
+
+a:link {
+  color: #000000;
+  background-color: transparent;
+  text-decoration: none; 
+} 
+
+a:visited { 
+  color: #333333;
+  background-color: transparent;
+  text-decoration: none; 
+} 
+
+a:hover {
+  text-decoration: underline; 
+} 
+
+hr {
+  color: #000000;
+  background-color: transparent; 
+}
+
+td.naked {
+	padding: 0px; 
+	margin: 0px; 
+	border: none;
+}
+
+td.logo2menuSpace {
+	height: 0.5em;
+}
+
+td.head {
+	font-weight: bold;
+	font-size: 12pt;
+}
+
+table.head {
+	border-right: #000000 2px;
+	border-top: #000000 2px;
+	font-weight: bold;
+	font-size: 12pt;
+	background: #deb887;
+	margin: 0px;
+	border-left: #000000 2px;
+	width: 100%;
+	color: #000000;
+	border-bottom: #000000 2px;
+	font-family: tahoma, arial, sans-serif;
+}
+
+a.shutdownLink {
+	font-size: 10pt;
+	font-weight: bold;
+}
+
+td.footerBody {
+	text-align: center;
+	padding-left: 5%;
+	padding-right: 5%;
+}
+
+table.footer
+{
+	border-right: #000000 2px solid;
+	border-top: #000000 2px solid;
+	margin: 1em 0px 0px;
+	border-left: #000000 2px solid;
+	width: 100%;
+	color: #000000;
+	border-bottom: #000000 2px solid;
+	background-color: #deb887;
+}
+
+table.settingsTable {
+	border: 1px solid #000000;
+}
+
+table.openMessageTable, table.lookupResultsTable
+{
+	border-right: #cd853f 3px solid;
+	border-top: #cd853f 3px solid;
+	border-left: #cd853f 3px solid;
+	border-bottom: #cd853f 3px solid;
+}
+
+td.openMessageCloser {
+	text-align: right;
+}
+
+td.openMessageBody {
+	text-align: left;
+}
+
+td.settingsPanel {
+	border: 1px solid #000000;
+}
+
+
+.menuIndent {
+	width: 2%;
+}
+
+td.accuracy0to49 {
+	background-color: red;
+	color: black;
+}
+
+td.accuracy50to93 {
+	background-color: yellow;
+	color: black;
+}
+
+td.accuracy94to100 {
+	background-color: green;
+	color: black;
+}
+
+div.error01 {
+	background-color: transparent;
+	color: red;
+	font-size: larger;
+}
+
+div.error02 {
+	background-color: transparent;
+	color: red;
+}
+
+span.graphFont {
+	font-size: x-small;
+}
+
+.historyLabel {
+  font-weight: normal;
+}
+
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+.bucketsLabel {
+	font-weight: bold;
+}
+
+.magnetsLabel {
+	font-weight: bold;
+}
+
+.securityLabel {
+	font-weight: bold;
+}
+
+.configuration 
+{
+	font-size: 11pt;
+}
+
+.configurationLabel 
+{
+	font-size: 10pt;
+	font-weight: bold;
+}
+
+		
+.advancedLabel {
+	font-weight: bold;
+}
+		
+.passwordLabel {
+	font-weight: bold;
+}
+
+.sessionLabel {
+	font-weight: bold;
+}
+
+a.menuLink {
+	font-weight:bold;
+}
+
+table.historyWidgetsTop {
+	width: 100%;
+	margin-left: 1.5em;
+	margin-top: 0.6em;
+	margin-bottom: 1.0em;
+}
+
+table.historyButtonsBottom {
+	width: 100%;
+	margin-top: 0.6em;
+}
+
+td.historyNavigatorTop {
+	text-align: right;
+}
+
+td.historyNavigatorBottom {
+	text-align: right;
+}
+
+table.historyWidgetsBottom {
+	width: 100%;
+	margin-top: 0.6em;
+}
+
+span.bucketsWidgetState {
+	font-weight: bold;
+}
+
+span.configWidgetState 
+{
+	font-weight: bold;
+}
+
+span.securityWidgetState {
+	font-weight: bold;
+}

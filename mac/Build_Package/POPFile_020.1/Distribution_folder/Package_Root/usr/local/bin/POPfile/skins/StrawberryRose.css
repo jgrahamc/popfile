@@ -1,0 +1,557 @@
+/*********************************************************/
+/* da Big Kahuna */
+
+body {
+  background-color: #FAC;
+  border: none;
+  font-family: verdana, arial, sans-serif;
+  color: black;
+  font-size: 80%;
+  margin: 10px 20px 20px 20px;
+}
+
+/*********************************************************/
+/* General element settings */
+
+h2 {
+  font-family: verdana, arial, sans-serif;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #000000;
+  background-color: transparent;
+}
+
+hr {
+  color: black;
+  background-color: black;
+}
+
+th {
+  font-family: verdana, arial, sans-serif;
+  font-weight: normal;
+}
+
+td {
+  font-family: verdana, arial, sans-serif;
+}
+
+/* An undecorated table cell - center of shell tables */
+td.naked {
+	padding: 0;
+	margin: 0;
+	border: none
+}
+
+/* Text input and drop-down selections */
+input, select {
+  color: #000000;
+  background-color: #F2F0F0;
+  border: 1px #000000 solid;
+  font-weight: bold;
+  font-family: verdana, arial, sans-serif;
+}
+
+/* Checkboxes */
+.checkbox {
+  color: #000000;
+  background-color: transparent;
+  border: 0;
+}
+
+/*********************************************************/
+/* Button settings */
+
+/* All buttons */
+.submit, .toggleOn, .toggleOff, .reclassifyButton, .deleteButton, .undoButton {
+  color: #FFFFFF;
+  font-weight: bold;
+  font-family: verdana, arial, sans-serif;
+  padding-left:0;
+  padding-right:0;
+}
+.submit:active, .toggleOn:active, .toggleOff:active, .reclassifyButton:active,
+  .deleteButton:active, .undoButton:active {
+    color: #FFFFFF;
+}
+
+/* Basic Buttons (input tags with class "submit") */
+.submit {
+  background-color: rgb(135,7,1);
+  border: 2px gray outset;
+}
+.submit:active {
+  background-color: rgb(135,7,1);
+  border: 2px gray inset;
+}
+
+/* Toggle Buttons */
+.toggleOn {
+  background-color: green;
+  border: 2px gray outset;
+}
+.toggleOn:active {
+  background-color: green;
+  border: 2px gray inset;
+}
+
+.toggleOff {
+  background-color: rgb(223,32,32);
+  border: 2px gray outset;
+}
+.toggleOff:active {
+  background-color: rgb(223,32,32);
+  border: 2px gray inset;
+}
+
+/* Delete buttons */
+.deleteButton {
+  background-color: rgb(135,7,1);
+  border: 2px gray outset;
+}
+.deleteButton:active {
+  background-color: rgb(135,7,1);
+  border: 2px gray inset;
+}
+
+/* Undo buttons */
+.undoButton {
+  background-color: rgb(0,0,200);
+  border: 2px gray outset;
+}
+.undoButton:active {
+  background-color: rgb(0,0,200);
+  border: 2px gray inset;
+}
+
+.reclassifyButton {
+  background-color: rgb(0,0,255);
+  border: 2px gray outset;
+}
+.reclassifyButton:active {
+  background-color: rgb(0,0,255);
+  border: 2px gray inset;
+}
+
+
+/* *** Button Fixes *** */
+
+/* Fix width of security toggle buttons for IE */
+.securitySwitch .toggleOn {
+  width: 9em;
+}
+.securitySwitch .toggleOff {
+  width: 9em;
+}
+
+/* Reverse the color for these specific buttons */
+#securityAcceptPOP3Off {
+  color: #FFFFFF;
+  background-color: green;
+  width: 17em;
+}
+#securityAcceptPOP3On {
+  color: #FFFFFF;
+  background-color: rgb(223,32,32);
+}
+#securityAcceptHTTPOff {
+  color: #FFFFFF;
+  background-color: green;
+  width: 17em;
+}
+#securityAcceptHTTPOn {
+  color: #FFFFFF;
+  background-color: rgb(223,32,32);
+}
+
+
+/*********************************************************/
+/* Global link rules */
+:link, :visited {
+  text-decoration: none;
+}
+:link:focus, :visited:focus {
+  color: #000000;
+  background-color: #DB6479;
+}
+:link {
+  color: #000000;
+  background-color: transparent;
+}
+:visited {
+  color: #000000;
+  background-color: transparent;
+}
+:link:hover, :visited:hover {
+  color: #000000;
+  background-color: #DB6479;
+}
+:link:active, :visited:active {
+  color: #000000;
+  background-color: #DB6479;
+}
+
+/*********************************************************/
+/* Custom Link Rules */
+
+/* The big Shutdown link */
+.shutdownLink {
+	font-weight: bold;
+	color: black;
+	background-color: transparent;
+}
+
+/* For links in the menu tabs */
+.menuLink {
+	font-weight:bold;
+	color: black;
+	background-color: transparent;
+	display: block;
+	width: 100%;
+}
+
+/* For column headers (for sorting) on the History page */
+.historyLabel :link:focus, .historyLabel :visited:focus {
+  color: #630601;
+  background-color: #FFAACC;
+}
+.historyLabel :link {
+  color: #630601;
+  background-color: #DB6479;
+}
+.historyLabel :visited {
+  color: #630601;
+  background-color: #DB6479;
+}
+.historyLabel :link:hover, .historyLabel :visited:hover {
+  color: #630601;
+  background-color: #FFAACC;
+}
+.historyLabel :link:active, .historyLabel :visited:active {
+  color: #630601;
+  background-color: #FFAACC;
+}
+
+/* For the navigation pages on the History page */
+td.historyNavigatorTop :link, td.historyNavigatorBottom :link,
+td.historyNavigatorTop :visited, td.historyNavigatorBottom :visited {
+	color: rgb(99, 6, 1);
+	background-color: rgb(220, 90, 110);
+}
+td.historyNavigatorTop :link:hover, td.historyNavigatorBottom :link:hover,
+td.historyNavigatorTop :visited:hover, td.historyNavigatorBottom :visited:hover {
+	color: rgb(99, 6, 1);
+	background-color: rgb(255, 170, 204);
+}
+
+/* For viewing messages on the History page */
+.messageLink {
+  text-decoration: underline;
+}
+
+/* To prevent the background color from overriding the color in the color picker table */
+.colorChooserLink:link:focus, .colorChooserLink:visited:focus {
+  color: black;
+  background-color: transparent;
+}
+.colorChooserLink:link:hover, .colorChooserLink:visited:hover {
+  color: black;
+  background-color: transparent;
+}
+.colorChooserLink:link:active, .colorChooserLink:visited:active {
+  color: black;
+  background-color: transparent;
+}
+
+/* For wordlist page */
+.wordListLink:link:hover, .wordListLink:visited:hover {
+  color: black;
+  background-color: #FFAACC;
+}
+
+/*********************************************************/
+/* Major layout elements */
+
+/* Main tables, except footer */
+.shell, .shellTop {
+  color: #EEEEEE;
+  background-color: #CC1133;
+  border-style: ridge;
+  border-color: #FFFFFF;
+  border-width: 2px;
+  margin: 0;
+}
+
+/* The header table inside a shell table at the top of the page */
+table.head {
+  width: 100%;
+  color: #808080;
+  font-family: verdana, arial, sans-serif;
+  font-weight: bold;
+  background: #FFF;
+  border-style: groove;
+  border-color: #EEE;
+  border-width: 2px;
+  margin: 0;
+}
+
+td.head {
+  font-weight: bold;
+  font-size: 1em;
+}
+
+/* Spacing between header and main */
+td.logo2menuSpace {
+	height: 0.8em;
+}
+
+/* The footer table at the bottom of the page */
+table.footer {
+  width: 100%;
+  color: #808080;
+  background-color: #FFFFFF;
+  border-style: ridge;
+  border-color: #EEE;
+  border-width: 2px;
+  margin: 1em 0px 0px 0px;
+}
+
+td.footerBody {
+	text-align: center;
+	padding-left: 5%;
+	padding-right: 5%;
+}
+
+
+/*********************************************************/
+/* Main Menu Navigation */
+
+/* Menu Tabs' Table */
+.menu {
+  font-size: 1em;
+  font-weight: bold;
+  width: 100%;
+}
+
+/* Spacing on either side of tabs */
+.menuIndent {
+	width: 8%;
+}
+
+/* Spacing in between tabs (usually automatic) */
+.menuSpacer {
+}
+
+/* All tabs except currently active tab */
+.menuStandard {
+  background-color: #DBDF37;
+  width: 14%;
+  border-color: #FFFFFF;
+  border-style: ridge ridge none ridge;
+  border-width: 2px;
+  color: black;
+}
+
+/* Currently active tab */
+.menuSelected {
+  background-color: #7CE238;
+  width: 14%;
+  border-color: #FFFFFF;
+  border-style: ridge ridge none ridge;
+  border-width: 2px;
+  color: black;
+}
+
+
+/*********************************************************/
+
+/* General settings tables and panels */
+table.settingsTable {
+	border: 1px solid black;
+}
+
+td.settingsPanel {
+	border: 1px solid black;
+  color: #EEEEEE;
+	background-color: #DB6479;
+}
+
+/*********************************************************/
+/* History page settings */
+
+table.historyWidgetsTop {
+	width: 100%;
+	margin-left: 1.5em;
+	margin-top: 0.6em;
+	margin-bottom: 1.0em;
+}
+
+table.historyWidgetsBottom {
+	width: 100%;
+	margin-top: 0.6em;
+}
+
+td.historyNavigatorTop {
+	text-align: right;
+}
+
+td.historyNavigatorBottom {
+	text-align: right;
+}
+
+table.historyTable {
+  border-collapse: collapse;
+  border: 0 solid;
+}
+
+tr.rowHighlighted {
+	color: black;
+	background-color: #7CE238;
+}
+
+.historyTable td {
+  border-right: 2px solid #C13;
+}
+
+/* Don't put borders in the top20 table */
+.top20 td {
+  border-right: 0 solid;
+}
+
+/* Open message table */
+table.openMessageTable {
+	border: 2px solid black;
+}
+
+/* Don't put borders in the openMessage table */
+table.openMessageTable td {
+  border-right: 0 solid;
+}
+
+td.openMessageBody {
+  color: black;
+  background-color: rgb(250,220,220);
+  font-size: 1.2em;
+}
+
+td.openMessageCloser {
+	text-align: right;
+	color: black;
+	background-color: #7CE238;
+	font-weight: bold;
+}
+
+/* Top-20 stuff */
+
+.top20Buckets {
+  width: 100%;
+  color: black;
+  background-color: rgb(250,220,220);
+}
+
+.top20Words {
+  width: 100%;
+  color: black;
+  background-color: rgb(250,220,220);
+}
+
+/*********************************************************/
+/* Graphic colors, bars, etc */
+
+/* Bucket and history listings alternating row colors */
+tr.rowOdd {
+  color: black;
+  background-color: #C2DC87;
+}
+
+tr.rowEven {
+  color: black;
+  background-color: #A4CA4A;
+}
+
+/* Accuracy statistics bar colors*/
+.accuracy0to49 {
+	color: black;
+	background-color: red;
+}
+
+.accuracy50to93 {
+	color: black;
+	background-color: yellow;
+}
+
+.accuracy94to100 {
+	color: black;
+	background-color: green;
+}
+
+.lineImg {
+  width: 0.3em;
+}
+
+/* Bar chart legend font */
+span.graphFont {
+	font-size: x-small;
+}
+
+
+/*********************************************************/
+/* Labels */
+
+.historyLabelSort {
+  font-weight: bold;
+  font-style: normal;
+}
+
+.bucketsLabel {
+	font-weight: bold;
+}
+
+.magnetsLabel {
+	font-weight: bold;
+}
+
+.securityLabel {
+	font-weight: bold;
+}
+
+.configurationLabel {
+	font-weight: bold;
+}
+
+.advancedLabel {
+	font-weight: bold;
+}
+
+.passwordLabel {
+	font-weight: bold;
+}
+
+.sessionLabel {
+	font-weight: bold;
+}
+
+.configWidgetStateOn, .bucketsWidgetStateOn, .securityWidgetStateOn {
+  font-weight: bold;
+}
+
+
+/*********************************************************/
+/* Errors */
+
+div.error01 {
+	color: red;
+	background-color: black;
+	font-size: larger;
+}
+
+div.error02 {
+	color: red;
+	background-color: black;
+}
+
+/*********************************************************/
+/* Other stuff */
+
+.advancedWidgets {
+  margin-top: 1em;
+}

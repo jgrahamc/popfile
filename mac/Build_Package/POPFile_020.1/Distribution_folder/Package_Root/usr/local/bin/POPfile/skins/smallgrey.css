@@ -1,0 +1,394 @@
+H2 {
+  font-size: 170%;
+  font-weight: normal;
+}
+
+body {
+  background-color: #ffffff;
+  border: none;
+  font-family: tahoma, sans-serif;
+  font-size: 66%;
+  font-weight: normal;
+  color: #000000;
+  margin: 3px;
+}
+
+table.head {
+  font-weight: normal;
+  width: 100%;
+  background-color: #eeeeee;
+  color: #666666;
+}
+
+.shutdownLink {
+  color: #990000;
+  background-color: inherit;
+  text-decoration: none;
+}
+
+.shutdownLink:hover {
+  text-decoration: underline;
+}
+
+.shellTopRow, .shellLeft, .shellBottomRow, .shellRight {
+  visibility: hidden;
+  display: none;
+}
+
+.head, td.head {
+  font-weight: bold;
+  font-size: 140%;
+  background-color: #eeeeee;
+  color: #666666;
+  padding-left: 5px;
+}
+
+.shell, .shellTop {
+  border: 2px #cccccc solid;
+  margin: 0px;
+  padding: 0px;
+}
+
+.shell {
+  color: #000000;
+  background-color: #ffffff;
+}
+
+.shellTop {
+  color: #000000;
+  background-color: #eeeeee;
+}
+
+.head a {
+  font-size: 120%;
+  font-weight: normal;
+}
+
+.menu {
+  font-size: 120%;
+  font-weight: normal;
+  width: 100%;
+}
+
+.menuIndent {
+  width: 5%;
+}
+
+.menuSelected, .menuSelected a {
+  background-color: #cccccc;
+  color: #000000;
+  font-size: 123%;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+td.menuSelected {
+  border-left: 2px solid #000000;
+  border-right: 2px solid #000000;
+  border-top: 2px solid #000000;
+  padding-left: 2px;
+  padding-right: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
+  width: 15%;
+}
+
+.menuStandard, .menuStandard a {
+  background-color: #efefef;
+  color: #0000ff;
+  font-size: 123%;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+td.menuStandard {
+  border-left: 2px solid #cccccc;
+  border-right: 2px solid #cccccc;
+  border-top: 2px solid #cccccc;
+  padding-left: 2px;
+  padding-right: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
+  width: 15%;
+}
+
+.menuStandard a:hover {
+  text-decoration: underline;
+}
+
+.rowEven {
+  background-color: #f7f7f7;
+  color: #000000;
+}
+
+.rowOdd {
+  background-color: #eeeeee;
+  color: #000000;
+}
+
+.rowEven a, .rowOdd a {
+  text-decoration: none;
+}
+
+.rowEven a:hover, .rowOdd a:hover {
+  color: #000000;
+  background-color: #ffffcc;
+}
+
+.colorChooserImg {
+  height: 100%;
+  width: 0.7em;
+}
+
+.colorChooserTable a:hover {
+  background-color: transparent;
+  color: inherit;
+}
+
+.bucketsTable td {
+  border-top: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+}
+
+table.bucketsTable {
+  margin: 3px;
+}
+
+.lineImg {
+  width: 4px;
+}
+
+tr.rowHighlighted {
+  background-color: #ffffcc;
+  color: #666666;
+}
+
+table.settingsTable, td.settingsPanel {
+  border: 1px solid #cccccc;
+  padding: 3px;
+  margin: 2px;
+}
+
+.settingsPanel form {
+  padding-top: 8px;
+}
+
+table.openMessageTable, table.lookupResultsTable {
+  border: 2px solid Black;
+  padding: 2px;
+  margin: 0px;
+}
+
+td.naked {
+  padding: 0px; 
+  margin: 0px; 
+  border: none;
+}
+
+td.accuracy0to49 {
+  background-color: red;
+  color: #666666;
+  height: 20px;
+}
+
+td.accuracy50to93 {
+  background-color: yellow;
+  color: #666666;
+  height: 20px;
+}
+
+td.accuracy94to100 {
+  background-color: green;
+  color: #666666;
+  height: 20px;
+}
+
+div.error01 {
+  background-color: transparent;
+  color: red;
+  font-size: larger;
+}
+
+div.error02 {
+  background-color: transparent;
+  color: red;
+}
+
+td.historyNavigatorTop {
+  text-align: right;
+  padding-right: 5px;
+}
+
+.historyNavigatorTop a:hover, .historyNavigatorBottom a:hover {
+  background-color: #eeeeee;
+  color: #000000;
+}
+
+td.openMessageCloser {
+  text-align: right;
+  background-color: #eeeeee;
+  color: #000000;
+}
+
+.historyLabel, .historyLabel a {
+  font-weight: bold;
+  font-size: 110%;
+  text-decoration: none;
+}
+
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
+  color: #000000;
+  background-color: #ffffcc;
+}
+
+.historyLabel a:hover {
+  text-decoration: underline;
+}
+
+.bucketsLabel {
+  font-weight: bold;
+}
+
+.magnetsLabel {
+  font-weight: bold;
+}
+
+.securityLabel {
+  font-weight: bold;
+}
+
+.configurationLabel {
+  font-weight: normal;
+}
+
+.advancedLabel {
+  font-weight: bold;
+}
+
+.passwordLabel {
+  font-weight: bold;
+}
+
+.sessionLabel {
+  font-weight: bold;
+}
+
+table.historyWidgetsTop {
+  width: 100%;
+  border-top: 2px solid #cccccc;
+  border-bottom: 2px solid #cccccc;
+  text-align: center;
+}
+
+form {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.historyWidgetsTop .submit {
+  margin-right: 1.5em;
+}
+
+table.historyWidgetsBottom {
+  width: 100%;
+  border-bottom: 2px solid #cccccc;
+}
+
+table.historyWidgetsBottom td {
+  padding-left: 1em;
+  font-weight: bold;
+}
+
+table.footer {
+  width: 100%;
+  background-color: #eeeeee;
+  color: #666666;
+  border-left: 2px solid #cccccc;
+  border-right: 2px solid #cccccc;
+  border-bottom: 2px solid #cccccc;
+}
+
+td.footerBody { 
+  text-align: center;
+  padding-left: 1%;
+  padding-right: 1%;
+  font-size: 100%;
+  font-weight: bold;
+}
+
+.bottomLink {
+  text-decoration: none;
+}
+
+.bottomLink:hover {
+  background-color: #ffffcc;
+  color: #000000;
+}
+
+input, .submit, select {
+  font-family: tahoma, sans-serif;
+  font-size: 100%;
+  font-weight: normal;
+  padding: 0px;
+  margin: 0px;
+}
+
+tt {
+  font-family: "lucida console", courier, sans-serif;
+  font-size: 105%;
+  font-weight: normal;
+}
+
+span.bucketsWidgetStateOn {
+	font-weight: bold;
+}
+
+span.configWidgetStateOn {
+	font-weight: bold;
+}
+
+span.securityWidgetStateOn {
+	font-weight: bold;
+}
+
+span.bucketsWidgetStateOff {
+	background-color: inherit;
+	color: #666666;
+}
+
+span.configWidgetStateOff {
+	background-color: inherit;
+	color: #666666;
+}
+
+span.securityWidgetStateOff {
+	background-color: inherit;
+	color: #666666;
+}
+
+.toggleOn {
+	background-color: #dddddd;
+	color: #000000;
+}
+
+.toggleOff {
+	background-color: #bbbbbb;
+	color: #000000;
+}
+
+.bucketsTable input {
+	font-size: 90%;
+	border: 1px;
+}
+
+button, .submit, .reclassifyButton {
+	background-color: #dddddd;
+	color: #000000;
+}
+
+.deleteButton, .historyWidgetsBottom .submit {
+	background-color: #bbbbbb;
+	color: #000000;
+}

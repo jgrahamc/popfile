@@ -1,0 +1,493 @@
+<html><head><title>POPFile Documentation</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+
+</head>
+
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile Documentation</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+
+<table width=100% cellspacing=0><tr>
+
+<td width=15% align=center><font size=+1><b>First Time Setup:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%>Step 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installing</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center>Step 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Bucket Setup</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#cccc99 width=15% align=center>Step 3<br><font size=+1><b>&nbsp;<a href="email.html">Email Programs</a></b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%>Step 4<br><font size=+1><b>&nbsp;<a href="training.html">Training</a></b></font></td>
+
+<td width=25%>&nbsp;</td></tr>
+
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+
+<tr height=1><td colspan=10></td></tr>
+
+</table>
+
+<table width=100% cellspacing=0><tr>
+
+
+
+<td width=40% align=right><font size=+1><b>Using POPFile with:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Password Authentication</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Other Proxies</a></b></font><br></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Multiple Email Accounts</a></b></font></td>
+
+</tr>
+
+
+
+</table>
+
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+
+
+
+
+<h2>Getting Your Email Program To Talk To POPFile</h2>
+
+
+
+<p>POPFile works as a <i>proxy server</i>. Your email program talks to POPFile, which talks to your email server on its behalf. Instead of your email program getting messages directly, POPFile grabs them first, and scans them to decide what bucket they should go into.</p>
+
+
+
+<p>Once it's decided - which takes only a fraction of a second - POPFile does one of two things: it can add a tag like [this] to the start of the subject line; which means that simple filtering programs like Microsoft Outlook Express can deliver your mail where it's supposed to - or, for more advanced email programs like Eudora, it can add a new email header like this:</p>
+
+
+
+<p><b>X-Text-Classification: personal</b></p>
+
+
+
+<p>- which your email program can use as a filter.</p>
+
+
+
+<p>However, you need to do two things to get your email program talking to POPFile:
+
+
+
+<ol><li>Adjust your email program's settings to make it talk to POPFile, and
+
+<li>set up your email filters so that things get filed properly.</ol></p>
+
+
+
+<p>Let's adjust the mail settings first. We'll set up filters in a moment.
+
+
+
+<p>Below are instructions for some of the more popular email programs. For others - or for advanced users - here are the general instructions:</p>
+
+
+
+<p><ul><li>Change the POP3 server name in your email client to 127.0.0.1, noting the original address.
+
+<li>Change the POP3 user name to [original-POP3-server-address]:[username]
+
+<li>Leave the password alone</ul></p>
+
+
+
+<p>For accounts using Secure Password Authentication, see <a href=spa.html>Using POPFile with: Secure Password Authentication</a>.</p>
+
+
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+
+
+<td colspan=3 align="center">
+
+
+
+Just choose your email program and follow the column down. While these instructions might look complicated, they actually only take about two minutes - and it's hard to go wrong. (Just in case, make a note of your original settings in case you need to go back.)
+
+
+
+</td></tr><tr>
+
+
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Outlook</h3>
+
+
+
+<ul>
+
+<li>In Outlook select the Tools->Email Accounts... menu option.  The E-mail Accounts dialog will appear. <a href=../o_popfile1.gif>[screenshot]</a>
+
+<li>Click View or change existing e-mail accounts and click Next.  Choose the account you want to use POPFile with and click Change...
+
+Make a note of the Incoming mail server (POP3) server name and the User Name. <a href=../o_popfile2.gif>[screenshot]</a>
+
+<li>Change the Incoming mail server (POP3) server name to <b>127.0.0.1</b> and change the User Name to the combination of the original
+
+Incoming mail server (POP3) server name and the original User Name separated by a colon. <a href=../o_popfile3.gif>[screenshot]</a>
+
+<li>So, if the original Incoming mail server (POP3) name was <b>my.mail.com</b> and your username was <b>jdoe</b>, your new username would be <b>my.mail.com:jdoe</b>
+
+<li>You don't need to change the password.
+
+<li>Hit Next and then Finish.
+
+<li>Ensure that POPFile is running and all mail will be delivered through POPFile!
+
+<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <b>Startup</b> group. Now, Windows will load POPFile each time.
+
+<li>Important! If POPFile isn't loaded, the mail will not get through - and your email program won't connect!
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+
+
+<h3 align=center>Outlook Express</h3>
+
+
+
+<ul>
+
+<li>In Outlook Express select the Tools->Accounts... menu option.  The Internet Accounts dialog will appear. <a href=../oe_popfile1.gif>[screenshot]</a>
+
+<li>Select the account you wish to modify to use POPFile and click on Properties. <a href=../oe_popfile2.gif>[screenshot]</a>
+
+<li>Choose the Servers tab.  Make a note of the Incoming Mail (POP3) server name and the Incoming Mail Server Account Name. <a href=../oe_popfile3.gif>[screenshot]</a>
+
+<li>Change the Incoming Mail (POP3) server name to <b>127.0.0.1</b> and change the Incoming Mail Server Account Name to the combination of the original Incoming Mail (POP3) server name and the original Incoming Mail Server Account Name separated by a colon. <a href=../oe_popfile4.gif>[screenshot]</a>
+
+<li>So, if the original Incoming Mail server name was <b>my.mail.com</b> and your username was <b>jdoe</b>, your new username would be <b>my.mail.com:jdoe</b>
+
+<li>You don't need to change the password.
+
+<li>Hit OK and then Close.
+
+<li>Ensure that POPFile is running and all mail will be delivered through POPFile!
+
+<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <b>Startup</b> group. Now, Windows will load POPFile each time.
+
+<li>Important! If POPFile isn't loaded, the mail will not get through - and your email program won't connect!
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCCCFF" valign="top">
+
+
+
+<h3 align=center>Eudora</h3>
+
+
+
+<ul>
+
+<li>In Eudora select the Tools->Options... menu option.  The Options dialog will appear. <a href=../e_popfile1.gif>[screenshot]</a>
+
+<li>Make a note of the Mail Server (incoming) server name and the Login Name. <a href=../e_popfile2.gif>[screenshot]</a>
+
+<li>Change the Mail Server (incoming) server name to <b>127.0.0.1</b> and change the Login Name to the combination of the original
+
+Mail Server (incoming) server name and the original Login Name separated by a colon.  <a href=../e_popfile3.gif>[screenshot]</a>
+
+<li>So, if the original Mail Server (incoming) server name was <b>my.mail.com</b> and your username was <b>jdoe</b>, your new username would be <b>my.mail.com:jdoe</b>
+
+<li>You don't need to change the password.
+
+<li>Hit OK.
+
+<li>Ensure that POPFile is running and all mail will be delivered through POPFile.
+
+<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <b>Startup</b> group. Now, Windows will load POPFile each time.
+
+<li>Important! If POPFile isn't loaded, the mail will not get through - and your email program won't connect!
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Pegasus</h3>
+
+
+
+<ul>
+
+<li>   In Pegasus select the Tools->Internet Options... Receiving (POP3) tab. The POP3 account setup page will appear.
+
+<li>   Under General settings for receiving mail using POP3, select the POP3 Host dialog box. Make a note of the current POP3 host.
+
+<li>   Change the POP3 Host to <b>127.0.0.1</b>
+
+<li>   Under General settings for receiving mail using POP3, select the User name dialog box. Make a note of the current User name.
+
+<li>   Change the User name to the combination of the original POP3 Host name and the original User name separated by a colon.
+
+<li>   So, if the original POP3 host was <b>my.mail.com</b> and your User name was <b>jdoe</b>, your new User name would be <b>my.mail.com:jdoe</b>
+
+<li>   You don't need to change the password.
+
+<li>   Click the OK Button to save the changes.
+
+<li>   Ensure that POPFile is running and all mail will be delivered through POPFile!
+
+<li>   You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version of POPFile, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the Start -> Programs -> Startup group. Now, Windows will load POPFile each time.
+
+</ul>
+
+
+
+</td></tr></table>
+
+
+
+<p>Okay. Now we've done that, it's time to set up your mail filters, so that once POPFile has done its work, your email program can take that and put everything in the right folder.</p>
+
+
+
+<p>For advanced users, you have the option to modify the subject line to add a [classification] tag or not. It's near the bottom of the Configuration tab in the web UI. No matter which option you choose, the <b>X-Text-Classification</b> header is still added.</p>
+
+
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+
+
+<td colspan=3 align="center">
+
+
+
+Just choose your email program and follow the column down. While these instructions might look complicated, they actually only take about two minutes - and it's hard to go wrong. (Just in case, make a note of your original settings in case you need to go back.)
+
+
+
+</td></tr><tr>
+
+
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Outlook</h3>
+
+
+
+<ul>
+
+<li>In Outlook select the Tools->Rules Wizard... <a href=../o_filter1.gif>[screenshot]</a>
+
+<li>The Rules Wizard appears.  Click New... and select Start from a blank rule.  <a href=../o_filter2.gif>[screenshot]</a>
+
+<li>Outlook can use the <b>X-Text-Classification</b> header, which allows mail filtering to occur completely in the background. Click Next and select <i>with specific words in the message header</i>.
+
+<li>Now click the grey highlighted <i>specific words</i> link and enter "X-Text-Classification: " followed by the name of one of your buckets in the box that appears and hit Add, then OK.
+
+<li>Click Next and select <i>move it to the specified folder</i>.
+
+<li>Click the grey highlighted word <i>specified</i> and a list of folders appears.  Select whichever folder you want to move messages from that bucket to and hit OK.
+
+<li>Hit OK, then Finish.
+
+<li>Repeat the process for each of your buckets, then OK out.
+
+<li>You're done!
+
+<li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>off</b>.
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+
+
+<h3 align=center>Outlook Express</h3>
+
+
+
+<ul>
+
+<li>In Outlook Express select the Tools->Message Rules->Mail... <a href=../oe_filter1.gif>[screenshot]</a>
+
+<li>The New Mail Rule window appears.  <a href=../oe_filter2.gif>[screenshot]</a>
+
+<li>Outlook Express cannot use the <b>X-Text-Classification</b> header, which would allow mail filtering to occur completely in the background. So instead, click <i>Where the Subject line contains specific words</i> and also click
+
+<i>Move it to the specified folder</i>  <a href=../oe_filter3.gif>[screenshot]</a>
+
+<li>Now click the blue highlighted <i>contains specific words</i> link and the Type Specific Words dialog appears  <a href=../oe_filter4.gif>[screenshot]</a>
+
+<li>Enter the name of one of your buckets, surrounded by [square brackets], then hit OK.  Now click the blue highlighted <i>specified</i> word and the Move dialog appears.  Click the folder you want to move messages from that bucket to and hit OK.  <a href=../oe_filter5.gif>[screenshot]</a>
+
+<li>Hit OK.
+
+<li>Repeat the process for each of your buckets, and then OK out.
+
+<li>You're done!
+
+<li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>on</b>.
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCCCFF" valign="top">
+
+
+
+<h3 align=center>Eudora</h3>
+
+
+
+<p>Eudora allows filtering based on any mail header, which is great - everything can be done completely in the background, without changing the subject line!</p>
+
+
+
+<ul>
+
+<li>Select the Tools->Filters menu.  <a href=../e_filter1.gif>[screenshot]</a>
+
+<li>The Filters window appears.  Click New to create a new filter.  <a href=../e_filter2.gif>[screenshot]</a>
+
+<li>In the Header box type <b>X-Text-Classification</b> and in the box next to contains type the name of one of your buckets. <b>Don't</b> add square brackets around it.  <a href=../e_filter3.gif>[screenshot]</a>
+
+<li>The select <b>Transfer To</b> in the first Action box and select the mailbox you want to file message from this bucket into.  <a href=../e_filter4.gif>[screenshot]</a>
+
+<li>Repeat this for each of your buckets.
+
+<li>Close the Filters windows and say Yes when asked to save changes.
+
+<li>You're done!
+
+<li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>off</b>.
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Pegasus</h3>
+
+
+
+<ul>
+
+<li>   In Pegasus select the Tools->Mail Filtering Rules ->Edit New Mail Filtering Rules ->Rules Applied When Folder is Opened.
+
+<li>   The New Mail Filtering Rules window appears.
+
+<li>   Click the New Rule button. The Create a New Filtering Rule window appears.
+
+<li>   Click on the Expression button.  Note that using the Expression filter will work even if the POPFile Subject Line Modification option is turned off. If you use the Header filter, the POPFile Subject Line Modification option must be turned on.
+
+<li>   Select the If this regular expression dialog box
+
+<li>   Enter the name of one of your buckets, preceded <b>X-Text-Classification:</b>, for example: <b>X-Text-Classification: spam</b>
+
+<li>   Select the Headers or body radio button
+
+<li>   Select the desired action from the Action drop down list. For example Move
+
+<li>   If an action such as Move or Forward has been chosen, click the Set button.
+
+<li>   Select the destination folder or enter the forward to address as appropriate for the Action selected.
+
+<li>   Click the OK button to add the rule to the rule list.
+
+<li>   Repeat the process for each rule you need.
+
+<li>   The order in which the filter rules are applied can be adjusted using the red / blue (up / down) arrows in the New Mail Filter Rules window.
+
+<li>   Select the Save button to save the rules set changes.
+
+<li>   Select the OK button.
+
+<li>   You're done!
+
+</ul>
+
+
+
+</td></tr></table>
+
+
+
+<h2>That's all there it to it!... but...</h2>
+
+
+
+Despite all this, POPFile still won't filter mail right now. Why not? <i>It doesn't know what any of the buckets you entered mean.</i> It has no idea what 'spam' and 'genuine' mean, or what 'work' and 'personal' are.  It doesn't even know what language your e-mail is in - and it doesn't care. You need to train it to distinguish spam from regular email, or one project from another. You do this through <b>training</b> - and <a href="training.html">we'll deal with that next</a>.
+
+
+
+</td></tr></table>
+
+<br>
+
+<table width=100% cellspacing=0><tr>
+
+<td width=15% align=center><font size=+1><b>Web Links:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Home Page</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forums</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Bug Database</a></b></font></td>
+
+<td width=55%>&nbsp;</td></tr>
+
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+
+<tr height=1><td colspan=10></td></tr>
+
+</table>
+
+
+
+</body></html>

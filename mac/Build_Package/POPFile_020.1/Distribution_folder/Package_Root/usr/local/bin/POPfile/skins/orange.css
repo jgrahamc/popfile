@@ -1,0 +1,208 @@
+body {
+  background-color: #FFFFFF;
+  border: none;
+  font-family: sans-serif;
+  color: black;
+}
+
+table.head {
+  font-weight: normal;
+  font-size: 22pt;
+  background: #ffffcc;
+  color: black;
+  width: 100%;
+}
+
+.shell, .shellTop {
+    background-color: #ffffcc;
+    border: 3px #ff9966 solid;
+     color: black;
+}
+
+table.head a {
+  font-size: 12pt;
+}
+
+.menu {
+  font-size: 14pt;
+  font-weight: bold;
+  width: 100%;
+}
+
+.menuSelected {
+  background-color: #ff9966;
+  width: 14%;
+  color: #1E3B75;
+}
+
+.menuStandard {
+  background-color: #ffcc99;
+  width: 14%;
+  color: #1E3B75;
+}
+
+
+tr.rowEven {
+    background-color: #ffffcc;
+     color: black;
+}
+
+tr.rowOdd {
+    background-color: #ffcc99;
+     color: black;
+}
+
+hr {
+    color: gray; 
+     background-color: transparent;
+}
+
+table.settingsTable {
+    border: 1px solid #ffcc99;
+}
+
+table.openMessageTable, table.lookupResultsTable {
+    border: 3px solid #ffcc99;
+}
+
+td.settingsPanel {
+    border: 1px solid #ffcc99;
+}
+
+td.naked {
+    padding: 0px; 
+    margin: 0px; 
+    border: none
+}
+
+td.openMessageCloser {
+	text-align: right;
+}
+
+.menuIndent {
+	width: 8%;
+}
+
+td.accuracy0to49 {
+	background-color: red;
+	color: black;
+}
+
+td.accuracy50to93 {
+	background-color: yellow;
+	color: black;
+}
+
+td.accuracy94to100 {
+	background-color: green;
+	color: black;
+}
+
+div.error01 {
+	background-color: transparent;
+	color: red;
+	font-size: larger;
+}
+
+div.error02 {
+	background-color: transparent;
+	color: red;
+}
+
+span.graphFont {
+	font-size: x-small;
+}
+
+.bucketsLabel {
+	font-weight: bold;
+}
+
+.magnetsLabel {
+	font-weight: bold;
+}
+
+.securityLabel {
+	font-weight: bold;
+}
+
+.configurationLabel {
+	font-weight: bold;
+}
+		
+.advancedLabel {
+	font-weight: bold;
+}
+		
+.passwordLabel {
+	font-weight: bold;
+}
+
+.sessionLabel {
+	font-weight: bold;
+}
+
+table.historyWidgetsTop {
+	width: 100%;
+	margin-left: 1.5em;
+	margin-top: 0.6em;
+	margin-bottom: 1.0em;
+}
+
+table.historyWidgetsBottom {
+	width: 100%;
+	margin-top: 0.6em;
+}
+
+td.historyNavigatorTop {
+	text-align: right;
+}
+
+td.historyNavigatorBottom {
+	text-align: right;
+}
+
+tr.rowHighlighted {
+	background-color: #000000;
+	color: #eeeeee;
+}
+
+td.logo2menuSpace { 
+	height: 0.8em;
+}
+
+a.changeSettingLink {
+	background-color: transparent ;
+	color: #0000cc ;
+}
+
+td.footerBody { 
+	text-align: center;
+	padding-left: 5%;
+	padding-right: 5%;
+}
+
+table.footer {
+  width: 100%;
+  margin-top: 1em;
+}
+
+span.bucketsWidgetState {
+	font-weight: bold;
+}
+
+span.configWidgetState {
+	font-weight: bold;
+}
+
+span.securityWidgetState {
+	font-weight: bold;
+}
+
+.historyLabel {
+  font-weight: normal;
+}
+
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
+}

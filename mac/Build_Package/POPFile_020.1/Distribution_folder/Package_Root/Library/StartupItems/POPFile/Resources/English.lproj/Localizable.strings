@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+        <key>Starting POPfile</key>
+        <string>Starting POPfile</string>
+        <key>Stopping POPfile</key>
+        <string>Stopping POPfile</string>
+        <key>Restarting POPfile</key>
+        <string>Restarting POPfile</string>
+</dict>
+</plist>

@@ -1,0 +1,274 @@
+.content
+  {
+  font-size: 8pt;
+  font-weight : normal;
+  }
+
+.content th
+  {
+  font-size: 8pt;
+  font-weight : normal;
+  }
+
+.footer
+  {
+  font-size: 8pt;
+  font-weight : normal;
+  }
+
+
+.main
+  {
+  font-size: 8pt;
+  font-weight: bold;
+  }
+
+.menu
+  {
+  width: 100%;
+  }
+
+.menuSelected
+  {
+  background-color: #cccc99;
+  color: black;
+  width: 14%;
+  }
+
+.menuSpacer
+  {
+  width: 1px;
+  }
+
+.menuStandard
+  {
+  background-color: #ededca;
+  color: black;
+  width: 14%;
+  }
+
+.rowEven
+  {
+  background-color: #ededca;
+  font-size: 8pt;
+  font-weight: normal;
+  color: black;
+  }
+
+.rowOdd
+  {
+  background-color: #dfdfaf;
+  font-size: 8pt;
+  font-weight: normal;
+  color: black;
+  }
+
+.shell, .shellTop
+  {
+  background-color: #ededca;
+  border: 3px #cccc99 solid;
+  font-size: 8pt;
+  font-weight: normal;
+  color: black;
+  }
+
+a.dash:link
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+a.dash:visited
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+body
+  {
+  font-size: 8pt;
+  font-weight: normal;
+   font-family: sans-serif;
+}
+
+h2
+  {
+  font-size: 8pt;
+  font-weight: bold;
+  }
+
+input
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+select
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+.submit
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+td
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+tr
+  {
+  font-size: 8pt;
+  font-weight: normal;
+  }
+
+table.settingsTable {
+	border: 1px solid Black;
+}
+
+table.openMessageTable, table.lookupResultsTable {
+	border: 3px solid Black;
+}
+
+td.settingsPanel {
+	border: 1px solid Black;
+}
+
+td.naked {
+	padding: 0px; 
+	margin: 0px; 
+	border: none
+}
+
+td.logo2menuSpace { 
+	height: 0.8em;
+}
+
+td.head {
+  font-weight: bold;
+  font-size: 10pt;
+ }
+ 
+table.head {
+  width: 100%;
+ }
+
+a.shutdownLink {
+	font-size: 8pt;
+	font-weight: bold;
+}
+
+table.footer {
+	width: 100%;
+	margin-top: 1em;
+}
+
+td.footerBody { 
+	text-align: center;
+	padding-left: 5%;
+	padding-right: 5%;
+}
+
+td.openMessageCloser {
+	text-align: right;
+}
+
+.menuIndent {
+	width: 8%;
+}
+
+td.accuracy0to49 {
+	background-color: red;
+	color: black;
+}
+
+td.accuracy50to93 {
+	background-color: yellow;
+	color: black;
+}
+
+td.accuracy94to100 {
+	background-color: green;
+	color: black;
+}
+
+div.error01 {
+	background-color: transparent;
+	color: red;
+	font-size: larger;
+}
+
+div.error02 {
+	background-color: transparent;
+	color: red;
+}
+
+span.graphFont {
+	font-size: x-small;
+}
+
+.bucketsLabel {
+	font-weight: bold;
+}
+
+.magnetsLabel {
+	font-weight: bold;
+}
+
+.securityLabel {
+	font-weight: bold;
+}
+
+.configurationLabel {
+	font-weight: bold;
+}
+		
+.advancedLabel {
+	font-weight: bold;
+}
+		
+.passwordLabel {
+	font-weight: bold;
+}
+
+.sessionLabel {
+	font-weight: bold;
+}
+
+a.menuLink {
+	font-weight:bold;
+}
+
+td.historyNavigatorTop {
+	text-align: right;
+}
+
+td.historyNavigatorBottom {
+	text-align: right;
+}
+
+span.bucketsWidgetState {
+	font-weight: bold;
+}
+
+span.configWidgetState {
+	font-weight: bold;
+}
+
+span.securityWidgetState {
+	font-weight: bold;
+}
+
+.historyLabel {
+  font-weight: normal;
+}
+
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
+}

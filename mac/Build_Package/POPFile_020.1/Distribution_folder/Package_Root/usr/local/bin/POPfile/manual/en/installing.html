@@ -1,0 +1,89 @@
+<html><head><title>POPFile Documentation</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile Documentation</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>First Time Setup:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%>Step 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installing</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Step 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Bucket Setup</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Step 3<br><font size=+1><b>&nbsp;<a href="email.html">Email Programs</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>Step 4<br><font size=+1><b>&nbsp;<a href="training.html">Training</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>Using POPFile with:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Password Authentication</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Other Proxies</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Multiple Email Accounts</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+<h2>Installing POPFile</h2>
+
+<p>POPFile comes in two versions - an easy-to-install Windows version, and a cross-platform version for technically-minded users. Once installed, the two are identical.</p>
+
+<h3>Easy-to-Install Windows Version</h3>
+
+<p>Download the Windows installer from the <a href=http://sourceforge.net/project/showfiles.php?group_id=63137>POPFile Download Page</a>, and run <tt>setup.exe</tt> and follow the instructions in there. You can launch POPFile from the Start Menu (Start > Programs > POPFile > Run POPFile in Background), or reboot and it will start automatically. <b>Important note:</b> nothing will appear on your screen! To check if it's running correctly, read the "Accessing POPFile" section below.</p>
+
+<h4>System Requirements</h4>
+
+<p>You'll need several things to get started with POPFile.</p>
+<ol>
+<li>The latest POPFile release.</li>
+<li>An e-mail account that uses the POP3 protocol (most accounts do, although you can't use POPFile with web-based services like Hotmail and Yahoo! Mail without extra software)</li>
+<li>Around 2MB free disk space</li>
+</ol>
+
+<p>You can obtain the latest POPFile release as a zip file at the top of the
+package list at the <a href="http://sourceforge.net/project/showfiles.php?group_id=63137">POPFile
+download page</a>. Windows users will want the file under the section labeled Windows Only.</p>
+<p>POPFile itself occupies just over a megabyte. The word lists (called the corpus) used to classify
+your email will take some additional space depending on how much mail you use to train POPFile and how many buckets you create. </p>
+
+<h3>Cross-Platform Version</h3>
+
+<p>Get <a href="http://www.perl.com">Perl</a> running on your machine, then download the POPFile Perl zip from the <a href=http://popfile.sourceforge.net/>POPFile Home Page</a>, and extract it to a directory of your choice. On Windows platforms, launch with the command <tt>perl popfile.pl</tt>.
+
+<hr>
+
+<h2>Checking POPFile is running correctly</h2>
+
+<p>POPFile doesn't have a traditional interface like most programs - you access it through your web browser. Don't worry - unless you say otherwise, no-one outside your machine can access it.</p>
+
+<p>To load POPFile, go to <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a>, or (for the Windows version) click on the 'POPFile Web Interface' link in your Start Menu. <b>Important note</b>: if, during the Windows install process, you chose a different port to talk to POPFile on, replace the "8080" part with whatever you chose.</p>
+
+<p>If you get an error message, check that POPFile is really running, and that you have the port number correct (it should be 8080, but if you changed it, you'll also need to change that in the web address you're going to.)</p>
+
+<p>If you get a POPFile screen, congratulations! Now it's time to set up how you want your mail sorted. <a href="firsttime.html">Let's go on to the Bucket Setup. &gt;&gt;</a></p>
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Web Links:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Home Page</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forums</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Bug Database</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>
