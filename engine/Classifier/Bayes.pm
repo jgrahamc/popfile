@@ -720,7 +720,7 @@ sub classify_and_modify
         }
 
         if ( $getting_headers )  {
-            if ( $line =~ /[A-Z]/i )  {
+            if ( !( $line =~ /^(\r\n|\r|\n)$/i ) )  {
                 $message_size += length $line;                                        
                 print TEMP $line;
 
