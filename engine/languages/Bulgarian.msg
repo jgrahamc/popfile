@@ -1,208 +1,273 @@
-# Copyright (c) 2001-2003 John Graham-Cumming
+MIME-Version: 1.0
+Content-Transfer-Encoding: base64
+X-MIME-Autoconverted: from 8bit to base64 by mail.datasync.com id h1KNLSI27579
 
-# This is used to get the appropriate subdirectory for the manual
-LanguageCode                            bg
-LanguageCharset                         Windows-1251
-
-# Common words that are used on their own all over the interface
-Apply                                   Промени
-On                                      Вкл.
-Off                                     Изкл.
-TurnOn                                  Включи
-TurnOff                                 Изключи
-Add                                     Добави
-Remove                                  Премахни
-Previous                                Пред.
-Next                                    Следв.
-From                                    От
-Subject                                 Заглавие 
-Classification                          Класификация
-Reclassify                              Прекласиф.
-Undo                                    Върни
-Close                                   Затвори
-Find                                    Търси
-Filter                                  Филтър
-Yes                                     Да
-No                                      Не
-ChangeToYes                             Направи ДА
-ChangeToNo                              Направи НЕ
-Bucket                                  Кош
-Magnet                                  Магнит
-Delete                                  Изтрий
-Create                                  Създай
-To                                      До
-Total                                   Общо
-Rename                                  Преименувай
-Frequency                               Честота
-Probability                             Вероятност
-Score                                   Оценка
-Lookup                                  Търси
-
-# The header and footer that appear on every UI page
-Header_Title                            Панел за управление на POPFile
-Header_Shutdown                         Спри POPFile
-Header_History                          Хроника
-Header_Buckets                          Кошове
-Header_Configuration                    Конфигурация
-Header_Advanced                         Специални
-Header_Security                         Защита
-Header_Magnets                          Магнити
-
-Footer_HomePage                         Web страница на POPFile
-Footer_Manual                           Ръководство
-Footer_Forums                           Форуми
-Footer_FeedMe                           Дарение
-Footer_RequestFeature                   Идея
-Footer_MailingList                      Абонамент
-
-Configuration_Error1                    Въведете за разделител един-единствен знак
-Configuration_Error2                    Портът за потребителския интерфейс трябва да бъде число между 1 и 65535
-Configuration_Error3                    Работният порт за POP3 трябва да бъде число между 1 и 65535
-Configuration_Error4                    Размерът на страницата трябва да бъде число между 1 и 1000
-Configuration_Error5                    Броят дни в хрониката трябва да бъде число между 1 и 366
-Configuration_Error6                    TCP таймаутът трябва да бъде число между 10 и 300
-Configuration_POP3Port                  Работен порт за POP3
-Configuration_POP3Update                Работният порт е променен на %s; тази промяна ще се отрази при следващото стартиране на POPFile.
-Configuration_Separator                 Разделител
-Configuration_SepUpdate                 Разделителят променен на %s
-Configuration_UI                        Порт за потребителски интерфейс
-Configuration_UIUpdate                  Портът за потребителски интерфейс е променен на %s; тази промяна ще се отрази при следващото стартиране на POPFile.
-Configuration_History                   Брой съобщения на страница
-Configuration_HistoryUpdate             Броят съобщения на страница променен на %s
-Configuration_Days                      Брой дни за пазене на хроника
-Configuration_DaysUpdate                Броят на дните за пазене на хроника променен на %s
-Configuration_UserInterface             Потребителски интерфейс
-Configuration_Skins                     Skins
-Configuration_SkinsChoose               Choose skin
-Configuration_Language                  Език
-Configuration_LanguageChoose            Избери език
-Configuration_ListenPorts               Портове
-Configuration_HistoryView               Вид на хрониката
-Configuration_TCPTimeout                TCP Таймаут
-Configuration_TCPTimeoutSecs            Таймаут на TCP връзките в секунди
-Configuration_TCPTimeoutUpdate          TCP таймаутът променен на %s
-Configuration_ClassificationInsertion   Обозначаване на класификацията
-Configuration_SubjectLine               Промяна на заглавието
-Configuration_XTCInsertion              Вмъкване на X-Text-Classification
-Configuration_XPLInsertion              Вмъкване на X-POPFile-Link
-Configuration_Logging                   Протоколиране
-Configuration_None                      Без
-Configuration_ToScreen                  На екрана
-Configuration_ToFile                    Във файл
-Configuration_ToScreenFile              Във файла и на екран
-Configuration_LoggerOutput              Място за протоколиране
-
-Advanced_Error1                         '%s' вече присъства в списъка с игнорираните думи
-Advanced_Error2                         Игнорираните думи може да съдържат само букви, цифри и знаците ., _, -, или @
-Advanced_Error3                         '%s' добавена към списъка с игнорирани думи
-Advanced_Error4                         '%s' не присъства в списъка с игнорираните думи
-Advanced_Error5                         '%s' премахната към списъка с игнорирани думи
-Advanced_StopWords                      Игнорирани думи
-Advanced_Message1                       Следните думи се игнорират при класифициране, тъй като се срещат твърде често.
-Advanced_AddWord                        Добави дума
-Advanced_RemoveWord                     Премахни дума
-
-History_Filter                          &nbsp;(показан е само кош <font color="%s">%s</font>)
-History_Search                          &nbsp;(търсене за заглавие %s)
-History_Title                           Последни съобщения
-History_Jump                            Преход към съобщение
-History_ShowAll                         Покажи всички
-History_ShouldBe                        Трябва да бъде
-History_NoFrom                          Няма подател
-History_NoSubject                       Няма заглавие
-History_ClassifyAs                      Класифицирай като
-History_MagnetUsed                      Според магнит
-History_ChangedTo                       Променено на <font color="%s">%s
-History_Already                         Вече класифицирано като <font color="%s">%s</font>
-History_RemoveAll                       Премахни всички
-History_RemovePage                      Премахни тази страница
-History_Remove                          За премахване на съобщенията натисни:
-History_SearchMessage                   Търси по подател и заглавие
-History_NoMessages                      Няма съобщения
-History_ShowMagnet                      По магнит
-History_Magnet                          &nbsp;(само класифицираните по магнит)
-History_ResetSearch                     Изчисти търсенето
-
-Password_Title                          Парола
-Password_Enter                          Въведи парола
-Password_Go                             ОК
-Password_Error1                         Невалидна парола
-
-Security_Error1                         Портът с легитимиране трябва да бъде число между 1 и 65535
-Security_Stealth                        Скрит режим
-Security_NoStealthMode                  Не (скрит режим)
-Security_ExplainStats                   (Когато това е включено, POPFile веднъж дневно изпраща към скрипт на www.usethesource.com: bc (броя на кошовете), mc (броя съобщения, класифицирани от POPFile) и ec (броя на грешно класифицираните съобщения). Тези стойности се съхраняват във файл и благодарение на тях аз публикувам статистика за начина, по който хората използват POPFile и колко добре работи. Моят Web сървър съхранява лог-файловете си в продължение на около 5 дни, след което ги изтрива; аз не пазя връзка между статистическите данни и конкретните IP адреси.)
-Security_ExplainUpdate                  (Когато това е включено, POPFile веднъж дневно изпраща към скрипт на www.usethesource.com: bc (броя на кошовете), mc (броя съобщения, класифицирани от POPFile) и ec (броя на грешно класифицираните съобщения). POPFile получава обратно известие дали има по-нова версия на софтуера и показва съответна картинка на всяка страница. Моят Web сървър съхранява лог-файловете си в продължение на около 5 дни, след което ги изтрива; аз не пазя връзка между запитванията за нова версия и конкретните IP адреси.)
-Security_PasswordTitle                  Парола за потребителския интерфейс
-Security_Password                       Парола
-Security_PasswordUpdate                 Паролата променена на %s
-Security_AUTHTitle                      Легитимация пред сървъра/AUTH
-Security_SecureServer                   Сървър, изискващ легитимация
-Security_SecureServerUpdate             Сървърът с леитимация промене на %s; тази промяна ще бъде отразена при следващото стартиране на POPFile
-Security_SecurePort                     Порт за легитимация
-Security_SecurePortUpdate               Портът променен на %s; тази промяна ще бъде отразена при следващото стартиране на POPFile
-Security_POP3                           Приемане на POP3 връзки от други машини
-Security_UI                             Приемане на HTTP връзки (за потребителския интерфейс) от други машини
-Security_UpdateTitle                    Автоматична проверка за нови версии
-Security_Update                         Ежедневна проверка за нови версии на POPFile
-Security_StatsTitle                     Събиране на статистика
-Security_Stats                          Ежедневно изпращане на статистически данни на автора
-
-Magnet_Error1                           Магнит '%s' вече е зададен за кош '%s'
-Magnet_Error2                           Новият магнит '%s' противоречи на магнит '%s' за кош '%s' и може да предизвика нееднозначност; магнитът не е добавен.
-Magnet_Error3                           Създай нов магнит '%s' за кош '%s'
-Magnet_CurrentMagnets                   Магнити
-Magnet_Message1                         Следните магнити служат за незабавно класифициране на съобщенията в даден кош.
-Magnet_CreateNew                        Създай нов магнит
-Magnet_Explanation                      Има три вида магнити:</b> <ul><li><b>Адрес или име на подател:</b> Например: john@company.com за конкретен адрес, <br />company.com за всички адреси от company.com, <br />John Doe за конкретен подател, John за всички John-овци</li><li><b>Адрес или име на получател:</b> Подобно на адреса на подател, но за адреса на получателя на съобщението</li><li><b>Думи от заглавието:</b> Например: hello за всички съобщения, чието заглавие съдържа hello</li></ul>
-Magnet_MagnetType                       Тип на магнита
-Magnet_Value                            Стойност
-Magnet_Always                           Класифицирай винаги в кош
-
-Bucket_Error1                           Имената на кошовете може да съдържат само малки латински букви от a до z плюс знаците - и _
-Bucket_Error2                           Вече съществува кош %s
-Bucket_Error3                           Създаден е кош %s
-Bucket_Error4                           Моля въведете нещо
-Bucket_Error5                           Кош %s преименуван на %s
-Bucket_Error6                           Изтрит е кош %s
-Bucket_Title                            Статистика
-Bucket_BucketName                       Кош
-Bucket_WordCount                        Брой думи
-Bucket_WordCounts                       Брой думи
-Bucket_UniqueWords                      Уникални думи
-Bucket_SubjectModification              Промяна на заглавието
-Bucket_ChangeColor                      Промени цвета
-Bucket_NotEnoughData                    Недостатъчно данни
-Bucket_ClassificationAccuracy           Точност на класификацията
-Bucket_EmailsClassified                 Класифицирани съобщения
-Bucket_EmailsClassifiedUpper            Класифицирани съобщения
-Bucket_ClassificationErrors             Грешки при класификацията
-Bucket_Accuracy                         Точност
-Bucket_ClassificationCount              Брой класифицирани
-Bucket_ResetStatistics                  Нулирай статистиката
-Bucket_LastReset                        Последно нулиране
-Bucket_CurrentColor                     В момента цветът за %s е %s
-Bucket_SetColorTo                       Промени цветът за %s на %s
-Bucket_Maintenance                      Промени
-Bucket_CreateBucket                     Създай кош с име
-Bucket_DeleteBucket                     Изтрий кош с име
-Bucket_RenameBucket                     Преименувай кош с име
-Bucket_Lookup                           Търсене
-Bucket_LookupMessage                    Търсене на дума по кошовете
-Bucket_LookupMessage2                   Резултати от търсенето
-Bucket_LookupMostLikely                 <b>%s</b> най-често се среща в <font color="%s">%s</font>
-Bucket_DoesNotAppear                    <p><b>%s</b> не присъства в никой кош
-Bucket_DisabledGlobally                 Изключено за всички
-Bucket_To                               към
-Bucket_Quarantine                       Карантина
-
-SingleBucket_Title                      Детайли за %s
-SingleBucket_WordCount                  Брой думи в коша
-SingleBucket_TotalWordCount             Общо думи
-SingleBucket_Percentage                 Процент от общия брой
-SingleBucket_WordTable                  Думи, попадащи в %s
-SingleBucket_Message1                   Означените със звездичка (*) думи са използвани за класификация при това пускане на POPFile. Щракнете с мишката на някоя дума, за да видите вероятността за попадането й във всички кошове.
-SingleBucket_Unique                     %s уникални
-
-Session_Title                           Сеансът на работа с POPFile е приключил
-Session_Error                           Вашият сеанс на работа с POPFile е приключил.  Това може да се е получило от спиране и пускане на POPFile и оставен отворен прозорец на браузера. Щракнете на някой от горните връзки, за да продължите работа с POPFile.
+DQojIElkZW50aWZ5IHRoZSBsYW5ndWFnZSBhbmQgY2hhcmFjdGVyIHNldCB1c2VkIGZvciB0
+aGUgaW50ZXJmYWNlDQpMYW5ndWFnZUNvZGUgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+YmcNCkxhbmd1YWdlQ2hhcnNldCAgICAgICAgICAgICAgICAgICAgICAgICBXaW5kb3dzLTEy
+NTENCg0KIyBUaGlzIGlzIHVzZWQgdG8gZ2V0IHRoZSBhcHByb3ByaWF0ZSBzdWJkaXJlY3Rv
+cnkgZm9yIHRoZSBtYW51YWwNCk1hbnVhbExhbmd1YWdlICAgICAgICAgICAgICAgICAgICAg
+ICAgICBiZw0KDQojIENvbW1vbiB3b3JkcyB0aGF0IGFyZSB1c2VkIG9uIHRoZWlyIG93biBh
+bGwgb3ZlciB0aGUgaW50ZXJmYWNlDQpBcHBseSAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgz/Du7OXt6A0KT24gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgIMLq6y4NCk9mZiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDI5+rr
+Lg0KVHVybk9uICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIMLq6/736A0KVHVy
+bk9mZiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIMjn6uv+9+gNCkFkZCAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDE7uHg4ugNClJlbW92ZSAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICDP8OXs4PXt6A0KUHJldmlvdXMgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgIM/w5eQuDQpOZXh0ICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAg0evl5OIuDQpGcm9tICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgzvINClN1YmplY3QgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDH
+4OPr4OLo5SANCkNsYXNzaWZpY2F0aW9uICAgICAgICAgICAgICAgICAgICAgICAgICDK6+Dx
+6PTo6uD26P8NClJlY2xhc3NpZnkgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDP8OXq
+6+Dx6PQuDQpVbmRvICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgwvrw7egN
+CkNsb3NlICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDH4PLi7vDoDQpGaW5k
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg0vrw8egNCkZpbHRlciAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICDU6Ovy+vANClllcyAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICDE4A0KTm8gICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgIM3lDQpDaGFuZ2VUb1llcyAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgzeDv8ODi6CDEwA0KQ2hhbmdlVG9ObyAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+IM3g7/Dg4uggzcUNCkJ1Y2tldCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDK
+7vgNCk1hZ25ldCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDM4OPt6PINCkRl
+bGV0ZSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDI5/Lw6OkNCkNyZWF0ZSAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDR+ufk4OkNClRvICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICDE7g0KVG90YWwgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgIM7h+e4NClJlbmFtZSAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICDP8OXo7OXt8+Lg6Q0KRnJlcXVlbmN5ICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgINfl8fLu8uANClByb2JhYmlsaXR5ICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICDC5fDu//Lt7vHyDQpTY29yZSAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+zvbl7ergDQpMb29rdXAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg0vrw8egN
+Cg0KIyBUaGUgaGVhZGVyIGFuZCBmb290ZXIgdGhhdCBhcHBlYXIgb24gZXZlcnkgVUkgcGFn
+ZQ0KSGVhZGVyX1RpdGxlICAgICAgICAgICAgICAgICAgICAgICAgICAgIM/g7eXrIOfgIPPv
+8ODi6+Xt6OUg7eAgUE9QRmlsZQ0KSGVhZGVyX1NodXRkb3duICAgICAgICAgICAgICAgICAg
+ICAgICAgINHv8OggUE9QRmlsZQ0KSGVhZGVyX0hpc3RvcnkgICAgICAgICAgICAgICAgICAg
+ICAgICAgINXw7u3o6uANCkhlYWRlcl9CdWNrZXRzICAgICAgICAgICAgICAgICAgICAgICAg
+ICDK7vju4uUNCkhlYWRlcl9Db25maWd1cmF0aW9uICAgICAgICAgICAgICAgICAgICDK7u30
+6OPz8OD26P8NCkhlYWRlcl9BZHZhbmNlZCAgICAgICAgICAgICAgICAgICAgICAgICDR7+X2
+6ODr7egNCkhlYWRlcl9TZWN1cml0eSAgICAgICAgICAgICAgICAgICAgICAgICDH4Pno8uAN
+CkhlYWRlcl9NYWduZXRzICAgICAgICAgICAgICAgICAgICAgICAgICDM4OPt6PLoDQoNCkZv
+b3Rlcl9Ib21lUGFnZSAgICAgICAgICAgICAgICAgICAgICAgICBXZWIg8fLw4O3o9uAg7eAg
+UE9QRmlsZQ0KRm9vdGVyX01hbnVhbCAgICAgICAgICAgICAgICAgICAgICAgICAgIND66u7i
+7uTx8uLuDQpGb290ZXJfRm9ydW1zICAgICAgICAgICAgICAgICAgICAgICAgICAg1O7w8+zo
+DQpGb290ZXJfRmVlZE1lICAgICAgICAgICAgICAgICAgICAgICAgICAgxODw5e3o5Q0KRm9v
+dGVyX1JlcXVlc3RGZWF0dXJlICAgICAgICAgICAgICAgICAgIMjk5f8NCkZvb3Rlcl9NYWls
+aW5nTGlzdCAgICAgICAgICAgICAgICAgICAgICDA4e7t4Ozl7fINCg0KQ29uZmlndXJhdGlv
+bl9FcnJvcjEgICAgICAgICAgICAgICAgICAgIML64uXk5fLlIOfgIPDg5+Tl6+jy5esg5eTo
+7S3l5Ojt8fLi5e0g5+3g6g0KQ29uZmlndXJhdGlvbl9FcnJvcjIgICAgICAgICAgICAgICAg
+ICAgIM/u8PL68iDn4CDv7vLw5eHo8uXr8ero/yDo7fLl8PTl6fEg8vD/4eLgIOTgIOH65OUg
+9+jx6+4g7OXm5PMgMSDoIDY1NTM1DQpDb25maWd1cmF0aW9uX0Vycm9yMyAgICAgICAgICAg
+ICAgICAgICAg0ODh7vLt6P/yIO/u8PIg5+AgUE9QMyDy8P/h4uAg5OAg4frk5SD36PHr7iDs
+5ebk8yAxIOggNjU1MzUNCkNvbmZpZ3VyYXRpb25fRXJyb3I0ICAgICAgICAgICAgICAgICAg
+ICDQ4Ofs5fD68iDt4CDx8vDg7ej24PLgIPLw/+Hi4CDk4CDh+uTlIPfo8evuIOzl5uTzIDEg
+6CAxMDAwDQpDb25maWd1cmF0aW9uX0Vycm9yNSAgICAgICAgICAgICAgICAgICAgwfDu//Ig
+5O3oIOIg9fDu7ejq4PLgIPLw/+Hi4CDk4CDh+uTlIPfo8evuIOzl5uTzIDEg6CAzNjYNCkNv
+bmZpZ3VyYXRpb25fRXJyb3I2ICAgICAgICAgICAgICAgICAgICBUQ1Ag8uDp7ODz8vryIPLw
+/+Hi4CDk4CDh+uTlIPfo8evuIOzl5uTzIDEwIOggMzAwDQpDb25maWd1cmF0aW9uX1BPUDNQ
+b3J0ICAgICAgICAgICAgICAgICAg0ODh7vLl7SDv7vDyIOfgIFBPUDMNCkNvbmZpZ3VyYXRp
+b25fUE9QM1VwZGF0ZSAgICAgICAgICAgICAgICDQ4OHu8u3o//Ig7+7w8iDlIO/w7uzl7eXt
+IO3gICVzOyDy4OfoIO/w7uz/7eAg+eUg8eUg7vLw4OfoIO/w6CDx6+Xk4uD57vLuIPHy4PDy
+6PDg7eUg7eAgUE9QRmlsZS4NCkNvbmZpZ3VyYXRpb25fU2VwYXJhdG9yICAgICAgICAgICAg
+ICAgICDQ4Ofk5evo8uXrDQpDb25maWd1cmF0aW9uX1NlcFVwZGF0ZSAgICAgICAgICAgICAg
+ICAg0ODn5OXr6PLl6//yIO/w7uzl7eXtIO3gICVzDQpDb25maWd1cmF0aW9uX1VJICAgICAg
+ICAgICAgICAgICAgICAgICAgz+7w8iDn4CDv7vLw5eHo8uXr8eroIOjt8uXw9OXp8Q0KQ29u
+ZmlndXJhdGlvbl9VSVVwZGF0ZSAgICAgICAgICAgICAgICAgIM/u8PL68iDn4CDv7vLw5eHo
+8uXr8eroIOjt8uXw9OXp8SDlIO/w7uzl7eXtIO3gICVzOyDy4OfoIO/w7uz/7eAg+eUg8eUg
+7vLw4OfoIO/w6CDx6+Xk4uD57vLuIPHy4PDy6PDg7eUg7eAgUE9QRmlsZS4NCkNvbmZpZ3Vy
+YXRpb25fSGlzdG9yeSAgICAgICAgICAgICAgICAgICDB8O7pIPH67uH55e3o/yDt4CDx8vDg
+7ej24A0KQ29uZmlndXJhdGlvbl9IaXN0b3J5VXBkYXRlICAgICAgICAgICAgIMHw7v/yIPH6
+7uH55e3o/yDt4CDx8vDg7ej24CDv8O7s5e3l7SDt4CAlcw0KQ29uZmlndXJhdGlvbl9EYXlz
+ICAgICAgICAgICAgICAgICAgICAgIMHw7ukg5O3oIOfgIO/g5+Xt5SDt4CD18O7t6OrgDQpD
+b25maWd1cmF0aW9uX0RheXNVcGRhdGUgICAgICAgICAgICAgICAgwfDu//Ig7eAg5O3o8uUg
+5+Ag7+Dn5e3lIO3gIPXw7u3o6uAg7/Du7OXt5e0g7eAgJXMNCkNvbmZpZ3VyYXRpb25fVXNl
+ckludGVyZmFjZSAgICAgICAgICAgICDP7vLw5eHo8uXr8eroIOjt8uXw9OXp8Q0KQ29uZmln
+dXJhdGlvbl9Ta2lucyAgICAgICAgICAgICAgICAgICAgIFNraW5zDQpDb25maWd1cmF0aW9u
+X1NraW5zQ2hvb3NlICAgICAgICAgICAgICAgQ2hvb3NlIHNraW4NCkNvbmZpZ3VyYXRpb25f
+TGFuZ3VhZ2UgICAgICAgICAgICAgICAgICDF5+jqDQpDb25maWd1cmF0aW9uX0xhbmd1YWdl
+Q2hvb3NlICAgICAgICAgICAgyOfh5fDoIOXn6OoNCkNvbmZpZ3VyYXRpb25fTGlzdGVuUG9y
+dHMgICAgICAgICAgICAgICDP7vDy7uLlDQpDb25maWd1cmF0aW9uX0hpc3RvcnlWaWV3ICAg
+ICAgICAgICAgICAgwujkIO3gIPXw7u3o6uDy4A0KQ29uZmlndXJhdGlvbl9UQ1BUaW1lb3V0
+ICAgICAgICAgICAgICAgIFRDUCDS4Ons4PPyDQpDb25maWd1cmF0aW9uX1RDUFRpbWVvdXRT
+ZWNzICAgICAgICAgICAg0uDp7ODz8iDt4CBUQ1Ag4vD65+ro8uUg4iDx5erz7eToDQpDb25m
+aWd1cmF0aW9uX1RDUFRpbWVvdXRVcGRhdGUgICAgICAgICAgVENQIPLg6ezg8/L68iDv8O7s
+5e3l7SDt4CAlcw0KQ29uZmlndXJhdGlvbl9DbGFzc2lmaWNhdGlvbkluc2VydGlvbiAgIM7h
+7uft4Pfg4uDt5SDt4CDq6+Dx6PTo6uD26P/y4A0KQ29uZmlndXJhdGlvbl9TdWJqZWN0TGlu
+ZSAgICAgICAgICAgICAgIM/w7uz/7eAg7eAg5+Dj6+Di6OXy7g0KQ29uZmlndXJhdGlvbl9Y
+VENJbnNlcnRpb24gICAgICAgICAgICAgIMLs+uri4O3lIO3gIFgtVGV4dC1DbGFzc2lmaWNh
+dGlvbg0KQ29uZmlndXJhdGlvbl9YUExJbnNlcnRpb24gICAgICAgICAgICAgIMLs+uri4O3l
+IO3gIFgtUE9QRmlsZS1MaW5rDQpDb25maWd1cmF0aW9uX0xvZ2dpbmcgICAgICAgICAgICAg
+ICAgICAgz/Du8u7q7uvo8ODt5Q0KQ29uZmlndXJhdGlvbl9Ob25lICAgICAgICAgICAgICAg
+ICAgICAgIMHl5w0KQ29uZmlndXJhdGlvbl9Ub1NjcmVlbiAgICAgICAgICAgICAgICAgIM3g
+IOXq8ODt4A0KQ29uZmlndXJhdGlvbl9Ub0ZpbGUgICAgICAgICAgICAgICAgICAgIML64iD0
+4OnrDQpDb25maWd1cmF0aW9uX1RvU2NyZWVuRmlsZSAgICAgICAgICAgICAgwvriIPTg6evg
+IOgg7eAg5erw4O0NCkNvbmZpZ3VyYXRpb25fTG9nZ2VyT3V0cHV0ICAgICAgICAgICAgICDM
+//Hy7iDn4CDv8O7y7uru6+jw4O3lDQoNCkFkdmFuY2VkX0Vycm9yMSAgICAgICAgICAgICAg
+ICAgICAgICAgICAnJXMnIOLl9+Ug7/Do8frx8uLgIOIg8e/o8frq4CDxIOjj7e7w6PDg7ejy
+5SDk8+zoDQpBZHZhbmNlZF9FcnJvcjIgICAgICAgICAgICAgICAgICAgICAgICAgyOPt7vDo
+8ODt6PLlIOTz7Ogg7O7m5SDk4CDx+uT68Obg8iDx4OzuIOHz6uLoLCD26PTw6CDoIOft4Pbo
+8uUgLiwgXywgLSwg6OvoIEANCkFkdmFuY2VkX0Vycm9yMyAgICAgICAgICAgICAgICAgICAg
+ICAgICAnJXMnIOTu4eDi5e3gIOr67CDx7+jx+urgIPEg6OPt7vDo8ODt6CDk8+zoDQpBZHZh
+bmNlZF9FcnJvcjQgICAgICAgICAgICAgICAgICAgICAgICAgJyVzJyDt5SDv8Ojx+vHy4uAg
+4iDx7+jx+urgIPEg6OPt7vDo8ODt6PLlIOTz7OgNCkFkdmFuY2VkX0Vycm9yNSAgICAgICAg
+ICAgICAgICAgICAgICAgICAnJXMnIO/w5ezg9e3g8uAg6vrsIPHv6PH66uAg8SDo4+3u8Ojw
+4O3oIOTz7OgNCkFkdmFuY2VkX1N0b3BXb3JkcyAgICAgICAgICAgICAgICAgICAgICDI4+3u
+8Ojw4O3oIOTz7OgNCkFkdmFuY2VkX01lc3NhZ2UxICAgICAgICAgICAgICAgICAgICAgICDR
+6+Xk7ejy5SDk8+zoIPHlIOjj7e7w6PDg8iDv8Ogg6uvg8ej06Pbo8ODt5Swg8vrpIOrg8u4g
+8eUg8fDl+eDyIPLi+vDk5SD35fHy7i4NCkFkdmFuY2VkX0FkZFdvcmQgICAgICAgICAgICAg
+ICAgICAgICAgICDE7uHg4ugg5PPs4A0KQWR2YW5jZWRfUmVtb3ZlV29yZCAgICAgICAgICAg
+ICAgICAgICAgIM/w5ezg9e3oIOTz7OANCg0KSGlzdG9yeV9GaWx0ZXIgICAgICAgICAgICAg
+ICAgICAgICAgICAgICZuYnNwOyjv7urg5+DtIOUg8eDs7iDq7vggPGZvbnQgY29sb3I9IiVz
+Ij4lczwvZm9udD4pDQpIaXN0b3J5X0ZpbHRlckJ5ICAgICAgICAgICAgICAgICAgICAgICAg
+RmlsdGVyIEJ5DQpIaXN0b3J5X1NlYXJjaCAgICAgICAgICAgICAgICAgICAgICAgICAgJm5i
+c3A7KPL68PHl7eUg5+Ag5+Dj6+Di6OUgJXMpDQpIaXN0b3J5X1RpdGxlICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgz+7x6+Xk7egg8fru4fnl7ej/DQpIaXN0b3J5X0p1bXAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgz/Dl9e7kIOr67CDx+u7h+eXt6OUNCkhpc3RvcnlfU2hv
+d0FsbCAgICAgICAgICAgICAgICAgICAgICAgICDP7urg5ugg4vHo9+roDQpIaXN0b3J5X1No
+b3VsZEJlICAgICAgICAgICAgICAgICAgICAgICAg0vD/4eLgIOTgIOH65OUNCkhpc3Rvcnlf
+Tm9Gcm9tICAgICAgICAgICAgICAgICAgICAgICAgICDN/+zgIO/u5ODy5esNCkhpc3Rvcnlf
+Tm9TdWJqZWN0ICAgICAgICAgICAgICAgICAgICAgICDN/+zgIOfg4+vg4ujlDQpIaXN0b3J5
+X0NsYXNzaWZ5QXMgICAgICAgICAgICAgICAgICAgICAgyuvg8ej06Pbo8ODpIOrg8u4NCkhp
+c3RvcnlfTWFnbmV0VXNlZCAgICAgICAgICAgICAgICAgICAgICDR7+7w5eQg7ODj7ejyDQpI
+aXN0b3J5X0NoYW5nZWRUbyAgICAgICAgICAgICAgICAgICAgICAgz/Du7OXt5e3uIO3gIDxm
+b250IGNvbG9yPSIlcyI+JXMNCkhpc3RvcnlfQWxyZWFkeSAgICAgICAgICAgICAgICAgICAg
+ICAgICDC5fflIOrr4PHo9Oj26PDg7e4g6uDy7iA8Zm9udCBjb2xvcj0iJXMiPiVzPC9mb250
+Pg0KSGlzdG9yeV9SZW1vdmVBbGwgICAgICAgICAgICAgICAgICAgICAgIM/w5ezg9e3oIOLx
+6Pfq6A0KSGlzdG9yeV9SZW1vdmVQYWdlICAgICAgICAgICAgICAgICAgICAgIM/w5ezg9e3o
+IPLg5+gg8fLw4O3o9uANCkhpc3RvcnlfUmVtb3ZlICAgICAgICAgICAgICAgICAgICAgICAg
+ICDH4CDv8OXs4PXi4O3lIO3gIPH67uH55e3o//LgIO3g8ujx7eg6DQpIaXN0b3J5X1NlYXJj
+aE1lc3NhZ2UgICAgICAgICAgICAgICAgICAg0vrw8egg7+4g7+7k4PLl6yDoIOfg4+vg4ujl
+DQpIaXN0b3J5X05vTWVzc2FnZXMgICAgICAgICAgICAgICAgICAgICAgzf/s4CDx+u7h+eXt
+6P8NCkhpc3RvcnlfU2hvd01hZ25ldCAgICAgICAgICAgICAgICAgICAgICDP7iDs4OPt6PIN
+Ckhpc3RvcnlfTWFnbmV0ICAgICAgICAgICAgICAgICAgICAgICAgICAmbmJzcDso8eDs7iDq
+6+Dx6PTo9ujw4O3o8uUg7+4g7ODj7ejyKQ0KSGlzdG9yeV9SZXNldFNlYXJjaCAgICAgICAg
+ICAgICAgICAgICAgIMjn9+jx8ugg8vrw8eXt5fLuDQoNClBhc3N3b3JkX1RpdGxlICAgICAg
+ICAgICAgICAgICAgICAgICAgICDP4PDu6+ANClBhc3N3b3JkX0VudGVyICAgICAgICAgICAg
+ICAgICAgICAgICAgICDC+uLl5Ogg7+Dw7uvgDQpQYXNzd29yZF9HbyAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgzsoNClBhc3N3b3JkX0Vycm9yMSAgICAgICAgICAgICAgICAgICAg
+ICAgICDN5eLg6+jk7eAg7+Dw7uvgDQoNClNlY3VyaXR5X0Vycm9yMSAgICAgICAgICAgICAg
+ICAgICAgICAgICDP7vDy+vIg8SDr5ePo8ujs6PDg7eUg8vD/4eLgIOTgIOH65OUg9+jx6+4g
+7OXm5PMgMSDoIDY1NTM1DQpTZWN1cml0eV9TdGVhbHRoICAgICAgICAgICAgICAgICAgICAg
+ICAg0erw6PIg8OXm6OwNClNlY3VyaXR5X05vU3RlYWx0aE1vZGUgICAgICAgICAgICAgICAg
+ICDN5SAo8erw6PIg8OXm6OwpDQpTZWN1cml0eV9FeHBsYWluU3RhdHMgICAgICAgICAgICAg
+ICAgICAgKMru4+Dy7iDy7uLgIOUg4urr/vfl7e4sIFBPUEZpbGUg4uXk7frmIOTt5eLt7iDo
+5+/w4PngIOr67CDx6vDo7/Ig7eAgd3d3LnVzZXRoZXNvdXJjZS5jb206IGJjICjh8O7/IO3g
+IOru+O7i5fLlKSwgbWMgKOHw7v8g8fru4fnl7ej/LCDq6+Dx6PTo9ujw4O3oIO7yIFBPUEZp
+bGUpIOggZWMgKOHw7v8g7eAg4/Dl+O3uIOrr4PHo9Oj26PDg7ejy5SDx+u7h+eXt6P8pLiDS
+5efoIPHy7unt7vHy6CDx5SDx+vXw4O3/4uDyIOL64iD04OnrIOgg4evg4+7k4PDl7ejlIO3g
+IPL/9SDg5yDv8+Hr6Orz4uDsIPHy4PLo8fLo6uAg5+Ag7eD36O3gLCDv7iDq7uny7iD17vDg
+8uAg6Ofv7uvn4uDyIFBPUEZpbGUg6CDq7uvq7iDk7uHw5SDw4OHu8uguIMzu//IgV2ViIPH6
+8OL68CDx+vXw4O3/4uAg6+7jLfTg6evu4uXy5SDx6CDiIO/w7uT66+bl7ejlIO3gIO7q7uvu
+IDUg5O3oLCDx6+XkIOru5fLuIOPoIOjn8vDo4uA7IODnIO3lIO/g5/8g4vD65+rgIOzl5uTz
+IPHy4PLo8fLo9+Xx6ujy5SDk4O3t6CDoIOru7erw5fLt6PLlIElQIODk8OXx6C4pDQpTZWN1
+cml0eV9FeHBsYWluVXBkYXRlICAgICAgICAgICAgICAgICAgKMru4+Dy7iDy7uLgIOUg4urr
+/vfl7e4sIFBPUEZpbGUg4uXk7frmIOTt5eLt7iDo5+/w4PngIOr67CDx6vDo7/Ig7eAgd3d3
+LnVzZXRoZXNvdXJjZS5jb206IGJjICjh8O7/IO3gIOru+O7i5fLlKSwgbWMgKOHw7v8g8fru
+4fnl7ej/LCDq6+Dx6PTo9ujw4O3oIO7yIFBPUEZpbGUpIOggZWMgKOHw7v8g7eAg4/Dl+O3u
+IOrr4PHo9Oj26PDg7ejy5SDx+u7h+eXt6P8pLiBQT1BGaWxlIO/u6/P34OLgIO7h8ODy7e4g
+6Ofi5fHy6OUg5ODr6CDo7OAg7+4t7e7i4CDi5fDx6P8g7eAg8e708vPl8OAg6CDv7urg5+Lg
+IPH67vLi5fLt4CDq4PDy6O3q4CDt4CDi8f/q4CDx8vDg7ej24C4gzO7/8iBXZWIg8frw4vrw
+IPH69fDg7f/i4CDr7uMt9ODp6+7i5fLlIPHoIOIg7/Du5Prr5uXt6OUg7eAg7uru6+4gNSDk
+7egsIPHr5eQg6u7l8u4g4+gg6Ofy8Oji4Dsg4Ocg7eUg7+Dn/yDi8Prn6uAg7OXm5PMg5+Dv
+6PLi4O3o//LgIOfgIO3u4uAg4uXw8ej/IOgg6u7t6vDl8u3o8uUgSVAg4OTw5fHoLikNClNl
+Y3VyaXR5X1Bhc3N3b3JkVGl0bGUgICAgICAgICAgICAgICAgICDP4PDu6+Ag5+Ag7+7y8OXh
+6PLl6/Hq6P8g6O3y5fD05enxDQpTZWN1cml0eV9QYXNzd29yZCAgICAgICAgICAgICAgICAg
+ICAgICAgz+Dw7uvgDQpTZWN1cml0eV9QYXNzd29yZFVwZGF0ZSAgICAgICAgICAgICAgICAg
+z+Dw7uvg8uAg7/Du7OXt5e3gIO3gICVzDQpTZWN1cml0eV9BVVRIVGl0bGUgICAgICAgICAg
+ICAgICAgICAgICAgy+Xj6PLo7OD26P8g7/Dl5CDx+vDi+vDgL0FVVEgNClNlY3VyaXR5X1Nl
+Y3VyZVNlcnZlciAgICAgICAgICAgICAgICAgICDR+vDi+vAsIOjn6PHq4uD5IOvl4+jy6Ozg
+9uj/DQpTZWN1cml0eV9TZWN1cmVTZXJ2ZXJVcGRhdGUgICAgICAgICAgICAg0frw4vrw+vIg
+8SDr5ejy6Ozg9uj/IO/w7uzl7eUg7eAgJXM7IPLg5+gg7/Du7P/t4CD55SDh+uTlIO7y8ODn
+5e3gIO/w6CDx6+Xk4uD57vLuIPHy4PDy6PDg7eUg7eAgUE9QRmlsZQ0KU2VjdXJpdHlfU2Vj
+dXJlUG9ydCAgICAgICAgICAgICAgICAgICAgIM/u8PIg5+Ag6+Xj6PLo7OD26P8NClNlY3Vy
+aXR5X1NlY3VyZVBvcnRVcGRhdGUgICAgICAgICAgICAgICDP7vDy+vIg7/Du7OXt5e0g7eAg
+JXM7IPLg5+gg7/Du7P/t4CD55SDh+uTlIO7y8ODn5e3gIO/w6CDx6+Xk4uD57vLuIPHy4PDy
+6PDg7eUg7eAgUE9QRmlsZQ0KU2VjdXJpdHlfUE9QMyAgICAgICAgICAgICAgICAgICAgICAg
+ICAgIM/w6OXs4O3lIO3gIFBPUDMg4vD65+roIO7yIOTw8+PoIOzg+Ojt6A0KU2VjdXJpdHlf
+VUkgICAgICAgICAgICAgICAgICAgICAgICAgICAgIM/w6OXs4O3lIO3gIEhUVFAg4vD65+ro
+ICjn4CDv7vLw5eHo8uXr8ero/yDo7fLl8PTl6fEpIO7yIOTw8+PoIOzg+Ojt6A0KU2VjdXJp
+dHlfVXBkYXRlVGl0bGUgICAgICAgICAgICAgICAgICAgIMDi8u7s4PLo9+3gIO/w7uLl8Org
+IOfgIO3u4ugg4uXw8ejoDQpTZWN1cml0eV9VcGRhdGUgICAgICAgICAgICAgICAgICAgICAg
+ICAgxebl5O3l4u3gIO/w7uLl8OrgIOfgIO3u4ugg4uXw8ejoIO3gIFBPUEZpbGUNClNlY3Vy
+aXR5X1N0YXRzVGl0bGUgICAgICAgICAgICAgICAgICAgICDR+uHo8ODt5SDt4CDx8uDy6PHy
+6OrgDQpTZWN1cml0eV9TdGF0cyAgICAgICAgICAgICAgICAgICAgICAgICAgxebl5O3l4u3u
+IOjn7/Dg+eDt5SDt4CDx8uDy6PHy6Pfl8eroIOTg7e3oIO3gIODi8u7w4A0KDQpNYWduZXRf
+RXJyb3IxICAgICAgICAgICAgICAgICAgICAgICAgICAgzODj7ejyICclcycg4uX35SDlIOfg
+5ODk5e0g5+Ag6u74ICclcycNCk1hZ25ldF9FcnJvcjIgICAgICAgICAgICAgICAgICAgICAg
+ICAgICDN7uLo//Ig7ODj7ejyICclcycg7/Du8uji7vDl9+gg7eAg7ODj7ejyICclcycg5+Ag
+6u74ICclcycg6CDs7ublIOTgIO/w5eTo5+Lo6uAg7eXl5O3u5+3g9+3u8fI7IOzg4+3o8vry
+IO3lIOUg5O7h4OLl7S4NCk1hZ25ldF9FcnJvcjMgICAgICAgICAgICAgICAgICAgICAgICAg
+ICDR+ufk4Okg7e7iIOzg4+3o8iAnJXMnIOfgIOru+CAnJXMnDQpNYWduZXRfQ3VycmVudE1h
+Z25ldHMgICAgICAgICAgICAgICAgICAgzODj7ejy6A0KTWFnbmV0X01lc3NhZ2UxICAgICAg
+ICAgICAgICAgICAgICAgICAgINHr5eTt6PLlIOzg4+3o8ugg8evz5uDyIOfgIO3l5+Dh4OLt
+7iDq6+Dx6PTo9ujw4O3lIO3gIPH67uH55e3o//LgIOIg5ODk5e0g6u74Lg0KTWFnbmV0X0Ny
+ZWF0ZU5ldyAgICAgICAgICAgICAgICAgICAgICAgINH65+Tg6SDt7uIg7ODj7ejyDQpNYWdu
+ZXRfRXhwbGFuYXRpb24gICAgICAgICAgICAgICAgICAgICAgyOzgIPLw6CDi6OTgIOzg4+3o
+8ug6PC9iPiA8dWw+PGxpPjxiPsDk8OXxIOjr6CDo7OUg7eAg7+7k4PLl6zo8L2I+IM3g7/Do
+7OXwOiBqb2huQGNvbXBhbnkuY29tIOfgIOru7erw5fLl7SDg5PDl8SwgPGJyIC8+Y29tcGFu
+eS5jb20g5+Ag4vHo9+roIODk8OXx6CDu8iBjb21wYW55LmNvbSwgPGJyIC8+Sm9obiBEb2Ug
+5+Ag6u7t6vDl8uXtIO/u5ODy5essIEpvaG4g5+Ag4vHo9+roIEpvaG4t7uL26DwvbGk+PGxp
+PjxiPsDk8OXxIOjr6CDo7OUg7eAg7+7r8/fg8uXrOjwvYj4gz+7k7uHt7iDt4CDg5PDl8eAg
+7eAg7+7k4PLl6ywg7e4g5+Ag4OTw5fHgIO3gIO/u6/P34PLl6/8g7eAg8fru4fnl7ejl8u48
+L2xpPjxsaT48Yj7E8+zoIO7yIOfg4+vg4ujl8u46PC9iPiDN4O/w6Ozl8DogaGVsbG8g5+Ag
+4vHo9+roIPH67uH55e3o/ywg9+jl8u4g5+Dj6+Di6OUg8frk+vDm4CBoZWxsbzwvbGk+PC91
+bD4NCk1hZ25ldF9NYWduZXRUeXBlICAgICAgICAgICAgICAgICAgICAgICDS6O8g7eAg7ODj
+7ejy4A0KTWFnbmV0X1ZhbHVlICAgICAgICAgICAgICAgICAgICAgICAgICAgINHy7unt7vHy
+DQpNYWduZXRfQWx3YXlzICAgICAgICAgICAgICAgICAgICAgICAgICAgyuvg8ej06Pbo8ODp
+IOLo7eDj6CDiIOru+A0KDQpCdWNrZXRfRXJyb3IxICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgyOzl7eDy4CDt4CDq7vju4uXy5SDs7ublIOTgIPH65Prw5uDyIPHg7O4g7ODr6ugg6+Dy
+6O3x6ugg4fPq4ugg7vIgYSDk7iB6IO/r/vEg5+3g9ujy5SAtIOggXw0KQnVja2V0X0Vycm9y
+MiAgICAgICAgICAgICAgICAgICAgICAgICAgIMLl9+Ug8fr55fHy4vPi4CDq7vggJXMNCkJ1
+Y2tldF9FcnJvcjMgICAgICAgICAgICAgICAgICAgICAgICAgICDR+ufk4OTl7SDlIOru+CAl
+cw0KQnVja2V0X0Vycm9yNCAgICAgICAgICAgICAgICAgICAgICAgICAgIMzu6/8g4vri5eTl
+8uUg7eX57g0KQnVja2V0X0Vycm9yNSAgICAgICAgICAgICAgICAgICAgICAgICAgIMru+CAl
+cyDv8OXo7OXt8+Lg7SDt4CAlcw0KQnVja2V0X0Vycm9yNiAgICAgICAgICAgICAgICAgICAg
+ICAgICAgIMjn8vDo8iDlIOru+CAlcw0KQnVja2V0X1RpdGxlICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgINHy4PLo8fLo6uANCkJ1Y2tldF9CdWNrZXROYW1lICAgICAgICAgICAgICAg
+ICAgICAgICDK7vgNCkJ1Y2tldF9Xb3JkQ291bnQgICAgICAgICAgICAgICAgICAgICAgICDB
+8O7pIOTz7OgNCkJ1Y2tldF9Xb3JkQ291bnRzICAgICAgICAgICAgICAgICAgICAgICDB8O7p
+IOTz7OgNCkJ1Y2tldF9VbmlxdWVXb3JkcyAgICAgICAgICAgICAgICAgICAgICDT7ejq4Ovt
+6CDk8+zoDQpCdWNrZXRfU3ViamVjdE1vZGlmaWNhdGlvbiAgICAgICAgICAgICAgz/Du7P/t
+4CDt4CDn4OPr4OLo5fLuDQpCdWNrZXRfQ2hhbmdlQ29sb3IgICAgICAgICAgICAgICAgICAg
+ICAgz/Du7OXt6CD24uXy4A0KQnVja2V0X05vdEVub3VnaERhdGEgICAgICAgICAgICAgICAg
+ICAgIM3l5O7x8uDy+vft7iDk4O3t6A0KQnVja2V0X0NsYXNzaWZpY2F0aW9uQWNjdXJhY3kg
+ICAgICAgICAgINLu9+3u8fIg7eAg6uvg8ej06Org9uj/8uANCkJ1Y2tldF9FbWFpbHNDbGFz
+c2lmaWVkICAgICAgICAgICAgICAgICDK6+Dx6PTo9ujw4O3oIPH67uH55e3o/w0KQnVja2V0
+X0VtYWlsc0NsYXNzaWZpZWRVcHBlciAgICAgICAgICAgIMrr4PHo9Oj26PDg7egg8fru4fnl
+7ej/DQpCdWNrZXRfQ2xhc3NpZmljYXRpb25FcnJvcnMgICAgICAgICAgICAgw/Dl+OroIO/w
+6CDq6+Dx6PTo6uD26P/y4A0KQnVja2V0X0FjY3VyYWN5ICAgICAgICAgICAgICAgICAgICAg
+ICAgINLu9+3u8fINCkJ1Y2tldF9DbGFzc2lmaWNhdGlvbkNvdW50ICAgICAgICAgICAgICDB
+8O7pIOrr4PHo9Oj26PDg7egNCkJ1Y2tldF9SZXNldFN0YXRpc3RpY3MgICAgICAgICAgICAg
+ICAgICDN8+vo8ODpIPHy4PLo8fLo6uDy4A0KQnVja2V0X0xhc3RSZXNldCAgICAgICAgICAg
+ICAgICAgICAgICAgIM/u8evl5O3uIO3z6+jw4O3lDQpCdWNrZXRfQ3VycmVudENvbG9yICAg
+ICAgICAgICAgICAgICAgICAgwiDs7uzl7fLgIPbi5fL68iDn4CAlcyDlICVzDQpCdWNrZXRf
+U2V0Q29sb3JUbyAgICAgICAgICAgICAgICAgICAgICAgz/Du7OXt6CD24uXy+vIg5+AgJXMg
+7eAgJXMNCkJ1Y2tldF9NYWludGVuYW5jZSAgICAgICAgICAgICAgICAgICAgICDP8O7s5e3o
+DQpCdWNrZXRfQ3JlYXRlQnVja2V0ICAgICAgICAgICAgICAgICAgICAg0frn5ODpIOru+CDx
+IOjs5Q0KQnVja2V0X0RlbGV0ZUJ1Y2tldCAgICAgICAgICAgICAgICAgICAgIMjn8vDo6SDq
+7vgg8SDo7OUNCkJ1Y2tldF9SZW5hbWVCdWNrZXQgICAgICAgICAgICAgICAgICAgICDP8OXo
+7OXt8+Lg6SDq7vgg8SDo7OUNCkJ1Y2tldF9Mb29rdXAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICDS+vDx5e3lDQpCdWNrZXRfTG9va3VwTWVzc2FnZSAgICAgICAgICAgICAgICAgICAg
+0vrw8eXt5SDt4CDk8+zgIO/uIOru+O7i5fLlDQpCdWNrZXRfTG9va3VwTWVzc2FnZTIgICAg
+ICAgICAgICAgICAgICAg0OXn8+vy4PLoIO7yIPL68PHl7eXy7g0KQnVja2V0X0xvb2t1cE1v
+c3RMaWtlbHkgICAgICAgICAgICAgICAgIDxiPiVzPC9iPiDt4Okt9+Xx8u4g8eUg8fDl+eAg
+4iA8Zm9udCBjb2xvcj0iJXMiPiVzPC9mb250Pg0KQnVja2V0X0RvZXNOb3RBcHBlYXIgICAg
+ICAgICAgICAgICAgICAgIDxwPjxiPiVzPC9iPiDt5SDv8Ojx+vHy4uAg4iDt6Oru6SDq7vgN
+CkJ1Y2tldF9EaXNhYmxlZEdsb2JhbGx5ICAgICAgICAgICAgICAgICDI5+rr/vfl7e4g5+Ag
+4vHo9+roDQpCdWNrZXRfVG8gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg6vrsDQpC
+dWNrZXRfUXVhcmFudGluZSAgICAgICAgICAgICAgICAgICAgICAgyuDw4O3y6O3gDQoNClNp
+bmdsZUJ1Y2tldF9UaXRsZSAgICAgICAgICAgICAgICAgICAgICDE5fLg6evoIOfgICVzDQpT
+aW5nbGVCdWNrZXRfV29yZENvdW50ICAgICAgICAgICAgICAgICAgwfDu6SDk8+zoIOIg6u74
+4A0KU2luZ2xlQnVja2V0X1RvdGFsV29yZENvdW50ICAgICAgICAgICAgIM7h+e4g5PPs6A0K
+U2luZ2xlQnVja2V0X1BlcmNlbnRhZ2UgICAgICAgICAgICAgICAgIM/w7vbl7fIg7vIg7uH5
+6P8g4fDu6Q0KU2luZ2xlQnVja2V0X1dvcmRUYWJsZSAgICAgICAgICAgICAgICAgIMTz7Ogs
+IO/u7+Dk4PnoIOIgJXMNClNpbmdsZUJ1Y2tldF9NZXNzYWdlMSAgICAgICAgICAgICAgICAg
+ICDO5+3g9+Xt6PLlIPH68SDn4uXn5Oj36uAgKCopIOTz7Ogg8eAg6Ofv7uvn4uDt6CDn4CDq
+6+Dx6PTo6uD26P8g7/DoIPLu4uAg7/Px6uDt5SDt4CBQT1BGaWxlLiDZ8ODq7eXy5SDxIOzo
++Org8uAg7eAg7f/q7v8g5PPs4Cwg5+Ag5OAg4ujk6PLlIOLl8O7/8u3u8fLy4CDn4CDv7u/g
+5ODt5fLuIOkg4vriIOLx6Pfq6CDq7vju4uUuDQpTaW5nbGVCdWNrZXRfVW5pcXVlICAgICAg
+ICAgICAgICAgICAgICAgJXMg8+3o6uDr7egNCg0KU2Vzc2lvbl9UaXRsZSAgICAgICAgICAg
+ICAgICAgICAgICAgICAgINHl4O3x+vIg7eAg8ODh7vLgIPEgUE9QRmlsZSDlIO/w6Orr/vfo
+6w0KU2Vzc2lvbl9FcnJvciAgICAgICAgICAgICAgICAgICAgICAgICAgIMLg+Oj/8iDx5eDt
+8SDt4CDw4OHu8uAg8SBQT1BGaWxlIOUg7/Do6uv+9+jrLiAg0u7i4CDs7ublIOTgIPHlIOUg
+7+7r8/fo6+4g7vIg8e/o8ODt5SDoIO/z8erg7eUg7eAgUE9QRmlsZSDoIO7x8uDi5e0g7vLi
+7vDl7SDv8O7n7vDl9iDt4CDh8ODz5+Xw4C4g2fDg6u3l8uUg7eAg7f/q7ukg7vIg4+7w7ejy
+5SDi8Prn6ugsIOfgIOTgIO/w7uT66+bo8uUg8ODh7vLgIPEgUE9QRmlsZS4NCg==

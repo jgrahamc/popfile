@@ -1,215 +1,286 @@
-# Copyright (c) 2001-2003 John Graham-Cumming
+MIME-Version: 1.0
+Content-Transfer-Encoding: base64
+X-MIME-Autoconverted: from 8bit to base64 by mail.datasync.com id h1KNLSI27579
 
-# При переводе на русский язык всплыли самые разные ошибки и недочёты
-# самого веб-интерфейса -- слишком многое намертво зашито в код.
-# Если я и дальше буду пользоваться POPFile, я постараюсь найти время
-# отделить интерфейс от кода, и адаптировать интерфейс к русскому
-# языку.
-#
-# Предложения и замечания с благодарностью принимаются по электронной
-# почте: alexander saltanov <asdgray.at.yandex.ru>
-
-LanguageCode                            en
-LanguageCharset                         koi8-r
-
-# Common words that are used on their own all over the interface
-Apply                                   Запомнить
-On                                      Вкл.
-Off                                     Выкл.
-TurnOn                                  Включить
-TurnOff                                 Выключить
-Add                                     Добавить
-Remove                                  Удалить
-Previous                                Предыдущий
-Next                                    Следующий
-From                                    Отправитель
-Subject                                 Тема
-Classification                          Классификация
-Reclassify                              Переклассифицировать
-Undo                                    Отменить
-Close                                   Закрыть
-Find                                    Найти
-Filter                                  Выбрать
-Yes                                     Да
-No                                      Нет
-ChangeToYes                             Изменить на &laquo;Да&raquo;
-ChangeToNo                              Изменить на &laquo;Нет&raquo;
-Bucket                                  Ведро
-Magnet                                  Магнит
-Delete                                  Удалить
-Create                                  Создать
-To                                      Получатель
-Total                                   Всего
-Rename                                  Переименовать
-Frequency                               Частота
-Probability                             Вероятность
-Score                                   Счёт
-Lookup                                  Искать
-
-# The header and footer that appear on every UI page
-Header_Title                            Центр управления POPFile
-Header_Shutdown                         Выключить POPFile
-Header_History                          История
-Header_Buckets                          Вёдра
-Header_Configuration                    Настройка
-Header_Advanced                         Стоп-слова
-Header_Security                         Безопасность
-Header_Magnets                          Магниты
-
-Footer_HomePage                         Страничка POPFile в Интернете
-Footer_Manual                           Руководство пользователя
-Footer_Forums                           Форумы
-Footer_FeedMe                           Накормите автора!
-Footer_RequestFeature                   Нужна новая функция?
-Footer_MailingList                      Список рассылки
-
-Configuration_Error1                    Разделитель должен быть <stong>одним</strong> символом
-Configuration_Error2                    Номер порта для web-интерфейса должен быть числом от 1 до 65535
-Configuration_Error3                    Номер порта POP3 должен быть числом от 1 до 65535
-Configuration_Error4                    Размер страницы должен быть числом от 1 до 1000
-Configuration_Error5                    Число дней истории должно быть числом от 1 до 366
-Configuration_Error6                    Значение таймаута TCP должно быть числом от 10 до 300
-Configuration_POP3Port                  Слушать POP3 порт
-Configuration_POP3Update                Номер порта изменён на %s; изменения вступят в силу после перезапуска POPFile
-Configuration_Separator                 Разделитель
-Configuration_SepUpdate                 Разделитель изменён на %s
-Configuration_UI                        Порт веб-интерфейса
-Configuration_UIUpdate                  Номер порта веб-интерфейса изменён на %s; изменения вступят в силу после перезапуска POPFile
-Configuration_History                   Сколько писем показывать на одной странице
-Configuration_HistoryUpdate             Теперь на странице будет показываться %s писем
-Configuration_Days                      Сколько дней хранить историю
-Configuration_DaysUpdate                Теперь история будет храниться %s дней
-Configuration_UserInterface             Веб-интерфейс
-Configuration_Skins                     Оформление
-Configuration_SkinsChoose               Выбрать вариант оформления
-Configuration_Language                  Язык
-Configuration_LanguageChoose            Выбрать язык
-Configuration_ListenPorts               POP3 порт
-Configuration_HistoryView               История
-Configuration_TCPTimeout                Таймаут TCP-соединения
-Configuration_TCPTimeoutSecs            Таймаут TCP-соединения в секундах
-Configuration_TCPTimeoutUpdate          Таймаут изменён на %s секунд
-Configuration_ClassificationInsertion   Куда записывать классификатор
-Configuration_SubjectLine               Записывать классификатор в тему письма
-Configuration_XTCInsertion              Добавлять поле X-Text-Classification в заголовок
-Configuration_XPLInsertion              Добавлять поле X-POPFile-Link в заголовок
-Configuration_Logging                   Логи
-Configuration_None                      Никуда
-Configuration_ToScreen                  На экран
-Configuration_ToFile                    В файл
-Configuration_ToScreenFile              На экран и в файл
-Configuration_LoggerOutput              Куда выводить лог
-
-Advanced_Error1                         '%s' уже есть в списке стоп-слов
-Advanced_Error2                         Стоп-слово может содержать буквы, цифры, и символы ., _, -, @
-Advanced_Error3                         Слово '%s' добавлено в список стоп-слов
-Advanced_Error4                         '%s' нет в списке стоп-слов
-Advanced_Error5                         Слово '%s' удалено из списка стоп-слов
-Advanced_StopWords                      Стоп-слова
-Advanced_Message1                       Эти слова игнорируются при классификации писем, поскольку встречаются очень часто.
-Advanced_AddWord                        Добавить слово
-Advanced_RemoveWord                     Удалить слово
-
-History_Filter                          &nbsp;(лежащие в ведре <font color="%s">%s</font>)
-History_Search                          &nbsp;(найденные по теме &laquo;i<em>%s</em>&raquo;)
-History_Title                           Последние обработанные письма
-History_Jump                            Перейти к письму
-History_ShowAll                         Показывать всё
-History_ShouldBe                        Должно быть в&nbsp;
-History_NoFrom                          не задан отправитель
-History_NoSubject                       не задана тема
-History_ClassifyAs                      Классифицировать как
-History_MagnetUsed                      Использовался магнит
-History_ChangedTo                       Изменено на <font color="%s">%s
-History_Already                         Уже переклассифицировано как <font color="%s">%s</font>
-History_RemoveAll                       Удалить всю историю
-History_RemovePage                      Удалить эту страницу
-History_Remove                          Чтобы удалить записи из истории нажмите
-History_SearchMessage                   Искать в поле <em>Тема</em>
-History_NoMessages                      Нет писем
-History_ShowMagnet                      Только примагниченные
-History_Magnet                          &nbsp;(среди классифицированных с помощью магнитов)
- 
-Password_Title                          Пароль
-Password_Enter                          Скажите пароль
-Password_Go                             Войти
-Password_Error1                         Пароль оказался неправильным
-
-Security_Error1                         Номер безопасного порта должен быть числом от 1 до 65535
-Security_Stealth                        Режим невидимости/Настройка сервера
-Security_NoStealthMode                  Нет (режим невидимости)
-Security_ExplainStats                   (Если включено, POPFile раз в день будет отправлять скрипту на www.usethesource.com три числа: bc (число ваших вёдер), mc (сколько писем было классифицировано с помощью POPFile) и ec (число ошибок классификации). Эти значения сохранятся в файле и автор будет использовать их для опубликования статистических данных о том, как используется POPFile и насколько хорошо он работает. Веб-сервер автора хранит логи в течение 5 дней, после чего они удаляются, автор не занимается сопоставлением статистики и IP-адресов пользователей.)
-Security_ExplainUpdate                  (Если включено, POPFile раз в день будет отправлять скрипту на www.usethesource.com три числа: ma (старший номер версии установленного POPFile), mi (младший номер версии) и bn (номер сборки). POPFile получит ответ от сервера в виде картинки, которая появится вверху страницы, если доступна новая версия. Веб-сервер автора хранит логи в течение 5 дней, после чего они удаляются, автор не занимается сопоставлением запросов об обновлении и IP-адресов пользователей.)
-Security_PasswordTitle                  Пароль для веб-интерфейса
-Security_Password                       Пароль
-Security_PasswordUpdate                 Пароль изменён на '%s'
-Security_AUTHTitle                      Secure Password Authentication/AUTH
-Security_SecureServer                   Безопасный сервер
-Security_SecureServerUpdate             Безопасным теперь считается сервер '%s'. Изменение вступит в силу только после перезапуска POPFile
-Security_SecurePort                     Безопасный порт
-Security_SecurePortUpdate               Безопасным теперь считается порт %s. Изменение вступит в силу только после перезапуска POPFile
-Security_POP3                           Разрешать POP3-соединения с удалёнными машинами
-Security_UI                             Разрешать HTTP-соединения (веб-интерфейс) с удалёнными машинами
-Security_UpdateTitle                    Автоматическое обновление
-Security_Update                         Ежедневно проверять, не обновился ли POPFile
-Security_StatsTitle                     Статистические отчёты
-Security_Stats                          Ежедневно отправлять статистику Джону
-
-Magnet_Error1                           Магнит '%s' уже существует в ведре '%s'
-Magnet_Error2                           Новый магнит '%s' совпадает с магнитом '%s' в ведре '%s' и может спровоцировать двусмысленные результаты. Новый магнит не был добавлен.
-Magnet_Error3                           Создан новый магнит '%s' в ведре '%s'
-Magnet_CurrentMagnets                   Существующие магниты
-Magnet_Message1                         Магниты позволяют складывать все подходящие к ним сообщения в указанные ведра.
-Magnet_CreateNew                        Создать новый магнит
-Magnet_Explanation                      Существует три типа магнитов:</b><ul><li><b>Адрес или имя отправителя:</b> например, &quot;john@company.com&quot; сработает для писем, пришедших с указанного адреса, <br />&quot;company.com&quot; сработает для любых писем, пришедших из company.com, <br />&quot;John Doe&quot; сработает если в поле &quot;Отправитель&quot; присутствует указанное имя, в то время как, &quot;John&quot; сработает для любых Джонов, написавших вам письмо</li><li> <b>Адрес или имя получателя:</b> работает как предыдущий, только оперирует полем &quot;Получатель&quot;</li><li> <b>Слова в теме письма:</b> например, &quot;hello&quot; сработает на всех письмах с этим приветствием в теме</li></ul>
-Magnet_MagnetType                       Тип магнита
-Magnet_Value                            Значение
-Magnet_Always                           Всегда складывать в ведро
-
-Bucket_Error1                           Название ведра может состоять из строчныхлатинских букв от 'a' до 'z' и знаков - и _
-Bucket_Error2                           Ведро '%s' уже существует
-Bucket_Error3                           Создано ведро '%s'
-Bucket_Error4                           Please enter a non-blank word
-Bucket_Error5                           Ведро '%s' переименовано в '%s'
-Bucket_Error6                           Удалено ведро '%s'
-Bucket_Title                            Отчёт
-Bucket_BucketName                       Название ведра
-Bucket_WordCount                        Количество слов
-Bucket_WordCounts                       Слова
-Bucket_UniqueWords                      Уникальных слов
-Bucket_SubjectModification              Изменение темы письма
-Bucket_ChangeColor                      Изменить цвет
-Bucket_NotEnoughData                    Недостаточно данных
-Bucket_ClassificationAccuracy           Точность классификации
-Bucket_EmailsClassified                 Классифицированные письма
-Bucket_EmailsClassifiedUpper            Классифицированные письма
-Bucket_ClassificationErrors             Ошибки классификации
-Bucket_Accuracy                         Точность
-Bucket_ClassificationCount              Классифицировано
-Bucket_ResetStatistics                  Сброс статистики
-Bucket_LastReset                        Последний сброс был
-Bucket_CurrentColor                     %s текущий цвет&nbsp;&mdash; %s
-Bucket_SetColorTo                       Установить %s цвет в %s
-Bucket_Maintenance                      Управление
-Bucket_CreateBucket                     Создать ведро
-Bucket_DeleteBucket                     Удалить ведро
-Bucket_RenameBucket                     Переименовать ведро
-Bucket_Lookup                           Поиск
-Bucket_LookupMessage                    Искать слово в вёдрах
-Bucket_LookupMessage2                   Результаты поиска
-Bucket_LookupMostLikely                 <b>%s</b> чаще всего встречается в <font color="%s">%s</font>
-Bucket_DoesNotAppear                    <p><b>%s</b> не встречается ни в одном из вёдер
-Bucket_DisabledGlobally                 Выключено глобально
-Bucket_To                               в
-Bucket_Quarantine                       Карантин
-
-SingleBucket_Title                      Подробнее о %s
-SingleBucket_WordCount                  Слов в ведре
-SingleBucket_TotalWordCount             Слов вообще
-SingleBucket_Percentage                 Процентов от всего
-SingleBucket_WordTable                  Таблица слов для %s
-SingleBucket_Message1                   Слова со звёздочкой (*) были использованы при классификации в этой сессии POPFile. Щёлкните мышкой на любом слове, и вы увидите его вероятность для всех вёдер.
-SingleBucket_Unique                     %s уникально
-
-Session_Title                           Сессия POPFile устарела
-Session_Error                           Ваша сессия POPFile устарела. Обычно такое случается, если если остановить и снова запустит POPFile, а в броузере оставить открытым &laquo;Центр управления&raquo;. Пожалуйста, щёлкните по любой ссылке сверху, чтобы продолжить работу с POPFile.
+DQojIPDSySDQxdLF18/ExSDOwSDS1dPTy8nKINHa2csg19PQzNnMySDTwc3ZxSDSwdrO2cUg
+z9vJwsvJIMkgzsXEz96j1NkNCiMg08HNz8fPINfFwi3JztTF0sbFytPBIC0tINPMydvLz80g
+zc7Px8/FIM7BzcXS1NfPINrB28nUzyDXIMvPxC4NCiMg5dPMySDRIMkgxMHM2NvFIMLVxNUg
+0M/M2NrP18HU2NPRIFBPUEZpbGUsINEg0M/T1MHSwcDT2CDOwcrUySDX0sXN0Q0KIyDP1MTF
+zMnU2CDJztTF0sbFytMgz9Qgy8/EwSwgySDBxMHQ1MnSz9fB1Nggyc7UxdLGxcrTIMsg0tXT
+08vPzdUNCiMg0drZy9UuDQojDQojIPDSxcTMz9bFzsnRIMkg2sHNxd7BzsnRINMgwszBx8/E
+wdLOz9PU2MAg0NLJzsnNwcDU09Eg0M8g3MzFy9TSz87Oz8oNCiMg0M/e1MU6IGFsZXhhbmRl
+ciBzYWx0YW5vdiA8YXNkZ3JheS5hdC55YW5kZXgucnU+DQoNCiMgSWRlbnRpZnkgdGhlIGxh
+bmd1YWdlIGFuZCBjaGFyYWN0ZXIgc2V0IHVzZWQgZm9yIHRoZSBpbnRlcmZhY2UNCkxhbmd1
+YWdlQ29kZSAgICAgICAgICAgICAgICAgICAgICAgICAgICBydQ0KTGFuZ3VhZ2VDaGFyc2V0
+ICAgICAgICAgICAgICAgICAgICAgICAgIGtvaTgtcg0KDQojIFRoaXMgaXMgdXNlZCB0byBn
+ZXQgdGhlIGFwcHJvcHJpYXRlIHN1YmRpcmVjdG9yeSBmb3IgdGhlIG1hbnVhbA0KTWFudWFs
+TGFuZ3VhZ2UgICAgICAgICAgICAgICAgICAgICAgICAgIGVuDQoNCiMgQ29tbW9uIHdvcmRz
+IHRoYXQgYXJlIHVzZWQgb24gdGhlaXIgb3duIGFsbCBvdmVyIHRoZSBpbnRlcmZhY2UNCkFw
+cGx5ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICD6wdDPzc7J1NgNCk9uICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICD3y8wuDQpPZmYgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAg99nLzC4NClR1cm5PbiAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICD3y8zA3snU2A0KVHVybk9mZiAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgIPfZy8zA3snU2A0KQWRkICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgIOTPwsHXydTYDQpSZW1vdmUgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAg9cTBzMnU2A0KUHJldmlvdXMgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgIPDSxcTZxNXdycoNCk5leHQgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICDzzMXE1cDdycoNCkZyb20gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDv
+1NDSwdfJ1MXM2A0KU3ViamVjdCAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIPTF
+zcENCkNsYXNzaWZpY2F0aW9uICAgICAgICAgICAgICAgICAgICAgICAgICDrzMHT08nGycvB
+w8nRDQpSZWNsYXNzaWZ5ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg8MXSxcvMwdPT
+ycbJw8nSz9fB1NgNClVuZG8gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDv
+1M3FzsnU2A0KQ2xvc2UgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIPrBy9LZ
+1NgNCkZpbmQgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDuwcrUyQ0KRmls
+dGVyICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIPfZwtLB1NgNClllcyAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICDkwQ0KTm8gICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgIO7F1A0KQ2hhbmdlVG9ZZXMgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgIOnazcXOydTYIM7BICZsYXF1bzvkwSZyYXF1bzsNCkNoYW5nZVRvTm8g
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICDp2s3FzsnU2CDOwSAmbGFxdW877sXUJnJh
+cXVvOw0KQnVja2V0ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIPfFxNLPDQpN
+YWduZXQgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg7cHHzsnUDQpEZWxldGUg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg9cTBzMnU2A0KQ3JlYXRlICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgIPPP2sTB1NgNClRvICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICDwz8zV3sHUxczYDQpUb3RhbCAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAg99PFx88NClJlbmFtZSAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICDwxdLFyc3Fzs/XwdTYDQpGcmVxdWVuY3kgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAg/sHT1M/UwQ0KUHJvYmFiaWxpdHkgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgIPfF0s/R1M7P09TYDQpTY29yZSAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAg896j1A0KTG9va3VwICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+IOnTy8HU2A0KDQojIFRoZSBoZWFkZXIgYW5kIGZvb3RlciB0aGF0IGFwcGVhciBvbiBldmVy
+eSBVSSBwYWdlDQpIZWFkZXJfVGl0bGUgICAgICAgICAgICAgICAgICAgICAgICAgICAg48XO
+1NIg1dDSwdfMxc7J0SBQT1BGaWxlDQpIZWFkZXJfU2h1dGRvd24gICAgICAgICAgICAgICAg
+ICAgICAgICAg99nLzMDeydTYIFBPUEZpbGUNCkhlYWRlcl9IaXN0b3J5ICAgICAgICAgICAg
+ICAgICAgICAgICAgICDp09TP0snRDQpIZWFkZXJfQnVja2V0cyAgICAgICAgICAgICAgICAg
+ICAgICAgICAg96PE0sENCkhlYWRlcl9Db25maWd1cmF0aW9uICAgICAgICAgICAgICAgICAg
+ICDuwdPU0s/Ky8ENCkhlYWRlcl9BZHZhbmNlZCAgICAgICAgICAgICAgICAgICAgICAgICDz
+1M/QLdPMz9fBDQpIZWFkZXJfU2VjdXJpdHkgICAgICAgICAgICAgICAgICAgICAgICAg4sXa
+z9DB087P09TYDQpIZWFkZXJfTWFnbmV0cyAgICAgICAgICAgICAgICAgICAgICAgICAg7cHH
+zsnU2Q0KDQpGb290ZXJfSG9tZVBhZ2UgICAgICAgICAgICAgICAgICAgICAgICAg89TSwc7J
+3svBIFBPUEZpbGUg1yDpztTF0s7F1MUNCkZvb3Rlcl9NYW51YWwgICAgICAgICAgICAgICAg
+ICAgICAgICAgICDy1cvP18/E09TXzyDQz8zY2s/XwdTFzNENCkZvb3Rlcl9Gb3J1bXMgICAg
+ICAgICAgICAgICAgICAgICAgICAgICDmz9LVzdkNCkZvb3Rlcl9GZWVkTWUgICAgICAgICAg
+ICAgICAgICAgICAgICAgICDuwcvP0s3J1MUgwdfUz9LBIQ0KRm9vdGVyX1JlcXVlc3RGZWF0
+dXJlICAgICAgICAgICAgICAgICAgIO7V1s7BIM7P18HRIMbVzsvDydE/DQpGb290ZXJfTWFp
+bGluZ0xpc3QgICAgICAgICAgICAgICAgICAgICAg89DJ08/LINLB09PZzMvJDQoNCkNvbmZp
+Z3VyYXRpb25fRXJyb3IxICAgICAgICAgICAgICAgICAgICDywdrExczJ1MXM2CDEz8zWxc4g
+wtnU2CA8c3Rvbmc+z8TOyc08L3N0cm9uZz4g08nN18/Mz80NCkNvbmZpZ3VyYXRpb25fRXJy
+b3IyICAgICAgICAgICAgICAgICAgICDuz83F0iDQz9LUwSDEzNEgd2ViLcnO1MXSxsXK08Eg
+xM/M1sXOIMLZ1Ngg3snTzM/NIM/UIDEgxM8gNjU1MzUNCkNvbmZpZ3VyYXRpb25fRXJyb3Iz
+ICAgICAgICAgICAgICAgICAgICDuz83F0iDQz9LUwSBQT1AzIMTPzNbFziDC2dTYIN7J08zP
+zSDP1CAxIMTPIDY1NTM1DQpDb25maWd1cmF0aW9uX0Vycm9yNCAgICAgICAgICAgICAgICAg
+ICAg8sHazcXSINPU0sHOycPZIMTPzNbFziDC2dTYIN7J08zPzSDP1CAxIMTPIDEwMDANCkNv
+bmZpZ3VyYXRpb25fRXJyb3I1ICAgICAgICAgICAgICAgICAgICD+ydPMzyDEzsXKIMnT1M/S
+yckgxM/M1s7PIMLZ1Ngg3snTzM/NIM/UIDEgxM8gMzY2DQpDb25maWd1cmF0aW9uX0Vycm9y
+NiAgICAgICAgICAgICAgICAgICAg+s7B3sXOycUg1MHKzcHV1MEgVENQIMTPzNbOzyDC2dTY
+IN7J08zPzSDP1CAxMCDEzyAzMDANCkNvbmZpZ3VyYXRpb25fUE9QM1BvcnQgICAgICAgICAg
+ICAgICAgICDzzNXbwdTYIFBPUDMg0M/S1A0KQ29uZmlndXJhdGlvbl9QT1AzVXBkYXRlICAg
+ICAgICAgICAgICAgIO7PzcXSINDP0tTBIMnazcXOo84gzsEgJXM7IMnazcXOxc7J0SDX09TV
+0NHUINcg08nM1SDQz9PMxSDQxdLF2sHQ1dPLwSBQT1BGaWxlDQpDb25maWd1cmF0aW9uX1Nl
+cGFyYXRvciAgICAgICAgICAgICAgICAg8sHaxMXMydTFzNgNCkNvbmZpZ3VyYXRpb25fU2Vw
+VXBkYXRlICAgICAgICAgICAgICAgICDywdrExczJ1MXM2CDJ2s3FzqPOIM7BICVzDQpDb25m
+aWd1cmF0aW9uX1VJICAgICAgICAgICAgICAgICAgICAgICAg8M/S1CDXxcItyc7UxdLGxcrT
+wQ0KQ29uZmlndXJhdGlvbl9VSVVwZGF0ZSAgICAgICAgICAgICAgICAgIO7PzcXSINDP0tTB
+INfFwi3JztTF0sbFytPBIMnazcXOo84gzsEgJXM7IMnazcXOxc7J0SDX09TV0NHUINcg08nM
+1SDQz9PMxSDQxdLF2sHQ1dPLwSBQT1BGaWxlDQpDb25maWd1cmF0aW9uX0hpc3RvcnkgICAg
+ICAgICAgICAgICAgICAg88vPzNjLzyDQydPFzSDQz8vB2tnXwdTYIM7BIM/Ezs/KINPU0sHO
+ycPFDQpDb25maWd1cmF0aW9uX0hpc3RvcnlVcGRhdGUgICAgICAgICAgICAg9MXQxdLYIM7B
+INPU0sHOycPFIMLVxMXUINDPy8Ha2dfB1NjT0SAlcyDQydPFzQ0KQ29uZmlndXJhdGlvbl9E
+YXlzICAgICAgICAgICAgICAgICAgICAgIPPLz8zYy88gxM7FyiDI0sHOydTYIMnT1M/SycAN
+CkNvbmZpZ3VyYXRpb25fRGF5c1VwZGF0ZSAgICAgICAgICAgICAgICD0xdDF0tggydPUz9LJ
+0SDC1cTF1CDI0sHOydTY09EgJXMgxM7Fyg0KQ29uZmlndXJhdGlvbl9Vc2VySW50ZXJmYWNl
+ICAgICAgICAgICAgIPfFwi3JztTF0sbFytMNCkNvbmZpZ3VyYXRpb25fU2tpbnMgICAgICAg
+ICAgICAgICAgICAgICDvxs/SzczFzsnFDQpDb25maWd1cmF0aW9uX1NraW5zQ2hvb3NlICAg
+ICAgICAgICAgICAg99nC0sHU2CDXwdLJwc7UIM/Gz9LNzMXOydENCkNvbmZpZ3VyYXRpb25f
+TGFuZ3VhZ2UgICAgICAgICAgICAgICAgICDx2tnLDQpDb25maWd1cmF0aW9uX0xhbmd1YWdl
+Q2hvb3NlICAgICAgICAgICAg99nC0sHU2CDR2tnLDQpDb25maWd1cmF0aW9uX0xpc3RlblBv
+cnRzICAgICAgICAgICAgICAgUE9QMyDQz9LUDQpDb25maWd1cmF0aW9uX0hpc3RvcnlWaWV3
+ICAgICAgICAgICAgICAg6dPUz9LJ0Q0KQ29uZmlndXJhdGlvbl9UQ1BUaW1lb3V0ICAgICAg
+ICAgICAgICAgIPTBys3B1dQgVENQLdPPxcTJzsXOydENCkNvbmZpZ3VyYXRpb25fVENQVGlt
+ZW91dFNlY3MgICAgICAgICAgICD0wcrNwdXUIFRDUC3Tz8XEyc7FzsnRINcg08XL1c7EwcgN
+CkNvbmZpZ3VyYXRpb25fVENQVGltZW91dFVwZGF0ZSAgICAgICAgICD0wcrNwdXUIMnazcXO
+o84gzsEgJXMg08XL1c7EDQpDb25maWd1cmF0aW9uX0NsYXNzaWZpY2F0aW9uSW5zZXJ0aW9u
+ICAg69XEwSDawdDJ09nXwdTYIMvMwdPTycbJy8HUz9INCkNvbmZpZ3VyYXRpb25fU3ViamVj
+dExpbmUgICAgICAgICAgICAgICD6wdDJ09nXwdTYIMvMwdPTycbJy8HUz9Ig1yDUxc3VINDJ
+09jNwQ0KQ29uZmlndXJhdGlvbl9YVENJbnNlcnRpb24gICAgICAgICAgICAgIOTPwsHXzNHU
+2CDQz8zFIFgtVGV4dC1DbGFzc2lmaWNhdGlvbiDXINrBx8/Mz9fPyw0KQ29uZmlndXJhdGlv
+bl9YUExJbnNlcnRpb24gICAgICAgICAgICAgIOTPwsHXzNHU2CDQz8zFIFgtUE9QRmlsZS1M
+aW5rINcg2sHHz8zP18/LDQpDb25maWd1cmF0aW9uX0xvZ2dpbmcgICAgICAgICAgICAgICAg
+ICAg7M/HyQ0KQ29uZmlndXJhdGlvbl9Ob25lICAgICAgICAgICAgICAgICAgICAgIO7Jy9XE
+wQ0KQ29uZmlndXJhdGlvbl9Ub1NjcmVlbiAgICAgICAgICAgICAgICAgIO7BINzL0sHODQpD
+b25maWd1cmF0aW9uX1RvRmlsZSAgICAgICAgICAgICAgICAgICAg9yDGwcrMDQpDb25maWd1
+cmF0aW9uX1RvU2NyZWVuRmlsZSAgICAgICAgICAgICAg7sEg3MvSwc4gySDXIMbByswNCkNv
+bmZpZ3VyYXRpb25fTG9nZ2VyT3V0cHV0ICAgICAgICAgICAgICDr1cTBINfZ18/EydTYIMzP
+xw0KDQpBZHZhbmNlZF9FcnJvcjEgICAgICAgICAgICAgICAgICAgICAgICAgJyVzJyDV1sUg
+xdPU2CDXINPQydPLxSDT1M/QLdPMz9cNCkFkdmFuY2VkX0Vycm9yMiAgICAgICAgICAgICAg
+ICAgICAgICAgICDz1M/QLdPMz9fPIM3P1sXUINPPxMXS1sHU2CDC1cvX2Swgw8nG0tksIMkg
+08nN18/M2SAuLCBfLCAtLCBADQpBZHZhbmNlZF9FcnJvcjMgICAgICAgICAgICAgICAgICAg
+ICAgICAg88zP188gJyVzJyDEz8LB18zFzs8g1yDT0MnTz8sg09TP0C3TzM/XDQpBZHZhbmNl
+ZF9FcnJvcjQgICAgICAgICAgICAgICAgICAgICAgICAgJyVzJyDOxdQg1yDT0MnTy8Ug09TP
+0C3TzM/XDQpBZHZhbmNlZF9FcnJvcjUgICAgICAgICAgICAgICAgICAgICAgICAg88zP188g
+JyVzJyDVxMHMxc7PIMnaINPQydPLwSDT1M/QLdPMz9cNCkFkdmFuY2VkX1N0b3BXb3JkcyAg
+ICAgICAgICAgICAgICAgICAgICDz1M/QLdPMz9fBDQpBZHZhbmNlZF9NZXNzYWdlMSAgICAg
+ICAgICAgICAgICAgICAgICAg/NTJINPMz9fBIMnHzs/SydLVwNTT0SDQ0skgy8zB09PJxsnL
+wcPJySDQydPFzSwg0M/Ty8/M2MvVINfT1NLF3sHA1NPRIM/exc7YIN7B09TPLg0KQWR2YW5j
+ZWRfQWRkV29yZCAgICAgICAgICAgICAgICAgICAgICAgIOTPwsHXydTYINPMz9fPDQpBZHZh
+bmNlZF9SZW1vdmVXb3JkICAgICAgICAgICAgICAgICAgICAg9cTBzMnU2CDTzM/Xzw0KDQpI
+aXN0b3J5X0ZpbHRlciAgICAgICAgICAgICAgICAgICAgICAgICAgJm5ic3A7KMzF1sHdycUg
+1yDXxcTSxSA8Zm9udCBjb2xvcj0iJXMiPiVzPC9mb250PikNCkhpc3RvcnlfRmlsdGVyQnkg
+ICAgICAgICAgICAgICAgICAgICAgICBGaWx0ZXIgQnkNCkhpc3RvcnlfU2VhcmNoICAgICAg
+ICAgICAgICAgICAgICAgICAgICAmbmJzcDsozsHKxMXOztnFINDPINTFzcUgJmxhcXVvO2k8
+ZW0+JXM8L2VtPiZyYXF1bzspDQpIaXN0b3J5X1RpdGxlICAgICAgICAgICAgICAgICAgICAg
+ICAgICAg8M/TzMXEzsnFIM/C0sHCz9TBzs7ZxSDQydPYzcENCkhpc3RvcnlfSnVtcCAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICDwxdLFytTJIMsg0MnT2M3VDQpIaXN0b3J5X1Nob3dB
+bGwgICAgICAgICAgICAgICAgICAgICAgICAg8M/LwdrZ18HU2CDX06MNCkhpc3RvcnlfU2hv
+dWxkQmUgICAgICAgICAgICAgICAgICAgICAgICDkz8zWzs8gwtnU2CDXJm5ic3A7DQpIaXN0
+b3J5X05vRnJvbSAgICAgICAgICAgICAgICAgICAgICAgICAgzsUg2sHEwc4gz9TQ0sHXydTF
+zNgNCkhpc3RvcnlfTm9TdWJqZWN0ICAgICAgICAgICAgICAgICAgICAgICDOxSDawcTBzsEg
+1MXNwQ0KSGlzdG9yeV9DbGFzc2lmeUFzICAgICAgICAgICAgICAgICAgICAgIOvMwdPTycbJ
+w8nSz9fB1Nggy8HLDQpIaXN0b3J5X01hZ25ldFVzZWQgICAgICAgICAgICAgICAgICAgICAg
+6dPQz8zY2s/XwczT0SDNwcfOydQNCkhpc3RvcnlfQ2hhbmdlZFRvICAgICAgICAgICAgICAg
+ICAgICAgICDp2s3FzsXOzyDOwSA8Zm9udCBjb2xvcj0iJXMiPiVzDQpIaXN0b3J5X0FscmVh
+ZHkgICAgICAgICAgICAgICAgICAgICAgICAg9dbFINDF0sXLzMHT08nGycPJ0s/Xwc7PIMvB
+yyA8Zm9udCBjb2xvcj0iJXMiPiVzPC9mb250Pg0KSGlzdG9yeV9SZW1vdmVBbGwgICAgICAg
+ICAgICAgICAgICAgICAgIPXEwczJ1Ngg19PAIMnT1M/SycANCkhpc3RvcnlfUmVtb3ZlUGFn
+ZSAgICAgICAgICAgICAgICAgICAgICD1xMHMydTYINzU1SDT1NLBzsnD1Q0KSGlzdG9yeV9S
+ZW1vdmUgICAgICAgICAgICAgICAgICAgICAgICAgIP7Uz8LZINXEwczJ1Ngg2sHQydPJIMna
+IMnT1M/SyckgzsHWzcnUxQ0KSGlzdG9yeV9TZWFyY2hNZXNzYWdlICAgICAgICAgICAgICAg
+ICAgIOnTy8HU2CDXINDPzMUgPGVtPvTFzcE8L2VtPg0KSGlzdG9yeV9Ob01lc3NhZ2VzICAg
+ICAgICAgICAgICAgICAgICAgIO7F1CDQydPFzQ0KSGlzdG9yeV9TaG93TWFnbmV0ICAgICAg
+ICAgICAgICAgICAgICAgIPTPzNjLzyDQ0snNwcfOyd7Fzs7ZxQ0KSGlzdG9yeV9NYWduZXQg
+ICAgICAgICAgICAgICAgICAgICAgICAgICZuYnNwOyjT0sXEySDLzMHT08nGycPJ0s/Xwc7O
+2cgg0yDQz83P3djAIM3Bx87J1M/XKQ0KIA0KUGFzc3dvcmRfVGl0bGUgICAgICAgICAgICAg
+ICAgICAgICAgICAgIPDB0s/M2A0KUGFzc3dvcmRfRW50ZXIgICAgICAgICAgICAgICAgICAg
+ICAgICAgIPPLwdbJ1MUg0MHSz8zYDQpQYXNzd29yZF9HbyAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAg98/K1MkNClBhc3N3b3JkX0Vycm9yMSAgICAgICAgICAgICAgICAgICAgICAg
+ICDwwdLPzNggz8vB2sHM09EgzsXQ0sHXyczYztnNDQoNClNlY3VyaXR5X0Vycm9yMSAgICAg
+ICAgICAgICAgICAgICAgICAgICDuz83F0iDCxdrP0MHTzs/HzyDQz9LUwSDEz8zWxc4gwtnU
+2CDeydPMz80gz9QgMSDEzyA2NTUzNQ0KU2VjdXJpdHlfU3RlYWx0aCAgICAgICAgICAgICAg
+ICAgICAgICAgIPLF1snNIM7F18nEyc3P09TJL+7B09TSz8rLwSDTxdLXxdLBDQpTZWN1cml0
+eV9Ob1N0ZWFsdGhNb2RlICAgICAgICAgICAgICAgICAg7sXUICjSxdbJzSDOxdfJxMnNz9PU
+ySkNClNlY3VyaXR5X0V4cGxhaW5TdGF0cyAgICAgICAgICAgICAgICAgICAo5dPMySDXy8zA
+3sXOzywgUE9QRmlsZSDSwdog1yDExc7YIMLVxMXUIM/U0NLB18zR1Ngg08vSydDU1SDOwSB3
+d3cudXNldGhlc291cmNlLmNvbSDU0skg3snTzME6IGJjICjeydPMzyDXwdvJyCDXo8TF0iks
+IG1jICjTy8/M2MvPINDJ08XNIMLZzM8gy8zB09PJxsnDydLP18HOzyDTINDPzc/d2MAgUE9Q
+RmlsZSkgySBlYyAo3snTzM8gz9vJws/LIMvMwdPTycbJy8HDyckpLiD81Mkg2s7B3sXOydEg
+08/I0sHO0dTT0SDXIMbByszFIMkgwdfUz9IgwtXExdQgydPQz8zY2s/XwdTYIMnIIMTM0SDP
+0NXCzMnLz9fBzsnRINPUwdTJ09TJ3sXTy8nIIMTBzs7ZyCDPINTPzSwgy8HLIMnT0M/M2NrV
+xdTT0SBQT1BGaWxlIMkgzsHTy8/M2MvPIMjP0s/bzyDPziDSwcLP1MHF1C4g98XCLdPF0tfF
+0iDB19TP0sEgyNLBzsnUIMzPx8kg1yDUxd7FzsnFIDUgxM7Fyiwg0M/TzMUg3sXHzyDPzskg
+1cTBzNHA1NPRLCDB19TP0iDOxSDawc7JzcHF1NPRINPP0M/T1MHXzMXOycXNINPUwdTJ09TJ
+y8kgySBJUC3BxNLF08/XINDPzNjaz9fB1MXMxcouKQ0KU2VjdXJpdHlfRXhwbGFpblVwZGF0
+ZSAgICAgICAgICAgICAgICAgICjl08zJINfLzMDexc7PLCBQT1BGaWxlINLB2iDXIMTFztgg
+wtXExdQgz9TQ0sHXzNHU2CDTy9LJ0NTVIM7BIHd3dy51c2V0aGVzb3VyY2UuY29tINTSySDe
+ydPMwTogbWEgKNPUwdLbycogzs/NxdIg18XS08nJINXT1MHOz9fMxc7Oz8fPIFBPUEZpbGUp
+LCBtaSAozczBxNvJyiDOz83F0iDXxdLTyckpIMkgYm4gKM7PzcXSINPCz9LLySkuIFBPUEZp
+bGUg0M/M1d7J1CDP1NfF1CDP1CDTxdLXxdLBINcg18nExSDLwdLUyc7LySwgy8/Uz9LB0SDQ
+z9HXydTT0SDX18XSyNUg09TSwc7Jw9ksIMXTzMkgxM/T1NXQzsEgzs/XwdEg18XS08nRLiD3
+xcIt08XS18XSIMHX1M/SwSDI0sHOydQgzM/HySDXINTF3sXOycUgNSDEzsXKLCDQz9PMxSDe
+xcfPIM/OySDVxMHM0cDU09EsIMHX1M/SIM7FINrBzsnNwcXU09Eg08/Qz9PUwdfMxc7Jxc0g
+2sHQ0s/Tz9cgz8Igz8LOz9fMxc7JySDJIElQLcHE0sXTz9cg0M/M2NrP18HUxczFyi4pDQpT
+ZWN1cml0eV9QYXNzd29yZFRpdGxlICAgICAgICAgICAgICAgICAg8MHSz8zYIMTM0SDXxcIt
+yc7UxdLGxcrTwQ0KU2VjdXJpdHlfUGFzc3dvcmQgICAgICAgICAgICAgICAgICAgICAgIPDB
+0s/M2A0KU2VjdXJpdHlfUGFzc3dvcmRVcGRhdGUgICAgICAgICAgICAgICAgIPDB0s/M2CDJ
+2s3FzqPOIM7BICclcycNClNlY3VyaXR5X0FVVEhUaXRsZSAgICAgICAgICAgICAgICAgICAg
+ICBTZWN1cmUgUGFzc3dvcmQgQXV0aGVudGljYXRpb24vQVVUSA0KU2VjdXJpdHlfU2VjdXJl
+U2VydmVyICAgICAgICAgICAgICAgICAgIOLF2s/QwdPO2cog08XS18XSDQpTZWN1cml0eV9T
+ZWN1cmVTZXJ2ZXJVcGRhdGUgICAgICAgICAgICAg4sXaz9DB087ZzSDUxdDF0tgg097J1MHF
+1NPRINPF0tfF0iAnJXMnLiDp2s3FzsXOycUg19PU1dDJ1CDXINPJzNUg1M/M2MvPINDP08zF
+INDF0sXawdDV08vBIFBPUEZpbGUNClNlY3VyaXR5X1NlY3VyZVBvcnQgICAgICAgICAgICAg
+ICAgICAgICDixdrP0MHTztnKINDP0tQNClNlY3VyaXR5X1NlY3VyZVBvcnRVcGRhdGUgICAg
+ICAgICAgICAgICDixdrP0MHTztnNINTF0MXS2CDT3snUwcXU09Eg0M/S1CAlcy4g6drNxc7F
+zsnFINfT1NXQydQg1yDTyczVINTPzNjLzyDQz9PMxSDQxdLF2sHQ1dPLwSBQT1BGaWxlDQpT
+ZWN1cml0eV9QT1AzICAgICAgICAgICAgICAgICAgICAgICAgICAg8sHa0sXbwdTYIFBPUDMt
+08/FxMnOxc7J0SDTINXEwcyjzs7ZzckgzcHbyc7BzckNClNlY3VyaXR5X1VJICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICDywdrSxdvB1NggSFRUUC3Tz8XEyc7FzsnRICjXxcItyc7U
+xdLGxcrTKSDTINXEwcyjzs7ZzckgzcHbyc7BzckNClNlY3VyaXR5X1VwZGF0ZVRpdGxlICAg
+ICAgICAgICAgICAgICAgICDh19TPzcHUyd7F08vPxSDPws7P18zFzsnFDQpTZWN1cml0eV9V
+cGRhdGUgICAgICAgICAgICAgICAgICAgICAgICAg5dbFxM7F187PINDSz9fF0tHU2CwgzsUg
+z8LOz9fJzNPRIMzJIFBPUEZpbGUNClNlY3VyaXR5X1N0YXRzVGl0bGUgICAgICAgICAgICAg
+ICAgICAgICDz1MHUydPUyd7F08vJxSDP1N6j1NkNClNlY3VyaXR5X1N0YXRzICAgICAgICAg
+ICAgICAgICAgICAgICAgICDl1sXEzsXXzs8gz9TQ0sHXzNHU2CDT1MHUydPUycvVIOTWz87V
+DQoNCk1hZ25ldF9FcnJvcjEgICAgICAgICAgICAgICAgICAgICAgICAgICDtwcfOydQgJyVz
+JyDV1sUg09XdxdPU19XF1CDXINfFxNLFICclcycNCk1hZ25ldF9FcnJvcjIgICAgICAgICAg
+ICAgICAgICAgICAgICAgICDuz9fZyiDNwcfOydQgJyVzJyDTz9fQwcTBxdQg0yDNwcfOydTP
+zSAnJXMnINcg18XE0sUgJyVzJyDJIM3P1sXUINPQ0s/Xz8PJ0s/XwdTYIMTX1dPN2dPMxc7O
+2cUg0sXa1czY1MHU2S4g7s/X2cogzcHHzsnUIM7FIMLZzCDEz8LB18zFzi4NCk1hZ25ldF9F
+cnJvcjMgICAgICAgICAgICAgICAgICAgICAgICAgICDzz9rEwc4gzs/X2cogzcHHzsnUICcl
+cycg1yDXxcTSxSAnJXMnDQpNYWduZXRfQ3VycmVudE1hZ25ldHMgICAgICAgICAgICAgICAg
+ICAg89XdxdPU19XA3cnFIM3Bx87J1NkNCk1hZ25ldF9NZXNzYWdlMSAgICAgICAgICAgICAg
+ICAgICAgICAgICDtwcfOydTZINDP2tfPzNHA1CDTy8zBxNnXwdTYINfTxSDQz8TIz8TR3cnF
+IMsgzsnNINPPz8Ldxc7J0SDXINXLwdrBzs7ZxSDXxcTSwS4NCk1hZ25ldF9DcmVhdGVOZXcg
+ICAgICAgICAgICAgICAgICAgICAgICDzz9rEwdTYIM7P19nKIM3Bx87J1A0KTWFnbmV0X0V4
+cGxhbmF0aW9uICAgICAgICAgICAgICAgICAgICAgIPPV3cXT1NfVxdQg1NLJINTJ0MEgzcHH
+zsnUz9c6PC9iPjx1bD48bGk+PGI+4cTSxdMgyczJIMnN0SDP1NDSwdfJ1MXM0To8L2I+IM7B
+0NLJzcXSLCAmcXVvdDtqb2huQGNvbXBhbnkuY29tJnF1b3Q7INPSwcLP1MHF1CDEzNEg0MnT
+xc0sINDSydvFxNvJyCDTINXLwdrBzs7Px88gwcTSxdPBLCA8YnIgLz4mcXVvdDtjb21wYW55
+LmNvbSZxdW90OyDT0sHCz9TBxdQgxMzRIMzAwtnIINDJ08XNLCDQ0snbxcTbycggydogY29t
+cGFueS5jb20sIDxiciAvPiZxdW90O0pvaG4gRG9lJnF1b3Q7INPSwcLP1MHF1CDF08zJINcg
+0M/MxSAmcXVvdDvv1NDSwdfJ1MXM2CZxdW90OyDQ0snT1dTT1NfVxdQg1cvB2sHOzs/FIMnN
+0Swg1yDUzyDX0sXN0SDLwcssICZxdW90O0pvaG4mcXVvdDsg09LBws/UwcXUIMTM0SDMwMLZ
+yCDk1s/Oz9csIM7B0MnTwdfbycgg18HNINDJ09jNzzwvbGk+PGxpPiA8Yj7hxNLF0yDJzMkg
+yc3RINDPzNXewdTFzNE6PC9iPiDSwcLP1MHF1CDLwcsg0NLFxNnE1d3Jyiwg1M/M2MvPIM/Q
+xdLJ0tXF1CDQz8zFzSAmcXVvdDvwz8zV3sHUxczYJnF1b3Q7PC9saT48bGk+IDxiPvPMz9fB
+INcg1MXNxSDQydPYzcE6PC9iPiDOwdDSyc3F0iwgJnF1b3Q7aGVsbG8mcXVvdDsg09LBws/U
+wcXUIM7BINfTxcgg0MnT2M3ByCDTINzUyc0g0NLJ18XU09TXycXNINcg1MXNxTwvbGk+PC91
+bD4NCk1hZ25ldF9NYWduZXRUeXBlICAgICAgICAgICAgICAgICAgICAgICD0ydAgzcHHzsnU
+wQ0KTWFnbmV0X1ZhbHVlICAgICAgICAgICAgICAgICAgICAgICAgICAgIPrOwd7FzsnFDQpN
+YWduZXRfQWx3YXlzICAgICAgICAgICAgICAgICAgICAgICAgICAg99PFx8TBINPLzMHE2dfB
+1Ngg1yDXxcTSzw0KDQpCdWNrZXRfRXJyb3IxICAgICAgICAgICAgICAgICAgICAgICAgICAg
+7sHa18HOycUg18XE0sEgzc/WxdQg08/T1M/R1Nggydog09TSz97O2cjMwdTJztPLycggwtXL
+1yDP1CAnYScgxM8gJ3onIMkg2s7By8/XIC0gySBfDQpCdWNrZXRfRXJyb3IyICAgICAgICAg
+ICAgICAgICAgICAgICAgICAg98XE0s8gJyVzJyDV1sUg09XdxdPU19XF1A0KQnVja2V0X0Vy
+cm9yMyAgICAgICAgICAgICAgICAgICAgICAgICAgIPPP2sTBzs8g18XE0s8gJyVzJw0KQnVj
+a2V0X0Vycm9yNCAgICAgICAgICAgICAgICAgICAgICAgICAgIFBsZWFzZSBlbnRlciBhIG5v
+bi1ibGFuayB3b3JkDQpCdWNrZXRfRXJyb3I1ICAgICAgICAgICAgICAgICAgICAgICAgICAg
+98XE0s8gJyVzJyDQxdLFyc3Fzs/Xwc7PINcgJyVzJw0KQnVja2V0X0Vycm9yNiAgICAgICAg
+ICAgICAgICAgICAgICAgICAgIPXEwczFzs8g18XE0s8gJyVzJw0KQnVja2V0X1RpdGxlICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgIO/U3qPUDQpCdWNrZXRfQnVja2V0TmFtZSAgICAg
+ICAgICAgICAgICAgICAgICAg7sHa18HOycUg18XE0sENCkJ1Y2tldF9Xb3JkQ291bnQgICAg
+ICAgICAgICAgICAgICAgICAgICDrz8zJ3sXT1NfPINPMz9cNCkJ1Y2tldF9Xb3JkQ291bnRz
+ICAgICAgICAgICAgICAgICAgICAgICDzzM/XwQ0KQnVja2V0X1VuaXF1ZVdvcmRzICAgICAg
+ICAgICAgICAgICAgICAgIPXOycvBzNjO2cgg08zP1w0KQnVja2V0X1N1YmplY3RNb2RpZmlj
+YXRpb24gICAgICAgICAgICAgIOnazcXOxc7JxSDUxc3ZINDJ09jNwQ0KQnVja2V0X0NoYW5n
+ZUNvbG9yICAgICAgICAgICAgICAgICAgICAgIOnazcXOydTYIMPXxdQNCkJ1Y2tldF9Ob3RF
+bm91Z2hEYXRhICAgICAgICAgICAgICAgICAgICDuxcTP09TB1M/ezs8gxMHOztnIDQpCdWNr
+ZXRfQ2xhc3NpZmljYXRpb25BY2N1cmFjeSAgICAgICAgICAg9M/ezs/T1Nggy8zB09PJxsnL
+wcPJyQ0KQnVja2V0X0VtYWlsc0NsYXNzaWZpZWQgICAgICAgICAgICAgICAgIOvMwdPTycbJ
+w8nSz9fBzs7ZxSDQydPYzcENCkJ1Y2tldF9FbWFpbHNDbGFzc2lmaWVkVXBwZXIgICAgICAg
+ICAgICDrzMHT08nGycPJ0s/Xwc7O2cUg0MnT2M3BDQpCdWNrZXRfQ2xhc3NpZmljYXRpb25F
+cnJvcnMgICAgICAgICAgICAg79vJwsvJIMvMwdPTycbJy8HDyckNCkJ1Y2tldF9BY2N1cmFj
+eSAgICAgICAgICAgICAgICAgICAgICAgICD0z97Oz9PU2A0KQnVja2V0X0NsYXNzaWZpY2F0
+aW9uQ291bnQgICAgICAgICAgICAgIOvMwdPTycbJw8nSz9fBzs8NCkJ1Y2tldF9SZXNldFN0
+YXRpc3RpY3MgICAgICAgICAgICAgICAgICDzwtLP0yDT1MHUydPUycvJDQpCdWNrZXRfTGFz
+dFJlc2V0ICAgICAgICAgICAgICAgICAgICAgICAg8M/TzMXEzsnKINPC0s/TIMLZzA0KQnVj
+a2V0X0N1cnJlbnRDb2xvciAgICAgICAgICAgICAgICAgICAgICVzINTFy9Xdycogw9fF1CZu
+YnNwOyZtZGFzaDsgJXMNCkJ1Y2tldF9TZXRDb2xvclRvICAgICAgICAgICAgICAgICAgICAg
+ICD109TBzs/XydTYICVzIMPXxdQg1yAlcw0KQnVja2V0X01haW50ZW5hbmNlICAgICAgICAg
+ICAgICAgICAgICAgIPXQ0sHXzMXOycUNCkJ1Y2tldF9DcmVhdGVCdWNrZXQgICAgICAgICAg
+ICAgICAgICAgICDzz9rEwdTYINfFxNLPDQpCdWNrZXRfRGVsZXRlQnVja2V0ICAgICAgICAg
+ICAgICAgICAgICAg9cTBzMnU2CDXxcTSzw0KQnVja2V0X1JlbmFtZUJ1Y2tldCAgICAgICAg
+ICAgICAgICAgICAgIPDF0sXJzcXOz9fB1Ngg18XE0s8NCkJ1Y2tldF9Mb29rdXAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICDwz8nTyw0KQnVja2V0X0xvb2t1cE1lc3NhZ2UgICAgICAg
+ICAgICAgICAgICAgIOnTy8HU2CDTzM/XzyDXINejxNLByA0KQnVja2V0X0xvb2t1cE1lc3Nh
+Z2UyICAgICAgICAgICAgICAgICAgIPLF2tXM2NTB1Nkg0M/J08vBDQpCdWNrZXRfTG9va3Vw
+TW9zdExpa2VseSAgICAgICAgICAgICAgICAgPGI+JXM8L2I+IN7B3cUg19PFx88g19PU0sXe
+wcXU09Eg1yA8Zm9udCBjb2xvcj0iJXMiPiVzPC9mb250Pg0KQnVja2V0X0RvZXNOb3RBcHBl
+YXIgICAgICAgICAgICAgICAgICAgIDxwPjxiPiVzPC9iPiDOxSDX09TSxd7BxdTT0SDOySDX
+IM/Ezs/NIMnaINejxMXSDQpCdWNrZXRfRGlzYWJsZWRHbG9iYWxseSAgICAgICAgICAgICAg
+ICAg99nLzMDexc7PIMfMz8LBzNjOzw0KQnVja2V0X1RvICAgICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgINcNCkJ1Y2tldF9RdWFyYW50aW5lICAgICAgICAgICAgICAgICAgICAgICDr
+wdLBztTJzg0KDQpTaW5nbGVCdWNrZXRfVGl0bGUgICAgICAgICAgICAgICAgICAgICAg8M/E
+0s/CzsXFIM8gJXMNClNpbmdsZUJ1Y2tldF9Xb3JkQ291bnQgICAgICAgICAgICAgICAgICDz
+zM/XINcg18XE0sUNClNpbmdsZUJ1Y2tldF9Ub3RhbFdvcmRDb3VudCAgICAgICAgICAgICDz
+zM/XINfPz8LdxQ0KU2luZ2xlQnVja2V0X1BlcmNlbnRhZ2UgICAgICAgICAgICAgICAgIPDS
+z8PFztTP1yDP1CDX08XHzw0KU2luZ2xlQnVja2V0X1dvcmRUYWJsZSAgICAgICAgICAgICAg
+ICAgIPTBwszJw8Eg08zP1yDEzNEgJXMNClNpbmdsZUJ1Y2tldF9NZXNzYWdlMSAgICAgICAg
+ICAgICAgICAgICDzzM/XwSDTzyDa16PaxM/ey8/KICgqKSDC2czJIMnT0M/M2NrP18HO2SDQ
+0skgy8zB09PJxsnLwcPJySDXINzUz8og08XT08nJIFBPUEZpbGUuIP2jzMvOydTFIM3Z28vP
+yiDOwSDMwMLPzSDTzM/XxSwgySDX2SDV18nEydTFIMXHzyDXxdLP0dTOz9PU2CDEzNEg19PF
+yCDXo8TF0i4NClNpbmdsZUJ1Y2tldF9VbmlxdWUgICAgICAgICAgICAgICAgICAgICAlcyDV
+zsnLwczYzs8NCg0KU2Vzc2lvbl9UaXRsZSAgICAgICAgICAgICAgICAgICAgICAgICAgIPPF
+09PJ0SBQT1BGaWxlINXT1MHSxczBDQpTZXNzaW9uX0Vycm9yICAgICAgICAgICAgICAgICAg
+ICAgICAgICAg98HbwSDTxdPTydEgUE9QRmlsZSDV09TB0sXMwS4g78LZ3s7PINTBy8/FINPM
+1d7BxdTT0SwgxdPMySDF08zJIM/T1MHOz9fJ1NggySDTzs/XwSDawdDV09TJ1CBQT1BGaWxl
+LCDBINcgwtLP1drF0sUgz9PUwdfJ1Nggz9TL0tnU2c0gJmxhcXVvO+PFztTSINXQ0sHXzMXO
+ydEmcmFxdW87LiDwz9bBzNXK09TBLCDdo8zLzsnUxSDQzyDMwMLPyiDT09nMy8Ug09fF0sjV
+LCDe1M/C2SDQ0s/Ez8zWydTYINLBws/U1SDTIFBPUEZpbGUuDQo=

@@ -1,8 +1,12 @@
-# Copyright (c) 2001-2003 John Graham-Cumming
+MIME-Version: 1.0
 
-# This is used to get the appropriate subdirectory for the manual
+
+# Identify the language and character set used for the interface
 LanguageCode                            fi
 LanguageCharset                         ISO-8859-15
+
+# This is used to get the appropriate subdirectory for the manual
+ManualLanguage                          fi
 
 # Common words that are used on their own all over the interface
 Apply                                   K&auml;yt&auml;
@@ -103,6 +107,7 @@ Advanced_AddWord                        Lis&auml;&auml; sana
 Advanced_RemoveWord                     Poista sana
 
 History_Filter                          &nbsp;(N&auml;kyviss&auml; vain sangon <font color="%s">%s</font> sis&auml;lt&ouml;)
+History_FilterBy                        Filter By
 History_Search                          &nbsp;(Etsitty aihetta %s)
 History_Title                           Viimeaikaiset viestit
 History_Jump                            Siirry viestiin

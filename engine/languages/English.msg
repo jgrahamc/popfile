@@ -1,8 +1,12 @@
-# Copyright (c) 2001-2003 John Graham-Cumming
+MIME-Version: 1.0
 
-# This is used to get the appropriate subdirectory for the manual
+
+# Identify the language and character set used for the interface
 LanguageCode                            en
 LanguageCharset                         ISO-8859-1
+
+# This is used to get the appropriate subdirectory for the manual
+ManualLanguage                          en
 
 # Common words that are used on their own all over the interface
 Apply                                   Apply
@@ -103,6 +107,7 @@ Advanced_AddWord                        Add word
 Advanced_RemoveWord                     Remove word
 
 History_Filter                          &nbsp;(just showing bucket <font color="%s">%s</font>)
+History_FilterBy                        Filter By
 History_Search                          &nbsp;(searched for from/subject %s)
 History_Title                           Recent Messages
 History_Jump                            Jump to message

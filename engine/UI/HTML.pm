@@ -165,6 +165,7 @@ sub start
                                     $self->{configuration}->{configuration}{localui}  == 1 ? (LocalAddr => 'localhost') : (),
                                      LocalPort => $self->{configuration}->{configuration}{ui_port},
                                      Listen    => SOMAXCONN,
+                                     Reuse     => 1 ) or return 0;
                                      Reuse     => 1 );
 
     if ( !defined( $self->{server} ) ) {
@@ -396,7 +397,7 @@ sub html_common_top
 
     my $result = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" " ;
     $result .= "\"http://www.w3.org/TR/html4/loose.dtd\">\n" ;
-    $result .= "<html>\n<head>\n<title>$self->{language}{Header_Title}</title>\n" ;
+    $result .= "<html lang=\"$self->{language}{LanguageCode}\">\n<head>\n<title>$self->{language}{Header_Title}</title>\n" ;
 
     # If we are handling the shutdown page, then send the CSS along with the
     # page to avoid a request back from the browser _after_ we've shutdown,
@@ -560,7 +561,7 @@ sub html_common_bottom
     $result .= "<td class=\"footerBody\">\n" ;
     $result .= "POPFile $self->{configuration}{major_version}.$self->{configuration}{minor_version}." ;
     $result .= "$self->{configuration}{build_version} - \n" ;
-    $result .= "<a class=\"bottomLink\" href=\"manual/$self->{language}{LanguageCode}/manual.html\">\n" ;
+    $result .= "<a class=\"bottomLink\" href=\"manual/$self->{language}{ManualLanguage}/manual.html\">\n" ;
     $result .= "$self->{language}{Footer_Manual}</a> - \n" ;
 
     $result .= "<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/\">$self->{language}{Footer_HomePage}</a> - \n" ;
@@ -1415,7 +1416,7 @@ sub bar_chart_100
             if ( $percent != 0 )  {
                 $body .= "<td bgcolor=\"$self->{classifier}->{colors}{$bucket}\" title=\"$bucket ($percent%)\" width=\"";
                 $body .= (int($percent)<1)?1:int($percent);
-                $body .= "%\" height=\"20px\"></td>\n" ;
+                $body .= "%\"><img src=\"pix.gif\" alt=\"\" height=\"20px\" width=\"1px\" /></td>\n" ;
             }
         }
         $body .= "</tr>\n</table>";
@@ -1468,7 +1469,7 @@ sub corpus_page
         close COLOR;
         $self->{classifier}->{colors}{$self->{form}{bucket}} = $self->{form}{color};
     }
-
+    
     if ( ( defined($self->{form}{bucket}) ) && ( defined($self->{form}{subject}) ) && ( $self->{form}{subject} > 0 ) ) {
         $self->{classifier}->{parameters}{$self->{form}{bucket}}{subject} = $self->{form}{subject} - 1;
         $self->{classifier}->write_parameters();
@@ -1597,9 +1598,9 @@ sub corpus_page
         for my $i ( 0 .. $#{$self->{classifier}->{possible_colors}} ) {
             my $color = $self->{classifier}->{possible_colors}[$i];
             if ( $color ne $self->{classifier}->{colors}{$bucket} )  {
-                $body .= "<td bgcolor=\"$color\">\n" ;
-                $body .= "<a href=\"/buckets?color=$color&amp;bucket=$bucket&amp;session=$self->{session_key}\">\n" ;
-                $body .= "<img border=\"0\" alt='". sprintf( $self->{language}{Bucket_SetColorTo}, $bucket, $color ) . "' src=\"pix.gif\" width=\"10px\" height=\"20px\" /></a>\n";
+                $body .= "<td bgcolor=\"$color\" title=\"". sprintf( $self->{language}{Bucket_SetColorTo}, $bucket, $color ) . "\">\n" ;
+                $body .= "<a class=\"colorChooserLink\" href=\"/buckets?color=$color&amp;bucket=$bucket&amp;session=$self->{session_key}\">\n" ;
+                $body .= "<img border=\"0\" alt=\"". sprintf( $self->{language}{Bucket_SetColorTo}, $bucket, $color ) . "\" src=\"pix.gif\" width=\"10px\" height=\"20px\" /></a>\n";
                 $body .= "</td>\n" ;
             }
         }
@@ -1648,7 +1649,7 @@ sub corpus_page
     $body .= "$self->{language}{Bucket_Accuracy}:</th>\n<td align=\"right\">$accuracy</td>\n</tr>\n";
 
     if ( $percent > 0 )  {
-        $body .= "<tr>\n<td height=\"10px\" colspan=\"2\">&nbsp;</td>\n</tr>\n<tr>\n<td colspan=\"2\">\n" ;
+        $body .= "<tr>\n<td colspan=\"2\">&nbsp;</td>\n</tr>\n<tr>\n<td colspan=\"2\">\n" ;
         $body .= "<table class=\"barChart\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n";
         $body .= "<tr>\n";
 
@@ -1657,17 +1658,21 @@ sub corpus_page
             $body .= "\"accuracy0to49\"" if ( $i < 25 );
             $body .= "\"accuracy50to93\"" if ( ( $i > 24 ) && ( $i < 47 ) );
             $body .= "\"accuracy94to100\"" if ( $i > 46 );
-            $body .= " height=\"10px\">";
+            $body .= ">";
             if ( ( $i * 2 ) < $percent ) {
-                $body .= "<img src=\"black.gif\" height=\"4px\" width=\"6px\" alt=\"\" />";
+                $body .= "<img class=\"lineImg\" src=\"black.gif\" height=\"4px\" width=\"6px\" alt=\"\" />";
             } else {
                 $body .= "<img src=\"pix.gif\" height=\"4px\" width=\"6px\" alt=\"\" />";
             }
             $body .= "</td>\n";
         }
+        
+        # Extra td to hold the vertical spacer gif
+        
+        $body .= "<td><img src=\"pix.gif\" height=\"10px\" width=\"1px\" alt=\"\" /></td>" ;
         $body .= "</tr>\n<tr>\n";
         $body .= "<td colspan=\"25\" align=\"left\"><span class=\"graphFont\">0%</span></td>\n";
-        $body .= "<td colspan=\"25\" align=\"right\"><span class=\"graphFont\">100%</span></td>\n</tr></table>\n";
+        $body .= "<td colspan=\"26\" align=\"right\"><span class=\"graphFont\">100%</span></td>\n</tr></table>\n";
     }
 
 
@@ -1765,12 +1770,10 @@ sub corpus_page
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n<br />\n";
 
     # end optional widget placement
-   $body .= "</div>\n" ;
+    $body .= "</div>\n" ;
 
     if ( ( defined($self->{form}{lookup}) ) || ( defined($self->{form}{word}) ) ) {
        my $word = $self->{classifier}->{mangler}->mangle($self->{form}{word}, 1);
-
-        $body .= "<blockquote>\n";
 
         # Don't print the headings if there are no entries.
 
@@ -1840,10 +1843,9 @@ sub corpus_page
             $body .= "<div class=\"error01\">$self->{language}{Bucket_Error4}</div>";
         }
 
-        $body .= "\n</blockquote>\n";
     }
 
-    $body .= "</td>\n</tr>\n</table>";
+    $body .= "\n</td>\n</tr>\n</table>";
 
     http_ok($self, $client,$body,1);
 }
@@ -2008,9 +2010,9 @@ sub get_history_navigator
 
     my $body = "$self->{language}{History_Jump}: ";
     if ( $start_message != 0 )  {
-        $body .= "<a href=\"/history?start_message=";
+        $body .= "[<a href=\"/history?start_message=";
         $body .= $start_message - $self->{configuration}->{configuration}{page_size};
-        $body .= "&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">< $self->{language}{Previous}</a> ";
+        $body .= "&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">< $self->{language}{Previous}</a>] ";
     }
     my $i = 0;
     while ( $i < history_size( $self ) ) {
@@ -2018,17 +2020,17 @@ sub get_history_navigator
             $body .= "<b>";
             $body .= $i+1 . "</b>";
         } else {
-            $body .= "<a href=\"/history?start_message=$i&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">";
-            $body .= $i+1 . "</a>";
+            $body .= "[<a href=\"/history?start_message=$i&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">";
+            $body .= $i+1 . "</a>]";
         }
 
         $body .= " ";
         $i += $self->{configuration}->{configuration}{page_size};
     }
     if ( $start_message < ( history_size( $self ) - $self->{configuration}->{configuration}{page_size} ) )  {
-        $body .= "<a href=\"/history?start_message=";
+        $body .= "[<a href=\"/history?start_message=";
         $body .= $start_message + $self->{configuration}->{configuration}{page_size};
-        $body .= "&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">$self->{language}{Next} ></a>";
+        $body .= "&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">$self->{language}{Next} ></a>]";
     }
 
     return $body;
@@ -2255,7 +2257,9 @@ sub history_undo
 
                             next;
                         }
-                        $temp_words{$bucket}{$1} = $2 if ( /([^\s]+) (\d+)/ );                    }
+
+                        $temp_words{$bucket}{$1} = $2 if ( /([^\s]+) (\d+)/ );
+                    }
                      close WORDS;
                 }
                 # Find the words
@@ -2487,6 +2491,7 @@ sub history_page
         # Filter widget
         $body .= "<td colspan=\"3\">\n" ;
         $body .= "<form action=\"/history\">\n";
+        $body .= "<label class=\"historyLabel\" for=\"historyFilter\">$self->{language}{History_FilterBy}:&nbsp;</label>\n";
         $body .= "<input type=\"hidden\" name=\"search\" value=\"$self->{form}{search}\" />\n";
         $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form}{sort}\" />\n";
         $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n";
@@ -2607,8 +2612,8 @@ sub history_page
             $from =~ s/\"(.*)\"/$1/g;
             $subject =~ s/\"(.*)\"/$1/g;
 
-			$from    = $self->{classifier}->{parser}->decode_string( $from );
-			$subject = $self->{classifier}->{parser}->decode_string( $subject );
+            $from    = $self->{classifier}->{parser}->decode_string( $from );
+            $subject = $self->{classifier}->{parser}->decode_string( $subject );
 
             $short_from    = $from;
             $short_subject = $subject;
@@ -2696,7 +2701,7 @@ sub history_page
                 # Close button
                 $body .= "<tr>\n<td class=\"openMessageCloser\">\n" ;
                 $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">\n" ;
-                $body .= "<span class=\"bucketsLabel\">$self->{language}{Close}</span></a>\n" ;
+                $body .= "<span class=\"historyLabel\">$self->{language}{Close}</span></a>\n" ;
                 $body .= "<br /><br />\n</td>\n</tr>\n" ;
 
                 # Message body
@@ -2730,7 +2735,7 @@ sub history_page
 
                             if ( $head =~ /$header/i )  {
                                 if ( $arg =~ /$text/i )  {
-                                    $line =~ s/($text)/<b><font color=\"$self->{classifier}->{colors}{$self->{history}{$i}{bucket}}\">$1<\/font><\/b>/;
+                                    $line =~ s/($text)/<b><font title=\"[$self->{history}{$i}{bucket}]\" color=\"$self->{classifier}->{colors}{$self->{history}{$i}{bucket}}\">$1<\/font><\/b>/;
                                 }
                             }
                         }
@@ -2745,7 +2750,8 @@ sub history_page
 
                 # Close button
                 $body .= "<tr>\n<td class=\"openMessageCloser\">" ;
-                $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\"><span class=\"bucketsLabel\">$self->{language}{Close}</span></a>" ;
+                $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">\n" ;
+                $body .= "<span class=\"historyLabel\">$self->{language}{Close}</span></a>\n" ;
                 $body .= "</td>\n</tr>\n</table>\n</td>\n" ;
 
                 $body .= "<td class=\"top20\" valign=\"top\">\n";
@@ -2774,9 +2780,9 @@ sub history_page
         $body .= "<table class=\"historyWidgetsBottom\">\n<tr>\n<td>\n";
         $body .= "<form action=\"/history\">\n<input type=\"hidden\" name=\"filter\" value=\"$self->{form}{filter}\" />\n";
         $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form}{sort}\" />\n" ;
-        $body .= "<label class=\"historyLabel\">$self->{language}{History_Remove}:&nbsp;\n" ;
+        $body .= "<span class=\"historyLabel\">$self->{language}{History_Remove}:&nbsp;</span>\n" ;
         $body .= "<input type=\"submit\" class=\"submit\" name=\"clearall\" value=\"$self->{language}{History_RemoveAll}\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"clearpage\" value=\"$self->{language}{History_RemovePage}\" />\n</label>\n" ;
+        $body .= "<input type=\"submit\" class=\"submit\" name=\"clearpage\" value=\"$self->{language}{History_RemovePage}\" />\n" ;
         $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n" ;
         $body .= "<input type=\"hidden\" name=\"start_message\" value=\"$start_message\" />\n</form>\n" ;
         $body .= "</td>\n</tr>\n</table>\n" ;
@@ -3199,7 +3205,6 @@ sub history_delete_file
         unlink($mail_file);
     }
 }
-
 
 # ---------------------------------------------------------------------------------------------
 #

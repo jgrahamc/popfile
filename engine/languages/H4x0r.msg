@@ -1,7 +1,9 @@
-# Copyright (c) 2001-2003 John Graham-Cumming
+MIME-Version: 1.0
+
 
 LanguageCode                            en
 LanguageCharset                         ISO-8859-1
+ManualLanguage                          en
 Apply                                   4pply
 On                                      0n
 Off                                     0ff
@@ -11,7 +13,7 @@ Add                                     4dd
 Remove                                  R3m0v3
 Previous                                Pr3v10u5
 Next                                    N3xt
-From                                    Fr0m
+>From                                    Fr0m
 Subject                                 5ubj3ct
 Classification                          Cl4s51f1c4t10n
 Reclassify                              R3cl4s51fy
@@ -99,6 +101,7 @@ Advanced_AddWord                        4dd w0rd
 Advanced_RemoveWord                     R3m0v3 w0rd
 
 History_Filter                          &nbsp;(ju5t 5h0w1ng buck3t <font color="%s">%s</font>)
+History_FilterBy                        F1lt3r By
 History_Search                          &nbsp;(534rch3d f0r 5ubj3ct %s)
 History_Title                           R3c3nt M3ss4g35
 History_Jump                            Jump t0 m3s54g3

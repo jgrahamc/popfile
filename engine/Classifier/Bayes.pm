@@ -652,7 +652,7 @@ sub classify_file
         $total += exp($score{$b}) if ($score{$b} > 54 * log(0.5));
     }
 
-    $self->{scores} = "<b>Scores</b><p><table><tr><th scope=\"col\">Bucket</th>\n<th>&nbsp;</th>\n";
+    $self->{scores} = "<b>Scores</b><p>\n<table class=\"top20Buckets\">\n<tr>\n<th scope=\"col\">Bucket</th>\n<th>&nbsp;</th>\n";
     $self->{scores} .= "<th scope=\"col\">Probability</th></tr>\n";
     print "Bucket              Raw score      Normalized     Estimated prob\n\n" if $self->{debug};
     foreach my $b (@ranking) {
@@ -669,9 +669,9 @@ sub classify_file
     $self->{scores} .= "</table>";
 
     if ($self->{wordscores}) {
-        $self->{scores} .= "<table>\n<tr><td colspan=\"4\">&nbsp;</td></tr>\n";
-        $self->{scores} .= "<tr><th scope=\"col\">Word</th><th scope=\"col\">Prob</th><th>&nbsp;</th>";
-        $self->{scores} .= "<th scope=\"col\"><font color=\"$self->{colors}{$ranking[0]}\">$ranking[0]</font></th></tr>\n";
+        $self->{scores} .= "<table class=\"top20Words\">\n<tr><td colspan=\"4\">&nbsp;</td></tr>\n";
+        $self->{scores} .= "<tr>\n<th scope=\"col\">Word</th><th scope=\"col\">Prob</th>\n<th>&nbsp;</th>\n";
+        $self->{scores} .= "<th scope=\"col\">\n<font color=\"$self->{colors}{$ranking[0]}\">$ranking[0]</font>\n</th>\n</tr>\n";
         my $wi = 0;
         foreach my $word (@wordrank) {
             if ( $wi < 20 && $wordprob{$word} / $wtprob{$word} >= 0.25 ) {
