@@ -68,9 +68,8 @@ sub new
 #---------------------------------------------------------------------------------------------
 # CORE_loader_init
 #
-# Initiali
+# Initialize things only needed in CORE
 #
-# ***CORE***
 #---------------------------------------------------------------------------------------------
 
 sub CORE_loader_init
@@ -435,7 +434,7 @@ sub CORE_link_components
 
     foreach my $type (keys %{$self->{components__}}) {
         foreach my $name (keys %{$self->{components__}{$type}}) {
-            $self->{components__}{$type}{$name}->version(       $self->CORE_version()                    );
+            $self->{components__}{$type}{$name}->version(       scalar($self->CORE_version())                    );
             $self->{components__}{$type}{$name}->configuration( $self->{components__}{core}{config} );
             $self->{components__}{$type}{$name}->logger(        $self->{components__}{core}{logger} ) if ( $name ne 'logger' );
             $self->{components__}{$type}{$name}->mq(            $self->{components__}{core}{mq}     );
