@@ -61,7 +61,7 @@ Lookup                                  Bekijk
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Control Center
-Header_Shutdown                         Sluiten
+Header_Shutdown                         Afsluiten
 Header_History                          Geschiedenis
 Header_Buckets                          Bakken
 Header_Configuration                    Configuratie
