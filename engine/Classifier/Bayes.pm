@@ -591,18 +591,21 @@ sub classify_file
 
         # You cannot use @ or $ inside a \Q\E regular expression and hence
         # we have to change the $magnet and the text we are comparing against
-        # by changing the $ and @ signs to .
+        # by changing the $ and @ signs to special forms which I hope
+        # never really appear
 
             my $noattype;
 
             $noattype = $self->{parser__}->get_header($type);
-            $noattype =~ s/[@\$]/\./g;
+            $noattype =~ s/@/__POPFILE_AT__/g;
+            $noattype =~ s/\$/__POPFILE_DOLLAR__/g;
 
             for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
                 my $regex;
 
                 $regex = $magnet;
-                $regex =~ s/[@\$]/\./g;
+                $regex =~ s/@/__POPFILE_AT__/g;
+                $regex =~ s/\$/__POPFILE_DOLLAR__/g;
 
                 if ( $noattype =~ m/\Q$regex\E/i ) {
                     $self->{scores__}        = '';
