@@ -383,9 +383,25 @@ sub html_common_top
     my $result = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" " ;
     $result .= "\"http://www.w3.org/TR/html4/loose.dtd\">\n" ;
     $result .= "<html>\n<head>\n<title>$self->{language}{Header_Title}</title>\n" ;
+    
+    # If we are handling the shutdown page, then send the CSS along with the 
+    # page to avoid a request back from the browser _after_ we've shutdown,
+    # otherwise, send the link to the CSS file so it is cached by the browser.
 
-    $result .= "<link rel=\"stylesheet\" type=\"text/css\" " ;
-    $result .= "href=\"skins/$self->{configuration}->{configuration}{skin}.css\" title=\"main\">\n" ;
+    if ( $selected == -1 ) {
+        $result .= "<style type=\"text/css\">\n" ;
+	if ( open FILE, "<skins/$self->{configuration}->{configuration}{skin}.css" ) {
+	    while (<FILE>) {
+	        $result .= $_;
+	    }
+	    close FILE;
+	}
+	$result .= "</style>\n";
+    } else {
+        $result .= "<link rel=\"stylesheet\" type=\"text/css\" " ;
+        $result .= "href=\"skins/$self->{configuration}->{configuration}{skin}.css\" title=\"main\">\n" ;
+    }
+    
     $result .= "<meta http-equiv=\"Pragma\" content=\"no-cache\">\n" ;
     $result .= "<meta http-equiv=\"Expires\" content=\"0\">\n" ;
 
