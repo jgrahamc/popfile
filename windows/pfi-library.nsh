@@ -4,7 +4,7 @@
 #                     definitions for inclusion in the NSIS scripts used
 #                     to create (and test) the POPFile Windows installer.
 #
-# Copyright (c) 2003-2004 John Graham-Cumming
+# Copyright (c) 2003-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -1200,11 +1200,13 @@
 #--------------------------------------------------------------------------
 # Macro: GetDatabaseName
 #
-# The installation process and the uninstall process may both need a function which finds the
-# value of the 'bayes_database' entry in the POPFile configuration file ('popfile.cfg'). This
-# entry supplies the name of the SQLite database used by POPFile and has a default value of
-# 'popfile.db'. This macro makes maintenance easier by ensuring that both processes use
-# identical functions, with the only difference being their names.
+# The installation process and the uninstall process may both need a function which extracts
+# the name of the SQLite database file from the POPFile configuration file ('popfile.cfg').
+# The default filename is 'popfile.db' (which means it is stored in the 'User Data' folder).
+# POPFile releases 0.21.x and 0.22.x used the 'bayes_database' entry to hold the filename but
+# the 0.23.0 and later releases use the 'database_database' entry instead. This macro makes
+# maintenance easier by ensuring that both processes use identical functions, with the only
+# difference being their names.
 #
 # NOTE:
 # The !insertmacro GetDatabaseName "" and !insertmacro GetDatabaseName "un." commands
@@ -1212,12 +1214,13 @@
 # 'Call un.GetDatabaseName' without additional preparation.
 #
 # Inputs:
-#         (top of stack)          - the path where 'popfile.cfg' is to be found
+#         (top of stack)       - the path where 'popfile.cfg' is to be found
 #
 # Outputs:
-#         (top of stack)          - string with the current value of the 'bayes_database' entry
-#                                   (if entry is not found (perhaps because a "clean" install is
-#                                   in progress), the default value for the entry is returned)
+#         (top of stack)       - string with the current value of the 'database_database' or
+#                                the 'bayes_database' entry from the 'popfile.cfg' file
+#                                (if no entry is not found (perhaps because a "clean" install
+#                                is in progress), the default value for the entry is returned)
 #
 # Usage (after macro has been 'inserted'):
 #
@@ -1242,7 +1245,7 @@
     Push ${L_RESULT}
     Exch
     Push ${L_FILE_HANDLE}
-    Push ${L_PARAM}
+     Push ${L_PARAM}
     Push ${L_TEMP}
     Push ${L_TEXTEND}
 
@@ -1261,6 +1264,12 @@
     StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
     StrCmp ${L_PARAM} "$\n" loop
 
+    StrCpy ${L_TEMP} ${L_PARAM} 18
+    StrCmp ${L_TEMP} "database_database " 0 check_old_value
+    StrCpy ${L_RESULT} ${L_PARAM} "" 18
+    Goto check_eol
+
+  check_old_value:
     StrCpy ${L_TEMP} ${L_PARAM} 15
     StrCmp ${L_TEMP} "bayes_database " 0 check_eol
     StrCpy ${L_RESULT} ${L_PARAM} "" 15
@@ -2396,18 +2405,31 @@
     StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
     StrCmp ${L_TEMP} "$\n" loop
 
+    StrCpy ${L_RESULT} ${L_TEMP} 18
+    StrCmp ${L_RESULT} "database_database " got_sql_corpus
+    StrCpy ${L_RESULT} ${L_TEMP} 19
+    StrCmp ${L_RESULT} "database_dbconnect " got_sql_connect
+
     StrCpy ${L_RESULT} ${L_TEMP} 15
-    StrCmp ${L_RESULT} "bayes_database " got_sql_corpus
+    StrCmp ${L_RESULT} "bayes_database " got_sql_old_corpus
     StrCpy ${L_RESULT} ${L_TEMP} 16
-    StrCmp ${L_RESULT} "bayes_dbconnect " got_sql_connect
+    StrCmp ${L_RESULT} "bayes_dbconnect " got_sql_old_connect
     Goto check_eol
 
-  got_sql_corpus:
+  got_sql_old_corpus:
     StrCpy ${L_SQL_CORPUS} ${L_TEMP} "" 15
     Goto check_eol
 
-  got_sql_connect:
+  got_sql_old_connect:
     StrCpy ${L_SQL_CONNECT} ${L_TEMP} "" 16
+    Goto check_eol
+
+  got_sql_corpus:
+    StrCpy ${L_SQL_CORPUS} ${L_TEMP} "" 18
+    Goto check_eol
+
+  got_sql_connect:
+    StrCpy ${L_SQL_CONNECT} ${L_TEMP} "" 19
 
     ; Now read file until we get to end of the current line
     ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
