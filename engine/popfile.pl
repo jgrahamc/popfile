@@ -848,7 +848,7 @@ sub corpus_page
     {
         my $word = $classifier->{mangler}->mangle($form{word});
         
-        $body .= "<blockquote><b>Lookup result for $form{word}</b><p>";
+        $body .= "<blockquote><b>Lookup result for $form{word}</b><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Probability</b>";
         
         if ( $word ne '' ) 
         {
@@ -858,7 +858,22 @@ sub corpus_page
             {
                 if ( $classifier->{matrix}{$bucket}{$word} )
                 {
-                    $body .= "<b>$form{word}</b> appears in <font color=$classifier->{colors}{$bucket}>$bucket</font> with probability $classifier->{matrix}{$bucket}{$word}<br>";
+                    my $prob = "$classifier->{matrix}{$bucket}{$word}";
+                    if ( $prob =~ s/e\-(\d+)//i )
+                    {
+                        my $exp = $1;
+                        $prob     =~ /(.*)\.(.*)/;
+                        my $left  = $1;
+                        my $right = $2;
+                        my $pad;
+                        for my $i (1 .. $exp-1)
+                        {
+                            $pad .= "0";
+                        }
+                        $prob = "0.$pad$left$right";
+                    }
+                    
+                    $body .= "<tr><td><font color=$classifier->{colors}{$bucket}>$bucket</font><td><td><tt>$prob</tt>";
                     if ( $classifier->{matrix}{$bucket}{$word} > $max )
                     {
                         $max = $classifier->{matrix}{$bucket}{$word};
@@ -869,7 +884,7 @@ sub corpus_page
             
             if ( $max_bucket ne '' )
             {
-                $body .= "<p><b>$form{word}</b> is most likely to appear in <font color=$classifier->{colors}{$max_bucket}>$max_bucket</font>";
+                $body .= "</table><p><b>$form{word}</b> is most likely to appear in <font color=$classifier->{colors}{$max_bucket}>$max_bucket</font>";
             }
             else
             {
