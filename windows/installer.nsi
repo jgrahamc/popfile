@@ -9,17 +9,22 @@
 #
 #--------------------------------------------------------------------------
 
-; Modified to work with NSIS 2.0b4 (CVS) [ MAKENSIS.EXE dated 28 June 2003 @ 06:44 or later ]
+; This script requires a version of NSIS 2.0b4 (CVS) which meets the following requirements:
+;
+; (1) "NSIS Modern User Interface" version 1.65 (17 June 2003 or later)
+;     This script uses the new (simplified) page configuration system and other improvements.
+;
+; (2) '{NSIS}\makensis.exe' dated 8 July 2003 @ 18:44 (NSIS CVS version 1.203) or later
+;     This is required to ensure that out-of-date NLF files do not result in blank messages
+;     and to ensure that language strings can be combined with other strings.
+;
+; (3) '{NSIS}\NSIS\Contrib\UIs\modern.exe' dated xx July @ xx:xx (NSIS CVS v1.xxx) or later
+;     This is required to ensure the installer works properly when 'Japanese' is selected.
 
-#--------------------------------------------------------------------------
-# WARNINGS:
-#
-# (1) This script requires "NSIS Modern User Interface" version 1.65 (17 June 2003 or later)
-#     because it uses the new (simplified) page configuration system.
-#
-# (2) This script must be compiled with MAKENSIS.EXE dated 28 June 2003 @ 06:44 (or later)
-#     (earlier versions will crash while generating the language tables)
-#
+; NSIS CVS snapshot 09 July 2003 @ 07:44 has a partial fix for the 'Japanese' bug - but wordwrap
+; has not been enabled for the enlarged "Space required" field on the components page
+; (applies to all three "Modern UI" EXE files)
+
 #--------------------------------------------------------------------------
 # LANGUAGE SUPPORT:
 #
@@ -67,12 +72,6 @@
 # two new files and, if there is a suitable POPFile UI language file for the new language,
 # add a suitable '!insertmacro UI_LANG_CONFIG' line in the section which handles the optional
 # 'Languages' component to allow the installer to select the appropriate UI language.
-#--------------------------------------------------------------------------
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# At present (02 July 2003) support for 'Bulgarian' and 'Danish' has been disabled (as described
-# above) because in these two cases the corresponding NLF file is out-of-step and this could
-# result in wrong/missing messages during the installation.
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #--------------------------------------------------------------------------
 
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
@@ -342,12 +341,10 @@
         ; To remove a language, comment-out the relevant '!insertmacro PFI_LANG_LOAD' line
         ; from this list. (To remove all of these languages, use /DENGLISH_ONLY on command-line)
 
-# [02 July 03] "Bulgarian" disabled because the main NSIS NLF language file is out of date
-#        !insertmacro PFI_LANG_LOAD "Bulgarian"    ; 'New style' license msgs missing (27-Jun-03)
+        !insertmacro PFI_LANG_LOAD "Bulgarian"    ; 'New style' license msgs missing (27-Jun-03)
         !insertmacro PFI_LANG_LOAD "SimpChinese"
         !insertmacro PFI_LANG_LOAD "TradChinese"
-# [02 July 03]  "Danish" disabled because the main NSIS NLF language file is out of date
-#        !insertmacro PFI_LANG_LOAD "Danish"       ; 'New style' license msgs missing (27-Jun-03)
+        !insertmacro PFI_LANG_LOAD "Danish"       ; 'New style' license msgs missing (27-Jun-03)
         !insertmacro PFI_LANG_LOAD "Dutch"
         !insertmacro PFI_LANG_LOAD "Finnish"      ; 'New style' license msgs missing (27-Jun-03)
         !insertmacro PFI_LANG_LOAD "French"
@@ -417,6 +414,7 @@ Function .onInit
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioC.ini"
 
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "${C_RELEASE_NOTES}" "release.txt"
+
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -430,17 +428,9 @@ FunctionEnd
 
 Function PFIGUIInit
 
-  !define L_MSG   $R9   ; holds assembled 'language' string
-  !define L_TXT   $R8   ; used when assembling 'language' strings
-
-  Push ${L_MSG}
-  Push ${L_TXT}
-
   SearchPath ${G_NOTEPAD} notepad.exe
-  StrCpy ${L_MSG} "$(PFI_LANG_MBRELNOTES_1)"
-  StrCpy ${L_TXT} "$(PFI_LANG_MBRELNOTES_2)"
-  StrCpy ${L_MSG} "${L_MSG}$\r$\n$\r$\n${L_TXT}"
-  MessageBox MB_YESNO|MB_ICONQUESTION ${L_MSG} IDNO exit
+  MessageBox MB_YESNO|MB_ICONQUESTION \
+      "$(PFI_LANG_MBRELNOTES_1)$\r$\n$\r$\n$(PFI_LANG_MBRELNOTES_2)" IDNO exit
   StrCmp ${G_NOTEPAD} "" use_file_association
   ExecWait 'notepad.exe "$PLUGINSDIR\release.txt"'
   GoTo exit
@@ -457,11 +447,6 @@ exit:
   Call SetOutlookExpressPage_Init
   Call StartPOPFilePage_Init
 
-  Pop ${L_TXT}
-  Pop ${L_MSG}
-
-  !undef L_MSG
-  !undef L_TXT
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -475,12 +460,8 @@ Section "POPFile" SecPOPFile
   SectionIn RO
 
   !define L_CFG   $R9   ; file handle
-  !define L_MSG   $R8   ; assembled 'language' string
-  !define L_TXT   $R7   ; used when assembling 'language' string
 
   Push ${L_CFG}
-  Push ${L_MSG}
-  Push ${L_TXT}
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_UPGRADE)"
@@ -522,16 +503,11 @@ readme_ok:
   File "..\engine\otto.gif"
 
   IfFileExists "$INSTDIR\stopwords" 0 copy_stopwords
-  StrCpy ${L_MSG} "POPFile 'stopwords' "
-  StrCpy ${L_TXT} "$(PFI_LANG_MBSTPWDS_1)"
-  StrCpy ${L_MSG} "${L_MSG}${L_TXT}$\r$\n$\r$\n"
-  StrCpy ${L_TXT} "$(PFI_LANG_MBSTPWDS_2)"
-  StrCpy ${L_MSG} "${L_MSG}${L_TXT}$\r$\n$\r$\n"
-  StrCpy ${L_TXT} "$(PFI_LANG_MBSTPWDS_3)"
-  StrCpy ${L_MSG} "${L_MSG}${L_TXT} 'stopwords.bak')$\r$\n$\r$\n"
-  StrCpy ${L_TXT} "$(PFI_LANG_MBSTPWDS_4)"
-  StrCpy ${L_MSG} "${L_MSG}${L_TXT} 'stopwords.default')"
-  MessageBox MB_YESNO|MB_ICONQUESTION ${L_MSG} IDNO copy_default_stopwords
+  MessageBox MB_YESNO|MB_ICONQUESTION \
+      "POPFile 'stopwords' $(PFI_LANG_MBSTPWDS_1)$\r$\n$\r$\n\
+      $(PFI_LANG_MBSTPWDS_2)$\r$\n$\r$\n\
+      $(PFI_LANG_MBSTPWDS_3) 'stopwords.bak')$\r$\n$\r$\n\
+      $(PFI_LANG_MBSTPWDS_4) 'stopwords.default')" IDNO copy_default_stopwords
   IfFileExists "$INSTDIR\stopwords.bak" 0 make_backup
   SetFileAttributes "$INSTDIR\stopwords.bak" NORMAL
 
@@ -551,14 +527,11 @@ copy_default_stopwords:
   IfFileExists "$INSTDIR\popfile.cfg" 0 update_config
   SetFileAttributes "$INSTDIR\popfile.cfg" NORMAL
   IfFileExists "$INSTDIR\popfile.cfg.bak" 0 make_cfg_backup
-  StrCpy ${L_MSG} "$(PFI_LANG_MBCFGBK_1)"
-  StrCpy ${L_TXT} "$(PFI_LANG_MBCFGBK_2)"
-  StrCpy ${L_MSG} "${L_MSG} 'popfile.cfg' ${L_TXT} ('popfile.cfg.bak').$\r$\n$\r$\n"
-  StrCpy ${L_TXT} "$(PFI_LANG_MBCFGBK_3)"
-  StrCpy ${L_MSG} "${L_MSG}${L_TXT}$\r$\n$\r$\n"
-  StrCpy ${L_TXT} "$(PFI_LANG_MBCFGBK_4)"
-  StrCpy ${L_MSG} "${L_MSG}${L_TXT}"
-  MessageBox MB_YESNO|MB_ICONQUESTION "${L_MSG}" IDNO update_config
+  MessageBox MB_YESNO|MB_ICONQUESTION \
+      "$(PFI_LANG_MBCFGBK_1) 'popfile.cfg' $(PFI_LANG_MBCFGBK_2) ('popfile.cfg.bak').\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBCFGBK_3)$\r$\n$\r$\n\
+      $(PFI_LANG_MBCFGBK_4)" IDNO update_config
   SetFileAttributes "$INSTDIR\popfile.cfg.bak" NORMAL
 
 make_cfg_backup:
@@ -741,13 +714,9 @@ skip_autostart_set:
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
 
-  Pop ${L_TXT}
-  Pop ${L_MSG}
   Pop ${L_CFG}
 
   !undef L_CFG
-  !undef L_MSG
-  !undef L_TXT
 
 SectionEnd
 
@@ -821,12 +790,10 @@ Section "Languages" SecLangs
         ; UI_LANG_CONFIG parameters: "NSIS Language name"  "POPFile UI language name"
 
         !insertmacro UI_LANG_CONFIG "ENGLISH" "English"
-# [02 July 03] "Bulgarian" disabled because the main NSIS NLF language file is out of date
-#        !insertmacro UI_LANG_CONFIG "BULGARIAN" "Bulgarian"
+        !insertmacro UI_LANG_CONFIG "BULGARIAN" "Bulgarian"
         !insertmacro UI_LANG_CONFIG "SIMPCHINESE" "Chinese-Simplified"
         !insertmacro UI_LANG_CONFIG "TRADCHINESE" "Chinese-Traditional"
-# [02 July 03]  "Danish" disabled because the main NSIS NLF language file is out of date
-#        !insertmacro UI_LANG_CONFIG "DANISH" "Dansk"
+        !insertmacro UI_LANG_CONFIG "DANISH" "Dansk"
         !insertmacro UI_LANG_CONFIG "DUTCH" "Nederlands"
         !insertmacro UI_LANG_CONFIG "FINNISH" "Suomi"
         !insertmacro UI_LANG_CONFIG "FRENCH" "Francais"
@@ -928,8 +895,7 @@ attempt_shutdown:
   Pop ${L_OLD_GUI}
   StrCmp ${L_OLD_GUI} "" try_other_port
 
-  StrCpy ${L_RESULT} "$(PFI_LANG_INST_LOG_1)"
-  DetailPrint "${L_RESULT} ${L_OLD_GUI}"
+  DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_OLD_GUI}"
   NSISdl::download_quiet http://127.0.0.1:${L_OLD_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Sleep 250 ; milliseconds
   Pop ${L_RESULT}
@@ -941,8 +907,7 @@ try_other_port:
   Pop ${L_NEW_GUI}
   StrCmp ${L_NEW_GUI} "" exit_now
 
-  StrCpy ${L_RESULT} "$(PFI_LANG_INST_LOG_1)"
-  DetailPrint "${L_RESULT} ${L_NEW_GUI}"
+  DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_NEW_GUI}"
   NSISdl::download_quiet http://127.0.0.1:${L_NEW_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Sleep 250 ; milliseconds
   Pop ${L_RESULT} ; Ignore the result
@@ -1250,13 +1215,9 @@ FunctionEnd
 
 Function CheckPortOptions
 
-  !define L_MSG       $R9
-  !define L_RESULT    $R8
-  !define L_TXT       $R7
+  !define L_RESULT    $R9
 
-  Push ${L_MSG}
   Push ${L_RESULT}
-  Push ${L_TXT}
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${G_POP3} "ioA.ini" "Field 2" "State"
   !insertmacro MUI_INSTALLOPTIONS_READ ${G_GUI} "ioA.ini" "Field 4" "State"
@@ -1270,12 +1231,10 @@ Function CheckPortOptions
   IntCmp ${G_POP3} 65535 pop3_ok pop3_ok
 
 bad_pop3:
-  StrCpy ${L_MSG} "$(PFI_LANG_OPTIONS_MBPOP3_1)"
-  StrCpy ${L_TXT} "$(PFI_LANG_OPTIONS_MBPOP3_2)"
-  StrCpy ${L_MSG} "${L_MSG} $\"${G_POP3}$\"'.$\n$\n${L_TXT}$\n$\n"
-  StrCpy ${L_TXT} "$(PFI_LANG_OPTIONS_MBPOP3_3)"
-  StrCpy ${L_MSG} "${L_MSG}${L_TXT}"
-  MessageBox MB_OK|MB_ICONEXCLAMATION ${L_MSG}
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_OPTIONS_MBPOP3_1) $\"${G_POP3}$\"'.$\n$\n\
+      $(PFI_LANG_OPTIONS_MBPOP3_2)$\n$\n\
+      $(PFI_LANG_OPTIONS_MBPOP3_3)"
   Goto bad_exit
 
 pop3_ok:
@@ -1287,40 +1246,31 @@ pop3_ok:
   IntCmp ${G_GUI} 65535 good_exit good_exit
 
 bad_gui:
-  StrCpy ${L_MSG} "$(PFI_LANG_OPTIONS_MBGUI_1)"
-  StrCpy ${L_TXT} "$(PFI_LANG_OPTIONS_MBGUI_2)"
-  StrCpy ${L_MSG} "${L_MSG} $\"${G_GUI}$\".$\n$\n${L_TXT}$\n$\n"
-  StrCpy ${L_TXT} "$(PFI_LANG_OPTIONS_MBGUI_3)"
-  StrCpy ${L_MSG} "${L_MSG}${L_TXT}"
-  MessageBox MB_OK|MB_ICONEXCLAMATION ${L_MSG}
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_OPTIONS_MBGUI_1) $\"${G_GUI}$\".$\n$\n\
+      $(PFI_LANG_OPTIONS_MBGUI_2)$\n$\n\
+      $(PFI_LANG_OPTIONS_MBGUI_3)"
   Goto bad_exit
 
 ports_must_differ:
-  StrCpy ${L_MSG} "$(PFI_LANG_OPTIONS_MBDIFF_1)"
-  StrCpy ${L_TXT} "$(PFI_LANG_OPTIONS_MBDIFF_2)"
-  StrCpy ${L_MSG} "${L_MSG}$\n$\n${L_TXT}"
-  MessageBox MB_OK|MB_ICONEXCLAMATION ${L_MSG}
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_OPTIONS_MBDIFF_1)$\n$\n\
+      $(PFI_LANG_OPTIONS_MBDIFF_2)"
 
 bad_exit:
 
   ; Stay with the custom page created by "SetOptionsPage"
 
-  Pop ${L_TXT}
   Pop ${L_RESULT}
-  Pop ${L_MSG}
   Abort
 
 good_exit:
 
   ; Allow next page in the installation sequence to be shown
 
-  Pop ${L_TXT}
   Pop ${L_RESULT}
-  Pop ${L_MSG}
 
-  !undef L_MSG
   !undef L_RESULT
-  !undef L_TXT
 
 FunctionEnd
 
@@ -1495,11 +1445,8 @@ next_acct:
   StrCpy ${L_IDENTITY} $\"${L_IDENTITY}$\"
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "Account Name"
   StrCpy ${L_OEDATA} $\"${L_OEDATA}$\"
-  StrCpy ${LG_TEMP} "$(PFI_LANG_OECFG_IO_LINK_1)"
-  StrCpy ${L_OEDATA} "${L_OEDATA} ${LG_TEMP} ${L_IDENTITY} "
-  StrCpy ${LG_TEMP} "$(PFI_LANG_OECFG_IO_LINK_2)"
-  StrCpy ${L_OEDATA} "${L_OEDATA}${LG_TEMP}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" "Field 10" "Text" "${L_OEDATA}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" "Field 10" "Text" \
+      "${L_OEDATA} $(PFI_LANG_OECFG_IO_LINK_1) ${L_IDENTITY} $(PFI_LANG_OECFG_IO_LINK_2)"
 
   ; Display the OE account data and offer to configure this account to work with POPFile
 
@@ -1589,29 +1536,15 @@ FunctionEnd
 
 Function StartPOPFilePage_Init
 
-  !define L_MSG   $R9
-  !define L_TXT   $R8
-
-  Push ${L_MSG}
-  Push ${L_TXT}
-
   !insertmacro PFI_IO_TEXT "ioC.ini" "1" "$(PFI_LANG_LAUNCH_IO_INTRO)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "2" "$(PFI_LANG_LAUNCH_IO_NO)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "3" "$(PFI_LANG_LAUNCH_IO_DOSBOX)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "4" "$(PFI_LANG_LAUNCH_IO_BCKGRND)"
 
-  StrCpy ${L_MSG} "$(PFI_LANG_LAUNCH_IO_NOTE_1)"
-  StrCpy ${L_TXT} "$(PFI_LANG_LAUNCH_IO_NOTE_2)"
-  StrCpy ${L_MSG} "${L_MSG}\r\n\r\n${L_TXT}"
-  StrCpy ${L_TXT} "$(PFI_LANG_LAUNCH_IO_NOTE_3)"
-  StrCpy ${L_MSG} "${L_MSG}\r\n\r\n${L_TXT}"
-  !insertmacro PFI_IO_TEXT "ioC.ini" "6" "${L_MSG}"
-
-  Pop ${L_TXT}
-  Pop ${L_MSG}
-
-  !undef L_MSG
-  !undef L_TXT
+  !insertmacro PFI_IO_TEXT "ioC.ini" "6" \
+      "$(PFI_LANG_LAUNCH_IO_NOTE_1)\r\n\r\n\
+      $(PFI_LANG_LAUNCH_IO_NOTE_2)\r\n\r\n\
+      $(PFI_LANG_LAUNCH_IO_NOTE_3)"
 
 FunctionEnd
 
@@ -2088,17 +2021,15 @@ Section "Uninstall"
 
   !define L_CFG         $R9
   !define L_LNE         $R8
-  !define L_MSG         $R7
-  !define L_REG_KEY     $R6
-  !define L_REG_SUBKEY  $R5
-  !define L_REG_VALUE   $R4
-  !define L_TEMP        $R3
+  !define L_REG_KEY     $R7
+  !define L_REG_SUBKEY  $R6
+  !define L_REG_VALUE   $R5
+  !define L_TEMP        $R4
 
   IfFileExists $INSTDIR\popfile.pl skip_confirmation
-    StrCpy ${L_MSG} "$(un.PFI_LANG_MBNOTFOUND_1)"
-    StrCpy ${L_TEMP} "$(un.PFI_LANG_MBNOTFOUND_2)"
-    StrCpy ${L_MSG} "${L_MSG} '$INSTDIR'.$\r$\n$\r$\n${L_TEMP}"
-    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "${L_MSG}" IDYES skip_confirmation
+    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
+        "$(un.PFI_LANG_MBNOTFOUND_1) '$INSTDIR'.$\r$\n$\r$\n\
+        $(un.PFI_LANG_MBNOTFOUND_2)" IDYES skip_confirmation
     Abort "$(un.PFI_LANG_ABORT_1)"
 
 skip_confirmation:
@@ -2153,8 +2084,7 @@ done:
   Call un.StrCheckDecimal
   Pop ${G_GUI}
   StrCmp ${G_GUI} "" skip_shutdown
-  StrCpy ${L_MSG} "$(un.PFI_LANG_LOG_1)"
-  DetailPrint "${L_MSG} ${G_GUI}"
+  DetailPrint "$(un.PFI_LANG_LOG_1) ${G_GUI}"
   NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_TEMP}
   Sleep 250 ; milliseconds
@@ -2200,8 +2130,7 @@ skip_shutdown:
   ClearErrors
   FileOpen ${L_CFG} $INSTDIR\popfile.reg r
   IfErrors skip_registry_restore
-  StrCpy ${L_MSG} "$(un.PFI_LANG_LOG_2)"
-  DetailPrint "${L_MSG}: popfile.reg"
+  DetailPrint "$(un.PFI_LANG_LOG_2): popfile.reg"
 
 restore_loop:
   FileRead ${L_CFG} ${L_REG_KEY}
@@ -2220,14 +2149,12 @@ restore_loop:
   Pop ${L_REG_VALUE}
   IfErrors skip_registry_restore
   WriteRegStr HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
-  StrCpy ${L_MSG} "$(un.PFI_LANG_LOG_3)"
-  DetailPrint "${L_MSG} ${L_REG_SUBKEY}: ${L_REG_VALUE}"
+  DetailPrint "$(un.PFI_LANG_LOG_3) ${L_REG_SUBKEY}: ${L_REG_VALUE}"
   goto restore_loop
 
 skip_registry_restore:
   FileClose ${L_CFG}
-  StrCpy ${L_MSG} "$(un.PFI_LANG_LOG_4)"
-  DetailPrint "${L_MSG}: popfile.reg"
+  DetailPrint "$(un.PFI_LANG_LOG_4): popfile.reg"
   Delete $INSTDIR\popfile.reg
 
 no_reg_file:
@@ -2319,17 +2246,14 @@ no_reg_file:
     RMDir /r $INSTDIR
     IfFileExists $INSTDIR 0 Removed
       DetailPrint "$(un.PFI_LANG_LOG_6)"
-      StrCpy ${L_MSG} "$(un.PFI_LANG_MBREMERR_1)"
-      StrCpy ${L_TEMP} "$(un.PFI_LANG_MBREMERR_2)"
-      StrCpy ${L_MSG} "${L_MSG}: $INSTDIR ${L_TEMP}"
-      MessageBox MB_OK|MB_ICONEXCLAMATION ${L_MSG}
+      MessageBox MB_OK|MB_ICONEXCLAMATION \
+          "$(un.PFI_LANG_MBREMERR_1): $INSTDIR $(un.PFI_LANG_MBREMERR_2)"
 Removed:
 
   SetDetailsPrint both
 
   !undef L_CFG
   !undef L_LNE
-  !undef L_MSG
   !undef L_REG_KEY
   !undef L_REG_SUBKEY
   !undef L_REG_VALUE
