@@ -1339,7 +1339,7 @@ Section "Skins" SecSkins
 
   SetOutPath "$G_ROOTDIR\skins\oceanblue"
   File "..\engine\skins\oceanblue\*.*"
-  
+
   SetOutPath "$G_ROOTDIR\skins\orange"
   File "..\engine\skins\orange\*.*"
 
@@ -2290,11 +2290,81 @@ warning:
       $\r$\n$\r$\n\
       $INSTDIR\
       $\r$\n$\r$\n$\r$\n\
-      $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES continue
+      $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES check_options
 
   ; Return to the POPFile PROGRAM DIRECTORY selection page
 
   Abort
+
+check_options:
+
+  ; If user has NOT selected a program component on the COMPONENTS page and we find that the
+  ; version we are about to upgrade includes that program component then the user is asked for
+  ; permission to upgrade the component [To do: disable the component if user says 'No' ??]
+
+#-------------------------------------------
+# IMAP is not included in the 0.22.0 release
+# -------------------------------------------
+;;  !insertmacro SectionFlagIsSet ${SecIMAP} ${SF_SELECTED} check_nntp look_for_imap
+;;
+;;look_for_imap:
+;;  IfFileExists "$G_ROOTDIR\Services\IMAP.pm" ask_about_imap
+;;  IfFileExists "$G_ROOTDIR\Server\IMAP.pm" ask_about_imap
+;;  IfFileExists "$G_ROOTDIR\POPFile\IMAP.pm" ask_about_imap check_nntp
+;;
+;;ask_about_imap:
+;;  StrCpy $G_PLS_FIELD_1 "POPFile IMAP"
+;;  MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
+;;      $\r$\n$\r$\n\
+;;      $(MBCOMPONENT_PROB_2)" IDNO check_nntp
+;;  !insertmacro SelectSection ${SecIMAP}
+;;
+;;check_nntp:
+#-------------------------------------------
+# IMAP is not included in the 0.22.0 release
+# -------------------------------------------
+  !insertmacro SectionFlagIsSet ${SecNNTP} ${SF_SELECTED} check_smtp look_for_nntp
+
+look_for_nntp:
+  IfFileExists "$G_ROOTDIR\Proxy\NNTP.pm" 0 check_smtp
+  StrCpy $G_PLS_FIELD_1 "POPFile NNTP proxy"
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
+      $\r$\n$\r$\n\
+      $(MBCOMPONENT_PROB_2)" IDNO check_smtp
+  !insertmacro SelectSection ${SecNNTP}
+
+check_smtp:
+  !insertmacro SectionFlagIsSet ${SecSMTP} ${SF_SELECTED} check_socks look_for_smtp
+
+look_for_smtp:
+  IfFileExists "$G_ROOTDIR\Proxy\SMTP.pm" 0 check_socks
+  StrCpy $G_PLS_FIELD_1 "POPFile SMTP proxy"
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
+      $\r$\n$\r$\n\
+      $(MBCOMPONENT_PROB_2)" IDNO check_socks
+  !insertmacro SelectSection ${SecSMTP}
+
+check_socks:
+  !insertmacro SectionFlagIsSet ${SecSOCKS} ${SF_SELECTED} check_xmlrpc look_for_socks
+
+look_for_socks:
+  IfFileExists "$G_ROOTDIR\lib\IO\Socket\Socks.pm" 0 check_xmlrpc
+  StrCpy $G_PLS_FIELD_1 "SOCKS support"
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
+      $\r$\n$\r$\n\
+      $(MBCOMPONENT_PROB_2)" IDNO check_xmlrpc
+  !insertmacro SelectSection ${SecSOCKS}
+
+check_xmlrpc:
+  !insertmacro SectionFlagIsSet ${SecXMLRPC} ${SF_SELECTED} continue look_for_xmlrpc
+
+look_for_xmlrpc:
+  IfFileExists "$G_ROOTDIR\UI\XMLRPC.pm" 0 continue
+  StrCpy $G_PLS_FIELD_1 "POPFile XMLRPC"
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
+      $\r$\n$\r$\n\
+      $(MBCOMPONENT_PROB_2)" IDNO continue
+  !insertmacro SelectSection ${SecXMLRPC}
 
 continue:
 
