@@ -1,0 +1,292 @@
+H2 {
+  font-size: 14pt;
+  font-weight: normal;
+}
+
+body {
+  background-color: #ffffff;
+  border: none;
+  font-family: tahoma, sans-serif;
+  font-size: 8pt;
+  font-weight: normal;
+  color: #000000;
+  margin: 3px;
+}
+
+table.head {
+  font-weight: normal;
+  width: 100%;
+  background-color: #eeeeee;
+  color: #666666;
+}
+
+.top, .bottom, .borderTopLeft, .borderTop, .borderTopRight, .borderLeft, .borderRight, .borderBottomLeft, .borderBottom, .borderBottomRight {
+  visibility: hidden;
+  display: none;
+}
+
+.head, td.head {
+  font-weight: bold;
+  font-size: 14pt;
+  background-color: #eeeeee;
+  color: #666666;
+  padding-left: 5px;
+}
+
+.shell {
+  border: 2px #cccccc solid;
+  background-color: #ffffff;
+  color: #000000;
+  margin: 0px;
+  padding: 0px;
+}
+
+.head a {
+  font-size: 12pt;
+  font-weight: normal;
+}
+
+.menu {
+  font-size: 12pt;
+  font-weight: normal;
+  width: 100%;
+}
+
+.menuIndent {
+	width: 5%;
+}
+
+.menuSelected, .menuSelected a {
+  background-color: #cccccc;
+  color: #000000;
+  font-size: 14pt;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+td.menuSelected {
+  border-left: 2px solid #000000;
+  border-right: 2px solid #000000;
+  border-top: 2px solid #000000;
+  padding-left: 2px;
+  padding-right: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
+  width: 15%;
+}
+
+.menuStandard, .menuStandard a {
+  background-color: #efefef;
+  color: #0000ff;
+  font-size: 14pt;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+td.menuStandard {
+  border-left: 2px solid #cccccc;
+  border-right: 2px solid #cccccc;
+  border-top: 2px solid #cccccc;
+  padding-left: 2px;
+  padding-right: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
+  width: 15%;
+}
+
+.menuStandard a:hover {
+  text-decoration: underline;
+}
+
+.rowEven {
+  background-color: #f7f7f7;
+  color: #000000;
+}
+
+.rowOdd {
+  background-color: #eeeeee;
+  color: #000000;
+}
+
+.rowEven a, .rowOdd a {
+  text-decoration: none;
+}
+
+.rowEven a:hover, .rowOdd a:hover {
+  color: #000000;
+  background-color: #ffffcc;
+}
+
+tr.rowHighlighted {
+	background-color: #ffffcc;
+	color: #666666;
+}
+
+table.stabColor01 {
+  border: 1px solid #cccccc;
+  padding: 3px;
+  margin: 0px;
+}
+
+table.stabColor03 {
+  border: 2px solid Black;
+  padding: 2px;
+  margin: 0px;
+}
+
+td.stabColor01 {
+  border: 1px solid #cccccc;
+  padding: 3px;
+  margin: 0px;
+}
+
+td.naked {
+  padding: 0px; 
+  margin: 0px; 
+  border: none
+}
+
+td.accuracy0to49 {
+	background-color: red;
+	color: #666666;
+	height: 20px;
+}
+
+td.accuracy50to93 {
+	background-color: yellow;
+	color: #666666;
+	height: 20px;
+}
+	
+td.accuracy94to100 {
+	background-color: green;
+	color: #666666;
+	height: 20px;
+}
+
+div.error01 {
+	background-color: transparent;
+	color: red;
+	font-size: larger;
+}
+	
+div.error02 {
+	background-color: transparent;
+	color: red;
+}
+
+td.historyNavigatorTop {
+  text-align: right;
+  padding-right: 5px;
+}
+
+.historyNavigatorTop a:hover, .historyNavigatorBottom a:hover {
+  background-color: #eeeeee;
+  color: #000000;
+}
+
+td.openMessageCloser {
+  text-align: right;
+  background-color: #eeeeee;
+  color: #000000;
+}
+
+.historyLabel {
+  font-size: 9pt;
+  text-decoration: none;
+  padding-left: 1px;
+  padding-right: 2px;
+}
+
+a.historyLabel:hover {
+  text-decoration: underline;
+}
+
+span.bucketsLabel {
+	font-weight: bold;
+}
+
+span.magnetsLabel {
+	font-weight: bold;
+}
+
+span.securityLabel {
+	font-weight: bold;
+}
+
+span.configurationLabel {
+	font-weight: normal;
+}
+	
+span.advancedLabel {
+	font-weight: bold;
+}
+		
+span.passwordLabel {
+	font-weight: bold;
+}
+
+span.sessionLabel {
+	font-weight: bold;
+}
+
+table.historyWidgetsTop {
+  width: 100%;
+  border-top: 2px solid #cccccc;
+  border-bottom: 2px solid #cccccc;
+}
+
+table.historyWidgetsTop td {
+  padding-left: 20px;
+  font-weight: bold;
+}
+
+table.historyButtonsBottom {
+  width: 100%;
+  border-bottom: 2px solid #cccccc;
+}
+
+table.historyButtonsBottom td {
+  padding-left: 20px;
+  font-weight: bold;
+}
+
+table.footer {
+  width: 100%;
+  background-color: #eeeeee;
+  color: #666666;
+  border-left: 2px solid #cccccc;
+  border-right: 2px solid #cccccc;
+  border-bottom: 2px solid #cccccc;
+}
+
+td.footerBody { 
+  text-align: center;
+  padding-left: 5%;
+  padding-right: 5%;
+  font-size: 8pt;
+  font-weight: bold;
+}
+
+.bottomLink {
+  text-decoration: none;
+}
+
+.bottomLink:hover {
+  background-color: #ffffcc;
+  color: #000000;
+}
+
+input, button, select {
+  font-family: tahoma, sans-serif;
+  font-size: 8pt;
+  font-weight: normal;
+  padding: 0px;
+  margin: 0px;
+}
+
+tt {
+  font-family: "lucida console", courier, sans-serif;
+  font-size: 9pt;
+  font-weight: normal;
+}

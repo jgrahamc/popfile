@@ -1,0 +1,217 @@
+body {
+	background-color: #FFFFFF;
+	font-family: sans-serif;
+  	margin: 10px 20px 20px 20px; 
+	color: #000000;
+}
+
+.shell {
+	background-color: #bcd5ea;
+	border: 3px #88b5dd solid;
+	border-style: groove; 
+  	border-color: #FFFFFF;
+  	border-width: 2px;
+  	margin: 0px 0px 0px 0px;
+	color: #000000;
+}
+
+table.head {
+  width: 100%;
+   }
+
+td.head {
+  font-weight: normal;
+  font-size: 22pt;
+}
+
+.menu {
+	font-size: 14pt;
+	font-weight: bold;
+	width: 100%;
+}
+
+.menuSelected {
+	background-color: #88b5dd;
+	width: 14%;
+  	border-color: #ffffff;
+  	border-style: groove groove none groove;
+  	border-width: 2px;
+	color: #000000;
+}
+
+.menuStandard {
+	background-color: #bcd5ea;
+	width: 14%;
+  	border-color: #ffffff;
+  	border-style: groove groove none groove;
+  	border-width: 2px;
+	color: #000000;
+}
+
+.menuIndent {
+	width: 8%;
+}
+
+hr {
+  color: #88b5dd;
+  background-color: transparent; 
+}
+
+a.changeSettingLink {
+	background-color: transparent;
+	color: blue;
+}
+
+a:link {
+  color: #000000;
+  background-color: transparent;
+  text-decoration: underline; 
+} 
+
+a:visited { 
+  color: #333333;
+  background-color: transparent;
+  text-decoration: underline; 
+} 
+
+a:hover {
+  color: #000000;
+  background-color: transparent;
+  text-decoration: none; 
+} 
+
+tr.rowEven {
+	background-color: #bcd5ea;
+	color: #000000;
+}
+
+tr.rowOdd {
+	background-color: #88b5dd;
+	color: #000000;
+}
+
+tr.rowHighlighted {
+	background-color: #29abff;
+	color: #eeeeee;
+}
+
+table.footer {
+	width: 100%;
+}
+
+table.stabColor01 {
+	border: 1px solid #88b5dd;
+}
+
+table.stabColor03 {
+	border: 3px solid #88b5dd;
+}
+
+td.openMessageCloser {
+	text-align: right;
+}
+
+td.openMessageBody {
+	text-align: left;
+}
+
+td.stabColor01 {
+	border: 1px solid #88b5dd;
+}
+
+td.naked {
+	padding: 0px; 
+	margin: 0px; 
+	border: none
+}
+
+td.accuracy0to49 {
+	background-color: red;
+	color: black;
+}
+
+td.accuracy50to93 {
+	background-color: yellow;
+	color: black;
+}
+	
+td.accuracy94to100 {
+	background-color: green;
+	color: black;
+}
+
+div.error01 {
+	background-color: transparent;
+	color: red;
+	font-size: larger;
+}
+	
+div.error02 {
+	background-color: transparent;
+	color: red;
+}
+
+span.graphFont {
+	font-size: x-small;
+}		
+
+span.historyLabel {
+	font-weight: bold;
+}
+
+span.bucketsLabel {
+	font-weight: bold;
+}
+
+span.magnetsLabel {
+	font-weight: bold;
+}
+
+span.securityLabel {
+	font-weight: bold;
+}
+
+span.configurationLabel {
+	font-weight: bold;
+}
+
+		
+span.advancedLabel {
+	font-weight: bold;
+}
+		
+span.passwordLabel {
+	font-weight: bold;
+}
+
+span.sessionLabel {
+	font-weight: bold;
+}
+
+td.logo2menuSpace { 
+	height: 0.8em;
+}
+
+td.footerBody { 
+	text-align: center;
+	}
+	
+table.historyWidgetsTop {
+	width: 100%;
+	margin-left: 1.5em;
+	margin-top: 0.6em;
+	margin-bottom: 1.0em;
+}
+
+table.historyButtonsBottom {
+	width: 100%;
+	margin-top: 0.6em;
+}
+
+td.historyNavigatorTop {
+	text-align: right;
+}
+
+td.historyNavigatorBottom {
+	text-align: right;
+}
