@@ -477,9 +477,24 @@ sub slurp_
     # could accidentally split CRLF into two lines (one ending CR and one LF
     # if they appeared right at the 160 character boundary).
 
-    while ( ( $self->{slurp_buffer__}{"$handle"} !~ /[\012\015]/ ) &&
+    while ( ( $self->{slurp_buffer__}{"$handle"}{data} !~ /[\012\015]/ ) &&
             ( sysread( $handle, $c, 160 ) > 0 ) ) {
-        $self->{slurp_buffer__}{"$handle"} .= $c;
+        $self->{slurp_buffer__}{"$handle"}{data} .= $c;
+    }
+
+    # If the last character is CR then try to read one more character in
+    # case there's an LF after it
+
+    if ( $self->{slurp_buffer__}{"$handle"}{data} =~ /\015$/ ) {
+        if ( !defined( $self->{slurp_bufer__}{"$handle"}{select} ) ) {
+            $self->{slurp_buffer__}{"$handle"}{select} = new IO::Select( $handle );
+	}
+
+        if ( defined( $self->{slurp_buffer__}{"$handle"}{select}->can_read(0) ) ) {
+            if ( sysread( $handle, $c, 1 ) == 1 ) {
+                $self->{slurp_buffer__}{"$handle"}{data} .= $c;
+	    }
+	}
     }
 
     # The acceptable line endings are CR, CRLF or LF.  So we look for
@@ -487,19 +502,19 @@ sub slurp_
 
     # Look for LF
 
-    if ( $self->{slurp_buffer__}{"$handle"} =~ s/^([^\015\012]*\012)// ) {
+    if ( $self->{slurp_buffer__}{"$handle"}{data} =~ s/^([^\015\012]*\012)// ) {
         return $1;
     }	
 
     # Look for CRLF
 
-    if ( $self->{slurp_buffer__}{"$handle"} =~ s/^([^\015\012]*\015\012)// ) {
+    if ( $self->{slurp_buffer__}{"$handle"}{data} =~ s/^([^\015\012]*\015\012)// ) {
         return $1;
     }
 
     # Look for CR
 
-    if ( $self->{slurp_buffer__}{"$handle"} =~ s/^([^\015\012]*\015)// ) {
+    if ( $self->{slurp_buffer__}{"$handle"}{data} =~ s/^([^\015\012]*\015)// ) {
         return $1;
     }
 
@@ -507,7 +522,7 @@ sub slurp_
     # CRLF so return the line, otherwise we are reading at the end of the
     # stream/file so return undef
 
-    my $remaining = $self->{slurp_buffer__}{"$handle"}; 
+    my $remaining = $self->{slurp_buffer__}{"$handle"}{data}; 
     delete( $self->{slurp_buffer__}{"$handle"} );
 
     if ( $remaining eq '' ) {
