@@ -479,7 +479,7 @@ sub verify_have_uidl
             }
 
             # This gets the UIDL for a message            
-            if ( /(\d+) (.+)/ )
+            if ( /(\d+) ([^\r\n]+)/ )
             {
                 for ( my $i = 0; $i <= $highest_message; $i++ )
                 {
