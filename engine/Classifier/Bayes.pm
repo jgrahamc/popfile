@@ -288,7 +288,7 @@ sub load_word_matrix
         print " $self->{total}{$bucket} words\n" if $self->{debug};
     }
 
-    update_constants();
+    update_constants($self);
     
     print "Corpus loaded with $self->{full_total} entries\n" if $self->{debug};
     
