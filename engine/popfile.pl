@@ -409,8 +409,6 @@ sub echo_to_dot
             last;
         }
 
-        debug( "etd: $_" ); 
-
         print $client $_;
 
         if ( /^\.(\r\n|\r|\n)$/ )
@@ -2093,6 +2091,8 @@ sub run_popfile
                             my $msg_body;           # Store the message body here
                             my $last_timeout  = time;
                             my $timeout_count = 0;
+                            my $got_full_body = 0;
+                            my $message_size  = 0;
 
                             my $getting_headers = 1;
                             
@@ -2119,6 +2119,7 @@ sub run_popfile
                                 # here exactly
                                 if ( $line =~ /^\.(\r\n|\r|\n)$/ )
                                 {
+                                    $got_full_body = 1;
                                     last;
                                 }
 
@@ -2126,6 +2127,7 @@ sub run_popfile
                                 {
                                     if ( $line =~ /[A-Z0-9]/i ) 
                                     {
+                                        $message_size += length $line;                                        
                                         print TEMP $line;
             
                                         if ( $configuration{subject} ) 
@@ -2152,6 +2154,7 @@ sub run_popfile
                                 }
                                 else
                                 {
+                                    $message_size += length $line;
                                     print TEMP $line;
                                     $msg_body .= $line;
                                 }
@@ -2163,6 +2166,11 @@ sub run_popfile
                                     debug( "Sending timeout prevention header" );
                                     $timeout_count += 1;
                                     $last_timeout = time;
+                                }
+                                
+                                if ( $message_size > 100000 ) 
+                                {
+                                    last;
                                 }
                             }
 
@@ -2193,7 +2201,15 @@ sub run_popfile
                             # Echo the text of the message to the client
                             print $client $msg_headers;
                             print $client $msg_body;
-                            print $client ".$eol";
+                            
+                            if ( $got_full_body == 0 )   
+                            {   
+                                echo_to_dot( $mail, $client );   
+                            }   
+                            else   
+                            {   
+                                print $client ".$eol";    
+                            } 
 
                             open CLASS, ">$class_file";
                             print CLASS "$classification$eol";
