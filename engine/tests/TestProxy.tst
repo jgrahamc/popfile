@@ -80,7 +80,8 @@ $p->mq( $mq );
 $p->logger( $l );
 
 # Start a generic proxy on port 9999
-$p->config_( 'port', 9999 );
+my $port = 9000 + int(rand(1000));
+$p->config_( 'port', $port );
 test_assert_equal( $p->start(), 1 );
 $p->stop();
 
@@ -100,7 +101,7 @@ $sp->forker( \&forker );
 $sp->pipeready( \&pipeready );
 
 $sp->initialize();
-$sp->config_( 'port', 9999 );
+$sp->config_( 'port', $port );
 test_assert_equal( $sp->start(), 1 );
 test_assert( $sp->start_server() );
 
@@ -109,7 +110,7 @@ test_assert( $sp->start_server() );
 my $client = IO::Socket::INET->new(
                 Proto    => "tcp",
                 PeerAddr => 'localhost',
-                PeerPort => 9999 );
+                PeerPort => $port );
 $sp->service();
 
 test_assert( defined( $client ) );
@@ -134,8 +135,71 @@ select( undef, undef, undef, 0.25 );
 $sp->service_server();
 test_assert_regexp( $sp->received(), 'toserver' );
 
+# Test the tee function, that send a line to the server
+# or client and to the logger
+
+$sp->tee_( $client, "teed\n" );
+select( undef, undef, undef, 0.25 );
+$sp->service_server();
+test_assert_regexp( $sp->received(), 'teed' );
+my @lastten = $l->last_ten();
+test_assert_regexp( $lastten[$#lastten], 'teed' );
+
+# Test the echo_to_regexp_ function
+
+$sp->send( 'before1' );
+$sp->send( 'before2' );
+$sp->send( 'matchTHis' );
+$sp->send( 'after' );
+$sp->service_server();
+open TEMP, ">temp.tmp";
+$sp->echo_to_regexp_( $sp->{remote_client__}, \*TEMP, qr/TH/ );
+close TEMP;
+open TEMP, "<temp.tmp";
+my $line = <TEMP>;
+test_assert_regexp( $line, 'before1' );
+$line = <TEMP>;
+test_assert_regexp( $line, 'before2' );
+$line = <TEMP>;
+test_assert_regexp( $line, 'matchTHis' );
+$line = <TEMP>;
+test_assert( !defined( $line ) );
+close TEMP;
+
+my $handle = $sp->{remote_client__};
+$line = <$handle>;
+test_assert_regexp( $line, 'after' );
+
+# Test echo_to_dot_
+
+$sp->send( 'before1' );
+$sp->send( 'before2' );
+$sp->send( '.' );
+$sp->send( 'after' );
+$sp->service_server();
+open TEMP, ">temp.tmp";
+$sp->echo_to_dot_( $sp->{remote_client__}, \*TEMP );
+close TEMP;
+open TEMP, "<temp.tmp";
+my $line = <TEMP>;
+test_assert_regexp( $line, 'before1' );
+$line = <TEMP>;
+test_assert_regexp( $line, 'before2' );
+$line = <TEMP>;
+test_assert_regexp( $line, '\.' );
+$line = <TEMP>;
+test_assert( !defined( $line ) );
+close TEMP;
+
+$line = <$handle>;
+test_assert_regexp( $line, 'after' );
+
 # Close down the child process
 
 close $client;
 $sp->stop_server();
 select( undef, undef, undef, 0.25 );
+
+# Reap the children
+
+$sp->reaper();
