@@ -19,7 +19,7 @@
 #
 #                       (1) pfidiag.exe     (NSIS script: test\pfidiag.nsi)
 #
-# Copyright (c) 2002-2004 John Graham-Cumming
+# Copyright (c) 2002-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -1006,6 +1006,7 @@ install_schema:
 
   SetOutPath "$G_ROOTDIR\POPFile"
   File "..\engine\POPFile\MQ.pm"
+  File "..\engine\POPFile\Database.pm"
   File "..\engine\POPFile\History.pm"
   File "..\engine\POPFile\Loader.pm"
   File "..\engine\POPFile\Logger.pm"
@@ -2951,6 +2952,7 @@ continue:
   Delete "$G_ROOTDIR\pfi-data.ini"
 
   Delete "$G_ROOTDIR\popfile.pl"
+  Delete "$G_ROOTDIR\popfile.pck"
   Delete "$G_ROOTDIR\*.pm"
 
   Delete "$G_ROOTDIR\bayes.pl"
