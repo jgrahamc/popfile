@@ -79,7 +79,16 @@ Arrived                                 Chegada
 
 Locale_Thousands                       .
 Locale_Decimal                         ,
-Locale_Date                            %D %T
+
+# The Locale_Date uses the format strings in Perl's Date::Format
+# module to set the date format for the UI.  There are two possible
+# ways to specify it.
+#
+# <format>            Just one simple format used for all dates
+# <format> | <format> The first format is used for dates less than
+#                     7 days from now, the second for all other dates
+
+Locale_Date                            %a %R | %D %R
 
 # The header and footer that appear on every UI page
 Header_Title                            Centro de Controle do POPFile
@@ -150,7 +159,7 @@ Configuration_LoggerOutput              Saída do Logger
 Configuration_GeneralSkins              Skins
 Configuration_SmallSkins                Small Skins
 Configuration_TinySkins                 Tiny Skins
-Configuration_CurrentLogFile            &lt;arquivo de log atual&gt;
+Configuration_CurrentLogFile            &lt;Download do arquivo de log atual&gt;
 Configuration_SOCKSServer               Endereço do proxy SOCKS V
 Configuration_SOCKSPort                 Porta do proxy SOCKS V
 Configuration_SOCKSPortUpdate           Alterada a porta do proxy SOCKS V para %s
@@ -203,6 +212,7 @@ History_Increase			Incrementar
 History_Decrease			Decrementar
 History_Column_Characters		Alterar a largura das colunas De, Para, Cc e Assunto
 History_Automatic			Automático
+History_Reclassified                    Reclassificado
 
 Password_Title                          Senha
 Password_Enter                          Digite a senha
@@ -245,7 +255,7 @@ Magnet_Message1                         Os seguintes ímãs fazem as mensagens ser
 Magnet_CreateNew                        Criar Novo Ímã
 Magnet_Explanation                      Estes tipos de ímã estão disponíveis:</b> <ul><li><b>Endereço ou nome do remetente:</b> Por exemplo: fulano@empresa.com para pegar um endereço específico, <br />empresa.com para pegar todo mundo que envia de empresa.com, <br />Fulano de Tal para pegar uma pessoa específica, Fulano para pegar todos os Fulanos.</li><li><b>Endereço ou nome de destinatário/cópia:</b> Como um ímã de remetente mas para o endereço Para:/Cc: de uma mensagem.</li> <li><b>Palavras no assunto:</b> Por exemplo: olá para pegar todas as mensagens com olá no assunto.</li></ul>
 Magnet_MagnetType                       Tipo do ímã
-Magnet_Value                            Valor
+Magnet_Value                            Valores
 Magnet_Always                           Sempre vai para o balde
 Magnet_Jump                             Ir para a página de ímãs
 

@@ -77,7 +77,16 @@ Arrived                                 Eingang
 
 Locale_Thousands                       .
 Locale_Decimal                         ,
-Locale_Date                            %d.%m.%y %T
+
+# The Locale_Date uses the format strings in Perl's Date::Format
+# module to set the date format for the UI.  There are two possible
+# ways to specify it.
+#
+# <format>            Just one simple format used for all dates
+# <format> | <format> The first format is used for dates less than
+#                     7 days from now, the second for all other dates
+
+Locale_Date                            %a %R | %d.%m.%y %R
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Kontrollzentrum
@@ -196,6 +205,12 @@ History_Magnet                          &nbsp;(zeige nur durch Magnet eingestuft
 History_NoMagnet                        &nbsp;(zeige nicht durch Magnet eingestufte Nachrichten)
 History_ResetSearch                     Zurücksetzen
 History_ChangedClass                    Würde jetzt eingestuft als
+History_Purge                           Jetzt löschen
+History_Increase                        größer
+History_Decrease                        kleiner
+History_Column_Characters               Größe der Spalten für From, To, Cc und Subject
+History_Automatic                       automatisch
+History_Reclassified                    Neu eingestuft
 
 Password_Title                          Paßwort
 Password_Enter                          Paßwort eingeben
