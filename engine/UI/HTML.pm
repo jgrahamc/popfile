@@ -3444,14 +3444,14 @@ sub shutdown_page__
         $css .= $_;
     }
     close CSS;
-    $css .= "</style>";
+    $css .= ".headShutdown { display: none; } \n</style>";
 
     # Load the template, set the class of the menu tabs, and send the
     # output to $text
 
     my $templ = $self->load_template__( 'shutdown-page.thtml' );
 
-    for my $i (0..5) {
+    for my $i ( 0..6 ) {
         $templ->param( "Common_Middle_Tab$i" => "menuStandard" );
     }
 
