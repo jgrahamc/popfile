@@ -987,7 +987,8 @@ sub upgrade_bucket__
                 }
 
                 if ( $wc > 1 ) {
-                    $self->log_( "(completed ", $wc-1, " words)" );
+                    $wc -= 1;
+                    $self->log_( "(completed $wc words)" );
 		}
                 close WORDS;
             } else {
@@ -1031,7 +1032,8 @@ sub upgrade_bucket__
 	    }
 	}
 
-        $self->log_( "(completed " . $wc-1 . " words)" );
+        $wc -= 1;
+        $self->log_( "(completed $wc words)" );
         $self->{db__}->commit;
         untie %h;
         unlink $bdb_file;
