@@ -1,0 +1,177 @@
+<html><head><title>Documentação do POPFile</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+
+</head>
+
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>Documentação do POPFile</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+
+<table width=100% cellspacing=0><tr>
+
+<td width=15% align=center><font size=+1><b>Configurando pela Primeira Vez:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#cccc99 width=15%>Passo 1<br><font size=+1><b>&nbsp;<a href="installing.html">Instalando</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center>Passo 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Configuração de Buckets</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center>Passo 3<br><font size=+1><b>&nbsp;<a href="email.html">Programas de Email</a></b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%>Passo 4<br><font size=+1><b>&nbsp;<a href="training.html">Treinando</a></b></font></td>
+
+<td width=25%>&nbsp;</td></tr>
+
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+
+<tr height=1><td colspan=10></td></tr>
+
+</table>
+
+<table width=100% cellspacing=0><tr>
+
+
+
+<td width=40% align=right><font size=+1><b>Usando o POPFile com:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Autenticação Segura de Senha</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Outros Proxies</a></b></font><br></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Múltiplas Contas de Email</a></b></font></td>
+
+</tr>
+
+
+
+</table>
+
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+
+
+
+
+<h2>Instalando o POPFile</h2>
+
+
+
+<p>O POPFile vem em duas versões - uma versão para Windows fácil de instalar, e uma versão multi-plataforma para usuários técnicos. Uma vez instaladas, as duas versões são idênticas.</p>
+
+
+
+<h3>Versão para Windows Fácil de Instalar</h3>
+
+
+
+<p>Faça o download do instalador para Windows na <a href=http://sourceforge.net/project/showfiles.php?group_id=63137>Página de Download do POPFile</a>, exucute <tt>setup.exe</tt> e siga as instruções. Você pode executar o POPFile pelo Menu Iniciar (Iniciar > Programas > POPFile > Run POPFile in Background), ou reinicializar o computador e ele vai iniciar automaticamente. <b>Nota importante:</b> não vai aparecer nada na tela! Para conferir se ele está rodando corretamente, leia a seção "Accessando o POPFile" adiante.</p>
+
+
+
+<h4>Requisitos do Sistema</h4>
+
+
+
+<p>Você vai precisar de algumas coisas para começar a usar o POPFile.</p>
+
+<ol>
+
+<li>O último release do POPFile.</li>
+
+<li>Uma conta de email que usa o protocolo POP3 (a maioria das contas usam, embora você não possa usar o POPFile com serviços baseados em web-mail como Hotmail and Yahoo! Mail sem um software extra)</li>
+
+<li>Em torno de 2MB de espaço livre em disco</li>
+
+</ol>
+
+
+
+<p>Você pode obter o último release do POPFile como um arquivo zip no topo da
+
+lista de pacotes na <a href="http://sourceforge.net/project/showfiles.php?group_id=63137">Página
+
+de download do POPFile</a>. Usuários Windows preferirão o arquivo da seção chamada Windows Only.</p>
+
+<p>O POPFile em si ocupa apenas pouco mais de um megabyte. A lista de palavras (chamada de corpus) usada para classificar
+
+seus emails vai ocupar algum espaço adicional dependendo de quantos emails você usar para treinar o POPFile e de quantos buckets você criar. </p>
+
+
+
+<h3>Versão Multi-Plataforma</h3>
+
+
+
+<p>Deixe o <a href="http://www.perl.com">Perl</a> rodando em sua máquina, então faça o download do POPFile Perl zip da <a href=http://popfile.sourceforge.net/>Home Page do POPFile</a>, e extraia-o para um diretório a sua escolha. Nas plataformas Windows, execute-o com o comando <tt>perl popfile.pl</tt>.
+
+
+
+<hr>
+
+
+
+<h2>Verificando se o POPFile está rodando corretamente</h2>
+
+
+
+<p>O POPFile não tem uma interface tradicional como a maioria dos programas - você o acessa através de seu navegador web. Não se preocupe - a menos que você diga o contrário, ninguém de fora de sua máquina poderá acessá-lo.</p>
+
+
+
+<p>Para carregar o POPFile, vá em <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a>, ou (para a versão Windows) clique no link 'POPFile Web Interface' no Menu Iniciar. <b>Nota Importante</b>: se durante o processo de intalação no Windows você escolheu uma porta diferente para comunicar-se com o POPFile, substitua a parte "8080" com a porta que você escolheu.</p>
+
+
+
+<p>Se aparecer uma mensagem de erro, verifique se o POPFile está realmente rodando, e que você tem o número da porta correto (deveria ser 8080, mas se você o alterou, você precisará trocá-lo no endereço web também.)</p>
+
+
+
+<p>Se aparecer uma tela do POPFile, parabéns! Agora é hora de configurar como você quer que seus emails sejam classificados. <a href="firsttime.html">Vamos para a Configuração dos Buckets. &gt;&gt;</a></p>
+
+</td></tr></table>
+
+<br>
+
+<table width=100% cellspacing=0><tr>
+
+<td width=15% align=center><font size=+1><b>Links:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Home Page</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forums</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Bug Database</a></b></font></td>
+
+<td width=55%>&nbsp;</td></tr>
+
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+
+<tr height=1><td colspan=10></td></tr>
+
+</table>
+
+
+
+</body></html>

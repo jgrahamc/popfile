@@ -1,0 +1,259 @@
+<html><head><title>Documentação do POPFile</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+
+</head>
+
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>Documentação do POPFile</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+
+<table width=100% cellspacing=0><tr>
+
+<td width=15% align=center><font size=+1><b>Configurando pela Primeira Vez:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%>Passo 1<br><font size=+1><b>&nbsp;<a href="installing.html">Instalando</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center>Passo 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Configuração de Buckets</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center>Passo 3<br><font size=+1><b>&nbsp;<a href="email.html">Programas de Email</a></b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%>Passo 4<br><font size=+1><b>&nbsp;<a href="training.html">Treinando</a></b></font></td>
+
+<td width=25%>&nbsp;</td></tr>
+
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+
+<tr height=1><td colspan=10></td></tr>
+
+</table>
+
+<table width=100% cellspacing=0><tr>
+
+
+
+<td width=40% align=right><font size=+1><b>Usando o POPFile com:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Autenticação Segura de Senha</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#cccc99 width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Outros Proxies</a></b></font><br></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Múltiplas Contas de Email</a></b></font></td>
+
+</tr>
+
+
+
+</table>
+
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+
+
+<h2>Usando o POPFile com outros proxies tais como antivirus</h2>
+
+
+
+<p>Se você usa um proxy escaneador de email que alterou suas configurações de email tal como algumas versões do Norton Antivirus, então o POPFile não vai funcionar diretamente: em vez disso o proxy de email vai pegar os emails. Você precisa configurar o POPFile para conversar com o escaneador de email. (Se seu antivirus não altera a configuração do servidor de email POP3, então você não precisa seguir as próximas instruções).</p>
+
+
+
+<p>(Assim, basicamente, os emails são baixados pelo escaneador, passados ao POPFile, e então - finalmente - passados para seu programa de email.)</p>
+
+
+
+<p>Agora, como diferentes marcas de escaneadores de email funcionam de formas diferentes, nós vamos fazer assim:
+
+
+
+<ol><li>Desabilitar o escaneador de email e retornar sua configuração normal.
+
+<li>Ajustar o POPFile para receber conexões em uma porta diferente.
+
+<li>Ajustar o seu programa de email para conectar ao POPFile em uma porta diferente.
+
+<li>Reabilitar seu escaneador de email com a nova configuração.</ol></p>
+
+
+
+<h3>Desabilitando seu escaneador de email</h3>
+
+
+
+<p>Siga as instruções do fabricante.</p>
+
+
+
+<h3>Trocar a porta do POPFile</h3>
+
+
+
+<p>Vá para a seção Configuração da interface web, e troque a <b>Porta de Escuta POP3</b> para qualquer número similar - recomendamos 123. Clique em Aplicar.</p>
+
+
+
+<h3>Trocar a porta do seu programa de email</h3>
+
+
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+
+
+<td colspan=3 align="center">
+
+
+
+Apenas escolha seu programa de email e siga a coluna abaixo. Apesar de estas instruções parecerem complicadas, na verdade elas levam apenas em torno de dois minutos - e é fácil acertar. (Só para garantir, faça uma anotação de suas configurações originais caso você precise restaurar algo.)
+
+
+
+</td></tr><tr>
+
+
+
+<td width=33% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Outlook</h3>
+
+
+
+<ul>
+
+<li>Vá para o menu Ferramentas -> Contas de Email.
+
+<li>Clique em Visualizar ou alterar contas de email existentes e então clique em Próximo.
+
+<li>Selecione sua conta, então clique em Alterar.
+
+<li>Clique no botão Mais Configuração.
+
+<li>Clique em Avançado.
+
+<li>Em Servidor de entrada (POP3), digite o mesmo número que você escolheu antes (recomendamos 123).
+
+<li>Clique em OK, e repita o processo para cada conta que você quer usar com o POPFile.
+
+</ul>
+
+
+
+</td><td width=34% bgcolor="#CCFFCC" valign="top">
+
+
+
+<h3 align=center>Outlook Express</h3>
+
+
+
+<ul>
+
+<li>Vá para o menu Ferramentas -> Contas.
+
+<li>Selecione sua conta e clique em Propriedades.
+
+<li>Clique em Avançado.
+
+<li>Em Emails de entrada(POP3), digite o mesmo número que você escolheu antes (recomendamos 123).
+
+<li>Clique em OK, e repita o processo para cada conta que você quer usar com o POPFile.
+
+</ul>
+
+
+
+</td><td width=33% bgcolor="#CCCCFF" valign="top">
+
+
+
+<h3 align=center>Eudora</h3>
+
+
+
+<ul>
+
+<li>A configuração da porta no Eudora está escondida em suas configurações 'esotéricas'.
+
+<li>Vá para 'Meu Computador' e navegue para o diretório em que o Eudora está instalado - geralmente em C:\Arquivos de Programas\Qualcomm\Eudora
+
+<li>Clique na pasta 'extrastuff'.
+
+<li>Selecione o arquivo 'esoteric.epi', e copie-o usando o menu Editar > Copiar.
+
+<li>Volte para a pasta principal do Eudora, e cole-o usando Editar > Colar.
+
+<li>Abra o Eudora.
+
+<li>Vá para o menu Tools -> Options.
+
+<li>Vá para o fim da lista de opções no menu e escolha 'Ports & Protocols'.
+
+<li>Em 'POP3', digite o mesmo número que você escolheu antes (recomendamos 123).
+
+<li>Clique em OK. Feito.
+
+</ul>
+
+
+
+</td></tr></table>
+
+
+
+<h3>Reabilitar seu escaneador do email.</h3>
+
+
+
+Reative seu escaneador (consulte o manual do seu escaneador) e ele deve configurar tudo automaticamente para você. Os emails devem agora serem escaneados e classificados.
+
+
+
+</td></tr></table>
+
+<br>
+
+<table width=100% cellspacing=0><tr>
+
+<td width=15% align=center><font size=+1><b>Links:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Home Page</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forums</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Bug Database</a></b></font></td>
+
+<td width=55%>&nbsp;</td></tr>
+
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+
+<tr height=1><td colspan=10></td></tr>
+
+</table>
+
+
+
+</body></html>
