@@ -3,7 +3,7 @@
 ;
 ; Modified to work with NSIS v2.0b1
 !define MUI_PRODUCT "POPFile" 
-!define MUI_VERSION "0.18.1 RC1"
+!define MUI_VERSION "0.18.1 RC2"
 !include "MUI.nsh"
 ;--------------------------------
 ;Configuration
@@ -330,22 +330,32 @@ FunctionEnd
 
 Function SetOutlookOrOutlookExpressPage
 
-  ; In Outlook Express (v5.0 or later) the email account data may appear in
-  ; more than one place, depending upon how Outlook Express has been configured.
+  ; More than one "identity" can be created in OE. Each of these identities is
+  ; given a GUID and these GUIDs are stored in HKEY_CURRENT_USER\Identities.
+  ; Each identity can have several email accounts and the details for these
+  ; accounts are grouped according to the GUID which "owns" the accounts.
 
-  ; First we check the "Main Identity" (also known as the "Default Identity")
-  ; which is created when Outlook Express is installed. Note that this identity
-  ; may no longer be active, as users are free to delete it after creating
-  ; an additional identity and switching to the new one.
+  ; When OE is first installed it creates a default identity which is given the
+  ; name "Main Identity". Although there is a GUID for this default identity,
+  ; OE stores the email account data for this account in a different location
+  ; from that of any extra identities which are created by the user.
 
-  ; The Outlook Express "Main Identity" does not use an "identity number"
-  StrCpy ${OEIDENT} ""
-  Call CheckOutlookExpressAccounts
+  ; We step through every identity defined in HKEY_CURRENT_USER\Identities and
+  ; for each one found check its OE email account data. If an identity with
+  ; an "Identity Ordinal" value of 1 is found, we need to look in the area
+  ; dedicated to the initial "Main Identity", otherwise we look for email
+  ; account data in that GUID's entry in HKEY_CURRENT_USER\Identities.
 
-  ; Now we have to check if any additional identities have been created in
-  ; Outlook Express.  These identities are kept in HKEY_CURRENT_USER\Identities.
-  ; If we find any extra identities, we need to see if any of them have email
-  ; accounts we can reconfigure for use with POPFile.
+  ; The email account data for all identities, although stored in different
+  ; locations, uses the same structure. The "path" for each identity starts
+  ; with "HKEY_CURRENT_USER\" and ends with "\Internet Account Manager\Accounts".
+
+  ; All of the OE account data for an identity appears "under" the path defined
+  ; above, e.g. if an identity has more than three accounts they are found here:
+  ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000001
+  ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000002
+  ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000003
+  ;    etc
 
   StrCpy ${OEID} 0
   
@@ -355,35 +365,19 @@ next_id:
   EnumRegKey ${ID} HKCU "Identities" ${OEID}
   StrCmp ${ID} "" finished_oe
 
-  ; Now check all of the accounts for this particular identity
+  ; Check if this is the GUID for the first "Main Identity" created by OE as the
+  ; account data for this identity is stored separately from the other identities. 
+
+  ReadRegDWORD $R4 HKCU "Identities\${ID}" "Identity Ordinal"
+  StrCmp $R4 "1" firstID otherID
+firstID:
+  StrCpy ${OEIDENT} ""
+  goto checkID
+otherID:
   StrCpy ${OEIDENT} "Identities\${ID}\"
-  Call CheckOutlookExpressAccounts
 
-  ; Now move on to the next identity
-  IntOp ${OEID} ${OEID} + 1
-  goto next_id
-
-finished_oe:
-FunctionEnd
-
-; This function checks all the accounts for a particular Outlook Express identity
-
-Function CheckOutlookExpressAccounts
-
-  ; Called by SetOutLookExpressPage to check all of the accounts for a given
-  ; Outlook Express identity: either the "Main Identity", when ${OEIDENT} is
-  ; a null string (""), or one of the "Additional Identities", when ${OEIDENT}
-  ; is a string such as "Identities\{AB734464-478F-11D7-81C3-00409545B64C}\"
-
-  ; The email account data for all identities, although stored in different
-  ; locations, uses the same structure. The "path" for each identity starts
-  ; with "HKEY_CURRENT_USER\" and ends with "\Internet Account Manager\Accounts".
-
-  ; OE account data for each identity appears "under" the path defined above, e.g.
-  ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000001
-  ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000002
-  ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000003
-  ;    etc
+checkID:
+  ; Now check all of the accounts for this particular identity
 
   StrCpy $R1 0
   
@@ -404,12 +398,20 @@ next_acct:
   !insertmacro MUI_HEADER_TEXT "Reconfigure Outlook or Outlook Express" "POPFile can reconfigure Outlook or Outlook Express for you"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 2" "State" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 8" "Text" $R6
+
+  ; Find the Username used by OE for this identity and the OE Account Name
+  ; (so we can unambiguously report which email account we are offering
+  ; to reconfigure).
+
+  ReadRegStr $R7 HKCU "Identities\${ID}\" "Username"
+  StrCpy $R7 $\"$R7$\"
   ReadRegStr $R6 HKCU $R5 "SMTP Email Address"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 7" "Text" $R6
   ReadRegStr $R6 HKCU $R5 "POP3 User Name"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" $R6
   ReadRegStr $R6 HKCU $R5 "Account Name"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 10" "Text" $R6
+  StrCpy $R6 $\"$R6$\"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 10" "Text" "$R6 account for the $R7 identity"
   Push $R0
   InstallOptions::dialog $PLUGINSDIR\ioB.ini
   Pop $R0
@@ -451,6 +453,12 @@ next_acct_increment:
   goto next_acct
 
 finished_this_id:
+  ; Now move on to the next identity
+  IntOp ${OEID} ${OEID} + 1
+  goto next_id
+
+finished_oe:
+
 FunctionEnd
 
 ; TrimNewlines
