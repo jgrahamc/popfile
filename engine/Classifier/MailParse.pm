@@ -9,7 +9,6 @@ package Classifier::MailParse;
 # ---------------------------------------------------------------------------------------------
 
 use strict;
-use warnings;
 use locale;
 use Classifier::WordMangle;
 
