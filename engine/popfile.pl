@@ -1305,7 +1305,7 @@ sub run_popfile
                 # without any further processing.  We don't want to allow remote users to admin POPFile
                 my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
 
-                if ( $remote_host == inet_aton( "127.0.0.1" ) )
+                if ( $remote_host eq inet_aton( "127.0.0.1" ) )
                 {
                     if ( my $request = <$client> )
                     {
@@ -1343,7 +1343,7 @@ sub run_popfile
         # without any further processing.  We don't want to act as a proxy for just anyone's email
         my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
 
-        if ( $remote_host == inet_aton( "127.0.0.1" ) )
+        if ( $remote_host eq inet_aton( "127.0.0.1" ) )
         {
             # Tell the client that we are ready for commands and identify our version number
             tee( $client, "+OK POP3 popfile (v$major_version.$minor_version) server ready$eol" );
