@@ -378,7 +378,7 @@ sub load_module_
 
         if ( $first =~ /^# POPFILE LOADABLE MODULE/ ) {
             require $module;
-       
+
             $module =~ s/\//::/;
             $module =~ s/\.pm//;
 
@@ -441,7 +441,7 @@ sub CORE_platform_
 
     my $platform = $^O;
 
-    if ( -e "Platform/$platform.pm" ) {
+    if ( -e $self->root_path__( "Platform/$platform.pm" ) ) {
         print "\n         {core:" if $self->{debug__};
 
         $self->CORE_load_module( "Platform/$platform.pm",'core');
@@ -514,7 +514,7 @@ sub CORE_link_components
     # TODO Clean this up so that the Loader doesn't have to know so much about
     # Bayes.
 
-    $self->{components__}{classifier}{bayes}->{parser__}->mangle( 
+    $self->{components__}{classifier}{bayes}->{parser__}->mangle(
         $self->{components__}{classifier}{wordmangle} );
 }
 
