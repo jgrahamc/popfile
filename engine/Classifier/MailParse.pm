@@ -30,6 +30,8 @@ use locale;
 use MIME::Base64;
 use MIME::QuotedPrint;
 
+use HTML::Tagset;
+
 # Korean characters definition
 
 my $ksc5601_sym = '(?:[\xA1-\xAC][\xA1-\xFE])';
@@ -56,7 +58,7 @@ my $symbol_euc_jp = "(?:$symbol_row1_euc_jp|$symbol_row2_euc_jp|$symbol_row8_euc
 my $cho_on_symbol = '(?:\xA1\xBC)';
 
 # Non-symbol EUC-JP chars
-my $non_symbol_two_bytes_euc_jp = '(?:[\x8E\xA3-\xA7\xB0-\xFE][\xA1-\xFE])'; 
+my $non_symbol_two_bytes_euc_jp = '(?:[\x8E\xA3-\xA7\xB0-\xFE][\xA1-\xFE])';
 my $non_symbol_euc_jp = "(?:$non_symbol_two_bytes_euc_jp|$three_bytes_euc_jp|$cho_on_symbol)";
 
 # HTML entity mapping to character codes, this maps things like &amp; to their corresponding
@@ -237,11 +239,11 @@ sub get_color__
         if ( defined( $id ) ) {
             my @buckets = $self->{bayes__}->get_buckets( $self->{color__} );
 
-	    return $self->{bayes__}->get_bucket_color( $self->{color__}, 
-                $self->{bayes__}->get_top_bucket__( 
-                    $self->{color_userid__}, 
-                    $id, 
-                    $self->{color_matrix__},  
+	    return $self->{bayes__}->get_bucket_color( $self->{color__},
+                $self->{bayes__}->get_top_bucket__(
+                    $self->{color_userid__},
+                    $id,
+                    $self->{color_matrix__},
 		    \@buckets ) );
 	} else {
             return 'black';
@@ -264,6 +266,11 @@ sub get_color__
 sub compute_rgb_distance
 {
     my ( $self, $left, $right ) = @_;
+
+    # TODO: store front/back colors in a RGB hash/array
+    #       converting to a hh hh hh format and back
+    #       is a waste as is repeatedly decoding
+    #       from hh hh hh format
 
     # Figure out where the left color is and then subtract the right
     # color (point from it) to get the vector
@@ -291,6 +298,11 @@ sub compute_rgb_distance
 sub compute_html_color_distance
 {
     my ( $self ) = @_;
+
+    # TODO: store front/back colors in a RGB hash/array
+    #       converting to a hh hh hh format and back
+    #       is a waste as is repeatedly decoding
+    #       from hh hh hh format
 
     $self->{htmlcolordistance__} = $self->compute_rgb_distance( $self->{htmlfontcolor__}, $self->{htmlbackcolor__} );
 }
@@ -673,15 +685,15 @@ sub update_tag
 
     my $original;
 
-    while ( $arg =~ s/[ \t]*((\w+)[ \t]*=[ \t]*([\"\'])?(.*?)(\3|($|([ \t>]))))//i ) {
+    while ( $arg =~ s/[ \t]*((\w+)[ \t]*=[ \t]*(([\"\'])(.*?)\4|(\w+)($|([ \t>]))))// ) {
         $original  = $1;
         $attribute = $2;
-        $value     = $4;
+        $value     = $5 || $6;
         $quote     = '';
         $end_quote = '[\> \t\&\n]';
-        if (defined $3) {
-            $quote     = $3;
-            $end_quote = $3;
+        if (defined $4) {
+            $quote     = $4;
+            $end_quote = $4;
         }
 
         print "   attribute $attribute with value $quote$value$quote\n" if ($self->{debug__});
@@ -786,6 +798,7 @@ sub update_tag
             $self->{htmlfontcolor__} = map_color($self, $value);
             $self->compute_html_color_distance();
             print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug__} );
+            next;
         }
 
         if ( ( $attribute =~ /^text$/i ) && ( $tag =~ /^body$/i ) ) {
@@ -794,6 +807,7 @@ sub update_tag
             $self->{htmlfontcolor__} = map_color($self, $value);
             $self->compute_html_color_distance();
             print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug__} );
+            next;
         }
 
         # The width and height of images
@@ -801,12 +815,15 @@ sub update_tag
         if ( ( $attribute =~ /^(width|height)$/i ) && ( $tag =~ /^img$/i ) ) {
             $attribute = lc( $attribute );
             $self->update_pseudoword( 'html', "img$attribute$value", $encoded, $original );
+            next;
         }
 
         # Font sizes
 
         if ( ( $attribute =~ /^size$/i ) && ( $tag =~ /^font$/i ) ) {
+            #TODO: unify font size scaling to use the same scale across size specifiers
             $self->update_pseudoword( 'html', "fontsize$value", $encoded, $original );
+            next;
         }
 
         # Tags with background colors
@@ -819,6 +836,7 @@ sub update_tag
 
             $self->{htmlbodycolor__} = $self->{htmlbackcolor__} if ( $tag =~ /^body$/i );
             $self->compute_html_color_distance();
+            next;
         }
 
         # Tags with a charset
@@ -827,7 +845,108 @@ sub update_tag
             if ( $value=~ /charset=([^ ]{1,40})[\"\>]?/ ) {
                 update_word( $self, $1, $encoded, '', '', '' );
             }
+            next;
         }
+
+        # CSS handling
+
+        if ( !exists(%HTML::Tagset::emptyElement->{lc($tag)}) && $attribute =~ /^style$/i ) {
+            print "      Inline style tag found in $tag: $attribute=$value\n" if ( $self->{debug__} );
+
+            my $style = $self->parse_css_style($value);
+
+            if ($self->{debug__}) {
+                print "      CSS properties: ";
+                foreach my $key (keys( %{$style})) {
+                    print "$key($style->{$key}), ";
+                }
+                print "\n";
+            }
+
+            # CSS font sizing
+            if (defined($style->{'font-size'})) {
+
+                my $size = $style->{'font-size'};
+
+                # TODO: unify font size scaling to use the same scale across size specifiers
+                # approximate font sizes here:
+                # http://www.dejeu.com/web/tools/tech/css/variablefontsizes.asp
+
+                if ($size =~ /(((\+|\-)?\d?\.?\d+)(em|ex|px|%|pt|in|cm|mm|pt|pc))|(xx-small|x-small|small|medium|large|x-large|xx-large)/) {
+                    $self->update_pseudoword( 'html', "cssfontsize$size", $encoded, $original );
+                    print "     CSS font-size set to: $size\n" if $self->{debug__};
+                }
+            }
+
+            # CSS visibility
+            if (defined($style->{'visibility'})) {
+                $self->update_pseudoword( 'html', "cssvisibility" . $style->{'visibility'}, $encoded, $original );
+            }
+
+            # CSS foreground coloring
+
+            if (defined($style->{'color'})) {
+                my $color = $style->{'color'};
+                
+                print "      CSS color: $color\n" if ($self->{debug__});
+
+                $color = $self->parse_css_color($color);
+
+                if ( $color ne "error" ) {
+
+                    $self->{htmlfontcolor__} = map_color($self, $color);
+
+                    $self->{htmlfontcolor__} = $color;
+                    $self->compute_html_color_distance();
+                    print "      CSS set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug__} );
+                    $self->update_pseudoword( 'html', "cssfontcolor$self->{htmlfontcolor__}", $encoded, $original );
+                }
+            }
+
+            # CSS background coloring
+
+            if (defined($style->{'background-color'})) {
+
+                my $background_color = $style->{'background-color'};
+
+                $background_color = $self->parse_css_color($background_color);
+
+                if ($background_color ne "error") {
+                    $self->{htmlbackcolor__} = $background_color;
+                    $self->compute_html_color_distance();
+                    print "       CSS set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug__} );
+                }
+            }
+
+            # CSS all-in one background declaration (ugh)
+
+            if (defined($style->{'background'})) {
+                my $expression;
+                my $background = $style->{'background'};
+                
+                # Take the possibly multi-expression "background" property
+                
+                while ( $background =~ s/^([^ \t\r\n\f]+)( |$)// ) {
+                    
+                    # and examine each expression individually
+                    
+                    $expression = $1;
+                    print "       CSS expression $expression in background property\n" if ($self->{debug__} );
+                    
+                    my $background_color = $self->parse_css_color($expression);
+                    
+                    # to see if it is a color
+
+                    if ($background_color ne "error") {
+                        $self->{htmlbackcolor__} = $background_color;
+                        $self->compute_html_color_distance();
+                        print "       CSS set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug__} );
+                    }                    
+                }
+            }
+        }
+        
+        # TODO: move this up into the style part above
 
         # Tags with style attributes (this one may impact performance!!!)
         # most container tags accept styles, and the background style may
@@ -1026,6 +1145,8 @@ sub add_url
         $temp_after = "[\\\\\/]" if (defined $path);
         $temp_after = "[\:]" if (defined $port);
 
+        # add the entire domain
+
         update_word( $self, $host, $encoded, $temp_before, $temp_after, $prefix) if ( !defined( $noadd ) );
 
         # decided not to care about tld's beyond the verification performed when
@@ -1034,8 +1155,11 @@ sub add_url
         # http://www.0dns.org has a good reference of ccTLD's and their sub-tld's if desired
 
         if ( $hostform eq 'name' ) {
-            while ( $host =~ s/^([^\.])+\.(.*\.(.*))$/$2/ ) {
-                update_word( $self, $2, $encoded, '[\.]', '[<]', $prefix) if ( !defined( $noadd ) );
+
+            # recursively add the roots of the domain
+
+            while ( $host =~ s/^([^\.])+\.(.*)$/$2/ ) {
+                update_word( $self, $2, $encoded, '$1', '[<]', $prefix) if ( !defined( $noadd ) );
             }
         }
     }
@@ -1177,6 +1301,8 @@ sub parse_file
     $reset    = 1 if ( !defined( $reset    ) );
     $max_size = 0 if ( !defined( $max_size ) );
 
+    $lang = '' unless ( defined($lang) );
+
     $self->{lang__} = $lang;
     $self->start_parse( $reset );
 
@@ -1191,7 +1317,7 @@ sub parse_file
     while (<MSG>) {
         $size_read += length($_);
         $self->parse_line( $_ );
-        if ( ( $max_size > 0 ) && 
+        if ( ( $max_size > 0 ) &&
              ( $size_read > $max_size ) ) {
             last;
 	}
@@ -1311,6 +1437,13 @@ sub stop_parse
 
     if ( $self->{in_html_tag__} ) {
         $self->add_line( $self->{html_tag__} . ' ' . $self->{html_arg__}, 0, '' );
+    }
+    
+    # if we are here, and still have headers stored, we must have a bodyless message
+    
+    #TODO: Fix me
+
+    if ( $self->{header__} ne '' ) {
     }
 
     $self->{in_html_tag__} = 0;
@@ -1801,12 +1934,166 @@ sub parse_header
 
 # ---------------------------------------------------------------------------------------------
 #
+# parse_css_ruleset - Parses text for CSS declarations
+#                     Uses the second part of the "ruleset" grammar
+#
+# $line         The line to match
+# $braces       1 if braces are included, 0 if excluded. Defaults to 0. Optional.
+# Returns       A hash of properties containing their expressions
+#
+# ---------------------------------------------------------------------------------------------
+
+sub parse_css_style
+{
+    my ( $self, $line, $braces ) = @_;
+
+    # http://www.w3.org/TR/CSS2/grammar.html
+
+    $braces = 0 unless ( defined( $braces ) );
+
+    # A reference is used to return data
+
+    my $hash = {};
+
+    if ($braces) {
+        $line =~ s/\{(.*?)\}/$1/
+    }
+    while ($line =~ s/^[ \t\r\n\f]*([a-z][a-z0-9\-]+)[ \t\r\n\f]*:[ \t\r\n\f]*(.*?)[ \t\r\n\f]?(;|$)//i) {
+        $hash->{lc($1)} = $2;
+    }
+    return $hash;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# parse_css_color - Parses a CSS color string
+#
+# $color        The string to parse
+# Returns       (r,g,b) triplet in list context, rrggbb (hex) color in scalar context
+# In case of an error: (-1,-1,-1) in list context, "error" in scalar context
+#
+# ---------------------------------------------------------------------------------------------
+
+sub parse_css_color
+{
+    my ( $self, $color ) = @_;
+
+    # CSS colors can be in a rgb(r,g,b), #hhh, #hhhhhh or a named color form
+
+    # http://www.w3.org/TR/CSS2/syndata.html#color-units
+
+    my ($r, $g, $b, $error) = (0,0,0,0);
+
+    if ($color =~ /rgb\( ?(.*?) ?\, ?(.*?) ?\, ?(.*?) ?\)/ ) {
+
+        # rgb(r,g,b) can be expressed as values 0-255 or percentages 0%-100%,
+        # numbers outside this range are allowed and should be clipped into
+        # this range
+
+        # TODO: store front/back colors in a RGB hash/array
+        #       converting to a hh hh hh format and back
+        #       is a waste as is repeatedly decoding
+        #       from hh hh hh format
+
+        ($r, $g, $b) = ($1, $2, $3);
+
+        my $ispercent;
+
+        my $value_re = qr/^-?(\d+)$/;
+        my $percent_re = qr/^(\d+)%$/;
+
+        my ($r_temp, $g_temp, $b_temp);
+
+        if ((($r_temp) = ($r =~ $percent_re)) && (($g_temp) = ($g =~ $percent_re)) && (($b_temp) = ($b =~ $percent_re)) ) {
+
+            $ispercent = 1;
+
+            # clip to 0-100
+            $r_temp = 100 if ($r_temp > 100);
+            $g_temp = 100 if ($g_temp > 100);
+            $b_temp = 100 if ($b_temp > 100);
+
+            # convert into 0-255 range
+            $r = int((($r_temp / 100) * 255) + .5);
+            $g = int((($g_temp / 100) * 255) + .5);
+            $b = int((($b_temp / 100) * 255) + .5);
+        } elsif ( ($r =~ $value_re) && ($g =~ $value_re) && ( $b =~ $value_re) ) {
+            $ispercent = 0;
+
+            #clip to 0-255
+
+            $r = 0   if ($r <= 0);
+            $r = 255 if ($r >= 255);
+            $g = 0   if ($g <= 0);
+            $g = 255 if ($g >= 255);
+            $b = 0   if ($b <= 0);
+            $b = 255 if ($b >= 255);
+        } else {
+            # here we have a combination of percentages and integers or some other oddity
+            $ispercent = 0;
+            ($r, $g, $b) = (0,0,0);
+            $error = 1;
+        }
+
+        print "        CSS rgb($r, $g, $b) percent: $ispercent\n" if ( $self->{debug__} );
+
+    } elsif ( $color =~ /^#(([0-9a-f]{3})|([0-9a-f]{6}))$/i ) {
+
+        # #rgb or #rrggbb
+        print "        CSS numeric form: $color\n" if $self->{debug__};
+
+        $color = $2 || $3;
+
+        if (defined($2)) {
+            
+            # in 3 value form, the value is computed by doubling each digit
+
+            ($r, $g, $b)  = (hex($1 . $1), hex($2 . $2), hex($3 . $3)) if ($color =~ /^(.)(.)(.)$/);
+        } else {
+            ($r, $b, $g) = (hex($1), hex($2), hex($3)) if ($color =~ /^(..)(..)(..)/);
+        }
+
+    } elsif ($color =~ /^(aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|purple|red|silver|teal|white|yellow)$/i ) {
+        # these are the only CSS defined colours
+        
+        print "       CSS textual color form: $color\n" if $self->{debug__};
+        
+        my $new_color = map_color( $self, $color );
+        
+        # our color map may have failed
+        $error = 1 if ($new_color eq $color);
+        ($r, $g, $b) = (hex($1), hex($2), hex($3)) if ( $new_color =~ /^(..)(..)(..)$/);
+    } else {
+        $error = 1;
+    }
+
+    if ( defined($r) && ( 0 <= $r) && ($r <= 255) &&
+         defined($g) && ( 0 <= $g) && ($g <= 255) &&
+         defined($b) && ( 0 <= $b) && ($b <= 255) &&
+         !$error ) {
+        if (wantarray) {
+            return ($r, $g, $b);
+        } else {            
+            $color = sprintf('%1$02x%2$02x%3$02x', $r, $g, $b);
+            return $color;
+        }
+    } else {
+        if (wantarray) {
+            return (-1,-1,-1);
+        } else {
+            return "error";
+        }        
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # match_attachment_filename - Matches a line  like 'attachment; filename="<filename>"
 #
 # $line         The line to match
 # Returns       The first match (= "attchment" if found)
 #               The second match (= name of the file if found)
-#	
+#
 # ---------------------------------------------------------------------------------------------
 sub match_attachment_filename
 {
@@ -1824,7 +2111,7 @@ sub match_attachment_filename
 # $filename     The filename to split
 # Returns       The name of the file
 #               The extension of the file
-#	
+#
 # ---------------------------------------------------------------------------------------------
 sub file_extension
 {
@@ -1844,12 +2131,12 @@ sub file_extension
 #                         and attachment_ext
 #
 # $filename     The filename to add to the list of words
-#	
+#
 # ---------------------------------------------------------------------------------------------
 sub add_attachment_filename
 {
     my ( $self, $filename ) = @_;
-	
+
     if ( length( $filename ) > 0) {
         print "Add filename $filename\n" if $self->{debug__};
 
@@ -1871,12 +2158,12 @@ sub add_attachment_filename
 #                      If filename found, at the file name and extension to the word list
 #
 # $params     The parameters of the Content-Disposition header
-#	
+#
 # ---------------------------------------------------------------------------------------------
 sub handle_disposition
 {
     my ( $self, $params ) = @_;
-	
+
     my ( $attachment, $filename ) = $self->match_attachment_filename( $params );
 
     if ( $attachment eq 'attachment' ) {
