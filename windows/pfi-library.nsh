@@ -32,8 +32,9 @@
 # The following symbols are used to indicate the required subset:
 #
 # (1) ADDUSER          defined in adduser.nsi ('Add POPFile User' wizard)
-# (2) TRANSLATOR       defined in translator.nsi (main installer translations test program)
-# (3) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
+# (2) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
+# (3) TRANSLATOR       defined in translator.nsi (main installer translations test program)
+# (4) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
 #--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
@@ -241,7 +242,7 @@
 !endif
 
 
-!ifndef ADDUSER & TRANSLATOR_AUW
+!ifndef ADDUSER & RUNPOPFILE & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetIEVersion
     #
@@ -615,6 +616,10 @@ FunctionEnd
 #    Installer Function:   CheckIfLocked
 #    Uninstaller Function: un.CheckIfLocked
 #
+#    Macro:                FindLockedPFE
+#    Installer Function:   FindLockedPFE
+#    Uninstaller Function: un.FindLockedPFE
+#
 #    Macro:                GetCorpusPath
 #    Installer Function:   GetCorpusPath
 #    Uninstaller Function: un.GetCorpusPath
@@ -696,12 +701,12 @@ FunctionEnd
 #
 #  Usage (after macro has been 'inserted'):
 #
-#         Push "$G_MPBINDIR\wperl.exe"
+#         Push "$INSTDIR\wperl.exe"
 #         Call CheckIfLocked
 #         Pop $R0
 #
 #        (if the file is no longer in use, $R0 will be "")
-#        (if the file is still being used, $R0 will be "$G_MPBINDIR\wperl.exe")
+#        (if the file is still being used, $R0 will be "$INSTDIR\wperl.exe")
 #--------------------------------------------------------------------------
 
 !macro CheckIfLocked UN
@@ -732,7 +737,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef ADDUSER & TRANSLATOR & TRANSLATOR_AUW
+!ifndef ADDUSER & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: CheckIfLocked
     #
@@ -742,7 +747,7 @@ FunctionEnd
     !insertmacro CheckIfLocked ""
 !endif
 
-!ifndef TRANSLATOR & TRANSLATOR_AUW
+!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.CheckIfLocked
     #
@@ -750,6 +755,120 @@ FunctionEnd
     #--------------------------------------------------------------------------
 
     !insertmacro CheckIfLocked "un."
+!endif
+
+
+#--------------------------------------------------------------------------
+# Macro: FindLockedPFE
+#
+# The installation process and the uninstall process may both use a function which checks if
+# any of the POPFile executable (EXE) files is being used. This macro makes maintenance easier
+# by ensuring that both processes use identical functions, with the only difference being their
+# names.
+#
+# Early versions of POPFile only had two EXE files to check (perl.exe and wperl.exe) but current
+# versions have a much greater choice. More than one script needs to perform these checks, so
+# these macro-based functions have been created to make it easier to change the list of files to
+# be checked.
+#
+# NOTE:
+# The !insertmacro FindLockedPFE "" and !insertmacro FindLockedPFE "un." commands are included
+# in this file so the NSIS script can use 'Call FindLockedPFE' and 'Call un.FindLockedPFE'
+# without additional preparation.
+#
+# Inputs:
+#         (top of stack)   - the path where the EXE files can be found
+#
+# Outputs:
+#         (top of stack)   - if a locked EXE file is found, its full path is returned otherwise
+#                            an empty string ("") is returned (to show that no files are locked)
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Push "C:\Program Files\POPFile"
+#         Call FindLockedPFE
+#         Pop $R0
+#
+#        (if popfileb.exe is still running, $R0 will be "C:\Program Files\POPFile\popfileb.exe")
+#--------------------------------------------------------------------------
+
+!macro FindLockedPFE UN
+  Function ${UN}FindLockedPFE
+    !define L_PATH          $R9    ; full path to the POPFile EXE files which are to be checked
+    !define L_RESULT        $R8    ; either the full path to a locked file or an empty string
+
+    Exch ${L_PATH}
+    Push ${L_RESULT}
+    Exch
+
+    DetailPrint "Checking '${L_PATH}\popfileb.exe' ..."
+
+    Push "${L_PATH}\popfileb.exe"  ; runs POPFile in the background
+    Call ${UN}CheckIfLocked
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "" 0 exit
+
+    DetailPrint "Checking '${L_PATH}\popfileib.exe' ..."
+
+    Push "${L_PATH}\popfileib.exe" ; runs POPFile in the background with system tray icon
+    Call ${UN}CheckIfLocked
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "" 0 exit
+
+    DetailPrint "Checking '${L_PATH}\popfilef.exe' ..."
+
+    Push "${L_PATH}\popfilef.exe"  ; runs POPFile in the foreground/console window/DOS box
+    Call ${UN}CheckIfLocked
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "" 0 exit
+
+    DetailPrint "Checking '${L_PATH}\popfileif.exe' ..."
+
+    Push "${L_PATH}\popfileif.exe" ; runs POPFile in the foreground with system tray icon
+    Call ${UN}CheckIfLocked
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "" 0 exit
+
+    DetailPrint "Checking '${L_PATH}\wperl.exe' ..."
+
+    Push "${L_PATH}\wperl.exe"     ; runs POPFile in the background (using popfile.pl)
+    Call ${UN}CheckIfLocked
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "" 0 exit
+
+    DetailPrint "Checking '${L_PATH}\perl.exe' ..."
+
+    Push "${L_PATH}\perl.exe"      ; runs POPFile in the foreground (using popfile.pl)
+    Call ${UN}CheckIfLocked
+    Pop ${L_RESULT}
+
+   exit:
+    Pop ${L_PATH}
+    Exch ${L_RESULT}              ; return full path to a locked file or an empty string
+
+    !undef L_PATH
+    !undef L_RESULT
+  FunctionEnd
+!macroend
+
+!ifndef ADDUSER & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+    #--------------------------------------------------------------------------
+    # Installer Function: FindLockedPFE
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+
+    !insertmacro FindLockedPFE ""
+!endif
+
+!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.FindLockedPFE
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
+
+    !insertmacro FindLockedPFE "un."
 !endif
 
 
@@ -1021,7 +1140,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER
+!ifdef ADDUSER | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: GetDataPath
     #
@@ -1495,7 +1614,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER
+!ifdef ADDUSER | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: GetParent
     #
@@ -1695,7 +1814,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef TRANSLATOR & TRANSLATOR_AUW
+!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: ShutdownViaUI
     #
@@ -1772,7 +1891,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER
+!ifdef ADDUSER | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: StrBackSlash
     #
@@ -1867,7 +1986,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef TRANSLATOR
+!ifndef RUNPOPFILE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: StrCheckDecimal
     #
@@ -1877,7 +1996,7 @@ FunctionEnd
     !insertmacro StrCheckDecimal ""
 !endif
 
-!ifndef TRANSLATOR & TRANSLATOR_AUW
+!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.StrCheckDecimal
     #
@@ -1960,7 +2079,7 @@ FunctionEnd
     !insertmacro StrStr ""
 !endif
 
-!ifndef ADDUSER & TRANSLATOR & TRANSLATOR_AUW
+!ifndef ADDUSER & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.StrStr
     #
@@ -2021,7 +2140,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef TRANSLATOR_AUW
+!ifndef RUNPOPFILE & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: TrimNewlines
     #
@@ -2065,7 +2184,7 @@ FunctionEnd
 #
 #  Usage (after macro has been 'inserted'):
 #
-#         Push "$G_MPBINDIR\wperl.exe"
+#         Push "$INSTDIR\wperl.exe"
 #         Call WaitUntilUnlocked
 #
 #--------------------------------------------------------------------------
@@ -2075,6 +2194,20 @@ FunctionEnd
     !define L_EXE           $R9   ; full path to the EXE file which is to be monitored
     !define L_FILE_HANDLE   $R8
     !define L_TIMEOUT       $R7   ; used to avoid an infinite loop
+
+    ;-----------------------------------------------------------
+    ; Timeout loop counter start value (counts down to 0)
+
+    !ifndef C_SHUTDOWN_LIMIT
+      !define C_SHUTDOWN_LIMIT    20
+    !endif
+
+    ; Delay (in milliseconds) used inside the timeout loop
+
+    !ifndef C_SHUTDOWN_DELAY
+      !define C_SHUTDOWN_DELAY    1000
+    !endif
+    ;-----------------------------------------------------------
 
     Exch ${L_EXE}
     Push ${L_FILE_HANDLE}
@@ -2104,7 +2237,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef TRANSLATOR & TRANSLATOR_AUW
+!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: WaitUntilUnlocked
     #
