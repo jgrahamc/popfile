@@ -1622,10 +1622,20 @@ sub classify
     my %score;
     my %matchcount;
 
+    # Build up a list of the buckets that are OK to use for classification (i.e.
+    # that have at least one word in them).
+
+    my @ok_buckets;
+
     for my $bucket (@buckets) {
-        $score{$bucket} = $self->{bucket_start__}{$userid}{$bucket};
-        $matchcount{$bucket} = 0;
+        if ( $self->{bucket_start__}{$userid}{$bucket} != 0 ) {
+            $score{$bucket} = $self->{bucket_start__}{$userid}{$bucket};
+            $matchcount{$bucket} = 0;
+            push @ok_buckets, ( $bucket );
+	}
     }
+
+    @buckets = @ok_buckets;
 
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
     # P(word|bucket) ^ word count and multiply to the score
