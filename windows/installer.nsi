@@ -19,6 +19,7 @@ Section "ThisNameIsIgnoredSoWhyBother?"
   File "..\engine\*.pl"
   File "..\engine\pix.gif"
   File "C:\Perl\bin\perl.exe"
+  File "C:\Perl\bin\wperl.exe"
   File "C:\Perl\bin\perl56.dll"
   File "C:\Perl\lib\AutoLoader.pm"
   File "C:\Perl\lib\Carp.pm"
@@ -65,17 +66,21 @@ Section "ThisNameIsIgnoredSoWhyBother?"
   SetOutPath $INSTDIR\warnings
   File "C:\Perl\lib\warnings\register.pm"
 
+  SetOutPath $SMPROGRAMS\POPFile
   SetOutPath $INSTDIR
   CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile.lnk" \
                  "$INSTDIR\perl.exe" popfile.pl
-;  CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile in background.lnk" \
-;                 "$INSTDIR\wperl.exe" popfile.pl
-;  WriteINIStr "$SMPROGRAMS\POPFile\POPFile User Interface.url" \
-;              "InternetShortcut" "URL" "http://127.0.0.1:8080/"
-;  WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Home Page.url" \
-;              "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
-;  WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Manual.url" \
-;              "InternetShortcut" "URL" "http://popfile.sourceforge.net/manual.html"
+  CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile in background.lnk" \
+                 "$INSTDIR\wperl.exe" popfile.pl
+  SetOutPath $SMPROGRAMS\POPFile
+  WriteINIStr "$SMPROGRAMS\POPFile\POPFile User Interface.url" \
+              "InternetShortcut" "URL" "http://127.0.0.1:8080/"
+  SetOutPath $SMPROGRAMS\POPFile\Support
+  WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Home Page.url" \
+              "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
+  WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Manual.url" \
+              "InternetShortcut" "URL" "http://popfile.sourceforge.net/manual.html"
+              
 SectionEnd ; end the section
 
 ; eof
