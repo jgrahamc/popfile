@@ -20,7 +20,7 @@ commenting.  But that means its not fully valid CSS2.
 05-03-03: Center footer better and add "icon" in Mozilla, maybe Opera head fix
 05-05-03: Changed a lot of head stuff, got rid of absolute positioning
 05-21-03: Did what I could to fix the changes 0.19 RC3 made to the footer
-07-29-04: Add support for some new 0.22 classes and some code cleanup.
+08-06-04: Add support for some new 0.22 classes and some code improvements
 */
 
 body {
@@ -45,6 +45,7 @@ body {
   padding: 0;
   margin: 0;
   border: 0;
+  border-collapse: collapse;
 }
 
 .shellLeft, .shellRight {

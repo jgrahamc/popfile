@@ -24,6 +24,12 @@ input, select, textarea {
   font-family: verdana, arial, serif;
 }
 
+.checkbox {
+  border: 0;
+  //background-color: transparent;
+  /* ie hack */
+}
+
 .menu {
   font-size: 12pt;
   font-weight: bold;

@@ -95,8 +95,9 @@ tr.rowHighlighted {
 }
 
 hr {
-  color: gray; 
-  background-color: transparent;
+  color: #ffcc99;
+  background-color: #ffcc99;
+  border: 0;
 }
 
 table.settingsTable {
@@ -371,15 +372,6 @@ span.securityWidgetStateOff {
   margin-left: 1em;
   font-weight: bold;
   font-size: 75%;
-}
-
-div.securityPassWidget {
-  padding-left: 10%;
-}
-
-div.securityAuthWidgets {
-  padding-left: 36%;  
-  padding-bottom: 0.8em;
 }
 
 div.securityExplanation { 
