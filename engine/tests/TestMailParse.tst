@@ -89,6 +89,21 @@ test_assert_equal( $cl->map_color( 'FFFFFF' ),  'ffffff' );
 test_assert_equal( $cl->map_color( '#ffffff' ), 'ffffff' );
 test_assert_equal( $cl->map_color( '#FFfFFF' ), 'ffffff' );
 
+test_assert_equal( $cl->map_color( '#F0F0F0' ), 'f0f0f0' );
+test_assert_equal( $cl->map_color( 'F0F0F0' ), 'f0f0f0' );
+test_assert_equal( $cl->map_color( '#FyFyFy' ), 'f0f0f0' );
+test_assert_equal( $cl->map_color( 'FtFtFt' ), 'f0f0f0' );
+
+test_assert_equal( $cl->map_color( '#F0F0F' ), 'f0f0f0' );
+test_assert_equal( $cl->map_color( 'F0F0F' ), 'f0f0f0' );
+test_assert_equal( $cl->map_color( '#FtFuF' ), 'f0f0f0' );
+test_assert_equal( $cl->map_color( 'FhFgF' ), 'f0f0f0' );
+
+test_assert_equal( $cl->map_color( '#F0F0' ), 'f0f000' );
+test_assert_equal( $cl->map_color( 'F0F0' ), 'f0f000' );
+test_assert_equal( $cl->map_color( '#FoFp' ), 'f0f000' );
+test_assert_equal( $cl->map_color( 'F&F*' ), 'f0f000' );
+
 # Check line splitting into words
 $cl->{htmlbackcolor__} = $cl->map_color( 'white' );
 $cl->{htmlfontcolor__} = $cl->map_color( 'black' );

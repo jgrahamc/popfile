@@ -349,7 +349,19 @@ sub map_color
     if ( defined( $self->{color_map__}{$color} ) ) {
         return $self->{color_map__}{$color};
     } else {
-        return $color;
+
+        # Due to a bug/feature in Microsoft Internet Explorer it's possible to use
+        # invalid hexadecimal colors where the number 0 is replaced by any other character
+        # and if the hex is short it is padded on the right with 0s
+        #
+        # Here we check map non-hex values to 0, then check to see if it is too short and pad
+        # it
+
+        $color =~ s/[^0-9a-f]/0/g;
+        $color .= '000000';
+        $color =~ /(.{6})/;
+
+        return $1;
     }
 }
 
