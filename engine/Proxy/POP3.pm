@@ -504,7 +504,7 @@ sub child__
                     last if ( $response == 2 );
                     if ( $response == 0 ) {
                         $self->echo_to_dot_( $mail, $client );
-            		}
+                    }
                 }
 
                 next;
@@ -523,7 +523,7 @@ sub child__
                     last if ( $response == 2 );
                     if ( $response == 0 ) {
                         $self->echo_to_dot_( $mail, $client );
-            		}
+                    }
                 } else {
                     next;
                 }
@@ -691,13 +691,13 @@ sub configure_item
     } else {
         if ( $name eq 'pop3_security' ) {
             $templ->param( 'POP3_Security_Local' => ( $self->config_( 'local' ) == 1 ) );
-    	} else {
-    	    if ( $name eq 'pop3_chain' ) {
+        } else {
+            if ( $name eq 'pop3_chain' ) {
                 $templ->param( 'POP3_Chain_Secure_Server' => $self->config_( 'secure_server' ) );
                 $templ->param( 'POP3_Chain_Secure_Port' => $self->config_( 'secure_port' ) );
-        	} else {
+            } else {
                 $self->SUPER::configure_item( $name, $templ, $language );
-        	}
+            }
         }
     }
 }

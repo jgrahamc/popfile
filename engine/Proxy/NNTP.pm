@@ -151,7 +151,8 @@ sub start
         $self->config_( 'welcome_string', "NNTP POPFile ($self->{version_}) server ready" );        # PROFILE BLOCK STOP
     }
 
-    return $self->SUPER::start();; }
+    return $self->SUPER::start();;
+}
 
 # ----------------------------------------------------------------------------
 #
@@ -324,7 +325,7 @@ sub child__
 
             # Commands expecting a code + text response
 
-            if ( $command =~ 
+            if ( $command =~
                 /^ *(LIST|HEAD|BODY|NEWGROUPS|NEWNEWS|LISTGROUP|XGTITLE|XINDEX|XHDR|XOVER|XPAT|XROVER|XTHREAD)/i ) {
                 my ( $response, $ok ) = $self->get_response_( $news,
                                             $client, $command);
@@ -351,7 +352,7 @@ sub child__
 
             # Commands expecting a single-line response
 
-            if ( $command =~ 
+            if ( $command =~
                 /^ *(GROUP|STAT|IHAVE|LAST|NEXT|SLAVE|MODE|XPATH)/i ) {
                 $self->get_response_( $news, $client, $command );
                 next;
@@ -443,7 +444,7 @@ sub configure_item
         $templ->param( 'nntp_force_fork_on' => $self->config_( 'force_fork' ) );
     }
 
-    #$self->SUPER::configure_item( $name, $language, $session_key );
+    $self->SUPER::configure_item( $name, $templ, $language);
 }
 
 # ----------------------------------------------------------------------------
@@ -462,34 +463,36 @@ sub validate_item
 {
     my ( $self, $name, $templ, $language, $form ) = @_;
 
+    my ($status, $error);
+
     if ( $name eq 'nntp_port' ) {
         if ( defined $$form{nntp_port} ) {
             if ( ( $$form{nntp_port} >= 1 ) && ( $$form{nntp_port} < 65536 ) ) {
-                $self->config_( 'port', $$form{nntp_port} );
-                $templ->param( 'nntp_port_feedback' => sprintf $$language{Configuration_NNTPUpdate}, $self->config_( 'port' ) );
-             } 
-             else {
-                 $templ->param( 'nntp_port_feedback' => "<div class=\"error01\">$$language{Configuration_Error3}</div>" );
+                $status = sprintf $$language{Configuration_NNTPUpdate}, $self->config_( 'port' );
+             } else {
+                $error = $$language{Configuration_Error3};
              }
-        }
+         }
+         return ($status, $error);
     }
 
     if ( $name eq 'nntp_separator' ) {
         if ( defined $$form{nntp_separator} ) {
             if ( length($$form{nntp_separator}) == 1 ) {
                 $self->config_( 'separator', $$form{nntp_separator} );
-                $templ->param( 'nntp_separator_feedback' => sprintf $$language{Configuration_NNTPSepUpdate}, $self->config_( 'separator' ) );
-            } 
-            else {
-                $templ->param( 'nntp_separator_feedback' => "<div class=\"error01\">\n$$language{Configuration_Error1}</div>\n" );
+                $status = sprintf $$language{Configuration_NNTPSepUpdate}, $self->config_( 'separator' );
+            } else {
+               $error = $$language{Configuration_Error1};
             }
         }
+        return ($status, $error);
     }
 
     if ( $name eq 'nntp_local' ) {
         if ( defined $$form{nntp_local} ) {
             $self->config_( 'local', $$form{nntp_local} );
         }
+        return( undef, undef);
     }
 
 
@@ -497,9 +500,9 @@ sub validate_item
         if ( defined $$form{nntp_force_fork} ) {
             $self->config_( 'force_fork', $$form{nntp_force_fork} );
         }
+        return( undef, undef);
     }
-
-    # $self->SUPER::validate_item( $name, $language, $form );
+    return $self->SUPER::validate_item( $name, $templ, $language, $form );
 }
 
 1;

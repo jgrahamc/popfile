@@ -349,7 +349,7 @@ sub configure_item
     }
 
 
-    #$self->SUPER::configure_item( $name, $templ, $language );
+    $self->SUPER::configure_item( $name, $templ, $language );
 }
 
 # ----------------------------------------------------------------------------
@@ -368,6 +368,8 @@ sub validate_item
 {
     my ( $self, $name, $templ, $language, $form ) = @_;
 
+    my ($status, $error, $changed);
+
     if ( $name eq 'smtp_fork_and_port' ) {
 
         if ( defined($$form{smtp_force_fork}) ) {
@@ -377,24 +379,27 @@ sub validate_item
         if ( defined($$form{smtp_port}) ) {
             if ( ( $$form{smtp_port} >= 1 ) && ( $$form{smtp_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{smtp_port} );
-                $templ->param( 'smtp_port_feedback' => sprintf( $$language{Configuration_SMTPUpdate}, $self->config_( 'port' ) ) );
+                $status = sprintf( $$language{Configuration_SMTPUpdate}, $self->config_( 'port' ) );
              } else {
-                $templ->param( 'smtp_port_feedback' => "<div class=\"error01\">$$language{Configuration_Error3}</div>" );
+                $error = $$language{Configuration_Error3};
              }
         }
+        return( $status, $error );
     }
 
     if ( $name eq 'smtp_local' ) {
         if ( defined $$form{smtp_local} ) {
             $self->config_( 'local', $$form{smtp_local} );
         }
+        return ( $status, $error );
     }
 
     if ( $name eq 'smtp_server' ) {
         if ( defined $$form{smtp_chain_server} ) {
             $self->config_( 'chain_server', $$form{smtp_chain_server} );
-            $templ->param( 'smtp_server_feedback' => sprintf $$language{Security_SMTPServerUpdate}, $self->config_( 'chain_server' ) ) ;
+            $status = sprintf( $$language{Security_SMTPServerUpdate}, $self->config_( 'chain_server' ) );
         }
+        return( $status, $error );
     }
 
     if ( $name eq 'smtp_server_port' ) {
@@ -402,16 +407,15 @@ sub validate_item
 
             if ( ( $$form{smtp_chain_server_port} >= 1 ) && ( $$form{smtp_chain_server_port} < 65536 ) ) {
                 $self->config_( 'chain_port', $$form{smtp_chain_server_port} );
-                $templ->param( 'smtp_port_feedback' => sprintf $$language{Security_SMTPPortUpdate}, $self->config_( 'chain_port' ) );
-            }
-            else {
-                $templ->param( 'smtp_port_feedback' => "<div class=\"error01\">$$language{Security_Error1}</div>" );
+                $status = sprintf( $$language{Security_SMTPPortUpdate}, $self->config_( 'chain_port' ) )
+            } else {
+                $error = $$language{Security_Error1};
             }
         }
+        return( $status, $error );
     }
 
-
-    #$self->SUPER::validate_item( $name, $templ, $language, $form );
+    return $self->SUPER::validate_item( $name, $templ, $language, $form );
 }
 
 1;

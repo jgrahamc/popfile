@@ -7,23 +7,23 @@
         <td nowrap="nowrap">
             <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                 <TMPL_IF NAME="smtp_force_fork_on">
-            
+
                 <span class="securityWidgetStateOn">
                     <TMPL_VAR NAME="Localize_Yes">
                 </span>
                 <input type="submit" class="toggleOff" id="windowTrayIconOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
                 <input type="hidden" name="smtp_force_fork" value="0" />
-            
+
                 <TMPL_ELSE>
-            
+
                 <span class="securityWidgetStateOff">
                     <TMPL_VAR NAME="Localize_No">
                 </span>
                 <input type="submit" class="toggleOn" id="windowTrayIconOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
                 <input type="hidden" name="smtp_force_fork" value="1" />
-            
+
                 </TMPL_IF>
-            
+
             </form>
         </td>
     </tr>
@@ -38,16 +38,7 @@
             <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                 <input name="smtp_port" type="text" id="configPopPort" value="<TMPL_VAR NAME="smtp_port">" />
                 <input type="submit" class="submit" name="update_smtp_port" value="<TMPL_VAR NAME="Localize_Apply">" />
-            
-                <TMPL_IF NAME="smtp_port_feedback">
-                <p> 
-                    <div class="error01">
-                        <TMPL_VAR NAME="smtp_port_feedback">
-                    </div>
-                </p>
-            
-                </TMPL_IF>
-            
+
             </form>
         </td>
     </tr>

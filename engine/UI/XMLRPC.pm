@@ -228,7 +228,7 @@ sub service
 
                     $self->{server__}->SOAP::Transport::HTTP::Server::handle();
                     $client->send_response( $self->{server__}->response );
-		}
+     		    }
                 $client->close();
             }
         }
@@ -283,17 +283,17 @@ sub validate_item
 {
     my ( $self, $name, $templ, $language, $form ) = @_;
 
+    my ($status, $error);
+
     # Just check to see if the XML rpc port was change and check its value
 
     if ( $name eq 'xmlrpc_port' ) {
         if ( defined($$form{xmlrpc_port}) ) {
             if ( ( $$form{xmlrpc_port} >= 1 ) && ( $$form{xmlrpc_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{xmlrpc_port} );
-                $templ->param( 'XMLRPC_port_if_error' => 0 );
-                $templ->param( 'XMLRPC_port_updated' => sprintf( $$language{Configuration_XMLRPCUpdate}, $self->config_( 'port' ) ) );
-            } 
-            else {
-                $templ->param( 'XMLRPC_port_if_error' => 1 );
+                $status = sprintf( $$language{Configuration_XMLRPCUpdate}, $self->config_( 'port' ) );
+            } else {
+                $error = $$language{Configuration_Error7};
             }
         }
     }
@@ -302,7 +302,7 @@ sub validate_item
         $self->config_( 'local', $$form{xmlrpc_local}-1 ) if ( defined($$form{xmlrpc_local}) );
     }
 
-    return '';
+    return ( $status, $error );
 }
 
 1;
