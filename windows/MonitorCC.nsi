@@ -45,7 +45,7 @@
 # INI File Structure
 #
 #  [Settings]
-#    PERLDIR=full path to the folder where wperl.exe has been installed (created by installer)
+#    PERLDIR=full path to folder where popfileb.exe has been installed (created by installer)
 #    ROOTDIR=full path to the folder where POPFile has been installed (created by installer)
 #    USERDIR=full path to the folder with the POPFile configuration data (created by installer)
 #    KReboot=either 'yes' or 'no' (created by installer)
@@ -78,7 +78,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.6"
+  !define C_PFI_VERSION  "0.1.7"
 
   ; Mention the version number in the window title
 
@@ -585,7 +585,7 @@ Section ConvertCorpus
   !define L_BUCKET_PATH   $R6     ; full path to a corpus bucket file we are monitoring
   !define L_CORPUS_SIZE   $R5     ; total number of bytes in all the bucket files in the list
   !define L_LAST_CHANGE   $R4     ; used to detect when a bucket file has been deleted
-  !define L_MPBINDIR      $R3     ; folder containing wperl.exe file
+  !define L_MPBINDIR      $R3     ; folder containing popfileb.exe file
   !define L_POPFILE_ROOT  $R2     ; environment variable holding path to popfile.pl
   !define L_POPFILE_USER  $R1     ; environment variable holding path to popfile.cfg
   !define L_START_TIME    $R0     ; time in Min100 units when we started the corpus conversion
@@ -610,7 +610,13 @@ Section ConvertCorpus
 
   SetDetailsPrint listonly
 
-  ; Get minimal Perl binary ('wperl.exe') folder location from the INI file
+  ; Get minimal Perl binary ('popfileb.exe') folder location from the INI file
+
+  ; We run POPFile in the background without the system tray icon because corpus conversion
+  ; can take several minutes (or even tens of minutes) and we do not want to encourage use of
+  ; the UI during this period. Earlier versions of this utility used 'wperl.exe' but there were
+  ; problems with it not shutting down when the user logs off, so we use 'popfileb.exe' as it
+  ; seems to be better behaved.
 
   ReadINIStr ${L_MPBINDIR} "$G_INIFILE_PATH" "Settings" "PERLDIR"
   StrCmp  ${L_MPBINDIR} "" no_perl_path
@@ -650,7 +656,7 @@ itaiji_set_ok:
   Goto exit
 
 no_perl_path:
-  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOPOPFILE) (wperl.exe)"
+  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOPOPFILE) (popfileb.exe)"
   Goto exit
 
 no_root_path:
@@ -702,7 +708,7 @@ root_set_ok:
 
 user_set_ok:
   ClearErrors
-  Exec '"${L_MPBINDIR}\wperl.exe" "$G_ROOTDIR\popfile.pl"'
+  Exec '"${L_MPBINDIR}\popfileb.exe"'
   IfErrors start_error
 
   ReadINIStr $G_BUCKET_COUNT "$G_INIFILE_PATH" "BucketList" "FileCount"
