@@ -9,7 +9,11 @@
 #
 #--------------------------------------------------------------------------
 
-; Modified to work with NSIS 2.0b4 (CVS) or later
+; Modified to work with NSIS 2.0b4 (CVS) [ dated 25 May 2003 ] or later
+
+; WARNING:
+;    This script requires "NSIS Modern User Interface" version 1.65 (or later)
+;    because it uses the new (simplified) page configuration system
 
 #--------------------------------------------------------------------------
 
@@ -43,10 +47,49 @@
   !include CBP.nsh
 
 #--------------------------------------------------------------------------
-# Installer Configuration
+# Define the Page order for the installer (and the uninstaller)
 #--------------------------------------------------------------------------
 
-  !define MUI_CUSTOMPAGECOMMANDS
+  ; Installer Pages
+  
+  !insertmacro MUI_PAGE_WELCOME
+  !insertmacro MUI_PAGE_LICENSE
+  !insertmacro MUI_PAGE_COMPONENTS
+  !insertmacro MUI_PAGE_DIRECTORY
+  Page custom SetOptionsPage "CheckPortOptions" ": Options"
+  !insertmacro MUI_PAGE_INSTFILES
+  !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS ": Create POPFile Buckets"
+  Page custom SetOutlookOrOutlookExpressPage "" ": Configure Outlook Express"
+  !insertmacro MUI_PAGE_FINISH
+  
+  ; Uninstaller Pages
+  
+  !insertmacro MUI_UNPAGE_CONFIRM
+  !insertmacro MUI_UNPAGE_INSTFILES
+
+#--------------------------------------------------------------------------
+# Configure the MUI pages
+#--------------------------------------------------------------------------
+  ;-----------------------------------------
+  ; General Settings - License Page Settings
+  ;-----------------------------------------
+
+  ; Select either "accept/do not accept" radio buttons or "accept" checkbox for the license page
+  
+#  !define MUI_LICENSEPAGE_RADIOBUTTONS
+  !define MUI_LICENSEPAGE_CHECKBOX
+
+  ;-----------------------------------------
+  ; General Settings - Other Settings
+  ;-----------------------------------------
+  
+  ; Show a message box with a warning when the user closes the installation
+  
+  !define MUI_ABORTWARNING
+
+  ;-----------------------------------------
+  ; Interface Settings
+  ;-----------------------------------------
 
   ; The "Special" bitmap appears on the "Welcome" and "Finish" pages,
   ; the "Header" bitmap appears on the other pages of the installer.
@@ -55,24 +98,6 @@
   !define MUI_HEADERBITMAP "hdr-right.bmp"
   !define MUI_HEADERBITMAP_RIGHT
 
-  !define MUI_WELCOMEPAGE
-  !define MUI_LICENSEPAGE
-
-  ; Select either "accept/do not accept" radio buttons or "accept" checkbox for the license page
-  
-#    !define MUI_LICENSEPAGE_RADIOBUTTONS
-    !define MUI_LICENSEPAGE_CHECKBOX
-    
-  !define MUI_COMPONENTSPAGE
-  !define MUI_DIRECTORYPAGE
-  
-  ; Use a "leave" function to look for 'popfile.cfg' in the directory selected for this install
-  
-    !define MUI_CUSTOMFUNCTION_DIRECTORY_LEAVE CheckExistingConfig
-    
-  !define MUI_ABORTWARNING
-  !define MUI_FINISHPAGE
-
   ; The icon files for the installer and uninstaller must have the same structure. For example,
   ; if one icon file contains a 32x32 16-colour image and a 16x16 16-colour image then the other
   ; file cannot just contain a 32x32 16-colour image, it must also have a 16x16 16-colour image.
@@ -80,8 +105,13 @@
   !define MUI_ICON    "POPFileIcon\popfile.ico"
   !define MUI_UNICON  "remove.ico" 
 
-  !define MUI_UNINSTALLER
-  !define MUI_UNCONFIRMPAGE
+  ;-----------------------------------------
+  ; Custom Functions added to MUI pages
+  ;-----------------------------------------
+
+  ; Use a "leave" function to look for 'popfile.cfg' in the directory selected for this install
+  
+  !define MUI_CUSTOMFUNCTION_DIRECTORY_LEAVE CheckExistingConfig
 
 #--------------------------------------------------------------------------
 # User Registers (Global)
@@ -106,6 +136,7 @@
   !insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_WELCOME_INFO_TEXT \
       "This wizard will guide you through the installation of ${MUI_PRODUCT}.\r\n\r\n\
       It is recommended that you close all other applications before starting Setup.\r\n\r\n"
+
   !insertmacro MUI_LANGUAGE "English"
 
 #--------------------------------------------------------------------------
@@ -130,20 +161,6 @@
 
   LangString TEXT_IO_TITLE ${LANG_ENGLISH} "Install Options Page"
   LangString TEXT_IO_SUBTITLE ${LANG_ENGLISH} "Options"
-
-#--------------------------------------------------------------------------
-# Define the Page order for the installer
-#--------------------------------------------------------------------------
-
-  !insertmacro MUI_PAGECOMMAND_WELCOME
-  !insertmacro MUI_PAGECOMMAND_LICENSE
-  !insertmacro MUI_PAGECOMMAND_COMPONENTS
-  !insertmacro MUI_PAGECOMMAND_DIRECTORY
-  Page custom SetOptionsPage "CheckPortOptions" ": Options"
-  !insertmacro MUI_PAGECOMMAND_INSTFILES
-  !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS ": Create POPFile Buckets"
-  Page custom SetOutlookOrOutlookExpressPage "" ": Configure Outlook Express"
-  !insertmacro MUI_PAGECOMMAND_FINISH
 
 #--------------------------------------------------------------------------
 # Component-selection page description text
@@ -262,6 +279,7 @@ stopwords_done:
       $\r$\nOK to overwrite this file?$\r$\n$\r$\n\
       Click 'Yes' to overwrite, click 'No' to skip making a backup copy" IDNO update_config
   SetFileAttributes popfile.cfg.bak NORMAL
+
 make_cfg_backup:
   CopyFiles $INSTDIR\popfile.cfg $INSTDIR\popfile.cfg.bak
       
@@ -1361,8 +1379,6 @@ you created that you want to keep, click No)" IDNO Removed
       MessageBox MB_OK|MB_ICONEXCLAMATION \
                  "Note: $INSTDIR could not be removed."
 Removed:
-
-  !insertmacro MUI_UNFINISHHEADER
 
 SectionEnd
 
