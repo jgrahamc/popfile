@@ -164,13 +164,11 @@ new_separator:
 
 separator_done:
   FileClose ${L_CFG}
-  Push ${L_SEPARATOR}
-  Call TrimNewlines
-  Pop ${L_SEPARATOR}
+  StrCmp ${L_SEPARATOR} "" default
+  StrCmp ${L_SEPARATOR} "$\r" default
+  StrCmp ${L_SEPARATOR} "$\n" 0 exit
 
-  ; Use separator character from popfile.cfg (if present) otherwise use a semicolon
-
-  StrCmp ${L_SEPARATOR} "" 0 exit
+default:
   StrCpy ${L_SEPARATOR} ":"
 
 exit:
@@ -359,7 +357,7 @@ FunctionEnd
 #         Call un.StrBackSlash
 #         Pop $R0
 #
-#         ($R0 at this point is ""C:\Program Files\Directory"\Whatever)
+#         ($R0 at this point is ""C:\Program Files\Directory\Whatever")
 #
 #--------------------------------------------------------------------------
 
