@@ -488,7 +488,7 @@ sub validate_item
     if ( $name eq 'pop3_separator' ) {
         if ( defined($$form{pop3_separator}) ) {
             if ( length($$form{pop3_separator}) == 1 ) {
-                $self->config_( 'separator', $$form{separator} );
+                $self->config_( 'separator', $$form{pop3_separator} );
                 return '<blockquote>' . sprintf( $$language{Configuration_POP3SepUpdate} . '</blockquote>' , $self->config_( 'separator' ) );
             } else {
                 return "<blockquote>\n<div class=\"error01\">\n$$language{Configuration_Error1}</div>\n</blockquote>\n";
