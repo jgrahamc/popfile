@@ -501,7 +501,11 @@ sub load_configuration
 
                 $parameter = $self->upgrade_parameter__($parameter);
 
-                $self->{configuration_parameters__}{$parameter} = $value;
+                if ( defined( $self->{configuration_parameters__}{$parameter} ) ) {
+                    $self->{configuration_parameters__}{$parameter} = $value;
+	        } else {
+                    $self->log_( "Discarded unknown parameter '$parameter' from popfile.cfg" );
+                } 
             }
         }
 
