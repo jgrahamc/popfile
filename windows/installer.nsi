@@ -1,73 +1,38 @@
 ;
-
 ; Copyright (c) 2001-2003 John Graham-Cumming
-
 ;
-
 ; Modified to work with NSIS v2.0b1
-
 !define MUI_PRODUCT "POPFile" 
-
-!define MUI_VERSION "0.18.1"
-
+!define MUI_VERSION "0.18.1 RC1"
 !include "MUI.nsh"
-
 ;--------------------------------
-
 ;Configuration
-
   
-
   !define MUI_WELCOMEPAGE
-
   !define MUI_COMPONENTSPAGE
-
   !define MUI_DIRECTORYPAGE
-
   !define MUI_ABORTWARNING
-
   !define MUI_FINISHPAGE
-
   
-
   !define MUI_UNINSTALLER
-
   
-
   !define MUI_CUSTOMPAGECOMMANDS
-
   ; Support for 20 user variables is provided by NSIS. They recommend using
-
   ; variables $0 to $9 as global variables and reserving $R0 to $R9 for
-
   ; use as local variables.
-
     
-
   !define POP3     $0
-
   !define GUI      $1
-
   !define STARTUP  $2
-
   !define CFG      $3
-
   !define LNE      $4
-
   !define CMPRE    $5
-
   !define OEID     $6
-
   !define ID       $7
-
   !define OEIDENT  $8
-
   !define ACCTID   $9
-
   
-
   ;Language
-
   !insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_WELCOME_INFO_TEXT "This wizard will guide you through the installation of ${MUI_PRODUCT}.\r\n\r\nIt is recommended that you close all other applications before starting Setup.\r\n\r\n"
   !insertmacro MUI_LANGUAGE "English"
 
