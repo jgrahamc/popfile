@@ -430,107 +430,169 @@ exit:
 
 FunctionEnd
 
+!ifndef ADDUSER
+    #--------------------------------------------------------------------------
+    # Installer Function: GetIEVersion
+    #
+    # Uses the registry to determine which version of Internet Explorer is installed.
+    #
+    # Inputs:
+    #         (none)
+    # Outputs:
+    #         (top of stack)     - string containing the Internet Explorer version
+    #                              (1.x, 2.x, 3.x, 4.x, 5.0, 5.5, 6.0). If Internet Explorer
+    #                              is not installed properly or at all, '?.?' is returned.
+    #
+    # Usage:
+    #         Call GetIEVersion
+    #         Pop $R0
+    #
+    #         ($R0 at this point is "5.0", for example)
+    #
+    #--------------------------------------------------------------------------
+    
+    Function GetIEVersion
+    
+      !define L_REGDATA   $R9
+      !define L_TEMP      $R8
+    
+      Push ${L_REGDATA}
+      Push ${L_TEMP}
+    
+      ClearErrors
+      ReadRegStr ${L_REGDATA} HKLM "Software\Microsoft\Internet Explorer" "Version"
+      IfErrors ie_123
+    
+      ; Internet Explorer 4.0 or later is installed. The 'Version' value is a string with the
+      ; following format: major-version.minor-version.build-number.sub-build-number
+    
+      ; According to MSDN, the 'Version' string under 'HKLM\Software\Microsoft\Internet Explorer'
+      ; can have the following values:
+      ;
+      ; Internet Explorer Version     'Version' string
+      ;    4.0                          4.71.1712.6
+      ;    4.01                         4.72.2106.8
+      ;    4.01 SP1                     4.72.3110.3
+      ;    5                  	        5.00.2014.0216
+      ;    5.5                          5.50.4134.0100
+      ;    6.0 Public Preview           6.0.2462.0000
+      ;    6.0 Public Preview Refresh   6.0.2479.0006
+      ;    6.0 RTM                    	6.0.2600.0000
+    
+      StrCpy ${L_TEMP} ${L_REGDATA} 1
+      StrCmp ${L_TEMP} "4" ie_4
+      StrCpy ${L_REGDATA} ${L_REGDATA} 3
+      Goto done
+    
+    ie_4:
+      StrCpy ${L_REGDATA} "4.x"
+      Goto done
+    
+    ie_123:
+    
+      ; Older versions of Internet Explorer use the 'IVer' string under the same registry key
+      ; (HKLM\Software\Microsoft\Internet Explorer). The 'IVer' string is used as follows:
+      ;
+      ; Internet Explorer 1.0 for Windows 95 (included with Microsoft Plus! for Windows 95)
+      ; uses the value '100'
+      ;
+      ; Internet Explorer 2.0 for Windows 95 uses the value '102'
+      ;
+      ; Versions of Internet Explorer that are included with Windows NT 4.0 use the value '101'
+      ;
+      ; Internet Explorer 3.x updates the 'IVer' string value to '103'
+    
+      ClearErrors
+      ReadRegStr ${L_REGDATA} HKLM "Software\Microsoft\Internet Explorer" "IVer"
+      IfErrors error
+    
+      StrCpy ${L_REGDATA} ${L_REGDATA} 3
+      StrCmp ${L_REGDATA} '100' ie1
+      StrCmp ${L_REGDATA} '101' ie2
+      StrCmp ${L_REGDATA} '102' ie2
+    
+      StrCpy ${L_REGDATA} '3.x'       ; default to ie3 if not 100, 101, or 102.
+      Goto done
+    
+    ie1:
+      StrCpy ${L_REGDATA} '1.x'
+      Goto done
+    
+    ie2:
+      StrCpy ${L_REGDATA} '2.x'
+      Goto done
+    
+    error:
+      StrCpy ${L_REGDATA} '?.?'
+    
+    done:
+      Pop ${L_TEMP}
+      Exch ${L_REGDATA}
+    
+      !undef L_REGDATA
+      !undef L_TEMP
+    
+    FunctionEnd
+!endif
 
 #--------------------------------------------------------------------------
-# Installer Function: GetIEVersion
+# Function StrLower
 #
-# Uses the registry to determine which version of Internet Explorer is installed.
+# Converts uppercase letters in a string into lowercase letters. Other characters unchanged.
 #
 # Inputs:
-#         (none)
+#         (top of stack)          - input string
+#
 # Outputs:
-#         (top of stack)     - string containing the Internet Explorer version
-#                              (1.x, 2.x, 3.x, 4.x, 5.0, 5.5, 6.0). If Internet Explorer
-#                              is not installed properly or at all, '?.?' is returned.
+#         (top of stack)          - output string
 #
-# Usage:
-#         Call GetIEVersion
-#         Pop $R0
+#  Usage Example:
 #
-#         ($R0 at this point is "5.0", for example)
+#    Push "C:\PROGRA~1\SQLPFILE"
+#    Call StrLower
+#    Pop $R0
+#
+#   ($R0 at this point is "c:\progra~1\sqlpfile")
 #
 #--------------------------------------------------------------------------
 
-Function GetIEVersion
+Function StrLower
 
-  !define L_REGDATA   $R9
-  !define L_TEMP      $R8
+  !define C_LOWERCASE    "abcdefghijklmnopqrstuvwxyz"
 
-  Push ${L_REGDATA}
-  Push ${L_TEMP}
+  Exch $0   ; The input string
+  Push $2   ; Holds the result
+  Push $3   ; A character from the input string
+  Push $4   ; The offset to a character in the "validity check" string
+  Push $5   ; A character from the "validity check" string
+  Push $6   ; Holds the current "validity check" string
 
-  ClearErrors
-  ReadRegStr ${L_REGDATA} HKLM "Software\Microsoft\Internet Explorer" "Version"
-  IfErrors ie_123
+  StrCpy $2 ""
 
-  ; Internet Explorer 4.0 or later is installed. The 'Version' value is a string with the
-  ; following format: major-version.minor-version.build-number.sub-build-number
+next_input_char:
+  StrCpy $3 $0 1              ; Get next character from the input string
+  StrCmp $3 "" done
+  StrCpy $6 ${C_LOWERCASE}$3  ; Add character to end of "validity check" to guarantee a match
+  StrCpy $0 $0 "" 1
+  StrCpy $4 -1
 
-  ; According to MSDN, the 'Version' string under 'HKLM\Software\Microsoft\Internet Explorer'
-  ; can have the following values:
-  ;
-  ; Internet Explorer Version     'Version' string
-  ;    4.0                          4.71.1712.6
-  ;    4.01                         4.72.2106.8
-	;    4.01 SP1                     4.72.3110.3
-	;    5                  	        5.00.2014.0216
-	;    5.5                          5.50.4134.0100
-	;    6.0 Public Preview           6.0.2462.0000
-	;    6.0 Public Preview Refresh   6.0.2479.0006
-	;    6.0 RTM                    	6.0.2600.0000
-
-  StrCpy ${L_TEMP} ${L_REGDATA} 1
-  StrCmp ${L_TEMP} "4" ie_4
-  StrCpy ${L_REGDATA} ${L_REGDATA} 3
-  Goto done
-
-ie_4:
-  StrCpy ${L_REGDATA} "4.x"
-  Goto done
-
-ie_123:
-
-  ; Older versions of Internet Explorer use the 'IVer' string under the same registry key
-  ; (HKLM\Software\Microsoft\Internet Explorer). The 'IVer' string is used as follows:
-  ;
-  ; Internet Explorer 1.0 for Windows 95 (included with Microsoft Plus! for Windows 95)
-  ; uses the value '100'
-  ;
-  ; Internet Explorer 2.0 for Windows 95 uses the value '102'
-  ;
-  ; Versions of Internet Explorer that are included with Windows NT 4.0 use the value '101'
-  ;
-  ; Internet Explorer 3.x updates the 'IVer' string value to '103'
-
-  ClearErrors
-  ReadRegStr ${L_REGDATA} HKLM "Software\Microsoft\Internet Explorer" "IVer"
-  IfErrors error
-
-  StrCpy ${L_REGDATA} ${L_REGDATA} 3
-  StrCmp ${L_REGDATA} '100' ie1
-  StrCmp ${L_REGDATA} '101' ie2
-  StrCmp ${L_REGDATA} '102' ie2
-
-  StrCpy ${L_REGDATA} '3.x'       ; default to ie3 if not 100, 101, or 102.
-  Goto done
-
-ie1:
-  StrCpy ${L_REGDATA} '1.x'
-  Goto done
-
-ie2:
-  StrCpy ${L_REGDATA} '2.x'
-  Goto done
-
-error:
-  StrCpy ${L_REGDATA} '?.?'
+next_valid_char:
+  IntOp $4 $4 + 1
+  StrCpy $5 $6 1 $4               ; Extract next from "validity check" string
+  StrCmp $3 $5 0 next_valid_char  ; We will ALWAYS find a match in the "validity check" string
+  StrCpy $2 $2$5                  ; Use "validity check" char to ensure result uses lowercase
+  goto next_input_char
 
 done:
-  Pop ${L_TEMP}
-  Exch ${L_REGDATA}
+  StrCpy $0 $2                ; Result is a string with no uppercase letters
+  Pop $6
+  Pop $5
+  Pop $4
+  Pop $3
+  Pop $2
+  Exch $0                     ; place result on top of the stack
 
-  !undef L_REGDATA
-  !undef L_TEMP
+  !undef C_LOWERCASE
 
 FunctionEnd
 
@@ -1524,14 +1586,15 @@ FunctionEnd
 
 !insertmacro StrStr ""
 
-#--------------------------------------------------------------------------
-# Uninstaller Function: un.StrStr
-#
-# This function is used during the uninstall process
-#--------------------------------------------------------------------------
-
-; !insertmacro StrStr "un."
-
+!ifndef ADDUSER
+      #--------------------------------------------------------------------------
+      # Uninstaller Function: un.StrStr
+      #
+      # This function is used during the uninstall process
+      #--------------------------------------------------------------------------
+      
+       !insertmacro StrStr "un."
+!endif
 
 #--------------------------------------------------------------------------
 # Macro: StrCheckDecimal
@@ -1747,13 +1810,15 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-#--------------------------------------------------------------------------
-# Installer Function: CheckIfLocked
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-!insertmacro CheckIfLocked ""
+!ifndef ADDUSER
+    #--------------------------------------------------------------------------
+    # Installer Function: CheckIfLocked
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro CheckIfLocked ""
+!endif
 
 #--------------------------------------------------------------------------
 # Uninstaller Function: un.CheckIfLocked
