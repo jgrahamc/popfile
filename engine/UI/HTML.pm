@@ -1433,9 +1433,10 @@ sub magnet_page
                 my $found = 0;
 
                 for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
-                    my %magnets = $self->{classifier__}->get_magnets( $bucket, $mtype );
+                    my %magnets;
+                    @magnets{ $self->{classifier__}->get_magnets( $bucket, $mtype )} = ();
 
-                    if ( defined( $magnets{$mtext} ) ) {
+                    if ( exists( $magnets{$mtext} ) ) {
                         $found  = 1;
                         $magnet_message .= "<blockquote>\n<div class=\"error02\">\n<b>";
                         $magnet_message .= sprintf( $self->{language__}{Magnet_Error1}, "$mtype: $mtext", $bucket );
@@ -1446,7 +1447,8 @@ sub magnet_page
 
                 if ( $found == 0 )  {
                     for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
-                        my %magnets = $self->{classifier__}->get_magnets( $bucket, $mtype );
+                        my %magnets;
+                        @magnets{ $self->{classifier__}->get_magnets( $bucket, $mtype )} = ();
 
                         for my $from (keys %magnets)  {
                             if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
