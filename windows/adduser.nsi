@@ -57,7 +57,12 @@
 # /install
 #
 # This command-line switch is used when this wizard is called by the main installer program
-# (setup.exe) and makes the wizard skip the language selection dialog and WELCOME page.
+# (setup.exe) and makes the wizard skip the language selection dialog and WELCOME page. When
+# this switch is used and an upgrade installation is being performed, the wizard does NOT show
+# the DIRECTORY page which selects the folder to be used for the 'User Data' because this build
+# of the wizard can only upgrade existing data 'in situ' (displaying the DIRECTORY page could be
+# taken as an indication that the wizard will automatically transfer the existing user data to
+# whatever location is selected).
 #
 # /installreboot
 #
@@ -151,7 +156,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.6"
+  !define C_PFI_VERSION  "0.2.7"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -173,18 +178,6 @@
   !define C_ALT_DEFAULT_USERDATA  "$WINDIR\Application Data\POPFile"
 
   ;-------------------------------------------------------------------------------
-  ; Constants for the timeout loop used after issuing a POPFile 'startup' request
-  ;-------------------------------------------------------------------------------
-
-  ; Timeout loop counter start value (counts down to 0)
-
-  !define C_STARTUP_LIMIT    20
-
-  ; Delay (in milliseconds) used inside the timeout loop
-
-  !define C_STARTUP_DELAY    1000
-
-  ;-------------------------------------------------------------------------------
   ; Constant used to avoid problems with Banner.dll
   ;
   ; (some versions of the DLL do not like being 'destroyed' immediately)
@@ -192,7 +185,15 @@
 
   ; Minimum time for the banner to be shown (in milliseconds)
 
-  !define C_MIN_BANNER_DISPLAY_TIME    250
+  !define C_MIN_BANNER_DISPLAY_TIME  250
+
+  ;-------------------------------------------------------------------------------
+  ; Constant used to give POPFile time to start its web server and be able to display the UI
+  ;-------------------------------------------------------------------------------
+
+  ; Sleep delay (in milliseconds) used after starting POPFile (in 'CheckLaunchOptions' function)
+
+  !define C_UI_STARTUP_DELAY         10000
 
 #--------------------------------------------------------------------------
 # User Registers (Global)
@@ -427,6 +428,13 @@
   ;---------------------------------------------------
   ; Installer Page - Select user data Directory
   ;---------------------------------------------------
+
+  ; Use a "pre" function to determine if this page should be displayed. This build of the
+  ; wizard cannot relocate an existing set of user data, so when the wizard is called from
+  ; the main 'setup.exe' installer to upgrade an existing installation, the DIRECTORY page
+  ; is bypassed, we use the existing location and upgrade any old-style corpus files there.
+
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE         "CheckUserDirStatus"
 
   ; Use a "leave" function to look for an existing 'popfile.cfg' and use it to determine some
   ; initial settings for this installation.
@@ -966,6 +974,12 @@ update_config:
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
                  "$G_ROOTDIR\runpopfile.exe"
 
+  IfFileExists "$G_ROOTDIR\pfidiag.exe" 0 uninst_shortcut
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk" NORMAL
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk" \
+                 "$G_ROOTDIR\pfidiag.exe"
+
+uninst_shortcut:
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk" \
                  "$G_USERDIR\uninstalluser.exe"
@@ -1473,8 +1487,95 @@ exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
+# Installer Function: CheckUserDirStatus
+# (the "pre" function for the User Data DIRECTORY selection page)
+#
+# This build of the installer is unable to relocate an existing set of user data, so if we
+# find one during the PROGRAM installation (performed by the main 'setup.exe' installer), we use
+# the same data location (by bypassing the DIRECTORY page which normally lets the user select
+# where the 'User Data' is to be stored)
+#
+# If the wizard is called directly (i.e. without either of the command-line switches used by
+# the main 'setup.exe' installer) then the DIRECTORY page is not bypassed, to allow the user
+# to discover the current 'User Data' location.
+#--------------------------------------------------------------------------
+
+Function CheckUserDirStatus
+
+  IfFileExists "$G_USERDIR\popfile.cfg" 0 exit
+  StrCmp $G_PFISETUP "/install" skip_userdata_select
+  StrCmp $G_PFISETUP "/installreboot" 0 exit
+
+skip_userdata_select:
+  Call CheckExistingConfigData
+  Abort
+
+exit:
+  ; Display the User Data DIRECTORY page
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Installer Function: CheckExistingDataDir
 # (the "leave" function for the DIRECTORY page)
+#
+# POPFile currently does not support paths containing spaces in POPFILE_ROOT and POPFILE_USER
+# so we use the short file name format for these two environment variables. However some
+# installations may not support short file names, so the wizard checks if the main installer
+# (setup.exe) was configured to use short file names. If short file names are not being used,
+# we must reject any path which contains spaces.
+#--------------------------------------------------------------------------
+
+Function CheckExistingDataDir
+
+  !define L_RESULT    $R9
+
+  ; If short file names are not supported on this system,
+  ; we cannot accept any path containing spaces.
+
+  StrCmp $G_SFN_DISABLED "0" upgrade_check
+
+  Push ${L_RESULT}
+
+  Push $G_USERDIR
+  Push ' '
+  Call StrStr
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" no_spaces
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Current configuration does not support short file names\
+      $\r$\n$\r$\n\
+      Please select a folder location which does not contain spaces"
+  Pop ${L_RESULT}
+  Abort
+
+no_spaces:
+  Pop ${L_RESULT}
+
+upgrade_check:
+
+  ; Warn the user if we are about to upgrade an existing installation
+  ; and allow user to select a different directory if they wish
+
+  IfFileExists "$G_USERDIR\popfile.cfg" 0 continue
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_3)\
+      $\r$\n$\r$\n\
+      $G_USERDIR\
+      $\r$\n$\r$\n$\r$\n\
+      $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES continue
+
+  ; We are returning to the DIRECTORY page
+
+  Abort
+
+continue:
+  Call CheckExistingConfigData
+
+  !undef L_RESULT
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckExistingConfigData
 #
 # This function is used to extract the POP3 and UI ports from the 'popfile.cfg'
 # configuration file (if a copy is found when the wizard starts up).
@@ -1494,14 +1595,9 @@ FunctionEnd
 # and saves (in 'ioC.ini') any values found for use when the user is offered the chance to start
 # POPFile from the installer. If no setting is found, we save '?' in 'ioC.ini'. These settings
 # are used by the 'StartPOPFilePage' and 'CheckLaunchOptions' functions.
-#
-# POPFile currently does not support paths containing spaces in POPFILE_ROOT and POPFILE_USER
-# so we use the short file name format for these two environment variables. However some
-# NTFS-based systems have disabled the creation of short file names and in these cases we reject
-# any path which contains spaces.
 #--------------------------------------------------------------------------
 
-Function CheckExistingDataDir
+Function CheckExistingConfigData
 
   !define L_CFG       $R9     ; handle for "popfile.cfg"
   !define L_CLEANCFG  $R8     ; handle for "clean" copy
@@ -1513,45 +1609,6 @@ Function CheckExistingDataDir
   !define L_LANG_NEW  $R2     ; new style UI lang parameter
   !define L_LANG_OLD  $R1     ; old style UI lang parameter
 
-  ; If short file names are not supported on this system,
-  ; we cannot accept any path containing spaces.
-
-  StrCmp $G_SFN_DISABLED "0" upgrade_check
-
-  Push ${L_CMPRE}
-
-  Push $G_USERDIR
-  Push ' '
-  Call StrStr
-  Pop ${L_CMPRE}
-  StrCmp ${L_CMPRE} "" no_spaces
-  MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "Current configuration does not support short file names\
-      $\r$\n$\r$\n\
-      Please select a folder location which does not contain spaces"
-  Pop ${L_CMPRE}
-  Abort
-
-no_spaces:
-  Pop ${L_CMPRE}
-
-upgrade_check:
-
-  ; Warn the user if we are about to upgrade an existing installation
-  ; and allow user to select a different directory if they wish
-
-  IfFileExists "$G_USERDIR\popfile.cfg" 0 continue
-  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_3)\
-      $\r$\n$\r$\n\
-      $G_USERDIR\
-      $\r$\n$\r$\n$\r$\n\
-      $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES continue
-
-  ; We are returning to the DIRECTORY page
-
-  Abort
-
-continue:
   Push ${L_CFG}
   Push ${L_CLEANCFG}
   Push ${L_CMPRE}
@@ -2009,8 +2066,8 @@ Function MakeUserDirSafe
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_GUI_PORT} "ioA.ini" "UI Port" "NewStyle"
   StrCmp ${L_GUI_PORT} "" try_old_style
-  DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_GUI_PORT} [new style port]"
-  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
+  DetailPrint "$(PFI_LANG_INST_LOG_SHUTDOWN) ${L_GUI_PORT} [new style port]"
+  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
   Push ${L_GUI_PORT}
   Call ShutdownViaUI
   Pop ${L_RESULT}
@@ -2020,8 +2077,8 @@ Function MakeUserDirSafe
 try_old_style:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_GUI_PORT} "ioA.ini" "UI Port" "OldStyle"
   StrCmp ${L_GUI_PORT} "" manual_shutdown
-  DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_GUI_PORT} [old style port]"
-  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
+  DetailPrint "$(PFI_LANG_INST_LOG_SHUTDOWN) ${L_GUI_PORT} [old style port]"
+  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
   Push ${L_GUI_PORT}
   Call ShutdownViaUI
   Pop ${L_RESULT}
@@ -2095,7 +2152,7 @@ Function SetEmailClientPage
   ; during which time the user may be tempted to click the 'Next' button. Display a banner to
   ; reassure the user (and hope they do NOT click any buttons)
 
-  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
+  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_BE_PATIENT)" "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_MAILCFG_TITLE)" "$(PFI_LANG_MAILCFG_SUBTITLE)"
 
@@ -2647,7 +2704,7 @@ Function ConvertOOERegData
   Push ${L_UNDO}
   Push ${L_UNDOFILE}
 
-  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
+  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_BE_PATIENT)" "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
 
   ; Original 'popfile.reg' format (2 values per entry, each using 3 lines) imported as 'IniV=1':
   ;
@@ -4175,14 +4232,12 @@ Function CheckLaunchOptions
   !define L_TEMP        $R7
   !define L_TRAY        $R6   ; set to 'i' if system tray enabled, otherwise set to ""
   !define L_CONSOLE     $R5   ; new console mode: 0 = disabled, 1 = enabled
-  !define L_TIMEOUT     $R4   ; used to wait for the UI to respond (when starting POPFile)
 
   Push ${L_CFG}
   Push ${L_EXE}
   Push ${L_TEMP}
   Push ${L_TRAY}
   Push ${L_CONSOLE}
-  Push ${L_TIMEOUT}
 
   StrCpy ${L_TRAY} "i"    ; the default is to enable the system tray icon
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Inherited" "TrayIcon"
@@ -4306,26 +4361,22 @@ error_msg:
 
 continue:
 
-  ; Wait until POPFile is ready to display the UI (may take a second or so)
+  ; A simple time delay is used to give POPFile time to get ready to display the UI (it takes
+  ; time for POPFile to start up and be able to generate the UI pages - attempts to access the
+  ; UI too quickly will result in a browser error message (which must be cancelled by the user)
+  ; and an empty browser window (which must be refreshed by the user). Earlier versions of the
+  ; installer waited until POPFile could display a UI page but on some systems this wait proved
+  ; to be endless. (The installer should have given up after a certain number of failed NSISdl
+  ; attempts to access the UI but in some cases NSISdl never returned control to the installer
+  ; so the installer stopped responding.)
 
-  StrCpy ${L_TIMEOUT} ${C_STARTUP_LIMIT}   ; Timeout limit to avoid an infinite loop
+  Sleep ${C_UI_STARTUP_DELAY}
 
-check_if_ready:
-  NSISdl::download_quiet http://127.0.0.1:$G_GUI "$PLUGINSDIR\ui.htm"
-  Pop ${L_TEMP}                        ; Did POPFile return an HTML page?
-  StrCmp ${L_TEMP} "success" remove_banner
-  Sleep ${C_STARTUP_DELAY}
-  IntOp ${L_TIMEOUT} ${L_TIMEOUT} - 1
-  IntCmp ${L_TIMEOUT} 0 remove_banner remove_banner check_if_ready
-
-remove_banner:
   StrCmp ${L_CONSOLE} 1 exit_without_banner
   Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
 
 exit_without_banner:
-
-  Pop ${L_TIMEOUT}
   Pop ${L_CONSOLE}
   Pop ${L_TRAY}
   Pop ${L_TEMP}
@@ -4337,7 +4388,6 @@ exit_without_banner:
   !undef L_TEMP
   !undef L_TRAY
   !undef L_CONSOLE
-  !undef L_TIMEOUT
 
 FunctionEnd
 
@@ -4460,11 +4510,15 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Installer Function: RunUI
 # (the "Run" function for the 'FINISH' page)
+#
+# If the installer is allowed to display the UI, it now displays the Buckets page
+# (instead of the default page). This makes it easier for users to check the results
+# of upgrading a pre-0.21.0 installation (the upgrade may change some bucket settings).
 #--------------------------------------------------------------------------
 
 Function RunUI
 
-  ExecShell "open" "http://127.0.0.1:$G_GUI"
+  ExecShell "open" "http://127.0.0.1:$G_GUI/buckets"
 
 FunctionEnd
 
@@ -4686,8 +4740,8 @@ ui_port_done:
   Call un.StrCheckDecimal
   Pop $G_GUI
   StrCmp $G_GUI "" use_other_port
-  DetailPrint "$(PFI_LANG_UN_LOG_1) $G_GUI"
-  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
+  DetailPrint "$(PFI_LANG_UN_LOG_SHUTDOWN) $G_GUI"
+  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
   Push $G_GUI
   Call un.ShutdownViaUI
   Pop ${L_TEMP}
@@ -4699,8 +4753,8 @@ use_other_port:
   Call un.StrCheckDecimal
   Pop ${L_OLDUI}
   StrCmp ${L_OLDUI} "" remove_user_data
-  DetailPrint "$(PFI_LANG_UN_LOG_1) ${L_OLDUI}"
-  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
+  DetailPrint "$(PFI_LANG_UN_LOG_SHUTDOWN) ${L_OLDUI}"
+  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
   Push ${L_OLDUI}
   Call un.ShutdownViaUI
   Pop ${L_TEMP}
@@ -4741,13 +4795,13 @@ remove_user_data:
   StrCpy ${L_UNDOFILE} "pfi-outexpress.ini"
   IfFileExists "$G_USERDIR\${L_UNDOFILE}" 0 end_oe_restore
   Push  ${L_UNDOFILE}
-  Push "$(PFI_LANG_UN_PROGRESS_4)"
+  Push "$(PFI_LANG_UN_PROG_OUTEXPRESS)"
   Call un.RestoreOOE
   Pop ${L_TEMP}
 
   StrCmp ${L_TEMP} "success" delete_oe_data
   StrCpy ${L_UNDOSTATUS} "fail"
-  DetailPrint "$(PFI_LANG_UN_LOG_7): ${L_UNDOFILE}"
+  DetailPrint "$(PFI_LANG_UN_LOG_DATAPROBS): ${L_UNDOFILE}"
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_1)\
       $\r$\n$\r$\n\
@@ -4770,13 +4824,13 @@ end_oe_restore:
   StrCpy ${L_UNDOFILE} "pfi-outlook.ini"
   IfFileExists "$G_USERDIR\${L_UNDOFILE}" 0 end_outlook_restore
   Push  ${L_UNDOFILE}
-  Push "$(PFI_LANG_UN_PROGRESS_7)"
+  Push "$(PFI_LANG_UN_PROG_OUTLOOK)"
   Call un.RestoreOOE
   Pop ${L_TEMP}
 
   StrCmp ${L_TEMP} "success" delete_outlook_data
   StrCpy ${L_UNDOSTATUS} "fail"
-  DetailPrint "$(PFI_LANG_UN_LOG_7): ${L_UNDOFILE}"
+  DetailPrint "$(PFI_LANG_UN_LOG_DATAPROBS): ${L_UNDOFILE}"
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_2)\
       $\r$\n$\r$\n\
@@ -4799,13 +4853,13 @@ end_outlook_restore:
   StrCpy ${L_UNDOFILE} "pfi-eudora.ini"
   IfFileExists "$G_USERDIR\${L_UNDOFILE}" 0 end_eudora_restore
   Push  ${L_UNDOFILE}
-  Push "$(PFI_LANG_UN_PROGRESS_8)"
+  Push "$(PFI_LANG_UN_PROG_EUDORA)"
   Call un.RestoreEudora
   Pop ${L_TEMP}
 
   StrCmp ${L_TEMP} "success" delete_eudora_data
   StrCpy ${L_UNDOSTATUS} "fail"
-  DetailPrint "$(PFI_LANG_UN_LOG_7): ${L_UNDOFILE}"
+  DetailPrint "$(PFI_LANG_UN_LOG_DATAPROBS): ${L_UNDOFILE}"
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_3)\
       $\r$\n$\r$\n\
@@ -4823,7 +4877,7 @@ end_eudora_restore:
   ;------------------------------------
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_5)"
+  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
   SetDetailsPrint listonly
 
   ; Win95 generates an error message if 'RMDir /r' is used on a non-existent directory
@@ -4834,6 +4888,7 @@ end_eudora_restore:
 skip_nonsql_corpus:
   Delete $G_USERDIR\popfile.db
   Delete "$G_USERDIR\Run SQLite utility.lnk"
+  Delete "$G_USERDIR\PFI Diagnostic utility.lnk"
 
   IfFileExists "$G_USERDIR\messages\*." 0 skip_messages
   RMDir /r $G_USERDIR\messages
@@ -4906,7 +4961,7 @@ cleanup_registry:
   ; Assume it is safe to offer to remove everything now
 
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_2)" IDNO exit
-  DetailPrint "$(PFI_LANG_UN_LOG_8)"
+  DetailPrint "$(PFI_LANG_UN_LOG_DELUSERDIR)"
   Delete $G_USERDIR\*.* ; this would be skipped if the user hits no
   RMDir /r $G_USERDIR
   StrCmp $APPDATA "" 0 appdata_valid_x
@@ -4918,7 +4973,7 @@ appdata_valid_x:
 
   check_removal:
     IfFileExists $G_USERDIR 0 exit
-      DetailPrint "$(PFI_LANG_UN_LOG_9)"
+      DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
       MessageBox MB_OK|MB_ICONEXCLAMATION \
           "$(PFI_LANG_UN_MBREMERR_1): $G_USERDIR $(PFI_LANG_UN_MBREMERR_2)"
 
@@ -5016,7 +5071,7 @@ Function un.RestoreOOE
   ; Read the registry settings found in the 'undo' file and restore them if there are any.
   ; All are assumed to be in HKCU
 
-  DetailPrint "$(PFI_LANG_UN_LOG_2): ${L_UNDOFILE}"
+  DetailPrint "$(PFI_LANG_UN_LOG_OPENED): ${L_UNDOFILE}"
   ClearErrors
   ReadINIStr ${L_INDEX} "$G_USERDIR\${L_UNDOFILE}" "History" "ListSize"
   IfErrors ooe_restore_corrupt
@@ -5079,9 +5134,9 @@ skip_port_check:
 skip_port_restore:
   WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "Yes"
 
-  DetailPrint "$(PFI_LANG_UN_LOG_3) POP3 User Name: ${L_POP_USER}"
-  DetailPrint "$(PFI_LANG_UN_LOG_3) POP3 Server: ${L_POP_SERVER}"
-  DetailPrint "$(PFI_LANG_UN_LOG_3) POP3 Port: ${L_POP_PORT}"
+  DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) POP3 User Name: ${L_POP_USER}"
+  DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) POP3 Server: ${L_POP_SERVER}"
+  DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) POP3 Port: ${L_POP_PORT}"
 
   Goto next_ooe_undo
 
@@ -5126,7 +5181,7 @@ quit_restore:
 save_result:
   FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}$\r$\n$\r$\n"
   FileClose ${L_ERRORLOG}
-  DetailPrint "$(PFI_LANG_UN_LOG_4): ${L_UNDOFILE}"
+  DetailPrint "$(PFI_LANG_UN_LOG_DELROOTDIR): ${L_UNDOFILE}"
   FlushINI "$G_USERDIR\${L_UNDOFILE}"
 
 exit_now:
@@ -5273,7 +5328,7 @@ restore_eudora:
       User  : $G_WINUSERNAME\
       $\r$\n"
 
-  DetailPrint "$(PFI_LANG_UN_LOG_2): ${L_UNDOFILE}"
+  DetailPrint "$(PFI_LANG_UN_LOG_OPENED): ${L_UNDOFILE}"
   ClearErrors
   ReadINIStr ${L_INDEX} "$G_USERDIR\${L_UNDOFILE}" "History" "ListSize"
   IfErrors eudora_restore_corrupt
@@ -5355,11 +5410,11 @@ restored:
   WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "Yes"
 
   StrCmp ${L_POP_SERVER} "*.*" log_port_restore
-  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'POPServer': ${L_POP_SERVER}"
-  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'LoginName': ${L_POP_LOGIN}"
+  DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) ${L_PERSONA} 'POPServer': ${L_POP_SERVER}"
+  DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) ${L_PERSONA} 'LoginName': ${L_POP_LOGIN}"
 
 log_port_restore:
-  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'POPPort': ${L_POP_PORT}"
+  DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) ${L_PERSONA} 'POPPort': ${L_POP_PORT}"
 
   Goto next_eudora_undo
 
@@ -5404,7 +5459,7 @@ quit_restore:
 save_result:
   FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}$\r$\n$\r$\n"
   FileClose ${L_ERRORLOG}
-  DetailPrint "$(PFI_LANG_UN_LOG_4): ${L_UNDOFILE}"
+  DetailPrint "$(PFI_LANG_UN_LOG_DELROOTDIR): ${L_UNDOFILE}"
   FlushINI "$G_USERDIR\${L_UNDOFILE}"
 
 exit_now:
