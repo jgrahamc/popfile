@@ -238,6 +238,7 @@ create table magnets( id integer primary key,    -- unique ID for this entry
                       bucketid integer,          -- a bucket
                       mtid integer,              -- the magnet type
                       value varchar(255),        -- value for the magnet
+                      comment varchar(255),      -- user defined comment
                       seq int                    -- used to set the order of magnets
                     );
 
@@ -260,6 +261,9 @@ create table history( id integer primary key, -- unique ID for this entry
                       magnetid integer,       -- the magnet used if applicable
                       message blob            -- the entire message
                     );
+
+create table bucket_action_types
+create table bucket_actions
 
 -- TRIGGERS
 

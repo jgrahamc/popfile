@@ -353,7 +353,7 @@ sub child__
                         # Note that the 1 here indicates that echo_response_ does not send the response to the
                         # client.  The +OK has already been sent by the RETR
 
-                        $response = $self->echo_response_($mail, $client, $command, 1 );
+                        $response = $self->echo_response_( $mail, $client, $command, 1 );
                         last if ( $response == 2 );
                         if ( $response == 0 ) {
 
@@ -499,7 +499,8 @@ sub child__
                     flush $pipe;
                     $self->yield_( $ppipe, $pid );
 
-                    # Note locally that file has been retrieved
+                    # Note locally that file has been retrieved if the full thing has been saved
+                    # to disk
 
                     $downloaded{$count} = 1;
                 }

@@ -288,7 +288,8 @@ sub deliver
     my ( $self, $type, $message, $parameter ) = @_;
 
     if ( $type eq 'CLASS' ) {
-        $self->set_bucket_parameter( $message, 'count', $self->get_bucket_parameter( $message, 'count' ) + 1 );
+        $self->set_bucket_parameter( $message, 'count', 
+            $self->get_bucket_parameter( $message, 'count' ) + 1 );
     }
 }
 
@@ -603,7 +604,9 @@ sub upgrade_bucket__
 		    }
                 }
 
-                $self->log_( "(completed ", $wc-1, " words)" );
+                if ( $wc > 1 ) {
+                    $self->log_( "(completed ", $wc-1, " words)" );
+		}
                 close WORDS;
             } else {
                 close WORDS;

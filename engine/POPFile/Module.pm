@@ -470,50 +470,56 @@ sub slurp_
 {
     my ( $self, $handle ) = @_;
 
-    my $line = $self->{slurp_buffer__}{"$handle"};
-    undef $self->{slurp_buffer__}{"$handle"};
     my $c;
 
-    while ( sysread( $handle, $c, 1 ) == 1 ) {
-        $line .= $c;
+    # Read until we either run out of data to read or we hit a suitable line
+    # ending character which is not right at the end of the data otherwise we
+    # could accidentally split CRLF into two lines (one ending CR and one LF
+    # if they appeared right at the 160 character boundary).
 
-        # If we hit a CR then it's acceptable that the next character is a LF
-        # in which case we will assume the line ending is CRLF, if it's not
-        # LF then the line ending is CR alone
+    while ( ( $self->{slurp_buffer__}{"$handle"} !~ /[\012\015]/ ) &&
+            ( sysread( $handle, $c, 160 ) > 0 ) ) {
+        $self->{slurp_buffer__}{"$handle"} .= $c;
 
-        if ( ord($c) == 13 ) {
-            if ( sysread( $handle, $c, 1 ) == 1 ) {
-                if ( ord($c) == 10 ) {
-                    return $line . $c;
-		} else {
-                    $self->{slurp_buffer__}{"$handle"} = $c;
-                    return $line;
-		}
-	    } else {
-            
-                # Last character in stream was CR so return the
-                # line
+        $self->log_( "slurp_ buffer for $handle now contains [" . $self->{slurp_buffer__}{"$handle"} . "]" );
+    }
 
-                return $line;
-	    }
-	}
+    # The acceptable line endings are CR, CRLF or LF.  So we look for
+    # them using these regexps.
 
-        # If we hit LF then that's the line ending
+    # Look for LF
 
-        if ( ord($c) == 10 ) {
-            return $line;
-	}
-    }   
+    if ( $self->{slurp_buffer__}{"$handle"} =~ s/^([^\015\012]*\012)// ) {
+        $self->log_( "slurp_ returning [$1] because LF found" );
+        return $1;
+    }	
+
+    # Look for CRLF
+
+    if ( $self->{slurp_buffer__}{"$handle"} =~ s/^([^\015\012]*\015\012)// ) {
+        $self->log_( "slurp_ returning [$1] because CRLF found" );
+        return $1;
+    }
+
+    # Look for CR
+
+    if ( $self->{slurp_buffer__}{"$handle"} =~ s/^([^\015\012]*\015)// ) {
+        $self->log_( "slurp_ returning [$1] because CR found" );
+        return $1;
+    }
 
     # If we get here with something in line then the file ends without any
     # CRLF so return the line, otherwise we are reading at the end of the
     # stream/file so return undef
 
-    if ( $line eq '' ) {
-        delete( $self->{slurp_buffer__}{"$handle"} );
+    my $remaining = $self->{slurp_buffer__}{"$handle"}; 
+    delete( $self->{slurp_buffer__}{"$handle"} );
+
+    if ( $remaining eq '' ) {
         return undef;
     } else {
-        return $line;
+        return $remaining;
+        $self->log_( "slurp_ returning [$remaining] at end of data" );
     }
 }
 
@@ -557,7 +563,7 @@ sub flush_extra_
     my $max_length = 8192;
 
     my ( $ready ) = $selector->can_read(0.01);
-    if ( $ready == $mail ) {
+    if ( defined( $ready ) && ( $ready == $mail ) ) {
         my $n = sysread( $mail, $buf, $max_length, length $buf );
 
         if ( $n > 0 ) {
