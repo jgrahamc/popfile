@@ -254,6 +254,12 @@ sub mangle
         return "";
     }
 
+    # Ditch long hex numbers
+    if ( $word =~ /[A-F0-9]{8,}/i )
+    {
+        return '';
+    }
+    
     return $word;
 }
 
