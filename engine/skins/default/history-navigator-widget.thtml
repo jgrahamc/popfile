@@ -1,0 +1,24 @@
+<TMPL_VAR NAME="Localize_History_Jump">: 
+<TMPL_IF NAME="History_Navigator_If_Previous">
+[<a href="/history?start_message=<TMPL_VAR NAME="History_Navigator_Previous"><TMPL_VAR NAME="History_Navigator_Fields">">&lt; <TMPL_VAR NAME="Localize_Previous"></a>] 
+</TMPL_IF>
+
+<TMPL_LOOP NAME="History_Navigator_Loop">
+<TMPL_IF NAME="History_Navigator_If_Spacer">
+<TMPL_IF NAME="History_Navigator_If_Dots">
+...
+</TMPL_IF>
+<TMPL_ELSE>
+<TMPL_IF NAME="History_Navigator_If_This_Page">
+<b><TMPL_VAR NAME="History_Navigator_Page"></b>
+<TMPL_ELSE>
+[<a href="/history?start_message=<TMPL_VAR NAME="History_Navigator_I"><TMPL_VAR NAME="History_Navigator_Fields">"><TMPL_VAR NAME="History_Navigator_Page"></a>]
+</TMPL_IF>
+</TMPL_IF>
+</TMPL_LOOP>
+
+<TMPL_IF NAME="History_Navigator_If_Next">
+[<a href="/history?start_message=<TMPL_VAR NAME="History_Navigator_Next"><TMPL_VAR NAME="History_Navigator_Fields">"><TMPL_VAR NAME="Localize_Next"> &gt;</a>]
+</TMPL_IF>
+
+ (<a class="history" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;setfilter="><TMPL_VAR NAME="Localize_Refresh"></a>)

@@ -426,14 +426,14 @@ sub module_config_
 #
 # Called by a subclass to register a UI element
 #
-# $type, $name, $object     See register_configuration_item in UI::HTML
+# $type, $name, $templ, $object     See register_configuration_item__ in UI::HTML
 #
 # ---------------------------------------------------------------------------------------------
 sub register_configuration_item_
 {
-    my ( $self, $type, $name, $object ) = @_;
+    my ( $self, $type, $name, $templ, $object ) = @_;
 
-    return $self->mq_post_( 'UIREG', "$type:$name", $object );
+    return $self->mq_post_( 'UIREG', "$type:$name:$templ", $object );
 }
 
 # ---------------------------------------------------------------------------------------------

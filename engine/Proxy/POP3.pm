@@ -129,27 +129,18 @@ sub start
     # item that needs a UI component
 
     $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
-                                         'pop3_port',
-                                         $self );                      # PROFILE BLOCK STOP
-
-    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
-                                         'pop3_separator',
-                                         $self );                      # PROFILE BLOCK STOP
-
-    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
-                                         'pop3_force_fork',
+                                         'pop3_configuration',
+                                         'pop3-configuration-panel.thtml',
                                          $self );                      # PROFILE BLOCK STOP
 
     $self->register_configuration_item_( 'security',                   # PROFILE BLOCK START
-                                         'pop3_local',
+                                         'pop3_security',
+                                         'pop3-security-panel.thtml',
                                          $self );                      # PROFILE BLOCK STOP
 
     $self->register_configuration_item_( 'chain',                      # PROFILE BLOCK START
-                                         'pop3_secure_server',
-                                         $self );                      # PROFILE BLOCK STOP
-
-    $self->register_configuration_item_( 'chain',                      # PROFILE BLOCK START
-                                         'pop3_secure_server_port',
+                                         'pop3_chain',
+                                         'pop3-chain-panel.thtml',
                                          $self );                      # PROFILE BLOCK STOP
 
     if ( $self->config_( 'welcome_string' ) =~ /^POP3 POPFile \(v\d+\.\d+\.\d+\) server ready$/ ) { # PROFILE BLOCK START
@@ -643,98 +634,32 @@ sub child__
 #
 # configure_item
 #
-#    $name            The name of the item being configured, was passed in by the call
-#                     to register_configuration_item
-#    $language        Reference to the hash holding the current language
-#    $session_key     The current session key
+#    $name            Name of this item
+#    $templ           The loaded template that was passed as a parameter
+#                     when registering
 #
-#  Must return the HTML for this item
 # ---------------------------------------------------------------------------------------------
 
 sub configure_item
 {
-    my ( $self, $name, $language, $session_key ) = @_;
+    my ( $self, $name, $templ ) = @_;
 
-    my $body = '';
-
-    # POP3 Listen Port widget
-    if ( $name eq 'pop3_port' ) {
-        $body .= "<form action=\"/configuration\">\n";
-        $body .= "<label class=\"configurationLabel\" for=\"configPopPort\">$$language{Configuration_POP3Port}:</label><br />\n";
-        $body .= "<input name=\"pop3_port\" type=\"text\" id=\"configPopPort\" value=\"" . $self->config_( 'port' ) . "\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_pop3_port\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-    }
-
-    # Separator Character widget
-    if ( $name eq 'pop3_separator' ) {
-        $body .= "\n<form action=\"/configuration\">\n";
-        $body .= "<label class=\"configurationLabel\" for=\"configSeparator\">$$language{Configuration_POP3Separator}:</label><br />\n";
-        $body .= "<input name=\"pop3_separator\" id=\"configSeparator\" type=\"text\" value=\"" . $self->config_( 'separator' ) . "\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_pop3_separator\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-    }
-
-    # Accept POP3 from Remote Machines widget
-    if ( $name eq 'pop3_local' ) {
-        $body .= "<span class=\"securityLabel\">$$language{Security_POP3}:</span><br />\n";
-
-        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
-        if ( $self->config_( 'local' ) == 1 ) {
-            $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
-            $body .= "<span class=\"securityWidgetStateOff\">$$language{Security_NoStealthMode}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securityAcceptPOP3On\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"pop3_local\" value=\"1\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        } else {
-            $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
-            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptPOP3Off\" name=\"toggle\" value=\"$$language{ChangeToNo} $$language{Security_StealthMode}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"pop3_local\" value=\"2\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+    if ( $name eq 'pop3_configuration' ) {
+        $templ->param( 'POP3_Configuration_If_Force_Fork' => ( $self->config_( 'force_fork' ) == 0 ) );
+        $templ->param( 'POP3_Configuration_Port'          => $self->config_( 'port' ) );
+        $templ->param( 'POP3_Configuration_Separator'     => $self->config_( 'separator' ) );
+    } else {
+        if ( $name eq 'pop3_security' ) {
+            $templ->param( 'POP3_Security_Local' => ( $self->config_( 'local' ) == 1 ) );
+	} else {
+            if ( $name eq 'pop3_chain' ) {
+                $templ->param( 'POP3_Chain_Secure_Server' => $self->config_( 'secure_server' ) );
+                $templ->param( 'POP3_Chain_Secure_Port' => $self->config_( 'secure_port' ) );
+	    } else {
+                $self->SUPER::configure_item( $name, $templ );
+	    }
         }
-        $body .= "</td></tr></table>\n";
-     }
-
-    # Secure Server widget
-    if ( $name eq 'pop3_secure_server' ) {
-        $body .= "<form action=\"/security\">\n";
-        $body .= "<label class=\"securityLabel\" for=\"securitySecureServer\">$$language{Security_SecureServer}:</label><br />\n";
-        $body .= "<input type=\"text\" name=\"server\" id=\"securitySecureServer\" value=\"" . $self->config_( 'secure_server' ) . "\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_server\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
     }
-
-    # Secure Port widget
-    if ( $name eq 'pop3_secure_server_port' ) {
-        $body .= "<form action=\"/security\">\n";
-        $body .= "<label class=\"securityLabel\" for=\"securitySecurePort\">$$language{Security_SecurePort}:</label><br />\n";
-        $body .= "<input type=\"text\" name=\"sport\" id=\"securitySecurePort\" value=\"" . $self->config_( 'secure_port' ) . "\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_sport\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-    }
-
-    if ( $name eq 'pop3_force_fork' ) {
-        $body .= "<span class=\"configurationLabel\">$$language{Configuration_POPFork}:</span><br />\n";
-        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
-
-        if ( $self->config_( 'force_fork' ) == 0 ) {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<span class=\"securityWidgetStateOff\">$$language{No}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOn\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"pop3_force_fork\" value=\"1\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        } else {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOff\" name=\"toggle\" value=\"$$language{ChangeToNo}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"pop3_force_fork\" value=\"0\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        }
-        $body .= "</td></tr></table>\n";
-    }
-
-    return $body . $self->SUPER::configure_item( $name, $language, $session_key );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -743,66 +668,70 @@ sub configure_item
 #
 #    $name            The name of the item being configured, was passed in by the call
 #                     to register_configuration_item
-#    $language        Reference to the hash holding the current language
+#    $templ           The loaded template
+#    $language        The language currently in use
 #    $form            Hash containing all form items
 #
-#  Must return the HTML for this item
 # ---------------------------------------------------------------------------------------------
 
 sub validate_item
 {
-    my ( $self, $name, $language, $form ) = @_;
+    my ( $self, $name, $templ, $language, $form ) = @_;
 
-    if ( $name eq 'pop3_port' ) {
+    if ( $name eq 'pop3_configuration' ) {
         if ( defined($$form{pop3_port}) ) {
             if ( ( $$form{pop3_port} >= 1 ) && ( $$form{pop3_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{pop3_port} );
-                return '<blockquote>' . sprintf( $$language{Configuration_POP3Update} . '</blockquote>' , $self->config_( 'port' ) );
-             } else {
-                 return "<blockquote><div class=\"error01\">$$language{Configuration_Error3}</div></blockquote>";
-             }
+                $templ->param( 'POP3_Configuration_If_Port_Updated' => 1 );
+                $templ->param( 'POP3_Configuration_Port_Updated' => sprintf( $$language{Configuration_POP3Update}, $self->config_( 'port' ) ) );
+            } else {
+                $templ->param( 'POP3_Configuration_If_Port_Error' => 1 );
+            }
         }
-    }
 
-    if ( $name eq 'pop3_separator' ) {
         if ( defined($$form{pop3_separator}) ) {
             if ( length($$form{pop3_separator}) == 1 ) {
                 $self->config_( 'separator', $$form{pop3_separator} );
-                return '<blockquote>' . sprintf( $$language{Configuration_POP3SepUpdate} . '</blockquote>' , $self->config_( 'separator' ) );
+                $templ->param( 'POP3_Configuration_If_Sep_Updated' => 1 );
+                $templ->param( 'POP3_Configuration_Sep_Updated' => sprintf( $$language{Configuration_POP3SepUpdate}, $self->config_( 'separator' ) ) );
             } else {
-                return "<blockquote>\n<div class=\"error01\">\n$$language{Configuration_Error1}</div>\n</blockquote>\n";
+                $templ->param( 'POP3_Configuration_If_Sep_Error' => 1 );
             }
         }
-    }
 
-    if ( $name eq 'pop3_local' ) {
-        $self->config_( 'local', $$form{pop3_local}-1 ) if ( defined($$form{pop3_local}) );
-    }
-
-    if ( $name eq 'pop3_secure_server' ) {
-         $self->config_( 'secure_server', $$form{server} ) if ( defined($$form{server}) );
-         return sprintf( "<blockquote>" . $$language{Security_SecureServerUpdate} . "</blockquote>", $self->config_( 'secure_server' ) ) if ( defined($$form{server}) );
-    }
-
-    if ( $name eq 'pop3_secure_server_port' ) {
-        if ( defined($$form{sport}) ) {
-            if ( ( $$form{sport} >= 1 ) && ( $$form{sport} < 65536 ) ) {
-                $self->config_( 'secure_port', $$form{sport} );
-                return sprintf( "<blockquote>" . $$language{Security_SecurePortUpdate} . "</blockquote>", $self->config_( 'secure_port' ) ) if ( defined($$form{sport}) );
-            } else {
-                return "<blockquote><div class=\"error01\">$$language{Security_Error1}</div></blockquote>";
-            }
-        }
-    }
-
-    if ( $name eq 'pop3_force_fork' ) {
         if ( defined($$form{pop3_force_fork}) ) {
             $self->config_( 'force_fork', $$form{pop3_force_fork} );
         }
+
+        return;
     }
 
-    return $self->SUPER::validate_item( $name, $language, $form );
+    if ( $name eq 'pop3_security' ) {
+        $self->config_( 'local', $$form{pop3_local}-1 ) if ( defined($$form{pop3_local}) );
+
+        return;
+    }
+
+    if ( $name eq 'pop3_chain' ) {
+        if ( defined( $$form{server} ) ) {
+            $self->config_( 'secure_server', $$form{server} );
+            $templ->param( 'POP3_Chain_If_Server_Updated' => 1 );
+            $templ->param( 'POP3_Chain_Server_Updated' => sprintf( $$language{Security_SecureServerUpdate}, $self->config_( 'secure_server' ) ) );
+	}
+
+        if ( defined($$form{sport}) ) {
+            if ( ( $$form{sport} >= 1 ) && ( $$form{sport} < 65536 ) ) {
+                $self->config_( 'secure_port', $$form{sport} );
+                $templ->param( 'POP3_Chain_If_Port_Updated' => 1 );
+                $templ->param( 'POP3_Chain_Port_Updated' => sprintf( $$language{Security_SecurePortUpdate}, $self->config_( 'secure_port' ) ) );
+            } else {
+                $templ->param( 'POP3_Chain_If_Port_Error' => 1 );
+            }
+        }
+
+        return;
+    }
+
+    $self->SUPER::validate_item( $name, $templ, $language, $form );
 }
 
-# TODO echo_response_ that calls echo_response_ with the extra parameters
-# required et al.

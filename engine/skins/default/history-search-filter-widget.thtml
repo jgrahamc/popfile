@@ -1,0 +1,26 @@
+<form action="/history">
+<label class="historyLabel" for="historySearch"><TMPL_VAR NAME="Localize_History_SearchMessage">:</label>
+
+<TMPL_IF NAME="History_If_Search">
+<input type="text" id="historySearch" name="search" value="<TMPL_VAR NAME="History_Field_Search">" />
+</TMPL_IF>
+
+<input type="submit" class="submit" name="setsearch" value="<TMPL_VAR NAME="Localize_Find">" />
+&nbsp;&nbsp;
+<label class="historyLabel" for="historyFilter"><TMPL_VAR NAME="Localize_History_FilterBy">:</label>
+<input type="hidden" name="sort" value="<TMPL_VAR NAME="History_Field_Sort">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+
+<select name="filter" id="historyFilter">
+<option value=""></option>
+<TMPL_LOOP NAME="History_Loop_SF_Buckets">
+<option value="<TMPL_VAR NAME="History_Bucket">" <TMPL_VAR NAME="History_Selected"> style="color: <TMPL_VAR NAME="History_Bucket_Color">"><TMPL_VAR NAME="History_Bucket"></option>
+</TMPL_LOOP>
+
+<option value="__filter__magnet" <TMPL_VAR NAME="History_Filter_Magnet">>&lt;<TMPL_VAR NAME="Localize_History_ShowMagnet">&gt;</option>
+<option value="__filter__no__magnet" <TMPL_VAR NAME="History_Filter_No_Magnet">>&lt;<TMPL_VAR NAME="Localize_History_ShowNoMagnet">&gt;</option>
+<option value="unclassified" <TMPL_VAR NAME="History_Filter_Unclassified">>&lt;unclassified&gt;</option>
+
+</select><input type="submit" class="submit" name="setfilter" value="<TMPL_VAR NAME="Localize_Filter">" />
+<input type="submit" class="submit" name="reset_filter_search" value="<TMPL_VAR NAME="Localize_History_ResetSearch">" />
+</form>

@@ -109,25 +109,25 @@ sub start
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-    $self->register_configuration_item_( 'configuration',
-                                         'smtp_port',
-                                         $self );
+#    $self->register_configuration_item_( 'configuration',
+#                                         'smtp_port',
+#                                         $self );
 
-    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
-                                         'smtp_force_fork',
-                                         $self );                      # PROFILE BLOCK STOP
+#    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
+#                                         'smtp_force_fork',
+#                                         $self );                      # PROFILE BLOCK STOP
 
-    $self->register_configuration_item_( 'security',
-                                         'smtp_local',
-                                         $self );
+#    $self->register_configuration_item_( 'security',
+#                                         'smtp_local',
+#                                         $self );
 
-    $self->register_configuration_item_( 'chain',
-                                         'smtp_server',
-                                         $self );
+#    $self->register_configuration_item_( 'chain',
+#                                         'smtp_server',
+#                                         $self );
 
-    $self->register_configuration_item_( 'chain',
-                                         'smtp_server_port',
-                                          $self );
+#    $self->register_configuration_item_( 'chain',
+#                                         'smtp_server_port',
+#                                          $self );
 
     return $self->SUPER::start();;
 }

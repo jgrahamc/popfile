@@ -1,0 +1,59 @@
+<a name="scores">
+<hr><b><TMPL_VAR NAME="Localize_Scores"></b><p>
+<table class="top20Words"><tr><th scope="col"><TMPL_VAR NAME="Localize_Bucket"></th><th>&nbsp;</th>
+
+<TMPL_IF NAME="View_Score_If_Score">
+<th scope="col"><TMPL_VAR NAME="Localize_Count">&nbsp;&nbsp;</th>
+<th scope="col" align="center"><TMPL_VAR NAME="Localize_Score"></th>
+<th scope="col"><TMPL_VAR NAME="Localize_Probability"></th></tr>
+<TMPL_ELSE>
+<th scope="col"><TMPL_VAR NAME="Localize_Count">&nbsp;&nbsp;</th>
+<th scope="col"><TMPL_VAR NAME="Localize_Probability"></th></tr>
+</TMPL_IF>
+<TMPL_LOOP NAME="View_Score_Loop_Scores">
+<tr>
+<td><font color="<TMPL_VAR NAME="View_Score_Bucket_Color">"><b><TMPL_VAR NAME="View_Score_Bucket"></b></font></td>
+<td>&nbsp;</td><td align="right"><TMPL_VAR NAME="View_Score_MatchCount">&nbsp;&nbsp;&nbsp;&nbsp;</td>
+<TMPL_IF NAME="View_Score_If_Score">
+<td align=right><TMPL_VAR NAME="View_Score_RawStr">&nbsp;&nbsp;&nbsp;</td>
+<td><TMPL_VAR NAME="View_Score_ProbStr"></td></tr>
+<TMPL_ELSE>
+<td><TMPL_VAR NAME="View_Score_ProbStr"></td></tr></TMPL_IF>
+</TMPL_LOOP>
+</table>
+
+<hr>
+
+<TMPL_IF NAME="View_Score_If_Table">
+<table class="top20Words">
+<tr>
+<th scope="col"><TMPL_VAR NAME="Localize_Word"></th>
+<th>&nbsp;</th>
+<th scope="col"><TMPL_VAR NAME="Localize_Count"></th>
+<th>&nbsp;</th>
+<TMPL_LOOP NAME="View_Score_Loop_Bucket_Header">
+<th><font color="<TMPL_VAR NAME="View_Score_Bucket_Color">"><TMPL_VAR NAME="View_Score_Bucket"></font></th><th>&nbsp;</th>
+</TMPL_LOOP>
+</tr>
+
+<TMPL_LOOP NAME="View_Score_Loop_Words">
+<tr>
+<td><font color="<TMPL_VAR NAME="View_Score_Word_Color">"><TMPL_VAR NAME="View_Score_Word"></font></td>
+<td>&nbsp;</td>
+<td><TMPL_VAR NAME="View_Score_Word_Count"></td>
+<td>&nbsp;</td>
+
+<TMPL_LOOP NAME="View_Score_Loop_Per_Bucket">
+<TMPL_IF NAME="View_Score_If_Probability">
+<td><font color="<TMPL_VAR NAME="View_Score_Word_Color">"><TMPL_VAR NAME="View_Score_Probability"></font></td>
+<TMPL_ELSE>
+<td>&nbsp;</td>
+</TMPL_IF>
+<td>&nbsp;</td>
+</TMPL_LOOP>
+</tr>
+</TMPL_LOOP>
+</table></p>
+</TMPL_IF>
+
+<hr>

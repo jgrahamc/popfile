@@ -1,0 +1,297 @@
+<TMPL_INCLUDE NAME="common-top.thtml">
+<TMPL_INCLUDE NAME="common-middle.thtml">
+
+<h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_Title"></h2>
+
+<table class="bucketsTable" width="100%" cellspacing="0" cellpadding="0" summary="<TMPL_VAR NAME="Localize_Bucket_MaintenanceTableSummary">"><tr>
+<th class="bucketsLabel" scope="col"><TMPL_VAR NAME="Localize_Bucket_BucketName"></th>
+<th width="1%">&nbsp;</th><th class="bucketsLabel" scope="col" align="right"><TMPL_VAR NAME="Localize_Bucket_UniqueWords"></th>
+<th width="1%">&nbsp;</th><th class="bucketsLabel" scope="col" align="center"><TMPL_VAR NAME="Localize_Bucket_SubjectModification"></th>
+<th width="1%">&nbsp;</th><th class="bucketsLabel" scope="col" align="center"><TMPL_VAR NAME="Localize_Configuration_XTCInsertion"></th>
+<th width="1%">&nbsp;</th><th class="bucketsLabel" scope="col" align="center"><TMPL_VAR NAME="Localize_Configuration_XPLInsertion"></th>
+<th width="1%">&nbsp;</th><th class="bucketsLabel" scope="col" align="center"><TMPL_VAR NAME="Localize_Bucket_Quarantine"></th>
+<th width="2%">&nbsp;</th><th class="bucketsLabel" scope="col" align="left"><TMPL_VAR NAME="Localize_Bucket_ChangeColor"></th></tr>
+
+<TMPL_LOOP NAME="Corpus_Loop_Buckets">
+<TMPL_IF NAME="__odd__">
+<tr class="rowOdd">
+<TMPL_ELSE>
+<tr class="rowEven">
+</TMPL_IF>
+<td>
+
+<TMPL_IF NAME="Corpus_If_Bucket_Not_Pseudo">
+<a href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;showbucket=<TMPL_VAR NAME="Corpus_Bucket">">
+</TMPL_IF>
+<font color="<TMPL_VAR NAME="Corpus_Bucket_Color">"><TMPL_VAR NAME="Corpus_Bucket"></font>
+<TMPL_IF NAME="Corpus_Bucket_Not_Pseudo">
+</a>
+</TMPL_IF>
+</td><td width="1%">&nbsp;</td>
+
+<TMPL_IF NAME="Corpus_If_Bucket_Not_Pseudo">
+<td align="right"><TMPL_VAR NAME="Corpus_Bucket_Unique"></td><td width="1%">&nbsp;</td>
+<TMPL_ELSE>
+<td align="right">&nbsp;</td><td width="1%">&nbsp;</td>
+</TMPL_IF>
+
+<td align="center">
+<form class="bucketsSwitch" style="margin: 0" action="/buckets">
+<TMPL_IF NAME="Corpus_If_Subject">
+<span class="bucketsWidgetStateOff"><TMPL_VAR NAME="Localize_Off"> </span>
+<input type="submit" class="toggleOn" name="toggle" value="<TMPL_VAR NAME="Localize_TurnOn">" />
+<input type="hidden" name="subject" value="2" />
+<TMPL_ELSE>
+<span class="bucketsWidgetStateOn"><TMPL_VAR NAME="Localize_On"> </span>
+<input type="submit" class="toggleOff" name="toggle" value="<TMPL_VAR NAME="Localize_TurnOff">" />
+<input type="hidden" name="subject" value="1" />
+</TMPL_IF>
+<input type="hidden" name="bucket" value="<TMPL_VAR NAME="Corpus_Bucket">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+</td>
+
+<td width="1%">&nbsp;</td><td align="center">
+<form class="bucketsSwitch" style="margin: 0" action="/buckets">
+<TMPL_IF NAME="Corpus_If_XTC">
+<span class="bucketsWidgetStateOff"><TMPL_VAR NAME="Localize_Off"> </span>
+<input type="submit" class="toggleOn" name="toggle" value="<TMPL_VAR NAME="Localize_TurnOn">" />
+<input type="hidden" name="xtc" value="2" />
+<TMPL_ELSE>
+<span class="bucketsWidgetStateOn"><TMPL_VAR NAME="Localize_On"> </span>
+<input type="submit" class="toggleOff" name="toggle" value="<TMPL_VAR NAME="Localize_TurnOff">" />
+<input type="hidden" name="xtc" value="1" />
+</TMPL_IF>
+<input type="hidden" name="bucket" value="<TMPL_VAR NAME="Corpus_Bucket">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+</td>
+
+<td width="1%">&nbsp;</td><td align="center">
+<form class="bucketsSwitch" style="margin: 0" action="/buckets">
+<TMPL_IF NAME="Corpus_If_XPL">
+<span class="bucketsWidgetStateOff"><TMPL_VAR NAME="Localize_Off"> </span>
+<input type="submit" class="toggleOn" name="toggle" value="<TMPL_VAR NAME="Localize_TurnOn">" />
+<input type="hidden" name="xpl" value="2" />
+<TMPL_ELSE>
+<form class="bucketsSwitch" style="margin: 0" action="/buckets">
+<span class="bucketsWidgetStateOn"><TMPL_VAR NAME="Localize_On"> </span>
+<input type="submit" class="toggleOff" name="toggle" value="<TMPL_VAR NAME="Localize_TurnOff">" />
+<input type="hidden" name="xpl" value="1" />
+</TMPL_IF>
+<input type="hidden" name="bucket" value="<TMPL_VAR NAME="Corpus_Bucket">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+</td>
+
+<td width="1%">&nbsp;</td><td align="center">
+<form class="bucketsSwitch" style="margin: 0" action="/buckets">
+<TMPL_IF NAME="Corpus_If_Quarantine">
+<span class="bucketsWidgetStateOff"><TMPL_VAR NAME="Localize_Off"> </span>
+<input type="submit" class="toggleOn" name="toggle" value="<TMPL_VAR NAME="Localize_TurnOn">" />
+<input type="hidden" name="quarantine" value="2" />
+<TMPL_ELSE>
+<span class="bucketsWidgetStateOn"><TMPL_VAR NAME="Localize_On"> </span>
+<input type="submit" class="toggleOff" name="toggle" value="<TMPL_VAR NAME="Localize_TurnOff">" />
+<input type="hidden" name="quarantine" value="1" />
+</TMPL_IF>
+<input type="hidden" name="bucket" value="<TMPL_VAR NAME="Corpus_Bucket">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+</td>
+
+<td width="1%">&nbsp;</td>
+<TMPL_IF NAME="Corpus_If_Bucket_Not_Pseudo">
+<td>
+<form class="bucketsSwitch" style="margin: 0" action="/buckets">
+<select name="color">
+<TMPL_LOOP NAME="Corpus_Loop_Loop_Colors">
+<option value="<TMPL_VAR NAME="Corpus_Available_Color">"  <TMPL_VAR NAME="Corpus_Color_Selected"> style="color: <TMPL_VAR NAME="Corpus_Available_Color">">
+<TMPL_VAR NAME="Corpus_Available_Color">
+</option>
+</TMPL_LOOP>
+</select>
+<input type="submit" value="<TMPL_VAR NAME="Localize_Apply">" />
+<input type="hidden" name="bucket" value="<TMPL_VAR NAME="Corpus_Bucket">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+</td>
+<TMPL_ELSE>
+<td></td>
+</TMPL_IF>
+
+</tr>
+</TMPL_LOOP>
+
+</tr>
+
+
+<tr><td colspan="3"><hr /></td></tr>
+<tr><th class="bucketsLabel" scope="row"><TMPL_VAR NAME="Localize_Total"></th><td width="1%"></td>
+<td align="right"><TMPL_VAR NAME="Corpus_Total_Unique"></td><td></td><td></td></tr></table><br />
+
+<table class="settingsTable" width="100%" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Bucket_StatisticsTableSummary">">
+
+<tr><td class="settingsPanel" valign="top" width="33%" align="center">
+<h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_ClassificationAccuracy"></h2>
+
+
+<table summary="">
+<tr><th scope="row" align="left"><TMPL_VAR NAME="Localize_Bucket_EmailsClassified">:</th>
+<td align="right"><TMPL_VAR NAME="Corpus_Message_Count"></td></tr>
+<tr><th scope="row" align="left"><TMPL_VAR NAME="Localize_Bucket_ClassificationErrors">:</th>
+<td align="right"><TMPL_VAR NAME="Corpus_Error_Count"></td></tr>
+<tr><td colspan="2"><hr /></td></tr>
+<tr><th scope="row" align="left">
+<TMPL_VAR NAME="Localize_Bucket_Accuracy">:</th><td align="right"><TMPL_VAR NAME="Corpus_Accuracy"></td></tr>
+<tr><td colspan="2"></td></tr>
+<tr><td colspan="2" align="center">
+<form action="/buckets">
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+<input type="submit" class="submit" name="reset_stats" value="<TMPL_VAR NAME="Localize_Bucket_ResetStatistics">" />
+
+<TMPL_IF NAME="Corpus_If_Last_Reset">
+<br />(<TMPL_VAR NAME="Localize_Bucket_LastReset">: <TMPL_VAR NAME="Corpus_Last_Reset"> )
+</TMPL_IF>
+
+</form>
+</td></tr></table>
+
+</td><td class="settingsPanel" valign="top" width="33%" align="center">
+<h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_EmailsClassifiedUpper"></h2>
+
+<table summary=""><tr>
+<th class="bucketsLabel" scope="col" align="left"><TMPL_VAR NAME="Localize_Bucket"></th><th>&nbsp;</th>
+<th class="bucketsLabel" scope="col" align="right"><TMPL_VAR NAME="Localize_Bucket_ClassificationCount"></th>
+<th class="bucketsLabel" scope="col" align="right"><TMPL_VAR NAME="Localize_Bucket_ClassificationFP"></th>
+<th class="bucketsLabel" scope="col" align="right"><TMPL_VAR NAME="Localize_Bucket_ClassificationFN"></th></tr>
+<TMPL_VAR NAME="Corpus_Bar_Chart_Classification">
+</table></td>
+<td class="settingsPanel" width="34%" valign="top" align="center">
+<h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_WordCounts"></h2><table summary=""><tr>
+<th class="bucketsLabel" scope="col" align="left"><TMPL_VAR NAME="Localize_Bucket"></th><th>&nbsp;</th>
+<th class="bucketsLabel" scope="col" align="right"><TMPL_VAR NAME="Localize_Bucket_WordCount"></th></tr>
+<TMPL_VAR NAME="Corpus_Bar_Chart_Word_Counts">
+</table></td></tr></table><br />
+
+<table class="settingsTable" width="100%" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Bucket_MaintenanceTableSummary">">
+
+<tr><td class="settingsPanel" valign="top" width="50%">
+<h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_Maintenance"></h2>
+
+<div class="bucketsMaintenanceWidget">
+
+<form action="/buckets">
+<label class="bucketsLabel" for="bucketsCreateBucket"><TMPL_VAR NAME="Localize_Bucket_CreateBucket">:</label><br />
+<input name="cname" id="bucketsCreateBucket" type="text" />
+<input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+
+<TMPL_IF NAME="Corpus_If_Create_Message">
+<blockquote><b>
+<TMPL_VAR NAME="Corpus_Create_Message">
+</b></blockquote>
+</TMPL_IF>
+
+<TMPL_IF NAME="Corpus_If_Create_Error">
+<blockquote><div class="error01">
+<TMPL_VAR NAME="Localize_Bucket_Error1">
+</div></blockquote>
+</TMPL_IF>
+
+<form action="/buckets">
+<label class="bucketsLabel" for="bucketsDeleteBucket"><TMPL_VAR NAME="Localize_Bucket_DeleteBucket">:</label><br />
+<select name="name" id="bucketsDeleteBucket"><option value=""></option>
+<TMPL_LOOP NAME="Corpus_Loop_Delete_Buckets">
+<option value="<TMPL_VAR NAME="Corpus_Delete_Bucket">" style="color: <TMPL_VAR NAME="Corpus_Delete_Bucket_Color">"><TMPL_VAR NAME="Corpus_Delete_Bucket"></option>
+</TMPL_LOOP>
+</select> <input type="submit" class="submit" name="delete" value="<TMPL_VAR NAME="Localize_Delete">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form>
+
+<TMPL_IF NAME="Corpus_If_Delete_Message">
+<blockquote><b>
+<TMPL_VAR NAME="Corpus_Delete_Message">
+</b></blockquote>
+</TMPL_IF>
+
+<form action="/buckets">
+<label class="bucketsLabel" for="bucketsRenameBucketFrom"><TMPL_VAR NAME="Localize_Bucket_RenameBucket">:</label><br />
+<select name="oname" id="bucketsRenameBucketFrom"><option value=""></option>
+<TMPL_LOOP NAME="Corpus_Loop_Rename_Buckets">
+<option value="<TMPL_VAR NAME="Corpus_Rename_Bucket">" style="color: <TMPL_VAR NAME="Corpus_Rename_Bucket_Color">"><TMPL_VAR NAME="Corpus_Rename_Bucket"></option>
+</TMPL_LOOP>
+</select><label class="bucketsLabel" for="bucketsRenameBucketTo"> <TMPL_VAR NAME="Localize_Bucket_To"></label> 
+<input type="text" id="bucketsRenameBucketTo" name="newname" /> 
+<input type="submit" class="submit" name="rename" value="<TMPL_VAR NAME="Localize_Rename">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+
+<TMPL_IF NAME="Corpus_If_Rename_Message">
+<blockquote><b>
+<TMPL_VAR NAME="Corpus_Rename_Message">
+</b></blockquote>
+</TMPL_IF>
+
+<TMPL_IF NAME="Corpus_If_Rename_Error">
+<blockquote><div class="error01">
+<TMPL_VAR NAME="Localize_Bucket_Error1">
+</div></blockquote>
+</TMPL_IF>
+
+<br /></div></td>
+
+<td class="settingsPanel" valign="top" width="50%"><a name="Lookup"></a>
+<h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_Lookup"></h2>
+<div class="bucketsLookupWidget">
+<form action="/buckets#Lookup">
+<label class="bucketsLabel" for="bucketsLookup"><TMPL_VAR NAME="Localize_Bucket_LookupMessage">:</label><br />
+<input name="word" id="bucketsLookup" type="text" /> 
+<input type="submit" class="submit" name="lookup" value="<TMPL_VAR NAME="Localize_Lookup">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form><br />
+</div>
+
+<TMPL_IF NAME="Corpus_If_Looked_Up">
+<blockquote>
+<table class="lookupResultsTable" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Bucket_LookupResultsSummary">">
+<tr><td>
+<table summary="">
+<caption><strong><TMPL_VAR NAME="Localize_Bucket_LookupMessage2"> <TMPL_VAR NAME="Corpus_Word"></strong><br /><br /></caption>
+<tr><th scope="col"><TMPL_VAR NAME="Localize_Bucket"></th><th>&nbsp;</th>
+<th scope="col"><TMPL_VAR NAME="Localize_Frequency"></th><th>&nbsp;</th>
+<th scope="col"><TMPL_VAR NAME="Localize_Probability"></th><th>&nbsp;</th>
+<th scope="col"><TMPL_VAR NAME="Localize_Score"></th></tr>
+
+<TMPL_LOOP NAME="Corpus_Loop_Lookup">
+<tr><td>
+<TMPL_IF NAME="Corpus_If_Most_Likely"><b></TMPL_IF>
+<font color="<TMPL_VAR NAME="Corpus_Bucket_Color">"><TMPL_VAR NAME="Corpus_Bucket"></font>
+<TMPL_IF NAME="Corpus_If_Most_Likely"></b></TMPL_IF>
+
+</td>
+<td></td><td>
+<TMPL_IF NAME="Corpus_If_Most_Likely"><b></TMPL_IF>
+<tt><TMPL_VAR NAME="Corpus_Probability"></tt>
+<TMPL_IF NAME="Corpus_If_Most_Likely"></b></TMPL_IF>
+</td><td></td>
+<td><TMPL_IF NAME="Corpus_If_Most_Likely"><b></TMPL_IF>
+<tt><TMPL_VAR NAME="Corpus_Normal"></tt>
+<TMPL_IF NAME="Corpus_If_Most_Likely"></b></TMPL_IF>
+</td><td></td><td>
+<TMPL_IF NAME="Corpus_If_Most_Likely"><b></TMPL_IF>
+<tt><TMPL_VAR NAME="Corpus_Score"></tt>
+<TMPL_IF NAME="Corpus_If_Most_Likely"></b></TMPL_IF>
+</td></tr>
+</TMPL_LOOP>
+
+</table>
+
+<br /><br />
+<TMPL_VAR NAME="Corpus_Lookup_Message">
+
+</table>
+</blockquote>
+</TMPL_IF>
+
+<TMPL_INCLUDE NAME="common-bottom.thtml">
+

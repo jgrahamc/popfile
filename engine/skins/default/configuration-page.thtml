@@ -1,0 +1,132 @@
+<TMPL_INCLUDE NAME="common-top.thtml">
+<TMPL_INCLUDE NAME="common-middle.thtml">
+
+<table class="settingsTable" width="100%" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Configuration_MainTableSummary">">
+<tr><td class="settingsPanel" width="33%" valign="top">
+<h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_UserInterface"></h2>
+<form action="/configuration">
+<label class="configurationLabel" for="configSkin"><TMPL_VAR NAME="Localize_Configuration_SkinsChoose">:</label><br />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+<select name="skin" id="configSkin">
+
+<optgroup label="<TMPL_VAR NAME="Localize_Configuration_GeneralSkins">">
+<TMPL_LOOP NAME="Configuration_Loop_General_Skins">
+<option value="<TMPL_VAR NAME="Configuration_General_Skin">" <TMPL_VAR NAME="Configuration_General_Selected">>
+<TMPL_VAR NAME="Configuration_General_Skin">
+</option>
+</TMPL_LOOP>
+</optgroup>
+
+<optgroup label="<TMPL_VAR NAME="Localize_Configuration_SmallSkins">">
+<TMPL_LOOP NAME="Configuration_Loop_Small_Skins">
+<option value="<TMPL_VAR NAME="Configuration_Small_Skin">" <TMPL_VAR NAME="Configuration_Small_Selected">>
+<TMPL_VAR NAME="Configuration_Small_Skin">
+</option>
+</TMPL_LOOP>
+</optgroup>
+
+<optgroup label="<TMPL_VAR NAME="Localize_Configuration_TinySkins">">
+<TMPL_LOOP NAME="Configuration_Loop_Tiny_Skins">
+<option value="<TMPL_VAR NAME="Configuration_Tiny_Skin">" <TMPL_VAR NAME="Configuration_Tiny_Selected">>
+<TMPL_VAR NAME="Configuration_Tiny_Skin">
+</option>
+</TMPL_LOOP>
+</optgroup>
+
+</select><input type="submit" class="submit" name="change_skin" value="<TMPL_VAR NAME="Localize_Apply">" />
+</form>
+
+<form action="/configuration">
+<label class="configurationLabel" for="configLanguage"><TMPL_VAR NAME="Localize_Configuration_LanguageChoose">:</label><br />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+<select name="language" id="configLanguage">
+<TMPL_LOOP NAME="Configuration_Loop_Languages">
+<option value="<TMPL_VAR NAME="Configuration_Language">" <TMPL_VAR NAME="Configuration_Selected_Language">>
+<TMPL_VAR NAME="Configuration_Language">
+</option>
+</TMPL_LOOP>
+</select><input type="submit" class="submit" name="change_language" value="<TMPL_VAR NAME="Localize_Apply">" />
+</form></td>
+
+<td class="settingsPanel" width="33%" valign="top">
+<h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_HistoryView"></h2>
+
+<form action="/configuration">
+<label class="configurationLabel" for="configPageSize"><TMPL_VAR NAME="Localize_Configuration_History">:</label><br />
+<input name="page_size" id="configPageSize" type="text" value="<TMPL_VAR NAME="Configuration_Page_Size">" />
+<input type="submit" class="submit" name="update_page_size" value="<TMPL_VAR NAME="Localize_Apply">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form>
+<TMPL_IF NAME="Configuration_If_Page_Size_Error">
+<blockquote><div class="error01"><TMPL_VAR NAME="Localize_Configuration_Error4"></div></blockquote>
+</TMPL_IF>
+<TMPL_VAR NAME="Configuration_Page_Size_Updated">
+
+<form action="/configuration">
+<label class="configurationLabel" for="configHistoryDays"><TMPL_VAR NAME="Localize_Configuration_Days">:</label> <br />
+<input name="history_days" id="configHistoryDays" type="text" value="<TMPL_VAR NAME="Configuration_History_Days">" />
+<input type="submit" class="submit" name="update_history_days" value="<TMPL_VAR NAME="Localize_Apply">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+<TMPL_IF NAME="Configuration_If_History_Days_Error">
+<blockquote><div class="error01"><TMPL_VAR NAME="Localize_Configuration_Error5"></div></blockquote>
+</TMPL_IF>
+<TMPL_VAR NAME="Configuration_History_Days_Updated">
+
+<td class="settingsPanel" width="33%" valign="top" rowspan="2">
+<h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_ListenPorts"></h2>
+
+<form action="/configuration">
+<label class="configurationLabel" for="configUIPort"><TMPL_VAR NAME="Localize_Configuration_UI">:</label><br />
+<input name="ui_port" id="configUIPort" type="text" value="<TMPL_VAR NAME="Configuration_UI_Port">" />
+<input type="submit" class="submit" name="update_ui_port" value="<TMPL_VAR NAME="Localize_Apply">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form>
+
+<TMPL_IF NAME="Configuration_If_UI_Port_Error">
+<blockquote><div class="error01"><TMPL_VAR NAME="Localize_Configuration_Error2"></div></blockquote>
+</TMPL_IF>
+<TMPL_VAR NAME="Configuration_UI_Port_Updated">
+
+<TMPL_VAR NAME="Configuration_Dynamic">
+
+<tr><td class="settingsPanel" width="33%" valign="top">
+<h3 class="configuration"><TMPL_VAR NAME="Localize_Configuration_TCPTimeout"></h3>
+
+<form action="/configuration">
+<label class="configurationLabel" for="configTCPTimeout"><TMPL_VAR NAME="Localize_Configuration_TCPTimeoutSecs">:</label><br />
+<input name="timeout" type="text" id="configTCPTimeout" value="<TMPL_VAR NAME="Configuration_TCP_Timeout">" />
+<input type="submit" class="submit" name="update_timeout" value="<TMPL_VAR NAME="Localize_Apply">" />
+<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form>
+<TMPL_IF NAME="Configuration_If_TCP_Timeout_Error">
+<blockquote><div class="error01"><TMPL_VAR NAME="Localize_Configuration_Error6"></div></blockquote>
+</TMPL_IF>
+<TMPL_VAR NAME="Configuration_TCP_Timeout_Updated">
+
+</td>
+
+<td class="settingsPanel" width="33%" valign="top">
+<h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_Logging"></h2>
+<form action="/configuration">
+<label class="configurationLabel" for="configLogging"><TMPL_VAR NAME="Localize_Configuration_LoggerOutput">:</label>
+<input type="hidden" value="<TMPL_VAR NAME="Session_Key">" name="session" />
+<select name="debug" id="configLogging">
+<option value="1" <TMPL_VAR NAME="Configuration_Debug_1_Selected">>
+<TMPL_VAR NAME="Localize_Configuration_None"></option>
+<option value="2" <TMPL_VAR NAME="Configuration_Debug_2_Selected">>
+<TMPL_VAR NAME="Localize_Configuration_ToFile"></option>
+<option value="3" <TMPL_VAR NAME="Configuration_Debug_3_Selected">>
+<TMPL_VAR NAME="Localize_Configuration_ToScreen"></option>
+<option value="4" <TMPL_VAR NAME="Configuration_Debug_4_Selected">>
+<TMPL_VAR NAME="Localize_Configuration_ToScreenFile"></option>
+</select><input type="submit" class="submit" name="submit_debug" value="<TMPL_VAR NAME="Localize_Apply">" />
+</form>
+
+<TMPL_IF NAME="Configuration_If_Show_Log">
+<p><a href="popfile_current_log.log?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Configuration_CurrentLogFile"></a>
+</TMPL_IF>
+
+
+</td></tr></table>
+
+
+
+<TMPL_INCLUDE NAME="common-bottom.thtml">

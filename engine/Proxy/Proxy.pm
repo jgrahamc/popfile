@@ -166,13 +166,10 @@ EOM
 
     # Tell the UI about the SOCKS parameters
 
-    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
-                                         $self->name() . '_socks_server',
-                                         $self );                      # PROFILE BLOCK STOP
-
-    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
-                                         $self->name() . '_socks_port',
-                                         $self );                      # PROFILE BLOCK STOP
+    $self->register_configuration_item_( 'configuration',  # PROFILE BLOCK START
+                                         $self->name() . '-socks-configuration',
+                                         'socks-widget.thtml',
+                                         $self );          # PROFILE BLOCK STOP
 
     return 1;
 }
@@ -742,38 +739,17 @@ sub verify_connected_
 #
 #    $name            The name of the item being configured, was passed in by the call
 #                     to register_configuration_item
-#    $language        Reference to the hash holding the current language
-#    $session_key     The current session key
+#    $templ           The loaded template
 #
-#  Must return the HTML for this item
 # ---------------------------------------------------------------------------------------------
 
 sub configure_item
 {
-    my ( $self, $name, $language, $session_key ) = @_;
+    my ( $self, $name, $templ ) = @_;
 
-    my $body = '';
-    my $me = $self->name();
-
-    # SOCKS Server widget
-    if ( $name eq $me . '_socks_server' ) {
-        $body .= "<form action=\"/configuration\">\n";
-        $body .= "<label class=\"configurationLabel\" for=\"SOCKSServer\">$$language{Configuration_SOCKSServer}:</label><br />\n";
-        $body .= "<input type=\"text\" name=\"$me" . "_socks_server\" id=\"SOCKSServer\" value=\"" . $self->config_( 'socks_server' ) . "\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_$me" . "_socks_server\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-    }
-
-    # SOCKS Port widget
-    if ( $name eq $me . '_socks_port' ) {
-        $body .= "<form action=\"/configuration\">\n";
-        $body .= "<label class=\"configurationLabel\" for=\"configSOCKSPort\">$$language{Configuration_SOCKSPort}:</label><br />\n";
-        $body .= "<input name=\"$me" . "_socks_port\" type=\"text\" id=\"configSOCKSPort\" value=\"" . $self->config_( 'socks_port' ) . "\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_$me" . "_socks_port\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-    }
-
-    return $body;
+    $templ->param( 'Socks_Widget_Name' => $self->name() );
+    $templ->param( 'Socks_Server'      => $self->config_( 'socks_server' ) );
+    $templ->param( 'Socks_Port'        => $self->config_( 'socks_port'   ) );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -782,6 +758,7 @@ sub configure_item
 #
 #    $name            The name of the item being configured, was passed in by the call
 #                     to register_configuration_item
+#    $templ           The loaded template
 #    $language        Reference to the hash holding the current language
 #    $form            Hash containing all form items
 #
@@ -790,26 +767,25 @@ sub configure_item
 
 sub validate_item
 {
-    my ( $self, $name, $language, $form ) = @_;
+    my ( $self, $name, $templ, $language, $form ) = @_;
 
     my $me = $self->name();
-    if ( $name eq $me . '_socks_port' ) {
-        if ( defined($$form{"$me" . "_socks_port"}) ) {
-            if ( ( $$form{"$me" . "_socks_port"} >= 1 ) && ( $$form{"$me" . "_socks_port"} < 65536 ) ) {
-                $self->config_( 'socks_port', $$form{"$me" . "_socks_port"} );
-                return '<blockquote>' . sprintf( $$language{Configuration_SOCKSPortUpdate} . '</blockquote>' , $self->config_( 'socks_port' ) );
-             } else {
-                 return "<blockquote><div class=\"error01\">$$language{Configuration_Error8}</div></blockquote>";
-             }
+
+    if ( defined($$form{"$me" . "_socks_port"}) ) {
+        if ( ( $$form{"$me" . "_socks_port"} >= 1 ) && ( $$form{"$me" . "_socks_port"} < 65536 ) ) {
+            $self->config_( 'socks_port', $$form{"$me" . "_socks_port"} );
+            $templ->param( 'Socks_Widget_If_Port_Updated' => 1 );
+            $templ->param( 'Socks_Widget_Port_Updated' => sprintf( $$language{Configuration_SOCKSPortUpdate}, $self->config_( 'socks_port' ) ) );
+        } else {
+            $templ->param( 'Socks_Widget_If_Port_Error' => 1 );
         }
     }
 
-    if ( $name eq $me . '_socks_server' ) {
-         $self->config_( 'socks_server', $$form{"$me" . "_socks_server"} ) if ( defined($$form{"$me" . "_socks_server"}) );
-         return sprintf( "<blockquote>" . $$language{Configuration_SOCKSServerUpdate} . "</blockquote>", $self->config_( 'socks_server' ) ) if ( defined($$form{"$me" . "_socks_server"}) );
+    if ( defined($$form{"$me" . "_socks_server"}) ) {
+        $self->config_( 'socks_server', $$form{"$me" . "_socks_server"} );
+        $templ->param( 'Socks_Widget_If_Server_Updated' => 1 );
+        $templ->param( 'Socks_Widget_Server_Updated' => sprintf( $$language{Configuration_SOCKSServerUpdate}, $self->config_( 'socks_server' ) ) );
     }
-
-    return '';
 }
 
 # SETTER

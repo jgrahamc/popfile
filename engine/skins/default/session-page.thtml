@@ -1,0 +1,6 @@
+<TMPL_INCLUDE NAME="common-top.thtml">
+<TMPL_INCLUDE NAME="common-middle.thtml">
+
+<h2 class="session"><TMPL_VAR NAME="Localize_Session_Title"></h2><br /><br /><TMPL_VAR NAME="Localize_Session_Error">
+
+<TMPL_INCLUDE NAME="common-bottom.thtml">

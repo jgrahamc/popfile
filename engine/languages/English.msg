@@ -69,6 +69,13 @@ Refresh                                 Refresh
 FAQ                                     FAQ
 ID                                      ID
 
+# This is a regular expression pattern that is used to convert
+# a number into a friendly looking number (for the US and UK this
+# means comma separated at the thousands)
+
+Locale_Thousands                       ,
+Locale_Decimal                         .
+
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Control Center
 Header_Shutdown                         Shutdown POPFile

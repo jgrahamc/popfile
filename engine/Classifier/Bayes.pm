@@ -1081,7 +1081,6 @@ sub magnet_match_helper__
 
         for my $i (0..(length($match)-length($magnet))) {
             if ( substr( $match, $i, length($magnet)) eq $magnet ) {
-                $self->{scores__}        = '';
                 $self->{magnet_used__}   = 1;
                 $self->{magnet_detail__} = "$type: $magnet";
 
@@ -1518,7 +1517,7 @@ sub get_top_bucket__
 # $session   A valid session key returned by a call to get_session_key
 # $file      The name of the file containing the text to classify (or undef to use
 #            the data already in the parser)
-# $ui        Reference to the UI used when doing colorization
+# $templ     Reference to the UI template used for word score display
 # $matrix    (optional) Reference to a hash that will be filled with the word matrix
 #            used in classification
 # $idmap     (optional) Reference to a hash that will map word ids in the $matrix to
@@ -1530,7 +1529,7 @@ sub get_top_bucket__
 # ---------------------------------------------------------------------------------------------
 sub classify
 {
-    my ( $self, $session, $file, $ui, $matrix, $idmap ) = @_;
+    my ( $self, $session, $file, $templ, $matrix, $idmap ) = @_;
     my $msg_total = 0;
 
     my $userid = $self->valid_session_key__( $session );
@@ -1591,11 +1590,11 @@ sub classify
 
     my $word_count = 0;
 
-    # The correction value is used to generate score displays in the scores__
+    # The correction value is used to generate score displays
     # variable which are consistent with the word scores shown by the GUI's
     # word lookup feature.  It is computed to make the contribution of a word
     # which is unrepresented in a bucket zero.  This correction affects only
-    # the values displayed in scores__; it has no effect on the classification
+    # the values displayed in the display; it has no effect on the classification
     # process.
 
     my $correction = 0;
@@ -1675,7 +1674,6 @@ sub classify
 
     $self->{db_classify__}->finish;
 
-
     foreach my $id (@id_list) {
         $word_count += 2;
         my $wmax = -10000;
@@ -1729,62 +1727,56 @@ sub classify
         $total += exp($score{$b}) if ($score{$b} > $ln2p_54 );
     }
 
-    if ($self->{wordscores__} && defined($ui) ) {
+    if ($self->{wordscores__} && defined($templ) ) {
         my %qm = %{$self->{parser__}->quickmagnets()};
         my $mlen = scalar(keys %{$self->{parser__}->quickmagnets()});
-        my %language    = $ui->language();
-        my $session_key = $ui->session_key();
 
         if ( $mlen >= 0 ) {
+            $templ->param( 'View_QuickMagnets_If' => 1 );
+            $templ->param( 'View_QuickMagnets_Count' => ($mlen + 1) );
             my @buckets = $self->get_buckets( $session );
             my $i = 0;
-            $self->{scores__} .= "<form action=\"/magnets\" method=\"get\">\n";
-            $self->{scores__} .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />";
-            $self->{scores__} .= "<input type=\"hidden\" name=\"count\" value=\"" . ($mlen + 1) . "\" />";
-            $self->{scores__} .= "<hr><b>$language{QuickMagnets}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Magnet}</th>\n<th>$language{Magnet_Always}</th>\n";
-
             my %types = $self->get_magnet_types( $session );
 
-            foreach my $type ( sort keys %types ) {
-
-                if (defined $qm{$type}) {
-                    $i += 1;
-
-                    $self->{scores__} .= "<tr><td scope=\"col\">$type: ";
-                    $self->{scores__} .= "<select name=\"text$i\" id=\"\">\n";
-
-                    foreach my $magnet ( @{$qm{$type}} ) {
-                        $self->{scores__} .= "<option value=\"$magnet\">$magnet</option>\n";
-                    }
-                    $self->{scores__} .= "</select>\n";
-                    $self->{scores__} .= "</td><td>";
-                    $self->{scores__} .= "<input type=\"hidden\" name=\"type$i\" id=\"magnetsAddType\" value=\"$type\"/>";
-                    $self->{scores__} .= "<select name=\"bucket$i\" id=\"magnetsAddBucket\">\n<option value=\"\"></option>\n";
-
-                    foreach my $bucket (@buckets) {
-                        $self->{scores__} .= "<option value=\"$bucket\">$bucket</option>\n";
-                    }
-
-                    $self->{scores__} .= "</select></td></tr>";
-                }
+            my @bucket_data;
+            foreach my $bucket (@buckets) {
+                my %row_data;
+                $row_data{View_QuickMagnets_Bucket} = $bucket;
+                $row_data{View_QuickMagnets_Bucket_Color} = $self->get_bucket_color( $session, $bucket );
+                push ( @bucket_data, \%row_data );
             }
 
-            $self->{scores__} .= "<tr><td></td><td><input type=\"submit\" class=\"submit\" name=\"create\" value=\"$language{Create}\" /></td></tr></table></form>";
+            my @qm_data;
+            foreach my $type (sort keys %types) {
+                my %row_data;
+
+                if (defined $qm{$type}) {
+                    $i++;
+
+                    $row_data{View_QuickMagnets_Type} = $type;
+                    $row_data{View_QuickMagnets_I} = $i;
+                    $row_data{View_QuickMagnets_Loop_Buckets} = \@bucket_data;
+
+                    my @magnet_data;
+                    foreach my $magnet ( @{$qm{$type}} ) {
+                        my %row_magnet;
+                        $row_magnet{View_QuickMagnets_Magnet} = $magnet;
+                        push ( @magnet_data, \%row_magnet );
+                    }
+                    $row_data{View_QuickMagnets_Loop_Magnets} = \@magnet_data;
+
+                    push ( @qm_data, \%row_data );
+                }
+            }
+            $templ->param( 'View_QuickMagnets_Loop' => \@qm_data );
         }
 
-        $self->{scores__} .= "<a name=\"scores\">";
-        $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n";
-
-        $self->{scores__} .= "<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
-        if ($self->{wmformat__} eq 'score') {
-            $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\" align=\"center\">$language{Score}</th><th scope=\"col\">$language{Probability}</th></tr>\n";
-        } else {
-            $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\">$language{Probability}</th></tr>\n";
-        }
-
+        $templ->param( 'View_Score_If_Score' => $self->{wmformat__} eq 'score' );
         my $log10 = log(10.0);
 
+        my @score_data;
         foreach my $b (@ranking) {
+             my %row_data;
              my $prob = exp($score{$b})/$total;
              my $probstr;
              my $rawstr;
@@ -1805,32 +1797,33 @@ sub classify
 
              my $color = $self->get_bucket_color( $session, $b );
 
+             $row_data{View_Score_Bucket} = $b;
+             $row_data{View_Score_Bucket_Color} = $color;
+             $row_data{View_Score_MatchCount} = $matchcount{$b};
+             $row_data{View_Score_ProbStr} = $probstr;
+
              if ($self->{wmformat__} eq 'score') {
-                $rawstr = sprintf("%12.6f", ($raw_score{$b} - $correction)/$log10);
-                $self->{scores__} .= "<tr>\n<td><font color=\"$color\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td align=right>$rawstr&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
-             } else {
-                $self->{scores__} .= "<tr>\n<td><font color=\"$color\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
+                 $row_data{View_Score_If_Score} = 1;
+                 $rawstr = sprintf("%12.6f", ($raw_score{$b} - $correction)/$log10);
+                 $row_data{View_Score_RawStr} = $rawstr;
              }
+             push ( @score_data, \%row_data );
         }
+        $templ->param( 'View_Score_Loop_Scores' => \@score_data );
 
-        $self->{scores__} .= "</table><hr>";
-
-        # We want a link to change the format here.  But only the UI knows how to build
-        # that link.  So we just insert a comment which can be replaced by the UI.  There's
-        # probably a better way.
-
-        $self->{scores__} .= "<!--format--><p>";
         if ( $self->{wmformat__} ne '' ) {
-            $self->{scores__} .= "<table class=\"top20Words\">\n";
-            $self->{scores__} .= "<tr>\n<th scope=\"col\">$language{Word}</th><th>&nbsp;</th><th scope=\"col\">$language{Count}</th><th>&nbsp;</th>\n";
+            $templ->param( 'View_Score_If_Table' => 1 );
 
+            my @header_data;
             foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
+                my %row_data;
                 my $bucket = $ranking[$ix];
                 my $bucketcolor  = $self->get_bucket_color( $session, $bucket );
-                $self->{scores__} .= "<th><font color=\"$bucketcolor\">$bucket</font></th><th>&nbsp;</th>";
+                $row_data{View_Score_Bucket} = $bucket;
+                $row_data{View_Score_Bucket_Color} = $bucketcolor;
+                push ( @header_data, \%row_data );
             }
-
-            $self->{scores__} .= "</tr>";
+            $templ->param( 'View_Score_Loop_Bucket_Header' => \@header_data );
 
             my %wordprobs;
 
@@ -1864,7 +1857,9 @@ sub classify
                 @ranked_ids = sort {($$matrix{$b}{$ranking[0]}||0) <=> ($$matrix{$a}{$ranking[0]}||0)} @id_list;
             }
 
+            my @word_data;
             foreach my $id (@ranked_ids) {
+                my %row_data;
                 my $known = 0;
 
                 foreach my $bucket (@ranking) {
@@ -1878,25 +1873,31 @@ sub classify
                     my $wordcolor = $self->get_bucket_color( $session, $self->get_top_bucket__( $userid, $id, $matrix, \@ranking ) );
                     my $count = $self->{parser__}->{words__}{$$idmap{$id}};
 
-                    $self->{scores__} .= "<tr>\n<td><font color=\"$wordcolor\">$$idmap{$id}</font></td><td>&nbsp;</td><td>$count</td><td>&nbsp;</td>\n";
+                    $row_data{View_Score_Word} = $$idmap{$id};
+                    $row_data{View_Score_Word_Color} = $wordcolor;
+                    $row_data{View_Score_Word_Count} = $count;
 
                     my $base_probability = 0;
                     if ( defined($$matrix{$id}{$ranking[0]}) && ( $$matrix{$id}{$ranking[0]} > 0 ) ) {
                         $base_probability = log( $$matrix{$id}{$ranking[0]} / $self->{db_bucketcount__}{$userid}{$ranking[0]} );
 	            }
 
+                    my @per_bucket;
                     foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
+                        my %bucket_row;
                         my $bucket = $ranking[$ix];
                         my $probability = 0;
                         if ( defined($$matrix{$id}{$bucket}) && ( $$matrix{$id}{$bucket} > 0 ) ) {
                             $probability = log( $$matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket} );
 	                }
-                        my $color        = 'black';
+                        my $color = 'black';
 
                         if ( $probability >= $base_probability || $base_probability == 0 ) {
                             $color = $self->get_bucket_color( $session, $bucket );
                         }
 
+                        $bucket_row{View_Score_If_Probability} = ( $probability != 0 );
+                        $bucket_row{View_Score_Word_Color} = $color;
                         if ( $probability != 0 ) {
                             my $wordprobstr;
                             if ($self->{wmformat__} eq 'score') {
@@ -1908,18 +1909,16 @@ sub classify
                                     $wordprobstr  = sprintf("%13.5f", exp($probability) );
                                 }
                             }
-
-                            $self->{scores__} .= "<td><font color=\"$color\">$wordprobstr</font></td>\n<td>&nbsp;</td>\n";
-                        } else {
-                            $self->{scores__} .= "<td>&nbsp;</td>\n<td>&nbsp;</td>\n";
+                            $bucket_row{View_Score_Probability} = $wordprobstr;
                         }
+                        push ( @per_bucket, \%bucket_row );
                     }
-                }
+                    $row_data{View_Score_Loop_Per_Bucket} = \@per_bucket;
 
-                $self->{scores__} .= "</tr>";
-            }
-
-            $self->{scores__} .= "</table></p>";
+                    push ( @word_data, \%row_data );
+	        }
+	    }
+            $templ->param( 'View_Score_Loop_Words' => \@word_data );
         }
     }
 
@@ -3228,8 +3227,10 @@ sub create_magnet
 
     my $mtid = $result->[0];
 
+    $text = $self->{db__}->quote( $text );
+
     $self->{db__}->do( "insert into magnets ( bucketid, mtid, val )
-                                     values ( $bucketid, $mtid, '$text' );" );
+                                     values ( $bucketid, $mtid, $text );" );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -3391,14 +3392,6 @@ sub wordscores
 
     $self->{wordscores__} = $value if (defined $value);
     return $self->{wordscores__};
-}
-
-sub scores
-{
-    my ( $self, $value ) = @_;
-
-    $self->{scores__} = $value if (defined $value);
-    return $self->{scores__};
 }
 
 sub wmformat

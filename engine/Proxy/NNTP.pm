@@ -117,21 +117,21 @@ sub start
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-    $self->register_configuration_item_( 'configuration',
-                                         'nntp_port',
-                                         $self );
+#    $self->register_configuration_item_( 'configuration',
+#                                         'nntp_port',
+#                                         $self );
 
-    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
-                                         'nntp_force_fork',
-                                         $self );                      # PROFILE BLOCK STOP
+#    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
+#                                         'nntp_force_fork',
+#                                         $self );                      # PROFILE BLOCK STOP
 
-    $self->register_configuration_item_( 'configuration',
-                                         'nntp_separator',
-                                         $self );
+#    $self->register_configuration_item_( 'configuration',
+#                                         'nntp_separator',
+#                                         $self );
 
-    $self->register_configuration_item_( 'security',
-                                         'nntp_local',
-                                         $self );
+#    $self->register_configuration_item_( 'security',
+#                                         'nntp_local',
+#                                         $self );
 
     return $self->SUPER::start();;
 }
