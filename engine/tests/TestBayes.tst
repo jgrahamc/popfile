@@ -54,14 +54,14 @@ for my $class_test (@class_tests) {
 # glob the tests directory for files called TestMailParse\d+.msg which consist of messages 
 # to be sent through classify_and_modify
 
-$b->config_( 'msgdir', 'tests/' );
+$b->global_config_( 'msgdir', 'tests/' );
 $b->module_config_( 'html', 'port', 8080 );
+$b->module_config_( 'html', 'local', 1 );
 $b->global_config_( 'xtc',  1 );
 $b->global_config_( 'xpl',  1 );
 $b->module_config_( 'pop3', 'local', 1 );
-$b->module_config_( 'subject',  1 );
+$b->global_config_( 'subject',  1 );
 $b->set_bucket_parameter( 'spam', 'subject', 1 );
-$b->set_bucket_parameter( 'spam', 'quarantine', 0 );
 
 my @modify_tests = sort glob 'tests/TestMailParse*.msg';
 
