@@ -162,6 +162,10 @@
 
   !define C_PFI_PRODUCT  "POPFile"
 
+  ; Name to be used for the program file (also used for the 'Version Information')
+
+  !define C_OUTFILE      "adduser.exe"
+
   Name                   "POPFile User"
 
   !define C_PFI_VERSION  "0.2.38"
@@ -277,6 +281,7 @@
   VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "Add/Remove POPFile User wizard"
   VIAddVersionKey "FileVersion"       "${C_PFI_VERSION}"
+  VIAddVersionKey "OriginalFilename" "${C_OUTFILE}"
 
   !ifndef ENGLISH_MODE
     VIAddVersionKey "Build"          "Multi-Language"
@@ -342,7 +347,7 @@
   ; and on all pages of the uninstaller.
 
   !define MUI_HEADERIMAGE
-  !define MUI_HEADERIMAGE_BITMAP              "test\hdr-common-cvs.bmp"
+  !define MUI_HEADERIMAGE_BITMAP              "hdr-common.bmp"
   !define MUI_HEADERIMAGE_RIGHT
 
   ;----------------------------------------------------------------
@@ -367,7 +372,7 @@
 
   ; The "Special" bitmap appears on the "WELCOME" and "FINISH" pages
 
-  !define MUI_WELCOMEFINISHPAGE_BITMAP        "test\special-cvs.bmp"
+  !define MUI_WELCOMEFINISHPAGE_BITMAP        "special.bmp"
 
   ;----------------------------------------------------------------
   ;  Interface Settings - Installer FINISH Page Interface Settings
@@ -594,7 +599,7 @@
 
   ; Specify NSIS output filename
 
-  OutFile "adduser.exe"
+  OutFile "${C_OUTFILE}"
 
   ; Ensure CRC checking cannot be turned off using the /NCRC command-line switch
 
