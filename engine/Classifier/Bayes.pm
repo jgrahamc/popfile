@@ -215,6 +215,10 @@ sub initialize
 
     $self->config_( 'hostname', $self->{hostname__} );
 
+    # The default size for the BerkeleyDB cache
+
+    $self->config_( 'db_cache_size', 65536 );
+
     # We want to hear about classification events so that we can
     # update statistics
 
@@ -573,8 +577,9 @@ sub tie_bucket__
     my ( $self, $bucket ) = @_;
 
     $self->{db__}{$bucket} = tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",              # PROFILE BLOCK START
-                                 -Filename => $self->config_( 'corpus' ) . "/$bucket/table.db",
-                                 -Flags    => DB_CREATE;                                         # PROFILE BLOCK STOP
+                                 -Cachesize => $self->config_( 'db_cache_size' ),
+                                 -Filename  => $self->config_( 'corpus' ) . "/$bucket/table.db",
+                                 -Flags     => DB_CREATE;                                        # PROFILE BLOCK STOP
 
     if ( !defined( $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} ) ) {
         $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}      = 0;
@@ -864,7 +869,7 @@ sub save_magnets__
 #
 # Helper the determines if a specific string matches a certain magnet type in a bucket
 #
-# $noattype        The string to match
+# $match           The string to match
 # $bucket          The bucket to check
 # $type            The magnet type to check
 #
