@@ -1170,9 +1170,14 @@ sub administration_page
             \%{$self->{form_}} );
 
         # Tell the user anything the dynamic UI was interested in sharing
-        $self->log_( 3, "dynamic config UI $name had status/error $status_message/$error_message") if (defined $status_message || defined $error_message);
-        $self->status_message__($templ,$status_message) if ( defined( $status_message ));
-        $self->error_message__($templ, $error_message)  if ( defined( $error_message ));
+        if ( defined( $status_message )) {
+            $self->status_message__($templ,$status_message);
+            $self->log_( 2, "dynamic config UI $name had status $status_message");
+        }
+        if ( defined( $error_message )) {
+            $self->error_message__($templ, $error_message);
+            $self->log_( 2, "dynamic config UI $name had error $error_message");
+        }
     }
 
     if ( defined($self->{form_}{ui_port}) ) {
@@ -2530,12 +2535,12 @@ sub history_page
     # Handle the jump to page functionality
 
     if ( defined( $self->{form_}{gopage} ) ) {
-        my $destination = ( $self->{form_}{jumptopage} - 1 ) * 
+        my $destination = ( $self->{form_}{jumptopage} - 1 ) *
                      $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' );
         my $maximum = $self->history_()->get_query_size( $self->{q__} );
-        
+
         if ( $destination <= $maximum && $destination > 0 ) {
-            return $self->http_redirect_( $client, "/history?start_message=$destination&" 
+            return $self->http_redirect_( $client, "/history?start_message=$destination&"
                  . $self->print_form_fields_(1,0,('filter','search','sort','session','negate') ), $session );
         }
     }
