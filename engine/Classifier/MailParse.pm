@@ -285,8 +285,15 @@ sub update_tag
         }
                 
         # Tags with background colors
-        if ( ( $attribute =~ /^bgcolor$/i ) && ( $tag =~ /^(td|table|body|tr|th)$/ ) ) {
+        if ( ( $attribute =~ /^(bgcolor|back)$/i ) && ( $tag =~ /^(td|table|body|tr|th|font)$/i ) ) {
             update_word( $self, $value, 0, $quote, $end_quote );
+        }
+
+        # Tags with a charset
+        if ( ( $attribute =~ /^content$/i ) && ( $tag =~ /^meta$/i ) ) {
+            if ( $value=~ /charset=(.{1,40})[\"\>]?/ ) {
+                update_word( $self, $1, 0, '', '' );
+            }
         }
                 
         # Tags with style attributes (this one may impact performance!!!)
@@ -574,15 +581,25 @@ sub parse_stream
                 }
                 
                 next if ( !defined($line) );
+
+                # Look for =?foo? syntax that identifies a charset
+                
+                if ( $line =~ /=\?(.{1,40})\?/ ) {
+                    update_word( $self, $1, 0, '', '' );
+                }
                 
                 # Transform some escape characters
                 
                 if ( $encoding =~ /quoted\-printable/ ) {
-                    $line =~ s/=[\r\n]*$/=\n/;
-                    while ( ( $line =~ /=([0-9A-F][0-9A-F])/i ) != 0 ) {
-                        my $from = "=$1";
-                        my $to   = chr(hex("0x$1"));
-                        $line =~ s/$from/$to/g;
+                    $line =~ s/=[\r\n]*$/\n/;
+                    $line =~ s/=3d/__popfile_equal__/gi;
+                    $line =~ s/=([0-9A-F][0-9A-F])/chr(hex("0x$1"))/egi;
+                    $line =~ s/__popfile_equal__/=/gi;
+                    
+                    if ( $self->{color} ) {
+                        $self->{ut} =~ s/=[\r\n]*$//;
+                        $self->{ut} =~ s/=3d/__popfile_equal__/gi;
+                        $self->{ut} =~ s/=([0-9A-F][0-9A-F])/chr(hex("0x$1"))/egi;
                     }
                 }
                 
@@ -633,6 +650,9 @@ sub parse_stream
                     # from them and treat them as words
     
                     if ( $header =~ /(From|To|Cc|Reply\-To)/i ) {
+                        if ( $argument =~ /=\?(.{1,40})\?/ ) {
+                            update_word( $self, $1, 0, '', '' );
+                        }
                         if ( $header =~ /From/ )  {
                             $encoding     = '';
                             $self->{content_type} = '';
@@ -708,6 +728,7 @@ sub parse_stream
         $colorized =~ s/(\r\n\r\n|\r\r|\n\n)/__BREAK____BREAK__/g;
         $colorized =~ s/[\r\n]+/__BREAK__/g;
         $colorized =~ s/__BREAK__/<br>/g;
+        $colorized =~ s/__popfile_equal__/=/g;
         
         return $colorized;
     }
