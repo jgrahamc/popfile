@@ -2861,24 +2861,7 @@ sub view_page
     $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
     $self->{form_}{search} = '' if ( !defined( $self->{form_}{search} ) );
     $self->{form_}{filter} = '' if ( !defined( $self->{form_}{filter} ) );
-
-    my $body = "<h2 class=\"buckets\">$self->{language__}{View_Title}</h2>\n";
-
-    $body .= "<table class=\"openMessageTable\" cellpadding=\"10%\" cellspacing=\"0\" width=\"100%\" summary=\"$self->{language__}{History_OpenMessageSummary}\">\n";
-
-    $body .= "<tr><td>";
-    $body .= "<form id=\"HistoryMainForm\" action=\"/history\" method=\"POST\">\n";
-    $body .= "<input type=\"hidden\" name=\"search\" value=\"$self->{form_}{search}\" />\n";
-    $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form_}{sort}\" />\n";
-    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
-    $body .= "<input type=\"hidden\" name=\"start_message\" value=\"$start_message\" />\n";
-    $body .= "<input type=\"hidden\" name=\"filter\" value=\"$self->{form_}{filter}\" />\n";    
-    $body .= "<table><tr><td><font size=+1><p><b>$self->{language__}{From}</b>: </td><td>$self->{history__}{$mail_file}{from}</font></td></tr>";
-    $body .= "<tr><td><font size=+1><b>$self->{language__}{Subject}</b>: </td><td>$self->{history__}{$mail_file}{subject}</font></td></tr>";
-    $body .= "<tr><td><font size=+1><b>$self->{language__}{Classification}</b>: </td><td><font color=\"$color\">$self->{history__}{$mail_file}{bucket}</font></font></td></tr>";
-
-    $body .= "<tr><td><font size=+1>";
-
+    
     my $index;
     foreach my $i ( $start_message  .. $start_message + $self->config_( 'page_size' ) - 1) {
         if ( $self->{history_keys__}[$i] eq $mail_file ) {
@@ -2887,29 +2870,82 @@ sub view_page
         }
     }
 
+    my $body = "<table width=\"100%\" summary=\"\">\n<tr>\n<td align=\"left\">\n";
+
+    # title
+    $body .= "<h2 class=\"buckets\">$self->{language__}{View_Title}</h2>\n</td>\n";
+
+    # navigator
+    $body .= "<td>\n";
+
+    if ( $index > 0 ) {
+        $body .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index - 1 ];
+        $body .= "&start_message=". ((( $index - 1 ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' )));
+        $body .= "&session=$self->{session_key__}&sort=$self->{form_}{sort}&filter=$self->{form_}{filter}&search=$self->{form_}{search}\">&lt;&lt;";
+        $body .= $self->{language__}{Previous};
+        $body .= "</a> ";
+    }
+
+    if ( $index < ( $self->history_size() - 1 ) ) {
+        $body .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index + 1 ];
+        $body .= "&start_message=". ((( $index + 1 ) < ( $start_message + $self->config_( 'page_size' ) ) )?$start_message:($start_message + $self->config_( 'page_size' )));
+        $body .= "&session=$self->{session_key__}&sort=$self->{form_}{sort}&filter=$self->{form_}{filter}&search=$self->{form_}{search}\"> ";
+        $body .= $self->{language__}{Next};
+        $body .= "&gt;&gt;</a>";
+    }
+
+    $body .= "</td>\n</tr>\n</table>\n";
+
+    # message
+
+    $body .= "<table class=\"openMessageTable\" cellpadding=\"10%\" cellspacing=\"0\" width=\"100%\" summary=\"$self->{language__}{History_OpenMessageSummary}\">\n";
+    
+    # Close button
+
+    $body .= "<tr>\n<td class=\"openMessageCloser\">";
+    $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">\n";
+    $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
+    $body .= "</td>\n</tr>\n";
+
+    $body .= "<tr><td>";
+    $body .= "<form id=\"HistoryMainForm\" action=\"/history\" method=\"POST\">\n";
+    $body .= "<input type=\"hidden\" name=\"search\" value=\"$self->{form_}{search}\" />\n";
+    $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form_}{sort}\" />\n";
+    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
+    $body .= "<input type=\"hidden\" name=\"start_message\" value=\"$start_message\" />\n";
+    $body .= "<input type=\"hidden\" name=\"filter\" value=\"$self->{form_}{filter}\" />\n";    
+    $body .= "<table align=left>";    
+    $body .= "<tr><td><font size=+1><b>$self->{language__}{From}</b>: </font></td><td><font size=+1>$self->{history__}{$mail_file}{from}</font></td></tr>";
+    $body .= "<tr><td><font size=+1><b>$self->{language__}{Subject}</b>: </font></td><td><font size=+1>$self->{history__}{$mail_file}{subject}</font></td></tr>";
+    $body .= "<tr><td><font size=+1><b>$self->{language__}{Classification}</b>: </font></td><td><font size=+1><font color=\"$color\">$self->{history__}{$mail_file}{bucket}</font></font></td></tr>";
+
+    $body .= "<tr><td colspan=2><font size=+1>";
+
     if ( $reclassified ) {
-      $body .= sprintf( $self->{language__}{History_Already}, ($color || ''), ($bucket || '') );
-      $body .= " <input type=\"submit\" class=\"undoButton\" name=\"undo_$index\" value=\"$self->{language__}{Undo}\">\n";
+        $body .= sprintf( $self->{language__}{History_Already}, ($color || ''), ($bucket || '') );
+        $body .= " <input type=\"submit\" class=\"undoButton\" name=\"undo_$index\" value=\"$self->{language__}{Undo}\">\n";
     } else {
-      if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
-	$body .= "\n$self->{language__}{History_ShouldBe}: <select name=\"$index\">\n";
-
-	# Show a blank bucket field
-	$body .= "<option selected=\"selected\"></option>\n";
-
-	foreach my $abucket ($self->{classifier__}->get_buckets()) {
-	  $body .= "<option value=\"$abucket\">$abucket</option>\n";
-	}
-	$body .= "</select>\n<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />";
-      } else {
-	$body .= " ($self->{language__}{History_MagnetUsed}: $self->{history__}{$mail_file}{magnet})";
-      }
+        if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
+        	$body .= "\n$self->{language__}{History_ShouldBe}: <select name=\"$index\">\n";
+        
+        	# Show a blank bucket field
+        	$body .= "<option selected=\"selected\"></option>\n";
+        
+        	foreach my $abucket ($self->{classifier__}->get_buckets()) {
+        	    $body .= "<option value=\"$abucket\">$abucket</option>\n";
+        	}
+        	$body .= "</select>\n<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />";
+        } else {
+	        $body .= " ($self->{language__}{History_MagnetUsed}: $self->{history__}{$mail_file}{magnet})";
+        }
     }
 
     $body .= "</font></td></tr>";
+    $body .= "</table></form>";    
+    $body .= "</td></tr>";
 
     # Message body
-    $body .= "</table></form></td></tr><tr>\n<td class=\"openMessageBody\"><hr><p>";
+    $body .= "<tr>\n<td class=\"openMessageBody\"><hr><p>";
 
     if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
       $body .= $self->{classifier__}->get_html_colored_message($self->global_config_( 'msgdir' ) . $mail_file);
@@ -2973,7 +3009,7 @@ sub view_page
     $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
     $body .= "</td>\n</tr>\n";
 
-    $body .= "</tr></table>";
+    $body .= "</table>";
 
     $self->http_ok( $client, $body, 2 );
 }
