@@ -134,6 +134,8 @@ select( undef, undef, undef, 0.25 );
 $sp->service_server();
 test_assert_regexp( $sp->received(), 'toserver' );
 
+# Close down the child process
+
 close $client;
 $sp->stop_server();
 select( undef, undef, undef, 0.25 );

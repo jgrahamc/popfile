@@ -10,3 +10,4 @@ error:
 
 runtest:
 	@perl -I ../ $(DEBUGARGS) ../tests.pl $(TESTARGS)
+	@perl ../coverage.pl

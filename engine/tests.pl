@@ -148,7 +148,7 @@ foreach my $test (@tests) {
 
     if ( $test =~ /$pattern/ ) {
 
-	# This works by reading the entire suite into the $suite variable
+ 	# This works by reading the entire suite into the $suite variable
 	# and then changing calls to test_assert_equal so that they include
 	# the line number and the file they are from, then the $suite is
 	# evaluated

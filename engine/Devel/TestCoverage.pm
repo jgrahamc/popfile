@@ -39,9 +39,6 @@ sub DB
 
 END
 {
-        # This hash will map file names of POPFile modules to coverage
-        my %files;
-
 	# Print out information for each file
 	for my $file (keys %count)	
 	{
@@ -50,6 +47,10 @@ END
                 my $block_executed = 0;
 		
 		open SOURCE_FILE, "<$file";
+                my $clean = $file;
+                $clean =~ s/^\.\.\/\///;
+                $clean =~ s/\//-/g;
+                open LINE_DATA, ">$clean.$$.lne";
 
 		# Read in each line of the source file and keep track of whether 
 		# it was executed or not using a new couple of keys in the 
@@ -59,7 +60,6 @@ END
 		{
 			# Keep count of the total number of lines in this file
 			$current_line              += 1;
-			$count{$file}{total_lines} += 1;
 			
 			# We do not count lines that are blank or exclusively 
 			# comments or just have braces on them or
@@ -75,7 +75,7 @@ END
 			    # that fact
 				
                             if ( ( $count{$file}{$current_line} > 0 ) || ( $block_executed ) ) {
-			        $count{$file}{total_executed} += 1;
+                                print LINE_DATA "1\n";
 
                                 # Check to see if the special comment PROFILE BLOCK START is on the line
                                 # and if so set the block mode where we count lines as being executed
@@ -89,24 +89,17 @@ END
                                     $block_executed = 0;
 		                }
 			    } else {
-                                print "$file:$current_line $_" if ( $file =~/WordMangle/);
+                                print LINE_DATA "0\n";
                             }
-			}
-
+			} else {
+                             print LINE_DATA "\n";
+                        }
 		}
 		
-                $files{$file} = int(100 * $count{$file}{total_executed} / $count{$file}{total_executable_lines}) unless ( $count{$file}{total_executable_lines} == 0 );
-		
 		close SOURCE_FILE;
+                close LINE_DATA;
           }
      }
-
-	foreach my $file (sort {$files{$b} <=> $files{$a}} keys %files) {
-            my $clean = $file;
-            $clean =~ s/^\.\.\/\///;
-		
-	    print sprintf( "Coverage of %-32s %d%%\n", "$clean...", $files{$file});
-	}
 }
 
 1;
