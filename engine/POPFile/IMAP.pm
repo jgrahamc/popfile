@@ -270,7 +270,7 @@ sub service
         eval {
             local $SIG{'PIPE'} = 'IGNORE';
             local $SIG{'__DIE__'};
-            
+
             # Check whether we already have open connections.
             # If not, connect and login for each of our folders
 
@@ -321,7 +321,7 @@ sub service
 #   about the flags associated with each folder.
 #   The hash will be stored in %{$self->{folders__}}
 #   When the list is ready, the function iterates over each folder and
-#   tries to establish an IMAP connection for each folder. The 
+#   tries to establish an IMAP connection for each folder. The
 #   corresponding sockect object, will be stored in $self->{imap__}{$folder}
 #
 # arguments:
@@ -381,11 +381,15 @@ sub connect_folders__
                     $self->get_mailbox_list( $self->{imap__}{$folder} );
                 }
 
-                # Change to folder
-
+                # Change to / SELECT the folder
                 $self->say( $self->{imap__}{$folder}, "SELECT \"$folder\"" );
                 if ( $self->get_response( $self->{imap__}{$folder} ) != 1 ) {
                     $error = "Could not SELECT folder $folder.";
+                }
+
+                # And now check that our UIDs are valid
+                unless ( $self->folder_uid_status__( $self->{imap__}{$folder}, $folder ) ) {
+                    $self->log_( "Changed UIDVALIDITY for folder $folder. Some new messages might have been skipped." );
                 }
 
             } else {
@@ -398,7 +402,7 @@ sub connect_folders__
 
         if ( $error ne '' ) {
             $self->log_( $error );
-            
+
             # This is drastic: If one of our connections fail, we remove
             # _all_ our connections from the imap__ hash and last out
             # of the loop, we also clear the folders hash.
@@ -443,12 +447,11 @@ sub scan_folder
 
     $self->log_( "Looking for new messages in folder $folder." );
 
-    # First, check that our UIDs are valid
+    # Do a NOOP first. Certain implementations won't tell us about
+    # new messages while we are connected and selected otherwise:
 
-    unless ( $self->folder_uid_status__( $imap, $folder ) ) {
-        $self->log_( "Changed UIDVALIDITY, will not check for new messages in folder $folder." );
-        return;
-    }
+    $self->say( $imap, "NOOP" );
+    $self->get_response( $imap );
 
     my $moved_message = 0;
     my @uids = $self->get_uids_ge( $imap, $self->uid_next__( $folder ) );
@@ -457,7 +460,6 @@ sub scan_folder
     # to our last stored UIDNEXT value (of course, the list might be
     # empty). Let's iterate over that list.
 
-    MESSAGE:
     foreach my $msg ( @uids ) {
         $self->log_( "" );
         $self->log_( "Found new message in folder $folder (UID: $msg)" );
@@ -473,11 +475,9 @@ sub scan_folder
 
                 my $result = $self->classify_message( $imap, $msg, $hash, $folder );
 
-                if ( defined $result ) {
-                    $moved_message = $result;
-                }
+                $moved_message = $result if ( defined $result );
 
-                next MESSAGE;
+                next;
             }
         }
 
@@ -486,7 +486,7 @@ sub scan_folder
 
                 my $result = $self->reclassify_message( $imap, $msg, $bucket, $old_bucket, $hash );
 
-                next MESSAGE;
+                next;
             }
         }
 
@@ -494,7 +494,6 @@ sub scan_folder
         $self->log_( "Ignoring message $msg" );
     }
 
-    FOLDER:
     if ( $moved_message && $self->config_( 'expunge' ) ) {
         $self->say( $imap, "EXPUNGE" );
         $self->get_response( $imap );
@@ -609,7 +608,7 @@ sub classify_message
                 }
             }
             else {
-                $self->log_( "Message can not be moved because output folder for bucket $class is not defined." );
+                $self->log_( "Message cannot be moved because output folder for bucket $class is not defined." );
             }
 
 
@@ -626,6 +625,7 @@ sub classify_message
             $self->log_( "Message $history_file was classified as $class." );
             $self->log_( "" );
 
+            last PART;
         }
     }
 
@@ -675,7 +675,7 @@ sub reclassify_message
     # I simply use "imap.tmp" as the file name here.
 
     unless ( open TMP, ">imap.tmp" ) {
-        $self->log( "Cannot open temp file imap.tmp" );
+        $self->log_( "Cannot open temp file imap.tmp" );
 
         return;
     };
@@ -1144,13 +1144,24 @@ sub get_mailbox_list
 sub fetch_message_part
 {
     my ( $self, $imap, $msg, $part ) = @_;
-
-    $self->log_( "Fetching $part of message $msg" );
+    
+    if ( $part ne '' ) {
+        $self->log_( "Fetching $part of message $msg" );
+    }
+    else {
+        $self->log_( "Fetching message $msg" );
+    }
 
     $self->say( $imap, "UID FETCH $msg (FLAGS BODY.PEEK[$part])" );
 
     my $result = $self->get_response ( $imap );
-    $self->log_( "Got $part of message # $msg, result: $result." );
+
+    if ( $part ne '' ) {
+        $self->log_( "Got $part of message # $msg, result: $result." );
+    }
+    else {
+        $self->log_( "Got message # $msg, result: $result." );
+    }
 
     if ( $result == 1 ) {
         my @lines = ();
