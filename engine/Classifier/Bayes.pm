@@ -239,6 +239,7 @@ sub initialize
     $self->config_( 'hostname', $self->{hostname__} );
 
     $self->mq_register_( 'COMIT', $self );
+
     return 1;
 }
 
@@ -256,9 +257,7 @@ sub deliver
     my ( $self, $type, @message ) = @_;
 
     if ( $type eq 'COMIT' ) {
-        my $session = $self->get_session_key( 'admin', '' );
-        $self->classified( $session, $message[1] );
-        $self->release_session_key( $session );
+        $self->classified( $message[0], $message[2] );
     }
 }
 
@@ -279,7 +278,8 @@ sub start
     # different from the charset POPFile uses for Japanese
     # characters(EUC-JP).
 
-    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+    if ( defined( $self->module_config_( 'html', 'language' ) ) && 
+       ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) ) {
         use POSIX qw( locale_h );
         setlocale( LC_COLLATE, 'C' );
     }
@@ -398,7 +398,8 @@ sub get_color
         if ( $prob != 0 )  {
             if ( $prob > $max )  {
                 $max   = $prob;
-                $color = $self->get_bucket_parameter( $session, $bucket, 'color' );
+                $color = $self->get_bucket_parameter( $session, $bucket,
+                             'color' );
             }
         }
     }
@@ -446,7 +447,8 @@ sub get_value_
         # log( $value ) - $cached and this turned out to be
         # much slower than this single log with a division in it
 
-        return log( $value / $self->get_bucket_word_count( $session, $bucket ) );
+        return log( $value /
+                    $self->get_bucket_word_count( $session, $bucket ) );
     } else {
         return 0;
     }
@@ -477,7 +479,8 @@ sub set_value_
 {
     my ( $self, $session, $bucket, $word, $value ) = @_;
 
-    if ( $self->db_put_word_count__( $session, $bucket, $word, $value ) == 1 ) {
+    if ( $self->db_put_word_count__( $session, $bucket,
+             $word, $value ) == 1 ) {
 
         # If we set the word count to zero then clean it up by deleting the
         # entry
@@ -539,7 +542,8 @@ sub update_constants__
             my $total = $self->get_bucket_word_count( $session, $bucket );
 
             if ( $total != 0 ) {
-                $self->{bucket_start__}{$userid}{$bucket} = log( $total / $wc );
+                $self->{bucket_start__}{$userid}{$bucket} = log( $total /
+                                                                 $wc );
             } else {
                 $self->{bucket_start__}{$userid}{$bucket} = 0;
             }
@@ -2267,17 +2271,16 @@ sub classify
 # history, outputting the same email on another handle with the
 # appropriate header modifications and insertions
 #
-# $session   A valid session key returned by a call to get_session_key
+# $session  - A valid session key returned by a call to get_session_key
 # $mail     - an open stream to read the email from
-# $client - an open stream to write the modified email to $nosave -
-# indicates that the message downloaded should not be saved in the
-# history
+# $client   - an open stream to write the modified email to 
+# $nosave   - set to 1 indicates that this should not save to history
 # $class    - if we already know the classification
 # $echo     - 1 to echo to the client, 0 to supress, defaults to 1
-# $crlf - The sequence to use at the end of a line in the output,
-# normally this is left undefined and this method uses $eol (the
-# normal network end of line), but if this method is being used with
-# real files you may wish to pass in \n instead
+# $crlf     - The sequence to use at the end of a line in the output,
+#   normally this is left undefined and this method uses $eol (the
+#   normal network end of line), but if this method is being used with
+#   real files you may wish to pass in \n instead
 #
 # Returns a classification if it worked and the slot ID of the history
 # item related to this classification
@@ -2610,7 +2613,7 @@ sub classify_and_modify
     if ( $nosave ) {
         $self->{history__}->release_slot( $slot );
     } else {
-        $self->{history__}->commit_slot( $slot, $classification, $self->{magnet_detail__} );
+        $self->{history__}->commit_slot( $session, $slot, $classification, $self->{magnet_detail__} );
     }
 
     return ( $classification, $slot, $self->{magnet_used__} );

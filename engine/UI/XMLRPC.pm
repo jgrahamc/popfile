@@ -94,7 +94,7 @@ sub initialize
 #
 # start
 #
-# Called to start the HTTP interface running
+# Called to start the XMLRPC interface running
 #
 # ---------------------------------------------------------------------------------------------
 sub start
@@ -109,7 +109,7 @@ sub start
 
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
-    
+
     $self->register_configuration_item_( 'configuration',
                                          'xmlrpc_port',
                                          'xmlrpc-port.thtml',

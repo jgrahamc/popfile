@@ -419,11 +419,13 @@ sub upgrade_parameter__
 {
     my ( $self, $parameter ) = @_;
 
-    # This table maps from the old parameter to the new one, for example the old
-    # xpl parameter which controls insertion of the X-POPFile-Link header in email
-    # is now called GLOBAL_xpl and is accessed through POPFile::Module::global_config_
-    # The old piddir parameter is now config_piddir and is accessed through either config_
-    # if accessed from the config module or through module_config_ from outside
+    # This table maps from the old parameter to the new one, for
+    # example the old xpl parameter which controls insertion of the
+    # X-POPFile-Link header in email is now called GLOBAL_xpl and is
+    # accessed through POPFile::Module::global_config_ The old piddir
+    # parameter is now config_piddir and is accessed through either
+    # config_ if accessed from the config module or through
+    # module_config_ from outside
 
     my %upgrades = ( # PROFILE BLOCK START
 

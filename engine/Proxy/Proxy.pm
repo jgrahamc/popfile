@@ -171,7 +171,7 @@ EOM
 # stop
 #
 # Called when POPFile is closing down, this is the last method that will get called before
-# the object is destroyed.  There is not return value from stop().
+# the object is destroyed.  There is no return value from stop().
 #
 # ---------------------------------------------------------------------------------------------
 sub stop
@@ -203,48 +203,58 @@ sub service
 {
     my ( $self ) = @_;
 
-    # Accept a connection from a client trying to use us as the mail server.  We service one client at a time
-    # and all others get queued up to be dealt with later.  We check the alive boolean here to make sure we
-    # are still allowed to operate. See if there's a connection waiting on the $server by getting the list of
-    # handles with data to read, if the handle is the server then we're off.
+    # Accept a connection from a client trying to use us as the mail
+    # server.  We service one client at a time and all others get
+    # queued up to be dealt with later.  We check the alive boolean
+    # here to make sure we are still allowed to operate. See if
+    # there's a connection waiting on the $server by getting the list
+    # of handles with data to read, if the handle is the server then
+    # we're off.
 
-    if ( ( defined( $self->{selector__}->can_read(0) ) ) && ( $self->{alive_} ) ) {
+    if ( ( defined( $self->{selector__}->can_read(0) ) ) &&
+         ( $self->{alive_} ) ) {
         if ( my $client = $self->{server__}->accept() ) {
 
             # Check to see if we have obtained a session key yet
 
             if ( $self->{api_session__} eq '' ) {
-                $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
+                $self->{api_session__} =
+                    $self->{classifier__}->get_session_key( 'admin', '' );
 	    }
 
-            # Check that this is a connection from the local machine, if it's not then we drop it immediately
-            # without any further processing.  We don't want to act as a proxy for just anyone's email
+            # Check that this is a connection from the local machine,
+            # if it's not then we drop it immediately without any
+            # further processing.  We don't want to act as a proxy for
+            # just anyone's email
 
-            my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
+            my ( $remote_port, $remote_host ) = sockaddr_in(
+                                                    $client->peername() );
 
-            if  ( ( ( $self->config_( 'local' ) || 0 ) == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
+            if  ( ( ( $self->config_( 'local' ) || 0 ) == 0 ) ||
+                    ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
 
-                # If we have force_fork turned on then we will do a fork, otherwise we will handle this
-                # inline, in the inline case we need to create the two ends of a pipe that will be used
-                # as if there was a child process
+                # If we have force_fork turned on then we will do a
+                # fork, otherwise we will handle this inline, in the
+                # inline case we need to create the two ends of a pipe
+                # that will be used as if there was a child process
 
                 binmode( $client );
 
                 if ( $self->config_( 'force_fork' ) ) {
                     my ( $pid, $pipe ) = &{$self->{forker_}};
 
-                    # If we fail to fork, or are in the child process then process this request
+                    # If we fail to fork, or are in the child process
+                    # then process this request
 
                     if ( !defined( $pid ) || ( $pid == 0 ) ) {
-                        $self->{child_}( $self, $client, $self->{api_session__} );
-# TODO                        $self->{flush_child_data_}( $self, $pipe );
+                        $self->{child_}( $self, $client,
+                            $self->{api_session__} );
                         exit(0) if ( defined( $pid ) );
                     }
 	        } else {
                     pipe my $reader, my $writer;
 
                     $self->{child_}( $self, $client, $self->{api_session__} );
-# TODO                    $self->{flush_child_data_}( $self, $reader );
                     close $reader;
                 }
             }

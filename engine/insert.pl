@@ -24,89 +24,70 @@
 # ---------------------------------------------------------------------------------------------
 
 use strict;
-use Classifier::Bayes;
-use Classifier::WordMangle;
-use POPFile::Configuration;
-use POPFile::MQ;
-use POPFile::Logger;
+use lib defined($ENV{POPFILE_ROOT})?$ENV{POPFILE_ROOT}:'./';
+use POPFile::Loader;
 
 my $code = 0;
 
 if ( $#ARGV > 0 ) {
-    my $c = new POPFile::Configuration;
-    my $mq = new POPFile::MQ;
-    my $l = new POPFile::Logger;
-    my $b = new Classifier::Bayes;
-    my $w = new Classifier::WordMangle;
 
-    $c->configuration( $c );
-    $c->mq( $mq );
-    $c->logger( $l );
+    # POPFile is actually loaded by the POPFile::Loader object which does all
+    # the work
 
-    $c->initialize();
+    my $POPFile = POPFile::Loader->new();
 
-    $l->configuration( $c );
-    $l->mq( $mq );
-    $l->logger( $l );
+    # Indicate that we should create not output on STDOUT (the POPFile
+    # load sequence)
 
-    $l->initialize();
+    $POPFile->debug(0);
+    $POPFile->CORE_loader_init();
+    $POPFile->CORE_signals();
+    $POPFile->CORE_load( 1 );
+    $POPFile->CORE_link_components();
+    $POPFile->CORE_initialize();
 
-    $w->configuration( $c );
-    $w->mq( $mq );
-    $w->logger( $l );
-
-    $w->start();
-
-    $mq->configuration( $c );
-    $mq->mq( $mq );
-    $mq->logger( $l );
-
-    $b->configuration( $c );
-    $b->mq( $mq );
-    $b->logger( $l );
-
-    $b->{parser__}->mangle( $w );
-    $b->initialize();
-
-    $c->load_configuration();
-
-    $b->start();
-    my $session = $b->get_session_key( 'admin', '' );
+    my $bucket = shift @ARGV;
 
     my @files;
 
     if ($^O =~ /linux/) {
-        @files = @ARGV[1 .. $#ARGV];
+        @files = @ARGV[0 .. $#ARGV];
     } else {
-        @files = map { glob } @ARGV[1 .. $#ARGV];
+        @files = map { glob } @ARGV[0 .. $#ARGV];
     }
 
-    # Check for the existence of each file first because the API
-    # call we use does not care if a file is missing
+    @ARGV = ();
 
-    foreach my $file (@files) {
-        if ( !(-e $file) ) {
-            print STDERR "Error: File `$file' does not exist, insert aborted.\n";
-            $code = 1;
-            last;
+    if ( $POPFile->CORE_config() ) {
+        $POPFile->CORE_start();
+
+        my $b = $POPFile->{components__}{classifier}{bayes};
+        my $session = $b->get_session_key( 'admin', '' );
+
+        # Check for the existence of each file first because the API
+        # call we use does not care if a file is missing
+
+        foreach my $file (@files) {
+            if ( !(-e $file) ) {
+                print STDERR "Error: File `$file' does not exist, insert aborted.\n";
+                $code = 1;
+                last;
+            }
         }
-    }
 
-    if ( $code == 0 ) {
-        if ( !$b->is_bucket( $session, $ARGV[0] ) ) {
-            print STDERR "Error: Bucket `$ARGV[0]' does not exist, insert aborted.\n";
-            $code = 1;
-        } else {
-            $b->add_messages_to_bucket( $session, $ARGV[0], @files );
-            print "Added ", $#files+1, " files to `$ARGV[0]'\n";
+        if ( $code == 0 ) {
+            if ( !$b->is_bucket( $session, $bucket ) ) {
+                print STDERR "Error: Bucket `$bucket' does not exist, insert aborted.\n";
+                $code = 1;
+            } else {
+                $b->add_messages_to_bucket( $session, $bucket, @files );
+                print "Added ", $#files+1, " files to `$bucket'\n";
+            }
         }
-    }
 
-    $b->release_session_key( $session );
-    $b->stop();
-    $l->stop();
-    $mq->stop();
-    $c->stop();
+        $b->release_session_key( $session );
+        $POPFile->CORE_stop();
+    }
 } else {
     print "insert.pl - insert mail messages into a specific bucket\n\n";
     print "Usage: insert.pl <bucket> <messages>\n";

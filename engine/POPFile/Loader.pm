@@ -473,10 +473,12 @@ sub CORE_platform_
 #
 # Loads POPFile's modules
 #
+# noserver              Set to 1 if no servers (i.e. UI and proxies)
+#
 #----------------------------------------------------------------------------
 sub CORE_load
 {
-    my ( $self ) = @_;
+    my ( $self, $noserver ) = @_;
 
     # Create the main objects that form the core of POPFile.  Consists
     # of the configuration modules, the classifier, the UI (currently
@@ -485,13 +487,19 @@ sub CORE_load
     print "\n    Loading... " if $self->{debug__};
 
     # Do our platform-specific stuff
+
     $self->CORE_platform_();
 
     # populate our components hash
+
     $self->CORE_load_directory_modules( 'POPFile',    'core'       );
     $self->CORE_load_directory_modules( 'Classifier', 'classifier' );
-    $self->CORE_load_directory_modules( 'UI',         'interface' );
-    $self->CORE_load_directory_modules( 'Proxy',      'proxy'      );
+
+    if ( !$noserver ) {
+        $self->CORE_load_directory_modules( 'UI',         'interface' );
+        $self->CORE_load_directory_modules( 'Proxy',      'proxy'     );
+        $self->CORE_load_directory_modules( 'Server',     'server'    );
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -533,16 +541,13 @@ sub CORE_link_components
         $self->{components__}{proxy}{$name}->history(    $self->{components__}{core}{history} );
     }
 
-    # TODO Clean this up so that the Loader doesn't have to know so
-    # much about Bayes or IMAP.
-
-    if ( exists $self->{components__}{core}{imap} ) {
-        $self->{components__}{core}{imap}->classifier( $self->{components__}{classifier}{bayes} );
-        $self->{components__}{core}{imap}->history(    $self->{components__}{core}{history} );
+    foreach my $name (sort keys %{$self->{components__}{server}}) {
+        $self->{components__}{server}{$name}->classifier( $self->{components__}{classifier}{bayes} );
+        $self->{components__}{server}{$name}->history(    $self->{components__}{core}{history} );
     }
 
     # Classifier::Bayes and POPFile::History are friends and are aware
-    # of own another
+    # of one another
 
     $self->{components__}{core}{history}->classifier( $self->{components__}{classifier}{bayes} );
     $self->{components__}{classifier}{bayes}->history( $self->{components__}{core}{history} );
@@ -587,7 +592,7 @@ sub CORE_initialize
         }
         print '} ' if $self->{debug__};
     }
-    print "\n";
+    print "\n" if $self->{debug__};
 }
 
 #----------------------------------------------------------------------------

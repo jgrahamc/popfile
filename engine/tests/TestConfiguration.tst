@@ -62,10 +62,8 @@ test_assert_equal( $c->name(), 'config' );
 # Parameters
 test_assert_equal( $c->initialize(), 1 );
 test_assert_equal( $c->config_( 'piddir' ), './' );
-test_assert_equal( $c->global_config_( 'download_count' ), 0 );
 test_assert_equal( $c->global_config_( 'timeout' ), 60 );
 test_assert_equal( $c->global_config_( 'msgdir' ), 'messages/' );
-
 
 # Check that the PID file gets created and then deleted and
 # contains the correct process ID
@@ -126,8 +124,6 @@ test_assert_regexp( $line, 'config_piddir ../tests/' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_debug 0' );
 $line = <FILE>;
-test_assert_regexp( $line, 'GLOBAL_download_count 0' );
-$line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_message_cutoff 100000' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_msgdir messages/' );
@@ -135,6 +131,8 @@ $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_timeout 60' );
 $line = <FILE>;
 test_assert_regexp( $line, 'logger_format default' );
+$line = <FILE>;
+test_assert_regexp( $line, 'logger_level 0' );
 $line = <FILE>;
 test_assert_regexp( $line, 'logger_logdir ./' );
 $line = <FILE>;
@@ -164,7 +162,6 @@ my %upgrades = (     'corpus',                   'bayes_corpus',
 		     'debug',                    'GLOBAL_debug',
 		     'msgdir',                   'GLOBAL_msgdir',
 		     'timeout',                  'GLOBAL_timeout',
-		     'download_count',           'GLOBAL_download_count',
 		     'logdir',                   'logger_logdir',
 		     'localpop',                 'pop3_local',
 		     'port',                     'pop3_port',
@@ -172,10 +169,10 @@ my %upgrades = (     'corpus',                   'bayes_corpus',
 		     'server',                   'pop3_secure_server',
 		     'separator',                'pop3_separator',
 		     'toptoo',                   'pop3_toptoo',
-		     'archive',                  'html_archive',
-		     'archive_classes',          'html_archive_classes',
-		     'archive_dir',              'html_archive_dir',
-		     'history_days',             'html_history_days',
+		     'archive',                  'history_archive',
+		     'archive_classes',          'history_archive_classes',
+		     'archive_dir',              'history_archive_dir',
+		     'history_days',             'history_history_days',
 		     'language',                 'html_language',
 		     'last_reset',               'html_last_reset',
 		     'last_update_check',        'html_last_update_check',

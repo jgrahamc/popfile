@@ -69,6 +69,8 @@ $b->configuration( $c );
 $b->mq( $mq );
 $b->logger( $l );
 
+$c->module_config_( 'html', 'language', 'English' );
+
 $b->{parser__}->mangle( $w );
 $b->initialize();
 test_assert( $b->start() );

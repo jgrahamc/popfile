@@ -203,7 +203,10 @@ sub service
         $self->{firsttime__} = 0;
     }
 
-    # Commit pending history items to the database
+    # Note when we go to multiuser POPFile we'll need to change this call
+    # so that we are sure that the session IDs that it is using are still
+    # valid.  The easiest way will be to call it in deliver() when we get
+    # a COMIT message.
 
     $self->commit_history__();
 
@@ -365,16 +368,17 @@ sub release_slot
 # returned by reserve_slot.  Note that commit_slot queues the message
 # for insertion and does not commit it until some (short) time later
 #
-# id              Unique ID returned by reserve_slot
+# session         User session with Classifier::Bayes API
+# slot            Unique ID returned by reserve_slot
 # bucket          Bucket classified to
 # magnet          Magnet if used
 #
 #----------------------------------------------------------------------------
 sub commit_slot
 {
-    my ( $self, $slot, $bucket, $magnet ) = @_;
+    my ( $self, $session, $slot, $bucket, $magnet ) = @_;
 
-    $self->mq_post_( 'COMIT', $slot, $bucket, $magnet );
+    $self->mq_post_( 'COMIT', $session, $slot, $bucket, $magnet );
 }
 
 #----------------------------------------------------------------------------
@@ -494,10 +498,8 @@ sub commit_history__
         return;
     }
 
-    my $session = $self->{classifier__}->get_session_key( 'admin', '' );
-
     foreach my $entry (@{$self->{commit_list__}}) {
-        my ( $slot, $bucket, $magnet ) = @{$entry};
+        my ( $session, $slot, $bucket, $magnet ) = @{$entry};
 
         my $file = $self->get_slot_file( $slot );
 
@@ -626,7 +628,6 @@ sub commit_history__
     }
 
     $self->{commit_list__} = ();
-    $self->{classifier__}->release_session_key( $session );
     $self->force_requery__();
 }
 
@@ -1118,6 +1119,8 @@ sub upgrade_history_files__
         $self->global_config_( 'msgdir' ) . 'popfile*.msg' );
 
     if ( $#msgs != -1 ) {
+        my $session = $self->{classifier__}->get_session_key( 'admin', '' );
+
         print "\nFound old history files, moving them into database\n    ";
 
         my $i = 0;
@@ -1139,12 +1142,16 @@ sub upgrade_history_files__
             if ( $bucket ne 'unknown_class' ) {
                 my ( $slot, $file ) = $self->reserve_slot();
                 rename $msg, $file;
-                $self->commit_slot( $slot, $bucket, 0 );
+                my @message = ( $session, $slot, $bucket, 0 );
+                push ( @{$self->{commit_list__}}, \@message );
             }
         }
         $self->db__()->commit;
 
         print "\nDone upgrading history\n";
+
+        $self->commit_history__();
+        $self->{classifier__}->release_session_key( $session );
     }
 }
 

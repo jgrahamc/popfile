@@ -167,12 +167,14 @@ This is the message body
 EOF
 close FILE;
 
-$h->commit_slot( $slot, 'spam', 0 );
+my $session = $b->get_session_key( 'admin', '' );
+$h->commit_slot( $session, $slot, 'spam', 0 );
 $mq->service();
 $h->service();
-$h->commit_slot( $slot1, 'personal', 0 );
+$h->commit_slot( $session, $slot1, 'personal', 0 );
 $mq->service();
 $h->service();
+$b->release_session_key( $session );
 
 # Check that the message hash mechanism works
 

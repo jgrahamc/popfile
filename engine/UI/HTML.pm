@@ -2177,6 +2177,19 @@ sub history_page
     # form element will contain the single index to be deleted. We
     # pass each file that needs deleting into the
 
+    if ( defined( $self->{form_}{clearpage} ) ) {
+
+        # Remove the list of marked messages using the array of
+        # "remove" checkboxes
+
+        for my $i ( keys %{$self->{form_}} ) {
+            if ( $i =~ /^rowid_(\d+)$/ ) {
+                $self->log_( 1, "clearpage $i" );
+                $self->{history__}->delete_slot( $1 );
+            }
+        }
+    }
+
     if ( defined( $self->{form_}{clearchecked} ) ) {
 
         # Remove the list of marked messages using the array of
@@ -2184,7 +2197,11 @@ sub history_page
 
         for my $i ( keys %{$self->{form_}} ) {
             if ( $i =~ /^remove_(\d+)$/ ) {
-                $self->{history__}->delete_slot( $1 );
+                my $slot = $1;
+                if ( $self->{form_}{$i} ne '' ) {
+                    $self->log_( 1, "clearchecked $i" );
+                    $self->{history__}->delete_slot( $slot );
+                }
             }
         }
     }

@@ -24,57 +24,27 @@
 # ---------------------------------------------------------------------------------------------
 
 use strict;
-use Classifier::Bayes;
-use Classifier::WordMangle;
-use POPFile::Configuration;
-use POPFile::MQ;
-use POPFile::Logger;
-
-# main
+use lib defined($ENV{POPFILE_ROOT})?$ENV{POPFILE_ROOT}:'./';
+use POPFile::Loader;
 
 my $code = 0;
 
 if ( $#ARGV >= 0 ) {
-    my $c = new POPFile::Configuration;
-    my $mq = new POPFile::MQ;
-    my $l = new POPFile::Logger;
-    my $b = new Classifier::Bayes;
-    my $w = new Classifier::WordMangle;
 
-    $c->configuration( $c );
-    $c->mq( $mq );
-    $c->logger( $l );
+    # POPFile is actually loaded by the POPFile::Loader object which does all
+    # the work
 
-    $c->initialize();
+    my $POPFile = POPFile::Loader->new();
 
-    $l->configuration( $c );
-    $l->mq( $mq );
-    $l->logger( $l );
+    # Indicate that we should create not output on STDOUT (the POPFile
+    # load sequence)
 
-    $l->initialize();
-
-    $w->configuration( $c );
-    $w->mq( $mq );
-    $w->logger( $l );
-
-    $w->start();
-
-    $mq->configuration( $c );
-    $mq->mq( $mq );
-    $mq->logger( $l );
-
-    $b->configuration( $c );
-    $b->mq( $mq );
-    $b->logger( $l );
-
-    $b->{parser__}->mangle( $w );
-    $b->initialize();
-
-    $c->load_configuration();
-
-    $b->start();
-
-    my $session = $b->get_session_key( 'admin', '' );
+    $POPFile->debug(0);
+    $POPFile->CORE_loader_init();
+    $POPFile->CORE_signals();
+    $POPFile->CORE_load( 1 );
+    $POPFile->CORE_link_components();
+    $POPFile->CORE_initialize();
 
     my @files;
 
@@ -84,29 +54,35 @@ if ( $#ARGV >= 0 ) {
         @files = map { glob } @ARGV[0 .. $#ARGV];
     }
 
-    foreach my $file (@files) {
-        if ( !(-e $file) ) {
-            print STDERR "Error: File `$file' does not exist, classification aborted.\n";
-            $code = 1;
-            last;
-        }
-    }
+    @ARGV = ();
 
-    if ( $code == 0 ) {
+    if ( $POPFile->CORE_config() ) {
+        $POPFile->CORE_start();
+
+        my $b = $POPFile->{components__}{classifier}{bayes};
+        my $session = $b->get_session_key( 'admin', '' );
+
         foreach my $file (@files) {
-            print "`$file' is `" . $b->classify( $session, $file ) . "'\n";
+            if ( !(-e $file) ) {
+                print STDERR "Error: File `$file' does not exist, classification aborted.\n";
+                $code = 1;
+                last;
+            }
         }
 
-        foreach my $word (sort keys %{$b->{parser__}->{words__}}) {
-            print "$word $b->{parser__}->{words__}{$word}\n";
+        if ( $code == 0 ) {
+            foreach my $file (@files) {
+                print "`$file' is `" . $b->classify( $session, $file ) . "'\n";
+            }
+
+            foreach my $word (sort keys %{$b->{parser__}->{words__}}) {
+                print "$word $b->{parser__}->{words__}{$word}\n";
+            }
         }
+
+        $b->release_session_key( $session );
+        $POPFile->CORE_stop();
     }
-
-    $b->release_session_key( $session );
-    $b->stop();
-    $l->stop();
-    $mq->stop();
-    $c->stop();
 }
 else
 {

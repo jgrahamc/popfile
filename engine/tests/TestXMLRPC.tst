@@ -70,53 +70,38 @@ $x->mq( $mq );
 $x->logger( $l );
 $x->{classifier__} = $b;
 
+$c->module_config_( 'html', 'language', 'English' );
+
 $b->initialize();
 test_assert( $b->start() );
 
 $x->initialize();
 $x->config_('enabled',1);
-#$x->start();
-
-
-
-# TODO: make this work
-# similar code fails in all tests
-# Test XMLRPC startup
-
-# $x->config_("port", "aaa");
-
-#open STDERR, ">stdout.tmp";
-#test_assert(!$x->start());
-#close STDERR;
-
-#open TEMP, "<stdout.tmp";
-
-#my $line = <TEMP>;
-#$line = <TEMP>;
-#$line = <TEMP>;
-#$line = <TEMP>;
-#test_assert_regexp($line,"Couldn't start the XMLRPC HTTP interface because POPFile could not bind to the");
-
-#close TEMP;
-#unlink "stdout.tmp";
 
 my $xport = 12000 + int(rand(2000));
 
 $x->config_("port", $xport);
 
 $b->prefork();
+$mq->prefork();
 
+$l->config_( 'level', 2 );
+
+pipe my $reader, my $writer;
 my $pid = fork();
 
 if ($pid == 0) {
+
+    close $reader;
+
+    $b->forked( $writer );
+    $mq->forked( $writer );
+
     # CHILD THAT WILL RUN THE XMLRPC SERVER
     if ($x->start() == 1) {
-
-        $b->forked();
-
         test_assert(1, "start passed\n");
 
-        while ( $x->service() && $b->alive()) {
+        while ( $mq->service() && $x->service() && $b->alive()) {
             select(undef,undef,undef, 0.1);
         }
         $x->stop();
@@ -129,7 +114,10 @@ if ($pid == 0) {
 } else {
     # PARENT -- test the XMLRPC server
 
-    $b->postfork();
+    close $writer;
+
+    $b->postfork( $pid, $reader );
+    $mq->postfork( $pid, $reader );
 
     select(undef,undef,undef,1);
     use XMLRPC::Lite;

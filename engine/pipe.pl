@@ -24,70 +24,48 @@
 # ---------------------------------------------------------------------------------------------
 
 use strict;
-use Classifier::Bayes;
-use Classifier::WordMangle;
-use POPFile::Configuration;
-use POPFile::MQ;
-use POPFile::Logger;
-use UI::HTML;
+use lib defined($ENV{POPFILE_ROOT})?$ENV{POPFILE_ROOT}:'./';
+use POPFile::Loader;
 
 # main
 
 if ( $#ARGV == -1 ) {
-    my $c = new POPFile::Configuration;
-    my $mq = new POPFile::MQ;
-    my $l = new POPFile::Logger;
-    my $b = new Classifier::Bayes;
-    my $u = new UI::HTML;
-    my $w = new Classifier::WordMangle;
 
-    $u->configuration( $c );
-    $u->mq( $mq );
-    $u->logger( $l );
+    # POPFile is actually loaded by the POPFile::Loader object which does all
+    # the work
 
-    $l->configuration( $c );
-    $l->mq( $mq );
-    $l->logger( $l );
+    my $POPFile = POPFile::Loader->new();
 
-    $mq->configuration( $c );
-    $mq->mq( $mq );
-    $mq->logger( $l );
+    # Indicate that we should create not output on STDOUT (the POPFile
+    # load sequence)
 
-    $b->configuration( $c );
-    $b->mq( $mq );
-    $b->logger( $l );
+    $POPFile->debug(0);
+    $POPFile->CORE_loader_init();
+    $POPFile->CORE_signals();
+    $POPFile->CORE_load( 1 );
+    $POPFile->CORE_link_components();
+    $POPFile->CORE_initialize();
 
-    $c->configuration( $c );
-    $c->mq( $mq );
-    $c->logger( $l );
+    # Ugly hack which is needed because Bayes::classify_and_modify looks up
+    # the UI port and whether we are allowing remote connections or not
+    # to set the XPL link in the header.  If we don't have these predefined
+    # then they'll be discarded when the configuration is loaded, and since
+    # we are not loading the UI, they are not defined at this point
 
-    $c->initialize();
-    $l->initialize();
+    my $c = $POPFile->{components__}{core}{config};
+    $c->module_config_( 'html', 'local', 1 );
+    $c->module_config_( 'html', 'port',  8080 );
 
-    $w->configuration( $c );
-    $w->mq( $mq );
-    $w->logger( $l );
+    if ( $POPFile->CORE_config() ) {
+        $POPFile->CORE_start();
 
-    $w->start();
+        my $b = $POPFile->{components__}{classifier}{bayes};
+        my $session = $b->get_session_key( 'admin', '' );
 
-    $b->{parser__}->mangle( $w );
-    $b->initialize();
-    $u->initialize();
-
-    $c->load_configuration();
-
-    $b->start();
-
-    my $session = $b->get_session_key( 'admin', '' );
-
-    $b->classify_and_modify( $session, \*STDIN, \*STDOUT, 0, 0, 1, '', 1, "\n") . "'\n";
-
-    $b->release_session_key( $session );
-    $b->stop();
-    $l->stop();
-    $mq->stop();
-    $c->stop();
-    $u->stop();
+        $b->classify_and_modify( $session, \*STDIN, \*STDOUT, 1, '', 1, "\n" );
+        $b->release_session_key( $session );
+        $POPFile->CORE_stop();
+    }
 
     exit 0;
 } else {

@@ -65,6 +65,7 @@ while ( <TEMP> ) {
     my $cam_line    = <CAM>;
     $cam_line =~ s/[\r\n]+/\n/g; # This tests that the network EOL has been removed
     next if ( $output_line =~ /X\-POPFile\-Timeout\-Prevention/ );
+    $output_line =~ s/view=\d+/view=popfile0=0.msg/;
     test_assert_equal( $output_line, $cam_line, $modify_file );
 }
 

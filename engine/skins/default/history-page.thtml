@@ -137,6 +137,7 @@
 
             <td>
                 <input type="checkbox" id="remove_<TMPL_VAR NAME="History_I1">" class="checkbox" name="remove_<TMPL_VAR NAME="History_I1">"/>
+                <input type="hidden" id="rowid_<TMPL_VAR NAME="History_I1">" name="rowid_<TMPL_VAR NAME="History_I1">" value="<TMPL_VAR NAME="History_I1">"/>
             </td>
             <TMPL_IF NAME="History_If_inserted">
             <td>
@@ -247,6 +248,7 @@
         </tr>
         <tr>
             <td colspan="<TMPL_VAR NAME="History_Colspan">">
+                <input type="submit" class="submit" name="clearpage" value="<TMPL_VAR NAME="Localize_History_RemovePage">" />
                 <input type="submit" class="submit" name="clearchecked" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" />
                 <span class="historyLabel">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<TMPL_VAR NAME="Localize_History_Column_Characters">:

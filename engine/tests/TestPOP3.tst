@@ -2,7 +2,7 @@
 #
 # Tests for POP3.pm
 #
-# Copyright (c) 2003 John Graham-Cumming
+# Copyright (c) 2003-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -317,6 +317,7 @@ sub forker
 {
     pipe my $reader, my $writer;
     $b->prefork();
+    $mq->prefork();
     my $pid = fork();
 
     if ( !defined( $pid ) ) {
@@ -326,7 +327,8 @@ sub forker
     }
 
     if ( $pid == 0 ) {
-       $b->forked();
+        $b->forked( $writer );
+        $mq->forked( $writer );
         close $reader;
 
         use IO::Handle;
@@ -335,7 +337,8 @@ sub forker
         return (0, $writer);
     }
 
-    $b->postfork();
+    $b->postfork( $pid, $reader );
+    $mq->postfork( $pid, $reader );
     close $writer;
     return ($pid, $reader);
 }
@@ -386,16 +389,14 @@ mkdir( 'messages' );
 pipe my $dserverreader, my $dserverwriter;
 pipe my $userverreader, my $userverwriter;
 
-$b->prefork();
-my $pid = fork();
+my ( $pid, $pipe ) = forker();
 
 if ( $pid == 0 ) {
-    $b->forked();
 
     # CHILD THAT WILL RUN THE POP3 SERVER
 
     close $dserverwriter;
-    close $dserverwriter;
+    close $userverreader;
 
     $userverwriter->autoflush(1);
 
@@ -449,8 +450,6 @@ if ( $pid == 0 ) {
     exit(0);
 } else {
 
-    $b->postfork();
-
     my $port = 9000 + int(rand(1000));
 
     # This pipe is used to send signals to the child running
@@ -471,12 +470,10 @@ if ( $pid == 0 ) {
 
     pipe my $dreader, my $dwriter;
     pipe my $ureader, my $uwriter;
-    $b->prefork();
-    my $pid2 = fork();
+
+    my ( $pid2, $pipe ) = forker();
 
     if ( $pid2 == 0 ) {
-
-        $b->forked();
 
         # CHILD THAT WILL RUN THE POP3 PROXY
 
@@ -553,8 +550,6 @@ if ( $pid == 0 ) {
 
         exit(0);
     } else {
-
-        $b->postfork();
 
         # PARENT THAT WILL SEND COMMAND TO THE PROXY
 

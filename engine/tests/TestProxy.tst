@@ -435,8 +435,7 @@ $mq->service();
 my @messages = $r->read();
 test_assert_equal( $#messages, 0 );
 test_assert_equal( $messages[0][0], 'LOGIN' );
-test_assert_equal( $messages[0][1], 'username' );
-test_assert_equal( $messages[0][2], '' );
+test_assert_equal( $messages[0][1][0], 'username' );
 
 # Make sure that stop will close off the child pipes
 

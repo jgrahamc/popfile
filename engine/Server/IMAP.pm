@@ -1,5 +1,5 @@
 # POPFILE LOADABLE MODULE
-package POPFile::IMAP;
+package Server::IMAP;
 use POPFile::Module;
 @ISA = ("POPFile::Module");
 
@@ -7,8 +7,7 @@ use POPFile::Module;
 #
 # IMAP.pm --- a module to use POPFile for an IMAP connection.
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
-#
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -29,12 +28,12 @@ use POPFile::Module;
 #   Originally created by   Manni Heumann (mannih2001@users.sourceforge.net)
 #   Modified by             Sam Schinke (sschinke@users.sourceforge.net)
 #   Patches by              David Lang (davidlang@users.sourceforge.net)
+#   Moved location by       John Graham-Cumming (jgrahamc@users.sf.net)
 #
 #   A proposed roadmap for this module is available at
-#   http://popfile.sourceforge.net/cgi-bin/wiki.pl?ExperimentalModules/ImapRoadmap
+#   http://popfile.sf.net/cgi-bin/wiki.pl?ExperimentalModules/ImapRoadmap
 #
 # ---------------------------------------------------------------------------------------------
-
 
 use IO::Socket;
 use Digest::MD5 qw( md5_hex );
@@ -44,10 +43,6 @@ use locale;
 
 my $eol = "\015\012";
 my $cfg_separator = "-->";
-
-
-
-
 
 #----------------------------------------------------------------------------
 # new
@@ -266,14 +261,16 @@ sub service
             }
             else {
 
-                # If we haven't yet set up a list of serviced folders, or if the list
-                # was changed by the user, build up a list of folder in $self->{folders__}
+                # If we haven't yet set up a list of serviced folders,
+                # or if the list was changed by the user, build up a
+                # list of folder in $self->{folders__}
 
                 if ( ( keys %{$self->{folders__}} == 0 ) || ( $self->{folder_change_flag__} == 1 ) ) {
                     $self->build_folder_list__();
                 }
 
-                # Try to establish connections, log in, and select for all of our folders
+                # Try to establish connections, log in, and select for
+                # all of our folders
                 $self->connect_folders__();
 
                 # Now do the real job
