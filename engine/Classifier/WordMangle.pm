@@ -169,7 +169,7 @@ sub stopwords
         $self->{stop__} = $value;
     }
 
-    return $self->{stop__};
+    return keys %{$self->{stop__}};
 }
 
 1;

@@ -1176,7 +1176,9 @@ sub advanced_page
     my $groupCounter = 0;
     my $groupSize = 5;
     my $firstRow = 1;
-    for my $word (sort keys %{$self->{classifier__}->get_stopword_list()}) {
+    my @words = $self->{classifier__}->get_stopword_list();
+
+    for my $word (sort @words) {
         $word =~ /^(.)/;
         if ( $1 ne $last )  {
             if (! $firstRow) {
@@ -1208,6 +1210,7 @@ sub advanced_page
             $need_comma = 1;
         }
     }
+
     $body .= "</td></tr>\n</table>\n";
 
     # optional widget placement
