@@ -38,8 +38,40 @@ sub new
 
     # Used to parse mail messages
     $self->{parser}            = new Classifier::MailParse;
+
+    # Colors assigned to each bucket
+    $self->{colors}            = {};
    
     return bless $self, $type;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_color
+#
+# Retrieves the color for a specific word, color is the most likely bucket
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_color
+{
+    my ($self, $word) = @_;
+    
+    my $max   = 0;
+    my $color = 'black';
+    
+    for my $bucket (keys %{$self->{matrix}})
+    {
+        my $prob  = ( $self->{matrix}{$bucket}{$word} / $self->{total}{$bucket} );
+        
+        if ( $prob > $max ) 
+        {
+            $max   = $prob;
+            $color = $self->{colors}{$bucket};
+        }
+    }
+    
+    return $color;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -53,6 +85,8 @@ sub new
 sub load_word_matrix
 {
     my ($self) = @_;
+    my @colors = ( 'red', 'green', 'blue', 'yellow', 'orange', 'purple', 'magenta', 'cyan' );
+    my $c      = 0;
     
     print "Loading the corpus...\n" if $self->{debug};
     
@@ -66,6 +100,16 @@ sub load_word_matrix
 
         $bucket =~ /([A-Za-z0-9-_]+)$/;
         $bucket =  $1;
+
+        if ( $c < $#colors )
+        {
+            $self->{colors}{$bucket} = $colors[$c];
+            $c += 1;
+        } 
+        else 
+        {
+            $self->{colors}{$bucket} = 'black';
+        }
 
         # Each line in the word table is a word and a count
 
