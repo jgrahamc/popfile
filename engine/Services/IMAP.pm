@@ -1970,6 +1970,7 @@ sub configure_item
                 $data_watched_folders{IMAP_loop_mailboxes} = \@loop_mailboxes;
                 $data_watched_folders{IMAP_loop_counter} = $i;
                 $data_watched_folders{IMAP_WatchedFolder_Msg} = $$language{Imap_WatchedFolder};
+                $data_watched_folders{Localize_Remove} = $$language{Remove};
 
                 push @loop_watched_folders, \%data_watched_folders;
             }
@@ -2114,6 +2115,8 @@ sub validate_item
 
     # watched folders
     if ( $name eq 'imap_1_watch_folders' ) {
+
+        # Update list of watched folders if the user clicked the Apply button
         if ( defined $$form{update_imap_1_watch_folders} ) {
 
             my $i = 1;
@@ -2126,6 +2129,20 @@ sub validate_item
             $self->watched_folders__( sort keys %folders );
             $self->{folder_change_flag__} = 1;
         }
+
+        # Remove a watched folder from the list
+        my $count = $self->watched_folders__();
+        for my $i ( 1 .. $count ) {
+            if ( defined $$form{"remove_imap_watched_folder_$i"} ) {
+                my @watched = $self->watched_folders__();
+                splice @watched, $i - 1, 1;
+                $self->watched_folders__( @watched );
+                $self->{folder_change_flag__} = 1;
+                last;
+            }
+        }
+
+
         return;
     }
 

@@ -22,7 +22,9 @@
 
     </TMPL_LOOP>
 
-    </select><br />
+    </select>
+    <input type="submit" class="submit" name="remove_imap_watched_folder_<TMPL_VAR NAME="IMAP_loop_counter">" value="<TMPL_VAR NAME="Localize_Remove">" />
+    <br />
 
     </TMPL_LOOP>
 
