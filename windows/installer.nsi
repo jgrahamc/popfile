@@ -42,7 +42,7 @@
 ; servers (so it is NOT subject to the same problems as the 'NSIS Update' feature).
 ;
 ; This version of the script has been tested with NSIS 2.0b4 (CVS) after updating it by using
-; the 4 August 2003 (07:44 GMT) version of the NSIS CVS snapshot.
+; the 11 August 2003 (19:44 GMT) version of the NSIS CVS snapshot.
 
 #--------------------------------------------------------------------------
 # LANGUAGE SUPPORT:
@@ -384,9 +384,11 @@
 
         ; Additional languages supported by the installer.
 
-        ; Entries will appear in the drop-down list of languages in the order given below.
         ; To remove a language, comment-out the relevant '!insertmacro PFI_LANG_LOAD' line
         ; from this list. (To remove all of these languages, use /DENGLISH_ONLY on command-line)
+
+        ; Entries will appear in the drop-down list of languages in the order given below
+        ; (the order used here ensures that the list entries appear in alphabetic order).
 
         !insertmacro PFI_LANG_LOAD "Bulgarian"    ; 'New style' license msgs missing (27-Jun-03)
         !insertmacro PFI_LANG_LOAD "SimpChinese"
