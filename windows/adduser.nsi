@@ -156,7 +156,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.7"
+  !define C_PFI_VERSION  "0.2.8"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -193,7 +193,7 @@
 
   ; Sleep delay (in milliseconds) used after starting POPFile (in 'CheckLaunchOptions' function)
 
-  !define C_UI_STARTUP_DELAY         10000
+  !define C_UI_STARTUP_DELAY         5000
 
 #--------------------------------------------------------------------------
 # User Registers (Global)
@@ -892,6 +892,8 @@ continue:
   CreateShortCut "$G_USERDIR\Run SQLite utility.lnk" \
                  "$G_ROOTDIR\sqlite.exe" "popfile.db"
 
+  IfFileExists "$G_ROOTDIR\pfi-stopwords.default" 0 update_config_ports
+
   IfFileExists "$G_USERDIR\stopwords" 0 copy_stopwords
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "POPFile 'stopwords' $(PFI_LANG_MBSTPWDS_1)\
@@ -908,11 +910,12 @@ make_backup:
   CopyFiles /SILENT /FILESONLY "$G_USERDIR\stopwords" "$G_USERDIR\stopwords.bak"
 
 copy_stopwords:
-  File "..\engine\stopwords"
+  CopyFiles /SILENT /FILESONLY "$G_ROOTDIR\pfi-stopwords.default" "$G_USERDIR\stopwords"
 
 copy_default_stopwords:
-  File /oname=stopwords.default "..\engine\stopwords"
+  CopyFiles /SILENT /FILESONLY "$G_ROOTDIR\pfi-stopwords.default" "$G_USERDIR\stopwords.default"
 
+update_config_ports:
   FileOpen  ${L_CFG} $PLUGINSDIR\popfile.cfg a
   FileSeek  ${L_CFG} 0 END
   FileWrite ${L_CFG} "pop3_port $G_POP3$\r$\n"
@@ -5181,7 +5184,7 @@ quit_restore:
 save_result:
   FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}$\r$\n$\r$\n"
   FileClose ${L_ERRORLOG}
-  DetailPrint "$(PFI_LANG_UN_LOG_DELROOTDIR): ${L_UNDOFILE}"
+  DetailPrint "$(PFI_LANG_UN_LOG_CLOSED): ${L_UNDOFILE}"
   FlushINI "$G_USERDIR\${L_UNDOFILE}"
 
 exit_now:
@@ -5459,7 +5462,7 @@ quit_restore:
 save_result:
   FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}$\r$\n$\r$\n"
   FileClose ${L_ERRORLOG}
-  DetailPrint "$(PFI_LANG_UN_LOG_DELROOTDIR): ${L_UNDOFILE}"
+  DetailPrint "$(PFI_LANG_UN_LOG_CLOSED): ${L_UNDOFILE}"
   FlushINI "$G_USERDIR\${L_UNDOFILE}"
 
 exit_now:
