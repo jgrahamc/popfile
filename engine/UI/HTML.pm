@@ -1,3 +1,6 @@
+# POPFILE LOADABLE MODULE
+package UI::HTML;
+
 #----------------------------------------------------------------------------
 #
 # This package contains an HTML UI for POPFile
@@ -5,7 +8,6 @@
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
 #----------------------------------------------------------------------------
-package UI::HTML;
 
 use strict;
 use warnings;
@@ -181,6 +183,20 @@ sub stop
     my ( $self ) = @_;
 
     close $self->{server} if ( defined( $self->{server} ) );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# name
+#
+# Called to get the simple name for this module
+#
+# ---------------------------------------------------------------------------------------------
+sub name
+{
+    my ( $self ) = @_;
+
+    return 'html';
 }
 
 # ---------------------------------------------------------------------------------------------

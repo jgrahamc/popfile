@@ -1,3 +1,6 @@
+# POPFILE LOADABLE MODULE
+package Proxy::POP3;
+
 # ---------------------------------------------------------------------------------------------
 #
 # This module handles proxying the POP3 protocol for POPFile. 
@@ -5,7 +8,6 @@
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
 # ---------------------------------------------------------------------------------------------
-package Proxy::POP3;
 
 use IO::Handle;
 use IO::Socket;
@@ -154,6 +156,20 @@ sub stop
     for my $kid (keys %{$self->{children}}) {
         close $self->{children}{$kid};
     }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# name
+#
+# Called to get the simple name for this module
+#
+# ---------------------------------------------------------------------------------------------
+sub name
+{
+    my ( $self ) = @_;
+
+    return 'pop3';
 }
 
 # ---------------------------------------------------------------------------------------------

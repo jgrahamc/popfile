@@ -32,12 +32,19 @@ use locale;
 # reaper()     - called when a process has terminated to give a module a chance to do 
 #                whatever clean up is needed
 #
+# name()	   - returns a simple name for the module by which other modules can get access
+#				 through the %components hash.  The name returned here will be the name
+#                used as the key for this module in %components
+#
 # alive        - Gets set to 1 when the parent wants to kill all the running sub modules
 #
 # forker       - This is a reference to a function (forker) in this file that performs a fork
 #                and informs modules that a fork has occurred.
 #
-# The POPFile classes are stored by reference in the %components hash
+# The POPFile classes are stored by reference in the %components hash, the top level key is
+# the type of the component (see load_modules) and then the name of the component derived from 
+# calls to each loadable modules name() method and which points to the actual module
+
 my %components;
 
 # This is the A PIECE OF PLATFORM SPECIFIC CODE and all it does is force Windows users to have 
@@ -52,15 +59,10 @@ if ( $^O eq 'MSWin32' ) {
 	$on_windows = 1;
 }
 
-use Classifier::Bayes;          # Use the Naive Bayes classifier
-use UI::HTML;                   # Load the POPFile HTML user interface
-use POPFile::Configuration;     # POPFile's configuration is handled by this module
-use Proxy::POP3;                # The POP3 proxy engine
-use POPFile::Logger;            # POPFile's logging mechanism
-
 # A handy boolean that tells us whether we are alive or not.  When this is set to 1 then the
 # proxy works normally, when set to 0 (typically by the aborting() function called from a signal)
 # then we will terminate gracefully
+
 my $alive = 1;
 
 # ---------------------------------------------------------------------------------------------
@@ -74,9 +76,11 @@ my $alive = 1;
 sub aborting 
 {
     $alive = 0;
-    for my $c (keys %components) {
-        $components{$c}->{alive} = 0;
-	    $components{$c}->stop();
+	foreach my $type (keys %components) {
+		foreach my $name (keys %{$components{$type}}) {
+			$components{$type}{$name}->{alive} = 0;
+			$components{$type}{$name}->stop();
+		}
     }
 }
 
@@ -131,8 +135,10 @@ sub forker
     # then return 0 as the PID so that the caller knows that we are in the child
     
     if ( $pid == 0 ) {
-        for my $c (sort keys %components) {
-            $components{$c}->forked();
+		foreach my $type (keys %components) {
+			foreach my $name (keys %{$components{$type}}) {
+	            $components{$type}{$name}->forked();
+	    	}
         }
         
         close $reader;
@@ -145,6 +151,53 @@ sub forker
     
     close $writer;
     return ($pid, $reader);
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# load_modules
+#
+# Called to load all the POPFile loadable modules (implemented as .pm files with special
+# comment on first line) in a specific subdirectory
+#
+# $directory		The directory to search for loadable modules
+# $type				The 'type' of module being loaded (e.g. proxy, core, ui) which is used
+#				    below when fixing up references between modules (e.g. proxy modules all
+#					need access to the classifier module)
+#
+#
+# ---------------------------------------------------------------------------------------------
+sub load_modules
+{
+	my ( $directory, $type ) = @_;
+
+	# Look for all the .pm files in named directory and then see which of them
+	# are POPFile modules indicated by the first line of the file being and
+	# comment (# POPFILE LOADABLE MODULE) and load that module into the %components
+	# hash getting the name from the module by calling name()
+	
+	my @modules = glob "$directory/*.pm";
+	
+	foreach my $module (@modules) {
+		if ( open MODULE, "<$module" ) {
+			my $first = <MODULE>;
+			close MODULE;
+			
+			if ( $first =~ /^# POPFILE LOADABLE MODULE/ ) {
+				require $module;
+
+				$module =~ s/\//::/;
+				$module =~ s/\.pm//;
+
+				my $mod = new $module;
+				my $name = $mod->name();
+
+				$components{$type}{$name} = $mod;
+				
+				print " {$name}";
+			}
+		}
+	}
 }
 
 #
@@ -167,85 +220,100 @@ $SIG{CHLD}  = $on_windows?'IGNORE':\&reaper;
 
 # Create the main objects that form the core of POPFile.  Consists of the configuration
 # modules, the classifier, the UI (currently HTML based), and the POP3 proxy.
-$components{config}     = new POPFile::Configuration;
-$components{classifier} = new Classifier::Bayes;
-$components{ui}         = new UI::HTML;
-$components{pop3}       = new Proxy::POP3;
-$components{logger}     = new POPFile::Logger;
 
-# This version number
-$components{config}->{major_version} = 0;
-$components{config}->{minor_version} = 18;
-$components{config}->{build_version} = 0;
+print "    Loading... ";
 
-print "POPFile Engine v$components{config}->{major_version}.$components{config}->{minor_version}.$components{config}->{build_version} starting\n";
+load_modules( 'POPFile',	'core'       );
+load_modules( 'Classifier', 'classifier' );
+load_modules( 'UI',         'ui'         );
+load_modules( 'Proxy',      'proxy'      );
+
+# The version number
+
+$components{core}{config}->{major_version} = 0;
+$components{core}{config}->{minor_version} = 18;
+$components{core}{config}->{build_version} = 1;
+
+print "\nPOPFile Engine v$components{core}{config}->{major_version}.$components{core}{config}->{minor_version}.$components{core}{config}->{build_version} starting";
 
 # Link each of the main objects with the configuration object so that they can set their
-# default parameters.
-$components{classifier}->{configuration} = $components{config};
-$components{ui}->{configuration}         = $components{config};
-$components{pop3}->{configuration}       = $components{config};
-$components{logger}->{configuration}     = $components{config};
+# default parameters all or them also get access to the logger
 
-# The POP3 proxy and UI need to know about the classifier
-$components{pop3}->{classifier}          = $components{classifier};
-$components{ui}->{classifier}            = $components{classifier};
+foreach my $type (keys %components) {
+	foreach my $name (keys %{$components{$type}}) {
+		$components{$type}{$name}->{configuration} = $components{core}{config} if ( $name ne 'config' );
+		$components{$type}{$name}->{logger}        = $components{core}{logger} if ( $name ne 'logger' );
+	}
+}
 
-# The classifier needs to talk to the UI
-$components{classifier}->{ui}            = $components{ui};
+# All proxies need access to the classifier
 
-# The proxy uses the logger
-$components{pop3}->{logger}              = $components{logger};
-$components{classifier}->{logger}        = $components{logger};
+foreach my $name (keys %{$components{proxy}}) {
+	$components{proxy}{$name}->{classifier} = $components{classifier}{classifier};
+}
 
-print "    Initializing... ";
+print "\n    Initializing... ";
 
 # Tell each module to initialize itself
-for my $c (sort keys %components) {
-    print "{$c} ";
-    if ( $components{$c}->initialize() == 0 ) {
-        die "Failed to start while initializing the $c module";
-    }
-    
-    $components{$c}->{alive}  = 1;
-    $components{$c}->{forker} = \&forker;
+
+foreach my $type (keys %components) {
+	foreach my $name (keys %{$components{$type}}) {
+		print "{$name} ";
+		if ( $components{$type}{$name}->initialize() == 0 ) {
+			die "Failed to start while initializing the $name module";
+		}
+
+		$components{$type}{$name}->{alive}  = 1;
+		$components{$type}{$name}->{forker} = \&forker;
+	}
 }
 
 # Load the configuration from disk and then apply any command line
 # changes that override the saved configuration
-$components{config}->load_configuration();
-$components{config}->parse_command_line();
+
+$components{core}{config}->load_configuration();
+$components{core}{config}->parse_command_line();
 
 print "\n    Starting...     ";
 
 # Now that the configuration is set tell each module to begin operation
-for my $c (sort keys %components) {
-    print "{$c} ";
-    if ( $components{$c}->start() == 0 ) {
-        die "Failed to start while starting the $c module";
-    }
+
+foreach my $type (keys %components) {
+	foreach my $name (keys %{$components{$type}}) {
+		print "{$name} ";
+		if ( $components{$type}{$name}->start() == 0 ) {
+			die "Failed to start while starting the $name module";
+		}
+	}
 }
 
-print "\nPOPFile Engine v$components{config}->{major_version}.$components{config}->{minor_version}.$components{config}->{build_version} running\n";
+print "\nPOPFile Engine v$components{core}{config}->{major_version}.$components{core}{config}->{minor_version}.$components{core}{config}->{build_version} running\n";
 
 # MAIN LOOP - Call each module's service() method to all it to
 #             handle its own requests
+
 while ( $alive == 1 ) {
-    for my $c (keys %components) {
-        if ( $components{$c}->service() == 0 ) {
-            $alive = 0;
-            last;
-        }
+	foreach my $type (keys %components) {
+		foreach my $name (keys %{$components{$type}}) {
+			if ( $components{$type}{$name}->service() == 0 ) {
+				$alive = 0;
+				last;
+			}
+		}
     }
     
     # Sleep for 0.05 of a second to ensure that POPFile does not hog the machine's
     # CPU
+
     select(undef, undef, undef, 0.05);
     
     # If we are on Windows then reap children here
+
     if ( $on_windows ) {
-		for my $c (keys %components) {
-			$components{$c}->reaper();
+		foreach my $type (keys %components) {
+			foreach my $name (keys %{$components{$type}}) {
+				$components{$type}{$name}->reaper();
+			}
 		}
     }
 }
@@ -253,17 +321,21 @@ while ( $alive == 1 ) {
 print "    Stopping... ";
 
 # Shutdown all the modules
-for my $c (sort keys %components) {
-    print "{$c} ";
-    $components{$c}->{alive} = 0;
-    $components{$c}->stop();
+
+foreach my $type (keys %components) {
+	foreach my $name (keys %{$components{$type}}) {
+		print "{$name} ";
+		$components{$type}{$name}->{alive} = 0;
+		$components{$type}{$name}->stop();
+	}
 }
 
 print "\n    Saving configuration\n";
 
 # Write the final configuration to disk
-$components{config}->save_configuration();
 
-print "POPFile Engine v$components{config}->{major_version}.$components{config}->{minor_version}.$components{config}->{build_version} terminating\n";
+$components{core}{config}->save_configuration();
+
+print "POPFile Engine v$components{core}{config}->{major_version}.$components{core}{config}->{minor_version}.$components{core}{config}->{build_version} terminating\n";
 
 # ---------------------------------------------------------------------------------------------

@@ -1,3 +1,6 @@
+# POPFILE LOADABLE MODULE
+package POPFile::Logger;
+
 #----------------------------------------------------------------------------
 #
 # This module handles POPFile's logger.  It is used to save debugging 
@@ -6,7 +9,6 @@
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
 #----------------------------------------------------------------------------
-package POPFile::Logger;
 
 use strict;
 use warnings;
@@ -22,13 +24,15 @@ my $seconds_per_day = 60 * 60 * 24;
 #----------------------------------------------------------------------------
 sub new 
 {
-    my $type = shift;
-    my $self;
+	my $proto = shift;
+    my $class = ref($proto) || $proto;
+    my $self = {};
 
     # The name of the debug file
     $self->{debug_filename} = '';
     
-    return bless $self, $type;
+    bless($self, $class);
+    return $self;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -77,6 +81,20 @@ sub start
 sub stop
 {
     my ( $self ) = @_;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# name
+#
+# Called to get the simple name for this module
+#
+# ---------------------------------------------------------------------------------------------
+sub name
+{
+    my ( $self ) = @_;
+
+    return 'logger';
 }
 
 # ---------------------------------------------------------------------------------------------

@@ -1,3 +1,6 @@
+# POPFILE LOADABLE MODULE
+package POPFile::Configuration;  
+
 #----------------------------------------------------------------------------
 #
 # This module handles POPFile's configuration parameters.  It is used to
@@ -8,7 +11,6 @@
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
 #----------------------------------------------------------------------------
-package POPFile::Configuration;
 
 use strict;
 use warnings;
@@ -72,6 +74,20 @@ sub start
 sub stop
 {
     my ( $self ) = @_;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# name
+#
+# Called to get the simple name for this module
+#
+# ---------------------------------------------------------------------------------------------
+sub name
+{
+    my ( $self ) = @_;
+
+    return 'config';
 }
 
 # ---------------------------------------------------------------------------------------------
