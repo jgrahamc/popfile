@@ -81,8 +81,26 @@
 #
 # The '/WAIT' parameter is important, otherwise the 'failed' case will not be detected.
 #-------------------------------------------------------------------------------------------
-#  This version was tested using "NSIS 2 Release Candidate 2" released 5 January 2004
-#-------------------------------------------------------------------------------------------
+
+  ; This version of the script has been tested with the "NSIS 2.0" compiler (final),
+  ; released 7 February 2004, with no "official" NSIS patches applied. This compiler
+  ; can be downloaded from http://prdownloads.sourceforge.net/nsis/nsis20.exe?download
+
+  !define ${NSIS_VERSION}_found
+
+  !ifndef v2.0_found
+      !warning \
+          "$\r$\n\
+          $\r$\n***   NSIS COMPILER WARNING:\
+          $\r$\n***\
+          $\r$\n***   This script has only been tested using the NSIS 2.0 compiler\
+          $\r$\n***   and may not work properly with this NSIS ${NSIS_VERSION} compiler\
+          $\r$\n***\
+          $\r$\n***   The resulting 'installer' program should be tested carefully!\
+          $\r$\n$\r$\n"
+  !endif
+
+  !undef  ${NSIS_VERSION}_found
 
   ;--------------------------------------------------------------------------
   ; Symbols used to avoid confusion over where the line breaks occur.
@@ -105,7 +123,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define C_VERSION     "0.5.10"       ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION     "0.5.11"     ; see 'VIProductVersion' comment below for format details
 
   !define C_OUTFILE     "stop_pf.exe"
 
@@ -181,7 +199,7 @@ Section Shutdown
 
   ; It does not matter if the first command-line parameter uses uppercase or lowercase
 
-  Call GetParameters
+  Call PFI_GetParameters
   Pop ${L_PARAMS}
   StrCmp ${L_PARAMS} "" usage
   StrCmp ${L_PARAMS} "/?" usage
@@ -198,7 +216,7 @@ Section Shutdown
 
   StrCpy ${L_TEMP} ${L_RESULT} 1
   Push ${L_TEMP}
-  Call StrCheckDecimal
+  Call PFI_StrCheckDecimal
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "" 0 port_checks
   StrCmp ${L_RESULT} "/showerrors" only_errors
@@ -210,7 +228,7 @@ Section Shutdown
 
 usage:
   MessageBox MB_OK "POPFile Silent Shutdown Utility v${C_VERSION}            \
-    Copyright (c) 2004  John Graham-Cumming\
+    Copyright (c) 2005  John Graham-Cumming\
     ${MB_NL}${MB_NL}\
     This command-line utility shuts POPFile down silently, without opening a browser window.\
     ${MB_NL}${MB_NL}\
@@ -258,7 +276,7 @@ other_param:
 port_checks:
   StrCmp ${L_RESULT} "" no_port_supplied
   Push ${L_RESULT}
-  Call StrCheckDecimal
+  Call PFI_StrCheckDecimal
   Pop ${L_GUI}
   StrCmp ${L_GUI} "" integer_error
   IntCmp ${L_GUI} 0 port_error port_error
@@ -297,7 +315,7 @@ try_password_again:
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" 0 password_ok
   Push "$PLUGINSDIR\shutdown_2.htm"
-  Call GetFileSize
+  Call PFI_GetFileSize
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} 0 password_ok
   StrCmp ${L_REPORT} "none" error_exit
@@ -338,7 +356,7 @@ try_again:
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" 0 shutdown_ok
   Push "$PLUGINSDIR\shutdown_2.htm"
-  Call GetFileSize
+  Call PFI_GetFileSize
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} 0 shutdown_ok
   StrCmp ${L_REPORT} "none" error_exit

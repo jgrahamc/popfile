@@ -39,8 +39,25 @@
 #
 #-------------------------------------------------------------------------------------------
 
-; This version of the script has been tested with the "NSIS 2" compiler (final),
-; released 7 February 2004, with no "official" NSIS patches/CVS updates applied.
+  ; This version of the script has been tested with the "NSIS 2.0" compiler (final),
+  ; released 7 February 2004, with no "official" NSIS patches applied. This compiler
+  ; can be downloaded from http://prdownloads.sourceforge.net/nsis/nsis20.exe?download
+
+  !define ${NSIS_VERSION}_found
+
+  !ifndef v2.0_found
+      !warning \
+          "$\r$\n\
+          $\r$\n***   NSIS COMPILER WARNING:\
+          $\r$\n***\
+          $\r$\n***   This script has only been tested using the NSIS 2.0 compiler\
+          $\r$\n***   and may not work properly with this NSIS ${NSIS_VERSION} compiler\
+          $\r$\n***\
+          $\r$\n***   The resulting 'installer' program should be tested carefully!\
+          $\r$\n$\r$\n"
+  !endif
+
+  !undef  ${NSIS_VERSION}_found
 
   ;--------------------------------------------------------------------------
   ; Symbols used to avoid confusion over where the line breaks occur.
@@ -58,7 +75,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.2"     ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.0.3"     ; see 'VIProductVersion' comment below for format details
   !define C_OUTFILE   "runsqlite.exe"
 
   ; The default NSIS caption is "Name Setup" so we override it here
@@ -155,7 +172,7 @@ Section RunSQLiteUtility
   GetFullPathName ${L_TEMP} ".\"
   SetOutPath "${L_TEMP}"
 
-  Call GetParameters
+  Call PFI_GetParameters
   Pop $G_DATABASE
   StrCmp $G_DATABASE "" no_file_supplied
 
@@ -169,7 +186,7 @@ no_file_supplied:
 
 continue:
   Push $G_DATABASE
-  Call GetSQLiteFormat
+  Call PFI_GetSQLiteFormat
   Pop $G_DBFORMAT
   StrCpy $G_SQLITEUTIL "sqlite.exe"
   StrCmp $G_DBFORMAT "2.x" run_sqlite

@@ -28,10 +28,27 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #-------------------------------------------------------------------------------------------
-#
-# This version of the script has been tested with the "NSIS 2" compiler (final),
-# released 7 February 2004, with no "official" NSIS patches/CVS updates applied.
-#
+
+  ; This version of the script has been tested with the "NSIS 2.0" compiler (final),
+  ; released 7 February 2004, with no "official" NSIS patches applied. This compiler
+  ; can be downloaded from http://prdownloads.sourceforge.net/nsis/nsis20.exe?download
+
+  !define ${NSIS_VERSION}_found
+
+  !ifndef v2.0_found
+      !warning \
+          "$\r$\n\
+          $\r$\n***   NSIS COMPILER WARNING:\
+          $\r$\n***\
+          $\r$\n***   This script has only been tested using the NSIS 2.0 compiler\
+          $\r$\n***   and may not work properly with this NSIS ${NSIS_VERSION} compiler\
+          $\r$\n***\
+          $\r$\n***   The resulting 'installer' program should be tested carefully!\
+          $\r$\n$\r$\n"
+  !endif
+
+  !undef  ${NSIS_VERSION}_found
+
 #--------------------------------------------------------------------------
 # Optional run-time command-line switches (used by 'runpopfile.exe')
 #--------------------------------------------------------------------------
@@ -89,7 +106,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_PFI_VERSION   "0.1.14"
+  !define C_PFI_VERSION   "0.1.15"
 
   !define C_OUTFILE       "runpopfile.exe"
 
@@ -196,7 +213,7 @@ not_compatible:
   Goto exit
 
 found_popfile:
-  Call GetParameters
+  Call PFI_GetParameters
   Pop ${L_PARAMS}
   StrCmp ${L_PARAMS} "" use_reg_dirdata
   StrCmp ${L_PARAMS} "/startup" use_reg_dirdata
@@ -229,7 +246,7 @@ check_config:
 
   Push ${L_EXEFILE}
   Push ${L_PARAMS}
-  Call GetDataPath
+  Call PFI_GetDataPath
   Pop ${L_PFI_USER}
   IfFileExists "${L_PFI_USER}\popfile.cfg" config_found
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to find popfile.cfg !\
@@ -270,7 +287,7 @@ get_temp_sfn:
 check_for_spaces:
   Push ${L_PFI_USER}
   Push ' '
-  Call StrStr
+  Call PFI_StrStr
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "" config_is_valid
   MessageBox MB_OK|MB_ICONEXCLAMATION \

@@ -26,8 +26,25 @@
 #
 #--------------------------------------------------------------------------
 
-; This version of the script has been tested with the "NSIS 2" compiler (final),
-; released 7 February 2004, with no "official" NSIS patches/CVS updates applied.
+  ; This version of the script has been tested with the "NSIS 2.0" compiler (final),
+  ; released 7 February 2004, with no "official" NSIS patches applied. This compiler
+  ; can be downloaded from http://prdownloads.sourceforge.net/nsis/nsis20.exe?download
+
+  !define ${NSIS_VERSION}_found
+
+  !ifndef v2.0_found
+      !warning \
+          "$\r$\n\
+          $\r$\n***   NSIS COMPILER WARNING:\
+          $\r$\n***\
+          $\r$\n***   This script has only been tested using the NSIS 2.0 compiler\
+          $\r$\n***   and may not work properly with this NSIS ${NSIS_VERSION} compiler\
+          $\r$\n***\
+          $\r$\n***   The resulting 'installer' program should be tested carefully!\
+          $\r$\n$\r$\n"
+  !endif
+
+  !undef  ${NSIS_VERSION}_found
 
 #--------------------------------------------------------------------------
 # Support provided for this utility by the Windows installer
@@ -93,7 +110,7 @@
   ; (two commonly used exceptions to this rule are 'IO_NL' and 'MB_NL')
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION             "0.0.60"
+  !define C_VERSION             "0.0.61"
 
   !define C_OUTFILE             "msgcapture.exe"
 
@@ -292,7 +309,7 @@ Function .onInit
 
   StrCpy $G_MODE_FLAG ""      ; select 'normal' mode by default
 
-  Call GetParameters
+  Call PFI_GetParameters
   Pop $G_TIMEOUT
   StrCmp $G_TIMEOUT "" default
   StrCpy ${L_TEMP} $G_TIMEOUT 9
@@ -300,7 +317,7 @@ Function .onInit
   StrCpy ${L_TEMP} $G_TIMEOUT "" 9
   StrCmp ${L_TEMP} "PFI" installer_mode
   Push ${L_TEMP}
-  Call StrCheckDecimal
+  Call PFI_StrCheckDecimal
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "" usage_error
   StrCmp ${L_TEMP} "0" exit
@@ -451,7 +468,7 @@ found_exe:
   DetailPrint "Using 'popfile${L_TRAYICON}f.exe' to run POPFile"
   DetailPrint "------------------------------------------------------------"
 
-  Call GetDateTimeStamp
+  Call PFI_GetDateTimeStamp
   Pop ${L_TEMP}
   DetailPrint "(report started ${L_TEMP})"
   DetailPrint "------------------------------------------------------------"
@@ -475,7 +492,7 @@ display_status:
   DetailPrint "------------------------------------------------------------"
   DetailPrint "Status code: ${L_RESULT}"
 
-  Call GetDateTimeStamp
+  Call PFI_GetDateTimeStamp
   Pop ${L_TEMP}
   DetailPrint "------------------------------------------------------------"
   DetailPrint "(report finished ${L_TEMP})"

@@ -32,8 +32,25 @@
 #
 #--------------------------------------------------------------------------
 
-; This version of the script has been tested with the "NSIS 2" compiler (final),
-; released 7 February 2004, with no "official" NSIS patches applied.
+  ; This version of the script has been tested with the "NSIS 2.0" compiler (final),
+  ; released 7 February 2004, with no "official" NSIS patches applied. This compiler
+  ; can be downloaded from http://prdownloads.sourceforge.net/nsis/nsis20.exe?download
+
+  !define ${NSIS_VERSION}_found
+
+  !ifndef v2.0_found
+      !warning \
+          "$\r$\n\
+          $\r$\n***   NSIS COMPILER WARNING:\
+          $\r$\n***\
+          $\r$\n***   This script has only been tested using the NSIS 2.0 compiler\
+          $\r$\n***   and may not work properly with this NSIS ${NSIS_VERSION} compiler\
+          $\r$\n***\
+          $\r$\n***   The resulting 'installer' program should be tested carefully!\
+          $\r$\n$\r$\n"
+  !endif
+
+  !undef  ${NSIS_VERSION}_found
 
   ;------------------------------------------------
   ; This script requires the 'untgz' NSIS plugin
@@ -108,7 +125,7 @@
 
   Name                   "POPFile SSL Setup"
 
-  !define C_PFI_VERSION  "0.0.14"
+  !define C_PFI_VERSION  "0.0.15"
 
   ; Mention the wizard's version number in the window title
 
@@ -516,7 +533,7 @@ Section "-tidyup"
 
   StrCmp $G_PLS_FIELD_1 "No suitable patches were found" close_log
   StrCmp $G_PLS_FIELD_1 "OK" 0 show_status
-  !insertmacro BACKUP_123_DP "$G_ROOTDIR\POPFile" "Module.pm"
+  !insertmacro PFI_BACKUP_123_DP "$G_ROOTDIR\POPFile" "Module.pm"
   SetDetailsPrint none
   Rename "$PLUGINSDIR\Module.ssl" "$G_ROOTDIR\POPFile\Module.pm"
   IfFileExists "$G_ROOTDIR\POPFile\Module.pm" success
@@ -527,7 +544,7 @@ Section "-tidyup"
   DetailPrint "$(PSS_LANG_PATCHFAILED)"
   SetDetailsPrint listonly
   DetailPrint ""
-  Call GetDateTimeStamp
+  Call PFI_GetDateTimeStamp
   Pop $G_PLS_FIELD_1
   DetailPrint "----------------------------------------------------"
   DetailPrint "POPFile SSL Setup failed ($G_PLS_FIELD_1)"
@@ -547,7 +564,7 @@ close_log:
   DetailPrint "$(PSS_LANG_PROG_SUCCESS)"
   SetDetailsPrint listonly
   DetailPrint ""
-  Call GetDateTimeStamp
+  Call PFI_GetDateTimeStamp
   Pop $G_PLS_FIELD_1
   DetailPrint "----------------------------------------------------"
   DetailPrint "POPFile SSL Setup completed $G_PLS_FIELD_1"
@@ -559,9 +576,9 @@ close_log:
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_PROG_SAVELOG)"
   SetDetailsPrint none
-  !insertmacro BACKUP_123 "$G_ROOTDIR" "addssl.log"
+  !insertmacro PFI_BACKUP_123 "$G_ROOTDIR" "addssl.log"
   Push "$G_ROOTDIR\addssl.log"
-  Call DumpLog
+  Call PFI_DumpLog
 
   SetDetailsPrint both
   DetailPrint "Log report saved in '$G_ROOTDIR\addssl.log'"
@@ -667,7 +684,7 @@ Function MakeRootDirSafe
   ; to allow POPFile to be run as a Windows service.
 
   Push "POPFile"
-  Call ServiceRunning
+  Call PFI_ServiceRunning
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "true" manual_shutdown
 
@@ -680,7 +697,7 @@ Function MakeRootDirSafe
   ; Earlier versions of POPFile use only 'perl.exe' or 'wperl.exe'.
 
   Push $G_ROOTDIR
-  Call FindLockedPFE
+  Call PFI_FindLockedPFE
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" exit
 
@@ -732,14 +749,14 @@ done:
   FileClose ${L_CFG}
 
   Push ${L_NEW_GUI}
-  Call TrimNewlines
+  Call PFI_TrimNewlines
   Pop ${L_NEW_GUI}
 
   StrCmp ${L_NEW_GUI} "" manual_shutdown
   DetailPrint "$(PFI_LANG_INST_LOG_SHUTDOWN) ${L_NEW_GUI}"
   DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
   Push ${L_NEW_GUI}
-  Call ShutdownViaUI
+  Call PFI_ShutdownViaUI
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" check_exe
   StrCmp ${L_RESULT} "password?" manual_shutdown
@@ -748,10 +765,10 @@ check_exe:
   DetailPrint "Waiting for '${L_EXE}' to unlock after NSISdl request..."
   DetailPrint "Please be patient, this may take more than 30 seconds"
   Push ${L_EXE}
-  Call WaitUntilUnlocked
+  Call PFI_WaitUntilUnlocked
   DetailPrint "Checking if '${L_EXE}' is still locked after NSISdl request..."
   Push ${L_EXE}
-  Call CheckIfLocked
+  Call PFI_CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" unlocked_now
 

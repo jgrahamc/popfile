@@ -24,8 +24,25 @@
 #
 #--------------------------------------------------------------------------
 
-; This version of the script has been tested with the "NSIS 2" compiler (final),
-; released 7 February 2004, with no "official" NSIS patches/CVS updates applied.
+  ; This version of the script has been tested with the "NSIS 2.0" compiler (final),
+  ; released 7 February 2004, with no "official" NSIS patches applied. This compiler
+  ; can be downloaded from http://prdownloads.sourceforge.net/nsis/nsis20.exe?download
+
+  !define ${NSIS_VERSION}_found
+
+  !ifndef v2.0_found
+      !warning \
+          "$\r$\n\
+          $\r$\n***   NSIS COMPILER WARNING:\
+          $\r$\n***\
+          $\r$\n***   This script has only been tested using the NSIS 2.0 compiler\
+          $\r$\n***   and may not work properly with this NSIS ${NSIS_VERSION} compiler\
+          $\r$\n***\
+          $\r$\n***   The resulting 'installer' program should be tested carefully!\
+          $\r$\n$\r$\n"
+  !endif
+
+  !undef  ${NSIS_VERSION}_found
 
 #--------------------------------------------------------------------------
 # Run-time command-line switch (used by 'pfidiag.exe')
@@ -60,7 +77,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.51"
+  !define C_VERSION   "0.0.52"
 
   !define C_OUTFILE   "pfidiag.exe"
 
@@ -349,7 +366,7 @@ Section default
   ; If the command-line switch /FULL has been supplied, display "everything"
   ; (for convenience the leading slash is stripped from the value used internally)
 
-  Call GetParameters
+  Call PFI_GetParameters
   Pop ${L_DIAG_MODE}
   StrCpy ${L_TEMP} ${L_DIAG_MODE} 1
   StrCmp ${L_TEMP} "/" 0 set_simple
@@ -413,7 +430,7 @@ start_report:
 
   DetailPrint "IsNT return code  = ${L_WIN_OS_TYPE}"
 
-  Call GetIEVersion
+  Call PFI_GetIEVersion
   Pop ${L_TEMP}
   DetailPrint "Internet Explorer = ${L_TEMP}"
   DetailPrint ""
@@ -799,7 +816,7 @@ compare_root_var:
   StrCmp ${L_EXPECTED_ROOT} ${L_POPFILE_ROOT} check_user
   Push ${L_EXPECTED_ROOT}
   Push " "
-  Call StrStr
+  Call PFI_StrStr
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "" 0 check_user
   DetailPrint "^^^^^ Error ^^^^^"
@@ -819,7 +836,7 @@ compare_user_var:
   StrCmp ${L_EXPECTED_USER} ${L_POPFILE_USER} check_vars
   Push ${L_EXPECTED_USER}
   Push " "
-  Call StrStr
+  Call PFI_StrStr
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "" 0 check_vars
   DetailPrint "^^^^^ Error ^^^^^"
@@ -891,7 +908,7 @@ exit_with_blank_line:
   DetailPrint ""
 
 exit:
-  Call GetDateTimeStamp
+  Call PFI_GetDateTimeStamp
   Pop ${L_TEMP}
   DetailPrint "------------------------------------------------------------"
   DetailPrint "(report created ${L_TEMP})"
@@ -987,7 +1004,7 @@ Function CheckForSpaces
   Exch ${L_TEMP}
   Push ${L_TEMP}
   Push " "
-  Call StrStr
+  Call PFI_StrStr
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "" exit
   DetailPrint "^^^^^ Error ^^^^^   The above value should not contain spaces"
