@@ -20,6 +20,7 @@ BEGIN
 {
 	# We want to look inside subroutines so tell the debugger to trace into
 	# them
+
 	$DB::trace = 1;
 }
 
@@ -45,7 +46,8 @@ END
 	for my $file (keys %count)	
 	{
 	    if ( ( $file =~ /^[^\/]/ ) && ( $file ne 'tests.pl' ) && !( $file =~ /^Test\// ) ) {
-		my $current_line = 0;
+		my $current_line   = 0;
+                my $block_executed = 0;
 		
 		open SOURCE_FILE, "<$file";
 		
@@ -62,22 +64,35 @@ END
 			# We do not count lines that are blank or exclusively 
 			# comments or just have braces on them or
 			# just an else or just a subroutine definition
-			if ( ( /^\s*\#/                   == 0 ) &&
-                             ( /^\s*$/                    == 0 ) &&
-                             ( /^\s*(\{|\}|else|\s)+\s*$/ == 0 ) &&
-                             ( /^\s*sub \w+( \{)?\s*$/    == 0 ) &&
-                             ( /^\s*package /             == 0 ) )
-			{
-				$count{$file}{total_executable_lines} += 1;
+			if ( ( ( /^\s*\#/                   == 0 ) &&
+                               ( /^\s*$/                    == 0 ) &&
+                               ( /^\s*(\{|\}|else|\s)+\s*$/ == 0 ) &&
+                               ( /^\s*sub \w+( \{)?\s*$/    == 0 ) &&
+                               ( /^\s*package /             == 0 ) ) || ( $block_executed ) ) {
+		            $count{$file}{total_executable_lines} += 1;
 				
-				# If this line was executed then keep count of
-				# that fact
-				if ( $count{$file}{$current_line} > 0 ) {
-					$count{$file}{total_executed} += 1;
-				} else {
-print "$file $_\n" if ( $file =~/Module/);
-}
+			    # If this line was executed then keep count of
+			    # that fact
+				
+                            if ( ( $count{$file}{$current_line} > 0 ) || ( $block_executed ) ) {
+			        $count{$file}{total_executed} += 1;
+
+                                # Check to see if the special comment PROFILE BLOCK START is on the line
+                                # and if so set the block mode where we count lines as being executed
+                                # in the block if the first line was
+
+   		                if ( /\# PROFILE BLOCK START/ ) {
+                                    $block_executed = 1;
+		                }
+
+   		                if ( /\# PROFILE BLOCK STOP/ ) {
+                                    $block_executed = 0;
+		                }
+			    } else {
+                                print "$file $_\n" if ( $file =~/Configuration/);
+                            }
 			}
+
 		}
 		
                 $files{$file} = int(100 * $count{$file}{total_executed} / $count{$file}{total_executable_lines}) unless ( $count{$file}{total_executable_lines} == 0 );

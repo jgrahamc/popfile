@@ -113,11 +113,9 @@ sub start
     $self->{pid_file__} = $self->config_( 'piddir' ) . 'popfile.pid';
 
     if ( -e $self->{pid_file__} ) {
-        my $error = "\n\nAnother copy of POPFile appears to be running.  \nIf this is not the case then" .
-            " delete the file \n$self->{pid_file__} and restart POPFile.\n\n";
+        my $error = "\n\nAnother copy of POPFile appears to be running.  \nIf this is not the case then delete the file \n$self->{pid_file__} and restart POPFile.\n\n";
 
-        print $error;
-        $self->log_( $error );
+        print STDERR $error;
 
         return 0;
     }
@@ -166,25 +164,26 @@ sub parse_command_line
     if ( $#ARGV >= 0 )  {
         my $i = 0;
 
-        while ( $i < $#ARGV )  {
+        while ( $i <= $#ARGV )  {
             # A command line argument must start with a -
 
             if ( $ARGV[$i] =~ /^-(.+)$/ ) {
 	        my $parameter = $self->upgrade_parameter__($1);
+
                 if ( defined($self->{configuration_parameters__}{$parameter}) ) {
                     if ( $i < $#ARGV ) {
                         $self->{configuration_parameters__}{$parameter} = $ARGV[$i+1];
                         $i += 2;
                     } else {
-                        print "Missing argument for $ARGV[$i]\n";
+                        print STDERR "Missing argument for $ARGV[$i]\n";
                         last;
                     }
                 } else {
-                    print "Unknown command line option $ARGV[$i]\n";
+                    print STDERR "Unknown command line option $ARGV[$i]\n";
                     last;
                 }
             } else {
-                print "Expected a command line option and got $ARGV[$i]\n";
+                print STDERR "Expected a command line option and got $ARGV[$i]\n";
                 last;
             }
         }
@@ -210,7 +209,7 @@ sub upgrade_parameter__
     # The old piddir parameter is now config_piddir and is accessed through either config_
     # if accessed from the config module or through module_config_ from outside
 
-    my %upgrades = (
+    my %upgrades = ( # PROFILE BLOCK START
 
 		     # Parameters that are now handled by Classifier::Bayes
 
@@ -261,7 +260,7 @@ sub upgrade_parameter__
 		     'test_language',            'html_test_language',
 		     'update_check',             'html_update_check',
                      'ui_port',                  'html_port',
-    );
+    ); # PROFILE BLOCK END
 
     if ( defined( $upgrades{$parameter} ) ) {
         return $upgrades{$parameter};
