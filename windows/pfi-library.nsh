@@ -741,6 +741,10 @@
 #    Installer Function:   GetCorpusPath
 #    Uninstaller Function: un.GetCorpusPath
 #
+#    Macro:                GetDatabaseName
+#    Installer Function:   GetDatabaseName
+#    Uninstaller Function: un.GetDatabaseName
+#
 #    Macro:                GetDataPath
 #    Installer Function:   GetDataPath
 #    Uninstaller Function: un.GetDataPath
@@ -1173,6 +1177,131 @@
 #--------------------------------------------------------------------------
 
 ;!insertmacro GetCorpusPath "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: GetDatabaseName
+#
+# The installation process and the uninstall process may both need a function which finds the
+# value of the 'bayes_database' entry in the POPFile configuration file ('popfile.cfg'). This
+# entry supplies the name of the SQLite database used by POPFile and has a default value of
+# 'popfile.db'. This macro makes maintenance easier by ensuring that both processes use
+# identical functions, with the only difference being their names.
+#
+# NOTE:
+# The !insertmacro GetDatabaseName "" and !insertmacro GetDatabaseName "un." commands
+# are included in this file so the NSIS script can use 'Call GetDatabaseName' and
+# 'Call un.GetDatabaseName' without additional preparation.
+#
+# Inputs:
+#         (top of stack)          - the path where 'popfile.cfg' is to be found
+#
+# Outputs:
+#         (top of stack)          - string with the current value of the 'bayes_database' entry
+#                                   (if entry is not found (perhaps because a "clean" install is
+#                                   in progress), the default value for the entry is returned)
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push $G_USERDIR
+#         Call GetDatabaseName
+#         Pop $R0
+#
+#         ($R0 will be "popfile.db" if the default was in use or if this is a "clean" install)
+#--------------------------------------------------------------------------
+
+!macro GetDatabaseName UN
+  Function ${UN}GetDatabaseName
+
+    !define L_FILE_HANDLE   $R9   ; used to access the configuration file (popfile.cfg)
+    !define L_PARAM         $R8   ; parameter from the configuration file
+    !define L_RESULT        $R7
+    !define L_SOURCE        $R6   ; folder containing the configuration file
+    !define L_TEMP          $R5
+    !define L_TEXTEND       $R4   ; helps ensure correct handling of lines over 1023 chars long
+
+    Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
+    Push ${L_RESULT}
+    Exch
+    Push ${L_FILE_HANDLE}
+    Push ${L_PARAM}
+    Push ${L_TEMP}
+    Push ${L_TEXTEND}
+
+    StrCpy ${L_RESULT} ""
+
+    IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default
+
+    FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
+
+  found_eol:
+    StrCpy ${L_TEXTEND} "<eol>"
+
+  loop:
+    FileRead ${L_FILE_HANDLE} ${L_PARAM}
+    StrCmp ${L_PARAM} "" cfg_file_done
+    StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
+    StrCmp ${L_PARAM} "$\n" loop
+
+    StrCpy ${L_TEMP} ${L_PARAM} 15
+    StrCmp ${L_TEMP} "bayes_database " 0 check_eol
+    StrCpy ${L_RESULT} ${L_PARAM} "" 15
+
+    ; Now read file until we get to end of the current line
+    ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+  check_eol:
+    StrCpy ${L_TEXTEND} ${L_PARAM} 1 -1
+    StrCmp ${L_TEXTEND} "$\n" found_eol
+    StrCmp ${L_TEXTEND} "$\r" found_eol loop
+
+  cfg_file_done:
+    FileClose ${L_FILE_HANDLE}
+
+    StrCmp ${L_RESULT} "" use_default
+    Push ${L_RESULT}
+    Call ${UN}TrimNewlines
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "" use_default got_result
+
+  use_default:
+    StrCpy ${L_RESULT} "popfile.db"
+
+  got_result:
+    Pop ${L_TEXTEND}
+    Pop ${L_TEMP}
+    Pop ${L_PARAM}
+    Pop ${L_FILE_HANDLE}
+    Pop ${L_SOURCE}
+    Exch ${L_RESULT}
+
+    !undef L_FILE_HANDLE
+    !undef L_PARAM
+    !undef L_RESULT
+    !undef L_SOURCE
+    !undef L_TEMP
+    !undef L_TEXTEND
+
+  FunctionEnd
+!macroend
+
+!ifdef ADDUSER
+    #--------------------------------------------------------------------------
+    # Installer Function: GetDatabaseName
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+
+    !insertmacro GetDatabaseName ""
+!endif
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetDatabaseName
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetDatabaseName "un."
 
 
 #--------------------------------------------------------------------------

@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.53"
+  !define C_PFI_VERSION  "0.2.54"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -989,10 +989,14 @@ continue:
   ; Create a shortcut to make it easier to run the SQLite utility. There are two versions of
   ; the SQLite utility (one for SQlite 2.x format files and one for SQLite 3.x format files)
   ; so we use 'runsqlite.exe' which automatically selects and runs the appropriate version.
+  
+  Push $G_USERDIR
+  Call GetDatabaseName
+  Pop ${L_TEMP}
 
   SetFileAttributes "$G_USERDIR\Run SQLite utility.lnk" NORMAL
   CreateShortCut "$G_USERDIR\Run SQLite utility.lnk" \
-                 "$G_ROOTDIR\runsqlite.exe" "popfile.db"
+                 "$G_ROOTDIR\runsqlite.exe" "${L_TEMP}"
 
 stopwords:
   IfFileExists "$G_ROOTDIR\pfi-stopwords.default" 0 update_config_ports
