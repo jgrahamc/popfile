@@ -175,6 +175,7 @@ sub server
                  print $client "+OK " . ( -s $messages[$index] ) . "$eol";
 
                  open FILE, "<$messages[$index]";
+                 binmode FILE;
                  while ( <FILE> ) {
                      print $client $_;
 		 }
@@ -195,6 +196,7 @@ sub server
                  print $client "+OK " . ( -s $messages[$index] ) . "$eol";
 
                  open FILE, "<$messages[$index]";
+                 binmode FILE;
                  while ( <FILE> ) {
                      print $client $_;
 
@@ -530,6 +532,7 @@ if ( $pid == 0 ) {
         $cam =~ s/msg$/cam/;
 
         test_assert( open FILE, "<$cam" );
+        binmode FILE;
         while ( <FILE> ) {
             my $line = $_;
             $result = <$client>;
@@ -556,7 +559,9 @@ if ( $pid == 0 ) {
         test_assert( -e 'messages/popfile1=1.cls' );
 
         test_assert( open FILE, "<$messages[0]" );
+        binmode FILE;
         test_assert( open HIST, "<messages/popfile1=1.msg" );
+        binmode HIST;
         while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
             $fl =~ s/[\r\n]//g;
             $ml =~ s/[\r\n]//g;
@@ -616,6 +621,7 @@ if ( $pid == 0 ) {
         test_assert_equal( $result, "+OK " . ( -s $messages[4] ) . "$eol" );
 
         test_assert( open FILE, "<$messages[4]" );
+        binmode FILE;
         my $headers   = 1;
         while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
             $result = <$client>;
@@ -655,6 +661,7 @@ if ( $pid == 0 ) {
         $cam =~ s/msg$/cam/;
 
         test_assert( open FILE, "<$cam" );
+        binmode FILE;
         while ( <FILE> ) {
             my $line = $_;
             $result = <$client>;
@@ -681,7 +688,9 @@ if ( $pid == 0 ) {
         test_assert( -e 'messages/popfile1=7.cls' );
 
         test_assert( open FILE, "<$messages[6]" );
+        binmode FILE;
         test_assert( open HIST, "<messages/popfile1=7.msg" );
+        binmode HIST;
         while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
             $fl =~ s/[\r\n]//g;
             $ml =~ s/[\r\n]//g;
@@ -735,6 +744,7 @@ if ( $pid == 0 ) {
         $cam = $messages[7];
         $cam =~ s/msg$/cam/;
         test_assert( open FILE, "<$cam" );
+        binmode FILE;
         $headers   = 1;
         while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
             $result = <$client>;
@@ -758,7 +768,9 @@ if ( $pid == 0 ) {
         test_assert( -e 'messages/popfile2=8.cls' );
 
         test_assert( open FILE, "<$messages[7]" );
+        binmode FILE;
         test_assert( open HIST, "<messages/popfile2=8.msg" );
+        binmode HIST;
         while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
             $fl =~ s/[\r\n]//g;
             $ml =~ s/[\r\n]//g;
@@ -784,6 +796,7 @@ if ( $pid == 0 ) {
         $cam = $messages[7];
         $cam =~ s/msg$/cam/;
         test_assert( open FILE, "<$cam" );
+        binmode FILE;
         $headers   = 1;
         while ( my $line = <FILE> ) {
             $line =~ s/[\r\n]//g;
@@ -806,6 +819,7 @@ if ( $pid == 0 ) {
         $cam =~ s/msg$/cam/;
 
         test_assert( open FILE, "<$cam" );
+        binmode FILE;
         while ( <FILE> ) {
             my $line = $_;
             $result = <$client>;
@@ -825,7 +839,9 @@ if ( $pid == 0 ) {
         test_assert( -e 'messages/popfile2=9.cls' );
 
         test_assert( open FILE, "<$messages[8]" );
+        binmode FILE;
         test_assert( open HIST, "<messages/popfile2=9.msg" );
+        binmode HIST;
         while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
             $fl =~ s/[\r\n]//g;
             $ml =~ s/[\r\n]//g;
@@ -849,6 +865,7 @@ if ( $pid == 0 ) {
         $cam = $messages[8];
         $cam =~ s/msg$/cam/;
         test_assert( open FILE, "<$cam" );
+        binmode FILE;
         $headers   = 1;
         while ( my $line = <FILE> ) {
             $line =~ s/[\r\n]//g;
@@ -873,6 +890,7 @@ if ( $pid == 0 ) {
         $cam = $messages[8];
         $cam =~ s/msg$/cam/;
         test_assert( open FILE, "<$cam" );
+        binmode FILE;
         $headers   = 1;
         while ( my $line = <FILE> ) {
             $line =~ s/[\r\n]//g;
