@@ -1219,20 +1219,24 @@ does_not_exist:
 
 name_exists:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_CBP_MBDUPERR_1) $\"${CBP_L_CREATE_NAME}$\" $(PFI_LANG_CBP_MBDUPERR_2)$\n$\n\
+      "$(PFI_LANG_CBP_MBDUPERR_1) $\"${CBP_L_CREATE_NAME}$\" $(PFI_LANG_CBP_MBDUPERR_2)\
+      $\r$\n$\r$\n\
       $(PFI_LANG_CBP_MBDUPERR_3)"
   goto get_next_bucket_cmd
 
 too_many:
   MessageBox MB_OK|MB_ICONINFORMATION \
-      "$(PFI_LANG_CBP_MBMAXERR_1) ${CBP_C_MAX_BNCOUNT} $(PFI_LANG_CBP_MBMAXERR_2)$\n$\n\
+      "$(PFI_LANG_CBP_MBMAXERR_1) ${CBP_C_MAX_BNCOUNT} $(PFI_LANG_CBP_MBMAXERR_2)\
+      $\r$\n$\r$\n\
       $(PFI_LANG_CBP_MBMAXERR_3) ${CBP_C_MAX_BNCOUNT} $(PFI_LANG_CBP_MBMAXERR_2)"
   goto get_next_bucket_cmd
 
 bad_name:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_CBP_MBNAMERR_1) $\"${CBP_L_CREATE_NAME}$\" $(PFI_LANG_CBP_MBNAMERR_2)$\n$\n\
-      $(PFI_LANG_CBP_MBNAMERR_3)$\n$\n\
+      "$(PFI_LANG_CBP_MBNAMERR_1) $\"${CBP_L_CREATE_NAME}$\" $(PFI_LANG_CBP_MBNAMERR_2)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_CBP_MBNAMERR_3)\
+      $\r$\n$\r$\n\
       $(PFI_LANG_CBP_MBNAMERR_4)"
   goto get_next_bucket_cmd
 
@@ -1240,14 +1244,17 @@ no_user_input:
   IntCmp ${CBP_L_COUNT} 0 need_buckets
   IntCmp ${CBP_L_COUNT} 1 too_few
   MessageBox MB_YESNO|MB_ICONQUESTION \
-      "${CBP_L_COUNT} $(PFI_LANG_CBP_MBDONE_1)$\n$\n\
-      $(PFI_LANG_CBP_MBDONE_2)$\n$\n\
+      "${CBP_L_COUNT} $(PFI_LANG_CBP_MBDONE_1)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_CBP_MBDONE_2)\
+      $\r$\n$\r$\n\
       $(PFI_LANG_CBP_MBDONE_3)" IDYES finished_buckets
   goto get_next_bucket_cmd
 
 need_buckets:
   MessageBox MB_OK|MB_ICONINFORMATION \
-      "$(PFI_LANG_CBP_MBCONTERR_1)$\n$\n\
+      "$(PFI_LANG_CBP_MBCONTERR_1)\
+      $\r$\n$\r$\n\
       $(PFI_LANG_CBP_MBCONTERR_2)"
   goto get_next_bucket_cmd
 
@@ -1267,7 +1274,9 @@ finished_buckets:
   StrCmp ${CBP_L_RESULT} "0" finished_now
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_CBP_MBMAKERR_1) ${CBP_L_RESULT} $(PFI_LANG_CBP_MBMAKERR_2) ${CBP_L_COUNT} \
-      $(PFI_LANG_CBP_MBMAKERR_3)$\n$\n$(PFI_LANG_CBP_MBMAKERR_4)"
+      $(PFI_LANG_CBP_MBMAKERR_3)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_CBP_MBMAKERR_4)"
 
 finished_now:
   StrCpy ${CBP_L_RESULT} "completed"

@@ -92,15 +92,21 @@
   !define C_README        "v0.19.1.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
 
+  ;-----------------------------------------
   ; Root directory for the Perl files used to build the installer
+  ;-----------------------------------------
 
   !define C_PERL_DIR      "C:\Perl"
   
+  ;-----------------------------------------
   ; Delay (in milliseconds) used after issuing a POPFile 'shutdown' request
+  ;-----------------------------------------
   
   !define C_SHUTDOWN_DELAY    1500
 
+  ;-----------------------------------------
   ; Define PFI_VERBOSE to get more compiler output
+  ;-----------------------------------------
 
 # !define PFI_VERBOSE
 
@@ -201,7 +207,7 @@
   ; (1) New style with an 'I accept' checkbox below the license window
   ; (2) New style with 'I accept/I do not accept' radio buttons below the license window
   ; (3) Classic style with the 'Next' button replaced by an 'Agree' button
-  ;     (to get the 'Classic' style,  comment-out the CHECKBOX and the RADIOBUTTONS 'defines')
+  ;     (to get the 'Classic' style, comment-out the CHECKBOX and the RADIOBUTTONS 'defines')
 
   !define MUI_LICENSEPAGE_CHECKBOX
 #  !define MUI_LICENSEPAGE_RADIOBUTTONS
@@ -423,7 +429,9 @@ Function PFIGUIInit
 
   SearchPath ${G_NOTEPAD} notepad.exe
   MessageBox MB_YESNO|MB_ICONQUESTION \
-      "$(PFI_LANG_MBRELNOTES_1)$\r$\n$\r$\n$(PFI_LANG_MBRELNOTES_2)" IDNO exit
+      "$(PFI_LANG_MBRELNOTES_1)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBRELNOTES_2)" IDNO exit
   StrCmp ${G_NOTEPAD} "" use_file_association
   ExecWait 'notepad.exe "$PLUGINSDIR\release.txt"'
   GoTo exit
@@ -497,9 +505,12 @@ readme_ok:
 
   IfFileExists "$INSTDIR\stopwords" 0 copy_stopwords
   MessageBox MB_YESNO|MB_ICONQUESTION \
-      "POPFile 'stopwords' $(PFI_LANG_MBSTPWDS_1)$\r$\n$\r$\n\
-      $(PFI_LANG_MBSTPWDS_2)$\r$\n$\r$\n\
-      $(PFI_LANG_MBSTPWDS_3) 'stopwords.bak')$\r$\n$\r$\n\
+      "POPFile 'stopwords' $(PFI_LANG_MBSTPWDS_1)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBSTPWDS_2)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBSTPWDS_3) 'stopwords.bak')\
+      $\r$\n$\r$\n\
       $(PFI_LANG_MBSTPWDS_4) 'stopwords.default')" IDNO copy_default_stopwords
   IfFileExists "$INSTDIR\stopwords.bak" 0 make_backup
   SetFileAttributes "$INSTDIR\stopwords.bak" NORMAL
@@ -523,7 +534,8 @@ copy_default_stopwords:
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "$(PFI_LANG_MBCFGBK_1) 'popfile.cfg' $(PFI_LANG_MBCFGBK_2) ('popfile.cfg.bak').\
       $\r$\n$\r$\n\
-      $(PFI_LANG_MBCFGBK_3)$\r$\n$\r$\n\
+      $(PFI_LANG_MBCFGBK_3)\
+      $\r$\n$\r$\n\
       $(PFI_LANG_MBCFGBK_4)" IDNO update_config
   SetFileAttributes "$INSTDIR\popfile.cfg.bak" NORMAL
 
@@ -1154,8 +1166,10 @@ Function SetOptionsPage
   IfFileExists "$INSTDIR\popfile.pl" 0 continue
 
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_OPTIONS_MBUNINST_1) '$INSTDIR'$\r$\n$\r$\n\
-      $(PFI_LANG_OPTIONS_MBUNINST_2)$\r$\n$\r$\n\
+      "$(PFI_LANG_OPTIONS_MBUNINST_1) '$INSTDIR'\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OPTIONS_MBUNINST_2)\
+      $\r$\n$\r$\n\
       ($(PFI_LANG_OPTIONS_MBUNINST_3))" IDNO continue
 
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
@@ -1257,8 +1271,10 @@ Function CheckPortOptions
 
 bad_pop3:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_OPTIONS_MBPOP3_1) $\"${G_POP3}$\"'.$\n$\n\
-      $(PFI_LANG_OPTIONS_MBPOP3_2)$\n$\n\
+      "$(PFI_LANG_OPTIONS_MBPOP3_1) $\"${G_POP3}$\"'.\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OPTIONS_MBPOP3_2)\
+      $\r$\n$\r$\n\
       $(PFI_LANG_OPTIONS_MBPOP3_3)"
   Goto bad_exit
 
@@ -1272,14 +1288,17 @@ pop3_ok:
 
 bad_gui:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_OPTIONS_MBGUI_1) $\"${G_GUI}$\".$\n$\n\
-      $(PFI_LANG_OPTIONS_MBGUI_2)$\n$\n\
+      "$(PFI_LANG_OPTIONS_MBGUI_1) $\"${G_GUI}$\".\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OPTIONS_MBGUI_2)\
+      $\r$\n$\r$\n\
       $(PFI_LANG_OPTIONS_MBGUI_3)"
   Goto bad_exit
 
 ports_must_differ:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_OPTIONS_MBDIFF_1)$\n$\n\
+      "$(PFI_LANG_OPTIONS_MBDIFF_1)\
+      $\r$\n$\r$\n\
       $(PFI_LANG_OPTIONS_MBDIFF_2)"
 
 bad_exit:
@@ -1811,7 +1830,8 @@ Section "Uninstall"
 confirmation:
   IfFileExists $INSTDIR\popfile.pl skip_confirmation
     MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
-        "$(un.PFI_LANG_MBNOTFOUND_1) '$INSTDIR'.$\r$\n$\r$\n\
+        "$(un.PFI_LANG_MBNOTFOUND_1) '$INSTDIR'.\
+        $\r$\n$\r$\n\
         $(un.PFI_LANG_MBNOTFOUND_2)" IDYES skip_confirmation
     Abort "$(un.PFI_LANG_ABORT_1)"
 
