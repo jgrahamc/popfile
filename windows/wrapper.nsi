@@ -2,11 +2,11 @@
 #
 # wrapper.nsi --- A simple utility to run POPFile after ensuring the necessary
 #                 environment variables exist. These environment variables are
-#                 defined in 'wrapper.ini' (so they can be easily altered).
+#                 defined using data found in 'wrapper.ini' (for easy alteration).
 #                 If 'wrapper.ini' is not found in the current directory,
-#                 the utility creates the file there automatically.
+#                 the utility asks for permission to create the file there.
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -25,7 +25,7 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #-------------------------------------------------------------------------------------------
 #
-#  This version was tested using "NSIS 2 Release Candidate 1" released 27 December 2003
+#  This version was tested using "NSIS 2 Release Candidate 2" released 5 January 2004
 #
 #-------------------------------------------------------------------------------------------
 # Compile-time command-line switches (used by 'makensis.exe')
@@ -57,11 +57,11 @@
 #
 # [Configuration]
 #  POPFileFolder=path to the folder containing the POPFile program files
-#  UserDataFolder=path to the folder containing the user's POPFile configuration file(s)
+#  UserDataFolder=path to the folder containing the user's POPFile configuration files
 #
 # [Environment]
-#  POPFILE_ROOT=short-filename path (in lowercase) to the POPFile program files
-#  POPFILE_USER=short-filename path (in lowercase) to the user's configuration file(s)
+#  POPFILE_ROOT=short-filename path to the POPFile program files
+#  POPFILE_USER=short-filename path to the user's POPFile configuration files
 #
 # NOTES:
 #
@@ -78,24 +78,25 @@
 #     section to it:
 #
 #     [Environment]
-#     POPFILE_ROOT=c:\progra~1\popfile
+#     POPFILE_ROOT=C:\PROGRA~1\POPFILE
 #     POPFILE_USER=.
 #
 #    (notice that the POPFILE_USER value uses a relative path)
 #-------------------------------------------------------------------------------------------
 
+  Name    "POPFile Wrapper Utility"
+  !define VERSION   "0.3.0"     ; see 'VIProductVersion' comment below for format details
+
   ; The default NSIS caption is "Name Setup" so we override it here
 
-  Name    "POPFile Wrapper Utility"
-  Caption "POPFile Wrapper Utility"
-
-  !define VERSION   "0.2.2"     ; see 'VIProductVersion' comment below for format details
-
   !ifdef BACKGROUND
+          Caption "POPFile Wrapper Utility (Background mode)"
           OutFile wrapperb.exe
   !else ifdef FOREGROUND
+          Caption "POPFile Wrapper Utility (Foreground mode)"
           OutFile wrapperf.exe
   !else
+          Caption "POPFile Wrapper Utility"
           OutFile wrapper.exe
   !endif
 
@@ -153,7 +154,7 @@ Section default
   ; (if not found, we ask for permission to create it there)
   
   IfFileExists ".\Wrapper.ini" continue
-  GetFullPathName ${L_DATA} ".\"
+  GetFullPathName ${L_DATA} "."
   MessageBox MB_YESNO|MB_ICONQUESTION "Unable to find user's POPFile configuration data in\
       $\r$\n$\r$\n\
       ${L_DATA}\
@@ -193,14 +194,10 @@ got_pf_folder:
 pf_ok:
   ReadINIStr ${L_POPFILE_USER} ".\Wrapper.ini" "Configuration" "UserDataFolder"
   StrCmp ${L_POPFILE_USER} "" 0 got_ud_path
-
-  ReadRegStr ${L_POPFILE_USER} HKLM "SOFTWARE\POPFile" InstallLocation
-  StrCmp ${L_POPFILE_USER} "" 0 got_new_ud_path
-
-  StrCpy ${L_POPFILE_USER} "C:\Program Files\POPFile"
-  IfFileExists "${L_POPFILE_USER}\*.*" got_new_ud_path
-  MessageBox MB_OK|MB_ICONSTOP "Unable to find User Data folder"
-  Goto error_exit
+  
+  ; Use current directory for POPFile configuration data
+  
+  StrCpy ${L_POPFILE_USER} ${L_DATA}
 
 got_new_ud_path:
   WriteINIStr ".\Wrapper.ini" "Configuration" "UserDataFolder" "${L_POPFILE_USER}"
@@ -217,17 +214,10 @@ got_ud_path:
 got_ud_folder:
   GetFullPathName /SHORT ${L_POPFILE_ROOT} ${L_POPFILE_ROOT}
   GetFullPathName /SHORT ${L_POPFILE_USER} ${L_POPFILE_USER}
-  StrCmp ${L_POPFILE_ROOT} ${L_POPFILE_USER} 0 lowercase
+  StrCmp ${L_POPFILE_ROOT} ${L_POPFILE_USER} 0 save_environment
   StrCpy ${L_POPFILE_USER} "."
 
-lowercase:
-  Push ${L_POPFILE_ROOT}
-  Call StrLower
-  Pop ${L_POPFILE_ROOT}
-  Push ${L_POPFILE_USER}
-  Call StrLower
-  Pop ${L_POPFILE_USER}
-
+save_environment:
   WriteINIStr ".\Wrapper.ini" "Environment" "POPFILE_ROOT" "${L_POPFILE_ROOT}"
   WriteINIStr ".\Wrapper.ini" "Environment" "POPFILE_USER" "${L_POPFILE_USER}"
 
@@ -342,68 +332,6 @@ get:
   Pop $R2
   Pop $R1
   Exch $R0
-FunctionEnd
-
-
-#--------------------------------------------------------------------------
-# Function StrLower
-#
-# Converts uppercase letters in a string into lowercase letters. Other characters unchanged.
-#
-# Inputs:
-#         (top of stack)          - input string
-#
-# Outputs:
-#         (top of stack)          - output string
-#
-#  Usage Example:
-#
-#    Push "C:\PROGRA~1\SQLPFILE"
-#    Call StrLower
-#    Pop $R0
-#
-#   ($R0 at this point is "c:\progra~1\sqlpfile")
-#
-#--------------------------------------------------------------------------
-
-Function StrLower
-
-  !define C_LOWERCASE    "abcdefghijklmnopqrstuvwxyz"
-
-  Exch $0   ; The input string
-  Push $2   ; Holds the result
-  Push $3   ; A character from the input string
-  Push $4   ; The offset to a character in the "validity check" string
-  Push $5   ; A character from the "validity check" string
-  Push $6   ; Holds the current "validity check" string
-
-  StrCpy $2 ""
-
-next_input_char:
-  StrCpy $3 $0 1              ; Get next character from the input string
-  StrCmp $3 "" done
-  StrCpy $6 ${C_LOWERCASE}$3  ; Add character to end of "validity check" to guarantee a match
-  StrCpy $0 $0 "" 1
-  StrCpy $4 -1
-
-next_valid_char:
-  IntOp $4 $4 + 1
-  StrCpy $5 $6 1 $4               ; Extract next from "validity check" string
-  StrCmp $3 $5 0 next_valid_char  ; We will ALWAYS find a match in the "validity check" string
-  StrCpy $2 $2$5                  ; Use "validity check" char to ensure result uses lowercase 
-  goto next_input_char
-
-done:
-  StrCpy $0 $2                ; Result is a string with no uppercase letters
-  Pop $6
-  Pop $5
-  Pop $4
-  Pop $3
-  Pop $2
-  Exch $0                     ; place result on top of the stack
-
-  !undef C_LOWERCASE
-
 FunctionEnd
 
 ;-------------
