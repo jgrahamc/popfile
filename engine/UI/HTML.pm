@@ -694,9 +694,13 @@ sub configuration_page
             $templ->param( 'Configuration_If_History_Days_Error' => 1 );
             delete $self->{form_}{history_days};
         }
+
+        if ( defined( $self->{form_}{purge_history} ) ) {
+             $self->{history__}->cleanup_history();
+	}
     }
 
-    $templ->param( 'Configuration_History_Days_Updated' => sprintf( $self->{language__}{Configuration_DaysUpdate}, $self->config_( 'history_days' ) ) ) if ( defined($self->{form_}{history_days} ) );
+    $templ->param( 'Configuration_History_Days_Updated' => sprintf( $self->{language__}{Configuration_DaysUpdate}, $self->module_config_( 'history', 'history_days' ) ) ) if ( defined($self->{form_}{history_days} ) );
     $templ->param( 'Configuration_History_Days' => $self->module_config_( 'history', 'history_days' ) );
 
     if ( defined($self->{form_}{timeout}) ) {

@@ -198,7 +198,7 @@ sub deliver
     # If a day has passed then clean up the history
 
     if ( $type eq 'TICKD' ) {
-        $self->cleanup_history__();
+        $self->cleanup_history();
     }
 
     if ( $type eq 'COMIT' ) {
@@ -1003,13 +1003,13 @@ sub history_read_class__
 
 #----------------------------------------------------------------------------
 #
-# cleanup_history__
+# cleanup_history
 #
 # Removes the popfile*.msg files that are older than a number of days
 # configured as history_days.
 #
 #----------------------------------------------------------------------------
-sub cleanup_history__
+sub cleanup_history
 {
     my ( $self ) = @_;
 
