@@ -3098,14 +3098,16 @@ sub history_delete_file
 sub history_copy_file
 {
     my ( $self, $from, $to_dir, $to_name ) = @_;
-           
-    if ( open( FROM, "<$from") && open( TO, ">$to_dir\/$to_name") ) {
-        binmode FROM;
-        while (<FROM>) {
-            print TO $_;
-        }
+
+    if ( open( FROM, "<$from") ) {
+    	if ( open( TO, ">$to_dir\/$to_name") ) {
+            binmode FROM;
+            while (<FROM>) {
+                print TO $_;
+            }
         close FROM;
-        close TO;            
+        }
+        close TO;
     }    
 }
 
