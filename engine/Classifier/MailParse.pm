@@ -79,7 +79,7 @@ sub un_base64
 
 sub update_word
 {
-    my ($self, $word) = @_;
+    my ($self, $word, $encoded) = @_;
     
     my $mword = $self->{mangle}->mangle($word);
     
@@ -88,7 +88,11 @@ sub update_word
         if ( $self->{color} )
         {
             my $color = $self->{bayes}->get_color($mword);
-            if ( ( $self->{ut} =~ s/($word)/<b><font color=$color>\1<\/font><\/b>/g ) == 0 )
+            if ( $encoded == 0 ) 
+            {
+                $self->{ut} =~ s/($word)/<b><font color=$color>\1<\/font><\/b>/g;
+            }
+            else
             {
                 $self->{ut} .= "Found in encoded data <font color=$color>$word<\/font>\r\n";
             }
@@ -113,20 +117,20 @@ sub update_word
 
 sub add_line
 {
-    my ($self, $line) = @_;
+    my ($self, $line, $encoded) = @_;
 
     # Pull out any email addresses in the line that are marked with <> and have an @ in them
 
     while ( $line =~ s/<([A-Za-z0-9\-_]+?@[A-Za-z0-9\-_\.]+?)>// ) 
     {
-        update_word($self, $1);
+        update_word($self, $1, $encoded);
     }
 
     # Grab domain names
 
     while ( $line =~ s/(([A-Za-z][A-Za-z0-9\-_]+\.){2,})([A-Za-z0-9\-_]+)([^A-Za-z0-9\-_]|$)/\4/ ) 
     {
-        update_word($self, "$1$3");
+        update_word($self, "$1$3", $encoded);
     }
 
     # Only care about words between 3 and 45 characters since short words like
@@ -135,7 +139,7 @@ sub add_line
 
     while ( $line =~ s/([A-Za-z][A-Za-z\']{2,44})[,\.\"\'\)\?!:;\/]{0,2}([ \t\n\r]|$)/ / )
     {
-        update_word($self,$1);
+        update_word($self,$1, $encoded);
     }
 }
 
@@ -221,7 +225,7 @@ sub parse_stream
                 if ( $decoded =~ /[^A-Za-z\-\.]$/ ) 
                 {
                     $self->{ut} = $line if $self->{color};
-                    add_line( $self, $decoded );
+                    add_line( $self, $decoded, 1 );
                     $decoded = '';
                     if ( $self->{color} ) 
                     {
@@ -235,7 +239,7 @@ sub parse_stream
                 $line = <MSG>;
             }
             
-            add_line( $self, $decoded );
+            add_line( $self, $decoded, 1 );
         }
 
         if ( $line =~ /<html>/i ) 
@@ -285,7 +289,7 @@ sub parse_stream
                     update_word($self, $1);
                 }
                 
-                add_line( $self, $argument );
+                add_line( $self, $argument, 0 );
                 next;
             }
             
@@ -330,9 +334,9 @@ sub parse_stream
                 next;
             }
             
-            add_line( $self, $argument );
+            add_line( $self, $argument, 0 );
         } else {
-            add_line( $self, $line );
+            add_line( $self, $line, 0 );
         }
     }
 
