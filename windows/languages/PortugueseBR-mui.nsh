@@ -1,6 +1,8 @@
 #--------------------------------------------------------------------------
 # PortugueseBR-mui.nsh
 #
+# Translated by Adriano Rafael Gomes <adrianorg@users.sourceforge.net>
+#
 # This file contains additional "PortugueseBR" text strings used by the Windows installer
 # for POPFile (these strings are customised versions of strings provided by NSIS).
 #
@@ -49,7 +51,7 @@
 #--------------------------------------------------------------------------
 
 !insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_FINISH_RUN \
-"POPFile Interface de Usuário"
+"Interface de Usuário do POPFile"
 
 #--------------------------------------------------------------------------
 # End of 'PortugueseBR-mui.nsh'
