@@ -268,9 +268,8 @@
         </tr>
         <tr>
             <td colspan="<TMPL_VAR NAME="History_Colspan">">
-                <input type="submit" class="submit removeButton" name="clearpage" value="<TMPL_VAR NAME="Localize_History_RemovePage">" />
                 <input type="submit" class="submit removeButton" name="clearchecked" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" />
-
+                <input type="submit" class="submit removeButton" name="clearpage" value="<TMPL_VAR NAME="Localize_History_RemovePage">" />
             </td>
             <td>
                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
