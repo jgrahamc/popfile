@@ -76,9 +76,9 @@
 #
 # The number of languages which can be supported depends upon the availability of:
 #
-#     (1) an up-to-date main NSIS language file ({NSIS}\Contrib\Language files\*.nlf)
+# (1) an up-to-date main NSIS language file (${NSISDIR}\Contrib\Language files\*.nlf)
 # and
-#     (2) an up-to-date NSIS MUI Language file ({NSIS}\Contrib\Modern UI\Language files\*.nsh)
+# (2) an up-to-date NSIS MUI Language file (${NSISDIR}\Contrib\Modern UI\Language files\*.nsh)
 #
 # To add support for a language which is already supported by the NSIS MUI package, an extra
 # file is required:
@@ -92,6 +92,28 @@
 # '!insertmacro UI_LANG_CONFIG' line in the section which handles the optional 'Languages'
 # component to allow the wizard to select the appropriate UI language.
 #--------------------------------------------------------------------------
+
+  ;------------------------------------------------
+  ; 'Add User' wizard overview
+  ;------------------------------------------------
+
+  ; This wizard is called when 'runpopfile.exe' is unable to determine appropriate values for
+  ; the POPFILE_ROOT and POPFILE_USER environment variables which are used by POPFile 0.21.0
+  ; (or later). For example, if a multi-user install was performed then the first time a new
+  ; user tries to use the standard 'Run POPFile' shortcut there will be no HKCU registry data
+  ; to tell 'runpopfile.exe' how to initialise the environment variables.
+  ;
+  ; This wizard uses HKLM Registry data to create the necessary HKCU entries and ensures the
+  ; environment variables are initialized before running POPFile. It also offers to reconfigure
+  ; any suitable Outlook Express, Outlook or Eudora accounts for the user and can monitor the
+  ; conversion of an existing flat file or BerkeleyDB corpus.
+  ;
+  ; Other uses for this wizard include allowing a user to switch between different sets of
+  ; configuration data and repairing 'damaged' HKCU entries.
+  ;
+  ; The wizard creates an uninstaller (uninstalluser.exe) which makes it easy to restore the
+  ; Outlook Express, Outlook and Eudora settings which were changed by the wizard, in addition
+  ; to removing the user's POPFile configuration data.
 
   ;------------------------------------------------
   ; Define PFI_VERBOSE to get more compiler output
@@ -109,7 +131,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.1"
+  !define C_PFI_VERSION  "0.1.2"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -173,7 +195,6 @@
   Var G_ROOTDIR            ; full path to the folder used for the POPFile program files
   Var G_USERDIR            ; full path to the folder containing the 'popfile.cfg' file
   Var G_MPBINDIR           ; full path to the folder used for the minimal Perl EXE and DLL files
-  Var G_MPLIBDIR           ; full path to the folder used for the rest of the minimal Perl files
 
   Var G_POP3               ; POP3 port (1-65535)
   Var G_GUI                ; GUI port (1-65535)
@@ -378,18 +399,21 @@
 
   !define MUI_WELCOMEPAGE_TEXT "$(PFI_LANG_ADDUSER_INFO_TEXT)"
 
-  ; Use a "leave" function to look for an existing 'popfile.cfg' and decide upon a suitable
-  ; default value for the user data folder (this default value is used when displaying the
-  ; DIRECTORY page used to select 'User Data' location). For this build, we do not attempt to
-  ; relocate the user data when upgrading a POPFile installation.
+  ; Use a "leave" function to decide upon a suitable initial value for the user data folder
+  ; (this initial value is used for the DIRECTORY page used to select 'User Data' location).
 
-  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "CheckExistingConfig"
+  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "ChooseDefaultDataDir"
 
   !insertmacro MUI_PAGE_WELCOME
 
   ;---------------------------------------------------
   ; Installer Page - Select user data Directory
   ;---------------------------------------------------
+
+  ; Use a "leave" function to look for an existing 'popfile.cfg' and use it to determine some
+  ; initial settings for this installation.
+
+  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "CheckExistingDataDir"
 
   ; This page is used to select the folder for the POPFile USER DATA files
 
@@ -516,6 +540,11 @@
 
         ; Entries will appear in the drop-down list of languages in the order given below
         ; (the order used here ensures that the list entries appear in alphabetic order).
+
+        ; NOTE: The order used here assumes that the NSIS MUI 'Japanese.nsh' language file has
+        ; been patched to use 'Nihongo' instead of 'Japanese' [see 'SMALL NSIS PATCH REQUIRED'
+        ; in the 'Support for Japanese text processing' section of the header comment at the
+        ; start of the 'installer.nsi' file]
 
         !insertmacro PFI_LANG_LOAD "Bulgarian"
         !insertmacro PFI_LANG_LOAD "SimpChinese"
@@ -644,14 +673,13 @@ Function PFIGUIInit
 
   !define L_RESERVED            $1    ; used in the system.dll call
 
-  Push ${L_RESERVED}
-
-  ReadRegStr ${L_RESERVED} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
-  StrCmp ${L_RESERVED} "" 0 continue
+  ReadRegStr $G_ROOTDIR HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
+  StrCmp $G_ROOTDIR "" 0 found_reg_data
   MessageBox MB_OK|MB_ICONSTOP "Error: Cannot find compatible version of POPFile !"
   Abort
 
-continue:
+found_reg_data:
+  Push ${L_RESERVED}
 
   ; Ensure only one copy of this installer is running
 
@@ -662,7 +690,6 @@ continue:
   Abort
 
 mutex_ok:
-  ReadRegStr $G_ROOTDIR HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
 
   ; Insert appropriate language strings into the custom page INI files
   ; (the CBP package creates its own INI file so there is no need for a CBP *Page_Init function)
@@ -710,29 +737,17 @@ Section "POPFile" SecPOPFile
   Push ${L_TEMP_4}
   Push ${L_TEMP_5}
 
-  ; For this build, each user is expected to have separate user data folders. The installer uses
+  ; For this build, each user is expected to have a separate user data folder. The wizard uses
   ; the $G_USERDIR variable to hold the full path to this folder. By default each folder will
   ; contain popfile.cfg, stopwords, stopwords.default, popfile.db, the messages folder, etc.
-  ; If an existing flat file or BerkeleyDB corpus has been converted to the new SQL database
+  ; If an existing flat file or BerkeleyDB corpus is to be converted to the new SQL database
   ; format, a backup copy of the old corpus will be saved in the $G_USERDIR\backup folder.
-  ; If we are upgrading a prior version  of POPFile, the user data is found in $INSTDIR
-  ; so we set $G_USERDIR to $INSTDIR when suggesting a location for the user data.
 
-  ; For increased flexibility, four global user variables are used in addition to $INSTDIR
-  ; (this makes it easier to change the folder structure used by the installer).
+  ; For flexibility, several global user variables are used to access installation folders
+  ; (1) $G_ROOTDIR is initialized by the 'PFIGUIInit' function
+  ; (2) $G_USERDIR is initialized by the 'User Data' DIRECTORY page
 
   StrCpy $G_MPBINDIR  "$G_ROOTDIR"
-  StrCpy $G_MPLIBDIR  "$G_ROOTDIR\lib"
-
-  ; The fourth global variable ($G_USERDIR) is initialized by the 'CheckExistingConfig' function
-  ; and may be changed by the user via the second DIRECTORY page.
-
-  ; Retrieve the POP3 and GUI ports from the ini and get whether we install the
-  ; POPFile run in the Startup group
-
-  !insertmacro MUI_INSTALLOPTIONS_READ $G_POP3    "ioA.ini" "Field 2" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ $G_GUI     "ioA.ini" "Field 4" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ $G_STARTUP "ioA.ini" "Field 5" "State"
 
   ReadRegStr ${L_TEMP_2} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Major Version"
   ReadRegStr ${L_TEMP_3} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Minor Version"
@@ -745,12 +760,11 @@ Section "POPFile" SecPOPFile
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile RevStatus" "${L_TEMP_5}"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "adduser.exe"
 
-  ReadRegStr ${L_TEMP} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
-  Push ${L_TEMP}
+  Push $G_ROOTDIR
   Call StrLower
   Pop ${L_TEMP}
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "${L_TEMP}"
-  GetFullPathName /SHORT ${L_TEMP_2} ${L_TEMP}
+  GetFullPathName /SHORT ${L_TEMP_2} $G_ROOTDIR
   Push ${L_TEMP_2}
   Call StrLower
   Pop ${L_TEMP_2}
@@ -872,11 +886,81 @@ update_config:
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
 
   ; NOTE: The main POPFile installer uses 'uninstall.exe' so we have to use a different name
-  ; in case user has selected the main POPFile directory for the user data
+  ; in case the user has selected the main POPFile directory for the user data
 
   SetOutPath $G_USERDIR
   Delete $G_USERDIR\uninstalluser.exe
   WriteUninstaller $G_USERDIR\uninstalluser.exe
+
+  ; Create the START MENU entries
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_SHORT)"
+  SetDetailsPrint listonly
+
+  ; 'CreateShortCut' uses '$OUTDIR' as the working directory for the shortcut
+  ; ('SetOutPath' is one way to change the value of $OUTDIR)
+
+  ; For this build the following simple scheme is used for the shortcuts:
+  ; (a) a 'POPFile' folder with the standard set of shortcuts is created for the current user
+  ; (b) if the user ticked the relevant checkbox then a 'Run POPFile' shortcut is placed in the
+  ;     current user's StartUp folder.
+  ; (c) if the user did not tick the relevant checkbox then the 'Run POPFile' shortcut is
+  ;     removed from the current user's StartUp folder if the user does not have 'Admin' rights
+
+  ReadRegStr $G_ROOTDIR HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
+
+  SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
+  SetOutPath $G_ROOTDIR
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
+                 "$G_ROOTDIR\runpopfile.exe"
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk" \
+                 "$G_USERDIR\uninstalluser.exe"
+
+  ; Use registry data to construct the name of the NOTEPAD-compatible release notes file
+
+  ReadRegStr ${L_TEMP}  HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Major Version"
+  ReadRegStr ${L_TEMP_2} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Minor Version"
+  StrCpy ${L_TEMP} "v${L_TEMP}.${L_TEMP_2}"
+  ReadRegStr ${L_TEMP_2} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Revision"
+  StrCpy ${L_TEMP} "${L_TEMP}.${L_TEMP_2}.change.txt"
+  IfFileExists "$G_ROOTDIR\${L_TEMP}" 0 skip_rel_notes
+
+  SetOutPath $G_ROOTDIR
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" \
+                 "$G_ROOTDIR\${L_TEMP}"
+
+skip_rel_notes:
+  SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url" \
+              "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/"
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" \
+              "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" \
+              "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
+              "InternetShortcut" "URL" \
+              "http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137"
+
+  SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
+              "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
+
+  SetOutPath $G_ROOTDIR
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
+                 "$G_ROOTDIR\stop_pf.exe" "/showerrors $G_GUI"
+
+  SetOutPath $SMSTARTUP
+  SetOutPath $G_ROOTDIR
+  StrCmp $G_STARTUP "1" set_autostart_set
+  StrCmp $G_WINUSERTYPE "Admin" end_autostart_set
+  Delete "$SMSTARTUP\Run POPFile.lnk"
+  Goto end_autostart_set
+
+set_autostart_set:
+  CreateShortCut "$SMSTARTUP\Run POPFile.lnk" "$G_ROOTDIR\runpopfile.exe" "/startup"
+
+end_autostart_set:
 
   ; Create entry in the Control Panel's "Add/Remove Programs" list
 
@@ -922,7 +1006,7 @@ SectionEnd
 # If we are performing an upgrade of a 'flat file' or 'BerkeleyDB' version of POPFile, we make
 # a backup of the old corpus structure. Note that if a backup already exists, we do nothing.
 #
-# The backup is created in the '$INSTDIR\backup' folder. Information on the backup is stored
+# The backup is created in the '$G_USERDIR\backup' folder. Information on the backup is stored
 # in the 'backup.ini' file to assist in restoring the old corpus. A copy of 'popfile.cfg'
 # is also placed in the backup folder.
 #
@@ -1121,7 +1205,7 @@ SectionEnd
 # If no match is found or if the UI language file does not exist, the default UI language
 # is used (it is left to POPFile to determine which language to use).
 #
-# By the time this section is executed, the function 'CheckExistingConfig' in conjunction with
+# By the time this section is executed, the function 'CheckExistingDataDir' in conjunction with
 # the processing performed in the "POPFile" section will have removed all UI language settings
 # from 'popfile.cfg' so all we have to do is append the UI setting to the file. If we do not
 # append anything, POPFile will choose the default language.
@@ -1219,8 +1303,61 @@ lang_done:
 SectionEnd
 
 #--------------------------------------------------------------------------
-# Installer Function: CheckExistingConfig
+# Installer Function: ChooseDefaultDataDir
 # (the "leave" function for the WELCOME page)
+#
+# This function is used to choose a suitable initial value for the DIRECTORY page which allows
+# the user to choose where their POPFile Configuration data is to be stored.
+#--------------------------------------------------------------------------
+
+Function ChooseDefaultDataDir
+
+  !define  L_RESULT    $R9
+
+  ; This function initialises the $G_USERDIR global user variable for use by the DIRECTORY page
+
+  ; Starting with the 0.21.0 release, user-specific data is stored in the registry
+
+  ReadRegStr $G_USERDIR HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath"
+  StrCmp $G_USERDIR "" use_default_locn
+  Goto exit
+
+use_default_locn:
+
+  ;----------------------------------------------------------------------
+  ; Default location for POPFile User Data files (popfile.cfg and others)
+  ;
+  ; Windows 95 systems with Internet Explorer 4 installed also need to have
+  ; Active Desktop installed, otherwise $APPDATA will not be available.
+  ;----------------------------------------------------------------------
+
+  StrCmp $APPDATA "" 0 appdata_valid
+  StrCpy $G_USERDIR "${C_ALT_DEFAULT_USERDATA}\$G_WINUSERNAME"
+  Goto exit
+
+appdata_valid:
+  Push ${L_RESULT}
+
+  StrCpy $G_USERDIR "${C_STD_DEFAULT_USERDATA}"
+  Push $G_USERDIR
+  Push $G_WINUSERNAME
+  Call StrStr
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" 0 default_locn_ok
+  StrCpy $G_USERDIR "$G_USERDIR\$G_WINUSERNAME"
+
+default_locn_ok:
+  Pop ${L_RESULT}
+
+exit:
+
+  !undef L_RESULT
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckExistingDataDir
+# (the "leave" function for the DIRECTORY page)
 #
 # This function is used to extract the POP3 and UI ports from the 'popfile.cfg'
 # configuration file (if a copy is found when the wizard starts up).
@@ -1242,7 +1379,7 @@ SectionEnd
 # are used by the 'StartPOPFilePage' and 'CheckLaunchOptions' functions.
 #--------------------------------------------------------------------------
 
-Function CheckExistingConfig
+Function CheckExistingDataDir
 
   !define L_CFG       $R9     ; handle for "popfile.cfg"
   !define L_CLEANCFG  $R8     ; handle for "clean" copy
@@ -1254,55 +1391,9 @@ Function CheckExistingConfig
   !define L_LANG_NEW  $R2     ; new style UI lang parameter
   !define L_LANG_OLD  $R1     ; old style UI lang parameter
 
-  ; Only one register pushed for now, in case we bail out via an Abort
-
-  Push ${L_CFG}
-
-  ; This function initialises the $G_USERDIR global user variable for use elsewhere in wizard
-
   ; Warn the user if we are about to upgrade an existing installation
   ; and allow user to select a different directory if they wish
 
-  ; Starting with the 0.21.0 release, user-specific data is stored in the registry
-
-  ReadRegStr $G_USERDIR HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath"
-  StrCmp $G_USERDIR "" look_elsewhere
-  IfFileExists "$G_USERDIR\popfile.cfg" warning
-
-look_elsewhere:
-
-  ; All versions prior to 0.21.0 stored popfile.pl and popfile.cfg in the same folder
-
-  StrCpy $G_USERDIR $G_ROOTDIR
-
-  IfFileExists "$G_USERDIR\popfile.cfg" warning
-
-  ; Check if we are installing over a version which uses an early version of the new structure
-
-  StrCpy $G_USERDIR "$INSTDIR\user"
-  IfFileExists "$G_USERDIR\popfile.cfg" warning
-
-  ;----------------------------------------------------------------------
-  ; Default location for POPFile User Data files (popfile.cfg and others)
-  ;
-  ; Windows 95 systems with Internet Explorer 4 installed also need to have
-  ; Active Desktop installed, otherwise $APPDATA will not be available.
-  ;----------------------------------------------------------------------
-
-  StrCmp $APPDATA "" 0 appdata_valid
-  StrCpy $G_USERDIR "${C_ALT_DEFAULT_USERDATA}\$G_WINUSERNAME"
-  Goto check_default_locn
-
-appdata_valid:
-  StrCpy $G_USERDIR "${C_STD_DEFAULT_USERDATA}"
-  Push $G_USERDIR
-  Push $G_WINUSERNAME
-  Call StrStr
-  Pop ${L_CFG}
-  StrCmp ${L_CFG} "" 0 check_default_locn
-  StrCpy $G_USERDIR "$G_USERDIR\$G_WINUSERNAME"
-
-check_default_locn:
   IfFileExists "$G_USERDIR\popfile.cfg" warning
   Goto continue
 
@@ -1313,12 +1404,12 @@ warning:
       $\r$\n$\r$\n$\r$\n\
       $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES continue
 
-  ; We are returning to the DIRECTORY page, so there is only one register to restore
+  ; We are returning to the DIRECTORY page
 
-  Pop ${L_CFG}
   Abort
 
 continue:
+  Push ${L_CFG}
   Push ${L_CLEANCFG}
   Push ${L_CMPRE}
   Push ${L_LNE}
@@ -1573,6 +1664,9 @@ FunctionEnd
 # This function is used to configure the POP3 and UI ports, and
 # whether or not POPFile should be started automatically when Windows starts.
 #
+# This function loads the validated values into $G_POP3 and $G_GUI and also
+# sets $G_STARTUP to the state of the 'Run POPFile at Windows startup' checkbox
+#
 # A "leave" function (CheckPortOptions) is used to validate the port
 # selections made by the user.
 #--------------------------------------------------------------------------
@@ -1585,17 +1679,17 @@ Function SetOptionsPage
   Push ${L_PORTLIST}
   Push ${L_RESULT}
 
-  ; The function "CheckExistingConfig" loads $G_POP3 and $G_GUI with the settings found in
+  ; The function "CheckExistingDataDir" loads $G_POP3 and $G_GUI with the settings found in
   ; a previously installed "popfile.cfg" file or if no such file is found, it loads the
   ; POPFile default values. Now we display these settings and allow the user to change them.
 
   ; The POP3 and GUI port numbers must be in the range 1 to 65535 inclusive, and they
-  ; must be different. This function assumes that the values "CheckExistingConfig" has loaded
+  ; must be different. This function assumes that the values "CheckExistingDataDir" has loaded
   ; into $G_POP3 and $G_GUI are valid.
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_OPTIONS_TITLE)" "$(PFI_LANG_OPTIONS_SUBTITLE)"
 
-  ; If the POP3 (or GUI) port determined by "CheckExistingConfig" is not present in the list of
+  ; If the POP3 (or GUI) port determined by "CheckExistingDataDir" is not present in the list of
   ; possible values for the POP3 (or GUI) combobox, add it to the end of the list.
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_PORTLIST} "ioA.ini" "Field 2" "ListItems"
@@ -1644,10 +1738,14 @@ show_defaults:
 
   !insertmacro MUI_INSTALLOPTIONS_SHOW
 
-  ; Store validated data (for use when the "POPFile" section is processed)
+  ; Store validated data (for completeness)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "State" $G_POP3
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "State" $G_GUI
+
+  ; Retrieve the state of the 'Run POPFile automatically when Windows starts' checkbox
+
+  !insertmacro MUI_INSTALLOPTIONS_READ $G_STARTUP "ioA.ini" "Field 5" "State"
 
   Pop ${L_RESULT}
   Pop ${L_PORTLIST}
@@ -4072,8 +4170,8 @@ Function un.onInit
   ; Phase 1 of the multi-user support introduced in 0.21.0 requires some slight changes
   ; to the folder structure.
 
-  ; For increased flexibility, four global user variables are used in addition to $INSTDIR
-  ; (this makes it easier to change the folder structure used by the installer)
+  ; For increased flexibility, several global user variables are used (this makes it easier
+  ; to change the folder structure used by the wizard)
 
   StrCpy $G_USERDIR   $INSTDIR
 
@@ -4399,6 +4497,7 @@ skip_messages:
 complete_uninstall:
   Delete $G_USERDIR\install.ini
   Delete "$G_USERDIR\uninstalluser.exe"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk"
 
   RMDir $G_USERDIR
 
@@ -4411,7 +4510,9 @@ appdata_valid:
 
 remove_uninstall_entry:
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_Data"
-  DeleteRegKey /ifempty HKCU "SOFTWARE\${C_PFI_PRODUCT}"
+  DeleteRegKey HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI"
+  DeleteRegKey /ifempty HKCU "Software\POPFile Project\${C_PFI_PRODUCT}"
+  DeleteRegKey /ifempty HKCU "Software\POPFile Project"
 
   ; if $G_USERDIR was removed, skip these next ones
 
