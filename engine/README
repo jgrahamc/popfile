@@ -40,9 +40,6 @@ message.txt type
 
 perl insert.pl spam message.txt
 
-When you've finished inserting messages into buckets type classify to build
-the model that POPFile will use for text classification.
-
 POPFile also optimizes download speed.  By sorting mail into ascending order
 of size downloads seem much faster on slow connections.  When downloading a
 lot of mail across a slow link POPFile gives you the small mails first and
@@ -76,7 +73,14 @@ The modify your mail client to talk to the proxy: the server becomes
 
 6. How do I use POPFile with Outlook Express
 
-INSERT THE INSTRUCTIONS HERE
+In Outlook Express select the Tools->Accounts... menu option. The Internet
+Accounts dialog will appear. Select the account you wish to modify to use
+POPFile and click on Properties. Choose the Servers tab. Make a note of the
+Incoming Mail (POP3) server name and the Incoming Mail Server Account Name.
+Change the Incoming Mail (POP3) server name to 127.0.0.1 and change the
+Incoming Mail Server Account Name to the combination of the original
+Incoming Mail (POP3) server name and the original Incoming Mail Server
+Account Name separated by a colon. Hit OK and then Close.
 
 7. How do I use POPFile with Outlook
 
@@ -154,7 +158,11 @@ authentication.
 
 12. How do I insert mail into the different buckets?
 
-EXPLAIN INSERT AND CLASSIFY
+Use the insert.pl script and insert mail as follows:
+
+perl insert.pl family mailmessage.txt
+perl insert.pl spam spammsgs*.txt
+perl insert.pl work work.*
 
 13. How do I configure POPFile?
 
