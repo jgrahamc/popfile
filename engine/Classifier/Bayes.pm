@@ -441,7 +441,7 @@ sub update_constants_
     my ($self) = @_;
 
     if ( $self->{full_total__} > 0 )  {
-        $self->{not_likely__} = -log( $self->{full_total__} / 10 );
+        $self->{not_likely__} = -log( 10 * $self->{full_total__} );
 
         foreach my $bucket (keys %{$self->{matrix__}}) {
             my $total = $self->get_bucket_word_count( $bucket );
