@@ -183,6 +183,7 @@ History_ShowNoMagnet                    unmagnetized
 History_Magnet                          &nbsp;(just showing magnet classified messages)
 History_NoMagnet                        &nbsp;(just showing non-magnet classified messages)
 History_ResetSearch                     Reset
+History_ChangedClass                    Would now classify as
 
 Password_Title                          Password
 Password_Enter                          Enter password

@@ -178,6 +178,7 @@ History_ShowNoMagnet                    unmagnetisiert
 History_Magnet                          &nbsp;(zeige nur durch Magnet eingestufte Nachrichten)
 History_NoMagnet                        &nbsp;(zeige nicht durch Magnet eingestufte Nachrichten)
 History_ResetSearch                     Zurücksetzen
+History_ChangedClass                    Würde jetzt eingestuft als
 
 Password_Title                          Paßwort
 Password_Enter                          Paßwort eingeben
