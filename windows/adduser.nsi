@@ -168,7 +168,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.43"
+  !define C_PFI_VERSION  "0.2.44"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -1167,7 +1167,7 @@ end_autostart_set:
   ; Create entry in the Control Panel's "Add/Remove Programs" list
 
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_Data" \
-              "DisplayName" "${C_PFI_PRODUCT} ($G_WINUSERNAME)"
+              "DisplayName" "${C_PFI_PRODUCT} Data ($G_WINUSERNAME)"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_Data" \
               "UninstallString" "$G_USERDIR\uninstalluser.exe"
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_Data" \
