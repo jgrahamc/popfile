@@ -131,7 +131,21 @@ sub start
                                     $self->{configuration}->{configuration}{localpop} == 1 ? (LocalAddr => 'localhost') : (), 
                                     LocalPort => $self->{configuration}->{configuration}{port},
                                     Listen    => SOMAXCONN,
-                                    Reuse     => 1 ) or return 0;
+                                    Reuse     => 1 );
+                                    
+    if ( !defined( $self->{server} ) ) {
+    	print <<EOM;
+
+\nCouldn't start the POP3 proxy because POPFile could not bind to the 
+POP3 listen port $self->{configuration}->{configuration}{port}. This could be because there is another service 
+using that port or because you do not have the right privileges on 
+your system (On Unix systems this can happen if you are not root 
+and the port you specified is less than 1024).
+
+EOM
+
+	return 0;
+    }
 
     # This is used to perform select calls on the $server socket so that we can decide when there is 
     # a call waiting an accept it without having to block
@@ -209,7 +223,7 @@ sub flush_child_data
             debug( $self, "Incrementing $class for $kid" );
         } else {
         
-            # This is here so that we get in errorneous position where the pipready
+            # This is here so that we get in errorneous position where the pipeready
             # function is returning that there's data, but there is none, in fact the
             # pipe is dead then we break the cycle here.  This was happening to me when
             # I tested POPFile running under cygwin.

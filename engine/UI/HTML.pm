@@ -165,7 +165,21 @@ sub start
                                     $self->{configuration}->{configuration}{localui}  == 1 ? (LocalAddr => 'localhost') : (),
                                      LocalPort => $self->{configuration}->{configuration}{ui_port},
                                      Listen    => SOMAXCONN,
-                                     Reuse     => 1 ) or return 0;
+                                     Reuse     => 1 );
+
+    if ( !defined( $self->{server} ) ) {
+    	print <<EOM;
+
+\nCouldn't start the HTTP interface because POPFile could not bind to the 
+HTTP port $self->{configuration}->{configuration}{ui_port}. This could be because there is another service 
+using that port or because you do not have the right privileges on 
+your system (On Unix systems this can happen if you are not root 
+and the port you specified is less than 1024).
+
+EOM
+
+	return 0;
+    }
 
     $self->{selector} = new IO::Select( $self->{server} );
 
