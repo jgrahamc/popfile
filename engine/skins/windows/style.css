@@ -20,6 +20,7 @@ commenting.  But that means its not fully valid CSS2.
 05-03-03: Center footer better and add "icon" in Mozilla, maybe Opera head fix
 05-05-03: Changed a lot of head stuff, got rid of absolute positioning
 05-21-03: Did what I could to fix the changes 0.19 RC3 made to the footer
+06-12-04: Add support for session seperator (RowBoundary) for 0.22 CVS
 */
 
 body {
@@ -386,6 +387,10 @@ div.securityExplanation {
 span.graphFont {
  font-size: 95%;
 }
+
+ tr.rowBoundary {
+  background-color: InfoBackground;
+ }
 
 /* - uncomment this section if you want On text to be bold
 span.bucketsWidgetStateOn {
