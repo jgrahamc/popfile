@@ -153,7 +153,6 @@ sub update_pseudoword
 {
     my ( $self, $prefix, $word ) = @_;
 
-    print "update_pseudoword:$prefix:$word\n";
     $self->increment_word( "$prefix:$word" );
 }
 
