@@ -839,14 +839,12 @@ sub classify
 
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
         $word_count += 2;
-        my $wmax = -10000;
 
         foreach my $bucket (@buckets) {
             my $probability = $self->get_value_( $bucket, $word );
 
             $matchcount{$bucket} += $self->{parser__}{words__}{$word} if ($probability != 0);
             $probability = $self->{not_likely__} if ( $probability == 0 );
-            $wmax = $probability if ( $wmax < $probability );
 
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
             # and we multiply by the number of times that the word occurs
