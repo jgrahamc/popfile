@@ -1190,6 +1190,7 @@ sub load_history_cache
             $bucket       = <CLASS>;
             $reclassified = 1;
         }
+        close CLASS;
         $bucket =~ s/[\r\n]//g;
         
         if ( ( $filter eq '' ) || ( $bucket eq $filter ) || ( ( $filter eq '__filter__magnet' ) && ( $magnet ne '' ) ) ) {
