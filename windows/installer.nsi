@@ -582,6 +582,7 @@ Section "POPFile" SecPOPFile
   File "..\engine\favicon.ico"
   File "..\engine\black.gif"
   File "..\engine\otto.gif"
+  File "stop_pf.exe"
 
   IfFileExists "$INSTDIR\stopwords" 0 copy_stopwords
   MessageBox MB_YESNO|MB_ICONQUESTION \
@@ -792,6 +793,9 @@ update_config:
   SetOutPath "$SMPROGRAMS\${MUI_PRODUCT}\Support"
   WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
+  SetOutPath $INSTDIR
+  CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\Shutdown POPFile silently.lnk" \
+                 "$INSTDIR\stop_pf.exe" "/showerrors $G_GUI"
 
   StrCmp $G_STARTUP "1" 0 skip_autostart_set
       SetOutPath $SMSTARTUP
