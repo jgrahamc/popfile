@@ -142,12 +142,11 @@
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion "0.19.0.0"
+  VIProductVersion "0.20.0.0"
 
   VIAddVersionKey "ProductName" "POPFile"
   VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sourceforge.net"
   VIAddVersionKey "CompanyName" "POPFile Team"
-#  VIAddVersionKey "LegalTrademarks" "POPFile"
   VIAddVersionKey "LegalCopyright" "© 2001-2003  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "POPFile Automatic email classification"
   VIAddVersionKey "FileVersion" "${MUI_VERSION}"
@@ -1020,11 +1019,6 @@ loop:
   StrCpy ${L_CMPRE} ${L_LNE} 8
   StrCmp ${L_CMPRE} "ui_port " got_ui_port
   
-  ; Remove old POP3 server string to ensure the new installation identifies itself properly
-  
-  StrCpy ${L_CMPRE} ${L_LNE} 20
-  StrCmp ${L_CMPRE} "pop3_welcome_string " loop
-
   StrCmp ${L_STRIPLANG} "" transfer
 
   ; do not transfer any UI language settings to the copy of popfile.cfg
