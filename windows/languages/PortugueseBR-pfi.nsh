@@ -238,17 +238,17 @@
 !insertmacro PFI_LANG_STRING DESC_SecSkins                 "Instala skins do POPFile que permitem a você trocar a aparência da interface de usuário do POPFile."
 !insertmacro PFI_LANG_STRING DESC_SecLangs                 "Instala versões da interface de usuário em outras línguas."
 
-!insertmacro PFI_LANG_STRING DESC_SubSecOptional           "Extra POPFile components (for advanced users)"
-!insertmacro PFI_LANG_STRING DESC_SecIMAP                  "Installs the POPFile IMAP module"
-!insertmacro PFI_LANG_STRING DESC_SecNNTP                  "Installs POPFile's NNTP proxy"
-!insertmacro PFI_LANG_STRING DESC_SecSMTP                  "Installs POPFile's SMTP proxy"
-!insertmacro PFI_LANG_STRING DESC_SecSOCKS                 "Installs extra Perl components which allow the POPFile proxies to use SOCKS"
+!insertmacro PFI_LANG_STRING DESC_SubSecOptional           "Componentes extra do POPFile (para usuários avançados)"
+!insertmacro PFI_LANG_STRING DESC_SecIMAP                  "Instala o módulo IMAP do POPFile"
+!insertmacro PFI_LANG_STRING DESC_SecNNTP                  "Instala o proxy NNTP do POPFile"
+!insertmacro PFI_LANG_STRING DESC_SecSMTP                  "Instala o proxy SMTP do POPFile"
+!insertmacro PFI_LANG_STRING DESC_SecSOCKS                 "Instala componentes extra do Perl que permitem aos proxies do POPFile usar SOCKS"
 !insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Instala o módulo XMLRPC do POPFile (para acessar a API do POPFile) e o suporte do Perl requerido."
 
 ; Text strings used when user has NOT selected a component found in the existing installation
 
-!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_1            "Do you want to upgrade the existing $G_PLS_FIELD_1 component ?"
-!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_2            "(using out of date POPFile components can cause problems)"
+!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_1            "Você quer atualizar o componente $G_PLS_FIELD_1 existente?"
+!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_2            "(usar componentes desatualizados do POPFile pode causar problemas)"
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
