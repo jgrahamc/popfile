@@ -1,0 +1,43 @@
+Return-Path: <syjet@yahu.com>
+Received: from N1N ([218.0.119.123]) by priv-edtnes27.telusplanet.net
+	(InterMail vM.5.01.05.17 201-253-122-126-117-20021021) with ESMTP
+	id <20030112013444.RTJR4607.priv-edtnes27.telusplanet.net@N1N>
+	for <jopat@telusplanet.net>; Sat, 11 Jan 2003 18:34:44 -0700
+From: "Alice" <syjet@yahu.com>
+Subject: Hello,Let us enjoy life!
+To: jopat@telusplanet.net
+Content-Type: text/html;
+    charset="us-ascii"
+Date: Sun, 12 Jan 2003 09:34:46 +0800
+X-Priority: 3
+X-Mailer: jpfree Group Mail Express V1.0
+Message-Id: <20030112013444.RTJR4607.priv-edtnes27.telusplanet.net@N1N>
+
+<HTML><HEAD><TITLE></TITLE>
+<META content="Microsoft FrontPage 4.0" name=GENERATOR></HEAD> 
+<BODY text=#000000 bgColor=#EFEBE7>
+<table border="0" width="500" cellspacing="0" cellpadding="5">
+<tr>
+<td valign="top">
+<h1 align=left><FONT size=4><B>Hello friends.</B></FONT></h1> 
+<h1 align=left><B><FONT size=4 face="Arial Narrow">I bet you would just love
+to<a href="http://www.apple999.com/xy1.htm">
+see me naked</a>, spreading my candy for ya. I can not even tell 
+you how much it turns me on to have people <a
+href="http://www.apple999.com/xy1.htm">get
+off to my naked sexy body</a>. I've left you a tiny sample of 
+my gorgeousness just to give you a itty- bitty taste of what's 
+inside if you join. So when you are done checking out my different 
+pics- it's time for you to join!!</FONT></B></h1>
+<P align=left><B><FONT size=4 face="Arial"><a
+href="http://www.apple999.com/xy1.htm">See
+you inside...</a></FONT></B></P>
+<P align=left><B><FONT size=4 face="Arial"><a
+href="http://www.apple999.com/xy1.htm">Hugs
+&amp; Kisses,</a><BR>
+Kurious</FONT></B></P>
+</td>
+<td><a href="http://www.apple999.com/xy1.htm">
+</tr>
+</table>
+</BODY></HTML>
