@@ -320,7 +320,8 @@ sub log_
 {
     my ( $self, $message ) = @_;
 
-    $self->{logger__}->debug( $self->{name__} . ': ' . $message );
+    my ( $package, $file, $line ) = caller;
+    $self->{logger__}->debug( $self->{name__} . ": $line: " . $message );
 }
 
 # ---------------------------------------------------------------------------------------------
