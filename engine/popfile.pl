@@ -243,6 +243,16 @@ sub configuration_page
         $configuration{subject} = $form{subject}-1;
     }
 
+    if ( ( defined($form{xtc}) ) && ( ( $form{xtc} >= 1 ) && ( $form{xtc} <= 2 ) ) )
+    {
+        $configuration{xtc} = $form{xtc}-1;
+    }
+
+    if ( ( defined($form{xpl}) ) && ( ( $form{xpl} >= 1 ) && ( $form{xpl} <= 2 ) ) )
+    {
+        $configuration{xpl} = $form{xpl}-1;
+    }
+
     if ( defined($form{separator}) )
     {
         if ( length($form{separator}) == 1 )
@@ -344,16 +354,35 @@ sub configuration_page
     $body .= "</select><input type=submit value=Apply name=change_skin></form>";
     $body .= "<p><hr><h2>TCP Connection Timeout</h2><p><form action=/configuration><b>TCP connection timeout in seconds:</b> <br><input name=timeout type=text value=$configuration{timeout}><input type=submit name=update_timeout value=Apply><input type=hidden name=session value=$session_key></form>$timeout_error";    
     $body .= "Updated TCP connection timeout to $configuration{timeout}" if ( defined($form{timeout}) );
-    $body .= "<p><hr><h2>Classification Insertion</h2><p><b>Subject line modification:</b><br>";    
+    $body .= "<p><hr><h2>Classification Insertion</h2><p>";
+    $body .= "<table><tr><td><b>Subject line modification:</b> ";    
     if ( $configuration{subject} == 1 ) 
     {
-        $body .= "<b>On</b> <a href=/configuration?subject=1&session=$session_key><font color=blue>[Turn Off]</font></a> ";
+        $body .= "<td><b>On</b> <a href=/configuration?subject=1&session=$session_key><font color=blue>[Turn Off]</font></a> ";
     } 
     else
     {
-        $body .= "<b>Off</b> <a href=/configuration?subject=2&session=$session_key><font color=blue>[Turn On]</font></a>";
+        $body .= "<td><b>Off</b> <a href=/configuration?subject=2&session=$session_key><font color=blue>[Turn On]</font></a>";
     }
-    $body .= "<hr><h2>Logging</h2><b>Logger output:</b><br><form action=/configuration><input type=hidden value=$session_key name=session><select name=debug>";
+    $body .= "<tr><td><b>X-Text-Classification insertion:</b> ";    
+    if ( $configuration{xtc} == 1 ) 
+    {
+        $body .= "<td><b>On</b> <a href=/configuration?xtc=1&session=$session_key><font color=blue>[Turn Off]</font></a> ";
+    } 
+    else
+    {
+        $body .= "<td><b>Off</b> <a href=/configuration?xtc=2&session=$session_key><font color=blue>[Turn On]</font></a>";
+    }
+    $body .= "<tr><td><b>X-POPFile-Link insertion:</b> ";    
+    if ( $configuration{xpl} == 1 ) 
+    {
+        $body .= "<td><b>On</b> <a href=/configuration?xpl=1&session=$session_key><font color=blue>[Turn Off]</font></a> ";
+    } 
+    else
+    {
+        $body .= "<td><b>Off</b> <a href=/configuration?xpl=2&session=$session_key><font color=blue>[Turn On]</font></a>";
+    }
+    $body .= "</table><hr><h2>Logging</h2><b>Logger output:</b><br><form action=/configuration><input type=hidden value=$session_key name=session><select name=debug>";
     $body .= "<option value=1";
     $body .= " selected" if ( $configuration{debug} == 0 );
     $body .= ">None</option>";
@@ -2766,10 +2795,10 @@ sub run_popfile
                             }
                         }
 
-                        $msg_headers .= "X-Text-Classification: $classification$eol";
+                        $msg_headers .= "X-Text-Classification: $classification$eol" if ( $configuration{xtc} );
                         $temp_file =~ s/messages\/(.*)/$1/;
-                        $msg_headers .= "X-POPFile-Link: http://127.0.0.1:$configuration{ui_port}/jump_to_message?view=$temp_file";
-                        $msg_headers .= "$eol$eol";
+                        $msg_headers .= "X-POPFile-Link: http://127.0.0.1:$configuration{ui_port}/jump_to_message?view=$temp_file$eol" if ( $configuration{xpl} );
+                        $msg_headers .= "$eol";
 
                         # Echo the text of the message to the client
                         print $client $msg_headers;
@@ -2916,6 +2945,8 @@ $configuration{debug}        = 1;
 $configuration{port}         = 110;
 $configuration{ui_port}      = 8080;
 $configuration{subject}      = 1;
+$configuration{xtc}          = 1;
+$configuration{xpl}          = 1;
 $configuration{server}       = '';
 $configuration{sport}        = 110;
 $configuration{page_size}    = 20;
