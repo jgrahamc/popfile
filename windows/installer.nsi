@@ -338,7 +338,7 @@
   Var G_WINUSERTYPE        ; user group ('Admin', 'Power', 'User', 'Guest' or 'Unknown')
 
   Var G_SFN_DISABLED       ; 1 = short file names not supported, 0 = short file names available
-  
+
   ; NSIS provides 20 general purpose user registers:
   ; (a) $R0 to $R9   are used as local registers
   ; (b) $0 to $9     are used as additional local registers
@@ -725,6 +725,7 @@
         ; in the 'Support for Japanese text processing' section of the header comment at the
         ; start of the 'installer.nsi' file]
 
+        !insertmacro PFI_LANG_LOAD "Arabic"
         !insertmacro PFI_LANG_LOAD "Bulgarian"
         !insertmacro PFI_LANG_LOAD "SimpChinese"
         !insertmacro PFI_LANG_LOAD "TradChinese"
@@ -1227,7 +1228,7 @@ copy_stopwords:
 
 copy_default_stopwords:
   File /oname=stopwords.default "..\engine\stopwords"
-  
+
   FileOpen  ${L_CFG} $PLUGINSDIR\popfile.cfg a
   FileSeek  ${L_CFG} 0 END
   FileWrite ${L_CFG} "pop3_port $G_POP3$\r$\n"
@@ -1429,9 +1430,9 @@ update_config:
   SetOutPath $INSTDIR
   Delete $INSTDIR\uninstall.exe
   WriteUninstaller $INSTDIR\uninstall.exe
-  
-  ; Attempt to remove StartUp shortcuts created during previous installations 
-  
+
+  ; Attempt to remove StartUp shortcuts created during previous installations
+
   SetShellVarContext all
   Delete "$SMSTARTUP\Run POPFile.lnk"
 
@@ -1817,7 +1818,11 @@ exit:
 SectionEnd
 
 #--------------------------------------------------------------------------
-# Installer Section: (optional) Skins component
+# Installer Section: (optional) Skins component (default = selected)
+#
+# Installs additional skins to allow the look-and-feel of the User Interface
+# to be changed. The 'SimplyBlue' skin is always installed (by the 'POPFile'
+# section) since this skin is the default skin for POPFile.
 #--------------------------------------------------------------------------
 
 Section "Skins" SecSkins
@@ -1843,7 +1848,7 @@ Section "Skins" SecSkins
 SectionEnd
 
 #--------------------------------------------------------------------------
-# Installer Section: (optional) UI Languages component
+# Installer Section: (optional) UI Languages component (default = selected)
 #
 # If this component is selected, the installer will attempt to preset the POPFile UI
 # language to match the language used for the installation. The 'UI_LANG_CONFIG' macro
@@ -1885,7 +1890,6 @@ Section "Languages" SecLangs
   StrCmp ${L_LANG} "?" use_installer_lang
 
 use_inherited_lang:
-  StrCmp ${L_LANG} "Arabic" special_case
   StrCmp ${L_LANG} "English-UK" special_case
   StrCmp ${L_LANG} "Hebrew"  0 use_installer_lang
 
@@ -1903,6 +1907,7 @@ use_installer_lang:
         ; UI_LANG_CONFIG parameters: "NSIS Language name"  "POPFile UI language name"
 
         !insertmacro UI_LANG_CONFIG "ENGLISH" "English"
+        !insertmacro UI_LANG_CONFIG "ARABIC" "Arabic"
         !insertmacro UI_LANG_CONFIG "BULGARIAN" "Bulgarian"
         !insertmacro UI_LANG_CONFIG "SIMPCHINESE" "Chinese-Simplified"
         !insertmacro UI_LANG_CONFIG "TRADCHINESE" "Chinese-Traditional"
@@ -2035,6 +2040,59 @@ SectionEnd
 !endif
 
 #--------------------------------------------------------------------------
+# Installer Section: (optional) POPFile XMLRPC component (default = not selected)
+#
+# If this component is selected, the installer installs the POPFile XML-RPC module
+# and the extra Perl modules required to support it. The XML-RPC module exposes the
+# POPFile API to allow access to many POPFile functions.
+#--------------------------------------------------------------------------
+
+Section /o "XMLRPC" SecXMLRPC
+
+  SetDetailsPrint textonly
+  DetailPrint "Installing XML-RPC support"
+  SetDetailsPrint listonly
+
+  ; Experimental POPFile component
+
+  SetOutPath $G_ROOTDIR\UI
+  File "..\engine\UI\XMLRPC.pm"
+
+  ; Perl modules required to support the POPFile XMLRPC component
+
+  SetOutPath $G_MPLIBDIR
+  File "${C_PERL_DIR}\site\lib\LWP.pm"
+  File "${C_PERL_DIR}\lib\re.pm"
+  File "${C_PERL_DIR}\site\lib\URI.pm"
+
+  SetOutPath $G_MPLIBDIR\HTTP
+  File /r "${C_PERL_DIR}\site\lib\HTTP\*"
+
+  SetOutPath $G_MPLIBDIR\LWP
+  File /r "${C_PERL_DIR}\site\lib\LWP\*"
+
+  SetOutPath $G_MPLIBDIR\SOAP
+  File /r "${C_PERL_DIR}\site\lib\SOAP\*"
+
+  SetOutPath $G_MPLIBDIR\Time
+  File /r "${C_PERL_DIR}\lib\Time\*"
+
+  SetOutPath $G_MPLIBDIR\URI
+  File /r "${C_PERL_DIR}\site\lib\URI\*"
+
+  SetOutPath $G_MPLIBDIR\XML
+  File /r "${C_PERL_DIR}\site\lib\XML\*"
+
+  SetOutPath $G_MPLIBDIR\XMLRPC
+  File /r "${C_PERL_DIR}\site\lib\XMLRPC\*"
+
+  SetDetailsPrint textonly
+  DetailPrint "XMLRPC support installed"
+  SetDetailsPrint listonly
+
+SectionEnd
+
+#--------------------------------------------------------------------------
 # Component-selection page descriptions
 #
 # There is no need to provide any translations for the 'SecKakasi' description
@@ -2045,6 +2103,7 @@ SectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile} $(DESC_SecPOPFile)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}   $(DESC_SecSkins)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}   $(DESC_SecLangs)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}  $(DESC_SecXMLRPC)
     !ifndef NO_KAKASI
       !insertmacro MUI_DESCRIPTION_TEXT ${SecKakasi} "Kakasi (used to process Japanese email)"
     !endif
@@ -4975,7 +5034,7 @@ Function CheckEudoraRequests
   Push ${L_USER}
 
   ; If user has cancelled Eudora reconfiguration, there is nothing to do
-  
+
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_EMAIL} "ioE.ini" "Settings" "NumFields"
   StrCmp ${L_EMAIL} "1" exit
 
@@ -5989,6 +6048,16 @@ skip_kakasi:
   DetailPrint "$(PFI_LANG_UN_PROGRESS_6)"
   SetDetailsPrint listonly
 
+  IfFileExists "$G_MPLIBDIR\HTTP\*.*" 0 skip_XMLRPC_support
+  RMDir /r "$G_MPLIBDIR\HTTP"
+  RMDir /r "$G_MPLIBDIR\LWP"
+  RMDir /r "$G_MPLIBDIR\SOAP"
+  RMDir /r "$G_MPLIBDIR\Time"
+  RMDir /r "$G_MPLIBDIR\URI"
+  RMDir /r "$G_MPLIBDIR\XML"
+  RMDir /r "$G_MPLIBDIR\XMLRPC"
+
+skip_XMLRPC_support:
   RMDir /r "$G_MPLIBDIR\auto"
   RMDir /r "$G_MPLIBDIR\Carp"
   RMDir /r "$G_MPLIBDIR\DBD"
@@ -6043,13 +6112,13 @@ tidymenu:
 
   RMDir $G_ROOTDIR
   RMDir $INSTDIR
-  
+
   Call un.IsNT
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} 0 cleanup_registry
-  
+
   ; Delete current user's POPFile environment variables
-  
+
   DeleteRegValue HKCU "Environment" "POPFILE_ROOT"
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
   DeleteRegValue HKCU "Environment" "POPFILE_USER"
