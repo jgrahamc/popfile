@@ -98,19 +98,33 @@
     <table class="historyTable" width="100%" summary="<TMPL_VAR NAME="Localize_History_MainTableSummary">">
         <tr class="headerRow">
 
-            <th id="removeChecks" align="left"></th>
+            <th id="removeChecks" scope="col" align="left" valign="bottom"></th>
 
             <TMPL_LOOP NAME="History_Loop_Headers">
 
-            <th class="historyLabel" scope="col" align="left">
+            <th class="historyLabel" scope="col" align="left" valign="bottom">
 
-                <span style="float:left;">
-                    <a class="columnHide" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;removecolumn=<TMPL_VAR NAME="History_Header">">
-                    <img title="<TMPL_VAR NAME="Localize_History_RemoveColumn">" src="skins/x.gif" border="0" alt=""></a>
+              <div style="padding-bottom: 1em; clear: both;" class="columnControl">
 
-                    <a href="/history?<TMPL_VAR NAME="History_Fields">&amp;setsort=<TMPL_VAR NAME="History_Sort"><TMPL_VAR NAME="History_Header">" title="<TMPL_VAR NAME="Localize_History_Click_To_Sort">">
+                <a style="float: left; padding: 0 0.2em;" class="columnHide" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;removecolumn=<TMPL_VAR NAME="History_Header">">
+                <img title="<TMPL_VAR NAME="Localize_History_RemoveColumn">" src="skins/x.gif" border="0" alt=""></a>
 
-                    <TMPL_IF NAME="History_If_Sorted">
+                <span style="float:right;">
+                    <TMPL_IF NAME="History_If_MoveLeft">
+                       <a style="float:left; padding: 0 0.2em;" class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveleft=<TMPL_VAR NAME="History_Header">">
+                       <img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/leftarrow.gif" border="0" alt=""></a>
+                    </TMPL_IF>
+
+                    <TMPL_IF NAME="History_If_MoveRight">
+                       <a style="float:left; padding: 0 0.2em;" class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveright=<TMPL_VAR NAME="History_Header">">
+                       <img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/rightarrow.gif" border="0" alt=""></a>
+                    </TMPL_IF>
+                </span>
+              </div>
+
+              <a href="/history?<TMPL_VAR NAME="History_Fields">&amp;setsort=<TMPL_VAR NAME="History_Sort"><TMPL_VAR NAME="History_Header">" title="<TMPL_VAR NAME="Localize_History_Click_To_Sort">">
+
+              <TMPL_IF NAME="History_If_Sorted">
 
                     <em class="historyLabelSort">
 
@@ -126,31 +140,18 @@
 
                     </em>
 
-                    <TMPL_ELSE>
+              <TMPL_ELSE>
 
-                    <TMPL_VAR NAME="History_Label"></a>
+              <TMPL_VAR NAME="History_Label"></a>
 
-                    </TMPL_IF>
-
-                </span>
-
-                <span style="float:right;">
-                    <TMPL_IF NAME="History_If_MoveLeft">
-                    <a class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveleft=<TMPL_VAR NAME="History_Header">">
-                    <img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/leftarrow.gif" border="0" alt=""></a>
-                    </TMPL_IF>
-                    <TMPL_IF NAME="History_If_MoveRight">
-                    <a class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveright=<TMPL_VAR NAME="History_Header">">
-                    <img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/rightarrow.gif" border="0" alt=""></a>
-                    </TMPL_IF>
-                </span>
+              </TMPL_IF>
             </th>
 
             </TMPL_LOOP>
 
-            <td scope="col" align="center">
+            <th scope="col" align="center" valign="bottom">
                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
-            </td>
+            </th>
         </tr>
 
         <TMPL_LOOP NAME="History_Loop_Messages">
