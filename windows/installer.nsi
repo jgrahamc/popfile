@@ -2895,6 +2895,7 @@ try_again:
   Delete "$G_ROOTDIR\pfimsgcapture.exe"
 
 continue:
+  Delete "$G_ROOTDIR\otto.png"
   Delete "$G_ROOTDIR\*.gif"
   Delete "$G_ROOTDIR\*.change"
   Delete "$G_ROOTDIR\*.change.txt"
