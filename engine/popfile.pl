@@ -20,10 +20,14 @@ use Classifier::Bayes;
 use IO::Socket;
 use IO::Select;
 
+# This is used to get the hostname of the current machine
+# in a cross platform way
+use Sys::Hostname;
+
 # This version number
 my $major_version = 0;
 my $minor_version = 17;
-my $build_version = 9;
+my $build_version = 10;
 
 # The name of the debug file
 my $debug_filename;
@@ -2596,10 +2600,7 @@ if ( $configuration{unclassified_probability} != 0 )  {
 $classifier->load_word_matrix();
 
 # Get the hostname for use in the X-POPFile-Link header
-use Sys::Hostname;
 $hostname = hostname;
-
-debug( "We are $hostname" );
 
 debug( "POPFile Engine v$major_version.$minor_version.$build_version running" );
 
