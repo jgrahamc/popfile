@@ -2355,7 +2355,7 @@ sub history_page
         $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n";
         $body .= "<input type=\"hidden\" name=\"filter\" value=\"$self->{form}{filter}\">\n";
         
-        $body .= "<input type=\"text\" name=\"search\"";
+        $body .= "<input type=\"text\" name=\"search\" ";
         $body .= "value=\"$self->{form}{search}\"" if (defined $self->{form}{search});
         $body .= "> \n" ;
         $body .= "<input type=submit class=submit name=searchbutton value=\"$self->{language}{Find}\">\n";
