@@ -118,7 +118,7 @@
 # should end with a \r\n\r\n$_CLICK sequence).
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_INFO_TEXT    "This wizard will guide you through the configuration of POPFile for the '$G_WINUSERNAME' user.\r\n\r\nIt is recommended that you close all other applications before continuing.\r\n\r\n$_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_INFO_TEXT    "Este assistente vai guiar você pela configuração do POPFile para o usuário '$G_WINUSERNAME'.\r\n\r\nÉ recomendado que você feche todas as outras aplicações antes de continuar.\r\n\r\n$_CLICK"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Directory Page (for the 'Add POPFile User' wizard)
@@ -133,30 +133,30 @@
 # Standard MUI Page - Installation Page (for the 'Add POPFile User' wizard)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_TITLE        "Configuring POPFile for '$G_WINUSERNAME' user"
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_SUBTITLE     "Please wait while the POPFile configuration files are updated for this user"
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_TITLE        "Configurando o POPFile para o usuário '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_SUBTITLE     "Por favor espere enquanto os arquivos de configuração do POPFile são atualizados para este usuário"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish (for the 'Add POPFile User' wizard)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_FINISH_INFO "POPFile has been configured for the '$G_WINUSERNAME' user.\r\n\r\nClick Finish to close this wizard."
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_FINISH_INFO "O POPFile foi configurado para o usuário '$G_WINUSERNAME'.\r\n\r\nClique em Finalizar para fechar este assistente."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall Confirmation Page (for the 'Add POPFile User' wizard)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TITLE        "Uninstall POPFile data for '$G_WINUSERNAME' user"
-!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_SUBTITLE     "Remove POPFile configuration data for this user from your computer"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TITLE        "Desinstalar dados do POPFile para o usuário '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_SUBTITLE     "Remover dados de configuração do POPFile para este usuário do seu computador"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TEXT_TOP     "The POPFile configuration data for the '$G_WINUSERNAME' user will be uninstalled from the following folder. $_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TEXT_TOP     "Os dados de configuração do POPFile para o usuário '$G_WINUSERNAME' serão desinstalados da seguinte pasta. $_CLICK"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstallation Page (for the 'Add POPFile User' wizard)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_TITLE       "Uninstalling POPFile data for '$G_WINUSERNAME' user"
-!insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_SUBTITLE    "Please wait while the POPFile configuration files for this user are deleted"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_TITLE       "Desinstalando dados do POPFile para o usuário '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_SUBTITLE    "Por favor espere enquanto os arquivos de configuração do POPFile para este usuário são deletados"
 
 
 #==========================================================================
@@ -182,7 +182,7 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1   "Instalação anterior encontrada em"
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2   "Você quer atualizá-la?"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_3   "Previous configuration data found at"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_3   "Dados de configuração anteriores encontrados em"
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
@@ -531,12 +531,12 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_5             "Removendo todos os arquivos da pasta do POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_6             "Nota: impossível remover todos os arquivos da pasta do POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_7             "Problemas nos dados"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_8             "Removing all files from POPFile 'User Data' directory"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_9             "Note: unable to remove all files from POPFile 'User Data' directory"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_8             "Removendo todos os arquivos do diretório 'User Data' do POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_9             "Nota: impossível remover todos os arquivos do diretório 'User Data' do POPFile"
 
 ; Message Box text strings
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDIFFUSER_1      "'$G_WINUSERNAME' is attempting to remove data belonging to another user"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDIFFUSER_1      "'$G_WINUSERNAME' está tentando remover dados pertencentes a outro usuário"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_1      "Não parece que o POPFile esteja instalado nesta pasta"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "Continuar mesmo assim (não recomendado) ?"
@@ -556,7 +556,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_4         "Clique em 'Sim' para manter estes dados (para tentar outra vez mais tarde)"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Você quer remover todos os arquivos da sua pasta do POPFile ?$\r$\n$\r$\n(Se você tiver qualquer coisa que você criou e quer manter, clique Não)"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Do you want to remove all files in your POPFile 'User Data' directory?$\r$\n$\r$\n(If you have anything you created that you want to keep, click No)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Você quer remover todos os arquivos do seu diretório 'User Data' do POPFile?$\r$\n$\r$\n(Se você tiver qualquer coisa que você criou e quer manter, clique em Não)"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "Nota"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "não pode ser removido."
