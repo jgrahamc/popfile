@@ -93,7 +93,7 @@ Locale_Date                            %a %R | %d.%m.%y %R
 Header_Title                            POPFile Kontrollzentrum
 Header_Shutdown                         Herunterfahren
 Header_History                          Verlauf
-Header_Buckets                          Kategorie
+Header_Buckets                          Kategorien
 Header_Configuration                    Konfiguration
 Header_Advanced                         Erweitert
 Header_Security                         Sicherheit
@@ -103,7 +103,7 @@ Footer_HomePage                         POPFile Homepage
 Footer_Manual                           Handbuch
 Footer_Forums                           Foren
 Footer_FeedMe                           Spenden
-Footer_RequestFeature                   Funktionalität vorschlagen
+Footer_RequestFeature                   Verbesserung vorschlagen
 Footer_MailingList                      Mailing Liste
 Footer_Wiki                             Zusätzliche Dokumentation
 
@@ -282,8 +282,8 @@ Bucket_EmailsClassifiedUpper            Nachrichten klassifiziert
 Bucket_ClassificationErrors             Einstufungsfehler
 Bucket_Accuracy                         Genauigkeit
 Bucket_ClassificationCount              Anzahl Einstufungen
-Bucket_ClassificationFP                 fehlerhaft Positive
-Bucket_ClassificationFN                 fehlerhaft Negative
+Bucket_ClassificationFP                 falsch positiv
+Bucket_ClassificationFN                 falsch negativ
 Bucket_ResetStatistics                  Statistiken zurücksetzen
 Bucket_LastReset                        Läuft seit
 Bucket_CurrentColor                     Derzeitige Farbe von %s ist %s
