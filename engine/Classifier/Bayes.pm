@@ -287,7 +287,7 @@ sub classified
 {
     my ( $self, $session, $class ) = @_;
 
-    $self->set_bucket_parameter( $session, $class, 'count', 
+    $self->set_bucket_parameter( $session, $class, 'count',
         $self->get_bucket_parameter( $session, $class, 'count' ) + 1 );
 }
 
@@ -410,7 +410,7 @@ sub get_sort_value_
     my $v = $self->get_value_( $session, $bucket, $word );
 
     if ( $v == 0 ) {
-        
+
         my $userid = $self->valid_session_key__( $session );
         return undef if ( !defined( $userid ) );
 
@@ -645,7 +645,7 @@ sub db_connect__
 
     $self->{db_delete_zero_words__} = $self->{db__}->prepare(
              'delete from matrix
-                  where matrix.times = 0  
+                  where matrix.times = 0
                     and matrix.bucketid = ?;' );
 
     # Get the mapping from parameter names to ids into a local hash
@@ -812,7 +812,7 @@ sub db_put_word_count__
 
     $self->{db_put_word_count__}->execute( $bucketid, $wordid, $count );
 
-    # If we set the word count to zero then clean it up by deleting the 
+    # If we set the word count to zero then clean it up by deleting the
     # entry
 
     $self->{db_delete_zero_words__}->execute( $bucketid );
@@ -1185,30 +1185,30 @@ sub add_words_to_bucket__
     return undef if ( !defined( $userid ) );
 
     # Map the list of words to a list of counts currently in the database
-    # then update those counts and write them back to the database.  
+    # then update those counts and write them back to the database.
 
     my $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
 
     $self->{get_wordids__} = $self->{db__}->prepare(
-             "select id, word 
+             "select id, word
                   from words
                   where word in ( $words );" );
     $self->{get_wordids__}->execute;
 
     my @id_list;
     my %wordmap;
-  
+
     while ( my $row = $self->{get_wordids__}->fetchrow_arrayref ) {
         push @id_list, ($row->[0]);
-        $wordmap{$row->[1]} = $row->[0]; 
+        $wordmap{$row->[1]} = $row->[0];
     }
-     
-    $self->{get_wordids__}->finish;           
+
+    $self->{get_wordids__}->finish;
 
     my $ids = join( ',', @id_list );
 
-    $self->{db_getwords__} = $self->{db__}->prepare( 
-             "select matrix.times, matrix.wordid 
+    $self->{db_getwords__} = $self->{db__}->prepare(
+             "select matrix.times, matrix.wordid
                   from matrix
                   where matrix.wordid in ( $ids )
                     and matrix.bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};" );
@@ -1226,7 +1226,7 @@ sub add_words_to_bucket__
     $self->{db__}->begin_work;
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
 
-        # If there's already a count then it means that the word is already 
+        # If there's already a count then it means that the word is already
         # in the database and we have its id in $wordmap{$word} so for speed we
         # execute the db_put_word_count__ query here rather than going through
         # set_value_ which would need to look up the wordid again
@@ -1237,7 +1237,7 @@ sub add_words_to_bucket__
 	} else {
 
             # If the word is not in the database and we are trying to subtract then
-            # we do nothing because negative values are meaningless 
+            # we do nothing because negative values are meaningless
 
             if ( $subtract == 1 ) {
                 $self->set_value_( $session, $bucket, $word, $self->{parser__}->{words__}{$word} );
@@ -1643,15 +1643,17 @@ sub classify
     #
     # NOTE.  Since there is a single not_likely probability we do not worry about
     #        the fact that the select in 1 might return a shorter list of words
-    #        than was found in the message (because some words are not in the 
+    #        than was found in the message (because some words are not in the
     #        database) since the missing words will be the same for all buckets
     #        and hence constitute a fixed scaling factor on all the buckets which
     #        is irrelevant in deciding which the winning bucket is.
 
     my $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
 
+
+
     $self->{get_wordids__} = $self->{db__}->prepare(
-             "select id, word 
+             "select id, word
                   from words
                   where word in ( $words )
                   order by id;" );
@@ -1661,21 +1663,21 @@ sub classify
     my %temp_idmap;
 
     if ( !defined( $idmap ) ) {
-        $idmap = \%temp_idmap; 
+        $idmap = \%temp_idmap;
     }
 
     while ( my $row = $self->{get_wordids__}->fetchrow_arrayref ) {
         push @id_list, ($row->[0]);
-        $$idmap{$row->[0]} = $row->[1]; 
+        $$idmap{$row->[0]} = $row->[1];
     }
-     
-    $self->{get_wordids__}->finish;           
+
+    $self->{get_wordids__}->finish;
 
     my $ids = join( ',', @id_list );
 
-    $self->{db_classify__} = $self->{db__}->prepare( 
-             "select matrix.times, matrix.wordid, buckets.name 
-                  from matrix, buckets 
+    $self->{db_classify__} = $self->{db__}->prepare(
+             "select matrix.times, matrix.wordid, buckets.name
+                  from matrix, buckets
                   where matrix.wordid in ( $ids )
                     and matrix.bucketid = buckets.id
                     and buckets.userid = $userid;" );
@@ -1686,8 +1688,8 @@ sub classify
     # $matrix{$wordid}{$bucket} == $count
 
     my %temp_matrix;
-   
-    if ( !defined( $matrix ) ) { 
+
+    if ( !defined( $matrix ) ) {
         $matrix = \%temp_matrix;
     }
 
@@ -1697,13 +1699,14 @@ sub classify
 
     $self->{db_classify__}->finish;
 
+
     foreach my $id (@id_list) {
         $word_count += 2;
         my $wmax = -10000;
 
         foreach my $bucket (@buckets) {
             my $probability = 0;
- 
+
             if ( defined($$matrix{$id}{$bucket}) && ( $$matrix{$id}{$bucket} > 0 ) ) {
                 $probability = log( $$matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket} );
 	    }
@@ -2085,7 +2088,7 @@ sub classify_and_modify
     $echo = 1    unless (defined $echo);
     $crlf = $eol unless (defined $crlf);
 
-    my $msg_subject     = '';     # The message subject
+    my $msg_subject;              # The message subject
     my $msg_head_before = '';     # Store the message headers that come before Subject here
     my $msg_head_after  = '';     # Store the message headers that come after Subject here
     my $msg_head_q      = '';     # Store questionable header lines here
@@ -2182,7 +2185,7 @@ sub classify_and_modify
                     # can't detect
 
                     if ( $line =~ /^(([ \t])|(([a-zA-Z\-])+:))/ ) {
-                        if ( $msg_subject eq '' )  {
+                        if ( !defined($msg_subject) )  {
                             $msg_head_before .= $msg_head_q . $line;
                         } else {
                             $msg_head_after  .= $msg_head_q . $line;
@@ -2511,7 +2514,7 @@ sub is_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    return ( ( defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) && 
+    return ( ( defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) &&
              ( !$self->{db_bucketid__}{$userid}{$bucket}{pseudo} ) );
 }
 
@@ -3373,9 +3376,9 @@ sub remove_stopword
 # ---------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------
 #       _____   _____   _____  _______ _____        _______     _______  _____  _____
-#      |_____] |     | |_____] |______   |   |      |______     |_____| |_____]   |  
+#      |_____] |     | |_____] |______   |   |      |______     |_____| |_____]   |
 #      |       |_____| |       |       __|__ |_____ |______     |     | |       __|__
-#                                                     
+#
 # ---------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------
 
