@@ -353,7 +353,7 @@
 
   ; Debug aid: Hide the installation log but let user display it (using "Show details" button)
 
-##  !define MUI_FINISHPAGE_NOAUTOCLOSE
+  !define MUI_FINISHPAGE_NOAUTOCLOSE
 
   ;----------------------------------------------------------------
   ;  Interface Settings - Abort Warning Settings
@@ -460,6 +460,12 @@
   ;---------------------------------------------------
   ; Installer Page - Install POPFile PROGRAM files
   ;---------------------------------------------------
+
+  ; Replace the standard "Installation Complete/Setup was completed successfully" header
+  ; with one indicating that the next step is to configure POPFile
+
+  !define MUI_INSTFILESPAGE_FINISHHEADER_TEXT    "$(PFI_LANG_INSTFINISH_TITLE)"
+  !define MUI_INSTFILESPAGE_FINISHHEADER_SUBTEXT "$(PFI_LANG_INSTFINISH_SUBTITLE)"
 
   !insertmacro MUI_PAGE_INSTFILES
 
@@ -766,6 +772,11 @@ Section "POPFile" SecPOPFile
 
   Call MinPerlRestructure
 
+  ; Now that the HTML for the UI is no longer embedded in the Perl code, a new skin system is
+  ; used so we attempt to convert the existing skins to work with the new system
+
+  Call SkinsRestructure
+
   StrCmp $G_WINUSERTYPE "Admin" 0 current_user_root
   WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "Installer Language" "$LANGUAGE"
   WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Major Version" "${C_POPFILE_MAJOR_VERSION}"
@@ -880,7 +891,7 @@ save_HKCU_root_sfn:
   File "..\engine\UI\HTML.pm"
   File "..\engine\UI\HTTP.pm"
 
-  ; 'English' version of the manual
+  ; 'English' version of the QuickStart Guide
 
   SetOutPath "$G_ROOTDIR\manual"
   File "..\engine\manual\*.gif"
@@ -895,8 +906,8 @@ save_HKCU_root_sfn:
 
   ; Default UI skin (the POPFile UI looks better if a skin is used)
 
-  SetOutPath "$G_ROOTDIR\skins"
-  File "..\engine\skins\SimplyBlue.css"
+  SetOutPath "$G_ROOTDIR\skins\default"
+  File "..\engine\skins\default\*.*"
 
   ; Install the Minimal Perl files
 
@@ -941,12 +952,18 @@ save_HKCU_root_sfn:
 
   SetOutPath "$G_MPLIBDIR\File"
   File "${C_PERL_DIR}\lib\File\Glob.pm"
+  File "${C_PERL_DIR}\lib\File\Spec.pm"
+
+  SetOutPath "$G_MPLIBDIR\File\Spec"
+  File "${C_PERL_DIR}\lib\File\Spec\Unix.pm"
+  File "${C_PERL_DIR}\lib\File\Spec\Win32.pm"
 
   SetOutPath "$G_MPLIBDIR\Getopt"
   File "${C_PERL_DIR}\lib\Getopt\Long.pm"
 
   SetOutPath "$G_MPLIBDIR\HTML"
   File "${C_PERL_DIR}\site\lib\HTML\Tagset.pm"
+  File "${C_PERL_DIR}\site\lib\HTML\Template.pm"
 
   SetOutPath "$G_MPLIBDIR\IO"
   File "${C_PERL_DIR}\lib\IO\*"
@@ -1036,17 +1053,19 @@ save_HKCU_root_sfn:
   Delete "$G_ROOTDIR\uninstall.exe"
   WriteUninstaller "$G_ROOTDIR\uninstall.exe"
 
-  ; Attempt to remove StartUp shortcuts created during previous installations
+  ; Attempt to remove some StartUp and Start Menu shortcuts created by previous installations
 
   SetShellVarContext all
   Delete "$SMSTARTUP\Run POPFile.lnk"
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url"
 
   SetShellVarContext current
   Delete "$SMSTARTUP\Run POPFile.lnk"
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url"
 
   ; Create the START MENU entries
 
@@ -1103,8 +1122,8 @@ uninst_shortcut:
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
 
-  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" NORMAL
-  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" \
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" NORMAL
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" \
               "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" NORMAL
@@ -1179,7 +1198,7 @@ SectionEnd
 # Installer Section: (optional) Skins component (default = selected)
 #
 # Installs additional skins to allow the look-and-feel of the User Interface
-# to be changed. The 'SimplyBlue' skin is always installed (by the 'POPFile'
+# to be changed. The 'default' skin is always installed (by the 'POPFile'
 # section) since this is the default skin for POPFile.
 #--------------------------------------------------------------------------
 
@@ -1189,15 +1208,80 @@ Section "Skins" SecSkins
   DetailPrint "$(PFI_LANG_INST_PROG_SKINS)"
   SetDetailsPrint listonly
 
-  SetOutPath "$G_ROOTDIR\skins"
-  File "..\engine\skins\*.css"
-  File "..\engine\skins\*.gif"
+  SetOutPath "$G_ROOTDIR\skins\blue"
+  File "..\engine\skins\blue\*.*"
 
-  SetOutPath "$G_ROOTDIR\skins\lavishImages"
-  File "..\engine\skins\lavishImages\*.gif"
+  SetOutPath "$G_ROOTDIR\skins\coolblue"
+  File "..\engine\skins\coolblue\*.*"
 
-  SetOutPath "$G_ROOTDIR\skins\sleetImages"
-  File "..\engine\skins\sleetImages\*.gif"
+  SetOutPath "$G_ROOTDIR\skins\coolbrown"
+  File "..\engine\skins\coolbrown\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\coolgreen"
+  File "..\engine\skins\coolgreen\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\coolorange"
+  File "..\engine\skins\coolorange\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\coolyellow"
+  File "..\engine\skins\coolyellow\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\default"
+  File "..\engine\skins\default\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\glassblue"
+  File "..\engine\skins\glassblue\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\green"
+  File "..\engine\skins\green\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\lavish"
+  File "..\engine\skins\lavish\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\lrclaptop"
+  File "..\engine\skins\lrclaptop\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\orange"
+  File "..\engine\skins\orange\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\orangecream"
+  File "..\engine\skins\orangecream\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\outlook"
+  File "..\engine\skins\outlook\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\prjbluegrey"
+  File "..\engine\skins\prjbluegrey\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\prjsteelbeach"
+  File "..\engine\skins\prjsteelbeach\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\sleet"
+  File "..\engine\skins\sleet\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\sleet-rtl"
+  File "..\engine\skins\sleet-rtl\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\smalldefault"
+  File "..\engine\skins\smalldefault\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\smallgrey"
+  File "..\engine\skins\smallgrey\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\strawberryrose"
+  File "..\engine\skins\strawberryrose\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\tinydefault"
+  File "..\engine\skins\tinydefault\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\tinygrey"
+  File "..\engine\skins\tinygrey\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\white"
+  File "..\engine\skins\white\*.*"
+
+  SetOutPath "$G_ROOTDIR\skins\windows"
+  File "..\engine\skins\windows\*.*"
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
@@ -1388,6 +1472,27 @@ Section /o "XMLRPC" SecXMLRPC
 
 SectionEnd
 
+#--------------------------------------------------------------------------
+# Installer Section: (optional) POPFile IMAP component (default = not selected)
+#
+# If this component is selected, the installer installs the experimental IMAP module.
+#--------------------------------------------------------------------------
+
+Section /o "IMAP" SecIMAP
+
+  SetDetailsPrint textonly
+  DetailPrint "Installing IMAP module..."
+  SetDetailsPrint listonly
+
+  SetOutpath "$G_ROOTDIR\POPFile"
+  File "..\engine\POPFile\IMAP.pm"
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
+
+SectionEnd
+
 SubSectionEnd
 
 #--------------------------------------------------------------------------
@@ -1403,6 +1508,8 @@ SubSectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}   $(DESC_SecLangs)
     !insertmacro MUI_DESCRIPTION_TEXT ${SubSecOptional} "Extra POPFile components (for advanced users)"
     !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}  $(DESC_SecXMLRPC)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}  \
+        "Installs POPFile's experimental IMAP module"
     !ifndef NO_KAKASI
       !insertmacro MUI_DESCRIPTION_TEXT ${SecKakasi} "Kakasi (used to process Japanese email)"
     !endif
@@ -1771,6 +1878,73 @@ exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
+# Installer Function: SkinsRestructure
+#
+# Now that the HTML for the UI is no longer embedded in the Perl code, some changes need to be
+# made to the skins. There is now a new default skin which includes a set of HTML template files
+# in addition to a CSS file. Additional skins consist of separate folders containing 'style.css'
+# and any image files used by the skin (instead of each skin using a uniquely named CSS file in
+# the 'skins' folder, with any necessary image files being stored either in the 'skins' folder
+# or in a separate sub-folder).
+#
+# We attempt to rearrange any existing skins to suit this new structure (the current build only
+# handles the standard set of UI skins supplied with the 0.21.1 release). The new default skin
+# and its associated HTML template files are always installed (even if the 'skins' component is
+# not installed).
+#--------------------------------------------------------------------------
+
+Function SkinsRestructure
+
+  IfFileExists "$G_ROOTDIR\skins\default\*.thtml" exit
+
+  !insertmacro SkinMove "blue"           "blue"
+  !insertmacro SkinMove "CoolBlue"       "coolblue"
+  !insertmacro SkinMove "CoolBrown"      "coolbrown"
+  !insertmacro SkinMove "CoolGreen"      "coolgreen"
+  !insertmacro SkinMove "CoolOrange"     "coolorange"
+  !insertmacro SkinMove "CoolYellow"     "coolyellow"
+  !insertmacro SkinMove "default"        "default"
+  !insertmacro SkinMove "glassblue"      "glassblue"
+  !insertmacro SkinMove "green"          "green"
+  IfFileExists "$G_ROOTDIR\skins\lavishImages\*.*" 0 lavish
+  Rename  "$G_ROOTDIR\skins\lavishImages" "$G_ROOTDIR\skins\lavish"
+
+lavish:
+  !insertmacro SkinMove "Lavish"         "lavish"
+  !insertmacro SkinMove "LRCLaptop"      "lrclaptop"
+  !insertmacro SkinMove "orange"         "orange"
+  !insertmacro SkinMove "orangeCream"    "orangecream"
+  !insertmacro SkinMove "outlook"        "outlook"
+  !insertmacro SkinMove "PRJBlueGrey"    "prjbluegrey"
+  !insertmacro SkinMove "PRJSteelBeach"  "prjsteelbeach"
+  !insertmacro SkinMove "SimplyBlue"     "simplyblue"
+  IfFileExists "$G_ROOTDIR\skins\sleetImages\*.*" 0 sleet
+  Rename  "$G_ROOTDIR\skins\sleetImages" "$G_ROOTDIR\skins\sleet"
+
+sleet:
+  !insertmacro SkinMove "Sleet"          "sleet"
+  !insertmacro SkinMove "Sleet-RTL"      "sleet-rtl"
+  !insertmacro SkinMove "smalldefault"   "smalldefault"
+  !insertmacro SkinMove "smallgrey"      "smallgrey"
+  !insertmacro SkinMove "StrawberryRose" "strawberryrose"
+  !insertmacro SkinMove "tinydefault"    "tinydefault"
+  !insertmacro SkinMove "tinygrey"       "tinygrey"
+  !insertmacro SkinMove "white"          "white"
+  !insertmacro SkinMove "windows"        "windows"
+
+  IfFileExists "$G_ROOTDIR\skins\chipped_obsidian.gif" 0 metalback
+  CreateDirectory "$G_ROOTDIR\skins\prjsteelbeach"
+  Rename "$G_ROOTDIR\skins\chipped_obsidian.gif" "$G_ROOTDIR\skins\prjsteelbeach\chipped_obsidian.gif"
+
+metalback:
+  IfFileExists "$G_ROOTDIR\skins\metalback.gif" 0 exit
+  CreateDirectory "$G_ROOTDIR\skins\prjsteelbeach"
+  Rename "$G_ROOTDIR\skins\metalback.gif" "$G_ROOTDIR\skins\prjsteelbeach\metalback.gif"
+
+exit:
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Installer Function: CheckForExistingLocation
 # (the "pre" function for the POPFile PROGRAM DIRECTORY selection page)
 #
@@ -1998,7 +2172,7 @@ FunctionEnd
 #  (5) un.POPFile Core       - uninstall POPFile PROGRAM files
 #  (6) un.Skins              - uninstall POPFile skins
 #  (7) un.Languages          - uninstall POPFile UI languages
-#  (8) un.Manual             - uninstall POPFile English manual
+#  (8) un.QuickStart Guide   - uninstall POPFile English QuickStart Guide
 #  (9) un.Kakasi             - uninstall Kakasi package and remove its environment variables
 # (10) un.Minimal Perl       - uninstall minimal Perl, including all of the optional modules
 # (11) un.Registry Entries   - remove 'Add/Remove Program' data and other registry entries
@@ -2207,7 +2381,6 @@ Section "un.Start Menu Entries" UnSecStartMenu
 
 menucleanup:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url"
-  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Manual.url"
   RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
 
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk"
@@ -2217,7 +2390,7 @@ menucleanup:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk"
 
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url"
-  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url"
 
@@ -2317,12 +2490,32 @@ Section "un.Skins" UnSecSkins
   DetailPrint "$(PFI_LANG_UN_PROG_SKINS)"
   SetDetailsPrint listonly
 
-  Delete "$G_ROOTDIR\skins\*.css"
-  Delete "$G_ROOTDIR\skins\*.gif"
-  Delete "$G_ROOTDIR\skins\lavishImages\*.gif"
-  Delete "$G_ROOTDIR\skins\sleetImages\*.gif"
-  RMDir "$G_ROOTDIR\skins\sleetImages"
-  RMDir "$G_ROOTDIR\skins\lavishImages"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\blue"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\coolblue"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\coolbrown"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\coolgreen"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\coolorange"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\coolyellow"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\default"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\glassblue"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\green"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\lavish"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\lrclaptop"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\orange"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\orangecream"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\outlook"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\prjbluegrey"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\prjsteelbeach"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\sleet"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\sleet-rtl"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\smalldefault"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\smallgrey"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\strawberryrose"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\tinydefault"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\tinygrey"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\white"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\windows"
+
   RMDir "$G_ROOTDIR\skins"
 
   SetDetailsPrint textonly
@@ -2351,10 +2544,10 @@ Section "un.Languages" UnSecLangs
 SectionEnd
 
 #--------------------------------------------------------------------------
-# Uninstaller Section: 'un.Manual'
+# Uninstaller Section: 'un.QuickStart Guide'
 #--------------------------------------------------------------------------
 
-Section "un.Manual" UnSecManual
+Section "un.QuickStart Guide" UnSecQuickGuide
 
   SetDetailsPrint textonly
   DetailPrint " "
@@ -2527,7 +2720,6 @@ section_exit:
   Pop ${L_REGDATA}
 
   !undef L_REGDATA
-
 SectionEnd
 
 #--------------------------------------------------------------------------
