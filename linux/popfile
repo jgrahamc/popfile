@@ -1,0 +1,113 @@
+#!/bin/sh
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# Copyright (c) 2003 John Graham-Cumming
+#
+# ===
+#
+# popfile
+#
+# A shell script designed to start and stop POPFile from within
+# /etc/init.d on *nix systems.
+#
+# usage: popfile { start | stop | restart | }
+ 
+##
+# RedHat comment block...
+#
+# chkconfig: 345 80 20
+# description: popfile is a POP3 proxy and mail filter
+# pidfile: /var/run/popfile.pid
+# processname: popfile
+##
+ 
+##
+# LSB comment block...
+#
+# The bogus 345 run-levels are a workround for a buggy RedHat chkconfig which
+# reads the LSB comment block (incorrectly) as an undocumented 'feature'.
+#
+### BEGIN INIT INFO
+# Provides: popfile
+# Required-Start: $network
+# Required-Stop: $network
+# Default-Start: 345 3 4 5
+# Default-Stop: 345 3 4 5
+# Description: popfile is a POP3 proxy and mail filter
+### END INIT INFO
+##
+ 
+popfile_root=/home/jgc/src/popfile/engine
+popfile="${popfile_root}/popfile.pl" 
+cwd=`pwd`
+popfile_pid="${popfile_root}/popfile.pid"
+pid=`cat ${popfile_pid} 2> /dev/null` 
+
+start() {
+    echo -n "Starting POPFile as background process: "
+    if [ "${pid}" = "" ] ; then
+        cd ${popfile_root}
+        export POPFILE_ROOT=${popfile_root}
+        export POPFILE_USER=${popfile_root}
+        ${popfile} &> /var/log/popfile &
+        echo " done"
+    else
+        echo " POPFile already running"
+    fi
+}
+ 
+stop() {
+    echo -n "Stopping POPFile: "
+ 
+    if [ "${pid}" = "" ] ; then
+        echo "POPFile not running"
+    else
+        kill $pid
+        echo " done"
+    fi
+}
+ 
+status() {
+    if [ "${pid}" = "" ] ; then
+        echo "down"
+    else
+        echo "up"
+    fi
+}
+ 
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    status)
+        status
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
+ 
+cd $cwd
+exit 0
