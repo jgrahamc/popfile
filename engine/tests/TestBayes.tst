@@ -60,14 +60,13 @@ $b->configuration( $c );
 $b->mq( $mq );
 $b->logger( $l );
 
+$b->module_config_( 'html', 'language', 'English' );
+
 $b->initialize();
 
 # Hide the upgrading messages
 
-open STDOUT, ">temp.tmp";
 test_assert( $b->start() );
-close STDOUT;
-unlink 'temp.tmp';
 
 # Test the unclassifier_probability parameter
 
