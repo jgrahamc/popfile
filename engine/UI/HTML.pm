@@ -36,7 +36,7 @@ my $seconds_per_day = 60 * 60 * 24;
 sub new
 {
     my $type = shift;
-    my $self;
+    my $self = POPFile::Module->new();
 
     # The classifier (Classifier::Bayes)
 
@@ -118,57 +118,57 @@ sub initialize
 {
     my ( $self ) = @_;
 
-    # $self->config_( $1, $2, 1 );
+    $self->config_( 'port', 8080 );
 
     # Checking for updates if off by default
-    $self->config_( 'update_check', 0, 1 );
+    $self->config_( 'update_check', 0 );
 
     # Sending of statistics is off
-    $self->config_( 'send_stats', 0, 1 );
+    $self->config_( 'send_stats', 0 );
 
     # The size of a history page
-    $self->config_( 'page_size', 20, 1 );
+    $self->config_( 'page_size', 20 );
 
     # Only accept connections from the local machine for the UI
-    $self->config_( 'localui', 1, 1 );
+    $self->config_( 'local', 1 );
 
     # The default location for the message files
-    $self->config_( 'msgdir', 'messages/', 1 );
+    $self->config_( 'msgdir', 'messages/' );
 
     # Use the default skin
-    $self->config_( 'skin', 'SimplyBlue', 1 );
+    $self->config_( 'skin', 'SimplyBlue' );
 
     # Keep the history for two days
-    $self->config_( 'history_days', 2, 1 );
+    $self->config_( 'history_days', 2 );
 
     # The last time we checked for an update using the local epoch
-    $self->config_( 'last_update_check', 0, 1 );
+    $self->config_( 'last_update_check', 0 );
 
     # The user interface password
-    $self->config_( 'password', '', 1 );
+    $self->config_( 'password', '' );
 
     # The last time (textual) that the statistics were reset
-    $self->config_( 'last_reset', localtime, 1 );
+    $self->config_( 'last_reset', localtime );
 
     # We start by assuming that the user speaks English like the
     # perfidious Anglo-Saxons that we are... :-)
-    $self->config_( 'language', 'English', 1 );
+    $self->config_( 'language', 'English' );
 
     # If this is 1 then when the language is loaded we will use the language string identifier as the
     # string shown in the UI.  This is used to test whether which identifiers are used where.
-    $self->config_( 'test_language', 0, 1 );
+    $self->config_( 'test_language', 0 );
 
     # If 1, Messages are saved to an archive when they are removed or expired from the history cache
     $self->config_( 'archive', 0, 1 );
 
     # The directory where messages will be archived to, in sub-directories for each bucket
-    $self->config_( 'archive_dir', "archive", 1 );
+    $self->config_( 'archive_dir', 'archive' );
 
     # This is an advanced setting which will save archived files to a randomly numbered
     # sub-directory, if set to greater than zero, otherwise messages will be saved in the
     # bucket directory
     # 0 <= directory name < archive_classes
-    $self->config_( 'archive_classes', 0, 1 );
+    $self->config_( 'archive_classes', 0 );
 
     # Load skins
     load_skins($self);
@@ -217,7 +217,7 @@ sub start
     $self->sort_filter_history( '', '', '' );
 
     $self->{server} = IO::Socket::INET->new( Proto     => 'tcp',
-                                    $self->config_( 'localui' )  == 1 ? (LocalAddr => 'localhost') : (),
+                                    $self->config_( 'local' )  == 1 ? (LocalAddr => 'localhost') : (),
                                      LocalPort => $self->config_( 'port' ),
                                      Listen    => SOMAXCONN,
                                      Reuse     => 1 );
@@ -279,7 +279,7 @@ sub service
             # without any further processing.  We don't want to allow remote users to admin POPFile
             my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
 
-            if ( ( $self->config_( 'localui' ) == 0 ) ||
+            if ( ( $self->config_( 'local' ) == 0 ) ||
                  ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
 
                 # Read the request line (GET or POST) from the client and if we manage to do that
@@ -993,8 +993,8 @@ sub security_page
 
     $self->config_( 'password', $self->{form__}{password} )         if ( defined($self->{form__}{password}) );
     $self->config_( 'server', $self->{form__}{server} )           if ( defined($self->{form__}{server}) );
-    $self->config_( 'localpop', $self->{form__}{localpop}-1 )     if ( defined($self->{form__}{localpop}) );
-    $self->config_( 'localui', $self->{form__}{localui}-1 )      if ( defined($self->{form__}{localui}) );
+    $self->config_( 'local', $self->{form__}{localpop}-1 )     if ( defined($self->{form__}{localpop}) );
+    $self->config_( 'local', $self->{form__}{localui}-1 )      if ( defined($self->{form__}{localui}) );
     $self->config_( 'update_check', $self->{form__}{update_check}-1 ) if ( defined($self->{form__}{update_check}) );
     $self->config_( 'send_stats', $self->{form__}{send_stats}-1 )   if ( defined($self->{form__}{send_stats}) );
 
@@ -1036,7 +1036,7 @@ sub security_page
     $body .= "<span class=\"securityLabel\">$self->{language__}{Security_UI}:</span><br />\n";
 
     $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td>\n";
-    if ( $self->config_( 'localui' ) == 1 ) {
+    if ( $self->config_( 'local' ) == 1 ) {
         $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
         $body .= "<span class=\"securityWidgetStateOff\">$self->{language__}{Security_NoStealthMode}</span>\n";
         $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securityAcceptHTTPOn\" name=\"toggle\" value=\"$self->{language__}{ChangeToYes}\" />\n";
@@ -1583,7 +1583,7 @@ sub corpus_page
         $self->config_( 'mcount', 0 );
         $self->config_( 'ecount', 0 );
         for my $bucket ($self->{classifier__}->get_buckets()) {
-            $self->{classifier__}->{parameters}{$bucket}{count} = 0;
+            $self->{classifier__}->set_bucket_parameter( $bucket, 'count', 0 );
         }
         $self->{classifier__}->write_parameters();
         $self->config_( 'last_reset', localtime );
@@ -1608,13 +1608,11 @@ sub corpus_page
     }
 
     if ( ( defined($self->{form__}{bucket}) ) && ( defined($self->{form__}{subject}) ) && ( $self->{form__}{subject} > 0 ) ) {
-        $self->{classifier__}->{parameters}{$self->{form__}{bucket}}{subject} = $self->{form__}{subject} - 1;
-        $self->{classifier__}->write_parameters();
+        $self->{classifier__}->set_bucket_parameter( $self->{form__}{bucket}, 'subject', $self->{form__}{subject} - 1 );
     }
 
     if ( ( defined($self->{form__}{bucket}) ) &&  ( defined($self->{form__}{quarantine}) ) && ( $self->{form__}{quarantine} > 0 ) ) {
-        $self->{classifier__}->{parameters}{$self->{form__}{bucket}}{quarantine} = $self->{form__}{quarantine} - 1;
-        $self->{classifier__}->write_parameters();
+        $self->{classifier__}->set_bucket_parameter( $self->{form__}{bucket}, 'quarantine', $self->{form__}{quarantine} - 1 );
     }
 
     if ( ( defined($self->{form__}{cname}) ) && ( $self->{form__}{cname} ne '' ) ) {
@@ -1677,7 +1675,7 @@ sub corpus_page
 
     my $total_count = 0;
     foreach my $bucket (@buckets) {
-        $total_count += $self->{classifier__}->{parameters}{$bucket}{count};
+        $total_count += $self->{classifier__}->get_bucket_parameter( $bucket, 'count' );
     }
 
     foreach my $bucket (@buckets) {
@@ -1701,7 +1699,7 @@ sub corpus_page
             # Subject Modification on/off widget
 
             $body .= "<td align=\"center\">\n";
-            if ( $self->{classifier__}->{parameters}{$bucket}{subject} == 0 ) {
+            if ( $self->{classifier__}->get_bucket_parameter( $bucket, 'subject' ) == 0 ) {
                 $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
                 $body .= "<span class=\"bucketsWidgetStateOff\">$self->{language__}{Off} </span>\n";
                 $body .= "<input type=\"submit\" class=\"toggleOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
@@ -1723,7 +1721,7 @@ sub corpus_page
         # Quarantine on/off widget
 
         $body .= "<td width=\"1%\">&nbsp;</td><td align=\"center\">\n";
-        if ( $self->{classifier__}->{parameters}{$bucket}{quarantine} == 0 ) {
+        if ( $self->{classifier__}->get_bucket_parameter( $bucket, 'quarantine' ) == 0 ) {
             $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
             $body .= "<span class=\"bucketsWidgetStateOff\">$self->{language__}{Off} </span>\n";
             $body .= "<input type=\"submit\" class=\"toggleOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
@@ -1845,7 +1843,7 @@ sub corpus_page
 
     my %bar_values;
     for my $bucket (@buckets)  {
-        $bar_values{$bucket} = $self->{classifier__}->{parameters}{$bucket}{count};
+        $bar_values{$bucket} = $self->{classifier__}->get_bucket_parameter( $bucket, 'count' );
     }
 
     $body .= bar_chart_100( $self, %bar_values );
@@ -2489,8 +2487,8 @@ sub history_reclassify
 
                 $self->{logger}->debug( "Reclassifying $mail_file from $bucket to $newbucket" );
 
-                $self->{classifier__}->{parameters}{$newbucket}{count} += 1;
-                $self->{classifier__}->{parameters}{$bucket}{count}    -= 1;
+# TODO                $self->{classifier__}->set_parameters( $newbucket, count} += 1;
+# TODO                $self->{classifier__}->{parameters}{$bucket}{count}    -= 1;
 
                 # Update the class file
 
@@ -2586,8 +2584,8 @@ sub history_undo
 
                 if ( $bucket ne $usedtobe ) {
                     $self->config_( 'ecount', $self->config_( 'ecount' ) - 1 ) if ( $self->config_( 'ecount' ) > 0 );
-                    $self->{classifier__}->{parameters}{$bucket}{count}   -= 1;
-                    $self->{classifier__}->{parameters}{$usedtobe}{count} += 1;
+# TODO                    $self->{classifier__}->{parameters}{$bucket}{count}   -= 1;
+# TODO                    $self->{classifier__}->{parameters}{$usedtobe}{count} += 1;
                 }
 
                 # Since we have just changed the classification of this file and it has

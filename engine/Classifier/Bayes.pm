@@ -33,7 +33,7 @@ my $eol = "\015\012";
 sub new
 {
     my $type = shift;
-    my $self;
+    my $self = POPFile::Module->new();
 
     # Set this to 1 to get scores for individual words in message detail
     $self->{wordscores__}        = 1;
@@ -110,10 +110,10 @@ sub initialize
     my ( $self ) = @_;
 
     # No default unclassified probability
-    $self->config_( 'unclassified_probability', 0, 1 );
+    $self->config_( 'unclassified_probability', 0 );
 
     # The corpus is kept in the 'corpus' subfolder of POPFile
-    $self->config_( 'corpus', 'corpus', 1 );
+    $self->config_( 'corpus', 'corpus' );
 
     # Get the hostname for use in the X-POPFile-Link header
     $self->{hostname__} = hostname;

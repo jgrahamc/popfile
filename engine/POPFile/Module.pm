@@ -223,7 +223,7 @@ sub log_
 {
     my ( $self, $message ) = @_;
 
-    $self->{logger__}->debug( $self->{name__} . ':' . $message );
+    $self->{logger__}->debug( $self->{name__} . ': ' . $message );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -234,40 +234,16 @@ sub log_
 #
 # $name              The name of the parameter (e.g. 'port')
 # $value             (optional) The value to set
-# $short_name        1 if the $name should be registered in short form as well
 #
 # If called with just a $name then config_() will return the current value
-# of the configuration parameter.  
-#
-# Short vs Long Names.  All configuration parameters are identified by their
-# long name which consists of the individual parameter name preceded by the
-# module name (underscore is used as the separator).  For compatbility with
-# older versions of POPFile the configuration module will also recognize some
-# short names (i.e. without the preceding name and underscore) and map automaticall
-# to the long name
-#
-# Example: POP3 registers a parameter for its listen port call port, this is stored
-# in the configuration as pop3_port.  POP3 also registers for the short name version
-# which is simply port.  When loading the configuration either will be accepted.
-#
-# Note NO NEW PARAMETERS should use short form
+# of the configuration parameter.
 #
 # ---------------------------------------------------------------------------------------------
 sub config_
 {
-    my ( $self, $name, $value, $short_name ) = @_;
+    my ( $self, $name, $value ) = @_;
 
-    my $long_name = $self->{name__} . '_' . $name;
-
-    if ( defined( $value ) ) {
-	$self->{configuration__}->{configuration}{$long_name} = $value;
-
-	if ( defined( $short_name ) ) {
-	    $self->{configuration__}->{configuration}{$name} = $value;
-	}
-    }
-
-    return $self->{configuration__}->{configuration}{$long_name};
+    return $self->{configuration__}->parameter( $self->{name__} . '_' . $name, $value );
 }
 
 # GETTER/SETTER methods.  Note that I do not expect documentation of these unless they

@@ -27,14 +27,17 @@ my $seconds_per_day = 60 * 60 * 24;
 #----------------------------------------------------------------------------
 sub new 
 {
-	my $proto = shift;
+    my $proto = shift;
     my $class = ref($proto) || $proto;
-    my $self = {};
+    my $self = POPFile::Module->new();
 
     # The name of the debug file
-    $self->{debug_filename} = '';
-    
+    $self->{debug_filename__} = '';
+
     bless($self, $class);
+
+    $self->name( 'logger' );
+
     return $self;
 }
 
@@ -50,54 +53,14 @@ sub initialize
     my ( $self ) = @_;
 
     # Start with debugging to file
-    $self->{configuration}->{configuration}{debug} = 1;
+    $self->config_( 'debug', 1 );
 
     # The default location for log files
-    $self->{configuration}->{configuration}{logdir} = './';
+    $self->config_( 'logdir', './' );
 
     remove_debug_files( $self );
-    
-    return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# start
-#
-# Called to start this module
-#
-# ---------------------------------------------------------------------------------------------
-sub start
-{
-    my ( $self ) = @_;
 
     return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# stop
-#
-# Called to shutdown this module
-#
-# ---------------------------------------------------------------------------------------------
-sub stop
-{
-    my ( $self ) = @_;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# name
-#
-# Called to get the simple name for this module
-#
-# ---------------------------------------------------------------------------------------------
-sub name
-{
-    my ( $self ) = @_;
-
-    return 'logger';
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -117,30 +80,6 @@ sub service
 
 # ---------------------------------------------------------------------------------------------
 #
-# forked
-#
-# Called when someone forks POPFile
-#
-# ---------------------------------------------------------------------------------------------
-sub forked
-{
-    my ( $self ) = @_;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# reaper
-#
-# Called to reap our dead children
-#
-# ---------------------------------------------------------------------------------------------
-sub reaper
-{
-    my ( $self ) = @_;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # remove_debug_files
 #
 # Removes popfile log files that are older than 3 days
@@ -149,12 +88,12 @@ sub reaper
 sub remove_debug_files 
 {
     my ( $self ) = @_;
-    
-    my $yesterday = defined($self->{today})?$self->{today}:0;
-    calculate_today( $self );
 
-    if ( $self->{today} > $yesterday ) {    
-        my @debug_files = glob "$self->{configuration}->{configuration}{logdir}popfile*.log";
+    my $yesterday = defined($self->{today__})?$self->{today__}:0;
+    calculate_today__( $self );
+
+    if ( $self->{today__} > $yesterday ) {
+        my @debug_files = glob $self->config_( 'logdir' ) . 'popfile*.log';
 
         foreach my $debug_file (@debug_files) {
             # Extract the epoch information from the popfile log file name
@@ -171,13 +110,13 @@ sub remove_debug_files
 # calculate_today - set the global $self->{today} variable to the current day in seconds
 #
 # ---------------------------------------------------------------------------------------------
-sub calculate_today 
+sub calculate_today__
 {
     my ( $self ) = @_;
-    
+
     # Create the name of the debug file for the debug() function
-    $self->{today} = int( time / $seconds_per_day ) * $seconds_per_day;
-    $self->{debug_filename} = "$self->{configuration}->{configuration}{logdir}popfile$self->{today}.log";
+    $self->{today__} = int( time / $seconds_per_day ) * $seconds_per_day;
+    $self->{debug_filename__} = $self->config_( 'logdir' ) . "popfile$self->{today__}.log";
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -189,11 +128,11 @@ sub calculate_today
 # Prints the passed string if the global $debug is true
 #
 # ---------------------------------------------------------------------------------------------
-sub debug 
+sub debug
 {
     my ( $self, $message ) = @_;
-    
-    if ( $self->{configuration}->{configuration}{debug} > 0 ) {
+
+    if ( $self->config_( 'debug' ) > 0 ) {
         # Check to see if we are handling the USER/PASS command and if we are then obscure the
         # account information
         $message = "$`$1$3 XXXXXX$4" if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ );
@@ -202,15 +141,15 @@ sub debug
 
         my $now = localtime;
         my $msg = "$now ($$): $message";
-        
-        if ( $self->{configuration}->{configuration}{debug} & 1 )  {
-            open DEBUG, ">>$self->{debug_filename}";
+
+        if ( $self->config_( 'debug' ) & 1 )  {
+            open DEBUG, ">>$self->{debug_filename__}";
             binmode DEBUG;
             print DEBUG $msg;
             close DEBUG;
         }
-        
-        print $msg if ( $self->{configuration}->{configuration}{debug} & 2 );
+
+        print $msg if ( $self->config_( 'debug' ) & 2 );
     }
 }
 

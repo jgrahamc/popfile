@@ -27,13 +27,16 @@ my $eol = "\015\012";
 sub new
 {
     my $type = shift;
-    my $self = {};
+    my $self = Proxy::Proxy->new();
 
     # Must call bless before attempting to call any methods
 
     bless $self, $type;
 
     $self->name( 'pop3' );
+
+    $self->{child_}            = \&child__;
+    $self->{flush_child_data_} = \&flush_child_data__;
 
     return $self;
 }
@@ -50,33 +53,33 @@ sub initialize
     my ( $self ) = @_;
 
     # Default ports for POP3 service and the user interface
-    $self->config_( 'port', 110, 1 );
+    $self->config_( 'port', 110 );
 
     # Subject modification (global setting is on)
-    $self->config_( 'subject', 1, 1 );
+    $self->config_( 'subject', 1 );
 
     # Adding the X-Text-Classification on
-    $self->config_( 'xtc', 1, 1 );
+    $self->config_( 'xtc', 1 );
 
     # Adding the X-POPFile-Link is no
-    $self->config_( 'xpl', 1, 1 );
+    $self->config_( 'xpl', 1 );
 
     # There is no default setting for the secure server
-    $self->config_( 'server', '', 1 );
-    $self->config_( 'sport', 110, 1 );
+    $self->config_( 'server', '' );
+    $self->config_( 'sport', 110 );
 
     # The default timeout in seconds for POP3 commands
-    $self->config_( 'timeout', 60, 1 );
+    $self->config_( 'timeout', 60 );
 
     # Only accept connections from the local machine for POP3
-    $self->config_( 'local', 1, 1 ); # TODO localpop
+    $self->config_( 'local', 1 ); # TODO localpop
 
     # Whether to do classification on TOP as well
-    $self->config_( 'toptoo', 0, 1 );
+    $self->config_( 'toptoo', 0 );
 
     # Start with no messages downloaded and no error
-    $self->config_( 'mcount', 0, 1 );
-    $self->config_( 'ecount', 0, 1 );
+    $self->config_( 'mcount', 0 );
+    $self->config_( 'ecount', 0 );
 
     # This counter is used when creating unique IDs for message stored
     # in the history.  The history message files have the format
@@ -86,17 +89,17 @@ sub initialize
     # Where the download_count is derived from this value and the
     # message_count is a local counter within that download, for sorting
     # purposes must sort on download_count and then message_count
-    $self->config_( 'download_count', 0, 1 );
+    $self->config_( 'download_count', 0 );
 
     # The separator within the POP3 username is :
-    $self->config_( 'separator', ':', 1 );
+    $self->config_( 'separator', ':' );
 
     return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
 #
-# flush_child_data
+# flush_child_data__
 #
 # Called to flush data from the pipe of each child as we go, I did this because there
 # appears to be a problem on Windows where the pipe gets a lot of read data in it and
@@ -107,7 +110,7 @@ sub initialize
 # $handle   The handle of the child's pipe
 #
 # ---------------------------------------------------------------------------------------------
-sub flush_child_data
+sub flush_child_data__
 {
     my ( $self, $kid, $handle ) = @_;
 
@@ -120,7 +123,7 @@ sub flush_child_data
         if ( defined( $class ) ) {
             $class =~ s/[\r\n]//g;
 
-            $self->{classifier__}->{parameters}{$class}{count} += 1;
+# TODO            $self->{classifier__}->{parameters}{$class}{count} += 1;
             $self->config_( 'mcount' )  += 1;
             $stats_changed                                    = 1;
 
@@ -144,7 +147,7 @@ sub flush_child_data
 
 # ---------------------------------------------------------------------------------------------
 #
-# child
+# child__
 #
 # The worker method that is called when we get a good connection from a client
 #
@@ -152,7 +155,7 @@ sub flush_child_data
 # $download_count - The unique download count for this session
 #
 # ---------------------------------------------------------------------------------------------
-sub child
+sub child__
 {
     my ( $self, $client, $download_count, $pipe ) = @_;
 
@@ -163,7 +166,7 @@ sub child
     my $mail;
 
     # Tell the client that we are ready for commands and identify our version number
-    $self->tee_(  $client, "+OK POP3 POPFile (v$self->{configuration}->{major_version}.$self->{configuration}->{minor_version}.$self->{configuration}->{build_version}) server ready$eol" );
+    $self->tee_( $client, "+OK POP3 POPFile (vTODO.TODO.TODO) server ready$eol" );
 
     # Retrieve commands from the client and process them until the client disconnects or
     # we get a specific QUIT command
@@ -183,12 +186,13 @@ sub child
         # pass through to that server and represents the account on the remote machine that we
         # will pull email from.  Doing this means we can act as a proxy for multiple mail clients
         # and mail accounts
-        if ( $command =~ /USER (.+)(:(\d+))?$self->config_( 'separator' )(.+)/i ) {
+	my $user_command = 'USER (.+)(:(\d+))?' . $self->config_( 'separator' ) . '(.+)';
+        if ( $command =~ /$user_command/i ) { 
             if ( $1 ne '' )  {
-                if ( $mail = verify_connected( $self, $mail, $client, $1, $3 || 110 ) )  {
+                if ( $mail = $self->verify_connected_( $mail, $client, $1, $3 || 110 ) )  {
                     # Pass through the USER command with the actual user name for this server,
                     # and send the reply straight to the client
-                    echo_response( $self, $mail, $client, 'USER ' . $4 );
+                    $self->echo_response_($mail, $client, 'USER ' . $4 );
                 } else {
                     last;
                 }
@@ -197,28 +201,28 @@ sub child
                 last;
             }
 
-            flush_extra( $self, $mail, $client, 0 );
+            $self->flush_extra_( $mail, $client, 0 );
             next;
         }
 
         # User is issuing the APOP command to start a session with the remote server
         if ( $command =~ /APOP (.*):((.*):)?(.*) (.*)/i ) {
-            if ( $mail = verify_connected( $self, $mail, $client,  $1, $3 || 110 ) )  {
+            if ( $mail = $self->verify_connected_( $mail, $client,  $1, $3 || 110 ) )  {
                 # Pass through the USER command with the actual user name for this server,
                 # and send the reply straight to the client
-                echo_response( $self, $mail, $client, "APOP $4 $5" );
+                $self->echo_response_($mail, $client, "APOP $4 $5" );
             } else {
                 last;
             }
 
-            flush_extra( $self, $mail, $client, 0 );
+            $self->flush_extra_( $mail, $client, 0 );
             next;
         }
 
         # Secure authentication
         if ( $command =~ /AUTH ([^ ]+)/ ) {
             if ( $self->config_( 'server' ) ne '' )  {
-                if ( $mail = verify_connected( $self, $mail, $client,  $self->config_( 'server' ), $self->config_( 'sport' ) ) )  {
+                if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'server' ), $self->config_( 'sport' ) ) )  {
                     # Loop until we get -ERR or +OK
                     my $response;
                     $response = get_response( $self, $mail, $client, $command );
@@ -238,7 +242,7 @@ sub child
                     last;
                 }
 
-                flush_extra( $self, $mail, $client, 0 );
+                $self->flush_extra_( $mail, $client, 0 );
             } else {
                 $self->tee_(  $client, "-ERR No secure server specified$eol" );
             }
@@ -248,15 +252,15 @@ sub child
 
         if ( $command =~ /AUTH/ ) {
             if ( $self->config_( 'server' ) ne '' )  {
-                if ( $mail = verify_connected( $self, $mail, $client,  $self->config_( 'server' ), $self->config_( 'sport' ) ) )  {
-                    if ( echo_response( $self, $mail, $client, "AUTH" ) ) {
-                        echo_to_dot_( $self, $mail, $client );
+                if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'server' ), $self->config_( 'sport' ) ) )  {
+                    if ( $self->echo_response_($mail, $client, "AUTH" ) ) {
+                        $self->echo_to_dot_( $mail, $client );
                     }
                 } else {
                     last;
                 }
 
-                flush_extra( $self, $mail, $client, 0 );
+                $self->flush_extra_( $mail, $client, 0 );
             } else {
                 $self->tee_(  $client, "-ERR No secure server specified$eol" );
             }
@@ -267,11 +271,11 @@ sub child
         # The client is requesting a LIST/UIDL of the messages
         if ( ( $command =~ /LIST ?(.*)?/i ) ||
              ( $command =~ /UIDL ?(.*)?/i ) ) {
-            if ( echo_response( $self, $mail, $client, $command ) ) {
-                echo_to_dot_( $self, $mail, $client ) if ( $1 eq '' );
+            if ( $self->echo_response_($mail, $client, $command ) ) {
+                $self->echo_to_dot_( $mail, $client ) if ( $1 eq '' );
             }
 
-            flush_extra( $self, $mail, $client, 0 );
+            $self->flush_extra_( $mail, $client, 0 );
             next;
         }
 
@@ -309,9 +313,9 @@ sub child
         if ( $command =~ /TOP (.*) (.*)/i ) {
             if ( $2 ne '99999999' )  {
                 if ( $self->config_( 'toptoo' ) ) {
-                    if ( echo_response( $self, $mail, $client, "RETR $1" ) ) {
+                    if ( $self->echo_response_($mail, $client, "RETR $1" ) ) {
                         my $class = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 1, '' );
-                        if ( echo_response( $self, $mail, $client, $command ) ) {
+                        if ( $self->echo_response_($mail, $client, $command ) ) {
                             $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, $class );
 
                             # Tell the parent that we just handled a mail
@@ -319,9 +323,9 @@ sub child
                         }
                     }
                 } else {
-                    echo_to_dot_( $self, $mail, $client ) if ( echo_response( $self, $mail, $client, $command ) );
+                    $self->echo_to_dot_( $mail, $client ) if ( $self->echo_response_($mail, $client, $command ) );
                 }
-                flush_extra( $self, $mail, $client, 0 );
+                $self->flush_extra_( $mail, $client, 0 );
                 next;
             }
 
@@ -332,8 +336,8 @@ sub child
         # The CAPA command
         if ( $command =~ /CAPA/i ) {
             if ( $self->config_( 'server' ) ne '' )  {
-                if ( $mail = verify_connected( $self, $mail, $client, $self->config_( 'server' ), $self->config_( 'sport' ) ) )  {
-                    echo_to_dot_( $self, $mail, $client ) if ( echo_response( $self, $mail, $client, "CAPA" ) );
+                if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'server' ), $self->config_( 'sport' ) ) )  {
+                    $self->echo_to_dot_( $mail, $client ) if ( $self->echo_response_($mail, $client, "CAPA" ) );
                 } else {
                     last;
                 }
@@ -341,7 +345,7 @@ sub child
                 $self->tee_(  $client, "-ERR No secure server specified$eol" );
             }
 
-            flush_extra( $self, $mail, $client, 0 );
+            $self->flush_extra_( $mail, $client, 0 );
             next;
         }
 
@@ -360,8 +364,8 @@ sub child
              ( $command =~ /XSENDER (.*)/i ) ||
              ( $command =~ /DELE (.*)/i )    ||
              ( $command =~ /RSET/i ) ) {
-            echo_response( $self, $mail, $client, $command );
-            flush_extra( $self, $mail, $client, 0 );
+            $self->echo_response_($mail, $client, $command );
+            $self->flush_extra_( $mail, $client, 0 );
             next;
         }
 
@@ -371,14 +375,14 @@ sub child
         if ( ( $command =~ /RETR (.*)/i ) || ( $command =~ /TOP (.*) 99999999/i ) )  {
             # Get the message from the remote server, if there's an error then we're done, but if not then
             # we echo each line of the message until we hit the . at the end
-            if ( echo_response( $self, $mail, $client, $command ) ) {
+            if ( $self->echo_response_($mail, $client, $command ) ) {
                 $count += 1;
                 my $class = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '' );
 
                 # Tell the parent that we just handled a mail
                 print $pipe "$class$eol";
 
-                flush_extra( $self, $mail, $client, 0 );
+                $self->flush_extra_( $mail, $client, 0 );
                 next;
             }
         }
@@ -388,7 +392,7 @@ sub child
         # close the connection immediately
         if ( $command =~ /QUIT/i ) {
             if ( $mail )  {
-                echo_response( $self, $mail, $client, $command );
+                $self->echo_response_($mail, $client, $command );
                 close $mail;
             } else {
                 $self->tee_(  $client, "+OK goodbye$eol" );
@@ -398,8 +402,8 @@ sub child
 
         # Don't know what this is so let's just pass it through and hope for the best
         if ( $mail && $mail->connected )  {
-            echo_response( $self, $mail, $client, $command );
-            flush_extra( $self, $mail, $client, 0 );
+            $self->echo_response_($mail, $client, $command );
+            $self->flush_extra_( $mail, $client, 0 );
             next;
         } else {
             $self->tee_(  $client, "-ERR unknown command or bad syntax$eol" );

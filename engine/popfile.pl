@@ -71,20 +71,20 @@ sub pipeready
     my ( $pipe ) = @_;
 
     # Check that the $pipe is still a valid handle
-    
+
     if ( !defined( $pipe ) ) {
         return 0;
     }
 
     if ( $on_windows ) {
-        
+
         # I am NOT doing a select() here because that does not work
         # on Perl running on Windows.  -s returns the "size" of the file
         # (in this case a pipe) and will be non-zero if there is data to read
-        
+
         return ( ( -s $pipe ) > 0 );
     } else {
-        
+
         # Here I do a select because we are not running on Windows where
         # you can't select() on a pipe
 
@@ -263,7 +263,7 @@ print "\nPOPFile Engine v$components{core}{config}->{major_version}.$components{
 
 foreach my $type (keys %components) {
      foreach my $name (keys %{$components{$type}}) {
-          $components{$type}{$name}->configuration( $components{core}{config} ) if ( $name ne 'config' );
+          $components{$type}{$name}->configuration( $components{core}{config} );
           $components{$type}{$name}->logger(        $components{core}{logger} ) if ( $name ne 'logger' );
      }
 }
