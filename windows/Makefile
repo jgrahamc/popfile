@@ -40,10 +40,13 @@ setup.exe: installer.nsi ioA.ini ioB.ini CBP.nsh
 
 stop_pf.exe: stop_popfile.nsi
 	@$(MAKENSIS)
-runpopfile.exe : runpopfile.nsi
+
+runpopfile.exe: runpopfile.nsi
 	@makensis.exe $<
-monitorcc.exe : MonitorCC.nsi
+
+monitorcc.exe: MonitorCC.nsi
 	@makensis.exe $<
-adduser.exe : adduser.nsi
+
+adduser.exe: adduser.nsi monitorcc.exe
 	@makensis.exe $<
 
