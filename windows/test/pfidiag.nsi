@@ -60,7 +60,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.49"
+  !define C_VERSION   "0.0.50"
 
   !define C_OUTFILE   "pfidiag.exe"
 
@@ -92,7 +92,7 @@
   VIProductVersion                   "${C_VERSION}.0"
 
   VIAddVersionKey "ProductName"      "PFI Diagnostic Utility"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
   VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "PFI Diagnostic Utility"

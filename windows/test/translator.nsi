@@ -139,7 +139,7 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT       "PFI Testbed"
-  !define C_PFI_VERSION       "0.11.12"
+  !define C_PFI_VERSION       "0.11.13"
 
   Name                        "${C_PFI_PRODUCT}"
   Caption                     "${C_PFI_PRODUCT} ${C_PFI_VERSION} Setup"
@@ -229,7 +229,7 @@
   VIProductVersion                   "${C_PFI_VERSION}.0"
 
   VIAddVersionKey "ProductName"      "POPFile Installer Language Testbed"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
   VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "POPFile Installer Language Testbed"

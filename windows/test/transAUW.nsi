@@ -95,7 +95,7 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT      "PFI Testbed"
-  !define C_PFI_VERSION      "0.1.17"
+  !define C_PFI_VERSION      "0.1.18"
 
   !ifndef ENGLISH_MODE
     !define C_PFI_VERSION_ID "${C_PFI_VERSION} (ML)"
@@ -206,7 +206,7 @@
   VIProductVersion                  "${C_PFI_VERSION}.0"
 
   VIAddVersionKey "ProductName"     "POPFile 'Add/Remove User' Language Testbed"
-  VIAddVersionKey "Comments"        "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "Comments"        "POPFile Homepage: http://getpopfile.org"
   VIAddVersionKey "CompanyName"     "The POPFile Project"
   VIAddVersionKey "LegalCopyright"  "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "POPFile 'Add/Remove User' Testbed"

@@ -74,7 +74,7 @@
   !define C_PFI_PRODUCT      "Corpus Conversion Testbed"
   Name                       "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION      "0.1.5"
+  !define C_PFI_VERSION      "0.1.6"
 
   ; Mention the version number in the window title
 
@@ -108,7 +108,7 @@
   VIProductVersion                   "${C_PFI_VERSION}.0"
 
   VIAddVersionKey "ProductName"      "${C_PFI_PRODUCT}"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
   VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "POPFile Corpus Conversion Testbed"
