@@ -1508,7 +1508,7 @@ sub corpus_page
     my $rename_message = '';
 
     if ( ( defined($self->{form_}{color}) ) && ( defined($self->{form_}{bucket}) ) ) {
-        open COLOR, '>' . $self->config_( 'corpus' ) . "/$self->{form_}{bucket}/color";
+        open COLOR, '>' . $self->{classifier__}->config_( 'corpus' ) . "/$self->{form_}{bucket}/color";
         print COLOR "$self->{form_}{color}\n";
         close COLOR;
         $self->{classifier__}->set_bucket_color($self->{form_}{bucket}, $self->{form_}{color});
