@@ -36,14 +36,18 @@
 # (a) comment-out the relevant '!insertmacro PFI_LANG_LOAD' line in the list of languages
 #     in the 'Language Support for the installer and uninstaller' block of code
 #
-# (b) comment-out the relevant '!insertmacro PFI_SETTING' line in the list of languages
+# (b) comment-out the relevant '!insertmacro UI_LANG_CONFIG' line in the list of languages
 #     in the code which handles the 'UI Languages' component
 #
-# For example, to remove support for the 'Dutch' language, comment-out the
+# For example, to remove support for the 'Dutch' language, comment-out the line
+#
 #     !insertmacro PFI_LANG_LOAD "Dutch"
-# line in the list of languages supported by the installer and comment-out the
+#
+# in the list of languages supported by the installer, and comment-out the line
+#
 #     !insertmacro UI_LANG_CONFIG "DUTCH" "Nederlands"
-# line in the code which handles the 'UI Languages' component.
+#
+# in the code which handles the 'UI Languages' component (Section "Languages").
 #
 # The number of languages which can be supported depends upon the availability of:
 #
