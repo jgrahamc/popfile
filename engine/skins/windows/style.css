@@ -8,19 +8,12 @@ bad.  Its does well on OS X's Safari 1.0 beta, Opera, and IE 5.  It seems on
 most Mac browsers the "title bar" is not working correctly due to the way
 they handle system colors.
 
-Original design by Joseph Connors (TexasFett) <wincss@texas.mailshell.com>,
-but wouldn't look nearly as good without Dan Martin (Kraelen).  Thanks Dan.
+Original design by Joseph Connors (TexasFett), but wouldn't look nearly as
+good without Dan Martin (Kraelen).  Thanks Dan.
 
 CSS2 sytle comments are below the line they apply to.  CSS1 style comments are
 hacks to make the skin look better on IE and Konqueror since they ignore CSS1
 commenting.  But that means its not fully valid CSS2.
-
-03-29-03: Last Major Update
-04-19-03: Fix menu visited color on IE 6 - version accepted into POPFile 0.19
-05-03-03: Center footer better and add "icon" in Mozilla, maybe Opera head fix
-05-05-03: Changed a lot of head stuff, got rid of absolute positioning
-05-21-03: Did what I could to fix the changes 0.19 RC3 made to the footer
-08-06-04: Add support for some new 0.22 classes and some code improvements
 */
 
 body {
@@ -220,6 +213,10 @@ h2 {
   font-size: 1.2em;
 }
 
+th.historyLabel {
+  text-align: left;
+}
+
 tr.rowEven {
   background-color: transparent;
 /* If you would like more color try lightblue. */
@@ -338,6 +335,18 @@ div.helpMessage {
   padding-bottom: 0;
 }
 
+.shellStatusMessage { 
+  color: InfoText;
+  border: 1px solid black;
+  background-color: InfoBackground;
+}
+
+.shellErrorMessage { 
+  color: red;
+  border: 1px solid black;
+  background-color: InfoBackground;
+}
+
 span.graphFont {
   font-size: 95%;
 }
@@ -350,24 +359,62 @@ table.settingsTable + br {
   display: none;
 }
 
+/*********************************************************/
+/* Config Bars */
+
 .configBar {
   border: 2px groove ActiveBorder;
   background-color: transparent;
 }
 
+.configBar form {
+  margin: 0;
+}
+
 .configBarOption {
   border: 2px groove ActiveBorder;
   margin: 0.3em;
-  padding: 5px;
-  white-space: nowrap;
+  padding: 0.3em;
   display: inline;
   float: left;
+  min-height: 3em;
 }
 
 .toggleConfigBar {
   float: right;
   border: 0;
 }
+
+.checkLabel {
+  white-space: nowrap;
+}
+
+.configBar input.submit {
+  margin-top: 4px;
+}
+
+.configBar label.configurationLabel {
+  display: block;
+}
+
+
+/*********************************************************/
+/* History Column Controls */
+
+.columnControls {
+  white-space: nowrap;
+  vertical-align: top;
+  width: 10px;
+}
+
+.columnRemove, .columnMove {
+  display: block;
+  width: 100%;
+  height: 1em;
+}
+
+/*********************************************************/
+/* Customizations */
 
 /* - uncomment this section if you want On text to be bold
 .bucketsWidgetStateOn, .configWidgetStateOn, .securityWidgetStateOn {
