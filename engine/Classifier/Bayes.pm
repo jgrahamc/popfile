@@ -689,6 +689,8 @@ sub classify
     my $base_score = $score{$ranking[0]};
     my $total = 0;
 
+    $self->log_( "Base score is $base_score for $ranking[0]" );
+
     # Compute the total of all the scores to generate the normalized scores and probability
     # estimate.  $total is always 1 after the first loop iteration, so any additional term
     # less than 2 ** -54 is insignificant, and need not be computed.
@@ -844,7 +846,7 @@ sub classify
 sub history_filename
 {
     my ( $self, $dcount, $mcount, $ext, $path) = @_;
-    
+
     $path = 0 if (!defined($path));
 
     return ($path?$self->global_config_( 'msgdir' ):'') . "popfile$dcount" . "=$mcount" . (defined $ext?$ext:'.msg');
@@ -1009,8 +1011,8 @@ sub classify_and_modify
     my $getting_headers = 1;
 
     my $temp_file  = $self->history_filename($dcount,$mcount, ".msg",1);
-    my $nopath_temp_file = $self->history_filename($dcount,$mcount,".msg",0);    
-    
+    my $nopath_temp_file = $self->history_filename($dcount,$mcount,".msg",0);
+
     # Get the class-file info without the path, since we'd just need to strip it
     my $class_file = $self->history_filename($dcount,$mcount, ".cls",0);
 

@@ -1078,7 +1078,7 @@ sub parse_line
 
         # For the Mac we do further splitting of the line at the CR characters
 
-        while ( $read =~ s/(.*?[\r\n]+)// )  {
+        while ( $read =~ s/(.*?)[\r\n]+// )  {
             my $line = $1;
 
             next if ( !defined($line) );

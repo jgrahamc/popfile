@@ -15,8 +15,7 @@ use POPFile::Logger;
 
 # main
 
-if ( $#ARGV == 0 ) 
-{
+if ( $#ARGV == 0 ) {
     my $c = new POPFile::Configuration;
     my $mq = new POPFile::MQ;
     my $l = new POPFile::Logger;
@@ -47,12 +46,11 @@ if ( $#ARGV == 0 )
     $b->start();
 
     my @files   = glob $ARGV[0];
-    foreach my $file (@files)
-    {
+    foreach my $file (@files) {
         print "$file is '" . $b->classify($file) . "'\n";
     }
 
-    foreach my $word (keys %{$b->{parser__}->{words__}}) {
+    foreach my $word (sort keys %{$b->{parser__}->{words__}}) {
         print "$word $b->{parser__}->{words__}{$word}\n";
     }
 }
