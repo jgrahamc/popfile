@@ -179,6 +179,7 @@ int APIENTRY GetMenuMessage()
 	}
 
 	if ( gUI ) {
+		gUI = false;
 		return 2;
 	}
 
