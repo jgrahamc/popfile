@@ -2101,7 +2101,7 @@ sub get_response
     unless ( $mail )
     {
        # $mail is undefined - return an error intead of crashing
-       tee( $client, "-ERR error communicating with mail server" );
+       tee( $client, "-ERR error communicating with mail server$eol" );
        return 0;
     }
 
