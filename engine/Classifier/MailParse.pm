@@ -1107,12 +1107,14 @@ sub parse_header
     my ($self, $header, $argument, $mime, $encoding) = @_;
 
     print "Header ($header) ($argument)\n" if ($self->{debug});
-    
-    # Remove over-reading
-    $self->{ut__} = '';  
-    
-    # Qeueue just this header for colorization    
-    $self->{ut__} = splitline("$header: $argument\015\012", $encoding);
+
+    if ($self->{color__} {
+        # Remove over-reading
+        $self->{ut__} = '';  
+        
+        # Qeueue just this header for colorization    
+        $self->{ut__} = splitline("$header: $argument\015\012", $encoding);
+    }
 
     # After a discussion with Tim Peters and some looking at emails
     # I'd received I discovered that the header names (case sensitive) are
@@ -1279,7 +1281,7 @@ sub splitline
     $line =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
     
     return $line;        
-}              
+}
 
 # GETTERS/SETTERS
 
