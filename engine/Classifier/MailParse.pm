@@ -134,6 +134,13 @@ sub add_line
         update_word($self, "$1$3", $encoded);
     }
 
+    # Grab IP addresses
+
+    while ( $line =~ s/(([12]?\d{1,2}\.){3}[12]?\d{1,2})// ) 
+    {
+        update_word($self, "$1", $encoded);
+    }
+
     # Only care about words between 3 and 45 characters since short words like
     # an, or, if are too common and the longest word in English (according to
     # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
