@@ -60,20 +60,20 @@
 #--------------------------------------------------------------------------
 # Standard MUI Page - Welcome
 #
-# The sequence \r\n\r\n inserts a blank line (note that the PFI_TEXT_WELCOME_INFO_TEXT string
+# The sequence \r\n\r\n inserts a blank line (note that the PFI_LANG_WELCOME_INFO_TEXT string
 # should end with a \r\n\r\n$_CLICK sequence).
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_TEXT_WELCOME_INFO_TEXT \
+!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT \
 "Vous êtes sur le point d'installer POPFile sur votre ordinateur.\r\n\r\nAvant de débuter l'installation, il est recommandé de fermer toutes les autres applications.\r\n\r\n$_CLICK"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish
 #
-# The PFI_TEXT_FINISH_RUN text should be a short phrase (not a long paragraph)
+# The PFI_LANG_FINISH_RUN_TEXT text should be a short phrase (not a long paragraph)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_TEXT_FINISH_RUN \
+!insertmacro PFI_LANG_STRING PFI_LANG_FINISH_RUN_TEXT \
 "POPFile Interface Utilisateur"
 
 #==========================================================================

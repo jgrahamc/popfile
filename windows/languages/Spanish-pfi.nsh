@@ -26,11 +26,6 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 #--------------------------------------------------------------------------
-#
-# Translation created by: Manuel Periago (ricesvinto at users.sourceforge.net)
-# Translation updated by: Manuel Periago (ricesvinto at users.sourceforge.net)
-#
-#--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_MB* text used for message boxes):
 #
 #   (1) The sequence  $\r$\n        inserts a newline
@@ -65,20 +60,20 @@
 #--------------------------------------------------------------------------
 # Standard MUI Page - Welcome
 #
-# The sequence \r\n\r\n inserts a blank line (note that the PFI_TEXT_WELCOME_INFO_TEXT string
+# The sequence \r\n\r\n inserts a blank line (note that the PFI_LANG_WELCOME_INFO_TEXT string
 # should end with a \r\n\r\n$_CLICK sequence).
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_TEXT_WELCOME_INFO_TEXT \
+!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT \
 "Este programa instalará POPFile en su ordenador.\r\n\r\nSe recomienda que cierre todas las demás aplicaciones antes de iniciar la Instalación.\r\n\r\n$_CLICK"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish
 #
-# The PFI_TEXT_FINISH_RUN text should be a short phrase (not a long paragraph)
+# The PFI_LANG_FINISH_RUN_TEXT text should be a short phrase (not a long paragraph)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_TEXT_FINISH_RUN \
+!insertmacro PFI_LANG_STRING PFI_LANG_FINISH_RUN_TEXT \
 "POPFile Interfaz de usuario"
 
 #==========================================================================

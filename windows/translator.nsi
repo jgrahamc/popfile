@@ -357,7 +357,7 @@
 
   !define MUI_PAGE_CUSTOMFUNCTION_PRE "ShowInstaller"
 
-  !define MUI_WELCOMEPAGE_TEXT "$(PFI_TEXT_WELCOME_INFO_TEXT)"
+  !define MUI_WELCOMEPAGE_TEXT "$(PFI_LANG_WELCOME_INFO_TEXT)"
   
   !insertmacro MUI_PAGE_WELCOME
   
@@ -441,7 +441,7 @@
   ; option is only offered if the installer has started POPFile running)
 
   !define MUI_FINISHPAGE_RUN
-  !define MUI_FINISHPAGE_RUN_TEXT     "$(PFI_TEXT_FINISH_RUN)"
+  !define MUI_FINISHPAGE_RUN_TEXT     "$(PFI_LANG_FINISH_RUN_TEXT)"
   !define MUI_FINISHPAGE_RUN_FUNCTION "RunUI"
 
   ; Provide a checkbox to let user display the Release Notes for this version of POPFile

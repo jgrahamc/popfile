@@ -65,20 +65,20 @@
 #--------------------------------------------------------------------------
 # Standard MUI Page - Welcome
 #
-# The sequence \r\n\r\n inserts a blank line (note that the PFI_TEXT_WELCOME_INFO_TEXT string
+# The sequence \r\n\r\n inserts a blank line (note that the PFI_LANG_WELCOME_INFO_TEXT string
 # should end with a \r\n\r\n$_CLICK sequence).
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_TEXT_WELCOME_INFO_TEXT \
+!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT \
 "이 마법사는 귀하의 컴퓨터에 POPFile(팝파일)을 설치할 것입니다.\r\n\r\n설치를 시작하기 전에 모든 프로그램을 종료시킬 것을 권장합니다.\r\n\r\n$_CLICK"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish
 #
-# The PFI_TEXT_FINISH_RUN text should be a short phrase (not a long paragraph)
+# The PFI_LANG_FINISH_RUN_TEXT text should be a short phrase (not a long paragraph)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_TEXT_FINISH_RUN \
+!insertmacro PFI_LANG_STRING PFI_LANG_FINISH_RUN_TEXT \
 "팝파일 사용자 화면"
 
 #==========================================================================

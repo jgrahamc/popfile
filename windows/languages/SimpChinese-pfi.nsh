@@ -60,27 +60,27 @@
 #--------------------------------------------------------------------------
 # Standard MUI Page - Welcome
 #
-# The sequence \r\n\r\n inserts a blank line (note that the PFI_TEXT_WELCOME_INFO_TEXT string
+# The sequence \r\n\r\n inserts a blank line (note that the PFI_LANG_WELCOME_INFO_TEXT string
 # should end with a \r\n\r\n$_CLICK sequence).
 #--------------------------------------------------------------------------
 
 ; POPFile translation not available - use default NSIS message
 
-;!insertmacro PFI_LANG_STRING PFI_TEXT_WELCOME_INFO_TEXT \
+;!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT \
 ;"This wizard will guide you through the installation of POPFile.\r\n\r\nIt is recommended that you close all other applications before starting Setup.\r\n\r\n$_CLICK"
 
 ; Default NSIS message:
 
-!insertmacro PFI_LANG_STRING PFI_TEXT_WELCOME_INFO_TEXT \
+!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT \
 "这将会在你的计算机，安装 POPFile 。\r\n\r\n在开始安装之前，建议先关闭其他所有应用程序。这将允许“安装程序”更新指定的系统文件，而不需要重新启动你的计算机。\r\n\r\n$_CLICK"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish
 #
-# The PFI_TEXT_FINISH_RUN text should be a short phrase (not a long paragraph)
+# The PFI_LANG_FINISH_RUN_TEXT text should be a short phrase (not a long paragraph)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_TEXT_FINISH_RUN \
+!insertmacro PFI_LANG_STRING PFI_LANG_FINISH_RUN_TEXT \
 "POPFile User Interface"
 
 #==========================================================================
