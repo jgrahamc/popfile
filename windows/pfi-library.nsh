@@ -79,10 +79,17 @@
   ; (1) The MUI_LANGUAGE macro loads the standard MUI text strings for a particular language
   ; (2) '*-pfi.nsh' contains the text strings used for pages, progress reports, logs etc
 
-  !macro PFI_LANG_LOAD LANG
-    !insertmacro MUI_LANGUAGE "${LANG}"
-    !include "languages\${LANG}-pfi.nsh"
-  !macroend
+!ifdef TRANSLATOR | TRANSLATOR_AUW
+        !macro PFI_LANG_LOAD LANG
+          !insertmacro MUI_LANGUAGE "${LANG}"
+          !include "..\languages\${LANG}-pfi.nsh"
+        !macroend
+!else
+        !macro PFI_LANG_LOAD LANG
+          !insertmacro MUI_LANGUAGE "${LANG}"
+          !include "languages\${LANG}-pfi.nsh"
+        !macroend
+!endif
 
   ;--------------------------------------------------------------------------
   ; Used in 'installer.nsi' to select the POPFile UI language according to the language used
@@ -173,11 +180,183 @@ Label_C_${PFI_UNIQUE_ID}:
 
 #==============================================================================================
 #
-# Functions used only by the installer
+# Functions used only by the installer (in alphabetic order)
+#
+#    Installer Function: GetFileSize
+#    Installer Function: GetIEVersion
+#    Installer Function: GetParameters
+#    Installer Function: GetSeparator
+#    Installer Function: SetConsoleMode
+#    Installer Function: StrStripLZS
 #
 #==============================================================================================
 
-!ifndef ADDUSER
+!ifndef TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Installer Function: GetFileSize
+  #
+  # Returns the size (in bytes) of the filename passed on the stack
+  # (if file not found, returns -1)
+  #
+  # Inputs:
+  #         (top of stack)     - filename of file to be checked
+  # Outputs:
+  #         (top of stack)     - length of the file (in bytes)
+  #                              or '-1' if file not found
+  #                              or '-2' if error occurred
+  #
+  # Usage:
+  #         Push "corpus\spam\table"
+  #         Call GetFileSize
+  #         Pop $R0
+  #
+  #         ($R0 now holds the size (in bytes) of the 'spam' bucket's 'table' file)
+  #
+  #--------------------------------------------------------------------------
+
+  Function GetFileSize
+
+    !define L_FILENAME  $R9
+    !define L_RESULT    $R8
+
+    Exch ${L_FILENAME}
+    Push ${L_RESULT}
+    Exch
+
+    IfFileExists ${L_FILENAME} find_size
+    StrCpy ${L_RESULT} "-1"
+    Goto exit
+
+  find_size:
+    ClearErrors
+    FileOpen ${L_RESULT} ${L_FILENAME} r
+    FileSeek ${L_RESULT} 0 END ${L_FILENAME}
+    FileClose ${L_RESULT}
+    IfErrors 0 return_size
+    StrCpy ${L_RESULT} "-2"
+    Goto exit
+
+  return_size:
+    StrCpy ${L_RESULT} ${L_FILENAME}
+
+  exit:
+    Pop ${L_FILENAME}
+    Exch ${L_RESULT}
+
+    !undef L_FILENAME
+    !undef L_RESULT
+
+  FunctionEnd
+!endif
+
+
+!ifndef ADDUSER & TRANSLATOR_AUW
+    #--------------------------------------------------------------------------
+    # Installer Function: GetIEVersion
+    #
+    # Uses the registry to determine which version of Internet Explorer is installed.
+    #
+    # Inputs:
+    #         (none)
+    # Outputs:
+    #         (top of stack)     - string containing the Internet Explorer version
+    #                              (1.x, 2.x, 3.x, 4.x, 5.0, 5.5, 6.0). If Internet Explorer
+    #                              is not installed properly or at all, '?.?' is returned.
+    #
+    # Usage:
+    #         Call GetIEVersion
+    #         Pop $R0
+    #
+    #         ($R0 at this point is "5.0", for example)
+    #
+    #--------------------------------------------------------------------------
+
+    Function GetIEVersion
+
+      !define L_REGDATA   $R9
+      !define L_TEMP      $R8
+
+      Push ${L_REGDATA}
+      Push ${L_TEMP}
+
+      ClearErrors
+      ReadRegStr ${L_REGDATA} HKLM "Software\Microsoft\Internet Explorer" "Version"
+      IfErrors ie_123
+
+      ; Internet Explorer 4.0 or later is installed. The 'Version' value is a string with the
+      ; following format: major-version.minor-version.build-number.sub-build-number
+
+      ; According to MSDN, the 'Version' string under 'HKLM\Software\Microsoft\Internet Explorer'
+      ; can have the following values:
+      ;
+      ; Internet Explorer Version     'Version' string
+      ;    4.0                          4.71.1712.6
+      ;    4.01                         4.72.2106.8
+      ;    4.01 SP1                     4.72.3110.3
+      ;    5                  	        5.00.2014.0216
+      ;    5.5                          5.50.4134.0100
+      ;    6.0 Public Preview           6.0.2462.0000
+      ;    6.0 Public Preview Refresh   6.0.2479.0006
+      ;    6.0 RTM                    	6.0.2600.0000
+
+      StrCpy ${L_TEMP} ${L_REGDATA} 1
+      StrCmp ${L_TEMP} "4" ie_4
+      StrCpy ${L_REGDATA} ${L_REGDATA} 3
+      Goto done
+
+    ie_4:
+      StrCpy ${L_REGDATA} "4.x"
+      Goto done
+
+    ie_123:
+
+      ; Older versions of Internet Explorer use the 'IVer' string under the same registry key
+      ; (HKLM\Software\Microsoft\Internet Explorer). The 'IVer' string is used as follows:
+      ;
+      ; Internet Explorer 1.0 for Windows 95 (included with Microsoft Plus! for Windows 95)
+      ; uses the value '100'
+      ;
+      ; Internet Explorer 2.0 for Windows 95 uses the value '102'
+      ;
+      ; Versions of Internet Explorer that are included with Windows NT 4.0 use the value '101'
+      ;
+      ; Internet Explorer 3.x updates the 'IVer' string value to '103'
+
+      ClearErrors
+      ReadRegStr ${L_REGDATA} HKLM "Software\Microsoft\Internet Explorer" "IVer"
+      IfErrors error
+
+      StrCpy ${L_REGDATA} ${L_REGDATA} 3
+      StrCmp ${L_REGDATA} '100' ie1
+      StrCmp ${L_REGDATA} '101' ie2
+      StrCmp ${L_REGDATA} '102' ie2
+
+      StrCpy ${L_REGDATA} '3.x'       ; default to ie3 if not 100, 101, or 102.
+      Goto done
+
+    ie1:
+      StrCpy ${L_REGDATA} '1.x'
+      Goto done
+
+    ie2:
+      StrCpy ${L_REGDATA} '2.x'
+      Goto done
+
+    error:
+      StrCpy ${L_REGDATA} '?.?'
+
+    done:
+      Pop ${L_TEMP}
+      Exch ${L_REGDATA}
+
+      !undef L_REGDATA
+      !undef L_TEMP
+
+    FunctionEnd
+!endif
+
+
+!ifndef ADDUSER & TRANSLATOR & TRANSLATOR_AUW
   #--------------------------------------------------------------------------
   # Installer Function: GetParameters
   #
@@ -202,37 +381,37 @@ Label_C_${PFI_UNIQUE_ID}:
     Push $R1
     Push $R2
     Push $R3
-  
+
     StrCpy $R2 1
     StrLen $R3 $CMDLINE
-  
+
     ; Check for quote or space
-  
+
     StrCpy $R0 $CMDLINE $R2
     StrCmp $R0 '"' 0 +3
     StrCpy $R1 '"'
     Goto loop
-  
+
     StrCpy $R1 " "
-  
+
   loop:
     IntOp $R2 $R2 + 1
     StrCpy $R0 $CMDLINE 1 $R2
     StrCmp $R0 $R1 get
     StrCmp $R2 $R3 get
     Goto loop
-  
+
   get:
     IntOp $R2 $R2 + 1
     StrCpy $R0 $CMDLINE 1 $R2
     StrCmp $R0 " " get
     StrCpy $R0 $CMDLINE "" $R2
-  
+
     Pop $R3
     Pop $R2
     Pop $R1
     Exch $R0
-  
+
   FunctionEnd
 !endif
 
@@ -315,74 +494,76 @@ exit:
 FunctionEnd
 
 
-#--------------------------------------------------------------------------
-# Installer Function: SetConsoleMode
-#
-# Used to set required console mode in 'popfile.cfg'
-#
-# Inputs:
-#         (top of stack)     - required console mode (0 = disabled, 1 = enabled)
-#
-# Outputs:
-#         none
-#
-# Usage:
-#         Push "1"
-#         Call SetConsoleMode
-#
-#--------------------------------------------------------------------------
+!ifndef TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Installer Function: SetConsoleMode
+  #
+  # Used to set required console mode in 'popfile.cfg'
+  #
+  # Inputs:
+  #         (top of stack)     - required console mode (0 = disabled, 1 = enabled)
+  #
+  # Outputs:
+  #         none
+  #
+  # Usage:
+  #         Push "1"
+  #         Call SetConsoleMode
+  #
+  #--------------------------------------------------------------------------
 
-Function SetConsoleMode
+  Function SetConsoleMode
 
-  !define L_NEW_CFG     $R9   ; file handle used for clean copy
-  !define L_OLD_CFG     $R8   ; file handle for old version
-  !define L_LNE         $R7   ; a line from the popfile.cfg file
-  !define L_MODE        $R6   ; new console mode
-  !define L_PARAM       $R5
+    !define L_NEW_CFG     $R9   ; file handle used for clean copy
+    !define L_OLD_CFG     $R8   ; file handle for old version
+    !define L_LNE         $R7   ; a line from the popfile.cfg file
+    !define L_MODE        $R6   ; new console mode
+    !define L_PARAM       $R5
 
-  Exch ${L_MODE}
-  Push ${L_NEW_CFG}
-  Push ${L_OLD_CFG}
-  Push ${L_LNE}
-  Push ${L_PARAM}
+    Exch ${L_MODE}
+    Push ${L_NEW_CFG}
+    Push ${L_OLD_CFG}
+    Push ${L_LNE}
+    Push ${L_PARAM}
 
-  ClearErrors
-  FileOpen  ${L_OLD_CFG} "$G_USERDIR\popfile.cfg" r
-  FileOpen  ${L_NEW_CFG} "$PLUGINSDIR\new.cfg" w
+    ClearErrors
+    FileOpen  ${L_OLD_CFG} "$G_USERDIR\popfile.cfg" r
+    FileOpen  ${L_NEW_CFG} "$PLUGINSDIR\new.cfg" w
 
-loop:
-  FileRead   ${L_OLD_CFG} ${L_LNE}
-  IfErrors copy_done
+  loop:
+    FileRead   ${L_OLD_CFG} ${L_LNE}
+    IfErrors copy_done
 
-  StrCpy ${L_PARAM} ${L_LNE} 16
-  StrCmp ${L_PARAM} "windows_console " got_console
-  FileWrite ${L_NEW_CFG} ${L_LNE}
-  Goto loop
+    StrCpy ${L_PARAM} ${L_LNE} 16
+    StrCmp ${L_PARAM} "windows_console " got_console
+    FileWrite ${L_NEW_CFG} ${L_LNE}
+    Goto loop
 
-got_console:
-  FileWrite ${L_NEW_CFG} "windows_console ${L_MODE}$\r$\n"
-  Goto loop
+  got_console:
+    FileWrite ${L_NEW_CFG} "windows_console ${L_MODE}$\r$\n"
+    Goto loop
 
-copy_done:
-  FileClose ${L_OLD_CFG}
-  FileClose ${L_NEW_CFG}
+  copy_done:
+    FileClose ${L_OLD_CFG}
+    FileClose ${L_NEW_CFG}
 
-  Delete "$G_USERDIR\popfile.cfg"
-  Rename "$PLUGINSDIR\new.cfg" "$G_USERDIR\popfile.cfg"
+    Delete "$G_USERDIR\popfile.cfg"
+    Rename "$PLUGINSDIR\new.cfg" "$G_USERDIR\popfile.cfg"
 
-  Pop ${L_PARAM}
-  Pop ${L_LNE}
-  Pop ${L_OLD_CFG}
-  Pop ${L_NEW_CFG}
-  Pop ${L_MODE}
+    Pop ${L_PARAM}
+    Pop ${L_LNE}
+    Pop ${L_OLD_CFG}
+    Pop ${L_NEW_CFG}
+    Pop ${L_MODE}
 
-  !undef L_NEW_CFG
-  !undef L_OLD_CFG
-  !undef L_LNE
-  !undef L_MODE
-  !undef L_PARAM
+    !undef L_NEW_CFG
+    !undef L_OLD_CFG
+    !undef L_LNE
+    !undef L_MODE
+    !undef L_PARAM
 
-FunctionEnd
+  FunctionEnd
+!endif
 
 
 #--------------------------------------------------------------------------
@@ -433,172 +614,67 @@ done:
 FunctionEnd
 
 
-#--------------------------------------------------------------------------
-# Installer Function: GetFileSize
-#
-# Returns the size (in bytes) of the filename passed on the stack
-# (if file not found, returns -1)
-#
-# Inputs:
-#         (top of stack)     - filename of file to be checked
-# Outputs:
-#         (top of stack)     - length of the file (in bytes)
-#                              or '-1' if file not found
-#                              or '-2' if error occurred
-#
-# Usage:
-#         Push "corpus\spam\table"
-#         Call GetFileSize
-#         Pop $R0
-#
-#         ($R0 now holds the size (in bytes) of the 'spam' bucket's 'table' file)
-#
-#--------------------------------------------------------------------------
-
-Function GetFileSize
-
-  !define L_FILENAME  $R9
-  !define L_RESULT    $R8
-
-  Exch ${L_FILENAME}
-  Push ${L_RESULT}
-  Exch
-
-  IfFileExists ${L_FILENAME} find_size
-  StrCpy ${L_RESULT} "-1"
-  Goto exit
-
-find_size:
-  ClearErrors
-  FileOpen ${L_RESULT} ${L_FILENAME} r
-  FileSeek ${L_RESULT} 0 END ${L_FILENAME}
-  FileClose ${L_RESULT}
-  IfErrors 0 return_size
-  StrCpy ${L_RESULT} "-2"
-  Goto exit
-
-return_size:
-  StrCpy ${L_RESULT} ${L_FILENAME}
-
-exit:
-  Pop ${L_FILENAME}
-  Exch ${L_RESULT}
-
-  !undef L_FILENAME
-  !undef L_RESULT
-
-FunctionEnd
-
-
-!ifndef ADDUSER
-    #--------------------------------------------------------------------------
-    # Installer Function: GetIEVersion
-    #
-    # Uses the registry to determine which version of Internet Explorer is installed.
-    #
-    # Inputs:
-    #         (none)
-    # Outputs:
-    #         (top of stack)     - string containing the Internet Explorer version
-    #                              (1.x, 2.x, 3.x, 4.x, 5.0, 5.5, 6.0). If Internet Explorer
-    #                              is not installed properly or at all, '?.?' is returned.
-    #
-    # Usage:
-    #         Call GetIEVersion
-    #         Pop $R0
-    #
-    #         ($R0 at this point is "5.0", for example)
-    #
-    #--------------------------------------------------------------------------
-    
-    Function GetIEVersion
-    
-      !define L_REGDATA   $R9
-      !define L_TEMP      $R8
-    
-      Push ${L_REGDATA}
-      Push ${L_TEMP}
-    
-      ClearErrors
-      ReadRegStr ${L_REGDATA} HKLM "Software\Microsoft\Internet Explorer" "Version"
-      IfErrors ie_123
-    
-      ; Internet Explorer 4.0 or later is installed. The 'Version' value is a string with the
-      ; following format: major-version.minor-version.build-number.sub-build-number
-    
-      ; According to MSDN, the 'Version' string under 'HKLM\Software\Microsoft\Internet Explorer'
-      ; can have the following values:
-      ;
-      ; Internet Explorer Version     'Version' string
-      ;    4.0                          4.71.1712.6
-      ;    4.01                         4.72.2106.8
-      ;    4.01 SP1                     4.72.3110.3
-      ;    5                  	        5.00.2014.0216
-      ;    5.5                          5.50.4134.0100
-      ;    6.0 Public Preview           6.0.2462.0000
-      ;    6.0 Public Preview Refresh   6.0.2479.0006
-      ;    6.0 RTM                    	6.0.2600.0000
-    
-      StrCpy ${L_TEMP} ${L_REGDATA} 1
-      StrCmp ${L_TEMP} "4" ie_4
-      StrCpy ${L_REGDATA} ${L_REGDATA} 3
-      Goto done
-    
-    ie_4:
-      StrCpy ${L_REGDATA} "4.x"
-      Goto done
-    
-    ie_123:
-    
-      ; Older versions of Internet Explorer use the 'IVer' string under the same registry key
-      ; (HKLM\Software\Microsoft\Internet Explorer). The 'IVer' string is used as follows:
-      ;
-      ; Internet Explorer 1.0 for Windows 95 (included with Microsoft Plus! for Windows 95)
-      ; uses the value '100'
-      ;
-      ; Internet Explorer 2.0 for Windows 95 uses the value '102'
-      ;
-      ; Versions of Internet Explorer that are included with Windows NT 4.0 use the value '101'
-      ;
-      ; Internet Explorer 3.x updates the 'IVer' string value to '103'
-    
-      ClearErrors
-      ReadRegStr ${L_REGDATA} HKLM "Software\Microsoft\Internet Explorer" "IVer"
-      IfErrors error
-    
-      StrCpy ${L_REGDATA} ${L_REGDATA} 3
-      StrCmp ${L_REGDATA} '100' ie1
-      StrCmp ${L_REGDATA} '101' ie2
-      StrCmp ${L_REGDATA} '102' ie2
-    
-      StrCpy ${L_REGDATA} '3.x'       ; default to ie3 if not 100, 101, or 102.
-      Goto done
-    
-    ie1:
-      StrCpy ${L_REGDATA} '1.x'
-      Goto done
-    
-    ie2:
-      StrCpy ${L_REGDATA} '2.x'
-      Goto done
-    
-    error:
-      StrCpy ${L_REGDATA} '?.?'
-    
-    done:
-      Pop ${L_TEMP}
-      Exch ${L_REGDATA}
-    
-      !undef L_REGDATA
-      !undef L_TEMP
-    
-    FunctionEnd
-!endif
-
-
 #==============================================================================================
 #
-# Macro-based Functions used by the installer and by the uninstaller
+# Macro-based Functions used by the installer and by the uninstaller (in alphabetic order)
+#
+#   ;-----------------------------------------------------------------------------------------
+#   ; 'GetLocalTime' is used by other time-related macros, so it must be defined before them
+#   ;-----------------------------------------------------------------------------------------
+#
+#    Macro:                GetLocalTime
+#    Installer Function:   GetLocalTime
+#    Uninstaller Function: un.GetLocalTime
+#
+#   ;-----------------------------------------------------------------------------------------
+#
+#    Macro:                CheckIfLocked
+#    Installer Function:   CheckIfLocked
+#    Uninstaller Function: un.CheckIfLocked
+#
+#    Macro:                GetCorpusPath
+#    Installer Function:   GetCorpusPath
+#    Uninstaller Function: un.GetCorpusPath
+#
+#    Macro:                GetDataPath
+#    Installer Function:   GetDataPath
+#    Uninstaller Function: un.GetDataPath
+#
+#    Macro:                GetDateStamp
+#    Installer Function:   GetDateStamp
+#    Uninstaller Function: un.GetDateStamp
+#
+#    Macro:                GetDateTimeStamp
+#    Installer Function:   GetTimeStamp
+#    Uninstaller Function: un.GetTimeStamp
+#
+#    Macro:                GetParent
+#    Installer Function:   GetParent
+#    Uninstaller Function: un.GetParent
+#
+#    Macro:                GetTimeStamp
+#    Installer Function:   GetTimeStamp
+#    Uninstaller Function: un.GetTimeStamp
+#
+#    Macro:                StrBackSlash
+#    Installer Function:   StrBackSlash
+#    Uninstaller Function: un.StrBackSlash
+#
+#    Macro:                StrCheckDecimal
+#    Installer Function:   StrCheckDecimal
+#    Uninstaller Function: un.StrCheckDecimal
+#
+#    Macro:                StrStr
+#    Installer Function:   StrStr
+#    Uninstaller Function: un.StrStr
+#
+#    Macro:                TrimNewlines
+#    Installer Function:   TrimNewlines
+#    Uninstaller Function: un.TrimNewlines
+#
+#    Macro:                WaitUntilUnlocked
+#    Installer Function:   WaitUntilUnlocked
+#    Uninstaller Function: un.WaitUntilUnlocked
 #
 #==============================================================================================
 
@@ -699,13 +775,377 @@ FunctionEnd
 
 !insertmacro GetLocalTime ""
 
+!ifndef TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Uninstaller Function: un.GetLocalTime
+  #
+  # This function is used during the uninstall process
+  #--------------------------------------------------------------------------
+
+  !insertmacro GetLocalTime "un."
+!endif
+
+
 #--------------------------------------------------------------------------
-# Uninstaller Function: un.GetLocalTime
+# Macro: CheckIfLocked
+#
+# The installation process and the uninstall process both use a function which checks if
+# a particular executable file (an EXE file) is being used (the EXE file to be checked depends
+# upon the version of POPFile in use and upon how it has been configured. If the specified EXE
+# file is no longer in use, this function returns an empty string (otherwise it returns the
+# input parameter unchanged).
+#
+# Inputs:
+#         (top of stack)     - the full path of the EXE file to be checked
+#
+# Outputs:
+#         (top of stack)     - if file is no longer in use, an empty string ("") is returned
+#                              otherwise the input string is returned
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Push "$G_MPBINDIR\wperl.exe"
+#         Call CheckIfLocked
+#         Pop $R0
+#
+#        (if the file is no longer in use, $R0 will be "")
+#        (if the file is still being used, $R0 will be "$G_MPBINDIR\wperl.exe")
+#--------------------------------------------------------------------------
+
+!macro CheckIfLocked UN
+  Function ${UN}CheckIfLocked
+    !define L_EXE           $R9   ; full path to the EXE file which is to be monitored
+    !define L_FILE_HANDLE   $R8
+
+    Exch ${L_EXE}
+    Push ${L_FILE_HANDLE}
+
+    IfFileExists "${L_EXE}" 0 unlocked_exit
+    SetFileAttributes "${L_EXE}" NORMAL
+
+    ClearErrors
+    FileOpen ${L_FILE_HANDLE} "${L_EXE}" a
+    FileClose ${L_FILE_HANDLE}
+    IfErrors exit
+
+  unlocked_exit:
+    StrCpy ${L_EXE} ""
+
+   exit:
+    Pop ${L_FILE_HANDLE}
+    Exch ${L_EXE}
+
+    !undef L_EXE
+    !undef L_FILE_HANDLE
+  FunctionEnd
+!macroend
+
+!ifndef ADDUSER & TRANSLATOR & TRANSLATOR_AUW
+    #--------------------------------------------------------------------------
+    # Installer Function: CheckIfLocked
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+
+    !insertmacro CheckIfLocked ""
+!endif
+
+!ifndef TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Uninstaller Function: un.CheckIfLocked
+  #
+  # This function is used during the uninstall process
+  #--------------------------------------------------------------------------
+
+  !insertmacro CheckIfLocked "un."
+!endif
+
+
+#--------------------------------------------------------------------------
+# Macro: GetCorpusPath
+#
+# The installation process and the uninstall process both use a function which finds the full
+# path for the corpus if a copy of 'popfile.cfg' is found in the installation folder. This
+# macro makes maintenance easier by ensuring that both processes use identical functions, with
+# the only difference being their names.
+#
+# The 'popfile.cfg' file is used to determine the full path of the directory where the corpus
+# files are stored. By default the flat file and BerkeleyDB versions of POPFile (i.e. versions
+# prior to 0.21.0) store the corpus in the '$G_USERDIR\corpus' directory but the 'popfile.cfg'
+# file can define a different location, using a variety of paths (eg relative, absolute, local
+# or even remote). If the path specified in 'popfile.cfg' ends with a trailing slash, the
+# trailing slash is stripped.
+#
+# If 'popfile.cfg' is found in the specified folder, we use the corpus parameter (if present)
+# otherwise we assume the default location is to be used (the sub-folder called 'corpus').
+#
+# NOTE:
+# The !insertmacro GetCorpusPath "" and !insertmacro GetCorpusPath "un." commands are included
+# in this file so 'installer.nsi' can use 'Call GetCorpusPath' and 'Call un.GetCorpusPath'
+# without additional preparation.
+#
+# Inputs:
+#         (top of stack)          - the path where 'popfile.cfg' is to be found
+#
+# Outputs:
+#         (top of stack)          - string containing the full (unambiguous) path to the corpus
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Push $G_USERDIR
+#         Call un.GetCorpusPath
+#         Pop $R0
+#
+#         ($R0 will be "C:\Program Files\POPFile\corpus" if default corpus location is used)
+#--------------------------------------------------------------------------
+
+!macro GetCorpusPath UN
+  Function ${UN}GetCorpusPath
+
+    !define L_CORPUS        $R9
+    !define L_FILE_HANDLE   $R8
+    !define L_RESULT        $R7
+    !define L_SOURCE        $R6
+    !define L_TEMP          $R5
+
+    Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
+    Push ${L_RESULT}
+    Exch
+    Push ${L_CORPUS}
+    Push ${L_FILE_HANDLE}
+    Push ${L_TEMP}
+
+    StrCpy ${L_CORPUS} ""
+
+    IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default_locn
+    ClearErrors
+    FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
+
+  loop:
+    FileRead ${L_FILE_HANDLE} ${L_TEMP}
+    IfErrors cfg_file_done
+    StrCpy ${L_RESULT} ${L_TEMP} 7
+    StrCmp ${L_RESULT} "corpus " got_old_corpus
+    StrCpy ${L_RESULT} ${L_TEMP} 13
+    StrCmp ${L_RESULT} "bayes_corpus " got_new_corpus
+    Goto loop
+
+  got_old_corpus:
+    StrCpy ${L_CORPUS} ${L_TEMP} "" 7
+    Goto loop
+
+  got_new_corpus:
+    StrCpy ${L_CORPUS} ${L_TEMP} "" 13
+    Goto loop
+
+  cfg_file_done:
+    FileClose ${L_FILE_HANDLE}
+    Push ${L_CORPUS}
+    Call ${UN}TrimNewlines
+    Pop ${L_CORPUS}
+    StrCmp ${L_CORPUS} "" use_default_locn use_cfg_data
+
+  use_default_locn:
+    StrCpy ${L_RESULT} ${L_SOURCE}\corpus
+    Goto got_result
+
+  use_cfg_data:
+    StrCpy ${L_TEMP} ${L_CORPUS} 1 -1
+    StrCmp ${L_TEMP} "/" strip_slash no_trailing_slash
+    StrCmp ${L_TEMP} "\" 0 no_trailing_slash
+
+  strip_slash:
+    StrCpy ${L_CORPUS} ${L_CORPUS} -1
+
+  no_trailing_slash:
+    Push ${L_SOURCE}
+    Push ${L_CORPUS}
+    Call ${UN}GetDataPath
+    Pop ${L_RESULT}
+
+  got_result:
+    Pop ${L_TEMP}
+    Pop ${L_FILE_HANDLE}
+    Pop ${L_CORPUS}
+    Pop ${L_SOURCE}
+    Exch ${L_RESULT}  ; place full path of 'corpus' directory on top of the stack
+
+    !undef L_CORPUS
+    !undef L_FILE_HANDLE
+    !undef L_RESULT
+    !undef L_SOURCE
+    !undef L_TEMP
+
+  FunctionEnd
+!macroend
+
+!ifndef TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Installer Function: GetCorpusPath
+  #
+  # This function is used during the installation process
+  #--------------------------------------------------------------------------
+
+  !insertmacro GetCorpusPath ""
+!endif
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetCorpusPath
 #
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-!insertmacro GetLocalTime "un."
+;!insertmacro GetCorpusPath "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: GetDataPath
+#
+# The installation process and the uninstall process both use a function which converts a
+# 'base directory' and a 'data folder' parameter (usually relative to the 'base directory')
+# into a single, absolute path. For example, it will convert 'C:\Program Files\POPFile' and
+# 'corpus' into 'C:\Program Files\POPFile\corpus'. This macro makes maintenance easier by
+# ensuring that both processes use identical functions, with the only difference being their
+# names.
+#
+# It is assumed that the 'base directory' is in standard Windows format with no trailing slash.
+#
+# The 'data folder' may be supplied in a variety of different formats, for example:
+# corpus, ./corpus, "..\..\corpus", Z:/Data/corpus or even "\\server\share\corpus".
+#
+# NOTE:
+# The !insertmacro GetDataPath "" and !insertmacro GetDataPath "un." commands are included
+# in this file so 'installer.nsi' can use 'Call GetDataPath' and 'Call un.GetDataPath'
+# without additional preparation.
+#
+# Inputs:
+#         (top of stack)          - the 'data folder' parameter (eg "../../corpus")
+#         (top of stack - 1)      - the 'base directory' parameter
+#
+# Outputs:
+#         (top of stack)          - string containing the full (unambiguous) path to the data
+#                                   (the string "" is returned if input data was null)
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Push $G_USERDIR
+#         Push "../../corpus"
+#         Call un.GetDataPath
+#         Pop $R0
+#
+#         ($R0 will be "C:\corpus", assuming $G_USERDIR was "C:\Program Files\POPFile")
+#--------------------------------------------------------------------------
+
+!macro GetDataPath UN
+  Function ${UN}GetDataPath
+
+    !define L_BASEDIR     $R9
+    !define L_DATA        $R8
+    !define L_RESULT      $R7
+    !define L_TEMP        $R6
+
+    Exch ${L_DATA}        ; the 'data folder' parameter (often a relative path)
+    Exch
+    Exch ${L_BASEDIR}      ; the 'base directory' used for cases where 'data folder' is relative
+    Push ${L_RESULT}
+    Push ${L_TEMP}
+
+    StrCmp ${L_DATA} "" 0 strip_quotes
+    StrCpy ${L_DATA} ${L_BASEDIR}
+    Goto got_path
+
+  strip_quotes:
+
+    ; Strip leading/trailing quotes, if any
+
+    StrCpy ${L_TEMP} ${L_DATA} 1
+    StrCmp ${L_TEMP} '"' 0 slashconversion
+    StrCpy ${L_DATA} ${L_DATA} "" 1
+    StrCpy ${L_TEMP} ${L_DATA} 1 -1
+    StrCmp ${L_TEMP} '"' 0 slashconversion
+    StrCpy ${L_DATA} ${L_DATA} -1
+
+  slashconversion:
+    StrCmp ${L_DATA} "." source_folder
+    Push ${L_DATA}
+    Call ${UN}StrBackSlash            ; ensure parameter uses backslashes
+    Pop ${L_DATA}
+
+    StrCpy ${L_TEMP} ${L_DATA} 2
+    StrCmp ${L_TEMP} ".\" sub_folder
+    StrCmp ${L_TEMP} "\\" got_path
+
+    StrCpy ${L_TEMP} ${L_DATA} 3
+    StrCmp ${L_TEMP} "..\" relative_folder
+
+    StrCpy ${L_TEMP} ${L_DATA} 1
+    StrCmp ${L_TEMP} "\" basedir_drive
+
+    StrCpy ${L_TEMP} ${L_DATA} 1 1
+    StrCmp ${L_TEMP} ":" got_path
+
+    ; Assume path can be safely added to 'base directory'
+
+    StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
+    Goto got_path
+
+  source_folder:
+    StrCpy ${L_DATA} ${L_BASEDIR}
+    Goto got_path
+
+  sub_folder:
+    StrCpy ${L_DATA} ${L_DATA} "" 2
+    StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
+    Goto got_path
+
+  relative_folder:
+    StrCpy ${L_RESULT} ${L_BASEDIR}
+
+  relative_again:
+    StrCpy ${L_DATA} ${L_DATA} "" 3
+    Push ${L_RESULT}
+    Call ${UN}GetParent
+    Pop ${L_RESULT}
+    StrCpy ${L_TEMP} ${L_DATA} 3
+    StrCmp ${L_TEMP} "..\" relative_again
+    StrCpy ${L_DATA} ${L_RESULT}\${L_DATA}
+    Goto got_path
+
+  basedir_drive:
+    StrCpy ${L_TEMP} ${L_BASEDIR} 2
+    StrCpy ${L_DATA} ${L_TEMP}${L_DATA}
+
+  got_path:
+    Pop ${L_TEMP}
+    Pop ${L_RESULT}
+    Pop ${L_BASEDIR}
+    Exch ${L_DATA}  ; place full path to the data directory on top of the stack
+
+    !undef L_BASEDIR
+    !undef L_DATA
+    !undef L_RESULT
+    !undef L_TEMP
+
+  FunctionEnd
+!macroend
+
+!ifndef TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Installer Function: GetDataPath
+  #
+  # This function is used during the installation process
+  #--------------------------------------------------------------------------
+
+  !insertmacro GetDataPath ""
+!endif
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetDataPath
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetDataPath "un."
 
 
 #--------------------------------------------------------------------------
@@ -838,96 +1278,6 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 ;!insertmacro GetDateStamp "un."
-
-
-#--------------------------------------------------------------------------
-# Macro: GetTimeStamp
-#
-# The installation process and the uninstall process may need a function which uses the
-# local time from Windows to generate a time stamp (eg '01:23:45'). This macro makes
-# maintenance easier by ensuring that both processes use identical functions, with
-# the only difference being their names.
-#
-# NOTE:
-# The !insertmacro GetTimeStamp "" and !insertmacro GetTimeStamp "un." commands are included
-# in this file so 'installer.nsi' and/or other library functions in 'pfi-library.nsh' can use
-# 'Call GetTimeStamp' and 'Call un.GetTimeStamp' without additional preparation.
-#
-# Inputs:
-#         (none)
-# Outputs:
-#         (top of stack)     - string holding current time (eg '23:01:59')
-#
-#  Usage (after macro has been 'inserted'):
-#
-#         Call GetTimeStamp
-#         Pop $R9
-#
-#         ($R9 now holds a string like '23:01:59')
-#--------------------------------------------------------------------------
-
-!macro GetTimeStamp UN
-  Function ${UN}GetTimeStamp
-
-    !define L_TIMESTAMP   $R9
-    !define L_HOURS       $R8
-    !define L_MINUTES     $R7
-    !define L_SECONDS     $R6
-
-    Push ${L_TIMESTAMP}
-    Push ${L_HOURS}
-    Push ${L_MINUTES}
-    Push ${L_SECONDS}
-
-    Call ${UN}GetLocalTIme
-    Pop ${L_TIMESTAMP}    ; ignore year
-    Pop ${L_TIMESTAMP}    ; ignore month
-    Pop ${L_TIMESTAMP}    ; ignore day of week
-    Pop ${L_TIMESTAMP}    ; ignore day
-    Pop ${L_HOURS}
-    Pop ${L_MINUTES}
-    Pop ${L_SECONDS}
-    Pop ${L_TIMESTAMP}    ; ignore milliseconds
-
-    IntCmp ${L_HOURS} 10 +2 0 +2
-    StrCpy ${L_HOURS} "0${L_HOURS}"
-
-    IntCmp ${L_MINUTES} 10 +2 0 +2
-    StrCpy ${L_MINUTES} "0${L_MINUTES}"
-
-    IntCmp ${L_SECONDS} 10 +2 0 +2
-    StrCpy ${L_SECONDS} "0${L_SECONDS}"
-
-    StrCpy ${L_TIMESTAMP} "${L_HOURS}:${L_MINUTES}:${L_SECONDS}"
-
-    Pop ${L_SECONDS}
-    Pop ${L_MINUTES}
-    Pop ${L_HOURS}
-    Exch ${L_TIMESTAMP}
-
-    !undef L_TIMESTAMP
-    !undef L_HOURS
-    !undef L_MINUTES
-    !undef L_SECONDS
-
-  FunctionEnd
-!macroend
-
-#--------------------------------------------------------------------------
-# Installer Function: GetTimeStamp
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-;!insertmacro GetTimeStamp ""
-
-#--------------------------------------------------------------------------
-# Uninstaller Function: un.GetTimeStamp
-#
-# This function is used during the uninstall process
-#--------------------------------------------------------------------------
-
-;!insertmacro GetTimeStamp "un."
 
 
 #--------------------------------------------------------------------------
@@ -1074,296 +1424,181 @@ FunctionEnd
 
 !insertmacro GetDateTimeStamp ""
 
-#--------------------------------------------------------------------------
-# Uninstaller Function: un.GetDateTimeStamp
-#
-# This function is used during the uninstall process
-#--------------------------------------------------------------------------
+!ifndef TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Uninstaller Function: un.GetDateTimeStamp
+  #
+  # This function is used during the uninstall process
+  #--------------------------------------------------------------------------
 
-!insertmacro GetDateTimeStamp "un."
+  !insertmacro GetDateTimeStamp "un."
+!endif
 
 
 #--------------------------------------------------------------------------
-# Macro: GetCorpusPath
+# Macro: GetParent
 #
-# The installation process and the uninstall process both use a function which finds the full
-# path for the corpus if a copy of 'popfile.cfg' is found in the installation folder. This
-# macro makes maintenance easier by ensuring that both processes use identical functions, with
-# the only difference being their names.
+# The installation process and the uninstall process both use a function which extracts the
+# parent directory from a given path. This macro makes maintenance easier by ensuring that both
+# processes use identical functions, with the only difference being their names.
 #
-# The 'popfile.cfg' file is used to determine the full path of the directory where the corpus
-# files are stored. By default the flat file and BerkeleyDB versions of POPFile (i.e. versions
-# prior to 0.21.0) store the corpus in the '$G_USERDIR\corpus' directory but the 'popfile.cfg'
-# file can define a different location, using a variety of paths (eg relative, absolute, local
-# or even remote). If the path specified in 'popfile.cfg' ends with a trailing slash, the
-# trailing slash is stripped.
-#
-# If 'popfile.cfg' is found in the specified folder, we use the corpus parameter (if present)
-# otherwise we assume the default location is to be used (the sub-folder called 'corpus').
+# NB: The path is assumed to use backslashes (\)
 #
 # NOTE:
-# The !insertmacro GetCorpusPath "" and !insertmacro GetCorpusPath "un." commands are included
-# in this file so 'installer.nsi' can use 'Call GetCorpusPath' and 'Call un.GetCorpusPath'
+# The !insertmacro GetParent "" and !insertmacro GetParent "un." commands are included
+# in this file so 'installer.nsi' can use 'Call GetParent' and 'Call un.GetParent'
 # without additional preparation.
 #
 # Inputs:
-#         (top of stack)          - the path where 'popfile.cfg' is to be found
+#         (top of stack)          - string containing a path (e.g. C:\A\B\C)
 #
 # Outputs:
-#         (top of stack)          - string containing the full (unambiguous) path to the corpus
+#         (top of stack)          - the parent part of the input string (e.g. C:\A\B)
 #
 #  Usage (after macro has been 'inserted'):
 #
-#         Push $G_USERDIR
-#         Call un.GetCorpusPath
+#         Push "C:\Program Files\Directory\Whatever"
+#         Call un.GetParent
 #         Pop $R0
 #
-#         ($R0 will be "C:\Program Files\POPFile\corpus" if default corpus location is used)
+#         ($R0 at this point is ""C:\Program Files\Directory")
+#
 #--------------------------------------------------------------------------
 
-!macro GetCorpusPath UN
-  Function ${UN}GetCorpusPath
+!macro GetParent UN
+  Function ${UN}GetParent
+    Exch $R0
+    Push $R1
+    Push $R2
+    Push $R3
 
-    !define L_CORPUS        $R9
-    !define L_FILE_HANDLE   $R8
-    !define L_RESULT        $R7
-    !define L_SOURCE        $R6
-    !define L_TEMP          $R5
-
-    Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
-    Push ${L_RESULT}
-    Exch
-    Push ${L_CORPUS}
-    Push ${L_FILE_HANDLE}
-    Push ${L_TEMP}
-
-    StrCpy ${L_CORPUS} ""
-
-    IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default_locn
-    ClearErrors
-    FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
+    StrCpy $R1 0
+    StrLen $R2 $R0
 
   loop:
-    FileRead ${L_FILE_HANDLE} ${L_TEMP}
-    IfErrors cfg_file_done
-    StrCpy ${L_RESULT} ${L_TEMP} 7
-    StrCmp ${L_RESULT} "corpus " got_old_corpus
-    StrCpy ${L_RESULT} ${L_TEMP} 13
-    StrCmp ${L_RESULT} "bayes_corpus " got_new_corpus
+    IntOp $R1 $R1 + 1
+    IntCmp $R1 $R2 get 0 get
+    StrCpy $R3 $R0 1 -$R1
+    StrCmp $R3 "\" get
     Goto loop
 
-  got_old_corpus:
-    StrCpy ${L_CORPUS} ${L_TEMP} "" 7
-    Goto loop
+  get:
+    StrCpy $R0 $R0 -$R1
 
-  got_new_corpus:
-    StrCpy ${L_CORPUS} ${L_TEMP} "" 13
-    Goto loop
-
-  cfg_file_done:
-    FileClose ${L_FILE_HANDLE}
-    Push ${L_CORPUS}
-    Call ${UN}TrimNewlines
-    Pop ${L_CORPUS}
-    StrCmp ${L_CORPUS} "" use_default_locn use_cfg_data
-
-  use_default_locn:
-    StrCpy ${L_RESULT} ${L_SOURCE}\corpus
-    Goto got_result
-
-  use_cfg_data:
-    StrCpy ${L_TEMP} ${L_CORPUS} 1 -1
-    StrCmp ${L_TEMP} "/" strip_slash no_trailing_slash
-    StrCmp ${L_TEMP} "\" 0 no_trailing_slash
-
-  strip_slash:
-    StrCpy ${L_CORPUS} ${L_CORPUS} -1
-
-  no_trailing_slash:
-    Push ${L_SOURCE}
-    Push ${L_CORPUS}
-    Call ${UN}GetDataPath
-    Pop ${L_RESULT}
-
-  got_result:
-    Pop ${L_TEMP}
-    Pop ${L_FILE_HANDLE}
-    Pop ${L_CORPUS}
-    Pop ${L_SOURCE}
-    Exch ${L_RESULT}  ; place full path of 'corpus' directory on top of the stack
-
-    !undef L_CORPUS
-    !undef L_FILE_HANDLE
-    !undef L_RESULT
-    !undef L_SOURCE
-    !undef L_TEMP
-
+    Pop $R3
+    Pop $R2
+    Pop $R1
+    Exch $R0
   FunctionEnd
 !macroend
 
-#--------------------------------------------------------------------------
-# Installer Function: GetCorpusPath
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
+!ifndef TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Installer Function: GetParent
+  #
+  # This function is used during the installation process
+  #--------------------------------------------------------------------------
 
-!insertmacro GetCorpusPath ""
+  !insertmacro GetParent ""
+!endif
 
 #--------------------------------------------------------------------------
-# Uninstaller Function: un.GetCorpusPath
+# Uninstaller Function: un.GetParent
 #
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-;!insertmacro GetCorpusPath "un."
+;!insertmacro GetParent "un."
 
 
 #--------------------------------------------------------------------------
-# Macro: GetDataPath
+# Macro: GetTimeStamp
 #
-# The installation process and the uninstall process both use a function which converts a
-# 'base directory' and a 'data folder' parameter (usually relative to the 'base directory')
-# into a single, absolute path. For example, it will convert 'C:\Program Files\POPFile' and
-# 'corpus' into 'C:\Program Files\POPFile\corpus'. This macro makes maintenance easier by
-# ensuring that both processes use identical functions, with the only difference being their
-# names.
-#
-# It is assumed that the 'base directory' is in standard Windows format with no trailing slash.
-#
-# The 'data folder' may be supplied in a variety of different formats, for example:
-# corpus, ./corpus, "..\..\corpus", Z:/Data/corpus or even "\\server\share\corpus".
+# The installation process and the uninstall process may need a function which uses the
+# local time from Windows to generate a time stamp (eg '01:23:45'). This macro makes
+# maintenance easier by ensuring that both processes use identical functions, with
+# the only difference being their names.
 #
 # NOTE:
-# The !insertmacro GetDataPath "" and !insertmacro GetDataPath "un." commands are included
-# in this file so 'installer.nsi' can use 'Call GetDataPath' and 'Call un.GetDataPath'
-# without additional preparation.
+# The !insertmacro GetTimeStamp "" and !insertmacro GetTimeStamp "un." commands are included
+# in this file so 'installer.nsi' and/or other library functions in 'pfi-library.nsh' can use
+# 'Call GetTimeStamp' and 'Call un.GetTimeStamp' without additional preparation.
 #
 # Inputs:
-#         (top of stack)          - the 'data folder' parameter (eg "../../corpus")
-#         (top of stack - 1)      - the 'base directory' parameter
-#
+#         (none)
 # Outputs:
-#         (top of stack)          - string containing the full (unambiguous) path to the data
-#                                   (the string "" is returned if input data was null)
+#         (top of stack)     - string holding current time (eg '23:01:59')
 #
 #  Usage (after macro has been 'inserted'):
 #
-#         Push $G_USERDIR
-#         Push "../../corpus"
-#         Call un.GetDataPath
-#         Pop $R0
+#         Call GetTimeStamp
+#         Pop $R9
 #
-#         ($R0 will be "C:\corpus", assuming $G_USERDIR was "C:\Program Files\POPFile")
+#         ($R9 now holds a string like '23:01:59')
 #--------------------------------------------------------------------------
 
-!macro GetDataPath UN
-  Function ${UN}GetDataPath
+!macro GetTimeStamp UN
+  Function ${UN}GetTimeStamp
 
-    !define L_BASEDIR     $R9
-    !define L_DATA        $R8
-    !define L_RESULT      $R7
-    !define L_TEMP        $R6
+    !define L_TIMESTAMP   $R9
+    !define L_HOURS       $R8
+    !define L_MINUTES     $R7
+    !define L_SECONDS     $R6
 
-    Exch ${L_DATA}        ; the 'data folder' parameter (often a relative path)
-    Exch
-    Exch ${L_BASEDIR}      ; the 'base directory' used for cases where 'data folder' is relative
-    Push ${L_RESULT}
-    Push ${L_TEMP}
+    Push ${L_TIMESTAMP}
+    Push ${L_HOURS}
+    Push ${L_MINUTES}
+    Push ${L_SECONDS}
 
-    StrCmp ${L_DATA} "" 0 strip_quotes
-    StrCpy ${L_DATA} ${L_BASEDIR}
-    Goto got_path
+    Call ${UN}GetLocalTIme
+    Pop ${L_TIMESTAMP}    ; ignore year
+    Pop ${L_TIMESTAMP}    ; ignore month
+    Pop ${L_TIMESTAMP}    ; ignore day of week
+    Pop ${L_TIMESTAMP}    ; ignore day
+    Pop ${L_HOURS}
+    Pop ${L_MINUTES}
+    Pop ${L_SECONDS}
+    Pop ${L_TIMESTAMP}    ; ignore milliseconds
 
-  strip_quotes:
+    IntCmp ${L_HOURS} 10 +2 0 +2
+    StrCpy ${L_HOURS} "0${L_HOURS}"
 
-    ; Strip leading/trailing quotes, if any
+    IntCmp ${L_MINUTES} 10 +2 0 +2
+    StrCpy ${L_MINUTES} "0${L_MINUTES}"
 
-    StrCpy ${L_TEMP} ${L_DATA} 1
-    StrCmp ${L_TEMP} '"' 0 slashconversion
-    StrCpy ${L_DATA} ${L_DATA} "" 1
-    StrCpy ${L_TEMP} ${L_DATA} 1 -1
-    StrCmp ${L_TEMP} '"' 0 slashconversion
-    StrCpy ${L_DATA} ${L_DATA} -1
+    IntCmp ${L_SECONDS} 10 +2 0 +2
+    StrCpy ${L_SECONDS} "0${L_SECONDS}"
 
-  slashconversion:
-    StrCmp ${L_DATA} "." source_folder
-    Push ${L_DATA}
-    Call ${UN}StrBackSlash            ; ensure parameter uses backslashes
-    Pop ${L_DATA}
+    StrCpy ${L_TIMESTAMP} "${L_HOURS}:${L_MINUTES}:${L_SECONDS}"
 
-    StrCpy ${L_TEMP} ${L_DATA} 2
-    StrCmp ${L_TEMP} ".\" sub_folder
-    StrCmp ${L_TEMP} "\\" got_path
+    Pop ${L_SECONDS}
+    Pop ${L_MINUTES}
+    Pop ${L_HOURS}
+    Exch ${L_TIMESTAMP}
 
-    StrCpy ${L_TEMP} ${L_DATA} 3
-    StrCmp ${L_TEMP} "..\" relative_folder
-
-    StrCpy ${L_TEMP} ${L_DATA} 1
-    StrCmp ${L_TEMP} "\" basedir_drive
-
-    StrCpy ${L_TEMP} ${L_DATA} 1 1
-    StrCmp ${L_TEMP} ":" got_path
-
-    ; Assume path can be safely added to 'base directory'
-
-    StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
-    Goto got_path
-
-  source_folder:
-    StrCpy ${L_DATA} ${L_BASEDIR}
-    Goto got_path
-
-  sub_folder:
-    StrCpy ${L_DATA} ${L_DATA} "" 2
-    StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
-    Goto got_path
-
-  relative_folder:
-    StrCpy ${L_RESULT} ${L_BASEDIR}
-
-  relative_again:
-    StrCpy ${L_DATA} ${L_DATA} "" 3
-    Push ${L_RESULT}
-    Call ${UN}GetParent
-    Pop ${L_RESULT}
-    StrCpy ${L_TEMP} ${L_DATA} 3
-    StrCmp ${L_TEMP} "..\" relative_again
-    StrCpy ${L_DATA} ${L_RESULT}\${L_DATA}
-    Goto got_path
-
-  basedir_drive:
-    StrCpy ${L_TEMP} ${L_BASEDIR} 2
-    StrCpy ${L_DATA} ${L_TEMP}${L_DATA}
-
-  got_path:
-    Pop ${L_TEMP}
-    Pop ${L_RESULT}
-    Pop ${L_BASEDIR}
-    Exch ${L_DATA}  ; place full path to the data directory on top of the stack
-
-    !undef L_BASEDIR
-    !undef L_DATA
-    !undef L_RESULT
-    !undef L_TEMP
+    !undef L_TIMESTAMP
+    !undef L_HOURS
+    !undef L_MINUTES
+    !undef L_SECONDS
 
   FunctionEnd
 !macroend
 
 #--------------------------------------------------------------------------
-# Installer Function: GetDataPath
+# Installer Function: GetTimeStamp
 #
 # This function is used during the installation process
 #--------------------------------------------------------------------------
 
-!insertmacro GetDataPath ""
+;!insertmacro GetTimeStamp ""
 
 #--------------------------------------------------------------------------
-# Uninstaller Function: un.GetDataPath
+# Uninstaller Function: un.GetTimeStamp
 #
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-;!insertmacro GetDataPath "un."
+;!insertmacro GetTimeStamp "un."
 
 
 #--------------------------------------------------------------------------
@@ -1424,13 +1659,15 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-#--------------------------------------------------------------------------
-# Installer Function: StrBackSlash
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
+!ifndef TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Installer Function: StrBackSlash
+  #
+  # This function is used during the installation process
+  #--------------------------------------------------------------------------
 
-!insertmacro StrBackSlash ""
+  !insertmacro StrBackSlash ""
+!endif
 
 #--------------------------------------------------------------------------
 # Uninstaller Function: un.StrBackSlash
@@ -1439,162 +1676,6 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 ;!insertmacro StrBackSlash "un."
-
-
-#--------------------------------------------------------------------------
-# Macro: GetParent
-#
-# The installation process and the uninstall process both use a function which extracts the
-# parent directory from a given path. This macro makes maintenance easier by ensuring that both
-# processes use identical functions, with the only difference being their names.
-#
-# NB: The path is assumed to use backslashes (\)
-#
-# NOTE:
-# The !insertmacro GetParent "" and !insertmacro GetParent "un." commands are included
-# in this file so 'installer.nsi' can use 'Call GetParent' and 'Call un.GetParent'
-# without additional preparation.
-#
-# Inputs:
-#         (top of stack)          - string containing a path (e.g. C:\A\B\C)
-#
-# Outputs:
-#         (top of stack)          - the parent part of the input string (e.g. C:\A\B)
-#
-#  Usage (after macro has been 'inserted'):
-#
-#         Push "C:\Program Files\Directory\Whatever"
-#         Call un.GetParent
-#         Pop $R0
-#
-#         ($R0 at this point is ""C:\Program Files\Directory")
-#
-#--------------------------------------------------------------------------
-
-!macro GetParent UN
-  Function ${UN}GetParent
-    Exch $R0
-    Push $R1
-    Push $R2
-    Push $R3
-
-    StrCpy $R1 0
-    StrLen $R2 $R0
-
-  loop:
-    IntOp $R1 $R1 + 1
-    IntCmp $R1 $R2 get 0 get
-    StrCpy $R3 $R0 1 -$R1
-    StrCmp $R3 "\" get
-    Goto loop
-
-  get:
-    StrCpy $R0 $R0 -$R1
-
-    Pop $R3
-    Pop $R2
-    Pop $R1
-    Exch $R0
-  FunctionEnd
-!macroend
-
-#--------------------------------------------------------------------------
-# Installer Function: GetParent
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-!insertmacro GetParent ""
-
-#--------------------------------------------------------------------------
-# Uninstaller Function: un.GetParent
-#
-# This function is used during the uninstall process
-#--------------------------------------------------------------------------
-
-;!insertmacro GetParent "un."
-
-
-#--------------------------------------------------------------------------
-# Macro: StrStr
-#
-# The installation process and the uninstall process both use a function which checks if
-# a given string appears inside another string. This macro makes maintenance easier by ensuring
-# that both processes use identical functions, with the only difference being their names.
-#
-# NOTE:
-# The !insertmacro StrStr "" and !insertmacro StrStr "un." commands are included in this file
-# so 'installer.nsi' can use 'Call StrStr' and 'Call un.StrStr' without additional preparation.
-#
-# Search for matching string
-#
-# Inputs:
-#         (top of stack)     - the string to be found (needle)
-#         (top of stack - 1) - the string to be searched (haystack)
-# Outputs:
-#         (top of stack)     - string starting with the match, if any
-#
-#  Usage (after macro has been 'inserted'):
-#
-#         Push "this is a long string"
-#         Push "long"
-#         Call StrStr
-#         Pop $R0
-#         ($R0 at this point is "long string")
-#
-#--------------------------------------------------------------------------
-
-!macro StrStr UN
-  Function ${UN}StrStr
-
-    Exch $R1    ; Make $R1 the "needle", Top of stack = old$R1, haystack
-    Exch        ; Top of stack = haystack, old$R1
-    Exch $R2    ; Make $R2 the "haystack", Top of stack = old$R2, old$R1
-
-    Push $R3    ; Length of the needle
-    Push $R4    ; Counter
-    Push $R5    ; Temp
-
-    StrLen $R3 $R1
-    StrCpy $R4 0
-
-  loop:
-    StrCpy $R5 $R2 $R3 $R4
-    StrCmp $R5 $R1 done
-    StrCmp $R5 "" done
-    IntOp $R4 $R4 + 1
-    Goto loop
-
-  done:
-    StrCpy $R1 $R2 "" $R4
-
-    Pop $R5
-    Pop $R4
-    Pop $R3
-
-    Pop $R2
-    Exch $R1
-  FunctionEnd
-!macroend
-
-#--------------------------------------------------------------------------
-# Installer Function: StrStr
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-!insertmacro StrStr ""
-
-!ifndef ADDUSER
-      #--------------------------------------------------------------------------
-      # Uninstaller Function: un.StrStr
-      #
-      # This function is used during the uninstall process
-      #--------------------------------------------------------------------------
-      
-       !insertmacro StrStr "un."
-!endif
-
 
 #--------------------------------------------------------------------------
 # Macro: StrCheckDecimal
@@ -1680,13 +1761,96 @@ FunctionEnd
 
 !insertmacro StrCheckDecimal ""
 
+!ifndef TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Uninstaller Function: un.StrCheckDecimal
+  #
+  # This function is used during the uninstall process
+  #--------------------------------------------------------------------------
+
+  !insertmacro StrCheckDecimal "un."
+!endif
+
+
 #--------------------------------------------------------------------------
-# Uninstaller Function: un.StrCheckDecimal
+# Macro: StrStr
 #
-# This function is used during the uninstall process
+# The installation process and the uninstall process both use a function which checks if
+# a given string appears inside another string. This macro makes maintenance easier by ensuring
+# that both processes use identical functions, with the only difference being their names.
+#
+# NOTE:
+# The !insertmacro StrStr "" and !insertmacro StrStr "un." commands are included in this file
+# so 'installer.nsi' can use 'Call StrStr' and 'Call un.StrStr' without additional preparation.
+#
+# Search for matching string
+#
+# Inputs:
+#         (top of stack)     - the string to be found (needle)
+#         (top of stack - 1) - the string to be searched (haystack)
+# Outputs:
+#         (top of stack)     - string starting with the match, if any
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Push "this is a long string"
+#         Push "long"
+#         Call StrStr
+#         Pop $R0
+#         ($R0 at this point is "long string")
+#
 #--------------------------------------------------------------------------
 
-!insertmacro StrCheckDecimal "un."
+!macro StrStr UN
+  Function ${UN}StrStr
+
+    Exch $R1    ; Make $R1 the "needle", Top of stack = old$R1, haystack
+    Exch        ; Top of stack = haystack, old$R1
+    Exch $R2    ; Make $R2 the "haystack", Top of stack = old$R2, old$R1
+
+    Push $R3    ; Length of the needle
+    Push $R4    ; Counter
+    Push $R5    ; Temp
+
+    StrLen $R3 $R1
+    StrCpy $R4 0
+
+  loop:
+    StrCpy $R5 $R2 $R3 $R4
+    StrCmp $R5 $R1 done
+    StrCmp $R5 "" done
+    IntOp $R4 $R4 + 1
+    Goto loop
+
+  done:
+    StrCpy $R1 $R2 "" $R4
+
+    Pop $R5
+    Pop $R4
+    Pop $R3
+
+    Pop $R2
+    Exch $R1
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: StrStr
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro StrStr ""
+
+!ifndef ADDUSER & TRANSLATOR & TRANSLATOR_AUW
+      #--------------------------------------------------------------------------
+      # Uninstaller Function: un.StrStr
+      #
+      # This function is used during the uninstall process
+      #--------------------------------------------------------------------------
+
+       !insertmacro StrStr "un."
+!endif
 
 
 #--------------------------------------------------------------------------
@@ -1757,79 +1921,6 @@ FunctionEnd
 
 
 #--------------------------------------------------------------------------
-# Macro: CheckIfLocked
-#
-# The installation process and the uninstall process both use a function which checks if
-# a particular executable file (an EXE file) is being used (the EXE file to be checked depends
-# upon the version of POPFile in use and upon how it has been configured. If the specified EXE
-# file is no longer in use, this function returns an empty string (otherwise it returns the
-# input parameter unchanged).
-#
-# Inputs:
-#         (top of stack)     - the full path of the EXE file to be checked
-#
-# Outputs:
-#         (top of stack)     - if file is no longer in use, an empty string ("") is returned
-#                              otherwise the input string is returned
-#
-#  Usage (after macro has been 'inserted'):
-#
-#         Push "$G_MPBINDIR\wperl.exe"
-#         Call CheckIfLocked
-#         Pop $R0
-#
-#        (if the file is no longer in use, $R0 will be "")
-#        (if the file is still being used, $R0 will be "$G_MPBINDIR\wperl.exe")
-#--------------------------------------------------------------------------
-
-!macro CheckIfLocked UN
-  Function ${UN}CheckIfLocked
-    !define L_EXE           $R9   ; full path to the EXE file which is to be monitored
-    !define L_FILE_HANDLE   $R8
-
-    Exch ${L_EXE}
-    Push ${L_FILE_HANDLE}
-
-    IfFileExists "${L_EXE}" 0 unlocked_exit
-    SetFileAttributes "${L_EXE}" NORMAL
-
-    ClearErrors
-    FileOpen ${L_FILE_HANDLE} "${L_EXE}" a
-    FileClose ${L_FILE_HANDLE}
-    IfErrors exit
-
-  unlocked_exit:
-    StrCpy ${L_EXE} ""
-
-   exit:
-    Pop ${L_FILE_HANDLE}
-    Exch ${L_EXE}
-
-    !undef L_EXE
-    !undef L_FILE_HANDLE
-  FunctionEnd
-!macroend
-
-!ifndef ADDUSER
-    #--------------------------------------------------------------------------
-    # Installer Function: CheckIfLocked
-    #
-    # This function is used during the installation process
-    #--------------------------------------------------------------------------
-    
-    !insertmacro CheckIfLocked ""
-!endif
-
-#--------------------------------------------------------------------------
-# Uninstaller Function: un.CheckIfLocked
-#
-# This function is used during the uninstall process
-#--------------------------------------------------------------------------
-
-!insertmacro CheckIfLocked "un."
-
-
-#--------------------------------------------------------------------------
 # Macro: WaitUntilUnlocked
 #
 # The installation process and the uninstall process both use a function which waits until
@@ -1886,21 +1977,23 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-#--------------------------------------------------------------------------
-# Installer Function: WaitUntilUnlocked
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
+!ifndef TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Installer Function: WaitUntilUnlocked
+  #
+  # This function is used during the installation process
+  #--------------------------------------------------------------------------
 
-!insertmacro WaitUntilUnlocked ""
+  !insertmacro WaitUntilUnlocked ""
 
-#--------------------------------------------------------------------------
-# Uninstaller Function: un.WaitUntilUnlocked
-#
-# This function is used during the uninstall process
-#--------------------------------------------------------------------------
+  #--------------------------------------------------------------------------
+  # Uninstaller Function: un.WaitUntilUnlocked
+  #
+  # This function is used during the uninstall process
+  #--------------------------------------------------------------------------
 
-!insertmacro WaitUntilUnlocked "un."
+  !insertmacro WaitUntilUnlocked "un."
+!endif
 
 #--------------------------------------------------------------------------
 # End of 'pfi-library.nsh'
