@@ -126,6 +126,7 @@ sub initialize
     $self->config_( 'update_interval', 20 );
     $self->config_( 'byte_limit', 0 );
     $self->config_( 'expunge', 0 );
+    $self->config_( 'use_ssl', 0 );
 
     # Those next variables have getter/setter functions and should
     # not be used directly:
@@ -865,12 +866,26 @@ sub connect
     if ( $hostname ne '' && $port ne '' ) {
 
         my $response = '';
-        my $imap = IO::Socket::INET->new(
+
+        my $imap;
+
+        if ( $self->config_( 'use_ssl' ) ) {
+            require IO::Socket::SSL;
+            $imap = IO::Socket::SSL->new (
+                                Proto    => "tcp",
+                                PeerAddr => $hostname,
+                                PeerPort => $port,
+                                Timeout  => $self->global_config_( 'timeout' )
+                                          );
+        }
+        else {
+            $imap = IO::Socket::INET->new(
                                 Proto    => "tcp",
                                 PeerAddr => $hostname,
                                 PeerPort => $port,
                                 Timeout  => $self->global_config_( 'timeout' )
                                          );
+        }
 
 
         # Check that the connect succeeded for the remote server
@@ -881,7 +896,9 @@ sub connect
                 # Set binmode on the socket so that no translation of CRLF
                 # occurs
 
-                binmode( $imap );
+                if ( $self->config_( 'use_ssl' ) == 0 ) {
+                    binmode( $imap );
+                }
 
                 # Wait for a response from the remote server and if
                 # there isn't one then give up trying to connect
@@ -993,17 +1010,17 @@ sub raw_say
 {
     my ( $self, $imap, $tag, $command ) = @_;
 
-    my $cmdstr = sprintf "A%05d %s", $tag, $command;
+    my $cmdstr = sprintf "A%05d %s%s", $tag, $command, $eol;
 
     # Talk to the server
-    unless( print $imap $cmdstr, $eol ) {
+    unless( print $imap $cmdstr ) {
         $imap->shutdown( 2 );
         return;
     }
 
     # Log command
     # Obfuscate login and password for logins:
-    $cmdstr =~ s/^(A\d+) LOGIN ".+?" ".+"$/$1 LOGIN "xxxxx" "xxxxx"/;
+    $cmdstr =~ s/^(A\d+) LOGIN ".+?" ".+"(.+)/$1 LOGIN "xxxxx" "xxxxx"$2/;
     $self->log_( 1, "<< $cmdstr" );
 
     return 1;
@@ -1035,7 +1052,7 @@ sub say__
     my ( $self, $imap_or_folder, $command ) = @_;
 
     # Did we get a socket object?
-    if ( ref( $imap_or_folder ) eq 'IO::Socket::INET' ) {
+    if ( ref( $imap_or_folder ) eq 'IO::Socket::INET' || ref( $imap_or_folder ) eq 'IO::Socket::SSL' ) {
 
         $self->{last_command__} = $command;
 
@@ -1052,7 +1069,7 @@ sub say__
 
         unless ( exists $self->{folders__}{$imap_or_folder}{imap} ) {
             # No! commit suicide.
-            $self->log_( 0, "Got a folder with no attached socket in say!" );
+            $self->log_( 0, "Got a folder ($imap_or_folder) with no attached socket in say!" );
             die( "The connection to the IMAP server was lost. Could not talk to the server." );
         }
 
@@ -1246,7 +1263,7 @@ sub get_response__
     my $result;
 
     # Are we dealing with a socket object?
-    if ( ref( $imap_or_folder ) eq 'IO::Socket::INET' ) {
+    if ( ref( $imap_or_folder ) eq 'IO::Socket::INET' ||  ref( $imap_or_folder ) eq 'IO::Socket::SSL' ) {
         $result = $self->raw_get_response( $imap_or_folder,
                                               $self->{last_command__},
                                               \$self->{tag__},
