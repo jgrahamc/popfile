@@ -89,7 +89,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define C_VERSION   "0.5.6"       ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.5.7"       ; see 'VIProductVersion' comment below for format details
 
   ; Specify EXE filename and icon for the 'installer'
 
@@ -133,6 +133,16 @@
 
 #----------------------------------------------------------------------------------------
 
+#--------------------------------------------------------------------------
+# Include private library functions and macro definitions
+#--------------------------------------------------------------------------
+
+  ; Avoid compiler warnings by disabling the functions and definitions we do not use
+
+  !define STOP_POPFILE
+
+  !include "pfi-library.nsh"
+
 ;-------------------
 ; Section: Shutdown
 ;-------------------
@@ -166,7 +176,7 @@ Section Shutdown
 
   StrCpy ${L_TEMP} ${L_RESULT} 1
   Push ${L_TEMP}
-  Call StrCheckInteger
+  Call StrCheckDecimal
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "" 0 port_checks
   StrCmp ${L_RESULT} "/showerrors" only_errors
@@ -226,7 +236,7 @@ other_param:
 port_checks:
   StrCmp ${L_RESULT} "" no_port_supplied
   Push ${L_RESULT}
-  Call StrCheckInteger
+  Call StrCheckDecimal
   Pop ${L_GUI}
   StrCmp ${L_GUI} "" integer_error
   IntCmp ${L_GUI} 0 port_error port_error
@@ -249,7 +259,7 @@ port_checks:
   ; If first attempt appears to succeed, we must try again to check if POPFile has shutdown
   ; (we cannot tell the difference between 'shutdown' and 'incorrect password' responses)
 
-  NSISdl::download_quiet ${C_DLTIMEOUT} http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown_1.htm"
+  NSISdl::download_quiet ${C_DLTIMEOUT} http://${C_UI_URL}:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown_1.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" try_password_again
   StrCmp ${L_REPORT} "none" error_exit
@@ -261,7 +271,7 @@ port_checks:
 
 try_password_again:
   Sleep ${C_DLGAP}
-  NSISdl::download_quiet ${C_DLTIMEOUT} http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown_2.htm"
+  NSISdl::download_quiet ${C_DLTIMEOUT} http://${C_UI_URL}:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown_2.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" 0 password_ok
   Push "$PLUGINSDIR\shutdown_2.htm"
@@ -290,7 +300,7 @@ no_password_supplied:
   ; If first attempt appears to succeed, we must try again to check if POPFile has shutdown
   ; (we cannot tell the difference between 'shutdown' and 'enter password' responses)
 
-  NSISdl::download_quiet ${C_DLTIMEOUT} http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown_1.htm"
+  NSISdl::download_quiet ${C_DLTIMEOUT} http://${C_UI_URL}:${L_GUI}/shutdown "$PLUGINSDIR\shutdown_1.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" try_again
   StrCmp ${L_REPORT} "none" error_exit
@@ -302,7 +312,7 @@ no_password_supplied:
 
 try_again:
   Sleep ${C_DLGAP}
-  NSISdl::download_quiet ${C_DLTIMEOUT} http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown_2.htm"
+  NSISdl::download_quiet ${C_DLTIMEOUT} http://${C_UI_URL}:${L_GUI}/shutdown "$PLUGINSDIR\shutdown_2.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" 0 shutdown_ok
   Push "$PLUGINSDIR\shutdown_2.htm"
@@ -354,59 +364,6 @@ exit:
   !undef L_RESULT
   !undef L_TEMP
 SectionEnd
-
-
-#--------------------------------------------------------------------------
-# General Purpose Library Function: GetParameters
-#--------------------------------------------------------------------------
-#
-# Extracts the command-line parameters (if any)
-#
-# Inputs:
-#         (NSIS provides the command-line as $CMDLINE)
-#
-# Outputs:
-#         (top of stack)   - the command-line parameters supplied (if any)
-#
-# Usage:
-#         Call GetParameters
-#         Pop $R0
-#
-#         ($R0 at this point is "" if no parameters were supplied)
-#
-#--------------------------------------------------------------------------
-
-Function GetParameters
-  Push $R0
-  Push $R1
-  Push $R2
-  Push $R3
-
-  StrCpy $R0 $CMDLINE 1
-  StrCpy $R1 '"'
-  StrCpy $R2 1
-  StrLen $R3 $CMDLINE
-  StrCmp $R0 '"' loop
-  StrCpy $R1 ' ' ; we're scanning for a space instead of a quote
-
-loop:
-  StrCpy $R0 $CMDLINE 1 $R2
-  StrCmp $R0 $R1 loop2
-  StrCmp $R2 $R3 loop2
-  IntOp $R2 $R2 + 1
-  Goto loop
-
-loop2:
-  IntOp $R2 $R2 + 1
-  StrCpy $R0 $CMDLINE 1 $R2
-  StrCmp $R0 " " loop2
-  StrCpy $R0 $CMDLINE "" $R2
-
-  Pop $R3
-  Pop $R2
-  Pop $R1
-  Exch $R0
-FunctionEnd
 
 
 #--------------------------------------------------------------------------
@@ -474,131 +431,6 @@ done:
   !undef L_CHAR
   !undef L_LIST
   !undef L_PARAM
-
-FunctionEnd
-
-
-#--------------------------------------------------------------------------
-# General Purpose Library Function: StrCheckInteger
-#--------------------------------------------------------------------------
-#
-# This function checks that a given string contains only the digits 0 to 9
-# (if the string contains any invalid characters, "" is returned)
-#
-# Inputs:
-#         (top of stack)   - string which may contain an integer number
-#
-# Outputs:
-#         (top of stack)   - the input string (if valid) or "" (if invalid)
-#
-# Usage:
-#         Push "12345"
-#         Call StrCheckInteger
-#         Pop $R0
-#
-#         ($R0 at this point is "12345")
-#
-#--------------------------------------------------------------------------
-
-Function StrCheckInteger
-
-  !define DECIMAL_DIGIT    "0123456789"
-
-  Exch $0   ; The input string
-  Push $1   ; Holds the result: either "" (if input is invalid) or the input string (if valid)
-  Push $2   ; A character from the input string
-  Push $3   ; The offset to a character in the "validity check" string
-  Push $4   ; A character from the "validity check" string
-  Push $5   ; Holds the current "validity check" string
-
-  StrCpy $1 ""
-
-next_input_char:
-  StrCpy $2 $0 1                ; Get the next character from the input string
-  StrCmp $2 "" done
-  StrCpy $5 ${DECIMAL_DIGIT}$2  ; Add it to end of "validity check" to guarantee a match
-  StrCpy $0 $0 "" 1
-  StrCpy $3 -1
-
-next_valid_char:
-  IntOp $3 $3 + 1
-  StrCpy $4 $5 1 $3             ; Extract next "valid" character (from "validity check" string)
-  StrCmp $2 $4 0 next_valid_char
-  IntCmp $3 10 invalid 0 invalid  ; If match is with the char we added, input string is bad
-  StrCpy $1 $1$4                ; Add "valid" character to the result
-  goto next_input_char
-
-invalid:
-  StrCpy $1 ""
-
-done:
-  StrCpy $0 $1      ; Result is either a string of decimal digits or ""
-  Pop $5
-  Pop $4
-  Pop $3
-  Pop $2
-  Pop $1
-  Exch $0           ; place result on top of the stack
-
-  !undef DECIMAL_DIGIT
-
-FunctionEnd
-
-
-#--------------------------------------------------------------------------
-# General Purpose Library Function: GetFileSize
-#--------------------------------------------------------------------------
-#
-# This function returns the size (in bytes) of the specified file. If the file
-# cannot be found then -1 is returned. If an error is detected, -2 is returned.
-#
-# Inputs:
-#         (top of stack)     - filename of file to be checked
-# Outputs:
-#         (top of stack)     - length of the file (in bytes)
-#                              or '-1' if file not found
-#                              or '-2' if error occurred
-#
-# Usage:
-#         Push "corpus\spam\table"
-#         Call GetFileSize
-#         Pop $R0
-#
-#         ($R0 now holds the size (in bytes) of the 'spam' bucket's 'table' file)
-#
-#--------------------------------------------------------------------------
-
-Function GetFileSize
-
-  !define L_FILENAME  $R9
-  !define L_RESULT    $R8
-
-  Exch ${L_FILENAME}
-  Push ${L_RESULT}
-  Exch
-
-  IfFileExists ${L_FILENAME} find_size
-  StrCpy ${L_RESULT} "-1"
-  Goto exit
-
-find_size:
-  ClearErrors
-  FileOpen ${L_RESULT} ${L_FILENAME} r
-  FileSeek ${L_RESULT} 0 END ${L_FILENAME}
-  FileClose ${L_RESULT}
-  IfErrors 0 return_size
-  StrCpy ${L_RESULT} "-2"
-  Goto exit
-
-return_size:
-  StrCpy ${L_RESULT} ${L_FILENAME}
-
-exit:
-  Pop ${L_FILENAME}
-  Exch ${L_RESULT}
-
-  !undef L_FILENAME
-  !undef L_RESULT
 
 FunctionEnd
 
