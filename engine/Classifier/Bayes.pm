@@ -241,7 +241,7 @@ sub open_db_env__
     return new BerkeleyDB::Env
                            -Cachesize => $self->config_( 'db_cache_size' ),
    	                   -Home      => $self->get_user_path_( $self->config_( 'corpus' ) ),
- 	                   -ErrFile   => $self->get_user_path_( 'bdb_error' ),
+ 	                   -ErrFile   => $self->get_user_path_( "bdb_error$$" ),
                            -Verbose   => 1,
  	                   -Flags     => DB_INIT_LOG | 
    			                 DB_INIT_LOCK | DB_INIT_MPOOL | $flags;
