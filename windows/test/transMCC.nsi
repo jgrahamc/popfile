@@ -5,7 +5,7 @@
 #                  easy to check the various language strings used by the
 #                  real utility.
 #
-# Copyright (c) 2004 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -46,25 +46,33 @@
 # when corpus conversion has failed.
 #
 #--------------------------------------------------------------------------
+# The POPFile installer uses several multi-language mode programs built using NSIS. To make
+# maintenance easier, an 'include' file (pfi-languages.nsh) defines the supported languages.
+#
+# To remove support for a particular language, comment-out the relevant line in the list of
+# languages in the 'pfi-languages.nsh' file.
+#
+# For instructions on how to add support for new languages, see the 'pfi-languages.nsh' file.
+#--------------------------------------------------------------------------
 
   ;--------------------------------------------------------------------------
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_PFI_PRODUCT  "Corpus Conversion Testbed"
-  Name                   "${C_PFI_PRODUCT}"
+  !define C_PFI_PRODUCT      "Corpus Conversion Testbed"
+  Name                       "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.1"
+  !define C_PFI_VERSION      "0.1.2"
 
   ; Mention the version number in the window title
 
-  Caption                "${C_PFI_PRODUCT} ${C_PFI_VERSION}"
+  Caption                    "${C_PFI_PRODUCT} ${C_PFI_VERSION}"
 
   ;------------------------------------------------
   ; Constants used to specify delays (in milliseconds)
   ;------------------------------------------------
 
-  !define C_STANDARD_DELAY    3000
+  !define C_STANDARD_DELAY   3000
 
   ;------------------------------------------------
   ; Define PFI_VERBOSE to get more compiler output
@@ -85,19 +93,19 @@
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion "${C_PFI_VERSION}.0"
+  VIProductVersion                   "${C_PFI_VERSION}.0"
 
-  VIAddVersionKey "ProductName" "${C_PFI_PRODUCT}"
-  VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sf.net"
-  VIAddVersionKey "CompanyName" "The POPFile Project"
-  VIAddVersionKey "LegalCopyright" "© 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription" "POPFile Corpus Conversion Testbed"
-  VIAddVersionKey "FileVersion" "${C_PFI_VERSION}"
+  VIAddVersionKey "ProductName"      "${C_PFI_PRODUCT}"
+  VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "CompanyName"      "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"   "© 2004  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"  "POPFile Corpus Conversion Testbed"
+  VIAddVersionKey "FileVersion"      "${C_PFI_VERSION}"
 
-  VIAddVersionKey "Build" "Multi-Language"
+  VIAddVersionKey "Build"            "Multi-Language"
 
-  VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script" "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
+  VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages
@@ -109,10 +117,10 @@
 
   ; The icon file for the utility
 
-  !define MUI_ICON    "..\POPFileIcon\popfile.ico"
+  !define MUI_ICON                            "..\POPFileIcon\popfile.ico"
 
   !define MUI_HEADERIMAGE
-  !define MUI_HEADERIMAGE_BITMAP "hdr-common-test.bmp"
+  !define MUI_HEADERIMAGE_BITMAP              "hdr-common-test.bmp"
   !define MUI_HEADERIMAGE_RIGHT
 
   ;----------------------------------------------------------------
@@ -123,13 +131,13 @@
   ; two lines of text, e.g. the German version is truncated, so we use a custom UI which
   ; provides slightly wider text areas. Each area is still limited to a single line of text.
 
-  !define MUI_UI "..\UI\pfi_modern.exe"
+  !define MUI_UI                              "..\UI\pfi_modern.exe"
 
   ; The 'hdr-common.bmp' logo is only 90 x 57 pixels, much smaller than the 150 x 57 pixel
   ; space provided by the default 'modern_headerbmpr.exe' UI, so we use a custom UI which
   ; leaves more room for the TITLE and SUBTITLE text.
 
-  !define MUI_UI_HEADERIMAGE_RIGHT "..\UI\pfi_headerbmpr.exe"
+  !define MUI_UI_HEADERIMAGE_RIGHT            "..\UI\pfi_headerbmpr.exe"
 
   ;----------------------------------------------------------------
   ;  Interface Settings - Installer Finish Page Interface Settings
@@ -154,13 +162,13 @@
 
   ; Override the standard prompt (to match the one used by the main installer)
 
-  !define MUI_LANGDLL_WINDOWTITLE "Language Selection"
+  !define MUI_LANGDLL_WINDOWTITLE             "Language Selection"
 
   ; Use same language setting as the installer (assumes the translator testbed installer)
 
-  !define MUI_LANGDLL_REGISTRY_ROOT "HKCU"
-  !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\POPFile Project\PFI Testbed\MRI"
-  !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
+  !define MUI_LANGDLL_REGISTRY_ROOT           "HKCU"
+  !define MUI_LANGDLL_REGISTRY_KEY            "SOFTWARE\POPFile Project\PFI Testbed\MRI"
+  !define MUI_LANGDLL_REGISTRY_VALUENAME      "Installer Language"
 
 #--------------------------------------------------------------------------
 # Define the Page order for the utility
@@ -249,41 +257,7 @@
 
   ; Additional languages supported by the utility
 
-  ; To remove a language, comment-out the relevant '!insertmacro PFI_LANG_LOAD' line below.
-
-  ; Entries will appear in the drop-down list of languages in the order given below
-  ; (the order used here ensures that the list entries appear in alphabetic order).
-
-  ; NOTE: The order used here assumes that the NSIS MUI 'Japanese.nsh' language file has
-  ; been patched to use 'Nihongo' instead of 'Japanese' [see 'SMALL NSIS PATCH REQUIRED'
-  ; in the 'Support for Japanese text processing' section of the header comment at the
-  ; start of the 'installer.nsi' file]
-
-  !insertmacro PFI_LANG_LOAD "Arabic"
-  !insertmacro PFI_LANG_LOAD "Bulgarian"
-  !insertmacro PFI_LANG_LOAD "SimpChinese"
-  !insertmacro PFI_LANG_LOAD "TradChinese"
-  !insertmacro PFI_LANG_LOAD "Czech"
-  !insertmacro PFI_LANG_LOAD "Danish"
-  !insertmacro PFI_LANG_LOAD "German"
-  !insertmacro PFI_LANG_LOAD "Spanish"
-  !insertmacro PFI_LANG_LOAD "French"
-  !insertmacro PFI_LANG_LOAD "Greek"
-  !insertmacro PFI_LANG_LOAD "Italian"
-  !insertmacro PFI_LANG_LOAD "Korean"
-  !insertmacro PFI_LANG_LOAD "Hungarian"
-  !insertmacro PFI_LANG_LOAD "Dutch"
-  !insertmacro PFI_LANG_LOAD "Japanese"
-  !insertmacro PFI_LANG_LOAD "Norwegian"
-  !insertmacro PFI_LANG_LOAD "Polish"
-  !insertmacro PFI_LANG_LOAD "Portuguese"
-  !insertmacro PFI_LANG_LOAD "PortugueseBR"
-  !insertmacro PFI_LANG_LOAD "Russian"
-  !insertmacro PFI_LANG_LOAD "Slovak"
-  !insertmacro PFI_LANG_LOAD "Finnish"
-  !insertmacro PFI_LANG_LOAD "Swedish"
-  !insertmacro PFI_LANG_LOAD "Turkish"
-  !insertmacro PFI_LANG_LOAD "Ukrainian"
+  !include "..\pfi-languages.nsh"
 
 #--------------------------------------------------------------------------
 # General settings
@@ -301,8 +275,9 @@
 # Reserve the files required by the utility (to improve performance)
 #--------------------------------------------------------------------------
 
-  ;Things that need to be extracted on startup (keep these lines before any File command!)
-  ;Only useful for BZIP2 compression
+  ; Things that need to be extracted on startup (keep these lines before any File command!)
+  ; Only useful when solid compression is used (by default, solid compression is enabled
+  ; for BZIP2 and LZMA compression)
 
   !insertmacro MUI_RESERVEFILE_LANGDLL
 
@@ -321,8 +296,8 @@ FunctionEnd
 # Functions used to manipulate the contents of the details view
 #--------------------------------------------------------------------------
 
-  !define LVM_GETITEMCOUNT        0x1004
-  !define LVM_DELETEITEM          0x1008
+  !define C_LVM_GETITEMCOUNT        0x1004
+  !define C_LVM_DELETEITEM          0x1008
 
 ; This function deletes one element (i.e. one row) from the details view
 ; Push the index of the element to delete before calling this function
@@ -332,7 +307,7 @@ Function DeleteDetailViewItem
   Push $1
   FindWindow $1 "#32770" "" $HWNDPARENT
   GetDlgItem $1 $1 0x3F8                  ; This is the Control ID of the details view
-  SendMessage $1 ${LVM_DELETEITEM} $0 0
+  SendMessage $1 ${C_LVM_DELETEITEM} $0 0
   Pop $1
   Pop $0
 FunctionEnd
@@ -344,7 +319,7 @@ Function GetDetailViewItemCount
   Push $1
   FindWindow $1 "#32770" "" $HWNDPARENT
   GetDlgItem $1 $1 0x3F8                  ; This is the Control ID of the details view
-  SendMessage $1 ${LVM_GETITEMCOUNT} 0 0 $1
+  SendMessage $1 ${C_LVM_GETITEMCOUNT} 0 0 $1
   Exch $1
 FunctionEnd
 
