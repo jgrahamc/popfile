@@ -1711,7 +1711,7 @@ sub remove_message_from_bucket
 #
 # $mail     The stream (created with IO::) to send the message to (the remote mail server)
 # $client   (optional) The local mail client (created with IO::) that needs the response
-# $file     (optional) A file to print the response to
+# $file     (optional) A file to print the response to, caller specifies open style
 # $before   (optional) String to send to client before the dot is sent
 #
 # echo all information from the $mail server until a single line with a . is seen
@@ -1723,7 +1723,7 @@ sub echo_to_dot_
 {
     my ( $self, $mail, $client, $file, $before ) = @_;
 
-    open FILE, ">>$file" if ( defined( $file ) );
+    my $isopen = (open FILE, "$file" if ( defined( $file ) ));
 
     while ( <$mail> ) {
 
@@ -1738,7 +1738,7 @@ sub echo_to_dot_
         if ( /^\.(\r\n|\r|\n)$/ ) {
             if ( defined( $before ) && ( $before ne '' ) ) {
                 print $client $before if ( defined( $client ) );
-                print FILE    $before if ( defined( $file ) );
+                print FILE    $before if ( defined( $isopen ) );
             }
 
             # Note that there is no print FILE here.  This is correct because we
@@ -1750,11 +1750,11 @@ sub echo_to_dot_
         }
 
         print $client $_ if ( defined( $client ) );
-        print FILE    $_ if ( defined( $file ) );
+        print FILE    $_ if ( defined( $isopen ) );
 
     }
 
-    close FILE if ( defined( $file ) );
+    close FILE if ( $isopen );
 }
 
 # ---------------------------------------------------------------------------------------------
