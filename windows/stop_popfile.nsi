@@ -89,7 +89,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define C_VERSION   "0.5.1"       ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.5.3"       ; see 'VIProductVersion' comment below for format details
 
   ; Specify EXE filename and icon for the 'installer'
 
@@ -237,7 +237,7 @@ port_checks:
   ; If first attempt appears to succeed, we must try again to check if POPFile has shutdown
   ; (we cannot tell the difference between 'shutdown' and 'incorrect password' responses)
 
-  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown.htm"
+  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown_1.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" try_password_again
   StrCmp ${L_REPORT} "none" error_exit
@@ -248,7 +248,8 @@ port_checks:
   Goto error_exit
 
 try_password_again:
-  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown.htm"
+  Sleep 5000
+  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown_2.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" 0 password_ok
   StrCmp ${L_REPORT} "none" error_exit
@@ -273,7 +274,7 @@ no_password_supplied:
   ; If first attempt appears to succeed, we must try again to check if POPFile has shutdown
   ; (we cannot tell the difference between 'shutdown' and 'enter password' responses)
 
-  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown_1.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" try_again
   StrCmp ${L_REPORT} "none" error_exit
@@ -284,7 +285,8 @@ no_password_supplied:
   Goto error_exit
 
 try_again:
-  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  Sleep 5000
+  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown_2.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" 0 shutdown_ok
   StrCmp ${L_REPORT} "none" error_exit
