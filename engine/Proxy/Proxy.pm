@@ -340,7 +340,7 @@ sub echo_to_dot_
 
         print $client $_;
         #$self->tee_($client, $_);
-        
+
         # The termination has to be a single line with exactly a dot on it and nothing
         # else other than line termination characters.  This is vital so that we do
         # not mistake a line beginning with . as the end of the block
@@ -426,11 +426,11 @@ sub get_response_
 
             if ( $response ) {
                 # Echo the response up to the mail client
-                $self->tee_(  $client, $response );
+                $self->tee_( $client, $response );
                 return $response;
             }
         }
-        
+
         if (!null_resp) {
             # An error has occurred reading from the mail server
             $self->tee_(  $client, "$self->{connection_timeout_error_}$eol" );
@@ -438,7 +438,7 @@ sub get_response_
         } else {
             $self->tee_($client, "");
             return "";
-        }        
+        }
     }
 
     return $response;

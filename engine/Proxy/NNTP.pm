@@ -55,12 +55,15 @@ sub initialize
     my ( $self ) = @_;
 
     # Default ports for POP3 service and the user interface
+
     $self->config_( 'port', 119 );
 
     # Only accept connections from the local machine for NNTP
+
     $self->config_( 'local', 1 );
-    
+
     # The separator within the NNTP user name is :
+
     $self->config_( 'separator', '@');
 
     return 1;
@@ -85,7 +88,7 @@ sub child__
 
     # The handle to the real news server gets stored here
     my $news;
-    
+
     # The state of the connection (username needed, password needed, authenticated/connected)
     my $connection_state = 'username needed';
 
@@ -103,9 +106,7 @@ sub child__
         $command =~ s/(\015|\012)//g;
 
         $self->log_( "Command: --$command--" );
-        #$self->log_( "State: --$connection_state--" );
-        
-        
+
         # The news client wants to stop using the server, so send that message through to the
         # real mail server, echo the response back up to the client and exit the while.  We will
         # close the connection immediately
@@ -117,31 +118,32 @@ sub child__
                 $self->tee_( $client, "205 goodbye$eol" );
             }
             last;
-        }        
-        
+        }
+
         if ($connection_state eq 'username needed') {
-        
             my $user_command = '^ *AUTHINFO USER ((.+)\\' . $self->config_('separator') . ')?([^\:]+)(:(.*))?';
-            if ( $command =~ /$user_command/i ) {                 
-                
+
+            if ( $command =~ /$user_command/i ) {
                 my $username = $2;
-                my $server = $3;
-                my $port = $5;                
-                
+                my $server   = $3;
+                my $port     = $5;
+
                 if ( $server ne '' )  {
                     if ( $news = $self->verify_connected_( $news, $client, $server, $port || 119 ) )  {
-                                                
                         if (defined $username) {
-                            # Pass through the AUTHINFO command with the actual user name for this server,
+
+			    # Pass through the AUTHINFO command with the actual user name for this server,
                             # if one is defined, and send the reply straight to the client
+
                             $self->get_response_($news, $client, 'AUTHINFO USER ' . $username );
                             $connection_state = "password needed";
                         } else {
+
                             # Signal to the client to send the password
-                            $self->tee_($client, "381 password$eol"); 
+
+                            $self->tee_($client, "381 password$eol");
                             $connection_state = "ignore password";
-                        }                       
-                                                
+                        }
                     } else {
                         last;
                     }
@@ -149,133 +151,128 @@ sub child__
                     $self->tee_( $client, "482 Authentication rejected server name not specified in AUTHINFO USER command$eol" );
                     last;
                 }
-    
+
                 $self->flush_extra_( $news, $client, 0 );
                 next;
             } else {
+
                 # Issue a 480 authentication required response
-                
+
                 $self->tee_( $client, "480 Authorization required for this command$eol" );
                 next;
             }
-            
         } elsif ( $connection_state eq "password needed" ) {
-                                    
             if ($command =~ /^ *AUTHINFO PASS (.*)/i) {
-                
-                my $response = $self->get_response_($news, $client, $command);                
-                
+                my $response = $self->get_response_($news, $client, $command);
+
                 if ($response =~ /^281 .*/) {
-                    $connection_state = "connected"                                        
+                    $connection_state = "connected";
                 }
-                                                                
-                next;                
+                next;
             } else {
-                
+
                 # Issue a 381 more authentication required response
-                
+
                 $self->tee_( $client, "381 more authentication required for this command$eol" );
                 next;
-            }            
+            }
         } elsif ($connection_state eq "ignore password") {
             if ($command =~ /^ *AUTHINFO PASS (.*)/i) {
-                
                 $self->tee_($client, "281 authentication accepted$eol");
                 $connection_state = "connected";
-                next;                 
+                next;
             } else {
-                
+
                 # Issue a 480 authentication required response
-                
+
                 $self->tee_( $client, "381 more authentication required for this command$eol" );
                 next;
             }
         } elsif ( $connection_state eq "connected" ) {
-            
+
             # COMMANDS USED DIRECTLY WITH THE REMOTE NNTP SERVER GO HERE
-            
+
             # The client wants to retrieve an article. We oblige, and insert classification headers.
+
             if ( $command =~ /^ *ARTICLE (.*)/i ) {
                 my $response = $self->get_response_( $news, $client, $command);
                 if ( $response =~ /^220 (.*) (.*)$/i) {
-                    
                     $count += 1;
+
                     my $class = $self->{classifier__}->classify_and_modify( $news, $client, $download_count, $count, 0, '' );
-    
+
                     # Tell the parent that we just handled a mail
-                    print $pipe "$class$eol";                 
+
+                    print $pipe "$class$eol";
                 }
-                
-                $self->flush_extra_( $news, $client, 0 );                                        
-                next;
-            }
-            
-            # Commands expecting a code + text response
-            if ( $command =~ /^ *(LIST|HEAD|BODY|NEWSGROUPS|NEWNEWS|LISTGROUP|XGTITLE|XINDEX|XHDR|XOVER|XPAT|XROVER|XTHREAD)/i ) {                
-                my $response = $self->get_response_( $news, $client, $command);
-                
-                # 2xx (200) series response indicates multi-line text follows to .crlf
-                
-                $self->echo_to_dot_( $news, $client, 0 ) if ($response =~ /^2\d\d/ );
-                               
+
                 $self->flush_extra_( $news, $client, 0 );
                 next;
             }
-            
+
+            # Commands expecting a code + text response
+
+            if ( $command =~ /^ *(LIST|HEAD|BODY|NEWSGROUPS|NEWNEWS|LISTGROUP|XGTITLE|XINDEX|XHDR|XOVER|XPAT|XROVER|XTHREAD)/i ) {
+                my $response = $self->get_response_( $news, $client, $command);
+
+                # 2xx (200) series response indicates multi-line text follows to .crlf
+
+                $self->echo_to_dot_( $news, $client, 0 ) if ( $response =~ /^2\d\d/ );
+                $self->flush_extra_( $news, $client, 0 );
+                next;
+            }
+
             # Exceptions to 200 code above
+
             if ( $ command =~ /^ *(HELP)/i ) {
                 my $response = $self->get_response_( $news, $client, $command);
-                
                 $self->echo_to_dot_( $news, $client, 0 ) if ( $response =~ /^1\d\d/ );
-                
                 $self->flush_extra_( $news, $client, 0 );
                 next;
             }
-            
-            
+
             # Commands expecting a single-line response
+
             if ( $command =~ /^ *(GROUP|STAT|IHAVE|LAST|NEXT|SLAVE|MODE|XPATH)/i ) {
                 $self->get_response_( $news, $client, $command );
                 $self->flush_extra_( $news, $client, 0 );
                 next;
             }
-            
+
             # Commands followed by multi-line client response
+
             if ( $command =~ /^ *(IHAVE|POST|XRELPIC)/i ) {
                 my $response = $self->get_response_( $news, $client, $command);
-                
+
                 # 3xx (300) series response indicates multi-line text should be sent, up to .crlf
+
                 if ($response =~ /^3\d\d/ ) {
-                    
+
                     # Echo from the client to the server
-                    
+
                     $self->echo_to_dot_( $client, $news, 0 );
-                    
+
                     # Echo to dot doesn't provoke a server response somehow, we add another CRLF
-                    
+
                     $self->get_response_( $news, $client, "$eol" );
-                                    
-                    $self->flush_extra_( $news, $client, 0 );                    
+                    $self->flush_extra_( $news, $client, 0 );
                 }
-                
-                next;                
+                next;
             }
-            
-            
         }
-        
+
         # Commands we expect no response to, such as the null command
-        
-        if ( $ command =~ /^ *$/ ) {            
+
+        if ( $ command =~ /^ *$/ ) {
             if ( $news && $news->connected ) {
                 $self->get_response_($news, $client, $command, '',1);
                 $self->flush_extra_( $news, $client, 0 );
-                next;               
-            }                        
+                next;
+            }
         }
-        
 
         # Don't know what this is so let's just pass it through and hope for the best
+
         if ( $news && $news->connected)  {
             $self->echo_response_($news, $client, $command );
             $self->flush_extra_( $news, $client, 0 );
