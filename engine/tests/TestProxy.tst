@@ -119,6 +119,7 @@ $sp->pipeready( \&pipeready );
 
 $sp->initialize();
 $sp->config_( 'port', $port );
+$sp->config_( 'force_fork', 1 );
 test_assert_equal( $sp->start(), 1 );
 test_assert_equal( $sp->start_server(), 1 );
 
