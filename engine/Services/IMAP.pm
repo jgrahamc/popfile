@@ -2315,8 +2315,8 @@ sub train_on_archive__
 
     foreach my $folder ( keys %{$self->{folders__}} ) {
 
-        # Set uidnext value to 0. We will train on all messages.
-        $self->uid_next__( $folder, 0 );
+        # Set uidnext value to 1. We will train on all messages.
+        $self->uid_next__( $folder, 1 );
         my @uids = $self->get_new_message_list( $folder );
         my $bucket = $self->{folders__}{$folder}{output};
 
