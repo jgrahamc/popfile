@@ -51,8 +51,8 @@ if ( open PACKING, "<$packing_list" ) {
             local $::SIG{__DIE__};
             local $::SIG{__WARN__};
             eval "require $module";
-            my $ver = ${"${module}::VERSION"} || ${"${module}::VERSION"} || 0;
-            $ver = ${"${module}::VERSION"} || ${"${module}::VERSION"} || 0;
+            my $ver = ${"${module}::VERSION"} || ${"${module}::Version"} || 0;
+            $ver = ${"${module}::VERSION"} || ${"${module}::Version"} || 0;
             $ver = -1 if $@;
 
             if ( $ver eq '-1' ) {
