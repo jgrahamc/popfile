@@ -2725,6 +2725,7 @@ sub load_template__
         case_sensitive    => 1,
         loop_context_vars => 1,
         cache             => $self->config_( 'cache_templates' ),
+        die_on_bad_params => 0,
         search_path_on_include => 1,
         path => [$self->get_root_path_( "$root" ),
                  $self->get_root_path_( 'skins/default' ) ]
