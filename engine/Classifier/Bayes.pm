@@ -236,14 +236,18 @@ sub start
 {
     my ( $self ) = @_;
 
+    $self->{dbenv__} = new BerkeleyDB::Env
+                           -Cachesize => $self->config_( 'db_cache_size' ),
+   	                   -Home      => $self->get_user_path_( $self->config_( 'corpus' ) ),
+ 	                   -ErrFile   => $self->get_user_path_( 'bdb_error' ),
+                           -Verbose   => 1,
+ 	                   -Flags     => DB_INIT_LOG | DB_INIT_LOCK | DB_INIT_MPOOL | DB_CREATE or return 0;
     # Pass in the current interface language for language specific parsing
 
     $self->{parser__}->{lang__}  = $self->module_config_( 'html', 'language' );
 
     $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
-    $self->load_word_matrix_();
-
-    return 1;
+    return $self->load_word_matrix_();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -259,6 +263,7 @@ sub stop
 
     $self->write_parameters();
     $self->close_database__();
+    delete $self->{dbenv__};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -499,7 +504,13 @@ sub load_word_matrix_
 
     foreach my $bucket (@buckets) {
 
+        # A bucket directory must be lowercase
+
         next if ( lc($bucket) ne $bucket );
+
+        # A bucket directory must be a directory
+
+        next unless ( -d $bucket );
 
         # Look for the delete file that indicates that this bucket
         # is no longer needed
@@ -530,7 +541,7 @@ sub load_word_matrix_
             close COLOR;
         }
 
-        $self->load_bucket_( $bucket );
+        return 0 if ( !$self->load_bucket_( $bucket ) );
 
         $bucket =~ /([[:alpha:]0-9-_]+)$/;
         $bucket =  $1;
@@ -561,6 +572,8 @@ sub load_word_matrix_
 
     $self->{parameters__}{unclassified}{quarantine} = 0;
     $self->{parameters__}{unsure}{quarantine}       = 0;
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -579,16 +592,15 @@ sub tie_bucket__
     my ( $self, $bucket ) = @_;
 
     $self->{db__}{$bucket} = tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",              # PROFILE BLOCK START
-                                 -Cachesize => $self->config_( 'db_cache_size' ),
-                                 -Filename  => $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table.db" ),
-                                 -Flags     => DB_CREATE;                                        # PROFILE BLOCK STOP
+                                 -Filename  => "$bucket/table.db",
+                                 -Env       => $self->{dbenv__};                                 # PROFILE BLOCK STOP
 
     # Check to see if the tie worked, if it failed then POPFile is about to fail
     # badly
 
     if ( !defined( $self->{db__}{$bucket} ) ) {
-        $self->log_( "Failed to tie database hash for bucket $bucket" );
-        die "Database tie failed for $bucket";
+        $self->log_( "Failed to tie database hash for bucket $bucket" . $BerkeleyDB::Error );
+        die "Database tie failed for $bucket [$!]";
     }
 
     if ( !defined( $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} ) ) {
