@@ -544,7 +544,9 @@
 # This function is used during the installation process
 #--------------------------------------------------------------------------
 
-!insertmacro IsNT ""
+!ifndef NO_KAKASI
+  !insertmacro IsNT ""
+!endif
 
 #--------------------------------------------------------------------------
 # Uninstaller Function: un.IsNT
