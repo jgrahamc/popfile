@@ -10,6 +10,7 @@
 use strict;
 use Classifier::Bayes;
 use POPFile::Configuration;
+use POPFile::MQ;
 
 my $debug = 0;
 
@@ -63,7 +64,7 @@ sub compare_mf
 sub initialize
 {
     my ($config) = @_;
-    
+
     $config->parameter("csv",$DEFAULT_CSV);
     $config->parameter("toe",$DEFAULT_TOE);
     $config->parameter("stopwords",$DEFAULT_STOP);
@@ -78,8 +79,8 @@ sub initialize
 
 sub cvs_out
 {
-    my ($config, $file, @log) = @_;    
- 
+    my ($config, $file, @log) = @_;
+
     if ($file eq 'auto') {
         if ($config->parameter('toe') == 1) {
             $file = "toe";
@@ -89,26 +90,26 @@ sub cvs_out
         if ( ( $config->parameter('window1') ne $DEFAULT_WINDOW1 ) && \
              ( $config->parameter('window2') ne $DEFAULT_WINDOW2 ) ) {
             $file .= "$config->parameter('window1')and$config->parameter('window2')";
-                
+
         }
-        
+
         if ( $config->parameter('stopwords') ne $DEFAULT_STOP ) {
             $file .= "_";
-            if ($config->parameter('stopwords') != 1) {                
+            if ($config->parameter('stopwords') != 1) {
                 $file .= "no";
             }
-            $file .= "stop";                
+            $file .= "stop";
         }
-        
-        
+
+
         $file .= ".csv";
     }
-    
+
     print STDERR "Printing data to $file\n";
-    
+
     open CSV, ">$file";
-    
-    
+
+
     $, = ",";
 
     print CSV sort keys %{ @log[1] };
@@ -121,11 +122,11 @@ sub cvs_out
         }
         print CSV "\n";
     }
-    
+
     print STDERR "Data saved to $file\n";
-    
+
     $, = "";
-    
+
 }
 
 sub reclassify
@@ -150,7 +151,7 @@ sub reclassify
 sub retrain_decider
 {
     my ($toe,$predicted,$actual) = @_;
-    
+
     if ($toe == 1) {
         return ($predicted ne $actual);
     } elsif ($toe == 0) {
@@ -166,11 +167,11 @@ sub dump_corpus
 
     my $dir = $self->{configuration__}->parameter('corpus_out');
     mkdir($dir);
-    
+
     foreach my $abucket ( keys %{$self->{total__}} ) {
-        
+
         print "saving $abucket corpus.\n";
-        
+
         my $subdir = $dir;
         $subdir .= "/$abucket";
 
@@ -184,8 +185,8 @@ sub dump_corpus
                     print CORPUS "$1 $2\n";
                 }
             }
-        }        
-    }    
+        }
+    }
 }
 
 
@@ -271,27 +272,33 @@ if ( @ARGV[0] ne "-usage")
 {
     my $b = new Classifier::Bayes;
     my $c = new POPFile::Configuration;
+    my $mq = new POPFile::MQ;
 
     $b->configuration( $c );
     $c->configuration( $c );
+    $mq->configuration( $c);
+
+    $b->mq( $mq );
+    $c->mq( $mq );
+    $mq->mq( $mq );
 
     $c->initialize();
     $b->initialize();
     initialize( $c );
 
     $c->load_configuration();
-    
+
     $c->parse_command_line();
-    
+
 #    $b->{unclassified} = ($c->parameter('unclassified_probability') || 0.0001);
     $b->{unclassified__} = log($c->parameter("bayes_unclassified_probability") || 0.5);
-    
-    # test with or without stop-words    
+
+    # test with or without stop-words
      if ( $c->parameter("stopwords") eq 0 ) {
         $b->{parser__}->{mangle__}->{stop__} = {};
         $b->{mangler__}->{stop__} = {};
     }
-    
+
 
     my $archive = $c->parameter("html_archive_dir");
 
@@ -354,10 +361,10 @@ if ( @ARGV[0] ne "-usage")
         $correct = 1;
         my $message_count = $index + 1;
         $index = $#sorted_messages - $index;
-        print "\n$self->{messages}->{messages}{ @sorted_messages[$index] }{long}:" if ($debug);        
+        print "\n$self->{messages}->{messages}{ @sorted_messages[$index] }{long}:" if ($debug);
         $bucket_class = $b->classify_file( $self->{messages}->{messages}{ @sorted_messages[$index] }{long});
         $bucket_true = $self->{messages}->{messages}{ @sorted_messages[$index] }{bucket};
-        
+
         $b->{parser__}->{subject__} =~ s/(\r\n|\n|\r)[ \t]+//gm;
 
          if ($bucket_class ne $bucket_true) {
@@ -424,12 +431,12 @@ if ( @ARGV[0] ne "-usage")
     print STDERR "\n";
 
     my $end_time = time;
-    
+
     if ($c->parameter("dump")) {
         dump_corpus($b);
-        
+
     }
-    
+
 
     my $total_messages = $#sorted_messages + 1;
 
