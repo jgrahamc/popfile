@@ -49,6 +49,15 @@ my $eol = "\015\012";
 
 use BerkeleyDB;
 
+# Korean characters definition
+
+my $ksc5601_sym = '(?:[\xA1-\xAC][\xA1-\xFE])';
+my $ksc5601_han = '(?:[\xB0-\xC8][\xA1-\xFE])';
+my $ksc5601_hanja  = '(?:[\xCA-\xFD][\xA1-\xFE])';
+my $ksc5601 = "(?:$ksc5601_sym|$ksc5601_han|$ksc5601_hanja)";
+
+my $eksc = "(?:$ksc5601|[\x81-\xC6][\x41-\xFE])"; #extended ksc
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -1674,9 +1683,6 @@ sub get_bucket_word_prefixes
     } else {
         if  ( $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
     	    no locale;
-            my $ksc5601 = '(?:[\xA1-\xFE][\xA1-\xFE])';
-            my $eksc = "(?:$ksc5601|[\x81-\xC6][\x41-\xFE])";
-
             return grep {$_ ne $prev && ($prev = $_, 1)} sort map {$_ =~ /([\x20-\x80]|$eksc)/} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
         } else {
             return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};

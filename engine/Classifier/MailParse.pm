@@ -34,7 +34,11 @@ use MIME::QuotedPrint;
 
 # Korean characters definition
 
-my $ksc5601 = '(?:[\xA1-\xFE][\xA1-\xFE])';
+my $ksc5601_sym = '(?:[\xA1-\xAC][\xA1-\xFE])';
+my $ksc5601_han = '(?:[\xB0-\xC8][\xA1-\xFE])';
+my $ksc5601_hanja  = '(?:[\xCA-\xFD][\xA1-\xFE])';
+my $ksc5601 = "(?:$ksc5601_sym|$ksc5601_han|$ksc5601_hanja)";
+
 my $eksc = "(?:$ksc5601|[\x81-\xC6][\x41-\xFE])"; #extended ksc
 
 # These are used for Japanese support
@@ -429,7 +433,14 @@ sub add_line
                 my $to   = $entityhash{$2};
 
                 if ( defined( $to ) ) {
-                    $to         = chr($to);
+                    
+                    # HTML entities confilict with DBCS chars. Replace entities with blanks.
+                    
+                    if ( $self->{lang__} eq 'Korean' ) {
+                    	$to = ' ';
+                    } else {
+                	$to = chr($to);
+                    }
                     $line       =~ s/$from/$to/g;
                     $self->{ut__} =~ s/$from/$to/g;
                     print "$from -> $to\n" if $self->{debug__};
@@ -522,8 +533,7 @@ sub add_line
                     # In Korean mode, [[:alpha:]] in regular expression is changed to 2bytes chars
                     # to support 2 byte characters.
                     #
-                    # In Korean, 1 character(2 bytes) words are meaningful, so care about
-                    # words between 2 and 45 characters.
+                    # In Korean, care about words between 2 and 45 characters.
 
                     while ( $line =~ s/(([A-Za-z]|$eksc)([A-Za-z\']|$eksc){1,44})([_\-,\.\"\'\)\?!:;\/& \t\n\r]{0,5}|$)// ) {
                         if ( ( $self->{in_headers__} == 0 ) && ( $self->{first20count__} < 20 ) ) {
