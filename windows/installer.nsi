@@ -282,7 +282,7 @@ Section "POPFile" SecPOPFile
   SectionIn RO
   
   SetDetailsPrint textonly
-  DetailPrint "Checking for existing version of POPFile..."
+  DetailPrint "Checking if this is an upgrade installation..."
   SetDetailsPrint listonly
 
   ; If we are installing over a previous version, (try to) ensure that version is not running
@@ -318,21 +318,23 @@ readme_ok:
   File "..\engine\black.gif"
   File "..\engine\otto.gif"
 
-  IfFileExists "$INSTDIR\stopwords" stopwords_found
+  IfFileExists "$INSTDIR\stopwords" 0 copy_stopwords
+  MessageBox MB_YESNO "POPFile 'stopwords' file from previous installation found.$\r$\n$\r$\n\
+      OK to update this 'stopwords' file ?$\r$\n$\r$\n\
+      Click 'Yes' to update it (old file will be saved as 'stopwords.bak')$\r$\n$\r$\n\
+      Click 'No' to keep the old file (new file will saved as 'stopwords.default')" \
+      IDNO copy_default_stopwords
+  IfFileExists "$INSTDIR\stopwords.bak" 0 make_backup
+  SetFileAttributes "$INSTDIR\stopwords.bak" NORMAL
+  
+make_backup:
+  CopyFiles /SILENT /FILESONLY "$INSTDIR\stopwords" "$INSTDIR\stopwords.bak"
+  
+copy_stopwords:
   File "..\engine\stopwords"
-  Goto stopwords_done
-
-stopwords_found:
-  IfFileExists "$INSTDIR\stopwords.default" 0 use_other_name
-  MessageBox MB_YESNO "Copy of default 'stopwords' already exists ('stopwords.default').$\r$\n\
-      $\r$\nOK to overwrite this file?$\r$\n$\r$\n\
-      Click 'Yes' to overwrite, click 'No' to skip updating this file" IDNO stopwords_done
-  SetFileAttributes "$INSTDIR\stopwords.default" NORMAL
-
-use_other_name:
+  
+copy_default_stopwords:
   File /oname=stopwords.default "..\engine\stopwords"
-
-stopwords_done:
   FileOpen  ${CFG} $PLUGINSDIR\popfile.cfg a
   FileSeek  ${CFG} 0 END
   FileWrite ${CFG} "pop3_port ${POP3}$\r$\n"
@@ -347,10 +349,10 @@ stopwords_done:
   SetFileAttributes "$INSTDIR\popfile.cfg.bak" NORMAL
 
 make_cfg_backup:
-  CopyFiles $INSTDIR\popfile.cfg $INSTDIR\popfile.cfg.bak
+  CopyFiles /SILENT /FILESONLY $INSTDIR\popfile.cfg $INSTDIR\popfile.cfg.bak
 
 update_config:
-  CopyFiles $PLUGINSDIR\popfile.cfg $INSTDIR\
+  CopyFiles /SILENT /FILESONLY $PLUGINSDIR\popfile.cfg $INSTDIR\
 
   SetOutPath $INSTDIR\Classifier
   File "..\engine\Classifier\Bayes.pm"
@@ -1796,6 +1798,8 @@ no_reg_file:
   RMDir $INSTDIR\languages
   RMDir /r $INSTDIR\corpus
   Delete $INSTDIR\stopwords
+  Delete $INSTDIR\stopwords.bak
+  Delete $INSTDIR\stopwords.default
   RMDir /r $INSTDIR\messages
   
   SetDetailsPrint textonly
