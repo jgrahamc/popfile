@@ -279,6 +279,21 @@ sub url_handler__
         $self->parse_form__( $content );
     }
 
+    if ( $url =~ /\/(.+\.gif)/ ) {
+        $self->http_file_( $client, $1, 'image/gif' );
+        return 1;
+    }
+
+    if ( $url =~ /(skins\/.+\.css)/ ) {
+        $self->http_file_( $client, $1, 'text/css' );
+        return 1;
+    }
+
+    if ( $url =~ /(manual\/.+\.html)/ ) {
+        $self->http_file_( $client, $1, 'text/html' );
+        return 1;
+    }
+
     # Check the password
 
     if ( $url eq '/password' )  {
@@ -336,21 +351,6 @@ sub url_handler__
 
     if ( $url =~ /(popfile.*\.log)/ ) {
         $self->http_file_( $client, $1, 'text/plain' );
-        return 1;
-    }
-
-    if ( $url =~ /\/(.+\.gif)/ ) {
-        $self->http_file_( $client, $1, 'image/gif' );
-        return 1;
-    }
-
-    if ( $url =~ /(skins\/.+\.css)/ ) {
-        $self->http_file_( $client, $1, 'text/css' );
-        return 1;
-    }
-
-    if ( $url =~ /(manual\/.+\.html)/ ) {
-        $self->http_file_( $client, $1, 'text/html' );
         return 1;
     }
 
@@ -958,7 +958,7 @@ sub configuration_page
     $body .= "</form>\n";
 
     if ( $self->global_config_( 'debug' ) & 1 ) {
-        $body .= "<p><a href=\"" . $self->logger()->debug_filename() . "\">$self->{language__}{Configuration_CurrentLogFile}</a>";
+        $body .= "<p><a href=\"" . $self->logger()->debug_filename() . "?session=$self->{session_key__}\">$self->{language__}{Configuration_CurrentLogFile}</a>";
     }
 
     $body .= "</td>\n</tr>\n</table>\n";
@@ -3099,7 +3099,7 @@ sub view_page
     # If we still can't find the message then return to the history page
 
     if ( $index == -1 ) {
-        return $self->http_redirect( $client, '/history' );
+        return $self->http_redirect_( $client, '/history' );
     }
 
     my $body = "<table width=\"100%\" summary=\"\">\n<tr>\n<td align=\"left\">\n";
