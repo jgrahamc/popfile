@@ -362,23 +362,31 @@ sub reclassified
     if ( $bucket ne $newbucket ) {
         my $count = $self->get_bucket_parameter(
                         $session, $newbucket, 'count' );
+        my $newcount = $count + $c;
+        $newcount = 0 if ( $newcount < 0 );
         $self->set_bucket_parameter(
-            $session, $newbucket, 'count', $count + $c );
+            $session, $newbucket, 'count', $newcount );
 
         $count = $self->get_bucket_parameter(
                      $session, $bucket, 'count' );
+        $newcount = $count - $c;
+        $newcount = 0 if ( $newcount < 0 );
         $self->set_bucket_parameter(
-            $session, $bucket, 'count', $count - $c );
+            $session, $bucket, 'count', $newcount );
 
         my $fncount = $self->get_bucket_parameter(
                           $session, $newbucket, 'fncount' );
+        my $newfncount = $fncount + $c;
+        $newfncount = 0 if ( $newfncount < 0 );
         $self->set_bucket_parameter(
-            $session, $newbucket, 'fncount', $fncount + $c );
+            $session, $newbucket, 'fncount', $newfncount );
 
         my $fpcount = $self->get_bucket_parameter(
                           $session, $bucket, 'fpcount' );
+        my $newfpcount = $fpcount + $c;
+        $newfpcount = 0 if ( $newfpcount < 0 );
         $self->set_bucket_parameter(
-            $session, $bucket, 'fpcount', $fpcount + $c );
+            $session, $bucket, 'fpcount', $newfpcount );
     }
 }
 
