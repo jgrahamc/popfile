@@ -460,9 +460,10 @@ Function CBP_MakePOPFileBuckets
   !define CBP_L_CREATE_NAME   $R7    ; name of bucket to be created
   !define CBP_L_FILE_HANDLE   $R6
   !define CBP_L_FIRST_FIELD   $R5    ; holds field number where first bucket name is stored
-  !define CBP_L_LOOP_LIMIT    $R4    ; used to terminate the processing loop
-  !define CBP_L_NAME          $R3    ; used when checking the corpus directory
-  !define CBP_L_PTR           $R2    ; used to access the names in the bucket list
+  !define CBP_L_FOLDER_COUNT  $R4    ; used to record number of bucket files created
+  !define CBP_L_LOOP_LIMIT    $R3    ; used to terminate the processing loop
+  !define CBP_L_NAME          $R2    ; used when checking the corpus directory
+  !define CBP_L_PTR           $R1    ; used to access the names in the bucket list
 
   Exch ${CBP_L_COUNT}         ; get number of buckets to be created
   Exch
@@ -471,6 +472,7 @@ Function CBP_MakePOPFileBuckets
   Push ${CBP_L_CORPUS}
   Push ${CBP_L_CREATE_NAME}
   Push ${CBP_L_FILE_HANDLE}
+  Push ${CBP_L_FOLDER_COUNT}
   Push ${CBP_L_LOOP_LIMIT}
   Push ${CBP_L_NAME}
   Push ${CBP_L_PTR}
@@ -486,6 +488,8 @@ Function CBP_MakePOPFileBuckets
   ; a file called "table" there.  The "table" file is empty apart from the bucket header
   ; (this mimics the behaviour of Bayes.pm version 1.152)
 
+  StrCpy ${CBP_L_FOLDER_COUNT} 0
+  
   ; Process only the "used" entries in the bucket list
 
   StrCpy ${CBP_L_PTR} ${CBP_L_FIRST_FIELD}
@@ -512,6 +516,15 @@ ok_to_create_bucket:
   FileClose ${CBP_L_FILE_HANDLE}
   IfErrors  incrm_ptr
   IntOp ${CBP_L_COUNT} ${CBP_L_COUNT} - 1
+  
+  ; Record the bucket location so the installer can remove it after POPFile has converted it
+  ; from the flat file corpus format to the current corpus format
+  
+  IntOp ${CBP_L_FOLDER_COUNT} ${CBP_L_FOLDER_COUNT} + 1
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "FolderList" \
+      "MaxNum" ${CBP_L_FOLDER_COUNT}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "FolderList" \
+      "Path-${CBP_L_FOLDER_COUNT}" "${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}"
 
 incrm_ptr:
   IntOp ${CBP_L_PTR} ${CBP_L_PTR} + 1
@@ -521,6 +534,7 @@ finished_now:
   Pop ${CBP_L_PTR}
   Pop ${CBP_L_NAME}
   Pop ${CBP_L_LOOP_LIMIT}
+  Pop ${CBP_L_FOLDER_COUNT}
   Pop ${CBP_L_FILE_HANDLE}
   Pop ${CBP_L_CREATE_NAME}
   Pop ${CBP_L_CORPUS}
@@ -533,6 +547,7 @@ finished_now:
   !undef CBP_L_CREATE_NAME
   !undef CBP_L_FILE_HANDLE
   !undef CBP_L_FIRST_FIELD
+  !undef CBP_L_FOLDER_COUNT
   !undef CBP_L_LOOP_LIMIT
   !undef CBP_L_NAME
   !undef CBP_L_PTR
@@ -2336,8 +2351,6 @@ FunctionEnd
 #==============================================================================================
 # Now destroy all the local/internal "!defines" which were created at the start of this file
 #==============================================================================================
-
-  !undef CBP_C_INIFILE
 
   !undef CBP_C_DEFAULT_BUCKETS
   !undef CBP_C_SUGGESTED_BUCKETS
