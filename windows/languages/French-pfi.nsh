@@ -28,7 +28,7 @@
 #--------------------------------------------------------------------------
 #
 # Translation created by: Olivier Guillion (olivier at myriad-online.com)
-# Translation updated by: (nobody)
+# Translation updated by: Olivier Guillion (olivier at myriad-online.com)
 #
 #--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_MB* text used for message boxes):
@@ -86,7 +86,7 @@
 # Standard MUI Page - Directory Page (for the main POPFile installer)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TITLE        "Sélectionnez l'emplacement d'installation des fichiers du programme"
+!insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TITLE        "Sélectionnez l'emplacement d'installation de POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TEXT_DESTN   "Dossier de destination du programme POPFile"
 
 #--------------------------------------------------------------------------
@@ -140,7 +140,7 @@
 # Standard MUI Page - Directory Page (for the 'Add POPFile User' wizard)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TITLE        "Sélectionnez l'emplacement des données de POPFile pour '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TITLE        "Sélectionnez l'emplacement des données de POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_SUBTITLE     "Choisissez le dossier dans lequel ranger les données de POPFile pour '$G_WINUSERNAME'"
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "Cette version de POPFile utilise des jeux de fichiers de données différents pour chaque utilisateur.${MB_NL}${MB_NL}L'installateur utilisera les dossiers suivants pour les données de POPFile appartenant à l'utilisateur  '$G_WINUSERNAME'. Pour utiliser un dossier différent pour cet utilisateur, cliquez sur 'Parcourir' et sélectionnez un autre dossier. $_CLICK"
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_DESTN   "Dossier à utiliser pour stocker les données de POPFile de '$G_WINUSERNAME'"
@@ -227,7 +227,7 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "Le navigateur par défaut est utilisé pour visualiser l'interface utilisateur de POPFile (son centre de contrôle).${IO_NL}${IO_NL}"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "POPFile ne nécessite pas un navigateur spécifique, il fonctionnera avec la plupart des navigateurs.${IO_NL}${IO_NL}"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "Une version minimale de Perl va être installée (POPFile est écrit en Perl).${IO_NL}${IO_NL}"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "Une version minimale de Perl va être installée (POPFile est écrit en Perl). "
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4    "Le Perl fourni avec POPFile utilise certains composants d'Internet Explorer et nécessite Internet Explorer 5.5 (ou une version plus récente)."
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_5    "L'installateur a détecté que ce système possède Internet Explorer"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "Il est possible que certaines fonctions de POPFile ne fonctionnent pas correctement sur ce système.${IO_NL}${IO_NL}"
