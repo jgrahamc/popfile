@@ -313,7 +313,9 @@ sub release_slot
     # Remove the entry from the database and delete the file
     # if present
 
-    $self->db__()->do( "delete from history where id = $slot;" );
+    my $delete = "delete from history where history.id = $slot;";
+
+    $self->db__()->do( $delete );
     unlink $self->get_slot_file( $slot );
 }
 
@@ -1015,15 +1017,17 @@ sub cleanup_history
 
     my $seconds_per_day = 24 * 60 * 60;
     my $old = time - $self->config_( 'history_days' ) * $seconds_per_day;
-    $self->db__()->begin_work;
     my $d = $self->db__()->prepare( "select id from history
                                          where inserted < $old;" );
     $d->execute;
     my @row;
+    my @ids;
     while ( @row = $d->fetchrow_array ) {
-        $self->delete_slot( $row[0], 1 );
+        push ( @ids, $row[0] );
     }
-    $self->db__()->commit;
+    foreach my $id (@ids) {
+        $self->delete_slot( $id, 1 );
+    }
 }
 
 # ---------------------------------------------------------------------------
