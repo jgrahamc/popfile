@@ -80,13 +80,13 @@ sub initialize
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-    $self->register_configuration_item_( 'configuration',
+    $self->register_configuration_item_( 'configuration',   # PROFILE BLOCK START
                                          'xmlrpc_port',
-                                         $self );
+                                         $self );           # PROFILE BLOCK STOP
 
-    $self->register_configuration_item_( 'security',
+    $self->register_configuration_item_( 'security',        # PROFILE BLOCK START
                                          'xmlrpc_local',
-                                          $self );
+                                          $self );          # PROFILE BLOCK STOP
 
     return 1;
 }
@@ -105,12 +105,12 @@ sub start
     # We use a single XMLRPC::Lite object to handle requests for access to the
     # Classifier::Bayes object
 
-    $self->{server__} = XMLRPC::Transport::HTTP::Daemon->new(
+    $self->{server__} = XMLRPC::Transport::HTTP::Daemon->new(   # PROFILE BLOCK START
                                      Proto     => 'tcp',
                                      $self->config_( 'local' )  == 1 ? (LocalAddr => 'localhost') : (),
                                      LocalPort => $self->config_( 'port' ),
                                      Listen    => SOMAXCONN,
-                                     Reuse     => 1 );
+                                     Reuse     => 1 );          # PROFILE BLOCK STOP
 
     if ( !defined( $self->{server__} ) ) {
         my $port = $self->config_( 'port' );
@@ -177,8 +177,8 @@ sub service
 
             my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
 
-            if ( ( $self->config_( 'local' ) == 0 ) ||
-                 ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
+            if ( ( $self->config_( 'local' ) == 0 ) ||              # PROFILE BLOCK START
+                 ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {   # PROFILE BLOCK STOP
                 my $request = $client->get_request();
 
                 $self->{server__}->request( $request );
