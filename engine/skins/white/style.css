@@ -1,0 +1,204 @@
+body {
+  background-color: #FFFFFF;
+  font-family: sans-serif;
+  color: Black;
+}
+
+.shell, .shellTop {
+    background-color: white;
+    border: 3px #778899 solid;
+   color: Black;
+}
+
+.menu {
+  font-size: 14pt;
+  font-weight: bold;
+  width: 100%;
+}
+
+.menuSelected {
+  background-color: #cccccc;
+  width: 150px;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #335D99;
+  color: Black;
+}
+
+.menuStandard {
+  background-color: white;
+  width: 150px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #778899;
+  color: Black;
+}
+
+tr.rowEven {
+    background-color: white;
+   color: Black;
+   }
+
+tr.rowOdd { 
+  background-color: #EEEEEE;
+  color: Black;
+}
+
+    
+
+  
+
+td.head {
+  font-weight: normal;
+  font-size: 22pt;
+  background-color: white;
+  color: black;
+}
+ 
+table.head {
+  font-weight: normal;
+  width: 100%;
+  background-color: white;
+  color: black;
+}
+
+
+.menuIndent {
+  width: 8%;
+}
+
+table.historyWidgetsTop {
+  width: 100%;
+  margin-left: 1.5em;
+  margin-top: 0.6em;
+  margin-bottom: 1.0em;
+}
+
+td.historyNavigatorTop {
+  text-align: right;
+  padding-right: 0.5em;
+}
+
+td.historyNavigatorBottom {
+  text-align: right;
+  padding-right: 0.5em;
+  padding-bottom: 1.0em;
+}
+
+table.historyWidgetsBottom {
+  width: 100%;
+  margin-left: 0.5em;
+  margin-top: 1.5em;
+}
+
+td.logo2menuSpace { 
+  height: 0.8em;
+}
+
+table.footer {
+  width: 100%;
+  margin-top: 1em;
+}
+
+td.footerBody { 
+  text-align: center;
+  padding-left: 5%;
+  padding-right: 5%;
+}
+
+td.openMessageCloser {
+  text-align: right;
+}
+
+a.changeSettingLink {
+  background-color: transparent ;
+  color: #0000cc ;
+}
+
+tr.rowHighlighted {
+  background-color: #000000;
+  color: #eeeeee;
+}
+
+.historyLabel {
+  font-weight: normal;
+}
+
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+.advancedLabel {
+  font-weight: bold;
+}
+    
+.passwordLabel {
+  font-weight: bold;
+}
+
+.sessionLabel {
+  font-weight: bold;
+}
+
+
+.magnetsLabel {
+  font-weight: bold;
+}
+
+.securityLabel {
+  font-weight: bold;
+}
+
+.configurationLabel {
+  font-weight: bold;
+}
+
+
+span.graphFont {
+  font-size: x-small;
+}
+
+.bucketsLabel {
+  font-weight: bold;
+}
+
+
+td.accuracy0to49 {
+  background-color: red;
+  color: black;
+}
+
+td.accuracy50to93 {
+  background-color: yellow;
+  color: black;
+}
+
+td.accuracy94to100 {
+  background-color: green;
+  color: black;
+}
+
+div.error01 {
+  background-color: transparent;
+  color: red;
+  font-size: larger;
+}
+
+div.error02 {
+  background-color: transparent;
+  color: red;
+}
+
+span.bucketsWidgetState {
+  font-weight: bold;
+}
+
+span.configWidgetState {
+  font-weight: bold;
+}
+
+span.securityWidgetState {
+  font-weight: bold;
+}
+  
