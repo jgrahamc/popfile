@@ -151,6 +151,7 @@ Advanced_AllParameters                  POPFile 全パラメーター
 Advanced_Parameter                      パラメーター
 Advanced_Value                          値
 Advanced_Warning                        以下は POPFile の全てのパラメーターのリストです。アドバンスド・ユーザーに限り、必要時、値を変更して更新ボタンをクリックして下さい。バリディティー（妥当性）チェックは行いません。
+Advanced_ConfigFile                     設定ファイル:
 
 History_Filter                          &nbsp;(<font color="%s">%s </font>バケツのみを表示)
 History_FilterBy                        フィルタリング
