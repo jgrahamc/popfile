@@ -195,12 +195,10 @@ sub parse_stream
 
         # For the Mac we do further splitting of the line at the CR characters
         
-        while ( $read =~ s/(.*?)[\r\n]+// ) 
+        while ( $read =~ s/(.*?[\r\n]+)// ) 
         {
             my $line = $1;
              
-            $line =~ s/[\r\n]//g;
-
             print ">>> $line" if $self->{debug};
 
             if ( $self->{color} ) 
@@ -234,7 +232,7 @@ sub parse_stream
             {
                 my $decoded = '';
                 $self->{ut} = '' if $self->{color};
-                while ( ( $line =~ /^[A-Za-z0-9+\/]{72}[\n\r]?$/ ) || ( $line =~ /^[A-Za-z0-9+\/]+=?[\n\r]?$/ ) )
+                while ( ( $line =~ /^[A-Za-z0-9+\/]{72}[\n\r]*?$/ ) || ( $line =~ /^[A-Za-z0-9+\/]+=+?[\n\r]*?$/ ) )
                 {
                     print "64> $line" if $self->{debug};
                     $decoded    .= un_base64( $self, $line );
@@ -345,6 +343,7 @@ sub parse_stream
                 if ( $header =~ /Content-Transfer-Encoding/i )
                 {
                     $encoding = $argument;
+                    print "Setting encoding to $encoding\n" if $self->{debug};
                     next;
                 }
 
@@ -372,7 +371,8 @@ sub parse_stream
         }
 
         $colorized .= "</tt>";
-        $colorized =~ s/\r\n/<br>/g;
+        $colorized =~ s/[\r\n]+/__BREAK__/g;
+        $colorized =~ s/__BREAK__/<br>/g;
         
         return $colorized;
     }

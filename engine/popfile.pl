@@ -249,7 +249,6 @@ sub remove_mail_files
                 unlink($mail_file);
                 unlink($class_file);
                 debug( "Deleting $mail_file/$class_file on $today" );
-                $configuration{mail_count} = 0;
             }
         }
     }
