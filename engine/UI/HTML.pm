@@ -1386,18 +1386,18 @@ sub corpus_page
     if ( $percent > 0 )  {
         $body .= "<tr ><td height=\"10\" colspan=\"2\">&nbsp;<tr><td colspan=\"2\">\n" ;
         $body .= "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n";
-        $body .= "<tr>";  #height=\"5\"
+        $body .= "<tr>";  
 
         for my $i ( 0..49 ) {
-            $body .= "<td valign=\"middle\" height=\"10\" width=\"6\" bgcolor=";
+            $body .= "<td valign=\"middle\" height=\"20\" width=\"6\" bgcolor=";
             $body .= "red" if ( $i < 25 );
             $body .= "yellow" if ( ( $i > 24 ) && ( $i < 47 ) );
             $body .= "green" if ( $i > 46 );
             $body .= ">";
             if ( ( $i * 2 ) < $percent ) {
-                $body .= " <img src=\"black.gif\" height=\"4\" width=\"6\" alt=\"\">";
+                $body .= " <img src=\"black.gif\" height=\"8\" width=\"6\" alt=\"\">";
             } else {
-                $body .= " <img src=\"pix.gif\" height=\"4\" width=\"6\" alt=\"\">";
+                $body .= " <img src=\"pix.gif\" height=\"8\" width=\"6\" alt=\"\">";
             }
             $body .= "</td>";
         }
