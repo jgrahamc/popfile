@@ -829,11 +829,13 @@ sub parse_stream
             next if ( !defined($line) );
 
             print ">>> $line" if $self->{debug};
-                        
-            $colorized .= $self->{ut__};
-            $self->{ut__} = '';
-            
-            $self->{ut__} .= splitline($line, $encoding);            
+
+            if (!$self->{in_html_tag__}) {
+                $colorized .= $self->{ut__};
+                $self->{ut__} = '';
+            }            
+
+            $self->{ut__} .= splitline($line, $encoding);
 
             if ($self->{in_headers__}) {
                 
