@@ -234,7 +234,10 @@
 
   Var G_GUI                ; GUI port (1-65535)
 
-  Var G_STARTUP            ; used to indicate if a banner was shown before the 'WELCOME' page
+  Var G_PFIFLAG            ; Multi-purpose variable:
+                            ; (1) used to indicate if banner was shown before the 'WELCOME' page
+                            ; (2) used to avoid unnecessary Install/Upgrade button text updates
+                            ; (3) used when determining if '/nouser' debug option supplied
 
   Var G_NOTEPAD            ; path to notepad.exe ("" = not found in search path)
 
@@ -244,6 +247,8 @@
   Var G_SFN_DISABLED       ; 1 = short file names not supported, 0 = short file names available
 
   Var G_PLS_FIELD_1        ; used to customise translated text strings
+
+  Var G_DLGITEM            ; HWND of the UI dialog field we are going to modify
 
   ; NSIS provides 20 general purpose user registers:
   ; (a) $R0 to $R9   are used as local registers
@@ -650,7 +655,7 @@ mutex_ok:
 
   ; Assume user displays the release notes
 
-  StrCpy $G_STARTUP "no banner"
+  StrCpy $G_PFIFLAG "no banner"
 
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "$(PFI_LANG_MBRELNOTES_1)\
@@ -672,7 +677,7 @@ notes_ignored:
   ; This looks a little strange (and may prompt the user to start clicking buttons too soon)
   ; so we display a banner to reassure the user. The banner will be removed by 'CheckUserRights'
 
-  StrCpy $G_STARTUP "banner displayed"
+  StrCpy $G_PFIFLAG "banner displayed"
 
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_BE_PATIENT)" "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
 
@@ -716,6 +721,36 @@ exit:
 
   !undef L_RESERVED
 
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: .onVerifyInstDir
+#
+# This function is called every time the user changes the installation directory. It ensures
+# that the button used to start the installation process is labelled "Install" or "Upgrade"
+# depending upon the currently selected directory. As this function is called EVERY time the
+# directory is altered, the button text is only updated when a change is required.
+#
+# The '$G_PFIFLAG' global variable is initialized by 'CheckForExistingLocation'
+# (the "pre" function for the PROGRAM DIRECTORY page).
+#--------------------------------------------------------------------------
+
+Function .onVerifyInstDir
+
+  IfFileExists "$INSTDIR\popfile.pl" upgrade
+  StrCmp $G_PFIFLAG "install" exit
+  StrCpy $G_PFIFLAG "install"
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(^InstallBtn)"
+  Goto exit
+
+upgrade:
+  StrCmp $G_PFIFLAG "upgrade" exit
+  StrCpy $G_PFIFLAG "upgrade"
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_INST_BTN_UPGRADE)"
+
+exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -1729,7 +1764,7 @@ not_admin:
 exit:
   Pop ${L_WELCOME_TEXT}
 
-  StrCmp $G_STARTUP "no banner" no_banner
+  StrCmp $G_PFIFLAG "no banner" no_banner
 
   ; Remove the banner which was displayed by the 'PFIGUIInit' function
 
@@ -2118,6 +2153,11 @@ FunctionEnd
 
 Function CheckForExistingLocation
 
+  ; Initialize the $G_PFIFLAG used by the '.onVerifyInstDir' function to avoid sending
+  ; unnecessary messages to change the text on the button used to start the installation
+
+  StrCpy $G_PFIFLAG ""
+
   ReadRegStr $INSTDIR HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
   StrCmp $INSTDIR "" try_HKLM
   IfFileExists "$INSTDIR\*.*" exit
@@ -2290,8 +2330,8 @@ FunctionEnd
 Function InstallUserData
 
   Call GetParameters
-  Pop $G_STARTUP
-  StrCmp $G_STARTUP "/nouser" continue
+  Pop $G_PFIFLAG
+  StrCmp $G_PFIFLAG "/nouser" continue
 
   ; For this build we skip our own FINISH page and disable the wizard's language selection
   ; dialog to make the wizard appear as an extension of the main 'setup.exe' installer.

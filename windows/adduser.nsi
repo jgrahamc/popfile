@@ -158,7 +158,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.32"
+  !define C_PFI_VERSION  "0.2.33"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -2249,6 +2249,19 @@ show_defaults:
   CreateFont $G_FONT "MS Shell Dlg" 10 700      ; use larger & bolder version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
+  ; If we are about to upgrade an existing installation, remind the user by changing the
+  ; text on the "Install" button to "Upgrade"
+
+  IfFileExists "$G_USERDIR\popfile.cfg" upgrade
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(^InstallBtn)"
+  Goto showpage
+
+upgrade:
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_INST_BTN_UPGRADE)"
+
+showpage:
   !insertmacro MUI_INSTALLOPTIONS_SHOW
 
   ; Store validated data (for completeness)

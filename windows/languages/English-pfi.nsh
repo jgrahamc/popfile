@@ -263,8 +263,13 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_2     "Please change your port selections."
 
 #--------------------------------------------------------------------------
-# Standard MUI Page - Installing POPfile
+# Standard MUI Page - Installing POPFile
 #--------------------------------------------------------------------------
+
+; When upgrading an existing installation, change the normal "Install" button to "Upgrade"
+; (the page with the "Install" button will vary depending upon the page order in the script)
+
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_UPGRADE     "Upgrade"
 
 ; Installation Progress Reports displayed above the progress bar
 
