@@ -51,7 +51,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.40"
+  !define C_VERSION   "0.0.41"
 
   ;--------------------------------------------------------------------------
   ; The default NSIS caption is "$(^Name) Setup" so we override it here
@@ -178,16 +178,19 @@
 Section default
 
   !define L_DIAG_MODE       $R9   ; controls the level of detail supplied by the utility
-  !define L_ITAIJIDICTPATH  $R8   ; current Kakasi environment variable
-  !define L_KANWADICTPATH   $R7   ; current Kakasi environment variable
-  !define L_POPFILE_ROOT    $R6   ; current environment variable
-  !define L_POPFILE_USER    $R5   ; current environment variable
-  !define L_REGDATA         $R4   ; data read from registry
-  !define L_STATUS_ROOT     $R3   ; used when reporting whether or not 'popfile.pl' exists
-  !define L_STATUS_USER     $R2   ; used when reporting whether or not 'popfile.cfg' exists
-  !define L_TEMP            $R1
-  !define L_WINUSERNAME     $R0   ; user's Windows login name
-  !define L_WINUSERTYPE     $9
+  !define L_EXPECTED_ROOT   $R8   ; expected value for POPFILE_ROOT or SFN version of RootDir
+  !define L_EXPECTED_USER   $R7   ; expected value for POPFILE_USER or SFN version of UserDir
+  !define L_ITAIJIDICTPATH  $R6   ; current Kakasi environment variable
+  !define L_KANWADICTPATH   $R5   ; current Kakasi environment variable
+  !define L_POPFILE_ROOT    $R4   ; current environment variable
+  !define L_POPFILE_USER    $R3   ; current environment variable
+  !define L_REGDATA         $R2   ; data read from registry
+  !define L_STATUS_ROOT     $R1   ; used when reporting whether or not 'popfile.pl' exists
+  !define L_STATUS_USER     $R0   ; used when reporting whether or not 'popfile.cfg' exists
+  !define L_TEMP            $9
+  !define L_WIN_OS_TYPE     $8    ; 0 = Win9x, 1 = more modern version of Windows
+  !define L_WINUSERNAME     $7    ; user's Windows login name
+  !define L_WINUSERTYPE     $6
 
   ; If the command-line switch /FULL has been supplied, display "everything"
   ; (for convenience we set ${L_DIAG_MODE} internally to either "full" or "simple")
@@ -204,6 +207,8 @@ set_simple:
   StrCpy ${L_DIAG_MODE} "simple"
 
 diag_mode_set:
+  Call IsNT
+  Pop ${L_WIN_OS_TYPE}
 
   ; The 'UserInfo' plugin may return an error if run on a Win9x system but since Win9x systems
   ; do not support different account types, we treat this error as if user has 'Admin' rights.
@@ -243,9 +248,7 @@ start_report:
 
   StrCmp ${L_DIAG_MODE} "simple" simple_HKCU_locns
 
-  Call IsNT
-  Pop ${L_TEMP}
-  DetailPrint "IsNT return code  = ${L_TEMP}"
+  DetailPrint "IsNT return code  = ${L_WIN_OS_TYPE}"
 
   Call GetIEVersion
   Pop ${L_TEMP}
@@ -338,8 +341,16 @@ start_report:
   DetailPrint "HKLM: InstallPath = < ${L_REGDATA} >"
   ReadRegStr ${L_REGDATA} HKLM "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_LFN"
   DetailPrint "HKLM: RootDir_LFN = < ${L_REGDATA} >"
+  StrCpy ${L_EXPECTED_ROOT} ${L_REGDATA}
   ReadRegStr ${L_REGDATA} HKLM "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_SFN"
   DetailPrint "HKLM: RootDir_SFN = < ${L_REGDATA} >"
+  StrCmp ${L_REGDATA} "Not supported" end_HKLM_root
+  GetFullPathName /SHORT ${L_EXPECTED_ROOT} ${L_EXPECTED_ROOT}
+  StrCmp ${L_EXPECTED_ROOT} ${L_REGDATA} end_HKLM_root
+  DetailPrint "^^^^^ Error ^^^^^"
+  DetailPrint "Expected Root SFN = < ${L_EXPECTED_ROOT} >"
+
+end_HKLM_root:
   DetailPrint ""
 
   ; Check HKCU data
@@ -359,6 +370,7 @@ start_report:
 
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_LFN"
   DetailPrint "HKCU: RootDir_LFN = < ${L_REGDATA} >"
+  StrCpy ${L_EXPECTED_ROOT} ${L_REGDATA}
   StrCpy ${L_STATUS_ROOT} ""
   IfFileExists "${L_REGDATA}\popfile.pl" root_sfn
   StrCpy ${L_STATUS_ROOT} "not "
@@ -366,11 +378,19 @@ start_report:
 root_sfn:
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_SFN"
   DetailPrint "HKCU: RootDir_SFN = < ${L_REGDATA} >"
+  StrCmp ${L_REGDATA} "Not supported" end_HKCU_root
+  GetFullPathName /SHORT ${L_EXPECTED_ROOT} ${L_EXPECTED_ROOT}
+  StrCmp ${L_EXPECTED_ROOT} ${L_REGDATA} end_HKCU_root
+  DetailPrint "^^^^^ Error ^^^^^"
+  DetailPrint "Expected Root SFN = < ${L_EXPECTED_ROOT} >"
+
+end_HKCU_root:
   DetailPrint ""
 
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_LFN"
   DetailPrint "HKCU: UserDir_LFN = < ${L_REGDATA} >"
   StrCpy ${L_POPFILE_USER} ${L_REGDATA}
+  StrCpy ${L_EXPECTED_USER} ${L_REGDATA}
   StrCpy ${L_STATUS_USER} ""
   IfFileExists "${L_REGDATA}\popfile.cfg" user_sfn
   StrCpy ${L_STATUS_USER} "not "
@@ -378,6 +398,13 @@ root_sfn:
 user_sfn:
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_SFN"
   DetailPrint "HKCU: UserDir_SFN = < ${L_REGDATA} >"
+  StrCmp ${L_REGDATA} "Not supported" end_HKCU_user
+  GetFullPathName /SHORT ${L_EXPECTED_USER} ${L_EXPECTED_USER}
+  StrCmp ${L_EXPECTED_USER} ${L_REGDATA} end_HKCU_user
+  DetailPrint "^^^^^ Error ^^^^^"
+  DetailPrint "Expected User SFN = < ${L_EXPECTED_USER} >"
+
+end_HKCU_user:
   DetailPrint ""
   DetailPrint "HKCU: popfile.pl  = ${L_STATUS_ROOT}found"
   DetailPrint "HKCU: popfile.cfg = ${L_STATUS_USER}found"
@@ -438,6 +465,7 @@ sql_backup_status:
 simple_HKCU_locns:
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_LFN"
   DetailPrint "Program folder    = < ${L_REGDATA} >"
+  StrCpy ${L_EXPECTED_ROOT} ${L_REGDATA}
   StrCpy ${L_STATUS_ROOT} ""
   IfFileExists "${L_REGDATA}\popfile.pl" simple_root_sfn
   StrCpy ${L_STATUS_ROOT} "not "
@@ -445,10 +473,18 @@ simple_HKCU_locns:
 simple_root_sfn:
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_SFN"
   DetailPrint "SFN equivalent    = < ${L_REGDATA} >"
+  StrCmp ${L_REGDATA} "Not supported" end_simple_root
+  GetFullPathName /SHORT ${L_EXPECTED_ROOT} ${L_EXPECTED_ROOT}
+  StrCmp ${L_EXPECTED_ROOT} ${L_REGDATA} end_simple_root
+  DetailPrint "^^^^^ Error ^^^^^"
+  DetailPrint "Expected value    = < ${L_EXPECTED_ROOT} >"
+
+end_simple_root:
   DetailPrint ""
 
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_LFN"
   DetailPrint "User Data folder  = < ${L_REGDATA} >"
+  StrCpy ${L_EXPECTED_USER} ${L_REGDATA}
   StrCpy ${L_STATUS_USER} ""
   IfFileExists "${L_REGDATA}\popfile.cfg" simple_user_sfn
   StrCpy ${L_STATUS_USER} "not "
@@ -456,6 +492,13 @@ simple_root_sfn:
 simple_user_sfn:
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_SFN"
   DetailPrint "SFN equivalent    = < ${L_REGDATA} >"
+  StrCmp ${L_REGDATA} "Not supported" end_simple_user
+  GetFullPathName /SHORT ${L_EXPECTED_USER} ${L_EXPECTED_USER}
+  StrCmp ${L_EXPECTED_USER} ${L_REGDATA} end_simple_user
+  DetailPrint "^^^^^ Error ^^^^^"
+  DetailPrint "Expected value    = < ${L_EXPECTED_USER} >"
+
+end_simple_user:
   DetailPrint ""
   DetailPrint "popfile.pl file   = ${L_STATUS_ROOT}found"
   DetailPrint "popfile.cfg file  = ${L_STATUS_USER}found"
@@ -476,7 +519,26 @@ check_env_vars:
   DetailPrint ""
 
   DetailPrint "'POPFILE_ROOT'    = < ${L_POPFILE_ROOT} >"
+  StrCmp ${L_WIN_OS_TYPE} "1" compare_root_var
+  StrCmp ${L_POPFILE_ROOT} "" check_user
+
+compare_root_var:
+  StrCmp ${L_EXPECTED_ROOT} ${L_POPFILE_ROOT} check_user
+  DetailPrint "^^^^^ Error ^^^^^"
+  DetailPrint "Expected value    = < ${L_EXPECTED_ROOT} >"
+  DetailPrint ""
+
+check_user:
   DetailPrint "'POPFILE_USER'    = < ${L_POPFILE_USER} >"
+  StrCmp ${L_WIN_OS_TYPE} "1" compare_user_var
+  StrCmp ${L_POPFILE_USER} "" check_vars
+
+compare_user_var:
+  StrCmp ${L_EXPECTED_USER} ${L_POPFILE_USER} check_vars
+  DetailPrint "^^^^^ Error ^^^^^"
+  DetailPrint "Expected value    = < ${L_EXPECTED_USER} >"
+
+check_vars:
   DetailPrint ""
 
   StrCmp ${L_POPFILE_ROOT} "" check_user_var
@@ -486,11 +548,11 @@ check_env_vars:
   StrCpy ${L_TEMP} "not "
 
 root_var_status:
-  StrCmp ${L_DIAG_MODE} "simple" simple_rvs
+  StrCmp ${L_DIAG_MODE} "simple" simple_root_status
   DetailPrint "Env: popfile.pl   = ${L_TEMP}found"
   Goto check_user_var
 
-simple_rvs:
+simple_root_status:
   DetailPrint "popfile.pl file   = ${L_TEMP}found"
 
 check_user_var:
@@ -503,11 +565,11 @@ user_result:
   StrCpy ${L_TEMP} "not "
 
 user_var_status:
-  StrCmp ${L_DIAG_MODE} "simple" simple_uvs
+  StrCmp ${L_DIAG_MODE} "simple" simple_user_status
   DetailPrint "Env: popfile.cfg  = ${L_TEMP}found"
   Goto blank_line
 
-simple_uvs:
+simple_user_status:
   DetailPrint "popfile.cfg file  = ${L_TEMP}found"
 
 blank_line:
@@ -553,6 +615,8 @@ exit:
   SetDetailsPrint none
 
   !undef L_DIAG_MODE
+  !undef L_EXPECTED_ROOT
+  !undef L_EXPECTED_USER
   !undef L_ITAIJIDICTPATH
   !undef L_KANWADICTPATH
   !undef L_POPFILE_ROOT
@@ -561,6 +625,7 @@ exit:
   !undef L_STATUS_ROOT
   !undef L_STATUS_USER
   !undef L_TEMP
+  !undef L_WIN_OS_TYPE
   !undef L_WINUSERNAME
   !undef L_WINUSERTYPE
 
