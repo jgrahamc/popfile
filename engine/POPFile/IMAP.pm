@@ -287,18 +287,15 @@ sub service
         }
         # Since say() as well as get_response() can throw an exception, i.e. die if
         # they detect a lost connection, we eval the following code to be able
-        # to catch the exception
+        # to catch the exception. We also tell Perl to ignore broken pipes.
         eval {
             local $SIG{'PIPE'} = 'IGNORE';
             local $SIG{'__DIE__'};
             # Do the real job now that we have a connection
             if ( $self->{imap__} ne '' ) {
 
-                # First classfiy messages found in one of our watched folders
-                $self->check_for_new_messages__( $self->{imap__} );
+                $self->scan_folders( $self->{imap__} );
 
-                # Now check for messages that might have to be reclassified.
-                $self->reclassify_on_move__( $self->{imap__} );
             }
             # Or complain
             else {
@@ -322,13 +319,22 @@ sub service
 
 
 
+
 # ---------------------------------------------------------------------------------------------
 #
-# check_for_new_messages__
+# scan_folders
 #
-#   Checks whether there are any new messages in our watched folders.
-#   If such messages are found, they are classified and moved to the output
-#   folders if we haven't seen them before.
+#   This function scans all of the folders on the IMAP server that are relevant for
+#   POPFile. Currently, these are the watched folders where we look for incoming
+#   mail and the output folders where we place classified messages and look for
+#   reclassification requests.
+#   According to the attributes of a folder (watched, output), and the attributes
+#   of the message (new, classified, etc) it then decides what to do with the
+#   messages.
+#   There are currently three possible actions:
+#       1. Classify the message and move to output folder
+#       2. Reclassify message
+#       3. Ignore message (if you want to call that an action)
 #
 # Arguments:
 #
@@ -336,145 +342,95 @@ sub service
 #
 # ---------------------------------------------------------------------------------------------
 
-sub check_for_new_messages__
+sub scan_folders
 {
     my ( $self, $imap ) = @_;
 
+    # Built a list of folders and their flags
+
+    my %folders;
+
+    foreach ( $self->watched_folders__() ) {
+        $folders{$_}{watched} = 1;
+    }
+
+    foreach my $bucket ( $self->{classifier__}->get_all_buckets( $self->{api_session__} ) ) {
+        my $folder = $self->folder_for_bucket__( $bucket );
+        $folders{$folder}{output} = $bucket;
+    }
+
+
+    # Loop over all our folders:
+
     FOLDER:
-    foreach my $folder ( $self->watched_folders__() ) {
+    foreach my $folder ( keys %folders ) {
+
+        # make the flags more accessible.
+        my $is_watched = ( exists $folders{$folder}{watched} ) ? 1 : 0;
+        my $is_output = ( exists $folders{$folder}{output} ) ? $folders{$folder}{output} : '';
 
         $self->log_( "Looking for new messages in folder $folder." );
 
         # First, check that our UIDs are valid
+
         unless ( $self->folder_uid_status__( $imap, $folder ) ) {
             $self->log_( "Changed UIDVALIDITY, will not check for new messages in folder $folder." );
-            next;
+            next FOLDER;
         }
 
         # Change to folder and search for new messages
-        my $old_next = $self->uid_next__( $folder );
+
         $self->say( $imap, "SELECT \"$folder\"" );
         if ( $self->get_response( $imap ) != 1 ) {
             $self->log_( "Could not SELECT folder $folder." );
-            next;
+            next FOLDER;
         }
-        my @uids = $self->get_uids_ge( $imap, $old_next );
 
-        my $moved_a_msg = 0;
+        my $moved_message = 0;
+        my @uids = $self->get_uids_ge( $imap, $self->uid_next__( $folder ) );
 
-        # Now loop over each message
+        # We now have a list of messages with UIDs greater than or equal
+        # to our last stored UIDNEXT value (of course, the list might be
+        # empty). Let's iterate over that list.
+
         MESSAGE:
         foreach my $msg ( @uids ) {
-
             $self->log_( "" );
-            $self->log_( "Found new message $msg in folder $folder." );
+            $self->log_( "Found new message in folder $folder (UID: $msg)" );
 
-            # get hash of this message
             my $hash = $self->get_hash( $imap, $msg );
 
-            # don't touch messages that were classified before
-            unless ( $self->can_classify__( $hash ) ) {
-                $self->log_( "Message $msg was classified before." );
-                $self->log_( "" );
-                next;
-            }
+            $self->uid_next__( $folder, $self->uid_next__( $folder ) + 1 );
 
-            # Increment the global download count
-            $self->global_config_( 'download_count', $self->global_config_( 'download_count' ) + 1 );
+            # Find out what we are dealing with here:
 
-            # open a temporary file that the classifier will
-            # use to read the message in binary, read-write mode:
-            my $pseudo_mailer;
-            unless ( open $pseudo_mailer, "+>imap.tmp" ) {
-                $self->log_( "Unable to open memory file. Nothing done to message $msg." );
-                $self->log_( "" );
-                next;
-            }
-            binmode $pseudo_mailer;
+            if ( $is_watched ) {
+                if ( $self->can_classify__( $hash ) ) {
 
-            # We don't retrieve the complete message, but handle
-            # it in different parts.
-            # Currently these parts are just headers and body.
-            # But there is room for improvement here.
-            # E.g. we could generate a list of parts by
-            # first looking at the parts the message really has.
+                    my $result = $self->classify_message( $imap, $msg, $hash, $folder );
 
-            my @message_parts = qw/HEADER TEXT/;
-
-            PART:
-            foreach my $part ( @message_parts ) {
-
-                my @lines = $self->fetch_message_part( $imap, $msg, $part );
-
-                unless ( @lines ) {
-                    $self->log_( "Could not fetch the $part part of message $msg." );
-                    $self->log_( "" );
-                    next MESSAGE;
-                }
-
-                foreach ( @lines ) {
-                    print $pseudo_mailer "$_";
-                }
-
-                my ( $class, $history_file, $magnet_used );
-
-                # If we are dealing with the headers, let the
-                # classifier have a non-save go:
-
-                if ( $part eq 'HEADER' ) {
-                    seek $pseudo_mailer, 0, 0;
-                    ( $class, $history_file, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, $self->global_config_( 'download_count' ), $msg, 1, '', 0 );
-
-                    if ( $magnet_used ) {
-                        $self->log_( "Message $history_file was classified as $class using a magnet." );
-                        print $pseudo_mailer "\nThis message was classified based on a magnet. The body of the message was not retrieved from the server.\n";
+                    if ( defined $result ) {
+                        $moved_message = $result;
                     }
-                    else {
-                        next PART;
-                    }
-                }
-
-                # We will only get here if the message was magnetized or we
-                # are looking at the complete message. Thus we let the classifier have
-                # a look and make it save the message to history:
-                seek $pseudo_mailer, 0, 0;
-                ( $class, $history_file, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, $self->global_config_( 'download_count' ), $self->config_( 'class_counter' ), 0, '', 0 );
-                close $pseudo_mailer;
-
-               if ( $magnet_used || $part eq 'TEXT' ) {
-
-                    # Move message:
-
-                    my $destination = $self->folder_for_bucket__( $class );
-                    if ( defined $destination ) {
-                        if ( $folder ne $destination ) {
-                            $self->move_message( $imap, $msg, $destination );
-                            $moved_a_msg = 1;
-                        }
-                    }
-                    else {
-                        $self->log_( "Message can not be moved because output folder for bucket $class is not defined." );
-                    }
-
-
-                    # Housekeeping:
-
-                    $self->log_( "Message $history_file was classified as $class." );
-                    $self->log_( "" );
-
-                    # Update the UIDNEXT value for this folder. Since $msg contains
-                    # the uid of the message we just classified, we simply set that
-                    # value to $msg+1
-                    $self->uid_next__( $folder, $msg + 1 );
-
-                    # Remember hash of this message in history, etc:
-                    $self->was_classified__( $hash, $class, $history_file );
 
                     next MESSAGE;
                 }
             }
+
+            if ( my $bucket = $is_output ) {
+                if ( my $old_bucket = $self->can_reclassify__( $hash, $bucket ) ) {
+
+                    my $result = $self->reclassify_message( $imap, $msg, $bucket, $old_bucket, $hash );
+
+                    next MESSAGE;
+                }
+            }
+
+            # If we get here despite all those next statements, we do nothing and say so
+            $self->log_( "Ignoring message $msg" );
         }
-        if ( $self->config_( 'expunge' ) && $moved_a_msg ) {
+
+        if ( $moved_message && $self->config_( 'expunge' ) ) {
             $self->say( $imap, "EXPUNGE" );
             $self->get_response( $imap );
         }
@@ -483,138 +439,194 @@ sub check_for_new_messages__
 
 
 
-
-
-
-
-
-
 # ---------------------------------------------------------------------------------------------
 #
-# reclassify_on_move__
+# classify_message
 #
-#   This function goes through each output/bucket folder and looks for new messages.
-#   If there is a new message and if we already know the message, the message
-#   is reclassified to the bucket corresponding to the folder the message was found in.
-#   Messages we don't know are simply ignored
+#   This function takes a message UID and then tries to classify the corresponding
+#   message to a POPFile bucket. It delegates all the house-keeping that keeps
+#   the POPFile statistics up to date to helper functions, but the house-keeping
+#   is done. The caller need not worry about this.
 #
 # Arguments:
-#   $imap:  The connection to our server.
+#
+#   $imap:   The connection to the server.
+#   $msg:    UID of the message (the IMAP folder must be SELECTed)
+#   $hash:   The hash of the message as computed by get_hash()
+#   $folder: The name of the folder on the server in which this message was found
+#
+# Return value:
+#
+#   undef on error
+#   1 if the message was moved,
+#   0 if the message was not moved
+#
 # ---------------------------------------------------------------------------------------------
 
-sub reclassify_on_move__
+sub classify_message
 {
-    my ( $self, $imap ) = @_;
+    my ( $self, $imap, $msg, $hash, $folder ) = @_;
 
-    # check whether there are any messages that the user moved
-    # to one of our output folders to request reclassification:
+    my $moved_a_msg = 0;
 
-    foreach my $bucket ( $self->{classifier__}->get_buckets( $self->{api_session__} ) ) {
+    # Increment the global download count
+    $self->global_config_( 'download_count', $self->global_config_( 'download_count' ) + 1 );
 
-        my $folder = $self->folder_for_bucket__( $bucket );
+    # open a temporary file that the classifier will
+    # use to read the message in binary, read-write mode:
+    my $pseudo_mailer;
+    unless ( open $pseudo_mailer, "+>imap.tmp" ) {
+        $self->log_( "Unable to open memory file. Nothing done to message $msg." );
+        $self->log_( "" );
 
-        # We have to be careful if an output folder is also a watched folder
-        # Simply incrementing our UIDNEXT value for each message we
-        # look at isn't good enough in this case. There might be a new
-        # message that came in after check_for_new_messages had a look at the folder.
-        # That's why we keep track of the number of completely new messages and
-        # why we update our UIDNEXT value only after we are done with the
-        # current folder.
+        return;
+    }
+    binmode $pseudo_mailer;
 
-        my $new_messages = 0;
+    # We don't retrieve the complete message, but handle
+    # it in different parts.
+    # Currently these parts are just headers and body.
+    # But there is room for improvement here.
+    # E.g. we could generate a list of parts by
+    # first looking at the parts the message really has.
 
-        # If the user has not yet configured a folder for this bucket, do nothing
-        if ( ! defined $folder ) {
-            next;
-        }
+    my @message_parts = qw/HEADER TEXT/;
 
-        $self->log_( "Looking for reclassification requests in folder $folder." );
+    PART:
+    foreach my $part ( @message_parts ) {
 
-        # Check that our UIDs are valid
-        unless ( $self->folder_uid_status__( $imap, $folder ) ) {
-            $self->log_( "Changed UIDVALIDITY, will not check for new messages in folder $folder." );
-            next;
-        }
+        my @lines = $self->fetch_message_part( $imap, $msg, $part );
 
-        my $old_next = $self->uid_next__( $folder );
-
-        $self->say( $imap, "SELECT \"$folder\"" );
-        unless ( $self->get_response( $imap ) == 1 ) {
-            $self->log_( "Could not SELECT folder $folder!" );
-            next;
-        }
-
-        # Get a list of UIDs greater than our old_next value.
-        my @uids = $self->get_uids_ge( $imap, $old_next );
-
-        foreach my $msg ( @uids ) {
+        unless ( @lines ) {
+            $self->log_( "Could not fetch the $part part of message $msg." );
             $self->log_( "" );
-            $self->log_( "Found possible reclassification request $msg in folder $folder." );
-            my $hash = $self->get_hash( $imap, $msg );
 
-            if ( my $old_bucket = $self->can_reclassify__( $hash, $bucket ) ) {
+            return;
+        }
 
-                my @lines = $self->fetch_message_part( $imap, $msg, '' );
+        foreach ( @lines ) {
+            print $pseudo_mailer "$_";
+        }
 
-                # We have to write the message to a temporary file.
-                # I simply use "imap.tmp" as the file name here.
+        my ( $class, $history_file, $magnet_used );
 
-                unless ( open TMP, ">imap.tmp" ) {
-                    $self->log( "Cannot open temp file imap.tmp" );
-                    next;
-                };
-                foreach ( @lines ) {
-                    print TMP "$_\n";
-                }
-                close TMP;
+        # If we are dealing with the headers, let the
+        # classifier have a non-save go:
 
-                # do all the house keeping
-                $self->was_reclassified__( $hash, $bucket, "imap.tmp" );
+        if ( $part eq 'HEADER' ) {
+            seek $pseudo_mailer, 0, 0;
+            ( $class, $history_file, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, $self->global_config_( 'download_count' ), $msg, 1, '', 0 );
 
-                $self->log_( "Reclassified the message with UID $msg in folder $folder from bucket $old_bucket to bucket $bucket." );
-                $self->log_( "" );
-
-                unlink "imap.tmp";
-
+            if ( $magnet_used ) {
+                $self->log_( "Message $history_file was classified as $class using a magnet." );
+                print $pseudo_mailer "\nThis message was classified based on a magnet. The body of the message was not retrieved from the server.\n";
             }
             else {
-                # Perhaps this message couldn't be reclassified because it is completely
-                # new and was thus never classified in the first place?
-                # If we are looking at a folder that also serves as a watched folder, we
-                # will not touch the UIDNEXT value so chech_for_new_messages__ will find
-                # the message and deal with it. If this is not a watched folder, the new
-                # message(s) will be ignored.
-
-                my %watched_folders;
-                @watched_folders{ $self->watched_folders__() } = ();
-                if ( exists $watched_folders{$folder} ) {
-                    # This _is_ a watched folder
-
-                    if ( $self->can_classify__( $hash ) ) {
-                        # and this is a new message
-                        $new_messages++;
-                        $self->log_( "Found a new message while looking for reclassification requests." );
-                    }
-                }
-                $self->log_( "Did not reclassify message." );
-                $self->log_( "" );
+                next PART;
             }
         }
-        # Update stored UIDNEXT value for this folder:
-        if ( $new_messages ) {
-            $self->log_( "Found $new_messages new messages in folder $folder" );
-        }
-        else {
-            $self->uid_next__( $folder, $old_next + @uids );
+
+        # We will only get here if the message was magnetized or we
+        # are looking at the complete message. Thus we let the classifier have
+        # a look and make it save the message to history:
+        seek $pseudo_mailer, 0, 0;
+        ( $class, $history_file, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, $self->global_config_( 'download_count' ), $self->config_( 'class_counter' ), 0, '', 0 );
+        close $pseudo_mailer;
+
+       if ( $magnet_used || $part eq 'TEXT' ) {
+
+            # Move message:
+
+            my $destination = $self->folder_for_bucket__( $class );
+            if ( defined $destination ) {
+                if ( $folder ne $destination ) {
+                    $self->move_message( $imap, $msg, $destination );
+                    $moved_a_msg = 1;
+                }
+            }
+            else {
+                $self->log_( "Message can not be moved because output folder for bucket $class is not defined." );
+            }
+
+
+            # Housekeeping:
+
+            $self->log_( "Message $history_file was classified as $class." );
+            $self->log_( "" );
+
+            # Update the UIDNEXT value for this folder. Since $msg contains
+            # the uid of the message we just classified, we simply set that
+            # value to $msg+1
+            $self->uid_next__( $folder, $msg + 1 );
+
+            # Remember hash of this message in history, etc:
+            $self->was_classified__( $hash, $class, $history_file );
         }
     }
+
+    return $moved_a_msg;
 }
 
 
 
+# ---------------------------------------------------------------------------------------------
+#
+# reclassify_message
+#
+#   This function takes a message UID and then tries to reclassify the corresponding
+#   message from one POPFile bucket to another POPFile bucket. It delegates all the
+#   house-keeping that keeps the POPFile statistics up to date to helper functions,
+#   but the house-keeping
+#   is done. The caller need not worry about this.
+#
+# Arguments:
+#
+#   $imap:       The connection to the server.
+#   $msg:        UID of the message (the IMAP folder must be SELECTed)
+#   $new_bucket: The bucket to classify the message to
+#   $old_bucket: The previous classification of the message
+#   $hash:   The hash of the message as computed by get_hash()
+#
+# Return value:
+#
+#   undef on error
+#   true if things went allright
+#
+# ---------------------------------------------------------------------------------------------
 
+sub reclassify_message
+{
+    my ( $self, $imap, $msg, $new_bucket, $old_bucket, $hash ) = @_;
 
+    my @lines = $self->fetch_message_part( $imap, $msg, '' );
 
+    unless ( @lines ) {
+        $self->log_( "Could not fetch message $msg!" );
+
+        return;
+    }
+
+    # We have to write the message to a temporary file.
+    # I simply use "imap.tmp" as the file name here.
+
+    unless ( open TMP, ">imap.tmp" ) {
+        $self->log( "Cannot open temp file imap.tmp" );
+
+        return;
+    };
+
+    foreach ( @lines ) {
+        print TMP "$_\n";
+    }
+    close TMP;
+
+    $self->was_reclassified__( $hash, $new_bucket, "imap.tmp" );
+
+    $self->log_( "Reclassified the message with UID $msg from bucket $old_bucket to bucket $new_bucket." );
+    $self->log_( "" );
+
+    unlink "imap.tmp";
+}
 
 
 # ---------------------------------------------------------------------------------------------
@@ -1561,7 +1573,7 @@ sub can_classify__
     my ( $self, $hash ) = @_;
 
     if ( exists $self->{hash_to_bucket__}{$hash} ) {
-        $self->log_( "Message was already classified." ) if $self->{debug__};
+        $self->log_( "Message was already classified." );
         return 0;
     }
     else {
@@ -1589,22 +1601,24 @@ sub can_reclassify__
 
     # We must know the message
     if ( exists $self->{hash_to_bucket__}{$hash} ) {
+
         # We must not reclassify a reclassified message
         if ( !exists $self->{hash_to_reclassed__}{$hash} ) {
+
             # new and old bucket must be different
             if ( $new_bucket ne $self->{hash_to_bucket__}{$hash} ) {
                 return $self->{hash_to_bucket__}{$hash};
             }
             else {
-                $self->log_( "Will not reclassify to same bucket ($new_bucket)." ) if $self->{debug__};
+                $self->log_( "Will not reclassify to same bucket ($new_bucket)." );
             }
         }
         else {
-            $self->log_( "The message was already reclassified." ) if $self->{debug__};
+            $self->log_( "The message was already reclassified." );
         }
     }
     else {
-        $self->log_( "Message is unknown and cannot be reclassified." ) if $self->{debug__};
+        $self->log_( "Message is unknown and cannot be reclassified." );
     }
 
     return;
