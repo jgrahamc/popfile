@@ -1176,8 +1176,8 @@ sub classify_and_modify
                 print $client "Date: " . $self->{parser__}->get_header( 'date' ) . "$eol";
                 if ( $self->global_config_( 'subject' ) ) {
                     # Don't add the classification unless it is not present
-                    if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&
-                         ( $self->{parameters__}{$classification}{subject} == 1 ) ) {
+                    if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&             # PROFILE BLOCK START
+                         ( $self->{parameters__}{$classification}{subject} == 1 ) ) {  # PROFILE BLOCK STOP
                         $msg_subject = " $modification$msg_subject";
                     }
                 }

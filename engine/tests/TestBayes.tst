@@ -445,7 +445,7 @@ for my $class_test (@class_tests) {
     test_assert_equal( $b->classify( $class_test ), $class, $class_test );
 }
 
-# glob the tests directory for files called TestMailParse\d+.msg which consist of messages 
+# glob the tests directory for files called TestMailParse\d+.msg which consist of messages
 # to be sent through classify_and_modify
 
 $b->global_config_( 'msgdir', '../tests/' );
@@ -663,6 +663,90 @@ test_assert( !eof( MAIL ) );
 test_assert( eof( TEMP ) );
 close MAIL;
 close TEMP;
+
+# test quarantining of a message
+
+$b->global_config_( 'msgdir', 'messages/' );
+$b->set_bucket_parameter( 'spam', 'quarantine', 1 );
+
+open CLIENT, ">temp.tmp";
+open MAIL, "<messages/one.msg";
+my ( $class, $nopath ) = $b->classify_and_modify( \*MAIL, \*CLIENT, 0, 0, 0, '', 1 );
+close CLIENT;
+close MAIL;
+
+test_assert_equal( $class, 'spam' );
+test_assert( -e 'messages/popfile0=0.msg' );
+test_assert( -e 'messages/popfile0=0.cls' );
+
+my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile0=0.msg' );
+test_assert( !$reclassified );
+test_assert_equal( $bucket, 'spam' );
+test_assert( !defined( $usedtobe ) );
+test_assert_equal( $magnet, '' );
+
+my @lookfor = ( '--popfile0=0.msg', 'Quarantined Message Detail', ' This is the body', '--popfile0=0.msg', '--popfile0=0.msg--', '.' );
+open CLIENT, "<temp.tmp";
+while ( $#lookfor > -1 ) {
+    test_assert( !eof( CLIENT ) );
+    my $search = shift @lookfor;
+    while ( <CLIENT> ) {
+        if ( /^\Q$search\E/ ) {
+            last;
+        }
+    }
+}
+close CLIENT;
+
+# test no save option
+
+unlink( 'messages/popfile0=0.cls' );
+unlink( 'messages/popfile0=0.msg' );
+open CLIENT, ">temp.tmp";
+open MAIL, "<messages/one.msg";
+my ( $class, $nopath ) = $b->classify_and_modify( \*MAIL, \*CLIENT, 0, 0, 1, '', 1 );
+close CLIENT;
+close MAIL;
+
+test_assert_equal( $class, 'spam' );
+test_assert( !( -e 'messages/popfile0=0.msg' ) );
+test_assert( !( -e 'messages/popfile0=0.cls' ) );
+
+# test no echo option
+
+open CLIENT, ">temp.tmp";
+open MAIL, "<messages/one.msg";
+my ( $class, $nopath ) = $b->classify_and_modify( \*MAIL, \*CLIENT, 0, 0, 0, '', 0 );
+close CLIENT;
+close MAIL;
+
+test_assert_equal( $class, 'spam' );
+test_assert( -e 'messages/popfile0=0.msg' );
+test_assert( -e 'messages/popfile0=0.cls' );
+
+test_assert_equal( ( -s 'temp.tmp' ), 0 );
+
+# test option where we know the classification
+
+open CLIENT, ">temp.tmp";
+open MAIL, "<messages/one.msg";
+my ( $class, $nopath ) = $b->classify_and_modify( \*MAIL, \*CLIENT, 0, 0, 0, 'other', 1 );
+close CLIENT;
+close MAIL;
+
+test_assert_equal( $class, 'other' );
+test_assert( -e 'messages/popfile0=0.msg' );
+test_assert( -e 'messages/popfile0=0.cls' );
+
+my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile0=0.msg' );
+test_assert( !$reclassified );
+test_assert_equal( $bucket, 'other' );
+test_assert( !defined( $usedtobe ) );
+test_assert_equal( $magnet, '' );
+
+# Test X-POPFile-TimeoutPrevention header insertion
+
+# TODO
 
 # TODO test that stop writes the parameters to disk
 
