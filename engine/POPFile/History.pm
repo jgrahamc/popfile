@@ -561,6 +561,9 @@ sub commit_history__
             }
             close FILE;
         }
+        else {
+            $self->log_( 0, "Could not open history message file $file for reading." );
+        }
 
         my $hash = $self->get_message_hash( ${$header{'message-id'}}[0],
                                             ${$header{'date'}}[0],
