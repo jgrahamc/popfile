@@ -215,6 +215,20 @@ sub service
 
 # ---------------------------------------------------------------------------------------------
 #
+# forked
+#
+# Called when someone forks POPFile
+#
+# ---------------------------------------------------------------------------------------------
+sub forked
+{
+    my ( $self ) = @_;
+
+    close $self->{server};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # http_redirect - tell the browser to redirect to a url
 #
 # $client   The web browser to send redirect to

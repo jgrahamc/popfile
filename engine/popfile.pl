@@ -14,8 +14,8 @@
 use strict;
 use locale;
 
-# NOTE: POPFile is constructed from a collection of classes which all have four special
-# interface functions:
+# NOTE: POPFile is constructed from a collection of classes which all have special
+# interface functions and variables:
 #
 # initialize() - called after the class is created to set default values for internal
 #                variables and global configuration information
@@ -26,7 +26,13 @@ use locale;
 # service()    - called by the main POPFile process to allow a submodule to do its own
 #                work (this is optional for modules that do not need to perform any service)
 #
+# forked()     - called when a module has forked the process.  This is called within the child
+#                process and should be used to clean up 
+#
 # alive        - Gets set to 1 when the parent wants to kill all the running sub modules
+#
+# forker       - This is a reference to a function (forker) in this file that performs a fork
+#                and informs modules that a fork has occurred.
 #
 # The POPFile classes are stored by reference in the %components hash
 my %components;
@@ -55,6 +61,29 @@ sub aborting
     for my $c (keys %components) {
         $components{$c}->{alive} = 0;
     }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# forker
+#
+# Called to fork POPFile.  Returns the return value from fork() and calls every module's forked
+# function in the child process
+#
+# ---------------------------------------------------------------------------------------------
+sub forker
+{
+    my $pid = fork();
+    
+    if ( defined( $pid ) ) {
+        if ( $pid == 0 ) {
+            for my $c (sort keys %components) {
+                $components{$c}->forked();
+            }
+        }
+    }
+    
+    return $pid;
 }
 
 #
@@ -105,7 +134,8 @@ for my $c (sort keys %components) {
         die "Failed to start while initializing the $c module";
     }
     
-    $components{$c}->{alive} = 1;
+    $components{$c}->{alive}  = 1;
+    $components{$c}->{forker} = \&forker;
 }
 
 # Load the configuration from disk and then apply any command line

@@ -186,7 +186,7 @@ sub service
             if  ( ( $self->{configuration}->{configuration}{localpop} == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
                 # Now that we have a good connection to the client fork a subprocess to handle the communication
                 $self->{configuration}->{configuration}{download_count} += 1;
-                my $pid = fork();
+                my $pid = &{$self->{forker}};
                 
                 if ( !defined( $pid ) ) {
                     debug( $self, "Could not fork!" );
@@ -195,7 +195,6 @@ sub service
                 }
                 
                 if ( $pid == 0 ) {
-                    close $self->{server};  # Not needed in the child process
                     child( $self, $client, $self->{configuration}->{configuration}{download_count} );
                     exit(0);
                 }
@@ -206,6 +205,20 @@ sub service
     }
     
     return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# forked
+#
+# Called when someone forks POPFile
+#
+# ---------------------------------------------------------------------------------------------
+sub forked
+{
+    my ( $self ) = @_;
+
+    close $self->{server};
 }
 
 # ---------------------------------------------------------------------------------------------

@@ -87,6 +87,18 @@ sub service
 
 # ---------------------------------------------------------------------------------------------
 #
+# forked
+#
+# Called when someone forks POPFile
+#
+# ---------------------------------------------------------------------------------------------
+sub forked
+{
+    my ( $self ) = @_;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # parse_command_line - Parse ARGV
 #
 # The arguments are the keys of the configuration hash.  Any argument that is not already
