@@ -51,7 +51,7 @@
   
   !define MUI_SPECIALBITMAP "special.bmp"
   !define MUI_HEADERBITMAP "hdr-right.bmp"
-  !define mUI_HEADERBITMAP_RIGHT
+  !define MUI_HEADERBITMAP_RIGHT
 
   !define MUI_WELCOMEPAGE
   !define MUI_LICENSEPAGE
