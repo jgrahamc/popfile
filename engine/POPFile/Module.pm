@@ -423,6 +423,29 @@ sub register_configuration_item_
     return $self->mq_post_( 'UIREG', "$type:$name", $object );
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# get_user_path_, get_root_path_
+#
+# Wrappers for POPFile::Configuration get_user_path and get_root_path
+#
+# $path             The path to modify
+#
+# ---------------------------------------------------------------------------------------------
+sub get_user_path_
+{
+    my ( $self, $path ) = @_;
+
+    return $self->{configuration__}->get_user_path( $path );
+}
+
+sub get_root_path_
+{
+    my ( $self, $path ) = @_;
+
+    return $self->{configuration__}->get_root_path( $path );
+}
+
 # GETTER/SETTER methods.  Note that I do not expect documentation of these unless they
 # are non-trivial since the documentation would be a waste of space
 #

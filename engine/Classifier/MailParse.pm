@@ -26,11 +26,9 @@ package Classifier::MailParse;
 
 use strict;
 use locale;
-use Classifier::WordMangle;
 
 use MIME::Base64;
 use MIME::QuotedPrint;
-
 
 # Korean characters definition
 
@@ -122,10 +120,6 @@ sub new
 {
     my $type = shift;
     my $self;
-
-    # Used to mangle words into the right shape for classification
-
-    $self->{mangle__} = new Classifier::WordMangle;
 
     # Hash of word frequences
 
@@ -1821,6 +1815,13 @@ sub quickmagnets
    my ( $self ) = @_;
 
    return $self->{quickmagnets__};
+}
+
+sub mangle
+{
+    my ( $self, $value ) = @_;
+
+    $self->{mangle__} = $value;
 }
 
 # ---------------------------------------------------------------------------------------------

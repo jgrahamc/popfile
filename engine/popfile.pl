@@ -32,6 +32,8 @@
 use strict;
 use locale;
 
+use lib $ENV{POPFILE_ROOT};   
+
 use POPFile::Loader;
 
 # POPFile is actually loaded by the POPFile::Loader object which does all

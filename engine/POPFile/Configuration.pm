@@ -70,6 +70,11 @@ sub new
 
     $self->{save_needed__} = 0;
 
+    # Local copies of POPFILE_ROOT and POPFILE_USER
+
+    $self->{popfile_root__} = '';
+    $self->{popfile_user__} = '';
+
     bless $self, $type;
 
     $self->name( 'config' );
@@ -87,6 +92,9 @@ sub new
 sub initialize
 {
     my ( $self ) = @_;
+
+    $self->{popfile_root__} = $ENV{POPFILE_ROOT};
+    $self->{popfile_user__} = $ENV{POPFILE_USER};
 
     # This is the location where we store the PID of POPFile in a file
     # called popfile.pid
@@ -145,7 +153,7 @@ sub start
     # Check to see if the PID file is present, if it is then another POPFile
     # may be running, warn the user and terminate
 
-    $self->{pid_file__} = $self->config_( 'piddir' ) . 'popfile.pid';
+    $self->{pid_file__} = $self->get_user_path_( $self->config_( 'piddir' ) . 'popfile.pid' );
 
     if (defined($self->live_check_())) {
         return 0;
@@ -476,7 +484,7 @@ sub load_configuration
 {
     my ( $self ) = @_;
 
-    if ( open CONFIG, "<popfile.cfg" ) {
+    if ( open CONFIG, '<' . $self->get_user_path_( 'popfile.cfg' ) ) {
         while ( <CONFIG> ) {
             s/(\015|\012)//g;
             if ( /(\S+) (.+)/ ) {
@@ -510,7 +518,7 @@ sub save_configuration
         return;
     }
 
-    if ( open CONFIG, ">popfile.cfg" ) {
+    if ( open CONFIG, '>' . $self->get_user_path_( 'popfile.cfg' ) ) {
         $self->{save_needed__} = 0;
 
         foreach my $key (sort keys %{$self->{configuration_parameters__}}) {
@@ -519,6 +527,53 @@ sub save_configuration
 
         close CONFIG;
     }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_user_path, get_root_path
+#
+# Resolve a path relative to POPFILE_USER or POPFILE_ROOT
+#
+# $path              The path to resolve
+#
+# ---------------------------------------------------------------------------------------------
+sub get_user_path
+{
+    my ( $self, $path ) = @_;
+
+    return $self->path_join__( $self->{popfile_user__}, $path );
+}
+
+sub get_root_path
+{
+    my ( $self, $path ) = @_;
+
+    return $self->path_join__( $self->{popfile_root__}, $path );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# path_join__
+#
+# Join two paths togther
+#
+# $left                The LHS
+# $right               The RHS
+#
+# ---------------------------------------------------------------------------------------------
+sub path_join__
+{
+    my ( $self, $left, $right ) = @_;
+
+    if ( ( $right =~ /^\// ) || ( $right =~ /^[A-Z]:\/\\/ ) ) {
+        return $right;
+    }
+
+    $left  =~ s/\/$//;
+    $right =~ s/^\///;
+
+    return "$left/$right";
 }
 
 # ---------------------------------------------------------------------------------------------

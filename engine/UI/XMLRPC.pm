@@ -41,8 +41,6 @@ use locale;
 use IO::Socket;
 use IO::Select;
 
-require XMLRPC::Transport::HTTP;
-
 my $eol = "\015\012";
 
 #----------------------------------------------------------------------------
@@ -75,7 +73,7 @@ sub initialize
 
     # By default we are disabled
 
-    $self->config_( 'disabled', 1 );
+    $self->config_( 'enabled', 0 );
 
     # XML-RPC is available on port 8081 initially
 
@@ -102,6 +100,8 @@ sub start
     if ( $self->config_( 'enabled' ) == 0 ) {
         return 2;
     }
+
+    require XMLRPC::Transport::HTTP;
 
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
