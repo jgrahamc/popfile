@@ -2377,9 +2377,7 @@ FunctionEnd
 Section "Uninstall"
 
   !define L_CFG         $R9   ; used as file handle
-  !define L_CORPUS      $R8   ; holds full path to the POPFile corpus data
   !define L_EXE         $R7   ; full path of the EXE to be monitored
-  !define L_HISTORY     $R6   ; holds full path to the message history data
   !define L_LNE         $R5   ; a line from popfile.cfg
   !define L_OLDUI       $R4   ; holds old-style UI port (if previous POPFile is an old version)
   !define L_REG_KEY     $R3   ; L_REG_* registers are used to  restore Outlook Express settings
@@ -2396,14 +2394,6 @@ Section "Uninstall"
     Abort "$(un.PFI_LANG_ABORT_1)"
 
 skip_confirmation:
-  Push $INSTDIR
-  Call un.GetCorpusPath
-  Pop ${L_CORPUS}
-
-  Push $INSTDIR
-  Call un.GetHistoryPath
-  Pop ${L_HISTORY}
-  
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_1)"
   SetDetailsPrint listonly
@@ -2623,17 +2613,16 @@ no_reg_file:
   Delete $INSTDIR\languages\*.msg
   RMDir $INSTDIR\languages
 
-  RMDir /r "${L_CORPUS}"
-  RMDir /r "${L_HISTORY}"
+  RMDir /r $INSTDIR\corpus
+  
+  Delete $INSTDIR\messages\*.*
+  RMDir $INSTDIR\messages
   
   Delete $INSTDIR\stopwords
   Delete $INSTDIR\stopwords.bak
   Delete $INSTDIR\stopwords.default
 
-  ;----------------------------------
-  ; Delete Kakasi - start
-  ;----------------------------------
-
+  IfFIleExists "$INSTDIR\kakasi\*.*" 0 skip_kakasi
   RMDir /r "$INSTDIR\kakasi"
 
   ;Delete Environment Variables
@@ -2643,10 +2632,7 @@ no_reg_file:
   Push ITAIJIDICTPATH
   Call un.DeleteEnvStr
 
-  ;----------------------------------
-  ; Delete Kakasi - end
-  ;----------------------------------
-  
+skip_kakasi:
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_6)"
   SetDetailsPrint listonly
@@ -2686,9 +2672,7 @@ Removed:
   SetDetailsPrint both
 
   !undef L_CFG
-  !undef L_CORPUS
   !undef L_EXE
-  !undef L_HISTORY
   !undef L_LNE
   !undef L_OLDUI
   !undef L_REG_KEY

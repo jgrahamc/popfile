@@ -385,83 +385,83 @@ FunctionEnd
 #          location and if the history parameter in 'popfile.cfg' is set to 'messages/')
 #--------------------------------------------------------------------------
 
-Function un.GetHistoryPath
-
-  !define L_FILE_HANDLE   $R9
-  !define L_HISTORY       $R8
-  !define L_RESULT        $R7
-  !define L_SOURCE        $R6
-  !define L_TEMP          $R5
-
-  Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
-  Push ${L_RESULT}
-  Exch
-  Push ${L_HISTORY}
-  Push ${L_FILE_HANDLE}
-  Push ${L_TEMP}
-
-  StrCpy ${L_HISTORY} ""
-
-  IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default_locn
-  ClearErrors
-  FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
-
-loop:
-  FileRead ${L_FILE_HANDLE} ${L_TEMP}
-  IfErrors cfg_file_done
-  StrCpy ${L_RESULT} ${L_TEMP} 7
-  StrCmp ${L_RESULT} "msgdir " got_old_msgdir
-  StrCpy ${L_RESULT} ${L_TEMP} 14
-  StrCmp ${L_RESULT} "GLOBAL_msgdir " got_new_msgdir
-  Goto loop
-
-got_old_msgdir:
-  StrCpy ${L_HISTORY} ${L_TEMP} "" 7
-  Goto loop
-
-got_new_msgdir:
-  StrCpy ${L_HISTORY} ${L_TEMP} "" 14
-  Goto loop
-
-cfg_file_done:
-  FileClose ${L_FILE_HANDLE}
-  Push ${L_HISTORY}
-  Call un.TrimNewlines
-  Pop ${L_HISTORY}
-  StrCmp ${L_HISTORY} "" use_default_locn use_cfg_data
-
-use_default_locn:
-  StrCpy ${L_RESULT} "${L_SOURCE}\messages"
-  Goto got_result
-
-use_cfg_data:
-  StrCpy ${L_TEMP} ${L_HISTORY} 1 -1
-  StrCmp ${L_TEMP} "/" strip_slash no_trailing_slash
-  StrCmp ${L_TEMP} "\" 0 no_trailing_slash
-
-strip_slash:
-  StrCpy ${L_HISTORY} ${L_HISTORY} -1
-
-no_trailing_slash:
-  Push ${L_SOURCE}
-  Push ${L_HISTORY}
-  Call un.GetDataPath
-  Pop ${L_RESULT}
-
-got_result:
-  Pop ${L_TEMP}
-  Pop ${L_FILE_HANDLE}
-  Pop ${L_HISTORY}
-  Pop ${L_SOURCE}
-  Exch ${L_RESULT}  ; place full path of 'messages' directory on top of the stack
-
-  !undef L_FILE_HANDLE
-  !undef L_HISTORY
-  !undef L_RESULT
-  !undef L_SOURCE
-  !undef L_TEMP
-
-FunctionEnd
+;Function un.GetHistoryPath
+;
+;  !define L_FILE_HANDLE   $R9
+;  !define L_HISTORY       $R8
+;  !define L_RESULT        $R7
+;  !define L_SOURCE        $R6
+;  !define L_TEMP          $R5
+;
+;  Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
+;  Push ${L_RESULT}
+;  Exch
+;  Push ${L_HISTORY}
+;  Push ${L_FILE_HANDLE}
+;  Push ${L_TEMP}
+;
+;  StrCpy ${L_HISTORY} ""
+;
+;  IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default_locn
+;  ClearErrors
+;  FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
+;
+;loop:
+;  FileRead ${L_FILE_HANDLE} ${L_TEMP}
+;  IfErrors cfg_file_done
+;  StrCpy ${L_RESULT} ${L_TEMP} 7
+;  StrCmp ${L_RESULT} "msgdir " got_old_msgdir
+;  StrCpy ${L_RESULT} ${L_TEMP} 14
+;  StrCmp ${L_RESULT} "GLOBAL_msgdir " got_new_msgdir
+;  Goto loop
+;
+;got_old_msgdir:
+;  StrCpy ${L_HISTORY} ${L_TEMP} "" 7
+;  Goto loop
+;
+;got_new_msgdir:
+;  StrCpy ${L_HISTORY} ${L_TEMP} "" 14
+;  Goto loop
+;
+;cfg_file_done:
+;  FileClose ${L_FILE_HANDLE}
+;  Push ${L_HISTORY}
+;  Call un.TrimNewlines
+;  Pop ${L_HISTORY}
+;  StrCmp ${L_HISTORY} "" use_default_locn use_cfg_data
+;
+;use_default_locn:
+;  StrCpy ${L_RESULT} "${L_SOURCE}\messages"
+;  Goto got_result
+;
+;use_cfg_data:
+;  StrCpy ${L_TEMP} ${L_HISTORY} 1 -1
+;  StrCmp ${L_TEMP} "/" strip_slash no_trailing_slash
+;  StrCmp ${L_TEMP} "\" 0 no_trailing_slash
+;
+;strip_slash:
+;  StrCpy ${L_HISTORY} ${L_HISTORY} -1
+;
+;no_trailing_slash:
+;  Push ${L_SOURCE}
+;  Push ${L_HISTORY}
+;  Call un.GetDataPath
+;  Pop ${L_RESULT}
+;
+;got_result:
+;  Pop ${L_TEMP}
+;  Pop ${L_FILE_HANDLE}
+;  Pop ${L_HISTORY}
+;  Pop ${L_SOURCE}
+;  Exch ${L_RESULT}  ; place full path of 'messages' directory on top of the stack
+;
+;  !undef L_FILE_HANDLE
+;  !undef L_HISTORY
+;  !undef L_RESULT
+;  !undef L_SOURCE
+;  !undef L_TEMP
+;
+;FunctionEnd
 
 
 #==============================================================================================
@@ -601,7 +601,7 @@ FunctionEnd
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-!insertmacro GetCorpusPath "un."
+;!insertmacro GetCorpusPath "un."
 
 
 #--------------------------------------------------------------------------
@@ -749,7 +749,7 @@ FunctionEnd
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-!insertmacro GetDataPath "un."
+;!insertmacro GetDataPath "un."
 
 
 #--------------------------------------------------------------------------
@@ -824,7 +824,7 @@ FunctionEnd
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-!insertmacro StrBackSlash "un."
+;!insertmacro StrBackSlash "un."
 
 
 #--------------------------------------------------------------------------
@@ -895,7 +895,7 @@ FunctionEnd
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-!insertmacro GetParent "un."
+;!insertmacro GetParent "un."
 
 
 #--------------------------------------------------------------------------
@@ -974,7 +974,7 @@ FunctionEnd
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-; !insertmacro StrStr "un."     ;' Temporarily disabled [03-Oct-03]
+; !insertmacro StrStr "un."
 
 
 #--------------------------------------------------------------------------
