@@ -589,7 +589,7 @@ sub verify_connected
             # Wait 10 seconds for a response from the remote server and if 
             # there isn't one then give up trying to connect
             my $selector = new IO::Select( $mail );
-            last unless () = $selector->can_read(10);
+            last unless () = $selector->can_read($configuration{timeout});
             
             # Read the response from the real server and say OK
             my $buf        = '';
@@ -771,6 +771,11 @@ sub popfile_homepage
         $configuration{page_size} = $form{page_size};
     }
 
+    if ( $form{update_timeout} eq 'Apply' )
+    {
+        $configuration{timeout} = $form{timeout};
+    }
+
     $body .= "<h2>Listen Ports</h2><p><form action=/configuration><b>POP3 listen port:</b><br><input name=port type=text value=$configuration{port}><input type=submit name=update_port value=Apply></form>";    
     $body .= "Updated port to $configuration{port}; this change will not take affect until you restart POPFile" if ( $form{update_port} eq 'Apply' );
     $body .= "<p><form action=/configuration><b>User interface web port:</b><br><input name=ui_port type=text value=$configuration{ui_port}><input type=submit name=update_ui_port value=Apply></form>";    
@@ -779,10 +784,10 @@ sub popfile_homepage
     $body .= "Updated secure server to $configuration{server}; this change will not take affect until you restart POPFile" if ( $form{update_server} eq 'Apply' );
     $body .= "<p><form action=/><b>Secure port:</b> <br><input name=sport type=text value=$configuration{sport}><input type=submit name=update_sport value=Apply></form>";    
     $body .= "Updated port to $configuration{sport}; this change will not take affect until you restart POPFile" if ( $form{update_sport} eq 'Apply' );
-
     $body .= "<p><hr><h2>History View</h2><p><form action=/configuration><b>Number of emails per page:</b> <br><input name=page_size type=text value=$configuration{page_size}><input type=submit name=update_page_size value=Apply></form>";    
     $body .= "Updated number of emails per page to $configuration{page_size}" if ( $form{update_page_size} eq 'Apply' );
-
+    $body .= "<p><hr><h2>TCP Connection Timeout</h2><p><form action=/configuration><b>TCP connection timeout in seconds:</b> <br><input name=timeout type=text value=$configuration{timeout}><input type=submit name=update_timeout value=Apply></form>";    
+    $body .= "Updated TCP connection timeout to $configuration{timeout}" if ( $form{update_timeout} eq 'Apply' );
     $body .= "<p><hr><h2>Classification Insertion</h2><p><b>Subject line modification:</b><br>";    
     $body .= "<b>" if ( $configuration{subject} == 0 );
     $body .= "<a href=/configuration?subject=1><font color=blue>Off</font></a> ";
@@ -2066,6 +2071,7 @@ $configuration{subject}   = 1;
 $configuration{server}    = '';
 $configuration{sport}     = '';
 $configuration{page_size} = 20;
+$configuration{timeout}   = 10;
 
 # Ensure that the messages subdirectory exists
 mkdir( 'messages' );
