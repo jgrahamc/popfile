@@ -17,7 +17,7 @@ use Classifier::Bayes;
 
 # This version number
 my $major_version = 0;
-my $minor_version = 16;
+my $minor_version = 17;
 my $build_version = 1;
 
 # A list of the messages currently on the server, each entry in this list
@@ -1364,7 +1364,7 @@ sub run_popfile
     my $selector   = new IO::Select( $server );
     my $uiselector = new IO::Select( $ui     );
     
-    print "POPFile Engine v$major_version.$minor_version ready\n";
+    print "POPFile Engine v$major_version.$minor_version.$build_version ready\n";
     
     # Accept a connection from a client trying to use us as the mail server.  We service one client at a time
     # and all others get queued up to be dealt with later.  We check the alive boolean here to make sure we
@@ -1936,7 +1936,7 @@ sub aborting
 
 # ---------------------------------------------------------------------------------------------
 
-print "POPFile Engine v$major_version.$minor_version starting\n";
+print "POPFile Engine v$major_version.$minor_version.$build_version starting\n";
 
 $SIG{BREAK} = \&aborting;
 $SIG{ABRT}  = \&aborting;
@@ -1980,7 +1980,7 @@ print "    Loading buckets...\n";
 $classifier = new Classifier::Bayes;
 $classifier->load_word_matrix();
 
-debug( "POPFile Engine v$major_version.$minor_version running" );
+debug( "POPFile Engine v$major_version.$minor_version.$build_version running" );
 
 # Fix up the page template with the current version number
 $header =~ s/VERSION/v$major_version\.$minor_version\.$build_version/g;
@@ -1994,6 +1994,6 @@ print "    Saving configuration\n";
 # Write the final configuration to disk
 save_configuration();
 
-print "POPFile Engine v$major_version.$minor_version terminating\n";
+print "POPFile Engine v$major_version.$minor_version.$build_version terminating\n";
 
 # ---------------------------------------------------------------------------------------------
