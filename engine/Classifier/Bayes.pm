@@ -194,9 +194,9 @@ sub initialize
     my ( $self ) = @_;
 
     # No default unclassified weight is the number of times more sure POPFile
-    # must be of the top class vs the second class, default is 10 times more
+    # must be of the top class vs the second class, default is 100 times more
 
-    $self->config_( 'unclassified_weight', 10 );
+    $self->config_( 'unclassified_weight', 100 );
 
     # The corpus is kept in the 'corpus' subfolder of POPFile
 
