@@ -102,6 +102,13 @@ use IO::Select;
 #
 # ---------------------------------------------------------------------------------------------
 
+# This variable is CLASS wide, not OBJECT wide and is used as temporary storage
+# for the slurp_ methods below.  It needs to be class wide because different objects
+# may call slurp on the same handle as the handle gets passed from object to
+# object.
+
+my %slurp_data__;
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -470,13 +477,13 @@ sub flush_slurp_data__
 
     # Look for LF
 
-    if ( $self->{slurp_data__}{"$handle"}{data} =~ s/^([^\015\012]*\012)// ) {
+    if ( $slurp_data__{"$handle"}{data} =~ s/^([^\015\012]*\012)// ) {
         return $1;
     }	
 
     # Look for CRLF
 
-    if ( $self->{slurp_data__}{"$handle"}{data} =~ s/^([^\015\012]*\015\012)// ) {
+    if ( $slurp_data__{"$handle"}{data} =~ s/^([^\015\012]*\015\012)// ) {
         return $1;
     }
 
@@ -484,7 +491,7 @@ sub flush_slurp_data__
     # total buffer could be ending with CR and there could actually be an LF to
     # read, so we check for that situation if we find CR
 
-    if ( $self->{slurp_data__}{"$handle"}{data} =~ s/^([^\015\012]*\015)// ) {
+    if ( $slurp_data__{"$handle"}{data} =~ s/^([^\015\012]*\015)// ) {
         my $cr = $1;
 
         # If we have removed everything from the buffer then see if there's 
@@ -492,23 +499,19 @@ sub flush_slurp_data__
         # to see if it is LF (in which case this is a line ending CRLF), otherwise
         # just save it
 
-        if ( $self->{slurp_data__}{"$handle"}{data} eq '' ) {
-            $self->log_( "flush_slurp_data__ hit CR/LF check on $cr" );
-            if ( defined( $self->{slurp_data__}{"$handle"}{select}->can_read(0) ) ) {
-                $self->log_( "Data is available to read" );
+        if ( $slurp_data__{"$handle"}{data} eq '' ) {
+            if ( defined( $slurp_data__{"$handle"}{select}->can_read(0.1) ) ) {
                 my $c;
                 if ( sysread( $handle, $c, 1 ) == 1 ) {
-                    $self->log_( "Read [" . ord($c) . "]" );
                     if ( $c eq "\012" ) {
                         $cr .= $c;
                     } else {
-                        $self->{slurp_data__}{"$handle"}{data} = $c;
+                        $slurp_data__{"$handle"}{data} = $c;
 		    }
 		}
 	    }
 	}
 
-        $self->log_( "Returning [$cr]" );
         return $cr;
     }
 
@@ -535,9 +538,9 @@ sub slurp_
 {
     my ( $self, $handle ) = @_;
 
-    if ( !defined( $self->{slurp_data__}{"$handle"}{data} ) ) {
-        $self->{slurp_data__}{"$handle"}{select} = new IO::Select( $handle );
-        $self->{slurp_data__}{"$handle"}{data}   = '';
+    if ( !defined( $slurp_data__{"$handle"}{data} ) ) {
+        $slurp_data__{"$handle"}{select} = new IO::Select( $handle );
+        $slurp_data__{"$handle"}{data}   = '';
     }
 
     my $result = $self->flush_slurp_data__( $handle );
@@ -549,7 +552,8 @@ sub slurp_
     my $c;
 
     while ( sysread( $handle, $c, 160 ) > 0 ) {
-        $self->{slurp_data__}{"$handle"}{data} .= $c;
+        $self->log_( "slurp_ read [$c]" );
+        $slurp_data__{"$handle"}{data} .= $c;
  
         $result = $self->flush_slurp_data__( $handle );
 
@@ -562,7 +566,7 @@ sub slurp_
     # CRLF so return the line, otherwise we are reading at the end of the
     # stream/file so return undef
 
-    my $remaining = $self->{slurp_data__}{"$handle"}{data}; 
+    my $remaining = $slurp_data__{"$handle"}{data}; 
     $self->done_slurp_( $handle );
 
     if ( $remaining eq '' ) {
@@ -585,9 +589,9 @@ sub done_slurp_
 {
     my ( $self, $handle ) = @_;
 
-    delete $self->{slurp_data__}{"$handle"}{select};
-    delete $self->{slurp_data__}{"$handle"}{data};
-    delete $self->{slurp_data__}{"$handle"};
+    delete $slurp_data__{"$handle"}{select};
+    delete $slurp_data__{"$handle"}{data};
+    delete $slurp_data__{"$handle"};
 }
 
 # ---------------------------------------------------------------------------------------------
