@@ -11,23 +11,21 @@
 
 test:    ; @perl tests.pl
 
-# windows build the Windows installer
+# windows builds the Windows installer
 
 windows: ; @$(MAKE) -C ../windows
 
-# package builds a zip file containing the POPFile package
+# build a ZIPped up package of POPFile
 
-ZIPUP = wzzip -P $(POPFILEZIP) -a
-POPFILEZIP=popfile.zip
+popfile.zip: popfile.pl pix.gif black.gif insert.pl Classifier/*.pm POPFile/*.pm Proxy/*.pm manual/*.gif manual/*/*.html languages/*.msg skins/*.css skins/*.gif
+	rm -f $@
+	wzzip -r -P $@ -a $^
 
-package: 
-	rm -f $(POPFILEZIP)
-	@$(ZIPUP) popfile.pl pix.gif black.gif insert.pl
-	@$(ZIPUP) Classifier/*.pm POPFile/*.pm Proxy/*.pm
-	@$(ZIPUP) UI/HTML.pm
-	@$(ZIPUP) manual/*.gif manual/*.html -r
-	@$(ZIPUP) languages/*.msg
-	@$(ZIPUP) skins/*.css skins/*.gif
+# package builds a zip file containing the POPFile package and the windows
+# installer
+
+package: popfile.zip windows
+
 	
 	
 
