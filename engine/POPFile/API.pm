@@ -72,6 +72,7 @@ sub new
 sub get_session_key            { shift->{c}->get_session_key( @_ ); }
 sub release_session_key        { shift->{c}->release_session_key( @_ ); }
 sub classify                   { shift->{c}->classify( @_ ); }
+sub reclassify                 { shift->{c}->reclassify( @_ ); }
 sub is_pseudo_bucket           { shift->{c}->is_pseudo_bucket( @_ ); }
 sub is_bucket                  { shift->{c}->is_bucket( @_ ); }
 sub get_bucket_word_count      { shift->{c}->get_bucket_word_count( @_ ); }

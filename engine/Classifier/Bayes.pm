@@ -401,6 +401,7 @@ sub reclassified
     }
 }
 
+
 #----------------------------------------------------------------------------
 # cleanup_orphan_words__
 # Removes Words from (words) no longer associated with a bucket
@@ -447,6 +448,7 @@ sub get_color
 
 #----------------------------------------------------------------------------
 #
+
 # get_not_likely_
 #
 # Returns the probability of a word that doesn't appear
@@ -2546,6 +2548,54 @@ sub classify_and_modify
     }
 
     return ( $classification, $slot, $self->{magnet_used__} );
+}
+
+#----------------------------------------------------------------------------
+#
+# reclassify
+#
+# Called to inform the module about a reclassification from one bucket
+# to another
+#
+# session            Valid API session
+# messages           hash mapping message slots to new buckets
+#
+# Returns 0 if succesful, undef if there was an error
+#
+#----------------------------------------------------------------------------
+sub reclassify
+{
+
+    my ($self, $session, %messages ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    $self->log_( 0, "Performing some reclassification. " . scalar %messages );
+
+    my %work;
+    while ( my ( $slot, $newbucket ) = each %messages ) {
+        $self->log_(2, "Message $slot will be reclassified to $newbucket" );
+        push @{$work{$newbucket}},
+                $self->history_()->get_slot_file( $slot );
+        my @fields = $self->history_()->get_slot_fields( $slot);
+        my $bucket = $fields[8];
+        $self->classifier_()->reclassified(
+            $session, $bucket, $newbucket, 0 );
+        $self->history_()->change_slot_classification(
+                $slot, $newbucket, $session, 0);
+    }
+
+    # At this point the work hash maps the buckets to lists of
+    # files to reclassify, so run through them doing bulk updates
+
+    foreach my $newbucket (keys %work) {
+        $self->classifier_()->add_messages_to_bucket(
+            $session, $newbucket, @{$work{$newbucket}} );
+
+        $self->log_( 1, "Reclassified " . $#{$work{$newbucket}} . " messages to $newbucket" );
+    }
+    return 0;
 }
 
 #----------------------------------------------------------------------------

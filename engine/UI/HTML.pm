@@ -1760,32 +1760,32 @@ sub corpus_page
     push @buckets, @pseudos;
 
     # Check whether the user requested any changes to the per-bucket settings
-    
+
     if ( defined($self->{form_}{bucket_settings}) ) {
         my @parameters = qw/subject xtc xpl quarantine/;
         foreach my $bucket ( @buckets ) {
             foreach my $variable ( @parameters ) {
                 my $bucket_param = $self->get_bucket_parameter__( $bucket, $variable );
                 my $form_param = ( $self->{form_}{"${bucket}_$variable"} ) ? 1 : 0;
-                
+
                 if ( $form_param ne $bucket_param ) {
                     $self->set_bucket_parameter__( $bucket, $variable, $form_param );
                 }
             }
-        
+
             # Since color isn't coded binary and only used for non-pseudo buckets,
             # we have to handle it separately
             unless ( $self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) {
                 my $bucket_color = $self->get_bucket_parameter__( $bucket, 'color' );
                 my $form_color = $self->{form_}{"${bucket}_color"};
-                
+
                 if ( $form_color ne $bucket_color ) {
                     $self->set_bucket_parameter__( $bucket, 'color', $form_color );
                 }
             }
         }
     }
-    
+
     my @corpus_data;
     foreach my $bucket ( @buckets ) {
         my %row_data;
@@ -2099,29 +2099,13 @@ sub history_reclassify
             }
         }
 
-        my %work;
+        $self->classifier_()->reclassify( $self->{api_session__}, %messages );
 
         while ( my ( $slot, $newbucket ) = each %messages ) {
-            push @{$work{$newbucket}},
-                $self->history_()->get_slot_file( $slot );
-            my @fields = $self->history_()->get_slot_fields( $slot);
-            my $bucket = $fields[8];
-            $self->classifier_()->reclassified(
-                $self->{api_session__}, $bucket, $newbucket, 0 );
-            $self->history_()->change_slot_classification(
-                 $slot, $newbucket, $self->{api_session__}, 0);
             $self->{feedback}{$slot} = sprintf(
                  $self->{language__}{History_ChangedTo},
                  $self->classifier_()->get_bucket_color(
                      $self->{api_session__}, $newbucket ), $newbucket );
-        }
-
-        # At this point the work hash maps the buckets to lists of
-        # files to reclassify, so run through them doing bulk updates
-
-        foreach my $newbucket (keys %work) {
-            $self->classifier_()->add_messages_to_bucket(
-                $self->{api_session__}, $newbucket, @{$work{$newbucket}} );
         }
     }
 }
