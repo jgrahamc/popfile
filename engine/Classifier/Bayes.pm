@@ -915,10 +915,6 @@ sub upgrade_bucket__
 
     $self->create_bucket( $session, $bucket );
 
-    $self->set_bucket_parameter( $session, $bucket, 'subject',    0 );
-    $self->set_bucket_parameter( $session, $bucket, 'count',      0 );
-    $self->set_bucket_parameter( $session, $bucket, 'quarantine', 0 );
-
     if ( open PARAMS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/params" ) ) {
         while ( <PARAMS> )  {
             s/[\r\n]//g;
@@ -928,6 +924,20 @@ sub upgrade_bucket__
         }
         close PARAMS;
         unlink $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/params" );
+    }
+
+    # Pre v0.21.0 POPFile had GLOBAL parameters for subject modification,
+    # XTC and XPL insertion.  To make the upgrade as clean as possible 
+    # check these parameters so that if they were OFF we set the equivalent
+    # per bucket to off
+
+    foreach my $gl ( 'subject', 'xtc', 'xpl' ) {
+        $self->log_( "Checking deprecated parameter GLOBAL_$gl for $bucket\n" );
+        my $val = $self->{configuration__}->deprecated_parameter( "GLOBAL_$gl" ); 
+        if ( defined( $val ) && ( $val == 0 ) ) {
+            $self->log_( "GLOBAL_$gl is 0 for $bucket, overriding $gl\n" );
+            $self->set_bucket_parameter( $session, $bucket, $gl, 0 );
+        }
     }
 
     # See if there are magnets defined
@@ -1018,6 +1028,7 @@ sub upgrade_bucket__
             } else {
                 close WORDS;
                 $self->{db__}->rollback;
+                unlink $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" );
                 return 0;
 	    }
 
