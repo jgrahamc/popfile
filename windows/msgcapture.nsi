@@ -6,7 +6,7 @@
 #                    the need to display the console window (when the console window was
 #                    used by earlier installers it caused confusion amongst some users).
 #
-# Copyright (c) 2004  John Graham-Cumming
+# Copyright (c) 2004-2005  John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -93,7 +93,7 @@
   ; (two commonly used exceptions to this rule are 'IO_NL' and 'MB_NL')
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION             "0.0.57"
+  !define C_VERSION             "0.0.58"
 
   !define C_OUTFILE             "msgcapture.exe"
 
@@ -115,26 +115,6 @@
   !include "MUI.nsh"
 
 #--------------------------------------------------------------------------
-# Version Information settings (for the utility's EXE file)
-#--------------------------------------------------------------------------
-
-  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
-  ; representing the following values: Major.Minor.Release.Build
-
-  VIProductVersion                   "${C_VERSION}.0"
-
-  VIAddVersionKey "ProductName"      "PFI Message Capture Utility"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
-  VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription"  "PFI Message Capture Utility (0-99 sec timeout)"
-  VIAddVersionKey "FileVersion"      "${C_VERSION}"
-  VIAddVersionKey "OriginalFilename" "${C_OUTFILE}"
-
-  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
-
-#--------------------------------------------------------------------------
 # Include private library functions and macro definitions
 #--------------------------------------------------------------------------
 
@@ -143,6 +123,29 @@
   !define MSGCAPTURE
 
   !include "pfi-library.nsh"
+
+#--------------------------------------------------------------------------
+# Version Information settings (for the utility's EXE file)
+#--------------------------------------------------------------------------
+
+  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
+  ; representing the following values: Major.Minor.Release.Build
+
+  VIProductVersion                          "${C_VERSION}.0"
+
+  VIAddVersionKey "ProductName"             "PFI Message Capture Utility"
+  VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
+  VIAddVersionKey "CompanyName"             "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"         "PFI Message Capture Utility (0-99 sec timeout)"
+  VIAddVersionKey "FileVersion"             "${C_VERSION}"
+  VIAddVersionKey "OriginalFilename"        "${C_OUTFILE}"
+
+  VIAddVersionKey "Build Date/Time"         "${__DATE__} @ ${__TIME__}"
+  !ifdef C_PFI_LIBRARY_VERSION
+    VIAddVersionKey "Build Library Version" "${C_PFI_LIBRARY_VERSION}"
+  !endif
+  VIAddVersionKey "Build Script"            "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
 #--------------------------------------------------------------------------
 # User Registers (Global)

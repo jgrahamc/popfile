@@ -2,7 +2,7 @@
 #
 # stop_popfile.nsi --- A simple 'command-line' utility to shutdown POPFile silently.
 #
-# Copyright (c) 2003-2004 John Graham-Cumming
+# Copyright (c) 2003-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -89,11 +89,15 @@
   ;
   ; ${IO_NL} is used for InstallOptions-style 'new line' sequences.
   ; ${MB_NL} is used for MessageBox-style 'new line' sequences.
+  ;
+  ; (these two constants do not follow the 'C_' naming convention described below)
   ;--------------------------------------------------------------------------
 
-  !define IO_NL     "\r\n"
-  !define MB_NL     "$\r$\n"
+  !define IO_NL   "\r\n"
+  !define MB_NL   "$\r$\n"
 
+  ;--------------------------------------------------------------------------
+  ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
   ; The default NSIS caption is "Name Setup" so we override it here
@@ -101,11 +105,13 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define C_VERSION   "0.5.9"       ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION     "0.5.10"       ; see 'VIProductVersion' comment below for format details
+
+  !define C_OUTFILE     "stop_pf.exe"
 
   ; Specify EXE filename and icon for the 'installer'
 
-  OutFile stop_pf.exe
+  OutFile "${C_OUTFILE}"
 
   Icon "shutdown.ico"
 
@@ -126,26 +132,6 @@
   !define C_DLGAP                    2000
 
 #--------------------------------------------------------------------------
-
-  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
-  ; representing the following values: Major.Minor.Release.Build
-
-  VIProductVersion                   "${C_VERSION}.1"
-
-  VIAddVersionKey "ProductName"      "POPFile Silent Shutdown Utility - stops POPFile without \
-                                     opening a browser window."
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
-  VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription"  "POPFile Silent Shutdown Utility"
-  VIAddVersionKey "FileVersion"      "${C_VERSION}"
-
-  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
-
-#----------------------------------------------------------------------------------------
-
-#--------------------------------------------------------------------------
 # Include private library functions and macro definitions
 #--------------------------------------------------------------------------
 
@@ -154,6 +140,30 @@
   !define STOP_POPFILE
 
   !include "pfi-library.nsh"
+
+#--------------------------------------------------------------------------
+
+  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
+  ; representing the following values: Major.Minor.Release.Build
+
+  VIProductVersion                          "${C_VERSION}.0"
+
+  VIAddVersionKey "ProductName"             "POPFile Silent Shutdown Utility - stops POPFile without \
+                                            opening a browser window."
+  VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
+  VIAddVersionKey "CompanyName"             "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"         "POPFile Silent Shutdown Utility"
+  VIAddVersionKey "FileVersion"             "${C_VERSION}"
+  VIAddVersionKey "OriginalFilename"        "${C_OUTFILE}"
+
+  VIAddVersionKey "Build Date/Time"         "${__DATE__} @ ${__TIME__}"
+  !ifdef C_PFI_LIBRARY_VERSION
+    VIAddVersionKey "Build Library Version" "${C_PFI_LIBRARY_VERSION}"
+  !endif
+  VIAddVersionKey "Build Script"            "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
+
+#----------------------------------------------------------------------------------------
 
 ;-------------------
 ; Section: Shutdown

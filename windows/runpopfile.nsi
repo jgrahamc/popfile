@@ -10,7 +10,7 @@
 #                    Capture utility (if it is available) whenever the 'windows-console'
 #                    mode is selected in 'popfile.cfg'.
 #
-# Copyright (c) 2004 John Graham-Cumming
+# Copyright (c) 2004-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -78,21 +78,27 @@
   ;
   ; ${IO_NL} is used for InstallOptions-style 'new line' sequences.
   ; ${MB_NL} is used for MessageBox-style 'new line' sequences.
+  ;
+  ; (these two constants do not follow the 'C_' naming convention described below)
   ;--------------------------------------------------------------------------
 
-  !define IO_NL     "\r\n"
-  !define MB_NL     "$\r$\n"
+  !define IO_NL   "\r\n"
+  !define MB_NL   "$\r$\n"
 
   ;--------------------------------------------------------------------------
+  ; POPFile constants have been given names beginning with 'C_' (eg C_README)
+  ;--------------------------------------------------------------------------
 
-  !define C_PFI_VERSION   0.1.13
+  !define C_PFI_VERSION   "0.1.14"
+
+  !define C_OUTFILE       "runpopfile.exe"
 
   Name    "Run POPFile"
   Caption "Run POPFile (enhanced)"
 
   Icon "POPFileIcon\popfile.ico"
 
-  OutFile runpopfile.exe
+  OutFile "${C_OUTFILE}"
 
   ; 'Silent' installers run invisibly
 
@@ -109,25 +115,6 @@
   !include WinMessages.nsh
 
 #--------------------------------------------------------------------------
-# Version Information settings (for runpopfile.exe)
-#--------------------------------------------------------------------------
-
-  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
-  ; representing the following values: Major.Minor.Release.Build
-
-  VIProductVersion                  "${C_PFI_VERSION}.0"
-
-  VIAddVersionKey "ProductName"     "Run POPFile"
-  VIAddVersionKey "Comments"        "POPFile Homepage: http://getpopfile.org"
-  VIAddVersionKey "CompanyName"     "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"  "Copyright (c) 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription" "Enhanced front-end for POPFile starter program"
-  VIAddVersionKey "FileVersion"     "${C_PFI_VERSION}"
-
-  VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"    "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
-
-#--------------------------------------------------------------------------
 # Include private library functions and macro definitions
 #--------------------------------------------------------------------------
 
@@ -136,6 +123,29 @@
   !define RUNPOPFILE
 
   !include "pfi-library.nsh"
+
+#--------------------------------------------------------------------------
+# Version Information settings (for runpopfile.exe)
+#--------------------------------------------------------------------------
+
+  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
+  ; representing the following values: Major.Minor.Release.Build
+
+  VIProductVersion                          "${C_PFI_VERSION}.0"
+
+  VIAddVersionKey "ProductName"             "Run POPFile"
+  VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
+  VIAddVersionKey "CompanyName"             "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"         "Enhanced front-end for POPFile starter program"
+  VIAddVersionKey "FileVersion"             "${C_PFI_VERSION}"
+  VIAddVersionKey "OriginalFilename"        "${C_OUTFILE}"
+
+  VIAddVersionKey "Build Date/Time"         "${__DATE__} @ ${__TIME__}"
+  !ifdef C_PFI_LIBRARY_VERSION
+    VIAddVersionKey "Build Library Version" "${C_PFI_LIBRARY_VERSION}"
+  !endif
+  VIAddVersionKey "Build Script"            "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
 #--------------------------------------------------------------------------
 # Language strings used by the POPFile Windows installer

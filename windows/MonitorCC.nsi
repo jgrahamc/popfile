@@ -4,7 +4,7 @@
 #                   POPFile Windows installer when a flat-file or BerkeleyDB corpus
 #                   needs to be converted to the new SQL database format.
 #
-# Copyright (c) 2004 John Graham-Cumming
+# Copyright (c) 2004-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -93,9 +93,12 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
+
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.17"
+  !define C_PFI_VERSION  "0.1.18"
+
+  !define C_OUTFILE      "monitorcc.exe"
 
   ; Mention the version number in the window title
 
@@ -120,19 +123,23 @@
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion                   "${C_PFI_VERSION}.0"
+  VIProductVersion                          "${C_PFI_VERSION}.0"
 
-  VIAddVersionKey "ProductName"      "${C_PFI_PRODUCT}"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
-  VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription"  "POPFile Corpus Conversion Monitor"
-  VIAddVersionKey "FileVersion"      "${C_PFI_VERSION}"
+  VIAddVersionKey "ProductName"             "${C_PFI_PRODUCT}"
+  VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
+  VIAddVersionKey "CompanyName"             "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"         "POPFile Corpus Conversion Monitor"
+  VIAddVersionKey "FileVersion"             "${C_PFI_VERSION}"
+  VIAddVersionKey "OriginalFilename"        "${C_OUTFILE}"
 
-  VIAddVersionKey "Build"            "Multi-Language"
+  VIAddVersionKey "Build"                   "Multi-Language"
 
-  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Date/Time"         "${__DATE__} @ ${__TIME__}"
+  !ifdef C_PFI_LIBRARY_VERSION
+    VIAddVersionKey "Build Library Version" "${C_PFI_LIBRARY_VERSION}"
+  !endif
+  VIAddVersionKey "Build Script"            "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages
@@ -305,7 +312,7 @@
 
   ; Specify NSIS output filename
 
-  OutFile "monitorcc.exe"
+  OutFile "${C_OUTFILE}"
 
   ; Ensure CRC checking cannot be turned off using the /NCRC command-line switch
 

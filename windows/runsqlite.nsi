@@ -9,7 +9,7 @@
 #                   and sqlite3.exe for 3.x format files. This utility ensures the appropriate
 #                   utility is used to access the specified SQLite database file.
 #
-# Copyright (c) 2004  John Graham-Cumming
+# Copyright (c) 2004-2005  John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -58,7 +58,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.1"     ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.0.2"     ; see 'VIProductVersion' comment below for format details
   !define C_OUTFILE   "runsqlite.exe"
 
   ; The default NSIS caption is "Name Setup" so we override it here
@@ -77,26 +77,6 @@
   SilentInstall silent
 
 #--------------------------------------------------------------------------
-
-  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
-  ; representing the following values: Major.Minor.Release.Build
-
-  VIProductVersion                   "${C_VERSION}.1"
-
-  VIAddVersionKey "ProductName"      "Run SQLite 2.x/3.x utility to examine a POPFile database"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
-  VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription"  "Run SQLite Utility for POPFile"
-  VIAddVersionKey "FileVersion"      "${C_VERSION}"
-  VIAddVersionKey "OriginalFilename" "${C_OUTFILE}"
-
-  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
-
-#----------------------------------------------------------------------------------------
-
-#--------------------------------------------------------------------------
 # Include private library functions and macro definitions
 #--------------------------------------------------------------------------
 
@@ -105,6 +85,29 @@
   !define RUNSQLITE
 
   !include "pfi-library.nsh"
+
+#--------------------------------------------------------------------------
+
+  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
+  ; representing the following values: Major.Minor.Release.Build
+
+  VIProductVersion                          "${C_VERSION}.0"
+
+  VIAddVersionKey "ProductName"             "Run SQLite 2.x/3.x utility to examine a POPFile database"
+  VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
+  VIAddVersionKey "CompanyName"             "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"         "Run SQLite Utility for POPFile"
+  VIAddVersionKey "FileVersion"             "${C_VERSION}"
+  VIAddVersionKey "OriginalFilename"        "${C_OUTFILE}"
+
+  VIAddVersionKey "Build Date/Time"         "${__DATE__} @ ${__TIME__}"
+  !ifdef C_PFI_LIBRARY_VERSION
+    VIAddVersionKey "Build Library Version" "${C_PFI_LIBRARY_VERSION}"
+  !endif
+  VIAddVersionKey "Build Script"            "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
+
+#----------------------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
 # User Variables (Global)
