@@ -285,7 +285,7 @@ sub reserve_slot
             "insert into history ( userid, committed ) values ( 1, $r );" );
         if ( defined( $ok ) ) {
             last;
-	}
+        }
         $self->log_( 0, "Failed to insert $r" );
     }
 
@@ -393,22 +393,22 @@ sub commit_history__
         my $last;
 
         if ( open FILE, "<$file" ) {
-	    while ( <FILE> ) {
-	        if ( /^[\r\n]*$/ ) {
+            while ( <FILE> ) {
+                if ( /^[\r\n]*$/ ) {
                     last;
-	        }
+                }
 
                 if ( /^([^ \t]+):[ \t]*([^\r\n]+)/ ) {
                     $last = lc($1);
                     $header{$last} .= $2;
-		} else {
-		    if ( defined $last ) {
+                } else {
+                    if ( defined $last ) {
                         $header{$last} .= $_;
-		    }
+                    }
                 }
-	    }
+            }
             close FILE;
-	}
+        }
 
         my $hash = $self->get_message_hash( $header{'message-id'},
                                             $header{date},
@@ -421,12 +421,12 @@ sub commit_history__
         my @required = ( 'from', 'to', 'cc', 'subject' );
 
         foreach my $h (@required) {
-	    if ( !defined $header{$h} ) {
+            if ( !defined $header{$h} ) {
                 $header{$h} = '';
-	    }
+            }
 
             $header{$h} = $self->db__()->quote( $header{$h} );
-	}
+        }
 
         # If we do not have a date header then set the date to
         # 0 (start of the Unix epoch), otherwise parse the string
@@ -435,7 +435,7 @@ sub commit_history__
 
         if ( !defined( $header{date} ) ) {
             $header{date} = 0;
-	} else {
+        } else {
             $header{date} = str2time( $header{date} );
         }
 
@@ -673,7 +673,7 @@ sub start_query
             $self->{queries__}{$id}{count} = 0;
             $self->{queries__}{$id}{cache} = ();
             return $id
-	}
+        }
     }
 }
 
@@ -700,7 +700,7 @@ sub stop_query
         if ( $#{$self->{queries__}{$id}{cache}} !=
              $self->{queries__}{$id}{count} ) {
            $q->finish;
-	}
+        }
     }
 
     delete $self->{queries__}{$id};
@@ -770,10 +770,10 @@ sub set_query
         my $direction = defined($1)?'desc':'asc';
         if ( $sort eq 'bucket' ) {
             $sort = 'buckets.name';
-	} else {
+        } else {
             if ( $sort ne 'inserted' ) {
                 $sort = "hdr_$sort";
-	    }
+            }
         }
         $select .= " order by $sort $direction;";
     } else {
