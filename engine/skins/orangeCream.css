@@ -1,422 +1,559 @@
 body {
-  background-color: #FFFFFF;
-  border: none;
-  font-family: sans-serif;
-  color: black;
+    background-color: #FFFFFF;
+    border: none;
+    font-family: sans-serif;
+    color: black;
 }
 
-.shell, .shellTop {
+.shell{
     background-color: #ffffd0;
     border: 3px #ff9966 solid;
-	 color: black;
+    color: black;
+}
+
+.shellTop{
+    background-color: #ffffd0;
+    border: 3px #ff9966 solid;
+    color: black;
+    width: 90%;
+}
+
+.shellBottom{
+    background-color: #ffffd0;
+    border: 3px #ff9966 solid;
+    color: black;
+    width: 70%;
 }
 
 table.head {
-  background: #ffffd0;
-  width: 100%;
-  color: #986343;
+    background: #ffffd0;
+    width: 100%;
+    color: #986343;
   }
 
 td.head {
-  font-weight: bold;
-  font-size: 22pt;
+    font-weight: bold;
+    font-size: 90%;
 }
 
 .menu {
-  font-size: 1.4em;
-  font-weight: bold;
-  width: 100%;
+    font-size: 85%;
+    font-weight: bold;
+    width: 100%;
 }
 
 .menuIndent {
-	width: 8%;
+    width: 14%;
 }
 
 .menuSelected {
-  background-color: #ff9966;
-  color: #2244aa;
-  width: 14%;
+    background-color: #ffffd0;
+    color: #1122bb;
+    width: 12%;
+    font-size: 100%;
+    border-top: 3px #ff9966 solid;
+    border-left: 3px #ff9966 solid;
+    border-right: 3px #ff9966 solid;
 }
 
 .menuStandard {
-  background-color: #ffcc99;
-  color: #2244aa;
-  width: 14%;
+    background-color: #FAE1C8;
+    color: #1122bb;
+    width: 12%;
+    font-size: 100%;
+    border-top: 3px #F9E1C8 solid;
+    border-left: 3px #F9E1C8 solid;
+    border-right: 3px #F9E1C8 solid;
 }
 
-a.menuLink {
-	text-decoration: none;
-	background-color : transparent;
-	color: #2244aa;
+.menuStandard .menuLink {
+    text-decoration: none;
+    background-color : transparent;
+    color: #7E82A9;
+}
+
+.menuSelected .menuLink {
+    text-decoration: none;
+    background-color : transparent;
+    color: #E80000;
 }
 
 a.menuLink:hover {
-	background-color : transparent;
-	color: #ee2233;
-	text-decoration: none;
+    background-color : transparent;
+    color: #E80000;
+    text-decoration: none;
 }
 
 tr.rowEven {
     background-color: #FFFFd0;
-	 color: black;
+    color: black;
+    font-size: 80%;
 }
 
 tr.rowOdd {
     background-color: #ffcc99;
-	 color: black;
+    color: black;
+    font-size: 80%;
 }
 
 tr.rowHighlighted {
-	background-color: #000000 ;
-	color: #eeeeee ;
+    background-color: #000000 ;
+    color: #eeeeee ;
 }
 
 hr {
     color: gray; 
-	 background-color: transparent;
+    background-color: transparent;
 }
 
 table.settingsTable {
-	border: 1px solid Black;
+    border: 1px solid Black;
 }
 
 table.openMessageTable, table.lookupResultsTable {
-	border: 3px solid Black;
+    border: 3px solid Black;
 }
 
 td.settingsPanel {
-	border: 1px solid Black;
+    border: 1px solid Black;
 }
 
 td.openMessageCloser {
-	text-align: right;
+    text-align: right;
 }
 
 td.openMessageBody {
-	text-align: left;
+    text-align: left;
 }
 
 td.footerBody { 
-	text-align: center;
-	padding-left: 20%;
-	padding-right: 20%;
-	padding-top: 0.8em;
+    text-align: center;
+    padding-left: 20%;
+    padding-right: 20%;
+    padding-top: 0.8em;
+    font-size: 75%;
 }
 
 
 td.naked {
-	padding: 0px; 
-	margin: 0px; 
-	border: none
+    padding: 0px; 
+    margin: 0px; 
+    border: none
 }
 
 table.footer {
-	width: 100%;
+    width: 100%;
 }
 
 a.changeSettingLink {
-	background-color: transparent ;
-	color: #bb2211 ;
+    background-color: transparent ;
+    color: #bb2211 ;
 }
 
 a.changeSettingLink:hover {
-	background-color: transparent ;
-	color: #119922 ;
+    background-color: transparent ;
+    color: #119922 ;
 }
 
 a.removeLink {
-	background-color: transparent ;
-	color: #1122bb ;
+    background-color: transparent ;
+    color: #1122bb ;
 }
 
 a.removeLink:hover {
-	background-color: transparent ;
-	color: #ee2233 ;
+    background-color: transparent ;
+    color: #ee2233 ;
 }
 
 td.accuracy0to49 {
-	background-color: red;
-	color: black;
+    background-color: red;
+    color: black;
 }
 
 td.accuracy50to93 {
-	background-color: yellow;
-	color: black;
+    background-color: yellow;
+    color: black;
 }
 
 td.accuracy94to100 {
-	background-color: green;
-	color: black;
+    background-color: green;
+    color: black;
 }
 
 div.error01 {
-	background-color: transparent;
-	color: red;
-	font-size: larger;
+    background-color: transparent;
+    color: red;
+    font-size: larger;
 }
 
 div.error02 {
-	background-color: transparent;
-	color: red;
+    background-color: transparent;
+    color: red;
 }
 
 span.graphFont {
-	font-size: x-small;
+    font-size: 50%;
 }
 
 .historyLabel {
-	background-color: transparent;
-	color: #8c6866;
-	font-weight: bold;
+    background-color: transparent;
+    color: #754B4B;
+    font-size: 75%;    
+    font-weight: bold;
+    text-align: center;
 }
 
-a.historyLabel {
-	background-color: transparent;
-	color: #8c6866;
-	font-weight: bold;
+.historyLabel a{
+   text-decoration: none;
+   color: #754B4B;
+   background-color: transparent;
 }
 
-a.historyLabel:hover {
-	background-color: transparent;
-	color: #cc1144;
-	font-weight: bold;
+.historyLabel a:hover {
+    background-color: transparent;
+    color: #cc1144;
+}
+
+.historyLabel em {
+    font-style: normal;
+    background-color: transparent;
+    color: #cc1144;
+}
+
+.bucketsWidgetStateOn {
+    font-weight: bold;
+    background-color: transparent;
+    color: #434fa0;
+    font-size: 90%;
+}
+
+.bucketsWidgetStateOff {
+    font-weight: bold;
+    background-color: transparent;
+    color: #434fa0;
+    font-size: 90%;
 }
 
 .bucketsLabel {
-	background-color: transparent;
-	color: #8c6866;
-	font-weight: bold;
+    background-color: transparent;
+    color: #5E3C2F;
+    font-weight: bold;
+    font-size: 75%;
+    text-align: center;
 }
 
 .magnetsLabel {
-	background-color: transparent;
-	color: #8c6866;
-	font-weight: bold;
+    background-color: transparent;
+    color: #5E3C2F;
+    font-weight: bold;
+    font-size: 75%;
 }
 
 .securityLabel {
-	background-color: transparent;
-	color: #8c6866;
-	font-weight: bold;
+    background-color: transparent;
+    color: #5E3C2F;
+    font-weight: bold;
+    font-size: 75%;
 }
 
 .configurationLabel {
-	background-color: transparent;
-	color: #8c6866;
-	font-weight: bold;
+    background-color: transparent;
+    color: #5E3C2F;
+    font-weight: bold;
+    font-size: 75%;
+    text-align: left;
 }
-		
+
 .advancedLabel {
-	background-color: transparent;
-	color: #8c6866;
-	font-weight: bold;
+    background-color: transparent;
+    color: #5E3C2F;
+    font-weight: bold;
+    font-size: 75%;
 }
-		
+
 .passwordLabel {
-	background-color: transparent;
-	color: #8c6866;
-	font-weight: bold;
+    background-color: transparent;
+    color: #5E3C2F;
+    font-weight: bold;
+    font-size: 75%;
 }
 
 .sessionLabel {
-	background-color: transparent;
-	color: #8c6866;
-	font-weight: bold;
+    background-color: transparent;
+    color: #5E3C2F;
+    font-weight: bold;
+    font-size: 75%;
 }
 
 td.logo2menuSpace { 
-	height: 0.8em;
+    height: 0.8em;
 }
 
 a.messageLink {
-	background-color : transparent;
-	color: #3172b0;
+    background-color : transparent;
+    color: #3172b0;
 }
 
 a.messageLink:hover {
-	background-color : transparent;
-	color: #cc5566;
+    background-color : transparent;
+    color: #cc5566;
 }
 
 a.shutdownLink {
-	background-color : transparent;
-	color: #2244aa;
-	text-decoration: none;
-	font-size: 1.2em;
-	font-weight: bold;
+    background-color : transparent;
+    color: #775555;
+    text-decoration: none;
+    font-size: 70%;
+    font-weight: bold;
 }
 
 a.shutdownLink:hover {
-	background-color : transparent;
-	color: #22aa44;
-	text-decoration: none;
-	font-size: 1.2em;
-	font-weight: bold;
+    background-color : transparent;
+    color: #dd0000;
+    text-decoration: none;
 }
 
 a.bottomLink {
-	background-color : transparent;
-	color: #2244aa;
-	text-decoration: none;
+    text-decoration: none;
+    color: #000088;
+    background-color: transparent;
 }
 
 a.bottomLink:hover {
-	background-color : transparent;
-	color: #cc1144;
-	text-decoration: none;
+    background-color : transparent;
+    color: #cc1144;
+    text-decoration: none;
 }
 
 h2.password {
-	color: #3c4895;
-	background-color: transparent;
-	font-size: 1.6em;
+    color: #3c4895;
+    background-color: transparent;
+    font-size: 82%;
+    font-weight: bold;
 }
 
 h2.session {
-	color: #3c4895;
-	background-color: transparent;
-	font-size: 1.6em;
+    color: #3c4895;
+    background-color: transparent;
+    font-size: 82%;
+    font-weight: bold;
 }
 
 h2.history {
-	color: #3c4895;
-	background-color: transparent;
-	font-size: 1.6em;
+    color: #3c4895;
+    background-color: transparent;
+    font-size: 82%;
+    font-weight: bold;
 }
 
 h2.buckets {
-	color: #3c4895;
-	background-color: transparent;
-	font-size: 1.6em;
+    color: #3c4895;
+    background-color: transparent;
+    font-size: 82%;
+    font-weight: bold;
 }
 
 h2.magnets {
-	color: #3c4895;
-	background-color: transparent;
-	font-size: 1.6em;
+    color: #3c4895;
+    background-color: transparent;
+    font-size: 82%;
+    font-weight: bold;
 }
 
 h2.configuration {
-	color: #3c4895;
-	background-color: transparent;
-	font-size: 1.6em;
+    color: #3c4895;
+    background-color: transparent;
+    font-size: 82%;
+    font-weight: bold;
 }
 
 h2.security {
-	color: #3c4895;
-	background-color: transparent;
-	font-size: 1.6em;
+    color: #3c4895;
+    background-color: transparent;
+    font-size: 82%;
+    font-weight: bold;
 }
 
 div.bucketsMaintenanceWidget {
-	padding-left: 5%;
+    padding-left: 5%;
 }
 
 div.bucketsLookupWidget {
-	padding-left: 5%;
+    padding-left: 5%;
 }
 
 div.magnetsNewWidget {
-	padding-left: 30%;
+    padding-left: 30%;
 }
 
 span.bucketsWidgetState {
-	color: #222299;
-	background-color: transparent;
-	font-weight: bold;
+    color: #222299;
+    background-color: transparent;
+    font-weight: bold;
 }
 
 span.configWidgetState {
-	color: #49aF61;
-	background-color: transparent;
-	font-weight: bold;
+    color: #49aF61;
+    background-color: transparent;
+    font-weight: bold;
 }
 
-span.securityWidgetState {
-	color: #49aF61;
-	background-color: transparent;
-	margin-left: 1em;
-	font-weight: bold;
+span.securityWidgetStateOn {
+    color: #298841;
+    background-color: transparent;
+    margin-left: 1em;
+    font-weight: bold;
+    font-size: 75%;
+}
+
+span.securityWidgetStateOff {
+    color: #298841;
+    background-color: transparent;
+    margin-left: 1em;
+    font-weight: bold;
+    font-size: 75%;
 }
 
 div.securityPassWidget {
-	padding-left: 10%;
+    padding-left: 10%;
 }
 
 div.securityAuthWidgets {
-	padding-left: 36%;	
-	padding-bottom: 0.8em;
+    padding-left: 36%;    
+    padding-bottom: 0.8em;
 }
 
 div.securityExplanation { 
-	margin-left: 0.8em;  
-	margin-right: 0.7em;
-	margin-bottom: 0.8em;
-	}
+    margin-left: 0.8em;  
+    margin-right: 0.7em;
+    margin-bottom: 0.8em;
+    margin-top: 1.0em;
+    font-size: 75%;
+}
 
 h2.advanced {
-	color: #3c4895;
-	background-color: transparent;
-	font-size: 1.6em;
+    color: #3c4895;
+    background-color: transparent;
+    font-size: 82%;
+    font-weight: bold;
 }
 
-td.advancedAlphabet {
-	color: #309040;
-	background-color: transparent;
-	font-size: larger;
-	padding-left: 0.6em;
-}	
+.advancedAlphabet {
+    color: #309040;
+    background-color: transparent;
+    font-size: 90%;
+    padding-left: 0.6em;
+}    
 
-td.advancedAlphabetGroupSpacing {
-	color: #309040;
-	background-color: transparent;
-	font-size: larger;
-	padding-left: 0.6em;
-	padding-top: 1.0em;
-}	
+.advancedAlphabetGroupSpacing {
+    color: #309040;
+    background-color: transparent;
+    font-size: 90%;
+    padding-left: 0.6em;
+    padding-top: 1.0em;
+}    
 
-td.advancedWords {
-	padding-left: 0.6em;
+.advancedWords {
+    padding-left: 0.6em;
+    font-size: 80% ;
 }
 
-td.advancedWordsGroupSpacing {
-	padding-left: 0.6em;
-	padding-top: 1.2em;
-	}
+.advancedWordsGroupSpacing {
+    padding-left: 0.6em;
+    padding-top: 1.2em;
+    font-size: 80% ;
+}
 
-tr.advancedGroupSpacing { 
-	height: 2.5em;  
-	vertical-align: text-bottom;
-	padding-top: 1em;
+.advancedGroupSpacing { 
+    height: 2.5em;  
+    vertical-align: text-bottom;
+    padding-top: 1em;
   }
-	
+    
 
 div.advancedWidgets {
-	padding-left: 36%;	
-	padding-bottom: 1.0em;
+    padding-left: 36%;    
+    padding-bottom: 1.0em;
 }
 
-table.historyWidgetsTop {
-	width: 100%;
-	margin-left: 1.5em;
-	margin-top: 0.6em;
-	margin-bottom: 1.0em;
+.historyWidgetsTop {
+    width: 100%;
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 1.0em;
 }
 
-table.historyWidgetsBottom {
-	width: 100%;
-	margin-left: 1.5em;
-	margin-top: 1.0em;
+.historyWidgetsBottom {
+    width: 100%;
+    margin-left: 1.5em;
+    margin-top: 1.0em;
 }
 
 td.historyNavigatorTop {
-	text-align: right;
-	padding-right: 0.5em;
+    text-align: right;
+    padding-right: 0.5em;
 }
 
 td.historyNavigatorBottom {
-	text-align: right;
-	padding-right: 0.5em;
-	padding-bottom: 1.0em;
+    text-align: right;
+    padding-right: 0.5em;
+    padding-bottom: 1.0em;
+}
+
+.lineImg {
+    width: 0.1em;
+}
+
+.submit {
+    font-size: 70%;
+}
+
+input {
+    font-size: 70%;
+}
+
+select {
+    font-size: 70%;
+}
+
+.rowOdd select {
+    font-size: 80%;
+}
+
+.rowEven select {
+    font-size: 80%;
+}
+
+.reclassifyButton {
+    font-size: 80%;
+}
+
+.rowOdd .deleteButton {
+    font-size: 80%;
+}
+
+.rowEven .deleteButton {
+    font-size: 80%;
+}
+
+.configWidgetStateOn {
+    color: #298841;
+    background-color: transparent;
+    font-weight: bold;
+    font-size: 75%;
+}
+
+.configWidgetStateOff {
+    color: #298841;
+    background-color: transparent;
+    font-weight: bold;
+    font-size: 75%;
+}
+
+.magnetsTable caption {
+    font-size: 85%;
+    width: 100%;
+    text-align: left;
+    margin-bottom: 1.0em;
 }
 
