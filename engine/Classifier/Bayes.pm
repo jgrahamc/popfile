@@ -1548,12 +1548,6 @@ sub classify_and_modify
 
     close TEMP unless $nosave;
 
-    # Parse Japanese mail message with Kakasi
-
-    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
-        parse_with_kakasi( $self, $temp_file, $dcount, $mcount );
-    }
-
     # If we don't yet know the classification then stop the parser
     if ( $class eq '' ) {
         $self->{parser__}->stop_parse();
@@ -1562,7 +1556,17 @@ sub classify_and_modify
     # Do the text classification and update the counter for that bucket that we just downloaded
     # an email of that type
 
-    $classification = ($class ne '')?$class:$self->classify(undef);
+    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+
+        # Parse Japanese mail message with Kakasi
+
+        parse_with_kakasi( $self, $temp_file, $dcount, $mcount );
+
+        $classification = ($class ne '')?$class:$self->classify($temp_file);
+    } else {
+        $classification = ($class ne '')?$class:$self->classify(undef);
+    }
+
     my $modification = $self->config_( 'subject_mod_left' ) . $classification . $self->config_( 'subject_mod_right' );
 
     # Add the Subject line modification or the original line back again
