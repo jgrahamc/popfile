@@ -1,4 +1,5 @@
-# Copyright (c) 2001-2003 John Graham-Cumming
+MIME-Version: 1.0
+
 
 # Identify the language and character set used for the interface
 LanguageCode                            fi
@@ -47,6 +48,7 @@ Lookup                                  Etsi
 Word                                    Sana
 Count                                   M&auml;&auml;r&auml;
 Update                                  P&auml;ivit&auml;
+Refresh                                 Virkist&auml; t&auml;m&auml; sivu
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile hallinta
@@ -188,10 +190,11 @@ Magnet_Error3                           Uusi magneetti, '%s', luotu sankoon '%s'
 Magnet_CurrentMagnets                   T&auml;m&auml;nhetkiset magneetit
 Magnet_Message1                         Seuraavat magneetit aiheuttavat sen, ett&auml; viestit luokitellaan aina m&auml;&auml;riteltyyn sankoon.
 Magnet_CreateNew                        Luo uusi magneetti
-Magnet_Explanation                      On kolmenlaisia magneetteja:</b> <ul><li><b>L&auml;hett&auml;j&auml;n osoite tai nimi:</b> esimerkiksi &quot;erkki@esimerkki.fi&quot; yksitt&auml;ist&auml; osoitetta varten, <br />&quot;esimerkki.fi&quot; kaikkia niit&auml; varten, joiden osoite p&auml;&auml;ttyy &quot;esimerkki.fi&quot;, <br />&quot;Erkki Esimerkki&quot; yksitt&auml;ist&auml; henkil&ouml;&auml; varten ja &quot;Erkki&quot; kaikkia Erkkej&auml; varten</li><li><b>Vastaanottajan osoite tai nimi:</b> Samalla tavoin kuin l&auml;hett&auml;j&auml;magneettien kanssa, mutta vastaanottajien osoitteiden kanssa</li><li><b>Sanat aiheessa:</b> esimerkiksi &quot;heipparallaa&quot; kaikkia sellaisia viestej&auml; varten, joiden aiherivill&auml; on sana &quot;heipparallaa&quot;.</li></ul>
+Magnet_Explanation                      On olemassa seuraavanlaisia magneetteja:</b> <ul><li><b>L&auml;hett&auml;j&auml;n osoite tai nimi:</b> esimerkiksi &quot;erkki@esimerkki.fi&quot; yksitt&auml;ist&auml; osoitetta varten, <br />&quot;esimerkki.fi&quot; kaikkia niit&auml; varten, joiden osoite p&auml;&auml;ttyy &quot;esimerkki.fi&quot;, <br />&quot;Erkki Esimerkki&quot; yksitt&auml;ist&auml; henkil&ouml;&auml; varten ja &quot;Erkki&quot; kaikkia Erkkej&auml; varten</li><li><b>Vastaanottajan osoite tai nimi/Kopio:</b> Samalla tavoin kuin l&auml;hett&auml;j&auml;magneettien kanssa, mutta vastaanottajien/kopion saavien osoitteiden kanssa</li><li><b>Sanat aiheessa:</b> esimerkiksi &quot;heipparallaa&quot; kaikkia sellaisia viestej&auml; varten, joiden aiherivill&auml; on sana &quot;heipparallaa&quot;.</li></ul>
 Magnet_MagnetType                       Magneetin tyyppi
 Magnet_Value                            arvo
 Magnet_Always                           laitetaan aina sankoon
+Magnet_Jump                             Siirry sivulle
 
 Bucket_Error1                           Sangon nimess&auml; saa olla ainoastaan pieni&auml; kirjaimia a:sta z:aan, sek&auml; merkkej&auml; &quot;-&quot; ja &quot;_&quot;
 Bucket_Error2                           Sanko nimelt&auml; %s on jo olemassa
