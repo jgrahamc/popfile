@@ -1,10 +1,21 @@
-;
-; Copyright (c) 2001-2003 John Graham-Cumming
-;
-; Modified to work with NSIS v2.0b1
-!define MUI_PRODUCT "POPFile" 
-!define MUI_VERSION "0.18.1"
-!include "MUI.nsh"
+#--------------------------------------------------------------------------
+#
+# installer.nsi --- This is the NSIS script used to create the
+#                   Windows installer for POPFile. This script uses
+#                   two custom pages whose layouts are defined
+#                   in the files "ioA.ini" and "ioB.ini".
+#
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
+#--------------------------------------------------------------------------
+
+; Modified to work with NSIS 2.0b4 (CVS) or later
+
+#--------------------------------------------------------------------------
+
+  !define MUI_PRODUCT "POPFile"
+  !define MUI_VERSION "0.19.0 (CVS)"
+  !include "MUI.nsh"
 
 #----------------------------------------------------------------------------------------
 # CBP Configuration Data (leave lines commented-out if defaults are satisfactory)
@@ -27,71 +38,115 @@
 # Make the CBP package available
 #----------------------------------------------------------------------------------------
 
-!include CBP.nsh
+  !include CBP.nsh
 
-;--------------------------------
-;Configuration
-  
+#--------------------------------------------------------------------------
+# Installer Configuration
+#--------------------------------------------------------------------------
+
   !define MUI_WELCOMEPAGE
+  !define MUI_LICENSEPAGE
+  ; Select either "accept/do not accept" radio buttons or "accept" checkbox for the license page
+#    !define MUI_LICENSEPAGE_RADIOBUTTONS
+    !define MUI_LICENSEPAGE_CHECKBOX
   !define MUI_COMPONENTSPAGE
   !define MUI_DIRECTORYPAGE
+  ; Use a "leave" function to look for 'popfile.cfg' in the directory selected for this install
+    !define MUI_CUSTOMFUNCTION_DIRECTORY_LEAVE CheckExistingConfig
   !define MUI_ABORTWARNING
   !define MUI_FINISHPAGE
-  
+
   !define MUI_UNINSTALLER
   !define MUI_UNCONFIRMPAGE
-  
+
   !define MUI_CUSTOMPAGECOMMANDS
-  ; Support for 20 user variables is provided by NSIS. They recommend using
-  ; variables $0 to $9 as global variables and reserving $R0 to $R9 for
-  ; use as local variables.
-    
-  !define POP3     $0
-  !define GUI      $1
-  !define STARTUP  $2
-  !define CFG      $3
-  !define LNE      $4
-  !define CMPRE    $5
+
+#--------------------------------------------------------------------------
+# User Registers (Global)
+#--------------------------------------------------------------------------
+
+  ; NSIS provides 20 general purpose user registers:
+  ; (a) $0 to $9 are used as global registers
+  ; (b) $R0 to $R9 are used as local registers
+
+  !define POP3     $0   ; POP3 port (1-65535)
+  !define GUI      $1   ; GUI port (1-65535)
+  !define STARTUP  $2   ; automatic startup flag (1 = yes, 0 = no)
+  !define CFG      $3   ; general purpose file handle
+  
   !define OEID     $6
   !define ID       $7
   !define OEIDENT  $8
   !define ACCTID   $9
 
-  !insertmacro MUI_SYSTEM
-  
-  ;Language
-  !insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_WELCOME_INFO_TEXT "This wizard will guide you through the installation of ${MUI_PRODUCT}.\r\n\r\nIt is recommended that you close all other applications before starting Setup.\r\n\r\n"
+#--------------------------------------------------------------------------
+# Language
+#--------------------------------------------------------------------------
+
+  !insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_WELCOME_INFO_TEXT \
+      "This wizard will guide you through the installation of ${MUI_PRODUCT}.\r\n\r\n\
+      It is recommended that you close all other applications before starting Setup.\r\n\r\n"
   !insertmacro MUI_LANGUAGE "English"
 
-  ;General
+#--------------------------------------------------------------------------
+# General settings
+#--------------------------------------------------------------------------
+
+  ; Specify NSIS output filename
+
   OutFile "setup.exe"
+
+  ; Ensure CRC checking cannot be turned off using the command-line switch
+
+  CRCcheck Force
   
-  ;Install Options pages
-  
-    ;Header
-    LangString TEXT_IO_TITLE ${LANG_ENGLISH} "Install Options Page"
-    LangString TEXT_IO_SUBTITLE ${LANG_ENGLISH} "Options"
-  
-  ;Page order 
+  ; Data file for license page
+
+  LicenseData "..\engine\license"
+
+#--------------------------------------------------------------------------
+# Install Options page header text
+#--------------------------------------------------------------------------
+
+  LangString TEXT_IO_TITLE ${LANG_ENGLISH} "Install Options Page"
+  LangString TEXT_IO_SUBTITLE ${LANG_ENGLISH} "Options"
+
+#--------------------------------------------------------------------------
+# Define the Page order for the installer
+#--------------------------------------------------------------------------
+
   !insertmacro MUI_PAGECOMMAND_WELCOME
+  !insertmacro MUI_PAGECOMMAND_LICENSE
   !insertmacro MUI_PAGECOMMAND_COMPONENTS
   !insertmacro MUI_PAGECOMMAND_DIRECTORY
-  Page custom SetOptionsPage "" ": Options"
+  Page custom SetOptionsPage "CheckPortOptions" ": Options"
   !insertmacro MUI_PAGECOMMAND_INSTFILES
   !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS ": Create POPFile Buckets"
   Page custom SetOutlookOrOutlookExpressPage "" ": Configure Outlook Express"
   !insertmacro MUI_PAGECOMMAND_FINISH
 
-  ;Component-selection page
-    ;Descriptions
-    LangString DESC_SecPOPFile ${LANG_ENGLISH} "Installs the core files needed by POPFile, including a minimal version of Perl."
-    LangString DESC_SecSkins   ${LANG_ENGLISH} "Installs POPFile skins that allow you to change the look and feel of the POPFile user interface."
-    LangString DESC_SecLangs   ${LANG_ENGLISH} "Installs non-English language versions of the POPFile UI."
+#--------------------------------------------------------------------------
+# Component-selection page description text
+#--------------------------------------------------------------------------
 
-  ;Folder-selection page
+  LangString DESC_SecPOPFile ${LANG_ENGLISH} "Installs the core files needed by POPFile, \
+                                              including a minimal version of Perl."
+  LangString DESC_SecSkins   ${LANG_ENGLISH} "Installs POPFile skins that allow you to change \
+                                              the look and feel of the POPFile user interface."
+  LangString DESC_SecLangs   ${LANG_ENGLISH} "Installs non-English language versions of the \
+                                              POPFile UI."
+
+#--------------------------------------------------------------------------
+# Default Destination Folder
+#--------------------------------------------------------------------------
+
   InstallDir "$PROGRAMFILES\${MUI_PRODUCT}"
   InstallDirRegKey HKLM SOFTWARE\POPFile InstallLocation
-  
+
+#--------------------------------------------------------------------------
+# Reserve the files required by the installer (to improve performance)
+#--------------------------------------------------------------------------
+
   ;Things that need to be extracted on startup (keep these lines before any File command!)
   ;Only useful for BZIP2 compression
   ;Use ReserveFile for your own Install Options ini files too!
@@ -101,58 +156,30 @@
   ReserveFile "ioA.ini"
   ReserveFile "ioB.ini"
 
+#--------------------------------------------------------------------------
+# Initialise the installer
+#--------------------------------------------------------------------------
+
 Function .onInit
 
-  ; See if we can get the current pop3 and gui port
-  ; from an existing configuration
-  FileOpen  ${CFG} $INSTDIR\popfile.cfg r
-
-loop:
-  FileRead   ${CFG} ${LNE}
-  IfErrors done
-
-  StrCpy ${CMPRE} ${LNE} 5
-  StrCmp ${CMPRE} "port " got_port not_port   
-got_port:
-  StrCpy ${POP3} ${LNE} 5 5
-  goto loop
-  
-not_port:
-  StrCpy ${CMPRE} ${LNE} 8
-  StrCmp ${CMPRE} "ui_port " got_ui_port loop   
-got_ui_port:
-  StrCpy ${GUI} ${LNE} 5 8
-  
-  goto loop
-
-done:  
-  FileClose ${CFG}
-
-  ; If the POP3 port is undefined then default it to 110
-  StrCmp ${POP3} "" 0 skip_pop3_set 
-  StrCpy ${POP3} "110"
-skip_pop3_set:
-
-  ; If the GUI port is undefined then default it to 8080
-  StrCmp ${GUI} "" 0 skip_gui_set 
-  StrCpy ${GUI} "8080"
-skip_gui_set:
-
-  InitPluginsDir
-  File /oname=$PLUGINSDIR\ioA.ini ioA.ini
-  File /oname=$PLUGINSDIR\ioB.ini ioB.ini
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioA.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioB.ini"
 
 FunctionEnd
 
-;--------------------------------
-;Installer Sections
+#--------------------------------------------------------------------------
+# Installer Section: POPFile component
+#--------------------------------------------------------------------------
 
 Section "POPFile" SecPOPFile
+
   ; Make this section mandatory (i.e. it is always installed)
+
   SectionIn RO
 
   ; Retrieve the POP3 and GUI ports from the ini and get whether we install the
   ; POPFile run in the Startup group
+
   !insertmacro MUI_INSTALLOPTIONS_READ ${POP3}    "ioA.ini" "Field 2" "State"
   !insertmacro MUI_INSTALLOPTIONS_READ ${GUI}     "ioA.ini" "Field 4" "State"
   !insertmacro MUI_INSTALLOPTIONS_READ ${STARTUP} "ioA.ini" "Field 5" "State"
@@ -162,17 +189,44 @@ Section "POPFile" SecPOPFile
   ; Install the POPFile Core files
 
   SetOutPath $INSTDIR
+   
   File "..\engine\license"
   File "..\engine\v0.18.1.change"
   File "..\engine\*.pl"
   File "..\engine\pix.gif"
   File "..\engine\black.gif"
   
-  FileOpen  ${CFG} $INSTDIR\popfile.cfg a
+  IfFileExists "$INSTDIR\stopwords" stopwords_found
+  File "..\engine\stopwords"
+  Goto stopwords_done
+
+stopwords_found:
+  IfFileExists "$INSTDIR\stopwords.default" 0 use_other_name
+  MessageBox MB_YESNO "Copy of default 'stopwords' already exists ('stopwords.default').$\r$\n\
+      $\r$\nOK to overwrite this file?$\r$\n$\r$\n\
+      Click 'Yes' to overwrite, click 'No' to skip updating this file" IDNO stopwords_done
+  SetFileAttributes stopwords.default NORMAL
+      
+use_other_name:
+  File /oname=stopwords.default "..\engine\stopwords"
+
+stopwords_done:
+  FileOpen  ${CFG} $PLUGINSDIR\popfile.cfg a
   FileSeek  ${CFG} 0 END
-  FileWrite ${CFG} "port ${POP3}$\n"
-  FileWrite ${CFG} "ui_port ${GUI}$\n"
+  FileWrite ${CFG} "pop3_port ${POP3}$\r$\n"
+  FileWrite ${CFG} "html_port ${GUI}$\r$\n"
   FileClose ${CFG}
+  IfFileExists "$INSTDIR\popfile.cfg" 0 update_config
+  IfFileExists "$INSTDIR\popfile.cfg.bak" 0 make_cfg_backup
+  MessageBox MB_YESNO "Backup copy of 'popfile.cfg' already exists ('popfile.cfg.bak').$\r$\n\
+      $\r$\nOK to overwrite this file?$\r$\n$\r$\n\
+      Click 'Yes' to overwrite, click 'No' to skip making a backup copy" IDNO update_config
+  SetFileAttributes popfile.cfg.bak NORMAL
+make_cfg_backup:
+  CopyFiles $INSTDIR\popfile.cfg $INSTDIR\popfile.cfg.bak
+      
+update_config:
+  CopyFiles $PLUGINSDIR\popfile.cfg $INSTDIR\
 
   SetOutPath $INSTDIR\Classifier
   File "..\engine\Classifier\Bayes.pm"
@@ -180,11 +234,14 @@ Section "POPFile" SecPOPFile
   File "..\engine\Classifier\MailParse.pm"
   SetOutPath $INSTDIR\POPFile
   File "..\engine\POPFile\Logger.pm"
+  File "..\engine\POPFile\Module.pm"
   File "..\engine\POPFile\Configuration.pm"
   SetOutPath $INSTDIR\Proxy
+  File "..\engine\Proxy\Proxy.pm"
   File "..\engine\Proxy\POP3.pm"
   SetOutPath $INSTDIR\UI
   File "..\engine\UI\HTML.pm"
+  File "..\engine\UI\HTTP.pm"
 
   SetOutPath $INSTDIR\manual
   File "..\engine\manual\*.gif"
@@ -241,7 +298,7 @@ Section "POPFile" SecPOPFile
 
   SetOutPath $INSTDIR\auto\DynaLoader
   File "C:\Perl58\lib\auto\DynaLoader\*"
-  
+
   SetOutPath $INSTDIR\auto\File\Glob
   File "C:\Perl58\lib\auto\File\Glob\*"
 
@@ -286,23 +343,39 @@ Section "POPFile" SecPOPFile
   WriteINIStr "$SMPROGRAMS\POPFile\Manual.url" \
               "InternetShortcut" "URL" "file://$INSTDIR/manual/en/manual.html"
   WriteINIStr "$SMPROGRAMS\POPFile\FAQ.url" \
-              "InternetShortcut" "URL" "http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137"
+              "InternetShortcut" "URL" \
+              "http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137"
   SetOutPath $SMPROGRAMS\POPFile\Support
   WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
 
-  StrCmp ${STARTUP} "1" 0 skip_autostart_set 
+  StrCmp ${STARTUP} "1" 0 skip_autostart_set
       SetOutPath $SMSTARTUP
       SetOutPath $INSTDIR
       CreateShortCut "$SMSTARTUP\Run POPFile in background.lnk" \
                      "$INSTDIR\wperl.exe" popfile.pl
 skip_autostart_set:
-              
+
   SetOutPath $INSTDIR
-  Delete $INSTDIR\uninstall.exe 
+  Delete $INSTDIR\uninstall.exe
   WriteUninstaller $INSTDIR\uninstall.exe
+  
+  ; Create entry in the Control Panel's "Add/Remove Programs" list
+
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" \
+              "DisplayName" "${MUI_PRODUCT} ${MUI_VERSION}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" \
+              "UninstallString" "$INSTDIR\uninstall.exe"
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" \
+              "NoModify" "1"
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" \
+              "NoRepair" "1"
 
 SectionEnd
+
+#--------------------------------------------------------------------------
+# Installer Section: (optional) Skins component
+#--------------------------------------------------------------------------
 
 Section "Skins" SecSkins
 
@@ -316,6 +389,10 @@ Section "Skins" SecSkins
 
 SectionEnd
 
+#--------------------------------------------------------------------------
+# Installer Section: (optional) UI Languages component
+#--------------------------------------------------------------------------
+
 Section "Languages" SecLangs
 
   SetOutPath $INSTDIR\languages
@@ -323,35 +400,287 @@ Section "Languages" SecLangs
 
 SectionEnd
 
-;--------------------------------
-;Descriptions
+#--------------------------------------------------------------------------
+# Component-selection page descriptions
+#--------------------------------------------------------------------------
 
-!insertmacro MUI_FUNCTIONS_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile} $(DESC_SecPOPFile)
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins} $(DESC_SecSkins)
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs} $(DESC_SecLangs)
-!insertmacro MUI_FUNCTIONS_DESCRIPTION_END
+  !insertmacro MUI_FUNCTIONS_DESCRIPTION_BEGIN
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile} $(DESC_SecPOPFile)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins} $(DESC_SecSkins)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs} $(DESC_SecLangs)
+  !insertmacro MUI_FUNCTIONS_DESCRIPTION_END
 
-;--------------------------------
-;Installer Functions
+#--------------------------------------------------------------------------
+# Installer Function: CheckExistingConfig
+# (the "leave" function for the DIRECTORY selection page)
+#
+# This function is used to extract the POP3 and UI ports from the 'popfile.cfg'
+# configuration file (if any) in the directory used for this installation.
+#
+# As it is possible that there are multiple entries for these parameters in the file,
+# this function removes them all as it makes a new copy of the file. New port data
+# entries will be added to this copy and the original updated (and backed up) when
+# the "POPFile" section of the installer is executed.
+#--------------------------------------------------------------------------
 
-Function SetOptionsPage
-  !insertmacro MUI_HEADER_TEXT "POPFile Installation Options" "Leave these options unchanged unless you need to change them"
-  !insertmacro MUI_INSTALLOPTIONS_READ $R5 "ioA.ini" "Field 2" "ListItems"
-  StrCpy $R5 $R5|${POP3}
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioA.ini" "Field 2" "ListItems" $R5
-  !insertmacro MUI_INSTALLOPTIONS_READ $R5 "ioA.ini" "Field 4" "ListItems"
-  StrCpy $R5 $R5|${GUI}
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioA.ini" "Field 4" "ListItems" $R5
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioA.ini" "Field 2" "State" ${POP3}
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioA.ini" "Field 4" "State" ${GUI}
+Function CheckExistingConfig
 
-  Push $R0
-  InstallOptions::dialog $PLUGINSDIR\ioA.ini
-  Pop $R0
+  !define L_CLEANCFG  $R9     ; handle for "clean" copy
+  !define L_CMPRE     $R8     ; config param name
+  !define L_LNE       $R7     ; a line from popfile.cfg
+  !define L_OLDUI     $R6     ; used to hold old-style of GUI port
+  
+  StrCpy ${POP3} ""
+  StrCpy ${GUI} ""
+  StrCpy ${L_OLDUI} ""
+
+  ; See if we can get the current pop3 and gui port from an existing configuration.
+  ; There may be more than one entry for these ports in the file - use the last one found
+  ; (but give priority to any "html_port" entry).
+
+  ClearErrors
+  
+  FileOpen  ${CFG} $INSTDIR\popfile.cfg r
+  FileOpen  ${L_CLEANCFG} $PLUGINSDIR\popfile.cfg w
+
+loop:
+  FileRead   ${CFG} ${L_LNE}
+  IfErrors done
+
+  StrCpy ${L_CMPRE} ${L_LNE} 5
+  StrCmp ${L_CMPRE} "port " got_port
+
+  StrCpy ${L_CMPRE} ${L_LNE} 10
+  StrCmp ${L_CMPRE} "pop3_port " got_pop3_port
+
+  StrCpy ${L_CMPRE} ${L_LNE} 8
+  StrCmp ${L_CMPRE} "ui_port " got_ui_port
+
+  StrCpy ${L_CMPRE} ${L_LNE} 10
+  StrCmp ${L_CMPRE} "html_port " got_html_port
+  
+  FileWrite  ${L_CLEANCFG} ${L_LNE}
+  Goto loop
+  
+got_port:
+  StrCpy ${POP3} ${L_LNE} 5 5
+  Goto loop
+
+got_pop3_port:
+  StrCpy ${POP3} ${L_LNE} 5 10
+  Goto loop
+
+got_ui_port:
+  StrCpy ${L_OLDUI} ${L_LNE} 5 8
+  Goto loop
+
+got_html_port:
+  StrCpy ${GUI} ${L_LNE} 5 10
+  Goto loop
+
+done:
+  FileClose ${CFG}
+  FileClose ${L_CLEANCFG}
+  
+  ; The 'port' and 'pop3_port' settings are treated as equals so we use the last entry found.
+  ; If 'ui_port' and 'html_port' settings were found, we use the last 'html_port' we found.
+  
+  StrCmp ${GUI} "" 0 validity_checks
+  StrCpy ${GUI} ${L_OLDUI}
+
+validity_checks:
+  
+  ; check port values (config file may have no port data or invalid port data)
+
+  StrCmp ${POP3} ${GUI} 0 ports_differ
+  
+  ; Config file has no port data or same port used for POP3 and GUI
+  ; (i.e. the data is not valid), so use POPFile defaults
+
+  StrCpy ${POP3} "110"
+  StrCpy ${GUI} "8080"
+  Goto ports_ok
+
+ports_differ:
+  Push ${POP3}
+  Call TrimNewlines
+  Pop ${POP3}
+
+  Push ${GUI}
+  Call TrimNewlines
+  Pop ${GUI}
+  
+  StrCmp ${POP3} "" default_pop3
+  Push ${POP3}
+  Call StrCheckDecimal
+  Pop ${POP3}
+  StrCmp ${POP3} "" default_pop3
+  IntCmp ${POP3} 1 pop3_ok default_pop3
+  IntCmp ${POP3} 65535 pop3_ok pop3_ok
+
+default_pop3:
+  StrCpy ${POP3} "110"
+  StrCmp ${POP3} ${GUI} 0 pop3_ok
+  StrCpy ${POP3} "111"
+
+pop3_ok:
+  StrCmp ${GUI} "" default_gui
+  Push ${GUI}
+  Call StrCheckDecimal
+  Pop ${GUI}
+  StrCmp ${GUI} "" default_gui
+  IntCmp ${GUI} 1 ports_ok default_gui
+  IntCmp ${GUI} 65535 ports_ok ports_ok
+
+default_gui:
+  StrCpy ${GUI} "8080"
+  StrCmp ${POP3} ${GUI} 0 ports_ok
+  StrCpy ${GUI} "8081"
+
+ports_ok:
+
+  !undef L_CLEANCFG
+  !undef L_CMPRE
+  !undef L_LNE
+  !undef L_OLDUI
+
 FunctionEnd
 
-; This function is used to reconfigure Outlook Express accounts
+#--------------------------------------------------------------------------
+# Installer Function: SetOptionsPage (generates a custom page)
+#
+# This function is used to configure the POP3 and UI ports, and
+# whether or not POPFile should be started automatically.
+#
+# A "leave" function (CheckPortOptions) is used to validate the port
+# selections made by the user.
+#--------------------------------------------------------------------------
+
+Function SetOptionsPage
+
+  !define L_PORTLIST  $R9   ; combo box ports list
+  !define L_RESULT    $R8
+
+  ; The function "CheckExistingConfig" loads ${POP3} and ${GUI} with the settings found in
+  ; a previously installed "popfile.cfg" file or if no such file is found, it loads the
+  ; POPFile default values. Now we display these settings and allow the user to change them.
+
+  ; The POP3 and GUI port numbers must be in the range 1 to 65535 inclusive, and they
+  ; must be different. This function assumes that the values "CheckExistingConfig" has loaded
+  ; into ${POP3} and ${GUI} are valid.
+
+  !insertmacro MUI_HEADER_TEXT "POPFile Installation Options" \
+                               "Leave these options unchanged unless you need to change them"
+
+  ; If the POP3 (or GUI) port determined by "CheckExistingConfig" is not present in the list of
+  ; possible values for the POP3 (or GUI) combobox, add it to the end of the list.
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_PORTLIST} "ioA.ini" "Field 2" "ListItems"
+  Push |${L_PORTLIST}|
+  Push |${POP3}|
+  Call StrStr
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" 0 POP3_is_in_list
+  StrCpy ${L_PORTLIST} ${L_PORTLIST}|${POP3}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "ListItems" ${L_PORTLIST}
+
+POP3_is_in_list:
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_PORTLIST} "ioA.ini" "Field 4" "ListItems"
+  Push |${L_PORTLIST}|
+  Push |${GUI}|
+  Call StrStr
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" 0 GUI_is_in_list
+  StrCpy ${L_PORTLIST} ${L_PORTLIST}|${GUI}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "ListItems" ${L_PORTLIST}
+
+GUI_is_in_list:
+
+  ; If the StartUp folder contains a link to start POPFile automatically
+  ; then offer to keep this facility in place.
+
+  IfFileExists "$SMSTARTUP\Run POPFile in background.lnk" 0 show_defaults
+    !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 5" "State" 1
+
+show_defaults:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "State" ${POP3}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "State" ${GUI}
+
+  ; Now display the custom page and wait for the user to make their selections.
+  ; The function "CheckPortOptions" will check the validity of the selections
+  ; and refuse to proceed until suitable ports have been chosen.
+  
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioA.ini"
+
+  !undef L_PORTLIST
+  !undef L_RESULT
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckPortOptions
+# (the "leave" function for the custom page created by "SetOptionsPage")
+#
+# This function is used to validate the POP3 and UI ports selected by the user.
+# If the selections are not valid, user is asked to select alternative values.
+#--------------------------------------------------------------------------
+
+Function CheckPortOptions
+
+  !define L_RESULT    $R9
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${POP3} "ioA.ini" "Field 2" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${GUI} "ioA.ini" "Field 4" "State"
+
+  StrCmp ${POP3} ${GUI} ports_must_differ
+  Push ${POP3}
+  Call StrCheckDecimal
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" bad_pop3
+  IntCmp ${POP3} 1 pop3_ok bad_pop3
+  IntCmp ${POP3} 65535 pop3_ok pop3_ok
+
+bad_pop3:
+  MessageBox MB_OK "The POP3 port cannot be set to $\"${POP3}$\".$\n$\n\
+      The port must be a number in the range 1 to 65535.$\n$\n\
+      Please change your POP3 port selection."
+  Goto bad_exit
+
+pop3_ok:
+  Push ${GUI}
+  Call StrCheckDecimal
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" bad_gui
+  IntCmp ${GUI} 1 good_exit bad_gui
+  IntCmp ${GUI} 65535 good_exit good_exit
+
+bad_gui:
+  MessageBox MB_OK "The 'User Interface' port cannot be set to $\"${GUI}$\".$\n$\n\
+      The port must be a number in the range 1 to 65535.$\n$\n\
+      Please change your 'User Interface' port selection."
+  Goto bad_exit
+
+ports_must_differ:
+  MessageBox MB_OK "The POP3 port must be different from the 'User Interface' port.$\n$\n\
+      Please change your port selections."
+  Goto bad_exit
+
+bad_exit:
+  ; Stay with the custom page created by "SetOptionsPage"
+  Abort
+  
+good_exit:
+  ; Allow next page in the installation sequence to be shown
+  
+  !undef L_RESULT
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: SetOutlookOrOutlookExpressPage (generates a custom page)
+#
+# This function is used to reconfigure Outlook Express accounts
+#--------------------------------------------------------------------------
 
 Function SetOutlookOrOutlookExpressPage
 
@@ -390,8 +719,9 @@ next_id:
   EnumRegKey ${ID} HKCU "Identities" ${OEID}
   StrCmp ${ID} "" finished_oe
 
-  ; Check if this is the GUID for the first "Main Identity" created by OE as the
-  ; account data for this identity is stored separately from the other identities. 
+  ; Check if this is the GUID for the first "Main Identity" created by OE (i.e. the GUID has
+  ; an "Identity Ordinal" value of 1) as the account data for this identity is stored
+  ; separately from the other identities. 
 
   ReadRegDWORD $R4 HKCU "Identities\${ID}" "Identity Ordinal"
   StrCmp $R4 "1" firstID otherID
@@ -420,7 +750,8 @@ next_acct:
   StrCmp $R6 "" next_acct_increment
   StrCmp $R6 "127.0.0.1" next_acct_increment
 
-  !insertmacro MUI_HEADER_TEXT "Reconfigure Outlook Express" "POPFile can reconfigure Outlook Express for you"
+  !insertmacro MUI_HEADER_TEXT "Reconfigure Outlook Express" \
+      "POPFile can reconfigure Outlook Express for you"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 2" "State" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 8" "Text" $R6
 
@@ -436,9 +767,10 @@ next_acct:
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" $R6
   ReadRegStr $R6 HKCU $R5 "Account Name"
   StrCpy $R6 $\"$R6$\"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 10" "Text" "$R6 account for the $R7 identity"
-  Push $R0
-  InstallOptions::dialog $PLUGINSDIR\ioB.ini
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 10" "Text" \
+      "$R6 account for the $R7 identity"
+  
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY_RETURN "ioB.ini"
   Pop $R0
   
   StrCmp $R0 "cancel" finished_this_id
@@ -486,36 +818,177 @@ finished_oe:
 
 FunctionEnd
 
-; TrimNewlines
-; input, top of stack  (e.g. whatever$\r$\n)
-; output, top of stack (replaces, with e.g. whatever)
-; modifies no other variables.
+#--------------------------------------------------------------------------
+# Installer Function: StrStr
+#
+# Search for matching string
+#
+# Inputs:
+#         (top of stack)     - the string to be found (needle)
+#         (top of stack - 1) - the string to be searched (haystack)
+# Outputs:
+#         (top of stack)     - string starting with the match, if any
+#
+#  Usage:
+#    Push "this is a long string"
+#    Push "long"
+#    Call StrStr
+#    Pop $R0
+#   ($R0 at this point is "long string")
+#
+#--------------------------------------------------------------------------
 
-Function un.TrimNewlines
+Function StrStr
+  Exch $R1    ; Make $R1 the "needle", Top of stack = old$R1, haystack
+  Exch        ; Top of stack = haystack, old$R1
+  Exch $R2    ; Make $R2 the "haystack", Top of stack = old$R2, old$R1
+
+  Push $R3    ; Length of the needle
+  Push $R4    ; Counter
+  Push $R5    ; Temp
+
+  StrLen $R3 $R1
+  StrCpy $R4 0
+
+loop:
+  StrCpy $R5 $R2 $R3 $R4
+  StrCmp $R5 $R1 done
+  StrCmp $R5 "" done
+  IntOp $R4 $R4 + 1
+  Goto loop
+
+done:
+  StrCpy $R1 $R2 "" $R4
+
+  Pop $R5
+  Pop $R4
+  Pop $R3
+
+  Pop $R2
+  Exch $R1
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: StrCheckDecimal
+#
+# Checks that a given string contains only the digits 0 to 9.
+# (if string contains any invalid characters, "" is returned)
+#
+# Inputs:
+#         (top of stack)   - string which may contain a decimal number
+#
+# Outputs:
+#         (top of stack)   - the input string (if valid) or "" (if invalid)
+#
+# Usage:
+#         Push "12345"
+#         Call StrCheckDecimal
+#         Pop $R0
+#         ($R0 at this point is "12345")
+#
+#--------------------------------------------------------------------------
+
+Function StrCheckDecimal
+
+  Exch $0   ; Original string
+  Push $1   ; Final string
+  Push $2   ; Current character
+  Push $3   ; ASCII code of current char
+  Push $4   ; Char equiv of ASCII code in $3
+
+  StrCpy $1 ""
+  
+Loop:
+  StrCpy $2 $0 1    ; Get next character
+  StrCmp $2 "" Done
+  StrCpy $0 $0 "" 1
+  StrCpy $3 48      ; 48 = ASCII code for '0'
+
+Loop2:
+  IntFmt $4 %c $3   ; Get character from current ASCII code
+  StrCmp $2 $4 ValidChar
+  IntOp $3 $3 + 1
+  StrCmp $3 58 NotDigit Loop2 ; 58 = ASCII code one beyond '9'
+
+ValidChar:
+  StrCpy $1 $1$2    ; Append to the final string
+  Goto Loop
+
+NotDigit:
+  StrCpy $1 ""      ; Invalid char found so return empty string now
+
+Done:
+  StrCpy $0 $1      ; Return the final string
+  Pop $4
+  Pop $3
+  Pop $2
+  Pop $1
+  Exch $0
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Macro: TrimNewlines
+#
+# The installation process and the uninstall process both
+# use a function which trims newlines from lines of text.
+# This macro makes maintenance easier by ensuring that
+# both processes use identical functions, with the only
+# difference being their names.
+#--------------------------------------------------------------------------
+
+  ; input, top of stack  (e.g. whatever$\r$\n)
+  ; output, top of stack (replaces, with e.g. whatever)
+  ; modifies no other variables.
+
+!macro TrimNewlines UN
+  Function ${UN}TrimNewlines
     Exch $R0
     Push $R1
     Push $R2
     StrCpy $R1 0
-loop:
+
+  loop:
     IntOp $R1 $R1 - 1
     StrCpy $R2 $R0 1 $R1
     StrCmp $R2 "$\r" loop
     StrCmp $R2 "$\n" loop
     IntOp $R1 $R1 + 1
-
+    IntCmp $R1 0 no_trim_needed
     StrCpy $R0 $R0 $R1
+    
+  no_trim_needed:
     Pop $R2
     Pop $R1
     Exch $R0
-FunctionEnd
+  FunctionEnd
+!macroend
 
-;--------------------------------
-;Uninstaller Section
+#--------------------------------------------------------------------------
+# Installer Function: TrimNewlines
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro TrimNewlines ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: unTrimNewlines
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+!insertmacro TrimNewlines "un."
+
+#--------------------------------------------------------------------------
+# Uninstaller Section
+#--------------------------------------------------------------------------
 
 Section "Uninstall"
 
   IfFileExists $INSTDIR\popfile.pl skip_confirmation
-    MessageBox MB_YESNO "It does not appear that POPFile is installed in the directory '$INSTDIR'.$\r$\nContinue anyway (not recommended)" IDYES skip_confirmation
+    MessageBox MB_YESNO "It does not appear that POPFile is installed in the \
+        directory '$INSTDIR'.$\r$\nContinue anyway (not recommended)" IDYES skip_confirmation
     Abort "Uninstall aborted by user"
 skip_confirmation:
 
@@ -534,8 +1007,9 @@ skip_confirmation:
   Delete $INSTDIR\*.exe
   Delete $INSTDIR\*.dll
   Delete $INSTDIR\*.change
+  Delete $INSTDIR\license
   Delete $INSTDIR\popfile.cfg
-  
+
   ; Read the registry settings found in popfile.reg and restore them
   ; it there are any.   All are assumed to be in HKCU
   FileOpen ${CFG} $INSTDIR\popfile.reg r
@@ -556,13 +1030,13 @@ restore_loop:
   Call un.TrimNewlines
   Pop $R7
   IfErrors skip_registry_restore
-  WriteRegStr HKCU $R5 $R6 $R7 
-  goto restore_loop  
- 
+  WriteRegStr HKCU $R5 $R6 $R7
+  goto restore_loop
+
 skip_registry_restore:
   FileClose ${CFG}
-  Delete $INSTDIR\popfile.reg  
-  
+  Delete $INSTDIR\popfile.reg
+
   Delete $INSTDIR\Proxy\*.pm
   RMDir $INSTDIR\Proxy
   Delete $INSTDIR\UI\*.pm
@@ -611,22 +1085,22 @@ skip_registry_restore:
   RMDir $INSTDIR\File
   Delete $INSTDIR\warnings\*.*
   RMDir $INSTDIR\warnings
-  
-  Delete "$INSTDIR\modern.exe"
+
   Delete "$INSTDIR\Uninstall.exe"
 
   RMDir $INSTDIR
 
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}"
   DeleteRegKey HKLM SOFTWARE\POPFile
 
   ; if $INSTDIR was removed, skip these next ones
-  IfFileExists $INSTDIR 0 Removed 
+  IfFileExists $INSTDIR 0 Removed
     MessageBox MB_YESNO|MB_ICONQUESTION \
       "Do you want to remove all files in your POPFile directory? (If you have anything \
 you created that you want to keep, click No)" IDNO Removed
     Delete $INSTDIR\*.* ; this would be skipped if the user hits no
     RMDir /r $INSTDIR
-    IfFileExists $INSTDIR 0 Removed 
+    IfFileExists $INSTDIR 0 Removed
       MessageBox MB_OK|MB_ICONEXCLAMATION \
                  "Note: $INSTDIR could not be removed."
 Removed:
@@ -635,5 +1109,6 @@ Removed:
 
 SectionEnd
 
-;eof
-
+#--------------------------------------------------------------------------
+# End of 'installer.nsi'
+#--------------------------------------------------------------------------
