@@ -546,6 +546,10 @@
   ; Installer Page - Select installation Directory
   ;---------------------------------------------------
 
+  ; Use a "pre" function to look for a registry entry for an earlier version of POPFile
+
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE         "CheckForExistingLocation"
+
   ; Use a "leave" function to check for an existing 'popfile.pl' and to decide upon a suitable
   ; initial value for the user data folder (this initial value is used for the DIRECTORY page
   ; used to select 'User Data' location).
@@ -2284,6 +2288,27 @@ Function MinPerlRestructure
   !insertmacro MinPerlMove "Sys"
   !insertmacro MinPerlMove "Text"
   !insertmacro MinPerlMove "warnings"
+
+exit:
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckForExistingLocation
+# (the "pre" function for the POPFile Program DIRECTORY selection page)
+#
+# Set the initial value used by the POPFile Program DIRECTORY page to the location used by
+# the most recent 0.21.0 (or later version) or the location of any pre-0.21.0 installation.
+#--------------------------------------------------------------------------
+
+Function CheckForExistingLocation
+
+  ReadRegStr $INSTDIR HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
+  StrCmp $INSTDIR "" 0 exit
+  ReadRegStr $INSTDIR HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
+  StrCmp $INSTDIR "" 0 exit
+  ReadRegStr $INSTDIR HKLM "Software\POPFile" "InstallLocation"
+  StrCmp $INSTDIR "" 0 exit
+  StrCpy $INSTDIR "$PROGRAMFILES\${C_PFI_PRODUCT}"
 
 exit:
 FunctionEnd
