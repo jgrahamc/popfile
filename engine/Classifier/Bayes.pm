@@ -488,21 +488,23 @@ sub classify_file
 
     for my $bucket (sort keys %{$self->{magnets}})  {
         for my $type (sort keys %{$self->{magnets}{$bucket}}) {
-			$self->{parser}->{$type} =~ s/[@\$]/\./g;
+            
+			# You cannot use @ or $ inside a \Q\E regular expression and hence
+			# we have to change the $magnet and the text we are comparing against
+			# by changing the $ and @ signs to .
+			
+        	my $noattype;
+        	
+        	$noattype = $self->{parser}->{$type};
+        	$noattype =~ s/[@\$]/\./g;
 			
 			for my $magnet (sort keys %{$self->{magnets}{$bucket}{$type}}) {
-            
-            	# You cannot use @ or $ inside a \Q\E regular expression and hence
-            	# we have to change the $magnet so that we get @ and $ outside the
-            	# \Q\E strings.
             	my $regex;
+
             	$regex = $magnet;
             	$regex =~ s/[@\$]/\./g;
             	
-            	print "About to use regex $regex\n" if $self->{debug};
-            	
-                if ( $self->{parser}->{$type} =~ m/\Q$regex\E/i ) {
-	            	print "Magnet match $magnet ($regex) $self->{parser}->{$type}\n" if $self->{debug};
+                if ( $noattype =~ m/\Q$regex\E/i ) {
                     $self->{scores}        = "<b>Magnet Used</b><p>Classified to <font color=$self->{colors}{$bucket}>$bucket</font> because of magnet $type: $magnet";
                     $self->{magnet_used}   = 1;
                     $self->{magnet_detail} = "$type: $magnet";
