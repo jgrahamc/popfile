@@ -90,7 +90,7 @@ sub configure_item
 
     my $body;
 
-    # POP3 Listen Port widget
+    # Tray icon widget
     if ( $name eq 'windows_trayicon' ) {
         $body .= "<span class=\"configurationLabel\">$$language{Windows_TrayIcon}:</span><br />\n";
         $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";

@@ -99,6 +99,9 @@ Configuration_SMTPPort                  SMTP listen port
 Configuration_SMTPUpdate                Updated SMTP port to %s; this change will not take affect until you restart POPFile
 Configuration_NNTPPort                  NNTP listen port
 Configuration_NNTPUpdate                Updated NNTP port to %s; this change will not take affect until you restart POPFile
+Configuration_POPFork                   Allow concurrent POP3 connections
+Configuration_SMTPFork                  Allow concurrent SMTP connections
+Configuration_NNTPFork                  Allow concurrent NNTP connections
 Configuration_POP3Separator             POP3 host:port:user separator character
 Configuration_NNTPSeparator             NNTP host:port:user separator character
 Configuration_POP3SepUpdate             Updated POP3 separator to %s

@@ -70,8 +70,8 @@ sub initialize
 {
     my ( $self ) = @_;
 
-    # By default we do fork
-    $self->config_( 'force_fork', 1 );
+    # By default we don't fork on Windows
+    $self->config_( 'force_fork', ($^O eq 'MSWin32')?0:1 );
 
     # Default port for SMTP service
     $self->config_( 'port', 25 );
@@ -92,6 +92,10 @@ sub initialize
     $self->register_configuration_item_( 'configuration',
                                          'smtp_port',
                                          $self );
+
+    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
+                                         'smtp_force_fork',
+                                         $self );                      # PROFILE BLOCK STOP
 
     $self->register_configuration_item_( 'security',
                                          'smtp_local',
@@ -357,6 +361,26 @@ sub configure_item
         $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
     }
 
+    if ( $name eq 'smtp_force_fork' ) {
+        $body .= "<span class=\"configurationLabel\">$$language{Configuration_SMTPFork}:</span><br />\n";
+        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
+
+        if ( $self->config_( 'force_fork' ) == 0 ) {
+            $body .= "<form action=\"/configuration\">\n";
+            $body .= "<span class=\"securityWidgetStateOff\">$$language{No}</span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOn\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"smtp_force_fork\" value=\"1\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        } else {
+            $body .= "<form action=\"/configuration\">\n";
+            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOff\" name=\"toggle\" value=\"$$language{ChangeToNo}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"smtp_force_fork\" value=\"0\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        }
+        $body .= "</td></tr></table>\n";
+    }
+
     return $body;
 }
 
@@ -404,6 +428,12 @@ sub validate_item
             } else {
                 return "<blockquote><div class=\"error01\">$$language{Security_Error1}</div></blockquote>";
             }
+        }
+    }
+
+    if ( $name eq 'smtp_force_fork' ) {
+        if ( defined($$form{smtp_force_fork}) ) {
+            $self->config_( 'force_fork', $$form{smtp_force_fork} );
         }
     }
 

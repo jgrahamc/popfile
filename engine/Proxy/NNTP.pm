@@ -70,9 +70,9 @@ sub initialize
 {
     my ( $self ) = @_;
 
-    # By default we don't fork
+    # By default we don't fork on Windows
 
-    $self->config_( 'force_fork', 0 );
+    $self->config_( 'force_fork', ($^O eq 'MSWin32')?0:1 );
 
     # Default ports for NNTP service and the user interface
 
@@ -95,6 +95,10 @@ sub initialize
     $self->register_configuration_item_( 'configuration',
                                          'nntp_port',
                                          $self );
+
+    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
+                                         'nntp_force_fork',
+                                         $self );                      # PROFILE BLOCK STOP
 
     $self->register_configuration_item_( 'configuration',
                                          'nntp_separator',
@@ -392,6 +396,26 @@ sub configure_item
         $body .= "</td></tr></table>\n";
      }
 
+    if ( $name eq 'nntp_force_fork' ) {
+        $body .= "<span class=\"configurationLabel\">$$language{Configuration_NNTPFork}:</span><br />\n";
+        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
+
+        if ( $self->config_( 'force_fork' ) == 0 ) {
+            $body .= "<form action=\"/configuration\">\n";
+            $body .= "<span class=\"securityWidgetStateOff\">$$language{No}</span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOn\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"nntp_force_fork\" value=\"1\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        } else {
+            $body .= "<form action=\"/configuration\">\n";
+            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOff\" name=\"toggle\" value=\"$$language{ChangeToNo}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"nntp_force_fork\" value=\"0\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        }
+        $body .= "</td></tr></table>\n";
+    }
+
     return $body;
 }
 
@@ -435,6 +459,13 @@ sub validate_item
 
     if ( $name eq 'nntp_local' ) {
         $self->config_( 'local', $$form{nntp_local}-1 ) if ( defined($$form{nntp_local}) );
+    }
+
+
+    if ( $name eq 'nntp_force_fork' ) {
+        if ( defined($$form{nntp_force_fork}) ) {
+            $self->config_( 'force_fork', $$form{nntp_force_fork} );
+        }
     }
 
     return '';

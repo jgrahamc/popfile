@@ -70,8 +70,8 @@ sub initialize
 {
     my ( $self ) = @_;
 
-    # By default we don't fork
-    $self->config_( 'force_fork', 0 );
+    # By default we don't fork on Windows
+    $self->config_( 'force_fork', ($^O eq 'MSWin32')?0:1 );
 
     # Default ports for POP3 service and the user interface
     $self->config_( 'port', 110 );
@@ -101,6 +101,10 @@ sub initialize
 
     $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
                                          'pop3_separator',
+                                         $self );                      # PROFILE BLOCK STOP
+
+    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
+                                         'pop3_force_fork',
                                          $self );                      # PROFILE BLOCK STOP
 
     $self->register_configuration_item_( 'security',                   # PROFILE BLOCK START
@@ -573,6 +577,26 @@ sub configure_item
         $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
     }
 
+    if ( $name eq 'pop3_force_fork' ) {
+        $body .= "<span class=\"configurationLabel\">$$language{Configuration_POPFork}:</span><br />\n";
+        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
+
+        if ( $self->config_( 'force_fork' ) == 0 ) {
+            $body .= "<form action=\"/configuration\">\n";
+            $body .= "<span class=\"securityWidgetStateOff\">$$language{No}</span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOn\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"pop3_force_fork\" value=\"1\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        } else {
+            $body .= "<form action=\"/configuration\">\n";
+            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOff\" name=\"toggle\" value=\"$$language{ChangeToNo}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"pop3_force_fork\" value=\"0\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        }
+        $body .= "</td></tr></table>\n";
+    }
+
     return $body;
 }
 
@@ -631,6 +655,12 @@ sub validate_item
             } else {
                 return "<blockquote><div class=\"error01\">$$language{Security_Error1}</div></blockquote>";
             }
+        }
+    }
+
+    if ( $name eq 'pop3_force_fork' ) {
+        if ( defined($$form{pop3_force_fork}) ) {
+            $self->config_( 'force_fork', $$form{pop3_force_fork} );
         }
     }
 
