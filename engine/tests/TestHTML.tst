@@ -234,6 +234,12 @@ test_assert_equal( $h->url_encode_( '[' ), '%5b' );
 test_assert_equal( $h->url_encode_( '[]' ), '%5b%5d' );
 test_assert_equal( $h->url_encode_( '[foo]' ), '%5bfoo%5d' );
 
+$h->{language__}{Locale_Thousands} = ',';
+test_assert_equal( $h->pretty_number( 1234 ), '1,234' );
+$h->{language__}{Locale_Thousands} = '&nbsp;';
+test_assert_equal( $h->pretty_number( 1234 ), '1&nbsp;234' );
+$h->{language__}{Locale_Thousands} = '';
+
 sub forker
 {
     pipe my $reader, my $writer;
@@ -362,7 +368,7 @@ EOM
                     select( undef, undef, undef, 0.1 );
                     $mq->service();
                     $hi->service();
-                }   
+                }
                 print $uwriter "OK\n";
                 next;
             }
