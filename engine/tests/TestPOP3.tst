@@ -307,11 +307,35 @@ if ( $pid == 0 ) {
 } else {
 
     my $port = 9000 + int(rand(1000));
+
+    # This pipe is used to send signals to the child running
+    # the proxy to change its state, the following commands can
+    # be sent
+    #
+    # __QUIT      Causes the child to terminate proxy service and
+    #             exit
+    #
+    # __TOPTOO    Causes the child to enable the toptoo option in
+    #             the proxy
+    #
+    # __SECUREBAD Causes the child to define an incorrect secure
+    #             server
+    #
+    # __SECUREOK  Causes the child to define the correct secure
+    #             server
+
+    pipe my $dreader, my $dwriter;
+    pipe my $ureader, my $uwriter;
     my $pid2 = fork();
 
     if ( $pid2 == 0 ) {
 
         # CHILD THAT WILL RUN THE POP3 PROXY
+
+        close $dwriter;
+        close $ureader;
+
+        $uwriter->autoflush(1);
 
         my $p = new Proxy::POP3;
 
@@ -329,10 +353,29 @@ if ( $pid == 0 ) {
         $p->global_config_( 'timeout', 1 );
         $p->start();
 
-        my $now = time;
+        while ( 1 ) {
+            last if !$p->service();
 
-        while ( $p->service() && ( ( $now + 15 ) > time ) ) {
+            if ( pipeready( $dreader ) ) {
+                my $command = <$dreader>;
+
+print "[$command]\n";
+
+                if ( $command =~ /__QUIT/ ) {
+		    print $uwriter "OK\n";
+                    last;
+		}
+
+                if ( $command =~ /__TOPTOO/ ) {
+                    $p->config_( 'toptoo', 1 );
+		    print $uwriter "OK\n";
+                    next;
+		}
+	    }
 	}
+
+        close $dreader;
+        close $uwriter;
 
         my @kids = keys %{$p->{children__}};
         while ( $#kids >= 0 ) {
@@ -347,6 +390,10 @@ if ( $pid == 0 ) {
     } else {
 
         # PARENT THAT WILL SEND COMMAND TO THE PROXY
+
+        close $dreader;
+        close $uwriter;
+        $dwriter->autoflush(1);
 
         my $client = IO::Socket::INET->new(
                         Proto    => "tcp",
@@ -633,11 +680,194 @@ if ( $pid == 0 ) {
         test_assert( !defined( $usedtobe ) );
         test_assert_equal( $magnet, '' );
 
-        # TODO Test basic TOP capability with toptoo gets classification
-        # TODO Test RETR after TOP comes from cache
-        # TODO Test TOP after TOP comes from cache
-
         # Check that we echo the remote servers QUIT response
+
+        print $client "QUIT$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Bye$eol" );
+
+        close $client;
+
+        # Test basic TOP capability with toptoo gets classification
+
+        print $dwriter "__TOPTOO\n";
+        my $line = <$ureader>;
+        test_assert_equal( $line, "OK\n" );
+
+
+        my $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        my $result = <$client>;
+        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "USER 127.0.0.1:8110:gooduser$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Welcome gooduser$eol" );
+
+        $countdown = 2;
+        print $client "TOP 8 $countdown$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK " . ( -s $messages[7] ) . "$eol" );
+
+        $cam = $messages[7];
+        $cam =~ s/msg$/cam/;
+        test_assert( open FILE, "<$cam" );
+        $headers   = 1;
+        while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
+            $result = <$client>;
+            $result =~ s/popfile2=8/popfile0=0/;
+            test_assert_equal( $result, $line );
+            if ( $headers == 0 ) {
+                $countdown -= 1;
+	    }
+            if ( $line =~ /^[\r\n]+$/ ) {
+                $headers = 0;
+	    }
+	}
+        close FILE;
+
+        $result = <$client>;
+        test_assert_equal( $result, "$eol" );
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+
+        test_assert( -e 'messages/popfile2=8.msg' );
+        test_assert( -e 'messages/popfile2=8.cls' );
+
+        test_assert( open FILE, "<$messages[7]" );
+        test_assert( open HIST, "<messages/popfile2=8.msg" );
+        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+            $fl =~ s/[\r\n]//g;
+            $ml =~ s/[\r\n]//g;
+            test_assert_equal( $fl, $ml );
+	}
+        test_assert( eof(FILE) );
+        test_assert( eof(HIST) );
+        close FILE;
+        close HIST;
+
+        my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile2=8.msg' );
+        test_assert( !$reclassified );
+        test_assert_equal( $bucket, 'spam' );
+        test_assert( !defined( $usedtobe ) );
+        test_assert_equal( $magnet, '' );
+
+        # Test RETR after TOP comes from cache
+
+        print $client "RETR 8$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=8.msg' ) . " bytes from POPFile cache$eol" );
+
+        $cam = $messages[7];
+        $cam =~ s/msg$/cam/;
+        test_assert( open FILE, "<$cam" );
+        $headers   = 1;
+        while ( my $line = <FILE> ) {
+            $line =~ s/[\r\n]//g;
+            $result = <$client>;
+            $result =~ s/[\r\n]//g;
+            $result =~ s/popfile2=8/popfile0=0/;
+            test_assert_equal( $result, $line );
+	}
+        close FILE;
+
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+
+        # Test RETR after RETR returns cached copy
+
+        print $client "RETR 9$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK " . ( -s $messages[8] ) . "$eol" );
+        my $cam = $messages[8];
+        $cam =~ s/msg$/cam/;
+
+        test_assert( open FILE, "<$cam" );
+        while ( <FILE> ) {
+            my $line = $_;
+            $result = <$client>;
+            $result =~ s/popfile2=9/popfile0=0/;
+            test_assert_equal( $result, $line );
+	}
+        close FILE;
+
+        $result = <$client>;
+        test_assert_equal( $result, "$eol" );
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+
+        select( undef, undef, undef, 0.1 );
+
+        test_assert( -e 'messages/popfile2=9.msg' );
+        test_assert( -e 'messages/popfile2=9.cls' );
+
+        test_assert( open FILE, "<$messages[8]" );
+        test_assert( open HIST, "<messages/popfile2=9.msg" );
+        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+            $fl =~ s/[\r\n]//g;
+            $ml =~ s/[\r\n]//g;
+            test_assert_equal( $fl, $ml );
+	}
+        test_assert( eof(FILE) );
+        test_assert( eof(HIST) );
+        close FILE;
+        close HIST;
+
+        my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile2=9.msg' );
+        test_assert( !$reclassified );
+        test_assert_equal( $bucket, 'spam' );
+        test_assert( !defined( $usedtobe ) );
+        test_assert_equal( $magnet, '' );
+
+        print $client "RETR 9$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=9.msg' ) . " bytes from POPFile cache$eol" );
+
+        $cam = $messages[8];
+        $cam =~ s/msg$/cam/;
+        test_assert( open FILE, "<$cam" );
+        $headers   = 1;
+        while ( my $line = <FILE> ) {
+            $line =~ s/[\r\n]//g;
+            $result = <$client>;
+            $result =~ s/[\r\n]//g;
+            $result =~ s/popfile2=9/popfile0=0/;
+            test_assert_equal( $result, $line );
+	}
+        close FILE;
+
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+
+        # TODO Test RETR after TOP/RETR with correct CLS file
+
+        unlink( 'messages/popfile2=9.cls' );
+
+        print $client "RETR 9$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=9.msg' ) . " bytes from POPFile cache$eol" );
+
+        $cam = $messages[8];
+        $cam =~ s/msg$/cam/;
+        test_assert( open FILE, "<$cam" );
+        $headers   = 1;
+        while ( my $line = <FILE> ) {
+            $line =~ s/[\r\n]//g;
+            $result = <$client>;
+            $result =~ s/[\r\n]//g;
+            $result =~ s/popfile2=9/popfile0=0/;
+            test_assert_equal( $result, $line );
+	}
+        close FILE;
+
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
 
         print $client "QUIT$eol";
         $result = <$client>;
@@ -774,6 +1004,14 @@ if ( $pid == 0 ) {
         test_assert_equal( $result, "+OK Bye$eol" );
 
         close $client;
+
+        # Tell the proxy to die
+
+        print $dwriter "__QUIT\n";
+        $line = <$ureader>;
+        test_assert_equal( $line, "OK\n" );
+        close $dwriter;
+        close $ureader;
 
         while ( waitpid( $pid, &WNOHANG ) != $pid ) {
         }
