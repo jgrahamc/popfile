@@ -530,11 +530,9 @@ sub CORE_platform_
     my $platform = $^O;
 
     if ( -e $self->root_path__( "Platform/$platform.pm" ) ) {
-        print "\n         {core:" if $self->{debug__};
+        print "\n        platform:" if $self->{debug__};
 
-        $self->CORE_load_module( "Platform/$platform.pm",'core');
-
-        print "}" if $self->{debug__};
+        $self->CORE_load_module( "Platform/$platform.pm", 'platform' );
     }
 }
 
