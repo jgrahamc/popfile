@@ -491,6 +491,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO         "áÇ (áÇ ÊÚãá 'æÇÌåÉ ÇáãÓÊÎÏã' ÅÐÇ ßÇä POPFile ãÞÝá)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "ÔÛøá POPFile (Ýí äÇÝÐÉ)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "ÔÛøá POPFile Ýí ÇáÎáÝíÉ (ÈÏæä ÅÙåÇÑ äÇÝÐÉ)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Run POPFile (do not show system tray icon)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Run POPFile with system tray icon (default setting)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "ÈÚÏ ÊÔÛíá POPFile¡ íãßä ÚÑÖ 'æÇÌåÉ ÇáãÓÊÎÏã' Úä ØÑíÞ"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(Ã) ÖÛØ ãÒÏæÌ Úáì ÃíÞæäÉ POPFile Ýí ÔÑíØ ÇáãåÇã¡  Ãæ"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(È) ÅÓÊÚãÇá ÇÈÏÃ --> ÈÑÇãÌ --> POPFile --> POPFile User Interface."
