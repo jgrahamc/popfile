@@ -863,7 +863,7 @@ sub classify_and_modify
             if ( $self->{parameters}{$classification}{quarantine} == 1 ) {
                 print $client "From: $self->{parser}->{from}$eol";
                 print $client "To: $self->{parser}->{to}$eol";
-                print $client "Date: " . localtime() . $eol;
+                print $client "Date: $self->{parser}->{date}$eol";
                 print $client "Subject:$msg_subject$eol";
                 print $client "X-Text-Classification: $classification$eol" if ( $self->{configuration}->{configuration}{xtc} );
                 print $client 'X-POPFile-Link: ' . $xpl if ( $self->{configuration}->{configuration}{xpl} );

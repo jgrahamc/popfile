@@ -853,6 +853,8 @@ sub parse_stream
                         $prefix = 'subject';
                     }
 
+                    $self->{date} = $argument if ( $header =~ /^Date/i );
+
                     # Look for MIME 
                     
                     if ( $header =~ /^Content-Type/i ) { 
