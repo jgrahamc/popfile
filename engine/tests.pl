@@ -37,7 +37,7 @@ sub test_report
 	my ( $ok, $test, $file, $line, $context ) = @_;
 	
  	$test_count += 1;
- 	
+	
  	if ( !$ok ) {
  		$fail_messages .= "\n    $file:$line failed '$test'";
  		if ( defined( $context ) ) {
@@ -45,7 +45,7 @@ sub test_report
  		}
  		$test_failures += 1;
  	}
- 	
+	
  	flush STDOUT;
 }
 
@@ -122,8 +122,8 @@ foreach my $test (@tests) {
     if ( $test =~ /$pattern/ ) {
 
 	# This works by reading the entire suite into the $suite variable
-	# and then changing calls to test_assert_equal so that they include 
-	# the line number and the file they are from, then the $suite is 
+	# and then changing calls to test_assert_equal so that they include
+	# the line number and the file they are from, then the $suite is
 	# evaluated
 	my $current_test_count  = $test_count;
 	my $current_error_count = $test_failures;

@@ -8,11 +8,34 @@
 
 use Classifier::Bayes;
 use POPFile::Configuration;
+use POPFile::MQ;
+use POPFile::Logger;
 
 # Load the test corpus
 my $c = new POPFile::Configuration;
+my $mq = new POPFile::MQ;
+my $l = new POPFile::Logger;
 my $b = new Classifier::Bayes;
+
+$c->configuration( $c );
+$c->mq( $mq );
+$c->logger( $l );
+
+$l->configuration( $c );
+$l->mq( $mq );
+$l->logger( $l );
+
+$l->initialize();
+
+$mq->configuration( $c );
+$mq->mq( $mq );
+$mq->logger( $l );
+
 $b->configuration( $c );
+$b->mq( $mq );
+$b->logger( $l );
+
+
 $b->initialize();
 $b->config_( 'corpus', 'tests/corpus' );
 $b->start();

@@ -72,6 +72,12 @@ sub new
     $self->{htmlbodycolor__} = map_color( $self, 'white' );
     $self->{htmlfontcolor__} = map_color( $self, 'black' );
 
+    # This is the distance betwee the back color and the font color
+    # as computed using compute_rgb_distance
+
+    $self->{htmlcolordistance__} = 0;
+    compute_html_color_distance( $self );
+
     # This is a mapping between HTML color names and HTML hexadecimal color values used by the
     # map_color value to get canonical color values
 
@@ -110,6 +116,52 @@ sub new
     $self->{first20__}      = '';
 
     return bless $self, $type;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# compute_rgb_distance
+#
+# Given two RGB colors compute the distance between them by considering them as points
+# in 3 dimensions and calculating the distance between them (or equivalently the length
+# of a vector between them)
+#
+# $left          One color
+# $right         The other color
+#
+# ---------------------------------------------------------------------------------------------
+sub compute_rgb_distance
+{
+    my ( $self, $left, $right ) = @_;
+
+    # Figure out where the left color is and then subtract the right
+    # color (point from it) to get the vector
+
+    $left =~ /^(..)(..)(..)$/;
+    my ( $rl, $gl, $bl ) = ( hex($1), hex($2), hex($3) );
+
+    $right =~ /^(..)(..)(..)$/;
+    my ( $r, $g, $b ) = ( $rl - hex($1), $gl - hex($2), $bl - hex($3) );
+
+    # Now apply Pythagoras in 3D to get the distance between them, we return
+    # the int because we don't need decimal level accuracy
+
+    return int( sqrt( $r*$r + $g*$g + $b*$b ) );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# compute_html_color_distance
+#
+# Calls compute_rgb_distance to set up htmlcolordistance__ from the current HTML back and
+# font colors
+#
+# ---------------------------------------------------------------------------------------------
+sub compute_html_color_distance
+{
+    my ( $self ) = @_;
+    $self->{htmlcolordistance__} = compute_rgb_distance( $self->{htmlfontcolor__},
+                                                         $self->{htmlbackcolor__} );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -173,7 +225,6 @@ sub increment_word
 # $literal      The literal text that generated this pseudoword
 #
 # ---------------------------------------------------------------------------------------------
-
 sub update_pseudoword
 {
     my ( $self, $prefix, $word, $encoded, $literal ) = @_;
@@ -261,6 +312,19 @@ sub add_line
     # add words that are hidden inside invisible ink
 
     if ( $self->{htmlfontcolor__} ne $self->{htmlbackcolor__} ) {
+
+        # If we are adding a line and the colors are different then we will
+        # add a count for the color difference to make sure that we catch
+        # camouflage attacks using similar colors, if the color similarity
+        # is less than 100.  I chose 100 somewhat arbitrarily but classic
+        # black text on white background has a distance of 441, red/blue or
+        # green on white has distance 255.  100 seems like a reasonable upper
+        # bound for tracking evil spammer tricks with similar colors
+
+        if ( $self->{htmlcolordistance__} < 100 ) {
+            $self->update_pseudoword( 'html', "colordistance$self->{htmlcolordistance__}", $encoded, '' );
+	}
+
         while ( $p < length($bigline) ) {
             my $line = substr($bigline, $p, 1024);
 
@@ -387,6 +451,7 @@ sub update_tag
     if ( $end_tag ) {
         if ( $tag =~ /^font$/i ) {
             $self->{htmlfontcolor__} = map_color( $self, 'black' );
+            $self->compute_html_color_distance();
         }
 
 	# If we hit a table tag then any font information is lost
@@ -394,6 +459,7 @@ sub update_tag
 	if ( $tag =~ /^(table|td|tr|th)$/i ) {
 	    $self->{htmlfontcolor__} = map_color( $self, 'black' );
 	    $self->{htmlbackcolor__} = $self->{htmlbodycolor__};
+            $self->compute_html_color_distance();
 	}
 
         return;
@@ -525,6 +591,7 @@ sub update_tag
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
             $self->update_pseudoword( 'html', "fontcolor$value", $encoded, $original );
             $self->{htmlfontcolor__} = map_color($self, $value);
+            $self->compute_html_color_distance();
 			print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug} );
         }
 
@@ -532,6 +599,7 @@ sub update_tag
             $self->update_pseudoword( 'html', "fontcolor$value", $encoded, $original );
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
             $self->{htmlfontcolor__} = map_color($self, $value);
+            $self->compute_html_color_distance();
 			print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug} );
         }
 
@@ -557,6 +625,7 @@ sub update_tag
 			print "Set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug} );
 
             $self->{htmlbodycolor__} = $self->{htmlbackcolor__} if ( $tag =~ /^body$/i );
+            $self->compute_html_color_distance();
         }
 
         # Tags with a charset
@@ -896,6 +965,7 @@ sub parse_stream
 
     $self->{htmlbackcolor__} = map_color( $self, 'white' );
     $self->{htmlfontcolor__} = map_color( $self, 'black' );
+    $self->compute_html_color_distance();
 
     $self->{in_headers__} = 1;
 
