@@ -1567,21 +1567,38 @@ sub load_history_cache
         my $class_file = $history_files[$i];
         my $magnet     = '';
         $class_file =~ s/msg$/cls/;
-        open CLASS, "<messages/$class_file";
-        my $bucket = <CLASS>;
-        if ( $bucket =~ /([^ ]+) MAGNET (.+)/ ) {
-            $bucket = $1;
-            $magnet = $2;
+        
+        my $bucket;
+        my $reclassified;
+        
+        # Something may have happened to the class file, this avoids errors
+        if ( defined open CLASS, "<messages/$class_file" ) {
+            $bucket = <CLASS>;
+            if ( $bucket =~ /([^ ]+) MAGNET (.+)/ ) {
+                $bucket = $1;
+                $magnet = $2;
+            } else {
+                $magnet = '';
+            }
+        
+            $reclassified = 0;
+            if ( $bucket =~ /RECLASSIFIED/ ) {
+                $bucket       = <CLASS>;
+                $reclassified = 1;
+            }
+            close CLASS;
+            $bucket =~ s/[\r\n]//g;
         } else {
-            $magnet = '';
+            # This means the CLASS file failed to open -- we don't know what to do with this file
+            # Give it the "classfileerror" bucket for now
+            
+            $bucket = "classfileerror";
+            
+            # Another option is to reclassify the message immediately. This will be intensive.
+            
+            # A third option is to give the message the "unclassified" bucket.
+            
         }
-        my $reclassified = 0;
-        if ( $bucket =~ /RECLASSIFIED/ ) {
-            $bucket       = <CLASS>;
-            $reclassified = 1;
-        }
-        close CLASS;
-        $bucket =~ s/[\r\n]//g;
         
         if ( ( $filter eq '' ) || ( $bucket eq $filter ) || ( ( $filter eq '__filter__magnet' ) && ( $magnet ne '' ) ) ) {
             my $found = 1;
@@ -1751,18 +1768,44 @@ sub history_page
             print WORDS "$word $temp_words{$word}\n" if ( $temp_words{$word} > 0 );
         }
         close WORDS;
+        
         $self->{classifier}->load_bucket("$self->{configuration}->{configuration}{corpus}/$self->{form}{badbucket}");
-        $self->{classifier}->update_constants();        
-        my $classification = $self->{classifier}->classify_file("messages/$self->{form}{undo}");
+        $self->{classifier}->update_constants();
+        
         my $class_file = "messages/$self->{form}{undo}";
         $class_file =~ s/msg$/cls/;
+        
+        # Some forward declarations for scope
+        my $usedtobe;
+        my $classification;
+        
+        # Load the class file to compare the old classification
+        open CLASS, "<$class_file";        
+        # Discard this (eq RECLASSIFIED)
+        my $bucket = <CLASS>;
+        if ( defined $bucket && $bucket =~ /RECLASSIFIED/ ) {
+            # The bucket the message was reclassified to
+            $bucket = <CLASS>;
+            # The bucket the message was classified from
+            $usedtobe = <CLASS>;
+        }
+        close CLASS;
+        
+        # If the read failed, or file was unexpected, use information from the form to approximate
+        if ( !defined $bucket || $bucket ne $usedtobe ) {
+            # None of this is neccesary if the old and new buckets match
+            $classification = $usedtobe;
+            $self->{configuration}->{configuration}{ecount} -= 1 if ( $self->{configuration}->{configuration}{ecount} > 0 );
+            $self->{classifier}->{parameters}{$self->{form}{badbucket}}{count} -= 1;
+            $self->{classifier}->{parameters}{$classification}{count} += 1;
+            $self->{classifier}->write_parameters();
+        } else {
+            $classification = $bucket;
+        }      
+          
         open CLASS, ">$class_file";
         print CLASS "$classification$eol";
         close CLASS;
-
-        $self->{configuration}->{configuration}{ecount} -= 1 if ( $self->{configuration}->{configuration}{ecount} > 0 );
-        $self->{classifier}->{parameters}{$self->{form}{badbucket}}{count} -= 1; 
-        $self->{classifier}->write_parameters();
         
         $self->{history_invalid} = 1;
     }
@@ -1845,7 +1888,7 @@ sub history_page
         my $class_file = "messages/$self->{form}{file}";
         $class_file =~ s/msg$/cls/;
         open CLASS, ">$class_file";
-        print CLASS "RECLASSIFIED$eol$self->{form}{shouldbe}$eol";
+        print CLASS "RECLASSIFIED$eol$self->{form}{shouldbe}$eol$self->{form}{usedtobe}$eol";
         close CLASS;
         
         $self->{configuration}->{configuration}{ecount} += 1 if ( $self->{form}{shouldbe} ne $self->{form}{usedtobe} );
@@ -2019,7 +2062,7 @@ sub history_page
             if ( $reclassified )  {
                 $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font><td>" . sprintf( $self->{language}{History_Already}, $self->{classifier}->{colors}{$bucket}, $bucket ) . " - <a href=\"/history?undo=$mail_file&amp;session=$self->{session_key}&amp;badbucket=$bucket&amp;filter=$self->{form}{filter}&amp;start_message=$start_message#$mail_file\">[$self->{language}{Undo}]</a>";
             } else {
-                if ( $bucket eq 'unclassified' )  {
+                if ( $bucket eq 'unclassified' || !defined $self->{classifier}->{colors}{$bucket})  {
                     $body .= "$bucket<td>";
                 } else {
                     $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font><td>";
