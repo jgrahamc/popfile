@@ -232,10 +232,10 @@ Security_PasswordTitle                  Paßwort für Benutzeroberfläche
 Security_Password                       Paßwort
 Security_PasswordUpdate                 Passwort geändert
 Security_AUTHTitle                      externe Server
-Security_SecureServer                   POP3 SPA/AUTH Server
-Security_SecureServerUpdate             Neuer POP3 SPA/AUTH Server: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
-Security_SecurePort                     POP3 SPA/AUTH Port
-Security_SecurePortUpdate               Neuer POP3 SPA/AUTH Port %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Security_SecureServer                   POP3 Server (SPA/AUTH oder transparenter Proxy)
+Security_SecureServerUpdate             Neuer externer POP3 Server: %s
+Security_SecurePort                     POP3 Port (SPA/AUTH oder transparenter Proxy)
+Security_SecurePortUpdate               Neuer POP3 Port %s
 Security_SMTPServer                     externer SMTP Server
 Security_SMTPServerUpdate               Neuer externer SMTP Server: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
 Security_SMTPPort                       externer SMTP port
