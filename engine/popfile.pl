@@ -1514,7 +1514,7 @@ sub history_page
             $body .= "<td>";
             if ( $reclassified ) 
             {
-                $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified as <font color=$classifier->{colors}{$bucket}>$bucket</font> - <a href=/history?undo=$mail_file&session=$session_key&badbucket=$bucket&filter=$form{filter}>[Undo]</a>";
+                $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified as <font color=$classifier->{colors}{$bucket}>$bucket</font> - <a href=/history?undo=$mail_file&session=$session_key&badbucket=$bucket&filter=$form{filter}&start_message=$start_message>[Undo]</a>";
             } 
             else
             {
