@@ -38,15 +38,21 @@
 # Removing support for a particular language:
 #
 # To remove any of the additional languages, only TWO lines need to be commented-out:
+#
 # (a) comment-out the relevant '!insertmacro PFI_LANG_LOAD' line in the list of languages
 #     in the 'Language Support for the installer and uninstaller' block of code
+#
 # (b) comment-out the relevant '!insertmacro UI_LANG_CONFIG' line in the list of languages
 #     in the code which handles the 'UI Languages' component
 #
 # For example, to remove support for the 'Dutch' language, comment-out the line
+#
 #     !insertmacro PFI_LANG_LOAD "Dutch"
+#
 # in the list of languages supported by the installer, and comment-out the line
+#
 #     !insertmacro UI_LANG_CONFIG "DUTCH" "Nederlands"
+#
 # in the code which handles the 'UI Languages' component (Section "Languages").
 #
 #--------------------------------------------------------------------------
@@ -55,7 +61,7 @@
 # The number of languages which can be supported depends upon the availability of:
 #
 #     (1) an up-to-date main NSIS language file ({NSIS}\Contrib\Language files\*.nlf)
-# _and_
+# and
 #     (2) an up-to-date NSIS MUI Language file ({NSIS}\Contrib\Modern UI\Language files\*.nsh)
 #
 # To add support for a language which is already supported by the NSIS MUI package, two files
@@ -85,6 +91,18 @@
 
   !define C_README        "v0.19.0.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
+
+  ; Root directory for the Perl files used to build the installer
+
+  !define C_PERL_DIR      "C:\Perl"
+
+  ; Define PFI_VERBOSE to get more compiler output
+
+# !define PFI_VERBOSE
+
+#--------------------------------------------------------------------------
+# Use the "Modern User Interface" and standard NSIS Section flag utilities
+#--------------------------------------------------------------------------
 
   !include "MUI.nsh"
   !include "Sections.nsh"
@@ -139,6 +157,12 @@
 #----------------------------------------------------------------------------------------
 
   !include CBP.nsh
+
+#--------------------------------------------------------------------------
+# Include private library functions and macro definitions
+#--------------------------------------------------------------------------
+
+  !include pfi-library.nsh
 
 #--------------------------------------------------------------------------
 # Define the Page order for the installer (and the uninstaller)
@@ -234,12 +258,12 @@
 
   ; Use a "leave" function to look for 'popfile.cfg' in the directory selected for this install
 
-  !define MUI_CUSTOMFUNCTION_DIRECTORY_LEAVE CheckExistingConfig
+  !define MUI_CUSTOMFUNCTION_DIRECTORY_LEAVE "CheckExistingConfig"
 
   ; Use a "pre" function for the 'Finish' page to ensure installer only offers to display
   ; POPFile User Interface if user has chosen to start POPFile from the installer.
 
-  !define MUI_CUSTOMFUNCTION_FINISH_PRE CheckRunStatus
+  !define MUI_CUSTOMFUNCTION_FINISH_PRE "CheckRunStatus"
 
 #--------------------------------------------------------------------------
 # User Registers (Global)
@@ -280,46 +304,6 @@
   !define MUI_LANGDLL_REGISTRY_ROOT "HKLM"
   !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\POPFile"
   !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
-
-  ;-----------------------------------------
-  ; Macros used to simplify inclusion of necessary language files
-  ;-----------------------------------------
-
-  ; Used in the '*-pfi.nsh' files to define the text strings for the installer
-
-  !macro PFI_LANG_STRING NAME VALUE
-    LangString ${NAME} ${LANG_${PFI_LANG}} "${VALUE}"
-  !macroend
-
-  ; Used in the '*-pfi.nsh' files to define the text strings for the uninstaller
-
-  !macro PFI_LANG_UNSTRING NAME VALUE
-    !insertmacro PFI_LANG_STRING "un.${NAME}" "${VALUE}"
-  !macroend
-
-  ; Used in '*-pfi.nsh' files to define the text strings for fields in a custom page INI file
-
-  !macro PFI_IO_TEXT PATH FIELD TEXT
-    WriteINIStr "$PLUGINSDIR\${PATH}" "Field ${FIELD}" "Text" "${TEXT}"
-  !macroend
-
-  ; Used in '*-pfi.nsh' files to define entries in [Settings] section of a custom page INI file
-
-  !macro PFI_IO_SETTING PATH FIELD TEXT
-    WriteINIStr "$PLUGINSDIR\${PATH}" "Settings" "${FIELD}" "${TEXT}"
-  !macroend
-
-  ; Macro used to load the three files required for each language:
-  ; (1) '*-mui.nsh' contains the customisations to be applied to the standard MUI text strings
-  ; (2) '*-pfi.nsh' contains the text strings used for custom pages, progress reports and logs
-  ; (3) the GPL license text (at present every language uses the 'English' version of the GPL)
-
-  !macro PFI_LANG_LOAD LANG
-    !include "languages\${LANG}-mui.nsh"
-    !insertmacro MUI_LANGUAGE "${LANG}"
-    !include "languages\${LANG}-pfi.nsh"
-    LicenseData /LANG=${LANG} "..\engine\license"
-  !macroend
 
   ;-----------------------------------------
   ; Select the languages to be supported by installer/uninstaller.
@@ -545,6 +529,7 @@ update_config:
   File "..\engine\Classifier\MailParse.pm"
   SetOutPath $INSTDIR\POPFile
   File "..\engine\POPFile\MQ.pm"
+  File "..\engine\POPFile\Loader.pm"
   File "..\engine\POPFile\Logger.pm"
   File "..\engine\POPFile\Module.pm"
   File "..\engine\POPFile\Configuration.pm"
@@ -573,85 +558,85 @@ update_config:
   SetDetailsPrint listonly
 
   SetOutPath $INSTDIR
-  File "C:\Perl\bin\perl.exe"
-  File "C:\Perl\bin\wperl.exe"
-  File "C:\Perl\bin\perl58.dll"
-  File "C:\Perl\lib\AutoLoader.pm"
-  File "C:\Perl\lib\Carp.pm"
-  File "C:\Perl\lib\Config.pm"
-  File "C:\Perl\lib\DynaLoader.pm"
-  File "C:\Perl\lib\Errno.pm"
-  File "C:\Perl\lib\Exporter.pm"
-  File "C:\Perl\lib\IO.pm"
-  File "C:\Perl\lib\integer.pm"
-  File "C:\Perl\lib\locale.pm"
-  File "C:\Perl\lib\POSIX.pm"
-  File "C:\Perl\lib\SelectSaver.pm"
-  File "C:\Perl\lib\Socket.pm"
-  File "C:\Perl\lib\strict.pm"
-  File "C:\Perl\lib\Symbol.pm"
-  File "C:\Perl\lib\vars.pm"
-  File "C:\Perl\lib\warnings.pm"
-  File "C:\Perl\lib\XSLoader.pm"
+  File "${C_PERL_DIR}\bin\perl.exe"
+  File "${C_PERL_DIR}\bin\wperl.exe"
+  File "${C_PERL_DIR}\bin\perl58.dll"
+  File "${C_PERL_DIR}\lib\AutoLoader.pm"
+  File "${C_PERL_DIR}\lib\Carp.pm"
+  File "${C_PERL_DIR}\lib\Config.pm"
+  File "${C_PERL_DIR}\lib\DynaLoader.pm"
+  File "${C_PERL_DIR}\lib\Errno.pm"
+  File "${C_PERL_DIR}\lib\Exporter.pm"
+  File "${C_PERL_DIR}\lib\IO.pm"
+  File "${C_PERL_DIR}\lib\integer.pm"
+  File "${C_PERL_DIR}\lib\locale.pm"
+  File "${C_PERL_DIR}\lib\POSIX.pm"
+  File "${C_PERL_DIR}\lib\SelectSaver.pm"
+  File "${C_PERL_DIR}\lib\Socket.pm"
+  File "${C_PERL_DIR}\lib\strict.pm"
+  File "${C_PERL_DIR}\lib\Symbol.pm"
+  File "${C_PERL_DIR}\lib\vars.pm"
+  File "${C_PERL_DIR}\lib\warnings.pm"
+  File "${C_PERL_DIR}\lib\XSLoader.pm"
 
   SetOutPath $INSTDIR\Carp
-  File "C:\Perl\lib\Carp\*"
+  File "${C_PERL_DIR}\lib\Carp\*"
 
   SetOutPath $INSTDIR\Exporter
-  File "C:\Perl\lib\Exporter\*"
+  File "${C_PERL_DIR}\lib\Exporter\*"
 
   SetOutPath $INSTDIR\MIME
-  File "C:\Perl\lib\MIME\*"
+  File "${C_PERL_DIR}\lib\MIME\*"
 
   SetOutPath $INSTDIR\Win32
-  File "C:\Perl\site\lib\Win32\API.pm"
+  File "${C_PERL_DIR}\site\lib\Win32\API.pm"
 
   SetOutPath $INSTDIR\Win32\API
-  File "C:\Perl\site\lib\Win32\API\*.pm"
+  File "${C_PERL_DIR}\site\lib\Win32\API\*.pm"
 
   SetOutPath $INSTDIR\auto\Win32\API
-  File "C:\Perl\site\lib\auto\Win32\API\*"
+  File "${C_PERL_DIR}\site\lib\auto\Win32\API\*"
 
   SetOutPath $INSTDIR\IO
-  File "C:\Perl\lib\IO\*"
+  File "${C_PERL_DIR}\lib\IO\*"
 
   SetOutPath $INSTDIR\Sys
-  File "C:\Perl\lib\Sys\*"
+  File "${C_PERL_DIR}\lib\Sys\*"
 
   SetOutPath $INSTDIR\Text
-  File "C:\Perl\lib\Text\ParseWords.pm"
+  File "${C_PERL_DIR}\lib\Text\ParseWords.pm"
 
   SetOutPath $INSTDIR\IO\Socket
-  File "C:\Perl\lib\IO\Socket\*"
+  File "${C_PERL_DIR}\lib\IO\Socket\*"
 
   SetOutPath $INSTDIR\auto\DynaLoader
-  File "C:\Perl\lib\auto\DynaLoader\*"
+  File "${C_PERL_DIR}\lib\auto\DynaLoader\*"
 
   SetOutPath $INSTDIR\auto\File\Glob
-  File "C:\Perl\lib\auto\File\Glob\*"
+  File "${C_PERL_DIR}\lib\auto\File\Glob\*"
 
   SetOutPath $INSTDIR\auto\MIME\Base64
-  File "C:\Perl\lib\auto\MIME\Base64\*"
+  File "${C_PERL_DIR}\lib\auto\MIME\Base64\*"
 
   SetOutPath $INSTDIR\auto\IO
-  File "C:\Perl\lib\auto\IO\*"
+  File "${C_PERL_DIR}\lib\auto\IO\*"
 
   SetOutPath $INSTDIR\auto\Socket
-  File "C:\Perl\lib\auto\Socket\*"
+  File "${C_PERL_DIR}\lib\auto\Socket\*"
 
   SetOutPath $INSTDIR\auto\Sys\Hostname
-  File "C:\Perl\lib\auto\Sys\Hostname\*"
+  File "${C_PERL_DIR}\lib\auto\Sys\Hostname\*"
 
   SetOutPath $INSTDIR\auto\POSIX
-  File "C:\Perl\lib\auto\POSIX\POSIX.dll"
-  File "C:\Perl\lib\auto\POSIX\autosplit.ix"
-  File "C:\Perl\lib\auto\POSIX\load_imports.al"
+  File "${C_PERL_DIR}\lib\auto\POSIX\POSIX.dll"
+  File "${C_PERL_DIR}\lib\auto\POSIX\autosplit.ix"
+  File "${C_PERL_DIR}\lib\auto\POSIX\load_imports.al"
 
   SetOutPath $INSTDIR\File
-  File "C:\Perl\lib\File\Glob.pm"
+  File "${C_PERL_DIR}\lib\File\Glob.pm"
 
   SetOutPath $INSTDIR\warnings
-  File "C:\Perl\lib\warnings\register.pm"
+  File "${C_PERL_DIR}\lib\warnings\register.pm"
 
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
@@ -748,26 +733,21 @@ SectionEnd
 #
 # If this component is selected, the installer will attempt to preset the POPFile UI
 # language to match the language used for the installation. The 'UI_LANG_CONFIG' macro
-# defines the mapping between NSIS language name and POPFile UI language name. This
-# macro will only preset the UI language if the required UI language file is present.
-# If no match is found or if the UI language file is not present, the default UI language
+# defines the mapping between NSIS language name and POPFile UI language name.
+# The POPFile UI language is only preset if the required UI language file exists.
+# If no match is found or if the UI language file does not exist, the default UI language
 # is used (it is left to POPFile to determine which language to use).
+#
+# By the time this section is executed, the function 'CheckExistingConfig' in conjunction with
+# the processing performed in the "POPFile" section will have removed all UI language settings
+# from 'popfile.cfg' so all we have to do is append the UI setting to the file. If we do not
+# append anything, POPFile will choose the default language.
 #--------------------------------------------------------------------------
 
 Section "Languages" SecLangs
 
-  ; Macro to simplify the code which selects a UI language based upon the installer language
-  ; (the installer uses NSIS language names which differ from the names used by POPFile's UI)
-
-  !macro UI_LANG_CONFIG PFI_SETTING UI_SETTING
-    StrCmp $LANGUAGE ${LANG_${PFI_SETTING}} 0 +4
-      IfFileExists "$INSTDIR\languages\${UI_SETTING}.msg" 0 lang_done
-      StrCpy ${L_LANG} "${UI_SETTING}"
-      Goto lang_save
-  !macroend
-
   !define L_CFG   $R9   ; file handle
-  !define L_LANG  $R8
+  !define L_LANG  $R8   ; language to be used for POPFile UI
 
   Push ${L_CFG}
   Push ${L_LANG}
@@ -1094,7 +1074,6 @@ default_gui:
   StrCpy ${G_GUI} "8081"
 
 ports_ok:
-
   Pop ${L_STRIPLANG}
   Pop ${L_OLDUI}
   Pop ${L_LNE}
@@ -1131,8 +1110,16 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Installer Function: SetOptionsPage (generates a custom page)
 #
+# If this is an "upgrade" installation, the user is offered the chance to uninstall the old
+# version before continuing with the upgrade. If an uninstall is selected, the 'uninstall.exe'
+# from THIS installer is used instead of the one from the POPFile which is being upgraded. This
+# is done to ensure that a special "upgrade" uninstall is performed instead of a "normal" one.
+# The "upgrade" uninstall ensures that the corpus and some other files are not removed. After
+# an "upgrade" uninstall, the "SHUTDOWN" warning message is removed from the custom page
+# (POPFile is automatically shutdown during the "upgrade" uninstall).
+#
 # This function is used to configure the POP3 and UI ports, and
-# whether or not POPFile should be started automatically.
+# whether or not POPFile should be started automatically when Windows starts.
 #
 # A "leave" function (CheckPortOptions) is used to validate the port
 # selections made by the user.
@@ -1145,6 +1132,27 @@ Function SetOptionsPage
 
   Push ${L_PORTLIST}
   Push ${L_RESULT}
+
+  IfFileExists "$INSTDIR\popfile.pl" 0 continue
+
+  MessageBox MB_YESNO|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_OPTIONS_MBUNINST_1)$\r$\n$\r$\n\
+      $(PFI_LANG_OPTIONS_MBUNINST_2)$\r$\n$\r$\n\
+      $(PFI_LANG_OPTIONS_MBUNINST_3)" IDNO continue
+
+  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
+  WriteUninstaller $INSTDIR\uninstall.exe
+  ExecWait '"$INSTDIR\uninstall.exe"  _?=$INSTDIR'
+  IfFileExists "$INSTDIR\popfile.pl" skip_msg_delete
+
+  ; No need to display the warning about shutting down POPFile as it has just been uninstalled
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Settings" "NumFields" "5"
+
+skip_msg_delete:
+  Banner::destroy
+
+continue:
 
   ; The function "CheckExistingConfig" loads ${G_POP3} and ${G_GUI} with the settings found in
   ; a previously installed "popfile.cfg" file or if no such file is found, it loads the
@@ -1734,273 +1742,6 @@ exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
-# Installer Function: GetSeparator
-#
-# Returns the character to be used as the separator when configuring an e-mail account.
-# If the character is not defined in popfile.cfg, the default separator (':') is returned
-#
-# Inputs:
-#         none
-# Outputs:
-#         (top of stack)     - character to be used as the separator
-#
-#  Usage:
-#    Call GetSeparator
-#    Pop $R0
-#
-#   ($R0 at this point is ":" unless popfile.cfg has altered the default setting)
-#
-#--------------------------------------------------------------------------
-
-Function GetSeparator
-
-  !define L_CFG         $R9   ; file handle
-  !define L_LNE         $R8   ; a line from the popfile.cfg file
-  !define L_PARAM       $R7
-  !define L_SEPARATOR   $R6   ; character used to separate the pop3 server from the username
-
-  Push ${L_SEPARATOR}
-  Push ${L_CFG}
-  Push ${L_LNE}
-  Push ${L_PARAM}
-
-  StrCpy ${L_SEPARATOR} ""
-
-  ClearErrors
-
-  FileOpen  ${L_CFG} $INSTDIR\popfile.cfg r
-
-loop:
-  FileRead   ${L_CFG} ${L_LNE}
-  IfErrors separator_done
-
-  StrCpy ${L_PARAM} ${L_LNE} 10
-  StrCmp ${L_PARAM} "separator " old_separator
-  StrCpy ${L_PARAM} ${L_LNE} 15
-  StrCmp ${L_PARAM} "pop3_separator " new_separator
-  Goto loop
-
-old_separator:
-  StrCpy ${L_SEPARATOR} ${L_LNE} 1 10
-  Goto loop
-
-new_separator:
-  StrCpy ${L_SEPARATOR} ${L_LNE} 1 15
-  Goto loop
-
-separator_done:
-  FileClose ${L_CFG}
-  Push ${L_SEPARATOR}
-  Call TrimNewlines
-  Pop ${L_SEPARATOR}
-
-  ; Use separator character from popfile.cfg (if present) otherwise use a semicolon
-
-  StrCmp ${L_SEPARATOR} "" 0 exit
-  StrCpy ${L_SEPARATOR} ":"
-
-exit:
-  Pop ${L_PARAM}
-  Pop ${L_LNE}
-  Pop ${L_CFG}
-  Exch ${L_SEPARATOR}
-
-  !undef L_CFG
-  !undef L_LNE
-  !undef L_PARAM
-  !undef L_SEPARATOR
-
-FunctionEnd
-
-#--------------------------------------------------------------------------
-# Installer Function: StrStr
-#
-# Search for matching string
-#
-# Inputs:
-#         (top of stack)     - the string to be found (needle)
-#         (top of stack - 1) - the string to be searched (haystack)
-# Outputs:
-#         (top of stack)     - string starting with the match, if any
-#
-#  Usage:
-#    Push "this is a long string"
-#    Push "long"
-#    Call StrStr
-#    Pop $R0
-#   ($R0 at this point is "long string")
-#
-#--------------------------------------------------------------------------
-
-Function StrStr
-  Exch $R1    ; Make $R1 the "needle", Top of stack = old$R1, haystack
-  Exch        ; Top of stack = haystack, old$R1
-  Exch $R2    ; Make $R2 the "haystack", Top of stack = old$R2, old$R1
-
-  Push $R3    ; Length of the needle
-  Push $R4    ; Counter
-  Push $R5    ; Temp
-
-  StrLen $R3 $R1
-  StrCpy $R4 0
-
-loop:
-  StrCpy $R5 $R2 $R3 $R4
-  StrCmp $R5 $R1 done
-  StrCmp $R5 "" done
-  IntOp $R4 $R4 + 1
-  Goto loop
-
-done:
-  StrCpy $R1 $R2 "" $R4
-
-  Pop $R5
-  Pop $R4
-  Pop $R3
-
-  Pop $R2
-  Exch $R1
-FunctionEnd
-
-#--------------------------------------------------------------------------
-# Macro: StrCheckDecimal
-#
-# The installation process and the uninstall process both use a function which checks if
-# a given string contains a decimal number. This macro makes maintenance easier by ensuring
-# that both processes use identical functions, with the only difference being their names.
-#
-# The 'StrCheckDecimal' and 'un.StrCheckDecimal' functions check that a given string contains
-# only the digits 0 to 9. (if the string contains any invalid characters, "" is returned)
-#
-# Inputs:
-#         (top of stack)   - string which may contain a decimal number
-#
-# Outputs:
-#         (top of stack)   - the input string (if valid) or "" (if invalid)
-#
-# Usage:
-#         Push "12345"
-#         Call StrCheckDecimal
-#         Pop $R0
-#         ($R0 at this point is "12345")
-#
-#--------------------------------------------------------------------------
-!macro StrCheckDecimal UN
-  Function ${UN}StrCheckDecimal
-
-    !define DECIMAL_DIGIT    "0123456789"
-
-    Exch $0   ; The input string
-    Push $1   ; Holds the result: either "" (if input is invalid) or the input string (if valid)
-    Push $2   ; A character from the input string
-    Push $3   ; The offset to a character in the "validity check" string
-    Push $4   ; A character from the "validity check" string
-    Push $5   ; Holds the current "validity check" string
-
-    StrCpy $1 ""
-
-  next_input_char:
-    StrCpy $2 $0 1                ; Get the next character from the input string
-    StrCmp $2 "" done
-    StrCpy $5 ${DECIMAL_DIGIT}$2  ; Add it to end of "validity check" to guarantee a match
-    StrCpy $0 $0 "" 1
-    StrCpy $3 -1
-
-  next_valid_char:
-    IntOp $3 $3 + 1
-    StrCpy $4 $5 1 $3             ; Extract next "valid" character (from "validity check" string)
-    StrCmp $2 $4 0 next_valid_char
-    IntCmp $3 10 invalid 0 invalid  ; If match is with the char we added, input string is bad
-    StrCpy $1 $1$4                ; Add "valid" character to the result
-    goto next_input_char
-
-  invalid:
-    StrCpy $1 ""
-
-  done:
-    StrCpy $0 $1      ; Result is either a string of decimal digits or ""
-    Pop $5
-    Pop $4
-    Pop $3
-    Pop $2
-    Pop $1
-    Exch $0           ; place result on top of the stack
-
-    !undef DECIMAL_DIGIT
-
-  FunctionEnd
-!macroend
-
-#--------------------------------------------------------------------------
-# Installer Function: StrCheckDecimal
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-!insertmacro StrCheckDecimal ""
-
-#--------------------------------------------------------------------------
-# Uninstaller Function: un.StrCheckDecimal
-#
-# This function is used during the uninstall process
-#--------------------------------------------------------------------------
-
-!insertmacro StrCheckDecimal "un."
-
-#--------------------------------------------------------------------------
-# Macro: TrimNewlines
-#
-# The installation process and the uninstall process both
-# use a function which trims newlines from lines of text.
-# This macro makes maintenance easier by ensuring that
-# both processes use identical functions, with the only
-# difference being their names.
-#--------------------------------------------------------------------------
-
-  ; input, top of stack  (e.g. whatever$\r$\n)
-  ; output, top of stack (replaces, with e.g. whatever)
-  ; modifies no other variables.
-
-!macro TrimNewlines UN
-  Function ${UN}TrimNewlines
-    Exch $R0
-    Push $R1
-    Push $R2
-    StrCpy $R1 0
-
-  loop:
-    IntOp $R1 $R1 - 1
-    StrCpy $R2 $R0 1 $R1
-    StrCmp $R2 "$\r" loop
-    StrCmp $R2 "$\n" loop
-    IntOp $R1 $R1 + 1
-    IntCmp $R1 0 no_trim_needed
-    StrCpy $R0 $R0 $R1
-
-  no_trim_needed:
-    Pop $R2
-    Pop $R1
-    Exch $R0
-  FunctionEnd
-!macroend
-
-#--------------------------------------------------------------------------
-# Installer Function: TrimNewlines
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-!insertmacro TrimNewlines ""
-
-#--------------------------------------------------------------------------
-# Uninstaller Function: un.TrimNewlines
-#
-# This function is used during the uninstall process
-#--------------------------------------------------------------------------
-
-!insertmacro TrimNewlines "un."
-
-#--------------------------------------------------------------------------
 # Initialise the uninstaller
 #--------------------------------------------------------------------------
 
@@ -2014,17 +1755,42 @@ FunctionEnd
 
 #--------------------------------------------------------------------------
 # Uninstaller Section
+#
+# There are two types of uninstall:
+#
+# (1) normal uninstall, performed when user wishes to completely remove POPFile from the system
+#
+# (2) an uninstall performed as part of an upgrade installation. In this case some files are
+#     preserved (eg the existing corpus).
 #--------------------------------------------------------------------------
 
 Section "Uninstall"
 
-  !define L_CFG         $R9
-  !define L_LNE         $R8
-  !define L_REG_KEY     $R7
+  !define L_CFG         $R9   ; used as file handle
+  !define L_LNE         $R8   ; a line from popfile.cfg
+  !define L_REG_KEY     $R7   ; L_REG_* registers are used to  restore Outlook Express settings
   !define L_REG_SUBKEY  $R6
   !define L_REG_VALUE   $R5
   !define L_TEMP        $R4
+  !define L_UPGRADE     $R3   ; "yes" if this is an upgrade, "no" if we are just uninstalling
+  !define L_CORPUS      $R2   ; holds full path to the POPFile corpus data
+  !define L_SUBFOLDER   $R1   ; "yes" if corpus is in a subfolder of $INSTDIR, otherwise "no"
 
+  ; When a normal uninstall is performed, the uninstaller is copied to a uniquely named
+  ; temporary file and it is that temporary file which is executed (this is how the uninstaller
+  ; removes itself). If we are performing an uninstall as part of an upgrade installation then
+  ; no temporary file is created, we execute the 'real' file ($INSTDIR\uninstall.exe) instead.
+
+  StrCpy ${L_UPGRADE} "no"
+
+  Push $CMDLINE
+  Push "$INSTDIR\uninstall.exe"
+  Call un.StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" confirmation
+  StrCpy ${L_UPGRADE} "yes"
+
+confirmation:
   IfFileExists $INSTDIR\popfile.pl skip_confirmation
     MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
         "$(un.PFI_LANG_MBNOTFOUND_1) '$INSTDIR'.$\r$\n$\r$\n\
@@ -2032,6 +1798,20 @@ Section "Uninstall"
     Abort "$(un.PFI_LANG_ABORT_1)"
 
 skip_confirmation:
+
+  StrCpy ${L_SUBFOLDER} "yes"
+
+  Push $INSTDIR
+  Call un.GetCorpusPath
+  Pop ${L_CORPUS}
+  Push ${L_CORPUS}
+  Push $INSTDIR
+  Call un.StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" 0 check_if_running
+  StrCpy ${L_SUBFOLDER} "no"
+
+check_if_running:
 
   ; If the POPFile we are about to uninstall is still running,
   ; then one of the EXE files will be 'locked'
@@ -2106,12 +1886,22 @@ skip_shutdown:
   DetailPrint "$(un.PFI_LANG_PROGRESS_3)"
   SetDetailsPrint listonly
 
+  ; popfile.pl deleted to indicate an uninstall has occurred (file is checked during 'upgrade')
+
+  Delete $INSTDIR\popfile.pl
+  Delete $INSTDIR\popfile.cfg.bak
+  Delete $INSTDIR\*.pm
+  Delete $INSTDIR\*.dll
+
+  ; For "upgrade" uninstalls, we leave most files in $INSTDIR
+  ; and do not restore Outlook Express settings
+
+  StrCmp ${L_UPGRADE} "yes" no_reg_file
+
   Delete $INSTDIR\*.log
   Delete $INSTDIR\*.pl
   Delete $INSTDIR\*.gif
-  Delete $INSTDIR\*.pm
   Delete $INSTDIR\*.exe
-  Delete $INSTDIR\*.dll
   Delete $INSTDIR\*.change
   Delete $INSTDIR\*.change.txt
   Delete $INSTDIR\license
@@ -2188,46 +1978,31 @@ no_reg_file:
   RMDir $INSTDIR\manual
   Delete $INSTDIR\languages\*.msg
   RMDir $INSTDIR\languages
-  RMDir /r $INSTDIR\corpus
+
+  StrCmp ${L_UPGRADE} "yes" skip_corpus
+  RMDir /r "${L_CORPUS}"
+
+skip_corpus:
   Delete $INSTDIR\stopwords
   Delete $INSTDIR\stopwords.bak
   Delete $INSTDIR\stopwords.default
-  RMDir /r $INSTDIR\messages
+  !insertmacro SafeRecursiveRMDir "$INSTDIR\messages"
 
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_6)"
   SetDetailsPrint listonly
 
-  Delete $INSTDIR\Win32\API\*
-  RmDir /r $INSTDIR\Win32\API
-  Delete $INSTDIR\Win32\*
-  RmDir /r $INSTDIR\Win32
-  Delete $INSTDIR\auto\Win32\API\*
-  RmDir /r $INSTDIR\auto\Win32\API
-  Delete $INSTDIR\MIME\*.*
-  RMDir  $INSTDIR\MIME
-  Delete $INSTDIR\IO\*.*
-  Delete $INSTDIR\IO\Socket\*.*
-  RMDir /r $INSTDIR\IO
-  Delete $INSTDIR\Carp\*.*
-  RMDir /r $INSTDIR\Carp
-  Delete $INSTDIR\Sys\Hostname\*.*
-  RMDir /r $INSTDIR\Sys\Hostname
-  RMDir /r $INSTDIR\Sys
-  Delete $INSTDIR\Text\*.pm
-  RMDir /r $INSTDIR\Text
-  Delete $INSTDIR\auto\POSIX\*.*
-  Delete $INSTDIR\auto\DynaLoader\*.*
-  Delete $INSTDIR\auto\File\Glob\*.*
-  Delete $INSTDIR\auto\MIME\Base64\*.*
-  Delete $INSTDIR\auto\IO\*.*
-  Delete $INSTDIR\auto\Socket\*.*
-  Delete $INSTDIR\auto\Sys\*.*
-  RMDir /r $INSTDIR\auto
-  Delete $INSTDIR\File\*.*
-  RMDir $INSTDIR\File
-  Delete $INSTDIR\warnings\*.*
-  RMDir $INSTDIR\warnings
+  !insertmacro SafeRecursiveRMDir "$INSTDIR\auto"
+  !insertmacro SafeRecursiveRMDir "$INSTDIR\Carp"
+  !insertmacro SafeRecursiveRMDir "$INSTDIR\File"
+  !insertmacro SafeRecursiveRMDir "$INSTDIR\IO"
+  !insertmacro SafeRecursiveRMDir "$INSTDIR\MIME"
+  !insertmacro SafeRecursiveRMDir "$INSTDIR\Sys"
+  !insertmacro SafeRecursiveRMDir "$INSTDIR\Text"
+  !insertmacro SafeRecursiveRMDir "$INSTDIR\warnings"
+  !insertmacro SafeRecursiveRMDir "$INSTDIR\Win32"
+
+  StrCmp ${L_UPGRADE} "yes" Removed
 
   Delete "$INSTDIR\Uninstall.exe"
 
@@ -2257,6 +2032,9 @@ Removed:
   !undef L_REG_SUBKEY
   !undef L_REG_VALUE
   !undef L_TEMP
+  !undef L_UPGRADE
+  !undef L_CORPUS
+  !undef L_SUBFOLDER
 SectionEnd
 
 #--------------------------------------------------------------------------
