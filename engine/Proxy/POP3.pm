@@ -742,14 +742,32 @@ sub verify_connected
             # Read the response from the real server and say OK
             my $buf        = '';
             my $max_length = 8192;
-            my $n          = sysread( $mail, $buf, $max_length, length $buf );
+            my $n          = sysread( $mail, $buf, $max_length, length $buf );           
             
-            debug( $self, "Connection returned: $buf" );
             if ( !( $buf =~ /[\r\n]/ ) ) {
-                for my $i ( 0..4 ) {
-                    flush_extra( $self, $mail, $client, 1 );
+                my $hit_newline = 0;
+                my $temp_buf;
+                
+                # Read until timeout or a newline (newline _should_ be immediate)
+                
+                for my $i ( 0..($self->{configuration}->{configuration}{timeout} * 100) ) {
+                    if ( !$hit_newline ) {
+                        $temp_buf = flush_extra( $self, $mail, $client, 1 );          
+                        $hit_newline = ( $temp_buf =~ /[\r\n]/ );
+                        $buf .= $temp_buf;
+                    } else {
+                        last;
+                    }
                 }
             }
+            debug( $self, "Connection returned: $buf" );
+            
+            # Clean up junk following a newline
+            
+            for my $i ( 0..4 ) {
+                flush_extra( $self, $mail, $client, 1 );
+            }
+                        
             return $mail;
         }
     }
@@ -765,6 +783,8 @@ sub verify_connected
 # flush_extra - Read extra data from the mail server and send to client, this is to handle
 #               POP servers that just send data when they shouldn't.  I've seen one that sends
 #               debug messages!
+#
+#               Returns the extra data flushed
 #
 # $mail        The handle of the real mail server
 # $client      The mail client talking to us
@@ -786,7 +806,9 @@ sub flush_extra
                 last unless ( my $n = sysread( $mail, $buf, $max_length, length $buf ) );
 
                 tee( $self,  $client, $buf ) if ( $discard != 1 );
+                return $buf;
             }
         }
     }
+    return '';
 }
