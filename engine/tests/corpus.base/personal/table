@@ -2,5 +2,6 @@ __CORPUS__ __VERSION__ 1
 foo 1
 bar 2
 baz 100
+bom 0
 
 

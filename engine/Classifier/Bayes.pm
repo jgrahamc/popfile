@@ -713,7 +713,9 @@ sub load_bucket_
                         s/[\r\n]//g;
 
                         if ( /^([^\s]+) (\d+)$/ ) {
-                            $self->set_value_( $bucket, $1, $2 );
+  			    if ( $2 != 0 ) {
+                                $self->set_value_( $bucket, $1, $2 );
+			    }
                         } else {
                             $self->log_( "Found entry in corpus for $bucket that looks wrong: \"$_\" (ignoring)" );
                         }
@@ -756,13 +758,15 @@ sub load_bucket_
                         s/[\r\n]//g;
 
                         if ( /^([^\s]+) (\d+)$/ ) {
-			    if ( $self->get_base_value_( $bucket, $1 ) != $2 ) {
-                                print "\nUpgrade error for word $1 in bucket $bucket.\nShutdown POPFile and rerun.\n";
-                                $upgrade_failed = 1;
-                                last;
+  			    if ( $2 != 0 ) {
+    			        if ( $self->get_base_value_( $bucket, $1 ) != $2 ) {
+                                    print "\nUpgrade error for word $1 in bucket $bucket.\nShutdown POPFile and rerun.\n";
+                                    $upgrade_failed = 1;
+                                    last;
+			        }
+                                $bucket_total  += $2;
+                                $bucket_unique += 1;
 			    }
-                            $bucket_total  += $2;
-                            $bucket_unique += 1;
                         } else {
                             $self->log_( "Found entry in corpus for $bucket that looks wrong: \"$_\" (ignoring)" );
                         }
