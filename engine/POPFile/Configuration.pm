@@ -74,7 +74,7 @@ sub start
     my ( $self ) = @_;
 
     if ( open PID, '>' . $self->config_( 'piddir' ) . 'popfile.pid' ) {
-        print PID "$$\n"; 
+        print PID "$$\n";
         close PID;
     }
 
@@ -119,9 +119,10 @@ sub parse_command_line
             # A command line argument must start with a -
 
             if ( $ARGV[$i] =~ /^-(.+)$/ ) {
-                if ( defined($self->{configuration_parameters__}{$1}) ) {
+	        my $parameter = $self->upgrade_parameter__($1);
+                if ( defined($self->{configuration_parameters__}{$parameter}) ) {
                     if ( $i < $#ARGV ) {
-                        $self->{configuration_parameters__}{$1} = $ARGV[$i+1];
+                        $self->{configuration_parameters__}{$parameter} = $ARGV[$i+1];
                         $i += 2;
                     } else {
                         print "Missing argument for $ARGV[$i]\n";
@@ -141,9 +142,89 @@ sub parse_command_line
 
 # ---------------------------------------------------------------------------------------------
 #
+# upgrade_parameter__
+#
+# Given a parameter from either command line or from the configuration file return the
+# upgraded version (e.g. the old port parameter becomes pop3_port
+#
+# ---------------------------------------------------------------------------------------------
+
+sub upgrade_parameter__
+{
+    my ( $self, $parameter ) = @_;
+
+    # This table maps from the old parameter to the new one, for example the old
+    # xpl parameter which controls insertion of the X-POPFile-Link header in email
+    # is now called GLOBAL_xpl and is accessed through POPFile::Module::global_config_
+    # The old piddir parameter is now config_piddir and is accessed through either config_
+    # if accessed from the config module or through module_config_ from outside
+
+    my %upgrades = ( 
+
+		     # Parameters that are now handled by Classifier::Bayes
+
+		     'corpus',                   'bayes_corpus corpus',
+		     'unclassified_probability', 'bayes_unclassified_probability',
+
+		     # Parameters that are now handled by POPFile::Configuration
+
+		     'piddir',                   'config_piddir',
+
+		     # Parameters that are now global to POPFile
+
+		     'debug',                    'GLOBAL_debug',
+		     'ecount',                   'GLOBAL_ecount',
+		     'mcount',                   'GLOBAL_mcount',
+		     'msgdir',                   'GLOBAL_msgdir',
+		     'subject',                  'GLOBAL_subject',
+		     'imeout',                   'GLOBAL_timeout',
+		     'xpl',                      'GLOBAL_xpl',
+		     'xtc',                      'GLOBAL_xtc',
+
+		     # Parameters that are now handled by POPFile::Logger
+
+		     'logdir',                   'logger_logdir',
+
+		     # Parameters that are now handled by Proxy::POP3
+
+		     'download_count',           'pop3_download_count',
+		     'localpop',                 'pop3_local',
+		     'port',                     'pop3_port',
+		     'sport',                    'pop3_secure_port',
+		     'server',                   'pop3_secure_server',
+		     'separator',                'pop3_separator',
+		     'optoo',                    'pop3_toptoo',
+
+		     # Parameters that are now handled by UI::HTML
+
+		     'archive',                  'ui_archive',
+		     'archive_classes',          'ui_archive_classes',
+		     'archive_dir',              'ui_archive_dir',
+		     'history_days',             'ui_history_days',
+		     'language',                 'ui_language',
+		     'last_reset',               'ui_last_reset',
+		     'last_update_check',        'ui_last_update_check',
+		     'localui',                  'ui_local',
+		     'page_size',                'ui_page_size',
+		     'password',                 'ui_password',
+		     'send_stats',               'ui_send_stats',
+		     'skin',                     'ui_skin',
+		     'test_language',            'ui_test_language',
+		     'update_check',             'ui_update_check'
+    );
+
+    if ( defined( $upgrades{$parameter} ) ) {
+        return $upgrades{$parameter};
+    } else {
+        return $parameter;
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # load_configuration
 #
-# Loads the current configuration of popfile into the configuration hash from a local file.  
+# Loads the current configuration of popfile into the configuration hash from a local file.
 # The format is a very simple set of lines containing a space separated name and value pair
 #
 # ---------------------------------------------------------------------------------------------
@@ -155,7 +236,12 @@ sub load_configuration
         while ( <CONFIG> ) {
             s/(\015|\012)//g; 
             if ( /(\S+) (.+)/ ) {
-                $self->{configuration_parameters__}{$1} = $2;
+	        my $parameter = $1;
+		my $value     = $2;
+
+		$parameter = $self->upgrade_parameter__($parameter);
+
+                $self->{configuration_parameters__}{$parameter} = $value;
             }
         }
 

@@ -889,7 +889,7 @@ sub parse_stream
                         $prefix = 'subject';
                     }
 
-                    $self->{date} = $argument if ( $header =~ /^Date/i );
+                    $self->{date__} = $argument if ( $header =~ /^Date/i );
 
                     # Look for MIME
 
