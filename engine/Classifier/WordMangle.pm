@@ -179,7 +179,7 @@ sub add_stopword
             return 0;
         }
     } else {
-        if ( ( $stopword !~ /:/ ) && ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) ) {
+        if ( ( $stopword !~ /:/ ) && ( $stopword =~ /[^[:alpha:]\-_\.\@0-9]/i ) ) {
             return 0;
         }
     }
@@ -207,7 +207,7 @@ sub remove_stopword
             return 0;
         }
     } else {
-        if ( ( $stopword !~ /:/ ) && ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) ) {
+        if ( ( $stopword !~ /:/ ) && ( $stopword =~ /[^[:alpha:]\-_\.\@0-9]/i ) ) {
             return 0;
         }
     }
