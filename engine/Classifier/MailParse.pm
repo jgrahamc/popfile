@@ -372,14 +372,19 @@ sub map_color
         # needs at least one more character to make
         # three even triplets)
 
-        $color .= "0" x $quotient;
+        $color .= "00" . "0" x $quotient;
 
         # even length RGB triplets
         my ($r, $g, $b) = ($color =~ /(.{$quotient})(.{$quotient})(.{$quotient})/);
 
         print "$r $g $b\n" if $self->{debug_};
 
-        #trim long triplets
+        # left-trim very long triplets to 4 bytes
+        $r =~ s/(.{8})$/$1/;
+        $g =~ s/(.{8})$/$1/;
+        $b =~ s/(.{8})$/$1/;
+
+        # right-trim long triplets to get the first two bytes
         $r =~ s/(..).*/$1/;
         $g =~ s/(..).*/$1/;
         $b =~ s/(..).*/$1/;
