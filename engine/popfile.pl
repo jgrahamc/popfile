@@ -25,6 +25,8 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
+#   Modified by     Sam Schinke (sschinke@users.sourceforge.net)
+#
 # ---------------------------------------------------------------------------------------------
 
 use strict;
@@ -56,6 +58,7 @@ $POPFile->CORE_load();
 $POPFile->CORE_link_components();
 $POPFile->CORE_initialize();
 $POPFile->CORE_config();
+$POPFile->CORE_enabled_check();
 $POPFile->CORE_start();
 
 # This is the main POPFile loop that services requests, it will exit only when we

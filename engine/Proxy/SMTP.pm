@@ -26,6 +26,8 @@ use Proxy::Proxy;
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
+#   Modified by     Sam Schinke (sschinke@users.sourceforge.net)
+#
 # ---------------------------------------------------------------------------------------------
 
 use strict;
@@ -69,6 +71,9 @@ sub new
 sub initialize
 {
     my ( $self ) = @_;
+
+    # Disabled by default
+    $self->config_( 'enabled', 0);
 
     # By default we don't fork on Windows
     $self->config_( 'force_fork', ($^O eq 'MSWin32')?0:1 );
@@ -163,9 +168,9 @@ sub child__
 
             next;
         }
-        
+
         # Handle EHLO specially so we can control what ESMTP extensions are negotiated
-        
+
         if ( $command =~ /EHLO/i ) {
             if ( $self->config_( 'chain_server' ) )  {
                 if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'chain_server' ),  $self->config_( 'chain_port' ) ) )  {
@@ -176,20 +181,20 @@ sub child__
 
                     my $unsupported;
 
-                    
-                    
+
+
                     # RFC 1830, http://www.faqs.org/rfcs/rfc1830.html
                     # CHUNKING and BINARYMIME both require the support of the "BDAT" command
                     # support of BDAT requires extensive changes to POPFile's internals and
                     # will not be implemented at this time
 
                     $unsupported .= "CHUNKING|BINARYMIME";
-                    
+
                     # append unsupported ESMTP extensions to $unsupported here, important to maintain
                     # format of OPTION|OPTION2|OPTION3
-                    
+
                     $unsupported = qr/250\-$unsupported/;
-                                        
+
                     $self->smtp_echo_response_( $mail, $client, $command, $unsupported );
 
 

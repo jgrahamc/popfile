@@ -26,6 +26,8 @@ use Proxy::Proxy;
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
+#   Modified by     Sam Schinke (sschinke@users.sourceforge.net)
+#
 # ---------------------------------------------------------------------------------------------
 
 use strict;
@@ -69,6 +71,9 @@ sub new
 sub initialize
 {
     my ( $self ) = @_;
+
+    # Enabled by default
+    $self->config_( 'enabled', 1);
 
     # By default we don't fork on Windows
     $self->config_( 'force_fork', ($^O eq 'MSWin32')?0:1 );
@@ -447,12 +452,22 @@ sub child__
 
                 my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_read_class($short_file);
 
+                $self->log_( "Message is: long($file) short($short_file)");
+
+                $self->log_( "Message is: reclassified($reclassified) bucket($bucket) usedtobe($usedtobe) magnet($magnet)" );
+
                 if ($bucket ne 'unknown class') {
 
                     # echo file, inserting known classification, without saving
 
+                    $self->log_( "known class, printing");
+
                     $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, $count, 1, $bucket );
+
+                    $self->log_( "done printing" );
                 } else {
+
+                    $self->log_( "unknown class, classifying");
 
                     # If the class wasn't saved properly, classify from disk normally
 
@@ -465,6 +480,7 @@ sub child__
 
                 close RETRFILE;
                 print $client ".$eol";
+                $self->log_( "message complete" );
             } else {
 
                 # Retrieve file directly from the server

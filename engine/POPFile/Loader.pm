@@ -6,9 +6,9 @@ package POPFile::Loader;
 #               tasks
 #
 # Subroutine names beginning with CORE indicate a subroutine designed for exclusive use of
-# POPFile's core application (popfile.pl). 
+# POPFile's core application (popfile.pl).
 #
-# Subroutines not so marked are suitable for use by POPFile-based utilities to assist in loading 
+# Subroutines not so marked are suitable for use by POPFile-based utilities to assist in loading
 # and executing modules
 #
 # Copyright (c) 2001-2003 John Graham-Cumming
@@ -29,6 +29,8 @@ package POPFile::Loader;
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
+#   Modified by     Sam Schinke (sschinke@users.sourceforge.net)
+#
 # ---------------------------------------------------------------------------------------------
 
 #----------------------------------------------------------------------------------------------
@@ -47,6 +49,12 @@ sub new
     # the actual module
 
     $self->{components__} = {};
+
+    $self->{disabled_components__} = {};
+
+    # Do not allow disabling of the following components (group or name)
+
+    $self->{required_components__} =  qr/^(core|html|bayes)$/;
 
     # A handy boolean that tells us whether we are alive or not.  When this is set to 1 then the
     # proxy works normally, when set to 0 (typically by the aborting() function called from a signal)
@@ -533,6 +541,7 @@ sub CORE_initialize
         }
         print '} ' if $self->{debug__};
     }
+    print "\n";
 }
 
 #---------------------------------------------------------------------------------------------
@@ -564,7 +573,7 @@ sub CORE_start
 {
     my ( $self ) = @_;
 
-    print "\n\n    Starting...     " if $self->{debug__};
+    print "\n    Starting...     " if $self->{debug__};
 
     # Now that the configuration is set tell each module to begin operation
 
@@ -582,6 +591,40 @@ sub CORE_start
 
     print "\n\nPOPFile Engine ", scalar($self->CORE_version()), " running\n" if $self->{debug__};
     flush STDOUT;
+}
+
+#---------------------------------------------------------------------------------------------
+#
+# CORE_enabled_check
+#
+# Prevents calling of start and service of disabled optional modules
+#
+#---------------------------------------------------------------------------------------------
+sub CORE_enabled_check
+{
+    my ( $self ) = @_;
+
+    # Check all currently enabled components
+
+    foreach my $type (keys %{$self->{components__}}) {
+        unless ( $type =~ $self->{required_components__} ) {
+            foreach my $name (keys %{$self->{components__}{$type}}) {
+                unless ( ( $name =~ $self->{required_components__} )
+                         ||     ( defined($self->{components__}{$type}{$name}->config_( 'enabled' ) )
+                                && $self->{components__}{$type}{$name}->config_( 'enabled' ) ) ) {
+
+                    # If the component is optional and is disabled, move it to a holding
+                    # hash. This is done this way to allow recovery/re-enabling of objects
+                    # (eg, HUP) and to leave them intact for interface plugin configuration.
+                    $self->{disabled_components__}{$type}{$name} = $self->{components__}{$type}{$name};
+                    delete $self->{components__}{$type}{$name};
+                }
+            }
+        }
+    }
+
+    # Re-enable any disabled components that are now enabled
+    # TODO: implement this when POPFile needs to be able to handle a HUP.
 }
 
 #---------------------------------------------------------------------------------------------
