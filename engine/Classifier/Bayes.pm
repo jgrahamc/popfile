@@ -2227,7 +2227,7 @@ sub is_bucket
 {
     my ( $self, $bucket ) = @_;
 
-    return defined($self->{db_bucketid__}{$bucket});
+    return (defined($self->{db_bucketid__}{$bucket}) && !$self->{db_bucketid__}{$bucket}{pseudo});
 }
 
 # ---------------------------------------------------------------------------------------------
