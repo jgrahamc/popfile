@@ -2874,8 +2874,9 @@ sub history_page
     $self->history_reclassify();
     $self->history_undo();
 
-    # Handle removal of one or more items from the history page, the remove_array form will contain
-    # all the indexes into history_keys that need to be deleted.  We pass each file that needs
+    # Handle removal of one or more items from the history page, the remove_array form, if defined,
+    # will contain all the indexes into history_keys that need to be deleted. If undefined, the remove
+    # form element will contain the single index to be deleted. We pass each file that needs
     # deleting into the history_delete_file helper
 
     if ( defined( $self->{form_}{deletemessage} ) ) {
@@ -2886,8 +2887,12 @@ sub history_page
         # in the cache.  Note that there is no need to invalidate the history cache since
         # we are in control of deleting messages
 
-        for my $i ( 0 .. $#{$self->{form_}{remove_array}} ) {
-            $self->history_delete_file( $self->{history_keys__}[$self->{form_}{remove_array}[$i] - 1], 0);
+        if ( defined($self->{form_}{remove_array}) ) {
+            for my $i ( 0 .. $#{$self->{form_}{remove_array}} ) {
+                $self->history_delete_file( $self->{history_keys__}[$self->{form_}{remove_array}[$i] - 1], 0);
+            }
+        } elsif ( defined($self->{form_}{remove}) ) {
+            $self->history_delete_file( $self->{history_keys__}[$self->{form_}{remove} - 1], 0);
         }
     }
 
