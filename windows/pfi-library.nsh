@@ -301,6 +301,7 @@ copy_done:
 
 FunctionEnd
 
+
 #--------------------------------------------------------------------------
 # Installer Function: StrStripLZS
 #
@@ -348,107 +349,12 @@ done:
 
 FunctionEnd
 
+
 #==============================================================================================
 #
 # Functions used only by the uninstaller
 #
 #==============================================================================================
-
-#--------------------------------------------------------------------------
-# Function: un.GetCorpusPath
-#
-# This function is used by the uninstaller when uninstalling a previous version of POPFile.
-# It uses 'popfile.cfg' file to determine the full path of the directory where the corpus files
-# are stored. By default POPFile stores the corpus in the '$INSTDIR\corpus' directory but the
-# 'popfile.cfg' file can define a different location, using a variety of paths (eg relative,
-# absolute, local or even remote).
-#
-# If 'popfile.cfg' is found in the specified folder, we use the corpus parameter (if present)
-# otherwise we assume the default location is to be used (the sub-folder called 'corpus').
-#
-# Inputs:
-#         (top of stack)          - the path where 'popfile.cfg' is to be found
-#
-# Outputs:
-#         (top of stack)          - string containing the full (unambiguous) path to the corpus
-#
-#  Usage Example:
-#         Push $INSTDIR
-#         Call un.GetCorpusPath
-#         Pop $R0
-#
-#         ($R0 will be "C:\Program Files\POPFile\corpus" if default corpus location is used)
-#--------------------------------------------------------------------------
-
-Function un.GetCorpusPath
-
-  !define L_CORPUS        $R9
-  !define L_FILE_HANDLE   $R8
-  !define L_RESULT        $R7
-  !define L_SOURCE        $R6
-  !define L_TEMP          $R5
-
-  Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
-  Push ${L_RESULT}
-  Exch
-  Push ${L_CORPUS}
-  Push ${L_FILE_HANDLE}
-  Push ${L_TEMP}
-
-  StrCpy ${L_CORPUS} ""
-
-  IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default_locn
-  ClearErrors
-  FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
-
-loop:
-  FileRead ${L_FILE_HANDLE} ${L_TEMP}
-  IfErrors cfg_file_done
-  StrCpy ${L_RESULT} ${L_TEMP} 7
-  StrCmp ${L_RESULT} "corpus " got_old_corpus
-  StrCpy ${L_RESULT} ${L_TEMP} 13
-  StrCmp ${L_RESULT} "bayes_corpus " got_new_corpus
-  Goto loop
-
-got_old_corpus:
-  StrCpy ${L_CORPUS} ${L_TEMP} "" 7
-  Goto loop
-
-got_new_corpus:
-  StrCpy ${L_CORPUS} ${L_TEMP} "" 13
-  Goto loop
-
-cfg_file_done:
-  FileClose ${L_FILE_HANDLE}
-  Push ${L_CORPUS}
-  Call un.TrimNewlines
-  Pop ${L_CORPUS}
-  StrCmp ${L_CORPUS} "" use_default_locn use_cfg_data
-
-use_default_locn:
-  StrCpy ${L_RESULT} ${L_SOURCE}\corpus
-  Goto got_result
-
-use_cfg_data:
-  Push ${L_SOURCE}
-  Push ${L_CORPUS}
-  Call un.GetDataPath
-  Pop ${L_RESULT}
-
-got_result:
-  Pop ${L_TEMP}
-  Pop ${L_FILE_HANDLE}
-  Pop ${L_CORPUS}
-  Pop ${L_SOURCE}
-  Exch ${L_RESULT}  ; place full path of 'corpus' directory on top of the stack
-
-  !undef L_CORPUS
-  !undef L_FILE_HANDLE
-  !undef L_RESULT
-  !undef L_SOURCE
-  !undef L_TEMP
-
-FunctionEnd
 
 #--------------------------------------------------------------------------
 # Function: un.GetHistoryPath
@@ -557,17 +463,166 @@ got_result:
 
 FunctionEnd
 
-#--------------------------------------------------------------------------
-# Function: un.GetDataPath
+
+#==============================================================================================
 #
-# This function is used to convert a 'base directory' and a 'data folder' parameter (usually
-# relative to the 'base directory') into a single, absolute path. For example, it will convert
-# 'C:\Program Files\POPFile' and 'corpus' into 'C:\Program Files\POPFile\corpus'.
+# Macro-based Functions used by the installer and by the uninstaller
+#
+#==============================================================================================
+
+#--------------------------------------------------------------------------
+# Macro: GetCorpusPath
+#
+# The installation process and the uninstall process both use a function which finds the full
+# path for the corpus if a copy of 'popfile.cfg' is found in the installation folder. This
+# macro makes maintenance easier by ensuring that both processes use identical functions, with
+# the only difference being their names.
+#
+# The 'popfile.cfg' file is used to determine the full path of the directory where the corpus
+# files are stored. By default POPFile stores the corpus in the '$INSTDIR\corpus' directory but
+# the 'popfile.cfg' file can define a different location, using a variety of paths (eg relative,
+# absolute, local or even remote). If the path specified in 'popfile.cfg' end with a trailing
+# slash, the trailing slash is stripped.
+#
+# If 'popfile.cfg' is found in the specified folder, we use the corpus parameter (if present)
+# otherwise we assume the default location is to be used (the sub-folder called 'corpus').
+#
+# NOTE:
+# The !insertmacro GetCorpusPath "" and !insertmacro GetCorpusPath "un." commands are included
+# in this file so 'installer.nsi' can use 'Call GetCorpusPath' and 'Call un.GetCorpusPath'
+# without additional preparation.
+#
+# Inputs:
+#         (top of stack)          - the path where 'popfile.cfg' is to be found
+#
+# Outputs:
+#         (top of stack)          - string containing the full (unambiguous) path to the corpus
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Push $INSTDIR
+#         Call un.GetCorpusPath
+#         Pop $R0
+#
+#         ($R0 will be "C:\Program Files\POPFile\corpus" if default corpus location is used)
+#--------------------------------------------------------------------------
+
+!macro GetCorpusPath UN
+  Function ${UN}GetCorpusPath
+  
+    !define L_CORPUS        $R9
+    !define L_FILE_HANDLE   $R8
+    !define L_RESULT        $R7
+    !define L_SOURCE        $R6
+    !define L_TEMP          $R5
+  
+    Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
+    Push ${L_RESULT}
+    Exch
+    Push ${L_CORPUS}
+    Push ${L_FILE_HANDLE}
+    Push ${L_TEMP}
+  
+    StrCpy ${L_CORPUS} ""
+  
+    IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default_locn
+    ClearErrors
+    FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
+  
+  loop:
+    FileRead ${L_FILE_HANDLE} ${L_TEMP}
+    IfErrors cfg_file_done
+    StrCpy ${L_RESULT} ${L_TEMP} 7
+    StrCmp ${L_RESULT} "corpus " got_old_corpus
+    StrCpy ${L_RESULT} ${L_TEMP} 13
+    StrCmp ${L_RESULT} "bayes_corpus " got_new_corpus
+    Goto loop
+  
+  got_old_corpus:
+    StrCpy ${L_CORPUS} ${L_TEMP} "" 7
+    Goto loop
+  
+  got_new_corpus:
+    StrCpy ${L_CORPUS} ${L_TEMP} "" 13
+    Goto loop
+  
+  cfg_file_done:
+    FileClose ${L_FILE_HANDLE}
+    Push ${L_CORPUS}
+    Call ${UN}TrimNewlines
+    Pop ${L_CORPUS}
+    StrCmp ${L_CORPUS} "" use_default_locn use_cfg_data
+  
+  use_default_locn:
+    StrCpy ${L_RESULT} ${L_SOURCE}\corpus
+    Goto got_result
+
+  use_cfg_data:
+    StrCpy ${L_TEMP} ${L_CORPUS} 1 -1
+    StrCmp ${L_TEMP} "/" strip_slash no_trailing_slash
+    StrCmp ${L_TEMP} "\" 0 no_trailing_slash
+
+  strip_slash:
+    StrCpy ${L_CORPUS} ${L_CORPUS} -1
+
+  no_trailing_slash:
+    Push ${L_SOURCE}
+    Push ${L_CORPUS}
+    Call ${UN}GetDataPath
+    Pop ${L_RESULT}
+  
+  got_result:
+    Pop ${L_TEMP}
+    Pop ${L_FILE_HANDLE}
+    Pop ${L_CORPUS}
+    Pop ${L_SOURCE}
+    Exch ${L_RESULT}  ; place full path of 'corpus' directory on top of the stack
+  
+    !undef L_CORPUS
+    !undef L_FILE_HANDLE
+    !undef L_RESULT
+    !undef L_SOURCE
+    !undef L_TEMP
+  
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: GetCorpusPath
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro GetCorpusPath ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetCorpusPath
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+!insertmacro GetCorpusPath "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: GetDataPath
+#
+# The installation process and the uninstall process both use a function which converts a
+# 'base directory' and a 'data folder' parameter (usually relative to the 'base directory')
+# into a single, absolute path. For example, it will convert 'C:\Program Files\POPFile' and
+# 'corpus' into 'C:\Program Files\POPFile\corpus'. This macro makes maintenance easier by
+# ensuring that both processes use identical functions, with the only difference being their
+# names.
 #
 # It is assumed that the 'base directory' is in standard Windows format with no trailing slash.
 #
 # The 'data folder' may be supplied in a variety of different formats, for example:
 # corpus, ./corpus, "..\..\corpus", Z:/Data/corpus or even "\\server\share\corpus".
+#
+# NOTE:
+# The !insertmacro GetDataPath "" and !insertmacro GetDataPath "un." commands are included
+# in this file so 'installer.nsi' can use 'Call GetDataPath' and 'Call un.GetDataPath'
+# without additional preparation.
 #
 # Inputs:
 #         (top of stack)          - the 'data folder' parameter (eg "../../corpus")
@@ -577,7 +632,8 @@ FunctionEnd
 #         (top of stack)          - string containing the full (unambiguous) path to the data
 #                                   (the string "" is returned if input data was null)
 #
-#  Usage Example:
+#  Usage (after macro has been 'inserted'):
+#
 #         Push $INSTDIR
 #         Push "../../corpus"
 #         Call un.GetDataPath
@@ -586,102 +642,127 @@ FunctionEnd
 #         ($R0 will be "C:\corpus", assuming $INSTDIR was "C:\Program Files\POPFile")
 #--------------------------------------------------------------------------
 
-Function un.GetDataPath
-
-  !define L_BASEDIR     $R9
-  !define L_DATA        $R8
-  !define L_RESULT      $R7
-  !define L_TEMP        $R6
-
-  Exch ${L_DATA}        ; the 'data folder' parameter (often a relative path)
-  Exch
-  Exch ${L_BASEDIR}      ; the 'base directory' used for cases where 'data folder' is relative
-  Push ${L_RESULT}
-  Push ${L_TEMP}
-
-  StrCmp ${L_DATA} "" 0 strip_quotes
-  StrCpy ${L_DATA} ${L_BASEDIR}
-  Goto got_path
-
-strip_quotes:
-
-  ; Strip leading/trailing quotes, if any
-
-  StrCpy ${L_TEMP} ${L_DATA} 1
-  StrCmp ${L_TEMP} '"' 0 slashconversion
-  StrCpy ${L_DATA} ${L_DATA} "" 1
-  StrCpy ${L_TEMP} ${L_DATA} 1 -1
-  StrCmp ${L_TEMP} '"' 0 slashconversion
-  StrCpy ${L_DATA} ${L_DATA} -1
-
-slashconversion:
-  StrCmp ${L_DATA} "." source_folder
-  Push ${L_DATA}
-  Call un.StrBackSlash            ; ensure parameter uses backslashes
-  Pop ${L_DATA}
-
-  StrCpy ${L_TEMP} ${L_DATA} 2
-  StrCmp ${L_TEMP} ".\" sub_folder
-  StrCmp ${L_TEMP} "\\" got_path
-
-  StrCpy ${L_TEMP} ${L_DATA} 3
-  StrCmp ${L_TEMP} "..\" relative_folder
-
-  StrCpy ${L_TEMP} ${L_DATA} 1
-  StrCmp ${L_TEMP} "\" basedir_drive
-
-  StrCpy ${L_TEMP} ${L_DATA} 1 1
-  StrCmp ${L_TEMP} ":" got_path
-
-  ; Assume path can be safely added to 'base directory'
-
-  StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
-  Goto got_path
-
-source_folder:
-  StrCpy ${L_DATA} ${L_BASEDIR}
-  Goto got_path
-
-sub_folder:
-  StrCpy ${L_DATA} ${L_DATA} "" 2
-  StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
-  Goto got_path
-
-relative_folder:
-  StrCpy ${L_RESULT} ${L_BASEDIR}
-
-relative_again:
-  StrCpy ${L_DATA} ${L_DATA} "" 3
-  Push ${L_RESULT}
-  Call un.GetParent
-  Pop ${L_RESULT}
-  StrCpy ${L_TEMP} ${L_DATA} 3
-  StrCmp ${L_TEMP} "..\" relative_again
-  StrCpy ${L_DATA} ${L_RESULT}\${L_DATA}
-  Goto got_path
-
-basedir_drive:
-  StrCpy ${L_TEMP} ${L_BASEDIR} 2
-  StrCpy ${L_DATA} ${L_TEMP}${L_DATA}
-
-got_path:
-  Pop ${L_TEMP}
-  Pop ${L_RESULT}
-  Pop ${L_BASEDIR}
-  Exch ${L_DATA}  ; place full path to the data directory on top of the stack
-
-  !undef L_BASEDIR
-  !undef L_DATA
-  !undef L_RESULT
-  !undef L_TEMP
-
-FunctionEnd
+!macro GetDataPath UN
+  Function ${UN}GetDataPath
+  
+    !define L_BASEDIR     $R9
+    !define L_DATA        $R8
+    !define L_RESULT      $R7
+    !define L_TEMP        $R6
+  
+    Exch ${L_DATA}        ; the 'data folder' parameter (often a relative path)
+    Exch
+    Exch ${L_BASEDIR}      ; the 'base directory' used for cases where 'data folder' is relative
+    Push ${L_RESULT}
+    Push ${L_TEMP}
+  
+    StrCmp ${L_DATA} "" 0 strip_quotes
+    StrCpy ${L_DATA} ${L_BASEDIR}
+    Goto got_path
+  
+  strip_quotes:
+  
+    ; Strip leading/trailing quotes, if any
+  
+    StrCpy ${L_TEMP} ${L_DATA} 1
+    StrCmp ${L_TEMP} '"' 0 slashconversion
+    StrCpy ${L_DATA} ${L_DATA} "" 1
+    StrCpy ${L_TEMP} ${L_DATA} 1 -1
+    StrCmp ${L_TEMP} '"' 0 slashconversion
+    StrCpy ${L_DATA} ${L_DATA} -1
+  
+  slashconversion:
+    StrCmp ${L_DATA} "." source_folder
+    Push ${L_DATA}
+    Call ${UN}StrBackSlash            ; ensure parameter uses backslashes
+    Pop ${L_DATA}
+  
+    StrCpy ${L_TEMP} ${L_DATA} 2
+    StrCmp ${L_TEMP} ".\" sub_folder
+    StrCmp ${L_TEMP} "\\" got_path
+  
+    StrCpy ${L_TEMP} ${L_DATA} 3
+    StrCmp ${L_TEMP} "..\" relative_folder
+  
+    StrCpy ${L_TEMP} ${L_DATA} 1
+    StrCmp ${L_TEMP} "\" basedir_drive
+  
+    StrCpy ${L_TEMP} ${L_DATA} 1 1
+    StrCmp ${L_TEMP} ":" got_path
+  
+    ; Assume path can be safely added to 'base directory'
+  
+    StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
+    Goto got_path
+  
+  source_folder:
+    StrCpy ${L_DATA} ${L_BASEDIR}
+    Goto got_path
+  
+  sub_folder:
+    StrCpy ${L_DATA} ${L_DATA} "" 2
+    StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
+    Goto got_path
+  
+  relative_folder:
+    StrCpy ${L_RESULT} ${L_BASEDIR}
+  
+  relative_again:
+    StrCpy ${L_DATA} ${L_DATA} "" 3
+    Push ${L_RESULT}
+    Call ${UN}GetParent
+    Pop ${L_RESULT}
+    StrCpy ${L_TEMP} ${L_DATA} 3
+    StrCmp ${L_TEMP} "..\" relative_again
+    StrCpy ${L_DATA} ${L_RESULT}\${L_DATA}
+    Goto got_path
+  
+  basedir_drive:
+    StrCpy ${L_TEMP} ${L_BASEDIR} 2
+    StrCpy ${L_DATA} ${L_TEMP}${L_DATA}
+  
+  got_path:
+    Pop ${L_TEMP}
+    Pop ${L_RESULT}
+    Pop ${L_BASEDIR}
+    Exch ${L_DATA}  ; place full path to the data directory on top of the stack
+  
+    !undef L_BASEDIR
+    !undef L_DATA
+    !undef L_RESULT
+    !undef L_TEMP
+  
+  FunctionEnd
+!macroend
 
 #--------------------------------------------------------------------------
-# Function: un.StrBackSlash
+# Installer Function: GetDataPath
 #
-# This function is used by the uninstaller when it looks for the corpus files for the version
-# of POPFile which is being upgraded. It converts all the slashes in a string to backslashes
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro GetDataPath ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetDataPath
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+!insertmacro GetDataPath "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: StrBackSlash
+#
+# The installation process and the uninstall process both use a function which converts all
+# slashes in a string into backslashes. This macro makes maintenance easier by ensuring that
+# both processes use identical functions, with the only difference being their names.
+#
+# NOTE:
+# The !insertmacro StrBackSlash "" and !insertmacro StrBackSlash "un." commands are included
+# in this file so 'installer.nsi' can use 'Call StrBackSlash' and 'Call un.StrBackSlash'
+# without additional preparation.
 #
 # Inputs:
 #         (top of stack)            - string containing slashes (e.g. "C:/This/and/That")
@@ -689,50 +770,76 @@ FunctionEnd
 # Outputs:
 #         (top of stack)            - string containing backslashes (e.g. "C:\This\and\That")
 #
-# Usage Example:
+#  Usage (after macro has been 'inserted'):
+#
 #         Push "C:/Program Files/Directory/Whatever"
-#         Call un.StrBackSlash
+#         Call StrBackSlash
 #         Pop $R0
 #
 #         ($R0 at this point is ""C:\Program Files\Directory\Whatever")
 #
 #--------------------------------------------------------------------------
 
-Function un.StrBackSlash
-  Exch $R0    ; Input string with slashes
-  Push $R1    ; Output string using backslashes
-  Push $R2    ; Current character
-
-  StrCpy $R1 ""
-  StrCmp $R0 $R1 nothing_to_do
-
-loop:
-  StrCpy $R2 $R0 1
-  StrCpy $R0 $R0 "" 1
-  StrCmp $R2 "/" found
-  StrCpy $R1 "$R1$R2"
-  StrCmp $R0 "" done loop
-
-found:
-  StrCpy $R1 "$R1\"
-  StrCmp $R0 "" done loop
-
-done:
-  StrCpy $R0 $R1
-
-nothing_to_do:
-  Pop $R2
-  Pop $R1
-  Exch $R0
-FunctionEnd
+!macro StrBackSlash UN
+  Function ${UN}StrBackSlash
+    Exch $R0    ; Input string with slashes
+    Push $R1    ; Output string using backslashes
+    Push $R2    ; Current character
+  
+    StrCpy $R1 ""
+    StrCmp $R0 $R1 nothing_to_do
+  
+  loop:
+    StrCpy $R2 $R0 1
+    StrCpy $R0 $R0 "" 1
+    StrCmp $R2 "/" found
+    StrCpy $R1 "$R1$R2"
+    StrCmp $R0 "" done loop
+  
+  found:
+    StrCpy $R1 "$R1\"
+    StrCmp $R0 "" done loop
+  
+  done:
+    StrCpy $R0 $R1
+  
+  nothing_to_do:
+    Pop $R2
+    Pop $R1
+    Exch $R0
+  FunctionEnd
+!macroend
 
 #--------------------------------------------------------------------------
-# Function: un.GetParent
+# Installer Function: StrBackSlash
 #
-# This function is used by the uninstaller when it looks for the corpus files for the version
-# of POPFile which is being upgraded. It extracts the parent directory from a given path.
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro StrBackSlash ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.StrBackSlash
 #
-# NB: Path is assumed to use backslashes (\)
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+!insertmacro StrBackSlash "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: GetParent
+#
+# The installation process and the uninstall process both use a function which extracts the
+# parent directory from a given path. This macro makes maintenance easier by ensuring that both
+# processes use identical functions, with the only difference being their names.
+#
+# NB: The path is assumed to use backslashes (\)
+#
+# NOTE:
+# The !insertmacro GetParent "" and !insertmacro GetParent "un." commands are included
+# in this file so 'installer.nsi' can use 'Call GetParent' and 'Call un.GetParent'
+# without additional preparation.
 #
 # Inputs:
 #         (top of stack)          - string containing a path (e.g. C:\A\B\C)
@@ -740,7 +847,8 @@ FunctionEnd
 # Outputs:
 #         (top of stack)          - the parent part of the input string (e.g. C:\A\B)
 #
-#  Usage Example:
+#  Usage (after macro has been 'inserted'):
+#
 #         Push "C:\Program Files\Directory\Whatever"
 #         Call un.GetParent
 #         Pop $R0
@@ -749,33 +857,46 @@ FunctionEnd
 #
 #--------------------------------------------------------------------------
 
-Function un.GetParent
-  Exch $R0              ; old $R0 is on top of stack
-  Push $R1
-  Push $R2
-  Push $R3
-  StrLen $R3 $R0
+!macro GetParent UN
+  Function ${UN}GetParent
+    Exch $R0              ; old $R0 is on top of stack
+    Push $R1
+    Push $R2
+    Push $R3
+    StrLen $R3 $R0
+  
+  loop:
+    IntOp $R1 $R1 - 1
+    IntCmp $R1 -$R3 exit exit
+    StrCpy $R2 $R0 1 $R1
+    StrCmp $R2 "\" exit
+    Goto loop
+  
+  exit:
+    StrCpy $R0 $R0 $R1
+    Pop $R3
+    Pop $R2
+    Pop $R1
+    Exch $R0              ; put $R0 on top of stack, restore $R0 to original value
+  FunctionEnd
+!macroend
 
-loop:
-  IntOp $R1 $R1 - 1
-  IntCmp $R1 -$R3 exit exit
-  StrCpy $R2 $R0 1 $R1
-  StrCmp $R2 "\" exit
-  Goto loop
-
-exit:
-  StrCpy $R0 $R0 $R1
-  Pop $R3
-  Pop $R2
-  Pop $R1
-  Exch $R0              ; put $R0 on top of stack, restore $R0 to original value
-FunctionEnd
-
-#==============================================================================================
+#--------------------------------------------------------------------------
+# Installer Function: GetParent
 #
-# Macro-based Functions used by the installer and by the uninstaller
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro GetParent ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetParent
 #
-#==============================================================================================
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+!insertmacro GetParent "un."
+
 
 #--------------------------------------------------------------------------
 # Macro: StrStr
@@ -853,7 +974,7 @@ FunctionEnd
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-;!insertmacro StrStr "un."    ; Temporarily disabled (to avoid a compiler warning) [03-Oct-03]
+; !insertmacro StrStr "un."     ;' Temporarily disabled [03-Oct-03]
 
 
 #--------------------------------------------------------------------------

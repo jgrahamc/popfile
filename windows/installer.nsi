@@ -873,6 +873,99 @@ skip_autostart_set:
 SectionEnd
 
 #--------------------------------------------------------------------------
+# Installer Section: Flat File Corpus Backup component (always 'installed')
+#
+# If we are performing an upgrade of a 'flat file' version of POPFile, we make a backup of the
+# flat file corpus structure. Note that if a backup already exists, we do nothing.
+#
+# The backup is created in the '$INSTDIR\backup' folder. Information on the backup is stored
+# in the 'backup.ini' file to assist in restoring the flat file corpus. A copy of 'popfile.cfg'
+# is also placed in the backup folder.
+#--------------------------------------------------------------------------
+
+Section "-FlatFileBackup" SecBackup
+
+  !define L_CFG_HANDLE    $R9     ; handle for "popfile.cfg"
+  !define L_CORPUS_PATH   $R8     ; full path to the corpus  
+  !define L_TEMP          $R7
+
+  Push ${L_CFG_HANDLE}
+  Push ${L_CORPUS_PATH}
+  Push ${L_TEMP}
+  
+  IfFileExists "$INSTDIR\popfile.cfg" 0 exit
+  IfFileExists "$INSTDIR\backup\backup.ini" exit
+  
+  ; Use data in 'popfile.cfg' to generate the full path to the corpus folder
+  
+  Push $INSTDIR
+  Call GetCorpusPath
+  Pop ${L_CORPUS_PATH}
+  
+  FindFirst ${L_CFG_HANDLE} ${L_TEMP} ${L_CORPUS_PATH}\*.*
+
+  ; If the "corpus" directory does not exist then "${L_CFG_HANDLE}" will be empty
+
+  StrCmp ${L_CFG_HANDLE} "" nothing_to_backup
+
+  ; Now search through the corpus folder, looking for buckets (at this point ${L_TEMP} is ".")
+
+corpus_check:
+  FindNext ${L_CFG_HANDLE} ${L_TEMP}
+  StrCmp ${L_TEMP} ".." corpus_check
+  StrCmp ${L_TEMP} "" nothing_to_backup
+
+  ; Assume what we've found is a bucket folder, now check if it contains
+  ; a BerkeleyDB file or a flat-file corpus file. We stop our search as
+  ; soon as we find either type of file (i.e. we do not examine every bucket)
+  
+  IfFileExists "${L_CORPUS_PATH}\${L_TEMP}\table.db" nothing_to_backup
+  IfFileExists "${L_CORPUS_PATH}\${L_TEMP}\table" backup_corpus
+  Goto corpus_check
+
+backup_corpus:
+  
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_FFCBACK)"
+  SetDetailsPrint listonly
+
+  CreateDirectory "$INSTDIR\backup"
+  CopyFiles "$INSTDIR\popfile.cfg" "$INSTDIR\backup\popfile.cfg"
+  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "CorpusPath" "${L_CORPUS_PATH}"
+  
+  StrCpy ${L_TEMP} ${L_CORPUS_PATH}
+  Push ${L_TEMP}
+  Call GetParent
+  Pop ${L_TEMP}
+  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "ParentPath" "${L_TEMP}"
+  StrLen ${L_TEMP} ${L_TEMP}
+  IntOp ${L_TEMP} ${L_TEMP} + 1
+  StrCpy ${L_TEMP} ${L_CORPUS_PATH} "" ${L_TEMP}
+  
+  CopyFiles /SILENT "${L_CORPUS_PATH}\*.*" "$INSTDIR\backup\${L_TEMP}"
+  
+  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Corpus" "${L_TEMP}"
+  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "new"
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
+
+nothing_to_backup:
+  FindClose ${L_CFG_HANDLE}
+
+exit:
+  Pop ${L_TEMP}
+  Pop ${L_CORPUS_PATH}
+  Pop ${L_CFG_HANDLE}
+  
+  !undef L_CFG_HANDLE
+  !undef L_CORPUS_PATH
+  !undef L_TEMP
+  
+SectionEnd
+
+#--------------------------------------------------------------------------
 # Installer Section: (optional) Skins component
 #--------------------------------------------------------------------------
 
@@ -1205,7 +1298,7 @@ FunctionEnd
 # 'Languages' component for further details). A copy of any settings found is kept in 'ioC.ini'
 # for later use in the 'Languages' section.
 #
-# This function also ensures that only copy of the tray icon and console settings is present,
+# This function also ensures that only one copy of the tray icon & console settings is present,
 # and saves (in 'ioC.ini') any values found for use when the user is offered the chance to start
 # POPFile from the installer. If no setting is found, we save '?' in 'ioC.ini'. These settings
 # are used by the 'StartPOPFilePage' and 'CheckLaunchOptions' functions.
@@ -1983,6 +2076,24 @@ close_file:
   Goto display_the_page
 
 page_enabled:
+
+  ; If we are upgrading POPFile, the corpus might have to be converted from flat file format
+  
+  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
+  StrCmp ${L_TEMP} "new" 0 continue
+  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "old"
+  
+  ; Corpus conversion will occur when POPFile is started - this may take several minutes,
+  ; so we ensure that POPFile will not be run in the background when it is run for the
+  ; first time (by the installer, by using the Start Menu or by running 'popfile.exe').
+  
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "1"
+  Push "1"
+  Call SetConsoleMode
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "Flags" "DISABLED"
+
+continue:
 
   ; clear all three radio buttons ('do not start', 'use console', 'run in background')
 
