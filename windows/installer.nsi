@@ -968,14 +968,7 @@ app_paths:
   File "..\engine\bayes.pl"
   File "..\engine\pipe.pl"
 
-  File "..\engine\pix.gif"
   File "..\engine\favicon.ico"
-  File "..\engine\black.gif"
-  File "..\engine\otto.gif"
-  File "..\engine\otto.png"
-  File "..\engine\left.gif"
-  File "..\engine\right.gif"
-  File "..\engine\x.gif"
 
   SetOutPath "$G_ROOTDIR\Classifier"
   File "..\engine\Classifier\Bayes.pm"
