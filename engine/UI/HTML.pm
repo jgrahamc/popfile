@@ -1173,7 +1173,7 @@ sub advanced_page
     my $groupCounter = 0;
     my $groupSize = 5;
     my $firstRow = 1;
-    for my $word (sort keys %{$self->{classifier__}->get_stop_word_list()}) {
+    for my $word (sort keys %{$self->{classifier__}->get_stopword_list()}) {
         $word =~ /^(.)/;
         if ( $1 ne $last )  {
             if (! $firstRow) {

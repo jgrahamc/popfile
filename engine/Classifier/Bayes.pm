@@ -1609,13 +1609,13 @@ sub delete_magnet
 
 # ---------------------------------------------------------------------------------------------
 #
-# get_stop_word_list
+# get_stopword_list
 #
 # Gets the complete list of stop words
 #
 # ---------------------------------------------------------------------------------------------
 
-sub get_stop_word_list
+sub get_stopword_list
 {
     my ( $self ) = @_;
 

@@ -27,17 +27,17 @@ sub new
 
     bless $self, $type;
 
-    $self->load_stop_words();
+    $self->load_stopwords();
 
     return $self;
 }
 
 # ---------------------------------------------------------------------------------------------
 #
-# load_stop_words, save_stop_words - load and save the stop word list in the stopwords file
+# load_stopwords, save_stopwords - load and save the stop word list in the stopwords file
 #
 # ---------------------------------------------------------------------------------------------
-sub load_stop_words
+sub load_stopwords
 {
     my ($self) = @_;
 
@@ -52,7 +52,7 @@ sub load_stop_words
     }
 }
 
-sub save_stop_words
+sub save_stopwords
 {
     my ($self) = @_;
 
@@ -135,7 +135,7 @@ sub add_stopword
 
     if ( $stopword ne '' ) {
         $self->{stop__}{$stopword} = 1;
-        $self->save_stop_words();
+        $self->save_stopwords();
 
        return 1;
     }
@@ -151,7 +151,7 @@ sub remove_stopword
 
     if ( $stopword ne '' ) {
         delete $self->{stop__}{$stopword};
-        $self->save_stop_words();
+        $self->save_stopwords();
 
         return 1;
     }
