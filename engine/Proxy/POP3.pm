@@ -55,15 +55,6 @@ sub initialize
     # Default ports for POP3 service and the user interface
     $self->config_( 'port', 110 );
 
-    # Subject modification (global setting is on)
-    $self->config_( 'subject', 1 );
-
-    # Adding the X-Text-Classification on
-    $self->config_( 'xtc', 1 );
-
-    # Adding the X-POPFile-Link is no
-    $self->config_( 'xpl', 1 );
-
     # There is no default setting for the secure server
     $self->config_( 'server', '' );
     $self->config_( 'sport', 110 );

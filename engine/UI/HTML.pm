@@ -58,14 +58,14 @@ sub new
     # history page
     #
     # The history hash contains information about ALL the files stored in the history
-    # folder (by default messages/) and is updated by the load_history_cache method
+    # folder (by default messages/) and is updated by the load_history_cache__ method
     #
     # Access to the history cache is formatted $self->{history}{file}{subkey} where
     # the file is the name of the file that is related to this history entry.
     #
     # The subkeys are
     #
-    #   cull            Used internally by load_history_cache (see there for details)
+    #   cull            Used internally by load_history_cache__ (see there for details)
     #   from            The address the email was from
     #   short_from      Version of from with max 40 characters
     #   subject         The subject of the email
@@ -80,7 +80,7 @@ sub new
     # in the current filter, sort or search set.
     #
     # history_invalid is set to cause the history cache to be reloaded by a call to
-    # load_history_cache, and is set by a call to invalidate_history_cache
+    # load_history_cache__, and is set by a call to invalidate_history_cache
 
     $self->{history__}         = {};
     $self->{history_keys__}    = ();
@@ -133,7 +133,7 @@ sub initialize
     $self->config_( 'local', 1 );
 
     # The default location for the message files
-    $self->config_( 'msgdir', 'messages/' );
+    $self->global_config_( 'msgdir', 'messages/' );
 
     # Use the default skin
     $self->config_( 'skin', 'SimplyBlue' );
@@ -213,7 +213,7 @@ sub start
     # or History_NoSubject in while loading the cache
 
     $self->invalidate_history_cache();
-    $self->load_history_cache();
+    $self->load_history_cache__();
     $self->sort_filter_history( '', '', '' );
 
     $self->{server} = IO::Socket::INET->new( Proto     => 'tcp',
@@ -2013,11 +2013,11 @@ sub compare_mf
     my $am;
     my $bm;
 
-    if ( $a =~ /popfile(.*)=(.*)\.msg/ )  {
+    if ( $a =~ /popfile(.+)=(.+)\.msg/ )  {
         $ad = $1;
         $am = $2;
 
-        if ( $b =~ /popfile(.*)=(.*)\.msg/ ) {
+        if ( $b =~ /popfile(.+)=(.+)\.msg/ ) {
             $bd = $1;
             $bm = $2;
 
@@ -2117,14 +2117,14 @@ sub sort_filter_history
 
 # ---------------------------------------------------------------------------------------------
 #
-# load_history_cache
+# load_history_cache__
 #
 # Forces a reload of the history cache from disk.  This works by globbing the history
 # directory and then checking for new files that need to be loaded into the history cache
 # and culling any files that have been removed without telling us
 #
 # ---------------------------------------------------------------------------------------------
-sub load_history_cache
+sub load_history_cache__
 {
     my ( $self ) = @_;
 
@@ -2145,14 +2145,14 @@ sub load_history_cache
     # through them looking for existing entries in the history which must be marked
     # for non-culling and new entries that need to be added to the end
 
-    my @history_files = sort compare_mf glob $self->config_( 'msgdir' ) . "popfile*=*.msg";
+    my @history_files = sort compare_mf glob $self->global_config_( 'msgdir' ) . "popfile*=*.msg";
 
     foreach my $i ( 0 .. $#history_files ) {
 
         # Strip any directory portion of the name in the current file so that we
         # just get the base name of the file that we are dealing with
 
-        $history_files[$i] =~ /(popfile.*\.msg)/;
+        $history_files[$i] =~ /(popfile\d+=\d+\.msg)$/;
         $history_files[$i] = $1;
 
         # If this file already exists in the history cache then just mark it not
@@ -2169,7 +2169,7 @@ sub load_history_cache
             my $from    = '';
             my $subject = '';
 
-            if ( open MAIL, '<'. $self->config_( 'msgdir' ) . "$history_files[$i]" ) {
+            if ( open MAIL, '<'. $self->global_config_( 'msgdir' ) . "$history_files[$i]" ) {
                 while ( <MAIL> )  {
                     last          if ( /^(\r\n|\r|\n)/ );
                     $from = $1    if ( /^From:(.*)/i );
@@ -2336,7 +2336,7 @@ sub history_write_class {
 
     $filename =~ s/msg$/cls/;
 
-    open CLASS, '>' . $self->config_( 'msgdir' ) . $filename;
+    open CLASS, '>' . $self->global_config_( 'msgdir' ) . $filename;
 
     if ( defined( $magnet ) && ( $magnet ne '' ) ) {
         print CLASS "$bucket MAGNET $magnet\n";
@@ -2377,7 +2377,7 @@ sub history_load_class {
     my $usedtobe;
     my $magnet = '';
 
-    if ( open CLASS, '<' . $self->config_( 'msgdir' ) . $filename ) {
+    if ( open CLASS, '<' . $self->global_config_( 'msgdir' ) . $filename ) {
         $bucket = <CLASS>;
         if ( $bucket =~ /([^ ]+) MAGNET (.+)/ ) {
             $bucket = $1;
@@ -2394,7 +2394,7 @@ sub history_load_class {
         close CLASS;
         $bucket =~ s/[\r\n]//g;
     } else {
-        print "Error: " . $self->config_( 'msgdir' ) . "$filename: $!\n";
+        print "Error: " . $self->global_config_( 'msgdir' ) . "$filename: $!\n";
     }
     return ( $reclassified, $bucket, $usedtobe, $magnet );
 }
@@ -2474,7 +2474,7 @@ sub history_reclassify
 
                 # Parse the messages and tally the word-count
 
-                $self->{classifier__}->{parser}->parse_stream( $self->config_( 'msgdir' ) . "$mail_file" );
+                $self->{classifier__}->{parser}->parse_stream( $self->global_config_( 'msgdir' ) . "$mail_file" );
 
                 foreach my $word (keys %{$self->{classifier__}->{parser}->{words}}) {
                     $self->{classifier__}->get_word_count()   += $self->{classifier__}->{parser}->{words}{$word};
@@ -2567,7 +2567,7 @@ sub history_undo
                     }
                 }
 
-                $self->{classifier__}->{parser}->parse_stream($self->config_( 'msgdir' ) . "$mail_file");
+                $self->{classifier__}->{parser}->parse_stream($self->global_config_( 'msgdir' ) . "$mail_file");
 
                 # Tally the words
 
@@ -2759,7 +2759,7 @@ sub history_page
     # any of the sort, search or filter options have changed they must be
     # applied.  The watch word here is to avoid doing work
 
-    $self->load_history_cache() if ( $self->{history_invalid__} == 1 );
+    $self->load_history_cache__() if ( $self->{history_invalid__} == 1 );
     $self->sort_filter_history( $self->{form__}{filter},
                                 $self->{form__}{search},
                                 $self->{form__}{sort} ) if ( ( defined( $self->{form__}{setfilter}     ) ) ||
@@ -2962,7 +2962,7 @@ sub history_page
                 if ( $self->{history__}{$mail_file}{magnet} eq '' )  {
                     $self->{classifier__}->{parser}->{color} = 1;
                     $self->{classifier__}->{parser}->{bayes} = $self->{classifier__};
-                    $body .= $self->{classifier__}->{parser}->parse_stream($self->config_( 'msgdir' ) . "$self->{form__}{view}");
+                    $body .= $self->{classifier__}->{parser}->parse_stream($self->global_config_( 'msgdir' ) . "$self->{form__}{view}");
                     $self->{classifier__}->{parser}->{color} = 0;
                 } else {
                     $self->{history__}{$mail_file}{magnet} =~ /(.+): ([^\r\n]+)/;
@@ -2970,7 +2970,7 @@ sub history_page
                     my $text   = $2;
                     $body .= "<tt>";
 
-                    open MESSAGE, "<$self->config_( 'msgdir' )$self->{form__}{view}";
+                    open MESSAGE, '<' . $self->global_config_( 'msgdir' ) . "$self->{form__}{view}";
                     my $line;
                     # process each line of the message
                     while ($line = <MESSAGE>) {
@@ -3008,7 +3008,7 @@ sub history_page
                 $body .= "</td>\n</tr>\n</table>\n</td>\n";
 
                 $body .= "<td class=\"top20\" valign=\"top\">\n";
-                $self->{classifier__}->classify_file($self->config_( 'msgdir' ) . "$self->{form__}{view}");
+                $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . "$self->{form__}{view}");
                 $body .= $self->{classifier__}->{scores};
                 $body .= "</td>\n</tr>\n";
             }
@@ -3187,7 +3187,7 @@ sub handle_url
         # but we do find it on disk using perl's -e file test operator (returns
         # true if the file exists).
 
-        $self->invalidate_history_cache() if ( !$found && ( -e ($self->config_( 'msgdir' ) . "$file") ) );
+        $self->invalidate_history_cache() if ( !$found && ( -e ($self->global_config_( 'msgdir' ) . "$file") ) );
         $self->http_redirect( $client, "/history?session=$self->{session_key__}&start_message=0&view=$self->{form__}{view}#$self->{form__}{view}" );
         return 1;
     }
@@ -3362,7 +3362,7 @@ sub remove_mail_files
     $self->calculate_today();
 
     if ( $self->{today} > $yesterday ) {
-        my @mail_files = glob $self->config_( 'msgdir' ) . "popfile*=*.msg";
+        my @mail_files = glob $self->global_config_( 'msgdir' ) . "popfile*=*.msg";
 
         foreach my $mail_file (@mail_files) {
             my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($mail_file);
@@ -3374,7 +3374,7 @@ sub remove_mail_files
 
          # Clean up old style msg/cls files
 
-        @mail_files = glob $self->config_( 'msgdir' ) . "popfile*_*.???";
+        @mail_files = glob $self->global_config_( 'msgdir' ) . "popfile*_*.???";
 
         foreach my $mail_file (@mail_files) {
             unlink($mail_file);
@@ -3432,7 +3432,7 @@ sub history_delete_file
             # TODO This may be UNSAFE, please write a better comment that explains
             # why this might be unsafe.  What does unsafe mean in this context?
 
-            $self->history_copy_file( $self->config_( 'msgdir' ) . "$mail_file", $path, $mail_file );
+            $self->history_copy_file( $self->global_config_( 'msgdir' ) . "$mail_file", $path, $mail_file );
         }
     }
 
@@ -3444,9 +3444,9 @@ sub history_delete_file
     # Now remove the files from the disk, remove both the msg file containing
     # the mail message and its associated CLS file
 
-    unlink( $self->config_( 'msgdir' ) . "$mail_file" );
+    unlink( $self->global_config_( 'msgdir' ) . "$mail_file" );
     $mail_file =~ s/msg$/cls/;
-    unlink( $self->config_( 'msgdir' ) . "$mail_file" );
+    unlink( $self->global_config_( 'msgdir' ) . "$mail_file" );
 }
 
 

@@ -109,6 +109,15 @@ sub initialize
 {
     my ( $self ) = @_;
 
+    # Subject modification (global setting is on)
+    $self->config_( 'subject', 1 );
+
+    # Adding the X-Text-Classification on
+    $self->config_( 'xtc', 1 );
+
+    # Adding the X-POPFile-Link is no
+    $self->config_( 'xpl', 1 );
+
     # No default unclassified probability
     $self->config_( 'unclassified_probability', 0 );
 
@@ -524,7 +533,7 @@ sub classify_file
     }
 
     # If the user has not defined any buckets then we escape here return unclassified
-    return "unclassified " if ( $#buckets == -1 );
+    return "unclassified" if ( $#buckets == -1 );
 
     # The score hash will contain the likelihood that the given message is in each
     # bucket, the buckets are the keys for score
@@ -559,7 +568,7 @@ sub classify_file
 
     # Switching from using *= to += and using the log of every probability instead
 
-    foreach my $word (keys %{$self->{parser__}->{words}}) {
+    foreach my $word (keys %{$self->{parser__}->{words__}}) {
         my $wmax = -10000;
         if ($self->{wordscores__})  {
             $wtprob{$word} = 0;
@@ -575,7 +584,7 @@ sub classify_file
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
             # and we multiply by the number of times that the word occurs
 
-            $score{$bucket} += ( $probability * $self->{parser__}{words}{$word} );
+            $score{$bucket} += ( $probability * $self->{parser__}{words__}{$word} );
             if ($self->{wordscores__})  {
                 $wtprob{$word} += exp($probability);
                 $wbprob{$word}{$bucket} = exp($probability);
@@ -583,9 +592,9 @@ sub classify_file
         }
 
         if ($wmax > $self->{not_likely__}) {
-            $correction += ($wmax - $logbuck) * $self->{parser__}{words}{$word};
+            $correction += ($wmax - $logbuck) * $self->{parser__}{words__}{$word};
         } else {
-            $correction += $wmax * $self->{parser__}{words}{$word};
+            $correction += $wmax * $self->{parser__}{words__}{$word};
         }
         $wordprob{$word} = exp($wmax);
     }
@@ -712,8 +721,8 @@ sub classify_and_modify
     # Whether we are currently reading the mail headers or not
     my $getting_headers = 1;
 
-    my $temp_file  = "$self->config_( 'msgdir' )popfile$dcount" . "=$mcount.msg";
-    my $class_file = "$self->config_( 'msgdir' )popfile$dcount" . "=$mcount.cls";
+    my $temp_file  = $self->global_config_( 'msgdir' ) . "popfile$dcount" . "=$mcount.msg";
+    my $class_file = $self->global_config_( 'msgdir' ) . "popfile$dcount" . "=$mcount.cls";
 
     open TEMP, ">$temp_file";
 
