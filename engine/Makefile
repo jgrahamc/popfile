@@ -104,7 +104,7 @@ BUILD_ZIP=wzzip -P $(POPFILE_ZIP) -a $^
 xplat: $(POPFILE_ZIP)
 $(POPFILE_ZIP): core manual skins POPFile/popfile_version
 
-core: popfile.pl otto.gif otto.png pix.gif black.gif bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/*.pm Services/*.pm UI/*.pm v$(POPFILE_VERSION).change license stopwords favicon.ico $(POPFILE_VERSION_FILE) Classifier/popfile.sql
+core: popfile.pl otto.gif otto.png pix.gif black.gif bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/*.pm Services/*.pm UI/*.pm v$(POPFILE_VERSION).change license stopwords favicon.ico $(POPFILE_VERSION_FILE) Classifier/popfile.sql popfile.pck
 	rm -f $(POPFILE_ZIP)
 	$(BUILD_ZIP)
 
@@ -147,4 +147,4 @@ $(POPFILE_VERSION_FILE): vars.mak
 packing: popfile.pck
 
 popfile.pck: popfile.pl bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/*.pm Services/*.pm UI/*.pm
-	@perl make_packing_list.pl $@ $?
+	@perl make_packing_list.pl $@ $^

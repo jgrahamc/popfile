@@ -46,7 +46,7 @@ foreach my $file (@ARGV) {
 
 open PACKAGE, ">$output";
 foreach my $module (sort keys %modules) {
-    if ( $module !~ /^Classifier|POPFile|Proxy/ ) {
+    if ( $module !~ /^Classifier|POPFile|Proxy|UI/ ) {
         print PACKAGE "$modules{$module}\t0.0.0\t$module\n";
     }
 }
@@ -66,11 +66,11 @@ sub scan_file
 
     if ( open FILE, "<$file" ) {
         while ( <FILE> ) {
-            if ( /^[ \t]*require[ \t]+([^ \t]+::[^ \t\r\n;]+)/ ) {
+            if ( /^[ \t]*require[ \t]+([A-Z][^ \t\r\n;]+)/ ) {
                 $modules{$1} = 'OPTIONAL-TODO';
                 next;
             }
-            if ( /^[ \t]*use[ \t]+([^ \t]+::[^ \t\r\n;]+)/ ) {
+            if ( /^[ \t]*use[ \t]+([A-Z][^ \t\r\n;]+)/ ) {
                 $modules{$1} = 'REQUIRED';
                 next;
             }
