@@ -343,9 +343,10 @@ sub parse_stream
         if ( $self->{ut} ne '' ) 
         {
             $colorized .= $self->{ut};
-            $colorized .= "</tt>";
-            $colorized =~ s/\r\n/<br>/g;
         }
+
+        $colorized .= "</tt>";
+        $colorized =~ s/\r\n/<br>/g;
         
         return $colorized;
     }
