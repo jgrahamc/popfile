@@ -190,165 +190,174 @@ sub parse_stream
     
     while (<MSG>)
     {
-        my $line = $_;
+        my $read = $_;
 
-        print ">>> $line" if $self->{debug};
-    
-        if ( $self->{color} ) 
+        # For the Mac we do further splitting of the line at the CR characters
+        
+        while ( $read =~ s/(.*?\r)// ) 
         {
-            if ( $self->{ut} ne '' ) 
+            my $line = $1;
+             
+            $line =~ s/\r$/\r\n/;
+
+            print ">>> $line" if $self->{debug};
+
+            if ( $self->{color} ) 
             {
-                $colorized .= $self->{ut};
+                if ( $self->{ut} ne '' ) 
+                {
+                    $colorized .= $self->{ut};
+                }
+
+                my $splitline = $line;    
+                $splitline =~ s/([^\r\n]{150})/$1\r\n/g;
+
+                $self->{ut} = $splitline;
+                $self->{ut} =~ s/</&lt;/g;
+                $self->{ut} =~ s/>/&gt;/g;
             }
 
-            my $splitline = $line;    
-            $splitline =~ s/([^\r\n]{150})/$1\r\n/g;
-        
-            $self->{ut} = $splitline;
-            $self->{ut} =~ s/</&lt;/g;
-            $self->{ut} =~ s/>/&gt;/g;
-        }
+            # If we are in a mime document then spot the boundaries
 
-        # If we are in a mime document then spot the boundaries
-
-        if ( ( $mime ne '' ) && ( $line =~ /$mime/ ) )
-        {
-            print "Hit mime boundary\n" if $self->{debug};
-            $encoding = '';
-            next;
-        }
-    
-        # If we are doing base64 decoding then look for suitable lines and remove them 
-        # for decoding
-    
-        if ( $encoding =~ /base64/i )
-        {
-            my $decoded = '';
-            $self->{ut} = '' if $self->{color};
-            while ( ( $line =~ /^[A-Za-z0-9+\/]{72}[\n\r]?$/ ) || ( $line =~ /^[A-Za-z0-9+\/]+=?[\n\r]?$/ ) )
+            if ( ( $mime ne '' ) && ( $line =~ /$mime/ ) )
             {
-                print "64> $line" if $self->{debug};
-                $decoded    .= un_base64( $self, $line );
-                if ( $decoded =~ /[^A-Za-z\-\.]$/ ) 
+                print "Hit mime boundary\n" if $self->{debug};
+                $encoding = '';
+                next;
+            }
+
+            # If we are doing base64 decoding then look for suitable lines and remove them 
+            # for decoding
+
+            if ( $encoding =~ /base64/i )
+            {
+                my $decoded = '';
+                $self->{ut} = '' if $self->{color};
+                while ( ( $line =~ /^[A-Za-z0-9+\/]{72}[\n\r]?$/ ) || ( $line =~ /^[A-Za-z0-9+\/]+=?[\n\r]?$/ ) )
                 {
-                    if ( $self->{color} )
+                    print "64> $line" if $self->{debug};
+                    $decoded    .= un_base64( $self, $line );
+                    if ( $decoded =~ /[^A-Za-z\-\.]$/ ) 
                     {
-                        my $splitline = $line;    
-                        $splitline =~ s/([^\r\n]{150})/$1\r\n/g;
-                        $self->{ut} = $splitline;
-                    }
-                    add_line( $self, $decoded, 1 );
-                    $decoded = '';
-                    if ( $self->{color} ) 
-                    {
-                        if ( $self->{ut} ne '' ) 
+                        if ( $self->{color} )
                         {
-                            $colorized .= $self->{ut};
-                            $self->{ut} = '';
+                            my $splitline = $line;    
+                            $splitline =~ s/([^\r\n]{150})/$1\r\n/g;
+                            $self->{ut} = $splitline;
+                        }
+                        add_line( $self, $decoded, 1 );
+                        $decoded = '';
+                        if ( $self->{color} ) 
+                        {
+                            if ( $self->{ut} ne '' ) 
+                            {
+                                $colorized .= $self->{ut};
+                                $self->{ut} = '';
+                            }
                         }
                     }
+                    $line = <MSG>;
                 }
-                $line = <MSG>;
+
+                add_line( $self, $decoded, 1 );
             }
-            
-            add_line( $self, $decoded, 1 );
-        }
 
-        if ( $line =~ /<html>/i ) 
-        {
-            $content_type = 'text/html';
-        }
-
-        # Transform some escape characters
-        
-        if ( $encoding =~ /quoted\-printable/ )
-        {
-            $line =~ s/=20/ /g;
-            $line =~ s/=3D/=/g;
-        }
-        
-        # Remove HTML tags completely
-        
-        if ( $content_type =~ /html/ ) 
-        {
-            $line =~ s/<[\/!]?[A-Za-z]+[^>]*?>/ /g;
-            $line =~ s/<[\/!]?[A-Za-z]+[^>]*?$/ /;
-            $line =~ s/^[^>]*?>/ /;
-        }
-        
-        # If we have an email header then just keep the part after the :
-        
-        if ( $line =~ /^([A-Za-z-]+): ([^\n\r]*)/ ) 
-        {
-            my $header   = $1;
-            my $argument = $2;
-            
-            print "Header ($header) ($argument)\n" if ($self->{debug});
-
-            if ( $header =~ /From/ ) 
+            if ( $line =~ /<html>/i ) 
             {
-                $encoding = '';
-                $content_type = '';
+                $content_type = 'text/html';
             }
-            
-            # Handle the From, To and Cc headers and extract email addresses
-            # from them and treat them as words
-            
-            if ( $header =~ /(From|To|Cc)/i )
+
+            # Transform some escape characters
+
+            if ( $encoding =~ /quoted\-printable/ )
             {
-                while ( $argument =~ s/<([A-Za-z0-9\-_]+?@[A-Za-z0-9\-_\.]+?)>// ) 
+                $line =~ s/=20/ /g;
+                $line =~ s/=3D/=/g;
+            }
+
+            # Remove HTML tags completely
+
+            if ( $content_type =~ /html/ ) 
+            {
+                $line =~ s/<[\/!]?[A-Za-z]+[^>]*?>/ /g;
+                $line =~ s/<[\/!]?[A-Za-z]+[^>]*?$/ /;
+                $line =~ s/^[^>]*?>/ /;
+            }
+
+            # If we have an email header then just keep the part after the :
+
+            if ( $line =~ /^([A-Za-z-]+): ([^\n\r]*)/ ) 
+            {
+                my $header   = $1;
+                my $argument = $2;
+
+                print "Header ($header) ($argument)\n" if ($self->{debug});
+
+                if ( $header =~ /From/ ) 
                 {
-                    update_word($self, $1, 0);
+                    $encoding = '';
+                    $content_type = '';
                 }
-                
+
+                # Handle the From, To and Cc headers and extract email addresses
+                # from them and treat them as words
+
+                if ( $header =~ /(From|To|Cc)/i )
+                {
+                    while ( $argument =~ s/<([A-Za-z0-9\-_]+?@[A-Za-z0-9\-_\.]+?)>// ) 
+                    {
+                        update_word($self, $1, 0);
+                    }
+
+                    add_line( $self, $argument, 0 );
+                    next;
+                }
+
+                # Look for MIME
+
+                if ( $header =~ /Content-Type/i ) 
+                {
+                    if ( $argument =~ /multipart\//i )
+                    {
+                        my $boundary = $argument;
+                        if ( !( $argument =~ /boundary=\"(.*)\"/ ))
+                        {
+                            $boundary = <MSG>;
+                        }
+
+                        if ( $boundary =~ /boundary=\"(.*)\"/ ) 
+                        {
+                            print "Set mime boundary to $1\n" if $self->{debug};
+
+                            $mime = $1;
+                            $mime =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\\1/g;
+                        }
+                    }
+
+                    $content_type = $argument;
+                    next;
+                }
+
+                # Look for the different encodings in a MIME document, when we hit base64 we will
+                # do a special parse here since words might be broken across the boundaries
+
+                if ( $header =~ /Content-Transfer-Encoding/i )
+                {
+                    $encoding = $argument;
+                    next;
+                }
+
+                # Some headers to discard
+
+                if ( $header =~ /(Thread-Index|X-UIDL|Message-ID|X-Text-Classification)/i ) 
+                {
+                    next;
+                }
+
                 add_line( $self, $argument, 0 );
-                next;
+            } else {
+                add_line( $self, $line, 0 );
             }
-            
-            # Look for MIME
-            
-            if ( $header =~ /Content-Type/i ) 
-            {
-                if ( $argument =~ /multipart\//i )
-                {
-                    my $boundary = $argument;
-                    if ( !( $argument =~ /boundary=\"(.*)\"/ ))
-                    {
-                        $boundary = <MSG>;
-                    }
-
-                    if ( $boundary =~ /boundary=\"(.*)\"/ ) 
-                    {
-                        print "Set mime boundary to $1\n" if $self->{debug};
-                        
-                        $mime = $1;
-                        $mime =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\\1/g;
-                    }
-                }
-                
-                $content_type = $argument;
-                next;
-            }
-            
-            # Look for the different encodings in a MIME document, when we hit base64 we will
-            # do a special parse here since words might be broken across the boundaries
-            
-            if ( $header =~ /Content-Transfer-Encoding/i )
-            {
-                $encoding = $argument;
-                next;
-            }
-
-            # Some headers to discard
-
-            if ( $header =~ /(Thread-Index|X-UIDL|Message-ID|X-Text-Classification)/i ) 
-            {
-                next;
-            }
-            
-            add_line( $self, $argument, 0 );
-        } else {
-            add_line( $self, $line, 0 );
         }
     }
 
@@ -363,6 +372,7 @@ sub parse_stream
 
         $colorized .= "</tt>";
         $colorized =~ s/\r\n/<br>/g;
+        $colorized =~ s/\r/<br>/g;
         
         return $colorized;
     }
