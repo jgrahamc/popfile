@@ -1661,12 +1661,18 @@ sub history_page
                 $from = "$1...";
             }
 
+            $from =~ s/</&lt;/g;
+            $from =~ s/>/&gt;/g;
+
             if ( length($subject)>40 ) 
             {
                 $subject =~ s/=20/ /g;
                 $subject =~ /(.{40})/;
                 $subject = "$1...";
             }
+
+            $subject =~ s/</&lt;/g;
+            $subject =~ s/>/&gt;/g;
 
             # If the user has more than 4 buckets then we'll present a drop down list of buckets, otherwise we present simple
             # links
