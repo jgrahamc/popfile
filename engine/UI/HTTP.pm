@@ -341,7 +341,7 @@ sub http_file_
     my ( $self, $client, $file, $type ) = @_;
     my $contents = '';
 
-    if ( open FILE, "<$file" ) {
+    if ( defined( $file ) && ( open FILE, "<$file" ) ) {
 
         binmode FILE;
         while (<FILE>) {

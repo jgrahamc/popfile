@@ -365,30 +365,36 @@ close TEMP2;
 # get_user_path_ (note Makefile sets POPFILE_USER to ../tests/)
 
 test_assert_equal( $m->get_user_path_( 'foo' ), '../tests/foo' );
-test_assert_equal( $m->get_user_path_( '/foo' ), '/foo' );
+test_assert_equal( $m->get_user_path_( '/foo', 0 ), '/foo' );
+test_assert_equal( $m->get_user_path_( '/foo' ), undef );
 test_assert_equal( $m->get_user_path_( 'foo/' ), '../tests/foo/' );
 $m->{configuration__}->{popfile_user__} = './';
 test_assert_equal( $m->get_user_path_( 'foo' ), './foo' );
-test_assert_equal( $m->get_user_path_( '/foo' ), '/foo' );
+test_assert_equal( $m->get_user_path_( '/foo', 0 ), '/foo' );
+test_assert_equal( $m->get_user_path_( '/foo' ), undef );
 test_assert_equal( $m->get_user_path_( 'foo/' ), './foo/' );
 $m->{configuration__}->{popfile_user__} = '.';
 test_assert_equal( $m->get_user_path_( 'foo' ), './foo' );
-test_assert_equal( $m->get_user_path_( '/foo' ), '/foo' );
+test_assert_equal( $m->get_user_path_( '/foo', 0 ), '/foo' );
+test_assert_equal( $m->get_user_path_( '/foo' ), undef );
 test_assert_equal( $m->get_user_path_( 'foo/' ), './foo/' );
 $m->{configuration__}->{popfile_user__} = '../tests/';
 
 # get_root_path_ (note Makefile sets POPFILE_ROOT to ../)
 
 test_assert_equal( $m->get_root_path_( 'foo' ), '../foo' );
-test_assert_equal( $m->get_root_path_( '/foo' ), '/foo' );
+test_assert_equal( $m->get_root_path_( '/foo', 0 ), '/foo' );
+test_assert_equal( $m->get_root_path_( '/foo' ), undef );
 test_assert_equal( $m->get_root_path_( 'foo/' ), '../foo/' );
 $m->{configuration__}->{popfile_root__} = './';
 test_assert_equal( $m->get_root_path_( 'foo' ), './foo' );
-test_assert_equal( $m->get_root_path_( '/foo' ), '/foo' );
+test_assert_equal( $m->get_root_path_( '/foo', 0 ), '/foo' );
+test_assert_equal( $m->get_root_path_( '/foo' ), undef );
 test_assert_equal( $m->get_root_path_( 'foo/' ), './foo/' );
 $m->{configuration__}->{popfile_root__} = '.';
 test_assert_equal( $m->get_root_path_( 'foo' ), './foo' );
-test_assert_equal( $m->get_root_path_( '/foo' ), '/foo' );
+test_assert_equal( $m->get_root_path_( '/foo', 0 ), '/foo' );
+test_assert_equal( $m->get_root_path_( '/foo' ), undef );
 test_assert_equal( $m->get_root_path_( 'foo/' ), './foo/' );
 $m->{configuration__}->{popfile_root__} = '../';
 

@@ -470,14 +470,14 @@ sub get_user_path_
 {
     my ( $self, $path, $sandbox ) = @_;
 
-    return $self->{configuration__}->get_user_path( $path );
+    return $self->{configuration__}->get_user_path( $path, $sandbox );
 }
 
 sub get_root_path_
 {
     my ( $self, $path, $sandbox ) = @_;
 
-    return $self->{configuration__}->get_root_path( $path );
+    return $self->{configuration__}->get_root_path( $path, $sandbox );
 }
 
 # ---------------------------------------------------------------------------------------------
