@@ -278,9 +278,12 @@ View_ShowFrequencies                    Exibir freqüência das palavras
 View_ShowProbabilities                  Exibir probabilidade das palavras
 View_ShowScores                         Exibir pontuação das palavras
 View_WordMatrix                         Matriz de palavras
+View_WordProbabilities                  exibindo probabilidade das palavras
+View_WordFrequencies                    exibindo freqüência das palavras
+View_WordScores                         exibindo pontuação das palavras
 
 Windows_TrayIcon                        Exibir o ícone do POPFile na bandeja do sistema?
-Windows_Console                         Enviar mensagens do POPFile para uma janela de console?
+Windows_Console                         Executar o POPFile em uma janela de console?
 Windows_NextTime                        <p><font color="red">Esta alteração não terá efeito até que você reinicie o POPFile</font>
 
 Header_MenuSummary                      Esta tabela é o menu de navegação que possibilita acesso a cada uma das diferentes páginas do centro de controle.
