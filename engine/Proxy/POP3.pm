@@ -269,13 +269,9 @@ sub service
 		$self->flush_child_data( $kid );
 	}
 
-    # Accept a connection from a client trying to use us as the mail server.  We service one client at a time
-    # and all others get queued up to be dealt with later.  We check the alive boolean here to make sure we
-    # are still allowed to operate. See if there's a connection waiting on the $server by getting the list of 
-    # handles with data to read, if the handle is the server then we're off.     
+    # Accept a connection from a client trying to use us as the mail server.  
     
-    # If we have some handles left, accept a connection
-    while ( ( defined( $self->{selector}->can_read(0) ) ) && ( $self->{alive} ) ) {        
+    if ( ( defined( $self->{selector}->can_read(0) ) ) && ( $self->{alive} ) ) {        
         if ( my $client = $self->{server}->accept() ) {
             # Check that this is a connection from the local machine, if it's not then we drop it immediately
             # without any further processing.  We don't want to act as a proxy for just anyone's email
