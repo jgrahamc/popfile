@@ -356,7 +356,7 @@
 ; Empty lists ("") are allowed (but are not very user-friendly)
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_DEFAULT_BUCKETS  "spam|pessoal|trabalho|outro"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_SUGGESTED_NAMES  "admin|negocios|computadores|familia|financeiro|geral|passa-tempo|entrada|lixo|admin-lista|miscelanea|nao_spam|outro|pessoal|recreacao|escola|seguranca|compras|spam|viagem|trabalho"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_SUGGESTED_NAMES  "admin|admin-lista|compras|computadores|entrada|escola|familia|financeiro|geral|lixo|miscelanea|nao_spam|negocios|outros|passa-tempo|pessoal|recreacao|seguranca|spam|trabalho|viagem"
 
 ; Page Title and Sub-title displayed in the page header
 
