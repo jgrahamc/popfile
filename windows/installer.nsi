@@ -2133,15 +2133,24 @@ FunctionEnd
 
 Function MinPerlRestructure
 
-  IfFileExists "$G_MPLIBDIR\*.pm" exit
+  ; Since the 0.18.0 release (February 2003), the minimal Perl has used perl58.dll. Earlier
+  ; versions of POPFile used earlier versions of Perl (e.g. the 0.17.8 release (December 2002)
+  ; used perl56.dll)
 
-  IfFileExists "$G_ROOTDIR\*.pm" 0 exit
+  Delete "$G_ROOTDIR\perl56.dll"
+
+  ; If the minimal Perl folder used by 0.21.0 or later exists and has some Perl files in it,
+  ; assume there are no pre-0.21.0 minimal Perl files to be moved out of the way.
+
+  IfFileExists "$G_MPLIBDIR\*.pm" exit
 
   CreateDirectory "$G_MPLIBDIR"
 
+  IfFileExists "$G_ROOTDIR\*.pm" 0 move_folders
   CopyFiles /SILENT /FILESONLY "$G_ROOTDIR\*.pm" "$G_MPLIBDIR\"
   Delete "$G_ROOTDIR\*.pm"
 
+move_folders:
   !insertmacro MinPerlMove "auto"
   !insertmacro MinPerlMove "Carp"
   !insertmacro MinPerlMove "DBD"
@@ -2159,7 +2168,7 @@ Function MinPerlRestructure
 
   ; Delete redundant minimal Perl files from earlier installations
 
-  IfFileExists "$G_ROOTDIR\Win32\API.pm" 0 exit
+  IfFileExists "$G_ROOTDIR\Win32\*.*" 0 exit
   Delete "$G_ROOTDIR\Win32\API\Callback.pm"
   Delete "$G_ROOTDIR\Win32\API\Struct.pm"
   Delete "$G_ROOTDIR\Win32\API\Type.pm"
