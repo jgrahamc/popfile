@@ -150,7 +150,7 @@ sub parse_stream
             
             if ( $header =~ /(From|To|Cc)/i )
             {
-                while ( $argument =~ s/<(.*)>// ) 
+                while ( $argument =~ s/<(.+?)>// ) 
                 {
                     update_word($self, $1);
                 }
