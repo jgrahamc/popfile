@@ -267,7 +267,7 @@ sub child__
         #
         #    NOTE messages retrieved using TOPTOO are visible in the history as they
         #    are "cached" to avoid requiring repeated downloads if the client issues
-        #    a RETR for the message in the same session   
+        #    a RETR for the message in the same session
         #
         #    NOTE using toptoo=1 on a slow link could cause performance problems, in
         #    cases where only the headers, but not classification, is required.
@@ -358,6 +358,11 @@ sub child__
             $short_file =~ s/^[^\/]*\///;
 
             if (defined($downloaded{$count}) && open( RETRFILE, "<$file" ) ) {
+
+                # act like a network stream
+
+                binmode RETRFILE;
+
                 # File has been fetched and classified already
 
                 $self->log_( "Printing message from cache" );
