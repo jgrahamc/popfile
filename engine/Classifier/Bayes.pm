@@ -85,7 +85,7 @@ sub get_color
 sub load_word_matrix
 {
     my ($self) = @_;
-    my @colors = ( 'red', 'green', 'blue', 'yellow', 'orange', 'purple', 'magenta', 'cyan' );
+    my @colors = ( 'red', 'green', 'blue', 'brown', 'orange', 'purple', 'magenta', 'cyan' );
     my $c      = 0;
     
     print "Loading the corpus...\n" if $self->{debug};
