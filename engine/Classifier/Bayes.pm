@@ -474,6 +474,7 @@ sub save_magnets__
 # classify_file
 #
 # $file      The name of the file containing the text to classify
+# $ui        Reference to the UI used when doing colorization
 #
 # Splits the mail message into valid words, then runs the Bayes algorithm to figure out
 # which bucket it belongs in.  Returns the bucket name
@@ -481,7 +482,7 @@ sub save_magnets__
 # ---------------------------------------------------------------------------------------------
 sub classify_file
 {
-    my ($self, $file) = @_;
+    my ($self, $file, $ui) = @_;
     my $msg_total = 0;
 
     $self->{magnet_used__}   = 0;
@@ -582,7 +583,6 @@ sub classify_file
 
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
 
-
     my %raw_score;
     my $base_score = $score{$ranking[0]};
     my $total = 0;
@@ -600,27 +600,54 @@ sub classify_file
         $total += exp($score{$b}) if ($score{$b} > ( -54 * 0.693147180559945309417232121458177 ) );
     }
 
-    $self->{scores__} = "<b>Scores</b><p>\n<table class=\"top20Buckets\">\n<tr>\n<th scope=\"col\">Bucket</th>\n<th>&nbsp;</th>\n";
-    $self->{scores__} .= "<th scope=\"col\">Probability</th></tr>\n";
+    if ($self->{wordscores__} && defined($ui) ) {
+        my @qm = @{$self->{parser__}->quickmagnets()};
+        my %language = $ui->language();
+        my $session_key = $ui->session_key();
 
-    foreach my $b (@ranking) {
-         my $prob = exp($score{$b})/$total;
-         my $probstr;
+        if ( $#qm >= 0 ) {
+            $self->{scores__} = "<p><b>$language{QuickMagnets}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Magnet}</th>\n<th>$language{Magnet_Always}</th>\n";
 
-         if ($prob >= 0.1 || $prob == 0.0) {
-             $probstr = sprintf("%12.6f", $prob);
-         } else {
-             $probstr = sprintf("%17.6e", $prob);
-         }
+            foreach my $m (@qm) {
+                $self->{scores__} .= "<tr><td scope=\"col\">$m</td><td>";
 
-         $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
-    }
+                $self->{scores__} .= "<form action=\"/magnets\">\n";
+                $self->{scores__} .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />";
+                $self->{scores__} .= "<input type=\"hidden\" name=\"type\" id=\"magnetsAddType\" />";
+                $self->{scores__} .= "<input type=\"hidden\" name=\"text\" id=\"magnetsAddText\" />";
 
-    $self->{scores__} .= "</table>";
+                $self->{scores__} .= "<select name=\"bucket\" id=\"magnetsAddBucket\">\n<option value=\"\"></option>\n";
 
-    if ($self->{wordscores__}) {
+                my @buckets = $self->get_buckets();
+                foreach my $bucket (@buckets) {
+                    $self->{scores__} .= "<option value=\"$bucket\">$bucket</option>\n";
+                }
+
+                $self->{scores__} .= "</select><input type=\"submit\" class=\"submit\" name=\"create\" value=\"$language{Create}\" /></form></td></tr>";
+	    }
+
+            $self->{scores__} .= "</table>";
+	}
+
+        $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
+        $self->{scores__} .= "<th scope=\"col\">$language{Probability}</th></tr>\n";
+
+        foreach my $b (@ranking) {
+             my $prob = exp($score{$b})/$total;
+             my $probstr;
+
+            if ($prob >= 0.1 || $prob == 0.0) {
+                 $probstr = sprintf("%12.6f", $prob);
+             } else {
+                $probstr = sprintf("%17.6e", $prob);
+             }
+
+             $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
+        }
+
+        $self->{scores__} .= "</table><hr>";
         $self->{scores__} .= "<table class=\"top20Words\">\n<tr><td colspan=\"4\">&nbsp;</td></tr>\n";
-        $self->{scores__} .= "<tr>\n<th scope=\"col\">Word</th><th>&nbsp;</th><th scope=\"col\">Count</th><th>&nbsp;</th>\n";
+        $self->{scores__} .= "<tr>\n<th scope=\"col\">$language{Word}</th><th>&nbsp;</th><th scope=\"col\">$language{Count}</th><th>&nbsp;</th>\n";
 
         foreach my $bucket (@buckets) {
             my $bucketcolor  = $self->get_bucket_color( $bucket );
@@ -1081,7 +1108,7 @@ sub get_html_colored_message
     $self->{parser__}->{color__} = 1;
     $self->{parser__}->{bayes__} = bless $self;
     my $result = $self->{parser__}->parse_stream($file);
-    $self->{parser__}->{color__} = 0;        
+    $self->{parser__}->{color__} = 0;
 
     return $result;
 }

@@ -1423,7 +1423,7 @@ sub bucket_page
 #
 # bar_chart_100 - Output an HTML bar chart
 #
-# %values       A hash of bucket names with values
+# %values       A hash of bucket names with values in series 0, 1, 2, ...
 #
 # ---------------------------------------------------------------------------------------------
 sub bar_chart_100
@@ -1432,31 +1432,42 @@ sub bar_chart_100
     my $body = '';
     my $total_count = 0;
     my @xaxis = sort keys %values;
+    my @series = sort keys %{$values{$xaxis[0]}};
 
     for my $bucket (@xaxis)  {
-        $total_count += $values{$bucket};
+        $total_count += $values{$bucket}{0};
     }
 
     for my $bucket (@xaxis)  {
-        my $count   = pretty_number( $self,  $values{$bucket} );
-        my $percent;
+        $body .= "<tr>\n<td align=\"left\"><font color=\"". $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></td>\n<td>&nbsp;</td>";
 
-        if ( $total_count == 0 ) {
-            $percent = "0%";
-        } else {
-            $percent = int( $values{$bucket} * 10000 / $total_count ) / 100;
-            $percent .= "%";
-        }
-        $body .= "<tr>\n<td align=\"left\"><font color=\"". $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></td>\n";
-        $body .= "<td>&nbsp;</td>\n<td align=\"right\">$count ($percent)</td>\n</tr>\n";
+        for my $s (@series) {
+            my $value = $values{$bucket}{$s} || 0;
+            my $count   = $self->pretty_number( $value );
+            my $percent = '';
+
+            if ( $s == 0 ) {
+                if ( $total_count == 0 ) {
+                    $percent = " (0%)";
+                } else {
+                   $percent = " ( " . int( $value * 10000 / $total_count ) / 100;
+                    $percent .= "%)";
+                }
+	    }
+
+            $body .= "\n<td align=\"right\">$count$percent</td>";
+	}
+        $body .= "\n</tr>\n";
     }
 
-    $body .= "<tr>\n<td colspan=\"3\">&nbsp;</td>\n</tr>\n<tr>\n<td colspan=\"3\">\n";
+    my $colspan = 3;
+
+    $body .= "<tr>\n<td colspan=\"$colspan\">&nbsp;</td>\n</tr>\n<tr>\n<td colspan=\"$colspan\">\n";
 
     if ( $total_count != 0 ) {
         $body .= "<table class=\"barChart\" width=\"100%\" summary=\"$self->{language__}{Bucket_BarChartSummary}\">\n<tr>\n";
         foreach my $bucket (@xaxis) {
-            my $percent = int( $values{$bucket} * 10000 / $total_count ) / 100;
+            my $percent = int( $values{$bucket}{0} * 10000 / $total_count ) / 100;
             if ( $percent != 0 )  {
                 $body .= "<td bgcolor=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\" title=\"$bucket ($percent%)\" width=\"";
                 $body .= (int($percent)<1)?1:int($percent);
@@ -1469,7 +1480,7 @@ sub bar_chart_100
     $body .= "</td>\n</tr>\n";
 
     if ( $total_count != 0 )  {
-        $body .= "<tr>\n<td colspan=\"3\" align=\"right\"><span class=\"graphFont\">100%</span></td>\n</tr>\n";
+        $body .= "<tr>\n<td colspan=\"$colspan\" align=\"right\"><span class=\"graphFont\">100%</span></td>\n</tr>\n";
     }
 
     return $body;
@@ -1508,7 +1519,7 @@ sub corpus_page
     my $rename_message = '';
 
     if ( ( defined($self->{form_}{color}) ) && ( defined($self->{form_}{bucket}) ) ) {
-        open COLOR, '>' . $self->{classifier__}->config_( 'corpus' ) . "/$self->{form_}{bucket}/color";
+        open COLOR, '>' . $self->module_config_( 'bayes', 'corpus' ) . "/$self->{form_}{bucket}/color";
         print COLOR "$self->{form_}{color}\n";
         close COLOR;
         $self->{classifier__}->set_bucket_color($self->{form_}{bucket}, $self->{form_}{color});
@@ -1733,11 +1744,16 @@ sub corpus_page
 
     $body .= "<table summary=\"\">\n<tr>\n";
     $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"left\">$self->{language__}{Bucket}</th>\n<th>&nbsp;</th>\n";
-    $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language__}{Bucket_ClassificationCount}</th>\n</tr>\n";
+    $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language__}{Bucket_ClassificationCount}</th>\n";
+    $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language__}{Bucket_ClassificationFP}</th>\n";
+    $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language__}{Bucket_ClassificationFN}</th>\n</tr>\n";
+
 
     my %bar_values;
     for my $bucket (@buckets)  {
-        $bar_values{$bucket} = $self->{classifier__}->get_bucket_parameter( $bucket, 'count' );
+        $bar_values{$bucket}{0} = $self->{classifier__}->get_bucket_parameter( $bucket, 'count' );
+        $bar_values{$bucket}{1} = $self->{classifier__}->get_bucket_parameter( $bucket, 'fpcount' );
+        $bar_values{$bucket}{2} = $self->{classifier__}->get_bucket_parameter( $bucket, 'fncount' );
     }
 
     $body .= bar_chart_100( $self, %bar_values );
@@ -1749,7 +1765,9 @@ sub corpus_page
     $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language__}{Bucket_WordCount}</th>\n</tr>\n";
 
     for my $bucket (@buckets)  {
-        $bar_values{$bucket} = $self->{classifier__}->get_bucket_word_count($bucket);
+        $bar_values{$bucket}{0} = $self->{classifier__}->get_bucket_word_count($bucket);
+        delete $bar_values{$bucket}{1};
+        delete $bar_values{$bucket}{2};
     }
 
     $body .= bar_chart_100( $self, %bar_values );
@@ -2348,10 +2366,17 @@ sub history_reclassify
 
                 $self->log_( "Reclassifying $mail_file from $bucket to $newbucket" );
 
-                $self->{classifier__}->set_bucket_parameter( $newbucket, 'count', 
-                $self->{classifier__}->get_bucket_parameter( $newbucket, 'count' ) + 1 );
-                $self->{classifier__}->set_bucket_parameter( $bucket, 'count', 
-                $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1 );
+                if ( $bucket ne $newbucket ) {
+                    $self->{classifier__}->set_bucket_parameter( $newbucket, 'count',
+                    $self->{classifier__}->get_bucket_parameter( $newbucket, 'count' ) + 1 );
+                    $self->{classifier__}->set_bucket_parameter( $bucket, 'count',
+                    $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1 );
+
+                    $self->{classifier__}->set_bucket_parameter( $newbucket, 'fncount',
+                    $self->{classifier__}->get_bucket_parameter( $newbucket, 'fncount' ) + 1 );
+                    $self->{classifier__}->set_bucket_parameter( $bucket, 'fpcount',
+                    $self->{classifier__}->get_bucket_parameter( $bucket, 'fpcount' ) + 1 );
+		}
 
                 # Update the class file
 
@@ -2406,6 +2431,11 @@ sub history_undo
                     $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1 );
                     $self->{classifier__}->set_bucket_parameter( $usedtobe, 'count',
                     $self->{classifier__}->get_bucket_parameter( $usedtobe, 'count' ) + 1 );
+
+                    $self->{classifier__}->set_bucket_parameter( $bucket, 'fncount',
+                    $self->{classifier__}->get_bucket_parameter( $bucket, 'fncount' ) - 1 );
+                    $self->{classifier__}->set_bucket_parameter( $usedtobe, 'fpcount',
+                    $self->{classifier__}->get_bucket_parameter( $usedtobe, 'fpcount' ) - 1 );
                 }
 
                 # Since we have just changed the classification of this file and it has
@@ -2818,7 +2848,7 @@ sub history_page
                 $body .= "</td>\n</tr>\n</table>\n";
 
                 $body .= "<table><tr><td class=\"top20\" valign=\"top\">\n";
-                $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . "$self->{form_}{view}");
+                $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . "$self->{form_}{view}", $self);
                 $body .= $self->{classifier__}->{scores__};
                 $body .= "</tr></table></td>\n</tr>\n";
             }
@@ -3188,6 +3218,20 @@ sub classifier
     }
 
     return $self->{classifier__};
+}
+
+sub language
+{
+    my ( $self ) = @_;
+
+    return %{$self->{language__}};
+}
+
+sub session_key
+{
+    my ( $self ) = @_;
+
+    return $self->{session_key__};
 }
 
 1;

@@ -53,11 +53,17 @@ sub new
 
     $self->{color__}     = 0;
 
-    # This will store the from, to, cc and subject from the last parse 
+    # This will store the from, to, cc and subject from the last parse
     $self->{from__}      = '';
     $self->{to__}        = '';
     $self->{cc__}        = '';
     $self->{subject__}   = '';
+
+    # This is used to store the words found in the from, to, and subject
+    # lines for use in creating new magnets, it is a list of pairs mapping
+    # a magnet type to a magnet string, e.g. from => popfile@jgc.org
+
+    $self->{quickmagnets__}      = ();
 
     # These store the current HTML background color and font color to
     # detect "invisible ink" used by spammers
@@ -173,6 +179,10 @@ sub update_word
     if ( $mword ne '' )  {
         $mword = $prefix . ':' . $mword if ( $prefix ne '' );
 
+        if ( $prefix =~ /(from|to|cc|subject)/i ) {
+            push @{$self->{quickmagnets__}}, ("$prefix: $word");
+        }
+
         if ( $self->{color__} ) {
             my $color = $self->{bayes__}->get_color($mword);
             if ( $encoded == 0 )  {
@@ -183,6 +193,7 @@ sub update_word
             } else {
                 $self->{ut__} .= "<font color=\"$color\">$word<\/font> ";
             }
+
         } else {
             increment_word( $self, $mword );
         }
@@ -784,23 +795,24 @@ sub parse_stream
     # Base64 attachments are loaded into this as we read them
 
     $self->{base64__}       = '';
-    
+
     # Variable to note that the temporary colorized storage is "frozen",
     # and what type of freeze it is (allows nesting of reasons to freeze
     # colorization)
-    
+
     $self->{in_html_tag__} = 0;
-    
+
     $self->{html_tag__}    = '';
     $self->{html_arg__}    = '';
 
-    $self->{words__}     = {};
-    $self->{msg_total__} = 0;
-    $self->{from__}      = '';
-    $self->{to__}        = '';
-    $self->{cc__}        = '';
-    $self->{subject__}   = '';
-    $self->{ut__}        = '';
+    $self->{words__}        = {};
+    $self->{msg_total__}    = 0;
+    $self->{from__}         = '';
+    $self->{to__}           = '';
+    $self->{cc__}           = '';
+    $self->{subject__}      = '';
+    $self->{ut__}           = '';
+    $self->{quickmagnets__} = ();
 
     $self->{htmlbackcolor__} = map_color( $self, 'white' );
     $self->{htmlfontcolor__} = map_color( $self, 'black' );
@@ -1195,7 +1207,6 @@ sub parse_header
     # Look for MIME
 
     if ( $header =~ /^Content-Type$/i ) {
-        
         if ( $argument =~ /charset=\"?([^\"]{1,40})\"?/ ) {
             update_word( $self, $1, 0, '' , '', 'charset' );
         }
@@ -1204,8 +1215,8 @@ sub parse_header
             print "Set content type to $1\n" if $self->{debug};
             $self->{content_type__} = $1;
         }
-        
-        if ( $argument =~ /multipart\//i ) {            
+
+        if ( $argument =~ /multipart\//i ) {
             my $boundary = $argument;
 
             if ( $boundary =~ /boundary= ?(\"([A-Z0-9\'\(\)\+\_\,\-\.\/\:\=\?][A-Z0-9\'\(\)\+_,\-\.\/:=\? ]{0,69})\"|([^\(\)\<\>\@\,\;\:\\\"\/\[\]\?\=]{1,70}))/i ) {
@@ -1292,7 +1303,12 @@ sub first20
    return $self->{first20__};
 }
 
+sub quickmagnets
+{
+   my ( $self ) = @_;
 
+   return $self->{quickmagnets__};
+}
 
 1;
 

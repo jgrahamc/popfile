@@ -21,6 +21,9 @@ From                                    From
 Subject                                 Subject 
 Classification                          Classification
 Reclassify                              Reclassify
+Probability                             Probability
+Scores                                  Scores
+QuickMagnets                            QuickMagnets
 Undo                                    Undo
 Close                                   Close
 Find                                    Find
@@ -40,6 +43,8 @@ Frequency                               Frequency
 Probability                             Probability
 Score                                   Score
 Lookup                                  Lookup
+Word                                    Word
+Count                                   Count
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Control Center
@@ -202,6 +207,8 @@ Bucket_EmailsClassifiedUpper            Messages Classified
 Bucket_ClassificationErrors             Classification errors
 Bucket_Accuracy                         Accuracy
 Bucket_ClassificationCount              Classification Count
+Bucket_ClassificationFP                 False Positives
+Bucket_ClassificationFN                 False Negatives
 Bucket_ResetStatistics                  Reset Statistics
 Bucket_LastReset                        Last Reset
 Bucket_CurrentColor                     %s current color is %s
