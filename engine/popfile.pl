@@ -1215,7 +1215,7 @@ sub corpus_page
     my $pecount = pretty_number( $configuration{ecount} );
     my $accuracy = 'Not enough data';
     my $percent = 0;
-    if ( $configuration{mcount} >= 100 ) 
+    if ( $configuration{mcount} > 0 ) 
     {
         $percent = int( 10000 * ( $configuration{mcount} - $configuration{ecount} ) / $configuration{mcount} ) / 100;
         $accuracy = "$percent%";
@@ -1438,10 +1438,7 @@ sub history_page
         open CLASS, ">$class_file";
         print CLASS "$classification$eol";
         close CLASS;
-        if ( $configuration{mcount} >= 100 )
-        {
-            $configuration{ecount} -= 1;
-        }
+        $configuration{ecount} -= 1;
     }
 
     # Handle clearing the history files
@@ -1541,12 +1538,9 @@ sub history_page
         print CLASS "RECLASSIFIED$eol$form{shouldbe}$eol";
         close CLASS;
         
-        if ( $configuration{mcount} >= 100 )
+        if ( $form{shouldbe} ne $form{usedtobe} ) 
         {
-            if ( $form{shouldbe} ne $form{usedtobe} ) 
-            {
-                $configuration{ecount} += 1;
-            }
+            $configuration{ecount} += 1;
         }
 
         $classifier->load_bucket("corpus/$form{shouldbe}");
@@ -2523,7 +2517,7 @@ $configuration{port}      = 110;
 $configuration{ui_port}   = 8080;
 $configuration{subject}   = 1;
 $configuration{server}    = '';
-$configuration{sport}     = 995;
+$configuration{sport}     = 110;
 $configuration{page_size} = 20;
 $configuration{timeout}   = 60;
 $configuration{localpop}  = 1;
