@@ -15,6 +15,7 @@ my $debug = 0;
 
 my $DEFAULT_CSV = 'auto';
 my $DEFAULT_TOE = 1;
+my $DEFAULT_STOP = 1;
 my $DEFAULT_WINDOW1 = 100;
 my $DEFAULT_WINDOW2 = 500;
 my $DEFAULT_CLASSIFIER = "bayes";
@@ -63,6 +64,7 @@ sub initialize
     
     $config->parameter("csv",$DEFAULT_CSV);
     $config->parameter("toe",$DEFAULT_TOE);
+    $config->parameter("stopwords",$DEFAULT_STOP);
     $config->parameter("window1",$DEFAULT_WINDOW1);
     $config->parameter("window2",$DEFAULT_WINDOW2);
     $config->parameter("classifier",$DEFAULT_CLASSIFIER);
@@ -85,6 +87,15 @@ sub cvs_out
             $file .= "$config->parameter('window1')and$config->parameter('window2')";
                 
         }
+        
+        if ( $config->parameter('stopwords') ne $DEFAULT_STOP ) {
+            $file .= "_";
+            if ($config->parameter('stopwords') != 1) {                
+                $file .= "no";
+            }
+            $file .= "stop";                
+        }
+        
         
         $file .= ".csv";
     }
@@ -250,6 +261,12 @@ if ( @ARGV[0] ne "-usage")
 #    $b->{unclassified} = ($c->parameter('unclassified_probability') || 0.0001);
     $b->{unclassified__} = ($c->parameter("bayes_unclassified_probability") || 0.5);
     
+    # test with or without stop-words    
+     if ( $c->parameter("stopwords") eq 0 ) {
+        $b->{parser__}->{mangle__}->{stop__} = {};
+        $b->{mangler__}->{stop__} = {};
+    }
+    
 
     my $archive = $c->parameter("ui_archive_dir");
 
@@ -397,6 +414,7 @@ if ( @ARGV[0] ne "-usage")
     print "  Other Parameters     Use\n";
     print "     -archive_dir:   Location to seek an archive\n";
     print "     -csv:           Filename to save CSV log to, \"auto\" generates a filename\n";
-    print "     -toe:           Train Only Errors, defaults to $DEFAULT_TOE";
+    print "     -toe:           Train Only Errors, defaults to $DEFAULT_TOE\n";
+    print "     -stopwords:     Use stop-words, defaults to $DEFAULT_STOP\n";
 }
 
