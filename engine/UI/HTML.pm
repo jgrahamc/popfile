@@ -2267,8 +2267,9 @@ sub corpus_page
             my $max_bucket = '';
             my $total = 0;
             foreach my $bucket (@buckets) {
-                if ( $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word ) != 0 ) {
-                    my $prob = exp( $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word ) );
+                my $val = $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word );
+                if ( $val != 0 ) {
+                    my $prob = exp( $val );
                     $total += $prob;
                     if ( $max_bucket eq '' ) {
                         $body .= $heading;
@@ -2277,21 +2278,21 @@ sub corpus_page
                         $max = $prob;
                         $max_bucket = $bucket;
                     }
-                }
-                # Take into account the probability the Bayes calculation applies
-                # for the buckets in which the word is not found.
-                else {
-                    if ( $self->{classifier__}->get_word_count( $self->{api_session__} ) > 0 ) {
-                        $total += 0.1 / $self->{classifier__}->get_word_count( $self->{api_session__} );
-                    }
+                } else {
+
+                    # Take into account the probability the Bayes calculation applies
+                    # for the buckets in which the word is not found.
+
+                    $total += exp( $self->{classifier__}->get_not_likely_( $self->{api_session__} ) );
                 }
             }
 
             foreach my $bucket (@buckets) {
-                if ( $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word ) != 0 ) {
-                    my $prob    = exp( $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word ) );
+                my $val = $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word );
+                if ( $val != 0 ) {
+                    my $prob    = exp( $val );
                     my $n       = ($total > 0)?$prob / $total:0;
-                    my $score   = ($#buckets >= 0)?(log($prob)-$self->{classifier__}->{not_likely__})/log(10.0):0;
+                    my $score   = ($#buckets >= 0)?($val - $self->{classifier__}->get_not_likely_( $self->{api_session__} ) )/log(10.0):0;
                     my $normal  = sprintf("%.10f", $n);
                     $score      = sprintf("%.10f", $score);
                     my $probf   = sprintf("%.10f", $prob);

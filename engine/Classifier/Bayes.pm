@@ -319,6 +319,23 @@ sub get_color
 
 # ---------------------------------------------------------------------------------------------
 #
+# get_not_likely_
+#
+# Returns the probability of a word that doesn't appear
+#
+# ---------------------------------------------------------------------------------------------
+sub get_not_likely_
+{
+    my ( $self, $session ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    return $self->{not_likely_}{$userid};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # get_value_
 #
 # Returns the value for a specific word in a bucket.  The word is converted to the log value
@@ -426,6 +443,8 @@ sub update_constants__
                 $self->{bucket_start__}{$userid}{$bucket} = 0;
             }
         }
+    } else {
+        $self->{not_likely__}{$userid} = 0;
     }
 }
 
@@ -2955,7 +2974,7 @@ sub get_magnet_types
 
     my %result;
 
-    my $h = $self->{db__}->prepare( "select magnet_types.mtype, magnet_types.header from magnet_types;" );
+    my $h = $self->{db__}->prepare( "select magnet_types.mtype, magnet_types.header from magnet_types order by mtype;" );
 
     $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {

@@ -691,13 +691,13 @@ INPUTIS   pop3_force_fork 0
 
 INPUTIS   ui_port $port
 CONFIGIS  html_port $port
-SETSUBMIT ui_port 8081
-INPUTIS   ui_port 8081
-CONFIGIS  html_port 8081
-MATCH Updated user interface web port to 8081; this change will not take affect until you restart POPFile
+SETSUBMIT ui_port 8082
+INPUTIS   ui_port 8082
+CONFIGIS  html_port 8082
+MATCH Updated user interface web port to 8082; this change will not take affect until you restart POPFile
 SETSUBMIT ui_port 0
 MATCH The user interface port must be a number between 1 and 65535
-INPUTIS   ui_port 8081
+INPUTIS   ui_port 8082
 
 # Security Page
 
@@ -791,7 +791,7 @@ MATCH smtp
 
 # Check add ignore word
 
-CONFIGIS newword
+INPUTIS newword
 SETSUBMIT newword four11@.-_
 MATCH four11@.-_
 SETSUBMIT newword ba"d
@@ -799,7 +799,7 @@ MATCH Ignored words can only contain alphanumeric, ., _, -, or @ characters
 
 # Check remove ignore word
 
-CONFIGIS word
+INPUTIS word
 SETSUBMIT word four11@.-_
 NOTMATCH four11@.-_
 SETSUBMIT word ba"d
@@ -852,9 +852,7 @@ MATCH <a href="/buckets?session=$sk&amp;showbucket=other">
 
 MATCH >656<
 MATCH >3<
-MATCH >3,353<
-
-MATCH >14,002<
+MATCH >3,358<
 
 # Check statistics displayed correctly
 
@@ -881,7 +879,7 @@ NOTMATCH newbucket0-_
 SETSUBMIT cname newbucket0-_
 MATCH newbucket0-_
 MATCH Created bucket named newbucket0-_
-MATCH newbucket0-_ current color is red
+MATCH newbucket0-_ current color is black
 
 SETSUBMIT cname bu%cket
 MATCH Bucket names can only contain the letters a to z in lower case
@@ -894,6 +892,11 @@ MATCH Bucket named spam already exists
 MATCH spam
 MATCH personal
 MATCH other
+
+# Check set bucket color
+
+GET /buckets?color=blue&bucket=newbucket0-_&session=$sk
+MATCH newbucket0-_ current color is blue
 
 # Check bucket rename
 
@@ -971,7 +974,7 @@ MATCH /buckets?session=$sk&amp;showbucket=spam
 GET /buckets?session=$sk&amp;showbucket=spam
 MATCH Detail for <font color="feldspar">spam</font>
 MATCH 12,114
-MATCH (3,353 unique)
+MATCH (3,358 distinct)
 MATCH >100.00%<
 MATCH <a href=/buckets?session=$sk&amp;showbucket=spam&amp;showletter=m><b>m</b></a>
 
@@ -981,7 +984,7 @@ MATCH <a class="wordListLink" href="/buckets?session=$sk&amp;lookup=Lookup&amp;w
 # Check clearing of individual bucket
 
 CLICK clearbucket
-MATCH (0 unique)</td>
+MATCH (0 distinct)</td>
 
 # Test removal of history files that are out of date (old and new style)
 
