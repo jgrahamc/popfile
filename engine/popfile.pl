@@ -707,7 +707,12 @@ sub corpus_page
     {
         $configuration{mcount} = 0;
         $configuration{ecount} = 0;
+        for my $bucket (keys %{$classifier->{total}})
+        {
+            $classifier->{parameters}{$bucket}{count} = 0;
+        }
         save_configuration();
+        $classifier->write_parameters();
     }
     
     if ( defined($form{showbucket}) ) 
@@ -789,7 +794,7 @@ sub corpus_page
         }
     }    
     
-    my $body = "<h2>Summary</h2><table width=100% cellspacing=0 cellpadding=0><tr><td><b>Bucket Name</b><td width=10>&nbsp;<td align=right><b>Word Count</b><td width=10>&nbsp;<td align=right><b>Unique Words</b><td width=10>&nbsp;<td align=right><b>Emails Classified</b><td width=10>&nbsp;<td align=center><b>Subject Modification</b><td width=20>&nbsp;<td align=left><b>Change Color</b>";
+    my $body = "<h2>Summary</h2><table width=100% cellspacing=0 cellpadding=0><tr><td><b>Bucket Name</b><td width=10>&nbsp;<td align=right><b>Word Count</b><td width=10>&nbsp;<td align=right><b>Unique Words</b><td width=10>&nbsp;<td align=center><b>Subject Modification</b><td width=20>&nbsp;<td align=left><b>Change Color</b>";
 
     my @buckets = sort keys %{$classifier->{total}};
     my $stripe = 0;
@@ -804,19 +809,7 @@ sub corpus_page
     {
         my $number  = pretty_number( $classifier->{total}{$bucket} );
         my $unique  = pretty_number( $classifier->{unique}{$bucket} );
-        my $count   = pretty_number( $classifier->{parameters}{$bucket}{count} );
-        my $percent;
-        
-        if ( $total_count == 0 )
-        {
-            $percent = "0%";
-        }
-        else
-        {
-            $percent = int( $classifier->{parameters}{$bucket}{count} * 10000 / $total_count ) / 100;
-            $percent .= "%";
-        }
-        
+
         $body .= "<tr";
         if ( $stripe == 1 ) 
         {
@@ -827,7 +820,7 @@ sub corpus_page
             $body .= " class=row_odd";
         }
         $stripe = 1 - $stripe;
-        $body .= "><td><a href=/buckets?session=$session_key&showbucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td width=10>&nbsp;<td align=right>$number<td width=10>&nbsp;<td align=right>$unique<td width=10>&nbsp;<td align=right>$count ($percent)<td width=10>&nbsp;";
+        $body .= "><td><a href=/buckets?session=$session_key&showbucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td width=10>&nbsp;<td align=right>$number<td width=10>&nbsp;<td align=right>$unique<td width=10>&nbsp;";
         if ( $configuration{subject} == 1 ) 
         {
             $body .= "<td align=center>";
@@ -869,7 +862,7 @@ sub corpus_page
         $accuracy = "$percent%";
     } 
 
-    $body .= "<tr><td><hr><b>Total</b><td width=10><hr>&nbsp;<td align=right><hr><b>$number</b><td><td></table><p><hr><h2>Statistics</h2><table cellspacing=0 cellpadding=0><tr><td>Messages classified:<td align=right>$pmcount<tr><td>Classification errors:<td align=right>$pecount<tr><td><hr>Accuracy:<td align=right><hr>$accuracy";
+    $body .= "<tr><td><hr><b>Total</b><td width=10><hr>&nbsp;<td align=right><hr><b>$number</b><td><td></table><p><hr><table width=50%><tr><td valign=top><h2>Classification Accuracy</h2><table cellspacing=0 cellpadding=0><tr><td>Emails classified:<td align=right>$pmcount<tr><td>Classification errors:<td align=right>$pecount<tr><td><hr>Accuracy:<td align=right><hr>$accuracy";
     
     if ( $percent > 0 ) 
     {
@@ -895,7 +888,49 @@ sub corpus_page
         }
         $body .= "<tr><td colspan=25 align=left><font size=1>0%<td colspan=25 align=right><font size=1>100%</table>";
     }
-    $body .= "</table><form action=/buckets><input type=hidden name=session value=$session_key><input type=submit name=reset_stats value='Reset Statistics'></form><p><hr><h2>Maintenance</h2><p><form action=/buckets><b>Create bucket with name:</b> <br><input name=cname type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
+    $body .= "</table><form action=/buckets><input type=hidden name=session value=$session_key><input type=submit name=reset_stats value='Reset Statistics'></form><td  valign=top><h2>Emails Classified</h2><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Classification Count</b>";
+
+    for my $bucket (@buckets) 
+    {
+        my $count   = pretty_number( $classifier->{parameters}{$bucket}{count} );
+        my $percent;
+        
+        if ( $total_count == 0 )
+        {
+            $percent = "0%";
+        }
+        else
+        {
+            $percent = int( $classifier->{parameters}{$bucket}{count} * 10000 / $total_count ) / 100;
+            $percent .= "%";
+        }
+        $body .= "<tr><td><font color=$classifier->{colors}{$bucket}>$bucket</font><td>&nbsp;<td align=right>$count ($percent)";
+    }    
+    
+    $body .= "<tr><td colspan=3>&nbsp;<tr><td colspan=3><table width=100%><tr>";
+    
+    if ( $total_count != 0 )
+    {
+        foreach my $bucket (@buckets)
+        {
+            my $percent = int( $classifier->{parameters}{$bucket}{count} * 10000 / $total_count ) / 100; 
+            if ( $percent != 0 ) 
+            {
+                $body .= "<td bgcolor=$classifier->{colors}{$bucket}><img src=pix.gif alt=\"$bucket ($percent%)\" height=20 width=";
+                $body .= 2 * int($percent);
+                $body .= "</td>";
+            }
+        }
+    }
+    
+    $body .= "</table>";
+    
+    if ( $total_count != 0 ) 
+    {
+        $body .= "<tr><td colspan=3 align=right><font size=1>100%</font>";
+    }
+    
+    $body .= "</table></table><p><hr><h2>Maintenance</h2><p><form action=/buckets><b>Create bucket with name:</b> <br><input name=cname type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
     
     $body .= "<p><form action=/buckets><b>Delete bucket named:</b> <br><select name=name><option value=></option>";
     foreach my $bucket (@buckets)
