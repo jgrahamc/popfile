@@ -194,11 +194,11 @@ sub parse_stream
 
         # For the Mac we do further splitting of the line at the CR characters
         
-        while ( $read =~ s/(.*?\r)([^\n])/\2/ ) 
+        while ( $read =~ s/(.*?)[\r\n]+// ) 
         {
             my $line = $1;
              
-            $line =~ s/\r$/\r\n/;
+            $line =~ s/[\r\n]//g;
 
             print ">>> $line" if $self->{debug};
 
