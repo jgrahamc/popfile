@@ -191,7 +191,7 @@ sub classify_file
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
             # and we multiply by the number of times that the word occurs
 
-            for my $i (0 .. $self->{parser}->{words}{$word})
+            for my $i (1 .. $self->{parser}->{words}{$word})
             {
                 my $max;
                 
