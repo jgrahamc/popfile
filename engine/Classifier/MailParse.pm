@@ -18,7 +18,7 @@ use MIME::QuotedPrint;
 # HTML entity mapping to character codes, this maps things like &amp; to their corresponding
 # character code
 
-my %entityhash = ('aacute'  => 224,     'Aacute'  => 202,     'Acirc'   => 203,     'acirc'   => 225,
+my %entityhash = ('aacute'  => 224,     'Aacute'  => 202,     'Acirc'   => 203,     'acirc'   => 225, # PROFILE BLOCK START
                   'acute'   => 189,     'AElig'   => 207,     'aelig'   => 229,     'Agrave'  => 201,
                   'agrave'  => 223,     'amp'     => 38,      'Aring'   => 206,     'aring'   => 228,
                   'atilde'  => 226,     'Atilde'  => 204,     'Auml'    => 196,     'auml'    => 228,
@@ -42,7 +42,8 @@ my %entityhash = ('aacute'  => 224,     'Aacute'  => 202,     'Acirc'   => 203, 
                   'Uacute'  => 217,     'uacute'  => 249,     'ucirc'   => 250,     'Ucirc'   => 218,
                   'ugrave'  => 248,     'Ugrave'  => 216,     'uml'     => 168,     'Uuml'    => 220,
                   'uuml'    => 252,     'Yacute'  => 220,     'yacute'  => 252,     'yen'     => 165,
-                  'yuml'    => 254); 
+                  'yuml'    => 254); # PROFILE BLOCK STOP
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -100,7 +101,7 @@ sub new
     # This is a mapping between HTML color names and HTML hexadecimal color values used by the
     # map_color value to get canonical color values
 
-    $self->{color_map__} = { 'aliceblue','f0f8ff', 'antiquewhite','faebd7', 'aqua','00ffff', 'aquamarine','7fffd4', 'azure','f0ffff',
+    $self->{color_map__} = { 'aliceblue','f0f8ff', 'antiquewhite','faebd7', 'aqua','00ffff', 'aquamarine','7fffd4', 'azure','f0ffff', # PROFILE BLOCK START
         'beige','f5f5dc', 'bisque','ffe4c4', 'black','000000', 'blanchedalmond','ffebcd', 'blue','0000ff', 'blueviolet','8a2be2',
         'brown','a52a2a', 'burlywood','deb887', 'cadetblue','5f9ea0', 'chartreuse','7fff00', 'chocolate','d2691e', 'coral','ff7f50',
         'cornflowerblue','6495ed', 'cornsilk','fff8dc', 'crimson','dc143c', 'cyan','00ffff', 'darkblue','00008b', 'darkcyan','008b8b',
@@ -124,7 +125,7 @@ sub new
         'salmon','fa8072', 'sandybrown','f4a460', 'seagreen','2e8b57', 'seashell','fff5ee', 'sienna','a0522d', 'silver','c0c0c0',
         'skyblue','87ceeb', 'slateblue','6a5acd', 'slategray','708090', 'snow','fffafa', 'springgreen','00ff7f', 'steelblue','4682b4',
         'tan','d2b48c', 'teal','008080', 'thistle','d8bfd8', 'tomato','ff6347', 'turquoise','40e0d0', 'violet','ee82ee', 'wheat','f5deb3',
-        'white','ffffff', 'whitesmoke','f5f5f5', 'yellow','ffff00', 'yellowgreen','9acd32' };
+        'white','ffffff', 'whitesmoke','f5f5f5', 'yellow','ffff00', 'yellowgreen','9acd32' }; # PROFILE BLOCK STOP
 
     $self->{content_type__} = '';
     $self->{base64__}       = '';
@@ -179,8 +180,8 @@ sub compute_rgb_distance
 sub compute_html_color_distance
 {
     my ( $self ) = @_;
-    $self->{htmlcolordistance__} = $self->compute_rgb_distance( $self->{htmlfontcolor__},
-                                                         $self->{htmlbackcolor__} );
+
+    $self->{htmlcolordistance__} = $self->compute_rgb_distance( $self->{htmlfontcolor__}, $self->{htmlbackcolor__} );
 }
 
 # ---------------------------------------------------------------------------------------------

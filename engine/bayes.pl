@@ -43,11 +43,17 @@ if ( $#ARGV == 0 ) {
 
     $c->load_configuration();
 
+$b->config_( 'corpus', 'tests/corpus' );
     $b->start();
+
+$b->{parser__}->{color__} = 1;
+$b->{parser__}->{bayes__} = $b;
 
     my @files   = glob $ARGV[0];
     foreach my $file (@files) {
         print "$file is '" . $b->classify($file) . "'\n";
+        print $b->{parser__}->parse_file($file);
+
     }
 
     foreach my $word (sort keys %{$b->{parser__}->{words__}}) {

@@ -7,6 +7,39 @@
 # ---------------------------------------------------------------------------------------------
 
 use Classifier::MailParse;
+use Classifier::Bayes;
+use POPFile::Configuration;
+use POPFile::MQ;
+use POPFile::Logger;
+
+# Load the test corpus
+my $c = new POPFile::Configuration;
+my $mq = new POPFile::MQ;
+my $l = new POPFile::Logger;
+my $b = new Classifier::Bayes;
+
+$c->configuration( $c );
+$c->mq( $mq );
+$c->logger( $l );
+
+$l->configuration( $c );
+$l->mq( $mq );
+$l->logger( $l );
+
+$l->initialize();
+
+$mq->configuration( $c );
+$mq->mq( $mq );
+$mq->logger( $l );
+
+$b->configuration( $c );
+$b->mq( $mq );
+$b->logger( $l );
+
+
+$b->initialize();
+$b->config_( 'corpus', 'tests/corpus' );
+$b->start();
 
 my $cl = new Classifier::MailParse;
 
@@ -146,3 +179,21 @@ test_assert_equal( $cl->{to__},      'dsmith@ctaz.com, dsmith@dol.net, dsmith@di
 $cl->{cc__} =~ s/[\r\n]//g;
 test_assert_equal( $cl->{cc__},      'dsmith@dmi.net, dsmith@datamine.net, dsmith@crusader.com, dsmith@datasync.com, 	<dsmith@doorpi.net>, <dsmith@dnet.net>, <dsmith@cybcon.com>, <dsmith@csonline.net>, 	<dsmith@directlink.net>, <dsmith@cvip.net>, <dsmith@dragonbbs.com>, <dsmith@crosslinkinc.com>, 	<dsmith@dccnet.com>, <dsmith@dakotacom.net>' );
 
+# Test colorization
+
+my @color_tests = sort glob 'tests/TestMailParse019.msg';
+
+for my $color_test (@color_tests) {
+    my $colored = $color_test;
+    $colored    =~ s/msg/clr/;
+    
+    $cl->{color__} = 1;
+    $cl->{bayes__} = $b;
+    my $html = $cl->parse_file( $color_test );
+
+    open HTML, "<$colored";
+    my $check = <HTML>;
+    $check =~ s/[\r\n]*//g;
+    close HTML;
+    test_assert_equal( $check, $html );
+}

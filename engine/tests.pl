@@ -172,6 +172,7 @@ foreach my $test (@tests) {
 	close SUITE;
 	if ( !defined( eval $suite ) ) {
             print "Error in $test: $@";
+            $code = 1;
 	}
 	
 	if ( $test_failures > $current_error_count ) {
