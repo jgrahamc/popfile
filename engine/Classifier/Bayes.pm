@@ -2213,7 +2213,7 @@ sub echo_to_dot_
 
     my $isopen = open FILE, "$file" if ( defined( $file ) );
 
-    while ( <$mail> ) {
+    while ( my $line = $self->slurp_( $mail ) ) {
 
         # Check for an abort
 
@@ -2223,7 +2223,7 @@ sub echo_to_dot_
         # else other than line termination characters.  This is vital so that we do
         # not mistake a line beginning with . as the end of the block
 
-        if ( /^\.(\r\n|\r|\n)$/ ) {
+        if ( $line =~ /^\.(\r\n|\r|\n)$/ ) {
             if ( defined( $before ) && ( $before ne '' ) ) {
                 print $client $before if ( defined( $client ) );
                 print FILE    $before if ( defined( $isopen ) );
@@ -2233,12 +2233,12 @@ sub echo_to_dot_
             # do no want the network terminator . to appear in the file version
             # of any message
 
-            print $client $_ if ( defined( $client ) );
+            print $client $line if ( defined( $client ) );
             last;
         }
 
-        print $client $_ if ( defined( $client ) );
-        print FILE    $_ if ( defined( $isopen ) );
+        print $client $line if ( defined( $client ) );
+        print FILE    $line if ( defined( $isopen ) );
 
     }
 
