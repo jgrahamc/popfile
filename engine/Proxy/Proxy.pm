@@ -71,6 +71,11 @@ sub new
 
     $self->{pipe_cache__};
 
+    # This is where we keep the session with the Classifier::Bayes
+    # module
+
+    $self->{api_session__} = '';
+
     # This is the error message returned if the connection at any
     # time times out while handling a command
     #
@@ -164,6 +169,10 @@ EOM
 sub stop
 {
     my ( $self ) = @_;
+
+    if ( $self->{api_session__} ne '' ) {
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
+    }
 
     # Need to close all the duplicated file handles, this include the POP3 listener
     # and all the reading ends of pipes to active children
@@ -326,6 +335,12 @@ sub service
     if ( ( defined( $self->{selector__}->can_read(0) ) ) && ( $self->{alive_} ) ) {
         if ( my $client = $self->{server__}->accept() ) {
 
+            # Check to see if we have obtained a session key yet
+
+            if ( $self->{api_session__} eq '' ) {
+                $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
+	    }
+
             # Check that this is a connection from the local machine, if it's not then we drop it immediately
             # without any further processing.  We don't want to act as a proxy for just anyone's email
 
@@ -356,19 +371,15 @@ sub service
                     # If we fail to fork, or are in the child process then process this request
 
                     if ( !defined( $pid ) || ( $pid == 0 ) ) {
-                        my $session = $self->{classifier__}->get_session_key( 'admin', '' );
-                        $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $pipe, 0, $pid, $session );
+                        $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $pipe, 0, $pid, $self->{api_session__} );
                         $self->{flush_child_data_}( $self, $pipe );
-                        $self->{classifier__}->release_session_key( $session );
                         exit(0) if ( defined( $pid ) );
                     }
 	        } else {
                     pipe my $reader, my $writer;
 
-                    my $session = $self->{classifier__}->get_session_key( 'admin', '' );
-                    $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $writer, $reader, $$, $session );
+                    $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $writer, $reader, $$, $self->{api_session__} );
                     $self->{flush_child_data_}( $self, $reader );
-                    $self->{classifier__}->release_session_key( $session );
                     close $reader;
                 }
             }
