@@ -48,6 +48,18 @@ test_assert_equal( $mq->{waiters__}{NOTYPE}[0], $m );
 test_assert_equal( $mq->{queue__}{DUMMY}[0][0], 'msg' );
 test_assert_equal( $mq->{queue__}{DUMMY}[0][1], 'param' );
 
+# Check that register UI item sends the right message
+use Test::MQReceiver;
+my $r = new Test::MQReceiver;
+$m->mq_register_( 'UIREG', $r );
+$m->register_configuration_item_( 'type', 'name', $c );
+$mq->service();
+my @messages = $r->read();
+test_assert_equal( $#messages, 0 );
+test_assert_equal( $messages[0][0], 'UIREG' );
+test_assert_equal( $messages[0][1], 'type:name' );
+test_assert_equal( $messages[0][2], $c );
+
 # Check that the logger function works
 
 my $l = new POPFile::Logger;
@@ -60,3 +72,20 @@ $m->log_( 'logmsg' );
 
 test_assert( $l->{last_ten__}[0] =~ /logmsg/ );
 test_assert_equal( $l->last_ten(), $m->last_ten_log_entries() );
+
+# Check all the setter/getter functions
+
+test_assert_equal( $m->mq(), $mq );
+test_assert_equal( $m->configuration(), $c );
+$m->forker( 'forker' );
+test_assert_equal( $m->forker(), 'forker' );
+test_assert_equal( $m->logger(), $l );
+$m->pipeready( 'pr' );
+test_assert_equal( $m->pipeready(), 'pr' );
+test_assert_equal( $m->alive(), 1 );
+$m->alive(0);
+test_assert_equal( $m->alive(), 0 );
+$m->name( 'newname' );
+test_assert_equal( $m->name(), 'newname' );
+$m->version( 'vt.t.t' );
+test_assert_equal( $m->version(), 'vt.t.t' );

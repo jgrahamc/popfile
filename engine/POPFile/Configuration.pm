@@ -24,7 +24,7 @@ use locale;
 #
 #   Class new() function
 #----------------------------------------------------------------------------
-sub new 
+sub new
 {
     my $type = shift;
     my $self = POPFile::Module->new();

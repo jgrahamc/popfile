@@ -44,7 +44,7 @@ END
 	# Print out information for each file
 	for my $file (keys %count)	
 	{
-	    if ( ( $file =~ /^[^\/]/ ) && ( $file ne 'tests.pl' ) ) {
+	    if ( ( $file =~ /^[^\/]/ ) && ( $file ne 'tests.pl' ) && !( $file =~ /^Test\// ) ) {
 		my $current_line = 0;
 		
 		open SOURCE_FILE, "<$file";
@@ -62,7 +62,7 @@ END
 			# We do not count lines that are blank or exclusively 
 			# comments or just have braces on them or
 			# just an else or just a subroutine definition
-			if ( ( /^\s*\#/ == 0 ) && ( /^\s*$/ == 0 ) && ( /^\s*(\{|\}|else)\s*$/ == 0 ) && ( /^\s*sub \w+( \{)?\s*$/ == 0 ) )
+			if ( ( /^\s*\#/ == 0 ) && ( /^\s*$/ == 0 ) && ( /^\s*(\{|\}|else|\s)+\s*$/ == 0 ) && ( /^\s*sub \w+( \{)?\s*$/ == 0 ) )
 			{
 				$count{$file}{total_executable_lines} += 1;
 				
