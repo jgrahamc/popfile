@@ -1,0 +1,5 @@
+LIBRARY	POPFileIcon
+
+EXPORTS
+	GetMenuMessage	@1
+	
