@@ -1410,7 +1410,7 @@ sub advanced_page
     # end optional widget placement
     $body .= "</div>\n";
 
-    $body .= "</td><td class=\"settingsPanel\" width=\"50%\" valign=\"top\"><h2 class=\"advanced\">$self->{language__}{Advanced_AllParameters}</h2>\n<p>$self->{language__}{Advanced_Warning}";
+    $body .= "</td><td class=\"settingsPanel\" width=\"50%\" valign=\"top\"><h2 class=\"advanced\">$self->{language__}{Advanced_AllParameters}</h2>\n<p>$self->{language__}{Advanced_Warning}<p>$self->{language__}{Advanced_ConfigFile} " . $self->get_user_path_( 'popfile.cfg' );
 
     $body .= "<form action=\"/advanced\" method=\"POST\">\n";
     $body .= "<table width=\"100%\"><tr><th width=\"50%\">$self->{language__}{Advanced_Parameter}</th><th width=\"50%\">$self->{language__}{Advanced_Value}</th></tr>\n";
