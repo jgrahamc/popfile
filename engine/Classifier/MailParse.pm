@@ -566,7 +566,7 @@ sub add_url
 
     $authinfo = $1 if ( $url =~ s/^([[:alpha:]0-9\-_\.\;\:\&\=\+\$\,]+)(\@|\%40)// );
 
-    if ( $url =~ s/^(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro|[[:alpha:]]{2})([^[:alpha:]0-9\-_\.]|$)/$4/ ) {
+    if ( $url =~ s/^(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro|[[:alpha:]]{2})([^[:alpha:]0-9\-_\.]|$)/$4/i ) {
         $host = "$1$3";
         $hostform = "name";
     } elsif ( $url =~ /(([^:\/])+)/ ) {
