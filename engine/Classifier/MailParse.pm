@@ -685,7 +685,7 @@ sub update_tag
 
     my $original;
 
-    while ( $arg =~ s/^[ \t]*((\w+)[ \t]*=[ \t]*(([\"\'])(.*?)\4|([^ \t>]+)($|([ \t>]))))// ) {
+    while ( $arg =~ s/[ \t]*((\w+)[ \t]*=[ \t]*(([\"\'])(.*?)\4|([^ \t>]+)($|([ \t>]))))// ) {
         $original  = $1;
         $attribute = $2;
         $value     = $5 || $6;
