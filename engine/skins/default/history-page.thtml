@@ -298,7 +298,7 @@
             </span>
             <p>
         </td>
-    </tr>            
+    </tr>
 </table>
 
 
@@ -316,6 +316,7 @@
         <div class="toggleConfigBar">
            <input type="submit" class="submit" name="show_configbar" value="<TMPL_VAR NAME="Localize_Configuration_Show_Bar">" />
            <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+           <input type="hidden" name="start_message" value="<TMPL_VAR NAME="History_Start_Message">" />
         </div>
      </form>
    </td></tr>

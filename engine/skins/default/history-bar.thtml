@@ -20,7 +20,7 @@
 
                 <TMPL_IF NAME="Configuration_Field_Visible">
 
-                <span class="checkLabel"><input type="checkbox" id="<TMPL_VAR NAME="Configuration_Field_Name">" class="checkbox" name="<TMPL_VAR NAME="Configuration_Field_Name">">&nbsp;<TMPL_VAR NAME="Configuration_Localized_Field_Name">&nbsp;</span> 
+                <span class="checkLabel"><input type="checkbox" id="<TMPL_VAR NAME="Configuration_Field_Name">" class="checkbox" name="<TMPL_VAR NAME="Configuration_Field_Name">">&nbsp;<TMPL_VAR NAME="Configuration_Localized_Field_Name">&nbsp;</span>
 
                 <TMPL_ELSE>
 
@@ -31,6 +31,7 @@
                 </TMPL_LOOP>
                 <input type="submit" class="submit" name="update_fields" value="<TMPL_VAR NAME="Localize_Apply">" />
                 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+                <input type="hidden" name="start_message" value="<TMPL_VAR NAME="History_Start_Message">" />
         </div>
 
         <div class="configBarOption">
