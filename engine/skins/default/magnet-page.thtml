@@ -3,106 +3,164 @@
 
 <h2 class="magnets"><TMPL_VAR NAME="Localize_Magnet_CurrentMagnets"></h2>
 
-
 <TMPL_INCLUDE NAME="magnet-navigator.thtml">
 
-
 <form action="/magnets" method="POST">
-<table width="75%" class="magnetsTable" summary="<TMPL_VAR NAME="Localize_Magnet_MainTableSummary">">
-<caption><TMPL_VAR NAME="Localize_Magnet_Message1"></caption>
-<tr><th class="magnetsLabel" scope="col"><TMPL_VAR NAME="Localize_Magnet"></th>
-<th class="magnetsLabel" scope="col"><TMPL_VAR NAME="Localize_Bucket"></th>
-<th class="magnetsLabel" scope="col"><TMPL_VAR NAME="Localize_Remove"></th></tr>
+    <table width="75%" class="magnetsTable" summary="<TMPL_VAR NAME="Localize_Magnet_MainTableSummary">">
+        <caption>
+            <TMPL_VAR NAME="Localize_Magnet_Message1">
+        </caption>
+        <tr>
+            <th class="magnetsLabel" scope="col">
+                <TMPL_VAR NAME="Localize_Magnet">
+            </th>
+            <th class="magnetsLabel" scope="col">
+                <TMPL_VAR NAME="Localize_Bucket">
+            </th>
+            <th class="magnetsLabel" scope="col">
+                <TMPL_VAR NAME="Localize_Remove">
+            </th>
+        </tr>
 
-<TMPL_LOOP NAME="Magnet_Loop_Magnets">
-<TMPL_IF NAME="__odd__">
-<tr class="rowOdd">
-<TMPL_ELSE>
-<tr class="rowEven">
-</TMPL_IF>
+        <TMPL_LOOP NAME="Magnet_Loop_Magnets">
 
-<td><select name="type<TMPL_VAR NAME="Magnet_Row_ID">" id="magnetsAddType">
-<TMPL_LOOP NAME="Magnet_Loop_Loop_Types">
-<option value="<TMPL_VAR NAME="Magnet_Type_Name">" <TMPL_VAR NAME="Magnet_Type_Selected">>
-<TMPL_VAR NAME="Magnet_Type_Localized">
-</TMPL_LOOP>
-</option>
-</select>: <input type="text" name="text<TMPL_VAR NAME="Magnet_Row_ID">" value="<TMPL_VAR NAME="Magnet_Validating">" size="<TMPL_VAR NAME="Magnet_Size">" /></td>
-<td><select name="bucket<TMPL_VAR NAME="Magnet_Row_ID">" id="magnetsAddBucket">
-<TMPL_LOOP NAME="Magnet_Loop_Loop_Buckets">
-<option value="<TMPL_VAR NAME="Magnet_Bucket_Bucket">" <TMPL_VAR NAME="Magnet_Bucket_Selected"> style="color: <TMPL_VAR NAME="Magnet_Bucket_Color">">
-<TMPL_VAR NAME="Magnet_Bucket_Bucket">
-</option>
-</TMPL_LOOP>
-</select></td>
+        <TMPL_IF NAME="__odd__">
+        <tr class="rowOdd">
+        <TMPL_ELSE>
+        <tr class="rowEven">
+        </TMPL_IF>
 
-<td>
-<input type="checkbox" class="deleteButton" name="remove<TMPL_VAR NAME="Magnet_Row_ID">" /><TMPL_VAR NAME="Localize_Remove">
+            <td>
+                <select name="type<TMPL_VAR NAME="Magnet_Row_ID">" id="magnetsAddType">
 
-<input name="otype<TMPL_VAR NAME="Magnet_Row_ID">" type="hidden" value="<TMPL_VAR NAME="Magnet_MType">" />
-<input name="otext<TMPL_VAR NAME="Magnet_Row_ID">" type="hidden" value="<TMPL_VAR NAME="Magnet_Validating">" />
-<input name="obucket<TMPL_VAR NAME="Magnet_Row_ID">" type="hidden" value="<TMPL_VAR NAME="Magnet_Bucket">" />
+                    <TMPL_LOOP NAME="Magnet_Loop_Loop_Types">
 
-</td>
-</tr>
+                    <option value="<TMPL_VAR NAME="Magnet_Type_Name">" <TMPL_VAR NAME="Magnet_Type_Selected">>
+                        <TMPL_VAR NAME="Magnet_Type_Localized">
+                    </option>
 
+                    </TMPL_LOOP>
 
-</TMPL_LOOP>
+                </select>
+                :
+                <input type="text" name="text<TMPL_VAR NAME="Magnet_Row_ID">" value="<TMPL_VAR NAME="Magnet_Validating">" size="<TMPL_VAR NAME="Magnet_Size">" />
+            </td>
+            <td>
+                <select name="bucket<TMPL_VAR NAME="Magnet_Row_ID">" id="magnetsAddBucket">
 
-<tr>
-<td></td>
-<td><input type="submit" class="deleteButton" name="update" value="<TMPL_VAR NAME="Localize_Update">" /></td>
-<td><input type="submit" class="deleteButton" name="delete" value="<TMPL_VAR NAME="Localize_Remove">" /></td></tr></table>
-<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-<input type="hidden" name="start_magnet" value="<TMPL_VAR NAME="Magnet_Start_Magnet">" />
-<input type="hidden" name="count" value="<TMPL_VAR NAME="Magnet_Count_Magnet">" /></form><br /><br />
+                    <TMPL_LOOP NAME="Magnet_Loop_Loop_Buckets">
+
+                    <option value="<TMPL_VAR NAME="Magnet_Bucket_Bucket">" <TMPL_VAR NAME="Magnet_Bucket_Selected"> style="color: <TMPL_VAR NAME="Magnet_Bucket_Color">">
+                        <TMPL_VAR NAME="Magnet_Bucket_Bucket">
+                    </option>
+
+                    </TMPL_LOOP>
+
+                </select>
+            </td>
+            <td>
+                <input type="checkbox" class="deleteButton" name="remove<TMPL_VAR NAME="Magnet_Row_ID">" />
+                <TMPL_VAR NAME="Localize_Remove">
+                <input name="otype<TMPL_VAR NAME="Magnet_Row_ID">" type="hidden" value="<TMPL_VAR NAME="Magnet_MType">" />
+                <input name="otext<TMPL_VAR NAME="Magnet_Row_ID">" type="hidden" value="<TMPL_VAR NAME="Magnet_Validating">" />
+                <input name="obucket<TMPL_VAR NAME="Magnet_Row_ID">" type="hidden" value="<TMPL_VAR NAME="Magnet_Bucket">" />
+            </td>
+        </tr>
+
+        </TMPL_LOOP> <!-- Loop Magnets -->
+
+        <tr>
+            <td>
+            </td>
+            <td>
+                <input type="submit" class="deleteButton" name="update" value="<TMPL_VAR NAME="Localize_Update">" />
+            </td>
+            <td>
+                <input type="submit" class="deleteButton" name="delete" value="<TMPL_VAR NAME="Localize_Remove">" />
+            </td>
+        </tr>
+    </table>
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+    <input type="hidden" name="start_magnet" value="<TMPL_VAR NAME="Magnet_Start_Magnet">" />
+    <input type="hidden" name="count" value="<TMPL_VAR NAME="Magnet_Count_Magnet">" />
+</form>
+<br />
+<br />
 
 <TMPL_INCLUDE NAME="magnet-navigator.thtml">
 
 <hr />
 <h2 class="magnets"><TMPL_VAR NAME="Localize_Magnet_CreateNew"></h2>
-<table cellspacing="0" summary=""><tr><td>
-<b><TMPL_VAR NAME="Localize_Magnet_Explanation">
-</td></tr></table>
-
+<table cellspacing="0" summary="">
+    <tr>
+        <td>
+            <b>
+                <TMPL_VAR NAME="Localize_Magnet_Explanation">
+        </td>
+    </tr>
+</table>
 <div class="magnetsNewWidget">
-<form action="/magnets">
-<label class="magnetsLabel" for="magnetsAddType"><TMPL_VAR NAME="Localize_Magnet_MagnetType">:</label><br />
-<select name="type0" id="magnetsAddType">
+    <form action="/magnets">
+        <label class="magnetsLabel" for="magnetsAddType">
+            <TMPL_VAR NAME="Localize_Magnet_MagnetType">:
+        </label>
+        <br />
+        <select name="type0" id="magnetsAddType">
 
-<TMPL_LOOP NAME="Magnet_Loop_Types">
-<option value="<TMPL_VAR NAME="Magnet_Type">"><TMPL_VAR NAME="Magnet_Type_Name"></option>
-</TMPL_LOOP>
+            <TMPL_LOOP NAME="Magnet_Loop_Types">
+            
+            <option value="<TMPL_VAR NAME="Magnet_Type">">
+                <TMPL_VAR NAME="Magnet_Type_Name">
+            </option>
 
-</select><input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /><br /><br />
-<input type="hidden" name="count" value="1" />
+            </TMPL_LOOP>
 
-<label class="magnetsLabel" for="magnetsAddText"><TMPL_VAR NAME="Localize_Magnet_Value">:</label><br />
-<textarea name="text0" id="magnetsAddText" cols="20" cols="3"></textarea><br /><br />
+        </select>
+        <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+        <br />
+        <br />
+        <input type="hidden" name="count" value="1" />
+        <label class="magnetsLabel" for="magnetsAddText">
+            <TMPL_VAR NAME="Localize_Magnet_Value">:
+        </label>
+        <br />
+        <textarea name="text0" id="magnetsAddText" cols="20" rows="3"></textarea>
+        <br />
+        <br />
+        <label class="magnetsLabel" for="magnetsAddBucket">
+            <TMPL_VAR NAME="Localize_Magnet_Always">:
+        </label>
+        <br />
+        <select name="bucket0" id="magnetsAddBucket">
+            <option value=""></option>
 
-<label class="magnetsLabel" for="magnetsAddBucket"><TMPL_VAR NAME="Localize_Magnet_Always">:</label><br />
-<select name="bucket0" id="magnetsAddBucket"><option value=""></option>
+            <TMPL_LOOP NAME="Magnet_Loop_Buckets">
 
-<TMPL_LOOP NAME="Magnet_Loop_Buckets">
-<option value="<TMPL_VAR NAME="Magnet_Bucket">" style="color: <TMPL_VAR NAME="Magnet_Bucket_Color">">
-<TMPL_VAR NAME="Magnet_Bucket">
-</option>
-</TMPL_LOOP>
+            <option value="<TMPL_VAR NAME="Magnet_Bucket">" style="color: <TMPL_VAR NAME="Magnet_Bucket_Color">">
+                <TMPL_VAR NAME="Magnet_Bucket">
+            </option>
 
-</select><input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" />
-<input type="hidden" name="start_magnet" value="<TMPL_VAR NAME="Magnet_Start_Magnet">" />
-<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form>
+            </TMPL_LOOP>
 
-<TMPL_IF NAME="Magnet_If_Message">
-<blockquote>
-<div class="error02">
-<b>
-<TMPL_VAR NAME="Magnet_Message">
-</div>
-</blockquote>
-</TMPL_IF>
+        </select>
+        <input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" />
+        <input type="hidden" name="start_magnet" value="<TMPL_VAR NAME="Magnet_Start_Magnet">" />
+        <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+    </form>
 
-<br />
+    <TMPL_IF NAME="Magnet_If_Message">
+
+    <blockquote>
+        <div class="error02">
+            <b>
+                <TMPL_VAR NAME="Magnet_Message">
+            </b>
+        </div>
+    </blockquote>
+
+    </TMPL_IF>
+
+    <br />
 </div>
 
 <TMPL_INCLUDE NAME="common-bottom.thtml">
