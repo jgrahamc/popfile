@@ -2083,7 +2083,9 @@ sub history_page
 
     $self->{old_sort__} = $self->{form_}{sort};
 
-    $self->{form_}{negate} = '' if ( !defined( $self->{form_}{negate} ) );
+    $self->{form_}{negate} = $self->{old_negate__} || '' if ( !defined( $self->{form_}{negate} ) );
+
+    $self->{old_negate__} = $self->{form_}{negate};
 
     # If the user hits the Reset button on a search then we need to
     # clear the search value but make it look as though they hit the
