@@ -192,7 +192,7 @@ Password_Error1                         Incorrect password
 Security_Error1                         The port must be a number between 1 and 65535
 Security_Stealth                        Stealth Mode/Server Operation
 Security_NoStealthMode                  No (Stealth Mode)
-Securiry_StealthMode                    (Stealth Mode)
+Security_StealthMode                    (Stealth Mode)
 Security_ExplainStats                   (With this turned on POPFile sends once per day the following three values to a script on www.usethesource.com: bc (the total number of buckets that you have), mc (the total number of messages that POPFile has classified) and ec (the total number of classification errors).  These get stored in a file and I will use this to publish some statistics about how people use POPFile and how well it works.  My web server keeps its log files for about 5 days and then they get deleted; I am not storing any connection between the statistics and individual IP addresses.)
 Security_ExplainUpdate                  (With this turned on POPFile sends once per day the following three values to a script on www.usethesource.com: ma (the major version number of your installed POPFile), mi (the minor version number of your installed POPFile) and bn (the build number of your installed POPFile).  POPFile receives a response in the form of a graphic that appears at the top of the page if a new version is available.  My web server keeps its log files for about 5 days and then they get deleted; I am not storing any connection between the update checks and individual IP addresses.)
 Security_PasswordTitle                  User Interface Password
