@@ -1805,7 +1805,8 @@ sub load_history_cache
                                 
                 open MAIL, "<$self->{configuration}->{configuration}{msgdir}$history_files[$i]";
                 while (<MAIL>)  {
-                    if ( ! /^$eol/i )  {
+                    if ( ! /^(\r\n|\r|\n)/ )  {
+                    	                    	
                         if ( /^From:(.*)/i ) {
                             $from = $1;
                             if ( ( $search ne '' ) && ( $from =~ /\Q$search\E/i ) ) {
@@ -2388,8 +2389,8 @@ sub history_page
             $body .= " selected" if ( ( defined($self->{form}{filter}) ) && ( $self->{form}{filter} eq $abucket ) );
             $body .= ">$abucket</option>";
         }
-        $body .= "<option value=\"__filter__magnet\"" . ($self->{form}{filter} eq '__filter__magnet'?'selected':'') . ">&lt;$self->{language}{History_ShowMagnet}&gt;</option>\n" ;
-        $body .= "<option value=\"unclassified\"" . ($self->{form}{filter} eq 'unclassified'?'selected':'') . ">&lt;unclassified&gt;</option>\n";        $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\">\n" ;
+        $body .= "<option value=\"__filter__magnet\"" . ($self->{form}{filter} eq '__filter__magnet'?' selected':'') . ">&lt;$self->{language}{History_ShowMagnet}&gt;</option>\n" ;
+        $body .= "<option value=\"unclassified\"" . ($self->{form}{filter} eq 'unclassified'?' selected':'') . ">&lt;unclassified&gt;</option>\n";        $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\">\n" ;
         $body .= "</form>\n";
         $body .= "</td></tr></table>" ;
         
@@ -2454,7 +2455,7 @@ sub history_page
             if ( ( $self->{history}{$i}{subject} eq '' ) || ( $self->{history}{$i}{from} eq '' ) )  {
                 open MAIL, "<$self->{configuration}->{configuration}{msgdir}$mail_file";
                 while (<MAIL>)  {
-                    if ( !/^$eol/ )  {
+                    if ( ! /^(\r\n|\r|\n)/ )  {
                         if ( /^From:(.*)/i ) {
                             if ( $from eq '' )  {
                                 $from = $1;
@@ -2557,6 +2558,7 @@ sub history_page
                         $body .= ">$abucket</option>"
                     }
                     $body .= "</select>\n";
+                    $body .= " <input type=submit class=submit name=change value=\"$self->{language}{Reclassify}\">\n" ;
                 } else {
                     $body .= " ($self->{language}{History_MagnetUsed}: $self->{history}{$i}{magnet})";
                 }
@@ -2637,8 +2639,7 @@ sub history_page
             # $body .= "<tr class=\"rowHighlighted\"><td><td>" . sprintf( $self->{language}{History_ChangedTo}, $self->{classifier}->{colors}{$self->{form}{shouldbe}}, $self->{form}{shouldbe} ) if ( ( defined($self->{form}{file}) ) && ( $self->{form}{file} eq $mail_file ) );
         }
         
-        $body .= "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>\n" ;
-        $body .= " <input type=submit class=submit name=change value=\"$self->{language}{Reclassify}\">\n" ;
+        $body .= "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>\n" ;        
         $body .= "</td></tr>\n" ;
 
         $body .= "</table>\n" ;
@@ -2671,7 +2672,9 @@ sub history_page
         }
 
         $body .= "<option value=__filter__magnet>\n&lt;$self->{language}{History_ShowMagnet}&gt;\n" ;
-        $body .= "</option>\n</select>\n" ;
+        $body .= "</option>\n";
+        $body .= "<option value=\unclassified\"" . ($self->{form}{filter} eq 'unclassified'?' selected':'') . ">&lt;unclassified&gt;</option>\n";
+        $body .= "</select>\n"; 
         $body .="<input type=submit class=submit name=setfilter value=\"$self->{language}{Filter}\">\n</form>\n";
 
     }
@@ -2802,6 +2805,17 @@ sub handle_url
     }
     
     if ( $url eq '/jump_to_message' )  {
+    	my $found = 0;
+    	my $file = $self->{form}{view};
+    	foreach my $akey ( keys %{ $self->{history} } ) {
+    		
+    		if ($self->{history}{$akey}{file} eq $file) {
+    			$found = 1;
+    			last;
+    		}    		
+    	}
+    	    	
+    	$self->{history_invalid} = 1 if ( !$found && glob "$self->{configuration}->{configuration}{msgdir}$file" );    
         $self->http_redirect( $client, "/history?session=$self->{session_key}&start_message=0&view=$self->{form}{view}#$self->{form}{view}" );
         return 1;
     }
