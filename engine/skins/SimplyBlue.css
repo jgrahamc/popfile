@@ -1,159 +1,175 @@
+/*********************************************************/
+/* Main Body */
+
 body {
-	background-color: #FFFFFF;
-	font-family: sans-serif;
-	margin: 10px 20px 20px 20px; 
-	color: #000000;
+  color: #000000;
+  background-color: #ffffff;
+  font-family: sans-serif;
+  font-size: 100%;
+  margin: 10px 20px 20px 20px;
 }
 
-.shell, .shellTop {
-	background-color: #bcd5ea;
-	border: 3px #88b5dd solid;
-	border-style: groove; 
-	border-color: #FFFFFF;
-	border-width: 2px;
-	margin: 0px 0px 0px 0px;
-	color: #000000;
-}
-
-table.head {
-	width: 100%;
-}
-
-td.head {
-	font-weight: normal;
-	font-size: 22pt;
-}
-
-.menu {
-	font-size: 14pt;
-	font-weight: bold;
-	width: 100%;
-}
-
-.menuSelected {
-	background-color: #88b5dd;
-	width: 14%;
-	border-color: #ffffff;
-	border-style: groove groove none groove;
-	border-width: 2px;
-	color: #000000;
-}
-
-.menuStandard {
-	background-color: #bcd5ea;
-	width: 14%;
-	border-color: #ffffff;
-	border-style: groove groove none groove;
-	border-width: 2px;
-	color: #000000;
-}
-
-.menuIndent {
-	width: 8%;
-}
+/*********************************************************/
+/* General element settings */
 
 hr {
-	color: #88b5dd;
-	background-color: transparent; 
-}
-
-a.changeSettingLink {
-	background-color: transparent;
-	color: blue;
+  color: #88b5dd;
+  background-color: transparent;
 }
 
 a:link {
-	color: #000000;
-	background-color: transparent;
-	text-decoration: underline; 
-} 
+  color: #000000;
+  background-color: transparent;
+  text-decoration: underline;
+}
 
-a:visited { 
-	color: #333333;
-	background-color: transparent;
-	text-decoration: underline; 
-} 
+a:visited {
+  color: #333333;
+  background-color: transparent;
+  text-decoration: underline;
+}
 
 a:hover {
-	color: #000000;
-	background-color: transparent;
-	text-decoration: none; 
-} 
-
-tr.rowEven {
-	background-color: #bcd5ea;
-	color: #000000;
+  color: #000000;
+  background-color: transparent;
+  text-decoration: none;
 }
 
-tr.rowOdd {
-	background-color: #88b5dd;
-	color: #000000;
-}
+/*********************************************************/
+/* Shell structure */
 
-tr.rowHighlighted {
-	background-color: #29abff;
-	color: #eeeeee;
-}
-
-table.footer {
-	width: 100%;
-}
-
-table.settingsTable {
-	border: 1px solid #88b5dd;
-}
-
-table.openMessageTable, table.lookupResultsTable {
-	border: 3px solid #88b5dd;
-}
-
-td.openMessageCloser {
-	text-align: right;
-}
-
-td.openMessageBody {
-	text-align: left;
-}
-
-td.settingsPanel {
-	border: 1px solid #88b5dd;
+.shell, .shellTop {
+  color: #000000;
+  background-color: #bcd5ea;
+  /*order: 3px #88b5dd solid; */
+  border: 2px #ffffff groove;
+  margin: 0;
 }
 
 td.naked {
-	padding: 0px; 
-	margin: 0px; 
-	border: none
+  padding: 0px;
+  margin: 0px;
+  border: none
 }
 
+table.head {
+  width: 100%;
+}
+
+td.head {
+  font-weight: normal;
+  font-size: 1.8em;
+}
+
+table.footer {
+  width: 100%;
+}
+
+td.footerBody {
+  text-align: center;
+}
+
+td.logo2menuSpace {
+  height: 0.8em;
+}
+
+/*********************************************************/
+/* Menu Settings */
+
+.menu {
+  font-size: 1.2em;
+  font-weight: bold;
+  width: 100%;
+}
+
+.menuSelected {
+  color: #000000;
+  background-color: #88b5dd;
+  width: 14%;
+  border-color: #ffffff;
+  border-style: groove groove none groove;
+  border-width: 2px;
+}
+
+.menuStandard {
+  color: #000000;
+  background-color: #bcd5ea;
+  width: 14%;
+  border-color: #ffffff;
+  border-style: groove groove none groove;
+  border-width: 2px;
+}
+
+.menuIndent {
+  width: 8%;
+}
+
+/*********************************************************/
+/* Table Settings */
+
+table.settingsTable {
+  border: 1px solid #88b5dd;
+}
+
+td.settingsPanel {
+  border: 1px solid #88b5dd;
+}
+
+table.openMessageTable {
+  border: 3px solid #88b5dd;
+}
+
+td.openMessageCloser {
+  text-align: right;
+}
+
+td.openMessageBody {
+  text-align: left;
+}
+
+tr.rowEven {
+  background-color: #bcd5ea;
+  color: #000000;
+}
+
+tr.rowOdd {
+  background-color: #88b5dd;
+  color: #000000;
+}
+
+tr.rowHighlighted {
+  background-color: #29abff;
+  color: #eeeeee;
+}
+
+table.lookupResultsTable {
+  border: 3px solid #88b5dd;
+}
+
+/*********************************************************/
+/* Graphics */
+
 td.accuracy0to49 {
-	background-color: red;
-	color: black;
+  background-color: red;
+  color: black;
 }
 
 td.accuracy50to93 {
-	background-color: yellow;
-	color: black;
-}
-	
-td.accuracy94to100 {
-	background-color: green;
-	color: black;
+  background-color: yellow;
+  color: black;
 }
 
-div.error01 {
-	background-color: transparent;
-	color: red;
-	font-size: larger;
-}
-	
-div.error02 {
-	background-color: transparent;
-	color: red;
+td.accuracy94to100 {
+  background-color: green;
+  color: black;
 }
 
 span.graphFont {
-	font-size: x-small;
-}		
+  font-size: x-small;
+}
+
+/*********************************************************/
+/* Form Labels */
 
 .historyLabel {
   font-weight: normal;
@@ -165,70 +181,79 @@ span.graphFont {
 }
 
 .bucketsLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .magnetsLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .securityLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .configurationLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
-		
 .advancedLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
-		
+
 .passwordLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .sessionLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
-td.logo2menuSpace { 
-	height: 0.8em;
+.bucketsWidgetStateOn, .bucketsWidgetStateOff {
+  font-weight: bold;
 }
 
-td.footerBody { 
-	text-align: center;
-	}
-	
+.configWidgetStateOn, .configWidgetStateOff {
+  font-weight: bold;
+}
+
+.securityWidgetStateOn, .securityWidgetStateOff {
+  font-weight: bold;
+}
+
+/*********************************************************/
+/* Positioning */
+
 table.historyWidgetsTop {
-	width: 100%;
-	margin-left: 1.5em;
-	margin-top: 0.6em;
-	margin-bottom: 1.0em;
+  width: 100%;
+  margin-left: 1.5em;
+  margin-top: 0.6em;
+  margin-bottom: 1.0em;
 }
 
 table.historyWidgetsBottom {
-	width: 100%;
-	margin-top: 0.6em;
+  width: 100%;
+  margin-top: 0.6em;
 }
 
 td.historyNavigatorTop {
-	text-align: right;
+  text-align: right;
 }
 
 td.historyNavigatorBottom {
-	text-align: right;
+  text-align: right;
 }
 
-span.bucketsWidgetState {
-	font-weight: bold;
+/*********************************************************/
+/* Errors */
+
+div.error01 {
+  background-color: transparent;
+  color: red;
+  font-size: larger;
 }
 
-span.configWidgetState {
-	font-weight: bold;
+div.error02 {
+  background-color: transparent;
+  color: red;
 }
 
-span.securityWidgetState {
-	font-weight: bold;
-}
