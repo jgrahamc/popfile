@@ -1,0 +1,63 @@
+body {
+  background-color: #FFFFFF;
+  font-family: sans-serif;
+  color: Black;
+}
+
+	
+
+.head {
+  font-weight: normal;
+  font-size: 22pt;
+}
+
+.shell {
+    background-color: white;
+    border: 3px #778899 solid;
+	 color: Black;
+}
+
+.head a {
+  font-size: 12pt;
+}
+
+.menu {
+  font-size: 14pt;
+  font-weight: bold;
+}
+
+.menu_selected {
+  background-color: #cccccc;
+  width: 150px;
+  border-style: solid;
+  border-width: 2px;
+  border-color: #335D99;
+  color: Black;
+}
+
+.menu_standard {
+  background-color: white;
+  width: 150px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #778899;
+  color: Black;
+}
+
+.row_even {
+    background-color: white;
+	 color: Black;
+	 	
+	 }
+
+	.row_odd { 
+	background-color: #EEEEEE;
+	color: Black;
+		}
+		
+	
+   
+
+	
+
+
