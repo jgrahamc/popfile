@@ -20,10 +20,10 @@ windows: ; @$(MAKE) -C ../windows
 
 # build a ZIPped up package of POPFile
 
-BUILD_ZIP=wzzip -r -P popfile.zip -a $^
+BUILD_ZIP=wzzip -P popfile.zip -a $^
 popfile.zip: core manual skins
 
-core: popfile.pl pix.gif black.gif insert.pl Classifier/*.pm POPFile/Configuration.pm POPFile/Logger.pm Proxy/POP3.pm
+core: popfile.pl pix.gif black.gif insert.pl Classifier/*.pm POPFile/Configuration.pm POPFile/Logger.pm Proxy/POP3.pm UI/HTML.pm *.change 
 	rm -f popfile.zip
 	$(BUILD_ZIP)
 
