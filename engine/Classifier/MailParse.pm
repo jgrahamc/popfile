@@ -11,12 +11,15 @@ use warnings;
 use locale;
 use Classifier::WordMangle;
 
+use MIME::Base64;
+use MIME::QuotedPrint;
+
 # HTML entity mapping to character codes, this maps things like &amp; to their corresponding
 # character code
 
 my %entityhash;
 
-@entityhash{"nbsp","iexcl","cent","pound","curren","yen","brvbar","sect","uml","copy","ordf","laquo","not","shy","reg","macr","deg","plusmn","sup2","sup3","acute","micro","para","middot","cedil","sup1","ordm","raquo","frac14","frac12","frac34","iquest","Agrave","Aacute","Acirc","Atilde","Auml","Aring","AElig","Ccedil","Egrave","Eacute","Ecirc","Euml","Igrave","Iacute","Icirc","Iuml","ETH","Ntilde","Ograve","Oacute","Ocirc","Otilde","Ouml","times","Oslash","Ugrave","Uacute","Ucirc","Uuml","Yacute","THORN","szlig","agrave","aacute","acirc","atilde","auml","aring","aelig","ccedil","egrave","eacute","ecirc","euml","igrave","iacute","icirc","iuml","eth","ntilde","ograve","oacute","ocirc","otilde","ouml","divide","oslash","ugrave","uacute","ucirc","uuml","yacute","thorn","yuml"} = ( 160,161,162,163,164,165,166,167,168,169,170,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255 );        
+@entityhash{'amp', 'nbsp','iexcl','cent','pound','curren','yen','brvbar','sect','uml','copy','ordf','laquo','not','shy','reg','macr','deg','plusmn','sup2','sup3','acute','micro','para','middot','cedil','sup1','ordm','raquo','frac14','frac12','frac34','iquest','Agrave','Aacute','Acirc','Atilde','Auml','Aring','AElig','Ccedil','Egrave','Eacute','Ecirc','Euml','Igrave','Iacute','Icirc','Iuml','ETH','Ntilde','Ograve','Oacute','Ocirc','Otilde','Ouml','times','Oslash','Ugrave','Uacute','Ucirc','Uuml','Yacute','THORN','szlig','agrave','aacute','acirc','atilde','auml','aring','aelig','ccedil','egrave','eacute','ecirc','euml','igrave','iacute','icirc','iuml','eth','ntilde','ograve','oacute','ocirc','otilde','ouml','divide','oslash','ugrave','uacute','ucirc','uuml','yacute','thorn','yuml'} = ( 38, 160,161,162,163,164,165,166,167,168,169,170,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,210,211,212,213,214,215,216,217,218,219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255 );        
 
 #----------------------------------------------------------------------------
 # new
@@ -57,32 +60,74 @@ sub new
     $self->{from}      = '';
     $self->{to}        = '';
     $self->{subject}   = '';
+
+    # These store the current HTML background color and font color to
+    # detect "invisible ink" used by spammers
+
+    $self->{htmlbackcolor} = map_color( $self, 'white' );
+    $self->{htmlfontcolor} = map_color( $self, 'black' );
+
+    # This is a mapping between HTML color names and HTML hexadecimal color values used by the
+    # map_color value to get canonical color values
+
+    $self->{color_map} = { 'white', 'ffffff', 'black', '000000', 'red', 'ff0000', 'green', '00ff00', 'blue', '0000ff' };
+
+    $self->{content_type} = '';
+    $self->{base64}       = '';
+    $self->{in_html_tag}  = 0;
+    $self->{html_tag}     = '';
+    $self->{html_arg}     = '';
+    $self->{in_headers}   = 0;
     
     return bless $self, $type;
 }
 
 # ---------------------------------------------------------------------------------------------
 #
-# un_base64
+# map_color
 #
-# Decode a line of base64 encoded data, returns the data from within the base64
+# Convert an HTML color value into its canonical lower case hexadecimal form with no #
 #
-# $line     A line of base64 encoded data
+# $color        A color value found in a tag
 #
 # ---------------------------------------------------------------------------------------------
-sub un_base64 
+sub map_color
 {
-    my ($self, $line) = @_;
-    my $result;
+    my ( $self, $color ) = @_;
     
-    $line =~ s/=+$//; 
-    $line =~ s/[\r\n]//g; 
-    $line =~ tr|A-Za-z0-9+/| -_|;
+    # The canonical form is lowercase hexadecimal, so start by lowercasing and stripping any
+    # initial #
+    
+    $color = lc( $color );
+    $color =~ s/^#//;
+    
+    # Map color names to hexadecimal values
+    
+    if ( defined( $self->{color_map}{$color} ) ) {
+        return $self->{color_map}{$color};
+    } else {
+        return $color;
+    }
+}
 
-    $result = join'', map( unpack("u", chr(32 + length($_)*3/4) . $_), $line =~ /(.{1,196})/gs);
-    $result =~ s/\x00//g;
+# ---------------------------------------------------------------------------------------------
+#
+# increment_word
+#
+# Updates the word frequency for a word without performing any coloring or transformation
+# on the word
+#
+# $word     The word
+#
+# ---------------------------------------------------------------------------------------------
+sub increment_word
+{
+    my ($self, $word) = @_;
     
-    return $result;
+    $self->{words}{$word} += 1;
+    $self->{msg_total}    += 1;
+
+    print "--- $word ($self->{words}{$word})\n" if ($self->{debug});
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -117,10 +162,7 @@ sub update_word
                 $self->{ut} .= "Found in encoded data <font color=$color>$word<\/font>\r\n";
             }
         } else {
-            $self->{words}{$mword} += 1;
-            $self->{msg_total}     += 1;
-
-            print "--- $mword ($self->{words}{$mword})\n" if ($self->{debug});
+            increment_word( $self, $mword );
         }
     }
 }
@@ -142,52 +184,118 @@ sub add_line
     my ($self, $bigline, $encoded, $prefix) = @_;
     my $p = 0;
     
+    print "add_line: $bigline\n" if $self->{debug};
+    
     # If the line is really long then split at every 1k and feed it to the parser below
     
-    while ( $p < length($bigline) ) {
-        my $line = substr($bigline, $p, 1024);
-        
-        # Pull out any email addresses in the line that are marked with <> and have an @ in them
+    # Check the HTML back and font colors to ensure that we are not about to
+    # add words that are hidden inside invisible ink
 
-        while ( $line =~ s/(mailto:)?([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([\&\?\:\/ >\&\;])// )  {
-            update_word($self, $2, $encoded, ($1?$1:''), '[\&\?\:\/ >\&\;]', $prefix);
-            add_url($self, $3, $encoded, '\@', '[\&\?\:\/]', $prefix);
-        }
-        
-        # Grab domain names
-        while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro|[[:alpha:]]{2})([^[:alpha:]0-9\-_\.]|$)/$4/ )  {
-             add_url($self, "$1$3", $encoded, '', '', $prefix);
-        }
+    if ( $self->{htmlfontcolor} ne $self->{htmlbackcolor} ) {
+        while ( $p < length($bigline) ) {
+            my $line = substr($bigline, $p, 1024);
 
-        # Grab IP addresses
+            # mangle up html character entities
+            # these are just the low ISO-Latin1 entities
+            # see: http://www.w3.org/TR/REC-html32#latin1
+            # TODO: find a way to make this (and other similar stuff) highlight
+            #       without using the encoded content printer or modifying $self->{ut}
 
-        while ( $line =~ s/(([12]?\d{1,2}\.){3}[12]?\d{1,2})// )  {
-            update_word($self, "$1", $encoded, '', '', $prefix);
-        }
-        
-        #deal with runs of alternating spaces and letters
-        #TODO: find a way to make this (and other similar stuff) highlight
-        #       without using the encoded content printer or modifying $self->{ut}
-        while ( $line =~ m/\G(([ \xA0]|[^\w]|^)([\w][\xA0 ]){3,42}([\w][^ \xA0\w])?)/ig ) {
-            my $from = $1;            
-            $from =~ s/^([\xA0 ])?(.*)([\xA0 \r\n])?$/$2/g;
-            my $to = $from;            
-            $to =~ s/[ \xA0]//g;
-            print "\"$from\" -> \"$to\"\n" if $self->{debug};
-            $line =~ s/$from/ $to /g;
-            $self->{ut} =~ s/$from/ $to /g;
-        }
-        
+            while ( $line =~ m/(&(\w{3,6});)/g ) { 
+                my $from = $1; 
+                my $to   = $entityhash{$2}; 
 
-        # Only care about words between 3 and 45 characters since short words like
-        # an, or, if are too common and the longest word in English (according to
-        # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
+                if ( defined( $to ) ) {
+                    $to         = chr($to);
+                    $line       =~ s/$from/$to/g;
+                    $self->{ut} =~ s/$from/$to/g;
+                    print "$from -> $to\n" if $self->{debug};
+                } 
+            }
 
-        while ( $line =~ s/([[:alpha:]][[:alpha:]\']{0,44})[_\-,\.\"\'\)\?!:;\/&]{0,5}([ \t\n\r]|$)/ / ) {
-            update_word($self,$1, $encoded, '', '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]', $prefix) if (length $1 >= 3);
+            while ( $line =~ m/(&#([\d]{1,3});)/g ) { 
+
+                # Don't decode odd (nonprintable) characters or < >'s. 
+
+                if ( ( ( $2 < 255 ) && ( $2 > 63 ) ) || ( $2 == 61 ) || ( ( $2 < 60 ) && ( $2 > 31 ) ) ) { 
+                    my $from = $1;
+                    my $to   = chr($2);
+
+                    if ( defined( $to ) &&  ( $to ne '' ) ) {
+                        $line       =~ s/$from/$to/g;
+                        $self->{ut} =~ s/$from/$to/g;
+                        print "$from -> $to\n" if $self->{debug};
+                        increment_word( $self, 'html:numericentity' );
+                    }
+                }
+            }
+
+            # Pull out any email addresses in the line that are marked with <> and have an @ in them
+
+            while ( $line =~ s/(mailto:)?([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([\) \&\?\:\/ >\&\;])// )  {
+                update_word($self, $2, $encoded, ($1?$1:''), '[\&\?\:\/ >\&\;]', $prefix);
+                add_url($self, $3, $encoded, '\@', '[\&\?\:\/]', $prefix);
+            }
+
+            # Grab domain names
+            while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro)([^[:alpha:]0-9\-_\.]|$)/$4/ )  {
+                 add_url($self, "$1$3", $encoded, '', '', $prefix);
+            }
+
+            # Grab IP addresses
+
+            while ( $line =~ s/(([12]?\d{1,2}\.){3}[12]?\d{1,2})// )  {
+                update_word($self, "$1", $encoded, '', '', $prefix);
+            }
+
+            # One common spam trick is to use accented characters incorrectly such as fàntástïc
+            # which to an English speaker reads as fantastic.  To work around this we remove all
+            # accents from characters, this is the accent equivalent of lower casing all the
+            # letters
+
+            $line =~ s/[\xaaàáâäãå]/a/g;
+            $line =~ s/[éèêë]/e/g;
+            $line =~ s/[ìíîï]/i/g;
+            $line =~ s/[\xbaðòóôõö]/o/g;
+            $line =~ s/[ùúûüµ]/u/g;
+            $line =~ s/[ýÿ]/y/g;
+            $line =~ s/ç/c/g;
+            $line =~ s/\x9e/z/g;
+            $line =~ s/\x9a/s/g;
+            $line =~ s/\x9c/oe/g;
+            $line =~ s/\xe6/ae/g;
+            $line =~ s/\x83/f/g;
+            $line =~ s/ñ/n/g;    
+
+            # Deal with runs of alternating spaces and letters
+            # TODO: find a way to make this (and other similar stuff) highlight
+            #       without using the encoded content printer or modifying $self->{ut}
+
+            foreach my $space (' ', '\'', '*', '^', '`' ){
+                while ( $line =~ s/ (([A-Z]\Q$space\E){2,15}[A-Z])( |\Q$space\E|[!\?])/ /i ) {
+                    my $word = $1;
+                    $word    =~ s/\Q$space\E//g;
+                    update_word( $self, $word, $encoded, ' ', ' ', '' );
+                    increment_word( $self, 'trick:spacedout' );
+                }
+            }
+            
+            # Deal with random insertion of . inside words
+
+            while ( $line =~ s/([A-Z])\.([A-Z])/$1$2/i ) {
+                increment_word( $self, 'trick:dottedwords' );
+            }
+
+            # Only care about words between 3 and 45 characters since short words like
+            # an, or, if are too common and the longest word in English (according to
+            # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
+
+            while ( $line =~ s/([[:alpha:]][[:alpha:]\']{1,44})([_\-,\.\"\'\)\?!:;\/& \t\n\r]{0,5}|$)// ) {
+                update_word($self,$1, $encoded, '', '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]', $prefix) if (length $1 >= 3);
+            }
+
+            $p += 1024;
         }
-        
-        $p += 1024;
     }
 }
 
@@ -198,23 +306,36 @@ sub add_line
 # Extract elements from within HTML tags that are considered important 'words' for analysis
 # such as domain names, alt tags, 
 #
-# $tag     The tag name
-# $arg     The arguments
+# $tag      The tag name
+# $arg      The arguments
+# $end_tag  Whether this is an end tag or not
 #
 # ---------------------------------------------------------------------------------------------
 sub update_tag 
 {
-    my ($self, $tag, $arg) = @_;
+    my ( $self, $tag, $arg, $end_tag ) = @_;
 
     $tag =~ s/[\r\n]//g;
     $arg =~ s/[\r\n]//g;
 
     print "HTML tag $tag with argument " . $arg . "\n" if ($self->{debug});
+
+    # End tags do not require any argument decoding but we do look at them
+    # to make sure that we handle /font to change the font color
+
+    if ( $end_tag ) {
+        if ( $tag =~ /^font$/i ) {
+            $self->{htmlfontcolor} = map_color( $self, 'black' );
+        }
+        
+        return;
+    }
  
     my $attribute;
     my $value;
     
     # These are used to pass good values to update_word
+
     my $quote;
     my $end_quote;
     
@@ -222,6 +343,7 @@ sub update_tag
     # Match the closing attribute character, if there is none 
     # (this allows nested single/double quotes),
     # match a space or > or EOL    
+
     while ( $arg =~ s/[ \t]*(\w+)[ \t]*=[ \t]*([\"\'])?(.*?)(?(2)\2|($|([ \t>])))//i ) {
         $attribute = $1;
         $value     = $3;        
@@ -235,6 +357,7 @@ sub update_tag
         print "   attribute $attribute with value $quote$value$quote\n" if ($self->{debug});
         
         # Remove leading whitespace and leading value-less attributes
+
         if ( $arg =~ s/^(([ \t]*(\w+)[\t ]+)+)([^=])/$4/ ) {    
             print "   attribute(s) " . $1 . " with no value\n" if ($self->{debug});        
         }       
@@ -242,9 +365,11 @@ sub update_tag
         # Toggle for parsing script URI's. 
         # Should be left off (0) until more is known about how different html 
         # rendering clients behave.
+
         my $parse_script_uri = 0;
         
         # Tags with src attributes
+
         if ( ( $attribute =~ /^src$/i ) &&
              ( ( $tag =~ /^img|frame|iframe$/i )
                || ( $tag =~ /^script$/i && $parse_script_uri ) ) ) {
@@ -253,14 +378,18 @@ sub update_tag
         }
         
         # Tags with href attributes
+
         if ( $attribute =~ /^href$/i && $tag =~ /^(a|link|base|area)$/i )  {
+
             # ftp, http, https
+
             if ( $value =~ /^(ftp|http|https):\/\//i ) {
                 add_url($self, $value, 0, $quote, $end_quote, '');
                 next;
             }
     
             # The less common mailto: goes second, and we only care if this is in an anchor
+
             if ( $tag =~ /^a$/ && $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/]|$)/i )  {
                update_word( $self, $1, 0, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
                add_url( $self, $2, 0, '@', ($3?'[\\\&\?\:\/]':$end_quote), '' );
@@ -269,34 +398,42 @@ sub update_tag
         }
         
         # Tags with alt attributes
+
         if ( $attribute =~ /^alt$/i && $tag =~ /^img$/i )  {
             add_line($self, $value, 0, '');
             next;
          }
          
         # Tags with working background attributes
+
         if ( $attribute =~ /^background$/i && $tag =~ /^(td|table|body)$/i ) {
             add_url( $self, $value, 0, $quote, $end_quote, '' );
             next;
         }
         
         # Tags that load sounds
+
         if ( $attribute =~ /^bgsound$/i && $tag =~ /^body$/i ) {
             add_url( $self, $2, 0, $quote, $end_quote, '' );
             next;
         }
 
+
         # Tags with colors in them
         if ( ( $attribute =~ /^color$/i ) && ( $tag =~ /^font$/i ) ) {
             update_word( $self, $value, 0, $quote, $end_quote, '' );
+            $self->{htmlfontcolor} = map_color($self, $value);
         }
                 
         # Tags with background colors
+
         if ( ( $attribute =~ /^(bgcolor|back)$/i ) && ( $tag =~ /^(td|table|body|tr|th|font)$/i ) ) {
             update_word( $self, $value, 0, $quote, $end_quote, '' );
+            $self->{htmlbackcolor} = map_color($self, $value);
         }
 
         # Tags with a charset
+
         if ( ( $attribute =~ /^content$/i ) && ( $tag =~ /^meta$/i ) ) {
             if ( $value=~ /charset=(.{1,40})[\"\>]?/ ) {
                 update_word( $self, $1, 0, '', '', '' );
@@ -306,12 +443,14 @@ sub update_tag
         # Tags with style attributes (this one may impact performance!!!)
         # most container tags accept styles, and the background style may
         # not be in a predictable location (search the entire value)
+
         if ( $attribute =~ /^style$/i && $tag =~ /^(body|td|tr|table|span|div|p)$/i ) {            
             add_url( $self, $1, 0, '[\']', '[\']', '' ) if ( $value =~ /background\-image:[ \t]?url\([ \t]?\'(.*)\'[ \t]?\)/i );
             next;
         }
         
         # Tags with action attributes
+
         if ( $attribute =~ /^action$/i && $tag =~ /^form$/i )  {
             if ( $value =~ /^(ftp|http|https):\/\//i ) {
                 add_url( $self, $value, 0, $quote, $end_quote, '' );
@@ -319,6 +458,7 @@ sub update_tag
             }
         
             # mailto forms            
+
             if ( $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/])/i )  {
                update_word( $self, $1, 0, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
                add_url( $self, $2, 0, '@', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
@@ -372,6 +512,7 @@ sub add_url
         $url =~ s/$from/$to/g;
         $self->{ut} =~ s/$from/$to/g;
         print "$from -> $to\n" if $self->{debug};
+        increment_word( $self, "html:encodedurl" );
     }
 
     # Extract authorization information from the URL (e.g. http://foo@bar.com)
@@ -382,6 +523,7 @@ sub add_url
         $host = "$1$3";
         $hostform = "name";
     } elsif ( $url =~ /(([^:\/])+)/ ) {
+    
         # Some other hostname format found, maybe
         # Read here for reference: http://www.pc-help.org/obscure.htm
         # Go here for comparison: http://www.samspade.org/t/url
@@ -484,61 +626,86 @@ sub add_url
 #
 # parse_html
 #
-# Parse a line that might contain HTML information
+# Parse a line that might contain HTML information, returns 1 if we are still inside an 
+# unclosed HTML tag
 #
 # $line     A line of text 
+# $encoded  1 if this HTML was found inside encoded (base64) text
 #
 # ---------------------------------------------------------------------------------------------
 sub parse_html
 {
-    my ( $self, $line ) = @_;
+    my ( $self, $line, $encoded ) = @_;
 
-    my $code = 0;
-    
-    # Remove HTML comments
+    my $found = 1;
 
-    $line =~ s/<!--.*?-->//g;
+    $line =~ s/[\r\n\t ]+$//;
 
-    # Remove HTML tags completely
+    print "parse_html: [$line]\n" if $self->{debug};
+   
+    # Remove HTML comments and other tags that begin !
 
-    if ( $self->{in_html_tag} )  {
-        if ( $line =~ s/(.*?)>// ) {
-            $self->{html_arg} .= $1;
-            $self->{in_html_tag} = 0;
-            $self->{html_tag} =~ s/=\n ?//g;
-            $self->{html_arg} =~ s/=\n ?//g;
-            update_tag( $self, $self->{html_tag}, $self->{html_arg} );
-            $self->{html_tag} = '';
-            $self->{html_arg} = '';
-            $code             = 1;
-        } else {
-            $self->{html_arg} .= " " . $line;
-            $line = '';
+    while ( $line =~ s/<!.*?>// ) {
+        increment_word( $self, 'html:comment' );
+    }
+
+    while ( $found && ( $line ne '' ) ) {
+        $found = 0;
+        
+        $line =~ s/^[\r\n\t ]+//;
+
+        # If we are in an HTML tag then look for the close of the tag, if we get it then
+        # handle the tag, if we don't then keep building up the arguments of the tag
+
+        if ( $self->{in_html_tag} )  {
+            if ( $line =~ s/^(.*?)>// ) {
+                $self->{html_arg} .= ' ' . $1;
+                $self->{in_html_tag} = 0;
+                $self->{html_tag} =~ s/=\n ?//g;
+                $self->{html_arg} =~ s/=\n ?//g;
+                update_tag( $self, $self->{html_tag}, $self->{html_arg}, $self->{html_end} );
+                $self->{html_tag} = '';
+                $self->{html_arg} = '';
+                $found = 1;
+                next;
+            } else {
+                $self->{html_arg} .= ' ' . $line;
+                return 1;
+            }
+        }
+
+        # Does the line start with a HTML tag that is closed (i.e. has both the < and the 
+        # > present)?  If so then handle that tag immediately and continue
+        
+        if ( $line =~ s/^<([\/]?)([A-Za-z]+)([^>]*?)>// )  {
+            update_tag( $self, $2, $3, ( $1 eq '/' ) );
+            $found = 1;
+            next;
+        }
+
+        # Does the line consist of just a tag that has no closing > then set up the global
+        # vars that record the tag and return 1 to indicate to the caller that we have an
+        # unclosed tag
+
+        if ( $line =~ /^<([\/]?)([^ >]+)([^>]*)$/ )  {
+            $self->{html_end}    = ( $1 eq '/' );
+            $self->{html_tag}    = $2;
+            $self->{html_arg}    = $3;
+            $self->{in_html_tag} = 1;
             return 1;
         }
-    }
 
-    while ( $line =~ s/<[\/]?([A-Za-z]+)([^>]*?)>// )  {
-        update_tag( $self, $1, $2 );
-        $code = 1;
-    }
+        # There could be something on the line that needs parsing (such as a word), if we reach here
+        # then we are not in an unclosed tag and so we can grab everything from the start of the line
+        # to the end or the first < and pass it to the line parser
 
-    if ( $line =~ s/<([^ >]+)([^>]*)$// )  {
-        $self->{html_tag} = $1;
-        $self->{html_arg} = $2;
-        $self->{in_html_tag} = 1;
-        $code = 1;
+        if ( $line =~ s/^([^<]*)(<|$)/$2/ ) {
+            $found = 1;
+            add_line( $self, $1, $encoded, '' );
+        }
     }
     
-    print "HTML removed leaves: $line \n" if ($self->{debug} && $code);
-    
-    if ( $self->{content_type} =~ /\/html/i ) {
-        add_line( $self, $line, 0, '' );
-    } else {
-        $code = 0;
-    }
-
-    return $code;
+    return 0;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -570,6 +737,10 @@ sub parse_stream
     
     my $colorized = '';
 
+    # Base64 attachments are loaded into this as we read them
+
+    $self->{base64}       = '';
+    
     $self->{in_html_tag} = 0;
     $self->{html_tag}    = '';
     $self->{html_arg}    = '';
@@ -580,7 +751,10 @@ sub parse_stream
     $self->{to}        = '';
     $self->{subject}   = '';
     $self->{ut}        = '';
-    
+
+    $self->{htmlbackcolor} = map_color( $self, 'white' );
+    $self->{htmlfontcolor} = map_color( $self, 'black' );
+
     $self->{in_headers} = 1;
 
     $colorized .= "<tt>" if ( $self->{color} );
@@ -619,123 +793,18 @@ sub parse_stream
                 $splitline =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
                 $self->{ut} .= $splitline;
             }
-            
-            if ( !$self->{in_headers} ) {
-                # If we are in a mime document then spot the boundaries
-                if ( ( $mime ne '' ) && ( $line =~ /^\-\-($mime)(\-\-)?/ ) ) {
-                    if (!defined $2) {
-                        print "Hit MIME boundary --$1\n" if $self->{debug};
-                        $encoding = '';
-                        $self->{in_headers} = 1;
-                    } else {
-                        my $boundary = $1;
-                        
-                        print "Hit MIME boundary terminator --$1--\n" if $self->{debug};
-                        
-                        #double-escape to match escape stuff.. gross                        
-                        $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
-                        $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
-                        
-                        $mime =~ s/(\|$boundary|$boundary\||$boundary)//;
-                        print "MIME boundary list now $mime\n" if $self->{debug};
-                    }
-                    next;
-                }
-                
-                # If we are doing base64 decoding then look for suitable lines and remove them 
-                # for decoding
-                
-                if ( $encoding =~ /base64/i ) {
-                    my $decoded = '';
-                    $self->{ut} = '' if $self->{color};
-                    print "ba> [$line]" if $self->{debug};
-                    while ( ( $line =~ /^([A-Za-z0-9+\/]{4}){1,48}[\n\r]*/ ) || ( $line =~ /^[A-Za-z0-9+\/]+=+?[\n\r]*/ ) ) {
-                        print "64> $line" if $self->{debug};
-                        $decoded    .= un_base64( $self, $line );
-                        if ( $decoded =~ /[^[:alpha:]\-\.]$/ )  {
-                            if ( $self->{color} ) {
-                                my $splitline = $line;    
-                                $splitline =~ s/([^\r\n]{120})/$1\r\n/g;
-                                $self->{ut} = $splitline;
-                            }
-                            add_line( $self, $decoded, 1, '' ) if ( parse_html( $self, $decoded ) == 0 );
-                            $decoded = '';
-                            if ( $self->{color} )  {
-                                if ( $self->{ut} ne '' )  {
-                                    $colorized .= $self->{ut};
-                                    $self->{ut} = '';
-                                }
-                            }
-                        }
-                
-                        last if ( !($line = <MSG>) );
-                    }
-                
-                    add_line( $self, $decoded, 1, '' ) if ( parse_html( $self, $decoded ) == 0 );
-                }
-                
-                next if ( !defined($line) );
 
-                # Look for =?foo? syntax that identifies a charset
-                
-                if ( $line =~ /=\?(.{1,40})\?/ ) {
-                    update_word( $self, $1, 0, '', '', '' );
-                }
-                
-                # Transform some escape characters
-                
-                if ( $encoding =~ /quoted\-printable/i ) {
-                    $line =~ s/=[\r\n]*$/\n/;
-                    $line =~ s/=3d/__popfile_equal__/gi;
-                    $line =~ s/=([0-9A-F][0-9A-F])/chr(hex("0x$1"))/egi;
-                    $line =~ s/__popfile_equal__/=/gi;
-                    
-                    if ( $self->{color} ) {
-                        $self->{ut} =~ s/=[\r\n]*$//;
-                        $self->{ut} =~ s/=3d/__popfile_equal__/gi;
-                        $self->{ut} =~ s/=([0-9A-F][0-9A-F])/chr(hex("0x$1"))/egi;
-                    }
-                }
-                
-                # mangle up html character entities
-                # these are just the low ISO-Latin1 entities
-                # see: http://www.w3.org/TR/REC-html32#latin1
-                # TODO: find a way to make this (and other similar stuff) highlight
-                #       without using the encoded content printer or modifying $self->{ut}
-                if ( $self->{content_type} =~ /html/ ) {
-                      while ( $line =~ m/(\&([\w]{3,6})\;)/g ) { 
-                            my $from = "$1"; 
-                            my $to = $entityhash{$2}; 
-                         if ( defined( $to ) ) {
-                            $to         = chr($to);
-                            $line       =~ s/$from/$to/g;
-                            $self->{ut} =~ s/$from/$to/g;
-                            print "$from -> $to\n" if $self->{debug};
-                         } 
-                     }
-                     while ( $line =~ m/(\&#([\d]{1,3})\;)/g ) { 
-                        # Don't decode odd (nonprintable) characters or < >'s. 
-                        if ( ( $2 < 255 && $2 > 63 ) || $2 == 61 || ($2 < 60 && $2 > 31 ) ) { 
-                            my $from = $1;
-                            my $to   = chr($2);
-                            if ( defined( $to ) &&  ( $to ne '' ) ) {
-                                $line       =~ s/$from/$to/g;
-                                $self->{ut} =~ s/$from/$to/g;
-                                print "$from -> $to\n" if $self->{debug};
-                            }
-                        }
-                    }
-                }
-                add_line( $self, $line, 0, '' ) if ( parse_html( $self, $line ) == 0 );
-            } 
             if ($self->{in_headers}) {                
-                #check for blank line signifying end of headers
+            
+                # Check for blank line signifying end of headers
+                
                 if ( $line =~ /^\r\n/) {
                     $self->{in_headers} = 0;
                     print "Header parsing complete.\r" if $self->{debug};
                 }
                                                 
                 # If we have an email header then just keep the part after the :
+                
                 if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ )  {
                     my $header   = $1;
                     my $argument = $2;
@@ -757,7 +826,7 @@ sub parse_stream
     
                     if ( $header =~ /(From|To|Cc|Reply\-To)/i ) {
                         if ( $argument =~ /=\?(.{1,40})\?/ ) {
-                            update_word( $self, $1, 0, '', '', '' );
+                            update_word( $self, $1, 0, '', '', 'charset' );
                         }
                         
                         if ( $header =~ /From/i )  {
@@ -797,12 +866,7 @@ sub parse_stream
                             my $boundary = $argument; 
                                                         
                             if ( !( $argument =~ /boundary=(\"([A-Z0-9\'\(\)\+\_\,\-\.\/\:\=\?][A-Z0-9\'\(\)\+_,\-\.\/:=\? ]{0,69})\"|([^\(\)\<\>\@\,\;\:\\\"\/\[\]\?\=]{1,70}))/i )) {
-                                # Store the file-handle's position
-                                my $pos = tell MSG;                                
-                                if ( $pos != -1 ) {
-                                    $boundary = <MSG>;
-                                    seek MSG, $pos, 0;
-                                }
+                                $boundary = <MSG>;
                             }
                             
                             if ( $boundary =~ /boundary=(\"([A-Z0-9\'\(\)\+\_\,\-\.\/\:\=\?][A-Z0-9\'\(\)\+_,\-\.\/:=\? ]{0,69})\"|([^\(\)\<\>\@\,\;\:\\\"\/\[\]\?\=]{1,70}))/i ) { 
@@ -817,10 +881,18 @@ sub parse_stream
                                     $mime = $boundary;
                                 }
                                 print "Set mime boundary to " . $mime . "\n" if $self->{debug};
+                                next;
                             } 
                         } 
+
+                        if ( $argument =~ /charset=\"?([^\"]{1,40})\"?/ ) {
+                            update_word( $self, $1, 0, '' , '', 'charset' );
+                        }
                         
-                        $self->{content_type} = $argument; 
+                        if ( $argument =~ /^(.*?)(;$)/ ) {
+                            print "Set content type to $1\n" if $self->{debug};                        
+                            $self->{content_type} = $1; 
+                        }
                         next; 
                     }
                         
@@ -830,6 +902,9 @@ sub parse_stream
                     if ( $header =~ /Content-Transfer-Encoding/i ) {
                         $encoding = $argument;
                         print "Setting encoding to $encoding\n" if $self->{debug};
+                        my $compact_encoding = $encoding;
+                        $compact_encoding =~ s/[^A-Za-z0-9]//g;
+                        increment_word( $self, "encoding:$compact_encoding" );
                         next;
                     }
     
@@ -838,13 +913,86 @@ sub parse_stream
                     next if ( $header =~ /(Thread-Index|X-UIDL|Message-ID|X-Text-Classification|X-Mime-Key)/i );
     
                     add_line( $self, $argument, 0, $prefix );
-                } else {
-                    add_line( $self, $line, 0, '' ) if ( parse_html( $self, $line ) == 0 );
+                    
+                    next;
                 }
             }
-        }
+            
+            # If we are in a mime document then spot the boundaries
+            
+            if ( ( $mime ne '' ) && ( $line =~ /^\-\-($mime)(\-\-)?/ ) ) {
+                $colorized .= clear_out_base64( $self );
+                
+                if (!defined $2) {
+                    print "Hit MIME boundary --$1\n" if $self->{debug};
+                    $encoding = '';
+                    $self->{in_headers} = 1;
+                } else {
+                    my $boundary = $1;
+
+                    print "Hit MIME boundary terminator --$1--\n" if $self->{debug};
+
+                    # Double-escape to match escape stuff.. gross
+                    
+                    $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
+                    $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
+
+                    $mime =~ s/(\|$boundary|$boundary\||$boundary)//;
+                    print "MIME boundary list now $mime\n" if $self->{debug};
+                    $self->{in_headers} = 0;
+                }
+                
+                next;
+            }
+            
+            # If we are still in the headers then make sure that we are on a line with whitespace
+            # at the start
+
+            if ( $self->{in_headers} ) {
+                if ( $line =~ /^[ \t\r\n]/ ) {
+                    next;
+                }
+            }
+
+            # If we are doing base64 decoding then look for suitable lines and remove them 
+            # for decoding
+
+            if ( $encoding =~ /base64/i ) {
+                $line =~ s/[\r\n]//g;
+                $line =~ s/!$//;
+                $self->{base64} .= $line;
+                
+                next;
+            }
+
+            next if ( !defined($line) );
+
+            # Look for =?foo? syntax that identifies a charset
+
+            if ( $line =~ /=\?(.{1,40})\?/ ) {
+                update_word( $self, $1, 0, '', '', 'charset' );
+            }
+
+            # Decode quoted-printable
+
+            if ( $encoding =~ /quoted\-printable/i ) {
+                $line       = decode_qp( $line );
+                $self->{ut} = decode_qp( $self->{ut} ) if ( $self->{color} );
+            }
+
+            parse_html( $self, $line, 0 );
+        } 
     }
 
+    # If we reach here and disover that we think that we are in an unclosed HTML tag then there
+    # has probably been an error (such as a < in the text messing things up) and so we dump
+    # whatever is stored in the HTML tag out
+    
+    if ( $self->{in_html_tag} ) {
+        add_line( $self, $self->{html_tag} . ' ' . $self->{html_arg}, 0, '' );
+    }
+
+    $colorized .= clear_out_base64( $self );
     close MSG;
     
     if ( $self->{color} )  {
@@ -854,10 +1002,55 @@ sub parse_stream
         $colorized =~ s/(\r\n\r\n|\r\r|\n\n)/__BREAK____BREAK__/g;
         $colorized =~ s/[\r\n]+/__BREAK__/g;
         $colorized =~ s/__BREAK__/<br>/g;
-        $colorized =~ s/__popfile_equal__/=/g;
         
         return $colorized;
     }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# clear_out_base64
+#
+# If there's anything in the {base64} then decode it and parse it, returns colorization
+# information to be added to the colorized output
+#
+# ---------------------------------------------------------------------------------------------
+sub clear_out_base64
+{
+    my ( $self ) = @_;
+
+    my $colorized = '';
+
+    if ( $self->{base64} ne '' ) {
+        my $decoded = '';
+
+        $self->{ut}     = '' if $self->{color};
+        $self->{base64} =~ s/ //g;
+
+        $decoded = decode_base64( $self->{base64} );
+        parse_html( $self, $decoded, 1 );
+
+        if ( $decoded =~ /[^[:alpha:]\-\.]$/ )  {
+            if ( $self->{color} ) {
+                my $splitline = $self->{base64};    
+                $splitline =~ s/([^\r\n]{120})/$1\r\n/g;
+                $self->{ut} = $splitline;
+            }
+
+            $decoded = '';
+
+            if ( $self->{color} )  {
+                if ( $self->{ut} ne '' )  {
+                    $colorized  = $self->{ut};
+                    $self->{ut} = '';
+                }
+            }
+        }
+    }
+    
+    $self->{base64} = '';
+    
+    return $colorized;
 }
 
 1;
