@@ -45,7 +45,7 @@
                 :
                 <input type="text" name="text<TMPL_VAR NAME="Magnet_Row_ID">" value="<TMPL_VAR NAME="Magnet_Validating">" size="<TMPL_VAR NAME="Magnet_Size">" />
             </td>
-            <td>
+            <td align="center">
                 <select name="bucket<TMPL_VAR NAME="Magnet_Row_ID">" id="magnetsAddBucket">
 
                     <TMPL_LOOP NAME="Magnet_Loop_Loop_Buckets">
@@ -58,7 +58,7 @@
 
                 </select>
             </td>
-            <td>
+            <td align="center">
                 <input type="checkbox" class="checkbox" name="remove<TMPL_VAR NAME="Magnet_Row_ID">" />
                 <TMPL_VAR NAME="Localize_Remove">
                 <input name="otype<TMPL_VAR NAME="Magnet_Row_ID">" type="hidden" value="<TMPL_VAR NAME="Magnet_MType">" />
@@ -72,10 +72,10 @@
         <tr>
             <td>
             </td>
-            <td>
+            <td align="center">
                 <input type="submit" class="deleteButton" name="update" value="<TMPL_VAR NAME="Localize_Update">" />
             </td>
-            <td>
+            <td align="center">
                 <input type="submit" class="deleteButton" name="delete" value="<TMPL_VAR NAME="Localize_Remove">" />
             </td>
         </tr>
@@ -94,8 +94,7 @@
 <table cellspacing="0" summary="">
     <tr>
         <td>
-            <b>
-                <TMPL_VAR NAME="Localize_Magnet_Explanation">
+            <TMPL_VAR NAME="Localize_Magnet_Explanation">
         </td>
     </tr>
 </table>
