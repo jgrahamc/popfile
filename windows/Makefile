@@ -1,24 +1,14 @@
-.PHONY: all build package
+.PHONY: all build
 
-all: package
+all: build
 
 build: setup.exe
-package: popfile-windows.zip
 
+setup.exe: ../engine/*.pl ../engine/Classifier/*.pm ../engine/skins/*.css ../engine/skins/*.gif
 setup.exe: installer.nsi
-setup.exe: ../engine/*.pl ../engine/Classifier/*.pm ../engine/skins/*.css
-	@echo Making installer $@...
-	@/cygdrive/c/Program\ Files/NSIS/makensis.exe /V2 installer.nsi
+	@../NSIS/makensis.exe /V4 $<
+	@rm $@
+	@mv setup2.exe $@
 
-setup2.exe: installer2.nsi io*.ini
-setup2.exe: ../engine/*.pl ../engine/Classifier/*.pm ../engine/skins/*.css
-	@echo Making installer $@...
-	@../NSIS/makensis.exe /V4 installer2.nsi
 
-popfile-windows.zip: setup.exe	
-	@echo Packaging release file $@...
-	@gzip -S .zip -q setup.exe
-	@rm -f $@
-	@mv setup.exe.zip $@
-	
 	

@@ -160,6 +160,9 @@ Section "Minimal Perl" SecPerl
   File "C:\Perl\lib\warnings.pm"
   File "C:\Perl\lib\XSLoader.pm"
 
+  SetOutPath $INSTDIR\Carp
+  File "C:\Perl\lib\Carp\*"
+
   SetOutPath $INSTDIR\Exporter
   File "C:\Perl\lib\Exporter\*"
 
@@ -183,6 +186,9 @@ Section "Minimal Perl" SecPerl
 
   SetOutPath $INSTDIR\auto\Socket
   File "C:\Perl\lib\auto\Socket\*"
+
+  SetOutPath $INSTDIR\auto\Sys\Hostname
+  File "C:\Perl\lib\auto\Sys\Hostname\*"
 
   SetOutPath $INSTDIR\File
   File "C:\Perl\lib\File\Glob.pm"
@@ -259,12 +265,16 @@ skip_confirmation:
   Delete $INSTDIR\IO\*.*
   Delete $INSTDIR\IO\Socket\*.*
   RMDir /r $INSTDIR\IO
-  Delete $INSTDIR\Sys\*.*
+  Delete $INSTDIR\Carp\*.*
+  RMDir /r $INSTDIR\Carp
+  Delete $INSTDIR\Sys\Hostname\*.*
+  RMDir /r $INSTDIR\Sys\Hostname
   RMDir /r $INSTDIR\Sys
   Delete $INSTDIR\auto\DynaLoader\*.*
   Delete $INSTDIR\auto\File\Glob\*.*
   Delete $INSTDIR\auto\IO\*.*
   Delete $INSTDIR\auto\Socket\*.*
+  Delete $INSTDIR\auto\Sys\*.*
   RMDir /r $INSTDIR\auto
   Delete $INSTDIR\File\*.*
   RMDir $INSTDIR\File
