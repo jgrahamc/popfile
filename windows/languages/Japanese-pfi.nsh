@@ -492,6 +492,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO         "いいえ(ユーザーインターフェースは POPFile を起動しないと使えません)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "POPFile を起動(コンソール)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "POPFile をバックグラウンドで起動(コンソールなし)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Run POPFile (do not show system tray icon)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Run POPFile with system tray icon (default setting)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "POPFile を起動すれば以下の方法でユーザーインターフェースを使用できます。"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(a) システムトレイ中の POPFile アイコンをダブルクリック"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(b) スタート --> プログラム --> POPFile --> POPFile User Interface を選択"

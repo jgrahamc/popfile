@@ -492,6 +492,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO         "아니오 ('사용자 화면'은 POPFile이 시작되지 않으면 사용할 수 없습니다.)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "POPFile 시작 (창에서)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "POPFile을 백그라운드에서 시작 (창이 나타나지 않습니다)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Run POPFile (do not show system tray icon)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Run POPFile with system tray icon (default setting)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "POPFile 시작되고 나면 '사용자 화면'을 표시할 수 있습니다."
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     " (a) 시스템 트레이의 POPFile 아이콘을 클릭하시거나,"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     " (b) 시작 --> 프로그램(P) --> POPFile --> POPFile User Interface 를 선택하십시오."
