@@ -663,22 +663,6 @@ sub classify
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
     # P(word|bucket) ^ word count and multiply to the score
 
-    my $logbuck = 1;
-    $logbuck = log( $#buckets + 1 ) if ( $#buckets > 0 );
-
-    # Ideally, the "raw score" in the score display would reflect the sum of the
-    # scores for the individual words, as shown by the lookup GUI.  Actually
-    # doing this requires a fair amount of computation to compute the sum of the
-    # probabilities.  If we assume that only the most probable choice is significant
-    # (that is, that the max probability and the sum of the probabilities are the
-    # same), we do much less computation, and still end up with results that are
-    # "close enough for jazz".  Note that this makes *no* difference for
-    # classification - it only matters for the debug (bayes.pl) display.
-
-    my $correction = -$logbuck;
-
-    # Switching from using *= to += and using the log of every probability instead
-
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
         my $wmax = -10000;
 
@@ -694,36 +678,11 @@ sub classify
 
             $score{$bucket} += ( $probability * $self->{parser__}{words__}{$word} );
         }
-
-        if ($wmax > $self->{not_likely__}) {
-            $correction += ($wmax - $logbuck) * $self->{parser__}{words__}{$word};
-        } else {
-            $correction += $wmax * $self->{parser__}{words__}{$word};
-        }
     }
 
     # Now sort the scores to find the highest and return that bucket as the classification
 
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
-
-    my %raw_score;
-    my $base_score = $score{$ranking[0]};
-    my $total = 0;
-
-    $self->log_( "Base score is $base_score for $ranking[0]" );
-
-    # Compute the total of all the scores to generate the normalized scores and probability
-    # estimate.  $total is always 1 after the first loop iteration, so any additional term
-    # less than 2 ** -54 is insignificant, and need not be computed.
-
-    my $ln2 = log(2);
-
-    foreach my $b (@ranking) {
-        $raw_score{$b} = $score{$b};
-        $score{$b} -= $base_score;
-
-        $total += exp($score{$b}) if ($score{$b} > ( -54 * $ln2 ) );
-    }
 
     if ($self->{wordscores__} && defined($ui) ) {
         my %qm = %{$self->{parser__}->quickmagnets()};
@@ -773,16 +732,17 @@ sub classify
         $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\">$language{Probability}</th></tr>\n";
 
         foreach my $b (@ranking) {
-             my $prob = exp($score{$b})/$total;
-             my $probstr;
 
-            if ($prob >= 0.1 || $prob == 0.0) {
-                 $probstr = sprintf("%12.6f", $prob);
-             } else {
-                $probstr = sprintf("%17.6e", $prob);
-             }
+            # Take a score value (which is log of the probability) and write it out as 0.000000 lots 00000001234, to do this we
+            # calculate the number of 0 between the . and the first significant digit and output the number of zeroes and
+            # then the significant digits
 
-             $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
+            my $zero_count  = -int($score{$b}/log(10));
+            my $significant = sprintf( "%.6f", exp($score{$b} + $zero_count * log(10)) );
+            $significant =~ s/^0\.//;
+            my $probstr     = sprintf( "0. [%d zeroes] %s", $zero_count, $significant );
+
+            $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
         }
 
         $self->{scores__} .= "</table><hr>";
@@ -845,9 +805,9 @@ sub classify
     # If no bucket has a probability better than 0.5, call the message "unclassified".
     my $class = 'unclassified';
 
-    if ( ( $total != 0 ) && ( $score{$ranking[0]} > $self->{unclassified__} + log($total) ) ) {
+    # if ( ( $total != 0 ) && ( $score{$ranking[0]} > $self->{unclassified__} + log($total) ) ) {
         $class = $ranking[0];
-    }
+    # }
 
     return $class;
 }
