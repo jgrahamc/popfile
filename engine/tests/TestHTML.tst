@@ -76,7 +76,7 @@ $b->logger( $l );
 
 $b->initialize();
 
-my $h = new UI::HTML;
+our $h = new UI::HTML;
 
 $h->configuration( $c );
 $h->mq( $mq );
@@ -84,15 +84,16 @@ $h->logger( $l );
 $h->classifier( $b );
 $h->initialize();
 $h->version( 'testsuite' );
+our $version = $h->version();
 
-my $sk = $h->{session_key__};
+our $sk = $h->{session_key__};
 
 test_assert_equal( $h->url_encode_( ']' ), '%5d' );
 test_assert_equal( $h->url_encode_( '[' ), '%5b' );
 test_assert_equal( $h->url_encode_( '[]' ), '%5b%5d' );
 test_assert_equal( $h->url_encode_( '[foo]' ), '%5bfoo%5d' );
 
-my $port = 9000 + int(rand(1000));
+our $port = 9000 + int(rand(1000));
 pipe my $dreader, my $dwriter;
 pipe my $ureader, my $uwriter;
 my $pid = fork();
@@ -134,80 +135,60 @@ if ( $pid == 0 ) {
 
     use LWP::Simple;
     use URI::URL;
+    use String::Interpolate 'interpolate';
 
-    # Test the simplest functionality of the HTML interface
+    our $url;
+    our $content;
+    open SCRIPT, "<TestHTML.script";
 
-    my $url = url( "http://127.0.0.1:$port" );
-    my $content = get($url);
+    while ( my $line = <SCRIPT> ) {
+        $line =~ s/^[\t ]+//g;
+        $line =~ s/[\r\n\t ]+$//g;
 
-    # Look for elements that should appear at the TOP and BOTTOM
-    # of every page
+        $line = interpolate( $line );
 
-    # Common TOP parts
+        if ( $line =~ /^#/ ) {
+            next;
+	}
 
-    test_assert_regexp( $content, "<title>POPFile Control Center</title>" );
-    test_assert_regexp( $content, "<html lang=\"en\">" );
-    test_assert_regexp( $content, "<meta http-equiv=\"Pragma\" content=\"no-cache\">" );
-    test_assert_regexp( $content, "<meta http-equiv=\"Expires\" content=\"0\">" );
-    test_assert_regexp( $content, "<meta http-equiv=\"Cache-Control\" content=\"no-cache\">" );
-    test_assert_regexp( $content, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">" );
-    test_assert_regexp( $content, "<link rel=\"stylesheet\" type=\"text/css\" href=\"skins/SimplyBlue.css\" title=\"SimplyBlue\">" );
-    test_assert_regexp( $content, "<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"favicon.ico\">" );
-    test_assert_regexp( $content, "<link rel=\"icon\" href=\"popfile.ico\" type=\"image/ico\">" );
+        if ( $line =~ /^URL (.+)/ ) {
+            $url = url( $1 );
+            next;
+	}
 
-    # Common MIDDLE parts (i.e. the tabs)
+        if ( $line =~ /^GET$/ ) {
+            $content = get($url);
+            next;
+	}
 
-    test_assert_regexp( $content, "<a class=\"menuLink\" href=\"/history.session=$sk&amp;setfilter=\">" );
-    test_assert_regexp( $content, "History</a>" );
-    test_assert_regexp( $content, "<a class=\"menuLink\" href=\"/buckets.session=$sk\">" );
-    test_assert_regexp( $content, "Buckets</a>" );
-    test_assert_regexp( $content, "<a class=\"menuLink\" href=\"/magnets.session=$sk&amp;start_magnet=0\">" );
-    test_assert_regexp( $content, "Magnets</a>" );
-    test_assert_regexp( $content, "<a class=\"menuLink\" href=\"/configuration.session=$sk\">" );
-    test_assert_regexp( $content, "Configuration</a>" );
-    test_assert_regexp( $content, "<a class=\"menuLink\" href=\"/security.session=$sk\">" );
-    test_assert_regexp( $content, "Security</a>" );
-    test_assert_regexp( $content, "<a class=\"menuLink\" href=\"/advanced.session=$sk\">" );
-    test_assert_regexp( $content, "Advanced</a>" );
+        if ( $line =~ /^MATCH (.+)$/ ) {
+            test_assert_regexp( $content, "\Q$1\E" );
+            next;
+        }
 
-    # Common BOTTOM parts
+        if ( $line =~ /^MATCH$/ ) {
+            my $block;
 
-    test_assert_regexp( $content, "<a class=\"bottomLink\" href=\"manual/en/manual.html\">" );
-    test_assert_regexp( $content, "<br>" . $h->version() . "<br>" );
+            while ( $line = <SCRIPT> ) {
+                $line =~ s/^[\t ]+//g;
+                $line =~ s/[\r\n\t ]+$//g;
 
-    # Verify that each of the pages highlights the correct item on
-    # the tab bar and hence the simplest level of page serving is working
-    # correctly
+                $line = interpolate( $line );
 
-    $url = url( "http://127.0.0.1:$port/history" );
-    $content = get($url);
+	        if ( $line =~ /^ENDMATCH$/ ) {
+                    last;
+	        }
 
-    test_assert_regexp( $content, "<td class=\"menuSelected\" align=\"center\">\n<a class=\"menuLink\" href=\"/history.session=$sk&amp;setfilter=\">" );
+                $block .= "\n" unless ( $block eq '' );
+                $block .= $line;
+	    }
 
-    $url = url( "http://127.0.0.1:$port/buckets" );
-    $content = get($url);
+            test_assert_regexp( $content, "\Q$block\E" );
+            next;
+        }
+    }
 
-    test_assert_regexp( $content, "<td class=\"menuSelected\" align=\"center\">\n<a class=\"menuLink\" href=\"/buckets.session=$sk\">" );
-
-    $url = url( "http://127.0.0.1:$port/magnets" );
-    $content = get($url);
-
-    test_assert_regexp( $content, "<td class=\"menuSelected\" align=\"center\">\n<a class=\"menuLink\" href=\"/magnets.session=$sk&amp;start_magnet=0\">" );
-
-    $url = url( "http://127.0.0.1:$port/configuration" );
-    $content = get($url);
-
-    test_assert_regexp( $content, "<td class=\"menuSelected\" align=\"center\">\n<a class=\"menuLink\" href=\"/configuration.session=$sk\">" );
-
-    $url = url( "http://127.0.0.1:$port/security" );
-    $content = get($url);
-
-    test_assert_regexp( $content, "<td class=\"menuSelected\" align=\"center\">\n<a class=\"menuLink\" href=\"/security.session=$sk\">" );
-
-    $url = url( "http://127.0.0.1:$port/advanced" );
-    $content = get($url);
-
-    test_assert_regexp( $content, "<td class=\"menuSelected\" align=\"center\">\n<a class=\"menuLink\" href=\"/advanced.session=$sk\">" );
+    close SCRIPT;
 
     # TODO Validate every page in the interface against the W3C HTML 4.01
     # validation service

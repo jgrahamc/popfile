@@ -1,0 +1,131 @@
+# ---------------------------------------------------------------------------------------------
+#
+# Test script for the HTML interface, loaded by TestHTML.tst
+#
+# Copyright (c) 2003 John Graham-Cumming
+#
+#   This file is part of POPFile
+#
+#   POPFile is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   POPFile is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with POPFile; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# ---------------------------------------------------------------------------------------------
+
+# To simplify testing the POPFile HTML UI this file contains a script
+# that is read by TestHTML.tst and executed.  The script consists of instructions
+# for specific URLs that are to be hit and instructions for how to match the
+# result that comes back
+#
+# The commands are as follows
+#
+# URL <url>         Set the URL that is to be fetched
+# GET               Gets the last set URL
+# POST/ENDPOST      Contains a block of data to be POSTed
+# MATCH <data>      Match the return from last URL fetch against the data
+# MATCH/ENDMATCH    Encloses a block of test to find in the return from the last URL fetch
+#
+# Expect that the following are available to you within the MATCH/ENDMATCH block
+#
+# $port             The port on which the HTML interface is running
+# $url              URL object for the last URL specified
+# $content          String containing the return from the last URL fetch
+# $sk               The current HTML UI session key
+# $version          Same as $h->version()
+
+# Test the simplest functionality of the HTML interface
+
+# Look for elements that should appear at the TOP and BOTTOM
+# of every page
+
+URL http://127.0.0.1:$port
+GET
+
+# Common TOP parts
+
+MATCH <title>POPFile Control Center</title>
+MATCH <html lang="en">
+MATCH <meta http-equiv="Pragma" content="no-cache">
+MATCH <meta http-equiv="Expires" content="0">
+MATCH <meta http-equiv="Cache-Control" content="no-cache">
+MATCH <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+MATCH <link rel="stylesheet" type="text/css" href="skins/SimplyBlue.css" title="SimplyBlue">
+MATCH <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+MATCH <link rel="icon" href="popfile.ico" type="image/ico">
+
+# Common MIDDLE parts (i.e. the tabs)
+
+MATCH <a class="menuLink" href="/history?session=$sk&amp;setfilter=">
+MATCH History</a>
+MATCH <a class="menuLink" href="/buckets?session=$sk">
+MATCH Buckets</a>
+MATCH <a class="menuLink" href="/magnets?session=$sk&amp;start_magnet=0">
+MATCH Magnets</a>
+MATCH <a class="menuLink" href="/configuration?session=$sk">
+MATCH Configuration</a>
+MATCH <a class="menuLink" href="/security?session=$sk">
+MATCH Security</a>
+MATCH <a class="menuLink" href="/advanced?session=$sk">
+MATCH Advanced</a>
+
+# Common BOTTOM parts
+
+MATCH <a class="bottomLink" href="manual/en/manual.html">
+MATCH <br>$version<br>
+
+# Verify that each of the pages highlights the correct item on
+# the tab bar and hence the simplest level of page serving is working
+# correctly
+
+URL http://127.0.0.1:$port/history
+GET
+MATCH
+<td class="menuSelected" align="center">
+<a class="menuLink" href="/history?session=$sk&amp;setfilter=">
+ENDMATCH
+
+URL http://127.0.0.1:$port/buckets
+GET
+MATCH
+<td class="menuSelected" align="center">
+<a class="menuLink" href="/buckets?session=$sk">
+ENDMATCH
+
+URL http://127.0.0.1:$port/magnets
+GET
+MATCH
+<td class="menuSelected" align="center">
+<a class="menuLink" href="/magnets?session=$sk&amp;start_magnet=0">
+ENDMATCH
+
+URL http://127.0.0.1:$port/configuration
+GET
+MATCH
+<td class="menuSelected" align="center">
+<a class="menuLink" href="/configuration?session=$sk">
+ENDMATCH
+
+URL http://127.0.0.1:$port/security
+GET
+MATCH 
+<td class="menuSelected" align="center">
+<a class="menuLink" href="/security?session=$sk">
+ENDMATCH
+
+URL http://127.0.0.1:$port/advanced
+GET
+MATCH
+<td class="menuSelected" align="center">
+<a class="menuLink" href="/advanced?session=$sk">
+ENDMATCH
+
