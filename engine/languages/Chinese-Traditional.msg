@@ -1,4 +1,4 @@
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -16,270 +16,365 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# POPFile 0.18.1 Traditional Chinese Translation, Created By Mark Wu, 2003/03/04
-# POPFile 0.19.0 Traditional Chinese Translation, Modified By Mark Wu, 2003/06/02
+#   POPFile 0.22.0 Traditional Chinese Translation
+#   Created By Jedi Lin, 2004/09/19
+#   Modified By Jedi Lin, 2004/09/23
 
 # Identify the language and character set used for the interface
 LanguageCode                            tw
-LanguageCharset                         big5
+LanguageCharset                         UTF8
 LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
-ManualLanguage                          en
+ManualLanguage                          zh-tw
+
+# This is where to find the FAQ on the Wiki
+FAQLink                                 FrequentlyAskedQuestions
 
 # Common words that are used on their own all over the interface
-Apply                                   ®M¥Î
-On                                      ¶}
-Off                                     Ãö
-TurnOn                                  ¶}±Ò
-TurnOff                                 Ãö³¬
-Add                                     ¥[¤J
-Remove                                  ²¾°£
-Previous                                ¤W¤@­¶
-Next                                    ¤U¤@­¶
-From                                    ±H¥óªÌ
-Subject                                 ¥D¦®
-Cc                                      °Æ¥» 
-Classification                          ¤ÀÃş
-Reclassify                              ­«·s¤ÀÃş
-Probability                             ¾÷²v
-Scores                                  ¤À¼Æ
-QuickMagnets                            §Ö³t³W«hºëÆF
-Undo                                    ´_­ì
-Close                                   Ãö³¬
-Find                                    ·j´M
-Filter                                  ¹LÂo
-Yes                                     ¬O
-No                                      §_
-ChangeToYes                             ¬O
-ChangeToNo                              §_
-Bucket                                  ¤ÀÃş
-Magnet                                  ³W«h
-Delete                                  §R°£
-Create                                  «Ø¥ß
-To                                      ¦¬¥óªÌ
-Total                                   ¥ş³¡
-Rename                                  ­«·s©R¦W
-Frequency                               ÀW²v
-Probability                             ¾÷²v
-Score                                   ¤À¼Æ
-Lookup                                  ¬d¬İ
-Word                                    ³æ¦r
-Count                                   ­p¼Æ
-Update                                  §ó·s
-Refresh                                 ­«·s¾ã²z
+Apply                                   å¥—ç”¨
+On                                      é–‹
+Off                                     é—œ
+TurnOn                                  æ‰“é–‹
+TurnOff                                 é—œä¸Š
+Add                                     åŠ å…¥
+Remove                                  ç§»é™¤
+Previous                                å‰ä¸€é 
+Next                                    ä¸‹ä¸€é 
+From                                    å¯„ä»¶è€…
+Subject                                 ä¸»æ—¨
+Cc                                      å‰¯æœ¬
+Classification                          éƒµç­’
+Reclassify                              é‡æ–°åˆ†é¡
+Probability                             å¯èƒ½æ€§
+Scores                                  åˆ†æ•¸
+QuickMagnets                            å¿«é€Ÿå¸éµ
+Undo                                    é‚„åŸ
+Close                                   é—œé–‰
+Find                                    å°‹æ‰¾
+Filter                                  éæ¿¾å™¨
+Yes                                     æ˜¯
+No                                      å¦
+ChangeToYes                             æ”¹æˆæ˜¯
+ChangeToNo                              æ”¹æˆå¦
+Bucket                                  éƒµç­’
+Magnet                                  å¸éµ
+Delete                                  åˆªé™¤
+Create                                  å»ºç«‹
+To                                      æ”¶ä»¶äºº
+Total                                   å…¨éƒ¨
+Rename                                  æ›´å
+Frequency                               é »ç‡
+Probability                             å¯èƒ½æ€§
+Score                                   åˆ†æ•¸
+Lookup                                  æŸ¥æ‰¾
+Word                                    å­—è©
+Count                                   è¨ˆæ•¸
+Update                                  æ›´æ–°
+Refresh                                 é‡æ–°æ•´ç†
+FAQ                                     å¸¸è¦‹å•ç­”é›†
+ID                                      ID
+Date                                    æ—¥æœŸ
+Arrived                                 æ”¶ä»¶æ™‚é–“
+Size                                    å¤§å°
+
+# This is a regular expression pattern that is used to convert
+# a number into a friendly looking number (for the US and UK this
+# means comma separated at the thousands)
+
+Locale_Thousands                       ,
+Locale_Decimal                         .
+
+# The Locale_Date uses the format strings in Perl's Date::Format
+# module to set the date format for the UI.  There are two possible
+# ways to specify it.
+#
+# <format>            Just one simple format used for all dates
+# <<format> | <format> The first format is used for dates less than
+#                     7 days from now, the second for all other dates
+
+Locale_Date                            %a %m/%d %TT%z | %A %Y/%m/%d %TT%z
 
 # The header and footer that appear on every UI page
-Header_Title                            POPFile ±±¨î¥x
-Header_Shutdown                         °±¤î POPFile
-Header_History                          ¾ú¥v
-Header_Buckets                          ¤ÀÃş
-Header_Configuration                    ³]©w
-Header_Advanced                         ¶i¶¥
-Header_Security                         ¦w¥ş
-Header_Magnets                          ³W«h
+Header_Title                            POPFile æ§åˆ¶ä¸­å¿ƒ
+Header_Shutdown                         åœæ‰ POPFile
+Header_History                          æ­·å²
+Header_Buckets                          éƒµç­’
+Header_Configuration                    çµ„æ…‹
+Header_Advanced                         é€²éš
+Header_Security                         å®‰å…¨
+Header_Magnets                          å¸éµ
 
-Footer_HomePage                         POPFile ­º­¶
-Footer_Manual                           ¨Ï¥Î¤â¥U
-Footer_Forums                           ½×¾Â
-Footer_FeedMe                           ÃÙ§U
-Footer_RequestFeature                   ¥\¯à«ØÄ³
-Footer_MailingList                      ¶l¥ó¸s²Õ
+Footer_HomePage                         POPFile é¦–é 
+Footer_Manual                           æ‰‹å†Š
+Footer_Forums                           è¨è«–å€
+Footer_FeedMe                           æåŠ©
+Footer_RequestFeature                   åŠŸèƒ½è«‹æ±‚
+Footer_MailingList                      éƒµéè«–é¡Œ
+Footer_Wiki                             æ–‡ä»¶é›†
 
-Configuration_Error1                    ¤À¹j¦r¤¸¥²¶·¬°³æ¤@¦r¤¸
-Configuration_Error2                    ¨Ï¥ÎªÌ¤¶­±³s±µ°ğ¥²¶·¤¶©ó 1 ¨ì 65535 ¤§¶¡
-Configuration_Error3                    POP3 ¦øªA¾¹³s±µ°ğ¥²¶·¤¶©ó 1 ¨ì 65535 ¤§¶¡
-Configuration_Error4                    ¨C¤@­¶Åã¥Ü«H¥ó¼Æ¥²¶·¤¶©ó 1 ¨ì 1000 ¤§¶¡
-Configuration_Error5                    ¾ú¥v¬ö¿ı¤Ñ¼Æ¥²¶·¤¶©ó 1 ¨ì 366 ¤§¶¡
-Configuration_Error6                    ³s±µ¹O®É¬í¼Æ¤¶©ó 10 ¨ì 300 ¤§¶¡
-Configuration_Error7                    XML-RPC ±µ¦¬°ğ¥²¶·¤¶©ó 1 ¨ì 65535 ¤§¶¡
-Configuration_POP3Port                  POP3 ¦øªA¾¹³s±µ°ğ
-Configuration_POP3Update                §ó·s POP3 ¦øªA¾¹³s±µ°ğ¬° %s; »İ­«·s±Ò°Ê POPFile
-Configuration_XMLRPCUpdate              §ó·s XML-RPC ³s±µ°ğ¬° %s; »İ­«·s±Ò°Ê POPFile
-Configuration_XMLRPCPort                XML-RPC ³s±µ°ğ
-Configuration_SMTPPort                  SMTP ¦øªA¾¹³s±µ°ğ
-Configuration_SMTPUpdate                §ó·s SMTP ¦øªA¾¹³s±µ°ğ¬° %s; »İ­«·s±Ò°Ê POPFile
-Configuration_NNTPPort                  NNTP ¦øªA¾¹³s±µ°ğ
-Configuration_NNTPUpdate                §ó·s NNTP ¦øªA¾¹³s±µ°ğ¬° %s; »İ­«·s±Ò°Ê POPFile
-Configuration_POP3Separator             SMTP ¦øªA¾¹ host:port:user ¤À¹j¦r¤¸
-Configuration_NNTPSeparator             NNTP ¦øªA¾¹ host:port:user ¤À¹j¦r¤¸
-Configuration_POP3SepUpdate             §ó·s POP3 ¦øªA¾¹¤À¹j¦r¤¸¬° %s
-Configuration_NNTPSepUpdate             §ó·s NNTP ¦øªA¾¹¤À¹j¦r¤¸¬° %s
-Configuration_UI                        ¨Ï¥ÎªÌ¤¶­±³s±µ°ğ
-Configuration_UIUpdate                  §ó§ï¨Ï¥ÎªÌ¤¶­±³s±µ°ğ¬° %s; »İ­«·s±Ò°Ê POPFile
-Configuration_History                   ¨C¤@­¶Åã¥Ü«H¥ó¼Æ
-Configuration_HistoryUpdate             §ó§ï¨C¤@­¶Åã¥Ü«H¥ó¼Æ¬° to %s
-Configuration_Days                      ¾ú¥v¬ö¿ı¤Ñ¼Æ
-Configuration_DaysUpdate                §ó§ï¾ú¥v¬ö¿ı¤Ñ¼Æ¬° %s
-Configuration_UserInterface             ¨Ï¥ÎªÌ¤¶­±
-Configuration_Skins                     ­±ª©
-Configuration_SkinsChoose               ¿ï¾Ü­±ª©
-Configuration_Language                  »y¨¥
-Configuration_LanguageChoose            ¿ï¾Ü»y¨¥
-Configuration_ListenPorts               ¼Ò²Õ¿ï¶µ
-Configuration_HistoryView               ¾ú¥vÀËµø
-Configuration_TCPTimeout                ³s±µ¹O®É
-Configuration_TCPTimeoutSecs            ³s±µ¹O®É¬í¼Æ
-Configuration_TCPTimeoutUpdate          §ó·s³s±µ¹O®É¬í¼Æ¬° %s ¬í
-Configuration_ClassificationInsertion   E-Mail ¤º®e­×§ï
-Configuration_SubjectLine               «H¥ó¥D¦®­×§ï
-Configuration_XTCInsertion              ¥[¤J X-Text-Classification ¨ì«H¥ó¼ĞÃD¤¤
-Configuration_XPLInsertion              ¥[¤J X-POPFile-Link ¨ì«H¥ó¼ĞÃD¤¤
-Configuration_Logging                   ¬ö¿ı
-Configuration_None                      µL
-Configuration_ToScreen                  ¿é¥X¨ì¿Ã¹õ
-Configuration_ToFile                    ¿é¥X¨ìÀÉ®×
-Configuration_ToScreenFile              ¿é¥X¨ì¿Ã¹õ»PÀÉ®×
-Configuration_LoggerOutput              °O¿ı¿é¥X¤è¦¡
-Configuration_GeneralSkins              ­±ª©
-Configuration_SmallSkins                ­±ª©(¤p¦r§Î)
-Configuration_TinySkins                 ­±ª©(°g§A¦r§Î)
-Configuration_CurrentLogFile            &lt;²{¦b¹B§@¤¤ªº¬ö¿ıÀÉ&gt;
+Configuration_Error1                    åˆ†éš”ç¬¦ç¥‡èƒ½æ˜¯å–®ä¸€çš„å­—ç¬¦
+Configuration_Error2                    ä½¿ç”¨è€…ä»‹é¢çš„é€£æ¥åŸ ä¸€å®šè¦ä»‹æ–¼ 1 å’Œ 65535 ä¹‹é–“
+Configuration_Error3                    POP3 è†è½é€£æ¥åŸ ä¸€å®šè¦ä»‹æ–¼ 1 å’Œ 65535 ä¹‹é–“
+Configuration_Error4                    é é¢å¤§å°ä¸€å®šè¦ä»‹æ–¼ 1 å’Œ 1000 ä¹‹é–“
+Configuration_Error5                    æ­·å²è£è¦ä¿ç•™çš„æ—¥æ•¸ä¸€å®šè¦ä»‹æ–¼ 1 å’Œ 366 ä¹‹é–“
+Configuration_Error6                    TCP é€¾æ™‚å€¼ä¸€å®šè¦ä»‹æ–¼ 10 å’Œ 300 ä¹‹é–“
+Configuration_Error7                    XML RPC è†è½é€£æ¥åŸ ä¸€å®šè¦ä»‹æ–¼ 1 å’Œ 65535 ä¹‹é–“
+Configuration_Error8                    SOCKS V ä»£ç†ä¼ºæœå™¨é€£æ¥åŸ ä¸€å®šè¦ä»‹æ–¼ 1 å’Œ 65535 ä¹‹é–“
+Configuration_POP3Port                  POP3 è†è½é€£æ¥åŸ 
+Configuration_POP3Update                POP3 é€£æ¥åŸ å·²æ›´æ–°ç‚º %s; é€™é …æ›´å‹•åœ¨å¦³é‡æ–°å•Ÿå‹• POPFile å‰éƒ½ä¸æœƒç”Ÿæ•ˆ
+Configuration_XMLRPCUpdate              XML-RPC é€£æ¥åŸ å·²æ›´æ–°ç‚º %s; é€™é …æ›´å‹•åœ¨å¦³é‡æ–°å•Ÿå‹• POPFile å‰éƒ½ä¸æœƒç”Ÿæ•ˆ
+Configuration_XMLRPCPort                XML-RPC è†è½é€£æ¥åŸ 
+Configuration_SMTPPort                  SMTP è†è½é€£æ¥åŸ 
+Configuration_SMTPUpdate                SMTP é€£æ¥åŸ å·²æ›´æ–°ç‚º %s; é€™é …æ›´å‹•åœ¨å¦³é‡æ–°å•Ÿå‹• POPFile å‰éƒ½ä¸æœƒç”Ÿæ•ˆ
+Configuration_NNTPPort                  NNTP è†è½é€£æ¥åŸ 
+Configuration_NNTPUpdate                NNTP é€£æ¥åŸ å·²æ›´æ–°ç‚º %s; é€™é …æ›´å‹•åœ¨å¦³é‡æ–°å•Ÿå‹• POPFile å‰éƒ½ä¸æœƒç”Ÿæ•ˆ
+Configuration_POPFork                   å…è¨±é‡è¤‡çš„ POP3 é€£ç·š
+Configuration_SMTPFork                  å…è¨±é‡è¤‡çš„ SMTP é€£ç·š
+Configuration_NNTPFork                  å…è¨±é‡è¤‡çš„ NNTP é€£ç·š
+Configuration_POP3Separator             POP3 ä¸»æ©Ÿ:é€£æ¥åŸ :ä½¿ç”¨è€… åˆ†éš”ç¬¦
+Configuration_NNTPSeparator             NNTP ä¸»æ©Ÿ:é€£æ¥åŸ :ä½¿ç”¨è€… åˆ†éš”ç¬¦
+Configuration_POP3SepUpdate             POP3 çš„åˆ†éš”ç¬¦å·²æ›´æ–°ç‚º %s
+Configuration_NNTPSepUpdate             NNTP çš„åˆ†éš”ç¬¦å·²æ›´æ–°ç‚º %s
+Configuration_UI                        ä½¿ç”¨è€…ä»‹é¢ç¶²é é€£æ¥åŸ 
+Configuration_UIUpdate                  ä½¿ç”¨è€…ä»‹é¢ç¶²é é€£æ¥åŸ å·²æ›´æ–°ç‚º %s; é€™é …æ›´å‹•åœ¨å¦³é‡æ–°å•Ÿå‹• POPFile å‰éƒ½ä¸æœƒç”Ÿæ•ˆ
+Configuration_History                   æ¯ä¸€é æ‰€è¦åˆ—å‡ºçš„éƒµä»¶è¨Šæ¯æ•¸é‡
+Configuration_HistoryUpdate             æ¯ä¸€é æ‰€è¦åˆ—å‡ºçš„éƒµä»¶è¨Šæ¯æ•¸é‡å·²æ›´æ–°ç‚º %s
+Configuration_Days                      æ­·å²è£æ‰€è¦ä¿ç•™çš„å¤©æ•¸
+Configuration_DaysUpdate                æ­·å²è£æ‰€è¦ä¿ç•™çš„å¤©æ•¸å·²æ›´æ–°ç‚º %s
+Configuration_UserInterface             ä½¿ç”¨è€…ä»‹é¢
+Configuration_Skins                     å¤–è§€æ¨£å¼
+Configuration_SkinsChoose               é¸æ“‡å¤–è§€æ¨£å¼
+Configuration_Language                  èªè¨€
+Configuration_LanguageChoose            é¸æ“‡èªè¨€
+Configuration_ListenPorts               æ¨¡çµ„é¸é …
+Configuration_HistoryView               æ­·å²æª¢è¦–
+Configuration_TCPTimeout                é€£ç·šé€¾æ™‚
+Configuration_TCPTimeoutSecs            é€£ç·šé€¾æ™‚ç§’æ•¸
+Configuration_TCPTimeoutUpdate          é€£ç·šé€¾æ™‚ç§’æ•¸å·²æ›´æ–°ç‚º %s
+Configuration_ClassificationInsertion   æ’å…¥éƒµä»¶è¨Šæ¯æ–‡å­—
+Configuration_SubjectLine               è®Šæ›´ä¸»æ—¨åˆ—
+Configuration_XTCInsertion              åœ¨æ¨™é ­æ’å…¥<br>X-Text-Classification
+Configuration_XPLInsertion              åœ¨æ¨™é ­æ’å…¥<br>X-POPFile-Link
+Configuration_Logging                   æ—¥èªŒ
+Configuration_None                      ç„¡
+Configuration_ToScreen                  è¼¸å‡ºè‡³è¢å¹•
+Configuration_ToFile                    è¼¸å‡ºè‡³æª”æ¡ˆ
+Configuration_ToScreenFile              è¼¸å‡ºè‡³è¢å¹•åŠæª”æ¡ˆ
+Configuration_LoggerOutput              æ—¥èªŒè¼¸å‡ºæ–¹å¼
+Configuration_GeneralSkins              å¤–è§€æ¨£å¼
+Configuration_SmallSkins                å°å‹å¤–è§€æ¨£å¼
+Configuration_TinySkins                 å¾®å‹å¤–è§€æ¨£å¼
+Configuration_CurrentLogFile            &lt;ä¸‹è¼‰ç›®å‰çš„æ—¥èªŒæª”&gt;
+Configuration_SOCKSServer               SOCKS V ä»£ç†ä¼ºæœå™¨ä¸»æ©Ÿ
+Configuration_SOCKSPort                 SOCKS V ä»£ç†ä¼ºæœå™¨é€£æ¥åŸ 
+Configuration_SOCKSPortUpdate           SOCKS V ä»£ç†ä¼ºæœå™¨é€£æ¥åŸ å·²æ›´æ–°ç‚º %s
+Configuration_SOCKSServerUpdate         SOCKS V ä»£ç†ä¼ºæœå™¨ä¸»æ©Ÿå·²æ›´æ–°ç‚º %s
+Configuration_Fields                    æ­·å²æ¬„ä½
 
-Advanced_Error1                         '%s' ¤w¸g¦s¦b©¿²¤³æ¦r¦rªí¤¤
-Advanced_Error2                         ©¿²¤³æ¦r¥u¥i¥]§t­^¤å,¼Æ¦r, ., _, -, ©Î @ µ¥¦r¤¸
-Advanced_Error3                         '%s' ¤w¸g¥[¤J©¿²¤³æ¦r¦rªí¤¤
-Advanced_Error4                         '%s' ¤£¦s¦b©¿²¤³æ¦r¦rªí¤¤
-Advanced_Error5                         '%s' ¤w¸g±q©¿²¤³æ¦r¦rªí¤¤²¾°£
-Advanced_StopWords                      ©¿²¤³æ¦r¦rªí
-Advanced_Message1                       POPFile ·|©¿²¤¥H¤U¥X²{ÀW²v¸û°ªªº³æ¦r:
-Advanced_AddWord                        ¥[¤J³æ¦r
-Advanced_RemoveWord                     ²¾°£³æ¦r
+Advanced_Error1                         '%s' å·²ç¶“åœ¨å¿½ç•¥å­—è©æ¸…å–®è£äº†
+Advanced_Error2                         è¦è¢«å¿½ç•¥çš„å­—è©åƒ…èƒ½åŒ…å«å­—æ¯æ•¸å­—, ., _, -, æˆ– @ å­—ç¬¦
+Advanced_Error3                         '%s' å·²è¢«åŠ å…¥å¿½ç•¥å­—è©æ¸…å–®è£äº†
+Advanced_Error4                         '%s' ä¸¦ä¸åœ¨å¿½ç•¥å­—è©æ¸…å–®è£
+Advanced_Error5                         '%s' å·²å¾å¿½ç•¥å­—è©æ¸…å–®è£è¢«ç§»é™¤äº†
+Advanced_StopWords                      è¢«å¿½ç•¥çš„å­—è©
+Advanced_Message1                       POPFile æœƒå¿½ç•¥ä¸‹åˆ—é€™äº›å¸¸ç”¨çš„å­—è©:
+Advanced_AddWord                        åŠ å…¥å­—è©
+Advanced_RemoveWord                     ç§»é™¤å­—è©
+Advanced_AllParameters                  æ‰€æœ‰çš„ POPFile åƒæ•¸
+Advanced_Parameter                      åƒæ•¸
+Advanced_Value                          å€¼
+Advanced_Warning                        é€™æ˜¯å®Œæ•´çš„ POPFile åƒæ•¸æ¸…å–®.  ç¥‡é©åˆé€²éšä½¿ç”¨è€…: å¦³å¯ä»¥è®Šæ›´ä»»ä½•åƒæ•¸å€¼ä¸¦æŒ‰ä¸‹ æ›´æ–°; ä¸éæ²’æœ‰ä»»ä½•æ©Ÿåˆ¶æœƒæª¢æŸ¥é€™äº›åƒæ•¸å€¼çš„æœ‰æ•ˆæ€§.  ä»¥ç²—é«”é¡¯ç¤ºçš„é …ç›®è¡¨ç¤ºå·²ç¶“å¾é è¨­å€¼è¢«åŠ ä»¥è®Šæ›´äº†.
+Advanced_ConfigFile                     çµ„æ…‹æª”:
 
-History_Filter                          &nbsp;(Åã¥Ü¤ÀÃş <font color="%s">%s</font>)
-History_FilterBy                        ¹LÂo±ø¥ó
-History_Search                          &nbsp;(·j´M±H¥óªÌ/¥D¦® %s)
-History_Title                           ³Ìªñ«H¥ó
-History_Jump                            ²¾¦Ü«H¥ó
-History_ShowAll                         ¥ş³¡Åã¥Ü
-History_ShouldBe                        À³¸Ó¬O
-History_NoFrom                          ¨S¦³±H¥óªÌ
-History_NoSubject                       ¨S¦³¥D¦®
-History_ClassifyAs                      ¤ÀÃş¬°
-History_MagnetUsed                      ¨Ï¥Î³W«h
-History_MagnetBecause                   <b>¨Ï¥Î³W«h</b><p>¤ÀÃş¬° <font color="%s">%s</font> ¦]¬°³W«h %s </p>
-History_ChangedTo                       §ïÅÜ¬° <font color="%s">%s
-History_Already                         ¤w¸g­«·s¤ÀÃş¬° <font color="%s">%s</font>
-History_RemoveAll                       ¥ş³¡²¾°£
-History_RemovePage                      ²¾°£³o¤@­¶
-History_Remove                          ²¾°£¾ú¥v«H¥ó
-History_SearchMessage                   ·j´M±H¥óªÌ/¥D¦®
-History_NoMessages                      ¨S¦³¥ô¦ó°T®§
-History_ShowMagnet                      ¨Ï¥Î³W«h
-History_ShowNoMagnet                    ¥¼¨Ï¥Î³W«h
-History_Magnet                          &nbsp;(¥uÅã¥Ü¨Ï¥Î³W«h¤ÀÃşªº«H¥ó)
-History_NoMagnet                        &nbsp;(¥uÅã¥Ü¥¼¨Ï¥Î³W«h¤ÀÃşªº«H¥ó)
-History_ResetSearch                     ­«³]
+History_Filter                          &nbsp;(ç¥‡é¡¯ç¤º <font color="%s">%s</font> éƒµç­’)
+History_FilterBy                        éæ¿¾æ¢ä»¶
+History_Search                          &nbsp;(æŒ‰å¯„ä»¶è€…/ä¸»æ—¨ä¾†æœå°‹ %s)
+History_Title                           æœ€è¿‘çš„éƒµä»¶è¨Šæ¯
+History_Jump                            è·³åˆ°é€™ä¸€é 
+History_ShowAll                         å…¨éƒ¨é¡¯ç¤º
+History_ShouldBe                        æ‡‰è©²è¦æ˜¯
+History_NoFrom                          æ²’æœ‰å¯„ä»¶è€…åˆ—
+History_NoSubject                       æ²’æœ‰ä¸»æ—¨åˆ—
+History_ClassifyAs                      åˆ†é¡æˆ
+History_MagnetUsed                      ä½¿ç”¨äº†å¸éµ
+History_MagnetBecause                   <b>ä½¿ç”¨äº†å¸éµ</b><p>è¢«åˆ†é¡æˆ <font color="%s">%s</font> çš„åŸå› æ˜¯ %s å¸éµ</p>
+History_ChangedTo                       å·²è®Šæ›´ç‚º <font color="%s">%s</font>
+History_Already                         é‡æ–°åˆ†é¡æˆ <font color="%s">%s</font>
+History_RemoveAll                       å…¨éƒ¨ç§»é™¤
+History_RemovePage                      ç§»é™¤æœ¬é 
+History_RemoveChecked                   ç§»é™¤è¢«æ ¸é¸çš„
+History_Remove                          æŒ‰æ­¤ç§»é™¤æ­·å²è£çš„é …ç›®
+History_SearchMessage                   æœå°‹å¯„ä»¶è€…/ä¸»æ—¨
+History_NoMessages                      æ²’æœ‰éƒµä»¶è¨Šæ¯
+History_ShowMagnet                      ç”¨äº†å¸éµ
+History_Negate_Search                   è² å‘æœå°‹/éæ¿¾
+History_Magnet                          &nbsp;(ç¥‡é¡¯ç¤ºç”±å¸éµæ‰€åˆ†é¡çš„éƒµä»¶è¨Šæ¯)
+History_NoMagnet                        &nbsp;(ç¥‡é¡¯ç¤ºä¸æ˜¯ç”±å¸éµæ‰€åˆ†é¡çš„éƒµä»¶è¨Šæ¯)
+History_ResetSearch                     é‡è¨­
+History_ChangedClass                    ç¾åœ¨è¢«åˆ†é¡ç‚º
+History_Purge                           é¦¬ä¸Šåˆªé™¤
+History_Increase                        å¢åŠ 
+History_Decrease                        æ¸›å°‘
+History_Column_Characters               è®Šæ›´å¯„ä»¶è€…, æ”¶ä»¶è€…, å‰¯æœ¬å’Œä¸»æ—¨æ¬„ä½çš„å¯¬åº¦
+History_Automatic                       è‡ªå‹•åŒ–
+History_Reclassified                    å·²é‡æ–°åˆ†é¡
+History_Size_Bytes                      %d&nbsp;B
+History_Size_KiloBytes                  %.1f&nbsp;KB
+History_Size_MegaBytes                  %.1f&nbsp;MB
 
-Password_Title                          ±K½X
-Password_Enter                          ¿é¤J±K½X
-Password_Go                             ¶i¤J
-Password_Error1                         ±K½X¿ù»~
+Password_Title                          å¯†ç¢¼
+Password_Enter                          è¼¸å…¥å¯†ç¢¼
+Password_Go                             è¡!
+Password_Error1                         ä¸æ­£ç¢ºçš„å¯†ç¢¼
 
-Security_Error1                         POP3 SPA/AUTH ªA¾¹³s±µ°ğ¥²¶·¤¶©ó 1 ¨ì 65535 ¤§¶¡
-Security_Stealth                        ³æ¾÷/¥D¾÷¼Ò¦¡³]©w
-Security_NoStealthMode                  §_ (³æ¾÷¼Ò¦¡)
-Security_ExplainStats                   (¶}±Ò³o¶µ¥\¯à, ·|¨Ï POPFile ¨C¤Ñ¶Ç°e¤T¶µ¯S©wªº¸ê®Æ¨ì www.usethesource.com: ¥]§t bc (©Ò¦³¤ÀÃşªº­Ó¼Æ), mc (©Ò¦³ POPFile ¤ÀÃş¹Lªº«H¥ó¼Æ) and ec (©Ò¦³ªº¤ÀÃş¿ù»~¦¸¼Æ).  POPFile ºô¯¸·|§Q¥Î³o¨Ç¸ê®Æ¨Ó²Î­p¨Ã¤ÀªR¨Ï¥ÎªÌ¦p¦ó¨ÓÀ³¥Î POPFile. POPFile ºô¯¸·|±N³o¨Ç¸ê®Æ«O¯d¤­¤Ñ, ¤­¤Ñ«á·|¦Û°Ê±N³o¨Ç¸ê®Æ±q¸ê®Æ®w¤¤²¾°£; POPFile ºô¯¸¨S¦³«O¯d¥ô¦ó§AªºIP¦ì§}¦b³o¨Ç¶Ç¿éªº¸ê®Æ¤¤.)
-Security_ExplainUpdate                  (¶}±Ò³o¶µ¥\¯à, ·|¨Ï POPFile ¨C¤Ñ¶Ç°e¤T¶µ¯S©wªº¸ê®Æ¨ì www.usethesource.com: ¥]§t ma (§A¦w¸Ëªº POPFile ªº¥D­nª©¥»), mi (§A¦w¸Ëªº POPFile ªº¦¸­nª©¥») and bn (§A¦w¸Ëªº POPFile ªº«Ø¥ß¥N½X).  ¦pªG POPFile ªº·sª©¦s¦b, ·|¦b POPFile ±±¨î¤¤¤ß­º­¶Åã¥Ü§ó·s¸ê°T. POPFile ºô¯¸·|±N³o¨Ç¸ê®Æ«O¯d¤­¤Ñ, ¤­¤Ñ«á·|¦Û°Ê±N³o¨Ç¸ê®Æ±q¸ê®Æ®w¤¤²¾°£; POPFile ºô¯¸¨S¦³«O¯d¥ô¦ó§AªºIP¦ì§}¦b³o¨Ç¶Ç¿éªº¸ê®Æ¤¤.)
-Security_PasswordTitle                  ¨Ï¥ÎªÌ¤¶­±±K½X³]©w
-Security_Password                       ±K½X
-Security_PasswordUpdate                 §ó§ï±K½X¬° %s
-Security_AUTHTitle                      »·ºİ¦øªA¾¹
-Security_SecureServer                   POP3 SPA/AUTH ¦øªA¾¹
-Security_SecureServerUpdate             §ó·s POP3 SPA/AUTH ¦øªA¾¹¬° %s; »İ­«·s±Ò°Ê POPFile
-Security_SecurePort                     POP3 SPA/AUTH ¦øªA¾¹³s±µ°ğ
-Security_SecurePortUpdate               §ó·s POP3 SPA/AUTH ¦øªA¾¹³s±µ°ğ¬° %s; »İ­«·s±Ò°Ê POPFile
-Security_SMTPServer                     SMTP ¦øªA¾¹
-Security_SMTPServerUpdate               §ó·s SMTP ¦øªA¾¹¬° %s; »İ­«·s±Ò°Ê POPFile
-Security_SMTPPort                       SMTP ¦øªA¾¹³s±µ°ğ
-Security_SMTPPortUpdate                 §ó·s SMTP ¦øªA¾¹³s±µ°ğ¬° %s; »İ­«·s±Ò°Ê
-Security_POP3                           ¤¹³\»·ºİ¶}±Ò POP3 ³s½u; »İ­«·s±Ò°Ê POPFile
-Security_SMTP                           ¤¹³\»·ºİ¶}±Ò SMTP ³s½u; »İ­«·s±Ò°Ê POPFile
-Security_NNTP                           ¤¹³\»·ºİ¶}±Ò NNTP ³s½u; »İ­«·s±Ò°Ê POPFile
-Security_UI                             ¤¹³\»·ºİ¶}±Ò HTTP ³s½u¨ì¨Ï¥ÎªÌ¤¶­±; »İ­«·s±Ò°Ê POPFile
-Security_XMLRPC                         ¤¹³\»·ºİ¶}±Ò XML-RPC ³s½u; »İ­«·s±Ò°Ê POPFile
-Security_UpdateTitle                    ¦Û°Ê§ó·sÀË¬d
-Security_Update                         ¨C¤ÑÀË¬d POPFile ¬O§_¦³§ó·sª©¥»
-Security_StatsTitle                     ³ø§i²Î­p¸ê®Æ
-Security_Stats                          ¨C¤Ñ¶Ç°e²Î­p¸ê®Æ
+Security_Error1                         é€£æ¥åŸ ä¸€å®šè¦ä»‹æ–¼ 1 å’Œ 65535 ä¹‹é–“
+Security_Stealth                        é¬¼é¬¼ç¥Ÿç¥Ÿæ¨¡å¼/ä¼ºæœå™¨ä½œæ¥­
+Security_NoStealthMode                  å¦ (é¬¼é¬¼ç¥Ÿç¥Ÿæ¨¡å¼)
+Security_StealthMode                    (é¬¼é¬¼ç¥Ÿç¥Ÿæ¨¡å¼)
+Security_ExplainStats                   (é€™å€‹é¸é …é–‹å•Ÿå¾Œ, POPFile æ¯å¤©éƒ½æœƒå‚³é€ä¸€æ¬¡ä¸‹åˆ—ä¸‰å€‹æ•¸å€¼åˆ° www.usethesource.com çš„ä¸€å€‹è…³æœ¬: bc (å¦³çš„éƒµç­’æ•¸é‡), mc (è¢« POPFile åˆ†é¡éçš„éƒµä»¶è¨Šæ¯ç¸½æ•¸) å’Œ ec (åˆ†é¡éŒ¯èª¤çš„ç¸½æ•¸).  é€™äº›æ•¸å€¼æœƒè¢«å„²å­˜åˆ°ä¸€å€‹æª”æ¡ˆè£, ç„¶å¾Œæœƒè¢«æˆ‘ç”¨ä¾†ç™¼ä½ˆä¸€äº›é—œæ–¼äººå€‘ä½¿ç”¨ POPFile çš„æƒ…æ³è·Ÿå…¶æˆæ•ˆçš„çµ±è¨ˆè³‡æ–™.  æˆ‘çš„ç¶²é ä¼ºæœå™¨æœƒä¿ç•™å…¶æœ¬èº«çš„æ—¥èªŒæª”ç´„ 5 å¤©, ç„¶å¾Œå°±æœƒåŠ ä»¥åˆªé™¤; æˆ‘ä¸æœƒå„²å­˜ä»»ä½•çµ±è¨ˆèˆ‡å–®ç¨ IP åœ°å€é–“çš„é—œè¯æ€§èµ·ä¾†.)
+Security_ExplainUpdate                  (é€™å€‹é¸é …é–‹å•Ÿå¾Œ, POPFile æ¯å¤©éƒ½æœƒå‚³é€ä¸€æ¬¡ä¸‹åˆ—ä¸‰å€‹æ•¸å€¼åˆ° www.usethesource.com çš„ä¸€å€‹è…³æœ¬: ma (å¦³çš„ POPFile çš„ä¸»è¦ç‰ˆæœ¬ç·¨è™Ÿ), mi (å¦³çš„ POPFile çš„æ¬¡è¦ç‰ˆæœ¬ç·¨è™Ÿ) å’Œ bn (å¦³çš„ POPFile çš„å»ºè™Ÿ).  æ–°ç‰ˆæ¨å‡ºæ™‚, POPFile æœƒæ”¶åˆ°ä¸€ä»½åœ–å½¢å›æ‡‰, ä¸¦ä¸”é¡¯ç¤ºåœ¨ç•«é¢é ‚ç«¯.  æˆ‘çš„ç¶²é ä¼ºæœå™¨æœƒä¿ç•™å…¶æœ¬èº«çš„æ—¥èªŒæª”ç´„ 5 å¤©, ç„¶å¾Œå°±æœƒåŠ ä»¥åˆªé™¤; æˆ‘ä¸æœƒå„²å­˜ä»»ä½•æ›´æ–°æª¢æŸ¥èˆ‡å–®ç¨ IP åœ°å€é–“çš„é—œè¯æ€§èµ·ä¾†.)
+Security_PasswordTitle                  ä½¿ç”¨è€…ä»‹é¢å¯†ç¢¼
+Security_Password                       å¯†ç¢¼
+Security_PasswordUpdate                 å¯†ç¢¼å·²æ›´æ–°
+Security_AUTHTitle                      é ç«¯ä¼ºæœå™¨
+Security_SecureServer                   é ç«¯ POP3 ä¼ºæœå™¨ (SPA/AUTH æˆ–ç©¿é€å¼ä»£ç†ä¼ºæœå™¨)
+Security_SecureServerUpdate             é ç«¯ POP3 ä¼ºæœå™¨å·²æ›´æ–°ç‚º %s
+Security_SecurePort                     é ç«¯ POP3 é€£æ¥åŸ  (SPA/AUTH æˆ–ç©¿é€å¼ä»£ç†ä¼ºæœå™¨)
+Security_SecurePortUpdate               é ç«¯ POP3 é€£æ¥åŸ å·²æ›´æ–°ç‚º %s
+Security_SMTPServer                     SMTP é€£é–ä¼ºæœå™¨
+Security_SMTPServerUpdate               SMTP é€£é–ä¼ºæœå™¨å·²æ›´æ–°ç‚º %s; é€™é …æ›´å‹•åœ¨å¦³é‡æ–°å•Ÿå‹• POPFile å‰éƒ½ä¸æœƒç”Ÿæ•ˆ
+Security_SMTPPort                       SMTP é€£é–é€£æ¥åŸ 
+Security_SMTPPortUpdate                 SMTP é€£é–é€£æ¥åŸ å·²æ›´æ–°ç‚º %s; é€™é …æ›´å‹•åœ¨å¦³é‡æ–°å•Ÿå‹• POPFile å‰éƒ½ä¸æœƒç”Ÿæ•ˆ
+Security_POP3                           æ¥å—ä¾†è‡ªé ç«¯æ©Ÿå™¨çš„ POP3 é€£ç·š (éœ€è¦é‡æ–°å•Ÿå‹• POPFile)
+Security_SMTP                           æ¥å—ä¾†è‡ªé ç«¯æ©Ÿå™¨çš„ SMTP é€£ç·š (éœ€è¦é‡æ–°å•Ÿå‹• POPFile)
+Security_NNTP                           æ¥å—ä¾†è‡ªé ç«¯æ©Ÿå™¨çš„ NNTP é€£ç·š (éœ€è¦é‡æ–°å•Ÿå‹• POPFile)
+Security_UI                             æ¥å—ä¾†è‡ªé ç«¯æ©Ÿå™¨çš„ HTTP (ä½¿ç”¨è€…ä»‹é¢) é€£ç·š (éœ€è¦é‡æ–°å•Ÿå‹• POPFile)
+Security_XMLRPC                         æ¥å—ä¾†è‡ªé ç«¯æ©Ÿå™¨çš„ XML-RPC é€£ç·š (éœ€è¦é‡æ–°å•Ÿå‹• POPFile)
+Security_UpdateTitle                    è‡ªå‹•æ›´æ–°æª¢æŸ¥
+Security_Update                         æ¯å¤©æª¢æŸ¥ POPFile æ˜¯å¦æœ‰æ›´æ–°
+Security_StatsTitle                     å›å ±çµ±è¨ˆè³‡æ–™
+Security_Stats                          æ¯æ—¥é€å‡ºçµ±è¨ˆè³‡æ–™
 
-Magnet_Error1                           ³W«h '%s' ¤w¸g¦s¦b¤ÀÃş '%s' ¤¤
-Magnet_Error2                           ·s³W«h '%s' »P³W«h '%s' ¦b¤ÀÃş '%s' ¤¤­«½Æ¡A¥i¯à·|¾É­P»~§P. ·s³W«h¥¼¥[¤J.
-Magnet_Error3                           «Ø¥ß·s³W«h '%s' ¦b¤ÀÃş '%s' ¤¤
-Magnet_CurrentMagnets                   ²{¦³³W«h
-Magnet_Message1                         ¥H¤Uªº³W«h·|¨Ïªº«H¥óÁ`¬OÂkÃş¨ì¯S©wªº¤ÀÃş¤¤.
-Magnet_CreateNew                        «Ø¥ß·s³W«h
-Magnet_Explanation                      ²{¦³³W«hÃş§O:</b> <ul><li><b>±H¥óªÌªº¹q¤l¶l¥ó«H½c©Î©m¦W:</b> ¨Ò¦p: john@company.com ¹ïÀ³¨ì¤@­Ó¯S©wªº¹q¤l¶l¥ó«H½c, <br />company.com ¹ïÀ³¨ì¨C¤@­Ó¨Ó¦Û©ó company.com ªº±H¥óªÌ, <br />John Doe ¹ïÀ³¨ì¤@­Ó¯S©wªº©m¦W, John ¹ïÀ³¨ì¨C¤@­Ó¦W¦r¤¤¦³ John ªº¤H</li><li><b>¦¬¥óªÌ/°Æ¥»ªº¹q¤l¶l¥ó«H½c©Î©m¦W:</b> ¦p¦P±H¥óªÌªº³W«hÃş§O¤@¼Ë¡A¥u¬O³o¶µ³W«hÃş§O¬O°w¹ï¦¬¥óªÌ/°Æ¥»</li> <li><b>«H¥ó¥D¦®¤¤ªº¯S©w³æ¦r</b> ¨Ò¦p: hello ·|¹ïÀ³¨ì©Ò¦³«H¥ó¥D¦®¤¤¦³ hello ªº«H¥ó</li></ul>
-Magnet_MagnetType                       ³W«hÃş§O
-Magnet_Value                            ­È
-Magnet_Always                           Á`¬OÂkÃş¨ì¤ÀÃş
-Magnet_Jump                             ²¾¦Ü³W«h(­¶)
+Magnet_Error1                           '%s' å¸éµå·²ç¶“å­˜åœ¨æ–¼ '%s' éƒµç­’è£äº†
+Magnet_Error2                           æ–°çš„ '%s' å¸éµè·Ÿæ—¢æœ‰çš„ '%s' å¸éµèµ·äº†è¡çª, å¯èƒ½æœƒå¼•èµ· '%s' éƒµç­’å…§çš„æ­§ç•°çµæœ.  æ–°çš„å¸éµä¸æœƒè¢«åŠ é€²å».
+Magnet_Error3                           å»ºç«‹æ–°çš„å¸éµ '%s' æ–¼ '%s' éƒµç­’ä¸­
+Magnet_CurrentMagnets                   ç¾ç”¨çš„å¸éµ
+Magnet_Message1                         ä¸‹åˆ—çš„å¸éµæœƒè®“ä¿¡ä»¶ç¸½æ˜¯è¢«åˆ†é¡åˆ°ç‰¹å®šçš„éƒµç­’è£.
+Magnet_CreateNew                        å»ºç«‹æ–°çš„å¸éµ
+Magnet_Explanation                      æœ‰é€™äº›é¡åˆ¥çš„å¸éµå¯ä»¥ç”¨:</b> <ul><li><b>å¯„ä»¶è€…åœ°å€æˆ–åå­—:</b> èˆ‰ä¾‹ä¾†èªª: john@company.com å°±ç¥‡æœƒå»åˆç‰¹å®šçš„åœ°å€, <br />company.com æœƒå»åˆåˆ°ä»»ä½•å¾ company.com å¯„å‡ºä¾†çš„äºº, <br />John Doe æœƒå»åˆç‰¹å®šçš„äºº, John æœƒå»åˆæ‰€æœ‰çš„ Johns</li><li><b>æ”¶ä»¶è€…/å‰¯æœ¬åœ°å€æˆ–åç¨±:</b> å°±è·Ÿå¯„ä»¶è€…ä¸€æ¨£: ä½†æ˜¯å¸éµç¥‡æœƒé‡å°éƒµä»¶è¨Šæ¯è£çš„ To:/Cc: åœ°å€ç”Ÿæ•ˆ</li> <li><b>ä¸»æ—¨å­—è©:</b> ä¾‹å¦‚: hello æœƒå»åˆæ‰€æœ‰ä¸»æ—¨è£æœ‰ hello çš„éƒµä»¶è¨Šæ¯</li></ul>
+Magnet_MagnetType                       å¸éµé¡åˆ¥
+Magnet_Value                            å€¼
+Magnet_Always                           ç¸½æ˜¯åˆ†åˆ°éƒµç­’
+Magnet_Jump                             è·³åˆ°å¸éµé é¢
 
-Bucket_Error1                           ¤ÀÃş¥u¥i¥]§t¤p¼gªº­^¤å a ¨ì z ¥H¤Î - »P _
-Bucket_Error2                           ¤ÀÃş %s ¤w¸g¦s¦b
-Bucket_Error3                           ¤w¸g«Ø¥ß¤ÀÃş %s
-Bucket_Error4                           ½Ğ¿é¤J¥¼§tªÅ¥Õªº¦r¤¸
-Bucket_Error5                           ­«·s©R¦W¤ÀÃş %s ¬° %s
-Bucket_Error6                           ¤w¸g§R°£¤ÀÃş %s
-Bucket_Title                            Á`µ²
-Bucket_BucketName                       ¤ÀÃş¦WºÙ
-Bucket_WordCount                        ¥ş³¡³æ¦r¦r¼Æ
-Bucket_WordCounts                       ¥X²{¦r¼Æ²Î­p
-Bucket_UniqueWords                      «D­«½Æ³æ¦r¦r¼Æ
-Bucket_SubjectModification              «H¥ó¥D¦®­×§ï
-Bucket_ChangeColor                      §ó§ïÃC¦â
-Bucket_NotEnoughData                    ¨S¦³¨¬°÷¸ê®Æ
-Bucket_ClassificationAccuracy           ¤ÀÃş·Ç½T²v
-Bucket_EmailsClassified                 ¤w¤ÀÃşªº«H¥ó¼Æ
-Bucket_EmailsClassifiedUpper            «H¥ó¤ÀÃşµ²ªG
-Bucket_ClassificationErrors             ¤ÀÃş¿ù»~¦¸¼Æ
-Bucket_Accuracy                         ·Ç½T²v
-Bucket_ClassificationCount              «H¥ó¤ÀÃş²Î­p
-Bucket_ClassificationFP                 ¿ù»~¤ÀÃş
-Bucket_ClassificationFN                 µLªk¤ÀÃş
-Bucket_ResetStatistics                  ­«³]²Î­p°O¿ı
-Bucket_LastReset                        ¤W¦¸­«³]®É¶¡¬°
-Bucket_CurrentColor                     %s ²{¦bÃC¦â¬O %s
-Bucket_SetColorTo                       §ó§ïÃC¦â %s ¬° %s
-Bucket_Maintenance                      ºûÅ@
-Bucket_CreateBucket                     «Ø¥ß¤ÀÃş
-Bucket_DeleteBucket                     §R°£¤ÀÃş
-Bucket_RenameBucket                     ­«·s©R¦W¤ÀÃş
-Bucket_Lookup                           ¬d¬İ
-Bucket_LookupMessage                    ¬d¬İ¤ÀÃş¤¤ªº³æ¦r
-Bucket_LookupMessage2                   ¬d¬İµ²ªG
-Bucket_LookupMostLikely                 <b>%s</b> ³Ì±`¥X²{¦b¤ÀÃş <font color="%s">%s</font>
-Bucket_DoesNotAppear                    <p><b>%s</b> ¨S¦³¥X²{¦b¥ô¦ó¤ÀÃş¤¤
-Bucket_DisabledGlobally                 ¥ş³¡°±¤î
-Bucket_To                               ¬°
-Bucket_Quarantine                       ¹jÂ÷
+Bucket_Error1                           éƒµç­’åç¨±ç¥‡èƒ½å«æœ‰å°å¯« a åˆ° z çš„å­—æ¯, 0 åˆ° 9 çš„æ•¸å­—, åŠ ä¸Š - å’Œ _
+Bucket_Error2                           å·²ç¶“æœ‰åç‚º %s çš„éƒµç­’äº†
+Bucket_Error3                           å·²ç¶“å»ºç«‹äº†åç‚º %s çš„éƒµç­’
+Bucket_Error4                           è«‹è¼¸å…¥éç©ºç™½çš„å­—è©
+Bucket_Error5                           å·²ç¶“æŠŠ %s éƒµç­’æ”¹åç‚º %s äº†
+Bucket_Error6                           å·²ç¶“åˆªé™¤äº† %s éƒµç­’äº†
+Bucket_Title                            éƒµç­’çµ„æ…‹
+Bucket_BucketName                       éƒµç­’åç¨±
+Bucket_WordCount                        å­—è©è¨ˆæ•¸
+Bucket_WordCounts                       å­—è©æ•¸ç›®çµ±è¨ˆ
+Bucket_UniqueWords                      ç¨ç‰¹çš„<br>å­—è©æ•¸
+Bucket_SubjectModification              ä¿®æ”¹ä¸»æ—¨æ¨™é ­
+Bucket_ChangeColor                      éƒµç­’é¡è‰²
+Bucket_NotEnoughData                    è³‡æ–™ä¸è¶³
+Bucket_ClassificationAccuracy           åˆ†é¡æº–ç¢ºåº¦
+Bucket_EmailsClassified                 å·²åˆ†é¡çš„éƒµä»¶è¨Šæ¯æ•¸é‡
+Bucket_EmailsClassifiedUpper            éƒµä»¶è¨Šæ¯åˆ†é¡çµæœ
+Bucket_ClassificationErrors             åˆ†é¡éŒ¯èª¤
+Bucket_Accuracy                         æº–ç¢ºåº¦
+Bucket_ClassificationCount              åˆ†é¡è¨ˆæ•¸
+Bucket_ClassificationFP                 å½é™½æ€§åˆ†é¡
+Bucket_ClassificationFN                 å½é™°æ€§åˆ†é¡
+Bucket_ResetStatistics                  é‡è¨­çµ±è¨ˆè³‡æ–™
+Bucket_LastReset                        å‰æ¬¡é‡è¨­æ–¼
+Bucket_CurrentColor                     %s ç¾ç”¨çš„é¡è‰²ç‚º %s
+Bucket_SetColorTo                       è¨­å®š %s çš„é¡è‰²ç‚º %s
+Bucket_Maintenance                      ç¶­è­·
+Bucket_CreateBucket                     ç”¨é€™å€‹åå­—å»ºç«‹éƒµç­’
+Bucket_DeleteBucket                     åˆªæ‰æ­¤åç¨±çš„éƒµç­’
+Bucket_RenameBucket                     æ›´æ”¹æ­¤åç¨±çš„éƒµç­’
+Bucket_Lookup                           æŸ¥æ‰¾
+Bucket_LookupMessage                    åœ¨éƒµç­’è£æŸ¥æ‰¾å­—è©
+Bucket_LookupMessage2                   æŸ¥æ‰¾æ­¤å­—è©çš„çµæœ
+Bucket_LookupMostLikely                 <b>%s</b> æœ€åƒæ˜¯åœ¨ <font color="%s">%s</font> æœƒå‡ºç¾çš„å–®è©
+Bucket_DoesNotAppear                    <p><b>%s</b> ä¸¦æœªå‡ºç¾æ–¼ä»»ä½•éƒµç­’è£
+Bucket_DisabledGlobally                 å·²å…¨åŸŸåœç”¨çš„
+Bucket_To                               è‡³
+Bucket_Quarantine                       éš”é›¢éƒµç­’
 
-SingleBucket_Title                      ¸Ô²Ó¸ê®Æ %s
-SingleBucket_WordCount                  ¤ÀÃş¦r¼Æ²Î­p
-SingleBucket_TotalWordCount             ¥ş³¡¦r¼Æ²Î­p
-SingleBucket_Percentage                 ¦û¦Ê¤À¤ñ
-SingleBucket_WordTable                  ¦rªí %s
-SingleBucket_Message1                   ¼Ğ¥Ü (*) ªº³æ¦r¥Nªí¤w³Q¨Ï¥Î¦b POPFile ³o¤@¦¸ Session ªº¤ÀÃş¤¤. «ö¥ô¦ó¤@­Ó³æ¦r¥h¬d¬İ¥L¦b¨C¤@­Ó¤ÀÃş¤¤¥X½uªº¾÷²v.
-SingleBucket_Unique                     %s «D­«½Æ
-SingleBucket_ClearBucket                ²¾°£©Ò¦³³æ¦r
+SingleBucket_Title                      %s çš„è©³ç´°è³‡æ–™
+SingleBucket_WordCount                  éƒµç­’å­—è©è¨ˆæ•¸
+SingleBucket_TotalWordCount             å…¨éƒ¨çš„å­—è©è¨ˆæ•¸
+SingleBucket_Percentage                 ä½”å…¨éƒ¨çš„ç™¾åˆ†æ¯”
+SingleBucket_WordTable                  %s çš„å­—è©è¡¨
+SingleBucket_Message1                   æŒ‰ä¸‹ç´¢å¼•è£çš„å­—æ¯ä¾†çœ‹çœ‹æ‰€æœ‰ä»¥è©²å­—æ¯é–‹é ­çš„å­—è©.  æŒ‰ä¸‹ä»»ä½•å­—è©å°±å¯ä»¥æŸ¥æ‰¾å®ƒåœ¨æ‰€æœ‰éƒµç­’è£çš„å¯èƒ½æ€§.
+SingleBucket_Unique                     %s ç¨æœ‰çš„
+SingleBucket_ClearBucket                ç§»é™¤æ‰€æœ‰çš„å­—è©
 
-Session_Title                           POPFile Session ¤w¸g¹L´Á
-Session_Error                           §Aªº POPFile session ¤w¸g¹L´Á.  This could have been caused by starting and stopping POPFile but leaving your web browser open.  Please click one of the links above to continue using POPFile.
+Session_Title                           POPFile éšæ®µæ™‚æœŸå·²é€¾æ™‚
+Session_Error                           å¦³çš„ POPFile éšæ®µæ™‚æœŸå·²ç¶“é€¾æœŸäº†.  é€™å¯èƒ½æ˜¯å› ç‚ºå¦³å•Ÿå‹•ä¸¦åœæ­¢äº† POPFile ä½†å»ä¿æŒç¶²é ç€è¦½å™¨é–‹å•Ÿæ‰€è‡´.  è«‹æŒ‰ä¸‹åˆ—çš„éˆçµä¹‹ä¸€ä¾†ç¹¼çºŒä½¿ç”¨ POPFile.
 
-View_Title                              ³æ¤@°T®§ÀËµø
+View_Title                              å–®ä¸€éƒµä»¶è¨Šæ¯æª¢è¦–
+View_ShowFrequencies                    é¡¯ç¤ºå­—è©é »ç‡
+View_ShowProbabilities                  é¡¯ç¤ºå­—è©å¯èƒ½æ€§
+View_ShowScores                         é¡¯ç¤ºå­—è©å¾—åˆ†åŠåˆ¤å®šåœ–è¡¨
+View_WordMatrix                         å­—è©çŸ©é™£
+View_WordProbabilities                  æ­£åœ¨é¡¯ç¤ºå­—è©å¯èƒ½æ€§
+View_WordFrequencies                    æ­£åœ¨é¡¯ç¤ºå­—è©é »ç‡
+View_WordScores                         æ­£åœ¨é¡¯ç¤ºå­—è©å¾—åˆ†
+View_Chart                              åˆ¤å®šåœ–è¡¨
 
-Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.
-History_MainTableSummary                This table shows the sender and subject of recently received messages and allows them to be reviewed and reclassified.  Clicking on the subject line will show the full message text, along with information about why it was classified as it was.  The 'Should be' column allows you to specify which bucket the message belongs in, or to undo that change.  The 'Delete' column allows you to delete specific messages from the history if you don't need them anymore.
-History_OpenMessageSummary              This table contains the full text of an email message, with the words that are used for classification highlighted according to the bucket that was most relevant for each.
-Bucket_MainTableSummary                 This table provides an overview of the classification buckets.  Each row shows the bucket name, the word count total for that bucket, the actual number of individual words in each bucket, whether the email's subject line will be modified when it gets classified to that bucket, whether to quarantine the messages received in that bucket, and a table to pick the color used in displaying anything related to that bucket in the control center.
-Bucket_StatisticsTableSummary           This table provides three sets of statistics on the overall performance of POPFile.  The first is how accurate its classification is, the second is how many emails have been classified, and to which buckets, and the third is how many words are in each bucket, and what their relative percentages are.
-Bucket_MaintenanceTableSummary          This table contains forms that allow you to create, delete or rename buckets, and to lookup a word in all of the buckets to see its relative probabilities.
-Bucket_AccuracyChartSummary             This table graphically represents the accuracy of the email classification.
-Bucket_BarChartSummary                  This table graphically represents a percentage allocation for each of the different buckets.  It is used for both number of emails classified, and total word counts.
-Bucket_LookupResultsSummary             This table shows the probabilities associated with any given word of the corpus.  For each bucket, it shows the frequency that that word occurs, the probability that it will occur in that bucket, and the overall effect on the score of the bucket if that word exists in an email.
-Bucket_WordListTableSummary             This table provides a listing of all the words for a particular bucket, organized by common first letter for each row.
-Magnet_MainTableSummary                 This table shows the list of magnets that are used to automatically classify email according to fixed rules.  Each row shows how the magnet is defined, what bucket it is intended for, and a button to delete the magnet.
-Configuration_MainTableSummary          This table contains a number of forms to allow you to control the configuration of POPFile.
-Configuration_InsertionTableSummary     This table contains buttons that determine whether or not certain modifications are made to the headers or subject line of the email before it is passed on to the email client.
-Security_MainTableSummary               This table provides sets of controls that affect the security of the overall configuration of POPFile, whether it should automatically check for updates to the program, and whether statistics about POPFile's performance should be sent to the central datastore of the program's author for general information.
-Advanced_MainTableSummary               This table provides a list of words that POPFile ignores when classifying email due to their relative frequency in email in general.  They are organized per row according to the first letter of the words.
+Windows_TrayIcon                        æ˜¯å¦è¦åœ¨ Windows çš„ç³»çµ±å¸¸é§åˆ—é¡¯ç¤º POPFile åœ–ç¤º?
+Windows_Console                         æ˜¯å¦è¦åœ¨å‘½ä»¤åˆ—è¦–çª—è£åŸ·è¡Œ POPFile?
+Windows_NextTime                        <p><font color="red">é€™é …æ›´å‹•åœ¨å¦³é‡æ–°å•Ÿå‹• POPFile å‰éƒ½ä¸æœƒç”Ÿæ•ˆ</font>
+
+Header_MenuSummary                      é€™å€‹è¡¨æ ¼æ˜¯ä»½å°è¦½é¸å–®, èƒ½è®“å¦³å­˜å–æ§åˆ¶ä¸­å¿ƒè£ä¸åŒçš„æ¯ä¸€å€‹é é¢.
+History_MainTableSummary                é€™ä»½è¡¨æ ¼åˆ—å‡ºäº†æœ€è¿‘æ”¶åˆ°çš„éƒµä»¶è¨Šæ¯çš„å¯„ä»¶è€…åŠä¸»æ—¨, å¦³ä¹Ÿèƒ½åœ¨æ­¤é‡æ–°åŠ ä»¥æª¢è¦–ä¸¦é‡æ–°åˆ†é¡é€™äº›éƒµä»¶è¨Šæ¯.  æŒ‰ä¸€ä¸‹ä¸»æ—¨åˆ—å°±æœƒé¡¯ç¤ºå‡ºå®Œæ•´çš„éƒµä»¶è¨Šæ¯æ–‡å­—, ä»¥åŠå¥¹å€‘ç‚ºä½•æœƒè¢«å¦‚æ­¤åˆ†é¡çš„è³‡è¨Š.  å¦³å¯ä»¥åœ¨ 'æ‡‰è©²è¦æ˜¯' æ¬„ä½æŒ‡å®šéƒµä»¶è¨Šæ¯è©²æ­¸å±¬çš„éƒµç­’, æˆ–è€…é‚„åŸé€™é …è®Šæ›´.  å¦‚æœæœ‰ç‰¹å®šçš„éƒµä»¶è¨Šæ¯å†ä¹Ÿä¸éœ€è¦äº†, å¦³ä¹Ÿå¯ä»¥ç”¨ 'åˆªé™¤' æ¬„ä½ä¾†å¾æ­·å²è£åŠ ä»¥åˆªé™¤.
+History_OpenMessageSummary              é€™å€‹è¡¨æ ¼å«æœ‰æŸå€‹éƒµä»¶è¨Šæ¯çš„å…¨æ–‡, å…¶ä¸­è¢«é«˜äº®åº¦æ¨™ç¤ºçš„å­—è©æ˜¯è¢«ç”¨ä¾†åˆ†é¡çš„, ä¾æ“šçš„æ˜¯å¥¹å€‘è·Ÿé‚£å€‹éƒµç­’æœ€æœ‰é—œè¯.
+Bucket_MainTableSummary                 é€™å€‹è¡¨æ ¼æä¾›äº†åˆ†é¡éƒµç­’çš„æ¦‚æ³.  æ¯ä¸€åˆ—éƒ½æœƒé¡¯ç¤ºå‡ºéƒµç­’åç¨±, è©²éƒµç­’è£çš„å­—è©ç¸½æ•¸, æ¯å€‹éƒµç­’è£å¯¦éš›çš„å–®ç¨å­—è©æ•¸é‡, éƒµä»¶è¨Šæ¯çš„ä¸»æ—¨åˆ—æ˜¯å¦æœƒåœ¨è¢«åˆ†é¡åˆ°è©²éƒµç­’æ™‚ä¸€ä½µè¢«ä¿®æ”¹, æ˜¯å¦è¦éš”é›¢è¢«æ”¶é€²è©²éƒµç­’è£çš„éƒµä»¶è¨Šæ¯, ä»¥åŠä¸€å€‹è®“å¦³æŒ‘é¸é¡è‰²çš„è¡¨æ ¼, é€™å€‹é¡è‰²æœƒåœ¨æ§åˆ¶ä¸­å¿ƒè£é¡¯ç¤ºæ–¼ä»»ä½•è·Ÿè©²éƒµç­’æœ‰é—œçš„åœ°æ–¹.
+Bucket_StatisticsTableSummary           é€™å€‹è¡¨æ ¼æä¾›äº†ä¸‰çµ„è·Ÿ POPFile æ•´é«”æ•ˆèƒ½æœ‰é—œçš„çµ±è¨ˆè³‡æ–™.  ç¬¬ä¸€çµ„æ˜¯å…¶åˆ†é¡æº–ç¢ºåº¦å¦‚ä½•, ç¬¬äºŒçµ„æ˜¯å…±æœ‰å¤šå°‘éƒµä»¶è¨Šæ¯è¢«åŠ ä»¥åˆ†é¡åˆ°é‚£å€‹éƒµç­’è£, ç¬¬ä¸‰çµ„æ˜¯æ¯å€‹éƒµç­’è£æœ‰å¤šå°‘å­—è©åŠå…¶é—œè¯ç™¾åˆ†æ¯”.
+Bucket_MaintenanceTableSummary          é€™å€‹è¡¨æ ¼å«æœ‰ä¸€å€‹è¡¨å–®, è®“å¦³èƒ½å¤ å»ºç«‹, åˆªé™¤, æˆ–é‡æ–°å‘½åæŸå€‹éƒµç­’, ä¹Ÿå¯ä»¥åœ¨æ‰€æœ‰çš„éƒµç­’è£æŸ¥æ‰¾æŸå€‹å­—è©, çœ‹çœ‹å…¶é—œè¯å¯èƒ½æ€§.
+Bucket_AccuracyChartSummary             é€™å€‹è¡¨æ ¼ç”¨åœ–å½¢é¡¯ç¤ºäº†éƒµä»¶è¨Šæ¯åˆ†é¡çš„æº–ç¢ºåº¦.
+Bucket_BarChartSummary                  é€™å€‹è¡¨æ ¼ç”¨åœ–å½¢é¡¯ç¤ºäº†ä¸åŒéƒµç­’æ‰€ä½”æ“šçš„ç™¾åˆ†æ¯”.  é€™åŒæ™‚è¨ˆç®—äº†è¢«åˆ†é¡çš„éƒµä»¶è¨Šæ¯æ•¸é‡, ä»¥åŠå…¨éƒ¨çš„å­—è©è¨ˆæ•¸.
+Bucket_LookupResultsSummary             é€™å€‹è¡¨æ ¼é¡¯ç¤ºäº†èˆ‡å±é«”è£ä»»ä½•çµ¦å®šå­—è©é—œè¯çš„å¯èƒ½æ€§.  å°æ–¼æ¯å€‹éƒµç­’ä¾†èªª, å¥¹éƒ½æœƒé¡¯ç¤ºå‡ºè©²å­—è©ç™¼ç”Ÿçš„é »ç‡, å­—è©æœƒå‡ºç¾åœ¨è©²éƒµç­’è£çš„å¯èƒ½æ€§, ä»¥åŠç•¶è©²å­—è©å‡ºç¾åœ¨éƒµä»¶è¨Šæ¯è£æ™‚, å°æ–¼è©²éƒµç­’å¾—åˆ†çš„æ•´é«”å½±éŸ¿.
+Bucket_WordListTableSummary             é€™å€‹è¡¨æ ¼æä¾›äº†ç‰¹å®šéƒµç­’è£å…¨éƒ¨çš„å­—è©æ¸…å–®, æŒ‰ç…§é–‹é ­çš„å­—æ¯é€åˆ—æ•´ç†.
+Magnet_MainTableSummary                 é€™å€‹è¡¨æ ¼é¡¯ç¤ºäº†å¸éµæ¸…å–®, é€™äº›å¸éµæ˜¯ç”¨ä¾†æŒ‰ç…§å›ºå®šè¦å‰‡æŠŠéƒµä»¶è¨Šæ¯åŠ ä»¥åˆ†é¡çš„.  æ¯ä¸€åˆ—éƒ½æœƒé¡¯ç¤ºå‡ºå¸éµå¦‚ä½•è¢«å®šç¾©è‘—, å…¶æ‰€è¦¬è¦¦çš„éƒµç­’, é‚„æœ‰ç”¨ä¾†åˆªé™¤è©²å¸éµçš„æŒ‰éˆ•.
+Configuration_MainTableSummary          é€™å€‹è¡¨æ ¼å«æœ‰æ•¸å€‹è¡¨å–®, è®“å¦³æ§åˆ¶ POPFile çš„çµ„æ…‹.
+Configuration_InsertionTableSummary     é€™å€‹è¡¨æ ¼å«æœ‰ä¸€äº›æŒ‰éˆ•, åˆ¤æ–·æ˜¯å¦è¦åœ¨éƒµä»¶è¨Šæ¯éé€çµ¦éƒµä»¶ç”¨æˆ¶ç«¯ç¨‹å¼å‰, å…ˆè¡Œä¿®æ”¹æ¨™é ­æˆ–ä¸»æ—¨åˆ—.
+Security_MainTableSummary               é€™å€‹è¡¨æ ¼æä¾›äº†å¹¾çµ„æ§åˆ¶, èƒ½å½±éŸ¿ POPFile æ•´é«”çµ„æ…‹çš„å®‰å…¨, æ˜¯å¦è¦è‡ªå‹•æª¢æŸ¥ç¨‹å¼æ›´æ–°, ä»¥åŠæ˜¯å¦è¦æŠŠ POPFile æ•ˆèƒ½çµ±è¨ˆè³‡æ–™çš„ä¸€èˆ¬è³‡è¨Šå‚³å›ç¨‹å¼ä½œè€…çš„ä¸­å¤®è³‡æ–™åº«.
+Advanced_MainTableSummary               é€™å€‹è¡¨æ ¼æä¾›äº†ä¸€ä»½ POPFile åˆ†é¡éƒµä»¶è¨Šæ¯æ™‚æ‰€æœƒå¿½ç•¥çš„å­—è©æ¸…å–®, å› ç‚ºä»–å€‘åœ¨ä¸€èˆ¬éƒµä»¶è¨Šæ¯è£çš„é—œè¯éæ–¼é »ç¹.  å¥¹å€‘æœƒè¢«æŒ‰ç…§å­—è©é–‹é ­çš„å­—ç•è¢«é€åˆ—æ•´ç†.
+
+Imap_Bucket2Folder                      <b>%s</b> éƒµç­’çš„ä¿¡ä»¶è‡³éƒµä»¶åŒ£
+Imap_MapError                           å¦³ä¸èƒ½æŠŠè¶…éä¸€å€‹çš„éƒµç­’å°æ‡‰åˆ°å–®ä¸€çš„éƒµä»¶åŒ£è£!
+Imap_Server                             IMAP ä¼ºæœå™¨ä¸»æ©Ÿåç¨±:
+Imap_ServerNameError                    è«‹è¼¸å…¥ä¼ºæœå™¨çš„ä¸»æ©Ÿåç¨±!
+Imap_Port                               IMAP ä¼ºæœå™¨é€£æ¥åŸ :
+Imap_PortError                          è«‹è¼¸å…¥æœ‰æ•ˆçš„é€£æ¥åŸ è™Ÿç¢¼!
+Imap_Login                              IMAP å¸³è™Ÿç™»å…¥:
+Imap_LoginError                         è«‹è¼¸å…¥ä½¿ç”¨è€…/ç™»å…¥åç¨±!
+Imap_Password                           IMAP å¸³è™Ÿçš„å¯†ç¢¼:
+Imap_PasswordError                      è«‹è¼¸å…¥è¦ç”¨æ–¼ä¼ºæœå™¨çš„å¯†ç¢¼!
+Imap_Expunge                            å¾è¢«ç›£è¦–çš„ä¿¡ä»¶åŒ£è£æ¸…é™¤å·²è¢«åˆªé™¤çš„éƒµä»¶è¨Šæ¯.
+Imap_Interval                           æ›´æ–°é–“éš”ç§’æ•¸:
+Imap_IntervalError                      è«‹è¼¸å…¥ä»‹æ–¼ 10 ç§’è‡³ 3600 ç§’é–“çš„é–“éš”.
+Imap_Bytelimit                          æ¯å°éƒµä»¶è¨Šæ¯è¦ç”¨ä¾†åˆ†é¡çš„ä½å…ƒçµ„æ•¸. è¼¸å…¥ 0 (ç©º) è¡¨ç¤ºå®Œæ•´çš„éƒµä»¶è¨Šæ¯:
+Imap_BytelimitError                     è«‹è¼¸å…¥æ•¸å€¼.
+Imap_RefreshFolders                     é‡æ–°æ•´ç†éƒµä»¶åŒ£æ¸…å–®
+Imap_Now                                ç¾åœ¨!
+Imap_UpdateError1                       ç„¡æ³•ç™»å…¥. è«‹é©—è­‰å¦³çš„ç™»å…¥åç¨±è·Ÿå¯†ç¢¼.
+Imap_UpdateError2                       é€£æ¥è‡³ä¼ºæœå™¨å¤±æ•—. è«‹æª¢æŸ¥ä¸»æ©Ÿåç¨±è·Ÿé€£æ¥åŸ , ä¸¦è«‹ç¢ºèªå¦³æ­£åœ¨ç·šä¸Š.
+Imap_UpdateError3                       è«‹å…ˆçµ„æ…‹é€£ç·šç´°ç¯€.
+Imap_NoConnectionMessage                è«‹å…ˆçµ„æ…‹é€£ç·šç´°ç¯€. ç•¶å¦³å®Œæˆå¾Œ, é€™ä¸€é è£å°±æœƒå‡ºç¾æ›´å¤šå¯ç”¨çš„é¸é ….
+Imap_WatchMore                          è¢«ç›£è¦–éƒµä»¶åŒ£æ¸…å–®çš„éƒµä»¶åŒ£
+Imap_WatchedFolder                      è¢«ç›£è¦–çš„éƒµä»¶åŒ£ç·¨è™Ÿ
+
+Shutdown_Message                        POPFile å·²ç¶“è¢«åœæ‰äº†
+
+Help_Training                           ç•¶å¦³åˆæ¬¡ä½¿ç”¨ POPFile æ™‚, å¥¹å•¥ä¹Ÿä¸æ‡‚è€Œéœ€è¦è¢«åŠ ä»¥èª¿æ•™. POPFile çš„æ¯ä¸€å€‹éƒµç­’éƒ½éœ€è¦ç”¨éƒµä»¶è¨Šæ¯ä¾†åŠ ä»¥èª¿æ•™, ç¥‡æœ‰ç•¶å¦³é‡æ–°æŠŠæŸå€‹è¢« POPFile éŒ¯èª¤åˆ†é¡çš„éƒµä»¶è¨Šæ¯é‡æ–°åˆ†é¡åˆ°æ­£ç¢ºçš„éƒµç­’æ™‚, çº”çœŸçš„æ˜¯åœ¨èª¿æ•™å¥¹. åŒæ™‚å¦³ä¹Ÿå¾—è¨­å®šå¦³çš„éƒµä»¶ç”¨æˆ¶ç«¯ç¨‹å¼, ä¾†æŒ‰ç…§ POPFile çš„åˆ†é¡çµæœåŠ ä»¥éæ¿¾éƒµä»¶è¨Šæ¯. é—œæ–¼è¨­å®šç”¨æˆ¶ç«¯éæ¿¾å™¨çš„è³‡è¨Šå¯ä»¥åœ¨ <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">POPFile æ–‡ä»¶è¨ˆç•«</a>è£è¢«æ‰¾åˆ°.
+Help_Bucket_Setup                       POPFile é™¤äº†æœªåˆ†é¡ (unclassified) çš„å‡éƒµç­’å¤–, é‚„éœ€è¦è‡³å°‘å…©å€‹éƒµç­’. è€Œ POPFile çš„ç¨ç‰¹ä¹‹è™•æ­£åœ¨æ–¼å¥¹å°é›»å­éƒµä»¶çš„å€åˆ†æ›´å‹æ–¼æ­¤, å¦³ç”šè‡³å¯ä»¥æœ‰ä»»æ„æ•¸é‡çš„éƒµç­’. ç°¡å–®çš„è¨­å®šæœƒæ˜¯åƒ "åƒåœ¾ (spam)", "å€‹äºº (personal)", å’Œ "å·¥ä½œ (work)" éƒµç­’.
+Help_No_More                            åˆ¥å†é¡¯ç¤ºé€™å€‹èªªæ˜äº†
