@@ -25,7 +25,7 @@
   ;   <start of code block>
   ;
   ;   #----------------------------------------------------------------------------------------
-  ;   # CBP Configuration Data (to change the default settings, un-comment appropriate lines)
+  ;   # CBP Configuration Data (to override defaults, un-comment lines below and modify them)
   ;   #----------------------------------------------------------------------------------------
   ;   #   ; Maximum number of buckets handled (in range 2 to 8)
   ;   #
@@ -100,6 +100,30 @@
 #                           External interface - ends here
 #
 #//////////////////////////////////////////////////////////////////////////////////////////////
+
+  ;============================================================================================
+  ; (Informal) Coding standard for the CBP Package
+  ;============================================================================================
+
+  ; (1) All functions, macros and define statements use the 'CBP_' prefix
+  ;
+  ; (2) With the exception of some small library functions, 'defines' are used to give registers
+  ;     'meaningful' names and make maintenance easier.
+  ;
+  ; (3) Similarly, 'defines' are used for constants
+  ;
+  ; (4) Naming conventions: local registers are give names starting with 'CBP_L_' and
+  ;     constants are given names starting with 'CBP_C_'. If global registers are introduced,
+  ;     they should use names beginning with 'CBP_G_'.
+  ;
+  ; (5) All functions preserve register values using the stack (with the sole exception of the
+  ;     'leave' function for the custom page - it shares the same registers as the custom page
+  ;     creator function in order to simplify the input validation process)
+  ;
+  ; (6) Parameters are passed on the stack (the sole exception is the custom page's
+  ;     'leave' function)
+
+  ;============================================================================================
 
   ; Name of the INI file used to create the custom page for this package. Normally the
   ; 'CBP_CreateBucketsPage' function will call 'CBP_CreateINIfile' to create this INI file
@@ -180,9 +204,9 @@ Function CBP_CheckCorpusStatus
   Push ${CBP_L_CORPUS}
   Push ${CBP_L_FILE_HANDLE}
   Push ${CBP_L_TEMP}
-  
+
   StrCpy ${CBP_L_CORPUS} ""
-  
+
   IfFileExists ${CBP_L_SOURCE}\popfile.cfg 0 check_default_corpus_locn
 
   ClearErrors
@@ -196,7 +220,7 @@ loop:
   StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 13
   StrCmp ${CBP_L_RESULT} "bayes_corpus " got_new_corpus
   Goto loop
-  
+
 got_old_corpus:
   StrCpy ${CBP_L_CORPUS} ${CBP_L_TEMP} "" 7
   Goto loop
@@ -212,7 +236,7 @@ cfg_file_done:
   Call CBP_TrimNewlines
   Pop ${CBP_L_CORPUS}
   StrCmp ${CBP_L_CORPUS} "" check_default_corpus_locn
-  
+
   ; A non-null corpus parameter has been found in 'popfile.cfg'
   ; Strip leading/trailing quotes, if any
 
@@ -237,23 +261,23 @@ slashconversion:
 
   StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 1
   StrCmp ${CBP_L_TEMP} "\" instdir_drive
-  
+
   StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 1 1
   StrCmp ${CBP_L_TEMP} ":" look_for_corpus_files
-  
+
   ; Assume path can be safely added to $INSTDIR
-  
+
   StrCpy ${CBP_L_CORPUS} $INSTDIR\${CBP_L_CORPUS}
   Goto look_for_corpus_files
-  
+
 sub_folder:
   StrCpy ${CBP_L_CORPUS} ${CBP_L_CORPUS} "" 2
   StrCpy ${CBP_L_CORPUS} $INSTDIR\${CBP_L_CORPUS}
   Goto look_for_corpus_files
-  
+
 relative_folder:
   StrCpy ${CBP_L_RESULT} $INSTDIR
-  
+
 relative_again:
   StrCpy ${CBP_L_CORPUS} ${CBP_L_CORPUS} "" 3
   Push ${CBP_L_RESULT}
@@ -263,18 +287,18 @@ relative_again:
   StrCmp ${CBP_L_TEMP} "..\" relative_again
   StrCpy ${CBP_L_CORPUS} ${CBP_L_RESULT}\${CBP_L_CORPUS}
   Goto look_for_corpus_files
-  
+
 instdir_drive:
   StrCpy ${CBP_L_TEMP} $INSTDIR 2
   StrCpy ${CBP_L_CORPUS} ${CBP_L_TEMP}${CBP_L_CORPUS}
   Goto look_for_corpus_files
-  
+
 check_default_corpus_locn:
   StrCpy ${CBP_L_CORPUS} ${CBP_L_SOURCE}\corpus
-  
+
 look_for_corpus_files:
   ; Save path in INI file for later use by 'CBP_MakePOPFileBucket'
-  
+
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
       "CBP Data" "CorpusPath" "${CBP_L_CORPUS}"
 
@@ -400,7 +424,7 @@ Function CBP_MakePOPFileBuckets
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${CBP_L_CORPUS} "${CBP_C_INIFILE}" \
       "CBP Data" "CorpusPath"
-      
+
   StrCpy ${CBP_L_UNC} ${CBP_L_CORPUS} 2   ; will be "\\" for UNC-format paths
 
   ; Now we create the buckets selected by the user. At present this code is only executed
@@ -451,7 +475,7 @@ finished_now:
   Pop ${CBP_L_CREATE_NAME}
   Pop ${CBP_L_CORPUS}
   Pop ${CBP_L_FIRST_FIELD}
-  
+
   Exch ${CBP_L_COUNT}       ; top of stack now has number of buckets we were unable to create
 
   !undef CBP_L_CORPUS
@@ -520,8 +544,8 @@ FunctionEnd
 # Macro used to insert the "Create Buckets" custom page into the list of installer pages
 #==============================================================================================
 
-  !macro CBP_PAGECOMMAND_SELECTBUCKETS CAPTION
-    Page custom CBP_CreateBucketsPage "CBP_HandleUserInput" "${CAPTION}"
+  !macro CBP_PAGE_SELECTBUCKETS
+    Page custom CBP_CreateBucketsPage "CBP_HandleUserInput"
   !macroend
 
 #==============================================================================================
@@ -670,44 +694,44 @@ Function CBP_CreateINIfile
 
   ; Constants used to position information on the left-half of the page
 
-  !define INFO_LEFT_MARGIN      0
-  !define INFO_RIGHT_MARGIN   131
+  !define CBP_INFO_LEFT_MARGIN      0
+  !define CBP_INFO_RIGHT_MARGIN   131
 
   ; Constants used to position the bucket names
 
-  !define BN_NAME_LEFT        157
-  !define BN_NAME_RIGHT       -44
+  !define CBP_BN_NAME_LEFT        157
+  !define CBP_BN_NAME_RIGHT       -44
 
   ; Constants used to position the "Remove" boxes
 
-  !define BN_REMOVE_LEFT      -42
-  !define BN_REMOVE_RIGHT     -1
+  !define CBP_BN_REMOVE_LEFT      -42
+  !define CBP_BN_REMOVE_RIGHT     -1
 
   ; Constants used to define the position of the 8 rows in the bucket list
 
-  !define BN_ROW_1_TOP        12
-  !define BN_ROW_1_BOTTOM     22
+  !define CBP_BN_ROW_1_TOP        12
+  !define CBP_BN_ROW_1_BOTTOM     22
 
-  !define BN_ROW_2_TOP        27
-  !define BN_ROW_2_BOTTOM     37
+  !define CBP_BN_ROW_2_TOP        27
+  !define CBP_BN_ROW_2_BOTTOM     37
 
-  !define BN_ROW_3_TOP        42
-  !define BN_ROW_3_BOTTOM     52
+  !define CBP_BN_ROW_3_TOP        42
+  !define CBP_BN_ROW_3_BOTTOM     52
 
-  !define BN_ROW_4_TOP        57
-  !define BN_ROW_4_BOTTOM     67
+  !define CBP_BN_ROW_4_TOP        57
+  !define CBP_BN_ROW_4_BOTTOM     67
 
-  !define BN_ROW_5_TOP        72
-  !define BN_ROW_5_BOTTOM     82
+  !define CBP_BN_ROW_5_TOP        72
+  !define CBP_BN_ROW_5_BOTTOM     82
 
-  !define BN_ROW_6_TOP        87
-  !define BN_ROW_6_BOTTOM     97
+  !define CBP_BN_ROW_6_TOP        87
+  !define CBP_BN_ROW_6_BOTTOM     97
 
-  !define BN_ROW_7_TOP        102
-  !define BN_ROW_7_BOTTOM     112
+  !define CBP_BN_ROW_7_TOP        102
+  !define CBP_BN_ROW_7_BOTTOM     112
 
-  !define BN_ROW_8_TOP        117
-  !define BN_ROW_8_BOTTOM     127
+  !define CBP_BN_ROW_8_TOP        117
+  !define CBP_BN_ROW_8_BOTTOM     127
 
   ; Basic macro used to create the INI file
 
@@ -742,7 +766,8 @@ Function CBP_CreateINIfile
     !insertmacro CBP_DEFINE_CONTROL "${FIELD}" \
       "Label" \
       "${TEXT}" \
-      "${BN_NAME_LEFT}" "${BN_NAME_RIGHT}"  "${BN_${ROW}_TOP}" "${BN_${ROW}_BOTTOM}"
+      "${CBP_BN_NAME_LEFT}" "${CBP_BN_NAME_RIGHT}"  \
+      "${CBP_BN_${ROW}_TOP}" "${CBP_BN_${ROW}_BOTTOM}"
   !macroend
 
   ; Macro used to define a checkbox for marking a bucket name for deletion
@@ -751,7 +776,8 @@ Function CBP_CreateINIfile
     !insertmacro CBP_DEFINE_CONTROL "${FIELD}" \
       "CheckBox" \
       "Remove" \
-      "${BN_REMOVE_LEFT}" "${BN_REMOVE_RIGHT}" "${BN_${ROW}_TOP}" "${BN_${ROW}_BOTTOM}"
+      "${CBP_BN_REMOVE_LEFT}" "${CBP_BN_REMOVE_RIGHT}" \
+      "${CBP_BN_${ROW}_TOP}" "${CBP_BN_${ROW}_BOTTOM}"
   !macroend
 
 #----------------------------------------------------------------------------------------------
@@ -772,7 +798,7 @@ Function CBP_CreateINIfile
       "After installation, POPFile makes it easy to change the number of buckets \
       (and their names) to suit your needs.\r\n\r\nBucket names must be single words, \
       using lowercase letters, digits 0 to 9, hyphens and underscores." \
-      "${INFO_LEFT_MARGIN}" "${INFO_RIGHT_MARGIN}" "0" "60"
+      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "0" "60"
 
   ; Label for the "Create Bucket" ComboBox
 
@@ -780,14 +806,14 @@ Function CBP_CreateINIfile
       "Label" \
       "Create a new bucket by either selecting a name from the list below or \
       typing a name of your own choice in the box below." \
-      "${INFO_LEFT_MARGIN}" "${INFO_RIGHT_MARGIN}" "63" "87"
+      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "63" "87"
 
   ; ComboBox used to create a new bucket
 
   !insertmacro CBP_DEFINE_CONTROL "Field 3" \
       "ComboBox" \
       "A|B" \
-      "${INFO_LEFT_MARGIN}" "${INFO_RIGHT_MARGIN}" "90" "170"
+      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "90" "170"
 
   ; Instruction for deleting bucket names from the list
 
@@ -795,7 +821,7 @@ Function CBP_CreateINIfile
       "Label" \
       "To delete one or more buckets from the list, tick the relevant 'Remove' box(es) \
       then click the 'Continue' button." \
-      "${INFO_LEFT_MARGIN}" "${INFO_RIGHT_MARGIN}" "110" "190"
+      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "110" "190"
 
   ; Label used to display progress reports
 
@@ -835,28 +861,28 @@ Function CBP_CreateINIfile
 
   FlushINI "$PLUGINSDIR\${CBP_C_INIFILE}"
 
-  !undef INFO_LEFT_MARGIN
-  !undef INFO_RIGHT_MARGIN
-  !undef BN_NAME_LEFT
-  !undef BN_NAME_RIGHT
-  !undef BN_REMOVE_LEFT
-  !undef BN_REMOVE_RIGHT
-  !undef BN_ROW_1_TOP
-  !undef BN_ROW_1_BOTTOM
-  !undef BN_ROW_2_TOP
-  !undef BN_ROW_2_BOTTOM
-  !undef BN_ROW_3_TOP
-  !undef BN_ROW_3_BOTTOM
-  !undef BN_ROW_4_TOP
-  !undef BN_ROW_4_BOTTOM
-  !undef BN_ROW_5_TOP
-  !undef BN_ROW_5_BOTTOM
-  !undef BN_ROW_6_TOP
-  !undef BN_ROW_6_BOTTOM
-  !undef BN_ROW_7_TOP
-  !undef BN_ROW_7_BOTTOM
-  !undef BN_ROW_8_TOP
-  !undef BN_ROW_8_BOTTOM
+  !undef CBP_INFO_LEFT_MARGIN
+  !undef CBP_INFO_RIGHT_MARGIN
+  !undef CBP_BN_NAME_LEFT
+  !undef CBP_BN_NAME_RIGHT
+  !undef CBP_BN_REMOVE_LEFT
+  !undef CBP_BN_REMOVE_RIGHT
+  !undef CBP_BN_ROW_1_TOP
+  !undef CBP_BN_ROW_1_BOTTOM
+  !undef CBP_BN_ROW_2_TOP
+  !undef CBP_BN_ROW_2_BOTTOM
+  !undef CBP_BN_ROW_3_TOP
+  !undef CBP_BN_ROW_3_BOTTOM
+  !undef CBP_BN_ROW_4_TOP
+  !undef CBP_BN_ROW_4_BOTTOM
+  !undef CBP_BN_ROW_5_TOP
+  !undef CBP_BN_ROW_5_BOTTOM
+  !undef CBP_BN_ROW_6_TOP
+  !undef CBP_BN_ROW_6_BOTTOM
+  !undef CBP_BN_ROW_7_TOP
+  !undef CBP_BN_ROW_7_BOTTOM
+  !undef CBP_BN_ROW_8_TOP
+  !undef CBP_BN_ROW_8_BOTTOM
 
 FunctionEnd
 
@@ -876,9 +902,9 @@ FunctionEnd
 # The "Continue" button at the foot of the page is used to action any requests. If no name
 # has been entered to create a new bucket and no buckets have been marked for deletion, it is
 # assumed that the user is happy with the current list therefore if at least two buckets are
-# in the list the function creates those buckets and exits.
+# in the list, the 'leave' function creates those buckets and then this function exits.
 #
-# This function enters a display loop, repeatedly displaying the custom page until the "leave"
+# This function enters a display loop, repeatedly displaying the custom page until the 'leave'
 # function (CBP_HandleUserInput) indicates that the user has selected enough buckets.
 #----------------------------------------------------------------------------------------------
 # Inputs:
@@ -896,9 +922,10 @@ FunctionEnd
 # Global CBP Constants Used:
 #   CBP_C_CREATE_BN               - field number of the "Create Bucket" combobox
 #   CBP_C_DEFAULT_BUCKETS         - defines the default bucket selection
+#   CBP_C_FIRST_BN_CBOX           - field holding the first "Remove" check box
 #   CBP_C_FIRST_BN_CBOX_MINUS_ONE - used when determining how many "remove" boxes to show
-#   CBP_C_LAST_BN_CBOX_PLUS_ONE   - used when clearing all of the "Remove" ticks
 #   CBP_C_INIFILE                 - name of the INI file used to create the custom page
+#   CBP_MAX_BN_CBOX_PLUS_ONE      - used in loop which clears the ticks in the 'Remove' boxes
 #   CBP_C_MAX_BNCOUNT             - maximum number of buckets installer can handle
 #   CBP_C_MESSAGE                 - field number for the progress report message
 #----------------------------------------------------------------------------------------------
@@ -921,7 +948,7 @@ Function CBP_CreateBucketsPage
   ; function as a "leave" function. The CBP package treats CBP_HandleUserInput as an extension
   ; of CBP_CreateBucketsPage so they share the same registers. To simplify maintenance, a pair
   ; of macros are used to specify the shared registers.
-  
+
   !macro CBP_HUI_SharedDefs
     !define CBP_L_COUNT         $R9    ; counts number of buckets selected
     !define CBP_L_CREATE_NAME   $R8    ; name (input via combobox) of bucket to be created
@@ -941,7 +968,7 @@ Function CBP_CreateBucketsPage
     !undef CBP_L_RESULT
     !undef CBP_L_TEMP
   !macroend
-  
+
   !insertmacro CBP_HUI_SharedDefs
 
   Push ${CBP_L_COUNT}
@@ -977,7 +1004,8 @@ use_INI_file:
   Call CBP_SetDefaultBuckets
   Pop ${CBP_L_COUNT}
 
-get_more_input:
+input_loop:
+
   ; Update the status message under the list of bucket names
 
   IntCmp ${CBP_L_COUNT} 0 zero_so_far
@@ -1007,7 +1035,7 @@ update_lists:
   ; Ensure no bucket selected for creation
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_C_CREATE_BN}" "State" ""
-  
+
   ; Ensure no buckets are marked for deletion
 
   StrCpy ${CBP_L_PTR} ${CBP_C_FIRST_BN_CBOX}
@@ -1016,7 +1044,7 @@ clear_loop:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
         "Field ${CBP_L_PTR}" "State" "0"
   IntOp ${CBP_L_PTR} ${CBP_L_PTR} + 1
-  IntCmp ${CBP_L_PTR} ${CBP_C_LAST_BN_CBOX_PLUS_ONE} clear_finished
+  IntCmp ${CBP_L_PTR} ${CBP_MAX_BN_CBOX_PLUS_ONE} clear_finished
   Goto clear_loop
 
 clear_finished:
@@ -1030,10 +1058,11 @@ clear_finished:
 
   Call CBP_UpdateAddBucketList
 
-  ; Display the "Bucket Selection Page" and wait for user to enter data and click "Continue"
+  ; Display the "Bucket Selection Page" and wait for user to enter data and click "Continue".
+  ; The 'leave' function (CBP_HandleUserInput) updates ${CBP_L_RESULT} after checking user input
 
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "${CBP_C_INIFILE}"
-  StrCmp ${CBP_L_RESULT} "wait" get_more_input
+  StrCmp ${CBP_L_RESULT} "wait" input_loop
 
 finished_now:
 
@@ -1085,7 +1114,6 @@ FunctionEnd
 #   CBP_C_CREATE_BN               - field number of the "Create Bucket" combobox
 #   CBP_C_FIRST_BN_CBOX           - field holding the first "Remove" check box
 #   CBP_C_FIRST_BN_TEXT           - field number of first entry in list of names
-#   CBP_C_FIRST_BN_CBOX_MINUS_ONE - used when determining how many "remove" boxes to show
 #   CBP_C_INIFILE                 - name of the INI file used to create the custom page
 #   CBP_C_MAX_BNCOUNT             - maximum number of buckets installer can handle
 #----------------------------------------------------------------------------------------------
@@ -1127,14 +1155,11 @@ process_deletions:
   Push ${CBP_L_NAME}
 
   ; Work through the current entries in the bucket list, removing any entries for which the
-  ; "Remove" checkbox has been ticked (and clearing the tick). The end result will be a list
-  ; of bucket names without any gaps in the list. If all names are removed then an empty list
-  ; will be shown.
+  ; "Remove" checkbox has been ticked. The end result will be a list of bucket names without
+  ; any gaps in the list. If all names are removed then an empty list will be shown.
+  ; NB: The ticks in the 'Remove' boxes are cleared by the 'CBP_CreateBucketsPage' function.
 
 pd_loop:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_L_PTR}" "State" "0"
-
-pd_loop2:
   IntOp ${CBP_L_NAME} ${CBP_L_NAME} + 1
   IntOp ${CBP_L_PTR} ${CBP_L_PTR} + 1
   IntCmp ${CBP_L_PTR} ${CBP_L_LOOP_LIMIT} tidy_up
@@ -1148,7 +1173,7 @@ pd_loop2:
       "Field ${CBP_L_NAME}" "Text" "${CBP_L_TEMP}"
   IntOp ${CBP_L_NAME} ${CBP_L_NAME} + 1
   Exch ${CBP_L_NAME}
-  goto pd_loop2
+  goto pd_loop
 
 tidy_up:
   Pop ${CBP_L_NAME}
@@ -1226,7 +1251,7 @@ too_few:
 get_next_bucket_cmd:
   StrCpy ${CBP_L_RESULT} "wait"
   Return
-  
+
 finished_buckets:
   Push ${CBP_C_FIRST_BN_TEXT}
   Push ${CBP_L_COUNT}
@@ -1465,7 +1490,7 @@ Function CBP_StrCheckName
   ; Bucket names can contain only lowercase letters, digits (0-9), underscores (_) & hyphens (-)
 
   !define CBP_VALIDCHARS    "abcdefghijklmnopqrstuvwxyz_-0123456789"
-  
+
   Exch $0   ; The input string
   Push $1   ; Number of characters in ${CBP_VALIDCHARS}
   Push $2   ; Holds the result (either "" or a valid bucket name derived from the input string)
@@ -1476,14 +1501,14 @@ Function CBP_StrCheckName
 
   StrLen $1 "${CBP_VALIDCHARS}"
   StrCpy $2 ""
-  
+
 next_input_char:
   StrCpy $3 $0 1              ; Get next character from the input string
   StrCmp $3 "" done
   StrCpy $6 ${CBP_VALIDCHARS}$3  ; Add character to end of "validity check" to guarantee a match
   StrCpy $0 $0 "" 1
   StrCpy $4 -1
-  
+
 next_valid_char:
   IntOp $4 $4 + 1
   StrCpy $5 $6 1 $4   ; Extract next "valid" character (from "validity check" string)
@@ -1491,10 +1516,10 @@ next_valid_char:
   IntCmp $4 $1 invalid_name 0 invalid_name  ; if match is with the char we added, name is bad
   StrCpy $2 $2$5      ; Use "valid" character to ensure we store lowercase letters in the result
   goto next_input_char
-  
+
 invalid_name:
   StrCpy $2 ""
-  
+
 done:
   StrCpy $0 $2      ; Result is either a valid bucket name or ""
   Pop $6
@@ -1504,7 +1529,7 @@ done:
   Pop $2
   Pop $1
   Exch $0           ; place result on top of the stack
-  
+
   !undef CBP_VALIDCHARS
 
 FunctionEnd
@@ -1570,9 +1595,9 @@ Function CBP_ExtractBN
   Exch $0             ; get list of bucket names
   Push $1
   Push $2
-  
+
   ; If the list of names starts with "|" character, ignore the "|"
-  
+
   StrCpy $2 $0 1
   StrCmp $2 "|" 0 start_now
   StrCpy $0 $0 "" 1
@@ -1923,7 +1948,7 @@ loop:
   IntOp $R1 $R1 + 1
   IntCmp $R1 0 no_trim_needed
   StrCpy $R0 $R0 $R1
-    
+
 no_trim_needed:
   Pop $R2
   Pop $R1
@@ -1987,7 +2012,7 @@ found:
 
 done:
   StrCpy $R0 $R1
-  
+
 nothing_to_do:
   Pop $R2
   Pop $R1
@@ -2036,16 +2061,16 @@ Function CBP_GetParent
   Exch $R0
   Push $R1
   Push $R2
-  
+
   StrCpy $R1 -1
-  
+
 loop:
   StrCpy $R2 $R0 1 $R1
   StrCmp $R2 "" exit
   StrCmp $R2 "\" exit
   IntOp $R1 $R1 - 1
   Goto loop
-  
+
 exit:
   StrCpy $R0 $R0 $R1
   Pop $R2
@@ -2072,6 +2097,7 @@ FunctionEnd
   !undef CBP_C_FIRST_BN_CBOX
   !undef CBP_C_FIRST_BN_CBOX_MINUS_ONE
   !undef CBP_C_FIRST_BN_TEXT
+  !undef CBP_C_LAST_BN_CBOX_PLUS_ONE
   !undef CBP_C_LAST_BN_TEXT_PLUS_ONE
 
   !undef CBP_C_MAX_BNCOUNT
