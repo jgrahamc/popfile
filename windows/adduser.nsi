@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.65"
+  !define C_PFI_VERSION  "0.2.66"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -2853,7 +2853,14 @@ display_results:
   Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
 
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY_RETURN "ioF.ini"
+  ; Set focus to the "Next" button (instead of the list of detected clients,
+  ; to avoid the annoying flashing cursor at the start of the list)
+
+  !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioF.ini"
+  Pop ${L_TEMP}
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1
+  SendMessage $HWNDPARENT ${WM_NEXTDLGCTL} $G_DLGITEM 1
+  !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "back" 0 exit
   !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "ClientEXE" "ConfigStatus" "SkipAll"
