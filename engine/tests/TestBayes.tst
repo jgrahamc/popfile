@@ -113,11 +113,22 @@ test_assert_equal( $all_buckets[1], 'personal' );
 test_assert_equal( $all_buckets[2], 'spam' );
 test_assert_equal( $all_buckets[3], 'unclassified' );
 
+# is_bucket
+
+test_assert_equal( $b->is_bucket( $session, 'personal' ),     1 );
+test_assert_equal( $b->is_bucket( $session, 'impersonal' ),   0 );
+test_assert_equal( $b->is_bucket( $session, 'unclassified' ), 0 );
+
 # get_pseudo_buckets
 
 my @pseudo_buckets = $b->get_pseudo_buckets( $session );
 test_assert_equal( $#pseudo_buckets, 0 );
 test_assert_equal( $pseudo_buckets[0], 'unclassified' );
+
+# is_pseudo_bucket
+
+test_assert_equal( $b->is_pseudo_bucket( $session, 'personal' ),     0 );
+test_assert_equal( $b->is_pseudo_bucket( $session, 'unclassified' ), 1 );
 
 # get_buckets
 

@@ -93,7 +93,7 @@ if ( $#ARGV > 0 ) {
     }
 
     if ( $code == 0 ) {
-        if ( !$b->is_bucket( $session, $ARGV[0]) ) {
+        if ( !$b->is_bucket( $session, $ARGV[0] ) ) {
             print STDERR "Error: Bucket `$ARGV[0]' does not exist, insert aborted.\n";
             $code = 1;
         } else {

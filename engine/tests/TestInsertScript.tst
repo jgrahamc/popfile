@@ -90,12 +90,11 @@ while ( <WORDS> ) {
 close WORDS;
 
 open STDERR, ">temp.tmp";
-
 @stdout =`$insert personal TestMailParse021.msg`;
-
 $code = ($? >> 8);
+close STDERR;
 
-test_assert( $code == 0 );
+test_assert_equal( $code, 0 );
 
 $line = shift @stdout;
 

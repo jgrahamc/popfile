@@ -2288,16 +2288,23 @@ sub is_pseudo_bucket
 
 # ---------------------------------------------------------------------------------------------
 #
-# is_pseudo_bucket
+# is_bucket
 #
 # Returns 1 if the named bucket is a bucket
+#
+# $session   A valid session key returned by a call to get_session_key
+# $bucket    The bucket to check
 #
 # ---------------------------------------------------------------------------------------------
 sub is_bucket
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $session, $bucket ) = @_;
 
-    return (defined($self->{db_bucketid__}{$bucket}) && !$self->{db_bucketid__}{$bucket}{pseudo});
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    return ( ( defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) && 
+             ( !$self->{db_bucketid__}{$userid}{$bucket}{pseudo} ) );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2575,7 +2582,8 @@ sub set_bucket_parameter
 
     # Exactly one row should be affected by this statement
 
-    return ( $self->{db_set_bucket_parameter__}->execute( $bucketid, $btid, $value ) == 1 );
+    $self->{db_set_bucket_parameter__}->execute( $bucketid, $btid, $value );
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
