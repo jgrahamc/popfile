@@ -23,7 +23,7 @@
 #--------------------------------------------------------------------------
 # LANGUAGE SUPPORT:
 #
-# The installer defaults to supporting a number of languages (currently 18 plus English).
+# The installer defaults to supporting a number of languages (the default is 'English').
 #
 # If required, a command-line switch can be used to build an English-only version.
 #
@@ -31,13 +31,31 @@
 #
 # To build an English-only installer:   makensis /DENGLISH_ONLY installer.nsi
 #
-# To remove any of the additional languages, only ONE line needs to be commented-out.
-# Simply comment-out the relevant '!insertmacro PFI_LANG_LOAD' line in the list of languages
-# in the 'Language Support for the installer and uninstaller' block of code.
+# To remove any of the additional languages, only TWO lines need to be commented-out:
+#
+# (a) comment-out the relevant '!insertmacro PFI_LANG_LOAD' line in the list of languages
+#     in the 'Language Support for the installer and uninstaller' block of code
+#
+# (b) comment-out the relevant '!insertmacro PFI_SETTING' line in the list of languages
+#     in the code which handles the 'UI Languages' component
 #
 # For example, to remove support for the 'Dutch' language, comment-out the
 #     !insertmacro PFI_LANG_LOAD "Dutch"
-# line in the list of languages supported by the installer.
+# line in the list of languages supported by the installer and comment-out the
+#     !insertmacro UI_LANG_CONFIG "DUTCH" "Nederlands"
+# line in the code which handles the 'UI Languages' component.
+#
+# The number of languages which can be supported depends upon the availability of:
+#
+#     (1) an up-to-date main NSIS language file ({NSIS}\Contrib\Language files\*.nlf)
+# _and_
+#     (2) an up-to-date NSIS MUI Language file ({NSIS}\Contrib\Modern UI\Language files\*.nsh)
+#
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# At present (02 July 2003) support for 'Bulgarian' and 'Danish' has been disabled (as described
+# above) because in these two cases the corresponding NLF file is out-of-step and this could
+# result in the wrong messages being displayed during the installation.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
 # To add support for a language which is already supported by the NSIS MUI package, two files
 # are required:
@@ -317,10 +335,15 @@
         ; To remove a language, comment-out the relevant '!insertmacro PFI_LANG_LOAD' line
         ; from this list. (To remove all of these languages, use /DENGLISH_ONLY on command-line)
 
-        !insertmacro PFI_LANG_LOAD "Bulgarian"    ; NSIS MUI file out-of-date as of 27-Jun-03
+# [02 July 03] "Bulgarian" disabled because the main NSIS NLF language file is out of date
+#        !insertmacro PFI_LANG_LOAD "Bulgarian"    ; NSIS MUI file out-of-date as of 27-Jun-03
+
         !insertmacro PFI_LANG_LOAD "SimpChinese"
         !insertmacro PFI_LANG_LOAD "TradChinese"
-        !insertmacro PFI_LANG_LOAD "Danish"       ; NSIS MUI file out-of-date as of 27-Jun-03
+
+# [02 July 03]  "Danish" disabled because the main NSIS NLF language file is out of date
+#        !insertmacro PFI_LANG_LOAD "Danish"       ; NSIS MUI file out-of-date as of 27-Jun-03
+
         !insertmacro PFI_LANG_LOAD "Dutch"
         !insertmacro PFI_LANG_LOAD "Finnish"      ; NSIS MUI file out-of-date as of 27-Jun-03
         !insertmacro PFI_LANG_LOAD "French"
@@ -794,10 +817,16 @@ Section "Languages" SecLangs
         ; UI_LANG_CONFIG parameters: "NSIS Language name"  "POPFile UI language name"
 
         !insertmacro UI_LANG_CONFIG "ENGLISH" "English"
-        !insertmacro UI_LANG_CONFIG "BULGARIAN" "Bulgarian"
+
+# [02 July 03] "Bulgarian" disabled because the main NSIS NLF language file is out of date
+#        !insertmacro UI_LANG_CONFIG "BULGARIAN" "Bulgarian"
+
         !insertmacro UI_LANG_CONFIG "SIMPCHINESE" "Chinese-Simplified"
         !insertmacro UI_LANG_CONFIG "TRADCHINESE" "Chinese-Traditional"
-        !insertmacro UI_LANG_CONFIG "DANISH" "Dansk"
+
+# [02 July 03]  "Danish" disabled because the main NSIS NLF language file is out of date
+#        !insertmacro UI_LANG_CONFIG "DANISH" "Dansk"
+
         !insertmacro UI_LANG_CONFIG "DUTCH" "Nederlands"
         !insertmacro UI_LANG_CONFIG "FINNISH" "Suomi"
         !insertmacro UI_LANG_CONFIG "FRENCH" "Francais"
