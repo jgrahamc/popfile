@@ -1802,6 +1802,12 @@ sub bar_chart_100
                 }
             }
 
+            if ( ( $s == 2 ) && 
+                 ( $self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) ) {
+	        $count = '';
+		$percent = '';
+	    }
+
             $body .= "\n<td align=\"right\">$count$percent</td>";
         }
         $body .= "\n</tr>\n";
@@ -1901,7 +1907,8 @@ sub corpus_page
         if ( $self->{form_}{cname} =~ /$invalid_bucket_chars/ )  {
             $create_message = "<blockquote><div class=\"error01\">$self->{language__}{Bucket_Error1}</div></blockquote>";
         } else {
-            if ( ( defined($self->{classifier__}->get_bucket_word_count( $self->{api_session__}, $self->{form_}{cname} )) ) && ( $self->{classifier__}->get_bucket_word_count( $self->{api_session__}, $self->{form_}{cname} ) > 0 ) )  {
+            if ( $self->{classifier__}->is_bucket( $self->{api_session__}, $self->{form_}{cname} ) ||
+                 $self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $self->{form_}{cname} ) ) {
                 $create_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error2}, $self->{form_}{cname} ) . "</b></blockquote>";
             } else {
                 $self->{classifier__}->create_bucket( $self->{api_session__}, $self->{form_}{cname} );

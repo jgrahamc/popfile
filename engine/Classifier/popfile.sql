@@ -289,7 +289,6 @@ alter table user_template modify id int(11) auto_increment;
 alter table users modify id int(11) auto_increment;
 alter table words modify id int(11) auto_increment;
 
-
 -- TRIGGERS
 
 -- ---------------------------------------------------------------------------------------------

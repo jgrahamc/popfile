@@ -90,7 +90,7 @@ sub new
     $self->{db_get_wordid__} = 0;
     $self->{db_get_word_count__} = 0;
     $self->{db_put_word_count__} = 0;
-    $self->{db_get_bucket_unique_count__} = 0;
+    $self->{db_get_bucket_unique_counts__} = 0;
     $self->{db_get_unique_word_count__} = 0;
     $self->{db_get_bucket_word_counts__} = 0;
     $self->{db_get_full_total__} = 0;
@@ -556,6 +556,13 @@ sub db_connect__
                 next if ( !/[a-z;]/ );
                 s/--.*$//;
 
+                # If the line begins 'alter' and we are doing SQLite then ignore
+                # the line
+
+                if ( ( $dbconnect =~ /sqlite/i ) && ( /^alter/i ) ) {
+		    next;
+	        }
+
                 $schema .= $_;
 
                 if ( ( /end;/ ) || ( /\);/ ) ) {
@@ -598,9 +605,11 @@ sub db_connect__
     $self->{db_put_word_count__} = $self->{db__}->prepare(
 	   'replace into matrix ( bucketid, wordid, times ) values ( ?, ?, ? );' );
 
-    $self->{db_get_bucket_unique_count__} = $self->{db__}->prepare(
-	     'select count(*) from matrix
-                  where matrix.bucketid = ?;' );
+    $self->{db_get_bucket_unique_counts__} = $self->{db__}->prepare(
+	     'select count(matrix.wordid), buckets.name from matrix, buckets
+                  where buckets.userid = ?
+                    and matrix.bucketid = buckets.id
+                  group by buckets.name;' );
 
     $self->{db_get_bucket_word_counts__} = $self->{db__}->prepare(
 	     'select sum(matrix.times), buckets.name from matrix, buckets
@@ -667,7 +676,7 @@ sub db_disconnect__
     $self->{db_get_userid__}->finish;
     $self->{db_get_word_count__}->finish;
     $self->{db_put_word_count__}->finish;
-    $self->{db_get_bucket_unique_count__}->finish;
+    $self->{db_get_bucket_unique_counts__}->finish;
     $self->{db_get_bucket_word_counts__}->finish;
     $self->{db_get_unique_word_count__}->finish;
     $self->{db_get_full_total__}->finish;
@@ -689,6 +698,8 @@ sub db_disconnect__
 #
 # Updates our local cache of user and bucket ids.
 #
+# $session           Must be a valid session
+#
 # ---------------------------------------------------------------------------------------------
 sub db_update_cache__
 {
@@ -707,8 +718,19 @@ sub db_update_cache__
 
     $self->{db_get_bucket_word_counts__}->execute( $userid );
 
+    for my $b (sort keys %{$self->{db_bucketid__}{$userid}}) {
+        $self->{db_bucketcount__}{$userid}{$b} = 0;
+        $self->{db_bucketunique__}{$userid}{$b} = 0;
+    }
+
     while ( my $row = $self->{db_get_bucket_word_counts__}->fetchrow_arrayref ) {
         $self->{db_bucketcount__}{$userid}{$row->[1]} = $row->[0];
+    }
+
+    $self->{db_get_bucket_unique_counts__}->execute( $userid );
+
+    while ( my $row = $self->{db_get_bucket_unique_counts__}->fetchrow_arrayref ) {
+        $self->{db_bucketunique__}{$userid}{$row->[1]} = $row->[0];
     }
 
     $self->update_constants__( $session );
@@ -2644,8 +2666,9 @@ sub get_bucket_unique_count
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $self->{db_get_bucket_unique_count__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id} );
-    return $self->{db_get_bucket_unique_count__}->fetchrow_arrayref->[0];
+    my $c = $self->{db_bucketunique__}{$userid}{$bucket};
+
+    return defined($c)?$c:0;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2871,6 +2894,11 @@ sub fast_get_html_colored_message
 sub create_bucket
 {
     my ( $self, $session, $bucket ) = @_;
+
+    if ( $self->is_bucket( $session, $bucket ) ||
+         $self->is_pseudo_bucket( $session, $bucket ) ) {
+        return 0;
+    }
 
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );

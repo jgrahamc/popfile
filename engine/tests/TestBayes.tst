@@ -236,7 +236,8 @@ if ( $html ne $check ) {
 
 # create_bucket
 
-$b->create_bucket( $session, 'zebra' );
+test_assert( $b->create_bucket( $session, 'zebra' ) );
+test_assert( !$b->create_bucket( $session, 'zebra' ) );
 
 @buckets = $b->get_buckets( $session );
 test_assert_equal( $#buckets, 3 );
@@ -470,6 +471,9 @@ test_assert_equal( $#buckets, 2 );
 test_assert_equal( $buckets[0], 'other' );
 test_assert_equal( $buckets[1], 'personal' );
 test_assert_equal( $buckets[2], 'spam' );
+
+test_assert( !$b->is_bucket( $session, 'zeotrope' ) );
+test_assert( !$b->is_pseudo_bucket( $session, 'zeotrope' ) );
 
 # getting and setting values
 
