@@ -5,7 +5,7 @@
 
 <form id="HistoryMainForm" action="/history" method="POST">
     <input type="hidden" name="search" value="<TMPL_VAR NAME="History_Field_Search">" />
-    <input type="hidden" name="sort" value="<TMPL_VAR NAME="History_Field_Sort">" />    
+    <input type="hidden" name="sort" value="<TMPL_VAR NAME="History_Field_Sort">" />
     <input type="hidden" name="negate" value="<TMPL_VAR NAME="History_Field_Negate">" />
     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
     <input type="hidden" name="start_message" value="<TMPL_VAR NAME="History_Start_Message">" />
@@ -69,15 +69,14 @@
 
                         <TMPL_IF NAME="History_If_Sorted_Ascending">
 
-                        &gt;&nbsp;
+                        &gt;&nbsp;<TMPL_VAR NAME="History_Label">
 
                         <TMPL_ELSE>
 
-                        &lt;&nbsp;
+                        &lt;&nbsp;<TMPL_VAR NAME="History_Label">
 
                         </TMPL_IF>
 
-                        <TMPL_VAR NAME="History_Label">
                     </em>
 
                     <TMPL_ELSE>
@@ -216,14 +215,14 @@
 
         </TMPL_LOOP>
 
-        <tr>        
+        <tr>
         <td colspan="<TMPL_VAR NAME="History_Colspan">"></td>
         </tr>
         <tr>
             <td colspan="<TMPL_VAR NAME="History_Colspan">">
                 <input type="submit" class="submit" name="clearchecked" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" />
                 <span class="historyLabel">
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<TMPL_VAR NAME="Localize_History_Column_Characters">: 
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<TMPL_VAR NAME="Localize_History_Column_Characters">:
                 </span>
                 <input type="submit" class="submit" name="increase" value="<TMPL_VAR NAME="Localize_History_Increase">">
                 <input type="submit" class="submit" name="decrease" value="<TMPL_VAR NAME="Localize_History_Decrease">">

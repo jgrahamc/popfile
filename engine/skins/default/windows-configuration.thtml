@@ -1,0 +1,77 @@
+<span class="configurationLabel">
+    <TMPL_VAR NAME="Localize_Windows_Console">
+</span>
+<br />
+<table border="0" cellpadding="0" cellspacing="0" summary="">
+    <tr>
+        <td nowrap="nowrap">
+            <form action="/configuration" method="post">
+                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+
+                <TMPL_IF NAME="windows_console_on">
+
+                <span class="securityWidgetStateOn">
+                    <TMPL_VAR NAME="Localize_Yes">
+                </span>
+                <input type="submit" class="toggleOff" id="windowConsoleOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
+                <input type="hidden" name="windows_console" value="0" />
+
+                <TMPL_ELSE>
+
+                <span class="securityWidgetStateOff">
+                    <TMPL_VAR NAME="Localize_No">
+                </span>
+                <input type="submit" class="toggleOn" id="windowConsoleOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
+                <input type="hidden" name="windows_console" value="1" />
+
+                </TMPL_IF>
+
+                <TMPL_IF NAME="console_feedback">
+
+                <TMPL_VAR NAME="Localize_Windows_NextTime">
+
+                </TMPL_IF>
+
+            </form>
+        </td>
+    </tr>
+</table>
+<br />
+<span class="configurationLabel">
+    <TMPL_VAR NAME="Localize_Windows_TrayIcon">
+</span>
+
+<table border="0" cellpadding="0" cellspacing="0" summary="">
+    <tr>
+        <td nowrap="nowrap">
+            <form action="/configuration" method="post">
+                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+
+                <TMPL_IF NAME="windows_icon_on">
+
+                <span class="securityWidgetStateOn">
+                    <TMPL_VAR NAME="Localize_Yes">
+                </span>
+                <input type="submit" class="toggleOff" id="windowTrayIconOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
+                <input type="hidden" name="windows_trayicon" value="0" />
+
+                <TMPL_ELSE>
+
+                <span class="securityWidgetStateOff">
+                    <TMPL_VAR NAME="Localize_No">
+                </span>
+                <input type="submit" class="toggleOn" id="windowTrayIconOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
+                <input type="hidden" name="windows_trayicon" value="1" />
+
+                </TMPL_IF>
+
+                <TMPL_IF NAME="trayicon_feedback">
+
+                <TMPL_VAR NAME="Localize_Windows_NextTime">
+
+                </TMPL_IF>
+
+            </form>
+        </td>
+    </tr>
+</table>

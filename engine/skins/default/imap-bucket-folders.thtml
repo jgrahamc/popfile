@@ -8,8 +8,6 @@
 
     <label class="configurationLabel">
         <TMPL_VAR NAME="IMAP_Bucket_Header">
-        <!-- was: Mail for bucket <b> TMPL_VAR NAME="IMAP_bucket" </b> goes to folder-->
-        
     </label>
     <br />
     <select name="imap_folder_for_<TMPL_VAR NAME="IMAP_bucket">">
@@ -29,7 +27,7 @@
     </select><br />
 
     </TMPL_LOOP>
-    
+
     <TMPL_IF NAME="IMAP_buckets_to_folders_if_error">
        <blockquote>
         <div class="error01">

@@ -65,13 +65,8 @@ sub initialize
     $self->config_( 'console',  0 );
     
     $self->register_configuration_item_( 'configuration',
-                                         'windows_trayicon',
-                                         'windows-trayicon-configuration.thtml',
-                                         $self );
-
-    $self->register_configuration_item_( 'configuration',
-                                         'windows_console',
-                                         'windows-console-configuration.thtml',
+                                         'windows_trayicon_and_console',
+                                         'windows-configuration.thtml',
                                          $self );
 
     return 1;
@@ -92,11 +87,8 @@ sub configure_item
 {
     my ( $self, $name, $templ, $language ) = @_;
 
-    if ( $name eq 'windows_trayicon' ) {
+    if ( $name eq 'windows_trayicon_and_console' ) {
         $templ->param( 'windows_icon_on' => $self->config_( 'trayicon' ) );
-    }
-
-    if ( $name eq 'windows_console' ) {
         $templ->param( 'windows_console_on' => $self->config_( 'console' ) );
     }
 }
@@ -117,17 +109,16 @@ sub validate_item
 {
     my ( $self, $name, $templ, $language, $form ) = @_;
 
-    if ( $name eq 'windows_trayicon' ) {
+    if ( $name eq 'windows_trayicon_and_console' ) {
+
         if ( defined($$form{windows_trayicon}) ) {
             $self->config_( 'trayicon', $$form{windows_trayicon} );
-            $templ->param( 'feedback' => 1 );
+            $templ->param( 'trayicon_feedback' => 1 );
         }
-    }
 
-    if ( $name eq 'windows_console' ) {
         if ( defined($$form{windows_console}) ) {
             $self->config_( 'console', $$form{windows_console} );
-            $templ->param( 'feedback' => 1 );
+            $templ->param( 'console_feedback' => 1 );
         }
     }
 

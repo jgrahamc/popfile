@@ -1,86 +1,81 @@
 <body dir="<TMPL_VAR NAME="Localize_LanguageDirection">">
-<table class="shellTop" align="center" width="100%" summary="">
-<tr class="shellTopRow">
-<td class="shellTopLeft"></td>
-<td class="shellTopCenter"></td>
-<td class="shellTopRight"></td>
-</tr>
-<tr>
-<td class="shellLeft"></td>
-<td class="naked">
+    <table class="shellTop" align="center" width="100%" summary="">
+        <tr class="shellTopRow">
+            <td class="shellTopLeft"></td>
+            <td class="shellTopCenter"></td>
+            <td class="shellTopRight"></td>
+        </tr>
+        <tr>
+            <td class="shellLeft"></td>
+            <td class="naked">
+                <table class="head" cellspacing="0" summary="">
+                    <tr>
+                        <td class="head"><TMPL_VAR NAME="Localize_Header_Title"></td>
+                        <td align="right" valign="bottom"><a class="shutdownLink" href="/shutdown"><TMPL_VAR NAME="Localize_Header_Shutdown"></a>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td height="1%" colspan="3"></td>
+                    </tr>
+                </table>
+            </td>
+            <td class="shellRight"></td>
+        </tr>
+        <tr class="shellBottomRow">
+            <td class="shellBottomLeft"></td>
+            <td class="shellBottomCenter"></td>
+            <td class="shellBottomRight"></td>
+        </tr>
+    </table>
+    <p>
+        <table class="menu" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Header_MenuSummary>">
+            <tr>
+                <td class="menuIndent">&nbsp;</td>
+                <td class="<TMPL_VAR NAME="Common_Middle_Tab0">" align="center">
+                    <a class="menuLink" href="/history?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_History"></a>
+                </td>
+                <td class="menuSpacer"></td>
+                <td class="<TMPL_VAR NAME="Common_Middle_Tab1">" align="center">
+                    <a class="menuLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Buckets"></a>
+                </td>
+                <td class="menuSpacer"></td>
+                <td class="<TMPL_VAR NAME="Common_Middle_Tab2">" align="center">
+                    <a class="menuLink" href="/magnets?session=<TMPL_VAR NAME="Session_Key">&amp;start_magnet=0"><TMPL_VAR NAME="Localize_Header_Magnets"></a>
+                </td>
+                <td class="menuSpacer"></td>
+                <td class="<TMPL_VAR NAME="Common_Middle_Tab3">" align="center">
+                    <a class="menuLink" href="/configuration?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Configuration"></a>
+                </td>
+                <td class="menuSpacer"></td>
+                <td class="<TMPL_VAR NAME="Common_Middle_Tab4">" align="center">
+                    <a class="menuLink" href="/security?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Security"></a>
+                </td>
+                <td class="menuSpacer"></td>
+                <td class="<TMPL_VAR NAME="Common_Middle_Tab5">" align="center">
+                    <a class="menuLink" href="/advanced?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Advanced"></a>
+                </td>
+                <td class="menuIndent">&nbsp;</td>
+            </tr>
+        </table>
+        <table class="shell" align="center" width="100%" summary="">
+            <tr class="shellTopRow">
+                <td class="shellTopLeft"></td>
+                <td class="shellTopCenter"></td>
+                <td class="shellTopRight"></td>
+            </tr>
+            <tr>
+                <td class="shellLeft"></td>
+                <td class="naked">
 
-<table class="head" cellspacing="0" summary="">
-<tr>
-<td class="head"><TMPL_VAR NAME="Localize_Header_Title"></td>
-<td align="right" valign="bottom">
-<a class="shutdownLink" href="/shutdown"><TMPL_VAR NAME="Localize_Header_Shutdown"></a>&nbsp;
-</td>
-</tr>
-<tr>
-<td height="1%" colspan="3"></td>
-</tr>
-</table>
-</td>
-<td class="shellRight"></td>
-</tr>
-<tr class="shellBottomRow">
-<td class="shellBottomLeft"></td>
-<td class="shellBottomCenter"></td>
+                    <TMPL_IF NAME="Common_Middle_If_UpdateCheck">
 
-<td class="shellBottomRight"></td>
-</tr>
-</table>
-<p><table class="menu" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Header_MenuSummary>">
-<tr>
-<td class="menuIndent">&nbsp;</td>
-<td class="<TMPL_VAR NAME="Common_Middle_Tab0">" align="center">
-<a class="menuLink" href="/history?session=<TMPL_VAR NAME="Session_Key">">
-<TMPL_VAR NAME="Localize_Header_History"></a>
-</td>
-<td class="menuSpacer"></td>
-<td class="<TMPL_VAR NAME="Common_Middle_Tab1">" align="center">
-<a class="menuLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">">
-<TMPL_VAR NAME="Localize_Header_Buckets"></a>
-</td>
-<td class="menuSpacer"></td>
-<td class="<TMPL_VAR NAME="Common_Middle_Tab2">" align="center">
-<a class="menuLink" href="/magnets?session=<TMPL_VAR NAME="Session_Key">&amp;start_magnet=0">
+                        <a href="http://sourceforge.net/project/showfiles.php?group_id=63137">
+                            <img border="0" alt="" src="http://www.usethesource.com/cgi-bin/popfile_update.pl?ma=<TMPL_VAR NAME="Common_Middle_Major_Version">&amp;mi=<TMPL_VAR NAME="Common_Middle_Minor_Version">&amp;bu=<TMPL_VAR NAME="Common_Middle_Build_Version">" />
+                        </a>
 
-<TMPL_VAR NAME="Localize_Header_Magnets"></a>
-</td>
-<td class="menuSpacer"></td>
-<td class="<TMPL_VAR NAME="Common_Middle_Tab3">" align="center">
-<a class="menuLink" href="/configuration?session=<TMPL_VAR NAME="Session_Key">">
-<TMPL_VAR NAME="Localize_Header_Configuration"></a>
-</td>
-<td class="menuSpacer"></td>
-<td class="<TMPL_VAR NAME="Common_Middle_Tab4">" align="center">
-<a class="menuLink" href="/security?session=<TMPL_VAR NAME="Session_Key">">
-<TMPL_VAR NAME="Localize_Header_Security"></a>
-</td>
-<td class="menuSpacer"></td>
-<td class="<TMPL_VAR NAME="Common_Middle_Tab5">" align="center">
-<a class="menuLink" href="/advanced?session=<TMPL_VAR NAME="Session_Key">">
-<TMPL_VAR NAME="Localize_Header_Advanced"></a>
-</td>
+                    </TMPL_IF>
 
-<td class="menuIndent">&nbsp;</td></tr>
-</table>
-<table class="shell" align="center" width="100%" summary="">
-<tr class="shellTopRow">
-<td class="shellTopLeft"></td>
-<td class="shellTopCenter"></td>
-<td class="shellTopRight"></td>
-</tr>
-<tr>
-<td class="shellLeft"></td>
-<td class="naked">
+                    <TMPL_IF NAME="Common_Middle_If_SendStats">
 
-<TMPL_IF NAME="Common_Middle_If_UpdateCheck">
-<a href="http://sourceforge.net/project/showfiles.php?group_id=63137">
-<img border="0" alt="" src="http://www.usethesource.com/cgi-bin/popfile_update.pl?ma=<TMPL_VAR NAME="Common_Middle_Major_Version">&amp;mi=<TMPL_VAR NAME="Common_Middle_Minor_Version">&amp;bu=<TMPL_VAR NAME="Common_Middle_Build_Version">" /></a>
-</TMPL_IF>
+                    <img border="0" alt="" src="http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=<TMPL_VAR NAME="Common_Middle_Buckets">&amp;mc==<TMPL_VAR NAME="Common_Middle_Messages">&amp;ec==<TMPL_VAR NAME="Common_Middle_Errors">" />
 
-<TMPL_IF NAME="Common_Middle_If_SendStats">
-<img border="0" alt="" src="http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=<TMPL_VAR NAME="Common_Middle_Buckets">&amp;mc==<TMPL_VAR NAME="Common_Middle_Messages">&amp;ec==<TMPL_VAR NAME="Common_Middle_Errors">" />
-</TMPL_IF>
+                    </TMPL_IF>

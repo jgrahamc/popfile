@@ -64,7 +64,7 @@
 <br />
 <table summary="<TMPL_VAR NAME="Localize_Bucket_WordListTableSummary">">
     <tr>
-        <td colspan=2>
+        <td colspan="2">
 
             <TMPL_LOOP NAME="Bucket_Loop_Letters">
 
@@ -74,7 +74,8 @@
         </td>
     </tr>
     <tr>
-        <td colspan=2>&nbsp;
+        <td colspan="2">
+            &nbsp;
         </td>
     </tr>
     <tr>
@@ -176,16 +177,16 @@
         </td>
     </tr>
     <tr>
-        <td colspan=2>
+        <td colspan="2">
             &nbsp;
         </td>
     </tr>
     <tr>
-        <td colspan=2>
+        <td colspan="2">
 
             <TMPL_ELSE>
 
-            <a href=/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;showbucket=<TMPL_VAR NAME="Bucket_Bucket">&amp;showletter=<TMPL_VAR NAME="Bucket_Letter">>
+            <a href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;showbucket=<TMPL_VAR NAME="Bucket_Bucket">&amp;showletter=<TMPL_VAR NAME="Bucket_Letter">">
                 <b>
                     <TMPL_VAR NAME="Bucket_Letter">
                 </b>

@@ -1,29 +1,40 @@
-</td>
-<td class="shellRight"></td>
-</tr>
-<tr class="shellBottomRow">
-<td class="shellBottomLeft"></td>
-
-<td class="shellBottomCenter"></td>
-<td class="shellBottomRight"></td>
-</tr>
-</table>
-<table class="footer" summary="">
-<tr>
-<td class="footerBody"><a class="bottomLink" href="http://popfile.sourceforge.net/"><TMPL_VAR NAME="Localize_Footer_HomePage"></a><br>
-<a class="bottomLink" href="http://popfile.sourceforge.net/manual/<TMPL_VAR NAME="Localize_ManualLanguage">/manual.html">
-<TMPL_VAR NAME="Localize_Footer_Manual"></a><br>
-<a class="bottomLink" href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions"><TMPL_VAR NAME="Localize_FAQ"></a><br>
-</td><td class="footerBody">
-<a class="bottomLink" href="http://popfile.sourceforge.net/"><img src="otto.gif" border="0" alt=""></a>
-<br><TMPL_VAR NAME="Common_Bottom_Version">
-<br>(<TMPL_VAR NAME="Common_Bottom_Date"> - <TMPL_VAR NAME="Common_Bottom_LastLogin">)</td>
-<td class="footerBody"><a class="bottomLink" href="http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959"><TMPL_VAR NAME="Localize_Footer_RequestFeature"></a><br>
-<a class="bottomLink" href="http://lists.sourceforge.net/lists/listinfo/popfile-announce"><TMPL_VAR NAME="Localize_Footer_MailingList"></a><br>
-<a class="bottomLink" href="http://sourceforge.net/forum/forum.php?forum_id=213876"><TMPL_VAR NAME="Localize_Footer_FeedMe"></a>
-
-</td>
-</tr>
+            </td>
+            <td class="shellRight"></td>
+        </tr>
+        <tr class="shellBottomRow">
+            <td class="shellBottomLeft"></td>
+            <td class="shellBottomCenter"></td>
+            <td class="shellBottomRight"></td>
+        </tr>
+    </table>
+    <table class="footer" summary="">
+    <tr>
+        <td class="footerBody">
+            <a class="bottomLink" href="http://popfile.sourceforge.net/"><TMPL_VAR NAME="Localize_Footer_HomePage"></a>
+            <br>
+            <a class="bottomLink" href="http://popfile.sourceforge.net/manual/<TMPL_VAR NAME="Localize_ManualLanguage">/manual.html">
+                <TMPL_VAR NAME="Localize_Footer_Manual"></a>
+            <br>
+            <a class="bottomLink" href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions"><TMPL_VAR NAME="Localize_FAQ"></a>
+            <br>
+        </td>
+        <td class="footerBody">
+            <a class="bottomLink" href="http://popfile.sourceforge.net/">
+                <img src="otto.gif" border="0" alt="">
+            </a>
+            <br>
+            <TMPL_VAR NAME="Common_Bottom_Version">
+            <br>
+            (<TMPL_VAR NAME="Common_Bottom_Date"> - <TMPL_VAR NAME="Common_Bottom_LastLogin">)
+        </td>
+        <td class="footerBody">
+            <a class="bottomLink" href="http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959"><TMPL_VAR NAME="Localize_Footer_RequestFeature"></a>
+            <br>
+            <a class="bottomLink" href="http://lists.sourceforge.net/lists/listinfo/popfile-announce"><TMPL_VAR NAME="Localize_Footer_MailingList"></a>
+            <br>
+            <a class="bottomLink" href="http://sourceforge.net/forum/forum.php?forum_id=213876"><TMPL_VAR NAME="Localize_Footer_FeedMe"></a>
+        </td>
+    </tr>
 </table>
 </body>
 </html>
