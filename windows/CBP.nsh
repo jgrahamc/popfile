@@ -5,7 +5,7 @@
 #             buckets for use with a "clean" install of POPFile. Three built-in default values
 #             can be overridden by creating suitable "!define" statements in 'adduser.nsi'.
 #
-# Copyright (c) 2003-2004 John Graham-Cumming
+# Copyright (c) 2003-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -314,12 +314,18 @@ loop:
 
   StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 7
   StrCmp ${CBP_L_RESULT} "corpus " got_flat_corpus
+  
   StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 13
   StrCmp ${CBP_L_RESULT} "bayes_corpus " got_bdb_corpus
+  
+  StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 18
+  StrCmp ${CBP_L_RESULT} "database_database " got_sql_corpus
+  StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 19
+  StrCmp ${CBP_L_RESULT} "database_dbconnect " got_sql_connect
   StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 15
-  StrCmp ${CBP_L_RESULT} "bayes_database " got_sql_corpus
+  StrCmp ${CBP_L_RESULT} "bayes_database " got_sql_old_corpus
   StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 16
-  StrCmp ${CBP_L_RESULT} "bayes_dbconnect " got_sql_connect
+  StrCmp ${CBP_L_RESULT} "bayes_dbconnect " got_sql_old_connect
   Goto check_eol
 
 got_flat_corpus:
@@ -330,12 +336,20 @@ got_bdb_corpus:
   StrCpy ${CBP_L_NONSQL_CORPUS} ${CBP_L_TEMP} "" 13
   Goto check_eol
 
-got_sql_corpus:
+got_sql_old_corpus:
   StrCpy ${CBP_L_SQL_CORPUS} ${CBP_L_TEMP} "" 15
   Goto check_eol
 
-got_sql_connect:
+got_sql_old_connect:
   StrCpy ${CBP_L_SQL_CONNECT} ${CBP_L_TEMP} "" 16
+  Goto check_eol
+
+got_sql_corpus:
+  StrCpy ${CBP_L_SQL_CORPUS} ${CBP_L_TEMP} "" 18
+  Goto check_eol
+
+got_sql_connect:
+  StrCpy ${CBP_L_SQL_CONNECT} ${CBP_L_TEMP} "" 19
 
   ; Now read file until we get to end of the current line
   ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
