@@ -61,7 +61,7 @@ sub initialize
     $self->config_( 'local', 1 );
     
     # The separator within the NNTP user name is :
-    $self->config_( 'separator', ':');
+    $self->config_( 'separator', '@');
 
     return 1;
 }
@@ -121,23 +121,26 @@ sub child__
         
         if ($connection_state eq 'username needed') {
         
-            my $user_command = '^ *AUTHINFO USER (.+)(:(\d+))?(' . $self->config_( 'separator' ) . '(.+))?';
-            if ( $command =~ /$user_command/i ) { 
-                if ( $1 ne '' )  {
-                    if ( $news = $self->verify_connected_( $news, $client, $1, $3 || 119 ) )  {
+            my $user_command = '^ *AUTHINFO USER ((.+)\\' . $self->config_('separator') . ')?([^\:]+)(:(.*))?';
+            if ( $command =~ /$user_command/i ) {                 
+                
+                my $username = $2;
+                my $server = $3;
+                my $port = $5;                
+                
+                if ( $server ne '' )  {
+                    if ( $news = $self->verify_connected_( $news, $client, $server, $port || 119 ) )  {
                                                 
-                        if (defined $5) {
+                        if (defined $username) {
                             # Pass through the AUTHINFO command with the actual user name for this server,
                             # if one is defined, and send the reply straight to the client
-                            $self->echo_response_($news, $client, 'AUTHINFO USER ' . $5 );
+                            $self->get_response_($news, $client, 'AUTHINFO USER ' . $username );
                             $connection_state = "password needed";
                         } else {
                             # Signal to the client to send the password
                             $self->tee_($client, "381 password$eol"); 
                             $connection_state = "ignore password";
-                        }
-                        
-                       
+                        }                       
                                                 
                     } else {
                         last;
@@ -160,8 +163,7 @@ sub child__
                                     
             if ($command =~ /^ *AUTHINFO PASS (.*)/i) {
                 
-                my $response = $self->echo_response_($news, $client, $command);
-                $self->tee_($client,$response);
+                my $response = $self->get_response_($news, $client, $command);                
                 
                 if ($response =~ /^281 .*/) {
                     $connection_state = "connected"                                        
