@@ -1,19 +1,19 @@
-Return-Path: <elia@tepkom.ru>
-Delivered-To: run@tepkom.ru
+Return-Path: <elia@tpkm.ru>
+Delivered-To: run@tpkm.ru
 Received: from localhost (localhost [127.0.0.1])
-	by mail.tepkom.ru (Postfix) with SMTP id 1D8F4971EC
-	for <run@tepkom.ru>; Tue, 21 Jan 2003 01:01:30 +0300 (MSK)
+	by mail.tpkm.ru (Postfix) with SMTP id 1D8F4971EC
+	for <run@tpkm.ru>; Tue, 21 Jan 2003 01:01:30 +0300 (MSK)
 Received: from mta1.wss.scd.yahoo.com (mta1.wss.scd.yahoo.com [66.218.85.32])
-	by mail.tepkom.ru (Postfix) with ESMTP id 91A4B971E8
-	for <run@tepkom.ru>; Tue, 21 Jan 2003 01:01:28 +0300 (MSK)
-Received: from keymaster.relativity.com (12.146.171.10) by mta1.wss.scd.yahoo.com (6.5.032.1)
-        id 3E270D860018BFCC for bugs@drunin.net; Mon, 20 Jan 2003 13:59:26 -0800
+	by mail.tpkm.ru (Postfix) with ESMTP id 91A4B971E8
+	for <run@tpkm.ru>; Tue, 21 Jan 2003 01:01:28 +0300 (MSK)
+Received: from keymaster.rltvty.com (12.146.171.10) by mta1.wss.scd.yahoo.com (6.5.032.1)
+        id 3E270D860018BFCC for bugs@drnn.net; Mon, 20 Jan 2003 13:59:26 -0800
 Message-ID: <3E270D860018BFCC@mta1.wss.scd.yahoo.com> (added by postmaster@mail.san.yahoo.com)
-Received: from rtfm (rtfm.relativity.com [63.100.138.144]) by keymaster.relativity.com with SMTP (Microsoft Exchange Internet Mail Service Version 5.5.2653.13)
+Received: from rtfm (rtfm.rltvty.com [63.100.138.144]) by keymaster.rltvty.com with SMTP (Microsoft Exchange Internet Mail Service Version 5.5.2653.13)
 	id DKF9F5YP; Mon, 20 Jan 2003 16:59:22 -0500
-To: rescuebre@tepkom.ru, bugs@drunin.net, kcruz@relativity.com, bugtracker@relativity.com
+To: rescuebre@tpkm.ru, bugs@drnn.net, kcruz@rltvty.com, bugtracker@rltvty.com
 Date: Mon, 20 Jan 03 16:59:20
-From: <elia@tepkom.ru>
+From: <elia@tpkm.ru>
 Subject: [spam] VI ID: 24052  Status: Open  Sev: 2
 MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="isboundary"
@@ -31,8 +31,8 @@ Content-Type: text/html; charset=us-ascii
   <TR>
     <TD><B>Incident:</B></TD>
     <TD>
-      <A href="http://rtfm.relativity.com/VIWeb/default.asp?type=incident&amp;name=24052">24052</A>
-      (<A href="http://vi.relativity.com/VIWeb/default.asp?type=incident&amp;name=24052">Alternative server</A>)
+      <A href="http://rtfm.rltvty.com/VIWeb/default.asp?type=incident&amp;name=24052">24052</A>
+      (<A href="http://vi.rltvty.com/VIWeb/default.asp?type=incident&amp;name=24052">Alternative server</A>)
     </TD>
     <TD WIDTH="20%"><TD><TD><TD></TR>
   <TBODY>
@@ -136,7 +136,7 @@ The unnecessary statements are kept in computation slice from GSS.cbl program.
     <TD COLSPAN=5><TEXTAREA READONLY ROWS=10 COLS=60></TEXTAREA></TD></TR></TBODY></TABLE>
 <HR>
 If you have received this email in error, please respond to: <A 
-href="mailto:BugTracker@relativity.com">BugTracker@relativity.com</A> 
+href="mailto:BugTracker@rltvty.com">BugTracker@rltvty.com</A> 
 <HR>
 </BODY></HTML>
 

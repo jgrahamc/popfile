@@ -212,11 +212,11 @@ test_assert_equal( $cl->{from__},    'RN <rrr@nnnnnnnnn.com>'                   
 test_assert_equal( $cl->{to__},      '"Armlet Forum" <armlet-forum@news.palmos.com>' );
 test_assert_equal( $cl->{subject__}, '(Archive Copy) RE: CW v9 and armlets...'       );
 $cl->parse_file( 'TestMailParse018.msg' );
-$cl->{to__} =~ /(\Qbugtracker\E@\Qrelativity.com\E)/;
-test_assert_equal( $1, 'bugtracker@relativity.com' );
+$cl->{to__} =~ /(\Qbugtracker\E@\Qrltvty.com\E)/;
+test_assert_equal( $1, 'bugtracker@rltvty.com' );
 $cl->parse_file( 'TestMailParse019.msg' );
-$cl->{to__} =~ /(\Qbugtracker\E@\Qrelativity.com\E)/;
-test_assert_equal( $1, 'bugtracker@relativity.com' );
+$cl->{to__} =~ /(\Qbugtracker\E@\Qrltvty.com\E)/;
+test_assert_equal( $1, 'bugtracker@rltvty.com' );
 
 # Check that multi-line To: and CC: headers get handled properly
 $cl->parse_file( 'TestMailParse021.msg' );

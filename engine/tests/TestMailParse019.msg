@@ -1,24 +1,24 @@
-From bugs@drunin.net  Wed Jan 29 20:28:35 2003
-Return-Path: <bugs@drunin.net>
-Delivered-To: run@mail.tepkom.ru
-Received: by mail.tepkom.ru (Postfix)
+From bugs@drnn.net  Wed Jan 29 20:28:35 2003
+Return-Path: <bugs@drnn.net>
+Delivered-To: run@mail.tpkm.ru
+Received: by mail.tpkm.ru (Postfix)
 	id 70071971F2; Wed, 29 Jan 2003 20:30:49 +0300 (MSK)
-Delivered-To: rescuebre@tepkom.ru
+Delivered-To: rescuebre@tpkm.ru
 Received: from localhost (localhost [127.0.0.1])
-	by mail.tepkom.ru (Postfix) with SMTP
+	by mail.tpkm.ru (Postfix) with SMTP
 	id 6474D971FA; Wed, 29 Jan 2003 20:30:49 +0300 (MSK)
-Received: from keymaster.relativity.com (keymaster.relativity.com [12.146.171.10])
-	by mail.tepkom.ru (Postfix) with ESMTP
+Received: from keymaster.rltvty.com (keymaster.rltvty.com [12.146.171.10])
+	by mail.tpkm.ru (Postfix) with ESMTP
 	id 93510971F2; Wed, 29 Jan 2003 20:30:47 +0300 (MSK)
-Received: from rtfm (rtfm.relativity.com [63.100.138.144]) by keymaster.relativity.com with SMTP (Microsoft Exchange Internet Mail Service Version 5.5.2653.13)
+Received: from rtfm (rtfm.rltvty.com [63.100.138.144]) by keymaster.rltvty.com with SMTP (Microsoft Exchange Internet Mail Service Version 5.5.2653.13)
 	id D4Z7ASMC; Wed, 29 Jan 2003 12:28:21 -0500
-To: elia@tepkom.ru, rescuebre@tepkom.ru, kcruz@relativity.com, bugtracker@relativity.com
+To: elia@tpkm.ru, rescuebre@tpkm.ru, kcruz@rltvty.com, bugtracker@rltvty.com
 Date: Wed, 29 Jan 03 12:28:29
-From: <bugs@drunin.net>
+From: <bugs@drnn.net>
 Subject:  VI ID: 24149  Status: Dev Confirmed Fix  Sev: 1
 MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="isboundary"
-Message-Id: <20030129173047.93510971F2@mail.tepkom.ru>
+Message-Id: <20030129173047.93510971F2@mail.tpkm.ru>
 X-Text-Classification: lists
 X-POPFile-Link: <http://127.0.0.1:8080/jump_to_message?view=popfile523=1.msg>
 
@@ -33,8 +33,8 @@ Content-Type: text/html; charset=us-ascii
   <TR>
     <TD><B>Incident:</B></TD>
     <TD>
-      <A href="http://rtfm.relativity.com/VIWeb/default.asp?type=incident&amp;name=24149">24149</A>
-      (<A href="http://vi.relativity.com/VIWeb/default.asp?type=incident&amp;name=24149">Alternative server</A>)
+      <A href="http://rtfm.rltvty.com/VIWeb/default.asp?type=incident&amp;name=24149">24149</A>
+      (<A href="http://vi.rltvty.com/VIWeb/default.asp?type=incident&amp;name=24149">Alternative server</A>)
     </TD>
     <TD WIDTH="20%"><TD><TD><TD></TR>
   <TBODY>
@@ -116,7 +116,7 @@ Fixed in Blue. No warning in this case, BRE runs DFA instead.
     <TD COLSPAN=5><TEXTAREA READONLY ROWS=10 COLS=60></TEXTAREA></TD></TR></TBODY></TABLE>
 <HR>
 If you have received this email in error, please respond to: <A 
-href="mailto:BugTracker@relativity.com">BugTracker@relativity.com</A> 
+href="mailto:BugTracker@rltvty.com">BugTracker@rltvty.com</A> 
 <HR>
 </BODY></HTML>
 
