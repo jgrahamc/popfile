@@ -338,14 +338,10 @@ sub add_url
     my $temp_url = $url;
     my $temp_before;
     my $temp_after;
+    my $hostform;   #ip or name
     
-    #remove URL encoding
-    while ( ( $url =~ /\%([0-9A-F][0-9A-F])/i ) != 0 ) {
-        my $from = "%$1";
-        my $to   = chr(hex("0x$1"));
-        $url =~ s/$from/$to/g;
-        $self->{ut} =~ s/$from/$to/g;
-    }                   
+    # remove HTML entity encoding
+    # oops, already done in main loop if html is present
     
     # parts of a URL, from left to right
     my $protocol;   #optional
@@ -357,12 +353,84 @@ sub add_url
     my $hash;       #optional    
     
     # lay the groundwork
-    $protocol = $1 if ( $url =~ s/^(.*)\:\/\/// );
-    $authinfo = $1 if ( $url =~ s/^([[:alpha:]0-9\-_]+\:[[:alpha:]0-9\-_]+)\@// );
+    $protocol = $1 if ( $url =~ s/^(.*)\:\/\/// ); 
     
+    # remove URL encoding (protocol may not be URL encoded)
+    while ( $url =~ /(\%([0-9A-Fa-f][0-9A-Fa-f]))/g ) {
+        my $from = "$1";
+        my $to   = chr(hex("0x$2"));
+        $url =~ s/$from/$to/g;
+        $self->{ut} =~ s/$from/$to/g;
+        print "$from -> $to\n" if $self->{debug};
+    }
+            
+    $authinfo = $1 if ( $url =~ s/^([[:alpha:]0-9\-_\.\;\:\&\=\+\$\,]+)(\@|\%40)// );
+        
     if ( $url =~ s/^(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro|[[:alpha:]]{2})([^[:alpha:]0-9\-_\.]|$)/$4/ ) {
-        $host = "$1$3";        
-    } else {
+        $host = "$1$3";
+        $hostform = "name";
+    } elsif ( $url =~ /(([^:\/])+)/ ) {
+        # Some other hostname format found, maybe
+        # Read here for reference: http://www.pc-help.org/obscure.htm
+        # Go here for comparison: http://www.samspade.org/t/url
+                
+        my $host_candidate = $1;    # save the possible hostname
+        
+        my %quads;                  # stores discovered IP address
+        
+        # temporary values
+        my $quad = 1;
+        my $number;        
+        
+        #iterate through the possible hostname, build dotted quad format
+        while ($host_candidate =~ s/\G^((0x)[0-9A-Fa-f]+|0[0-7]+|[0-9]+)(\.)?//) {            
+            
+            my $hex = $2;
+            my $quad_candidate = $1; # possible IP quad(s)
+            my $more_dots = $3;
+            
+            if (defined $hex) {
+                # hex number
+                # trim arbitrary octets that are greater than most significant bit
+                $quad_candidate =~ s/.*(([0-9A-F][0-9A-F]){4})$/$1/i;
+                $number = hex( $quad_candidate );                
+            } elsif ( $quad_candidate =~ /^0([0-7]+)/ )  {
+                # octal number
+                $number = oct($1);
+            } else {
+                # assume decimal number
+                $number = int($quad_candidate);
+                # deviates from the obscure.htm document here, no current browsers overflow
+            }     
+            
+            # No more IP dots?
+            if (!defined $more_dots) {
+                
+                # Expand final decimal/octal/hex to extra quads              
+                while ($quad <= 4) {
+                    my $shift = ((4 - $quad) * 8);
+                    $quads{$quad} = ($number & (hex("0xFF") << $shift) ) >> $shift;
+                    $quad++;
+                }
+            } else {
+                # Just plug the quad in, no overflow allowed
+                $quads{$quad} = $number if ($number < 256);
+                $quad++;
+            }
+            
+            last if ($quad > 4);
+            
+        }
+        $host_candidate =~ s/\r|\n|$//g;
+        if ( $host_candidate eq '' && defined $quads{1} && defined $quads{2} && defined $quads{3} && defined $quads{4} && !defined $quads{5} ) {
+            #we did actually find an IP address, and not some fake
+            $hostform = "ip";
+            $host = "$quads{1}.$quads{2}.$quads{3}.$quads{4}";
+            $url =~ s/(([^:\/])+)//;
+        }
+    }
+    
+    if ( !defined $host || $host eq '' ) {
         print "no hostname found: [$temp_url]\n" if ($self->{debug});
         return 0;
     }    
@@ -391,9 +459,11 @@ sub add_url
         # grabbing $host
         # special subTLD's can just get their own classification weight (eg, .bc.ca)
         # http://www.0dns.org has a good reference of ccTLD's and their sub-tld's if desired
-        while ( $host =~ s/^([^\.])+\.(.*\.(.*))$/$2/ ) {
-            update_word( $self, $2, $encoded, '[\.]', '[<]');
-        }        
+        if ( $hostform eq "name" ) {
+            while ( $host =~ s/^([^\.])+\.(.*\.(.*))$/$2/ ) {
+                update_word( $self, $2, $encoded, '[\.]', '[<]');
+            }
+        }
     }
     
     # $protocol $authinfo $host $port $query $hash may be processed below if desired
