@@ -168,7 +168,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.45"
+  !define C_PFI_VERSION  "0.2.46"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -302,7 +302,11 @@
 #   ; Default bucket selection (use "" if no buckets are to be pre-selected)
 #
 #   !define CBP_DEFAULT_LIST "inbox|spam|personal|work"
-  !define CBP_DEFAULT_LIST "spam|personal|work|other"
+#
+#   Allow the names of the default buckets (for a 'clean' install) to be translated,
+#   but they can use only the characters abcdefghijklmnopqrstuvwxyz_-0123456789
+#
+  !define CBP_DEFAULT_LIST "$(PFI_LANG_CBP_DEFAULT_BUCKETS)"
 #
 #   ; List of suggestions for bucket names (use "" if no suggestions are required)
 #
@@ -310,6 +314,12 @@
 #   "admin|business|computers|family|financial|general|hobby|inbox|junk|list-admin|\
 #   miscellaneous|not_spam|other|personal|recreation|school|security|shopping|spam|\
 #   travel|work"
+#
+#   Allow the list of suggested bucket names (for a 'clean' install) to be translated,
+#   but they can use only the characters abcdefghijklmnopqrstuvwxyz_-0123456789
+#
+  !define CBP_SUGGESTION_LIST "$(PFI_LANG_CBP_SUGGESTED_NAMES)"
+#  
 #----------------------------------------------------------------------------------------
 # Make the CBP package available
 #----------------------------------------------------------------------------------------
