@@ -238,6 +238,12 @@ sub initialize
 
     $self->config_( 'hostname', $self->{hostname__} );
 
+    # If set to 1 then the X-POPFile-Link will have < > around the
+    # URL (i.e. X-POPFile-Link: <http://foo.bar>) when set to 0 there
+    # are none (i.e. X-POPFile-Link: http://foo.bar)
+
+    $self->config_( 'xpl_angle', 0 );
+
     $self->mq_register_( 'COMIT', $self );
 
     return 1;
@@ -2485,11 +2491,16 @@ sub classify_and_modify
                                                                           ( $quarantine == 0 ) ); # PROFILE BLOCK STOP
 
     # Add the XPL header
-    my $xpl = '';
+
+    my $xpl = $self->config_( 'xpl_angle' )?'<':'';
 
     $xpl .= "http://";
     $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->config_( 'hostname' );
     $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$slot$crlf";
+
+    if ( $self->config_( 'xpl_angle' ) ) {
+        $xpl .= '>';
+    }
 
     if ( $xpl_insertion && ( $quarantine == 0 ) ) {
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
