@@ -1373,7 +1373,7 @@ sub parse_header
         $self->{subject__} = $argument if ( ( $self->{subject__} eq '' ) );
     }
 
-    $self->{date__} = $argument if ( $header =~ /^Date/i );
+    $self->{date__} = $argument if ( $header =~ /^Date$/i );
 
     # Look for MIME
 

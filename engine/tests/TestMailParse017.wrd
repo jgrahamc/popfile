@@ -1,4 +1,3 @@
-microsoft 1
 200.155.65.82 1
 site 2
 mta04-srv.alltel.net 1
@@ -10,7 +9,6 @@ hottest_site_on_net22840@yahoo.com 1
 to:undisclosed 1
 from:hottest_site_on_net22840@yahoo.com 1
 hottest 2
-smtpsvc 1
 203.146.108.97 1
 mx1.mail.yahoo.com 1
 opt 1

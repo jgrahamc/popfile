@@ -1,11 +1,8 @@
-From rrr@nnnnnnnnn.com Mon Jan 06 05:00:37 2003
 Received: from palm.lyris.net [216.91.57.210] by ajw.com [127.0.0.1] with SMTP (MDaemon.v2.7.SP4.R) for <Archive@ajw.com>; Mon, 06 Jan 2003 05:00:43 -0500
 Mime-Version: 1.0
 X-Sender: rRR@pop.rrrrr.net
 Message-Id: <LYRIS-57933-146278-2003.01.06-02.00.42--alan#ajw.com@news.palmos.com>
-In-Reply-To: 
- <LYRIS-54343-146225-2003.01.06-00.00.02--rrr#nnnnnnnnn.com@news.palmos.com
- >
+In-Reply-To: <LYRIS-54343-146225-2003.01.06-00.00.02--rrr#nnnnnnnnn.com@news.palmos.com>
 Date: Mon, 6 Jan 2003 02:00:37 -0800
 To: "Armlet Forum" <armlet-forum@news.palmos.com>
 From: RN <rrr@nnnnnnnnn.com>

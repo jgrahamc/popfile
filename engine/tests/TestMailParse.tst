@@ -23,8 +23,8 @@ test_assert_equal( $cl->map_color( '#ffffff' ), 'ffffff' );
 test_assert_equal( $cl->map_color( '#FFfFFF' ), 'ffffff' ); 
 
 # Check line splitting into words
-$cl->{htmlbackcolor} = $cl->map_color( 'white' );
-$cl->{htmlfontcolor} = $cl->map_color( 'black' );
+$cl->{htmlbackcolor__} = $cl->map_color( 'white' );
+$cl->{htmlfontcolor__} = $cl->map_color( 'black' );
 $cl->{words__}       = {};
 $cl->add_line( 'this is a test of,adding words: from a line of text!', 0, '' );
 test_assert_equal( $cl->{words__}{test},   1 );
@@ -61,7 +61,7 @@ $cl->{htmlfontcolor__} = '';
 test_assert_equal( $cl->parse_html( '<font color=red>' ), 0 );
 test_assert_equal( $cl->{htmlfontcolor__}, $cl->map_color( 'red' ) );
 $cl->{htmlfontcolor__} = '';
-test_assert_equal( $cl->parse_html( '<font color=#00ff00>' ), 0 );
+test_assert_equal( $cl->parse_html( '<font color=#008000>' ), 0 );
 test_assert_equal( $cl->{htmlfontcolor__}, $cl->map_color( 'green' ) );
 $cl->{htmlfontcolor__} = '';
 test_assert_equal( $cl->parse_html( '<font color=#00ff00></font>' ), 0 );
@@ -129,17 +129,20 @@ for my $parse_test (@parse_tests) {
 
 # Check that from, to and subject get set correctly when parsing a message
 $cl->parse_stream( 'tests/TestMailParse013.msg' );
-test_assert_equal( $cl->{from},    'RN <rrr@nnnnnnnnn.com>'                        );
-test_assert_equal( $cl->{to},      '"Armlet Forum" <armlet-forum@news.palmos.com>' );
-test_assert_equal( $cl->{subject}, '(Archive Copy) RE: CW v9 and armlets...'       );
+test_assert_equal( $cl->{from__},    'RN <rrr@nnnnnnnnn.com>'                        );
+test_assert_equal( $cl->{to__},      '"Armlet Forum" <armlet-forum@news.palmos.com>' );
+test_assert_equal( $cl->{subject__}, '(Archive Copy) RE: CW v9 and armlets...'       );
 $cl->parse_stream( 'tests/TestMailParse018.msg' );
-$cl->{to} =~ /(\Qbugtracker\E@\Qrelativity.com\E)/;
+$cl->{to__} =~ /(\Qbugtracker\E@\Qrelativity.com\E)/;
 test_assert_equal( $1, 'bugtracker@relativity.com' );
 $cl->parse_stream( 'tests/TestMailParse019.msg' );
-$cl->{to} =~ /(\Qbugtracker\E@\Qrelativity.com\E)/;
+$cl->{to__} =~ /(\Qbugtracker\E@\Qrelativity.com\E)/;
 test_assert_equal( $1, 'bugtracker@relativity.com' );
 
 # Check that multi-line To: and CC: headers get handled properly
 $cl->parse_stream( 'tests/TestMailParse021.msg' );
-test_assert_equal( $cl->{to},      'dsmith@ctaz.com, dsmith@dol.net, dsmith@dirtur.com, dsmith@dialpoint.net, dsmith@crosscountybank.com, <dsmith@cybersurf.net>, <dsmith@dotnet.com>, <dsmith@db.com>, <dsmith@cs.com>, <dsmith@crossville.com>, <dsmith@dreamscape.com>, <dsmith@cvnc.net>, <dsmith@dmrtc.net>, <dsmith@datarecall.net>, <dsmith@dasia.net>' );
-test_assert_equal( $cl->{cc},      'dsmith@dmi.net, dsmith@datamine.net, dsmith@crusader.com, dsmith@datasync.com, <dsmith@doorpi.net>, <dsmith@dnet.net>, <dsmith@cybcon.com>, <dsmith@csonline.net>, <dsmith@directlink.net>, <dsmith@cvip.net>, <dsmith@dragonbbs.com>, <dsmith@crosslinkinc.com>, <dsmith@dccnet.com>, <dsmith@dakotacom.net>' );
+$cl->{to__} =~ s/[\r\n]//g;
+test_assert_equal( $cl->{to__},      'dsmith@ctaz.com, dsmith@dol.net, dsmith@dirtur.com, dsmith@dialpoint.net, dsmith@crosscountybank.com, 	<dsmith@cybersurf.net>, <dsmith@dotnet.com>, <dsmith@db.com>, <dsmith@cs.com>	, <dsmith@crossville.com>, 	<dsmith@dreamscape.com>, <dsmith@cvnc.net>, <dsmith@dmrtc.net>, <dsmith@datarecall.net>, 	<dsmith@dasia.net>' );
+$cl->{cc__} =~ s/[\r\n]//g;
+test_assert_equal( $cl->{cc__},      'dsmith@dmi.net, dsmith@datamine.net, dsmith@crusader.com, dsmith@datasync.com, 	<dsmith@doorpi.net>, <dsmith@dnet.net>, <dsmith@cybcon.com>, <dsmith@csonline.net>, 	<dsmith@directlink.net>, <dsmith@cvip.net>, <dsmith@dragonbbs.com>, <dsmith@crosslinkinc.com>, 	<dsmith@dccnet.com>, <dsmith@dakotacom.net>' );
+

@@ -63,12 +63,12 @@ ensure 1
 dfa 1
 slice 1
 generated 2
-bugs@drunin.net 2
+bugs@drunin.net 1
 vi.relativity.com 1
 archives 1
-postfix 1
+postfix 3
 confirmed 1
-tepkom 3
+tepkom 5
 to:elia@tepkom.ru 1
 to:bugtracker@relativity.com 1
 server 1
@@ -78,7 +78,7 @@ visual 1
 correct 1
 internet 1
 63.100.138.144 1
-drunin.net 2
+drunin.net 1
 fix 1
 subject:dev 1
 jump 1
