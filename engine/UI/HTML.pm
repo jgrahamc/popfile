@@ -205,6 +205,11 @@ sub initialize
 
     $self->config_( 'session_dividers', 1 );
 
+    # The number of characters to show in each column in the history, if set
+    # to 0 then POPFile tries to do this automatically
+
+    $self->config_( 'column_characters', 0 );
+
     # Load skins
 
     $self->load_skins__();
@@ -2234,6 +2239,20 @@ sub history_page
         my $i = $start_message;
         @columns = split( ',', $self->config_( 'columns' ) );
         my $last = -1;
+        if ( defined($self->{form_}{automatic}) ) {
+            $self->config_( 'column_characters', 0 );
+        }
+        if ( $self->config_( 'column_characters' ) != 0 ) {
+            $length = $self->config_( 'column_characters' );
+	}
+        if ( defined($self->{form_}{increase}) ) {
+            $length++;
+            $self->config_( 'column_characters', $length );
+        }
+        if ( defined($self->{form_}{decrease}) ) {
+            $length--;
+            $self->config_( 'column_characters', $length );
+        }
         foreach my $row (@rows) {
             my %row_data;
             my $mail_file = $row_data{History_Mail_File} = $$row[0];

@@ -205,7 +205,12 @@
         </TMPL_LOOP>
 
         <tr>
-            <td colspan="<TMPL_VAR NAME="History_Colspan">">&nbsp;</td>
+            <td colspan="<TMPL_VAR NAME="History_Colspan">">
+                <TMPL_VAR NAME="Localize_History_Column_Characters">: 
+                <input type="submit" class="submit" name="increase" value="<TMPL_VAR NAME="Localize_History_Increase">">
+                <input type="submit" class="submit" name="decrease" value="<TMPL_VAR NAME="Localize_History_Decrease">">
+                <input type="submit" class="submit" name="automatic" value="<TMPL_VAR NAME="Localize_History_Automatic">">
+            </td>
             <td>
                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
             </td>
