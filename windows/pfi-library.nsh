@@ -31,17 +31,18 @@
 #
 # The following symbols are used to construct the expressions defining the required subset:
 #
-#  (1) ADDUSER          defined in adduser.nsi ('Add POPFile User' wizard)
-#  (2) BACKUP           defined in backup.nsi (POPFile 'User Data' Backup utility)
-#  (3) INSTALLER        defined in installer.nsi (the main installer program, setup.exe)
-#  (4) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
-#  (5) PFIDIAG          defined in test\pfidiag.nsi (helps diagnose installer-related problems)
-#  (6) RESTORE          defined in restore.nsi (POPFile 'User Data' Restore utility)
-#  (7) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
-#  (8) RUNSQLITE        defined in runsqlite.nsi (simple front-end for sqlite.exe/sqlite3.exe)
-#  (9) STOP_POPFILE     defined in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
-# (10) TRANSLATOR       defined in translator.nsi (main installer translations test program)
-# (11) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
+#  (1) ADDSSL           defined in add-ons\addssl.nsi (POPFile 'SSL Setup' wizard)
+#  (2) ADDUSER          defined in adduser.nsi ('Add POPFile User' wizard)
+#  (3) BACKUP           defined in backup.nsi (POPFile 'User Data' Backup utility)
+#  (4) INSTALLER        defined in installer.nsi (the main installer program, setup.exe)
+#  (5) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
+#  (6) PFIDIAG          defined in test\pfidiag.nsi (helps diagnose installer-related problems)
+#  (7) RESTORE          defined in restore.nsi (POPFile 'User Data' Restore utility)
+#  (8) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
+#  (9) RUNSQLITE        defined in runsqlite.nsi (simple front-end for sqlite.exe/sqlite3.exe)
+# (10) STOP_POPFILE     defined in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
+# (11) TRANSLATOR       defined in test\translator.nsi (main installer translations testbed)
+# (12) TRANSLATOR_AUW   defined in test\transAUW.nsi ('Add POPFile User' translations testbed)
 #--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
@@ -434,7 +435,7 @@
 !endif
 
 
-!ifndef BACKUP
+!ifndef ADDSSL & BACKUP
     #--------------------------------------------------------------------------
     # Installer Function: GetParameters
     #
@@ -893,7 +894,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE
+!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: CheckIfLocked
     #
@@ -1007,7 +1008,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE
+!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: FindLockedPFE
     #
@@ -1606,7 +1607,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | MSGCAPTURE | PFIDIAG | RESTORE | TRANSLATOR_AUW
+!ifdef ADDSSL | ADDUSER | BACKUP | MSGCAPTURE | PFIDIAG | RESTORE | TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetDateTimeStamp
     #
@@ -1694,7 +1695,7 @@
     FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE | STOP_POPFILE
+!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | RESTORE | STOP_POPFILE
     #--------------------------------------------------------------------------
     # Installer Function: GetFileSize
     #
@@ -1803,7 +1804,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | MSGCAPTURE | PFIDIAG | RESTORE | TRANSLATOR_AUW
+!ifdef ADDSSL | ADDUSER | BACKUP | MSGCAPTURE | PFIDIAG | RESTORE | TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetLocalTime
     #
@@ -2033,7 +2034,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | RESTORE | RUNPOPFILE
+!ifdef ADDSSL | ADDUSER | BACKUP | RESTORE | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: GetParent
     #
@@ -2961,7 +2962,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE
+!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: ServiceCall
     #
@@ -3038,7 +3039,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE
+!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: ServiceRunning
     #
@@ -3235,7 +3236,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE
+!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: ShutdownViaUI
     #
@@ -3314,7 +3315,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | RESTORE | RUNPOPFILE
+!ifdef ADDSSL | ADDUSER | BACKUP | RESTORE | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: StrBackSlash
     #
@@ -3494,7 +3495,7 @@
   FunctionEnd
 !macroend
 
-!ifndef MSGCAPTURE & RUNSQLITE & STOP_POPFILE & TRANSLATOR
+!ifndef ADDSSL & MSGCAPTURE & RUNSQLITE & STOP_POPFILE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: StrStr
     #
@@ -3565,7 +3566,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE | TRANSLATOR
+!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | RESTORE | TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: TrimNewlines
     #
@@ -3664,7 +3665,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | INSTALLER
+!ifdef ADDSSL | ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Installer Function: WaitUntilUnlocked
     #
