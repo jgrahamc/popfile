@@ -403,10 +403,21 @@ sub connect_folders__
             next;
         }
 
-        $self->log_( 1, "Trying to connect to ". $self->config_( 'hostname' ) . " for folder $folder." );
-        $self->{folders__}{$folder}{imap} = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
         $self->{folders__}{$folder}{server} = 1;
         $self->{folders__}{$folder}{tag} = 0;
+
+        # The folder may be write-only:
+        if ( exists $self->{folders__}{$folder}{output}
+                &&
+            ! exists $self->{folders__}{$folder}{watched}
+                &&
+            $self->{classifier__}->is_pseudo_bucket( $self->{api_session__},
+                                    $self->{folders__}{$folder}{output} ) ) {
+                next;
+        }
+
+        $self->log_( 1, "Trying to connect to ". $self->config_( 'hostname' ) . " for folder $folder." );
+        $self->{folders__}{$folder}{imap} = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
 
         # Did the connection succeed?
         if ( defined $self->{folders__}{$folder}{imap} ) {
@@ -785,9 +796,8 @@ sub folder_uid_status__
     # Check whether the old value is still valid
     if ( defined $old_val ) {
         if ( $uidvalidity != $old_val ) {
-            $self->uid_validity__( $folder, $uidvalidity );
             $self->log_( 0, "UIDVALIDITY has changed! Expected $old_val, got $uidvalidity." );
-            return;
+            undef $old_val;
         }
     }
 
@@ -795,7 +805,7 @@ sub folder_uid_status__
     # must be a new folder for us.
     # In that case, we do an extra STATUS command to get the current value
     # for UIDNEXT.
-    else {
+    unless ( defined $old_val ) {
 
         $self->say__( $folder, "STATUS \"$folder\" (UIDNEXT)" );
         my $response = $self->get_response__( $folder );
@@ -1521,8 +1531,7 @@ sub get_new_message_list
         }
     }
 
-    return ( sort @return_list );
-
+    return ( sort { $a <=> $b } @return_list );
 }
 
 
@@ -1756,13 +1765,6 @@ sub get_hash
         my $subject  = ${$header{'subject'}}[0];
         my $received = ${$header{'received'}}[0];
 
-        # remove those log_ calls once we can be sure everything works:
-        $self->log_( 1, "Just for debugging purposes:" );
-        $self->log_( 1, "mid:      $mid." );
-        $self->log_( 1, "date:     $date." );
-        $self->log_( 1, "subject:  $subject." );
-        $self->log_( 1, "received: $received." );
-
         my $hash = $self->{history__}->get_message_hash( $mid, $date, $subject, $received );
 
         $self->log_( 1, "Hashed message: $subject." );
@@ -1801,7 +1803,7 @@ sub can_classify__
         return 0;
     }
     else {
-        $self->log_( 1, "The message is not in history." );
+        $self->log_( 1, "The message is not yet in history." );
         return 1;
     }
 }
@@ -1824,7 +1826,7 @@ sub can_reclassify__
 {
     my ( $self, $hash, $new_bucket ) = @_;
 
-    # We must know the message
+    # We must already know the message
 
     my $slot = $self->{history__}->get_slot_from_hash( $hash );
 
