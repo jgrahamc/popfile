@@ -587,7 +587,7 @@ sub commit_history__
             ${$header{$h}}[0] =
                  $self->{classifier__}->{parser__}->decode_string(
                      ${$header{$h}}[0] );
-            ${$header{$h}} =~ s/\0//g;
+            ${$header{$h}}[0] =~ s/\0//g;
             ${$header{$h}}[0] = $self->db__()->quote( ${$header{$h}}[0] );
         }
 
