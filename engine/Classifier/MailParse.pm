@@ -63,7 +63,7 @@ sub new
     # lines for use in creating new magnets, it is a list of pairs mapping
     # a magnet type to a magnet string, e.g. from => popfile@jgc.org
 
-    $self->{quickmagnets__}      = ();
+    $self->{quickmagnets__}      = {};
 
     # These store the current HTML background color and font color to
     # detect "invisible ink" used by spammers
@@ -180,7 +180,7 @@ sub update_word
         $mword = $prefix . ':' . $mword if ( $prefix ne '' );
 
         if ( $prefix =~ /(from|to|cc|subject)/i ) {
-            push @{$self->{quickmagnets__}}, ($prefix, $word);
+            push @{$self->{quickmagnets__}{$prefix}}, $word;
         }
 
         if ( $self->{color__} ) {
@@ -1170,11 +1170,12 @@ sub parse_header
             $self->{content_type__} = '';            
             $self->{from__} = $argument if ( $self->{from__} eq '' ) ;
             $prefix = 'from';
+            push @{$self->{quickmagnets__}{$prefix}}, $argument if ($argument ne '');
         }
 
         if ( $header =~ /^To$/i ) {
             $prefix = 'to';
-            $self->{to__} = $argument if ( $self->{to__} eq '' );
+            $self->{to__} = $argument if ( $self->{to__} eq '' );            
         }
 
         if ( $header =~ /^Cc$/i ) {

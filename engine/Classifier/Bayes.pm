@@ -630,33 +630,45 @@ sub classify_file
     }
 
     if ($self->{wordscores__} && defined($ui) ) {
-        my @qm = @{$self->{parser__}->quickmagnets()};
+        my %qm = %{$self->{parser__}->quickmagnets()};
+        my $mlen = scalar(keys %{$self->{parser__}->quickmagnets()});
         my %language    = $ui->language();
         my $session_key = $ui->session_key();
 
-        if ( $#qm >= 0 ) {
+        if ( $mlen >= 0 ) {
             my @buckets = $self->get_buckets();
             my $i = 0;
-            $self->{scores__} .= "<form action=\"/magnets\" method=\"POST\">\n";
+            $self->{scores__} .= "<form action=\"/magnets\" method=\"get\">\n";
             $self->{scores__} .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />";
-            $self->{scores__} .= "<input type=\"hidden\" name=\"count\" value=\"" . ($#qm+1) . "\" />";
+            $self->{scores__} .= "<input type=\"hidden\" name=\"count\" value=\"" . ($mlen + 1) . "\" />";
             $self->{scores__} .= "<hr><b>$language{QuickMagnets}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Magnet}</th>\n<th>$language{Magnet_Always}</th>\n";
+            
+            my %types = get_magnet_types();
+           
+            foreach my $type ( keys %types ) {
 
-            while ( $#qm >= 0 ) {
-                my $type = shift @qm;
-                my $text = shift @qm;
-                $i += 1;
-
-                $self->{scores__} .= "<tr><td scope=\"col\">$type: $text</td><td>";
-                $self->{scores__} .= "<input type=\"hidden\" name=\"type$i\" id=\"magnetsAddType\" value=\"$type\"/>";
-                $self->{scores__} .= "<input type=\"hidden\" name=\"text$i\" id=\"magnetsAddText\" value=\"$text\"/>";
-                $self->{scores__} .= "<select name=\"bucket$i\" id=\"magnetsAddBucket\">\n<option value=\"\"></option>\n";
-
-                foreach my $bucket (@buckets) {
-                    $self->{scores__} .= "<option value=\"$bucket\">$bucket</option>\n";
-                }
-
-                $self->{scores__} .= "</select></td></tr>";
+                if (defined $qm{$type})
+                {
+                    $i += 1;
+    
+                    
+                    $self->{scores__} .= "<tr><td scope=\"col\">$type: ";
+                    $self->{scores__} .= "<select name=\"text$i\" id=\"\">\n";
+                    
+                    foreach my $magnet ( 0 .. $#{$qm{$type}} ) {
+                        $self->{scores__} .= "<option>" . Classifier::MailParse::splitline(@{$qm{$type}}[$magnet], 0) . "</option>\n";
+                    }
+                    $self->{scores__} .= "</select>\n";                
+                    $self->{scores__} .= "</td><td>";
+                    $self->{scores__} .= "<input type=\"hidden\" name=\"type$i\" id=\"magnetsAddType\" value=\"$type\"/>";                
+                    $self->{scores__} .= "<select name=\"bucket$i\" id=\"magnetsAddBucket\">\n<option value=\"\"></option>\n";
+    
+                    foreach my $bucket (@buckets) {
+                        $self->{scores__} .= "<option value=\"$bucket\">$bucket</option>\n";
+                    }
+    
+                    $self->{scores__} .= "</select></td></tr>";
+                }                
 	    }
 
             $self->{scores__} .= "<tr><td></td><td><input type=\"submit\" class=\"submit\" name=\"create\" value=\"$language{Create}\" /></td></tr></table></form>";
