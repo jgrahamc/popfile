@@ -577,6 +577,7 @@ sub db_connect__
     # word
     # parameter
 
+
     $self->{db_get_buckets__} = $self->{db__}->prepare(
    	     'select name, id, pseudo from buckets
                   where buckets.userid = ?;' );
@@ -699,7 +700,7 @@ sub db_update_cache__
         $self->{db_get_bucket_word_count__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id} );
         my $row = $self->{db_get_bucket_word_count__}->fetchrow_arrayref;
         $self->{db_bucketcount__}{$userid}{$bucket} = $row->[0];
-    }
+     }
 
     $self->update_constants__( $session );
 }
@@ -1435,8 +1436,6 @@ sub classify
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $self->log_( "Begin classification at " . time );
-
     $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
 
     # Pass language parameter to parse_file()
@@ -1466,8 +1465,6 @@ sub classify
     # If the user has not defined any buckets then we escape here return unclassified
     return "unclassified" if ( $#buckets == -1 );
 
-    $self->log_( "Done with bucket check at " . time );
-
     # The score hash will contain the likelihood that the given message is in each
     # bucket, the buckets are the keys for score
 
@@ -1495,31 +1492,89 @@ sub classify
 
     my $correction = 0;
 
-    foreach my $word (keys %{$self->{parser__}->{words__}}) {
+    # Classification against the database works in a sequence of steps to get
+    # the fastest time possible.  The steps are as follows:
+    #
+    # 1. Convert the list of words returned by the parser into a list of unique
+    #    word ids that can be used in the database.  This requires a select
+    #    against the database to get the word ids (and associated words) which
+    #    is then converted into two things: @id_list which is just the sorted
+    #    list of word ids and %idmap which maps a word to its id.
+    #
+    # 2. Then run a second select that get the triplet (count, id, bucket) for
+    #    each word id and each bucket.  The triplet contains the word count from
+    #    the database for each bucket and each id, where there is an entry. That
+    #    data gets loaded into the sparse matrix %matrix.
+    #
+    # 3. Do the normal classification loop as before running against the @id_list
+    #    for the words and for each bucket.   If there's an entry in %matrix for
+    #    the id/bucket combination then calculate the probability, otherwise use
+    #    the not_likely probability.
+    #
+    # NOTE.  Since there is a single not_likely probability we do not worry about
+    #        the fact that the select in 1 might return a shorter list of words
+    #        than was found in the message (because some words are not in the 
+    #        database) since the missing words will be the same for all buckets
+    #        and hence constitute a fixed scaling factor on all the buckets which
+    #        is irrelevant in deciding which the winning bucket is.
+
+    my $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
+
+    $self->{get_wordids__} = $self->{db__}->prepare(
+             "select id, word 
+                  from words
+                  where word in ( $words )
+                  order by id;" );
+    $self->{get_wordids__}->execute;
+
+    my @id_list;
+    my %idmap;
+  
+    while ( my $row = $self->{get_wordids__}->fetchrow_arrayref ) {
+        push @id_list, ($row->[0]);
+        $idmap{$row->[0]} = $row->[1]; 
+    }
+     
+    $self->{get_wordids__}->finish;           
+
+    my $ids = join( ',', @id_list );
+
+    $self->{db_classify__} = $self->{db__}->prepare( 
+             "select matrix.times, matrix.wordid, buckets.name 
+                  from matrix, buckets 
+                  where matrix.wordid in ( $ids )
+                    and matrix.bucketid = buckets.id
+                    and buckets.userid = $userid;" );
+
+    $self->{db_classify__}->execute;
+
+    my %matrix;
+
+    while ( my $row = $self->{db_classify__}->fetchrow_arrayref ) {
+        $matrix{$row->[1]}{$row->[2]} = $row->[0];
+    }
+
+    $self->{db_classify__}->finish;
+
+    foreach my $id (@id_list) {
         $word_count += 2;
         my $wmax = -10000;
 
         foreach my $bucket (@buckets) {
-            my $probability = $self->get_value_( $session, $bucket, $word );
+            my $probability = defined($matrix{$id}{$bucket})?log( $matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket} ):0;
 
-            $matchcount{$bucket} += $self->{parser__}{words__}{$word} if ($probability != 0);
+            $matchcount{$bucket} += $self->{parser__}{words__}{$idmap{$id}} if ($probability != 0);
             $probability = $self->{not_likely__}{$userid} if ( $probability == 0 );
             $wmax = $probability if ( $wmax < $probability );
-
-            # Here we are doing the bayes calculation: P(word|bucket) is in probability
-            # and we multiply by the number of times that the word occurs
-
-            $score{$bucket} += ( $probability * $self->{parser__}{words__}{$word} );
+            $score{$bucket} += ( $probability * $self->{parser__}{words__}{$idmap{$id}} );
         }
 
         if ($wmax > $self->{not_likely__}{$userid}) {
-            $correction += $self->{not_likely__}{$userid} * $self->{parser__}{words__}{$word};
+            $correction += $self->{not_likely__}{$userid} * $self->{parser__}{words__}{$idmap{$id}};
         } else {
-            $correction += $wmax * $self->{parser__}{words__}{$word};
+            $correction += $wmax * $self->{parser__}{words__}{$idmap{$id}};
         }
     }
-
-    $self->log_( "Done with Bayes rule at " . time );
 
     # Now sort the scores to find the highest and return that bucket as the classification
 
