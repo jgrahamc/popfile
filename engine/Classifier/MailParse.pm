@@ -798,6 +798,13 @@ sub parse_stream
 
                 $splitline =~ s/</&lt;/g;
                 $splitline =~ s/>/&gt;/g;
+                
+                #TODO: regress patch to 0.18.1
+                if ( $encoding =~ /quoted\-printable/i ) {
+                    $splitline =~ s/=3C/&lt;/g;
+                    $splitline =~ s/=3E/&gt;/g;
+                }
+                
                 $splitline =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
                 $self->{ut__} .= $splitline;
             }
