@@ -167,6 +167,10 @@ sub classify_file
     {
         $score{$bucket} = $self->{total}{$bucket} / $self->{full_total};
     }
+
+    # The probability used for words that are not present in the corpus
+
+    my $not_likely   = 1 / ( 10 * $self->{full_total} );
     
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
     # P(word|bucket) ^ word count and multiply to the score
@@ -176,9 +180,7 @@ sub classify_file
         foreach my $bucket (keys %{$self->{total}}) 
         {
             my $bucket_total = $self->{total}{$bucket};
-            my $not_likely   = 1 / ( 10 * $bucket_total );
-        
-            my $probability = $self->{matrix}{$bucket}{$word} / $bucket_total;
+            my $probability  = $self->{matrix}{$bucket}{$word} / $bucket_total;
             
             if ( $probability == 0 ) 
             {
