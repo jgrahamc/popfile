@@ -847,7 +847,11 @@ update_config:
       CreateShortCut "$SMSTARTUP\Run POPFile.lnk" \
                      "$INSTDIR\popfile.exe"
 skip_autostart_set:
+
+  ; Remove redundant links (used by earlier versions of POPFile)
+  
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile in background.lnk"
 
   ; Create entry in the Control Panel's "Add/Remove Programs" list
 
