@@ -31,7 +31,9 @@ use POPFile::Logger;
 
 # main
 
-if ( $#ARGV == 0 ) {
+my $code = 0;
+
+if ( $#ARGV >= 0 ) {
     my $c = new POPFile::Configuration;
     my $mq = new POPFile::MQ;
     my $l = new POPFile::Logger;
@@ -61,18 +63,43 @@ if ( $#ARGV == 0 ) {
 
     $b->start();
 
-    my @files   = glob $ARGV[0];
-    foreach my $file (@files) {
-        print "$file is '" . $b->classify($file) . "'\n";
+    my @files;
+
+    if ($^O =~ /linux/) {
+        @files = @ARGV[0 .. $#ARGV];
+    } else {
+        @files = map { glob } @ARGV[0 .. $#ARGV];
     }
 
-    foreach my $word (sort keys %{$b->{parser__}->{words__}}) {
-        print "$word $b->{parser__}->{words__}{$word}\n";
+    foreach my $file (@files) {
+        if ( !(-e $file) ) {
+            print STDERR "Error: File `$file' does not exist, classification aborted.\n";
+            $code = 1;
+            last;
+        }
     }
+
+    if ( $code == 0 ) {
+        foreach my $file (@files) {
+            print "`$file' is `" . $b->classify( $file ) . "'\n";
+        }
+
+        foreach my $word (sort keys %{$b->{parser__}->{words__}}) {
+            print "$word $b->{parser__}->{words__}{$word}\n";
+        }
+    }
+
+    $b->stop();
+    $l->stop();
+    $mq->stop();
+    $c->stop();
 }
 else
 {
-    print "bayes.pl - output the score that a message is in each bucket\n\n";
+    print "bayes.pl - output the classification of a message\n\n";
     print "Usage: bayes.pl <messages>\n";
     print "       <messages>         Filename of message(s) to classify\n";
+    $code = 1;
 }
+
+exit $code;

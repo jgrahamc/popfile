@@ -132,6 +132,10 @@ sub new
 
     $self->{last_login__}      = '';
 
+    # Used to determine whehter the cache needs to be saved
+
+    $self->{save_cache__}      = 0;
+
     # Must call bless before attempting to call any methods
 
     bless $self, $type;
@@ -2486,6 +2490,10 @@ sub save_disk_cache__
 {
     my ( $self ) = @_;
 
+    if ( $self->{save_cache__} == 0 ) {
+        return;
+    }
+
     open CACHE, '>' . $self->global_config_( 'msgdir' ) . 'history_cache';
     print CACHE "___HISTORY__ __ VERSION__ 1\n";
     foreach my $key (keys %{$self->{history__}}) {
@@ -3765,6 +3773,7 @@ sub copy_pre_cache__
         $index += 1;
         $added = 1;
         delete $self->{history_pre_cache__}{$file};
+        $self->{save_cache__} = 1;
     }
 
     $self->{history_pre_cache__} = {};

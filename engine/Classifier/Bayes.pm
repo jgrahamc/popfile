@@ -33,6 +33,7 @@ use warnings;
 use locale;
 use Classifier::MailParse;
 use Classifier::WordMangle;
+use IO::Handle;
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -1356,7 +1357,7 @@ sub write_line__
 {
     my ( $self, $file, $line, $class ) = @_;
 
-    print $file $line;
+    print $file $line if defined( $file );
 
     if ( $class eq '' ) {
         $self->{parser__}->parse_line( $line );
@@ -1378,6 +1379,10 @@ sub write_line__
 # $nosave   - indicates that the message downloaded should not be saved in the history
 # $class    - if we already know the classification
 # $echo     - 1 to echo to the client, 0 to supress, defaults to 1
+# $crlf     - The sequence to use at the end of a line in the output, normally
+#             this is left undefined and this method uses $eol (the normal network end
+#             of line), but if this method is being used with real files you may wish
+#             to pass in \n instead
 #
 # Returns a classification if it worked and the name of the file where the message
 # was saved
@@ -1387,9 +1392,10 @@ sub write_line__
 # ---------------------------------------------------------------------------------------------
 sub classify_and_modify
 {
-    my ( $self, $mail, $client, $dcount, $mcount, $nosave, $class, $echo ) = @_;
+    my ( $self, $mail, $client, $dcount, $mcount, $nosave, $class, $echo, $crlf ) = @_;
 
-    $echo = 1 unless (defined $echo);
+    $echo = 1    unless (defined $echo);
+    $crlf = $eol unless (defined $crlf);
 
     my $msg_subject     = '';     # The message subject
     my $msg_head_before = '';     # Store the message headers that come before Subject here
@@ -1431,7 +1437,7 @@ sub classify_and_modify
     # middle of downloading a message and we refresh the history we do not
     # get class file errors
 
-    open TEMP, ">$temp_file";
+    open TEMP, ">$temp_file" unless $nosave;
 
     while ( <$mail> ) {
         my $line;
@@ -1467,7 +1473,7 @@ sub classify_and_modify
 
             if ( !( $line =~ /^(\r\n|\r|\n)$/i ) )  {
                 $message_size += length $line;
-                $self->write_line__( \*TEMP, $fileline, $class );
+                $self->write_line__( $nosave?undef:\*TEMP, $fileline, $class );
 
                 # If there is no echoing occuring, it doesn't matter what we do to these
 
@@ -1496,19 +1502,19 @@ sub classify_and_modify
                     }
                 }
             } else {
-                $self->write_line__( \*TEMP, "\n", $class );
-                $message_size += length $eol;
+                $self->write_line__( $nosave?undef:\*TEMP, "\n", $class );
+                $message_size += length $crlf;
                 $getting_headers = 0;
             }
         } else {
             $message_size += length $line;
             $msg_body     .= $line;
-            $self->write_line__( \*TEMP, $fileline, $class );
+            $self->write_line__( $nosave?undef:\*TEMP, $fileline, $class );
         }
 
         # Check to see if too much time has passed and we need to keep the mail client happy
         if ( time > ( $last_timeout + 2 ) ) {
-            print $client "X-POPFile-TimeoutPrevention: $timeout_count$eol" if ( $echo );
+            print $client "X-POPFile-TimeoutPrevention: $timeout_count$crlf" if ( $echo );
             $timeout_count += 1;
             $last_timeout = time;
         }
@@ -1516,7 +1522,7 @@ sub classify_and_modify
         last if ( ( $message_size > 100000 ) && ( $getting_headers == 0 ) );
     }
 
-    close TEMP;
+    close TEMP unless $nosave;
 
     # Parse Japanese mail message with Kakasi
 
@@ -1548,10 +1554,10 @@ sub classify_and_modify
     }
 
     $msg_head_before .= 'Subject:' . $msg_subject;
-    $msg_head_before .= $eol;
+    $msg_head_before .= $crlf;
 
     # Add the XTC header
-    $msg_head_after .= "X-Text-Classification: $classification$eol" if ( ( $self->global_config_( 'xtc' ) ) && # PROFILE BLOCK START
+    $msg_head_after .= "X-Text-Classification: $classification$crlf" if ( ( $self->global_config_( 'xtc' ) ) && # PROFILE BLOCK START
                                                                          ( $self->{parameters__}{$classification}{quarantine} == 0 ) ); # PROFILE BLOCK STOP
 
     # Add the XPL header
@@ -1559,13 +1565,13 @@ sub classify_and_modify
 
     $xpl .= "http://";
     $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->config_( 'hostname' );
-    $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$nopath_temp_file$eol";
+    $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$nopath_temp_file$crlf";
 
-    if ( $self->global_config_( 'xpl' ) && ( $self->{parameters__}{$classification}{quarantine} == 0 ) ) {
+    if ( $self->global_config_( 'xpl' ) && ( $self->{parameters__}{$classification}{quarantine} == 0 ) && ( !$nosave ) ) {
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
     }
 
-    $msg_head_after .= $msg_head_q . "$eol";
+    $msg_head_after .= $msg_head_q . "$crlf";
 
     # Echo the text of the message to the client
 
@@ -1576,9 +1582,9 @@ sub classify_and_modify
 
         if ( ( $classification ne 'unclassified' ) && ( $classification ne 'unsure' ) ) {
             if ( $self->{parameters__}{$classification}{quarantine} == 1 ) {
-                print $client "From: " . $self->{parser__}->get_header( 'from' ) . "$eol";
-                print $client "To: " . $self->{parser__}->get_header( 'to' ) . "$eol";
-                print $client "Date: " . $self->{parser__}->get_header( 'date' ) . "$eol";
+                print $client "From: " . $self->{parser__}->get_header( 'from' ) . "$crlf";
+                print $client "To: " . $self->{parser__}->get_header( 'to' ) . "$crlf";
+                print $client "Date: " . $self->{parser__}->get_header( 'date' ) . "$crlf";
                 if ( $self->global_config_( 'subject' ) ) {
                     # Don't add the classification unless it is not present
                     if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&             # PROFILE BLOCK START
@@ -1586,22 +1592,24 @@ sub classify_and_modify
                         $msg_subject = " $modification$msg_subject";
                     }
                 }
-                print $client "Subject:$msg_subject$eol";
-                print $client "X-Text-Classification: $classification$eol" if ( $self->global_config_( 'xtc' ) );
-                print $client 'X-POPFile-Link: ' . $xpl if ( $self->global_config_( 'xpl' ) );
-                print $client "MIME-Version: 1.0$eol";
-                print $client "Content-Type: multipart/report; boundary=\"$nopath_temp_file\"$eol$eol--$nopath_temp_file$eol";
-                print $client "Content-Type: text/plain$eol$eol";
-                print $client "POPFile has quarantined a message.  It is attached to this email.$eol$eol";
-                print $client "Quarantined Message Detail$eol$eol";
-                print $client "Original From: " . $self->{parser__}->get_header('from') . "$eol";
-                print $client "Original To: " . $self->{parser__}->get_header('to') . "$eol";
-                print $client "Original Subject: " . $self->{parser__}->get_header('subject') . "$eol";
-                print $client "To examine the email open the attachment. To change this mail's classification go to $xpl$eol";
-                print $client "The first 20 words found in the email are:$eol$eol";
+                print $client "Subject:$msg_subject$crlf";
+                print $client "X-Text-Classification: $classification$crlf" if ( $self->global_config_( 'xtc' ) );
+                print $client 'X-POPFile-Link: ' . $xpl if ( $self->global_config_( 'xpl' ) && !$nosave );
+                print $client "MIME-Version: 1.0$crlf";
+                print $client "Content-Type: multipart/report; boundary=\"$nopath_temp_file\"$crlf$crlf--$nopath_temp_file$crlf";
+                print $client "Content-Type: text/plain$crlf$crlf";
+                print $client "POPFile has quarantined a message.  It is attached to this email.$crlf$crlf";
+                print $client "Quarantined Message Detail$crlf$crlf";
+                print $client "Original From: " . $self->{parser__}->get_header('from') . "$crlf";
+                print $client "Original To: " . $self->{parser__}->get_header('to') . "$crlf";
+                print $client "Original Subject: " . $self->{parser__}->get_header('subject') . "$crlf";
+                print $client "To examine the email open the attachment. ";
+                print $client "To change this mail's classification go to $xpl" unless $nosave;
+                print $client "$crlf";
+                print $client "The first 20 words found in the email are:$crlf$crlf";
                 print $client $self->{parser__}->first20();
-                print $client "$eol--$nopath_temp_file$eol";
-                print $client "Content-Type: message/rfc822$eol$eol";
+                print $client "$crlf--$nopath_temp_file$crlf";
+                print $client "Content-Type: message/rfc822$crlf$crlf";
             }
         }
 
@@ -1614,23 +1622,21 @@ sub classify_and_modify
 
     if ( ( $classification ne 'unclassified' ) && ( $classification ne 'unsure' ) ) {
         if ( ( $self->{parameters__}{$classification}{quarantine} == 1 ) && $echo ) {
-            $before_dot = "$eol--$nopath_temp_file--$eol";
+            $before_dot = "$crlf--$nopath_temp_file--$crlf";
         }
     }
 
     if ( !$got_full_body ) {
-        $self->echo_to_dot_( $mail, $echo?$client:undef, '>>' . $temp_file, $before_dot );
+        $self->echo_to_dot_( $mail, $echo?$client:undef, $nosave?undef:'>>' . $temp_file, $before_dot );
     } else {
         print $client $before_dot if ( $before_dot ne '' );
     }
 
     if ( $echo && $got_full_body ) {
-        print $client "$eol.$eol";
+        print $client "$crlf.$crlf";
     }
 
-    if ( $nosave ) {
-        unlink( $temp_file );
-    } else {
+    if ( !$nosave ) {
         $self->history_write_class($class_file, undef, $classification, undef, ($self->{magnet_used__}?$self->{magnet_detail__}:undef));
 
         # Now rename the MSG file, since the class file has been written it's safe for the mesg

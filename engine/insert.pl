@@ -29,6 +29,8 @@ use POPFile::Configuration;
 use POPFile::MQ;
 use POPFile::Logger;
 
+my $code = 0;
+
 if ( $#ARGV > 0 ) {
     my $c = new POPFile::Configuration;
     my $mq = new POPFile::MQ;
@@ -64,18 +66,40 @@ if ( $#ARGV > 0 ) {
     if ($^O =~ /linux/) {
         @files = @ARGV[1 .. $#ARGV];
     } else {
-        @files   = map { glob } @ARGV[1 .. $#ARGV];
+        @files = map { glob } @ARGV[1 .. $#ARGV];
     }
 
-    if ( !$b->add_messages_to_bucket( $ARGV[0], @files ) ) {
-        print "Bucket $ARGV[0] does not exist\n";
-    } else {
-        print "Added ", $#files+1, " files to $ARGV[0]\n";
+    # Check for the existence of each file first because the API
+    # call we use does not care if a file is missing
+
+    foreach my $file (@files) {
+        if ( !(-e $file) ) {
+            print STDERR "Error: File `$file' does not exist, insert aborted.\n";
+            $code = 1;
+            last;
+        }
     }
+
+    if ( $code == 0 ) {
+        if ( !$b->add_messages_to_bucket( $ARGV[0], @files ) ) {
+            print STDERR "Error: Bucket `$ARGV[0]' does not exist, insert aborted.\n";
+            $code = 1;
+        } else {
+            print "Added ", $#files+1, " files to `$ARGV[0]'\n";
+        }
+    }
+
+    $b->stop();
+    $l->stop();
+    $mq->stop();
+    $c->stop();
 } else {
     print "insert.pl - insert mail messages into a specific bucket\n\n";
     print "Usage: insert.pl <bucket> <messages>\n";
     print "       <bucket>           The name of the bucket\n";
     print "       <messages>         Filename of message(s) to insert\n";
+    $code = 1;
 }
+
+exit $code;
 

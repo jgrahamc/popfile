@@ -64,6 +64,10 @@ sub new
 
     $self->{pid_check__} = time;
 
+    # Used to tell whether we need to save the configuration
+
+    $self->{save_needed__} = 0;
+
     bless $self, $type;
 
     $self->name( 'config' );
@@ -103,18 +107,23 @@ sub initialize
     $self->global_config_( 'download_count', 0 );
 
     # The default timeout in seconds for POP3 commands
+
     $self->global_config_( 'timeout', 60 );
 
     # Subject modification (global setting is on)
+
     $self->global_config_( 'subject', 1 );
 
     # Adding the X-Text-Classification on
+
     $self->global_config_( 'xtc', 1 );
 
     # Adding the X-POPFile-Link is on
+
     $self->global_config_( 'xpl', 1 );
 
     # The default location for the message files
+
     $self->global_config_( 'msgdir', 'messages/' );
 
     return 1;
@@ -174,8 +183,6 @@ sub service
     return 1;
 }
 
-
-
 # ---------------------------------------------------------------------------------------------
 #
 # stop
@@ -191,7 +198,6 @@ sub stop
 
     $self->delete_pid_();
 }
-
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -449,6 +455,8 @@ sub load_configuration
 
         close CONFIG;
     }
+
+    $self->{save_needed__} = 0;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -462,7 +470,13 @@ sub save_configuration
 {
     my ( $self ) = @_;
 
+    if ( $self->{save_needed__} == 0 ) {
+        return;
+    }
+
     if ( open CONFIG, ">popfile.cfg" ) {
+        $self->{save_needed__} = 0;
+
         foreach my $key (sort keys %{$self->{configuration_parameters__}}) {
             print CONFIG "$key $self->{configuration_parameters__}{$key}\n";
         }
@@ -488,6 +502,7 @@ sub parameter
   my ( $self, $name, $value ) = @_;
 
   if ( defined( $value ) ) {
+    $self->{save_needed__} = 1;
     $self->{configuration_parameters__}{$name} = $value;
   }
 
