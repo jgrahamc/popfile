@@ -38,7 +38,7 @@
 <TMPL_ELSE>
     <form action="/configuration">
     <span class="securityWidgetStateOn"><TMPL_VAR NAME="Localize_Yes"></span>
-    <input type="submit" class="toggleOn" id="windowTrayIconOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
+    <input type="submit" class="toggleOff" id="windowTrayIconOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
     <input type="hidden" name="pop3_force_fork" value="0" />
     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form>
 </TMPL_IF>
