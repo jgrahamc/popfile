@@ -819,9 +819,6 @@ sub parse_stream
                     $splitline =~ s/=3E/&gt;/g;
                 }
 
-                    # Parse the last header
-                    
-                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);
                 $splitline =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
                     
                 $self->{ut__} .= $splitline;
@@ -832,6 +829,11 @@ sub parse_stream
                 # Check for blank line signifying end of headers
 
                 if ( $line =~ /^(\r\n|\r|\n)/) {
+                    
+                     # Parse the last header
+                                         
+                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);
+                    
                     $self->{in_headers__} = 0;
                     print "Header parsing complete.\n" if $self->{debug};
                 }                
