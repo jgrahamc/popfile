@@ -310,14 +310,30 @@ sub http_file_
 {
     my ( $self, $client, $file, $type ) = @_;
     my $contents = '';
+
     if ( open FILE, "<$file" ) {
+
         binmode FILE;
         while (<FILE>) {
             $contents .= $_;
         }
         close FILE;
 
-        my $header = "HTTP/1.0 200 OK\r\nContent-Type: $type\r\nContent-Length: ";
+        # To prevent the browser for continuously asking for file handled in this way
+        # we calculate the current date and time plus 1 hour to give the browser
+        # cache 1 hour to keep things like graphics and style sheets in cache.
+
+        my @day   = ( 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' );
+        my @month = ( 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' );
+        my $zulu = time;
+        $zulu += 60 * 60; # 1 hour
+        my ( $sec, $min, $hour, $mday, $mon, $year, $wday ) = gmtime( $zulu );
+
+        my $expires = sprintf( "%s, %02d %s %04d %02d:%02d:%02d GMT",
+	                       $day[$wday], $mday, $month[$mon], $year+1900,
+	                       $hour, $min, $sec);
+
+        my $header = "HTTP/1.0 200 OK\r\nContent-Type: $type\r\nExpires: $expires\r\nContent-Length: ";
         $header .= length($contents);
         $header .= "$eol$eol";
         print $client $header . $contents;
