@@ -113,7 +113,7 @@
 ; Text strings displayed on the custom page
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_INTRO        "After installation, POPFile makes it easy to change the number of buckets (and their names) to suit your needs.\r\n\r\nBucket names must be single words, using lowercase letters, digits 0 to 9, hyphens and underscores."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_CREATE       "Create a new bucket by either selecting a name from the list below or typing a name of your own choice in the box below."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_CREATE       "Create a new bucket by either selecting a name from the list below or typing a name of your own choice."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_DELETE       "To delete one or more buckets from the list, tick the relevant 'Remove' box(es) then click the 'Continue' button."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_LISTHDR      "Buckets to be used by POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_REMOVE       "Remove"

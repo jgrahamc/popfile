@@ -81,7 +81,6 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORE      "Installing POPFile core files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL      "Installing minimal Perl files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT     "Creating POPFile shortcuts..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC    "Click Next to continue"
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS     "Installing POPFile skin files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS     "Installing POPFile UI language files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC    "Click Next to continue"

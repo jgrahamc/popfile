@@ -53,7 +53,7 @@
 ; Text strings displayed on the custom page
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_POP3     "Choose the default port number for POP3 connections (110 recommended)"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI      "Choose the default for 'User Interface' connections (8080 recommended)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI      "Choose the default port for 'User Interface' connections (8080 recommended)"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP  "Run POPFile automatically when Windows starts (runs in background)"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_WARNING  "IMPORTANT WARNING"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE  "IF UPGRADING POPFILE --- INSTALLER WILL SHUTDOWN EXISTING VERSION"
