@@ -1335,6 +1335,9 @@ Section "Skins" SecSkins
   SetOutPath "$G_ROOTDIR\skins\orange"
   File "..\engine\skins\orange\*.*"
 
+  SetOutPath "$G_ROOTDIR\skins\osx"
+  File "..\engine\skins\osx\*.*"
+
   SetOutPath "$G_ROOTDIR\skins\orangecream"
   File "..\engine\skins\orangecream\*.*"
 
@@ -1604,8 +1607,12 @@ Section /o "IMAP" SecIMAP
   DetailPrint "Installing IMAP module..."
   SetDetailsPrint listonly
 
-  SetOutpath "$G_ROOTDIR\POPFile"
-  File "..\engine\POPFile\IMAP.pm"
+  ; Early versions of the IMAP.pm module were found in the 'POPFile' sub-folder but as part
+  ; of the preparation for the 0.22.0 release it was moved to the new 'Server' sub-folder
+
+  SetOutpath "$G_ROOTDIR\Server"
+  File "..\engine\Server\IMAP.pm"
+  Delete "$G_ROOTDIR\POPFile\IMAP.pm"
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
@@ -2829,6 +2836,9 @@ continue:
   Delete "$G_ROOTDIR\Proxy\*.pm"
   RMDir "$G_ROOTDIR\Proxy"
 
+  Delete "$G_ROOTDIR\Server\*.pm"
+  RMDir "$G_ROOTDIR\Server"
+
   Delete "$G_ROOTDIR\UI\*.pm"
   RMDir "$G_ROOTDIR\UI"
 
@@ -2861,6 +2871,7 @@ Section "un.Skins" UnSecSkins
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\lrclaptop"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\orange"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\orangecream"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\osx"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\outlook"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\prjbluegrey"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\prjsteelbeach"
