@@ -186,7 +186,7 @@ sub upgrade_parameter__
 
 		     # Parameters that are now handled by Classifier::Bayes
 
-		     'corpus',                   'bayes_corpus corpus',
+		     'corpus',                   'bayes_corpus',
 		     'unclassified_probability', 'bayes_unclassified_probability',
 
 		     # Parameters that are now handled by POPFile::Configuration
@@ -203,6 +203,7 @@ sub upgrade_parameter__
 		     'imeout',                   'GLOBAL_timeout',
 		     'xpl',                      'GLOBAL_xpl',
 		     'xtc',                      'GLOBAL_xtc',
+		     'download_count',           'GLOBAL_download_count',
 
 		     # Parameters that are now handled by POPFile::Logger
 
@@ -210,7 +211,6 @@ sub upgrade_parameter__
 
 		     # Parameters that are now handled by Proxy::POP3
 
-		     'download_count',           'pop3_download_count',
 		     'localpop',                 'pop3_local',
 		     'port',                     'pop3_port',
 		     'sport',                    'pop3_secure_port',
