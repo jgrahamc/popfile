@@ -78,7 +78,9 @@ mon
 select
 helo
 esmtp
+header:from
 alt
+header:From
 note
 border
 message

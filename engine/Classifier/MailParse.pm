@@ -317,24 +317,31 @@ sub increment_word
 # $encoded      Whether this was found inside encoded text
 # $literal      The literal text that generated this pseudoword
 #
+# Returns 0 if the pseudoword was filtered out by a stopword
+#
 # ---------------------------------------------------------------------------------------------
 sub update_pseudoword
 {
     my ( $self, $prefix, $word, $encoded, $literal ) = @_;
 
-    my $mword = "$prefix:$word";
+    my $mword = $self->{mangle__}->mangle("$prefix:$word",1);
 
-    if ( $self->{color__} ) {
-        if ( $encoded == 1 )  {
-            $literal =~ s/</&lt;/g;
-            $literal =~ s/>/&gt;/g;
-            my $color = $self->{bayes__}->get_color($mword);
-            my $to    = "<b><font color=\"$color\"><a title=\"$mword\">$literal</a></font></b>";
-            $self->{ut__} .= $to . ' ';
+    if ( $mword ne '' ) {
+        if ( $self->{color__} ) {
+            if ( $encoded == 1 )  {
+                $literal =~ s/</&lt;/g;
+                $literal =~ s/>/&gt;/g;
+                my $color = $self->{bayes__}->get_color($mword);
+                my $to    = "<b><font color=\"$color\"><a title=\"$mword\">$literal</a></font></b>";
+                $self->{ut__} .= $to . ' ';
+	    }
         }
+
+        $self->increment_word( $mword );
+        return 1;
     }
 
-   $self->increment_word( $mword );
+    return 0;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1534,22 +1541,25 @@ sub parse_header
 
     print "Header ($header) ($argument)\n" if ($self->{debug__});
 
-    if ( $self->{color__} ) {
-        my $color     = $self->{bayes__}->get_color( "header:$header" );
-
-        my $fix_argument = $argument;
-        $fix_argument =~ s/</&lt;/g;
-        $fix_argument =~ s/>/&gt;/g;
-
-        $self->{ut__} =  "<b><font color=\"$color\">$header</font></b>: $fix_argument\015\012";
-    }
-
     # After a discussion with Tim Peters and some looking at emails
     # I'd received I discovered that the header names (case sensitive) are
     # very significant in identifying different types of mail, for example
     # much spam uses MIME-Version, MiME-Version and Mime-Version
 
-    $self->update_pseudoword( 'header', $header, 0, $header );
+    my $fix_argument = $argument;
+    $fix_argument =~ s/</&lt;/g;
+    $fix_argument =~ s/>/&gt;/g;
+
+    if ( $self->update_pseudoword( 'header', $header, 0, $header ) ) {
+        if ( $self->{color__} ) {
+            my $color     = $self->{bayes__}->get_color( "header:$header" );
+            $self->{ut__} =  "<b><font color=\"$color\">$header</font></b>: $fix_argument\015\012";
+        }
+    } else {
+        if ( $self->{color__} ) {
+            $self->{ut__} =  "$header: $fix_argument\015\012";
+        }
+    }
 
     # Check the encoding type in all RFC 2047 encoded headers
 

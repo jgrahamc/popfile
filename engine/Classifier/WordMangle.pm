@@ -111,32 +111,34 @@ sub mangle
 
     # All words are treated as lowercase
 
-    $word = lc($word);
+    my $lcword = lc($word);
 
     # Stop words are ignored
 
-    return '' if ( ( $self->{stop__}{$word} ) && ( !defined( $ignore_stops ) ) );
+    return '' if ( ( ( $self->{stop__}{$lcword} ) ||
+                     ( $self->{stop__}{$word} ) ) &&
+                   ( !defined( $ignore_stops ) ) );
 
     # Remove characters that would mess up a Perl regexp and replace with .
 
-    $word =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\./g;
+    $lcword =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\./g;
 
     # Long words are ignored also
 
-    return '' if ( length($word) > 45 );
+    return '' if ( length($lcword) > 45 );
 
     # Ditch long hex numbers
 
-    return '' if ( $word =~ /^[A-F0-9]{8,}$/i );
+    return '' if ( $lcword =~ /^[A-F0-9]{8,}$/i );
 
     # Colons are forbidden inside words, we should never get passed a word
     # with a colon in it here, but if we do then we strip the colon.  The colon
     # is used as a separator between a special identifier and a word, see MailParse.pm
     # for more details
 
-    $word =~ s/://g if ( !defined( $allow_colon ) );
+    $lcword =~ s/://g if ( !defined( $allow_colon ) );
 
-    return $word;
+    return ($word =~ /:/ )?$word:$lcword;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -162,12 +164,12 @@ sub add_stopword
             return 0;
         }
     } else {
-        if ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) {
+        if ( ( $stopword !~ /:/ ) && ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) ) {
             return 0;
         }
     }
 
-    $stopword = $self->mangle( $stopword, 0, 1 );
+    $stopword = $self->mangle( $stopword, 1, 1 );
 
     if ( $stopword ne '' ) {
         $self->{stop__}{$stopword} = 1;
@@ -190,12 +192,12 @@ sub remove_stopword
             return 0;
         }
     } else {
-        if ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) {
+        if ( ( $stopword !~ /:/ ) && ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) ) {
             return 0;
         }
     }
 
-    $stopword = $self->mangle( $stopword, 0, 1 );
+    $stopword = $self->mangle( $stopword, 1, 1 );
 
     if ( $stopword ne '' ) {
         delete $self->{stop__}{$stopword};

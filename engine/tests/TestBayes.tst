@@ -747,9 +747,8 @@ test_assert_equal( $bucket, 'other' );
 test_assert( !defined( $usedtobe ) );
 test_assert_equal( $magnet, '' );
 
-# Test X-POPFile-TimeoutPrevention header insertion
-
-# TODO
+# TODO Check that magnet_match__ does what we expect in the presence of @
+# and $
 
 # TODO test that stop writes the parameters to disk
 
