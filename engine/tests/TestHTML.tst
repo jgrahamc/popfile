@@ -168,7 +168,7 @@ $p->configuration( $c );
 $p->mq( $mq );
 $p->logger( $l );
 $p->classifier( $b );
-$p->version( 'testsuite' );
+$p->version( 'vtest.suite.ver' );
 $p->initialize();
 
 our $h = new UI::HTML;
@@ -178,7 +178,7 @@ $h->mq( $mq );
 $h->logger( $l );
 $h->classifier( $b );
 $h->initialize();
-$h->version( 'testsuite' );
+$h->version( 'vtest.suite.ver' );
 test_assert_equal( $h->language(), 'English' );
 our $version = $h->version();
 
@@ -209,12 +209,13 @@ if ( $pid == 0 ) {
     $h->start();
 
     while ( 1 ) {
-        last if !$h->service();
+        $h->service();
 
         if ( pipeready( $dreader ) ) {
             my $command = <$dreader>;
 
             if ( $command =~ /^__QUIT/ ) {
+                $h->stop();
                 print $uwriter "OK\n";
                 last;
 	    }
@@ -222,6 +223,12 @@ if ( $pid == 0 ) {
             if ( $command =~ /^__GETCONFIG (.+)/ ) {
                 my $value = $c->parameter( $1 );
                 print $uwriter "OK $value\n";
+                next;
+	    }
+
+            if ( $command =~ /^__SETCONFIG (.+) (.+)/ ) {
+                $c->parameter( $1, $2 );
+                print $uwriter "OK\n";
                 next;
 	    }
 
@@ -328,6 +335,18 @@ if ( $pid == 0 ) {
             my $reply = <$ureader>;
             $reply =~ /^OK ([^\r\n]+)/;
             test_assert_equal( $1, $expected, "From script line $line_number" );
+            next;
+	}
+
+        if ( $line =~ /^SETCONFIG +([^ ]+) ?(.+)?$/ ) {
+            my ( $option, $value ) = ( $1, $2 );
+            $value = '' if ( !defined( $value ) );
+            print $dwriter "__SETCONFIG $option $value\n";
+            my $reply = <$ureader>;
+
+            if ( !( $reply =~ /^OK/ ) ) {
+                test_assert( 0, "From script line $line_number" );
+	    }
             next;
 	}
 

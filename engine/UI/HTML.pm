@@ -2359,13 +2359,13 @@ sub sort_filter_history
 
     if ( ( $filter ne '' ) || ( $search ne '' ) ) {
         foreach my $file (sort compare_mf keys %{$self->{history__}}) {
-            if ( ( $filter eq '' ) ||
+            if ( ( $filter eq '' ) ||                                                                            # PROFILE BLOCK START
                  ( $self->{history__}{$file}{bucket} eq $filter ) ||
                  ( ( $filter eq '__filter__magnet' ) && ( $self->{history__}{$file}{magnet} ne '' ) ) ||
-                 ( ( $filter eq '__filter__no__magnet' ) && ( $self->{history__}{$file}{magnet} eq '' ) ) ) {
-                if ( ( $search eq '' ) ||
+                 ( ( $filter eq '__filter__no__magnet' ) && ( $self->{history__}{$file}{magnet} eq '' ) ) ) {    # PROFILE BLOCK STOP
+                if ( ( $search eq '' ) ||                                                                        # PROFILE BLOCK START
                    ( $self->{history__}{$file}{from}    =~ /\Q$search\E/i ) ||
-                   ( $self->{history__}{$file}{subject} =~ /\Q$search\E/i ) ) {
+                   ( $self->{history__}{$file}{subject} =~ /\Q$search\E/i ) ) {                                  # PROFILE BLOCK STOP
                            if ( defined( $self->{history_keys__} ) ) {
                             @{$self->{history_keys__}} = (@{$self->{history_keys__}}, $file);
                         } else {
@@ -2391,16 +2391,16 @@ sub sort_filter_history
         $descending = 1;
     }
 
-    if ( ( $sort ne '' ) &&
+    if ( ( $sort ne '' ) &&                                           # PROFILE BLOCK START
 
          # If the filter had no messages, this will be undefined
          # and there are no ways to sort nothing
 
-         defined @{$self->{history_keys__}} ) {
+         defined @{$self->{history_keys__}} ) {                       # PROFILE BLOCK STOP
 
         @{$self->{history_keys__}} = sort {
-                                            my ($a1,$b1) = ($self->{history__}{$a}{$sort},
-                                              $self->{history__}{$b}{$sort});
+                                            my ($a1,$b1) = ($self->{history__}{$a}{$sort},  # PROFILE BLOCK START
+                                              $self->{history__}{$b}{$sort});               # PROFILE BLOCK STOP
                                               $a1 =~ s/&(l|g)t;//ig;
                                               $b1 =~ s/&(l|g)t;//ig;
                                               $a1 =~ s/[^A-Z0-9]//ig;
@@ -2610,8 +2610,8 @@ sub new_history_file__
     if ( open MAIL, '<'. $self->global_config_( 'msgdir' ) . $file ) {
         while ( <MAIL> )  {
             last          if ( /^(\r\n|\r|\n)/ );
-            $from = $1    if ( /^From:(.*)/i );
-            $subject = $1 if ( /^Subject:(.*)/i );
+            $from = $1    if ( /^From: *(.*)/i );
+            $subject = $1 if ( /^Subject: *(.*)/i );
             last if ( ( $from ne '' ) && ( $subject ne '' ) );
         }
         close MAIL;
@@ -3110,16 +3110,16 @@ sub history_page
 
     if ( defined( $self->{form_}{clearall} ) ) {
         foreach my $i (0 .. $self->history_size()-1 ) {
-            $self->history_delete_file( $self->{history_keys__}[$i],
-                                        $self->config_( 'archive' ) );
+            $self->history_delete_file( $self->{history_keys__}[$i],   # PROFILE BLOCK START
+                                        $self->config_( 'archive' ) ); # PROFILE BLOCK STOP
         }
     }
 
     if ( defined($self->{form_}{clearpage}) ) {
         foreach my $i ( $self->{form_}{start_message} .. $self->{form_}{start_message} + $self->config_( 'page_size' ) - 1 ) {
             if ( defined( $self->{history_keys__}[$i] ) ) {
-                $self->history_delete_file( $self->{history_keys__}[$i],
-                                            $self->config_( 'archive' ) );
+                $self->history_delete_file( $self->{history_keys__}[$i],   # PROFILE BLOCK START
+                                            $self->config_( 'archive' ) ); # PROFILE BLOCK STOP
             }
         }
     }
@@ -3282,7 +3282,7 @@ sub history_page
                     }
                     $body .= "</select>\n";
                 } else {
-                    $body .= " ($self->{language__}{History_MagnetUsed}: " . splitline( $self->{history__}{$mail_file}{magnet}, 0 ) . ")";
+                    $body .= " ($self->{language__}{History_MagnetUsed}: " . Classifier::MailParse::splitline( $self->{history__}{$mail_file}{magnet}, 0 ) . ")";
                 }
             }
 
@@ -3456,7 +3456,7 @@ sub view_page
                 }
                 $body .= "</select>\n<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />";
         } else {
-                $body .= " ($self->{language__}{History_MagnetUsed}: " . splitline( $self->{history__}{$mail_file}{magnet} , 0) . ")";
+                $body .= " ($self->{language__}{History_MagnetUsed}: " . Classifier::MailParse::splitline( $self->{history__}{$mail_file}{magnet} , 0) . ")";
         }
     }
 
@@ -3940,36 +3940,6 @@ sub register_configuration_item__
 
    $self->{dynamic_ui__}{$type}{$name} = $object;
 }
-
-# ---------------------------------------------------------------------------------------------
-#
-# splitline - Escapes characters so a line will print as plain-text within a HTML document.
-#
-# $line         The line to escape
-# $encoding     The value of any current encoding scheme
-#
-# ---------------------------------------------------------------------------------------------
-
-sub splitline
-{
-    my ($line, $encoding) = @_;
-
-    $line =~ s/([^\r\n]{100,120} )/$1\r\n/g;
-    $line =~ s/([^ \r\n]{120})/$1\r\n/g;
-
-    $line =~ s/</&lt;/g;
-    $line =~ s/>/&gt;/g;
-
-    if ( $encoding =~ /quoted\-printable/i ) {
-        $line =~ s/=3C/&lt;/g;
-        $line =~ s/=3E/&gt;/g;
-    }
-
-    $line =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
-
-    return $line;
-}
-
 
 # ---------------------------------------------------------------------------------------------
 #

@@ -39,6 +39,7 @@
 # SUBMIT a          Finds the form with input a and submits it
 # SETSUBMIT a b     Just like doing SETINPUT a b followed by SUBMIT a
 # CONFIGIS a b      Verify that config item a has value b
+# SETCONFIG a b     Set config item a to b
 # MAGNETIS a b c    Checks that magnet c exists in bucket a with type b
 # PARAMETERIS a b c Check that parameter b in bucket a has value c
 # CLICK a           Click the button called a
@@ -120,7 +121,7 @@ MATCH
 ENDMATCH
 
 GET /security
-MATCH 
+MATCH
 <td class="menuSelected" align="center">
 <a class="menuLink" href="/security?session=$sk">
 ENDMATCH
@@ -140,10 +141,10 @@ GET /history
 # sort options are present
 
 MATCH &lt;no subject line&gt;
-MATCH <a title=" test\@test.com"> test\@test.com</a>
-MATCH Enlarge your package Doctor ApprovedNH...
+MATCH <a title="test\@test.com">test\@test.com</a>
+MATCH Enlarge your package Doctor ApprovedNHOB...
 MATCH &lt;no from line&gt;
-MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH VI ID: 24052  Status: Open  Sev: 2
 MATCH <a href="buckets?session=$sk&showbucket=spam"><font color="blue">spam</font></a>
 MATCH &gt;ID
@@ -157,7 +158,7 @@ GET /history?start_message=20&amp;session=$sk
 MATCH Jump to message: [<a href="/history?start_message=0&amp;session=$sk">< Previous</a>] [<a href="/history?start_message=0&amp;session=$sk">1</a>] <b>21</b>
 MATCH XoSeXyGoDdEsSm\@hotmail.com
 MATCH from: Leandro
-NOTMATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+NOTMATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 GET /history
 
 # Check refresh
@@ -193,29 +194,29 @@ NOTMATCH Jump to message
 CLICK reset_filter_search
 NOTMATCH searched for from/subject
 NOTMATCH No messages.
-MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH Jump to message
 
 SETSUBMIT search test.com
 MATCH searched for from/subject test.com
 MATCH test\@test.com
-NOTMATCH Enlarge your package Doctor ApprovedNH...
+NOTMATCH Enlarge your package Doctor ApprovedNHOB...
 NOTMATCH Jump to message
 CLICK reset_filter_search
 NOTMATCH searched for from/subject
 NOTMATCH No messages.
-MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH Jump to message
 
 SETSUBMIT search Doctor
 MATCH searched for from/subject Doctor
 NOTMATCH test\@test.com
-MATCH Enlarge your package Doctor ApprovedNH...
+MATCH Enlarge your package Doctor ApprovedNHOB...
 NOTMATCH Jump to message
 CLICK reset_filter_search
 NOTMATCH searched for from/subject
 NOTMATCH No messages.
-MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH Jump to message
 
 # Check filter
@@ -223,13 +224,13 @@ MATCH Jump to message
 SETINPUT filter personal 
 CLICK setfilter
 MATCH (just showing bucket <font color="green">personal</font>)
-NOTMATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+NOTMATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH Testing Refresh
 CLICK reset_filter_search
 SETINPUT filter spam
 CLICK setfilter
 MATCH (just showing bucket <font color="blue">spam</font>)
-MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 NOTMATCH Testing Refresh
 MATCH Jump to message: <b>1</b> [<a href="/history?start_message=20&amp;session=$sk&amp;filter=spam">21</a>] [<a href="/history?start_message=20&amp;session=$sk&amp;filter=spam">Next ></a>]
 GET /history?start_message=20&amp;session=$sk&amp;filter=spam
@@ -240,16 +241,18 @@ MATCH (just showing bucket <font color="red">other</font>)
 MATCH No messages.
 CLICK reset_filter_search
 
-# TODO Check sorting
+# Check sorting
 
-
+MATCH <a href="/history?session=$sk&amp;setsort=bucket">Classification</a>
+GET /history?session=$sk&amp;setsort=bucket
+MATCH <a href="buckets?session=$sk&showbucket=personal"><font color="green">personal</font></a>
+MATCH <a href="/history?session=$sk&amp;setsort=-bucket"><em class="historyLabelSort">&gt;Classification</em></a>
+GET /history?session=$sk&amp;setsort=-bucket
+MATCH <a href="/history?session=$sk&amp;setsort=bucket"><em class="historyLabelSort">&lt;Classification</em></a>
+NOTMATCH <a href="buckets?session=$sk&showbucket=personal"><font color="green">personal</font></a>
+GET /history?session=$sk&amp;setsort=
 
 # TODO Check reclassification
-
-# TODO Check delete one message
-# TODO Check delete some messages
-# TODO Check delete page of messages
-# TODO Check delete all messages
 
 # Check click through from bucket name
 
@@ -258,8 +261,71 @@ GET /buckets?session=$sk&showbucket=spam
 MATCH Detail for <font color="blue">spam</font>
 GET /history
 
-# TODO single message view for accuracy
+# Single message view for accuracy
+
+MATCH <a class="messageLink" title="Testing Refresh" href="/view?view=popfile10000=1.msg&amp;start_message=0&amp;session=$sk">Testing Refresh</a>
+GET /view?view=popfile10000=1.msg&amp;start_message=0&amp;session=$sk
+MATCH Single Message View
+MATCH Testing Refresh
+MATCH John
+MATCH <font color=\"green\">personal</font>
+MATCH Scores
+MATCH 0.769209
+MATCH 0.230763
+MATCH 2.829186e-05
+MATCH <font color="red">here</font>
+MATCH 0.0017
+MATCH 0.0034
+MATCH <font color="black">John</font>
+MATCH <font color="red">here</font>
+MATCH Body would
+
+# Jump to message
+
+GET /jump_to_message?view=popfile10000=1.msg
+MATCH Single Message View
+MATCH Testing Refresh
+MATCH John
+MATCH <font color=\"green\">personal</font>
+MATCH Scores
+MATCH 0.769209
+MATCH 0.230763
+MATCH 2.829186e-05
+MATCH <font color="red">here</font>
+MATCH 0.0017
+MATCH 0.0034
+MATCH <font color="black">John</font>
+MATCH <font color="red">here</font>
+MATCH Body would
+
+GET /jump_to_message?view=popfile10001=1.msg
+NOTMATCH Single Message View
+MATCH Recent Messages
+
+# TODO quick magnets
 # TODO reclassify from single message view
+
+# TODO Check delete one message
+
+MATCH Testing Refresh
+GET /history
+#SETINPUT remove on
+#CLICK deletemessage
+#NOTMATCH Testing Refresh
+
+# TODO Check delete some messages
+
+# Check delete page of messages
+
+GET /history
+CLICK clearpage
+MATCH <a href="buckets?session=$sk&showbucket=spam"><font color="blue">spam</font></a>
+NOTMATCH Jump to message: <b>1</b> [<a href="/history?start_message=20&amp;session=$sk">21</a>] [<a href="/history?start_message=20&amp;session=$sk">Next ></a>]
+
+# Check delete all messages
+
+CLICK clearall
+MATCH No messages.
 
 # Magnets Page
 
@@ -289,6 +355,16 @@ INPUTIS   text5 newmagnet
 INPUTIS   type5 subject
 INPUTIS   bucket5 spam
 MAGNETIS  spam subject newmagnet
+
+SETINPUT text0 foo
+SETINPUT type0 from
+SETSUBMIT bucket0 personal
+MATCH Magnet 'from: foo' already exists in bucket 'personal' 
+
+SETINPUT text0 fo
+SETINPUT type0 from
+SETSUBMIT bucket0 personal
+MATCH New magnet 'from: fo' clashes with magnet 'from: foo' in bucket 'personal' and could cause ambiguous results.
 
 # Check magnet change value
 
@@ -350,8 +426,20 @@ INPUTIS text4 baz\@baz.com
 INPUTIS bucket4 personal
 INPUTIS type4 to
 
+# Check the magnet navigator
+
+GET /configuration
+SETSUBMIT page_size 3
+GET /magnets
+MATCH Jump to magnet page: <b>1</b> [<a href="/magnets?start_magnet=3&amp;session=$sk">2</a>] [<a href="/magnets?start_magnet=3&amp;session=$sk">Next ></a>]
+GET /magnets?start_magnet=3&amp;session=$sk
+MATCH Jump to magnet page: [<a href="/magnets?start_magnet=0&amp;session=$sk">< Previous</a>] [<a href="/magnets?start_magnet=0&amp;session=$sk">1</a>] <b>2</b> 
+GET /configuration
+SETSUBMIT page_size 20
+
 # Check magnet deletion
 
+GET /magnets
 SETINPUT remove5 on
 CLICK delete
 NOTMATCH newmagnetvalue
@@ -666,9 +754,6 @@ MATCH >14,002<
 
 # Check statistics displayed correctly
 
-MATCH >Not enough data<
-MATCH >0 (  0.00%)<
-
 MATCH >1,785 (12.74%)<
 MATCH >103 (0.73%)<
 MATCH >12,114 (86.51%)<
@@ -677,7 +762,14 @@ MATCH <td bgcolor="red" title="other (12.74%)" width="12%"><img src="pix.gif" al
 MATCH <td bgcolor="green" title="personal (0.73%)" width="1%"><img src="pix.gif" alt="" height="20" width="1" /></td>
 MATCH <td bgcolor="blue" title="spam (86.51%)" width="86%"><img src="pix.gif" alt="" height="20" width="1" /></td>
 
-# TODO Check Reset Statistics
+# Check Reset Statistics
+
+MATCH <td align="right">132</td>
+MATCH <td align="right">3</td>
+MATCH <td align="right">97.72%</td>
+CLICK reset_stats
+MATCH >Not enough data<
+MATCH >0 (  0.00%)<
 
 # Check bucket creation
 
@@ -691,6 +783,9 @@ SETSUBMIT cname bu%cket
 MATCH Bucket names can only contain the letters a to z in lower case
 SETSUBMIT cname BUCKET
 MATCH Bucket names can only contain the letters a to z in lower case
+
+SETSUBMIT cname spam
+MATCH Bucket named spam already exists
 
 MATCH spam
 MATCH personal
@@ -784,5 +879,48 @@ MATCH <a class="wordListLink" href="/buckets?session=$sk&amp;lookup=Lookup&amp;w
 CLICK clearbucket
 MATCH <td width="1%">&nbsp;</td><td align="right">0</td><td width="1%">&nbsp;</td>
 
-# TODO Check shutdown operation
-# TODO Check bad session key
+# Check the login message
+
+SENDMSG LOGIN iloggedin
+GET /
+MATCH - iloggedin)
+
+# Check bad session key
+
+GET /history?session=123456
+MATCH POPFile Session Expired
+
+# TODO Get ICO, GIF, CSS, PNG, LOG and HTML file
+
+# Get a page that does not exist
+
+GET /foo
+
+# Check update checking
+
+SETCONFIG html_update_check 1
+SETCONFIG html_send_stats 1
+SETCONFIG html_last_update_check 0
+SETCONFIG GLOBAL_ecount 1
+GET /
+MATCH popfile_update.pl
+MATCH popfile_stats.pl
+
+# Check the operation of passwords
+
+GET /security
+INPUTIS password
+CONFIGIS html_password
+SETSUBMIT password secret
+GET /advanced?session=123456
+MATCH Enter password:
+SETSUBMIT password secret
+MATCH All POPFile Parameters
+GET /security
+
+# Check shutdown operation
+
+GET /shutdown
+MATCH Enter password:
+SETSUBMIT password secret
+MATCH POPFile shutdown  
