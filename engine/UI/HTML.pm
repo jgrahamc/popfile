@@ -2044,20 +2044,37 @@ sub history_page
             $body .="<h2>$self->{language}{History_Title}$filtered</h2>\n"; 
         }
         
-        $body .= "<table width=\"100%\">\n<tr valign=\"bottom\">\n<td>\n<a href=/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=>";
+        $body .= "<table width=\"100%\">\n";
+        
+        $body .= "<tr valign=\"bottom\"><td></td><td colspan=\"2\"><form action=\"/history\">";
+		$body .= "<input type=hidden name=filter value=\"$self->{form}{filter}\">";
+		$body .= "<input type=hidden name=sort value=\"$self->{form}{sort}\">";
+		$body .= "<input type=hidden name=session value=\"$self->{session_key}\">";
+		$body .= "<b>$self->{language}{History_SearchMessage}:&nbsp;</b>";
+		$body .= "<input type=\"text\" name=\"search\"> ";
+        $body .= "<input type=submit class=submit name=searchbutton value=\"$self->{language}{Find}\"></form>\n
+        </td><td colspan=\"3\">\n<form action=\"/history\">\n" ;
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n" ;
+        $body .= "<select name=\"filter\"><option value=\"__filter__all\">&lt;$self->{language}{History_ShowAll}&gt;</option>\n";
+        
+        my @buckets = sort keys %{$self->{classifier}->{total}};
+        foreach my $abucket (@buckets) {
+            $body .= "<option value=\"$abucket\"";
+            $body .= " selected" if ( ( defined($self->{form}{filter}) ) && ( $self->{form}{filter} eq $abucket ) );
+            $body .= ">$abucket</option>";
+        }
+        $body .= "<option value=\"__filter__magnet\">&lt;$self->{language}{History_ShowMagnet}&gt;</option>\n" ;
+        $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\">\n" ;
+        $body .= "</form>";
+        
+        $body .= "<tr valign=\"bottom\"><td><a href=/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=>";
         if ( $self->{form}{sort} eq '' ) {
             $body .= "<b>ID</b>";
         } else {
             $body .= "ID";
         }
         $body .= "</a></td>\n" ;
-        $body .= "<td>\n<form action=\"/history\">";
-        $body .= "<input type=hidden name=filter value=\"$self->{form}{filter}\">" ;
-        $body .= "<input type=hidden name=sort value=\"$self->{form}{sort}\">" ;
-        $body .= "<input type=hidden name=session value=\"$self->{session_key}\">" ;
-        $body .= "<b>$self->{language}{History_SearchMessage}:&nbsp;</b>" ;
-        $body .= "<input type=\"text\" name=\"search\"> " ;
-        $body .= "<input type=submit class=submit name=searchbutton value=\"$self->{language}{Find}\"></form>\n<a href=/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=from>";
+        $body .= "<td>\n<a href=/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=from>";
         
         if ( $self->{form}{sort} eq 'from' ) {
             $body .= "<b>$self->{language}{From}</b>";
@@ -2073,19 +2090,7 @@ sub history_page
             $body .= "$self->{language}{Subject}";
         }
         
-        $body .= "</a>\n<td>\n<form action=\"/history\">\n" ;
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n" ;
-        $body .= "<select name=\"filter\"><option value=\"__filter__all\">&lt;$self->{language}{History_ShowAll}&gt;</option>\n";
-        
-        my @buckets = sort keys %{$self->{classifier}->{total}};
-        foreach my $abucket (@buckets) {
-            $body .= "<option value=\"$abucket\"";
-            $body .= " selected" if ( ( defined($self->{form}{filter}) ) && ( $self->{form}{filter} eq $abucket ) );
-            $body .= ">$abucket</option>";
-        }
-        $body .= "<option value=\"__filter__magnet\">&lt;$self->{language}{History_ShowMagnet}&gt;</option>\n" ;
-        $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\">\n" ;
-        $body .= "</form>\n<a href=/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=bucket>";
+        $body .= "</a>\n<td>\n<a href=/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=bucket>";
         
         if ( $self->{form}{sort} eq 'bucket' ) {
             $body .= "<b>$self->{language}{Classification}</b>";
