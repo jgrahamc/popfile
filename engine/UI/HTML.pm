@@ -196,6 +196,11 @@ sub initialize
 
     $self->config_( 'columns', '-inserted,+from,+to,+cc,+subject,+date,+bucket' );
 
+    # An overriden date format set by the user, if empty then the Locale_Date from the language
+    # file is used (see pretty_date__)
+
+    $self->config_( 'date_format', '' );
+
     # Load skins
 
     $self->load_skins__();
@@ -889,6 +894,26 @@ sub pretty_number
     $number =~ s/^$c(.*)/$1/;
 
     return $number;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# pretty_date__ - format a date as the user wants to see it
+#
+# $date           Epoch seconds
+#
+# ---------------------------------------------------------------------------------------------
+sub pretty_date__
+{
+    my ( $self, $date ) = @_;
+
+    my $format = $self->config_( 'date_format' );
+
+    if ( $format eq '' ) {
+        $format = $self->{language__}{Locale_Date};
+    }
+
+    return time2str( $format, $date );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2204,11 +2229,11 @@ sub history_page
                 $header =~ /(.)(.+)/;
                 $row_data{"History_If_$2"} = ( $1 eq '+')?1:0;
 	    }
-            $row_data{History_Arrived}       = time2str( $self->{language__}{Locale_Date}, $$row[7] );
+            $row_data{History_Arrived}       = $self->pretty_date__( $$row[7] );
             $row_data{History_From}          = $$row[1];
             $row_data{History_To}            = $$row[2];
             $row_data{History_Cc}            = $$row[3];
-            $row_data{History_Date}          = time2str( $self->{language__}{Locale_Date}, $$row[5] );
+            $row_data{History_Date}          = $self->pretty_date__( $$row[5] );
             $row_data{History_Subject}       = $$row[4];
             $row_data{History_Short_From}    = $self->shorten__( $$row[1] );
             $row_data{History_Short_To}      = $self->shorten__( $$row[2] );
@@ -2539,10 +2564,10 @@ sub load_template__
     # Set a variety of common elements that are used repeatedly throughout
     # POPFile's pages
 
-    my $now = localtime;
+    my $now = time;
     my %fixups = ( 'Skin_Root'               => $root,
                    'Session_Key'             => $self->{session_key__},
-                   'Common_Bottom_Date'      => $now,
+                   'Common_Bottom_Date'      => $self->pretty_date__( $now ),
                    'Common_Bottom_LastLogin' => $self->{last_login__},
                    'Common_Bottom_Version'   => $self->version() );
 
