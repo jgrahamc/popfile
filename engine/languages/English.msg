@@ -198,3 +198,6 @@ SingleBucket_Percentage                 Percentage of total
 SingleBucket_WordTable                  Word Table for %s
 SingleBucket_Message1                   Starred (*) words have been used for classification in this POPFile session.  Click any word to lookup its probability for all buckets.
 SingleBucket_Unique                     %s unique
+
+Session_Title                           POPFile Session Expired
+Session_Error                           Your POPFile session has expired.  This could have been caused by starting and stopping POPFile but leaving your web browser open.  Please click one of the links above to continue using POPFile.

@@ -117,7 +117,6 @@ sub initialize
 
     # Calculate a session key
     change_session_key($self);
-    $self->{session_key} = '';
 
     calculate_today( $self );
     
@@ -2166,6 +2165,19 @@ sub password_page
 
 # ---------------------------------------------------------------------------------------------
 #
+# session_page - Simple page information the user of a bad session key
+#
+# $client     The web browser to send the results to
+#
+# ---------------------------------------------------------------------------------------------
+sub session_page 
+{
+    my ( $self, $client ) = @_;
+    http_ok($self, $client, "<h2>$self->{language}{Session_Title}</h2><p>$self->{language}{Session_Error}", 99);
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # handle_url - Handle a URL request
 #
 # $client     The web browser to send the results to
@@ -2251,7 +2263,12 @@ sub handle_url
         return 1;
     }
 
-    if ( ( $url eq '/' ) || (!defined($self->{form}{session})) || ( $self->{form}{session} ne $self->{session_key} ) ) {
+    if ( ( defined($self->{form}{session}) ) && ( $self->{form}{session} ne $self->{session_key} ) ) {
+        session_page( $self, $client, 0, $url );
+        return 1;
+    }
+
+    if ( ( $url eq '/' ) || (!defined($self->{form}{session})) ) {
         delete $self->{form};
     }
 
