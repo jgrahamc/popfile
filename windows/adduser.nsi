@@ -168,7 +168,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.41"
+  !define C_PFI_VERSION  "0.2.42"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -1136,6 +1136,9 @@ skip_rel_notes:
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (full).lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (full).lnk" \
                  "$G_ROOTDIR\pfidiag.exe" "/full"
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\Create 'User Data' shortcut.lnk" NORMAL
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\Create 'User Data' shortcut.lnk" \
+                 "$G_ROOTDIR\pfidiag.exe" "/shortcut"
 
 silent_shutdown:
   SetOutPath "$G_ROOTDIR"
