@@ -360,6 +360,9 @@ sub post
 {
     my ( $self, $type, $message, $parameter ) = @_;
 
+    $message = '' if ( !defined( $message ) );
+    $parameter = '' if ( !defined( $parameter ) );
+
     $self->log_( 2, "post $type, $message, $parameter" );
 
     # If we are in the parent process then just stick this on the queue,
