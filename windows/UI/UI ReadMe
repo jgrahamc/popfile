@@ -2,7 +2,7 @@
 NOTES ON HOW THE CUSTOMISED UI FILES FOR THE POPFILE INSTALLER WERE CREATED
 =============================================================================
 
-Last updated: 22 September 2003 (11:50 GMT)
+Last updated: 19 November 2003 (23:41 GMT)
 
 =============================================================================
 INTRODUCTION
@@ -21,7 +21,7 @@ To solve this problem, the following customised UI files have been created:
 (3) pfi_headerbmpr.exe based upon ${NSISDIR}\Contrib\UIs\modern_headerbmpr.exe
 
 The current versions of these customised UI files are based upon the UI files
-provided in the NSIS CVS snapshot of 27 August 2003 (19:44 GMT).
+provided in the NSIS 2.0b4 release (dated 19 November 2003).
 
 Future updates to the NSIS compiler may not be compatible with these customised
 UI files. These notes describe in detail how these files were created, to make
@@ -39,8 +39,8 @@ when POPFile is being started by the installer and also when an uninstall is
 performed during an upgrade installation. The banner's icon has been moved to
 the left to allow the width of the two text areas to be increased.
 
-'pfi_modern.exe' v1.1 was created by modifying 'modern.exe', NSIS CVS v1.33
-(dated 05-Aug-2003), as follows:
+'pfi_modern.exe' v1.2 was created by modifying 'modern.exe', NSIS CVS v1.37
+(dated 24-Oct-2003), as follows:
 
 [1] Dialog 111, Control 103 (the icon image)
 
@@ -83,8 +83,8 @@ units, leaving 40 units available to increase the width of the two text areas.
 'PFI_HEADERBMP.EXE' CHANGES (bitmap appears at the left of the header area)
 =============================================================================
 
-'pfi_headerbmp.exe' v1.1 was created by modifying 'modern_headerbmp.exe',
-NSIS CVS v1.5 (dated 05-Aug-2003), as follows:
+'pfi_headerbmp.exe' v1.2 was created by modifying 'modern_headerbmp.exe',
+NSIS CVS v1.6 (dated 12-Oct-2003), as follows:
 
 [1] Dialog 105, Control 1037 (the TITLE text area)
 
@@ -95,8 +95,8 @@ NSIS CVS v1.5 (dated 05-Aug-2003), as follows:
 
 [2] Dialog 105, Control 1038 (the SUBTITLE text area)
 
-       Left/Top/Width/Height changed from "110, 17, 210, 16"
-                                       to  "70, 17, 250, 16"
+       Left/Top/Width/Height changed from "110, 16, 210, 16"
+                                       to  "70, 16, 250, 16"
 
        (i.e. left edge moved 40 units to left, width increased by 40 units)
 
@@ -111,8 +111,8 @@ NSIS CVS v1.5 (dated 05-Aug-2003), as follows:
 'PFI_HEADERBMPR.EXE' CHANGES (bitmap appears at the right of the header area)
 =============================================================================
 
-'pfi_headerbmpr.exe' v1.1 was created by modifying 'modern_headerbmpr.exe',
-NSIS CVS v1.5 (dated 05-Aug-2003), as follows:
+'pfi_headerbmpr.exe' v1.2 was created by modifying 'modern_headerbmpr.exe',
+NSIS CVS v1.6 (dated 12-Oct-2003), as follows:
 
 [1] Dialog 105, Control 1037 (the TITLE text area)
 
@@ -123,8 +123,8 @@ NSIS CVS v1.5 (dated 05-Aug-2003), as follows:
 
 [2] Dialog 105, Control 1038 (the SUB-TITLE text area)
 
-       Left/Top/Width/Height changed from "15, 17, 210, 16"
-                                       to "15, 17, 250, 16"
+       Left/Top/Width/Height changed from "15, 16, 210, 16"
+                                       to "15, 16, 250, 16"
 
        (i.e. width increased by 40 units)
 
