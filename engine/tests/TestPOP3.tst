@@ -330,7 +330,7 @@ if ( $pid == 0 ) {
 
         my $now = time;
 
-        while ( $p->service() && ( ( $now + 5 ) > time ) ) {
+        while ( $p->service() && ( ( $now + 10 ) > time ) ) {
 	}
 
         my @kids = keys %{$p->{children__}};
@@ -632,6 +632,10 @@ if ( $pid == 0 ) {
         test_assert( !defined( $usedtobe ) );
         test_assert_equal( $magnet, '' );
 
+        # TODO Test basic TOP capability with toptoo gets classification
+        # TODO Test RETR after TOP comes from cache
+        # TODO Test TOP after TOP comes from cache
+
         # Check that we echo the remote servers QUIT response
 
         print $client "QUIT$eol";
@@ -640,13 +644,82 @@ if ( $pid == 0 ) {
 
         close $client;
 
-        # TODO QUIT straight after connect
+        # Test QUIT straight after connect
 
-        # TODO odd command straight after connect gives error
+        my $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
 
-        # TODO -pop3_toptoo tests with caching behavior
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
 
-        # TODO SPA/AUTH tests with good, bad and missing remote servers
+        my $result = <$client>;
+        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "QUIT$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK goodbye$eol" );
+
+        close $client;
+
+        # Test odd command straight after connect gives error
+
+        my $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        my $result = <$client>;
+        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "FOOF$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "-ERR unknown command or bad syntax$eol" );
+
+        print $client "QUIT$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK goodbye$eol" );
+
+        close $client;
+
+        # TODO the APOP command
+
+        # Test SPA/AUTH commands with no secure server specified
+
+        my $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        my $result = <$client>;
+        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "CAPA$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "-ERR No secure server specified$eol" );
+
+        print $client "AUTH$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "-ERR No secure server specified$eol" );
+
+        print $client "AUTH username$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "-ERR No secure server specified$eol" );
+
+        print $client "QUIT$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK goodbye$eol" );
+
+        close $client;
+
+        # TODO SPA/AUTH tests with good, bad servers
 
         while ( waitpid( $pid, &WNOHANG ) != $pid ) {
         }
