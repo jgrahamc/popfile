@@ -353,7 +353,9 @@ sub classify_file
     {
         foreach my $b (@ranking)
         {
-            print "    Bucket $b has score $score{$b}\n";
+            print "    Bucket $b has score ";
+            print 1 / ( -$score{$b} );
+            print "\n";
         }
     }
 

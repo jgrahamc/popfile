@@ -24,7 +24,7 @@ if ( $#ARGV == 0 )
 }
 else
 {
-    print "bayes.pl - output the probability that a message is in each bucket\n\n";
+    print "bayes.pl - output the score that a message is in each bucket\n\n";
     print "Usage: bayes.pl <messages>\n";
     print "       <messages>         Filename of message(s) to classify\n";
 }
