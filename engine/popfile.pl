@@ -2510,16 +2510,20 @@ sub run_popfile
                     next;
                 }
 
-                # The client is requesting a specific message.  
+                # Note the horrible hack here where we detect a command of the form TOP x 99999999 this
+                # is done so that fetchmail can be used with POPFile.  
                 if ( $command =~ /TOP (.*) (.*)/i )
                 {
-                    if ( echo_response( $mail, $client, $command ) )
-                    {
-                        echo_to_dot( $mail, $client );
-                    }
+                    if ( $2 ne '99999999' ) 
+                    {                    
+                        if ( echo_response( $mail, $client, $command ) )
+                        {
+                            echo_to_dot( $mail, $client );
+                        }
 
-                    flush_extra( $mail, $client, 0 );
-                    next;
+                        flush_extra( $mail, $client, 0 );
+                        next;
+                    }
                 }
 
                 # The XSENDER command
@@ -2547,7 +2551,9 @@ sub run_popfile
                 }                
 
                 # The client is requesting a specific message.  
-                if ( $command =~ /RETR (.*)/i )
+                # Note the horrible hack here where we detect a command of the form TOP x 99999999 this
+                # is done so that fetchmail can be used with POPFile.  
+                if ( ( $command =~ /RETR (.*)/i ) || ( $command =~ /TOP (.*) 99999999/i ) ) 
                 {
                     # Get the message from the remote server, if there's an error then we're done, but if not then
                     # we echo each line of the message until we hit the . at the end
