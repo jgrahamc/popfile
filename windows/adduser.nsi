@@ -168,7 +168,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.39"
+  !define C_PFI_VERSION  "0.2.40"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -635,7 +635,7 @@ Function .onInit
 
   ; The command-line switch '/install' (or '/installreboot') is used to suppress this wizard's
   ; language selection dialog when the wizard is called from 'setup.exe' during installation
-  ; of POPFile. The '/restore="path to restored data"' switch peforms a similar function when
+  ; of POPFile. The '/restore="path to restored data"' switch performs a similar function when
   ; this wizard is called from the POPFile 'User Data' Restore wizard.
 
   Call GetParameters
@@ -1183,39 +1183,24 @@ SectionEnd
 #--------------------------------------------------------------------------
 # Installer Section: Pre-0.22.0 SQLite Database Backup component (always 'installed')
 #
-# If we are performing an upgrade of a POPFile 0.21.0 or 0.21.1 installation, the SQLite
-# database will be upgraded (and the message history converted) so we make a backup of the
-# SQlite database before running POPFile for the first time.
+# If we are performing an upgrade of a POPFile 0.21.x installation, the SQL database will be
+# upgraded (and the message history converted) so we make a backup of the SQlite database before
+# running POPFile for the first time (if the SQL database is not SQLite then no backup is made).
 #
 # The backup is created in the '$G_USERDIR\backup' folder. Information on the backup is stored
 # in the 'backup.ini' file to assist in restoring the old corpus.
 #
-# If SQLite database conversion is required, we will use the 'Message Capture' utility to show
+# If SQL database conversion is required, we will use the 'Message Capture' utility to show
 # the conversion progress reports (instead of running POPFile in a console window)
 #--------------------------------------------------------------------------
 
 Section "-SQLCorpusBackup" SecSQLBackup
 
-  !define L_MESSAGES  $R9
-  !define L_SQL_DB    $R8
-  !define L_TEMP      $R7
+  !define L_SQL_DB    $R9
+  !define L_TEMP      $R8
 
-  Push ${L_MESSAGES}
   Push ${L_SQL_DB}
   Push ${L_TEMP}
-
-  Push $G_USERDIR
-  Call GetMessagesPath
-  Pop ${L_MESSAGES}
-
-  ; If the new style of 'messages' folder is in use, assume SQL database uses the new schema
-  ; so there is no need to make a backup of the existing database
-
-  IfFileExists "${L_MESSAGES}\00\*.*" exit
-
-  ; If the 'messages' folder has messages in it, assume we need to backup the SQL database
-
-  IfFileExists "${L_MESSAGES}\*.msg" 0 exit
 
   ; If there is no 'popfile.cfg' then we cannot find the SQL database configuration
 
@@ -1224,6 +1209,13 @@ Section "-SQLCorpusBackup" SecSQLBackup
   ; If the SQLite backup folder exists, do not attempt to backup the database
 
   IfFileExists "$G_USERDIR\backup\oldsql\*.*" exit
+
+  ; If popfile.cfg contains the old-style of archive parameter,
+  ; assume the SQL database will  need to be converted
+
+  Call CheckArchiveFormat
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "old style" 0 exit
 
   Push $G_USERDIR
   Call GetSQLdbPathName
@@ -1259,9 +1251,7 @@ Section "-SQLCorpusBackup" SecSQLBackup
 exit:
   Pop ${L_TEMP}
   Pop ${L_SQL_DB}
-  Pop ${L_MESSAGES}
 
-  !undef L_MESSAGES
   !undef L_SQL_DB
   !undef L_TEMP
 
@@ -4808,6 +4798,89 @@ exit_without_banner:
 FunctionEnd
 
 #--------------------------------------------------------------------------
+# Installer Function: CheckArchiveFormat
+#
+# Assumes $G_USERDIR holds folder path for popfile.cfg
+#
+# Returns a result string on the top of the stack:
+#
+#     "popfile.cfg not found"   - (self explanatory)
+#     "not found"               - neither the old style nor the new style parameter was found
+#     "old style"               - old style archive directory parameter found
+#     "new style"               - new style archive directory parameter found
+#--------------------------------------------------------------------------
+
+Function CheckArchiveFormat
+
+  !define L_CFG       $R9     ; handle for "popfile.cfg"
+  !define L_DATA      $R8     ; a line (or part of a line) from popfile.cfg
+  !define L_RESULT    $R7
+  !define L_TEMP      $R6
+  !define L_TEXTEND   $R5     ; used to ensure correct handling of lines longer than 1023 chars
+
+  Push ${L_RESULT}
+  Push ${L_CFG}
+  Push ${L_DATA}
+  Push ${L_TEMP}
+  Push ${L_TEXTEND}
+
+  StrCpy ${L_RESULT} "popfile.cfg not found"
+  IfFileExists "$G_USERDIR\popfile.cfg" 0 exit
+
+  StrCpy ${L_RESULT} "not found"
+
+  FileOpen  ${L_CFG} "$G_USERDIR\popfile.cfg" r
+
+found_eol:
+  StrCpy ${L_TEXTEND} "<eol>"
+
+loop:
+  FileRead ${L_CFG} ${L_DATA}
+  StrCmp ${L_DATA} "" done
+  StrCmp ${L_TEXTEND} "<eol>" 0 next_line
+  StrCmp ${L_DATA} "$\n" next_line
+
+  StrCpy ${L_TEMP} ${L_DATA} 17
+  StrCmp ${L_TEMP} "html_archive_dir " got_html_archive_dir
+
+  StrCpy ${L_TEMP} ${L_DATA} 20
+  StrCmp ${L_TEMP} "history_archive_dir " got_history_archive_dir
+
+next_line:
+
+  ; Now read file until we get to end of the current line
+  ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+  StrCpy ${L_TEXTEND} ${L_DATA} 1 -1
+  StrCmp ${L_TEXTEND} "$\n" found_eol
+  StrCmp ${L_TEXTEND} "$\r" found_eol loop
+
+got_history_archive_dir:
+  StrCpy ${L_RESULT} "new style"
+  Goto done
+
+got_html_archive_dir:
+  StrCpy ${L_RESULT} "old style"
+
+done:
+  FileClose ${L_CFG}
+
+exit:
+  Pop ${L_TEXTEND}
+  Pop ${L_TEMP}
+  Pop ${L_DATA}
+  Pop ${L_CFG}
+  Exch ${L_RESULT}
+
+  !undef L_CFG
+  !undef L_DATA
+  !undef L_RESULT
+  !undef L_TEMP
+  !undef L_TEXTEND
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Installer Function: ConvertCorpus
 #--------------------------------------------------------------------------
 
@@ -4881,10 +4954,8 @@ FunctionEnd
 
 Function CheckRunStatus
 
-  !define L_MESSAGES    $R9
-  !define L_TEMP        $R8
+  !define L_TEMP        $R9
 
-  Push ${L_MESSAGES}
   Push ${L_TEMP}
 
   IfRebootFlag 0 no_reboot_reqd
@@ -4932,10 +5003,9 @@ sqlupgrade_check:
   Call FindLockedPFE
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "" 0 selection_ok
-  Push $G_USERDIR
-  Call GetMessagesPath
-  Pop ${L_MESSAGES}
-  IfFileExists "${L_MESSAGES}\00\*.*" selection_ok
+  Call CheckArchiveFormat
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "new style" selection_ok
 
 sqlupgrade:
   Call UpgradeSQLdatabase
@@ -4952,9 +5022,7 @@ selection_ok:
   BringToFront
 
   Pop ${L_TEMP}
-  Pop ${L_MESSAGES}
 
-  !undef L_MESSAGES
   !undef L_TEMP
 
 FunctionEnd
