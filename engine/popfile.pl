@@ -1460,14 +1460,21 @@ sub history_page
         if ( $#history_cache < 0 ) 
         {
             @history_cache = sort compare_mf glob "messages/popfile*.msg";
+
+            foreach my $i ( 0 .. $#history_cache )
+            {
+                $history_cache[$i] =~ /(popfile.*\.msg)/;
+                $history_cache[$i] = $1;
+            }
         }
 
         foreach my $mail_file (@history_cache)
         {
             my $class_file = $mail_file;
             $class_file =~ s/msg$/cls/;
-            unlink($mail_file);
-            unlink($class_file);
+            unlink("messages/$mail_file");
+            unlink("messages/$class_file");
+            debug( "Removing $mail_file because of Remove All" );
         }
         $configuration{mail_count} = 0;
         $configuration{last_count} = 0;
@@ -1482,6 +1489,12 @@ sub history_page
         if ( $#history_cache < 0 ) 
         {
             @history_cache = sort compare_mf glob "messages/popfile*.msg";
+
+            foreach my $i ( 0 .. $#history_cache )
+            {
+                $history_cache[$i] =~ /(popfile.*\.msg)/;
+                $history_cache[$i] = $1;
+            }
         }
         
         foreach my $i ( $form{start_message} .. $form{start_message} + $configuration{page_size} - 1 )
@@ -1490,8 +1503,9 @@ sub history_page
             $class_file =~ s/msg$/cls/;
             if ( $class_file ne '' ) 
             {
-                unlink($history_cache[$i]);
-                unlink($class_file);
+                unlink("messages/$history_cache[$i]");
+                unlink("messages/$class_file");
+                debug( "Removing $history_cache[$i] because of Remove Page" );
             }
         }
 
