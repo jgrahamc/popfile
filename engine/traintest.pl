@@ -357,6 +357,8 @@ if ( @ARGV[0] ne "-usage")
         print "\n$self->{messages}->{messages}{ @sorted_messages[$index] }{long}:" if ($debug);        
         $bucket_class = $b->classify_file( $self->{messages}->{messages}{ @sorted_messages[$index] }{long});
         $bucket_true = $self->{messages}->{messages}{ @sorted_messages[$index] }{bucket};
+        
+        $b->{parser__}->{subject__} =~ s/(\r\n|\n|\r)[ \t]+//gm;
 
          if ($bucket_class ne $bucket_true) {
             @errors[$error_count] = {};
