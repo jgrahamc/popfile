@@ -123,9 +123,9 @@
 #
 # The number of languages which can be supported depends upon the availability of:
 #
-#     (1) an up-to-date main NSIS language file ({NSIS}\Contrib\Language files\*.nlf)
+# (1) an up-to-date main NSIS language file (${NSISDIR}\Contrib\Language files\*.nlf)
 # and
-#     (2) an up-to-date NSIS MUI Language file ({NSIS}\Contrib\Modern UI\Language files\*.nsh)
+# (2) an up-to-date NSIS MUI Language file (${NSISDIR}\Contrib\Modern UI\Language files\*.nsh)
 #
 # To add support for a language which is already supported by the NSIS MUI package, an extra
 # file is required:
@@ -153,6 +153,26 @@
 # The Kakasi package and the additional Perl modules almost double the size of the installer
 # (assuming that the default compression method is used). If the command-line switch
 # /DNO_KAKASI is used then a smaller installer can be built by omitting the Japanese support.
+#
+# SMALL NSIS PATCH REQUIRED:
+#
+# The POPFile User Interface 'Language' menu uses the name 'Nihongo' to select the Japanese
+# language texts. The NSIS default name used to select the Japanese language texts is 'Japanese'
+# which can cause some confusion.
+#
+# It is an easy matter to make the installer display 'Nihongo' in the list of languages offered.
+# However this requires a small change to one of the NSIS MUI language files:
+#
+# In the file ${NSISDIR}\Contrib\Modern UI\Language files\Japanese.nsh, change the value of the
+# MUI_LANGNAME string from "Japanese" to "Nihongo". For example, using the file supplied with
+# NSIS 2.0, released 7 February 2004, change line 13 from:
+#
+# !define MUI_LANGNAME "Japanese" ;(“ú–{Œê) Use only ASCII characters (if this is not possible, use the English name)
+#
+# to:
+#
+# !define MUI_LANGNAME "Nihongo" ;(“ú–{Œê) Use only ASCII characters (if this is not possible, use the English name)
+#
 #--------------------------------------------------------------------------
 
   ;------------------------------------------------
@@ -675,6 +695,11 @@
         ; Entries will appear in the drop-down list of languages in the order given below
         ; (the order used here ensures that the list entries appear in alphabetic order).
 
+        ; NOTE: The order used here assumes that the NSIS MUI 'Japanese.nsh' language file has
+        ; been patched to use 'Nihongo' instead of 'Japanese' [see 'SMALL NSIS PATCH REQUIRED'
+        ; in the 'Support for Japanese text processing' section of the header comment at the
+        ; start of the 'installer.nsi' file]
+
         !insertmacro PFI_LANG_LOAD "Bulgarian"
         !insertmacro PFI_LANG_LOAD "SimpChinese"
         !insertmacro PFI_LANG_LOAD "TradChinese"
@@ -807,7 +832,7 @@ FunctionEnd
 # Installer Function: PFIGUIInit
 # (custom .onGUIInit function)
 #
-# Used to complete the initialisation of the installer.
+# Used to complete the initialization of the installer.
 # This code was moved from '.onInit' in order to permit the use of language-specific strings
 # (the selected language is not available inside the '.onInit' function)
 #--------------------------------------------------------------------------
@@ -946,7 +971,7 @@ Section "POPFile" SecPOPFile
   StrCpy $G_MPBINDIR  "$INSTDIR"
   StrCpy $G_MPLIBDIR  "$INSTDIR\lib"
 
-  ; The $G_USERDIR global variable is initialised by the 'CheckExistingDataDir' function
+  ; The $G_USERDIR global variable is initialized by the 'CheckExistingDataDir' function
   ; and may be changed by the user via the 'User Data' DIRECTORY page.
 
   ; If we are installing over a previous version, ensure that version is not running
@@ -954,7 +979,7 @@ Section "POPFile" SecPOPFile
   Call MakeItSafe
 
   ; Starting with 0.21.0, a new structure is used for the minimal Perl (to enable POPFile to
-  ; be started from any folder, once POPFILE_ROOT and POPFILE_USER have been initialised)
+  ; be started from any folder, once POPFILE_ROOT and POPFILE_USER have been initialized)
 
   Call MinPerlRestructure
 
@@ -1086,13 +1111,13 @@ install_files:
   File "stop_pf.exe"
   File "sqlite.exe"
 
-  StrCmp $G_WINUSERTYPE "Admin" 0 create_shortcuts
+  StrCmp $G_WINUSERTYPE "Admin" 0 sqlite_shortcut
   File "adduser.exe"
 
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\stop_pf.exe" \
       "" "$G_ROOTDIR\stop_pf.exe"
 
-create_shortcuts:
+sqlite_shortcut:
 
   ; Create a shortcut to make it easier to run the SQLite utility
   ; (should this shortcut be an option created only for advanced users ?)
@@ -1197,7 +1222,7 @@ update_config:
   SetOutPath $G_ROOTDIR\languages
   File "..\engine\languages\English.msg"
 
-  ; Default UI skin
+  ; Default UI skin (the POPFile UI looks better if a skin is used)
 
   SetOutPath $G_ROOTDIR\skins
   File "..\engine\skins\SimplyBlue.css"
@@ -1348,6 +1373,19 @@ update_config:
   ; 'CreateShortCut' uses '$OUTDIR' as the working directory for the shortcut
   ; ('SetOutPath' is one way to change the value of $OUTDIR)
 
+  ; For this build the following simple scheme is used for the shortcuts:
+  ; (a) a 'POPFile' folder with the standard set of shortcuts is created for the current user
+  ; (b) if the user ticked the relevant checkbox then a 'Run POPFile' shortcut is placed in the
+  ;     current user's StartUp folder.
+  ; (c) if the user did not tick the relevant checkbox then the 'Run POPFile' shortcut is
+  ;     removed from the current user's StartUp folder if the user does not have 'Admin' rights
+  ; (d) if the user has 'Admin' rights, a 'POPFile' folder with the standard set of shortcuts is
+  ;     created for 'all users' if the 'all users' folder is in a different location from that
+  ;     of the current user
+  ; (e) if the user has 'Admin' rights and the user ticked the relevant checkbox then a
+  ;     'Run POPFile' shortcut is placed in the 'all users' StartUp folder if that folder
+  ;     is in a different location from that of the current user
+
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
   SetOutPath $INSTDIR
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
@@ -1381,6 +1419,7 @@ update_config:
   SetOutPath $SMSTARTUP
   SetOutPath $INSTDIR
   StrCmp $G_STARTUP "1" set_autostart_set
+  StrCmp $G_WINUSERTYPE "Admin" end_autostart_set
   Delete "$SMSTARTUP\Run POPFile.lnk"
   Goto end_autostart_set
 
@@ -1388,12 +1427,19 @@ set_autostart_set:
   CreateShortCut "$SMSTARTUP\Run POPFile.lnk" "$INSTDIR\runpopfile.exe" "/startup"
 
 end_autostart_set:
+  StrCmp $G_WINUSERTYPE "Admin" 0 remove_redundant_shortcuts
 
   ; Only admins have full access rights to the 'all users' area. If the 'all users' folder
-  ; is not found, the 'current user' folder will be used
+  ; is not found, NSIS will return the 'current user' folder. To avoid unnecessary work,
+  ; check if the 'all users' data is stored in the same place as the current user' data
 
-  StrCmp $G_WINUSERTYPE "Admin" 0 remove_redundant_shortcuts
+  StrCpy ${L_TEMP} $SMPROGRAMS
+  StrCpy ${L_CFG}  $SMSTARTUP
+
   SetShellVarContext all
+
+  StrCmp $SMPROGRAMS ${L_TEMP} check_startup
+  
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
   SetOutPath $INSTDIR
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
@@ -1424,6 +1470,8 @@ end_autostart_set:
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
                  "$G_ROOTDIR\stop_pf.exe" "/showerrors $G_GUI"
 
+check_startup:
+  StrCmp $SMSTARTUP ${L_CFG} remove_redundant_shortcuts
   StrCmp $G_STARTUP "1" 0 remove_redundant_shortcuts
   SetOutPath $SMSTARTUP
   SetOutPath $INSTDIR
