@@ -1572,11 +1572,8 @@ sub magnet_page
     my $stripe = 0;
 
     for my $bucket ($self->{classifier__}->get_buckets_with_magnets( $self->{api_session__} )) {
-	$self->log_( "Magnet bucket: $bucket" );
         for my $type ($self->{classifier__}->get_magnet_types_in_bucket( $self->{api_session__}, $bucket )) {
-   	    $self->log_( "Magnet type: $type" );
             for my $magnet ($self->{classifier__}->get_magnets( $self->{api_session__}, $bucket, $type ))  {
-  	        $self->log_( "Magnet: $magnet" );
                 $count += 1;
                 if ( ( $count < $start_magnet ) || ( $count > $stop_magnet ) ) {
                     next;
@@ -1876,9 +1873,6 @@ sub corpus_page
     my $rename_message = '';
 
     if ( ( defined($self->{form_}{color}) ) && ( defined($self->{form_}{bucket}) ) ) {
-        open COLOR, '>' . $self->get_user_path_( $self->module_config_( 'bayes', 'corpus' ) . "/$self->{form_}{bucket}/color" );
-        print COLOR "$self->{form_}{color}\n";
-        close COLOR;
         $self->{classifier__}->set_bucket_color( $self->{api_session__}, $self->{form_}{bucket}, $self->{form_}{color});
     }
 
@@ -1919,7 +1913,7 @@ sub corpus_page
 
     if ( ( defined($self->{form_}{delete}) ) && ( $self->{form_}{name} ne '' ) ) {
         $self->{form_}{name} = lc($self->{form_}{name});
-    $self->{classifier__}->delete_bucket( $self->{api_session__}, $self->{form_}{name} );
+        $self->{classifier__}->delete_bucket( $self->{api_session__}, $self->{form_}{name} );
         $deletemessage = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error6}, $self->{form_}{name} ) . "</b></blockquote>";
     }
 
@@ -1929,8 +1923,11 @@ sub corpus_page
         } else {
             $self->{form_}{oname} = lc($self->{form_}{oname});
             $self->{form_}{newname} = lc($self->{form_}{newname});
-        $self->{classifier__}->rename_bucket( $self->{api_session__}, $self->{form_}{oname}, $self->{form_}{newname} );
-            $rename_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error5}, $self->{form_}{oname}, $self->{form_}{newname} ) . "</b></blockquote>";
+            if ( $self->{classifier__}->rename_bucket( $self->{api_session__}, $self->{form_}{oname}, $self->{form_}{newname} ) == 1 ) {
+                $rename_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error5}, $self->{form_}{oname}, $self->{form_}{newname} ) . "</b></blockquote>";
+	    } else {
+                $rename_message = "<blockquote><b>RENAME FAILED: INTERNAL ERROR</b></blockquote>";
+	    }
         }
     }
 
@@ -3152,6 +3149,17 @@ sub history_page
 
     $self->{old_sort__} = $self->{form_}{sort};
 
+    # If the user hits the Reset button on a search then we need to clear
+    # the search value but make it look as though they hit the search button
+    # so that sort_filter_history will get called below to get the right values
+    # in history_keys
+
+    if ( defined( $self->{form_}{reset_filter_search} ) ) {
+        $self->{form_}{filter}    = '';
+        $self->{form_}{search}    = '';
+        $self->{form_}{setsearch} = 1;
+    }
+
     # Information from submit buttons isn't always preserved if the buttons aren't
     # pressed. This compares values in some fields and sets the button-values as
     # though they had been pressed
@@ -3163,17 +3171,6 @@ sub history_page
     # Set setfilter if filter changed and setfilter is undefined
     $self->{form_}{setfilter} = 'Filter' if ( ( ( !defined($self->{old_filter__}) && ($self->{form_}{filter} ne '') ) || ( defined($self->{old_filter__}) && ( $self->{old_filter__} ne $self->{form_}{filter} ) ) ) && !defined($self->{form_}{setfilter} ) );
     $self->{old_filter__} = $self->{form_}{filter};
-
-    # If the user hits the Reset button on a search then we need to clear
-    # the search value but make it look as though they hit the search button
-    # so that sort_filter_history will get called below to get the right values
-    # in history_keys
-
-    if ( defined( $self->{form_}{reset_filter_search} ) ) {
-        $self->{form_}{filter}    = '';
-        $self->{form_}{search}    = '';
-        $self->{form_}{setsearch} = 1;
-    }
 
     # Set up the text that will appear at the top of the history page
     # indicating the current filter and search settings

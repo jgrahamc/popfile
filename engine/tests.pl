@@ -109,7 +109,7 @@ sub test_report__
             $fail_messages .= " ($context)";
         }
         $test_failures += 1;
-        print "Test fail at $file:$line ($test) ($context)\n";
+#        print "Test fail at $file:$line ($test) ($context)\n";
     } else {
 #       print "Test pass at $file:$line ($test) ($context)\n";
     }

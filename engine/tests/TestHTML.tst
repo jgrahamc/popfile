@@ -186,7 +186,7 @@ $p->config_( 'port', 9110 );
 $p->config_( 'force_fork', 0 );
 $p->start();
 
-test_assert(1);
+test_assert( $p->config_( 'secure_server' ) eq '' );
 
 $b->initialize();
 test_assert( $b->start() );
@@ -426,8 +426,12 @@ if ( $pid == 0 ) {
             $expected = '' if ( !defined( $expected ) );
             print $dwriter "__GETCONFIG $option\n";
             my $reply = <$ureader>;
-            $reply =~ /^OK ([^\r\n]+)/;
-            test_assert_equal( $1, $expected, "From script line $line_number" );
+            if ( $reply =~ /^OK ([^\r\n]+)/ ) {
+                $reply = $1; 
+            } else {
+                $reply = '';
+            }
+            test_assert_equal( $reply, $expected, "From script line $line_number asking for $option and got reply $reply" );
             next;
 	}
 

@@ -74,7 +74,7 @@ MATCH <link rel="icon" href="favicon.ico">
 
 # Common MIDDLE parts (i.e. the tabs)
 
-MATCH <a class="menuLink" href="/history?session=$sk&amp;setfilter=">
+MATCH <a class="menuLink" href="/history?session=$sk">
 MATCH History</a>
 MATCH <a class="menuLink" href="/buckets?session=$sk">
 MATCH Buckets</a>
@@ -99,7 +99,7 @@ MATCH <br>$version<br>
 GET /history
 MATCH
 <td class="menuSelected" align="center">
-<a class="menuLink" href="/history?session=$sk&amp;setfilter=">
+<a class="menuLink" href="/history?session=$sk">
 ENDMATCH
 
 GET /buckets
@@ -336,8 +336,8 @@ MATCH <font color="red">here</font>
 MATCH Body would
 GET /view?view=popfile10000=1.msg&amp;start_message=0&amp;session=$sk&amp;format=prob
 MATCH showing word probabilities
-MATCH 0.3289
-MATCH 0.6697
+MATCH 0.7692
+MATCH 0.2308
 GET /view?view=popfile10000=1.msg&amp;start_message=0&amp;session=$sk&amp;format=freq
 MATCH showing word frequencies
 MATCH 0.00165
@@ -392,8 +392,8 @@ MATCH Single Message View
 MATCH <option value="Testing">Testing</option>
 MATCH <option value="Refresh">Refresh</option>
 MATCH <option value="John">John</option>
-SETINPUT text2 John
-SETINPUT bucket2 other
+SETINPUT text1 John
+SETINPUT bucket1 other
 CLICK create
 MATCH Current Magnets
 MATCH <input type="text" name="text1" value="John" size="50" />
@@ -852,7 +852,7 @@ MATCH <a href="/buckets?session=$sk&amp;showbucket=other">
 
 MATCH >656<
 MATCH >3<
-MATCH >3,358<
+MATCH >3,353<
 
 # Check statistics displayed correctly
 
@@ -912,7 +912,7 @@ MATCH spam
 MATCH personal
 MATCH other
 
-# Check bucket delete
+# TODO Check bucket delete
 
 SETSUBMIT name sensible
 MATCH Deleted bucket sensible
@@ -974,7 +974,7 @@ MATCH /buckets?session=$sk&amp;showbucket=spam
 GET /buckets?session=$sk&amp;showbucket=spam
 MATCH Detail for <font color="feldspar">spam</font>
 MATCH 12,114
-MATCH (3,358 distinct)
+MATCH (3,353 distinct)
 MATCH >100.00%<
 MATCH <a href=/buckets?session=$sk&amp;showbucket=spam&amp;showletter=m><b>m</b></a>
 
@@ -1075,7 +1075,7 @@ MATCH popfile_stats.pl
 
 GET /security
 INPUTIS password
-CONFIGIS html_password
+CONFIGIS html_password b61124a488acc5f4406e74272629ee86
 SETSUBMIT password secret
 GET /advanced?session=123456
 MATCH Enter password:

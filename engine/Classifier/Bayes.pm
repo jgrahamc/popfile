@@ -709,8 +709,10 @@ sub db_update_cache__
     return undef if ( !defined( $userid ) );
 
     delete $self->{db_bucketid__}{$userid};
+
     $self->{db_get_buckets__}->execute( $userid );
-    while ( my $row = $self->{db_get_buckets__}->fetchrow_arrayref ) {
+    while ( my $row = $self->{db_get_buckets__}->fetchrow_arrayref ) { 
+        $self->log_( "Read bucket $row->[0] with id $row->[1]" );
         $self->{db_bucketid__}{$userid}{$row->[0]}{id} = $row->[1];
         $self->{db_bucketid__}{$userid}{$row->[0]}{pseudo} = $row->[2];
         $self->{db_bucketcount__}{$userid}{$row->[0]} = 0;
@@ -1769,7 +1771,7 @@ sub classify
 
             my %types = $self->get_magnet_types( $session );
 
-            foreach my $type ( keys %types ) {
+            foreach my $type ( sort keys %types ) {
 
                 if (defined $qm{$type}) {
                     $i += 1;
@@ -1883,7 +1885,7 @@ sub classify
 
             my @ranked_ids;
             if ($self->{wmformat__} eq 'prob') {
-                @ranked_ids = sort {$wordprobs{$ranking[0],$b} <=> $wordprobs{$ranking[0],$a}} @id_list;
+                @ranked_ids = sort {($wordprobs{$ranking[0],$b}||0) <=> ($wordprobs{$ranking[0],$a}||0)} @id_list;
             } else {
                 @ranked_ids = sort {($$matrix{$b}{$ranking[0]}||0) <=> ($$matrix{$a}{$ranking[0]}||0)} @id_list;
             }
@@ -2048,7 +2050,7 @@ sub history_read_class
             $usedtobe =~ s/[\r\n]//g;
         }
         close CLASS;
-        $bucket =~ s/[\r\n]//g;
+        $bucket =~ s/[\r\n]//g if defined( $bucket );
     } else {
         $self->log_( "Error: " . $self->get_user_path_( $self->global_config_( 'msgdir' ) . "$filename: $!" ) );
 
@@ -2192,7 +2194,6 @@ sub classify_and_modify
                     # can't detect
 
                     if ( $line =~ /^([ \t]|([A-Z\-_]+:))/i ) {
-                        $self->log_( "Adding header line: [$line]" );
                         if ( !defined($msg_subject) )  {
                             $msg_head_before .= $msg_head_q . $line;
                         } else {
@@ -2269,6 +2270,8 @@ sub classify_and_modify
          ( $quarantine == 0 ) )  {                                                 # PROFILE BLOCK STOP
          $msg_subject = " $modification";
     }
+
+    $msg_subject = '' if ( !defined( $msg_subject ) );
 
     $msg_head_before .= 'Subject:' . $msg_subject;
     $msg_head_before .= $crlf;
@@ -2933,8 +2936,10 @@ sub create_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
+    $bucket = $self->{db__}->quote( $bucket );
+
     $self->{db__}->do(
-        "insert into buckets ( userid, name, pseudo ) values ( $userid, '$bucket', 0 );" );
+        "insert into buckets ( name, pseudo, userid ) values ( $bucket, 0, $userid );" );
     $self->db_update_cache__( $session );
 
     return 1;
@@ -2956,6 +2961,12 @@ sub delete_bucket
 
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
+
+    # Make sure that the bucket passed in actually exists
+
+    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) { 
+        return 0;
+    }
 
     $self->{db__}->do(
         "delete from buckets where buckets.userid = $userid and buckets.name = '$bucket';" );
@@ -2982,8 +2993,19 @@ sub rename_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    my $result = $self->{db__}->do(
-        "update buckets set name = '$new_bucket' where buckets.userid = $userid and buckets.name = '$old_bucket';" );
+    # Make sure that the bucket passed in actually exists
+
+    if ( !defined( $self->{db_bucketid__}{$userid}{$old_bucket} ) ) { 
+        $self->log_( "Bad bucket name $old_bucket to rename_bucket" );
+        return 0;
+    }
+
+    my $id = $self->{db__}->quote( $self->{db_bucketid__}{$userid}{$old_bucket}{id} );
+    $new_bucket = $self->{db__}->quote( $new_bucket );
+   
+    $self->log_( "Rename bucket $old_bucket to $new_bucket" );
+
+    my $result = $self->{db__}->do( "update buckets set name = $new_bucket where id = $id;" );
 
     if ( !defined( $result ) || ( $result == -1 ) ) {
         return 0;
