@@ -2107,15 +2107,21 @@ Section "Uninstall"
   Abort "$(PFI_LANG_UN_ABORT_1)"
 
 look_for_popfile:
-  IfFileExists $G_ROOTDIR\popfile.pl skip_confirmation
-  IfFileExists $G_ROOTDIR\popfile.exe skip_confirmation
+  IfFileExists $G_ROOTDIR\popfile.pl look_for_uninstalluser
+  IfFileExists $G_ROOTDIR\popfile.exe look_for_uninstalluser
     MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
         "$(PFI_LANG_UN_MBNOTFOUND_1) '$G_ROOTDIR'.\
         $\r$\n$\r$\n\
-        $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES skip_confirmation
+        $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES look_for_uninstalluser
     Abort "$(PFI_LANG_UN_ABORT_1)"
 
-skip_confirmation:
+look_for_uninstalluser:
+  IfFileExists "$G_ROOTDIR\uninstalluser.exe" 0 uninstall_popfile
+  HideWindow
+  ExecWait '"$G_ROOTDIR\uninstalluser.exe" _?=$G_ROOTDIR'
+  BringToFront
+
+uninstall_popfile:
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROGRESS_1)"
   SetDetailsPrint listonly
@@ -2395,6 +2401,7 @@ final_check:
   IfFileExists "$INSTDIR\*.*" 0 removed
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_1)" IDNO removed
   DetailPrint "$(PFI_LANG_UN_LOG_5)"
+  Delete "$INSTDIR\*.*"
   RMDir /r $INSTDIR
   IfFileExists "$INSTDIR\*.*" 0 removed
   DetailPrint "$(PFI_LANG_UN_LOG_6)"
