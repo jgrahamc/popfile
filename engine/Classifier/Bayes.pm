@@ -612,7 +612,7 @@ sub chi2
         $sum  += $term;
     }
 
-    return ($sum < 1)?$sum:1;
+    return $sum;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -718,7 +718,7 @@ sub classify
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
 
     foreach my $bucket (@buckets) {
-        $chi{$bucket} = chi2( $score{$bucket}, 2 * $matchcount{$bucket}, -int($score{$ranking[0]}/log(10)) * log(10) );
+        $chi{$bucket} = chi2( $score{$bucket}, 2 * $matchcount{$ranking[0]}, -int($score{$ranking[0]}/log(10)) * log(10) );
     }
 
     # If no bucket has a probability better than 0.5, call the message "unclassified".
