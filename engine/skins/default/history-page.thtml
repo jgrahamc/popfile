@@ -226,7 +226,7 @@
                 <TMPL_ELSE>
 
                 <TMPL_IF NAME="History_If_Magnetized">
-                    <img title="<TMPL_VAR NAME="History_Magnet">" alt="<TMPL_VAR NAME="History_Magnet" ESCAPE=HTML>" src="/skins/default/magnet.png">
+                    <img title="<TMPL_VAR NAME="History_Magnet" ESCAPE=HTML>" alt="<TMPL_VAR NAME="History_Magnet" ESCAPE=HTML>" src="/skins/default/magnet.png">
                 <TMPL_ELSE>
 
                 <select name="reclassify_<TMPL_VAR NAME="History_I">">
