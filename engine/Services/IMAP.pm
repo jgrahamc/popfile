@@ -963,6 +963,7 @@ sub login
     $self->say__( $imap, "LOGIN \"$login\" \"$pass\"" );
 
     if ( $self->get_response__( $imap ) == 1 ) {
+        $self->mq_post_( 'LOGIN', $login );
         return 1;
     }
     else {
