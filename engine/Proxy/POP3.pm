@@ -392,7 +392,9 @@ sub child__
             my $count = $1;
             my $class;
 
-            my $file = $self->{classifier__}->history_filename($download_count, $count);
+            # The 1 here indicates that we need the path to the history file
+
+            my $file = $self->{classifier__}->history_filename($download_count, $count, undef, 1);
 
             my $short_file = $file;
             $short_file =~ s/^[^\/]*\///;
@@ -409,22 +411,22 @@ sub child__
 
                 # Give the client an +OK:
 
-                print $client "+OK file data cached by POPFile$eol";
+                print $client "+OK " . ( -s $file ) . " bytes from POPFile cache$eol";
 
                 # Load the last classification
 
-                my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_load_class($short_file);
+                my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_read_class($short_file);
 
                 if ($bucket ne 'unknown class') {
 
                     # echo file, inserting known classification, without saving
 
-                    $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, 0, 1, $bucket );
+                    $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, $count, 1, $bucket );
                 } else {
 
                     # If the class wasn't saved properly, classify from disk normally
 
-                    $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, 0, 1, '' );
+                    $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, $count, 1, '' );
 
                     print $pipe "CLASS:$class$eol";
                 }
@@ -453,9 +455,9 @@ sub child__
 
                     $self->flush_extra_( $mail, $client, 0 );
                 }
-
-                next;
             }
+
+            next;
         }
 
         # The mail client wants to stop using the server, so send that message through to the
