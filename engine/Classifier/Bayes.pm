@@ -588,6 +588,35 @@ sub save_magnets__
 
 # ---------------------------------------------------------------------------------------------
 #
+# chi2
+#
+# $val       The value on which we do the chi2 test
+# $free      Number of degrees of freedom
+# $modifier  log() of a power of 10 to make values come in range
+#
+# Performs a chi-squared calculation on the passed in log(probability), liberally inspired
+# by code in SpamBayes and work by Gary Robinson
+#
+# ---------------------------------------------------------------------------------------------
+
+sub chi2
+{
+    my ( $val, $free, $modifier ) = @_;
+
+    my $m    = $val + $modifier;
+    my $sum  = exp(-$m);
+    my $term = $sum;
+
+    for my $i (1..$free/2) {
+        $term *= $m / $i;
+        $sum  += $term;
+    }
+
+    return ($sum < 1)?$sum:1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # classify
 #
 # $file      The name of the file containing the text to classify (or undef to use
@@ -657,6 +686,7 @@ sub classify
 
     my %score;
     my %matchcount;
+    my %chi;
 
     for my $bucket (@buckets) {
         $score{$bucket} = $self->{bucket_start__}{$bucket};
@@ -686,6 +716,24 @@ sub classify
     # Now sort the scores to find the highest and return that bucket as the classification
 
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
+
+    foreach my $bucket (@buckets) {
+        $chi{$bucket} = chi2( $score{$bucket}, 2 * $matchcount{$bucket}, -int($score{$ranking[0]}/log(10)) * log(10) );
+    }
+
+    # If no bucket has a probability better than 0.5, call the message "unclassified".
+    my $class = 'unclassified';
+
+    if ( $score{$ranking[0]} > ( $score{$ranking[1]} + $self->{unclassified__} ) ) {
+        $class = $ranking[0];
+    }
+
+    # Now take a look at the top two chi tests, if they are close to each other then
+    # we are unsure
+
+    if ( ( $chi{$ranking[0]} * 0.5 ) < $chi{$ranking[1]} ) {
+        $class = 'unsure';
+    }
 
     if ($self->{wordscores__} && defined($ui) ) {
         my %qm = %{$self->{parser__}->quickmagnets()};
@@ -731,7 +779,7 @@ sub classify
             $self->{scores__} .= "<tr><td></td><td><input type=\"submit\" class=\"submit\" name=\"create\" value=\"$language{Create}\" /></td></tr></table></form>";
         }
 
-        $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
+        $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<b>Verdict: <font color=\"$self->{colors__}{$class}\">$class</font></b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
         $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\">$language{Probability}</th></tr>\n";
 
         foreach my $b (@ranking) {
@@ -803,13 +851,6 @@ sub classify
         }
 
         $self->{scores__} .= "</table></p>";
-    }
-
-    # If no bucket has a probability better than 0.5, call the message "unclassified".
-    my $class = 'unclassified';
-
-    if ( $score{$ranking[0]} > ( $score{$ranking[1]} + $self->{unclassified__} ) ) {
-        $class = $ranking[0];
     }
 
     return $class;
