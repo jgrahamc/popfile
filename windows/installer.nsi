@@ -277,11 +277,17 @@
   ; Interface Settings
   ;-----------------------------------------
 
+  ; The 'hdr-common.bmp' icon is only 90 x 57 pixels, much smaller than the 150 x 57 pixel
+  ; space provided by the default 'modern_headerbmpr.exe' UI, so we use a custom UI which
+  ; leaves more room for the TITLE and SUB-TITLE text.
+  
+  !define MUI_UI_HEADERBITMAP_RIGHT "UI\pfi_headerbmpr.exe"
+  
   ; The "Special" bitmap appears on the "Welcome" and "Finish" pages,
   ; the "Header" bitmap appears on the other pages of the installer.
 
   !define MUI_SPECIALBITMAP "special.bmp"
-  !define MUI_HEADERBITMAP "hdr-right.bmp"
+  !define MUI_HEADERBITMAP "hdr-common.bmp"
   !define MUI_HEADERBITMAP_RIGHT
 
   ; The icon files for the installer and uninstaller must have the same structure. For example,
