@@ -97,13 +97,16 @@ sub start
     # We try to delete everything that is in that form but does not have 
     # our PID
 
-    my @temp = glob $ENV{TEMP} . "/pdk-" . Win32::LoginName() . "-*";
+    my $pdk = $ENV{TEMP} . "/pdk-" . Win32::LoginName() . "-*";
+    $pdk =~ s/ /?/g;
+
+    my @temp = glob $pdk;
 
     foreach my $dir (@temp) {
         if ( $dir =~ /pdk\-.+\-(\d+)$/ ) {
-	    if ( $$ != $1 ) {
+   	        if ( $$ != $1 ) {
                 rmdir $dir;
-	    }
+	        }
         }
     }
 
