@@ -49,9 +49,9 @@
   !insertmacro MUI_PAGECOMMAND_WELCOME
   !insertmacro MUI_PAGECOMMAND_COMPONENTS
   !insertmacro MUI_PAGECOMMAND_DIRECTORY
-  Page custom SetOptionsPage  "Options"
+  Page custom SetOptionsPage  ": Options"
   !insertmacro MUI_PAGECOMMAND_INSTFILES
-  Page custom SetOutlookExpressPage  "Configure Outlook Express"
+  Page custom SetOutlookOrOutlookExpressPage  ": Configure Outlook or Outlook Express"
   !insertmacro MUI_PAGECOMMAND_FINISH
 
   ;Component-selection page
@@ -260,11 +260,11 @@ Section "POPFile" SecPOPFile
               "InternetShortcut" "URL" "http://127.0.0.1:${GUI}/shutdown"
   WriteINIStr "$SMPROGRAMS\POPFile\Manual.url" \
               "InternetShortcut" "URL" "file://$INSTDIR/manual/en/manual.html"
+  WriteINIStr "$SMPROGRAMS\POPFile\FAQ.url" \
+              "InternetShortcut" "URL" "http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137"
   SetOutPath $SMPROGRAMS\POPFile\Support
   WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
-  WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Manual.url" \
-              "InternetShortcut" "URL" "http://popfile.sourceforge.net/manual.html"
 
   StrCmp ${STARTUP} "1" 0 skip_autostart_set 
       SetOutPath $SMSTARTUP
@@ -322,9 +322,9 @@ Function SetOptionsPage
   Pop $R0
 FunctionEnd
 
-; This function is used to reconfigure Outlook Express accounts
+; This function is used to reconfigure Outlook or Outlook Express accounts
 
-Function SetOutlookExpressPage
+Function SetOutlookOrOutlookExpressPage
 
   ; In Outlook Express (v5.0 or later) the email account data may appear in
   ; more than one place, depending upon how Outlook Express has been configured.
@@ -397,7 +397,7 @@ next_acct:
   StrCmp $R6 "" next_acct_increment
   StrCmp $R6 "127.0.0.1" next_acct_increment
 
-  !insertmacro MUI_HEADER_TEXT "Reconfigure Outlook Express" "POPFile can reconfigure Outlook Express for you"
+  !insertmacro MUI_HEADER_TEXT "Reconfigure Outlook or Outlook Express" "POPFile can reconfigure Outlook or Outlook Express for you"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 2" "State" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 8" "Text" $R6
   ReadRegStr $R6 HKCU $R5 "SMTP Email Address"
@@ -420,6 +420,25 @@ change_oe:
   StrCpy $R5 "${OEIDENT}Software\Microsoft\Internet Account Manager\Accounts\${ACCTID}"
   ReadRegStr $R6 HKCU $R5 "POP3 User Name"
   ReadRegStr $R7 HKCU $R5 "POP3 Server"
+  
+  ; To be able to restore the registry to previous settings when we uninstall we
+  ; write a special file called popfile.reg containing the registry settings 
+  ; prior to modification in the form of lines consisting of
+  ;
+  ; the\key
+  ; thesubkey
+  ; the\value
+  
+  FileOpen  ${CFG} $INSTDIR\popfile.reg a
+  FileSeek  ${CFG} 0 END
+  FileWrite ${CFG} "$R5$\n"
+  FileWrite ${CFG} "POP3 User Name$\n"
+  FileWrite ${CFG} "$R6$\n"     
+  FileWrite ${CFG} "$R5$\n"
+  FileWrite ${CFG} "POP3 Server$\n"
+  FileWrite ${CFG} "$R7$\n"    
+  FileClose ${CFG}
+  
   WriteRegStr HKCU $R5 "POP3 User Name" "$R7:$R6" 
   WriteRegStr HKCU $R5 "POP3 Server" "127.0.0.1"
 
@@ -428,6 +447,29 @@ next_acct_increment:
   goto next_acct
 
 finished_this_id:
+FunctionEnd
+
+; TrimNewlines
+; input, top of stack  (e.g. whatever$\r$\n)
+; output, top of stack (replaces, with e.g. whatever)
+; modifies no other variables.
+
+Function un.TrimNewlines
+    Exch $R0
+    Push $R1
+    Push $R2
+    StrCpy $R1 0
+loop:
+    IntOp $R1 $R1 - 1
+    StrCpy $R2 $R0 1 $R1
+    StrCmp $R2 "$\r" loop
+    StrCmp $R2 "$\n" loop
+    IntOp $R1 $R1 + 1
+
+    StrCpy $R0 $R0 $R1
+    Pop $R2
+    Pop $R1
+    Exch $R0
 FunctionEnd
 
 ;--------------------------------
@@ -455,6 +497,33 @@ skip_confirmation:
   Delete $INSTDIR\*.exe
   Delete $INSTDIR\*.dll
   Delete $INSTDIR\popfile.cfg
+  
+  ; Read the registry settings found in popfile.reg and restore them
+  ; it there are any.   All are assumed to be in HKCU
+  FileOpen ${CFG} $INSTDIR\popfile.reg r
+  IfErrors skip_registry_restore
+restore_loop:
+  FileRead ${CFG} $R5
+  Push $R5
+  Call un.TrimNewlines
+  Pop $R5
+  IfErrors skip_registry_restore
+  FileRead ${CFG} $R6
+  Push $R6
+  Call un.TrimNewlines
+  Pop $R6
+  IfErrors skip_registry_restore
+  FileRead ${CFG} $R7
+  Push $R7
+  Call un.TrimNewlines
+  Pop $R7
+  IfErrors skip_registry_restore
+  WriteRegStr HKCU $R5 $R6 $R7 
+  goto restore_loop  
+ 
+skip_registry_restore:
+  FileClose ${CFG}
+  Delete $INSTDIR\popfile.reg  
   
   Delete $INSTDIR\Proxy\*.pm
   RMDir $INSTDIR\Proxy
