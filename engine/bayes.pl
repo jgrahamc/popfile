@@ -9,20 +9,39 @@
 
 use strict;
 use Classifier::Bayes;
+use POPFile::Configuration;
+use POPFile::MQ;
+use POPFile::Logger;
 
 # main
 
 if ( $#ARGV == 0 ) 
 {
+    my $c = new POPFile::Configuration;
+    my $mq = new POPFile::MQ;
+    my $l = new POPFile::Logger;
     my $b = new Classifier::Bayes;
 
-    if ( $b->initialize() == 0 ) {
-        die "Failed to start while initializing the classifier module";
-    }
+    $c->configuration( $c );
+    $c->mq( $mq );
+    $c->logger( $l );
 
-    $b->{debug} = 1; 
-    $b->{parser}->{debug} = 0;
-    $b->load_word_matrix();
+    $l->configuration( $c );
+    $l->mq( $mq );
+    $l->logger( $l );
+
+    $l->initialize();
+
+    $mq->configuration( $c );
+    $mq->mq( $mq );
+    $mq->logger( $l );
+
+    $b->configuration( $c );
+    $b->mq( $mq );
+    $b->logger( $l );
+
+    $b->initialize();
+    $b->start();
 
     my @files   = glob $ARGV[0];
     foreach my $file (@files)
@@ -30,8 +49,8 @@ if ( $#ARGV == 0 )
         print "$file is '" . $b->classify_file($file) . "'\n";
     }
 
-    foreach my $word (keys %{$b->{parser}->{words}}) {
-        print "$word $b->{parser}->{words}{$word}\n";
+    foreach my $word (keys %{$b->{parser__}->{words__}}) {
+        print "$word $b->{parser__}->{words__}{$word}\n";
     }
 }
 else
