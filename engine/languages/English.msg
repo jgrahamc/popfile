@@ -276,6 +276,9 @@ View_ShowFrequencies                    Show word frequencies
 View_ShowProbabilities                  Show word probabilities
 View_ShowScores                         Show word scores
 View_WordMatrix                         Word matrix
+View_WordProbabilities                  showing word probabilities
+View_WordFrequencies                    showing word frequencies
+View_WordScores                         showing word scores
 
 Windows_TrayIcon                        Show POPFile icon in Windows system tray?
 Windows_Console                         Run POPFile in a console window?

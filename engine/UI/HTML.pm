@@ -3541,8 +3541,16 @@ sub view_page
         # We want to insert a link to change the output format at the start of the word
         # matrix.  The classifier puts a comment in the right place, which we can replace
         # by the link.  (There's probably a better way.)
+
+        my $view = $self->{language__}{View_WordProbabilities};
+        if ( $self->config_( 'wordtable_format' ) eq 'freq' ) {
+            $view = $self->{language__}{View_WordFrequencies};
+	}
+        if ( $self->config_( 'wordtable_format' ) eq 'score' ) {
+            $view = $self->{language__}{View_WordScores};
+	}
   
-        $fmtlinks = "<table width=\"100%\">\n<td class=\"top20\" align=\"left\"><b>$self->{language__}{View_WordMatrix}</b></td>\n<td class=\"historyNavigatorTop\">\n";
+        $fmtlinks = "<table width=\"100%\">\n<td class=\"top20\" align=\"left\"><b>$self->{language__}{View_WordMatrix} ($view)</b></td>\n<td class=\"historyNavigatorTop\">\n";
         if ($self->config_( 'wordtable_format' ) ne 'freq' ) {
             $fmtlinks .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index ];
             $fmtlinks .= "&start_message=". ((( $index ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' )));
