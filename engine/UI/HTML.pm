@@ -1774,7 +1774,13 @@ sub bar_chart_100
     my ( $self, %values ) = @_;
     my $body = '';
     my $total_count = 0;
-    my @xaxis = sort keys %values;
+    my @xaxis = sort { 
+        if ( $self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $a ) == $self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $b ) ) {
+            $a cmp $b;   
+        } else {
+            $self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $a ) <=> $self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $b );
+	  }
+     } keys %values;
 
     return '' if ( $#xaxis < 0 );
 
