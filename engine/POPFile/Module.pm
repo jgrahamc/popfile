@@ -49,6 +49,9 @@ package POPFile::Module;
 # forked()     - called when a module has forked the process.  This is called within the child
 #                process and should be used to clean up
 #
+# postfork()   - called in the parent process to tell it that the fork has occurred.  This is
+#                like forked but in the parent
+#
 # reaper()     - called when a process has terminated to give a module a chance to do
 #                whatever clean up is needed
 #
@@ -255,6 +258,21 @@ sub prefork
 #
 # ---------------------------------------------------------------------------------------------
 sub forked
+{
+    my ( $self ) = @_;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# postfork
+#
+# This is called when some module has just forked POPFile.  It is called in the parent
+# process.
+#
+# There is no return value from this method
+#
+# ---------------------------------------------------------------------------------------------
+sub postfork
 {
     my ( $self ) = @_;
 }

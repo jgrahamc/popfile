@@ -36,10 +36,18 @@ use Classifier::WordMangle;
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
+
 use Sys::Hostname;
 
 # A handy variable containing the value of an EOL for networks
+
 my $eol = "\015\012";
+
+# The corpus is stored in BerkeleyDB hashes called table.db in each
+# of the corpus/* subdirectories.  The db files are tied to Perl
+# hashes for simple access
+
+use BerkeleyDB;
 
 #----------------------------------------------------------------------------
 # new
@@ -59,12 +67,7 @@ sub new
 
     # Matrix of buckets, words and the word counts
     $self->{matrix__}            = {};
-
-    # Total number of words in each bucket
-    $self->{total__}             = {};
-
-    # Total number of unique words in each bucket
-    $self->{unique__}            = {};
+    $self->{db_env__}            = 0;
 
     # Total number of words in all buckets
     $self->{full_total__}        = 0;
@@ -117,6 +120,53 @@ sub new
     $self->name( 'bayes' );
 
     return bless $self, $type;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# prefork
+#
+# POPFile is about to fork, because the BerkeleyDB interface doesn't support multiple
+# threads accessing the database we will get a nasty failure if the database is tied to
+# the hashes when the fork occurs (actually when the child exits).  So here we untie from
+# the database
+#
+# ---------------------------------------------------------------------------------------------
+sub prefork
+{
+    my ( $self ) = @_;
+
+    $self->close_database__();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# forked
+#
+# This is called inside a child process that has just forked, since the child needs access
+# to the database we reopen it
+#
+# ---------------------------------------------------------------------------------------------
+sub forked
+{
+    my ( $self ) = @_;
+
+    $self->load_word_matrix_();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# forked
+#
+# This is called inside the parent process that has just forked, since the parent needs access
+# to the database we reopen it
+#
+# ---------------------------------------------------------------------------------------------
+sub postfork
+{
+    my ( $self ) = @_;
+
+    $self->load_word_matrix_();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -189,6 +239,7 @@ sub stop
     my ( $self ) = @_;
 
     $self->write_parameters();
+    $self->close_database__();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -221,12 +272,33 @@ sub write_parameters
 {
     my ($self) = @_;
 
-    for my $bucket (keys %{$self->{total__}})  {
+    for my $bucket (keys %{$self->{matrix__}})  {
         open PARAMS, '>' . $self->config_( 'corpus' ) . "/$bucket/params";
         for my $param (keys %{$self->{parameters__}{$bucket}}) {
             print PARAMS "$param $self->{parameters__}{$bucket}{$param}\n";
         }
         close PARAMS;
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# close_database__
+#
+# Close all the database connections
+#
+# ---------------------------------------------------------------------------------------------
+sub close_database__
+{
+    my ( $self ) = @_;
+
+    for my $bucket (keys %{$self->{matrix__}})  {
+        untie %{$self->{matrix__}{$bucket}};
+        delete $self->{matrix__}{$bucket};
+    }
+
+    if ( defined( $self->{db_env__} ) ) {
+        delete $self->{db_env__};
     }
 }
 
@@ -246,8 +318,8 @@ sub get_color
     my $max   = -10000;
     my $color = 'black';
 
-    for my $bucket (keys %{$self->{total__}}) {
-        my $prob = get_value_( $self, $bucket, $word);
+    for my $bucket (keys %{$self->{matrix__}}) {
+        my $prob = get_value_( $self, $bucket, $word );
 
         if ( $prob != 0 )  {
             if ( $prob > $max )  {
@@ -262,41 +334,81 @@ sub get_color
 
 # ---------------------------------------------------------------------------------------------
 #
-# Perl hashes are a memory hog.  The original implementation was a Perl hash for the word
-# matrix, but instead we use a a set of nested array and some regexps magic.
+# get_value_
 #
-# The word paradise in the bucket spam will be found in the array element
-#   matrix{spam}[p] with an entry of the form "|paradise 1234|".
-#
-# TODO: replace the word matrix hash with Berkeley DB tie
+# Returns the value for a specific word in a bucket.  The word is converted to the log value
+# of the probability before return to get the raw value just hit the hash directly or call
+# get_base_value_
 #
 # ---------------------------------------------------------------------------------------------
 sub get_value_
 {
-    my ($self, $bucket, $word) = @_;
-    $word =~ /^(.)/;
-    my $i = ord($1);
+    my ( $self, $bucket, $word ) = @_;
 
-    if ( defined($self->{matrix__}{$bucket}[$i]) ) {
-        if ( ( $self->{matrix__}{$bucket}[$i] =~ /\|\Q$word\E (\d+)\|/ ) != 0 )  {
-            my $newvalue = log($1/$self->{total__}{$bucket});
-            return $newvalue;
+    my $value = $self->{matrix__}{$bucket}{$word};
+
+    if ( defined( $value ) ) {
+        my $total = $self->get_bucket_word_count( $bucket );
+        return log( $value ) - log( $total );
+    } else {
+        return 0;
+    }
+}
+
+sub get_base_value_
+{
+    my ( $self, $bucket, $word ) = @_;
+
+    my $value = $self->{matrix__}{$bucket}{$word};
+
+    if ( defined( $value ) ) {
+        return $value;
+    } else {
+        return 0;
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# set_value_
+#
+# Sets the value for a word in a bucket and updates the total word counts for the bucket
+# and globally
+#
+# ---------------------------------------------------------------------------------------------
+sub set_value_
+{
+    my ( $self, $bucket, $word, $value ) = @_;
+
+    # If there's an existing value then remove it and keep the total up to date
+    # then add the new value, this is a little complicated but by keeping the
+    # total in a value in the database it avoids us doing any sort of query
+    # or full table scan
+
+    my $oldvalue = $self->{matrix__}{$bucket}{$word};
+
+    if ( !defined( $oldvalue ) ) {
+        $oldvalue = 0;
+        $self->{matrix__}{$bucket}{$word} = $oldvalue;
+        if ( defined( $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} ) ) {
+            $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} += 1;
+	} else {
+            $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} = 1;
         }
     }
 
-    return 0;
-}
+    my $total = $self->get_bucket_word_count( $bucket );
 
-sub set_value_
-{
-    my ($self, $bucket, $word, $value) = @_;
+    $total                                         -= $oldvalue;
+    $self->{full_total__}                          -= $oldvalue;
+    $self->{matrix__}{$bucket}{$word}               = $value;
+    $total                                         += $value;
+    $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}  = $total;
+    $self->{full_total__}                          += $value;
 
-    if ( $word ne '' ) {
-        $word =~ /^(.)/;
-        my $i = ord($1);
-
-        $self->{matrix__}{$bucket}[$i] = '' if ( !defined($self->{matrix__}{$bucket}[$i]) );
-        $self->{matrix__}{$bucket}[$i] .= "|$word $value|" if ( ( $self->{matrix__}{$bucket}[$i] =~ s/\|\Q$word\E [\-\.\d]+\|/\|$word $value\|/ ) == 0 );
+    if ( $self->{matrix__}{$bucket}{$word} <= 0 ) {
+        $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} -= 1;
+        delete $self->{matrix__}{$bucket}{$word};
     }
 }
 
@@ -332,14 +444,13 @@ sub update_constants_
     my ($self) = @_;
 
     if ( $self->{full_total__} > 0 )  {
+        $self->{not_likely__} = -log( $self->{full_total__} ) - log(10);
 
-        # ln(10) =~ 2.30258509299404568401799145468436
+        foreach my $bucket (keys %{$self->{matrix__}}) {
+            my $total = $self->get_bucket_word_count( $bucket );
 
-        $self->{not_likely__} = -log( $self->{full_total__} ) - 2.30258509299404568401799145468436;
-
-        foreach my $bucket (keys %{$self->{total__}}) {
-            if ( $self->{total__}{$bucket} != 0 ) {
-                $self->{bucket_start__}{$bucket} = log( $self->{total__}{$bucket} / $self->{full_total__} );
+            if ( $total != 0 ) {
+                $self->{bucket_start__}{$bucket} = log( $total ) - log( $self->{full_total__} );
             } else {
                 $self->{bucket_start__}{$bucket} = 0;
             }
@@ -359,8 +470,9 @@ sub load_word_matrix_
     my ($self) = @_;
     my $c      = 0;
 
-    $self->{matrix__}       = {};
-    $self->{total__}        = {};
+    $self->close_database__();
+    $self->{db_env__} = new BerkeleyDB::Env -Flags => DB_INIT_CDB;
+
     $self->{magnets__}      = {};
     $self->{full_total__}   = 0;
 
@@ -392,9 +504,9 @@ sub load_word_matrix_
         }
 
         $self->load_bucket_( $bucket );
+
         $bucket =~ /([[:alpha:]0-9-_]+)$/;
         $bucket =  $1;
-        $self->{full_total__} += $self->{total__}{$bucket};
 
         if ( $color eq '' )  {
             $self->{colors__}{$bucket} = $self->{possible_colors__}[$c];
@@ -444,9 +556,6 @@ sub load_bucket_
     $self->{parameters__}{$bucket}{count}      = 0;
     $self->{parameters__}{$bucket}{quarantine} = 0;
 
-    $self->{total__}{$bucket}  = 0;
-    $self->{unique__}{$bucket} = 0;
-    $self->{matrix__}{$bucket} = ();
     $self->{magnets__}{$bucket} = {};
 
     # See if there's a color file specified
@@ -501,41 +610,69 @@ sub load_bucket_
         close MAGNETS;
     }
 
-    # Each line in the word table is a word and a count
-    $self->{total__}{$bucket} = 0;
+    # This code performs two tasks:
+    #
+    # If there is an existing table.db in the bucket directory then simply
+    # tie it to the appropriate hash.
+    #
+    # If there is no existing table but there is a table file (the old style
+    # flat file used by POPFile for corpus storage) then create the new
+    # tied hash from it thus performing an automatic upgrade.
 
-    if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
-        my $first = <WORDS>;
-        if ( defined( $first ) && ( $first =~ s/^__CORPUS__ __VERSION__ (\d+)// ) ) {
-            if ( $1 != $self->{corpus_version__} )  {
-                print STDERR "Incompatible corpus version in $bucket\n";
-                close WORDS;
-                return 0;
-            }
-        } else {
-            close WORDS;
-            return 0;
-        }
+    tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",
+            -Filename => $self->config_( 'corpus' ) . "/$bucket/table.db",
+            -Flags    => DB_CREATE;
 
-        while ( <WORDS> ) {
-
-            s/[\r\n]//g;
-
-            if ( /^([^\s]+) (\d+)$/ ) {
-                my $word  = $1;
-                my $value = $2;
-                if ( $value > 0 )  {
-                    $self->{total__}{$bucket}        += $value;
-                    $self->{unique__}{$bucket}       += 1;
-                    set_value_( $self, $bucket, $word, $value );
-                }
-            } else {
-                $self->log_( "Found entry in corpus for $bucket that looks wrong: \"$_\" (ignoring)" );
-            }
-        }
-
-        close WORDS;
+    if ( !defined( $self->get_bucket_word_count( $bucket ) ) ) {
+        $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} = 0;
     }
+
+    if ( -e $self->config_( 'corpus' ) . "/$bucket/table" ) {
+        $self->log_( "Performing automatic upgrade of $bucket corpus from flat file to BerkeleyDB" );
+
+        my $ft = $self->{full_total__};
+
+        if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
+
+	    print "\nUpgrading bucket $bucket...";
+            flush STDOUT;
+            my $wc = 1;
+
+            my $first = <WORDS>;
+            if ( defined( $first ) && ( $first =~ s/^__CORPUS__ __VERSION__ (\d+)// ) ) {
+                if ( $1 != $self->{corpus_version__} )  {
+                    print STDERR "Incompatible corpus version in $bucket\n";
+                    close WORDS;
+                } else {
+                    while ( <WORDS> ) {
+		        if ( $wc % 100 == 0 ) {
+                            print "$wc ";
+                            flush STDOUT;
+		        }
+                        $wc += 1;
+                        s/[\r\n]//g;
+
+                        if ( /^([^\s]+) (\d+)$/ ) {
+                            $self->set_value_( $bucket, $1, $2 );
+                        } else {
+                            $self->log_( "Found entry in corpus for $bucket that looks wrong: \"$_\" (ignoring)" );
+                        }
+		    }
+                }
+
+                print "(completed $wc words)";
+                close WORDS;
+            } else {
+                close WORDS;
+	    }
+
+            unlink( $self->config_( 'corpus' ) . "/$bucket/table" );
+
+            $self->{full_total__} = $ft;
+        }
+    }
+
+    $self->{full_total__} += $self->get_bucket_word_count( $bucket );
 
     $self->calculate_magnet_count__();
 
@@ -556,7 +693,7 @@ sub calculate_magnet_count__
 
     $self->{magnet_count__} = 0;
 
-    for my $bucket (keys %{$self->{total__}}) {
+    for my $bucket (keys %{$self->{matrix__}}) {
         for my $type (keys %{$self->{magnets__}{$bucket}})  {
             for my $from (keys %{$self->{magnets__}{$bucket}{$type}})  {
                 $self->{magnet_count__} += 1;
@@ -576,7 +713,7 @@ sub save_magnets__
 {
     my ($self) = @_;
 
-    for my $bucket (keys %{$self->{total__}}) {
+    for my $bucket (keys %{$self->{matrix__}}) {
         open MAGNET, '>' . $self->config_( 'corpus' ). "/$bucket/magnets";
 
         for my $type (keys %{$self->{magnets__}{$bucket}})  {
@@ -601,7 +738,6 @@ sub save_magnets__
 # by code in SpamBayes and work by Gary Robinson
 #
 # ---------------------------------------------------------------------------------------------
-
 sub chi2
 {
     my ( $val, $free, $modifier ) = @_;
@@ -645,7 +781,7 @@ sub classify
     # Check to see if this email should be classified based on a magnet
     # Get the list of buckets
 
-    my @buckets = keys %{$self->{total__}};
+    my @buckets = keys %{$self->{matrix__}};
 
     for my $bucket (sort keys %{$self->{magnets__}})  {
         for my $type (sort keys %{$self->{magnets__}{$bucket}}) {
@@ -706,7 +842,7 @@ sub classify
         my $wmax = -10000;
 
         foreach my $bucket (@buckets) {
-            my $probability = get_value_( $self, $bucket, $word );
+            my $probability = $self->get_value_( $bucket, $word );
 
             $matchcount{$bucket} += $self->{parser__}{words__}{$word} if ($probability != 0);
             $probability = $self->{not_likely__} if ( $probability == 0 );
@@ -840,7 +976,7 @@ sub classify
 
                 foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
                     my $bucket = $ranking[$ix];
-                    my $probability  = get_value_( $self, $bucket, $word );
+                    my $probability  = $self->get_value_( $bucket, $word );
                     my $color        = 'black';
 
                     if ( $probability >= $base_probability || $base_probability == 0 ) {
@@ -1283,7 +1419,7 @@ sub get_buckets
 {
     my ( $self ) = @_;
 
-    return sort keys %{$self->{total__}};
+    return sort keys %{$self->{matrix__}};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1299,7 +1435,7 @@ sub get_bucket_word_count
 {
     my ( $self, $bucket ) = @_;
 
-    return $self->{total__}{$bucket};
+    return $self->{matrix__}{$bucket}{__POPFILE__TOTAL__};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1319,13 +1455,13 @@ sub get_bucket_word_list
     my @result;
 
     if ( $self->get_bucket_word_count( $bucket ) > 0 ) {
-        my @entries = @{$self->{matrix__}{$bucket}};
+# TODO        my @entries = @{$self->{matrix__}{$bucket}};
 
-        for my $i (0..$#entries) {
-            if ( defined( $entries[$i] ) && ( $entries[$i] ne '' ) ) {
-                push @result, ($entries[$i]);
-            }
-        }
+# TODO        for my $i (0..$#entries) {
+# TODO            if ( defined( $entries[$i] ) && ( $entries[$i] ne '' ) ) {
+# TODO                push @result, ($entries[$i]);
+# TODO            }
+# TODO        }
     }
 
     return @result;
@@ -1359,13 +1495,7 @@ sub get_count_for_word
 {
     my ( $self, $bucket, $word ) = @_;
 
-    my $value = $self->get_value_( $bucket, $word );
-
-    if ( $value == 0 ) {
-         return 0;
-    } else {
-        return int( exp( $value ) * $self->get_bucket_word_count( $bucket ) + 0.5 );
-    }
+    return $self->get_base_value_( $bucket, $word );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1381,7 +1511,7 @@ sub get_bucket_unique_count
 {
     my ( $self, $bucket ) = @_;
 
-    return $self->{unique__}{$bucket};
+    return $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1497,10 +1627,9 @@ sub create_bucket
     mkdir( $self->config_( 'corpus' ) );
     mkdir( $self->config_( 'corpus' ) . "/$bucket" );
 
-    if ( open NEW, '>' . $self->config_( 'corpus' ) . "/$bucket/table" ) {
-        print NEW "__CORPUS__ __VERSION__ 1\n";
-        close NEW;
-    }
+    tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",
+            -Filename => $self->config_( 'corpus' ) . "/$bucket/table.db",
+            -Flags    => DB_CREATE;
 
     $self->load_word_matrix_();
 }
@@ -1518,13 +1647,15 @@ sub delete_bucket
 {
     my ( $self, $bucket ) = @_;
 
-    if ( !defined( $self->{total__}{$bucket} ) ) {
+    if ( !defined( $self->{matrix__}{$bucket} ) ) {
         return 0;
     }
 
     my $bucket_directory = $self->config_( 'corpus' ) . "/$bucket";
 
-    unlink( "$bucket_directory/table" );
+    $self->close_database__();
+
+    unlink( "$bucket_directory/table.db" );
     unlink( "$bucket_directory/color" );
     unlink( "$bucket_directory/params" );
     unlink( "$bucket_directory/magnets" );
@@ -1549,9 +1680,11 @@ sub rename_bucket
 {
     my ( $self, $old_bucket, $new_bucket ) = @_;
 
-    if ( !defined( $self->{total__}{$old_bucket} ) ) {
+    if ( !defined( $self->{matrix__}{$old_bucket} ) ) {
         return 0;
     }
+
+    $self->close_database__();
 
     rename($self->config_( 'corpus' ) . "/$old_bucket" , $self->config_( 'corpus' ) . "/$new_bucket");
 
@@ -1577,54 +1710,16 @@ sub add_messages_to_bucket
     # Verify that the bucket exists.  You must call create_bucket before this
     # when making a new bucket.
 
-    if ( !defined( $self->{total__}{$bucket} ) ) {
+    if ( !defined( $self->{matrix__}{$bucket} ) ) {
         return 0;
-    }
-
-    my %words;
-
-    if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
-        while (<WORDS>) {
-            if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
-                if ( $1 != $self->{corpus_version__} )  {
-                    print STDERR "Incompatible corpus version in $bucket\n";
-                    close WORDS;
-                    return 0;
-                }
-
-                next;
-            }
-
-            s/[\r\n]//g;
-
-            if ( /^([^\s]+) (\d+)$/ ) {
-                my $word  = $1;
-                my $value = $2;
-                if ( $value > 0 )  {
-                    $words{$word} = $value;
-                }
-            }
-        }
-
-        close WORDS;
     }
 
     foreach my $file (@files) {
         $self->{parser__}->parse_file( $file );
 
         foreach my $word (keys %{$self->{parser__}->{words__}}) {
-            $words{$word} += $self->{parser__}->{words__}{$word};
+            $self->set_value_( $bucket, $word, $self->{parser__}->{words__}{$word} + $self->get_base_value_( $bucket, $word ) );
         }
-    }
-
-    if ( open WORDS, '>' . $self->config_( 'corpus' ) . "/$bucket/table" ) {
-        print WORDS "__CORPUS__ __VERSION__ 1\n";
-        foreach my $word (sort keys %words) {
-            if ( $words{$word} != 0 ) {
-                print WORDS "$word $words{$word}\n";
-            }
-        }
-        close WORDS;
     }
 
     $self->load_word_matrix_();
@@ -1666,52 +1761,14 @@ sub remove_message_from_bucket
     # Verify that the bucket exists.  You must call create_bucket before this
     # when making a new bucket.
 
-    if ( !defined( $self->{total__}{$bucket} ) ) {
+    if ( !defined( $self->{matrix__}{$bucket} ) ) {
         return 0;
-    }
-
-    my %words;
-
-    if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
-        while (<WORDS>) {
-            if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
-                if ( $1 != $self->{corpus_version__} )  {
-                    print STDERR "Incompatible corpus version in $bucket\n";
-                    close WORDS;
-                    return 0;
-                }
-
-                next;
-            }
-
-            s/[\r\n]//g;
-
-            if ( /^([^\s]+) (\d+)$/ ) {
-                my $word  = $1;
-                my $value = $2;
-                if ( $value > 0 )  {
-                    $words{$word} = $value;
-                }
-            }
-        }
-
-        close WORDS;
     }
 
     $self->{parser__}->parse_file( $file );
 
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
-        $words{$word} -= $self->{parser__}->{words__}{$word};
-    }
-
-    if ( open WORDS, '>' . $self->config_( 'corpus' ) . "/$bucket/table" ) {
-        print WORDS "__CORPUS__ __VERSION__ 1\n";
-        foreach my $word (sort keys %words) {
-            if ( $words{$word} != 0 ) {
-                print WORDS "$word $words{$word}\n";
-            }
-        }
-        close WORDS;
+        $self->set_value_( $bucket, $word, $self->get_base_value_( $bucket, $word ) - $self->{parser__}->{words__}{$word} );
     }
 
     $self->load_word_matrix_();
@@ -1826,7 +1883,8 @@ sub clear_bucket
 
     my $bucket_directory = $self->config_( 'corpus' ) . "/$bucket";
 
-    unlink( "$bucket_directory/table" );
+    untie %{$self->{matrix__}{$bucket}};
+    unlink( "$bucket_directory/table.db" );
 
     $self->load_word_matrix_();
 }

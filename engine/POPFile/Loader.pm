@@ -256,6 +256,12 @@ sub CORE_forker
     # file handle and return our PID (non-zero) indicating that this is the parent
     # process
 
+    foreach my $type (keys %{$self->{components__}}) {
+        foreach my $name (keys %{$self->{components__}{$type}}) {
+            $self->{components__}{$type}{$name}->postfork();
+        }
+    }
+
     close $writer;
     return ($pid, $reader);
 }

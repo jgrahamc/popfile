@@ -1708,6 +1708,8 @@ sub bucket_page
     $body .= "</font>\n</h2>\n$self->{language__}{SingleBucket_Message1}\n<br /><br />\n<table summary=\"$self->{language__}{Bucket_WordListTableSummary}\">\n";
     $body .= "<tr><td colspan=2>";
 
+    # TODO FIX THIS TO USE NEW API
+
     if ( $self->{classifier__}->get_bucket_word_count( $self->{form_}{showbucket} ) > 0 ) {
       for my $i ($self->{classifier__}->get_bucket_word_list($self->{form_}{showbucket})) {
         if ( defined($i) ) {
