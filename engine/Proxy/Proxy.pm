@@ -335,7 +335,7 @@ sub tee_
 # $mail     The stream (created with IO::) to send the message to (the remote mail server)
 # $client   The local mail client (created with IO::) that needs the response
 # $regexp   The pattern match to terminate echoing, compile using qr/pattern/
-# $verbose  (OPTIONAL) log output if 1, defaults to 0 if unset
+# $log      (OPTIONAL) log output if 1, defaults to 0 if unset
 # $suppress (OPTIONAL) suppress any lines that match, compile using qr/pattern/
 #
 # echo all information from the $mail server until a single line matching $regexp is seen
@@ -343,9 +343,9 @@ sub tee_
 # ---------------------------------------------------------------------------------------------
 sub echo_to_regexp_
 {
-    my ( $self, $mail, $client, $regexp, $verbose, $suppress ) = @_;
+    my ( $self, $mail, $client, $regexp, $log, $suppress ) = @_;
 
-    $verbose = 0 if (!defined($verbose));
+    $log = 0 if (!defined($log));
 
     while ( <$mail> ) {
         # Check for an abort
@@ -353,11 +353,9 @@ sub echo_to_regexp_
         last if ( $self->{alive_} == 0 );
 
         if (!defined($suppress) || !( $_ =~ $suppress )) {
-            if (!$verbose) {
+            if (!$log) {
                 print $client $_;
             } else {
-                # This creates log output
-
                 $self->tee_($client, $_);
             }
         } else {
