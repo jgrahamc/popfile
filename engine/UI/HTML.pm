@@ -2021,19 +2021,14 @@ sub sort_filter_history
          # If the filter had no messages, this will be undefined
          # and there are no ways to sort nothing
          && defined @{$self->{history_keys__}}) {
-    
 
-        
-        if ($sort ne '') {
-            @{$self->{history_keys__}} = sort {
-                                                my ($a1,$b1) = ($self->{history__}{$a}{$sort},
-                                                  $self->{history__}{$b}{$sort});
-                                                  $a1 =~ s/[^A-Z0-9]//ig;
-                                                  $b1 =~ s/[^A-Z0-9]//ig;
-                                                  return ( $a1 cmp $b1 );
-                                              } @{$self->{history_keys__}};
-        }                                            
-
+        @{$self->{history_keys__}} = sort {
+                                            my ($a1,$b1) = ($self->{history__}{$a}{$sort},
+                                              $self->{history__}{$b}{$sort});
+                                              $a1 =~ s/[^A-Z0-9]//ig;
+                                              $b1 =~ s/[^A-Z0-9]//ig;
+                                              return ( $a1 cmp $b1 );
+                                          } @{$self->{history_keys__}};
     } else {
         # Here's a quick shortcut so that we don't have to iterate
         # if there's no work for us to do
