@@ -870,7 +870,9 @@ sub classify_and_modify
                 print $client "Original To: " . $self->{parser__}->get_header('to') . "$eol";
                 print $client "Original Subject: " . $self->{parser__}->get_header('subject') . "$eol";
                 print $client "To examine the email open the attachment. To change this mail's classification go to $xpl$eol";
-                print $client "--$temp_file$eol";
+                print $client "The first 20 words found in the email are:$eol$eol";
+                print $client $self->{parser__}->first20();
+                print $client "$eol--$temp_file$eol";
                 print $client "Content-Type: message/rfc822$eol$eol";
             }
         }

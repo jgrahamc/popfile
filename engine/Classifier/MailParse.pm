@@ -77,6 +77,7 @@ sub new
     $self->{html_tag__}     = '';
     $self->{html_arg__}     = '';
     $self->{in_headers__}   = 0;
+    $self->{first20__}      = '';
 
     return bless $self, $type;
 }
@@ -275,6 +276,11 @@ sub add_line
             # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
 
             while ( $line =~ s/([[:alpha:]][[:alpha:]\']{1,44})([_\-,\.\"\'\)\?!:;\/& \t\n\r]{0,5}|$)// ) {
+                if ( ( $self->{in_headers__} == 0 ) && ( $self->{first20count__} < 20 ) ) {
+                    $self->{first20count__} += 1;
+                    $self->{first20__} .= " $1";
+                }
+
                 update_word($self,$1, $encoded, '', '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]', $prefix) if (length $1 >= 3);
             }
 
@@ -765,6 +771,9 @@ sub parse_stream
 
     $self->{in_headers__} = 1;
 
+    $self->{first20__}      = '';
+    $self->{first20count__} = 0;
+
     $colorized .= "<tt>" if ( $self->{color__} );
 
     open MSG, "<$file";
@@ -1157,4 +1166,12 @@ sub get_header
     return $self->{$header . '__'};
 }
 
+# GETTERS/SETTERS
+
+sub first20
+{
+   my ( $self ) = @_;
+
+   return $self->{first20__};
+}
 1;
