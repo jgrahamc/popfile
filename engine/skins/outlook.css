@@ -1,0 +1,128 @@
+body {
+  background-color: #FFFFFF;
+  border: none;
+  font-family: verdana, arial, serif;
+  color: black;
+  font-size: 12pt;
+  margin: 10px 20px 20px 20px; 
+}
+
+.head {
+  color: #808080;
+  font-size: 12pt;
+  font-family: verdana, arial, serif;
+  font-weight: bold;
+  background: #ffffff;
+  border-style: groove; 
+  border-color: #FFFFFF;
+  border-width: 2px;
+  margin: 0px 0px 0px 0px;
+}
+
+.shell {
+  color: #808080;
+  background-color: #D4D0C8;
+  border-style: groove; 
+  border-color: #FFFFFF;
+  border-width: 2px;
+  margin: 0px 0px 0px 0px;
+}
+
+.footer {
+  color: #808080;
+  background-color: #D4D0C8;
+  border-style: groove; 
+  border-color: #FFFFFF;
+  border-width: 2px;
+  margin: 0px 0px 0px 0px;
+}
+
+input, select {
+  color: #000000;
+  background-color: #F2F0F0;
+  border: 1px #000000 solid;
+  font-weight: bold;
+  font-family: verdana, arial, serif;
+}
+
+.menu {
+  font-size: 12pt;
+  font-weight: bold;
+}
+
+.menu_selected {
+  background-color: #7495C5;
+  width: 150px;
+  border-color: #FFFFFF;
+  border-style: groove groove none groove;
+  border-width: 2px;
+}
+
+.menu_standard {
+  background-color: #D4D0C8;
+  width: 150px;
+  border-color: #FFFFFF;
+  border-style: groove groove none groove;
+  border-width: 2px;
+}
+
+.row_even {
+  background-color: #C6CBD2;
+  border: 1px #000000 solid;
+}
+
+.row_odd {
+  background-color: #D9DEE7;
+  border: 1px #000000 solid;
+}
+
+a:link {
+  color: #000000;
+  background-color: transparent;
+  text-decoration: none; 
+} 
+
+a:visited { 
+  color: #333333;
+  background-color: transparent;
+  text-decoration: none; 
+} 
+
+a:hover {
+  text-decoration: underline; 
+} 
+
+hr {
+  color: #000000;
+  background-color: transparent; 
+}
+
+h1 , h2 {
+  font-family: verdana, arial, serif;
+  font-size: 12pt;
+  font-weight: bold;
+  color: #000000;
+  background-color: transparent;
+} 
+
+p {
+  font-family: verdana, arial, serif;
+  font-size: 10pt;
+  color: #000000;
+  background-color: transparent;
+} 
+
+td {
+  font-family: verdana, arial, serif;
+  font-size: 10pt;
+  color: #000000;
+
+}
+ 
+b {
+  font-family: verdana, arial, serif;
+  font-size: 10pt;
+  font-weight: bold;
+  color: #000000;
+  background-color: transparent;
+} 
