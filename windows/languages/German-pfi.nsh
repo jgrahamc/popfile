@@ -400,7 +400,7 @@
 # Text used on buttons to skip configuration of email clients
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPALL   "Überspringen"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPALL   "Alle überspringen"
 !insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPONE   "Überspringen"
 
 #--------------------------------------------------------------------------
