@@ -33,7 +33,7 @@ package POPFile::Loader;
 #
 #----------------------------------------------------------------------------
 
-use Getopt::Long;
+use Getopt::Long qw(:config pass_through);
 
 #----------------------------------------------------------------------------
 # new
@@ -166,7 +166,8 @@ sub CORE_loader_init
 
     # Parse just the --verbose command-line option
 
-    GetOptions( "verbose=n" => \$self->{debug__} );
+    GetOptions( "verbose!" => \$self->{debug__},
+                "quiet" => sub{ $self->{debug__} = 0 } );
 }
 
 #----------------------------------------------------------------------------
