@@ -219,6 +219,9 @@ sub new
     $self->{first20__}      = '';
 
 
+    # For support Quoted Printable in Japanese text, save encoded text in multiple lines
+    $self->{prev__} = '';
+
     return bless $self, $type;
 }
 
@@ -1543,6 +1546,27 @@ sub parse_line
 
             print ">>> $line" if $self->{debug__};
 
+            # Decode quoted-printable
+            if ( !$self->{in_headers__} && $self->{encoding__} =~ /quoted\-printable/i) {
+                if ( $self->{lang__} eq 'Nihongo') {
+                    if ( $line =~ /=\r\n$/ ) {
+                        # Encoded in multiple lines
+                        $line =~ s/=\r\n$//g;
+                        $self->{prev__} .= $line;
+                        next;
+                    } else {
+                        $line = $self->{prev__} . $line;
+                        $self->{prev__} = '';
+                    }
+                }
+                $line = decode_qp( $line );
+            }
+
+            # Decode \x??
+            if ( $self->{lang__} eq 'Nihongo' ) {
+                $line =~ s/\\x([A-F0-9]{2})/pack("C", hex($1))/eig;
+            }
+
             if ( $self->{lang__} eq 'Nihongo' ) {
                 $line = convert_encoding( $line, $self->{charset__}, 'euc-jp', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
                 $line = parse_line_with_kakasi( $self, $line );
@@ -1675,14 +1699,6 @@ sub parse_line
             }
 
             next if ( !defined($line) );
-
-            # Decode quoted-printable
-
-            if ( $self->{encoding__} =~ /quoted\-printable/i ) {
-                $line       = decode_qp( $line );
-                $line       =~ s/[\r\n]+$/ /g;
-                $self->{ut__} = decode_qp( $self->{ut__} ) if ( $self->{color__} ne '' );
-            }
 
             parse_html( $self, $line, 0 );
         }
