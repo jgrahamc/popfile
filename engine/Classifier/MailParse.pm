@@ -184,7 +184,7 @@ sub add_line
     my ($self, $bigline, $encoded, $prefix) = @_;
     my $p = 0;
     
-    print "add_line: $bigline\n" if $self->{debug};
+    print "add_line: [$bigline]\n" if $self->{debug};
     
     # If the line is really long then split at every 1k and feed it to the parser below
     
@@ -232,7 +232,7 @@ sub add_line
 
             # Pull out any email addresses in the line that are marked with <> and have an @ in them
 
-            while ( $line =~ s/(mailto:)?([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+\.[[:alpha:]0-9\-_]+))([\&\?\:\/ >\&\;])// )  {
+            while ( $line =~ s/(mailto:)?([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+\.[[:alpha:]0-9\-_]+))([\&\)\?\:\/ >\&\;])// )  {
                 update_word($self, $2, $encoded, ($1?$1:''), '[\&\?\:\/ >\&\;]', $prefix);
                 add_url($self, $3, $encoded, '\@', '[\&\?\:\/]', $prefix);
             }
@@ -699,7 +699,7 @@ sub parse_html
         # then we are not in an unclosed tag and so we can grab everything from the start of the line
         # to the end or the first < and pass it to the line parser
 
-        if ( $line =~ s/^([^<]*)(<|$)/$2/ ) {
+        if ( $line =~ s/^([^<]+)(<|$)/$2/ ) {
             $found = 1;
             add_line( $self, $1, $encoded, '' );
         }
