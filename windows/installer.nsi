@@ -45,15 +45,34 @@
 ; the 27 August 2003 (19:44 GMT) version of the NSIS CVS snapshot.
 
 #--------------------------------------------------------------------------
+# POPFile Version Data:
+#
+# In order to simplify maintenance, the POPFile version number and 'Release Candidate' status
+# are passed as command-line parameters to the NSIS compiler.
+#
+# The following 4 parameters must be supplied (where x is a value in range 0 to 65535):
+#
+# (a) the Major Version number      (supplied as /DC_POPFILE_MAJOR_VERSION=x)
+# (b) the Minor Version number      (supplied as /DC_POPFILE_MINOR_VERSION=x)
+# (c) the Revision number           (supplied as /DC_POPFILE_REVISION=x)
+# (d) the Release Candidate number  (supplied as /DC_POPFILE_RC=RCx)
+#
+# Note that if a production build is required (i.e. not a Release Candidate), /DC_POPFILE_RC
+# can be used instead of /DC_POPFILE_RC=RCx
+#
+# For example, to build the installer for POPFile 0.20.1 the following command-line could be
+# used:
+#
+# makensis.exe /DC_POPFILE_MAJOR_VERSION=0 /DC_POPFILE_MINOR_VERSION=20 /DC_POPFILE_REVISION=1 /DC_POPFILE_RC installer.nsi
+#--------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------
 # LANGUAGE SUPPORT:
 #
 # The installer defaults to multi-language mode ('English' plus a number of other languages).
 #
-# If required, a command-line switch can be used to build an English-only version.
-#
-# Normal multi-language build command:  makensis.exe installer.nsi
-# To build an English-only installer:   makensis.exe  /DENGLISH_MODE installer.nsi
-#
+# If required, the command-line switch /DENGLISH_MODE can be used to build an English-only
+# version. This switch can appear before or after the four POPFile version number parameters.
 #--------------------------------------------------------------------------
 # Removing support for a particular language:
 #
@@ -113,13 +132,24 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  ReadEnvStr C_POPFILE_MAJOR_VERSION "POPFILE_MAJOR_VERSION"
-  ReadEnvStr C_POPFILE_MINOR_VERSION "POPFILE_MINOR_VERSION"
-  ReadEnvStr C_POPFILE_REVISION      "POPFILE_REVISION" 
-  ReadEnvStr C_POPFILE_RC            "RC" 
+  !ifndef C_POPFILE_MAJOR_VERSION
+    !error "$\r$\n$\r$\nFatal error: POPFile Major Version parameter not supplied$\r$\n"
+  !endif
+
+  !ifndef C_POPFILE_MINOR_VERSION
+    !error "$\r$\n$\r$\nFatal error: POPFile Minor Version parameter not supplied$\r$\n"
+  !endif
+
+  !ifndef C_POPFILE_REVISION
+    !error "$\r$\n$\r$\nFatal error: POPFile Revision parameter not supplied$\r$\n"
+  !endif
+
+  !ifndef C_POPFILE_RC
+    !error "$\r$\n$\r$\nFatal error: POPFile RC parameter not supplied$\r$\n"
+  !endif
 
   !define MUI_PRODUCT   "POPFile"
-  !define MUI_VERSION   "${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}${RC}"
+  !define MUI_VERSION   "${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}${C_POPFILE_RC}"
 
   !define C_README        "v${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
@@ -2151,9 +2181,9 @@ close_file:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "1"
   Push "1"
   Call SetConsoleMode
-  
+
   ; Remove the 'Click Next to convert the corpus' text (because we need to reboot first)
-  
+
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioD.ini" "Settings" "NumFields" "7"
 
   Goto display_the_page
@@ -2442,9 +2472,9 @@ Function CheckRunStatus
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Settings" "NumFields" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioD.ini" "Settings" "NumFields" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Settings" "BackEnabled" "0"
-  
+
   WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "old"
-  
+
   Goto selection_ok
 
 no_reboot_reqd:
@@ -2475,7 +2505,7 @@ no_reboot_reqd:
   ; POPFile in a console window with the system tray icon disabled. This avoids the need to make
   ; any changes to 'popfile.cfg' so the next time 'popfile.exe' is used to start POPFile, the
   ; the settings in 'popfile.cfg' will be used.
-  
+
   SetOutPath $INSTDIR
   ClearErrors
   Exec '"$INSTDIR\popfilef.exe"'
