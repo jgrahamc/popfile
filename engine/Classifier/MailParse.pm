@@ -1039,7 +1039,7 @@ sub parse_html
 
     while ( $line =~ s/(<\/?(?!(?:$spacing_tags|$non_spacing_tags)\W)[a-z0-9]+(?:\s+.*?)?\/?>)//io ) {
         $self->update_pseudoword( 'html', 'invalidtag', $encoded, $1 );
-        print "html:invalidtag: $1\n" if $self->{debug};
+        print "html:invalidtag: $1\n" if $self->{debug__};
     }
 
     # Remove pairs of non-spacing tags without content such as <b></b>
@@ -1049,7 +1049,7 @@ sub parse_html
 
     while ( $line =~s/(<($non_spacing_tags)(?:\s+[^>]*?)?><\/\2>)//io ) {
         $self->update_pseudoword( 'html', 'emptypair', $encoded, $1 );
-        print "html:emptypair: $1\n" if $self->{debug};
+        print "html:emptypair: $1\n" if $self->{debug__};
     }
 
     while ( $found && ( $line ne '' ) ) {
@@ -1746,7 +1746,7 @@ sub add_attachment_filename
     my ( $self, $filename ) = @_;
 	
     if ( length( $filename ) > 0) {
-        print "Add filename $filename\n" if $self->{debug};
+        print "Add filename $filename\n" if $self->{debug__};
 
         my ( $name, $ext ) = $self->file_extension( $filename );
 
