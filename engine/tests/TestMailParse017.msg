@@ -2,12 +2,12 @@ X-Auth-OK: admin
 Return-Path: <admin>
 Return-Path: <hottest_site_on_net22840@yahoo.com>
 Received: from 3pmc.NBIA-PMC.COM ([203.146.108.97]) by mta04-srv.alltel.net
-with ESMTP
-id <20030125075758.QOHH11957.mta04-srv.alltel.net@3pmc.NBIA-PMC.COM>
-for <ct85711@alltel.net>; Sat, 25 Jan 2003 01:57:58 -0600
+	  with ESMTP
+	  id <20030125075758.QOHH11957.mta04-srv.alltel.net@3pmc.NBIA-PMC.COM>
+	  for <ct85711@alltel.net>; Sat, 25 Jan 2003 01:57:58 -0600
 Received: from mx1.mail.yahoo.com ([200.155.65.82]) by 3pmc.NBIA-PMC.COM with
-Microsoft SMTPSVC(5.0.2195.5329);
-     Sat, 25 Jan 2003 14:51:04 +0700
+	  Microsoft SMTPSVC(5.0.2195.5329);
+	  Sat, 25 Jan 2003 14:51:04 +0700
 Message-ID: <000048406f59$0000394e$00004d5c@mx1.mail.yahoo.com>
 To: <Undisclosed Recipients>
 From: hottest_site_on_net22840@yahoo.com

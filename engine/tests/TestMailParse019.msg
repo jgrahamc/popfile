@@ -1,4 +1,3 @@
-From bugs@drnn.net  Wed Jan 29 20:28:35 2003
 Return-Path: <bugs@drnn.net>
 Delivered-To: run@mail.tpkm.ru
 Received: by mail.tpkm.ru (Postfix)

@@ -2029,13 +2029,13 @@ sub history_read_class
 
     if ( open CLASS, '<' . $self->get_user_path_( $self->global_config_( 'msgdir' ) . $filename ) ) {
         $bucket = <CLASS>;
-        if ( $bucket =~ /([^ ]+) MAGNET ([^\r\n]+)/ ) {
+        if ( defined( $bucket ) && ( $bucket =~ /([^ ]+) MAGNET ([^\r\n]+)/ ) ) {
             $bucket = $1;
             $magnet = $2;
         }
 
         $reclassified = 0;
-        if ( $bucket =~ /RECLASSIFIED/ ) {
+        if ( defined( $bucket ) && ( $bucket =~ /RECLASSIFIED/ ) ) {
             $bucket       = <CLASS>;
             $usedtobe = <CLASS>;
             $reclassified = 1;
@@ -2180,11 +2180,13 @@ sub classify_and_modify
                     # Store any lines that appear as though they may be non-header content
                     # Lines that are headers begin with whitespace or Alphanumerics and "-"
                     # followed by a colon.
-                    # This prevents wierd things like HTML before the headers terminate from
+                    #
+                    # This prevents weird things like HTML before the headers terminate from
                     # causing the XPL and XTC headers to be inserted in places some clients
                     # can't detect
 
-                    if ( $line =~ /^(([ \t])|(([a-zA-Z\-])+:))/ ) {
+                    if ( $line =~ /^([ \t]|([A-Z\-_]+:))/i ) {
+                        $self->log_( "Adding header line: [$line]" );
                         if ( !defined($msg_subject) )  {
                             $msg_head_before .= $msg_head_q . $line;
                         } else {
@@ -2195,6 +2197,7 @@ sub classify_and_modify
 
                         # Gather up any header lines that are questionable
 
+                        $self->log_( "Found odd email header: $line" );
                         $msg_head_q .= $line;
                     }
                 }
@@ -2249,10 +2252,16 @@ sub classify_and_modify
 
     # Add the Subject line modification or the original line back again
     # Don't add the classification unless it is not present
-    if ( !( $msg_subject =~ /\Q$modification\E/ ) &&                        # PROFILE BLOCK START
+    if (  ( defined( $msg_subject ) && ( $msg_subject !~ /\Q$modification\E/ ) ) && # PROFILE BLOCK START
           ( $subject_modification == 1 ) &&
-          ( $quarantine == 0 ) )  {                                          # PROFILE BLOCK STOP
+          ( $quarantine == 0 ) )  {                                                 # PROFILE BLOCK STOP
          $msg_subject = " $modification$msg_subject";
+    }
+
+    if ( !defined( $msg_subject )       &&                                         # PROFILE BLOCK START
+         ( $subject_modification == 1 ) &&
+         ( $quarantine == 0 ) )  {                                                 # PROFILE BLOCK STOP
+         $msg_subject = " $modification";
     }
 
     $msg_head_before .= 'Subject:' . $msg_subject;
@@ -2287,8 +2296,8 @@ sub classify_and_modify
            print $client "To: " . $self->{parser__}->get_header( 'to' ) . "$crlf";
            print $client "Date: " . $self->{parser__}->get_header( 'date' ) . "$crlf";
            # Don't add the classification unless it is not present
-           if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&             # PROFILE BLOCK START
-                 ( $subject_modification == 1 ) ) {                           # PROFILE BLOCK STOP
+           if ( ( defined( $msg_subject ) && ( $msg_subject !~ /\[\Q$classification\E\]/ ) ) && # PROFILE BLOCK START
+                 ( $subject_modification == 1 ) ) {                                             # PROFILE BLOCK STOP
                $msg_subject = " $modification$msg_subject";
            }
            print $client "Subject:$msg_subject$crlf";
@@ -2757,6 +2766,12 @@ sub get_bucket_parameter
         return $self->{db_parameters__}{$userid}{$bucket}{$parameter};
     }
 
+    # Make sure that the bucket passed in actually exists
+
+    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) { 
+        return undef;
+    }
+
     # If there is a non-default value for this parameter then return it.
 
     $self->{db_get_bucket_parameter__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id}, $self->{db_parameterid__}{$parameter} );
@@ -2797,6 +2812,12 @@ sub set_bucket_parameter
 
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
+
+    # Make sure that the bucket passed in actually exists
+
+    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) { 
+        return undef;
+    }
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $btid     = $self->{db_parameterid__}{$parameter};
