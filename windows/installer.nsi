@@ -1041,12 +1041,10 @@ Section "Languages" SecLangs
 use_inherited_lang:
   StrCmp ${L_LANG} "English-UK" special_case
   StrCmp ${L_LANG} "Hebrew" special_case
-  StrCmp ${L_LANG} "Norsk" special_case
-  StrCmp ${L_LANG} "H4x0r" 0 use_installer_lang
+  StrCmp ${L_LANG} "Norsk"  0 use_installer_lang
 
 special_case:
   IfFileExists "$INSTDIR\languages\${L_LANG}.msg" lang_save
-  Goto lang_done
 
 use_installer_lang:
 
