@@ -184,7 +184,7 @@ sub child__
                     # Pass through the USER command with the actual user name for this server,
                     # and send the reply straight to the client
 
-                    $self->echo_response_($mail, $client, 'USER ' . $4 );
+                    last if ( $self->echo_response_($mail, $client, 'USER ' . $4 ) == 2 );
                 } else {
 
                     # If the login fails then we want to continue in the unlogged in state
@@ -205,7 +205,7 @@ sub child__
                 # Pass through the APOP command with the actual user name for this server,
                 # and send the reply straight to the client
 
-                $self->echo_response_($mail, $client, "APOP $4 $5" );
+                last if ( $self->echo_response_($mail, $client, "APOP $4 $5" ) == 2 );
             } else {
                 next;
             }
@@ -221,14 +221,13 @@ sub child__
 
                     # Loop until we get -ERR or +OK
 
-                    my $response;
-                    $response = $self->get_response_( $mail, $client, $command );
+                    my ( $response, $ok ) = $self->get_response_( $mail, $client, $command );
 
                     while ( ( ! ( $response =~ /\+OK/ ) ) && ( ! ( $response =~ /-ERR/ ) ) ) {
                         my $auth;
                         $auth = <$client>;
                         $auth =~ s/(\015|\012)$//g;
-                        $response = $self->get_response_( $mail, $client, $auth );
+                        ( $response, $ok ) = $self->get_response_( $mail, $client, $auth );
                     }
                 } else {
                     next;
@@ -243,7 +242,9 @@ sub child__
         if ( $command =~ /AUTH/ ) {
             if ( $self->config_( 'secure_server' ) ne '' )  {
                 if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
-                    if ( $self->echo_response_($mail, $client, "AUTH" ) ) {
+                    my $response = $self->echo_response_($mail, $client, "AUTH" );
+                    last if ( $response == 2 );
+                    if ( $response == 0 ) {
                         $self->echo_to_dot_( $mail, $client );
                     }
                 } else {
@@ -260,7 +261,9 @@ sub child__
 
         if ( ( $command =~ /LIST ?(.*)?/i ) ||                            # PROFILE BLOCK START
              ( $command =~ /UIDL ?(.*)?/i ) ) {                           # PROFILE BLOCK STOP
-            if ( $self->echo_response_($mail, $client, $command ) ) {
+            my $response = $self->echo_response_($mail, $client, $command );
+            last if ( $response == 2 );
+            if ( $response == 0 ) {
                 $self->echo_to_dot_( $mail, $client ) if ( $1 eq '' );
             }
 
@@ -310,7 +313,9 @@ sub child__
 
             if ( $2 ne '99999999' )  {
                 if ( $self->config_( 'toptoo' ) ) {
-                    if ( $self->echo_response_($mail, $client, "RETR $count" ) ) {
+                    my $response = $self->echo_response_($mail, $client, "RETR $count" );
+                    last if ( $response == 2 );
+                    if ( $response == 0 ) {
 
                         # Classify without echoing to client, saving file for later RETR's
 
@@ -321,7 +326,9 @@ sub child__
                         # Note that the 1 here indicates that echo_response_ does not send the response to the
                         # client.  The +OK has already been sent by the RETR
 
-                        if ( $self->echo_response_($mail, $client, $command, 1 ) ) {
+                        $response = $self->echo_response_($mail, $client, $command, 1 );
+                        last if ( $response == 2 );
+                        if ( $response == 0 ) {
 
                             # Classify with pre-defined class, without saving, echoing to client
 
@@ -336,7 +343,11 @@ sub child__
                         }
                     }
                 } else {
-                    $self->echo_to_dot_( $mail, $client ) if ( $self->echo_response_($mail, $client, $command ) );
+                    my $response = $self->echo_response_($mail, $client, $command );
+                    last if ( $response == 2 );
+                    if ( $response == 0 ) {
+                        $self->echo_to_dot_( $mail, $client );
+		    }
                 }
 
                 next;
@@ -351,7 +362,11 @@ sub child__
         if ( $command =~ /CAPA/i ) {
             if ( $mail || $self->config_( 'secure_server' ) ne '' )  {
                 if ( $mail || ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) ) )  {
-                    $self->echo_to_dot_( $mail, $client ) if ( $self->echo_response_($mail, $client, "CAPA" ) );
+                    my $response = $self->echo_response_($mail, $client, "CAPA" );
+                    last if ( $response == 2 );
+                    if ( $response == 0 ) {
+                        $self->echo_to_dot_( $mail, $client );
+		    }
                 } else {
                     next;
                 }
@@ -379,7 +394,7 @@ sub child__
              ( $command =~ /XSENDER (.*)/i ) ||
              ( $command =~ /DELE (.*)/i )    ||
              ( $command =~ /RSET/i ) ) {                         # PROFILE BLOCK STOP
-            $self->echo_response_($mail, $client, $command );
+            last if ( $self->echo_response_($mail, $client, $command ) == 2 );
             next;
         }
 
@@ -441,7 +456,9 @@ sub child__
                 # Get the message from the remote server, if there's an error then we're done, but if not then
                 # we echo each line of the message until we hit the . at the end
 
-                if ( $self->echo_response_($mail, $client, $command ) ) {
+                my $response = $self->echo_response_($mail, $client, $command );
+                last if ( $response == 2 );
+                if ( $response == 0 ) {
                     my $history_file;
                     ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '' );
 
@@ -467,7 +484,7 @@ sub child__
 
         if ( $command =~ /QUIT/i ) {
             if ( $mail )  {
-                $self->echo_response_( $mail, $client, $command );
+                last if ( $self->echo_response_( $mail, $client, $command ) == 2 );
                 close $mail;
             } else {
                 $self->tee_( $client, "+OK goodbye$eol" );
@@ -478,7 +495,7 @@ sub child__
         # Don't know what this is so let's just pass it through and hope for the best
 
         if ( $mail && $mail->connected )  {
-            $self->echo_response_($mail, $client, $command );
+            last if ( $self->echo_response_($mail, $client, $command ) == 2 );
             next;
         } else {
             $self->tee_(  $client, "-ERR unknown command or bad syntax$eol" );

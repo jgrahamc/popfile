@@ -154,7 +154,7 @@ sub child__
         # close the connection immediately
         if ( $command =~ /^ *QUIT/i ) {
             if ( $news )  {
-                $self->echo_response_( $news, $client, $command );
+                last if ( $self->echo_response_( $news, $client, $command ) == 2 );
                 close $news;
             } else {
                 $self->tee_( $client, "205 goodbye$eol" );
@@ -210,7 +210,7 @@ sub child__
             }
         } elsif ( $connection_state eq "password needed" ) {
             if ($command =~ /^ *AUTHINFO PASS (.*)/i) {
-                my $response = $self->get_response_($news, $client, $command);
+                my ( $response, $ok ) = $self->get_response_($news, $client, $command);
 
                 if ($response =~ /^281 .*/) {
                     $connection_state = "connected";
@@ -242,7 +242,7 @@ sub child__
             # The client wants to retrieve an article. We oblige, and insert classification headers.
 
             if ( $command =~ /^ *ARTICLE (.*)/i ) {
-                my $response = $self->get_response_( $news, $client, $command);
+                my ( $response, $ok ) = $self->get_response_( $news, $client, $command);
                 if ( $response =~ /^220 (.*) (.*)$/i) {
                     $count += 1;
 
@@ -262,7 +262,7 @@ sub child__
             # Commands expecting a code + text response
 
             if ( $command =~ /^ *(LIST|HEAD|BODY|NEWGROUPS|NEWNEWS|LISTGROUP|XGTITLE|XINDEX|XHDR|XOVER|XPAT|XROVER|XTHREAD)/i ) {
-                my $response = $self->get_response_( $news, $client, $command);
+                my ( $response, $ok ) = $self->get_response_( $news, $client, $command);
 
                 # 2xx (200) series response indicates multi-line text follows to .crlf
 
@@ -273,7 +273,7 @@ sub child__
             # Exceptions to 200 code above
 
             if ( $ command =~ /^ *(HELP)/i ) {
-                my $response = $self->get_response_( $news, $client, $command);
+                my ( $response, $ok ) = $self->get_response_( $news, $client, $command);
                 $self->echo_to_dot_( $news, $client, 0 ) if ( $response =~ /^1\d\d/ );
                 next;
             }
@@ -288,7 +288,7 @@ sub child__
             # Commands followed by multi-line client response
 
             if ( $command =~ /^ *(IHAVE|POST|XRELPIC)/i ) {
-                my $response = $self->get_response_( $news, $client, $command);
+                my ( $response, $ok ) = $self->get_response_( $news, $client, $command);
 
                 # 3xx (300) series response indicates multi-line text should be sent, up to .crlf
 

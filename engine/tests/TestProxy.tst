@@ -287,7 +287,9 @@ close TEMP;
 
 $sp->{connection_timeout_error_} = 'timeout error';
 open TEMP, ">temp.tmp";
-test_assert_regexp( $sp->get_response_( undef, \*TEMP, "HELLO" ), 'timeout error' );
+my ( $r, $o ) = $sp->get_response_( undef, \*TEMP, "HELLO" );
+test_assert_regexp( $r, 'timeout error' );
+test_assert_equal( $o, 0 );
 close TEMP;
 open TEMP, "<temp.tmp";
 $line = <TEMP>;
@@ -298,7 +300,9 @@ close TEMP;
 
 $sp->global_config_( 'timeout', 1 );
 open TEMP, ">temp.tmp";
-test_assert_regexp( $sp->get_response_( $client, \*TEMP, "HELLO" ), 'timeout error' );
+( $r, $o ) = $sp->get_response_( $client, \*TEMP, "HELLO" );
+test_assert_regexp( $r, 'timeout error' );
+test_assert_equal( $o, 0 );
 close TEMP;
 open TEMP, "<temp.tmp";
 $line = <TEMP>;
@@ -308,7 +312,9 @@ close TEMP;
 # Test get_response_ with null response not allowed
 
 open TEMP, ">temp.tmp";
-test_assert_equal( $sp->get_response_( $client, \*TEMP, "HELLO", 1 ), '' );
+( $r, $o ) = $sp->get_response_( $client, \*TEMP, "HELLO", 1 );
+test_assert_equal( $r, '' );
+test_assert_equal( $o, 1 );
 close TEMP;
 open TEMP, "<temp.tmp";
 $line = <TEMP>;
@@ -321,7 +327,9 @@ $sp->send( 'HELLO response');
 $sp->service_server();
 
 open TEMP, ">temp.tmp";
-test_assert_regexp( $sp->get_response_( $client, \*TEMP, "HELLO" ), 'HELLO response' );
+( $r, $o ) = $sp->get_response_( $client, \*TEMP, "HELLO" );
+test_assert_regexp( $r, 'HELLO response' );
+test_assert_equal( $o, 1 );
 close TEMP;
 open TEMP, "<temp.tmp";
 $line = <TEMP>;
@@ -335,7 +343,7 @@ $sp->service_server();
 
 $sp->{good_response_} = 'GOOD';
 open TEMP, ">temp.tmp";
-test_assert( $sp->echo_response_( $client, \*TEMP, "HOWRU?" ) );
+test_assert_equal( $sp->echo_response_( $client, \*TEMP, "HOWRU?" ), 0 );
 close TEMP;
 open TEMP, "<temp.tmp";
 $line = <TEMP>;
@@ -348,7 +356,7 @@ $sp->send( 'BAD');
 $sp->service_server();
 
 open TEMP, ">temp.tmp";
-test_assert( !$sp->echo_response_( $client, \*TEMP, "HOWRU?" ) );
+test_assert_equal( $sp->echo_response_( $client, \*TEMP, "HOWRU?" ), 1 );
 close TEMP;
 open TEMP, "<temp.tmp";
 $line = <TEMP>;

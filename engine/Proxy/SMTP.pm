@@ -286,7 +286,7 @@ sub child__
 sub smtp_echo_response_
 {
     my ($self, $mail, $client, $command, $suppress) = @_;
-    my $response = $self->get_response_( $mail, $client, $command );
+    my ( $response, $ok ) = $self->get_response_( $mail, $client, $command );
 
     if ( $response =~ /^\d\d\d-/ ) {
         $self->echo_to_regexp_($mail, $client, qr/^\d\d\d /, 1, $suppress);

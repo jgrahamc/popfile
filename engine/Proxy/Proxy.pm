@@ -529,10 +529,9 @@ sub flush_extra_
 # $suppress If set to 1 then the response does not go to the client
 #
 # Send $command to $mail, receives the response and echoes it to the $client and the debug
-# output.  Returns the response
+# output.  Returns the response and a failure code indicating false if there was a timeout
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_response_
 {
     my ( $self, $mail, $client, $command, $null_resp, $suppress ) = @_;
@@ -543,7 +542,7 @@ sub get_response_
     unless ( defined($mail) && $mail->connected ) {
        # $mail is undefined - return an error intead of crashing
        $self->tee_(  $client, "$self->{connection_timeout_error_}$eol" );
-       return $self->{connection_timeout_error_};
+       return ( $self->{connection_timeout_error_}, 0 );
     }
 
     # Send the command (followed by the appropriate EOL) to the mail server
@@ -564,7 +563,7 @@ sub get_response_
             # Echo the response up to the mail client
 
             $self->tee_( $client, $response ) if ( !$suppress );
-            return $response;
+            return ( $response, 1 );
         }
     }
 
@@ -572,10 +571,10 @@ sub get_response_
         # An error has occurred reading from the mail server
 
         $self->tee_(  $client, "$self->{connection_timeout_error_}$eol" );
-        return $self->{connection_timeout_error_};
+        return ( $self->{connection_timeout_error_}, 0 );
     } else {
         $self->tee_($client, "");
-        return "";
+        return ( "", 1 );
     }
 }
 
@@ -589,7 +588,13 @@ sub get_response_
 # $suppress If set to 1 then the response does not go to the client
 #
 # Send $command to $mail, receives the response and echoes it to the $client and the debug
-# output.  Returns true if the response was +OK and false if not
+# output.
+#
+# Returns one of three values
+#
+# 0 Successfully sent the command and got a positive response
+# 1 Sent the command and got a negative response
+# 2 Failed to send the command (e.g. a timeout occurred)
 #
 # ---------------------------------------------------------------------------------------------
 sub echo_response_
@@ -598,7 +603,18 @@ sub echo_response_
 
     # Determine whether the response began with the string +OK.  If it did then return 1
     # else return 0
-    return ( $self->get_response_( $mail, $client, $command, 0, $suppress ) =~ /$self->{good_response_}/ );
+
+    my ( $response, $ok ) = $self->get_response_( $mail, $client, $command, 0, $suppress );
+
+    if ( $ok == 1 ) {
+        if ( $response =~ /$self->{good_response_}/ ) {
+            return 0;
+	} else {
+            return 1;
+        }
+    } else {
+        return 2;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
