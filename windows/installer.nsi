@@ -972,6 +972,7 @@ save_HKCU_root_sfn:
 
   SetOutPath $G_MPLIBDIR\IO\Socket
   File "${C_PERL_DIR}\lib\IO\Socket\*"
+  File "${C_PERL_DIR}\site\lib\IO\Socket\Socks.pm"
 
   SetOutPath $G_MPLIBDIR\MIME
   File "${C_PERL_DIR}\lib\MIME\*"
