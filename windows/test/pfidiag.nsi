@@ -51,7 +51,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.41"
+  !define C_VERSION   "0.0.42"
 
   ;--------------------------------------------------------------------------
   ; The default NSIS caption is "$(^Name) Setup" so we override it here
@@ -89,6 +89,16 @@
 
   VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
   VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+
+#--------------------------------------------------------------------------
+# Include private library functions and macro definitions
+#--------------------------------------------------------------------------
+
+  ; Avoid compiler warnings by disabling the functions and definitions we do not use
+
+  !define PFIDIAG
+
+  !include "..\pfi-library.nsh"
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages
@@ -141,15 +151,13 @@
 
   ; Override the standard "Installing..." page header
 
-  !define MUI_PAGE_HEADER_TEXT                    "Generating the PFI Diagnostic report..."
-  !define MUI_PAGE_HEADER_SUBTEXT \
-          "Searching for POPFile registry entries and the POPFile environment variables"
+  !define MUI_PAGE_HEADER_TEXT                      "$(PFI_LANG_DIAG_STD_HDR)"
+  !define MUI_PAGE_HEADER_SUBTEXT                   "$(PFI_LANG_DIAG_STD_SUBHDR)"
 
   ; Override the standard "Installation complete..." page header
 
-  !define MUI_INSTFILESPAGE_FINISHHEADER_TEXT     "POPFile Installer Diagnostic Utility"
-  !define MUI_INSTFILESPAGE_FINISHHEADER_SUBTEXT \
-          "For a simple report use 'PFIDIAG'       For a detailed report use 'PFIDIAG /FULL'"
+  !define MUI_INSTFILESPAGE_FINISHHEADER_TEXT       "$(PFI_LANG_DIAG_END_HDR)"
+  !define MUI_INSTFILESPAGE_FINISHHEADER_SUBTEXT    "$(PFI_LANG_DIAG_END_SUBHDR)"
 
   !insertmacro MUI_PAGE_INSTFILES
 
@@ -158,6 +166,28 @@
 #--------------------------------------------------------------------------
 
   !insertmacro MUI_LANGUAGE "English"
+
+  ;--------------------------------------------------------------------------
+  ; Current build only supports English and uses local strings
+  ; instead of language strings from languages\*-pfi.nsh files
+  ;--------------------------------------------------------------------------
+
+  !macro PFI_DIAG_TEXT NAME VALUE
+    LangString ${NAME} ${LANG_ENGLISH} "${VALUE}"
+  !macroend
+
+  !insertmacro PFI_DIAG_TEXT "PFI_LANG_DIAG_STD_HDR"    \
+         "Generating the PFI Diagnostic report..."
+  !insertmacro PFI_DIAG_TEXT "PFI_LANG_DIAG_STD_SUBHDR" \
+        "Searching for POPFile registry entries and the POPFile environment variables"
+
+  !insertmacro PFI_DIAG_TEXT "PFI_LANG_DIAG_END_HDR"    \
+        "POPFile Installer Diagnostic Utility"
+  !insertmacro PFI_DIAG_TEXT "PFI_LANG_DIAG_END_SUBHDR" \
+        "For a simple report use 'PFIDIAG'       For a detailed report use 'PFIDIAG /FULL'"
+
+  !insertmacro PFI_DIAG_TEXT "PFI_LANG_DIAG_RIGHTCLICK" \
+        "Right-click in the window below to copy the report to the clipboard"
 
 #--------------------------------------------------------------------------
 # General settings
@@ -343,8 +373,14 @@ start_report:
   DetailPrint "HKLM: RootDir_LFN = < ${L_REGDATA} >"
   StrCpy ${L_EXPECTED_ROOT} ${L_REGDATA}
   ReadRegStr ${L_REGDATA} HKLM "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_SFN"
+  StrCmp ${L_REGDATA} "Not supported" 0 short_HKLM_root
+  Push ${L_EXPECTED_ROOT}
+  Call CheckForSpaces
   DetailPrint "HKLM: RootDir_SFN = < ${L_REGDATA} >"
-  StrCmp ${L_REGDATA} "Not supported" end_HKLM_root
+  Goto end_HKLM_root
+
+short_HKLM_root:
+  DetailPrint "HKLM: RootDir_SFN = < ${L_REGDATA} >"
   GetFullPathName /SHORT ${L_EXPECTED_ROOT} ${L_EXPECTED_ROOT}
   StrCmp ${L_EXPECTED_ROOT} ${L_REGDATA} end_HKLM_root
   DetailPrint "^^^^^ Error ^^^^^"
@@ -377,8 +413,14 @@ end_HKLM_root:
 
 root_sfn:
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_SFN"
+  StrCmp ${L_REGDATA} "Not supported"  0 short_HKCU_root
+  Push ${L_EXPECTED_ROOT}
+  Call CheckForSpaces
   DetailPrint "HKCU: RootDir_SFN = < ${L_REGDATA} >"
-  StrCmp ${L_REGDATA} "Not supported" end_HKCU_root
+  Goto end_HKCU_root
+
+short_HKCU_root:
+  DetailPrint "HKCU: RootDir_SFN = < ${L_REGDATA} >"
   GetFullPathName /SHORT ${L_EXPECTED_ROOT} ${L_EXPECTED_ROOT}
   StrCmp ${L_EXPECTED_ROOT} ${L_REGDATA} end_HKCU_root
   DetailPrint "^^^^^ Error ^^^^^"
@@ -397,8 +439,14 @@ end_HKCU_root:
 
 user_sfn:
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_SFN"
+  StrCmp ${L_REGDATA} "Not supported" 0 short_HKCU_user
+  Push ${L_EXPECTED_USER}
+  Call CheckForSpaces
   DetailPrint "HKCU: UserDir_SFN = < ${L_REGDATA} >"
-  StrCmp ${L_REGDATA} "Not supported" end_HKCU_user
+  Goto end_HKCU_user
+
+short_HKCU_user:
+  DetailPrint "HKCU: UserDir_SFN = < ${L_REGDATA} >"
   GetFullPathName /SHORT ${L_EXPECTED_USER} ${L_EXPECTED_USER}
   StrCmp ${L_EXPECTED_USER} ${L_REGDATA} end_HKCU_user
   DetailPrint "^^^^^ Error ^^^^^"
@@ -472,8 +520,14 @@ simple_HKCU_locns:
 
 simple_root_sfn:
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_SFN"
+  StrCmp ${L_REGDATA} "Not supported" 0 short_simple_root
+  Push ${L_EXPECTED_ROOT}
+  Call CheckForSpaces
   DetailPrint "SFN equivalent    = < ${L_REGDATA} >"
-  StrCmp ${L_REGDATA} "Not supported" end_simple_root
+  Goto end_simple_root
+
+short_simple_root:
+  DetailPrint "SFN equivalent    = < ${L_REGDATA} >"
   GetFullPathName /SHORT ${L_EXPECTED_ROOT} ${L_EXPECTED_ROOT}
   StrCmp ${L_EXPECTED_ROOT} ${L_REGDATA} end_simple_root
   DetailPrint "^^^^^ Error ^^^^^"
@@ -491,8 +545,14 @@ end_simple_root:
 
 simple_user_sfn:
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_SFN"
+  StrCmp ${L_REGDATA} "Not supported" 0 short_simple_user
+  Push ${L_EXPECTED_USER}
+  Call CheckForSpaces
   DetailPrint "SFN equivalent    = < ${L_REGDATA} >"
-  StrCmp ${L_REGDATA} "Not supported" end_simple_user
+  Goto end_simple_user
+
+short_simple_user:
+  DetailPrint "SFN equivalent    = < ${L_REGDATA} >"
   GetFullPathName /SHORT ${L_EXPECTED_USER} ${L_EXPECTED_USER}
   StrCmp ${L_EXPECTED_USER} ${L_REGDATA} end_simple_user
   DetailPrint "^^^^^ Error ^^^^^"
@@ -500,7 +560,7 @@ simple_user_sfn:
 
 end_simple_user:
   DetailPrint ""
-  DetailPrint "popfile.pl file   = ${L_STATUS_ROOT}found"
+  DetailPrint "popfile.pl  file  = ${L_STATUS_ROOT}found"
   DetailPrint "popfile.cfg file  = ${L_STATUS_USER}found"
   DetailPrint ""
 
@@ -523,7 +583,14 @@ check_env_vars:
   StrCmp ${L_POPFILE_ROOT} "" check_user
 
 compare_root_var:
+  Push ${L_POPFILE_ROOT}
+  Call CheckForSpaces
   StrCmp ${L_EXPECTED_ROOT} ${L_POPFILE_ROOT} check_user
+  Push ${L_EXPECTED_ROOT}
+  Push " "
+  Call StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" 0 check_user
   DetailPrint "^^^^^ Error ^^^^^"
   DetailPrint "Expected value    = < ${L_EXPECTED_ROOT} >"
   DetailPrint ""
@@ -534,7 +601,14 @@ check_user:
   StrCmp ${L_POPFILE_USER} "" check_vars
 
 compare_user_var:
+  Push ${L_POPFILE_USER}
+  Call CheckForSpaces
   StrCmp ${L_EXPECTED_USER} ${L_POPFILE_USER} check_vars
+  Push ${L_EXPECTED_USER}
+  Push " "
+  Call StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" 0 check_vars
   DetailPrint "^^^^^ Error ^^^^^"
   DetailPrint "Expected value    = < ${L_EXPECTED_USER} >"
 
@@ -553,7 +627,7 @@ root_var_status:
   Goto check_user_var
 
 simple_root_status:
-  DetailPrint "popfile.pl file   = ${L_TEMP}found"
+  DetailPrint "popfile.pl  file  = ${L_TEMP}found"
 
 check_user_var:
   StrCmp ${L_POPFILE_USER} "" 0 user_result
@@ -611,7 +685,7 @@ exit:
   DetailPrint "(report created ${L_TEMP})"
   DetailPrint "------------------------------------------------------------"
   SetDetailsPrint textonly
-  DetailPrint "Use right-click menu in the panel below to copy the report to the clipboard"
+  DetailPrint "$(PFI_LANG_DIAG_RIGHTCLICK)"
   SetDetailsPrint none
 
   !undef L_DIAG_MODE
@@ -672,413 +746,44 @@ IsNT_yes:
 FunctionEnd
 
 
-;--------------------------------------------------------------------------
-; Remainder of this script is a very small subset of 'pfi-library.nsh'
-;--------------------------------------------------------------------------
-
 #--------------------------------------------------------------------------
-# Installer Function: GetParameters
+# Installer Function: CheckForSpaces
 #
-# Returns the command-line parameters (if any) supplied when the installer was started
+# This function logs an error message if there are any spaces in the input string
 #
 # Inputs:
-#         none
+#         (top of stack)   - input string
+#
 # Outputs:
-#         (top of stack)     - all of the parameters supplied on the command line (may be "")
-#
-# Usage:
-#         Call GetParameters
-#         Pop $R0
-#
-#         (if 'setup.exe /outlook' was used to start the installer, $R0 will hold '/outlook')
-#
-#--------------------------------------------------------------------------
-
-Function GetParameters
-
-  Push $R0
-  Push $R1
-  Push $R2
-  Push $R3
-
-  StrCpy $R2 1
-  StrLen $R3 $CMDLINE
-
-  ; Check for quote or space
-
-  StrCpy $R0 $CMDLINE $R2
-  StrCmp $R0 '"' 0 +3
-  StrCpy $R1 '"'
-  Goto loop
-
-  StrCpy $R1 " "
-
-loop:
-  IntOp $R2 $R2 + 1
-  StrCpy $R0 $CMDLINE 1 $R2
-  StrCmp $R0 $R1 get
-  StrCmp $R2 $R3 get
-  Goto loop
-
-get:
-  IntOp $R2 $R2 + 1
-  StrCpy $R0 $CMDLINE 1 $R2
-  StrCmp $R0 " " get
-  StrCpy $R0 $CMDLINE "" $R2
-
-  Pop $R3
-  Pop $R2
-  Pop $R1
-  Exch $R0
-
-FunctionEnd
-
-
-#--------------------------------------------------------------------------
-# Installer Function: GetIEVersion
-#
-# Uses the registry to determine which version of Internet Explorer is installed.
-#
-# Inputs:
 #         (none)
-# Outputs:
-#         (top of stack)     - string containing the Internet Explorer version
-#                              (1.x, 2.x, 3.x, 4.x, 5.0, 5.5, 6.0). If Internet Explorer
-#                              is not installed properly or at all, '?.?' is returned.
 #
 # Usage:
-#         Call GetIEVersion
-#         Pop $R0
 #
-#         ($R0 at this point is "5.0", for example)
+#         Push "an example"
+#         Call IsNT
+#
+#         (an error message will be added to the log)
 #
 #--------------------------------------------------------------------------
 
-Function GetIEVersion
+Function CheckForSpaces
 
-  !define L_REGDATA   $R9
-  !define L_TEMP      $R8
+  !define L_TEMP  $R9
 
-  Push ${L_REGDATA}
+  Exch ${L_TEMP}
   Push ${L_TEMP}
-
-  ClearErrors
-  ReadRegStr ${L_REGDATA} HKLM "Software\Microsoft\Internet Explorer" "Version"
-  IfErrors ie_123
-
-  ; Internet Explorer 4.0 or later is installed. The 'Version' value is a string with the
-  ; following format: major-version.minor-version.build-number.sub-build-number
-
-  ; According to MSDN, the 'Version' string under 'HKLM\Software\Microsoft\Internet Explorer'
-  ; can have the following values:
-  ;
-  ; Internet Explorer Version     'Version' string
-  ;    4.0                          4.71.1712.6
-  ;    4.01                         4.72.2106.8
-  ;    4.01 SP1                     4.72.3110.3
-  ;    5                  	        5.00.2014.0216
-  ;    5.5                          5.50.4134.0100
-  ;    6.0 Public Preview           6.0.2462.0000
-  ;    6.0 Public Preview Refresh   6.0.2479.0006
-  ;    6.0 RTM                    	6.0.2600.0000
-
-  StrCpy ${L_TEMP} ${L_REGDATA} 1
-  StrCmp ${L_TEMP} "4" ie_4
-  StrCpy ${L_REGDATA} ${L_REGDATA} 3
-  Goto done
-
-ie_4:
-  StrCpy ${L_REGDATA} "4.x"
-  Goto done
-
-ie_123:
-
-  ; Older versions of Internet Explorer use the 'IVer' string under the same registry key
-  ; (HKLM\Software\Microsoft\Internet Explorer). The 'IVer' string is used as follows:
-  ;
-  ; Internet Explorer 1.0 for Windows 95 (included with Microsoft Plus! for Windows 95)
-  ; uses the value '100'
-  ;
-  ; Internet Explorer 2.0 for Windows 95 uses the value '102'
-  ;
-  ; Versions of Internet Explorer that are included with Windows NT 4.0 use the value '101'
-  ;
-  ; Internet Explorer 3.x updates the 'IVer' string value to '103'
-
-  ClearErrors
-  ReadRegStr ${L_REGDATA} HKLM "Software\Microsoft\Internet Explorer" "IVer"
-  IfErrors error
-
-  StrCpy ${L_REGDATA} ${L_REGDATA} 3
-  StrCmp ${L_REGDATA} '100' ie1
-  StrCmp ${L_REGDATA} '101' ie2
-  StrCmp ${L_REGDATA} '102' ie2
-
-  StrCpy ${L_REGDATA} '3.x'       ; default to ie3 if not 100, 101, or 102.
-  Goto done
-
-ie1:
-  StrCpy ${L_REGDATA} '1.x'
-  Goto done
-
-ie2:
-  StrCpy ${L_REGDATA} '2.x'
-  Goto done
-
-error:
-  StrCpy ${L_REGDATA} '?.?'
-
-done:
+  Push " "
+  Call StrStr
   Pop ${L_TEMP}
-  Exch ${L_REGDATA}
+  StrCmp ${L_TEMP} "" exit
+  DetailPrint "^^^^^ Error ^^^^^   The above value should not contain spaces"
 
-  !undef L_REGDATA
+exit:
+  Pop ${L_TEMP}
+
   !undef L_TEMP
 
 FunctionEnd
-
-
-#--------------------------------------------------------------------------
-# Macro: GetDateTimeStamp
-#
-# The installation process and the uninstall process may need a function which returns a
-# string with the current date and time (using the current time from Windows). This macro
-# makes maintenance easier by ensuring that both processes use identical functions, with
-# the only difference being their names.
-#
-# NOTE:
-# The !insertmacro GetDateTimeStamp "" and !insertmacro GetDateTimeStamp "un." commands are
-# included in this file so the NSIS script and/or other library functions in 'pfi-library.nsh'
-# can use 'Call GetDateTimeStamp' & 'Call un.GetDateTimeStamp' without additional preparation.
-#
-# Inputs:
-#         (none)
-# Outputs:
-#         (top of stack)     - string with current date and time (eg '08-Dec-2003 @ 23:01:59')
-#
-#  Usage (after macro has been 'inserted'):
-#
-#         Call GetDateTimeStamp
-#         Pop $R9
-#
-#         ($R9 now holds a string like '08-Dec-2003 @ 23:01:59')
-#--------------------------------------------------------------------------
-
-!macro GetDateTimeStamp UN
-  Function ${UN}GetDateTimeStamp
-
-    !define L_DATETIMESTAMP   $R9
-    !define L_DAY             $R8
-    !define L_MONTH           $R7
-    !define L_YEAR            $R6
-    !define L_HOURS           $R5
-    !define L_MINUTES         $R4
-    !define L_SECONDS         $R3
-
-    Push ${L_DATETIMESTAMP}
-    Push ${L_DAY}
-    Push ${L_MONTH}
-    Push ${L_YEAR}
-    Push ${L_HOURS}
-    Push ${L_MINUTES}
-    Push ${L_SECONDS}
-
-    Call ${UN}GetLocalTime
-    Pop ${L_YEAR}
-    Pop ${L_MONTH}
-    Pop ${L_DAY}              ; ignore day of week
-    Pop ${L_DAY}
-    Pop ${L_HOURS}
-    Pop ${L_MINUTES}
-    Pop ${L_SECONDS}
-    Pop ${L_DATETIMESTAMP}    ; ignore milliseconds
-
-    IntCmp ${L_DAY} 10 +2 0 +2
-    StrCpy ${L_DAY} "0${L_DAY}"
-
-    StrCmp ${L_MONTH} 1 0 +3
-    StrCpy ${L_MONTH} Jan
-    Goto DoubleDigitTime
-
-    StrCmp ${L_MONTH} 2 0 +3
-    StrCpy ${L_MONTH} Feb
-    Goto DoubleDigitTime
-
-    StrCmp ${L_MONTH} 3 0 +3
-    StrCpy ${L_MONTH} Mar
-    Goto DoubleDigitTime
-
-    StrCmp ${L_MONTH} 4 0 +3
-    StrCpy ${L_MONTH} Apr
-    Goto DoubleDigitTime
-
-    StrCmp ${L_MONTH} 5 0 +3
-    StrCpy ${L_MONTH} May
-    Goto DoubleDigitTime
-
-    StrCmp ${L_MONTH} 6 0 +3
-    StrCpy ${L_MONTH} Jun
-    Goto DoubleDigitTime
-
-    StrCmp ${L_MONTH} 7 0 +3
-    StrCpy ${L_MONTH} Jul
-    Goto DoubleDigitTime
-
-    StrCmp ${L_MONTH} 8 0 +3
-    StrCpy ${L_MONTH} Aug
-    Goto DoubleDigitTime
-
-    StrCmp ${L_MONTH} 9 0 +3
-    StrCpy ${L_MONTH} Sep
-    Goto DoubleDigitTime
-
-    StrCmp ${L_MONTH} 10 0 +3
-    StrCpy ${L_MONTH} Oct
-    Goto DoubleDigitTime
-
-    StrCmp ${L_MONTH} 11 0 +3
-    StrCpy ${L_MONTH} Nov
-    Goto DoubleDigitTime
-
-    StrCmp ${L_MONTH} 12 0 +2
-    StrCpy ${L_MONTH} Dec
-
-  DoubleDigitTime:
-    IntCmp ${L_HOURS} 10 +2 0 +2
-    StrCpy ${L_HOURS} "0${L_HOURS}"
-
-    IntCmp ${L_MINUTES} 10 +2 0 +2
-    StrCpy ${L_MINUTES} "0${L_MINUTES}"
-
-    IntCmp ${L_SECONDS} 10 +2 0 +2
-    StrCpy ${L_SECONDS} "0${L_SECONDS}"
-
-    StrCpy ${L_DATETIMESTAMP} "${L_DAY}-${L_MONTH}-${L_YEAR} @ ${L_HOURS}:${L_MINUTES}:${L_SECONDS}"
-
-    Pop ${L_SECONDS}
-    Pop ${L_MINUTES}
-    Pop ${L_HOURS}
-    Pop ${L_YEAR}
-    Pop ${L_MONTH}
-    Pop ${L_DAY}
-    Exch ${L_DATETIMESTAMP}
-
-    !undef L_DATETIMESTAMP
-    !undef L_DAY
-    !undef L_MONTH
-    !undef L_YEAR
-    !undef L_HOURS
-    !undef L_MINUTES
-    !undef L_SECONDS
-
-  FunctionEnd
-!macroend
-
-#--------------------------------------------------------------------------
-# Installer Function: GetDateTimeStamp
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-!insertmacro GetDateTimeStamp ""
-
-
-#--------------------------------------------------------------------------
-# Macro: GetLocalTime
-#
-# The installation process and the uninstall process may need a function which gets the
-# local time from Windows (to generate data and/or time stamps, etc). This macro makes
-# maintenance easier by ensuring that both processes use identical functions, with
-# the only difference being their names.
-#
-# Normally this function will be used by a higher level one which returns a suitable string.
-#
-# NOTE:
-# The !insertmacro GetLocalTime "" and !insertmacro GetLocalTime "un." commands are included
-# in this file so the NSIS script and/or other library functions in 'pfi-library.nsh' can use
-# 'Call GetLocalTime' and 'Call un.GetLocalTime' without additional preparation.
-#
-# Inputs:
-#         (none)
-# Outputs:
-#         (top of stack)     - year         (4-digits)
-#         (top of stack - 1) - month        (1 to 12)
-#         (top of stack - 2) - day of week  (0 = Sunday, 6 = Saturday)
-#         (top of stack - 3) - day          (1 - 31)
-#         (top of stack - 4) - hours        (0 - 23)
-#         (top of stack - 5) - minutes      (0 - 59)
-#         (top of stack - 6) - seconds      (0 - 59)
-#         (top of stack - 7) - milliseconds (0 - 999)
-#
-#  Usage (after macro has been 'inserted'):
-#
-#         Call GetLocalTime
-#         Pop $Year
-#         Pop $Month
-#         Pop $DayOfWeek
-#         Pop $Day
-#         Pop $Hours
-#         Pop $Minutes
-#         Pop $Seconds
-#         Pop $Milliseconds
-#--------------------------------------------------------------------------
-
-!macro GetLocalTime UN
-  Function ${UN}GetLocalTime
-
-    # Preparing Variables
-
-    Push $1
-    Push $2
-    Push $3
-    Push $4
-    Push $5
-    Push $6
-    Push $7
-    Push $8
-
-    # Calling the Function GetLocalTime from Kernel32.dll
-
-    System::Call '*(&i2, &i2, &i2, &i2, &i2, &i2, &i2, &i2) i .r1'
-    System::Call 'kernel32::GetLocalTime(i) i(r1)'
-    System::Call '*$1(&i2, &i2, &i2, &i2, &i2, &i2, &i2, &i2)(.r8, .r7, .r6, .r5, .r4, .r3, .r2, .r1)'
-
-    # Returning to User
-
-    Exch $8
-    Exch
-    Exch $7
-    Exch
-    Exch 2
-    Exch $6
-    Exch 2
-    Exch 3
-    Exch $5
-    Exch 3
-    Exch 4
-    Exch $4
-    Exch 4
-    Exch 5
-    Exch $3
-    Exch 5
-    Exch 6
-    Exch $2
-    Exch 6
-    Exch 7
-    Exch $1
-    Exch 7
-
-  FunctionEnd
-!macroend
-
-#--------------------------------------------------------------------------
-# Installer Function: GetLocalTime
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-!insertmacro GetLocalTime ""
-
 
 #--------------------------------------------------------------------------
 # End of 'pfidiag.nsi'
