@@ -8,7 +8,7 @@
 <td width=2></td>
 <td bgcolor=#ededca width=15% align=center>Trinn 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Bøtteoppsett</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#cccc99 width=15% align=center>Trinn 3<br><font size=+1><b>&nbsp;<a href="email.html">Epost-programmer</a></b></font></td>
+<td bgcolor=#cccc99 width=15% align=center>Trinn 3<br><font size=+1><b>&nbsp;<a href="email.html">E-post-programmer</a></b></font></td>
 <td width=2></td>
 <td align=center bgcolor=#ededca width=15%>Trinn 4<br><font size=+1><b>&nbsp;<a href="training.html">Trening</a></b></font></td>
 <td width=25%>&nbsp;</td></tr>
@@ -21,12 +21,13 @@
 <td width=2></td>
 <td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Brannmurer</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Sikker Passord 
-Autentisering</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Sikker </a></b></font>
+<a href="spa.html"><font size="+1"><b>Godkjenning av Passord</b></font></a></td>
 <td width=2></td>
 <td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Andre Proxy</a></b></font><br></td>
 <td width=2></td>
-<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Flere Epost-kontoer</a></b></font></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Flere 
+e-post-kontoer</a></b></font></td>
 </tr>
 
 </table>
@@ -36,37 +37,38 @@ Autentisering</a></b></font></td>
 
 <h2>Få ditt e-postprogram til å snakke med POPFile</h2>
 
-<p>POPFile virker som en <i>proxy server</i>. Ditt epostprogram snakker med POPFile, som igjen snakker med epostserveren på vegne av epostprogrammet. 
-Istedenfor at epostprogrammet henter beskjedene direkte, henter POPFile dem 
+<p>POPFile virker som en <i>proxy server</i>. Ditt e-postprogram snakker med POPFile, som igjen snakker med 
+e-postserveren på vegne av e-postprogrammet. 
+Istedenfor at e-postprogrammet henter beskjedene direkte, henter POPFile dem 
 først, og søker gjennom dem for så å avgjøre hvilken bøtte de skal i.</p>
 
 <p>Så snart det er bestemt - noe som tar en brøkdel av et sekund - gjør POPFile 
 en av to ting: et merke som [dette] kan legges til starten på emne-linjen; som 
-betyr at&nbsp; epostprogrammer som er i stand til enkel epostfiltrering (som Microsoft Outlook Express), 
-kan levere eposten i mapper etter ditt valg - eller, for mer avanserte epostprogrammer 
-som Eudora, kan POPFile legge til et nytt epost hode (e-mail header) som for 
+betyr at&nbsp; e-postprogrammer som er i stand til enkel e-postfiltrering (som Microsoft Outlook Express), 
+kan levere e-posten i mapper etter ditt valg - eller, for mer avanserte e-postprogrammer 
+som Eudora, kan POPFile legge til et nytt e-post hode (e-mail header) som for 
 eksempel denne:</p>
 
 <p><b>X-Text-Classification: personlig</b></p>
 
-<p>- som ditt epostprogram kan bruke som et filter.</p>
+<p>- som ditt e-postprogram kan bruke som et filter.</p>
 
-<p>Likevel, du må gjøre to ting for å få epostprogrammet ditt til å snakke med 
+<p>Likevel, du må gjøre to ting for å få e-postprogrammet ditt til å snakke med 
 POPFile:
 
-<ol><li>Justere epostprogrammet ditt sine instillinger slik at det snakker med POPFile, 
+<ol><li>Justere e-postprogrammet ditt sine instillinger slik at det snakker med POPFile, 
   og
-<li>sette opp epostfiltrene i epostprogrammet slik at beskjeden blir sendt dit 
+<li>sette opp e-postfiltrene i e-postprogrammet slik at beskjeden blir sendt dit 
 de skal.</ol></p>
 
-<p>La oss justere epostinnstillingene først. Vi setter opp filtrene om et 
+<p>La oss justere e-postinnstillingene først. Vi setter opp filtrene om et 
 øyeblikk.
 
 <p>Nedenfor finner du instruksjonene for de mest populære programmene. For andre 
-epostprogrammer - eller for avanserte brukere - her følger de generelle 
+e-postprogrammer - eller for avanserte brukere - her følger de generelle 
 instruksjonene:</p>
 
-<p><ul><li>Forandre navnet på POP3-serveren i din epostklient til127.0.0.1. Legg 
+<p><ul><li>Forandre navnet på POP3-serveren i din e-postklient til127.0.0.1. Legg 
   merke til den opprinnelige adressen.
 <li>Forandre POP3 brukernavnet til [opprinnelig-POP3-server-adresse]:[brukernavn]
 <li>La passordet være i fred.</ul></p>
@@ -79,29 +81,37 @@ SPA), se <a href="spa.html">Bruk av POPFile med: Sikker Godkjenning av Passord
 
 <td colspan=3 align="center" width="644">
 
-Velg ditt epostprogram og følg kolonnen helt ned. Selv om disse instruksjonene 
-kan synes kompliserte, tar de faktisk bare et par mnutter - og det er vanskelig 
+Velg ditt e-postprogram og følg kolonnen helt ned. Selv om disse instruksjonene 
+kan synes kompliserte, tar de faktisk bare et par minutter - og det er vanskelig 
 å gjøre det feil. (Bare i tilfelle: Skriv ned de opprinnelige innstillingene 
 etter hvert som du gjør endringer, slik at du lett kan gjøre det om igjen dersom 
-noe skulle gå galt). Disse instruksjonene er fortsatt på engelsk - norsk vil 
-komme etter hvert som oversetter får tid...</td></tr><tr>
+noe skulle gå galt).</td></tr><tr>
 
 <td width=211 bgcolor="#FFCCCC" valign="top">
 
 <h3 align=center>Outlook</h3>
 
 <ul>
-<li>I Outlook select the Tools->Email Accounts... menu option.  The E-mail Accounts dialog will appear. <a href=http://popfile.sourceforge.net/manual/o_popfile1.gif>[screenshot]</a>
-<li>Click View or change existing e-mail accounts and click Next.  Choose the account you want to use POPFile with and click Change...
-Make a note of the Incoming mail server (POP3) server name and the User Name. <a href=http://popfile.sourceforge.net/manual/o_popfile2.gif>[screenshot]</a>
-<li>Change the Incoming mail server (POP3) server name to <b>127.0.0.1</b> and change the User Name to the combination of the original
-Incoming mail server (POP3) server name and the original User Name separated by a colon. <a href=http://popfile.sourceforge.net/manual/o_popfile3.gif>[screenshot]</a>
-<li>So, if the original Incoming mail server (POP3) name was <b>my.mail.com</b> and your username was <b>jdoe</b>, your new username would be <b>my.mail.com:jdoe</b>
-<li>You don't need to change the password.
-<li>Hit Next and then Finish.
-<li>Ensure that POPFile is running and all mail will be delivered through POPFile!
-<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <b>Startup</b> group. Now, Windows will load POPFile each time.
-<li>Important! If POPFile isn't loaded, the mail will not get through - and your email program won't connect!
+<li>I Outlook, klikk menyvalget Verktøy -&gt; E-postkontoer... <br>
+E-postkontoer-dialogen vil dukke opp <a href=http://popfile.sourceforge.net/manual/o_popfile1.gif>[bilde]</a>
+<li>Klikk 'Vise eller endre eksisterende e-postkontoer' og klikk 'Neste'.
+<li>Velg din konto, klikk så 'Endre...' Legg merke til (og noter)&nbsp; 
+Inkommende e-post servernavnet (POP3) og Brukernavnet. <a href=http://popfile.sourceforge.net/manual/o_popfile2.gif>[bilde]</a>
+<li>Forandre servernavnet for Innkommende e-post (POP3) til <b>127.0.0.1</b> og 
+forandre Brukernavnet til en kombinasjon av det opprinnelige servernavnet for 
+Inkommende e-post (POP3) og det opprinnelige Brukernavnet, atskilt med et kolon <a href=http://popfile.sourceforge.net/manual/o_popfile3.gif>[bilde]</a>
+<li>Så, hvis det opprinnelige servernavnet for Inkommende e-post (POP3) var <b>min.epost.no</b> 
+og brukernavnet ditt var <b>onordman</b>, vil ditt nye brukernavn bli <b>
+min.epost.no:onordman</b>
+<li>Du trenger ikke forandre passord.
+<li>Klikk 'Neste' og så 'Fullfør'.
+<li>Forsikre deg om at POPFile kjører, så vil all e-post bli levert gjennom POPFile!
+<li>Du må sikre deg at POPFile starter hver gang du starter Windows.Hvis du 
+installerte Windows-versjonen kan du dra 'Start POPFile in Background' linken 
+fra POPFile gruppen i Startmenyen til <b>Oppstart-</b>gruppen, så vil POPFile 
+starte hver gang Windows starter.
+<li>Viktig! Hvis POPFile ikke kjører vil ikke e-postprogrammet kunne koble til 
+og du får ikke hentet e-post!
 </ul>
 
 </td><td width=212 bgcolor="#CCFFCC" valign="top">
@@ -109,21 +119,33 @@ Incoming mail server (POP3) server name and the original User Name separated by 
 <h3 align=center>Outlook Express</h3>
 
 <ul>
-<li>In Outlook Express select the Tools->Accounts... menu option.  The Internet Accounts dialog will appear. <a href=http://popfile.sourceforge.net/manual/oe_popfile1.gif>[screenshot]</a>
-<li>Select the account you wish to modify to use POPFile and click on Properties. <a href=http://popfile.sourceforge.net/manual/oe_popfile2.gif>[screenshot]</a>
-<li>Choose the Servers tab.  Make a note of the Incoming Mail (POP3) server name and the Incoming Mail Server Account Name. <a href=http://popfile.sourceforge.net/manual/oe_popfile3.gif>[screenshot]</a>
-<li>Change the Incoming Mail (POP3) server name to <b>127.0.0.1</b> and change the Incoming Mail Server Account Name to the combination of the original Incoming Mail (POP3) server name and the original Incoming Mail Server Account Name separated by a colon. <a href=http://popfile.sourceforge.net/manual/oe_popfile4.gif>[screenshot]</a>
-<li>So, if the original Incoming Mail server name was <b>my.mail.com</b> and your username was <b>jdoe</b>, your new username would be <b>my.mail.com:jdoe</b>
-<li>You don't need to change the password.
-<li>Hit OK and then Close.
-<li>Ensure that POPFile is running and all mail will be delivered through POPFile!
-<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <b>Startup</b> group. Now, Windows will load POPFile each time.
-<li>Important! If POPFile isn't loaded, the mail will not get through - and your email program won't connect!
-</ul>
+<li>Gå til menyen <br>
+Verktøy -> Kontoer...&nbsp; <a href=http://popfile.sourceforge.net/manual/oe_popfile1.gif>[bilde]</a>
+<li>Velg kontoen din og klikk 'Egenskaper'. <a href=http://popfile.sourceforge.net/manual/oe_popfile2.gif>[bilde]</a>
+<li>Velg arkfanen 'Servere' Legg merke til (og noter)&nbsp; Inkommende e-post 
+servernavnet (POP3) og Kontonavnet for innkommende epostserver. <a href=http://popfile.sourceforge.net/manual/oe_popfile3.gif>[bilde]</a>
+<li>Forandre servernavnet for Innkommende e-post (POP3) til <b>127.0.0.1</b> og 
+forandre Kontonavnet for innkommende epostserver til en kombinasjon av det 
+opprinnelige servernavnet for Inkommende e-post (POP3) og det opprinnelige 
+Kontonavnet for innkommende epostserver, atskilt med et kolon <a href=http://popfile.sourceforge.net/manual/oe_popfile4.gif>[bilde]</a>
+<li>Så, hvis det opprinnelige servernavnet for Inkommende e-post (POP3) var <b>min.epost.no</b> 
+og det opprinnelige kontonavnet <b>onordman</b>, vil ditt nye kontonavn bli <b>
+min.epost.no:onordman</b>
+<li>Du trenger ikke forandre passord.<li>Klikk 'OK' og så 'Lukk'.<li>Forsikre 
+deg om at POPFile kjører, så vil all e-post bli levert gjennom POPFile!&nbsp;
+<li>Du må sikre deg at POPFile starter hver gang du starter Windows.Hvis du 
+installerte Windows-versjonen kan du dra 'Start POPFile in Background' linken 
+fra POPFile gruppen i Startmenyen til <b>Oppstart-</b>gruppen, så vil POPFile 
+starte hver gang Windows starter.
+<li>Viktig! Hvis POPFile ikke kjører vil ikke e-postprogrammet kunne koble til 
+og du får ikke hentet e-post!</ul>
 
 </td><td width=211 bgcolor="#CCCCFF" valign="top">
 
 <h3 align=center>Eudora</h3>
+
+<p align=center>(Merknad: Ettersom oversetter av manualen ikke benytter Eudora 
+er disse instruksjonene fortsatt på engelsk)</p>
 
 <ul>
 <li>In Eudora select the Tools->Options... menu option.  The Options dialog will appear. <a href=http://popfile.sourceforge.net/manual/e_popfile1.gif>[screenshot]</a>
@@ -142,6 +164,9 @@ Mail Server (incoming) server name and the original Login Name separated by a co
 
 <h3 align=center>Pegasus</h3>
 
+<p align=center>(Merknad: Ettersom oversetter av manualen ikke benytter Pegasus 
+er disse instruksjonene fortsatt på engelsk)</p>
+
 <ul>
 <li>   In Pegasus select the Tools->Internet Options... Receiving (POP3) tab. The POP3 account setup page will appear.
 <li>   Under General settings for receiving mail using POP3, select the POP3 Host dialog box. Make a note of the current POP3 host.
@@ -158,11 +183,11 @@ Mail Server (incoming) server name and the original Login Name separated by a co
 </td></tr></table>
 
 <p>OK. Nå som vi er ferdige med dette, er det tid for å sett opp filtrene, slik 
-at når POPFile har gjort jobben sin, så kan epostprogrammet ditt ta over og 
+at når POPFile har gjort jobben sin, så kan e-postprogrammet ditt ta over og 
 plassere alt i riktig mappe.</p>
 
 <p>Avanserte brukere har muligheten til å velge om POPfile skal legge til et [klassifikasjon] 
-merke eller ikke i emne-linjen i eposten. Muligheten finner du nær bunnen i 
+merke eller ikke i emne-linjen i e-posten. Muligheten finner du nær bunnen i 
 siden merket 'Configuration' i web-grensesnittet til POPFile. Uansett hav du 
 velger vil fortsatt <b>X-Text-Classification</b> hode bli lagt til.</p>
 
@@ -170,28 +195,35 @@ velger vil fortsatt <b>X-Text-Classification</b> hode bli lagt til.</p>
 
 <td colspan=3 align="center">
 
-Velg ditt epostprogram og følg kolonnen helt ned. Selv om disse instruksjonene 
-kan synes kompliserte, tar de faktisk bare et par mnutter - og det er vanskelig 
+Velg ditt e-postprogram og følg kolonnen helt ned. Selv om disse instruksjonene 
+kan synes kompliserte, tar de faktisk bare et par minutter - og det er vanskelig 
 å gjøre det feil. (Bare i tilfelle: Skriv ned de opprinnelige innstillingene 
 etter hvert som du gjør endringer, slik at du lett kan gjøre det om igjen dersom 
-noe skulle gå galt). Disse instruksjonene er fortsatt på engelsk - norsk vil 
-komme etter hvert som oversetter får tid...</td></tr><tr>
+noe skulle gå galt).</td></tr><tr>
 
 <td width=25% bgcolor="#FFCCCC" valign="top">
 
 <h3 align=center>Outlook</h3>
 
 <ul>
-<li>In Outlook select the Tools->Rules Wizard... <a href=http://popfile.sourceforge.net/manual/o_filter1.gif>[screenshot]</a>
-<li>The Rules Wizard appears.  Click New... and select Start from a blank rule.  <a href=http://popfile.sourceforge.net/manual/o_filter2.gif>[screenshot]</a>
-<li>Outlook can use the <b>X-Text-Classification</b> header, which allows mail filtering to occur completely in the background. Click Next and select <i>with specific words in the message header</i>.
-<li>Now click the grey highlighted <i>specific words</i> link and enter "X-Text-Classification: " followed by the name of one of your buckets in the box that appears and hit Add, then OK.
-<li>Click Next and select <i>move it to the specified folder</i>.
-<li>Click the grey highlighted word <i>specified</i> and a list of folders appears.  Select whichever folder you want to move messages from that bucket to and hit OK.
-<li>Hit OK, then Finish.
-<li>Repeat the process for each of your buckets, then OK out.
-<li>You're done!
-<li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>off</b>.
+<li>I Outlook velg Verktøy -&gt; Regelveiviser... <a href=http://popfile.sourceforge.net/manual/o_filter1.gif>[bilde]</a>
+<li>Regelveiviseren dukker opp.  Klikk Ny... og velg Begynn med en ny regel.  <a href=http://popfile.sourceforge.net/manual/o_filter2.gif>[bilde]</a>
+<li>Outlook kan bruke <b>X-Text-Classification</b> meldingshode, som gjør at 
+sorteringen av e-post kan skje fullstendig i bakgrunnen. Klikk Neste og velg <i>
+med bestemte ord i meldingshodet</i>.
+<li>Klikk så den understrekete og uthevete linken <i>bestemte ord</i>, og skriv 
+inn "X-Text-Classification: " fulgt av navnet på en av bøttene (buckets) dine, 
+klikk 'Legg til', og så 'OK'.
+<li>Klikk Neste og velg <i>flytt den til mappen angitt</i>.
+<li>Klikk så den understrekete og uthevete linken <i>angitt</i> og en mappeliste 
+dukker opp.  Velg den mappen du vil at e-posten fra denne bøtten skal sendes til 
+og klikk 'OK'.
+<li>Klikk 'OK', så 'Fullfør'.
+<li>Gjenta prosessen for hver av bøttene dine - og klikk til slutt 'OK'.
+<li>Du er ferdig!
+<li>En liten merknad: I <a href="http://127.0.0.1:8080">Web-grensesnittet for 
+POPFile</a>, på siden 'Configuration', kontroller at valget 'Subject Line Modification' 
+er slått av (<b>off)</b>.
 </ul>
 
 </td><td width=25% bgcolor="#CCFFCC" valign="top">
@@ -199,23 +231,34 @@ komme etter hvert som oversetter får tid...</td></tr><tr>
 <h3 align=center>Outlook Express</h3>
 
 <ul>
-<li>In Outlook Express select the Tools->Message Rules->Mail... <a href=http://popfile.sourceforge.net/manual/oe_filter1.gif>[screenshot]</a>
-<li>The New Mail Rule window appears.  <a href=http://popfile.sourceforge.net/manual/oe_filter2.gif>[screenshot]</a>
-<li>Outlook Express cannot use the <b>X-Text-Classification</b> header, which would allow mail filtering to occur completely in the background. So instead, click <i>Where the Subject line contains specific words</i> and also click
-<i>Move it to the specified folder</i>  <a href=http://popfile.sourceforge.net/manual/oe_filter3.gif>[screenshot]</a>
-<li>Now click the blue highlighted <i>contains specific words</i> link and the Type Specific Words dialog appears  <a href=http://popfile.sourceforge.net/manual/oe_filter4.gif>[screenshot]</a>
-<li>Enter the name of one of your buckets, surrounded by [square brackets], then hit OK.  Now click the blue highlighted <i>specified</i> word and the Move dialog appears.  Click the folder you want to move messages from that bucket to and hit OK.  <a href=http://popfile.sourceforge.net/manual/oe_filter5.gif>[screenshot]</a>
-<li>Hit OK.
-<li>Repeat the process for each of your buckets, and then OK out.
-<li>You're done!
-<li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>on</b>.
+<li>I Outlook Express velg Verktøy-&gt;Meldingsregler -&gt; E-post... <a href=http://popfile.sourceforge.net/manual/oe_filter1.gif>[bilde]</a>
+<li>Vinduet for meldingsregler dukker opp.  <a href=http://popfile.sourceforge.net/manual/oe_filter2.gif>[bilde]</a>
+<li>Outlook Express kan <i>ikke</i> bruke <b>X-Text-Classification</b> 
+meldingshode, som muliggjør at sorteringen av e-post kan skje fullstendig i 
+bakgrunnen. Så, istedenfor klikker du <i>Hvor emnelinjen inneholder bestemte ord</i> 
+og klikk også <i>Flytt den til mappen angitt</i>  <a href=http://popfile.sourceforge.net/manual/oe_filter3.gif>[bilde]</a>
+<li>Klikk den blå uthevede linken <i>inneholder bestemte ord</i> og dialogboksen 
+'Skriv inn bestemte ord' dukker opp  <a href=http://popfile.sourceforge.net/manual/oe_filter4.gif>[bilde]</a>
+<li>Skriv inn navnet på en av bøttene dine, omgitt av [hakeparentes], og klikk 
+'OK'. Klikk så den blå uthevede linken <i>bestemte ord</i> og dialogboksen 
+'Flytt' dukker opp.  elg den mappen du vil at e-posten fra denne bøtten skal 
+sendes til og klikk 'OK'.  <a href=http://popfile.sourceforge.net/manual/oe_filter5.gif>[bilde]</a>
+<li>Klikk OK.
+<li>Gjenta prosessen for hver av bøttene dine - og klikk til slutt 'OK'.
+<li>Du er ferdig!
+<li>En liten merknad: I <a href="http://127.0.0.1:8080">Web-grensesnittet for 
+POPFile</a>, på siden 'Configuration', kontroller at valget 'Subject Line Modification' 
+er slått på (<b>on)</b>.
 </ul>
 
 </td><td width=25% bgcolor="#CCCCFF" valign="top">
 
 <h3 align=center>Eudora</h3>
 
-<p>Eudora allows filtering based on any mail header, which is great - everything can be done completely in the background, without changing the subject lin!</p>
+<p align=center>(Merknad: Ettersom oversetter av manualen ikke benytter Eudora 
+er disse instruksjonene fortsatt på engelsk)</p>
+
+<p>Eudora allows filtering based on any mail header, which is great - everything can be done completely in the background, without changing the subject line!</p>
 
 <ul>
 <li>Select the Tools->Filters menu.  <a href=http://popfile.sourceforge.net/manual/e_filter1.gif>[screenshot]</a>
@@ -231,6 +274,9 @@ komme etter hvert som oversetter får tid...</td></tr><tr>
 </td><td width=25% bgcolor="#FFCCCC" valign="top">
 
 <h3 align=center>Pegasus</h3>
+
+<p align=center>(Merknad: Ettersom oversetter av manualen ikke benytter Pegasus 
+er disse instruksjonene fortsatt på engelsk)</p>
 
 <ul>
 <li>   In Pegasus select the Tools->Mail Filtering Rules ->Edit New Mail Filtering Rules ->Rules Applied When Folder is Opened.
@@ -255,11 +301,12 @@ komme etter hvert som oversetter får tid...</td></tr><tr>
 
 <h2>Dette var alt!... men...</h2>
 
-Til tross for alt dette vil ikke POPFile sortere epost riktig ennå. Hvorfor 
+Til tross for alt dette vil ikke POPFile sortere e-post riktig ennå. Hvorfor 
 ikke? <i>POPFile vet ikke hva de ulike bøttene du har opprettet betyr.</i> 
 POPFile har ingen formening om hva 'spam' og&nbsp; 'ekte' betyr, eller 'arbeid' 
-og 'personlig' er. POPFile vet ikke engang hvilket språk eposten din er skrevet 
-i - og det bryr seg ikke. Du må lære POPFile å skille de ulike kategoriene epost 
+og 'personlig' er. POPFile vet ikke engang hvilket språk e-posten din er skrevet 
+i - og det bryr seg ikke. Du må lære POPFile å skille de ulike kategoriene 
+e-post 
 fra hverandre. Du gjør dette gjennom <b>trening</b> - og <a href="training.html">
 vi tar oss av dette i neste trinn</a>.
 
@@ -270,9 +317,9 @@ vi tar oss av dette i neste trinn</a>.
 <td width=2></td>
 <td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Hjemmeside</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forum</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Diskusjonsforum</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Bug-Database</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;</b></font><a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956"><font size="+1"><b>Feildatabase</b></font></a></td>
 <td width=55%>&nbsp;</td></tr>
 <tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
 <tr height=1><td colspan=10></td></tr>

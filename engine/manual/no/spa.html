@@ -1,77 +1,79 @@
-<html><head><title>POPFile Documentation</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+<html><head><title>POPFile Dokumentasjon</title><style type=text/css>h1, h2, h3, p, td {font-family: sans-serif;}</style>
 </head>
-<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile Documentation</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile Dokumentasjon</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
 <table width=100% cellspacing=0><tr>
-<td width=15% align=center><font size=+1><b>First Time Setup:</b></font></td>
+<td width=15% align=center><font size=+1><b>Første gangs oppsett:</b></font></td>
 <td width=2></td>
-<td align=center bgcolor=#ededca width=15%>Step 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installing</a></b></font></td>
+<td align=center bgcolor=#ededca width=15%>Trinn 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installering</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center>Step 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Bucket Setup</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center>Trinn 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Bøtteoppsett</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center>Step 3<br><font size=+1><b>&nbsp;<a href="email.html">Email Programs</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center>Trinn 3<br><font size=+1><b>&nbsp;<a href="email.html">E</a></b></font><a href="email.html"><font size="+1"><b>-post-programmer</b></font></a></td>
 <td width=2></td>
-<td align=center bgcolor=#ededca width=15%>Step 4<br><font size=+1><b>&nbsp;<a href="training.html">Training</a></b></font></td>
+<td align=center bgcolor=#ededca width=15%>Trinn 4<br><font size=+1><b>&nbsp;<a href="training.html">Trening</a></b></font></td>
 <td width=25%>&nbsp;</td></tr>
 <tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
 <tr height=1><td colspan=10></td></tr>
 </table>
 <table width=100% cellspacing=0><tr>
 
-<td width=40% align=right><font size=+1><b>Using POPFile with:</b></font></td>
+<td width=40% align=right><font size="+1"><b>Bruke POPFile med:</b></font></td>
 <td width=2></td>
-<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Brannmurer</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Password Authentication</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Sikker </a></b></font>
+<a href="spa.html"><font size="+1"><b>Godkjenning av Passord</b></font></a></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Other Proxies</a></b></font><br></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;</b></font><a href="proxies.html"><font size="+1"><b>Andre 
+Proxy</b></font></a><br></td>
 <td width=2></td>
-<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Multiple Email Accounts</a></b></font></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Flere 
+e-post-kontoer</a></b></font></td>
 </tr>
 
 </table>
 <table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
 
 
-<h2>Using POPFile with Secure Password Authentication</h2>
+<h2>Bruke POPFile samen med Sikker Godkjenning av Passord</h2>
 
-<p>Head to the web interface's Security tab, and enter the server name and port of your Secure Password Authentication-protected server. Once done, you simply need to change the server name in your mail program to 127.0.0.1 - you don't need to change the username.</p>
+<p>Gå til siden merket 'Security' i web-grensesnittet til POPFile, og skriv inn server-navnet 
+og porten til serveren som er beskyttet ved hjelp av Sikker Godkjenning av 
+Passord (engelsk: 'Secure Password Authentication - SPA). Så snart det er gjort, 
+trenger du bare å forandre server-navnet i e-postprogrammet ditt til 127.0.0.1 - 
+du behøver ikke forandre brukernavnet.</p>
 
-<p>Unfortunately, you can currently only have one SPA account through each installation of POPFile.</p>
+<p>Dessverre kan du foreløpig bare ha en SPA-konto for hver installasjon av 
+POPFile.</p>
 
-<h2>A note about MSN Secure Password Authentication</h2>
+<h2>En merknad angående MSN Sikker Godkjenning av Passord</h2>
 
 <ol>
-<li> You have to start popfile with the following command
-(type it in exactly)
+<li> Du må starte POPFile med følgende kommando (skriv inn nøyaktig):
 <blockquote><b>perl popfile.pl -port 110 -server pop3.email.msn.com -sport
 110</b></blockquote>
 
-<li> On your accounts, server page, make sure you have the
-following information:
+<li> På dine kontoer, server-siden, sørg for at du har følgende informasjon:
 <p>
-Incoming mail server: 127.0.0.1<br>
-Account name: YOUR_MSN_ACCOUNT_NAME_ONLY
+Innkommende e-post-server: 127.0.0.1<br>
+Kontoonavn: BARE_DITT_MSN_KONTONAVN<p>
+Sørg for at det er haket av for &quot;Logg på ved hjelp av Sikker Godkjenning av 
+Passord&quot; (Secure Password Authentication)<p>
+På siden 'Avansert', sørg for at innkommende e-post port er satt til 110 og at 
+det IKKE er haket av for "Denne serveren krever sikker tilkobling (SSL)&quot;.
 <p>
-Make sure that "Log on using Secure Password
-authentication" is checked
-<p>
-On the Advanced tab, make sure that your incoming mail
-port is set to 110 and the "This server requires a secure
-connection (SSL)" is UNCHECKED.
-<p>
-<li> You should be able to check your mail now by clicking
-on the account name in the "Mail Icon drop down".
-</ol>
+<li> Nå skal du ha muligheten til å sjekke e-posten din ved å klikke 
+kontonavnet.</ol>
 </td></tr></table>
 <br>
 <table width=100% cellspacing=0><tr>
-<td width=15% align=center><font size=+1><b>Web Links:</b></font></td>
+<td width=15% align=center><font size=+1><b>Weblinker:</b></font></td>
 <td width=2></td>
-<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Home Page</a></b></font></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Hjemmeside</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forums</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Diskusjonsforum</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Bug Database</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;</b></font><a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956"><font size="+1"><b>Feildatabase</b></font></a></td>
 <td width=55%>&nbsp;</td></tr>
 <tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
 <tr height=1><td colspan=10></td></tr>

@@ -1,80 +1,99 @@
-<html><head><title>POPFile Documentation</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+<html><head><title>POPFile Dokumentasjon</title><style type=text/css>h1, h2, h3, p, td {font-family: sans-serif;}</style>
 </head>
-<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile Documentation</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile Dokumentasjon</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
 <table width=100% cellspacing=0><tr>
-<td width=15% align=center><font size=+1><b>First Time Setup:</b></font></td>
+<td width=15% align=center><font size=+1><b>Første gangs oppsett:</b></font></td>
 <td width=2></td>
-<td align=center bgcolor=#ededca width=15%>Step 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installing</a></b></font></td>
+<td align=center bgcolor=#ededca width=15%>Trinn 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installering</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center>Step 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Bucket Setup</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center>Trinn 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Bøtteoppsett</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center>Step 3<br><font size=+1><b>&nbsp;<a href="email.html">Email Programs</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center>Trinn 3<br><font size=+1><b>&nbsp;<a href="email.html">E-post-programmer</a></b></font></td>
 <td width=2></td>
-<td align=center bgcolor=#ededca width=15%>Step 4<br><font size=+1><b>&nbsp;<a href="training.html">Training</a></b></font></td>
+<td align=center bgcolor=#ededca width=15%>Trinn 4<br><font size=+1><b>&nbsp;<a href="training.html">Trening</a></b></font></td>
 <td width=25%>&nbsp;</td></tr>
 <tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
 <tr height=1><td colspan=10></td></tr>
 </table>
 <table width=100% cellspacing=0><tr>
 
-<td width=40% align=right><font size=+1><b>Using POPFile with:</b></font></td>
+<td width=40% align=right><font size="+1"><b>Bruke POPFile med:</b></font></td>
 <td width=2></td>
-<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Brannmurer</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Password Authentication</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Sikker </a></b></font>
+<a href="spa.html"><font size="+1"><b>Godkjenning av Passord</b></font></a></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Other Proxies</a></b></font><br></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;</b></font><a href="proxies.html"><font size="+1"><b>Andre 
+Proxy</b></font></a><br></td>
 <td width=2></td>
-<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Multiple Email Accounts</a></b></font></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;</b></font><a href="multiple.html"><font size="+1"><b>Flere 
+e-post-kontoer</b></font></a></td>
 </tr>
 
 </table>
 <table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
 
 
-<h2>Using POPFile with other proxies such as virus scanners</h2>
+<h2>Bruke POPFile sammen med andre proxy, som enkelte virussøkere</h2>
 
-<p>If you use an email scanning proxy that has changed your email setting like some versions of Norton Antivirus, then POPFile won't work straight off the bat: the email proxy will grab them instead. You need to configure POPFile to talk to the email scanner. (If your virus scanner didn't change your email POP3 server setting then there is no need to follow these instructions).</p>
+<p>Hvis du bruker en proxy som søker gjennom e-post etter virus (heretter kalt
+<i>virussøker</i> - vi snakker her om et antivirusprogram som søker etter virus 
+i e-post), og denne har endret innstillingene for e-post, slik noen versjoner av Norton Antivirus 
+gjør, så vil ikke POPFile virke sånn helt uten videre: <i>virussøkeren</i> vil 
+hente e-posten istedenfor. Du må da konfigurer POPFile for å snakke med <i>
+virussøkeren</i>. (hvis <i>virussøkeren</i> ikke har forandret POP3-server 
+innstillingene dine så har du ikke behov for å følge disse instruksjonene).</p>
 
-<p>(So, basically, emails get downloaded by the scanner, passed to POPFile, and then - finally - passed to your email program.)</p>
+<p>(Så, det du rett å slett trenger å få til, er at e-posten blir lastet ned av
+<i>virussøkeren</i>, sendt videre til POPFile, og så til slutt sendt videre til 
+e-postprogrammet ditt).</p>
 
-<p>Now, since different brands of email scanners work differently, we'll work like this:
+<p>Ettersom forskjellige <i>virussøkere</i> virker ulikt, vil vi gå fram som 
+følger:
 
-<ol><li>Disable the email scanner and return your settings to normal.
-<li>Tell POPFile to listen for connections on a different port.
-<li>Tell your email program to connect to POPFile on a different port.
-<li>Re-enable your email scanner with the new settings.</ol></p>
+<ol><li>Slå av <i>virussøkeren</i> og gå tilbake til normale instillinger.
+<li>Fortelle POPFile at det skal &quot;høre&quot; etter forbindelse på en annen port.
+<li>Fortelle e-postprogrammet at det skal koble seg til POPFile på en annen port.
+<li>Slå på igjen <i>virussøkeren</i> med de nye innstillingene.</ol></p>
 
-<h3>Disabling your e-mail scanner</h3>
+<h3>Slå av virussøkeren</h3>
 
-<p>Follow your manufacturer's instructions for this.</p>
+<p>Følg produsentens instruksjoner for dette.</p>
 
-<h3>Change POPFile's port</h3>
+<h3>Forandre POPFiles port</h3>
 
-<p>Head to the Web Interface's Configuration tab, and change your <b>POP3 Listen Port</b> to any similar number - we recommend 123. Click Apply.</p>
+<p>Gå til konfigurasjonssiden (Configuration) i POPFile sitt web-grensesnitt, og 
+forandre <b>POP3 Listen Port</b> til et eller annet lignende nummer - vi 
+anbefaler 123. Klikk 'Apply'.</p>
 
-<h3>Change your email program's port</h3>
+<h3>Forandre e-postprogrammets port</h3>
 
 <table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
 
 <td colspan=3 align="center">
 
-Just choose your email program and follow the column down. While these instructions might look complicated, they actually only take about two minutes - and it's hard to go wrong. (Just in case, make a note of your original settings in case you need to go back.)
-
-</td></tr><tr>
+Velg ditt e-postprogram og følg kolonnen helt ned. Selv om disse instruksjonene 
+kan synes kompliserte, tar de faktisk bare et par minutter - og det er vanskelig 
+å gjøre det feil. (Bare i tilfelle: Skriv ned de opprinnelige innstillingene 
+etter hvert som du gjør endringer, slik at du lett kan gjøre det om igjen dersom 
+noe skulle gå galt).</td></tr><tr>
 
 <td width=33% bgcolor="#FFCCCC" valign="top">
 
 <h3 align=center>Outlook</h3>
 
 <ul>
-<li>Go to the Tools -> Email Accounts menu.
-<li>Click on View or change existing e-mail accounts and then click Next.
-<li>Select your account, then click on Change.
-<li>Click on the More Settings button.
-<li>Click on the Advanced tab.
-<li>Beside Outgoing server (POP3), enter the same number as you chose earlier (we recommended 123).
-<li>Click OK, and repeat the process for each of the accounts you want to use POPFile with.
+<li>Gå til menyvalget<br>
+Verktøy -&gt; E-postkontoer. <a href=http://popfile.sourceforge.net/manual/o_popfile1.gif>[bilde]</a>
+<li>Klikk 'Vise eller endre eksisterende e-postkontoer' og klikk 'Neste'.
+<li>Velg din konto, klikk så 'Endre...'
+<li>Klikk på 'Flere innstillinger...'.
+<li>Klikk på arkfanen 'Avansert'.
+<li>Ved siden av 'Innkommende e-post (POP3)' skriver du det samme nummeret som 
+du valgte tidligere (vi anbefalte 123).
+<li>Klikk OK, og gjenta prosessen for hver av kontoene som du vil bruke POPFile 
+med.
 </ul>
 
 </td><td width=34% bgcolor="#CCFFCC" valign="top">
@@ -82,16 +101,20 @@ Just choose your email program and follow the column down. While these instructi
 <h3 align=center>Outlook Express</h3>
 
 <ul>
-<li>Go to the Tools -> Accounts menu.
-<li>Select your account and click Properties.
-<li>Click on the Advanced tab.
-<li>Beside Incoming Mail (POP3), enter the same number as you chose earlier (we recommended 123).
-<li>Click OK, and repeat the process for each of the accounts you want to use POPFile with.
-</ul>
+<li>Gå til menyen Verktøy -> Kontoer...
+<li>Velg kontoen din og klikk 'Egenskaper'.
+<li>Klikk på arkfanen 'Avansert'.
+<li>Ved siden av 'Innkommende e-post (POP3)' skriver du det samme nummeret som 
+du valgte tidligere (vi anbefalte 123).
+<li>Klikk OK, og gjenta prosessen for hver av kontoene som du vil bruke POPFile 
+med.</ul>
 
 </td><td width=33% bgcolor="#CCCCFF" valign="top">
 
 <h3 align=center>Eudora</h3>
+
+<p align=center>(Merknad: Ettersom oversetter av manualen ikke benytter Eudora 
+er disse instruksjonene fortsatt på engelsk)</p>
 
 <ul>
 <li>Eudora's port setting is in its hidden, 'esoteric' settings.
@@ -108,20 +131,22 @@ Just choose your email program and follow the column down. While these instructi
 
 </td></tr></table>
 
-<h3>Re-enable your email scanner.</h3>
+<h3>Slå på igjen <i>virussøkeren</i></h3>
 
-Reactivate your scanner (consult your scanner's manual) and it should automatcally set everything up for you. Mail should now be scanned and sorted.
+Reaktiver <i>virussøkeren</i> (se manualen for ditt anti-virusprogram) og den 
+skal nå sette opp alt automatisk. E-posten din skal nå både bli gjennomsøkt 
+etter virus og bli sortert.
 
 </td></tr></table>
 <br>
 <table width=100% cellspacing=0><tr>
-<td width=15% align=center><font size=+1><b>Web Links:</b></font></td>
+<td width=15% align=center><font size=+1><b>Weblinker:</b></font></td>
 <td width=2></td>
-<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Home Page</a></b></font></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Hjemmeside</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forums</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Diskusjonsforum</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Bug Database</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;</b></font><a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956"><font size="+1"><b>Feildatabase</b></font></a></td>
 <td width=55%>&nbsp;</td></tr>
 <tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
 <tr height=1><td colspan=10></td></tr>
