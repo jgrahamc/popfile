@@ -2663,7 +2663,9 @@ Function CheckSSLOnlyFlag
   !insertmacro UnselectSection ${SecPOPFile}
   !insertmacro UnselectSection ${SecSkins}
   !insertmacro UnselectSection ${SecLangs}
-  !insertmacro UnselectSection ${SecKakasi}
+  !ifndef NO_KAKASI
+    !insertmacro UnselectSection ${SecKakasi}
+  !endif
   !insertmacro UnselectSection ${SecNNTP}
   !insertmacro UnselectSection ${SecSMTP}
   !insertmacro UnselectSection ${SecXMLRPC}
