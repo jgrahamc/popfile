@@ -532,9 +532,6 @@ sub classify_file
     # Set up the initial score as P(bucket)
 
     my %score;
-    my %wordprob;
-    my %wtprob;
-    my %wbprob;
 
     for my $bucket (@buckets) {
         $score{$bucket} = $self->{bucket_start__}{$bucket};
@@ -561,10 +558,6 @@ sub classify_file
 
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
         my $wmax = -10000;
-        if ($self->{wordscores__})  {
-            $wtprob{$word} = 0;
-            $wbprob{$word} = {};
-        }
 
         foreach my $bucket (@buckets) {
             my $probability = get_value_( $self, $bucket, $word );
@@ -576,10 +569,6 @@ sub classify_file
             # and we multiply by the number of times that the word occurs
 
             $score{$bucket} += ( $probability * $self->{parser__}{words__}{$word} );
-            if ($self->{wordscores__})  {
-                $wtprob{$word} += exp($probability);
-                $wbprob{$word}{$bucket} = exp($probability);
-            }
         }
 
         if ($wmax > $self->{not_likely__}) {
@@ -587,16 +576,12 @@ sub classify_file
         } else {
             $correction += $wmax * $self->{parser__}{words__}{$word};
         }
-        $wordprob{$word} = exp($wmax);
     }
 
     # Now sort the scores to find the highest and return that bucket as the classification
 
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
-    my @wordrank;
-    if ($self->{wordscores__}) {
-        @wordrank = sort {($wordprob{$b} / $wtprob{$b}) <=> ($wordprob{$a} / $wtprob{$a})} keys %wordprob;
-    }
+
 
     my %raw_score;
     my $base_score = $score{$ranking[0]};
@@ -618,36 +603,68 @@ sub classify_file
     foreach my $b (@ranking) {
          my $prob = exp($score{$b})/$total;
          my $probstr;
+
          if ($prob >= 0.1 || $prob == 0.0) {
              $probstr = sprintf("%12.6f", $prob);
          } else {
              $probstr = sprintf("%17.6e", $prob);
          }
+
          $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
     }
+
     $self->{scores__} .= "</table>";
 
     if ($self->{wordscores__}) {
         $self->{scores__} .= "<table class=\"top20Words\">\n<tr><td colspan=\"4\">&nbsp;</td></tr>\n";
-        $self->{scores__} .= "<tr>\n<th scope=\"col\">Word</th><th scope=\"col\">Prob</th>\n<th>&nbsp;</th>\n";
-        $self->{scores__} .= "<th scope=\"col\">\n<font color=\"$self->{colors__}{$ranking[0]}\">$ranking[0]</font>\n</th>\n</tr>\n";
-        my $wi = 0;
-        foreach my $word (@wordrank) {
-            if ( $wi < 20 && $wordprob{$word} / $wtprob{$word} >= 0.25 ) {
-                my $wordstr = $word;
-                my $long    = $wordstr;
-                if ( length($wordstr)>14 )  {
-                    $wordstr =~ /(.{12})/;
-                    $wordstr = "$1...";
+        $self->{scores__} .= "<tr>\n<th scope=\"col\">Word</th><th>&nbsp;</th><th scope=\"col\">Count</th><th>&nbsp;</th>\n";
+
+        foreach my $bucket (@buckets) {
+            my $bucketcolor  = $self->get_bucket_color( $bucket );
+            $self->{scores__} .= "<th><font color=\"$bucketcolor\">$bucket</font></th><th>&nbsp;</th>";
+        }
+
+        $self->{scores__} .= "</tr>";
+
+        my @ranked_words = sort {$self->get_value_( $ranking[0], $b ) <=> $self->get_value_( $ranking[0], $a )} keys %{$self->{parser__}->{words__}};
+
+        foreach my $word (@ranked_words) {
+            my $known = 0;
+
+            foreach my $bucket (@buckets) {
+                if ( $self->get_value_( $bucket, $word ) != 0 ) {
+                   $known = 1;
+                   last;
                 }
-                my $wordcolor = get_color($self, $word);
-                my $wordprobstr = sprintf("%12.4f", $wordprob{$word} / $wtprob{$word});
-                my $otherprobstr = sprintf("%12.4f", $wbprob{$word}{$ranking[0]} / $wtprob{$word});
-                $self->{scores__} .= "<tr>\n<td><font color=\"$wordcolor\"><a title=\"$long\">$wordstr</a></font></td>\n";
-                $self->{scores__} .= "<td><font color=\"$wordcolor\">$wordprobstr</font></td>\n<td>&nbsp;</td>\n";
-                $self->{scores__} .= "<td><font color=\"$self->{colors__}{$ranking[0]}\">$otherprobstr</font></td>\n</tr>\n";
             }
-            $wi += 1;
+
+            if ( $known == 1 ) {
+                my $wordcolor = $self->get_color( $word );
+                my $count     = $self->{parser__}->{words__}{$word};
+
+                $self->{scores__} .= "<tr>\n<td><font color=\"$wordcolor\">$word</font></td><td>&nbsp;</td><td>$count</td><td>&nbsp;</td>\n";
+
+                my $base_probability = $self->get_value_( $ranking[0], $word );
+
+                    foreach my $bucket (@buckets) {
+                    my $probability  = get_value_( $self, $bucket, $word );
+                    my $color        = 'black';
+
+                    if ( $probability >= $base_probability ) {
+                        $color = $self->get_bucket_color( $bucket );
+                    }
+
+                    if ( $probability != 0 ) {
+                        my $wordprobstr  = sprintf("%12.4f", exp($probability) );
+
+                        $self->{scores__} .= "<td><font color=\"$color\">$wordprobstr</font></td>\n<td>&nbsp;</td>\n";
+                    } else {
+                        $self->{scores__} .= "<td>&nbsp;</td>\n<td>&nbsp;</td>\n";
+                    }
+                }
+            }
+
+            $self->{scores__} .= "</tr>";
         }
 
         $self->{scores__} .= "</table></p>";
@@ -658,10 +675,6 @@ sub classify_file
 
     if ( ( $total != 0 ) && ( $score{$ranking[0]} > log($self->{unclassified__} * $total) ) ) {
         $class = $ranking[0];
-    }
-
-    if ( $self->{wordscores__} ) {
-        $self->{scores__} .= "<p>(<b>$class</b>)</p>";
     }
 
     return $class;
@@ -1041,7 +1054,7 @@ sub get_html_colored_message
     $self->{parser__}->{color__} = 1;
     $self->{parser__}->{bayes__} = bless $self;
     my $result = $self->{parser__}->parse_stream($file);
-    $self->{parser__}->{color__} = 0;	
+    $self->{parser__}->{color__} = 0;        
 
     return $result;
 }
@@ -1064,8 +1077,8 @@ sub create_bucket
     mkdir( $self->config_( 'corpus' ) . "/$bucket" );
 
     if ( open NEW, '>' . $self->config_( 'corpus' ) . "/$bucket/table" ) {
-	print NEW "\n";
-	close NEW;
+        print NEW "\n";
+        close NEW;
     }
 
     $self->load_word_matrix_();

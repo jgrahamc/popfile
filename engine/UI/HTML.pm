@@ -2843,7 +2843,7 @@ sub history_page
 
             # Check to see if we want to view a message
             if ( ( defined($self->{form__}{view}) ) && ( $self->{form__}{view} eq $mail_file ) ) {
-                $body .= "<tr>\n<td></td>\n<td colspan=\"3\" valign=\"top\">\n";
+                $body .= "<tr>\n<td></td>\n<td colspan=\"5\" valign=\"top\">\n";
                 $body .= "<table class=\"openMessageTable\" cellpadding=\"10%\" cellspacing=\"0\" width=\"100%\" summary=\"$self->{language__}{History_OpenMessageSummary}\">\n";
 
                 # Close button
@@ -2898,12 +2898,12 @@ sub history_page
                 $body .= "<tr>\n<td class=\"openMessageCloser\">";
                 $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form__}{sort}&amp;search=$self->{form__}{search}&amp;filter=$self->{form__}{filter}\">\n";
                 $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
-                $body .= "</td>\n</tr>\n</table>\n</td>\n";
+                $body .= "</td>\n</tr>\n</table>\n";
 
-                $body .= "<td class=\"top20\" valign=\"top\">\n";
+                $body .= "<table><tr><td class=\"top20\" valign=\"top\">\n";
                 $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . "$self->{form__}{view}");
                 $body .= $self->{classifier__}->{scores__};
-                $body .= "</td>\n</tr>\n";
+                $body .= "</tr></table></td>\n</tr>\n";
             }
 
             if ( defined $self->{feedback}{$mail_file} ) {
