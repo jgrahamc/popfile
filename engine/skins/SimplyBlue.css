@@ -5,7 +5,7 @@ body {
 	color: #000000;
 }
 
-.shell {
+.shell, .shellTop {
 	background-color: #bcd5ea;
 	border: 3px #88b5dd solid;
 	border-style: groove; 
@@ -99,11 +99,11 @@ table.footer {
 	width: 100%;
 }
 
-table.stabColor01 {
+table.settingsTable {
 	border: 1px solid #88b5dd;
 }
 
-table.stabColor03 {
+table.openMessageTable, table.lookupResultsTable {
 	border: 3px solid #88b5dd;
 }
 
@@ -115,7 +115,7 @@ td.openMessageBody {
 	text-align: left;
 }
 
-td.stabColor01 {
+td.settingsPanel {
 	border: 1px solid #88b5dd;
 }
 
@@ -156,35 +156,40 @@ span.graphFont {
 }		
 
 .historyLabel {
+  font-weight: normal;
+}
+
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+.bucketsLabel {
 	font-weight: bold;
 }
 
-span.bucketsLabel {
+.magnetsLabel {
 	font-weight: bold;
 }
 
-span.magnetsLabel {
+.securityLabel {
 	font-weight: bold;
 }
 
-span.securityLabel {
-	font-weight: bold;
-}
-
-span.configurationLabel {
+.configurationLabel {
 	font-weight: bold;
 }
 
 		
-span.advancedLabel {
+.advancedLabel {
 	font-weight: bold;
 }
 		
-span.passwordLabel {
+.passwordLabel {
 	font-weight: bold;
 }
 
-span.sessionLabel {
+.sessionLabel {
 	font-weight: bold;
 }
 
@@ -203,7 +208,7 @@ table.historyWidgetsTop {
 	margin-bottom: 1.0em;
 }
 
-table.historyButtonsBottom {
+table.historyWidgetsBottom {
 	width: 100%;
 	margin-top: 0.6em;
 }
@@ -227,9 +232,3 @@ span.configWidgetState {
 span.securityWidgetState {
 	font-weight: bold;
 }
-
-.historyLabel em {
-
-	font-style: normal;
-}
-
