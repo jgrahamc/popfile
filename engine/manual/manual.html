@@ -1,0 +1,459 @@
+<html>
+<body>
+<h2>POPFile Reference Manual and User's Guide</h2>
+<h3>Contents</h3>
+<ul>
+<li><a href=#intro><b> Introduction</b></a>
+<ul>
+<li><a href=#install> Installing POPFile</a>
+</ul>
+<p>
+<li><a href=#using><b> Using POPFile</b></a>
+<ul>
+<li><a href=#insert> Running POPFile</a>
+<ul>
+<li><a href=#getting> General instructions</a>
+<li><a href=#getting_oe> Getting mail from Outlook Express</a>
+<li><a href=#getting_o> Getting mail from Outlook</a>
+<li><a href=#getting_e> Getting mail from Eudora</a>
+</ul>
+<li><a href=#config_mail> Configuring your mail client</a>
+<ul>
+<li><a href=#config_general> General instructions</a>
+<li><a href=#config_oe> Configuring Outlook Express</a>
+<li><a href=#config_o> Configuring Outlook</a>
+<li><a href=#config_e> Configuring Eudora</a>
+</ul>
+<li><a href=#filter> Filtering based in POPFile classifications</a>
+<ul>
+<li><a href=#filter_general> General instructions</a>
+<li><a href=#filter_oe> Filtering in Outlook Express</a>
+<li><a href=#filter_o> Filtering in Outlook</a>
+<li><a href=#filter_e> Filtering in Eudora</a>
+</ul>
+<li><a href=#firewall> POPFile and firewalls</a>
+<li><a href=#auth> POPFile and Secure Password Authentication</a>
+</ul>
+<p>
+<li><a href=#cli><b> POPFile command line reference</b></a>
+<p>
+<li><a href=#help><b> Getting Help and Reporting Problems</b></a>
+<p>
+<li><a href=#appendix><b>Appendix</b></a>
+<ul>
+<li><a href=#corpus>The format of the corpus files</a>
+<li><a href=#faq>Other questions answered</a>
+</ul>
+</ul>
+
+<a name=intro><h3>Introduction</h3></a>
+
+POPFile is a POP3-based proxy written in Perl that sites between a mail client
+(such as Microsoft Outlook) and a mail server and intercepts email as it is downloaded.
+Your mail client is reconfigured to talk directly to a copy of POPFile running on your
+computer and POPFile talks on your behalf to the mail server.  In that way POPFile gets
+to see all incoming mail.
+<p>
+POPFile is used to classify email into one of a collection of buckets.  Buckets are
+user defined an usually correspond to folders within an email program or categories of
+mail that the user receives.  For example a user might choose to split their email into
+buckets for work, family, friends, a flower arranging mailing list, unwanted spam and
+other.
+<p>
+POPFile automatically reads, splits open and analyzes each email as it is downloaded to
+determine which bucket mail should be placed in.  POPFile signals the determined bucket
+by adding extra text to the Subject: line of an email containing the bucket name and by
+adding an extra email header containing the bucket name. With the bucket name embedded in
+the email any email client can filter the mail into an
+appropriate folder automatically.  The combination of automatic mail bucket idenfitication
+and simple filters in an email client means that POPFile can provide spam filtering and
+automatically place messages from family in one folder, move work messages to a high
+priority.
+<p>
+POPFile uses a powerful mathematical technique known as Bayes Theorem and an engine that
+quickly splits email into words, open and parses attachments and filters out HTML to automatically
+identify which bucket an email should go in.  All POPFile needs is to be shown some
+examples of emails and which buckets they belong in.  Based on the examples POPFile learns
+the characteristics associated with each bucket and can sort incoming email as required.  Additional
+examples and even additional buckets can be added at any time.
+
+<a name=#install><h4>Installing POPFile</h4></a>
+POPFile is so small and so simple that is doesn't have an installer.  To install POPFile you need to
+perform the following steps:
+<ul>
+<li>Make sure that you have Perl installed on your system.  To get Perl visit
+<a href=http://www.perl.com/pub/a/language/info/software.html#binary>Perl.com</a> and get the right
+version for your OS.
+<li>Download POPFile from the <a href=http://popfile.sourceforge.net>POPFile home page</a>.
+<li>Unzip the contents of the POPFile zip file into a folder.
+<li>That's it... POPFile is installed.
+</ul>
+
+POPFile consists of two programs:
+<ul>
+<li><tt>insert.pl</tt> - The program used to add new buckets and new example emails to teach
+POPFile about your mail preferences.
+<li><tt>popfile.pl</tt> - The POP3 proxy program that runs whenever you want to download mail
+and performs email classification.
+</ul>
+
+<a name=using><h3>Using POPFile</h3></a>
+
+<h4><a name=insert>Running POPFile</h4>
+
+To use POPFile you must decide on the set of different buckets you want your mail sorted into.  In
+this manual we'll use the example buckets: work, personal and spam.  You can choose as many buckets
+as you want (make sure that you have at least two otherwise POPFile is a little pointless).
+<p>
+Once you've decided on the set of buckets you are going to use separate your mail into those
+buckets by exporting the mail from your mail client.
+<p>
+Mail is inserted into the POPFile system by running the <tt>insert.pl</tt> specifying the name of the bucket
+you wish to insert mail into and the name of a file contain a mail message or messages.  For example if you
+saved all your spam into a file called spam.txt then you could insert it into a spam bucket with the command
+<blockquote>
+<tt>perl insert.pl spam spam.txt</tt>
+</blockquote>
+If you placed many different files containing family mail in a folder called familymail then you could insert it
+into the family bucket with the command
+<blockquote>
+<tt>perl insert.pl family familymail/*</tt>
+</blockquote>
+
+Once your mail is inserted you need to configure your mail client to talk to POPFile and then run POPFile with the
+command
+<blockquote>
+<tt>perl popfile.pl</tt>
+</blockquote>
+
+<h4><a name=getting> General instructions</a></h4>
+
+A simple strategy for handling mail insertion is to create a folder in your POPFile folder called mail and place subfolders for each
+bucket under the mail folder with the same name as the bucket.  If you had three buckets called work, personal and
+spam then you'd create the folders <tt>mail</tt>, <tt>mail/work</tt>, <tt>mail/personal</tt> and <tt>mail/spam</tt> and copy messages
+into the appropriate folder.
+<p>
+Once the messages are present mail insertion would be achieved with the commands
+<blockquote>
+<tt>
+perl insert.pl spam mail/spam/*<br>
+perl insert.pl work mail/work/*<br>
+perl insert.pl personal mail/personal/*<br>
+</tt>
+</blockquote>
+
+In the following specific instructions we'll assume you are going to use this mail folder strategy.
+
+<h4><a name=getting_oe> Getting mail from Outlook Express</a></h4>
+Outlook Express supports drag and drop of mail messages into a folder on your hard drive.  To set up a folder containing
+mail messages for a personal bucket and then insert them do the following.
+<ul>
+<li> In the POPFile folder create a folder called <tt>mail</tt>.
+<li> In the <tt>mail</tt> folder create a folder called <tt>personal</tt>.
+<li> In Outlook Express select the message or messages your want to extract (ctrl-click to select multiple messages)
+<li> Drag the messages onto the <tt>personal</tt> folder.
+<li> Run the command <tt>perl insert.pl personal mail/personal/*</tt> to insert the newly extracted messages.
+</ul>
+
+Outlook Express will save the mail messages with their attachments in the folder and POPFile will open the attachments
+using its own decoder looking for significant words even in attachments.
+
+<h4><a name=getting_o> Getting mail from Outlook</a></h4>
+
+Outlook supports drag and drop of mail messages into a folder on your hard drive.  To set up a folder containing
+mail messages for a personal bucket and then insert them do the following.
+<ul>
+<li> In the POPFile folder create a folder called <tt>mail</tt>.
+<li> In the <tt>mail</tt> folder create a folder called <tt>personal</tt>.
+<li> In Outlook select the message or messages your want to extract (ctrl-click to select multiple messages)
+<li> Drag the messages onto the <tt>personal</tt> folder.
+<li> Run the command <tt>perl insert.pl personal mail/personal/*</tt> to insert the newly extracted messages.
+</ul>
+
+Although Outlook creates a binary file instead of a text file containing the mail message, POPFile knows how to handle
+the binary file automatically.
+
+<h4><a name=getting_e> Getting mail from Eudora</a></h4>
+
+Eudora allows you to save messages to a file.  To set up a folder containing mail messages for a personal bucket and then
+insert them do the following.
+
+<ul>
+<li> In the POPFile folder create a folder called <tt>mail</tt>.
+<li> In the <tt>mail</tt> folder create a folder called <tt>personal</tt>.
+<li> In Eudora select the message or messages your want to extract.
+<li> Click File->Save As... and navigate to the <tt>mail/personal</tt> folder, enter a file name such as messages.txt and make sure that Include Headers
+is checked.  Hit Save.
+<li> Run the command <tt>perl insert.pl personal mail/personal/*</tt> to insert the newly extracted messages.
+</ul>
+
+Eudora does not include attachments
+
+<a name=config_mail><h3>Configuring your mail client</h3></a>
+<a name=config_general><h4>General instructions</h4></a>
+To use POPFile you must configure your email program to talk directly to the POPFile program.  All incoming
+email passes through POPFile so that it is delivered in the optimal order.  You will need to know three
+important facts about your email service: the POP3 server name (for example pop.company.com), your POP3 user
+name (for example joe) and your POP3 password.
+<p>
+To tell POPFile to operate you:
+<ul>
+<li>Change the POP3 server name in your email client to 127.0.0.1 (if it was originally pop.company.com then
+note that address and enter 127.0.0.1)
+<li>Change the POP3 user name to the POP3 server name followed by a colon (:) and followed by your original
+POP3 username (if your POP3 server name was originally pop.company.com and your POP3 user name was joe you would
+change the POP3 user name to pop.company.com:joe).
+</ul>
+
+<a name=config_oe><h4>Configuring POPFile in Outlook Express</h4></a>
+<ul>
+<li>In Outlook Express select the Tools->Accounts... menu option.  The Internet Accounts dialog will appear.
+<p align=center><img src=oe_popfile1.gif><p>
+<li>Select the account you wish to modify to use POPFile and click on Properties.
+<p align=center><img src=oe_popfile2.gif><p>
+<li>Choose the Servers tab.  Make a note of the Incoming Mail (POP3) server name and the Incoming Mail Server Account Name.
+<p align=center><img src=oe_popfile3.gif><p>
+<li>Change the Incoming Mail (POP3) server name to <b>127.0.0.1</b> and change the Incoming Mail Server Account Name to the combination of the original Incoming Mail (POP3) server name and the original Incoming Mail Server Account Name separated by a colon.
+<p align=center><img src=oe_popfile4.gif><p>
+<li>Hit OK and then Close.
+<li>Ensure that POPFile is running and all mail will be delivered through POPFile.
+</ul>
+
+<a name=config_o><h4>Configuring POPFile in Outlook</h4></a>
+<ul>
+<li>In Outlook select the Tools->Email Accounts... menu option.  The E-mail Accounts dialog will appear.
+<p align=center><img src=o_popfile1.gif><p>
+<li>Click View or change existing e-mail accounts and click Next.  Choose the account you want to use POPFile with and click Change...
+Make a note of the Incoming mail server (POP3) server name and the User Name.
+<p align=center><img src=o_popfile2.gif><p>
+<li>Change the Incoming mail server (POP3) server name to <b>127.0.0.1</b> and change the User Name to the combination of the original
+Incoming mail server (POP3) server name and the original User Name separated by a colon.
+<p align=center><img src=o_popfile3.gif><p>
+<li>Hit Next and then Finish.
+<li>Ensure that POPFile is running and all mail will be delivered through POPFile.
+</ul>
+
+<a name=config_e><h4>Configuring POPFile in Eudora</h4></a>
+<ul>
+<li>In Eudora select the Tools->Options... menu option.  The Options dialog will appear.
+<p align=center><img src=e_popfile1.gif><p>
+<li>Make a note of the Mail Server (incoming) server name and the Login Name.
+<p align=center><img src=e_popfile2.gif><p>
+<li>Change the Mail Server (incoming) server name to <b>127.0.0.1</b> and change the Login Name to the combination of the original
+Mail Server (incoming) server name and the original Login Name separated by a colon.
+<p align=center><img src=e_popfile3.gif><p>
+<li>Hit OK.
+<li>Ensure that POPFile is running and all mail will be delivered through POPFile.
+</ul>
+
+<a name=filter><h3>Filtering based in POPFile classifications</h3></a>
+
+<a name=filter_general><h4>General instructions</h4></a>
+
+POPFile provides two clues to the bucket in which an email should be placed: a modification to the
+Subject: line and the insertion of the X-Text-Classification: header.  Depending on the capabilities
+of your mail client you can choose either of these.
+<p>
+Since modifting the Subject: line actually changes the text of an email it is preferable that you
+use the X-Text-Classification header and turn off Subject: line modification (see <a href=>POPFile
+command line reference</a> for details).
+<p>
+The most common form of filtering is moving mail in a specific bucket to a specific folder.
+
+<a name=filter_oe><h4>Filtering in Outlook Express</h4></a>
+
+<ul>
+<li>In Outlook Express select the Tools->Message Rules->Mail...
+<p align=center><img src=oe_filter1.gif><p>
+<li>The New Mail Rule window appears.
+<p align=center><img src=oe_filter2.gif><p>
+<li>Outlook Express cannot use the X-Text-Classification header so click <i>Where the Subject line contains specific words</i> and also click
+<i>Move it to the specified folder</i>
+<p align=center><img src=oe_filter3.gif><p>
+<li>Now click the blue highlighted <i>contains specific words</i> link and the Type Specific Words dialog appears
+<p align=center><img src=oe_filter4.gif><p>
+<li>In this case we plan to put all spam directly in the Deleted Items folder so enter [spam] and hit Add, then hit OK.  Now click the blue
+highlighted <i>specified</i> word and the Move dialog appears.  Click Deleted Items and hit OK.
+<p align=center><img src=oe_filter5.gif><p>
+<li>Hit OK and then OK.
+<li>All mail with [spam] in the subject will now be placed in Deleted Items automatically.
+</ul>
+
+<a name=filter_o><h4>Filtering in Outlook</h4></a>
+
+<ul>
+<li>In Outlook select the Tools->Rules Wizard...
+<p align=center><img src=o_filter1.gif><p>
+<li>The Rules Wizard appears.  Click New... and select Start from a blank rule
+<p align=center><img src=o_filter2.gif><p>
+<li>Outlook cannot use the X-Text-Classification header so Next and select <i>with specific words in the subject</i>.
+<p align=center><img src=o_filter3.gif><p>
+<li>Now click the grey highlighted <i>specific words</i> link and enter [spam] in the box that appears and hit Add, then OK.
+<p align=center><img src=o_filter4.gif><p>
+<li>Click Next and select <i>move it to the specified folder</i>.
+<p align=center><img src=o_filter5.gif><p>
+<li>Click the grey highlighted word <i>specified</i> and a list of folders appears.  Select Deleted Items and hit OK.
+<p align=center><img src=o_filter6.gif><p>
+<li>Hit OK, then Finish, then OK.
+<li>All mail with [spam] in the subject will now be placed in Deleted Items automatically.
+</ul>
+
+<a name=filter_e><h4>Filtering in Eudora</h4></a>
+
+Eudora allows filtering based on any mail header, so the best bet is to filter on the X-Text-Classification header that POPFile adds and turn
+off Subject: line modification. (Run POPFile with the command line option <tt>-subject 0</tt>).
+
+<ul>
+<li>In Eudora select the Tools->Filters
+<p align=center><img src=e_filter1.gif><p>
+<li>The Filters window appears.  Click New to create a new filter.
+<p align=center><img src=e_filter2.gif><p>
+<li>In the Header box type <tt>X-Text-Classification</tt> and in the box next to contains type <tt>spam</tt>.
+<p align=center><img src=e_filter3.gif><p>
+<li>The select <tt>Transfer To</tt> in the first Action box and select Trash from the drop down list.
+<p align=center><img src=e_filter4.gif><p>
+<li>Close the Filters windows and say Yes when asked to save changes.
+<li>All mail classified as spam will be automatically moved to Trash.
+</ul>
+
+<a name=firewall><h4>POPFile and Firewalls</h4></a>
+
+perl is running the POPFile POP3 proxy and needs to be able to accept connections
+from clients on your local machine and needs to be able to make connections
+outbound to the Internet so that it can download your mail.
+<p>
+In ZoneAlarm configure perl.exe as follows:
+<p>
+<center><img src=zonealaram.gif></center>
+<p>
+
+<a name=auth><h4>POPFile and Secure Password Authentication</h4></a>
+
+You need to tell POPFile the server name and port number that your email
+server is running on when you start the program if you email client requires
+Secure Password Authentication (sometimes called AUTH).  Suppose that the server
+was pop.secureserver.com running on port 123; you would type
+
+<blockquote>
+<tt>perl popfile.pl -port 110 -sserver pop.secureserver.com -sport 123</tt>
+</blockquote>
+to start POPFile listening on port 110 and ready to connect to
+pop.secureserver.com on port 123 when it sees a secure authentication.
+<p>
+Then modify your mail client to talk to the proxy: the server becomes
+127.0.0.1 and the port 110.  The user name does not need to be changed.
+
+<a name=cli><h3>POPFile command line reference</h3></a>
+
+The POPFile <tt>popfile.pl</tt> has the following command line parameters.
+<ul>
+<li><tt>-port &lt;port&gt;</tt> Specifies the port number that POPFile should listen on for a connection
+from your email client.  By default POPFile listens on port 110.
+<blockquote>
+Example: <tt>perl popfile.pl -port 123</tt>
+</blockquote>
+
+<li><tt>-debug &lt;where&gt;</tt> Specifies whether to output debug information.  A value of 0 (the default)
+means no debug information, a value of 1 means write debug information a log file, a value of 2 means
+write debug information to the screen and 3 means both file and screen.
+<blockquote>
+Example: <tt>perl popfile.pl -debug 2</tt>
+</blockquote>
+
+<li><tt>-subject &lt;on&gt;</tt> Specifies whether POPFile should modify the Subject: of an email or not.  If
+set to 1 (the default) then the Subject: will have the bucket added in the form [bucket] at the start of the
+subject line.  0 turns this behaviour off.
+<blockquote>
+Example: <tt>perl popfile.pl -subject 0</tt>
+</blockquote>
+
+<li><tt>-sserver &lt;host&gt;</tt> Specifies the host that POPFile should connect to when secure password
+authentication (or AUTH) is used.
+<blockquote>
+Example: <tt>perl popfile.pl -sserver spop.foo.bar.com</tt>
+</blockquote>
+
+<li><tt>-sport &lt;port&gt;</tt> Specifies the port number that POPFile should connect to when secure password
+authentication (or AUTH) is used.
+<blockquote>
+Example: <tt>perl popfile.pl -sport 991</tt>
+</blockquote>
+</ul>
+<a name=help><h3>Getting Help and Reporting Problems</h3></a>
+
+To start understanding POPFile make sure that you've read this manual and the latest README file in the
+<a href=http://sourceforge.net/docman/?group_id=63137>Docs</a> section of the <a href=http://popfile.sourceforge.net/>POPFile</a> home page.
+<p>
+If you are still having trouble take a look at the POPFile <a href=http://sourceforge.net/forum/?group_id=63137>Forums</a> where POPFile is discussed
+and ask your question there.
+<p>
+If you find a bug please report it in the <a href=http://sourceforge.net/tracker/?group_id=63137&atid=502956>Bug Database</a>
+
+<a name=appendix><h3>Appendix</h3></a>
+
+<a name=corpus><h4>The format of the corpus files</h4></a>
+POPFile keeps track of the words related to each category in a folder called
+<tt>corpus</tt>.  Inside the corpus folder you'll find folders for each of
+the buckets you have configured and inside each of those folders a file called
+<tt>table</tt>
+<p>
+The <tt>table</tt> is a simple text file containing a list of words and the frequency
+for each word.  Any standard text editor can read the table file.  Here's a section from
+a real <tt>corpus/spam/table</tt>.
+<pre>
+free 79
+availability 1
+evening 5
+cds 1
+running 2
+pertaining 2
+leave 2
+magical 1
+download 5
+</pre>
+
+The word <i>free</i> appears 79 times and the word <i>magical</i> once.  To investigate the
+table files further use the <a href=#viewer>viewer.pl</a> script that comes with POPFile.
+
+<a name=faq><h4>Other questions answered</h4></a>
+
+<ul>
+<li>How do I chain multiple POP3 proxies together?</li>
+<p>
+You can use the first command line option of POPFile to specify the port it
+listens on and it automatically picks up the port to connect to from the
+user name specified in the client.
+<p>
+Suppose you have another proxy running on the local machine on port 111 and
+you have configured the user name in your client to be real-server-
+name/real-user-name connecting to a server on 127.0.0.1 using port 110.
+<p>
+To use POPFile you would change the user name to 127.0.0.1:110:real-server-
+name/real-user-name. This tells POPFile to connect to 127.0.0.1 on port 110
+and pass in the user name real-server-name/real-user-name that the proxy
+expects.
+<p>
+Then run POPFile on some port other than 110:
+<blockquote>
+<tt>perl popfile.pl -port 111</tt>
+</blockquote>
+And tell the email client to contact the server on 127.0.0.1 and port 111.
+<p>
+<li>Can I use multiple email accounts with POPFile?
+<p>
+If you are *not* using secure authentication then the answer is yes: point
+each email configuration at 127.0.0.1:110 and POPFile will automatically
+distinguish between the email accounts you are using, although it will use
+only one email corpus for classification.
+<p>
+If you have multiple regular accounts (not using secure authentication) and
+one that needs to be secure then you can still use POPFile.  Run POPFile
+with the command line specified in question 5 and point all your accounts at
+127.0.0.1:110.  POPFile will use the appropriate account for the secure
+email account, and distinguish the rest automatically.
+<p>
+POPFile cannot currently be used with multiple accounts requiring secure
+authentication.
+</ul>
+</body>
+</html>
