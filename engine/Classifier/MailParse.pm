@@ -1890,7 +1890,7 @@ sub parse_header
         $sa_keywords =~ s/(.+)autolearn.+$/$1/ or $sa_keywords =~ s/(.+)version.+$/$1/;
 
         # remove all spaces that may still be present:
-        $sa_keywords =~ s/ //g;
+        $sa_keywords =~ s/[\t ]//g;
 
         foreach ( split /,/, $sa_keywords ) {
             $self->update_pseudoword( 'spamassassin', lc($_), 0, $argument );
