@@ -1266,7 +1266,7 @@ sub add_words_to_bucket__
             # we do nothing because negative values are meaningless
 
             if ( $subtract == 1 ) {
-                $self->set_value_( $session, $bucket, $word, $self->{parser__}->{words__}{$word} );
+                $self->db_put_word_count__( $session, $bucket, $word, $self->{parser__}->{words__}{$word} );
 	    }
 	}
     }
