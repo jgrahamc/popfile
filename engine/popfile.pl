@@ -875,7 +875,7 @@ sub corpus_page
     {
         my $word = $classifier->{mangler}->mangle($form{word});
         
-        $body .= "<blockquote><b>Lookup result for $form{word}</b><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Probability</b><td>&nbsp;<td><b>Weighted Probability</b>";
+        $body .= "<blockquote><b>Lookup result for $form{word}</b><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Score</b><td>&nbsp;<td><b>Weighted Score</b>";
         
         if ( $word ne '' ) 
         {
