@@ -1055,6 +1055,7 @@ install_schema:
   File "${C_PERL_DIR}\lib\DynaLoader.pm"
   File "${C_PERL_DIR}\lib\Errno.pm"
   File "${C_PERL_DIR}\lib\Exporter.pm"
+  File "${C_PERL_DIR}\lib\Fcntl.pm"
   File "${C_PERL_DIR}\lib\integer.pm"
   File "${C_PERL_DIR}\lib\IO.pm"
   File "${C_PERL_DIR}\lib\lib.pm"
@@ -1140,6 +1141,9 @@ install_schema:
   File "${C_PERL_DIR}\lib\auto\POSIX\autosplit.ix"
   File "${C_PERL_DIR}\lib\auto\POSIX\load_imports.al"
 
+  SetOutPath "$G_MPLIBDIR\auto\Fcntl"
+  File "${C_PERL_DIR}\lib\auto\Fcntl\Fcntl.dll"
+
   SetOutPath "$G_MPLIBDIR\auto\Socket"
   File "${C_PERL_DIR}\lib\auto\Socket\*"
 
@@ -1181,29 +1185,6 @@ install_schema:
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.dll"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.exp"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.lib"
-
-  ;--------------------------------------------------------------------------
-  ; The Kakasi package (v2.3.4) is not "thread safe" so we use semaphores to avoid
-  ; problems when forking is enabled (i.e. when concurrent POP3 connections are enabled)
-  ; Future releases may require semaphores elsewhere, so semaphore support is always installed
-  ; (instead of just installing it when the Kakasi package is installed).
-  ;--------------------------------------------------------------------------
-
-  SetOutPath "$G_MPLIBDIR"
-  File "${C_PERL_DIR}\lib\attributes.pm"
-  File "${C_PERL_DIR}\lib\threads.pm"
-
-  SetOutPath "$G_MPLIBDIR\auto\threads"
-  File "${C_PERL_DIR}\lib\auto\threads\*"
-
-  SetOutPath "$G_MPLIBDIR\auto\threads\shared"
-  File "${C_PERL_DIR}\lib\auto\threads\shared\*"
-
-  SetOutPath "$G_MPLIBDIR\Thread"
-  File "${C_PERL_DIR}\lib\Thread\Semaphore.pm"
-
-  SetOutPath "$G_MPLIBDIR\threads"
-  File "${C_PERL_DIR}\lib\threads\shared.pm"
 
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
@@ -3163,8 +3144,10 @@ Section "un.Minimal Perl" UnSecMinPerl
   Delete "$G_ROOTDIR\perl.exe"
   Delete "$G_ROOTDIR\wperl.exe"
 
-  ; Win95 displays an error message if an attempt is made to delete non-existent folders
-  ; (so we check before removing optional Perl components which may not have been installed)
+  ; Win95 displays an error message if an attempt is made to delete
+  ; non-existent folders
+  ; (so we check before removing optional Perl components which may
+  ; not have been installed)
 
   IfFileExists "$G_MPLIBDIR\HTTP\*.*" 0 skip_XMLRPC_support
   RMDir /r "$G_MPLIBDIR\HTTP"
@@ -3176,11 +3159,6 @@ Section "un.Minimal Perl" UnSecMinPerl
   RMDir /r "$G_MPLIBDIR\XMLRPC"
 
 skip_XMLRPC_support:
-  IfFileExists "$G_MPLIBDIR\Thread\*.*" 0 skip_semaphore_support
-  RMDir /r "$G_MPLIBDIR\Thread"
-  RMDir /r "$G_MPLIBDIR\threads"
-
-skip_semaphore_support:
   RMDir /r "$G_MPLIBDIR\auto"
   RMDir /r "$G_MPLIBDIR\Carp"
   RMDir /r "$G_MPLIBDIR\Date"
