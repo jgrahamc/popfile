@@ -903,7 +903,7 @@ sub corpus_page
     {
         my $word = $classifier->{mangler}->mangle($form{word});
         
-        $body .= "<blockquote><b>Lookup result for $form{word}</b><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Score</b><td>&nbsp;<td><b>Weighted Score</b>";
+        $body .= "<blockquote><table cellpadding=6 cellspacing=0 border=3 bordercolor=$stab_color><tr><td><b>Lookup result for $form{word}</b><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Score</b><td>&nbsp;<td><b>Weighted Score</b>";
         
         if ( $word ne '' ) 
         {
@@ -978,7 +978,7 @@ sub corpus_page
             $body .= "Cannot lookup word $form{word} because it is not a valid word";
         }
         
-        $body .= "</blockquote>";
+        $body .= "</table></blockquote>";
     }
     
     return http_ok($body,1);
