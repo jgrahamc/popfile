@@ -426,7 +426,7 @@ sub get_response_
         }
 
         # An error has occurred reading from the mail server
-        $self->tee_(  $client, "$self->{connection_timeout_error}$eol" );
+        $self->tee_(  $client, "$self->{connection_timeout_error_}$eol" );
         return $self->{connection_timeout_error_};
     }
 
