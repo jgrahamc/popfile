@@ -1200,8 +1200,6 @@ sub parse_header
         }
 
         if ( $header =~ /^From$/i )  {
-            $encoding     = '';
-            $self->{content_type__} = '';            
             $self->{from__} = $argument if ( $self->{from__} eq '' ) ;
             $prefix = 'from';
             push @{$self->{quickmagnets__}{$prefix}}, $argument if ($argument ne '');
