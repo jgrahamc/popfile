@@ -96,7 +96,6 @@ sub new
     # as computed using compute_rgb_distance
 
     $self->{htmlcolordistance__} = 0;
-    compute_html_color_distance( $self );
 
     # This is a mapping between HTML color names and HTML hexadecimal color values used by the
     # map_color value to get canonical color values
@@ -180,7 +179,7 @@ sub compute_rgb_distance
 sub compute_html_color_distance
 {
     my ( $self ) = @_;
-    $self->{htmlcolordistance__} = compute_rgb_distance( $self->{htmlfontcolor__},
+    $self->{htmlcolordistance__} = $self->compute_rgb_distance( $self->{htmlfontcolor__},
                                                          $self->{htmlbackcolor__} );
 }
 
@@ -341,6 +340,7 @@ sub add_line
         # green on white has distance 255.  100 seems like a reasonable upper
         # bound for tracking evil spammer tricks with similar colors
 
+        $self->compute_html_color_distance();
         if ( $self->{htmlcolordistance__} < 100 ) {
             $self->update_pseudoword( 'html', "colordistance$self->{htmlcolordistance__}", $encoded, '' );
 	}
