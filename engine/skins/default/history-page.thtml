@@ -108,8 +108,8 @@
                 <tr>
                 <td align="left">
                     <a href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;removecolumn=<TMPL_VAR NAME="History_Header">">
-                    <img title="<TMPL_VAR NAME="Localize_History_RemoveColumn">" src="skins/x.gif" border="0">
-                    </a> 
+                    <img title="<TMPL_VAR NAME="Localize_History_RemoveColumn">" src="<TMPL_VAR NAME="Skin_Root">x.gif" border="0">
+                    </a>
 
                 <a href="/history?<TMPL_VAR NAME="History_Fields">&amp;setsort=<TMPL_VAR NAME="History_Sort"><TMPL_VAR NAME="History_Header">" title="<TMPL_VAR NAME="Localize_History_Click_To_Sort">">
 
@@ -140,12 +140,12 @@
 
                     <TMPL_IF NAME="History_If_MoveLeft">
                     <a href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveleft=<TMPL_VAR NAME="History_Header">">
-                    <img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/left.gif" border="0">
+                    <img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="<TMPL_VAR NAME="Skin_Root">left.gif" border="0">
                     </a>
                     </TMPL_IF>
                     <TMPL_IF NAME="History_If_MoveRight">
                     <a href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveright=<TMPL_VAR NAME="History_Header">">
-                    <img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/right.gif" border="0">
+                    <img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="<TMPL_VAR NAME="Skin_Root">right.gif" border="0">
                     </a>
                     </TMPL_IF>
                     </td>
@@ -176,7 +176,7 @@
                 <input type="checkbox" id="remove_<TMPL_VAR NAME="History_I1">" class="checkbox" name="remove_<TMPL_VAR NAME="History_I1">"/>
                 <input type="hidden" id="rowid_<TMPL_VAR NAME="History_I1">" name="rowid_<TMPL_VAR NAME="History_I1">" value="<TMPL_VAR NAME="History_I1">"/>
             </td>
- 
+
             <TMPL_LOOP NAME="History_Loop_Loop_Cells">
             <TMPL_IF NAME="History_If_Bucket_Column">
             <td>
@@ -204,13 +204,13 @@
             </td>
             <TMPL_ELSE>
             <TMPL_IF NAME="History_If_Subject_Column">
-            <td>    
+            <td>
                 <a class="messageLink" title="<TMPL_VAR NAME="History_Cell_Title" ESCAPE=HTML>" href="/view?view=<TMPL_VAR NAME="History_Mail_File"><TMPL_VAR NAME="History_Fields">">
             <span title="<TMPL_VAR NAME="History_Cell_Title" ESCAPE=HTML>"><TMPL_VAR NAME="History_Cell_Value" ESCAPE=HTML></span>
 </a>
             </td>
             <TMPL_ELSE>
-            <td>    
+            <td>
             <span title="<TMPL_VAR NAME="History_Cell_Title" ESCAPE=HTML>"><TMPL_VAR NAME="History_Cell_Value" ESCAPE=HTML></span>
             </td>
             </TMPL_IF>
@@ -226,7 +226,7 @@
                 <TMPL_ELSE>
 
                 <TMPL_IF NAME="History_If_Magnetized">
-                    <img title="<TMPL_VAR NAME="History_Magnet" ESCAPE=HTML>" alt="<TMPL_VAR NAME="History_Magnet" ESCAPE=HTML>" src="/skins/magnet.png">
+                    <img title="<TMPL_VAR NAME="History_Magnet" ESCAPE=HTML>" alt="<TMPL_VAR NAME="History_Magnet" ESCAPE=HTML>" src="<TMPL_VAR NAME="Skin_Root">magnet.png">
                 <TMPL_ELSE>
 
                 <select name="reclassify_<TMPL_VAR NAME="History_I">">

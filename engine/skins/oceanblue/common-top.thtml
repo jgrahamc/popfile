@@ -3,5 +3,5 @@
 <head>
 <title><TMPL_VAR NAME="Localize_Header_Title"></title>
 <link rel="icon" href="favicon.ico">
-<link rel="stylesheet" type="text/css" href="skins/style.css" title="POPFile-Style">
+<link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">style.css" title="POPFile-Style">
 </head>

@@ -320,54 +320,77 @@ sub url_handler__
         $content =~ s/[\r\n]//g;
         $self->parse_form_( $content );
     }
-    
+
     # files in the skins directory load from the current skin if they exist
-    # if not, they load from the default skin
-    
-    if ( $url =~ /skins\/(.+)/ ) {
-    
-    
-	my %mime_extensions = qw( gif image/gif
-				  png image/png
-				  ico image/x-icon
-				  jpg image/jpeg
-				  jpeg image/jpeg
-				  css text/css
-				  html text/html );
-				  
-	my $filename = $1;
+    # if not, they load from the default skin. The skin name is removed
+    # from the path if possible (including the skin name in the URL helps
+    # prevent caching
 
-	my $template_root = 'skins/' . $self->user_config_( 1, 'skin' ) . '/';
+    if ( $url =~ /skins\/(([^\/]+)\/(([^\/]+\/)+)?)?([^\/]+)$/ ) {
 
-	my $file = $self->get_root_path_( "$template_root$filename" );
-	if ( !( -e $file ) ) {
-		$template_root = 'skins/default/';
-		$file = $self->get_root_path_( "$template_root$filename" );
-	}
-	
-	$self->log_(2, "Skin file $filename mapped to $file");
+        my $path = ( $1 || '');
+        my $path_skin = ( $2 || '');
+        my $path_not_skin = ( $3 || '' );
+        my $filename = ( $5 || '' );
 
+        my $config_skin = $self->user_config_( 1, 'skin' );
 
-	# determine mime type from extension -- crude, but we only expect a few mime types
-	
-	my $mime;
-	
-	if ( $file =~ /.*?([^\.]+)$/ ) {
-		$mime = $mime_extensions{$1} if ( defined( $1 ) )
-	}
-	
-	# only allow access to file types explicitly permitted by inclusion in the 
-	# %mime_extensions hash
-	if ( defined($mime) ) {
-		$self->http_file_( $client, $file, $mime );
-	} else {
-		$self->log_( 0, "Unknown mime type loaded from skins folder. $filename" );
-		$self->http_error_( $client, 404 );
-	}
-	return 1;
+        my %mime_extensions = qw( gif image/gif
+                                  png image/png
+                                  ico image/x-icon
+                                  jpg image/jpeg
+                                  jpeg image/jpeg
+                                  css text/css
+                                  html text/html );
+        my $path_is_skin = 0;
+
+        if ( $path_skin eq $config_skin ) {
+            $path_is_skin = 1;
+        }
+
+        my $template_root = 'skins/' . $config_skin . '/';
+
+        if ( $path_is_skin ) {
+            $template_root .= $path_not_skin;
+        } else {
+            $template_root .= $path;
+        }
+
+        my $file = $self->get_root_path_( "$template_root$filename" );
+        if ( !( -e $file ) ) {
+                $template_root = 'skins/default/';
+
+                if ( $path_is_skin ) {
+                    $template_root .= $path_not_skin;
+                } else {
+                    $template_root .= $path;
+                }
+
+                $file = $self->get_root_path_( "$template_root$filename" );
+        }
+
+        $self->log_(2, "Skin file $url mapped to $file");
+
+        # determine mime type from extension -- crude, but we only expect a few mime types
+
+        my $mime;
+
+        if ( $file =~ /.*?([^\.]+)$/ ) {
+                $mime = $mime_extensions{$1} if ( defined( $1 ) )
+        }
+
+        # only allow access to file types explicitly permitted by inclusion in the
+        # %mime_extensions hash
+        if ( defined($mime) ) {
+                $self->http_file_( $client, $file, $mime );
+        } else {
+                $self->log_( 0, "Unknown mime type loaded from skins folder. $filename" );
+                $self->http_error_( $client, 404 );
+        }
+        return 1;
     }
-    
-    
+
+
 
 
     if ( $url =~ /\/autogen_(.+)\.bmp/ ) {
@@ -1570,7 +1593,6 @@ sub bar_chart_100
         $bucket_row_data{bar_bucket_color} = $self->classifier_()->get_bucket_color( $self->{api_session__}, $bucket );
         $bucket_row_data{bar_bucket_name}  = $bucket;
 
-
         my @series_data;
         for my $s (@series) {
             my %series_row_data;
@@ -1610,6 +1632,7 @@ sub bar_chart_100
     if ( $total_count != 0 ) {
         $templ->param( 'bar_if_total_count' => 1 );
         @bucket_data = ();
+
         foreach my $bucket (@xaxis) {
             my %bucket_row_data;
             my $percent = sprintf "%.2f", ( $values{$bucket}{0} * 10000 / $total_count ) / 100;
@@ -1618,6 +1641,7 @@ sub bar_chart_100
                 $bucket_row_data{bar_bucket_color} = $self->classifier_()->get_bucket_color( $self->{api_session__}, $bucket );
                 $bucket_row_data{bar_bucket_name2} = $bucket;
                 $bucket_row_data{bar_width}        = $percent;
+                $bucket_row_data{Skin_Root}        = $self->{skin_root};
             }
             else {
                 $bucket_row_data{bar_if_percent} = 0;
@@ -2400,6 +2424,7 @@ sub history_page
             $row_data{Localize_History_Click_To_Sort} = $self->{language__}{History_Click_To_Sort};
             $row_data{Localize_History_MoveLeft} = $self->{language__}{History_MoveLeft};
             $row_data{Localize_History_MoveRight} = $self->{language__}{History_MoveRight};
+            $row_data{Skin_Root} = $self->{skin_root};
             push ( @header_data, \%row_data );
             $length -= 10;
         }
@@ -2506,6 +2531,7 @@ sub history_page
                      my $bucket = $col_data{History_Bucket} = $$row[8];
                      $col_data{History_If_Magnetized} = ($$row[11] ne '');
                      $col_data{History_Magnet}        = $$row[11];
+                     $col_data{Skin_Root} = $self->{skin_root};
                      $col_data{History_If_Not_Pseudo} =
                          !$self->classifier_()->is_pseudo_bucket(
                                           $self->{api_session__}, $bucket );
@@ -2859,6 +2885,8 @@ sub load_template__
                    'If_Show_Training_Help'   => $self->user_config_( 1, 'show_training_help' ),
                    'Common_Middle_If_CanAdmin' => $self->user_global_config_( 1, 'can_admin' ),
                    'Configuration_Action'      => $page );
+
+    $self->{skin_root} = $root;
 
 
     foreach my $fixup (keys %fixups) {
