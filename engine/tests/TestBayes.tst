@@ -81,6 +81,7 @@ for my $modify_file (@modify_tests) {
 		close OUTPUT;
 		unlink( 'tests/popfile0=0.msg' );
 		unlink( 'tests/popfile0=0.cls' );
+#		rename( 'tests/temp.out', $output_file );
 		unlink( 'tests/temp.out' );
     }
 }
