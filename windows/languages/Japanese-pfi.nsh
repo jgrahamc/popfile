@@ -129,13 +129,13 @@
 
 ; Message Box text strings
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_1          "以前にインストールされたファイルを検出しました。"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_1          "は以前にインストールされたファイルです。"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_2          "アップデートしてもよろしいですか？"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3          "アップデートするには「Yes」をクリックして下さい。(古いファイルは次の名前で保存されます:"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4          "古いファイルを残すには「No」をクリックして下さい。(新しいファイルは次の名前で保存されます:"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_1           "次のファイルのバックアップ:"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_2           "は既に存在します。"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_1           "ファイル"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_2           "のバックアップは既に存在します。"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_3           "上書きしてもよろしいですか？"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_4           "上書きするには「Yes」、バックアップをスキップするなら「No」をクリックしてください。"
 
@@ -228,7 +228,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_INTRO     "POPFile を起動しますか？"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO        "いいえ(「ユーザーインターフェース」は POPFile を起動しないと使えません。)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX    "POPFile を起動(コンソール)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND   "POPFile をバックグランドで起動(コンソールなし)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND   "POPFile をバックグラウンドで起動(コンソールなし)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1    "POPFile を起動すれば以下の方法で「ユーザーインターフェース」を使用できます。"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2    "(a) システムトレイ中の POPFile アイコンをダブルクリックするか、"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3    "(b) スタート --> プログラム --> POPFile --> POPFile User Interface を選択します。"
