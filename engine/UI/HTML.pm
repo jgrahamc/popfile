@@ -588,7 +588,7 @@ sub http_ok
         if ( $self->config_( 'send_stats' ) ) {
             my @buckets = $self->{classifier__}->get_buckets();
             my $bc      = $#buckets + 1;
-            $update_check .= "<img border=\"0\" alt=\"\" src=\"http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=$bc&amp;mc=" . $self->mcount__() . "&amp;ec=" . $self->global_config_( 'ecount' ) . "\" />\n";
+            $update_check .= "<img border=\"0\" alt=\"\" src=\"http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=$bc&amp;mc=" . $self->mcount__() . "&amp;ec=" . $self->ecount__() . "\" />\n";
         }
 
         $self->config_( 'last_update_check', $self->{today}, 1 );
@@ -2915,9 +2915,6 @@ sub history_reclassify
                 $self->log_( "Reclassifying $mail_file from $bucket to $newbucket" );
 
                 if ( $bucket ne $newbucket ) {
-                    my $ecount = $self->global_config_( 'ecount' ) + 1;
-                    $self->global_config_( 'ecount', $ecount );
-
                     my $count = $self->{classifier__}->get_bucket_parameter( $newbucket, 'count' );
                     $self->{classifier__}->set_bucket_parameter( $newbucket, 'count', $count+1 );
 
@@ -2987,10 +2984,6 @@ sub history_undo
                 $self->log_( "Undoing $mail_file from $bucket to $usedtobe" );
 
                 if ( $bucket ne $usedtobe ) {
-                    my $ecount = $self->global_config_( 'ecount' ) - 1;
-                    $ecount = 0 if ( $ecount < 0 );
-                    $self->global_config_( 'ecount', $ecount );
-
                     my $count = $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1;
                     $count = 0 if ( $count < 0 );
                     $self->{classifier__}->set_bucket_parameter( $bucket, 'count', $count );
