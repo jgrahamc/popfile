@@ -415,7 +415,6 @@ sub child__
 
                 close RETRFILE;
                 print $client ".$eol";
-                next;
             } else {
 
                 # Retrieve file directly from the server
@@ -437,8 +436,9 @@ sub child__
                     $downloaded{$count} = 1;
 
                     $self->flush_extra_( $mail, $client, 0 );
-                    next;
                 }
+
+                next;
             }
         }
 
