@@ -218,7 +218,7 @@ sub initialize
     # This lets us give a nice message and then disable
     # the version checking later
     
-    $self->config_( 'bad_sqlite_version', '1.05' );
+    $self->config_( 'bad_sqlite_version', '3.0.0' );
 
     # No default unclassified weight is the number of times more sure POPFile
     # must be of the top class vs the second class, default is 100 times more
