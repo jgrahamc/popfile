@@ -302,22 +302,28 @@ sub reserve_slot
     my $r;
 
     while (1) {
-        $r = rand( 2 + 1000000000 );
+        $r = int(rand( 1000000000 )+2);
+
+        $self->log_( 2, "reserve_slot selected random number $r" );
 
         # TODO Replace the hardcoded user ID 1 with the looked up
         # user ID from the session key
+
+        my $test = $self->db__()->selectrow_arrayref(
+                 "select id from history where committed = $r limit 1;");
+
+        if ( defined( $test ) ) {
+            next;
+        }
 
         # Get the date/time now which will be stored in the database
         # so that we can sort on the Date: header in the message and
         # when we received it
 
         my $now = time;
-        my $ok = $self->db__()->do(
+        $self->db__()->do(
             "insert into history ( userid, committed, inserted ) values ( 1, $r, $now );" );
-        if ( defined( $ok ) ) {
-            last;
-        }
-        $self->log_( 0, "Failed to insert $r" );
+        last;
     }
 
     my $result = $self->db__()->selectrow_arrayref(
