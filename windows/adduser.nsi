@@ -157,7 +157,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.11"
+  !define C_PFI_VERSION  "0.2.12"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -1473,10 +1473,14 @@ FunctionEnd
 # (the "pre" function for the User Data DIRECTORY selection page)
 #
 # This build of the installer is unable to relocate an existing set of user data, so if we
-# find one during the PROGRAM installation (performed by the main 'setup.exe' installer), we
-# suggest using the same data location (by bypassing the DIRECTORY page which normally lets the
-# user select where the 'User Data' is to be stored). If the user does not want to upgrade the
-# existing configuration, we display the DIRECTORY page to let them choose a different location.
+# find one during the PROGRAM installation (i.e. when we have been called from the 'setup.exe'
+# installer), we ask for permission to upgrade the existing data. If permission is given, the
+# normal DIRECTORY page which lets the user select where the 'User Data' is to be stored is not
+# shown and we use the location of the existing user data instead.
+#
+# If upgrade permission is not given, we display the DIRECTORY page (suggesting the default
+# location used for a 'clean' installation) to let the user choose where the new configuration
+# data will be created.
 #
 # If the wizard is called directly (i.e. without either of the command-line switches used by
 # the main 'setup.exe' installer) then the DIRECTORY page is not bypassed, to allow the user
@@ -1484,6 +1488,8 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 Function CheckUserDirStatus
+
+  !define L_RESULT    $R9
 
   IfFileExists "$G_USERDIR\popfile.cfg" 0 exit
   StrCmp $G_PFISETUP "/install" upgrade_install
@@ -1494,12 +1500,35 @@ upgrade_install:
       $\r$\n$\r$\n\
       $G_USERDIR\
       $\r$\n$\r$\n$\r$\n\
-      $(PFI_LANG_DIRSELECT_MBWARN_2)" IDNO exit
+      $(PFI_LANG_DIRSELECT_MBWARN_2)" IDNO offer_default
   Call CheckExistingConfigData
   Abort
 
+offer_default:
+  StrCmp $APPDATA "" 0 appdata_valid
+  StrCpy $G_USERDIR "${C_ALT_DEFAULT_USERDATA}\$G_WINUSERNAME"
+  Goto exit
+
+appdata_valid:
+  Push ${L_RESULT}
+
+  StrCpy $G_USERDIR "${C_STD_DEFAULT_USERDATA}"
+  Push $G_USERDIR
+  Push $G_WINUSERNAME
+  Call StrStr
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" 0 default_locn_ok
+  StrCpy $G_USERDIR "$G_USERDIR\$G_WINUSERNAME"
+
+default_locn_ok:
+  Pop ${L_RESULT}
+
 exit:
+
   ; Display the User Data DIRECTORY page
+
+  !undef L_RESULT
+
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -5028,7 +5057,7 @@ Section "un.Environment" UnSecEnvVars
 
   StrCmp $G_PFIFLAG "fail" do_nothing
 
-  !define L_TEMP        $R9
+  !define L_TEMP      $R9
 
   Push ${L_TEMP}
 
