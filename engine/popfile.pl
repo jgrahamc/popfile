@@ -127,8 +127,12 @@ $components{logger}->{configuration}     = $components{config};
 $components{pop3}->{classifier}          = $components{classifier};
 $components{ui}->{classifier}            = $components{classifier};
 
-# The proxy needs to talk to the ui
-$components{pop3}->{ui}                  = $components{ui};
+# The classifier needs to talk to the UI
+$components{classifier}->{ui}            = $components{ui};
+
+# The proxy uses the logger
+$components{pop3}->{logger}              = $components{logger};
+$components{classifier}->{logger}        = $components{logger};
 
 # The proxy uses the logger
 $components{pop3}->{logger}              = $components{logger};
