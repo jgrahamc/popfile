@@ -163,7 +163,7 @@ sub parse_stream
 
     if ( $self->{color} )
     {
-        print "<h2>Color Key</h2><table>";
+        print "<html><body><h2>Color Key</h2><table>";
         for my $bucket (keys %{$self->{bayes}->{matrix}})
         {
             print "<tr><td><b><font color=$self->{bayes}->{colors}{$bucket}>$self->{bayes}->{colors}{$bucket}</font></b><td>$bucket";
@@ -326,7 +326,7 @@ sub parse_stream
         if ( $self->{ut} ne '' ) 
         {
             print $self->{ut};
-            print "</pre>";
+            print "</pre></body></html>";
         }
     }
     
