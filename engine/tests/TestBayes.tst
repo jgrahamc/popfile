@@ -6,6 +6,12 @@
 #
 # ---------------------------------------------------------------------------------------------
 
+test_assert( `rm -rf corpus` == 0 );
+test_assert( `cp -R corpus.base corpus` == 0 );
+
+unlink 'stopwords';
+test_assert( `cp stopwords.base stopwords` == 0 );
+
 use Classifier::Bayes;
 use POPFile::Configuration;
 use POPFile::MQ;
@@ -277,6 +283,80 @@ $line = <FILE>;
 test_assert_regexp( $line, 'Incompatible corpus version in zeotrope' );
 close FILE;
 
+# create_magnet
+
+test_assert_equal( $b->magnet_count(), 4 );
+$b->create_magnet( 'zeotrope', 'from', 'francis' );
+test_assert_equal( $b->magnet_count(), 5 );
+
+# get_buckets_with_magnets
+
+my @mags = $b->get_buckets_with_magnets();
+test_assert_equal( $#mags, 1 );
+test_assert_equal( $mags[0], 'personal' );
+test_assert_equal( $mags[1], 'zeotrope' );
+
+# get_magnet_type_in_bucket
+
+my @types = $b->get_magnet_types_in_bucket( 'zeotrope' );
+test_assert_equal( $#types, 0 );
+test_assert_equal( $types[0], 'from' );
+
+@types = $b->get_magnet_types_in_bucket( 'personal' );
+test_assert_equal( $#types, 2 );
+test_assert_equal( $types[0], 'from' );
+test_assert_equal( $types[1], 'subject' );
+test_assert_equal( $types[2], 'to' );
+
+# get_magnets
+
+my @magnets = $b->get_magnets( 'zeotrope', 'from' );
+test_assert_equal( $#magnets, 0 );
+test_assert_equal( $magnets[0], 'francis' );
+
+@magnets = $b->get_magnets( 'personal', 'from' );
+test_assert_equal( $#magnets, 1 );
+test_assert_equal( $magnets[0], 'foo' );
+test_assert_equal( $magnets[1], 'oldstyle' );
+@magnets = $b->get_magnets( 'personal', 'to' );
+test_assert_equal( $#magnets, 0 );
+test_assert_equal( $magnets[0], 'baz@baz.com' );
+@magnets = $b->get_magnets( 'personal', 'subject' );
+test_assert_equal( $#magnets, 0 );
+test_assert_equal( $magnets[0], 'bar' );
+
+# get_magnet_types
+
+my %mtypes = $b->get_magnet_types();
+my @mkeys = keys %mtypes;
+test_assert_equal( $#mkeys, 3 );
+test_assert_equal( $mtypes{from}, 'From' );
+test_assert_equal( $mtypes{to}, 'To' );
+test_assert_equal( $mtypes{subject}, 'Subject' );
+test_assert_equal( $mtypes{cc}, 'Cc' );
+
+# delete_magnet
+
+$b->delete_magnet( 'zeotrope', 'from', 'francis' );
+test_assert_equal( $b->magnet_count(), 4 );
+
+@mags = $b->get_buckets_with_magnets();
+test_assert_equal( $#mags, 0 );
+test_assert_equal( $mags[0], 'personal' );
+
+# clear_bucket
+
+$b->clear_bucket( 'zeotrope' );
+test_assert( !( -e 'corpus/zeotrope/table' ) );
+test_assert_equal( $b->get_bucket_word_count('zeotrope'), 0 );
+
+# clear_magnets
+
+$b->clear_magnets();
+test_assert_equal( $b->magnet_count(), 4 );
+@mags = $b->get_buckets_with_magnets();
+test_assert_equal( $#mags, -1 );
+
 # delete_bucket
 
 test_assert( !$b->delete_bucket( 'zebrazerba' ) );
@@ -289,8 +369,6 @@ test_assert_equal( $#buckets, 2 );
 test_assert_equal( $buckets[0], 'other' );
 test_assert_equal( $buckets[1], 'personal' );
 test_assert_equal( $buckets[2], 'spam' );
-
-
 
 # getting and setting values
 
@@ -361,6 +439,39 @@ for my $modify_file (@modify_tests) {
 		unlink( 'temp.out' );
     }
 }
+
+# tests for stopwords API
+
+unlink 'stopwords';
+open FILE, ">stopwords";
+print FILE "notthis\nandnotthat\n";
+close FILE;
+
+$b->{parser__}->{mangle__}->load_stopwords();
+
+# get_stopword_list
+
+my @stopwords = $b->get_stopword_list();
+test_assert_equal( $#stopwords, 1 );
+test_assert_equal( $stopwords[0], 'notthis' );
+test_assert_equal( $stopwords[1], 'andnotthat' );
+
+# add_stopword
+
+test_assert( $b->add_stopword( 'northat' ) );
+@stopwords = $b->get_stopword_list();
+test_assert_equal( $#stopwords, 2 );
+test_assert_equal( $stopwords[0], 'northat' );
+test_assert_equal( $stopwords[1], 'notthis' );
+test_assert_equal( $stopwords[2], 'andnotthat' );
+
+# remove_stopword
+
+test_assert( $b->remove_stopword( 'northat' ) );
+@stopwords = $b->get_stopword_list();
+test_assert_equal( $#stopwords, 1 );
+test_assert_equal( $stopwords[0], 'notthis' );
+test_assert_equal( $stopwords[1], 'andnotthat' );
 
 # TODO test that stop writes the parameters to disk
 

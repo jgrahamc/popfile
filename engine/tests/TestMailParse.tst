@@ -7,7 +7,7 @@
 # ---------------------------------------------------------------------------------------------
 
 unlink 'stopwords';
-`cp stopwords.base stopwords`;
+test_assert( `cp stopwords.base stopwords` == 0 );
 
 use Classifier::MailParse;
 use Classifier::Bayes;

@@ -18,6 +18,8 @@ my %count;
 # This is called when we begin the code coverage (or debugging) session
 BEGIN
 {
+        unlink 'tests/*.lne';
+
         # We want to look inside subroutines so tell the debugger to trace into
         # them
 

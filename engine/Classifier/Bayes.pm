@@ -1803,7 +1803,17 @@ sub get_buckets_with_magnets
 {
     my ( $self ) = @_;
 
-    return sort keys %{$self->{magnets__}};
+    my @buckets;
+
+    foreach my $b (sort keys %{$self->{magnets__}}) {
+        my @keys = keys %{$self->{magnets__}{$b}};
+
+        if ( $#keys >= 0 ) {
+            push @buckets, ($b);
+        }
+    }
+
+    return @buckets;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1902,10 +1912,10 @@ sub create_magnet
 # ---------------------------------------------------------------------------------------------
 sub get_magnet_types
 {
-    return ( 'from'    => 'From',
+    return ( 'from'    => 'From',  # PROFILE BLOCK START
              'to'      => 'To',
              'subject' => 'Subject',
-             'cc'      => 'Cc' );
+             'cc'      => 'Cc' );  # PROFILE BLOCK STOP
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1924,6 +1934,22 @@ sub delete_magnet
     my ( $self, $bucket, $type, $text ) = @_;
 
     delete $self->{magnets__}{$bucket}{$type}{$text};
+
+    # Now check to see if there are any magnets left of that type
+
+    my @keys = keys %{$self->{magnets__}{$bucket}{$type}};
+    if ( $#keys == -1 ) {
+        delete $self->{magnets__}{$bucket}{$type};
+
+        # Now check to see if this bucket has any magnets
+
+        @keys = keys %{$self->{magnets__}{$bucket}};
+
+        if ( $#keys == -1 ) {
+            delete $self->{magnets__}{$bucket};
+	}
+    }
+
     $self->save_magnets__();
     $self->calculate_magnet_count__();
 }
