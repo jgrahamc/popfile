@@ -1622,6 +1622,32 @@ sub parse_header
     }
 
     $self->{date__} = $argument if ( $header =~ /^Date$/i );
+    if ( $header =~ /^X-Spam-Status$/i) {
+
+        # We have found a header added by SpamAssassin. We expect to
+        # find keywords in here that will help us classify our messages
+
+        # We will find the keywords after the phrase "tests=" and before
+        # SpamAssassin's version number or autolearn= string
+
+        (my $sa_keywords = $argument) =~ s/[\r\n ]//sg;
+        $sa_keywords =~ s/^.+tests=(.+)/$1/;
+        $sa_keywords =~ s/(.+)autolearn.+$/$1/ or $sa_keywords =~ s/(.+)version.+$/$1/;
+
+        # remove all spaces that may still be present:
+        $sa_keywords =~ s/ //g;
+
+        foreach ( split /,/, $sa_keywords ) {
+            $self->update_pseudoword( 'spamassassin', $_, 0, lc($argument) );
+        }
+    }
+
+    if ( $header =~ /^X-Spam-Level$/i) {
+        my $count = ( $argument =~ tr/*// );
+        for ( 1 .. $count ) {
+            $self->update_pseudoword( 'spamassassinlevel', 'spam', 0, $argument );
+        }
+    }
 
     # Look for MIME
 
