@@ -1500,7 +1500,7 @@ upgrade:
 
 start_summary:
   StrCpy $G_PLS_FIELD_1 "${L_TEMP}${IO_NL}${IO_NL}\
-      $(PFI_LANG_SUMMARY_BASICLIST)${IO_NL}"
+      $(PFI_LANG_SUMMARY_BASICLIST)"
   StrCpy ${L_TEMP} "${C_NLT}$(PFI_LANG_SUMMARY_NONE)"
 
   !insertmacro PFI_SectionNotSelected ${SecPOPFile} check_min_perl
@@ -1534,11 +1534,11 @@ check_kakasi:
     end_basic:
   !endif
   StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${L_TEMP}${IO_NL}${IO_NL}\
-      $(PFI_LANG_SUMMARY_OPTIONLIST)${IO_NL}"
+      $(PFI_LANG_SUMMARY_OPTIONLIST)"
 
   ; Check the optional components in alphabetic order
 
-  StrCpy ${L_TEMP} "\t$(PFI_LANG_SUMMARY_NONE)"
+  StrCpy ${L_TEMP} "${C_NLT}$(PFI_LANG_SUMMARY_NONE)"
 
   !insertmacro PFI_SectionNotSelected ${SecIMAP} check_nntp
   StrCpy ${L_TEMP} ""
