@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.55"
+  !define C_PFI_VERSION  "0.2.56"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -2429,11 +2429,25 @@ show_defaults:
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioA.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
 
+  !ifndef ENGLISH_MODE
+
+    ; Do not attempt to display "bold" text when using Chinese, Japanese or Korean
+
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} button_text
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} button_text
+    StrCmp $LANGUAGE ${LANG_JAPANESE} button_text
+    StrCmp $LANGUAGE ${LANG_KOREAN} button_text
+  !endif
+
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
   GetDlgItem $G_DLGITEM $G_HWND 1204            ; Field 5 = 'Run POPFile at startup' checkbox
   CreateFont $G_FONT "MS Shell Dlg" 10 700      ; use larger & bolder version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
+  
+  !ifndef ENGLISH_MODE
+    button_text:
+  !endif
 
   ; If we are about to upgrade an existing installation or reset POPFile to use newly restored
   ; 'User Data', remind the user by changing the text on the "Install" button to "Upgrade" or
@@ -3175,12 +3189,25 @@ display_list:
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
 
+  !ifndef ENGLISH_MODE
+
+    ; Do not attempt to display "bold" text when using Chinese, Japanese or Korean
+
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_JAPANESE} show_page
+    StrCmp $LANGUAGE ${LANG_KOREAN} show_page
+  !endif
+
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
   GetDlgItem $G_DLGITEM $G_HWND 1200             ; Field 1 = IDENTITY label (above the box)
   CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
+  !ifndef ENGLISH_MODE
+    show_page:
+  !endif
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
@@ -3204,12 +3231,25 @@ display_list_again:
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
 
+  !ifndef ENGLISH_MODE
+
+    ; Do not attempt to display "bold" text when using Chinese, Japanese or Korean
+
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} show_page_again
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} show_page_again
+    StrCmp $LANGUAGE ${LANG_JAPANESE} show_page_again
+    StrCmp $LANGUAGE ${LANG_KOREAN} show_page_again
+  !endif
+
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
   GetDlgItem $G_DLGITEM $G_HWND 1200             ; Field 1 = IDENTITY label (above the box)
   CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
+  !ifndef ENGLISH_MODE
+    show_page_again:
+  !endif
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
@@ -3970,12 +4010,25 @@ display_list:
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
 
+  !ifndef ENGLISH_MODE
+
+    ; Do not attempt to display "bold" text when using Chinese, Japanese or Korean
+
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_JAPANESE} show_page
+    StrCmp $LANGUAGE ${LANG_KOREAN} show_page
+  !endif
+  
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
   GetDlgItem $G_DLGITEM $G_HWND 1200              ; Field 1 = IDENTITY label (above the box)
   CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
+  !ifndef ENGLISH_MODE
+    show_page:
+  !endif
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
@@ -3999,12 +4052,25 @@ display_list_again:
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
 
+  !ifndef ENGLISH_MODE
+
+    ; Do not attempt to display "bold" text when using Chinese, Japanese or Korean
+
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} show_page_again
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} show_page_again
+    StrCmp $LANGUAGE ${LANG_JAPANESE} show_page_again
+    StrCmp $LANGUAGE ${LANG_KOREAN} show_page_again
+  !endif
+
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
   GetDlgItem $G_DLGITEM $G_HWND 1200             ; Field 1 = IDENTITY label (above the box)
   CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
+  !ifndef ENGLISH_MODE
+    show_page_again:
+  !endif
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
@@ -4492,12 +4558,25 @@ write_intro:
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioE.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
 
+  !ifndef ENGLISH_MODE
+
+    ; Do not attempt to display "bold" text when using Chinese, Japanese or Korean
+
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} show_page
+    StrCmp $LANGUAGE ${LANG_JAPANESE} show_page
+    StrCmp $LANGUAGE ${LANG_KOREAN} show_page
+  !endif
+
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
   GetDlgItem $G_DLGITEM $G_HWND 1203             ; Field 4 = PERSONA (text in groupbox frame)
   CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
+  !ifndef ENGLISH_MODE
+    show_page:
+  !endif
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_STATUS}
   StrCmp ${L_STATUS} "back" abort_eudora_config
