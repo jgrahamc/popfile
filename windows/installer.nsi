@@ -1362,6 +1362,10 @@ check_bucket_count:
   StrCpy ${L_TEMP} ${L_CORPUS_PATH} "" ${L_TEMP}
   WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "BackupPath" "$INSTDIR\backup\nonsql"
 
+  ; Ensure the CopyFiles command works on NT and Win95 systems
+  
+  CreateDirectory "$INSTDIR\backup\nonsql\${L_TEMP}"
+
   ClearErrors
   CopyFiles /SILENT "${L_CORPUS_PATH}" "$INSTDIR\backup\nonsql\${L_TEMP}\"
   IfErrors 0 continue
@@ -1648,6 +1652,9 @@ SectionEnd
 # current versions of Windows. Older systems will have suitable versions of these components
 # provided Internet Explorer 5.5 or later has been installed. If we find an earlier version
 # of Internet Explorer is installed, we suggest the user upgrades to IE 5.5 or later.
+#
+# It seems that the functions required by POPFile can be supplied by IE 5.0 so we only show
+# this page if we find a version earlier than IE 5 (or if we fail to detect the IE version).
 #--------------------------------------------------------------------------
 
 Function CheckPerlRequirementsPage
@@ -1663,8 +1670,7 @@ Function CheckPerlRequirementsPage
 
   StrCpy ${L_TEMP} ${L_VERSION} 1
   StrCmp ${L_TEMP} '?' not_good
-  IntCmp ${L_TEMP} 5 0 not_good exit
-  StrCmp ${L_VERSION} '5.5' exit
+  IntCmp ${L_TEMP} 5 exit not_good exit
 
 not_good:
 
@@ -1672,11 +1678,18 @@ not_good:
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioG.ini" "Settings" "RTL" "$(^RTL)"
 
-  !insertmacro PFI_IO_TEXT "ioG.ini" "1" "$(PFI_LANG_PERLREQ_IO_TEXT_1)"
-  !insertmacro PFI_IO_TEXT "ioG.ini" "2" "$(PFI_LANG_PERLREQ_IO_TEXT_2) ${L_VERSION}"
-  !insertmacro PFI_IO_TEXT "ioG.ini" "3" "$(PFI_LANG_PERLREQ_IO_TEXT_3)"
+  !insertmacro PFI_IO_TEXT "ioG.ini" "1" \
+      "$(PFI_LANG_PERLREQ_IO_TEXT_1)\r\n\
+       $(PFI_LANG_PERLREQ_IO_TEXT_2)\r\n\
+       $(PFI_LANG_PERLREQ_IO_TEXT_3)\r\n\
+       $(PFI_LANG_PERLREQ_IO_TEXT_4)"
 
-  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_PERLREQ_TITLE)" "$(PFI_LANG_PERLREQ_SUBTITLE)"
+  !insertmacro PFI_IO_TEXT "ioG.ini" "2" \
+      "$(PFI_LANG_PERLREQ_IO_TEXT_5) ${L_VERSION}\r\n\r\n\
+       $(PFI_LANG_PERLREQ_IO_TEXT_6)\r\n\
+       $(PFI_LANG_PERLREQ_IO_TEXT_7)"
+
+  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_PERLREQ_TITLE)" " "
 
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioG.ini"
 
@@ -5107,11 +5120,16 @@ end_eudora_restore:
   Delete $G_ROOTDIR\languages\*.msg
   RMDir $G_ROOTDIR\languages
 
+  IfFileExists "$G_USERDIR\corpus\*.*" 0 skip_nonsql_corpus
   RMDir /r $G_USERDIR\corpus
+
+skip_nonsql_corpus:
   Delete $G_USERDIR\popfile.db
 
+  IfFileExists "$G_USERDIR\messages\*." 0 skip_messages
   RMDir /r $G_USERDIR\messages
 
+skip_messages:
   Delete $G_USERDIR\stopwords
   Delete $G_USERDIR\stopwords.bak
   Delete $G_USERDIR\stopwords.default
@@ -5135,7 +5153,10 @@ skip_kakasi:
   RMDir /r "$G_MPLIBDIR\Carp"
   RMDir /r "$G_MPLIBDIR\DBD"
   RMDir /r "$G_MPLIBDIR\Digest"
+  IfFileExists "$G_MPLIBDIR\Encode\*.*" 0 skip_Encode
   RMDir /r "$G_MPLIBDIR\Encode"
+
+skip_Encode:
   RMDir /r "$G_MPLIBDIR\Exporter"
   RMDir /r "$G_MPLIBDIR\File"
   RMDir /r "$G_MPLIBDIR\Getopt"
@@ -5145,8 +5166,10 @@ skip_kakasi:
   RMDir /r "$G_MPLIBDIR\Sys"
   RMDir /r "$G_MPLIBDIR\Text"
   RMDir /r "$G_MPLIBDIR\warnings"
+  IfFileExists "$G_MPLIBDIR\Win32\*.*" 0 skip_Win32
   RMDir /r "$G_MPLIBDIR\Win32"
 
+skip_Win32:
   Delete "$G_MPLIBDIR\*.pm"
   RMDIR $G_MPLIBDIR
 
