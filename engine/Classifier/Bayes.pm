@@ -245,6 +245,14 @@ sub start
 
     unlink glob( $self->get_user_path_( $self->config_( 'corpus' ) . '/__db.*' ) );
 
+    $self->{dbenv__} = new BerkeleyDB::Env
+                           -Cachesize => $self->config_( 'db_cache_size' ),
+   	                   -Home      => $self->get_user_path_( $self->config_( 'corpus' ) ),
+ 	                   -ErrFile   => $self->get_user_path_( 'bdb_error' ),
+                           -Verbose   => 1,
+ 	                   -Flags     => DB_INIT_LOG | 
+                                         DB_INIT_LOCK | DB_INIT_MPOOL | DB_CREATE or return 0;
+
     return $self->load_word_matrix_( 0 );
 }
 
@@ -261,6 +269,9 @@ sub stop
 
     $self->write_parameters();
     $self->close_database__();
+
+    undef $self->{dbenv__};
+    delete $self->{dbenv__};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -316,9 +327,6 @@ sub close_database__
     for my $bucket (keys %{$self->{matrix__}})  {
         $self->untie_bucket__( $bucket );
     }
-
-    undef $self->{dbenv__};
-    delete $self->{dbenv__};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -498,14 +506,6 @@ sub load_word_matrix_
     my $c      = 0;
 
     $self->close_database__();
-
-    $self->{dbenv__} = new BerkeleyDB::Env
-                           -Cachesize => $self->config_( 'db_cache_size' ),
-   	                   -Home      => $self->get_user_path_( $self->config_( 'corpus' ) ),
- 	                   -ErrFile   => $self->get_user_path_( 'bdb_error' ),
-                           -Verbose   => 1,
- 	                   -Flags     => DB_INIT_LOG | 
-                                         DB_INIT_LOCK | DB_INIT_MPOOL | DB_CREATE or return 0;
 
     $self->{magnets__}      = {};
     $self->{full_total__}   = 0;
