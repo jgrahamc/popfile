@@ -114,7 +114,7 @@
   ;--------------------------------------------------------------------------
 
   !define MUI_PRODUCT   "POPFile"
-  !define MUI_VERSION   "0.20.0RC3"
+  !define MUI_VERSION   "0.20.0RC4"
 
   !define C_README        "v0.20.0.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
@@ -2178,12 +2178,14 @@ Function CheckLaunchOptions
   !define L_TEMP        $R7
   !define L_TRAY        $R6   ; set to 'i' if system tray enabled, otherwise set to ""
   !define L_CONSOLE     $R5   ; new console mode: 0 = disabled, 1 = enabled
+  !define L_TIMEOUT     $R4   ; used to wait for the UI to respond (when starting POPFile)
 
   Push ${L_CFG}
   Push ${L_EXE}
   Push ${L_TEMP}
   Push ${L_TRAY}
   Push ${L_CONSOLE}
+  Push ${L_TIMEOUT}
 
   StrCpy ${L_TRAY} "i"    ; the default is to enable the system tray icon
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Inherited" "TrayIcon"
@@ -2270,21 +2272,22 @@ display_banner:
 
   ; Wait until POPFile is ready to display the UI (may take a second or so)
 
-  StrCpy ${L_TEMP} ${C_STARTUP_LIMIT}   ; Timeout limit to avoid an infinite loop
+  StrCpy ${L_TIMEOUT} ${C_STARTUP_LIMIT}   ; Timeout limit to avoid an infinite loop
 
 check_if_ready:
   NSISdl::download_quiet http://127.0.0.1:$G_GUI "$PLUGINSDIR\ui.htm"
   Pop ${L_TEMP}                        ; Did POPFile return an HTML page?
   StrCmp ${L_TEMP} "success" remove_banner
   Sleep ${C_STARTUP_DELAY}
-  IntOp ${L_TEMP} ${L_TEMP} - 1
-  IntCmp ${L_TEMP} 0 remove_banner remove_banner check_if_ready
+  IntOp ${L_TIMEOUT} ${L_TIMEOUT} - 1
+  IntCmp ${L_TIMEOUT} 0 remove_banner remove_banner check_if_ready
 
 remove_banner:
   Banner::destroy
 
 exit_without_banner:
 
+  Pop ${L_TIMEOUT}
   Pop ${L_CONSOLE}
   Pop ${L_TRAY}
   Pop ${L_TEMP}
@@ -2296,6 +2299,7 @@ exit_without_banner:
   !undef L_TEMP
   !undef L_TRAY
   !undef L_CONSOLE
+  !undef L_TIMEOUT
 
 FunctionEnd
 
