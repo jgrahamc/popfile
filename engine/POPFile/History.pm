@@ -532,7 +532,10 @@ sub commit_history__
         my %sort_headers;
 
         foreach my $h (@sortable) {
-            $sort_headers{$h} = lc(${header{$h}}[0] || '');
+            $sort_headers{$h} =
+                 $self->{classifier__}->{parser__}->decode_string(
+                     ${$header{$h}}[0] );
+            $sort_headers{$h} = lc($sort_headers{$h} || '');
             $sort_headers{$h} =~ s/[\"<>]//g;
             $sort_headers{$h} =~ s/^[ \t]+//g;
             $sort_headers{$h} = $self->db__()->quote(
