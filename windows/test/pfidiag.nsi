@@ -31,6 +31,10 @@
 # Run-time command-line switch (used by 'pfidiag.exe')
 #--------------------------------------------------------------------------
 #
+# /HELP
+#
+# Displays some simple notes about the command-line options
+#
 # /SIMPLE
 #
 # This command-line switch selects the default mode which only displays a few key values.
@@ -43,15 +47,20 @@
 # files. If this command-line switch is supplied, the utility displays much more information
 # (which might help debug strange behaviour, for example). Uppercase or lowercase may be used.
 #
-# If both command-line switches are supplied, the default mode will be used.
+# /SHORTCUT
 #
+# This command-line switch creates a Start Menu shortcut to the 'User Data' folder (accessed
+# via the Start -> Programs -> POPFile -> Support -> User Data (<username>) entry)
+#
+# It is assumed that only one command-line option will be supplied. If an invalid
+# option or a combination of options is supplied then the /HELP option is used.
 #--------------------------------------------------------------------------
 
   ;--------------------------------------------------------------------------
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.42"
+  !define C_VERSION   "0.0.43"
 
   ;--------------------------------------------------------------------------
   ; The default NSIS caption is "$(^Name) Setup" so we override it here
@@ -184,7 +193,7 @@
   !insertmacro PFI_DIAG_TEXT "PFI_LANG_DIAG_END_HDR"    \
         "POPFile Installer Diagnostic Utility"
   !insertmacro PFI_DIAG_TEXT "PFI_LANG_DIAG_END_SUBHDR" \
-        "For a simple report use 'PFIDIAG'       For a detailed report use 'PFIDIAG /FULL'"
+        "For a simple report use 'PFIDIAG'       For other options, use 'PFIDIAG /HELP'"
 
   !insertmacro PFI_DIAG_TEXT "PFI_LANG_DIAG_RIGHTCLICK" \
         "Right-click in the window below to copy the report to the clipboard"
@@ -222,8 +231,10 @@ Section default
   !define L_WINUSERNAME     $7    ; user's Windows login name
   !define L_WINUSERTYPE     $6
 
+  SetDetailsPrint listonly
+
   ; If the command-line switch /FULL has been supplied, display "everything"
-  ; (for convenience we set ${L_DIAG_MODE} internally to either "full" or "simple")
+  ; (for convenience the leading slash is stripped from the value used internally)
 
   Call GetParameters
   Pop ${L_DIAG_MODE}
@@ -231,7 +242,9 @@ Section default
   StrCmp ${L_TEMP} "/" 0 set_simple
   StrCpy ${L_DIAG_MODE} ${L_DIAG_MODE} "" 1
   StrCmp ${L_DIAG_MODE} "full" diag_mode_set
-  StrCmp ${L_DIAG_MODE} "simple" diag_mode_set
+  StrCmp ${L_DIAG_MODE} "help" display_help
+  StrCmp ${L_DIAG_MODE} "shortcut" diag_mode_set
+  StrCmp ${L_DIAG_MODE} "simple" diag_mode_set  display_help
 
 set_simple:
   StrCpy ${L_DIAG_MODE} "simple"
@@ -268,6 +281,7 @@ get_usertype:
   StrCpy ${L_WINUSERTYPE} "Unknown"
 
 start_report:
+  StrCmp ${L_DIAG_MODE} "shortcut" shortcut
   DetailPrint "------------------------------------------------------------"
   DetailPrint "POPFile $(^Name) v${C_VERSION} (${L_DIAG_MODE} mode)"
   DetailPrint "------------------------------------------------------------"
@@ -510,6 +524,47 @@ sql_backup_status:
   DetailPrint ""
   Goto check_env_vars
 
+display_help:
+  DetailPrint "POPFile $(^Name) v${C_VERSION}"
+  DetailPrint ""
+  DetailPrint "pfidiag            --- displays location of POPFile program and the 'User Data' files"
+  DetailPrint ""
+  DetailPrint "pfidiag /simple    --- same as 'pfidiag' option"
+  DetailPrint ""
+  DetailPrint "pfidiag /full      --- displays a more detailed report"
+  DetailPrint ""
+  DetailPrint "pfidiag /shortcut  --- creates a Start Menu shortcut to the 'User Data' folder"
+  DetailPrint ""
+  DetailPrint "pfidiag /help      --- displays this help screen"
+  Goto quiet_exit
+
+shortcut:
+  ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_LFN"
+  StrCmp ${L_REGDATA} "" no_reg_data
+  IfFileExists "${L_REGDATA}\*.*" folder_found
+
+no_reg_data:
+  DetailPrint "ERROR:"
+  DetailPrint ""
+  DetailPrint "Unable to create the POPFile 'User Data' shortcut for '${L_WINUSERNAME}' user"
+  DetailPrint ""
+  DetailPrint "(registry entry missing or invalid - run 'adduser.exe' to repair)"
+  DetailPrint ""
+  Goto quiet_exit
+
+folder_found:
+  SetDetailsPrint none
+  SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\User Data (${L_WINUSERNAME}).lnk" NORMAL
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\User Data (${L_WINUSERNAME}).lnk" \
+                 "${L_REGDATA}"
+  SetDetailsPrint listonly
+  DetailPrint "For easy access to the POPFile 'User Data' for '${L_WINUSERNAME}' use the shortcut:"
+  DetailPrint ""
+  DetailPrint "Start --> Programs --> POPFile --> Support --> User Data (${L_WINUSERNAME})"
+  DetailPrint ""
+  Goto quiet_exit
+
 simple_HKCU_locns:
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_LFN"
   DetailPrint "Program folder    = < ${L_REGDATA} >"
@@ -684,6 +739,8 @@ exit:
   DetailPrint "------------------------------------------------------------"
   DetailPrint "(report created ${L_TEMP})"
   DetailPrint "------------------------------------------------------------"
+
+quiet_exit:
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_DIAG_RIGHTCLICK)"
   SetDetailsPrint none
