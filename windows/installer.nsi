@@ -452,12 +452,10 @@ loop:
 
   StrCpy ${L_CMPRE} ${L_LNE} 10
   StrCmp ${L_CMPRE} "pop3_port " got_pop3_port
+  StrCmp ${L_CMPRE} "html_port " got_html_port
 
   StrCpy ${L_CMPRE} ${L_LNE} 8
   StrCmp ${L_CMPRE} "ui_port " got_ui_port
-
-  StrCpy ${L_CMPRE} ${L_LNE} 10
-  StrCmp ${L_CMPRE} "html_port " got_html_port
   
   FileWrite  ${L_CLEANCFG} ${L_LNE}
   Goto loop
@@ -890,40 +888,45 @@ FunctionEnd
 
 Function StrCheckDecimal
 
-  Exch $0   ; Original string
-  Push $1   ; Final string
-  Push $2   ; Current character
-  Push $3   ; ASCII code of current char
-  Push $4   ; Char equiv of ASCII code in $3
+  !define DECIMAL_DIGIT    "0123456789"
+  
+  Exch $0   ; The input string
+  Push $1   ; Holds the result: either "" (if input is invalid) or the input string (if valid)
+  Push $2   ; A character from the input string
+  Push $3   ; The offset to a character in the "validity check" string
+  Push $4   ; A character from the "validity check" string
+  Push $5   ; Holds the current "validity check" string
 
   StrCpy $1 ""
   
-Loop:
-  StrCpy $2 $0 1    ; Get next character
-  StrCmp $2 "" Done
+next_input_char:
+  StrCpy $2 $0 1                ; Get the next character from the input string
+  StrCmp $2 "" done
+  StrCpy $5 ${DECIMAL_DIGIT}$2  ; Add it to end of "validity check" to guarantee a match
   StrCpy $0 $0 "" 1
-  StrCpy $3 48      ; 48 = ASCII code for '0'
-
-Loop2:
-  IntFmt $4 %c $3   ; Get character from current ASCII code
-  StrCmp $2 $4 ValidChar
+  StrCpy $3 -1
+  
+next_valid_char:
   IntOp $3 $3 + 1
-  StrCmp $3 58 NotDigit Loop2 ; 58 = ASCII code one beyond '9'
-
-ValidChar:
-  StrCpy $1 $1$2    ; Append to the final string
-  Goto Loop
-
-NotDigit:
-  StrCpy $1 ""      ; Invalid char found so return empty string now
-
-Done:
-  StrCpy $0 $1      ; Return the final string
+  StrCpy $4 $5 1 $3             ; Extract next "valid" character (from "validity check" string)
+  StrCmp $2 $4 0 next_valid_char
+  IntCmp $3 10 invalid 0 invalid  ; If match is with the char we added, input string is bad
+  StrCpy $1 $1$4                ; Add "valid" character to the result
+  goto next_input_char
+  
+invalid:
+  StrCpy $1 ""
+  
+done:
+  StrCpy $0 $1      ; Result is either a string of decimal digits or ""
+  Pop $5
   Pop $4
   Pop $3
   Pop $2
   Pop $1
-  Exch $0
+  Exch $0           ; place result on top of the stack
+  
+  !undef DECIMAL_DIGIT
 
 FunctionEnd
 
