@@ -18,7 +18,7 @@
 #
 
 # Identify the language and character set used for the interface
-LanguageCode                            jp
+LanguageCode                            ja
 LanguageCharset                         EUC-JP
 LanguageDirection                       ltr
 
@@ -27,10 +27,10 @@ ManualLanguage                          jp
 
 # Common words that are used on their own all over the interface
 Apply                                   適用
-On                                      オン
-Off                                     オフ
-TurnOn                                  オンにする
-TurnOff                                 オフにする
+On                                      ON
+Off                                     OFF
+TurnOn                                  ON にする
+TurnOff                                 OFF にする
 Add                                     追加
 Remove                                  削除
 Previous                                前へ
@@ -165,7 +165,7 @@ History_ClassifyAs                      分類先
 History_MagnetUsed                      マグネット使用
 History_MagnetBecause                   <b>マグネット使用</b><p><font color="%s">%s</font> に分類されました。(マグネット %s のため)</p>
 History_ChangedTo                       変更先 <font color="%s">%s
-History_Already                         <font color="%s">%s</font> として既に分類されました
+History_Already                         <font color="%s">%s</font> に分類されました
 History_RemoveAll                       全て削除
 History_RemovePage                      このページを削除
 History_Remove                          履歴からメッセージを削除
@@ -256,7 +256,7 @@ Bucket_LookupMessage                    バケツ内で単語を検査
 Bucket_LookupMessage2                   検査結果 : 
 Bucket_LookupMostLikely                 <b>%s</b> は <font color="%s">%s</font> 内にある可能性が大きいです。
 Bucket_DoesNotAppear                    <p><b>%s</b> はどのバケツの中にもありません。
-Bucket_DisabledGlobally                 完全無効
+Bucket_DisabledGlobally                 全て OFF
 Bucket_To                               を
 Bucket_Quarantine                       隔離
 
