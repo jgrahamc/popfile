@@ -47,6 +47,9 @@
 # (the 'PFI_LANG_CBP_IO_INTRO' custom page string which is listed under the heading
 # 'Custom Page - POPFile Classification Bucket Creation' includes some examples)
 #--------------------------------------------------------------------------
+# Some strings will be customised at run-time using data held in Global User Variables.
+# These variables will have names which start with '$G_', e.g. $G_PLS_FIELD_1
+#--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
   !verbose 3
@@ -278,6 +281,10 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      "Instalando os arquivos de skins do POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "Instalando os arquivos de línguas do POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Instalando os arquivos XMLRPC do POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_REGSET     "Updating registry settings and environment variables..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SQLBACKUP  "Backing up the old SQLite database..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FINDCORPUS "Looking for existing flat-file or BerkeleyDB corpus..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_MAKEBAT    "Generating the 'pfi-run.bat' batch file..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "Clique em Avançar para continuar"
 
 ; Installation Log Messages
@@ -291,9 +298,9 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3           "Clique 'Sim' para atualizar (o arquivo antigo será salvo como"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4           "Clique 'Não' para manter o arquivo antigo (o arquivo novo será salvo como"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "Impossível desligar o POPFile automaticamente."
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "Por favor desligue o POPFile manualmente agora."
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3          "Quando o POPFile tiver sido desligado, clique 'OK' para continuar."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "Impossível desligar o $G_PLS_FIELD_1 automaticamente."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "Por favor desligue o $G_PLS_FIELD_1 manualmente agora."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3          "Quando o $G_PLS_FIELD_1 tiver sido desligado, clique 'OK' para continuar."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCORPUS_1           "Erro detectado quando o instalador tentou fazer o backup do corpus antigo."
 
@@ -493,7 +500,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "Executar o POPFile (em uma janela)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "Executar o POPFile em segundo plano (nenhuma janela é exibida)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Executar o POPFile (não exibir o ícone na bandeja do sistema)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Executar o POPFile com o ícone na bandeja do sistema (configuração padrão)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Executar o POPFile com o ícone na bandeja do sistema"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "Uma vez que o POPFile tenha sido iniciado, você pode exibir a 'Interface de Usuário'"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(a) dando um duplo-clique no ícone do POPFile na bandeja do sistema,   OU"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(b) usando Iniciar --> Programas --> POPFile --> Interface de Usuário do POPFile."
@@ -537,6 +544,10 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_PERL         "Deletando arquivos mínimos do Perl..."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTLOOK      "Restaurando configurações do Outlook..."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EUDORA       "Restaurando configurações do Eudora..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_DBMSGDIR     "Deleting corpus and 'Recent Messages' directory..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EXESTATUS    "Checking program status..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CONFIG       "Deleting configuration data..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_REGISTRY     "Deleting POPFile registry entries..."
 
 ; Uninstall Log Messages
 
@@ -573,6 +584,8 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Você quer remover todos os arquivos da sua pasta do POPFile ?$\r$\n$\r$\n(Se você tiver qualquer coisa que você criou e quer manter, clique Não)"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Você quer remover todos os arquivos do seu diretório 'User Data' do POPFile?$\r$\n$\r$\n(Se você tiver qualquer coisa que você criou e quer manter, clique em Não)"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Do you want to remove all files in your 'Recent Messages' directory?"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "Nota"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "não pode ser removido."

@@ -47,6 +47,9 @@
 # (the 'PFI_LANG_CBP_IO_INTRO' custom page string which is listed under the heading
 # 'Custom Page - POPFile Classification Bucket Creation' includes some examples)
 #--------------------------------------------------------------------------
+# Some strings will be customised at run-time using data held in Global User Variables.
+# These variables will have names which start with '$G_', e.g. $G_PLS_FIELD_1
+#--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
   !verbose 3
@@ -278,6 +281,10 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      "POPFile のスキンファイルをインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "POPFile UI 言語ファイルをインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Installing POPFile XMLRPC files..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_REGSET     "Updating registry settings and environment variables..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SQLBACKUP  "Backing up the old SQLite database..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FINDCORPUS "Looking for existing flat-file or BerkeleyDB corpus..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_MAKEBAT    "Generating the 'pfi-run.bat' batch file..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "「次へ」をクリックして続行して下さい。"
 
 ; Installation Log Messages
@@ -291,9 +298,9 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3           "アップデートするには「Yes」をクリックして下さい。(古いファイルは次の名前で保存されます:"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4           "古いファイルを残すには「No」をクリックして下さい。(新しいファイルは次の名前で保存されます:"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "POPFile を自動的にシャットダウンすることができませんでした。"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "POPFile を手動でシャットダウンして下さい。"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3          "POPFile をシャットダウンしたら、'OK' をクリックして続行して下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "$G_PLS_FIELD_1 を自動的にシャットダウンすることができませんでした。"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "$G_PLS_FIELD_1 を手動でシャットダウンして下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3          "$G_PLS_FIELD_1 をシャットダウンしたら、'OK' をクリックして続行して下さい。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCORPUS_1           "古い corpus をバックアップ中にエラーが見つかりました。"
 
@@ -493,7 +500,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "POPFile を起動(コンソール)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "POPFile をバックグラウンドで起動(コンソールなし)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Run POPFile (do not show system tray icon)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Run POPFile with system tray icon (default setting)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Run POPFile with system tray icon"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "POPFile を起動すれば以下の方法でユーザーインターフェースを使用できます。"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(a) システムトレイ中の POPFile アイコンをダブルクリック"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(b) スタート --> プログラム --> POPFile --> POPFile User Interface を選択"
@@ -537,6 +544,10 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_PERL         "最小バージョンの Perl を削除中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTLOOK      "Outlook の設定を元に戻しています..."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EUDORA       "Eudora の設定を元に戻しています..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_DBMSGDIR     "Deleting corpus and 'Recent Messages' directory..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EXESTATUS    "Checking program status..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CONFIG       "Deleting configuration data..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_REGISTRY     "Deleting POPFile registry entries..."
 
 ; Uninstall Log Messages
 
@@ -573,6 +584,8 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "POPFile ディレクトリ以下の全てのファイルを削除しますか？$\r$\n$\r$\n(残したいファイルがあれば No をクリックして下さい。)"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "POPFile「ユーザーデータ」ディレクトリ以下の全てのファイルを削除しますか？$\r$\n$\r$\n(残したいファイルがあれば No をクリックして下さい。)"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Do you want to remove all files in your 'Recent Messages' directory?"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "注意"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "は削除できませんでした。"
