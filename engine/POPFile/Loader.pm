@@ -518,6 +518,7 @@ sub CORE_link_components
 
     if ( exists $self->{components__}{core}{imap} ) {
         $self->{components__}{core}{imap}->classifier( $self->{components__}{classifier}{bayes} );
+        $self->{components__}{core}{imap}->history(    $self->{components__}{core}{history} );
     }
 
     # Classifier::Bayes and POPFile::History are friends and are aware
