@@ -2412,10 +2412,7 @@ sub load_disk_cache__
 
     if ( $first =~ /___HISTORY__ __ VERSION__ 1/ ) {
         while ( my $line = <CACHE> ) {
-            if ( !( $line =~ /__HISTORY__ __BOUNDARY__/ ) ) {
-                $self->log_( "Problem in history_cache file, expecting boundary got $line" );
-                last;
-            }
+            last if ( !( $line =~ /__HISTORY__ __BOUNDARY__/ ) );
 
             $line = <CACHE>;
             $line =~ s/[\r\n]//g;
@@ -2629,14 +2626,13 @@ sub new_history_file__
     $short_subject =~ s/</&lt;/g;
     $short_subject =~ s/>/&gt;/g;
 
-    # If the index is known, stick it straight into the history else# go into
+    # If the index is known, stick it straight into the history else go into
     # the precache for merging into history when the history is viewed next
 
     my $cache = 'history__';
     if ( !defined( $index ) ) {
         $cache = 'history_pre_cache__';
     }
-
 
     $self->{$cache}{$file}{bucket}        = $bucket;
     $self->{$cache}{$file}{reclassified}  = $reclassified;
@@ -3040,10 +3036,12 @@ sub history_page
     if ( !( $filter eq '' ) ) {
         if ( $filter eq '__filter__magnet' ) {
             $filtered .= $self->{language__}{History_Magnet};
-        } elsif ( $filter eq '__filter__no__magnet' ) {
-            $filtered .= $self->{language__}{History_NoMagnet};
         } else {
-            $filtered = sprintf( $self->{language__}{History_Filter}, $self->{classifier__}->get_bucket_color($self->{form_}{filter}), $self->{form_}{filter} ) if ( $self->{form_}{filter} ne '' );
+            if ( $filter eq '__filter__no__magnet' ) {
+                $filtered .= $self->{language__}{History_NoMagnet};
+            } else {
+                $filtered = sprintf( $self->{language__}{History_Filter}, $self->{classifier__}->get_bucket_color($self->{form_}{filter}), $self->{form_}{filter} ) if ( $self->{form_}{filter} ne '' );
+            }
         }
     }
 
@@ -3241,7 +3239,7 @@ sub history_page
                     }
                     $body .= "</select>\n";
                 } else {
-                    $body .= " ($self->{language__}{History_MagnetUsed}: " . Classifier::MailParse::splitline( $self->{history__}{$mail_file}{magnet}, 0 ) . ")";
+                    $body .= " ($self->{language__}{History_MagnetUsed}: " . $self->{history__}{$mail_file}{magnet} . ")";
                 }
             }
 
@@ -3387,7 +3385,7 @@ sub view_page
                 }
                 $body .= "</select>\n<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />";
         } else {
-                $body .= " ($self->{language__}{History_MagnetUsed}: " . Classifier::MailParse::splitline( $self->{history__}{$mail_file}{magnet} , 0) . ")";
+                $body .= " ($self->{language__}{History_MagnetUsed}: " . $self->{history__}{$mail_file}{magnet} . ")";
         }
     }
 
@@ -3460,10 +3458,10 @@ sub view_page
         $body .= $self->{classifier__}->scores();
         $self->{classifier__}->scores('');
     } else {
-        $body .= sprintf(   $self->{language__}{History_MagnetBecause},
+        $body .= sprintf(   $self->{language__}{History_MagnetBecause},                                # PROFILE BLOCK START
                             $color, $bucket,
                             Classifier::MailParse::splitline($self->{history__}{$mail_file}{magnet},0)
-                            );
+                            );                                                                         # PROFILE BLOCK STOP
     }
 
     # Close button

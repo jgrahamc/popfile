@@ -65,10 +65,10 @@ test_assert( $b->start() );
 
 # Test the unclassifier_probability parameter
 
-test_assert_equal( $b->{unclassified__}, log(100) );
-$b->config_( 'unclassified_weight', 10 );
-test_assert( $b->start() );
 test_assert_equal( $b->{unclassified__}, log(10) );
+$b->config_( 'unclassified_weight', 9 );
+test_assert( $b->start() );
+test_assert_equal( $b->{unclassified__}, log(9) );
 $b->config_( 'unclassified_weight', 5 );
 test_assert( $b->start() );
 test_assert_equal( $b->{unclassified__}, log(5) );

@@ -131,20 +131,25 @@ sub initialize
     my ( $self ) = @_;
 
     # No default unclassified weight is the number of times more sure POPFile
-    # must be of the top class vs the second class, default is 100 times more
-    $self->config_( 'unclassified_weight', 100 );
+    # must be of the top class vs the second class, default is 10 times more
+
+    $self->config_( 'unclassified_weight', 10 );
 
     # The corpus is kept in the 'corpus' subfolder of POPFile
+
     $self->config_( 'corpus', 'corpus' );
 
     # The characters that appear before and after a subject modification
+
     $self->config_( 'subject_mod_left',  '[' );
     $self->config_( 'subject_mod_right', ']' );
 
     # Get the hostname for use in the X-POPFile-Link header
+
     $self->{hostname__} = hostname;
 
     # Allow the user to override the hostname
+
     $self->config_( 'hostname', $self->{hostname__} );
 
     # We want to hear about classification events so that we can
@@ -945,7 +950,7 @@ sub history_read_class
 
     if ( open CLASS, '<' . $self->global_config_( 'msgdir' ) . $filename ) {
         $bucket = <CLASS>;
-        if ( $bucket =~ /([^ ]+) MAGNET (.+)/ ) {
+        if ( $bucket =~ /([^ ]+) MAGNET ([^\r\n]+)/ ) {
             $bucket = $1;
             $magnet = $2;
         }

@@ -186,6 +186,38 @@ MATCH Testing Refresh
 MATCH personal
 MATCH popfile10000=1
 
+# Check magnet classified mails
+
+NOTMATCH Magnetic Attraction for Ferrous Females
+MATCH (<a class="history" href="/history?session=$sk&amp;setfilter=">Refresh</a>)
+CODE
+open NEWMSG, ">messages/popfile10002=1.msg";
+print NEWMSG <<EOM;
+From: foo-magnet\@magnetmania.com
+Subject: Magnetic Attraction for Ferrous Females
+
+Align your pole to magnetic north
+EOM
+close NEWMSG;
+open NEWCLS, ">messages/popfile10002=1.cls";
+print NEWCLS "personal MAGNET from: foo\n";
+close NEWCLS;
+ENDCODE
+SENDMSG NEWFL popfile10002=1.msg
+GET /history?session=$sk&amp;setfilter=
+MATCH foo-magnet\@magnetmania.com
+MATCH Magnetic Attraction for Ferrous Females
+MATCH personal
+MATCH popfile10002=1
+MATCH Magnet used: from: foo
+
+GET /view?view=popfile10002=1.msg&amp;start_message=0&amp;session=$sk
+MATCH Single Message View
+MATCH foo-magnet\@magnetmania.com
+MATCH Magnetic Attraction for Ferrous Females
+MATCH Magnet used: from: foo
+MATCH <font color="green">foo</font>
+
 # Check search
 
 SETSUBMIT search isnotpresent
@@ -240,6 +272,16 @@ SETINPUT filter other
 CLICK setfilter
 MATCH (just showing bucket <font color="red">other</font>)
 MATCH No messages.
+SETINPUT filter __filter__magnet
+CLICK setfilter
+MATCH (just showing magnet classified messages)
+MATCH Magnetic Attraction for Ferrous Females
+NOTMATCH Testing Refresh
+SETINPUT filter __filter__no__magnet
+CLICK setfilter
+MATCH (just showing non-magnet classified messages)
+NOTMATCH Magnetic Attraction for Ferrous Females
+MATCH Testing Refresh
 CLICK reset_filter_search
 
 # Check sorting
@@ -257,14 +299,14 @@ GET /history?session=$sk&amp;setsort=
 
 GET /history
 MATCH Testing Refresh
-SETINPUT 0 spam
+SETINPUT 1 spam
 CLICK change
 MATCH Changed to <font color="blue">spam</font>
 MATCH Reclassified as <font color="blue">spam</font>
 
 # Check undo
 
-CLICK undo_0
+CLICK undo_1
 MATCH Changed to <font color="green">personal</font>
 
 # Check click through from bucket name
@@ -335,7 +377,7 @@ CLICK delete
 GET /view?view=popfile10000=1.msg&amp;start_message=0&amp;session=$sk
 MATCH Single Message View
 MATCH Testing Refresh
-SETINPUT 0 spam
+SETINPUT 1 spam
 CLICK change
 MATCH Changed to <font color="blue">spam</font>
 MATCH Reclassified as <font color="blue">spam</font>
@@ -344,14 +386,14 @@ MATCH Reclassified as <font color="blue">spam</font>
 
 GET /view?view=popfile10000=1.msg&amp;start_message=0&amp;session=$sk
 MATCH Single Message View
-CLICK undo_0
+CLICK undo_1
 MATCH Changed to <font color="green">personal</font>
 
 # Check delete one message
 
 GET /history
 MATCH Testing Refresh
-SETINPUT remove_1 on
+SETINPUT remove_2 on
 CLICK deletemessage
 MATCH Recent Messages
 NOTMATCH Testing Refresh
@@ -360,8 +402,8 @@ NOTMATCH Testing Refresh
 
 MATCH test for various HTML parts
 MATCH Enlarge your package Doctor ApprovedNHOB
-SETINPUT remove_4 on
 SETINPUT remove_5 on
+SETINPUT remove_6 on
 CLICK deletemessage
 NOTMATCH test for various HTML parts
 NOTMATCH Enlarge your package Doctor ApprovedNHOB
