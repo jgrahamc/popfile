@@ -106,7 +106,7 @@
 # version.
 #
 # Normal multi-language build command:  makensis.exe translator.nsi
-# To build an English-only version:     makensis.exe /DENGLISH_MODE translator.nsi
+# To build an English-only version:     makensis.exe  /DENGLISH_MODE translator.nsi
 #--------------------------------------------------------------------------
 # The POPFile installer uses several multi-language mode programs built using NSIS. To make
 # maintenance easier, an 'include' file (pfi-languages.nsh) defines the supported languages.
@@ -127,7 +127,7 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT       "PFI Testbed"
-  !define C_PFI_VERSION       "0.11.0"
+  !define C_PFI_VERSION       "0.11.1"
 
   Name                        "${C_PFI_PRODUCT}"
   Caption                     "${C_PFI_PRODUCT} ${C_PFI_VERSION} Setup"
@@ -146,20 +146,20 @@
 # Delays (in milliseconds) used to simulate installation and uninstall activities
 #--------------------------------------------------------------------------
 
-  !define C_INST_PROG_UPGRADE_DELAY   2000
-  !define C_INST_PROG_CORE_DELAY      2500
-  !define C_INST_PROG_PERL_DELAY      2500
-  !define C_INST_PROG_SHORT_DELAY     2500
-  !define C_INST_PROG_SKINS_DELAY     2500
-  !define C_INST_PROG_LANGS_DELAY     2500
-  !define C_INST_PROG_XMLRPC_DELAY    2500
+  !define C_INST_PROG_UPGRADE_DELAY     2000
+  !define C_INST_PROG_CORE_DELAY        2500
+  !define C_INST_PROG_PERL_DELAY        2500
+  !define C_INST_PROG_SHORT_DELAY       2500
+  !define C_INST_PROG_SKINS_DELAY       2500
+  !define C_INST_PROG_LANGS_DELAY       2500
+  !define C_INST_PROG_XMLRPC_DELAY      2500
 
-  !define C_UNINST_PROGRESS_1_DELAY   2500
-  !define C_UNINST_PROGRESS_2_DELAY   2500
-  !define C_UNINST_PROGRESS_3_DELAY   2500
-  !define C_UNINST_PROGRESS_4_DELAY   2500
-  !define C_UNINST_PROGRESS_5_DELAY   2500
-  !define C_UNINST_PROGRESS_6_DELAY   2500
+  !define C_UNINST_PROG_SHUTDOWN_DELAY  2500
+  !define C_UNINST_PROG_SHORT_DELAY     2500
+  !define C_UNINST_PROG_CORE_DELAY      2500
+  !define C_UNINST_PROG_EMAIL_DELAY     2500
+  !define C_UNINST_PROG_SKINS_DELAY     2500
+  !define C_UNINST_PROG_PERL_DELAY      2500
 
 #------------------------------------------------
 # Define PFI_VERBOSE to get more compiler output
@@ -841,8 +841,8 @@ FunctionEnd
 
 Function MakeItSafe
 
-  DetailPrint "$(PFI_LANG_INST_LOG_1) 9876"
-  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
+  DetailPrint "$(PFI_LANG_INST_LOG_SHUTDOWN) 9876"
+  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
 
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
     $\r$\n$\r$\n\
@@ -965,15 +965,15 @@ get_usertype:
 
 continue:
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_1)"
+  DetailPrint "$(PFI_LANG_UN_PROG_SHUTDOWN)"
   SetDetailsPrint listonly
 
-  DetailPrint "$(PFI_LANG_UN_LOG_1) 8080"
+  DetailPrint "$(PFI_LANG_UN_LOG_SHUTDOWN) 8080"
 
-  Sleep ${C_UNINST_PROGRESS_1_DELAY}
+  Sleep ${C_UNINST_PROG_SHUTDOWN_DELAY}
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_2)"
+  DetailPrint "$(PFI_LANG_UN_PROG_SHORT)"
   SetDetailsPrint listonly
 
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Add POPFile User Demo.lnk"
@@ -983,13 +983,13 @@ continue:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall PFI Testbed.lnk"
   RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
 
-  Sleep ${C_UNINST_PROGRESS_2_DELAY}
+  Sleep ${C_UNINST_PROG_SHORT_DELAY}
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_3)"
+  DetailPrint "$(PFI_LANG_UN_PROG_CORE)"
   SetDetailsPrint listonly
 
-  Sleep ${C_UNINST_PROGRESS_3_DELAY}
+  Sleep ${C_UNINST_PROG_CORE_DELAY}
 
   Delete $INSTDIR\popfile.cfg.bak
 
@@ -1009,7 +1009,7 @@ continue:
   IfFileExists "$INSTDIR\popfile.reg.dummy" 0 no_reg_file
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_4)"
+  DetailPrint "$(PFI_LANG_UN_PROG_OUTEXPRESS)"
   SetDetailsPrint listonly
 
   ; Read the registry settings found in popfile.reg.dummy and restore them
@@ -1018,9 +1018,9 @@ continue:
   ClearErrors
   FileOpen ${L_CFG} $INSTDIR\popfile.reg.dummy r
   IfErrors skip_registry_restore
-  Sleep ${C_UNINST_PROGRESS_4_DELAY}
+  Sleep ${C_UNINST_PROG_EMAIL_DELAY}
 
-  DetailPrint "$(PFI_LANG_UN_LOG_2): popfile.reg.dummy"
+  DetailPrint "$(PFI_LANG_UN_LOG_OPENED): popfile.reg.dummy"
 
 restore_loop:
   FileRead ${L_CFG} ${L_REG_KEY}
@@ -1041,29 +1041,29 @@ restore_loop:
 
   ; Testbed does NOT restore Outlook Express settings (it never changed them during 'install')
 
-  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_REG_SUBKEY}: ${L_REG_VALUE}"
+  DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) ${L_REG_SUBKEY}: ${L_REG_VALUE}"
   goto restore_loop
 
 skip_registry_restore:
   FileClose ${L_CFG}
-  DetailPrint "$(PFI_LANG_UN_LOG_4): popfile.reg.dummy"
+  DetailPrint "$(PFI_LANG_UN_LOG_DELROOTDIR): popfile.reg.dummy"
   Delete $INSTDIR\popfile.reg.dummy
 
 no_reg_file:
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_5)"
+  DetailPrint "$(PFI_LANG_UN_PROG_SKINS)"
   SetDetailsPrint listonly
 
-  Sleep ${C_UNINST_PROGRESS_5_DELAY}
+  Sleep ${C_UNINST_PROG_SKINS_DELAY}
 
   Delete $INSTDIR\languages\*.msg
   RMDir $INSTDIR\languages
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_6)"
+  DetailPrint "$(PFI_LANG_UN_PROG_PERL)"
   SetDetailsPrint listonly
 
-  Sleep ${C_UNINST_PROGRESS_6_DELAY}
+  Sleep ${C_UNINST_PROG_PERL_DELAY}
 
   Delete "$INSTDIR\uninst_transauw.exe"
   Delete "$INSTDIR\uninst_testbed.exe"
@@ -1079,10 +1079,10 @@ no_reg_file:
 
   IfFileExists $INSTDIR 0 Removed
     MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_1)" IDNO Removed
-    DetailPrint "$(PFI_LANG_UN_LOG_5)"
+    DetailPrint "$(PFI_LANG_UN_LOG_DELUSERDIR)"
     Delete $INSTDIR\*.* ; this would be skipped if the user hits no
     RMDir /r $INSTDIR
-    DetailPrint "$(PFI_LANG_UN_LOG_6)"
+    DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
     MessageBox MB_OK|MB_ICONEXCLAMATION \
         "$(PFI_LANG_UN_MBREMERR_1): $INSTDIR $(PFI_LANG_UN_MBREMERR_2)"
 Removed:

@@ -83,7 +83,7 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT      "PFI Testbed"
-  !define C_PFI_VERSION      "0.1.0"
+  !define C_PFI_VERSION      "0.1.1"
 
   !ifndef ENGLISH_MODE
     !define C_PFI_VERSION_ID "${C_PFI_VERSION} (ML)"
@@ -119,16 +119,16 @@
 # Delays (in milliseconds) used to simulate installation and uninstall activities
 #--------------------------------------------------------------------------
 
-  !define C_INST_PROG_UPGRADE_DELAY   2000
-  !define C_INST_PROG_MBOX_DELAY      1000
-  !define C_INST_PROG_SHORT_DELAY     2500
-  !define C_INST_PROG_NONSQL_DELAY    2500
+  !define C_INST_PROG_UPGRADE_DELAY     2000
+  !define C_INST_PROG_MBOX_DELAY        1000
+  !define C_INST_PROG_SHORT_DELAY       2500
+  !define C_INST_PROG_NONSQL_DELAY      2500
 
-  !define C_INST_RUN_BANNER_DELAY     2500
+  !define C_INST_RUN_BANNER_DELAY       2500
 
-  !define C_UNINST_PROGRESS_1_DELAY   2500
-  !define C_UNINST_PROGRESS_2_DELAY   2500
-  !define C_UNINST_PROGRESS_4_DELAY   2500
+  !define C_UNINST_PROG_SHUTDOWN_DELAY  2500
+  !define C_UNINST_PROG_SHORT_DELAY     2500
+  !define C_UNINST_PROG_EMAIL_DELAY     2500
 
 #------------------------------------------------
 # Define PFI_VERBOSE to get more compiler output
@@ -676,21 +676,26 @@ Section "POPFile" SecPOPFile
 
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}\Add User Demo"
   SetOutPath $G_USERDIR
-  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Add User Demo\Uninstall Testbed Data ($G_WINUSERNAME).lnk" \
-                 "$G_USERDIR\uninst_transauw.exe"
+  CreateShortCut \
+      "$SMPROGRAMS\${C_PFI_PRODUCT}\Add User Demo\Uninstall Testbed Data ($G_WINUSERNAME).lnk" \
+      "$G_USERDIR\uninst_transauw.exe"
 
   Sleep ${C_INST_PROG_SHORT_DELAY}
 
   ; Create entry in the Control Panel's "Add/Remove Programs" list
 
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_AUW" \
+  WriteRegStr HKCU \
+              "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_AUW" \
               "DisplayName" "${C_PFI_PRODUCT} ${C_PFI_VERSION}"
-  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_AUW" \
+  WriteRegStr HKCU \
+              "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_AUW" \
               "UninstallString" "$G_USERDIR\uninst_transauw.exe"
-  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_AUW" \
-              "NoModify" "1"
-  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_AUW" \
-              "NoRepair" "1"
+  WriteRegDWORD HKCU \
+                "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_AUW" \
+                "NoModify" "1"
+  WriteRegDWORD HKCU \
+                "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_AUW" \
+                "NoRepair" "1"
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
@@ -756,13 +761,13 @@ FunctionEnd
 
 Function MakeItSafe
 
-  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
+  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_BE_PATIENT)" "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
   Sleep ${C_INST_RUN_BANNER_DELAY}
   Banner::destroy
   Sleep ${C_INST_RUN_BANNER_DELAY}
 
-  DetailPrint "$(PFI_LANG_INST_LOG_1) 9876"
-  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
+  DetailPrint "$(PFI_LANG_INST_LOG_SHUTDOWN) 9876"
+  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
 
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
     $\r$\n$\r$\n\
@@ -2117,8 +2122,8 @@ display_list:
 
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
-  GetDlgItem $G_DLGITEM $G_HWND 1200             ; Field 1 = 'Outlook User' label (above the box)
-  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  GetDlgItem $G_DLGITEM $G_HWND 1200            ; Field 1 = 'Outlook User' label (above the box)
+  CreateFont $G_FONT "MS Shell Dlg" 8 700       ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
@@ -2928,28 +2933,28 @@ get_usertype:
 
 continue:
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_1)"
+  DetailPrint "$(PFI_LANG_UN_PROG_SHUTDOWN)"
   SetDetailsPrint listonly
 
-  DetailPrint "$(PFI_LANG_UN_LOG_1) 8080"
-  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
+  DetailPrint "$(PFI_LANG_UN_LOG_SHUTDOWN) 8080"
+  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
 
-  Sleep ${C_UNINST_PROGRESS_1_DELAY}
+  Sleep ${C_UNINST_PROG_SHUTDOWN_DELAY}
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_2)"
+  DetailPrint "$(PFI_LANG_UN_PROG_SHORT)"
   SetDetailsPrint listonly
 
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Add User Demo\Uninstall Testbed Data ($G_WINUSERNAME).lnk"
   RMDir  "$SMPROGRAMS\${C_PFI_PRODUCT}\Add User Demo"
   RMDir  "$SMPROGRAMS\${C_PFI_PRODUCT}"
 
-  Sleep ${C_UNINST_PROGRESS_2_DELAY}
+  Sleep ${C_UNINST_PROG_SHORT_DELAY}
 
   ; Display the "restoring Outlook Express settings" messages
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_4)"
+  DetailPrint "$(PFI_LANG_UN_PROG_OUTEXPRESS)"
   SetDetailsPrint listonly
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EXP)\
@@ -2962,14 +2967,14 @@ continue:
              IDRETRY exp_continue IDIGNORE exp_continue
 
 exp_continue:
-  Sleep ${C_UNINST_PROGRESS_4_DELAY}
+  Sleep ${C_UNINST_PROG_EMAIL_DELAY}
 
-  DetailPrint "$(PFI_LANG_UN_LOG_2): popfile.reg.dummy"
-  DetailPrint "$(PFI_LANG_UN_LOG_3) POP3 User Name: an.example"
-  DetailPrint "$(PFI_LANG_UN_LOG_3) POP3 Server: mail.my.isp.com"
-  DetailPrint "$(PFI_LANG_UN_LOG_3) POP3 Port: 110"
-  DetailPrint "$(PFI_LANG_UN_LOG_7)"
-  DetailPrint "$(PFI_LANG_UN_LOG_4): popfile.reg.dummy"
+  DetailPrint "$(PFI_LANG_UN_LOG_OPENED): popfile.reg.dummy"
+  DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) POP3 User Name: an.example"
+  DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) POP3 Server: mail.my.isp.com"
+  DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) POP3 Port: 110"
+  DetailPrint "$(PFI_LANG_UN_LOG_DATAPROBS)"
+  DetailPrint "$(PFI_LANG_UN_LOG_DELROOTDIR): popfile.reg.dummy"
 
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_1)\
@@ -2979,12 +2984,12 @@ exp_continue:
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_exp_restore
 
 end_exp_restore:
-  Sleep ${C_UNINST_PROGRESS_4_DELAY}
+  Sleep ${C_UNINST_PROG_EMAIL_DELAY}
 
   ; Display the "restoring Outlook settings" messages
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_7)"
+  DetailPrint "$(PFI_LANG_UN_PROG_OUTLOOK)"
   SetDetailsPrint listonly
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_OUT)\
@@ -2997,7 +3002,7 @@ end_exp_restore:
              IDRETRY out_continue IDIGNORE out_continue
 
 out_continue:
-  Sleep ${C_UNINST_PROGRESS_4_DELAY}
+  Sleep ${C_UNINST_PROG_EMAIL_DELAY}
 
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_2)\
@@ -3007,12 +3012,12 @@ out_continue:
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_out_restore
 
 end_out_restore:
-  Sleep ${C_UNINST_PROGRESS_4_DELAY}
+  Sleep ${C_UNINST_PROG_EMAIL_DELAY}
 
   ; Display the "restoring Eudora settings" messages
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_8)"
+  DetailPrint "$(PFI_LANG_UN_PROG_EUDORA)"
   SetDetailsPrint listonly
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EUD)\
@@ -3025,7 +3030,7 @@ end_out_restore:
              IDRETRY eud_continue IDIGNORE eud_continue
 
 eud_continue:
-  Sleep ${C_UNINST_PROGRESS_4_DELAY}
+  Sleep ${C_UNINST_PROG_EMAIL_DELAY}
 
   Delete $G_USERDIR\expchanges.txt
   Delete $G_USERDIR\expconfig.txt
@@ -3040,7 +3045,7 @@ eud_continue:
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_eud_restore
 
 end_eud_restore:
-  Sleep ${C_UNINST_PROGRESS_4_DELAY}
+  Sleep ${C_UNINST_PROG_EMAIL_DELAY}
 
   RMDir /r $G_USERDIR\corpus
 
@@ -3081,10 +3086,10 @@ remove_shortcut:
 
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_2)" IDNO Removed
 Removed:
-  DetailPrint "$(PFI_LANG_UN_LOG_8)"
+  DetailPrint "$(PFI_LANG_UN_LOG_DELUSERDIR)"
   Delete $G_USERDIR\*.* ; this would be skipped if the user hits no
   RMDir /r $G_USERDIR
-  DetailPrint "$(PFI_LANG_UN_LOG_9)"
+  DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBREMERR_1): $G_USERDIR $(PFI_LANG_UN_MBREMERR_2)"
   SetDetailsPrint both
