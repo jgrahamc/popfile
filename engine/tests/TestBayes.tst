@@ -29,6 +29,8 @@ test_assert( `rm -rf corpus/CVS` == 0 );
 unlink 'stopwords';
 test_assert( `cp stopwords.base stopwords` == 0 );
 
+mkdir 'messages';
+
 use Classifier::Bayes;
 use POPFile::Configuration;
 use POPFile::MQ;
@@ -615,19 +617,20 @@ close TEMP;
 
 # to a file (no dot)
 
-open TEMP, ">temp.tmp";
+unlink( 'temp.tmp' );
 open MAIL, "<messages/one.msg";
-$b->echo_to_dot_( \*MAIL, undef, \*TEMP );
+$b->echo_to_dot_( \*MAIL, undef, 'temp.tmp' );
 test_assert( eof( MAIL ) );
 close MAIL;
-close TEMP;
 
 open TEMP, "<temp.tmp";
 open MAIL, "<messages/one.msg";
 while ( !eof( MAIL ) && !eof( TEMP ) ) {
     my $temp = <TEMP>;
     my $mail = <MAIL>;
-    last if ( $mail =~ /^./ );
+    if ( $mail =~ /^\./ ) {
+        last;
+    }
     test_assert_regexp( $temp, $mail );
 }
 test_assert( !eof( MAIL ) );
@@ -637,23 +640,23 @@ close TEMP;
 
 # both
 
-open TEMP, ">temp.tmp";
+unlink( 'temp.tmp' );
 open TEMP2, ">temp2.tmp";
 open MAIL, "<messages/one.msg";
-$b->echo_to_dot_( \*MAIL, \*TEMP2, \*TEMP );
+$b->echo_to_dot_( \*MAIL, \*TEMP2, 'temp.tmp' );
 test_assert( eof( MAIL ) );
 close MAIL;
-close TEMP;
+close TEMP2;
 
 open TEMP, "<temp.tmp";
 open TEMP2, "<temp2.tmp";
 open MAIL, "<messages/one.msg";
 while ( !eof( MAIL ) && !eof( TEMP ) && !eof( TEMP2 ) ) {
     my $temp = <TEMP>;
-    my $temp2 = <TEMP>;
+    my $temp2 = <TEMP2>;
     my $mail = <MAIL>;
     test_assert_regexp( $temp2, $mail );
-    last if ( $mail =~ /^./ );
+    last if ( $mail =~ /^\./ );
     test_assert_regexp( $temp, $mail );
 }
 test_assert( !eof( MAIL ) );
@@ -665,25 +668,24 @@ close TEMP2;
 
 # to a file (no dot) with before string
 
-open TEMP, ">temp.tmp";
+unlink( 'temp.tmp' );
 open MAIL, "<messages/one.msg";
-$b->echo_to_dot_( \*MAIL, undef, \*TEMP, "before\n" );
+$b->echo_to_dot_( \*MAIL, undef, 'temp.tmp', "before\n" );
 test_assert( eof( MAIL ) );
 close MAIL;
-close TEMP;
 
 open TEMP, "<temp.tmp";
 open MAIL, "<messages/one.msg";
 while ( !eof( MAIL ) && !eof( TEMP ) ) {
     my $temp = <TEMP>;
     my $mail = <MAIL>;
-    if ( $mail =~ /^./ ) {
+    if ( $mail =~ /^\./ ) {
         test_assert_regexp( $temp, 'before' );
         last;
     }
     test_assert_regexp( $temp, $mail );
 }
-test_assert( !eof( MAIL ) );
+test_assert( eof( MAIL ) );
 test_assert( eof( TEMP ) );
 close MAIL;
 close TEMP;
