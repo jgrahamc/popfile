@@ -138,7 +138,7 @@ sub http_ok
 {
     my ( $client, $text, $selected ) = @_;
     my @tab = ( 'menu_standard', 'menu_standard', 'menu_standard', 'menu_standard', 'menu_standard', 'menu_standard' );
-    $tab[$selected] = 'menu_selected' if ( $selected <= $#tab );
+    $tab[$selected] = 'menu_selected' if ( ( $selected <= $#tab ) && ( $selected >= 0 ) );
     my $time = localtime;
     my $update_check = ''; 
 
@@ -152,7 +152,9 @@ sub http_ok
         }
     }
     
-    $text = "<html><head><title>POPFile Control Center</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style><link rel=stylesheet type=text/css href='skins/$configuration{skin}.css' title=main></link><META HTTP-EQUIV=Pragma CONTENT=no-cache><META HTTP-EQUIV=Expires CONTENT=0><META HTTP-EQUIV=Cache-Control CONTENT=no-cache><META HTTP-EQUIV=Refresh CONTENT=600></head><body><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'><table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;POPFile Control Center<td align=right valign=middle><a href=/shutdown>Shutdown</a>&nbsp;<tr height=3><td colspan=3></td></tr></table></td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center>$update_check<table class=menu cellspacing=0><tr><td class=$tab[2] align=center><a href=/history?session=$session_key&setfilter=Filter&filter=>History</a></td><td class=menu_spacer></td><td class=$tab[1] align=center><a href=/buckets?session=$session_key>Buckets</a></td><td class=menu_spacer></td><td class=$tab[4] align=center><a href=/magnets?session=$session_key>Magnets</a></td><td class=menu_spacer></td><td class=$tab[0] align=center><a href=/configuration?session=$session_key>Configuration</a></td><td class=menu_spacer></td><td class=$tab[3] align=center><a href=/security?session=$session_key>Security</a></td><td class=menu_spacer></td><td class=$tab[5] align=center><a href=/advanced?session=$session_key>Advanced</a></td></tr></table><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>" . $text . "</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center><table class=footer><tr><td>POPFile $major_version.$minor_version.$build_version - <a href=manual/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://sourceforge.net/tracker/index.php?group_id=63137&atid=502959>Request Feature</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a> - ($time) - ($lastuser)</td></tr></table></body></html>";
+    my $refresh = ($selected != -1)?"<META HTTP-EQUIV=Refresh CONTENT=600>":"";
+    
+    $text = "<html><head><title>POPFile Control Center</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style><link rel=stylesheet type=text/css href='skins/$configuration{skin}.css' title=main></link><META HTTP-EQUIV=Pragma CONTENT=no-cache><META HTTP-EQUIV=Expires CONTENT=0><META HTTP-EQUIV=Cache-Control CONTENT=no-cache>$refresh</head><body><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'><table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;POPFile Control Center<td align=right valign=middle><a href=/shutdown>Shutdown</a>&nbsp;<tr height=3><td colspan=3></td></tr></table></td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center>$update_check<table class=menu cellspacing=0><tr><td class=$tab[2] align=center><a href=/history?session=$session_key&setfilter=Filter&filter=>History</a></td><td class=menu_spacer></td><td class=$tab[1] align=center><a href=/buckets?session=$session_key>Buckets</a></td><td class=menu_spacer></td><td class=$tab[4] align=center><a href=/magnets?session=$session_key>Magnets</a></td><td class=menu_spacer></td><td class=$tab[0] align=center><a href=/configuration?session=$session_key>Configuration</a></td><td class=menu_spacer></td><td class=$tab[3] align=center><a href=/security?session=$session_key>Security</a></td><td class=menu_spacer></td><td class=$tab[5] align=center><a href=/advanced?session=$session_key>Advanced</a></td></tr></table><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>" . $text . "</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center><table class=footer><tr><td>POPFile $major_version.$minor_version.$build_version - <a href=manual/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://sourceforge.net/tracker/index.php?group_id=63137&atid=502959>Request Feature</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a> - ($time) - ($lastuser)</td></tr></table></body></html>";
     
     my $http_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
     $http_header .= length($text);
@@ -544,7 +546,6 @@ sub magnet_page
         
         if ( $found == 0 ) {
             $classifier->{magnets}{$form{bucket}}{$form{type}}{$form{text}} = 1;
-            $classifier->save_magnets();
             $magnet_message = "<blockquote>Create new magnet '$form{type}: $form{text}' in bucket '$form{bucket}'</blockquote>";
             $classifier->save_magnets();
         }
@@ -691,6 +692,7 @@ sub corpus_page
         }
         save_configuration();
         $classifier->write_parameters();
+        $configuration{last_reset} = localtime;
     }
     
     if ( defined($form{showbucket}) )  {
@@ -753,7 +755,7 @@ sub corpus_page
             $form{oname} = lc($form{oname});
             $form{newname} = lc($form{newname});
             rename("$configuration{corpus}/$form{oname}" , "$configuration{corpus}/$form{newname}");
-            $rename_message = "<blockquote><b>Rename bucket $form{oname} to $form{newname}</b></blockquote>";
+            $rename_message = "<blockquote><b>Renamed bucket $form{oname} to $form{newname}</b></blockquote>";
             $classifier->load_word_matrix();
         }
     }    
@@ -834,7 +836,7 @@ sub corpus_page
         $body .= "<tr><td colspan=25 align=left><font size=1>0%<td colspan=25 align=right><font size=1>100%</table>";
     }
     
-    $body .= "</table><form action=/buckets><input type=hidden name=session value=$session_key><input type=submit class=submit name=reset_stats value='Reset Statistics'></form><td  valign=top width=33%><h2>Emails Classified</h2><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Classification Count</b>";
+    $body .= "</table><form action=/buckets><input type=hidden name=session value=$session_key><input type=submit class=submit name=reset_stats value='Reset Statistics'><br>(Last reset: $configuration{last_reset})</form><td valign=top width=33%><h2>Emails Classified</h2><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Classification Count</b>";
 
     my %bar_values;
     for my $bucket (@buckets)  {
@@ -1593,7 +1595,7 @@ sub handle_url
 
     if ( $url eq '/shutdown' )  {
         $alive = 0;
-        http_ok($client, "POPFile shutdown", 0);
+        http_ok($client, "POPFile shutdown", -1);
         return;
     }
 
@@ -1678,7 +1680,7 @@ sub load_configuration
 {
     if ( open CONFIG, "<popfile.cfg" ) {
         while ( <CONFIG> ) {
-            if ( /(\S+) (\S+)/ ) {
+            if ( /(\S+) (.+)/ ) {
                 $configuration{$1} = $2;
             }
         }
@@ -2528,6 +2530,7 @@ $configuration{corpus}                      = 'corpus';
 $configuration{unclassified_probability}    = 0;
 $configuration{last_update_check}           = 0;
 $configuration{password}                    = '';
+$configuration{last_reset}                  = 'never';
 
 # Load skins
 load_skins();
