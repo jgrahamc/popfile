@@ -288,8 +288,9 @@ create table history( id integer primary key,    -- unique ID for this entry
 --
 -- ---------------------------------------------------------------------------------------------
 
+
 alter table buckets modify id int(11) auto_increment;
-alter table bucket_param modify id int(11) auto_increment;
+alter table bucket_params modify id int(11) auto_increment;
 alter table bucket_template modify id int(11) auto_increment;
 alter table magnets modify id int(11) auto_increment;
 alter table magnet_types modify id int(11) auto_increment;
@@ -298,8 +299,27 @@ alter table user_params modify id int(11) auto_increment;
 alter table user_template modify id int(11) auto_increment;
 alter table users modify id int(11) auto_increment;
 alter table words modify id int(11) auto_increment;
-alter table words modify word binary(255);
 alter table history modify id int(11) auto_increment;
+alter table popfile modify id int(11) auto_increment;
+
+-- MySQL treats char fields as case insensitive for searches, in order to have
+-- the same behavior as SQLite (case sensitive searches) we alter the word.word
+-- field to binary, that will trick MySQL into treating it the way we want.
+
+alter table words modify word binary(255);
+
+
+-- MySQL enforces types, SQLite uses the concept of manifest typing, where 
+-- the type of a value is associated with the value itself, not the column that 
+-- it is stored in. POPFile has two date fields in history where POPFile
+-- is actually storing the unix time not a date. MySQL interprets the
+-- unix time as a date of 0000-00-00, whereas SQLite simply stores the
+-- unix time integer. The follow alter table statements redefine those
+-- date fields as integer for MySQL so the correct behavior is obtained
+-- for POPFile's use of the fields.
+
+alter table history modify hdr_date int(11);
+alter table history modify inserted int(11);
 
 -- TRIGGERS
 
@@ -372,7 +392,7 @@ create trigger delete_bucket_template delete on bucket_template
 
 -- Default data
 
--- This is schema version 1
+-- This is schema version 3
 
 insert into popfile ( version ) values ( 3 );
 
@@ -414,6 +434,14 @@ insert into magnet_types ( mtype, header ) values ( 'cc',      'Cc'      );
 -- messages that it isn't sure about.
 
 insert into buckets ( name, pseudo, userid ) values ( 'unclassified', 1, 1 );
+
+-- MySQL insists that auto_increment fields start at 1. POPFile requires
+-- a special magnet record with an id of 0 in order to work properly.
+-- The following SQL statement will fix the inserted special record
+-- on MySQL installs so the id is 0, the statement should do nothing
+-- on SQLite installs since it will not satisfy the where clause.
+
+update magnets set id = 0 where id = 1 and (bucketid = 0 and mtid = 0);
 
 -- END
 

@@ -670,7 +670,13 @@ sub db_connect__
 
     my $need_upgrade = 1;
 
-    my @tables = $self->{db__}->tables();
+    #
+    # retrieve the SQL_IDENTIFIER_QUOTE_CHAR for the database then use it
+    # to strip off any sqlquotechars from the table names we retrieve
+    #
+
+    my $sqlquotechar = $self->{db__}->get_info(29) || ''; 
+    my @tables = map { s/$sqlquotechar//g; $_ } ($self->{db__}->tables());
 
     foreach my $table (@tables) {
         if ( $table eq 'popfile' ) {
@@ -900,7 +906,7 @@ sub insert_schema__
 
             $schema .= $_;
 
-            if ( ( /end;/ ) || ( /\);/ ) ) {
+            if ( ( /end;/ ) || ( /\);/ ) || ( /^alter/i ) ) {
                 $self->{db__}->do( $schema );
                 $schema = '';
             }
