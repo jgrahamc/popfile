@@ -160,9 +160,12 @@ sub debug
         # account information
         if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ ) 
         {
-            $message = "$`$1$3 XXXXXX$4\n";
+            $message = "$`$1$3 XXXXXX$4";
         }
         
+        chomp $message;
+        $message .= "\n";
+
         open DEBUG, ">>$debug_filename";
         binmode DEBUG;
         my $now = localtime;
@@ -598,7 +601,7 @@ sub run_popfile
                 # Clean up the command so that it has a nice clean $eol at the end
                 $command =~ s/(\015|\012)//g;
 
-                debug( "Command: --$command--$eol" );
+                debug( "Command: --$command--" );
  
                 # Check for a possible abort
                 if ( $alive == 0 )
@@ -939,7 +942,7 @@ sub run_popfile
                             # Remove the temporary file
                             unlink("temp.tmp");
 
-                            debug ("Classification: $classification\n" );
+                            debug ("Classification: $classification" );
                             
                             # Add the spam header
                             if ( $configuration{subject} ) 
@@ -961,12 +964,12 @@ sub run_popfile
                             # Retrieve any more of the body
                             if ( !$got_full_body )
                             {
-                                debug( "Echoing rest of message\n" );
+                                debug( "Echoing rest of message" );
                                 echo_to_dot( $mail, $client );
                             }
                             else
                             {
-                                debug( "Full message was received\n" );
+                                debug( "Full message was received" );
                                 print $client ".$eol";
                             }
 
@@ -1077,7 +1080,7 @@ sub run_popfile
 # ---------------------------------------------------------------------------------------------
 sub aborting
 {
-    debug("Forced to abort via signal\n");
+    debug("Forced to abort via signal");
     $alive = 0;
 }
 
