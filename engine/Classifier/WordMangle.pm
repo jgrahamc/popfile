@@ -230,7 +230,7 @@ sub mangle
     }
 
     # Remove characters that would mess up a Perl regexp and replace with .
-    $word =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)//g;
+    $word =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\./g;
 
     # Long words are ignored also
     if ( length($word) > 45 ) 

@@ -242,6 +242,7 @@ sub remove_mail_files
                 $class_file =~ s/msg$/cls/;
                 unlink($mail_file);
                 unlink($class_file);
+                debug( "Deleting $mail_file/$class_file on $today" );
                 $configuration{mail_count} = 0;
             }
         }
@@ -932,7 +933,7 @@ sub pretty_number
 # ---------------------------------------------------------------------------------------------
 sub bucket_page 
 {
-    my $body = "<h2>Detail for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</a></h2><p><table><tr><td><b>Bucket word count</b><td>&nbsp;<td align=right>". pretty_number($classifier->{total}{$form{showbucket}});
+    my $body = "<h2>Detail for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</font></h2><p><table><tr><td><b>Bucket word count</b><td>&nbsp;<td align=right>". pretty_number($classifier->{total}{$form{showbucket}});
     $body .= "<tr><td><b>Total word count</b><td>&nbsp;<td align=right>" . pretty_number($classifier->{full_total});
     my $percent = "0%";
     if ( $classifier->{full_total} > 0 ) 
@@ -941,6 +942,19 @@ sub bucket_page
         $percent = "$percent%";
     }
     $body .= "<tr><td><hr><b>Percentage of total</b><td>&nbsp;<td align=right><hr>$percent</table>";
+ 
+    $body .= "<h2>Word Table for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</font></h2><p><table>";
+    for my $i (@{$classifier->{matrix}{$form{showbucket}}})
+    {
+        if ( $i ne '' ) 
+        {
+            $i =~ s/\|\|/, /g;
+            $i =~ s/\|//g;
+            $i =~ /^(.)/;
+            $body .= "<tr><td valign=top><b>$1</b><td valign=top>$i";
+        }
+    }
+    $body .= "</table>";
  
     return http_ok($body,1);
 }
