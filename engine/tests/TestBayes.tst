@@ -563,6 +563,7 @@ test_assert_equal( $stopwords[1], 'notthis' );
 # Test history class file reading and writing
 
 unlink( 'messages/*' );
+$b->global_config_( 'msgdir', '../tests/messages/' );
 
 $b->history_write_class( 'one.msg', 0, 'zeotrope' );
 my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'one.msg' );
@@ -593,10 +594,10 @@ test_assert( !defined( $magnet ) );
 
 `touch messages/two.cls`;
 my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'two.msg' );
-test_assert( !defined( $reclassified ) );
+test_assert_equal( $reclassified, 0 );
 test_assert_equal( $bucket, 'unknown class' );
 test_assert( !defined( $usedtobe ) );
-test_assert( !defined( $magnet ) );
+test_assert_equal( $magnet, '' );
 
 # echo_to_dot_
 
@@ -714,7 +715,6 @@ close TEMP;
 
 # test quarantining of a message
 
-$b->global_config_( 'msgdir', 'messages/' );
 $b->set_bucket_parameter( 'spam', 'quarantine', 1 );
 
 open CLIENT, ">temp.tmp";

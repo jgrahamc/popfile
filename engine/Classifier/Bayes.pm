@@ -1285,8 +1285,9 @@ sub history_write_class
     my ( $self, $filename, $reclassified, $bucket, $usedtobe, $magnet ) = @_;
 
     $filename =~ s/msg$/cls/;
+    $filename =  $self->get_user_path_( $self->global_config_( 'msgdir' ) . $filename );
 
-    open CLASS, '>' . $self->get_user_path_( $self->global_config_( 'msgdir' ) . $filename );
+    open CLASS, ">$filename";
 
     if ( defined( $magnet ) && ( $magnet ne '' ) ) {
         print CLASS "$bucket MAGNET $magnet\n";
