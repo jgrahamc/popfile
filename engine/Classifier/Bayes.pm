@@ -215,6 +215,7 @@ sub initialize
 
     $self->mq_register_( 'COMIT', $self );
     $self->mq_register_( 'RELSE', $self );
+    $self->mq_register_( 'TICKD', $self );
 
     $self->{parser__}->{mangle__} = $self->mangle_();
 
@@ -240,6 +241,10 @@ sub deliver
 
     if ( $type eq 'RELSE' ) {
         $self->release_session_key_private__( $message[0] );
+    }
+
+    if ( $type eq 'TICKD' ) {
+        $self->cleanup_orphan_words__();
     }
 }
 
@@ -394,6 +399,18 @@ sub reclassified
         $self->set_bucket_parameter(
             $session, $bucket, 'fpcount', $newfpcount );
     }
+}
+
+#----------------------------------------------------------------------------
+# cleanup_orphan_words__
+# Removes Words from (words) no longer associated with a bucket
+# Called when the TICKD message is received each hour.
+#----------------------------------------------------------------------------
+sub cleanup_orphan_words__
+{
+    my ( $self ) = @_;
+    $self->{db__}->do( "delete from words where words.id in
+                        (select id from words except select wordid from matrix);" );
 }
 
 #----------------------------------------------------------------------------
@@ -1441,7 +1458,7 @@ sub generate_unique_session_key__
 # $session        A session key previously returned by get_session_key
 #
 # Releases and invalidates the session key. Worker function that does the work
-# of release_session_key. 
+# of release_session_key.
 #                   ****DO NOT CALL DIRECTLY****
 # unless you want your session key released immediately, possibly preventing
 # asynchronous tasks from completing
