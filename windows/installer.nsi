@@ -2134,6 +2134,23 @@ close_file:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "Flags" "DISABLED"
 
+  ; If we are upgrading POPFile, the corpus might have to be converted from flat file format
+
+  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
+  StrCmp ${L_TEMP} "new" 0 display_the_page
+
+  ; Corpus conversion will occur when POPFile is started - this may take several minutes,
+  ; so we ensure that POPFile will not be run in the background when it is run for the
+  ; first time (by using the Start Menu or by running 'popfile.exe').
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "1"
+  Push "1"
+  Call SetConsoleMode
+  
+  ; Remove the 'Click Next to convert the corpus' text (because we need to reboot first)
+  
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioD.ini" "Settings" "NumFields" "7"
+
   Goto display_the_page
 
 page_enabled:
@@ -2418,7 +2435,11 @@ Function CheckRunStatus
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Settings" "NumFields" "0"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioD.ini" "Settings" "NumFields" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Settings" "BackEnabled" "0"
+  
+  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "old"
+  
   Goto selection_ok
 
 no_reboot_reqd:
@@ -2442,6 +2463,14 @@ no_reboot_reqd:
   WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "old"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Settings" "BackEnabled" "0"
 
+  ; When 'popfile.exe' is used to run POPFile, the 'windows_console' parameter in 'popfile.cfg'
+  ; is used to choose between running in a console window or running in the background. However
+  ; for corpus conversion we want to run in a console window (to display the progress reports,
+  ; in case the conversion takes several minutes), so we "cheat" by using 'popfilef.exe' to run
+  ; POPFile in a console window with the system tray icon disabled. This avoids the need to make
+  ; any changes to 'popfile.cfg' so the next time 'popfile.exe' is used to start POPFile, the
+  ; the settings in 'popfile.cfg' will be used.
+  
   SetOutPath $INSTDIR
   ClearErrors
   Exec '"$INSTDIR\popfilef.exe"'
