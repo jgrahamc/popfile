@@ -1871,7 +1871,7 @@ sub history_page
 
             if ( ( defined($form{file}) ) && ( $form{file} eq $mail_file ) )
             {
-                $body .= "<tr><td><td>Changed to <font color=$classifier->{colors}{$form{shouldbe}}>$form{shouldbe}</font><td><td>";
+                $body .= "<tr bgcolor=$highlight_color><td><td>Changed to <font color=$classifier->{colors}{$form{shouldbe}}>$form{shouldbe}</font><td><td>";
             }
         }
 
