@@ -647,7 +647,7 @@ sub html_common_bottom
 
     $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/docman/display_doc.php?docid=14421&amp;group_id=63137\">FAQ</a><br>\n";
 
-    $result .= "</td><td class=\"footerBody\">\n<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/\"><img src=\"otto.gif\" border=\"0\"></a><br>$self->{version_}<br>($time)</td>\n";
+    $result .= "</td><td class=\"footerBody\">\n<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/\"><img src=\"otto.gif\" border=\"0\" alt=\"\"></a><br>$self->{version_}<br>($time)</td>\n";
 
     $result .= "<td class=\"footerBody\"><a class=\"bottomLink\" href=\"http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959\">$self->{language__}{Footer_RequestFeature}</a><br>\n";
     $result .= "<a class=\"bottomLink\" href=\"http://lists.sourceforge.net/lists/listinfo/popfile-announce\">$self->{language__}{Footer_MailingList}</a><br>\n";
