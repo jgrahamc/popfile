@@ -581,8 +581,6 @@ sub path_join__
     $left  =~ s/\/$//;
     $right =~ s/^\///;
 
-    print "$left/$right\n";
-
     return "$left/$right";
 }
 
