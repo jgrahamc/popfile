@@ -318,6 +318,13 @@ sub update_tag
         return;
     }
 
+	# If we hit a table tag then any font information is lost
+	
+	if ( $tag =~ /^(table|td|tr|th)$/i ) {
+		$self->{htmlfontcolor} = map_color( $self, 'black' );
+		$self->{htmlbackcolor} = map_color( $self, 'white' );
+	}
+
 	# Count the number of TD elements
 	increment_word( $self, 'html:td' ) if ( $tag =~ /^td$/i );
  
