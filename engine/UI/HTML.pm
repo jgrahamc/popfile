@@ -2081,7 +2081,7 @@ sub sort_filter_history
 		foreach my $file (sort compare_mf keys %{$self->{history_}}) {
 			if ( ( $filter eq '' ) || 
 				 ( $self->{history_}{$file}{bucket} eq $filter ) || 
-				 ( ( $filter eq '__filter__magnet' ) && ( $self->{history_}{$file}{bucket} ne '' ) ) ) {
+				 ( ( $filter eq '__filter__magnet' ) && ( $self->{history_}{$file}{magnet} ne '' ) ) ) {
 				if ( ( $search eq '' ) || 
 				   ( $self->{history_}{$file}{from}    =~ /\Q$search\E/i ) ||
 				   ( $self->{history_}{$file}{subject} =~ /\Q$search\E/i ) ) {
