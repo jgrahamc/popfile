@@ -133,6 +133,7 @@ sub stop
 
     for my $kid (keys %{$self->{children__}}) {
         close $self->{children__}{$kid};
+        delete $self->{children__}{$kid};
     }
 }
 
@@ -305,6 +306,7 @@ sub forked
 
     for my $kid (keys %{$self->{children__}}) {
         close $self->{children__}{$kid};
+        delete $self->{children__}{$kid};
     }
 }
 

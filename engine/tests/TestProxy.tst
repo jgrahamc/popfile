@@ -104,7 +104,7 @@ $sp->pipeready( \&pipeready );
 $sp->initialize();
 $sp->config_( 'port', $port );
 test_assert_equal( $sp->start(), 1 );
-test_assert( $sp->start_server() );
+test_assert_equal( $sp->start_server(), 1 );
 
 # Now connect a socket to the proxy through which
 # we can test it
@@ -246,6 +246,8 @@ test_assert_regexp( $line, 'after' );
 
 # Close down the child process
 
+$sp->send( '__POPFILE__ABORT__CHILD__' );
+$sp->service_server();
 close $client;
 $sp->stop_server();
 select( undef, undef, undef, 0.25 );
@@ -253,9 +255,101 @@ select( undef, undef, undef, 0.25 );
 # Reap the children
 
 my @kids = keys %{$sp->{children__}};
-if ( $#kids >= 0 ) {
+while ( $#kids >= 0 ) {
     $sp->reaper();
+    select( undef, undef, undef, 0.25 );
     @kids = keys %{$sp->{children__}};
 }
 
-select( undef, undef, undef, 0.25 );
+$sp->stop();
+
+# Make sure that stop will close off the child pipes
+
+$sp = new Test::SimpleProxy;
+
+$sp->configuration( $c );
+$sp->mq( $mq );
+$sp->logger( $l );
+
+$sp->forker( \&forker );
+$sp->pipeready( \&pipeready );
+
+$sp->initialize();
+$sp->config_( 'port', $port );
+
+test_assert_equal( $sp->start(), 1 );
+test_assert_equal( $sp->start_server(), 1 );
+$client = IO::Socket::INET->new(
+                Proto    => "tcp",
+                PeerAddr => 'localhost',
+                PeerPort => $port );
+$sp->service();
+test_assert( defined( $client ) );
+test_assert( $client->connected );
+$sp->service();
+select( undef, undef, undef, 0.1 );
+$sp->service_server();
+select( undef, undef, undef, 0.1 );
+@kids = keys %{$sp->{children__}};
+my %tmp = %{$sp->{children__}};
+test_assert_equal( $#kids, 0 ); 
+$sp->stop_server();
+$sp->stop();
+@kids = keys %{$sp->{children__}};
+test_assert_equal( $#kids, -1 );
+print $client "__POPFILE__ABORT__CHILD__\n";
+close $client;
+
+%{$sp->{children__}} = %tmp;
+@kids = keys %{$sp->{children__}};
+while ( $#kids >= 0 ) {
+    $sp->reaper();
+    select( undef, undef, undef, 0.25 );
+    @kids = keys %{$sp->{children__}};
+}
+
+# Make sure that forked will close off the child pipes
+
+$sp = new Test::SimpleProxy;
+
+$sp->configuration( $c );
+$sp->mq( $mq );
+$sp->logger( $l );
+
+$sp->forker( \&forker );
+$sp->pipeready( \&pipeready );
+
+$sp->initialize();
+$sp->config_( 'port', $port );
+
+test_assert_equal( $sp->start(), 1 );
+test_assert_equal( $sp->start_server(), 1 );
+$client = IO::Socket::INET->new(
+                Proto    => "tcp",
+                PeerAddr => 'localhost',
+                PeerPort => $port );
+$sp->service();
+test_assert( defined( $client ) );
+test_assert( $client->connected );
+$sp->service();
+select( undef, undef, undef, 0.1 );
+$sp->service_server();
+select( undef, undef, undef, 0.1 );
+@kids = keys %{$sp->{children__}};
+test_assert_equal( $#kids, 0 ); 
+%tmp = %{$sp->{children__}};
+$sp->forked();
+@kids = keys %{$sp->{children__}};
+test_assert_equal( $#kids, -1 );
+$sp->stop_server();
+$sp->stop();
+print $client "__POPFILE__ABORT__CHILD__\n";
+close $client;
+
+%{$sp->{children__}} = %tmp;
+@kids = keys %{$sp->{children__}};
+while ( $#kids >= 0 ) {
+    $sp->reaper();
+    select( undef, undef, undef, 0.25 );
+    @kids = keys %{$sp->{children__}};
+}

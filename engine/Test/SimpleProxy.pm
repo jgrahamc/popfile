@@ -56,7 +56,12 @@ sub stop_server
 {
     my ( $self ) = @_;
 
-    close $self->{remote_server__} if ( defined( $self->{remote_server__} ) );
+    if ( defined( $self->{remote_server__} ) ) {
+        close $self->{remote_server__};
+        close $self->{remote_client__};
+        undef $self->{remote_server__};
+        undef $self->{remote_selector__};
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -110,7 +115,9 @@ sub service_server
 
         if ( defined( $self->{remote_client_selector__}->can_read(0) ) ) {
             my $line = <$handle>;
-            $self->{received__} .= $line;
+            if ( defined( $line ) ) {
+                $self->{received__} .= $line;
+	    }
 	}
     } else {
         $self->log_( "service_server: remote client is not connected" );
@@ -153,10 +160,11 @@ sub child__
     my $remote_selector = new IO::Select( $remote );
     my $client_selector = new IO::Select( $client );
 
-    while ( $client->connected ) {
+    while ( defined($client) && $client->connected ) {
         if ( defined( $remote_selector->can_read(0) ) ) {
             my $line = <$remote>;
             if ( defined( $line ) ) {
+	        last if ( $line =~ /__POPFILE__ABORT__CHILD__/ );
                 print $client $line;
 	    } else {
                 last;
@@ -164,12 +172,15 @@ sub child__
         }
         if ( defined( $client_selector->can_read(0) ) ) {
             my $line = <$client>;
+            last if ( $line =~ /__POPFILE__ABORT__CHILD__/ );
             print $remote $line;
         }
     }
 
     close $remote;
     close $pipe;
+
+    $self->log_( "Child stopped" );
 }
 
 # Getter/setter
