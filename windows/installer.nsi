@@ -31,6 +31,9 @@ Section "POPFile"
   SetOutPath $INSTDIR\Classifier
   File "..\engine\Classifier\*.pm"
 
+  SetOutPath $INSTDIR\skins
+  File "..\engine\skins\*.css"
+
   SetOutPath $INSTDIR\Exporter
   File "C:\Perl\lib\Exporter\*"
 
@@ -107,6 +110,8 @@ skip_confirmation:
   RMDir $INSTDIR\Classifier
   Delete $INSTDIR\Exporter\*.*
   RMDir $INSTDIR\Exporter
+  Delete $INSTDIR\skins\*.css
+  RMDir $INSTDIR\skins
 
   Delete $INSTDIR\IO\*.*
   Delete $INSTDIR\IO\Socket\*.*
