@@ -14,7 +14,7 @@
         </th>
 
         <TMPL_IF NAME="View_Score_If_Score">
-        
+
         <th scope="col">
             <TMPL_VAR NAME="Localize_Count">&nbsp;&nbsp;
         </th>
@@ -25,9 +25,9 @@
             <TMPL_VAR NAME="Localize_Probability">
         </th>
     </tr>
-    
+
         <TMPL_ELSE>
-    
+
         <th scope="col">
             <TMPL_VAR NAME="Localize_Count">&nbsp;&nbsp;
         </th>
@@ -35,11 +35,11 @@
             <TMPL_VAR NAME="Localize_Probability">
         </th>
     </tr>
-    
+
         </TMPL_IF>
-    
+
     <TMPL_LOOP NAME="View_Score_Loop_Scores">
-    
+
     <tr>
         <td>
             <span style="color:<TMPL_VAR NAME="View_Score_Bucket_Color">">
@@ -54,9 +54,9 @@
         <td align="right">
             <TMPL_VAR NAME="View_Score_MatchCount">&nbsp;&nbsp;&nbsp;&nbsp;
         </td>
-        
+
         <TMPL_IF NAME="View_Score_If_Score">
-        
+
         <td align=right>
             <TMPL_VAR NAME="View_Score_RawStr">&nbsp;&nbsp;&nbsp;
         </td>
@@ -64,16 +64,16 @@
             <TMPL_VAR NAME="View_Score_ProbStr">
         </td>
     </tr>
-    
+
         <TMPL_ELSE>
-    
+
         <td>
             <TMPL_VAR NAME="View_Score_ProbStr">
         </td>
     </tr>
-    
+
         </TMPL_IF>
-        
+
     </TMPL_LOOP>
 
 </table>
@@ -83,34 +83,34 @@
         <td class="top20" align="left">
             <b>
                 <TMPL_IF NAME="View_If_Format">
-                
+
                 <TMPL_VAR NAME="Localize_View_WordMatrix"> (<TMPL_VAR NAME="View_View">)
-                
+
                 </TMPL_IF>
-            
+
             </b>
         </td>
         <td class="historyNavigatorTop">
-            
+
             <TMPL_IF NAME="View_If_Format_Freq">
 
             <a href="/view?session=<TMPL_VAR NAME="Session_Key">&amp;view=<TMPL_VAR NAME="View_This">&amp;start_message=<TMPL_VAR NAME="View_This_Page">&amp;format=freq#scores">
                 <TMPL_VAR NAME="Localize_View_ShowFrequencies"></a>
-            
+
             </TMPL_IF>
-            
+
             <TMPL_IF NAME="View_If_Format_Prob">
-            
+
             <a href="/view?session=<TMPL_VAR NAME="Session_Key">&amp;view=<TMPL_VAR NAME="View_This">&amp;start_message=<TMPL_VAR NAME="View_This_Page">&amp;format=prob#scores">
                 <TMPL_VAR NAME="Localize_View_ShowProbabilities"></a>
-            
+
             </TMPL_IF>
-            
+
             <TMPL_IF NAME="View_If_Format_Score">
 
             <a href="/view?session=<TMPL_VAR NAME="Session_Key">&amp;view=<TMPL_VAR NAME="View_This">&amp;start_message=<TMPL_VAR NAME="View_This_Page">&amp;format=score#scores">
                 <TMPL_VAR NAME="Localize_View_ShowScores"></a>
-            
+
             </TMPL_IF>
         </td>
     </tr>
@@ -132,9 +132,9 @@
         <th>
             &nbsp;
         </th>
-        
+
         <TMPL_LOOP NAME="View_Score_Loop_Bucket_Header">
-        
+
         <th>
             <span style="color:<TMPL_VAR NAME="View_Score_Bucket_Color">">
                 <TMPL_VAR NAME="View_Score_Bucket">
@@ -143,9 +143,9 @@
         <th>
             &nbsp;
         </th>
-        
+
         </TMPL_LOOP>
-        
+
     </tr>
 
     <TMPL_LOOP NAME="View_Score_Loop_Words">
@@ -167,9 +167,9 @@
         </td>
 
         <TMPL_LOOP NAME="View_Score_Loop_Per_Bucket">
-        
+
         <TMPL_IF NAME="View_Score_If_Probability">
-        
+
         <td>
             <span style="color:<TMPL_VAR NAME="View_Score_Word_Color">">
                 <TMPL_VAR NAME="View_Score_Probability">
@@ -183,20 +183,20 @@
         </td>
 
         </TMPL_IF>
-        
+
         <td>
             &nbsp;
         </td>
-    
+
         </TMPL_LOOP>
     </tr>
-    
+
     </TMPL_LOOP>
 
     </table>
-    
+
     <TMPL_IF NAME="If_chart">
-    
+
     <hr />
 
     <b>
@@ -208,7 +208,7 @@
     <TMPL_LOOP NAME="View_Loop_Chart1">
         <td valign="bottom">
         <TMPL_IF NAME="View_If_Bar">
-            <img src="autogen_<TMPL_VAR NAME="View_Color">.bmp" width="<TMPL_VAR NAME="View_Width">" height="<TMPL_VAR NAME="View_Height">" alt="<TMPL_VAR NAME="View_Chart_Word">" title="<TMPL_VAR NAME="View_Chart_Word">">
+            <img src="autogen_<TMPL_VAR NAME="View_Color" ESCAPE=URL>.bmp" width="<TMPL_VAR NAME="View_Width">" height="<TMPL_VAR NAME="View_Height">" alt="<TMPL_VAR NAME="View_Chart_Word">" title="<TMPL_VAR NAME="View_Chart_Word">">
         </TMPL_IF>
         </td>
     </TMPL_LOOP>
@@ -217,13 +217,13 @@
     <TMPL_LOOP NAME="View_Loop_Chart2">
         <td valign="top">
         <TMPL_IF NAME="View_If_Bar">
-            <img src="autogen_<TMPL_VAR NAME="View_Color">.bmp" width="<TMPL_VAR NAME="View_Width">" height="<TMPL_VAR NAME="View_Height">" alt="<TMPL_VAR NAME="View_Chart_Word">" title="<TMPL_VAR NAME="View_Chart_Word">"><br />
+            <img src="autogen_<TMPL_VAR NAME="View_Color" ESCAPE=URL>.bmp" width="<TMPL_VAR NAME="View_Width">" height="<TMPL_VAR NAME="View_Height">" alt="<TMPL_VAR NAME="View_Chart_Word">" title="<TMPL_VAR NAME="View_Chart_Word">"><br />
         </TMPL_IF>
         </td>
     </TMPL_LOOP>
     </tr>
     </table>
-    
+
     </TMPL_IF>
 
 </TMPL_IF>
