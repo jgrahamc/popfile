@@ -38,6 +38,7 @@ use Classifier::MailParse;
 use IO::Handle;
 use DBI;
 use Digest::MD5 qw( md5_hex );
+use MIME::Base64;
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -2310,6 +2311,7 @@ sub classify_and_modify
                                   # come after Subject here
     my $msg_head_q      = '';     # Store questionable header lines here
     my $msg_body        = '';     # Store the message body here
+    my $in_subject_header = 0;    # 1 if in Subject header
 
     # These two variables are used to control the insertion of the
     # X-POPFile-TimeoutPrevention header when downloading long or slow
@@ -2394,7 +2396,10 @@ sub classify_and_modify
                     if ( $line =~ /^Subject:(.*)/i )  {
                         $msg_subject = $1;
                         $msg_subject =~ s/(\012|\015)//g;
+                        $in_subject_header = 1;
                         next;
+                    } elsif ( $line !~ /^[ \t]/ ) {
+                        $in_subject_header = 0;
                     }
 
                     # Strip out the X-Text-Classification header that
@@ -2412,6 +2417,12 @@ sub classify_and_modify
                     # headers terminate from causing the XPL and XTC
                     # headers to be inserted in places some clients
                     # can't detect
+
+                    if ( ( $line =~ /^[ \t]/ ) && $in_subject_header ) {
+                        $line =~ s/(\012|\015)//g;
+                        $msg_subject .= $crlf . $line;
+                        next;
+                    }
 
                     if ( $line =~ /^([ \t]|([A-Z0-9\-_]+:))/i ) {
                         if ( !defined($msg_subject) )  {
@@ -2521,8 +2532,23 @@ sub classify_and_modify
         # POPFile and wrapping the original message in a MIME encoding
 
        if ( $quarantine == 1 ) {
-           print $client "From: " . $self->{parser__}->get_header( 'from' ) . "$crlf";
-           print $client "To: " . $self->{parser__}->get_header( 'to' ) . "$crlf";
+           my ( $orig_from, $orig_to, $orig_subject ) = ( $self->{parser__}->get_header('from'), $self->{parser__}->get_header('to'), $self->{parser__}->get_header('subject') );
+           my ( $encoded_from, $encoded_to ) = ( $orig_from, $orig_to );
+           if ( $self->{parser__}->{lang__} eq 'Nihongo' ) {
+               require Encode;
+
+               Encode::from_to( $orig_from, 'euc-jp', 'iso-2022-jp');
+               Encode::from_to( $orig_to, 'euc-jp', 'iso-2022-jp');
+               Encode::from_to( $orig_subject, 'euc-jp', 'iso-2022-jp');
+
+               $encoded_from = $orig_from;
+               $encoded_to = $orig_to;
+               $encoded_from =~ s/(\x1B\x24\x42.+\x1B\x28\x42)/"=?ISO-2022-JP?B?" . encode_base64($1,'') . "?="/eg;
+               $encoded_to =~ s/(\x1B\x24\x42.+\x1B\x28\x42)/"=?ISO-2022-JP?B?" . encode_base64($1,'') . "?="/eg;
+           }
+
+           print $client "From: $encoded_from$crlf";
+           print $client "To: $encoded_to$crlf";
            print $client "Date: " . $self->{parser__}->get_header( 'date' ) . "$crlf";
            # Don't add the classification unless it is not present
            if ( ( defined( $msg_subject ) && ( $msg_subject !~ /\[\Q$classification\E\]/ ) ) && # PROFILE BLOCK START
@@ -2534,17 +2560,29 @@ sub classify_and_modify
            print $client 'X-POPFile-Link: ' . $xpl if ( $xpl_insertion );
            print $client "MIME-Version: 1.0$crlf";
            print $client "Content-Type: multipart/report; boundary=\"$slot\"$crlf$crlf--$slot$crlf";
-           print $client "Content-Type: text/plain$crlf$crlf";
+           print $client "Content-Type: text/plain";
+           print $client "; charset=iso-2022-jp" if ( $self->{parser__}->{lang__} eq 'Nihongo' );
+           print $client "$crlf$crlf";
            print $client "POPFile has quarantined a message.  It is attached to this email.$crlf$crlf";
            print $client "Quarantined Message Detail$crlf$crlf";
-           print $client "Original From: " . $self->{parser__}->get_header('from') . "$crlf";
-           print $client "Original To: " . $self->{parser__}->get_header('to') . "$crlf";
-           print $client "Original Subject: " . $self->{parser__}->get_header('subject') . "$crlf";
+
+           print $client "Original From: $orig_from$crlf";
+           print $client "Original To: $orig_to$crlf";
+           print $client "Original Subject: $orig_subject$crlf";
+
            print $client "To examine the email open the attachment. ";
            print $client "To change this mail's classification go to $xpl";
            print $client "$crlf";
            print $client "The first 20 words found in the email are:$crlf$crlf";
-           print $client $self->{parser__}->first20();
+
+           my $first20 = $self->{parser__}->first20();
+           if ( $self->{parser__}->{lang__} eq 'Nihongo' ) {
+               require Encode;
+
+               Encode::from_to( $first20, 'euc-jp', 'iso-2022-jp');
+           }
+
+           print $client $first20;
            print $client "$crlf--$slot$crlf";
            print $client "Content-Type: message/rfc822$crlf$crlf";
         }
