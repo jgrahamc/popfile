@@ -128,7 +128,7 @@ manual_connect:
   MessageBox MB_OKCANCEL|MB_ICONINFORMATION "$(PFI_LANG_MB_INTERNETCONNECT)" IDOK download
   DetailPrint "InternetCheckConnection: cancelled by user"
   !ifdef INSTALLER
-      Goto exit
+      Goto installer_error_exit
   !else
       Goto error_exit
   !endif
@@ -213,9 +213,21 @@ error_exit:
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_MB_UNPACKFAIL)"
 
   !ifdef INSTALLER
+    installer_error_exit:
+      Push $R1    ; No need to preserve $R0 here as it is known as ${L_RESULT} in this 'Section'
+
+      ; The first system call gets the full pathname (returned in $R0) and the second call
+      ; extracts the filename (and possibly the extension) part (returned in $R1)
+
+      System::Call 'kernel32::GetModuleFileNameA(i 0, t .R0, i 1024)'
+      System::Call 'comdlg32::GetFileTitleA(t R0, t .R1, i 1024)'
+      StrCpy $G_PLS_FIELD_1 $R1
+      MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_MB_REPEATSSL)"
+
+      Pop $R1
       Goto exit
   !else
-      Call GetDateTimeStamp
+      Call PFI_GetDateTimeStamp
       Pop $G_PLS_FIELD_1
       DetailPrint "----------------------------------------------------"
       DetailPrint "POPFile SSL Setup failed ($G_PLS_FIELD_1)"
@@ -267,8 +279,8 @@ Function GetSSLFile
 
   StrCpy $G_PLS_FIELD_1 $G_SSL_FILEURL
   Push $G_PLS_FIELD_1
-  Call StrBackSlash
-  Call GetParent
+  Call PFI_StrBackSlash
+  Call PFI_GetParent
   Pop $G_PLS_FIELD_2
   StrLen $G_PLS_FIELD_2 $G_PLS_FIELD_2
   IntOp $G_PLS_FIELD_2 $G_PLS_FIELD_2 + 1
@@ -287,7 +299,7 @@ Function GetSSLFile
   SetDetailsPrint listonly
   DetailPrint ""
   !ifdef ADDSSL
-      Call GetDateTimeStamp
+      Call PFI_GetDateTimeStamp
       Pop $G_PLS_FIELD_1
       DetailPrint "----------------------------------------------------"
       DetailPrint "POPFile SSL Setup failed ($G_PLS_FIELD_1)"
