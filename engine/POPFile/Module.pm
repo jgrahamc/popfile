@@ -508,7 +508,7 @@ sub slurp_
     # stream/file so return undef
 
     if ( $line eq '' ) {
-        undef $self->{slurp_buffer__}{"$handle"};
+        delete( $self->{slurp_buffer__}{"$handle"} );
         return undef;
     } else {
         return $line;
@@ -518,6 +518,8 @@ sub slurp_
 sub done_slurp_
 {
     my ( $self, $handle ) = @_;
+
+    $self->log_( "Done slurping from $handle" );
 
     undef $self->{slurp_buffer__}{"$handle"};
 }
