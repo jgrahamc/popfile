@@ -140,12 +140,12 @@
 
                     <TMPL_IF NAME="History_If_MoveLeft">
                     <a href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveleft=<TMPL_VAR NAME="History_Header">">
-                    <img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/left.gif" border="0">
+                    <img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/leftarrow.gif" border="0">
                     </a>
                     </TMPL_IF>
                     <TMPL_IF NAME="History_If_MoveRight">
                     <a href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveright=<TMPL_VAR NAME="History_Header">">
-                    <img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/right.gif" border="0">
+                    <img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/rightarrow.gif" border="0">
                     </a>
                     </TMPL_IF>
                     </td>
