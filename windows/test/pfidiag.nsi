@@ -60,7 +60,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.48"
+  !define C_VERSION   "0.0.49"
 
   !define C_OUTFILE   "pfidiag.exe"
 
@@ -165,7 +165,9 @@
   !macroend
 
   ;---------------------------------------------------------------------------
-  ; Differentiate between non-existent and empty environment variable strings
+  ; Differentiate between non-existent and empty POPFile environment variables
+  ; (on Win9x systems it is quite normal for these variables to be undefined, as
+  ; the 'runpopfile.exe' program creates them 'on the fly' when it runs POPFile)
   ;---------------------------------------------------------------------------
 
   !macro CHECK_ENVIRONMENT REGISTER ENV_VARIABLE MESSAGE
@@ -176,6 +178,38 @@
       ReadEnvStr "${REGISTER}" "${ENV_VARIABLE}"
       StrCmp "${REGISTER}" "" 0 show_value_${PFI_UNIQUE_ID}
       IfErrors 0 show_value_${PFI_UNIQUE_ID}
+      StrCmp ${L_WIN_OS_TYPE} "1" notWin9x_${PFI_UNIQUE_ID}
+      DetailPrint "${MESSAGE}= ><   (this is OK)"
+      Goto continue_${PFI_UNIQUE_ID}
+
+    notWin9x_${PFI_UNIQUE_ID}:
+      DetailPrint "${MESSAGE}= ><"
+      Goto continue_${PFI_UNIQUE_ID}
+
+    show_value_${PFI_UNIQUE_ID}:
+      DetailPrint "${MESSAGE}= < ${REGISTER} >"
+
+    continue_${PFI_UNIQUE_ID}:
+  !macroend
+
+  ;---------------------------------------------------------------------------
+  ; Differentiate between non-existent and empty Kakasi environment variables
+  ; (these variables are only defined if the Kakasi software has been installed)
+  ;---------------------------------------------------------------------------
+
+  !macro CHECK_KAKASI REGISTER ENV_VARIABLE MESSAGE
+
+      !insertmacro PFI_UNIQUE_ID
+
+      ClearErrors
+      ReadEnvStr "${REGISTER}" "${ENV_VARIABLE}"
+      StrCmp "${REGISTER}" "" 0 show_value_${PFI_UNIQUE_ID}
+      IfErrors 0 show_value_${PFI_UNIQUE_ID}
+      IfFileExists "${L_EXPECTED_ROOT}\kakasi\*.*" Kakasi_${PFI_UNIQUE_ID}
+      DetailPrint "${MESSAGE}= ><   (this is OK)"
+      Goto continue_${PFI_UNIQUE_ID}
+
+    Kakasi_${PFI_UNIQUE_ID}:
       DetailPrint "${MESSAGE}= ><"
       Goto continue_${PFI_UNIQUE_ID}
 
@@ -361,6 +395,8 @@ start_report:
   DetailPrint "------------------------------------------------------------"
   DetailPrint "POPFile $(^Name) v${C_VERSION} (${L_DIAG_MODE} mode)"
   DetailPrint "------------------------------------------------------------"
+  DetailPrint "String data report format (not used for numeric data)"
+  DetailPrint ""
   DetailPrint "string not found              :  ><"
   DetailPrint "empty string found            :  <  >"
   DetailPrint "string with 'xyz' value found :  < xyz >"
@@ -824,8 +860,8 @@ blank_line:
   DetailPrint ""
 
 check_kakasi:
-  !insertmacro CHECK_ENVIRONMENT "${L_ITAIJIDICTPATH}" "ITAIJIDICTPATH" "'ITAIJIDICTPATH'  "
-  !insertmacro CHECK_ENVIRONMENT "${L_KANWADICTPATH}"  "KANWADICTPATH"  "'KANWADICTPATH'   "
+  !insertmacro CHECK_KAKASI "${L_ITAIJIDICTPATH}" "ITAIJIDICTPATH" "'ITAIJIDICTPATH'  "
+  !insertmacro CHECK_KAKASI "${L_KANWADICTPATH}"  "KANWADICTPATH"  "'KANWADICTPATH'   "
   DetailPrint ""
   StrCmp ${L_DIAG_MODE} "simple" exit
   StrCmp ${L_ITAIJIDICTPATH} "" check_other_kakaksi
