@@ -156,7 +156,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.8"
+  !define C_PFI_VERSION  "0.2.9"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -766,6 +766,10 @@ Section "POPFile" SecPOPFile
   !define L_RESERVED      $0    ; used in system.dll calls
   Push ${L_RESERVED}
 
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
   ; If we are installing over a previous version, ensure that version is not running
 
   Call MakeUserDirSafe
@@ -1327,9 +1331,9 @@ Section "-Languages" SecLangs
   ; installer, so if we are upgrading a system which was using one of these UI languages,
   ; we re-select it, provided the UI language file still exists.
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_LANG} "ioC.ini" "Inherited" "html_language"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_LANG} "pfi-cfg.ini" "Inherited" "html_language"
   StrCmp ${L_LANG} "?" 0 use_inherited_lang
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_LANG} "ioC.ini" "Inherited" "language"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_LANG} "pfi-cfg.ini" "Inherited" "language"
   StrCmp ${L_LANG} "?" use_installer_lang
 
 use_inherited_lang:
@@ -1494,9 +1498,10 @@ FunctionEnd
 # (the "pre" function for the User Data DIRECTORY selection page)
 #
 # This build of the installer is unable to relocate an existing set of user data, so if we
-# find one during the PROGRAM installation (performed by the main 'setup.exe' installer), we use
-# the same data location (by bypassing the DIRECTORY page which normally lets the user select
-# where the 'User Data' is to be stored)
+# find one during the PROGRAM installation (performed by the main 'setup.exe' installer), we
+# suggest using the same data location (by bypassing the DIRECTORY page which normally lets the
+# user select where the 'User Data' is to be stored). If the user does not want to upgrade the
+# existing configuration, we display the DIRECTORY page to let them choose a different location.
 #
 # If the wizard is called directly (i.e. without either of the command-line switches used by
 # the main 'setup.exe' installer) then the DIRECTORY page is not bypassed, to allow the user
@@ -1506,10 +1511,15 @@ FunctionEnd
 Function CheckUserDirStatus
 
   IfFileExists "$G_USERDIR\popfile.cfg" 0 exit
-  StrCmp $G_PFISETUP "/install" skip_userdata_select
+  StrCmp $G_PFISETUP "/install" upgrade_install
   StrCmp $G_PFISETUP "/installreboot" 0 exit
 
-skip_userdata_select:
+upgrade_install:
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_3)\
+      $\r$\n$\r$\n\
+      $G_USERDIR\
+      $\r$\n$\r$\n$\r$\n\
+      $(PFI_LANG_DIRSELECT_MBWARN_2)" IDNO exit
   Call CheckExistingConfigData
   Abort
 
@@ -1591,13 +1601,13 @@ FunctionEnd
 # If the user has selected the optional 'Languages' component then this function also strips
 # out the POPFile UI language setting to allow the installer to easily preset the UI language
 # to match the language selected for use by the installer. (See the code which handles the
-# 'Languages' component for further details). A copy of any settings found is kept in 'ioC.ini'
-# for later use in the 'Languages' section.
+# 'Languages' component for further details). A copy of any settings found is kept in the
+# 'pfi-cfg.ini' file for later use in the 'Languages' section.
 #
 # This function also ensures that only one copy of the tray icon & console settings is present,
-# and saves (in 'ioC.ini') any values found for use when the user is offered the chance to start
-# POPFile from the installer. If no setting is found, we save '?' in 'ioC.ini'. These settings
-# are used by the 'StartPOPFilePage' and 'CheckLaunchOptions' functions.
+# and saves (in 'pfi-cfg.ini') any values found for use when the user is offered the chance
+# to start POPFile from the installer. If no setting is found, we save '?' in 'pfi-cfg.ini'.
+# These settings are used by the 'StartPOPFilePage' and 'CheckLaunchOptions' functions.
 #--------------------------------------------------------------------------
 
 Function CheckExistingConfigData
@@ -1707,27 +1717,27 @@ done:
 
   ; Before closing the clean copy of 'popfile.cfg' we add the most recent settings for the
   ; system tray icon and console mode, if valid values were found. If no valid values were
-  ; found, we add nothing to the clean copy. A record of our findings is stored in 'ioC.ini'
-  ; for use by 'StartPOPFilePage' and 'CheckLaunchOptions'.
+  ; found, we add nothing to the clean copy. A record of our findings is stored in the file
+  ; 'pfi-cfg.ini' for later use by 'StartPOPFilePage' and 'CheckLaunchOptions'.
 
   StrCmp ${L_CONSOLE} "0" found_console
   StrCmp ${L_CONSOLE} "1" found_console
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "?"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "Console" "?"
   Goto check_trayicon
 
 found_console:
   FileWrite ${L_CLEANCFG} "windows_console ${L_CONSOLE}$\r$\n"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "${L_CONSOLE}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "Console" "${L_CONSOLE}"
 
 check_trayicon:
   StrCmp ${L_TRAYICON} "0" found_trayicon
   StrCmp ${L_TRAYICON} "1" found_trayicon
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "TrayIcon" "?"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "TrayIcon" "?"
   Goto close_cleancopy
 
 found_trayicon:
   FileWrite ${L_CLEANCFG} "windows_trayicon ${L_TRAYICON}$\r$\n"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "TrayIcon" "${L_TRAYICON}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "TrayIcon" "${L_TRAYICON}"
 
 close_cleancopy:
   FileClose ${L_CLEANCFG}
@@ -1750,8 +1760,8 @@ check_lang_old:
   StrCpy ${L_LANG_OLD} "?"
 
 save_langs:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "html_language" "${L_LANG_NEW}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "language" "${L_LANG_OLD}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "html_language" "${L_LANG_NEW}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "language" "${L_LANG_OLD}"
 
   Push $G_POP3
   Call TrimNewlines
@@ -1767,8 +1777,8 @@ save_langs:
 
   ; Save the UI port settings (from popfile.cfg) for later use by the 'MakeUserDirSafe' function
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "UI Port" "NewStyle" "$G_GUI"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "UI Port" "OldStyle" "${L_OLDUI}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "NewStyleUI" "$G_GUI"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "OldStyleUI" "${L_OLDUI}"
 
   ; The 'port' and 'pop3_port' settings are treated as equals so we use the last entry found.
   ; If 'ui_port' and 'html_port' settings were found, we use the last 'html_port' we found.
@@ -2064,10 +2074,18 @@ Function MakeUserDirSafe
   DetailPrint "$(PFI_LANG_INST_PROG_UPGRADE)"
   SetDetailsPrint listonly
 
+  ; Using 'FindLockedPFE' is a temporary solution (until popfile.pid's location is "inherited")
+  ; (could check popfile.db instead but we currently assume the default location for it too)
+
+  Push $G_ROOTDIR
+  Call FindLockedPFE
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" exit_now
+
   ; If we are upgrading an existing installation then 'CheckExistingDataDir' will have
   ; extracted the GUI port parameters from the existing popfile.cfg file
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_GUI_PORT} "ioA.ini" "UI Port" "NewStyle"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_GUI_PORT} "pfi-cfg.ini" "Inherited" "NewStyleUI"
   StrCmp ${L_GUI_PORT} "" try_old_style
   DetailPrint "$(PFI_LANG_INST_LOG_SHUTDOWN) ${L_GUI_PORT} [new style port]"
   DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
@@ -2078,7 +2096,7 @@ Function MakeUserDirSafe
   StrCmp ${L_RESULT} "password?" manual_shutdown
 
 try_old_style:
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_GUI_PORT} "ioA.ini" "UI Port" "OldStyle"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_GUI_PORT} "pfi-cfg.ini" "Inherited" "OldStyleUI"
   StrCmp ${L_GUI_PORT} "" manual_shutdown
   DetailPrint "$(PFI_LANG_INST_LOG_SHUTDOWN) ${L_GUI_PORT} [old style port]"
   DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
@@ -2096,6 +2114,10 @@ manual_shutdown:
       $(PFI_LANG_MBMANSHUT_3)"
 
 exit_now:
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
   Pop ${L_RESULT}
   Pop ${L_GUI_PORT}
 
@@ -2175,7 +2197,7 @@ read_next_name:
   StrCpy ${L_CLIENT_TYPE} " (*)"
 
   ReadRegStr ${L_TEMP} HKLM "Software\Clients\Mail\${L_CLIENT_NAME}\shell\open\command" ""
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "ClientEXE" "${L_CLIENT_NAME}" "${L_TEMP}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "ClientEXE" "${L_CLIENT_NAME}" "${L_TEMP}"
 
 add_to_list:
   StrCpy ${L_CLIENT_LIST} "${L_CLIENT_LIST}${L_SEPARATOR}${L_CLIENT_NAME}${L_CLIENT_TYPE}"
@@ -2194,7 +2216,7 @@ display_results:
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY_RETURN "ioF.ini"
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "back" 0 exit
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "ClientEXE" "ConfigStatus" "SkipAll"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "ClientEXE" "ConfigStatus" "SkipAll"
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioF.ini" "Settings" "NumFields" "1"
   !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioF.ini" "Settings" "BackEnabled" "0"
@@ -2322,7 +2344,7 @@ Function SetOutlookExpressPage
 
   Call GetDateTimeStamp
   Pop ${L_TEMP}
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "DateTime" "OutlookExpress" "${L_TEMP}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "DateTime" "OutlookExpress" "${L_TEMP}"
   IfFileExists "$G_USERDIR\popfile.reg" 0 check_oe_config_enabled
   Push "popfile.reg"
   Call ConvertOOERegData
@@ -2331,7 +2353,7 @@ check_oe_config_enabled:
 
   ; Check if user decided to skip all email client configuration
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioF.ini" "ClientEXE" "ConfigStatus"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "pfi-cfg.ini" "ClientEXE" "ConfigStatus"
     StrCmp ${L_STATUS} "SkipAll" exit
 
   ; If Outlook Express is running, ask the user to shut it down now
@@ -2368,7 +2390,7 @@ abort_oe_config:
 
 open_logfiles:
   !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioB.ini" "Settings" "BackEnabled" "1"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "OutlookExpress"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "DateTime" "OutlookExpress"
 
   FileOpen  $G_OOECONFIG_HANDLE "$G_USERDIR\expconfig.txt" w
   FileWrite $G_OOECONFIG_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_EXPCFG_LOG_BEFORE) (${L_TEMP})\
@@ -2458,7 +2480,7 @@ next_acct:
 
   ; Have found an email account so we add a new entry to the list (which can hold 6 accounts)
 
-  IntOp $G_OOELIST_INDEX $G_OOELIST_INDEX + 1    ; used to access the [Account] data in ioB.ini
+  IntOp $G_OOELIST_INDEX $G_OOELIST_INDEX + 1    ; to access [Account] data in pfi-cfg.ini
   IntOp $G_OOELIST_CBOX $G_OOELIST_CBOX + 1      ; field number for relevant checkbox
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Settings" "NumFields" "$G_OOELIST_CBOX"
@@ -2524,7 +2546,7 @@ continue:
 
   ReadRegStr ${L_IDENTITY} HKCU "Identities\${L_GUID}\" "Username"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 1" "Text" "'${L_IDENTITY}' $(PFI_LANG_OOECFG_IO_BOXHDR)"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "Username" "${L_IDENTITY}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Identity" "Username" "${L_IDENTITY}"
 
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "Account Name"
 
@@ -2545,12 +2567,12 @@ no_padding:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 11" "State"
   !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 11" "State" "${L_STATUS}${L_TEMP}${L_USERNAME}"
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "AccountName" "${L_OEDATA}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "EmailAddress" "${L_EMAILADDRESS}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "POP3server" "${L_POP3SERVER}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "POP3username" "${L_USERNAME}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "POP3port" "${L_PORT}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "RegistryKey" "${L_ACCOUNT}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "pfi-cfg.ini" "Account $G_OOELIST_INDEX" "AccountName" "${L_OEDATA}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "pfi-cfg.ini" "Account $G_OOELIST_INDEX" "EmailAddress" "${L_EMAILADDRESS}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "pfi-cfg.ini" "Account $G_OOELIST_INDEX" "POP3server" "${L_POP3SERVER}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "pfi-cfg.ini" "Account $G_OOELIST_INDEX" "POP3username" "${L_USERNAME}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "pfi-cfg.ini" "Account $G_OOELIST_INDEX" "POP3port" "${L_PORT}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "pfi-cfg.ini" "Account $G_OOELIST_INDEX" "RegistryKey" "${L_ACCOUNT}"
 
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_IDENTITY}"     20
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_OEDATA}"       20
@@ -2566,8 +2588,6 @@ display_list:
 
   ; Display the OE account data with checkboxes enabled for those accounts we can configure
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "new"
-
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
 
@@ -2583,7 +2603,7 @@ display_list:
   StrCmp ${L_TEMP} "back" abort_oe_config
   StrCmp ${L_TEMP} "cancel" finished_this_guid
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Identity" "PageStatus"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Identity" "PageStatus"
   StrCmp ${L_TEMP} "updated" display_list
   StrCmp ${L_TEMP} "leftover_ticks" display_list
 
@@ -2597,8 +2617,6 @@ finished_this_guid:
   IntCmp $G_OOELIST_INDEX 0 continue_guid continue_guid
 
 display_list_again:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "new"
-
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
 
@@ -2614,7 +2632,7 @@ display_list_again:
   StrCmp ${L_TEMP} "back" abort_oe_config
   StrCmp ${L_TEMP} "cancel" finished_this_guid
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Identity" "PageStatus"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Identity" "PageStatus"
   StrCmp ${L_TEMP} "updated" display_list_again
   StrCmp ${L_TEMP} "leftover_ticks" display_list_again
 
@@ -2775,11 +2793,11 @@ update_list_size:
 
 add_entry:
   StrCmp ${L_REG_FILE} "popfile.reg" outlook_express_stamp
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "Outlook"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "DateTime" "Outlook"
   Goto save_entry
 
 outlook_express_stamp:
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "OutlookExpress"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "DateTime" "OutlookExpress"
 
 save_entry:
   WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "History" "Undo-${L_UNDO}" "Imported on ${L_TEMP}"
@@ -2879,17 +2897,17 @@ next_row:
   IntOp ${L_CBOX_INDEX} ${L_CBOX_INDEX} + 1
   IntCmp ${L_CBOX_INDEX} 17 next_row next_row
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "Username" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Identity" "Username" ""
 
   StrCpy ${L_TEXT_INDEX} 1
 
 next_account:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Account ${L_TEXT_INDEX}" "AccountName" ""
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Account ${L_TEXT_INDEX}" "EMailAddress" ""
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Account ${L_TEXT_INDEX}" "POP3server" ""
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Account ${L_TEXT_INDEX}" "POP3username" ""
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Account ${L_TEXT_INDEX}" "POP3port" ""
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Account ${L_TEXT_INDEX}" "RegistryKey" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Account ${L_TEXT_INDEX}" "AccountName" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Account ${L_TEXT_INDEX}" "EMailAddress" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Account ${L_TEXT_INDEX}" "POP3server" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Account ${L_TEXT_INDEX}" "POP3username" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Account ${L_TEXT_INDEX}" "POP3port" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Account ${L_TEXT_INDEX}" "RegistryKey" ""
   IntOp ${L_TEXT_INDEX} ${L_TEXT_INDEX} + 1
   IntCmp ${L_TEXT_INDEX} 6 next_account next_account
 
@@ -2944,7 +2962,12 @@ Function CheckOutlookExpressRequests
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Settings" "NumFields"
   StrCmp ${L_TEMP} "1" exit
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_IDENTITY} "ioB.ini" "Identity" "Username"
+  ; 'PageStatus' will be set to 'updated' or 'leftover_ticks' when the page needs to be
+  ; redisplayed to confirm which accounts (if any) have been reconfigured
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Identity" "PageStatus" "clean"
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_IDENTITY} "pfi-cfg.ini" "Identity" "Username"
 
   StrCpy ${L_CBOX_INDEX} 12
   StrCpy ${L_DATA_INDEX} 1
@@ -2956,12 +2979,12 @@ next_row:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_CBOX_STATE} "ioB.ini" "Field ${L_CBOX_INDEX}" "State"
   StrCmp ${L_CBOX_STATE} "0" continue
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_ACCOUNTNAME}  "ioB.ini" "Account ${L_DATA_INDEX}" "AccountName"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_EMAILADDRESS} "ioB.ini" "Account ${L_DATA_INDEX}" "EMailAddress"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3SERVER}   "ioB.ini" "Account ${L_DATA_INDEX}" "POP3server"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3USERNAME} "ioB.ini" "Account ${L_DATA_INDEX}" "POP3username"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3PORT}     "ioB.ini" "Account ${L_DATA_INDEX}" "POP3port"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_REGKEY}       "ioB.ini" "Account ${L_DATA_INDEX}" "RegistryKey"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_ACCOUNTNAME}  "pfi-cfg.ini" "Account ${L_DATA_INDEX}" "AccountName"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_EMAILADDRESS} "pfi-cfg.ini" "Account ${L_DATA_INDEX}" "EMailAddress"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3SERVER}   "pfi-cfg.ini" "Account ${L_DATA_INDEX}" "POP3server"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3USERNAME} "pfi-cfg.ini" "Account ${L_DATA_INDEX}" "POP3username"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3PORT}     "pfi-cfg.ini" "Account ${L_DATA_INDEX}" "POP3port"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_REGKEY}       "pfi-cfg.ini" "Account ${L_DATA_INDEX}" "RegistryKey"
 
   MessageBox MB_YESNO \
       "$(PFI_LANG_EXPCFG_MBIDENTITY) ${L_IDENTITY}\
@@ -2982,7 +3005,7 @@ next_row:
       $(PFI_LANG_OOECFG_MBQUESTION)\
       " IDNO ignore_tick
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "updated"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Identity" "PageStatus" "updated"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field ${L_CBOX_INDEX}" "Flags" "DISABLED"
 
   ReadINIStr  ${L_UNDO} "$G_USERDIR\pfi-outexpress.ini" "History" "ListSize"
@@ -2996,7 +3019,7 @@ update_list_size:
   WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "History" "ListSize" "${L_UNDO}"
 
 add_entry:
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "OutlookExpress"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "DateTime" "OutlookExpress"
   WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "History" "Undo-${L_UNDO}" "Created on ${L_TEMP}"
   WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "History" "User-${L_UNDO}" "$G_WINUSERNAME"
   WriteINIStr "$G_USERDIR\pfi-outexpress.ini" "History" "Type-${L_UNDO}" "$G_WINUSERTYPE"
@@ -3023,7 +3046,7 @@ add_entry:
   Goto continue
 
 ignore_tick:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "leftover_ticks"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Identity" "PageStatus" "leftover_ticks"
 
 continue:
   IntOp ${L_CBOX_INDEX} ${L_CBOX_INDEX} + 1
@@ -3130,7 +3153,7 @@ Function SetOutlookPage
 
   Call GetDateTimeStamp
   Pop ${L_TEMP}
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "DateTime" "Outlook" "${L_TEMP}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "DateTime" "Outlook" "${L_TEMP}"
   IfFileExists "$G_USERDIR\outlook.reg" 0 check_for_outlook
   Push "outlook.reg"
   Call ConvertOOERegData
@@ -3139,7 +3162,7 @@ check_for_outlook:
 
   ; Check if user decided to skip all email client configuration
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioF.ini" "ClientEXE" "ConfigStatus"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "pfi-cfg.ini" "ClientEXE" "ConfigStatus"
     StrCmp ${L_STATUS} "SkipAll" exit
 
   ; Look for Outlook account data - if none found then quit
@@ -3207,7 +3230,7 @@ open_logfiles:
   Call GetDateTimeStamp
   Pop ${L_TEMP}
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "DateTime" "Outlook" "${L_TEMP}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "DateTime" "Outlook" "${L_TEMP}"
 
   FileOpen  $G_OOECONFIG_HANDLE "$G_USERDIR\outconfig.txt" w
   FileWrite $G_OOECONFIG_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_OUTCFG_LOG_BEFORE) (${L_TEMP})\
@@ -3263,7 +3286,7 @@ next_acct:
 
   ; Have found an email account so we add a new entry to the list (which can hold 6 accounts)
 
-  IntOp $G_OOELIST_INDEX $G_OOELIST_INDEX + 1    ; used to access the [Account] data in ioB.ini
+  IntOp $G_OOELIST_INDEX $G_OOELIST_INDEX + 1    ; to access [Account] data in pfi-cfg.ini
   IntOp $G_OOELIST_CBOX $G_OOELIST_CBOX + 1      ; field number for relevant checkbox
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Settings" "NumFields" "$G_OOELIST_CBOX"
@@ -3328,7 +3351,7 @@ continue:
   ; (so we can unambiguously report which email account we are offering to reconfigure).
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 1" "Text" "'$G_WINUSERNAME' $(PFI_LANG_OOECFG_IO_BOXHDR)"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "Username" "$G_WINUSERNAME"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Identity" "Username" "$G_WINUSERNAME"
 
   ReadRegStr ${L_OUTDATA} HKCU ${L_ACCOUNT} "Account Name"
 
@@ -3349,12 +3372,12 @@ no_padding:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 11" "State"
   !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 11" "State" "${L_STATUS}${L_TEMP}${L_USERNAME}"
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "AccountName" "${L_OUTDATA}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "EmailAddress" "${L_EMAILADDRESS}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "POP3server" "${L_POP3SERVER}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "POP3username" "${L_USERNAME}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "POP3port" "${L_PORT}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "RegistryKey" "${L_ACCOUNT}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "pfi-cfg.ini" "Account $G_OOELIST_INDEX" "AccountName" "${L_OUTDATA}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "pfi-cfg.ini" "Account $G_OOELIST_INDEX" "EmailAddress" "${L_EMAILADDRESS}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "pfi-cfg.ini" "Account $G_OOELIST_INDEX" "POP3server" "${L_POP3SERVER}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "pfi-cfg.ini" "Account $G_OOELIST_INDEX" "POP3username" "${L_USERNAME}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "pfi-cfg.ini" "Account $G_OOELIST_INDEX" "POP3port" "${L_PORT}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "pfi-cfg.ini" "Account $G_OOELIST_INDEX" "RegistryKey" "${L_ACCOUNT}"
 
   !insertmacro OOECONFIG_BEFORE_LOG  "$G_WINUSERNAME"    20
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_OUTDATA}"      20
@@ -3370,14 +3393,12 @@ display_list:
 
   ; Display the Outlook account data with checkboxes enabled for those accounts we can configure
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "new"
-
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
 
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
-  GetDlgItem $G_DLGITEM $G_HWND 1200              ; Field 1 = IDENTITY label (above the box)
+  GetDlgItem $G_DLGITEM $G_HWND 1200             ; Field 1 = IDENTITY label (above the box)
   CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
@@ -3387,7 +3408,7 @@ display_list:
   StrCmp ${L_TEMP} "back" abort_outlook_config
   StrCmp ${L_TEMP} "cancel" finished_outlook_config
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Identity" "PageStatus"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Identity" "PageStatus"
   StrCmp ${L_TEMP} "updated" display_list
   StrCmp ${L_TEMP} "leftover_ticks" display_list
 
@@ -3401,8 +3422,6 @@ finished_the_accounts:
   IntCmp $G_OOELIST_INDEX 0 finished_outlook_config
 
 display_list_again:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "new"
-
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
 
@@ -3418,7 +3437,7 @@ display_list_again:
   StrCmp ${L_TEMP} "back" abort_outlook_config
   StrCmp ${L_TEMP} "cancel" finished_outlook_config
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Identity" "PageStatus"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Identity" "PageStatus"
   StrCmp ${L_TEMP} "updated" display_list_again
   StrCmp ${L_TEMP} "leftover_ticks" display_list_again
 
@@ -3503,7 +3522,12 @@ Function CheckOutlookRequests
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Settings" "NumFields"
   StrCmp ${L_TEMP} "1" exit
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_IDENTITY} "ioB.ini" "Identity" "Username"
+  ; 'PageStatus' will be set to 'updated' or 'leftover_ticks' when the page needs to be
+  ; redisplayed to confirm which accounts (if any) have been reconfigured
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Identity" "PageStatus" "clean"
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_IDENTITY} "pfi-cfg.ini" "Identity" "Username"
 
   StrCpy ${L_CBOX_INDEX} 12
   StrCpy ${L_DATA_INDEX} 1
@@ -3515,12 +3539,12 @@ next_row:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_CBOX_STATE} "ioB.ini" "Field ${L_CBOX_INDEX}" "State"
   StrCmp ${L_CBOX_STATE} "0" continue
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_ACCOUNTNAME}  "ioB.ini" "Account ${L_DATA_INDEX}" "AccountName"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_EMAILADDRESS} "ioB.ini" "Account ${L_DATA_INDEX}" "EMailAddress"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3SERVER}   "ioB.ini" "Account ${L_DATA_INDEX}" "POP3server"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3USERNAME} "ioB.ini" "Account ${L_DATA_INDEX}" "POP3username"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3PORT}     "ioB.ini" "Account ${L_DATA_INDEX}" "POP3port"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_REGKEY}       "ioB.ini" "Account ${L_DATA_INDEX}" "RegistryKey"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_ACCOUNTNAME}  "pfi-cfg.ini" "Account ${L_DATA_INDEX}" "AccountName"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_EMAILADDRESS} "pfi-cfg.ini" "Account ${L_DATA_INDEX}" "EMailAddress"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3SERVER}   "pfi-cfg.ini" "Account ${L_DATA_INDEX}" "POP3server"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3USERNAME} "pfi-cfg.ini" "Account ${L_DATA_INDEX}" "POP3username"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3PORT}     "pfi-cfg.ini" "Account ${L_DATA_INDEX}" "POP3port"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_REGKEY}       "pfi-cfg.ini" "Account ${L_DATA_INDEX}" "RegistryKey"
 
   MessageBox MB_YESNO \
       "$(PFI_LANG_OUTCFG_MBIDENTITY) ${L_IDENTITY}\
@@ -3541,7 +3565,7 @@ next_row:
       $(PFI_LANG_OOECFG_MBQUESTION)\
       " IDNO ignore_tick
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "updated"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Identity" "PageStatus" "updated"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field ${L_CBOX_INDEX}" "Flags" "DISABLED"
 
   ReadINIStr  ${L_UNDO} "$G_USERDIR\pfi-outlook.ini" "History" "ListSize"
@@ -3555,7 +3579,7 @@ update_list_size:
   WriteINIStr "$G_USERDIR\pfi-outlook.ini" "History" "ListSize" "${L_UNDO}"
 
 add_entry:
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "Outlook"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "DateTime" "Outlook"
   WriteINIStr "$G_USERDIR\pfi-outlook.ini" "History" "Undo-${L_UNDO}" "Created on ${L_TEMP}"
   WriteINIStr "$G_USERDIR\pfi-outlook.ini" "History" "User-${L_UNDO}" "$G_WINUSERNAME"
   WriteINIStr "$G_USERDIR\pfi-outlook.ini" "History" "Type-${L_UNDO}" "$G_WINUSERTYPE"
@@ -3583,7 +3607,7 @@ add_entry:
   Goto continue
 
 ignore_tick:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "leftover_ticks"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "pfi-cfg.ini" "Identity" "PageStatus" "leftover_ticks"
 
 continue:
   IntOp ${L_CBOX_INDEX} ${L_CBOX_INDEX} + 1
@@ -3699,7 +3723,7 @@ Function SetEudoraPage
 
   ; Check if user decided to skip all email client configuration
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioF.ini" "ClientEXE" "ConfigStatus"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "pfi-cfg.ini" "ClientEXE" "ConfigStatus"
   StrCmp ${L_STATUS} "SkipAll" exit
 
   ; Look for Eudora registry entry which identifies the relevant INI file
@@ -3709,7 +3733,7 @@ Function SetEudoraPage
 
   ; No data in registry. Did the 'SetEmailClient' function find a path for the Eudora program?
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioF.ini" "ClientEXE" "Eudora"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "pfi-cfg.ini" "ClientEXE" "Eudora"
   StrCmp ${L_STATUS} "" exit
 
   ; Look for the Eudora INI file
@@ -4124,10 +4148,10 @@ FunctionEnd
 # The user is allowed to change their selection by returning to this page (by clicking 'Back'
 # on the 'FINISH' page) if corpus conversion is not required.
 #
-# The [Inherited] section in 'ioC.ini' has information on the system tray icon and console mode
-# settings found in 'popfile.cfg'. Valid values are 0 (disabled), 1 (enabled) and ? (undefined).
-# If any settings are undefined, this function adds the default settings to 'popfile.cfg'
-# (i.e. console mode disabled, system tray icon enabled)
+# The [Inherited] section in 'pfi-cfg.ini' has information on the system tray icon and the
+# console mode settings found in 'popfile.cfg'. Valid values are 0 (disabled), 1 (enabled)
+# and ? (undefined). If any settings are undefined, this function adds the default settings
+# to 'popfile.cfg' (i.e. console mode disabled, system tray icon enabled)
 #--------------------------------------------------------------------------
 
 Function StartPOPFilePage
@@ -4144,16 +4168,16 @@ Function StartPOPFilePage
   FileOpen  ${L_CFG} "$G_USERDIR\popfile.cfg" a
   FileSeek  ${L_CFG} 0 END
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Inherited" "Console"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Inherited" "Console"
   StrCmp ${L_TEMP} "?" 0 check_trayicon
   FileWrite ${L_CFG} "windows_console 0$\r$\n"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "0"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "Console" "0"
 
 check_trayicon:
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Inherited" "TrayIcon"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Inherited" "TrayIcon"
   StrCmp ${L_TEMP} "?" 0 close_file
   FileWrite ${L_CFG} "windows_trayicon 1$\r$\n"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "TrayIcon" "1"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "TrayIcon" "1"
 
 close_file:
   FileClose ${L_CFG}
@@ -4185,7 +4209,7 @@ page_enabled:
   ; If we have returned to this page from the 'FINISH' page then we can use the [LastAction]
   ; data to select the appropriate radio button, otherwise we use the [Inherited] data.
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "" use_inherited_data
   StrCmp ${L_TEMP} "console" console
   StrCmp ${L_TEMP} "background" background
@@ -4193,7 +4217,7 @@ page_enabled:
   Goto display_the_page
 
 use_inherited_data:
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Inherited" "Console"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Inherited" "Console"
   StrCmp ${L_TEMP} "0" background
 
 console:
@@ -4243,7 +4267,7 @@ Function CheckLaunchOptions
   Push ${L_CONSOLE}
 
   StrCpy ${L_TRAY} "i"    ; the default is to enable the system tray icon
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Inherited" "TrayIcon"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Inherited" "TrayIcon"
   StrCmp ${L_TEMP} "1" check_radio_buttons
   StrCpy ${L_TRAY} ""
 
@@ -4254,7 +4278,7 @@ check_radio_buttons:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "State"
   StrCmp ${L_TEMP} "0" run_popfile
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "" exit_without_banner
   StrCmp ${L_TEMP} "no" exit_without_banner
 
@@ -4268,7 +4292,7 @@ background_to_no:
   StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_TRAY}b.exe"
 
 lastaction_no:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "no"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Run Status" "LastAction" "no"
 
   ; User has changed their mind: Shutdown the newly installed version of POPFile
 
@@ -4305,26 +4329,26 @@ run_popfile:
 
   ; Run POPFile using console window
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "console" exit_without_banner
   StrCmp ${L_TEMP} "no" lastaction_console
   StrCmp ${L_TEMP} "" lastaction_console
   StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_TRAY}b.exe"
 
 lastaction_console:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "console"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Run Status" "LastAction" "console"
   StrCpy ${L_CONSOLE} "1"
   Goto corpus_conv_check
 
 run_in_background:
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "background" exit_without_banner
   StrCmp ${L_TEMP} "no" lastaction_background
   StrCmp ${L_TEMP} "" lastaction_background
   StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_TRAY}f.exe"
 
 lastaction_background:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "background"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Run Status" "LastAction" "background"
   StrCpy ${L_CONSOLE} "0"
 
 corpus_conv_check:
