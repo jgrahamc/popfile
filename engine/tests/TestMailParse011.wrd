@@ -103,3 +103,6 @@ header:Content-Type 1
 header:Delivered-To 2
 header:Received 2
 header:From 1
+.com 1
+from:.fr 1
+.fr 1

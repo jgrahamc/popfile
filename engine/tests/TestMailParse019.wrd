@@ -133,3 +133,8 @@ header:Subject 1
 msk 3
 header:Delivered-To 2
 header:Received 4
+to:.com 2
+to:.ru 2
+.com 8
+from:.net 1
+.net 1

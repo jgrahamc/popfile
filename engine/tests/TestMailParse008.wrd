@@ -76,3 +76,7 @@ header:Received 1
 html:td 2
 html:fontsize4 4
 header:From 1
+.com 6
+.net 3
+to:.net 1
+from:.com 1

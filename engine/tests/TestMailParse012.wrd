@@ -165,3 +165,8 @@ header:Subject 1
 header:X-Authentication-Warning 1
 header:Received 2
 gnu 1
+to:.org 1
+from:.com 1
+.com 6
+.net 1
+.org 1

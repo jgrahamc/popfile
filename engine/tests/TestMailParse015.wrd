@@ -74,3 +74,7 @@ html:fontsize3 6
 html:fontsize5 1
 header:From 1
 qaa 1
+.com 4
+.bz 3
+.net 3
+from:.com 1

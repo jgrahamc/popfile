@@ -155,3 +155,7 @@ header:List-Owner 1
 header:Sender 1
 header:List-Unsubscribe 1
 header:Received 1
+to:.com 1
+from:.com 1
+.com 10
+.net 2

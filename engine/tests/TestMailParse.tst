@@ -320,6 +320,17 @@ for my $parse_test (@parse_tests) {
 
     foreach my $missed (keys %{$cl->{words__}}) {
         test_assert( 0, "$missed $cl->{words__}{$missed} missing in $words" );
+
+        # Only use this if once you KNOW FOR CERTAIN that it's
+        # not going to update the WRD files with bogus entries
+        # First manually check the test failures and then switch the
+        # 0 to 1 and run once
+
+        if ( 0 ) {
+             open UPDATE, ">>$words";
+             print UPDATE "$missed $cl->{words__}{$missed}\n";
+             close UPDATE;
+        }
         delete $cl->{words__}{$missed};
     }
 }
@@ -398,15 +409,18 @@ my @from = @{$qm{from}};
 my @to = @{$qm{to}};
 my @cc = @{$qm{cc}};
 my @subject = @{$qm{subject}};
-test_assert_equal( $#from, 1 );
+test_assert_equal( $#from, 2 );
 test_assert_equal( $from[0], 'test@test.com' );
 test_assert_equal( $from[1], 'test.com' );
-test_assert_equal( $#to, 1 );
+test_assert_equal( $from[2], '.com' );
+test_assert_equal( $#to, 2 );
 test_assert_equal( $to[0], 'someone@somewhere.com' );
 test_assert_equal( $to[1], 'somewhere.com' );
-test_assert_equal( $#cc, 1 );
+test_assert_equal( $to[2], '.com' );
+test_assert_equal( $#cc, 2 );
 test_assert_equal( $cc[0], 'someoneelse@somewhere.com' );
 test_assert_equal( $cc[1], 'somewhere.com' );
+test_assert_equal( $cc[2], '.com' );
 test_assert_equal( $#subject, 2 );
 test_assert_equal( $subject[0], 'test' );
 test_assert_equal( $subject[1], 'various' );

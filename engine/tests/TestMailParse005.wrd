@@ -67,3 +67,7 @@ header:Message-ID 1
 header:X-UIDL 1
 header:Subject 1
 header:From 1
+.com 2
+.net 2
+.kr 1
+from:.com 2

@@ -157,3 +157,10 @@ content 1
 sliced 1
 visual 1
 priority 1
+to:.com 2
+to:.ru 1
+.ru 3
+.com 10
+from:.ru 1
+.net 1
+to:.net 1

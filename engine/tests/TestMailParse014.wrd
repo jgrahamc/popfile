@@ -109,3 +109,7 @@ html:td 15
 html:fontsize2 6
 html:fontsize4 1
 header:From 1
+.com 2
+from:.net 1
+.net 2
+to:.net 1
