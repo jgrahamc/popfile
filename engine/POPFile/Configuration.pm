@@ -211,7 +211,7 @@ sub live_check_
 
             if ( kill(0, $pid) ) {
                 # running
-                $error = "\n A copy of POPFile is running.\n It has signalled that it is alive with proccess ID: $pid\n";
+                $error = "\n A copy of POPFile is running.\n It has signaled that it is alive with process ID: $pid\n";
                 print STDERR $error;
                 return $pid;
             } else {
