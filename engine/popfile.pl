@@ -14,8 +14,6 @@
 use strict;
 use locale;
 
-use POSIX ":sys_wait_h";
-
 # NOTE: POPFile is constructed from a collection of classes which all have special
 # interface functions and variables:
 #
@@ -82,15 +80,17 @@ sub aborting
 sub forker
 {
     # Create the pipe that will be used to send data from the child to the parent process, 
-    # WRITER will be returned to the child process and READER to the parent process
+    # $writer will be returned to the child process and $reader to the parent process
     
-    pipe( READER, WRITER );
+    pipe my $reader, my $writer;
     my $pid = fork();
     
     # If fork() returns an undefined value then we failed to fork and are
     # in serious trouble (probably out of resources) so we return undef
     
     if ( !defined( $pid ) ) {
+        close $reader;
+        close $writer;
         return (undef, undef);
     }
 
@@ -103,16 +103,16 @@ sub forker
             $components{$c}->forked();
         }
         
-        close READER;
-        return (0, \*WRITER);
+        close $reader;
+        return (0, $writer);
     }
     
     # Reach here because we are in the parent process, close out the writer pipe
     # file handle and return our PID (non-zero) indicating that this is the parent
     # process
     
-    close WRITER;
-    return ($pid, \*READER);
+    close $writer;
+    return ($pid, $reader);
 }
 
 #
@@ -203,12 +203,6 @@ while ( $alive == 1 ) {
     # Sleep for 0.05 of a second to ensure that POPFile does not hog the machine's
     # CPU
     select(undef, undef, undef, 0.05);
-
-    # Under ActiveState Perl 5.8.0 on Windows we were seeing a single handle leak per
-    # fork even though all handles were closed in the child process.  It appears that the
-    # IGNORE SIGCHLD is not working and so each time around the loop we do a quick scan for
-    # any child that needs reaping
-    my $kid = waitpid(-1, WNOHANG);
 }
 
 print "    Stopping... ";

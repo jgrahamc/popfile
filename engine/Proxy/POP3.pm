@@ -16,6 +16,8 @@ use locale;
 # A handy variable containing the value of an EOL for Unix systems
 my $eol = "\015\012";
 
+use POSIX ":sys_wait_h";
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -41,8 +43,9 @@ sub new
     # Used to tell any loops to terminate
     $self->{alive}          = 1;
     
-    # List of file handles to read from active children
-    $self->{children}        = (undef);
+    # List of file handles to read from active children, this
+    # maps the PID for each child to its associated pipe handle
+    $self->{children}        = {};
     
     return bless $self, $type;
 }
@@ -146,8 +149,8 @@ sub stop
     # and all the reading ends of pipes to active children
     close $self->{server} if ( defined( $self->{server} ) );
     
-    for my $pipe (@{$self->{children}}) {
-        close $pipe;
+    for my $kid (keys %{$self->{children}}) {
+        close $self->{children}{$kid};
     }
 }
 
@@ -162,44 +165,32 @@ sub service
 {
     my ( $self ) = @_;
 
-    # Now see if any of our children have data ready to read from their pipes, the data returned is
-    # a line containing just the name of a bucket for which we have done a classification.  Increment
-    # the statistics for that bucket and the total message count
+    # Look for children that have completed and then flush the data from their
+    # associated pipe and see if any of our children have data ready to read from their pipes, 
+    # the data returned is a line containing just the name of a bucket for which we have done a 
+    # classification.  Increment the statistics for that bucket and the total message count
 
-    my @pipes;
+    my @kids = keys %{$self->{children}};
     
-    if ( $#{$self->{children}} >= 0 ) {
-        debug( $self, $#{$self->{children}}+1 . " children running" );
-        @pipes = @{$self->{children}};
-    }
-    $self->{children} = ();
-    
-    for my $pipe (@pipes) {
-        my $selector = new IO::Select( $pipe );
-        my ($ready)  = $selector->can_read(0); 
-        if ( defined( $ready ) ) {
-            my $class = <$pipe>;
-        
-            $class =~ s/[\r\n]//g;
-            debug( $self, "Read $class from $pipe" );
+    if ( $#kids >= 0 ) {
+        for my $kid (@kids) {
+            if ( waitpid( $kid, WNOHANG) == $kid ) {
+                my $handle = $self->{children}{$kid};
+                
+                while ( <$handle> ) {
+                    s/[\r\n]//g;
 
-            if ( $class eq '__popfile__pipe__done__' ) {
-                debug( $self, "Closing $pipe$eol" );
-                close $pipe;
-                $pipe = undef;
-                last;
-            }            
+                    $self->{classifier}->{parameters}{$_}{count}     += 1;
+                    $self->{configuration}->{configuration}{mcount}  += 1;
 
-            $self->{classifier}->{parameters}{$class}{count} += 1;
-            $self->{configuration}->{configuration}{mcount}  += 1;
-
-            debug( $self, "Incrementing $class$eol" );
-        }
-        
-        # If the pipe is still open when we reach here then we need to keep it
-        # around for next time
-        if ( defined( $pipe ) ) {
-            push @{$self->{children}}, ($pipe);
+                    debug( $self, "Incrementing $_" );
+                }
+                
+                debug( $self, "Killing $kid handle $handle" ); 
+                
+                close $self->{children}{$kid};
+                delete $self->{children}{$kid};
+            }
         }
     }
 
@@ -223,7 +214,7 @@ sub service
 
                 # If we are in the parent process then push the pipe handle onto the children list
                 if ( ( defined( $pid ) ) && ( $pid != 0 ) ) {
-                    push @{$self->{children}}, ($pipe);
+                    $self->{children}{$pid} = $pipe;
                 }
 
                 # If we fail to fork, or are in the child process then process this request
@@ -253,8 +244,8 @@ sub forked
 
     close $self->{server};
 
-    for my $pipe (@{$self->{children}}) {
-        close $pipe;
+    for my $kid (keys %{$self->{children}}) {
+        close $self->{children}{$kid};
     }
 }
 
@@ -499,7 +490,6 @@ sub child
 
     close $mail if defined( $mail );
     close $client;
-    print $pipe "__popfile__pipe__done__$eol";
     close $pipe;
  
     debug( $self, "POP3 forked child done" );
