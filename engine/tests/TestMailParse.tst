@@ -295,4 +295,11 @@ $cl->parse_file( 'temp.tmp' );
 test_assert_equal( $cl->{words__}{'html:imgwidth42'}, 1 );
 test_assert_equal( $cl->{words__}{'html:imgheight41'}, 1 );
 
+open FILE, ">temp.tmp";
+print FILE "From: John\nContent-Type: multipart/alternative;\n\tboundary=\"247C6_.5B._4\"\n\n--247C6_.5B._4\nContent-Type: text/html;\nContent-Transfer-Encoding: quoted-printable\n\n<img width=3D42\nheight=3D41>\n\n--247C6_.5B._4--\n";
+close FILE;
+$cl->parse_file( 'temp.tmp' );
+test_assert_equal( $cl->{words__}{'html:imgwidth42'}, 1 );
+test_assert_equal( $cl->{words__}{'html:imgheight41'}, 1 );
+
 $b->stop();
