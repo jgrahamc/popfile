@@ -1371,6 +1371,14 @@ update_config:
   SetOutPath $INSTDIR
   Delete $INSTDIR\uninstall.exe
   WriteUninstaller $INSTDIR\uninstall.exe
+  
+  ; Attempt to remove StartUp shortcuts created during previous installations 
+  
+  SetShellVarContext all
+  Delete "$SMSTARTUP\Run POPFile.lnk"
+
+  SetShellVarContext current
+  Delete "$SMSTARTUP\Run POPFile.lnk"
 
   ; Create the START MENU entries
 
