@@ -1,4 +1,4 @@
-<body dir="<TMPL_VAR NAME="Localize_LanguageDirection">">
+<body dir="<TMPL_VAR NAME="Localize_LanguageDirection">" onLoad="OnLoadHandler()">
     <table class="shellTop" align="center" width="100%" summary="">
         <tr class="shellTopRow">
             <td class="shellTopLeft"></td>

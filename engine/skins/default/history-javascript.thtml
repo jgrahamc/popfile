@@ -1,9 +1,11 @@
-<script language="JavaScript1.2">
-if (document.getElementById("removeChecks"))
-    document.getElementById("removeChecks").innerHTML = "<input type='checkbox' class='checkbox' onclick='javascript:toggleChecks(this);' title='Select All' />"
+<script language="JavaScript">
+<!--
+function OnLoadHandler() {    // redefine default OnLoadHandler
+    if (document.getElementById("removeChecks"))
+         document.getElementById("removeChecks").innerHTML = "<input type='checkbox' class='checkbox' onclick='javascript:toggleChecks(this);' title='Select All' />"
+}
 
-function toggleChecks(x)
-{
+function toggleChecks(x) {
     d = document.forms;
     for (var i=0; i < d.length; i++)
     {
@@ -13,4 +15,5 @@ function toggleChecks(x)
     }
     return 0;
 }
+-->
 </script>
