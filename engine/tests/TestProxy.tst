@@ -52,6 +52,7 @@ use POPFile::Configuration;
 use POPFile::MQ;
 use POPFile::Logger;
 use Proxy::Proxy;
+use IO::Handle;
 use IO::Socket;
 
 my $c = new POPFile::Configuration;
@@ -138,6 +139,7 @@ test_assert_regexp( $sp->received(), 'toserver' );
 # Test the tee function, that send a line to the server
 # or client and to the logger
 
+test_assert( $client->connected );
 $sp->tee_( $client, "teed\n" );
 select( undef, undef, undef, 0.25 );
 $sp->service_server();
@@ -166,9 +168,57 @@ $line = <TEMP>;
 test_assert( !defined( $line ) );
 close TEMP;
 
-my $handle = $client;
-$line = <$handle>;
+$line = <$client>;
 test_assert_regexp( $line, 'after' );
+
+# Test echo_to_regexp_ with suppression
+
+$sp->send( 'before11' );
+$sp->send( 'before12' );
+$sp->send( 'matchTHis1' );
+$sp->send( 'after1' );
+$sp->service_server();
+open TEMP, ">temp.tmp";
+$sp->echo_to_regexp_( $client, \*TEMP, qr/TH/, 0, qr/12/ );
+close TEMP;
+open TEMP, "<temp.tmp";
+$line = <TEMP>;
+test_assert_regexp( $line, 'before11' );
+$line = <TEMP>;
+test_assert_regexp( $line, 'matchTHis1' );
+$line = <TEMP>;
+test_assert( !defined( $line ) );
+close TEMP;
+
+$line = <$client>;
+test_assert_regexp( $line, 'after1' );
+
+# Test echo_to_regexp_ with logging
+
+$sp->send( 'before21' );
+$sp->send( 'before22' );
+$sp->send( 'matchTHis2' );
+$sp->send( 'after2' );
+$sp->service_server();
+open TEMP, ">temp.tmp";
+$sp->echo_to_regexp_( $client, \*TEMP, qr/TH/, 1, qr/22/ );
+close TEMP;
+open TEMP, "<temp.tmp";
+$line = <TEMP>;
+test_assert_regexp( $line, 'before21' );
+$line = <TEMP>;
+test_assert_regexp( $line, 'matchTHis2' );
+$line = <TEMP>;
+test_assert( !defined( $line ) );
+close TEMP;
+
+@lastten = $l->last_ten();
+test_assert_regexp( $lastten[$#lastten], 'matchTHis2' );
+test_assert_regexp( $lastten[$#lastten-1], 'Suppressed: before22' );
+test_assert_regexp( $lastten[$#lastten-2], 'before21' );
+
+$line = <$client>;
+test_assert_regexp( $line, 'after2' );
 
 # Test echo_to_dot_
 
@@ -181,7 +231,7 @@ open TEMP, ">temp.tmp";
 $sp->echo_to_dot_( $client, \*TEMP );
 close TEMP;
 open TEMP, "<temp.tmp";
-my $line = <TEMP>;
+$line = <TEMP>;
 test_assert_regexp( $line, 'before1' );
 $line = <TEMP>;
 test_assert_regexp( $line, 'before2' );
@@ -191,7 +241,7 @@ $line = <TEMP>;
 test_assert( !defined( $line ) );
 close TEMP;
 
-$line = <$handle>;
+$line = <$client>;
 test_assert_regexp( $line, 'after' );
 
 # Close down the child process
@@ -202,6 +252,10 @@ select( undef, undef, undef, 0.25 );
 
 # Reap the children
 
-$sp->reaper();
+my @kids = keys %{$sp->{children__}};
+if ( $#kids >= 0 ) {
+    $sp->reaper();
+    @kids = keys %{$sp->{children__}};
+}
 
 select( undef, undef, undef, 0.25 );
