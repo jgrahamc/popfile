@@ -1,0 +1,130 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><meta http-equiv="Content-Language" content="zh-cn" /><title>POPFile 文件集</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile 文件集</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>初次设定:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>步骤 1<br><font size=+1><b>&nbsp;<a href="installing.html">安装</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>步骤 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">设立邮筒</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>步骤 3<br><font size=+1><b>&nbsp;<a href="email.html">电子邮件程序</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>步骤 4<br><font size=+1><b>&nbsp;<a href="training.html">调教</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>搭配 POPFile 一并使用:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">防火墙</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">保全口令认证 (SPA)</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">其它代理服务器</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">多重电子邮件帐号</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+<h2>搭配 POPFile 一并使用其它像是病毒扫瞄程序之类的代理服务器</h2>
+
+<p>如果你用了像是诺顿防毒软体 (Norton Antivirus) 这种会修改电子邮件设定的电子邮件扫毒代理服务器的话, POPFile 就没办法运作了: 电子邮件代理服务器将会取而代之. 你得重新组态 POPFile 好让她跟电子邮件扫毒软体交谈才行. (如果你的扫毒软体并不会变更电子邮件 POP3 服务器设定的话, 就不需要按照底下这些指示来处理了).</p>
+
+<p>(那么, 基本上, 电子邮件会被扫毒软体下载, 接著递送给 POPFile, 然后 - 最后 - 再被递送给你的电子邮件程序..)</p>
+
+<p>现在, 因为不同厂牌的电子邮件扫毒软体的运作方式各有不同, 所以我们将会这样做:
+
+<ol><li>取消电子邮件扫毒软体, 好将你的设定值还原成正常的样子.
+<li>叫 POPFile 在不同的连接埠聆听联机.
+<li>叫电子邮件软体用不同的连接埠连接到 POPFile 去.
+<li>用新的设定来重新启用你的电子邮件扫毒软体.</ol></p>
+
+<h3>取消你的电子邮件扫毒软体</h3>
+
+<p>请按照各厂商的指示来完成此动作.</p>
+
+<h3>变更 POPFile 的连接埠</h3>
+
+<p>到网页接口的组态分页, 把 <b>POP3 聆听连接埠</b> 变更成任何类似的号码 - 我们在此建议你采用 123. 点击套用.</p>
+
+<h3>变更你的电子邮件程序的连接埠</h3>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=3 align="center">
+
+按照你的电子邮件程序来遵照下列字段里的步骤. 这些指示虽然可能看来复杂, 但是其实花不到两分钟就可以弄完了 - 而且还很难弄错. (为了以防万一, 你最好还是把原来的设定值给记下来, 以便有需要的时候设回去.)
+
+</td></tr><tr>
+
+<td width=33% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Outlook</h3>
+
+<ul>
+<li>到 工具 -> 电子邮件帐号 选单.
+<li>在 检视或变更既有的电子邮件帐号 上按一下然后按 下一步.
+<li>选择你的帐号, 然后在 变更 上按一下.
+<li>在 更多设定 的按钮上按一下.
+<li>在 进阶 卷标上按一下.
+<li>在 内送服务器 (POP3) 旁边, 输入你稍早所选用的号码 (我们稍早所推荐的是 123).
+<li>按 OK, 然后重复上述步骤直到所有你想搭配 POPFile 的帐号都处理完为止.
+</ul>
+
+</td><td width=34% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>Outlook Express</h3>
+
+<ul>
+<li>到 工具 -> 帐号 选单.
+<li>选择你的帐号并按下 内容.
+<li>按一下 进阶 卷标.
+<li>在 内送邮件 (POP3) 旁, 输入你稍早所选用的号码 (我们稍早所推荐的是 123).
+<li>按 OK, 然后重复上述步骤直到所有你想搭配 POPFile 的帐号都处理完为止.
+</ul>
+
+</td><td width=33% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<ul>
+<li>Eudora 的连接埠设定位于隐藏的 '奥义 (esoteric)' 设定里.
+<li>到 '我的计算机' 并且导览至 Eudora 的安装目录- 通常是 C:\Program Files\Qualcomm\Eudora
+<li>点进 'extrastuff' 数据夹.
+<li>选取 'esoteric.epi' 档案, 并且用 编辑 > 复制 选单来加以复制.
+<li>回到 Eudora 的主选单, 并且用 编辑 > 贴上 来把刚刚的档案贴进来.
+<li>激活 Eudora.
+<li>到 工具 -> 选项 选单.
+<li>卷到选项选单的最底下, 并选择 '连接埠及通讯协议'.
+<li>在 'POP3' 后面, 输入你稍早所选用的号码 (我们稍早所推荐的是 123).
+<li>按 OK. 大功告成.
+</ul>
+
+</td></tr></table>
+
+<h3>重新启用你的电子邮件扫毒软体.</h3>
+
+重新启用你的扫毒软体 (请查询你扫毒软体的手册) 那么她应该就能够替你把剩下来的事情都处理好. 现在邮件都应该能被扫瞄及分类了.
+
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>网页链接:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">首页</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">讨论区</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">瑕疵数据库</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>

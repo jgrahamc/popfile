@@ -1,0 +1,485 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><meta http-equiv="Content-Language" content="zh-cn" /><title>POPFile 文件集</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+
+</head>
+
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile 文件集</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+
+<table width=100% cellspacing=0><tr>
+
+<td width=15% align=center><font size=+1><b>初次设定:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%>步骤 1<br><font size=+1><b>&nbsp;<a href="installing.html">安装</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center>步骤 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">设立邮筒</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#cccc99 width=15% align=center>步骤 3<br><font size=+1><b>&nbsp;<a href="email.html">电子邮件程序</a></b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%>步骤 4<br><font size=+1><b>&nbsp;<a href="training.html">调教</a></b></font></td>
+
+<td width=25%>&nbsp;</td></tr>
+
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+
+<tr height=1><td colspan=10></td></tr>
+
+</table>
+
+<table width=100% cellspacing=0><tr>
+
+
+
+<td width=40% align=right><font size=+1><b>搭配 POPFile 一并使用:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">防火墙</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">保全口令认证 (SPA)</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">其它代理服务器</a></b></font><br></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">多重电子邮件帐号</a></b></font></td>
+
+</tr>
+
+
+
+</table>
+
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+
+
+
+
+<h2>让你的电子邮件程序跟 POPFile 交谈</h2>
+
+
+
+<p>POPFile 以<i>代理服务器</i>的型态运作. 你的电子邮件程序会跟 POPFile 交谈, 而她自己会去跟你的电子邮件服务器交谈. 于是你的电子邮件程序将不再直接取得邮件讯, 而是让 POPFile 先取得她们, 并且加以扫瞄来决定她们该被装进那个邮筒里.</p>
+
+
+
+<p>一旦决定了之后 - 这祇会花零点几秒而已 - POPFile 就可以再做下列两件事: 他可以在主旨列最前面加上像 [这样] 的卷标; 这表示 Microsoft Outlook Express 这类简单的过滤程序也能把邮件转发到她们该去的地方 - 或者, 对于像 Eudora 这类更进阶的电子邮件程序来说, 她也能加入一列像这样的新标头:</p>
+
+
+
+<p><b>X-Text-Classification: personal</b></p>
+
+
+
+<p>- 而你的电子邮件程序就可以依此来加以过滤.</p>
+
+
+
+<p>然而, 你得做两件事才能让电子邮件程序去跟 POPFile 对话:
+
+
+
+<ol><li>调整你的电子邮件程序的设定好让她去跟 POPFile 对话, 以及
+
+<li>设立你的电子邮件过滤器来妥善处理这件事.</ol></p>
+
+
+
+<p>让咱们先调整邮件设定. 稍后我们马上就会设立过滤器了.
+
+
+
+<p>底下是给一些较常见电子邮件程序的指引. 对于其它的电子邮件软体 - 或对进阶使用者 - 来说, 以下为一般性的指引:</p>
+
+
+
+<p><ul><li>把电子邮件用户端的 POP3 服务器名称改为 127.0.0.1, 把原始的地址记下来.
+
+<li>把 POP3 的使用者名称改为 原来的-POP3-服务器地址:使用者名称
+
+<li>不要去动口令的部分</ul></p>
+
+
+
+<p>对于使用保全口令认证 (SPA) 的帐号, 请参见<a href=spa.html>搭配 POPFile 一并使用: 保全口令认证 (SPA)</a>.</p>
+
+
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+
+
+<td colspan=4 align="center">
+
+
+
+从底下选出属于你的电子邮件程序那一栏然后读下去. 虽然这些指引看来复杂, 但其实两分钟内就可以做完了 - 而且还很难弄错. (不过为了以防万一, 你最好还是把原有的更定值给记下来, 以备将来有需要把他们给设回去.)
+
+
+
+</td></tr><tr>
+
+
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Outlook</h3>
+
+
+
+<ul>
+
+<li>在 Outlook 里选择 工具->邮件帐号... 选单选项.  接下来就会出现电子邮件帐号对话窗. <a href=../o_popfile1.gif>[屏幕快照]</a>
+
+<li>按下 检视或变更既有的电子邮件帐号 然后按 下一步. 选择你想使用 POPFile 的帐号然后按下 变更... 把内收邮件服务器 (POP3) 的服务器名称跟使用者名称记下来. <a href=../o_popfile2.gif>[屏幕快照]</a>
+
+<li>把内收邮件服务器 (POP3) 的服务器名称改成 <b>127.0.0.1</b> 然后, 把使用者名称改成原来的内收邮件服务器 (POP3) 的服务器名称连著原来的使用者名称, 并以冒号隔开. <a href=../o_popfile3.gif>[屏幕快照]</a>
+
+<li>所以, 如果原来的内收邮件服务器 (POP3) 名称为 <b>my.mail.com</b> 而使用者名称为 <b>jdoe</b> 的话, 新的使用者名称就会是 <b>my.mail.com:jdoe</b>
+
+<li>你并不需要变更口令.
+
+<li>按 下一步 然后按 完成.
+
+<li>确认 POPFile 正在执行, 而所有的电子邮件都会透过 POPFile 寄达!
+
+<li>你得确定任何 Widows 激活的时候 POPFile 也都一并激活了. 如果你正在使用 Windows 安装版的话, 可以把 'Start POPFile in Background' 链接从 POPFile 群组里拖曳到开始选单的<b>激活</b>群组里. 那么, 每次 Windows 都将会加载 POPFile 了.
+
+<li>重要! 如果 POPFile 没有被加载的话, 邮件就不能通过了 - 而你的电子邮件程序将无法联机到邮件服务器!
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+
+
+<h3 align=center>Outlook Express</h3>
+
+
+
+<ul>
+
+<li>在 Outlook Express 里选择 工具->帐号... 选单选项.  接下来就会出现网际网络帐号对话窗. <a href=../oe_popfile1.gif>[屏幕快照]</a>
+
+<li>选择你想要修改来使用 POPFile 的帐号然后在 内容 上按一下. <a href=../oe_popfile2.gif>[屏幕快照]</a>
+
+<li>选择 服务器 分页.  把内收邮件 (POP3) 的服务器名称跟内收邮件服务器帐号名称记下来. <a href=../oe_popfile3.gif>[屏幕快照]</a>
+
+<li>把内收邮件 (POP3) 的服务器名称改成 <b>127.0.0.1</b> 然后, 把内收邮件服务器帐号名称 改成原来的内收邮件 (POP3) 服务器名称后面接著原来的内收邮件服务器帐号名称, 并用冒号隔开. <a href=../oe_popfile4.gif>[屏幕快照]</a>
+
+<li>所以, 如果原来的内收邮件服务器名称是 <b>my.mail.com</b> 而你的使用者名称为 <b>jdoe</b> 的话, 新的使用者名称就会是 <b>my.mail.com:jdoe</b>
+
+<li>你并不需要变更口令.
+
+<li>按一下 OK 然后按 关闭.
+
+<li>确认 POPFile 正在执行, 而所有的电子邮件都会透过 POPFile 寄达!
+
+<li>你得确定任何 Widows 激活的时候 POPFile 也都一并激活了. 如果你正在使用 Windows 安装版的话, 可以把 'Start POPFile in Background' 链接从 POPFile 群组里拖曳到开始选单的<b>激活</b>群组里. 那么, 每次 Windows 都将会加载 POPFile 了.
+
+<li>重要! 如果 POPFile 没有被加载的话, 邮件就不能通过了 - 而你的电子邮件程序将无法联机到邮件服务器!
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCCCFF" valign="top">
+
+
+
+<h3 align=center>Eudora</h3>
+
+
+
+<ul>
+
+<li>在 Eudora 里选择 工具->选项... 选单选项.  接下来会出现选项对话窗. <a href=../e_popfile1.gif>[屏幕快照]</a>
+
+<li>把邮件服务器 (内送) 的服务器名称跟登入名称记下来. <a href=../e_popfile2.gif>[屏幕快照]</a>
+
+<li>把邮件服务器 (内送) 的服务器名称改为 <b>127.0.0.1</b> 然后, 把登入名称改成原来的邮件服务器 (内送) 服务器名称后面接著原来的登入名称, 并以冒号分隔.  <a href=../e_popfile3.gif>[屏幕快照]</a>
+
+<li>所以, 如果原来的邮件服务器 (内送) 服务器名称是 <b>my.mail.com</b> 而使用者名称为 <b>jdoe</b> 的话, 新的使用者名称就会是 <b>my.mail.com:jdoe</b>
+
+<li>你并不需要变更口令.
+
+<li>按一下 OK.
+
+<li>确认 POPFile 正在执行, 而所有的电子邮件都会透过 POPFile 寄达!
+
+<li>你得确定任何 Widows 激活的时候 POPFile 也都一并激活了. 如果你正在使用 Windows 安装版的话, 可以把 'Start POPFile in Background' 链接从 POPFile 群组里拖曳到开始选单的<b>激活</b>群组里. 那么, 每次 Windows 都将会加载 POPFile 了.
+
+<li>重要! 如果 POPFile 没有被加载的话, 邮件就不能通过了 - 而你的电子邮件程序将无法联机到邮件服务器!
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Pegasus</h3>
+
+
+
+<ul>
+
+<li>   在 Pegasus 里选择 工具->网际网络选项... 接收 (POP3) 分页. 接下来会出现 POP3 帐号设定页面.
+
+<li>   在 使用 POP3 接收信件的一边性设定 里, 选择 POP3 主机 对话盒. 把目前的 POP3 主机记下来.
+
+<li>   把 POP3 主机改为 <b>127.0.0.1</b>
+
+<li>   在 使用 POP3 接收信件的一边性设定 里, 选择 使用者名称 对话盒. 把目前的使用者名称记下来.
+
+<li>   把使用者名称改成原来的 POP3 主机名称后面接著原来的使用者名称, 并以冒号分隔.
+
+<li>   所以, 如果原来的 POP3 主机是 <b>my.mail.com</b> 而使用者名称是 <b>jdoe</b> 的话, 新的使用者名称就会是 <b>my.mail.com:jdoe</b>
+
+<li>   你并不需要变更口令.
+
+<li>   按一下 OK 按钮来储存变更.
+
+<li>确认 POPFile 正在执行, 而所有的电子邮件都会透过 POPFile 寄达!
+
+<li>你得确定任何 Widows 激活的时候 POPFile 也都一并激活了. 如果你正在使用 Windows 安装版的话, 可以把 'Start POPFile in Background' 链接从 POPFile 群组里拖曳到 开始 -> 程序 -> 激活 群组里. 那么, 每次 Windows 都将会加载 POPFile 了.
+
+</ul>
+
+
+
+</td></tr></table>
+
+
+
+<p>好. 现在我们完成了上述的步骤, 该是要来设立邮件过滤器的时候了, 这么一来当 POPFile 完成工作后, 你的电子邮件程序才能把每一封信归到正确的信件匣里.</p>
+
+
+
+<p>对于进阶的使用者来说, 你可以决定是否要变更主旨列来加入 [分类] 卷标. 这个选项在网页接口中组态分页接近最底下的地方. 不论你是否选择了这个选项, 都会加入 <b>X-Text-Classification</b> 标头.</p>
+
+
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+
+
+<td colspan=4 align="center">
+
+
+
+从底下选出属于你的电子邮件程序那一栏然后读下去. 虽然这些指引看来复杂, 但其实两分钟内就可以做完了 - 而且还很难弄错. (不过为了以防万一, 你最好还是把原有的更定值给记下来, 以备将来有需要把他们给设回去.)
+
+
+
+</td></tr><tr>
+
+
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Outlook</h3>
+
+
+
+<ul>
+
+<li>在 Outlook 里选择 工具->规则精灵... <a href=../o_filter1.gif>[屏幕快照]</a>
+
+<li>接下来会出现规则精灵.  按一下 新增... 然后选择 从空白规则开始.  <a href=../o_filter2.gif>[屏幕快照]</a>
+
+<li>Outlook 可以使用 <b>X-Text-Classification</b> 标头, 这么一来邮件过滤就会完全在幕后完成. 按一下 下一步 然后选择 <i>用讯息标头里的特定文字</i>.
+
+<li>现在按一下灰色高亮度的<i>特定文字</i>链接, 然后在出现的对话盒里输入 "X-Text-Classification: " 后面接著你的邮筒名称, 然后按下 加入, 再按 OK.
+
+<li>按一下 下一步 然后选择<i>移动到指定的信件匣</i>.
+
+<li>按一下灰色高亮度的<i>指定的</i>文字, 然后会出现一份信件匣清单.  选择任何你想要移动该邮筒内的信件的目标信件匣, 然后按 OK.
+
+<li>按一下 OK, 然后按 完成.
+
+<li>重复上述的步骤, 直到每一个邮筒都设定完毕, 然后按 OK 离开.
+
+<li>大功告成!
+
+<li>提醒你: 在 <a href="http://127.0.0.1:8080">POPFile 网页接口</a>中, 在组态分页底下, 检查一下要把修改主旨列选项<b>关闭</b>.
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+
+
+<h3 align=center>Outlook Express</h3>
+
+
+
+<ul>
+
+<li>在 Outlook Express 里选择 工具->讯息规则->邮件... <a href=../oe_filter1.gif>[屏幕快照]</a>
+
+<li>接下来会出现新增邮件规则窗口.  <a href=../oe_filter2.gif>[屏幕快照]</a>
+
+<li>Outlook Express 并不能使用 <b>X-Text-Classification</b> 标头, 所以就不能完全在幕后过滤邮件了. 于是, 请改按<i>主旨含有特定文字</i>然后按下<i>移动到特定的信件匣</i>  <a href=../oe_filter3.gif>[屏幕快照]</a>
+
+<li>现在按一下蓝色高亮度的<i>含有特定文字</i>链接, 然后会出现键入特定文字的对话窗  <a href=../oe_filter4.gif>[屏幕快照]</a>
+
+<li>输入一个邮筒名称, 并且以 [方括号] 包住, 然后按 OK.  现在按一下蓝色高亮度的<i>特定</i>, 接下来会出现移动对话窗.  按一下你想要从邮筒移动讯息到的目标信件匣, 然后按 OK.  <a href=../oe_filter5.gif>[屏幕快照]</a>
+
+<li>按一下 OK.
+
+<li>重复上述的步骤, 直到每一个邮筒都设定完毕, 然后按 OK 离开.
+
+<li>大功告成!
+
+<li>提醒你: 在 <a href="http://127.0.0.1:8080">POPFile 网页接口</a>中, 在组态分页底下, 检查一下要把修改主旨列选项<b>打开</b>.
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCCCFF" valign="top">
+
+
+
+<h3 align=center>Eudora</h3>
+
+
+
+<p>Eudora 可以用任何邮件标头来过滤邮件, 这实在太棒了 - 所有的工作都可以完全在背景完成, 而不会变更主旨列!</p>
+
+
+
+<ul>
+
+<li>选择 工具->过滤器 选单.  <a href=../e_filter1.gif>[屏幕快照]</a>
+
+<li>接下来会出现过滤器窗口.  按一下 新增 来建立新的过滤器.  <a href=../e_filter2.gif>[屏幕快照]</a>
+
+<li>在标头对话盒里键入 <b>X-Text-Classification</b> 然后再下一个对话盒里键入某个邮筒的名称. <b>不要</b>在周围加上方括号.  <a href=../e_filter3.gif>[屏幕快照]</a>
+
+<li>然后在第一个动作对话盒里选择<b>传送到</b>, 然后选择你希望该邮筒内的信件所要递送到的信箱.  <a href=../e_filter4.gif>[屏幕快照]</a>
+
+<li>重复上述的步骤, 直到每一个邮筒都设定完毕, 然后按 OK 离开.
+
+<li>关闭过滤器窗口, 当询问是否要储存变更时回答 是.
+
+<li>大功告成!
+
+<li>提醒你: 在 <a href="http://127.0.0.1:8080">POPFile 网页接口</a>中, 在组态分页底下, 检查一下要把修改主旨列选项<b>关闭</b>.
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Pegasus</h3>
+
+
+
+<ul>
+
+<li>   在 Pegasus 里选择 工具->邮件过滤规则 ->编辑新邮件过滤规则 ->信件匣开启时套用规则.
+
+<li>   接下来会出现新邮件过滤规则窗口.
+
+<li>   按一下 新规则 按钮. 接下来会出现建立一个新的过滤规则窗口.
+
+<li>   在 表示式 按钮上按一下.  请注意用表示式过滤器的话, 就算 POPFile 的修改主旨列选项被关闭了也能动. 如果你要用标头过滤器的话, 就一定要开启 POPFile 的修改主旨列选项才行.
+
+<li>   选择 如果吻合此正规表示式 对话盒
+
+<li>   输入某个邮筒的名称, 前面加上 <b>X-Text-Classification:</b>, 像是: <b>X-Text-Classification: spam</b>
+
+<li>   选择 标头或本体 圆钮
+
+<li>   从 动作 下拉式选单里选择想要做的事. 像是 移动
+
+<li>   如果被选择了像是 移动 或 转寄 的动作, 按下 设定 按钮.
+
+<li>   选择目标信件匣或者输入要转寄的地址以搭配所选的动作.
+
+<li>   按下 OK 按钮来将规则加入到规则清单里.
+
+<li>   重复上述的程序来建立所有你所需的规则.
+
+<li>   过滤规则被套用的次序能够用新邮件过滤规则窗口里的红/蓝 (上/下) 箭头加以调整.
+
+<li>   选择 储存 按钮来储存规则设定的变更.
+
+<li>   选择 OK 按钮.
+
+<li>   大功告成!
+
+</ul>
+
+
+
+</td></tr></table>
+
+
+
+<h2>这就是整件事了!... 但是...</h2>
+
+
+
+除此之外, POPFile 现在仍然不会过滤任何邮件. 为什么不会呢? <i>因为她根本不知道你所输入的邮筒到底要做甚么用.</i> 她不晓得 '垃圾 (spam)' 和 '名符其实 (genuine)' 代表著甚么, 也不知道 '工作 (work)' 跟 '私人 (personal)' 又是甚么.  她甚至不晓得你的电子邮件是以何种语言撰写而成 - 事实上她根本就不在乎这件事. 你得调教她把垃圾信从一般的电子邮件里分出来, 或者把某个项目跟其它项目加以区隔. 你可以<b>调教</b>她来做这件事 - 而<a href="training.html">我们即将开始这个工作</a>.
+
+
+
+</td></tr></table>
+
+<br>
+
+<table width=100% cellspacing=0><tr>
+
+<td width=15% align=center><font size=+1><b>网页链接:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">首页</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">讨论区</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">瑕疵数据库</a></b></font></td>
+
+<td width=55%>&nbsp;</td></tr>
+
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+
+<tr height=1><td colspan=10></td></tr>
+
+</table>
+
+
+
+</body></html>

@@ -1,0 +1,73 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><meta http-equiv="Content-Language" content="zh-cn" /><title>POPFile 文件集</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile 文件集</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>初次设定:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>步骤 1<br><font size=+1><b>&nbsp;<a href="installing.html">安装</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>步骤 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">设立邮筒</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>步骤 3<br><font size=+1><b>&nbsp;<a href="email.html">电子邮件程序</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>步骤 4<br><font size=+1><b>&nbsp;<a href="training.html">调教</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>搭配 POPFile 一并使用:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">防火墙</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">保全口令认证 (SPA)</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">其它代理服务器</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">多重电子邮件帐号</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+<h2>搭配 POPFile 一并使用保全口令认证 (SPA)</h2>
+
+<p>到网页接口的安全分页, 输入你用保全口令认证加以保护的服务器名称跟连接埠. 一旦完成后, 你就祇需要到邮件程序里把服务器名称改成 127.0.0.1 就行了 - 你并不需要去更动使用者名称字段.</p>
+
+<p>很不幸地, 目前你祇能在每一份安装好的 POPFile 里使用一个 SPA 帐号.</p>
+
+<h2>关于 MSN 保全口令认证的批注</h2>
+
+<ol>
+<li> 你得要用下列的指令来激活 POPFile (请正确地逐一键入)
+<blockquote><b>perl popfile.pl -port 110 -server pop3.email.msn.com -sport 110</b></blockquote>
+
+<li> 在你的帐号, 服务器页面, 确认你有著下列信息:
+<p>
+收信邮件服务器: 127.0.0.1<br>
+帐号名称: 在这里祇需要填入你的_MSN_帐号名称就好
+<p>
+请确认你核选了 "以保全口令认证登入"
+<p>
+在进阶分页里, 确认你的收信邮件连接埠被设成 110 而且 *没有核选* "这个服务器需要使用保全联机 (SSL)".
+<p>
+<li> 现在你应该可以在 "邮件图标下拉式选单" 里点击帐号名称来检查邮件了.
+</ol>
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>网页链接:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">首页</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">讨论区</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">瑕疵数据库</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>

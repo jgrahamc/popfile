@@ -1,0 +1,73 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><meta http-equiv="Content-Language" content="zh-tw" /><title>POPFile 文件集</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile 文件集</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>初次設定:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>步驟 1<br><font size=+1><b>&nbsp;<a href="installing.html">安裝</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>步驟 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">設立郵筒</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>步驟 3<br><font size=+1><b>&nbsp;<a href="email.html">電子郵件程式</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>步驟 4<br><font size=+1><b>&nbsp;<a href="training.html">調教</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>搭配 POPFile 一併使用:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">防火牆</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">保全密碼認證 (SPA)</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">其他代理伺服器</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">多重電子郵件帳號</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+<h2>搭配 POPFile 一併使用保全密碼認證 (SPA)</h2>
+
+<p>到網頁介面的安全分頁, 輸入妳用保全密碼認證加以保護的伺服器名稱跟連接埠. 一旦完成後, 妳就祇需要到郵件程式裏把伺服器名稱改成 127.0.0.1 就行了 - 妳並不需要去更動使用者名稱欄位.</p>
+
+<p>很不幸地, 目前妳祇能在每一份安裝好的 POPFile 裏使用一個 SPA 帳號.</p>
+
+<h2>關於 MSN 保全密碼認證的註解</h2>
+
+<ol>
+<li> 妳得要用下列的指令來啟動 POPFile (請正確地逐一鍵入)
+<blockquote><b>perl popfile.pl -port 110 -server pop3.email.msn.com -sport 110</b></blockquote>
+
+<li> 在妳的帳號, 伺服器頁面, 確認妳有著下列資訊:
+<p>
+收信郵件伺服器: 127.0.0.1<br>
+帳號名稱: 在這裡祇需要填入妳的_MSN_帳號名稱就好
+<p>
+請確認妳核選了 "以保全密碼認證登入"
+<p>
+在進階分頁裏, 確認妳的收信郵件連接埠被設成 110 而且 *沒有核選* "這個伺服器需要使用保全連線 (SSL)".
+<p>
+<li> 現在妳應該可以在 "郵件圖示下拉式選單" 裏點擊帳號名稱來檢查郵件了.
+</ol>
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>網頁鏈結:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">首頁</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">討論區</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">瑕疵資料庫</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>

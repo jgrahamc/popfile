@@ -1,0 +1,87 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><meta http-equiv="Content-Language" content="zh-tw" /><title>POPFile 文件集</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile 文件集</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>初次設定:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%>步驟 1<br><font size=+1><b>&nbsp;<a href="installing.html">安裝</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>步驟 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">設立郵筒</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>步驟 3<br><font size=+1><b>&nbsp;<a href="email.html">電子郵件程式</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>步驟 4<br><font size=+1><b>&nbsp;<a href="training.html">調教</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>搭配 POPFile 一併使用:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">防火牆</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">保全密碼認證 (SPA)</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">其他代理伺服器</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">多重電子郵件帳號</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+<h2>安裝 POPFile</h2>
+
+<p>POPFile 有兩種版本 - 一種是容易安裝的 Windows 版, 另一種是給技術人員安裝的跨平台版. 不過裝好之後, 這兩個版本將會一模一樣.</p>
+
+<h3>容易安裝的 Windows 版</h3>
+
+<p>從 <a href=http://sourceforge.net/project/showfiles.php?group_id=63137>POPFile 下載頁面</a>取得 Windows 安裝檔, 然後執行 <tt>setup.exe</tt> 並按照那裡的指示繼續下去. 妳可以從開始選單 (開始 > 程式 > POPFile > Run POPFile in Background) 來啟動 POPFile, 或者重新開機後她就會自動跑起來. <b>重要:</b> 啥也不會出現在妳的螢幕上! 如果妳想要檢查看看她是否正確地被執行了, 請閱讀底下的 "存取 POPFile" 段落.</p>
+
+<h4>系統需求</h4>
+
+<p>妳需要一些東西纔能讓 POPFile 開始動起來.</p>
+<ol>
+<li>最新釋出的 POPFile.</li>
+<li>使用 POP3 通訊協定的電子郵件帳號 (多數的帳號都是; 不過如果沒有額外的軟體相助, 妳將不能搭配 POPFile 一併使用像是 Hotmail 和 Yahoo! Mail 這類的網頁郵件服務)</li>
+<li>大約 2MB 左右的硬碟空間</li>
+</ol>
+
+<p>妳可以在 <a href="http://sourceforge.net/project/showfiles.php?group_id=63137">POPFile
+下載頁面</a>套件清單的最上面取得最新釋出的 POPFile 的 zip 格式壓縮檔. Windows 使用者祇會想要抓被放在 Windows 檔區裏的檔案.</p>
+<p>POPFile 本身祇會佔據大約 1 MB 再多一點空間而已. 用來分類電子郵件的字表 (又被稱做屍體) 還會佔掉額外的一些空間, 不過這會依妳如何調教 POPFile, 以及妳所建立的郵筒數量而有所不同. </p>
+
+<h3>跨平台版</h3>
+
+<p>首先要在妳的機器上把 <a href="http://www.perl.com">Perl</a> 給跑起來, 然後從 <a href=http://popfile.sourceforge.net/>POPFile 首頁</a>下載 POPFile Perl 腳本的 zip 壓縮檔, 並解開到妳所指定的目錄裏. 在 Windows 平台上的話, 就用 <tt>perl popfile.pl</tt> 這個指令來加以啟動.
+
+<hr>
+
+<h2>檢查 POPFile 是否正確地跑起來了</h2>
+
+<p>POPFile 沒有多數程式的那種傳統介面 - 妳其實是用妳自己的網頁瀏覽器來對她加以存取的. 別擔心 - 除非妳首肯, 否則妳機器外的任何人都沒辦法碰到她.</p>
+
+<p>要載入 POPFile 的話, 請連到 <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a>, 或者 (對 Windows 版的使用者來說) 在開始選單裏的 'POPFile Web Interface' 按一下. <b>重要</b>: 如果, 在 Windows 的安裝過程中, 妳選擇要用其他的連接埠來跟 POPFile 交談的話, 請把這裏的 "8080" 換成任何妳所挑選的數字.</p>
+
+<p>如果妳得到錯誤訊息的話, 請先檢查 POPFile 是否真的已經跑起來了, 然後看看連接埠號碼是否正確 (她應該要是 8080 纔對, 但是如果妳曾變更過, 那麼妳就得一併變更妳所要連的網址.)</p>
+
+<p>如果妳看到 POPFile 畫面的話, 恭喜啦! 現在妳可以開始設定要如何分類郵件了. <a href="firsttime.html">讓咱們繼續設定郵筒吧. &gt;&gt;</a></p>
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>網頁鏈結:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">首頁</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">討論區</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">瑕疵資料庫</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>
