@@ -35,15 +35,15 @@
             <li class="<TMPL_VAR NAME="Common_Middle_Tab2">">
                 <a class="menuLink" href="/magnets?session=<TMPL_VAR NAME="Session_Key">&amp;start_magnet=0"><TMPL_VAR NAME="Localize_Header_Magnets"></a>
             </li>
-            <li class="<TMPL_VAR NAME="Common_Middle_Tab3">">
-                <a class="menuLink" href="/configuration?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Configuration"></a>
-            </li>
+
+            <TMPL_IF NAME="Common_Middle_If_CanAdmin">
             <li class="<TMPL_VAR NAME="Common_Middle_Tab4">">
-                <a class="menuLink" href="/security?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Security"></a>
+                <a class="menuLink" href="/administration?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Administration"></a>
             </li>
             <li class="<TMPL_VAR NAME="Common_Middle_Tab5">">
                 <a class="menuLink" href="/advanced?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Advanced"></a>
             </li>
+            </TMPL_IF>
          </ul>
     </div>
 

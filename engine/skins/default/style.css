@@ -69,6 +69,11 @@ td.logo2menuSpace {
   width: 8%;
 }
 
+.menuLink {
+  display: block;
+  width: 100%;
+}
+
 /*********************************************************/
 /* Table Settings */
 
@@ -223,10 +228,6 @@ table.historyWidgetsBottom {
   text-align: left;
 }
 
-.advancedWidgets {
-  margin-top: 1em;
-}
-
 /*********************************************************/
 /* Config Bars */
 
@@ -245,11 +246,11 @@ table.historyWidgetsBottom {
 }
 
 .configBarOption {
-  display: inline;
   border: 1px solid #CCCC99;
+  margin: 0.3em;
   padding: 0.3em;
-  margin: 0.1em 0.3em;
   white-space: nowrap;
+  display: inline;
   float: left;
 }
 
@@ -258,6 +259,6 @@ table.historyWidgetsBottom {
   border: 0;
 }
 
-.checkLabel { 
+.checkLabel {
   border: 1px solid #CCCC99;
 }

@@ -18,7 +18,7 @@
                             <span class="securityWidgetStateOff">
                                 <TMPL_VAR NAME="Localize_Security_NoStealthMode">
                             </span>
-                            <input type="submit" class="toggleOn" id="securityAcceptHTTPOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
+                            <input type="submit" class="submit toggleOn" id="securityAcceptHTTPOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
                             <input type="hidden" name="localui" value="1" />
 
                             <TMPL_ELSE>
@@ -26,7 +26,7 @@
                             <span class="securityWidgetStateOn">
                                 <TMPL_VAR NAME="Localize_Yes">
                             </span>
-                            <input type="submit" class="toggleOff" id="securityAcceptHTTPOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo"> <TMPL_VAR NAME="Localize_Security_StealthMode">" />
+                            <input type="submit" class="submit toggleOff" id="securityAcceptHTTPOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo"> <TMPL_VAR NAME="Localize_Security_StealthMode">" />
                             <input type="hidden" name="localui" value="2" />
 
                             </TMPL_IF>
@@ -55,13 +55,13 @@
                             <span class="securityWidgetStateOn">
                                 <TMPL_VAR NAME="Localize_Yes">
                             </span>
-                            <input type="submit" class="toggleOff" id="securityUpdateCheckOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
+                            <input type="submit" class="submit toggleOff" id="securityUpdateCheckOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
                             <input type="hidden" name="update_check" value="1" />
 
                             <TMPL_ELSE>
 
                             <span class="securityWidgetStateOff"><TMPL_VAR NAME="Localize_No"></span>
-                            <input type="submit" class="toggleOn" id="securityUpdateCheckOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
+                            <input type="submit" class="submit toggleOn" id="securityUpdateCheckOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
                             <input type="hidden" name="update_check" value="2" />
 
                             </TMPL_IF>
@@ -83,7 +83,7 @@
                             <span class="securityWidgetStateOn">
                                 <TMPL_VAR NAME="Localize_Yes">
                             </span>
-                            <input type="submit" class="toggleOff" id="securitySendStatsOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
+                            <input type="submit" class="submit toggleOff" id="securitySendStatsOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
                             <input type="hidden" name="send_stats" value="1" />
 
                             <TMPL_ELSE>
@@ -91,7 +91,7 @@
                             <span class="securityWidgetStateOff">
                                 <TMPL_VAR NAME="Localize_No">
                             </span>
-                            <input type="submit" class="toggleOn" id="securitySendStatsOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
+                            <input type="submit" class="submit toggleOn" id="securitySendStatsOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
                             <input type="hidden" name="send_stats" value="2" />
 
                             </TMPL_IF>

@@ -38,7 +38,7 @@
                 <TMPL_LOOP NAME="bar_loop_total_xaxis">
                 <TMPL_IF NAME="bar_if_percent">
 
-                <td bgcolor="<TMPL_VAR NAME="bar_bucket_color">" title="<TMPL_VAR NAME="bar_bucket_name2"> (<TMPL_VAR NAME="bar_width">)" width="<TMPL_VAR NAME="bar_width">%">
+                <td bgcolor="<TMPL_VAR NAME="bar_bucket_color">" title="<TMPL_VAR NAME="bar_bucket_name2"> (<TMPL_VAR NAME="bar_width">)" width="<TMPL_VAR NAME="bar_width">%" height="20">
                     <img src="<TMPL_VAR NAME="Skin_Root">pix.gif" alt="" height="20" width="1" />
                 </td>
 

@@ -125,7 +125,7 @@
             </TMPL_LOOP>
 
             <th scope="col" align="center">
-                <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
+                <input type="submit" class="submit reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
             </th>
 
         </tr>
@@ -190,7 +190,7 @@
 
                 <TMPL_IF NAME="History_If_Reclassified">
                 <TMPL_VAR NAME="Localize_History_Reclassified">
-                <input type="submit" class="undoButton" name="undo_<TMPL_VAR NAME="History_I">" value="<TMPL_VAR NAME="Localize_Undo">" />
+                <input type="submit" class="submit undoButton" name="undo_<TMPL_VAR NAME="History_I">" value="<TMPL_VAR NAME="Localize_Undo">" />
 
                 <TMPL_ELSE>
 
@@ -242,7 +242,7 @@
                 <input type="submit" class="submit removeButton" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll"> (<TMPL_VAR NAME="History_Count">)" />
             </td>
             <td align="center">
-                <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
+                <input type="submit" class="submit reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
             </td>
         </tr>
     </table>

@@ -176,7 +176,7 @@
                 <td colspan="4">
                 </td>
                 <td>
-                    <input type="submit" name="bucket_settings" value="<TMPL_VAR NAME="Localize_ApplyChanges">" />
+                    <input type="submit" class="submit" name="bucket_settings" value="<TMPL_VAR NAME="Localize_ApplyChanges">" />
                 </td>
             </tr>
         </table>
@@ -247,7 +247,7 @@
                             <TMPL_IF NAME="Corpus_If_Last_Reset">
 
                             <br />
-                            (<TMPL_VAR NAME="Localize_Bucket_LastReset">: <TMPL_VAR NAME="Corpus_Last_Reset"> )
+                            <TMPL_VAR NAME="Localize_Bucket_LastReset">: <TMPL_VAR NAME="Corpus_Last_Reset">
 
                             </TMPL_IF>
 

@@ -167,7 +167,7 @@ Configuration_LoggerOutput              Logger output
 Configuration_GeneralSkins              Skins
 Configuration_SmallSkins                Small Skins
 Configuration_TinySkins                 Tiny Skins
-Configuration_CurrentLogFile            &lt;current log file&gt;
+Configuration_CurrentLogFile            &lt;View current log file&gt;
 Configuration_SOCKSServer               SOCKS V proxy host
 Configuration_SOCKSPort                 SOCKS V proxy port
 Configuration_SOCKSPortUpdate           Updated SOCKS V proxy port to %s

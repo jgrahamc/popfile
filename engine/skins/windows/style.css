@@ -272,21 +272,6 @@ td.stabColor01 {
   border: 1px outset ActiveBorder;
 }
 
-td.accuracy0to49 {
-  background-color: red;
-  color: black;
-}
-
-td.accuracy50to93 {
-  background-color: yellow;
-  color: black;
-}
-
-td.accuracy94to100 {
-  background-color: green;
-  color: black;
-}
-
 td.historyNavigatorTop {
   text-align: right;
   padding-right: 0.5em;
@@ -359,6 +344,29 @@ span.graphFont {
 
 tr.rowBoundary {
   background-color: InfoBackground;
+}
+
+table.settingsTable + br {
+  display: none;
+}
+
+.configBar {
+  border: 2px groove ActiveBorder;
+  background-color: transparent;
+}
+
+.configBarOption {
+  border: 2px groove ActiveBorder;
+  margin: 0.3em;
+  padding: 5px;
+  white-space: nowrap;
+  display: inline;
+  float: left;
+}
+
+.toggleConfigBar {
+  float: right;
+  border: 0;
 }
 
 /* - uncomment this section if you want On text to be bold

@@ -73,10 +73,10 @@
             <td>
             </td>
             <td align="center">
-                <input type="submit" class="deleteButton" name="update" value="<TMPL_VAR NAME="Localize_Update">" />
+                <input type="submit" class="submit deleteButton" name="update" value="<TMPL_VAR NAME="Localize_Update">" />
             </td>
             <td align="center">
-                <input type="submit" class="deleteButton" name="delete" value="<TMPL_VAR NAME="Localize_Remove">" />
+                <input type="submit" class="submit deleteButton" name="delete" value="<TMPL_VAR NAME="Localize_Remove">" />
             </td>
         </tr>
     </table>

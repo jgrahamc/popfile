@@ -68,7 +68,7 @@
                 <span class="securityWidgetStateOff">
                     <TMPL_VAR NAME="Localize_No">
                 </span>
-                <input type="submit" class="toggleOn" id="windowTrayIconOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
+                <input type="submit" class="submit toggleOn" id="windowTrayIconOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
                 <input type="hidden" name="pop3_force_fork" value="1" />
                 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
             </form>
@@ -79,7 +79,7 @@
                 <span class="securityWidgetStateOn">
                     <TMPL_VAR NAME="Localize_Yes">
                 </span>
-                <input type="submit" class="toggleOff" id="windowTrayIconOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
+                <input type="submit" class="submit toggleOff" id="windowTrayIconOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
                 <input type="hidden" name="pop3_force_fork" value="0" />
                 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
             </form>

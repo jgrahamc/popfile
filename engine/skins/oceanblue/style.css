@@ -105,6 +105,10 @@ input {
   padding: 0;
 }
 
+.settingsTable + br {
+  display: none;
+}
+
 .settingsPanel {
   color: white;
   border: 0;
@@ -368,3 +372,25 @@ a:link:hover, a:visited:hover {
 /* Hide Tan Hack from IE5-mac \*/
 * html .shell  {height: 1%;}
 /* End hide from IE5-mac */
+
+.configBar {
+  background-color: transparent;
+}
+
+.configBar td {
+  border: 1px solid #2175bc;
+}
+
+.configBarOption {
+  border: 1px solid #2175bc;
+  margin: 0.3em;
+  padding: 5px;
+  white-space: nowrap;
+  display: inline;
+  float: left;
+}
+
+.toggleConfigBar {
+  float: right;
+  border: 0;
+}

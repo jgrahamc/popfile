@@ -23,7 +23,7 @@
                 </TMPL_LOOP>
 
             </table>
-
+            <p />
             <div class="advancedWidgets">
                 <form action="/advanced" method="post">
                     <label class="advancedLabel" for="advancedAddWordText"><TMPL_VAR NAME="Localize_Advanced_AddWord">:</label><br />
