@@ -486,7 +486,7 @@ sub html_common_bottom
     
     my $result = "<table class=\"footer\">\n<tr>\n" ;
     $result .= "<td class=\"footerBody\">\n" ;
-    $result .= "POPFile $self->{configuration}{major_version}.$self->{configuration}{minor_version}" ;
+    $result .= "POPFile $self->{configuration}{major_version}.$self->{configuration}{minor_version}." ;
     $result .= "$self->{configuration}{build_version} - \n" ;
     $result .= "<a class=\"bottomLink\" href=\"manual/$self->{language}{LanguageCode}/manual.html\">\n" ;
     $result .= "$self->{language}{Footer_Manual}</a> - \n" ;
@@ -2061,8 +2061,8 @@ sub history_page
 
         load_history_cache( $self, $self->{form}{filter}, '', $self->{form}{sort}) if ( history_cache_empty( $self ) );
 
-        foreach my $i ($self->{history_keys}) {
-            my $mail_file = $self->{history}{$i}{file};
+        foreach my $i (0..history_size($self)-1) {
+            my $mail_file = $self->{history}{$self->{history_keys}[$i]}{file};
             my $class_file = $mail_file;
             $class_file =~ s/msg$/cls/;
             unlink("$self->{configuration}->{configuration}{msgdir}$mail_file");
@@ -2070,7 +2070,7 @@ sub history_page
         }
 
         $self->{history_invalid} = 1;        
-        http_redirect( $self, $client,"/history?session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}");
+        http_redirect( $self, $client,"/history?session=$self->{session_key}&sort=$self->{form}{sort}&filter=$self->{form}{filter}");
         return;
     }
 
