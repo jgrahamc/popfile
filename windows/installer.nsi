@@ -246,6 +246,9 @@ update_config:
   SetOutPath $INSTDIR\Proxy
   File "..\engine\Proxy\Proxy.pm"
   File "..\engine\Proxy\POP3.pm"
+  SetOutPath $INSTDIR\Platform
+  File "..\engine\Platform\MSWin32.pm"
+  File "..\engine\Platform\POPFileIcon.dll"
   SetOutPath $INSTDIR\UI
   File "..\engine\UI\HTML.pm"
   File "..\engine\UI\HTTP.pm"
@@ -290,6 +293,15 @@ update_config:
 
   SetOutPath $INSTDIR\MIME
   File "C:\Perl58\lib\MIME\*"
+
+  SetOutPath $INSTDIR\Win32
+  File "C:\Perl58\site\lib\Win32\API.pm"
+
+  SetOutPath $INSTDIR\Win32\API
+  File "C:\Perl58\site\lib\Win32\API\*.pm"
+
+  SetOutPath $INSTDIR\auto\Win32\API
+  File "C:\Perl58\site\lib\auto\Win32\API\*"
 
   SetOutPath $INSTDIR\IO
   File "C:\Perl58\lib\IO\*"
@@ -1050,6 +1062,9 @@ skip_registry_restore:
   FileClose ${CFG}
   Delete $INSTDIR\popfile.reg
 
+  Delete $INSTDIR\Platform\*.pm
+  Delete $INSTDIR\Platform\*.dll
+  RMDir $INSTDIR\Platform
   Delete $INSTDIR\Proxy\*.pm
   RMDir $INSTDIR\Proxy
   Delete $INSTDIR\UI\*.pm
@@ -1075,7 +1090,14 @@ skip_registry_restore:
   RMDir $INSTDIR\languages
   RMDir /r $INSTDIR\corpus
   Delete $INSTDIR\stopwords
+  RMDir /r $INSTDIR\messages
 
+  Delete $INSTDIR\Win32\API\*
+  RmDir /r $INSTDIR\Win32\API
+  Delete $INSTDIR\Win32\*
+  RmDir /r $INSTDIR\Win32
+  Delete $INSTDIR\auto\Win32\API\*
+  RmDir /r $INSTDIR\auto\Win32\API
   Delete $INSTDIR\MIME\*.*
   RMDir  $INSTDIR\MIME
   Delete $INSTDIR\IO\*.*
