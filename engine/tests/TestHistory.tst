@@ -170,7 +170,6 @@ my $size2 = -s $file;
 
 sleep(2);
 
-
 # This is a message for testing evil spammer header tricks or 
 # unusual header malformations that may end up parsed into our
 # history database
@@ -503,12 +502,13 @@ $h->stop_deleting();
 test_assert( !( -e $file ) );
 
 $h->set_query( $q, '', '', '', 0 );
-test_assert_equal( $h->get_query_size( $q ), 2 );
+test_assert_equal( $h->get_query_size( $q ), 3 );
 
-@rows = $h->get_query_rows( $q, 1, 2 );
-test_assert_equal( $#rows, 1 );
+@rows = $h->get_query_rows( $q, 1, 3 );
+test_assert_equal( $#rows, 2 );
 test_assert_equal( $rows[0][1], 'Another Person' );
-test_assert_equal( $rows[1][1], 'John Graham-Cumming <nospam@jgc.org>' );
+test_assert_equal( $rows[1][1], 'Evil Spammer who does tricks <nospam@jgc.org>' );
+test_assert_equal( $rows[2][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
 # Now try history cleanup, should leave nothing
 
