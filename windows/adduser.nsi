@@ -157,7 +157,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.13"
+  !define C_PFI_VERSION  "0.2.14"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -1298,7 +1298,7 @@ exit:
 SectionEnd
 
 #--------------------------------------------------------------------------
-# Installer Section: UI Languages component
+# Installer Section: UI Languages component (always 'installed')
 #
 # The installer will attempt to preset the POPFile UI
 # language to match the language used for the installation. The 'UI_LANG_CONFIG' macro
@@ -1402,6 +1402,75 @@ lang_done:
 
   !undef L_CFG
   !undef L_LANG
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Installer Section: MakeBatchFile (always 'installed')
+#
+# Since we only create environment variables 'on the fly' on Win9x systems, this simple batch
+# file is provided to make it easier to run POPFile from the command-line (e.g. to help debug
+# problems).
+#--------------------------------------------------------------------------
+
+Section "-MakeBatchFile" SecMakeBatch
+
+  !define L_FILEHANDLE      $R9
+  !define L_POPFILE_ROOT    $R8
+  !define L_POPFILE_USER    $R7
+  !define L_TIMESTAMP       $R6
+
+  Push ${L_FILEHANDLE}
+  Push ${L_POPFILE_ROOT}
+  Push ${L_POPFILE_USER}
+  Push ${L_TIMESTAMP}
+
+  Call GetDateTimeStamp
+  Pop ${L_TIMESTAMP}
+
+  ReadEnvStr ${L_POPFILE_ROOT} "POPFILE_ROOT"
+  ReadEnvStr ${L_POPFILE_USER} "POPFILE_USER"
+
+  SetFileAttributes "$G_USERDIR\pfi-run.bat" NORMAL
+  FileOpen ${L_FILEHANDLE} "$G_USERDIR\pfi-run.bat" w
+
+  FileWrite ${L_FILEHANDLE} "@echo off$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM Simple batch file to run POPFile (for '$G_WINUSERNAME' user)$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM Created by 'Add POPFile User' v${C_PFI_VERSION} on ${L_TIMESTAMP}$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM POPFile program location = $G_ROOTDIR$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "set POPFILE_ROOT=${L_POPFILE_ROOT}$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM POPFile User Data folder = $G_USERDIR$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "set POPFILE_USER=${L_POPFILE_USER}$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM Do not try to use the 'Debug' and 'Normal' commands at the same time!$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM Debug command: Start POPFile in foreground using 'popfile.pl'$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\perl.exe$\" $\"%POPFILE_ROOT%\popfile.pl$\"$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM Normal command: Start POPFile using the settings in 'popfile.cfg'$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM $\"%POPFILE_ROOT%\popfile.exe$\"$\r$\n"
+
+  FileClose ${L_FILEHANDLE}
+
+  Pop ${L_TIMESTAMP}
+  Pop ${L_POPFILE_USER}
+  Pop ${L_POPFILE_ROOT}
+  Pop ${L_FILEHANDLE}
+
+  !undef L_FILEHANDLE
+  !undef L_POPFILE_ROOT
+  !undef L_POPFILE_USER
+  !undef L_TIMESTAMP
 
 SectionEnd
 
@@ -4870,6 +4939,8 @@ Section "un.User Config" UnSecConfig
   Delete "$G_USERDIR\stopwords"
   Delete "$G_USERDIR\stopwords.bak"
   Delete "$G_USERDIR\stopwords.default"
+
+  Delete "$G_USERDIR\pfi-run.bat"
 
 SectionEnd
 
