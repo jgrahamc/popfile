@@ -125,9 +125,9 @@ Configuration_TCPTimeout                Tempo Limite de Conexão
 Configuration_TCPTimeoutSecs            Tempo limite de conexão em segundos
 Configuration_TCPTimeoutUpdate          Alterado o tempo limite de conexão para %s
 Configuration_ClassificationInsertion   Inserção de Texto na Mensagem
-Configuration_SubjectLine               Modificação de linha de assunto
-Configuration_XTCInsertion              Cabeçalho X-Text-Classification
-Configuration_XPLInsertion              Cabeçalho X-POPFile-Link
+Configuration_SubjectLine               Modificação de<br>linha de assunto
+Configuration_XTCInsertion              Cabeçalho<br>X-Text-Classification
+Configuration_XPLInsertion              Cabeçalho<br>X-POPFile-Link
 Configuration_Logging                   Logging
 Configuration_None                      Nada
 Configuration_ToScreen                  Na Tela
@@ -157,7 +157,7 @@ History_Filter                          &nbsp;(apenas mostrando o balde <font co
 History_FilterBy                        Filtrar Por
 History_Search                          &nbsp;(procurado por remetente/assunto %s)
 History_Title                           Mensagens Recentes
-History_Jump                            Ir para a mensagem
+History_Jump                            Ir para a página
 History_ShowAll                         Exibir Tudo
 History_ShouldBe                        Deveria ser
 History_NoFrom                          sem linha de
