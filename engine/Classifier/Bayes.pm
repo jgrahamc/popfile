@@ -12,6 +12,9 @@ use locale;
 use Classifier::MailParse;
 use Classifier::WordMangle;
 
+# A handy variable containing the value of an EOL for Unix systems
+my $eol = "\015\012";
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -609,6 +612,176 @@ sub classify_file
         return "unclassified";
     } else {
         return $ranking[0];
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# classify_and_modify
+#
+# This method reads an email terminated by . on a line by itself (or the end of stream)
+# from a handle and creates an entry in the history, outputting the same email on another
+# handle with the appropriate header modifications and insertions
+#
+# $mail     - an open stream to read the email from
+# $client   - an open stream to write the modified email to
+# $dcount   - the unique download count for this message
+# $mcount   - the message count for this message
+# $nosave   - indicates that the message downloaded should not be saved in the history
+# $class    - if we already know the classification
+#
+# ---------------------------------------------------------------------------------------------
+sub classify_and_modify
+{
+    my ( $self, $mail, $client, $dcount, $mcount, $nosave, $class ) = @_;
+    
+    my $msg_subject     = '';     # The message subject
+    my $msg_head_before = '';     # Store the message headers that come before Subject here
+    my $msg_head_after  = '';     # Store the message headers that come after Subject here
+    my $msg_body        = '';     # Store the message body here
+
+    # These two variables are used to control the insertion of the X-POPFile-TimeoutPrevention
+    # header when downloading long or slow emails
+    my $last_timeout   = time;
+    my $timeout_count  = 0;
+
+    # Indicates whether the first time through the receive loop we got the full body, this
+    # will happen on small emails
+    my $got_full_body  = 0;
+
+    # The size of the message downloaded so far.
+    my $message_size   = 0;
+
+    # The classification for this message
+    my $classification = '';
+
+    # Whether we are currently reading the mail headers or not
+    my $getting_headers = 1;
+
+    my $temp_file  = "messages/popfile$dcount" . "=$mcount.msg";
+    my $class_file = "messages/popfile$dcount" . "=$mcount.cls";
+    $self->{configuration}->{configuration}{mcount}     += 1 if ( !$nosave );
+    $self->{ui}->{history_invalid}                       = 1 if ( !$nosave );
+
+    $self->{logger}->debug( "Writing $temp_file" );
+
+    open TEMP, ">$temp_file";
+    binmode TEMP;
+
+    while ( <$mail> ) {   
+        my $line;
+
+        $line = $_;
+
+        # Check for an abort
+        last if ( $self->{alive} == 0 );
+
+        # The termination of a message is a line consisting of exactly .CRLF so we detect that
+        # here exactly
+        if ( $line =~ /^\.(\r\n|\r|\n)$/ ) {
+            $got_full_body = 1;
+            last;
+        }
+
+        if ( $getting_headers )  {
+            if ( $line =~ /[A-Z0-9]/i )  {
+                $message_size += length $line;                                        
+                print TEMP $line;
+
+                if ( $self->{configuration}->{configuration}{subject} )  {
+                    if ( $line =~ /Subject:(.*)/i )  {
+                        $msg_subject = $1;
+                        $msg_subject =~ s/(\012|\015)//g;
+                        next;
+                    } 
+                }
+
+                # Strip out the X-Text-Classification header that is in an incoming message
+                if ( ( $line =~ /X-Text-Classification:/i ) == 0 ) {
+                    if ( $msg_subject eq '' )  {
+                        $msg_head_before .= $line;
+                    } else {
+                        $msg_head_after  .= $line;
+                    }
+                }
+            } else {
+                print TEMP $eol;
+                $getting_headers = 0;
+            }
+        } else {
+            $message_size += length $line;
+            print TEMP $line;
+            $msg_body .= $line;
+        }
+
+        # Check to see if too much time has passed and we need to keep the mail client happy
+        if ( time > ( $last_timeout + 2 ) ) {
+            print $client "X-POPFile-TimeoutPrevention: $timeout_count$eol" if ( !$nosave );
+            $timeout_count += 1;
+            $last_timeout = time;
+        }
+
+        last if ( ( $message_size > 100000 ) && ( $getting_headers == 0 ) );
+    }
+
+    close TEMP;
+
+    # Do the text classification and update the counter for that bucket that we just downloaded
+    # an email of that type
+    $classification = ($class ne '')?$class:$self->classify_file($temp_file);
+    if ( !$nosave ) {
+        $self->{parameters}{$classification}{count} += 1 if ( $classification ne 'unclassified' );
+    }
+
+    # Add the Subject line modification or the original line back again
+    if ( $self->{configuration}->{configuration}{subject} && ( $msg_subject ne '' ) ) {
+        # Don't add the classification unless it is not present
+        if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $self->{parameters}{$classification}{subject} == 1 ) )  {
+            $msg_head_before .= "Subject: [$classification]$msg_subject$eol";
+        } else {
+            $msg_head_before .= "Subject:$msg_subject$eol";
+        }
+    }
+
+    if ( $nosave ) {
+        unlink( $temp_file );
+    }
+
+    # Add the XTC header
+    $msg_head_after .= "X-Text-Classification: $classification$eol" if ( $self->{configuration}->{configuration}{xtc} );
+
+    # Add the XPL header
+    $temp_file =~ s/messages\/(.*)/$1/;
+
+    if ( $self->{configuration}->{configuration}{xpl} ) {
+        $msg_head_after .= "X-POPFile-Link: <http://";
+        $msg_head_after .= $self->{configuration}->{configuration}{localpop}?"127.0.0.1":$self->{hostname};
+        $msg_head_after .= ":$self->{configuration}->{configuration}{ui_port}/jump_to_message?view=$temp_file>$eol";
+    }
+
+    $msg_head_after .= "$eol";
+
+    # Echo the text of the message to the client
+    if ( !$nosave ) {
+        print $client $msg_head_before;
+        print $client $msg_head_after;
+        print $client $msg_body;
+    }
+    
+    if ( $got_full_body == 0 )    {   
+        echo_to_dot( $self, $mail, $client ) if ( !$nosave );   
+    } else {   
+        print $client ".$eol" if ( !$nosave );    
+    } 
+
+    if ( !$nosave ) {
+        open CLASS, ">$class_file";
+        if ( $self->{magnet_used} == 0 )  {
+            print CLASS "$classification$eol";
+        } else {
+            print CLASS "$classification MAGNET $self->{magnet_detail}$eol";
+        }
+        close CLASS;
     }
 }
 
