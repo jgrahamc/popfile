@@ -17,60 +17,73 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 
-.PHONY: all build
+.PHONY: all build clean
 
-include ..\engine\vars.mak
+ENGINE=../engine
+include $(ENGINE)/vars.mak
 
 MAKENSIS_VERSION_STRING:=/DC_POPFILE_MAJOR_VERSION=$(POPFILE_MAJOR_VERSION) /DC_POPFILE_MINOR_VERSION=$(POPFILE_MINOR_VERSION) /DC_POPFILE_REVISION=$(POPFILE_REVISION) /DC_POPFILE_RC=$(RC)
 
-MAKENSIS=makensis.exe $(MAKENSIS_VERSION_STRING) /V2 $<
+MAKENSIS=echo Making $@ ; makensis.exe $(MAKENSIS_VERSION_STRING) /V2 /O$(patsubst %.exe,%.log,$@) $<
 BUILD_ZIP=wzzip -P $(POPFILE_WINDOWS_ZIP) -a $^
+
+SETUP=setup.exe
+INSTALLER=installer.exe
+RUNPOPFILE=runpopfile.exe
+ADDUSER=adduser.exe
+MONITORCC=monitorcc.exe
+STOP_PF=stop_pf.exe
+MSGCAPTURE=msgcapture.exe
+RUNSQLITE=runsqlite.exe
+
+ALLEXES := $(SETUP) $(INSTALLER) $(RUNPOPFILE) $(ADDUSER) $(MONITORCC) $(STOP_PF) $(MSGCAPTURE) $(RUNSQLITE) $(POPFILE_WINDOWS_ZIP)
 
 all: build
 build: $(POPFILE_WINDOWS_ZIP)
-$(POPFILE_WINDOWS_ZIP): setup.exe
+$(POPFILE_WINDOWS_ZIP): $(SETUP)
 	rm -f $@
 	$(BUILD_ZIP)
+clean:
+	@rm -f $(ALLEXES)
 
-setup.exe: installer.nsi ../engine/*.pl ../engine/POPFile/*.pm ../engine/Classifier/*.pm ../engine/Proxy/*.pm ../engine/UI/*.pm ../engine/Platform/MSWin32.pm ../engine/skins/*/*.css ../engine/skins/*/*.gif ../engine/skins/*/*.thtml ../engine/v$(POPFILE_VERSION).change
-setup.exe: stop_pf.exe ../engine/popfile.exe ../engine/popfileb.exe ../engine/popfileib.exe ../engine/popfilef.exe ../engine/popfileif.exe ../engine/popfile-service.exe
-setup.exe: runpopfile.exe adduser.exe monitorcc.exe stop_pf.exe msgcapture.exe
-setup.exe: ioG.ini pfi-library.nsh WriteEnvStr.nsh
-setup.exe: languages/*-pfi.nsh hdr-common.bmp special.bmp remove.ico
-setup.exe: UI/pfi_headerbmpr.exe UI/pfi_modern.exe POPFileIcon/popfile.ico
-setup.exe: test/pfidiag.exe
-setup.exe:
+.SUFFIXES:
+%.exe : %.nsi pfi-library.nsh ; @$(MAKENSIS)
+
+$(SETUP): $(INSTALLER)
+	@cp $(SETUP) $(INSTALLER)
+
+$(STOP_PF) : stop_popfile.nsi
 	@$(MAKENSIS)
-
-stop_pf.exe: stop_popfile.nsi pfi-library.nsh shutdown.ico
-	@$(MAKENSIS)
-
-runpopfile.exe: runpopfile.nsi pfi-library.nsh languages/English-pfi.nsh
-runpopfile.exe: POPFileIcon/popfile.ico
-runpopfile.exe:
-	@makensis.exe $<
-
-monitorcc.exe: MonitorCC.nsi
-monitorcc.exe: WriteEnvStr.nsh pfi-languages.nsh
-monitorcc.exe: languages/*-pfi.nsh hdr-common.bmp
-monitorcc.exe: UI/pfi_headerbmpr.exe UI/pfi_modern.exe POPFileIcon/popfile.ico
-monitorcc.exe:
-	@makensis.exe $<
-
-adduser.exe: adduser.nsi monitorcc.exe ioA.ini ioB.ini ioC.ini ioE.ini ioF.ini
-adduser.exe: pfi-library.nsh WriteEnvStr.nsh pfi-languages.nsh
-adduser.exe: languages/*-pfi.nsh hdr-common.bmp special.bmp remove.ico
-adduser.exe: UI/pfi_headerbmpr.exe UI/pfi_modern.exe POPFileIcon/popfile.ico
-adduser.exe:
-	@makensis.exe $<
-
-msgcapture.exe: msgcapture.nsi pfi-library.nsh hdr-common.bmp
-msgcapture.exe: UI/pfi_headerbmpr.exe UI/pfi_modern.exe POPFileIcon/popfile.ico
-msgcapture.exe:
-	@makensis.exe $<
 
 test/pfidiag.exe: test/pfidiag.nsi test/pfinfo.ico
-test/pfidiag.exe: pfi-library.nsh hdr-common.bmp UI/pfi_headerbmpr.exe
+test/pfidiag.exe: hdr-common.bmp UI/pfi_headerbmpr.exe
 test/pfidiag.exe: UI/pfi_modern.exe
 test/pfidiag.exe:
-	@makensis.exe $<
+	@cd $(dir $@) ; makensis /v2 $(notdir $<)
+
+$(INSTALLER): $(patsubst %.exe,%.nsi,$(INSTALLER))
+$(INSTALLER): $(ENGINE)/*.pl $(ENGINE)/POPFile/*.pm $(ENGINE)/Classifier/*.pm $(ENGINE)/Proxy/*.pm $(ENGINE)/UI/*.pm $(ENGINE)/Platform/MSWin32.pm $(ENGINE)/skins/*/*.css $(ENGINE)/skins/*/*.gif $(ENGINE)/skins/*/*.thtml $(ENGINE)/v$(POPFILE_VERSION).change
+$(INSTALLER): $(STOP_PF) $(ENGINE)/popfile.exe $(ENGINE)/popfileb.exe $(ENGINE)/popfileib.exe $(ENGINE)/popfilef.exe $(ENGINE)/popfileif.exe $(ENGINE)/popfile-service.exe
+$(INSTALLER): $(RUNPOPFILE) $(ADDUSER) $(MONITORCC) $(STOP_PF) $(MSGCAPTURE)
+$(INSTALLER): ioG.ini WriteEnvStr.nsh
+$(INSTALLER): languages/*-pfi.nsh hdr-common.bmp special.bmp remove.ico
+$(INSTALLER): UI/pfi_headerbmpr.exe UI/pfi_modern.exe
+$(INSTALLER): test/pfidiag.exe $(RUNSQLITE)
+
+$(RUNPOPFILE): $(patsubst %.exe,%.nsi,$(RUNPOPFILE))
+$(RUNPOPFILE): languages/English-pfi.nsh
+
+$(MONITORCC): $(patsubst %.exe,%.nsi,$(MONITORCC))
+$(MONITORCC): WriteEnvStr.nsh pfi-languages.nsh
+$(MONITORCC): languages/*-pfi.nsh hdr-common.bmp
+$(MONITORCC): UI/pfi_headerbmpr.exe UI/pfi_modern.exe
+
+$(ADDUSER): $(patsubst %.exe,%.nsi,$(ADDUSER))
+$(ADDUSER): $(MONITORCC) ioA.ini ioB.ini ioC.ini ioE.ini ioF.ini
+$(ADDUSER): WriteEnvStr.nsh pfi-languages.nsh
+$(ADDUSER): languages/*-pfi.nsh hdr-common.bmp special.bmp remove.ico
+$(ADDUSER): UI/pfi_headerbmpr.exe UI/pfi_modern.exe
+
+$(MSGCAPTURE): $(patsubst %.exe,%.nsi,$(MSGCAPTURE))
+$(MSGCAPTURE): hdr-common.bmp
+$(MSGCAPTURE): UI/pfi_headerbmpr.exe UI/pfi_modern.exe
