@@ -1010,7 +1010,8 @@ sub classify_and_modify
     # Whether we are currently reading the mail headers or not
     my $getting_headers = 1;
 
-    my $temp_file  = $self->history_filename($dcount,$mcount, ".msg",1);
+    my $msg_file  = $self->history_filename($dcount,$mcount, ".msg",1);
+    my $temp_file = "$msg_file.tmp";
     my $nopath_temp_file = $self->history_filename($dcount,$mcount,".msg",0);
 
     # Get the class-file info without the path, since we'd just need to strip it
@@ -1025,7 +1026,7 @@ sub classify_and_modify
     # middle of downloading a message and we refresh the history we do not
     # get class file errors
 
-    open TEMP, ">$temp_file.tmp";
+    open TEMP, ">$temp_file";
 
     while ( <$mail> ) {
         my $line;
@@ -1208,7 +1209,7 @@ sub classify_and_modify
         if ( $classification ne 'unclassified' ) {
             if ( ( $self->{parameters__}{$classification}{quarantine} == 1 ) && $echo ) {
                 print $client "$eol--$temp_file--$eol";
-	        }
+	    }
         }
 
         print $client "$eol.$eol" if ( $echo );
@@ -1225,7 +1226,8 @@ sub classify_and_modify
         # file to have the correct name.  If the history cache is reloaded then we wont have a class
         # file error since it was already written
 
-        rename "$temp_file.tmp", $temp_file;
+        unlink $msg_file;
+        rename $temp_file, $msg_file;
     }
 
     return ( $classification, $nopath_temp_file );
