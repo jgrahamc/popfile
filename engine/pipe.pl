@@ -52,7 +52,7 @@ if ( $#ARGV == -1 ) {
     # then they'll be discarded when the configuration is loaded, and since
     # we are not loading the UI, they are not defined at this point
 
-    my $c = $POPFile->get_module('POPFile::Configuration');
+    my $c = $POPFile->get_module('POPFile::Config');
     $c->module_config_( 'html', 'local', 1 );
     $c->module_config_( 'html', 'port',  8080 );
 

@@ -62,7 +62,7 @@ if ( $#ARGV > 0 ) {
 
         # Prevent the tool from finding another copy of POPFile running
 
-        my $c = $POPFile->get_module('POPFile::Configuration');
+        my $c = $POPFile->get_module('POPFile::Config');
         $c->config_( 'piddir', $c->config_( 'piddir' ) . 'insert.pl.' );
 
         $POPFile->CORE_start();
