@@ -50,12 +50,6 @@ sub new
 
     $self->{components__} = {};
 
-    $self->{disabled_components__} = {};
-
-    # Do not allow disabling of the following components (group or name)
-
-    $self->{required_components__} =  qr/^(core|html|bayes)$/;
-
     # A handy boolean that tells us whether we are alive or not.  When this is set to 1 then the
     # proxy works normally, when set to 0 (typically by the aborting() function called from a signal)
     # then we will terminate gracefully
@@ -64,7 +58,7 @@ sub new
 
     # This must be 1 for POPFile::Loader to create any output on STDOUT
 
-    $self->{debug__} = 0;
+    $self->{debug__} = 1;
 
     # This stuff lets us do some things in a way that tolerates some window-isms
 
@@ -90,6 +84,10 @@ sub new
     $self->{build_version__}  = '?';
     $self->{version_string__} = '';
 
+    # Where POPFile is installed
+
+    $self->{popfile_root__} = './';
+
     bless $self, $type;
 
     return $self;
@@ -106,6 +104,10 @@ sub CORE_loader_init
 {
     my ( $self ) = @_;
 
+    if ( defined( $ENV{POPFILE_ROOT} ) ) {
+        $self->{popfile_root__} = $ENV{POPFILE_ROOT};
+    }
+
     # These anonymous subroutine references allow us to call these important
     # functions from anywhere using the reference, granting internal access
     # to $self, without exposing $self to the unwashed. No reference to
@@ -119,7 +121,7 @@ sub CORE_loader_init
     # See if there's a file named popfile_version that contains the
     # POPFile version number
 
-    my $version_file = 'POPFile/popfile_version';
+    my $version_file = $self->root_path__( 'POPFile/popfile_version' );
 
     if ( -e $version_file ) {
         open VER, "<$version_file";
@@ -313,7 +315,7 @@ sub CORE_load_directory_modules
     # comment (# POPFILE LOADABLE MODULE) and load that module into the %{$self->{components__}}
     # hash getting the name from the module by calling name()
 
-    opendir MODULES, $directory;
+    opendir MODULES, $self->root_path__( $directory );
 
     while ( my $entry = readdir MODULES ) {
         if ( $entry =~ /\.pm$/ ) {
@@ -370,13 +372,13 @@ sub load_module_
 
     my $mod;
 
-    if ( open MODULE, "<$module" ) {
+    if ( open MODULE, '<' . $self->root_path__( $module ) ) {
         my $first = <MODULE>;
         close MODULE;
 
         if ( $first =~ /^# POPFILE LOADABLE MODULE/ ) {
             require $module;
-
+       
             $module =~ s/\//::/;
             $module =~ s/\.pm//;
 
@@ -508,6 +510,12 @@ sub CORE_link_components
     foreach my $name (keys %{$self->{components__}{proxy}}) {
         $self->{components__}{proxy}{$name}->classifier( $self->{components__}{classifier}{bayes} );
     }
+
+    # TODO Clean this up so that the Loader doesn't have to know so much about
+    # Bayes.
+
+    $self->{components__}{classifier}{bayes}->{parser__}->mangle( 
+        $self->{components__}{classifier}{wordmangle} );
 }
 
 #---------------------------------------------------------------------------------------------
@@ -606,40 +614,6 @@ sub CORE_start
 
     print "\n\nPOPFile Engine ", scalar($self->CORE_version()), " running\n" if $self->{debug__};
     flush STDOUT;
-}
-
-#---------------------------------------------------------------------------------------------
-#
-# CORE_enabled_check
-#
-# Prevents calling of start and service of disabled optional modules
-#
-#---------------------------------------------------------------------------------------------
-sub CORE_enabled_check
-{
-    my ( $self ) = @_;
-
-    # Check all currently enabled components
-
-    foreach my $type (keys %{$self->{components__}}) {
-        unless ( $type =~ $self->{required_components__} ) {
-            foreach my $name (keys %{$self->{components__}{$type}}) {
-                unless ( ( $name =~ $self->{required_components__} )
-                         ||     ( defined($self->{components__}{$type}{$name}->config_( 'enabled' ) )
-                                && $self->{components__}{$type}{$name}->config_( 'enabled' ) ) ) {
-
-                    # If the component is optional and is disabled, move it to a holding
-                    # hash. This is done this way to allow recovery/re-enabling of objects
-                    # (eg, HUP) and to leave them intact for interface plugin configuration.
-                    $self->{disabled_components__}{$type}{$name} = $self->{components__}{$type}{$name};
-                    delete $self->{components__}{$type}{$name};
-                }
-            }
-        }
-    }
-
-    # Re-enable any disabled components that are now enabled
-    # TODO: implement this when POPFile needs to be able to handle a HUP.
 }
 
 #---------------------------------------------------------------------------------------------
@@ -818,6 +792,25 @@ sub remove_module
     $self->{components__}{$type}{$name}->stop();
 
     delete($self->{components__}{$type}{$name});
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# root_path__
+#
+# Joins the path passed in with the POPFile root
+#
+# $path             RHS of path
+#
+# ---------------------------------------------------------------------------------------------
+sub root_path__
+{
+    my ( $self, $path ) = @_;
+
+    $self->{popfile_root__}  =~ s/[\/\\]$//;
+    $path                    =~ s/^[\/\\]//;
+
+    return "$self->{popfile_root__}/$path";
 }
 
 # GETTER/SETTER
