@@ -1222,7 +1222,22 @@ sub magnet_page
     my ( $self, $client ) = @_;
 
     my $magnet_message = '';
-    if ( defined( $self->{form_}{count} ) ) {
+
+    if ( defined( $self->{form_}{delete} ) ) {
+        for my $i ( 1 .. $self->{form_}{count} ) {
+  	    if ( defined( $self->{form_}{"remove$i"} ) && ( $self->{form_}{"remove$i"} ) ) {
+                my $mtype   = $self->{form_}{"type$i"};
+                my $mtext   = $self->{form_}{"text$i"};
+                my $mbucket = $self->{form_}{"bucket$i"};
+
+                $self->{classifier__}->delete_magnet( $mbucket, $mtype, $mtext );
+	    }
+        }
+    }
+
+    if ( defined( $self->{form_}{count} ) && ( defined( $self->{form_}{update} ) || defined( $self->{form_}{create} ) ) ) {
+        $self->{classifier__}->clear_magnets() if ( defined( $self->{form_}{update} ) );
+
         for my $i ( 1 .. $self->{form_}{count} ) {
             my $mtype   = $self->{form_}{"type$i"};
             my $mtext   = $self->{form_}{"text$i"};
@@ -1274,25 +1289,26 @@ sub magnet_page
         }
     }
 
-    if ( defined($self->{form_}{dtype}) )  {
-        $self->{classifier__}->delete_magnet( $self->{form_}{bucket}, $self->{form_}{dtype}, $self->{form_}{dmagnet});
-    }
-
     # Current Magnets panel
     my $body = "<h2 class=\"magnets\">$self->{language__}{Magnet_CurrentMagnets}</h2>\n";
 
     # magnet listing headings
+    $body .= "<form action=\"/magnets\">\n";
     $body .= "<table width=\"75%\" class=\"magnetsTable\" summary=\"$self->{language__}{Magnet_MainTableSummary}\">\n";
     $body .= "<caption>$self->{language__}{Magnet_Message1}</caption>\n";
     $body .= "<tr>\n<th class=\"magnetsLabel\" scope=\"col\">$self->{language__}{Magnet}</th>\n";
     $body .= "<th class=\"magnetsLabel\" scope=\"col\">$self->{language__}{Bucket}</th>\n";
-    $body .= "<th class=\"magnetsLabel\" scope=\"col\">$self->{language__}{Delete}</th>\n</tr>\n";
+    $body .= "<th class=\"magnetsLabel\" scope=\"col\">$self->{language__}{Remove}</th>\n</tr>\n";
+
+    my %magnet_types = ( 'from', 'From', 'to', 'To', 'subject', 'Subject' );
+    my $i = 0;
 
     # magnet listing
     my $stripe = 0;
     for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
         for my $type ($self->{classifier__}->get_magnet_types_in_bucket($bucket)) {
             for my $magnet ($self->{classifier__}->get_magnets( $bucket, $type))  {
+                $i += 1;
                 $body .= "<tr ";
                 if ( $stripe )  {
                     $body .= "class=\"rowEven\"";
@@ -1305,26 +1321,34 @@ sub magnet_page
                 $validatingMagnet =~ s/&/&amp;/g;
                 $validatingMagnet =~ s/</&lt;/g;
                 $validatingMagnet =~ s/>/&gt;/g;
+                $body .= ">\n<td><select name=\"type$i\" id=\"magnetsAddType\">\n";
 
-                $body .= ">\n<td>$type: $validatingMagnet</td>\n";
-                $body .= "<td><font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></td>\n";
+		for my $mtype (keys %magnet_types) {
+                    my $selected = ( $mtype eq $type )?"selected":"";
+                    $body .= "<option value=\"$mtype\" $selected>\n$self->{language__}{$magnet_types{$mtype}}</option>\n";
+		}
+                $body .= "</select>: <input type=\"text\" name=\"text$i\" value=\"$validatingMagnet\" /></td>\n";
+                $body .= "<td><select name=\"bucket$i\" id=\"magnetsAddBucket\">\n";
 
-                # Remove magnet button
+                my @buckets = $self->{classifier__}->get_buckets();
+                foreach my $mbucket (@buckets) {
+                    my $selected = ( $bucket eq $mbucket )?"selected":"";
+                    $body .= "<option value=\"$mbucket\" $selected>$mbucket</option>\n";
+                }
+                $body .= "</select></td>\n";
 
-                $body .= "<td>\n<form class=\"magnetsDelete\" style=\"margin: 0\" action=\"/magnets\">\n";
-                $body .= "<input type=\"submit\" class=\"deleteButton\" name=\"deleteMagnet\" value=\"$self->{language__}{Delete}\" />\n";
-                $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
-                $body .= "<input type=\"hidden\" name=\"dtype\" value=\"$type\" />\n";
-                $body .= "<input type=\"hidden\" name=\"dmagnet\" value=\"$validatingMagnet\" />\n";
-                $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
-                $body .= "</form>\n</td>\n";
+                $body .= "<td>\n";
+                $body .= "<input type=\"checkbox\" class=\"deleteButton\" name=\"remove$i\" />$self->{language__}{Remove}\n";
+                $body .= "</td>\n";
                 $body .= "</tr>";
                 $stripe = 1 - $stripe;
             }
         }
     }
 
-    $body .= "</table>\n<br /><br />\n<hr />\n";
+    $body .= "<tr><td></td><td><input type=\"submit\" class=\"deleteButton\" name=\"update\" value=\"$self->{language__}{Update}\" /></td><td><input type=\"submit\" class=\"deleteButton\" name=\"delete\" value=\"$self->{language__}{Remove}\" /></td></tr></table>";
+    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n<br /><br />\n";
+    $body .= "<input type=\"hidden\" name=\"count\" value=\"$i\" />\n</form>\n<br /><br />\n<hr />\n";
 
     # Create New Magnet panel
     $body .= "<h2 class=\"magnets\">$self->{language__}{Magnet_CreateNew}</h2>\n";
@@ -2866,7 +2890,7 @@ sub view_page
     $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
     $self->{form_}{search} = '' if ( !defined( $self->{form_}{search} ) );
     $self->{form_}{filter} = '' if ( !defined( $self->{form_}{filter} ) );
-    
+
     my $index;
     foreach my $i ( $start_message  .. $start_message + $self->config_( 'page_size' ) - 1) {
         if ( $self->{history_keys__}[$i] eq $mail_file ) {
@@ -2904,7 +2928,7 @@ sub view_page
     # message
 
     $body .= "<table class=\"openMessageTable\" cellpadding=\"10%\" cellspacing=\"0\" width=\"100%\" summary=\"$self->{language__}{History_OpenMessageSummary}\">\n";
-    
+
     # Close button
 
     $body .= "<tr>\n<td class=\"openMessageCloser\">";
@@ -2918,8 +2942,8 @@ sub view_page
     $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form_}{sort}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
     $body .= "<input type=\"hidden\" name=\"start_message\" value=\"$start_message\" />\n";
-    $body .= "<input type=\"hidden\" name=\"filter\" value=\"$self->{form_}{filter}\" />\n";    
-    $body .= "<table align=left>";    
+    $body .= "<input type=\"hidden\" name=\"filter\" value=\"$self->{form_}{filter}\" />\n";
+    $body .= "<table align=left>";
     $body .= "<tr><td><font size=+1><b>$self->{language__}{From}</b>: </font></td><td><font size=+1>$self->{history__}{$mail_file}{from}</font></td></tr>";
     $body .= "<tr><td><font size=+1><b>$self->{language__}{Subject}</b>: </font></td><td><font size=+1>$self->{history__}{$mail_file}{subject}</font></td></tr>";
     $body .= "<tr><td><font size=+1><b>$self->{language__}{Classification}</b>: </font></td><td><font size=+1><font color=\"$color\">$self->{history__}{$mail_file}{bucket}</font></font></td></tr>";
@@ -2932,10 +2956,10 @@ sub view_page
     } else {
         if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
         	$body .= "\n$self->{language__}{History_ShouldBe}: <select name=\"$index\">\n";
-        
+
         	# Show a blank bucket field
         	$body .= "<option selected=\"selected\"></option>\n";
-        
+
         	foreach my $abucket ($self->{classifier__}->get_buckets()) {
         	    $body .= "<option value=\"$abucket\">$abucket</option>\n";
         	}
@@ -2946,7 +2970,7 @@ sub view_page
     }
 
     $body .= "</font></td></tr>";
-    $body .= "</table></form>";    
+    $body .= "</table></form>";
     $body .= "</td></tr>";
 
     # Message body

@@ -45,6 +45,7 @@ Score                                   Score
 Lookup                                  Lookup
 Word                                    Word
 Count                                   Count
+Update                                  Update
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Control Center

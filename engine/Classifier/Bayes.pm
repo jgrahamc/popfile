@@ -1387,11 +1387,27 @@ sub get_magnet_types_in_bucket
 
 # ---------------------------------------------------------------------------------------------
 #
+# clear_magnets
+#
+# Removes every magnet currently defined
+#
+# ---------------------------------------------------------------------------------------------
+
+sub clear_magnets
+{
+    my ( $self ) = @_;
+
+    delete $self->{magnets__};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # get_magnets
 #
 # Returns the magnets of a certain type in a bucket
 #
 # $bucket          The bucket to search for magnets
+# $type            The magnet type (e.g. from, to or subject)
 #
 # ---------------------------------------------------------------------------------------------
 
