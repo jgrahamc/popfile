@@ -31,6 +31,7 @@ sub test_report
  	
  	if ( !$ok ) {
  		print "\nTest $test_count failed: $test";
+ 		$test_failures += 1;
  	} else {
  		print '.';
  	}
