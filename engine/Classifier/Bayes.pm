@@ -1200,7 +1200,7 @@ sub classify_and_modify
 
     if ( $classification ne 'unclassified' ) {
         if ( ( $self->{parameters__}{$classification}{quarantine} == 1 ) && $echo ) {
-            $before_dot = "$eol--$temp_file--$eol";
+            $before_dot = "$eol--$nopath_temp_file--$eol";
         }
     }
 
