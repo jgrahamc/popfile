@@ -49,6 +49,8 @@ $c->configuration( $c );
 $c->mq( $mq );
 $c->logger( $l );
 
+$c->initialize();
+
 $l->configuration( $c );
 $l->mq( $mq );
 $l->logger( $l );

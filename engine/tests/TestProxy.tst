@@ -96,6 +96,8 @@ $p->configuration( $c );
 $p->mq( $mq );
 $p->logger( $l );
 
+$p->initialize();
+
 test_assert_equal( $p->config_( 'enabled' ), 1 );
 
 # Start a generic proxy on port 9999

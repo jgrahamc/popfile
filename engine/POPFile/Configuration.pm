@@ -161,7 +161,7 @@ sub start
     # Check to see if the PID file is present, if it is then another POPFile
     # may be running, warn the user and terminate
 
-    $self->{pid_file__} = $self->get_user_path_( $self->config_( 'piddir' ) . 'popfile.pid' );
+    $self->{pid_file__} = $self->get_user_path( $self->config_( 'piddir' ) . 'popfile.pid' );
 
     if (defined($self->live_check_())) {
         return 0;
@@ -492,7 +492,7 @@ sub load_configuration
 {
     my ( $self ) = @_;
 
-    if ( open CONFIG, '<' . $self->get_user_path_( 'popfile.cfg' ) ) {
+    if ( open CONFIG, '<' . $self->get_user_path( 'popfile.cfg' ) ) {
         while ( <CONFIG> ) {
             s/(\015|\012)//g;
             if ( /(\S+) (.+)/ ) {
@@ -526,7 +526,7 @@ sub save_configuration
         return;
     }
 
-    if ( open CONFIG, '>' . $self->get_user_path_( 'popfile.cfg' ) ) {
+    if ( open CONFIG, '>' . $self->get_user_path( 'popfile.cfg' ) ) {
         $self->{save_needed__} = 0;
 
         foreach my $key (sort keys %{$self->{configuration_parameters__}}) {
@@ -574,7 +574,7 @@ sub path_join__
 {
     my ( $self, $left, $right ) = @_;
 
-    if ( ( $right =~ /^\// ) || ( $right =~ /^[A-Z]:\/\\/ ) ) {
+    if ( ( $right =~ /^\// ) || ( $right =~ /^[A-Z]:[\/\\]/ ) ) {
         return $right;
     }
 
