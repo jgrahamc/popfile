@@ -9,7 +9,7 @@
 #
 #--------------------------------------------------------------------------
 
-; Modified to work with NSIS 2.0b4 (CVS) or later
+; Modified to work with NSIS 2.0b4 (CVS) [ MAKENSIS.EXE dated 28 June 2003 @ 06:44 or later ]
 
 #--------------------------------------------------------------------------
 # WARNINGS:
@@ -23,43 +23,36 @@
 #--------------------------------------------------------------------------
 # LANGUAGE SUPPORT:
 #
-# The installer defaults to supporting a number of languages (the default is 'English').
+# The installer defaults to multi-language mode ('English' plus a number of other languages).
 #
 # If required, a command-line switch can be used to build an English-only version.
 #
-# Normal multi-language build command:  makensis installer.nsi
+# Normal multi-language build command:  makensis.exe installer.nsi
+# To build an English-only installer:   makensis.exe  /DENGLISH_ONLY installer.nsi
 #
-# To build an English-only installer:   makensis /DENGLISH_ONLY installer.nsi
+#--------------------------------------------------------------------------
+# Removing support for a particular language:
 #
 # To remove any of the additional languages, only TWO lines need to be commented-out:
-#
 # (a) comment-out the relevant '!insertmacro PFI_LANG_LOAD' line in the list of languages
 #     in the 'Language Support for the installer and uninstaller' block of code
-#
 # (b) comment-out the relevant '!insertmacro UI_LANG_CONFIG' line in the list of languages
 #     in the code which handles the 'UI Languages' component
 #
 # For example, to remove support for the 'Dutch' language, comment-out the line
-#
 #     !insertmacro PFI_LANG_LOAD "Dutch"
-#
 # in the list of languages supported by the installer, and comment-out the line
-#
 #     !insertmacro UI_LANG_CONFIG "DUTCH" "Nederlands"
-#
 # in the code which handles the 'UI Languages' component (Section "Languages").
+#
+#--------------------------------------------------------------------------
+# Adding support for a particular language (it must be supported by NSIS):
 #
 # The number of languages which can be supported depends upon the availability of:
 #
 #     (1) an up-to-date main NSIS language file ({NSIS}\Contrib\Language files\*.nlf)
 # _and_
 #     (2) an up-to-date NSIS MUI Language file ({NSIS}\Contrib\Modern UI\Language files\*.nsh)
-#
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# At present (02 July 2003) support for 'Bulgarian' and 'Danish' has been disabled (as described
-# above) because in these two cases the corresponding NLF file is out-of-step and this could
-# result in the wrong messages being displayed during the installation.
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #
 # To add support for a language which is already supported by the NSIS MUI package, two files
 # are required:
@@ -74,6 +67,12 @@
 # two new files and, if there is a suitable POPFile UI language file for the new language,
 # add a suitable '!insertmacro UI_LANG_CONFIG' line in the section which handles the optional
 # 'Languages' component to allow the installer to select the appropriate UI language.
+#--------------------------------------------------------------------------
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+# At present (02 July 2003) support for 'Bulgarian' and 'Danish' has been disabled (as described
+# above) because in these two cases the corresponding NLF file is out-of-step and this could
+# result in wrong/missing messages during the installation.
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 #--------------------------------------------------------------------------
 
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
@@ -172,10 +171,14 @@
   ; General Settings - License Page Settings
   ;-----------------------------------------
 
-  ; Select either "accept/do not accept" radio buttons or "accept" checkbox for the license page
+  ; Three styles of 'License Agreement' page are available:
+  ; (1) New style with an 'I accept' checkbox below the license window
+  ; (2) New style with 'I accept/I do not accept' radio buttons below the license window
+  ; (3) Classic style with the 'Next' button replaced by an 'Agree' button
+  ;     (to get the 'Classic' style,  comment-out the CHECKBOX and the RADIOBUTTONS 'defines')
 
-#  !define MUI_LICENSEPAGE_RADIOBUTTONS
   !define MUI_LICENSEPAGE_CHECKBOX
+#  !define MUI_LICENSEPAGE_RADIOBUTTONS
 
   ;-----------------------------------------
   ; General Settings - Finish Page Settings
@@ -340,16 +343,13 @@
         ; from this list. (To remove all of these languages, use /DENGLISH_ONLY on command-line)
 
 # [02 July 03] "Bulgarian" disabled because the main NSIS NLF language file is out of date
-#        !insertmacro PFI_LANG_LOAD "Bulgarian"    ; NSIS MUI file out-of-date as of 27-Jun-03
-
+#        !insertmacro PFI_LANG_LOAD "Bulgarian"    ; 'New style' license msgs missing (27-Jun-03)
         !insertmacro PFI_LANG_LOAD "SimpChinese"
         !insertmacro PFI_LANG_LOAD "TradChinese"
-
 # [02 July 03]  "Danish" disabled because the main NSIS NLF language file is out of date
-#        !insertmacro PFI_LANG_LOAD "Danish"       ; NSIS MUI file out-of-date as of 27-Jun-03
-
+#        !insertmacro PFI_LANG_LOAD "Danish"       ; 'New style' license msgs missing (27-Jun-03)
         !insertmacro PFI_LANG_LOAD "Dutch"
-        !insertmacro PFI_LANG_LOAD "Finnish"      ; NSIS MUI file out-of-date as of 27-Jun-03
+        !insertmacro PFI_LANG_LOAD "Finnish"      ; 'New style' license msgs missing (27-Jun-03)
         !insertmacro PFI_LANG_LOAD "French"
         !insertmacro PFI_LANG_LOAD "German"
         !insertmacro PFI_LANG_LOAD "Hungarian"
@@ -440,7 +440,7 @@ Function PFIGUIInit
   StrCpy ${L_MSG} "$(PFI_LANG_MBRELNOTES_1)"
   StrCpy ${L_TXT} "$(PFI_LANG_MBRELNOTES_2)"
   StrCpy ${L_MSG} "${L_MSG}$\r$\n$\r$\n${L_TXT}"
-  MessageBox MB_YESNO ${L_MSG} IDNO exit
+  MessageBox MB_YESNO|MB_ICONQUESTION ${L_MSG} IDNO exit
   StrCmp ${G_NOTEPAD} "" use_file_association
   ExecWait 'notepad.exe "$PLUGINSDIR\release.txt"'
   GoTo exit
@@ -531,7 +531,7 @@ readme_ok:
   StrCpy ${L_MSG} "${L_MSG}${L_TXT} 'stopwords.bak')$\r$\n$\r$\n"
   StrCpy ${L_TXT} "$(PFI_LANG_MBSTPWDS_4)"
   StrCpy ${L_MSG} "${L_MSG}${L_TXT} 'stopwords.default')"
-  MessageBox MB_YESNO ${L_MSG} IDNO copy_default_stopwords
+  MessageBox MB_YESNO|MB_ICONQUESTION ${L_MSG} IDNO copy_default_stopwords
   IfFileExists "$INSTDIR\stopwords.bak" 0 make_backup
   SetFileAttributes "$INSTDIR\stopwords.bak" NORMAL
 
@@ -558,7 +558,7 @@ copy_default_stopwords:
   StrCpy ${L_MSG} "${L_MSG}${L_TXT}$\r$\n$\r$\n"
   StrCpy ${L_TXT} "$(PFI_LANG_MBCFGBK_4)"
   StrCpy ${L_MSG} "${L_MSG}${L_TXT}"
-  MessageBox MB_YESNO "${L_MSG}" IDNO update_config
+  MessageBox MB_YESNO|MB_ICONQUESTION "${L_MSG}" IDNO update_config
   SetFileAttributes "$INSTDIR\popfile.cfg.bak" NORMAL
 
 make_cfg_backup:
@@ -821,16 +821,12 @@ Section "Languages" SecLangs
         ; UI_LANG_CONFIG parameters: "NSIS Language name"  "POPFile UI language name"
 
         !insertmacro UI_LANG_CONFIG "ENGLISH" "English"
-
 # [02 July 03] "Bulgarian" disabled because the main NSIS NLF language file is out of date
 #        !insertmacro UI_LANG_CONFIG "BULGARIAN" "Bulgarian"
-
         !insertmacro UI_LANG_CONFIG "SIMPCHINESE" "Chinese-Simplified"
         !insertmacro UI_LANG_CONFIG "TRADCHINESE" "Chinese-Traditional"
-
 # [02 July 03]  "Danish" disabled because the main NSIS NLF language file is out of date
 #        !insertmacro UI_LANG_CONFIG "DANISH" "Dansk"
-
         !insertmacro UI_LANG_CONFIG "DUTCH" "Nederlands"
         !insertmacro UI_LANG_CONFIG "FINNISH" "Suomi"
         !insertmacro UI_LANG_CONFIG "FRENCH" "Francais"
@@ -1279,7 +1275,7 @@ bad_pop3:
   StrCpy ${L_MSG} "${L_MSG} $\"${G_POP3}$\"'.$\n$\n${L_TXT}$\n$\n"
   StrCpy ${L_TXT} "$(PFI_LANG_OPTIONS_MBPOP3_3)"
   StrCpy ${L_MSG} "${L_MSG}${L_TXT}"
-  MessageBox MB_OK ${L_MSG}
+  MessageBox MB_OK|MB_ICONEXCLAMATION ${L_MSG}
   Goto bad_exit
 
 pop3_ok:
@@ -1296,14 +1292,14 @@ bad_gui:
   StrCpy ${L_MSG} "${L_MSG} $\"${G_GUI}$\".$\n$\n${L_TXT}$\n$\n"
   StrCpy ${L_TXT} "$(PFI_LANG_OPTIONS_MBGUI_3)"
   StrCpy ${L_MSG} "${L_MSG}${L_TXT}"
-  MessageBox MB_OK ${L_MSG}
+  MessageBox MB_OK|MB_ICONEXCLAMATION ${L_MSG}
   Goto bad_exit
 
 ports_must_differ:
   StrCpy ${L_MSG} "$(PFI_LANG_OPTIONS_MBDIFF_1)"
   StrCpy ${L_TXT} "$(PFI_LANG_OPTIONS_MBDIFF_2)"
   StrCpy ${L_MSG} "${L_MSG}$\n$\n${L_TXT}"
-  MessageBox MB_OK ${L_MSG}
+  MessageBox MB_OK|MB_ICONEXCLAMATION ${L_MSG}
 
 bad_exit:
 
@@ -2102,7 +2098,7 @@ Section "Uninstall"
     StrCpy ${L_MSG} "$(un.PFI_LANG_MBNOTFOUND_1)"
     StrCpy ${L_TEMP} "$(un.PFI_LANG_MBNOTFOUND_2)"
     StrCpy ${L_MSG} "${L_MSG} '$INSTDIR'.$\r$\n$\r$\n${L_TEMP}"
-    MessageBox MB_YESNO "${L_MSG}" IDYES skip_confirmation
+    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 "${L_MSG}" IDYES skip_confirmation
     Abort "$(un.PFI_LANG_ABORT_1)"
 
 skip_confirmation:
