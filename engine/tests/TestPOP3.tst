@@ -247,6 +247,7 @@ sub server
 test_assert( `rm -rf corpus` == 0 );
 test_assert( `cp -R corpus.base corpus` == 0 );
 test_assert( `rm -rf corpus/CVS` == 0 );
+test_assert( `rm -rf messages/*` == 0 );
 
 my $c = new POPFile::Configuration;
 my $mq = new POPFile::MQ;
@@ -453,13 +454,16 @@ if ( $pid == 0 ) {
 
         # Now get a message that actually exists
 
+        unlink( 'messages/popfile1=1.msg' );
+        unlink( 'messages/popfile1=1.cls' );
+
         print $client "RETR 1$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK " . ( -s $messages[0] ) . "$eol" );
         my $cam = $messages[0];
         $cam =~ s/msg$/cam/;
 
-        open FILE, "<$cam";
+        test_assert( open FILE, "<$cam" );
         while ( <FILE> ) {
             my $line = $_;
             $result = <$client>;
@@ -473,9 +477,35 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
 
+        # This delay is here because Windows was having a little trouble
+        # with the files created by the RETR not existing and I have a little
+        # rest here while Windows wakes from its afternoon nap and writes
+        # the files to disk
+
+        select( undef, undef, undef, 0.1 );
+
         # TODO check for NEWFL and CLASS messages
 
-        # TODO check that the file was written to the history
+        test_assert( -e 'messages/popfile1=1.msg' );
+        test_assert( -e 'messages/popfile1=1.cls' );
+
+        test_assert( open FILE, "<$messages[0]" );
+        test_assert( open HIST, "<messages/popfile1=1.msg" );
+        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+            $fl =~ s/[\r\n]//g;
+            $ml =~ s/[\r\n]//g;
+            test_assert_equal( $fl, $ml );
+	}
+        test_assert( eof(FILE) );
+        test_assert( eof(HIST) );
+        close FILE;
+        close HIST;
+
+        my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile1=1.msg' );
+        test_assert( !$reclassified );
+        test_assert_equal( $bucket, 'spam' );
+        test_assert( !defined( $usedtobe ) );
+        test_assert_equal( $magnet, '' );
 
         # Try an unsuccessful delete
 
@@ -489,6 +519,24 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "+OK Deleted 1$eol" );
 
+        # Check that CAPA command works once we are connected
+
+        print $client "CAPA$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK I can handle$eol" );
+        $result = <$client>;
+        test_assert_equal( $result, "AUTH$eol" );
+        $result = <$client>;
+        test_assert_equal( $result, "USER$eol" );
+        $result = <$client>;
+        test_assert_equal( $result, "APOP$eol" );
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+
+        # Check the basic TOP command
+
+        # TODO
+
         # Check that we echo the remote servers QUIT response
 
         print $client "QUIT$eol";
@@ -496,6 +544,14 @@ if ( $pid == 0 ) {
         test_assert_equal( $result, "+OK Bye$eol" );
 
         close $client;
+
+        # TODO QUIT straight after connect
+
+        # TODO odd command straight after connect gives error
+
+        # TODO -pop3_toptoo tests with caching behavior
+
+        # TODO SPA/AUTH tests with good and bad remote servers
 
         while ( waitpid( $pid, &WNOHANG ) != $pid ) {
         }
