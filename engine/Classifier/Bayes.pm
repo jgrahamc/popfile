@@ -246,6 +246,8 @@ sub initialize
     $self->config_( 'xpl_angle', 0 );
 
     $self->mq_register_( 'COMIT', $self );
+   
+    $self->mq_register_( 'RELSE', $self );
 
     return 1;
 }
@@ -266,6 +268,10 @@ sub deliver
     if ( $type eq 'COMIT' ) {
         $self->classified( $message[0], $message[2] );
     }
+    
+    if ( $type eq 'RELSE' ) {
+        $self->release_session_key( $message[0] );
+    }    
 }
 
 #----------------------------------------------------------------------------

@@ -32,10 +32,15 @@ sub new
     # This will store a reference to the classifier object
 
     $self->{c} = 0;
+    
+    # and a mq object
+    
+    $self->{m} = 0;
 
     bless $self, $type;
     return $self;
 }
+
 
 # I'm generally against doing obscure things in Perl because it makes the code
 # hard to read, but since this entire file is a bunch of wrappers for the
@@ -69,7 +74,7 @@ sub new
 #    omit it.
 
 sub get_session_key            { shift->{c}->get_session_key( @_ ); }
-sub release_session_key        { shift->{c}->release_session_key( @_ ); }
+sub release_session_key        { shift->{m}->mq_post_( "RELSE", join( ':',@_ )); }
 sub classify                   { shift->{c}->classify( @_ ); }
 sub is_pseudo_bucket           { shift->{c}->is_pseudo_bucket( @_ ); }
 sub is_bucket                  { shift->{c}->is_bucket( @_ ); }

@@ -154,6 +154,7 @@ EOM
     #     POPFile/API.get_bucket_color
 
     $self->{api__}->{c} = $self->{classifier__};
+    $self->{api__}->{m} = $self->{mq__};
     $self->{server__}->dispatch_to( $self->{api__} );
 
     # DANGER WILL ROBINSON!  In order to make a polling XML-RPC server I am using
