@@ -1,5 +1,5 @@
 !define MUI_PRODUCT "POPFile"
-!define MUI_VERSION "0.17"
+!define MUI_VERSION "0.18"
 
 !include "${NSISDIR}\Contrib\Modern UI\System.nsh"
 
@@ -42,6 +42,7 @@
     LangString DESC_SecPOPFile ${LANG_ENGLISH} "Installs the core files needed by POPFile."
     LangString DESC_SecPerl    ${LANG_ENGLISH} "Installs minimal Perl needed by POPFile."
     LangString DESC_SecSkins   ${LANG_ENGLISH} "Installs POPFile skins that allow you to change the look and feel of the POPFile user interface."
+    LangString DESC_SecLangs   ${LANG_ENGLISH} "Installs non-English language translations of the POPFile UI and manual."
 
   ;Folder-selection page
   InstallDir "$PROGRAMFILES\${MUI_PRODUCT}"
@@ -52,7 +53,6 @@
   ;Use ReserveFile for your own Install Options ini files too!
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
   ReserveFile "ioA.ini"
-  ReserveFile "ioB.ini"
 
 Function .onInit
 
@@ -104,6 +104,9 @@ skip_gui_set:
 
   SetOutPath $INSTDIR\manual
   File "..\engine\manual\*.html"
+
+  SetOutPath $INSTDIR\languages
+  File "..\engine\languages\English.msg"
 
   SetOutPath $SMPROGRAMS\POPFile
   SetOutPath $INSTDIR
@@ -210,6 +213,13 @@ Section "Skins" SecSkins
 
 SectionEnd
 
+Section "Languages" SecLangs
+
+  SetOutPath $INSTDIR\languages
+  File "..\engine\languages\*.msg"
+
+SectionEnd
+
 !insertmacro MUI_SECTIONS_FINISHHEADER ;Insert this macro after the sections
 
 ;--------------------------------
@@ -219,6 +229,7 @@ SectionEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile} $(DESC_SecPOPFile)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecPerl} $(DESC_SecPerl)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins} $(DESC_SecSkins)
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs} $(DESC_SecLangs)
 !insertmacro MUI_FUNCTIONS_DESCRIPTION_END
 
 ;--------------------------------
@@ -263,6 +274,8 @@ skip_confirmation:
   RMDir $INSTDIR\skins
   Delete $INSTDIR\manual\*.html
   RMDir $INSTDIR\manual
+  Delete $INSTDIR\languages\*.msg
+  RMDir $INSTDIR\languages
 
   Delete $INSTDIR\IO\*.*
   Delete $INSTDIR\IO\Socket\*.*
