@@ -1068,7 +1068,14 @@ sub get_bucket_parameter
 {
     my ( $self, $bucket, $parameter ) = @_;
 
-    return $self->{parameters__}{$bucket}{$parameter};
+    my $param = $self->{parameters__}{$bucket}{$parameter};
+
+    if ( !defined( $param ) ) {
+        $param = 0;
+    }
+
+    $self->log_( "get_bucket_parameter( $bucket, $parameter ) is $param ");
+    return $param;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1087,7 +1094,10 @@ sub set_bucket_parameter
 {
     my ( $self, $bucket, $parameter, $value ) = @_;
 
+    $self->log_( "set_bucket_parameter( $bucket, $parameter ) to $value ");
+
     $self->{parameters__}{$bucket}{$parameter} = $value;
+    $self->write_parameters();
 }
 
 # ---------------------------------------------------------------------------------------------

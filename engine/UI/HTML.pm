@@ -1502,9 +1502,12 @@ sub corpus_page
         $self->global_config_( 'ecount', 0 );
         for my $bucket ($self->{classifier__}->get_buckets()) {
             $self->{classifier__}->set_bucket_parameter( $bucket, 'count', 0 );
+            $self->{classifier__}->set_bucket_parameter( $bucket, 'fpcount', 0 );
+            $self->{classifier__}->set_bucket_parameter( $bucket, 'fncount', 0 );
         }
         $self->{classifier__}->write_parameters();
-        $self->config_( 'last_reset', localtime );
+        my $lasttime = localtime;
+        $self->config_( 'last_reset', $lasttime );
         $self->{configuration__}->save_configuration();
     }
 
@@ -2374,20 +2377,26 @@ sub history_reclassify
 
             if ( !$reclassified ) {
                 $self->{classifier__}->add_message_to_bucket( $self->global_config_( 'msgdir' ) . $mail_file, $newbucket );
-                $self->global_config_( 'ecount', $self->global_config_( 'ecount' ) + 1 ) if ( $newbucket ne $bucket );
 
                 $self->log_( "Reclassifying $mail_file from $bucket to $newbucket" );
 
                 if ( $bucket ne $newbucket ) {
-                    $self->{classifier__}->set_bucket_parameter( $newbucket, 'count',
-                    $self->{classifier__}->get_bucket_parameter( $newbucket, 'count' ) + 1 );
-                    $self->{classifier__}->set_bucket_parameter( $bucket, 'count',
-                    $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1 );
+                    my $ecount = $self->global_config_( 'ecount' ) + 1;
+                    $self->global_config_( 'ecount', $ecount );
 
-                    $self->{classifier__}->set_bucket_parameter( $newbucket, 'fncount',
-                    $self->{classifier__}->get_bucket_parameter( $newbucket, 'fncount' ) + 1 );
-                    $self->{classifier__}->set_bucket_parameter( $bucket, 'fpcount',
-                    $self->{classifier__}->get_bucket_parameter( $bucket, 'fpcount' ) + 1 );
+                    my $count = $self->{classifier__}->get_bucket_parameter( $newbucket, 'count' );
+                    $self->{classifier__}->set_bucket_parameter( $newbucket, 'count', $count+1 );
+
+                    $count = $self->{classifier__}->get_bucket_parameter( $bucket, 'count' );
+                    $count -= 1;
+                    $count = 0 if ( $count < 0 ) ;
+                    $self->{classifier__}->set_bucket_parameter( $bucket, 'count', $count );
+
+                    my $fncount = $self->{classifier__}->get_bucket_parameter( $newbucket, 'fncount' );
+                    $self->{classifier__}->set_bucket_parameter( $newbucket, 'fncount', $fncount+1 );
+
+                    my $fpcount = $self->{classifier__}->get_bucket_parameter( $bucket, 'fpcount' );
+                    $self->{classifier__}->set_bucket_parameter( $bucket, 'fpcount', $fpcount+1 );
 		}
 
                 # Update the class file
@@ -2437,18 +2446,25 @@ sub history_undo
                 $self->log_( "Undoing $mail_file from $bucket to $usedtobe" );
 
                 if ( $bucket ne $usedtobe ) {
-                    $self->global_config_( 'ecount', $self->global_config_( 'ecount' ) - 1 ) if ( $self->global_config_( 'ecount' ) > 0 );
+                    my $ecount = $self->global_config_( 'ecount' ) - 1;
+                    $ecount = 0 if ( $ecount < 0 );
+                    $self->global_config_( 'ecount', $ecount );
 
-                    $self->{classifier__}->set_bucket_parameter( $bucket, 'count',
-                    $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1 );
-                    $self->{classifier__}->set_bucket_parameter( $usedtobe, 'count',
-                    $self->{classifier__}->get_bucket_parameter( $usedtobe, 'count' ) + 1 );
+                    my $count = $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1;
+                    $count = 0 if ( $count < 0 );
+                    $self->{classifier__}->set_bucket_parameter( $bucket, 'count', $count );
 
-                    $self->{classifier__}->set_bucket_parameter( $bucket, 'fncount',
-                    $self->{classifier__}->get_bucket_parameter( $bucket, 'fncount' ) - 1 );
-                    $self->{classifier__}->set_bucket_parameter( $usedtobe, 'fpcount',
-                    $self->{classifier__}->get_bucket_parameter( $usedtobe, 'fpcount' ) - 1 );
-                }
+		    $count = $self->{classifier__}->get_bucket_parameter( $usedtobe, 'count' ) + 1;
+                    $self->{classifier__}->set_bucket_parameter( $usedtobe, 'count', $count );
+
+                    my $fncount = $self->{classifier__}->get_bucket_parameter( $bucket, 'fncount' ) - 1;
+                    $fncount = 0 if ( $fncount < 0 );
+                    $self->{classifier__}->set_bucket_parameter( $bucket, 'fncount', $fncount );
+
+                    my $fpcount = $self->{classifier__}->get_bucket_parameter( $usedtobe, 'fpcount' ) - 1;
+                    $fpcount = 0 if ( $fpcount < 0 );
+                    $self->{classifier__}->set_bucket_parameter( $usedtobe, 'fpcount', $fpcount );
+		}
 
                 # Since we have just changed the classification of this file and it has
                 # not been reclassified and has a new bucket name then we need to update the
@@ -2705,7 +2721,7 @@ sub history_page
         # It would be tempting to do keys %headers_table here but there is not guarantee that
         # they will come back in the right order
 
-        foreach my $header (undef, 'from', 'subject', 'bucket') {
+        foreach my $header ('', 'from', 'subject', 'bucket') {
             $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
             $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form_}{filter}&amp;setsort=" . ($self->{form_}{sort} eq "$header"?"-":"");
             $body .= "$header\">";
