@@ -54,8 +54,34 @@ sub new
 
     # The expected corpus version
     $self->{corpus_version}    = 1;
+
+    # Per bucket parameters
+    $self->{parameters}        = {};
     
     return bless $self, $type;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# write_parameters
+#
+# Save the parameters hash
+#
+# ---------------------------------------------------------------------------------------------
+
+sub write_parameters
+{
+    my ($self) = @_;
+    
+    for my $bucket (keys %{$self->{total}}) 
+    {
+        open PARAMS, ">corpus/$bucket/params";
+        for my $param (keys %{$self->{parameters}{$bucket}})
+        {
+            print PARAMS "$param $self->{parameters}{$bucket}{$param}\n";
+        }
+        close PARAMS;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -104,12 +130,12 @@ sub get_value
     my ($self, $bucket, $word) = @_;
     $word =~ /^(.)/;
     my $i = ord($1);
-    if ( ( $self->{matrix}{$bucket}[$i] =~ /\|$word L([\-\.\d]+)\|/ ) != 0 ) 
+    if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E L([\-\.\d]+)\|/ ) != 0 ) 
     {
         return $1;
     } 
 
-    if ( ( $self->{matrix}{$bucket}[$i] =~ /\|$word (\d+)\|/ ) != 0 ) 
+    if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E (\d+)\|/ ) != 0 ) 
     {
         my $newvalue = log($1 / $self->{total}{$bucket});
         set_value( $self, $bucket, $word, "L$newvalue" );
@@ -127,7 +153,7 @@ sub set_value
     $word =~ /^(.)/;
     my $i = ord($1);
 
-    if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|$word (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 ) 
+    if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|\Q$word\E $value\|/ ) == 0 ) 
     {
         $self->{matrix}{$bucket}[$i] .= "|$word $value|";
     }
@@ -167,6 +193,20 @@ sub load_word_matrix
         my $color = <COLOR>;
         $color =~ s/[\r\n]//g;
         close COLOR;
+
+        $self->{parameters}{$bucket}{subject} = 1;
+
+        # See if there's a color file specified
+        open PARAMS, "<corpus/$bucket/params";
+        while ( <PARAMS> ) 
+        {
+            s/[\r\n]//g;
+            if ( /^([a-z]+) ([^ ]+)$/ ) 
+            {
+                $self->{parameters}{$bucket}{$1} = $2;
+            }
+        }
+        close PARAMS;
 
         if ( $color eq '' ) 
         {
@@ -339,24 +379,24 @@ sub classify_file
         }
     }
 
-    if ( $self->{debug} )
+    $self->{scores} = "<table><tr><td>Bucket<td>&nbsp;<td>Probability";
+    print "Bucket              Raw score      Normalized     Estimated prob\n\n" if $self->{debug};
+    foreach my $b (@ranking)
     {
-        print "Bucket              Raw score      Normalized     Estimated prob\n\n";
-        foreach my $b (@ranking)
-        {
-             my $prob = exp($score{$b})/$total;
-             my $probstr;
-             if ($prob >= 0.1 || $prob == 0.0)
-             {
-                 $probstr = sprintf("%12.6f", $prob);
-             }
-             else
-             {
-                 $probstr = sprintf("%17.6e", $prob);
-             }
-             printf("%-15s%15.6f%15.6f %s\n", $b, ($raw_score{$b} - $correction)/$logbuck, ($score{$b} - log($total))/$logbuck + 1, $probstr);
-        }
+         my $prob = exp($score{$b})/$total;
+         my $probstr;
+         if ($prob >= 0.1 || $prob == 0.0)
+         {
+             $probstr = sprintf("%12.6f", $prob);
+         }
+         else
+         {
+             $probstr = sprintf("%17.6e", $prob);
+         }
+         $self->{scores} .= "<tr><td><font color=$self->{colors}{$b}><b>$b</b></font><td>&nbsp;<td>$probstr";
+         printf("%-15s%15.6f%15.6f %s\n", $b, ($raw_score{$b} - $correction)/$logbuck, ($score{$b} - log($total))/$logbuck + 1, $probstr) if $self->{debug};
     }
+    $self->{scores} .= "</table>";
 
     # If no bucket has a probability better than 0.5, call the message "unclassified".
 

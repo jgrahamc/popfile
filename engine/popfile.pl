@@ -943,7 +943,7 @@ sub bucket_page
     }
     $body .= "<tr><td><hr><b>Percentage of total</b><td>&nbsp;<td align=right><hr>$percent</table>";
  
-    $body .= "<h2>Word Table for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</font></h2><p>Red words have been used for classification in this POPFile session.<p><table>";
+    $body .= "<h2>Word Table for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</font></h2><p>Colored words have been used for classification in this POPFile session.<p><table>";
     for my $i (@{$classifier->{matrix}{$form{showbucket}}})
     {
         if ( $i ne '' ) 
@@ -951,7 +951,7 @@ sub bucket_page
             my $j = $i;
             $j =~ s/\|\|/, /g;
             $j =~ s/\|//g;
-            $j =~ s/([^ ]+) (L\-[\.\d]+)/<font color=red>\1 \2<\/font>/g;
+            $j =~ s/([^ ]+) (L\-[\.\d]+)/<font color=$classifier->{colors}{$form{showbucket}}>\1 \2<\/font>/g;
             $j =~ s/L(\-[\.\d]+)/int(exp(eval(\1)))/ge;
             $j =~ /^(.)/;
             $body .= "<tr><td valign=top><b>$1</b><td valign=top>$j";
@@ -985,6 +985,12 @@ sub corpus_page
         print COLOR "$form{color}\n";
         close COLOR;
         $classifier->{colors}{$form{bucket}} = $form{color};
+    }
+
+    if ( ( $form{subject} > 0 ) && ( $form{bucket} ne '' ) )
+    {
+        $classifier->{parameters}{$form{bucket}}{subject} = $form{subject} - 1;
+        $classifier->write_parameters();
     }
     
     if ( $form{name} ne '' )
@@ -1084,7 +1090,7 @@ sub corpus_page
     }    
     
     
-    my $body = "<table width=75%><tr><td valign=top><h2>Summary</h2><table width=100% cellspacing=0 cellpadding=0><tr><td><b>Bucket Name</b><td align=right><b>Total Words</b><td width=50>&nbsp;<td align=left><b>Change Color</b>";
+    my $body = "<table width=75%><tr><td valign=top><h2>Summary</h2><table width=100% cellspacing=0 cellpadding=0><tr><td><b>Bucket Name</b><td align=right><b>Total Words</b><td width=50>&nbsp;<td><b>Subject Modification</b><td width=50>&nbsp;<td align=left><b>Change Color</b>";
 
     my @buckets = sort keys %{$classifier->{total}};
     my $stripe = 0;
@@ -1098,7 +1104,36 @@ sub corpus_page
             $body .= " bgcolor=$stripe_color";
         }
         $stripe = 1 - $stripe;
-        $body .= "><td><a href=/buckets?session=$session_key&showbucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td align=right>$number<td>&nbsp;<td align=left bgcolor=$main_color><table cellpadding=0 cellspacing=1><tr>";
+        $body .= "><td><a href=/buckets?session=$session_key&showbucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td align=right>$number<td>&nbsp;";
+        if ( $configuration{subject} == 1 ) 
+        {
+            $body .= "<td><a href=/buckets?session=$session_key&bucket=$bucket&subject=1>";
+            if ( $classifier->{parameters}{$bucket}{subject} == 0 ) 
+            {
+                $body .= "<b>";
+            }
+            $body .= "Off";
+            if ( $classifier->{parameters}{$bucket}{subject} == 0 ) 
+            {
+                $body .= "</b>";
+            }
+            $body .= "</a> <a href=/buckets?session=$session_key&bucket=$bucket&subject=2>";
+            if ( $classifier->{parameters}{$bucket}{subject} == 1 ) 
+            {
+                $body .= "<b>";
+            }
+            $body .= "On"; 
+            if ( $classifier->{parameters}{$bucket}{subject} == 1 ) 
+            {
+                $body .= "</b>";
+            }
+            $body .= "</a>";
+        } 
+        else
+        {
+            $body .= "<td>Disabled globally";
+        }
+        $body .= "<td>&nbsp;<td align=left bgcolor=$main_color><table cellpadding=0 cellspacing=1><tr>";
         my $color = $classifier->{colors}{$bucket};
         $body .= "<td width=10 bgcolor=$color><img border=0 alt='$bucket current color is $color' src=pix.gif width=10 height=20><td>&nbsp;";
         for my $i ( 0 .. $#{$classifier->{possible_colors}} )
@@ -1109,7 +1144,7 @@ sub corpus_page
                 $body .= "<td width=10 bgcolor=$color><a href=/buckets?color=$color&bucket=$bucket&session=$session_key><img border=0 alt='Set $bucket color to $color' src=pix.gif width=10 height=20></a>";
             } 
         }
-        $body .= "</table></tr>";
+        $body .= "</table>";
     }
 
     my $number = pretty_number( $classifier->{full_total} );
@@ -1534,12 +1569,10 @@ sub history_page
             $classifier->{parser}->{bayes} = $classifier;
             $body .= $classifier->{parser}->parse_stream("messages/$form{view}");
             $classifier->{parser}->{color} = 0;
-            $body .= "<p align=right><a href=/history?start_message=$start_message&session=$session_key><b>Close</b></a></table><td valign=top><b>Color Key</b><p>";
-            
-            foreach my $bucket (@buckets)
-            {
-                $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><br>";
-            }
+            $body .= "<p align=right><a href=/history?start_message=$start_message&session=$session_key><b>Close</b></a></table><td valign=top>";
+            $classifier->classify_file("messages/$form{view}");
+            $body .= "<b>Scores</b><p>";
+            $body .= $classifier->{scores};
         }
         
         if ( $form{file} eq $mail_file )
@@ -2165,10 +2198,10 @@ sub run_popfile
                             debug ("Classification: $classification" );
                             
                             # Add the spam header
-                            if ( $configuration{subject} ) 
+                            if ( $configuration{subject} )
                             {
                                 # Don't add the classification unless it is not present
-                                if ( !( $msg_subject =~ /\[$classification\]/ ) ) 
+                                if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $classifier->{parameters}{$classification}{subject} == 1 ) ) 
                                 {
                                     $msg_headers .= "Subject: [$classification] $msg_subject$eol";
                                 } 
@@ -2276,6 +2309,8 @@ sub run_popfile
             close $mail;
             undef $mail;
         }
+
+        save_configuration();
 
         # Clear out the counters that say the number of messages available, everything to zero
         # to prepare for the next connection
