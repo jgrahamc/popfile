@@ -132,6 +132,7 @@ test_assert_equal( $b->is_pseudo_bucket( $session, 'personal' ),     0 );
 test_assert_equal( $b->is_pseudo_bucket( $session, 'unclassified' ), 1 );
 test_assert_equal( $b->is_pseudo_bucket( $session, 'impersonal2' ),   0 );
 test_assert_equal( $b->is_pseudo_bucket( $session, 'impersonal2' ),   0 );
+test_assert_equal( $b->is_bucket( $session, 'impersonal2' ),   0 );
 
 # get_buckets
 
@@ -503,7 +504,7 @@ my @class_tests = sort glob 'TestMailParse*.msg';
 for my $class_test (@class_tests) {
     my $class_file = $class_test;
     $class_file    =~ s/msg/cls/;
-	my $class;
+    my $class;
 
     if ( open CLASS, "<$class_file" ) {
     	$class = <CLASS>;
@@ -650,14 +651,18 @@ close MAIL;
 # to a handle
 
 open TEMP, ">temp.tmp";
+binmode TEMP;
 open MAIL, "<messages/one.msg";
+binmode MAIL;
 test_assert( $b->echo_to_dot_( \*MAIL, \*TEMP ) );
 test_assert( eof( MAIL ) );
 close MAIL;
 close TEMP;
 
 open TEMP, "<temp.tmp";
+binmode TEMP;
 open MAIL, "<messages/one.msg";
+binmode MAIL;
 while ( !eof( MAIL ) && !eof( TEMP ) ) {
     my $temp = <TEMP>;
     my $mail = <MAIL>;
@@ -695,15 +700,20 @@ close TEMP;
 
 unlink( 'temp.tmp' );
 open TEMP2, ">temp2.tmp";
+binmode TEMP2;
 open MAIL, "<messages/one.msg";
+binmode MAIL;
 test_assert( $b->echo_to_dot_( \*MAIL, \*TEMP2, '>temp.tmp' ) );
 test_assert( eof( MAIL ) );
 close MAIL;
 close TEMP2;
 
 open TEMP, "<temp.tmp";
+binmode TEMP;
 open TEMP2, "<temp2.tmp";
+binmode TEMP2;
 open MAIL, "<messages/one.msg";
+binmode MAIL;
 while ( !eof( MAIL ) && !eof( TEMP ) && !eof( TEMP2 ) ) {
     my $temp = <TEMP>;
     my $temp2 = <TEMP2>;
@@ -764,14 +774,18 @@ close MAIL;
 # to a handle
 
 open TEMP, ">temp.tmp";
+binmode TEMP;
 open MAIL, "<messages/one.msg";
+binmode MAIL;
 test_assert( !$b->echo_to_dot_( \*MAIL, \*TEMP ) );
 test_assert( eof( MAIL ) );
 close MAIL;
 close TEMP;
 
 open TEMP, "<temp.tmp";
+binmode TEMP;
 open MAIL, "<messages/one.msg";
+binmode MAIL;
 while ( !eof( MAIL ) && !eof( TEMP ) ) {
     my $temp = <TEMP>;
     my $mail = <MAIL>;
@@ -791,7 +805,9 @@ test_assert( eof( MAIL ) );
 close MAIL;
 
 open TEMP, "<temp.tmp";
+binmode TEMP;
 open MAIL, "<messages/one.msg";
+binmode MAIL;
 while ( !eof( MAIL ) && !eof( TEMP ) ) {
     my $temp = <TEMP>;
     my $mail = <MAIL>;
@@ -809,7 +825,9 @@ close TEMP;
 
 unlink( 'temp.tmp' );
 open TEMP2, ">temp2.tmp";
+binmode TEMP2;
 open MAIL, "<messages/one.msg";
+binmode MAIL;
 test_assert( !$b->echo_to_dot_( \*MAIL, \*TEMP2, '>temp.tmp' ) );
 test_assert( eof( MAIL ) );
 close MAIL;
@@ -818,6 +836,9 @@ close TEMP2;
 open TEMP, "<temp.tmp";
 open TEMP2, "<temp2.tmp";
 open MAIL, "<messages/one.msg";
+binmode TEMP;
+binmode TEMP2;
+binmode MAIL;
 while ( !eof( MAIL ) && !eof( TEMP ) && !eof( TEMP2 ) ) {
     my $temp = <TEMP>;
     my $temp2 = <TEMP2>;
