@@ -66,6 +66,7 @@ my %headers_table = ( 'from',    'From',            # PROFILE BLOCK START
                       'subject', 'Subject',
                       'date',    'Date',
                       'inserted', 'Arrived',
+                      'size',    'Size',
                       'bucket',  'Classification'); # PROFILE BLOCK STOP
 
 
@@ -198,7 +199,7 @@ sub initialize
     # (hide this column) in the value.  By default we show everything
 
     $self->config_( 'columns',
-        '+inserted,+from,+to,-cc,+subject,-date,+bucket' );
+        '+inserted,+from,+to,-cc,+subject,-date,-size,+bucket' );
 
     # An overriden date format set by the user, if empty then the
     # Locale_Date from the language file is used (see pretty_date__)
@@ -2421,6 +2422,21 @@ sub history_page
                                                                            $bucket );
             $row_data{History_If_Magnetized} = ($$row[11] ne '');
             $row_data{History_Magnet}        = $$row[11];
+            my $size = $$row[12];
+            if ( defined $size ) {
+                if ( $size >= 1024 * 1024 ) {
+                    $row_data{History_Size} = sprintf "%.1f&nbsp;MB", $size / ( 1024 * 1024 );
+                }
+                elsif ( $size >= 1024 ) {
+                    $row_data{History_Size} = sprintf "%.1f&nbsp;KB", $size / 1024;
+                }
+                else {
+                    $row_data{History_Size} = "$size&nbsp;B";
+                }
+            }
+            else {
+                $row_data{History_Size} = "?";
+            }
             $row_data{History_Loop_Loop_Buckets} = \@bucket_data;
             if ( defined $self->{feedback}{$mail_file} ) {
                 $row_data{History_If_Feedback} = 1;

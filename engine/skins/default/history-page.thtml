@@ -185,6 +185,12 @@
                 <span title="<TMPL_VAR NAME="History_Date" ESCAPE=HTML>"><TMPL_VAR NAME="History_Date"></span>
             </td>
             </TMPL_IF>
+            <TMPL_IF NAME="History_If_size">
+            <td>
+                <span title="<TMPL_VAR NAME="History_Size">"><TMPL_VAR NAME="History_Size"></span>
+            </td>
+            </TMPL_IF>
+                    
             <TMPL_IF NAME="History_If_bucket">
             <td>
 

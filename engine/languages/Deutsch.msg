@@ -70,6 +70,7 @@ FAQ                                     FAQ
 ID                                      ID
 Date                                    Datum
 Arrived                                 Eingang
+Size                                    Größe
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this
@@ -327,7 +328,7 @@ History_MainTableSummary                Diese Tabelle zeigt Absender und Betreff
 History_OpenMessageSummary              Diese Tabelle enthält den kompletten Text einer Nachricht. Die Wörter sind entsprechend der Kategorie eingefärbt, in die sie am wahrscheinlichsten passen.
 Bucket_MainTableSummary                 Diese Tabelle bietet einen Überblick über die einzelnen Kategorien. Jede Reihe zeigt Name, Gesamtzahl der Wörter und die Anzahl verschiedener Wörter pro Kategorie an, ob die Betreff-Zeile der Nachricht bei der Klassifizierung geändert wird, ob die Nachrichten dieser Kategorie in Quarantäne gestellt werden sollen, sowie eine Tabelle zur Auswahl einer Farbe, in der alle zu dieser Kategorie gehörenden Elemente im Kontrollzentrum dargestellt werden sollen.
 Bucket_StatisticsTableSummary           Diese Tabelle zeigt drei verschiedene Statistiken bezüglich POPFiles Gesamtleistung an. Die erste: Wie fehlerfrei ist die Einordnung in die entsprechenden Kategorien? Die zweite: Wie viele Nachrichten wurden analysiert und wie wurden sie eingeordnet? Die dritte: Wie viele Wörter gehören zu jeder Kategorie und wie hoch ist der Prozentsatz zur Gesamtzahl?
-Bucket_MaintenanceTableSummary          Diese Tabelle enthält Formulare zum Erstellen, Löschen und Umbenennen von Kategorien und um die relative Wahrscheinlichkeit der Wörter in jeder einzelnen Kategorie nachzuschlagen. 
+Bucket_MaintenanceTableSummary          Diese Tabelle enthält Formulare zum Erstellen, Löschen und Umbenennen von Kategorien und um die relative Wahrscheinlichkeit der Wörter in jeder einzelnen Kategorie nachzuschlagen.
 Bucket_AccuracyChartSummary             Diese Tabelle stellt die Genauigkeit der Nachrichten-Sortierung grafisch dar.
 Bucket_BarChartSummary                  Diese Tabelle stellt einen Prozentanteil grafisch dar. Sie wird sowohl für die Anzahl der eingestuften Nachrichten als auch für die Gesamtzahl der Wörter genutzt.
 Bucket_LookupResultsSummary             Diese Tabelle stellt die Wahrscheinlichkeiten bezüglich jedes angegebenen Wortes dar. Für jede Kategorie wird folgendes angezeigt: Die Häufigkeit, mit der das Wort auftritt, die Wahrscheinlichkeit, daß es in dieser Kategorie auftritt und die Auswirkungen auf die Punktzahl der Kategorie insgesamt, falls das Wort in einer Nachricht auftaucht.

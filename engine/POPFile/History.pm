@@ -37,7 +37,7 @@ use Date::Parse;
 use Digest::MD5 qw( md5_hex );
 
 my $fields_slot = 'history.id, hdr_from, hdr_to, hdr_cc, hdr_subject,
-hdr_date, hash, inserted, buckets.name, usedtobe, history.bucketid, magnets.val';
+hdr_date, hash, inserted, buckets.name, usedtobe, history.bucketid, magnets.val, size';
 
 #----------------------------------------------------------------------------
 # new
@@ -603,6 +603,8 @@ sub commit_history__
         my $bucketid = $self->{classifier__}->get_bucket_id(
                            $session, $bucket );
 
+        my $msg_size = -s $file;
+
         # If we can't get the bucket ID because the bucket doesn't exist
         # which could happen when we are upgrading the history which
         # has old bucket names in it then we will remove the entry from the
@@ -622,7 +624,8 @@ sub commit_history__
                                     bucketid    = $bucketid,
                                     usedtobe    = 0,
                                     magnetid    = $magnet,
-                                    hash        = $hash
+                                    hash        = $hash,
+                                    size        = $msg_size
                                     where id = $slot;" );
         } else {
             $self->log_( 0, "Couldn't find bucket ID for bucket $bucket when committing $slot" );
@@ -948,7 +951,7 @@ sub set_query
             if ( $sort =~ /from|to|cc/ ) {
                 $sort = "sort_$sort";
             } else {
-                if ( $sort ne 'inserted' ) {
+                if ( $sort ne 'inserted' && $sort ne 'size' ) {
                     $sort = "hdr_$sort";
                 }
             }
@@ -1031,7 +1034,7 @@ sub get_query_size
 #
 #    id (0), from (1), to (2), cc (3), subject (4), date (5), hash (6),
 #    inserted date (7), bucket name (8), reclassified id (9), bucket id (10),
-#    magnet value (11)
+#    magnet value (11), size (12)
 #----------------------------------------------------------------------------
 sub get_query_rows
 {

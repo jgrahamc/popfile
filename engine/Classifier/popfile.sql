@@ -1,4 +1,4 @@
--- POPFILE SCHEMA 2
+-- POPFILE SCHEMA 3
 -- ---------------------------------------------------------------------------------------------
 --
 -- popfile.schema - POPFile's database schema
@@ -70,6 +70,7 @@
 --          | inserted   |
 --          |    hash    |
 --          | committed  |
+--          |    size    |
 --          +------------+
 --
 
@@ -274,7 +275,8 @@ create table history( id integer primary key,    -- unique ID for this entry
                       magnetid integer,          -- If classified with magnet
                       sort_from   varchar(255),  -- The From: header 
                       sort_to     varchar(255),  -- The To: header            
-                      sort_cc     varchar(255)   -- The Cc: header            
+                      sort_cc     varchar(255),  -- The Cc: header            
+                      size        integer        -- Size of the message in Bytes
                     );
 
 -- MySQL SPECIFIC 
@@ -372,7 +374,7 @@ create trigger delete_bucket_template delete on bucket_template
 
 -- This is schema version 1
 
-insert into popfile ( version ) values ( 2 );
+insert into popfile ( version ) values ( 3 );
 
 -- There's always a user called 'admin'
 

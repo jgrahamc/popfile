@@ -150,6 +150,7 @@ This is the message body
 EOF
 close FILE;
 
+my $size = -s $file;
 my $slot1 = $slot;
 
 sleep(2);
@@ -166,6 +167,7 @@ Message-ID: 12345
 This is the message body
 EOF
 close FILE;
+my $size2 = -s $file;
 
 my $session = $b->get_session_key( 'admin', '' );
 $h->commit_slot( $session, $slot, 'spam', 0 );
@@ -178,8 +180,8 @@ $b->release_session_key( $session );
 
 # Check that the message hash mechanism works
 
-my $hash = $h->get_message_hash( '1234', 
-    'Sun, 25 Jul 2020 03:46:32 -0700', 
+my $hash = $h->get_message_hash( '1234',
+    'Sun, 25 Jul 2020 03:46:32 -0700',
     'this is the subject line',
     'Today' );
 
@@ -190,7 +192,7 @@ test_assert_equal( $slot1, $h->get_slot_from_hash( $hash ) );
 # the database
 
 @result = $h->{db__}->selectrow_array( "select * from history where id = 1;" );
-test_assert_equal( $#result, 15 );
+test_assert_equal( $#result, 16 );
 test_assert_equal( $result[0], 1 ); # id
 test_assert_equal( $result[1], 1 ); # userid
 test_assert_equal( $result[2], 1 ); # committed
@@ -204,9 +206,10 @@ test_assert_equal( $result[11], 0 ); # usedtobe
 test_assert_equal( $result[13], 'john graham-cumming nospam@jgc.org' );
 test_assert_equal( $result[14], 'everyone nospam-everyone@jgc.org' ); # To
 test_assert_equal( $result[15], 'people no-spam-people@jgc.org' ); # Cc
+test_assert_equal( $result[16], $size ); # size
 
 @result = $h->{db__}->selectrow_array( "select * from history where id = 2;" );
-test_assert_equal( $#result, 15 );
+test_assert_equal( $#result, 16 );
 test_assert_equal( $result[0], 2 ); # id
 test_assert_equal( $result[1], 1 ); # userid
 test_assert_equal( $result[2], 1 ); # committed
@@ -220,7 +223,7 @@ test_assert_equal( $result[11], 0 ); # usedtobe
 test_assert_equal( $result[13], 'evil spammer nospam@jgc.org' ); # From
 test_assert_equal( $result[14], 'someone else nospam-everyone@jgc.org' );
 test_assert_equal( $result[15], '' ); # Cc
-
+test_assert_equal( $result[16], $size2 ); # size
 # Try a reclassification and undo
 
 my $session = $b->get_session_key( 'admin', '' );
@@ -321,7 +324,7 @@ test_assert_equal( $#rows, 0 );
 test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
 test_assert_equal( $rows[0][8], 'spam' );
 
-# Now try a search 
+# Now try a search
 
 $h->set_query( $q, '', 'john', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 1 );
@@ -390,6 +393,9 @@ Date: Sun, 25 Jul 2000 03:46:31 -0700
 This is the body of the message
 EOF
 close MSG;
+
+$size = -s $h->get_user_path_( $h->global_config_( 'msgdir' ) . 'popfile1=1.msg' );
+
 open CLS, '>' . $h->get_user_path_( $h->global_config_( 'msgdir' ) . 'popfile1=1.cls' );
 print CLS <<EOF;
 RECLASSIFIED
@@ -418,6 +424,7 @@ test_assert_equal( $rows[0][1], 'Another Person' );
 test_assert_equal( $rows[0][2], 'Someone Else' );
 test_assert_equal( $rows[0][4], 'Something' );
 test_assert_equal( $rows[0][5], 964521991 );
+test_assert_equal( $rows[0][12], $size );
 
 # Now check that deletion works
 
@@ -442,6 +449,7 @@ test_assert_equal( $rows[1][1], 'John Graham-Cumming <nospam@jgc.org>' );
 $h->stop_query( $q );
 
 $h->config_( 'history_days', 0 );
+sleep( 2 );
 $h->cleanup_history();
 
 my $qq = $h->start_query();

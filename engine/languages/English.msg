@@ -70,6 +70,7 @@ FAQ                                     FAQ
 ID                                      ID
 Date                                    Date
 Arrived                                 Arrived
+Size                                    Size
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this
