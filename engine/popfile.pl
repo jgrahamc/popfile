@@ -70,8 +70,13 @@ sub aborting
 #
 # forker
 #
-# Called to fork POPFile.  Returns the return value from fork() and calls every module's forked
-# function in the child process
+# Called to fork POPFile.  Calls every module's forked function in the child process to give
+# then a chance to clean up
+#
+# Returns the return value from fork() and a pair of file handles that form a pipe in the
+# direction child to parent.  There is no need to close the file handles that are unused as
+# would normally be the case with a pipe and fork as forker takes care that in each process
+# only one file handle is open (be it the reader or the writer)
 #
 # ---------------------------------------------------------------------------------------------
 sub forker
@@ -136,6 +141,7 @@ $components{classifier}->{logger}        = $components{logger};
 
 # The proxy uses the logger
 $components{pop3}->{logger}              = $components{logger};
+$components{classifier}->{logger}        = $components{logger};
 
 print "    Initializing... ";
 
