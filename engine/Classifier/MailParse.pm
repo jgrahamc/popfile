@@ -2015,6 +2015,23 @@ sub parse_header
         }
     }
 
+    if ( $header =~ /^X-SpamViper-Score$/ ) {
+        # This is a header that was added by SpamViper. Works just like the
+        # SpamAssassin header.
+
+        ( my $sv_keywords = $argument ) =~ s/[\r\n]//g;
+
+        # The keywords can be found after the phrase "Mail scored X points":
+
+        $sv_keywords =~ s/Mail scored \d+ points //;
+        $sv_keywords =~ s/[\t ]//g;
+
+        foreach ( split /,/, $sv_keywords ) {
+            $self->update_pseudoword( 'spamviper', lc( $_ ), 0, $argument );
+        }
+    }
+
+
     if ( $header =~ /^X-Spam-Level$/i) {
         my $count = ( $argument =~ tr/*// );
         for ( 1 .. $count ) {
