@@ -172,7 +172,7 @@ sub parse_command_line
 
 sub load_skins
 {
-    @skins = glob 'skins/*';
+    @skins = glob 'skins/*.css';
     
     for my $i (0..$#skins)
     {
@@ -1569,7 +1569,10 @@ sub history_page
         open CLASS, ">$class_file";
         print CLASS "$classification$eol";
         close CLASS;
-        $configuration{ecount} -= 1;
+        if ( $configuration{ecount} > 0 ) 
+        {
+            $configuration{ecount} -= 1;
+        }
     }
 
     # Handle clearing the history files
@@ -1870,7 +1873,7 @@ sub history_page
 
     $body .= "</table><form action=/history><b>To remove entries in the history click: <input type=submit name=clear value='Remove All'>";
     $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form>";
-    
+
     if ( $configuration{page_size} <= $#mail_files )
     {
         $body .= "<p><center>Jump to message: ";
@@ -1992,7 +1995,7 @@ sub handle_url
         return http_ok("POPFile shutdown", 0);
     }
 
-    if ( $url =~ /(.+\.gif)/ )
+    if ( $url =~ /\/(.+\.gif)/ )
     {
         return http_file( $1, 'image/gif' );
     }
