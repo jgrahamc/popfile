@@ -55,7 +55,7 @@ if ( open PACKING, "<$packing_list" ) {
             $ver = ${"${module}::VERSION"} || ${"${module}::VERSION"} || 0;
             $ver = -1 if $@;
 
-            if ( $ver == -1 ) {
+            if ( $ver eq '-1' ) {
                 if ( $required eq 'REQUIRED' ) {
                     $fatal = 1;
                     print STDERR "ERROR: POPFile needs Perl module $module, please install it.\n";
