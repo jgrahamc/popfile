@@ -3,6 +3,7 @@ body {
     border: none;
     font-family: sans-serif;
     color: black;
+    font-size: 100%;
 }
 
 .shell{
@@ -16,13 +17,6 @@ body {
     border: 3px #ff9966 solid;
     color: black;
     width: 90%;
-}
-
-.shellBottom{
-    background-color: #ffffd0;
-    border: 3px #ff9966 solid;
-    color: black;
-    width: 70%;
 }
 
 table.head {
@@ -61,9 +55,9 @@ td.head {
     color: #1122bb;
     width: 12%;
     font-size: 100%;
-    border-top: 3px #F9E1C8 solid;
-    border-left: 3px #F9E1C8 solid;
-    border-right: 3px #F9E1C8 solid;
+    border-color: #F9E1C8; 
+    border-style: solid solid none solid; 
+    border-width: 3px;
 }
 
 .menuStandard .menuLink {
@@ -143,26 +137,6 @@ td.naked {
 
 table.footer {
     width: 100%;
-}
-
-a.changeSettingLink {
-    background-color: transparent ;
-    color: #bb2211 ;
-}
-
-a.changeSettingLink:hover {
-    background-color: transparent ;
-    color: #119922 ;
-}
-
-a.removeLink {
-    background-color: transparent ;
-    color: #1122bb ;
-}
-
-a.removeLink:hover {
-    background-color: transparent ;
-    color: #ee2233 ;
 }
 
 td.accuracy0to49 {
@@ -386,18 +360,6 @@ div.magnetsNewWidget {
     padding-left: 30%;
 }
 
-span.bucketsWidgetState {
-    color: #222299;
-    background-color: transparent;
-    font-weight: bold;
-}
-
-span.configWidgetState {
-    color: #49aF61;
-    background-color: transparent;
-    font-weight: bold;
-}
-
 span.securityWidgetStateOn {
     color: #298841;
     background-color: transparent;
@@ -502,6 +464,10 @@ td.historyNavigatorBottom {
 
 .lineImg {
     width: 0.1em;
+}
+
+.colorChooserImg {
+    width: 0.3em;
 }
 
 .submit {
