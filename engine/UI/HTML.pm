@@ -1691,26 +1691,6 @@ sub corpus_page
         return;
     }
 
-    if ( ( defined($self->{form_}{color}) ) && ( defined($self->{form_}{bucket}) ) ) {
-        $self->classifier_()->set_bucket_color( $self->{api_session__}, $self->{form_}{bucket}, $self->{form_}{color});
-    }
-
-    if ( ( defined($self->{form_}{bucket}) ) && ( defined($self->{form_}{subject}) ) && ( $self->{form_}{subject} > 0 ) ) {
-        $self->set_bucket_parameter__( $self->{form_}{bucket}, 'subject', $self->{form_}{subject} - 1 );
-    }
-
-    if ( ( defined($self->{form_}{bucket}) ) && ( defined($self->{form_}{xtc}) ) && ( $self->{form_}{xtc} > 0 ) ) {
-        $self->set_bucket_parameter__( $self->{form_}{bucket}, 'xtc', $self->{form_}{xtc} - 1 );
-    }
-
-    if ( ( defined($self->{form_}{bucket}) ) && ( defined($self->{form_}{xpl}) ) && ( $self->{form_}{xpl} > 0 ) ) {
-        $self->set_bucket_parameter__( $self->{form_}{bucket}, 'xpl', $self->{form_}{xpl} - 1 );
-    }
-
-    if ( ( defined($self->{form_}{bucket}) ) &&  ( defined($self->{form_}{quarantine}) ) && ( $self->{form_}{quarantine} > 0 ) ) {
-        $self->set_bucket_parameter__( $self->{form_}{bucket}, 'quarantine', $self->{form_}{quarantine} - 1 );
-    }
-
     # This regular expression defines the characters that are NOT valid
     # within a bucket name
 
@@ -1779,21 +1759,44 @@ sub corpus_page
     my @pseudos = $self->classifier_()->get_pseudo_buckets( $self->{api_session__} );
     push @buckets, @pseudos;
 
+    # Check whether the user requested any changes to the per-bucket settings
+    
+    if ( defined($self->{form_}{bucket_settings}) ) {
+        my @parameters = qw/subject xtc xpl quarantine/;
+        foreach my $bucket ( @buckets ) {
+            foreach my $variable ( @parameters ) {
+                my $bucket_param = $self->get_bucket_parameter__( $bucket, $variable );
+                my $form_param = ( $self->{form_}{"${bucket}_$variable"} ) ? 1 : 0;
+                
+                if ( $form_param ne $bucket_param ) {
+                    $self->set_bucket_parameter__( $bucket, $variable, $form_param );
+                }
+            }
+        
+            # Since color isn't coded binary and only used for non-pseudo buckets,
+            # we have to handle it separately
+            unless ( $self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) {
+                my $bucket_color = $self->get_bucket_parameter__( $bucket, 'color' );
+                my $form_color = $self->{form_}{"${bucket}_color"};
+                
+                if ( $form_color ne $bucket_color ) {
+                    $self->set_bucket_parameter__( $bucket, 'color', $form_color );
+                }
+            }
+        }
+    }
+    
     my @corpus_data;
-    foreach my $bucket (@buckets) {
+    foreach my $bucket ( @buckets ) {
         my %row_data;
         $row_data{Corpus_Bucket}        = $bucket;
         $row_data{Corpus_Bucket_Color}  = $self->get_bucket_parameter__( $bucket, 'color' );
         $row_data{Corpus_Bucket_Unique} = $self->pretty_number(  $self->classifier_()->get_bucket_unique_count( $self->{api_session__}, $bucket ) );
         $row_data{Corpus_If_Bucket_Not_Pseudo} = !$self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $bucket );
-        $row_data{Corpus_If_Subject}    = !$self->get_bucket_parameter__( $bucket, 'subject' );
-        $row_data{Corpus_If_XTC}        = !$self->get_bucket_parameter__( $bucket, 'xtc' );
-        $row_data{Corpus_If_XPL}        = !$self->get_bucket_parameter__( $bucket, 'xpl' );
-        $row_data{Corpus_If_Quarantine} = !$self->get_bucket_parameter__( $bucket, 'quarantine' );
-        $row_data{Localize_On}          = $self->{language__}{On};
-        $row_data{Localize_Off}         = $self->{language__}{Off};
-        $row_data{Localize_TurnOn}      = $self->{language__}{TurnOn};
-        $row_data{Localize_TurnOff}     = $self->{language__}{TurnOff};
+        $row_data{Corpus_If_Subject}    = $self->get_bucket_parameter__( $bucket, 'subject' );
+        $row_data{Corpus_If_XTC}        = $self->get_bucket_parameter__( $bucket, 'xtc' );
+        $row_data{Corpus_If_XPL}        = $self->get_bucket_parameter__( $bucket, 'xpl' );
+        $row_data{Corpus_If_Quarantine} = $self->get_bucket_parameter__( $bucket, 'quarantine' );
         my @color_data;
         foreach my $color (@{$self->classifier_()->{possible_colors__}} ) {
             my %color_row;
