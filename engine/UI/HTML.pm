@@ -496,7 +496,8 @@ sub url_handler__
 
         my $slot = $self->{form_}{view};
 
-        if ( $self->{history__}->is_valid_slot( $slot ) ) {
+        if ( ( $slot =~ /^\d+$/ ) &&
+             ( $self->{history__}->is_valid_slot( $slot ) ) ) {
             $self->http_redirect_( $client,
                  "/view?session=$self->{session_key__}&view=$slot" );
         } else {
