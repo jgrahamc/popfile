@@ -141,3 +141,10 @@ $(POPFILE_VERSION_FILE): vars.mak
 	@echo $(POPFILE_MINOR_VERSION) >> $@
 	@echo $(POPFILE_REVISION) >> $@
 
+# Make's the POPFile packing list
+
+.PHONY: packing popfile.pck
+packing: popfile.pck
+
+popfile.pck: popfile.pl bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/*.pm Services/*.pm UI/*.pm
+	@perl make_packing_list.pl $@ $?

@@ -30,11 +30,46 @@
 #
 # ----------------------------------------------------------------------------
 
+# Check the packing list of POPFile to ensure that all the required
+# modules are present.
+
+my $packing_list = 'popfile.pck';
+my $fatal = 0;
+my $log = '';
+
+if ( open PACKING, "<$packing_list" ) {
+    while (<PACKING>) {
+        if ( /^(REQUIRED|OPTIONAL-([^\t]+))\t([^\t]+)\t([^\r\n]+)/ ) {
+            my ( $required, $why, $version, $module ) = ( $1, $2, $3, $4 );
+
+            # Find the module and set $ver to the loaded version, or -1 if
+            # the module was not found
+
+            local $::SIG{__DIE__};
+            local $::SIG{__WARN__};
+            eval "require $module";
+            my $ver = ${"${module}::VERSION"} || ${"${module}::VERSION"} || 0;
+            $ver = ${"${module}::VERSION"} || ${"${module}::VERSION"} || 0;
+            $ver = -1 if $@;
+
+            if ( $ver == -1 ) {
+                if ( $required eq 'REQUIRED' ) {
+                    $fatal = 1;
+                    print STDERR "ERROR: POPFile needs Perl module $module, please install it.\n";
+                } else {
+                    $log .= "WARNING: POPFile may require Perl module $module; it is needed for \"$why\".\n";
+                }
+            }
+        }
+    }
+    close PACKING;
+} else {
+    $log .= "WARNING: Couldn't open POPFile packing list ($packing_list) so cannot check configuration\n";
+}
+
 use strict;
 use locale;
-
 use lib defined($ENV{POPFILE_ROOT})?$ENV{POPFILE_ROOT}:'./';
-
 use POPFile::Loader;
 
 # POPFile is actually loaded by the POPFile::Loader object which does all
@@ -63,6 +98,13 @@ $POPFile->CORE_link_components();
 $POPFile->CORE_initialize();
 if ( $POPFile->CORE_config() ) {
     $POPFile->CORE_start();
+
+    # If there were any log messages from the packing list check then
+    # log them now
+
+    if ( $log ne '' ) {
+        $POPFile->get_module( 'POPFile::Logger' )->debug( 0, $log );
+    }
 
     # This is the main POPFile loop that services requests, it will
     # exit only when we need to exit
