@@ -676,11 +676,76 @@ sub load_bucket_
                 close WORDS;
                 return 0;
 	    }
+	}
 
-            unlink( $self->config_( 'corpus' ) . "/$bucket/table" );
+        if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
+            my $wc = 1;
+            my $bucket_total   = 0;
+            my $bucket_unique  = 0;
+            my $upgrade_failed = 0;
 
-            $self->{full_total__} = $ft;
-        }
+            my $first = <WORDS>;
+            if ( defined( $first ) && ( $first =~ s/^__CORPUS__ __VERSION__ (\d+)// ) ) {
+                if ( $1 != $self->{corpus_version__} )  {
+                    print STDERR "Incompatible corpus version in $bucket\n";
+                    close WORDS;
+                    return 0;
+                } else {
+   	            print "\nVerifying successful bucket upgrade of $bucket...";
+                    flush STDOUT;
+
+                    while ( <WORDS> ) {
+		        if ( $wc % 100 == 0 ) {
+                            print "$wc ";
+                            flush STDOUT;
+		        }
+                        $wc += 1;
+                        s/[\r\n]//g;
+
+                        if ( /^([^\s]+) (\d+)$/ ) {
+			    if ( $self->get_base_value_( $bucket, $1 ) != $2 ) {
+                                print "\nUpgrade error for word $1 in bucket $bucket.\nShutdown POPFile and rerun.\n";
+                                $upgrade_failed = 1;
+                                last;
+			    }
+                            $bucket_total  += $2;
+                            $bucket_unique += 1;
+                        } else {
+                            $self->log_( "Found entry in corpus for $bucket that looks wrong: \"$_\" (ignoring)" );
+                        }
+		    }
+                }
+
+                close WORDS;
+
+                if ( $bucket_total != $self->get_bucket_word_count( $bucket ) ) {
+                    print "\nUpgrade error bucket $bucket word count is incorrect.\nShutdown POPFile and rerun.\n";
+                    $upgrade_failed = 1;
+		}
+                if ( $bucket_unique != $self->get_bucket_unique_count( $bucket ) ) {
+                    print "\nUpgrade error bucket $bucket unique count is incorrect.\nShutdown POPFile and rerun.\n";
+                    $upgrade_failed = 1;
+		}
+
+                if ( $upgrade_failed ) {
+                    undef $self->{db__}{$bucket};
+                    delete $self->{db__}{$bucket};
+                    untie %{$self->{matrix__}{$bucket}};
+                    delete $self->{matrix__}{$bucket};
+                    unlink( $self->config_( 'corpus' ) . "/$bucket/table.db" );
+                    return 0;
+		}
+
+                print "(successfully verified ", $wc-1, " words)";
+            } else {
+                close WORDS;
+                return 0;
+	    }
+	}
+
+        unlink( $self->config_( 'corpus' ) . "/$bucket/table" );
+
+        $self->{full_total__} = $ft;
     }
 
     $self->{full_total__} += $self->get_bucket_word_count( $bucket );
