@@ -1581,7 +1581,7 @@ sub history_page
         }
 
         $body .= "</table><form action=/history><input type=hidden name=filter value=$form{filter}><b>To remove entries in the history click: <input type=submit name=clear value='Remove All'>";
-        $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=filter value=$form{filter}><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit name=search Value=Find></form>$search_message";
+        $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=filter value=$form{filter}><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit name=searchbutton Value=Find></form>$search_message";
 
         if ( $configuration{page_size} <= $#history_cache )
         {
