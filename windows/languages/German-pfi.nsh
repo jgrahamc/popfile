@@ -174,6 +174,12 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "Dies kann einige Sekunden dauern..."
 
 #--------------------------------------------------------------------------
+# Message displayed when 'Add User' does not seem to be part of the current version
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_COMPAT_NOTFOUND      "Error: Compatible version of ${C_PFI_PRODUCT} not found !"
+
+#--------------------------------------------------------------------------
 # Message displayed when installer exits because another copy is running
 #--------------------------------------------------------------------------
 
@@ -204,12 +210,12 @@
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "Der Standardbrowser wird zum Anzeigen der POPFile Benutzeroberfläche verwendet.\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "POPFile benötigt keinen speziellen Browser und wird mit fast jedem Browser funktionieren.\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "Eine minimale Version des Perl-Interpreters wird installiert werden.\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4    "Die Perlversion, die von POPFile installiert wird, verwendet einige Komponenten des Internet Explorers und benötigt daher mindestes Internet Explorer 5.5.\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "Der Standardbrowser wird zum Anzeigen der POPFile Benutzeroberfläche verwendet.\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "POPFile benötigt keinen speziellen Browser und wird mit fast jedem Browser funktionieren.\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "Eine minimale Version des Perl-Interpreters wird installiert werden.\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4    "Die Perlversion, die von POPFile installiert wird, verwendet einige Komponenten des Internet Explorers und benötigt daher mindestes Internet Explorer 5.5."
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_5    "Das Installationsprogramm hat festgestellt, daß der Internet Explorer auf diesem System installiert ist."
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "Es ist möglich, daß einige Funktionen von POPFile auf diesem System nicht korrekt funktionieren. "
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "Es ist möglich, daß einige Funktionen von POPFile auf diesem System nicht korrekt funktionieren.\r\n\r\n"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_7    "Falls Sie irgendwelche Probleme mit POPFile haben, versuchen Sie zunächst ein Update auf eine neuere Version des Internet Explorers."
 
 #--------------------------------------------------------------------------

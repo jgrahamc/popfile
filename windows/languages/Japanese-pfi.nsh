@@ -174,6 +174,12 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "この処理にはしばらく時間がかかります..."
 
 #--------------------------------------------------------------------------
+# Message displayed when 'Add User' does not seem to be part of the current version
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_COMPAT_NOTFOUND      "Error: Compatible version of ${C_PFI_PRODUCT} not found !"
+
+#--------------------------------------------------------------------------
 # Message displayed when installer exits because another copy is running
 #--------------------------------------------------------------------------
 
@@ -204,12 +210,12 @@
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "POPFile ユーザーインターフェース(コントロールセンター)はデフォルトブラウザーを使用します。\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "POPFile は特定のブラウザーを必要とせず、ほとんどどのブラウザーとも動作します。\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "最小バージョンの Perl をインストールします(POPFile は Perl で書かれています)。\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4    "POPFile に付属する Perl はインターネットエクスプローラー 5.5(あるいはそれ以上)のコンポーネントの一部を必要とします。\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "POPFile ユーザーインターフェース(コントロールセンター)はデフォルトブラウザーを使用します。\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "POPFile は特定のブラウザーを必要とせず、ほとんどどのブラウザーとも動作します。\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "最小バージョンの Perl をインストールします(POPFile は Perl で書かれています)。\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4    "POPFile に付属する Perl はインターネットエクスプローラー 5.5(あるいはそれ以上)のコンポーネントの一部を必要とします。"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_5    "インストーラーはインターネットエクスプローラーを検出しました。"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "POPFile のいくつかの機能は正常に動作しないかもしれません。\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "POPFile のいくつかの機能は正常に動作しないかもしれません。\r\n\r\n"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_7    "POPFile で問題が起こった場合、新しいバージョンのインターネットエクスプローラーにアップグレードすることを推奨します。"
 
 #--------------------------------------------------------------------------

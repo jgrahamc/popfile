@@ -173,6 +173,12 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "ÓíÍÊÇÌ ÇáÃãÑ áÈÖÚ áÍÙÇÊ..."
 
 #--------------------------------------------------------------------------
+# Message displayed when 'Add User' does not seem to be part of the current version
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_COMPAT_NOTFOUND      "Error: Compatible version of ${C_PFI_PRODUCT} not found !"
+
+#--------------------------------------------------------------------------
 # Message displayed when installer exits because another copy is running
 #--------------------------------------------------------------------------
 
@@ -203,12 +209,12 @@
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "ÓíÓÊÚãá ÇáãÊÕİÍ ÇáÅİÊÑÇÖí áÚÑÖ æÇÌåÉ ÅÓÊÚãÇá POPFile (ãÑßÒ ÇáÊÍßã).\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "áÇ íÊØáÈ POPFile ãÊÕİÍ ãÍÏÏ¡ ÓíÚãá ãÚ Çí ãÊÕİÍ.\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "ÓíÊã ÊäÕíÈ äÓÎÉ ãÕÛÑÉ ãä Perl (Êã ßÊÇÈÉ POPFile ÈæÇÓØÉ Perl).\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4    "íÊØáÈ Perl ÇáãÒæÏ ãÚ POPFile ÈÚÖ ãßæäÇÊ Internet Explorer æáåĞÇ íÊØáÈ æÌæÏ Internet Explorer 5.5 (Ãæ ãÇ ÈÚÏåÇ).\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "ÓíÓÊÚãá ÇáãÊÕİÍ ÇáÅİÊÑÇÖí áÚÑÖ æÇÌåÉ ÅÓÊÚãÇá POPFile (ãÑßÒ ÇáÊÍßã).\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "áÇ íÊØáÈ POPFile ãÊÕİÍ ãÍÏÏ¡ ÓíÚãá ãÚ Çí ãÊÕİÍ.\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "ÓíÊã ÊäÕíÈ äÓÎÉ ãÕÛÑÉ ãä Perl (Êã ßÊÇÈÉ POPFile ÈæÇÓØÉ Perl).\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4    "íÊØáÈ Perl ÇáãÒæÏ ãÚ POPFile ÈÚÖ ãßæäÇÊ Internet Explorer æáåĞÇ íÊØáÈ æÌæÏ Internet Explorer 5.5 (Ãæ ãÇ ÈÚÏåÇ)."
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_5    "áŞÏ ÅßÊÔİ ÇáãäÕøÈ æÌæÏ Internet Explorer İí åĞÇ ÇáäÙÇã"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "ãä Çáããßä Ãä ÈÚÖ ãíÒÇÊ POPFile áä ÊÚãá ÈÔßá ÕÍíÍ Úáì åĞÇ ÇáäÙÇã.\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "ãä Çáããßä Ãä ÈÚÖ ãíÒÇÊ POPFile áä ÊÚãá ÈÔßá ÕÍíÍ Úáì åĞÇ ÇáäÙÇã.\r\n\r\n"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_7    "ÅĞÇ æÇÌåÊ ãÔÇßá ãÚ POPFile¡ İÅä ÇáÊÑŞíÉ Çáì äÓÎÉ ÌÏíÏÉ ãä Internet Explorer ããßä Çä ÊÓÇÚÏ."
 
 #--------------------------------------------------------------------------
