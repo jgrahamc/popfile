@@ -614,14 +614,14 @@ sub magnet_page
     }
     
     my $body = '<h2>Current Magnets</h2><p>The following magnets cause mail to always be classified into the specified bucket.';
-    $body .= "<p><table width=50%><tr><td><b>Magnet</b><td><b>Bucket</b><td><b>Delete</b>";
+    $body .= "<p><table width=75%><tr><td><b>Magnet</b><td><b>Bucket</b><td><b>Delete</b>";
     
     my $stripe = 0;
-    for my $bucket (keys %{$classifier->{magnets}})
+    for my $bucket (sort keys %{$classifier->{magnets}})
     {
-        for my $type (keys %{$classifier->{magnets}{$bucket}})
+        for my $type (sort keys %{$classifier->{magnets}{$bucket}})
         {
-            for my $magnet (keys %{$classifier->{magnets}{$bucket}{$type}}) 
+            for my $magnet (sort keys %{$classifier->{magnets}{$bucket}{$type}}) 
             {
                 $body .= "<tr "; 
                 if ( $stripe ) 
