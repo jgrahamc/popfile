@@ -463,15 +463,18 @@ sub load_bucket_
                 next;
             }
 
-            if ( /([^\s]+) (\d+)/ ) {
+            s/[\r\n]//g;
+
+            if ( /^([^\s]+) (\d+)$/ ) {
                 my $word  = $1;
                 my $value = $2;
-                $value =~ s/[\r\n]//g;
                 if ( $value > 0 )  {
                     $self->{total__}{$bucket}        += $value;
                     $self->{unique__}{$bucket}       += 1;
                     set_value_( $self, $bucket, $word, $value );
                 }
+            } else {
+                $self->log_( "Found entry in corpus for $bucket that looks wrong: \"$_\" (ignoring)" );
             }
         }
 
@@ -1354,10 +1357,11 @@ sub add_message_to_bucket
                 next;
             }
 
-            if ( /([^\s]+) (\d+)/ ) {
+            s/[\r\n]//g;
+
+            if ( /^([^\s]+) (\d+)$/ ) {
                 my $word  = $1;
                 my $value = $2;
-                $value =~ s/[\r\n]//g;
                 if ( $value > 0 )  {
                     $words{$word} = $value;
                 }
@@ -1412,10 +1416,11 @@ sub remove_message_from_bucket
                 next;
             }
 
-            if ( /([^\s]+) (\d+)/ ) {
+            s/[\r\n]//g;
+
+            if ( /^([^\s]+) (\d+)$/ ) {
                 my $word  = $1;
                 my $value = $2;
-                $value =~ s/[\r\n]//g;
                 if ( $value > 0 )  {
                     $words{$word} = $value;
                 }
