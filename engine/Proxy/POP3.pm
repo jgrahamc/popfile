@@ -161,40 +161,6 @@ sub service
 {
     my ( $self ) = @_;
 
-    # Accept a connection from a client trying to use us as the mail server.  We service one client at a time
-    # and all others get queued up to be dealt with later.  We check the alive boolean here to make sure we
-    # are still allowed to operate. See if there's a connection waiting on the $server by getting the list of 
-    # handles with data to read, if the handle is the server then we're off. 
-    my ($ready)   = $self->{selector}->can_read(0);
-
-    # If the $server is ready then we can go ahead and accept the connection
-    if ( ( defined($ready) ) && ( $ready == $self->{server} ) ) {
-        if ( my $client = $self->{server}->accept() ) {
-            # Check that this is a connection from the local machine, if it's not then we drop it immediately
-            # without any further processing.  We don't want to act as a proxy for just anyone's email
-            my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
-
-            if  ( ( $self->{configuration}->{configuration}{localpop} == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
-                # Now that we have a good connection to the client fork a subprocess to handle the communication
-                $self->{configuration}->{configuration}{download_count} += 1;
-                my ($pid,$pipe) = &{$self->{forker}};
-
-                # If we are in the parent process then push the pipe handle onto the children list
-                if ( ( defined( $pid ) ) && ( $pid != 0 ) ) {
-                    push @{$self->{children}}, ($pipe);
-                }
-
-                # If we fail to fork, or are in the child process then process this request
-                if ( !defined( $pid ) || ( $pid == 0 ) ) {
-                    child( $self, $client, $self->{configuration}->{configuration}{download_count}, $pipe );
-                    exit(0) if ( defined( $pid ) );
-                }
-            }
-
-            close $client;
-        }
-    }
-
     # Now see if any of our children have data ready to read from their pipes, the data returned is
     # a line containing just the name of a bucket for which we have done a classification.  Increment
     # the statistics for that bucket and the total message count
@@ -232,6 +198,40 @@ sub service
         # around for next time
         if ( defined( $pipe ) ) {
             push @{$self->{children}}, ($pipe);
+        }
+    }
+
+    # Accept a connection from a client trying to use us as the mail server.  We service one client at a time
+    # and all others get queued up to be dealt with later.  We check the alive boolean here to make sure we
+    # are still allowed to operate. See if there's a connection waiting on the $server by getting the list of 
+    # handles with data to read, if the handle is the server then we're off. 
+    my ($ready)   = $self->{selector}->can_read(0);
+
+    # If the $server is ready then we can go ahead and accept the connection
+    if ( ( defined($ready) ) && ( $ready == $self->{server} ) ) {
+        if ( my $client = $self->{server}->accept() ) {
+            # Check that this is a connection from the local machine, if it's not then we drop it immediately
+            # without any further processing.  We don't want to act as a proxy for just anyone's email
+            my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
+
+            if  ( ( $self->{configuration}->{configuration}{localpop} == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
+                # Now that we have a good connection to the client fork a subprocess to handle the communication
+                $self->{configuration}->{configuration}{download_count} += 1;
+                my ($pid,$pipe) = &{$self->{forker}};
+
+                # If we are in the parent process then push the pipe handle onto the children list
+                if ( ( defined( $pid ) ) && ( $pid != 0 ) ) {
+                    push @{$self->{children}}, ($pipe);
+                }
+
+                # If we fail to fork, or are in the child process then process this request
+                if ( !defined( $pid ) || ( $pid == 0 ) ) {
+                    child( $self, $client, $self->{configuration}->{configuration}{download_count}, $pipe );
+                    exit(0) if ( defined( $pid ) );
+                }
+            }
+
+            close $client;
         }
     }
     

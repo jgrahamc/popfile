@@ -162,10 +162,6 @@ $components{classifier}->{ui}            = $components{ui};
 $components{pop3}->{logger}              = $components{logger};
 $components{classifier}->{logger}        = $components{logger};
 
-# The proxy uses the logger
-$components{pop3}->{logger}              = $components{logger};
-$components{classifier}->{logger}        = $components{logger};
-
 print "    Initializing... ";
 
 # Tell each module to initialize itself
@@ -206,9 +202,9 @@ while ( $alive == 1 ) {
         }
     }
     
-    # Sleep for 0.01 of a second to ensure that POPFile does not hog the machine's
+    # Sleep for 0.05 of a second to ensure that POPFile does not hog the machine's
     # CPU
-    select(undef, undef, undef, 0.01);
+    select(undef, undef, undef, 0.05);
 
     # Under ActiveState Perl 5.8.0 on Windows we were seeing a single handle leak per
     # fork even though all handles were closed in the child process.  It appears that the
