@@ -711,7 +711,7 @@ Function CBP_CreateINIfile
   ; Constants used to position information on the left-half of the page
 
   !define CBP_INFO_LEFT_MARGIN      0
-  !define CBP_INFO_RIGHT_MARGIN   141
+  !define CBP_INFO_RIGHT_MARGIN   150
 
   ; Constants used to position the bucket names
 
@@ -812,42 +812,42 @@ Function CBP_CreateINIfile
   !insertmacro CBP_DEFINE_CONTROL "Field 1" \
       "Label" \
       "$(PFI_LANG_CBP_IO_INTRO)" \
-      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "0" "60"
+      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "0" "56"
 
   ; Label for the "Create Bucket" ComboBox
 
   !insertmacro CBP_DEFINE_CONTROL "Field 2" \
       "Label" \
       "$(PFI_LANG_CBP_IO_CREATE)" \
-      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "63" "87"
+      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "58" "90"
 
   ; ComboBox used to create a new bucket
 
   !insertmacro CBP_DEFINE_CONTROL "Field 3" \
       "ComboBox" \
       "A|B" \
-      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "90" "170"
+      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "92" "160"
 
   ; Instruction for deleting bucket names from the list
 
   !insertmacro CBP_DEFINE_CONTROL "Field 4" \
       "Label" \
       "$(PFI_LANG_CBP_IO_DELETE)" \
-      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "107" "140"
+      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "108" "140"
 
   ; Label used to display progress reports
 
   !insertmacro CBP_DEFINE_CONTROL "Field 5" \
       "Label" \
       " " \
-      "155" "299" "132" "140"
+      "154" "300" "132" "140"
 
   ; Box enclosing the list of bucket names defined so far
 
   !insertmacro CBP_DEFINE_CONTROL "Field 6" \
       "GroupBox" \
       "$(PFI_LANG_CBP_IO_LISTHDR)" \
-      "150" "300" "0" "130"
+      "153" "300" "0" "130"
 
   ; Text for GroupBox lines 1 to 8
 
