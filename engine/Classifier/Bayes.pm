@@ -339,7 +339,7 @@ sub classify_file
     my $logbuck = 0;
     if ( $#buckets > 0 )
     {
-       $logbuck = log( $#buckets );
+       $logbuck = log( $#buckets + 1 );
     }
 
     # Ideally, the "raw score" in the score display would reflect the sum of the
