@@ -137,11 +137,11 @@
 
 ; Message box text strings
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_1      "Sorry! A bucket called"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_1      "A bucket called"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_2      "has already been defined."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_3      "Please choose a different name for the new bucket."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_1      "Sorry! The installer can only create up to"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_1      "The installer can only create up to"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_2      "buckets."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_3      "Once POPFile has been installed you can create more than"
 
@@ -152,16 +152,16 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_1     "POPFile requires AT LEAST TWO buckets before it can classify your email."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_2     "Please enter the name of a bucket to be created,$\r$\n$\r$\neither by picking a suggested name from the drop-down list$\r$\n$\r$\nor by typing in a name of your own choice."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_3     "Sorry! You must define AT LEAST TWO buckets before continuing with the installation of POPFile."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_3     "You must define AT LEAST TWO buckets before continuing with the installation of POPFile."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_1        "buckets have been defined for use by POPFile."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_2        "Do you want to configure POPFile to use these buckets?"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_3        "Click 'No' if you wish to change your bucket selections."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_1      "Sorry! The installer was unable to create"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_1      "The installer was unable to create"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_2      "of the"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_3      "buckets you selected."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4      "Once POPFile has been installed you can use its 'User Interface' control panel to create the missing bucket(s)."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4      "Once POPFile has been installed you can use its 'User Interface'$\r$\n$\r$\ncontrol panel to create the missing bucket(s)."
 
 #--------------------------------------------------------------------------
 # Custom Page - Reconfigure Outlook Express
@@ -234,8 +234,11 @@
 
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_1      "It does not appear that POPFile is installed in the directory"
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_2      "Continue anyway (not recommended) ?"
+
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_ABORT_1           "Uninstall aborted by user"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMDIR_1        "Do you want to remove all files in your POPFile directory? (If you have anything you created that you want to keep, click No)"
+
+!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMDIR_1        "Do you want to remove all files in your POPFile directory?$\r$\n$\r$\n(If you have anything you created that you want to keep, click No)"
+
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_1        "Note"
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_2        "could not be removed."
 

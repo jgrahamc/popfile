@@ -161,7 +161,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_1      "The installer was unable to create"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_2      "of the"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_3      "buckets you selected."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4      "Once POPFile has been installed you can use its 'User Interface' control panel to create the missing bucket(s)."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4      "Once POPFile has been installed you can use its 'User Interface'$\r$\n$\r$\ncontrol panel to create the missing bucket(s)."
 
 #--------------------------------------------------------------------------
 # Custom Page - Reconfigure Outlook Express
@@ -234,8 +234,11 @@
 
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_1      "It does not appear that POPFile is installed in the directory"
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_2      "Continue anyway (not recommended) ?"
+
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_ABORT_1           "Uninstall aborted by user"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMDIR_1        "Do you want to remove all files in your POPFile directory? (If you have anything you created that you want to keep, click No)"
+
+!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMDIR_1        "Do you want to remove all files in your POPFile directory?$\r$\n$\r$\n(If you have anything you created that you want to keep, click No)"
+
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_1        "Note"
 !insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_2        "could not be removed."
 
