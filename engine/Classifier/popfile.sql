@@ -301,7 +301,7 @@ create trigger delete_user delete on users
 
 create trigger delete_magnet_type delete on magnet_types
              begin
-                 delete from magnet where mtid = old.id;
+                 delete from magnets where mtid = old.id;
              end;
 
 -- ---------------------------------------------------------------------------------------------
