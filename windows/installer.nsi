@@ -574,7 +574,25 @@
 # Default Destination Folder
 #--------------------------------------------------------------------------
 
-  InstallDir "$PROGRAMFILES\${C_PFI_PRODUCT}"
+  ; Note that the 'InstallDir' value has a trailing slash (to override the default behaviour)
+  ;
+  ; By default, NSIS will append '\${C_PFI_PRODUCT}' to the path selected using the 'Browse'
+  ; button if the path does not already end with '\${C_PFI_PRODUCT}'. If the 'Browse' button
+  ; is used to select 'C:\Program Files\POPFile Test' the installer will install the program
+  ; in the 'C:\Program Files\POPFile Test\POPFile' folder and although this location is shown
+  ; on the DIRECTORY page before the user clicks the 'Next' button most users will not notice
+  ; that '\POPFile' has been appended to the location they selected. This problem will be made
+  ; worse if there is an existing version of POPFile in the 'C:\Program Files\POPFile Test'
+  ; folder since there will already be a 'C:\Program Files\POPFile Test\POPFile' folder holding
+  ; Configuration.pm, History.pm, etc
+  ;
+  ; By adding a trailing slash we ensure that if the user selects a folder using the 'Browse'
+  ; button then that is what the installer will use. One side effect of this change is that it
+  ; is now easier for users to select a folder such as 'C:\Program Files' for the installation
+  ; (which is not a good choice - so we refuse to accept any path matching the target system's
+  ; "program files" folder; see the 'CheckExistingProgDir' function)
+
+  InstallDir "$PROGRAMFILES\${C_PFI_PRODUCT}\"
   InstallDirRegKey HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
 
 #--------------------------------------------------------------------------
@@ -2298,44 +2316,68 @@ FunctionEnd
 # Installer Function: CheckExistingProgDir
 # (the "leave" function for the POPFile PROGRAM DIRECTORY selection page)
 #
+# Now that we are overriding the default InstallDir behaviour, we really need to check
+# that the main 'Program Files' folder has not been selected for the installation.
+#
 # This function is used to check if a previous POPFile installation exists in the directory
-# chosen for this installation's POPFile PROGRAM files (popfile.pl, etc)
+# chosen for this installation's POPFile PROGRAM files (popfile.pl, etc). If we find one,
+# we check if it contains any of the optional components and remind the user if it seems that
+# they have forgotten to 'upgrade' them.
 #--------------------------------------------------------------------------
 
 Function CheckExistingProgDir
 
   !define L_RESULT  $R9
 
+  Push ${L_RESULT}
+  
+  ; Strip trailing slashes (if any) from the path selected by the user
+  
+  Push $INSTDIR
+  Pop $INSTDIR
+
+  ; We do not permit POPFile to be installed in the target system's 'Program Files' folder
+  ; (i.e. we do not allow 'popfile.pl' etc to be stored there)
+
+  StrCmp $INSTDIR "$PROGRAMFILES" return_to_directory_selection
+
   ; If short file names are not supported on this system,
   ; we cannot accept any path containing spaces.
 
-  StrCmp $G_SFN_DISABLED "0" check_locn
-
-  Push ${L_RESULT}
+  StrCmp $G_SFN_DISABLED "0" check_SFN_PROGRAMFILES
 
   Push $INSTDIR
   Push ' '
   Call StrStr
   Pop ${L_RESULT}
-  StrCmp ${L_RESULT} "" no_spaces
+  StrCmp ${L_RESULT} "" check_locn
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "Current configuration does not support short file names!\
-      ${MB_NL}${MB_NL}\
-      Please select a folder location which does not contain spaces"
+      "Please select a folder location which does not contain spaces"
 
   ; Return to the POPFile PROGRAM DIRECTORY selection page
 
+return_to_directory_selection:
   Pop ${L_RESULT}
   Abort
 
-no_spaces:
-  Pop ${L_RESULT}
+check_SFN_PROGRAMFILES:
+  GetFullPathName /SHORT ${L_RESULT} "$PROGRAMFILES"
+  StrCmp $INSTDIR ${L_RESULT} return_to_directory_selection
 
 check_locn:
 
   ; Initialise the global user variable used for the POPFile PROGRAM files location
+  ; (we always try to use the LFN format, even if the user has entered a SFN format path)
 
   StrCpy $G_ROOTDIR "$INSTDIR"
+  Push $G_ROOTDIR
+  Call GetCompleteFPN
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" got_path
+  StrCpy $G_ROOTDIR ${L_RESULT}
+
+got_path:
+  Pop ${L_RESULT}
 
   ; Warn the user if we are about to upgrade an existing installation
   ; and allow user to select a different directory if they wish
@@ -2346,7 +2388,7 @@ check_locn:
 warning:
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_1)\
       ${MB_NL}${MB_NL}\
-      $INSTDIR\
+      $G_ROOTDIR\
       ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES check_options
 

@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.60"
+  !define C_PFI_VERSION  "0.2.61"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -197,6 +197,8 @@
   ;       Active Desktop installed, otherwise $APPDATA will not be available. For
   ;       these cases, an alternative constant is used to define the default location.
   ;----------------------------------------------------------------------
+
+  ; Note: C_STD_DEFAULT_USERDATA and C_ALT_DEFAULT_USERDATA must not end with trailing slashes
 
   !define C_STD_DEFAULT_USERDATA  "$APPDATA\POPFile"
   !define C_ALT_DEFAULT_USERDATA  "$WINDIR\Application Data\POPFile"
@@ -584,9 +586,9 @@
   !define MUI_FINISHPAGE_SHOWREADME
   !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
   !define MUI_FINISHPAGE_SHOWREADME_FUNCTION  "ShowReadMe"
-  
+
   ; Provide a link to the POPFile Home Page
-  
+
   !define MUI_FINISHPAGE_LINK                 "$(PFI_LANG_FINISH_WEB_LINK_TEXT)"
   !define MUI_FINISHPAGE_LINK_LOCATION        "http://getpopfile.org/"
 
@@ -647,7 +649,22 @@
 # Default Destination Folder
 #--------------------------------------------------------------------------
 
-  InstallDir "${C_STD_DEFAULT_USERDATA}"
+  ; Note that the 'InstallDir' value has a trailing slash (to override the default behaviour)
+  ;
+  ; By default, NSIS will append '\POPFile' to the path selected using the 'Browse' button if
+  ; the path does not already end with '\POPFile'. If the 'Browse' button is used to select
+  ; 'C:\Application Data\POPFile Test' the wizard will install the 'User Data' in the folder
+  ; 'C:\Application Data\POPFile Test\POPFile' and although this location is displayed on the
+  ; DIRECTORY page before the user clicks the 'Next' button most users will not notice that
+  ; '\POPFile' has been appended to the location they selected.
+  ;
+  ; By adding a trailing slash we ensure that if the user selects a folder using the 'Browse'
+  ; button then that is what the wizard will use. One side effect of this change is that it
+  ; is now easier for users to select a folder such as 'C:\Program Files' for the 'User Data'
+  ; (which is not a good choice - so we refuse to accept any path matching the target system's
+  ; "program files" folder; see the 'CheckExistingDataDir' function)
+
+  InstallDir "${C_STD_DEFAULT_USERDATA}\"
 
 #--------------------------------------------------------------------------
 # Reserve the files required by the installer (to improve performance)
@@ -1967,6 +1984,9 @@ FunctionEnd
 # Installer Function: CheckExistingDataDir
 # (the "leave" function for the DIRECTORY page)
 #
+# Now that we are overriding the default InstallDir behaviour, we really need to check
+# that the main 'Program Files' folder has not been selected for the 'User Data' folder.
+#
 # POPFile currently does not support paths containing spaces in POPFILE_ROOT and POPFILE_USER
 # so we use the short file name format for these two environment variables. However some
 # installations may not support short file names, so the wizard checks if the main installer
@@ -1978,29 +1998,52 @@ Function CheckExistingDataDir
 
   !define L_RESULT    $R9
 
+  Push ${L_RESULT}
+  
+  ; Strip trailing slashes (if any) from the path selected by the user
+  
+  Push $G_USERDIR
+  Pop $INSTDIR
+  StrCpy $G_USERDIR "$INSTDIR"
+
+  ; We do not permit POPFile 'User Data' to be in the main 'Program Files' folder
+  ; (i.e. we do not allow 'popfile.cfg' etc to be stored there)
+
+  StrCmp $G_USERDIR "$PROGRAMFILES" return_to_directory_selection
+
   ; If short file names are not supported on this system,
   ; we cannot accept any path containing spaces.
 
-  StrCmp $G_SFN_DISABLED "0" upgrade_check
-
-  Push ${L_RESULT}
+  StrCmp $G_SFN_DISABLED "0" check_SFN_PROGRAMFILES
 
   Push $G_USERDIR
   Push ' '
   Call StrStr
   Pop ${L_RESULT}
-  StrCmp ${L_RESULT} "" no_spaces
+  StrCmp ${L_RESULT} "" check_locn
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "Current configuration does not support short file names\
-      ${MB_NL}${MB_NL}\
-      Please select a folder location which does not contain spaces"
+      "Please select a folder location which does not contain spaces"
+
+return_to_directory_selection:
   Pop ${L_RESULT}
   Abort
 
-no_spaces:
-  Pop ${L_RESULT}
+check_SFN_PROGRAMFILES:
+  GetFullPathName /SHORT ${L_RESULT} "$PROGRAMFILES"
+  StrCmp $G_USERDIR "${L_RESULT}" return_to_directory_selection
 
-upgrade_check:
+check_locn:
+
+  ; We always try to use the LFN format, even if the user has entered a SFN format path
+
+  Push $G_USERDIR
+  Call GetCompleteFPN
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" got_path
+  StrCpy $G_USERDIR ${L_RESULT}
+
+got_path:
+  Pop ${L_RESULT}
 
   ; Warn the user if we are about to upgrade an existing installation
   ; and allow user to select a different directory if they wish
