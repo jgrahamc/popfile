@@ -3166,6 +3166,12 @@ sub history_page
                                             $self->config_( 'archive' ) ); # PROFILE BLOCK STOP
             }
         }
+
+        # Check that the start_message now exists, if not then go back a page
+
+        while ( ( $self->{form_}{start_message} + $self->config_( 'page_size' ) ) >= $self->history_size() ) {
+            $self->{form_}{start_message} -= $self->config_( 'page_size' );
+	}
     }
 
     $self->copy_pre_cache__();
