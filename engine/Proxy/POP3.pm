@@ -1,4 +1,4 @@
-# POPFILE LOADABLE MODULE
+# POPFILE LOADABLE MODULE 4
 package Proxy::POP3;
 
 use Proxy::Proxy;
@@ -475,7 +475,7 @@ sub child__
                         # file for later RETR's
 
                         my ( $class, $slot ) =
-                             $self->{classifier__}->classify_and_modify(
+                             $self->classifier_()->classify_and_modify(
                                  $session, $mail, $client, 0, '', 0, 0 );
 
                         $downloaded{$count} = $slot;
@@ -494,7 +494,7 @@ sub child__
                             # Classify with pre-defined class, without
                             # saving, echoing to client
 
-                            $self->{classifier__}->classify_and_modify(
+                            $self->classifier_()->classify_and_modify(
                                 $session, $mail, $client, 1, $class, $slot, 1 );
                         }
                     }
@@ -566,7 +566,7 @@ sub child__
             my $file;
 
             if ( defined($downloaded{$count}) &&
-                 ( $file = $self->{history__}->get_slot_file( $downloaded{$count} ) ) &&
+                 ( $file = $self->history_()->get_slot_file( $downloaded{$count} ) ) &&
                  (open RETRFILE, "<$file") ) {
 
                 # act like a network stream
@@ -585,14 +585,14 @@ sub child__
 
                 my ( $id, $from, $to, $cc, $subject,
                     $date, $hash, $inserted, $bucket, $reclassified ) =
-                    $self->{history__}->get_slot_fields( $downloaded{$count} );
+                    $self->history_()->get_slot_fields( $downloaded{$count} );
 
                 if ( $bucket ne 'unknown class' ) {
 
                     # echo file, inserting known classification,
                     # without saving
 
-                    ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, 1, $bucket, $downloaded{$count} );
+                    ($class, undef) = $self->classifier_()->classify_and_modify( $session, \*RETRFILE, $client, 1, $bucket, $downloaded{$count} );
                     print $client ".$eol";
 
                 } else {
@@ -600,7 +600,7 @@ sub child__
                     # If the class wasn't saved properly, classify
                     # from disk normally
 
-                    ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, 1, '', 0 );
+                    ($class, undef) = $self->classifier_()->classify_and_modify( $session, \*RETRFILE, $client, 1, '', 0 );
                     print $client ".$eol";
                 }
 
@@ -619,7 +619,7 @@ sub child__
                 last if ( $response == 2 );
                 if ( $response == 0 ) {
                     my $slot;
-                    ( $class, $slot ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, 0, '', 0 );
+                    ( $class, $slot ) = $self->classifier_()->classify_and_modify( $session, $mail, $client, 0, '', 0 );
 
                     # Note locally that file has been retrieved if the
                     # full thing has been saved to disk

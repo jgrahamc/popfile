@@ -1,4 +1,4 @@
-# POPFILE LOADABLE MODULE
+# POPFILE LOADABLE MODULE 0
 package POPFile::MQ;
 
 use POPFile::Module;

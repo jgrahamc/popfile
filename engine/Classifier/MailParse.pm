@@ -2422,13 +2422,6 @@ sub quickmagnets
    return $self->{quickmagnets__};
 }
 
-sub mangle
-{
-    my ( $self, $value ) = @_;
-
-    $self->{mangle__} = $value;
-}
-
 # ----------------------------------------------------------------------------
 #
 # convert_encoding

@@ -51,6 +51,31 @@ sub new
 
     $self->{components__} = {};
 
+    # POPFile modules are initialized and loaded in run order which
+    # is specified in the # POPFILE LOADABLE MODULE header in the
+    # PLM.  The following run levels are defined
+    #
+    # 0     None of the system has been initialized
+    # 1     Configuration data has been loaded
+    # 2     Logging services are ready
+    # 3     Database access is available
+    # 4     Classification interface ready
+    # 5     Proxies and services up
+    # 6     Ready to run
+    #
+    # which translates into the following load order
+    #
+    # 0     POPFile::Configuration, POPFile::MQ
+    # 1     POPFile::Logger
+    # 2     POPFile::Database, Classifier::WordMangle
+    # 3     Classifier::Bayes, POPFile::History
+    # 4     Proxy::*, Services::*
+    # 5     UI::*
+    #
+    # This has maps run levels to lists of modules to load
+
+    $self->{run_levels__} = {};
+
     # A handy boolean that tells us whether we are alive or not.  When
     # this is set to 1 then the proxy works normally, when set to 0
     # (typically by the aborting() function called from a signal) then
@@ -134,8 +159,6 @@ sub CORE_loader_init
         close VER;
         $self->CORE_version( $major, $minor, $rev );
     }
-
-    print "\nPOPFile Engine loading\n" if $self->{debug__};
 }
 
 #----------------------------------------------------------------------------
@@ -318,7 +341,7 @@ sub CORE_load_directory_modules
 {
     my ( $self, $directory, $type ) = @_;
 
-    print "\n         {$type:" if $self->{debug__};
+    print "\n        $type:" if $self->{debug__};
 
     # Look for all the .pm files in named directory and then see which
     # of them are POPFile modules indicated by the first line of the
@@ -335,8 +358,6 @@ sub CORE_load_directory_modules
     }
 
     closedir MODULES;
-
-    print '} ' if $self->{debug__};
 }
 
 #----------------------------------------------------------------------------
@@ -357,12 +378,13 @@ sub CORE_load_module
 {
     my ( $self, $module, $type ) = @_;
 
-    my $mod = $self->load_module_($module);
+    my ( $mod, $runlevel ) = $self->load_module_($module);
 
     if ( defined( $mod ) ) {
         my $name = $mod->name();
         print " $name" if $self->{debug__};
         $self->{components__}{$type}{$name} = $mod;
+        push @{$self->{run_levels__}{$runlevel}}, "$type:$name";
     }
     return $mod;
 }
@@ -373,8 +395,8 @@ sub CORE_load_module
 #
 # Called to load a single POPFile Loadable Module (implemented as .pm
 # files with special comment on first line. Returns a handle to the
-# module, undef if the module failed to load.  No internal
-# side-effects.
+# module, undef if the module failed to load and the runlevel.  No
+# internal side-effects.
 #
 # $module           The path of the module to load
 #
@@ -383,22 +405,29 @@ sub load_module_
 {
     my ( $self, $module ) = @_;
 
-    my $mod;
+    my ( $mod, $runlevel );
 
     if ( open MODULE, '<' . $self->root_path__( $module ) ) {
         my $first = <MODULE>;
         close MODULE;
 
-        if ( $first =~ /^# POPFILE LOADABLE MODULE/ ) {
+        if ( $first =~ /^# POPFILE LOADABLE MODULE (\d+)/ ) {
+            $runlevel = $1;
+
             require $module;
 
             $module =~ s/\//::/;
             $module =~ s/\.pm//;
 
             $mod = $module->new();
+        } else {
+            if ( $first =~ /^# POPFILE LOADABLE MODULE/ ) {
+                print "ERROR: $module has no run level\n";
+            }
         }
     }
-    return $mod;
+
+    return ( $mod, $runlevel );
 }
 
 #----------------------------------------------------------------------------
@@ -508,60 +537,6 @@ sub CORE_load
 
 #----------------------------------------------------------------------------
 #
-# CORE_link_components
-#
-# Links POPFile's modules together to allow them to make use of
-# each-other as objects
-#
-#----------------------------------------------------------------------------
-sub CORE_link_components
-{
-    my ( $self ) = @_;
-
-    print "\n\nPOPFile Engine $self->{version_string__} starting" if $self->{debug__};
-
-    # Link each of the main objects with the configuration object so
-    # that they can set their default parameters all or them also get
-    # access to the logger, version, and message-queue
-
-    foreach my $type (sort keys %{$self->{components__}}) {
-        foreach my $name (sort keys %{$self->{components__}{$type}}) {
-            $self->{components__}{$type}{$name}->version(       scalar($self->CORE_version())                    );
-            $self->{components__}{$type}{$name}->configuration( $self->{components__}{core}{config} );
-            $self->{components__}{$type}{$name}->logger(        $self->{components__}{core}{logger} ) if ( $name ne 'logger' );
-            $self->{components__}{$type}{$name}->mq(            $self->{components__}{core}{mq}     );
-        }
-    }
-
-    # All interface components need access to the classifier and history
-
-    foreach my $name (sort keys %{$self->{components__}{interface}}) {
-        $self->{components__}{interface}{$name}->classifier( $self->{components__}{classifier}{bayes} );
-        $self->{components__}{interface}{$name}->history( $self->{components__}{core}{history} );
-    }
-
-    foreach my $name (sort keys %{$self->{components__}{proxy}}) {
-        $self->{components__}{proxy}{$name}->classifier( $self->{components__}{classifier}{bayes} );
-        $self->{components__}{proxy}{$name}->history(    $self->{components__}{core}{history} );
-    }
-
-    foreach my $name (sort keys %{$self->{components__}{services}}) {
-        $self->{components__}{services}{$name}->classifier( $self->{components__}{classifier}{bayes} );
-        $self->{components__}{services}{$name}->history(    $self->{components__}{core}{history} );
-    }
-
-    # Classifier::Bayes and POPFile::History are friends and are aware
-    # of one another
-
-    $self->{components__}{core}{history}->classifier( $self->{components__}{classifier}{bayes} );
-    $self->{components__}{classifier}{bayes}->history( $self->{components__}{core}{history} );
-
-    $self->{components__}{classifier}{bayes}->{parser__}->mangle(
-        $self->{components__}{classifier}{wordmangle} );
-}
-
-#----------------------------------------------------------------------------
-#
 # CORE_initialize
 #
 # Loops across POPFile's modules and initializes them
@@ -573,31 +548,33 @@ sub CORE_initialize
 
     print "\n\n    Initializing... " if $self->{debug__};
 
-    # Tell each module to initialize itself
+    # Tell each module to initialize itself and do this in run level
+    # order
 
-    # Make sure that the core is started first.
-    my @c = ( 'core', grep {!/^core$/} sort keys %{$self->{components__}} );
-
-    foreach my $type (@c) {
-        print "\n         {$type:" if $self->{debug__};
-        foreach my $name (sort keys %{$self->{components__}{$type}}) {
+    foreach my $runlevel (sort keys %{$self->{run_levels__}}) {
+        print "\n        Level $runlevel" if $self->{debug__};
+        foreach my $load (sort @{$self->{run_levels__}{$runlevel}}) {
+            $load =~ /^(.+):(.+)$/;
+            my ( $type, $name ) = ( $1, $2 );
             print " $name" if $self->{debug__};
             flush STDOUT;
 
-            my $code = $self->{components__}{$type}{$name}->initialize();
+            my $mod = $self->{components__}{$type}{$name};
+
+            $mod->loader( $self );
+            $mod->version( $self->{version_string__} );
+            my $code = $mod->initialize();
 
             if ( $code == 0 ) {
                 die "Failed to start while initializing the $name module";
             }
 
             if ( $code == 1 ) {
-                 $self->{components__}{$type}{$name}->alive(     1 );
-
-                 $self->{components__}{$type}{$name}->forker(    $self->{forker__} );
-                 $self->{components__}{$type}{$name}->pipeready( $self->{pipeready__} );
-	    }
+                 $mod->alive(     1 );
+                 $mod->forker(    $self->{forker__} );
+                 $mod->pipeready( $self->{pipeready__} );
+            }
         }
-        print '} ' if $self->{debug__};
     }
     print "\n" if $self->{debug__};
 }
@@ -635,12 +612,11 @@ sub CORE_start
 
     # Now that the configuration is set tell each module to begin operation
 
-    # Make sure that the core is started first.
-    my @c = ( 'core', grep {!/^core$/} sort keys %{$self->{components__}} );
-
-    foreach my $type (@c) {
-        print "\n         {$type:" if $self->{debug__};
-        foreach my $name (sort keys %{$self->{components__}{$type}}) {
+    foreach my $runlevel (sort keys %{$self->{run_levels__}}) {
+        print "\n        Level $runlevel" if $self->{debug__};
+        foreach my $load (sort @{$self->{run_levels__}{$runlevel}}) {
+            $load =~ /^(.+):(.+)$/;
+            my ( $type, $name ) = ( $1, $2 );
             my $code = $self->{components__}{$type}{$name}->start();
 
             if ( $code == 0 ) {
@@ -652,16 +628,14 @@ sub CORE_start
 
             if ( $code == 2 ) {
                 delete $self->{components__}{$type}{$name};
-	    } else {
+   	        } else {
                 print " $name" if $self->{debug__};
                 flush STDOUT;
             }
         }
-        print '} ' if $self->{debug__};
     }
 
-    print "\n\nPOPFile Engine ", scalar($self->CORE_version()), " running\n" if $self->{debug__};
-    flush STDOUT;
+    print "\n" if $self->{debug__};
 }
 
 #----------------------------------------------------------------------------
@@ -726,8 +700,6 @@ sub CORE_stop
     my ( $self ) = @_;
 
     if ( $self->{debug__} ) {
-        print "\n\nPOPFile Engine $self->{version_string__} stopping\n";
-        flush STDOUT;
         print "\n    Stopping... ";
     }
 
@@ -742,20 +714,24 @@ sub CORE_stop
 
     # Shutdown all the modules
 
-    foreach my $type (sort keys %{$self->{components__}}) {
-        print "\n         {$type:" if $self->{debug__};
-        foreach my $name (sort keys %{$self->{components__}{$type}}) {
-            print " $name" if $self->{debug__};
-            flush STDOUT;
-            next if ( $name eq 'mq' );
-            next if ( $name eq 'history' );
-            $self->{components__}{$type}{$name}->alive(0);
-            $self->{components__}{$type}{$name}->stop();
-        }
+    foreach my $runlevel (sort { $b <=> $a } keys %{$self->{run_levels__}}) {
+        print "\n        Level $runlevel" if $self->{debug__};
+        foreach my $load (sort { $b cmp $a } @{$self->{run_levels__}{$runlevel}}) {
+            $load =~ /^(.+):(.+)$/;
+            my ( $type, $name ) = ( $1, $2 );
+            if ( exists( $self->{components__}{$type}{$name} ) ) {
+                print " $name" if $self->{debug__};
+                flush STDOUT;
 
-        print '} ' if $self->{debug__};
+                next if ( $name eq 'mq' );
+                next if ( $name eq 'history' );
+                $self->{components__}{$type}{$name}->alive(0);
+                $self->{components__}{$type}{$name}->stop();
+            }
+        }
     }
-    print "\n\nPOPFile Engine $self->{version_string__} terminated\n" if $self->{debug__};
+
+    print "\n" if $self->{debug__};
 }
 
 #----------------------------------------------------------------------------
@@ -812,6 +788,8 @@ sub get_module
 
         $type =~ s/^POPFile$/core/i;
     }
+
+    $name =~ s/configuration/config/;
 
     return $self->{components__}{$type}{$name};
 }

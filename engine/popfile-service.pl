@@ -68,13 +68,13 @@ sub Startup
 
     $POPFile->CORE_signals();
 
-    # Create the main objects that form the core of POPFile.  Consists of the configuration
-    # modules, the classifier, the UI (currently HTML based), platform specific code,
-    # and the POP3 proxy.  The link the components together, intialize them all, load
-    # the configuration from disk, start the modules running
+    # Create the main objects that form the core of POPFile.  Consists
+    # of the configuration modules, the classifier, the UI (currently
+    # HTML based), platform specific code, and the POP3 proxy.  The
+    # link the components together, intialize them all, load the
+    # configuration from disk, start the modules running
 
     $POPFile->CORE_load();
-    $POPFile->CORE_link_components();
     $POPFile->CORE_initialize();
     $POPFile->CORE_config();
     $POPFile->CORE_start();

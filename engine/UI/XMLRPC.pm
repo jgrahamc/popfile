@@ -1,4 +1,4 @@
-# POPFILE LOADABLE MODULE
+# POPFILE LOADABLE MODULE 5
 package UI::XMLRPC;
 
 #----------------------------------------------------------------------------
@@ -148,26 +148,31 @@ EOM
     }
 
 
-    # All requests will get dispatched to the main Classifier::Bayes object, for example
-    # the get_bucket_color interface is accessed with the method name.  The actual
-    # dispatch is via the POPFile::API object which we create in initialize above.
+    # All requests will get dispatched to the main Classifier::Bayes
+    # object, for example the get_bucket_color interface is accessed
+    # with the method name.  The actual dispatch is via the
+    # POPFile::API object which we create in initialize above.
     #
     #     POPFile/API.get_bucket_color
 
-    $self->{api__}->{c} = $self->{classifier__};
+    $self->{api__}->{c} = $self->classifier_();
     $self->{server__}->dispatch_to( $self->{api__} );
 
-    # DANGER WILL ROBINSON!  In order to make a polling XML-RPC server I am using
-    # the XMLRPC::Transport::HTTP::Daemon class which uses blocking I/O.  This would
-    # be all very well but it seems to be totally ignorning signals on Windows and so
-    # POPFile is unstoppable when the handle() method is called.  Forking with this
-    # blocking doesn't help much because then we get an unstoppable child.
+    # DANGER WILL ROBINSON!  In order to make a polling XML-RPC server
+    # I am using the XMLRPC::Transport::HTTP::Daemon class which uses
+    # blocking I/O.  This would be all very well but it seems to be
+    # totally ignorning signals on Windows and so POPFile is
+    # unstoppable when the handle() method is called.  Forking with
+    # this blocking doesn't help much because then we get an
+    # unstoppable child.
     #
-    # So the solution relies on knowing the internals of XMLRPC::Transport::HTTP::Daemon
-    # which is actually a SOAP::Transport::HTTP::Daemon which has a HTTP::Daemon (stored
-    # in a private variable called _daemon.  HTTP::Daemon is an IO::Socket::INET which means
-    # we can create a selector on it, so here we access a PRIVATE variable on the XMLRPC
-    # object.  This is very bad behaviour, but it works until someone changes XMLRPC.
+    # So the solution relies on knowing the internals of
+    # XMLRPC::Transport::HTTP::Daemon which is actually a
+    # SOAP::Transport::HTTP::Daemon which has a HTTP::Daemon (stored
+    # in a private variable called _daemon.  HTTP::Daemon is an
+    # IO::Socket::INET which means we can create a selector on it, so
+    # here we access a PRIVATE variable on the XMLRPC object.  This is
+    # very bad behaviour, but it works until someone changes XMLRPC.
 
     $self->{selector__} = new IO::Select( $self->{server__}->{_daemon} );
 
@@ -185,16 +190,18 @@ sub service
 {
     my ( $self ) = @_;
 
-    # See if there's a connection pending on the XMLRPC socket and handle
-    # single request
+    # See if there's a connection pending on the XMLRPC socket and
+    # handle single request
 
     my ( $ready ) = $self->{selector__}->can_read(0);
 
     if ( defined( $ready ) ) {
         if ( my $client = $self->{server__}->accept() ) {
 
-            # Check that this is a connection from the local machine, if it's not then we drop it immediately
-            # without any further processing.  We don't want to allow remote users to admin POPFile
+            # Check that this is a connection from the local machine,
+            # if it's not then we drop it immediately without any
+            # further processing.  We don't want to allow remote users
+            # to admin POPFile
 
             my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
 
@@ -202,18 +209,22 @@ sub service
                  ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {   # PROFILE BLOCK STOP
                 my $request = $client->get_request();
 
-                # Note that handle() relies on the $request being perfectly valid, so here we
-                # check that it is, if it is not then we don't want to call handle and we'll
+                # Note that handle() relies on the $request being
+                # perfectly valid, so here we check that it is, if it
+                # is not then we don't want to call handle and we'll
                 # return out own error
 
                 if ( defined( $request ) ) {
                     $self->{server__}->request( $request );
 
-                    # Note the direct call to SOAP::Transport::HTTP::Server::handle() here, this is
-                    # because we have taken the code from XMLRPC::Transport::HTTP::Server::handle()
-                    # and reproduced a modification of it here, accepting a single request and handling
-                    # it.  This call to the parent of XMLRPC::Transport::HTTP::Server will actually
-                    # deal with the request
+                    # Note the direct call to
+                    # SOAP::Transport::HTTP::Server::handle() here,
+                    # this is because we have taken the code from
+                    # XMLRPC::Transport::HTTP::Server::handle() and
+                    # reproduced a modification of it here, accepting
+                    # a single request and handling it.  This call to
+                    # the parent of XMLRPC::Transport::HTTP::Server
+                    # will actually deal with the request
 
                     $self->{server__}->SOAP::Transport::HTTP::Server::handle();
                     $client->send_response( $self->{server__}->response );
@@ -246,7 +257,6 @@ sub configure_item
     }
 
     if ( $name eq 'xmlrpc_local' ) {
-        
         if ( $self->config_( 'local' ) == 1 ) {
             $templ->param( 'XMLRPC_local_on' => 1 );
         }
@@ -260,7 +270,8 @@ sub configure_item
 #
 # validate_item
 #
-#    $name            The name of the item being configured, was passed in by the call
+#    $name The name of the item being configured, was passed in by the
+#           call
 #                     to register_configuration_item
 #    $templ           The loaded template
 #    $language        The language currently in use
@@ -292,30 +303,6 @@ sub validate_item
     }
 
     return '';
-}
-
-# GETTERS/SETTERS
-
-sub classifier
-{
-    my ( $self, $value ) = @_;
-
-    if ( defined( $value ) ) {
-        $self->{classifier__} = $value;
-    }
-
-    return $self->{classifier__};
-}
-
-sub history
-{
-    my ( $self, $value ) = @_;
-
-    if ( defined( $value ) ) {
-        $self->{history__} = $value;
-    }
-
-    return $self->{history__};
 }
 
 1;

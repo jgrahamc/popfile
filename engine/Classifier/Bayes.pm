@@ -1,4 +1,4 @@
-# POPFILE LOADABLE MODULE
+# POPFILE LOADABLE MODULE 3
 package Classifier::Bayes;
 
 use POPFile::Module;
@@ -81,14 +81,8 @@ sub new
 
     $self->{hostname__}        = '';
 
-    # File Handle for DBI database
-
-    $self->{db__}                = {};
-
-    $self->{history__}        = 0;
-
     # To save time we also 'prepare' some commonly used SQL statements
-    # and cache them here, see the function db_connect__ for details
+    # and cache them here, see the function db_prepare__ for details
 
     $self->{db_get_buckets__} = 0;
     $self->{db_get_wordid__} = 0;
@@ -123,6 +117,7 @@ sub new
     $self->{db_parameters__}     = {};
 
     # Used to parse mail messages
+
     $self->{parser__}            = new Classifier::MailParse;
 
     # The possible colors for buckets
@@ -179,21 +174,6 @@ sub new
 
 #----------------------------------------------------------------------------
 #
-# forked
-#
-# This is called inside a child process that has just forked, since
-# the child needs access to the database we open it
-#
-#----------------------------------------------------------------------------
-sub forked
-{
-    my ( $self ) = @_;
-
-    $self->db_connect__();
-}
-
-#----------------------------------------------------------------------------
-#
 # initialize
 #
 # Called to set up the Bayes module's parameters
@@ -202,29 +182,6 @@ sub forked
 sub initialize
 {
     my ( $self ) = @_;
-
-    # This is the name for the database
-
-    $self->config_( 'database', 'popfile.db' );
-
-    # This is the 'connect' string used by DBI to connect to the
-    # database, if you decide to change from using SQLite to some
-    # other database (e.g. MySQL, Oracle, ... ) this *should* be all
-    # you need to change.  The additional parameters user and auth are
-    # needed for some databases. 
-    #
-    # Note that the dbconnect string
-    # will be interpolated before being passed to DBI and the variable
-    # $dbname can be used within it and it resolves to the full path
-    # to the database named in the database parameter above.
-
-    $self->config_( 'dbconnect', 'dbi:SQLite:dbname=$dbname' );
-    $self->config_( 'dbuser', '' ); $self->config_( 'dbauth', '' );
-
-    # SQLite 1.05+ have some problems we are resolving.  This lets us
-    # give a nice message and then disable the version checking later
-    
-    $self->config_( 'bad_sqlite_version', '3.0.0' );
 
     # No default unclassified weight is the number of times more sure
     # POPFile must be of the top class vs the second class, default is
@@ -259,22 +216,10 @@ sub initialize
 
     $self->config_( 'xpl_angle', 0 );
 
-    # This is a bit mask used to control options when we are using the
-    # default SQLite database.  By default all the options are on.
-    #
-    # 1 = Asynchronous deletes
-    # 2 = Backup database every hour
-    
-    $self->config_( 'sqlite_tweaks', 0xFFFFFFFF );
-
     $self->mq_register_( 'COMIT', $self );
     $self->mq_register_( 'RELSE', $self );
 
-    # Register for the TICKD message which is sent hourly by the
-    # Logger module.  We use this to hourly save the database if bit 1
-    # of the sqlite_tweaks is set and we are using SQLite
-
-    $self->mq_register_( 'TICKD', $self );
+    $self->{parser__}->{mangle__} = $self->mangle_();
 
     return 1;
 }
@@ -295,13 +240,9 @@ sub deliver
     if ( $type eq 'COMIT' ) {
         $self->classified( $message[0], $message[2] );
     }
-    
+
     if ( $type eq 'RELSE' ) {
         $self->release_session_key_private__( $message[0] );
-    }    
-
-    if ( $type eq 'TICKD' ) {
-        $self->backup_database__();
     }
 }
 
@@ -334,10 +275,7 @@ sub start
     $self->{parser__}->{lang__}  = $self->module_config_( 'html', 'language' );
     $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
 
-    if ( !$self->db_connect__() ) {
-        return 0;
-    }
-
+    $self->db_prepare__();
     $self->upgrade_predatabase_data__();
 
     return 1;
@@ -354,7 +292,7 @@ sub stop
 {
     my ( $self ) = @_;
 
-    $self->db_disconnect__();
+    $self->db_cleanup__();
     delete $self->{parser__};
 }
 
@@ -373,56 +311,6 @@ sub classified
 
     $self->set_bucket_parameter( $session, $class, 'count',             # PROFILE BLOCK START
         $self->get_bucket_parameter( $session, $class, 'count' ) + 1 ); # PROFILE BLOCK STOP
-}
-
-#----------------------------------------------------------------------------
-#
-# backup_database__
-#
-# Called when the TICKD message is received each hour and if we are using
-# the default SQLite database will make a copy with the .backup extension
-#
-#----------------------------------------------------------------------------
-sub backup_database__
-{
-    my ( $self ) = @_;
-
-    # If database backup is turned on and we are using SQLite then
-    # backup the database by copying it
-
-    if ( ( $self->config_( 'sqlite_tweaks' ) & 2 ) && 
-         $self->{db_is_sqlite__} ) {
-        if ( !copy( $self->{db_name__}, $self->{db_name__} . ".backup" ) ) {
-	    $self->log_( 0, "Failed to backup database ".$self->{db_name__} );
-        }
-    }
-}
-
-#----------------------------------------------------------------------------
-#
-# tweak_sqlite
-#
-# Called when a module wants is to tweak access to the SQLite database.
-#
-# $tweak    The tweak to apply (a bit in the sqlite_tweaks mask)
-# $state    1 to enable the tweak, 0 to disable
-# $db       The db handle to tweak
-#
-#----------------------------------------------------------------------------
-sub tweak_sqlite
-{
-    my ( $self, $tweak, $state, $db ) = @_;
-
-    if ( $self->{db_is_sqlite__} && 
-         ( $self->config_( 'sqlite_tweaks' ) & $tweak ) ) {
-
-        $self->log_( 1, "Performing tweak $tweak to $state" );
-
-        if ( $tweak == 1 ) {
-            my $sync = $state?'off':'normal';
-            $db->do( "pragma synchronous=$sync;" );
-        }    
-    }
 }
 
 #----------------------------------------------------------------------------
@@ -659,219 +547,14 @@ sub update_constants__
 
 #----------------------------------------------------------------------------
 #
-# db_connect__
+# db_prepare__
 #
-# Connects to the POPFile database and returns 1 if successful
+# Prepare various SQL statements
 #
 #----------------------------------------------------------------------------
-sub db_connect__
+sub db_prepare__
 {
     my ( $self ) = @_;
-
-    # Connect to the database, note that the database must exist for
-    # this to work, to make this easy for people POPFile we will
-    # create the database automatically here using the file
-    # 'popfile.sql' which should be located in the same directory the
-    # Classifier/Bayes.pm module
-
-    # If we are using SQLite then the dbname is actually the name of a
-    # file, and hence we treat it like one, otherwise we leave it
-    # alone
-
-    my $dbname;
-    my $dbconnect = $self->config_( 'dbconnect' );
-    my $dbpresent;
-    my $sqlite = ( $dbconnect =~ /sqlite/i );
-
-    if ( $sqlite ) {
-        $dbname = $self->get_user_path_( $self->config_( 'database' ) );
-        $dbpresent = ( -e $dbname ) || 0;                
-    } else {
-        $dbname = $self->config_( 'database' );
-        $dbpresent = 1;
-    }
-
-    # Record whether we are using SQLite or not and the name of the
-    # database so that other routines can access it; this is used by
-    # the backup_database__ routine to make a backup copy of the
-    # database when using SQLite.
-
-    $self->{db_is_sqlite__} = $sqlite;
-    $self->{db_name__}      = $dbname;
-
-    # Now perform the connect, note that this is database independent
-    # at this point, the actual database that we connect to is defined
-    # by the dbconnect parameter.
-
-    $dbconnect =~ s/\$dbname/$dbname/g;
-
-    $self->log_( 0, "Attempting to connect to $dbconnect ($dbpresent)" );
-
-    $self->{db__} = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
-                                  $self->config_( 'dbuser' ),
-                                  $self->config_( 'dbauth' ) );  # PROFILE BLOCK STOP
-                                  
-    $self->log_( 0, "Using SQLite library version " . $self->{db__}{sqlite_version});
-    
-    # We check to make sure we're not using DBD::SQLite 1.05 or greater
-    # which uses SQLite V 3 If so, we'll use DBD::SQLite2 and SQLite 2.8,
-    # which is still compatible with old databases
-    
-    if ( $self->{db__}{sqlite_version} gt $self->config_('bad_sqlite_version' ) )  {
-        $self->log_( 0, "Substituting DBD::SQLite2 for DBD::SQLite 1.05" );        
-        $self->log_( 0, "Please install DBD::SQLite2 and set dbconnect to use DBD::SQLite2" );
-        
-        $dbconnect =~ s/SQLite:/SQLite2:/;
-        
-        undef $self->{db__};
-#         $self->db_disconnect__();
-        
-        $self->{db__} = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
-                                      $self->config_( 'dbuser' ),
-                                      $self->config_( 'dbauth' ) );  # PROFILE BLOCK STOP        
-    }
-
-    if ( !defined( $self->{db__} ) ) {
-        $self->log_( 0, "Failed to connect to database and got error $DBI::errstr" );
-        return 0;
-    }
-
-    if ( !$dbpresent ) {
-        if ( !$self->insert_schema__( $sqlite ) ) {
-            return 0;
-        }
-    }
-
-    # Now check for a need to upgrade the database because the schema
-    # has been changed.  From POPFile v0.22.0 there's a special
-    # 'popfile' table inside the database that contains the schema
-    # version number.  If the version number doesn't match or is
-    # missing then do the upgrade.
-
-    open SCHEMA, '<' . $self->get_root_path_( 'Classifier/popfile.sql' );
-    <SCHEMA> =~ /-- POPFILE SCHEMA (\d+)/;
-    my $version = $1;
-    close SCHEMA;
-
-    my $need_upgrade = 1;
-
-    #
-    # retrieve the SQL_IDENTIFIER_QUOTE_CHAR for the database then use it
-    # to strip off any sqlquotechars from the table names we retrieve
-    #
-
-    my $sqlquotechar = $self->{db__}->get_info(29) || ''; 
-    my @tables = map { s/$sqlquotechar//g; $_ } ($self->{db__}->tables());
-
-    foreach my $table (@tables) {
-        if ( $table eq 'popfile' ) {
-            my @row = $self->{db__}->selectrow_array(
-               'select version from popfile;' );
-
-            if ( $#row == 0 ) {
-                $need_upgrade = ( $row[0] != $version );
-            }
-        }
-    }
-
-    if ( $need_upgrade ) {
-
-        print "\n\nDatabase schema is outdated, performing automatic upgrade\n";
-        # The database needs upgrading, so we are going to dump out
-        # all the data in the database as INSERT statements in a
-        # temporary file, then DROP all the tables in the database,
-        # then recreate the schema from the new schema and finally
-        # rerun the inserts.
-
-        my $i = 0;
-        my $ins_file = $self->get_user_path_( 'insert.sql' );
-        open INSERT, '>' . $ins_file;
-
-        foreach my $table (@tables) {
-            next if ( $table eq 'popfile' );
-            if ( $sqlite && ( $table =~ /^sqlite_/ ) ) {
-                next;
-            }
-            if ( $i > 99 ) {
-                print "\n";
-            }
-            print "    Saving table $table\n    ";
-
-            my $t = $self->{db__}->prepare( "select * from $table;" );
-            $t->execute;
-            $i = 0;
-            while ( 1 ) {
-                if ( ( ++$i % 100 ) == 0 ) {
-                    print "[$i]";
-                    flush STDOUT;
-                }
-                my @rows = $t->fetchrow_array;
-
-                last if ( $#rows == -1 );
-
-                print INSERT "INSERT INTO $table (";
-                for my $i (0..$t->{NUM_OF_FIELDS}-1) {
-                    if ( $i != 0 ) {
-                        print INSERT ',';
-                    }
-                    print INSERT $t->{NAME}->[$i];
-                }
-                print INSERT ') VALUES (';
-                for my $i (0..$t->{NUM_OF_FIELDS}-1) {
-                    if ( $i != 0 ) {
-                        print INSERT ',';
-                    }
-                    my $val = $rows[$i];
-                    if ( $t->{TYPE}->[$i] !~ /^int/i ) {
-                        $val = '' if ( !defined( $val ) );
-                        $val = $self->{db__}->quote( $val );
-                    } else {
-                        $val = 'NULL' if ( !defined( $val ) );
-                    }
-                    print INSERT $val;
-                }
-                print INSERT ");\n";
-            }
-        }
-
-        close INSERT;
-
-        if ( $i > 99 ) {
-            print "\n";
-        }
-
-        foreach my $table (@tables) {
-            if ( $sqlite && ( $table =~ /^sqlite_/ ) ) {
-                next;
-            }
-            print "    Dropping old table $table\n";
-            $self->{db__}->do( "DROP TABLE $table;" );
-        }
-
-        print "    Inserting new database schema\n";
-        if ( !$self->insert_schema__( $sqlite ) ) {
-            return 0;
-        }
-
-        print "    Restoring old data\n    ";
-
-        $self->{db__}->begin_work;
-        open INSERT, '<' . $ins_file;
-        $i = 0;
-        while ( <INSERT> ) {
-            if ( ( ++$i % 100 ) == 0 ) {
-               print "[$i]";
-               flush STDOUT;
-            }
-            s/[\r\n]//g;
-            $self->{db__}->do( $_ );
-        }
-        close INSERT;
-        $self->{db__}->commit;
-
-        unlink $ins_file;
-        print "\nDatabase upgrade complete\n\n";
-    }
 
     # Now prepare common SQL statements for use, as a matter of convention the
     # parameters to each statement always appear in the following order:
@@ -881,74 +564,74 @@ sub db_connect__
     # word
     # parameter
 
-    $self->{db_get_buckets__} = $self->{db__}->prepare(                                 # PROFILE BLOCK START
+    $self->{db_get_buckets__} = $self->db_()->prepare(                                 # PROFILE BLOCK START
              'select name, id, pseudo from buckets
                   where buckets.userid = ?;' );                                         # PROFILE BLOCK STOP
 
-    $self->{db_get_wordid__} = $self->{db__}->prepare(                                  # PROFILE BLOCK START
+    $self->{db_get_wordid__} = $self->db_()->prepare(                                  # PROFILE BLOCK START
              'select id from words
                   where words.word = ? limit 1;' );                                     # PROFILE BLOCK STOP
 
-    $self->{db_get_userid__} = $self->{db__}->prepare(                                  # PROFILE BLOCK START
+    $self->{db_get_userid__} = $self->db_()->prepare(                                  # PROFILE BLOCK START
              'select id from users where name = ?
                                      and password = ? limit 1;' );                      # PROFILE BLOCK STOP
 
-    $self->{db_get_word_count__} = $self->{db__}->prepare(                              # PROFILE BLOCK START
+    $self->{db_get_word_count__} = $self->db_()->prepare(                              # PROFILE BLOCK START
              'select matrix.times from matrix
                   where matrix.bucketid = ? and
                         matrix.wordid = ? limit 1;' );                                  # PROFILE BLOCK STOP
 
-    $self->{db_put_word_count__} = $self->{db__}->prepare(                              # PROFILE BLOCK START
+    $self->{db_put_word_count__} = $self->db_()->prepare(                              # PROFILE BLOCK START
            'replace into matrix ( bucketid, wordid, times ) values ( ?, ?, ? );' );     # PROFILE BLOCK STOP
 
-    $self->{db_get_bucket_unique_counts__} = $self->{db__}->prepare(                    # PROFILE BLOCK START
+    $self->{db_get_bucket_unique_counts__} = $self->db_()->prepare(                    # PROFILE BLOCK START
              'select count(matrix.wordid), buckets.name from matrix, buckets
                   where buckets.userid = ?
                     and matrix.bucketid = buckets.id
                   group by buckets.name;' );                                            # PROFILE BLOCK STOP
 
-    $self->{db_get_bucket_word_counts__} = $self->{db__}->prepare(                      # PROFILE BLOCK START
+    $self->{db_get_bucket_word_counts__} = $self->db_()->prepare(                      # PROFILE BLOCK START
              'select sum(matrix.times), buckets.name from matrix, buckets
                   where matrix.bucketid = buckets.id
                     and buckets.userid = ?
                     group by buckets.name;' );                                          # PROFILE BLOCK STOP
 
-    $self->{db_get_unique_word_count__} = $self->{db__}->prepare(                       # PROFILE BLOCK START
+    $self->{db_get_unique_word_count__} = $self->db_()->prepare(                       # PROFILE BLOCK START
              'select count(matrix.wordid) from matrix, buckets
                   where matrix.bucketid = buckets.id and
                         buckets.userid = ?;' );                                         # PROFILE BLOCK STOP
 
-    $self->{db_get_full_total__} = $self->{db__}->prepare(                              # PROFILE BLOCK START
+    $self->{db_get_full_total__} = $self->db_()->prepare(                              # PROFILE BLOCK START
              'select sum(matrix.times) from matrix, buckets
                   where buckets.userid = ? and
                         matrix.bucketid = buckets.id;' );                               # PROFILE BLOCK STOP
 
-    $self->{db_get_bucket_parameter__} = $self->{db__}->prepare(                        # PROFILE BLOCK START
+    $self->{db_get_bucket_parameter__} = $self->db_()->prepare(                        # PROFILE BLOCK START
              'select bucket_params.val from bucket_params
                   where bucket_params.bucketid = ? and
                         bucket_params.btid = ?;' );                                     # PROFILE BLOCK STOP
 
-    $self->{db_set_bucket_parameter__} = $self->{db__}->prepare(                        # PROFILE BLOCK START
+    $self->{db_set_bucket_parameter__} = $self->db_()->prepare(                        # PROFILE BLOCK START
            'replace into bucket_params ( bucketid, btid, val ) values ( ?, ?, ? );' );  # PROFILE BLOCK STOP
 
-    $self->{db_get_bucket_parameter_default__} = $self->{db__}->prepare(                # PROFILE BLOCK START
+    $self->{db_get_bucket_parameter_default__} = $self->db_()->prepare(                # PROFILE BLOCK START
              'select bucket_template.def from bucket_template
                   where bucket_template.id = ?;' );                                     # PROFILE BLOCK STOP
 
-    $self->{db_get_buckets_with_magnets__} = $self->{db__}->prepare(                    # PROFILE BLOCK START
+    $self->{db_get_buckets_with_magnets__} = $self->db_()->prepare(                    # PROFILE BLOCK START
              'select buckets.name from buckets, magnets
                   where buckets.userid = ? and
                         magnets.id != 0 and
                         magnets.bucketid = buckets.id group by buckets.name order by buckets.name;' );
                                                                                         # PROFILE BLOCK STOP
-    $self->{db_delete_zero_words__} = $self->{db__}->prepare(                           # PROFILE BLOCK START
+    $self->{db_delete_zero_words__} = $self->db_()->prepare(                           # PROFILE BLOCK START
              'delete from matrix
                   where matrix.times = 0
                     and matrix.bucketid = ?;' );                                        # PROFILE BLOCK STOP
 
     # Get the mapping from parameter names to ids into a local hash
 
-    my $h = $self->{db__}->prepare( "select name, id from bucket_template;" );
+    my $h = $self->db_()->prepare( "select name, id from bucket_template;" );
     $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {
         $self->{db_parameterid__}{$row->[0]} = $row->[1];
@@ -960,58 +643,12 @@ sub db_connect__
 
 #----------------------------------------------------------------------------
 #
-# insert_schema__
+# db_cleanup__
 #
-# Insert the POPFile schema in a database
-#
-# $sqlite          Set to 1 if this is a SQLite database
+# Cleanup handles into the database
 #
 #----------------------------------------------------------------------------
-sub insert_schema__
-{
-    my ( $self, $sqlite ) = @_;
-
-    if ( -e $self->get_root_path_( 'Classifier/popfile.sql' ) ) {
-        my $schema = '';
-
-        $self->log_( 0, "Creating database schema" );
-
-        open SCHEMA, '<' . $self->get_root_path_( 'Classifier/popfile.sql' );
-        while ( <SCHEMA> ) {
-            next if ( /^--/ );
-            next if ( !/[a-z;]/ );
-            s/--.*$//;
-
-            # If the line begins 'alter' and we are doing SQLite then ignore
-            # the line
-
-            if ( $sqlite && ( /^alter/i ) ) {
-                next;
-            }
-
-            $schema .= $_;
-
-            if ( ( /end;/ ) || ( /\);/ ) || ( /^alter/i ) ) {
-                $self->{db__}->do( $schema );
-                $schema = '';
-            }
-        }
-        close SCHEMA;
-        return 1;
-    } else {
-        $self->log_( 0, "Can't find the database schema" );
-        return 0;
-    }
-}
-
-#----------------------------------------------------------------------------
-#
-# db_disconnect__
-#
-# Disconnect from the POPFile database
-#
-#----------------------------------------------------------------------------
-sub db_disconnect__
+sub db_cleanup__
 {
     my ( $self ) = @_;
 
@@ -1029,11 +666,6 @@ sub db_disconnect__
     $self->{db_get_bucket_parameter_default__}->finish;
     $self->{db_get_buckets_with_magnets__}->finish;
     $self->{db_delete_zero_words__}->finish;
-
-    if ( defined( $self->{db__} ) ) {
-        $self->{db__}->disconnect;
-        undef $self->{db__};
-    }
 }
 
 #----------------------------------------------------------------------------
@@ -1141,14 +773,14 @@ sub db_put_word_count__
     # word in the words table (if there's none then we need to add the
     # word), the bucket id in the buckets table (which must exist)
 
-    $word = $self->{db__}->quote($word);
+    $word = $self->db_()->quote($word);
 
-    my $result = $self->{db__}->selectrow_arrayref(
+    my $result = $self->db_()->selectrow_arrayref(
                      "select words.id from words where words.word = $word limit 1;");
 
     if ( !defined( $result ) ) {
-        $self->{db__}->do( "insert into words ( word ) values ( $word );" );
-        $result = $self->{db__}->selectrow_arrayref(
+        $self->db_()->do( "insert into words ( word ) values ( $word );" );
+        $result = $self->db_()->selectrow_arrayref(
                      "select words.id from words where words.word = $word limit 1;");
     }
 
@@ -1322,7 +954,7 @@ sub upgrade_bucket__
     if ( -e $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) ) {
         $self->log_( 0, "Performing automatic upgrade of $bucket corpus from flat file to DBI" );
 
-        $self->{db__}->begin_work;
+        $self->db_()->begin_work;
 
         if ( open WORDS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) )  {
 
@@ -1333,7 +965,7 @@ sub upgrade_bucket__
                 if ( $1 != $self->{corpus_version__} )  {
                     print STDERR "Incompatible corpus version in $bucket\n";
                     close WORDS;
-                    $self->{db__}->rollback;
+                    $self->db_()->rollback;
                     return 0;
                 } else {
                     $self->log_( 0, "Upgrading bucket $bucket..." );
@@ -1362,12 +994,12 @@ sub upgrade_bucket__
                 close WORDS;
             } else {
                 close WORDS;
-                $self->{db__}->rollback;
+                $self->db_()->rollback;
                 unlink $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" );
                 return 0;
             }
 
-            $self->{db__}->commit;
+            $self->db_()->commit;
             unlink $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" );
         }
     }
@@ -1385,7 +1017,7 @@ sub upgrade_bucket__
         tie %h, "BerkeleyDB::Hash", -Filename => $bdb_file;
 
         $self->log_( 0, "Upgrading bucket $bucket..." );
-        $self->{db__}->begin_work;
+        $self->db_()->begin_work;
 
         my $wc = 1;
 
@@ -1404,7 +1036,7 @@ sub upgrade_bucket__
 
         $wc -= 1;
         $self->log_( 0, "(completed $wc words)" );
-        $self->{db__}->commit;
+        $self->db_()->commit;
         untie %h;
         unlink $bdb_file;
     }
@@ -1441,7 +1073,7 @@ sub magnet_match_helper__
     my @magnets;
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $h = $self->{db__}->prepare(                                           # PROFILE BLOCK START
+    my $h = $self->db_()->prepare(                                           # PROFILE BLOCK START
         "select magnets.val, magnets.id from magnets, users, buckets, magnet_types
              where buckets.id = $bucketid and
                    magnets.id != 0 and
@@ -1540,8 +1172,8 @@ sub add_words_to_bucket__
     # then update those counts and write them back to the database.
 
     my $words;
-    $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
-    $self->{get_wordids__} = $self->{db__}->prepare(        # PROFILE BLOCK START
+    $words = join( ',', map( $self->db_()->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
+    $self->{get_wordids__} = $self->db_()->prepare(        # PROFILE BLOCK START
              "select id, word
                   from words
                   where word in ( $words );" );             # PROFILE BLOCK STOP
@@ -1559,7 +1191,7 @@ sub add_words_to_bucket__
 
     my $ids = join( ',', @id_list );
 
-    $self->{db_getwords__} = $self->{db__}->prepare(                                         # PROFILE BLOCK START
+    $self->{db_getwords__} = $self->db_()->prepare(                                         # PROFILE BLOCK START
              "select matrix.times, matrix.wordid
                   from matrix
                   where matrix.wordid in ( $ids )
@@ -1575,7 +1207,7 @@ sub add_words_to_bucket__
 
     $self->{db_getwords__}->finish;
 
-    $self->{db__}->begin_work;
+    $self->db_()->begin_work;
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
 
         # If there's already a count then it means that the word is
@@ -1607,7 +1239,7 @@ sub add_words_to_bucket__
         $self->{db_delete_zero_words__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id} );
     }
 
-    $self->{db__}->commit;
+    $self->db_()->commit;
 }
 
 #----------------------------------------------------------------------------
@@ -1765,7 +1397,7 @@ sub generate_unique_session_key__
 sub release_session_key_private__
 {
     my ( $self, $session ) = @_;
-    
+
     if ( defined( $self->{api_sessions__}{$session} ) ) {
         $self->log_( 1, "release_session_key releasing key $session for user $self->{api_sessions__}{$session}" );
         delete $self->{api_sessions__}{$session};
@@ -1886,7 +1518,7 @@ sub get_session_key
 sub release_session_key
 {
     my ( $self, $session ) = @_;
-    
+
     $self->mq_post_( "RELSE", $session );
 }
 
@@ -2051,8 +1683,8 @@ sub classify
     # winning bucket is.
 
     my $words;
-    $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
-    $self->{get_wordids__} = $self->{db__}->prepare(  # PROFILE BLOCK START
+    $words = join( ',', map( $self->db_()->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
+    $self->{get_wordids__} = $self->db_()->prepare(  # PROFILE BLOCK START
              "select id, word
                   from words
                   where word in ( $words )
@@ -2075,7 +1707,7 @@ sub classify
 
     my $ids = join( ',', @id_list );
 
-    $self->{db_classify__} = $self->{db__}->prepare(            # PROFILE BLOCK START
+    $self->{db_classify__} = $self->db_()->prepare(            # PROFILE BLOCK START
              "select matrix.times, matrix.wordid, buckets.name
                   from matrix, buckets
                   where matrix.wordid in ( $ids )
@@ -2399,7 +2031,7 @@ sub classify
                     my $width_2 = int( $chart{$word_2} * $scale - .5 ) * -1;
 
                     last if ( $width_1 <=0 && $width_2 <= 0 );
-                    
+
                     my %row_data;
 
                     $row_data{View_Chart_Word_1} = $word_1;
@@ -2512,9 +2144,9 @@ sub classify_and_modify
     $class = '' if ( !defined( $class ) );
     if ( $class eq '' ) {
         $self->{parser__}->start_parse();
-        ( $slot, $msg_file ) = $self->{history__}->reserve_slot();
+        ( $slot, $msg_file ) = $self->history_()->reserve_slot();
     } else {
-        $msg_file = $self->{history__}->get_slot_file( $slot );
+        $msg_file = $self->history_()->get_slot_file( $slot );
     }
 
     # We append .TMP to the filename for the MSG file so that if we are in
@@ -2837,9 +2469,9 @@ sub classify_and_modify
 
     if ( $class eq '' ) {
         if ( $nosave ) {
-            $self->{history__}->release_slot( $slot );
+            $self->history_()->release_slot( $slot );
         } else {
-            $self->{history__}->commit_slot( $session, $slot, $classification, $self->{magnet_detail__} );
+            $self->history_()->commit_slot( $session, $slot, $classification, $self->{magnet_detail__} );
         }
     }
 
@@ -3059,7 +2691,7 @@ sub get_bucket_word_list
     return undef if ( !defined( $userid ) );
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $result = $self->{db__}->selectcol_arrayref(  # PROFILE BLOCK START
+    my $result = $self->db_()->selectcol_arrayref(  # PROFILE BLOCK START
         "select words.word from matrix, words
          where matrix.wordid  = words.id and
                matrix.bucketid = $bucketid and
@@ -3088,7 +2720,7 @@ sub get_bucket_word_prefixes
     my $prev = '';
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $result = $self->{db__}->selectcol_arrayref(   # PROFILE BLOCK START
+    my $result = $self->db_()->selectcol_arrayref(   # PROFILE BLOCK START
         "select words.word from matrix, words
          where matrix.wordid  = words.id and
                matrix.bucketid = $bucketid;");        # PROFILE BLOCK STOP
@@ -3346,7 +2978,7 @@ sub get_html_colored_message
     $self->{parser__}->{color_idmap__}  = undef;
     $self->{parser__}->{color_userid__} = undef;
     $self->{parser__}->{bayes__} = bless $self;
-    
+
     my $result = $self->{parser__}->parse_file( $file,   # PROFILE BLOCK START
            $self->global_config_( 'message_cutoff'   ) ); # PROFILE BLOCK STOP
 
@@ -3411,9 +3043,9 @@ sub create_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $bucket = $self->{db__}->quote( $bucket );
+    $bucket = $self->db_()->quote( $bucket );
 
-    $self->{db__}->do(                                                                    # PROFILE BLOCK START
+    $self->db_()->do(                                                                    # PROFILE BLOCK START
         "insert into buckets ( name, pseudo, userid ) values ( $bucket, 0, $userid );" ); # PROFILE BLOCK STOP
     $self->db_update_cache__( $session );
 
@@ -3443,7 +3075,7 @@ sub delete_bucket
         return 0;
     }
 
-    $self->{db__}->do(                                                                        # PROFILE BLOCK START
+    $self->db_()->do(                                                                        # PROFILE BLOCK START
         "delete from buckets where buckets.userid = $userid and buckets.name = '$bucket';" ); # PROFILE BLOCK STOP
     $self->db_update_cache__( $session );
 
@@ -3475,12 +3107,12 @@ sub rename_bucket
         return 0;
     }
 
-    my $id = $self->{db__}->quote( $self->{db_bucketid__}{$userid}{$old_bucket}{id} );
-    $new_bucket = $self->{db__}->quote( $new_bucket );
+    my $id = $self->db_()->quote( $self->{db_bucketid__}{$userid}{$old_bucket}{id} );
+    $new_bucket = $self->db_()->quote( $new_bucket );
 
     $self->log_( 1, "Rename bucket $old_bucket to $new_bucket" );
 
-    my $result = $self->{db__}->do( "update buckets set name = $new_bucket where id = $id;" );
+    my $result = $self->db_()->do( "update buckets set name = $new_bucket where id = $id;" );
 
     if ( !defined( $result ) || ( $result == -1 ) ) {
         return 0;
@@ -3624,7 +3256,7 @@ sub get_magnet_types_in_bucket
     my @result;
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $h = $self->{db__}->prepare( "select magnet_types.mtype from magnet_types, magnets, buckets
+    my $h = $self->db_()->prepare( "select magnet_types.mtype from magnet_types, magnets, buckets
         where magnet_types.id = magnets.mtid and
               magnets.bucketid = buckets.id and
               buckets.id = $bucketid
@@ -3659,7 +3291,7 @@ sub clear_bucket
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
 
-    $self->{db__}->do( "delete from matrix where matrix.bucketid = $bucketid;" );
+    $self->db_()->do( "delete from matrix where matrix.bucketid = $bucketid;" );
     $self->db_update_cache__( $session );
 }
 
@@ -3681,7 +3313,7 @@ sub clear_magnets
 
     for my $bucket (keys %{$self->{db_bucketid__}{$userid}}) {
         my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-        $self->{db__}->do( "delete from magnets where magnets.bucketid = $bucketid" );
+        $self->db_()->do( "delete from magnets where magnets.bucketid = $bucketid" );
     }
 }
 
@@ -3706,7 +3338,7 @@ sub get_magnets
     my @result;
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $h = $self->{db__}->prepare( "select magnets.val from magnets, magnet_types
+    my $h = $self->db_()->prepare( "select magnets.val from magnets, magnet_types
         where magnets.bucketid = $bucketid and
               magnets.id != 0 and
               magnet_types.id = magnets.mtid and
@@ -3741,14 +3373,14 @@ sub create_magnet
     return undef if ( !defined( $userid ) );
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $result = $self->{db__}->selectrow_arrayref("select magnet_types.id from magnet_types
+    my $result = $self->db_()->selectrow_arrayref("select magnet_types.id from magnet_types
                                                         where magnet_types.mtype = '$type';" );
 
     my $mtid = $result->[0];
 
-    $text = $self->{db__}->quote( $text );
+    $text = $self->db_()->quote( $text );
 
-    $self->{db__}->do( "insert into magnets ( bucketid, mtid, val )
+    $self->db_()->do( "insert into magnets ( bucketid, mtid, val )
                                      values ( $bucketid, $mtid, $text );" );
 }
 
@@ -3770,7 +3402,7 @@ sub get_magnet_types
 
     my %result;
 
-    my $h = $self->{db__}->prepare( "select magnet_types.mtype, magnet_types.header from magnet_types order by mtype;" );
+    my $h = $self->db_()->prepare( "select magnet_types.mtype, magnet_types.header from magnet_types order by mtype;" );
 
     $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {
@@ -3801,12 +3433,12 @@ sub delete_magnet
     return undef if ( !defined( $userid ) );
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
-    my $result = $self->{db__}->selectrow_arrayref("select magnet_types.id from magnet_types
+    my $result = $self->db_()->selectrow_arrayref("select magnet_types.id from magnet_types
                                                         where magnet_types.mtype = '$type';" );
 
     my $mtid = $result->[0];
 
-    $self->{db__}->do( "delete from magnets
+    $self->db_()->do( "delete from magnets
                             where magnets.bucketid = $bucketid and
                                   magnets.mtid = $mtid and
                                   magnets.val  = '$text';" );
@@ -3847,7 +3479,7 @@ sub magnet_count
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    my $result = $self->{db__}->selectrow_arrayref( "select count(*) from magnets, buckets
+    my $result = $self->db_()->selectrow_arrayref( "select count(*) from magnets, buckets
         where buckets.userid = $userid and
               magnets.id != 0 and
               magnets.bucketid = buckets.id;" );
@@ -3920,20 +3552,6 @@ sub wmformat
 
     $self->{wmformat__} = $value if (defined $value);
     return $self->{wmformat__};
-}
-
-sub db
-{
-    my ( $self ) = @_;
-
-    return $self->{db__};
-}
-
-sub history
-{
-    my ( $self, $history ) = @_;
-
-    $self->{history__} = $history;
 }
 
 1;

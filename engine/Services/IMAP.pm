@@ -1,5 +1,6 @@
-# POPFILE LOADABLE MODULE
+# POPFILE LOADABLE MODULE 4
 package Services::IMAP;
+
 use POPFile::Module;
 @ISA = ("POPFile::Module");
 

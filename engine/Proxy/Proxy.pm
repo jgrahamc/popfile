@@ -49,11 +49,6 @@ sub new
     my $type = shift;
     my $self = POPFile::Module->new();
 
-    # A reference to the classifier and history
-
-    $self->{classifier__}     = 0;
-    $self->{history__}        = 0;
-
     # Reference to a child() method called to handle a proxy
     # connection
 
@@ -180,7 +175,7 @@ sub stop
     my ( $self ) = @_;
 
     if ( $self->{api_session__} ne '' ) {
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
+        $self->classifier_()->release_session_key( $self->{api_session__} );
     }
 
     # Need to close all the duplicated file handles, this include the POP3 listener
@@ -220,7 +215,7 @@ sub service
 
             if ( $self->{api_session__} eq '' ) {
                 $self->{api_session__} =
-                    $self->{classifier__}->get_session_key( 'admin', '' );
+                    $self->classifier_()->get_session_key( 'admin', '' );
 	    }
 
             # Check that this is a connection from the local machine,
@@ -620,22 +615,6 @@ sub validate_item
         $templ->param( 'Socks_Widget_If_Server_Updated' => 1 );
         $templ->param( 'Socks_Widget_Server_Updated' => sprintf( $$language{Configuration_SOCKSServerUpdate}, $self->config_( 'socks_server' ) ) );
     }
-}
-
-# SETTERS
-
-sub classifier
-{
-    my ( $self, $classifier ) = @_;
-
-    $self->{classifier__} = $classifier;
-}
-
-sub history
-{
-    my ( $self, $history ) = @_;
-
-    $self->{history__} = $history;
 }
 
 1;

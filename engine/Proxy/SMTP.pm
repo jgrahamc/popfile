@@ -1,4 +1,4 @@
-# POPFILE LOADABLE MODULE
+# POPFILE LOADABLE MODULE 4
 package Proxy::SMTP;
 
 use Proxy::Proxy;
@@ -246,7 +246,7 @@ sub child__
             if ( $self->smtp_echo_response_( $mail, $client, $command ) ) {
                 $count += 1;
 
-                my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $client, $mail, 0, '', 0  );
+                my ( $class, $history_file ) = $self->classifier_()->classify_and_modify( $session, $client, $mail, 0, '', 0  );
 
                 my $response = $self->slurp_( $mail );
                 $self->tee_( $client, $response );

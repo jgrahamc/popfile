@@ -123,21 +123,6 @@ sub new
     my $type = shift;
     my $self;
 
-    # A reference to the POPFile::Configuration module, every module is
-    # able to get configuration information through this, note that it
-    # is valid when initialize is called, however, the configuration is not
-    # read from disk until after initialize has been called
-
-    $self->{configuration__} = 0; # PRIVATE
-
-    # A reference to the POPFile::Logger module
-
-    $self->{logger__}        = 0; # PRIVATE
-
-    # A reference to the POPFile::MQ module
-
-    $self->{mq__}            = 0;
-
     # The name of this module
 
     $self->{name__}          = ''; # PRIVATE
@@ -151,6 +136,16 @@ sub new
     # cross platform way
 
     $self->{pipeready_}      = 0;
+
+    # Cached handles to other modules, see the get_module__ function
+    # for details
+
+    $self->{modules__}       = {};
+
+    # Reference to the POPFile::Loader module which is set by a 
+    # call to loader() and used by get_module__
+
+    $self->{loader__}        = {};
 
     # This is a reference to a function (forker) in popfile.pl that
     # performs a fork and informs modules that a fork has occurred
@@ -338,7 +333,7 @@ sub log_
     my ( $self, $level, $message ) = @_;
 
     my ( $package, $file, $line ) = caller;
-    $self->{logger__}->debug( $level, $self->{name__} . ": $line: " .
+    $self->logger_()->debug( $level, $self->{name__} . ": $line: " .
         $message );
 }
 
@@ -376,7 +371,7 @@ sub mq_post_
 {
     my ( $self, $type, @message ) = @_;
 
-    return $self->{mq__}->post( $type, @message );
+    return $self->mq_()->post( $type, @message );
 }
 
 # ----------------------------------------------------------------------------
@@ -393,7 +388,7 @@ sub mq_register_
 {
     my ( $self, $type, $object ) = @_;
 
-    return $self->{mq__}->register( $type, $object );
+    return $self->mq_()->register( $type, $object );
 }
 
 # ----------------------------------------------------------------------------
@@ -435,7 +430,7 @@ sub module_config_
 {
     my ( $self, $module, $name, $value ) = @_;
 
-    return $self->{configuration__}->parameter( $module . "_" . $name, $value );
+    return $self->configuration_()->parameter( $module . "_" . $name, $value );
 }
 
 # ----------------------------------------------------------------------------
@@ -470,14 +465,14 @@ sub get_user_path_
 {
     my ( $self, $path, $sandbox ) = @_;
 
-    return $self->{configuration__}->get_user_path( $path, $sandbox );
+    return $self->configuration_()->get_user_path( $path, $sandbox );
 }
 
 sub get_root_path_
 {
     my ( $self, $path, $sandbox ) = @_;
 
-    return $self->{configuration__}->get_root_path( $path, $sandbox );
+    return $self->configuration_()->get_root_path( $path, $sandbox );
 }
 
 # ----------------------------------------------------------------------------
@@ -570,7 +565,6 @@ sub flush_slurp_data__
 # Returns the length of data currently buffered for the passed in handle
 #
 # ----------------------------------------------------------------------------
-
 sub slurp_data_size__
 {
     my ( $self, $handle ) = @_;
@@ -590,7 +584,6 @@ sub slurp_data_size__
 # will return undef
 #
 # ----------------------------------------------------------------------------
-
 sub slurp_buffer_
 {
     my ( $self, $handle, $length ) = @_;
@@ -687,7 +680,6 @@ sub slurp_
 # clean up temporary buffer space used by slurp_
 #
 # ----------------------------------------------------------------------------
-
 sub done_slurp_
 {
     my ( $self, $handle ) = @_;
@@ -767,6 +759,79 @@ sub flush_extra_
    return $full_buf;
 }
 
+# Functions used to get handles to other POPFile modules
+#
+# If a module needs to get access to the MQ (for example) then
+# they do $self->mq_() which will return a handle to POPFile::MQ
+# and will cache the handle for next time
+
+sub mq_
+{
+    my ( $self ) = @_;
+
+    return $self->get_module__( 'mq', 'POPFile::MQ' );
+}
+
+sub configuration_
+{
+    my ( $self ) = @_;
+
+    return $self->get_module__( 'config', 'POPFile::Configuration' );
+}
+
+sub logger_
+{
+    my ( $self ) = @_;
+
+    return $self->get_module__( 'logger', 'POPFile::Logger' );
+}
+
+sub classifier_
+{
+    my ( $self ) = @_;
+
+    return $self->get_module__( 'classifier', 'Classifier::Bayes' );
+}
+
+sub database_
+{
+    my ( $self ) = @_;
+
+    return $self->get_module__( 'database', 'POPFile::Database' );
+}
+
+sub db_
+{
+    my ( $self ) = @_;
+
+    return $self->database_()->db();
+}
+
+sub history_
+{
+    my ( $self ) = @_;
+
+    return $self->get_module__( 'history', 'POPFile::History' );
+}
+
+sub mangle_
+{
+    my ( $self ) = @_;
+
+    return $self->get_module__( 'mangle', 'Classifier::WordMangle' );
+}
+
+sub get_module__
+{
+    my ( $self, $alias, $module ) = @_;
+
+    if ( !exists( $self->{modules__}{$alias} ) ) {
+        $self->{modules__}{$alias} = $self->{loader__}->get_module( $module );
+    }
+
+    return $self->{modules__}{$alias};
+}
+
 # GETTER/SETTER methods.  Note that I do not expect documentation of
 # these unless they are non-trivial since the documentation would be a
 # waste of space
@@ -788,28 +853,6 @@ sub flush_extra_
 # This method access the foo_ variable for reading or writing,
 # $c->foo() read foo_ and $c->foo( 'foo' ) writes foo_
 
-sub mq
-{
-    my ( $self, $value ) = @_;
-
-    if ( defined( $value ) ) {
-        $self->{mq__} = $value;
-    }
-
-    return $self->{mq__};
-}
-
-sub configuration
-{
-    my ( $self, $value ) = @_;
-
-    if ( defined( $value ) ) {
-        $self->{configuration__} = $value;
-    }
-
-    return $self->{configuration__};
-}
-
 sub forker
 {
     my ( $self, $value ) = @_;
@@ -819,17 +862,6 @@ sub forker
     }
 
     return $self->{forker_};
-}
-
-sub logger
-{
-    my ( $self, $value ) = @_;
-
-    if ( defined( $value ) ) {
-        $self->{logger__} = $value;
-    }
-
-    return $self->{logger__};
 }
 
 sub pipeready
@@ -880,7 +912,14 @@ sub last_ten_log_entries
 {
     my ( $self ) = @_;
 
-    return $self->{logger__}->last_ten();
+    return $self->logger_()->last_ten();
+}
+
+sub loader
+{
+    my ( $self, $loader ) = @_;
+
+    $self->{loader__} = $loader;
 }
 
 1;

@@ -1,4 +1,4 @@
-# POPFILE LOADABLE MODULE
+# POPFILE LOADABLE MODULE 5
 package UI::HTML;
 
 #----------------------------------------------------------------------------
@@ -79,10 +79,6 @@ sub new
 {
     my $type = shift;
     my $self = UI::HTTP->new();
-
-    # The classifier (Classifier::Bayes)
-
-    $self->{c__}      = 0;
 
     # Session key to make the UI safer
 
@@ -277,11 +273,11 @@ sub start
 
     # Get a query session with the History object
 
-    $self->{q__} = $self->{history__}->start_query();
+    $self->{q__} = $self->history_()->start_query();
 
     # Ensure that the messages subdirectory exists
 
-    if ( !$self->{history__}->make_directory__(
+    if ( !$self->history_()->make_directory__(
         $self->get_user_path_( $self->global_config_( 'msgdir' ) ) ) ) {
         print STDERR "Failed to create the messages subdirectory\n";
         return 0;
@@ -300,7 +296,7 @@ sub start
     # Set the classifier option wmformat__ according to our wordtable_format
     # option.
 
-    $self->{c__}->wmformat( $self->config_( 'wordtable_format' ) );
+    $self->classifier_()->wmformat( $self->config_( 'wordtable_format' ) );
 
     return $self->SUPER::start();
 }
@@ -317,10 +313,10 @@ sub stop
     my ( $self ) = @_;
 
     if ( $self->{api_session__} ne '' ) {
-        $self->{c__}->release_session_key( $self->{api_session__} );
+        $self->classifier_()->release_session_key( $self->{api_session__} );
     }
 
-    $self->{history__}->stop_query( $self->{q__} );
+    $self->history_()->stop_query( $self->{q__} );
 
     $self->SUPER::stop();
 }
@@ -370,7 +366,7 @@ sub url_handler__
 
     # Check to see if we obtained the session key yet
     if ( $self->{api_session__} eq '' ) {
-        $self->{api_session__} = $self->{c__}->get_session_key(
+        $self->{api_session__} = $self->classifier_()->get_session_key(
             'admin', '' );
     }
 
@@ -512,7 +508,7 @@ sub url_handler__
         my $slot = $self->{form_}{view};
 
         if ( ( $slot =~ /^\d+$/ ) &&
-             ( $self->{history__}->is_valid_slot( $slot ) ) ) {
+             ( $self->history_()->is_valid_slot( $slot ) ) ) {
             $self->http_redirect_( $client,
                  "/view?session=$self->{session_key__}&view=$slot" );
         } else {
@@ -639,7 +635,7 @@ sub bmp_file__
     # create a BMP file and return it
 
     if ( $color !~ /^[0-9a-f]{6}$/ ) {
-        $color = $self->{c__}->{parser__}->map_color( $color );
+        $color = $self->classifier_()->{parser__}->map_color( $color );
     }
 
 
@@ -712,7 +708,7 @@ sub http_ok
 
         if ( $self->config_( 'send_stats' ) ) {
             $templ->param( 'Common_Middle_If_SendStats' => 1 );
-            my @buckets = $self->{c__}->get_buckets(
+            my @buckets = $self->classifier_()->get_buckets(
                 $self->{api_session__} );
             my $bc      = $#buckets + 1;
             $templ->param( 'Common_Middle_Buckets'  => $bc );
@@ -844,7 +840,7 @@ sub configuration_page
         }
 
         if ( defined( $self->{form_}{purge_history} ) ) {
-             $self->{history__}->cleanup_history();
+             $self->history_()->cleanup_history();
         }
     }
 
@@ -1104,16 +1100,16 @@ sub advanced_page
     if ( defined( $self->{form_}{update_params} ) ) {
         foreach my $param (sort keys %{$self->{form_}}) {
             if ( $param =~ /parameter_(.*)/ ) {
-                $self->{configuration__}->parameter( $1,
+                $self->configuration_()->parameter( $1,
                     $self->{form_}{$param} );
             }
         }
 
-        $self->{configuration__}->save_configuration();
+        $self->configuration_()->save_configuration();
     }
 
     if ( defined($self->{form_}{newword}) ) {
-        my $result = $self->{c__}->add_stopword( $self->{api_session__},
+        my $result = $self->classifier_()->add_stopword( $self->{api_session__},
                          $self->{form_}{newword} );
         if ( $result == 0 ) {
             $templ->param( 'Advanced_If_Add_Message' => 1 );
@@ -1121,7 +1117,7 @@ sub advanced_page
     }
 
     if ( defined($self->{form_}{word}) ) {
-        my $result = $self->{c__}->remove_stopword( $self->{api_session__},
+        my $result = $self->classifier_()->remove_stopword( $self->{api_session__},
                          $self->{form_}{word} );
         if ( $result == 0 ) {
             $templ->param( 'Advanced_If_Delete_Message' => 1 );
@@ -1133,7 +1129,7 @@ sub advanced_page
     my $need_comma = 0;
     my $groupCounter = 0;
     my $groupSize = 5;
-    my @words = $self->{c__}->get_stopword_list( $self->{api_session__} );
+    my @words = $self->classifier_()->get_stopword_list( $self->{api_session__} );
     my $commas;
 
     my @word_loop;
@@ -1198,8 +1194,8 @@ sub advanced_page
     my $last_module = '';
 
     my @param_loop;
-    foreach my $param ($self->{configuration__}->configuration_parameters()) {
-        my $value = $self->{configuration__}->parameter( $param );
+    foreach my $param ($self->configuration_()->configuration_parameters()) {
+        my $value = $self->configuration_()->parameter( $param );
         $param =~ /^([^_]+)_/;
 
         my %row_data;
@@ -1215,7 +1211,7 @@ sub advanced_page
         $row_data{Advanced_Parameter}   = $param;
         $row_data{Advanced_Value}       = $value;
         $row_data{Advanced_If_Changed}  =
-            !$self->{configuration__}->is_default( $param );
+            !$self->configuration_()->is_default( $param );
         $row_data{Advanced_If_Password} =
             ( $param =~ /_password/ ) ? 1 : 0;
 
@@ -1256,7 +1252,7 @@ sub magnet_page
                 my $mtext   = $self->{form_}{"text$i"};
                 my $mbucket = $self->{form_}{"bucket$i"};
 
-                $self->{c__}->delete_magnet( $self->{api_session__}, $mbucket, $mtype, $mtext );
+                $self->classifier_()->delete_magnet( $self->{api_session__}, $mbucket, $mtype, $mtext );
             }
         }
     }
@@ -1275,7 +1271,7 @@ sub magnet_page
                 my $obucket = $self->{form_}{"obucket$i"};
 
                 if ( defined( $otype ) ) {
-                    $self->{c__}->delete_magnet( $self->{api_session__},
+                    $self->classifier_()->delete_magnet( $self->{api_session__},
                         $obucket, $otype, $otext );
                 }
             }
@@ -1310,10 +1306,10 @@ sub magnet_page
                 my $found = 0;
 
                 foreach my $current_mtext (@mtexts) {
-                    for my $bucket ($self->{c__}->get_buckets_with_magnets(
+                    for my $bucket ($self->classifier_()->get_buckets_with_magnets(
                                         $self->{api_session__} )) {
                         my %magnets;
-                        @magnets{ $self->{c__}->get_magnets(
+                        @magnets{ $self->classifier_()->get_magnets(
                                       $self->{api_session__},
                                           $bucket, $mtype )} = ();
 
@@ -1325,9 +1321,9 @@ sub magnet_page
                     }
 
                     if ( $found == 0 )  {
-                        for my $bucket ($self->{c__}->get_buckets_with_magnets( $self->{api_session__} )) {
+                        for my $bucket ($self->classifier_()->get_buckets_with_magnets( $self->{api_session__} )) {
                             my %magnets;
-                            @magnets{ $self->{c__}->get_magnets( $self->{api_session__}, $bucket, $mtype )} = ();
+                            @magnets{ $self->classifier_()->get_magnets( $self->{api_session__}, $bucket, $mtype )} = ();
 
                             for my $from (keys %magnets)  {
                                 if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
@@ -1361,7 +1357,7 @@ sub magnet_page
                     $current_mtext =~ s/^[ \t]+//;
                     $current_mtext =~ s/[ \t]+$//;
 
-                    $self->{c__}->create_magnet( $self->{api_session__}, $mbucket, $mtype, $current_mtext );
+                    $self->classifier_()->create_magnet( $self->{api_session__}, $mbucket, $mtype, $current_mtext );
                     if ( !defined( $self->{form_}{update} ) ) {
                         $magnet_message .= sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $current_mtext", $mbucket )  . '<br>';
                     }
@@ -1380,7 +1376,7 @@ sub magnet_page
 
     my $start_magnet = $self->{form_}{start_magnet};
     my $stop_magnet  = $self->{form_}{stop_magnet};
-    my $magnet_count = $self->{c__}->magnet_count( $self->{api_session__} );
+    my $magnet_count = $self->classifier_()->magnet_count( $self->{api_session__} );
     my $navigator = '';
 
     if ( !defined( $start_magnet ) ) {
@@ -1398,7 +1394,7 @@ sub magnet_page
 
     $templ->param( 'Magnet_Start_Magnet' => $start_magnet );
 
-    my %magnet_types = $self->{c__}->get_magnet_types( $self->{api_session__} );
+    my %magnet_types = $self->classifier_()->get_magnet_types( $self->{api_session__} );
     my $i = 0;
     my $count = -1;
 
@@ -1411,11 +1407,11 @@ sub magnet_page
     }
     $templ->param( 'Magnet_Loop_Types' => \@magnet_type_loop );
 
-    my @buckets = $self->{c__}->get_buckets( $self->{api_session__} );
+    my @buckets = $self->classifier_()->get_buckets( $self->{api_session__} );
     my @magnet_bucket_loop;
     foreach my $bucket (@buckets) {
         my %row_data;
-        my $bcolor = $self->{c__}->get_bucket_color( $self->{api_session__}, $bucket );
+        my $bcolor = $self->classifier_()->get_bucket_color( $self->{api_session__}, $bucket );
         $row_data{Magnet_Bucket} = $bucket;
         $row_data{Magnet_Bucket_Color} = $bcolor;
         push ( @magnet_bucket_loop, \%row_data );
@@ -1425,9 +1421,9 @@ sub magnet_page
     # magnet listing
 
     my @magnet_loop;
-    for my $bucket ($self->{c__}->get_buckets_with_magnets( $self->{api_session__} )) {
-        for my $type ($self->{c__}->get_magnet_types_in_bucket( $self->{api_session__}, $bucket )) {
-            for my $magnet ($self->{c__}->get_magnets( $self->{api_session__}, $bucket, $type ))  {
+    for my $bucket ($self->classifier_()->get_buckets_with_magnets( $self->{api_session__} )) {
+        for my $type ($self->classifier_()->get_magnet_types_in_bucket( $self->{api_session__}, $bucket )) {
+            for my $magnet ($self->classifier_()->get_magnets( $self->{api_session__}, $bucket, $type ))  {
                 my %row_data;
                 $count += 1;
                 if ( ( $count < $start_magnet ) || ( $count > $stop_magnet ) ) {
@@ -1472,11 +1468,11 @@ sub magnet_page
                 $row_data{Magnet_Loop_Loop_Types} = \@type_loop;
 
                 my @bucket_loop;
-                my @buckets = $self->{c__}->get_buckets( $self->{api_session__} );
+                my @buckets = $self->classifier_()->get_buckets( $self->{api_session__} );
                 foreach my $mbucket (@buckets) {
                     my %bucket_data;
                     my $selected = ( $bucket eq $mbucket )?"selected":"";
-                    my $bcolor   = $self->{c__}->get_bucket_color( $self->{api_session__}, $mbucket );
+                    my $bcolor   = $self->classifier_()->get_bucket_color( $self->{api_session__}, $mbucket );
                     $bucket_data{Magnet_Bucket_Bucket}   = $mbucket;
                     $bucket_data{Magnet_Bucket_Color}    = $bcolor;
                     $bucket_data{Magnet_Bucket_Selected} = $selected;
@@ -1509,25 +1505,25 @@ sub bucket_page
 
     $templ = $self->load_template__( 'bucket-page.thtml' );
 
-    my $color = $self->{c__}->get_bucket_color( $self->{api_session__}, $bucket );
+    my $color = $self->classifier_()->get_bucket_color( $self->{api_session__}, $bucket );
     $templ->param( 'Bucket_Main_Title' => sprintf( $self->{language__}{SingleBucket_Title}, "<font color=\"$color\">$bucket</font>" ) );
 
-    my $bucket_count = $self->{c__}->get_bucket_word_count( $self->{api_session__}, $bucket );
+    my $bucket_count = $self->classifier_()->get_bucket_word_count( $self->{api_session__}, $bucket );
     $templ->param( 'Bucket_Word_Count'   => $self->pretty_number( $bucket_count ) );
-    $templ->param( 'Bucket_Unique_Count' => sprintf( $self->{language__}{SingleBucket_Unique}, $self->pretty_number( $self->{c__}->get_bucket_unique_count( $self->{api_session__}, $bucket ) ) ) );
-    $templ->param( 'Bucket_Total_Word_Count' => $self->pretty_number( $self->{c__}->get_word_count( $self->{api_session__} ) ) );
+    $templ->param( 'Bucket_Unique_Count' => sprintf( $self->{language__}{SingleBucket_Unique}, $self->pretty_number( $self->classifier_()->get_bucket_unique_count( $self->{api_session__}, $bucket ) ) ) );
+    $templ->param( 'Bucket_Total_Word_Count' => $self->pretty_number( $self->classifier_()->get_word_count( $self->{api_session__} ) ) );
     $templ->param( 'Bucket_Bucket' => $bucket );
 
     my $percent = '0%';
-    if ( $self->{c__}->get_word_count( $self->{api_session__} ) > 0 )  {
-        $percent = sprintf( '%6.2f%%', int( 10000 * $bucket_count / $self->{c__}->get_word_count( $self->{api_session__} ) ) / 100 );
+    if ( $self->classifier_()->get_word_count( $self->{api_session__} ) > 0 )  {
+        $percent = sprintf( '%6.2f%%', int( 10000 * $bucket_count / $self->classifier_()->get_word_count( $self->{api_session__} ) ) / 100 );
     }
     $templ->param( 'Bucket_Percentage' => $percent );
 
-    if ( $self->{c__}->get_bucket_word_count( $self->{api_session__}, $bucket ) > 0 ) {
+    if ( $self->classifier_()->get_bucket_word_count( $self->{api_session__}, $bucket ) > 0 ) {
         $templ->param( 'Bucket_If_Has_Words' => 1 );
         my @letter_data;
-        for my $i ($self->{c__}->get_bucket_word_prefixes( $self->{api_session__}, $bucket )) {
+        for my $i ($self->classifier_()->get_bucket_word_prefixes( $self->{api_session__}, $bucket )) {
             my %row_data;
             $row_data{Bucket_Letter} = $i;
             $row_data{Bucket_Bucket} = $bucket;
@@ -1548,8 +1544,8 @@ sub bucket_page
 
             my %word_count;
 
-            for my $j ( $self->{c__}->get_bucket_word_list( $self->{api_session__}, $bucket, $letter ) ) {
-                $word_count{$j} = $self->{c__}->get_count_for_word( $self->{api_session__}, $bucket, $j );
+            for my $j ( $self->classifier_()->get_bucket_word_list( $self->{api_session__}, $bucket, $letter ) ) {
+                $word_count{$j} = $self->classifier_()->get_count_for_word( $self->{api_session__}, $bucket, $j );
                 }
 
             my @words = sort { $word_count{$b} <=> $word_count{$a} || $a cmp $b } keys %word_count;
@@ -1593,10 +1589,10 @@ sub bar_chart_100
     my $templ = $self->load_template__( 'bar-chart-widget.thtml' );
     my $total_count = 0;
     my @xaxis = sort {
-        if ( $self->{c__}->is_pseudo_bucket( $self->{api_session__}, $a ) == $self->{c__}->is_pseudo_bucket( $self->{api_session__}, $b ) ) {
+        if ( $self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $a ) == $self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $b ) ) {
             $a cmp $b;
         } else {
-            $self->{c__}->is_pseudo_bucket( $self->{api_session__}, $a ) <=> $self->{c__}->is_pseudo_bucket( $self->{api_session__}, $b );
+            $self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $a ) <=> $self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $b );
         }
     } keys %values;
 
@@ -1612,7 +1608,7 @@ sub bar_chart_100
     for my $bucket (@xaxis)  {
         my %bucket_row_data;
 
-        $bucket_row_data{bar_bucket_color} = $self->{c__}->get_bucket_color( $self->{api_session__}, $bucket );
+        $bucket_row_data{bar_bucket_color} = $self->classifier_()->get_bucket_color( $self->{api_session__}, $bucket );
         $bucket_row_data{bar_bucket_name}  = $bucket;
 
 
@@ -1634,7 +1630,7 @@ sub bar_chart_100
             }
 
             if ( ( $s == 2 ) &&
-                 ( $self->{c__}->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) ) {
+                 ( $self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) ) {
                 $count = '';
                 $percent = '';
             }
@@ -1660,7 +1656,7 @@ sub bar_chart_100
             my $percent = sprintf "%.2f", ( $values{$bucket}{0} * 10000 / $total_count ) / 100;
             if ( $percent != 0 )  {
                 $bucket_row_data{bar_if_percent}   = 1;
-                $bucket_row_data{bar_bucket_color} = $self->{c__}->get_bucket_color( $self->{api_session__}, $bucket );
+                $bucket_row_data{bar_bucket_color} = $self->classifier_()->get_bucket_color( $self->{api_session__}, $bucket );
                 $bucket_row_data{bar_bucket_name2} = $bucket;
                 $bucket_row_data{bar_width}        = $percent;
             }
@@ -1690,18 +1686,18 @@ sub corpus_page
     my ( $self, $client, $templ ) = @_;
 
     if ( defined( $self->{form_}{clearbucket} ) ) {
-        $self->{c__}->clear_bucket( $self->{api_session__}, $self->{form_}{showbucket} );
+        $self->classifier_()->clear_bucket( $self->{api_session__}, $self->{form_}{showbucket} );
     }
 
     if ( defined($self->{form_}{reset_stats}) ) {
-        foreach my $bucket ($self->{c__}->get_all_buckets( $self->{api_session__} )) {
+        foreach my $bucket ($self->classifier_()->get_all_buckets( $self->{api_session__} )) {
             $self->set_bucket_parameter__( $bucket, 'count', 0 );
             $self->set_bucket_parameter__( $bucket, 'fpcount', 0 );
             $self->set_bucket_parameter__( $bucket, 'fncount', 0 );
         }
         my $lasttime = localtime;
         $self->config_( 'last_reset', $lasttime );
-        $self->{configuration__}->save_configuration();
+        $self->configuration_()->save_configuration();
     }
 
     if ( defined($self->{form_}{showbucket}) )  {
@@ -1710,7 +1706,7 @@ sub corpus_page
     }
 
     if ( ( defined($self->{form_}{color}) ) && ( defined($self->{form_}{bucket}) ) ) {
-        $self->{c__}->set_bucket_color( $self->{api_session__}, $self->{form_}{bucket}, $self->{form_}{color});
+        $self->classifier_()->set_bucket_color( $self->{api_session__}, $self->{form_}{bucket}, $self->{form_}{color});
     }
 
     if ( ( defined($self->{form_}{bucket}) ) && ( defined($self->{form_}{subject}) ) && ( $self->{form_}{subject} > 0 ) ) {
@@ -1738,12 +1734,12 @@ sub corpus_page
         if ( $self->{form_}{cname} =~ /$invalid_bucket_chars/ )  {
             $templ->param( 'Corpus_If_Create_Error' => 1 );
         } else {
-            if ( $self->{c__}->is_bucket( $self->{api_session__}, $self->{form_}{cname} ) ||
-                $self->{c__}->is_pseudo_bucket( $self->{api_session__}, $self->{form_}{cname} ) ) {
+            if ( $self->classifier_()->is_bucket( $self->{api_session__}, $self->{form_}{cname} ) ||
+                $self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $self->{form_}{cname} ) ) {
                 $templ->param( 'Corpus_If_Create_Message' => 1 );
                 $templ->param( 'Corpus_Create_Message' => sprintf( $self->{language__}{Bucket_Error2}, $self->{form_}{cname} ) );
             } else {
-                $self->{c__}->create_bucket( $self->{api_session__}, $self->{form_}{cname} );
+                $self->classifier_()->create_bucket( $self->{api_session__}, $self->{form_}{cname} );
                 $templ->param( 'Corpus_If_Create_Message' => 1 );
                 $templ->param( 'Corpus_Create_Message' => sprintf( $self->{language__}{Bucket_Error3}, $self->{form_}{cname} ) );
             }
@@ -1752,7 +1748,7 @@ sub corpus_page
 
     if ( ( defined($self->{form_}{delete}) ) && ( $self->{form_}{name} ne '' ) ) {
         $self->{form_}{name} = lc($self->{form_}{name});
-        $self->{c__}->delete_bucket( $self->{api_session__}, $self->{form_}{name} );
+        $self->classifier_()->delete_bucket( $self->{api_session__}, $self->{form_}{name} );
         $templ->param( 'Corpus_If_Delete_Message' => 1 );
         $templ->param( 'Corpus_Delete_Message' => sprintf( $self->{language__}{Bucket_Error6}, $self->{form_}{name} ) );
     }
@@ -1765,7 +1761,7 @@ sub corpus_page
         } else {
             $self->{form_}{oname} = lc($self->{form_}{oname});
             $self->{form_}{newname} = lc($self->{form_}{newname});
-            if ( $self->{c__}->rename_bucket( $self->{api_session__}, $self->{form_}{oname}, $self->{form_}{newname} ) == 1 ) {
+            if ( $self->classifier_()->rename_bucket( $self->{api_session__}, $self->{form_}{oname}, $self->{form_}{newname} ) == 1 ) {
                 $templ->param( 'Corpus_If_Rename_Message' => 1 );
                 $templ->param( 'Corpus_Rename_Message' => sprintf( $self->{language__}{Bucket_Error5}, $self->{form_}{oname}, $self->{form_}{newname} ) );
             } else {
@@ -1775,7 +1771,7 @@ sub corpus_page
         }
     }
 
-    my @buckets = $self->{c__}->get_buckets( $self->{api_session__} );
+    my @buckets = $self->classifier_()->get_buckets( $self->{api_session__} );
 
     my $total_count = 0;
     my @delete_data;
@@ -1794,7 +1790,7 @@ sub corpus_page
     $templ->param( 'Corpus_Loop_Delete_Buckets' => \@delete_data );
     $templ->param( 'Corpus_Loop_Rename_Buckets' => \@rename_data );
 
-    my @pseudos = $self->{c__}->get_pseudo_buckets( $self->{api_session__} );
+    my @pseudos = $self->classifier_()->get_pseudo_buckets( $self->{api_session__} );
     push @buckets, @pseudos;
 
     my @corpus_data;
@@ -1802,8 +1798,8 @@ sub corpus_page
         my %row_data;
         $row_data{Corpus_Bucket}        = $bucket;
         $row_data{Corpus_Bucket_Color}  = $self->get_bucket_parameter__( $bucket, 'color' );
-        $row_data{Corpus_Bucket_Unique} = $self->pretty_number(  $self->{c__}->get_bucket_unique_count( $self->{api_session__}, $bucket ) );
-        $row_data{Corpus_If_Bucket_Not_Pseudo} = !$self->{c__}->is_pseudo_bucket( $self->{api_session__}, $bucket );
+        $row_data{Corpus_Bucket_Unique} = $self->pretty_number(  $self->classifier_()->get_bucket_unique_count( $self->{api_session__}, $bucket ) );
+        $row_data{Corpus_If_Bucket_Not_Pseudo} = !$self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $bucket );
         $row_data{Corpus_If_Subject}    = !$self->get_bucket_parameter__( $bucket, 'subject' );
         $row_data{Corpus_If_XTC}        = !$self->get_bucket_parameter__( $bucket, 'xtc' );
         $row_data{Corpus_If_XPL}        = !$self->get_bucket_parameter__( $bucket, 'xpl' );
@@ -1813,7 +1809,7 @@ sub corpus_page
         $row_data{Localize_TurnOn}      = $self->{language__}{TurnOn};
         $row_data{Localize_TurnOff}     = $self->{language__}{TurnOff};
         my @color_data;
-        foreach my $color (@{$self->{c__}->{possible_colors__}} ) {
+        foreach my $color (@{$self->classifier_()->{possible_colors__}} ) {
             my %color_row;
             $color_row{Corpus_Available_Color} = $color;
             $color_row{Corpus_Color_Selected}  = ( $row_data{Corpus_Bucket_Color} eq $color )?'selected':'';
@@ -1835,19 +1831,19 @@ sub corpus_page
 
     $templ->param( 'Corpus_Bar_Chart_Classification' => $self->bar_chart_100( %bar_values ) );
 
-    @buckets = $self->{c__}->get_buckets( $self->{api_session__} );
+    @buckets = $self->classifier_()->get_buckets( $self->{api_session__} );
 
     delete $bar_values{unclassified};
 
     for my $bucket (@buckets)  {
-        $bar_values{$bucket}{0} = $self->{c__}->get_bucket_word_count( $self->{api_session__}, $bucket );
+        $bar_values{$bucket}{0} = $self->classifier_()->get_bucket_word_count( $self->{api_session__}, $bucket );
         delete $bar_values{$bucket}{1};
         delete $bar_values{$bucket}{2};
     }
 
     $templ->param( 'Corpus_Bar_Chart_Word_Counts' => $self->bar_chart_100( %bar_values ) );
 
-    my $number = $self->pretty_number(  $self->{c__}->get_unique_word_count( $self->{api_session__} ) );
+    my $number = $self->pretty_number(  $self->classifier_()->get_unique_word_count( $self->{api_session__} ) );
     $templ->param( 'Corpus_Total_Unique' => $number );
 
     my $pmcount = $self->pretty_number(  $self->mcount__() );
@@ -1872,7 +1868,7 @@ sub corpus_page
         my $word = $self->{form_}{word};
 
         if ( !( $word =~ /^[A-Za-z0-9\-_]+:/ ) ) {
-            $word = $self->{c__}->{parser__}->{mangle__}->mangle($word, 1);
+            $word = $self->classifier_()->{parser__}->{mangle__}->mangle($word, 1);
         }
 
         if ( $self->{form_}{word} ne '' ) {
@@ -1880,7 +1876,7 @@ sub corpus_page
                 my $max_bucket = '';
             my $total = 0;
             foreach my $bucket (@buckets) {
-                my $val = $self->{c__}->get_value_( $self->{api_session__}, $bucket, $word );
+                my $val = $self->classifier_()->get_value_( $self->{api_session__}, $bucket, $word );
                 if ( $val != 0 ) {
                     my $prob = exp( $val );
                     $total += $prob;
@@ -1894,19 +1890,19 @@ sub corpus_page
                     # calculation applies for the buckets in which the
                     # word is not found.
 
-                    $total += exp( $self->{c__}->get_not_likely_( $self->{api_session__} ) );
+                    $total += exp( $self->classifier_()->get_not_likely_( $self->{api_session__} ) );
                 }
             }
 
             my @lookup_data;
             foreach my $bucket (@buckets) {
-                my $val = $self->{c__}->get_value_( $self->{api_session__}, $bucket, $word );
+                my $val = $self->classifier_()->get_value_( $self->{api_session__}, $bucket, $word );
 
                 if ( $val != 0 ) {
                     my %row_data;
                     my $prob    = exp( $val );
                       my $n       = ($total > 0)?$prob / $total:0;
-                    my $score   = ($#buckets >= 0)?($val - $self->{c__}->get_not_likely_( $self->{api_session__} ) )/log(10.0):0;
+                    my $score   = ($#buckets >= 0)?($val - $self->classifier_()->get_not_likely_( $self->{api_session__} ) )/log(10.0):0;
                     my $d = $self->{language__}{Locale_Decimal};
                     my $normal  = sprintf("%.10f", $n);
                     $normal =~ s/\./$d/;
@@ -1931,7 +1927,7 @@ sub corpus_page
             $templ->param( 'Corpus_Loop_Lookup' => \@lookup_data );
 
             if ( $max_bucket ne '' ) {
-                $templ->param( 'Corpus_Lookup_Message' => sprintf( $self->{language__}{Bucket_LookupMostLikely}, $word, $self->{c__}->get_bucket_color( $self->{api_session__}, $max_bucket ), $max_bucket ) );
+                $templ->param( 'Corpus_Lookup_Message' => sprintf( $self->{language__}{Bucket_LookupMostLikely}, $word, $self->classifier_()->get_bucket_color( $self->{api_session__}, $max_bucket ), $max_bucket ) );
             } else {
                 $templ->param( 'Corpus_Lookup_Message' => sprintf( $self->{language__}{Bucket_DoesNotAppear}, $word ) );
             }
@@ -1992,10 +1988,10 @@ sub set_history_navigator__
     my $p = 1;
     my $dots = 0;
     my @nav_data;
-    while ( $i < $self->{history__}->get_query_size( $self->{q__} ) ) {
+    while ( $i < $self->history_()->get_query_size( $self->{q__} ) ) {
         my %row_data;
         if ( ( $i == 0 ) ||
-             ( ( $i + $self->config_( 'page_size' ) ) >= $self->{history__}->get_query_size( $self->{q__} ) ) ||
+             ( ( $i + $self->config_( 'page_size' ) ) >= $self->history_()->get_query_size( $self->{q__} ) ) ||
              ( ( ( $i - 2 * $self->config_( 'page_size' ) ) <= $start_message ) &&
                ( ( $i + 2 * $self->config_( 'page_size' ) ) >= $start_message ) ) ) {
             $row_data{History_Navigator_Page} = $p;
@@ -2021,7 +2017,7 @@ sub set_history_navigator__
     }
     $templ->param( 'History_Navigator_Loop' => \@nav_data );
 
-    if ( $start_message < ( $self->{history__}->get_query_size( $self->{q__} ) - $self->config_( 'page_size' ) ) )  {
+    if ( $start_message < ( $self->history_()->get_query_size( $self->{q__} ) - $self->config_( 'page_size' ) ) )  {
         $templ->param( 'History_Navigator_If_Next' => 1 );
         $templ->param( 'History_Navigator_Next'    => $start_message + $self->config_( 'page_size' ) );
     }
@@ -2110,16 +2106,16 @@ sub history_reclassify
 
         while ( my ( $slot, $newbucket ) = each %messages ) {
             push @{$work{$newbucket}},
-                $self->{history__}->get_slot_file( $slot );
-            my @fields = $self->{history__}->get_slot_fields( $slot);
+                $self->history_()->get_slot_file( $slot );
+            my @fields = $self->history_()->get_slot_fields( $slot);
             my $bucket = $fields[8];
-            $self->{c__}->reclassified(
+            $self->classifier_()->reclassified(
                 $self->{api_session__}, $bucket, $newbucket, 0 );
-            $self->{history__}->change_slot_classification(
+            $self->history_()->change_slot_classification(
                  $slot, $newbucket, $self->{api_session__}, 0);
             $self->{feedback}{$slot} = sprintf(
                  $self->{language__}{History_ChangedTo},
-                 $self->{c__}->get_bucket_color(
+                 $self->classifier_()->get_bucket_color(
                      $self->{api_session__}, $newbucket ), $newbucket );
         }
 
@@ -2127,7 +2123,7 @@ sub history_reclassify
         # files to reclassify, so run through them doing bulk updates
 
         foreach my $newbucket (keys %work) {
-            $self->{c__}->add_messages_to_bucket(
+            $self->classifier_()->add_messages_to_bucket(
                 $self->{api_session__}, $newbucket, @{$work{$newbucket}} );
         }
     }
@@ -2150,18 +2146,18 @@ sub history_undo
     foreach my $key (keys %{$self->{form_}}) {
         if ( $key =~ /^undo_([0-9]+)$/ ) {
             my $slot = $1;
-            my @fields = $self->{history__}->get_slot_fields( $slot );
+            my @fields = $self->history_()->get_slot_fields( $slot );
             my $bucket = $fields[8];
-            my $newbucket = $self->{c__}->get_bucket_name(
+            my $newbucket = $self->classifier_()->get_bucket_name(
                                 $self->{api_session__},
                                 $fields[9] );
-            $self->{c__}->reclassified(
+            $self->classifier_()->reclassified(
                 $self->{api_session__}, $newbucket, $bucket, 1 );
-            $self->{history__}->change_slot_classification(
+            $self->history_()->change_slot_classification(
                  $slot, $newbucket, $self->{api_session__}, 1 );
-            $self->{c__}->remove_message_from_bucket(
+            $self->classifier_()->remove_message_from_bucket(
                 $self->{api_session__}, $bucket,
-                $self->{history__}->get_slot_file( $slot ) );
+                $self->history_()->get_slot_file( $slot ) );
         }
     }
 }
@@ -2281,14 +2277,14 @@ sub history_page
         # Remove the list of marked messages using the array of
         # "remove" checkboxes
 
-        $self->{history__}->start_deleting();
+        $self->history_()->start_deleting();
         for my $i ( keys %{$self->{form_}} ) {
             if ( $i =~ /^rowid_(\d+)$/ ) {
                 $self->log_( 1, "clearpage $i" );
-                $self->{history__}->delete_slot( $1 );
+                $self->history_()->delete_slot( $1 );
             }
         }
-        $self->{history__}->stop_deleting();
+        $self->history_()->stop_deleting();
     }
 
     if ( defined( $self->{form_}{clearchecked} ) ) {
@@ -2296,27 +2292,27 @@ sub history_page
         # Remove the list of marked messages using the array of
         # "remove" checkboxes
 
-        $self->{history__}->start_deleting();
+        $self->history_()->start_deleting();
         for my $i ( keys %{$self->{form_}} ) {
             if ( $i =~ /^remove_(\d+)$/ ) {
                 my $slot = $1;
                 if ( $self->{form_}{$i} ne '' ) {
                     $self->log_( 1, "clearchecked $i" );
-                    $self->{history__}->delete_slot( $slot );
+                    $self->history_()->delete_slot( $slot );
                 }
             }
         }
-        $self->{history__}->stop_deleting();
+        $self->history_()->stop_deleting();
     }
 
     # Handle clearing the history files, there are two options here,
     # clear the current page or clear all the files in the cache
 
     if ( defined( $self->{form_}{clearall} ) ) {
-        $self->{history__}->delete_query( $self->{q__} );
+        $self->history_()->delete_query( $self->{q__} );
     }
 
-    $self->{history__}->set_query( $self->{q__},
+    $self->history_()->set_query( $self->{q__},
                                    $self->{form_}{filter},
                                    $self->{form_}{search},
                                    $self->{form_}{sort},
@@ -2336,15 +2332,15 @@ sub history_page
     $templ->param( 'History_If_Search'     => defined( $self->{form_}{search} ) );
     $templ->param( 'History_Field_Sort'    => $self->{form_}{sort} );
     $templ->param( 'History_Field_Filter'  => $self->{form_}{filter} );
-    $templ->param( 'History_If_MultiPage'  => $self->config_( 'page_size' ) <= $self->{history__}->get_query_size( $self->{q__} ) );
+    $templ->param( 'History_If_MultiPage'  => $self->config_( 'page_size' ) <= $self->history_()->get_query_size( $self->{q__} ) );
 
-    my @buckets = $self->{c__}->get_buckets( $self->{api_session__} );
+    my @buckets = $self->classifier_()->get_buckets( $self->{api_session__} );
 
     my @bucket_data;
     foreach my $bucket (@buckets) {
         my %row_data;
         $row_data{History_Bucket} = $bucket;
-        $row_data{History_Bucket_Color}  = $self->{c__}->get_bucket_parameter( $self->{api_session__},
+        $row_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $self->{api_session__},
                                                                       $bucket,
                                                                       'color' );
         push ( @bucket_data, \%row_data );
@@ -2355,7 +2351,7 @@ sub history_page
         my %row_data;
         $row_data{History_Bucket} = $bucket;
         $row_data{History_Selected} = ( defined( $self->{form_}{filter} ) && ( $self->{form_}{filter} eq $bucket ) )?'selected':'';
-        $row_data{History_Bucket_Color}  = $self->{c__}->get_bucket_parameter( $self->{api_session__},
+        $row_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $self->{api_session__},
                                                                       $bucket,
                                                                       'color' );
         push ( @sf_bucket_data, \%row_data );
@@ -2366,7 +2362,7 @@ sub history_page
     $templ->param( 'History_Filter_Unclassified' => ($self->{form_}{filter} eq 'unclassified')?'selected':'' );
     $templ->param( 'History_Field_Not' => ($self->{form_}{negate} ne '')?'checked':'' );
 
-    my $c = $self->{history__}->get_query_size( $self->{q__} );
+    my $c = $self->history_()->get_query_size( $self->{q__} );
     if ( $c > 0 ) {
         $templ->param( 'History_If_Some_Messages' => 1 );
         $templ->param( 'History_Count' => $self->pretty_number( $c ) );
@@ -2383,7 +2379,7 @@ sub history_page
         $templ->param( 'History_Start_Message' => $start_message );
 
         my $stop_message  = $start_message + $self->config_( 'page_size' ) - 1;
-        $stop_message = $self->{history__}->get_query_size( $self->{q__} ) - 1 if ( $stop_message >= $self->{history__}->get_query_size( $self->{q__} ) );
+        $stop_message = $self->history_()->get_query_size( $self->{q__} ) - 1 if ( $stop_message >= $self->history_()->get_query_size( $self->{q__} ) );
 
         $self->set_history_navigator__( $templ, $start_message, $stop_message );
 
@@ -2425,7 +2421,7 @@ sub history_page
         $templ->param( 'History_Loop_Headers' => \@header_data );
         $templ->param( 'History_Colspan' => $colspan );
 
-        my @rows = $self->{history__}->get_query_rows(
+        my @rows = $self->history_()->get_query_rows(
             $self->{q__}, $start_message+1,
             $stop_message - $start_message + 1 );
 
@@ -2468,14 +2464,14 @@ sub history_page
             $row_data{History_Short_Cc}      = $self->shorten__( $$row[3], $length );
             $row_data{History_Short_Subject} = $self->shorten__( $$row[4], $length );
             my $bucket = $row_data{History_Bucket} = $$row[8];
-            $row_data{History_Bucket_Color}  = $self->{c__}->get_bucket_parameter( $self->{api_session__},
+            $row_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $self->{api_session__},
                                                                           $bucket,
                                                                           'color' );
             $row_data{History_If_Reclassified} = ( $$row[9] != 0 );
             $row_data{History_I}             = $$row[0];
             $row_data{History_I1}            = $$row[0];
             $row_data{History_Fields}        = $self->print_form_fields_(0,1,('start_message','session','filter','search','sort','negate' ) );
-            $row_data{History_If_Not_Pseudo} = !$self->{c__}->is_pseudo_bucket( $self->{api_session__},
+            $row_data{History_If_Not_Pseudo} = !$self->classifier_()->is_pseudo_bucket( $self->{api_session__},
                                                                            $bucket );
             $row_data{History_If_Magnetized} = ($$row[11] ne '');
             $row_data{History_Magnet}        = $$row[11];
@@ -2542,14 +2538,14 @@ sub view_page
 {
     my ( $self, $client, $templ ) = @_;
 
-    my $mail_file = $self->{history__}->get_slot_file( $self->{form_}{view} );
+    my $mail_file = $self->history_()->get_slot_file( $self->{form_}{view} );
     my $start_message = $self->{form_}{start_message} || 0;
 
     my ( $id, $from, $to, $cc, $subject, $date, $hash, $inserted,
         $bucket, $reclassified, $bucketid, $magnet ) =
-        $self->{history__}->get_slot_fields( $self->{form_}{view} );
+        $self->history_()->get_slot_fields( $self->{form_}{view} );
 
-    my $color = $self->{c__}->get_bucket_color(
+    my $color = $self->classifier_()->get_bucket_color(
                     $self->{api_session__}, $bucket );
     my $page_size = $self->config_( 'page_size' );
 
@@ -2563,7 +2559,7 @@ sub view_page
     # If a format change was requested for the word matrix, record it in the
     # configuration and in the classifier options.
 
-    $self->{c__}->wmformat( $self->{form_}{format} );
+    $self->classifier_()->wmformat( $self->{form_}{format} );
 
     my $index = $self->{form_}{view};
 
@@ -2592,9 +2588,9 @@ sub view_page
         $templ->param( 'View_If_Magnetized' => ( $magnet ne '' ) );
         if ( $magnet eq '' ) {
             my @bucket_data;
-            foreach my $abucket ($self->{c__}->get_buckets( $self->{api_session__} )) {
+            foreach my $abucket ($self->classifier_()->get_buckets( $self->{api_session__} )) {
                 my %row_data;
-                $row_data{View_Bucket_Color} = $self->{c__}->get_bucket_color( $self->{api_session__}, $abucket );
+                $row_data{View_Bucket_Color} = $self->classifier_()->get_bucket_color( $self->{api_session__}, $abucket );
                 $row_data{View_Bucket} = $abucket;
                 push ( @bucket_data, \%row_data );
             }
@@ -2610,21 +2606,21 @@ sub view_page
 
         # Enable saving of word-scores
 
-        $self->{c__}->wordscores( 1 );
+        $self->classifier_()->wordscores( 1 );
 
         # Build the scores by classifying the message, since
         # get_html_colored_message has parsed the message for us we do
         # not need to parse it again and hence we pass in undef for
         # the filename
 
-        my $current_class = $self->{c__}->classify(
+        my $current_class = $self->classifier_()->classify(
             $self->{api_session__}, $mail_file, $templ, \%matrix, \%idmap );
 
         # Check whether the original classfication is still valid.  If
         # not, add a note at the top of the page:
 
         if ( $current_class ne $bucket ) {
-            my $new_color = $self->{c__}->get_bucket_color(
+            my $new_color = $self->classifier_()->get_bucket_color(
                 $self->{api_session__}, $current_class );
             $templ->param( 'View_If_Class_Changed' => 1 );
             $templ->param( 'View_Class_Changed' => $current_class );
@@ -2633,10 +2629,10 @@ sub view_page
 
         # Disable, print, and clear saved word-scores
 
-        $self->{c__}->wordscores( 0 );
+        $self->classifier_()->wordscores( 0 );
 
         $templ->param( 'View_Message' =>
-            $self->{c__}->fast_get_html_colored_message(
+            $self->classifier_()->fast_get_html_colored_message(
                 $self->{api_session__}, $mail_file, \%matrix, \%idmap ) );
 
         # We want to insert a link to change the output format at the
@@ -2702,7 +2698,7 @@ sub view_page
             #        $text =~ s/>/&gt;/g;
 
             #        if ( $arg =~ /\Q$text\E/i ) {
-            #            my $new_color = $self->{c__}->get_bucket_color( $self->{api_session__}, $bucket );
+            #            my $new_color = $self->classifier_()->get_bucket_color( $self->{api_session__}, $bucket );
             #            $line =~ s/(\Q$text\E)/<b><font color=\"$new_color\">$1<\/font><\/b>/;
             #        }
             #    }
@@ -3123,7 +3119,7 @@ sub mcount__
 
     my $count = 0;
 
-    my @buckets = $self->{c__}->get_all_buckets( $self->{api_session__} );
+    my @buckets = $self->classifier_()->get_all_buckets( $self->{api_session__} );
 
     foreach my $bucket (@buckets) {
         $count += $self->get_bucket_parameter__( $bucket, 'count' );
@@ -3138,7 +3134,7 @@ sub ecount__
 
     my $count = 0;
 
-    my @buckets = $self->{c__}->get_all_buckets( $self->{api_session__} );
+    my @buckets = $self->classifier_()->get_all_buckets( $self->{api_session__} );
 
     foreach my $bucket (@buckets) {
         $count += $self->get_bucket_parameter__( $bucket, 'fncount' );
@@ -3167,26 +3163,15 @@ sub get_bucket_parameter__
     # rest we leave untouched in @_ and pass to the real API
 
     my $self = shift;
-    return $self->{c__}->get_bucket_parameter( $self->{api_session__}, @_ );
+    return $self->classifier_()->get_bucket_parameter( $self->{api_session__}, @_ );
 }
 sub set_bucket_parameter__
 {
     my $self = shift;
-    return $self->{c__}->set_bucket_parameter( $self->{api_session__}, @_ );
+    return $self->classifier_()->set_bucket_parameter( $self->{api_session__}, @_ );
 }
 
 # GETTERS/SETTERS
-
-sub classifier
-{
-    my ( $self, $value ) = @_;
-
-    if ( defined( $value ) ) {
-        $self->{c__} = $value;
-    }
-
-    return $self->{c__};
-}
 
 sub language
 {
@@ -3204,16 +3189,19 @@ sub session_key
 
 
 #----------------------------------------------------------------------------
+#
 # shutdown_page__
 #
 #   Determines the text to send in response to a click on the
 #   shutdown link.
+#
 #----------------------------------------------------------------------------
 sub shutdown_page__
 {
     my ( $self ) = @_;
 
     # Figure out what style sheet we are using
+
     my $root = 'skins/' . $self->config_( 'skin' ) . '/';
     my $css_file = $self->get_root_path_( $root . 'style.css' );
     if ( !( -e $css_file ) ) {
@@ -3231,7 +3219,8 @@ sub shutdown_page__
     close CSS;
     $css .= "</style>";
 
-    # Load the template, set the class of the menu tabs, and send the output to $text
+    # Load the template, set the class of the menu tabs, and send the
+    # output to $text
 
     my $templ = $self->load_template__( 'shutdown-page.thtml' );
 
@@ -3243,9 +3232,11 @@ sub shutdown_page__
 
     # Replace the reference to the favicon, we won't be able
     # to handle that request
+
     $text =~ s/<link rel="icon" href="favicon\.ico">//;
 
     # Replace the link to the style sheet with the style sheet itself
+
     $text =~ s/\Q<link rel="stylesheet" type="text\/css" href="${root}style.css" title="POPFile-Style">\E/$css/;
 
     # Remove the session key from the menu links:

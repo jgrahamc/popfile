@@ -97,7 +97,6 @@ $POPFile->CORE_signals();
 # disk, start the modules running
 
 $POPFile->CORE_load();
-$POPFile->CORE_link_components();
 $POPFile->CORE_initialize();
 if ( $POPFile->CORE_config() ) {
     $POPFile->CORE_start();

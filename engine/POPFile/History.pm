@@ -1,4 +1,4 @@
-# POPFILE LOADABLE MODULE
+# POPFILE LOADABLE MODULE 3
 package POPFile::History;
 
 use POPFile::Module;
@@ -66,13 +66,6 @@ sub new
     $self->{queries__} = ();
 
     $self->{firsttime__} = 1;
-
-    # Will contain the database handle retrieved from
-    # Classifier::Bayes
-
-    $self->{db__} = undef;
-
-    $self->{classifier__} = 0;
 
     bless($self, $class);
 
@@ -143,28 +136,6 @@ sub stop
 
 #----------------------------------------------------------------------------
 #
-# db__
-#
-# Since we don't know the order in which the start() methods of PLMs
-# is called we cannot be sure that Classifier::Bayes will have started
-# and connected to the database before us, hence we can't set our
-# database handle at start time.  So instead we access the db handle
-# through this method
-#
-#----------------------------------------------------------------------------
-sub db__
-{
-    my ( $self ) = @_;
-
-    if ( !defined( $self->{db__} ) ) {
-        $self->{db__} = $self->{classifier__}->db()->clone;
-    }
-
-    return $self->{db__};
-}
-
-#----------------------------------------------------------------------------
-#
 # service
 #
 # Called periodically so that the module can do its work
@@ -211,21 +182,6 @@ sub deliver
     if ( $type eq 'COMIT' ) {
         push ( @{$self->{commit_list__}}, \@message );
     }
-}
-
-# ---------------------------------------------------------------------------
-#
-# forked
-#
-# This is called inside a child process that has just forked, since the
-# child needs access to the database we open it
-#
-# ---------------------------------------------------------------------------
-sub forked
-{
-    my ( $self ) = @_;
-
-    $self->{db__} = undef;
 }
 
 #----------------------------------------------------------------------------
@@ -287,7 +243,7 @@ sub reserve_slot
         # TODO Replace the hardcoded user ID 1 with the looked up
         # user ID from the session key
 
-        my $test = $self->db__()->selectrow_arrayref(
+        my $test = $self->db_()->selectrow_arrayref(
                  "select id from history where committed = $r limit 1;");
 
         if ( defined( $test ) ) {
@@ -299,12 +255,12 @@ sub reserve_slot
         # when we received it
 
         my $now = time;
-        $self->db__()->do(
+        $self->db_()->do(
             "insert into history ( userid, committed, inserted ) values ( 1, $r, $now );" );
         last;
     }
 
-    my $result = $self->db__()->selectrow_arrayref(
+    my $result = $self->db_()->selectrow_arrayref(
                  "select id from history where committed = $r limit 1;");
 
     my $slot = $result->[0];
@@ -333,7 +289,7 @@ sub release_slot
 
     my $delete = "delete from history where history.id = $slot;";
 
-    $self->db__()->do( $delete );
+    $self->db_()->do( $delete );
 
     my $file = $self->get_slot_file( $slot );
 
@@ -408,7 +364,7 @@ sub change_slot_classification
     # then retrieve the current classification for this slot
     # and update the database
 
-    my $bucketid = $self->{classifier__}->get_bucket_id(
+    my $bucketid = $self->classifier_()->get_bucket_id(
                            $session, $class );
 
     my $oldbucketid = 0;
@@ -417,7 +373,7 @@ sub change_slot_classification
         $oldbucketid = $fields[10];
     }
 
-    $self->db__()->do( "update history set bucketid = $bucketid,
+    $self->db_()->do( "update history set bucketid = $bucketid,
                                            usedtobe = $oldbucketid
                                        where id = $slot;" );
     $self->force_requery__();
@@ -440,7 +396,7 @@ sub revert_slot_classification
     my @fields = $self->get_slot_fields( $slot );
     my $oldbucketid = $fields[9];
 
-    $self->db__()->do( "update history set bucketid = $oldbucketid,
+    $self->db_()->do( "update history set bucketid = $oldbucketid,
                                            usedtobe = 0
                                        where id = $slot;" );
     $self->force_requery__();
@@ -460,7 +416,7 @@ sub get_slot_fields
 {
     my ( $self, $slot ) = @_;
 
-    return $self->db__()->selectrow_array(
+    return $self->db_()->selectrow_array(
         "select $fields_slot from history, buckets, magnets
              where history.id = $slot and
                    buckets.id = history.bucketid and
@@ -480,7 +436,7 @@ sub is_valid_slot
 {
     my ( $self, $slot ) = @_;
 
-    my @row = $self->db__()->selectrow_array(
+    my @row = $self->db_()->selectrow_array(
         "select id from history where history.id = $slot;" );
 
     return ( ( @row ) && ( $row[0] == $slot ) );
@@ -545,7 +501,7 @@ sub commit_history__
                                             ${$header{'date'}}[0],
                                             ${$header{'subject'}}[0],
                                             ${$header{'received'}}[0] );
-        $hash = $self->db__()->quote( $hash );
+        $hash = $self->db_()->quote( $hash );
 
         # For sorting purposes the From, To and CC headers have special
         # cleaned up versions of themselves in the database.  The idea
@@ -560,13 +516,13 @@ sub commit_history__
 
         foreach my $h (@sortable) {
             $sort_headers{$h} =
-                 $self->{classifier__}->{parser__}->decode_string(
+                 $self->classifier_()->{parser__}->decode_string(
                      ${$header{$h}}[0] );
             $sort_headers{$h} = lc($sort_headers{$h} || '');
             $sort_headers{$h} =~ s/[\"<>]//g;
             $sort_headers{$h} =~ s/^[ \t]+//g;
             $sort_headers{$h} =~ s/\0//g;
-            $sort_headers{$h} = $self->db__()->quote(
+            $sort_headers{$h} = $self->db_()->quote(
                 $sort_headers{$h} );
         }
 
@@ -578,7 +534,7 @@ sub commit_history__
         foreach my $h (@required) {
 
             ${$header{$h}}[0] =
-                 $self->{classifier__}->{parser__}->decode_string(
+                 $self->classifier_()->{parser__}->decode_string(
                      ${$header{$h}}[0] );
             
             if ( !defined ${$header{$h}}[0] || ${$header{$h}}[0] =~ /^\s*$/ ) {
@@ -590,7 +546,7 @@ sub commit_history__
             }
             
             ${$header{$h}}[0] =~ s/\0//g;
-            ${$header{$h}}[0] = $self->db__()->quote( ${$header{$h}}[0] );
+            ${$header{$h}}[0] = $self->db_()->quote( ${$header{$h}}[0] );
         }
 
         # If we do not have a date header then set the date to
@@ -608,7 +564,7 @@ sub commit_history__
         # classified into (and the same for the magnet if it is
         # defined)
 
-        my $bucketid = $self->{classifier__}->get_bucket_id(
+        my $bucketid = $self->classifier_()->get_bucket_id(
                            $session, $bucket );
 
         my $msg_size = -s $file;
@@ -619,7 +575,7 @@ sub commit_history__
         # history and log the failure
 
         if ( defined( $bucketid ) ) {
-            my $result = $self->db__()->do(
+            my $result = $self->db_()->do(
                 "update history set hdr_from    = ${$header{from}}[0],
                                     hdr_to      = ${$header{to}}[0],
                                     hdr_date    = ${$header{date}}[0],
@@ -668,7 +624,7 @@ sub delete_slot
 
         $self->make_directory__( $path );
 
-        my @b = $self->db__()->selectrow_array(
+        my @b = $self->db_()->selectrow_array(
             "select buckets.name from history, buckets
                  where history.bucketid = buckets.id and
                        history.id = $slot;" );
@@ -721,7 +677,7 @@ sub start_deleting
 {
     my ( $self ) = @_;
 
-    $self->{classifier__}->tweak_sqlite( 1, 1, $self->db__() );
+    $self->classifier_()->tweak_sqlite( 1, 1, $self->db_() );
 }
 
 #----------------------------------------------------------------------------
@@ -736,7 +692,7 @@ sub stop_deleting
 {
     my ( $self ) = @_;
 
-    $self->{classifier__}->tweak_sqlite( 1, 0, $self->db__() );
+    $self->classifier_()->tweak_sqlite( 1, 0, $self->db_() );
 }
 
 #----------------------------------------------------------------------------
@@ -826,8 +782,8 @@ sub get_slot_from_hash
 {
     my ( $self, $hash ) = @_;
 
-    $hash = $self->db__()->quote( $hash );
-    my $result = $self->db__()->selectrow_arrayref(
+    $hash = $self->db_()->quote( $hash );
+    my $result = $self->db_()->selectrow_arrayref(
         "select id from history where hash = $hash limit 1;" );
 
     return defined( $result )?$result->[0]:'';
@@ -957,7 +913,7 @@ sub set_query
     my $equal     = $not?'=':'!=';
 
     if ( $search ne '' ) {
-        $search = $self->db__()->quote( '%' . $search . '%' );
+        $search = $self->db_()->quote( '%' . $search . '%' );
         $self->{queries__}{$id}{base} .= " and $not_word ( hdr_from like $search or hdr_subject like $search )";
     }
 
@@ -969,11 +925,11 @@ sub set_query
             $self->{queries__}{$id}{base} .=
                 " and history.magnetid $equal 0";
         } else {
-            my $session = $self->{classifier__}->get_session_key(
+            my $session = $self->classifier_()->get_session_key(
                               'admin', '' );
-            my $bucketid = $self->{classifier__}->get_bucket_id(
+            my $bucketid = $self->classifier_()->get_bucket_id(
                                $session, $filter );
-            $self->{classifier__}->release_session_key( $session );
+            $self->classifier_()->release_session_key( $session );
             $self->{queries__}{$id}{base} .=
                 " and history.bucketid $not_equal $bucketid";
         }
@@ -1005,11 +961,11 @@ sub set_query
     $count =~ s/XXX/COUNT(*)/;
 
     $self->{queries__}{$id}{count} =
-        $self->db__()->selectrow_arrayref( $count )->[0];
+        $self->db_()->selectrow_arrayref( $count )->[0];
 
     my $select = $self->{queries__}{$id}{base};
     $select =~ s/XXX/$fields_slot/;
-    $self->{queries__}{$id}{query} = $self->db__()->prepare( $select );
+    $self->{queries__}{$id}{query} = $self->db_()->prepare( $select );
     $self->{queries__}{$id}{query}->execute;
     $self->{queries__}{$id}{cache} = ();
 }
@@ -1031,7 +987,7 @@ sub delete_query
 
     my $delete = $self->{queries__}{$id}{base};
     $delete =~ s/XXX/history.id/;
-    my $d = $self->db__()->prepare( $delete );
+    my $d = $self->db_()->prepare( $delete );
     $d->execute;
     my @row;
     my @ids;
@@ -1168,12 +1124,12 @@ sub upgrade_history_files__
         $self->global_config_( 'msgdir' ) . 'popfile*.msg', 0 );
 
     if ( $#msgs != -1 ) {
-        my $session = $self->{classifier__}->get_session_key( 'admin', '' );
+        my $session = $self->classifier_()->get_session_key( 'admin', '' );
 
         print "\nFound old history files, moving them into database\n    ";
 
         my $i = 0;
-        $self->db__()->begin_work;
+        $self->db_()->begin_work;
         foreach my $msg (@msgs) {
             if ( ( ++$i % 100 ) == 0 ) {
                 print "[$i]";
@@ -1195,12 +1151,12 @@ sub upgrade_history_files__
                 push ( @{$self->{commit_list__}}, \@message );
             }
         }
-        $self->db__()->commit;
+        $self->db_()->commit;
 
         print "\nDone upgrading history\n";
 
         $self->commit_history__();
-        $self->{classifier__}->release_session_key( $session );
+        $self->classifier_()->release_session_key( $session );
 
         unlink $self->get_user_path_(
             $self->global_config_( 'msgdir' ) . 'history_cache', 0 );
@@ -1275,7 +1231,7 @@ sub cleanup_history
 
     my $seconds_per_day = 24 * 60 * 60;
     my $old = time - $self->config_( 'history_days' ) * $seconds_per_day;
-    my $d = $self->db__()->prepare( "select id from history
+    my $d = $self->db_()->prepare( "select id from history
                                          where inserted < $old;" );
     $d->execute;
     my @row;
@@ -1334,15 +1290,6 @@ sub force_requery__
     foreach my $id (keys %{$self->{queries__}}) {
         $self->{queries__}{$id}{fields} = '';
     }
-}
-
-# SETTER
-
-sub classifier
-{
-    my ( $self, $classifier ) = @_;
-
-    $self->{classifier__} = $classifier;
 }
 
 1;

@@ -32,7 +32,7 @@ sub new
     # This will store a reference to the classifier object
 
     $self->{c} = 0;
-        
+
     bless $self, $type;
     return $self;
 }

@@ -1,4 +1,4 @@
-# POPFILE LOADABLE MODULE
+# POPFILE LOADABLE MODULE 1
 package Classifier::WordMangle;
 
 use POPFile::Module;

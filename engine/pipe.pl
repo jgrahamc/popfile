@@ -43,7 +43,6 @@ if ( $#ARGV == -1 ) {
     $POPFile->CORE_loader_init();
     $POPFile->CORE_signals();
     $POPFile->CORE_load( 1 );
-    $POPFile->CORE_link_components();
     $POPFile->CORE_initialize();
 
     # Ugly hack which is needed because Bayes::classify_and_modify looks up

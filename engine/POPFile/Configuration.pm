@@ -1,4 +1,4 @@
-# POPFILE LOADABLE MODULE
+# POPFILE LOADABLE MODULE 0
 package POPFile::Configuration;
 
 use POPFile::Module;
@@ -355,9 +355,9 @@ sub parse_command_line
         return 0;
     }
 
-    # Join together the options specified with --set and those after the --, the
-    # options in @set_options are going to be of the form foo=bar and hence need to
-    # be split into foo bar
+    # Join together the options specified with --set and those after
+    # the --, the options in @set_options are going to be of the form
+    # foo=bar and hence need to be split into foo bar
 
     my @options;
 
@@ -473,7 +473,7 @@ sub upgrade_parameter__
                      'update_check',             'html_update_check',
                      'ui_port',                  'html_port',
 
-                     # Parameters the have moved from the UI::HTML to
+                     # Parameters that have moved from the UI::HTML to
                      # POPFile::History
 
                      'archive',                  'history_archive',
@@ -484,6 +484,16 @@ sub upgrade_parameter__
                      'html_archive_classes',     'history_archive_classes',
                      'html_archive_dir',         'history_archive_dir',
                      'html_history_days',        'history_history_days',
+
+                     # Parameters that have moved from Classifer::Bayes to
+                     # POPFile::Database
+
+                     'bayes_bad_sqlite_version', 'database_bad_sqlite_version',
+                     'bayes_database',           'database_database',
+                     'bayes_dbauth',             'database_dbauth',
+                     'bayes_dbconnect',          'database_dbconnect',
+                     'bayes_dbuser',             'database_dbuser',
+                     'bayes_sqlite_tweaks',      'database_sqlite_tweaks'
 
     ); # PROFILE BLOCK STOP
 

@@ -1,4 +1,4 @@
-# POPFILE LOADABLE MODULE
+# POPFILE LOADABLE MODULE 1
 package POPFile::Logger;
 
 use POPFile::Module;

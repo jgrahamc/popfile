@@ -1,11 +1,13 @@
 #!/usr/bin/perl
 # ----------------------------------------------------------------------------
 #
-# popfile-tray.pl --- Message analyzer and sorter (Windows loader used with PerlTray)
+# popfile-tray.pl --- Message analyzer and sorter (Windows loader used
+# with PerlTray)
 #
-# Acts as a server and client designed to sit between a real mail/news client and a real mail/
-# news server using POP3.  Inserts an extra header X-Text-Classification: into the header to
-# tell the client which category the message belongs in and much more...
+# Acts as a server and client designed to sit between a real mail/news
+# client and a real mail/ news server using POP3.  Inserts an extra
+# header X-Text-Classification: into the header to tell the client
+# which category the message belongs in and much more...
 #
 # Copyright (c) 2001-2004 John Graham-Cumming
 #
@@ -96,7 +98,8 @@ sub Timer
 #
 # Shutdown
 #
-# Called by PerlTray when Windows is shutting down or the current user is logging off
+# Called by PerlTray when Windows is shutting down or the current user
+# is logging off
 #
 # ----------------------------------------------------------------------------
 
@@ -128,8 +131,8 @@ sub popfile_shutdown
     exit(0);
 }
 
-# Indicate that we should create output on STDOUT (the POPFile
-# load sequence) and initialize with the version
+# Indicate that we should create output on STDOUT (the POPFile load
+# sequence) and initialize with the version
 
 $POPFile->debug(1);
 $POPFile->CORE_loader_init();
@@ -138,20 +141,20 @@ $POPFile->CORE_loader_init();
 
 $POPFile->CORE_signals();
 
-# Create the main objects that form the core of POPFile.  Consists of the configuration
-# modules, the classifier, the UI (currently HTML based), platform specific code,
-# and the POP3 proxy.  The link the components together, intialize them all, load
-# the configuration from disk, start the modules running
+# Create the main objects that form the core of POPFile.  Consists of
+# the configuration modules, the classifier, the UI (currently HTML
+# based), platform specific code, and the POP3 proxy.  The link the
+# components together, intialize them all, load the configuration from
+# disk, start the modules running
 
 $POPFile->CORE_load();
-$POPFile->CORE_link_components();
 $POPFile->CORE_initialize();
 $POPFile->CORE_config();
 $POPFile->CORE_start();
 
 SetIcon( 'trayicon' );
 
-# We terminate here because that lets PerlTray start and it will call the Timer
-# function above
+# We terminate here because that lets PerlTray start and it will call
+# the Timer function above
 
 Timer();
