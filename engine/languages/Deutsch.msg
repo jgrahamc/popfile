@@ -66,6 +66,8 @@ Word                                    Wort
 Count                                   Anzahl
 Update                                  Ändern
 Refresh                                 Aktualisieren
+FAQ                                     FAQ
+ID                                      ID
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Kontrollzentrum
@@ -185,6 +187,7 @@ Password_Error1                         Falsches Paßwort
 Security_Error1                         Der Port muß zwischen 1 und 65535 liegen.
 Security_Stealth                        Stealth Modus/Serverbetrieb
 Security_NoStealthMode                  Nein (Stealth Modus)
+Security_StealthMode                    (Stealth Modus)
 Security_ExplainStats                   (Wenn Sie diese Funktion einschalten, sendet POPFile täglich die drei folgenden Werte an ein Skript auf www.usethesource.com: bc (Anzahl von Ihnen eingerichteter Kategorien), mc (Anzahl von POPFile eingestufter Nachrichten) und ec (Anzahl der Einstufungsfehler). Diese werden in einer Datei gespeichert und benutzt, um öffentliche Statistiken darüber zu erstellen, wie POPFile genutzt wird und wie gut es dabei funktioniert. Die Daten werden etwa 5 Tage auf dem Server gespeichert und dann gelöscht. Zuordnungen zwischen IP-Adressen und statistischen Daten werden nicht gespeichert.)
 Security_ExplainUpdate                  (Wenn Sie diese Funktion einschalten, sendet POPFile täglich die drei folgenden Werte an ein Skript auf www.usethesource.com: ma (die Hauptversionsnummer der POPFile-Installation), mi (die Nebenversionsnummer der POPFile-Installation) und bn (die build-Nummer der POPFile-Installation). POPFile erhält die Antwort in Form einer Grafik, die am Kopf einer Seite erscheint, wenn eine neue Version verfügbar ist. Die Daten werden etwa 5 Tage auf dem Server gespeichert und dann gelöscht. Zuordnungen zwischen IP-Adressen und statistischen Daten werden nicht gespeichert.)
 Security_PasswordTitle                  Paßwort für Benutzeroberfläche
