@@ -67,6 +67,14 @@
 #
 #  (Data for the first bucket file is in section [Bucket-1], the second in [Bucket-2], etc)
 #--------------------------------------------------------------------------
+# The POPFile installer uses several multi-language mode programs built using NSIS. To make
+# maintenance easier, an 'include' file (pfi-languages.nsh) defines the supported languages.
+#
+# To remove support for a particular language, comment-out the relevant line in the list of
+# languages in the 'pfi-languages.nsh' file.
+#
+# For instructions on how to add support for new languages, see the 'pfi-languages.nsh' file.
+#--------------------------------------------------------------------------
 
   ;--------------------------------------------------------------------------
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
@@ -75,7 +83,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.12"
+  !define C_PFI_VERSION  "0.1.13"
 
   ; Mention the version number in the window title
 
@@ -100,19 +108,19 @@
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion "${C_PFI_VERSION}.0"
+  VIProductVersion                   "${C_PFI_VERSION}.0"
 
-  VIAddVersionKey "ProductName" "${C_PFI_PRODUCT}"
-  VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sf.net"
-  VIAddVersionKey "CompanyName" "The POPFile Project"
-  VIAddVersionKey "LegalCopyright" "© 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription" "POPFile Corpus Conversion Monitor"
-  VIAddVersionKey "FileVersion" "${C_PFI_VERSION}"
+  VIAddVersionKey "ProductName"      "${C_PFI_PRODUCT}"
+  VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "CompanyName"      "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"   "© 2004  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"  "POPFile Corpus Conversion Monitor"
+  VIAddVersionKey "FileVersion"      "${C_PFI_VERSION}"
 
-  VIAddVersionKey "Build" "Multi-Language"
+  VIAddVersionKey "Build"            "Multi-Language"
 
-  VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script" "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
+  VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages
@@ -290,7 +298,6 @@
   ; Ensure CRC checking cannot be turned off using the /NCRC command-line switch
 
   CRCcheck Force
-
 
 #--------------------------------------------------------------------------
 # Reserve the files required by the utility (to improve performance)
@@ -913,12 +920,12 @@ FunctionEnd
 #
 #  Usage:
 #
-#         Push "$G_MPBINDIR\wperl.exe"
+#         Push "C:\Program Files\POPFile\wperl.exe"
 #         Call CheckIfLocked
 #         Pop $R0
 #
 #        (if the file is no longer in use, $R0 will be "")
-#        (if the file is still being used, $R0 will be "$G_MPBINDIR\wperl.exe")
+#        (if the file is still being used, $R0 will be "C:\Program Files\POPFile\wperl.exe")
 #--------------------------------------------------------------------------
 
 Function CheckIfLocked
