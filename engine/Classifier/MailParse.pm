@@ -232,7 +232,7 @@ sub parse_stream
             {
                 my $decoded = '';
                 $self->{ut} = '' if $self->{color};
-                while ( ( $line =~ /^[A-Za-z0-9+\/]{72}[\n\r]*?$/ ) || ( $line =~ /^[A-Za-z0-9+\/]+=+?[\n\r]*?$/ ) )
+                while ( ( $line =~ /^([A-Za-z0-9+\/][A-Za-z0-9+\/]){36,38}[\n\r]*?$/ ) || ( $line =~ /^[A-Za-z0-9+\/]+=+?[\n\r]*?$/ ) )
                 {
                     print "64> $line" if $self->{debug};
                     $decoded    .= un_base64( $self, $line );
