@@ -339,25 +339,19 @@ sub echo_to_regexp_
     
     $verbose = 0 if (!defined($verbose));
 
-    # ASSERT: $regexp =~ /^\/.*\/$/ *shrug*
-    
-    #$regexp =~ s/^\/(.*)\/$/$1/;
-
     while ( <$mail> ) {
         # Check for an abort
+        
         last if ( $self->{alive_} == 0 );
 
         if (!$verbose) {
             print $client $_;
         } else {
             # This creates log output
+            
             $self->tee_($client, $_);
         }
-        
-        my $done = ($_ =~ $regexp);
-        
-        print $regexp . "=~" . $_ . ($done?'1':'0') . "\n" ;
-                
+                        
         last if ( $_ =~ $regexp );
     }
 }
