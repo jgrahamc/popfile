@@ -91,7 +91,7 @@
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_TITLE     "プログラムファイルがインストールされました。"
-!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_SUBTITLE  "${C_PFI_PRODUCT} を使用するにはその前に設定がされていなければなりません。"
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_SUBTITLE  "次に ${C_PFI_PRODUCT} を使用するための設定を行います。"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish (for the main POPFile installer)
@@ -147,7 +147,7 @@
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_TITLE        "'$G_WINUSERNAME' ユーザーのための POPFile の設定"
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_SUBTITLE     "POPFile 設定ファイルをこのユーザー用にアップデートし終わるまでしばらくお待ち下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_SUBTITLE     "POPFile 設定ファイルをこのユーザー用にアップデートします。しばらくお待ち下さい。"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish (for the 'Add POPFile User' wizard)
@@ -162,7 +162,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TITLE        "'$G_WINUSERNAME' ユーザーのための POPFile データのアンインストール"
 !insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_SUBTITLE     "このユーザー用 POPFile 設定データをコンピューターから削除します。"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TEXT_TOP     "'$G_WINUSERNAME' ユーザー用 POPFile 設定データは次のフォルダから削除されます。 $_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TEXT_TOP     "'$G_WINUSERNAME' ユーザー用 POPFile 設定データを次のフォルダから削除します。 $_CLICK"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstallation Page (for the 'Add POPFile User' wizard)
@@ -247,8 +247,8 @@
 
 ; Text strings used when user has NOT selected a component found in the existing installation
 
-!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_1            "Do you want to upgrade the existing $G_PLS_FIELD_1 component ?"
-!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_2            "(using out of date POPFile components can cause problems)"
+!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_1            "$G_PLS_FIELD_1 コンポーネントをアップグレードしますか？"
+!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_2            "(古いバージョンの POPFile コンポーネントを使っていると問題が起こることがあります。)"
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
