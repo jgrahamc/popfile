@@ -92,8 +92,8 @@
 #
 #   <NSIS Language NAME>-pfi.nsh  - holds strings used on the custom pages and elsewhere
 #
-# Once these files have been prepared and placed in the 'languages' directory with the other
-# *-mui.nsh and *-pfi.nsh files, add a new '!insertmacro PFI_LANG_LOAD' line to load these
+# Once these files have been prepared and placed in the 'windows\languages' directory with the
+# other *-mui.nsh and *-pfi.nsh files, add a new '!insertmacro PFI_LANG_LOAD' line to load these
 # two new files and, if there is a suitable POPFile UI language file for the new language,
 # add a suitable '!insertmacro UI_LANG_CONFIG' line in the section which handles the optional
 # 'Languages' component to allow the installer to select the appropriate UI language.
@@ -104,12 +104,7 @@
   ;--------------------------------------------------------------------------
 
   !define MUI_PRODUCT   "POPFile"
-
-  !ifndef ENGLISH_ONLY
-    !define MUI_VERSION   "0.20.0 (ML)"
-  !else
-    !define MUI_VERSION   "0.20.0 (English)"
-  !endif
+  !define MUI_VERSION   "0.20.0 (CVS)"
 
   !define C_README        "v0.19.1.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
@@ -161,8 +156,6 @@
 # Version Information settings (for the installer EXE and uninstaller EXE)
 #--------------------------------------------------------------------------
 
-  ; This feature is "under construction" (and has not yet been documented in NSIS user manual)
-
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
@@ -176,13 +169,13 @@
   VIAddVersionKey "FileVersion" "${MUI_VERSION}"
 
   !ifndef ENGLISH_ONLY
-    VIAddVersionKey "Build" "Multi-Language (Experimental)"
+    VIAddVersionKey "Build" "Multi-Language (CVS)"
   !else
-    VIAddVersionKey "Build" "English-Only (Experimental)"
+    VIAddVersionKey "Build" "English-Only (CVS)"
   !endif
 
   VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script" "${__FILE__} (${__TIMESTAMP__})"
+  VIAddVersionKey "Build Script" "${__FILE__}$\r$\n(${__TIMESTAMP__})"
 
 #----------------------------------------------------------------------------------------
 # CBP Configuration Data (to override defaults, un-comment the lines below and modify them)
@@ -458,6 +451,10 @@ Function .onInit
   !define L_OUTPUT_FILE_HANDLE  $R8
   !define L_LINE                $R7
   
+  Push ${L_INPUT_FILE_HANDLE}
+  Push ${L_OUTPUT_FILE_HANDLE}
+  Push ${L_LINE}
+  
   ; Conditional compilation: if ENGLISH_ONLY is defined, support only 'English'
 
   !ifndef ENGLISH_ONLY
@@ -490,6 +487,10 @@ loop:
 close_files:
   FileClose ${L_INPUT_FILE_HANDLE}
   FileClose ${L_OUTPUT_FILE_HANDLE}
+  
+  Pop ${L_LINE}
+  Pop ${L_OUTPUT_FILE_HANDLE}
+  Pop ${L_INPUT_FILE_HANDLE}
   
   !undef L_INPUT_FILE_HANDLE
   !undef L_OUTPUT_FILE_HANDLE
