@@ -158,9 +158,9 @@ sub debug
     {
         # Check to see if we are handling the USER/PASS command and if we are then obscure the
         # account information
-        if ( $message =~ /(USER|PASS)/ ) 
+        if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ ) 
         {
-            $message = "$1 XXXXXX\n";
+            $message = "$`$1$3 XXXXXX$4\n";
         }
         
         open DEBUG, ">>$debug_filename";
