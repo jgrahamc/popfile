@@ -66,7 +66,7 @@
                     <input type="submit" class="submit" name="change_language" value="<TMPL_VAR NAME="Localize_Apply">" />
                 </div>
                 
-                <div class="configBarOption">
+                <div class="configBarOption toggleConfigBar">
                     <input type="submit" class="submit" name="hide_configbar" value="<TMPL_VAR NAME="Localize_Configuration_Hide_Bar">" />
                 </div>
             </form>

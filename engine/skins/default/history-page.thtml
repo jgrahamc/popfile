@@ -239,7 +239,7 @@
             <td colspan="<TMPL_VAR NAME="History_Colspan">">
                 <input type="submit" class="submit removeButton" name="clearchecked" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" />
                 <input type="submit" class="submit removeButton" name="clearpage" value="<TMPL_VAR NAME="Localize_History_RemovePage">" />
-                <input type="submit" class="submit removeButton" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" />
+                <input type="submit" class="submit removeButton" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll"> (<TMPL_VAR NAME="History_Count">)" />
             </td>
             <td align="center">
                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
@@ -307,14 +307,18 @@
 <TMPL_INCLUDE NAME="history-javascript.thtml">
 
 <TMPL_INCLUDE NAME="common-before-configuration.thtml">
+
 <TMPL_IF NAME="If_Show_Config_Bars">
      <TMPL_INCLUDE NAME="history-bar.thtml">
      <TMPL_INCLUDE NAME="configuration-bar.thtml">
 <TMPL_ELSE>
      <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-         <input type="submit" class="submit" name="show_configbar" value="<TMPL_VAR NAME="Localize_Configuration_Show_Bar">" />
-         <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+        <div class="toggleConfigBar">
+           <input type="submit" class="submit" name="show_configbar" value="<TMPL_VAR NAME="Localize_Configuration_Show_Bar">" />
+           <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+        </div>
      </form>
+     
 </TMPL_IF>
 <TMPL_INCLUDE NAME="common-after-configuration.thtml">
 <TMPL_INCLUDE NAME="common-bottom.thtml">

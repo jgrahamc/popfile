@@ -123,21 +123,6 @@ tr.rowBoundary {
 /*********************************************************/
 /* Graphics */
 
-td.accuracy0to49 {
-  background-color: red;
-  color: black;
-}
-
-td.accuracy50to93 {
-  background-color: yellow;
-  color: black;
-}
-
-td.accuracy94to100 {
-  background-color: green;
-  color: black;
-}
-
 span.graphFont {
   font-size: x-small;
 }
@@ -255,12 +240,17 @@ table.historyWidgetsBottom {
 
 .configBarOption {
   display: inline;
-  float: left;
   border: 1px solid #CCCC99;
-  padding: 0.1em;
-  margin: 0.2em 1em;
+  padding: 0.3em;
+  margin: 0.1em 0.3em;
+  white-space: nowrap;
+  float: left;
 }
 
-.addHistory { 
+.toggleConfigBar {
+  float: right;
+}
+
+.checkLabel { 
   border: 1px solid #CCCC99;
 }
