@@ -11,6 +11,7 @@
 # ---------------------------------------------------------------------------------------------
 
 use strict;
+use warnings;
 
 # Use the Naive Bayes classifier
 use Classifier::Bayes;
@@ -18,7 +19,7 @@ use Classifier::Bayes;
 # This version number
 my $major_version = 0;
 my $minor_version = 17;
-my $build_version = 4;
+my $build_version = 5;
 
 # A list of the messages currently on the server, each entry in this list
 # is a hash containing the following items
@@ -88,15 +89,16 @@ my $header = "<html><head><title>POPFile Control Center</title><style type=text/
 <table width=100% cellspacing=0><tr>\
 <td align=center bgcolor=TAB2 width=10%><font size=+1><b>&nbsp;<a href=/history?session=SESSKEY>History</a></b></font></td><td width=2></td>\
 <td align=center bgcolor=TAB1 width=10%><font size=+1><b>&nbsp;<a href=/buckets?session=SESSKEY>Buckets</a></b></font></td><td width=2></td>\
+<td align=center bgcolor=TAB4 width=10%><font size=+1><b>&nbsp;<a href=/magnets?session=SESSKEY>Magnets</a></b></font></td><td width=2></td>\
 <td bgcolor=TAB0 width=10% align=center><font size=+1><b>&nbsp;<a href=/configuration?session=SESSKEY>Configuration</a></b></font></td><td width=2></td>\
 <td bgcolor=TAB3 width=10% align=center><font size=+1><b>&nbsp;<a href=/security?session=SESSKEY>Security</a></b></font></td>\
-<td width=70%>&nbsp;</td></tr>\
+<td width=50%>&nbsp;</td></tr>\
 </table>\
 <table width=100% cellpadding=12 cellspacing=0 bordercolor=$stab_color border=2><tr><td width=100% valign=top bgcolor=$main_color>";
 my $footer = "</tr></table><p align=center>POPFile VERSION - <a href=http://popfile.sourceforge.net/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a></body></html>";
 
 # Hash used to store form parameters
-my %form = {};
+my %form = ();
 
 # Used for creating file names for storing messages in 
 my $mail_filename = '';
@@ -688,7 +690,7 @@ sub http_redirect
 sub http_ok
 {
     my ( $text, $selected ) = @_;
-    my @tab = ( $tab_color, $tab_color, $tab_color, $tab_color );
+    my @tab = ( $tab_color, $tab_color, $tab_color, $tab_color, $tab_color );
     $tab[$selected] = $stab_color;
     
     $text = $header . $text . $footer;
@@ -697,11 +699,12 @@ sub http_ok
     $text =~ s/TAB1/$tab[1]/;
     $text =~ s/TAB2/$tab[2]/;
     $text =~ s/TAB3/$tab[3]/;
+    $text =~ s/TAB4/$tab[4]/;
     
-    my $header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
-    $header .= length($text);
-    $header .= "$eol$eol";
-    return $header . $text;
+    my $http_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
+    $http_header .= length($text);
+    $http_header .= "$eol$eol";
+    return $http_header . $text;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -715,17 +718,21 @@ sub http_file
 {
     my ($file) = @_;
     my $contents = '';
-    open FILE, "<$file";
-    while (<FILE>)
+    if ( open FILE, "<$file" )
     {
-        $contents .= $_;
+        while (<FILE>)
+        {
+            $contents .= $_;
+        }
+        close FILE;
+
+        my $header = "HTTP/1.0 200 OK\r\nContent-Type: image/gif\r\nContent-Length: ";
+        $header .= length($contents);
+        $header .= "$eol$eol";
+        return $header . $contents;
     }
-    close FILE;
     
-    my $header = "HTTP/1.0 200 OK\r\nContent-Type: image/gif\r\nContent-Length: ";
-    $header .= length($contents);
-    $header .= "$eol$eol";
-    return $header . $contents;
+    return http_error(404);
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -754,18 +761,32 @@ sub popfile_homepage
     my $ui_port_error = '';
     my $page_size_error = '';
     my $timeout_error = '';
+    my $separator_error = '';
 
-    if ( ( $form{debug} >= 1 ) && ( $form{debug} <= 4 ) )
+    if ( ( defined($form{debug}) ) && ( ( $form{debug} >= 1 ) && ( $form{debug} <= 4 ) ) )
     {
         $configuration{debug} = $form{debug}-1;
     }
 
-    if ( ( $form{subject} >= 1 ) && ( $form{subject} <= 2 ) )
+    if ( ( defined($form{subject}) ) && ( ( $form{subject} >= 1 ) && ( $form{subject} <= 2 ) ) )
     {
         $configuration{subject} = $form{subject}-1;
     }
 
-    if ( $form{update_ui_port} eq 'Apply' )
+    if ( defined($form{separator}) )
+    {
+        if ( length($form{separator}) == 1 )
+        {
+            $configuration{separator} = $form{separator};
+        }
+        else
+        {
+            $separator_error = "<blockquote><font color=red size=+1>The separator character must be a single character</font></blockquote>";
+            delete $form{separator};
+        }
+    }
+
+    if ( defined($form{ui_port}) )
     {
         if ( ( $form{ui_port} >= 1 ) && ( $form{ui_port} < 65536 ) )
         {
@@ -774,11 +795,11 @@ sub popfile_homepage
         else
         {
             $ui_port_error = "<blockquote><font color=red size=+1>The user interface port must be a number between 1 and 65535</font></blockquote>";
-            $form{update_ui_port} = '';
+            delete $form{ui_port};
         }
     }
 
-    if ( $form{update_port} eq 'Apply' )
+    if ( defined($form{port}) )
     {
         if ( ( $form{port} >= 1 ) && ( $form{port} < 65536 ) )
         {
@@ -787,11 +808,11 @@ sub popfile_homepage
         else
         {
             $port_error = "<blockquote><font color=red size=+1>The POP3 listen port must be a number between 1 and 65535</font></blockquote>";
-            $form{update_port} = '';
+            delete $form{port};
         }
     }
 
-    if ( $form{update_page_size} eq 'Apply' )
+    if ( defined($form{page_size}) )
     {
         if ( ( $form{page_size} >= 1 ) && ( $form{page_size} <= 1000 ) )
         {
@@ -800,11 +821,11 @@ sub popfile_homepage
         else
         {
             $page_size_error = "<blockquote><font color=red size=+1>The page size must be a number between 1 and 1000</font></blockquote>";
-            $form{update_page_size} = '';
+            delete $form{page_size};
         }
     }
 
-    if ( $form{update_timeout} eq 'Apply' )
+    if ( defined($form{timeout}) )
     {
         if ( ( $form{timeout} >= 10 ) && ( $form{timeout} <= 300 ) )
         {
@@ -818,13 +839,15 @@ sub popfile_homepage
     }
 
     $body .= "<h2>Listen Ports</h2><p><form action=/configuration><b>POP3 listen port:</b><br><input name=port type=text value=$configuration{port}><input type=submit name=update_port value=Apply><input type=hidden name=session value=$session_key></form>$port_error";    
-    $body .= "Updated port to $configuration{port}; this change will not take affect until you restart POPFile" if ( $form{update_port} eq 'Apply' );
+    $body .= "Updated port to $configuration{port}; this change will not take affect until you restart POPFile" if ( defined($form{port}) );
+    $body .= "<p><form action=/configuration><b>Separator character:</b><br><input name=separator type=text value=$configuration{separator}><input type=submit name=update_separator value=Apply><input type=hidden name=session value=$session_key></form>$separator_error";
+    $body .= "Updated separator to $configuration{separator}" if ( defined($form{separator}) );
     $body .= "<p><form action=/configuration><b>User interface web port:</b><br><input name=ui_port type=text value=$configuration{ui_port}><input type=submit name=update_ui_port value=Apply><input type=hidden name=session value=$session_key></form>$ui_port_error";    
-    $body .= "Updated user interface web port to $configuration{ui_port}; this change will not take affect until you restart POPFile" if ( $form{update_ui_port} eq 'Apply' );
+    $body .= "Updated user interface web port to $configuration{ui_port}; this change will not take affect until you restart POPFile" if ( defined($form{ui_port}) );
     $body .= "<p><hr><h2>History View</h2><p><form action=/configuration><b>Number of emails per page:</b> <br><input name=page_size type=text value=$configuration{page_size}><input type=submit name=update_page_size value=Apply><input type=hidden name=session value=$session_key></form>$page_size_error";    
-    $body .= "Updated number of emails per page to $configuration{page_size}" if ( $form{update_page_size} eq 'Apply' );
+    $body .= "Updated number of emails per page to $configuration{page_size}" if ( defined($form{page_size}) );
     $body .= "<p><hr><h2>TCP Connection Timeout</h2><p><form action=/configuration><b>TCP connection timeout in seconds:</b> <br><input name=timeout type=text value=$configuration{timeout}><input type=submit name=update_timeout value=Apply><input type=hidden name=session value=$session_key></form>$timeout_error";    
-    $body .= "Updated TCP connection timeout to $configuration{timeout}" if ( $form{update_timeout} eq 'Apply' );
+    $body .= "Updated TCP connection timeout to $configuration{timeout}" if ( defined($form{timeout}) );
     $body .= "<p><hr><h2>Classification Insertion</h2><p><b>Subject line modification:</b><br>";    
     if ( $configuration{subject} == 1 ) 
     {
@@ -864,12 +887,12 @@ sub security_page
     my $server_error = '';
     my $port_error   = '';
     
-    if ( $form{update_server} eq 'Apply' )
+    if ( defined($form{server}) )
     {
         $configuration{server} = $form{server};
     }
 
-    if ( $form{update_sport} eq 'Apply' )
+    if ( defined($form{sport}) )
     {
         if ( ( $form{sport} >= 1 ) && ( $form{sport} < 65536 ) )
         {
@@ -878,16 +901,16 @@ sub security_page
         else
         {
             $port_error = "<blockquote><font color=red size=+1>The secure port must be a number between 1 and 65535</font></blockquote>";
-            $form{update_sport} = '';
+            delete $form{sport};
         }
     }
 
-    if ( $form{localpop} != 0 )
+    if ( defined($form{localpop}) )
     {
         $configuration{localpop} = $form{localpop} - 1;
     }
 
-    if ( $form{localui} != 0 )
+    if ( defined($form{localui}) )
     {
         $configuration{localui} = $form{localui} - 1;
     }
@@ -907,9 +930,9 @@ sub security_page
     $body .= "<a href=/security?localui=1&session=$session_key><font color=blue>Yes</font></a> ";
     $body .= "</b>" if ( $configuration{localui} == 0 );
     $body .= "<p><hr><h2>Secure Password Authentication/AUTH</h2><p><form action=/security><b>Secure server:</b> <br><input name=server type=text value=$configuration{server}><input type=submit name=update_server value=Apply><input type=hidden name=session value=$session_key></form>";    
-    $body .= "Updated secure server to $configuration{server}; this change will not take affect until you restart POPFile" if ( $form{update_server} eq 'Apply' );
+    $body .= "Updated secure server to $configuration{server}; this change will not take affect until you restart POPFile" if ( defined($form{server}) );
     $body .= "<p><form action=/security><b>Secure port:</b> <br><input name=sport type=text value=$configuration{sport}><input type=submit name=update_sport value=Apply><input type=hidden name=session value=$session_key></form>$port_error";    
-    $body .= "Updated port to $configuration{sport}; this change will not take affect until you restart POPFile" if ( $form{update_sport} eq 'Apply' );
+    $body .= "Updated port to $configuration{sport}; this change will not take affect until you restart POPFile" if ( defined($form{sport}) );
     
     return http_ok($body,3); 
 }
@@ -926,11 +949,52 @@ sub pretty_number
     my ($number) = @_;
     
     $number = reverse $number;
-    $number =~ s/(\d{3})/\1,/g;
+    $number =~ s/(\d{3})/$1,/g;
     $number = reverse $number;
-    $number =~ s/^,(.*)/\1/;
+    $number =~ s/^,(.*)/$1/;
     
     return $number;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# magnet_page - the list of bucket magnets
+#
+# ---------------------------------------------------------------------------------------------
+sub magnet_page 
+{
+    if ( defined($form{from}) )
+    {
+        $classifier->{magnets}{$form{bucket}}{$form{from}} = 1;
+        $classifier->save_magnets();
+    }
+
+    if ( defined($form{dfrom}) ) 
+    {
+        delete $classifier->{magnets}{$form{bucket}}{$form{dfrom}};
+        $classifier->save_magnets();
+    }
+    
+    my $body = '<h2>Current Magnets</h2><p>The following magnets cause mail from specified email addresses to always be classified into the specified bucket.';
+    $body .= "<p><table width=50%><tr><td><b>From</b><td><b>Bucket</b><td><b>Delete</b>";
+    
+    for my $bucket (keys %{$classifier->{magnets}})
+    {
+        for my $from (keys %{$classifier->{magnets}{$bucket}}) 
+        {
+            $body .= "<tr><td>$from<td><font color=$classifier->{colors}{$bucket}>$bucket</font><td><a href=/magnets?bucket=$bucket&dfrom=$from&session=$session_key>Delete</a>";
+        }
+    }
+    
+    $body .= "</table><p><hr><p><h2>Create New Magnet</h2><form action=/magnets><b>From address or name:</b><br><input type=text name=from><input type=hidden name=session value=$session_key>";
+    $body .= "<p><b>Always goes to bucket:</b><br><select name=bucket>";
+    my @buckets = sort keys %{$classifier->{total}};
+    foreach my $bucket (@buckets)
+    {
+        $body .= "<option value=$bucket>$bucket</option>";
+    }
+    $body .= "</select> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>";
+    return http_ok($body,4);
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -951,18 +1015,19 @@ sub bucket_page
     }
     $body .= "<td><tr><td><hr><b>Percentage of total</b><td><hr>&nbsp;<td align=right><hr>$percent<td></table>";
  
-    $body .= "<h2>Word Table for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</font></h2><p>Colored words have been used for classification in this POPFile session.<p><table>";
+    $body .= "<h2>Word Table for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</font></h2><p>Starred (*) words have been used for classification in this POPFile session.  Click any word to lookup its probability for all buckets.<p><table>";
     for my $i (@{$classifier->{matrix}{$form{showbucket}}})
     {
-        if ( $i ne '' ) 
+        if ( defined($i) ) 
         {
             my $j = $i;
             $j =~ s/\|\|/, /g;
             $j =~ s/\|//g;
             $j =~ /^(.)/;
             my $first = $1;
-            $j =~ s/([^ ]+) (L\-[\.\d]+)/<font color=$classifier->{colors}{$form{showbucket}}>\1 \2<\/font>/g;
+            $j =~ s/([^ ]+) (L\-[\.\d]+)/\*$1 $2<\/font>/g;
             $j =~ s/L(\-[\.\d]+)/int( $classifier->{total}{$form{showbucket}} * exp($1) + 0.5 )/ge;
+            $j =~ s/([^ ,\*]+) ([^ ,\*]+)/<a href=\/buckets\?session=$session_key\&lookup=Lookup\&word=$1#Lookup>$1<\/a> $2/g;
             $body .= "<tr><td valign=top><b>$first</b><td valign=top>$j";
         }
     }
@@ -978,7 +1043,7 @@ sub bucket_page
 # ---------------------------------------------------------------------------------------------
 sub corpus_page
 {
-    if ( $form{showbucket} ne '' ) 
+    if ( defined($form{showbucket}) ) 
     {
         return bucket_page();
     }
@@ -988,7 +1053,7 @@ sub corpus_page
     my $delete_message = '';
     my $rename_message = '';
     
-    if ( ( $form{color} ne '' ) && ( $form{bucket} ne '' ) )
+    if ( ( defined($form{color}) ) && ( defined($form{bucket}) ) )
     {
         open COLOR, ">corpus/$form{bucket}/color";
         print COLOR "$form{color}\n";
@@ -996,13 +1061,13 @@ sub corpus_page
         $classifier->{colors}{$form{bucket}} = $form{color};
     }
 
-    if ( ( $form{subject} > 0 ) && ( $form{bucket} ne '' ) )
+    if ( ( defined($form{bucket}) ) && ( $form{subject} > 0 ) )
     {
         $classifier->{parameters}{$form{bucket}}{subject} = $form{subject} - 1;
         $classifier->write_parameters();
     }
     
-    if ( $form{cname} ne '' )
+    if ( defined($form{cname}) )
     {
         if ( $form{cname} =~ /[^a-z\-_]/ ) 
         {
@@ -1028,7 +1093,7 @@ sub corpus_page
        }
     }
 
-    if ( $form{delete} eq 'Delete' )
+    if ( defined($form{delete}) )
     {
         $form{name} = lc($form{name});
         unlink( "corpus/$form{name}/table" );
@@ -1038,7 +1103,7 @@ sub corpus_page
         $classifier->load_word_matrix();
     }
     
-    if ( $form{upload} eq 'Upload' )
+    if ( defined($form{upload}) )
     {
         debug( "Told to upload $form{file} into $form{name}" );
         my %words;
@@ -1082,7 +1147,7 @@ sub corpus_page
         $classifier->load_word_matrix();
     }
 
-    if ( $form{newname} ne '' )
+    if ( defined($form{newname}) )
     {
         if ( $form{newname} =~ /[^a-z\-_]/ ) 
         {
@@ -1097,7 +1162,6 @@ sub corpus_page
             $classifier->load_word_matrix();
         }
     }    
-    
     
     my $body = "<h2>Summary</h2><table width=100% cellspacing=0 cellpadding=0><tr><td><b>Bucket Name</b><td width=10>&nbsp;<td align=right><b>Word Count</b><td width=10>&nbsp;<td align=right><b>Unique Words</b><td width=10>&nbsp;<td align=center><b>Subject Modification</b><td width=20>&nbsp;<td align=left><b>Change Color</b>";
 
@@ -1129,7 +1193,7 @@ sub corpus_page
         } 
         else
         {
-            $body .= "<td>Disabled globally";
+            $body .= "<td align=center>Disabled globally";
         }
         $body .= "<td>&nbsp;<td align=left bgcolor=$main_color><table cellpadding=0 cellspacing=1><tr>";
         my $color = $classifier->{colors}{$bucket};
@@ -1149,16 +1213,40 @@ sub corpus_page
     my $pmcount = pretty_number( $configuration{mcount} );
     my $pecount = pretty_number( $configuration{ecount} );
     my $accuracy = 'Not enough data';
+    my $percent = 0;
     if ( $configuration{mcount} >= 100 ) 
     {
-        $accuracy = int( 10000 * ( $configuration{mcount} - $configuration{ecount} ) / $configuration{mcount} ) / 100;
-        $accuracy .= "%";
+        $percent = int( 10000 * ( $configuration{mcount} - $configuration{ecount} ) / $configuration{mcount} ) / 100;
+        $accuracy = "$percent%";
     } 
 
-    $body .= "<tr><td><hr><b>Total</b><td width=10><hr>&nbsp;<td align=right><hr><b>$number</b><td><td></table><p><hr><h2>Statistics</h2><table cellspacing=0 cellpadding=0><tr><td>Messages classified:<td align=right>$pmcount<tr><td>Classification errors:<td align=right>$pecount<tr><td><hr>Accuracy:<td align=right><hr>$accuracy<td></table>";
+    $body .= "<tr><td><hr><b>Total</b><td width=10><hr>&nbsp;<td align=right><hr><b>$number</b><td><td></table><p><hr><h2>Statistics</h2><table cellspacing=0 cellpadding=0><tr><td>Messages classified:<td align=right>$pmcount<tr><td>Classification errors:<td align=right>$pecount<tr><td><hr>Accuracy:<td align=right><hr>$accuracy";
+    
+    if ( $percent > 0 ) 
+    {
+        $body .= "<tr height=10><td colspan=2>&nbsp;<tr><td colspan=2><table width=100% cellspacing=0 cellpadding=0 border=0>";
+        $body .= "<tr height=5>";
 
-    $body .= "<p><hr><h2>Maintenance</h2>";
-    $body .= "<p><form action=/buckets><b>Create bucket with name:</b> <br><input name=cname type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
+        for my $i ( 0..49 )
+        {
+            $body .= "<td valign=middle height=10 width=6 bgcolor=";
+            $body .= "red" if ( $i < 25 );
+            $body .= "yellow" if ( ( $i > 24 ) && ( $i < 47 ) );
+            $body .= "green" if ( $i > 46 );
+            $body .= ">";
+            if ( ( $i * 2 ) < $percent )
+            {
+                $body .= " <img src=black.gif height=4 width=6>";
+            }
+            else 
+            {
+                $body .= " <img src=pix.gif width=6 height=4>";
+            }
+            $body .= "</td>";
+        }
+        $body .= "<tr><td colspan=25 align=left><font size=1>0%<td colspan=25 align=right><font size=1>100%</table>";
+    }
+    $body .= "</table><p><hr><h2>Maintenance</h2><p><form action=/buckets><b>Create bucket with name:</b> <br><input name=cname type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
     
     $body .= "<p><form action=/buckets><b>Delete bucket named:</b> <br><select name=name>";
     foreach my $bucket (@buckets)
@@ -1176,7 +1264,7 @@ sub corpus_page
 
     $body .= "<p><hr><a name=Lookup><h2>Lookup</h2><form action=/buckets#Lookup><p><b>Lookup word in corpus: </b><br><input name=word type=text> <input type=submit name=lookup value=Lookup><input type=hidden name=session value=$session_key></form>";
 
-    if ( ( $form{lookup} eq 'Lookup' ) || ( $form{word} ne '' ) )
+    if ( ( defined($form{lookup}) ) || ( defined($form{word}) ) )
     {
        my $word = $classifier->{mangler}->mangle($form{word});
 
@@ -1292,8 +1380,71 @@ sub history_page
 {
     my $body = "<h2>Recent Messages</h2><table width=100%><tr><td></td><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";
 
+    # Handle undo
+    if ( defined($form{undo}) )
+    {
+        my %temp_words;
+        
+        open WORDS, "<corpus/$form{badbucket}/table";
+        while (<WORDS>)
+        {
+            if ( /__CORPUS__ __VERSION__ (\d+)/ )
+            {
+                if ( $1 != 1 ) 
+                {
+                    print "Incompatible corpus version in $form{badbucket}\n";
+                    return;
+                }
+                
+                next;
+            }
+            
+            if ( /(.+) (.+)/ )
+            {
+                $temp_words{$1} = $2;
+            }
+        }
+        close WORDS;
+
+        $classifier->{parser}->parse_stream("messages/$form{undo}");
+
+        foreach my $word (keys %{$classifier->{parser}->{words}})
+        {
+            $classifier->{full_total} -= $classifier->{parser}->{words}{$word};
+            $temp_words{$word}        -= $classifier->{parser}->{words}{$word};
+            
+            if ( $temp_words{$word} <= 0 ) 
+            {
+                delete $temp_words{$word};
+            }
+        }
+        
+        open WORDS, ">corpus/$form{badbucket}/table";
+        print WORDS "__CORPUS__ __VERSION__ 1\n";
+        foreach my $word (keys %temp_words)
+        {
+            if ( $temp_words{$word} > 0 ) 
+            {
+                print WORDS "$word $temp_words{$word}\n";
+            }
+        }
+        close WORDS;
+        $classifier->load_bucket("corpus/$form{badbucket}");
+        $classifier->update_constants();        
+        my $classification = $classifier->classify_file("messages/$form{undo}");
+        my $class_file = "messages/$form{undo}";
+        $class_file =~ s/msg$/cls/;
+        open CLASS, ">$class_file";
+        print CLASS "$classification$eol";
+        close CLASS;
+        if ( $configuration{mcount} >= 100 )
+        {
+            $configuration{ecount} -= 1;
+        }
+    }
+
     # Handle clearing the history files
-    if ( $form{clear} eq 'Remove+All' )
+    if ( ( defined($form{clear}) ) && ( $form{clear} eq 'Remove+All' ) )
     {
         my @mail_files = glob "messages/popfile*.msg";
 
@@ -1310,7 +1461,7 @@ sub history_page
         return http_redirect('/history');
     }
 
-    if ( $form{clear} eq 'Remove+Page' )
+    if ( ( defined($form{clear}) ) && ( $form{clear} eq 'Remove+Page' ) )
     {
         my @mail_files = sort compare_mf glob "messages/popfile*.msg";
 
@@ -1339,9 +1490,9 @@ sub history_page
     }
 
     # Handle the reinsertion of a message file
-    if ( $form{shouldbe} ne '' )
+    if ( ( defined($form{shouldbe} ) ) && ( $form{shouldbe} ne '' ) )
     {
-        my %words;
+        my %temp_words;
         
         open WORDS, "<corpus/$form{shouldbe}/table";
         while (<WORDS>)
@@ -1359,7 +1510,7 @@ sub history_page
             
             if ( /(.+) (.+)/ )
             {
-                $words{$1} = $2;
+                $temp_words{$1} = $2;
             }
         }
         close WORDS;
@@ -1369,14 +1520,17 @@ sub history_page
         foreach my $word (keys %{$classifier->{parser}->{words}})
         {
             $classifier->{full_total} += $classifier->{parser}->{words}{$word};
-            $words{$word}             += $classifier->{parser}->{words}{$word};
+            $temp_words{$word}        += $classifier->{parser}->{words}{$word};
         }
         
         open WORDS, ">corpus/$form{shouldbe}/table";
         print WORDS "__CORPUS__ __VERSION__ 1\n";
-        foreach my $word (keys %words)
+        foreach my $word (keys %temp_words)
         {
-            print WORDS "$word $words{$word}\n";
+            if ( $temp_words{$word} > 0 ) 
+            {
+                print WORDS "$word $temp_words{$word}\n";
+            }
         }
         close WORDS;
         
@@ -1400,7 +1554,7 @@ sub history_page
 
     @mail_files = sort compare_mf @mail_files;
     my $start_message = 0;
-    if ( $form{start_message} > 0 ) 
+    if ( ( defined($form{start_message}) ) && ($form{start_message} > 0 ) )
     {
         $start_message = $form{start_message};
     }
@@ -1415,23 +1569,23 @@ sub history_page
     foreach my $i ($start_message ..  $stop_message)
     {
         my $mail_file;
-        my $from;
-        my $subject;
+        my $from = '';
+        my $subject = '';
         $mail_file = $mail_files[$i];
     
         open MAIL, "<messages/$mail_file";
         while (<MAIL>) 
         {
-            if ( /^From: (.*)/i )
+            if ( /^From:(.*)/i )
             {
                 if ( $from eq '' ) 
                 {
                     $from = $1;
-                    $from =~ s/<(.*)>/&lt;\1&gt;/g;
-                    $from =~ s/\"(.*)\"/\1/g;
+                    $from =~ s/<(.*)>/&lt;$1&gt;/g;
+                    $from =~ s/\"(.*)\"/$1/g;
                 }
             }
-            if ( /^Subject: (.*)/i )
+            if ( /^Subject:(.*)/i )
             {
                 if ( $subject eq '' ) 
                 {
@@ -1478,9 +1632,9 @@ sub history_page
         }
         $body .= "<a name=$mail_file>";
         $body .= "<tr";
-        if ( ( $form{view} eq $mail_file ) || ( $form{file} eq $mail_file ) )
+        if ( ( ( defined($form{view}) ) && ( $form{view} eq $mail_file ) ) || ( ( defined($form{file}) && ( $form{file} eq $mail_file ) ) ) )
         {
-            $body .= " bgcolor=$highlight_color" if ($form{view} eq $mail_file) || ($form{file} eq $mail_file);
+            $body .= " bgcolor=$highlight_color";
         }
         else
         {
@@ -1517,11 +1671,18 @@ sub history_page
         $body .= "<td>";
         if ( $reclassified ) 
         {
-            $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified";
+            $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified as <font color=$classifier->{colors}{$bucket}>$bucket</font> - <a href=/history?undo=$mail_file&session=$session_key&badbucket=$bucket>Undo</a>";
         } 
         else
         {
-            $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>";
+            if ( $bucket eq 'unclassified' ) 
+            {
+                $body .= "$bucket<td>";
+            }
+            else
+            {
+                $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>";
+            }
             
             if ( $drop_down )
             {
@@ -1534,16 +1695,13 @@ sub history_page
             
             foreach my $abucket (@buckets)
             {
-                if ( ( $configuration{reinforce} == 1 ) || ( $abucket ne $bucket ) )
+                if ( $drop_down ) 
                 {
-                    if ( $drop_down ) 
-                    {
-                        $body .= "<option value=$abucket>$abucket</option>"
-                    }
-                    else
-                    {
-                        $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$session_key&usedtobe=$bucket><font color=$classifier->{colors}{$abucket}>$abucket</font></a> ";
-                    }
+                    $body .= "<option value=$abucket>$abucket</option>"
+                }
+                else
+                {
+                    $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$session_key&usedtobe=$bucket><font color=$classifier->{colors}{$abucket}>$abucket</font></a> ";
                 }
             }
             
@@ -1560,7 +1718,7 @@ sub history_page
         }
         
         # Check to see if we want to view a message
-        if ( $form{view} eq $mail_file )
+        if ( ( defined($form{view}) ) && ( $form{view} eq $mail_file ) )
         {
             $body .= "<tr><td><td colspan=3><table border=3 bordercolor=$stab_color cellspacing=0 cellpadding=6><tr><td>";
             $classifier->{parser}->{color} = 1;
@@ -1569,11 +1727,10 @@ sub history_page
             $classifier->{parser}->{color} = 0;
             $body .= "<p align=right><a href=/history?start_message=$start_message&session=$session_key><b>Close</b></a></table><td valign=top>";
             $classifier->classify_file("messages/$form{view}");
-            $body .= "<b>Scores</b><p>";
             $body .= $classifier->{scores};
         }
         
-        if ( $form{file} eq $mail_file )
+        if ( ( defined($form{file}) ) && ( $form{file} eq $mail_file ) )
         {
             $body .= "<tr><td><td>Changed to <font color=$classifier->{colors}{$form{shouldbe}}>$form{shouldbe}</font><td><td>";
         }
@@ -1632,7 +1789,7 @@ sub handle_url
     my ($url) = @_;
 
     # See if there are any form parameters and if there are parse them into the %form hash
-    %form = {};
+    %form = ();
 
     # Remove a # element
     # Remove a # element
@@ -1652,7 +1809,7 @@ sub handle_url
                 debug( "$1" );
                 my $from = "%$1";
                 my $to   = chr(hex("0x$1"));
-                $to =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\\1/g;
+                $to =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
                 $form{$arg} =~ s/$from/$to/g;
             }
 
@@ -1662,9 +1819,9 @@ sub handle_url
     
     debug( $url );
 
-    if ( ( $url eq '/' ) || ( $form{session} ne $session_key ) )
+    if ( ( $url eq '/' ) || (!defined($form{session})) || ( $form{session} ne $session_key ) )
     {
-        %form = {};
+        %form = ();
     }
     
     if ( $url eq '/security' ) 
@@ -1682,6 +1839,11 @@ sub handle_url
         return corpus_page();
     }
 
+    if ( $url eq '/magnets' )
+    {
+        return magnet_page();
+    }
+
     if ( ( $url eq '/history' ) || ( $url eq '/' ) )
     {
         return history_page();
@@ -1694,6 +1856,11 @@ sub handle_url
     }
 
     if ( $url =~ /(pix\.gif)/ )
+    {
+        return http_file( $1 );
+    }
+
+    if ( $url =~ /(black\.gif)/ )
     {
         return http_file( $1 );
     }
@@ -1750,7 +1917,7 @@ sub run_popfile
         my ($uiready) = $uiselector->can_read(0.1);
 
         # Handle HTTP requests for the UI
-        if ( $uiready == $ui ) 
+        if ( ( defined($uiready) ) && ( $uiready == $ui ) )
         {
             if ( my $client = $ui->accept() )
             {
@@ -1760,7 +1927,7 @@ sub run_popfile
 
                 if ( ( $configuration{localui} == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) )
                 {
-                    if ( my $request = <$client> )
+                    if ( ( defined($client) ) && ( my $request = <$client> ) )
                     {
                         debug( $request );
                         while ( <$client> ) 
@@ -1794,7 +1961,7 @@ sub run_popfile
         }
         
         # If the $server is ready then we can go ahead and accept the connection
-        if ( $ready == $server )
+        if ( ( defined($ready) ) && ( $ready == $server ) )
         {
         if ( my $client = $server->accept() )
         {
@@ -2091,10 +2258,11 @@ sub run_popfile
                             my $msg_subject;        # The message subject
                             my $msg_headers;        # Store the message headers here (will add X-Spam to end)
                             my $msg_body;           # Store the message body here
-                            my $last_timeout  = time;
-                            my $timeout_count = 0;
-                            my $got_full_body = 0;
-                            my $message_size  = 0;
+                            my $last_timeout   = time;
+                            my $timeout_count  = 0;
+                            my $got_full_body  = 0;
+                            my $message_size   = 0;
+                            my $classification = '';
 
                             my $getting_headers = 1;
                             
@@ -2134,7 +2302,7 @@ sub run_popfile
             
                                         if ( $configuration{subject} ) 
                                         {
-                                            if ( $line =~ /Subject: (.*)/i ) 
+                                            if ( $line =~ /Subject:(.*)/i ) 
                                             {
                                                 $msg_subject = $1;
                                                 $msg_subject =~ s/(\012|\015)//g;
@@ -2179,7 +2347,7 @@ sub run_popfile
                             close TEMP;
 
                             # Do the text classification and parse the result
-                            my $classification = $classifier->classify_file($temp_file);
+                            $classification = $classifier->classify_file($temp_file);
 
                             debug ("Classification: $classification" );
                             
@@ -2189,11 +2357,11 @@ sub run_popfile
                                 # Don't add the classification unless it is not present
                                 if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $classifier->{parameters}{$classification}{subject} == 1 ) ) 
                                 {
-                                    $msg_headers .= "Subject: [$classification] $msg_subject$eol";
+                                    $msg_headers .= "Subject: [$classification]$msg_subject$eol";
                                 } 
                                 else
                                 {
-                                    $msg_headers .= "Subject: $msg_subject$eol";
+                                    $msg_headers .= "Subject:$msg_subject$eol";
                                 }
                             }
 
@@ -2360,7 +2528,6 @@ $configuration{localpop}  = 1;
 $configuration{localui}   = 1;
 $configuration{mcount}    = 0;
 $configuration{ecount}    = 0;
-$configuration{reinforce} = 1;
 $configuration{separator} = ':';
 
 # Calculate a session key

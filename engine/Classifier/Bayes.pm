@@ -62,6 +62,9 @@ sub new
     # Per bucket parameters
     $self->{parameters}        = {};
     
+    # The magnets that cause attraction to certain buckets
+    $self->{magnets}           = {};
+    
     return bless $self, $type;
 }
 
@@ -279,14 +282,13 @@ sub load_bucket
 
     print "Loading $bucket..." if $self->{debug};
 
-    open WORDS, "<$bucket/table";
-
     $bucket =~ /([A-Za-z0-9-_]+)$/;
     $bucket =  $1;
     $self->{parameters}{$bucket}{subject} = 1;
     $self->{total}{$bucket}  = 0;
     $self->{unique}{$bucket} = 0;
     $self->{matrix}{$bucket} = ();
+    $self->{magnets}{$bucket} = {};
 
     # See if there's a color file specified
     if ( open PARAMS, "<corpus/$bucket/params" )
@@ -302,36 +304,81 @@ sub load_bucket
         close PARAMS;
     }
 
+    # See if there are magnets defined
+    if ( open MAGNETS, "<corpus/$bucket/magnets" )
+    {
+        while ( <MAGNETS> ) 
+        {
+            s/[\r\n]//g;
+            if ( /^(.+)$/ ) 
+            {
+                $self->{magnets}{$bucket}{$1} = 1;
+            }
+        }
+        close MAGNETS;
+    }
+
     # Each line in the word table is a word and a count
     $self->{total}{$bucket} = 0;
 
-    while (<WORDS>)
+    if ( open WORDS, "<corpus/$bucket/table" ) 
     {
-        if ( /__CORPUS__ __VERSION__ (\d+)/ )
+        while (<WORDS>)
         {
-            if ( $1 != $self->{corpus_version} ) 
+            if ( /__CORPUS__ __VERSION__ (\d+)/ )
             {
-                print "Incompatible corpus version in $bucket\n";
-                return;
+                if ( $1 != $self->{corpus_version} ) 
+                {
+                    print "Incompatible corpus version in $bucket\n";
+                    return;
+                }
+
+                next;
             }
 
-            next;
+            if ( /(.+) (.+)/ )
+            {
+                my $word = $self->{mangler}->mangle($1);
+                my $value = $2;
+                $value =~ s/[\r\n]//g;
+                if ( $value > 0 ) 
+                {
+                    $self->{total}{$bucket}        += $value;
+                    $self->{unique}{$bucket}       += 1;
+                    set_value( $self, $bucket, $word, $value );
+                }
+            }
         }
 
-        if ( /(.+) (.+)/ )
-        {
-            my $word = $self->{mangler}->mangle($1);
-            my $value = $2;
-            $value =~ s/[\r\n]//g;
-            $self->{total}{$bucket}        += $value;
-            $self->{unique}{$bucket}       += 1;
-            set_value( $self, $bucket, $word, $value );
-        }
+        close WORDS;
     }
-
-    close WORDS;
-
+    
     print " $self->{total}{$bucket} words\n" if $self->{debug};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# save_magnets
+#
+# Save all the magnet definitions
+#
+# ---------------------------------------------------------------------------------------------
+
+sub save_magnets
+{
+    my ($self) = @_;
+    
+    for my $bucket (keys %{$self->{total}})
+    {
+        open MAGNET, ">corpus/$bucket/magnets";
+        
+        for my $from (keys %{$self->{magnets}{$bucket}}) 
+        {
+            print MAGNET "$from\n";
+        }
+        
+        close MAGNET;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -354,7 +401,24 @@ sub classify_file
 
     $self->{parser}->parse_stream($file);
 
+    # Check to see if this email should be classified based on a magnet
     print " $self->{parser}->{msg_total} words\n" if $self->{debug};
+
+    # Get the list of buckets
+    
+    my @buckets = keys %{$self->{total}};
+
+    for my $bucket (keys %{$self->{magnets}}) 
+    {
+        for my $from (keys %{$self->{magnets}{$bucket}})
+        {
+            if ( $self->{parser}->{from} =~ /\Q$from\E/ )
+            {
+                $self->{scores} = "<b>Magnet Used</b><p>Classified to <font color=$self->{colors}{$bucket}>$bucket</font> because of magnet $from";
+                return $bucket;
+            }
+        }
+    }
 
     # The score hash will contain the likelihood that the given message is in each
     # bucket, the buckets are the keys for score
@@ -371,10 +435,6 @@ sub classify_file
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
     # P(word|bucket) ^ word count and multiply to the score
     
-    # Get the list of buckets
-    
-    my @buckets = keys %{$self->{total}};
-
     my $logbuck = 1;
     if ( $#buckets > 0 )
     {
@@ -450,7 +510,7 @@ sub classify_file
         }
     }
 
-    $self->{scores} = "<table><tr><td>Bucket<td>&nbsp;<td>Probability";
+    $self->{scores} = "<b>Scores</b><p><table><tr><td>Bucket<td>&nbsp;<td>Probability";
     print "Bucket              Raw score      Normalized     Estimated prob\n\n" if $self->{debug};
     foreach my $b (@ranking)
     {

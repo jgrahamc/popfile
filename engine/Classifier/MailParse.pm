@@ -44,6 +44,10 @@ sub new
     # Specifies the parse mode, 1 means color the output
     
     $self->{color}     = 0;
+    
+    # This will store the from address from the last parse
+    
+    $self->{from}      = '';
 
     return bless $self, $type;
 }
@@ -302,7 +306,7 @@ sub parse_stream
 
             # If we have an email header then just keep the part after the :
 
-            if ( $line =~ /^([A-Za-z-]+): ([^\n\r]*)/ ) 
+            if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ ) 
             {
                 my $header   = $1;
                 my $argument = $2;
@@ -320,10 +324,16 @@ sub parse_stream
 
                 if ( $header =~ /(From|To|Cc)/i )
                 {
+                    if ( $header =~ /From/ ) 
+                    {
+                        $self->{from} = $argument;
+                    }
+                    
                     while ( $argument =~ s/<([A-Za-z0-9\-_]+?@[A-Za-z0-9\-_\.]+?)>// ) 
                     {
                         update_word($self, $1, 0);
                     }
+
 
                     add_line( $self, $argument, 0 );
                     next;
