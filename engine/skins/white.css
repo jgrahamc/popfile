@@ -182,6 +182,17 @@ div.error02 {
 	color: red;
 }
 
+span.bucketsWidgetState {
+	font-weight: bold;
+}
+
+span.configWidgetState {
+	font-weight: bold;
+}
+
+span.securityWidgetState {
+	font-weight: bold;
+}
 	
 
 
