@@ -96,7 +96,7 @@ my $header = "<html><head><title>POPFile Control Center</title><style type=text/
 <td width=50%>&nbsp;</td></tr>\
 </table>\
 <table width=100% cellpadding=12 cellspacing=0 bordercolor=$stab_color border=2><tr><td width=100% valign=top bgcolor=$main_color>";
-my $footer = "</tr></table><p align=center>POPFile VERSION - <a href=http://popfile.sourceforge.net/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a></body></html>";
+my $footer = "</tr></table><p align=center>POPFile VERSION - <a href=http://popfile.sourceforge.net/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a> - (TIME)</body></html>";
 
 # Hash used to store form parameters
 my %form = ();
@@ -701,6 +701,8 @@ sub http_ok
     $text =~ s/TAB2/$tab[2]/;
     $text =~ s/TAB3/$tab[3]/;
     $text =~ s/TAB4/$tab[4]/;
+    my $time = localtime;
+    $text =~ s/TIME/$time/;
     
     my $http_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
     $http_header .= length($text);
