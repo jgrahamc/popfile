@@ -43,7 +43,8 @@ use IO::Select;
 # start() - called once all configuration has been read and POPFile is
 # ready to start operating
 #
-# stop()       - called when POPFile is shutting down
+# stop() - called when POPFile is shutting down.  If a child overrides
+# this then it must call the parent with a call to SUPER::stop()
 #
 # service() - called by the main POPFile process to allow a submodule
 # to do its own work (this is optional for modules that do not need to
@@ -53,10 +54,15 @@ use IO::Select;
 # the fork happens
 #
 # forked() - called when a module has forked the process.  This is
-# called within the child process and should be used to clean up
+# called within the child process and should be used to clean up. Note
+# that any child that overrides this MUST call the parent forked()
+# with a call to SUPER::forked()
 #
 # postfork() - called in the parent process to tell it that the fork
-# has occurred.  This is like forked but in the parent
+# has occurred.  This is like forked but in the parent.
+#
+# childexit() - called in a child process when the child is about
+# to exit.
 #
 # reaper() - called when a process has terminated to give a module a
 # chance to do whatever clean up is needed
@@ -156,6 +162,10 @@ sub new
 
     $self->{forker_}         = 0;
 
+    # Handle to database set by (and returned by) a call to db_()
+
+    $self->{db_handle__}     = undef;
+
     return bless $self, $type;
 }
 
@@ -208,13 +218,20 @@ sub start
 # stop
 #
 # Called when POPFile is closing down, this is the last method that
-# will get called before the object is destroyed.  There is not return
+# will get called before the object is destroyed.  There is no return
 # value from stop().
 #
 # ----------------------------------------------------------------------------
 sub stop
 {
     my ( $self ) = @_;
+
+    # If the database handle had been cloned then we need to clean it
+    # up here
+
+    if ( $self->{db_handle__} ) {
+        $self->{db_handle__}->disconnect;
+    }
 }
 
 # ----------------------------------------------------------------------------
@@ -280,11 +297,14 @@ sub prefork
 #         the child
 #
 # There is no return value from this method
-#
 # ----------------------------------------------------------------------------
 sub forked
 {
     my ( $self, $writer ) = @_;
+
+    if ( $self->{db_handle__} ) {
+        undef $self->{db_handle__};
+    }
 }
 
 # ----------------------------------------------------------------------------
@@ -303,6 +323,24 @@ sub forked
 sub postfork
 {
     my ( $self, $pid, $reader ) = @_;
+}
+
+# ----------------------------------------------------------------------------
+#
+# childexit
+#
+# Called in a child process when the child is about to exit
+#
+# There is no return value from this method
+#
+# ----------------------------------------------------------------------------
+sub childexit
+{
+    my ( $self ) = @_;
+
+    if ( $self->{db_handle__} ) {
+        $self->{db_handle__}->disconnect;
+    }
 }
 
 # ----------------------------------------------------------------------------
@@ -877,11 +915,18 @@ sub database_
     return $self->get_module__( 'database', 'POPFile::Database' );
 }
 
+# Returns a the database handle owned by the POPFile::Database object.
+# If this method is called then the caller must clean up the handle.
+
 sub db_
 {
     my ( $self ) = @_;
 
-    return $self->database_()->db();
+    if ( !defined( $self->{db_handle__} ) ) {
+        $self->{db_handle__} = $self->database_()->db();
+    }
+
+    return $self->{db_handle__};
 }
 
 sub history_
@@ -940,6 +985,17 @@ sub forker
     }
 
     return $self->{forker_};
+}
+
+sub setchildexit
+{
+    my ( $self, $value ) = @_;
+
+    if ( defined( $value ) ) {
+        $self->{childexit_} = $value;
+    }
+
+    return $self->{childexit_};
 }
 
 sub pipeready

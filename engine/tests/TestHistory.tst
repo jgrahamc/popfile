@@ -25,7 +25,7 @@
 rmtree( 'messages' );
 rmtree( 'corpus' );
 test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-test_assert( rmtree( 'corpus/CVS' ) > 0 );
+rmtree( 'corpus/CVS' );
 
 unlink 'popfile.db';
 unlink 'stopwords';
@@ -33,68 +33,29 @@ test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
 mkdir 'messages';
 
-use Classifier::Bayes;
-use POPFile::Configuration;
-use POPFile::MQ;
-use POPFile::Logger;
-use Classifier::WordMangle;
-use POPFile::History;
+use POPFile::Loader;
+my $POPFile = POPFile::Loader->new();
+$POPFile->CORE_loader_init();
+$POPFile->CORE_signals();
 
-# Load the test corpus
-my $c = new POPFile::Configuration;
-my $mq = new POPFile::MQ;
-my $l = new POPFile::Logger;
-my $b = new Classifier::Bayes;
-my $w = new Classifier::WordMangle;
-my $h = new POPFile::History;
+my %valid = ( 'Classifier/Bayes' => 1,
+              'Classifier/WordMangle' => 1,
+              'POPFile/Logger' => 1,
+              'POPFile/Database' => 1,
+              'POPFile/History' => 1,
+              'POPFile/MQ'     => 1,
+              'POPFile/Configuration' => 1 );
 
-$c->configuration( $c );
-$c->mq( $mq );
-$c->logger( $l );
-
-$c->initialize();
-
-$l->configuration( $c );
-$l->mq( $mq );
-$l->logger( $l );
-
-$l->initialize();
-
-$w->configuration( $c );
-$w->mq( $mq );
-$w->logger( $l );
-
-$w->start();
-
-$mq->configuration( $c );
-$mq->mq( $mq );
-$mq->logger( $l );
-
-$b->configuration( $c );
-$b->mq( $mq );
-$b->logger( $l );
-
-$h->configuration( $c );
-$h->mq( $mq );
-$h->logger( $l );
-
-$b->history( $h );
-$h->classifier( $b );
-
-$h->initialize();
-
-$b->module_config_( 'html', 'language', 'English' );
-$b->{parser__}->mangle( $w );
-$b->initialize();
-
-test_assert( $b->start() );
-test_assert( $h->start() );
-
-$l->config_( 'level', 2 );
+$POPFile->CORE_load( 0, \%valid );
+$POPFile->CORE_initialize();
+$POPFile->CORE_config( 1 );
+$POPFile->CORE_start();
 
 # Check the behaviour of reserve_slot.  It should return a valid
 # number and create the associated path (but not the file), check
 # that get_slot_file returns the same file as reserve_slot
+
+my $h = $POPFile->get_module( 'POPFile/History' );
 
 my ( $slot, $file ) = $h->reserve_slot();
 
@@ -114,7 +75,7 @@ close FILE;
 # Check that there is an entry and that it has not yet
 # been committed
 
-my @result = $h->{db__}->selectrow_array( "select committed from history where id = $slot;" );
+my @result = $h->db_()->selectrow_array( "select committed from history where id = $slot;" );
 test_assert_equal( $#result, 0 );
 test_assert( $result[0] != 1 );
 
@@ -126,7 +87,7 @@ $h->release_slot( $slot );
 test_assert( !( -e $file ) );
 test_assert( !( -e $path ) );
 
-@result = $h->{db__}->selectrow_array( "select committed from history where id = $slot;" );
+@result = $h->db_()->selectrow_array( "select committed from history where id = $slot;" );
 test_assert_equal( $#result, -1 );
 
 # Now try actually adding an element to the history.  Reserve a slot
@@ -202,18 +163,17 @@ EOF
 close FILE;
 my $size3 = -s $file;
 
-
+my $b = $POPFile->get_module( 'Classifier/Bayes' );
 my $session = $b->get_session_key( 'admin', '' );
 $h->commit_slot( $session, $slot, 'spam', 0 );
-$mq->service();
-$h->service();
+$POPFile->CORE_service( 1 );
 $h->commit_slot( $session, $slot1, 'personal', 0 );
-$mq->service();
-$h->service();
+$POPFile->CORE_service( 1 );
 $h->commit_slot( $session, $slot2, 'spam', 0 );
-$mq->service();
-$h->service();
+$POPFile->CORE_service( 1 );
+$POPFile->CORE_service( 1 );
 $b->release_session_key( $session );
+$POPFile->CORE_service( 1 );
 
 # Check that the message hash mechanism works
 
@@ -228,7 +188,7 @@ test_assert_equal( $slot1, $h->get_slot_from_hash( $hash ) );
 # Check that the three messages were correctly inserted into
 # the database
 
-@result = $h->{db__}->selectrow_array( "select * from history where id = 1;" );
+@result = $h->db_()->selectrow_array( "select * from history where id = 1;" );
 test_assert_equal( $#result, 16 );
 test_assert_equal( $result[0], 1 ); # id
 test_assert_equal( $result[1], 1 ); # userid
@@ -245,7 +205,7 @@ test_assert_equal( $result[14], 'everyone nospam-everyone@jgc.org' ); # To
 test_assert_equal( $result[15], 'people no-spam-people@jgc.org' ); # Cc
 test_assert_equal( $result[16], $size ); # size
 
-@result = $h->{db__}->selectrow_array( "select * from history where id = 2;" );
+@result = $h->db_()->selectrow_array( "select * from history where id = 2;" );
 test_assert_equal( $#result, 16 );
 test_assert_equal( $result[0], 2 ); # id
 test_assert_equal( $result[1], 1 ); # userid
@@ -262,7 +222,7 @@ test_assert_equal( $result[14], 'someone else nospam-everyone@jgc.org' );
 test_assert_equal( $result[15], '' ); # Cc
 test_assert_equal( $result[16], $size2 ); # size
 
-@result = $h->{db__}->selectrow_array( "select * from history where id = 3;" );
+@result = $h->db_()->selectrow_array( "select * from history where id = 3;" );
 test_assert_equal( $#result, 16 );
 test_assert_equal( $result[0], 3 ); # id
 test_assert_equal( $result[1], 1 ); # userid
@@ -472,8 +432,7 @@ $h->upgrade_history_files__();
 test_assert( !(-e $h->get_user_path_( $h->global_config_( 'msgdir' ) . 'popfile1=1.cls' ) ) );
 test_assert( !(-e $h->get_user_path_( $h->global_config_( 'msgdir' ) . 'popfile1=1.msg' ) ) );
 
-$mq->service();
-$h->service();
+$POPFile->CORE_service( 1 );
 
 $h->set_query( $q, '', '', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 4 );
@@ -514,7 +473,7 @@ test_assert_equal( $rows[2][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
 $h->stop_query( $q );
 
-$h->config_( 'history_days', 0 );
+$h->user_config_( 1, 'history_days', 0 );
 sleep( 2 );
 $h->cleanup_history();
 
@@ -531,7 +490,6 @@ test_assert( !( -e 'messages/00' ) );
 test_assert( !( -e 'messages/00/00' ) );
 test_assert( !( -e 'messages/00/00/00' ) );
 
-$h->stop();
-$b->stop();
+$POPFile->CORE_stop();
 
 1;

@@ -128,6 +128,10 @@ sub stop
     # added to the queue and before service() is called
 
     $self->commit_history__();
+
+    # Clean up the database handle
+
+    $self->SUPER::stop();
 }
 
 #----------------------------------------------------------------------------
@@ -851,11 +855,8 @@ sub stop_query
 
     my $q = $self->{queries__}{$id}{query};
 
-    if ( ( defined $q ) && ( $q != 0 ) ) {
-        if ( $#{$self->{queries__}{$id}{cache}} !=
-             $self->{queries__}{$id}{count} ) {
-           $q->finish;
-        }
+    if ( ( defined $q ) && ( $q != 0 ) && ( $q->{Active} ) ) {
+        $q->finish;
     }
 
     delete $self->{queries__}{$id};
@@ -1226,7 +1227,7 @@ sub cleanup_history
     my ( $self ) = @_;
 
     my $seconds_per_day = 24 * 60 * 60;
-    my $old = time - $self->user_config_( 1, 'history_days' ) * $seconds_per_day;
+    my $old = time - $self->user_config_( 1, 'history_days' )*$seconds_per_day;
     my $d = $self->db_()->prepare( "select id from history
                                          where inserted < $old;" );
     $d->execute;

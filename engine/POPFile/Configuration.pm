@@ -205,8 +205,8 @@ sub stop
     my ( $self ) = @_;
 
     $self->save_configuration();
-
     $self->delete_pid_();
+    $self->SUPER::stop();
 }
 
 # ----------------------------------------------------------------------------

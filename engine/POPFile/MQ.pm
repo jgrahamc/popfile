@@ -161,6 +161,8 @@ sub stop
         close $self->{children__}{$kid};
         delete $self->{children__}{$kid};
     }
+
+    $self->SUPER::stop();
 }
 
 #----------------------------------------------------------------------------
@@ -197,6 +199,8 @@ sub yield_
 sub forked
 {
     my ( $self, $writer ) = @_;
+
+    $self->SUPER::forked( $writer );
 
     $self->{writer__} = $writer;
 

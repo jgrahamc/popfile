@@ -139,24 +139,29 @@ sub new
                                    'black' ];                                        # PROFILE BLOCK STOP
 
     # Precomputed per bucket probabilities
+
     $self->{bucket_start__}      = {};
 
     # A very unlikely word
+
     $self->{not_likely__}        = {};
 
     # The expected corpus version
     #
     # DEPRECATED  This is only used when upgrading old flat file corpus files
     #             to the database
+
     $self->{corpus_version__}    = 1;
 
     # The unclassified cutoff this value means that the top
     # probabilily must be n times greater than the second probability,
     # default is 100 times more likely
+
     $self->{unclassified__}      = log(100);
 
     # Used to tell the caller whether a magnet was used in the last
     # mail classification
+
     $self->{magnet_used__}       = 0;
     $self->{magnet_detail__}     = 0;
 
@@ -287,6 +292,22 @@ sub stop
 
     $self->db_cleanup__();
     delete $self->{parser__};
+    $self->SUPER::stop();
+}
+
+#----------------------------------------------------------------------------
+#
+# forked
+#
+# Called when POPFile has entered a child process
+#
+#----------------------------------------------------------------------------
+sub forked
+{
+    my ( $self, $writer ) = @_;
+
+    $self->db_cleanup__();
+    $self->SUPER::forked( $writer );
 }
 
 #----------------------------------------------------------------------------
@@ -916,7 +937,7 @@ sub upgrade_bucket__
 
     foreach my $gl ( 'subject', 'xtc', 'xpl' ) {
         $self->log_( 1, "Checking deprecated parameter GLOBAL_$gl for $bucket\n" );
-        my $val = $self->{configuration__}->deprecated_parameter( "GLOBAL_$gl" );
+        my $val = $self->configuration_()->deprecated_parameter( "GLOBAL_$gl" );
         if ( defined( $val ) && ( $val == 0 ) ) {
             $self->log_( 1, "GLOBAL_$gl is 0 for $bucket, overriding $gl\n" );
             $self->set_bucket_parameter( $session, $bucket, $gl, 0 );

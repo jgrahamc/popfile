@@ -105,6 +105,7 @@ sub new
     $self->{pipeready__}    = '';
     $self->{forker__}       = '';
     $self->{reaper__}       = '';
+    $self->{childexit__}    = '';
 
     # POPFile's version number as individual numbers and as
     # string
@@ -147,6 +148,7 @@ sub CORE_loader_init
     $self->{pipeready__} = sub { $self->pipeready(@_) };
     $self->{forker__} = sub { $self->CORE_forker(@_) };
     $self->{reaper__} = sub { $self->CORE_reaper(@_) };
+    $self->{childexit__} = sub { $self->CORE_childexit(@_) };
 
     # See if there's a file named popfile_version that contains the
     # POPFile version number
@@ -250,6 +252,30 @@ sub CORE_reaper
 
 #----------------------------------------------------------------------------
 #
+# CORE_childexit
+#
+# Called by a module that is in a child process and wants to exit.  This
+# warns all the other modules in the same process by calling their childexit
+# function and then does the exit.
+#
+# $code         The process exit code
+#
+#----------------------------------------------------------------------------
+sub CORE_childexit
+{
+    my ( $self, $code ) = @_;
+
+    foreach my $type (sort keys %{$self->{components__}}) {
+        foreach my $name (sort keys %{$self->{components__}{$type}}) {
+            $self->{components__}{$type}{$name}->childexit();
+        }
+    }
+
+    exit( $code );
+}
+
+#----------------------------------------------------------------------------
+#
 # CORE_forker
 #
 # Called to fork POPFile.  Calls every module's forked function in the
@@ -336,6 +362,7 @@ sub CORE_forker
 # files with special comment on first line) in a specific subdirectory
 # and loads them into a structured components hash
 #
+# $valid       Hash reference to valid modules to load. See CORE_load
 # $directory   The directory to search for loadable modules
 # $type        The 'type' of module being loaded (e.g. proxy, core, ui) which
 # is used when fixing up references between modules (e.g. proxy
@@ -345,7 +372,7 @@ sub CORE_forker
 #----------------------------------------------------------------------------
 sub CORE_load_directory_modules
 {
-    my ( $self, $directory, $type ) = @_;
+    my ( $self, $valid, $directory, $type ) = @_;
 
     print "\n        $type:" if $self->{debug__};
 
@@ -358,9 +385,14 @@ sub CORE_load_directory_modules
     opendir MODULES, $self->root_path__( $directory );
 
     while ( my $entry = readdir MODULES ) {
-        if ( $entry =~ /\.pm$/ ) {
+        if ( $entry =~ /(.+)\.pm$/ ) {
+            if ( $valid ) {
+                if ( !$$valid{"$directory/$1"} ) {
+                    next;
+                }
+            }
             $self->CORE_load_module( "$directory/$entry", $type );
-	}
+        }
     }
 
     closedir MODULES;
@@ -512,32 +544,37 @@ sub CORE_platform_
 #
 # Loads POPFile's modules
 #
-# noserver              Set to 1 if no servers (i.e. UI and proxies)
+# $noserver (optional) Set to 1 if no servers (i.e. UI and proxies)
+# $valid    (optional) Hash reference consisting of the names of the
+#           modules that are valid or not valid to load
 #
 #----------------------------------------------------------------------------
 sub CORE_load
 {
-    my ( $self, $noserver ) = @_;
+    my ( $self, $noserver, $valid ) = @_;
 
     # Create the main objects that form the core of POPFile.  Consists
     # of the configuration modules, the classifier, the UI (currently
-    # HTML based), and the POP3 proxy.
+    # HTML based), and the proxies.
 
-    print "\n    Loading... " if $self->{debug__};
+    if ( $self->{debug__} ) {
+        print "\n    POPFile ", $self->{version_string__}, "\n";
+        print "\n    Loading... ";
+    }
 
     # Do our platform-specific stuff
 
-    $self->CORE_platform_();
+    $self->CORE_platform_( $valid );
 
     # populate our components hash
 
-    $self->CORE_load_directory_modules( 'POPFile',    'core'       );
-    $self->CORE_load_directory_modules( 'Classifier', 'classifier' );
+    $self->CORE_load_directory_modules( $valid, 'POPFile',    'core'       );
+    $self->CORE_load_directory_modules( $valid, 'Classifier', 'classifier' );
 
     if ( !$noserver ) {
-        $self->CORE_load_directory_modules( 'UI',         'interface' );
-        $self->CORE_load_directory_modules( 'Proxy',      'proxy'     );
-        $self->CORE_load_directory_modules( 'Services',   'services'    );
+        $self->CORE_load_directory_modules( $valid, 'UI',       'interface' );
+        $self->CORE_load_directory_modules( $valid, 'Proxy',    'proxy'     );
+        $self->CORE_load_directory_modules( $valid, 'Services', 'services'  );
     }
 }
 
@@ -578,6 +615,7 @@ sub CORE_initialize
             if ( $code == 1 ) {
                  $mod->alive(     1 );
                  $mod->forker(    $self->{forker__} );
+                 $mod->setchildexit( $self->{childexit__} );
                  $mod->pipeready( $self->{pipeready__} );
             }
         }
@@ -591,16 +629,24 @@ sub CORE_initialize
 #
 # Loads POPFile's configuration and command-line settings
 #
+# $ignore          If set to 1 then will not parse the command
+#                  line
+#
 #----------------------------------------------------------------------------
 sub CORE_config
 {
-    my ( $self ) = @_;
+    my ( $self, $ignore ) = @_;
 
     # Load the configuration from disk and then apply any command line
     # changes that override the saved configuration
 
     $self->{components__}{core}{config}->load_configuration();
-    return $self->{components__}{core}{config}->parse_command_line();
+
+    if ( !defined( $ignore ) || !$ignore ) {
+        return $self->{components__}{core}{config}->parse_command_line();
+    } else {
+        return 1;
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -713,10 +759,10 @@ sub CORE_stop
     # any remaining messages and hand them off to the other modules
     # that might want to deal with them in their stop() routine
 
-    $self->{components__}{core}{mq}->alive(0);
-    $self->{components__}{core}{mq}->stop();
-    $self->{components__}{core}{history}->alive(0);
-    $self->{components__}{core}{history}->stop();
+    if ( exists( $self->{components__}{core}{mq} ) ) {
+        $self->{components__}{core}{mq}->alive(0);
+        $self->{components__}{core}{mq}->stop();
+    }
 
     # Shutdown all the modules
 
@@ -730,7 +776,6 @@ sub CORE_stop
                 flush STDOUT;
 
                 next if ( $name eq 'mq' );
-                next if ( $name eq 'history' );
                 $self->{components__}{$type}{$name}->alive(0);
                 $self->{components__}{$type}{$name}->stop();
             }
@@ -777,6 +822,7 @@ sub CORE_version
 # May be called either as:
 #
 # $name     Module name in scoped format (eg, Classifier::Bayes)
+#           (or with / instead of ::)
 #
 # Or:
 #
@@ -788,9 +834,10 @@ sub get_module
 {
     my ( $self, $name, $type ) = @_;
 
-    if (!defined($type) && $name =~ /^(.*)::(.*)$/ ) {
+    if ( !defined( $type ) &&
+         ( $name =~ /^(.*)((::)|\/)(.*)$/ ) ) {
         $type = lc($1);
-        $name = lc($2);
+        $name = lc($4);
 
         $type =~ s/^POPFile$/core/i;
     }

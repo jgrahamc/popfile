@@ -156,8 +156,7 @@ sub stop
     my ( $self ) = @_;
 
     $self->db_disconnect__();
-
-    return 1;
+    $self->SUPER::stop();
 }
 
 #----------------------------------------------------------------------------
@@ -238,6 +237,24 @@ sub db_connect__
 {
     my ( $self ) = @_;
 
+    $self->{db__} = $self->db_connect_helper__(1);
+
+    return defined( $self->{db__} );
+}
+
+#----------------------------------------------------------------------------
+#
+# db_connect_helper__
+#
+# Connects to the POPFile database and returns the handle
+#
+# $upgrade         1 if it's ok to upgrade the database
+#
+#----------------------------------------------------------------------------
+sub db_connect_helper__
+{
+    my ( $self, $upgrade ) = @_;
+
     # Connect to the database, note that the database must exist for
     # this to work, to make this easy for people POPFile we will
     # create the database automatically here using the file
@@ -277,172 +294,171 @@ sub db_connect__
 
     $self->log_( 0, "Attempting to connect to $dbconnect ($dbpresent)" );
 
-    $self->{db__} = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
+    my $db = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
                                   $self->config_( 'dbuser' ),
                                   $self->config_( 'dbauth' ) );  # PROFILE BLOCK STOP
 
-    $self->log_( 0, "Using SQLite library version " . $self->{db__}{sqlite_version});
+    $self->log_( 0, "Using SQLite library version " . $db->{sqlite_version});
 
     # We check to make sure we're not using DBD::SQLite 1.05 or greater
     # which uses SQLite V 3 If so, we'll use DBD::SQLite2 and SQLite 2.8,
     # which is still compatible with old databases
 
-    if ( $self->{db__}{sqlite_version} gt $self->config_('bad_sqlite_version' ) )  {
+    if ( $db->{sqlite_version} gt $self->config_('bad_sqlite_version' ) )  {
         $self->log_( 0, "Substituting DBD::SQLite2 for DBD::SQLite 1.05" );
         $self->log_( 0, "Please install DBD::SQLite2 and set dbconnect to use DBD::SQLite2" );
 
         $dbconnect =~ s/SQLite:/SQLite2:/;
 
-        undef $self->{db__};
-
-        $self->{db__} = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
+        $db = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
                                       $self->config_( 'dbuser' ),
                                       $self->config_( 'dbauth' ) );  # PROFILE BLOCK STOP
     }
 
-    if ( !defined( $self->{db__} ) ) {
+    if ( !defined( $db ) ) {
         $self->log_( 0, "Failed to connect to database and got error $DBI::errstr" );
-        return 0;
+        return undef
     }
 
     if ( !$dbpresent ) {
-        if ( !$self->insert_schema__( $sqlite ) ) {
-            return 0;
+        if ( !$self->insert_schema__( $db, $sqlite ) ) {
+            return undef;
         }
     }
 
-    # Now check for a need to upgrade the database because the schema
-    # has been changed.  From POPFile v0.22.0 there's a special
-    # 'popfile' table inside the database that contains the schema
-    # version number.  If the version number doesn't match or is
-    # missing then do the upgrade.
+    if ( $upgrade ) {
 
-    open SCHEMA, '<' . $self->get_root_path_( 'Classifier/popfile.sql' );
-    <SCHEMA> =~ /-- POPFILE SCHEMA (\d+)/;
-    my $version = $1;
-    close SCHEMA;
+        # Now check for a need to upgrade the database because the schema
+        # has been changed.  From POPFile v0.22.0 there's a special
+        # 'popfile' table inside the database that contains the schema
+        # version number.  If the version number doesn't match or is
+        # missing then do the upgrade.
 
-    my $need_upgrade = 1;
+        open SCHEMA, '<' . $self->get_root_path_( 'Classifier/popfile.sql' );
+        <SCHEMA> =~ /-- POPFILE SCHEMA (\d+)/;
+        my $version = $1;
+        close SCHEMA;
 
-    #
-    # retrieve the SQL_IDENTIFIER_QUOTE_CHAR for the database then use it
-    # to strip off any sqlquotechars from the table names we retrieve
-    #
+        my $need_upgrade = 1;
 
-    my $sqlquotechar = $self->{db__}->get_info(29) || ''; 
-    my @tables = map { s/$sqlquotechar//g; $_ } ($self->{db__}->tables());
+        # retrieve the SQL_IDENTIFIER_QUOTE_CHAR for the database then use it
+        # to strip off any sqlquotechars from the table names we retrieve
 
-    foreach my $table (@tables) {
-        if ( $table eq 'popfile' ) {
-            my @row = $self->{db__}->selectrow_array(
-               'select version from popfile;' );
-
-            if ( $#row == 0 ) {
-                $need_upgrade = ( $row[0] != $version );
-            }
-        }
-    }
-
-    if ( $need_upgrade ) {
-        print "\n\nDatabase schema is outdated, performing automatic upgrade\n";
-
-        # The database needs upgrading, so we are going to dump out
-        # all the data in the database as INSERT statements in a
-        # temporary file, then DROP all the tables in the database,
-        # then recreate the schema from the new schema and finally
-        # rerun the inserts.
-
-        my $i = 0;
-        my $ins_file = $self->get_user_path_( 'insert.sql' );
-        open INSERT, '>' . $ins_file;
+        my $sqlquotechar = $db->get_info(29) || ''; 
+        my @tables = map { s/$sqlquotechar//g; $_ } ($db->tables());
 
         foreach my $table (@tables) {
-            next if ( $table eq 'popfile' );
-            if ( $sqlite && ( $table =~ /^sqlite_/ ) ) {
-                next;
+            if ( $table eq 'popfile' ) {
+                my @row = $db->selectrow_array(
+                   'select version from popfile;' );
+
+                if ( $#row == 0 ) {
+                    $need_upgrade = ( $row[0] != $version );
+                }
             }
+        }
+
+        if ( $need_upgrade ) {
+            print "\n\nDatabase schema is outdated, performing automatic upgrade\n";
+
+            # The database needs upgrading, so we are going to dump out
+            # all the data in the database as INSERT statements in a
+            # temporary file, then DROP all the tables in the database,
+            # then recreate the schema from the new schema and finally
+            # rerun the inserts.
+
+            my $i = 0;
+            my $ins_file = $self->get_user_path_( 'insert.sql' );
+            open INSERT, '>' . $ins_file;
+
+            foreach my $table (@tables) {
+                next if ( $table eq 'popfile' );
+                if ( $sqlite && ( $table =~ /^sqlite_/ ) ) {
+                    next;
+                }
+                if ( $i > 99 ) {
+                    print "\n";
+                }
+                print "    Saving table $table\n    ";
+
+                my $t = $db->prepare( "select * from $table;" );
+                $t->execute;
+                $i = 0;
+                while ( 1 ) {
+                    if ( ( ++$i % 100 ) == 0 ) {
+                        print "[$i]";
+                        flush STDOUT;
+                    }
+                    my @rows = $t->fetchrow_array;
+
+                    last if ( $#rows == -1 );
+
+                    print INSERT "INSERT INTO $table (";
+                    for my $i (0..$t->{NUM_OF_FIELDS}-1) {
+                        if ( $i != 0 ) {
+                            print INSERT ',';
+                        }
+                        print INSERT $t->{NAME}->[$i];
+                    }
+                    print INSERT ') VALUES (';
+                    for my $i (0..$t->{NUM_OF_FIELDS}-1) {
+                        if ( $i != 0 ) {
+                            print INSERT ',';
+                        }
+                        my $val = $rows[$i];
+                        if ( $t->{TYPE}->[$i] !~ /^int/i ) {
+                            $val = '' if ( !defined( $val ) );
+                            $val = $db->quote( $val );
+                        } else {
+                            $val = 'NULL' if ( !defined( $val ) );
+                        }
+                        print INSERT $val;
+                    }
+                    print INSERT ");\n";
+                }
+            }
+
+            close INSERT;
+
             if ( $i > 99 ) {
                 print "\n";
             }
-            print "    Saving table $table\n    ";
 
-            my $t = $self->{db__}->prepare( "select * from $table;" );
-            $t->execute;
+            foreach my $table (@tables) {
+                if ( $sqlite && ( $table =~ /^sqlite_/ ) ) {
+                    next;
+                }
+                print "    Dropping old table $table\n";
+                $db->do( "DROP TABLE $table;" );
+            }
+
+            print "    Inserting new database schema\n";
+            if ( !$self->insert_schema__( $db, $sqlite ) ) {
+                return undef;
+            }
+
+            print "    Restoring old data\n    ";
+
+            $db->begin_work;
+            open INSERT, '<' . $ins_file;
             $i = 0;
-            while ( 1 ) {
+            while ( <INSERT> ) {
                 if ( ( ++$i % 100 ) == 0 ) {
                     print "[$i]";
                     flush STDOUT;
                 }
-                my @rows = $t->fetchrow_array;
-
-                last if ( $#rows == -1 );
-
-                print INSERT "INSERT INTO $table (";
-                for my $i (0..$t->{NUM_OF_FIELDS}-1) {
-                    if ( $i != 0 ) {
-                        print INSERT ',';
-                    }
-                    print INSERT $t->{NAME}->[$i];
-                }
-                print INSERT ') VALUES (';
-                for my $i (0..$t->{NUM_OF_FIELDS}-1) {
-                    if ( $i != 0 ) {
-                        print INSERT ',';
-                    }
-                    my $val = $rows[$i];
-                    if ( $t->{TYPE}->[$i] !~ /^int/i ) {
-                        $val = '' if ( !defined( $val ) );
-                        $val = $self->{db__}->quote( $val );
-                    } else {
-                        $val = 'NULL' if ( !defined( $val ) );
-                    }
-                    print INSERT $val;
-                }
-                print INSERT ");\n";
+                s/[\r\n]//g;
+                $db->do( $_ );
             }
+            close INSERT;
+            $db->commit;
+
+            unlink $ins_file;
+            print "\nDatabase upgrade complete\n\n";
         }
-
-        close INSERT;
-
-        if ( $i > 99 ) {
-            print "\n";
-        }
-
-        foreach my $table (@tables) {
-            if ( $sqlite && ( $table =~ /^sqlite_/ ) ) {
-                next;
-            }
-            print "    Dropping old table $table\n";
-            $self->{db__}->do( "DROP TABLE $table;" );
-        }
-
-        print "    Inserting new database schema\n";
-        if ( !$self->insert_schema__( $sqlite ) ) {
-            return 0;
-        }
-
-        print "    Restoring old data\n    ";
-
-        $self->{db__}->begin_work;
-        open INSERT, '<' . $ins_file;
-        $i = 0;
-        while ( <INSERT> ) {
-            if ( ( ++$i % 100 ) == 0 ) {
-               print "[$i]";
-               flush STDOUT;
-            }
-            s/[\r\n]//g;
-            $self->{db__}->do( $_ );
-        }
-        close INSERT;
-        $self->{db__}->commit;
-
-        unlink $ins_file;
-        print "\nDatabase upgrade complete\n\n";
     }
 
-    return 1;
+    return $db;
 }
 
 #----------------------------------------------------------------------------
@@ -451,12 +467,13 @@ sub db_connect__
 #
 # Insert the POPFile schema in a database
 #
+# $db              Database handle
 # $sqlite          Set to 1 if this is a SQLite database
 #
 #----------------------------------------------------------------------------
 sub insert_schema__
 {
-    my ( $self, $sqlite ) = @_;
+    my ( $self, $db, $sqlite ) = @_;
 
     if ( -e $self->get_root_path_( 'Classifier/popfile.sql' ) ) {
         my $schema = '';
@@ -479,7 +496,7 @@ sub insert_schema__
             $schema .= $_;
 
             if ( ( /end;/ ) || ( /\);/ ) || ( /^alter/i ) ) {
-                $self->{db__}->do( $schema );
+                $db->do( $schema );
                 $schema = '';
             }
         }
@@ -501,7 +518,9 @@ sub insert_schema__
 #----------------------------------------------------------------------------
 sub forked
 {
-    my ( $self ) = @_;
+    my ( $self, $writer ) = @_;
+
+    $self->SUPER::forked( $writer );
 
     $self->db_connect__();
 }
@@ -512,7 +531,7 @@ sub db
 {
     my ( $self ) = @_;
 
-    return $self->{db__};
+    return $self->db_connect_helper__(0);
 }
 
 1;

@@ -166,8 +166,9 @@ EOM
 #
 # stop
 #
-# Called when POPFile is closing down, this is the last method that will get called before
-# the object is destroyed.  There is no return value from stop().
+# Called when POPFile is closing down, this is the last method that
+# will get called before the object is destroyed.  There is no return
+# value from stop().
 #
 # ----------------------------------------------------------------------------
 sub stop
@@ -178,21 +179,26 @@ sub stop
         $self->classifier_()->release_session_key( $self->{api_session__} );
     }
 
-    # Need to close all the duplicated file handles, this include the POP3 listener
-    # and all the reading ends of pipes to active children
+    # Need to close all the duplicated file handles, this include the
+    # POP3 listener and all the reading ends of pipes to active
+    # children
 
     close $self->{server__} if ( defined( $self->{server__} ) );
+
+    $self->SUPER::stop();
 }
 
 # ----------------------------------------------------------------------------
 #
 # service
 #
-# service() is a called periodically to give the module a chance to do housekeeping work.
+# service() is a called periodically to give the module a chance to do
+# housekeeping work.
 #
-# If any problem occurs that requires POPFile to shutdown service() should return 0 and
-# the top level process will gracefully terminate POPFile including calling all stop()
-# methods.  In normal operation return 1.
+# If any problem occurs that requires POPFile to shutdown service()
+# should return 0 and the top level process will gracefully terminate
+# POPFile including calling all stop() methods.  In normal operation
+# return 1.
 #
 # ----------------------------------------------------------------------------
 sub service
@@ -216,7 +222,7 @@ sub service
             if ( $self->{api_session__} eq '' ) {
                 $self->{api_session__} =
                     $self->classifier_()->get_session_key( 'admin', '' );
-	    }
+   	        }
 
             # Check that this is a connection from the local machine,
             # if it's not then we drop it immediately without any
@@ -245,7 +251,9 @@ sub service
                     if ( !defined( $pid ) || ( $pid == 0 ) ) {
                         $self->{child_}( $self, $client,
                             $self->{api_session__} );
-                        exit(0) if ( defined( $pid ) );
+                        if ( defined( $pid ) ) {
+                            &{$self->{childexit_}}(0)
+                        }
                     }
 	        } else {
                     pipe my $reader, my $writer;
@@ -266,15 +274,18 @@ sub service
 #
 # forked
 #
-# This is called when some module forks POPFile and is within the context of the child
-# process so that this module can close any duplicated file handles that are not needed.
+# This is called when some module forks POPFile and is within the
+# context of the child process so that this module can close any
+# duplicated file handles that are not needed.
 #
 # There is no return value from this method
 #
 # ----------------------------------------------------------------------------
 sub forked
 {
-    my ( $self ) = @_;
+    my ( $self, $writer ) = @_;
+
+    $self->SUPER::forked( $writer );
 
     close $self->{server__};
 }

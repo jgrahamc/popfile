@@ -42,14 +42,16 @@
             <td class="<TMPL_VAR NAME="Common_Middle_Tab3">" align="center">
                 <a class="menuLink" href="/configuration?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Configuration"></a>
             </td>
-            <td class="menuSpacer"></td>
-            <td class="<TMPL_VAR NAME="Common_Middle_Tab4">" align="center">
-                <a class="menuLink" href="/security?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Security"></a>
-            </td>
-            <td class="menuSpacer"></td>
-            <td class="<TMPL_VAR NAME="Common_Middle_Tab5">" align="center">
-                <a class="menuLink" href="/advanced?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Advanced"></a>
-            </td>
+            <TMPL_IF NAME="Common_Middle_If_CanAdmin">
+                <td class="menuSpacer"></td>
+                <td class="<TMPL_VAR NAME="Common_Middle_Tab4">" align="center">
+                    <a class="menuLink" href="/administration?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Administration"></a>
+                </td>
+                <td class="menuSpacer"></td>
+                <td class="<TMPL_VAR NAME="Common_Middle_Tab5">" align="center">
+                    <a class="menuLink" href="/advanced?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Advanced"></a>
+                </td>
+            </TMPL_IF>
             <td class="menuIndent">&nbsp;</td>
         </tr>
     </table>

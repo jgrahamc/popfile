@@ -1,8 +1,8 @@
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # Tests for insert.pl
 #
-# Copyright (c) 2003 John Graham-Cumming
+# Copyright (c) 2003-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -20,7 +20,7 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 # global to store STDOUT when doing backticks
 
@@ -29,7 +29,7 @@ my @stdout;
 rmtree( 'messages' );
 rmtree( 'corpus' );
 test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-test_assert( rmtree( 'corpus/CVS' ) > 0 );
+rmtree( 'corpus/CVS' );
 test_assert( `rm popfile.db` == 0);
 
 unlink 'stopwords';
@@ -100,42 +100,23 @@ $line = shift @stdout;
 
 test_assert_regexp( $line, 'Added 1 files to `personal\'' );
 
-use Classifier::Bayes;
-use POPFile::Configuration;
-use POPFile::MQ;
-use POPFile::Logger;
+use POPFile::Loader;
+my $POPFile = POPFile::Loader->new();
+$POPFile->CORE_loader_init();
+$POPFile->CORE_signals();
 
-my $c = new POPFile::Configuration;
-my $mq = new POPFile::MQ;
-my $l = new POPFile::Logger;
-my $b = new Classifier::Bayes;
+my %valid = ( 'Classifier/Bayes' => 1,
+              'POPFile/Logger' => 1,
+              'POPFile/MQ'     => 1,
+              'POPFile/Database'     => 1,
+              'POPFile/Configuration' => 1 );
 
-$c->configuration( $c );
-$c->mq( $mq );
-$c->logger( $l );
+$POPFile->CORE_load( 0, \%valid );
+$POPFile->CORE_initialize();
+$POPFile->CORE_config( 1 );
+$POPFile->CORE_start();
 
-$c->initialize();
-
-$l->configuration( $c );
-$l->mq( $mq );
-$l->logger( $l );
-
-$l->initialize();
-
-$mq->configuration( $c );
-$mq->mq( $mq );
-$mq->logger( $l );
-
-$b->configuration( $c );
-$b->mq( $mq );
-$b->logger( $l );
-
-$b->module_config_( 'html', 'language', 'English' );
-
-$b->initialize();
-
-test_assert( $b->start() );
-
+my $b = $POPFile->get_module( 'Classifier/Bayes' );
 my $session = $b->get_session_key( 'admin', '' );
 
 foreach my $word (keys %words) {
@@ -143,7 +124,7 @@ foreach my $word (keys %words) {
 }
 
 $b->release_session_key( $session );
-$b->stop();
+$POPFile->CORE_stop();
 
 1;
 

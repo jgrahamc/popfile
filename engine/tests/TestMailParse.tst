@@ -1,8 +1,8 @@
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # Tests for MailParse.pm
 #
-# Copyright (c) 2003 John Graham-Cumming
+# Copyright (c) 2003-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -20,64 +20,36 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 rmtree( 'messages' );
 rmtree( 'corpus' );
 test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-test_assert( rmtree( 'corpus/CVS' ) > 0 );
+rmtree( 'corpus/CVS' );
 unlink 'stopwords';
 test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
+use POPFile::Loader;
+my $POPFile = POPFile::Loader->new();
+$POPFile->CORE_loader_init();
+$POPFile->CORE_signals();
+
+my %valid = ( 'Classifier/Bayes' => 1,
+              'Classifier/WordMangle' => 1,
+              'POPFile/Logger' => 1,
+              'POPFile/MQ'     => 1,
+              'POPFile/Database'     => 1,
+              'POPFile/Configuration' => 1 );
+
+$POPFile->CORE_load( 0, \%valid );
+$POPFile->CORE_initialize();
+$POPFile->CORE_config( 1 );
+$POPFile->CORE_start();
+
 use Classifier::MailParse;
-use Classifier::Bayes;
-use Classifier::WordMangle;
-use POPFile::Configuration;
-use POPFile::MQ;
-use POPFile::Logger;
-
-# Load the test corpus
-my $c = new POPFile::Configuration;
-my $mq = new POPFile::MQ;
-my $l = new POPFile::Logger;
-my $b = new Classifier::Bayes;
-my $w = new Classifier::WordMangle;
-
-$c->configuration( $c );
-$c->mq( $mq );
-$c->logger( $l );
-
-$c->initialize();
-
-$l->configuration( $c );
-$l->mq( $mq );
-$l->logger( $l );
-
-$l->initialize();
-
-$w->configuration( $c );
-$w->mq( $mq );
-$w->logger( $l );
-
-$w->start();
-
-$mq->configuration( $c );
-$mq->mq( $mq );
-$mq->logger( $l );
-
-$b->configuration( $c );
-$b->mq( $mq );
-$b->logger( $l );
-
-$c->module_config_( 'html', 'language', 'English' );
-
-$b->{parser__}->mangle( $w );
-$b->initialize();
-test_assert( $b->start() );
-
 my $cl = new Classifier::MailParse;
 
-$cl->mangle( $w );
+$cl->{mangle__} = $POPFile->get_module( 'Classifier/WordMangle' );
 $cl->{lang__} = "English";
 # map_color()
 test_assert_equal( $cl->map_color( 'red' ),     'ff0000' );
@@ -427,6 +399,7 @@ test_assert_equal( $cl->{cc__},      'dsmith@dmi.net, dsmith@datamine.net, dsmit
 
 my @color_tests = ( 'TestMailParse015.msg', 'TestMailParse019.msg' );
 
+my $b = $POPFile->get_module( 'Classifier/Bayes' );
 my $session = $b->get_session_key( 'admin', '' );
 
 for my $color_test (@color_tests) {
@@ -530,6 +503,6 @@ $cl->parse_file( 'temp.tmp' );
 test_assert_equal( $cl->{words__}{'html:imgwidth42'}, 1 );
 test_assert_equal( $cl->{words__}{'html:imgheight41'}, 1 );
 
-$b->stop();
+$POPFile->CORE_stop();
 
 1;

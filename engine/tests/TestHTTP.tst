@@ -1,8 +1,8 @@
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # Tests for HTTP.pm
 #
-# Copyright (c) 2003 John Graham-Cumming
+# Copyright (c) 2003-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -20,12 +20,12 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 rmtree( 'messages' );
 rmtree( 'corpus' );
 test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-test_assert( rmtree( 'corpus/CVS' ) > 0 );
+rmtree( 'corpus/CVS' );
 
 sub my_handler
 {
@@ -45,36 +45,22 @@ sub my_handler
 use IO::Handle;
 use POSIX ":sys_wait_h";
 
+use POPFile::Loader;
+my $POPFile = POPFile::Loader->new();
+$POPFile->CORE_loader_init();
+$POPFile->CORE_signals();
+
+my %valid = ( 'POPFile/Logger' => 1,
+              'POPFile/MQ'     => 1,
+              'POPFile/Configuration' => 1 );
+
+$POPFile->CORE_load( 0, \%valid );
 use UI::HTTP;
-use POPFile::Configuration;
-use POPFile::MQ;
-use POPFile::Logger;
-
-my $c = new POPFile::Configuration;
-my $mq = new POPFile::MQ;
-my $l = new POPFile::Logger;
 my $h = new UI::HTTP;
-
-$c->configuration( $c );
-$c->mq( $mq );
-$c->logger( $l );
-
-$l->configuration( $c );
-$l->mq( $mq );
-$l->logger( $l );
-
-$l->initialize();
-
-$mq->configuration( $c );
-$mq->mq( $mq );
-$mq->logger( $l );
-
-$h->configuration( $c );
-$h->mq( $mq );
-$h->logger( $l );
-
-$c->initialize();
-$h->initialize();
+$h->loader( $POPFile );
+$POPFile->CORE_initialize();
+$POPFile->CORE_config( 1 );
+$POPFile->CORE_start();
 
 my $port = 9000 + int(rand(1000));
 $h->config_( 'port', $port );
@@ -224,10 +210,7 @@ close FILE;
 
 my $h2 = new UI::HTTP;
 
-$h2->configuration( $c );
-$h2->mq( $mq );
-$h2->logger( $l );
-
+$h2->loader( $POPFile );
 $h2->initialize();
 $h2->name( 'simple' );
 $h2->config_( 'port', -1 );
@@ -348,5 +331,7 @@ if ( $pid == 0 ) {
 
     $h->stop();
 }
+
+$POPFile->CORE_stop();
 
 1;

@@ -425,22 +425,30 @@ sub url_handler__
     # display, the page table maps the pages to the functions that
     # handle them and the related template
 
-    my %page_table = ( 'security'      => [ \&security_page,      'security-page.thtml'      ],       # PROFILE BLOCK START
-                       'configuration' => [ \&configuration_page, 'configuration-page.thtml' ],
-                       'buckets'       => [ \&corpus_page,        'corpus-page.thtml'        ],
-                       'magnets'       => [ \&magnet_page,        'magnet-page.thtml'        ],
-                       'advanced'      => [ \&advanced_page,      'advanced-page.thtml'      ],
-                       'history'       => [ \&history_page,       'history-page.thtml'       ],
-                       'view'          => [ \&view_page,          'view-page.thtml'          ] );     # PROFILE BLOCK STOP
+    my %page_table = ( 'administration' => [ \&administration_page,      'administration-page.thtml'      ],       # PROFILE BLOCK START
+                       'configuration'  => [ \&configuration_page, 'configuration-page.thtml' ],
+                       'buckets'        => [ \&corpus_page,        'corpus-page.thtml'        ],
+                       'magnets'        => [ \&magnet_page,        'magnet-page.thtml'        ],
+                       'advanced'       => [ \&advanced_page,      'advanced-page.thtml'      ],
+                       'history'        => [ \&history_page,       'history-page.thtml'       ],
+                       'view'           => [ \&view_page,          'view-page.thtml'          ] );     # PROFILE BLOCK STOP
 
-    my %url_table = ( '/security'      => 'security',       # PROFILE BLOCK START
-                      '/configuration' => 'configuration',
-                      '/buckets'       => 'buckets',
-                      '/magnets'       => 'magnets',
-                      '/advanced'      => 'advanced',
-                      '/view'          => 'view',
-                      '/history'       => 'history',
-                      '/'              => 'history' );      # PROFILE BLOCK STOP
+    my %url_table = ( '/administration' => 'administration', # PROFILE BLOCK START
+                      '/configuration'  => 'configuration',
+                      '/buckets'        => 'buckets',
+                      '/magnets'        => 'magnets',
+                      '/advanced'       => 'advanced',
+                      '/view'           => 'view',
+                      '/history'        => 'history',
+                      '/'               => 'history' );      # PROFILE BLOCK STOP
+
+    # Check to see if this user has administration rights, if they do not
+    # then remove the administration and advanced URLs
+
+    if ( !$self->user_global_config_( 1, 'can_admin' ) ) {
+        delete $url_table{administration};
+        delete $url_table{advanced};
+    }
 
     # Any of the standard pages can be found in the url_table, the
     # other pages are probably files on disk
@@ -809,12 +817,12 @@ sub configuration_page
 
 #----------------------------------------------------------------------------
 #
-# security_page - get the security configuration page
+# administration_page - get the administration page
 #
 # $client     The web browser to send the results to
 #
 #----------------------------------------------------------------------------
-sub security_page
+sub administration_page
 {
     my ( $self, $client, $templ ) = @_;
 
@@ -2665,7 +2673,8 @@ sub load_template__
                    'Common_Bottom_LastLogin' => $self->{last_login__},
                    'Common_Bottom_Version'   => $self->version(),
                    'If_Show_Bucket_Help'     => $self->user_config_( 1, 'show_bucket_help' ),
-                   'If_Show_Training_Help'   => $self->user_config_( 1, 'show_training_help' ) );
+                   'If_Show_Training_Help'   => $self->user_config_( 1, 'show_training_help' ),
+                   'Common_Middle_If_CanAdmin' => $self->user_global_config_( 1, 'can_admin' ) );
 
     foreach my $fixup (keys %fixups) {
         if ( $templ->query( name => $fixup ) ) {

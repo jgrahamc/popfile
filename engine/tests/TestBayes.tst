@@ -1,8 +1,8 @@
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # Tests for Bayes.pm
 #
-# Copyright (c) 2003 John Graham-Cumming
+# Copyright (c) 2003-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -20,12 +20,12 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 rmtree( 'messages' );
 rmtree( 'corpus' );
 test_assert( rec_cp( 'corpus.base', 'corpus' ) );
-test_assert( rmtree( 'corpus/CVS' ) > 0 );
+rmtree( 'corpus/CVS' );
 
 unlink 'popfile.db';
 unlink 'stopwords';
@@ -33,70 +33,34 @@ test_assert( copy ( 'stopwords.base', 'stopwords' ) );
 
 mkdir 'messages';
 
-use Classifier::Bayes;
-use POPFile::Configuration;
-use POPFile::MQ;
-use POPFile::Logger;
-use Classifier::WordMangle;
-use POPFile::History;
+use POPFile::Loader;
+my $POPFile = POPFile::Loader->new();
+$POPFile->CORE_loader_init();
+$POPFile->CORE_signals();
 
-# Load the test corpus
-my $c = new POPFile::Configuration;
-my $mq = new POPFile::MQ;
-my $l = new POPFile::Logger;
-my $b = new Classifier::Bayes;
-my $w = new Classifier::WordMangle;
-my $h = new POPFile::History;
+my %valid = ( 'POPFile/Database' => 1,
+              'POPFile/Logger' => 1,
+              'POPFile/MQ'     => 1,
+              'POPFile/History'     => 1,
+              'Classifier/Bayes'     => 1,
+              'Classifier/WordMangle'     => 1,
+              'POPFile/Configuration' => 1 );
 
-$c->configuration( $c );
-$c->mq( $mq );
-$c->logger( $l );
+$POPFile->CORE_load( 0, \%valid );
+$POPFile->CORE_initialize();
+$POPFile->CORE_config( 1 );
+$POPFile->CORE_start();
 
-$c->initialize();
-
-$l->configuration( $c );
-$l->mq( $mq );
-$l->logger( $l );
-
-$l->initialize();
-
-$w->configuration( $c );
-$w->mq( $mq );
-$w->logger( $l );
-
-$w->start();
-
-$mq->configuration( $c );
-$mq->mq( $mq );
-$mq->logger( $l );
-
-$b->configuration( $c );
-$b->mq( $mq );
-$b->logger( $l );
-
-$h->configuration( $c );
-$h->mq( $mq );
-$h->logger( $l );
-
-$b->history( $h );
-$h->classifier( $b );
-
-$h->initialize();
-
-$b->module_config_( 'html', 'language', 'English' );
-$b->{parser__}->mangle( $w );
-$b->initialize();
-
-test_assert( $b->start() );
-test_assert( $h->start() );
+my $b = $POPFile->get_module( 'Classifier/Bayes' );
+my $h = $POPFile->get_module( 'POPFile/History' );
 
 # Test the unclassified_probability parameter
 
 test_assert_equal( $b->{unclassified__}, log(100) );
-$b->config_( 'unclassified_weight', 9 );
+$b->user_config_( 1, 'unclassified_weight', 9 );
 test_assert( $b->start() );
 test_assert_equal( $b->{unclassified__}, log(9) );
-$b->config_( 'unclassified_weight', 5 );
+$b->user_config_( 1, 'unclassified_weight', 5 );
 test_assert( $b->start() );
 test_assert_equal( $b->{unclassified__}, log(5) );
 
@@ -457,7 +421,7 @@ test_assert_equal( $mags[0], 'personal' );
 
 test_assert_equal( $b->get_bucket_parameter(  $session, 'zeotrope', 'count' ), 0 );
 $b->classified( $session, 'zeotrope' );
-$mq->service();
+$POPFile->CORE_service(1);
 test_assert_equal( $b->get_bucket_parameter(  $session, 'zeotrope', 'count' ), 1 );
 
 # clear_bucket
@@ -1005,6 +969,6 @@ if ( $have_text_kakasi ) {
     print "\nWarning: Japanese tests skipped because Text::Kakasi was not found\n";
 }
 
-$b->stop();
+$POPFile->CORE_stop();
 
 1;

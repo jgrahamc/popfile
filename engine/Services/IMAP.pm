@@ -203,7 +203,8 @@ sub start
 # ----------------------------------------------------------------------------
 # stop
 #
-#   Not much to do here.
+#   Not much to do here.  THIS COMMENT IS BAD.  THERE'S LOTS OF STUFF
+#   HAPPENING!
 #
 # ----------------------------------------------------------------------------
 
@@ -221,17 +222,16 @@ sub stop
             delete $self->{folders__}{$_}{imap};
         }
     }
+
+    $self->SUPER::stop();
 }
-
-
 
 # ----------------------------------------------------------------------------
 #
 # service
 #
-#   This get's frequently called by the framework.
-#   It checks whether our checking interval has elapsed and if it has,
-#   it goes to work.
+#   This get's frequently called by the framework.  It checks whether
+#   our checking interval has elapsed and if it has, it goes to work.
 #
 # ----------------------------------------------------------------------------
 

@@ -100,6 +100,7 @@ Header_Buckets                          Buckets
 Header_Configuration                    Configuration
 Header_Advanced                         Advanced
 Header_Security                         Security
+Header_Administration                   Administration
 Header_Magnets                          Magnets
 
 Footer_HomePage                         POPFile Home Page

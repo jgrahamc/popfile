@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # Tests for WordMangle.pm
 #
@@ -20,44 +20,25 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
-use Classifier::WordMangle;
-use POPFile::Configuration;
-use POPFile::MQ;
-use POPFile::Logger;
+use POPFile::Loader;
+my $POPFile = POPFile::Loader->new();
+$POPFile->CORE_loader_init();
+$POPFile->CORE_signals();
 
-# Load the test corpus
-my $c = new POPFile::Configuration;
-my $mq = new POPFile::MQ;
-my $l = new POPFile::Logger;
-my $w = new Classifier::WordMangle;
+my %valid = ( 'Classifier/WordMangle' => 1,
+              'POPFile/Logger' => 1,
+              'POPFile/MQ'     => 1,
+              'POPFile/Configuration' => 1 );
 
-$c->configuration( $c );
-$c->mq( $mq );
-$c->logger( $l );
-
-$c->initialize();
-
-$l->configuration( $c );
-$l->mq( $mq );
-$l->logger( $l );
-
-$l->initialize();
-
-$mq->configuration( $c );
-$mq->mq( $mq );
-$mq->logger( $l );
-
-$w->configuration( $c );
-$w->mq( $mq );
-$w->logger( $l );
-
-$w->initialize();
-
+$POPFile->CORE_load( 0, \%valid );
+$POPFile->CORE_initialize();
+$POPFile->CORE_config( 1 );
 unlink 'stopwords';
+$POPFile->CORE_start();
 
-$w->start();
+my $w = $POPFile->get_module( 'Classifier/WordMangle' );
 
 # Test basic mangling functions
 
@@ -116,5 +97,7 @@ $w->start();
 my @stopwords = $w->stopwords();
 test_assert_equal( $#stopwords, 0 );
 test_assert_equal( $stopwords[0], 'anotherbigword' );
+
+$POPFile->CORE_stop();
 
 1;
