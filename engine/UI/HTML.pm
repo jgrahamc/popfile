@@ -289,7 +289,7 @@ sub url_handler__
             }
         }
 
-        #Reset any filters
+        # Reset any filters
         $self->{form_}{filter}    = '';
         $self->{form_}{search}    = '';
         $self->{form_}{setsearch} = 1;
@@ -298,8 +298,12 @@ sub url_handler__
         # but we do find it on disk using perl's -e file test operator (returns
         # true if the file exists).
 
-        $self->invalidate_history_cache() if ( !$found && ( -e ( $self->global_config_( 'msgdir' ) . $file ) ) );
-        $self->http_redirect_( $client, "/view?session=$self->{session_key__}&view=$self->{form_}{view}&start_message=$self->{form_}{start_message}" );
+        $self->invalidate_history_cache() if ( !$found );
+        if ( -e ( $self->global_config_( 'msgdir' ) . $file ) ) {
+            $self->http_redirect_( $client, "/view?session=$self->{session_key__}&view=$self->{form_}{view}&start_message=$self->{form_}{start_message}" );
+	} else {
+            $self->http_redirect_( $client, "/history" );
+        }
         return 1;
     }
 
@@ -2927,8 +2931,10 @@ sub view_page
 {
     my ( $self, $client ) = @_;
 
+    $self->load_history_cache__() if ( $self->{history_invalid__} == 1 );
+
     my $mail_file     = $self->{form_}{view};
-    my $start_message = $self->{form_}{start_message};
+    my $start_message = $self->{form_}{start_message} || 0;
     my $reclassified  = $self->{history__}{$mail_file}{reclassified};
     my $bucket        = $self->{history__}{$mail_file}{bucket};
     my $color         = $self->{classifier__}->get_bucket_color($bucket);
@@ -2970,7 +2976,7 @@ sub view_page
     }
 
     $body .= "</td>\n";
-    
+
     $body .= "<td class=\"openMessageCloser\">";
     $body .= "<a class=\"messageLink\" href=\"/history?" . $self->print_form_fields_(1,1,('start_message','filter','session','search','sort')) . "\">\n";
     $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
