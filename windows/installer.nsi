@@ -43,6 +43,9 @@ Section "POPFile"
   SetOutPath $INSTDIR\IO
   File "C:\Perl\lib\IO\*"
 
+  SetOutPath $INSTDIR\Sys
+  File "C:\Perl\lib\Sys\*"
+
   SetOutPath $INSTDIR\IO\Socket
   File "C:\Perl\lib\IO\Socket\*"
 
