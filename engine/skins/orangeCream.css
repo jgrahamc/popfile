@@ -76,15 +76,15 @@ hr {
 	 background-color: transparent;
 }
 
-.settingsTable {
+table.settingsTable {
 	border: 1px solid Black;
 }
 
-.openMessageTable, .lookupResultsTable {
+table.openMessageTable, table.lookupResultsTable {
 	border: 3px solid Black;
 }
 
-.settingsPanel {
+td.settingsPanel {
 	border: 1px solid Black;
 }
 
@@ -174,7 +174,6 @@ a.historyLabel {
 	background-color: transparent;
 	color: #8c6866;
 	font-weight: bold;
-	text-decoration: none;
 }
 
 a.historyLabel:hover {
@@ -225,7 +224,7 @@ a.historyLabel:hover {
 	font-weight: bold;
 }
 
-td.logo2menuSpace {
+td.logo2menuSpace { 
 	height: 0.8em;
 }
 
@@ -419,14 +418,5 @@ td.historyNavigatorBottom {
 	text-align: right;
 	padding-right: 0.5em;
 	padding-bottom: 1.0em;
-}
-
-.historyLabel em {
-	font-weight: bold;
-	font-style: normal;
-}
-
-.magnetsTable caption {
-	text-align: left;
 }
 
