@@ -2672,6 +2672,7 @@ skip_kakasi:
   RMDir /r "$INSTDIR\Sys"
   RMDir /r "$INSTDIR\Text"
   RMDir /r "$INSTDIR\warnings"
+  RMDir /r "$INSTDIR\Win32"
 
   Delete "$INSTDIR\Uninstall.exe"
 
