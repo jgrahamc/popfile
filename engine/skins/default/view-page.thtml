@@ -28,13 +28,13 @@
                 <input type="hidden" name="start_message" value="<TMPL_VAR NAME="View_This_Page">" />
                 <input type="hidden" name="filter" value="<TMPL_VAR NAME="View_Field_Filter">" />
 
-                <table align=left>
-                    <tr>
+                <table align="left">
+                    <tr valign="top">
                         <td>
                             <font size="+1">
                                 <b>
-                                    <TMPL_VAR NAME="Localize_From">
-                                </b>:
+                                    <TMPL_VAR NAME="Localize_From">:
+                                </b>
                             </font>
                         </td>
                         <td align=left>
@@ -43,12 +43,12 @@
                             </font>
                         </td>
                     </tr>
-                    <tr>
+                    <tr valign="top">
                         <td>
                             <font size="+1">
                                 <b>
-                                    <TMPL_VAR NAME="Localize_To">
-                                </b>:
+                                    <TMPL_VAR NAME="Localize_To">:
+                                </b>
                             </font>
                         </td>
                         <td>
@@ -57,12 +57,12 @@
                             </font>
                         </td>
                     </tr>
-                    <tr>
+                    <tr valign="top">
                         <td>
                             <font size="+1">
                                 <b>
-                                    <TMPL_VAR NAME="Localize_Cc">
-                                </b>:
+                                    <TMPL_VAR NAME="Localize_Cc">:
+                                </b>
                             </font>
                         </td>
                         <td>
@@ -71,12 +71,12 @@
                             </font>
                         </td>
                     </tr>
-                    <tr>
+                    <tr valign="top">
                         <td>
                             <font size="+1">
                                 <b>
-                                    <TMPL_VAR NAME="Localize_Date">
-                                </b>:
+                                    <TMPL_VAR NAME="Localize_Date">:
+                                </b>
                             </font>
                         </td>
                         <td>
@@ -85,12 +85,12 @@
                             </font>
                         </td>
                     </tr>
-                    <tr>
+                    <tr valign="top">
                         <td>
                             <font size="+1">
                                 <b>
-                                    <TMPL_VAR NAME="Localize_Subject">
-                                </b>:
+                                    <TMPL_VAR NAME="Localize_Subject">:
+                                </b>
                             </font>
                         </td>
                         <td>
@@ -99,14 +99,16 @@
                             </font>
                         </td>
                     </tr>
-                </table>
-                <table align=left width=100%>
-                    <tr>
+                    <tr valign="top">
                         <td>
                             <font size="+1">
                                 <b>
-                                    <TMPL_VAR NAME="Localize_Classification">
-                                </b>:
+                                    <TMPL_VAR NAME="Localize_Classification">:
+                                </b>
+                            </font>
+                        </td>
+                        <td>
+                            <font size="+1">
                                 <span style="color:<TMPL_VAR NAME="View_Bucket_Color">">
                                     <TMPL_VAR NAME="View_Bucket">
                                 </span>
@@ -116,12 +118,16 @@
 
                     <TMPL_IF NAME="View_If_Class_Changed">
 
-                    <tr>
+                    <tr valign="top">
                         <td>
                             <font size="+1">
                                 <b>
-                                    <TMPL_VAR NAME="Localize_History_ChangedClass">
-                                </b>:
+                                    <TMPL_VAR NAME="Localize_History_ChangedClass">:
+                                </b>
+                            </font>
+                        </td>
+                        <td>
+                            <font size="+1">
                                 <span style="color:<TMPL_VAR NAME="View_Class_Changed_Color">">
                                     <TMPL_VAR NAME="View_Class_Changed">
                                 </span>
@@ -131,44 +137,67 @@
 
                     </TMPL_IF>
 
-                    <tr>
-                        <td colspan=2>
+                    <tr valign="top">
+
+                        <TMPL_IF NAME="View_If_Reclassified">
+
+                        <td>
                             <font size="+1">
-
-                                <TMPL_IF NAME="View_If_Reclassified">
-
-                                <TMPL_VAR NAME="View_Already">
-                                <input type="submit" class="undoButton" name="undo_<TMPL_VAR NAME="View_Index">" value="<TMPL_VAR NAME="Localize_Undo">">
-
-                                <TMPL_ELSE>
-
-                                <TMPL_IF NAME="View_If_Magnetized">
-
-                                (<TMPL_VAR NAME="Localize_History_MagnetUsed">: <TMPL_VAR NAME="View_Magnet">)
-
-                                <TMPL_ELSE>
-
-                                <TMPL_VAR NAME="Localize_History_ShouldBe">:
-                                <select name="reclassify_<TMPL_VAR NAME="View_Index">">
-                                    <option selected="selected"></option>
-
-                                    <TMPL_LOOP NAME="View_Loop_Buckets">
-
-                                    <option value="<TMPL_VAR NAME="View_Bucket">" style="color: <TMPL_VAR NAME="View_Bucket_Color">">
-                                        <TMPL_VAR NAME="View_Bucket">
-                                    </option>
-
-                                    </TMPL_LOOP>
-
-                                </select>
-                                <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
-
-                                </TMPL_IF>
-
-                                </TMPL_IF>
-
+                                <b>
+                                    <TMPL_VAR NAME="View_Already">
+                                </b>
                             </font>
                         </td>
+                        <td>
+                            <input type="submit" class="undoButton" name="undo_<TMPL_VAR NAME="View_Index">" value="<TMPL_VAR NAME="Localize_Undo">">
+                        </td>
+
+                        <TMPL_ELSE>
+
+                        <TMPL_IF NAME="View_If_Magnetized">
+
+                        <td>
+                            <font size="+1">
+                                <b>
+                                    <TMPL_VAR NAME="Localize_History_MagnetUsed">:
+                                </b>
+                            </font>
+                        </td>
+                        <td>
+                            <font size="+1">
+                                <TMPL_VAR NAME="View_Magnet">
+                            </font>
+                        </td>
+
+                        <TMPL_ELSE>
+
+                        <td>
+                           <font size="+1">
+                                <b>
+                                    <TMPL_VAR NAME="Localize_History_ShouldBe">:
+                                </b>
+                            </font>
+                        </td>
+                        <td>
+                            <select name="reclassify_<TMPL_VAR NAME="View_Index">">
+                                <option selected="selected"></option>
+
+                                <TMPL_LOOP NAME="View_Loop_Buckets">
+
+                                <option value="<TMPL_VAR NAME="View_Bucket">" style="color: <TMPL_VAR NAME="View_Bucket_Color">">
+                                    <TMPL_VAR NAME="View_Bucket">
+                                </option>
+
+                                </TMPL_LOOP>
+
+                            </select>
+                            <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
+                        </td>
+
+                        </TMPL_IF>
+
+                        </TMPL_IF>
+
                     </tr>
                 </table>
             </form>
