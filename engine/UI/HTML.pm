@@ -1523,8 +1523,9 @@ sub history_page
 
         foreach my $i ($start_message ..  $stop_message) {
             my $mail_file;
-            my $from = '';
-            my $subject = '';
+            my $from          = '';
+            my $subject       = '';
+            my $short_subject = '';
             $mail_file = $self->{history}{$i}{file};
 
             if ( ( $self->{history}{$i}{subject} eq '' ) || ( $self->{history}{$i}{from} eq '' ) )  {
@@ -1551,31 +1552,38 @@ sub history_page
                 }
                 close MAIL;
 
+                $from    = "&lt;$self->{language}{History_NoFrom}&gt;" if ( $from eq '' );
+                $subject = "&lt;$self->{language}{History_NoSubject}&gt;" if ( !( $subject =~ /[^ \t\r\n]/ ) );
+
+                $short_subject = $subject;
+
                 if ( length($from)>40 )  {
                     $from =~ /(.{40})/;
                     $from = "$1...";
                 }
 
-                if ( length($subject)>40 )  {
-                    $subject =~ s/=20/ /g;
-                    $subject =~ /(.{40})/;
-                    $subject = "$1...";
+                if ( length($short_subject)>40 )  {
+                    $short_subject =~ s/=20/ /g;
+                    $short_subject =~ /(.{40})/;
+                    $short_subject = "$1...";
                 }
-                
-                $from    = "&lt;$self->{language}{History_NoFrom}&gt;" if ( $from eq '' );
-                $subject = "&lt;$self->{language}{History_NoSubject}&gt;" if ( !( $subject =~ /[^ \t\r\n]/ ) );
 
                 $from =~ s/</&lt;/g;
                 $from =~ s/>/&gt;/g;
 
                 $subject =~ s/</&lt;/g;
                 $subject =~ s/>/&gt;/g;
+
+                $short_subject =~ s/</&lt;/g;
+                $short_subject =~ s/>/&gt;/g;
                 
-                $self->{history}{$i}{from}    = $from;
-                $self->{history}{$i}{subject} = $subject;
+                $self->{history}{$i}{from}          = $from;
+                $self->{history}{$i}{subject}       = $subject;
+                $self->{history}{$i}{short_subject} = $short_subject;
             } else {
-                $from    = $self->{history}{$i}{from};
-                $subject = $self->{history}{$i}{subject}; 
+                $from          = $self->{history}{$i}{from};
+                $subject       = $self->{history}{$i}{subject}; 
+                $short_subject = $self->{history}{$i}{short_subject}; 
             }
             
             # If the user has more than 4 buckets then we'll present a drop down list of buckets, otherwise we present simple
@@ -1601,7 +1609,7 @@ sub history_page
             my $reclassified = $self->{history}{$i}{reclassified}; 
             $mail_file =~ /popfile\d+=(\d+)\.msg/;
             $body .= $from;
-            $body .= "<td><a href=/history?view=$mail_file&start_message=$start_message&session=$self->{session_key}&filter=$self->{form}{filter}#$mail_file>$subject</a><td>";
+            $body .= "<td><a title='$subject' href=/history?view=$mail_file&start_message=$start_message&session=$self->{session_key}&filter=$self->{form}{filter}#$mail_file>$short_subject</a><td>";
             if ( $reclassified )  {
                 $body .= "<font color=$self->{classifier}->{colors}{$bucket}>$bucket</font><td>" . sprintf( $self->{language}{History_Already}, $self->{classifier}->{colors}{$bucket}, $bucket ) . " - <a href=/history?undo=$mail_file&session=$self->{session_key}&badbucket=$bucket&filter=$self->{form}{filter}&start_message=$start_message#$mail_file>[$self->{language}{Undo}]</a>";
             } else {
