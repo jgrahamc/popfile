@@ -92,10 +92,11 @@ if ( $#ARGV > 0 ) {
     }
 
     if ( $code == 0 ) {
-        if ( !$b->add_messages_to_bucket( $ARGV[0], @files ) ) {
+        if ( !$b->is_bucket($ARGV[0]) ) {
             print STDERR "Error: Bucket `$ARGV[0]' does not exist, insert aborted.\n";
             $code = 1;
         } else {
+            $b->add_messages_to_bucket( $ARGV[0], @files );
             print "Added ", $#files+1, " files to `$ARGV[0]'\n";
         }
     }

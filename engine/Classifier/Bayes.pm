@@ -1168,6 +1168,7 @@ sub echo_to_dot_
     my $hit_dot = 0;
 
     my $isopen = open FILE, "$file" if ( defined( $file ) );
+    binmode FILE if ($isopen);
 
     while ( my $line = $self->slurp_( $mail ) ) {
 
@@ -2213,6 +2214,20 @@ sub is_pseudo_bucket
     my ( $self, $bucket ) = @_;
 
     return $self->{db_bucketid__}{$bucket}{pseudo};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# is_pseudo_bucket
+#
+# Returns 1 if the named bucket is a bucket
+#
+# ---------------------------------------------------------------------------------------------
+sub is_bucket
+{
+    my ( $self, $bucket ) = @_;
+
+    return defined($self->{db_bucketid__}{$bucket});
 }
 
 # ---------------------------------------------------------------------------------------------
