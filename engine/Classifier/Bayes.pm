@@ -773,14 +773,14 @@ sub classify_and_modify
                 $message_size += length $line;                                        
                 print TEMP $line;
 
-                if ( $line =~ /Subject:(.*)/i )  {
+                if ( $line =~ /^Subject:(.*)/i )  {
                     $msg_subject = $1;
                     $msg_subject =~ s/(\012|\015)//g;
                     next;
                 }
 
                 # Strip out the X-Text-Classification header that is in an incoming message
-                if ( ( $line =~ /X-Text-Classification:/i ) == 0 ) {
+                if ( ( $line =~ /^X-Text-Classification:/i ) == 0 ) {
                     if ( $msg_subject eq '' )  {
                         $msg_head_before .= $line;
                     } else {
