@@ -1,0 +1,13 @@
+#!/bin/sh
+
+/usr/bin/perl -MMIME::Base64 -e"print 'yes'" >/dev/null 2>&1
+
+if [ $? = 0 ]; then
+	rm -rf /usr/local/bin/POPFile/MIME/Base64.pm >/dev/null 2>&1
+fi
+
+/usr/bin/perl -MMIME::QuotedPrint -e"print 'yes'" >/dev/null 2>&1
+
+if [ $? = 0 ]; then
+	rm -rf /usr/local/bin/POPFile/MIME/QuotedPrint.pm >/dev/null 2>&1
+fi

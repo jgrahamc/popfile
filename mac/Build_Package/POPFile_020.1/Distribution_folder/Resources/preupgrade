@@ -1,0 +1,7 @@
+#!/bin/sh
+pid=$( ps -auxww | grep popfile.pl | grep -v grep | awk '{ print $2 }' )
+if [ $pid ]; then
+  kill -6 $pid
+else
+  exit 0
+fi

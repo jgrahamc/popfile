@@ -1,0 +1,16 @@
+Title POPfile
+Version 0.19
+Description POPfile mail classifier proxy
+DefaultLocation /
+DeleteWarning 
+
+### Package Flags
+
+NeedsAuthorization YES
+Required NO
+Relocatable NO
+RequiresReboot NO
+UseUserMask YES
+OverwritePermissions NO
+InstallFat NO
+RootVolumeOnly YES

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+if [ -L /usr ] || [ -L /usr/local ] || [ -L /usr/local/bin ] || [ -L /Library ] || [ -L /Library/StartupItems ]; then
+	/usr/bin/osascript -e 'tell application "Finder" to display dialog "There is a symlink in one of the installation paths that will prevent this package from installing correctly. The installer will now exit with an error" buttons {"cancel"} default button 1' > /dev/null 2>&1
+fi

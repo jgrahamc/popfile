@@ -1,0 +1,7 @@
+{
+  Description     = "POPfile mail classifier proxy";
+  Provides        = ("POP Proxy");
+  Requires        = ("Network");
+  Uses            = ("Disks", "Network Time", "IPServices");
+  OrderPreference = "Last";
+}

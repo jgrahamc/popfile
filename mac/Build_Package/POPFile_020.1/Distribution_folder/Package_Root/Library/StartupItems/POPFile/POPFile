@@ -1,0 +1,54 @@
+#!/bin/sh
+
+##
+# POPfile
+##
+
+. /etc/rc.common
+
+# if ( $?PERL5LIB ) then
+# PERL5LIB="/sw/lib/perl5:$PERL5LIB"
+# export PERL5LIB
+# else
+# PERL5LIB="/sw/lib/perl5"
+# export PERL5LIB
+# fi 
+
+POPFILEDIR="/usr/local/bin/POPfile"
+
+StartService ()
+{
+    pid=$( ps -auxww | grep popfile.pl | grep -v grep | awk '{ print $2 }' )
+    if ! [ $pid ]; then
+      ConsoleMessage "Starting POPfile POP mail proxy"
+      rm -f "$POPFILEDIR"/popfile.pid
+      cd "$POPFILEDIR"
+      ./popfile.pl > /dev/null 2>&1 &
+    else
+      ConsoleMessage "POPfile is already running"
+    fi
+}
+
+StopService ()
+{
+    pid=$( ps -auxww | grep popfile.pl | grep -v grep | awk '{ print $2 }' )
+    if [ $pid ]; then
+      ConsoleMessage "Stopping POPfile POP mail proxy"
+      kill -6 $pid
+      rm -f "$POPFILEDIR"/popfile.pid
+    else
+      ConsoleMessage "POPfile is not running."
+    fi
+}
+
+RestartService ()
+{
+    pid=$( ps -auxww | grep popfile.pl | grep -v grep | awk '{ print $2 }' )
+      ConsoleMessage "Restarting POPfile POP mail proxy"
+      kill -HUP $pid
+      rm -f "$POPFILEDIR"/popfile.pid
+      cd "$POPFILEDIR"
+      ./popfile.pl > /dev/null 2>&1 &
+}
+
+RunService "$1"

@@ -1,0 +1,5 @@
+Open POPFile.pmsp in Packagemaker.app and correct the paths to "Resources" and "Package_Root". At this point if the ownerships and permissions have been preserved it should build. Keep in mind that the Apple package maker by virtue of PAX can severly impact system operation. Know also that if you get the package ownerships and file permissions wrong, the diskutil repair permissions process will use the receipt file your package leaves behind. This means that repairing permissions will undo any repairs the end user may do by hand. This can be very frustrating. It is suggested that the existing ownerships and permissions be compared to the existing file system after having run "diskutil repairPermissions /" from the command line. Eventually there may be a script included that would correct them before the package is built.
+
+--Cheers
+
+
