@@ -1677,7 +1677,7 @@ sub corpus_page
                     $normal =~ s/\./$d/;
 	            $score      = sprintf("%.10f", $score);
                     $score =~ s/\./$d/;
-	            my $probf   = sprintf("%.40f", $prob);
+	            my $probf   = sprintf("%.10f", $prob);
                     $probf =~ s/\./$d/;
 	            my $bold    = '';
 	            my $endbold = '';
