@@ -2876,7 +2876,7 @@ sub create_bucket
     return undef if ( !defined( $userid ) );
 
     $self->{db__}->do(
-        "insert or ignore into buckets ( 'userid', 'name', 'pseudo' ) values ( $userid, '$bucket', 0 );" );
+        "insert into buckets ( userid, name, pseudo ) values ( $userid, '$bucket', 0 );" );
     $self->db_update_cache__( $session );
 
     return 1;
