@@ -1708,44 +1708,30 @@ sub bucket_page
     $body .= "</font>\n</h2>\n$self->{language__}{SingleBucket_Message1}\n<br /><br />\n<table summary=\"$self->{language__}{Bucket_WordListTableSummary}\">\n";
     $body .= "<tr><td colspan=2>";
 
-    # TODO FIX THIS TO USE NEW API
-
     if ( $self->{classifier__}->get_bucket_word_count( $self->{form_}{showbucket} ) > 0 ) {
-      for my $i ($self->{classifier__}->get_bucket_word_list($self->{form_}{showbucket})) {
-        if ( defined($i) ) {
-          my $j = $i;
-          $j =~ /^\|(.)/;
-          my $first = $1;
+        for my $i ($self->{classifier__}->get_bucket_word_prefixes($self->{form_}{showbucket})) {
+            if ( defined( $self->{form_}{showletter} ) && ( $i eq $self->{form_}{showletter} ) ) {
+                my %temp;
 
-          if ( defined( $self->{form_}{showletter} ) && ( $first eq $self->{form_}{showletter} ) ) {
-            # Split the entries on the double bars
+                for my $j ( $self->{classifier__}->get_bucket_word_list( $self->{form_}{showbucket}, $i ) ) {
+                    $temp{$j} = $self->{classifier__}->get_count_for_word( $self->{form_}{showbucket}, $j );
+                }
 
-            my %temp;
+                $body .= "</td></tr><tr><td colspan=2>&nbsp;</td></tr><tr>\n<td valign=\"top\">\n<b>$i</b>\n</td>\n<td valign=\"top\">\n<table><tr valign=\"top\">";
 
-            while ( $j =~ m/\G\|(.*?) L?\-?[\.\d]+\|/g ) {
-              my $word = $1;
-              $temp{$word} = $self->{classifier__}->get_count_for_word( $self->{form_}{showbucket}, $word );
-            }
+                my $count = 0;
 
-            $body .= "</td></tr><tr><td colspan=2>&nbsp;</td></tr><tr>\n<td valign=\"top\">\n<b>$first</b>\n</td>\n<td valign=\"top\">\n<table><tr valign=\"top\">";
+                for my $word (sort { $temp{$b} <=> $temp{$a} } keys %temp) {
+                    $body .= "</tr><tr valign=\"top\">" if ( ( $count % 6 ) ==  0 );
+                    $body .= "<td><a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key__}\&amp;lookup=Lookup\&amp;word=". $self->url_encode_( $word ) . "#Lookup\"><b>$word</b><\/a></td><td>$temp{$word}</td><td>&nbsp;</td>";
+                    $count += 1;
+                }
 
-            my $count = 0;
-
-            for my $word (sort { $temp{$b} <=> $temp{$a} } keys %temp) {
-              $body .= "</tr><tr valign=\"top\">" if ( ( $count % 6 ) ==  0 );
-              $body .= "<td><a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key__}\&amp;lookup=Lookup\&amp;word=". $self->url_encode_( $word ) . "#Lookup\"><b>$word</b><\/a></td><td>$temp{$word}</td><td>&nbsp;</td>";
-              $count += 1;
-            }
-
-            $body .= "</tr></table></td>\n</tr>\n<tr><td colspan=2>&nbsp;</td></tr><tr><td colspan=2>";
-
+                $body .= "</tr></table></td>\n</tr>\n<tr><td colspan=2>&nbsp;</td></tr><tr><td colspan=2>";
           } else {
-            $j = '';
-
-            $body .= "<a href=/buckets?session=$self->{session_key__}\&amp;showbucket=$self->{form_}{showbucket}\&amp;showletter=" . $self->url_encode_($first) . "><b>$first</b></a>\n";
+            $body .= "<a href=/buckets?session=$self->{session_key__}\&amp;showbucket=$self->{form_}{showbucket}\&amp;showletter=" . $self->url_encode_($i) . "><b>$i</b></a>\n";
           }
-        }
-      }
+       }
     }
 
     $body .= "</td></tr>";

@@ -67,6 +67,7 @@ sub new
 
     # Matrix of buckets, words and the word counts
     $self->{matrix__}            = {};
+    $self->{db__}                = {};
 
     # Total number of words in all buckets
     $self->{full_total__}        = 0;
@@ -294,6 +295,7 @@ sub close_database__
     for my $bucket (keys %{$self->{matrix__}})  {
         untie %{$self->{matrix__}{$bucket}};
         delete $self->{matrix__}{$bucket};
+        delete $self->{db__}{$bucket};
     }
 }
 
@@ -613,9 +615,9 @@ sub load_bucket_
     # flat file used by POPFile for corpus storage) then create the new
     # tied hash from it thus performing an automatic upgrade.
 
-    tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",
-            -Filename => $self->config_( 'corpus' ) . "/$bucket/table.db",
-            -Flags    => DB_CREATE;
+    $self->{db__}{$bucket} = tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",
+                                 -Filename => $self->config_( 'corpus' ) . "/$bucket/table.db",
+                                 -Flags    => DB_CREATE;
 
     if ( !defined( $self->get_bucket_word_count( $bucket ) ) ) {
         $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} = 0;
@@ -1434,29 +1436,34 @@ sub get_bucket_word_count
 #
 # get_bucket_word_list
 #
-# Returns a list of bucket entries, each entry corresponds to all the words with the
-# same leading character
+# Returns a list of words all with the same first character
 #
 # $bucket      The name of the bucket for which the word count is desired
+# $prefix      The first character of the words
 #
 # ---------------------------------------------------------------------------------------------
 sub get_bucket_word_list
 {
+    my ( $self, $bucket, $prefix ) = @_;
+
+    return grep {/^$prefix/} keys %{$self->{matrix__}{$bucket}};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_bucket_word_prefixes
+#
+# Returns a list of all the initial letters of words in a bucket
+#
+# $bucket      The name of the bucket for which the word count is desired
+#
+# ---------------------------------------------------------------------------------------------
+sub get_bucket_word_prefixes
+{
     my ( $self, $bucket ) = @_;
 
-    my @result;
-
-    if ( $self->get_bucket_word_count( $bucket ) > 0 ) {
-# TODO        my @entries = @{$self->{matrix__}{$bucket}};
-
-# TODO        for my $i (0..$#entries) {
-# TODO            if ( defined( $entries[$i] ) && ( $entries[$i] ne '' ) ) {
-# TODO                push @result, ($entries[$i]);
-# TODO            }
-# TODO        }
-    }
-
-    return @result;
+    my $prev = '';
+    return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)} keys %{$self->{matrix__}{$bucket}};
 }
 
 # ---------------------------------------------------------------------------------------------
