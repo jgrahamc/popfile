@@ -26,8 +26,9 @@
 #
 #--------------------------------------------------------------------------
 
-; This version of the script has been tested with the "NSIS 2 Release Candidate 4" compiler,
-; released 2 February 2004, with no patches applied.
+; This version of the script has been tested with the "NSIS 2" compiler (final),
+; released 7 February 2004, with no patches applied.
+;
 ; Expect 3 compiler warnings, all related to standard NSIS language files which are out-of-date.
 
 ; IMPORTANT WARNING:
@@ -592,7 +593,7 @@
 
   ;-----------------------------------------
   ; Select the languages to be supported by installer/uninstaller.
-  ; Currently a subset of the languages supported by NSIS MUI 1.68 (using the NSIS names)
+  ; Currently a subset of the languages supported by NSIS MUI 1.70 (using the NSIS names)
   ;-----------------------------------------
 
   ; At least one language must be specified for the installer (the default is "English")
@@ -661,9 +662,9 @@
 # Reserve the files required by the installer (to improve performance)
 #--------------------------------------------------------------------------
 
-  ;Things that need to be extracted on startup (keep these lines before any File command!)
-  ;Only useful for BZIP2 compression
-  ;Use ReserveFile for your own Install Options ini files too!
+  ; Things that need to be extracted on startup (keep these lines before any File command!)
+  ; Only useful when solid compression is used (by default, solid compression is enabled
+  ; for BZIP2 and LZMA compression)
 
   !insertmacro MUI_RESERVEFILE_LANGDLL
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
@@ -1362,12 +1363,8 @@ check_bucket_count:
   StrCpy ${L_TEMP} ${L_CORPUS_PATH} "" ${L_TEMP}
   WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "BackupPath" "$INSTDIR\backup\nonsql"
 
-  ; Ensure the CopyFiles command works on NT and Win95 systems
-  
-  CreateDirectory "$INSTDIR\backup\nonsql\${L_TEMP}"
-
   ClearErrors
-  CopyFiles /SILENT "${L_CORPUS_PATH}" "$INSTDIR\backup\nonsql\${L_TEMP}\"
+  CopyFiles /SILENT "${L_CORPUS_PATH}" "$INSTDIR\backup\nonsql\"
   IfErrors 0 continue
   DetailPrint "Error detected when making corpus backup"
   MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_MBCORPUS_1)"
