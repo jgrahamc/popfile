@@ -131,8 +131,12 @@ $cl->{htmlfontcolor__} = '';
 test_assert_equal( $cl->parse_html( '<font color=#008000>' ), 0 );
 test_assert_equal( $cl->{htmlfontcolor__}, $cl->map_color( 'green' ) );
 $cl->{htmlfontcolor__} = '';
-test_assert_equal( $cl->parse_html( '<font color=#00ff00></font>' ), 0 );
+test_assert_equal( $cl->parse_html( '<font color=#00FF00>foo</font>' ), 0 );
 test_assert_equal( $cl->{htmlfontcolor__}, $cl->map_color( 'black' ) );
+$cl->{htmlfontcolor__} = '';
+test_assert_equal( $cl->parse_html( '<font color=#00FF00></font>' ), 0 ); # test for empty tag removal interacting with font tags
+test_assert_equal( $cl->{htmlfontcolor__}, '' );
+
 
 # Check comment detection
 $cl->{words__}         = {};
@@ -184,7 +188,7 @@ test_assert_equal( scalar( $cl->parse_css_color($style->{'color'}) ), 'ff00ff' )
 test_assert_equal( $style->{'background'}, 'red' );
 test_assert_equal( scalar($cl->parse_css_color($style->{'background'})), 'ff0000' );
 
-$style = $cl->parse_css_style( '{color: #ff00ff; background: red }', 1 );
+$style = $cl->parse_css_style( '{ color: #ff00ff ; background : red }', 1 );
 
 test_assert_equal( $style->{'color'}, '#ff00ff' );
 test_assert_equal( scalar( $cl->parse_css_color($style->{'color'}) ), 'ff00ff' );
@@ -254,9 +258,13 @@ $cl->parse_html( '<body style="color:#ffffff;background: white">' );
 test_assert_equal( $cl->{words__}{'html:cssfontcolorffffff'}, 1 );
 test_assert_equal( $cl->{words__}{'html:cssbackcolorffffff'}, 1 );
 
+
+test_assert_equal( $cl->{cssfontcolortag__}, 'body' );
+test_assert_equal( $cl->{cssbackcolortag__}, 'body' );
 test_assert_equal( $cl->{htmlfontcolor__}, 'ffffff' );
 test_assert_equal( $cl->{htmlbackcolor__}, 'ffffff' );
 test_assert_equal( $cl->{htmlbodycolor__}, 'ffffff' );
+test_assert_equal( $cl->{htmlcolordistance__}, 0 );
 
 test_assert_equal( $cl->{cssfontcolortag__}, 'body');
 test_assert_equal( $cl->{cssbackcolortag__}, 'body');
@@ -270,23 +278,46 @@ test_assert_equal( $cl->{words__}{'html:cssdisplaynone'}, 1 );
 
 $cl->parse_html( '</div></body>' );
 
+test_assert_equal( $cl->{htmlcolordistance__},  441 );
+
 test_assert_equal( $cl->{cssfontcolortag__}, '' );
 test_assert_equal( $cl->{cssbackcolortag__}, '' );
 test_assert_equal( $cl->{htmlfontcolor__}, '000000' );
 test_assert_equal( $cl->{htmlbackcolor__}, 'ffffff' );
 test_assert_equal( $cl->{htmlbodycolor__}, 'ffffff' );
 
+$cl->parse_html( '<P style="color: rgb(0,0,0);background: #010101">' );
 
-
-$cl->parse_html( '<p style="color: rgb(0,0,0);background: #000000">' );
-
+test_assert_equal( $cl->{cssfontcolortag__}, 'p' );
+test_assert_equal( $cl->{cssbackcolortag__}, 'p' );
 test_assert_equal( $cl->{words__}{'html:cssfontcolor000000'}, 1 );
-test_assert_equal( $cl->{words__}{'html:cssbackcolor000000'}, 1 );
+test_assert_equal( $cl->{words__}{'html:cssbackcolor010101'}, 1 );
+test_assert_equal( $cl->{htmlcolordistance__}, 1 );
+test_assert_equal( $cl->{htmlfontcolor__}, '000000' );
+test_assert_equal( $cl->{htmlbackcolor__}, '010101' );
+
+
+$cl->parse_html( '</P>');
+
+test_assert_equal( $cl->{cssfontcolortag__}, '' );
+test_assert_equal( $cl->{cssbackcolortag__}, '' );
+test_assert_equal( $cl->{htmlcolordistance__}, 441 );
+test_assert_equal( $cl->{htmlfontcolor__}, '000000' );
+test_assert_equal( $cl->{htmlbackcolor__}, 'ffffff' );
+test_assert_equal( $cl->{htmlbodycolor__}, 'ffffff' );
 
 $cl->{htmlfontcolor__} = '';
 $cl->{words__}         = {};
 $cl->{in_html_tag}   = 0;
 
+$cl->parse_html( '<img src="popfile.sourceforge.net/foo.gif">' );
+test_assert_equal( $cl->{words__}{'popfile.sourceforge.net'}, 1 );
+
+# make sure we don't crash for some stupid html things like
+# invalid tags passed to update_tag
+
+$cl->update_tag( "faketag(|", "foo", 0, 0 );
+$cl->update_tag( "faketag(|", "foo", 1, 0 );
 
 # glob the tests directory for files called TestMailParse\d+.msg which consist of messages
 # to be parsed with the resulting values for the words hash in TestMailParse\d+.wrd
@@ -318,7 +349,7 @@ for my $parse_test (@parse_tests) {
     }
     close WORDS;
 
-    foreach my $missed (keys %{$cl->{words__}}) {
+    foreach my $missed ( sort( keys %{$cl->{words__}} ) ) {
         test_assert( 0, "$missed $cl->{words__}{$missed} missing in $words" );
 
         # Only use this if once you KNOW FOR CERTAIN that it's
