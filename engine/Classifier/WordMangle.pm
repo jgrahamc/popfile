@@ -121,7 +121,7 @@ sub mangle
 
     # Remove characters that would mess up a Perl regexp and replace with .
 
-    $lcword =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\./g;
+    $lcword =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.|\\)/\./g;
 
     # Long words are ignored also
 
@@ -138,7 +138,7 @@ sub mangle
 
     $lcword =~ s/://g if ( !defined( $allow_colon ) );
 
-    return ($word =~ /:/ )?$word:$lcword;
+    return ($lcword =~ /:/ )?$word:$lcword;
 }
 
 # ---------------------------------------------------------------------------------------------

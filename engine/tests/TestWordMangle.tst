@@ -31,11 +31,11 @@ my $w = new Classifier::WordMangle;
 # Test basic mangling functions
 
 test_assert_equal( $w->mangle( 'BIGWORD' ), 'bigword' );
-test_assert_equal( $w->mangle( 'BIG+/?*|()[]{}^$.WORD' ), 'big..............word' );
+test_assert_equal( $w->mangle( 'BIG+/?*|()[]{}^$\\.WORD' ), 'big...............word' );
 test_assert_equal( $w->mangle( 'awordthatisfartolongtobeacceptableforuseinclassification' ), '' );
 test_assert_equal( $w->mangle( 'A1234BEF66' ), '' );
 test_assert_equal( $w->mangle( 'BIG:WORD' ), 'bigword' );
-test_assert_equal( $w->mangle( 'BIG:WORD', 1 ), 'big:word' );
+test_assert_equal( $w->mangle( 'BIG:WORD', 1 ), 'BIG:WORD' );
 
 # Test stop words
 test_assert_equal( $w->mangle( 'BIGWORD' ), 'bigword' );
