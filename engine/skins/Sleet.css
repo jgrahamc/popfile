@@ -1,0 +1,344 @@
+BODY {
+	MARGIN: 1%;
+	COLOR: #ffffff;
+	FONT-FAMILY: sans-serif;
+	BACKGROUND-COLOR: #7988A5;
+	TEXT-ALIGN: center;
+}
+
+.shell {
+    background-color: #424D63;
+    color: #ffffff;
+    border-collapse: collapse;
+}
+
+.naked {
+    FONT-SIZE: 8pt;
+    FONT-FAMILY: sans-serif;
+    padding: 5px;
+}
+
+TABLE.head {
+	WIDTH: 100%;
+	FONT-FAMILY: sans;
+	TEXT-ALIGN: left;
+}
+
+TD.head {
+	FONT-WEIGHT: bold;
+	FONT-SIZE: 12pt;
+	FONT-FAMILY: arial;
+}
+
+select, input {
+    border: 1px outset #000000; 
+    background-color: #BAB8C6;
+    color: black;
+    font-size: 8pt;
+    font-weight: normal; 
+    margin: 0px 0px 0px 0px; 
+    padding: 0px 0px 0px 0px;
+}
+
+.submit {
+    border: none; 
+    background-color: transparent;
+    height: 22px;
+    width: 99px;
+    font-size: 8pt;
+    font-weight: bold; 
+    color: #ffffff;
+    margin: 0px 0px 0px 0px; 
+    padding: 0px 0px 0px 0px;
+    BACKGROUND-IMAGE: url(sleetImages/button.gif);
+    cursor: pointer;
+}
+
+.borderTop {
+	BACKGROUND-IMAGE: url(sleetImages/top.gif);
+	BACKGROUND-REPEAT: repeat-x;
+        height: 21px;
+        padding: 0px;
+        margin: 0px;
+        border: none;
+}
+
+.borderTopLeft {
+        height: 21px;
+	WIDTH: 27px;
+        padding: 0px;
+        margin: 0px;
+        border: none;
+	BACKGROUND-IMAGE: url(sleetImages/topLeft.gif);
+	BACKGROUND-REPEAT: no-repeat;
+}
+
+.borderTopRight {
+        height: 21px;
+	WIDTH: 25px;
+        padding: 0px;
+        margin: 0px;
+        border: none;
+	BACKGROUND-IMAGE: url(sleetImages/topRight.gif);
+	BACKGROUND-REPEAT: no-repeat;
+}
+
+.borderLeft {
+        padding: 0px;
+        margin: 0px;
+        border: none;
+	WIDTH: 27px;
+	BACKGROUND-IMAGE: url(sleetImages/left.gif);
+	BACKGROUND-REPEAT: repeat-y;
+}
+
+.borderRight {
+        padding: 0px;
+        margin: 0px;
+        border: none;
+	BACKGROUND-IMAGE: url(sleetImages/right.gif);
+	WIDTH: 25px;
+	BACKGROUND-REPEAT: repeat-y;
+}
+
+.borderBottom {
+        padding: 0px;
+        margin: 0px;
+        border: none;
+	BACKGROUND-IMAGE: url(sleetImages/bottom.gif);
+	BACKGROUND-REPEAT: repeat-x;
+	HEIGHT: 22px;
+}
+
+.borderBottomLeft {
+        padding: 0px;
+        margin: 0px;
+        border: none;
+	BACKGROUND-IMAGE: url(sleetImages/bottomLeft.gif);
+	WIDTH: 27px;
+	HEIGHT: 22px;
+	BACKGROUND-REPEAT: no-repeat;
+}
+
+.borderBottomRight {
+        padding: 0px;
+        margin: 0px;
+        border: none;
+	BACKGROUND-IMAGE: url(sleetImages/bottomRight.gif);
+	WIDTH: 25px;
+	BACKGROUND-REPEAT: no-repeat;
+	HEIGHT: 22px;
+}
+
+.menu {
+	BACKGROUND-IMAGE: url(sleetImages/menu.gif);
+	FONT-WEIGHT: normal;
+	FONT-SIZE: 10pt;
+        width: 100%;
+}
+
+.menu A {
+	color: #ffffff;
+        background-color: transparent;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 8pt;
+}
+
+.menu A:hover {
+    border: none;
+    cursor: pointer;   
+}
+
+
+.menuSelected {
+	BACKGROUND-IMAGE: url(sleetImages/menuButton.gif);
+	WIDTH: 109px;
+        height: 21px;
+	BACKGROUND-REPEAT: no-repeat;
+}
+
+.menuStandard {
+	BACKGROUND-IMAGE: url(sleetImages/menuButton.gif);
+	WIDTH: 109px;
+        height: 21px;
+	BACKGROUND-REPEAT: no-repeat;
+
+}
+
+.menuIndent {
+	background-image: none;
+        color: #ffffff;
+        background-color: #7988A5;
+	PADDING: 0px;
+        MARGIN: 0px;
+	WIDTH: 0px;
+}
+
+.rowEven, .rowEven A {
+	FONT-SIZE: 8pt;
+	COLOR: #ffffff;
+        background-color: transparent;
+}
+
+
+.rowOdd A {
+	COLOR: #aaaaaa;
+        background-color: transparent;
+}
+
+.rowOdd A {
+    font-size: 8pt;
+    color: #aaaaaa;
+    background-color: transparent;
+}
+
+.rowOdd {
+        color: #ffffff;
+        background-color: #545F74;
+}
+
+.rowOdd TD {
+	COLOR: #aaaaaa;
+        border-top: 1px #888888 solid;
+        border-bottom: 1px #888888 solid;
+}
+
+TR.rowHighlighted {
+	COLOR: #eeeeee;
+        background-color: #545F74;
+}
+
+TD.openMessageCloser {
+	TEXT-ALIGN: right;
+}
+
+TD.openMessageBody {
+	TEXT-ALIGN: left;
+}
+
+TD.accuracy0to49 {
+	COLOR: black;
+	BACKGROUND-COLOR: red
+}
+
+TD.accuracy50to93 {
+	COLOR: black;
+	BACKGROUND-COLOR: yellow
+}
+
+TD.accuracy94to100 {
+	COLOR: black;
+	BACKGROUND-COLOR: green
+}
+
+DIV.error01 {
+	FONT-SIZE: larger;
+	COLOR: red;
+	BACKGROUND-COLOR: transparent
+}
+
+DIV.error02 {
+	COLOR: red;
+	BACKGROUND-COLOR: transparent
+}
+
+SPAN.graphFont {
+	FONT-SIZE: x-small
+}
+
+H2 {
+	FONT-WEIGHT: bold;
+        font-size: 12pt;
+}
+
+SPAN.bucketsLabel {
+	FONT-WEIGHT: bold;
+}
+
+SPAN.magnetsLabel {
+	FONT-WEIGHT: bold;
+}
+
+SPAN.securityLabel {
+	FONT-WEIGHT: bold;
+}
+
+SPAN.configurationLabel {
+	FONT-WEIGHT: bold;
+}
+
+SPAN.advancedLabel {
+	FONT-WEIGHT: bold;
+}
+
+SPAN.passwordLabel {
+	FONT-WEIGHT: bold;
+}
+
+SPAN.sessionLabel {
+	FONT-WEIGHT: bold;
+}
+
+TD.logo2menuSpace {
+	HEIGHT: 1.0em;
+}
+
+A {
+	FONT-SIZE: 10pt;
+	COLOR: #ffffff;
+        text-decoration: underline;
+        background-color: transparent;
+
+}
+
+A:hover {
+        border: 1px #ffffff solid;
+}
+
+HR {
+	COLOR: #888888;
+        background-color: transparent;
+        height: 1px;
+}
+
+.menuSpacer {
+	PADDING-RIGHT: 0px;
+	PADDING-LEFT: 0px;
+	PADDING-BOTTOM: 0px;
+	MARGIN: 0px;
+	WIDTH: 0px;
+	PADDING-TOP: 0px
+}
+
+
+.stabColor01 {
+    border: 1px solid #888888;
+    color: #ffffff;
+    background-color: #545F74;
+
+}
+
+.stabColor03 {
+    border: 1px solid #888888;
+    color: #ffffff;
+    background-color: #545F74;
+}
+
+.footer {
+    BACKGROUND-IMAGE: url(sleetImages/menu.gif);
+    margin-top: 10px;
+    margin-left: 10%;
+    margin-right: 10%;
+    height: 22px;
+    width: 80%;
+    font-size: 8pt;
+    background-color: transparent;
+    color: #000000;
+}
+
+.footer A {
+    font-size: 8pt;
+    color: #000000;
+    background-color: transparent;
+}
