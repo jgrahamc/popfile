@@ -126,7 +126,7 @@ History_RemovePage                      Remove Page
 History_Remove                          To remove entries in the history click
 History_SearchMessage                   Search From/Subject
 History_NoMessages                      No messages
-History_ShowMagnet                      Magnetized
+History_ShowMagnet                      magnetized
 History_Magnet                          &nbsp;(just showing magnet classified messages)
 History_ResetSearch                     Reset
 
