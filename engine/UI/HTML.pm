@@ -639,7 +639,7 @@ sub url_handler__
         $http_header .= "; charset=$self->{language__}{LanguageCharset}\r\n";
         $http_header .= "Content-Length: ";
 
-        my $text = $self->shutdown_page__();
+        my $text = $self->shutdown_page__( $session );
 
         $http_header .= length($text);
         $http_header .= "$eol$eol";
