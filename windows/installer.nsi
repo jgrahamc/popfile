@@ -52,7 +52,7 @@
 # If required, a command-line switch can be used to build an English-only version.
 #
 # Normal multi-language build command:  makensis.exe installer.nsi
-# To build an English-only installer:   makensis.exe  /DENGLISH_ONLY installer.nsi
+# To build an English-only installer:   makensis.exe  /DENGLISH_MODE installer.nsi
 #
 #--------------------------------------------------------------------------
 # Removing support for a particular language:
@@ -114,7 +114,7 @@
   ;--------------------------------------------------------------------------
 
   !define MUI_PRODUCT   "POPFile"
-  !define MUI_VERSION   "0.20.0 (CVS KAKASI)"
+  !define MUI_VERSION   "0.20.0 (INVISIBLE KAKASI)"
 
   !define C_README        "v0.20.0.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
@@ -192,10 +192,10 @@
   VIAddVersionKey "FileDescription" "POPFile Automatic email classification"
   VIAddVersionKey "FileVersion" "${MUI_VERSION}"
 
-  !ifndef ENGLISH_ONLY
-    VIAddVersionKey "Build" "Multi-Language (CVS KAKASI)"
+  !ifndef ENGLISH_MODE
+    VIAddVersionKey "Build" "Multi-Language"
   !else
-    VIAddVersionKey "Build" "English-Only (CVS KAKASI)"
+    VIAddVersionKey "Build" "English-Mode"
   !endif
 
   VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
@@ -402,14 +402,14 @@
 
   !insertmacro PFI_LANG_LOAD "English"
 
-  ; Conditional compilation: if ENGLISH_ONLY is defined, support only 'English'
+  ; Conditional compilation: if ENGLISH_MODE is defined, support only 'English'
 
-  !ifndef ENGLISH_ONLY
+  !ifndef ENGLISH_MODE
 
         ; Additional languages supported by the installer.
 
         ; To remove a language, comment-out the relevant '!insertmacro PFI_LANG_LOAD' line
-        ; from this list. (To remove all of these languages, use /DENGLISH_ONLY on command-line)
+        ; from this list. (To remove all of these languages, use /DENGLISH_MODE on command-line)
 
         ; Entries will appear in the drop-down list of languages in the order given below
         ; (the order used here ensures that the list entries appear in alphabetic order).
@@ -487,9 +487,9 @@ Function .onInit
   Push ${L_OUTPUT_FILE_HANDLE}
   Push ${L_LINE}
 
-  ; Conditional compilation: if ENGLISH_ONLY is defined, support only 'English'
+  ; Conditional compilation: if ENGLISH_MODE is defined, support only 'English'
 
-  !ifndef ENGLISH_ONLY
+  !ifndef ENGLISH_MODE
         !insertmacro MUI_LANGDLL_DISPLAY
   !endif
 
@@ -570,6 +570,10 @@ exit:
   Call SetOptionsPage_Init
   Call SetOutlookExpressPage_Init
   Call StartPOPFilePage_Init
+
+  ; Ensure the 'Kakasi' section is selected if 'Japanese' has been chosen
+
+  Call HandleKakasi
 
 FunctionEnd
 
@@ -706,34 +710,6 @@ update_config:
   SetOutPath $INSTDIR\languages
   File "..\engine\languages\English.msg"
 
-  !ifndef ENGLISH_ONLY
-          StrCmp $LANGUAGE ${LANG_JAPANESE} 0 skip_kakasi_install
-  !endif
-
-  ;--------------------------------------------------------------------------
-  ; Install Kakasi package
-  ;--------------------------------------------------------------------------
-
-  SetOutPath $INSTDIR
-  File /r "${C_KAKASI_DIR}\kakasi"
-
-  ; Add Environment Variables for Kakasi
-
-  Push ITAIJIDICTPATH
-  Push $INSTDIR\kakasi\share\kakasi\itaijidict
-  Call WriteEnvStr
-  Push KANWADICTPATH
-  Push $INSTDIR\kakasi\share\kakasi\kanwadict
-  Call WriteEnvStr
-
-  ;--------------------------------------------------------------------------
-  ; End of Kakasi installation
-  ;--------------------------------------------------------------------------
-  
-  !ifndef ENGLISH_ONLY
-      skip_kakasi_install:
-  !endif
-
   ; Install the Minimal Perl files
 
   SetDetailsPrint textonly
@@ -744,11 +720,9 @@ update_config:
   File "${C_PERL_DIR}\bin\perl.exe"
   File "${C_PERL_DIR}\bin\perl58.dll"
   File "${C_PERL_DIR}\lib\AutoLoader.pm"
-  File "${C_PERL_DIR}\lib\base.pm"
   File "${C_PERL_DIR}\lib\Carp.pm"
   File "${C_PERL_DIR}\lib\Config.pm"
   File "${C_PERL_DIR}\lib\DynaLoader.pm"
-  File "${C_PERL_DIR}\lib\Encode.pm"
   File "${C_PERL_DIR}\lib\Errno.pm"
   File "${C_PERL_DIR}\lib\Exporter.pm"
   File "${C_PERL_DIR}\lib\IO.pm"
@@ -766,23 +740,6 @@ update_config:
   SetOutPath $INSTDIR\Carp
   File "${C_PERL_DIR}\lib\Carp\*"
 
-  !ifndef ENGLISH_ONLY
-          StrCmp $LANGUAGE ${LANG_JAPANESE} full_encode
-          SetOutPath $INSTDIR\Encode
-          File "${C_PERL_DIR}\lib\Encode\Alias.pm"
-          File "${C_PERL_DIR}\lib\Encode\Config.pm"
-          File "${C_PERL_DIR}\lib\Encode\Encoding.pm"
-          Goto encode_done
-      full_encode:
-  !endif
-
-  SetOutPath $INSTDIR\Encode
-  File /r "${C_PERL_DIR}\lib\Encode\*"
-
-  !ifndef ENGLISH_ONLY
-      encode_done:
-  !endif
-  
   SetOutPath $INSTDIR\Exporter
   File "${C_PERL_DIR}\lib\Exporter\*"
 
@@ -803,16 +760,6 @@ update_config:
 
   SetOutPath $INSTDIR\Text
   File "${C_PERL_DIR}\lib\Text\ParseWords.pm"
-  
- !ifndef ENGLISH_ONLY
-          StrCmp $LANGUAGE ${LANG_JAPANESE} 0 skip_text_kakasi
-  !endif
-  
-    File "${C_PERL_DIR}\lib\Text\Kakasi.pm"
-    
- !ifndef ENGLISH_ONLY
-      skip_text_kakasi:
- !endif
 
   SetOutPath $INSTDIR\warnings
   File "${C_PERL_DIR}\lib\warnings\register.pm"
@@ -825,21 +772,6 @@ update_config:
 
   SetOutPath $INSTDIR\auto\DynaLoader
   File "${C_PERL_DIR}\lib\auto\DynaLoader\*"
-
-  !ifndef ENGLISH_ONLY
-          StrCmp $LANGUAGE ${LANG_JAPANESE} full_auto_encode
-          SetOutPath $INSTDIR\auto\Encode
-          File "${C_PERL_DIR}\lib\auto\Encode\*"
-          Goto auto_encode_done
-      full_auto_encode:
-  !endif
-
-  SetOutPath $INSTDIR\auto\Encode
-  File /r "${C_PERL_DIR}\lib\auto\Encode\*"
-
-  !ifndef ENGLISH_ONLY
-      auto_encode_done:
-  !endif
 
   SetOutPath $INSTDIR\auto\File\Glob
   File "${C_PERL_DIR}\lib\auto\File\Glob\*"
@@ -860,17 +792,6 @@ update_config:
 
   SetOutPath $INSTDIR\auto\Sys\Hostname
   File "${C_PERL_DIR}\lib\auto\Sys\Hostname\*"
-
- !ifndef ENGLISH_ONLY
-          StrCmp $LANGUAGE ${LANG_JAPANESE} 0 skip_auto_text_kakasi
-  !endif
-
-  SetOutPath $INSTDIR\auto\Text\Kakasi
-  File "${C_PERL_DIR}\lib\auto\Text\Kakasi\*"
-
-  !ifndef ENGLISH_ONLY
-      skip_auto_text_kakasi:
-  !endif
 
   SetOutPath $INSTDIR\auto\Win32\API
   File "${C_PERL_DIR}\site\lib\auto\Win32\API\*"
@@ -1016,10 +937,10 @@ Section "Languages" SecLangs
   SetOutPath $INSTDIR\languages
   File "..\engine\languages\*.msg"
 
-  ; Conditional compilation: if ENGLISH_ONLY is defined, installer supports only 'English'
+  ; Conditional compilation: if ENGLISH_MODE is defined, installer supports only 'English'
   ; so there is no need to select a language for the POPFile UI
 
-  !ifndef ENGLISH_ONLY
+  !ifndef ENGLISH_MODE
 
         ; UI_LANG_CONFIG parameters: "NSIS Language name"  "POPFile UI language name"
 
@@ -1073,6 +994,55 @@ Section "Languages" SecLangs
 SectionEnd
 
 #--------------------------------------------------------------------------
+# Installer Section: (optional) Kakasi component
+#
+# This component is automatically installed if 'Japanese' has been selected
+# as the language for the installer. Normally this component is not seen in
+# the 'Components' list, but if an English-mode installer is built this
+# component will be made visible to allow it to be selected by the user.
+#--------------------------------------------------------------------------
+
+Section "Kakasi" SecKakasi
+
+  ;--------------------------------------------------------------------------
+  ; Install Kakasi package
+  ;--------------------------------------------------------------------------
+
+  SetOutPath $INSTDIR
+  File /r "${C_KAKASI_DIR}\kakasi"
+
+  ; Add Environment Variables for Kakasi
+
+  Push ITAIJIDICTPATH
+  Push $INSTDIR\kakasi\share\kakasi\itaijidict
+  Call WriteEnvStr
+  Push KANWADICTPATH
+  Push $INSTDIR\kakasi\share\kakasi\kanwadict
+  Call WriteEnvStr
+
+  ;--------------------------------------------------------------------------
+  ; Install Perl modules: base.pm, the Encode collection and Text::Kakasi
+  ;--------------------------------------------------------------------------
+
+  SetOutPath $INSTDIR
+  File "${C_PERL_DIR}\lib\base.pm"
+  File "${C_PERL_DIR}\lib\Encode.pm"
+
+  SetOutPath $INSTDIR\Encode
+  File /r "${C_PERL_DIR}\lib\Encode\*"
+
+  SetOutPath $INSTDIR\auto\Encode
+  File /r "${C_PERL_DIR}\lib\auto\Encode\*"
+
+  SetOutPath $INSTDIR\Text
+  File "${C_PERL_DIR}\lib\Text\Kakasi.pm"
+
+  SetOutPath $INSTDIR\auto\Text\Kakasi
+  File "${C_PERL_DIR}\lib\auto\Text\Kakasi\*"
+
+SectionEnd
+
+#--------------------------------------------------------------------------
 # Component-selection page descriptions
 #--------------------------------------------------------------------------
 
@@ -1080,7 +1050,31 @@ SectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile} $(DESC_SecPOPFile)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}   $(DESC_SecSkins)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}   $(DESC_SecLangs)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecKakasi}   "Kakasi"
   !insertmacro MUI_FUNCTIONS_DESCRIPTION_END
+
+#--------------------------------------------------------------------------
+# Installer Function: HandleKakasi
+#
+# This function ensures that when 'Japanese' has been selected as the language
+# for the installer, the 'Kakasi' section is invisibly selected for installation
+# (if any other language is selected, we do not select the invisible 'Kakasi' section).
+#
+# If the installer is built in ENGLISH_MODE then the 'Kakasi' section will be visible
+# to allow it to be selected if it is required.
+#--------------------------------------------------------------------------
+
+Function HandleKakasi
+
+  !insertmacro UnselectSection ${SecKakasi}
+
+  !ifndef ENGLISH_MODE
+        SectionSetText ${SecKakasi} ""            ; this makes the component invisible
+        StrCmp $LANGUAGE ${LANG_JAPANESE} 0 exit
+        !insertmacro SelectSection ${SecKakasi}
+      exit:
+  !endif
+FunctionEnd
 
 #--------------------------------------------------------------------------
 # Installer Function: MakeItSafe
@@ -2174,7 +2168,7 @@ Function CheckRunStatus
   Push ${L_TEMP}
 
   IfRebootFlag 0 not_Win9x
-  
+
   ; We are running on a Win9x system and must reboot before using POPFile
   ; (replace previous page with a simple "Please wait" one, in case the page appears
   ; again while the system is rebooting)
