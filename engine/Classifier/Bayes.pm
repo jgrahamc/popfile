@@ -1286,7 +1286,7 @@ sub add_message_to_bucket
             }
 
             if ( /([^\s]+) (\d+)/ ) {
-                my $word = $self->{mangler__}->mangle($1,1);
+                my $word  = $1;
                 my $value = $2;
                 $value =~ s/[\r\n]//g;
                 if ( $value > 0 )  {
@@ -1344,7 +1344,7 @@ sub remove_message_from_bucket
             }
 
             if ( /([^\s]+) (\d+)/ ) {
-                my $word = $self->{mangler__}->mangle($1,1);
+                my $word  = $1;
                 my $value = $2;
                 $value =~ s/[\r\n]//g;
                 if ( $value > 0 )  {

@@ -423,12 +423,13 @@ sub update_tag
                    add_url( $self, $2, $encoded, '@', ($3?'[\\\&\?\:\/]':$end_quote), '' );
                 }
             } else {
+
                 # Anything that isn't a mailto is probably an URL
-                
+
                 $self->add_url($value, $encoded, $quote, $end_quote, '');
             }
-            
-            next;            
+
+            next;
         }
 
         # Tags with alt attributes
@@ -454,6 +455,7 @@ sub update_tag
 
 
         # Tags with colors in them
+
         if ( ( $attribute =~ /^color$/i ) && ( $tag =~ /^font$/i ) ) {
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
             $self->{htmlfontcolor__} = map_color($self, $value);
@@ -466,7 +468,15 @@ sub update_tag
 			print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug} );
         }
 
+        # The width and height of images
+
+        if ( ( $attribute =~ /^(width|height)$/i ) && ( $tag =~ /^img$/i ) ) {
+            $attribute = lc( $attribute );
+            $self->update_pseudoword( 'html', "img$attribute$value" );
+	}
+
         # Font sizes
+
         if ( ( $attribute =~ /^size$/i ) && ( $tag =~ /^font$/i ) ) {
             $self->update_pseudoword( 'html', "fontsize$value" );
         }
