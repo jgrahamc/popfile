@@ -38,9 +38,10 @@
 #  (5) PFIDIAG          defined in test\pfidiag.nsi (helps diagnose installer-related problems)
 #  (6) RESTORE          defined in restore.nsi (POPFile 'User Data' Restore utility)
 #  (7) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
-#  (8) STOP_POPFILE     define in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
-#  (9) TRANSLATOR       defined in translator.nsi (main installer translations test program)
-# (10) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
+#  (8) RUNSQLITE        defined in runsqlite.nsi (simple front-end for sqlite.exe/sqlite3.exe)
+#  (9) STOP_POPFILE     defined in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
+# (10) TRANSLATOR       defined in translator.nsi (main installer translations test program)
+# (11) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
 #--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
@@ -770,6 +771,14 @@
 #    Macro:                GetSQLdbPathName
 #    Installer Function:   GetSQLdbPathName
 #    Uninstaller Function: un.GetSQLdbPathName
+#
+#    Macro:                GetSQLiteFormat
+#    Installer Function:   GetSQLiteFormat
+#    Uninstaller Function: un.GetSQLiteFormat
+#
+#    Macro:                GetSQLiteSchemaVersion
+#    Installer Function:   GetSQLiteSchemaVersion
+#    Uninstaller Function: un.GetSQLiteSchemaVersion
 #
 #    Macro:                GetTimeStamp
 #    Installer Function:   GetTimeStamp
@@ -1942,14 +1951,16 @@
   FunctionEnd
 !macroend
 
-#--------------------------------------------------------------------------
-# Installer Function: GetMessagesPath
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-;!insertmacro GetMessagesPath ""
-
+;;!ifdef ADDUSER
+;;    #--------------------------------------------------------------------------
+;;    # Installer Function: GetMessagesPath
+;;    #
+;;    # This function is used during the installation process
+;;    #--------------------------------------------------------------------------
+;;
+;;    !insertmacro GetMessagesPath ""
+;;!endif
+;;
 !ifdef ADDUSER
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.GetMessagesPath
@@ -2201,6 +2212,235 @@
 #--------------------------------------------------------------------------
 
 ;!insertmacro GetSQLdbPathName "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: GetSQLiteFormat
+#
+# The installation process and the uninstall process may both need a function which determines
+# the format of the SQLite database. SQLite 2.x and 3.x databases use incompatible formats and
+# the only way to determine the format is to examine the first few bytes in the database file.
+# This macro makes maintenance easier by ensuring that both processes use identical functions,
+# with the only difference being their names.
+#
+# NOTE:
+# The !insertmacro GetSQLiteFormat "" and !insertmacro GetSQLiteFormat "un." commands
+# are included in this file so the NSIS script can use 'Call GetSQLiteFormat' and
+# 'Call un.GetSQLiteFormat' without additional preparation.
+#
+# Inputs:
+#         (top of stack)     - SQLite database filename (may include the path)
+#
+# Outputs:
+#         (top of stack)     - one of the following result strings:
+#                              (a) 2.x                   - SQLite 2.1 format database found
+#                              (b) 3.x                   - SQLite 3.x format database found
+#                              (c) (<format>)            - <format> is what was found in file
+#                              (d) (unable to open file) - if file is locked or non-existent
+#
+#                              If the result is enclosed in parentheses then an error occurred.
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push "popfile.db"
+#         Call GetSQLiteFormat
+#         Pop $R0
+#
+#         ($R0 will be "2.x" if the popfile.db file belongs to POPFile 0.21.0)
+#--------------------------------------------------------------------------
+
+!macro GetSQLiteFormat UN
+  Function ${UN}GetSQLiteFormat
+
+    !define L_BYTE       $R9  ; byte read from the database file
+    !define L_COUNTER    $R8  ; expect a null-terminated string, but use a length limit as well
+    !define L_FILENAME   $R7  ; name of the SQLite database file
+    !define L_HANDLE     $R6  ; used to access the database file
+    !define L_RESULT     $R5  ; string returned on top of the stack
+
+    Exch ${L_FILENAME}
+    Push ${L_RESULT}
+    Exch
+    Push ${L_BYTE}
+    Push ${L_COUNTER}
+    Push ${L_HANDLE}
+
+    StrCpy ${L_RESULT} "unable to open file"
+    StrCpy ${L_COUNTER} 47
+
+    ClearErrors
+    FileOpen ${L_HANDLE} "${L_FILENAME}" r
+    IfErrors done
+    StrCpy ${L_RESULT} ""
+
+  loop:
+    FileReadByte ${L_HANDLE} ${L_BYTE}
+    StrCmp ${L_BYTE} "0" done
+    IntCmp ${L_BYTE} 32 0 done
+    IntCmp ${L_BYTE} 127 done 0 done
+    IntFmt ${L_BYTE} "%c" ${L_BYTE}
+    StrCpy ${L_RESULT} "${L_RESULT}${L_BYTE}"
+    IntOp ${L_COUNTER} ${L_COUNTER} - 1
+    IntCmp ${L_COUNTER} 0 loop done loop
+
+  done:
+    FileClose ${L_HANDLE}
+    StrCmp ${L_RESULT} "** This file contains an SQLite 2.1 database **" sqlite_2
+    StrCpy ${L_COUNTER} ${L_RESULT} 15
+    StrCmp ${L_COUNTER} "SQLite format 3" sqlite_3
+
+    ; Unrecognized format string found, so return it enclosed in parentheses (to indicate error)
+
+    StrCpy ${L_RESULT} "(${L_RESULT})"
+    Goto exit
+
+  sqlite_2:
+    StrCpy ${L_RESULT} "2.x"
+    Goto exit
+
+  sqlite_3:
+    StrCpy ${L_RESULT} "3.x"
+
+  exit:
+    Pop ${L_HANDLE}
+    Pop ${L_COUNTER}
+    Pop ${L_BYTE}
+    Pop ${L_FILENAME}
+    Exch ${L_RESULT}
+
+    !undef L_BYTE
+    !undef L_COUNTER
+    !undef L_FILENAME
+    !undef L_HANDLE
+    !undef L_RESULT
+
+  FunctionEnd
+!macroend
+
+!ifdef BACKUP | RUNSQLITE
+    #--------------------------------------------------------------------------
+    # Installer Function: GetSQLiteFormat
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+
+    !insertmacro GetSQLiteFormat ""
+!endif
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetSQLiteFormat
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetSQLiteFormat "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: GetSQLiteSchemaVersion
+#
+# The installation process and the uninstall process may both need a function which determines
+# the POPFile Schema version used by the SQLite database. POPFile uses this data to determine
+# when an automatic database upgrade is required. Upgrades can take several minutes during
+# which POPFile will appear to be locked up. This function helps the installer detect when an
+# upgrade will occur so it can use the Message Capture Utility to display the database upgrade
+# progress reports. This macro makes maintenance easier by ensuring that both processes use
+# identical functions, with the only difference being their names.
+#
+# NOTE:
+# The !insertmacro GetSQLiteSchemaVersion "" and !insertmacro GetSQLiteSchemaVersion "un."
+# commands are included in this file so the NSIS script can use 'Call GetSQLiteSchemaVersion'
+# and 'Call un.GetSQLiteSchemaVersion' without additional preparation.
+#
+# Inputs:
+#         (top of stack)     - SQLite database filename (may include the path)
+#
+# Outputs:
+#         (top of stack)     - one of the following result strings:
+#                              (a) x          - where 'x' is the version number, e.g. '2'
+#                              (b) (<error>)  - an error occurred when determining the SQLite
+#                                               database format or when accessing schema data
+#
+#                              If the result is enclosed in parentheses then an error occurred
+#                              (e.g. if a SQLite 2.x database does not contain any schema data,
+#                              "(SQL error: no such table: popfile)" will be returned)
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push "popfile.db"
+#         Call GetSQLiteSchemaVersion
+#         Pop $R0
+#
+#         ($R0 will be "3" if the popfile.db database uses POPFile Schema version 3)
+#--------------------------------------------------------------------------
+
+!macro GetSQLiteSchemaVersion UN
+  Function ${UN}GetSQLiteSchemaVersion
+
+    !define L_DATABASE   $R9   ; name of the SQLite database file
+    !define L_RESULT     $R8   ; string returned on top of the stack
+    !define L_SQLITEUTIL $R7   ; used to run relevant SQLite utility
+    !define L_STATUS     $R6   ; status code returned by SQLite utility
+
+    Exch ${L_DATABASE}
+    Push ${L_RESULT}
+    Exch
+    Push ${L_SQLITEUTIL}
+    Push ${L_STATUS}
+
+    Push ${L_DATABASE}
+    Call ${UN}GetSQLiteFormat
+    Pop ${L_RESULT}
+    StrCpy ${L_SQLITEUTIL} "sqlite.exe"
+    StrCmp ${L_RESULT} "2.x" look_for_sqlite
+    StrCpy ${L_SQLITEUTIL} "sqlite3.exe"
+    StrCmp ${L_RESULT} "3.x" look_for_sqlite
+    Goto exit
+
+  look_for_sqlite:
+    IfFileExists "$EXEDIR\${L_SQLITEUTIL}" run_sqlite
+    StrCpy ${L_RESULT} "(cannot find '$EXEDIR\${L_SQLITEUTIL}')"
+    Goto exit
+
+  run_sqlite:
+    nsExec::ExecToStack '"$EXEDIR\${L_SQLITEUTIL}" "${L_DATABASE}" "select version from popfile;"'
+    Pop ${L_STATUS}
+    Call ${UN}TrimNewlines
+    Pop ${L_RESULT}
+    StrCmp ${L_STATUS} "0" exit
+    StrCpy ${L_RESULT} "(${L_RESULT})"
+
+  exit:
+    Pop ${L_STATUS}
+    Pop ${L_SQLITEUTIL}
+    Pop ${L_DATABASE}
+    Exch ${L_RESULT}
+
+    !undef L_DATABASE
+    !undef L_RESULT
+    !undef L_SQLITEUTIL
+    !undef L_STATUS
+
+  FunctionEnd
+!macroend
+
+!ifdef BACKUP | RUNSQLITE
+    #--------------------------------------------------------------------------
+    # Installer Function: GetSQLiteSchemaVersion
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+
+    !insertmacro GetSQLiteSchemaVersion ""
+!endif
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetSQLiteSchemaVersion
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetSQLiteSchemaVersion "un."
 
 
 #--------------------------------------------------------------------------
@@ -3040,7 +3280,7 @@
   FunctionEnd
 !macroend
 
-!ifndef PFIDIAG & RUNPOPFILE & TRANSLATOR
+!ifndef PFIDIAG & RUNPOPFILE & RUNSQLITE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: StrCheckDecimal
     #
@@ -3123,7 +3363,7 @@
   FunctionEnd
 !macroend
 
-!ifndef MSGCAPTURE & STOP_POPFILE & TRANSLATOR
+!ifndef MSGCAPTURE & RUNSQLITE & STOP_POPFILE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: StrStr
     #
