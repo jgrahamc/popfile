@@ -93,7 +93,7 @@
   ; (two commonly used exceptions to this rule are 'IO_NL' and 'MB_NL')
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION             "0.0.56"
+  !define C_VERSION             "0.0.57"
 
   !define C_OUTFILE             "msgcapture.exe"
 
@@ -124,7 +124,7 @@
   VIProductVersion                   "${C_VERSION}.0"
 
   VIAddVersionKey "ProductName"      "PFI Message Capture Utility"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
   VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "PFI Message Capture Utility (0-99 sec timeout)"

@@ -101,7 +101,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define C_VERSION   "0.5.8"       ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.5.9"       ; see 'VIProductVersion' comment below for format details
 
   ; Specify EXE filename and icon for the 'installer'
 
@@ -134,7 +134,7 @@
 
   VIAddVersionKey "ProductName"      "POPFile Silent Shutdown Utility - stops POPFile without \
                                      opening a browser window."
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sourceforge.net"
+  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
   VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "POPFile Silent Shutdown Utility"

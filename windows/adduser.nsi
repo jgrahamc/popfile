@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.48"
+  !define C_PFI_VERSION  "0.2.49"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -288,7 +288,7 @@
   VIProductVersion                   "${C_PFI_VERSION}.0"
 
   VIAddVersionKey "ProductName"      "POPFile User wizard"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
   VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "Add/Remove POPFile User wizard"
@@ -1115,7 +1115,7 @@ skip_rel_notes:
 
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
               "InternetShortcut" "URL" \
-              "http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions"
+              "http://getpopfile.org/cgi-bin/wiki.pl?FrequentlyAskedQuestions"
 
   !ifndef ENGLISH_MODE
       Goto support
@@ -1123,7 +1123,7 @@ skip_rel_notes:
     japanese_faq:
       WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
                   "InternetShortcut" "URL" \
-                  "http://popfile.sourceforge.net/cgi-bin/wiki.pl?JP_FrequentlyAskedQuestions"
+                  "http://getpopfile.org/cgi-bin/wiki.pl?JP_FrequentlyAskedQuestions"
 
     support:
   !endif
@@ -1132,7 +1132,7 @@ skip_rel_notes:
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
-              "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
+              "InternetShortcut" "URL" "http://getpopfile.org/"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url" NORMAL
 
@@ -1142,7 +1142,7 @@ skip_rel_notes:
 
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url" \
               "InternetShortcut" "URL" \
-              "http://popfile.sourceforge.net/cgi-bin/wiki.pl?POPFileDocumentationProject"
+              "http://getpopfile.org/cgi-bin/wiki.pl?POPFileDocumentationProject"
 
   !ifndef ENGLISH_MODE
       Goto pfidiagnostic
@@ -1150,7 +1150,7 @@ skip_rel_notes:
     japanese_wiki:
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url" \
                   "InternetShortcut" "URL" \
-                  "http://popfile.sourceforge.net/cgi-bin/wiki.pl?JP_POPFileDocumentationProject"
+                  "http://getpopfile.org/cgi-bin/wiki.pl?JP_POPFileDocumentationProject"
 
     pfidiagnostic:
   !endif

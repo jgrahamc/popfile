@@ -85,7 +85,7 @@
 
   ;--------------------------------------------------------------------------
 
-  !define C_PFI_VERSION   0.1.12
+  !define C_PFI_VERSION   0.1.13
 
   Name    "Run POPFile"
   Caption "Run POPFile (enhanced)"
@@ -118,7 +118,7 @@
   VIProductVersion                  "${C_PFI_VERSION}.0"
 
   VIAddVersionKey "ProductName"     "Run POPFile"
-  VIAddVersionKey "Comments"        "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "Comments"        "POPFile Homepage: http://getpopfile.org"
   VIAddVersionKey "CompanyName"     "The POPFile Project"
   VIAddVersionKey "LegalCopyright"  "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "Enhanced front-end for POPFile starter program"
