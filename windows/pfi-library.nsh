@@ -864,6 +864,7 @@ FunctionEnd
     Push $R2
     Push $R3
     StrLen $R3 $R0
+    StrCpy $R1 0
   
   loop:
     IntOp $R1 $R1 - 1
