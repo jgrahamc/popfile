@@ -50,6 +50,15 @@
 !endif
 
 #--------------------------------------------------------------------------
+# Since so many scripts rely upon this library file, provide an easy way
+# for the installers/uninstallers, wizards and other utilities to identify
+# the particular library file used by NSIS to compile the executable file
+# (by using this constant in the executable's "Version Information" data).
+#--------------------------------------------------------------------------
+
+  !define C_PFI_LIBRARY_VERSION     "0.1.0"
+
+#--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
 #
 # ${IO_NL} is used for InstallOptions-style 'new line' sequences.
