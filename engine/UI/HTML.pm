@@ -3066,6 +3066,11 @@ sub handle_url
                 last;
             }
         }
+        
+        #Reset any filters
+        $self->{form__}{filter}    = '';
+        $self->{form__}{search}    = '';
+        $self->{form__}{setsearch} = 1;
 
         # Force a history_reload if we did not find this file in the history cache
         # but we do find it on disk using perl's -e file test operator (returns
