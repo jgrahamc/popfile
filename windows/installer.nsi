@@ -1421,6 +1421,7 @@ new_separator:
   Goto loop
 
 separator_done:
+  FileClose ${CFG}
   Push ${L_SEPARATOR}
   Call TrimNewlines
   Pop ${L_SEPARATOR}
