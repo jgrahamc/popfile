@@ -89,7 +89,7 @@ sub server
         $command = $_;
         $command =~ s/(\015|\012)//g;
 
-        if ( $command =~ /USER (.*)/i ) {
+        if ( $command =~ /^USER (.*)/i ) {
 	    if ( $1 =~ /(gooduser)/ ) {
                  print $client "+OK Welcome $1$eol";
 	    } else {
@@ -137,7 +137,7 @@ sub server
             next;
         }
 
-        if ( $command =~ /QUIT/i ) {
+        if ( $command =~ /^QUIT/i ) {
             print $client "+OK Bye$eol";
             last;
         }
@@ -221,7 +221,8 @@ sub server
             next;
         }
 
-        if ( $command =~ /APOP (.*):((.*):)?(.*) (.*)/i ) {
+        if ( $command =~ /APOP (.*) (.*)/i ) {
+            print $client "+OK Welcome APOPer$eol";
             next;
         }
 
@@ -241,7 +242,7 @@ sub server
         print $client "-ERR unknown command or bad syntax$eol";
     }
 
-    return 0;
+    return 1;
 }
 
 test_assert( `rm -rf corpus` == 0 );
@@ -330,7 +331,7 @@ if ( $pid == 0 ) {
 
         my $now = time;
 
-        while ( $p->service() && ( ( $now + 10 ) > time ) ) {
+        while ( $p->service() && ( ( $now + 15 ) > time ) ) {
 	}
 
         my @kids = keys %{$p->{children__}};
@@ -686,7 +687,37 @@ if ( $pid == 0 ) {
 
         close $client;
 
-        # TODO the APOP command
+        # Test the APOP command
+
+        my $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        my $result = <$client>;
+        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        # Try a connection to a server that does not exist
+
+        print $client "APOP 127.0.0.1:8111:gooduser md5$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "-ERR can't connect to 127.0.0.1:8111$eol" );
+
+        # Check that we can connect to the remote POP3 server (should still be waiting
+        # for us)
+
+        print $client "APOP 127.0.0.1:8110:gooduser md5$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Welcome APOPer$eol" );
+
+        print $client "QUIT$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Bye$eol" );
+
+        close $client;
 
         # Test SPA/AUTH commands with no secure server specified
 
@@ -720,6 +751,29 @@ if ( $pid == 0 ) {
         close $client;
 
         # TODO SPA/AUTH tests with good, bad servers
+
+        # Send the remote server a special message that makes it die
+
+        my $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        my $result = <$client>;
+        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "USER 127.0.0.1:8110:gooduser$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Welcome gooduser$eol" );
+
+        print $client "__QUIT__$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Bye$eol" );
+
+        close $client;
 
         while ( waitpid( $pid, &WNOHANG ) != $pid ) {
         }
