@@ -658,7 +658,7 @@ sub verify_connected_
             # there isn't one then give up trying to connect
 
             my $selector = new IO::Select( $mail );
-            return undef unless () = $selector->can_read($self->global_config_( 'timeout' ));
+            last unless () = $selector->can_read($self->global_config_( 'timeout' ));
 
             # Read the response from the real server and say OK
 
