@@ -131,7 +131,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.4"
+  !define C_PFI_VERSION  "0.1.5"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -4503,12 +4503,28 @@ complete_uninstall:
 
   StrCmp $APPDATA "" 0 appdata_valid
   RMDir "${C_ALT_DEFAULT_USERDATA}"
-  Goto remove_uninstall_entry
+  Goto remove_registry_data
 
 appdata_valid:
   RMDir "${C_STD_DEFAULT_USERDATA}"
 
-remove_uninstall_entry:
+remove_registry_data:
+  
+  Call un.IsNT
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} 0 cleanup_registry
+  
+  ; Delete current user's POPFile environment variables
+  
+  DeleteRegValue HKCU "Environment" "POPFILE_ROOT"
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+  DeleteRegValue HKCU "Environment" "POPFILE_USER"
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+
+cleanup_registry:
+
+  ; Clean up registry data
+
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_Data"
   DeleteRegKey HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI"
   DeleteRegKey /ifempty HKCU "Software\POPFile Project\${C_PFI_PRODUCT}"

@@ -5820,6 +5820,21 @@ tidymenu:
 
   RMDir $G_ROOTDIR
   RMDir $INSTDIR
+  
+  Call un.IsNT
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} 0 cleanup_registry
+  
+  ; Delete current user's POPFile environment variables
+  
+  DeleteRegValue HKCU "Environment" "POPFILE_ROOT"
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+  DeleteRegValue HKCU "Environment" "POPFILE_USER"
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+
+cleanup_registry:
+
+  ; Clean up registry data
 
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}"
   DeleteRegKey HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI"
