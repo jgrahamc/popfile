@@ -244,6 +244,8 @@ sub parse_html
         $code = 1;
     }
 
+    add_line( $self, $line, 0 );
+
     return $code;
 }
 
@@ -365,7 +367,6 @@ sub parse_stream
             }
 
             next if ( !defined($line) );
-            parse_html( $self, $line );
             
             # Transform some escape characters
 
@@ -449,7 +450,7 @@ sub parse_stream
 
                 add_line( $self, $argument, 0 );
             } else {
-                add_line( $self, $line, 0 );
+                add_line( $self, $line, 0 ) if ( parse_html( $self, $line ) == 0 );
             }
         }
     }
