@@ -56,7 +56,7 @@ if ( ( $#ARGV == 0 ) || ( $#ARGV == -1 ) )
         {
             if ( $words{$test_word} ) 
             {
-                printf("\n%20s (%f)", $file, $words{$test_word} / $total );
+                printf("\n%20s (%f)", $file, 1 / ( -log($words{$test_word} / $total) ) );
             }
         }
         else

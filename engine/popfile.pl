@@ -877,10 +877,12 @@ sub corpus_page
             my $max_bucket = '';
             foreach my $bucket (keys %{$classifier->{total}})
             {
-                if ( $classifier->get_value( $bucket, $word ) > 0 )
+                if ( $classifier->get_value( $bucket, $word ) != 0 )
                 {
-                    my $prob = $classifier->get_value( $bucket, $word ) / $classifier->{total}{$bucket};
-                    my $w = $prob * $classifier->{total}{$bucket} / $classifier->{full_total};
+                    my $prob = $classifier->get_value( $bucket, $word );
+                    my $w = $prob + log( $classifier->{total}{$bucket} / $classifier->{full_total} );
+                    $prob = 1 / ( -$prob );
+                    $w    = 1 / ( -$w    );
                     if ( $w > $max )
                     {
                         $max = $w;
@@ -891,38 +893,13 @@ sub corpus_page
             
             foreach my $bucket (keys %{$classifier->{total}})
             {
-                if ( $classifier->get_value( $bucket, $word ) > 0 )
+                if ( $classifier->get_value( $bucket, $word ) != 0 )
                 {
-                    my $prob = $classifier->get_value( $bucket, $word ) / $classifier->{total}{$bucket};
-                    my $w = $prob * $classifier->{total}{$bucket} / $classifier->{full_total};
+                    my $prob = $classifier->get_value( $bucket, $word );
+                    my $w = $prob + log( $classifier->{total}{$bucket} / $classifier->{full_total} );
+                    $prob = 1 / ( -$prob );
+                    $w    = 1 / ( -$w    );
                     my $weighted = "$w";
-                    if ( $prob =~ s/e\-(\d+)//i )
-                    {
-                        my $exp = $1;
-                        $prob     =~ /(.*)\.(.*)/;
-                        my $left  = $1;
-                        my $right = $2;
-                        my $pad;
-                        for my $i (1 .. $exp-1)
-                        {
-                            $pad .= "0";
-                        }
-                        $prob = "0.$pad$left$right";
-                    }
-
-                    if ( $weighted =~ s/e\-(\d+)//i )
-                    {
-                        my $exp = $1;
-                        $weighted    =~ /(.*)\.(.*)/;
-                        my $left  = $1;
-                        my $right = $2;
-                        my $pad;
-                        for my $i (1 .. $exp-1)
-                        {
-                            $pad .= "0";
-                        }
-                        $weighted = "0.$pad$left$right";
-                    }
                     my $bold;
                     my $endbold;
                     $bold = "<b>" if ( $max == $w );

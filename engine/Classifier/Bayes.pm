@@ -47,6 +47,12 @@ sub new
     $self->{top10value}        = {};
     $self->{top10html}         = {};
     
+    # Precomputed per bucket probabilities
+    $self->{bucket_start}      = {};
+
+    # A very unlikely word
+    $self->{not_likely}        = 0;
+    
     return bless $self, $type;
 }
 
@@ -67,12 +73,16 @@ sub get_color
     
     for my $bucket (keys %{$self->{total}})
     {
-        my $prob  = get_value( $self, $bucket, $word ) / $self->{total}{$bucket};
+        my $prob  = get_value( $self, $bucket, $word);
         
-        if ( $prob > $max ) 
+        if ( $prob != 0 ) 
         {
-            $max   = $prob;
-            $color = $self->{colors}{$bucket};
+            $prob = 1 / ( -$prob );
+            if ( $prob > $max ) 
+            {
+                $max   = $prob;
+                $color = $self->{colors}{$bucket};
+            }
         }
     }
     
@@ -130,11 +140,18 @@ sub compute_top10
     {
         for my $i ( 0 .. 9 )
         {
-            my $j = 9 - $i;
-            if ( $self->{top10value}{$bucket}{$j} < $value )
+            if ( $self->{top10value}{$bucket}{$i} < $value )
             {
-                $self->{top10value}{$bucket}{$j} = $value;
-                $self->{top10}{$bucket}{$j}      = $word;
+                my $j = 9;
+                while ( $i < $j )
+                {
+                    $self->{top10value}{$bucket}{$j} = $self->{top10value}{$bucket}{$j-1};
+                    $self->{top10}{$bucket}{$j}      = $self->{top10}{$bucket}{$j-1};
+                    $j -= 1;
+                }
+                
+                $self->{top10value}{$bucket}{$i} = $value;
+                $self->{top10}{$bucket}{$i}      = $word;
                 last;
             }
         }
@@ -255,7 +272,17 @@ sub load_word_matrix
         
         print " $self->{total}{$bucket} words\n" if $self->{debug};
     }
-    
+
+
+    foreach my $bucket (keys %{$self->{total}})
+    {
+        $self->{bucket_start}{$bucket} = log( $self->{total}{$bucket} / $self->{full_total} );
+    }
+
+    # The probability used for words that are not present in the corpus
+
+    $self->{not_likely} = log( 1 / ( 10 * $self->{full_total} ) );
+
     print "Corpus loaded with $self->{full_total} entries\n" if $self->{debug};
     
     print "    ... $self->{full_total} words\n";
@@ -285,19 +312,10 @@ sub classify_file
 
     # The score hash will contain the likelihood that the given message is in each
     # bucket, the buckets are the keys for score
-    
-    my %score;
-   
+
     # Set up the initial score as P(bucket)
-    
-    foreach my $bucket (keys %{$self->{total}})
-    {
-        $score{$bucket} = log( $self->{total}{$bucket} / $self->{full_total} );
-    }
-
-    # The probability used for words that are not present in the corpus
-
-    my $not_likely   = log( 1 / ( 10 * $self->{full_total} ) );
+  
+    my %score = %{$self->{bucket_start}};
     
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
     # P(word|bucket) ^ word count and multiply to the score
@@ -312,11 +330,11 @@ sub classify_file
     {
         foreach my $bucket (@buckets)
         {
-            my $probability = get_value( $self, $bucket, $word ) / $self->{total}{$bucket};
+            my $probability = get_value( $self, $bucket, $word );
             
             if ( $probability == 0 ) 
             {
-                $probability = $not_likely;
+                $probability = $self->{not_likely};
             }
     
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
