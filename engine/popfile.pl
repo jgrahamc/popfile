@@ -1023,7 +1023,11 @@ sub history_page
 
         foreach my $word (keys %{$classifier->{parser}->{words}})
         {
-            $words{$word} += $classifier->{parser}->{words}{$word};
+            $words{$word}                         += $classifier->{parser}->{words}{$word};
+            $classifier->{total}{$form{shouldbe}} += $classifier->{parser}->{words}{$word};
+            $classifier->{full_total}             += $classifier->{parser}->{words}{$word};
+            $classifier->compute_top10( $form{shouldbe}, $word, $words{word} );
+            $classifier->set_value(     $form{shouldbe}, $word, $words{word} );
         }
         
         open WORDS, ">corpus/$form{shouldbe}/table";
@@ -1038,8 +1042,6 @@ sub history_page
         open CLASS, ">$class_file";
         print CLASS "RECLASSIFIED$eol$form{shouldbe}$eol";
         close CLASS;
-        
-        $classifier->load_word_matrix();
     }
 
     @mail_files = sort compare_mf @mail_files;
