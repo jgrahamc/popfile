@@ -461,7 +461,7 @@ sub parse_stream
         $colorized .= $self->{ut} if ( $self->{ut} ne '' );
 
         $colorized .= "</tt>";
-        $colorized =~ s/[\r\n]+$//;
+        $colorized =~ s/(\r\n\r\n|\r\r|\n\n)/__BREAK____BREAK__/g;
         $colorized =~ s/[\r\n]+/__BREAK__/g;
         $colorized =~ s/__BREAK__/<br>/g;
         

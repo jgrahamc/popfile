@@ -1107,16 +1107,24 @@ sub corpus_page
 # ---------------------------------------------------------------------------------------------
 sub compare_mf 
 {
-    my $an;
-    my $bn;
+    my $ad;
+    my $bd;
+    my $am;
+    my $bm;
     
     if ( $a =~ /popfile(.*)_(.*)\.msg/ )  {
-        $an = $2;
+        $ad = $1;
+        $am = $2;
         
         if ( $b =~ /popfile(.*)_(.*)\.msg/ ) {
-            $bn = $2;
+            $bd = $1;
+            $bm = $2;
     
-            return ( $bn <=> $an );
+            if ( $ad == $bd ) {
+                return ( $bm <=> $am );
+            } else {
+                return ( $bd <=> $ad );
+            }    
         }
     }
     
@@ -1141,11 +1149,6 @@ sub load_history_cache
     $self->{history} = {};
     $self->{history_invalid}     = 0;
     my $j = 0;
-
-    if ( $#history_files == -1 )  {
-        $self->{configuration}->{configuration}{mail_count} = 0;
-        $self->{configuration}->{configuration}{last_count} = 0;
-    }
 
     foreach my $i ( 0 .. $#history_files ) {
         $history_files[$i] =~ /(popfile.*\.msg)/;
@@ -1196,6 +1199,8 @@ sub load_history_cache
                 $self->{history}{$j}{bucket}       = $bucket;
                 $self->{history}{$j}{reclassified} = $reclassified;
                 $self->{history}{$j}{magnet}       = $magnet;
+                $self->{history}{$j}{subject}      = '';
+                $self->{history}{$j}{from}         = '';
 
                 $j += 1;
             }
@@ -1233,6 +1238,47 @@ sub history_size
     return ($#cache + 1);
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# get_history_navigator
+#
+# Return the HTML for the Next, Previous and page numbers for the history navigation
+#
+# $start_message        - The number of the first message displayed
+# $stop_message         - The number of the last message displayed
+#
+# ---------------------------------------------------------------------------------------------
+sub get_history_navigator
+{
+    my ( $self, $start_message, $stop_message ) = @_;
+    
+    my $body = "$self->{language}{History_Jump}: ";
+    if ( $start_message != 0 )  {
+        $body .= "<a href=/history?start_message=";
+        $body .= $start_message - $self->{configuration}->{configuration}{page_size};
+        $body .= "&session=$self->{session_key}&filter=$self->{form}{filter}>< $self->{language}{Previous}</a> ";
+    }
+    my $i = 0;
+    while ( $i < history_size( $self ) ) {
+        if ( $i == $start_message )  {
+            $body .= "<b>";
+            $body .= $i+1 . "</b>";
+        } else {
+            $body .= "<a href=/history?start_message=$i&session=$self->{session_key}&filter=$self->{form}{filter}>";
+            $body .= $i+1 . "</a>";
+        }
+
+        $body .= " ";
+        $i += $self->{configuration}->{configuration}{page_size};
+    }
+    if ( $start_message < ( history_size( $self ) - $self->{configuration}->{configuration}{page_size} ) )  {
+        $body .= "<a href=/history?start_message=";
+        $body .= $start_message + $self->{configuration}->{configuration}{page_size};
+        $body .= "&session=$self->{session_key}&filter=$self->{form}{filter}>$self->{language}{Next} ></a>";
+    }
+    
+    return $body;
+}
 # ---------------------------------------------------------------------------------------------
 #
 # history_page - get the message classification history page
@@ -1425,33 +1471,11 @@ sub history_page
             }
         }
         
-        $stop_message  = history_size( $self ) if ( $stop_message >= history_size( $self ) );
+        $stop_message = history_size( $self ) - 1 if ( $stop_message >= history_size( $self ) );
 
         if ( $self->{configuration}->{configuration}{page_size} <= history_size( $self ) ) {
-            $body .= "<table width=100%><tr><td align=left><h2>$self->{language}{History_Title}$filtered</h2><td align=right>$self->{language}{History_Jump}: ";
-            if ( $start_message != 0 )  {
-                $body .= "<a href=/history?start_message=";
-                $body .= $start_message - $self->{configuration}->{configuration}{page_size};
-                $body .= "&session=$self->{session_key}&filter=$self->{form}{filter}>< $self->{language}{Previous}</a> ";
-            }
-            my $i = 0;
-            while ( $i <= history_size( $self ) ) {
-                if ( $i == $start_message )  {
-                    $body .= "<b>";
-                    $body .= $i+1 . "</b>";
-                } else {
-                    $body .= "<a href=/history?start_message=$i&session=$self->{session_key}&filter=$self->{form}{filter}>";
-                    $body .= $i+1 . "</a>";
-                }
-
-                $body .= " ";
-                $i += $self->{configuration}->{configuration}{page_size};
-            }
-            if ( $start_message < ( history_size( $self ) - $self->{configuration}->{configuration}{page_size} ) )  {
-                $body .= "<a href=/history?start_message=";
-                $body .= $start_message + $self->{configuration}->{configuration}{page_size};
-                $body .= "&session=$self->{session_key}&filter=$self->{form}{filter}>$self->{language}{Next} ></a>";
-            }
+            $body .= "<table width=100%><tr><td align=left><h2>$self->{language}{History_Title}$filtered</h2><td align=right>"; 
+            $body .= get_history_navigator( $self, $start_message, $stop_message );
             $body .= "</table>";
         } else {
             $body .="<h2>$self->{language}{History_Title}$filtered</h2>"; 
@@ -1548,15 +1572,8 @@ sub history_page
             my $bucket       = $self->{history}{$i}{bucket};
             my $reclassified = $self->{history}{$i}{reclassified}; 
             $mail_file =~ /popfile\d+_(\d+)\.msg/;
-            my $bold = ( ( $self->{configuration}->{configuration}{last_count} <= $1 ) && ( $reclassified == 0 ) );
-            $body .= "<b>" if $bold;
             $body .= $from;
-            $body .= "</b>" if $bold;
-            $body .= "<td>";
-            $body .= "<b>" if $bold;
-            $body .= "<a href=/history?view=$mail_file&start_message=$start_message&session=$self->{session_key}&filter=$self->{form}{filter}#$mail_file>$subject</a>";
-            $body .= "</b>" if $bold;
-            $body .= "<td>";
+            $body .= "<td><a href=/history?view=$mail_file&start_message=$start_message&session=$self->{session_key}&filter=$self->{form}{filter}#$mail_file>$subject</a><td>";
             if ( $reclassified )  {
                 $body .= "<font color=$self->{classifier}->{colors}{$bucket}>$bucket</font><td>" . sprintf( $self->{language}{History_Already}, $self->{classifier}->{colors}{$bucket}, $bucket ) . " - <a href=/history?undo=$mail_file&session=$self->{session_key}&badbucket=$bucket&filter=$self->{form}{filter}&start_message=$start_message#$mail_file>[$self->{language}{Undo}]</a>";
             } else {
@@ -1640,7 +1657,9 @@ sub history_page
         }
 
         $body .= "</table><form action=/history><input type=hidden name=filter value=$self->{form}{filter}><b>$self->{language}{History_Remove}: <input type=submit class=submit name=clear value='$self->{language}{History_RemoveAll}'>";
-        $body .= "<input type=submit class=submit name=clear value='$self->{language}{History_RemovePage}'><input type=hidden name=session value=$self->{session_key}><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=filter value=$self->{form}{filter}><input type=hidden name=session value=$self->{session_key}>$self->{language}{History_SearchMessage}: <input type=text name=search> <input type=submit class=submit name=searchbutton value='$self->{language}{Find}'></form>";
+        $body .= "<input type=submit class=submit name=clear value='$self->{language}{History_RemovePage}'><input type=hidden name=session value=$self->{session_key}><input type=hidden name=start_message value=$start_message></form><table width=100%><tr><td align=left><form action=/history><input type=hidden name=filter value=$self->{form}{filter}><input type=hidden name=session value=$self->{session_key}>$self->{language}{History_SearchMessage}: <input type=text name=search> <input type=submit class=submit name=searchbutton value='$self->{language}{Find}'></form><td align=right>";
+        $body .= get_history_navigator( $self, $start_message, $stop_message ) if ( $self->{configuration}->{configuration}{page_size} <= history_size( $self ) );
+        $body .= "</table>";
     } else {
         $body .= "<h2>$self->{language}{History_Title}$filtered</h2><p><b>$self->{language}{History_NoMessages}.</b><p><form action=/history><input type=hidden name=session value=$self->{session_key}><select name=filter><option value=__filter__all>&lt;$self->{language}{History_ShowAll}&gt;</option>";
         
@@ -1889,18 +1908,15 @@ sub remove_mail_files
     calculate_today( $self );
     
     foreach my $mail_file (@mail_files) {
-        # Extract the epoch information from the popfile mail file name
         
-        if ( $mail_file =~ /popfile([0-9]+)_([0-9]*)\.msg/ )  {
-            # If older than now - some number of days then delete
-
-            if ( $1 < (time - $self->{configuration}->{configuration}{history_days} * $seconds_per_day) )  {
-                my $class_file = $mail_file;
-                $class_file =~ s/msg$/cls/;
-                unlink($mail_file);
-                unlink($class_file);
-                $result = 1;
-            }
+        # Extract the epoch information from the popfile mail file name
+        my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($mail_file);          
+        if ( $ctime < (time - $self->{configuration}->{configuration}{history_days} * $seconds_per_day) )  {
+            my $class_file = $mail_file;
+            $class_file =~ s/msg$/cls/;
+            unlink($mail_file);
+            unlink($class_file);
+            $result = 1;
         }
     }
     

@@ -93,6 +93,16 @@ sub initialize
     $self->{configuration}->{configuration}{mcount}    = 0;
     $self->{configuration}->{configuration}{ecount}    = 0;
 
+    # This counter is used when creating unique IDs for message stored
+    # in the history.  The history message files have the format
+    #
+    # popfile{download_count}_{message_count}.msg
+    #
+    # Where the download_count is derived from this value and the 
+    # message_count is a local counter within that download, for sorting
+    # purposes must sort on download_count and then message_count
+    $self->{configuration}->{configuration}{download_count} = 0;
+
     # The separator within the POP3 username is :
     $self->{configuration}->{configuration}{separator} = ':';
 
@@ -172,7 +182,8 @@ sub service
 
             if  ( ( $self->{configuration}->{configuration}{localpop} == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
                 # Now that we have a good connection to the client fork a subprocess to handle the communication
-                child( $self, $client ) if (fork() == 0);
+                $self->{configuration}->{configuration}{download_count} += 1;
+                child( $self, $client, $self->{configuration}->{configuration}{download_count} ) if (fork() == 0);
             }
 
             close $client;
@@ -189,19 +200,21 @@ sub service
 # The worker method that is called when we get a good connection from a client
 #
 # $client   - an open stream to a POP3 client
+# $download_count - The unique download count for this session
 #
 # ---------------------------------------------------------------------------------------------
 sub child
 {
-    my ( $self, $client ) = @_;
+    my ( $self, $client, $download_count ) = @_;
+
+    # Number of messages downloaded in this session
+    my $count = 0;
 
     # The handle to the real mail server gets stored here
     my $mail;
             
     # Tell the client that we are ready for commands and identify our version number
     tee( $self,  $client, "+OK POP3 POPFile (v$self->{configuration}->{major_version}.$self->{configuration}->{minor_version}.$self->{configuration}->{build_version}) server ready$eol" );
-
-    my $current_count = $self->{configuration}->{configuration}{mail_count};
 
     # Retrieve commands from the client and process them until the client disconnects or
     # we get a specific QUIT command
@@ -372,9 +385,9 @@ sub child
             # Get the message from the remote server, if there's an error then we're done, but if not then
             # we echo each line of the message until we hit the . at the end
             if ( echo_response( $self, $mail, $client, $command ) ) {
-                classify_and_modify( $self, $mail, $client );
+                $count += 1;
+                classify_and_modify( $self, $mail, $client, $download_count, $count );
                 flush_extra( $self, $mail, $client, 0 );
-                $self->{configuration}->{configuration}{last_count} = $current_count;
                 next;
             }
         }
@@ -386,7 +399,6 @@ sub child
             if ( $mail )  {
                 echo_response( $self, $mail, $client, $command );
                 close $mail;
-                
             } else {
                 tee( $self,  $client, "+OK goodbye" );
             }
@@ -419,11 +431,13 @@ sub child
 #
 # $mail     - an open stream to read the email from
 # $client   - an open stream to write the modified email to
+# $dcount   - the unique download count for this message
+# $mcount   - the message count for this message
 #
 # ---------------------------------------------------------------------------------------------
 sub classify_and_modify
 {
-    my ( $self, $mail, $client ) = @_;
+    my ( $self, $mail, $client, $dcount, $mcount ) = @_;
     
     my $msg_subject     = '';     # The message subject
     my $msg_head_before = '';     # Store the message headers that come before Subject here
@@ -448,13 +462,13 @@ sub classify_and_modify
     # Whether we are currently reading the mail headers or not
     my $getting_headers = 1;
 
-    my $temp_file = "messages/$self->{mail_filename}" . "_$self->{configuration}->{configuration}{mail_count}.msg";
-    my $class_file = "messages/$self->{mail_filename}" . "_$self->{configuration}->{configuration}{mail_count}.cls";
-    $self->{configuration}->{configuration}{mail_count} += 1;
+    my $temp_file  = "messages/popfile$dcount" . "_$mcount.msg";
+    my $class_file = "messages/popfile$dcount" . "_$mcount.cls";
     $self->{configuration}->{configuration}{mcount}     += 1;
     $self->{ui}->{history_invalid}                       = 1;
 
     open TEMP, ">$temp_file";
+    binmode TEMP;
 
     while ( <$mail> ) {   
         my $line;
@@ -493,6 +507,7 @@ sub classify_and_modify
                     }
                 }
             } else {
+                print TEMP $eol;
                 $getting_headers = 0;
             }
         } else {
