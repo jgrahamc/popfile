@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.58"
+  !define C_PFI_VERSION  "0.2.59"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -581,6 +581,11 @@
   !define MUI_FINISHPAGE_SHOWREADME
   !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
   !define MUI_FINISHPAGE_SHOWREADME_FUNCTION  "ShowReadMe"
+  
+  ; Provide a link to the POPFile Home Page
+  
+  !define MUI_FINISHPAGE_LINK                 "$(PFI_LANG_FINISH_WEB_LINK_TEXT)"
+  !define MUI_FINISHPAGE_LINK_LOCATION        "http://getpopfile.org/"
 
   !insertmacro MUI_PAGE_FINISH
 
