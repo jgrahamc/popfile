@@ -122,8 +122,6 @@ create table words(   id integer primary key, -- unique ID for this word
                       unique (word)           -- each word is unique
                   );
 
-create index words_index on words (word);
-
 -- ---------------------------------------------------------------------------------------------
 --
 -- matrix - the corpus that consists of buckets filled with words.  Each word
@@ -140,8 +138,6 @@ create table matrix( id integer primary key,   -- unique ID for this entry
                                                -- or written
                      unique (wordid, bucketid) -- each word appears once in a bucket 
                    );
-
-create index matrix_index on matrix (wordid, bucketid);
 
 -- ---------------------------------------------------------------------------------------------
 --
@@ -254,7 +250,6 @@ create table magnets( id integer primary key,    -- unique ID for this entry
 alter table buckets modify id int(11) auto_increment;
 alter table bucket_param modify id int(11) auto_increment;
 alter table bucket_template modify id int(11) auto_increment;
-alter table history modify id int(11) auto_increment;
 alter table magnets modify id int(11) auto_increment;
 alter table magnet_types modify id int(11) auto_increment;
 alter table matrix modify id int(11) auto_increment;
@@ -272,8 +267,7 @@ alter table words modify word binary(255);
 --                 that entries the hang off the bucket table are also deleted
 --
 -- It deletes the related entries in the 'matrix', 'bucket_params' and
--- 'magnets' tables.  In addition it removes entries from the 'history' which
--- were classified into that bucket.
+-- 'magnets' tables.  
 --
 -- ---------------------------------------------------------------------------------------------
  
@@ -282,8 +276,6 @@ create trigger delete_bucket delete on buckets
                  delete from matrix where bucketid = old.id;
                  delete from magnets where bucketid = old.id;
                  delete from bucket_params where bucketid = old.id;
-                 delete from history where bucketid = old.id;
-                 delete from history where usedtobe = old.id;
              end;
 
 -- ---------------------------------------------------------------------------------------------
@@ -291,7 +283,6 @@ create trigger delete_bucket delete on buckets
 -- delete_user - deletes entries that are related to a user
 --
 -- It deletes the related entries in the 'matrix' and 'user_params'.
--- In addition it removes entries from the 'history' for that user.
 --
 -- ---------------------------------------------------------------------------------------------
 
@@ -299,7 +290,6 @@ create trigger delete_user delete on users
              begin
                  delete from buckets where userid = old.id;
                  delete from user_params where userid = old.id;
-                 delete from history where userid = old.id;
              end;
 
 -- ---------------------------------------------------------------------------------------------
@@ -312,18 +302,6 @@ create trigger delete_user delete on users
 create trigger delete_magnet_type delete on magnet_types
              begin
                  delete from magnet where mtid = old.id;
-             end;
-
--- ---------------------------------------------------------------------------------------------
---
--- delete_magnet - handles the removal of a magnet by removing all entries
---                 from the history that were classified with that magnet
---
--- ---------------------------------------------------------------------------------------------
-
-create trigger delete_magnet delete on magnets
-             begin
-                 delete from history where magnetid = old.id;
              end;
 
 -- ---------------------------------------------------------------------------------------------
