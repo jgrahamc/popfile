@@ -1337,6 +1337,9 @@ Section "Skins" SecSkins
   SetOutPath "$G_ROOTDIR\skins\lrclaptop"
   File "..\engine\skins\lrclaptop\*.*"
 
+  SetOutPath "$G_ROOTDIR\skins\oceanblue"
+  File "..\engine\skins\oceanblue\*.*"
+  
   SetOutPath "$G_ROOTDIR\skins\orange"
   File "..\engine\skins\orange\*.*"
 
@@ -2895,6 +2898,7 @@ Section "un.Skins" UnSecSkins
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\green"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\lavish"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\lrclaptop"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\oceanblue"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\orange"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\orangecream"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\osx"
