@@ -201,6 +201,21 @@ sub new
           'span', 1,
           'mbox', 1,
           'status', 1,
+          'been', 1, 
+          'being', 1, 
+          'was', 1, 
+          'were', 1, 
+          'does', 1, 
+          'doing', 1, 
+          'done', 1, 
+          'having', 1,
+          'goes', 1, 
+          'going', 1, 
+          'gone', 1, 
+          'went', 1, 
+          'could', 1, 
+          'will', 1, 
+          'would', 1,
          };
 
     return bless $self, $type;

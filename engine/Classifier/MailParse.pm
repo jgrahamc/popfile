@@ -371,6 +371,7 @@ sub parse_stream
         }
 
         $colorized .= "</tt>";
+        $colorized =~ s/[\r\n]+$//;
         $colorized =~ s/[\r\n]+/__BREAK__/g;
         $colorized =~ s/__BREAK__/<br>/g;
         
