@@ -843,6 +843,17 @@ Section "POPFile" SecPOPFile
 
 rootdir_exists:
 
+  ; Starting with POPFile 0.22.0 the system tray icon uses 'localhost' instead of '127.0.0.1'
+  ; to display the User Interface (and the installer has been updated to follow suit), so we
+  ; need to ensure Win9x systems have a suitable 'hosts' file
+
+  Call IsNT
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "1" continue
+  Call CheckHostsFile
+
+continue:
+
   ; If we are installing over a previous version, ensure that version is not running
 
   Call MakeRootDirSafe
@@ -1913,17 +1924,6 @@ Function MakeRootDirSafe
   Push ${L_PARAM}
   Push ${L_RESULT}
   Push ${L_TEXTEND}
-
-  ; Starting with POPFIle 0.22.0 the system tray icon uses 'localhost' instead of '127.0.0.1'
-  ; to display the User Interface (and the installer has been updated to follow suit),  so we
-  ; need to ensure WIn9x systems have a suitable 'hosts' file
-
-  Call IsNT
-  Pop ${L_RESULT}
-  StrCmp ${L_RESULT} "1" continue
-  Call CheckHostsFile
-
-continue:
 
   ; Starting with POPfile 0.21.0 an experimental version of 'popfile-service.exe' was included
   ; to allow POPFile to be run as a Windows service.
