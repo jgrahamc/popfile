@@ -186,7 +186,7 @@ History_ChangedTo                       Changed to <font color="%s">%s</font>
 History_Already                         Reclassified as <font color="%s">%s</font>
 History_RemoveAll                       Remove All
 History_RemovePage                      Remove Page
-History_RemoveChecked                   Remove Selected
+History_RemoveChecked                   Remove Checked
 History_Remove                          To remove entries in the history click
 History_SearchMessage                   Search From/Subject
 History_NoMessages                      No messages
