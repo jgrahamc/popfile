@@ -228,7 +228,7 @@ sub increment_word
     $self->{words__}{$word} += 1;
     $self->{msg_total__}    += 1;
 
-    print "--- $word ($self->{words__}{$word})\n" if ($self->{debug});
+    print "--- $word ($self->{words__}{$word})\n" if ($self->{debug__});
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -295,7 +295,7 @@ sub update_word
             if ( $encoded == 0 )  {
                 $after = '&' if ( $after eq '>' );
                 if ( !( $self->{ut__} =~ s/($before)\Q$word\E($after)/$1<b><font color=\"$color\">$word<\/font><\/b>$2/ ) ) {
-                	print "Could not find $word for colorization\n" if ( $self->{debug} );
+                	print "Could not find $word for colorization\n" if ( $self->{debug__} );
                 }
             } else {
                 $self->{ut__} .= "<font color=\"$color\">$word<\/font> ";
@@ -323,7 +323,7 @@ sub add_line
     my ($self, $bigline, $encoded, $prefix) = @_;
     my $p = 0;
 
-    print "add_line: [$bigline]\n" if $self->{debug};
+    print "add_line: [$bigline]\n" if $self->{debug__};
 
     # If the line is really long then split at every 1k and feed it to the parser below
 
@@ -362,7 +362,7 @@ sub add_line
                     $to         = chr($to);
                     $line       =~ s/$from/$to/g;
                     $self->{ut__} =~ s/$from/$to/g;
-                    print "$from -> $to\n" if $self->{debug};
+                    print "$from -> $to\n" if $self->{debug__};
                 }
             }
 
@@ -377,7 +377,7 @@ sub add_line
                     if ( defined( $to ) &&  ( $to ne '' ) ) {
                         $line       =~ s/$from/$to/g;
                         $self->{ut__} =~ s/$from/$to/g;
-                        print "$from -> $to\n" if $self->{debug};
+                        print "$from -> $to\n" if $self->{debug__};
                         $self->update_pseudoword( 'html', 'numericentity', $encoded, $from );
                     }
                 }
@@ -407,9 +407,9 @@ sub add_line
                 while ( $line =~ s/( |^)(([A-Z]\Q$space\E){2,15}[A-Z])( |\Q$space\E|[!\?,])/ /i ) {
                     my $original = "$1$2$4";
                     my $word = $2;
-                    print "$word ->" if $self->{debug};
+                    print "$word ->" if $self->{debug__};
                     $word    =~ s/[^A-Z]//gi;
-                    print "$word\n" if $self->{debug};
+                    print "$word\n" if $self->{debug__};
                     $self->update_word( $word, $encoded, ' ', ' ', $prefix);
                     $self->update_pseudoword( 'trick', 'spacedout', $encoded, $original );
                 }
@@ -463,7 +463,7 @@ sub update_tag
     $tag =~ s/[\r\n]//g;
     $arg =~ s/[\r\n]//g;
 
-    print "HTML tag $tag with argument " . $arg . "\n" if ($self->{debug});
+    print "HTML tag $tag with argument " . $arg . "\n" if ($self->{debug__});
 
     # End tags do not require any argument decoding but we do look at them
     # to make sure that we handle /font to change the font color
@@ -514,12 +514,12 @@ sub update_tag
             $end_quote = $3;
         }
 
-        print "   attribute $attribute with value $quote$value$quote\n" if ($self->{debug});
+        print "   attribute $attribute with value $quote$value$quote\n" if ($self->{debug__});
 
         # Remove leading whitespace and leading value-less attributes
 
         if ( $arg =~ s/^(([ \t]*(\w+)[\t ]+)+)([^=])/$4/ ) {
-            print "   attribute(s) " . $1 . " with no value\n" if ($self->{debug});
+            print "   attribute(s) " . $1 . " with no value\n" if ($self->{debug__});
         }
 
         # Toggle for parsing script URI's.
@@ -612,7 +612,7 @@ sub update_tag
             $self->update_pseudoword( 'html', "fontcolor$value", $encoded, $original );
             $self->{htmlfontcolor__} = map_color($self, $value);
             $self->compute_html_color_distance();
-			print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug} );
+			print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug__} );
         }
 
         if ( ( $attribute =~ /^text$/i ) && ( $tag =~ /^body$/i ) ) {
@@ -620,7 +620,7 @@ sub update_tag
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
             $self->{htmlfontcolor__} = map_color($self, $value);
             $self->compute_html_color_distance();
-			print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug} );
+			print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug__} );
         }
 
         # The width and height of images
@@ -642,7 +642,7 @@ sub update_tag
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
             $self->update_pseudoword( 'html', "backcolor$value" );
             $self->{htmlbackcolor__} = map_color($self, $value);
-			print "Set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug} );
+			print "Set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug__} );
 
             $self->{htmlbodycolor__} = $self->{htmlbackcolor__} if ( $tag =~ /^body$/i );
             $self->compute_html_color_distance();
@@ -804,7 +804,7 @@ sub add_url
     }
 
     if ( !defined( $host ) || ( $host eq '' ) ) {
-        print "no hostname found: [$temp_url]\n" if ($self->{debug});
+        print "no hostname found: [$temp_url]\n" if ($self->{debug__});
         return '';
     }
 
@@ -861,13 +861,13 @@ sub parse_html
 
     $line =~ s/[\r\n]+//gm;
 
-    print "parse_html: [$line] " . $self->{in_html_tag__} . "\n" if $self->{debug};
+    print "parse_html: [$line] " . $self->{in_html_tag__} . "\n" if $self->{debug__};
 
     # Remove HTML comments and other tags that begin !
 
     while ( $line =~ s/(<!.*?>)// ) {
         $self->update_pseudoword( 'html', 'comment', $encoded, $1 );
-        print "$line\n" if $self->{debug};
+        print "$line\n" if $self->{debug__};
     }
 
     while ( $found && ( $line ne '' ) ) {
@@ -1010,7 +1010,7 @@ sub parse_stream
 
             next if ( !defined($line) );
 
-            print ">>> $line" if $self->{debug};
+            print ">>> $line" if $self->{debug__};
 
             if ($self->{color__}) {
 
@@ -1042,7 +1042,7 @@ sub parse_stream
                     $self->{ut__} .= splitline( "\015\012", 0 );
 
                     $self->{in_headers__} = 0;
-                    print "Header parsing complete.\n" if $self->{debug};
+                    print "Header parsing complete.\n" if $self->{debug__};
 
                     next;
                 }
@@ -1080,7 +1080,7 @@ sub parse_stream
                 $encoding = '';
 
                 if (!defined $2) {
-                    print "Hit MIME boundary --$1\n" if $self->{debug};
+                    print "Hit MIME boundary --$1\n" if $self->{debug__};
                     $self->{in_headers__} = 1;
                 } else {
 
@@ -1088,7 +1088,7 @@ sub parse_stream
 
                     my $boundary = $1;
 
-                    print "Hit MIME boundary terminator --$1--\n" if $self->{debug};
+                    print "Hit MIME boundary terminator --$1--\n" if $self->{debug__};
 
                     # escape to match escaped boundary characters
 
@@ -1108,7 +1108,7 @@ sub parse_stream
 
                     $mime = ($temp_mime || '');
 
-                    print "MIME boundary list now $mime\n" if $self->{debug};
+                    print "MIME boundary list now $mime\n" if $self->{debug__};
                     $self->{in_headers__} = 0;
                 }
 
@@ -1200,12 +1200,12 @@ sub clear_out_base64
         $self->{ut__}     = '' if $self->{color__};
         $self->{base64__} =~ s/ //g;
 
-        print "Base64 data: " . $self->{base64__} . "\n" if ($self->{debug});
+        print "Base64 data: " . $self->{base64__} . "\n" if ($self->{debug__});
 
         $decoded = decode_base64( $self->{base64__} );
         parse_html( $self, $decoded, 1 );
 
-        print "Decoded: " . $decoded . "\n" if ($self->{debug});
+        print "Decoded: " . $decoded . "\n" if ($self->{debug__});
 
         $self->{ut__} = "<b>Found in encoded data:</b> " . $self->{ut__} if ( $self->{color__} );
 
@@ -1289,7 +1289,7 @@ sub parse_header
 {
     my ($self, $header, $argument, $mime, $encoding) = @_;
 
-    print "Header ($header) ($argument)\n" if ($self->{debug});
+    print "Header ($header) ($argument)\n" if ($self->{debug__});
 
     if ( $self->{color__} ) {
         my $color     = $self->{bayes__}->get_color( "header:$header" );
@@ -1383,7 +1383,7 @@ sub parse_header
         }
 
         if ( $argument =~ /^(.*?)(;)/ ) {
-            print "Set content type to $1\n" if $self->{debug};
+            print "Set content type to $1\n" if $self->{debug__};
             $self->{content_type__} = $1;
         }
 
@@ -1404,7 +1404,7 @@ sub parse_header
                 } else {
                     $mime = $boundary;
                 }
-                print "Set mime boundary to " . $mime . "\n" if $self->{debug};
+                print "Set mime boundary to " . $mime . "\n" if $self->{debug__};
                 return ($mime, $encoding);
             }
         }
@@ -1416,7 +1416,7 @@ sub parse_header
 
     if ( $header =~ /^Content-Transfer-Encoding$/i ) {
         $encoding = $argument;
-        print "Setting encoding to $encoding\n" if $self->{debug};
+        print "Setting encoding to $encoding\n" if $self->{debug__};
         my $compact_encoding = $encoding;
         $compact_encoding =~ s/[^A-Za-z0-9]//g;
         $self->update_pseudoword( 'encoding', $compact_encoding, 0, $encoding );
