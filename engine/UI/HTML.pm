@@ -8,6 +8,7 @@ package UI::HTML;
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
 #----------------------------------------------------------------------------
+package UI::HTML;
 
 use strict;
 use warnings;
@@ -441,7 +442,7 @@ sub html_common_middle
     $result .= "<td class=\"borderBottomRight\"></td>\n</tr>\n</table>\n" ;
 
     # update check
-    $result .= "<table align=\"center\">\n<tr>\n<td class=\"logo2menuSpace\">$update_check</td></tr></table>" ;
+    $result .= "<table align=\"center\">\n<tr>\n<td class=\"logo2menuSpace\">$update_check</td></tr></table>\n" ;
 
     # menu start
     $result .= "<table class=\"menu\" cellspacing=\"0\">\n" ;
@@ -1193,12 +1194,13 @@ sub magnet_page
 
     # Current Magnets panel
     my $body = "<h2 class=\"magnets\">$self->{language}{Magnet_CurrentMagnets}</h2>\n" ;
-    $body .= "$self->{language}{Magnet_Message1}<br /><br />\n";
 
     # magnet listing headings
-    $body .= "<table width=\"75%\">\n<tr>\n<td><span class=\"magnetsLabel\">$self->{language}{Magnet}</span></td>\n" ;
-    $body .= "<td><span class=\"magnetsLabel\">$self->{language}{Bucket}</span></td>\n" ;
-    $body .= "<td><span class=\"magnetsLabel\">$self->{language}{Delete}</span></td>\n</tr>\n";
+    $body .= "<table width=\"75%\">\n";
+    $body .= "<caption>$self->{language}{Magnet_Message1}</caption>\n";
+    $body .= "<tr>\n<th class=\"magnetsLabel\" scope=\"col\">$self->{language}{Magnet}</th>\n" ;
+    $body .= "<th class=\"magnetsLabel\" scope=\"col\">$self->{language}{Bucket}</th>\n" ;
+    $body .= "<th class=\"magnetsLabel\" scope=\"col\">$self->{language}{Delete}</th>\n</tr>\n";
 
     # magnet listing
     my $stripe = 0;
@@ -1474,12 +1476,12 @@ sub corpus_page
 
     # column headings
     $body .= "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n" ;
-    $body .= "<td><span class=\"bucketsLabel\">$self->{language}{Bucket_BucketName}</span></td>\n" ;
-    $body .= "<td width=\"10\">&nbsp;</td>\n<td align=\"right\">\n<span class=\"bucketsLabel\">$self->{language}{Bucket_WordCount}</span></td>\n" ;
-    $body .= "<td width=\"10\">&nbsp;</td>\n<td align=\"right\">\n<span class=\"bucketsLabel\">$self->{language}{Bucket_UniqueWords}</span></td>\n" ;
-    $body .= "<td width=\"10\">&nbsp;</td>\n<td align=\"center\"><span class=\"bucketsLabel\">$self->{language}{Bucket_SubjectModification}</span></td>\n" ;
-    $body .= "<td width=\"10\">&nbsp;</td>\n<td align=\"center\"><span class=\"bucketsLabel\">$self->{language}{Bucket_Quarantine}</span></td>\n" ;
-    $body .= "<td width=\"20\">&nbsp;</td>\n<td align=\"left\"><span class=\"bucketsLabel\">$self->{language}{Bucket_ChangeColor}</span></td>\n</tr>\n";
+    $body .= "<th class=\"bucketsLabel\" scope=\"col\">$self->{language}{Bucket_BucketName}</th>\n" ;
+    $body .= "<th width=\"10\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language}{Bucket_WordCount}</th>\n" ;
+    $body .= "<th width=\"10\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language}{Bucket_UniqueWords}</th>\n" ;
+    $body .= "<th width=\"10\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"center\">$self->{language}{Bucket_SubjectModification}</th>\n" ;
+    $body .= "<th width=\"10\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"center\">$self->{language}{Bucket_Quarantine}</th>\n" ;
+    $body .= "<th width=\"20\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"left\">$self->{language}{Bucket_ChangeColor}</th>\n</tr>\n";
 
     my @buckets = sort keys %{$self->{classifier}->{total}};
     my $stripe = 0;
@@ -1556,8 +1558,9 @@ sub corpus_page
         $accuracy = "$percent%";
     }
 
-    $body .= "<tr>\n<td><hr /><span class=\"bucketsLabel\">$self->{language}{Total}</span></td>\n<td width=\"10\"><hr />&nbsp;</td>" ;
-    $body .= "<td align=\"right\"><hr /><b>$number</b></td>\n<td></td>\n<td></td>\n</tr></table>\n<br />\n" ;
+    $body .= "<tr>\n<td colspan=\"3\"><hr /></td>\n</tr>\n";
+    $body .= "<tr>\n<th class=\"bucketsLabel\" scope=\"row\">$self->{language}{Total}</th>\n<td width=\"10\"></td>\n";
+    $body .= "<td align=\"right\">$number</td>\n<td></td>\n<td></td>\n</tr>\n</table>\n<br />\n";
 
     # middle panel group
     $body .= "<table class=\"stabColor01\" width=\"100%\" cellpadding=\"10\" cellspacing=\"0\">\n" ;
@@ -1565,19 +1568,20 @@ sub corpus_page
     # Classification Accuracy panel
     $body .= "<tr>\n<td class=\"stabColor01\" valign=\"top\" width=\"33%\" align=\"center\">\n" ;
     $body .= "<h2 class=\"buckets\">$self->{language}{Bucket_ClassificationAccuracy}</h2>\n" ;
-    $body .= "<table cellspacing=\"0\" cellpadding=\"0\">\n" ;
+
+    $body .= "<table>\n" ;
     # emails classified line
-    $body .= "<tr>\n<td align=\"left\">$self->{language}{Bucket_EmailsClassified}:</td>\n" ;
+    $body .= "<tr>\n<th scope=\"row\" align=\"left\">$self->{language}{Bucket_EmailsClassified}:</th>\n" ;
     $body .= "<td align=\"right\">$pmcount</td>\n</tr>\n" ;
     # classification errors line
-    $body .= "<tr>\n<td align=\"left\">$self->{language}{Bucket_ClassificationErrors}:</td>\n" ;
+    $body .= "<tr>\n<th scope=\"row\" align=\"left\">$self->{language}{Bucket_ClassificationErrors}:</th>\n" ;
     $body .= "<td align=\"right\">$pecount</td>\n</tr>\n" ;
     # rules
-
+    $body .= "<tr>\n<td colspan=\"2\"><hr /></td>\n</tr>\n";
 
     # $body .= "<tr>\n<td colspan=\"2\"><hr /></td></tr>\n" ;
-    $body .= "<tr>\n<td align=\"left\"><hr />" ;
-    $body .= "$self->{language}{Bucket_Accuracy}:</td>\n<td align=\"right\"><hr />$accuracy</td>\n</tr>\n";
+    $body .= "<tr>\n<th scope=\"row\" align=\"left\">" ;
+    $body .= "$self->{language}{Bucket_Accuracy}:</th>\n<td align=\"right\">$accuracy</td>\n</tr>\n";
 
     if ( $percent > 0 )  {
         $body .= "<tr>\n<td height=\"10\" colspan=\"2\">&nbsp;</td>\n</tr>\n<tr>\n<td colspan=\"2\">\n" ;
@@ -1615,8 +1619,10 @@ sub corpus_page
     # Emails Classified panel
     $body .= "</form>\n</td>\n<td class=\"stabColor01\" valign=\"top\" width=\"33%\" align=\"center\">\n" ;
     $body .= "<h2 class=\"buckets\">$self->{language}{Bucket_EmailsClassifiedUpper}</h2>\n" ;
-    $body .= "<table>\n<tr>\n<td><span class=\"bucketsLabel\">$self->{language}{Bucket}</span></td>\n" ;
-    $body .= "<td>&nbsp;</td>\n<td><span class=\"bucketsLabel\">$self->{language}{Bucket_ClassificationCount}</span></td>\n</tr>\n";
+
+    $body .= "<table>\n<tr>\n";
+    $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"left\">$self->{language}{Bucket}</th>\n<th>&nbsp;</th>\n" ;
+    $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language}{Bucket_ClassificationCount}</th>\n</tr>\n";
 
     my %bar_values;
     for my $bucket (@buckets)  {
@@ -1628,8 +1634,8 @@ sub corpus_page
     # Word Counts panel
     $body .= "</table>\n</td>\n<td class=\"stabColor01\" width=\"34%\" valign=\"top\" align=\"center\">\n" ;
     $body .= "<h2 class=\"buckets\">$self->{language}{Bucket_WordCounts}</h2>\n<table>\n<tr>\n" ;
-    $body .= "<td align=\"left\">\n<span class=\"bucketsLabel\">$self->{language}{Bucket}</span>\n</td>\n" ;
-    $body .= "<td>&nbsp;</td>\n<td align=\"right\">\n<span class=\"bucketsLabel\">$self->{language}{Bucket_WordCount}</span>\n</td>\n</tr>\n";
+    $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"left\">$self->{language}{Bucket}</th>\n<th>&nbsp;</th>\n" ;
+    $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language}{Bucket_WordCount}</th>\n</tr>\n";
 
     for my $bucket (@buckets)  {
         $bar_values{$bucket} = $self->{classifier}->{total}{$bucket};
@@ -1704,11 +1710,13 @@ sub corpus_page
         # Don't print the headings if there are no entries.
 
         my $heading = "<table class=\"stabColor03\" cellpadding=\"6\" cellspacing=\"0\">\n" ;
-        $heading .= "<tr>\n<td><b>$self->{language}{Bucket_LookupMessage2}  $self->{form}{word}</b>" ;
-        $heading .= "<br /><br />\n<table>\n<tr>\n<td><b>$self->{language}{Bucket}</b></td>\n<td>&nbsp;</td>\n" ;
-        $heading .= "<td><b>$self->{language}{Frequency}</b></td>\n<td>&nbsp;</td>\n" ;
-        $heading .= "<td><b>$self->{language}{Probability}</b></td>\n<td>&nbsp;</td>\n" ;
-        $heading .= "<td><b>$self->{language}{Score}</b></td>\n</tr>\n";
+        $heading .= "<tr>\n<td>\n" ;
+        $heading .= "<table>\n";
+        $heading .= "<caption><strong>$self->{language}{Bucket_LookupMessage2} $self->{form}{word}</strong><br /><br /></caption>" ;
+        $heading .= "<tr>\n<th scope=\"col\">$self->{language}{Bucket}</th>\n<th>&nbsp;</th>\n" ;
+        $heading .= "<th scope=\"col\">$self->{language}{Frequency}</th>\n<th>&nbsp;</th>\n" ;
+        $heading .= "<th scope=\"col\">$self->{language}{Probability}</th>\n<th>&nbsp;</th>\n" ;
+        $heading .= "<th scope=\"col\">$self->{language}{Score}</th>\n</tr>\n";
 
         if ( $self->{form}{word} ne '' ) {
             my $max = 0;
@@ -1757,7 +1765,9 @@ sub corpus_page
             }
 
             if ( $max_bucket ne '' ) {
-                $body .= "</table>\n<br /><br />" . sprintf( $self->{language}{Bucket_LookupMostLikely}, $self->{form}{word}, $self->{classifier}->{colors}{$max_bucket}, $max_bucket) . "</td>\n</tr>\n</table>";
+                $body .= "</table>\n<br /><br />";
+                $body .= sprintf( $self->{language}{Bucket_LookupMostLikely}, $self->{form}{word}, $self->{classifier}->{colors}{$max_bucket}, $max_bucket);
+                $body .= "</td>\n</tr>\n</table>";
             } else {
                 $body .= sprintf( $self->{language}{Bucket_DoesNotAppear}, $self->{form}{word} );
             }
@@ -2442,43 +2452,47 @@ sub history_page
         # History messages
         $body .= "<table width=\"100%\">\n" ;
         # column headers
-        $body .="<tr valign=\"bottom\">\n";
-        $body .= "<td><a class=\"historyLabel\" href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=\">";
+        $body .= "<tr valign=\"bottom\">\n";
+        $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
+        $body .= "<a class=\"historyLabel\" href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=\">";
         if ( $self->{form}{sort} eq '' ) {
-            $body .= "<b>ID</b>";
+            $body .= "<em>ID</em>";
         } else {
             $body .= "ID";
         }
-        $body .= "</a></td>\n" ;
-        $body .= "<td><a class=\"historyLabel\" href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=from\">";
+        $body .= "</a>\n</th>\n" ;
+        $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
+        $body .= "<a class=\"historyLabel\" href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=from\">";
 
         if ( $self->{form}{sort} eq 'from' ) {
-            $body .= "<b>$self->{language}{From}</b>";
+            $body .= "<em>$self->{language}{From}</em>";
         } else {
             $body .= "$self->{language}{From}";
         }
 
-        $body .= "</a></td>\n" ;
-        $body .="<td><a class=\"historyLabel\" href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=subject\">";
+        $body .= "</a>\n</th>\n" ;
+        $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
+        $body .= "<a class=\"historyLabel\" href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=subject\">";
 
         if ( $self->{form}{sort} eq 'subject' ) {
-            $body .= "<b>$self->{language}{Subject}</b>";
+            $body .= "<em>$self->{language}{Subject}</em>";
         } else {
             $body .= "$self->{language}{Subject}";
         }
 
-        $body .= "</a></td>\n" ;
-        $body .= "<td><a class=\"historyLabel\" href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=bucket\">";
+        $body .= "</a>\n</th>\n" ;
+        $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
+        $body .= "<a class=\"historyLabel\" href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=bucket\">";
 
         if ( $self->{form}{sort} eq 'bucket' ) {
-            $body .= "<b>$self->{language}{Classification}</b>";
+            $body .= "<em>$self->{language}{Classification}</em>";
         } else {
             $body .= "$self->{language}{Classification}";
         }
 
-        $body .= "</a></td>\n" ;
-        $body .= "<td><span class=\"historyLabel\">$self->{language}{History_ShouldBe}</span></td>\n" ;
-        $body .= "<td><span class=\"historyLabel\">$self->{language}{Remove}</span></td>\n</tr>\n" ;
+        $body .= "</a>\n</th>\n" ;
+        $body .= "<th class=\"historyLabel\" scope=\"col\">$self->{language}{History_ShouldBe}</th>\n" ;
+        $body .= "<th class=\"historyLabel\" scope=\"col\">$self->{language}{Remove}</th>\n</tr>\n" ;
 
         my $stripe = 0;
 
@@ -2679,8 +2693,7 @@ sub history_page
             # $body .= "<tr class=\"rowHighlighted\"><td><td>" . sprintf( $self->{language}{History_ChangedTo}, $self->{classifier}->{colors}{$self->{form}{shouldbe}}, $self->{form}{shouldbe} ) if ( ( defined($self->{form}{file}) ) && ( $self->{form}{file} eq $mail_file ) );
         }
 
-        $body .= "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>\n" ;
-        $body .= "</td></tr>\n" ;
+        $body .= "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>\n" ;
 
         $body .= "</table>\n" ;
 
@@ -3145,7 +3158,7 @@ sub history_copy_file
         close FROM;
         }
         close TO;
-    }    
+    }
 }
 
 1;
