@@ -1399,7 +1399,7 @@ sub magnet_page
                 $body .= "<input type=\"submit\" class=\"deleteButton\" name=\"deleteMagnet\" value=\"$self->{language}{Delete}\" />\n";
                 $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
                 $body .= "<input type=\"hidden\" name=\"dtype\" value=\"$type\" />\n";
-                $body .= "<input type=\"hidden\" name=\"dmagnet\" value=\"" . url_encode($self, "$validatingMagnet") . "\" />\n";
+                $body .= "<input type=\"hidden\" name=\"dmagnet\" value=\"$validatingMagnet\" />\n";
                 $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n";
                 $body .= "</form>\n</td>\n";
                 $body .= "</tr>";
