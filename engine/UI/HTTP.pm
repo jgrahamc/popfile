@@ -32,6 +32,8 @@ sub new
     my $type = shift;
     my $self = POPFile::Module->new();
 
+    bless $self;
+
     return $self;
 }
 
@@ -46,16 +48,16 @@ sub start
 {
     my ( $self ) = @_;
 
-    $self->{server_} = IO::Socket::INET->new( Proto     => 'tcp',
+    $self->{server_} = IO::Socket::INET->new( Proto     => 'tcp',             # PROFILE BLOCK START
                                     $self->config_( 'local' )  == 1 ? (LocalAddr => 'localhost') : (),
                                      LocalPort => $self->config_( 'port' ),
                                      Listen    => SOMAXCONN,
-                                     Reuse     => 1 );
+                                     Reuse     => 1 );                        # PROFILE BLOCK STOP
 
     if ( !defined( $self->{server_} ) ) {
         my $port = $self->config_( 'port' );
         my $name = $self->name();
-        print <<EOM;
+        print STDERR <<EOM;                                                   # PROFILE BLOCK START
 
 \nCouldn't start the $name HTTP interface because POPFile could not bind to the
 HTTP port $port. This could be because there is another service
@@ -64,6 +66,7 @@ your system (On Unix systems this can happen if you are not root
 and the port you specified is less than 1024).
 
 EOM
+# PROFILE BLOCK STOP
 
         return 0;
     }
@@ -114,8 +117,8 @@ sub service
 
             my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
 
-            if ( ( $self->config_( 'local' ) == 0 ) ||
-                 ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
+            if ( ( $self->config_( 'local' ) == 0 ) ||                # PROFILE BLOCK START
+                 ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {     # PROFILE BLOCK STOP
 
                 # Read the request line (GET or POST) from the client and if we manage to do that
                 # then read the rest of the HTTP headers grabbing the Content-Length and using
@@ -198,7 +201,8 @@ sub handle_url
 #
 # parse_form_    - parse form data and fill in $self->{form_}
 #
-# $arguments         The text of the form arguments (e.g. foo=bar&baz=fou)
+# $arguments         The text of the form arguments (e.g. foo=bar&baz=fou) or separated by
+#                    CR/LF
 #
 # ---------------------------------------------------------------------------------------------
 sub parse_form_
@@ -219,10 +223,16 @@ sub parse_form_
 
         my $need_array = defined( $self->{form_}{$arg} );
 
+        if ( $need_array ) {
+	    if ( $#{ $self->{form_}{$arg . "_array"} } == -1 ) {
+                push( @{ $self->{form_}{$arg . "_array"} }, $self->{form_}{$arg} );
+	    }
+	}
+
         $self->{form_}{$arg} = $2;
         $self->{form_}{$arg} =~ s/\+/ /g;
 
-        # Expand %7E (hex) escapes in the form data
+        # Expand hex escapes in the form data
 
         $self->{form_}{$arg} =~ s/%([0-9A-F][0-9A-F])/chr hex $1/gie;
 
@@ -248,7 +258,7 @@ sub url_encode_
     my ( $self, $text ) = @_;
 
     $text =~ s/ /\+/;
-    $text =~ s/([^a-zA-Z0-9_\-.+])/sprintf("%%%02x",ord($1))/eg;
+    $text =~ s/([^a-zA-Z0-9_\-.\+\'!~*\(\)])/sprintf("%%%02x",ord($1))/eg;
 
     return $text;
 }
@@ -267,7 +277,7 @@ sub http_redirect_
 {
     my ( $self, $client, $url ) = @_;
 
-    my $header = "HTTP/1.0 302 Found\r\nLocation: ";
+    my $header = "HTTP/1.0 302 Found$eol" . 'Location: ';
     $header .= $url;
     $header .= "$eol$eol";
     print $client $header;
@@ -325,11 +335,11 @@ sub http_file_
         $zulu += 60 * 60; # 1 hour
         my ( $sec, $min, $hour, $mday, $mon, $year, $wday ) = gmtime( $zulu );
 
-        my $expires = sprintf( "%s, %02d %s %04d %02d:%02d:%02d GMT",
+        my $expires = sprintf( "%s, %02d %s %04d %02d:%02d:%02d GMT",          # PROFILE BLOCK START
                                $day[$wday], $mday, $month[$mon], $year+1900,
-                               $hour, $min, $sec);
+                               $hour, 59, 0);                                  # PROFILE BLOCK STOP
 
-        my $header = "HTTP/1.0 200 OK\r\nContent-Type: $type\r\nExpires: $expires\r\nContent-Length: ";
+        my $header = "HTTP/1.0 200 OK$eol" . "Content-Type: $type$eol" . "Expires: $expires$eol" . "Content-Length: ";
         $header .= length($contents);
         $header .= "$eol$eol";
         print $client $header . $contents;
