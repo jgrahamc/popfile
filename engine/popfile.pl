@@ -1329,6 +1329,8 @@ sub history_page
         return http_redirect("/history?session=$session_key");
     }
 
+    remove_mail_files();
+
     my @mail_files = glob "messages/popfile*.msg";
 
     foreach my $i ( 0 .. $#mail_files )
