@@ -281,7 +281,10 @@ sub start
 
     # Ensure that the messages subdirectory exists
 
-    mkdir( $self->get_user_path_( $self->global_config_( 'msgdir' ) ) );
+    if ( !$self->make_directory__( $self->get_user_path_( $self->global_config_( 'msgdir' ) ) ) ) {
+        print STDERR "Failed to create the messages subdirectory\n";
+        return 0;
+    }
 
     # Load the current configuration from disk and then load up the
     # appropriate language, note that we always load English first
@@ -3934,19 +3937,19 @@ sub history_delete_file
     if ( $archive ) {
         my $path = $self->get_user_path_( $self->config_( 'archive_dir' ) );
 
-        mkdir( $path );
+        $self->make_directory__( $path );
 
         my ($reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_read_class( $mail_file );
 
         if ( ( $bucket ne 'unclassified' ) && ( $bucket ne 'unknown class' ) && ( $bucket ne 'unsure' ) ) {
             $path .= "\/" . $bucket;
-            mkdir( $path );
+            $self->make_directory__( $path );
 
             if ( $self->config_( 'archive_classes' ) > 0) {
                 # archive to a random sub-directory of the bucket archive
                 my $subdirectory = int( rand( $self->config_( 'archive_classes' ) ) );
                 $path .= "\/" . $subdirectory;
-                mkdir( $path );
+                $self->make_directory__( $path );
             }
 
             # Previous comment about this potentially being unsafe (may have placed messages in
@@ -4139,6 +4142,28 @@ sub ecount__
     }
 
     return $count;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# make_directory__
+#
+# Wrapper for mkdir that ensures that the path we are making doesn't end in / or \
+# (Done because your can't do mkdir 'foo/' on NextStep.
+#
+# $path        The directory to make
+#
+# Returns whatever mkdir returns
+#
+# ---------------------------------------------------------------------------------------------
+sub make_directory__
+{
+    my ( $self, $path ) = @_;
+
+    $path =~ s/[\\\/]$//;
+
+    return 1 if ( -d $path );
+    return mkdir( $path );
 }
 
 # GETTERS/SETTERS
