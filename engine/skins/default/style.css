@@ -104,7 +104,7 @@ tr.rowOdd {
 
 tr.rowHighlighted {
   color: #000000;
-  background-color: #999999;
+  background-color: #B7B7B7;
 }
 
 tr.rowBoundary { 
@@ -240,6 +240,25 @@ table.historyWidgetsBottom {
 
 .advancedWidgets {
   margin-top: 1em;
+}
+
+/*********************************************************/
+/* Config Bars */
+
+.configBar {
+  background-color: #DFDFAF;
+}
+
+.configBar form {
+  margin: 0;
+}
+
+.configBarOption {
+  display: inline;
+  float: left;
+  border: 1px solid #CCCC99;
+  padding: 0.1em;
+  margin: 0.2em 1em;
 }
 
 .addHistory { 

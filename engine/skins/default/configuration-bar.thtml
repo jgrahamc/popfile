@@ -1,7 +1,7 @@
    <tr>
-      <td class="settingsPanel configBar" valign="top" width="100%" align="center">
+      <td class="settingsPanel configBar" width="100%" align="center">
           <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-          <div class="configBarOption" style="display:inline;">
+          <div class="configBarOption">
                 <label class="configurationLabel" for="configSkin">
                     <TMPL_VAR NAME="Localize_Configuration_SkinsChoose">:
                 </label>
@@ -44,9 +44,9 @@
                     </optgroup>
                 </select>
                 <input type="submit" class="submit" name="change_skin" value="<TMPL_VAR NAME="Localize_Apply">" />
-<br>
           </div>
-          <div class="configBarOption" style="display:inline;">
+
+          <div class="configBarOption">
 
                 <label class="configurationLabel" for="configLanguage">
                     <TMPL_VAR NAME="Localize_Configuration_LanguageChoose">:
