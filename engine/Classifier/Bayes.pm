@@ -63,8 +63,11 @@ sub new
     $self->{colors__}            = {};
 
     # The possible colors for buckets
-    $self->{possible_colors__} = [ 'red',  'green',      'blue',      'brown',     'orange',     'purple',      'magenta',  'gray',        'plum',     'silver',
-                   'pink', 'lightgreen', 'lightblue', 'lightcyan', 'lightcoral', 'lightsalmon', 'lightgrey', 'darkorange', 'darkcyan', 'feldspar' ];
+    $self->{possible_colors__} = [ 'red',       'green',      'blue',       'brown', # PROFILE BLOCK START
+                                   'orange',    'purple',     'magenta',    'gray',
+                                   'plum',      'silver',     'pink',       'lightgreen',
+                                   'lightblue', 'lightcyan',  'lightcoral', 'lightsalmon',
+                                   'lightgrey', 'darkorange', 'darkcyan',   'feldspar' ]; # PROFILE BLOCK STOP
 
     # Precomputed per bucket probabilities
     $self->{bucket_start__}      = {};

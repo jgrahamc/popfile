@@ -113,3 +113,8 @@ for my $modify_file (@modify_tests) {
 		unlink( 'temp.out' );
     }
 }
+
+# TODO test that stop writes the parameters to disk
+
+$b->stop();
+

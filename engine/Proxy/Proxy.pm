@@ -84,11 +84,11 @@ sub start
 
     # Open the socket used to receive request for proxy service
 
-    $self->{server__} = IO::Socket::INET->new( Proto     => 'tcp',
+    $self->{server__} = IO::Socket::INET->new( Proto     => 'tcp', # PROFILE BLOCK START
                                     $self->config_( 'local' ) == 1 ? (LocalAddr => 'localhost') : (),
                                     LocalPort => $self->config_( 'port' ),
                                     Listen    => SOMAXCONN,
-                                    Reuse     => 1 );
+                                    Reuse     => 1 ); # PROFILE BLOCK STOP
 
     if ( !defined( $self->{server__} ) ) {
         my $port = $self->config_( 'port' );
@@ -525,10 +525,10 @@ sub verify_connected_
     return $mail if ( $mail && $mail->connected );
 
     # Connect to the real mail server on the standard port
-   $mail = IO::Socket::INET->new(
+   $mail = IO::Socket::INET->new( # PROFILE BLOCK START
                 Proto    => "tcp",
                 PeerAddr => $hostname,
-                PeerPort => $port );
+                PeerPort => $port ); # PROFILE BLOCK STOP
 
     # Check that the connect succeeded for the remote server
     if ( $mail ) {

@@ -98,6 +98,12 @@ END
 		
 		close SOURCE_FILE;
                 close LINE_DATA;
+
+                # Check for an unterminated PROFILE BLOCK and warn the user
+
+                if ( $block_executed ) {
+                    print "WARNING: unterminated PROFILE BLOCK detected; did you forget a PROFILE BLOCK STOP in $file?\n";
+		}
           }
      }
 }

@@ -395,7 +395,7 @@ sub upgrade_parameter__
 		     'test_language',            'html_test_language',
 		     'update_check',             'html_update_check',
                      'ui_port',                  'html_port',
-    ); # PROFILE BLOCK END
+    ); # PROFILE BLOCK STOP
 
     if ( defined( $upgrades{$parameter} ) ) {
         return $upgrades{$parameter};
