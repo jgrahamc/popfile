@@ -826,7 +826,7 @@ Function CBP_CreateINIfile
   !insertmacro CBP_DEFINE_CONTROL "Field 3" \
       "ComboBox" \
       "A|B" \
-      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "92" "160"
+      "${CBP_INFO_LEFT_MARGIN}" "100" "92" "160"
 
   ; Instruction for deleting bucket names from the list
 

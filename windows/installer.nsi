@@ -1141,9 +1141,9 @@ Function SetOptionsPage
   IfFileExists "$INSTDIR\popfile.pl" 0 continue
 
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_OPTIONS_MBUNINST_1)$\r$\n$\r$\n\
+      "$(PFI_LANG_OPTIONS_MBUNINST_1) '$INSTDIR'$\r$\n$\r$\n\
       $(PFI_LANG_OPTIONS_MBUNINST_2)$\r$\n$\r$\n\
-      $(PFI_LANG_OPTIONS_MBUNINST_3)" IDNO continue
+      ($(PFI_LANG_OPTIONS_MBUNINST_3))" IDNO continue
 
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
   WriteUninstaller $INSTDIR\uninstall.exe
@@ -1552,11 +1552,10 @@ Function StartPOPFilePage_Init
   !insertmacro PFI_IO_TEXT "ioC.ini" "2" "$(PFI_LANG_LAUNCH_IO_NO)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "3" "$(PFI_LANG_LAUNCH_IO_DOSBOX)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "4" "$(PFI_LANG_LAUNCH_IO_BCKGRND)"
-
-  !insertmacro PFI_IO_TEXT "ioC.ini" "6" \
-      "$(PFI_LANG_LAUNCH_IO_NOTE_1)\r\n\r\n\
-      $(PFI_LANG_LAUNCH_IO_NOTE_2)\r\n\r\n\
-      $(PFI_LANG_LAUNCH_IO_NOTE_3)"
+  
+  !insertmacro PFI_IO_TEXT "ioC.ini" "6" "$(PFI_LANG_LAUNCH_IO_NOTE_1)"
+  !insertmacro PFI_IO_TEXT "ioC.ini" "7" "$(PFI_LANG_LAUNCH_IO_NOTE_2)"
+  !insertmacro PFI_IO_TEXT "ioC.ini" "8" "$(PFI_LANG_LAUNCH_IO_NOTE_3)"
 
 FunctionEnd
 
