@@ -621,6 +621,7 @@ sub html_common_bottom
     $result .= "/manual.html\">\n";
     $result .= "$self->{language}{Footer_Manual}</a> - \n";
 
+    $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137\">FAQ</a> - \n";
     $result .= "<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/\">$self->{language}{Footer_HomePage}</a> - \n";
     $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/forum/forum.php?forum_id=213876\">$self->{language}{Footer_FeedMe}</a> - \n";
     $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959\">$self->{language}{Footer_RequestFeature}</a> - \n";
