@@ -3,6 +3,8 @@
 function OnLoadHandler() {    // redefine default OnLoadHandler
     if (document.getElementById("removeChecks"))
          document.getElementById("removeChecks").innerHTML = "<input type='checkbox' class='checkbox' onclick='javascript:toggleChecks(this);' title='Select All' />"
+
+    document.getElementById("historySearch").focus();
 }
 
 function toggleChecks(x) {

@@ -1,0 +1,11 @@
+<script language="JavaScript">
+<!--
+warnings = 1; // this will be replaced with an Advanced variable that the Template will insert here
+
+function confirmClick(x) {
+    if(warnings)
+         return confirm ("Are you sure you want to do this?");
+    else return 0;
+}
+-->
+</script>
