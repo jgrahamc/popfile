@@ -537,6 +537,8 @@ sub verify_connected_
     if ( $mail ) {
         if ( $mail->connected )  {
 
+            $self->log_( "Connected to $hostname:$port timeout " . $self->global_config_( 'timeout' ) );
+
             # Set binmode on the socket so that no translation of CRLF
             # occurs
 
@@ -570,6 +572,7 @@ sub verify_connected_
                     }
                 }
             }
+
             $self->log_( "Connection returned: $buf" );
 
             # Clean up junk following a newline

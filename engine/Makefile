@@ -7,7 +7,7 @@
 
 include vars.mak
 
-.PHONY: test package windows core manual skins
+.PHONY: test package windows core manual skins coverage
 
 error:
 	@echo Must specify one of coverage, test, package or windows
