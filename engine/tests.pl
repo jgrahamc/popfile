@@ -51,9 +51,9 @@ my $fail_messages = '';
 sub test_report
 {
         my ( $ok, $test, $file, $line, $context ) = @_;
-        
+
         $test_count += 1;
-        
+
         if ( !$ok ) {
                 $fail_messages .= "\n    $file:$line failed '$test'";
                 if ( defined( $context ) ) {
@@ -64,7 +64,7 @@ sub test_report
         } else {
 #            print "Test pass at $file:$line ($context)\n";
         }
-        
+
         flush STDOUT;
 }
 
@@ -85,7 +85,7 @@ sub test_report
 sub test_assert
 {
         my ( $file, $line,  $test, $context ) = @_;
-        
+
         test_report( eval( $test ), $test, $file, $line, $context );
 }
 
@@ -108,20 +108,21 @@ sub test_assert
 
 sub test_assert_equal
 {
-        my ( $file, $line, $test, $expected, $context ) = @_;
-        my $result;
+    my ( $file, $line, $test, $expected, $context ) = @_;
+    my $result;
 
-        if ( !( $expected =~ /[^0-9]/ ) ) {
-        
-                # This int() and is so that we don't get bitten by odd
-                # floating point problems
-                my $scale = 1e10;       
-                $result = ( int( $test * $scale ) == int( $expected * $scale ) );
-        } else {        
-                $result = ( $test eq $expected );
-        }
+    if ( !( $expected =~ /[^0-9]/ ) ) {
 
-        test_report( $result, "expecting [$expected] and got [$test]", $file, $line, $context );
+        # This int() and is so that we don't get bitten by odd
+        # floating point problems
+
+        my $scale = 1e10;
+        $result = ( int( $test * $scale ) == int( $expected * $scale ) );
+    } else {
+        $result = ( $test eq $expected );
+    }
+
+    test_report( $result, "expecting [$expected] and got [$test]", $file, $line, $context );
 }
 
 # ---------------------------------------------------------------------------------------------

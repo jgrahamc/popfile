@@ -35,6 +35,8 @@ use strict;
 use warnings;
 use locale;
 
+use Getopt::Long;
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -67,14 +69,6 @@ sub new
     # Used to tell whether we need to save the configuration
 
     $self->{save_needed__} = 0;
-
-    # The location where POPFile is installed
-    
-    $self->{popfile_root__} = './';
-
-    # Where the current user's configuration is
-
-    $self->{popfile_user__} = './';
 
     bless $self, $type;
 
@@ -134,14 +128,6 @@ sub initialize
 
     $self->global_config_( 'msgdir', 'messages/' );
 
-    # Read the POPFILE_ROOT and POPFILE_USER variables into
-    # the local store, set up defaults if they are not defined
-
-    my ( $root, $user ) = ( $ENV{POPFILE_ROOT}, $ENV{POPFILE_USER} );
-
-    $self->{popfile_root__} = $root if defined( $root );
-    $self->{popfile_user__} = $user if defined( $user );
-
     return 1;
 }
 
@@ -159,7 +145,7 @@ sub start
     # Check to see if the PID file is present, if it is then another POPFile
     # may be running, warn the user and terminate
 
-    $self->{pid_file__} = $self->get_user_path( $self->config_( 'piddir' ) . 'popfile.pid' );
+    $self->{pid_file__} = $self->config_( 'piddir' ) . 'popfile.pid';
 
     if (defined($self->live_check_())) {
         return 0;
@@ -250,7 +236,6 @@ sub live_check_
     return undef;
 }
 
-
 # ---------------------------------------------------------------------------------------------
 #
 # check_pid_
@@ -264,7 +249,6 @@ sub check_pid_
     my ( $self ) = @_;
     return (-e $self->{pid_file__});
 }
-
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -318,7 +302,6 @@ sub delete_pid_
     unlink( $self->{pid_file__} );
 }
 
-
 # ---------------------------------------------------------------------------------------------
 #
 # parse_command_line - Parse ARGV
@@ -332,37 +315,74 @@ sub parse_command_line
 {
     my ( $self ) = @_;
 
-    # It's ok for the command line to be blank, the values of configuration will be drawn from
-    # the default values defined at the start of the code and those read from the configuration
-    # file
+    # Options from the command line specified with the --set parameter
 
-    if ( $#ARGV >= 0 )  {
+    my @set_options;
+
+    # The following command line options are supported:
+    #
+    # --set          Permanently sets a configuration item for the current user
+    # --             Everything after this point is an old style POPFile option
+    #
+    # So its possible to do
+    #
+    # --set bayes_param=value --set=-bayes_parem=value --set -bayes_parem=value -- -bayes_parem value
+
+    if ( !GetOptions( "set=s" => \@set_options ) ) {
+        return 0;
+    }
+
+    # Join together the options specified with --set and those after the --, the
+    # options in @set_options are going to be of the form foo=bar and hence need to
+    # be split into foo bar
+
+    my @options;
+
+    for my $i (0..$#set_options) {
+        $set_options[$i] =~ /-?(.+)=(.+)/;
+
+	if ( !defined( $1 ) ) {
+            print STDERR "\nBad option: $set_options[$i]\n";
+            return 0;
+	}
+
+        push @options, ("-$1");
+        if ( defined( $2 ) ) {
+            push @options, ($2);
+	}
+    }
+
+    push @options, @ARGV;
+
+    if ( $#options >= 0 )  {
         my $i = 0;
 
-        while ( $i <= $#ARGV )  {
+        while ( $i <= $#options )  {
             # A command line argument must start with a -
 
-            if ( $ARGV[$i] =~ /^-(.+)$/ ) {
+            if ( $options[$i] =~ /^-(.+)$/ ) {
                 my $parameter = $self->upgrade_parameter__($1);
 
                 if ( defined($self->{configuration_parameters__}{$parameter}) ) {
-                    if ( $i < $#ARGV ) {
-                        $self->{configuration_parameters__}{$parameter} = $ARGV[$i+1];
+                    if ( $i < $#options ) {
+                        $self->{configuration_parameters__}{$parameter} = $options[$i+1];
                         $i += 2;
                     } else {
-                        print STDERR "Missing argument for $ARGV[$i]\n";
-                        last;
+                        print STDERR "\nMissing argument for $options[$i]\n";
+                        return 0;
                     }
                 } else {
-                    print STDERR "Unknown command line option $ARGV[$i]\n";
-                    last;
+                    print STDERR "\nUnknown option $options[$i]\n";
+                    return 0;
                 }
             } else {
-                print STDERR "Expected a command line option and got $ARGV[$i]\n";
-                last;
+                print STDERR "\nExpected a command line option and got $options[$i]\n";
+                return 0;
             }
         }
     }
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -456,7 +476,7 @@ sub load_configuration
 {
     my ( $self ) = @_;
 
-    if ( open CONFIG, '<' . $self->get_user_path( 'popfile.cfg' ) ) {
+    if ( open CONFIG, "<popfile.cfg" ) {
         while ( <CONFIG> ) {
             s/(\015|\012)//g;
             if ( /(\S+) (.+)/ ) {
@@ -490,7 +510,7 @@ sub save_configuration
         return;
     }
 
-    if ( open CONFIG, '>' . $self->get_user_path( 'popfile.cfg' ) ) {
+    if ( open CONFIG, ">popfile.cfg" ) {
         $self->{save_needed__} = 0;
 
         foreach my $key (sort keys %{$self->{configuration_parameters__}}) {
@@ -525,107 +545,7 @@ sub parameter
   return $self->{configuration_parameters__}{$name};
 }
 
-# ---------------------------------------------------------------------------------------------
-#
-# get_root_path
-#
-# The POPFILE_ROOT environment variable is converted by the configuration
-# module into an internal variable.  This method take a relative or absolute
-# path and returns the same path relative to the POPFILE_ROOT.  Hence if the
-# passed in path is absolute it simply returns it, if relative then it returns
-# the full path consisting of the concatenation of the POPFILE_ROOT and the
-# passed in path
-#
-# $path                 The path to convert
-#
-# ---------------------------------------------------------------------------------------------
-sub get_root_path
-{
-    my ( $self, $path ) = @_;
-
-    if ( $self->is_absolute_path__( $path ) ) {
-        return $path;
-    } else {
-        return $self->path_join__( $self->{popfile_root__}, $path );
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# get_user_path
-#
-# The POPFILE_USER environment variable is converted by the configuration
-# module into an internal variable.  This method take a relative or absolute
-# path and returns the same path relative to the POPFILE_USER.  Hence if the
-# passed in path is absolute it simply returns it, if relative then it returns
-# the full path consisting of the concatenation of the POPFILE_USER and the
-# passed in path
-#
-# $path                 The path to convert
-#
-# ---------------------------------------------------------------------------------------------
-sub get_user_path
-{
-    my ( $self, $path ) = @_;
-
-    if ( $self->is_absolute_path__( $path ) ) {
-        return $path;
-    } else {
-        return $self->path_join__( $self->{popfile_user__}, $path );
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# is_absolute_path__
-#
-# Returns 1 is the path is absolute (i.e. start with / or a drive letter followed by /)
-#
-# $path                 Path to check
-#
-# ---------------------------------------------------------------------------------------------
-sub is_absolute_path__
-{
-    my ( $self, $path ) = @_;
-
-    if ( $path =~ /^\// ) {
-        return 1;
-    }
-
-    if ( $path =~ /^[A-Z]:[\/\\]/i ) {
-        return 1;
-    }
-
-    return 0;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# path_join__
-#
-# Joins two paths together making sure that the appropriate path separator is inserted
-#
-# $left             First part of path
-# $right            Second part of path
-#
-# ---------------------------------------------------------------------------------------------
-sub path_join__
-{
-    my ( $self, $left, $right ) = @_;
-
-    $left  =~ s/[\/\\]$//;
-    $right =~ s/^[\/\\]//;
-
-    my $path = "$left/$right";
-
-    # Strip any amount of leading ./
-
-    $path =~ s/^(\.\/)+//;
-
-    return $path;
-}
-
-# GETTER
+# GETTERS
 
 sub configuration_parameters
 {
@@ -635,3 +555,4 @@ sub configuration_parameters
 }
 
 1;
+

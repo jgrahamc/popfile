@@ -386,7 +386,11 @@ if ( $pid == 0 ) {
         $p->config_( 'port', $port );
         $p->config_( 'force_fork', 1 );
         $p->global_config_( 'timeout', 1 );
-        $p->start();
+
+        $p->config_( 'enabled', 0 );
+        test_assert_equal( $p->start(), 2 );
+        $p->config_( 'enabled', 1 );
+        test_assert_equal( $p->start(), 1 );
 
         while ( 1 ) {
             last if !$p->service();
@@ -778,7 +782,7 @@ if ( $pid == 0 ) {
         while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
             $result = <$client>;
             $result =~ s/popfile2=8/popfile0=0/;
-            test_assert_equal( $result, $line );
+            test_assert_equal( $result, $line, "[$result][$line]" );
             if ( $headers == 0 ) {
                 $countdown -= 1;
 	    }
@@ -972,7 +976,13 @@ if ( $pid == 0 ) {
         test_assert_equal( $line, "X-POPFile-TimeoutPrevention: 2$eol" );
         while ( <FILE> ) {
             my $line = $_;
-            $result = <$client>;
+            while ( $result = <$client> ) {
+                if ( $result =~ /TimeoutPrevention/ ) {
+                    next;
+	        } else {
+                    last;
+                }
+	    }
             $result =~ s/popfile3=1/popfile0=0/;
             test_assert_equal( $result, $line );
 	}

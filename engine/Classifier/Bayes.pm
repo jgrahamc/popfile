@@ -1590,7 +1590,7 @@ sub classify_and_modify
     $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->config_( 'hostname' );
     $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$nopath_temp_file$crlf";
 
-    if ( $self->global_config_( 'xpl' ) && ( $self->{parameters__}{$classification}{quarantine} == 0 ) && ( !$nosave ) ) {
+    if ( $self->global_config_( 'xpl' ) && ( $self->{parameters__}{$classification}{quarantine} == 0 ) ) {
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
     }
 
@@ -1617,7 +1617,7 @@ sub classify_and_modify
                 }
                 print $client "Subject:$msg_subject$crlf";
                 print $client "X-Text-Classification: $classification$crlf" if ( $self->global_config_( 'xtc' ) );
-                print $client 'X-POPFile-Link: ' . $xpl if ( $self->global_config_( 'xpl' ) && !$nosave );
+                print $client 'X-POPFile-Link: ' . $xpl if ( $self->global_config_( 'xpl' ) );
                 print $client "MIME-Version: 1.0$crlf";
                 print $client "Content-Type: multipart/report; boundary=\"$nopath_temp_file\"$crlf$crlf--$nopath_temp_file$crlf";
                 print $client "Content-Type: text/plain$crlf$crlf";
@@ -1627,7 +1627,7 @@ sub classify_and_modify
                 print $client "Original To: " . $self->{parser__}->get_header('to') . "$crlf";
                 print $client "Original Subject: " . $self->{parser__}->get_header('subject') . "$crlf";
                 print $client "To examine the email open the attachment. ";
-                print $client "To change this mail's classification go to $xpl" unless $nosave;
+                print $client "To change this mail's classification go to $xpl";
                 print $client "$crlf";
                 print $client "The first 20 words found in the email are:$crlf$crlf";
                 print $client $self->{parser__}->first20();

@@ -57,17 +57,17 @@ $POPFile->CORE_signals();
 $POPFile->CORE_load();
 $POPFile->CORE_link_components();
 $POPFile->CORE_initialize();
-$POPFile->CORE_config();
-$POPFile->CORE_enabled_check();
-$POPFile->CORE_start();
+if ( $POPFile->CORE_config() ) {
+    $POPFile->CORE_start();
 
-# This is the main POPFile loop that services requests, it will exit only when we
-# need to exit
+    # This is the main POPFile loop that services requests, it will exit only when we
+    # need to exit
 
-$POPFile->CORE_service();
+    $POPFile->CORE_service();
 
-# Shutdown every POPFile module
+    # Shutdown every POPFile module
 
-$POPFile->CORE_stop();
+    $POPFile->CORE_stop();
+}
 
 # END

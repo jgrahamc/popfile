@@ -73,9 +73,9 @@ sub initialize
 {
     my ( $self ) = @_;
 
-    # Disabled by default
+    # By default we are disabled
 
-    $self->config_( 'enabled', 0);
+    $self->config_( 'disabled', 1 );
 
     # XML-RPC is available on port 8081 initially
 
@@ -84,17 +84,6 @@ sub initialize
     # Only accept connections from the local machine
 
     $self->config_( 'local', 1 );
-
-    # Tell the user interface module that we having a configuration
-    # item that needs a UI component
-
-    $self->register_configuration_item_( 'configuration',   # PROFILE BLOCK START
-                                         'xmlrpc_port',
-                                         $self );           # PROFILE BLOCK STOP
-
-    $self->register_configuration_item_( 'security',        # PROFILE BLOCK START
-                                         'xmlrpc_local',
-                                          $self );          # PROFILE BLOCK STOP
 
     return 1;
 }
@@ -109,6 +98,21 @@ sub initialize
 sub start
 {
     my ( $self ) = @_;
+
+    if ( $self->config_( 'enabled' ) == 0 ) {
+        return 2;
+    }
+
+    # Tell the user interface module that we having a configuration
+    # item that needs a UI component
+
+    $self->register_configuration_item_( 'configuration',   # PROFILE BLOCK START
+                                         'xmlrpc_port',
+                                         $self );           # PROFILE BLOCK STOP
+
+    $self->register_configuration_item_( 'security',        # PROFILE BLOCK START
+                                         'xmlrpc_local',
+                                          $self );          # PROFILE BLOCK STOP
 
     # We use a single XMLRPC::Lite object to handle requests for access to the
     # Classifier::Bayes object

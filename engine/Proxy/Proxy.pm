@@ -92,6 +92,23 @@ sub new
 
 # ---------------------------------------------------------------------------------------------
 #
+# initialize
+#
+# Called to initialize the Proxy, most of this is handled by a subclass of this
+# but here we set the 'enabled' flag
+#
+# ---------------------------------------------------------------------------------------------
+sub initialize
+{
+    my ( $self ) = @_;
+
+    $self->config_( 'enabled', 1 );
+
+    return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # start
 #
 # Called when all configuration information has been loaded from disk.

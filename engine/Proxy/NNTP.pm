@@ -94,6 +94,26 @@ sub initialize
     # The welcome string from the proxy is configurable
     $self->config_( 'welcome_string', "NNTP POPFile ($self->{version_}) server ready" );
 
+    return $self->SUPER::initialize();;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# start
+#
+# Called to start the NNTP proxy module
+#
+# ---------------------------------------------------------------------------------------------
+sub start
+{
+    my ( $self ) = @_;
+
+    # If we are not enabled then no further work happens in this module
+
+    if ( $self->config_( 'enabled' ) == 0 ) {
+        return 2;
+    }
+
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
@@ -113,7 +133,7 @@ sub initialize
                                          'nntp_local',
                                          $self );
 
-    return 1;
+    return $self->SUPER::start();;
 }
 
 # ---------------------------------------------------------------------------------------------

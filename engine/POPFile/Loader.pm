@@ -530,14 +530,19 @@ sub CORE_initialize
         foreach my $name (keys %{$self->{components__}{$type}}) {
             print " $name" if $self->{debug__};
             flush STDOUT;
-            if ( $self->{components__}{$type}{$name}->initialize() == 0 ) {
+
+            my $code = $self->{components__}{$type}{$name}->initialize();
+
+            if ( $code == 0 ) {
                 die "Failed to start while initializing the $name module";
             }
 
-            $self->{components__}{$type}{$name}->alive(     1 );
+            if ( $code == 1 ) {
+                 $self->{components__}{$type}{$name}->alive(     1 );
 
-            $self->{components__}{$type}{$name}->forker(    $self->{forker__} );
-            $self->{components__}{$type}{$name}->pipeready( $self->{pipeready__} );
+                 $self->{components__}{$type}{$name}->forker(    $self->{forker__} );
+                 $self->{components__}{$type}{$name}->pipeready( $self->{pipeready__} );
+	    }
         }
         print '} ' if $self->{debug__};
     }
@@ -559,7 +564,7 @@ sub CORE_config
     # changes that override the saved configuration
 
     $self->{components__}{core}{config}->load_configuration();
-    $self->{components__}{core}{config}->parse_command_line();
+    return $self->{components__}{core}{config}->parse_command_line();
 }
 
 #---------------------------------------------------------------------------------------------
@@ -580,10 +585,20 @@ sub CORE_start
     foreach my $type (keys %{$self->{components__}}) {
         print "\n         {$type:" if $self->{debug__};
         foreach my $name (keys %{$self->{components__}{$type}}) {
-            print " $name" if $self->{debug__};
-            flush STDOUT;
-            if ( $self->{components__}{$type}{$name}->start() == 0 ) {
+            my $code = $self->{components__}{$type}{$name}->start();
+
+            if ( $code == 0 ) {
                 die "Failed to start while starting the $name module";
+            }
+
+            # If the module said that it didn't want to be loaded then
+            # unload it.
+
+            if ( $code == 2 ) {
+                delete $self->{components__}{$type}{$name};
+	    } else {
+                print " $name" if $self->{debug__};
+                flush STDOUT;
             }
         }
         print '} ' if $self->{debug__};

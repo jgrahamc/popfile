@@ -97,6 +97,24 @@ sub initialize
     # The welcome string from the proxy is configurable
     $self->config_( 'welcome_string', "POP3 POPFile ($self->{version_}) server ready" );
 
+    return $self->SUPER::initialize();;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# start
+#
+# ---------------------------------------------------------------------------------------------
+sub start
+{
+    my ( $self ) = @_;
+
+    # If we are not enabled then no further work happens in this module
+
+    if ( $self->config_( 'enabled' ) == 0 ) {
+        return 2;
+    }
+
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
@@ -123,18 +141,6 @@ sub initialize
     $self->register_configuration_item_( 'chain',                      # PROFILE BLOCK START
                                          'pop3_secure_server_port',
                                          $self );                      # PROFILE BLOCK STOP
-
-    return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# start
-#
-# ---------------------------------------------------------------------------------------------
-sub start
-{
-    my ( $self ) = @_;
 
     if ( $self->config_( 'welcome_string' ) =~ /^POP3 POPFile \(v\d+\.\d+\.\d+\) server ready$/ ) {
         $self->config_( 'welcome_string', "POP3 POPFile ($self->{version_}) server ready" );

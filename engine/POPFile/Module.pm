@@ -73,12 +73,6 @@ package POPFile::Module;
 #
 # register_configuration_item_() register a UI configuration item
 #
-# get_root_path_() Converts a relative path to an absolute based on the POPFile
-#                  root path (set through the environment variable POPFILE_ROOT)
-#
-# get_user_path_() Converts a relative path to an absolute based on the POPFile
-#                  user path (set through the environment variable POPFILE_USER)
-#
 # A note on the naming
 #
 # A method or variable that ends with an underscore is PROTECTED and should not be accessed
@@ -182,7 +176,8 @@ sub initialize
 # Called when all configuration information has been loaded from disk.
 #
 # The method should return 1 to indicate that it started correctly, if it returns
-# 0 then POPFile will abort loading immediately
+# 0 then POPFile will abort loading immediately, returns 2 if everything OK but this
+# module does not want to continue to be used.
 #
 # ---------------------------------------------------------------------------------------------
 sub start
@@ -428,48 +423,6 @@ sub register_configuration_item_
     return $self->mq_post_( 'UIREG', "$type:$name", $object );
 }
 
-# ---------------------------------------------------------------------------------------------
-#
-# get_root_path_
-#
-# The POPFILE_ROOT environment variable is converted by the configuration
-# module into an internal variable.  This method take a relative or absolute
-# path and returns the same path relative to the POPFILE_ROOT.  Hence if the
-# passed in path is absolute it simply returns it, if relative then it returns
-# the full path consisting of the concatenation of the POPFILE_ROOT and the
-# passed in path
-#
-# $path                 The path to convert
-#
-# ---------------------------------------------------------------------------------------------
-sub get_root_path_
-{
-    my ( $self, $path ) = @_;
-
-    $self->{configuration__}->get_root_path( $path );
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# get_user_path_
-#
-# The POPFILE_USER environment variable is converted by the configuration
-# module into an internal variable.  This method take a relative or absolute
-# path and returns the same path relative to the POPFILE_USER.  Hence if the
-# passed in path is absolute it simply returns it, if relative then it returns
-# the full path consisting of the concatenation of the POPFILE_USER and the
-# passed in path
-#
-# $path                 The path to convert
-#
-# ---------------------------------------------------------------------------------------------
-sub get_user_path_
-{
-    my ( $self, $path ) = @_;
-
-    $self->{configuration__}->get_user_path( $path );
-}
-
 # GETTER/SETTER methods.  Note that I do not expect documentation of these unless they
 # are non-trivial since the documentation would be a waste of space
 #
@@ -586,3 +539,4 @@ sub last_ten_log_entries
 }
 
 1;
+

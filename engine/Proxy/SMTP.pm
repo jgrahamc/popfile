@@ -26,8 +26,6 @@ use Proxy::Proxy;
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-#   Modified by     Sam Schinke (sschinke@users.sourceforge.net)
-#
 # ---------------------------------------------------------------------------------------------
 
 use strict;
@@ -72,9 +70,6 @@ sub initialize
 {
     my ( $self ) = @_;
 
-    # Disabled by default
-    $self->config_( 'enabled', 0);
-
     # By default we don't fork on Windows
     $self->config_( 'force_fork', ($^O eq 'MSWin32')?0:1 );
 
@@ -90,6 +85,26 @@ sub initialize
 
     # The welcome string from the proxy is configurable
     $self->config_( 'welcome_string', "SMTP POPFile ($self->{version_}) welcome" );
+
+    return $self->SUPER::initialize();;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# start
+#
+# Called to start the SMTP proxy module
+#
+# ---------------------------------------------------------------------------------------------
+sub start
+{
+    my ( $self ) = @_;
+
+    # If we are not enabled then no further work happens in this module
+
+    if ( $self->config_( 'enabled' ) == 0 ) {
+        return 2;
+    }
 
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
@@ -114,7 +129,7 @@ sub initialize
                                          'smtp_server_port',
                                           $self );
 
-    return 1;
+    return $self->SUPER::start();;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -168,9 +183,9 @@ sub child__
 
             next;
         }
-
+        
         # Handle EHLO specially so we can control what ESMTP extensions are negotiated
-
+        
         if ( $command =~ /EHLO/i ) {
             if ( $self->config_( 'chain_server' ) )  {
                 if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'chain_server' ),  $self->config_( 'chain_port' ) ) )  {
@@ -181,20 +196,20 @@ sub child__
 
                     my $unsupported;
 
-
-
+                    
+                    
                     # RFC 1830, http://www.faqs.org/rfcs/rfc1830.html
                     # CHUNKING and BINARYMIME both require the support of the "BDAT" command
                     # support of BDAT requires extensive changes to POPFile's internals and
                     # will not be implemented at this time
 
                     $unsupported .= "CHUNKING|BINARYMIME";
-
+                    
                     # append unsupported ESMTP extensions to $unsupported here, important to maintain
                     # format of OPTION|OPTION2|OPTION3
-
+                    
                     $unsupported = qr/250\-$unsupported/;
-
+                                        
                     $self->smtp_echo_response_( $mail, $client, $command, $unsupported );
 
 
@@ -441,3 +456,5 @@ sub validate_item
 }
 
 1;
+
+
