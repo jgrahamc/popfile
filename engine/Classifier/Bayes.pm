@@ -243,7 +243,7 @@ sub start
 
     # When starting clean up a previous BerkeleyDB environment
 
-    unlink glob( $self->get_user_path_( $self->config_( 'corpus' ) . '__db.*' ) );
+    unlink glob( $self->get_user_path_( $self->config_( 'corpus' ) . '/__db.*' ) );
 
     return $self->load_word_matrix_( 0 );
 }
