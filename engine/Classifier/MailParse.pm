@@ -191,17 +191,29 @@ sub update_tag
 
     if ( $tag =~ /^img$/i ) 
     {
-        if ( $arg =~ /src=[\"\']?http:\/\/([^ \/\"]+)([ \/\"])/i ) 
+        if ( $arg =~ /src=[\"\']?http:\/\/([^ \/\">]+)([ \/\">]|$)/i ) 
         {
-            update_word( $self, $1, 0, '\/', $2 );
+            my $url   = $1;
+            my $after = $2;
+            if ( $after eq '>' ) 
+            {
+                $after = '&';
+            }
+            update_word( $self, $url, 0, '\/', $after );
         }
     }
 
     if ( $tag =~ /^a$/i ) 
     {
-        if ( $arg =~ /href=[\"\']?http:\/\/([^ \/\"]+)([ \/\"])/i ) 
+        if ( $arg =~ /href=[\"\']?http:\/\/([^ \/\">]+)([ \/\">]|$)/i ) 
         {
-            update_word( $self, $1, 0, '\/', $2 );
+            my $url   = $1;
+            my $after = $2;
+            if ( $after eq '>' ) 
+            {
+                $after = '&';
+            }
+            update_word( $self, $url, 0, '\/', $after );
         }
     }
 }
