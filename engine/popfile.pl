@@ -839,8 +839,10 @@ sub corpus_page
     }
     
     my $body = "<h2>Summary</h2><table width=100%><tr><td><b>Bucket Name</b><td align=right><b>Total Words</b><td>&nbsp;<td align=center><b>Change Color</b><td>&nbsp;<td><b>Top 10 words</b>";
+
+    my @buckets = sort keys %{$classifier->{total}};
     
-    foreach my $bucket (keys %{$classifier->{total}})
+    foreach my $bucket (@buckets)
     {
         $body .= $classifier->{top10html}{$bucket};
     }
@@ -854,7 +856,7 @@ sub corpus_page
 
     $body .= "<p><hr><h2>Learn</h2>";
     $body .= "<h3>Upload file into a bucket</h3><form action=/buckets><b>Bucket: </b><select name=name>";
-    foreach my $bucket (keys %{$classifier->{total}})
+    foreach my $bucket (@buckets)
     {
         $body .= "<option value=$bucket>$bucket</option>";
     }
@@ -865,7 +867,7 @@ sub corpus_page
     $body .= "<p><form action=/buckets><b>Create bucket with name:</b> <br><input name=name type=text> <input type=submit name=create value=Create></form>$create_message";
     
     $body .= "<p><form action=/buckets><b>Delete bucket named:</b> <br><select name=name>";
-    foreach my $bucket (keys %{$classifier->{total}})
+    foreach my $bucket (@buckets)
     {
         $body .= "<option value=$bucket>$bucket</option>";
     }
@@ -883,7 +885,7 @@ sub corpus_page
         {
             my $max = 0;
             my $max_bucket = '';
-            foreach my $bucket (keys %{$classifier->{total}})
+            foreach my $bucket (@buckets)
             {
                 if ( $classifier->get_value( $bucket, $word ) != 0 )
                 {
@@ -897,7 +899,7 @@ sub corpus_page
                 }
             }
             
-            foreach my $bucket (keys %{$classifier->{total}})
+            foreach my $bucket (@buckets)
             {
                 if ( $classifier->get_value( $bucket, $word ) != 0 )
                 {
@@ -1106,7 +1108,7 @@ sub history_page
         
         # If the user has more than 4 buckets then we'll present a drop down list of buckets, otherwise we present simple
         # links
-        my @buckets = keys %{$classifier->{total}};
+        my @buckets = sort keys %{$classifier->{total}};
         my $drop_down = ( $#buckets > 4 );
 
         if ( $drop_down ) 
@@ -1156,7 +1158,7 @@ sub history_page
                 $body .= "Reclassify as: ";
             }
             
-            foreach my $abucket (keys %{$classifier->{total}})
+            foreach my $abucket (@buckets)
             {
                 if ( $abucket ne $bucket ) 
                 {
