@@ -190,7 +190,8 @@ sub initialize
 
     # The last time (textual) that the statistics were reset
 
-    $self->config_( 'last_reset', localtime );
+    my $lt = localtime;
+    $self->config_( 'last_reset', $lt );
 
     # We start by assuming that the user speaks English like the
     # perfidious Anglo-Saxons that we are... :-)
@@ -2027,9 +2028,15 @@ sub corpus_page
             $body .= " class=\"rowOdd\"";
         }
         $stripe = 1 - $stripe;
-        $body .= "><td><a href=\"/buckets?session=$self->{session_key__}&amp;showbucket=$bucket\">\n";
-        $body .= "<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></a></td>\n";
-        $body .= "<td width=\"1%\">&nbsp;</td><td align=\"right\">$number</td><td width=\"1%\">&nbsp;</td>\n";
+        $body .= '><td>';
+        if ( $bucket ne 'unclassified' ) {
+            $body .= "<a href=\"/buckets?session=$self->{session_key__}&amp;showbucket=$bucket\">\n";
+	}
+        $body .= "<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font>";
+        if ( $bucket ne 'unclassified' ) {
+            $body .= '</a>';
+	}
+        $body .= "</td>\n<td width=\"1%\">&nbsp;</td><td align=\"right\">$number</td><td width=\"1%\">&nbsp;</td>\n";
         $body .= "<td align=\"right\">$unique</td><td width=\"1%\">&nbsp;</td>";
 
         if ( $self->global_config_( 'subject' ) == 1 )  {
@@ -3348,12 +3355,14 @@ sub history_page
             $body .= "<a title=\"$from\">$short_from</a></td>\n";
             $body .= "<td><a class=\"messageLink\" title=\"$subject\" href=\"/view?view=$mail_file" . $self->print_form_fields_(0,1,('start_message','session','filter','search','sort')) . "\">";
             $body .= "$short_subject</a></td>\n<td>";
+            my $sbs = ($bucket ne 'unclassified')?"<a href=\"buckets?session=$self->{session_key__}&showbucket=$bucket\">":'';
+            my $sbe = ($bucket ne 'unclassified')?'</a>':'';
             if ( $reclassified )  {
-                $body .= "<a href=\"buckets?session=$self->{session_key__}&showbucket=$bucket\"><font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></a></td>\n<td>";
+                $body .= "$sbs<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font>$sbe</td>\n<td>";
                 $body .= sprintf( $self->{language__}{History_Already}, ($self->{classifier__}->get_bucket_color($bucket) || ''), ($bucket || '') );
                 $body .= " <input type=\"submit\" class=\"undoButton\" name=\"undo_$i\" value=\"$self->{language__}{Undo}\">\n";
             } else {
-                $body .= "<a href=\"buckets?session=$self->{session_key__}&showbucket=$bucket\"><font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></a></td>\n<td>";
+                $body .= "$sbs<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font>$sbe</td>\n<td>";
 
                 if ( $self->{history__}{$mail_file}{magnet} eq '' )  {
                     $body .= "\n<select name=\"$i\">\n";
@@ -3549,7 +3558,7 @@ sub view_page
         if ( $self->config_( 'wordtable_format' ) eq 'score' ) {
             $view = $self->{language__}{View_WordScores};
 	}
-  
+
         $fmtlinks = "<table width=\"100%\">\n<td class=\"top20\" align=\"left\"><b>$self->{language__}{View_WordMatrix} ($view)</b></td>\n<td class=\"historyNavigatorTop\">\n";
         if ($self->config_( 'wordtable_format' ) ne 'freq' ) {
             $fmtlinks .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index ];
