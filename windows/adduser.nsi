@@ -164,7 +164,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.37"
+  !define C_PFI_VERSION  "0.2.38"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -630,7 +630,8 @@ Function .onInit
 
   ; The command-line switch '/install' (or '/installreboot') is used to suppress this wizard's
   ; language selection dialog when the wizard is called from 'setup.exe' during installation
-  ; of POPFile.
+  ; of POPFile. The '/restore="path to restored data"' switch peforms a similar function when
+  ; this wizard is called from the POPFile 'User Data' Restore wizard.
 
   Call GetParameters
   Pop $G_PFISETUP
@@ -1809,7 +1810,7 @@ no_quotes:
 
 check_config:
   Pop ${L_RESULT}
-
+  IfFileExists "$G_USERDIR\pfi-restore.log" 0 invalid_restore
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_4)\
       $\r$\n$\r$\n\
       ($G_USERDIR)\
@@ -1818,6 +1819,11 @@ check_config:
 
   Call CheckExistingConfigData
   Abort
+
+invalid_restore:
+  MessageBox MB_OK|MB_ICONSTOP "Error: No 'restore' data found at specified location !\
+      $\r$\n$\r$\n\
+      ($G_USERDIR)"
 
 quit_wizard:
   Quit
