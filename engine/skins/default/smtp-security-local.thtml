@@ -1,15 +1,14 @@
-<br />
-<span class="securityLabel">
-    <TMPL_VAR NAME="Localize_Security_SMTP">:
-</span>
-<br />
 
 <table border="0" cellpadding="0" cellspacing="0" summary="">
     <tr>
         <td nowrap="nowrap">
-            <form class="securitySwitch" action="/security" method="post">
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+            <span class="securityLabel">
+                <TMPL_VAR NAME="Localize_Security_SMTP">:
+            </span>
+            <br />
 
+            <form class="securitySwitch" action="/security" method="post">
+                
                 <TMPL_IF NAME="smtp_local_on">
 
                 <span class="securityWidgetStateOff">
@@ -28,6 +27,7 @@
 
                 </TMPL_IF>
 
+                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
             </form>
         </td>
     </tr>

@@ -117,21 +117,25 @@ sub start
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-#    $self->register_configuration_item_( 'configuration',
-#                                         'nntp_port',
-#                                         $self );
+    $self->register_configuration_item_( 'configuration',
+                                         'nntp_port',
+                                         'nntp-port.thtml',
+                                         $self );
 
-#    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
-#                                         'nntp_force_fork',
-#                                         $self );                      # PROFILE BLOCK STOP
+    $self->register_configuration_item_( 'configuration',
+                                         'nntp_force_fork',
+                                         'nntp-force-fork.thtml',
+                                         $self );
 
-#    $self->register_configuration_item_( 'configuration',
-#                                         'nntp_separator',
-#                                         $self );
+    $self->register_configuration_item_( 'configuration',
+                                         'nntp_separator',
+                                         'nntp-separator.thtml',
+                                         $self );
 
-#    $self->register_configuration_item_( 'security',
-#                                         'nntp_local',
-#                                         $self );
+    $self->register_configuration_item_( 'security',
+                                         'nntp_local',
+                                         'nntp-security-local.thtml',
+                                         $self );
 
     return $self->SUPER::start();;
 }
@@ -272,7 +276,7 @@ sub child__
                     $count += 1;
 
                     my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $news, $client, 0, '' );
-		}
+                }
 
                 next;
             }
@@ -357,78 +361,35 @@ sub child__
 #
 # configure_item
 #
-#    $name            The name of the item being configured, was passed in by the call
-#                     to register_configuration_item
-#    $language        Reference to the hash holding the current language
-#    $session_key     The current session key
+#    $name            Name of this item
+#    $templ           The loaded template that was passed as a parameter
+#                     when registering
+#    $language        Current language
 #
-#  Must return the HTML for this item
 # ---------------------------------------------------------------------------------------------
 
 sub configure_item
 {
-    my ( $self, $name, $language, $session_key ) = @_;
-
-    my $body = '';
+    my ( $self, $name, $templ, $language ) = @_;
 
     if ( $name eq 'nntp_port' ) {
-        $body .= "<form action=\"/configuration\">\n";
-        $body .= "<label class=\"configurationLabel\" for=\"configPopPort\">$$language{Configuration_NNTPPort}:</label><br />\n";
-        $body .= "<input name=\"nntp_port\" type=\"text\" id=\"configPopPort\" value=\"" . $self->config_( 'port' ) . "\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_nntp_port\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        $templ->param( 'nntp_port' => $self->config_( 'port' ) );
     }
 
     # Separator Character widget
     if ( $name eq 'nntp_separator' ) {
-        $body .= "\n<form action=\"/configuration\">\n";
-        $body .= "<label class=\"configurationLabel\" for=\"configSeparator\">$$language{Configuration_NNTPSeparator}:</label><br />\n";
-        $body .= "<input name=\"nntp_separator\" id=\"configSeparator\" type=\"text\" value=\"" . $self->config_( 'separator' ) . "\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_nntp_separator\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        $templ->param( 'nntp_separator' => $self->config_( 'separator' ) );
     }
 
     if ( $name eq 'nntp_local' ) {
-        $body .= "<span class=\"securityLabel\">$$language{Security_NNTP}:</span><br />\n";
-
-        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
-        if ( $self->config_( 'local' ) == 1 ) {
-            $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
-            $body .= "<span class=\"securityWidgetStateOff\">$$language{Security_NoStealthMode}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securityAcceptPOP3On\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"nntp_local\" value=\"1\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        } else {
-            $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
-            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptPOP3Off\" name=\"toggle\" value=\"$$language{ChangeToNo} $$language{Security_StealthMode}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"nntp_local\" value=\"2\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        }
-        $body .= "</td></tr></table>\n";
+        $templ->param( 'nntp_if_local' => $self->config_( 'local' ) );
      }
 
     if ( $name eq 'nntp_force_fork' ) {
-        $body .= "<span class=\"configurationLabel\">$$language{Configuration_NNTPFork}:</span><br />\n";
-        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
-
-        if ( $self->config_( 'force_fork' ) == 0 ) {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<span class=\"securityWidgetStateOff\">$$language{No}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOn\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"nntp_force_fork\" value=\"1\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        } else {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOff\" name=\"toggle\" value=\"$$language{ChangeToNo}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"nntp_force_fork\" value=\"0\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        }
-        $body .= "</td></tr></table>\n";
+        $templ->param( 'nntp_force_fork_on' => $self->config_( 'force_fork' ) );
     }
 
-    return $body . $self->SUPER::configure_item( $name, $language, $session_key );
+    #$self->SUPER::configure_item( $name, $language, $session_key );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -437,50 +398,54 @@ sub configure_item
 #
 #    $name            The name of the item being configured, was passed in by the call
 #                     to register_configuration_item
-#    $language        Reference to the hash holding the current language
+#    $templ           The loaded template
+#    $language        The language currently in use
 #    $form            Hash containing all form items
 #
-#  Must return the HTML for this item
 # ---------------------------------------------------------------------------------------------
 
 sub validate_item
 {
-    my ( $self, $name, $language, $form ) = @_;
+    my ( $self, $name, $templ, $language, $form ) = @_;
 
     if ( $name eq 'nntp_port' ) {
-        if ( defined($$form{nntp_port}) ) {
+        if ( defined $$form{nntp_port} ) {
             if ( ( $$form{nntp_port} >= 1 ) && ( $$form{nntp_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{nntp_port} );
-                return '<blockquote>' . sprintf( $$language{Configuration_NNTPUpdate} . '</blockquote>' , $self->config_( 'port' ) );
-             } else {
-                 return "<blockquote><div class=\"error01\">$$language{Configuration_Error3}</div></blockquote>";
+                $templ->param( 'nntp_port_feedback' => sprintf $$language{Configuration_NNTPUpdate}, $self->config_( 'port' ) );
+             } 
+             else {
+                 $templ->param( 'nntp_port_feedback' => "<div class=\"error01\">$$language{Configuration_Error3}</div>" );
              }
         }
     }
 
     if ( $name eq 'nntp_separator' ) {
-        if ( defined($$form{nntp_separator}) ) {
+        if ( defined $$form{nntp_separator} ) {
             if ( length($$form{nntp_separator}) == 1 ) {
-                $self->config_( 'separator', $$form{separator} );
-                return '<blockquote>' . sprintf( $$language{Configuration_NNTPSepUpdate} . '</blockquote>' , $self->config_( 'separator' ) );
-            } else {
-                return "<blockquote>\n<div class=\"error01\">\n$$language{Configuration_Error1}</div>\n</blockquote>\n";
+                $self->config_( 'separator', $$form{nntp_separator} );
+                $templ->param( 'nntp_separator_feedback' => sprintf $$language{Configuration_NNTPSepUpdate}, $self->config_( 'separator' ) );
+            } 
+            else {
+                $templ->param( 'nntp_separator_feedback' => "<div class=\"error01\">\n$$language{Configuration_Error1}</div>\n" );
             }
         }
     }
 
     if ( $name eq 'nntp_local' ) {
-        $self->config_( 'local', $$form{nntp_local}-1 ) if ( defined($$form{nntp_local}) );
+        if ( defined $$form{nntp_local} ) {
+            $self->config_( 'local', $$form{nntp_local} );
+        }
     }
 
 
     if ( $name eq 'nntp_force_fork' ) {
-        if ( defined($$form{nntp_force_fork}) ) {
+        if ( defined $$form{nntp_force_fork} ) {
             $self->config_( 'force_fork', $$form{nntp_force_fork} );
         }
     }
 
-    return $self->SUPER::validate_item( $name, $language, $form );
+    # $self->SUPER::validate_item( $name, $language, $form );
 }
 
 1;
