@@ -575,7 +575,10 @@ sub CORE_initialize
 
     # Tell each module to initialize itself
 
-    foreach my $type (sort keys %{$self->{components__}}) {
+    # Make sure that the core is started first.
+    my @c = ( 'core', grep {!/^sort$/} sort keys %{$self->{components__}} );
+
+    foreach my $type (@c) {
         print "\n         {$type:" if $self->{debug__};
         foreach my $name (sort keys %{$self->{components__}{$type}}) {
             print " $name" if $self->{debug__};
@@ -632,7 +635,10 @@ sub CORE_start
 
     # Now that the configuration is set tell each module to begin operation
 
-    foreach my $type (sort keys %{$self->{components__}}) {
+    # Make sure that the core is started first.
+    my @c = ( 'core', grep {!/^sort$/} sort keys %{$self->{components__}} );
+
+    foreach my $type (@c) {
         print "\n         {$type:" if $self->{debug__};
         foreach my $name (sort keys %{$self->{components__}{$type}}) {
             my $code = $self->{components__}{$type}{$name}->start();
