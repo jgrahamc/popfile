@@ -933,6 +933,7 @@ save_HKCU_root_sfn:
   File "${C_PERL_DIR}\lib\lib.pm"
   File "${C_PERL_DIR}\lib\locale.pm"
   File "${C_PERL_DIR}\lib\POSIX.pm"
+  File "${C_PERL_DIR}\lib\re.pm"
   File "${C_PERL_DIR}\lib\SelectSaver.pm"
   File "${C_PERL_DIR}\lib\Socket.pm"
   File "${C_PERL_DIR}\lib\strict.pm"
@@ -1888,9 +1889,10 @@ FunctionEnd
 # or in a separate sub-folder).
 #
 # We attempt to rearrange any existing skins to suit this new structure (the current build only
-# handles the standard set of UI skins supplied with the 0.21.1 release). The new default skin
-# and its associated HTML template files are always installed (even if the 'skins' component is
-# not installed).
+# moves files, it does not edit the CSS files to update any image references within them).
+#
+# The new default skin and its associated HTML template files are always installed by the
+# mandatory 'POPFile' component (even if the 'skins' component is not installed).
 #--------------------------------------------------------------------------
 
 Function SkinsRestructure
@@ -1917,7 +1919,12 @@ lavish:
   !insertmacro SkinMove "outlook"        "outlook"
   !insertmacro SkinMove "PRJBlueGrey"    "prjbluegrey"
   !insertmacro SkinMove "PRJSteelBeach"  "prjsteelbeach"
+
+  ; 'SimplyBlue' is no longer in CVS (22 May 2004) but it was the default skin in earlier
+  ; releases so it is treated like the other standard skins which are still in CVS
+
   !insertmacro SkinMove "SimplyBlue"     "simplyblue"
+
   IfFileExists "$G_ROOTDIR\skins\sleetImages\*.*" 0 sleet
   Rename  "$G_ROOTDIR\skins\sleetImages" "$G_ROOTDIR\skins\sleet"
 
@@ -1937,9 +1944,44 @@ sleet:
   Rename "$G_ROOTDIR\skins\chipped_obsidian.gif" "$G_ROOTDIR\skins\prjsteelbeach\chipped_obsidian.gif"
 
 metalback:
-  IfFileExists "$G_ROOTDIR\skins\metalback.gif" 0 exit
+  IfFileExists "$G_ROOTDIR\skins\metalback.gif" 0 check_for_extra_skins
   CreateDirectory "$G_ROOTDIR\skins\prjsteelbeach"
   Rename "$G_ROOTDIR\skins\metalback.gif" "$G_ROOTDIR\skins\prjsteelbeach\metalback.gif"
+
+check_for_extra_skins:
+
+  ; Move any remaining CSS files to an appropriate folder (to make them available for selection)
+  ; Only the CSS files are moved, the user will have to adjust any skins which use images
+
+  !define L_CSS_HANDLE    $R9   ; used when searching for non-standard skins
+  !define L_SKIN_NAME     $R8   ; name of a non-standard skin (i.e. not supplied with POPFile)
+
+  Push ${L_CSS_HANDLE}
+  Push ${L_SKIN_NAME}
+
+  FindFirst ${L_CSS_HANDLE} ${L_SKIN_NAME} "$G_ROOTDIR\skins\*.css"
+  StrCmp ${L_CSS_HANDLE} "" all_done_now
+
+process_skin:
+  StrCmp ${L_SKIN_NAME} "." look_again
+  StrCmp ${L_SKIN_NAME} ".." look_again
+  IfFileExists "$G_ROOTDIR\skins\${L_SKIN_NAME}\*.*" look_again
+  StrCpy ${L_SKIN_NAME} ${L_SKIN_NAME} -4
+  CreateDirectory "$G_ROOTDIR\skins\${L_SKIN_NAME}"
+  Rename "$G_ROOTDIR\skins\${L_SKIN_NAME}.css" "$G_ROOTDIR\skins\${L_SKIN_NAME}\style.css"
+
+look_again:
+  FindNext ${L_CSS_HANDLE} ${L_SKIN_NAME}
+  StrCmp ${L_SKIN_NAME} "" all_done_now process_skin
+
+all_done_now:
+  FindClose ${L_CSS_HANDLE}
+
+  Pop ${L_SKIN_NAME}
+  Pop ${L_CSS_HANDLE}
+
+  !undef L_CSS_HANDLE
+  !undef L_SKIN_NAME
 
 exit:
 FunctionEnd
