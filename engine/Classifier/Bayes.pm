@@ -901,7 +901,7 @@ sub classify_and_modify
     if ( $classification ne 'unclassified' ) {
         if ( $self->global_config_( 'subject' ) ) {
             # Don't add the classification unless it is not present
-            if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&
+            if ( !( $msg_subject =~ /\Q$modification\E/ ) &&
                  ( $self->{parameters__}{$classification}{subject} == 1 ) &&
                  ( $self->{parameters__}{$classification}{quarantine} == 0 ) )  {
                 $msg_subject = " $modification$msg_subject";

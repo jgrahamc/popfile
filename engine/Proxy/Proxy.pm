@@ -462,7 +462,7 @@ sub get_response_
                 return $response;
             }
         }
-        
+
         if (!$null_resp) {
             # An error has occurred reading from the mail server
             $self->tee_(  $client, "$self->{connection_timeout_error_}$eol" );
@@ -470,7 +470,7 @@ sub get_response_
         } else {
             $self->tee_($client, "");
             return "";
-        }        
+        }
     }
 
     return $response;

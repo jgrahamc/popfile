@@ -1504,6 +1504,11 @@ sub bar_chart_100
     my $body = '';
     my $total_count = 0;
     my @xaxis = sort keys %values;
+
+    if ( $#xaxis < 0 ) {
+        return '';
+    }
+
     my @series = sort keys %{$values{$xaxis[0]}};
 
     for my $bucket (@xaxis)  {

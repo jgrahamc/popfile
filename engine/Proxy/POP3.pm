@@ -179,7 +179,7 @@ sub child__
                 if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
                     # Loop until we get -ERR or +OK
                     my $response;
-                    $response = get_response( $self, $mail, $client, $command );
+                    $response = $self->get_response_( $mail, $client, $command );
 
                     while ( ( ! ( $response =~ /\+OK/ ) ) && ( ! ( $response =~ /-ERR/ ) ) ) {
                         # Check for an abort
@@ -190,7 +190,7 @@ sub child__
                         my $auth;
                         $auth = <$client>;
                         $auth =~ s/(\015|\012)$//g;
-                        $response = get_response( $self, $mail, $client, $auth );
+                        $response = $self->get_response_( $mail, $client, $auth );
                     }
                 } else {
                     last;
