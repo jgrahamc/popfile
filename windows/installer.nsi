@@ -138,11 +138,11 @@
 
   !define C_PFI_PRODUCT  "POPFile"
   Name                   "${C_PFI_PRODUCT}"
-  
+
   !define C_PFI_VERSION  "${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}${C_POPFILE_RC}"
-  
+
   ; Mention the POPFile version number in the titles of the installer & uninstaller windows
-  
+
   Caption                "${C_PFI_PRODUCT} ${C_PFI_VERSION} Setup"
   UninstallCaption       "${C_PFI_PRODUCT} ${C_PFI_VERSION} Uninstall"
 
@@ -306,9 +306,9 @@
   ;----------------------------------------------------------------
 
   ; The "Special" bitmap appears on the "Welcome" and "Finish" pages
-  
+
   !define MUI_WELCOMEFINISHPAGE_BITMAP "special.bmp"
-  
+
   ;----------------------------------------------------------------
   ;  Interface Settings - Installer Finish Page Interface Settings
   ;----------------------------------------------------------------
@@ -367,11 +367,11 @@
   ; to obscure the installer window)
 
   !define MUI_PAGE_CUSTOMFUNCTION_PRE "ShowInstaller"
-  
+
   !define MUI_WELCOMEPAGE_TEXT "$(PFI_LANG_WELCOME_INFO_TEXT)"
-  
+
   !insertmacro MUI_PAGE_WELCOME
-  
+
   ;---------------------------------------------------
   ; Installer Page - License Page (uses English GPL)
   ;---------------------------------------------------
@@ -400,43 +400,43 @@
   ; Use a "leave" function to look for 'popfile.cfg' in the directory selected for this install
 
   !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "CheckExistingConfig"
-  
+
   !insertmacro MUI_PAGE_DIRECTORY
-  
+
   ;---------------------------------------------------
   ; Installer Page - POP3 and UI Port Options
   ;---------------------------------------------------
-  
+
   Page custom SetOptionsPage "CheckPortOptions"
-  
+
   ;---------------------------------------------------
   ; Installer Page - Install files
   ;---------------------------------------------------
 
   !insertmacro MUI_PAGE_INSTFILES
-  
+
   ;---------------------------------------------------
   ; Installer Page - Create Buckets (if necessary)
   ;---------------------------------------------------
 
   !insertmacro CBP_PAGE_SELECTBUCKETS
-  
+
   ;---------------------------------------------------
   ; Installer Page - Configure Outlook Express
   ;---------------------------------------------------
-  
+
   Page custom SetOutlookExpressPage
-  
+
   ;---------------------------------------------------
   ; Installer Page - Choose POPFile launch mode
   ;---------------------------------------------------
 
   Page custom StartPOPFilePage "CheckLaunchOptions"
-  
+
   ;---------------------------------------------------
   ; Installer Page - Convert Corpus (if necessary)
   ;---------------------------------------------------
-  
+
   Page custom ConvertCorpusPage
 
   ;---------------------------------------------------
@@ -447,7 +447,7 @@
   ; POPFile User Interface if user has chosen to start POPFile from the installer.
 
   !define MUI_PAGE_CUSTOMFUNCTION_PRE "CheckRunStatus"
-  
+
   ; Offer to display the POPFile User Interface (The 'CheckRunStatus' function ensures this
   ; option is only offered if the installer has started POPFile running)
 
@@ -1916,10 +1916,12 @@ Function SetOutlookExpressPage_Init
 
   !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_OECFG_IO_INTRO)"
   !insertmacro PFI_IO_TEXT "ioB.ini" "2" "$(PFI_LANG_OECFG_IO_CHECKBOX)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "3" "$(PFI_LANG_OECFG_IO_EMAIL)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "4" "$(PFI_LANG_OECFG_IO_SERVER)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "5" "$(PFI_LANG_OECFG_IO_USERNAME)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "6" "$(PFI_LANG_OECFG_IO_RESTORE)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "3" "$(PFI_LANG_OECFG_IO_RESTORE)"
+
+  !insertmacro PFI_IO_TEXT "ioB.ini" "5" "$(PFI_LANG_OECFG_IO_EMAIL)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "6" "$(PFI_LANG_OECFG_IO_SERVER)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "7" "$(PFI_LANG_OECFG_IO_USERNAME)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "8" "$(PFI_LANG_OECFG_IO_POP3PORT)"
 
 FunctionEnd
 
@@ -1965,8 +1967,9 @@ Function SetOutlookExpressPage
   !define L_OEDATA      $R3   ; some data (it varies) for current OE account
   !define L_OEPATH      $R2   ; holds part of the path used to access OE account data
   !define L_ORDINALS    $R1   ; "Identity Ordinals" flag (1 = found, 0 = not found)
-  !define L_SEPARATOR   $R0   ; char used to separate the pop3 server from the username
-  !define L_TEMP        $9
+  !define L_PORT        $R0   ; POP3 Port used for an OE Account
+  !define L_SEPARATOR   $9    ; char used to separate the pop3 server from the username
+  !define L_TEMP        $8
 
   Push ${L_ACCOUNT}
   Push ${L_ACCT_INDEX}
@@ -1977,6 +1980,7 @@ Function SetOutlookExpressPage
   Push ${L_OEDATA}
   Push ${L_OEPATH}
   Push ${L_ORDINALS}
+  Push ${L_PORT}
   Push ${L_SEPARATOR}
   Push ${L_TEMP}
 
@@ -2052,10 +2056,17 @@ next_acct:
 
   ; Prepare to display the 'POP3 Server' data
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 8" "Text" ${L_OEDATA}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 10" "Text" ${L_OEDATA}
 
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "SMTP Email Address"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 7" "Text" ${L_OEDATA}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" ${L_OEDATA}
+
+  ReadRegDWORD ${L_PORT} HKCU ${L_ACCOUNT} "POP3 Port"
+  StrCmp ${L_PORT} "" 0 port_ok
+  StrCpy ${L_PORT} "110"
+
+port_ok:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 12" "Text" ${L_PORT}
 
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
 
@@ -2067,7 +2078,7 @@ next_acct:
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "" 0 try_next_account
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" ${L_OEDATA}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 11" "Text" ${L_OEDATA}
 
   ; Find the Username used by OE for this identity and the OE Account Name
   ; (so we can unambiguously report which email account we are offering to reconfigure).
@@ -2076,7 +2087,7 @@ next_acct:
   StrCpy ${L_IDENTITY} $\"${L_IDENTITY}$\"
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "Account Name"
   StrCpy ${L_OEDATA} $\"${L_OEDATA}$\"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" "Field 10" "Text" \
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" "Field 4" "Text" \
       "${L_OEDATA} $(PFI_LANG_OECFG_IO_LINK_1) ${L_IDENTITY} $(PFI_LANG_OECFG_IO_LINK_2)"
 
   ; Display the OE account data and offer to configure this account to work with POPFile
@@ -2095,6 +2106,11 @@ next_acct:
 change_oe:
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
   ReadRegStr ${L_TEMP} HKCU ${L_ACCOUNT} "POP3 Server"
+  ReadRegDWORD ${L_PORT} HKCU ${L_ACCOUNT} "POP3 Port"
+  StrCmp ${L_PORT} "" 0 save_data
+  StrCpy ${L_PORT} "110"
+
+save_data:
 
   ; To be able to restore the registry to previous settings when we uninstall we
   ; write a special file called popfile.reg containing the registry settings
@@ -2106,16 +2122,29 @@ change_oe:
 
   FileOpen  ${L_CFG} $INSTDIR\popfile.reg a
   FileSeek  ${L_CFG} 0 END
+
   FileWrite ${L_CFG} "${L_ACCOUNT}$\n"
   FileWrite ${L_CFG} "POP3 User Name$\n"
   FileWrite ${L_CFG} "${L_OEDATA}$\n"
+
   FileWrite ${L_CFG} "${L_ACCOUNT}$\n"
   FileWrite ${L_CFG} "POP3 Server$\n"
   FileWrite ${L_CFG} "${L_TEMP}$\n"
+
+  FileWrite ${L_CFG} "${L_ACCOUNT}$\n"
+  FileWrite ${L_CFG} "POP3 Port$\n"
+  FileWrite ${L_CFG} "${L_PORT}$\n"
+
   FileClose ${L_CFG}
 
   WriteRegStr HKCU ${L_ACCOUNT} "POP3 User Name" "${L_TEMP}${L_SEPARATOR}${L_OEDATA}"
   WriteRegStr HKCU ${L_ACCOUNT} "POP3 Server" "127.0.0.1"
+  StrCmp $G_POP3 "110" 0 not_default_pop3
+  DeleteRegValue HKCU ${L_ACCOUNT} "POP3 Port"
+  Goto try_next_account
+
+not_default_pop3:
+  WriteRegDWORD HKCU ${L_ACCOUNT} "POP3 Port" $G_POP3
 
 try_next_account:
   IntOp ${L_ACCT_INDEX} ${L_ACCT_INDEX} + 1
@@ -2134,6 +2163,7 @@ finished_oe_config:
 
   Pop ${L_TEMP}
   Pop ${L_SEPARATOR}
+  Pop ${L_PORT}
   Pop ${L_ORDINALS}
   Pop ${L_OEPATH}
   Pop ${L_OEDATA}
@@ -2153,6 +2183,7 @@ finished_oe_config:
   !undef L_OEDATA
   !undef L_OEPATH
   !undef L_ORDINALS
+  !undef L_PORT
   !undef L_SEPARATOR
   !undef L_TEMP
 
@@ -2812,23 +2843,57 @@ remove_shortcuts:
   IfErrors skip_registry_restore
   DetailPrint "$(PFI_LANG_UN_LOG_2): popfile.reg"
 
+  ; The restore data for an OE account data can have either TWO or THREE entries, as follows:
+
+  ; Entry 1
+  ; Line x    : <Registry key for the OE Account>
+  ; Line x+1  : POP 3 User Name
+  ; Line x+2  : <user name data>
+
+  ; Entry 2
+  ; Line x+3  : <Registry key for the OE Account>
+  ; Line x+4  : POP3 Server
+  ; Line x+5  : <server data>
+
+  ; Entry 3
+  ; Line x+6  : <Registry key for the OE Account>
+  ; Line x+7  : POP3 Port
+  ; Line x+8  : <port number>
+
+  ; NB The third entry (POP3 Port) only exists in recent (i.e. post v0.20.1a) installations.
+
 restore_loop:
   FileRead ${L_CFG} ${L_REG_KEY}
   Push ${L_REG_KEY}
   Call un.TrimNewlines
   Pop ${L_REG_KEY}
   IfErrors skip_registry_restore
+
   FileRead ${L_CFG} ${L_REG_SUBKEY}
   Push ${L_REG_SUBKEY}
   Call un.TrimNewlines
   Pop ${L_REG_SUBKEY}
   IfErrors skip_registry_restore
+
   FileRead ${L_CFG} ${L_REG_VALUE}
   Push ${L_REG_VALUE}
   Call un.TrimNewlines
   Pop ${L_REG_VALUE}
   IfErrors skip_registry_restore
+
+  StrCmp ${L_REG_SUBKEY} "POP3 Port" 0 string_value
+  StrCmp ${L_REG_VALUE} "110" 0 not_default_port
+  DeleteRegValue HKCU  ${L_REG_KEY} ${L_REG_SUBKEY}
+  Goto log_it
+
+not_default_port:
+  WriteRegDWORD HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
+  Goto log_it
+
+string_value:
   WriteRegStr HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
+
+log_it:
   DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_REG_SUBKEY}: ${L_REG_VALUE}"
   goto restore_loop
 
