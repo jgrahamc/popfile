@@ -1286,6 +1286,61 @@ install_schema:
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.exp"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.lib"
 
+  ; Extra Perl modules required for the encrypted cookies introduced in POPFile 0.23.0
+
+  SetOutPath "$G_MPLIBDIR"
+  File "${C_PERL_DIR}\lib\bytes.pm"
+  File "${C_PERL_DIR}\lib\subs.pm"
+
+  SetOutPath "$G_MPLIBDIR\Class"
+  File "${C_PERL_DIR}\site\lib\Class\Loader.pm"
+
+  SetOutPath "$G_MPLIBDIR\Crypt"
+  File "${C_PERL_DIR}\site\lib\Crypt\Blowfish.pm"
+  File "${C_PERL_DIR}\site\lib\Crypt\CBC.pm"
+  File "${C_PERL_DIR}\site\lib\Crypt\Random.pm"
+
+  SetOutPath "$G_MPLIBDIR\Crypt\Random"
+  File "${C_PERL_DIR}\site\lib\Crypt\Random\Generator.pm"
+
+  SetOutPath "$G_MPLIBDIR\Crypt\Random\Provider"
+  File "${C_PERL_DIR}\site\lib\Crypt\Random\Provider\*.pm"
+  
+  SetOutPath "$G_MPLIBDIR\Data"
+  File "${C_PERL_DIR}\lib\Data\Dumper.pm"
+
+  SetOutPath "$G_MPLIBDIR\Digest"
+  File "${C_PERL_DIR}\site\lib\Digest\SHA.pm"
+
+  SetOutPath "$G_MPLIBDIR\Math"
+  File "${C_PERL_DIR}\site\lib\Math\Pari.pm"
+
+  SetOutPath "$G_MPLIBDIR\auto\Crypt\Blowfish"
+  File "${C_PERL_DIR}\site\lib\auto\Crypt\Blowfish\Blowfish.bs"
+  File "${C_PERL_DIR}\site\lib\auto\Crypt\Blowfish\Blowfish.dll"
+  File "${C_PERL_DIR}\site\lib\auto\Crypt\Blowfish\Blowfish.exp"
+  File "${C_PERL_DIR}\site\lib\auto\Crypt\Blowfish\Blowfish.lib"
+
+  SetOutPath "$G_MPLIBDIR\auto\Data\Dumper"
+  File "${C_PERL_DIR}\lib\auto\Data\Dumper\Dumper.bs"
+  File "${C_PERL_DIR}\lib\auto\Data\Dumper\Dumper.dll"
+  File "${C_PERL_DIR}\lib\auto\Data\Dumper\Dumper.exp"
+  File "${C_PERL_DIR}\lib\auto\Data\Dumper\Dumper.lib"
+
+  SetOutPath "$G_MPLIBDIR\auto\Digest\SHA"
+  File "${C_PERL_DIR}\site\lib\auto\Digest\SHA\SHA.bs"
+  File "${C_PERL_DIR}\site\lib\auto\Digest\SHA\SHA.dll"
+  File "${C_PERL_DIR}\site\lib\auto\Digest\SHA\SHA.exp"
+  File "${C_PERL_DIR}\site\lib\auto\Digest\SHA\SHA.lib"
+
+  SetOutPath "$G_MPLIBDIR\auto\Math\Pari"
+  File "${C_PERL_DIR}\site\lib\auto\Math\Pari\Pari.bs"
+  File "${C_PERL_DIR}\site\lib\auto\Math\Pari\Pari.dll"
+  File "${C_PERL_DIR}\site\lib\auto\Math\Pari\Pari.exp"
+  File "${C_PERL_DIR}\site\lib\auto\Math\Pari\Pari.lib"
+
+  ;-----------------------------------------------------------------------
+
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
 
@@ -3571,6 +3626,9 @@ Section "un.Minimal Perl" UnSecMinPerl
 skip_XMLRPC_support:
   RMDir /r "$G_MPLIBDIR\auto"
   RMDir /r "$G_MPLIBDIR\Carp"
+  RMDir /r "$G_MPLIBDIR\Class"
+  RMDir /r "$G_MPLIBDIR\Crypt"
+  RMDir /r "$G_MPLIBDIR\Data"
   RMDir /r "$G_MPLIBDIR\Date"
   RMDir /r "$G_MPLIBDIR\DBD"
   RMDir /r "$G_MPLIBDIR\Digest"
@@ -3583,6 +3641,7 @@ skip_Encode:
   RMDir /r "$G_MPLIBDIR\Getopt"
   RMDir /r "$G_MPLIBDIR\HTML"
   RMDir /r "$G_MPLIBDIR\IO"
+  RMDir /r "$G_MPLIBDIR\Math"
   RMDir /r "$G_MPLIBDIR\MIME"
   RMDir /r "$G_MPLIBDIR\String"
   RMDir /r "$G_MPLIBDIR\Sys"
