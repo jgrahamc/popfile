@@ -57,6 +57,12 @@ if ( $#ARGV == -1 ) {
     $c->module_config_( 'html', 'port',  8080 );
 
     if ( $POPFile->CORE_config() ) {
+
+        # Prevent the tool from finding another copy of POPFile running
+
+        my $c = $POPFile->{components__}{core}{config};
+        $c->config_( 'piddir', $c->config_( 'piddir' ) . 'pipe.pl.' );
+
         $POPFile->CORE_start();
 
         my $b = $POPFile->{components__}{classifier}{bayes};

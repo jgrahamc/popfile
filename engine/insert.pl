@@ -59,6 +59,12 @@ if ( $#ARGV > 0 ) {
     @ARGV = ();
 
     if ( $POPFile->CORE_config() ) {
+
+        # Prevent the tool from finding another copy of POPFile running
+
+        my $c = $POPFile->{components__}{core}{config};
+        $c->config_( 'piddir', $c->config_( 'piddir' ) . 'insert.pl.' );
+
         $POPFile->CORE_start();
 
         my $b = $POPFile->{components__}{classifier}{bayes};
