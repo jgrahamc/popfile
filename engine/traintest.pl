@@ -319,7 +319,7 @@ if ( @ARGV[0] ne "-usage")
          if ($bucket_class ne $bucket_true) {
             @errors[$error_count] = {};
             @errors[$error_count]->{index}= $message_count;
-            @errors[$error_count]->{subject} = $b->{parser}->{subject};
+            @errors[$error_count]->{subject} = $b->{parser__}->{subject__};
             @errors[$error_count]->{shouldbe} = $bucket_true;
             @errors[$error_count]->{classified_as} = $bucket_class;
             $error_count++;
@@ -343,8 +343,8 @@ if ( @ARGV[0] ne "-usage")
         @clog[$message_count]->{correct} = $correct;
         @clog[$message_count]->{error_count} = $error_count;
         @clog[$message_count]->{accuracy} = int( 10000 * ( $message_count - $error_count ) / $message_count ) / 100;
-        @clog[$message_count]->{subject} = $b->{parser}->{subject};
-        @clog[$message_count]->{from} = $b->{parser}->{from};
+        @clog[$message_count]->{subject} = $b->{parser__}->{subject__};
+        @clog[$message_count]->{from} = $b->{parser__}->{from__};
         @clog[$message_count]->{shouldbe} = $bucket_true;
         @clog[$message_count]->{classified_as} = $bucket_class;
         @clog[$message_count]->{filename} = @sorted_messages[$index];
