@@ -2,30 +2,40 @@
 ; Copyright (c) 2001-2003 John Graham-Cumming
 ;
 
+; Modified to work with NSIS v2.0b1
+
 !define MUI_PRODUCT "POPFile" 
 !define MUI_VERSION "0.18.1"
 
-!include "${NSISDIR}\Contrib\Modern UI\System.nsh"
+!include "MUI.nsh"
 
 ;--------------------------------
 ;Configuration
   
+  !define MUI_WELCOMEPAGE
   !define MUI_COMPONENTSPAGE
   !define MUI_DIRECTORYPAGE
   !define MUI_ABORTWARNING
+  !define MUI_FINISHPAGE
   
   !define MUI_UNINSTALLER
   
   !define MUI_CUSTOMPAGECOMMANDS
+
+  ; Support for 20 user variables is provided by NSIS. They recommend using
+  ; variables $0 to $9 as global variables and reserving $R0 to $R9 for
+  ; use as local variables.
     
-  !define POP3    $0
-  !define GUI     $1
-  !define STARTUP $2
-  !define CFG     $3
-  !define LNE     $4
-  !define CMPRE   $5
-  !define OEID    $6
-  !define ID      $7
+  !define POP3     $0
+  !define GUI      $1
+  !define STARTUP  $2
+  !define CFG      $3
+  !define LNE      $4
+  !define CMPRE    $5
+  !define OEID     $6
+  !define ID       $7
+  !define OEIDENT  $8
+  !define ACCTID   $9
   
   ;Language
   !insertmacro MUI_LANGUAGE "English"
@@ -40,16 +50,17 @@
     LangString TEXT_IO_SUBTITLE ${LANG_ENGLISH} "Options"
   
   ;Page order 
+  !insertmacro MUI_PAGECOMMAND_WELCOME
   !insertmacro MUI_PAGECOMMAND_COMPONENTS
   !insertmacro MUI_PAGECOMMAND_DIRECTORY
   Page custom SetOptionsPage  "Options"
-  Page custom SetOutlookExpressPage  "Configure Outlook Express"
   !insertmacro MUI_PAGECOMMAND_INSTFILES
+  Page custom SetOutlookExpressPage  "Configure Outlook Express"
+  !insertmacro MUI_PAGECOMMAND_FINISH
 
   ;Component-selection page
     ;Descriptions
-    LangString DESC_SecPOPFile ${LANG_ENGLISH} "Installs the core files needed by POPFile."
-    LangString DESC_SecPerl    ${LANG_ENGLISH} "Installs minimal Perl needed by POPFile."
+    LangString DESC_SecPOPFile ${LANG_ENGLISH} "Installs the core files needed by POPFile, including a minimal version of Perl."
     LangString DESC_SecSkins   ${LANG_ENGLISH} "Installs POPFile skins that allow you to change the look and feel of the POPFile user interface."
     LangString DESC_SecLangs   ${LANG_ENGLISH} "Installs non-English language versions of the POPFile UI."
 
@@ -62,6 +73,7 @@
   ;Use ReserveFile for your own Install Options ini files too!
 
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
+  !insertmacro MUI_RESERVEFILE_WELCOMEFINISHPAGE
   ReserveFile "ioA.ini"
   ReserveFile "ioB.ini"
 
@@ -117,6 +129,8 @@ FunctionEnd
 ;Installer Sections
 
 Section "POPFile" SecPOPFile
+  ; Make this section mandatory (i.e. it is always installed)
+  SectionIn RO
 
   ; Retrieve the POP3 and GUI ports from the ini and get whether we install the
   ; POPFile run in the Startup group
@@ -125,6 +139,8 @@ Section "POPFile" SecPOPFile
   !insertmacro MUI_INSTALLOPTIONS_READ ${STARTUP} "ioA.ini" "Field 5" "State"
 
   WriteRegStr HKLM SOFTWARE\POPFile InstallLocation $INSTDIR
+
+  ; Install the POPFile Core files
 
   SetOutPath $INSTDIR
   File "..\engine\*.pl"
@@ -157,41 +173,7 @@ Section "POPFile" SecPOPFile
   SetOutPath $INSTDIR\languages
   File "..\engine\languages\English.msg"
 
-  SetOutPath $SMPROGRAMS\POPFile
-  SetOutPath $INSTDIR
-  CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile.lnk" \
-                 "$INSTDIR\perl.exe" popfile.pl
-  CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile in background.lnk" \
-                 "$INSTDIR\wperl.exe" popfile.pl
-  CreateShortCut "$SMPROGRAMS\POPFile\Uninstall POPFile.lnk" \
-                 "$INSTDIR\uninstall.exe"
-  SetOutPath $SMPROGRAMS\POPFile
-  WriteINIStr "$SMPROGRAMS\POPFile\POPFile User Interface.url" \
-              "InternetShortcut" "URL" "http://127.0.0.1:${GUI}/"
-  WriteINIStr "$SMPROGRAMS\POPFile\Shutdown POPFile.url" \
-              "InternetShortcut" "URL" "http://127.0.0.1:${GUI}/shutdown"
-  WriteINIStr "$SMPROGRAMS\POPFile\Manual.url" \
-              "InternetShortcut" "URL" "file://$INSTDIR/manual/en/manual.html"
-  SetOutPath $SMPROGRAMS\POPFile\Support
-  WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Home Page.url" \
-              "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
-  WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Manual.url" \
-              "InternetShortcut" "URL" "http://popfile.sourceforge.net/manual.html"
-
-  StrCmp ${STARTUP} "1" 0 skip_autostart_set 
-      SetOutPath $SMSTARTUP
-      SetOutPath $INSTDIR
-      CreateShortCut "$SMSTARTUP\Run POPFile in background.lnk" \
-                     "$INSTDIR\wperl.exe" popfile.pl
-skip_autostart_set:
-              
-  SetOutPath $INSTDIR
-  Delete $INSTDIR\uninstall.exe 
-  WriteUninstaller $INSTDIR\uninstall.exe
-
-SectionEnd
-
-Section "Minimal Perl" SecPerl
+  ; Install the Minimal Perl files
 
   SetOutPath $INSTDIR
   File "C:\Perl58\bin\perl.exe"
@@ -265,6 +247,40 @@ Section "Minimal Perl" SecPerl
   SetOutPath $INSTDIR\warnings
   File "C:\Perl58\lib\warnings\register.pm"
 
+  ; Create the START MENU entries
+
+  SetOutPath $SMPROGRAMS\POPFile
+  SetOutPath $INSTDIR
+  CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile.lnk" \
+                 "$INSTDIR\perl.exe" popfile.pl
+  CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile in background.lnk" \
+                 "$INSTDIR\wperl.exe" popfile.pl
+  CreateShortCut "$SMPROGRAMS\POPFile\Uninstall POPFile.lnk" \
+                 "$INSTDIR\uninstall.exe"
+  SetOutPath $SMPROGRAMS\POPFile
+  WriteINIStr "$SMPROGRAMS\POPFile\POPFile User Interface.url" \
+              "InternetShortcut" "URL" "http://127.0.0.1:${GUI}/"
+  WriteINIStr "$SMPROGRAMS\POPFile\Shutdown POPFile.url" \
+              "InternetShortcut" "URL" "http://127.0.0.1:${GUI}/shutdown"
+  WriteINIStr "$SMPROGRAMS\POPFile\Manual.url" \
+              "InternetShortcut" "URL" "file://$INSTDIR/manual/en/manual.html"
+  SetOutPath $SMPROGRAMS\POPFile\Support
+  WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Home Page.url" \
+              "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
+  WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Manual.url" \
+              "InternetShortcut" "URL" "http://popfile.sourceforge.net/manual.html"
+
+  StrCmp ${STARTUP} "1" 0 skip_autostart_set 
+      SetOutPath $SMSTARTUP
+      SetOutPath $INSTDIR
+      CreateShortCut "$SMSTARTUP\Run POPFile in background.lnk" \
+                     "$INSTDIR\wperl.exe" popfile.pl
+skip_autostart_set:
+              
+  SetOutPath $INSTDIR
+  Delete $INSTDIR\uninstall.exe 
+  WriteUninstaller $INSTDIR\uninstall.exe
+
 SectionEnd
 
 Section "Skins" SecSkins
@@ -282,14 +298,11 @@ Section "Languages" SecLangs
 
 SectionEnd
 
-!insertmacro MUI_SECTIONS_FINISHHEADER ;Insert this macro after the sections
-
 ;--------------------------------
 ;Descriptions
 
 !insertmacro MUI_FUNCTIONS_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile} $(DESC_SecPOPFile)
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecPerl} $(DESC_SecPerl)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins} $(DESC_SecSkins)
   !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs} $(DESC_SecLangs)
 !insertmacro MUI_FUNCTIONS_DESCRIPTION_END
@@ -317,12 +330,24 @@ FunctionEnd
 
 Function SetOutlookExpressPage
 
-  ; Run through all the identities that are in HKEY_CURRENT_USER\Identities and for
-  ; each one that has a Software\Microsoft\Internet Account Manager\Accounts\00000001 entry
-  ; display the reconfiguration option if the account has not yet been reconfigured
-  ; which we detect by pop3 server name != 127.0.0.1
-  
-  IntOp ${OEID} ${OEID} * 0		; Weird way of making sure that ${OEID} is 0
+  ; In Outlook Express (v5.0 or later) the email account data may appear in
+  ; more than one place, depending upon how Outlook Express has been configured.
+
+  ; First we check the "Main Identity" (also known as the "Default Identity")
+  ; which is created when Outlook Express is installed. Note that this identity
+  ; may no longer be active, as users are free to delete it after creating
+  ; an additional identity and switching to the new one.
+
+  ; The Outlook Express "Main Identity" does not use an "identity number"
+  StrCpy ${OEIDENT} ""
+  Call CheckOutlookExpressAccounts
+
+  ; Now we have to check if any additional identities have been created in
+  ; Outlook Express.  These identities are kept in HKEY_CURRENT_USER\Identities.
+  ; If we find any extra identities, we need to see if any of them have email
+  ; accounts we can reconfigure for use with POPFile.
+
+  StrCpy ${OEID} 0
   
   ; Get the next identity from the registry
 
@@ -330,13 +355,51 @@ next_id:
   EnumRegKey ${ID} HKCU "Identities" ${OEID}
   StrCmp ${ID} "" finished_oe
 
-  ; Now extract the POP3 Server, if this does not exist then this ID is
+  ; Now check all of the accounts for this particular identity
+  StrCpy ${OEIDENT} "Identities\${ID}\"
+  Call CheckOutlookExpressAccounts
+
+  ; Now move on to the next identity
+  IntOp ${OEID} ${OEID} + 1
+  goto next_id
+
+finished_oe:
+FunctionEnd
+
+; This function checks all the accounts for a particular Outlook Express identity
+
+Function CheckOutlookExpressAccounts
+
+  ; Called by SetOutLookExpressPage to check all of the accounts for a given
+  ; Outlook Express identity: either the "Main Identity", when ${OEIDENT} is
+  ; a null string (""), or one of the "Additional Identities", when ${OEIDENT}
+  ; is a string such as "Identities\{AB734464-478F-11D7-81C3-00409545B64C}\"
+
+  ; The email account data for all identities, although stored in different
+  ; locations, uses the same structure. The "path" for each identity starts
+  ; with "HKEY_CURRENT_USER\" and ends with "\Internet Account Manager\Accounts".
+
+  ; OE account data for each identity appears "under" the path defined above, e.g.
+  ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000001
+  ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000002
+  ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000003
+  ;    etc
+
+  StrCpy $R1 0
+  
+  ; Get the next set of OE account data for the specified OE Identity
+
+next_acct:
+  EnumRegKey ${ACCTID} HKCU "${OEIDENT}Software\Microsoft\Internet Account Manager\Accounts" $R1
+  StrCmp ${ACCTID} "" finished_this_id
+
+  ; Now extract the POP3 Server, if this does not exist then this account is
   ; not configured for mail so move on
   
-  StrCpy $R5 "Identities\${ID}\Software\Microsoft\Internet Account Manager\Accounts\00000001"
+  StrCpy $R5 "${OEIDENT}Software\Microsoft\Internet Account Manager\Accounts\${ACCTID}"
   ReadRegStr $R6 HKCU $R5 "POP3 Server"
-  StrCmp $R6 "" next_id_increment
-  StrCmp $R6 "127.0.0.1" next_id_increment
+  StrCmp $R6 "" next_acct_increment
+  StrCmp $R6 "127.0.0.1" next_acct_increment
 
   !insertmacro MUI_HEADER_TEXT "Reconfigure Outlook Express" "POPFile can reconfigure Outlook Express for you"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 2" "State" "0"
@@ -345,28 +408,30 @@ next_id:
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 7" "Text" $R6
   ReadRegStr $R6 HKCU $R5 "POP3 User Name"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" $R6
+  ReadRegStr $R6 HKCU $R5 "Account Name"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 10" "Text" $R6
   Push $R0
   InstallOptions::dialog $PLUGINSDIR\ioB.ini
   Pop $R0
   
-  StrCmp $R0 "cancel" finished_oe
-  StrCmp $R0 "back" finished_oe
+  StrCmp $R0 "cancel" finished_this_id
+  StrCmp $R0 "back" finished_this_id
 
   !insertmacro MUI_INSTALLOPTIONS_READ $R5 "ioB.ini" "Field 2" "State"
-  StrCmp $R5 "1" change_oe next_id_increment
+  StrCmp $R5 "1" change_oe next_acct_increment
 
 change_oe:
-  StrCpy $R5 "Identities\${ID}\Software\Microsoft\Internet Account Manager\Accounts\00000001"
+  StrCpy $R5 "${OEIDENT}Software\Microsoft\Internet Account Manager\Accounts\${ACCTID}"
   ReadRegStr $R6 HKCU $R5 "POP3 User Name"
   ReadRegStr $R7 HKCU $R5 "POP3 Server"
   WriteRegStr HKCU $R5 "POP3 User Name" "$R7:$R6" 
   WriteRegStr HKCU $R5 "POP3 Server" "127.0.0.1"
 
-next_id_increment:
-  IntOp ${OEID} ${OEID} + 1
-  goto next_id
+next_acct_increment:
+  IntOp $R1 $R1 + 1
+  goto next_acct
 
-finished_oe:
+finished_this_id:
 FunctionEnd
 
 ;--------------------------------
@@ -464,3 +529,4 @@ Removed:
 SectionEnd
 
 ;eof
+
