@@ -91,7 +91,7 @@
 
   Name                   "POPFile SSL Setup"
 
-  !define C_PFI_VERSION  "0.0.9"
+  !define C_PFI_VERSION  "0.0.10"
 
   ; Mention the wizard's version number in the window title
 
@@ -647,6 +647,7 @@ done:
   SetDetailsPrint listonly
   DetailPrint ""
 
+  StrCmp $G_PLS_FIELD_1 "No suitable patches were found" close_log
   StrCmp $G_PLS_FIELD_1 "OK" 0 show_status
   !insertmacro BACKUP_123_DP "$G_ROOTDIR\POPFile" "Module.pm"
   SetDetailsPrint none
@@ -669,6 +670,7 @@ success:
 show_status:
   MessageBox MB_OK|MB_ICONEXCLAMATION "$(PSS_LANG_PATCHSTATUS)"
 
+close_log:
   SetDetailsPrint both
   DetailPrint "$(PSS_LANG_PROG_SUCCESS)"
   SetDetailsPrint listonly
