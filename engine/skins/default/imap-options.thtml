@@ -15,9 +15,9 @@
     <TMPL_IF NAME="IMAP_if_interval_error">
     
     <blockquote>
-    	<div class="error01">
-    	    <TMPL_VAR NAME="Localize_Imap_IntervalError">
-    	</div>
+        <div class="error01">
+            <TMPL_VAR NAME="Localize_Imap_IntervalError">
+        </div>
     </blockquote>
     
     </TMPL_IF>
@@ -36,9 +36,9 @@
     <TMPL_IF NAME="IMAP_if_bytelimit_error">
     
     <blockquote>
-    	<div class="error01">
-    	    <TMPL_VAR NAME="Localize_Imap_BytelimitError">
-    	</div>
+        <div class="error01">
+            <TMPL_VAR NAME="Localize_Imap_BytelimitError">
+        </div>
     </blockquote>
     
     </TMPL_IF>
