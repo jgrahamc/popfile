@@ -32,9 +32,10 @@
 # The following symbols are used to indicate the required subset:
 #
 # (1) ADDUSER          defined in adduser.nsi ('Add POPFile User' wizard)
-# (2) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
-# (3) TRANSLATOR       defined in translator.nsi (main installer translations test program)
-# (4) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
+# (2) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
+# (3) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
+# (4) TRANSLATOR       defined in translator.nsi (main installer translations test program)
+# (5) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
 #--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
@@ -162,8 +163,8 @@
 
       !insertmacro PFI_UNIQUE_ID
 
-      IfFileExists "$INSTDIR\${SUBFOLDER}\*.*" 0 skip_${PFI_UNIQUE_ID}
-      Rename "$INSTDIR\${SUBFOLDER}" "$G_MPLIBDIR\${SUBFOLDER}"
+      IfFileExists "$G_ROOTDIR\${SUBFOLDER}\*.*" 0 skip_${PFI_UNIQUE_ID}
+      Rename "$G_ROOTDIR\${SUBFOLDER}" "$G_MPLIBDIR\${SUBFOLDER}"
 
     skip_${PFI_UNIQUE_ID}:
 
@@ -221,7 +222,7 @@
 #==============================================================================================
 
 
-!ifndef ADDUSER & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef ADDUSER & MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetIEVersion
     #
@@ -760,7 +761,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: CheckIfLocked
     #
@@ -770,7 +771,7 @@ FunctionEnd
     !insertmacro CheckIfLocked ""
 !endif
 
-!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.CheckIfLocked
     #
@@ -874,7 +875,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: FindLockedPFE
     #
@@ -884,7 +885,7 @@ FunctionEnd
     !insertmacro FindLockedPFE ""
 !endif
 
-!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.FindLockedPFE
     #
@@ -1467,7 +1468,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | TRANSLATOR_AUW
+!ifdef ADDUSER | MSGCAPTURE | TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetDateTimeStamp
     #
@@ -1555,7 +1556,7 @@ FunctionEnd
     FunctionEnd
 !macroend
 
-!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetFileSize
     #
@@ -1565,7 +1566,7 @@ FunctionEnd
     !insertmacro GetFileSize ""
 !endif
 
-!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.GetFileSize
     #
@@ -1664,7 +1665,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | TRANSLATOR_AUW
+!ifdef ADDUSER | MSGCAPTURE | TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetLocalTime
     #
@@ -2002,7 +2003,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
   #--------------------------------------------------------------------------
   # Installer Function: ServiceCall
   #
@@ -2077,7 +2078,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
   #--------------------------------------------------------------------------
   # Installer Function: ServiceRunning
   #
@@ -2272,7 +2273,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: ShutdownViaUI
     #
@@ -2454,7 +2455,7 @@ FunctionEnd
     !insertmacro StrCheckDecimal ""
 !endif
 
-!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.StrCheckDecimal
     #
@@ -2527,7 +2528,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef TRANSLATOR
+!ifndef MSGCAPTURE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: StrStr
     #
@@ -2537,7 +2538,7 @@ FunctionEnd
     !insertmacro StrStr ""
 !endif
 
-!ifndef ADDUSER & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef ADDUSER & MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.StrStr
     #
@@ -2598,7 +2599,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef RUNPOPFILE & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: TrimNewlines
     #
@@ -2608,7 +2609,7 @@ FunctionEnd
     !insertmacro TrimNewlines ""
 !endif
 
-!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.TrimNewlines
     #
@@ -2697,7 +2698,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: WaitUntilUnlocked
     #
