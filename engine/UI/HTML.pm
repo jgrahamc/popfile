@@ -412,14 +412,13 @@ sub html_common_bottom
     my ($self) = @_;
     
     my $time = localtime;
-    my $lastuser = 'TODO';
 
     # The returned string has the standard footer that appears on every HTML page in 
     # POPFile with links to the POPFile home page and other information and closes
     # both the BODY and the complete page
     
     my $result = "\n\t\t<table class=\"footer\">\n\t\t\t<tr>\n\t\t\t\t<td align=\"left\">\n\t\t\t\t\t" ;
-    $result .= "POPFile $self->{configuration}{major_version}.$self->{configuration}{minor_version}" ;
+    $result .= "POPFile v$self->{configuration}{major_version}.$self->{configuration}{minor_version}." ;
     $result .= "$self->{configuration}{build_version} - \n\t\t\t\t\t" ;
     $result .= "<a href=\"manual/$self->{language}{LanguageCode}/manual.html\">\n\t\t\t\t\t\t" ;
     $result .= "$self->{language}{Footer_Manual}</a> - \n\t\t\t\t\t" ;
@@ -428,7 +427,7 @@ sub html_common_bottom
     $result .= "<a href=\"http://sourceforge.net/forum/forum.php?forum_id=213876\">$self->{language}{Footer_FeedMe}</a> - \n\t\t\t\t" ;
     $result .= "<a href=\"http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959\">$self->{language}{Footer_RequestFeature}</a> - \n\t\t\t\t\t" ;
     $result .= "<a href=\"http://lists.sourceforge.net/lists/listinfo/popfile-announce\">$self->{language}{Footer_MailingList}</a> - \n\t\t\t\t\t" ;
-    $result .= "($time) - ($lastuser)\n\t\t\t\t\t" ;
+    $result .= "($time)\n\t\t\t\t\t" ;
     
     # Comment out this next line prior to shipping code
     # enable it during development to check validation
@@ -1052,12 +1051,12 @@ sub magnet_page
     http_ok($self, $client,$body,4);
 }
 
+#
 # ---------------------------------------------------------------------------------------------
 #
 # bucket_page - information about a specific bucket
 #
 # $client     The web browser to send the results to
-#
 # ---------------------------------------------------------------------------------------------
 sub bucket_page  
 {
@@ -1270,9 +1269,10 @@ sub corpus_page
             $body .= " class=\"rowOdd\"";
         }
         $stripe = 1 - $stripe;
-        $body .= "><td><a href=\"/buckets?session=$self->{session_key}&amp;showbucket=$bucket\">\n" ;
-        $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font></a>\n" ;
-        $body .= "<td width=\"10\">&nbsp;<td align=\"right\">$number<td width=\"10\">&nbsp;\n" ;
+        $body .= "><td><a href=\"/buckets?session=$self->{session_key}&amp;showbucket=$bucket\">\n";
+        $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font></a>\n";
+        $body .= $self->{language}{Bucket_Quarantine} if ( $bucket eq 'spam' );
+        $body .= "<td width=\"10\">&nbsp;<td align=\"right\">$number<td width=\"10\">&nbsp;\n";
         $body .= "<td align=\"right\">$unique<td width=\"10\">&nbsp;";
         
         if ( $self->{configuration}->{configuration}{subject} == 1 )  {
@@ -1404,7 +1404,7 @@ sub corpus_page
     $body .= "<input name=\"cname\" type=\"text\">\n" ;
     $body .= "<input type=\"submit\" class=\"submit\" name=\"create\" value=\"$self->{language}{Create}\">\n" ;
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n" ;
-    $body .= "</form>\n$create_message\n<p>\n";
+    $body .= "<br>($self->{language}{Bucket_AboutSpam})</form>\n$create_message\n<p>\n";
     $body .= "<form action=\"/buckets\">\n<b>$self->{language}{Bucket_DeleteBucket}:</b> <br>\n" ;
     $body .= "<select name=\"name\"><option value=\"\">\n</option>\n";
 
@@ -2081,8 +2081,6 @@ sub history_page
 
                 if ( $self->{history}{$i}{magnet} eq '' )  {
                     if ( $drop_down ) {
-                        #$body .= " <input type=\"submit\" class=\"submit\" name=\"change\" value=\"$self->{language}{Reclassify}\">\n" ;
-                        #$body .= " <input type=\"hidden\" name=\"usedtobe\" value=\"$bucket\">\n<select name=\"shouldbe\">\n";
                         $body .= " <input type=submit class=submit name=change value=\"$self->{language}{Reclassify}\">\n" ;
                         $body .= "<input type=hidden name=usedtobe value=\"$bucket\"><select name=shouldbe>\n";
                     } else {
@@ -2095,14 +2093,11 @@ sub history_page
                             $body .= " selected" if ( $abucket eq $bucket );
                             $body .= ">$abucket</option>"
                         } else {
-                            # stan todo bug fix at work
-                            # $body .= "<a href=\"/history?shouldbe=$abucket&amp;file=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key}&amp;usedtobe=$bucket&amp;filter=$self->{form}{filter}#$mail_file\"><font color=\"$self->{classifier}->{colors}{$abucket}\">[$abucket]</font></a> ";
                             $body .= "<a href=\"/history?shouldbe=$abucket&amp;file=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key}&amp;usedtobe=$bucket&amp;filter=$self->{form}{filter}#$mail_file\">\n" ;
                             $body .= "<font color=$self->{classifier}->{colors}{$abucket}>[$abucket]</font></a> ";
                         }
                     }
 
-                    #$body .= "</select>\n<input type=\"hidden\" name=\"file\" value=\"$mail_file\">\n" ;
                     $body .= "<input type=\"hidden\" name=\"file\" value=\"$mail_file\">\n" ;
                     $body .= "<input type=\"hidden\" name=\"start_message\" value=\"$start_message\">\n" ;
                     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">" if ( $drop_down );
@@ -2153,6 +2148,8 @@ sub history_page
                                 }
                             }
                         }
+                        
+                        $body .= $line;
                     }
                     close MESSAGE;
                     $body .= "</tt>";

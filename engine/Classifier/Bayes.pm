@@ -35,6 +35,9 @@ sub new
     # Set this to 1 to get scores for individual words in message detail
     $self->{wordscores}        = 1;
 
+    # Assume we are still alive
+    $self->{alive}             = 1;
+
     # Just our hostname
     $self->{hostname}        = '';
 
@@ -405,7 +408,7 @@ sub load_bucket
             }
 
             if ( /(.+) (.+)/ ) {
-                my $word = $self->{mangler}->mangle($1);
+                my $word = $self->{mangler}->mangle($1,1);
                 my $value = $2;
                 $value =~ s/[\r\n]//g;
                 if ( $value > 0 )  {
@@ -588,7 +591,7 @@ sub classify_file
          } else {
              $probstr = sprintf("%17.6e", $prob);
          }
-         $self->{scores} .= "<tr><td><font color=$self->{colors}{$b}><b>$b</b></font><td>&nbsp;<td>$probstr";
+         $self->{scores} .= "<tr><td><font color=$self->{colors}{$b}><b>$b</b></font><td>&nbsp;<td>$probstr ($score{$b})";
          printf("%-15s%15.6f%15.6f %s\n", $b, ($raw_score{$b} - $correction)/$logbuck, ($score{$b} - log($total))/$logbuck + 1, $probstr) if $self->{debug};
     }
     $self->{scores} .= "</table>";
@@ -617,12 +620,28 @@ sub classify_file
     }
 
     # If no bucket has a probability better than 0.5, call the message "unclassified".
+    my $class = 'unclassified';
 
-    if ( ( $total == 0 ) || ( $score{$ranking[0]} <= log($self->{unclassified} * $total) ) ) {
-        return "unclassified";
-    } else {
-        return $ranking[0];
+    if ( ( $total != 0 ) && ( $score{$ranking[0]} > log($self->{unclassified} * $total) ) ) {
+   
+        # Because people treat spam as a very special case of email we need to be extra
+        # careful that we do not put something in a spam bucket that is not.  It is acceptable
+        # to most people to start getting spam in their inbox and then have to retrain but
+        # it is not acceptable the other way around.
+        #
+        # I came up with the number 2^44 by staring at a bunch of my own false positives, 
+        # maybe it's wrong, maybe not
+        
+        if ( ( $ranking[0] ne 'spam' ) || ( ( $score{$ranking[1]} + 44 ) < $score{$ranking[0]} ) ) {
+            $class = $ranking[0];
+        }
     }
+
+    if ( $self->{wordscores} ) {
+        $self->{scores} .= "(<b>$class</b>)<p>";
+    }
+    
+    return $class;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -673,8 +692,6 @@ sub classify_and_modify
     my $temp_file  = "messages/popfile$dcount" . "=$mcount.msg";
     my $class_file = "messages/popfile$dcount" . "=$mcount.cls";
 
-    $self->{logger}->debug( "Writing $temp_file" );
-
     open TEMP, ">$temp_file";
     binmode TEMP;
 
@@ -698,12 +715,13 @@ sub classify_and_modify
                 $message_size += length $line;                                        
                 print TEMP $line;
 
-                if ( $self->{configuration}->{configuration}{subject} )  {
-                    if ( $line =~ /Subject:(.*)/i )  {
-                        $msg_subject = $1;
-                        $msg_subject =~ s/(\012|\015)//g;
+                if ( $line =~ /Subject:(.*)/i )  {
+                    $msg_subject = $1;
+                    $msg_subject =~ s/(\012|\015)//g;
+                    
+                    if ( $self->{configuration}->{configuration}{subject} )  {
                         next;
-                    } 
+                    }
                 }
 
                 # Strip out the X-Text-Classification header that is in an incoming message
@@ -744,11 +762,12 @@ sub classify_and_modify
     if ( $self->{configuration}->{configuration}{subject} ) {
         # Don't add the classification unless it is not present
         if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $self->{parameters}{$classification}{subject} == 1 ) )  {
-            $msg_head_before .= "Subject: [$classification]$msg_subject$eol";
-        } else {
-            $msg_head_before .= "Subject:$msg_subject$eol";
+            $msg_subject = "[$classification]$msg_subject";
         }
     }
+        
+    $msg_head_before .= 'Subject: ' . $msg_subject;
+    $msg_head_before .= $eol;
 
     if ( $nosave ) {
         unlink( $temp_file );
@@ -760,16 +779,43 @@ sub classify_and_modify
     # Add the XPL header
     $temp_file =~ s/messages\/(.*)/$1/;
 
+    my $xpl = '';
+
+    $xpl .= "<http://";
+    $xpl .= $self->{configuration}->{configuration}{localpop}?"127.0.0.1":$self->{hostname};
+    $xpl .= ":$self->{configuration}->{configuration}{ui_port}/jump_to_message?view=$temp_file>$eol";
+
     if ( $self->{configuration}->{configuration}{xpl} ) {
-        $msg_head_after .= "X-POPFile-Link: <http://";
-        $msg_head_after .= $self->{configuration}->{configuration}{localpop}?"127.0.0.1":$self->{hostname};
-        $msg_head_after .= ":$self->{configuration}->{configuration}{ui_port}/jump_to_message?view=$temp_file>$eol";
+        $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
     }
 
     $msg_head_after .= "$eol";
 
     # Echo the text of the message to the client
+    
     if ( !$nosave ) {
+    
+        # If the bucket is named spam then we'll treat it specially by changing the message header to contain
+        # information from POPFile and wrapping the original message in a MIME encoding
+        
+        if ( $classification eq 'spam' ) {
+            print $client "From: $self->{parser}->{from}$eol";
+            print $client "Date: " . localtime() . $eol;
+            print $client "Subject: $msg_subject$eol";
+            print $client "X-Text-Classification: $classification$eol" if ( $self->{configuration}->{configuration}{xtc} );            
+            print $client 'X-POPFile-Link: ' . $xpl if ( $self->{configuration}->{configuration}{xpl} );
+            print $client "Content-Type: multipart/report; boundary=\"$temp_file\"$eol$eol--$temp_file$eol";
+            print $client "Content-Type: text/plain$eol$eol";
+            print $client "POPFile has quarantined a message that it believes is spam.  It is attached to this email.$eol$eol";
+            print $client "Quarantined Message Detail$eol$eol";
+            print $client "Original From: $self->{parser}->{from}$eol";
+            print $client "Original Subject: $self->{parser}->{subject}$eol";
+            print $client "Original To: $self->{parser}->{to}$eol$eol";
+            print $client "To examine the email open the attachment. To change this mail's classification go to $xpl$eol";
+            print $client "--$temp_file$eol";
+            print $client "Content-Type: message/rfc822$eol$eol";
+        }
+    
         print $client $msg_head_before;
         print $client $msg_head_after;
         print $client $msg_body;

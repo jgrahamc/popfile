@@ -65,7 +65,7 @@ sub new
 #
 # un_base64
 #
-# Decode a line of base64 encoded data
+# Decode a line of base64 encoded data, returns the data from within the base64
 #
 # $line     A line of base64 encoded data
 #
@@ -91,16 +91,23 @@ sub un_base64
 #
 # Updates the word frequency for a word 
 #
+# $word         The word that is being updated
+# $encoded      1 if the line was found in encoded text (base64)
+# $before       The character that appeared before the word in the original line
+# $after        The character that appeared after the word in the original line
+# $prefix       A string to prefix any words with in the corpus, used for the special
+#               identification of values found in for example the subject line
+#
 # ---------------------------------------------------------------------------------------------
 sub update_word 
 {
-    my ($self, $word, $encoded, $before, $after) = @_;
+    my ($self, $word, $encoded, $before, $after, $prefix) = @_;
 
-    print "--- $word ($before) ($after)\n" if ($self->{debug});
-    
     my $mword = $self->{mangle}->mangle($word);
-    
+
     if ( $mword ne '' )  {
+        $mword = $prefix . ':' . $mword if ( $prefix ne '' );
+
         if ( $self->{color} ) {
             my $color = $self->{bayes}->get_color($mword);
             if ( $encoded == 0 )  {
@@ -113,7 +120,7 @@ sub update_word
             $self->{words}{$mword} += 1;
             $self->{msg_total}     += 1;
 
-            print "--- $word ($self->{words}{$mword}) ($before) ($after)\n" if ($self->{debug});
+            print "--- $mword ($self->{words}{$mword})\n" if ($self->{debug});
         }
     }
 }
@@ -126,11 +133,13 @@ sub update_word
 #
 # $bigline      The line to split into words and add to the word counts
 # $encoded      1 if the line was found in encoded text (base64)
+# $prefix       A string to prefix any words with in the corpus, used for the special
+#               identification of values found in for example the subject line
 #
 # ---------------------------------------------------------------------------------------------
 sub add_line 
 {
-    my ($self, $bigline, $encoded) = @_;
+    my ($self, $bigline, $encoded, $prefix) = @_;
     my $p = 0;
     
     # If the line is really long then split at every 1k and feed it to the parser below
@@ -141,21 +150,19 @@ sub add_line
         # Pull out any email addresses in the line that are marked with <> and have an @ in them
 
         while ( $line =~ s/(mailto:)?([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([\&\?\:\/ >\&\;])// )  {
-            update_word($self, $2, $encoded, ($1?$1:''), '[\&\?\:\/ >\&\;]');
-            add_url($self, $3, $encoded, '\@', '[\&\?\:\/]');
+            update_word($self, $2, $encoded, ($1?$1:''), '[\&\?\:\/ >\&\;]', $prefix);
+            add_url($self, $3, $encoded, '\@', '[\&\?\:\/]', $prefix);
         }
         
         # Grab domain names
         while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro|[[:alpha:]]{2})([^[:alpha:]0-9\-_\.]|$)/$4/ )  {
-             add_url($self, "$1$3", $encoded, '', '');
+             add_url($self, "$1$3", $encoded, '', '', $prefix);
         }
-            
-             
 
         # Grab IP addresses
 
         while ( $line =~ s/(([12]?\d{1,2}\.){3}[12]?\d{1,2})// )  {
-            update_word($self, "$1", $encoded, '', '');
+            update_word($self, "$1", $encoded, '', '', $prefix);
         }
         
         #deal with runs of alternating spaces and letters
@@ -177,7 +184,7 @@ sub add_line
         # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
 
         while ( $line =~ s/([[:alpha:]][[:alpha:]\']{0,44})[_\-,\.\"\'\)\?!:;\/&]{0,5}([ \t\n\r]|$)/ / ) {
-            update_word($self,$1, $encoded, '', '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]') if (length $1 >= 3);
+            update_word($self,$1, $encoded, '', '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]', $prefix) if (length $1 >= 3);
         }
         
         $p += 1024;
@@ -241,7 +248,7 @@ sub update_tag
         if ( ( $attribute =~ /^src$/i ) &&
              ( ( $tag =~ /^img|frame|iframe$/i )
                || ( $tag =~ /^script$/i && $parse_script_uri ) ) ) {
-            add_url( $self, $value, 0, $quote, $end_quote );
+            add_url( $self, $value, 0, $quote, $end_quote, '' );
             next;
         }
         
@@ -249,50 +256,50 @@ sub update_tag
         if ( $attribute =~ /^href$/i && $tag =~ /^(a|link|base|area)$/i )  {
             # ftp, http, https
             if ( $value =~ /^(ftp|http|https):\/\//i ) {
-                add_url($self, $value, 0, $quote, $end_quote);
+                add_url($self, $value, 0, $quote, $end_quote, '');
                 next;
             }
     
             # The less common mailto: goes second, and we only care if this is in an anchor
             if ( $tag =~ /^a$/ && $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/]|$)/i )  {
-               update_word( $self, $1, 0, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote) );
-               add_url( $self, $2, 0, '@', ($3?'[\\\&\?\:\/]':$end_quote) );
+               update_word( $self, $1, 0, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
+               add_url( $self, $2, 0, '@', ($3?'[\\\&\?\:\/]':$end_quote), '' );
             }
             next;
         }
         
         # Tags with alt attributes
         if ( $attribute =~ /^alt$/i && $tag =~ /^img$/i )  {
-            add_line($self, $value, 0);
+            add_line($self, $value, 0, '');
             next;
          }
          
         # Tags with working background attributes
         if ( $attribute =~ /^background$/i && $tag =~ /^(td|table|body)$/i ) {
-            add_url( $self, $value, 0, $quote, $end_quote );
+            add_url( $self, $value, 0, $quote, $end_quote, '' );
             next;
         }
         
         # Tags that load sounds
         if ( $attribute =~ /^bgsound$/i && $tag =~ /^body$/i ) {
-            add_url( $self, $2, 0, $quote, $end_quote );
+            add_url( $self, $2, 0, $quote, $end_quote, '' );
             next;
         }
 
         # Tags with colors in them
         if ( ( $attribute =~ /^color$/i ) && ( $tag =~ /^font$/i ) ) {
-            update_word( $self, $value, 0, $quote, $end_quote );
+            update_word( $self, $value, 0, $quote, $end_quote, '' );
         }
                 
         # Tags with background colors
         if ( ( $attribute =~ /^(bgcolor|back)$/i ) && ( $tag =~ /^(td|table|body|tr|th|font)$/i ) ) {
-            update_word( $self, $value, 0, $quote, $end_quote );
+            update_word( $self, $value, 0, $quote, $end_quote, '' );
         }
 
         # Tags with a charset
         if ( ( $attribute =~ /^content$/i ) && ( $tag =~ /^meta$/i ) ) {
             if ( $value=~ /charset=(.{1,40})[\"\>]?/ ) {
-                update_word( $self, $1, 0, '', '' );
+                update_word( $self, $1, 0, '', '', '' );
             }
         }
                 
@@ -300,21 +307,21 @@ sub update_tag
         # most container tags accept styles, and the background style may
         # not be in a predictable location (search the entire value)
         if ( $attribute =~ /^style$/i && $tag =~ /^(body|td|tr|table|span|div|p)$/i ) {            
-            add_url( $self, $1, 0, '[\']', '[\']' ) if ( $value =~ /background\-image:[ \t]?url\([ \t]?\'(.*)\'[ \t]?\)/i );
+            add_url( $self, $1, 0, '[\']', '[\']', '' ) if ( $value =~ /background\-image:[ \t]?url\([ \t]?\'(.*)\'[ \t]?\)/i );
             next;
         }
         
         # Tags with action attributes
         if ( $attribute =~ /^action$/i && $tag =~ /^form$/i )  {
             if ( $value =~ /^(ftp|http|https):\/\//i ) {
-                add_url( $self, $value, 0, $quote, $end_quote );
+                add_url( $self, $value, 0, $quote, $end_quote, '' );
                 next;
             }
         
             # mailto forms            
             if ( $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/])/i )  {
-               update_word( $self, $1, 0, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote) );
-               add_url( $self, $2, 0, '@', ($3?'[\\\>\&\?\:\/]':$end_quote) );
+               update_word( $self, $1, 0, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
+               add_url( $self, $2, 0, '@', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
             }            
             next;
         }        
@@ -329,33 +336,36 @@ sub update_tag
 #
 # $url          the domain name to handle
 # $encoded      1 if the domain was found in encoded text (base64)
+# $before       The character that appeared before the URL in the original line
+# $after        The character that appeared after the URL in the original line
+# $prefix       A string to prefix any words with in the corpus, used for the special
+#               identification of values found in for example the subject line
 #
 # ---------------------------------------------------------------------------------------------
 sub add_url
 {
-    my ($self, $url, $encoded, $before, $after) = @_;
+    my ($self, $url, $encoded, $before, $after, $prefix) = @_;
       
     my $temp_url = $url;
     my $temp_before;
     my $temp_after;
     my $hostform;   #ip or name
-    
-    # remove HTML entity encoding
-    # oops, already done in main loop if html is present
-    
+   
     # parts of a URL, from left to right
-    my $protocol;   #optional
-    my $authinfo;   #optional
+    my $protocol;   
+    my $authinfo;   
     my $host;
-    my $port;       #optional    
-    my $path;       #optional
-    my $query;      #optional
-    my $hash;       #optional    
+    my $port;       
+    my $path;       
+    my $query;      
+    my $hash;       
     
-    # lay the groundwork
+    # Strip the protocol part of a URL (e.g. http://)
+    
     $protocol = $1 if ( $url =~ s/^(.*)\:\/\/// ); 
     
-    # remove URL encoding (protocol may not be URL encoded)
+    # Remove any URL encoding (protocol may not be URL encoded)
+    
     while ( $url =~ /(\%([0-9A-Fa-f][0-9A-Fa-f]))/g ) {
         my $from = "$1";
         my $to   = chr(hex("0x$2"));
@@ -363,6 +373,8 @@ sub add_url
         $self->{ut} =~ s/$from/$to/g;
         print "$from -> $to\n" if $self->{debug};
     }
+
+    # Extract authorization information from the URL (e.g. http://foo@bar.com)
             
     $authinfo = $1 if ( $url =~ s/^([[:alpha:]0-9\-_\.\;\:\&\=\+\$\,]+)(\@|\%40)// );
         
@@ -440,9 +452,6 @@ sub add_url
     $query = $1 if ( $url =~ s/^[\?]([^\#\n]*|$)?// );
     $hash = $1 if ( $url =~ s/^[\#](.*)$// );
     
-    print "URL: (".($protocol||'').")(".($authinfo||'').")(".($host||'').")(".($port||'').")(".($path||'').")(".($query||'').")(".($hash||'').")"." from ".$temp_url."\n" if ($self->{debug});
-    
-    
     if ( !defined $protocol || $protocol =~ /^(http|https)$/ ) {
         $temp_before = $before;
         $temp_before = "\:\/\/" if (defined $protocol);
@@ -454,14 +463,16 @@ sub add_url
         $temp_after = "[\\\\\/]" if (defined $path);
         $temp_after = "[\:]" if (defined $port);
         
-        update_word( $self, $host, $encoded, $temp_before, $temp_after);
+        update_word( $self, $host, $encoded, $temp_before, $temp_after, $prefix);
+
         # decided not to care about tld's beyond the verification performed when
         # grabbing $host
         # special subTLD's can just get their own classification weight (eg, .bc.ca)
         # http://www.0dns.org has a good reference of ccTLD's and their sub-tld's if desired
+
         if ( $hostform eq "name" ) {
             while ( $host =~ s/^([^\.])+\.(.*\.(.*))$/$2/ ) {
-                update_word( $self, $2, $encoded, '[\.]', '[<]');
+                update_word( $self, $2, $encoded, '[\.]', '[<]', $prefix);
             }
         }
     }
@@ -522,7 +533,7 @@ sub parse_html
     print "HTML removed leaves: $line \n" if ($self->{debug} && $code);
     
     if ( $self->{content_type} =~ /\/html/i ) {
-        add_line( $self, $line, 0 );
+        add_line( $self, $line, 0, '' );
     } else {
         $code = 0;
     }
@@ -647,7 +658,7 @@ sub parse_stream
                                 $splitline =~ s/([^\r\n]{120})/$1\r\n/g;
                                 $self->{ut} = $splitline;
                             }
-                            add_line( $self, $decoded, 1 ) if ( parse_html( $self, $decoded ) == 0 );
+                            add_line( $self, $decoded, 1, '' ) if ( parse_html( $self, $decoded ) == 0 );
                             $decoded = '';
                             if ( $self->{color} )  {
                                 if ( $self->{ut} ne '' )  {
@@ -660,7 +671,7 @@ sub parse_stream
                         last if ( !($line = <MSG>) );
                     }
                 
-                    add_line( $self, $decoded, 1 ) if ( parse_html( $self, $decoded ) == 0 );
+                    add_line( $self, $decoded, 1, '' ) if ( parse_html( $self, $decoded ) == 0 );
                 }
                 
                 next if ( !defined($line) );
@@ -668,7 +679,7 @@ sub parse_stream
                 # Look for =?foo? syntax that identifies a charset
                 
                 if ( $line =~ /=\?(.{1,40})\?/ ) {
-                    update_word( $self, $1, 0, '', '' );
+                    update_word( $self, $1, 0, '', '', '' );
                 }
                 
                 # Transform some escape characters
@@ -715,7 +726,7 @@ sub parse_stream
                         }
                     }
                 }
-                add_line( $self, $line, 0 ) if ( parse_html( $self, $line ) == 0 );
+                add_line( $self, $line, 0, '' ) if ( parse_html( $self, $line ) == 0 );
             } 
             if ($self->{in_headers}) {                
                 #check for blank line signifying end of headers
@@ -733,34 +744,51 @@ sub parse_stream
     
                     # Handle the From, To and Cc headers and extract email addresses
                     # from them and treat them as words
+
+                    # For certain headers we are going to mark them specially in the corpus
+                    # by tagging them with where they were found to help the classifier
+                    # do a better job.  So if you have
+                    #
+                    # From: foo@bar.com
+                    #
+                    # then we'll add from:foo@bar.com to the corpus and not just foo@bar.com
+
+                    my $prefix = '';
     
                     if ( $header =~ /(From|To|Cc|Reply\-To)/i ) {
                         if ( $argument =~ /=\?(.{1,40})\?/ ) {
-                            update_word( $self, $1, 0, '', '' );
+                            update_word( $self, $1, 0, '', '', '' );
                         }
-                        if ( $header =~ /From/ )  {
+                        
+                        if ( $header =~ /From/i )  {
                             $encoding     = '';
                             $self->{content_type} = '';
                             $self->{from} = $argument if ( $self->{from} eq '' ) ;
+                            $prefix = 'from';
                         }
-    
+
+                        $prefix = 'to' if ( $header =~ /To/i );
                         $self->{to} = $argument if ( ( $header =~ /To/i ) && ( $self->{to} eq '' ) );
                         
                         while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))>// )  {
-                            update_word($self, $1, 0, ';', '&');
-                            add_url($self, $2, 0, '@', '[&<]');
+                            update_word($self, $1, 0, ';', '&',$prefix);
+                            add_url($self, $2, 0, '@', '[&<]',$prefix);
                         }
     
                         while ( $argument =~ s/([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+))// )  {
-                            update_word($self, $1, 0, '', '');
-                            add_url($self, $2, 0, '@', '');
+                            update_word($self, $1, 0, '', '',$prefix);
+                            add_url($self, $2, 0, '@', '',$prefix);
                         }
     
-                        add_line( $self, $argument, 0 );
+                        add_line( $self, $argument, 0, $prefix );
                         next;
                     }
     
-                    $self->{subject} = $argument if ( ( $header =~ /Subject/ ) && ( $self->{subject} eq '' ) );
+                    $self->{subject} = $argument if ( ( $header =~ /Subject/i ) && ( $self->{subject} eq '' ) );
+
+                    if ( $header =~ /Subject/i ) {
+                        $prefix = 'subject';
+                    }
 
                     # Look for MIME 
                     
@@ -809,9 +837,9 @@ sub parse_stream
     
                     next if ( $header =~ /(Thread-Index|X-UIDL|Message-ID|X-Text-Classification|X-Mime-Key)/i );
     
-                    add_line( $self, $argument, 0 );
+                    add_line( $self, $argument, 0, $prefix );
                 } else {
-                    add_line( $self, $line, 0 ) if ( parse_html( $self, $line ) == 0 );
+                    add_line( $self, $line, 0, '' ) if ( parse_html( $self, $line ) == 0 );
                 }
             }
         }

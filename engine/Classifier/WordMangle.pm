@@ -83,28 +83,63 @@ sub save_stop_words
 # Mangles a word into either the empty string to indicate that the word should be ignored
 # or the canonical form
 #
-# $word     The word to either mangle into a nice form, or return empty string if this word
-#           is to be ignored
+# $word         The word to either mangle into a nice form, or return empty string if this word
+#               is to be ignored
+# $allow_colon  Set to any value allows : inside a word, this is used when mangle is used
+#               while loading the corpus in Bayes.pm but is not used anywhere else, the colon
+#               is used as a separator to indicate special words found in certain lines
+#               of the mail header
 #
 # ---------------------------------------------------------------------------------------------
 sub mangle
 {
-    my ($self, $word) = @_;
+    my ($self, $word, $allow_colon) = @_;
 
-    # all words are treated as lowercase
+    # All words are treated as lowercase
+    
     $word = lc($word);
 
-    # stop words are ignored
+    # Stop words are ignored
+    
     return '' if ( $self->{stop}{$word} );
 
     # Remove characters that would mess up a Perl regexp and replace with .
+    
     $word =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\./g;
 
     # Long words are ignored also
+    
     return '' if ( length($word) > 45 );
 
     # Ditch long hex numbers
+    
     return '' if ( $word =~ /^[A-F0-9]{8,}$/i );
+
+    # Colons are forbidden inside words, we should never get passed a word
+    # with a colon in it here, but if we do then we strip the colon.  The colon
+    # is used as a separator between a special identifier and a word, see MailParse.pm
+    # for more details
+
+    $word =~ s/://g if ( !defined( $allow_colon ) );
+
+    # One common spam trick is to use accented characters incorrectly such as fàntástïc
+    # which to an English speaker reads as fantastic.  To work around this we remove all
+    # accents from characters, this is the accent equivalent of lower casing all the
+    # letters
+    
+    $word =~ s/[\xaaàáâäãå]/a/g;
+    $word =~ s/[éèêë]/e/g;
+    $word =~ s/[ìíîï]/i/g;
+    $word =~ s/[\xbağòóôõö]/o/g;
+    $word =~ s/[ùúûüµ]/u/g;
+    $word =~ s/[ıÿ]/y/g;
+    $word =~ s/ç/c/g;
+    $word =~ s/\x9e/z/g;
+    $word =~ s/\x9a/s/g;
+    $word =~ s/\x9c/oe/g;
+    $word =~ s/\xe6/ae/g;
+    $word =~ s/\x83/f/g;
+    $word =~ s/ñ/n/g;    
     
     return $word;
 }
