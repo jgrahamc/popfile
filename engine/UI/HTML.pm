@@ -1175,12 +1175,6 @@ sub advanced_page
         $param =~ /^([^_]+)_/;
 
         my %row_data;
-        $row_data{Advanced_Parameter}   = $param;
-        $row_data{Advanced_Value}       = $value;
-        $row_data{Advanced_If_Changed}  =
-            !$self->{configuration__}->is_default( $param );
-        $row_data{Advanced_If_Password} =
-            ( $param =~ /_password/ ) ? 1 : 0;
 
         if ( ( $last_module ne '' ) && ( $last_module ne $1 ) ) {
             $row_data{Advanced_If_New_Module} = 1;
@@ -1189,6 +1183,14 @@ sub advanced_page
         }
 
         $last_module = $1;
+
+        $row_data{Advanced_Parameter}   = $param;
+        $row_data{Advanced_Value}       = $value;
+        $row_data{Advanced_If_Changed}  =
+            !$self->{configuration__}->is_default( $param );
+        $row_data{Advanced_If_Password} =
+            ( $param =~ /_password/ ) ? 1 : 0;
+
 
         push ( @param_loop, \%row_data);
     }
