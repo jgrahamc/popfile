@@ -67,7 +67,6 @@ sub new
 
     # Matrix of buckets, words and the word counts
     $self->{matrix__}            = {};
-    $self->{db_env__}            = 0;
 
     # Total number of words in all buckets
     $self->{full_total__}        = 0;
@@ -296,10 +295,6 @@ sub close_database__
         untie %{$self->{matrix__}{$bucket}};
         delete $self->{matrix__}{$bucket};
     }
-
-    if ( defined( $self->{db_env__} ) ) {
-        delete $self->{db_env__};
-    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -471,7 +466,6 @@ sub load_word_matrix_
     my $c      = 0;
 
     $self->close_database__();
-    $self->{db_env__} = new BerkeleyDB::Env -Flags => DB_INIT_CDB;
 
     $self->{magnets__}      = {};
     $self->{full_total__}   = 0;
