@@ -144,7 +144,7 @@ sub test_assert_equal
 sub test_assert_regexp
 {
     my ( $file, $line, $test, $expected, $context ) = @_;
-    my $result = ( $test =~ /$expected/ );
+    my $result = ( $test =~ /$expected/m );
 
     test_report( $result, "expecting to match [$expected] and got [$test]", $file, $line, $context );
 }
