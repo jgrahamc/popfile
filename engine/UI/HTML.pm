@@ -1488,51 +1488,80 @@ sub magnet_page
             }
 
             if ( ( defined($mbucket) ) && ( $mbucket ne '' ) && ( $mtext ne '' ) ) {
+
+				# Support for feature request 77646 - import function.  goal is a method of creating multiple
+				# magnets all with the same target bucket quickly.
+				#
+				# If we have multiple lines in $mtext, each line will actually be used to create a new magnet
+				# all with the same target.  We loop through all of the requested magnets, check to make sure
+				# they are all valid (not already existing, etc...) and then loop through them again to create 
+				# them.  this way, if even one isn't valid, none will be created.
+				#
+				# We also get rid of an \r's that may have been passed in.  We also and ignore lines containing, 
+				# only white space and if a line is repeated we add just one bucket for it.
+				
+	            $mtext =~ s/\r\n/\n/g;
+				
+				my @all_mtexts = split(/\n/,$mtext);
+				my %mtext_hash;
+				@mtext_hash{@all_mtexts} = ();
+                my @mtexts = keys %mtext_hash;
+                       
                 my $found = 0;
 
-                for my $bucket ($self->{classifier__}->get_buckets_with_magnets( $self->{api_session__} )) {
-                    my %magnets;
-                    @magnets{ $self->{classifier__}->get_magnets( $self->{api_session__}, $bucket, $mtype )} = ();
-
-                    if ( exists( $magnets{$mtext} ) ) {
-                        $found  = 1;
-                        $magnet_message .= "<blockquote>\n<div class=\"error02\">\n<b>";
-                        $magnet_message .= sprintf( $self->{language__}{Magnet_Error1}, "$mtype: $mtext", $bucket );
-                        $magnet_message .= "</b>\n</div>\n</blockquote>\n";
-                        last;
-                    }
-                }
-
-                if ( $found == 0 )  {
-                    for my $bucket ($self->{classifier__}->get_buckets_with_magnets( $self->{api_session__} )) {
-                        my %magnets;
-                        @magnets{ $self->{classifier__}->get_magnets( $self->{api_session__}, $bucket, $mtype )} = ();
-
-                        for my $from (keys %magnets)  {
-                            if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
-                                $found = 1;
-                                $magnet_message .= "<blockquote><div class=\"error02\"><b>" . sprintf( $self->{language__}{Magnet_Error2}, "$mtype: $mtext", "$mtype: $from", $bucket ) . "</b></div></blockquote>";
-                                last;
-                            }
-                        }
-                    }
-                }
-
+				foreach my $current_mtext (@mtexts) {									
+	                for my $bucket ($self->{classifier__}->get_buckets_with_magnets( $self->{api_session__} )) {
+	                    my %magnets;
+	                    @magnets{ $self->{classifier__}->get_magnets( $self->{api_session__}, $bucket, $mtype )} = ();
+	
+	                    if ( exists( $magnets{$current_mtext} ) ) {
+	                        $found  = 1;
+	                        $magnet_message .= "<blockquote>\n<div class=\"error02\">\n<b>";
+	                        $magnet_message .= sprintf( $self->{language__}{Magnet_Error1}, "$mtype: $current_mtext", $bucket );
+	                        $magnet_message .= "</b>\n</div>\n</blockquote>\n";
+	                        last;
+	                    }
+	                }
+	
+	                if ( $found == 0 )  {
+	                    for my $bucket ($self->{classifier__}->get_buckets_with_magnets( $self->{api_session__} )) {
+	                        my %magnets;
+	                        @magnets{ $self->{classifier__}->get_magnets( $self->{api_session__}, $bucket, $mtype )} = ();
+	
+	                        for my $from (keys %magnets)  {
+	                            if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
+	                                $found = 1;
+	                                $magnet_message .= "<blockquote><div class=\"error02\"><b>" . sprintf( $self->{language__}{Magnet_Error2}, "$mtype: $current_mtext", "$mtype: $from", $bucket ) . "</b></div></blockquote>";
+	                                last;
+	                            }
+	                        }
+	                    }
+	                }
+				}
+				
                 if ( $found == 0 ) {
+					foreach my $current_mtext (@mtexts) {									
 
-                    # It is possible to type leading or trailing white space in a magnet definition
-                    # which can later cause mysterious failures because the whitespace is eaten by
-                    # the browser when the magnet is displayed but is matched in the regular expression
-                    # that does the magnet matching and will cause failures... so strip off the whitespace
-
-                    $mtext =~ s/^[ \t]+//;
-                    $mtext =~ s/[ \t]+$//;
-
-                    $self->{classifier__}->create_magnet( $self->{api_session__}, $mbucket, $mtype, $mtext );
-                    if ( !defined( $self->{form_}{update} ) ) {
-                        $magnet_message .= "<blockquote>" . sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $mtext", $mbucket ) . "</blockquote>";
-                    }
-                }
+						# Skip mangnet definition if it consists only of white spaces
+						
+						if ($current_mtext =~ /^[ \t]*$/) {
+							next;
+						}
+						
+	                    # It is possible to type leading or trailing white space in a magnet definition
+	                    # which can later cause mysterious failures because the whitespace is eaten by
+	                    # the browser when the magnet is displayed but is matched in the regular expression
+	                    # that does the magnet matching and will cause failures... so strip off the whitespace
+	
+	                    $current_mtext =~ s/^[ \t]+//;
+	                    $current_mtext =~ s/[ \t]+$//;
+	
+	                    $self->{classifier__}->create_magnet( $self->{api_session__}, $mbucket, $mtype, $current_mtext );
+	                    if ( !defined( $self->{form_}{update} ) ) {
+	                        $magnet_message .= "<blockquote>" . sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $current_mtext", $mbucket ) . "</blockquote>";
+	                    }
+	                }
+				}
             }
         }
     }
@@ -1674,7 +1703,7 @@ sub magnet_page
 
     # Value widget
     $body .= "<label class=\"magnetsLabel\" for=\"magnetsAddText\">$self->{language__}{Magnet_Value}:</label><br />\n";
-    $body .= "<input type=\"text\" name=\"text0\" id=\"magnetsAddText\" />\n<br /><br />\n";
+    $body .= "<textarea name=\"text0\" id=\"magnetsAddText\" cols=\"20\" cols=\"3\"></textarea>\n<br /><br />\n";
 
     # Always Goes to Bucket widget
     $body .= "<label class=\"magnetsLabel\" for=\"magnetsAddBucket\">$self->{language__}{Magnet_Always}:</label><br />\n";

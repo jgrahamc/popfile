@@ -749,9 +749,10 @@ sub update_tag
             # Adding strings from these, even if they appear to be hostnames, may or
             # may not be beneficial
 
-            if ($value =~ /^cid\:/i )
-            {
+            if ($value =~ /^cid\:/i ) {
+
                 # TODO: Decide what to do here, ignoring CID's for now
+
             } else {
 
                 my $host = add_url( $self, $value, $encoded, $quote, $end_quote, '' );
