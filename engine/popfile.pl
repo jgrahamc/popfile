@@ -1283,19 +1283,23 @@ sub history_page
             if ( ( $subject_cache[$i] eq '' ) || ( $from_cache[$i] eq '' ) )  {
                 open MAIL, "<messages/$mail_file";
                 while (<MAIL>)  {
-                    if ( /^From:(.*)/i ) {
-                        if ( $from eq '' )  {
-                            $from = $1;
-                            $from =~ s/<(.*)>/&lt;$1&gt;/g;
-                            $from =~ s/\"(.*)\"/$1/g;
+                    if ( /[A-Z0-9]/i )  {
+                        if ( /^From:(.*)/i ) {
+                            if ( $from eq '' )  {
+                                $from = $1;
+                                $from =~ s/<(.*)>/&lt;$1&gt;/g;
+                                $from =~ s/\"(.*)\"/$1/g;
+                            }
                         }
-                    }
-                    if ( /^Subject:(.*)/i ) {
-                        if ( $subject eq '' )  {
-                            $subject = $1;
-                            $subject =~ s/<(.*)>/&lt;$1&gt;/g;
-                            $subject =~ s/\"(.*)\"/$1/g;
+                        if ( /^Subject:(.*)/i ) {
+                            if ( $subject eq '' )  {
+                                $subject = $1;
+                                $subject =~ s/<(.*)>/&lt;$1&gt;/g;
+                                $subject =~ s/\"(.*)\"/$1/g;
+                            }
                         }
+                    } else {
+                        last;
                     }
                     
                     last if (( $from ne '' ) && ( $subject ne '' ) );
