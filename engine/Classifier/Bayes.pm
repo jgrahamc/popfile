@@ -585,15 +585,27 @@ sub tie_bucket__
                                  -Filename  => $self->config_( 'corpus' ) . "/$bucket/table.db",
                                  -Flags     => DB_CREATE;                                        # PROFILE BLOCK STOP
 
+    # Check to see if the tie worked, if it failed then POPFile is about to fail
+    # badly
+
+    if ( !defined( $self->{db__}{$bucket} ) ) {
+        $self->log_( "Failed to tie database hash for bucket $bucket" );
+        die "Database tie failed for $bucket";
+    }
+
     if ( !defined( $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} ) ) {
         $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}      = 0;
+        $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__}     = 0;
+    }
+
+    if ( !defined( $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} ) ) {
         $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__}     = 0;
     }
 }
 
 # ---------------------------------------------------------------------------------------------
 #
-# tie_bucket__
+# untie_bucket__
 #
 # Unties the matrix__ hash from the BerkeleyDB
 #
