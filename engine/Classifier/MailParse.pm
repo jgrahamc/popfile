@@ -370,7 +370,7 @@ sub update_tag
         $attribute = $1;
         $value     = $3;
         $quote     = '';
-        $end_quote = '[\> \t\&]';
+        $end_quote = '[\> \t\&\n]';
         if (defined $2) {
             $quote     = $2;
             $end_quote = $2;
@@ -677,7 +677,7 @@ sub parse_html
 	$line =~ s/[\r\n]+/ /g;
     $line =~ s/[\t ]+$//;
 
-    print "parse_html: [$line] $self->{in_html_tag__}\n" if $self->{debug};
+    print "parse_html: [$line] " . $self->{in_html_tag__} . "\n" if $self->{debug};
 
     # Remove HTML comments and other tags that begin !
 
@@ -782,8 +782,13 @@ sub parse_stream
     # Base64 attachments are loaded into this as we read them
 
     $self->{base64__}       = '';
-
+    
+    # Variable to note that the temporary colorized storage is "frozen",
+    # and what type of freeze it is (allows nesting of reasons to freeze
+    # colorization)
+    
     $self->{in_html_tag__} = 0;
+    
     $self->{html_tag__}    = '';
     $self->{html_arg__}    = '';
 
@@ -822,68 +827,57 @@ sub parse_stream
             next if ( !defined($line) );
 
             print ">>> $line" if $self->{debug};
-
-            if ( $self->{color__} )  {
-                my $splitline = $line;
-                $splitline =~ s/([^\r\n]{100,120} )/$1\r\n/g;
-                $splitline =~ s/([^ \r\n]{120})/$1\r\n/g;
-
-                if ( !$self->{in_html_tag__} )  {
-                    $colorized .= $self->{ut__} if ( $self->{ut__} ne '' );
-
-                    $self->{ut__} = '';
-                }
-
-                $splitline =~ s/</&lt;/g;
-                $splitline =~ s/>/&gt;/g;
-
-                #TODO: regress patch to 0.18.1
-                if ( $encoding =~ /quoted\-printable/i ) {
-                    $splitline =~ s/=3C/&lt;/g;
-                    $splitline =~ s/=3E/&gt;/g;
-                }
-
-                $splitline =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
-
-                $self->{ut__} .= $splitline;
-            }
+                        
+            $colorized .= $self->{ut__};
+            $self->{ut__} = '';
+            
+            $self->{ut__} .= splitline($line, $encoding);            
 
             if ($self->{in_headers__}) {
+                
+                # temporary colorization while in headers is handled within parse_header
+                
+                $self->{ut__} = '';
 
                 # Check for blank line signifying end of headers
 
                 if ( $line =~ /^(\r\n|\r|\n)/) {
-
-                     # Parse the last header
-
-                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);
+                    
+                     # Parse the last header                                         
+                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);                    
 
                     # Clear the saved headers
                     $header   = '';
                     $argument = '';
+                    
+                    $self->{ut__} .= splitline("\015\012", 0);
 
                     $self->{in_headers__} = 0;
                     print "Header parsing complete.\n" if $self->{debug};
+
+                    next;
                 }
+
 
                 # If we have an email header then just keep the part after the :
 
                 if ( $line =~ /^([A-Za-z-]+):[ \t]*([^\n\r]*)/ )  {
 
                     # Parse the last header
-
-                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);
+                    
+                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding) if ($header ne '');                    
 
                     # Save the new information for the current header
 
                     $header   = $1;
                     $argument = $2;
+                    next;
                 }
 
                 # Append to argument if the next line begins with whitespace (isn't a new header)
-
-                if ( $line =~ /^[\t ](.*?)(\r\n|\r|\n)/ ) {
-                    $argument .= $1;
+                
+                if ( $line =~ /^([\t ].*?)(\r\n|\r|\n)/ ) {
+                    $argument .= "\015\012" . $1;
                 }
                 next;
             }
@@ -981,6 +975,8 @@ sub parse_stream
 
     $colorized .= clear_out_base64( $self );
     close MSG;
+    
+    $self->{in_html_tag__} = 0;
 
     if ( $self->{color__} )  {
         $colorized .= $self->{ut__} if ( $self->{ut__} ne '' );
@@ -1098,9 +1094,15 @@ sub get_header
 # ---------------------------------------------------------------------------------------------
 sub parse_header
 {
-    my ($self, $header, $argument, $mime, $encoding ) = @_;
+    my ($self, $header, $argument, $mime, $encoding) = @_;
 
     print "Header ($header) ($argument)\n" if ($self->{debug});
+    
+    # Remove over-reading
+    $self->{ut__} = '';  
+    
+    # Qeueue just this header for colorization    
+    $self->{ut__} = splitline("$header: $argument\015\012", $encoding);
 
     # After a discussion with Tim Peters and some looking at emails
     # I'd received I discovered that the header names (case sensitive) are
@@ -1111,6 +1113,7 @@ sub parse_header
 
     # Handle the From, To and Cc headers and extract email addresses
     # from them and treat them as words
+    
 
     # For certain headers we are going to mark them specially in the corpus
     # by tagging them with where they were found to help the classifier
@@ -1220,7 +1223,35 @@ sub parse_header
 
     return ($mime, $encoding);
 }
-                
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# splitline - Escapes characters so a line will print as plain-text within a HTML document.
+#
+# $line         The line to escape
+# $encoding     The value of any current encoding scheme
+#
+# ---------------------------------------------------------------------------------------------
+
+sub splitline
+{
+    my ($line, $encoding) = @_;
+    $line =~ s/([^\r\n]{100,120} )/$1\r\n/g;
+    $line =~ s/([^ \r\n]{120})/$1\r\n/g;        
+
+    $line =~ s/</&lt;/g;
+    $line =~ s/>/&gt;/g;
+
+    if ( $encoding =~ /quoted\-printable/i ) {
+        $line =~ s/=3C/&lt;/g;
+        $line =~ s/=3E/&gt;/g;
+    }
+
+    $line =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
+    
+    return $line;        
+}              
 
 # GETTERS/SETTERS
 
@@ -1230,4 +1261,9 @@ sub first20
 
    return $self->{first20__};
 }
+
+
+
 1;
+
+
