@@ -135,8 +135,6 @@ sub handle_message
 
     open IN, "<$in" or return undef;
     open OUT, ">$out" or return undef;
-    
-    $self->log_()
 
     my @result = $self->{c}->classify_and_modify(
         $session, \*IN, \*OUT, undef );
