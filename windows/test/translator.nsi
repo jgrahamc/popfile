@@ -123,11 +123,23 @@
 #--------------------------------------------------------------------------
 
   ;--------------------------------------------------------------------------
+  ; Symbols used to avoid confusion over where the line breaks occur.
+  ;
+  ; ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+  ; ${MB_NL} is used for MessageBox-style 'new line' sequences.
+  ;
+  ; (these two constants do not follow the 'C_' naming convention described below)
+  ;--------------------------------------------------------------------------
+
+  !define IO_NL   "\r\n"
+  !define MB_NL   "$\r$\n"
+
+  ;--------------------------------------------------------------------------
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT       "PFI Testbed"
-  !define C_PFI_VERSION       "0.11.10"
+  !define C_PFI_VERSION       "0.11.12"
 
   Name                        "${C_PFI_PRODUCT}"
   Caption                     "${C_PFI_PRODUCT} ${C_PFI_VERSION} Setup"
@@ -176,12 +188,14 @@
 
   ; This script uses 'User Variables' (with names starting with 'G_') to hold GLOBAL data.
 
+  Var G_ROOTDIR            ; the installation folder (used in some language strings)
+
   Var G_STARTUP            ; holds the parameters supplied, if any, when starting setup.exe)
   Var G_NOTEPAD            ; path to notepad.exe ("" = not found in search path)
 
   Var G_WINUSERNAME        ; current Windows user login name
 
-  Var G_PLS_FIELD_1        ; used to customize translated text strings
+  Var G_PLS_FIELD_1        ; used to customise translated text strings
 
   Var G_TEMP
   Var G_DLGITEM
@@ -222,7 +236,7 @@
   VIAddVersionKey "FileVersion"      "${C_PFI_VERSION_ID}"
 
   VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
   !ifndef ENGLISH_MODE
     VIAddVersionKey "Build Type"     "Multi-Language Testbed"
@@ -523,7 +537,7 @@ loop:
   Push ${L_TEMP}
   Call TrimNewlines
   Pop ${L_TEMP}
-  FileWrite ${L_OUTPUT_FILE_HANDLE} "${L_TEMP}$\r$\n"
+  FileWrite ${L_OUTPUT_FILE_HANDLE} "${L_TEMP}${MB_NL}"
   Goto loop
 
 close_files:
@@ -557,7 +571,7 @@ Function PFIGUIInit
 
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "$(PFI_LANG_MBRELNOTES_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBRELNOTES_2)" IDNO continue
 
   StrCmp $G_NOTEPAD "" use_file_association
@@ -832,7 +846,7 @@ Function CheckPerlRequirementsPage
        $(PFI_LANG_PERLREQ_IO_TEXT_4)"
 
   !insertmacro PFI_IO_TEXT "ioG.ini" "2" \
-      "$(PFI_LANG_PERLREQ_IO_TEXT_5) 4.2\r\n\r\n\
+      "$(PFI_LANG_PERLREQ_IO_TEXT_5) 4.2${IO_NL}${IO_NL}\
        $(PFI_LANG_PERLREQ_IO_TEXT_6)\
        $(PFI_LANG_PERLREQ_IO_TEXT_7)"
 
@@ -882,7 +896,7 @@ not_admin:
   !insertmacro MUI_INSTALLOPTIONS_READ "${L_WELCOME_TEXT}" "ioSpecial.ini" "Field 3" "Text"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 3" "Text" \
       "${L_WELCOME_TEXT}\
-      \r\n\r\n\
+      ${IO_NL}${IO_NL}\
       $(PFI_LANG_WELCOME_ADMIN_TEXT)"
 
   Pop ${L_WELCOME_TEXT}
@@ -905,9 +919,9 @@ Function MakeItSafe
 
   StrCpy $G_PLS_FIELD_1 "POPFile"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     $(PFI_LANG_MBMANSHUT_2)\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     $(PFI_LANG_MBMANSHUT_3)"
 
 FunctionEnd
@@ -938,26 +952,27 @@ check_dir:
   IfFileExists "$INSTDIR\uninstalluser.exe" reject
 
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $INSTDIR\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES continue
   Abort
 
 reject:
   MessageBox MB_OK|MB_ICONSTOP \
     "The folder '$INSTDIR' appears to be part of your POPFile installation.\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     Please select a different installation folder for this test program"
   Abort
 
 continue:
   StrCpy $G_PLS_FIELD_1 "POPFile IMAP"
   MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(MBCOMPONENT_PROB_2)" IDNO exit
 
 exit:
+  StrCpy $G_ROOTDIR $INSTDIR
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -1015,7 +1030,7 @@ Section "Uninstall"
 root_uninstall:
   MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
       "$(PFI_LANG_UN_MBNOTFOUND_1) '$INSTDIR'.\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES skip_confirmation
   Abort "$(PFI_LANG_UN_ABORT_1)"
 

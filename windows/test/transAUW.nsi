@@ -79,11 +79,23 @@
 #--------------------------------------------------------------------------
 
   ;--------------------------------------------------------------------------
+  ; Symbols used to avoid confusion over where the line breaks occur.
+  ;
+  ; ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+  ; ${MB_NL} is used for MessageBox-style 'new line' sequences.
+  ;
+  ; (these two constants do not follow the 'C_' naming convention described below)
+  ;--------------------------------------------------------------------------
+
+  !define IO_NL   "\r\n"
+  !define MB_NL   "$\r$\n"
+
+  ;--------------------------------------------------------------------------
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT      "PFI Testbed"
-  !define C_PFI_VERSION      "0.1.16"
+  !define C_PFI_VERSION      "0.1.17"
 
   !ifndef ENGLISH_MODE
     !define C_PFI_VERSION_ID "${C_PFI_VERSION} (ML)"
@@ -161,7 +173,7 @@
 
   Var G_WINUSERNAME        ; current Windows user login name
 
-  Var G_PLS_FIELD_1        ; used to customize translated text strings
+  Var G_PLS_FIELD_1        ; used to customise translated text strings
 
   Var G_TEMP
 
@@ -201,7 +213,7 @@
   VIAddVersionKey "FileVersion"     "${C_PFI_VERSION_ID}"
 
   VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"    "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Script"    "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
   !ifndef ENGLISH_MODE
     VIAddVersionKey "Build Type"    "Multi-Language 'Add/Remove User' Translation Testbed"
@@ -223,7 +235,7 @@
 #   Allow the names of the default buckets to be translated, as long as they
 #   use only the characters abcdefghijklmnopqrstuvwxyz_-0123456789
 #
-;;  !define CBP_DEFAULT_LIST "$(PFI_LANG_CBP_DEFAULT_BUCKETS)"
+  !define CBP_DEFAULT_LIST "$(PFI_LANG_CBP_DEFAULT_BUCKETS)"
 #
 #   ; List of suggestions for bucket names (use "" if no suggestions are required)
 #
@@ -235,7 +247,7 @@
 #   Allow the names of the suggested bucket names to be translated, as long as they
 #   use only the characters abcdefghijklmnopqrstuvwxyz_-0123456789
 #
-;;  !define CBP_SUGGESTION_LIST "$(PFI_LANG_CBP_SUGGESTED_NAMES)"
+  !define CBP_SUGGESTION_LIST "$(PFI_LANG_CBP_SUGGESTED_NAMES)"
 #
 #----------------------------------------------------------------------------------------
 # Make the CBP package available
@@ -644,11 +656,11 @@ Section "POPFile" SecPOPFile
 
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "POPFile 'stopwords' $(PFI_LANG_MBSTPWDS_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBSTPWDS_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBSTPWDS_3) 'stopwords.bak')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBSTPWDS_4) 'stopwords.default')"
 
   Sleep ${C_INST_PROG_MBOX_DELAY}
@@ -774,9 +786,9 @@ Function MakeItSafe
 
   StrCpy $G_PLS_FIELD_1 "POPFile"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     $(PFI_LANG_MBMANSHUT_2)\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     $(PFI_LANG_MBMANSHUT_3)"
 
 FunctionEnd
@@ -847,9 +859,9 @@ Function UseFixedDataDir
   SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_USERDIR_SUBTITLE)"
 
   MessageBox MB_OK|MB_ICONINFORMATION "This test program will store the 'User Data' in\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $EXEDIR\PFI Testbed\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       (it ignores the folder you select in the next page)"
 
 FunctionEnd
@@ -869,16 +881,16 @@ Function CheckExistingDataDir
 
 first_msg:
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_3)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $G_USERDIR\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES next_msg
 
 next_msg:
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_4)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $G_USERDIR\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_DIRSELECT_MBWARN_5)" IDYES continue
 
 continue:
@@ -1034,9 +1046,9 @@ Function CheckPortOptions
 bad_pop3:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_OPTIONS_MBPOP3_1) $\"$G_POP3$\"'.\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OPTIONS_MBPOP3_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OPTIONS_MBPOP3_3)"
   Goto bad_exit
 
@@ -1051,16 +1063,16 @@ pop3_ok:
 bad_gui:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_OPTIONS_MBGUI_1) $\"$G_GUI$\".\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OPTIONS_MBGUI_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OPTIONS_MBGUI_3)"
   Goto bad_exit
 
 ports_must_differ:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_OPTIONS_MBDIFF_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OPTIONS_MBDIFF_2)"
 
 bad_exit:
@@ -1118,7 +1130,7 @@ Function SetEmailClientPage
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_CBP_MBMAKERR_1) 1 $(PFI_LANG_CBP_MBMAKERR_2) 4 \
       $(PFI_LANG_CBP_MBMAKERR_3)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_CBP_MBMAKERR_4)"
 
   Push ${L_CLIENT_INDEX}
@@ -1150,7 +1162,7 @@ read_next_name:
 
 add_to_list:
   StrCpy ${L_CLIENT_LIST} "${L_CLIENT_LIST}${L_SEPARATOR}${L_CLIENT_NAME}${L_CLIENT_TYPE}"
-  StrCpy ${L_SEPARATOR} "\r\n"
+  StrCpy ${L_SEPARATOR} "${IO_NL}"
 
 incrm_index:
   IntOp ${L_CLIENT_INDEX} ${L_CLIENT_INDEX} + 1
@@ -1158,7 +1170,7 @@ incrm_index:
 
 display_results:
   StrCmp ${L_CLIENT_LIST} "" 0 display_page
-  StrCpy ${L_CLIENT_LIST} "Example Client\r\nAnother Mail Client (*)"
+  StrCpy ${L_CLIENT_LIST} "Example Client${IO_NL}Another Mail Client (*)"
 
 display_page:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "Field 2" "State" "${L_CLIENT_LIST}"
@@ -1288,11 +1300,11 @@ Function SetOutlookExpressPage
   ; (user is allowed to ignore our request)
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EXP)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_1)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_2)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_3)"\
              IDRETRY open_logfiles IDIGNORE open_logfiles
 
@@ -1307,7 +1319,7 @@ abort_oe_config:
   !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_EXPCFG_IO_CANCELLED)"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioB.ini"
   StrCmp $G_OOECONFIG_HANDLE "" exit
-  FileWrite $G_OOECONFIG_HANDLE "$\r$\n$(PFI_LANG_EXPCFG_IO_CANCELLED)$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "${MB_NL}$(PFI_LANG_EXPCFG_IO_CANCELLED)${MB_NL}"
   Goto finished_oe_config
 
 open_logfiles:
@@ -1317,22 +1329,22 @@ open_logfiles:
   Pop ${L_TEMP}
 
   FileOpen  $G_OOECONFIG_HANDLE "$G_USERDIR\expconfig.txt" w
-  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_EXPCFG_LOG_BEFORE) (${L_TEMP})$\r$\n$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_EXPCFG_LOG_BEFORE) (${L_TEMP})${MB_NL}${MB_NL}"
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_EXPCFG_LOG_IDENTITY)"  20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_EMAIL)"     30
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_SERVER)"    20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_USER)"      20
-  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OOECFG_LOG_PORT)$\r$\n$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OOECFG_LOG_PORT)${MB_NL}${MB_NL}"
 
   FileOpen  $G_OOECHANGES_HANDLE "$G_USERDIR\expchanges.txt" a
   FileSeek  $G_OOECHANGES_HANDLE 0 END
-  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_EXPCFG_LOG_AFTER) (${L_TEMP})$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_EXPCFG_LOG_AFTER) (${L_TEMP})${MB_NL}${MB_NL}"
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_EXPCFG_LOG_IDENTITY)"   20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"    20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWSERVER)"  17
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWUSER)"    40
-  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OOECFG_LOG_NEWPORT)$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OOECFG_LOG_NEWPORT)${MB_NL}${MB_NL}"
 
   ; Determine the separator character to be used when configuring an email account for POPFile
 
@@ -1471,7 +1483,7 @@ continue:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 8" "State"
   StrCpy ${L_TEMP} ""
   StrCmp ${L_STATUS} "" no_padding
-  StrCpy ${L_TEMP} "\r\n\r\n"
+  StrCpy ${L_TEMP} "${IO_NL}${IO_NL}"
 
 no_padding:
   !insertmacro MUI_INSTALLOPTIONS_WRITE \
@@ -1507,7 +1519,7 @@ no_padding:
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_EMAILADDRESS}" 30
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_POP3SERVER}"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_USERNAME}"     20
-  FileWrite $G_OOECONFIG_HANDLE "${L_PORT}$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "${L_PORT}${MB_NL}"
 
   IntCmp $G_OOELIST_INDEX 6 display_list try_next_account try_next_account
 
@@ -1579,10 +1591,10 @@ continue_guid:
   goto get_guid
 
 finished_oe_config:
-  FileWrite $G_OOECONFIG_HANDLE "$\r$\n$(PFI_LANG_OOECFG_LOG_END)$\r$\n$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "${MB_NL}$(PFI_LANG_OOECFG_LOG_END)${MB_NL}${MB_NL}"
   FileClose $G_OOECONFIG_HANDLE
 
-  FileWrite $G_OOECHANGES_HANDLE "$\r$\n$(PFI_LANG_OOECFG_LOG_END)$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "${MB_NL}$(PFI_LANG_OOECFG_LOG_END)${MB_NL}${MB_NL}"
   FileClose $G_OOECHANGES_HANDLE
 
 exit:
@@ -1743,20 +1755,20 @@ next_row:
 
   MessageBox MB_YESNO \
       "$(PFI_LANG_EXPCFG_MBIDENTITY) ${L_IDENTITY}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_EXPCFG_MBACCOUNT) ${L_ACCOUNTNAME}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBEMAIL) ${L_EMAILADDRESS}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBSERVER) 127.0.0.1 \
                                    ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3SERVER}')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBUSERNAME) ${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME} \
                                      ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3USERNAME}')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBOEPORT) $G_POP3 \
                                    ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3PORT}')\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBQUESTION)\
       " IDNO ignore_tick
 
@@ -1769,7 +1781,7 @@ next_row:
   !insertmacro OOECONFIG_CHANGES_LOG  "${L_ACCOUNTNAME}" 20
   !insertmacro OOECONFIG_CHANGES_LOG  "127.0.0.1"        17
   !insertmacro OOECONFIG_CHANGES_LOG  "${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME}"  40
-  FileWrite $G_OOECHANGES_HANDLE "$G_POP3$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "$G_POP3${MB_NL}"
 
   Goto continue
 
@@ -1871,11 +1883,11 @@ Function SetOutlookPage
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_OUTCFG_TITLE)" "$(PFI_LANG_OUTCFG_SUBTITLE)"
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_OUT)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_1)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_2)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_3)"\
              IDRETRY examine_registry IDIGNORE examine_registry
 
@@ -1889,7 +1901,7 @@ abort_outlook_config:
   !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_OUTCFG_IO_CANCELLED)"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioB.ini"
   StrCmp $G_OOECONFIG_HANDLE "" exit
-  FileWrite $G_OOECONFIG_HANDLE "$\r$\n$(PFI_LANG_OUTCFG_IO_CANCELLED)$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "${MB_NL}$(PFI_LANG_OUTCFG_IO_CANCELLED)${MB_NL}"
   Goto finished_outlook_config
 
 examine_registry:
@@ -1941,22 +1953,22 @@ got_outlook_path:
   Pop ${L_TEMP}
 
   FileOpen  $G_OOECONFIG_HANDLE "$G_USERDIR\outconfig.txt" w
-  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OUTCFG_LOG_BEFORE) (${L_TEMP})$\r$\n$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OUTCFG_LOG_BEFORE) (${L_TEMP})${MB_NL}${MB_NL}"
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OUTCFG_LOG_IDENTITY)"  20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_EMAIL)"     30
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_SERVER)"    20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_USER)"      20
-  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OOECFG_LOG_PORT)$\r$\n$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OOECFG_LOG_PORT)${MB_NL}${MB_NL}"
 
   FileOpen  $G_OOECHANGES_HANDLE "$G_USERDIR\outchanges.txt" a
   FileSeek  $G_OOECHANGES_HANDLE 0 END
-  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OUTCFG_LOG_AFTER) (${L_TEMP})$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OUTCFG_LOG_AFTER) (${L_TEMP})${MB_NL}${MB_NL}"
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OUTCFG_LOG_IDENTITY)"   20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"    20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWSERVER)"  17
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWUSER)"    40
-  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OOECFG_LOG_NEWPORT)$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OOECFG_LOG_NEWPORT)${MB_NL}${MB_NL}"
 
   ; Determine the separator character to be used when configuring an email account for POPFile
 
@@ -2062,7 +2074,7 @@ continue:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 8" "State"
   StrCpy ${L_TEMP} ""
   StrCmp ${L_STATUS} "" no_padding
-  StrCpy ${L_TEMP} "\r\n\r\n"
+  StrCpy ${L_TEMP} "${IO_NL}${IO_NL}"
 
 no_padding:
   !insertmacro MUI_INSTALLOPTIONS_WRITE \
@@ -2098,7 +2110,7 @@ no_padding:
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_EMAILADDRESS}" 30
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_POP3SERVER}"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_USERNAME}"     20
-  FileWrite $G_OOECONFIG_HANDLE "${L_PORT}$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "${L_PORT}${MB_NL}"
 
   IntCmp $G_OOELIST_INDEX 6 display_list try_next_account try_next_account
 
@@ -2108,18 +2120,18 @@ use_dummy_data:
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "Username" "$G_WINUSERNAME"
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE \
-               "ioB.ini" "Field 8" "State" "Sample Account\r\n\r\nAnother One"
+               "ioB.ini" "Field 8" "State" "Sample Account${IO_NL}${IO_NL}Another One"
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 9" "State"
   !insertmacro MUI_INSTALLOPTIONS_WRITE \
-               "ioB.ini" "Field 9" "State" "a.sample@.someisp.com\r\n\r\nexample@somewhere.net"
+               "ioB.ini" "Field 9" "State" "a.sample@.someisp.com${IO_NL}${IO_NL}example@somewhere.net"
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 10" "State"
   !insertmacro MUI_INSTALLOPTIONS_WRITE \
-               "ioB.ini" "Field 10" "State" "mail.someisp.com\r\n\r\npop3.mailserver.net"
+               "ioB.ini" "Field 10" "State" "mail.someisp.com${IO_NL}${IO_NL}pop3.mailserver.net"
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 11" "State"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 11" "State" "sample\r\n\r\nan.example"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 11" "State" "sample${IO_NL}${IO_NL}an.example"
 
   IntOp $G_OOELIST_INDEX $G_OOELIST_INDEX + 1
   IntOp $G_OOELIST_CBOX $G_OOELIST_CBOX + 1
@@ -2218,10 +2230,10 @@ display_list_again:
   Call ResetOutlookOutlookExpressAccountList
 
 finished_outlook_config:
-  FileWrite $G_OOECONFIG_HANDLE "$\r$\n$(PFI_LANG_OOECFG_LOG_END)$\r$\n$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "${MB_NL}$(PFI_LANG_OOECFG_LOG_END)${MB_NL}${MB_NL}"
   FileClose $G_OOECONFIG_HANDLE
 
-  FileWrite $G_OOECHANGES_HANDLE "$\r$\n$(PFI_LANG_OOECFG_LOG_END)$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "${MB_NL}$(PFI_LANG_OOECFG_LOG_END)${MB_NL}${MB_NL}"
   FileClose $G_OOECHANGES_HANDLE
 
 exit:
@@ -2317,20 +2329,20 @@ next_row:
 
   MessageBox MB_YESNO \
       "$(PFI_LANG_OUTCFG_MBIDENTITY) ${L_IDENTITY}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OUTCFG_MBACCOUNT) ${L_ACCOUNTNAME}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBEMAIL) ${L_EMAILADDRESS}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBSERVER) 127.0.0.1 \
                                    ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3SERVER}')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBUSERNAME) ${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME} \
                                      ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3USERNAME}')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBOEPORT) $G_POP3 \
                                    ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3PORT}')\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBQUESTION)\
       " IDNO ignore_tick
 
@@ -2343,7 +2355,7 @@ next_row:
   !insertmacro OOECONFIG_CHANGES_LOG  "${L_ACCOUNTNAME}" 20
   !insertmacro OOECONFIG_CHANGES_LOG  "127.0.0.1"        17
   !insertmacro OOECONFIG_CHANGES_LOG  "${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME}"  40
-  FileWrite $G_OOECHANGES_HANDLE "$G_POP3$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "$G_POP3${MB_NL}"
 
   Goto continue
 
@@ -2474,11 +2486,11 @@ Function SetEudoraPage
   ; (user is allowed to ignore our request)
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EUD)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_1)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_2)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_3)"\
              IDRETRY continue IDIGNORE continue
 
@@ -2653,18 +2665,18 @@ Function CheckEudoraRequests
 
   MessageBox MB_YESNO \
       "${L_PERSONA}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBEMAIL) ${L_EMAIL}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBSERVER) 127.0.0.1 \
                                    ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_SERVER}')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBUSERNAME) ${L_SERVER}$G_SEPARATOR${L_USER} \
                                      ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_USER}')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBOEPORT) $G_POP3 \
                                    ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_PORT}')\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBQUESTION)\
       " IDYES exit
   Pop ${L_USER}
@@ -2919,14 +2931,14 @@ Section "Uninstall"
 
   MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
       "$(PFI_LANG_UN_MBDIFFUSER_1) ('Owner') !\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES look_for_popfile
   Abort "$(PFI_LANG_UN_ABORT_1)"
 
 look_for_popfile:
   MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
       "$(PFI_LANG_UN_MBNOTFOUND_1) '$G_USERDIR'.\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES skip_confirmation
 
 skip_confirmation:
@@ -2980,11 +2992,11 @@ skip_confirmation:
   SetDetailsPrint listonly
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EXP)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_4)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_5)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_6)"\
              IDRETRY exp_continue IDIGNORE exp_continue
 
@@ -3001,9 +3013,9 @@ exp_continue:
 
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBEMAIL_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_exp_restore
 
 end_exp_restore:
@@ -3016,11 +3028,11 @@ end_exp_restore:
   SetDetailsPrint listonly
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_OUT)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_4)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_5)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_6)"\
              IDRETRY out_continue IDIGNORE out_continue
 
@@ -3029,9 +3041,9 @@ out_continue:
 
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBEMAIL_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_out_restore
 
 end_out_restore:
@@ -3044,11 +3056,11 @@ end_out_restore:
   SetDetailsPrint listonly
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EUD)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_4)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_5)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_6)"\
              IDRETRY eud_continue IDIGNORE eud_continue
 
@@ -3062,9 +3074,9 @@ eud_continue:
 
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_3)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBEMAIL_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_eud_restore
 
 end_eud_restore:
@@ -3074,11 +3086,11 @@ end_eud_restore:
 
   MessageBox MB_YESNO|MB_ICONSTOP \
     "$(PFI_LANG_UN_MBRERUN_1)\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     $(PFI_LANG_UN_MBRERUN_2)\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     $(PFI_LANG_UN_MBRERUN_3)\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     $(PFI_LANG_UN_MBRERUN_4)" IDYES remove_all
 
 remove_all:
@@ -3114,7 +3126,7 @@ Removed:
 
  MessageBox MB_YESNO|MB_ICONQUESTION \
    "$(PFI_LANG_UN_MBDELMSGS_1)\
-   $\r$\n$\r$\n\
+   ${MB_NL}${MB_NL}\
    ($G_USERDIR\messages)" IDNO section_exit
 
 section_exit:
