@@ -116,7 +116,7 @@ test_assert_equal( $m->name(), 'newname' );
 $m->version( 'vt.t.t' );
 test_assert_equal( $m->version(), 'vt.t.t' );
 
-# Test the slurp function
+# Test the slurp_ function
 
 open TEMP, ">slurp.tmp";
 binmode TEMP;
@@ -249,6 +249,46 @@ test_assert_equal( $m->slurp_( \*TEMP ), "23456789012345678901234567890123456789
 test_assert_equal( $m->slurp_( \*TEMP ), "1234567890123456789012345678901234567890\012" );
 test_assert_equal( $m->slurp_( \*TEMP ), "1234567890123456789012345678901234567890\015" );
 test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+
+# Test the slurp_buffer_ function
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert( !defined( $m->slurp_buffer_( \*TEMP, 0 ) ) );
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert( !defined( $m->slurp_buffer_( \*TEMP, 1 ) ) );
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert( !defined( $m->slurp_buffer_( \*TEMP, 100 ) ) );
+close TEMP;
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+print TEMP "A line of text that ends\015\012And another\015\012\015\012";
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert( !defined( $m->slurp_buffer_( \*TEMP, 0 ) ) );
+test_assert_equal( $m->slurp_buffer_( \*TEMP, 4 ), "A li" );
+test_assert_equal( $m->slurp_buffer_( \*TEMP, 1 ), "n" );
+test_assert_equal( $m->slurp_( \*TEMP ), "e of text that ends\015\012" );
+test_assert_equal( $m->slurp_buffer_( \*TEMP, 12 ), "And another\015" );
+test_assert_equal( $m->slurp_( \*TEMP ), "\012" );
+test_assert_equal( $m->slurp_( \*TEMP ), "\015\012" );
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+test_assert( !defined( $m->slurp_buffer_( \*TEMP, 0 ) ) );
+test_assert( !defined( $m->slurp_buffer_( \*TEMP, 10 ) ) );
 close TEMP;
 
 1;

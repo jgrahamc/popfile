@@ -163,8 +163,7 @@ sub service
                     }
 
                     if ( $content_length > 0 ) {
-                        $content = '';
-                        $client->sysread( $content, $content_length, length( $content ) );
+                        $content = $self->slurp_buffer_( $client, $content_length );
                     }
 
                     if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {

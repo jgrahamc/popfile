@@ -522,19 +522,66 @@ sub flush_slurp_data__
     return '';
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# slurp_data_size__
+#
+# $handle          A connection handle previously used with slurp_
+#
+# Returns the length of data currently buffered for the passed in handle
+#
+# ---------------------------------------------------------------------------------------------
+
 sub slurp_data_size__
 {
-    my ($self, $handle) = @_;
+    my ( $self, $handle ) = @_;
 
-    return length($slurp_data__{"$handle"}{data});
-
+    return length( $slurp_data__{"$handle"}{data} );
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# slurp_buffer_
+#
+# $handle                     Handle to read from, which should be in binmode
+# $length                     The amount of data to read
+#
+# Reads up to $length bytes from $handle and returns it, if there is nothing
+# to return because the buffer is empty and the handle is at eof then this
+# will return undef
+#
+# ---------------------------------------------------------------------------------------------
+
+sub slurp_buffer_
+{
+    my ( $self, $handle, $length ) = @_;
+
+    while ( $self->slurp_data_size__( $handle ) < $length ) {
+        my $c;
+        if ( sysread( $handle, $c, $length ) > 0 ) {
+            $slurp_data__{"$handle"}{data} .= $c;
+	} else {
+            last;
+	}
+    }
+
+    my $result = '';
+
+    if ( $self->slurp_data_size__( $handle ) < $length ) {
+        $result = $slurp_data__{"$handle"}{data};
+        $slurp_data__{"$handle"}{data} = '';
+    } else {
+        $result = substr( $slurp_data__{"$handle"}{data}, 0, $length );
+        $slurp_data__{"$handle"}{data} = substr( $slurp_data__{"$handle"}{data}, $length );
+    }
+
+    return ($result ne '')?$result:undef;
+}
 
 # ---------------------------------------------------------------------------------------------
 #
 # slurp_
-#t
+#
 # A replacement for Perl's <> operator on a handle that reads a line until CR, CRLF or LF
 # is encountered.  Returns the line if read (with the CRs and LFs), or undef if at the EOF,
 # blocks waiting for something to read.
