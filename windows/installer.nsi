@@ -137,10 +137,14 @@
   !endif
 
   !define C_PFI_PRODUCT  "POPFile"
-  Name                   ${C_PFI_PRODUCT}
+  Name                   "${C_PFI_PRODUCT}"
   
   !define C_PFI_VERSION  "${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}${C_POPFILE_RC}"
-  Caption                "${C_PFI_PRODUCT} ${C_PFI_VERSION}"
+  
+  ; Mention the POPFile version number in the titles of the installer & uninstaller windows
+  
+  Caption                "${C_PFI_PRODUCT} ${C_PFI_VERSION} Setup"
+  UninstallCaption       "${C_PFI_PRODUCT} ${C_PFI_VERSION} Uninstall"
 
   !define C_README        "v${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
@@ -275,10 +279,10 @@
   !define MUI_UNICON  "remove.ico"
 
   ; The "Header" bitmap appears on all pages of the installer (except Welcome & Finish pages)
+  ; and on all pages of the uninstaller.
 
   !define MUI_HEADERIMAGE
   !define MUI_HEADERIMAGE_BITMAP "hdr-common.bmp"
-  !define MUI_HEADERIMAGE_UNBITMAP "hdr-common.bmp"
   !define MUI_HEADERIMAGE_RIGHT
 
   ;----------------------------------------------------------------
@@ -363,15 +367,24 @@
   ; to obscure the installer window)
 
   !define MUI_PAGE_CUSTOMFUNCTION_PRE "ShowInstaller"
-
+  
   !define MUI_WELCOMEPAGE_TEXT "$(PFI_TEXT_WELCOME_INFO_TEXT)"
+  
   !insertmacro MUI_PAGE_WELCOME
   
   ;---------------------------------------------------
-  ; Installer Page - License Page (always in English)
+  ; Installer Page - License Page (uses English GPL)
   ;---------------------------------------------------
 
+  ; Three styles of 'License Agreement' page are available:
+  ; (1) New style with an 'I accept' checkbox below the license window
+  ; (2) New style with 'I accept/I do not accept' radio buttons below the license window
+  ; (3) Classic style with the 'Next' button replaced by an 'Agree' button
+  ;     (to get the 'Classic' style, comment-out the CHECKBOX and the RADIOBUTTONS 'defines')
+
   !define MUI_LICENSEPAGE_CHECKBOX
+##  !define MUI_LICENSEPAGE_RADIOBUTTONS
+
   !insertmacro MUI_PAGE_LICENSE "..\engine\license"
 
   ;---------------------------------------------------
@@ -387,6 +400,7 @@
   ; Use a "leave" function to look for 'popfile.cfg' in the directory selected for this install
 
   !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "CheckExistingConfig"
+  
   !insertmacro MUI_PAGE_DIRECTORY
   
   ;---------------------------------------------------
@@ -429,22 +443,23 @@
   ; Installer Page - Finish (may offer to start UI)
   ;---------------------------------------------------
 
+  ; Use a "pre" function for the 'Finish' page to ensure installer only offers to display
+  ; POPFile User Interface if user has chosen to start POPFile from the installer.
+
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE "CheckRunStatus"
+  
   ; Offer to display the POPFile User Interface (The 'CheckRunStatus' function ensures this
   ; option is only offered if the installer has started POPFile running)
 
   !define MUI_FINISHPAGE_RUN
   !define MUI_FINISHPAGE_RUN_FUNCTION "RunUI"
 
-  ; Display the Release Notes for this version of POPFile
+  ; Provide a checkbox to let user display the Release Notes for this version of POPFile
 
   !define MUI_FINISHPAGE_SHOWREADME
   !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
   !define MUI_FINISHPAGE_SHOWREADME_FUNCTION "ShowReadMe"
 
-  ; Use a "pre" function for the 'Finish' page to ensure installer only offers to display
-  ; POPFile User Interface if user has chosen to start POPFile from the installer.
-
-  !define MUI_PAGE_CUSTOMFUNCTION_PRE "CheckRunStatus"
   !insertmacro MUI_PAGE_FINISH
 
   ;---------------------------------------------------
