@@ -26,8 +26,8 @@
 #
 #--------------------------------------------------------------------------
 
-; This version of the script has been tested with the "NSIS 2 Release Candidate 3" compiler,
-; released 26 January 2004, with no patches applied.
+; This version of the script has been tested with the "NSIS 2 Release Candidate 4" compiler,
+; released 2 February 2004, with no patches applied.
 ; Expect 3 compiler warnings, all related to standard NSIS language files which are out-of-date.
 
 ; IMPORTANT WARNING:
@@ -254,6 +254,7 @@
   Var G_POP3               ; POP3 port (1-65535)
   Var G_GUI                ; GUI port (1-65535)
   Var G_STARTUP            ; automatic startup flag (1 = yes, 0 = no)
+                           ; Also used to indicate if a banner was shown before Welcome page
   Var G_NOTEPAD            ; path to notepad.exe ("" = not found in search path)
 
   Var G_OOECONFIG_HANDLE   ; to access list of all Outlook/Outlook Express accounts found
@@ -763,11 +764,15 @@ Function PFIGUIInit
 
 mutex_ok:
   SearchPath $G_NOTEPAD notepad.exe
+  
+  ; Assume user displays the release notes
+  
+  StrCpy $G_STARTUP "no banner"
 
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "$(PFI_LANG_MBRELNOTES_1)\
       $\r$\n$\r$\n\
-      $(PFI_LANG_MBRELNOTES_2)" IDNO continue
+      $(PFI_LANG_MBRELNOTES_2)" IDNO notes_ignored
 
   StrCmp $G_NOTEPAD "" use_file_association
   Exec 'notepad.exe "$PLUGINSDIR\${C_README}.txt"'
@@ -775,15 +780,20 @@ mutex_ok:
 
 use_file_association:
   ExecShell "open" "$PLUGINSDIR\${C_README}.txt"
+  Goto continue
 
-continue:
+notes_ignored:
 
   ; There may be a slight delay at this point and on some systems the 'Welcome' page may appear
   ; in two stages (first an empty MUI page appears and a little later the page contents appear).
   ; This looks a little strange (and may prompt the user to start clicking buttons too soon)
   ; so we display a banner to reassure the user. The banner will be removed by 'CheckUserRights'
 
+  StrCpy $G_STARTUP "banner displayed"
+  
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
+
+continue:
 
   ; Insert appropriate language strings into the custom page INI files
   ; (the CBP package creates its own INI file so there is no need for a CBP *Page_Init function)
@@ -1228,13 +1238,15 @@ Section "-NonSQLCorpusBackup" SecBackup
   !define L_BUCKET_NAME   $R7     ; name of a bucket folder
   !define L_CORPUS_PATH   $R6     ; full path to the corpus
   !define L_CORPUS_SIZE   $R5     ; total number of bytes in all the table/table.db files found
-  !define L_TEMP          $R4
+  !define L_FOLDER_COUNT  $R4     ; used to update the list of bucket folder paths
+  !define L_TEMP          $R3
 
   Push ${L_CFG_HANDLE}
   Push ${L_BUCKET_COUNT}
   Push ${L_BUCKET_NAME}
   Push ${L_CORPUS_PATH}
   Push ${L_CORPUS_SIZE}
+  Push ${L_FOLDER_COUNT}
   Push ${L_TEMP}
 
   IfFileExists "$G_USERDIR\popfile.cfg" 0 exit
@@ -1252,6 +1264,9 @@ Section "-NonSQLCorpusBackup" SecBackup
   Push $G_USERDIR
   Call GetCorpusPath
   Pop ${L_CORPUS_PATH}
+
+  StrCpy ${L_FOLDER_COUNT} 0
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "FolderList" "MaxNum" ${L_FOLDER_COUNT}
 
   StrCpy ${L_BUCKET_COUNT} 0
   WriteINIStr "$PLUGINSDIR\corpus.ini" "BucketList" "FileCount" ${L_BUCKET_COUNT}
@@ -1275,6 +1290,16 @@ corpus_check:
   StrCmp ${L_BUCKET_NAME} "" check_bucket_count
 
 got_bucket_name:
+  
+  IfFileExists "${L_CORPUS_PATH}\${L_BUCKET_NAME}\*.*" 0 corpus_check
+  
+  ; Have found a folder, so we make a note to make it easier to remove the folder after
+  ; corpus conversion has been completed (folder will only be removed if it is empty)
+  
+  IntOp ${L_FOLDER_COUNT} ${L_FOLDER_COUNT} + 1
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "FolderList" "MaxNum" ${L_FOLDER_COUNT}
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "FolderList" \
+              "Path-${L_FOLDER_COUNT}" "${L_CORPUS_PATH}\${L_BUCKET_NAME}"
 
   ; Assume what we've found is a bucket folder, now check if it contains
   ; a BerkeleyDB file or a flat-file corpus file. We make a list of all the
@@ -1317,7 +1342,7 @@ flat_bucket:
 check_bucket_count:
   WriteINIStr "$PLUGINSDIR\corpus.ini" "BucketList" "TotalSize" ${L_CORPUS_SIZE}
   FlushINI "$PLUGINSDIR\corpus.ini"
-  StrCpy ${L_BUCKET_COUNT} 0 nothing_to_backup
+  StrCmp ${L_BUCKET_COUNT} 0 nothing_to_backup
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_CORPUS)"
@@ -1358,6 +1383,7 @@ nothing_to_backup:
 
 exit:
   Pop ${L_TEMP}
+  Pop ${L_FOLDER_COUNT}
   Pop ${L_CORPUS_SIZE}
   Pop ${L_CORPUS_PATH}
   Pop ${L_BUCKET_NAME}
@@ -1369,6 +1395,7 @@ exit:
   !undef L_BUCKET_NAME
   !undef L_CORPUS_PATH
   !undef L_CORPUS_SIZE
+  !undef L_FOLDER_COUNT
   !undef L_TEMP
 
 SectionEnd
@@ -1666,8 +1693,6 @@ FunctionEnd
 # Installer Function: CheckUserRights
 # (the "pre" function for the WELCOME page)
 #
-# Try to ensure the installer window is not hidden behind any other windows.
-#
 # On systems which support different types of user, recommend that POPFile is installed by
 # a user with 'Administrative' rights (this makes it easier to use POPFile's multi-user mode).
 #--------------------------------------------------------------------------
@@ -1719,11 +1744,15 @@ not_admin:
 
 exit:
   Pop ${L_WELCOME_TEXT}
+  
+  StrCmp $G_STARTUP "no banner" no_banner
 
   ; Remove the banner which was displayed by the 'PFIGUIInit' function
 
   Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
+
+no_banner:
 
   !undef L_WELCOME_TEXT
 
@@ -4552,9 +4581,44 @@ FunctionEnd
 
 Function ConvertCorpus
 
+  !define L_FOLDER_COUNT  $R9
+  !define L_FOLDER_PATH   $R8
+  
+  Push ${L_FOLDER_COUNT}
+  Push ${L_FOLDER_PATH}
+  
   HideWindow
   ExecWait '"$PLUGINSDIR\monitorcc.exe" "$PLUGINSDIR\corpus.ini"'
   BringToFront
+  
+  ; Now remove any empty corpus folders (POPFile has deleted the files as they are converted)
+  
+  ReadINIStr ${L_FOLDER_COUNT} "$PLUGINSDIR\corpus.ini" "FolderList" "MaxNum"
+
+loop:
+  ReadINIStr ${L_FOLDER_PATH} "$PLUGINSDIR\corpus.ini" "FolderList" "Path-${L_FOLDER_COUNT}"
+  StrCmp  ${L_FOLDER_PATH} "" try_next_one
+  
+  ; Remove this corpus bucket folder if it is completely empty
+  
+  RMDir ${L_FOLDER_PATH}
+
+try_next_one:
+  IntOp ${L_FOLDER_COUNT} ${L_FOLDER_COUNT} - 1
+  IntCmp ${L_FOLDER_COUNT} 0 exit exit loop
+
+exit:
+
+  ; Remove the corpus folder if it is completely empty
+
+  ReadINIStr ${L_FOLDER_PATH} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "CorpusPath"
+  RMDir ${L_FOLDER_PATH}
+
+  Pop ${L_FOLDER_PATH}
+  Pop ${L_FOLDER_COUNT}
+
+  !undef L_FOLDER_COUNT
+  !undef L_FOLDER_PATH
 
 FunctionEnd
 
