@@ -109,15 +109,6 @@ sub initialize
 {
     my ( $self ) = @_;
 
-    # Subject modification (global setting is on)
-    $self->global_config_( 'subject', 1 );
-
-    # Adding the X-Text-Classification on
-    $self->global_config_( 'xtc', 1 );
-
-    # Adding the X-POPFile-Link is no
-    $self->global_config_( 'xpl', 1 );
-
     # No default unclassified probability
     $self->config_( 'unclassified_probability', 0 );
 

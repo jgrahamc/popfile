@@ -132,9 +132,6 @@ sub initialize
     # Only accept connections from the local machine for the UI
     $self->config_( 'local', 1 );
 
-    # The default location for the message files
-    $self->global_config_( 'msgdir', 'messages/' );
-
     # Use the default skin
     $self->config_( 'skin', 'SimplyBlue' );
 
