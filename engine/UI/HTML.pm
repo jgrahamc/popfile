@@ -2574,8 +2574,8 @@ sub history_page
     # though they had been pressed
     
     # Set setsearch if search changed and setsearch is undefined    
-    $self->{form__}{setsearch} = 'on' if ( ( ( !defined($self->{old_search__}) && defined $self->{form__}{search} ) || ( defined($self->{old_search__}) && ( $self->{old_search__} ne $self->{form__}{search} ) ) ) && !defined($self->{form__}{setsearch} ) );
-    $self->{old_search__} = $self->{form__}{search} if ( defined($self->{form__}{search}) );
+    $self->{form__}{setsearch} = 'on' if ( ( ( !defined($self->{old_search__}) && ($self->{form__}{search} ne '') ) || ( defined($self->{old_search__}) && ( $self->{old_search__} ne $self->{form__}{search} ) ) ) && !defined($self->{form__}{setsearch} ) );
+    $self->{old_search__} = $self->{form__}{search};
 
 
     # If the user is asking for a new sort option then it needs to get
