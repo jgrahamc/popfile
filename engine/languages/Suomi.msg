@@ -20,6 +20,7 @@
 # Identify the language and character set used for the interface
 LanguageCode                            fi
 LanguageCharset                         ISO-8859-15
+LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          en
@@ -83,7 +84,7 @@ Footer_FeedMe                           Ruoki minua!
 Footer_RequestFeature                   Pyyd&auml; ominaisuutta
 Footer_MailingList                      Postituslista
 
-Configuration_Error1                    Erotusmerkin pit&auml;&auml; olla yksitt&auml;inen merkki
+Configuration_Error1                    Erotinmerkin pit&auml;&auml; olla yksitt&auml;inen merkki
 Configuration_Error2                    K&auml;ytt&ouml;liittym&auml;n porttinumero pit&auml;&auml; olla 1:n ja 65535:n v&auml;lilt&auml;
 Configuration_Error3                    POP3-kuunteluportin numero pit&auml;&auml; olla 1:n ja 65535:n v&auml;lilt&auml;
 Configuration_Error4                    Sivun koon pit&auml;&auml; olla 1:n ja 1000:n v&auml;lilt&auml;
@@ -98,10 +99,13 @@ Configuration_SMTPPort                  SMTP-kuunteluportti
 Configuration_SMTPUpdate                SMTP-portiksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
 Configuration_NNTPPort                  NNTP-kuunteluportti
 Configuration_NNTPUpdate                NNTP-portiksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
-Configuration_POP3Separator             POP3:n is&auml;nt&auml;:portti:k&auml;ytt&auml;j&auml; erotusmerkki
-Configuration_NNTPSeparator             NNTP:n is&auml;nt&auml;:portti:k&auml;ytt&auml;j&auml; erotusmerkki
-Configuration_POP3SepUpdate             POP3-erotusmerkiksi vaihdettu %s
-Configuration_NNTPSepUpdate             NNTP-erotusmerkiksi vaihdettu %s
+Configuration_POPFork                   Anna k&auml;ytt&auml;j&auml;n ottaa useita samanaikaisia POP3-yhteyksi&auml;.
+Configuration_SMTPFork                  Anna k&auml;ytt&auml;j&auml;n ottaa useita samanaikaisia SMTP-yhteyksi&auml;.
+Configuration_NNTPFork                  Anna k&auml;ytt&auml;j&auml;n ottaa useita samanaikaisia NNTP-yhteyksi&auml;.
+Configuration_POP3Separator             POP3:n is&auml;nt&auml;:portti:k&auml;ytt&auml;j&auml; erotinmerkki
+Configuration_NNTPSeparator             NNTP:n is&auml;nt&auml;:portti:k&auml;ytt&auml;j&auml; erotinmerkki
+Configuration_POP3SepUpdate             POP3-erotinmerkiksi vaihdettu %s
+Configuration_NNTPSepUpdate             NNTP-erotinmerkiksi vaihdettu %s
 Configuration_UI                        K&auml;ytt&ouml;liittym&auml;n porttinumero
 Configuration_UIUpdate                  K&auml;ytt&ouml;liittym&auml;n porttinumeroksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
 Configuration_History                   Viestien m&auml;&auml;r&auml; sivua kohti
@@ -142,6 +146,10 @@ Advanced_StopWords                      Huomiotta j&auml;tett&auml;v&auml;t sana
 Advanced_Message1                       Seuraavia sanoja ei oteta huomioon viestien luokittelussa siksi koska ne esiintyv&auml;t niin usein.
 Advanced_AddWord                        Lis&auml;&auml; sana
 Advanced_RemoveWord                     Poista sana
+Advanced_AllParameters                  Kaikki POPFilen Parametrit
+Advanced_Parameter                      Parametri
+Advanced_Value                          Arvo
+Advanced_Warning                        T&auml;m&auml; on t&auml;ydellinen lista POPFilen k&auml;ytt&auml;mist&auml; parametreist&auml;. Vaihda arvoja vain jos tied&auml;t mit&auml; teet. Annetun tiedon oikeellisuutta ei tarkisteta.
 
 History_Filter                          &nbsp;(N&auml;kyviss&auml; vain sangon <font color=&quot;%s&quot;>%s</font> sis&auml;lt&ouml;)
 History_FilterBy                        Filter By
@@ -264,6 +272,14 @@ Session_Title                           POPFile-istunto vanhentunut
 Session_Error                           POPFile-instuntosi on vanhentunut. T&auml;m&auml; voi johtua siit&auml;, ett&auml; olet k&auml;ynnist&auml;nyt POPFilen uudelleen niin, ett&auml; selaimesi oli p&auml;&auml;ll&auml;. Napsauta ylh&auml;&auml;ll&auml; olevia linkkej&auml; jatkaaksesi POPFilen k&auml;ytt&ouml;&auml;.
 
 View_Title                              Yksitt&auml;isen viestin n&auml;kym&auml;
+View_ShowFrequencies                    N&auml;yt&auml; sanojen esiintymistiheys
+View_ShowProbabilities                  N&auml;yt&auml; sanojen esiintymistodenn&auml;k&ouml;isyydet
+View_ShowScores                         N&auml;yt&auml; sanojen pistem&auml;&auml;r&auml;t
+View_WordMatrix                         Sanamatriisi
+
+Windows_TrayIcon                        N&auml;ytet&auml;&auml;nk&ouml; POPFilen kuvake Windowsin teht&auml;v&auml;palkissa?
+Windows_Console                         Tulostetaanko POPFilen viestit konsoli-ikkunaan?
+Windows_NextTime                        <p><font color="red">T&auml;m&auml; muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;</font>
 
 Header_MenuSummary                      T&auml;ss&auml; taulukossa on navigointivalikko jonka avulla voit k&auml;ytt&auml;&auml; POPFilen hallinnan eri sivuja.
 History_MainTableSummary                T&auml;ss&auml; taulukossa n&auml;kyy viime aikoina saapuneiden viestien l&auml;hett&auml;j&auml;t ja aiheet. Viestej&auml; voi sen avulla tutkia ja uudelleenluokitella. Aiherivin napsautuksella n&auml;kyy koko vietin teksti, sek&auml; tietoa siit&auml; miksi viesti luokiteltiin niin kuin luokiteltiin. &quot;Pit&auml;isi olla&quot;-sarakkeen avulla voit kertoa mihin sankoon viesti kuuluu, tai kumoa muutoksen. Poista-sarakkeen avulla voit poistaa yksitt&auml;isi&auml; viestej&auml; viestihistoriasta, jos et tarvitse niit&auml; en&auml;&auml;.
