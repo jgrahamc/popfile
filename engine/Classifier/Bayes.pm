@@ -38,6 +38,7 @@ use Classifier::MailParse;
 use IO::Handle;
 use DBI;
 use Digest::MD5 qw( md5_hex );
+use File::Basename;
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
