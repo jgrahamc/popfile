@@ -11,10 +11,13 @@
 #
 # WARNING:
 #
-# This script requires a version of NSIS 2.0b4 (CVS) which meets the following requirement:
+# This script requires a version of NSIS 2.0b4 (CVS) which meets the following requirements:
 #
-#   '{NSIS}\makensis.exe' dated 8 July 2003 @ 18:44 (NSIS CVS version 1.203) or later
-#   This is required to ensure 'language' strings can be combined with other strings.
+# (1) '{NSIS}\makensis.exe' dated 8 July 2003 @ 18:44 (NSIS CVS version 1.203) or later
+#     This is required to ensure 'language' strings can be combined with other strings.
+#
+# (2) '{NSIS}\makensis.exe' dated 21 July 2003 @ 06:44 (NSIS CVS version 1.214) or later
+#     This is required to avoid spurious error messages when creating buckets with UNC paths.
 #----------------------------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
@@ -421,7 +424,6 @@ Function CBP_MakePOPFileBuckets
   !define CBP_L_LOOP_LIMIT    $R4    ; used to terminate the processing loop
   !define CBP_L_NAME          $R3    ; used when checking the corpus directory
   !define CBP_L_PTR           $R2    ; used to access the names in the bucket list
-  !define CBP_L_UNC           $R1    ; used to detect UNC-format 'corpus' paths
 
   Exch ${CBP_L_COUNT}         ; get number of buckets to be created
   Exch
@@ -433,14 +435,11 @@ Function CBP_MakePOPFileBuckets
   Push ${CBP_L_LOOP_LIMIT}
   Push ${CBP_L_NAME}
   Push ${CBP_L_PTR}
-  Push ${CBP_L_UNC}
 
   ; Retrieve the corpus path (as determined by CBP_CheckCorpusStatus)
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${CBP_L_CORPUS} "${CBP_C_INIFILE}" \
       "CBP Data" "CorpusPath"
-
-  StrCpy ${CBP_L_UNC} ${CBP_L_CORPUS} 2   ; will be "\\" for UNC-format paths
 
   ; Now we create the buckets selected by the user. At present this code is only executed
   ; for a "fresh" install, one where there are no corpus files, so we can simply create a
@@ -472,10 +471,7 @@ ok_to_create_bucket:
   FileOpen ${CBP_L_FILE_HANDLE} ${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}\table w
   FileWrite ${CBP_L_FILE_HANDLE} "__CORPUS__ __VERSION__ 1$\r$\n"
   FileClose ${CBP_L_FILE_HANDLE}
-  StrCmp ${CBP_L_UNC} "\\" ignore_errors
   IfErrors  incrm_ptr
-
-ignore_errors:
   IntOp ${CBP_L_COUNT} ${CBP_L_COUNT} - 1
 
 incrm_ptr:
@@ -483,7 +479,6 @@ incrm_ptr:
   IntCmp ${CBP_L_PTR} ${CBP_L_LOOP_LIMIT} finished_now next_bucket
 
 finished_now:
-  Pop ${CBP_L_UNC}
   Pop ${CBP_L_PTR}
   Pop ${CBP_L_NAME}
   Pop ${CBP_L_LOOP_LIMIT}
@@ -502,7 +497,6 @@ finished_now:
   !undef CBP_L_LOOP_LIMIT
   !undef CBP_L_NAME
   !undef CBP_L_PTR
-  !undef CBP_L_UNC
 
 FunctionEnd
 
