@@ -52,7 +52,6 @@
                     <TMPL_VAR NAME="Localize_Configuration_LanguageChoose">:
                 </label>
 
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                 <select name="language" id="configLanguage">
 
                     <TMPL_LOOP NAME="Configuration_Loop_Languages">
