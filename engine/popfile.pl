@@ -678,8 +678,6 @@ sub run_popfile
                 if ( ( $command =~ /PASS (.*)/i ) || ( $command =~ /NOOP/i ) )
                 {
                     echo_response( $mail, $client, $command );
-
-                    flush_extra( $mail, $client );
                     next;
                 }
 
