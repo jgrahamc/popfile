@@ -139,8 +139,9 @@ sub debug
         chomp $message;
         $message .= "\n";
 
-        my $now = localtime;
-        my $msg = "$now ($$): $message";
+        my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime;
+        $year += 1900;
+        my $msg = "$year/$mon/$mday $hour:$min:$sec $$: $message";
 
         if ( $self->global_config_( 'debug' ) & 1 )  {
             open DEBUG, ">>$self->{debug_filename__}";
