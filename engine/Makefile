@@ -17,7 +17,7 @@ error:
 	@echo "           (test and coverage pass the TESTARGS variable to the test suite)"
 	@echo
 	@echo "windows  - Build Windows installer" 
-        @echo "macosx   - Build Mac OS X package installer"
+	@echo "macosx   - Build Mac OS X package installer"
 	@echo "package  - Build Windows installer, and create"
 	@echo "           ZIP files for Windows and cross-platform"
 	@echo "           version"
