@@ -38,7 +38,7 @@
 --      |      id       |   |     |      id       |   |
 --  +---|    userid     |   | +---|   bucketid    |   |
 --  |   |     utid      |---+ |   |     btid      |---+
---  |   |    value      |     |   |    value      |
+--  |   |     val       |     |   |     val       |
 --  |   +---------------+     |   +---------------+
 --  |                         |                      +----------+
 --  |                         |                      |  matrix  |      +-------+
@@ -46,7 +46,7 @@
 --  |      +----------+       |   | buckets |        |    id    |      +-------+
 --  |      |   users  |       |   +---------+        |  wordid  |------|  id   |
 --  |      +----------+    /--+---|    id   |=====---| bucketid |      |  word |
---  +----==|    id    |---(-------| userid  |     \  |  count   |      +-------+
+--  +----==|    id    |---(-------| userid  |     \  |  times   |      +-------+
 --      /  |   name   |   |       |  name   |     |  | lastseen |
 --      |  | password |   |       | pseudo  |     |  +----------+
 --      |  +----------+   |       +---------+     |
@@ -57,9 +57,9 @@
 --      |   | history  |  |     +--|    id     |  |     | magnet_types |
 --      |   +----------+  |     |  | bucketid  |--+     +--------------+
 --      |   |   id     |  |     |  |   mtid    |--------|      id      |
---      +---| userid   |  |     |  |  value    |        |     type     |
+--      +---| userid   |  |     |  |   val     |        |     mtype    |
 --          |  frm     |  |     |  |   seq     |        |    header    |
---          |   to     |  |     |  +-----------+        +--------------+
+--          |   too    |  |     |  +-----------+        +--------------+
 --          |   cc     |  |     |
 --          | subject  |  |     |
 --          | bucketid |--+     |
@@ -134,7 +134,7 @@ create index words_index on words (word);
 create table matrix( id integer primary key,   -- unique ID for this entry
                      wordid integer,           -- an ID in the words table
                      bucketid integer,         -- an ID in the buckets table
-                     count integer,            -- number of times the word has
+                     times integer,            -- number of times the word has
                                                -- been seen
                      lastseen date,            -- last time the record was read
                                                -- or written
@@ -174,7 +174,7 @@ create table user_params( id integer primary key,    -- unique ID for this
                           userid integer,            -- a user
                           utid integer,              -- points to an entry in 
                                                      -- user_template
-                          value varchar(255),        -- value for the
+                          val varchar(255),          -- value for the
 			                             -- parameter
                           unique (userid, utid)      -- each user has just one
 			                             -- instance of each parameter
@@ -208,7 +208,7 @@ create table bucket_params( id integer primary key,    -- unique ID for this
                             bucketid integer,          -- a bucket
                             btid integer,              -- points to an entry in 
                                                        -- bucket_template
-                            value varchar(255),        -- value for the
+                            val varchar(255),          -- value for the
 			                               -- parameter
                             unique (bucketid, btid)    -- each bucket has just one
 			                               -- instance of each parameter
@@ -221,10 +221,10 @@ create table bucket_params( id integer primary key,    -- unique ID for this
 -- ---------------------------------------------------------------------------------------------
 
 create table magnet_types( id integer primary key,  -- unique ID for this entry
-                           type varchar(255),       -- the type of magnet
+                           mtype varchar(255),      -- the type of magnet
                                                     -- (e.g. from)
                            header varchar(255),     -- the header (e.g. From)
-                           unique (type)            -- types are unique
+                           unique (mtype)           -- types are unique
                          );
 
 -- ---------------------------------------------------------------------------------------------
@@ -237,7 +237,7 @@ create table magnet_types( id integer primary key,  -- unique ID for this entry
 create table magnets( id integer primary key,    -- unique ID for this entry
                       bucketid integer,          -- a bucket
                       mtid integer,              -- the magnet type
-                      value varchar(255),        -- value for the magnet
+                      val varchar(255),          -- value for the magnet
                       comment varchar(255),      -- user defined comment
                       seq int                    -- used to set the order of magnets
                     );
@@ -253,9 +253,10 @@ create table history( id integer primary key, -- unique ID for this entry
                       userid integer,         -- the associated user
                       frm varchar(255),       -- the From: address
                       subject varchar(255),   -- the Subject: line
-                      to varchar(255),        -- the To: line
+                      too varchar(255),       -- the To: line (spelled wrong because to
+                                              -- is a reserved word)
                       cc varchar(255),        -- the Cc: line
-                      date date,              -- the Date: line
+                      datetime date,          -- the Date: line
                       bucketid integer,       -- the bucket classified to
                       usedtobe integer,       -- the bucket it usedtobe in
                       magnetid integer,       -- the magnet used if applicable
@@ -353,7 +354,7 @@ create trigger delete_bucket_template delete on bucket_template
 
 -- There's always a user called 'admin'
 
-insert into users ( 'name', 'password' ) values ( 'admin', '' );
+insert into users ( 'name', 'password' ) values ( 'admin', 'e11f180f4a31d8caface8e62994abfaf' );
 
 -- These are the possible parameters for a bucket
 --
@@ -378,10 +379,10 @@ insert into bucket_template ( 'name', 'def' ) values ( 'color',      'black' );
 
 -- The possible magnet types
 
-insert into magnet_types ( 'type', 'header' ) values ( 'from',    'From'    );
-insert into magnet_types ( 'type', 'header' ) values ( 'to',      'To'      );
-insert into magnet_types ( 'type', 'header' ) values ( 'subject', 'Subject' );
-insert into magnet_types ( 'type', 'header' ) values ( 'cc',      'Cc'      );
+insert into magnet_types ( 'mtype', 'header' ) values ( 'from',    'From'    );
+insert into magnet_types ( 'mtype', 'header' ) values ( 'to',      'To'      );
+insert into magnet_types ( 'mtype', 'header' ) values ( 'subject', 'Subject' );
+insert into magnet_types ( 'mtype', 'header' ) values ( 'cc',      'Cc'      );
 
 -- There's always a bucket called 'unclassified' which is where POPFile puts
 -- messages that it isn't sure about.

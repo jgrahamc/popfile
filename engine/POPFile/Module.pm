@@ -503,7 +503,6 @@ sub flush_slurp_data__
             if ( ( !($handle =~ /socket/i) && ($^O eq 'MSWin32' ) ) ||
                  defined( $slurp_data__{"$handle"}{select}->can_read(0.1) ) ) {
 
-                #$self->log_("slurping past CR");
                 my $c;
                 my $retcode = sysread( $handle, $c, 1 );
                 if ( $retcode == 1 ) {
@@ -566,7 +565,6 @@ sub slurp_
     my $c;
 
     while ( sysread( $handle, $c, 160 ) > 0 ) {
-        $self->log_( "slurp_ read [$c]" );
         $slurp_data__{"$handle"}{data} .= $c;
 
         $result = $self->flush_slurp_data__( $handle );

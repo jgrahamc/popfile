@@ -92,7 +92,13 @@ test_assert_equal( $b->{unclassified__}, log(5) );
 
 # Test getting and releasing a session key
 
-my $session = $b->get_session_key();
+my $session;
+$session = $b->get_session_key( 'baduser', 'badpassword' );
+test_assert( !defined( $session ) );
+$session = $b->get_session_key( 'admin', 'badpassword' );
+test_assert( !defined( $session ) );
+$session = $b->get_session_key( 'admin', '' );
+test_assert( defined( $session ) );
 test_assert( $session ne '' );
 $b->release_session_key( $session );
 

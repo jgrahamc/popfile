@@ -37,6 +37,7 @@ use locale;
 use Classifier::MailParse;
 use IO::Handle;
 use DBI;
+use Digest::MD5 qw( md5_hex );
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -568,20 +569,24 @@ sub db_connect__
 	     'select id from words
                   where words.word = ? limit 1;' );
 
+    $self->{db_get_userid__} = $self->{db__}->prepare(
+             'select id from users where name = ? 
+                                     and password = ? limit 1;' );
+
     $self->{db_get_word_count__} = $self->{db__}->prepare(
-	     'select matrix.count from matrix
+	     'select matrix.times from matrix
                   where matrix.bucketid = ? and
                         matrix.wordid = ? limit 1;' );
 
     $self->{db_put_word_count__} = $self->{db__}->prepare(
-	   'insert or replace into matrix ( bucketid, wordid, count ) values ( ?, ?, ? );' );
+	   'insert or replace into matrix ( bucketid, wordid, times ) values ( ?, ?, ? );' );
 
     $self->{db_get_bucket_unique_count__} = $self->{db__}->prepare(
 	     'select count(*) from matrix
                   where matrix.bucketid = ?;' );
 
     $self->{db_get_bucket_word_count__} = $self->{db__}->prepare(
-	     'select sum(matrix.count) from matrix
+	     'select sum(matrix.times) from matrix
                   where matrix.bucketid = ?;' );
 
     $self->{db_get_unique_word_count__} = $self->{db__}->prepare(
@@ -590,17 +595,17 @@ sub db_connect__
                         buckets.userid = ?;' );
 
     $self->{db_get_full_total__} = $self->{db__}->prepare(
-	     'select sum(matrix.count) from matrix, buckets
+	     'select sum(matrix.times) from matrix, buckets
                   where buckets.userid = ? and
                         matrix.bucketid = buckets.id;' );
 
     $self->{db_get_bucket_parameter__} = $self->{db__}->prepare(
-             'select bucket_params.value from bucket_params
+             'select bucket_params.val from bucket_params
                   where bucket_params.bucketid = ? and
                         bucket_params.btid = ?;' );
 
     $self->{db_set_bucket_parameter__} = $self->{db__}->prepare(
-	   'insert or replace into bucket_params ( bucketid, btid, value ) values ( ?, ?, ? );' );
+	   'insert or replace into bucket_params ( bucketid, btid, val ) values ( ?, ?, ? );' );
 
     $self->{db_get_bucket_parameter_default__} = $self->{db__}->prepare(
              'select bucket_template.def from bucket_template
@@ -637,6 +642,7 @@ sub db_disconnect__
 
     $self->{db_get_buckets__}->finish;
     $self->{db_get_wordid__}->finish;
+    $self->{db_get_userid__}->finish;
     $self->{db_get_word_count__}->finish;
     $self->{db_put_word_count__}->finish;
     $self->{db_get_bucket_unique_count__}->finish;
@@ -1048,12 +1054,12 @@ sub magnet_match_helper__
 
     my $bucketid = $self->{db_bucketid__}{$bucket}{id};
     my $h = $self->{db__}->prepare(
-        "select magnets.value from magnets, users, buckets, magnet_types
+        "select magnets.val from magnets, users, buckets, magnet_types
              where buckets.id = $bucketid and
                    users.id = buckets.userid and
                    magnets.bucketid = buckets.id and
-                   magnet_types.type = '$type' and
-                   magnets.mtid = magnet_types.id order by magnets.value;" );
+                   magnet_types.mtype = '$type' and
+                   magnets.mtid = magnet_types.id order by magnets.val;" );
 
     $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {
@@ -1291,6 +1297,17 @@ sub valid_session_key__
 
     return undef if ( caller ne 'Classifier::Bayes' );
 
+    # If the session key is invalid then wait 1 second.  This is done to prevent
+    # people from calling a POPFile API such as get_bucket_count with random session
+    # keys fishing for a valid key.  The XML-RPC API is single threaded and hence this
+    # will delay all use of that API by one second.  Of course in normal use when the
+    # user knows the username/password or session key then there is no delay
+
+    if ( !defined( $self->{api_session__}{$session} ) ) {
+        $self->log_( "Invalid session key $session provided" );
+        select( undef, undef, undef, 1 );
+    }
+
     return $self->{api_sessions__}{$session};
 }
 
@@ -1324,12 +1341,28 @@ sub get_session_key
 {
     my ( $self, $user, $pwd ) = @_;
 
-    # Before we implement multi-user POPFile this method simply returns a session key
-    # for the default user no matter what user or pwd are supplied
+    # The password is stored in the database as an MD5 hash of the username and
+    # password concatenated and separated by the string __popfile__, so compute
+    # the hash here
+
+    my $hash = md5_hex( $user . '__popfile__' . $pwd );
+
+    $self->{db_get_userid__}->execute( $user, $hash );
+    my $result = $self->{db_get_userid__}->fetchrow_arrayref;
+    if ( !defined( $result ) ) {
+
+        # The delay of one second here is to prevent people from trying out
+        # username/password combinations at high speed to determine the
+        # credentials of a valid user
+
+        $self->log_( "Attempt to login with incorrect credentials for user $user" );
+        select( undef, undef, undef, 1 );
+        return undef;
+    }
 
     my $session = $self->generate_unique_session_key__();
 
-    $self->{api_sessions__}{$session} = 1;
+    $self->{api_sessions__}{$session} = $result->[0];
 
     return $session;
 }
@@ -2581,12 +2614,12 @@ sub get_magnet_types_in_bucket
     my @result;
 
     my $bucketid = $self->{db_bucketid__}{$bucket}{id};
-    my $h = $self->{db__}->prepare( "select magnet_types.type from magnet_types, magnets, buckets
+    my $h = $self->{db__}->prepare( "select magnet_types.mtype from magnet_types, magnets, buckets
         where magnet_types.id = magnets.mtid and
               magnets.bucketid = buckets.id and
               buckets.id = $bucketid
-              group by magnet_types.type
-              order by magnet_types.type;" );
+              group by magnet_types.mtype
+              order by magnet_types.mtype;" );
 
     $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {
@@ -2650,10 +2683,10 @@ sub get_magnets
     my @result;
 
     my $bucketid = $self->{db_bucketid__}{$bucket}{id};
-    my $h = $self->{db__}->prepare( "select magnets.value from magnets, magnet_types
+    my $h = $self->{db__}->prepare( "select magnets.val from magnets, magnet_types
         where magnets.bucketid = $bucketid and
               magnet_types.id = magnets.mtid and
-              magnet_types.type = '$type' order by magnets.value;" );
+              magnet_types.mtype = '$type' order by magnets.val;" );
 
     $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {
@@ -2682,11 +2715,11 @@ sub create_magnet
     my $bucketid = $self->{db_bucketid__}{$bucket}{id};
 
     my $result = $self->{db__}->selectrow_arrayref("select magnet_types.id from magnet_types
-                                                        where magnet_types.type = '$type';" );
+                                                        where magnet_types.mtype = '$type';" );
 
     my $mtid = $result->[0];
 
-    $self->{db__}->do( "insert into magnets ( bucketid, mtid, value )
+    $self->{db__}->do( "insert into magnets ( bucketid, mtid, val )
                                      values ( $bucketid, $mtid, '$text' );" );
 }
 
@@ -2703,7 +2736,7 @@ sub get_magnet_types
 
     my %result;
 
-    my $h = $self->{db__}->prepare( "select magnet_types.type, magnet_types.header from magnet_types;" );
+    my $h = $self->{db__}->prepare( "select magnet_types.mtype, magnet_types.header from magnet_types;" );
 
     $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {
@@ -2732,14 +2765,14 @@ sub delete_magnet
     my $bucketid = $self->{db_bucketid__}{$bucket}{id};
 
     my $result = $self->{db__}->selectrow_arrayref("select magnet_types.id from magnet_types
-                                                        where magnet_types.type = '$type';" );
+                                                        where magnet_types.mtype = '$type';" );
 
     my $mtid = $result->[0];
 
     $self->{db__}->do( "delete from magnets
                             where magnets.bucketid = $bucketid and
                                   magnets.mtid = $mtid and
-                                  magnets.value = '$text';" );
+                                  magnets.val  = '$text';" );
 }
 
 # ---------------------------------------------------------------------------------------------

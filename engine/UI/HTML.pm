@@ -34,6 +34,7 @@ use locale;
 
 use IO::Socket;
 use IO::Select;
+use Digest::MD5 qw( md5_hex );
 
 # A handy variable containing the value of an EOL for the network
 
@@ -190,7 +191,7 @@ sub initialize
 
     # The user interface password
 
-    $self->config_( 'password', '' );
+    $self->config_( 'password', md5_hex( '__popfile__' ) );
 
     # The last time (textual) that the statistics were reset
 
@@ -266,6 +267,13 @@ sub initialize
 sub start
 {
     my ( $self ) = @_;
+
+    # In pre v0.21.0 POPFile the UI password was stored in plaintext in the configuration
+    # data.  Check to see if the password is not a hash and upgrade it automatically here.
+
+    if ( length( $self->config_( 'password' ) ) != 32 ) {
+        $self->config_( 'password', md5_hex( '__popfile__' . $self->config_( 'password' ) ) );
+    }
 
     # Ensure that the messages subdirectory exists
 
@@ -427,7 +435,7 @@ sub url_handler__
     # Check the password
 
     if ( $url eq '/password' )  {
-        if ( $self->{form_}{password} eq $self->config_( 'password' ) )  {
+        if ( md5_hex( '__popfile__' . $self->{form_}{password} ) eq $self->config_( 'password' ) )  {
             change_session_key( $self );
             delete $self->{form_}{password};
             $self->{form_}{session} = $self->{session_key__};
@@ -446,7 +454,7 @@ sub url_handler__
     # If there's a password defined then check to see if the user already knows the
     # session key, if they don't then drop to the password screen
 
-    if ( ( (!defined($self->{form_}{session})) || ($self->{form_}{session} eq '' ) || ( $self->{form_}{session} ne $self->{session_key__} ) ) && ( $self->config_( 'password' ) ne '' ) ) {
+    if ( ( (!defined($self->{form_}{session})) || ($self->{form_}{session} eq '' ) || ( $self->{form_}{session} ne $self->{session_key__} ) ) && ( $self->config_( 'password' ) ne md5_hex( '__popfile__' ) ) ) {
 
         # Since the URL that has caused us to hit the password page might have information stored in the
         # form hash we need to extract it out (except for the session key) and package it up so that
@@ -1098,7 +1106,10 @@ sub security_page
     my $server_error = '';
     my $port_error   = '';
 
-    $self->config_( 'password', $self->{form_}{password} )         if ( defined($self->{form_}{password}) );
+    if ( ( defined($self->{form_}{password}) ) &&
+         ( $self->{form_}{password} ne $self->config_( 'password' ) ) ) {
+        $self->config_( 'password', md5_hex( '__popfile__' . $self->{form_}{password} ) )
+    }
     $self->config_( 'local', $self->{form_}{localui}-1 )      if ( defined($self->{form_}{localui}) );
     $self->config_( 'update_check', $self->{form_}{update_check}-1 ) if ( defined($self->{form_}{update_check}) );
     $self->config_( 'send_stats', $self->{form_}{send_stats}-1 )   if ( defined($self->{form_}{send_stats}) );
