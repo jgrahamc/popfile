@@ -6,7 +6,7 @@
 #                    buckets to be created - it is designed to provide a realistic
 #                    testbed for the POPFile Installer/Uninstaller language files.
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -70,8 +70,7 @@
 ; which are not backward-compatible (i.e. this POPFile installer script cannot be built by
 ; earlier versions of the NSIS compiler).
 
-; This version of the script has been tested with NSIS 2.0b4 dated 19 November 2003 after
-; applying the NSIS CVS snapshot dated 18-Dec-2003 (08:44 GMT).
+;  This version was tested using "NSIS 2 Release Candidate 1" released 27 December 2003
 
 ; IMPORTANT:
 ; The Outlook and Outlook Express Configuration pages use the NOWORDWRAP flag and this requires
@@ -144,7 +143,7 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT       "PFI Testbed"
-  !define C_PFI_VERSION       "0.9.0"
+  !define C_PFI_VERSION       "0.9.2"
 
   !ifdef    C_POPFILE_MAJOR_VERSION
     !undef  C_POPFILE_MAJOR_VERSION
@@ -1075,11 +1074,9 @@ Function MakeItSafe
   Push ${L_EXE}
   Call WaitUntilUnlocked
 
-  StrCpy ${L_EXE} "$INSTDIR"
-  Push ${L_EXE}
-  Call StrLower
+  Call GetParameters
   Pop ${L_EXE}
-
+  
   Push "1"
   Call SetConsoleMode
 
