@@ -16,7 +16,7 @@
 
 <TMPL_ELSE>
 
-[<a href="/magnets?start_magnet=<TMPL_VAR NAME="Magnet_Navigator_Start_Magnet">&amp;session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Magnet_Navigator_Count">]
+[<a href="/magnets?start_magnet=<TMPL_VAR NAME="Magnet_Navigator_Start_Magnet">&amp;session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Magnet_Navigator_Count"></a>]
 
 </TMPL_IF>
 
