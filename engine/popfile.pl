@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # ---------------------------------------------------------------------------------------------
 #
 # popfile.pl --- POP3 mail analyzer and sorter
@@ -1312,13 +1313,13 @@ sub corpus_page
                     my $normal = sprintf("%.10f", $n);
                     $score = sprintf("%.10f", $score);
                     my $probf = sprintf("%.10f", $prob);
-                    my $bold;
-                    my $endbold;
+                    my $bold = '';
+                    my $endbold = '';
                     if ( $score =~ /^[^\-]/ ) {
                         $score = "&nbsp;$score";
                     }
                     $bold = "<b>" if ( $max == $prob );
-                    $endbold = "<b>" if ( $max == $prob );
+                    $endbold = "</b>" if ( $max == $prob );
                     $body .= "<tr><td>$bold<font color=$classifier->{colors}{$bucket}>$bucket</font>$endbold<td><td>$bold<tt>$probf</tt>$endbold<td><td>$bold<tt>$normal</tt>$endbold<td><td>$bold<tt>$score</tt>$endbold";
                 }
             }
@@ -1590,6 +1591,8 @@ sub history_page
                 if ( $subject eq '' ) 
                 {
                     $subject = $1;
+                    $subject =~ s/<(.*)>/&lt;$1&gt;/g;
+                    $subject =~ s/\"(.*)\"/$1/g;
                 }
             }
             if (( $from ne '' ) && ( $subject ne '' ) ) 
@@ -2044,7 +2047,6 @@ sub run_popfile
                     next;
                 }
 
-                
                 # Secure authentication
                 if ( $command =~ /AUTH ([^ ]+)/ )
                 {
