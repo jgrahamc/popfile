@@ -1291,7 +1291,7 @@ sub create_bucket
     mkdir( $self->config_( 'corpus' ) . "/$bucket" );
 
     if ( open NEW, '>' . $self->config_( 'corpus' ) . "/$bucket/table" ) {
-        print NEW "\n";
+        print NEW "__CORPUS__ __VERSION__ 1\n";
         close NEW;
     }
 
