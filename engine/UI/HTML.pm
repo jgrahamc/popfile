@@ -656,7 +656,7 @@ sub configuration_page
     $body .= sprintf( $self->{language}{Configuration_DaysUpdate}, $self->{configuration}->{configuration}{history_days} ) if ( defined($self->{form}{history_days}) );
 
     # Classification Insertion panel
-    $body .= "\n<td class=\"stabColor01\" width=\"33%\" valign=\"top\">\n" ;
+    $body .= "\n<td class=\"stabColor01\" valign=\"top\">\n" ;
     $body .= "<h2>$self->{language}{Configuration_ClassificationInsertion}</h2>\n<p>\n" ;
     $body .= "<table>\n<tr>\n<td><b>$self->{language}{Configuration_SubjectLine}:</b> \n"; 
     if ( $self->{configuration}->{configuration}{subject} == 1 ) {
