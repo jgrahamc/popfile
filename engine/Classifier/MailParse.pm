@@ -369,6 +369,9 @@ sub update_tag
         # rendering clients behave.
 
         my $parse_script_uri = 0;
+
+		# Count the number of TD elements
+		increment_word( $self, 'html:td' );
         
         # Tags with src attributes
 

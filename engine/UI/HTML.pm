@@ -1903,8 +1903,8 @@ sub history_page
 
         load_history_cache( $self, $self->{form}{filter}, '', $self->{form}{sort}) if ( history_cache_empty( $self ) );
 
-        foreach my $i ($self->{history_keys}) {
-            my $mail_file = $self->{history}{$i}{file};
+        foreach my $i (0..history_size($self)-1) {
+            my $mail_file = $self->{history}{$self->{history_keys}[$i]}{file};
             my $class_file = $mail_file;
             $class_file =~ s/msg$/cls/;
             unlink("$self->{configuration}->{configuration}{msgdir}$mail_file");
