@@ -155,6 +155,18 @@
 ## !define PFI_VERBOSE
 
   ;--------------------------------------------------------------------------
+  ; Symbols used to avoid confusion over where the line breaks occur.
+  ;
+  ; ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+  ; ${MB_NL} is used for MessageBox-style 'new line' sequences.
+  ;
+  ; (these two constants do not follow the 'C_' naming convention described below)
+  ;--------------------------------------------------------------------------
+
+  !define IO_NL   "\r\n"
+  !define MB_NL   "$\r$\n"
+
+  ;--------------------------------------------------------------------------
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
@@ -168,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.46"
+  !define C_PFI_VERSION  "0.2.47"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -290,7 +302,7 @@
   !endif
 
   VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
 #----------------------------------------------------------------------------------------
 # CBP Configuration Data (to override defaults, un-comment the lines below and modify them)
@@ -886,7 +898,7 @@ save_root_sfn:
   CreateDirectory "$G_USERDIR"
   IfErrors 0 userdir_exists
   MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "Error: Unable to create folder for user data\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       ($G_USERDIR)"
 
 userdir_exists:
@@ -992,11 +1004,11 @@ stopwords:
   
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "POPFile 'stopwords' $(PFI_LANG_MBSTPWDS_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBSTPWDS_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBSTPWDS_3) 'stopwords.bak')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBSTPWDS_4) 'stopwords.default')" IDNO copy_default_stopwords
   IfFileExists "$G_USERDIR\stopwords.bak" 0 make_backup
   SetFileAttributes "$G_USERDIR\stopwords.bak" NORMAL
@@ -1013,8 +1025,8 @@ copy_default_stopwords:
 update_config_ports:
   FileOpen  ${L_CFG} "$PLUGINSDIR\popfile.cfg" a
   FileSeek  ${L_CFG} 0 END
-  FileWrite ${L_CFG} "pop3_port $G_POP3$\r$\n"
-  FileWrite ${L_CFG} "html_port $G_GUI$\r$\n"
+  FileWrite ${L_CFG} "pop3_port $G_POP3${MB_NL}"
+  FileWrite ${L_CFG} "html_port $G_GUI${MB_NL}"
   FileClose ${L_CFG}
   !insertmacro BACKUP_123_DP "$G_USERDIR" "popfile.cfg"
   CopyFiles /SILENT /FILESONLY "$PLUGINSDIR\popfile.cfg" "$G_USERDIR\"
@@ -1415,7 +1427,7 @@ flat_bucket:
   ; problems when this flat file corpus is converted to the new SQL database format
 
   FileOpen ${L_TEMP} "${L_CORPUS_PATH}\${L_BUCKET_NAME}\table" w
-  FileWrite ${L_TEMP} "__CORPUS__ __VERSION__ 1$\r$\n"
+  FileWrite ${L_TEMP} "__CORPUS__ __VERSION__ 1${MB_NL}"
   FileClose ${L_TEMP}
   StrCpy ${L_TEMP} 26
 
@@ -1589,7 +1601,7 @@ use_installer_lang:
 lang_save:
   FileOpen  ${L_CFG} "$G_USERDIR\popfile.cfg" a
   FileSeek  ${L_CFG} 0 END
-  FileWrite ${L_CFG} "html_language ${L_LANG}$\r$\n"
+  FileWrite ${L_CFG} "html_language ${L_LANG}${MB_NL}"
   FileClose ${L_CFG}
 
 lang_done:
@@ -1638,63 +1650,63 @@ Section "-MakeBatchFile" SecMakeBatch
   SetFileAttributes "$G_USERDIR\pfi-run.bat" NORMAL
   FileOpen ${L_FILEHANDLE} "$G_USERDIR\pfi-run.bat" w
 
-  FileWrite ${L_FILEHANDLE} "@echo off$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM Simple batch file to run POPFile (for '$G_WINUSERNAME' user)$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM Created by 'Add POPFile User' v${C_PFI_VERSION} on ${L_TIMESTAMP}$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM POPFile program location = $G_ROOTDIR$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "set POPFILE_ROOT=${L_POPFILE_ROOT}$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM POPFile User Data folder = $G_USERDIR$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "set POPFILE_USER=${L_POPFILE_USER}$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM To run in 'Normal' mode, remove REM from the start of the next line$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM goto normal$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM --------------------$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM Debug mode$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM --------------------$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "if exist $\"%POPFILE_ROOT%\msgcapture.exe$\" goto msgcapture$\r$\n"
-  FileWrite ${L_FILEHANDLE} "if exist $\"%POPFILE_ROOT%\pfimsgcapture.exe$\" goto pfimsgcapture$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM Debug command: Start POPFile in foreground using 'popfile.pl'$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\perl.exe$\" $\"%POPFILE_ROOT%\popfile.pl$\"$\r$\n"
-  FileWrite ${L_FILEHANDLE} "goto exit$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM Debug command: Start POPFile using the 'Message Capture' utility$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} ":msgcapture$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\msgcapture.exe$\" /TIMEOUT=0$\r$\n"
-  FileWrite ${L_FILEHANDLE} "goto exit$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} ":pfimsgcapture$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\pfimsgcapture.exe$\" /TIMEOUT=0$\r$\n"
-  FileWrite ${L_FILEHANDLE} "goto exit$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM --------------------$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM Normal mode$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM --------------------$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM Normal command: Start POPFile using the settings in 'popfile.cfg'$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} ":normal$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\popfile.exe$\"$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM --------------------$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM Exit from batch file$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM --------------------$\r$\n"
-  FileWrite ${L_FILEHANDLE} "$\r$\n"
-  FileWrite ${L_FILEHANDLE} ":exit$\r$\n"
+  FileWrite ${L_FILEHANDLE} "@echo off${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM Simple batch file to run POPFile (for '$G_WINUSERNAME' user)${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM Created by 'Add POPFile User' v${C_PFI_VERSION} on ${L_TIMESTAMP}${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM POPFile program location = $G_ROOTDIR${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "set POPFILE_ROOT=${L_POPFILE_ROOT}${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM POPFile User Data folder = $G_USERDIR${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "set POPFILE_USER=${L_POPFILE_USER}${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM To run in 'Normal' mode, remove REM from the start of the next line${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM goto normal${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM --------------------${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM Debug mode${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM --------------------${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "if exist $\"%POPFILE_ROOT%\msgcapture.exe$\" goto msgcapture${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "if exist $\"%POPFILE_ROOT%\pfimsgcapture.exe$\" goto pfimsgcapture${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM Debug command: Start POPFile in foreground using 'popfile.pl'${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\perl.exe$\" $\"%POPFILE_ROOT%\popfile.pl$\"${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "goto exit${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM Debug command: Start POPFile using the 'Message Capture' utility${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} ":msgcapture${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\msgcapture.exe$\" /TIMEOUT=0${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "goto exit${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} ":pfimsgcapture${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\pfimsgcapture.exe$\" /TIMEOUT=0${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "goto exit${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM --------------------${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM Normal mode${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM --------------------${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM Normal command: Start POPFile using the settings in 'popfile.cfg'${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} ":normal${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\popfile.exe$\"${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM --------------------${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM Exit from batch file${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "REM --------------------${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "${MB_NL}"
+  FileWrite ${L_FILEHANDLE} ":exit${MB_NL}"
 
   FileClose ${L_FILEHANDLE}
 
@@ -1816,9 +1828,9 @@ upgrade_install:
   SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_USERDIR_SUBTITLE)"
 
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_3)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $G_USERDIR\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_DIRSELECT_MBWARN_2)" IDNO offer_default
   Call CheckExistingConfigData
   Abort
@@ -1843,9 +1855,9 @@ check_config:
   Pop ${L_RESULT}
   IfFileExists "$G_USERDIR\pfi-restore.log" 0 invalid_restore
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_4)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       ($G_USERDIR)\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_DIRSELECT_MBWARN_5)" IDNO quit_wizard
 
   Call CheckExistingConfigData
@@ -1853,7 +1865,7 @@ check_config:
 
 invalid_restore:
   MessageBox MB_OK|MB_ICONSTOP "Error: No 'restore' data found at specified location !\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       ($G_USERDIR)"
 
 quit_wizard:
@@ -1915,7 +1927,7 @@ Function CheckExistingDataDir
   StrCmp ${L_RESULT} "" no_spaces
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "Current configuration does not support short file names\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       Please select a folder location which does not contain spaces"
   Pop ${L_RESULT}
   Abort
@@ -1930,9 +1942,9 @@ upgrade_check:
 
   IfFileExists "$G_USERDIR\popfile.cfg" 0 continue
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_3)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $G_USERDIR\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES continue
 
   ; We are returning to the DIRECTORY page
@@ -2089,7 +2101,7 @@ done:
   ; Ensure the 'clean copy' ends with end-of-line terminator so we can safely append data to it
 
   StrCmp ${L_TEXTEND} "<eol>" add_to_the_copy
-  FileWrite ${L_CLEANCFG} "$\r$\n"
+  FileWrite ${L_CLEANCFG} "${MB_NL}"
 
 add_to_the_copy:
 
@@ -2104,7 +2116,7 @@ add_to_the_copy:
   Goto check_trayicon
 
 found_console:
-  FileWrite ${L_CLEANCFG} "windows_console ${L_CONSOLE}$\r$\n"
+  FileWrite ${L_CLEANCFG} "windows_console ${L_CONSOLE}${MB_NL}"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "Console" "${L_CONSOLE}"
 
 check_trayicon:
@@ -2114,7 +2126,7 @@ check_trayicon:
   Goto close_cleancopy
 
 found_trayicon:
-  FileWrite ${L_CLEANCFG} "windows_trayicon ${L_TRAYICON}$\r$\n"
+  FileWrite ${L_CLEANCFG} "windows_trayicon ${L_TRAYICON}${MB_NL}"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "TrayIcon" "${L_TRAYICON}"
 
 close_cleancopy:
@@ -2407,9 +2419,9 @@ Function CheckPortOptions
 bad_pop3:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_OPTIONS_MBPOP3_1) $\"$G_POP3$\"'.\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OPTIONS_MBPOP3_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OPTIONS_MBPOP3_3)"
   Goto bad_exit
 
@@ -2424,16 +2436,16 @@ pop3_ok:
 bad_gui:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_OPTIONS_MBGUI_1) $\"$G_GUI$\".\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OPTIONS_MBGUI_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OPTIONS_MBGUI_3)"
   Goto bad_exit
 
 ports_must_differ:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_OPTIONS_MBDIFF_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OPTIONS_MBDIFF_2)"
 
 bad_exit:
@@ -2519,9 +2531,9 @@ manual_shutdown:
   StrCpy $G_PLS_FIELD_1 "POPFile"
   DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBMANSHUT_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBMANSHUT_3)"
 
 exit_now:
@@ -2677,7 +2689,7 @@ read_next_name:
 
 add_to_list:
   StrCpy ${L_CLIENT_LIST} "${L_CLIENT_LIST}${L_SEPARATOR}${L_CLIENT_NAME}${L_CLIENT_TYPE}"
-  StrCpy ${L_SEPARATOR} "\r\n"
+  StrCpy ${L_SEPARATOR} "${IO_NL}"
 
 incrm_index:
   IntOp ${L_CLIENT_INDEX} ${L_CLIENT_INDEX} + 1
@@ -2840,11 +2852,11 @@ check_again:
   IsWindow ${L_STATUS} 0 open_logfiles
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EXP)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_1)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_2)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_3)"\
              IDRETRY check_again IDIGNORE open_logfiles
 
@@ -2859,9 +2871,9 @@ abort_oe_config:
   !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_EXPCFG_IO_CANCELLED)"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioB.ini"
   StrCmp $G_OOECONFIG_HANDLE "" exit
-  FileWrite $G_OOECONFIG_HANDLE "$\r$\n\
+  FileWrite $G_OOECONFIG_HANDLE "${MB_NL}\
       $(PFI_LANG_EXPCFG_IO_CANCELLED)\
-      $\r$\n"
+      ${MB_NL}"
   Goto finished_oe_config
 
 open_logfiles:
@@ -2870,25 +2882,25 @@ open_logfiles:
 
   FileOpen  $G_OOECONFIG_HANDLE "$G_USERDIR\expconfig.txt" w
   FileWrite $G_OOECONFIG_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_EXPCFG_LOG_BEFORE) (${L_TEMP})\
-      $\r$\n$\r$\n"
+      ${MB_NL}${MB_NL}"
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_EXPCFG_LOG_IDENTITY)"  20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_EMAIL)"     30
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_SERVER)"    20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_USER)"      20
   FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OOECFG_LOG_PORT)\
-      $\r$\n$\r$\n"
+      ${MB_NL}${MB_NL}"
 
   FileOpen  $G_OOECHANGES_HANDLE "$G_USERDIR\expchanges.txt" a
   FileSeek  $G_OOECHANGES_HANDLE 0 END
   FileWrite $G_OOECHANGES_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_ExpCFG_LOG_AFTER) (${L_TEMP})\
-      $\r$\n$\r$\n"
+      ${MB_NL}${MB_NL}"
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_EXPCFG_LOG_IDENTITY)"   20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"    20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWSERVER)"  17
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWUSER)"    40
   FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OOECFG_LOG_NEWPORT)\
-      $\r$\n$\r$\n"
+      ${MB_NL}${MB_NL}"
 
   ; Determine the separator character to be used when configuring an email account for POPFile
 
@@ -3029,7 +3041,7 @@ continue:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 8" "State"
   StrCpy ${L_TEMP} ""
   StrCmp ${L_STATUS} "" no_padding
-  StrCpy ${L_TEMP} "\r\n\r\n"
+  StrCpy ${L_TEMP} "${IO_NL}${IO_NL}"
 
 no_padding:
   !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 8" "State" "${L_STATUS}${L_TEMP}${L_OEDATA}"
@@ -3056,7 +3068,7 @@ no_padding:
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_POP3SERVER}"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_USERNAME}"     20
   FileWrite $G_OOECONFIG_HANDLE "${L_PORT}\
-      $\r$\n"
+      ${MB_NL}"
 
   IntCmp $G_OOELIST_INDEX 6 display_list try_next_account try_next_account
 
@@ -3124,14 +3136,14 @@ continue_guid:
   goto get_guid
 
 finished_oe_config:
-  FileWrite $G_OOECONFIG_HANDLE "$\r$\n\
+  FileWrite $G_OOECONFIG_HANDLE "${MB_NL}\
       $(PFI_LANG_OOECFG_LOG_END)\
-      $\r$\n$\r$\n"
+      ${MB_NL}${MB_NL}"
   FileClose $G_OOECONFIG_HANDLE
 
-  FileWrite $G_OOECHANGES_HANDLE "$\r$\n\
+  FileWrite $G_OOECHANGES_HANDLE "${MB_NL}\
       $(PFI_LANG_OOECFG_LOG_END)\
-      $\r$\n$\r$\n"
+      ${MB_NL}${MB_NL}"
   FileClose $G_OOECHANGES_HANDLE
 
 exit:
@@ -3454,20 +3466,20 @@ next_row:
 
   MessageBox MB_YESNO \
       "$(PFI_LANG_EXPCFG_MBIDENTITY) ${L_IDENTITY}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_EXPCFG_MBACCOUNT) ${L_ACCOUNTNAME}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBEMAIL) ${L_EMAILADDRESS}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBSERVER) 127.0.0.1 \
                                    ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3SERVER}')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBUSERNAME) ${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME} \
                                      ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3USERNAME}')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBOEPORT) $G_POP3 \
                                    ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3PORT}')\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBQUESTION)\
       " IDNO ignore_tick
 
@@ -3507,7 +3519,7 @@ add_entry:
   !insertmacro OOECONFIG_CHANGES_LOG  "${L_ACCOUNTNAME}" 20
   !insertmacro OOECONFIG_CHANGES_LOG  "127.0.0.1"        17
   !insertmacro OOECONFIG_CHANGES_LOG  "${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME}"  40
-  FileWrite $G_OOECHANGES_HANDLE "$G_POP3$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "$G_POP3${MB_NL}"
 
   Goto continue
 
@@ -3667,11 +3679,11 @@ got_outlook_path:
   IsWindow ${L_STATUS} 0 open_logfiles
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_OUT)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_1)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_2)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_3)"\
              IDRETRY got_outlook_path IDIGNORE open_logfiles
 
@@ -3685,9 +3697,9 @@ abort_outlook_config:
   !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_OUTCFG_IO_CANCELLED)"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioB.ini"
   StrCmp $G_OOECONFIG_HANDLE "" exit
-  FileWrite $G_OOECONFIG_HANDLE "$\r$\n\
+  FileWrite $G_OOECONFIG_HANDLE "${MB_NL}\
       $(PFI_LANG_OUTCFG_IO_CANCELLED)\
-      $\r$\n"
+      ${MB_NL}"
   Goto finished_outlook_config
 
 open_logfiles:
@@ -3700,25 +3712,25 @@ open_logfiles:
 
   FileOpen  $G_OOECONFIG_HANDLE "$G_USERDIR\outconfig.txt" w
   FileWrite $G_OOECONFIG_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_OUTCFG_LOG_BEFORE) (${L_TEMP})\
-      $\r$\n$\r$\n"
+      ${MB_NL}${MB_NL}"
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OUTCFG_LOG_IDENTITY)"  20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_EMAIL)"     30
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_SERVER)"    20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_USER)"      20
   FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OOECFG_LOG_PORT)\
-      $\r$\n$\r$\n"
+      ${MB_NL}${MB_NL}"
 
   FileOpen  $G_OOECHANGES_HANDLE "$G_USERDIR\outchanges.txt" a
   FileSeek  $G_OOECHANGES_HANDLE 0 END
   FileWrite $G_OOECHANGES_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_OUTCFG_LOG_AFTER) (${L_TEMP})\
-      $\r$\n$\r$\n"
+      ${MB_NL}${MB_NL}"
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OUTCFG_LOG_IDENTITY)"   20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"    20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWSERVER)"  17
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWUSER)"    40
   FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OOECFG_LOG_NEWPORT)\
-      $\r$\n$\r$\n"
+      ${MB_NL}${MB_NL}"
 
   ; Determine the separator character to be used when configuring an email account for POPFile
 
@@ -3824,7 +3836,7 @@ continue:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 8" "State"
   StrCpy ${L_TEMP} ""
   StrCmp ${L_STATUS} "" no_padding
-  StrCpy ${L_TEMP} "\r\n\r\n"
+  StrCpy ${L_TEMP} "${IO_NL}${IO_NL}"
 
 no_padding:
   !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 8" "State" "${L_STATUS}${L_TEMP}${L_OUTDATA}"
@@ -3851,7 +3863,7 @@ no_padding:
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_POP3SERVER}"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "${L_USERNAME}"     20
   FileWrite $G_OOECONFIG_HANDLE "${L_PORT}\
-      $\r$\n"
+      ${MB_NL}"
 
   IntCmp $G_OOELIST_INDEX 6 display_list try_next_account try_next_account
 
@@ -3910,14 +3922,14 @@ display_list_again:
   Call ResetOutlookOutlookExpressAccountList
 
 finished_outlook_config:
-  FileWrite $G_OOECONFIG_HANDLE "$\r$\n\
+  FileWrite $G_OOECONFIG_HANDLE "${MB_NL}\
       $(PFI_LANG_OOECFG_LOG_END)\
-      $\r$\n$\r$\n"
+      ${MB_NL}${MB_NL}"
   FileClose $G_OOECONFIG_HANDLE
 
-  FileWrite $G_OOECHANGES_HANDLE "$\r$\n\
+  FileWrite $G_OOECHANGES_HANDLE "${MB_NL}\
       $(PFI_LANG_OOECFG_LOG_END)\
-      $\r$\n$\r$\n"
+      ${MB_NL}${MB_NL}"
   FileClose $G_OOECHANGES_HANDLE
 
 exit:
@@ -4014,20 +4026,20 @@ next_row:
 
   MessageBox MB_YESNO \
       "$(PFI_LANG_OUTCFG_MBIDENTITY) ${L_IDENTITY}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OUTCFG_MBACCOUNT) ${L_ACCOUNTNAME}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBEMAIL) ${L_EMAILADDRESS}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBSERVER) 127.0.0.1 \
                                    ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3SERVER}')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBUSERNAME) ${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME} \
                                      ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3USERNAME}')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBOEPORT) $G_POP3 \
                                    ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3PORT}')\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBQUESTION)\
       " IDNO ignore_tick
 
@@ -4068,7 +4080,7 @@ add_entry:
   !insertmacro OOECONFIG_CHANGES_LOG  "127.0.0.1"        17
   !insertmacro OOECONFIG_CHANGES_LOG  "${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME}"  40
   FileWrite $G_OOECHANGES_HANDLE "$G_POP3\
-      $\r$\n"
+      ${MB_NL}"
 
   Goto continue
 
@@ -4250,11 +4262,11 @@ check_if_running:
   IsWindow ${L_STATUS} 0 continue
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EUD)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_1)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_2)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_3)"\
              IDRETRY check_if_running IDIGNORE continue
 
@@ -4544,18 +4556,18 @@ Function CheckEudoraRequests
 
   MessageBox MB_YESNO \
       "${L_PERSONA}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBEMAIL) ${L_EMAIL}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBSERVER) 127.0.0.1 \
                                    ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_SERVER}')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBUSERNAME) ${L_SERVER}$G_SEPARATOR${L_USER} \
                                      ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_USER}')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBOEPORT) $G_POP3 \
                                    ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_PORT}')\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_OOECFG_MBQUESTION)\
       " IDYES exit
   Pop ${L_USER}
@@ -4636,13 +4648,13 @@ Function StartPOPFilePage
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Inherited" "Console"
   StrCmp ${L_TEMP} "?" 0 check_trayicon
-  FileWrite ${L_CFG} "windows_console 0$\r$\n"
+  FileWrite ${L_CFG} "windows_console 0${MB_NL}"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "Console" "0"
 
 check_trayicon:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Inherited" "TrayIcon"
   StrCmp ${L_TEMP} "?" 0 close_file
-  FileWrite ${L_CFG} "windows_trayicon 1$\r$\n"
+  FileWrite ${L_CFG} "windows_trayicon 1${MB_NL}"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Inherited" "TrayIcon" "1"
 
 close_file:
@@ -4770,9 +4782,9 @@ lastaction_no:
   StrCpy $G_PLS_FIELD_1 "POPFile"
   DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBMANSHUT_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBMANSHUT_3)"
   Goto exit_without_banner
 
@@ -4839,9 +4851,9 @@ do_not_show_banner:
   StrCpy $G_PLS_FIELD_1 "POPFile"
   DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBMANSHUT_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBMANSHUT_3)"
 
 continue:
@@ -4860,9 +4872,9 @@ continue:
 error_msg:
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST \
       "An error occurred when the installer tried to start POPFile.\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       Please use 'Start -> Programs -> POPFile -> Run POPFile' now.\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       Click 'OK' once POPFile has been started."
   Goto exit_without_banner
 
@@ -5298,7 +5310,7 @@ Function un.PFIGUIInit
   StrCpy $G_PFIFLAG "special"
   MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
       "$(PFI_LANG_UN_MBDIFFUSER_1) ('${L_TEMP}') !\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES continue_uninstall
   Abort "$(PFI_LANG_UN_ABORT_1)"
 
@@ -5339,7 +5351,7 @@ continue:
   IfFileExists $G_USERDIR\popfile.cfg skip_confirmation
     MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
         "$(PFI_LANG_UN_MBNOTFOUND_1) '$G_USERDIR'.\
-        $\r$\n$\r$\n\
+        ${MB_NL}${MB_NL}\
         $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES skip_confirmation
     Abort "$(PFI_LANG_UN_ABORT_1)"
 
@@ -5401,9 +5413,9 @@ manual_shutdown:
   StrCpy $G_PLS_FIELD_1 "POPFile"
   DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBMANSHUT_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBMANSHUT_3)"
 
 section_exit:
@@ -5455,9 +5467,9 @@ Section "un.Email Settings" UnSecEmail
   DetailPrint "$(PFI_LANG_UN_LOG_DATAPROBS): ${L_UNDOFILE}"
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBEMAIL_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_oe_restore
   ExecShell "open" "$G_USERDIR\${L_UNDOFILE}.errors.txt"
   Goto end_oe_restore
@@ -5484,9 +5496,9 @@ end_oe_restore:
   DetailPrint "$(PFI_LANG_UN_LOG_DATAPROBS): ${L_UNDOFILE}"
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBEMAIL_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_outlook_restore
   ExecShell "open" "$G_USERDIR\${L_UNDOFILE}.errors.txt"
   Goto end_outlook_restore
@@ -5513,9 +5525,9 @@ end_outlook_restore:
   DetailPrint "$(PFI_LANG_UN_LOG_DATAPROBS): ${L_UNDOFILE}"
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_3)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBEMAIL_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_eudora_restore
   ExecShell "open" "$G_USERDIR\${L_UNDOFILE}.errors.txt"
   Goto end_eudora_restore
@@ -5572,7 +5584,7 @@ skip_nonsql_corpus:
 
   MessageBox MB_YESNO|MB_ICONQUESTION \
     "$(PFI_LANG_UN_MBDELMSGS_1)\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     (${L_MESSAGES})" IDNO section_exit
 
 delete_msgdir:
@@ -5747,11 +5759,11 @@ Section "un.Uninstall End" UnSecEnd
   StrCmp $G_PFIFLAG "success" uninstall_files
   MessageBox MB_YESNO|MB_ICONSTOP \
     "$(PFI_LANG_UN_MBRERUN_1)\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     $(PFI_LANG_UN_MBRERUN_2)\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     $(PFI_LANG_UN_MBRERUN_3)\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     $(PFI_LANG_UN_MBRERUN_4)" IDYES exit
 
 uninstall_files:
@@ -5944,11 +5956,11 @@ Function un.RestoreOOE
   FileOpen  ${L_ERRORLOG} "$G_USERDIR\${L_UNDOFILE}.errors.txt" a
   FileSeek  ${L_ERRORLOG} 0 END
   FileWrite ${L_ERRORLOG} "Time  : ${L_TEMP}\
-      $\r$\n\
+      ${MB_NL}\
       Action: ${L_MESSAGE}\
-      $\r$\n\
+      ${MB_NL}\
       User  : $G_WINUSERNAME\
-      $\r$\n"
+      ${MB_NL}"
 
   SetDetailsPrint textonly
   DetailPrint "${L_MESSAGE}"
@@ -6028,20 +6040,20 @@ skip_port_restore:
 
 foreign_ooe_undo:
   WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (different user)"
-  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (different user)$\r$\n"
+  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (different user)${MB_NL}"
   StrCpy ${L_MESSAGE} "foreign"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_ooe_undo
 
 ooe_undo_not_valid:
   WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (data no longer valid)"
-  FileWrite ${L_ERRORLOG} "Alert : [Undo-${L_INDEX}] (data no longer valid)$\r$\n"
+  FileWrite ${L_ERRORLOG} "Alert : [Undo-${L_INDEX}] (data no longer valid)${MB_NL}"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_ooe_undo
 
 skip_ooe_undo:
   WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (undo data incomplete)"
-  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (undo data incomplete)$\r$\n"
+  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (undo data incomplete)${MB_NL}"
   StrCpy ${L_MESSAGE} "corrupt"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
 
@@ -6050,7 +6062,7 @@ next_ooe_undo:
   IntCmp ${L_INDEX} 0 quit_restore quit_restore read_ooe_undo_entry
 
 ooe_restore_corrupt:
-  FileWrite ${L_ERRORLOG} "Error : [History] data corrupted$\r$\n"
+  FileWrite ${L_ERRORLOG} "Error : [History] data corrupted${MB_NL}"
   StrCpy ${L_MESSAGE} "corrupt"
   DetailPrint "$(^Skipped)${L_UNDOFILE}"
   Goto quit_restore
@@ -6065,7 +6077,7 @@ quit_restore:
   StrCpy ${L_TEMP} "failure"
 
 save_result:
-  FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}$\r$\n$\r$\n"
+  FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}${MB_NL}${MB_NL}"
   FileClose ${L_ERRORLOG}
   DetailPrint "$(PFI_LANG_UN_LOG_CLOSED): ${L_UNDOFILE}"
   FlushINI "$G_USERDIR\${L_UNDOFILE}"
@@ -6192,11 +6204,11 @@ check_if_running:
   IsWindow ${L_TEMP} 0 restore_eudora
 
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EUD)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_4)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_5)\
-             $\r$\n$\r$\n\
+             ${MB_NL}${MB_NL}\
              $(PFI_LANG_MBCLIENT_STOP_6)"\
              IDABORT nothing_to_restore IDRETRY check_if_running
 
@@ -6208,11 +6220,11 @@ restore_eudora:
   FileOpen  ${L_ERRORLOG} "$G_USERDIR\${L_UNDOFILE}.errors.txt" a
   FileSeek  ${L_ERRORLOG} 0 END
   FileWrite ${L_ERRORLOG} "Time  : ${L_TEMP}\
-      $\r$\n\
+      ${MB_NL}\
       Action: ${L_MESSAGE}\
-      $\r$\n\
+      ${MB_NL}\
       User  : $G_WINUSERNAME\
-      $\r$\n"
+      ${MB_NL}"
 
   DetailPrint "$(PFI_LANG_UN_LOG_OPENED): ${L_UNDOFILE}"
   ClearErrors
@@ -6306,20 +6318,20 @@ log_port_restore:
 
 foreign_eudora_undo:
   WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (different user)"
-  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (different user)$\r$\n"
+  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (different user)${MB_NL}"
   StrCpy ${L_MESSAGE} "foreign"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_eudora_undo
 
 eudora_undo_not_valid:
   WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (data no longer valid)"
-  FileWrite ${L_ERRORLOG} "Alert : [Undo-${L_INDEX}] (data no longer valid)$\r$\n"
+  FileWrite ${L_ERRORLOG} "Alert : [Undo-${L_INDEX}] (data no longer valid)${MB_NL}"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_eudora_undo
 
 skip_eudora_undo:
   WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (undo data incomplete)"
-  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (undo data incomplete)$\r$\n"
+  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (undo data incomplete)${MB_NL}"
   StrCpy ${L_MESSAGE} "corrupt"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
 
@@ -6328,7 +6340,7 @@ next_eudora_undo:
   IntCmp ${L_INDEX} 0 quit_restore quit_restore read_eudora_undo_entry
 
 eudora_restore_corrupt:
-  FileWrite ${L_ERRORLOG} "Error : [History] data corrupted$\r$\n"
+  FileWrite ${L_ERRORLOG} "Error : [History] data corrupted${MB_NL}"
   StrCpy ${L_MESSAGE} "corrupt"
   DetailPrint "$(^Skipped)${L_UNDOFILE}"
   Goto quit_restore
@@ -6343,7 +6355,7 @@ quit_restore:
   StrCpy ${L_TEMP} "failure"
 
 save_result:
-  FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}$\r$\n$\r$\n"
+  FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}${MB_NL}${MB_NL}"
   FileClose ${L_ERRORLOG}
   DetailPrint "$(PFI_LANG_UN_LOG_CLOSED): ${L_UNDOFILE}"
   FlushINI "$G_USERDIR\${L_UNDOFILE}"
