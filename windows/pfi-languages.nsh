@@ -2,9 +2,9 @@
 #
 # pfi-languages.nsh --- This 'include' file lists the non-English languages currently
 #                       supported by the POPFile Windows installer and its associated
-#                       utilties. This makes maintenance easier.
+#                       utilities. This makes maintenance easier.
 #
-# Copyright (c) 2004 John Graham-Cumming
+# Copyright (c) 2004-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -104,9 +104,9 @@
 
   ; Entries will appear in the drop-down list of languages in the order given below
   ; (the order used here ensures that the list entries appear in alphabetic order).
-  
+
   ; It is assumed that !insertmacro PFI_LANG_LOAD "English" has been used to define "English"
-  ; before including this file (which is why "English" does not appear in the list below). 
+  ; before including this file (which is why "English" does not appear in the list below).
 
   ; NOTE: The order used here assumes that the NSIS MUI 'Japanese.nsh' language file has
   ; been patched to use 'Nihongo' instead of 'Japanese' [see 'SMALL NSIS PATCH REQUIRED' above]
