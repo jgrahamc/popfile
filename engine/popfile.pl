@@ -143,14 +143,23 @@ sub http_ok
     my $update_check = ''; 
 
     # Check to see if we've checked for updates today.  If we have not then insert a reference to an image
-    # that is generated through a CGI on UseTheSource.
-    if ( $configuration{update_check} ) {
-        if ( $today ne $configuration{last_update_check} ) {
-            calculate_today();
+    # that is generated through a CGI on UseTheSource.  Also send stats to the same site if that is allowed
+    if ( $today ne $configuration{last_update_check} ) {
+        calculate_today();
+        
+        if ( $configuration{update_check} ) {
             $update_check = "<a href=http://sourceforge.net/project/showfiles.php?group_id=63137><img border=0 src=http://www.usethesource.com/cgi-bin/popfile_update.pl?ma=$major_version&mi=$minor_version&bu=$build_version></a>";
-            $configuration{last_update_check} = $today;
         }
+        
+        if ( $configuration{send_stats} ) {
+            my @buckets = keys %{$classifier->{total}};
+            my $bc      = $#buckets + 1;
+            $update_check .= "<img border=0 src=http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=$bc&mc=$configuration{mcount}&ec=$configuration{ecount}>";
+        }
+
+        $configuration{last_update_check} = $today;
     }
+
     
     my $refresh = ($selected != -1)?"<META HTTP-EQUIV=Refresh CONTENT=600>":"";
     
@@ -369,6 +378,7 @@ sub security_page
     $configuration{localpop}     = $form{localpop} - 1     if ( defined($form{localpop}) );
     $configuration{localui}      = $form{localui} - 1      if ( defined($form{localui}) );
     $configuration{update_check} = $form{update_check} - 1 if ( defined($form{update_check}) );
+    $configuration{send_stats}   = $form{send_stats} - 1   if ( defined($form{send_stats}) );
 
     if ( defined($form{sport}) ) {
         if ( ( $form{sport} >= 1 ) && ( $form{sport} < 65536 ) ) {
@@ -392,12 +402,20 @@ sub security_page
     } else {
         $body .= "<b>Yes</b> <a href=/security?localui=2&session=$session_key><font color=blue>[Change to No (Stealth Mode)]</font></a> ";
     } 
+   
     $body .= "<p><hr><h2>Automatic Update Checking</h2><p><b>Check daily for updates to POPFile:</b><br>";
     if ( $configuration{update_check} == 1 ) {
         $body .= "<b>Yes</b> <a href=/security?update_check=1&session=$session_key><font color=blue>[Change to No]</font></a> ";
     } else {
         $body .= "<b>No</b> <a href=/security?update_check=2&session=$session_key><font color=blue>[Change to Yes]</font></a> ";
     } 
+    $body .= "<p><hr><h2>Reporting Statistics</h2><p><b>Send statistics back to John daily:</b><br>";
+    if ( $configuration{send_stats} == 1 ) {
+        $body .= "<b>Yes</b> <a href=/security?send_stats=1&session=$session_key><font color=blue>[Change to No]</font></a> ";
+    } else {
+        $body .= "<b>No</b> <a href=/security?send_stats=2&session=$session_key><font color=blue>[Change to Yes]</font></a> ";
+    } 
+    $body .= "<p>(With this turned up POPFile sends once per day the following three values to a script on www.usethesource.com: bc (the total number of buckets that you have), mc (the total number of messages that POPFile has classified) and ec (the total number of classification errors).  These get stored in a file and I will use this to publish some statistics about how people use POPFile and how well it works.  My web server keeps its log files for about 5 days and then they get deleted; I am not storing any connection between the statistics and individual IP addresses.)";
 
     $body .= "<p><hr><h2>User Interface Password</h2><p><form action=/security><b>Password:</b> <br><input name=password type=text value=$configuration{password}> <input type=submit class=submit name=update_server value=Apply> <input type=hidden name=session value=$session_key></form>";    
     $body .= "Updated password to $configuration{password}" if ( defined($form{password}) );
@@ -2524,6 +2542,7 @@ $configuration{subject}                     = 1;
 $configuration{xtc}                         = 1;
 $configuration{xpl}                         = 1;
 $configuration{update_check}                = 1;
+$configuration{send_stats}                  = 0;
 $configuration{server}                      = '';
 $configuration{sport}                       = 110;
 $configuration{page_size}                   = 20;
