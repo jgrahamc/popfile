@@ -829,12 +829,16 @@ sub popfile_homepage
     $body .= "<p><hr><h2>TCP Connection Timeout</h2><p><form action=/configuration><b>TCP connection timeout in seconds:</b> <br><input name=timeout type=text value=$configuration{timeout}><input type=submit name=update_timeout value=Apply><input type=hidden name=session value=$session_key></form>$timeout_error";    
     $body .= "Updated TCP connection timeout to $configuration{timeout}" if ( $form{update_timeout} eq 'Apply' );
     $body .= "<p><hr><h2>Classification Insertion</h2><p><b>Subject line modification:</b><br>";    
-    $body .= "<b>" if ( $configuration{subject} == 0 );
-    $body .= "<a href=/configuration?subject=1&session=$session_key><font color=blue>Off</font></a> ";
-    $body .= "</b>" if ( $configuration{subject} == 0 );
-    $body .= "<b>" if ( $configuration{subject} == 1 );
-    $body .= "<a href=/configuration?subject=2&session=$session_key><font color=blue>On</font></a> ";
-    $body .= "</b>" if ( $configuration{subject} == 1 );
+    if ( $configuration{subject} == 1 ) 
+    {
+        $body .= "<a href=/configuration?subject=1&session=$session_key><font color=blue>Off</font></a> ";
+        $body .= "<b>On</b>";
+    } 
+    else
+    {
+        $body .= "<b>Off</b> ";
+        $body .= "<a href=/configuration?subject=2&session=$session_key><font color=blue>On</font></a>";
+    }
     $body .= "<hr><h2>Logging</h2><b>Logger output:</b><br>";
     $body .= "<b>" if ( $configuration{debug} == 0 );
     $body .= "<a href=/configuration?debug=1&session=$session_key><font color=blue>None</font></a> ";
@@ -1113,27 +1117,15 @@ sub corpus_page
         $body .= "><td><a href=/buckets?session=$session_key&showbucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td align=right>$number<td>&nbsp;";
         if ( $configuration{subject} == 1 ) 
         {
-            $body .= "<td><a href=/buckets?session=$session_key&bucket=$bucket&subject=1>";
+            $body .= "<td>";
             if ( $classifier->{parameters}{$bucket}{subject} == 0 ) 
             {
-                $body .= "<b>";
+                $body .= "<b>Off</b> <a href=/buckets?session=$session_key&bucket=$bucket&subject=2>On</a>";            
             }
-            $body .= "Off";
-            if ( $classifier->{parameters}{$bucket}{subject} == 0 ) 
+            else
             {
-                $body .= "</b>";
+                $body .= "<a href=/buckets?session=$session_key&bucket=$bucket&subject=1>Off</a> <b>On</a>";
             }
-            $body .= "</a> <a href=/buckets?session=$session_key&bucket=$bucket&subject=2>";
-            if ( $classifier->{parameters}{$bucket}{subject} == 1 ) 
-            {
-                $body .= "<b>";
-            }
-            $body .= "On"; 
-            if ( $classifier->{parameters}{$bucket}{subject} == 1 ) 
-            {
-                $body .= "</b>";
-            }
-            $body .= "</a>";
         } 
         else
         {
