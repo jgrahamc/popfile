@@ -2,8 +2,8 @@
 ; Copyright (c) 2001-2003 John Graham-Cumming
 ;
 
-!define MUI_PRODUCT "POPFile TEST VERSION" 
-!define MUI_VERSION "0.XX TEST VERSION DO NOT DISTRIBUTE"
+!define MUI_PRODUCT "POPFile" 
+!define MUI_VERSION "0.18.0 (RC1)"
 
 !include "${NSISDIR}\Contrib\Modern UI\System.nsh"
 
@@ -18,12 +18,12 @@
   
   !define MUI_CUSTOMPAGECOMMANDS
     
-  !define POP3    $R0
-  !define GUI     $R1
-  !define STARTUP $R2
-  !define CFG     $R3
-  !define LNE     $R4
-  !define CMPRE   $R5
+  !define POP3    $0
+  !define GUI     $1
+  !define STARTUP $2
+  !define CFG     $3
+  !define LNE     $4
+  !define CMPRE   $5
   
   ;Language
   !insertmacro MUI_LANGUAGE "English"
