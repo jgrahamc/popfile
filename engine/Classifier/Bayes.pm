@@ -101,8 +101,9 @@ sub new
     $self->{magnets__}           = {};
     $self->{magnet_count__}      = 0;
 
-    # The unclassified cutoff probability
-    $self->{unclassified__}      = 0.5;
+    # The unclassified cutoff this value means that the top probabilily must be n times greater than the
+    # second probability, default is 100 times more likely
+    $self->{unclassified__}      = log(100);
 
     # Used to tell the caller whether a magnet was used in the last
     # mail classification
@@ -129,8 +130,9 @@ sub initialize
 {
     my ( $self ) = @_;
 
-    # No default unclassified probability
-    $self->config_( 'unclassified_probability', 0 );
+    # No default unclassified weight is the number of times more sure POPFile
+    # must be of the top class vs the second class, default is 100 times more
+    $self->config_( 'unclassified_weight', 100 );
 
     # The corpus is kept in the 'corpus' subfolder of POPFile
     $self->config_( 'corpus', 'corpus' );
@@ -164,12 +166,7 @@ sub start
 {
     my ( $self ) = @_;
 
-    if ( $self->config_( 'unclassified_probability' ) != 0 )  {
-        $self->{unclassified__} = $self->config_( 'unclassified_probability' );
-    }
-
-    $self->{unclassified__} = log($self->{unclassified__});
-
+    $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
     $self->load_word_matrix_();
 
     return 1;
@@ -519,6 +516,12 @@ sub load_bucket_
                 my $word  = $1;
                 my $value = $2;
                 if ( $value > 0 )  {
+
+                    # Here we do a simple "add one" smoothing on the data being
+                    # loaded
+
+                    $value += 1;
+
                     $self->{total__}{$bucket}        += $value;
                     $self->{unique__}{$bucket}       += 1;
                     set_value_( $self, $bucket, $word, $value );
@@ -805,9 +808,9 @@ sub classify
     # If no bucket has a probability better than 0.5, call the message "unclassified".
     my $class = 'unclassified';
 
-    # if ( ( $total != 0 ) && ( $score{$ranking[0]} > $self->{unclassified__} + log($total) ) ) {
+    if ( $score{$ranking[0]} > ( $score{$ranking[1]} + $self->{unclassified__} ) ) {
         $class = $ranking[0];
-    # }
+    }
 
     return $class;
 }
