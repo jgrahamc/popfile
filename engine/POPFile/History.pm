@@ -708,6 +708,37 @@ sub delete_slot
 
 #----------------------------------------------------------------------------
 #
+# start_deleting
+#
+# Called before doing a block of calls to delete_slot.  This will call
+# back into the Classifier::Bayes to tweak the database performance to
+# make this quick.
+#
+#----------------------------------------------------------------------------
+sub start_deleting
+{
+    my ( $self ) = @_;
+
+    $self->db__()->tweak_sqlite( 1, 1 );
+}
+
+#----------------------------------------------------------------------------
+#
+# stop_deleting
+#
+# Called after doing a block of calls to delete_slot.  This will call
+# back into the Classifier::Bayes to untweak the database performance.
+#
+#----------------------------------------------------------------------------
+sub stop_deleting
+{
+    my ( $self ) = @_;
+
+    $self->db__()->tweak_sqlite( 1, 0 );
+}
+
+#----------------------------------------------------------------------------
+#
 # get_slot_file
 #
 # Used to map a slot ID to the full path of the file will contain
@@ -994,6 +1025,8 @@ sub delete_query
 {
     my ( $self, $id ) = @_;
 
+    $self->start_deleting();
+
     my $delete = $self->{queries__}{$id}{base};
     $delete =~ s/XXX/history.id/;
     my $d = $self->db__()->prepare( $delete );
@@ -1006,6 +1039,8 @@ sub delete_query
     foreach my $id (@ids) {
         $self->delete_slot( $id, 1 );
     }
+
+    $self->stop_deleting();
 }
 
 #----------------------------------------------------------------------------

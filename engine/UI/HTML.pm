@@ -2281,12 +2281,14 @@ sub history_page
         # Remove the list of marked messages using the array of
         # "remove" checkboxes
 
+        $self->{history__}->start_deleting();
         for my $i ( keys %{$self->{form_}} ) {
             if ( $i =~ /^rowid_(\d+)$/ ) {
                 $self->log_( 1, "clearpage $i" );
                 $self->{history__}->delete_slot( $1 );
             }
         }
+        $self->{history__}->stop_deleting();
     }
 
     if ( defined( $self->{form_}{clearchecked} ) ) {
@@ -2294,6 +2296,7 @@ sub history_page
         # Remove the list of marked messages using the array of
         # "remove" checkboxes
 
+        $self->{history__}->start_deleting();
         for my $i ( keys %{$self->{form_}} ) {
             if ( $i =~ /^remove_(\d+)$/ ) {
                 my $slot = $1;
@@ -2303,6 +2306,7 @@ sub history_page
                 }
             }
         }
+        $self->{history__}->stop_deleting();
     }
 
     # Handle clearing the history files, there are two options here,

@@ -251,7 +251,8 @@ sub child__
                 my $ssl = defined( $options ) && ( $options =~ /ssl/i );
                 $port = 110 if ( !defined( $port ) );
 
-                if ( $mail = $self->verify_connected_( $mail, $client, $host, $port, $ssl ) )  {
+                if ( $mail = $self->verify_connected_( $mail, $client,
+                                 $host, $port, $ssl ) )  {
 
                     if ( defined( $options ) && ( $options =~ /apop/i ) ) {
 

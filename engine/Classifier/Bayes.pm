@@ -399,6 +399,32 @@ sub backup_database__
 
 #----------------------------------------------------------------------------
 #
+# tweak_sqlite
+#
+# Called when a module wants is to tweak access to the SQLite database.
+#
+# $tweak    The tweak to apply (a bit in the sqlite_tweaks mask)
+# $state    1 to enable the tweak, 0 to disable
+#
+#----------------------------------------------------------------------------
+sub tweak_sqlite
+{
+    my ( $self, $tweak, $state ) = @_;
+
+    if ( $self->{db_is_sqlite__} && 
+         ( $self->config_( 'sqlite_tweaks' ) & $tweak ) ) {
+
+        $self->log_( 1, "Performing tweak $tweak to $state" );
+
+        if ( $tweak == 1 ) {
+            $self->{db__}->do( 'pragma synchronous=' .
+                               $state?'OFF':'NORMAL' . ';' );
+        }    
+    }
+}
+
+#----------------------------------------------------------------------------
+#
 # reclassified
 #
 # Called to inform the module about a reclassification from one bucket
