@@ -1222,7 +1222,7 @@ name_exists:
   StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} $\"${CBP_L_CREATE_NAME}$\" ${CBP_L_TEMP}"
   StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBDUPERR_3)"
   StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}"
-  MessageBox MB_OK "${CBP_L_RESULT}"
+  MessageBox MB_OK|MB_ICONEXCLAMATION "${CBP_L_RESULT}"
   goto get_next_bucket_cmd
 
 too_many:
@@ -1233,7 +1233,7 @@ too_many:
   StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP} ${CBP_C_MAX_BNCOUNT}"
   StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAXERR_2)"
   StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}"
-  MessageBox MB_OK "${CBP_L_RESULT}"
+  MessageBox MB_OK|MB_ICONEXCLAMATION "${CBP_L_RESULT}"
   goto get_next_bucket_cmd
 
 bad_name:
@@ -1244,7 +1244,7 @@ bad_name:
   StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}$\n$\n"
   StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBNAMERR_4)"
   StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}"
-  MessageBox MB_OK "${CBP_L_RESULT}"
+  MessageBox MB_OK|MB_ICONEXCLAMATION "${CBP_L_RESULT}"
   goto get_next_bucket_cmd
 
 no_user_input:
@@ -1257,18 +1257,18 @@ no_user_input:
   StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}"
   StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBDONE_3)"
   StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}"
-  MessageBox MB_YESNO "${CBP_L_RESULT}" IDYES finished_buckets
+  MessageBox MB_YESNO|MB_ICONQUESTION "${CBP_L_RESULT}" IDYES finished_buckets
   goto get_next_bucket_cmd
 
 need_buckets:
   StrCpy ${CBP_L_RESULT} "$(PFI_LANG_CBP_MBCONTERR_1)"
   StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBCONTERR_2)"
   StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}"
-  MessageBox MB_OK "${CBP_L_RESULT}"
+  MessageBox MB_OK|MB_ICONEXCLAMATION "${CBP_L_RESULT}"
   goto get_next_bucket_cmd
 
 too_few:
-  MessageBox MB_OK "$(PFI_LANG_CBP_MBCONTERR_3)"
+  MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_CBP_MBCONTERR_3)"
   goto get_next_bucket_cmd
 
 get_next_bucket_cmd:
@@ -1289,7 +1289,7 @@ finished_buckets:
   StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}$\n$\n"
   StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAKERR_4)"
   StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}"
-  MessageBox MB_OK "${CBP_L_RESULT}"
+  MessageBox MB_OK|MB_ICONEXCLAMATION "${CBP_L_RESULT}"
 
 finished_now:
   StrCpy ${CBP_L_RESULT} "completed"
