@@ -278,24 +278,54 @@ slashconversion:
   Push ${L_CORPUS}
   Call un.StrBackSlash            ; ensure corpus path uses backslashes
   Pop ${L_CORPUS}
-  
-  GetFullPathName ${L_TEMP} ".\"
-  
-  ; Ensure relative paths are handled properly (${L_SOURCE} holds path to 'popfile.cfg' file)
-  
-  SetOutPath "${L_SOURCE}"
-  GetFullPathName ${L_RESULT} "${L_CORPUS}"
- 
-  SetOutPath "${L_TEMP}"
-  
-  ; If 'corpus' path parameter was not valid, GetFullPathName returns ""
-  
-  StrCmp ${L_RESULT} "" use_default_locn got_path
+
+  StrCpy ${L_TEMP} ${L_CORPUS} 2
+  StrCmp ${L_TEMP} ".\" sub_folder
+  StrCmp ${L_TEMP} "\\" got_path
+
+  StrCpy ${L_TEMP} ${L_CORPUS} 3
+  StrCmp ${L_TEMP} "..\" relative_folder
+
+  StrCpy ${L_TEMP} ${L_CORPUS} 1
+  StrCmp ${L_TEMP} "\" instdir_drive
+
+  StrCpy ${L_TEMP} ${L_CORPUS} 1 1
+  StrCmp ${L_TEMP} ":" got_path
+
+  ; Assume path can be safely added to $INSTDIR
+
+  StrCpy ${L_CORPUS} $INSTDIR\${L_CORPUS}
+  Goto got_path
+
+sub_folder:
+  StrCpy ${L_CORPUS} ${L_CORPUS} "" 2
+  StrCpy ${L_CORPUS} $INSTDIR\${L_CORPUS}
+  Goto got_path
+
+relative_folder:
+  StrCpy ${L_RESULT} $INSTDIR
+
+relative_again:
+  StrCpy ${L_CORPUS} ${L_CORPUS} "" 3
+  Push ${L_RESULT}
+  Call un.GetParent
+  Pop ${L_RESULT}
+  StrCpy ${L_TEMP} ${L_CORPUS} 3
+  StrCmp ${L_TEMP} "..\" relative_again
+  StrCpy ${L_CORPUS} ${L_RESULT}\${L_CORPUS}
+  Goto got_path
+
+instdir_drive:
+  StrCpy ${L_TEMP} $INSTDIR 2
+  StrCpy ${L_CORPUS} ${L_TEMP}${L_CORPUS}
+  Goto got_path
 
 use_default_locn:
-  StrCpy ${L_RESULT} "${L_SOURCE}\corpus"
+  StrCpy ${L_CORPUS} ${L_SOURCE}\corpus
 
 got_path:
+  StrCpy ${L_RESULT} ${L_CORPUS}
+
   Pop ${L_TEMP}
   Pop ${L_FILE_HANDLE}
   Pop ${L_CORPUS}
@@ -354,6 +384,50 @@ done:
   StrCpy $R0 $R1
 
 nothing_to_do:
+  Pop $R2
+  Pop $R1
+  Exch $R0
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Function: un.GetParent
+#
+# This function is used by the uninstaller when it looks for the corpus files for the version
+# of POPFile which is being upgraded. It extracts the parent directory from a given path.
+#
+# NB: Path is assumed to use backslashes (\)
+#
+# Inputs:
+#         (top of stack)          - string containing a path (e.g. C:\A\B\C)
+#
+# Outputs:
+#         (top of stack)          - the parent part of the input string (e.g. C:\A\B)
+#
+#  Usage Example:
+#         Push "C:\Program Files\Directory\Whatever"
+#         Call un.GetParent
+#         Pop $R0
+#
+#         ($R0 at this point is ""C:\Program Files\Directory")
+#
+#--------------------------------------------------------------------------
+
+Function un.GetParent
+  Exch $R0
+  Push $R1
+  Push $R2
+
+  StrCpy $R1 -1
+
+loop:
+  StrCpy $R2 $R0 1 $R1
+  StrCmp $R2 "" exit
+  StrCmp $R2 "\" exit
+  IntOp $R1 $R1 - 1
+  Goto loop
+
+exit:
+  StrCpy $R0 $R0 $R1
   Pop $R2
   Pop $R1
   Exch $R0
