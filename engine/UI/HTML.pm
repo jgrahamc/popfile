@@ -2946,7 +2946,7 @@ sub mcount__
 
     my $count = 0;
 
-    my @buckets = $self->{c__}->get_buckets( $self->{api_session__} );
+    my @buckets = $self->{c__}->get_all_buckets( $self->{api_session__} );
 
     foreach my $bucket (@buckets) {
         $count += $self->get_bucket_parameter__( $bucket, 'count' );
@@ -2961,7 +2961,7 @@ sub ecount__
 
     my $count = 0;
 
-    my @buckets = $self->{c__}->get_buckets( $self->{api_session__} );
+    my @buckets = $self->{c__}->get_all_buckets( $self->{api_session__} );
 
     foreach my $bucket (@buckets) {
         $count += $self->get_bucket_parameter__( $bucket, 'fncount' );
