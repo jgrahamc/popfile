@@ -116,21 +116,22 @@
                         </td>
                     </tr>
 
+                    <tr>
+                        <td>
+                        </td>
+                    </tr>
+
                     <TMPL_IF NAME="View_If_Class_Changed">
 
                     <tr valign="top">
-                        <td>
+                        <td colspan="2">
                             <font size="+1">
                                 <b>
-                                    <TMPL_VAR NAME="Localize_History_ChangedClass">:
+                                    <TMPL_VAR NAME="Localize_History_ChangedClass">
+                                    <span style="color:<TMPL_VAR NAME="View_Class_Changed_Color">">
+                                        <TMPL_VAR NAME="View_Class_Changed">
+                                    </span>
                                 </b>
-                            </font>
-                        </td>
-                        <td>
-                            <font size="+1">
-                                <span style="color:<TMPL_VAR NAME="View_Class_Changed_Color">">
-                                    <TMPL_VAR NAME="View_Class_Changed">
-                                </span>
                             </font>
                         </td>
                     </tr>
@@ -141,14 +142,13 @@
 
                         <TMPL_IF NAME="View_If_Reclassified">
 
-                        <td>
+                        <td colspan="2">
                             <font size="+1">
                                 <b>
                                     <TMPL_VAR NAME="View_Already">
                                 </b>
                             </font>
-                        </td>
-                        <td>
+
                             <input type="submit" class="undoButton" name="undo_<TMPL_VAR NAME="View_Index">" value="<TMPL_VAR NAME="Localize_Undo">">
                         </td>
 
@@ -156,14 +156,13 @@
 
                         <TMPL_IF NAME="View_If_Magnetized">
 
-                        <td>
+                        <td colspan="2">
                             <font size="+1">
                                 <b>
                                     <TMPL_VAR NAME="Localize_History_MagnetUsed">:
                                 </b>
                             </font>
-                        </td>
-                        <td>
+
                             <font size="+1">
                                 <TMPL_VAR NAME="View_Magnet">
                             </font>
@@ -171,14 +170,13 @@
 
                         <TMPL_ELSE>
 
-                        <td>
+                        <td colspan="2">
                            <font size="+1">
                                 <b>
                                     <TMPL_VAR NAME="Localize_History_ShouldBe">:
                                 </b>
                             </font>
-                        </td>
-                        <td>
+
                             <select name="reclassify_<TMPL_VAR NAME="View_Index">">
                                 <option selected="selected"></option>
 

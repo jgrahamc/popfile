@@ -4,12 +4,11 @@
 <TMPL_IF NAME="If_Show_Bucket_Help">
 
 <div class="helpMessage">
-    <p>
+    <form method="post" action="/buckets">
         <TMPL_VAR NAME="Localize_Help_Bucket_Setup">
-    </p>
-    <form method="post" action="/history">
         <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-        <input type="submit" name="nomore_bucket_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
+        <p />
+        <input type="submit" class="submit" name="nomore_bucket_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
     </form>
 </div>
 
@@ -18,12 +17,11 @@
 <TMPL_IF NAME="If_Show_Training_Help">
 
 <div class="helpMessage">
-    <p>
+    <form method="post" action="/buckets">
         <TMPL_VAR NAME="Localize_Help_Training">
-    </p>
-    <form method="post" action="/history">
         <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-        <input type="submit" name="nomore_training_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
+        <p />
+        <input type="submit" class="submit" name="nomore_training_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
     </form>
 </div>
 
@@ -44,7 +42,8 @@
 <table width="100%" summary="">
     <tr>
         <td align="left">
-            <h2 class="history"><TMPL_VAR NAME="Localize_History_Title"> (<TMPL_VAR NAME="History_Count">) </h2><input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" />
+            <h2 class="history"><TMPL_VAR NAME="Localize_History_Title"> (<TMPL_VAR NAME="History_Count">) </h2>
+            <input type="submit" class="submit removeButton" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" />
         </td>
         <td class="historyNavigatorTop">
 
@@ -155,22 +154,22 @@
             </td>
             <TMPL_IF NAME="History_If_inserted">
             <td>
-                <a title="<TMPL_VAR NAME="History_Arrived" ESCAPE=HTML>"><TMPL_VAR NAME="History_Arrived" ESCAPE=HTML></a>
+                <span title="<TMPL_VAR NAME="History_Arrived" ESCAPE=HTML>"><TMPL_VAR NAME="History_Arrived" ESCAPE=HTML></span>
             </td>
             </TMPL_IF>
             <TMPL_IF NAME="History_If_from">
             <td>
-                <a title="<TMPL_VAR NAME="History_From" ESCAPE=HTML>"><TMPL_VAR NAME="History_Short_From" ESCAPE=HTML></a>
+                <span title="<TMPL_VAR NAME="History_From" ESCAPE=HTML>"><TMPL_VAR NAME="History_Short_From" ESCAPE=HTML></span>
             </td>
             </TMPL_IF>
             <TMPL_IF NAME="History_If_to">
             <td>
-                <a title="<TMPL_VAR NAME="History_To" ESCAPE=HTML>"><TMPL_VAR NAME="History_Short_To" ESCAPE=HTML></a>
+                <span title="<TMPL_VAR NAME="History_To" ESCAPE=HTML>"><TMPL_VAR NAME="History_Short_To" ESCAPE=HTML></span>
             </td>
             </TMPL_IF>
             <TMPL_IF NAME="History_If_cc">
             <td>
-                <a title="<TMPL_VAR NAME="History_Cc" ESCAPE=HTML>"><TMPL_VAR NAME="History_Short_Cc" ESCAPE=HTML></a>
+                <span title="<TMPL_VAR NAME="History_Cc" ESCAPE=HTML>"><TMPL_VAR NAME="History_Short_Cc" ESCAPE=HTML></span>
             </td>
             </TMPL_IF>
             <TMPL_IF NAME="History_If_subject">
@@ -182,7 +181,7 @@
             </TMPL_IF>
             <TMPL_IF NAME="History_If_date">
             <td>
-                <a title="<TMPL_VAR NAME="History_Date" ESCAPE=HTML>"><TMPL_VAR NAME="History_Date"></a>
+                <span title="<TMPL_VAR NAME="History_Date" ESCAPE=HTML>"><TMPL_VAR NAME="History_Date"></span>
             </td>
             </TMPL_IF>
             <TMPL_IF NAME="History_If_bucket">
@@ -220,7 +219,7 @@
                 <TMPL_ELSE>
 
                 <TMPL_IF NAME="History_If_Magnetized">
-                    <img title="<TMPL_VAR NAME="History_Magnet">" src="/skins/default/magnet.png">&nbsp;<TMPL_VAR NAME="History_Magnet">
+                    <img title="<TMPL_VAR NAME="History_Magnet">" alt="<TMPL_VAR NAME="History_Magnet">" src="/skins/default/magnet.png">
                 <TMPL_ELSE>
 
                 <select name="reclassify_<TMPL_VAR NAME="History_I">">
@@ -262,8 +261,8 @@
         </tr>
         <tr>
             <td colspan="<TMPL_VAR NAME="History_Colspan">">
-                <input type="submit" class="submit" name="clearpage" value="<TMPL_VAR NAME="Localize_History_RemovePage">" />
-                <input type="submit" class="submit" name="clearchecked" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" />
+                <input type="submit" class="submit removeButton" name="clearpage" value="<TMPL_VAR NAME="Localize_History_RemovePage">" />
+                <input type="submit" class="submit removeButton" name="clearchecked" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" />
 
             </td>
             <td>

@@ -1,11 +1,8 @@
-<table border="0" cellpadding="0" cellspacing="0" summary="">
-    <tr>
-        <td nowrap="nowrap">
-            <span class="securityLabel">
-                <TMPL_VAR NAME="Localize_Security_POP3">:
-            </span>
-            <br />
             <form class="securitySwitch" action="/security" method="post">
+                <div class="securityLabel">
+                    <TMPL_VAR NAME="Localize_Security_POP3">:
+                </div>
+
                 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
                 <TMPL_IF NAME="POP3_Security_Local">
@@ -27,6 +24,3 @@
                 </TMPL_IF>
 
             </form>
-        </td>
-    </tr>
-</table>

@@ -13,9 +13,6 @@
                         <td class="head"><TMPL_VAR NAME="Localize_Header_Title"></td>
                         <td class="headShutdown" align="right" valign="bottom"><a class="shutdownLink" href="/shutdown"><TMPL_VAR NAME="Localize_Header_Shutdown"></a>&nbsp;</td>
                     </tr>
-                    <tr>
-                        <td height="1%" colspan="3"></td>
-                    </tr>
                 </table>
             </td>
             <td class="shellRight"></td>

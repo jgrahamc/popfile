@@ -37,6 +37,6 @@
             <a class="bottomLink" href="http://sourceforge.net/forum/forum.php?forum_id=213876"><TMPL_VAR NAME="Localize_Footer_FeedMe"></a>
         </td>
     </tr>
-</table>
+    </table>
 </body>
 </html>

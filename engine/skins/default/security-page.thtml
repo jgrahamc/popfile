@@ -1,18 +1,16 @@
 <TMPL_INCLUDE NAME="common-top.thtml">
 <TMPL_INCLUDE NAME="common-middle.thtml">
 
-<table class="settingsTable" width="100%" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Security_MainTableSummary">">
+<table class="settingsTable" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Security_MainTableSummary">">
     <tr>
         <td class="settingsPanel" width="50%" valign="top">
-            <h2 class="security"><TMPL_VAR NAME="Localize_Security_Stealth"></h2>
-            <table border="0" cellpadding="0" cellspacing="0" summary="">
-                <tr>
-                    <td>
-                        <span class="securityLabel">
-                            <TMPL_VAR NAME="Localize_Security_UI">:
-                        </span>
-                        <br />
+            <div class="securityServerWidget">
+                 <h2 class="security"><TMPL_VAR NAME="Localize_Security_Stealth"></h2>
                         <form class="securitySwitch" action="/security" method="post">
+                            <div class="securityLabel">
+                                <TMPL_VAR NAME="Localize_Security_UI">:
+                            </div>
+
                             <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
                             <TMPL_IF NAME="Security_If_Local">
@@ -28,25 +26,24 @@
                             <span class="securityWidgetStateOn">
                                 <TMPL_VAR NAME="Localize_Yes">
                             </span>
-                            <input type="submit" class="toggleOff" id="securityAcceptHTTPOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" /> <TMPL_VAR NAME="Localize_Security_StealthMode">
+                            <input type="submit" class="toggleOff" id="securityAcceptHTTPOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo"> <TMPL_VAR NAME="Localize_Security_StealthMode">" />
                             <input type="hidden" name="localui" value="2" />
 
                             </TMPL_IF>
 
                         </form>
                         <TMPL_VAR NAME="Security_Dynamic_Security">
-                    </td>
-                </tr>
-            </table>
-            <hr />
-            <h2 class="security"><TMPL_VAR NAME="Localize_Security_AUTHTitle"></h2>
+                 <hr />
+            </div>
+
             <div class="securityAuthWidgets">
+                <h2 class="security"><TMPL_VAR NAME="Localize_Security_AUTHTitle"></h2>
                 <TMPL_VAR NAME="Security_Dynamic_Chain">
             </div>
         </td>
-        <td class="settingsPanel" width="50%" valign="top" >
-            <h2 class="security"><TMPL_VAR NAME="Localize_Security_PasswordTitle"></h2>
+        <td class="settingsPanel" width="50%" valign="top">
             <div class="securityPassWidget">
+                <h2 class="security"><TMPL_VAR NAME="Localize_Security_PasswordTitle"></h2>
                 <form action="/security" method="post">
                     <label class="securityLabel" for="securityPassword">
                         <TMPL_VAR NAME="Localize_Security_Password">:
@@ -63,17 +60,15 @@
 
                 </TMPL_IF>
 
+                <hr />
             </div>
-            <hr />
-            <h2 class="security"><TMPL_VAR NAME="Localize_Security_UpdateTitle"></h2>
-            <span class="securityLabel">
-                <TMPL_VAR NAME="Localize_Security_Update">:
-            </span>
-            <br />
-            <table border="0" cellpadding="0" cellspacing="0" summary="">
-                <tr>
-                    <td>
+
+            <div class="securityUpdateWidget">
+                 <h2 class="security"><TMPL_VAR NAME="Localize_Security_UpdateTitle"></h2>
                         <form class="securitySwitch" action="/security" method="post">
+                            <div class="securityLabel">
+                                <TMPL_VAR NAME="Localize_Security_Update">:
+                            </div>
                             <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
                             <TMPL_IF NAME="Security_If_Update_Check">
@@ -93,22 +88,18 @@
                             </TMPL_IF>
 
                         </form>
-                    </td>
-                </tr>
-            </table>
-            <div class="securityExplanation">
-                <TMPL_VAR NAME="Localize_Security_ExplainUpdate">
+                 <div class="securityExplanation">
+                     <TMPL_VAR NAME="Localize_Security_ExplainUpdate">
+                 </div>
+                 <hr />
             </div>
-            <hr />
-            <h2 class="security"><TMPL_VAR NAME="Localize_Security_StatsTitle"></h2>
-            <span class="securityLabel">
-                <TMPL_VAR NAME="Localize_Security_Stats">:
-            </span>
-            <br />
-            <table border="0" cellpadding="0" cellspacing="0" summary="">
-                <tr>
-                    <td>
+
+            <div class="securityStatsWidget">
+                 <h2 class="security"><TMPL_VAR NAME="Localize_Security_StatsTitle"></h2>
                         <form class="securitySwitch" action="/security" method="post">
+                            <div class="securityLabel">
+                                <TMPL_VAR NAME="Localize_Security_Stats">:
+                            </div>
                             <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
                             <TMPL_IF NAME="Security_If_Send_Stats">
@@ -130,11 +121,9 @@
                             </TMPL_IF>
 
                         </form>
-                    </td>
-                </tr>
-            </table>
-            <div class="securityExplanation">
-                <TMPL_VAR NAME="Localize_Security_ExplainStats">
+                 <div class="securityExplanation">
+                     <TMPL_VAR NAME="Localize_Security_ExplainStats">
+                 </div>
             </div>
         </td>
     </tr>

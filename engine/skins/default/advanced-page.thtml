@@ -6,8 +6,7 @@
         <td class="settingsPanel" valign="top">
             <h2 class="advanced"><TMPL_VAR NAME="Localize_Advanced_StopWords"></h2>
             <TMPL_VAR NAME="Localize_Advanced_Message1">
-            <br />
-            <br />
+            <p />
             <table summary="<TMPL_VAR NAME="Localize_Advanced_MainTableSummary">">
 
                 <TMPL_LOOP NAME="Advanced_Loop_Word">

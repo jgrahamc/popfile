@@ -4,12 +4,11 @@
 <TMPL_IF NAME="If_Show_Bucket_Help">
 
 <div class="helpMessage">
-    <p>
-        <TMPL_VAR NAME="Localize_Help_Bucket_Setup">
-    </p>
     <form method="post" action="/buckets">
+        <TMPL_VAR NAME="Localize_Help_Bucket_Setup">
         <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-        <input type="submit" name="nomore_bucket_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
+        <p />
+        <input type="submit" class="submit" name="nomore_bucket_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
     </form>
 </div>
 
@@ -18,12 +17,11 @@
 <TMPL_IF NAME="If_Show_Training_Help">
 
 <div class="helpMessage">
-    <p>
-        <TMPL_VAR NAME="Localize_Help_Training">
-    </p>
     <form method="post" action="/buckets">
+        <TMPL_VAR NAME="Localize_Help_Training">
         <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-        <input type="submit" name="nomore_training_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
+        <p />
+        <input type="submit" class="submit" name="nomore_training_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
     </form>
 </div>
 
@@ -66,7 +64,7 @@
         <th class="bucketsLabel" scope="col" align="center">
             <TMPL_VAR NAME="Localize_Bucket_Quarantine">
         </th>
-        <th width="2%">
+        <th width="1%">
             &nbsp;
         </th>
         <th class="bucketsLabel" scope="col" align="left">
@@ -287,10 +285,6 @@
         <td align="right">
             <TMPL_VAR NAME="Corpus_Total_Unique">
         </td>
-        <td>
-        </td>
-        <td>
-        </td>
     </tr>
 </table>
 <br />
@@ -330,6 +324,7 @@
                 </tr>
                 <tr>
                     <td colspan="2">
+                        &nbsp;
                     </td>
                 </tr>
                 <tr>
@@ -535,8 +530,7 @@
                                         <TMPL_VAR NAME="Localize_Bucket_LookupMessage2">
                                         <TMPL_VAR NAME="Corpus_Word">
                                     </strong>
-                                    <br />
-                                    <br />
+                                    <p />
                                 </caption>
                                 <tr>
                                     <th scope="col">
@@ -634,9 +628,7 @@
                                 </TMPL_LOOP>
 
                             </table>
-
-                            <br />
-                            <br />
+                            <p />
                             <TMPL_VAR NAME="Corpus_Lookup_Message">
 
                         </td>

@@ -59,7 +59,7 @@
                 </select>
             </td>
             <td>
-                <input type="checkbox" class="deleteButton" name="remove<TMPL_VAR NAME="Magnet_Row_ID">" />
+                <input type="checkbox" class="checkbox" name="remove<TMPL_VAR NAME="Magnet_Row_ID">" />
                 <TMPL_VAR NAME="Localize_Remove">
                 <input name="otype<TMPL_VAR NAME="Magnet_Row_ID">" type="hidden" value="<TMPL_VAR NAME="Magnet_MType">" />
                 <input name="otext<TMPL_VAR NAME="Magnet_Row_ID">" type="hidden" value="<TMPL_VAR NAME="Magnet_Validating">" />

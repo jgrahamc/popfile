@@ -1,54 +1,52 @@
 <!--  This is the output of template imap-options.thtml -->
-<br />
+
 <form action="/configuration" method="post">
 
-    <input type="checkbox" name="imap_options_expunge" value="1" <TMPL_VAR NAME="IMAP_expunge_is_checked"> />
+    <input type="checkbox" class="checkbox" name="imap_options_expunge" value="1" <TMPL_VAR NAME="IMAP_expunge_is_checked"> />
     <label class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_Expunge">
     </label>
-    <br />
+    <p />
 
     <label class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_Interval">
     </label>
 
     <TMPL_IF NAME="IMAP_if_interval_error">
-    
+
     <blockquote>
         <div class="error01">
             <TMPL_VAR NAME="Localize_Imap_IntervalError">
         </div>
     </blockquote>
-    
+
     </TMPL_IF>
-    
+
     <br />
     <input type="text" name="imap_options_update_interval" value="<TMPL_VAR NAME="IMAP_interval">" />
-    <br />
-    
+    <p />
+
     <label class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_Bytelimit">
     </label>
     <br />
     <input name="imap_options_byte_limit" type="text" value="<TMPL_VAR NAME="IMAP_byte_limit">" />
     <br />
-    
+
     <TMPL_IF NAME="IMAP_if_bytelimit_error">
-    
+
     <blockquote>
         <div class="error01">
             <TMPL_VAR NAME="Localize_Imap_BytelimitError">
         </div>
     </blockquote>
-    
+
     </TMPL_IF>
 
-    <br />
-    <br />
+    <p />
     <input type="submit" class="submit" name="update_imap_5_options" value="<TMPL_VAR NAME="Localize_Apply">" />
     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+    <hr width="60%" align="center" />
 </form>
 
-
 <!-- End of template imap-options.thtml -->
-

@@ -1,7 +1,7 @@
 <TMPL_INCLUDE NAME="common-top.thtml">
 <TMPL_INCLUDE NAME="common-middle.thtml">
 
-<table class="settingsTable" width="100%" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Configuration_MainTableSummary">">
+<table class="settingsTable" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Configuration_MainTableSummary">">
     <tr>
         <td class="settingsPanel" width="33%" valign="top">
             <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_UserInterface"></h2>
@@ -70,7 +70,7 @@
                 <input type="submit" class="submit" name="change_language" value="<TMPL_VAR NAME="Localize_Apply">" />
             </form>
         </td>
-        <td class="settingsPanel" width="33%" valign="top">
+        <td class="settingsPanel" width="34%" valign="top">
             <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_HistoryView"></h2>
             <form action="/configuration" method="post">
                 <label class="configurationLabel" for="configPageSize">
@@ -117,6 +117,7 @@
             </TMPL_IF>
 
             <TMPL_VAR NAME="Configuration_History_Days_Updated">
+            <p />
             <form action="/configuration" method="post">
                 <label class="configurationLabel" for="configUIPort">
                     <TMPL_VAR NAME="Localize_Configuration_Fields">:
@@ -160,7 +161,7 @@
         </td>
     </tr>
     <tr>
-        <td class="settingsPanel" width="33%" valign="top">
+        <td class="settingsPanel" valign="top">
             <h3 class="configuration"><TMPL_VAR NAME="Localize_Configuration_TCPTimeout"></h3>
             <form action="/configuration" method="post">
                 <label class="configurationLabel" for="configTCPTimeout">
@@ -184,7 +185,7 @@
 
             <TMPL_VAR NAME="Configuration_TCP_Timeout_Updated">
         </td>
-        <td class="settingsPanel" width="33%" valign="top">
+        <td class="settingsPanel" valign="top">
             <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_Logging"></h2>
             <form action="/configuration" method="post">
                 <label class="configurationLabel" for="configLogging">
