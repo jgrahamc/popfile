@@ -546,15 +546,13 @@
 
 !insertmacro IsNT ""
 
-!ifndef ADDUSER
-    #--------------------------------------------------------------------------
-    # Uninstaller Function: un.IsNT
-    #
-    # This function is used during the uninstall process
-    #--------------------------------------------------------------------------
-    
-    !insertmacro IsNT "un."
-!endif
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.IsNT
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+!insertmacro IsNT "un."
 
 #--------------------------------------------------------------------------
 # End of 'WriteEnvStr.nsh'
