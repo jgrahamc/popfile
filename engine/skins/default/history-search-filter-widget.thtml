@@ -35,6 +35,7 @@
         </option>
     </select>
     <input type="submit" class="submit" name="setfilter" value="<TMPL_VAR NAME="Localize_Filter">" />
+    <input type="hidden" name="negate" value="">
     <input type="checkbox" name="negate" class="checkbox" <TMPL_VAR NAME="History_Field_Not"> />
     <TMPL_VAR NAME="Localize_History_Negate_Search">
     <input type="submit" class="submit" name="reset_filter_search" value="<TMPL_VAR NAME="Localize_History_ResetSearch">" />

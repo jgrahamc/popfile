@@ -2072,6 +2072,19 @@ sub history_page
     $self->{form_}{search} = (!defined($self->{form_}{setsearch})?$self->{old_search__}:'') || '' if ( !defined( $self->{form_}{search} ) );
     $self->{form_}{filter} = (!defined($self->{form_}{setfilter})?$self->{old_filter__}:'') || '' if ( !defined( $self->{form_}{filter} ) );
 
+    # If the user hits the Reset button on a search then we need to
+    # clear the search value but make it look as though they hit the
+    # search button so that sort_filter_history will get called below
+    # to get the right values in history_keys
+
+    if ( defined( $self->{form_}{reset_filter_search} ) ) {
+        $self->{form_}{filter}    = '';
+        $self->{form_}{negate}    = '';
+        delete $self->{form_}{negate_array};
+        $self->{form_}{search}    = '';
+        $self->{form_}{setsearch} = 1;
+    }
+
     # If the user is asking for a new sort option then it needs to get
     # stored in the sort form variable so that it can be used for
     # subsequent page views of the History to keep the sort in place
@@ -2083,21 +2096,34 @@ sub history_page
 
     $self->{old_sort__} = $self->{form_}{sort};
 
-    $self->{form_}{negate} = $self->{old_negate__} || '' if ( !defined( $self->{form_}{negate} ) );
+    # We are using a checkbox for negate, so we have to
+    # use an empty hidden input of the same name and
+    # check for multiple occurences or any of the name
+    # being defined
 
-    $self->{old_negate__} = $self->{form_}{negate};
+    if ( !defined( $self->{form_}{negate} ) ) {
 
-    # If the user hits the Reset button on a search then we need to
-    # clear the search value but make it look as though they hit the
-    # search button so that sort_filter_history will get called below
-    # to get the right values in history_keys
+        # if none of our negate inputs are active,
+        # this is a "clean" access of the history
 
-    if ( defined( $self->{form_}{reset_filter_search} ) ) {
-        $self->{form_}{filter}    = '';
-        $self->{form_}{negate}    = '';
-        $self->{form_}{search}    = '';
-        $self->{form_}{setsearch} = 1;
+        $self->{form_}{negate} = $self->{old_negate__} || '';
+
+    } elsif ( defined( $self->{form_}{negate_array} ) ) {
+        for ( @{$self->{form_}{negate_array}} ) {
+            if ($_ ne '') {
+                $self->{form_}{negate} = 'on';
+                $self->{old_negate__} = 'on';
+                last;
+            }
+        }
+    } else {
+        # We have a negate form, but no array.. this is likely
+        # the hidden input, so this is not a "clean" visit
+        $self->{old_negate__} = $self->{form_}{negate};
     }
+
+
+
 
     # Information from submit buttons isn't always preserved if the
     # buttons aren't pressed. This compares values in some fields and
@@ -2163,7 +2189,7 @@ sub history_page
     }
 
     $templ->param( 'History_Field_Search'  => $self->{form_}{search} );
-    $templ->param( 'History_Field_Negate'  => $self->{form_}{negate} );
+    $templ->param( 'History_Field_Not'  => $self->{form_}{negate} );
     $templ->param( 'History_If_Search'     => defined( $self->{form_}{search} ) );
     $templ->param( 'History_Field_Sort'    => $self->{form_}{sort} );
     $templ->param( 'History_Field_Filter'  => $self->{form_}{filter} );
