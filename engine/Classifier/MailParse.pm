@@ -421,7 +421,6 @@ sub add_line
         # green on white has distance 255.  100 seems like a reasonable upper
         # bound for tracking evil spammer tricks with similar colors
 
-        $self->compute_html_color_distance();
         if ( $self->{htmlcolordistance__} < 100 ) {
             $self->update_pseudoword( 'html', "colordistance$self->{htmlcolordistance__}", $encoded, '' );
         }
@@ -440,9 +439,9 @@ sub add_line
                 my $to   = $entityhash{$2};
 
                 if ( defined( $to ) ) {
-                    
+
                     # HTML entities confilict with DBCS chars. Replace entities with blanks.
-                    
+
                     if ( $self->{lang__} eq 'Korean' ) {
                     	$to = ' ';
                     } else {
