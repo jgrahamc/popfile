@@ -1107,6 +1107,7 @@ install_files:
   File "..\engine\popfileb.exe"
   File "..\engine\popfileif.exe"
   File "..\engine\popfileib.exe"
+  File "..\engine\popfile-service.exe"
 
   File "runpopfile.exe"
   File "stop_pf.exe"
