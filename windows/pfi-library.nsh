@@ -1,8 +1,8 @@
 #--------------------------------------------------------------------------
 #
 # pfi-library.nsi --- This is a collection of library functions and macro
-#                     definitions used by various NSIS scripts used to create
-#                     (and test) the Windows installer for POPFile.
+#                     definitions for inclusion in the NSIS scripts used
+#                     to create (and test) the POPFile Windows installer.
 #
 # Copyright (c) 2001-2004 John Graham-Cumming
 #
@@ -22,6 +22,18 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
+#--------------------------------------------------------------------------
+# CONDITIONAL COMPILATION NOTES
+#
+# This library is used by many different scripts which only require subsets of the library.
+# Conditional compilation is used to select the appropriate entries for a particular script
+# (to avoid unnecessary compiler warnings).
+#
+# The following symbols are used to indicate the required subset:
+#
+# (1) ADDUSER          defined in adduser.nsi ('Add POPFile User' wizard)
+# (2) TRANSLATOR       defined in translator.nsi (main installer translations test program)
+# (3) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
 #--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
@@ -72,7 +84,7 @@
   !macroend
 
   ;--------------------------------------------------------------------------
-  ; Used in 'installer.nsi' to define the languages to be supported
+  ; Used in multi-language scripts to define the languages to be supported
   ;--------------------------------------------------------------------------
 
   ; Macro used to load the files required for each language:
@@ -92,7 +104,7 @@
 !endif
 
   ;--------------------------------------------------------------------------
-  ; Used in 'installer.nsi' to select the POPFile UI language according to the language used
+  ; Used in 'adduser.nsi' to select the POPFile UI language according to the language used
   ; for the installation process (NSIS language names differ from those used by POPFile's UI)
   ;--------------------------------------------------------------------------
 
@@ -109,7 +121,7 @@
 
 #--------------------------------------------------------------------------
 #
-# Macros used when writing log files during Outlook Express account processing
+# Macros used when writing log files during 'Outlook' and 'Outlook Express' account processing
 #
 #--------------------------------------------------------------------------
 
@@ -141,42 +153,25 @@
 
 #--------------------------------------------------------------------------
 #
-# Macro used by the uninstaller
-# (guards against unexpectedly removing the corpus or message history)
-#
-# Usage:
-#   !insertmacro SafeRecursiveRMDir $(L_CORPUS}
+# Macro used by 'installer.nsi' when rearranging existing minimal Perl system
 #
 #--------------------------------------------------------------------------
 
-  !macro SafeRecursiveRMDir PATH
+  !macro MinPerlMove SUBFOLDER
+
       !insertmacro PFI_UNIQUE_ID
 
-      StrCmp ${L_SUBCORPUS} "no" Label_A_${PFI_UNIQUE_ID}
-      Push ${L_CORPUS}
-      Push "${PATH}"
-      Call un.StrStr
-      Pop ${L_TEMP}
-      StrCmp ${L_TEMP} "" 0 Label_C_${PFI_UNIQUE_ID}
+      IfFileExists "$INSTDIR\${SUBFOLDER}\*.*" 0 skip_${PFI_UNIQUE_ID}
+      Rename "$INSTDIR\${SUBFOLDER}" "$G_MPLIBDIR\${SUBFOLDER}"
 
-    Label_A_${PFI_UNIQUE_ID}:
-      StrCmp ${L_SUBHISTORY} "no" Label_B_${PFI_UNIQUE_ID}
-      Push ${L_HISTORY}
-      Push "${PATH}"
-      Call un.StrStr
-      Pop ${L_TEMP}
-      StrCmp ${L_TEMP} "" 0 Label_C_${PFI_UNIQUE_ID}
+    skip_${PFI_UNIQUE_ID}:
 
-    Label_B_${PFI_UNIQUE_ID}:
-      RMDir /r "${PATH}"
-
-    Label_C_${PFI_UNIQUE_ID}:
   !macroend
 
 
 #==============================================================================================
 #
-# Functions used only by the installer (in alphabetic order)
+# Functions used only during installation of POPFile or User Data files (in alphabetic order)
 #
 #    Installer Function: GetFileSize
 #    Installer Function: GetIEVersion
@@ -209,20 +204,20 @@
     #         ($R0 now holds the size (in bytes) of the 'spam' bucket's 'table' file)
     #
     #--------------------------------------------------------------------------
-  
+
     Function GetFileSize
-  
+
       !define L_FILENAME  $R9
       !define L_RESULT    $R8
-  
+
       Exch ${L_FILENAME}
       Push ${L_RESULT}
       Exch
-  
+
       IfFileExists ${L_FILENAME} find_size
       StrCpy ${L_RESULT} "-1"
       Goto exit
-  
+
     find_size:
       ClearErrors
       FileOpen ${L_RESULT} ${L_FILENAME} r
@@ -231,17 +226,17 @@
       IfErrors 0 return_size
       StrCpy ${L_RESULT} "-2"
       Goto exit
-  
+
     return_size:
       StrCpy ${L_RESULT} ${L_FILENAME}
-  
+
     exit:
       Pop ${L_FILENAME}
       Exch ${L_RESULT}
-  
+
       !undef L_FILENAME
       !undef L_RESULT
-  
+
     FunctionEnd
 !endif
 
@@ -429,63 +424,63 @@ FunctionEnd
     #         ($R0 at this point is ":" unless popfile.cfg has altered the default setting)
     #
     #--------------------------------------------------------------------------
-    
+
     Function GetSeparator
-    
+
       !define L_CFG         $R9   ; file handle
       !define L_LNE         $R8   ; a line from the popfile.cfg file
       !define L_PARAM       $R7
       !define L_SEPARATOR   $R6   ; character used to separate the pop3 server from the username
-    
+
       Push ${L_SEPARATOR}
       Push ${L_CFG}
       Push ${L_LNE}
       Push ${L_PARAM}
-    
+
       StrCpy ${L_SEPARATOR} ""
-    
+
       ClearErrors
-    
+
       FileOpen  ${L_CFG} "$G_USERDIR\popfile.cfg" r
-    
+
     loop:
       FileRead   ${L_CFG} ${L_LNE}
       IfErrors separator_done
-    
+
       StrCpy ${L_PARAM} ${L_LNE} 10
       StrCmp ${L_PARAM} "separator " old_separator
       StrCpy ${L_PARAM} ${L_LNE} 15
       StrCmp ${L_PARAM} "pop3_separator " new_separator
       Goto loop
-    
+
     old_separator:
       StrCpy ${L_SEPARATOR} ${L_LNE} 1 10
       Goto loop
-    
+
     new_separator:
       StrCpy ${L_SEPARATOR} ${L_LNE} 1 15
       Goto loop
-    
+
     separator_done:
       FileClose ${L_CFG}
       StrCmp ${L_SEPARATOR} "" default
       StrCmp ${L_SEPARATOR} "$\r" default
       StrCmp ${L_SEPARATOR} "$\n" 0 exit
-    
+
     default:
       StrCpy ${L_SEPARATOR} ":"
-    
+
     exit:
       Pop ${L_PARAM}
       Pop ${L_LNE}
       Pop ${L_CFG}
       Exch ${L_SEPARATOR}
-    
+
       !undef L_CFG
       !undef L_LNE
       !undef L_PARAM
       !undef L_SEPARATOR
-    
+
     FunctionEnd
 !endif
 
@@ -507,57 +502,57 @@ FunctionEnd
     #         Call SetConsoleMode
     #
     #--------------------------------------------------------------------------
-  
+
     Function SetConsoleMode
-  
+
       !define L_NEW_CFG     $R9   ; file handle used for clean copy
       !define L_OLD_CFG     $R8   ; file handle for old version
       !define L_LNE         $R7   ; a line from the popfile.cfg file
       !define L_MODE        $R6   ; new console mode
       !define L_PARAM       $R5
-  
+
       Exch ${L_MODE}
       Push ${L_NEW_CFG}
       Push ${L_OLD_CFG}
       Push ${L_LNE}
       Push ${L_PARAM}
-  
+
       ClearErrors
       FileOpen  ${L_OLD_CFG} "$G_USERDIR\popfile.cfg" r
       FileOpen  ${L_NEW_CFG} "$PLUGINSDIR\new.cfg" w
-  
+
     loop:
       FileRead   ${L_OLD_CFG} ${L_LNE}
       IfErrors copy_done
-  
+
       StrCpy ${L_PARAM} ${L_LNE} 16
       StrCmp ${L_PARAM} "windows_console " got_console
       FileWrite ${L_NEW_CFG} ${L_LNE}
       Goto loop
-  
+
     got_console:
       FileWrite ${L_NEW_CFG} "windows_console ${L_MODE}$\r$\n"
       Goto loop
-  
+
     copy_done:
       FileClose ${L_OLD_CFG}
       FileClose ${L_NEW_CFG}
-  
+
       Delete "$G_USERDIR\popfile.cfg"
       Rename "$PLUGINSDIR\new.cfg" "$G_USERDIR\popfile.cfg"
-  
+
       Pop ${L_PARAM}
       Pop ${L_LNE}
       Pop ${L_OLD_CFG}
       Pop ${L_NEW_CFG}
       Pop ${L_MODE}
-  
+
       !undef L_NEW_CFG
       !undef L_OLD_CFG
       !undef L_LNE
       !undef L_MODE
       !undef L_PARAM
-  
+
     FunctionEnd
 !endif
 
@@ -581,40 +576,40 @@ FunctionEnd
     #         ($R0 at this point is "123")
     #
     #--------------------------------------------------------------------------
-    
+
     Function StrStripLZS
-    
+
       !define L_CHAR      $R9
       !define L_STRING    $R8
-    
+
       Exch ${L_STRING}
       Push ${L_CHAR}
-    
+
     loop:
       StrCpy ${L_CHAR} ${L_STRING} 1
       StrCmp ${L_CHAR} "" done
       StrCmp ${L_CHAR} " " strip_char
       StrCmp ${L_CHAR} "0" strip_char
       Goto done
-    
+
     strip_char:
       StrCpy ${L_STRING} ${L_STRING} "" 1
       Goto loop
-    
+
     done:
       Pop ${L_CHAR}
       Exch ${L_STRING}
-    
+
       !undef L_CHAR
       !undef L_STRING
-    
+
     FunctionEnd
 !endif
 
 
 #==============================================================================================
 #
-# Macro-based Functions used by the installer and by the uninstaller (in alphabetic order)
+# Macro-based Functions which may be used by the installer and uninstaller (in alphabetic order)
 #
 #    Macro:                CheckIfLocked
 #    Installer Function:   CheckIfLocked
@@ -678,11 +673,19 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Macro: CheckIfLocked
 #
-# The installation process and the uninstall process both use a function which checks if
-# a particular executable file (an EXE file) is being used (the EXE file to be checked depends
-# upon the version of POPFile in use and upon how it has been configured. If the specified EXE
-# file is no longer in use, this function returns an empty string (otherwise it returns the
-# input parameter unchanged).
+# The installation process and the uninstall process may both use a function which checks if
+# a particular executable file (an EXE file) is being used. This macro makes maintenance easier
+# by ensuring that both processes use identical functions, with the only difference being their
+# names.
+#
+# The EXE file to be checked depends upon the version of POPFile in use and upon how it has
+# been configured. If the specified EXE file is no longer in use, this function returns an empty
+# string (otherwise it returns the input parameter unchanged).
+#
+# NOTE:
+# The !insertmacro CheckIfLocked "" and !insertmacro CheckIfLocked "un." commands are included
+# in this file so the NSIS script can use 'Call CheckIfLocked' and 'Call un.CheckIfLocked'
+# without additional preparation.
 #
 # Inputs:
 #         (top of stack)     - the full path of the EXE file to be checked
@@ -745,7 +748,7 @@ FunctionEnd
     #
     # This function is used during the uninstall process
     #--------------------------------------------------------------------------
-  
+
     !insertmacro CheckIfLocked "un."
 !endif
 
@@ -753,8 +756,8 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Macro: GetCorpusPath
 #
-# The installation process and the uninstall process both use a function which finds the full
-# path for the corpus if a copy of 'popfile.cfg' is found in the installation folder. This
+# The installation process and the uninstall process may both use a function which finds the
+# full path for the corpus if a copy of 'popfile.cfg' is found in the installation folder. This
 # macro makes maintenance easier by ensuring that both processes use identical functions, with
 # the only difference being their names.
 #
@@ -770,7 +773,7 @@ FunctionEnd
 #
 # NOTE:
 # The !insertmacro GetCorpusPath "" and !insertmacro GetCorpusPath "un." commands are included
-# in this file so 'installer.nsi' can use 'Call GetCorpusPath' and 'Call un.GetCorpusPath'
+# in this file so the NSIS script can use 'Call GetCorpusPath' and 'Call un.GetCorpusPath'
 # without additional preparation.
 #
 # Inputs:
@@ -874,7 +877,7 @@ FunctionEnd
     #
     # This function is used during the installation process
     #--------------------------------------------------------------------------
-  
+
     !insertmacro GetCorpusPath ""
 !endif
 
@@ -890,7 +893,7 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Macro: GetDataPath
 #
-# The installation process and the uninstall process both use a function which converts a
+# The installation process and the uninstall process may both use a function which converts a
 # 'base directory' and a 'data folder' parameter (usually relative to the 'base directory')
 # into a single, absolute path. For example, it will convert 'C:\Program Files\POPFile' and
 # 'corpus' into 'C:\Program Files\POPFile\corpus'. This macro makes maintenance easier by
@@ -904,7 +907,7 @@ FunctionEnd
 #
 # NOTE:
 # The !insertmacro GetDataPath "" and !insertmacro GetDataPath "un." commands are included
-# in this file so 'installer.nsi' can use 'Call GetDataPath' and 'Call un.GetDataPath'
+# in this file so the NSIS script can use 'Call GetDataPath' and 'Call un.GetDataPath'
 # without additional preparation.
 #
 # Inputs:
@@ -1024,7 +1027,7 @@ FunctionEnd
     #
     # This function is used during the installation process
     #--------------------------------------------------------------------------
-  
+
     !insertmacro GetDataPath ""
 !endif
 
@@ -1047,7 +1050,7 @@ FunctionEnd
 #
 # NOTE:
 # The !insertmacro GetDateStamp "" and !insertmacro GetDateStamp "un." commands are included
-# in this file so 'installer.nsi' and/or other library functions in 'pfi-library.nsh' can use
+# in this file so the NSIS script and/or other library functions in 'pfi-library.nsh' can use
 # 'Call GetDateStamp' and 'Call un.GetDateStamp' without additional preparation.
 #
 # Inputs:
@@ -1179,7 +1182,7 @@ FunctionEnd
 #
 # NOTE:
 # The !insertmacro GetDateTimeStamp "" and !insertmacro GetDateTimeStamp "un." commands are
-# included in this file so 'installer.nsi' and/or other library functions in 'pfi-library.nsh'
+# included in this file so the NSIS script and/or other library functions in 'pfi-library.nsh'
 # can use 'Call GetDateTimeStamp' & 'Call un.GetDateTimeStamp' without additional preparation.
 #
 # Inputs:
@@ -1311,7 +1314,7 @@ FunctionEnd
     #
     # This function is used during the installation process
     #--------------------------------------------------------------------------
-    
+
     !insertmacro GetDateTimeStamp ""
 !endif
 
@@ -1321,7 +1324,7 @@ FunctionEnd
     #
     # This function is used during the uninstall process
     #--------------------------------------------------------------------------
-  
+
     !insertmacro GetDateTimeStamp "un."
 !endif
 
@@ -1338,7 +1341,7 @@ FunctionEnd
 #
 # NOTE:
 # The !insertmacro GetLocalTime "" and !insertmacro GetLocalTime "un." commands are included
-# in this file so 'installer.nsi' and/or other library functions in 'pfi-library.nsh' can use
+# in this file so the NSIS script and/or other library functions in 'pfi-library.nsh' can use
 # 'Call GetLocalTime' and 'Call un.GetLocalTime' without additional preparation.
 #
 # Inputs:
@@ -1420,7 +1423,7 @@ FunctionEnd
     #
     # This function is used during the installation process
     #--------------------------------------------------------------------------
-    
+
     !insertmacro GetLocalTime ""
 !endif
 
@@ -1430,7 +1433,7 @@ FunctionEnd
     #
     # This function is used during the uninstall process
     #--------------------------------------------------------------------------
-  
+
     !insertmacro GetLocalTime "un."
 !endif
 
@@ -1438,7 +1441,7 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Macro: GetParent
 #
-# The installation process and the uninstall process both use a function which extracts the
+# The installation process and the uninstall process may both use a function which extracts the
 # parent directory from a given path. This macro makes maintenance easier by ensuring that both
 # processes use identical functions, with the only difference being their names.
 #
@@ -1446,7 +1449,7 @@ FunctionEnd
 #
 # NOTE:
 # The !insertmacro GetParent "" and !insertmacro GetParent "un." commands are included
-# in this file so 'installer.nsi' can use 'Call GetParent' and 'Call un.GetParent'
+# in this file so the NSIS script can use 'Call GetParent' and 'Call un.GetParent'
 # without additional preparation.
 #
 # Inputs:
@@ -1498,7 +1501,7 @@ FunctionEnd
     #
     # This function is used during the installation process
     #--------------------------------------------------------------------------
-  
+
     !insertmacro GetParent ""
 !endif
 
@@ -1521,7 +1524,7 @@ FunctionEnd
 #
 # NOTE:
 # The !insertmacro GetTimeStamp "" and !insertmacro GetTimeStamp "un." commands are included
-# in this file so 'installer.nsi' and/or other library functions in 'pfi-library.nsh' can use
+# in this file so the NSIS script and/or other library functions in 'pfi-library.nsh' can use
 # 'Call GetTimeStamp' and 'Call un.GetTimeStamp' without additional preparation.
 #
 # Inputs:
@@ -1604,7 +1607,7 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Macro: ShutdownViaUI
 #
-# The installation process and the uninstall process both use a function which attempts to
+# The installation process and the uninstall process may both use a function which attempts to
 # shutdown POPFile using the User Interface (UI) invisibly (i.e. no browser window is used).
 # This macro makes maintenance easier by ensuring that both processes use identical functions,
 # with the only difference being their names.
@@ -1615,7 +1618,7 @@ FunctionEnd
 #
 # NOTE:
 # The !insertmacro ShutdownViaUI "" and !insertmacro ShutdownViaUI "un." commands are included
-# in this file so 'installer.nsi' can use 'Call ShutdownViaUI' and 'Call un.ShutdownViaUI'
+# in this file so the NSIS script can use 'Call ShutdownViaUI' and 'Call un.ShutdownViaUI'
 # without additional preparation.
 #
 # Inputs:
@@ -1644,14 +1647,14 @@ FunctionEnd
 
 !macro ShutdownViaUI UN
   Function ${UN}ShutdownViaUI
-  
+
     !define L_RESULT    $R9
     !define L_UIPORT    $R8
-    
+
     Exch ${L_UIPORT}
     Push ${L_RESULT}
     Exch
-    
+
     StrCmp ${L_UIPORT} "" badport
     Push ${L_UIPORT}
     Call  ${UN}StrCheckDecimal
@@ -1659,18 +1662,18 @@ FunctionEnd
     StrCmp ${L_UIPORT} "" badport
     IntCmp ${L_UIPORT} 1 port_ok badport
     IntCmp ${L_UIPORT} 65535 port_ok port_ok
-  
+
   badport:
     StrCpy ${L_RESULT} "badport"
     Goto exit
-    
+
   port_ok:
     NSISdl::download_quiet http://127.0.0.1:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_1.htm"
     Pop ${L_RESULT}
     StrCmp ${L_RESULT} "success" try_again
     StrCpy ${L_RESULT} "failure"
     Goto exit
-  
+
   try_again:
     Sleep 3000
     NSISdl::download_quiet http://127.0.0.1:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_2.htm"
@@ -1678,17 +1681,17 @@ FunctionEnd
     StrCmp ${L_RESULT} "success" password
     StrCpy ${L_RESULT} "success"
     Goto exit
-  
+
   password:
     StrCpy ${L_RESULT} "password?"
-  
+
   exit:
     Pop ${L_UIPORT}
     Exch ${L_RESULT}
-      
+
     !undef L_RESULT
     !undef L_UIPORT
-  
+
   FunctionEnd
 !macroend
 
@@ -1698,7 +1701,7 @@ FunctionEnd
     #
     # This function is used during the installation process
     #--------------------------------------------------------------------------
-    
+
     !insertmacro ShutdownViaUI ""
 
     #--------------------------------------------------------------------------
@@ -1706,7 +1709,7 @@ FunctionEnd
     #
     # This function is used during the uninstall process
     #--------------------------------------------------------------------------
-    
+
     !insertmacro ShutdownViaUI "un."
 !endif
 
@@ -1714,13 +1717,13 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Macro: StrBackSlash
 #
-# The installation process and the uninstall process both use a function which converts all
+# The installation process and the uninstall process may both use a function which converts all
 # slashes in a string into backslashes. This macro makes maintenance easier by ensuring that
 # both processes use identical functions, with the only difference being their names.
 #
 # NOTE:
 # The !insertmacro StrBackSlash "" and !insertmacro StrBackSlash "un." commands are included
-# in this file so 'installer.nsi' can use 'Call StrBackSlash' and 'Call un.StrBackSlash'
+# in this file so the NSIS script can use 'Call StrBackSlash' and 'Call un.StrBackSlash'
 # without additional preparation.
 #
 # Inputs:
@@ -1775,7 +1778,7 @@ FunctionEnd
     #
     # This function is used during the installation process
     #--------------------------------------------------------------------------
-  
+
     !insertmacro StrBackSlash ""
 !endif
 
@@ -1791,7 +1794,7 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Macro: StrCheckDecimal
 #
-# The installation process and the uninstall process both use a function which checks if
+# The installation process and the uninstall process may both use a function which checks if
 # a given string contains a decimal number. This macro makes maintenance easier by ensuring
 # that both processes use identical functions, with the only difference being their names.
 #
@@ -1800,7 +1803,7 @@ FunctionEnd
 #
 # NOTE:
 # The !insertmacro StrCheckDecimal "" and !insertmacro StrCheckDecimal "un." commands are
-# included in this file so 'installer.nsi' can use 'Call StrCheckDecimal' and
+# included in this file so the NSIS script can use 'Call StrCheckDecimal' and
 # 'Call un.StrCheckDecimal' without additional preparation.
 #
 # Inputs:
@@ -1870,7 +1873,7 @@ FunctionEnd
     #
     # This function is used during the installation process
     #--------------------------------------------------------------------------
-    
+
     !insertmacro StrCheckDecimal ""
 !endif
 
@@ -1880,7 +1883,7 @@ FunctionEnd
     #
     # This function is used during the uninstall process
     #--------------------------------------------------------------------------
-  
+
     !insertmacro StrCheckDecimal "un."
 !endif
 
@@ -1888,13 +1891,13 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Macro: StrStr
 #
-# The installation process and the uninstall process both use a function which checks if
+# The installation process and the uninstall process may both use a function which checks if
 # a given string appears inside another string. This macro makes maintenance easier by ensuring
 # that both processes use identical functions, with the only difference being their names.
 #
 # NOTE:
 # The !insertmacro StrStr "" and !insertmacro StrStr "un." commands are included in this file
-# so 'installer.nsi' can use 'Call StrStr' and 'Call un.StrStr' without additional preparation.
+# so the NSIS script can use 'Call StrStr' and 'Call un.StrStr' without additional preparation.
 #
 # Search for matching string
 #
@@ -1953,7 +1956,7 @@ FunctionEnd
     #
     # This function is used during the installation process
     #--------------------------------------------------------------------------
-    
+
     !insertmacro StrStr ""
 !endif
 
@@ -1971,13 +1974,13 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Macro: TrimNewlines
 #
-# The installation process and the uninstall process both use a function which trims newlines
+# The installation process and the uninstall process may both use a function to trim newlines
 # from lines of text. This macro makes maintenance easier by ensuring that both processes use
 # identical functions, with the only difference being their names.
 #
 # NOTE:
 # The !insertmacro TrimNewlines "" and !insertmacro TrimNewlines "un." commands are
-# included in this file so 'installer.nsi' can use 'Call TrimNewlines' and
+# included in this file so the NSIS script can use 'Call TrimNewlines' and
 # 'Call un.TrimNewlines' without additional preparation.
 #
 # Inputs:
@@ -2024,7 +2027,7 @@ FunctionEnd
     #
     # This function is used during the installation process
     #--------------------------------------------------------------------------
-    
+
     !insertmacro TrimNewlines ""
 
     #--------------------------------------------------------------------------
@@ -2032,19 +2035,27 @@ FunctionEnd
     #
     # This function is used during the uninstall process
     #--------------------------------------------------------------------------
-    
+
     !insertmacro TrimNewlines "un."
 !endif
 
 #--------------------------------------------------------------------------
 # Macro: WaitUntilUnlocked
 #
-# The installation process and the uninstall process both use a function which waits until
-# a particular executable file (an EXE file) is no longer in use (the EXE file to be checked
-# depends upon the version of POPFile in use and upon how it has been configured. It may take
-# a little while for POPFile to shutdown so the installer/uninstaller calls this function which
-# waits in a loop until the specified EXE file is no longer in use. A timeout counter
-# is used to avoid an infinite loop.
+# The installation process and the uninstall process may both use a function which waits until
+# a particular executable file (an EXE file) is no longer in use. This macro makes maintenance
+# easier by ensuring that both processes use identical functions, with the only difference being
+# their names.
+#
+# The EXE file to be checked depends upon the version of POPFile in use and upon how it has been
+# configured. It may take a little while for POPFile to shutdown so the installer/uninstaller
+# calls this function which waits in a loop until the specified EXE file is no longer in use.
+# A timeout counter is used to avoid an infinite loop.
+#
+# NOTE:
+# The !insertmacro WaitUntilUnlocked "" and !insertmacro WaitUntilUnlocked "un." commands are
+# included in this file so the NSIS script can use 'Call WaitUntilUnlocked' and
+# 'Call un.WaitUntilUnlocked' without additional preparation.
 #
 # Inputs:
 #         (top of stack)     - the full path of the EXE file to be checked
@@ -2099,17 +2110,17 @@ FunctionEnd
     #
     # This function is used during the installation process
     #--------------------------------------------------------------------------
-  
+
     !insertmacro WaitUntilUnlocked ""
 !endif
-  
+
 !ifdef ADDUSER
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.WaitUntilUnlocked
     #
     # This function is used during the uninstall process
     #--------------------------------------------------------------------------
-  
+
     !insertmacro WaitUntilUnlocked "un."
 !endif
 
