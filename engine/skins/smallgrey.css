@@ -1,5 +1,5 @@
 H2 {
-  font-size: 14pt;
+  font-size: 170%;
   font-weight: normal;
 }
 
@@ -7,7 +7,7 @@ body {
   background-color: #ffffff;
   border: none;
   font-family: tahoma, sans-serif;
-  font-size: 8pt;
+  font-size: 66%;
   font-weight: normal;
   color: #000000;
   margin: 3px;
@@ -20,14 +20,24 @@ table.head {
   color: #666666;
 }
 
-.top, .bottom, .borderTopLeft, .borderTop, .borderTopRight, .borderLeft, .borderRight, .borderBottomLeft, .borderBottom, .borderBottomRight {
+.shutdownLink {
+  color: #990000;
+  background-color: inherit;
+  text-decoration: none;
+}
+
+.shutdownLink:hover {
+  text-decoration: underline;
+}
+
+.shellTopRow, .shellLeft, .shellBottomRow, .shellRight {
   visibility: hidden;
   display: none;
 }
 
 .head, td.head {
   font-weight: bold;
-  font-size: 14pt;
+  font-size: 140%;
   background-color: #eeeeee;
   color: #666666;
   padding-left: 5px;
@@ -35,19 +45,27 @@ table.head {
 
 .shell, .shellTop {
   border: 2px #cccccc solid;
-  background-color: #ffffff;
-  color: #000000;
   margin: 0px;
   padding: 0px;
 }
 
+.shell {
+  color: #000000;
+  background-color: #ffffff;
+}
+
+.shellTop {
+  color: #000000;
+  background-color: #eeeeee;
+}
+
 .head a {
-  font-size: 12pt;
+  font-size: 120%;
   font-weight: normal;
 }
 
 .menu {
-  font-size: 12pt;
+  font-size: 120%;
   font-weight: normal;
   width: 100%;
 }
@@ -59,7 +77,7 @@ table.head {
 .menuSelected, .menuSelected a {
   background-color: #cccccc;
   color: #000000;
-  font-size: 14pt;
+  font-size: 123%;
   font-weight: normal;
   text-decoration: none;
 }
@@ -78,7 +96,7 @@ td.menuSelected {
 .menuStandard, .menuStandard a {
   background-color: #efefef;
   color: #0000ff;
-  font-size: 14pt;
+  font-size: 123%;
   font-weight: normal;
   text-decoration: none;
 }
@@ -117,15 +135,42 @@ td.menuStandard {
   background-color: #ffffcc;
 }
 
+.colorChooserImg {
+  height: 100%;
+  width: 0.7em;
+}
+
+.colorChooserTable a:hover {
+  background-color: transparent;
+  color: inherit;
+}
+
+.bucketsTable td {
+  border-top: 1px solid #ffffff;
+  border-bottom: 1px solid #ffffff;
+}
+
+table.bucketsTable {
+  margin: 3px;
+}
+
+.lineImg {
+  width: 4px;
+}
+
 tr.rowHighlighted {
   background-color: #ffffcc;
   color: #666666;
 }
 
-table.settingsTable {
+table.settingsTable, td.settingsPanel {
   border: 1px solid #cccccc;
   padding: 3px;
-  margin: 0px;
+  margin: 2px;
+}
+
+.settingsPanel form {
+  padding-top: 8px;
 }
 
 table.openMessageTable, table.lookupResultsTable {
@@ -134,16 +179,10 @@ table.openMessageTable, table.lookupResultsTable {
   margin: 0px;
 }
 
-td.settingsPanel {
-  border: 1px solid #cccccc;
-  padding: 3px;
-  margin: 0px;
-}
-
 td.naked {
   padding: 0px; 
   margin: 0px; 
-  border: none
+  border: none;
 }
 
 td.accuracy0to49 {
@@ -191,20 +230,20 @@ td.openMessageCloser {
   color: #000000;
 }
 
-.historyLabel {
-  font-weight: normal;
-  font-size: 9pt;
+.historyLabel, .historyLabel a {
+  font-weight: bold;
+  font-size: 110%;
   text-decoration: none;
-  padding-left: 1px;
-  padding-right: 2px;
 }
 
 .historyLabel em {
   font-weight: bold;
   font-style: normal;
+  color: #000000;
+  background-color: #ffffcc;
 }
 
-a.historyLabel:hover {
+.historyLabel a:hover {
   text-decoration: underline;
 }
 
@@ -240,11 +279,16 @@ table.historyWidgetsTop {
   width: 100%;
   border-top: 2px solid #cccccc;
   border-bottom: 2px solid #cccccc;
+  text-align: center;
 }
 
-table.historyWidgetsTop td {
-  padding-left: 20px;
-  font-weight: bold;
+form {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.historyWidgetsTop .submit {
+  margin-right: 1.5em;
 }
 
 table.historyWidgetsBottom {
@@ -253,7 +297,7 @@ table.historyWidgetsBottom {
 }
 
 table.historyWidgetsBottom td {
-  padding-left: 20px;
+  padding-left: 1em;
   font-weight: bold;
 }
 
@@ -268,9 +312,9 @@ table.footer {
 
 td.footerBody { 
   text-align: center;
-  padding-left: 5%;
-  padding-right: 5%;
-  font-size: 8pt;
+  padding-left: 1%;
+  padding-right: 1%;
+  font-size: 100%;
   font-weight: bold;
 }
 
@@ -285,7 +329,7 @@ td.footerBody {
 
 input, .submit, select {
   font-family: tahoma, sans-serif;
-  font-size: 8pt;
+  font-size: 100%;
   font-weight: normal;
   padding: 0px;
   margin: 0px;
@@ -293,18 +337,58 @@ input, .submit, select {
 
 tt {
   font-family: "lucida console", courier, sans-serif;
-  font-size: 9pt;
+  font-size: 105%;
   font-weight: normal;
 }
 
-span.bucketsWidgetState {
+span.bucketsWidgetStateOn {
 	font-weight: bold;
 }
 
-span.configWidgetState {
+span.configWidgetStateOn {
 	font-weight: bold;
 }
 
-span.securityWidgetState {
+span.securityWidgetStateOn {
 	font-weight: bold;
+}
+
+span.bucketsWidgetStateOff {
+	background-color: inherit;
+	color: #666666;
+}
+
+span.configWidgetStateOff {
+	background-color: inherit;
+	color: #666666;
+}
+
+span.securityWidgetStateOff {
+	background-color: inherit;
+	color: #666666;
+}
+
+.toggleOn {
+	background-color: #dddddd;
+	color: #000000;
+}
+
+.toggleOff {
+	background-color: #bbbbbb;
+	color: #000000;
+}
+
+.bucketsTable input {
+	font-size: 90%;
+	border: 1px;
+}
+
+button, .submit, .reclassifyButton {
+	background-color: #dddddd;
+	color: #000000;
+}
+
+.deleteButton, .historyWidgetsBottom .submit {
+	background-color: #bbbbbb;
+	color: #000000;
 }
