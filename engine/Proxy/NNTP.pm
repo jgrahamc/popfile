@@ -119,7 +119,7 @@ sub initialize
 # ---------------------------------------------------------------------------------------------
 sub child__
 {
-    my ( $self, $client, $download_count, $pipe ) = @_;
+    my ( $self, $client, $download_count, $pipe, $ppipe, $pid ) = @_;
 
     # Number of messages downloaded in this session
     my $count = 0;
@@ -248,6 +248,7 @@ sub child__
 
                     print $pipe "CLASS:$class$eol";
                     print $pipe "NEWFL:$history_file$eol";
+                    $self->yield_( $ppipe, $pid );
                 }
 
                 $self->flush_extra_( $news, $client, 0 );
@@ -330,6 +331,7 @@ sub child__
     close $news if defined( $news );
     close $client;
     print $pipe "CMPLT$eol";
+    $self->yield_( $ppipe, $pid );
     close $pipe;
 
     $self->log_( "NNTP forked child done" );

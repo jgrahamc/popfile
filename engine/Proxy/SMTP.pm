@@ -120,7 +120,7 @@ sub initialize
 # ---------------------------------------------------------------------------------------------
 sub child__
 {
-    my ( $self, $client, $download_count, $pipe ) = @_;
+    my ( $self, $client, $download_count, $pipe, $ppipe, $pid ) = @_;
 
     # Number of messages downloaded in this session
     my $count = 0;
@@ -226,6 +226,7 @@ sub child__
                 # Tell the parent that we just handled a mail
                 print $pipe "CLASS:$class$eol";
                 print $pipe "NEWFL:$history_file$eol";
+                $self->yield_( $ppipe, $pid );
 
                 my $response = <$mail>;
                 $self->tee_( $client, $response );
@@ -261,6 +262,7 @@ sub child__
     close $mail if defined( $mail );
     close $client;
     print $pipe "CMPLT$eol";
+    $self->yield_( $ppipe, $pid );
     close $pipe;
 }
 

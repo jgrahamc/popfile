@@ -345,13 +345,13 @@ sub service
                     # If we fail to fork, or are in the child process then process this request
 
                     if ( !defined( $pid ) || ( $pid == 0 ) ) {
-                        $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $pipe );
+                        $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $pipe, 0, $pid );
                         exit(0) if ( defined( $pid ) );
                     }
 	        } else {
                     pipe my $reader, my $writer;
 
-                    $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $writer );
+                    $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $writer, $reader, $$ );
                     $self->{flush_child_data_}( $self, $reader );
                 }
             }
@@ -361,6 +361,24 @@ sub service
     }
 
     return 1;
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# yield_
+#
+# Called by a proxy child process to allow the parent to do work, this only does anything
+# in the case where we didn't fork for the child process
+#
+# ---------------------------------------------------------------------------------------------
+sub yield_
+{
+    my ( $self, $pipe, $pid ) = @_;
+
+    if ( $pid != 0 ) {
+        $self->{flush_child_data_}( $self, $pipe )
+    }
 }
 
 # ---------------------------------------------------------------------------------------------

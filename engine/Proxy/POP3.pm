@@ -124,13 +124,16 @@ sub initialize
 #
 # The worker method that is called when we get a good connection from a client
 #
-# $client   - an open stream to a POP3 client
+# $client         - an open stream to a POP3 client
 # $download_count - The unique download count for this session
+# $pipe           - The pipe to the parent process to send messages to
+# $ppipe          - 0 or the parent's end of the pipe
+# $pid            - 0 if this is a child process
 #
 # ---------------------------------------------------------------------------------------------
 sub child__
 {
-    my ( $self, $client, $download_count, $pipe ) = @_;
+    my ( $self, $client, $download_count, $pipe, $ppipe, $pid ) = @_;
 
     # Hash of indexes of downloaded messages
 
@@ -169,6 +172,7 @@ sub child__
         if ( $command =~ /$user_command/i ) {
             if ( $1 ne '' )  {
                 print $pipe "LOGIN:$4$eol";
+                $self->yield_( $ppipe, $pid );
                 if ( $mail = $self->verify_connected_( $mail, $client, $1, $3 || 110 ) )  {
 
                     # Pass through the USER command with the actual user name for this server,
@@ -328,6 +332,7 @@ sub child__
 
                             print $pipe "CLASS:$class$eol";
                             print $pipe "NEWFL:$history_file$eol";
+                            $self->yield_( $ppipe, $pid );
                         }
                     }
                 } else {
@@ -425,6 +430,7 @@ sub child__
                     $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, $count, 1, '' );
 
                     print $pipe "CLASS:$class$eol";
+                    $self->yield_( $ppipe, $pid );
                 }
 
                 close RETRFILE;
@@ -444,6 +450,7 @@ sub child__
 
                     print $pipe "NEWFL:$history_file$eol";
                     print $pipe "CLASS:$class$eol";
+                    $self->yield_( $ppipe, $pid );
 
                     # Note locally that file has been retrieved
 
@@ -485,6 +492,7 @@ sub child__
     close $mail if defined( $mail );
     close $client;
     print $pipe "CMPLT$eol";
+    $self->yield_( $ppipe, $pid );
     close $pipe;
 
     $self->log_( "POP3 forked child done" );
