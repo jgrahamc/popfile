@@ -37,6 +37,9 @@ Section "POPFile"
   File "..\engine\skins\*.css"
   File "..\engine\skins\*.gif"
 
+  SetOutPath $INSTDIR\manual
+  File "..\engine\manual\*.html"
+
   SetOutPath $INSTDIR\Exporter
   File "C:\Perl\lib\Exporter\*"
 
@@ -121,6 +124,8 @@ skip_confirmation:
   Delete $INSTDIR\skins\*.css
   Delete $INSTDIR\skins\*.gif
   RMDir $INSTDIR\skins
+  Delete $INSTDIR\manual\*.html
+  RMDir $INSTDIR\manual
 
   Delete $INSTDIR\IO\*.*
   Delete $INSTDIR\IO\Socket\*.*
