@@ -2,8 +2,8 @@
 #
 # installer.nsi --- This is the NSIS script used to create the
 #                   Windows installer for POPFile. This script uses
-#                   three custom pages whose layouts are defined
-#                   in the files "ioA.ini", "ioB.ini" and "ioC.ini".
+#                   four custom pages whose layouts are defined
+#                   in the files "ioA.ini", "ioB.ini", "ioC.ini" and "ioD.ini".
 #
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
@@ -114,7 +114,7 @@
   ;--------------------------------------------------------------------------
 
   !define MUI_PRODUCT   "POPFile"
-  !define MUI_VERSION   "0.20.0RC4"
+  !define MUI_VERSION   "0.20.0"
 
   !define C_README        "v0.20.0.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
@@ -211,6 +211,7 @@
 #   ; Default bucket selection (use "" if no buckets are to be pre-selected)
 #
 #   !define CBP_DEFAULT_LIST "inbox|spam|personal|work"
+  !define CBP_DEFAULT_LIST "spam|personal|work|other"
 #
 #   ; List of suggestions for bucket names (use "" if no suggestions are required)
 #
@@ -246,6 +247,7 @@
   !insertmacro CBP_PAGE_SELECTBUCKETS
   Page custom SetOutlookExpressPage
   Page custom StartPOPFilePage "CheckLaunchOptions"
+  Page custom ConvertCorpusPage
   !insertmacro MUI_PAGE_FINISH
 
   ; Uninstaller Pages
@@ -287,7 +289,7 @@
 
   ; Debug aid: Hide the installation log but let user display it (using "Show details" button)
 
-  !define MUI_FINISHPAGE_NOAUTOCLOSE
+;  !define MUI_FINISHPAGE_NOAUTOCLOSE
 
   ;-----------------------------------------
   ; General Settings - Other Settings
@@ -441,6 +443,7 @@
         !insertmacro PFI_LANG_LOAD "Slovak"
         !insertmacro PFI_LANG_LOAD "Finnish"      ; 'New style' license msgs missing (27-Jun-03)
         !insertmacro PFI_LANG_LOAD "Swedish"
+        !insertmacro PFI_LANG_LOAD "Turkish"
         !insertmacro PFI_LANG_LOAD "Ukrainian"
 
   !endif
@@ -478,6 +481,7 @@
   ReserveFile "ioA.ini"
   ReserveFile "ioB.ini"
   ReserveFile "ioC.ini"
+  ReserveFile "ioD.ini"
   ReserveFile "${C_RELEASE_NOTES}"
 
 #--------------------------------------------------------------------------
@@ -503,6 +507,7 @@ Function .onInit
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioA.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioB.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioC.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioD.ini"
 
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "${C_RELEASE_NOTES}" "${C_README}"
 
@@ -552,16 +557,16 @@ Function PFIGUIInit
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "$(PFI_LANG_MBRELNOTES_1)\
       $\r$\n$\r$\n\
-      $(PFI_LANG_MBRELNOTES_2)" IDNO exit
+      $(PFI_LANG_MBRELNOTES_2)" IDNO continue
 
   StrCmp $G_NOTEPAD "" use_file_association
   ExecWait 'notepad.exe "$PLUGINSDIR\${C_README}.txt"'
-  GoTo exit
+  GoTo continue
 
 use_file_association:
   ExecShell "open" "$PLUGINSDIR\${C_README}.txt"
 
-exit:
+continue:
 
   ; Insert appropriate language strings into the custom page INI files
   ; (the CBP package creates its own INI file so there is no need for a CBP *Page_Init function)
@@ -569,6 +574,7 @@ exit:
   Call SetOptionsPage_Init
   Call SetOutlookExpressPage_Init
   Call StartPOPFilePage_Init
+  Call ConvertCorpusPage_Init
 
   ; Ensure the 'Kakasi' section is selected if 'Japanese' has been chosen
 
@@ -821,6 +827,8 @@ update_config:
                  "$INSTDIR\popfile.exe"
   CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\Uninstall POPFile.lnk" \
                  "$INSTDIR\uninstall.exe"
+  CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\Release Notes.lnk" \
+                 "$INSTDIR\${C_README}.txt"
 
   SetOutPath "$SMPROGRAMS\${MUI_PRODUCT}"
   WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\POPFile User Interface.url" \
@@ -944,8 +952,13 @@ backup_corpus:
   IntOp ${L_TEMP} ${L_TEMP} + 1
   StrCpy ${L_TEMP} ${L_CORPUS_PATH} "" ${L_TEMP}
 
+  ClearErrors
   CopyFiles /SILENT "${L_CORPUS_PATH}\*.*" "$INSTDIR\backup\${L_TEMP}"
+  IfErrors 0 continue
+  DetailPrint "Error detected when making corpus backup"
+  MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_MBFFCERR_1)"
 
+continue:
   WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Corpus" "${L_TEMP}"
   WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "new"
 
@@ -1073,6 +1086,7 @@ use_installer_lang:
         !insertmacro UI_LANG_CONFIG "SLOVAK" "Slovak"
         !insertmacro UI_LANG_CONFIG "FINNISH" "Suomi"
         !insertmacro UI_LANG_CONFIG "SWEDISH" "Svenska"
+        !insertmacro UI_LANG_CONFIG "TURKISH" "Turkce"
         !insertmacro UI_LANG_CONFIG "UKRAINIAN" "Ukrainian"
 
         ; at this point, no match was found so we use the default POPFile UI language
@@ -1151,13 +1165,16 @@ SectionEnd
 
 #--------------------------------------------------------------------------
 # Component-selection page descriptions
+#
+# There is no need to provide any translations for the 'SecKakasi' description
+# because it is only visible when the installer is built in ENGLISH_MODE.
 #--------------------------------------------------------------------------
 
   !insertmacro MUI_FUNCTIONS_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile} $(DESC_SecPOPFile)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}   $(DESC_SecSkins)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}   $(DESC_SecLangs)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecKakasi}   "Kakasi"
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecKakasi}   "Kakasi (used to process Japanese email)"
   !insertmacro MUI_FUNCTIONS_DESCRIPTION_END
 
 #--------------------------------------------------------------------------
@@ -1297,57 +1314,12 @@ check_exe:
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" unlocked_exit
 
-  StrCmp ${L_OLD_GUI} "" try_new_style
-
-  DetailPrint "Trying browser request for ${L_OLD_GUI} [old style port]"
-  ClearErrors
-  ExecShell "open" "http://127.0.0.1:${L_OLD_GUI}/shutdown"
-  IfErrors 0 old_ok
-  DetailPrint "ExecShell error detected"
-
-old_ok:
-  DetailPrint "Waiting for 5 seconds..."
-  Sleep 5000
-  BringToFront
-  DetailPrint "Waiting for '${L_EXE}' to unlock after browser request..."
-  DetailPrint "Please be patient, this may take more than 30 seconds"
-  Push ${L_EXE}
-  Call WaitUntilUnlocked
-  DetailPrint "Checking if '${L_EXE}' is still locked after browser request..."
-  Push ${L_EXE}
-  Call CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" unlocked_exit
-
-try_new_style:
-  StrCmp ${L_NEW_GUI} "" manual_shutdown_required
-  DetailPrint "Trying browser request for ${L_NEW_GUI} [new style port]"
-  ClearErrors
-  ExecShell "open" "http://127.0.0.1:${L_NEW_GUI}/shutdown"
-  IfErrors 0 new_ok
-  DetailPrint "ExecShell error detected"
-
-new_ok:
-  DetailPrint "Waiting for 5 seconds..."
-  Sleep 5000
-  BringToFront
-  DetailPrint "Waiting for '${L_EXE}' to unlock after browser request..."
-  DetailPrint "Please be patient, this may take more than 30 seconds"
-  Push ${L_EXE}
-  Call WaitUntilUnlocked
-  DetailPrint "Checking if '${L_EXE}' is still locked after browser request..."
-  Push ${L_EXE}
-  Call CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" unlocked_exit
-
-manual_shutdown_required:
   DetailPrint "Unable to shutdown automatically - manual intervention requested"
-  MessageBox MB_OK|MB_TOPMOST "Unable to shutdown POPFile automatically.\
+  MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
-      Please shutdown POPFile manually now.\
+      $(PFI_LANG_MBMANSHUT_2)\
       $\r$\n$\r$\n\
-      When POPFile has been shutdown, click 'OK' to continue."
+      $(PFI_LANG_MBMANSHUT_3)"
   Goto exit_now
 
 unlocked_exit:
@@ -2112,7 +2084,7 @@ FunctionEnd
 # A "leave" function (CheckLaunchOptions) is used to act upon the selection made by the user.
 #
 # The user is allowed to change their selection by returning to this page (by clicking 'Back'
-# on the 'Finish' page).
+# on the 'Finish' page) if corpus conversion is not required.
 #
 # The [Inherited] section in 'ioC.ini' has information on the system tray icon and console mode
 # settings found in 'popfile.cfg'. Valid values are 0 (disabled), 1 (enabled) and ? (undefined).
@@ -2162,40 +2134,9 @@ close_file:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "Flags" "DISABLED"
 
-  ; If we are upgrading POPFile, the corpus might have to be converted from flat file format
-
-  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
-  StrCmp ${L_TEMP} "new" 0 display_the_page
-  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "old"
-
-  ; Corpus conversion will occur when POPFile is started - this may take several minutes,
-  ; so we ensure that POPFile will not be run in the background when it is run for the
-  ; first time (by using the Start Menu or by running 'popfile.exe').
-
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "1"
-  Push "1"
-  Call SetConsoleMode
   Goto display_the_page
 
 page_enabled:
-
-  ; If we are upgrading POPFile, the corpus might have to be converted from flat file format
-
-  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
-  StrCmp ${L_TEMP} "new" 0 continue
-  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "old"
-
-  ; Corpus conversion will occur when POPFile is started - this may take several minutes,
-  ; so we ensure that POPFile will not be run in the background when it is run for the
-  ; first time (by the installer, by using the Start Menu or by running 'popfile.exe').
-
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "1"
-  Push "1"
-  Call SetConsoleMode
-
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "Flags" "DISABLED"
-
-continue:
 
   ; clear all three radio buttons ('do not start', 'use console', 'run in background')
 
@@ -2244,6 +2185,9 @@ FunctionEnd
 # This function is used to action the "start POPFile" option selected by the user.
 # The user is allowed to return to this page and change their selection, so the
 # previous state is stored in the INI file used for this custom page.
+#
+# If corpus conversion is required, this function will not launch POPFile
+# (but it will still update 'popfile.cfg' to reflect the user's startup choice)
 #--------------------------------------------------------------------------
 
 Function CheckLaunchOptions
@@ -2334,6 +2278,9 @@ lastaction_background:
   StrCpy ${L_CONSOLE} "0"
 
 display_banner:
+  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
+  StrCmp ${L_TEMP} "new" exit_without_banner
+
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_LAUNCH_BANNER_1)" "$(PFI_LANG_LAUNCH_BANNER_2)"
 
   ; Before starting the newly installed POPFile, ensure that no other version of POPFile
@@ -2350,11 +2297,11 @@ display_banner:
   Exec '"$INSTDIR\popfile.exe"'
   IfErrors 0 continue
   Banner::destroy
-  MessageBox MB_OK|MB_TOPMOST "An error occurred when the installer tried to start POPFile.\
+  MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "An error occurred when the installer tried to start POPFile.\
       $\r$\n$\r$\n\
       Please use 'Start -> Programs -> POPFile -> Run POPFile' now.\
       $\r$\n$\r$\n\
-      Click 'OK' when the 'POPFile Engine v0.20.0 running' message appears."
+      Click 'OK' once POPFile has been started."
   Goto exit_without_banner
 
 continue:
@@ -2393,6 +2340,53 @@ exit_without_banner:
 FunctionEnd
 
 #--------------------------------------------------------------------------
+# Installer Function: ConvertCorpusPage_Init (adds language texts to custom page INI file)
+#
+# This function adds language texts to the INI file used by the "ConvertCorpusPage" function
+# (to make the custom page use the language selected by the user for the installer)
+#--------------------------------------------------------------------------
+
+Function ConvertCorpusPage_Init
+
+  !insertmacro PFI_IO_TEXT "ioD.ini" "1" "$(PFI_LANG_FLATFILE_IO_NOTE_1)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "2" "$(PFI_LANG_FLATFILE_IO_NOTE_2)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "3" "$(PFI_LANG_FLATFILE_IO_NOTE_3)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "4" "$(PFI_LANG_FLATFILE_IO_NOTE_4)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "5" "$(PFI_LANG_FLATFILE_IO_NOTE_5)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "6" "$(PFI_LANG_FLATFILE_IO_NOTE_6)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "7" "$(PFI_LANG_FLATFILE_IO_NOTE_7)"
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: ConvertCorpusPage (generates a custom page)
+#
+# Displays custom page when an existing flat file corpus has to be converted to the new
+# BerkeleyDB format. Conversion may take several minutes during which time the POPFile
+# User Interface will be unresponsive.
+#--------------------------------------------------------------------------
+
+Function ConvertCorpusPage
+
+  !define L_TEMP   $R9
+
+  Push ${L_TEMP}
+
+  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
+  StrCmp ${L_TEMP} "new" 0 exit
+
+  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_FLATFILE_TITLE)" "$(PFI_LANG_FLATFILE_SUBTITLE)"
+
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioD.ini"
+
+exit:
+  Pop ${L_TEMP}
+
+  !undef L_TEMP
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Installer Function: CheckRunStatus
 # (the "pre" function for the 'Finish' page)
 #
@@ -2402,6 +2396,7 @@ FunctionEnd
 # CheckBox can only be ticked if the installer has started POPFile.
 #
 # NB: User can switch back and forth between the 'Start POPFile' page and the 'Finish' page
+# (when corpus conversion is not required)
 #--------------------------------------------------------------------------
 
 Function CheckRunStatus
@@ -2409,6 +2404,10 @@ Function CheckRunStatus
   !define L_TEMP        $R9
 
   Push ${L_TEMP}
+
+  ; If POPFile is running in a console window, it might be obscuring the installer
+
+  BringToFront
 
   IfRebootFlag 0 no_reboot_reqd
 
@@ -2433,12 +2432,20 @@ no_reboot_reqd:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "State"
   StrCmp ${L_TEMP} "1" disable_UI_option
 
-  ; Get 'Flags' for the 'Run POPFile in background' radio button on the 'Start POPFile' page
   ; If flat file corpus conversion is required, we cannot offer to display the POPFile UI
   ; (conversion may take several minutes, during which time the UI will be unresponsive)
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 4" "Flags"
-  StrCmp ${L_TEMP} "DISABLED" 0 selection_ok
+  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
+  StrCmp ${L_TEMP} "new" 0 selection_ok
+
+  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "old"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Settings" "BackEnabled" "0"
+
+  SetOutPath $INSTDIR
+  ClearErrors
+  Exec '"$INSTDIR\popfilef.exe"'
+  IfErrors 0 disable_UI_option
+  MessageBox MB_OK|MB_TOPMOST "An error occurred when starting the corpus conversion process."
 
 disable_UI_option:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "State" "0"
@@ -2614,6 +2621,7 @@ remove_shortcuts:
   Delete "$SMPROGRAMS\${MUI_PRODUCT}\Support\POPFile Manual.url"
   RMDir "$SMPROGRAMS\${MUI_PRODUCT}\Support"
 
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\Release Notes.lnk"
   Delete "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile.lnk"
   Delete "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${MUI_PRODUCT}\Shutdown POPFile silently.lnk"
