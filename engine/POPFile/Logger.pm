@@ -196,7 +196,7 @@ sub remove_debug_files
     my ( $self ) = @_;
 
     my @debug_files = glob( $self->get_user_path_(
-                          $self->config_( 'logdir' ) . 'popfile*.log' ) );
+                          $self->config_( 'logdir' ) . 'popfile*.log', 0 ) );
 
     foreach my $debug_file (@debug_files) {
         # Extract the epoch information from the popfile log file name
