@@ -28,7 +28,9 @@
 #--------------------------------------------------------------------------
 #
 # Translation created by: Matthias Deege (pfaelzerchen at users.sourceforge.net)
+#
 # Translation updated by: Matthias Deege (pfaelzerchen at users.sourceforge.net)
+# Translation updated by: Manni Heumann  (mannih2001 at users.sourceforge.net)
 #
 #--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_MB* text used for message boxes):
@@ -90,8 +92,8 @@
 # Standard MUI Page - Installation Page (for the main POPFile installer)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_TITLE     "Program Files Installed"
-!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_SUBTITLE  "${C_PFI_PRODUCT} must be configured before it can be used"
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_TITLE     "Komponenten wurden installiert"
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_SUBTITLE  "${C_PFI_PRODUCT} muss konfiguriert werden, bevor es benutzt werden kann"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish (for the main POPFile installer)
@@ -187,7 +189,7 @@
 # Message displayed when 'Add User' does not seem to be part of the current version
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_COMPAT_NOTFOUND      "Error: Compatible version of ${C_PFI_PRODUCT} not found !"
+!insertmacro PFI_LANG_STRING PFI_LANG_COMPAT_NOTFOUND      "Fehler: Kompatible Version von ${C_PFI_PRODUCT} konnte nicht gefunden werden!"
 
 #--------------------------------------------------------------------------
 # Message displayed when installer exits because another copy is running
@@ -202,15 +204,15 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1   "Vorhandene Installation gefunden:"
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2   "Wollen Sie die bestehende Version aktualisieren?"
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_3   "Ältere Konfigurationsdaten gefunden:"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_4   "Restored configuration data found"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_5   "Do you want to use the restored data ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_4   "Wiederhergestellte Konfigurationsdaten wurden gefunden"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_5   "Möchten Sie die wiederhergestellten Daten verwenden?"
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_1         "Hinweise zu dieser POPFile-Version anzeigen?"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_2         "Falls Sie von einer älteren Version updaten, sollten Sie 'Ja' wählen. (Sie sollten evtl. Backups VOR dem Update anlegen)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_2         "Falls Sie von einer älteren Version updaten, sollten Sie 'Ja' wählen.$\r$\nVOR dem Update sollten Sie evtl. Backups anlegen."
 
 #--------------------------------------------------------------------------
 # Custom Page - Check Perl Requirements
@@ -238,17 +240,17 @@
 !insertmacro PFI_LANG_STRING DESC_SecSkins                 "Installiert POPFile Skins, mit denen Sie die Benutzeroberfläche von POPFile anpassen können."
 !insertmacro PFI_LANG_STRING DESC_SecLangs                 "Installiert Unterstützung für weitere (nicht-englische) Sprachen."
 
-!insertmacro PFI_LANG_STRING DESC_SubSecOptional           "Extra POPFile components (for advanced users)"
-!insertmacro PFI_LANG_STRING DESC_SecIMAP                  "Installs the POPFile IMAP module"
-!insertmacro PFI_LANG_STRING DESC_SecNNTP                  "Installs POPFile's NNTP proxy"
-!insertmacro PFI_LANG_STRING DESC_SecSMTP                  "Installs POPFile's SMTP proxy"
-!insertmacro PFI_LANG_STRING DESC_SecSOCKS                 "Installs extra Perl components which allow the POPFile proxies to use SOCKS"
-!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Installs the POPFile XMLRPC module (for access to the POPFile API) and the Perl support it requires."
+!insertmacro PFI_LANG_STRING DESC_SubSecOptional           "Zusätzliche POPFile Komponenten (für fortgeschrittene Benutzer)"
+!insertmacro PFI_LANG_STRING DESC_SecIMAP                  "Installiert das POPFile IMAP Modul"
+!insertmacro PFI_LANG_STRING DESC_SecNNTP                  "Installiert POPFiles NNTP Proxy"
+!insertmacro PFI_LANG_STRING DESC_SecSMTP                  "Installiert POPFiles SMTP Proxy"
+!insertmacro PFI_LANG_STRING DESC_SecSOCKS                 "Installiert zusätliche Perl Module, die es den POPFile Proxies erlauben, SOCKS zu verwenden"
+!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Installiert das POPFile XMLRPC Modul, das Zugriff zum POPFile-API erlaubt, und die benötigten Perl Komponenten"
 
 ; Text strings used when user has NOT selected a component found in the existing installation
 
-!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_1            "Do you want to upgrade the existing $G_PLS_FIELD_1 component ?"
-!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_2            "(using out of date POPFile components can cause problems)"
+!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_1            "Möchten Sie die existierende $G_PLS_FIELD_1 Komponente aktualisieren?"
+!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_2            "(die Benutzung veralteter Komponenten kann Probleme verursachen)"
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
@@ -261,11 +263,11 @@
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_POP3      "Wählen Sie den Standart-Port für POP3-Verbindungen (110 empfohlen)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_POP3      "Wählen Sie den Standard-Port für POP3-Verbindungen (110 empfohlen)"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI       "Wählen Sie den Standard-Port für Verbindungen zur Benutzeroberfläche (8080 empfohlen)"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP   "POPFile mit Windows starten"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_WARNING   "WICHTIGER HINWEIS"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE   "WENN SIE POPFILE UPDATEN: SETUP WIRD DIE VORHANDENE VERSION BEENDEN, FALLS DIESE IM HINTERGRUND LÄUFT"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE   "Wenn Sie POPFile aktualisieren: Setup wird die vorhandene Version beenden, falls diese im Hintergrund läuft"
 
 ; Message Boxes used when validating user's selections
 
@@ -287,11 +289,11 @@
 ; When upgrading an existing installation, change the normal "Install" button to "Upgrade"
 ; (the page with the "Install" button will vary depending upon the page order in the script)
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_UPGRADE     "Upgrade"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_UPGRADE     "Aktualisieren"
 
 ; When resetting POPFile to use newly restored 'User Data', change "Install" button to "Restore"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_RESTORE     "Restore"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_RESTORE     "Wiederherstellen"
 
 ; Installation Progress Reports displayed above the progress bar
 
@@ -302,11 +304,11 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORPUS     "Erstelle Corpus Backup. Dies kann einige Sekunden dauern..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      "Installiere Skins..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "Installiere Sprachdateien..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Installing POPFile XMLRPC files..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_REGSET     "Updating registry settings and environment variables..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SQLBACKUP  "Backing up the old SQLite database..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FINDCORPUS "Looking for existing flat-file or BerkeleyDB corpus..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_MAKEBAT    "Generating the 'pfi-run.bat' batch file..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Installiere POPFile XMLRPC Dateien..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_REGSET     "Aktualisieren Registry und Umgebungsvariablen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SQLBACKUP  "Erstelle Sicherungskopie der alten SQLite Datenbank..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FINDCORPUS "Suche nach vorhandenem nur-Text oder BerkeleyDB Corpus..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_MAKEBAT    "Erstelle die 'pfi-run.bat' Batch Datei..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "Klicken Sie auf Weiter um fortzufahren"
 
 ; Installation Log Messages
@@ -317,8 +319,8 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_1           "Datei einer älteren Version gefunden."
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_2           "Diese Datei aktualisieren?"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3           "Wählen Sie 'Ja', um diese zu aktualisieren (Die alte Datei wird gespeichert unter"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4           "Wählen Sie 'Nein', um die alte Datei zu behalten (Die neue Datei wird gespeichert unter"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3           "Wählen Sie 'Ja', um diese zu aktualisieren (die alte Datei wird gespeichert unter"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4           "Wählen Sie 'Nein', um die alte Datei zu behalten (die neue Datei wird gespeichert unter"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "$G_PLS_FIELD_1 kann nicht automatisch beendet werden."
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "Bitte beenden Sie $G_PLS_FIELD_1 jetzt manuell."
@@ -521,8 +523,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO         "Nein (Die Benutzeroberfläche kann bis zum Start von POPFile nicht verwendet werden)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "POPFile starten (in einem Fenster)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "POPFile im Hintergrund starten (kein Fenster anzeigen)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Run POPFile (do not show system tray icon)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Run POPFile with system tray icon"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "POPFile starten (das Symbol im System-Tray nicht anzeigen)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "POPFile mit Symbol im System-Tray starten"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "Wenn POPFile gestartet wurde, können Sie die Benutzeroberfläche aufrufen, indem"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(a) Sie auf das POPFile-Symbol neben der Uhr doppelklicken oder indem"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(b) Sie Start --> Programme --> POPFile --> POPFile User Interface wählen."
@@ -607,7 +609,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Wollen Sie alle Dateien im POPFile-Verzeichnis löschen? (Wenn Sie irgendetwas erstellt haben, was sie behalten möchten, wählen Sie Nein)"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Wollen Sie alle Dateien im Benutzerdatenverzeichnis löschen?$\r$\n$\r$\n(Wenn Sie irgendetwas erstellt haben, was sie behalten möchten, wählen Sie Nein)"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Do you want to remove all files in your 'Recent Messages' directory?"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Möchten Sie alle Dateien aus der Liste der 'Aktuellen Nachrichten' entfernen?"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "Hinweis"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "konnte nicht entfernt werden."
