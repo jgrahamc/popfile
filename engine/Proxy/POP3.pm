@@ -194,6 +194,7 @@ sub service
                 if ( $pid == 0 ) {
                     close $self->{server};  # Not needed in the child process
                     child( $self, $client, $self->{configuration}->{configuration}{download_count} );
+                    exit(0);
                 }
             }
 
@@ -428,10 +429,6 @@ sub child
     }
 
     close $mail if ( $mail );
-
-    debug( $self, "Exiting" );
-
-    exit(0);
 }
 
 # ---------------------------------------------------------------------------------------------

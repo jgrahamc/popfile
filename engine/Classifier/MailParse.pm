@@ -582,22 +582,22 @@ sub parse_stream
                 # TODO: find a way to make this (and other similar stuff) highlight
                 #       without using the encoded content printer or modifying $self->{ut}
                 if ( $self->{content_type} =~ /html/ ) {
-                     while ( $line =~ /\&([\w]{3,6})\;/ ) {
-                         my $from = "&$1;";                         
-                         my $to = $entityhash{"$1"};
-                         if ($to < 255 && $to > 159) {
-                            $to = chr($to);
-                            $line =~ s/$from/$to/g;
+                     while ( $line =~ m/\G(\&([\w]{3,6})\;)/g ) {
+                         my $from = $2;                         
+                         my $to   = $entityhash{$1};
+                         if ( defined( $to ) ) {
+                            $to         = chr($to);
+                            $line       =~ s/$from/$to/g;
                             $self->{ut} =~ s/$from/$to/g;
-                            print "\"$from\" -> \"$to\"\n" if $self->{debug};
-                        }
+                            print "$from -> $to\n" if $self->{debug};
+                         } 
                      }
-                     while ( $line =~ /\&\#([\d]{3})\;/ ) {
-                         if ($1 < 255 && $1 > 159) {
-                            my $from = "&#$1;";
-                            my $to = chr($1);
-                            if (defined $to && $to ne '') {
-                                $line =~ s/$from/$to/g;
+                     while ( $line =~ /(\&\#([\d]{3})\;)/ ) {
+                         if ( ( $1 < 255 ) && ( $1 > 159 ) ) {
+                            my $from = $1;
+                            my $to   = chr($2);
+                            if ( defined( $to ) &&  ( $to ne '' ) ) {
+                                $line       =~ s/$from/$to/g;
                                 $self->{ut} =~ s/$from/$to/g;
                             }
                         }
