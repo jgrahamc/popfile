@@ -213,6 +213,7 @@ CONFIGIS  html_page_size 20
 SETSUBMIT page_size 30
 INPUTIS   page_size 30
 CONFIGIS  html_page_size 30
+MATCH Updated number of messages per page to 30
 SETSUBMIT page_size 0
 MATCH The page size must be a number between 1 and 1000
 INPUTIS   page_size 30
@@ -224,6 +225,7 @@ CONFIGIS  html_history_days 2
 SETSUBMIT history_days 3
 INPUTIS   history_days 3
 CONFIGIS  html_history_days 3
+MATCH Updated number of days of history to 3
 SETSUBMIT history_days 0
 MATCH The number of days in the history must be a number between 1 and 366
 INPUTIS   history_days 3
@@ -235,6 +237,7 @@ CONFIGIS  GLOBAL_timeout 60
 SETSUBMIT timeout 61
 INPUTIS   timeout 61
 CONFIGIS  GLOBAL_timeout 61
+MATCH Updated connection timeout to 61
 SETSUBMIT timeout 0
 MATCH The TCP timeout must be a number between 10 and 300
 INPUTIS   timeout 61
@@ -246,6 +249,7 @@ CONFIGIS  pop3_port 110
 SETSUBMIT pop3_port 111
 INPUTIS   pop3_port 111
 CONFIGIS  pop3_port 111
+MATCH Updated POP3 port to 111; this change will not take affect until you restart POPFile
 SETSUBMIT pop3_port 0
 MATCH The POP3 listen port must be a number between 1 and 65535
 INPUTIS   pop3_port 111
@@ -257,6 +261,7 @@ CONFIGIS  pop3_separator :
 SETSUBMIT pop3_separator ;
 INPUTIS   pop3_separator ;
 CONFIGIS  pop3_separator ;
+MATCH Updated POP3 separator to ;
 SETSUBMIT pop3_separator gg
 MATCH The separator character must be a single character
 INPUTIS   pop3_separator ;
@@ -306,33 +311,113 @@ CONFIGIS  html_port $port
 SETSUBMIT ui_port 8081
 INPUTIS   ui_port 8081
 CONFIGIS  html_port 8081
+MATCH Updated user interface web port to 8081; this change will not take affect until you restart POPFile
 SETSUBMIT ui_port 0
 MATCH The user interface port must be a number between 1 and 65535
 INPUTIS   ui_port 8081
 
-# TODO Check XMLRPC port
-# TODO Check SMTP port
-# TODO Check NNTP port
-# TODO Check NNTP separator
+# TODO Check XMLRPC port (write when doing TestXMLRPC)
+# TODO Check SMTP port (write when doing TestSMTP)
+# TODO Check NNTP port (write when doing TestNNTP)
+# TODO Check NNTP separator (write when doing TestNNTP)
 # TODO Check Windows icon
 
-# TODO Security Page
+# Security Page
 
-# TODO Check POP3 stealth
-# TODO Check SMTP stealth
-# TODO Check NNTP stealth
-# TODO Check XMLRPC stealth
-# TODO Check UI stealth
-# TODO Check POP3 AUTH options
-# TODO Check SMTP chain options
-# TODO Check autoupdate
-# TODO Check statistics sending
-# TODO Check password
+GET /security
 
-# TODO Advanced Page
+# Check POP3 stealth
 
-# TODO Check presence of ignore words
-# TODO Check add ignore word
+INPUTIS pop3_local 1
+CONFIGIS pop3_local 1
+SETSUBMIT pop3_local 1
+INPUTIS pop3_local 2
+CONFIGIS pop3_local 0
+SETSUBMIT pop3_local 2
+INPUTIS pop3_local 1
+CONFIGIS pop3_local 1
+
+# Check UI stealth
+
+INPUTIS localui 1
+CONFIGIS html_local 1
+SETSUBMIT localui 1
+INPUTIS localui 2
+CONFIGIS html_local 0
+SETSUBMIT localui 2
+INPUTIS localui 1
+CONFIGIS html_local 1
+
+# Check POP3 AUTH options
+
+INPUTIS   server
+CONFIGIS  pop3_secure_server
+SETSUBMIT server secure.com
+INPUTIS   server secure.com
+CONFIGIS  pop3_secure_server secure.com
+MATCH Updated POP3 SPA/AUTH secure server to secure.com; this change will not take affect until you restart POPFile
+
+INPUTIS   sport 110
+CONFIGIS  pop3_secure_port 110
+SETSUBMIT sport 111
+INPUTIS   sport 111
+CONFIGIS  pop3_secure_port 111
+MATCH Updated POP3 SPA/AUTH port to 111; this change will not take affect until you restart POPFile
+
+# Check autoupdate
+
+INPUTIS update_check 2
+CONFIGIS html_update_check 0
+SETSUBMIT update_check 1
+INPUTIS update_check 2
+CONFIGIS html_update_check 0
+SETSUBMIT update_check 2
+INPUTIS update_check 1
+CONFIGIS html_update_check 1
+
+# Check statistics sending
+
+INPUTIS send_stats 2
+CONFIGIS html_send_stats 0
+SETSUBMIT send_stats 1
+INPUTIS send_stats 2
+CONFIGIS html_send_stats 0
+SETSUBMIT send_stats 2
+INPUTIS send_stats 1
+CONFIGIS html_send_stats 1
+
+# Check password
+
+INPUTIS password
+CONFIGIS html_password
+SETSUBMIT password secret
+CONFIGIS html_password secret
+MATCH Updated password to secret
+SETSUBMIT password
+INPUTIS password
+MATCH Updated password to 
+
+# TODO Check SMTP stealth (write when doing TestSMTP)
+# TODO Check SMTP chain options (write when doing TestSMTP)
+# TODO Check NNTP stealth (write when doing TestNNTP)
+# TODO Check XMLRPC stealth (write when doing TestXMLRPC)
+
+# Advanced Page
+
+GET /advanced
+
+# Check presence of ignore words
+
+MATCH one
+MATCH two
+MATCH three
+
+# Check add ignore word
+
+CONFIGIS newword
+SETSUBMIT newword four
+MATCH four
+
 # TODO Check remove ignore word
 # TODO Check change arbitrary parameter
 

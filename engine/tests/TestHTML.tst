@@ -30,6 +30,11 @@ test_assert( `cp -R corpus.base corpus` == 0 );
 test_assert( `rm -rf corpus/CVS` == 0 );
 test_assert( `rm -rf messages` == 0 );
 
+unlink( 'stopwords' );
+open STOPS, ">stopwords";
+print "one\ntwo\nthree\n";
+close STOPS;
+
 mkdir 'messages';
 my @messages = glob '*.msg';
 
@@ -259,8 +264,9 @@ if ( $pid == 0 ) {
             next;
 	}
 
-        if ( $line =~ /^CONFIGIS +([^ ]+) (.+)$/ ) {
+        if ( $line =~ /^CONFIGIS +([^ ]+) ?(.+)?$/ ) {
             my ( $option, $expected ) = ( $1, $2 );
+            $expected = '' if ( !defined( $expected ) );
             print $dwriter "__GETCONFIG $option\n";
             my $reply = <$ureader>;
             $reply =~ /^OK (.+)$/;
@@ -268,8 +274,10 @@ if ( $pid == 0 ) {
             next;
 	}
 
-        if ( $line =~ /^INPUTIS +([^ ]+) (.+)$/ ) {
-            test_assert_equal( form_input( $1 ), $2, "From script line $line_number" );
+        if ( $line =~ /^INPUTIS +([^ ]+) ?(.+)?$/ ) {
+            my ( $name, $expected ) = ( $1, $2 );
+            $expected = '' if ( !defined( $expected ) );
+            test_assert_equal( form_input( $name ), $expected, "From script line $line_number" );
             next;
 	}
 
