@@ -79,6 +79,13 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TEXT_DESTN   "Destination Folder for the POPFile Program"
 
 #--------------------------------------------------------------------------
+# Standard MUI Page - Installation Page (for the main POPFile installer)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_TITLE     "Program Files Installed"
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_SUBTITLE  "${C_PFI_PRODUCT} must be configured before it can be used"
+
+#--------------------------------------------------------------------------
 # Standard MUI Page - Finish (for the main POPFile installer)
 #
 # The PFI_LANG_FINISH_RUN_TEXT text should be a short phrase (not a long paragraph)
