@@ -1376,22 +1376,23 @@ input_loop:
   IntCmp ${CBP_L_COUNT} ${CBP_C_MAX_BNCOUNT} at_the_limit
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_C_MESSAGE}" \
-      "Text" "$(PFI_LANG_CBP_IO_MSG_1)"
+      "Text" "$(PFI_LANG_CBP_IO_MSG_A)"
   goto update_lists
 
 zero_so_far:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_C_MESSAGE}" \
-      "Text" "$(PFI_LANG_CBP_IO_MSG_2)"
+      "Text" "$(PFI_LANG_CBP_IO_MSG_B)"
   goto update_lists
 
 just_one:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_C_MESSAGE}" \
-      "Text" "$(PFI_LANG_CBP_IO_MSG_3)"
+      "Text" "$(PFI_LANG_CBP_IO_MSG_C)"
   goto update_lists
 
 at_the_limit:
+  StrCpy $G_PLS_FIELD_1 "${CBP_C_MAX_BNCOUNT}"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_C_MESSAGE}" \
-      "Text" "$(PFI_LANG_CBP_IO_MSG_4) ${CBP_C_MAX_BNCOUNT} $(PFI_LANG_CBP_IO_MSG_5)"
+      "Text" "$(PFI_LANG_CBP_IO_MSG_D)"
 
 update_lists:
 
@@ -1577,37 +1578,41 @@ does_not_exist:
   goto get_next_bucket_cmd
 
 name_exists:
+  StrCpy $G_PLS_FIELD_1 "${CBP_L_CREATE_NAME}"
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_CBP_MBDUPERR_1) $\"${CBP_L_CREATE_NAME}$\" $(PFI_LANG_CBP_MBDUPERR_2)\
+      "$(PFI_LANG_CBP_MBDUPERR_A)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_CBP_MBDUPERR_3)"
+      $(PFI_LANG_CBP_MBDUPERR_B)"
   goto get_next_bucket_cmd
 
 too_many:
+  StrCpy $G_PLS_FIELD_1 "${CBP_C_MAX_BNCOUNT}"
   MessageBox MB_OK|MB_ICONINFORMATION \
-      "$(PFI_LANG_CBP_MBMAXERR_1) ${CBP_C_MAX_BNCOUNT} $(PFI_LANG_CBP_MBMAXERR_2)\
+      "$(PFI_LANG_CBP_MBMAXERR_A)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_CBP_MBMAXERR_3) ${CBP_C_MAX_BNCOUNT} $(PFI_LANG_CBP_MBMAXERR_2)"
+      $(PFI_LANG_CBP_MBMAXERR_B)"
   goto get_next_bucket_cmd
 
 bad_name:
+  StrCpy $G_PLS_FIELD_1 "${CBP_L_CREATE_NAME}"
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_CBP_MBNAMERR_1) $\"${CBP_L_CREATE_NAME}$\" $(PFI_LANG_CBP_MBNAMERR_2)\
+      "$(PFI_LANG_CBP_MBNAMERR_A)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_CBP_MBNAMERR_3)\
+      $(PFI_LANG_CBP_MBNAMERR_B)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_CBP_MBNAMERR_4)"
+      $(PFI_LANG_CBP_MBNAMERR_C)"
   goto get_next_bucket_cmd
 
 no_user_input:
   IntCmp ${CBP_L_COUNT} 0 need_buckets
   IntCmp ${CBP_L_COUNT} 1 too_few
+  StrCpy $G_PLS_FIELD_1 "${CBP_L_COUNT}"
   MessageBox MB_YESNO|MB_ICONQUESTION \
-      "${CBP_L_COUNT} $(PFI_LANG_CBP_MBDONE_1)\
+      "$(PFI_LANG_CBP_MBDONE_A)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_CBP_MBDONE_2)\
+      $(PFI_LANG_CBP_MBDONE_B)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_CBP_MBDONE_3)" IDYES finished_buckets
+      $(PFI_LANG_CBP_MBDONE_C)" IDYES finished_buckets
   goto get_next_bucket_cmd
 
 need_buckets:
@@ -1631,11 +1636,12 @@ finished_buckets:
   Call CBP_MakePOPFileBuckets
   Pop ${CBP_L_RESULT}
   StrCmp ${CBP_L_RESULT} "0" finished_now
+  StrCpy $G_PLS_FIELD_1 "${CBP_L_RESULT}"
+  StrCpy $G_PLS_FIELD_2 "${CBP_L_COUNT}"
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_CBP_MBMAKERR_1) ${CBP_L_RESULT} $(PFI_LANG_CBP_MBMAKERR_2) ${CBP_L_COUNT} \
-      $(PFI_LANG_CBP_MBMAKERR_3)\
+      "$(PFI_LANG_CBP_MBMAKERR_A)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_CBP_MBMAKERR_4)"
+      $(PFI_LANG_CBP_MBMAKERR_B)"
 
 finished_now:
   StrCpy ${CBP_L_RESULT} "completed"

@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.64"
+  !define C_PFI_VERSION  "0.2.65"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -259,6 +259,7 @@
   Var G_SFN_DISABLED       ; 1 = short file names not supported, 0 = short file names available
 
   Var G_PLS_FIELD_1        ; used to customize translated text strings
+  Var G_PLS_FIELD_2        ; used to customize translated text strings (used in 'CBP.nsh' file)
 
   ; NSIS provides 20 general purpose user registers:
   ; (a) $R0 to $R9   are used as local registers
@@ -847,7 +848,7 @@ Section "POPFile" SecPOPFile
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_REGSET)"
   SetDetailsPrint listonly
-  
+
   IfFileExists "$G_USERDIR\*.*" userdir_exists
   ClearErrors
   CreateDirectory "$G_USERDIR"
@@ -911,20 +912,20 @@ update_HKCU_data:
   ; For flexibility, several global user variables are used to access installation folders
   ; (1) $G_ROOTDIR is initialized by the 'PFIGUIInit' function
   ; (2) $G_USERDIR is normally initialized by the 'User Data' DIRECTORY page
-  
+
   ReadRegStr ${L_TEMP} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
   Push ${L_TEMP}
   Call GetCompleteFPN
   Pop ${L_TEMP}
   StrCmp $G_ROOTDIR ${L_TEMP} 0 update_author
-  
+
   ; The version data in the registry applies to the POPFile programs we have found, so copy it
-  
+
   !insertmacro Copy_HKLM_to_HKCU "${L_TEMP}" "POPFile Major Version"
   !insertmacro Copy_HKLM_to_HKCU "${L_TEMP}" "POPFile Minor Version"
   !insertmacro Copy_HKLM_to_HKCU "${L_TEMP}" "POPFile Revision"
   !insertmacro Copy_HKLM_to_HKCU "${L_TEMP}" "POPFile RevStatus"
-  
+
 update_author:
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "adduser.exe"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Owner" "$G_WINUSERNAME"
@@ -1048,13 +1049,13 @@ stopwords:
   StrCmp ${L_TEMP} "same" copy_default_stopwords
 
   MessageBox MB_YESNO|MB_ICONQUESTION \
-      "POPFile 'stopwords' $(PFI_LANG_MBSTPWDS_1)\
+      "$(PFI_LANG_MBSTPWDS_A)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_MBSTPWDS_2)\
+      $(PFI_LANG_MBSTPWDS_B)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_MBSTPWDS_3) 'stopwords.bak')\
+      $(PFI_LANG_MBSTPWDS_C)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_MBSTPWDS_4) 'stopwords.default')" IDNO copy_default_stopwords
+      $(PFI_LANG_MBSTPWDS_D)" IDNO copy_default_stopwords
   IfFileExists "$G_USERDIR\stopwords.bak" 0 make_backup
   SetFileAttributes "$G_USERDIR\stopwords.bak" NORMAL
 
@@ -1984,9 +1985,9 @@ Function CheckExistingDataDir
   !define L_RESULT    $R9
 
   Push ${L_RESULT}
-  
+
   ; Strip trailing slashes (if any) from the path selected by the user
-  
+
   Push $INSTDIR
   Pop $INSTDIR
   StrCpy $G_USERDIR "$INSTDIR"
@@ -2567,11 +2568,11 @@ Function CheckPortOptions
 
 bad_pop3:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_OPTIONS_MBPOP3_1) $\"$G_POP3$\"'.\
+      "$(PFI_LANG_OPTIONS_MBPOP3_A)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_OPTIONS_MBPOP3_2)\
+      $(PFI_LANG_OPTIONS_MBPOP3_B)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_OPTIONS_MBPOP3_3)"
+      $(PFI_LANG_OPTIONS_MBPOP3_C)"
   Goto bad_exit
 
 pop3_ok:
@@ -2584,11 +2585,11 @@ pop3_ok:
 
 bad_gui:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_OPTIONS_MBGUI_1) $\"$G_GUI$\".\
+      "$(PFI_LANG_OPTIONS_MBGUI_A)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_OPTIONS_MBGUI_2)\
+      $(PFI_LANG_OPTIONS_MBGUI_B)\
       ${MB_NL}${MB_NL}\
-      $(PFI_LANG_OPTIONS_MBGUI_3)"
+      $(PFI_LANG_OPTIONS_MBGUI_C)"
   Goto bad_exit
 
 ports_must_differ:
@@ -3044,7 +3045,7 @@ open_logfiles:
 
   FileOpen  $G_OOECHANGES_HANDLE "$G_USERDIR\expchanges.txt" a
   FileSeek  $G_OOECHANGES_HANDLE 0 END
-  FileWrite $G_OOECHANGES_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_ExpCFG_LOG_AFTER) (${L_TEMP})\
+  FileWrite $G_OOECHANGES_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_EXPCFG_LOG_AFTER) (${L_TEMP})\
       ${MB_NL}${MB_NL}"
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_EXPCFG_LOG_IDENTITY)"   20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"    20
@@ -5250,7 +5251,7 @@ corpus_conv_check:
     Banner::show /NOUNLOAD /set 76 "Preparing to start POPFile." "This may take a few seconds..."
     Goto do_not_show_banner   ; sic!
 
-  show_banner:
+    show_banner:
   !endif
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_LAUNCH_BANNER_1)" "$(PFI_LANG_LAUNCH_BANNER_2)"
 
@@ -6143,8 +6144,9 @@ uninstall_files:
 
   IfFileExists "$G_USERDIR\*.*" 0 tidy_up
   DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
+  StrCpy $G_PLS_FIELD_1 $G_USERDIR
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_UN_MBREMERR_1): $G_USERDIR $(PFI_LANG_UN_MBREMERR_2)"
+      "$(PFI_LANG_UN_MBREMERR_A))"
 
 tidy_up:
   StrCmp $APPDATA "" 0 appdata_valid
