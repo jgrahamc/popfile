@@ -63,13 +63,34 @@ sub initialize
 
     $self->config_( 'trayicon', 1 );
     $self->config_( 'console',  0 );
-    
+
+    return 1;
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# start
+#
+# Called when all configuration information has been loaded from disk.
+#
+# The method should return 1 to indicate that it started correctly, if
+# it returns 0 then POPFile will abort loading immediately, returns 2
+# if everything OK but this module does not want to continue to be
+# used.
+#
+# ---------------------------------------------------------------------------------------------
+
+sub start
+{
+    my ( $self ) = @_;
+
     $self->register_configuration_item_( 'configuration',
                                          'windows_trayicon_and_console',
                                          'windows-configuration.thtml',
                                          $self );
 
-    return 1;
+    return $self->SUPER::start();
 }
 
 # ---------------------------------------------------------------------------------------------
