@@ -230,7 +230,7 @@ sub upgrade_parameter__
 		     'sport',                    'pop3_secure_port',
 		     'server',                   'pop3_secure_server',
 		     'separator',                'pop3_separator',
-		     'optoo',                    'pop3_toptoo',
+		     'toptoo',                   'pop3_toptoo',
 
 		     # Parameters that are now handled by UI::HTML
 

@@ -125,6 +125,14 @@ sub reaper
 # ---------------------------------------------------------------------------------------------
 sub forker
 {
+    # Tell all the modules that a fork is about to happen
+
+    foreach my $type (keys %components) {
+        foreach my $name (keys %{$components{$type}}) {
+            $components{$type}{$name}->prefork();
+        }
+    }
+
     # Create the pipe that will be used to send data from the child to the parent process,
     # $writer will be returned to the child process and $reader to the parent process
 

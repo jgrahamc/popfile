@@ -69,6 +69,7 @@ sub new
     # detect "invisible ink" used by spammers
 
     $self->{htmlbackcolor__} = map_color( $self, 'white' );
+    $self->{htmlbodycolor__} = map_color( $self, 'white' );
     $self->{htmlfontcolor__} = map_color( $self, 'black' );
 
     # This is a mapping between HTML color names and HTML hexadecimal color values used by the
@@ -146,14 +147,30 @@ sub increment_word
 #
 # $prefix       The pseudoword prefix (e.g. header)
 # $word         The pseudoword (e.g. Mime-Version)
+# $encoded      Whether this was found inside encoded text
+# $literal      The literal text that generated this pseudoword
 #
 # ---------------------------------------------------------------------------------------------
 
 sub update_pseudoword
 {
-    my ( $self, $prefix, $word ) = @_;
+    my ( $self, $prefix, $word, $encoded, $literal ) = @_;
 
-    $self->increment_word( "$prefix:$word" );
+    my $mword = "$prefix:$word";
+
+    if ( $self->{color__} ) {
+        $literal =~ s/</&lt;/g;
+        $literal =~ s/>/&gt;/g;
+        my $color = $self->{bayes__}->get_color($mword);
+        my $to    = "<b><font color=\"$color\"><a title=\"$mword\">$literal</a></font></b>";
+        if ( $encoded == 0 )  {
+	    $self->{ut__} =~ s/\Q$literal\E/$to/g;
+        } else {
+            $self->{ut__} .= $to . ' ';
+        }
+    } else {
+        $self->increment_word( $mword );
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -193,7 +210,6 @@ sub update_word
             } else {
                 $self->{ut__} .= "<font color=\"$color\">$word<\/font> ";
             }
-
         } else {
             increment_word( $self, $mword );
         }
@@ -258,7 +274,7 @@ sub add_line
                         $line       =~ s/$from/$to/g;
                         $self->{ut__} =~ s/$from/$to/g;
                         print "$from -> $to\n" if $self->{debug};
-                        increment_word( $self, 'html:numericentity' );
+                        $self->update_pseudoword( 'html', 'numericentity', $encoded, $from );
                     }
                 }
             }
@@ -282,24 +298,23 @@ sub add_line
             }
 
             # Deal with runs of alternating spaces and letters
-            # TODO: find a way to make this (and other similar stuff) highlight
-            #       without using the encoded content printer or modifying $self->{ut__}
 
-            foreach my $space (' ', '\'', '*', '^', '`', '  ', '\38' ){
-                while ( $line =~ s/( |^)(([A-Z]\Q$space\E){2,15}[A-Z])( |\Q$space\E|[!\?])/ /i ) {
+            foreach my $space (' ', '\'', '*', '^', '`', '  ', '\38', '.' ){
+                while ( $line =~ s/( |^)(([A-Z]\Q$space\E){2,15}[A-Z])( |\Q$space\E|[!\?,])/ /i ) {
+                    my $original = "$1$2$4";
                     my $word = $2;
                     print "$word ->" if $self->{debug};
-                    $word    =~ s/\Q$space\E//g;
+                    $word    =~ s/[^A-Z]//gi;
                     print "$word\n" if $self->{debug};
-                    update_word( $self, $word, $encoded, ' ', ' ', $prefix);
-                    increment_word( $self, 'trick:spacedout' );
+                    $self->update_word( $word, $encoded, ' ', ' ', $prefix);
+                    $self->update_pseudoword( 'trick', 'spacedout', $encoded, $original );
                 }
             }
 
             # Deal with random insertion of . inside words
 
             while ( $line =~ s/ ([A-Z]+)\.([A-Z]{2,}) / $1$2 /i ) {
-                increment_word( $self, 'trick:dottedwords' );
+                $self->update_pseudoword( 'trick', 'dottedwords', $encoded, "$1$2" );
             }
 
             # Only care about words between 3 and 45 characters since short words like
@@ -319,7 +334,7 @@ sub add_line
         }
     } else {
         if ( $bigline ne '' ) {
-    	    $self->increment_word( 'trick:invisibleink' );
+            $self->update_pseudoword( 'trick', 'invisibleink', $encoded, $bigline );
 	}
     }
 }
@@ -354,18 +369,18 @@ sub update_tag
             $self->{htmlfontcolor__} = map_color( $self, 'black' );
         }
 
-        return;
-    }
-
 	# If we hit a table tag then any font information is lost
 	
 	if ( $tag =~ /^(table|td|tr|th)$/i ) {
-		$self->{htmlfontcolor__} = map_color( $self, 'black' );
-		$self->{htmlbackcolor__} = map_color( $self, 'white' );
+	    $self->{htmlfontcolor__} = map_color( $self, 'black' );
+	    $self->{htmlbackcolor__} = $self->{htmlbodycolor__};
 	}
 
-	# Count the number of TD elements
-	increment_word( $self, 'html:td' ) if ( $tag =~ /^td$/i );
+        return;
+    }
+
+    # Count the number of TD elements
+    $self->update_pseudoword('html', 'td', $encoded, $tag ) if ( $tag =~ /^td$/i );
 
     my $attribute;
     my $value;
@@ -380,14 +395,17 @@ sub update_tag
     # (this allows nested single/double quotes),
     # match a space or > or EOL
 
-    while ( $arg =~ s/[ \t]*(\w+)[ \t]*=[ \t]*([\"\'])?(.*?)(?(2)\2|($|([ \t>])))//i ) {
-        $attribute = $1;
-        $value     = $3;
+    my $original;
+
+    while ( $arg =~ s/[ \t]*((\w+)[ \t]*=[ \t]*([\"\'])?(.*?)(\3|($|([ \t>]))))//i ) {
+        $original  = $1;
+        $attribute = $2;
+        $value     = $4;
         $quote     = '';
         $end_quote = '[\> \t\&\n]';
-        if (defined $2) {
-            $quote     = $2;
-            $end_quote = $2;
+        if (defined $3) {
+            $quote     = $3;
+            $end_quote = $3;
         }
 
         print "   attribute $attribute with value $quote$value$quote\n" if ($self->{debug});
@@ -409,7 +427,7 @@ sub update_tag
         if ( ( $attribute =~ /^src$/i ) &&
              ( ( $tag =~ /^img|frame|iframe$/i )
                || ( $tag =~ /^script$/i && $parse_script_uri ) ) ) {
-                
+
             # "CID:" links refer to an origin-controlled attachment to a html email.
             # Adding strings from these, even if they appear to be hostnames, may or
             # may not be beneficial
@@ -417,23 +435,22 @@ sub update_tag
             if ($value =~ /^cid\:/i )
             {
                 # TODO: Decide what to do here, ignoring CID's for now
-                
             } else {
 
-                my $host = add_url( $self, $value, $encoded, $quote, $end_quote, '' );                
+                my $host = add_url( $self, $value, $encoded, $quote, $end_quote, '', 1 );
 
                 # If the host name is not blank (i.e. there was a hostname in the url
                 # and it was an image, then if the host was not this host then report
                 # an off machine image
 
                 if ( ( $host ne '' ) && ( $tag =~ /^img$/i ) ) {
-        	        if ( $host ne 'localhost' ) {
-                        $self->update_pseudoword( 'html', 'imgremotesrc' );
-        	        }
+        	    if ( $host ne 'localhost' ) {
+                        $self->update_pseudoword( 'html', 'imgremotesrc', $encoded, $original );
+        	    }
                 }
             }
-            
 
+            add_url( $self, $value, $encoded, $quote, $end_quote, '' );
             next;
         }
 
@@ -498,13 +515,13 @@ sub update_tag
 
         if ( ( $attribute =~ /^(width|height)$/i ) && ( $tag =~ /^img$/i ) ) {
             $attribute = lc( $attribute );
-            $self->update_pseudoword( 'html', "img$attribute$value" );
+            $self->update_pseudoword( 'html', "img$attribute$value", $encoded, $original );
         }
 
         # Font sizes
 
         if ( ( $attribute =~ /^size$/i ) && ( $tag =~ /^font$/i ) ) {
-            $self->update_pseudoword( 'html', "fontsize$value" );
+            $self->update_pseudoword( 'html', "fontsize$value", $encoded, $original );
         }
 
         # Tags with background colors
@@ -513,6 +530,8 @@ sub update_tag
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
             $self->{htmlbackcolor__} = map_color($self, $value);
 			print "Set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug} );
+
+            $self->{htmlbodycolor__} = $self->{htmlbackcolor__} if ( $tag =~ /^body$/i );
         }
 
         # Tags with a charset
@@ -563,13 +582,14 @@ sub update_tag
 # $after        The character that appeared after the URL in the original line
 # $prefix       A string to prefix any words with in the corpus, used for the special
 #               identification of values found in for example the subject line
+# $noadd        If defined indicates that only parsing should be done, no word updates
 #
 # Returns the hostname
 #
 # ---------------------------------------------------------------------------------------------
 sub add_url
 {
-    my ($self, $url, $encoded, $before, $after, $prefix) = @_;
+    my ($self, $url, $encoded, $before, $after, $prefix, $noadd) = @_;
 
     my $temp_url = $url;
     my $temp_before;
@@ -591,11 +611,11 @@ sub add_url
 
     # Remove any URL encoding (protocol may not be URL encoded)
 
-    if ( $url =~ s/(\%([0-9A-Fa-f][0-9A-Fa-f]))/chr(hex("0x$2"))/eg ) {
-        increment_word( $self, "html:encodedurl" );
-        my $new_url = (defined $protocol?"$protocol://":'') . $url;
-        print "$temp_url -> " . $new_url . "\n" if $self->{debug};
-        $self->{ut__} =~ s/$temp_url/$new_url/e if $self->{color__};
+    my $oldurl   = $url;
+    my $percents =  ( $url =~ s/(%([0-9A-Fa-f]{2}))/chr(hex("0x$2"))/ge );
+
+    if ( $percents > 0 ) {
+        $self->update_pseudoword( 'html', 'encodedurl', $encoded, $oldurl ) if ( !defined( $noadd ) );
     }
 
     # Extract authorization information from the URL (e.g. http://foo@bar.com)
@@ -688,7 +708,7 @@ sub add_url
         $temp_after = "[\\\\\/]" if (defined $path);
         $temp_after = "[\:]" if (defined $port);
 
-        update_word( $self, $host, $encoded, $temp_before, $temp_after, $prefix);
+        update_word( $self, $host, $encoded, $temp_before, $temp_after, $prefix) if ( !defined( $noadd ) );
 
         # decided not to care about tld's beyond the verification performed when
         # grabbing $host
@@ -697,7 +717,7 @@ sub add_url
 
         if ( $hostform eq "name" ) {
             while ( $host =~ s/^([^\.])+\.(.*\.(.*))$/$2/ ) {
-                update_word( $self, $2, $encoded, '[\.]', '[<]', $prefix);
+                update_word( $self, $2, $encoded, '[\.]', '[<]', $prefix) if ( !defined( $noadd ) );
             }
         }
     }
@@ -729,8 +749,8 @@ sub parse_html
 
     # Remove HTML comments and other tags that begin !
 
-    while ( $line =~ s/<!.*?>// ) {
-        increment_word( $self, 'html:comment' );
+    while ( $line =~ s/(<!.*?>)// ) {
+        $self->update_pseudoword( 'html', 'comment', $encoded, $1 );
         print "$line\n" if $self->{debug};
     }
 
@@ -1156,9 +1176,9 @@ sub parse_header
 
     if ($self->{color__}) {
         # Remove over-reading
-        $self->{ut__} = '';  
-        
-        # Qeueue just this header for colorization    
+        $self->{ut__} = '';
+
+        # Qeueue just this header for colorization
         $self->{ut__} = splitline("$header: $argument\015\012", $encoding);
     }
 
@@ -1167,17 +1187,16 @@ sub parse_header
     # very significant in identifying different types of mail, for example
     # much spam uses MIME-Version, MiME-Version and Mime-Version
 
-    $self->update_pseudoword( 'header', $header );
+    $self->update_pseudoword( 'header', $header, 0, $header );
 
     # Check the encoding type in all RFC 2047 encoded headers
-    
+
     if ( $argument =~ /=\?(.{1,40})\?(Q|B)/i ) {
             update_word( $self, $1, 0, '', '', 'charset' );
     }
 
     # Handle the From, To and Cc headers and extract email addresses
     # from them and treat them as words
-    
 
     # For certain headers we are going to mark them specially in the corpus
     # by tagging them with where they were found to help the classifier
@@ -1281,18 +1300,18 @@ sub parse_header
         print "Setting encoding to $encoding\n" if $self->{debug};
         my $compact_encoding = $encoding;
         $compact_encoding =~ s/[^A-Za-z0-9]//g;
-        increment_word( $self, "encoding:$compact_encoding" );
+        $self->update_pseudoword( 'encoding', $compact_encoding, 0, $encoding );
         return ($mime, $encoding);
     }
 
     # Some headers to discard
 
     return ($mime, $encoding) if ( $header =~ /^(Thread-Index|X-UIDL|Message-ID|X-Text-Classification|X-Mime-Key)$/i );
-    
+
     # Some headers should never be RFC 2047 decoded
-    
+
     $argument = $self->decode_string($argument) unless ($header =~ /^(Revceived|Content\-Type|Content\-Disposition)$/i);
-        
+
     add_line( $self, $argument, 0, $prefix );
 
     return ($mime, $encoding);
@@ -1312,7 +1331,7 @@ sub splitline
 {
     my ($line, $encoding) = @_;
     $line =~ s/([^\r\n]{100,120} )/$1\r\n/g;
-    $line =~ s/([^ \r\n]{120})/$1\r\n/g;        
+    $line =~ s/([^ \r\n]{120})/$1\r\n/g;
 
     $line =~ s/</&lt;/g;
     $line =~ s/>/&gt;/g;
@@ -1323,8 +1342,8 @@ sub splitline
     }
 
     $line =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
-    
-    return $line;        
+
+    return $line;
 }
 
 # GETTERS/SETTERS

@@ -20,10 +20,12 @@ package POPFile::Module;
 # service()    - called by the main POPFile process to allow a submodule to do its own
 #                work (this is optional for modules that do not need to perform any service)
 #
-# forked()     - called when a module has forked the process.  This is called within the child
-#                process and should be used to clean up 
+# prefork()    - called when a module has requested a fork, but before the fork happens
 #
-# reaper()     - called when a process has terminated to give a module a chance to do 
+# forked()     - called when a module has forked the process.  This is called within the child
+#                process and should be used to clean up
+#
+# reaper()     - called when a process has terminated to give a module a chance to do
 #                whatever clean up is needed
 #
 # name()       - returns a simple name for the module by which other modules can get access
@@ -190,6 +192,20 @@ sub service
     my ( $self ) = @_;
 
     return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# prefork
+#
+# This is called when some module is about to fork POPFile
+#
+# There is no return value from this method
+#
+# ---------------------------------------------------------------------------------------------
+sub prefork
+{
+    my ( $self ) = @_;
 }
 
 # ---------------------------------------------------------------------------------------------
