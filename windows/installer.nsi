@@ -541,6 +541,7 @@ Function MakeItSafe
   Pop ${L_OLD_GUI}
   StrCmp ${L_OLD_GUI} "" try_other_port
 
+  DetailPrint "Shutting down previous version of POPFile..."
   NSISdl::download_quiet http://127.0.0.1:${L_OLD_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" exit_now
@@ -551,6 +552,7 @@ try_other_port:
   Pop ${L_NEW_GUI}
   StrCmp ${L_NEW_GUI} "" exit_now
 
+  DetailPrint "Shutting down previous version of POPFile..."
   NSISdl::download_quiet http://127.0.0.1:${L_NEW_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_RESULT} ; Ignore the result
 
@@ -881,11 +883,11 @@ Function SetOutlookOrOutlookExpressPage
   ; email account data in a fixed registry location. If an identity with an "Identity Ordinal"
   ; value of 1 is found, we need to look for its OE email account data in
   ;
-  ;     HK_CURRENT_USER\Software\Microsoft\Internet Account Manager\Accounts
+  ;     HKEY_CURRENT_USER\Software\Microsoft\Internet Account Manager\Accounts
   ;
   ; otherwise we look in the GUID's entry in HKEY_CURRENT_USER\Identities, using the path
   ;
-  ;     HK_CURRENT_USER\Identities\{GUID}\Software\Microsoft\Internet Account Manager\Accounts
+  ;     HKEY_CURRENT_USER\Identities\{GUID}\Software\Microsoft\Internet Account Manager\Accounts
 
   ; All of the OE account data for an identity appears "under" the path defined
   ; above, e.g. if an identity has several accounts, the account data is stored like this:
@@ -1103,7 +1105,7 @@ FunctionEnd
 Function StartPOPFilePage
 
   !insertmacro MUI_HEADER_TEXT "POPFile is now ready for use" \
-                               "POPFile and its User Interface can be started now, if required"
+               "The POPFile User Interface only works if POPFile has been started"
 
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioC.ini"
 
@@ -1155,7 +1157,7 @@ run_popfile:
   StrCmp ${L_TEMP} "DOS-box" exit_without_banner
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "DOS-box"
 
-  Banner::show /NOUNLOAD /set 76 "Preparing to start POPFile now." "Please be patient..."
+  Banner::show /NOUNLOAD /set 76 "Preparing to start POPFile." "This may take a few seconds..."
 
   ; Before starting the newly installed POPFile, ensure that no other version of POPFile
   ; is running on the same UI port as the newly installed version.
@@ -1174,7 +1176,7 @@ run_in_background:
   StrCmp ${L_TEMP} "background" exit_without_banner
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "background"
 
-  Banner::show /NOUNLOAD /set 76 "Preparing to start POPFile now." "Please be patient..."
+  Banner::show /NOUNLOAD /set 76 "Preparing to start POPFile." "This may take a few seconds..."
 
   ; Before starting the newly installed POPFile, ensure that no other version of POPFile
   ; is running on the same UI port as the newly installed version.
@@ -1525,6 +1527,7 @@ Section "Uninstall"
     MessageBox MB_YESNO "It does not appear that POPFile is installed in the \
         directory '$INSTDIR'.$\r$\nContinue anyway (not recommended)" IDYES skip_confirmation
     Abort "Uninstall aborted by user"
+
 skip_confirmation:
 
   ; Shutdown POPFile before uninstalling it
@@ -1553,6 +1556,7 @@ done:
   Call un.StrCheckDecimal
   Pop ${GUI}
   StrCmp ${GUI} "" skip_shutdown
+  DetailPrint "Shutting down POPFile..."
   NSISdl::download_quiet http://127.0.0.1:${GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_TEMP}
 
@@ -1577,8 +1581,10 @@ skip_shutdown:
 
   ; Read the registry settings found in popfile.reg and restore them
   ; it there are any.   All are assumed to be in HKCU
+  
   FileOpen ${CFG} $INSTDIR\popfile.reg r
   IfErrors skip_registry_restore
+  
 restore_loop:
   FileRead ${CFG} ${L_REG_KEY}
   Push ${L_REG_KEY}
@@ -1596,6 +1602,7 @@ restore_loop:
   Pop ${L_REG_VALUE}
   IfErrors skip_registry_restore
   WriteRegStr HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
+  DetailPrint "Restored ${L_REG_SUBKEY}: ${L_REG_VALUE}"
   goto restore_loop
 
 skip_registry_restore:
@@ -1671,13 +1678,16 @@ skip_registry_restore:
   DeleteRegKey HKLM SOFTWARE\POPFile
 
   ; if $INSTDIR was removed, skip these next ones
+  
   IfFileExists $INSTDIR 0 Removed
     MessageBox MB_YESNO|MB_ICONQUESTION \
       "Do you want to remove all files in your POPFile directory? (If you have anything \
       you created that you want to keep, click No)" IDNO Removed
+    DetailPrint "Removing all files from POPFile directory"
     Delete $INSTDIR\*.* ; this would be skipped if the user hits no
     RMDir /r $INSTDIR
     IfFileExists $INSTDIR 0 Removed
+      DetailPrint "Note: unable to remove all files from POPFile directory"
       MessageBox MB_OK|MB_ICONEXCLAMATION \
                  "Note: $INSTDIR could not be removed."
 Removed:
