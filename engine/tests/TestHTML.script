@@ -42,6 +42,7 @@
 # MAGNETIS a b c    Checks that magnet c exists in bucket a with type b
 # PARAMETERIS a b c Check that parameter b in bucket a has value c
 # CLICK a           Click the button called a
+# SENDMSG a b       Send a message through the POPFile MQ (message a with parameter b)
 #
 # Expect that the following are available to you within the MATCH/ENDMATCH block
 #
@@ -130,19 +131,132 @@ MATCH
 <a class="menuLink" href="/advanced?session=$sk">
 ENDMATCH
 
-# TODO History Page
+# History Page
 
-# TODO Check for existence of messages
-# TODO Check the page navigator
-# TODO Check refresh
-# TODO Check search
-# TODO Check filter
+GET /history
+
+# Check for existence of messages, check that there
+# are links from the bucket names, check that the basic
+# sort options are present
+
+MATCH &lt;no subject line&gt;
+MATCH <a title=" test\@test.com"> test\@test.com</a>
+MATCH Enlarge your package Doctor ApprovedNH...
+MATCH &lt;no from line&gt;
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+MATCH VI ID: 24052  Status: Open  Sev: 2
+MATCH <a href="buckets?session=$sk&showbucket=spam"><font color="blue">spam</font></a>
+MATCH &gt;ID
+MATCH <a href="/history?session=$sk&amp;setsort=from">From</a>
+
+# Check the page navigator
+
+MATCH Jump to message: <b>1</b> [<a href="/history?start_message=20&amp;session=$sk">21</a>] [<a href="/history?start_message=20&amp;session=$sk">Next ></a>]
+NOTMATCH XoSeXyGoDdEsSm\@hotmail.com
+GET /history?start_message=20&amp;session=$sk
+MATCH Jump to message: [<a href="/history?start_message=0&amp;session=$sk">< Previous</a>] [<a href="/history?start_message=0&amp;session=$sk">1</a>] <b>21</b>
+MATCH XoSeXyGoDdEsSm\@hotmail.com
+MATCH from: Leandro
+NOTMATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+GET /history
+
+# Check refresh
+
+NOTMATCH Testing Refresh
+MATCH (<a class="history" href="/history?session=$sk&amp;setfilter=">Refresh</a>)
+CODE
+open NEWMSG, ">messages/popfile10000=1.msg";
+print NEWMSG <<EOM;
+From: John
+Subject: Testing Refresh
+
+Body would go here
+EOM
+close NEWMSG;
+open NEWCLS, ">messages/popfile10000=1.cls";
+print NEWCLS "personal\n";
+close NEWCLS;
+ENDCODE
+SENDMSG NEWFL popfile10000=1.msg
+GET /history?session=$sk&amp;setfilter=
+MATCH John
+MATCH Testing Refresh
+MATCH personal
+MATCH popfile10000=1
+
+# Check search
+
+SETSUBMIT search isnotpresent
+MATCH searched for from/subject isnotpresent
+MATCH No messages.
+NOTMATCH Jump to message
+CLICK reset_filter_search
+NOTMATCH searched for from/subject
+NOTMATCH No messages.
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+MATCH Jump to message
+
+SETSUBMIT search test.com
+MATCH searched for from/subject test.com
+MATCH test\@test.com
+NOTMATCH Enlarge your package Doctor ApprovedNH...
+NOTMATCH Jump to message
+CLICK reset_filter_search
+NOTMATCH searched for from/subject
+NOTMATCH No messages.
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+MATCH Jump to message
+
+SETSUBMIT search Doctor
+MATCH searched for from/subject Doctor
+NOTMATCH test\@test.com
+MATCH Enlarge your package Doctor ApprovedNH...
+NOTMATCH Jump to message
+CLICK reset_filter_search
+NOTMATCH searched for from/subject
+NOTMATCH No messages.
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+MATCH Jump to message
+
+# Check filter
+
+SETINPUT filter personal 
+CLICK setfilter
+MATCH (just showing bucket <font color="green">personal</font>)
+NOTMATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+MATCH Testing Refresh
+CLICK reset_filter_search
+SETINPUT filter spam
+CLICK setfilter
+MATCH (just showing bucket <font color="blue">spam</font>)
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;...
+NOTMATCH Testing Refresh
+MATCH Jump to message: <b>1</b> [<a href="/history?start_message=20&amp;session=$sk&amp;filter=spam">21</a>] [<a href="/history?start_message=20&amp;session=$sk&amp;filter=spam">Next ></a>]
+GET /history?start_message=20&amp;session=$sk&amp;filter=spam
+NOTMATCH Testing Refresh
+SETINPUT filter other 
+CLICK setfilter
+MATCH (just showing bucket <font color="red">other</font>)
+MATCH No messages.
+CLICK reset_filter_search
+
+# TODO Check sorting
+
+
+
 # TODO Check reclassification
+
+# TODO Check delete one message
 # TODO Check delete some messages
 # TODO Check delete page of messages
 # TODO Check delete all messages
-# TODO Check sorting
-# TODO Check click through from bucket name
+
+# Check click through from bucket name
+
+MATCH <a href="buckets?session=$sk&showbucket=spam"><font color="blue">spam</font></a>
+GET /buckets?session=$sk&showbucket=spam
+MATCH Detail for <font color="blue">spam</font>
+GET /history
 
 # TODO single message view for accuracy
 # TODO reclassify from single message view

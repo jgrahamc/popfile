@@ -231,6 +231,13 @@ if ( $pid == 0 ) {
                 next;
 	    }
 
+            if ( $command =~ /^__SENDMESSAGE ([^ ]+) (.+)/ ) {
+                $b->mq_post_( $1, $2, '' );
+                $mq->service();
+                print $uwriter "OK\n";
+                next;
+	    }
+
             if ( $command =~ /^__CHECKMAGNET ([^ ]+) ([^ ]+) ([^\r\n]+)/ ) {
                 my $found = 0;
                 for my $magnet ($b->get_magnets( $1, $2 ) ) {
@@ -324,6 +331,17 @@ if ( $pid == 0 ) {
             next;
 	}
 
+        if ( $line =~ /^SENDMSG +([^ ]+) (.+)$/ ) {
+            my ( $msg, $param ) = ( $1, $2 );
+            print $dwriter "__SENDMESSAGE $msg $param\n";
+            my $reply = <$ureader>;
+
+            if ( !( $reply =~ /^OK/ ) ) {
+                test_assert( 0, "From script line $line_number" );
+	    }
+            next;
+	}
+
         if ( $line =~ /^MAGNETIS +([^ ]+) ([^ ]+) (.+)$/ ) {
             my ( $bucket, $type, $magnet ) = ( $1, $2, $3 );
             print $dwriter "__CHECKMAGNET $bucket $type $magnet\n";
@@ -405,8 +423,8 @@ if ( $pid == 0 ) {
                     last;
 	        }
 
-                $block .= "\n" unless ( $block eq '' );
                 $block .= $line;
+                $block .= "\n";
 	    }
 
             eval( $block );
