@@ -1148,21 +1148,20 @@ sub advanced_page
 
 # ---------------------------------------------------------------------------------------------
 #
-# encode
+# url_encode
 #
 # $text     Text to encode for URL safety
 #
-# Encode a URL so that it can be safely passed in a URL
+# Encode a URL so that it can be safely passed in a URL as per RFC2396
 #
 # ---------------------------------------------------------------------------------------------
 
-sub encode
+sub url_encode
 {
     my ( $self, $text ) = @_;
 
     $text =~ s/ /\+/;
-    $text =~ s/%/%25/g;
-    $text =~ s/#/%23/g;
+    $text =~ s/([^a-zA-Z0-9_\-.+])/sprintf("%%%02x",ord($1))/eg;
 
     return $text;
 }
@@ -1244,7 +1243,7 @@ sub magnet_page
                 $body .= ">\n<td>$type: $validatingMagnet</td>\n" ;
                 $body .= "<td><font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font></td>\n" ;
                 $body .= "<td><a class=\"removeLink\" href=\"/magnets?bucket=$bucket&amp;dtype=$type&amp;";
-                $body .= encode($self, "dmagnet=$validatingMagnet");
+                $body .= "dmagnet=" . url_encode($self, $validatingMagnet);
                 $body .= "&amp;session=$self->{session_key}\">\n[$self->{language}{Delete}]</a></td>\n";
                 $body .= "</tr>";
                 $stripe = 1 - $stripe;
@@ -1345,7 +1344,7 @@ sub bucket_page
 
             # Add the link to the corpus lookup
 
-            $j =~ s/([^ ,\*]+) ([^ ,\*]+)/"<a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key}\&amp;lookup=Lookup\&amp;word=" . encode($self,$1) . "#Lookup\">$1<\/a> $2"/ge;
+            $j =~ s/([^ ,\*]+) ([^ ,\*]+)/"<a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key}\&amp;lookup=Lookup\&amp;word=" . url_encode($self,$1) . "#Lookup\">$1<\/a> $2"/ge;
 
             # Add the bucket color if this word was used this session. IMPORTANT: this regex relies
             # on the fact that Classifier::WordMangle (mangle) removes astericks from all corpus words
@@ -1456,12 +1455,12 @@ sub corpus_page
         $self->{classifier}->{colors}{$self->{form}{bucket}} = $self->{form}{color};
     }
 
-    if ( ( defined($self->{form}{bucket}) ) && ( $self->{form}{subject} > 0 ) ) {
+    if ( ( defined($self->{form}{bucket}) ) && ( defined($self->{form}{subject}) ) && ( $self->{form}{subject} > 0 ) ) {
         $self->{classifier}->{parameters}{$self->{form}{bucket}}{subject} = $self->{form}{subject} - 1;
         $self->{classifier}->write_parameters();
     }
 
-    if ( ( defined($self->{form}{bucket}) ) && ( $self->{form}{quarantine} > 0 ) ) {
+    if ( ( defined($self->{form}{bucket}) ) &&  ( defined($self->{form}{quarantine}) ) && ( $self->{form}{quarantine} > 0 ) ) {
         $self->{classifier}->{parameters}{$self->{form}{bucket}}{quarantine} = $self->{form}{quarantine} - 1;
         $self->{classifier}->write_parameters();
     }
@@ -1470,7 +1469,7 @@ sub corpus_page
         if ( $self->{form}{cname} =~ /[^[:lower:]\-_]/ )  {
             $create_message = "<blockquote><div class=\"error01\">$self->{language}{Bucket_Error1}</div></blockquote>";
         } else {
-            if ( $self->{classifier}->{total}{$self->{form}{cname}} > 0 )  {
+            if ( ( defined($self->{classifier}->{total}{$self->{form}{cname}}) ) && ( $self->{classifier}->{total}{$self->{form}{cname}} > 0 ) )  {
                 $create_message = "<blockquote><b>" . sprintf( $self->{language}{Bucket_Error2}, $self->{form}{cname} ) . "</b></blockquote>";
             } else {
                 mkdir( $self->{configuration}->{configuration}{corpus} );
@@ -2149,7 +2148,7 @@ sub history_reclassify
 
                             next;
                         }
-                        $temp_words{$newbucket}{$1} = $2 if ( /(.+) (.+)/ );
+                        $temp_words{$newbucket}{$1} = $2 if ( /([^\s]+) (\d+)/ );
                     }
                     close WORDS;
                 }
@@ -2242,9 +2241,7 @@ sub history_undo
 
                             next;
                         }
-
-                        $temp_words{$bucket}{$1} = $2 if ( /(.+) (.+)/ );
-                    }
+                        $temp_words{$bucket}{$1} = $2 if ( /([^\s]+) (\d+)/ );                    }
                      close WORDS;
                 }
                 # Find the words

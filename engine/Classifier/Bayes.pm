@@ -463,7 +463,7 @@ sub load_bucket
                 next;
             }
 
-            if ( /(.+) (.+)/ ) {
+            if ( /([^\s]+) (\d+)/ ) {
                 my $word = $self->{mangler}->mangle($1,1);
                 my $value = $2;
                 $value =~ s/[\r\n]//g;
@@ -537,20 +537,20 @@ sub classify_file
     for my $bucket (sort keys %{$self->{magnets}})  {
         for my $type (sort keys %{$self->{magnets}{$bucket}}) {
 
-			# You cannot use @ or $ inside a \Q\E regular expression and hence
-			# we have to change the $magnet and the text we are comparing against
-			# by changing the $ and @ signs to .
+	    # You cannot use @ or $ inside a \Q\E regular expression and hence
+	    # we have to change the $magnet and the text we are comparing against
+	    # by changing the $ and @ signs to .
 
-        	my $noattype;
+            my $noattype;
 
-        	$noattype = $self->{parser}->{$type};
-        	$noattype =~ s/[@\$]/\./g;
+            $noattype = $self->{parser}->{$type};
+            $noattype =~ s/[@\$]/\./g;
 
-			for my $magnet (sort keys %{$self->{magnets}{$bucket}{$type}}) {
-            	my $regex;
+	    for my $magnet (sort keys %{$self->{magnets}{$bucket}{$type}}) {
+                my $regex;
 
-            	$regex = $magnet;
-            	$regex =~ s/[@\$]/\./g;
+                $regex = $magnet;
+                $regex =~ s/[@\$]/\./g;
 
                 if ( $noattype =~ m/\Q$regex\E/i ) {
                     $self->{scores}        = "<b>Magnet Used</b><p>Classified to <font color=\"$self->{colors}{$bucket}\">$bucket</font> because of magnet $type: $magnet</p>";
