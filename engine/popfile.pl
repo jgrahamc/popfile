@@ -17,7 +17,7 @@ use Classifier::Bayes;
 
 # This version number
 my $major_version = 0;
-my $minor_version = 10;
+my $minor_version = 11;
 
 # A list of the messages currently on the server, each entry in this list
 # is a hash containing the following items
@@ -960,20 +960,21 @@ sub run_popfile
                                     if ( $line =~ /[A-Z0-9]/i ) 
                                     {
                                         print TEMP "$line$eol";
-
-                                        if ( $line =~ /Subject: (.*)/ ) 
+            
+                                        if ( $configuration{subject} ) 
                                         {
-                                            $msg_subject = $1;
-                                            $msg_subject =~ s/(\012|\015)//g;
-                                        } 
-                                        else 
-                                        {
-                                            # Strip out the X-Text-Classification header that is in an incoming message
-                                            
-                                            if ( ( $line =~ /X-Text-Classification: / ) == 0 )
+                                            if ( $line =~ /Subject: (.*)/ ) 
                                             {
-                                                $msg_headers .= $line;
-                                            }
+                                                $msg_subject = $1;
+                                                $msg_subject =~ s/(\012|\015)//g;
+                                            } 
+                                        }
+                                        
+                                        # Strip out the X-Text-Classification header that is in an incoming message
+
+                                        if ( ( $line =~ /X-Text-Classification: / ) == 0 )
+                                        {
+                                            $msg_headers .= $line;
                                         }
                                     }
                                     else
@@ -1002,10 +1003,6 @@ sub run_popfile
                             if ( $configuration{subject} ) 
                             {
                                 $msg_headers .= "Subject: [$classification] $msg_subject$eol";
-                            }
-                            else
-                            {
-                                $msg_headers .= "Subject: $msg_subject$eol";
                             }
 
                             $msg_headers .= "X-Text-Classification: $classification";
