@@ -2,7 +2,7 @@
 #
 # adduser.nsi --- This is the NSIS script used to create the 'Add POPFile User' wizard
 #                 which makes it easy to add a new POPFile user. If a multi-user install
-#                 is performed, this utility is installed in the main POPFile installation
+#                 is performed, this wizard is installed in the main POPFile installation
 #                 folder for use when a new user tries to run POPFile for the first time.
 #
 # Copyright (c) 2001-2004 John Graham-Cumming
@@ -393,7 +393,7 @@
 
   ; This page is used to select the folder for the POPFile USER DATA files
 
-  !define MUI_DIRECTORYPAGE_VARIABLE          "$G_USERDIR"
+  !define MUI_DIRECTORYPAGE_VARIABLE          $G_USERDIR
 
   !define MUI_PAGE_HEADER_TEXT                "$(PFI_LANG_USERDIR_TITLE)"
   !define MUI_PAGE_HEADER_SUBTEXT             "$(PFI_LANG_USERDIR_SUBTITLE)"
@@ -635,7 +635,7 @@ FunctionEnd
 # Installer Function: PFIGUIInit
 # (custom .onGUIInit function)
 #
-# Used to complete the initialisation of the installer.
+# Used to complete the initialization of the installer.
 # This code was moved from '.onInit' in order to permit the use of language-specific strings
 # (the selected language is not available inside the '.onInit' function)
 #--------------------------------------------------------------------------
@@ -724,7 +724,7 @@ Section "POPFile" SecPOPFile
   StrCpy $G_MPBINDIR  "$G_ROOTDIR"
   StrCpy $G_MPLIBDIR  "$G_ROOTDIR\lib"
 
-  ; The fourth global variable ($G_USERDIR) is initialised by the 'CheckExistingConfig' function
+  ; The fourth global variable ($G_USERDIR) is initialized by the 'CheckExistingConfig' function
   ; and may be changed by the user via the second DIRECTORY page.
 
   ; Retrieve the POP3 and GUI ports from the ini and get whether we install the
@@ -870,6 +870,9 @@ update_config:
 
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
+
+  ; NOTE: The main POPFile installer uses 'uninstall.exe' so we have to use a different name
+  ; in case user has selected the main POPFile directory for the user data
 
   SetOutPath $G_USERDIR
   Delete $G_USERDIR\uninstalluser.exe
@@ -1217,10 +1220,10 @@ SectionEnd
 
 #--------------------------------------------------------------------------
 # Installer Function: CheckExistingConfig
-# (the "leave" function for the DIRECTORY selection page)
+# (the "leave" function for the WELCOME page)
 #
 # This function is used to extract the POP3 and UI ports from the 'popfile.cfg'
-# configuration file (if any) in the directory used for this installation.
+# configuration file (if a copy is found when the wizard starts up).
 #
 # As it is possible that there are multiple entries for these parameters in the file,
 # this function removes them all as it makes a new copy of the file. New port data
@@ -1255,10 +1258,18 @@ Function CheckExistingConfig
 
   Push ${L_CFG}
 
+  ; This function initialises the $G_USERDIR global user variable for use elsewhere in wizard
+
   ; Warn the user if we are about to upgrade an existing installation
   ; and allow user to select a different directory if they wish
 
-  ; This function initialises the $G_USERDIR global user variable for use elsewhere in installer
+  ; Starting with the 0.21.0 release, user-specific data is stored in the registry
+
+  ReadRegStr $G_USERDIR HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath"
+  StrCmp $G_USERDIR "" look_elsewhere
+  IfFileExists "$G_USERDIR\popfile.cfg" warning
+
+look_elsewhere:
 
   ; All versions prior to 0.21.0 stored popfile.pl and popfile.cfg in the same folder
 
@@ -1266,7 +1277,7 @@ Function CheckExistingConfig
 
   IfFileExists "$G_USERDIR\popfile.cfg" warning
 
-  ; Check if we are installing over a version which uses the new folder structure
+  ; Check if we are installing over a version which uses an early version of the new structure
 
   StrCpy $G_USERDIR "$INSTDIR\user"
   IfFileExists "$G_USERDIR\popfile.cfg" warning
@@ -4059,7 +4070,7 @@ Function un.onInit
 
   ; Before POPFile 0.21.0, POPFile and the minimal Perl shared the same folder structure.
   ; Phase 1 of the multi-user support introduced in 0.21.0 requires some slight changes
-  ; to the folder structure
+  ; to the folder structure.
 
   ; For increased flexibility, four global user variables are used in addition to $INSTDIR
   ; (this makes it easier to change the folder structure used by the installer)
