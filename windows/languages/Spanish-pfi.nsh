@@ -24,9 +24,13 @@
 #   (1) The sequence  \r\n      inserts a newline
 #   (2) The sequence  \r\n\r\n  inserts a blank line
 #
-# (the 'PFI_LANG_CBP_IO_INTRO' custom page string in which is listed under the heading
+# (the 'PFI_LANG_CBP_IO_INTRO' custom page string which is listed under the heading
 # 'Custom Page - POPFile Classification Bucket Creation' includes some examples)
 #--------------------------------------------------------------------------
+
+!ifndef PFI_VERBOSE
+  !verbose 3
+!endif
 
 #--------------------------------------------------------------------------
 # Mark the start of the language data
@@ -68,6 +72,10 @@
 
 ; Message Boxes used when validating user's selections
 
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_1    "A previous installation of POPFile has been detected"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_2    "Do you want to uninstall it ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_3    "( 'Yes' recommended )"
+
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_1    "The POP3 port cannot be set to"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_2    "The port must be a number in the range 1 to 65535."
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_3    "Please change your POP3 port selection."
@@ -78,6 +86,11 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_1    "The POP3 port must be different from the 'User Interface' port."
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_2    "Please change your port selections."
+
+; Banner message displayed whilst uninstalling old version
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1     "Removing previous version"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "This may take a few seconds..."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Installing POPfile
