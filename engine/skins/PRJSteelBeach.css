@@ -1,6 +1,6 @@
 BODY {
 BACKGROUND-COLOR : #CCCCDD; 
-BACKGROUND-IMAGE : url("skins/chipped_obsidian.jpg"); 
+BACKGROUND-IMAGE : url("chipped_obsidian.gif"); 
 BORDER-BOTTOM : 1PX SOLID #000033; 
 BORDER-LEFT : 1PX SOLID #EEEEEE; 
 BORDER-RIGHT : 1PX SOLID #000033; 
@@ -13,7 +13,7 @@ MARGIN-RIGHT : 20PX;
 MARGIN-TOP : 10PX; 
 } 
 .HEAD {
-BACKGROUND-IMAGE : url("skins/metalback.jpg"); 
+BACKGROUND-IMAGE : url("metalback.gif"); 
 COLOR : #000000; 
 FONT-FAMILY : "Bookman Old Style", "New Century Schoolbook", Times, serif; 
 FONT-SIZE : 175%; 
@@ -27,7 +27,7 @@ BORDER-TOP : 3PX SOLID #EEEEEE;
 FONT-FAMILY : "NEW CENTURY SCHOOLBOOK", TIMES, SERIF; 
 COLOR : #000000; 
 BACKGROUND-COLOR : #CCCCFF; 
-BACKGROUND-IMAGE : url("skins/metalback.jpg"); 
+BACKGROUND-IMAGE : url("metalback.gif"); 
 } 
 A:LINK {
 BORDER-BOTTOM : 1PX DASHED ; 
@@ -80,11 +80,11 @@ FONT-WEIGHT : BOLD;
 .MENU {
 FONT-WEIGHT : BOLD;
 FONT-SIZE : 140%
-BACKGROUND-IMAGE : url("skins/metalback.jpg");
+BACKGROUND-IMAGE : url("metalback.gif");
 }
 .MENU_STANDARD {
 BACKGROUND-COLOR : #DDDDDD;
-BACKGROUND-IMAGE : url("skins/metalback.jpg");
+BACKGROUND-IMAGE : url("metalback.gif");
 BORDER-BOTTOM : #000033 3PX SOLID; 
 BORDER-LEFT : #EEEEEE 3PX SOLID; 
 BORDER-RIGHT : #000033 3PX SOLID; 
@@ -92,7 +92,7 @@ BORDER-TOP : #EEEEEE 3PX SOLID;
 WIDTH : 150PX; 
 }
 .MENU_SELECTED {
-BACKGROUND-IMAGE : url("skins/metalback.jpg");
+BACKGROUND-IMAGE : url("metalback.gif");
 BORDER-BOTTOM : #EEEEEE 3px solid; 
 BORDER-LEFT : #000033 3px solid; 
 BORDER-RIGHT : #EEEEEE 3px solid; 
@@ -101,7 +101,7 @@ WIDTH : 150px;
 }
 .MENU_SPACER {
 BACKGROUND-COLOR : #CCCCDD;
-BACKGROUND-IMAGE : url("skins/chipped_obsidian.jpg");
+BACKGROUND-IMAGE : url("chipped_obsidian.gif");
 WIDTH : 5px; 
 }
 .FOOTER {
@@ -111,11 +111,11 @@ BORDER-LEFT : 3PX SOLID #000033;
 BORDER-RIGHT : 3PX SOLID #EEEEEE; 
 BORDER-TOP : 3PX SOLID #000033; 
 COLOR : #000033; 
-BACKGROUND-IMAGE : url("skins/metalback.jpg"); 
+BACKGROUND-IMAGE : url("metalback.gif"); 
 } 
 SUBMIT {
 BACKGROUND-COLOR : #CCCCCC; 
-BACKGROUND-IMAGE : url("skins/metalback.jpg"); 
+BACKGROUND-IMAGE : url("metalback.gif"); 
 BORDER-BOTTOM : 3PX SOLID #000033; 
 BORDER-LEFT : 3PX SOLID #EEEEEE; 
 BORDER-RIGHT : 3PX SOLID #000033; 
@@ -128,7 +128,7 @@ MARGIN-LEFT : 3PX;
 MARGIN-RIGHT : 3PX; 
 } 
 SELECT {
-BACKGROUND-IMAGE : url("skins/metalback.jpg"); 
+BACKGROUND-IMAGE : url("metalback.gif"); 
 BACKGROUND-COLOR : #FFFFFF; 
 BORDER-BOTTOM : 3PX SOLID #000033; 
 BORDER-LEFT : 3PX SOLID #EEEEEE; 
@@ -142,7 +142,7 @@ MARGIN-LEFT : 3PX;
 MARGIN-RIGHT : 3PX; 
 } 
 INPUT {
-BACKGROUND-IMAGE : url("skins/metalback.jpg"); 
+BACKGROUND-IMAGE : url("metalback.gif"); 
 BACKGROUND-COLOR : #FFFFFF; 
 BORDER-BOTTOM : 3PX SOLID #000033; 
 BORDER-LEFT : 3PX SOLID #EEEEEE; 
