@@ -1,5 +1,3 @@
-<TMPL_IF NAME="If_Show_Config_Bars">
-
    <tr>
       
       <td class="settingsPanel configBar" width="100%" align="center">
@@ -80,6 +78,4 @@
 
         </form>
        
-</tr>
-
-</TMPL_IF>
+   </tr>

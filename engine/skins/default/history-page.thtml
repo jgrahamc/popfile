@@ -121,6 +121,7 @@
               </a>
 
                     </th>
+
                 <TMPL_IF NAME="History_If_MoveLeft">
                    <td width="10px" style="vertical-align: top;">
                     <a style="display: block; width:100%; height: 1em;" class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveleft=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/leftarrow.gif" border="0" alt=""></a>
@@ -131,6 +132,7 @@
                     <a style="display: block; width:100%; height: 1em;" class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveright=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/rightarrow.gif" border="0" alt=""></a>
                    </td>
                 </TMPL_IF>
+
                     </tr>
                     </table>
 
@@ -294,7 +296,14 @@
 </TMPL_IF> <!-- if some messages -->
 
 <TMPL_INCLUDE NAME="common-before-configuration.thtml">
-<TMPL_INCLUDE NAME="history-bar.thtml">
-<TMPL_INCLUDE NAME="configuration-bar.thtml">
+<TMPL_IF NAME="If_Show_Config_Bars">
+     <TMPL_INCLUDE NAME="history-bar.thtml">
+     <TMPL_INCLUDE NAME="configuration-bar.thtml">
+<TMPL_ELSE>
+     <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
+         <input type="submit" class="submit" name="show_configbar" value="<TMPL_VAR NAME="Localize_Configuration_Show_Bar">" />
+         <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+     </form>
+</TMPL_IF>
 <TMPL_INCLUDE NAME="common-after-configuration.thtml">
 <TMPL_INCLUDE NAME="common-bottom.thtml">

@@ -1,5 +1,3 @@
-<TMPL_IF NAME="If_Show_Config_Bars">
-
     <tr>
         <td class="settingsPanel configBar" width="100%" align="center">
             <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
@@ -74,18 +72,3 @@
             </form>
         </td>
     </tr>
-    
-<TMPL_ELSE>
-
-    <tr>
-        <td class="settingsPanel configBar" width="100%" align="center">
-            <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                <div class="configBarOption">
-                    <input type="submit" class="submit" name="show_configbar" value="<TMPL_VAR NAME="Localize_Configuration_Show_Bar">" />
-                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-                </div>
-            </form>
-        </td>
-    </tr>
-
-</TMPL_IF>
