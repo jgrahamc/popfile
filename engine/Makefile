@@ -3,11 +3,11 @@
 # This Makefile is used for the creation of POPFile packages
 # and for testing
 #
-# Copyright (c) 2003 John Graham-Cumming
+# Copyright (c) 2003-2004 John Graham-Cumming
 
 include vars.mak
 
-.PHONY: test package windows core manual skins coverage macosx
+.PHONY: test package windows core manual skins coverage macosx rc
 
 error:
 	@echo Must specify one of coverage, test, package or windows

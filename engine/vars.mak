@@ -3,7 +3,7 @@
 # This Makefile is used for the creation of POPFile packages
 # and for testing
 #
-# Copyright (c) 2003 John Graham-Cumming
+# Copyright (c) 2003-2004 John Graham-Cumming
 
 export POPFILE_MAJOR_VERSION=0
 export POPFILE_MINOR_VERSION=22

@@ -196,7 +196,7 @@
 
   ; Name to be used for the installer program file (also used for the 'Version Information')
 
-  !define C_OUTFILE     "setup.exe"
+  !define C_OUTFILE     "setup${C_POPFILE_RC}.exe"
 
   Name                   "${C_PFI_PRODUCT}"
 

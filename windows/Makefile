@@ -27,8 +27,7 @@ MAKENSIS_VERSION_STRING:=/DC_POPFILE_MAJOR_VERSION=$(POPFILE_MAJOR_VERSION) /DC_
 MAKENSIS=echo Making $@ ; makensis.exe $(MAKENSIS_VERSION_STRING) /V2 /O$(patsubst %.exe,%.log,$@) $<
 BUILD_ZIP=wzzip -P $(POPFILE_WINDOWS_ZIP) -a $^
 
-SETUP=setup.exe
-INSTALLER=installer.exe
+SETUP:=setup$(RC).exe
 RUNPOPFILE=runpopfile.exe
 ADDUSER=adduser.exe
 MONITORCC=monitorcc.exe
@@ -36,7 +35,9 @@ STOP_PF=stop_pf.exe
 MSGCAPTURE=msgcapture.exe
 RUNSQLITE=runsqlite.exe
 
-ALLEXES := $(SETUP) $(INSTALLER) $(RUNPOPFILE) $(ADDUSER) $(MONITORCC) $(STOP_PF) $(MSGCAPTURE) $(RUNSQLITE) $(POPFILE_WINDOWS_ZIP)
+ALLEXES := $(SETUP) $(RUNPOPFILE) $(ADDUSER)     \
+           $(MONITORCC) $(STOP_PF) $(MSGCAPTURE) \
+           $(RUNSQLITE) $(POPFILE_WINDOWS_ZIP)
 
 all: build
 build: $(POPFILE_WINDOWS_ZIP)
@@ -49,9 +50,6 @@ clean:
 .SUFFIXES:
 %.exe : %.nsi pfi-library.nsh ; @$(MAKENSIS)
 
-$(SETUP): $(INSTALLER)
-	@cp $(SETUP) $(INSTALLER)
-
 $(STOP_PF) : stop_popfile.nsi
 	@$(MAKENSIS)
 
@@ -61,14 +59,14 @@ test/pfidiag.exe: UI/pfi_modern.exe
 test/pfidiag.exe:
 	@cd $(dir $@) ; makensis /v2 $(notdir $<)
 
-$(INSTALLER): $(patsubst %.exe,%.nsi,$(INSTALLER))
-$(INSTALLER): $(ENGINE)/*.pl $(ENGINE)/POPFile/*.pm $(ENGINE)/Classifier/*.pm $(ENGINE)/Proxy/*.pm $(ENGINE)/UI/*.pm $(ENGINE)/Platform/MSWin32.pm $(ENGINE)/skins/*/*.css $(ENGINE)/skins/*/*.gif $(ENGINE)/skins/*/*.thtml $(ENGINE)/v$(POPFILE_VERSION).change
-$(INSTALLER): $(STOP_PF) $(ENGINE)/popfile.exe $(ENGINE)/popfileb.exe $(ENGINE)/popfileib.exe $(ENGINE)/popfilef.exe $(ENGINE)/popfileif.exe $(ENGINE)/popfile-service.exe
-$(INSTALLER): $(RUNPOPFILE) $(ADDUSER) $(MONITORCC) $(STOP_PF) $(MSGCAPTURE)
-$(INSTALLER): ioG.ini WriteEnvStr.nsh
-$(INSTALLER): languages/*-pfi.nsh hdr-common.bmp special.bmp remove.ico
-$(INSTALLER): UI/pfi_headerbmpr.exe UI/pfi_modern.exe
-$(INSTALLER): test/pfidiag.exe $(RUNSQLITE)
+$(SETUP): installer.nsi ; @$(MAKENSIS)
+$(SETUP): $(ENGINE)/*.pl $(ENGINE)/POPFile/*.pm $(ENGINE)/Classifier/*.pm $(ENGINE)/Proxy/*.pm $(ENGINE)/UI/*.pm $(ENGINE)/Platform/MSWin32.pm $(ENGINE)/skins/*/*.css $(ENGINE)/skins/*/*.gif $(ENGINE)/skins/*/*.thtml $(ENGINE)/v$(POPFILE_VERSION).change
+$(SETUP): $(STOP_PF) $(ENGINE)/popfile.exe $(ENGINE)/popfileb.exe $(ENGINE)/popfileib.exe $(ENGINE)/popfilef.exe $(ENGINE)/popfileif.exe $(ENGINE)/popfile-service.exe
+$(SETUP): $(RUNPOPFILE) $(ADDUSER) $(MONITORCC) $(STOP_PF) $(MSGCAPTURE)
+$(SETUP): ioG.ini WriteEnvStr.nsh
+$(SETUP): languages/*-pfi.nsh hdr-common.bmp special.bmp remove.ico
+$(SETUP): UI/pfi_headerbmpr.exe UI/pfi_modern.exe
+$(SETUP): test/pfidiag.exe $(RUNSQLITE)
 
 $(RUNPOPFILE): $(patsubst %.exe,%.nsi,$(RUNPOPFILE))
 $(RUNPOPFILE): languages/English-pfi.nsh
