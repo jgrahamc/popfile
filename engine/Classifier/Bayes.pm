@@ -251,8 +251,14 @@ sub initialize
 
     $self->config_( 'xpl_angle', 0 );
 
+    # This is a bit mask used to control options when we are using the
+    # default SQLite database.   By default all the options are on.
+    #
+    # 1 = Asynchronous deletes
+    
+    $self->config_( 'sqlite_tweaks', 0xFFFFFFFF );
+
     $self->mq_register_( 'COMIT', $self );
-   
     $self->mq_register_( 'RELSE', $self );
 
     return 1;
