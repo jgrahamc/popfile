@@ -26,24 +26,30 @@ test_assert( `rm -rf messages` == 0 );
 test_assert( `rm -rf corpus` == 0 );
 test_assert( `cp -R corpus.base corpus` == 0 );
 test_assert( `rm -rf corpus/CVS` == 0 );
+test_assert( `rm popfile.db` == 0 );
 
 unlink 'stopwords';
 test_assert( `cp stopwords.base stopwords` == 0 );
 
 my $bayes = 'perl -I ../ ../bayes.pl';
 
+my @stdout;
+
 # One or no command line arguments
 
-$code = system( "$bayes > temp.tmp" );
+@stdout = `$bayes`;
+
+$code = ($? >> 8);
+
 test_assert( $code != 0 );
-open TEMP, "<temp.tmp";
-my $line = <TEMP>;
-close TEMP;
+my $line = shift @stdout;
 test_assert_regexp( $line, 'output the classification of a message' );
 
 # Bad file name
-
-$code = system( "$bayes doesnotexist 2> temp.tmp 1> temp2.tmp" );
+open STDERR, ">temp.tmp";
+`$bayes doesnotexist`;
+close STDERR;
+$code = ($? >> 8);
 test_assert( $code != 0 );
 open TEMP, "<temp.tmp";
 $line = <TEMP>;
@@ -62,21 +68,20 @@ while ( <WORDS> ) {
 }
 close WORDS;
 
-$code = system( "$bayes TestMailParse021.msg 2> temp.tmp 1> temp2.tmp" );
+@stdout = `$bayes TestMailParse021.msg`;# 2> temp.tmp 1> temp2.tmp" );
+
+$code = ($? >> 8);
 test_assert( $code == 0 );
-open TEMP, "<temp2.tmp";
-$line = <TEMP>;
+$line = shift @stdout;
 test_assert_regexp( $line, '`TestMailParse021.msg\' is `spam\'' );
 
 my %output;
 
-while ( <TEMP> ) {
+while ( $_ = shift @stdout ) {
     if ( /(.+) (\d+)/ ) {
         $output{$1} = $2;
     }
 }
-
-close TEMP;
 
 foreach my $word (keys %words) {
     test_assert_equal( $words{$word}, $output{$word}, $word );
