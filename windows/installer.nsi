@@ -13,7 +13,7 @@
 #                   (2) runpopfile.exe (NSIS script: runpopfile.nsi)
 #                   (3) stop_pf.exe    (NSIS script: stop_popfile.nsi)
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2002-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -272,7 +272,7 @@
   VIAddVersionKey "ProductName"      "${C_PFI_PRODUCT}"
   VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "© 2001-2004  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "POPFile Automatic email classification"
   VIAddVersionKey "FileVersion"      "${C_PFI_VERSION}"
 
@@ -877,6 +877,7 @@ save_HKCU_root_sfn:
 
   SetOutPath "$G_ROOTDIR\POPFile"
   File "..\engine\POPFile\MQ.pm"
+  File "..\engine\POPFile\History.pm"
   File "..\engine\POPFile\Loader.pm"
   File "..\engine\POPFile\Logger.pm"
   File "..\engine\POPFile\Module.pm"
@@ -945,6 +946,10 @@ save_HKCU_root_sfn:
   SetOutPath "$G_MPLIBDIR\Carp"
   File "${C_PERL_DIR}\lib\Carp\*"
 
+  SetOutPath "$G_MPLIBDIR\Date"
+  File "${C_PERL_DIR}\site\lib\Date\Format.pm"
+  File "${C_PERL_DIR}\site\lib\Date\Parse.pm"
+
   SetOutPath "$G_MPLIBDIR\Digest"
   File "${C_PERL_DIR}\lib\Digest\MD5.pm"
 
@@ -981,6 +986,10 @@ save_HKCU_root_sfn:
 
   SetOutPath "$G_MPLIBDIR\Text"
   File "${C_PERL_DIR}\lib\Text\ParseWords.pm"
+
+  SetOutPath "$G_MPLIBDIR\Time"
+  File "${C_PERL_DIR}\lib\Time\Local.pm"
+  File "${C_PERL_DIR}\site\lib\Time\Zone.pm"
 
   SetOutPath "$G_MPLIBDIR\warnings"
   File "${C_PERL_DIR}\lib\warnings\register.pm"
@@ -1257,6 +1266,9 @@ Section "Skins" SecSkins
   SetOutPath "$G_ROOTDIR\skins\prjsteelbeach"
   File "..\engine\skins\prjsteelbeach\*.*"
 
+  SetOutPath "$G_ROOTDIR\skins\simplyblue"
+  File "..\engine\skins\simplyblue\*.*"
+
   SetOutPath "$G_ROOTDIR\skins\sleet"
   File "..\engine\skins\sleet\*.*"
 
@@ -1508,7 +1520,7 @@ SubSectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}   $(DESC_SecSkins)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}   $(DESC_SecLangs)
     !insertmacro MUI_DESCRIPTION_TEXT ${SubSecOptional} "Extra POPFile components (for advanced users)"
-   !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}  $(DESC_SecXMLRPC)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}  $(DESC_SecXMLRPC)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}  \
         "Installs POPFile's experimental IMAP module"
     !ifndef NO_KAKASI
@@ -1927,6 +1939,7 @@ Function SkinsRestructure
   !insertmacro SkinMove "default"        "default"
   !insertmacro SkinMove "glassblue"      "glassblue"
   !insertmacro SkinMove "green"          "green"
+
   IfFileExists "$G_ROOTDIR\skins\lavishImages\*.*" 0 lavish
   Rename  "$G_ROOTDIR\skins\lavishImages" "$G_ROOTDIR\skins\lavish"
 
@@ -1938,10 +1951,6 @@ lavish:
   !insertmacro SkinMove "outlook"        "outlook"
   !insertmacro SkinMove "PRJBlueGrey"    "prjbluegrey"
   !insertmacro SkinMove "PRJSteelBeach"  "prjsteelbeach"
-
-  ; 'SimplyBlue' is no longer in CVS (22 May 2004) but it was the default skin in earlier
-  ; releases so it is treated like the other standard skins which are still in CVS
-
   !insertmacro SkinMove "SimplyBlue"     "simplyblue"
 
   IfFileExists "$G_ROOTDIR\skins\sleetImages\*.*" 0 sleet
@@ -2583,12 +2592,7 @@ Section "un.Skins" UnSecSkins
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\outlook"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\prjbluegrey"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\prjsteelbeach"
-
-  ; 'SimplyBlue' is no longer in CVS (22 May 2004) but it was the default skin in earlier
-  ; releases so it is treated like the other standard skins which are still in CVS
-
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\simplyblue"
-
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\sleet"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\sleet-rtl"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\smalldefault"
@@ -2718,7 +2722,6 @@ Section "un.Minimal Perl" UnSecMinPerl
   RMDir /r "$G_MPLIBDIR\LWP"
   RMDir /r "$G_MPLIBDIR\Net"
   RMDir /r "$G_MPLIBDIR\SOAP"
-  RMDir /r "$G_MPLIBDIR\Time"
   RMDir /r "$G_MPLIBDIR\URI"
   RMDir /r "$G_MPLIBDIR\XML"
   RMDir /r "$G_MPLIBDIR\XMLRPC"
@@ -2726,6 +2729,7 @@ Section "un.Minimal Perl" UnSecMinPerl
 skip_XMLRPC_support:
   RMDir /r "$G_MPLIBDIR\auto"
   RMDir /r "$G_MPLIBDIR\Carp"
+  RMDir /r "$G_MPLIBDIR\Date"
   RMDir /r "$G_MPLIBDIR\DBD"
   RMDir /r "$G_MPLIBDIR\Digest"
   IfFileExists "$G_MPLIBDIR\Encode\*.*" 0 skip_Encode
@@ -2741,6 +2745,7 @@ skip_Encode:
   RMDir /r "$G_MPLIBDIR\String"
   RMDir /r "$G_MPLIBDIR\Sys"
   RMDir /r "$G_MPLIBDIR\Text"
+  RMDir /r "$G_MPLIBDIR\Time"
   RMDir /r "$G_MPLIBDIR\warnings"
   IfFileExists "$G_MPLIBDIR\Win32\*.*" 0 skip_Win32
   RMDir /r "$G_MPLIBDIR\Win32"
