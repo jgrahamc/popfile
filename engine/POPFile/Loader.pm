@@ -33,6 +33,8 @@ package POPFile::Loader;
 #
 #----------------------------------------------------------------------------
 
+use Getopt::Long;
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -85,7 +87,7 @@ sub new
 
     # This must be 1 for POPFile::Loader to create any output on STDOUT
 
-    $self->{debug__} = 1;
+    $self->{debug__} = 0;
 
     # This stuff lets us do some things in a way that tolerates some
     # window-isms
@@ -159,6 +161,10 @@ sub CORE_loader_init
         close VER;
         $self->CORE_version( $major, $minor, $rev );
     }
+
+    # Parse just the --verbose command-line option
+
+    GetOptions( "verbose=n" => \$self->{debug__} );
 }
 
 #----------------------------------------------------------------------------
@@ -854,13 +860,6 @@ sub root_path__
 }
 
 # GETTER/SETTER
-
-sub debug
-{
-    my ( $self, $debug ) = @_;
-
-    $self->{debug__} = $debug;
-}
 
 sub module_config
 {

@@ -80,10 +80,6 @@ use POPFile::Loader;
 
 my $POPFile = POPFile::Loader->new();
 
-# Indicate that we should create output on STDOUT (the POPFile
-# load sequence) and initialize with the version
-
-$POPFile->debug(1);
 $POPFile->CORE_loader_init();
 
 # Redefine POPFile's signals

@@ -39,7 +39,6 @@ if ( $#ARGV >= 0 ) {
     # Indicate that we should create not output on STDOUT (the POPFile
     # load sequence)
 
-    $POPFile->debug(0);
     $POPFile->CORE_loader_init();
     $POPFile->CORE_signals();
     $POPFile->CORE_load( 1 );
