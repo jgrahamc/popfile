@@ -293,11 +293,16 @@
   ; Language Settings for MUI pages
   ;-----------------------------------------
 
+  ; Same "Language selection" dialog is used for the installer and the uninstaller
+  ; so we override the standard "Installer Language" title to avoid confusion.
+  
+  !define MUI_TEXT_LANGDLL_WINDOWTITLE "Language Selection"
+  
   ; Always show the language selection dialog, even if a language has been stored in the
   ; registry (the language stored in the registry will be selected as the default language)
 
   !define MUI_LANGDLL_ALWAYSSHOW
-
+  
   ; Remember user's language selection and offer this as the default when re-installing
   ; (uninstaller also uses this setting to determine which language is to be used)
 
