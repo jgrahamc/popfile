@@ -1929,6 +1929,35 @@ upgrade_install:
       ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_DIRSELECT_MBWARN_2)" IDNO offer_default
   StrCpy $G_USERDIR $INSTDIR
+
+  ; Assume SFN support is enabled (the default setting for Windows)
+
+  StrCpy $G_SFN_DISABLED "0"
+
+  Push ${L_RESULT}
+
+  Push $G_USERDIR
+  Call PFI_GetSFNStatus
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "1" check_config_data
+  StrCpy $G_SFN_DISABLED "1"
+
+  ; Short file names are not supported here, so we cannot accept any path containing spaces.
+
+  Push $G_USERDIR
+  Push ' '
+  Call PFI_StrStr
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" check_config_data
+  Push $G_USERDIR
+  Call PFI_GetRoot
+  Pop $G_PLS_FIELD_1
+  MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_DIRSELECT_MBNOSFN)"
+  Pop ${L_RESULT}
+  Goto offer_default
+
+check_config_data:
+  Pop ${L_RESULT}
   Call CheckExistingConfigData
   Abort
 
