@@ -114,7 +114,7 @@
   ;--------------------------------------------------------------------------
 
   !define MUI_PRODUCT   "POPFile"
-  !define MUI_VERSION   "0.20.0 (INVISIBLE KAKASI)"
+  !define MUI_VERSION   "0.20.0 (CORPUS BACKUP)"
 
   !define C_README        "v0.20.0.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
@@ -2290,9 +2290,9 @@ Function CheckRunStatus
 
   Push ${L_TEMP}
 
-  IfRebootFlag 0 not_Win9x
+  IfRebootFlag 0 no_reboot_reqd
 
-  ; We are running on a Win9x system and must reboot before using POPFile
+  ; We have installed Kakasi on a Win9x system and must reboot before using POPFile
   ; (replace previous page with a simple "Please wait" one, in case the page appears
   ; again while the system is rebooting)
 
@@ -2300,18 +2300,26 @@ Function CheckRunStatus
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Settings" "NumFields" "0"
   Goto selection_ok
 
-not_Win9x:
+no_reboot_reqd:
+
   ; Enable the 'Run' CheckBox on the 'Finish' page (it may have been disabled on our last visit)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "Flags" ""
 
   ; Get the status of the 'Do not run POPFile' radio button on the 'Start POPFile' page
+  ; If user has not started POPFile, we cannot offer to display the POPFile User Interface
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "State"
-  StrCmp ${L_TEMP} "0" selection_ok
+  StrCmp ${L_TEMP} "1" disable_UI_option
 
-  ; User has not started POPFile so we cannot offer to display the POPFile User Interface
+  ; Get 'Flags' for the 'Run POPFile in background' radio button on the 'Start POPFile' page
+  ; If flat file corpus conversion is required, we cannot offer to display the POPFile UI
+  ; (conversion may take several minutes, during which time the UI will be unresponsive)
+  
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 4" "Flags"
+  StrCmp ${L_TEMP} "DISABLED" 0 selection_ok
 
+disable_UI_option:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "State" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "Flags" "DISABLED"
 
