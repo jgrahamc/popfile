@@ -891,7 +891,6 @@ sub connect
         # Check that the connect succeeded for the remote server
         if ( $imap ) {
             if ( $imap->connected )  {
-                $self->log_( 0, "Connected to $hostname:$port timeout " . $self->global_config_( 'timeout' ) );
 
                 # Set binmode on the socket so that no translation of CRLF
                 # occurs
@@ -904,9 +903,12 @@ sub connect
                 # there isn't one then give up trying to connect
 
                 my $selector = new IO::Select( $imap );
-                unless ( () = $selector->can_read($self->global_config_( 'timeout' )) ) {
+                unless ( () = $selector->can_read( $self->global_config_( 'timeout' ) ) ) {
+                    $self->log_( 0, "Connection timed out for $hostname:$port" );
                     return;
                 }
+
+                $self->log_( 0, "Connected to $hostname:$port timeout " . $self->global_config_( 'timeout' ) );
 
                 # Read the response from the real server
                 my $buf = $self->slurp_( $imap );
@@ -1078,7 +1080,7 @@ sub say__
                                  $command ) ) {
             # If we failed to talk to the server, delete socket object, and die.
             delete $self->{folders__}{$imap_or_folder}{imap};
-            die( "The connection to the IMAP server was lost. Could not talk to the server." );
+            die( "The connection to the IMAP server was lost. Could not talk to the server (folder $imap_or_folder)." );
         }
     }
 }
@@ -1201,10 +1203,7 @@ sub raw_get_response
     $$response_ref = $response;
 
     # Increment tag for the next command/reply sequence:
-    if ( $$tag_ref++ == 10000 ) {
-        $$tag_ref = 0;
-    }
-
+    $$tag_ref++;
 
     if ( $response ) {
 
@@ -1521,7 +1520,9 @@ sub get_new_message_list
     $self->log_( 1, "Getting uids ge $uid" );
 
     $self->say__( $folder, "UID SEARCH UID $uid:* UNDELETED" );
-    $self->get_response__( $folder );
+    if ( $self->get_response__( $folder ) != 1 ) {
+        $self->log_( 0, "SEARCH command failed!" );
+    }
 
     # The server will respond with an untagged search reply.
     # This can either be empty ("* SEARCH") or if a
@@ -1904,8 +1905,6 @@ sub can_reclassify__
 sub configure_item
 {
     my ( $self, $name, $templ, $language ) = @_;
-
-    my $body;
 
     # conection details
     if ( $name eq 'imap_0_connection_details' ) {
