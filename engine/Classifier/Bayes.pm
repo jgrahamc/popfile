@@ -789,6 +789,7 @@ sub classify_and_modify
     my $msg_subject     = '';     # The message subject
     my $msg_head_before = '';     # Store the message headers that come before Subject here
     my $msg_head_after  = '';     # Store the message headers that come after Subject here
+    my $msg_head_q      = '';     # Store questionable header lines here
     my $msg_body        = '';     # Store the message body here
 
     # These two variables are used to control the insertion of the X-POPFile-TimeoutPrevention
@@ -860,13 +861,23 @@ sub classify_and_modify
                     }
 
                     # Strip out the X-Text-Classification header that is in an incoming message
-                    if ( ( $line =~ /^X-Text-Classification:/i ) == 0 ) {
+
+                    next if ( $line =~ /^X-Text-Classification:/i );
+
+                    if ( $line =~ /(^[ \t])|([:])/ ) {
                         if ( $msg_subject eq '' )  {
-                            $msg_head_before .= $line;
+                            $msg_head_before .= $msg_head_q . $line;                            
                         } else {
-                            $msg_head_after  .= $line;
+                            $msg_head_after  .= $msg_head_q . $line;
                         }
+                        $msg_head_q = '';
+                    } else {
+                        # Gather up any lines that are questionable
+                        
+                        $msg_head_q .= $line;                        
                     }
+                    
+                    
                 }
             } else {
                 print TEMP "\n";
@@ -933,7 +944,7 @@ sub classify_and_modify
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
     }
 
-    $msg_head_after .= "$eol";
+    $msg_head_after .= $msg_head_q . "$eol";
 
     # Echo the text of the message to the client
 
