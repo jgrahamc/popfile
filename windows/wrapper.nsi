@@ -103,7 +103,7 @@
 #-------------------------------------------------------------------------------------------
 
   Name    "POPFile Wrapper Utility"
-  !define C_VERSION   "0.4.0"     ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.4.1"     ; see 'VIProductVersion' comment below for format details
 
   ; The default NSIS caption is "Name Setup" so we override it here
 
@@ -175,12 +175,12 @@ Section default
 
 	ClearErrors
 	UserInfo::GetName
-	IfErrors 0 name_found
-  StrCpy ${L_USERNAME} "UnknownUser"
-  Goto got_name
-
-name_found:
+	IfErrors unknown_user
 	Pop ${L_USERNAME}
+  StrCmp ${L_USERNAME} "" unknown_user got_name
+
+unknown_user:
+  StrCpy ${L_USERNAME} "UnknownUser"
 
 got_name:
 
