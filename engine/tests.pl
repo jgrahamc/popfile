@@ -55,14 +55,11 @@ ok( $cl->{words}{offer},     1 );
 ok( $cl->{words}{full},      1 );
 ok( $cl->{words}{money},     1 );
 ok( $cl->{words}{back},      1 );
-ok( $cl->{words}{guarantee}, 1 );
 ok( $cl->{words}{customer},  1 );
-ok( $cl->{words}{'trick:dottedwords'}, 11 );
+ok( $cl->{words}{'trick:dottedwords'}, 6 );
 ok( $cl->{words}{click},     1 );
 ok( $cl->{words}{below},     1 );
 ok( $cl->{words}{more},      1 );
-ok( $cl->{words}{information}, 1 );
-ok( $cl->{words}{free},     1 );
 
 # Check discovery of font color
 $cl->{htmlfontcolor} = '';

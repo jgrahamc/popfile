@@ -282,7 +282,7 @@ sub add_line
             
             # Deal with random insertion of . inside words
 
-            while ( $line =~ s/([A-Z])\.([A-Z])/$1$2/i ) {
+            while ( $line =~ s/ ([A-Z]+)\.([A-Z]{2,}) / $1$2 /i ) {
                 increment_word( $self, 'trick:dottedwords' );
             }
 
