@@ -168,26 +168,33 @@ $p->logger( $l );
 $p->version( 'vtest.suite.ver' );
 $p->initialize();
 
+test_assert(1);
+
 $b->initialize();
-open STDOUT, ">temp.tmp";
 test_assert( $b->start() );
-close STDOUT;
-unlink 'temp.tmp';
 
 our $h = new UI::HTML;
+
+test_assert(1);
 
 $h->classifier( $b );
 $h->configuration( $c );
 $h->mq( $mq );
 $h->logger( $l );
+test_assert(1);
 $h->initialize();
+test_assert(1);
 $h->version( 'vtest.suite.ver' );
 test_assert_equal( $h->language(), 'English' );
 our $version = $h->version();
 
+test_assert(1);
+
 our $sk = $h->session_key();
 
 $mq->service();
+
+$h->global_config_( 'ecount', 1 );
 
 test_assert_equal( $h->url_encode_( ']' ), '%5d' );
 test_assert_equal( $h->url_encode_( '[' ), '%5b' );

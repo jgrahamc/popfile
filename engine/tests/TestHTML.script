@@ -70,8 +70,7 @@ MATCH <meta http-equiv="Expires" content="0">
 MATCH <meta http-equiv="Cache-Control" content="no-cache">
 MATCH <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 MATCH <link rel="stylesheet" type="text/css" href="skins/SimplyBlue.css" title="SimplyBlue">
-MATCH <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-MATCH <link rel="icon" href="popfile.ico" type="image/ico">
+MATCH <link rel="icon" href="favicon.ico">
 
 # Common MIDDLE parts (i.e. the tabs)
 
@@ -325,12 +324,12 @@ MATCH Testing Refresh
 MATCH John
 MATCH <font color=\"green\">personal</font>
 MATCH Scores
-MATCH 0. [28 zeroes] 265393
-MATCH 0. [29 zeroes] 796179
-MATCH 0. [33 zeroes] 976128
+MATCH 0.769209
+MATCH 0.230763
+MATCH 2.829186e-005
 MATCH <font color="red">here</font>
-MATCH 0.0017
-MATCH 0.0034
+MATCH 0.3289
+MATCH 0.6697
 MATCH <font color="black">John</font>
 MATCH <font color="red">here</font>
 MATCH Body would
@@ -343,12 +342,12 @@ MATCH Testing Refresh
 MATCH John
 MATCH <font color=\"green\">personal</font>
 MATCH Scores
-MATCH 0. [28 zeroes] 265393
-MATCH 0. [29 zeroes] 796179
-MATCH 0. [33 zeroes] 976128
+MATCH 0.769209
+MATCH 0.230763
+MATCH 2.829186e-005
 MATCH <font color="red">here</font>
-MATCH 0.0017
-MATCH 0.0034
+MATCH 0.3289
+MATCH 0.6697
 MATCH <font color="black">John</font>
 MATCH <font color="red">here</font>
 MATCH Body would
@@ -921,7 +920,7 @@ SETSUBMIT word used
 MATCH <b>used</b> is most likely to appear in <font color="red">other</font>
 MATCH 0.0005602241
 MATCH 0.6873803233
-MATCH 0.6587808605
+MATCH 1.8945518529
 MATCH Frequency
 
 # Check operation of Subject Modification
