@@ -627,7 +627,14 @@ sub http_ok
         . html_common_bottom($self);                                                                    # PROFILE BLOCK STOP
 
     # Build an HTTP header for standard HTML
-    my $http_header = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: text/html\r\nContent-Length: ";
+    my $http_header = "HTTP/1.1 200 OK\r\n";
+    $http_header .= "Connection: close\r\n";
+    $http_header .= "Pragma: no-cache\r\n";
+    $http_header .= "Expires: 0\r\n";
+    $http_header .= "Cache-Control: no-cache\r\n";
+    $http_header .= "Content-Type: text/html";
+    $http_header .= "; charset=$self->{language__}{LanguageCharset}\r\n";
+    $http_header .= "Content-Length: ";
     $http_header .= length($text);
     $http_header .= "$eol$eol";
 
@@ -658,12 +665,6 @@ sub html_common_top
     my $result = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" ";
     $result .= "\"http://www.w3.org/TR/html4/loose.dtd\">\n";
     $result .= "<html lang=\"$self->{language__}{LanguageCode}\">\n<head>\n<title>$self->{language__}{Header_Title}</title>\n";
-
-    $result .= "<meta http-equiv=\"Pragma\" content=\"no-cache\">\n";
-    $result .= "<meta http-equiv=\"Expires\" content=\"0\">\n";
-
-    $result .= "<meta http-equiv=\"Cache-Control\" content=\"no-cache\">\n";
-    $result .= "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=$self->{language__}{LanguageCharset}\">\n";
 
     $result .= "<link rel=\"icon\" href=\"favicon.ico\">\n";
 
