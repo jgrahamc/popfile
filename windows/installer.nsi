@@ -2614,10 +2614,9 @@ no_reg_file:
   RMDir $INSTDIR\languages
 
   RMDir /r $INSTDIR\corpus
-  
-  Delete $INSTDIR\messages\*.*
-  RMDir $INSTDIR\messages
-  
+
+  RMDir /r $INSTDIR\messages
+
   Delete $INSTDIR\stopwords
   Delete $INSTDIR\stopwords.bak
   Delete $INSTDIR\stopwords.default
