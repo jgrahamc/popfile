@@ -2,9 +2,9 @@
 #
 # installer.nsi --- This is the NSIS script used to create the
 #                   Windows installer for POPFile. This script uses
-#                   four custom pages whose layouts are defined
-#                   in the files "ioA.ini", "ioB.ini", "ioC.ini"
-#                   and "ioD.ini".
+#                   several custom pages whose layouts are defined
+#                   in the files "ioA.ini", "ioB.ini", "ioC.ini",
+#                   "ioD.ini", "ioE.ini", "ioF.ini" and "ioG.ini".
 #
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
@@ -31,7 +31,15 @@
 ; which are not backward-compatible (i.e. this POPFile installer script cannot be built by
 ; earlier versions of the NSIS compiler).
 
-; This version of the script has been tested with NSIS 2.0b4 dated 19 November 2003.
+; This version of the script has been tested with NSIS 2.0b4 dated 19 November 2003 after
+; applying the NSIS CVS snapshot dated 22 December 2003 (08:44 GMT).
+
+; IMPORTANT:
+; The Outlook and Outlook Express Configuration pages use the NOWORDWRAP flag which requires
+; InstallOptions 2.3 (or later). This means InstallOptions.dll dated 5 Dec 2003 or later
+; (i.e. InstallOptions.dll v1.73 or later). If this script is compiled with an earlier version
+; of the DLL, the account details will not be displayed correctly if any field exceeds the
+; column width.
 
 #--------------------------------------------------------------------------
 # POPFile Version Data:
@@ -53,6 +61,37 @@
 # used:
 #
 # makensis.exe /DC_POPFILE_MAJOR_VERSION=0 /DC_POPFILE_MINOR_VERSION=20 /DC_POPFILE_REVISION=1 /DC_POPFILE_RC installer.nsi
+#--------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------
+# Compile-time command-line switches (used by 'makensis.exe')
+#--------------------------------------------------------------------------
+#
+# /DENGLISH_MODE
+#
+# To build an installer that only displays English messages (so there is no need to ensure all
+# of the non-English *-pfi.nsh files are up-to-date), supply the command-line switch
+# /DENGLISH_MODE when compiling the installer. This switch only affects the language used by
+# the installer, it does not affect which files get installed.
+#
+# /DNO_KAKASI
+#
+# When the default compression mode is used to compile the installer, the Kakasi package and
+# the additional Perl components it requires cause the installer to almost double in size.
+# If the /DNO_KAKASI command-line switch is used, the installer will be built without these
+# additional packages so the compile time and the installer size will be greatly reduced.
+#
+#--------------------------------------------------------------------------
+# Run-time command-line switches (used by 'setup.exe')
+#--------------------------------------------------------------------------
+#
+# /OUTLOOK
+#
+# The 'Outlook' reconfiguration code has had very little testing so far, therefore the
+# installer does not normally offer to reconfigure 'Outlook' accounts. To enable the
+# configuration of 'Outlook' accounts, use the command-line switch /OUTLOOK when starting
+# the installer (the commands 'setup.exe /OUTLOOK' or 'setup.exe /outlook' can be used)
+#
 #--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
@@ -95,9 +134,9 @@
 # To add support for a language which is already supported by the NSIS MUI package, an extra
 # file is required:
 #
-#   <NSIS Language NAME>-pfi.nsh  - holds customised versions of the standard MUI text strings
-#                                   (eg removing the 'reboot' reference from the 'Welcome' page)
-#                                   plus strings used on the custom pages and elsewhere
+# <NSIS Language NAME>-pfi.nsh  -  holds customised versions of the standard MUI text strings
+#                                  (eg removing the 'reboot' reference from the 'Welcome' page)
+#                                  plus strings used on the custom pages and elsewhere
 #
 # Once this file has been prepared and placed in the 'windows\languages' directory with the
 # other *-pfi.nsh files, add a new '!insertmacro PFI_LANG_LOAD' line to load this new file
@@ -114,6 +153,10 @@
 #
 # This version of the installer also installs the complete Perl 'Encode' collection of modules
 # to complete the Japanese support requirements.
+#
+# The Kakasi package and the additional Perl modules almost double the size of the installer
+# (assuming that the default compression method is used). If the command-line switch
+# /DNO_KAKASI is used then a smaller installer can be built by omitting the Japanese support.
 #--------------------------------------------------------------------------
 
   ;--------------------------------------------------------------------------
@@ -223,9 +266,17 @@
   VIAddVersionKey "FileVersion" "${C_PFI_VERSION}"
 
   !ifndef ENGLISH_MODE
-    VIAddVersionKey "Build" "Multi-Language"
+    !ifndef NO_KAKASI
+      VIAddVersionKey "Build" "Multi-Language (with Kakasi)"
+    !else
+      VIAddVersionKey "Build" "Multi-Language (without Kakasi)"
+    !endif
   !else
-    VIAddVersionKey "Build" "English-Mode"
+    !ifndef NO_KAKASI
+      VIAddVersionKey "Build" "English-Mode (with Kakasi)"
+    !else
+      VIAddVersionKey "Build" "English-Mode (without Kakasi)"
+    !endif
   !endif
 
   VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
@@ -364,13 +415,19 @@
 
   ; Use a "pre" function for the 'Welcome' page to ensure the installer window is visible
   ; (if the "Release Notes" were displayed, another window could have been positioned
-  ; to obscure the installer window)
+  ; to obscure the installer window) and to check if the user had 'Admin' rights.
 
-  !define MUI_PAGE_CUSTOMFUNCTION_PRE "ShowInstaller"
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE "CheckUserRights"
 
   !define MUI_WELCOMEPAGE_TEXT "$(PFI_LANG_WELCOME_INFO_TEXT)"
 
   !insertmacro MUI_PAGE_WELCOME
+
+  ;---------------------------------------------------
+  ; Installer Page - Check some system requirements of the minimal Perl we install
+  ;---------------------------------------------------
+
+  Page custom CheckPerlRequirementsPage
 
   ;---------------------------------------------------
   ; Installer Page - License Page (uses English GPL)
@@ -422,10 +479,28 @@
   !insertmacro CBP_PAGE_SELECTBUCKETS
 
   ;---------------------------------------------------
-  ; Installer Page - Configure Outlook Express
+  ; Installer Page - Email Client Configuration
   ;---------------------------------------------------
 
-  Page custom SetOutlookExpressPage
+  Page custom SetEmailClientPage
+
+  ;---------------------------------------------------
+  ; Installer Page - Configure Outlook Express accounts
+  ;---------------------------------------------------
+
+  Page custom SetOutlookExpressPage "CheckOutlookExpressRequests"
+
+  ;---------------------------------------------------
+  ; Installer Page - Configure Outlook accounts
+  ;---------------------------------------------------
+
+  Page custom SetOutlookPage "CheckOutlookRequests"
+
+  ;---------------------------------------------------
+  ; Installer Page - Configure Eudora personalities
+  ;---------------------------------------------------
+
+  Page custom SetEudoraPage
 
   ;---------------------------------------------------
   ; Installer Page - Choose POPFile launch mode
@@ -481,10 +556,23 @@
 
   ; This script uses 'User Variables' (with names starting with 'G_') to hold GLOBAL data.
 
-  Var   G_POP3        ; POP3 port (1-65535)
-  Var   G_GUI         ; GUI port (1-65535)
-  Var   G_STARTUP     ; automatic startup flag (1 = yes, 0 = no)
-  Var   G_NOTEPAD     ; path to notepad.exe ("" = not found in search path)
+  Var G_POP3               ; POP3 port (1-65535)
+  Var G_GUI                ; GUI port (1-65535)
+  Var G_STARTUP            ; automatic startup flag (1 = yes, 0 = no)
+  Var G_NOTEPAD            ; path to notepad.exe ("" = not found in search path)
+
+  Var G_OOECONFIG_HANDLE   ; to access list of all Outlook/Outlook Express accounts found
+  Var G_OOECHANGES_HANDLE  ; to access list of Outlook/Outlook Express configuration changes
+  Var G_OOELIST_INDEX      ; to access the list of up to 6 Outlook/Outlook Express accounts
+  Var G_OOELIST_CBOX       ; to access one of the 6 checkbox fields on the configuration page
+  Var G_SEPARATOR          ; character used to separate the POP3 server from the username
+
+  Var G_HWND               ; HWND of the dialog we are going to modify
+  Var G_DLGITEM            ; HWND of the field we are going to modify on that dialog
+  Var G_FONT               ; the font we use to modify that field
+
+  Var G_WINUSERNAME        ; current Windows user login name
+  Var G_WINUSERTYPE        ; user group ('Admin', 'Power', 'User', 'Guest' or 'Unknown')
 
   ; NSIS provides 20 general purpose user registers:
   ; (a) $R0 to $R9   are used as local registers
@@ -505,7 +593,7 @@
 
   ;-----------------------------------------
   ; Select the languages to be supported by installer/uninstaller.
-  ; Currently a subset of the languages supported by NSIS MUI 1.65 (using the NSIS names)
+  ; Currently a subset of the languages supported by NSIS MUI 1.68 (using the NSIS names)
   ;-----------------------------------------
 
   ; At least one language must be specified for the installer (the default is "English")
@@ -584,6 +672,9 @@
   ReserveFile "ioB.ini"
   ReserveFile "ioC.ini"
   ReserveFile "ioD.ini"
+  ReserveFile "ioE.ini"
+  ReserveFile "ioF.ini"
+  ReserveFile "ioG.ini"
   ReserveFile "${C_RELEASE_NOTES}"
 
 #--------------------------------------------------------------------------
@@ -592,13 +683,28 @@
 
 Function .onInit
 
+  ; The reason why '.onInit' preserves the registers it uses is that it makes debugging easier!
+
   !define L_INPUT_FILE_HANDLE   $R9
   !define L_OUTPUT_FILE_HANDLE  $R8
-  !define L_LINE                $R7
+  !define L_TEMP                $R7
+  !define L_RESERVED            $1    ; used in the system.dll call
 
   Push ${L_INPUT_FILE_HANDLE}
   Push ${L_OUTPUT_FILE_HANDLE}
-  Push ${L_LINE}
+  Push ${L_TEMP}
+  Push ${L_RESERVED}
+
+  ; Ensure only one copy of this installer is running
+
+  System::Call 'kernel32::CreateMutexA(i 0, i 0, t "OnlyOnePFI_mutex") i .r1 ?e'
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} 0 continue
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Another copy of the POPFile installer is already running!"
+  Abort
+
+continue:
 
   ; Conditional compilation: if ENGLISH_MODE is defined, support only 'English'
 
@@ -610,6 +716,9 @@ Function .onInit
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioB.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioC.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioD.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioE.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioF.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioG.ini"
 
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "${C_RELEASE_NOTES}" "${C_README}"
 
@@ -622,25 +731,28 @@ Function .onInit
   ClearErrors
 
 loop:
-  FileRead ${L_INPUT_FILE_HANDLE} ${L_LINE}
+  FileRead ${L_INPUT_FILE_HANDLE} ${L_TEMP}
   IfErrors close_files
-  Push ${L_LINE}
+  Push ${L_TEMP}
   Call TrimNewlines
-  Pop ${L_LINE}
-  FileWrite ${L_OUTPUT_FILE_HANDLE} ${L_LINE}$\r$\n
+  Pop ${L_TEMP}
+  FileWrite ${L_OUTPUT_FILE_HANDLE} ${L_TEMP}$\r$\n
   Goto loop
 
 close_files:
   FileClose ${L_INPUT_FILE_HANDLE}
   FileClose ${L_OUTPUT_FILE_HANDLE}
 
-  Pop ${L_LINE}
+  Pop ${L_RESERVED}
+  Pop ${L_TEMP}
   Pop ${L_OUTPUT_FILE_HANDLE}
   Pop ${L_INPUT_FILE_HANDLE}
 
   !undef L_INPUT_FILE_HANDLE
   !undef L_OUTPUT_FILE_HANDLE
-  !undef L_LINE
+  !undef L_TEMP
+  !undef L_RESERVED
+
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -674,13 +786,19 @@ continue:
   ; (the CBP package creates its own INI file so there is no need for a CBP *Page_Init function)
 
   Call SetOptionsPage_Init
-  Call SetOutlookExpressPage_Init
+  Call SetEmailClientPage_Init
+  Call SetOutlookOutlookExpressPage_Init
+  Call SetEudoraPage_Init
   Call StartPOPFilePage_Init
   Call ConvertCorpusPage_Init
 
-  ; Ensure the 'Kakasi' section is selected if 'Japanese' has been chosen
+  !ifndef NO_KAKASI
 
-  Call HandleKakasi
+      ; Ensure the 'Kakasi' section is selected if 'Japanese' has been chosen
+
+      Call HandleKakasi
+
+  !endif
 
 FunctionEnd
 
@@ -732,7 +850,17 @@ Section "POPFile" SecPOPFile
   File "..\engine\popfileb.exe"
   File "..\engine\popfileif.exe"
   File "..\engine\popfileib.exe"
+
   File "stop_pf.exe"
+  File "wrapper.exe"
+  File "wrapperf.exe"
+  File "wrapperb.exe"
+  File "sqlite.exe"
+
+  ; Create default configuration data for use by the 'wrapper' utilities
+
+  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "POPFileFolder" "$INSTDIR"
+  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserDataFolder" "$INSTDIR"
 
   File "..\engine\popfile.pl"
   File "..\engine\insert.pl"
@@ -787,9 +915,11 @@ update_config:
   CopyFiles /SILENT /FILESONLY $PLUGINSDIR\popfile.cfg $INSTDIR\
 
   SetOutPath $INSTDIR\Classifier
+
   File "..\engine\Classifier\Bayes.pm"
   File "..\engine\Classifier\WordMangle.pm"
   File "..\engine\Classifier\MailParse.pm"
+  File "..\engine\Classifier\popfile.sql"
 
   SetOutPath $INSTDIR\Platform
   File "..\engine\Platform\MSWin32.pm"
@@ -800,6 +930,12 @@ update_config:
   File "..\engine\POPFile\Logger.pm"
   File "..\engine\POPFile\Module.pm"
   File "..\engine\POPFile\Configuration.pm"
+
+  ; CVS builds use installer version data to set the POPFile version
+
+  FileOpen ${L_CFG} "$INSTDIR\POPFile\popfile_version" w
+  FileWrite ${L_CFG} "${C_POPFILE_MAJOR_VERSION}$\r$\n${C_POPFILE_MINOR_VERSION}$\r$\n${C_POPFILE_REVISION}$\r$\n"
+  FileClose ${L_CFG}
 
   SetOutPath $INSTDIR\Proxy
   File "..\engine\Proxy\Proxy.pm"
@@ -825,15 +961,18 @@ update_config:
 
   SetOutPath $INSTDIR
   File "${C_PERL_DIR}\bin\perl.exe"
+  File "${C_PERL_DIR}\bin\wperl.exe"
   File "${C_PERL_DIR}\bin\perl58.dll"
   File "${C_PERL_DIR}\lib\AutoLoader.pm"
   File "${C_PERL_DIR}\lib\Carp.pm"
   File "${C_PERL_DIR}\lib\Config.pm"
+  File "${C_PERL_DIR}\lib\constant.pm"
   File "${C_PERL_DIR}\lib\DynaLoader.pm"
   File "${C_PERL_DIR}\lib\Errno.pm"
   File "${C_PERL_DIR}\lib\Exporter.pm"
   File "${C_PERL_DIR}\lib\IO.pm"
   File "${C_PERL_DIR}\lib\integer.pm"
+  File "${C_PERL_DIR}\lib\lib.pm"
   File "${C_PERL_DIR}\lib\locale.pm"
   File "${C_PERL_DIR}\lib\POSIX.pm"
   File "${C_PERL_DIR}\lib\SelectSaver.pm"
@@ -852,6 +991,9 @@ update_config:
 
   SetOutPath $INSTDIR\File
   File "${C_PERL_DIR}\lib\File\Glob.pm"
+
+  SetOutPath $INSTDIR\Getopt
+  File "${C_PERL_DIR}\lib\Getopt\Long.pm"
 
   SetOutPath $INSTDIR\IO
   File "${C_PERL_DIR}\lib\IO\*"
@@ -907,6 +1049,31 @@ update_config:
   File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\BerkeleyDB.exp"
   File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\BerkeleyDB.lib"
 
+  ; Install Perl modules and library files for SQLite support
+
+  SetOutPath $INSTDIR
+  File "${C_PERL_DIR}\lib\base.pm"
+  File "${C_PERL_DIR}\lib\overload.pm"
+  File "${C_PERL_DIR}\site\lib\DBI.pm"
+
+  SetOutPath $INSTDIR\auto\DBD\SQLite
+  File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.bs"
+  File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.dll"
+  File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.exp"
+  File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.lib"
+
+  SetOutPath $INSTDIR\auto\DBI
+  File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.bs"
+  File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.dll"
+  File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.exp"
+  File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.lib"
+
+  SetOutPath $INSTDIR\String
+  File "${C_PERL_DIR}\site\lib\String\Interpolate.pm"
+
+  SetOutPath $INSTDIR\DBD
+  File "${C_PERL_DIR}\site\lib\DBD\SQLite.pm"
+
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
 
@@ -926,7 +1093,7 @@ update_config:
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
   SetOutPath $INSTDIR
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
-                 "$INSTDIR\popfile.exe"
+                 "$INSTDIR\wrapper.exe"
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" \
                  "$INSTDIR\uninstall.exe"
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" \
@@ -955,7 +1122,7 @@ update_config:
       SetOutPath $SMSTARTUP
       SetOutPath $INSTDIR
       CreateShortCut "$SMSTARTUP\Run POPFile.lnk" \
-                     "$INSTDIR\popfile.exe"
+                     "$INSTDIR\wrapper.exe"
 skip_autostart_set:
 
   ; Remove redundant links (used by earlier versions of POPFile)
@@ -1216,54 +1383,56 @@ lang_done:
 
 SectionEnd
 
-#--------------------------------------------------------------------------
-# Installer Section: (optional) Kakasi component
-#
-# This component is automatically installed if 'Japanese' has been selected
-# as the language for the installer. Normally this component is not seen in
-# the 'Components' list, but if an English-mode installer is built this
-# component will be made visible to allow it to be selected by the user.
-#--------------------------------------------------------------------------
+!ifndef NO_KAKASI
+    #--------------------------------------------------------------------------
+    # Installer Section: (optional) Kakasi component
+    #
+    # This component is automatically installed if 'Japanese' has been selected
+    # as the language for the installer. Normally this component is not seen in
+    # the 'Components' list, but if an English-mode installer is built this
+    # component will be made visible to allow it to be selected by the user.
+    #--------------------------------------------------------------------------
 
-Section "Kakasi" SecKakasi
+    Section "Kakasi" SecKakasi
 
-  ;--------------------------------------------------------------------------
-  ; Install Kakasi package
-  ;--------------------------------------------------------------------------
+      ;--------------------------------------------------------------------------
+      ; Install Kakasi package
+      ;--------------------------------------------------------------------------
 
-  SetOutPath $INSTDIR
-  File /r "${C_KAKASI_DIR}\kakasi"
+      SetOutPath $INSTDIR
+      File /r "${C_KAKASI_DIR}\kakasi"
 
-  ; Add Environment Variables for Kakasi
+      ; Add Environment Variables for Kakasi
 
-  Push ITAIJIDICTPATH
-  Push $INSTDIR\kakasi\share\kakasi\itaijidict
-  Call WriteEnvStr
-  Push KANWADICTPATH
-  Push $INSTDIR\kakasi\share\kakasi\kanwadict
-  Call WriteEnvStr
+      Push ITAIJIDICTPATH
+      Push $INSTDIR\kakasi\share\kakasi\itaijidict
+      Call WriteEnvStr
+      Push KANWADICTPATH
+      Push $INSTDIR\kakasi\share\kakasi\kanwadict
+      Call WriteEnvStr
 
-  ;--------------------------------------------------------------------------
-  ; Install Perl modules: base.pm, the Encode collection and Text::Kakasi
-  ;--------------------------------------------------------------------------
+      ;--------------------------------------------------------------------------
+      ; Install Perl modules: base.pm, the Encode collection and Text::Kakasi
+      ;--------------------------------------------------------------------------
 
-  SetOutPath $INSTDIR
-  File "${C_PERL_DIR}\lib\base.pm"
-  File "${C_PERL_DIR}\lib\Encode.pm"
+      SetOutPath $INSTDIR
+      File "${C_PERL_DIR}\lib\base.pm"
+      File "${C_PERL_DIR}\lib\Encode.pm"
 
-  SetOutPath $INSTDIR\Encode
-  File /r "${C_PERL_DIR}\lib\Encode\*"
+      SetOutPath $INSTDIR\Encode
+      File /r "${C_PERL_DIR}\lib\Encode\*"
 
-  SetOutPath $INSTDIR\auto\Encode
-  File /r "${C_PERL_DIR}\lib\auto\Encode\*"
+      SetOutPath $INSTDIR\auto\Encode
+      File /r "${C_PERL_DIR}\lib\auto\Encode\*"
 
-  SetOutPath $INSTDIR\Text
-  File "${C_PERL_DIR}\site\lib\Text\Kakasi.pm"
+      SetOutPath $INSTDIR\Text
+      File "${C_PERL_DIR}\site\lib\Text\Kakasi.pm"
 
-  SetOutPath $INSTDIR\auto\Text\Kakasi
-  File "${C_PERL_DIR}\site\lib\auto\Text\Kakasi\*"
+      SetOutPath $INSTDIR\auto\Text\Kakasi
+      File "${C_PERL_DIR}\site\lib\auto\Text\Kakasi\*"
 
-SectionEnd
+    SectionEnd
+!endif
 
 #--------------------------------------------------------------------------
 # Component-selection page descriptions
@@ -1276,41 +1445,149 @@ SectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile} $(DESC_SecPOPFile)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}   $(DESC_SecSkins)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}   $(DESC_SecLangs)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecKakasi}   "Kakasi (used to process Japanese email)"
+    !ifndef NO_KAKASI
+      !insertmacro MUI_DESCRIPTION_TEXT ${SecKakasi} "Kakasi (used to process Japanese email)"
+    !endif
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
+!ifndef NO_KAKASI
+    #--------------------------------------------------------------------------
+    # Installer Function: HandleKakasi
+    #
+    # This function ensures that when 'Japanese' has been selected as the language
+    # for the installer, the 'Kakasi' section is invisibly selected for installation
+    # (if any other language is selected, we do not select the invisible 'Kakasi' section).
+    #
+    # If the installer is built in ENGLISH_MODE then the 'Kakasi' section will be visible
+    # to allow it to be selected if it is required.
+    #--------------------------------------------------------------------------
+
+    Function HandleKakasi
+
+      !insertmacro UnselectSection ${SecKakasi}
+
+      !ifndef ENGLISH_MODE
+            SectionSetText ${SecKakasi} ""            ; this makes the component invisible
+            StrCmp $LANGUAGE ${LANG_JAPANESE} 0 exit
+            !insertmacro SelectSection ${SecKakasi}
+          exit:
+      !endif
+    FunctionEnd
+!endif
+
 #--------------------------------------------------------------------------
-# Installer Function: HandleKakasi
+# Installer Function: CheckPerlRequirementsPage
 #
-# This function ensures that when 'Japanese' has been selected as the language
-# for the installer, the 'Kakasi' section is invisibly selected for installation
-# (if any other language is selected, we do not select the invisible 'Kakasi' section).
-#
-# If the installer is built in ENGLISH_MODE then the 'Kakasi' section will be visible
-# to allow it to be selected if it is required.
+# The minimal Perl we install requires some Microsoft components which are included in the
+# current versions of Windows. Older systems will have suitable versions of these components
+# provided Internet Explorer 5.5 or later has been installed. If we find an earlier version
+# of Internet Explorer is installed, we suggest the user upgrades to IE 5.5 or later.
 #--------------------------------------------------------------------------
 
-Function HandleKakasi
+Function CheckPerlRequirementsPage
 
-  !insertmacro UnselectSection ${SecKakasi}
+  !define L_TEMP      $R9
+  !define L_VERSION   $R8
 
-  !ifndef ENGLISH_MODE
-        SectionSetText ${SecKakasi} ""            ; this makes the component invisible
-        StrCmp $LANGUAGE ${LANG_JAPANESE} 0 exit
-        !insertmacro SelectSection ${SecKakasi}
-      exit:
-  !endif
+  Push ${L_TEMP}
+  Push ${L_VERSION}
+
+  Call GetIEVersion
+  Pop ${L_VERSION}
+
+  StrCpy ${L_TEMP} ${L_VERSION} 1
+  StrCmp ${L_TEMP} '?' not_good
+  IntCmp ${L_TEMP} 5 0 not_good exit
+  StrCmp ${L_VERSION} '5.5' exit
+
+not_good:
+
+  ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioG.ini" "Settings" "RTL" "$(^RTL)"
+
+  !insertmacro PFI_IO_TEXT "ioG.ini" "1" "$(PFI_LANG_PERLREQ_IO_TEXT_1)"
+  !insertmacro PFI_IO_TEXT "ioG.ini" "2" "$(PFI_LANG_PERLREQ_IO_TEXT_2) ${L_VERSION}"
+  !insertmacro PFI_IO_TEXT "ioG.ini" "3" "$(PFI_LANG_PERLREQ_IO_TEXT_3)"
+
+  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_PERLREQ_TITLE)" "$(PFI_LANG_PERLREQ_SUBTITLE)"
+
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioG.ini"
+
+exit:
+  Pop ${L_VERSION}
+  Pop ${L_TEMP}
+
+  !undef L_TEMP
+  !undef L_VERSION
+
 FunctionEnd
 
 #--------------------------------------------------------------------------
-# Installer Function: ShowInstaller
+# Installer Function: CheckUserRights
 # (the "pre" function for the WELCOME page)
 #
-# Ensure the installer window is not hidden behind any other windows
+# Try to ensure the installer window is not hidden behind any other windows.
+#
+# On systems which support different types of user, recommend that POPFile is installed by
+# a user with 'Administrative' rights (this makes it easier to use POPFile's multi-user mode).
 #--------------------------------------------------------------------------
 
-Function ShowInstaller
+Function CheckUserRights
+
+  !define L_WELCOME_TEXT  $R9
+
+  Push ${L_WELCOME_TEXT}
+
+  ; After showing the release notes, the installer may not be "on top" so try to correct this.
+  ; (On Windows XP this command may only flash the installer's task bar icon)
+
   BringToFront
+
+  ; The 'UserInfo' plugin may return an error if run on a Win9x system but since Win9x systems
+  ; do not support different account types, we treat this error as if user has 'Admin' rights.
+
+	ClearErrors
+	UserInfo::GetName
+	IfErrors 0 got_name
+
+  ; Assume Win9x system, so user has 'Admin' rights (To do: look for username in Registry?)
+  ; (UserInfo works on Win98SE so perhaps it is only Win95 that fails ?)
+
+  StrCpy $G_WINUSERNAME "UnknownUser"
+  StrCpy $G_WINUSERTYPE "Admin"
+  Goto exit
+
+got_name:
+	Pop $G_WINUSERNAME
+  StrCmp $G_WINUSERNAME "" 0 get_usertype
+  StrCpy $G_WINUSERNAME "UnknownUser"
+
+get_usertype:
+  UserInfo::GetAccountType
+	Pop $G_WINUSERTYPE
+  StrCmp $G_WINUSERTYPE "Admin" exit
+  StrCmp $G_WINUSERTYPE "Power" not_admin
+  StrCmp $G_WINUSERTYPE "User" not_admin
+  StrCmp $G_WINUSERTYPE "Guest" not_admin
+  StrCpy $G_WINUSERTYPE "Unknown"
+
+not_admin:
+
+  ; On the 'Welcome' page, add a note recommending that POPFile is installed by a user
+  ; with 'Administrator' rights
+
+  !insertmacro MUI_INSTALLOPTIONS_READ "${L_WELCOME_TEXT}" "ioSpecial.ini" "Field 3" "Text"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 3" "Text" \
+      "${L_WELCOME_TEXT}\
+      \r\n\r\n\
+      $(PFI_LANG_WELCOME_ADMIN_TEXT)"
+
+exit:
+  Pop ${L_WELCOME_TEXT}
+
+  !undef L_WELCOME_TEXT
+
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -1336,8 +1613,9 @@ Function MakeItSafe
 
   ; If we are about to overwrite an existing version which is still running,
   ; then one of the EXE files will be 'locked' which means we have to shutdown POPFile.
-  ; POPFile v0.20.0 and later may be using one of four popfile*.exe files.
-  ; Earlier versions of POPFile (up to and including 0.19.1) may be using wperl.exe or perl.exe.
+  ; POPFile v0.20.0 and later may be using 'popfileb.exe', 'popfilef.exe', 'popfileib.exe',
+  ; 'popfileif.exe', or 'perl.exe' ('wperl.exe' is another possibility if this is an upgraded
+  ; installation). Earlier versions of POPFile use only 'perl.exe' or 'wperl.exe'.
 
   DetailPrint "Checking $INSTDIR\popfileb.exe"
 
@@ -1477,6 +1755,23 @@ Function CheckExistingConfig
   !define L_CONSOLE   $R2     ; a config parameter used by popfile.exe
   !define L_LANG_NEW  $R1     ; new style UI lang parameter
   !define L_LANG_OLD  $R0     ; old style UI lang parameter
+
+  ; Warn the user if we are about to upgrade an existing installation
+  ; and allow user to select a different directory if they wish
+
+  IfFileExists "$INSTDIR\popfile.pl" warning
+  IfFileExists "$INSTDIR\popfile.cfg" warning
+  Goto continue
+
+warning:
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_1)\
+      $\r$\n$\r$\n\
+      $INSTDIR\
+      $\r$\n$\r$\n$\r$\n\
+      $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES continue
+  Abort
+
+continue:
 
   Push ${L_CFG}
   Push ${L_CLEANCFG}
@@ -1733,6 +2028,10 @@ FunctionEnd
 
 Function SetOptionsPage_Init
 
+  ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Settings" "RTL" "$(^RTL)"
+
   !insertmacro PFI_IO_TEXT "ioA.ini" "1" "$(PFI_LANG_OPTIONS_IO_POP3)"
   !insertmacro PFI_IO_TEXT "ioA.ini" "3" "$(PFI_LANG_OPTIONS_IO_GUI)"
   !insertmacro PFI_IO_TEXT "ioA.ini" "5" "$(PFI_LANG_OPTIONS_IO_STARTUP)"
@@ -1906,22 +2205,114 @@ good_exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
-# Installer Function: SetOutlookExpressPage_Init
+# Installer Function: SetEmailClientPage_Init
 #
-# This function adds language texts to the INI file used by the "SetOutlookExpressPage" function
+# This function adds language texts to the INI file used by "SetEmailClientPage" function
 # (to make the custom page use the language selected by the user for the installer)
 #--------------------------------------------------------------------------
 
-Function SetOutlookExpressPage_Init
+Function SetEmailClientPage_Init
 
-  !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_OECFG_IO_INTRO)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "2" "$(PFI_LANG_OECFG_IO_CHECKBOX)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "3" "$(PFI_LANG_OECFG_IO_RESTORE)"
+  ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
 
-  !insertmacro PFI_IO_TEXT "ioB.ini" "5" "$(PFI_LANG_OECFG_IO_EMAIL)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "6" "$(PFI_LANG_OECFG_IO_SERVER)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "7" "$(PFI_LANG_OECFG_IO_USERNAME)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "8" "$(PFI_LANG_OECFG_IO_POP3PORT)"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "Settings" "RTL" "$(^RTL)"
+
+  !insertmacro PFI_IO_TEXT "ioF.ini" "1" "$(PFI_LANG_MAILCFG_IO_TEXT_1)"
+  !insertmacro PFI_IO_TEXT "ioF.ini" "3" "$(PFI_LANG_MAILCFG_IO_TEXT_2)"
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: SetEmailClientPage (generates a custom page)
+#
+# This function is used to introduce the reconfiguration of email clients
+#--------------------------------------------------------------------------
+
+Function SetEmailClientPage
+
+  !define L_CLIENT_INDEX    $R9
+  !define L_CLIENT_LIST     $R8
+  !define L_CLIENT_NAME     $R7
+  !define L_CLIENT_TYPE     $R6   ; used to indicate if client can be reconfigured by installer
+  !define L_SEPARATOR       $R5
+  !define L_TEMP            $R4
+
+  Push ${L_CLIENT_INDEX}
+  Push ${L_CLIENT_LIST}
+  Push ${L_CLIENT_NAME}
+  Push ${L_CLIENT_TYPE}
+  Push ${L_SEPARATOR}
+  Push ${L_TEMP}
+
+  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_MAILCFG_TITLE)" "$(PFI_LANG_MAILCFG_SUBTITLE)"
+
+  StrCpy ${L_CLIENT_INDEX} 0
+  StrCpy ${L_CLIENT_LIST} ""
+  StrCpy ${L_SEPARATOR} ""
+
+read_next_name:
+  EnumRegKey ${L_CLIENT_NAME} HKLM "Software\Clients\Mail" ${L_CLIENT_INDEX}
+  StrCmp ${L_CLIENT_NAME} "" display_results
+  StrCmp ${L_CLIENT_NAME} "Hotmail" incrm_index
+  Push "|Microsoft Outlook|Outlook Express|Eudora|"
+  Push "|${L_CLIENT_NAME}|"
+  Call StrStr
+  Pop ${L_CLIENT_TYPE}
+  StrCmp ${L_CLIENT_TYPE} "" add_to_list
+  StrCpy ${L_CLIENT_TYPE} " (*)"
+
+  ReadRegStr ${L_TEMP} HKLM "Software\Clients\Mail\${L_CLIENT_NAME}\shell\open\command" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "ClientEXE" "${L_CLIENT_NAME}" "${L_TEMP}"
+
+add_to_list:
+  StrCpy ${L_CLIENT_LIST} "${L_CLIENT_LIST}${L_SEPARATOR}${L_CLIENT_NAME}${L_CLIENT_TYPE}"
+  StrCpy ${L_SEPARATOR} "\r\n"
+
+incrm_index:
+  IntOp ${L_CLIENT_INDEX} ${L_CLIENT_INDEX} + 1
+  Goto read_next_name
+
+display_results:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "Field 2" "State" "${L_CLIENT_LIST}"
+
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioF.ini"
+
+  Pop ${L_TEMP}
+  Pop ${L_SEPARATOR}
+  Pop ${L_CLIENT_TYPE}
+  Pop ${L_CLIENT_NAME}
+  Pop ${L_CLIENT_LIST}
+  Pop ${L_CLIENT_INDEX}
+
+  !undef L_CLIENT_INDEX
+  !undef L_CLIENT_LIST
+  !undef L_CLIENT_NAME
+  !undef L_CLIENT_TYPE
+  !undef L_SEPARATOR
+  !undef L_TEMP
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: SetOutlookOutlookExpressPage_Init
+#
+# This function adds language texts to the INI file used by "SetOutlookExpressPage" function
+# and by the "SetOutlookPage" function (to make the custom page use the language selected by
+# the user for the installer)
+#--------------------------------------------------------------------------
+
+Function SetOutlookOutlookExpressPage_Init
+
+  ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" "Settings" "RTL" "$(^RTL)"
+
+  !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_OOECFG_IO_BOXHDR)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "3" "$(PFI_LANG_OOECFG_IO_FOOTNOTE)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "4" "$(PFI_LANG_OOECFG_IO_ACCOUNTHDR)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "5" "$(PFI_LANG_OOECFG_IO_EMAILHDR)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "6" "$(PFI_LANG_OOECFG_IO_SERVERHDR)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "7" "$(PFI_LANG_OOECFG_IO_USRNAMEHDR)"
 
 FunctionEnd
 
@@ -1968,8 +2359,12 @@ Function SetOutlookExpressPage
   !define L_OEPATH      $R2   ; holds part of the path used to access OE account data
   !define L_ORDINALS    $R1   ; "Identity Ordinals" flag (1 = found, 0 = not found)
   !define L_PORT        $R0   ; POP3 Port used for an OE Account
-  !define L_SEPARATOR   $9    ; char used to separate the pop3 server from the username
+  !define L_STATUS      $9    ; keeps track of the status of the account we are checking
   !define L_TEMP        $8
+
+  !define L_POP3SERVER    $7
+  !define L_EMAILADDRESS  $6
+  !define L_USERNAME      $5
 
   Push ${L_ACCOUNT}
   Push ${L_ACCT_INDEX}
@@ -1981,13 +2376,68 @@ Function SetOutlookExpressPage
   Push ${L_OEPATH}
   Push ${L_ORDINALS}
   Push ${L_PORT}
-  Push ${L_SEPARATOR}
+  Push ${L_STATUS}
   Push ${L_TEMP}
+
+  Push ${L_POP3SERVER}
+  Push ${L_EMAILADDRESS}
+  Push ${L_USERNAME}
+
+  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_EXPCFG_TITLE)" "$(PFI_LANG_EXPCFG_SUBTITLE)"
+
+  ; If Outlook Express is running, ask the user to shut it down now
+  ; (user is allowed to ignore our request)
+
+check_again:
+  FindWindow ${L_STATUS} "Outlook Express Browser Class"
+  IsWindow ${L_STATUS} 0 open_logfiles
+
+  MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EXP)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_1)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_2)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_3)"\
+             IDRETRY check_again IDIGNORE open_logfiles
+
+  ; Abort has been selected so we do not offer to reconfigure any Outlook Express accounts
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioB.ini" "Settings" "NumFields" "1"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_EXPCFG_IO_CANCELLED)"
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioB.ini"
+  Goto exit
+
+open_logfiles:
+  Call GetDateTimeStamp
+  Pop ${L_TEMP}
+
+  FileOpen  $G_OOECONFIG_HANDLE "$INSTDIR\expconfig.txt" w
+  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_EXPCFG_LOG_BEFORE) (${L_TEMP})$\r$\n$\r$\n"
+  !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_EXPCFG_LOG_IDENTITY)"  20
+  !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"   20
+  !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_EMAIL)"     30
+  !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_SERVER)"    20
+  !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_USER)"      20
+  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OOECFG_LOG_PORT)$\r$\n$\r$\n"
+
+  FileOpen  $G_OOECHANGES_HANDLE "$INSTDIR\expchanges.txt" a
+  FileSeek  $G_OOECHANGES_HANDLE 0 END
+  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_ExpCFG_LOG_AFTER) (${L_TEMP})$\r$\n$\r$\n"
+  !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_EXPCFG_LOG_IDENTITY)"   20
+  !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"    20
+  !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWSERVER)"  17
+  !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWUSER)"    40
+  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OOECFG_LOG_NEWPORT)$\r$\n$\r$\n"
 
   ; Determine the separator character to be used when configuring an email account for POPFile
 
   Call GetSeparator
-  Pop ${L_SEPARATOR}
+  Pop $G_SEPARATOR
+
+  ; Start with an empty list of accounts and reset the list "pointers"
+
+  Call ResetOutlookOutlookExpressAccountList
 
   StrCpy ${L_GUID_INDEX} 0
 
@@ -2025,6 +2475,11 @@ check_accounts:
   StrCpy ${L_ACCT_INDEX} 0
 
 next_acct:
+
+  ; Reset the text string used to keep track of the status of the email account we are checking
+
+  StrCpy ${L_STATUS} ""
+
   EnumRegKey ${L_ACCOUNT} \
              HKCU "${L_OEPATH}Software\Microsoft\Internet Account Manager\Accounts" \
              ${L_ACCT_INDEX}
@@ -2038,119 +2493,168 @@ next_acct:
 
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 Server"
   StrCmp ${L_OEDATA} "" try_next_account
-  StrCmp ${L_OEDATA} "127.0.0.1" try_next_account
+
+  ; Have found an email account so we add a new entry to the list (which can hold 6 accounts)
+
+  IntOp $G_OOELIST_INDEX $G_OOELIST_INDEX + 1    ; used to access the [Account] data in ioB.ini
+  IntOp $G_OOELIST_CBOX $G_OOELIST_CBOX + 1      ; field number for relevant checkbox
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Settings" "NumFields" "$G_OOELIST_CBOX"
+
+  StrCmp ${L_OEDATA} "127.0.0.1" 0 check_pop3_server
+  StrCpy ${L_STATUS} "bad IP"
+  Goto check_pop3_username
+
+check_pop3_server:
 
   ; If 'POP3 Server' data contains the separator character, we cannot configure this account
 
   Push ${L_OEDATA}
-  Push ${L_SEPARATOR}
+  Push $G_SEPARATOR
   Call StrStr
   Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" 0 try_next_account
+  StrCmp ${L_TEMP} "" check_pop3_username
+  StrCpy ${L_STATUS} "bad servername"
 
-  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_OECFG_TITLE)" "$(PFI_LANG_OECFG_SUBTITLE)"
-
-  ; Ensure the 'configure this account' check box is NOT ticked
-
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 2" "State" "0"
+check_pop3_username:
 
   ; Prepare to display the 'POP3 Server' data
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 10" "Text" ${L_OEDATA}
+  StrCpy ${L_POP3SERVER} ${L_OEDATA}
 
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "SMTP Email Address"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" ${L_OEDATA}
+
+  StrCpy ${L_EMAILADDRESS} ${L_OEDATA}
 
   ReadRegDWORD ${L_PORT} HKCU ${L_ACCOUNT} "POP3 Port"
   StrCmp ${L_PORT} "" 0 port_ok
   StrCpy ${L_PORT} "110"
 
 port_ok:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 12" "Text" ${L_PORT}
-
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
+  StrCpy ${L_USERNAME} ${L_OEDATA}
+  StrCmp ${L_USERNAME} "" bad_username
 
   ; If 'POP3 User Name' data contains the separator character, we cannot configure this account
 
   Push ${L_OEDATA}
-  Push ${L_SEPARATOR}
+  Push $G_SEPARATOR
   Call StrStr
   Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" 0 try_next_account
+  StrCmp ${L_TEMP} "" configurable
+  StrCmp ${L_STATUS} "" 0 configurable
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 11" "Text" ${L_OEDATA}
+bad_username:
+  StrCpy ${L_STATUS} "bad username"
+  Goto continue
+
+configurable:
+  StrCmp ${L_STATUS} "" 0 continue
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field $G_OOELIST_CBOX" "Flags" ""
+
+continue:
 
   ; Find the Username used by OE for this identity and the OE Account Name
   ; (so we can unambiguously report which email account we are offering to reconfigure).
 
   ReadRegStr ${L_IDENTITY} HKCU "Identities\${L_GUID}\" "Username"
-  StrCpy ${L_IDENTITY} $\"${L_IDENTITY}$\"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 1" "Text" "'${L_IDENTITY}' $(PFI_LANG_OOECFG_IO_BOXHDR)"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "Username" "${L_IDENTITY}"
+
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "Account Name"
-  StrCpy ${L_OEDATA} $\"${L_OEDATA}$\"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" "Field 4" "Text" \
-      "${L_OEDATA} $(PFI_LANG_OECFG_IO_LINK_1) ${L_IDENTITY} $(PFI_LANG_OECFG_IO_LINK_2)"
 
-  ; Display the OE account data and offer to configure this account to work with POPFile
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 8" "State"
+  StrCpy ${L_TEMP} ""
+  StrCmp ${L_STATUS} "" no_padding
+  StrCpy ${L_TEMP} "\r\n\r\n"
 
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY_RETURN "ioB.ini"
+no_padding:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 8" "State" "${L_STATUS}${L_TEMP}${L_OEDATA}"
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 9" "State"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 9" "State" "${L_STATUS}${L_TEMP}${L_EMAILADDRESS}"
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 10" "State"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 10" "State" "${L_STATUS}${L_TEMP}${L_POP3SERVER}"
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 11" "State"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 11" "State" "${L_STATUS}${L_TEMP}${L_USERNAME}"
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "AccountName" "${L_OEDATA}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "EmailAddress" "${L_EMAILADDRESS}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "POP3server" "${L_POP3SERVER}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "POP3username" "${L_USERNAME}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "POP3port" "${L_PORT}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "RegistryKey" "${L_ACCOUNT}"
+
+  !insertmacro OOECONFIG_BEFORE_LOG  "${L_IDENTITY}"     20
+  !insertmacro OOECONFIG_BEFORE_LOG  "${L_OEDATA}"       20
+  !insertmacro OOECONFIG_BEFORE_LOG  "${L_EMAILADDRESS}" 30
+  !insertmacro OOECONFIG_BEFORE_LOG  "${L_POP3SERVER}"   20
+  !insertmacro OOECONFIG_BEFORE_LOG  "${L_USERNAME}"     20
+  FileWrite $G_OOECONFIG_HANDLE "${L_PORT}$\r$\n"
+
+  IntCmp $G_OOELIST_INDEX 6 display_list try_next_account try_next_account
+
+display_list:
+
+  ; Display the OE account data with checkboxes enabled for those accounts we can configure
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "new"
+
+  !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
+  Pop $G_HWND                 ; HWND of dialog we want to modify
+
+  ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
+
+  GetDlgItem $G_DLGITEM $G_HWND 1200             ; Field 1 = IDENTITY label (above the box)
+  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
+
+  !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
   StrCmp ${L_TEMP} "cancel" finished_this_guid
   StrCmp ${L_TEMP} "back" finished_this_guid
 
-  ; Has the user ticked the 'configure this account' check box ?
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Identity" "PageStatus"
+  StrCmp ${L_TEMP} "updated" display_list
+  StrCmp ${L_TEMP} "leftover_ticks" display_list
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Field 2" "State"
-  StrCmp ${L_TEMP} "1" change_oe try_next_account
-
-change_oe:
-  ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
-  ReadRegStr ${L_TEMP} HKCU ${L_ACCOUNT} "POP3 Server"
-  ReadRegDWORD ${L_PORT} HKCU ${L_ACCOUNT} "POP3 Port"
-  StrCmp ${L_PORT} "" 0 save_data
-  StrCpy ${L_PORT} "110"
-
-save_data:
-
-  ; To be able to restore the registry to previous settings when we uninstall we
-  ; write a special file called popfile.reg containing the registry settings
-  ; prior to modification in the form of lines consisting of
-  ;
-  ; the\key
-  ; thesubkey
-  ; the\value
-
-  FileOpen  ${L_CFG} $INSTDIR\popfile.reg a
-  FileSeek  ${L_CFG} 0 END
-
-  FileWrite ${L_CFG} "${L_ACCOUNT}$\n"
-  FileWrite ${L_CFG} "POP3 User Name$\n"
-  FileWrite ${L_CFG} "${L_OEDATA}$\n"
-
-  FileWrite ${L_CFG} "${L_ACCOUNT}$\n"
-  FileWrite ${L_CFG} "POP3 Server$\n"
-  FileWrite ${L_CFG} "${L_TEMP}$\n"
-
-  FileWrite ${L_CFG} "${L_ACCOUNT}$\n"
-  FileWrite ${L_CFG} "POP3 Port$\n"
-  FileWrite ${L_CFG} "${L_PORT}$\n"
-
-  FileClose ${L_CFG}
-
-  WriteRegStr HKCU ${L_ACCOUNT} "POP3 User Name" "${L_TEMP}${L_SEPARATOR}${L_OEDATA}"
-  WriteRegStr HKCU ${L_ACCOUNT} "POP3 Server" "127.0.0.1"
-  StrCmp $G_POP3 "110" 0 not_default_pop3
-  DeleteRegValue HKCU ${L_ACCOUNT} "POP3 Port"
-  Goto try_next_account
-
-not_default_pop3:
-  WriteRegDWORD HKCU ${L_ACCOUNT} "POP3 Port" $G_POP3
+  Call ResetOutlookOutlookExpressAccountList
 
 try_next_account:
   IntOp ${L_ACCT_INDEX} ${L_ACCT_INDEX} + 1
   goto next_acct
 
 finished_this_guid:
+  IntCmp $G_OOELIST_INDEX 0 continue_guid continue_guid
+
+display_list_again:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "new"
+
+  !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
+  Pop $G_HWND                 ; HWND of dialog we want to modify
+
+  ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
+
+  GetDlgItem $G_DLGITEM $G_HWND 1200             ; Field 1 = IDENTITY label (above the box)
+  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
+
+  !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
+  Pop ${L_TEMP}
+
+  StrCmp ${L_TEMP} "cancel" finished_this_guid
+  StrCmp ${L_TEMP} "back" finished_this_guid
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Identity" "PageStatus"
+  StrCmp ${L_TEMP} "updated" display_list_again
+  StrCmp ${L_TEMP} "leftover_ticks" display_list_again
+
+  Call ResetOutlookOutlookExpressAccountList
+
+continue_guid:
 
   ; If no "Identity Ordinal" values were found then exit otherwise move on to the next identity
 
@@ -2160,9 +2664,19 @@ finished_this_guid:
   goto get_guid
 
 finished_oe_config:
+  FileWrite $G_OOECONFIG_HANDLE "$\r$\n$(PFI_LANG_OOECFG_LOG_END)$\r$\n$\r$\n"
+  FileClose $G_OOECONFIG_HANDLE
+
+  FileWrite $G_OOECHANGES_HANDLE "$\r$\n$(PFI_LANG_OOECFG_LOG_END)$\r$\n$\r$\n"
+  FileClose $G_OOECHANGES_HANDLE
+
+exit:
+  Pop ${L_USERNAME}
+  Pop ${L_EMAILADDRESS}
+  Pop ${L_POP3SERVER}
 
   Pop ${L_TEMP}
-  Pop ${L_SEPARATOR}
+  Pop ${L_STATUS}
   Pop ${L_PORT}
   Pop ${L_ORDINALS}
   Pop ${L_OEPATH}
@@ -2184,8 +2698,1072 @@ finished_oe_config:
   !undef L_OEPATH
   !undef L_ORDINALS
   !undef L_PORT
-  !undef L_SEPARATOR
+  !undef L_STATUS
   !undef L_TEMP
+
+  !undef L_POP3SERVER
+  !undef L_EMAILADDRESS
+  !undef L_USERNAME
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: ResetOutlookOutlookExpressAccountList
+#
+# This function is used to empty the list used to display up to 6 accounts for a given identity
+#--------------------------------------------------------------------------
+
+Function ResetOutlookOutlookExpressAccountList
+
+  !define L_CBOX_INDEX   $R9
+  !define L_TEXT_INDEX   $R8
+
+  Push ${L_CBOX_INDEX}
+  Push ${L_TEXT_INDEX}
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Settings" "NumFields" "11"
+
+  StrCpy $G_OOELIST_INDEX     0    ; values 1 to 6 used to access the list
+  StrCpy $G_OOELIST_CBOX     11    ; first entry uses field 12
+
+  StrCpy ${L_CBOX_INDEX} 12
+
+next_row:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field ${L_CBOX_INDEX}" "State" "0"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field ${L_CBOX_INDEX}" "Flags" "DISABLED"
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 8" "State" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "State" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 10" "State" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 11" "State" ""
+
+  IntOp ${L_CBOX_INDEX} ${L_CBOX_INDEX} + 1
+  IntCmp ${L_CBOX_INDEX} 17 next_row next_row
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "Username" ""
+
+  StrCpy ${L_TEXT_INDEX} 1
+
+next_account:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Account ${L_TEXT_INDEX}" "AccountName" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Account ${L_TEXT_INDEX}" "EMailAddress" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Account ${L_TEXT_INDEX}" "POP3server" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Account ${L_TEXT_INDEX}" "POP3username" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Account ${L_TEXT_INDEX}" "POP3port" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Account ${L_TEXT_INDEX}" "RegistryKey" ""
+  IntOp ${L_TEXT_INDEX} ${L_TEXT_INDEX} + 1
+  IntCmp ${L_TEXT_INDEX} 6 next_account next_account
+
+  Pop ${L_TEXT_INDEX}
+  Pop ${L_CBOX_INDEX}
+
+  !undef L_CBOX_INDEX
+  !undef L_TEXT_INDEX
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckOutlookExpressRequests
+#
+# This function is used to confirm any Outlook Express account reconfiguration requests
+#--------------------------------------------------------------------------
+
+Function CheckOutlookExpressRequests
+
+  !define L_CBOX_INDEX   $R9
+  !define L_CBOX_STATE   $R8
+  !define L_DATA_INDEX   $R7
+  !define L_REGKEY       $R6
+  !define L_TEMP         $R5
+  !define L_TEXT_ENTRY   $R4
+  !define L_IDENTITY     $R3
+
+  !define L_ACCOUNTNAME   $9
+  !define L_EMAILADDRESS  $8
+  !define L_POP3SERVER    $7
+  !define L_POP3USERNAME  $6
+  !define L_POP3PORT      $5
+
+  Push ${L_CBOX_INDEX}
+  Push ${L_CBOX_STATE}
+  Push ${L_DATA_INDEX}
+  Push ${L_REGKEY}
+  Push ${L_TEMP}
+  Push ${L_TEXT_ENTRY}
+  Push ${L_IDENTITY}
+
+  Push ${L_ACCOUNTNAME}
+  Push ${L_EMAILADDRESS}
+  Push ${L_POP3SERVER}
+  Push ${L_POP3USERNAME}
+  Push ${L_POP3PORT}
+
+  ; If user has cancelled the reconfiguration, there is nothing to do here
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Settings" "NumFields"
+  StrCmp ${L_TEMP} "1" exit
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_IDENTITY} "ioB.ini" "Identity" "Username"
+
+  StrCpy ${L_CBOX_INDEX} 12
+  StrCpy ${L_DATA_INDEX} 1
+
+next_row:
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_CBOX_STATE} "ioB.ini" "Field ${L_CBOX_INDEX}" "Flags"
+  StrCmp ${L_CBOX_STATE} "DISABLED" continue
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_CBOX_STATE} "ioB.ini" "Field ${L_CBOX_INDEX}" "State"
+  StrCmp ${L_CBOX_STATE} "0" continue
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_ACCOUNTNAME}  "ioB.ini" "Account ${L_DATA_INDEX}" "AccountName"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_EMAILADDRESS} "ioB.ini" "Account ${L_DATA_INDEX}" "EMailAddress"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3SERVER}   "ioB.ini" "Account ${L_DATA_INDEX}" "POP3server"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3USERNAME} "ioB.ini" "Account ${L_DATA_INDEX}" "POP3username"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3PORT}     "ioB.ini" "Account ${L_DATA_INDEX}" "POP3port"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_REGKEY}       "ioB.ini" "Account ${L_DATA_INDEX}" "RegistryKey"
+
+  MessageBox MB_YESNO \
+      "$(PFI_LANG_EXPCFG_MBIDENTITY) ${L_IDENTITY}\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_EXPCFG_MBACCOUNT) ${L_ACCOUNTNAME}\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBEMAIL) ${L_EMAILADDRESS}\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBSERVER) 127.0.0.1 \
+                                   ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3SERVER}')\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBUSERNAME) ${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME} \
+                                     ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3USERNAME}')\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBOEPORT) $G_POP3 \
+                                   ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3PORT}')\
+      $\r$\n$\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBQUESTION)\
+      " IDNO ignore_tick
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "updated"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field ${L_CBOX_INDEX}" "Flags" "DISABLED"
+
+  ; To be able to restore the registry to previous settings when we uninstall we
+  ; write a special file called 'popfile.reg' containing the registry settings
+  ; prior to modification.
+  ;
+  ; For each account we save 3 registry settings, each using 3 lines as follows:
+  ;         "Registry key", "POP3 User Name", "original data",
+  ;         "Registry key", "POP3 Server", "original data",
+  ;         "Registry key", "POP3 Port", "original data"
+  ;
+  ; NB: This file format is compatible with previous releases of POPFile.
+
+  FileOpen  ${L_TEMP} $INSTDIR\popfile.reg a
+  FileSeek  ${L_TEMP} 0 END
+
+  FileWrite ${L_TEMP} "${L_REGKEY}$\n"
+  FileWrite ${L_TEMP} "POP3 User Name$\n"
+  FileWrite ${L_TEMP} "${L_POP3USERNAME}$\n"
+
+  FileWrite ${L_TEMP} "${L_REGKEY}$\n"
+  FileWrite ${L_TEMP} "POP3 Server$\n"
+  FileWrite ${L_TEMP} "${L_POP3SERVER}$\n"
+
+  FileWrite ${L_TEMP} "${L_REGKEY}$\n"
+  FileWrite ${L_TEMP} "POP3 Port$\n"
+  FileWrite ${L_TEMP} "${L_POP3PORT}$\n"
+
+  FileClose ${L_TEMP}
+
+  ; Reconfigure the Outlook Express account
+
+  WriteRegStr HKCU ${L_REGKEY} "POP3 User Name" "${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME}"
+  WriteRegStr HKCU ${L_REGKEY} "POP3 Server" "127.0.0.1"
+  WriteRegDWORD HKCU ${L_REGKEY} "POP3 Port" $G_POP3
+
+  !insertmacro OOECONFIG_CHANGES_LOG  "${L_IDENTITY}"    20
+  !insertmacro OOECONFIG_CHANGES_LOG  "${L_ACCOUNTNAME}" 20
+  !insertmacro OOECONFIG_CHANGES_LOG  "127.0.0.1"        17
+  !insertmacro OOECONFIG_CHANGES_LOG  "${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME}"  40
+  FileWrite $G_OOECHANGES_HANDLE "$G_POP3$\r$\n"
+
+  Goto continue
+
+ignore_tick:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "leftover_ticks"
+
+continue:
+  IntOp ${L_CBOX_INDEX} ${L_CBOX_INDEX} + 1
+  IntOp ${L_DATA_INDEX} ${L_DATA_INDEX} + 1
+  IntCmp ${L_DATA_INDEX} $G_OOELIST_INDEX next_row next_row
+
+exit:
+  Pop ${L_POP3PORT}
+  Pop ${L_POP3USERNAME}
+  Pop ${L_POP3SERVER}
+  Pop ${L_EMAILADDRESS}
+  Pop ${L_ACCOUNTNAME}
+
+  Pop ${L_IDENTITY}
+  Pop ${L_TEXT_ENTRY}
+  Pop ${L_TEMP}
+  Pop ${L_REGKEY}
+  Pop ${L_DATA_INDEX}
+  Pop ${L_CBOX_STATE}
+  Pop ${L_CBOX_INDEX}
+
+  !undef L_CBOX_INDEX
+  !undef L_CBOX_STATE
+  !undef L_DATA_INDEX
+  !undef L_REGKEY
+  !undef L_TEMP
+  !undef L_TEXT_ENTRY
+  !undef L_IDENTITY
+
+  !undef L_ACCOUNTNAME
+  !undef L_EMAILADDRESS
+  !undef L_POP3SERVER
+  !undef L_POP3USERNAME
+  !undef L_POP3PORT
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: SetOutlookPage (generates a custom page)
+#
+# This function is used to reconfigure Outlook accounts
+#
+# NOTE: This function is only used when the /OUTLOOK command-line switch is supplied
+#--------------------------------------------------------------------------
+
+Function SetOutlookPage
+
+  ; This is an initial attempt at providing reconfiguration of Outlook POP3 accounts
+  ; (unlike the 'SetOutlookExpressPage' function, 'SetOutlookPage' is based upon theory
+  ; instead of experiment)
+
+  ; Each version of Outlook seems to use a slightly different location in the registry
+  ; (this is an incomplete list but it is all that is to hand at the moment):
+  ;
+  ; Outlook 2000:
+  ;   HKEY_CURRENT_USER\Software\Microsoft\Office\Outlook\OMI Account Manager\Accounts
+  ;
+  ; Outlook 98:
+  ;   HKEY_CURRENT_USER\Software\Microsoft\Office\8.0\Outlook\OMI Account Manager\Accounts
+  ;
+  ; Outlook 97:
+  ;   HKEY_CURRENT_USER\Software\Microsoft\Office\7.0\Outlook\OMI Account Manager\Accounts
+  ;
+  ; Before working through this list, we try to cheat by looking for the key
+  ;
+  ;   HKEY_LOCAL_MACHINE\Software\Microsoft\Internet Account Manager\Outlook
+  ;
+  ; which may solve our problem (e.g. "Software\Microsoft\Office\Outlook\OMI Account Manager")
+
+  ; All of the account data for the current user appears "under" the path defined
+  ; above, e.g. if a user has several accounts, the account data is stored like this:
+  ;    HKEY_CURRENT_USER\Software\Microsoft\Office\...\OMI Account Manager\Accounts\00000001
+  ;    HKEY_CURRENT_USER\Software\Microsoft\Office\...\OMI Account Manager\Accounts\00000002
+  ;    etc
+
+  ; (This format is similar to that used by Outlook Express)
+
+  !define L_ACCOUNT       $R9   ; path to data for current Outlook account (less the HKCU part)
+  !define L_ACCT_INDEX    $R8   ; used to loop through Outlook accounts for the current user
+  !define L_EMAILADDRESS  $R7   ; for an Outlook account
+  !define L_OUTDATA       $R5   ; some data (it varies) for current Outlook account
+  !define L_OUTLOOK       $R4   ; registry path for the Outlook accounts (less the HKCU part)
+  !define L_POP3SERVER    $R3   ; POP3 server name for an Outlook account
+  !define L_PORT          $R2   ; POP3 Port used for an Outlook Account
+  !define L_STATUS        $R1   ; keeps track of the status of the account we are checking
+  !define L_TEMP          $R0
+  !define L_USERNAME      $9    ; POP3 username used for an Outlook account
+
+  Push ${L_ACCOUNT}
+  Push ${L_ACCT_INDEX}
+  Push ${L_EMAILADDRESS}
+  Push ${L_OUTDATA}
+  Push ${L_OUTLOOK}
+  Push ${L_POP3SERVER}
+  Push ${L_PORT}
+  Push ${L_STATUS}
+  Push ${L_TEMP}
+  Push ${L_USERNAME}
+
+  ; Only check 'Outlook' accounts if this option was requested when the installer was launched
+
+  Call GetParameters
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "/OUTLOOK" 0 exit
+
+  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_OUTCFG_TITLE)" "$(PFI_LANG_OUTCFG_SUBTITLE)"
+
+  ; Look for Outlook account data - if none found then quit
+
+  ReadRegStr ${L_OUTLOOK} HKLM "Software\Microsoft\Internet Account Manager" "Outlook"
+  StrCmp ${L_OUTLOOK} "" try_outlook_2000
+  Push ${L_OUTLOOK}
+  Push "OMI Account Manager"
+  Call StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" try_outlook_2000
+  StrCpy ${L_TEMP} ${L_OUTLOOK} "" -9
+  StrCmp ${L_TEMP} "\Accounts" got_outlook_path
+  StrCpy ${L_OUTLOOK} "${L_OUTLOOK}\Accounts"
+  Goto got_outlook_path
+
+try_outlook_2000:
+  EnumRegKey ${L_OUTLOOK} HKCU "Software\Microsoft\Office\Outlook\OMI Account Manager\Accounts" 0
+  StrCmp ${L_OUTLOOK} "" try_outlook_98
+  StrCpy ${L_OUTLOOK} "Software\Microsoft\Office\Outlook\OMI Account Manager\Accounts"
+  Goto got_outlook_path
+
+try_outlook_98:
+  EnumRegKey ${L_OUTLOOK} HKCU "Software\Microsoft\Office\8.0\Outlook\OMI Account Manager\Accounts" 0
+  StrCmp ${L_OUTLOOK} "" try_outlook_97
+  StrCpy ${L_OUTLOOK} "Software\Microsoft\Office\8.0\Outlook\OMI Account Manager\Accounts"
+  Goto got_outlook_path
+
+try_outlook_97:
+  EnumRegKey ${L_OUTLOOK} HKCU "Software\Microsoft\Office\7.0\Outlook\OMI Account Manager\Accounts" 0
+  StrCmp ${L_OUTLOOK} "" exit
+  StrCpy ${L_OUTLOOK} "Software\Microsoft\Office\7.0\Outlook\OMI Account Manager\Accounts"
+
+got_outlook_path:
+  MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_OUT)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_1)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_2)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_3)"\
+             IDRETRY got_outlook_path IDIGNORE open_logfiles
+
+  ; Abort has been selected so we do not offer to reconfigure any Outlook accounts
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioB.ini" "Settings" "NumFields" "1"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_OUTCFG_IO_CANCELLED)"
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioB.ini"
+  Goto exit
+
+open_logfiles:
+  Call GetDateTimeStamp
+  Pop ${L_TEMP}
+
+  FileOpen  $G_OOECONFIG_HANDLE "$INSTDIR\outconfig.txt" w
+  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OUTCFG_LOG_BEFORE) (${L_TEMP})$\r$\n$\r$\n"
+  !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OUTCFG_LOG_IDENTITY)"  20
+  !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"   20
+  !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_EMAIL)"     30
+  !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_SERVER)"    20
+  !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_USER)"      20
+  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OOECFG_LOG_PORT)$\r$\n$\r$\n"
+
+  FileOpen  $G_OOECHANGES_HANDLE "$INSTDIR\outchanges.txt" a
+  FileSeek  $G_OOECHANGES_HANDLE 0 END
+  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OUTCFG_LOG_AFTER) (${L_TEMP})$\r$\n$\r$\n"
+  !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OUTCFG_LOG_IDENTITY)"   20
+  !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"    20
+  !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWSERVER)"  17
+  !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWUSER)"    40
+  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OOECFG_LOG_NEWPORT)$\r$\n$\r$\n"
+
+  ; Determine the separator character to be used when configuring an email account for POPFile
+
+  Call GetSeparator
+  Pop $G_SEPARATOR
+
+  ; Start with an empty list of accounts and reset the list "pointers"
+
+  Call ResetOutlookOutLookExpressAccountList
+
+  ; Now check all of the Outlook accounts for the current user
+
+  StrCpy ${L_ACCT_INDEX} 0
+
+next_acct:
+
+  ; Reset the text string used to keep track of the status of the email account we are checking
+
+  StrCpy ${L_STATUS} ""
+
+  EnumRegKey ${L_ACCOUNT} HKCU ${L_OUTLOOK} ${L_ACCT_INDEX}
+  StrCmp ${L_ACCOUNT} "" finished_the_accounts
+  StrCpy ${L_ACCOUNT} "${L_OUTLOOK}\${L_ACCOUNT}"
+
+  ; Now extract the POP3 Server data, if this does not exist then this account is
+  ; not configured for mail so move on. If the data is "127.0.0.1" assume the account has
+  ; already been configured for use with POPFile.
+
+  ReadRegStr ${L_OUTDATA} HKCU ${L_ACCOUNT} "POP3 Server"
+  StrCmp ${L_OUTDATA} "" try_next_account
+
+  ; Have found an email account so we add a new entry to the list (which can hold 6 accounts)
+
+  IntOp $G_OOELIST_INDEX $G_OOELIST_INDEX + 1    ; used to access the [Account] data in ioB.ini
+  IntOp $G_OOELIST_CBOX $G_OOELIST_CBOX + 1      ; field number for relevant checkbox
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Settings" "NumFields" "$G_OOELIST_CBOX"
+
+  StrCmp ${L_OUTDATA} "127.0.0.1" 0 check_pop3_server
+  StrCpy ${L_STATUS} "bad IP"
+  Goto check_pop3_username
+
+check_pop3_server:
+
+  ; If 'POP3 Server' data contains the separator character, we cannot configure this account
+
+  Push ${L_OUTDATA}
+  Push $G_SEPARATOR
+  Call StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" check_pop3_username
+  StrCpy ${L_STATUS} "bad servername"
+
+check_pop3_username:
+
+  ; Prepare to display the 'POP3 Server' data
+
+  StrCpy ${L_POP3SERVER} ${L_OUTDATA}
+
+  ReadRegStr ${L_OUTDATA} HKCU ${L_ACCOUNT} "SMTP Email Address"
+
+  StrCpy ${L_EMAILADDRESS} ${L_OUTDATA}
+
+  ReadRegDWORD ${L_PORT} HKCU ${L_ACCOUNT} "POP3 Port"
+  StrCmp ${L_PORT} "" 0 port_ok
+  StrCpy ${L_PORT} "110"
+
+port_ok:
+  ReadRegStr ${L_OUTDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
+  StrCpy ${L_USERNAME} ${L_OUTDATA}
+  StrCmp ${L_USERNAME} "" bad_username
+
+  ; If 'POP3 User Name' data contains the separator character, we cannot configure this account
+
+  Push ${L_OUTDATA}
+  Push $G_SEPARATOR
+  Call StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" configurable
+  StrCmp ${L_STATUS} "" 0 configurable
+
+bad_username:
+  StrCpy ${L_STATUS} "bad username"
+  Goto continue
+
+configurable:
+  StrCmp ${L_STATUS} "" 0 continue
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field $G_OOELIST_CBOX" "Flags" ""
+
+continue:
+
+  ; Find the Username used by Outlook for this identity and the Outlook Account Name
+  ; (so we can unambiguously report which email account we are offering to reconfigure).
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 1" "Text" "'$G_WINUSERNAME' $(PFI_LANG_OOECFG_IO_BOXHDR)"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "Username" "$G_WINUSERNAME"
+
+  ReadRegStr ${L_OUTDATA} HKCU ${L_ACCOUNT} "Account Name"
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 8" "State"
+  StrCpy ${L_TEMP} ""
+  StrCmp ${L_STATUS} "" no_padding
+  StrCpy ${L_TEMP} "\r\n\r\n"
+
+no_padding:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 8" "State" "${L_STATUS}${L_TEMP}${L_OUTDATA}"
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 9" "State"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 9" "State" "${L_STATUS}${L_TEMP}${L_EMAILADDRESS}"
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 10" "State"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 10" "State" "${L_STATUS}${L_TEMP}${L_POP3SERVER}"
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioB.ini" "Field 11" "State"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Field 11" "State" "${L_STATUS}${L_TEMP}${L_USERNAME}"
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "AccountName" "${L_OUTDATA}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "EmailAddress" "${L_EMAILADDRESS}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "POP3server" "${L_POP3SERVER}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "POP3username" "${L_USERNAME}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "POP3port" "${L_PORT}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE  "ioB.ini" "Account $G_OOELIST_INDEX" "RegistryKey" "${L_ACCOUNT}"
+
+  !insertmacro OOECONFIG_BEFORE_LOG  "$G_WINUSERNAME"    20
+  !insertmacro OOECONFIG_BEFORE_LOG  "${L_OUTDATA}"      20
+  !insertmacro OOECONFIG_BEFORE_LOG  "${L_EMAILADDRESS}" 30
+  !insertmacro OOECONFIG_BEFORE_LOG  "${L_POP3SERVER}"   20
+  !insertmacro OOECONFIG_BEFORE_LOG  "${L_USERNAME}"     20
+  FileWrite $G_OOECONFIG_HANDLE "${L_PORT}$\r$\n"
+
+  IntCmp $G_OOELIST_INDEX 6 display_list try_next_account try_next_account
+
+display_list:
+
+  ; Display the Outlook account data with checkboxes enabled for those accounts we can configure
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "new"
+
+  !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
+  Pop $G_HWND                 ; HWND of dialog we want to modify
+
+  ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
+
+  GetDlgItem $G_DLGITEM $G_HWND 1200              ; Field 1 = IDENTITY label (above the box)
+  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
+
+  !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
+  Pop ${L_TEMP}
+
+  StrCmp ${L_TEMP} "cancel" finished_outlook_config
+  StrCmp ${L_TEMP} "back" finished_outlook_config
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Identity" "PageStatus"
+  StrCmp ${L_TEMP} "updated" display_list
+  StrCmp ${L_TEMP} "leftover_ticks" display_list
+
+  Call ResetOutlookOutlookExpressAccountList
+
+try_next_account:
+  IntOp ${L_ACCT_INDEX} ${L_ACCT_INDEX} + 1
+  goto next_acct
+
+finished_the_accounts:
+  IntCmp $G_OOELIST_INDEX 0 finished_outlook_config
+
+display_list_again:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "new"
+
+  !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioB.ini"
+  Pop $G_HWND                 ; HWND of dialog we want to modify
+
+  ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
+
+  GetDlgItem $G_DLGITEM $G_HWND 1200              ; Field 1 = IDENTITY label (above the box)
+  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
+
+  !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
+  Pop ${L_TEMP}
+
+  StrCmp ${L_TEMP} "cancel" finished_outlook_config
+  StrCmp ${L_TEMP} "back" finished_outlook_config
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Identity" "PageStatus"
+  StrCmp ${L_TEMP} "updated" display_list_again
+  StrCmp ${L_TEMP} "leftover_ticks" display_list_again
+
+  Call ResetOutlookOutlookExpressAccountList
+
+finished_outlook_config:
+  FileWrite $G_OOECONFIG_HANDLE "$\r$\n$(PFI_LANG_OOECFG_LOG_END)$\r$\n$\r$\n"
+  FileClose $G_OOECONFIG_HANDLE
+
+  FileWrite $G_OOECHANGES_HANDLE "$\r$\n$(PFI_LANG_OOECFG_LOG_END)$\r$\n$\r$\n"
+  FileClose $G_OOECHANGES_HANDLE
+
+exit:
+  Pop ${L_USERNAME}
+  Pop ${L_TEMP}
+  Pop ${L_STATUS}
+  Pop ${L_PORT}
+  Pop ${L_POP3SERVER}
+  Pop ${L_OUTLOOK}
+  Pop ${L_OUTDATA}
+  Pop ${L_EMAILADDRESS}
+  Pop ${L_ACCT_INDEX}
+  Pop ${L_ACCOUNT}
+
+  !undef L_ACCOUNT
+  !undef L_ACCT_INDEX
+  !undef L_EMAILADDRESS
+  !undef L_OUTDATA
+  !undef L_OUTLOOK
+  !undef L_POP3SERVER
+  !undef L_PORT
+  !undef L_STATUS
+  !undef L_TEMP
+  !undef L_USERNAME
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckOutlookRequests
+#
+# This function is used to confirm any Outlook Express account reconfiguration requests
+#--------------------------------------------------------------------------
+
+Function CheckOutlookRequests
+
+  !define L_CBOX_INDEX   $R9
+  !define L_CBOX_STATE   $R8
+  !define L_DATA_INDEX   $R7
+  !define L_REGKEY       $R6
+  !define L_TEMP         $R5
+  !define L_TEXT_ENTRY   $R4
+  !define L_IDENTITY     $R3
+
+  !define L_ACCOUNTNAME   $9
+  !define L_EMAILADDRESS  $8
+  !define L_POP3SERVER    $7
+  !define L_POP3USERNAME  $6
+  !define L_POP3PORT      $5
+
+  Push ${L_CBOX_INDEX}
+  Push ${L_CBOX_STATE}
+  Push ${L_DATA_INDEX}
+  Push ${L_REGKEY}
+  Push ${L_TEMP}
+  Push ${L_TEXT_ENTRY}
+  Push ${L_IDENTITY}
+
+  Push ${L_ACCOUNTNAME}
+  Push ${L_EMAILADDRESS}
+  Push ${L_POP3SERVER}
+  Push ${L_POP3USERNAME}
+  Push ${L_POP3PORT}
+
+  ; If user has cancelled the reconfiguration, there is nothing to do here
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Settings" "NumFields"
+  StrCmp ${L_TEMP} "1" exit
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_IDENTITY} "ioB.ini" "Identity" "Username"
+
+  StrCpy ${L_CBOX_INDEX} 12
+  StrCpy ${L_DATA_INDEX} 1
+
+next_row:
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_CBOX_STATE} "ioB.ini" "Field ${L_CBOX_INDEX}" "Flags"
+  StrCmp ${L_CBOX_STATE} "DISABLED" continue
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_CBOX_STATE} "ioB.ini" "Field ${L_CBOX_INDEX}" "State"
+  StrCmp ${L_CBOX_STATE} "0" continue
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_ACCOUNTNAME}  "ioB.ini" "Account ${L_DATA_INDEX}" "AccountName"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_EMAILADDRESS} "ioB.ini" "Account ${L_DATA_INDEX}" "EMailAddress"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3SERVER}   "ioB.ini" "Account ${L_DATA_INDEX}" "POP3server"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3USERNAME} "ioB.ini" "Account ${L_DATA_INDEX}" "POP3username"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_POP3PORT}     "ioB.ini" "Account ${L_DATA_INDEX}" "POP3port"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_REGKEY}       "ioB.ini" "Account ${L_DATA_INDEX}" "RegistryKey"
+
+  MessageBox MB_YESNO \
+      "$(PFI_LANG_OUTCFG_MBIDENTITY) ${L_IDENTITY}\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OUTCFG_MBACCOUNT) ${L_ACCOUNTNAME}\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBEMAIL) ${L_EMAILADDRESS}\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBSERVER) 127.0.0.1 \
+                                   ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3SERVER}')\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBUSERNAME) ${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME} \
+                                     ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3USERNAME}')\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBOEPORT) $G_POP3 \
+                                   ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_POP3PORT}')\
+      $\r$\n$\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBQUESTION)\
+      " IDNO ignore_tick
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "updated"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field ${L_CBOX_INDEX}" "Flags" "DISABLED"
+
+  ; To be able to restore the registry to previous settings when we uninstall we
+  ; write a special file called 'outlook.reg' containing the registry settings
+  ; prior to modification.
+  ;
+  ; For each account we save 3 settings, each using 3 lines as follows:
+  ;         "Registry key", "POP3 User Name", "original data",
+  ;         "Registry key", "POP3 Server", "original data",
+  ;         "Registry key", "POP3 Port", "original data"
+  ;
+  ; This format is identical to that used for Outlook Express (but we use a separate file).
+
+  FileOpen  ${L_TEMP} $INSTDIR\outlook.reg a
+  FileSeek  ${L_TEMP} 0 END
+
+  FileWrite ${L_TEMP} "${L_REGKEY}$\n"
+  FileWrite ${L_TEMP} "POP3 User Name$\n"
+  FileWrite ${L_TEMP} "${L_POP3USERNAME}$\n"
+
+  FileWrite ${L_TEMP} "${L_REGKEY}$\n"
+  FileWrite ${L_TEMP} "POP3 Server$\n"
+  FileWrite ${L_TEMP} "${L_POP3SERVER}$\n"
+
+  FileWrite ${L_TEMP} "${L_REGKEY}$\n"
+  FileWrite ${L_TEMP} "POP3 Port$\n"
+  FileWrite ${L_TEMP} "${L_POP3PORT}$\n"
+
+  FileClose ${L_TEMP}
+
+  ; Reconfigure the Outlook account
+
+  WriteRegStr HKCU ${L_REGKEY} "POP3 User Name" "${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME}"
+  WriteRegStr HKCU ${L_REGKEY} "POP3 Server" "127.0.0.1"
+  WriteRegDWORD HKCU ${L_REGKEY} "POP3 Port" $G_POP3
+
+  !insertmacro OOECONFIG_CHANGES_LOG  "${L_IDENTITY}"    20
+  !insertmacro OOECONFIG_CHANGES_LOG  "${L_ACCOUNTNAME}" 20
+  !insertmacro OOECONFIG_CHANGES_LOG  "127.0.0.1"        17
+  !insertmacro OOECONFIG_CHANGES_LOG  "${L_POP3SERVER}$G_SEPARATOR${L_POP3USERNAME}"  40
+  FileWrite $G_OOECHANGES_HANDLE "$G_POP3$\r$\n"
+
+  Goto continue
+
+ignore_tick:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "leftover_ticks"
+
+continue:
+  IntOp ${L_CBOX_INDEX} ${L_CBOX_INDEX} + 1
+  IntOp ${L_DATA_INDEX} ${L_DATA_INDEX} + 1
+  IntCmp ${L_DATA_INDEX} $G_OOELIST_INDEX next_row next_row
+
+exit:
+  Pop ${L_POP3PORT}
+  Pop ${L_POP3USERNAME}
+  Pop ${L_POP3SERVER}
+  Pop ${L_EMAILADDRESS}
+  Pop ${L_ACCOUNTNAME}
+
+  Pop ${L_IDENTITY}
+  Pop ${L_TEXT_ENTRY}
+  Pop ${L_TEMP}
+  Pop ${L_REGKEY}
+  Pop ${L_DATA_INDEX}
+  Pop ${L_CBOX_STATE}
+  Pop ${L_CBOX_INDEX}
+
+  !undef L_CBOX_INDEX
+  !undef L_CBOX_STATE
+  !undef L_DATA_INDEX
+  !undef L_REGKEY
+  !undef L_TEMP
+  !undef L_TEXT_ENTRY
+  !undef L_IDENTITY
+
+  !undef L_ACCOUNTNAME
+  !undef L_EMAILADDRESS
+  !undef L_POP3SERVER
+  !undef L_POP3USERNAME
+  !undef L_POP3PORT
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: SetEudoraPage_Init
+#
+# This function adds language texts to the INI file used by the "SetEudoraPage" function
+# (to make the custom page use the language selected by the user for the installer)
+#--------------------------------------------------------------------------
+
+Function SetEudoraPage_Init
+
+  ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Settings" "RTL" "$(^RTL)"
+
+  !insertmacro PFI_IO_TEXT "ioE.ini" "2" "$(PFI_LANG_EUCFG_IO_CHECKBOX)"
+  !insertmacro PFI_IO_TEXT "ioE.ini" "3" "$(PFI_LANG_EUCFG_IO_RESTORE)"
+
+  !insertmacro PFI_IO_TEXT "ioE.ini" "5" "$(PFI_LANG_EUCFG_IO_EMAIL)"
+  !insertmacro PFI_IO_TEXT "ioE.ini" "6" "$(PFI_LANG_EUCFG_IO_SERVER)"
+  !insertmacro PFI_IO_TEXT "ioE.ini" "7" "$(PFI_LANG_EUCFG_IO_USERNAME)"
+  !insertmacro PFI_IO_TEXT "ioE.ini" "8" "$(PFI_LANG_EUCFG_IO_POP3PORT)"
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: SetEudoraPage (generates a custom page)
+#
+# This function is used to reconfigure Eudora personalities
+#--------------------------------------------------------------------------
+
+Function SetEudoraPage
+
+  !define L_ININAME   $R9
+  !define L_LENGTH    $R8
+  !define L_STATUS    $R7
+  !define L_TEMP      $R6
+  !define L_TERMCHR   $R5
+
+  !define L_EMAIL     $R4
+  !define L_SERVER    $R3
+  !define L_USER      $R2
+  !define L_PORT      $R1
+
+  !define L_INDEX     $R0
+  !define L_PERSONA   $9
+  !define L_CFGTIME   $8
+
+  !define L_CHANGED   $7
+
+  Push ${L_ININAME}
+  Push ${L_LENGTH}
+  Push ${L_STATUS}
+  Push ${L_TEMP}
+  Push ${L_TERMCHR}
+
+  Push ${L_EMAIL}
+  Push ${L_SERVER}
+  Push ${L_USER}
+  Push ${L_PORT}
+
+  Push ${L_INDEX}
+  Push ${L_PERSONA}
+  Push ${L_CFGTIME}
+
+  Push ${L_CHANGED}
+
+  ; Look for Eudora registry entry which identifies the relevant INI file
+
+  ReadRegStr ${L_STATUS} HKCU "Software\Qualcomm\Eudora\CommandLine" "current"
+  StrCmp ${L_STATUS} "" 0 extract_INI_path
+
+  ; No data in registry. Did the 'SetEmailClient' function find a path for the Eudora program?
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioF.ini" "ClientEXE" "Eudora"
+  StrCmp ${L_STATUS} "" exit
+
+  ; Look for the Eudora INI file
+
+  Push ${L_STATUS}
+  Call GetParent
+  Pop ${L_ININAME}
+  StrCpy ${L_ININAME} "${L_ININAME}\EUDORA.INI"
+  IfFileExists "${L_ININAME}" gotname exit
+
+extract_INI_path:
+
+  ; Extract full path to the Eudora INI file
+
+  StrCpy ${L_TEMP} -1
+  StrLen ${L_LENGTH} ${L_STATUS}
+  IntOp ${L_LENGTH} 0 - ${L_LENGTH}
+
+  ; Check if we need to look for a space or double-quotes
+
+  StrCpy ${L_ININAME} ${L_STATUS} 1 ${L_TEMP}
+  StrCpy ${L_TERMCHR} '"'
+  StrCmp ${L_ININAME} '"' loop
+  StrCpy ${L_TERMCHR} ' '
+
+  ; We want the last of the three filename 'tokens' in the value extracted from the registry
+
+loop:
+  IntOp ${L_TEMP} ${L_TEMP} - 1
+  StrCpy ${L_ININAME} ${L_STATUS} 1 ${L_TEMP}
+  StrCmp ${L_ININAME} ${L_TERMCHR} extract
+  IntCmp ${L_TEMP} ${L_LENGTH} extract
+  Goto loop
+
+extract:
+  IntOp ${L_TEMP} ${L_TEMP} + 1
+  StrCpy ${L_ININAME} ${L_STATUS} "" ${L_TEMP}
+  StrCmp ${L_TERMCHR} ' ' gotname
+  StrCpy ${L_ININAME} ${L_ININAME} -1
+
+gotname:
+  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_EUCFG_TITLE)" "$(PFI_LANG_EUCFG_SUBTITLE)"
+
+  ; If Eudora is running, ask the user to shut it down now (user may ignore our request)
+
+check_if_running:
+  FindWindow ${L_STATUS} "EudoraMainWindow"
+  IsWindow ${L_STATUS} 0 continue
+
+  MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EUD)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_1)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_2)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_3)"\
+             IDRETRY check_if_running IDIGNORE continue
+
+  ; 'Abort' has been selected so we do not offer to reconfigure any Eudora accounts
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioE.ini" "Settings" "NumFields" "1"
+  !insertmacro PFI_IO_TEXT "ioE.ini" "1" "$(PFI_LANG_EUCFG_IO_CANCELLED)"
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioE.ini"
+  Goto exit
+
+continue:
+  Call GetDateTimeStamp
+  Pop ${L_CFGTIME}
+
+  ; If none of the  accounts are changed, we treat this as a special case and offer to change
+  ; only the POP3 port for Eudora. The ${L_CHANGED} register is used to detect this case.
+
+  StrCpy ${L_CHANGED} ""
+
+  ; The <Dominant> personality data is stored separately from that of the other personalities
+
+  !insertmacro PFI_IO_TEXT "ioE.ini" "4" "$(PFI_LANG_EUCFG_IO_DOMINANT)"
+  StrCpy ${L_PERSONA} "Settings"
+  StrCpy ${L_INDEX} -1
+  Goto common_to_all
+
+get_next_persona:
+  IntOp ${L_INDEX} ${L_INDEX} + 1
+  ReadINIStr ${L_PERSONA}  "${L_ININAME}" "Personalities" "Persona${L_INDEX}"
+  StrCmp ${L_PERSONA} "" 0 get_details
+  StrCmp ${L_CHANGED} "1" exit
+
+  ; None of the personalities have been changed. Offer to change the POPPort setting if this
+  ; installation uses a different POP3 port from that currently used by Eudora. This makes it
+  ; easy to use Eudora with the newly installed POPFile. Use the "*.*" wildcard for this case.
+
+  StrCmp ${L_PORT} $G_POP3 exit
+
+  !insertmacro PFI_IO_TEXT "ioE.ini" "4" "'<*.*>' $(PFI_LANG_EUCFG_IO_PERSONA)"
+  StrCpy ${L_PERSONA} "*.*"
+  StrCpy ${L_EMAIL} "*.*"
+  StrCpy ${L_SERVER} "*.*"
+  StrCpy ${L_USER} "*.*"
+  Goto update_persona_details
+
+get_details:
+  StrCpy ${L_TEMP} ${L_PERSONA} "" 8
+
+  !insertmacro PFI_IO_TEXT "ioE.ini" "4" "'${L_TEMP}' $(PFI_LANG_EUCFG_IO_PERSONA)"
+
+common_to_all:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "State" "0"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "Flags" ""
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 3" "Flags" ""
+
+  ReadINIStr ${L_EMAIL}  "${L_ININAME}" "${L_PERSONA}" "POPAccount"
+  ReadINIStr ${L_SERVER} "${L_ININAME}" "${L_PERSONA}" "POPServer"
+  ReadINIStr ${L_USER}   "${L_ININAME}" "${L_PERSONA}" "LoginName"
+  ReadINIStr ${L_STATUS} "${L_ININAME}" "${L_PERSONA}" "UsesPOP"
+  ReadINIStr ${L_PORT}   "${L_ININAME}" "Settings" "POPPort"
+
+  StrCmp ${L_EMAIL} "" 0 check_server
+  StrCpy ${L_EMAIL} "N/A"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "Flags" "DISABLED"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 3" "Flags" "DISABLED"
+
+check_server:
+  StrCmp ${L_SERVER} "127.0.0.1" disable
+  StrCmp ${L_SERVER} "" 0 check_username
+  StrCpy ${L_SERVER} "N/A"
+
+disable:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "Flags" "DISABLED"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 3" "Flags" "DISABLED"
+
+check_username:
+  StrCmp ${L_USER} "" 0 check_port
+  StrCpy ${L_USER} "N/A"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "Flags" "DISABLED"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 3" "Flags" "DISABLED"
+
+check_port:
+  StrCmp ${L_PORT} "" 0 check_status
+  StrCpy ${L_PORT} "110"
+
+check_status:
+  StrCmp ${L_STATUS} 1 update_persona_details
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "Flags" "DISABLED"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 3" "Flags" "DISABLED"
+
+update_persona_details:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 9" "Text" "${L_EMAIL}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 10" "Text" "${L_SERVER}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 11" "Text" "${L_USER}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 12" "Text" "${L_PORT}"
+
+  StrCpy ${L_TEMP} "."
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioE.ini" "Field 2" "Flags"
+  StrCmp ${L_STATUS} "DISABLED" write_intro
+  StrCpy ${L_TEMP} "$(PFI_LANG_EUCFG_IO_INTRO_2)"
+
+write_intro:
+    !insertmacro PFI_IO_TEXT "ioE.ini" "1" "$(PFI_LANG_EUCFG_IO_INTRO_1)${L_TEMP}"
+
+  !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioE.ini"
+  Pop $G_HWND                 ; HWND of dialog we want to modify
+
+  ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
+
+  GetDlgItem $G_DLGITEM $G_HWND 1203             ; Field 4 = PERSONA (text in groupbox frame)
+  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
+
+  !insertmacro MUI_INSTALLOPTIONS_SHOW
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioE.ini" "Field 2" "State"
+  StrCmp ${L_STATUS} "1" reconfigure_persona
+  StrCmp ${L_PERSONA} "*.*" exit
+  Goto get_next_persona
+
+reconfigure_persona:
+  ReadINIStr  ${L_STATUS} "$INSTDIR\pfi-eudora.ini" "History" "ListSize"
+  StrCmp ${L_STATUS} "" 0 update_list_size
+  StrCpy ${L_STATUS} 1
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "ListSize" "1"
+  Goto add_entry
+
+update_list_size:
+  IntOp ${L_STATUS} ${L_STATUS} + 1
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "ListSize" "${L_STATUS}"
+
+add_entry:
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Undo-${L_STATUS}" "Created on ${L_CFGTIME}"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Path-${L_STATUS}" "${L_ININAME}"
+
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Persona" "${L_PERSONA}"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPAccount" "${L_EMAIL}"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPServer" "${L_SERVER}"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "LoginName" "${L_USER}"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPPort" "${L_PORT}"
+
+  StrCmp ${L_PERSONA} "*.*" special_case
+
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPAccount" "${L_SERVER}$G_SEPARATOR${L_USER}@127.0.0.1"
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPServer"  "127.0.0.1"
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "LoginName"  "${L_SERVER}$G_SEPARATOR${L_USER}"
+  WriteINIStr "${L_ININAME}" "Settings"     "POPPort"    $G_POP3
+  StrCpy ${L_CHANGED} "1"
+  Goto get_next_persona
+
+special_case:
+  WriteINIStr "${L_ININAME}" "Settings"     "POPPort"    $G_POP3
+
+exit:
+  Pop ${L_CHANGED}
+
+  Pop ${L_CFGTIME}
+  Pop ${L_PERSONA}
+  Pop ${L_INDEX}
+
+  Pop ${L_PORT}
+  Pop ${L_USER}
+  Pop ${L_SERVER}
+  Pop ${L_EMAIL}
+
+  Pop ${L_TERMCHR}
+  Pop ${L_TEMP}
+  Pop ${L_STATUS}
+  Pop ${L_LENGTH}
+  Pop ${L_ININAME}
+
+  !undef L_ININAME
+  !undef L_LENGTH
+  !undef L_STATUS
+  !undef L_TEMP
+  !undef L_TERMCHR
+
+  !undef L_EMAIL
+  !undef L_SERVER
+  !undef L_USER
+  !undef L_PORT
+
+  !undef L_INDEX
+  !undef L_PERSONA
+  !undef L_CFGTIME
+
+  !undef L_CHANGED
 
 FunctionEnd
 
@@ -2197,6 +3775,10 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 Function StartPOPFilePage_Init
+
+  ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Settings" "RTL" "$(^RTL)"
 
   !insertmacro PFI_IO_TEXT "ioC.ini" "1" "$(PFI_LANG_LAUNCH_IO_INTRO)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "2" "$(PFI_LANG_LAUNCH_IO_NO)"
@@ -2444,7 +4026,7 @@ display_banner:
   Call SetConsoleMode
   SetOutPath $INSTDIR
   ClearErrors
-  Exec '"$INSTDIR\popfile.exe"'
+  Exec '"$INSTDIR\wrapper.exe"'
   IfErrors 0 continue
   Banner::destroy
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "An error occurred when the installer tried to start POPFile.\
@@ -2498,6 +4080,10 @@ FunctionEnd
 
 Function ConvertCorpusPage_Init
 
+  ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioD.ini" "Settings" "RTL" "$(^RTL)"
+
   !insertmacro PFI_IO_TEXT "ioD.ini" "1" "$(PFI_LANG_FLATFILE_IO_NOTE_1)"
   !insertmacro PFI_IO_TEXT "ioD.ini" "2" "$(PFI_LANG_FLATFILE_IO_NOTE_2)"
   !insertmacro PFI_IO_TEXT "ioD.ini" "3" "$(PFI_LANG_FLATFILE_IO_NOTE_3)"
@@ -2528,7 +4114,20 @@ Function ConvertCorpusPage
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_FLATFILE_TITLE)" "$(PFI_LANG_FLATFILE_SUBTITLE)"
 
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioD.ini"
+  !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioD.ini"
+  Pop $G_HWND                 ; HWND of dialog we want to modify
+
+  ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
+
+  GetDlgItem $G_DLGITEM $G_HWND 1202             ; Field 3 = text in the WARNING groupbox frame
+  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
+
+  GetDlgItem $G_DLGITEM $G_HWND 1203             ; Field 4 = text inside the WARNING groupbox
+  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
+
+  !insertmacro MUI_INSTALLOPTIONS_SHOW
 
 exit:
   Pop ${L_TEMP}
@@ -2606,7 +4205,7 @@ no_reboot_reqd:
 
   SetOutPath $INSTDIR
   ClearErrors
-  Exec '"$INSTDIR\popfilef.exe"'
+  Exec '"$INSTDIR\wrapperf.exe"'
   IfErrors 0 disable_UI_option
   MessageBox MB_OK|MB_TOPMOST "An error occurred when starting the corpus conversion process."
 
@@ -2628,7 +4227,7 @@ FunctionEnd
 
 Function RunUI
 
-  ExecShell "open" '"$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url"'
+  ExecShell "open" "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url"
 
 FunctionEnd
 
@@ -2668,13 +4267,20 @@ FunctionEnd
 Section "Uninstall"
 
   !define L_CFG         $R9   ; used as file handle
-  !define L_EXE         $R7   ; full path of the EXE to be monitored
+  !define L_EXE         $R8   ; full path of the EXE to be monitored
+  !define L_INDEX       $R7
+  !define L_ININAME     $R6   ; full path to the Eudora INI file modified by the installer
   !define L_LNE         $R5   ; a line from popfile.cfg
   !define L_OLDUI       $R4   ; holds old-style UI port (if previous POPFile is an old version)
-  !define L_REG_KEY     $R3   ; L_REG_* registers are used to  restore Outlook Express settings
-  !define L_REG_SUBKEY  $R2
-  !define L_REG_VALUE   $R1
-  !define L_TEMP        $R0
+  !define L_PERSONA     $R3   ; full section name for a Eudora personality
+  !define L_POP_ACCOUNT $R2   ; L_POP_* used to restore Eudora settings
+  !define L_POP_LOGIN   $R1
+  !define L_POP_PORT    $R0
+  !define L_POP_SERVER  $9
+  !define L_REG_KEY     $8    ; L_REG_* used to restore Outlook/Outlook Express settings
+  !define L_REG_SUBKEY  $7
+  !define L_REG_VALUE   $6
+  !define L_TEMP        $5
 
   IfFileExists $INSTDIR\popfile.pl skip_confirmation
   IfFileExists $INSTDIR\popfile.exe skip_confirmation
@@ -2809,6 +4415,16 @@ remove_shortcuts:
   Delete $INSTDIR\*.pm
   Delete $INSTDIR\*.dll
   Delete $INSTDIR\wperl.exe
+  Delete $INSTDIR\wrapper.exe
+  Delete $INSTDIR\wrapperf.exe
+  Delete $INSTDIR\wrapperb.exe
+  Delete $INSTDIR\wrapper.ini
+  Delete $INSTDIR\sqlite.exe
+
+  Delete $INSTDIR\expchanges.txt
+  Delete $INSTDIR\expconfig.txt
+  Delete $INSTDIR\outchanges.txt
+  Delete $INSTDIR\outconfig.txt
 
   Delete $INSTDIR\*.gif
   Delete $INSTDIR\*.log
@@ -2829,7 +4445,9 @@ remove_shortcuts:
   Delete $INSTDIR\license
   Delete $INSTDIR\popfile.cfg
 
-  IfFileExists "$INSTDIR\popfile.reg" 0 no_reg_file
+  ; Restore any email client settings which were changed during the install process
+
+  IfFileExists "$INSTDIR\popfile.reg" 0 end_oe_restore
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROGRESS_4)"
@@ -2840,7 +4458,8 @@ remove_shortcuts:
 
   ClearErrors
   FileOpen ${L_CFG} $INSTDIR\popfile.reg r
-  IfErrors skip_registry_restore
+  IfErrors quit_oe_restore
+  DetailPrint "$(PFI_LANG_UN_PROGRESS_4)"
   DetailPrint "$(PFI_LANG_UN_LOG_2): popfile.reg"
 
   ; The restore data for an OE account data can have either TWO or THREE entries, as follows:
@@ -2860,50 +4479,192 @@ remove_shortcuts:
   ; Line x+7  : POP3 Port
   ; Line x+8  : <port number>
 
-  ; NB The third entry (POP3 Port) only exists in recent (i.e. post v0.20.1a) installations.
+  ; NB The third entry (POP3 Port) only exists in post v0.20.1a installations.
 
-restore_loop:
+restore_oe_loop:
   FileRead ${L_CFG} ${L_REG_KEY}
   Push ${L_REG_KEY}
   Call un.TrimNewlines
   Pop ${L_REG_KEY}
-  IfErrors skip_registry_restore
+  IfErrors quit_oe_restore
 
   FileRead ${L_CFG} ${L_REG_SUBKEY}
   Push ${L_REG_SUBKEY}
   Call un.TrimNewlines
   Pop ${L_REG_SUBKEY}
-  IfErrors skip_registry_restore
+  IfErrors quit_oe_restore
 
   FileRead ${L_CFG} ${L_REG_VALUE}
   Push ${L_REG_VALUE}
   Call un.TrimNewlines
   Pop ${L_REG_VALUE}
-  IfErrors skip_registry_restore
+  IfErrors quit_oe_restore
 
-  StrCmp ${L_REG_SUBKEY} "POP3 Port" 0 string_value
-  StrCmp ${L_REG_VALUE} "110" 0 not_default_port
-  DeleteRegValue HKCU  ${L_REG_KEY} ${L_REG_SUBKEY}
-  Goto log_it
-
-not_default_port:
+  StrCmp ${L_REG_SUBKEY} "POP3 Port" 0 oe_string_value
   WriteRegDWORD HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
-  Goto log_it
+  Goto log_oe_restore
 
-string_value:
+oe_string_value:
   WriteRegStr HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
 
-log_it:
+log_oe_restore:
   DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_REG_SUBKEY}: ${L_REG_VALUE}"
-  goto restore_loop
+  goto restore_oe_loop
 
-skip_registry_restore:
+quit_oe_restore:
   FileClose ${L_CFG}
   DetailPrint "$(PFI_LANG_UN_LOG_4): popfile.reg"
   Delete $INSTDIR\popfile.reg
 
-no_reg_file:
+end_oe_restore:
+  IfFileExists "$INSTDIR\outlook.reg" 0 end_outlook_restore
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_UN_PROGRESS_7)"
+  SetDetailsPrint listonly
+
+  ; Read the registry settings found in outlook.reg and restore them
+  ; it there are any.   All are assumed to be in HKCU
+
+  ClearErrors
+  FileOpen ${L_CFG} $INSTDIR\outlook.reg r
+  IfErrors quit_outlook_restore
+  DetailPrint "$(PFI_LANG_UN_PROGRESS_7)"
+  DetailPrint "$(PFI_LANG_UN_LOG_2): outlook.reg"
+
+  ; The restore data for an Outlook account data has following structure:
+
+  ; Entry 1
+  ; Line x    : <Registry key for the Outlook Account>
+  ; Line x+1  : POP 3 User Name
+  ; Line x+2  : <user name data>
+
+  ; Entry 2
+  ; Line x+3  : <Registry key for the Outlook Account>
+  ; Line x+4  : POP3 Server
+  ; Line x+5  : <server data>
+
+  ; Entry 3
+  ; Line x+6  : <Registry key for the Outlook Account>
+  ; Line x+7  : POP3 Port
+  ; Line x+8  : <port number>
+
+restore_outlook_loop:
+  FileRead ${L_CFG} ${L_REG_KEY}
+  Push ${L_REG_KEY}
+  Call un.TrimNewlines
+  Pop ${L_REG_KEY}
+  IfErrors quit_outlook_restore
+
+  FileRead ${L_CFG} ${L_REG_SUBKEY}
+  Push ${L_REG_SUBKEY}
+  Call un.TrimNewlines
+  Pop ${L_REG_SUBKEY}
+  IfErrors quit_outlook_restore
+
+  FileRead ${L_CFG} ${L_REG_VALUE}
+  Push ${L_REG_VALUE}
+  Call un.TrimNewlines
+  Pop ${L_REG_VALUE}
+  IfErrors quit_outlook_restore
+
+  StrCmp ${L_REG_SUBKEY} "POP3 Port" 0 outlook_string_value
+  WriteRegDWORD HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
+  Goto log_outlook_restore
+
+outlook_string_value:
+  WriteRegStr HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
+
+log_outlook_restore:
+  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_REG_SUBKEY}: ${L_REG_VALUE}"
+  goto restore_outlook_loop
+
+quit_outlook_restore:
+  FileClose ${L_CFG}
+  DetailPrint "$(PFI_LANG_UN_LOG_4): outlook.reg"
+  Delete $INSTDIR\outlook.reg
+
+end_outlook_restore:
+  IfFileExists "$INSTDIR\pfi-eudora.ini" 0 end_email_restore
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_UN_PROGRESS_8)"
+  SetDetailsPrint listonly
+
+  ; If Eudora is running, ask the user to shut it down now (user may ignore our request)
+
+check_if_running:
+  FindWindow ${L_TEMP} "EudoraMainWindow"
+  IsWindow ${L_TEMP} 0 restore_eudora
+
+  MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EUD)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_4)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_5)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_6)"\
+             IDABORT end_email_restore IDRETRY check_if_running
+
+restore_eudora:
+  ClearErrors
+  ReadINIStr ${L_INDEX} "$INSTDIR\pfi-eudora.ini" "History" "ListSize"
+  IfErrors quit_eudora_restore
+  Push ${L_INDEX}
+  Call un.StrCheckDecimal
+  Pop ${L_INDEX}
+  StrCmp ${L_INDEX} "" quit_eudora_restore
+  DetailPrint "$(PFI_LANG_UN_PROGRESS_8)"
+
+read_undo_entry:
+
+  ; Check the 'undo' entry has all of the necessary values
+
+  ReadINIStr ${L_ININAME} "$INSTDIR\pfi-eudora.ini" "History" "Path-${L_INDEX}"
+  StrCmp ${L_ININAME} "" next_undo
+  IfFileExists ${L_ININAME} 0 next_undo
+
+  ReadINIStr ${L_PERSONA} "$INSTDIR\pfi-eudora.ini" "Undo-${L_INDEX}" "Persona"
+  StrCmp ${L_PERSONA} "" next_undo
+
+  ReadINIStr ${L_POP_ACCOUNT} "$INSTDIR\pfi-eudora.ini" "Undo-${L_INDEX}" "POPAccount"
+  StrCmp ${L_POP_ACCOUNT} "" next_undo
+
+  ReadINIStr ${L_POP_SERVER} "$INSTDIR\pfi-eudora.ini" "Undo-${L_INDEX}" "POPServer"
+  StrCmp ${L_POP_SERVER} "" next_undo
+
+  ReadINIStr ${L_POP_LOGIN} "$INSTDIR\pfi-eudora.ini" "Undo-${L_INDEX}" "LoginName"
+  StrCmp ${L_POP_LOGIN} "" next_undo
+
+  ReadINIStr ${L_POP_PORT} "$INSTDIR\pfi-eudora.ini" "Undo-${L_INDEX}" "POPPort"
+  StrCmp ${L_POP_PORT} "" next_undo
+
+  StrCmp ${L_PERSONA} "*.*" special_case
+
+  ClearErrors
+  ReadINIStr ${L_TEMP} "${L_ININAME}" "${L_PERSONA}" "POPAccount"
+  IfErrors next_undo
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPAccount" "${L_POP_ACCOUNT}"
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPServer" "${L_POP_SERVER}"
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "LoginName" "${L_POP_LOGIN}"
+
+special_case:
+  WriteINIStr "${L_ININAME}" "Settings"     "POPPort" "${L_POP_PORT}"
+
+  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'POPServer': ${L_POP_SERVER}"
+  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'LoginName': ${L_POP_LOGIN}"
+  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'POPPort': ${L_POP_PORT}"
+
+next_undo:
+  IntOp ${L_INDEX} ${L_INDEX} - 1
+  IntCmp ${L_INDEX} 0 quit_eudora_restore quit_eudora_restore read_undo_entry
+
+quit_eudora_restore:
+  Delete $INSTDIR\pfi-eudora.ini
+
+end_email_restore:
   Delete $INSTDIR\Classifier\*.pm
+  Delete $INSTDIR\Classifier\popfile.sql
   RMDir $INSTDIR\Classifier
 
   Delete $INSTDIR\Platform\*.pm
@@ -2911,6 +4672,7 @@ no_reg_file:
   RMDir $INSTDIR\Platform
 
   Delete $INSTDIR\POPFile\*.pm
+  Delete $INSTDIR\POPFile\popfile_version
   RMDir $INSTDIR\POPFile
 
   Delete $INSTDIR\Proxy\*.pm
@@ -2940,6 +4702,7 @@ no_reg_file:
   RMDir $INSTDIR\languages
 
   RMDir /r $INSTDIR\corpus
+  Delete $INSTDIR\popfile.db
 
   RMDir /r $INSTDIR\messages
 
@@ -2964,11 +4727,14 @@ skip_kakasi:
 
   RMDir /r "$INSTDIR\auto"
   RMDir /r "$INSTDIR\Carp"
+  RMDir /r "$INSTDIR\DBD"
   RMDir /r "$INSTDIR\Encode"
   RMDir /r "$INSTDIR\Exporter"
   RMDir /r "$INSTDIR\File"
+  RMDir /r "$INSTDIR\Getopt"
   RMDir /r "$INSTDIR\IO"
   RMDir /r "$INSTDIR\MIME"
+  RMDir /r "$INSTDIR\String"
   RMDir /r "$INSTDIR\Sys"
   RMDir /r "$INSTDIR\Text"
   RMDir /r "$INSTDIR\warnings"
@@ -2998,12 +4764,20 @@ Removed:
 
   !undef L_CFG
   !undef L_EXE
+  !undef L_INDEX
+  !undef L_ININAME
   !undef L_LNE
   !undef L_OLDUI
+  !undef L_PERSONA
+  !undef L_POP_ACCOUNT
+  !undef L_POP_LOGIN
+  !undef L_POP_PORT
+  !undef L_POP_SERVER
   !undef L_REG_KEY
   !undef L_REG_SUBKEY
   !undef L_REG_VALUE
   !undef L_TEMP
+
 SectionEnd
 
 #--------------------------------------------------------------------------
