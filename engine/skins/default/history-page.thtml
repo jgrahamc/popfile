@@ -147,6 +147,7 @@
 
                 <TMPL_IF NAME="History_If_Magnetized">
 
+
                 </TMPL_IF>
 
                 <TMPL_IF NAME="History_If_Not_Pseudo">
@@ -176,7 +177,7 @@
                 <TMPL_ELSE>
 
                 <TMPL_IF NAME="History_If_Magnetized">
-                    <img title="*MAGNET TYPE*:<TMPL_VAR NAME="History_Magnet">" src="/skins/default/magnet.png"> &nbsp; *TYPE*
+                    <img title="<TMPL_VAR NAME="History_Magnet">" src="/skins/default/magnet.png">&nbsp;<TMPL_VAR NAME="History_Magnet">
                 <TMPL_ELSE>
 
                 <select name="reclassify_<TMPL_VAR NAME="History_I">">
