@@ -70,6 +70,9 @@ sub initialize
     # The separator within the POP3 username is :
     $self->config_( 'separator', ':' );
 
+    # The welcome string from the proxy is configurable
+    $self->config_( 'welcome_string', "POP3 POPFile ($self->{version_}) server ready" );
+
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
@@ -117,7 +120,7 @@ sub child__
     my $mail;
 
     # Tell the client that we are ready for commands and identify our version number
-    $self->tee_( $client, "+OK POP3 POPFile ($self->{version_}) server ready$eol" );
+    $self->tee_( $client, "+OK " . $self->config_( 'welcome_string' ) . "$eol" );
 
     # Retrieve commands from the client and process them until the client disconnects or
     # we get a specific QUIT command

@@ -66,6 +66,9 @@ sub initialize
 
     $self->config_( 'separator', ':');
 
+    # The welcome string from the proxy is configurable
+    $self->config_( 'welcome_string', "NNTP POPFile ($self->{version_}) server ready" );
+
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
@@ -108,7 +111,7 @@ sub child__
     my $connection_state = 'username needed';
 
     # Tell the client that we are ready for commands and identify our version number
-    $self->tee_( $client, "201 NNTP POPFile (vTODO.TODO.TODO) server ready$eol" );
+    $self->tee_( $client, "201 " . $self->config_( 'welcome_string' ) . "$eol" );
 
     # Retrieve commands from the client and process them until the client disconnects or
     # we get a specific QUIT command
