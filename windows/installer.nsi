@@ -542,18 +542,10 @@ Function PFIGUIInit
 
   SearchPath $G_NOTEPAD notepad.exe
 
-;;;  ; POPFile 0.20.0 introduces some significant changes:
-;;;  ; (1) BerkeleyDB is used for the corpus instead of simple text files
-;;;  ; (2) POPFile is started by running 'popfile.exe' without any parameters
-;;;  ;     (instead of 'perl.exe popfile.pl' or 'wperl.exe popfile.pl')
-;;;  ;
-;;;  ; As a temporary measure, the "Release Notes" are _ALWAYS_ displayed in the hope that
-;;;  ; users will read about these changes _BEFORE_ installing POPFile.
-;;;
-;;;  MessageBox MB_YESNO|MB_ICONQUESTION \
-;;;      "$(PFI_LANG_MBRELNOTES_1)\
-;;;      $\r$\n$\r$\n\
-;;;      $(PFI_LANG_MBRELNOTES_2)" IDNO exit
+  MessageBox MB_YESNO|MB_ICONQUESTION \
+      "$(PFI_LANG_MBRELNOTES_1)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBRELNOTES_2)" IDNO exit
 
   StrCmp $G_NOTEPAD "" use_file_association
   ExecWait 'notepad.exe "$PLUGINSDIR\${C_README}.txt"'
