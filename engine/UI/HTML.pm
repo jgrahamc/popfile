@@ -513,14 +513,14 @@ sub url_handler__
         return 0;
     }
 
-    my %url_table = ( '/security'      => \&security_page,
+    my %url_table = ( '/security'      => \&security_page,       # PROFILE BLOCK START
                       '/configuration' => \&configuration_page,
                       '/buckets'       => \&corpus_page,
                       '/magnets'       => \&magnet_page,
                       '/advanced'      => \&advanced_page,
                       '/history'       => \&history_page,
                       '/view'          => \&view_page,
-                      '/'              => \&history_page );
+                      '/'              => \&history_page );      # PROFILE BLOCK STOP
 
     # Any of the standard pages can be found in the url_table, the other pages are probably
     # files on disk
@@ -1044,9 +1044,9 @@ sub configuration_page
     # Insert all the items that are dynamically created from the modules that are loaded
 
     for my $name (sort keys %{$self->{dynamic_ui__}{configuration}}) {
-        $body .= $self->{dynamic_ui__}{configuration}{$name}->configure_item( $name,
+        $body .= $self->{dynamic_ui__}{configuration}{$name}->configure_item( $name,                    # PROFILE BLOCK START
                                                                               \%{$self->{language__}},
-                                                                              $self->{session_key__} );
+                                                                              $self->{session_key__} ); # PROFILE BLOCK STOP
     }
 
 
@@ -1164,9 +1164,9 @@ sub security_page
     $body .= "<h2 class=\"security\">$self->{language__}{Security_Stealth}</h2>\n";
 
     for my $name (sort keys %{$self->{dynamic_ui__}{security}}) {
-        $body .= $self->{dynamic_ui__}{security}{$name}->configure_item( $name,
+        $body .= $self->{dynamic_ui__}{security}{$name}->configure_item( $name,                         # PROFILE BLOCK START
                                                                               \%{$self->{language__}},
-                                                                              $self->{session_key__} );
+                                                                              $self->{session_key__} ); # PROFILE BLOCK STOP
     }
 
     # Accept HTTP from Remote Machines widget
@@ -1195,9 +1195,9 @@ sub security_page
     $body .= "<div class=\"securityAuthWidgets\">\n";
 
     for my $name (sort keys %{$self->{dynamic_ui__}{chain}}) {
-        $body .= $self->{dynamic_ui__}{chain}{$name}->configure_item( $name,
+        $body .= $self->{dynamic_ui__}{chain}{$name}->configure_item( $name,                            # PROFILE BLOCK START
                                                                               \%{$self->{language__}},
-                                                                              $self->{session_key__} );
+                                                                              $self->{session_key__} ); # PROFILE BLOCK STOP
     }
 
     # end optional widgets placement
@@ -3130,7 +3130,7 @@ sub history_page
     # applied.  The watch word here is to avoid doing work
 
     $self->load_history_cache__() if ( $self->{history_invalid__} == 1 );
-    $self->sort_filter_history( $self->{form_}{filter},
+    $self->sort_filter_history( $self->{form_}{filter}, # PROFILE BLOCK START
                                 $self->{form_}{search},
                                 $self->{form_}{sort} ) if ( ( defined( $self->{form_}{setfilter}     ) ) ||
                                                             ( defined( $self->{form_}{setsort}       ) ) ||
@@ -3138,7 +3138,7 @@ sub history_page
                                                             ( defined( $self->{form_}{deletemessage} ) ) ||
                                                             ( defined( $self->{form_}{clearall}      ) ) ||
                                                             ( defined( $self->{form_}{clearpage}     ) ) ||
-                                                            ( $self->{need_resort__} == 1 )            );
+                                                            ( $self->{need_resort__} == 1 )            );      # PROFILE BLOCK STOP
 
     # Redirect somewhere safe if non-idempotent action has been taken
 
@@ -3195,10 +3195,10 @@ sub history_page
 
         # Column headers
 
-        my %headers_table = ( '',        'ID',
+        my %headers_table = ( '',        'ID',              # PROFILE BLOCK START
                               'from',    'From',
                               'subject', 'Subject',
-                              'bucket',  'Classification');
+                              'bucket',  'Classification'); # PROFILE BLOCK STOP
 
         $body .= "<tr valign=\"bottom\">\n";
 
@@ -3636,9 +3636,9 @@ sub change_session_key
 {
     my ( $self ) = @_;
 
-    my @chars = ( 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+    my @chars = ( 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',   # PROFILE BLOCK START
                   'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'U', 'V', 'W', 'X', 'Y',
-                  'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A' );
+                  'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A' ); # PROFILE BLOCK STOP
 
     $self->{session_key__} = '';
 

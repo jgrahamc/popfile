@@ -410,9 +410,9 @@ GET /advanced
 
 # Check presence of ignore words
 
-MATCH one
-MATCH two
-MATCH three
+MATCH address
+MATCH localhost
+MATCH smtp
 
 # Check add ignore word
 

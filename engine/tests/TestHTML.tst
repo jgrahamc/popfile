@@ -31,9 +31,7 @@ test_assert( `rm -rf corpus/CVS` == 0 );
 test_assert( `rm -rf messages` == 0 );
 
 unlink( 'stopwords' );
-open STOPS, ">stopwords";
-print STOPS "one\ntwo\nthree\n";
-close STOPS;
+test_assert( `cp stopwords.base stopwords` == 0 );
 
 mkdir 'messages';
 my @messages = glob '*.msg';
@@ -175,7 +173,7 @@ $h->initialize();
 $h->version( 'testsuite' );
 our $version = $h->version();
 
-our $sk = $h->{session_key__};
+our $sk = $h->session_key();
 
 $mq->service();
 
