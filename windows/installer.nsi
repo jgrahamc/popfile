@@ -179,15 +179,18 @@ Function .onInit
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioA.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioB.ini"
 
-  SearchPath $R0 notepad.exe
-  StrCmp $R0 "" skip_release_notes
-  
   File /oname=$PLUGINSDIR\release.txt "..\engine\v0.19.0.change"
   MessageBox MB_YESNO "Display POPFile Release Notes ?$\r$\n$\r$\n\
-      'Yes' recommended if you are upgrading." IDNO skip_release_notes
+      'Yes' recommended if you are upgrading." IDNO exit
+  SearchPath $R0 notepad.exe
+  StrCmp $R0 "" use_file_association
   ExecWait 'notepad.exe "$PLUGINSDIR\release.txt"'
+  GoTo exit
+
+use_file_association:
+  ExecShell "open" "$PLUGINSDIR\release.txt"
   
-skip_release_notes:
+exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
