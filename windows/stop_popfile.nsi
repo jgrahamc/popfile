@@ -72,7 +72,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define VERSION   "0.4.0"       ; see 'VIProductVersion' comment below for format details
+  !define VERSION   "0.4.1"       ; see 'VIProductVersion' comment below for format details
 
   ; Specify EXE filename and icon for the 'installer'
 
@@ -142,6 +142,8 @@ Section Shutdown
   StrCmp ${L_RESULT} "/showerrors" only_errors
   StrCmp ${L_RESULT} "/showall" all_cases
   StrCmp ${L_RESULT} "/none" other_param
+  StrCmp ${L_RESULT} "/?" usage
+  StrCmp ${L_RESULT} "/help" usage
   Goto option_error
 
 usage:
