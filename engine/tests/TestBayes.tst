@@ -90,6 +90,12 @@ test_assert_equal( $b->{unclassified__}, log(5) );
 
 # test the API functions
 
+# Test getting and releasing a session key
+
+my $session = $b->get_session_key();
+test_assert( $session ne '' );
+$b->release_session_key();
+
 # get_buckets
 
 my @buckets = $b->get_buckets();

@@ -150,6 +150,12 @@ sub new
     $self->{magnet_used__}       = 0;
     $self->{magnet_detail__}     = '';
 
+    # This maps session keys (long strings) to user ids.  If there's an entry here then the session key
+    # is valid and can be used in the POPFile API.   See the methods get_session_key and release_session_key
+    # for details
+
+    $self->{api_sessions__}      = {};
+
     # Must call bless before attempting to call any methods
 
     bless $self, $type;
@@ -426,6 +432,366 @@ sub update_constants__
             }
         }
     }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# parse_with_kakasi__
+#
+# Parse Japanese mail message with Kakasi
+#
+# Japanese needs to be parsed by language processing filter, "Kakasi"
+# before it is passed to Bayes classifier because words are not splitted
+# by spaces.
+#
+# $file           The file to parse
+#
+# ---------------------------------------------------------------------------------------------
+sub parse_with_kakasi__
+{
+    my ( $self, $file, $dcount, $mcount ) = @_;
+
+    # This is used for Japanese support
+    require Encode;
+
+    # This is used to parse Japanese
+    require Text::Kakasi;
+
+    my $temp_file  = $self->global_config_( 'msgdir' ) . "kakasi$dcount" . "=$mcount.msg";
+
+    # Split Japanese email body into words using Kakasi Wakachigaki
+    # mode(-w is passed to Kakasi as argument). The most common charset of
+    # Japanese email is ISO-2022-JP, alias is jis, so -ijis and -ojis
+    # are passed to tell Kakasi the input charset and the output charset
+    # explicitly.
+    #
+    # After Kakasi processing, Encode::from_to is used to convert into UTF-8.
+    #
+    # Japanese email charset is assumed to be ISO-2022-JP. Needs to expand for
+    # other possible charset, such as Shift_JIS, EUC-JP, UTF-8.
+
+    Text::Kakasi::getopt_argv("kakasi", "-w -ijis -ojis");
+    open KAKASI_IN, "<$file";
+    open KAKASI_OUT, ">$temp_file";
+
+    while( <KAKASI_IN> ){
+        my $kakasi_out;
+
+	$kakasi_out = Text::Kakasi::do_kakasi($_);
+        Encode::from_to($kakasi_out, "iso-2022-jp", "euc-jp");
+        print KAKASI_OUT $kakasi_out;
+    }
+
+    close KAKASI_OUT;
+    close KAKASI_IN;
+    Text::Kakasi::close_kanwadict();
+    unlink( $file );
+    rename( $temp_file, $file );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_connect__
+#
+# Connects to the POPFile database and returns 1 if successful
+#
+# ---------------------------------------------------------------------------------------------
+sub db_connect__
+{
+    my ( $self ) = @_;
+
+    # Connect to the database, note that the database must exist for this to work,
+    # to make this easy for people POPFile we will create the database automatically
+    # here using the file 'popfile.sql' which should be located in the same directory
+    # the Classifier/Bayes.pm module
+
+    my $dbname = $self->get_user_path_( $self->config_( 'database' ) );
+    my $dbpresent = ( -e $dbname ) || 0;
+
+    # Now perform the connect, note that this is database independent at this point, the
+    # actual database that we connect to is defined by the dbconnect parameter.
+
+    my $dbconnect = $self->config_( 'dbconnect' );
+    $dbconnect =~ s/\$dbname/$dbname/g;
+
+    $self->log_( "Attempting to connect to $dbconnect ($dbpresent)" );
+
+    $self->{db__} = DBI->connect( $dbconnect,
+                                  $self->config_( 'dbuser' ),
+                                  $self->config_( 'dbauth' ) );
+
+    if ( !defined( $self->{db__} ) ) {
+        $self->log_( "Failed to connect to database and got error $DBI::errstr" );
+        return 0;
+    }
+
+    if ( !$dbpresent ) {
+        if ( -e $self->get_root_path_( 'Classifier/popfile.sql' ) ) {
+            my $schema = '';
+
+            $self->log_( "Creating database schema" );
+
+            open SCHEMA, '<' . $self->get_root_path_( 'Classifier/popfile.sql' );
+            while ( <SCHEMA> ) {
+                next if ( /^--/ );
+                next if ( !/[a-z;]/ );
+                s/--.*$//;
+
+                $schema .= $_;
+
+                if ( ( /end;/ ) || ( /\);/ ) ) {
+                    $self->log_( "Performing SQL command: $schema" );
+                    $self->{db__}->do( $schema );
+                    $schema = '';
+		}
+	    }
+            close SCHEMA;
+	} else {
+            $self->log_( "Can't find the database schema" );
+            return 0;
+	}
+    }
+
+    # Now prepare common SQL statements for use, as a matter of convention the
+    # parameters to each statement always appear in the following order:
+    #
+    # user
+    # bucket
+    # word
+    # parameter
+
+    $self->{db_get_buckets__} = $self->{db__}->prepare(
+   	     'select name, id, pseudo from buckets
+                  where buckets.userid = ?;' );
+
+    $self->{db_get_wordid__} = $self->{db__}->prepare(
+	     'select id from words
+                  where words.word = ? limit 1;' );
+
+    $self->{db_get_word_count__} = $self->{db__}->prepare(
+	     'select matrix.count from matrix
+                  where matrix.bucketid = ? and
+                        matrix.wordid = ? limit 1;' );
+
+    $self->{db_put_word_count__} = $self->{db__}->prepare(
+	   'insert or replace into matrix ( bucketid, wordid, count ) values ( ?, ?, ? );' );
+
+    $self->{db_get_bucket_unique_count__} = $self->{db__}->prepare(
+	     'select count(*) from matrix
+                  where matrix.bucketid = ?;' );
+
+    $self->{db_get_bucket_word_count__} = $self->{db__}->prepare(
+	     'select sum(matrix.count) from matrix
+                  where matrix.bucketid = ?;' );
+
+    $self->{db_get_unique_word_count__} = $self->{db__}->prepare(
+	     'select count(matrix.wordid) from matrix, buckets
+                  where matrix.bucketid = buckets.id and
+                        buckets.userid = ?;' );
+
+    $self->{db_get_full_total__} = $self->{db__}->prepare(
+	     'select sum(matrix.count) from matrix, buckets
+                  where buckets.userid = ? and
+                        matrix.bucketid = buckets.id;' );
+
+    $self->{db_get_bucket_parameter__} = $self->{db__}->prepare(
+             'select bucket_params.value from bucket_params
+                  where bucket_params.bucketid = ? and
+                        bucket_params.btid = ?;' );
+
+    $self->{db_set_bucket_parameter__} = $self->{db__}->prepare(
+	   'insert or replace into bucket_params ( bucketid, btid, value ) values ( ?, ?, ? );' );
+
+    $self->{db_get_bucket_parameter_default__} = $self->{db__}->prepare(
+             'select bucket_template.def from bucket_template
+                  where bucket_template.id = ?;' );
+    $self->{db_get_buckets_with_magnets__} = $self->{db__}->prepare(
+             'select buckets.name from buckets, magnets
+                  where buckets.userid = ? and
+                        magnets.bucketid = buckets.id group by buckets.name order by buckets.name;' );
+
+    # Get the mapping from parameter names to ids into a local hash
+
+    my $h = $self->{db__}->prepare( "select name, id from bucket_template;" );
+    $h->execute;
+    while ( my $row = $h->fetchrow_arrayref ) {
+        $self->{db_parameterid__}{$row->[0]} = $row->[1];
+    }
+    $h->finish;
+
+    $self->db_update_cache__();
+
+    return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_disconnect__
+#
+# Disconnect from the POPFile database
+#
+# ---------------------------------------------------------------------------------------------
+sub db_disconnect__
+{
+    my ( $self ) = @_;
+
+    $self->{db_get_buckets__}->finish;
+    $self->{db_get_wordid__}->finish;
+    $self->{db_get_word_count__}->finish;
+    $self->{db_put_word_count__}->finish;
+    $self->{db_get_bucket_unique_count__}->finish;
+    $self->{db_get_bucket_word_count__}->finish;
+    $self->{db_get_unique_word_count__}->finish;
+    $self->{db_get_full_total__}->finish;
+    $self->{db_get_bucket_parameter__}->finish;
+    $self->{db_set_bucket_parameter__}->finish;
+    $self->{db_get_bucket_parameter_default__}->finish;
+    $self->{db_get_buckets_with_magnets__}->finish;
+
+    if ( defined( $self->{db__} ) ) {
+        $self->{db__}->disconnect;
+        undef $self->{db__};
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_update_cache__
+#
+# Updates our local cache of user and bucket ids.
+#
+# ---------------------------------------------------------------------------------------------
+sub db_update_cache__
+{
+    my ( $self ) = @_;
+
+    $self->{db_userid__} = $self->db_get_user_id__( 'admin' );
+
+    delete $self->{db_bucketid__};
+    $self->{db_get_buckets__}->execute( $self->{db_userid__} );
+    while ( my $row = $self->{db_get_buckets__}->fetchrow_arrayref ) {
+        $self->{db_bucketid__}{$row->[0]}{id} = $row->[1];
+        $self->{db_bucketid__}{$row->[0]}{pseudo} = $row->[2];
+    }
+
+    for my $bucket (keys %{$self->{db_bucketid__}}) {
+        $self->{db_get_bucket_word_count__}->execute( $self->{db_bucketid__}{$bucket}{id} );
+        my $row = $self->{db_get_bucket_word_count__}->fetchrow_arrayref;
+        $self->{db_bucketcount__}{$bucket} = $row->[0];
+    }
+
+    $self->update_constants__();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_get_user_id__
+#
+# Returns the unique ID for a named user
+#
+# $name         Name of user to look up
+#
+# ---------------------------------------------------------------------------------------------
+sub db_get_user_id__
+{
+    my ( $self, $name ) = @_;
+
+    my $result = $self->{db__}->selectrow_arrayref( "select users.id from users where
+                                                         users.name = '$name';" );
+
+    return $result->[0];
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_get_word_count__
+#
+# Return the 'count' value for a word in a bucket.  If the word is not found in that
+# bucket then returns undef.
+#
+# $bucket           bucket word is in
+# $word             word to lookup
+#
+# ---------------------------------------------------------------------------------------------
+sub db_get_word_count__
+{
+    my ( $self, $bucket, $word ) = @_;
+
+    $self->{db_get_wordid__}->execute( $word );
+    my $result = $self->{db_get_wordid__}->fetchrow_arrayref;
+    if ( !defined( $result ) ) {
+        return undef;
+    }
+
+    my $wordid = $result->[0];
+
+    $self->{db_get_word_count__}->execute( $self->{db_bucketid__}{$bucket}{id}, $wordid );
+    $result = $self->{db_get_word_count__}->fetchrow_arrayref;
+    if ( defined( $result ) ) {
+         return $result->[0];
+    } else {
+         return undef;
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_put_word_count__
+#
+# Update 'count' value for a word in a bucket, if the update fails then returns 0
+# otherwise is returns 1
+#
+# $bucket           bucket word is in
+# $word             word to update
+# $count            new count value
+#
+# ---------------------------------------------------------------------------------------------
+sub db_put_word_count__
+{
+    my ( $self, $bucket, $word, $count ) = @_;
+
+    # We need to have two things before we can start, the id of the word in the words
+    # table (if there's none then we need to add the word), the bucket id in the buckets
+    # table (which must exist)
+
+    $word = $self->{db__}->quote($word);
+
+    my $result = $self->{db__}->selectrow_arrayref("select words.id from words
+                                                        where words.word = $word limit 1;");
+
+    if ( !defined( $result ) ) {
+        $self->{db__}->do( "insert into words ( word ) values ( $word );" );
+        $result = $self->{db__}->selectrow_arrayref("select words.id from words
+                                                         where words.word = $word limit 1;");
+    }
+
+    my $wordid = $result->[0];
+    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+
+    $self->{db_put_word_count__}->execute( $bucketid, $wordid, $count );
+
+    return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_delete_word__
+#
+# Delete a word from the database from a specific bucket, returns 1 if successful and 0
+# otherwise
+#
+# $bucket           bucket word is in
+# $word             word to delete
+#
+# ---------------------------------------------------------------------------------------------
+sub db_delete_word__
+{
+    my ( $self, $bucket, $word ) = @_;
+
+    $word = $self->{db__}->quote($word);
+
+    return defined( $self->{db__}->do(
+        "delete from corpus where bucket = '$bucket' and word = $word ;" ) );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -728,6 +1094,237 @@ sub magnet_match__
     my ( $self, $match, $bucket, $type ) = @_;
 
     return $self->magnet_match_helper__( $match, $bucket, $type );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# write_line__
+#
+# Writes a line to a file and parses it unless the classification is already known
+#
+# $file         File handle for file to write line to
+# $line         The line to write
+# $class        (optional) The current classification
+#
+# ---------------------------------------------------------------------------------------------
+sub write_line__
+{
+    my ( $self, $file, $line, $class ) = @_;
+
+    print $file $line if defined( $file );
+
+    if ( $class eq '' ) {
+        $self->{parser__}->parse_line( $line );
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# add_words_to_bucket
+#
+# Takes words previously parsed by the mail parser and adds/subtracts them to/from a bucket,
+# this is a helper used by add_messages_to_bucket, remove_message_from_bucket
+#
+# $bucket         Bucket to add to
+# $subtract       Set to -1 means subtract the words, set to 1 means add
+#
+# ---------------------------------------------------------------------------------------------
+sub add_words_to_bucket__
+{
+    my ( $self, $bucket, $subtract ) = @_;
+
+    foreach my $word (keys %{$self->{parser__}->{words__}}) {
+        $self->set_value_( $bucket, $word, $subtract * $self->{parser__}->{words__}{$word} + # PROFILE BLOCK START
+            $self->get_base_value_( $bucket, $word ) );                                      # PROFILE BLOCK STOP
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# echo_to_dot_
+#
+# $mail     The stream (created with IO::) to send the message to (the remote mail server)
+# $client   (optional) The local mail client (created with IO::) that needs the response
+# $file     (optional) A file to print the response to, caller specifies open style
+# $before   (optional) String to send to client before the dot is sent
+#
+# echo all information from the $mail server until a single line with a . is seen
+#
+# NOTE Also echoes the line with . to $client but not to $file
+#
+# Returns 1 if there was a . or 0 if reached EOF before we hit the .
+#
+# ---------------------------------------------------------------------------------------------
+sub echo_to_dot_
+{
+    my ( $self, $mail, $client, $file, $before ) = @_;
+
+    my $hit_dot = 0;
+
+    my $isopen = open FILE, "$file" if ( defined( $file ) );
+
+    while ( my $line = $self->slurp_( $mail ) ) {
+
+        # Check for an abort
+
+        last if ( $self->{alive_} == 0 );
+
+        # The termination has to be a single line with exactly a dot on it and nothing
+        # else other than line termination characters.  This is vital so that we do
+        # not mistake a line beginning with . as the end of the block
+
+        if ( $line =~ /^\.(\r\n|\r|\n)$/ ) {
+            $hit_dot = 1;
+
+            if ( defined( $before ) && ( $before ne '' ) ) {
+                print $client $before if ( defined( $client ) );
+                print FILE    $before if ( defined( $isopen ) );
+            }
+
+            # Note that there is no print FILE here.  This is correct because we
+            # do no want the network terminator . to appear in the file version
+            # of any message
+
+            print $client $line if ( defined( $client ) );
+            last;
+        }
+
+        print $client $line if ( defined( $client ) );
+        print FILE    $line if ( defined( $isopen ) );
+
+    }
+
+    close FILE if ( $isopen );
+
+    return $hit_dot;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# substr_euc__
+#
+# "substr" function which supports EUC Japanese charset
+#
+# $pos      Start position
+# $len      Word length
+#
+# ---------------------------------------------------------------------------------------------
+sub substr_euc__
+{
+    my ( $str, $pos, $len ) = @_;
+    my $result_str;
+    my $char;
+    my $count = 0;
+    if ( !$pos ) {
+        $pos = 0;
+    }
+    if ( !$len ) {
+        $len = length( $str );
+    }
+
+    for ( $pos = 0; $count < $len; $pos++ ) {
+        $char = substr( $str, $pos, 1 );
+        if ( $char =~ /[\x80-\xff]/ ) {
+            $char = substr( $str, $pos++, 2 );
+        }
+        $result_str .= $char;
+        $count++;
+    }
+
+    return $result_str;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# generate_unique_session_key__
+#
+# Returns a unique string based session key that can be used as a key in the api_sessions__
+#
+# ---------------------------------------------------------------------------------------------
+sub generate_unique_session_key__
+{
+    my ( $self ) = @_;
+
+    my @chars = ( 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',   # PROFILE BLOCK START
+                  'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'U', 'V', 'W', 'X', 'Y',
+                  'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A' ); # PROFILE BLOCK STOP
+
+    my $session;
+
+    do {
+        $session = '';
+        my $length = int( 6 + rand(4) );
+
+        for my $i (0 .. $length) {
+            my $random = $chars[int( rand(36) )];
+
+            # Just to add spice to things we sometimes lowercase the value
+
+            if ( rand(1) < rand(1) ) {
+                $random = lc($random);
+            }
+  
+            $session .= $random;
+        }
+    } while ( defined( $self->{api_sessions__}{$session} ) );
+
+    return $session;
+}
+
+# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
+#       _____   _____   _____  _______ _____        _______     _______  _____  _____
+#      |_____] |     | |_____] |______   |   |      |______     |_____| |_____]   |  
+#      |       |_____| |       |       __|__ |_____ |______     |     | |       __|__
+#                                                     
+# The method below are public and may be accessed by other modules.  All of them may be
+# accessed remotely through the XMLRPC.pm module using the XML-RPC protocol
+# 
+# Note that every API function expects to be passed a $session which is obtained by first
+# calling get_session_key with a valid username and password.   Once done call the method
+# release_session_key.
+#
+# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_session_key
+#
+# $user           The name of an existing user
+# $pwd            The user's password
+#
+# Returns a string based session key if the username and password match, or undef if not
+#
+# ---------------------------------------------------------------------------------------------
+sub get_session_key
+{
+    my ( $self, $user, $pwd ) = @_;
+
+    # Before we implement multi-user POPFile this method simply returns a session key
+    # for the default user no matter what user or pwd are supplied
+
+    my $session = $self->generate_unique_session_key__();
+
+    $self->{api_sessions__}{$session} = 1;
+
+    return $session;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# release_session_key
+#
+# $session        A session key previously returned by get_session_key
+#
+# Releases and invalidates the session key
+#
+# ---------------------------------------------------------------------------------------------
+sub release_session_key
+{
+    my ( $self, $session ) = @_;
+
+    delete $self->{api_sessions__}{$session};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1161,28 +1758,6 @@ sub history_read_class
 
 # ---------------------------------------------------------------------------------------------
 #
-# write_line__
-#
-# Writes a line to a file and parses it unless the classification is already known
-#
-# $file         File handle for file to write line to
-# $line         The line to write
-# $class        (optional) The current classification
-#
-# ---------------------------------------------------------------------------------------------
-sub write_line__
-{
-    my ( $self, $file, $line, $class ) = @_;
-
-    print $file $line if defined( $file );
-
-    if ( $class eq '' ) {
-        $self->{parser__}->parse_line( $line );
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # classify_and_modify
 #
 # This method reads an email terminated by . on a line by itself (or the end of stream)
@@ -1608,7 +2183,7 @@ sub get_bucket_word_prefixes
 
     if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
         no locale;
-        return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc($_,0,1)} @{$result};
+        return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc__($_,0,1)} @{$result};
     } else {
         if  ( $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
     	    no locale;
@@ -1617,41 +2192,6 @@ sub get_bucket_word_prefixes
             return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)}  @{$result};
         }
     }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# substr_euc
-#
-# "substr" function which supports EUC Japanese charset
-#
-# $pos      Start position
-# $len      Word length
-#
-# ---------------------------------------------------------------------------------------------
-sub substr_euc
-{
-    my ( $str, $pos, $len ) = @_;
-    my $result_str;
-    my $char;
-    my $count = 0;
-    if ( !$pos ) {
-        $pos = 0;
-    }
-    if ( !$len ) {
-        $len = length( $str );
-    }
-
-    for ( $pos = 0; $count < $len; $pos++ ) {
-        $char = substr( $str, $pos, 1 );
-        if ( $char =~ /[\x80-\xff]/ ) {
-            $char = substr( $str, $pos++, 2 );
-        }
-        $result_str .= $char;
-        $count++;
-    }
-
-    return $result_str;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1904,27 +2444,6 @@ sub rename_bucket
 
 # ---------------------------------------------------------------------------------------------
 #
-# add_words_to_bucket
-#
-# Takes words previously parsed by the mail parser and adds/subtracts them to/from a bucket,
-# this is a helper used by add_messages_to_bucket, remove_message_from_bucket
-#
-# $bucket         Bucket to add to
-# $subtract       Set to -1 means subtract the words, set to 1 means add
-#
-# ---------------------------------------------------------------------------------------------
-sub add_words_to_bucket__
-{
-    my ( $self, $bucket, $subtract ) = @_;
-
-    foreach my $word (keys %{$self->{parser__}->{words__}}) {
-        $self->set_value_( $bucket, $word, $subtract * $self->{parser__}->{words__}{$word} + # PROFILE BLOCK START
-            $self->get_base_value_( $bucket, $word ) );                                      # PROFILE BLOCK STOP
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # add_messages_to_bucket
 #
 # Parses mail messages and updates the statistics in the specified bucket
@@ -1998,66 +2517,6 @@ sub remove_message_from_bucket
     $self->db_update_cache__();
 
     return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# echo_to_dot_
-#
-# $mail     The stream (created with IO::) to send the message to (the remote mail server)
-# $client   (optional) The local mail client (created with IO::) that needs the response
-# $file     (optional) A file to print the response to, caller specifies open style
-# $before   (optional) String to send to client before the dot is sent
-#
-# echo all information from the $mail server until a single line with a . is seen
-#
-# NOTE Also echoes the line with . to $client but not to $file
-#
-# Returns 1 if there was a . or 0 if reached EOF before we hit the .
-#
-# ---------------------------------------------------------------------------------------------
-sub echo_to_dot_
-{
-    my ( $self, $mail, $client, $file, $before ) = @_;
-
-    my $hit_dot = 0;
-
-    my $isopen = open FILE, "$file" if ( defined( $file ) );
-
-    while ( my $line = $self->slurp_( $mail ) ) {
-
-        # Check for an abort
-
-        last if ( $self->{alive_} == 0 );
-
-        # The termination has to be a single line with exactly a dot on it and nothing
-        # else other than line termination characters.  This is vital so that we do
-        # not mistake a line beginning with . as the end of the block
-
-        if ( $line =~ /^\.(\r\n|\r|\n)$/ ) {
-            $hit_dot = 1;
-
-            if ( defined( $before ) && ( $before ne '' ) ) {
-                print $client $before if ( defined( $client ) );
-                print FILE    $before if ( defined( $isopen ) );
-            }
-
-            # Note that there is no print FILE here.  This is correct because we
-            # do no want the network terminator . to appear in the file version
-            # of any message
-
-            print $client $line if ( defined( $client ) );
-            last;
-        }
-
-        print $client $line if ( defined( $client ) );
-        print FILE    $line if ( defined( $isopen ) );
-
-    }
-
-    close FILE if ( $isopen );
-
-    return $hit_dot;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2322,366 +2781,6 @@ sub remove_stopword
     # Pass language parameter to remove_stopword()
 
     return $self->{parser__}->{mangle__}->remove_stopword( $stopword, $self->module_config_( 'html', 'language' ) );
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# parse_with_kakasi__
-#
-# Parse Japanese mail message with Kakasi
-#
-# Japanese needs to be parsed by language processing filter, "Kakasi"
-# before it is passed to Bayes classifier because words are not splitted
-# by spaces.
-#
-# $file           The file to parse
-#
-# ---------------------------------------------------------------------------------------------
-sub parse_with_kakasi__
-{
-    my ( $self, $file, $dcount, $mcount ) = @_;
-
-    # This is used for Japanese support
-    require Encode;
-
-    # This is used to parse Japanese
-    require Text::Kakasi;
-
-    my $temp_file  = $self->global_config_( 'msgdir' ) . "kakasi$dcount" . "=$mcount.msg";
-
-    # Split Japanese email body into words using Kakasi Wakachigaki
-    # mode(-w is passed to Kakasi as argument). The most common charset of
-    # Japanese email is ISO-2022-JP, alias is jis, so -ijis and -ojis
-    # are passed to tell Kakasi the input charset and the output charset
-    # explicitly.
-    #
-    # After Kakasi processing, Encode::from_to is used to convert into UTF-8.
-    #
-    # Japanese email charset is assumed to be ISO-2022-JP. Needs to expand for
-    # other possible charset, such as Shift_JIS, EUC-JP, UTF-8.
-
-    Text::Kakasi::getopt_argv("kakasi", "-w -ijis -ojis");
-    open KAKASI_IN, "<$file";
-    open KAKASI_OUT, ">$temp_file";
-
-    while( <KAKASI_IN> ){
-        my $kakasi_out;
-
-	$kakasi_out = Text::Kakasi::do_kakasi($_);
-        Encode::from_to($kakasi_out, "iso-2022-jp", "euc-jp");
-        print KAKASI_OUT $kakasi_out;
-    }
-
-    close KAKASI_OUT;
-    close KAKASI_IN;
-    Text::Kakasi::close_kanwadict();
-    unlink( $file );
-    rename( $temp_file, $file );
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# db_connect__
-#
-# Connects to the POPFile database and returns 1 if successful
-#
-# ---------------------------------------------------------------------------------------------
-sub db_connect__
-{
-    my ( $self ) = @_;
-
-    # Connect to the database, note that the database must exist for this to work,
-    # to make this easy for people POPFile we will create the database automatically
-    # here using the file 'popfile.sql' which should be located in the same directory
-    # the Classifier/Bayes.pm module
-
-    my $dbname = $self->get_user_path_( $self->config_( 'database' ) );
-    my $dbpresent = ( -e $dbname ) || 0;
-
-    # Now perform the connect, note that this is database independent at this point, the
-    # actual database that we connect to is defined by the dbconnect parameter.
-
-    my $dbconnect = $self->config_( 'dbconnect' );
-    $dbconnect =~ s/\$dbname/$dbname/g;
-
-    $self->log_( "Attempting to connect to $dbconnect ($dbpresent)" );
-
-    $self->{db__} = DBI->connect( $dbconnect,
-                                  $self->config_( 'dbuser' ),
-                                  $self->config_( 'dbauth' ) );
-
-    if ( !defined( $self->{db__} ) ) {
-        $self->log_( "Failed to connect to database and got error $DBI::errstr" );
-        return 0;
-    }
-
-    if ( !$dbpresent ) {
-        if ( -e $self->get_root_path_( 'Classifier/popfile.sql' ) ) {
-            my $schema = '';
-
-            $self->log_( "Creating database schema" );
-
-            open SCHEMA, '<' . $self->get_root_path_( 'Classifier/popfile.sql' );
-            while ( <SCHEMA> ) {
-                next if ( /^--/ );
-                next if ( !/[a-z;]/ );
-                s/--.*$//;
-
-                $schema .= $_;
-
-                if ( ( /end;/ ) || ( /\);/ ) ) {
-                    $self->log_( "Performing SQL command: $schema" );
-                    $self->{db__}->do( $schema );
-                    $schema = '';
-		}
-	    }
-            close SCHEMA;
-	} else {
-            $self->log_( "Can't find the database schema" );
-            return 0;
-	}
-    }
-
-    # Now prepare common SQL statements for use, as a matter of convention the
-    # parameters to each statement always appear in the following order:
-    #
-    # user
-    # bucket
-    # word
-    # parameter
-
-    $self->{db_get_buckets__} = $self->{db__}->prepare(
-   	     'select name, id, pseudo from buckets
-                  where buckets.userid = ?;' );
-
-    $self->{db_get_wordid__} = $self->{db__}->prepare(
-	     'select id from words
-                  where words.word = ? limit 1;' );
-
-    $self->{db_get_word_count__} = $self->{db__}->prepare(
-	     'select matrix.count from matrix
-                  where matrix.bucketid = ? and
-                        matrix.wordid = ? limit 1;' );
-
-    $self->{db_put_word_count__} = $self->{db__}->prepare(
-	   'insert or replace into matrix ( bucketid, wordid, count ) values ( ?, ?, ? );' );
-
-    $self->{db_get_bucket_unique_count__} = $self->{db__}->prepare(
-	     'select count(*) from matrix
-                  where matrix.bucketid = ?;' );
-
-    $self->{db_get_bucket_word_count__} = $self->{db__}->prepare(
-	     'select sum(matrix.count) from matrix
-                  where matrix.bucketid = ?;' );
-
-    $self->{db_get_unique_word_count__} = $self->{db__}->prepare(
-	     'select count(matrix.wordid) from matrix, buckets
-                  where matrix.bucketid = buckets.id and
-                        buckets.userid = ?;' );
-
-    $self->{db_get_full_total__} = $self->{db__}->prepare(
-	     'select sum(matrix.count) from matrix, buckets
-                  where buckets.userid = ? and
-                        matrix.bucketid = buckets.id;' );
-
-    $self->{db_get_bucket_parameter__} = $self->{db__}->prepare(
-             'select bucket_params.value from bucket_params
-                  where bucket_params.bucketid = ? and
-                        bucket_params.btid = ?;' );
-
-    $self->{db_set_bucket_parameter__} = $self->{db__}->prepare(
-	   'insert or replace into bucket_params ( bucketid, btid, value ) values ( ?, ?, ? );' );
-
-    $self->{db_get_bucket_parameter_default__} = $self->{db__}->prepare(
-             'select bucket_template.def from bucket_template
-                  where bucket_template.id = ?;' );
-    $self->{db_get_buckets_with_magnets__} = $self->{db__}->prepare(
-             'select buckets.name from buckets, magnets
-                  where buckets.userid = ? and
-                        magnets.bucketid = buckets.id group by buckets.name order by buckets.name;' );
-
-    # Get the mapping from parameter names to ids into a local hash
-
-    my $h = $self->{db__}->prepare( "select name, id from bucket_template;" );
-    $h->execute;
-    while ( my $row = $h->fetchrow_arrayref ) {
-        $self->{db_parameterid__}{$row->[0]} = $row->[1];
-    }
-    $h->finish;
-
-    $self->db_update_cache__();
-
-    return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# db_disconnect__
-#
-# Disconnect from the POPFile database
-#
-# ---------------------------------------------------------------------------------------------
-sub db_disconnect__
-{
-    my ( $self ) = @_;
-
-    $self->{db_get_buckets__}->finish;
-    $self->{db_get_wordid__}->finish;
-    $self->{db_get_word_count__}->finish;
-    $self->{db_put_word_count__}->finish;
-    $self->{db_get_bucket_unique_count__}->finish;
-    $self->{db_get_bucket_word_count__}->finish;
-    $self->{db_get_unique_word_count__}->finish;
-    $self->{db_get_full_total__}->finish;
-    $self->{db_get_bucket_parameter__}->finish;
-    $self->{db_set_bucket_parameter__}->finish;
-    $self->{db_get_bucket_parameter_default__}->finish;
-    $self->{db_get_buckets_with_magnets__}->finish;
-
-    if ( defined( $self->{db__} ) ) {
-        $self->{db__}->disconnect;
-        undef $self->{db__};
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# db_update_cache__
-#
-# Updates our local cache of user and bucket ids.
-#
-# ---------------------------------------------------------------------------------------------
-sub db_update_cache__
-{
-    my ( $self ) = @_;
-
-    $self->{db_userid__} = $self->db_get_user_id__( 'admin' );
-
-    delete $self->{db_bucketid__};
-    $self->{db_get_buckets__}->execute( $self->{db_userid__} );
-    while ( my $row = $self->{db_get_buckets__}->fetchrow_arrayref ) {
-        $self->{db_bucketid__}{$row->[0]}{id} = $row->[1];
-        $self->{db_bucketid__}{$row->[0]}{pseudo} = $row->[2];
-    }
-
-    for my $bucket (keys %{$self->{db_bucketid__}}) {
-        $self->{db_get_bucket_word_count__}->execute( $self->{db_bucketid__}{$bucket}{id} );
-        my $row = $self->{db_get_bucket_word_count__}->fetchrow_arrayref;
-        $self->{db_bucketcount__}{$bucket} = $row->[0];
-    }
-
-    $self->update_constants__();
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# db_get_user_id__
-#
-# Returns the unique ID for a named user
-#
-# $name         Name of user to look up
-#
-# ---------------------------------------------------------------------------------------------
-sub db_get_user_id__
-{
-    my ( $self, $name ) = @_;
-
-    my $result = $self->{db__}->selectrow_arrayref( "select users.id from users where
-                                                         users.name = '$name';" );
-
-    return $result->[0];
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# db_get_word_count__
-#
-# Return the 'count' value for a word in a bucket.  If the word is not found in that
-# bucket then returns undef.
-#
-# $bucket           bucket word is in
-# $word             word to lookup
-#
-# ---------------------------------------------------------------------------------------------
-sub db_get_word_count__
-{
-    my ( $self, $bucket, $word ) = @_;
-
-    $self->{db_get_wordid__}->execute( $word );
-    my $result = $self->{db_get_wordid__}->fetchrow_arrayref;
-    if ( !defined( $result ) ) {
-        return undef;
-    }
-
-    my $wordid = $result->[0];
-
-    $self->{db_get_word_count__}->execute( $self->{db_bucketid__}{$bucket}{id}, $wordid );
-    $result = $self->{db_get_word_count__}->fetchrow_arrayref;
-    if ( defined( $result ) ) {
-         return $result->[0];
-    } else {
-         return undef;
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# db_put_word_count__
-#
-# Update 'count' value for a word in a bucket, if the update fails then returns 0
-# otherwise is returns 1
-#
-# $bucket           bucket word is in
-# $word             word to update
-# $count            new count value
-#
-# ---------------------------------------------------------------------------------------------
-sub db_put_word_count__
-{
-    my ( $self, $bucket, $word, $count ) = @_;
-
-    # We need to have two things before we can start, the id of the word in the words
-    # table (if there's none then we need to add the word), the bucket id in the buckets
-    # table (which must exist)
-
-    $word = $self->{db__}->quote($word);
-
-    my $result = $self->{db__}->selectrow_arrayref("select words.id from words
-                                                        where words.word = $word limit 1;");
-
-    if ( !defined( $result ) ) {
-        $self->{db__}->do( "insert into words ( word ) values ( $word );" );
-        $result = $self->{db__}->selectrow_arrayref("select words.id from words
-                                                         where words.word = $word limit 1;");
-    }
-
-    my $wordid = $result->[0];
-    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
-
-    $self->{db_put_word_count__}->execute( $bucketid, $wordid, $count );
-
-    return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# db_delete_word__
-#
-# Delete a word from the database from a specific bucket, returns 1 if successful and 0
-# otherwise
-#
-# $bucket           bucket word is in
-# $word             word to delete
-#
-# ---------------------------------------------------------------------------------------------
-sub db_delete_word__
-{
-    my ( $self, $bucket, $word ) = @_;
-
-    $word = $self->{db__}->quote($word);
-
-    return defined( $self->{db__}->do(
-        "delete from corpus where bucket = '$bucket' and word = $word ;" ) );
 }
 
 # GETTERS/SETTERS
