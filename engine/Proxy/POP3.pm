@@ -143,7 +143,7 @@ sub child__
         # pass through to that server and represents the account on the remote machine that we
         # will pull email from.  Doing this means we can act as a proxy for multiple mail clients
         # and mail accounts
-        my $user_command = 'USER (.+)(:(\d+))?' . $self->config_( 'separator' ) . '(.+)';
+        my $user_command = 'USER (.+?)(:(\d+))?' . $self->config_( 'separator' ) . '(.+)';
         if ( $command =~ /$user_command/i ) {
             if ( $1 ne '' )  {
                 print $pipe "LOGIN:$4$eol";
