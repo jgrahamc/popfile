@@ -48,6 +48,21 @@
 !endif
 
 #--------------------------------------------------------------------------
+# Symbols used to avoid confusion over where the line breaks occur.
+#
+# ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+# ${MB_NL} is used for MessageBox-style 'new line' sequences.
+#--------------------------------------------------------------------------
+
+!ifndef IO_NL
+  !define IO_NL     "\r\n"
+!endif
+
+!ifndef MB_NL
+  !define MB_NL     "$\r$\n"
+!endif
+
+#--------------------------------------------------------------------------
 # Universal POPFile Constant: the URL used to access the User Interface (UI)
 #--------------------------------------------------------------------------
 #
@@ -620,7 +635,7 @@
 
       StrCpy ${L_PARAM} ${L_LNE} 17
       StrCmp ${L_PARAM} "windows_trayicon " 0 copy_lne
-      FileWrite ${L_NEW_CFG} "windows_trayicon ${L_MODE}$\r$\n"
+      FileWrite ${L_NEW_CFG} "windows_trayicon ${L_MODE}${MB_NL}"
       Goto loop
 
     copy_lne:
@@ -2331,9 +2346,9 @@
     StrCpy $G_PLS_FIELD_1 "POPFile Message Capture Utility"
     DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
     MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
-        $\r$\n$\r$\n\
+        ${MB_NL}${MB_NL}\
         $(PFI_LANG_MBMANSHUT_2)\
-        $\r$\n$\r$\n\
+        ${MB_NL}${MB_NL}\
         $(PFI_LANG_MBMANSHUT_3)"
 
     ; Assume user has managed to shutdown the POPFile Message Capture Utility (runpopfile)
@@ -2349,9 +2364,9 @@
     StrCpy $G_PLS_FIELD_1 "POPFile Message Capture Utility"
     DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
     MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
-        $\r$\n$\r$\n\
+        ${MB_NL}${MB_NL}\
         $(PFI_LANG_MBMANSHUT_2)\
-        $\r$\n$\r$\n\
+        ${MB_NL}${MB_NL}\
         $(PFI_LANG_MBMANSHUT_3)"
 
     ; Assume user has managed to shutdown the POPFile Message Capture Utility (standard)
@@ -2367,9 +2382,9 @@
     StrCpy $G_PLS_FIELD_1 "POPFile Silent Shutdown Utility"
     DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
     MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
-        $\r$\n$\r$\n\
+        ${MB_NL}${MB_NL}\
         $(PFI_LANG_MBMANSHUT_2)\
-        $\r$\n$\r$\n\
+        ${MB_NL}${MB_NL}\
         $(PFI_LANG_MBMANSHUT_3)"
 
     ; Assume user has managed to shutdown the POPFile Message Capture Utility (standard)
@@ -2385,9 +2400,9 @@
     StrCpy $G_PLS_FIELD_1 "PFI Diagnostic Utility"
     DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
     MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
-        $\r$\n$\r$\n\
+        ${MB_NL}${MB_NL}\
         $(PFI_LANG_MBMANSHUT_2)\
-        $\r$\n$\r$\n\
+        ${MB_NL}${MB_NL}\
         $(PFI_LANG_MBMANSHUT_3)"
 
     ; Assume user has managed to shutdown the POPFile Message Capture Utility (standard)

@@ -73,7 +73,19 @@
 #
 #-------------------------------------------------------------------------------------------
 
-  !define C_PFI_VERSION   0.1.11
+  ;--------------------------------------------------------------------------
+  ; Symbols used to avoid confusion over where the line breaks occur.
+  ;
+  ; ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+  ; ${MB_NL} is used for MessageBox-style 'new line' sequences.
+  ;--------------------------------------------------------------------------
+
+  !define IO_NL     "\r\n"
+  !define MB_NL     "$\r$\n"
+
+  ;--------------------------------------------------------------------------
+
+  !define C_PFI_VERSION   0.1.12
 
   Name    "Run POPFile"
   Caption "Run POPFile (enhanced)"
@@ -113,7 +125,7 @@
   VIAddVersionKey "FileVersion"     "${C_PFI_VERSION}"
 
   VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"    "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Script"    "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
 #--------------------------------------------------------------------------
 # Include private library functions and macro definitions
@@ -181,7 +193,7 @@ found_popfile:
   StrCpy ${L_TEMP} ${L_PARAMS} 8
   StrCmp ${L_TEMP} "/config=" extract_config_path
   MessageBox MB_OK|MB_ICONSTOP "Error: Unknown option supplied !\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       (${L_PARAMS})"
   Goto exit
 
@@ -211,15 +223,15 @@ check_config:
   Pop ${L_PFI_USER}
   IfFileExists "${L_PFI_USER}\popfile.cfg" config_found
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to find popfile.cfg !\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       '/config=${L_PARAMS}' is not valid\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       ('${L_PFI_USER}\popfile.cfg' does not exist)"
   Goto exit
 
 path_missing:
   MessageBox MB_OK|MB_ICONSTOP "Error: /config=${L_PARAMS} is not valid\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       (no 'User Data' path supplied)"
   Goto exit
 
@@ -253,9 +265,9 @@ check_for_spaces:
   StrCmp ${L_TEMP} "" config_is_valid
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "Current configuration does not support short file names\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       '/config=${L_PARAMS}' is not valid\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       ('${L_PFI_USER}' contains spaces)"
   Goto exit
 
@@ -276,9 +288,9 @@ set_temp_user_now:
 
 ignore_config:
   MessageBox MB_OKCANCEL|MB_ICONQUESTION "Warning: the /config option will be ignored\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       ('runpopfile.exe' not in same folder as 'popfile.exe')\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       Click 'Yes' to continue or 'Cancel' to quit" IDCANCEL exit
 
 use_reg_dirdata:
@@ -291,9 +303,9 @@ use_reg_dirdata:
   StrCpy ${L_EXEFILE} $EXEDIR
   IfFileExists "${L_EXEFILE}\popfile.exe" got_exe_path
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to start POPFile !\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       POPFile start program not found:\
-      $\r$\n\
+      ${MB_NL}\
       ${L_EXEFILE}\popfile.exe"
   Goto exit
 
@@ -389,46 +401,46 @@ run_debug_mode:
 bad_root_error:
   IfFileExists "${L_EXEFILE}\adduser.exe" can_add_root
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to start POPFile !\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       POPFile start file not found:\
-      $\r$\n\
+      ${MB_NL}\
       ${L_PFI_ROOT}\popfile.pl"
   Goto exit
 
 can_add_root:
   MessageBox MB_YESNO|MB_ICONQUESTION "Error: Unable to start POPFile !\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       POPFile start file not found:\
-      $\r$\n\
+      ${MB_NL}\
       ${L_PFI_ROOT}\popfile.pl\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       Click 'Yes' to reconfigure POPFile now" IDYES run_adduser
   Goto exit
 
 bad_user_error:
   IfFileExists "${L_EXEFILE}\adduser.exe" can_add_user
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to start POPFile !\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       POPFile 'User Data' not found:\
-      $\r$\n\
+      ${MB_NL}\
       ${L_PFI_USER}"
   Goto exit
 
 can_add_user:
   MessageBox MB_YESNO|MB_ICONQUESTION "Error: Unable to start POPFile !\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       POPFile 'User Data' not found:\
-      $\r$\n\
+      ${MB_NL}\
       ${L_PFI_USER}\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       Click 'Yes' to reconfigure POPFile now" IDYES run_adduser
   Goto exit
 
 no_adduser_error:
   MessageBox MB_OK|MB_ICONSTOP "Error: Unable to start the 'Add User' wizard !\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       POPFile 'Add User' wizard not found:\
-      $\r$\n\
+      ${MB_NL}\
       ${L_EXEFILE}\adduser.exe"
   Goto exit
 

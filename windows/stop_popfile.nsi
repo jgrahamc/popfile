@@ -84,12 +84,24 @@
 #  This version was tested using "NSIS 2 Release Candidate 2" released 5 January 2004
 #-------------------------------------------------------------------------------------------
 
+  ;--------------------------------------------------------------------------
+  ; Symbols used to avoid confusion over where the line breaks occur.
+  ;
+  ; ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+  ; ${MB_NL} is used for MessageBox-style 'new line' sequences.
+  ;--------------------------------------------------------------------------
+
+  !define IO_NL     "\r\n"
+  !define MB_NL     "$\r$\n"
+
+  ;--------------------------------------------------------------------------
+
   ; The default NSIS caption is "Name Setup" so we override it here
 
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define C_VERSION   "0.5.7"       ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.5.8"       ; see 'VIProductVersion' comment below for format details
 
   ; Specify EXE filename and icon for the 'installer'
 
@@ -129,7 +141,7 @@
   VIAddVersionKey "FileVersion"      "${C_VERSION}"
 
   VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
 #----------------------------------------------------------------------------------------
 
@@ -189,30 +201,30 @@ Section Shutdown
 usage:
   MessageBox MB_OK "POPFile Silent Shutdown Utility v${C_VERSION}            \
     Copyright (c) 2004  John Graham-Cumming\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     This command-line utility shuts POPFile down silently, without opening a browser window.\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     Usage:    STOP_PF  [ <REPORT> ]  <PORT> [ <PASSWORD> ]\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     where <PORT> is the port number used to access the POPFile User Interface (normally 8080).\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     The optional <PASSWORD> is the password (no spaces allowed) for the POPFile User Interface.\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     The optional <REPORT> is /SHOWERRORS (only error messages shown), /SHOWALL\
-    $\r$\n\
+    ${MB_NL}\
     (success or error messages always shown), or /SHOWNONE (no messages - this is the default).\
-    $\r$\n$\r$\n\
+    ${MB_NL}${MB_NL}\
     A success/fail error code is always returned which can be checked in a batch file:\
-    $\r$\n\
-    $\r$\n          @ECHO OFF\
-    $\r$\n          START /WAIT STOP_PF 8080 Let_Me_In\
-    $\r$\n          IF ERRORLEVEL 1 GOTO FAILED\
-    $\r$\n          ECHO Shutdown succeeded\
-    $\r$\n          GOTO DONE\
-    $\r$\n          :FAILED\
-    $\r$\n          ECHO **** Shutdown failed ****\
-    $\r$\n          :DONE\
-    $\r$\n$\r$\n\
+    ${MB_NL}\
+    ${MB_NL}          @ECHO OFF\
+    ${MB_NL}          START /WAIT STOP_PF 8080 Let_Me_In\
+    ${MB_NL}          IF ERRORLEVEL 1 GOTO FAILED\
+    ${MB_NL}          ECHO Shutdown succeeded\
+    ${MB_NL}          GOTO DONE\
+    ${MB_NL}          :FAILED\
+    ${MB_NL}          ECHO **** Shutdown failed ****\
+    ${MB_NL}          :DONE\
+    ${MB_NL}${MB_NL}\
     Distributed under the terms of the GNU General Public License (GPL)."
   Goto error_exit
 
@@ -265,7 +277,7 @@ port_checks:
   StrCmp ${L_REPORT} "none" error_exit
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "Silent shutdown with password using port '${L_GUI}' failed\
-      $\r$\n\
+      ${MB_NL}\
       (error: ${L_RESULT})"
   Goto error_exit
 
@@ -281,7 +293,7 @@ try_password_again:
   StrCmp ${L_REPORT} "none" error_exit
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "Silent shutdown with password using port '${L_GUI}' failed\
-      $\r$\n\
+      ${MB_NL}\
       (error: wrong UI password supplied ?)"
   Goto error_exit
 
@@ -290,7 +302,7 @@ password_ok:                             ; Return error code 0 (success)
   StrCmp ${L_REPORT} "errors" exit
   MessageBox MB_OK|MB_ICONINFORMATION \
       "Silent shutdown with password OK\
-      $\r$\n\
+      ${MB_NL}\
       (port '${L_GUI}' used)"
   Goto exit
 
@@ -306,7 +318,7 @@ no_password_supplied:
   StrCmp ${L_REPORT} "none" error_exit
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "Silent shutdown using port '${L_GUI}' failed\
-      $\r$\n\
+      ${MB_NL}\
       (error: ${L_RESULT})"
   Goto error_exit
 
@@ -322,7 +334,7 @@ try_again:
   StrCmp ${L_REPORT} "none" error_exit
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "Silent shutdown using port '${L_GUI}' failed\
-      $\r$\n\
+      ${MB_NL}\
       (error: UI may be password protected ?)"
   Goto error_exit
 
@@ -343,7 +355,7 @@ port_error:
   Goto error_exit
 
 option_error:
-  MessageBox MB_OK|MB_ICONEXCLAMATION "Unknown option supplied$\r$\n(${L_RESULT})"
+  MessageBox MB_OK|MB_ICONEXCLAMATION "Unknown option supplied${MB_NL}(${L_RESULT})"
 
 error_exit:
   Abort                                  ; Return error code 1 (failure)
@@ -353,7 +365,7 @@ shutdown_ok:                             ; Return error code 0 (success)
   StrCmp ${L_REPORT} "errors" exit
   MessageBox MB_OK|MB_ICONINFORMATION \
       "Silent shutdown OK\
-      $\r$\n\
+      ${MB_NL}\
       (port '${L_GUI}' used)"
 
 exit:

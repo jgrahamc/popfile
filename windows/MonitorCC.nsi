@@ -77,13 +77,25 @@
 #--------------------------------------------------------------------------
 
   ;--------------------------------------------------------------------------
+  ; Symbols used to avoid confusion over where the line breaks occur.
+  ;
+  ; ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+  ; ${MB_NL} is used for MessageBox-style 'new line' sequences.
+  ;
+  ; (these two constants do not follow the 'C_' naming convention described below)
+  ;--------------------------------------------------------------------------
+
+  !define IO_NL   "\r\n"
+  !define MB_NL   "$\r$\n"
+
+  ;--------------------------------------------------------------------------
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.15"
+  !define C_PFI_VERSION  "0.1.16"
 
   ; Mention the version number in the window title
 
@@ -120,7 +132,7 @@
   VIAddVersionKey "Build"            "Multi-Language"
 
   VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages
@@ -363,7 +375,7 @@ got_param:
 no_quotes:
   IfFileExists "$G_INIFILE_PATH" exit
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOFILE)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       ($G_INIFILE_PATH)"
   Abort
 

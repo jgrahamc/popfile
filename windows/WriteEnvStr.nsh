@@ -26,6 +26,21 @@
 
   !include WinMessages.nsh
 
+  ;--------------------------------------------------------------------------
+  ; Symbols used to avoid confusion over where the line breaks occur.
+  ;
+  ; ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+  ; ${MB_NL} is used for MessageBox-style 'new line' sequences.
+  ;--------------------------------------------------------------------------
+
+!ifndef IO_NL
+  !define IO_NL     "\r\n"
+!endif
+
+!ifndef MB_NL
+  !define MB_NL     "$\r$\n"
+!endif
+
 !ifndef ADDUSER & NO_KAKASI
     #--------------------------------------------------------------------------
     # Installer Function: WriteEnv
@@ -112,18 +127,18 @@
       SetRebootFlag true                    ; Value does not exist, so we need to reboot
 
     copy_line:
-      FileWrite ${DESTN} "${LINE}$\r$\n"
+      FileWrite ${DESTN} "${LINE}${MB_NL}"
       Goto loop
 
     different_value:
-      FileWrite ${DESTN} "REM ${LINE}$\r$\n"    ; 'Comment out' the incorrect value
-      FileWrite ${DESTN} "${ENV_SETNAME}${ENV_VALUE}$\r$\n"
+      FileWrite ${DESTN} "REM ${LINE}${MB_NL}"    ; 'Comment out' the incorrect value
+      FileWrite ${DESTN} "${ENV_SETNAME}${ENV_VALUE}${MB_NL}"
       SetRebootFlag true
       Goto loop
 
     eof_found:
       StrCmp ${ENV_FOUND} 1 autoexec_done
-      FileWrite ${DESTN} "${ENV_SETNAME}${ENV_VALUE}$\r$\n"   ; Append line for the new variable
+      FileWrite ${DESTN} "${ENV_SETNAME}${ENV_VALUE}${MB_NL}"   ; Append line for the new variable
       SetRebootFlag true
 
     autoexec_done:
@@ -258,18 +273,18 @@
       SetRebootFlag true                    ; Value does not exist, so we need to reboot
 
     copy_line:
-      FileWrite ${DESTN} "${LINE}$\r$\n"
+      FileWrite ${DESTN} "${LINE}${MB_NL}"
       Goto loop
 
     different_value:
-      FileWrite ${DESTN} "REM ${LINE}$\r$\n"    ; 'Comment out' the incorrect value
-      FileWrite ${DESTN} "${ENV_SETNAME}${ENV_VALUE}$\r$\n"
+      FileWrite ${DESTN} "REM ${LINE}${MB_NL}"    ; 'Comment out' the incorrect value
+      FileWrite ${DESTN} "${ENV_SETNAME}${ENV_VALUE}${MB_NL}"
       SetRebootFlag true
       Goto loop
 
     eof_found:
       StrCmp ${ENV_FOUND} 1 autoexec_done
-      FileWrite ${DESTN} "${ENV_SETNAME}${ENV_VALUE}$\r$\n"   ; Append line for the new variable
+      FileWrite ${DESTN} "${ENV_SETNAME}${ENV_VALUE}${MB_NL}"   ; Append line for the new variable
       SetRebootFlag true
 
     autoexec_done:
@@ -370,7 +385,7 @@
       ; and we also ignore the following line if it is just a CRLF sequence
 
       FileRead $1 $3
-      StrCmp $3 "$\r$\n" DeleteEnvStr_dosLoop
+      StrCmp $3 "${MB_NL}" DeleteEnvStr_dosLoop
 
     no_match:
       StrCmp $5 "" DeleteEnvStr_dosLoopEnd
@@ -452,7 +467,7 @@
       ; and we also ignore the following line if it is just a CRLF sequence
 
       FileRead $1 $3
-      StrCmp $3 "$\r$\n" DeleteEnvStr_dosLoop
+      StrCmp $3 "${MB_NL}" DeleteEnvStr_dosLoop
 
     no_match:
       StrCmp $5 "" DeleteEnvStr_dosLoopEnd

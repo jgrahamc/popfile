@@ -160,23 +160,35 @@
   SetCompressor lzma
 
   ;--------------------------------------------------------------------------
+  ; Symbols used to avoid confusion over where the line breaks occur.
+  ;
+  ; ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+  ; ${MB_NL} is used for MessageBox-style 'new line' sequences.
+  ;
+  ; (these two constants do not follow the 'C_' naming convention described below)
+  ;--------------------------------------------------------------------------
+
+  !define IO_NL   "\r\n"
+  !define MB_NL   "$\r$\n"
+
+  ;--------------------------------------------------------------------------
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
   !ifndef C_POPFILE_MAJOR_VERSION
-    !error "$\r$\n$\r$\nFatal error: 'POPFile Major Version' parameter not supplied$\r$\n"
+    !error "${MB_NL}${MB_NL}Fatal error: 'POPFile Major Version' parameter not supplied${MB_NL}"
   !endif
 
   !ifndef C_POPFILE_MINOR_VERSION
-    !error "$\r$\n$\r$\nFatal error: 'POPFile Minor Version' parameter not supplied$\r$\n"
+    !error "${MB_NL}${MB_NL}Fatal error: 'POPFile Minor Version' parameter not supplied${MB_NL}"
   !endif
 
   !ifndef C_POPFILE_REVISION
-    !error "$\r$\n$\r$\nFatal error: 'POPFile Revision' parameter not supplied$\r$\n"
+    !error "${MB_NL}${MB_NL}Fatal error: 'POPFile Revision' parameter not supplied${MB_NL}"
   !endif
 
   !ifndef C_POPFILE_RC
-    !error "$\r$\n$\r$\nFatal error: 'POPFile RC' parameter not supplied$\r$\n"
+    !error "${MB_NL}${MB_NL}Fatal error: 'POPFile RC' parameter not supplied${MB_NL}"
   !endif
 
   !define C_PFI_PRODUCT  "POPFile"
@@ -309,7 +321,7 @@
   !endif
 
   VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
 #--------------------------------------------------------------------------
 # Include private library functions and macro definitions
@@ -614,7 +626,7 @@ loop:
   Push ${L_TEMP}
   Call TrimNewlines
   Pop ${L_TEMP}
-  FileWrite ${L_OUTPUT_FILE_HANDLE} "${L_TEMP}$\r$\n"
+  FileWrite ${L_OUTPUT_FILE_HANDLE} "${L_TEMP}${MB_NL}"
   Goto loop
 
 close_files:
@@ -663,7 +675,7 @@ mutex_ok:
 
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "$(PFI_LANG_MBRELNOTES_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBRELNOTES_2)" IDNO notes_ignored
 
   StrCmp $G_NOTEPAD "" use_file_association
@@ -1753,7 +1765,7 @@ not_good:
        $(PFI_LANG_PERLREQ_IO_TEXT_4)"
 
   !insertmacro PFI_IO_TEXT "ioG.ini" "2" \
-      "$(PFI_LANG_PERLREQ_IO_TEXT_5) ${L_VERSION}\r\n\r\n\
+      "$(PFI_LANG_PERLREQ_IO_TEXT_5) ${L_VERSION}${IO_NL}${IO_NL}\
        $(PFI_LANG_PERLREQ_IO_TEXT_6)\
        $(PFI_LANG_PERLREQ_IO_TEXT_7)"
 
@@ -1820,7 +1832,7 @@ not_admin:
   !insertmacro MUI_INSTALLOPTIONS_READ "${L_WELCOME_TEXT}" "ioSpecial.ini" "Field 3" "Text"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 3" "Text" \
       "${L_WELCOME_TEXT}\
-      \r\n\r\n\
+      ${IO_NL}${IO_NL}\
       $(PFI_LANG_WELCOME_ADMIN_TEXT)"
 
 exit:
@@ -2012,9 +2024,9 @@ manual_shutdown:
   StrCpy $G_PLS_FIELD_1 "POPFile"
   DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBMANSHUT_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBMANSHUT_3)"
   Goto check_pfi_utils
 
@@ -2266,7 +2278,7 @@ Function CheckExistingProgDir
   StrCmp ${L_RESULT} "" no_spaces
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "Current configuration does not support short file names!\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       Please select a folder location which does not contain spaces"
 
   ; Return to the POPFile PROGRAM DIRECTORY selection page
@@ -2291,9 +2303,9 @@ check_locn:
 
 warning:
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $INSTDIR\
-      $\r$\n$\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES check_options
 
   ; Return to the POPFile PROGRAM DIRECTORY selection page
@@ -2319,7 +2331,7 @@ check_options:
 ;;ask_about_imap:
 ;;  StrCpy $G_PLS_FIELD_1 "POPFile IMAP"
 ;;  MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
-;;      $\r$\n$\r$\n\
+;;      ${MB_NL}${MB_NL}\
 ;;      $(MBCOMPONENT_PROB_2)" IDNO check_nntp
 ;;  !insertmacro SelectSection ${SecIMAP}
 ;;
@@ -2333,7 +2345,7 @@ look_for_nntp:
   IfFileExists "$G_ROOTDIR\Proxy\NNTP.pm" 0 check_smtp
   StrCpy $G_PLS_FIELD_1 "POPFile NNTP proxy"
   MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(MBCOMPONENT_PROB_2)" IDNO check_smtp
   !insertmacro SelectSection ${SecNNTP}
 
@@ -2344,7 +2356,7 @@ look_for_smtp:
   IfFileExists "$G_ROOTDIR\Proxy\SMTP.pm" 0 check_socks
   StrCpy $G_PLS_FIELD_1 "POPFile SMTP proxy"
   MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(MBCOMPONENT_PROB_2)" IDNO check_socks
   !insertmacro SelectSection ${SecSMTP}
 
@@ -2355,7 +2367,7 @@ look_for_socks:
   IfFileExists "$G_ROOTDIR\lib\IO\Socket\Socks.pm" 0 check_xmlrpc
   StrCpy $G_PLS_FIELD_1 "SOCKS support"
   MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(MBCOMPONENT_PROB_2)" IDNO check_xmlrpc
   !insertmacro SelectSection ${SecSOCKS}
 
@@ -2366,7 +2378,7 @@ look_for_xmlrpc:
   IfFileExists "$G_ROOTDIR\UI\XMLRPC.pm" 0 continue
   StrCpy $G_PLS_FIELD_1 "POPFile XMLRPC"
   MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(MBCOMPONENT_PROB_2)" IDNO continue
   !insertmacro SelectSection ${SecXMLRPC}
 
@@ -2401,9 +2413,9 @@ Function CheckHostsFile
 
   IfFileExists "$WINDIR\HOSTS" look_for_localhost
   FileOpen ${L_CFG} "$WINDIR\HOSTS" w
-  FileWrite ${L_CFG} "# Created by the installer for ${C_PFI_PRODUCT} ${C_PFI_VERSION}$\r$\n"
-  FileWrite ${L_CFG} "$\r$\n"
-  FileWrite ${L_CFG} "127.0.0.1       localhost$\r$\n"
+  FileWrite ${L_CFG} "# Created by the installer for ${C_PFI_PRODUCT} ${C_PFI_VERSION}${MB_NL}"
+  FileWrite ${L_CFG} "${MB_NL}"
+  FileWrite ${L_CFG} "127.0.0.1       localhost${MB_NL}"
   FileClose ${L_CFG}
   Goto exit
 
@@ -2435,10 +2447,10 @@ done:
   StrCmp ${L_LOCALHOST} "1" exit
   FileOpen ${L_CFG} "$WINDIR\HOSTS" a
   FileSeek ${L_CFG} 0 END
-  FileWrite ${L_CFG} "$\r$\n"
-  FileWrite ${L_CFG} "# Inserted by the installer for ${C_PFI_PRODUCT} ${C_PFI_VERSION}$\r$\n"
-  FileWrite ${L_CFG} "$\r$\n"
-  FileWrite ${L_CFG} "127.0.0.1       localhost$\r$\n"
+  FileWrite ${L_CFG} "${MB_NL}"
+  FileWrite ${L_CFG} "# Inserted by the installer for ${C_PFI_PRODUCT} ${C_PFI_VERSION}${MB_NL}"
+  FileWrite ${L_CFG} "${MB_NL}"
+  FileWrite ${L_CFG} "127.0.0.1       localhost${MB_NL}"
   FileClose ${L_CFG}
 
 exit:
@@ -2608,7 +2620,7 @@ Section "un.Uninstall Begin" UnSecBegin
 
   MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
       "$(PFI_LANG_UN_MBDIFFUSER_1) ('${L_TEMP}') !\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES section_exit
   Abort "$(PFI_LANG_UN_ABORT_1)"
 
@@ -2637,7 +2649,7 @@ Section "un.Local User Data" UnSecUserData
   IfFileExists "$G_ROOTDIR\popfile.exe" look_for_uninstalluser
     MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
         "$(PFI_LANG_UN_MBNOTFOUND_1) '$G_ROOTDIR'.\
-        $\r$\n$\r$\n\
+        ${MB_NL}${MB_NL}\
         $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES look_for_uninstalluser
     Abort "$(PFI_LANG_UN_ABORT_1)"
 
@@ -2768,9 +2780,9 @@ manual_shutdown:
   StrCpy $G_PLS_FIELD_1 "POPFile"
   DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBMANSHUT_2)\
-      $\r$\n$\r$\n\
+      ${MB_NL}${MB_NL}\
       $(PFI_LANG_MBMANSHUT_3)"
 
   ; Assume user has managed to shutdown POPFile
