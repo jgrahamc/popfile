@@ -332,6 +332,7 @@
         !insertmacro PFI_LANG_LOAD "Bulgarian"    ; 'New style' license msgs missing (27-Jun-03)
         !insertmacro PFI_LANG_LOAD "SimpChinese"
         !insertmacro PFI_LANG_LOAD "TradChinese"
+        !insertmacro PFI_LANG_LOAD "Czech"
         !insertmacro PFI_LANG_LOAD "Danish"       ; 'New style' license msgs missing (27-Jun-03)
         !insertmacro PFI_LANG_LOAD "Dutch"
         !insertmacro PFI_LANG_LOAD "Finnish"      ; 'New style' license msgs missing (27-Jun-03)
@@ -656,6 +657,9 @@ update_config:
   DetailPrint "$(PFI_LANG_INST_PROG_SHORT)"
   SetDetailsPrint listonly
 
+  ; 'CreateShortCut' uses '$OUTDIR' as the working directory for the shortcut
+  ; ('SetOutPath' is one way to change the value of $OUTDIR)
+
   SetOutPath $SMPROGRAMS\POPFile
   SetOutPath $INSTDIR
   CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile.lnk" \
@@ -777,6 +781,7 @@ Section "Languages" SecLangs
         !insertmacro UI_LANG_CONFIG "BULGARIAN" "Bulgarian"
         !insertmacro UI_LANG_CONFIG "SIMPCHINESE" "Chinese-Simplified"
         !insertmacro UI_LANG_CONFIG "TRADCHINESE" "Chinese-Traditional"
+        !insertmacro UI_LANG_CONFIG "CZECH" "Czech"
         !insertmacro UI_LANG_CONFIG "DANISH" "Dansk"
         !insertmacro UI_LANG_CONFIG "DUTCH" "Nederlands"
         !insertmacro UI_LANG_CONFIG "FINNISH" "Suomi"
