@@ -312,6 +312,7 @@ print "\n    Initializing... ";
 foreach my $type (keys %components) {
 	foreach my $name (keys %{$components{$type}}) {
 		print "{$name} ";
+		flush STDOUT;
 		if ( $components{$type}{$name}->initialize() == 0 ) {
 			die "Failed to start while initializing the $name module";
 		}
@@ -335,6 +336,7 @@ print "\n    Starting...     ";
 foreach my $type (keys %components) {
 	foreach my $name (keys %{$components{$type}}) {
 		print "{$name} ";
+		flush STDOUT;
 		if ( $components{$type}{$name}->start() == 0 ) {
 			die "Failed to start while starting the $name module";
 		}

@@ -422,6 +422,12 @@ sub update_tag
             $self->{htmlfontcolor} = map_color($self, $value);
 			print "Set html font color to $self->{htmlfontcolor}\n" if ( $self->{debug} );
         }
+
+        if ( ( $attribute =~ /^text$/i ) && ( $tag =~ /^body$/i ) ) {
+            update_word( $self, $value, $encoded, $quote, $end_quote, '' );
+            $self->{htmlfontcolor} = map_color($self, $value);
+			print "Set html font color to $self->{htmlfontcolor}\n" if ( $self->{debug} );
+        }
                 
         # Tags with background colors
 

@@ -834,7 +834,9 @@ sub classify_and_modify
     if ( $classification ne 'unclassified' ) {
         if ( $self->{configuration}->{configuration}{subject} ) {
             # Don't add the classification unless it is not present
-            if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $self->{parameters}{$classification}{subject} == 1 ) )  {
+            if ( !( $msg_subject =~ /\[$classification\]/ ) && 
+                 ( $self->{parameters}{$classification}{subject} == 1 ) &&
+                 ( $self->{parameters}{$classification}{quarantine} == 0 ) )  {
                 $msg_subject = " [$classification]$msg_subject";
             }
         }
@@ -848,7 +850,8 @@ sub classify_and_modify
     }
 
     # Add the XTC header
-    $msg_head_after .= "X-Text-Classification: $classification$eol" if ( $self->{configuration}->{configuration}{xtc} );
+    $msg_head_after .= "X-Text-Classification: $classification$eol" if ( ( $self->{configuration}->{configuration}{xtc}          ) &&
+      																     ( $self->{parameters}{$classification}{quarantine} == 0 ) );
 
     # Add the XPL header
     $temp_file =~ s/messages\/(.*)/$1/;
@@ -859,7 +862,7 @@ sub classify_and_modify
     $xpl .= $self->{configuration}->{configuration}{localpop}?"127.0.0.1":$self->{hostname};
     $xpl .= ":$self->{configuration}->{configuration}{ui_port}/jump_to_message?view=$temp_file>$eol";
 
-    if ( $self->{configuration}->{configuration}{xpl} ) {
+    if ( $self->{configuration}->{configuration}{xpl} && ( $self->{parameters}{$classification}{quarantine} == 0 ) ) {
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
     }
 
@@ -877,6 +880,14 @@ sub classify_and_modify
                 print $client "From: $self->{parser}->{from}$eol";
                 print $client "To: $self->{parser}->{to}$eol";
                 print $client "Date: $self->{parser}->{date}$eol";
+				if ( $self->{configuration}->{configuration}{subject} ) {
+					# Don't add the classification unless it is not present
+					if ( !( $msg_subject =~ /\[$classification\]/ ) && 
+						 ( $self->{parameters}{$classification}{subject} == 1 ) &&
+						 ( $self->{parameters}{$classification}{quarantine} == 0 ) )  {
+						$msg_subject = " [$classification]$msg_subject";
+					}
+				}
                 print $client "Subject:$msg_subject$eol";
                 print $client "X-Text-Classification: $classification$eol" if ( $self->{configuration}->{configuration}{xtc} );
                 print $client 'X-POPFile-Link: ' . $xpl if ( $self->{configuration}->{configuration}{xpl} );
