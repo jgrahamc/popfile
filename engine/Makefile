@@ -5,7 +5,10 @@
 #
 # Copyright (c) 2003 John Graham-Cumming
 
-.PHONY: test package windows
+.PHONY: test package windows core manual skins
+
+error:
+	@echo Must specify one of test, package or windows
 
 # test runs the POPFile unit test suite
 
@@ -17,10 +20,19 @@ windows: ; @$(MAKE) -C ../windows
 
 # build a ZIPped up package of POPFile
 
-popfile.zip: popfile.pl pix.gif black.gif insert.pl Classifier/*.pm POPFile/*.pm Proxy/*.pm manual/*.gif manual/*/*.html languages/*.msg skins/*.css skins/*.gif
-	rm -f $@
-	wzzip -r -P $@ -a $^
+BUILD_ZIP=wzzip -r -P popfile.zip -a $^
+popfile.zip: core manual skins
 
+core: popfile.pl pix.gif black.gif insert.pl Classifier/*.pm POPFile/Configuration.pm POPFile/Logger.pm Proxy/POP3.pm
+	rm -f popfile.zip
+	$(BUILD_ZIP)
+
+manual: manual/*.gif manual/en/*.html languages/*.msg
+	$(BUILD_ZIP)
+
+skins: skins/*.css skins/*.gif  skins/*/*.gif
+	$(BUILD_ZIP)
+	
 # package builds a zip file containing the POPFile package and the windows
 # installer
 
