@@ -138,3 +138,8 @@ test_assert_equal( $1, 'bugtracker@relativity.com' );
 $cl->parse_stream( 'tests/TestMailParse019.msg' );
 $cl->{to} =~ /(\Qbugtracker\E@\Qrelativity.com\E)/;
 test_assert_equal( $1, 'bugtracker@relativity.com' );
+
+# Check that multi-line To: and CC: headers get handled properly
+$cl->parse_stream( 'tests/TestMailParse021.msg' );
+test_assert_equal( $cl->{to},      'dsmith@ctaz.com, dsmith@dol.net, dsmith@dirtur.com, dsmith@dialpoint.net, dsmith@crosscountybank.com, <dsmith@cybersurf.net>, <dsmith@dotnet.com>, <dsmith@db.com>, <dsmith@cs.com>, <dsmith@crossville.com>, <dsmith@dreamscape.com>, <dsmith@cvnc.net>, <dsmith@dmrtc.net>, <dsmith@datarecall.net>, <dsmith@dasia.net>' );
+test_assert_equal( $cl->{cc},      'dsmith@dmi.net, dsmith@datamine.net, dsmith@crusader.com, dsmith@datasync.com, <dsmith@doorpi.net>, <dsmith@dnet.net>, <dsmith@cybcon.com>, <dsmith@csonline.net>, <dsmith@directlink.net>, <dsmith@cvip.net>, <dsmith@dragonbbs.com>, <dsmith@crosslinkinc.com>, <dsmith@dccnet.com>, <dsmith@dakotacom.net>' );
