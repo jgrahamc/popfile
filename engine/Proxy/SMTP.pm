@@ -138,7 +138,12 @@ sub child__
             # we echo each line of the message until we hit the . at the end
             if ( $self->echo_response_( $mail, $client, $command ) ) {
                 $count += 1;
-                $self->{classifier__}->classify_and_modify( $client, $mail, $download_count, $count, 0, '' );
+
+		my $class = $self->{classifier__}->classify_and_modify( $client, $mail, $download_count, $count, 0, '' );
+
+		# Tell the parent that we just handled a mail
+		print $pipe "$class$eol";
+
 		my $response = <$mail>;
                 $self->tee_( $client, $response );
                 $self->flush_extra_( $mail, $client, 0 );
