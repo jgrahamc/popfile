@@ -1497,17 +1497,19 @@ sub clear_scores
 
 # ---------------------------------------------------------------------------------------------
 #
-# toggle_score - Enables and disables the saving of word scores
+# wordscores - Enables and disables the saving of word scores
 #
 # $value        1 for enabled, 0 for disabled
 #
 # ---------------------------------------------------------------------------------------------
 
-sub toggle_score
+sub wordscores
 {
     my ( $self, $value ) = @_;
     
-    $self->{wordscores__} = $value;
+    $self->{wordscores__} = $value if (defined $value);
+    
+    return $self->{wordscores__};
 }
 
 
