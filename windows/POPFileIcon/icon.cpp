@@ -25,6 +25,7 @@ char * gClassName = "POPFile.NOTIFYICONDATA.hWnd";
 
 bool gShutdown = false;
 bool gUI       = false;
+bool gHideIcon = false;
 
 // Used to store information about the POPFile icon displayed
 // in the system tray
@@ -77,7 +78,12 @@ LRESULT CALLBACK wndProc__( HWND hwnd, UINT message, WPARAM wParam, LPARAM lPara
 								hwnd,
 								NULL ) ) {
 						case IDM_EXIT: 
-							gShutdown = true;
+							if ( MessageBox( hwnd, "Are you sure you want to shutdown POPFile?", "Shutdown POPFile", MB_ICONQUESTION | MB_YESNO ) == IDYES ) {
+   							    gShutdown = true;
+							}
+							break;
+						case IDM_HIDEICON: 
+							gHideIcon = true;
 							break;
 						case IDM_UI:
 							gUI = true;
@@ -157,9 +163,8 @@ void ShowPOPFileIcon__()
 void HidePOPFileIcon__()
 {
 	Shell_NotifyIcon( NIM_DELETE, &gNid );
-
+    DestroyIcon( gNid.hIcon );
 	DestroyWindow( gHwnd );
-
 	UnregisterClass( gClassName, ghInst );
 }
 
@@ -182,6 +187,26 @@ int APIENTRY GetMenuMessage()
 		gUI = false;
 		return 2;
 	}
+
+	if ( gHideIcon ) {
+		gHideIcon = false;
+		return 3;
+	}
+
+	return 0;
+}
+
+//---------------------------------------------------------------------------
+//
+// HideIcon
+//
+// Called to make the icon disappear
+//
+//---------------------------------------------------------------------------
+
+int APIENTRY HideIcon()
+{
+	HidePOPFileIcon__();
 
 	return 0;
 }
