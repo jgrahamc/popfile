@@ -1332,6 +1332,9 @@ Section "Skins" SecSkins
   SetOutPath "$G_ROOTDIR\skins\green"
   File "..\engine\skins\green\*.*"
 
+  SetOutPath "$G_ROOTDIR\skins\klingon"
+  File "..\engine\skins\klingon\*.*"
+
   SetOutPath "$G_ROOTDIR\skins\lavish"
   File "..\engine\skins\lavish\*.*"
 
@@ -2967,6 +2970,7 @@ Section "un.Skins" UnSecSkins
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\default"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\glassblue"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\green"
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\klingon"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\lavish"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\lrclaptop"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\oceanblue"
