@@ -214,7 +214,7 @@ sub upgrade_parameter__
 		     'mcount',                   'GLOBAL_mcount',
 		     'msgdir',                   'GLOBAL_msgdir',
 		     'subject',                  'GLOBAL_subject',
-		     'imeout',                   'GLOBAL_timeout',
+		     'timeout',                  'GLOBAL_timeout',
 		     'xpl',                      'GLOBAL_xpl',
 		     'xtc',                      'GLOBAL_xtc',
 		     'download_count',           'GLOBAL_download_count',
@@ -247,7 +247,8 @@ sub upgrade_parameter__
 		     'send_stats',               'html_send_stats',
 		     'skin',                     'html_skin',
 		     'test_language',            'html_test_language',
-		     'update_check',             'html_update_check'
+		     'update_check',             'html_update_check',
+                     'ui_port',                  'html_port',
     );
 
     if ( defined( $upgrades{$parameter} ) ) {
