@@ -97,9 +97,16 @@ sub new
     # 0: basic information, quiet
     # 1: + commands + OK/BAD/NO responses + untagged responses
     # 2: + each server response
-    $self->{debug__} = 0;
+    $self->{debug__} = 1;
 
     # A hash to hold per-folder data (watched and output flag + socket connection)
+    # This data structure is extremely important to the work done by this
+    # module, so don't mess with it!
+    # The hash contains one key per service folder.
+    # This key will return another hash. This time the keys are fixed and
+    # can be {output} for an output folder
+    # {watched} for a watched folder.
+    # {imap} will hold a valid socket object for the connection of this folder.
     $self->{folders__} = ();
 
     # A flag that tells us that the folder list has changed
@@ -107,6 +114,8 @@ sub new
 
     # A hash containing the hash values of messages that we encountered
     # during a single run through service().
+    # If you provide a hash as a key and if that key exists, the value
+    # will be the folder where the original message was placed (or left) in.
     $self->{hash_values__} = ();
 
     return $self;
@@ -506,20 +515,24 @@ sub scan_folder
 
         my $hash = $self->get_hash( $folder, $msg );
 
-        $self->uid_next__( $folder, $self->uid_next__( $folder ) + 1 );
+        $self->uid_next__( $folder, $msg + 1 );
 
         # Watch our for those pesky duplicate and triplicate spam messages:
 
         if ( exists $self->{hash_values__}{$hash} ) {
 
-            $self->log_( "Found duplicate hash value: $hash. Ignoring duplicate." );
+            my $destination = $self->{hash_values__}{$hash};
+            if ( $destination ne $folder ) {
+                $self->log_( "Found duplicate hash value: $hash. Moving the message to $destination." );
+                $self->move_message( $folder, $msg, $destination );
+                $moved_message++;
+            }
+            else {
+                $self->log_( "Found duplicate hash value: $hash. Ignoring duplicate." );
+            }
 
             next;
         }
-        else {
-            $self->{hash_values__}{$hash} = 1;
-        }
-
 
         # Find out what we are dealing with here:
 
@@ -528,8 +541,15 @@ sub scan_folder
 
                 my $result = $self->classify_message( $msg, $hash, $folder );
 
-                $moved_message = $result if ( defined $result );
-
+                if ( defined $result ) {
+                    if ( $result ne '' ) {
+                        $moved_message++;
+                        $self->{hash_values__}{$hash} = $result;
+                    }
+                    else {
+                        $self->{hash_values__}{$hash} = $folder;
+                    }
+                }
                 next;
             }
         }
@@ -576,8 +596,8 @@ sub scan_folder
 # Return value:
 #
 #   undef on error
-#   1 if the message was moved,
-#   0 if the message was not moved
+#   The name of the destination folder if the message was moved
+#   The emtpy string if the message was not moved
 #
 # ---------------------------------------------------------------------------------------------
 
@@ -585,7 +605,7 @@ sub classify_message
 {
     my ( $self, $msg, $hash, $folder ) = @_;
 
-    my $moved_a_msg = 0;
+    my $moved_a_msg = '';
 
     # Increment the global download count
     $self->global_config_( 'download_count', $self->global_config_( 'download_count' ) + 1 );
@@ -657,7 +677,7 @@ sub classify_message
             if ( defined $destination ) {
                 if ( $folder ne $destination ) {
                     $self->move_message( $folder, $msg, $destination );
-                    $moved_a_msg = 1;
+                    $moved_a_msg = $destination;
                 }
             }
             else {
@@ -666,11 +686,6 @@ sub classify_message
 
 
             # Housekeeping:
-
-            # Update the UIDNEXT value for this folder. Since $msg contains
-            # the uid of the message we just classified, we simply set that
-            # value to $msg+1
-            $self->uid_next__( $folder, $msg + 1 );
 
             # Remember hash of this message in history, etc:
             $self->was_classified__( $hash, $class, $history_file );
@@ -1533,7 +1548,7 @@ sub get_new_message_list
         }
     }
 
-    return @return_list;
+    return ( sort @return_list );
 
 }
 
@@ -1814,7 +1829,7 @@ sub get_hash
         $response =~ s/$eol\s+/ /sg;
         # But make sure that the trailing new line is still there:
         $response .= $eol;
-        
+
         if ( $mid eq '' && $response =~ /^(message-id:.*?)$eol/ism ) {
             $mid = $1;
         }
@@ -1837,7 +1852,7 @@ sub get_hash
         $self->log_( "date:     $date" );
         $self->log_( "subject:  $subject" );
         $self->log_( "received: $received" );
-        
+
         my $hash = md5_hex( "[$mid][$date][$subject][$received]" );
 
         $self->log_( "Hashed message. $subject." ) if $self->{debug__}; # level 1
@@ -2481,3 +2496,4 @@ sub validate_item
 
 
 1;
+
