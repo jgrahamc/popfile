@@ -129,6 +129,7 @@ sub initialize
     $self->config_( 'update_interval', 20 );
     $self->config_( 'byte_limit', 0 );
     $self->config_( 'debug_level', $self->{debug__} );
+    $self->config_( 'expunge', 0 );
 
     # Those next variables have getter/setter functions and should
     # not be used directly:
@@ -209,11 +210,16 @@ sub start
                                          'imap-debug-level.thtml',
                                          $self );
 
+    $self->register_configuration_item_( 'configuration',
+                                          'imap_8_expunge',
+                                          'imap-expunge.thtml',
+                                          $self );
+
     # Read the class files for all messages in history
     # and retrieve hashes and classifications
-    $self->read_cls_files();
+    $self->read_cls_files__();
 
-    $self->{imap__} = $self->connect();
+    $self->{imap__} = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
 
     if ( defined $self->{imap__} ) {
         if ( $self->login( $self->{imap__} ) ) {
@@ -279,7 +285,7 @@ sub service
 
         # Check whether we already have an open connection. If not, connect and login
         if ( $self->{imap__} eq '' ) {
-            $self->{imap__} = $self->connect();
+            $self->{imap__} = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
 
             if ( defined $self->{imap__} ) {
                 unless ( $self->login( $self->{imap__} ) ) {
@@ -294,15 +300,16 @@ sub service
         # they detect a lost connection, we eval the following code to be able
         # to catch the exception
         eval {
+            local $SIG{'PIPE'} = 'IGNORE';
             local $SIG{'__DIE__'};
             # Do the real job now that we have a connection
             if ( $self->{imap__} ne '' ) {
 
                 # First classfiy messages found in one of our watched folders
-                $self->check_for_new_messages( $self->{imap__} );
+                $self->check_for_new_messages__( $self->{imap__} );
 
                 # Now check for messages that might have to be reclassified.
-                $self->reclassify_on_move( $self->{imap__} );
+                $self->reclassify_on_move__( $self->{imap__} );
             }
             # Or complain
             else {
@@ -328,7 +335,7 @@ sub service
 
 # ---------------------------------------------------------------------------------------------
 #
-# check_for_new_messages
+# check_for_new_messages__
 #
 #   Checks whether there are any new messages in our watched folders.
 #   If such messages are found, they are classified and moved to the output
@@ -340,29 +347,31 @@ sub service
 #
 # ---------------------------------------------------------------------------------------------
 
-sub check_for_new_messages
+sub check_for_new_messages__
 {
     my ( $self, $imap ) = @_;
 
     FOLDER:
-    foreach my $folder ( $self->watched_folders() ) {
+    foreach my $folder ( $self->watched_folders__() ) {
 
         $self->log_( "Looking for new messages in folder $folder." );
 
         # First, check that our UIDs are valid
-        unless ( $self->folder_uid_status( $imap, $folder ) ) {
+        unless ( $self->folder_uid_status__( $imap, $folder ) ) {
             $self->log_( "Changed UIDVALIDITY, will not check for new messages in folder $folder." );
             next;
         }
 
         # Change to folder and search for new messages
-        my $old_next = $self->uid_next( $folder );
+        my $old_next = $self->uid_next__( $folder );
         $self->say( $imap, "SELECT \"$folder\"" );
         if ( $self->get_response( $imap ) != 1 ) {
             $self->log_( "Could not SELECT folder $folder." );
             next;
         }
         my @uids = $self->get_uids_ge( $imap, $old_next );
+
+        my $moved_a_msg = 0;
 
         # Now loop over each message
         MESSAGE:
@@ -374,7 +383,7 @@ sub check_for_new_messages
             my $hash = $self->get_hash( $imap, $msg );
 
             # don't touch messages that were classified before
-            unless ( $self->can_classify( $hash ) ) {
+            unless ( $self->can_classify__( $hash ) ) {
                 $self->log_( "Message $msg was classified before." );
                 $self->log_( "" );
                 next;
@@ -442,10 +451,11 @@ sub check_for_new_messages
 
                     # Move message:
 
-                    my $destination = $self->folder_for_bucket( $class );
+                    my $destination = $self->folder_for_bucket__( $class );
                     if ( defined $destination ) {
                         if ( $folder ne $destination ) {
                             $self->move_message( $imap, $msg, $destination );
+                            $moved_a_msg = 1;
                         }
                     }
                     else {
@@ -463,14 +473,18 @@ sub check_for_new_messages
                     # Update the UIDNEXT value for this folder. Since $msg contains
                     # the uid of the message we just classified, we simply set that
                     # value to $msg+1
-                    $self->uid_next( $folder, $msg + 1 );
+                    $self->uid_next__( $folder, $msg + 1 );
 
                     # Remember hash of this message in history, etc:
-                    $self->was_classified( $hash, $class, $history_file );
+                    $self->was_classified__( $hash, $class, $history_file );
 
                     next MESSAGE;
                 }
             }
+        }
+        if ( $self->config_( 'expunge' ) && $moved_a_msg ) {
+            $self->say( $imap, "CLOSE" );
+            $self->get_response( $imap );
         }
     }
 }
@@ -485,7 +499,7 @@ sub check_for_new_messages
 
 # ---------------------------------------------------------------------------------------------
 #
-# reclassify_on_move
+# reclassify_on_move__
 #
 #   This function goes through each output/bucket folder and looks for new messages.
 #   If there is a new message and if we already know the message, the message
@@ -496,7 +510,7 @@ sub check_for_new_messages
 #   $imap:  The connection to our server.
 # ---------------------------------------------------------------------------------------------
 
-sub reclassify_on_move
+sub reclassify_on_move__
 {
     my ( $self, $imap ) = @_;
 
@@ -505,7 +519,18 @@ sub reclassify_on_move
 
     foreach my $bucket ( $self->{classifier__}->get_buckets( $self->{api_session__} ) ) {
 
-        my $folder = $self->folder_for_bucket( $bucket );
+        my $folder = $self->folder_for_bucket__( $bucket );
+
+        # We have to be careful if an output folder is also a watched folder
+        # Simply incrementing our UIDNEXT value for each message we
+        # look at isn't good enough in this case. It might be a new
+        # message that came in after check_for_new_messages had a look at the folder.
+        # That's why we keep track of the number of completely new messages and
+        # why we update our UIDNEXT value only after we are done with the
+        # current folder.
+
+        my $new_messages = 0;
+        my $highest_uid = 0;
 
         # If the user has not yet configured a folder for this bucket, do nothing
         if ( ! defined $folder ) {
@@ -515,12 +540,12 @@ sub reclassify_on_move
         $self->log_( "Looking for reclassification requests in folder $folder." );
 
         # Check that our UIDs are valid
-        unless ( $self->folder_uid_status( $imap, $folder ) ) {
+        unless ( $self->folder_uid_status__( $imap, $folder ) ) {
             $self->log_( "Changed UIDVALIDITY, will not check for new messages in folder $folder." );
             next;
         }
 
-        my $old_next = $self->uid_next( $folder );
+        my $old_next = $self->uid_next__( $folder );
         $self->say( $imap, "SELECT \"$folder\"" );
         unless ( $self->get_response( $imap ) == 1 ) {
             $self->log_( "Could not SELECT folder $folder!" );
@@ -530,12 +555,19 @@ sub reclassify_on_move
         # Get a list of UIDs greater than our old_next value.
         my @uids = $self->get_uids_ge( $imap, $old_next );
 
+        if ( $#uids > -1 ) {
+            $highest_uid = $uids[$#uids];
+        }
+        else {
+            $highest_uid = $old_next;
+        }
+
         foreach my $msg ( @uids ) {
             $self->log_( "" );
-            $self->log_( "Found new message $msg in folder $folder." );
+            $self->log_( "Found possible reclassification request $msg in folder $folder." );
             my $hash = $self->get_hash( $imap, $msg );
 
-            if ( my $old_bucket = $self->can_reclassify( $hash, $bucket ) ) {
+            if ( my $old_bucket = $self->can_reclassify__( $hash, $bucket ) ) {
 
                 my @lines = $self->fetch_message_part( $imap, $msg, '' );
 
@@ -570,20 +602,31 @@ sub reclassify_on_move
                 $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $bucket, "imap.tmp" );
                 $self->{classifier__}->remove_message_from_bucket( $self->{api_session__}, $old_bucket, "imap.tmp" );
 
-                $self->mq_post_( 'NEWFL', $self->get_msg_file( $hash ), '' );
+                $self->mq_post_( 'NEWFL', $self->get_msg_file__( $hash ), '' );
 
                 $self->log_( "Reclassified the message with UID $msg in folder $folder from bucket $old_bucket to bucket $bucket." );
                 $self->log_( "" );
                 unlink "imap.tmp";
 
-                $self->was_reclassified( $hash, $bucket );
+                $self->was_reclassified__( $hash, $bucket );
             }
             else {
+                # Perhaps this message couldn't be reclassified because it is completely
+                # new and was thus never classified in the first place?
+                if ( $self->can_classify__( $hash ) ) {
+                    $new_messages++;
+                    $self->log_( "Found a new message while looking for reclassification requests." );
+                }
                 $self->log_( "Did not reclassify message." );
                 $self->log_( "" );
             }
-            # Update stored UIDNEXT value for this folder:
-            $self->uid_next( $folder, $msg + 1 );
+        }
+        # Update stored UIDNEXT value for this folder:
+        if ( $new_messages ) {
+            $self->log_( "Found $new_messages new messages in folder $folder" );
+        }
+        else {
+            $self->uid_next__( $folder, $highest_uid + @uids );
         }
     }
 }
@@ -597,7 +640,7 @@ sub reclassify_on_move
 
 # ---------------------------------------------------------------------------------------------
 #
-# folder_uid_status
+# folder_uid_status__
 #
 #   This function checks the UID status of a given folder on the server.
 #   To this end, we query for the UIDVALIDITY and UIDNEXT values.
@@ -613,7 +656,7 @@ sub reclassify_on_move
 #
 # ---------------------------------------------------------------------------------------------
 
-sub folder_uid_status
+sub folder_uid_status__
 {
     my ( $self, $imap, $folder ) = @_;
 
@@ -624,7 +667,7 @@ sub folder_uid_status
 
     if ( $response == 1 ) {
 
-        my $old_val = $self->uid_validity( $folder );
+        my $old_val = $self->uid_validity__( $folder );
         my @lines = split /$eol/, $self->{last_response__};
 
         my $uidvalidity;
@@ -656,8 +699,8 @@ sub folder_uid_status
             # If this is not the case, we return an error and store the current
             # UIDNEXT value.
             if ( $uidvalidity != $old_val ) {
-                $self->uid_next( $folder, $uidnext );
-                $self->uid_validity( $folder, $uidvalidity );
+                $self->uid_next__( $folder, $uidnext );
+                $self->uid_validity__( $folder, $uidvalidity );
                 $self->log_( "UIDVALIDITY has changed! Expected $old_val, got $uidvalidity." );
                 return;
             }
@@ -669,9 +712,9 @@ sub folder_uid_status
         # process everything that we find, but that doesn't sound like
         # a very good idea.
         else {
-            $self->uid_next( $folder, $uidnext );
-            $self->uid_validity( $folder, $uidvalidity );
-            $self->log_( "Updated folder status (UIDVALIDITY and UIDNEXT for folder $folder." );
+            $self->uid_next__( $folder, $uidnext );
+            $self->uid_validity__( $folder, $uidvalidity );
+            $self->log_( "Updated folder status (UIDVALIDITY and UIDNEXT) for folder $folder." );
             return;
         }
 
@@ -696,9 +739,7 @@ sub folder_uid_status
 
 sub connect
 {
-    my ( $self ) = @_;
-
-    my ( $hostname, $port ) = ( $self->config_( 'hostname' ), $self->config_( 'port' ) );
+    my ( $self, $hostname, $port ) = @_;
 
     $self->log_( "Connecting to $hostname:$port" );
 
@@ -954,13 +995,14 @@ sub get_response
 # get_mailbox_list
 #
 #   Request a list of mailboxes from the server behind the passed in socket object.
-#   The list is stored away in @{$self->{mailboxes__}}.
+#   The list is stored away in @{$self->{mailboxes__}} and returned.
 #
 # Arguments:
 #   $imap: as usual, contains a valid connection to our IMAP server.
 #
-#   There is no return value
+# Return value:
 #
+#   The list of mailboxes
 # ---------------------------------------------------------------------------------------------
 
 sub get_mailbox_list
@@ -983,6 +1025,8 @@ sub get_mailbox_list
     }
 
     @{$self->{mailboxes__}} = @mailboxes;
+
+    return @mailboxes;
 }
 
 
@@ -1189,6 +1233,7 @@ sub get_uids_ge
 #
 #   $imap:      connection to server
 #   $what:      A string that tells the server what to search for, e.g. "UNSEEN"
+#   $all:       If this is defined, we will also search for deleted messages
 #
 # return value:
 #
@@ -1198,11 +1243,19 @@ sub get_uids_ge
 
 sub search_for_messages
 {
-    my ( $self, $imap, $what ) = @_;
+    my ( $self, $imap, $what, $all ) = @_;
 
-    $self->log_( "Searching undeleted messages with attribute $what" );
+    my $undeleted = 'UNDELETED';
 
-    $self->say( $imap, "UID SEARCH $what UNDELETED" );
+    if ( defined $all ) {
+        $undeleted = '';
+        $self->log_( "Searching messages with attribute $what" );
+    }
+    else {
+        $self->log_( "Searching undeleted messages with attribute $what" );
+    }
+
+    $self->say( $imap, "UID SEARCH $what $undeleted" );
     $self->get_response ( $imap );
 
     # The server will respond with an untagged search reply.
@@ -1231,14 +1284,14 @@ sub search_for_messages
 
 # ---------------------------------------------------------------------------------------------
 #
-#   folder_for_bucket
+#   folder_for_bucket__
 #
 #   Pass in a bucket name only to get a corresponding folder name
 #   Pass in a bucket name and a folder name to set the pair
 #
 #---------------------------------------------------------------------------------------------
 
-sub folder_for_bucket
+sub folder_for_bucket__
 {
     my ( $self, $bucket, $folder ) = @_;
 
@@ -1269,7 +1322,7 @@ sub folder_for_bucket
 
 #---------------------------------------------------------------------------------------------
 #
-#   watched_folders
+#   watched_folders__
 #
 #   Returns a list of watched folders when called with no arguments
 #   Otherwise set the list of watched folders to whatever argument happens to be.
@@ -1277,7 +1330,7 @@ sub folder_for_bucket
 #---------------------------------------------------------------------------------------------
 
 
-sub watched_folders
+sub watched_folders__
 {
     my ( $self, @folders ) = @_;
 
@@ -1300,14 +1353,14 @@ sub watched_folders
 
 #---------------------------------------------------------------------------------------------
 #
-#   uid_validity
+#   uid_validity__
 #
 #   Pass in a folder name only to get the stored UIDVALIDITY value for that folder
 #   Pass in folder name and new UIDVALIDITY value to store the value
 #
 #---------------------------------------------------------------------------------------------
 
-sub uid_validity
+sub uid_validity__
 {
     my ( $self, $folder, $uidval ) = @_;
 
@@ -1342,14 +1395,14 @@ sub uid_validity
 
 #---------------------------------------------------------------------------------------------
 #
-#   uid_next
+#   uid_next__
 #
 #   Pass in a folder name only to get the stored UIDNEXT value for that folder
 #   Pass in folder name and new UIDNEXT value to store the value
 #
 #---------------------------------------------------------------------------------------------
 
-sub uid_next
+sub uid_next__
 {
     my ( $self, $folder, $uidnext ) = @_;
 
@@ -1370,6 +1423,7 @@ sub uid_next
             $all .= "$key$cfg_separator$value$cfg_separator";
         }
         $self->config_( 'uidnexts', $all );
+        $self->log_( "Updated UIDNEXT value for folder $folder to $uidnext." ) if ( $self->{debug__} > 1 );
     }
     # get
     else {
@@ -1397,7 +1451,7 @@ sub classifier
 
 
 #----------------------------------------------------------------------------
-# read_cls_files
+# read_cls_files__
 #
 # This function globs for .cls files in the messages directory.
 # It opens each file, reads the bucket the message was classified
@@ -1405,7 +1459,7 @@ sub classifier
 # It several hashes (Perl hashes that is)
 #----------------------------------------------------------------------------
 
-sub read_cls_files
+sub read_cls_files__
 {
     my ( $self ) = @_;
 
@@ -1458,13 +1512,17 @@ sub read_cls_files
 #----------------------------------------------------------------------------
 # get hash
 #
-# Takes
+# Computes a hash of the MID and Date header lines of this message.
+# Note that a folder on the server needs to be selected for this to work.
+#
+# Arguments:
+#
 #   $imap:  the server connection and
 #   $msg:   message UID
 #
-#   and computes a hash of the MID and Date header lines of this message
+# Return value:
+#   A string containing the hash value or undef on error.
 #
-#   This hash value is then returned ( or undef on error).
 #----------------------------------------------------------------------------
 
 sub get_hash
@@ -1508,7 +1566,7 @@ sub get_hash
 
 
 #----------------------------------------------------------------------------
-#   can_classify
+#   can_classify__
 #
 # This function is a decider. It decides whether a message can be
 # classified if found in one of our watched folders or not.
@@ -1519,7 +1577,7 @@ sub get_hash
 # returns true or false
 #----------------------------------------------------------------------------
 
-sub can_classify
+sub can_classify__
 {
     my ( $self, $hash ) = @_;
 
@@ -1533,7 +1591,7 @@ sub can_classify
 }
 
 #----------------------------------------------------------------------------
-#   can_reclassify
+#   can_reclassify__
 #
 # This function is a decider. It decides whether a message can be
 # reclassified if found in one of our output folders or not.
@@ -1546,7 +1604,7 @@ sub can_classify
 #   the current classification if a reclassification is ok
 #----------------------------------------------------------------------------
 
-sub can_reclassify
+sub can_reclassify__
 {
     my ( $self, $hash, $new_bucket ) = @_;
 
@@ -1574,7 +1632,7 @@ sub can_reclassify
 }
 
 #----------------------------------------------------------------------------
-#   was_reclassified
+#   was_reclassified__
 #
 # This function MUST be called after a message was reclassified to
 # keep the internal records up to date and to change the class file
@@ -1586,14 +1644,14 @@ sub can_reclassify
 # there is no return value
 #----------------------------------------------------------------------------
 
-sub was_reclassified
+sub was_reclassified__
 {
     my ( $self, $hash, $bucket ) = @_;
 
     my $msg_file = $self->{hash_to_history__}{$hash};
     my $old_class = $self->{hash_to_bucket__}{$hash};
 
-    $self->change_cls_file ( $msg_file, $hash, $bucket, $old_class );
+    $self->change_cls_file__( $msg_file, $hash, $bucket, $old_class );
 
     $self->{hash_to_reclassed__}{$hash} = 1;
     $self->{hash_to_bucket__}{$hash} = $bucket;
@@ -1603,7 +1661,7 @@ sub was_reclassified
 
 
 #----------------------------------------------------------------------------
-# was_classified
+# was_classified__
 #
 # This function MUST be called after a message was classified. It updates
 # internal records and the corresponding class file
@@ -1615,11 +1673,11 @@ sub was_reclassified
 # there is no return value
 #----------------------------------------------------------------------------
 
-sub was_classified
+sub was_classified__
 {
     my ( $self, $hash, $bucket, $msg_file ) = @_;
 
-    $self->change_cls_file ( $msg_file, $hash, $bucket );
+    $self->change_cls_file__( $msg_file, $hash, $bucket );
     $self->{hash_to_bucket__}{$hash} = $bucket;
     $self->{hash_to_history__}{$hash} = $msg_file;
 }
@@ -1627,10 +1685,10 @@ sub was_classified
 
 
 #----------------------------------------------------------------------------
-# change_cls_file
+# change_cls_file__
 #
 # This gets called after a message was classified or reclassified
-# by either was_classified() or was_reclassified().
+# by either was_classified__() or was_reclassified__().
 # It rewrites the class file that belongs to the
 # messages ton include our hash value
 #
@@ -1642,7 +1700,7 @@ sub was_classified
 # there is no return value
 #----------------------------------------------------------------------------
 
-sub change_cls_file
+sub change_cls_file__
 {
     my ( $self, $msg_file, $hash, $class, $oldclass ) = @_;
 
@@ -1672,14 +1730,14 @@ sub change_cls_file
 
 
 #----------------------------------------------------------------------------
-# get_msg_file
+# get_msg_file__
 #
 # Takes the hash of a message as its argument
 # and returns the name of the history msg file retrieved from the internal
 # hash or undef on error
 #----------------------------------------------------------------------------
 
-sub get_msg_file
+sub get_msg_file__
 {
     my ( $self, $hash ) = @_;
 
@@ -1729,7 +1787,7 @@ sub configure_item
     if ( $name eq 'imap_1_watch_folders' ) {
 
         # We can only configure this when we have a list of mailboxes available on the server
-        if ( @{$self->{mailboxes__}} < 1 || ( ! $self->watched_folders() ) ) {
+        if ( @{$self->{mailboxes__}} < 1 || ( ! $self->watched_folders__() ) ) {
             $template->param( IMAP_if_mailboxes => 0 );
         }
         else {
@@ -1748,7 +1806,7 @@ sub configure_item
 
             # Loop over watched folder slot. One select form per watched folder
             # will be generated
-            foreach my $folder ( $self->watched_folders() ) {
+            foreach my $folder ( $self->watched_folders__() ) {
                 $i++;
                 my %data_watched_folders = ();
 
@@ -1812,7 +1870,7 @@ sub configure_item
 
             foreach my $bucket ( @buckets ) {
                 my %outer_data = ();
-                my $output = $self->folder_for_bucket( $bucket );
+                my $output = $self->folder_for_bucket__( $bucket );
 
                 $outer_data{IMAP_mailbox_defined} = (defined $output) ? 1 : 0;
 
@@ -1875,6 +1933,12 @@ sub configure_item
         }
         $template->param( IMAP_debug_levels => \@loop );
     }
+
+    # Should we expunge after leaving a folder or not?
+    if ( $name eq 'imap_8_expunge' ) {
+        my $checked = $self->config_( 'expunge' ) ? 'checked="checked"' : '';
+        $template->param( IMAP_expunge_is_checked => $checked );
+    }
 }
 
 
@@ -1930,6 +1994,7 @@ sub validate_item
                 $template->param( IMAP_connection_if_password_error => 1 );
             }
         }
+        return;
     }
 
     # watched folders
@@ -1938,22 +2003,24 @@ sub validate_item
 
             my $i = 1;
             my %folders;
-            foreach ( $self->watched_folders() ) {
+            foreach ( $self->watched_folders__() ) {
                 $folders{ $$form{"imap_folder_$i"} }++;
                 $i++;
             }
 
-            $self->watched_folders ( sort keys %folders );
+            $self->watched_folders__( sort keys %folders );
         }
+        return;
     }
 
     # Add a watched folder
     if ( $name eq 'imap_2_watch_more_folders' ) {
         if ( defined $$form{imap_2_watch_more_folders} ) {
-            my @current = $self->watched_folders();
+            my @current = $self->watched_folders__();
             push @current, 'INBOX';
-            $self->watched_folders( @current );
+            $self->watched_folders__( @current );
         }
+        return;
     }
 
     # map buckets to folders
@@ -1990,11 +2057,12 @@ sub validate_item
                     $bad = 1;
                 }
                 else {
-                    $self->folder_for_bucket( $bucket, $folder );
+                    $self->folder_for_bucket__( $bucket, $folder );
                 }
             }
             $template->param( IMAP_buckets_to_folders_if_error => $bad );
         }
+        return;
     }
 
     # update the list of mailboxes
@@ -2006,7 +2074,7 @@ sub validate_item
                 && $self->config_( 'port' )
                 && $self->config_( 'password' ) ) {
 
-                    my $imap = $self->connect();
+                    my $imap = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
                     if ( defined $imap ) {
                         if ( $self->login( $imap ) ) {;
                             $self->get_mailbox_list( $imap );
@@ -2026,6 +2094,7 @@ sub validate_item
                 $template->param( IMAP_update_list_failed => 'Please configure the connection details first.' );
             }
         }
+        return;
     }
 
     # update interval
@@ -2039,6 +2108,7 @@ sub validate_item
                 $template->param ( IMAP_if_interval_error => 1 );
             }
         }
+        return;
     }
 
     # byte limit for message download
@@ -2046,6 +2116,7 @@ sub validate_item
         if ( defined $$form{imap_6_byte_limit} ) {
             $self->config_( 'byte_limit', $$form{imap_6_byte_limit} );
         }
+        return;
     }
 
     # How noisy should the log file be?
@@ -2054,9 +2125,24 @@ sub validate_item
             $self->{debug__} = $$form{imap_debug_level};
             $self->config_( 'debug_level', $self->{debug__} );
         }
+        return;
     }
 
-    return '';
+
+    # Should we expunge after leaving a folder or not?
+    if ( $name eq 'imap_8_expunge' ) {
+        if ( defined $$form{update_imap_8_expunge} ) {
+            if ( defined $$form{imap_expunge} ) {
+                $self->config_( 'expunge', 1 );
+            }
+            else {
+                $self->config_( 'expunge', 0 );
+            }
+        }
+        return;
+    }
+
+    $self->SUPER::validate_item( $name, $template, $language, $form );
 }
 
 
