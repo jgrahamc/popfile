@@ -6,6 +6,8 @@
 #
 # ---------------------------------------------------------------------------------------------
 
+unlink 'popfile.cfg';
+
 use POPFile::Configuration;
 use POPFile::MQ;
 use POPFile::Logger;
@@ -64,7 +66,6 @@ test_assert_equal( $c->start(), 1 );
 $c->stop();
 test_assert( !$c->check_pid_() );
 
-
 # disable logging
 
 $c->global_config_( 'debug', 0 );
@@ -103,6 +104,41 @@ if ($process != 0) {
 
 close STDERR;
 $c->stop();
+
+# Check that the popfile.cfg was written
+
+open FILE, "<popfile.cfg";
+my $line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_debug 0' );
+$line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_download_count 0' );
+$line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_msgdir messages/' );
+$line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_subject 1' );
+$line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_timeout 60' );
+$line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_xpl 1' );
+$line = <FILE>;
+test_assert_regexp( $line, 'GLOBAL_xtc 1' );
+$line = <FILE>;
+test_assert_regexp( $line, 'config_piddir ../tests/' );
+$line = <FILE>;
+test_assert_regexp( $line, 'logger_logdir ./' );
+$line = <FILE>;
+test_assert_regexp( $line, 'testparam testvalue' );
+$line = <FILE>;
+close FILE;
+
+# Now add a parameter and reload the configuration
+
+open FILE, ">>popfile.cfg";
+print FILE "testparam2 testvalue2\n";
+close FILE;
+
+$c->load_configuration();
+test_assert_equal( $c->parameter( 'testparam2' ), 'testvalue2' );
 
 # Check that parameter upgrading works
 
