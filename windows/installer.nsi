@@ -1,19 +1,11 @@
-; installer.nsi
-
-; The name of the installer
 Name "POPFile Installer"
-
-; The file to write
 OutFile "setup.exe"
-
-; The default installation directory
 InstallDir $PROGRAMFILES\POPFile
+ShowInstDetails show
+ShowUninstDetails show
 
-; The text to prompt the user to enter a directory
 DirText "This will install POPFile on your computer. Choose a directory where POPFile will be installed"
-
-; The stuff to install
-Section "ThisNameIsIgnoredSoWhyBother?"
+Section "POPFile"
   
   SetOutPath $INSTDIR
   File "..\engine\*.pl"
@@ -72,6 +64,8 @@ Section "ThisNameIsIgnoredSoWhyBother?"
                  "$INSTDIR\perl.exe" popfile.pl
   CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile in background.lnk" \
                  "$INSTDIR\wperl.exe" popfile.pl
+  CreateShortCut "$SMPROGRAMS\POPFile\Uninstall POPFile.lnk" \
+                 "$INSTDIR\uninstall.exe"
   SetOutPath $SMPROGRAMS\POPFile
   WriteINIStr "$SMPROGRAMS\POPFile\POPFile User Interface.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:8080/"
@@ -81,6 +75,67 @@ Section "ThisNameIsIgnoredSoWhyBother?"
   WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Manual.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/manual.html"
               
+  SetOutPath $INSTDIR
+  Delete $INSTDIR\uninstall.exe 
+  WriteUninstaller $INSTDIR\uninstall.exe
+
 SectionEnd ; end the section
+
+UninstallText "This will uninstall POPFile from your system:"
+Section Uninstall
+  IfFileExists $INSTDIR\popfile.pl skip_confirmation
+    MessageBox MB_YESNO "It does not appear that POPFile is installed in the directory '$INSTDIR'.$\r$\nContinue anyway (not recommended)" IDYES skip_confirmation
+    Abort "Uninstall aborted by user"
+skip_confirmation:
+
+  Delete $SMPROGRAMS\POPFile\Support\*.url
+  RMDir $SMPROGRAMS\POPFile\Support
+
+  Delete $SMPROGRAMS\POPFile\*.lnk
+  Delete $SMPROGRAMS\POPFile\*.url
+  RMDir $SMPROGRAMS\POPFile
+
+  Delete $INSTDIR\popfile.cfg
+  Delete $INSTDIR\*.log
+  Delete $INSTDIR\*.pl
+  Delete $INSTDIR\*.gif
+  Delete $INSTDIR\*.pm
+  Delete $INSTDIR\*.exe
+  Delete $INSTDIR\*.dll
+  
+  Delete $INSTDIR\Classifier\*.pm
+  RMDir $INSTDIR\Classifier
+  Delete $INSTDIR\Exporter\*.*
+  RMDir $INSTDIR\Exporter
+
+  Delete $INSTDIR\IO\*.*
+  Delete $INSTDIR\IO\Socket\*.*
+  RMDir /r $INSTDIR\IO
+  Delete $INSTDIR\auto\DynaLoader\*.*
+  Delete $INSTDIR\auto\File\Glob\*.*
+  Delete $INSTDIR\auto\IO\*.*
+  Delete $INSTDIR\auto\Socket\*.*
+  RMDir /r $INSTDIR\auto
+  Delete $INSTDIR\File\*.*
+  RMDir $INSTDIR\File
+  Delete $INSTDIR\warnings\*.*
+  RMDir $INSTDIR\warnings
+  
+  RMDir /r $INSTDIR\messages
+  RMDir /r $INSTDIR\corpus
+  RMDir $INSTDIR
+
+  ; if $INSTDIR was removed, skip these next ones
+  IfFileExists $INSTDIR 0 Removed 
+    MessageBox MB_YESNO|MB_ICONQUESTION \
+      "Do you want to remove all files in your POPFile directory? (If you have anything \
+you created that you want to keep, click No)" IDNO Removed
+    Delete $INSTDIR\*.* ; this would be skipped if the user hits no
+    RMDir /r $INSTDIR
+    IfFileExists $INSTDIR 0 Removed 
+      MessageBox MB_OK|MB_ICONEXCLAMATION \
+                 "Note: $INSTDIR could not be removed."
+  Removed:
+SectionEnd
 
 ; eof
