@@ -35,6 +35,17 @@ use strict;
 
 my %modules;
 
+# The explanations for optional modules
+
+my $japanese = 'Japanese Language Support';
+my %explain = ( 'Encode' => $japanese,
+                'Encode::Guess' => $japanese,
+                'BerkeleyDB' => 'Upgrades from v0.20.x',
+                'IO::Socket::SSL' => 'SSL Connection Support',
+                'IO::Socket::Socks' => 'Socks Proxy Support',
+                'Text::Kakasi' => $japanese,
+                'XMLRPC::Transport::HTTP' => 'XML-RPC Server Support' );
+
 # ARGV should contain the name of the packing list to generate
 # followed by a list of files to search for use statements.
 
@@ -67,7 +78,7 @@ sub scan_file
     if ( open FILE, "<$file" ) {
         while ( <FILE> ) {
             if ( /^[ \t]*require[ \t]+([A-Z][^ \t\r\n;]+)/ ) {
-                $modules{$1} = 'OPTIONAL-TODO';
+                $modules{$1} = 'OPTIONAL-' . $explain{$1};
                 next;
             }
             if ( /^[ \t]*use[ \t]+([A-Z][^ \t\r\n;]+)/ ) {

@@ -21,4 +21,4 @@ REQUIRED	0.0.0	POSIX
 REQUIRED	0.0.0	Sys::Hostname
 OPTIONAL-Japanese Language Support	0.0.0	Text::Kakasi
 REQUIRED	0.0.0	Thread::Semaphore
-OPTIONAL-XML-RPC Interface	0.0.0	XMLRPC::Transport::HTTP
+OPTIONAL-XML-RPC Server Support	0.0.0	XMLRPC::Transport::HTTP

@@ -33,7 +33,10 @@
 # Check the packing list of POPFile to ensure that all the required
 # modules are present.
 
-my $packing_list = 'popfile.pck';
+my $packing_list = defined($ENV{POPFILE_ROOT})?$ENV{POPFILE_ROOT}:'./';
+$packing_list =~ s/[\\\/]$//;
+$packing_list .= '/popfile.pck';
+
 my $fatal = 0;
 my $log = '';
 
