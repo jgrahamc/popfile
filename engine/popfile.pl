@@ -436,7 +436,7 @@ sub echo_to_dot
 
         tee( $client, $_ );
 
-        if ( /^\.[\r\n]+$/ )
+        if ( /^\.(\r\n|\r|\n)$/ )
         {   
             last;
         }
