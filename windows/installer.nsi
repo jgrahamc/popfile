@@ -335,6 +335,12 @@
 
   !define MUI_CUSTOMFUNCTION_GUIINIT PFIGUIInit
 
+  ; Use a "pre" function for the 'Welcome' page to ensure the installer window is visible
+  ; (if the "Release Notes" were displayed, another window could have been positioned
+  ; to obscure the installer window)
+
+  !define MUI_CUSTOMFUNCTION_WELCOME_PRE "ShowInstaller"
+
   ; Use a "leave" function to look for 'popfile.cfg' in the directory selected for this install
 
   !define MUI_CUSTOMFUNCTION_DIRECTORY_LEAVE "CheckExistingConfig"
@@ -887,22 +893,22 @@ SectionEnd
 Section "-FlatFileBackup" SecBackup
 
   !define L_CFG_HANDLE    $R9     ; handle for "popfile.cfg"
-  !define L_CORPUS_PATH   $R8     ; full path to the corpus  
+  !define L_CORPUS_PATH   $R8     ; full path to the corpus
   !define L_TEMP          $R7
 
   Push ${L_CFG_HANDLE}
   Push ${L_CORPUS_PATH}
   Push ${L_TEMP}
-  
+
   IfFileExists "$INSTDIR\popfile.cfg" 0 exit
   IfFileExists "$INSTDIR\backup\backup.ini" exit
-  
+
   ; Use data in 'popfile.cfg' to generate the full path to the corpus folder
-  
+
   Push $INSTDIR
   Call GetCorpusPath
   Pop ${L_CORPUS_PATH}
-  
+
   FindFirst ${L_CFG_HANDLE} ${L_TEMP} ${L_CORPUS_PATH}\*.*
 
   ; If the "corpus" directory does not exist then "${L_CFG_HANDLE}" will be empty
@@ -919,13 +925,13 @@ corpus_check:
   ; Assume what we've found is a bucket folder, now check if it contains
   ; a BerkeleyDB file or a flat-file corpus file. We stop our search as
   ; soon as we find either type of file (i.e. we do not examine every bucket)
-  
+
   IfFileExists "${L_CORPUS_PATH}\${L_TEMP}\table.db" nothing_to_backup
   IfFileExists "${L_CORPUS_PATH}\${L_TEMP}\table" backup_corpus
   Goto corpus_check
 
 backup_corpus:
-  
+
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_FFCBACK)"
   SetDetailsPrint listonly
@@ -933,7 +939,7 @@ backup_corpus:
   CreateDirectory "$INSTDIR\backup"
   CopyFiles "$INSTDIR\popfile.cfg" "$INSTDIR\backup\popfile.cfg"
   WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "CorpusPath" "${L_CORPUS_PATH}"
-  
+
   StrCpy ${L_TEMP} ${L_CORPUS_PATH}
   Push ${L_TEMP}
   Call GetParent
@@ -942,9 +948,9 @@ backup_corpus:
   StrLen ${L_TEMP} ${L_TEMP}
   IntOp ${L_TEMP} ${L_TEMP} + 1
   StrCpy ${L_TEMP} ${L_CORPUS_PATH} "" ${L_TEMP}
-  
+
   CopyFiles /SILENT "${L_CORPUS_PATH}\*.*" "$INSTDIR\backup\${L_TEMP}"
-  
+
   WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Corpus" "${L_TEMP}"
   WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "new"
 
@@ -959,11 +965,11 @@ exit:
   Pop ${L_TEMP}
   Pop ${L_CORPUS_PATH}
   Pop ${L_CFG_HANDLE}
-  
+
   !undef L_CFG_HANDLE
   !undef L_CORPUS_PATH
   !undef L_TEMP
-  
+
 SectionEnd
 
 #--------------------------------------------------------------------------
@@ -1182,6 +1188,17 @@ Function HandleKakasi
         !insertmacro SelectSection ${SecKakasi}
       exit:
   !endif
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: ShowInstaller
+# (the "pre" function for the WELCOME page)
+#
+# Ensure the installer window is not hidden behind any other windows
+#--------------------------------------------------------------------------
+
+Function ShowInstaller
+  BringToFront
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -2075,17 +2092,17 @@ close_file:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "Flags" "DISABLED"
-  
+
   ; If we are upgrading POPFile, the corpus might have to be converted from flat file format
-  
+
   ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
   StrCmp ${L_TEMP} "new" 0 display_the_page
   WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "old"
-  
+
   ; Corpus conversion will occur when POPFile is started - this may take several minutes,
   ; so we ensure that POPFile will not be run in the background when it is run for the
   ; first time (by using the Start Menu or by running 'popfile.exe').
-  
+
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "1"
   Push "1"
   Call SetConsoleMode
@@ -2094,15 +2111,15 @@ close_file:
 page_enabled:
 
   ; If we are upgrading POPFile, the corpus might have to be converted from flat file format
-  
+
   ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
   StrCmp ${L_TEMP} "new" 0 continue
   WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "old"
-  
+
   ; Corpus conversion will occur when POPFile is started - this may take several minutes,
   ; so we ensure that POPFile will not be run in the background when it is run for the
   ; first time (by the installer, by using the Start Menu or by running 'popfile.exe').
-  
+
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "1"
   Push "1"
   Call SetConsoleMode
@@ -2331,7 +2348,7 @@ no_reboot_reqd:
   ; Get 'Flags' for the 'Run POPFile in background' radio button on the 'Start POPFile' page
   ; If flat file corpus conversion is required, we cannot offer to display the POPFile UI
   ; (conversion may take several minutes, during which time the UI will be unresponsive)
-  
+
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 4" "Flags"
   StrCmp ${L_TEMP} "DISABLED" 0 selection_ok
 
@@ -2526,7 +2543,7 @@ remove_shortcuts:
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_3)"
   SetDetailsPrint listonly
-  
+
   Delete $INSTDIR\popfile.pl
   Delete $INSTDIR\popfile.exe
   Delete $INSTDIR\popfile.cfg.bak
