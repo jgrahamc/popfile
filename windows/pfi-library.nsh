@@ -56,7 +56,7 @@
 # (by using this constant in the executable's "Version Information" data).
 #--------------------------------------------------------------------------
 
-  !define C_PFI_LIBRARY_VERSION     "0.1.5"
+  !define C_PFI_LIBRARY_VERSION     "0.1.6"
 
 #--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
@@ -813,6 +813,10 @@
 #    Installer Function:   CheckSQLiteIntegrity
 #    Uninstaller Function: un.CheckSQLiteIntegrity
 #
+#    Macro:                DumpLog
+#    Installer Function:   DumpLog
+#    Uninstaller Function: un.DumpLog
+#
 #    Macro:                FindLockedPFE
 #    Installer Function:   FindLockedPFE
 #    Uninstaller Function: un.FindLockedPFE
@@ -1060,6 +1064,110 @@
 #--------------------------------------------------------------------------
 
 ;!insertmacro CheckSQLiteIntegrity "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: DumpLog
+#
+# The installation process and the uninstall process may both need a function which dumps the
+# log using a filename supplied via the stack. This macro makes maintenance easier by ensuring
+# that both processes use identical functions, with the only difference being their names.
+#
+# NOTE:
+# The !insertmacro DumpLog "" and !insertmacro DumpLog "un." commands are included in this file
+# so NSIS scripts can use 'Call DumpLog' and 'Call un.DumpLog' without additional preparation.
+#
+# Inputs:
+#         (top of stack)     - the full path of the file where the log will be dumped
+#
+# Outputs:
+#         (none)
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push "$G_ROOTDIR\install.log"
+#         Call DumpLog
+#
+#        (the log contents will be saved in the "$G_ROOTDIR\install.log" file)
+#--------------------------------------------------------------------------
+
+!macro DumpLog UN
+  Function ${UN}DumpLog
+
+      !ifndef LVM_GETITEMCOUNT
+          !define LVM_GETITEMCOUNT 0x1004
+      !endif
+      !ifndef LVM_GETITEMTEXT
+        !define LVM_GETITEMTEXT 0x102D
+      !endif
+
+      Exch $5
+      Push $0
+      Push $1
+      Push $2
+      Push $3
+      Push $4
+      Push $6
+
+      FindWindow $0 "#32770" "" $HWNDPARENT
+      GetDlgItem $0 $0 1016
+      StrCmp $0 0 error
+      FileOpen $5 $5 "w"
+      StrCmp $5 "" error
+      SendMessage $0 ${LVM_GETITEMCOUNT} 0 0 $6
+      System::Alloc ${NSIS_MAX_STRLEN}
+      Pop $3
+      StrCpy $2 0
+      System::Call "*(i, i, i, i, i, i, i, i, i) i \
+                    (0, 0, 0, 0, 0, r3, ${NSIS_MAX_STRLEN}) .r1"
+
+    loop:
+      StrCmp $2 $6 done
+      System::Call "User32::SendMessageA(i, i, i, i) i \
+                    ($0, ${LVM_GETITEMTEXT}, $2, r1)"
+      System::Call "*$3(&t${NSIS_MAX_STRLEN} .r4)"
+      FileWrite $5 "$4${MB_NL}"
+      IntOp $2 $2 + 1
+      Goto loop
+
+    done:
+      FileClose $5
+      System::Free $1
+      System::Free $3
+      Goto exit
+
+    error:
+      MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_MB_SAVELOG_ERROR)"
+
+    exit:
+      Pop $6
+      Pop $4
+      Pop $3
+      Pop $2
+      Pop $1
+      Pop $0
+      Pop $5
+
+    FunctionEnd
+!macroend
+
+!ifdef ADDSSL | BACKUP | INSTALLER | RESTORE
+    #--------------------------------------------------------------------------
+    # Installer Function: DumpLog
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+
+    !insertmacro DumpLog ""
+!endif
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.DumpLog
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro DumpLog "un."
 
 
 #--------------------------------------------------------------------------
@@ -2007,7 +2115,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDSSL | ADDUSER | BACKUP | MSGCAPTURE | PFIDIAG | RESTORE | TRANSLATOR_AUW
+!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | MSGCAPTURE | PFIDIAG | RESTORE | TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetDateTimeStamp
     #
@@ -2204,7 +2312,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDSSL | ADDUSER | BACKUP | MSGCAPTURE | PFIDIAG | RESTORE | TRANSLATOR_AUW
+!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | MSGCAPTURE | PFIDIAG | RESTORE | TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetLocalTime
     #
