@@ -168,7 +168,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.42"
+  !define C_PFI_VERSION  "0.2.43"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -1128,6 +1128,12 @@ skip_rel_notes:
     pfidiagnostic:
   !endif
 
+  IfFileExists "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\User Data ($G_WINUSERNAME).lnk" 0 pfidiag_entries
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\User Data ($G_WINUSERNAME).lnk" NORMAL
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\User Data ($G_WINUSERNAME).lnk" \
+                 "$G_USERDIR"
+
+pfidiag_entries:
   IfFileExists "$G_ROOTDIR\pfidiag.exe" 0 silent_shutdown
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk"
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (simple).lnk" NORMAL
