@@ -115,6 +115,10 @@ sub initialize
     # The corpus is kept in the 'corpus' subfolder of POPFile
     $self->config_( 'corpus', 'corpus' );
 
+    # The characters that appear before and after a subject modification
+    $self->config_( 'subject_mod_left',  '[' );
+    $self->config_( 'subject_mod_right', ']' );
+
     # Get the hostname for use in the X-POPFile-Link header
     $self->{hostname__} = hostname;
 
@@ -779,7 +783,7 @@ sub classify_file
 sub classify_and_modify
 {
     my ( $self, $mail, $client, $dcount, $mcount, $nosave, $class, $echo ) = @_;
-    
+
     $echo = 1 unless (defined $echo);
 
     my $msg_subject     = '';     # The message subject
@@ -845,17 +849,16 @@ sub classify_and_modify
             if ( !( $line =~ /^(\r\n|\r|\n)$/i ) )  {
                 $message_size += length $line;
                 print TEMP $fileline;
-                
+
                 # If there is no echoing occuring, it doesn't matter what we do to these
-                
-                if ($echo) {
-    
+
+                if ( $echo ) {
                     if ( $line =~ /^Subject:(.*)/i )  {
                         $msg_subject = $1;
                         $msg_subject =~ s/(\012|\015)//g;
                         next;
                     }
-    
+
                     # Strip out the X-Text-Classification header that is in an incoming message
                     if ( ( $line =~ /^X-Text-Classification:/i ) == 0 ) {
                         if ( $msg_subject eq '' )  {
@@ -890,7 +893,9 @@ sub classify_and_modify
 
     # Do the text classification and update the counter for that bucket that we just downloaded
     # an email of that type
+
     $classification = ($class ne '')?$class:$self->classify_file($temp_file);
+    my $modification = $self->config_( 'subject_mod_left' ) . $classification . $self->config_( 'subject_mod_right' );
 
     # Add the Subject line modification or the original line back again
     if ( $classification ne 'unclassified' ) {
@@ -899,7 +904,7 @@ sub classify_and_modify
             if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&
                  ( $self->{parameters__}{$classification}{subject} == 1 ) &&
                  ( $self->{parameters__}{$classification}{quarantine} == 0 ) )  {
-                $msg_subject = " [$classification]$msg_subject";
+                $msg_subject = " $modification$msg_subject";
             }
         }
     }
@@ -946,7 +951,7 @@ sub classify_and_modify
                     # Don't add the classification unless it is not present
                     if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&
                          ( $self->{parameters__}{$classification}{subject} == 1 ) ) {
-                        $msg_subject = " [$classification]$msg_subject";
+                        $msg_subject = " $modification$msg_subject";
                     }
                 }
                 print $client "Subject:$msg_subject$eol";

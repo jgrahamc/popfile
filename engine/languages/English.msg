@@ -193,7 +193,7 @@ Magnet_MagnetType                       Magnet type
 Magnet_Value                            Value
 Magnet_Always                           Always goes to bucket
 
-Bucket_Error1                           Bucket names can only contain the letters a to z in lower case plus - and _
+Bucket_Error1                           Bucket names can only contain the letters a to z in lower case, numbers 0 to 9,  plus - and _
 Bucket_Error2                           Bucket named %s already exists
 Bucket_Error3                           Created bucket named %s
 Bucket_Error4                           Please enter a non-blank word
