@@ -1000,8 +1000,16 @@ sub magnet_page
                 } else {
                     $body .= " class=\"rowOdd\""; 
                 }
+                
+                #
                 # to validate, must replace & with &amp;
                 # stan todo note: come up with a smarter regex, this one's a bludgeon
+                #
+                # NOTE from JGC: Stan the right way to do this is to change the encode()
+                # function that is intended to do this type of URL encoding and is used
+                # elsewhere
+                #
+                
                 my $validatingMagnet = $magnet ;
                 $validatingMagnet =~ s/&/&amp;/g ;
                 
