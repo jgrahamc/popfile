@@ -1,4 +1,3 @@
-
 # POPFILE LOADABLE MODULE 3
 package Classifier::Bayes;
 
