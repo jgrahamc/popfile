@@ -519,7 +519,7 @@ Function GetLocalTimeAsMin100
   ; $1 contains the low  order Int32
   ; $2 contains the high order Int32
 
-  ; High order Int32 adjustment required if low order Int32 is negative
+  ; High order Int32 adjustment required if low order Int32 is negative (i.e. if top bit is set)
 
   StrCpy $3 $1 1
   StrCmp $3 "-" 0 convert_to_int64
