@@ -7,7 +7,7 @@
 
 include vars.mak
 
-.PHONY: test package windows core manual skins coverage
+.PHONY: test package windows core manual skins coverage macosx
 
 error:
 	@echo Must specify one of coverage, test, package or windows
@@ -17,6 +17,7 @@ error:
 	@echo "           (test and coverage pass the TESTARGS variable to the test suite)"
 	@echo
 	@echo "windows  - Build Windows installer" 
+        @echo "macosx   - Build Mac OS X package installer"
 	@echo "package  - Build Windows installer, and create"
 	@echo "           ZIP files for Windows and cross-platform"
 	@echo "           version"
@@ -36,6 +37,10 @@ ifdef TESTARGS
 	@echo with arguments '$(TESTARGS)'
 endif
 	@$(MAKE) --no-print-directory -C tests runtest TESTARGS=$(TESTARGS) DEBUGARGS=
+
+# Mac OS X is built in the Mac OS X directory
+
+macosx: ; @$(MAKE) -C ../macosx
 
 # windows builds the Windows installer
 
