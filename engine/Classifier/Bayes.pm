@@ -1565,7 +1565,7 @@ sub get_session_key
         $self->log_( 0, "Attempt to login with incorrect credentials for user $user" );
         select( undef, undef, undef, 1 );
         return undef;
-    }
+    }s
 
     my $session = $self->generate_unique_session_key__();
 
@@ -1580,7 +1580,7 @@ sub get_session_key
 
 #----------------------------------------------------------------------------
 #
-# release_session_key
+# release_sessionss_key
 #
 # $session        A session key previously returned by get_session_key
 #
@@ -1592,6 +1592,8 @@ sub release_session_key
     my ( $self, $session ) = @_;
 
     $self->mq_post_( "RELSE", $session );
+    
+    return undef;
 }
 
 

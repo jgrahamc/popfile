@@ -655,15 +655,16 @@ sub flush_slurp_data__
 
                 my $c;
                 my $retcode = sysread( $handle, $c, 1 );
+                $self->log_(2, "Slurp from $handle single character $c");
                 if ( $retcode == 1 ) {
                     if ( $c eq "\012" ) {
                         $cr .= $c;
                     } else {
                         $slurp_data__{"$handle"}{data} = $c;
-		    }
-		}
-	    }
-	}
+                    }
+                }
+            }
+        }
 
         return $cr;
     }
@@ -764,7 +765,7 @@ sub slurp_
     while ( sysread( $handle, $c, 160 ) > 0 ) {
         $slurp_data__{"$handle"}{data} .= $c;
 
-        $self->log_( 2, "Read slurp data $c" );
+        $self->log_( 2, "Read slurp data from $handle: $c" );
 
         $result = $self->flush_slurp_data__( $handle );
 
