@@ -210,10 +210,9 @@ sub read_pipe_
 
     if ( $^O eq "MSWin32" ) {
 
-        # PLATFORM SPECIFIC CODE
         # bypasses bug in -s $pipe under ActivePerl
 
-        my $message;
+        my $message;         # PROFILE PLATFORM START MSWin32
 
         if ( &{ $self->{pipeready_} }($handle) ) {
 
@@ -230,8 +229,7 @@ sub read_pipe_
 
         $message = $1 if ($self->{pipe_cache__} =~ s/(.*?\n)//);
 
-        return $message;
-
+        return $message;        # PROFILE PLATFORM STOP
     } else {
 
         # do things normally
