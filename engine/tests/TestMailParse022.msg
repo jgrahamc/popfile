@@ -1,7 +1,8 @@
 From: test@test.com
 To: someone@somewhere.com
 Cc: <someoneelse@somewhere.com>
-Subject: test for various HTML parts
+Subject: =?iso-8859-1?Q?test for various HTML parts?=
+Reply-To: =?somecharset?Q?someotherperson@somewhere.com?=
 
 <html>
 

@@ -29,3 +29,8 @@ www.bodysound.com 1
 header:Cc 1
 cc:someoneelse@somewhere.com 1
 cc:somewhere.com 1
+charset:iso-8859-1 1
+charset:somecharset 1
+header:Reply-To 1
+somewhere.com 1
+someotherperson@somewhere.com 1

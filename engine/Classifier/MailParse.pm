@@ -1121,7 +1121,7 @@ sub parse_line
                     $self->{ut__} = '';
                 }
 
-                $self->{ut__} .= splitline($line, $self->{encoding__});
+                $self->{ut__} .= $self->splitline($line, $self->{encoding__});
             }
 
             if ($self->{in_headers__}) {
@@ -1141,14 +1141,13 @@ sub parse_line
                     $self->{header__}   = '';
                     $self->{argument__} = '';
 
-                    $self->{ut__} .= splitline( "\015\012", 0 );
+                    $self->{ut__} .= $self->splitline( "\015\012", 0 );
 
                     $self->{in_headers__} = 0;
                     print "Header parsing complete.\n" if $self->{debug__};
 
                     next;
                 }
-
 
                 # If we have an email header then just keep the part after the :
 
@@ -1181,10 +1180,18 @@ sub parse_line
 
                 $self->{encoding__} = '';
 
-                if (!defined $2) {
+                if ( !defined( $2 ) ) {
+
+                    # This means there was no trailing -- on the mime boundary (which would
+                    # have indicated the end of a boundary, so now we have a new part of the
+                    # document, hence we need to look for new headers
+
                     print "Hit MIME boundary --$1\n" if $self->{debug__};
+
                     $self->{in_headers__} = 1;
                 } else {
+
+                    # A boundary was just terminated
 
                     $self->{in_headers__} = 0;
 
@@ -1192,15 +1199,19 @@ sub parse_line
 
                     print "Hit MIME boundary terminator --$1--\n" if $self->{debug__};
 
-                    # escape to match escaped boundary characters
+                    # Escape to match escaped boundary characters
 
                     $boundary =~ s/(.*)/\Q$1\E/g;
 
-                    my $temp_mime;
+                    # Remove the boundary we just found from the boundary list.  The list
+                    # is stored in $self->{mime__} and consists of mime boundaries separated
+                    # by the alternation characters | for use within a regexp
+
+                    my $temp_mime = '';
 
                     foreach my $aboundary (split(/\|/,$self->{mime__})) {
                         if ($boundary ne $aboundary) {
-                            if (defined $temp_mime) {
+                            if ( $temp_mime ne '' ) {
                                 $temp_mime = join('|', $temp_mime, $aboundary);
                             } else {
                                 $temp_mime = $aboundary
@@ -1208,22 +1219,12 @@ sub parse_line
                         }
                     }
 
-                    $self->{mime__} = ($temp_mime || '');
+                    $self->{mime__} = $temp_mime;
 
                     print "MIME boundary list now $self->{mime__}\n" if $self->{debug__};
-                    $self->{in_headers__} = 0;
                 }
 
                 next;
-            }
-
-            # If we are still in the headers then make sure that we are on a line with whitespace
-            # at the start
-
-            if ( $self->{in_headers__} ) {
-                if ( $line =~ /^[ \t\r\n]/ ) {
-                    next;
-                }
             }
 
             # If we are doing base64 decoding then look for suitable lines and remove them
@@ -1238,12 +1239,6 @@ sub parse_line
             }
 
             next if ( !defined($line) );
-
-            # Look for =?foo? syntax that identifies a charset
-
-            if ( $line =~ /=\?([^ ]{1,40})\?/ ) {
-                update_word( $self, $1, 0, '', '', 'charset' );
-            }
 
             # Decode quoted-printable
 
@@ -1413,10 +1408,6 @@ sub parse_header
 
         $argument = $self->decode_string( $argument );
 
-        if ( $argument =~ /=\?([^ ]{1,40})\?/ ) {
-            update_word( $self, $1, 0, '', '', 'charset' );
-        }
-
         if ( $header =~ /^From$/i )  {
             $self->{from__} = $argument if ( $self->{from__} eq '' ) ;
             $prefix = 'from';
@@ -1527,7 +1518,7 @@ sub parse_header
 
 sub splitline
 {
-    my ($line, $encoding) = @_;
+    my ( $self, $line, $encoding) = @_;
 
     $line =~ s/([^\r\n]{100,120} )/$1\r\n/g;
     $line =~ s/([^ \r\n]{120})/$1\r\n/g;

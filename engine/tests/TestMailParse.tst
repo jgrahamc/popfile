@@ -202,7 +202,16 @@ for my $color_test (@color_tests) {
     my $check = <HTML>;
     $check =~ s/[\r\n]*//g;
     close HTML;
-    test_assert_equal( $check, $html );
+    test_assert_equal( $check, $html, $color_test );
+
+    if ( $check ne $html ) {
+        open FILE, ">$color_test.expecting";
+        print FILE $check;
+        close FILE;
+        open FILE, ">$color_test.got";
+        print FILE $html;
+        close FILE;
+    }
 }
 
 $cl->{color__} = 0;
@@ -251,3 +260,7 @@ test_assert_equal( $cl->first20(), ' This is the title image' );
 $cl->parse_file( 'TestMailParse021.msg' );
 test_assert_equal( $cl->first20(), ' Take Control of Your Computer With This Top of the Line Software Norton SystemWorks Software Suite Professional Edition Includes Six' );
 
+# test splitline quoted-printable handling
+
+test_assert_equal( $cl->splitline( '=3Chtml=3E', 'quoted-Printable' ), '&lt;html&gt;' );
+test_assert_equal( $cl->splitline( '=3Chtml=3E', '' ), '=3Chtml=3E' );
