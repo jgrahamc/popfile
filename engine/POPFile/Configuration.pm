@@ -168,6 +168,18 @@ sub service
 {
     my ( $self ) = @_;
 
+    my $time = time;
+
+    if ( $self->{pid_check__} <= ( $time - $self->{pid_delay__})) {
+
+        $self->{pid_check__} = $time;
+
+        if ( !$self->check_pid_() ) {
+            $self->write_pid_();
+            $self->log_("New POPFile instance detected and signalled")
+        }
+    }
+
     return 1;
 }
 
@@ -201,25 +213,25 @@ sub live_check_
 
     if ( $self->check_pid_() ) {
 
+        my $oldpid = $self->get_pid_();
+
+        my $error = "\n\nA copy of POPFile appears to be running.\n Attempting to signal the previous copy.\n Waiting " . ($self->{pid_delay__} * 2) . " seconds for a reply.\n";
+
+        $self->delete_pid_();
+
+        print STDERR $error;
+
+        select(undef, undef, undef, ($self->{pid_delay__} * 2));
+
         my $pid = $self->get_pid_();
 
-        if ($pid != $$) {
-
-            my $error = "\n\nA copy of POPFile appears to be running.\n Attempting to signal the previous copy.\n";
-
+        if (defined($pid)) {
+            $error = "\n A copy of POPFile is running.\n It has signaled that it is alive with process ID: $pid\n";
             print STDERR $error;
-
-            if ( kill(0, $pid) ) {
-                # running
-                $error = "\n A copy of POPFile is running.\n It has signaled that it is alive with process ID: $pid\n";
-                print STDERR $error;
-                return $pid;
-            } else {
-                # not running
-                print STDERR "\nThe other POPFile ($pid) failed to signal back, starting new copy ($$)\n";
-                return undef;
-            }
-        }
+            return $pid;
+        } else {
+            print STDERR "\nThe other POPFile ($oldpid) failed to signal back, starting new copy ($$)\n";
+	}
     }
     return undef;
 }
