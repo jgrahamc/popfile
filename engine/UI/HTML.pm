@@ -1006,7 +1006,7 @@ sub handle_configuration_bar__
             if ( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ) ne 'English' ) {
                 $self->load_language( 'English', $session );
             }
-            $self->load_language( $self->user_config_( $self->{sessions__}{$session}{user}, 'language', $session ) );
+            $self->load_language( $self->user_config_( $self->{sessions__}{$session}{user}, 'language' ), $session );
 
             # Force a template relocalization because the language has been
             # changed which changes the localization of the template
