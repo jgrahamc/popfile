@@ -24,8 +24,8 @@
 #
 #--------------------------------------------------------------------------
 
-; This version of the script has been tested with the "NSIS 2 Release Candidate 4" compiler,
-; released 2 February 2004, with no patches applied.
+; This version of the script has been tested with the "NSIS 2" compiler (final),
+; released 7 February 2004, with no patches applied.
 ;
 ; Expect 3 compiler warnings, all related to standard NSIS language files which are out-of-date.
 
@@ -78,7 +78,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.3"
+  !define C_PFI_VERSION  "0.1.4"
 
   ; Mention the version number in the window title
 
@@ -186,8 +186,8 @@
   ; Use same language setting as the POPFile installer (if this registry entry
   ; is not found, the user will be asked to select the language to be used)
 
-  !define MUI_LANGDLL_REGISTRY_ROOT "HKLM"
-  !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\POPFile"
+  !define MUI_LANGDLL_REGISTRY_ROOT "HKCU"
+  !define MUI_LANGDLL_REGISTRY_KEY "Software\POPFile Project\POPFile\MRI"
   !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
 
 #--------------------------------------------------------------------------
@@ -323,8 +323,9 @@
 # Reserve the files required by the utility (to improve performance)
 #--------------------------------------------------------------------------
 
-  ;Things that need to be extracted on startup (keep these lines before any File command!)
-  ;Only useful for BZIP2 compression
+  ; Things that need to be extracted on startup (keep these lines before any File command!)
+  ; Only useful when solid compression is used (by default, solid compression is enabled
+  ; for BZIP2 and LZMA compression)
 
   !insertmacro MUI_RESERVEFILE_LANGDLL
 
@@ -344,7 +345,7 @@ FunctionEnd
 # Installer Function: PFIGUIInit
 # (custom .onGUIInit function)
 #
-# Used to complete the initialisation of the utility. This code was moved from
+# Used to complete the initialization of the utility. This code was moved from
 # '.onInit' in order to permit the use of language-specific error messages
 #--------------------------------------------------------------------------
 
@@ -580,9 +581,11 @@ Section ConvertCorpus
   !define L_CORPUS_SIZE   $R5     ; total number of bytes in all the bucket files in the list
   !define L_LAST_CHANGE   $R4     ; used to detect when a bucket file has been deleted
   !define L_MPBINDIR      $R3     ; folder containing wperl.exe file
-  !define L_START_TIME    $R2     ; time in Min100 units when we started the corpus conversion
-  !define L_TEMP          $R1
-  !define L_TIME_LEFT     $R0     ; estimated time remaining (updated when a file is deleted)
+  !define L_POPFILE_ROOT  $R2     ; environment variable holding path to popfile.pl
+  !define L_POPFILE_USER  $R1     ; environment variable holding path to popfile.cfg
+  !define L_START_TIME    $R0     ; time in Min100 units when we started the corpus conversion
+  !define L_TEMP          $9
+  !define L_TIME_LEFT     $8      ; estimated time remaining (updated when a file is deleted)
 
   !define L_RESERVED      $0      ; used to get result from the System.dll plugin
   Push ${L_RESERVED}
@@ -594,6 +597,8 @@ Section ConvertCorpus
   Push ${L_CORPUS_SIZE}
   Push ${L_LAST_CHANGE}
   Push ${L_MPBINDIR}
+  Push ${L_POPFILE_ROOT}
+  Push ${L_POPFILE_USER}
   Push ${L_START_TIME}
   Push ${L_TEMP}
   Push ${L_TIME_LEFT}
@@ -629,13 +634,13 @@ Section ConvertCorpus
   StrCmp $G_STILL_TO_DO "" no_kanwa_path
 
   System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("ITAIJIDICTPATH", "${L_TEMP}").r0'
-  StrCmp $0 0 0 itaiji_set_ok
+  StrCmp ${L_RESERVED} 0 0 itaiji_set_ok
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (ITAIJIDICTPATH)"
   Goto exit
 
 itaiji_set_ok:
   System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("KANWADICTPATH", "$G_STILL_TO_DO").r0'
-  StrCmp $0 0 0 kakasi_done
+  StrCmp ${L_RESERVED} 0 0 kakasi_done
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (KANWADICTPATH)"
   Goto exit
 
@@ -664,12 +669,17 @@ start_error:
   Goto exit
 
 kakasi_done:
+  ReadEnvStr ${L_POPFILE_ROOT} POPFILE_ROOT
+  ReadEnvStr ${L_POPFILE_USER} POPFILE_USER
+
   GetFullPathName /SHORT ${L_TEMP} $G_ROOTDIR
   Push ${L_TEMP}
   Call StrLower
   Pop ${L_TEMP}
+  StrCmp ${L_TEMP} ${L_POPFILE_ROOT} root_set_ok
+
   System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_ROOT", "${L_TEMP}").r0'
-  StrCmp $0 0 0 root_set_ok
+  StrCmp ${L_RESERVED} 0 0 root_set_ok
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (POPFILE_ROOT)"
   Goto exit
 
@@ -678,17 +688,14 @@ root_set_ok:
   Push ${L_TEMP}
   Call StrLower
   Pop ${L_TEMP}
+  StrCmp ${L_TEMP} ${L_POPFILE_USER} user_set_ok
+
   System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_USER", "${L_TEMP}").r0'
-  StrCmp $0 0 0 user_set_ok
+  StrCmp ${L_RESERVED} 0 0 user_set_ok
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (POPFILE_USER)"
   Goto exit
 
 user_set_ok:
-
-  ; Temporary workaround: need to set the working directory otherwise POPFile will not run
-
-  SetOutpath $G_ROOTDIR
-
   ClearErrors
   Exec '"${L_MPBINDIR}\wperl.exe" "$G_ROOTDIR\popfile.pl"'
   IfErrors start_error
@@ -813,6 +820,8 @@ exit:
   Pop ${L_TIME_LEFT}
   Pop ${L_TEMP}
   Pop ${L_START_TIME}
+  Pop ${L_POPFILE_USER}
+  Pop ${L_POPFILE_ROOT}
   Pop ${L_MPBINDIR}
   Pop ${L_LAST_CHANGE}
   Pop ${L_CORPUS_SIZE}
@@ -831,6 +840,8 @@ exit:
   !undef L_CORPUS_SIZE
   !undef L_LAST_CHANGE
   !undef L_MPBINDIR
+  !undef L_POPFILE_ROOT
+  !undef L_POPFILE_USER
   !undef L_START_TIME
   !undef L_TEMP
   !undef L_TIME_LEFT
