@@ -2158,13 +2158,15 @@
   FunctionEnd
 !macroend
 
-#--------------------------------------------------------------------------
-# Installer Function: GetPOPFileSchemaVersion
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
+!ifdef ADDUSER | INSTALLER
+    #--------------------------------------------------------------------------
+    # Installer Function: GetPOPFileSchemaVersion
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
 
-;!insertmacro GetPOPFileSchemaVersion ""
+    !insertmacro GetPOPFileSchemaVersion ""
+!endif
 
 #--------------------------------------------------------------------------
 # Uninstaller Function: un.GetPOPFileSchemaVersion
@@ -2278,8 +2280,8 @@
     Call ${UN}TrimNewlines
     Pop ${L_SQL_CONNECT}
     StrCmp ${L_SQL_CONNECT} "" no_sql_set
-    StrCpy ${L_SQL_CONNECT} ${L_SQL_CONNECT} 11
-    StrCmp ${L_SQL_CONNECT} "dbi:SQLite:" 0 not_sqlite
+    StrCpy ${L_SQL_CONNECT} ${L_SQL_CONNECT} 10
+    StrCmp ${L_SQL_CONNECT} "dbi:SQLite" 0 not_sqlite
 
     Push ${L_SQL_CORPUS}
     Call ${UN}TrimNewlines
@@ -2442,7 +2444,7 @@
   FunctionEnd
 !macroend
 
-!ifdef BACKUP | RUNSQLITE | RESTORE
+!ifdef ADDUSER | BACKUP | RUNSQLITE | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: GetSQLiteFormat
     #
@@ -2556,7 +2558,7 @@
   FunctionEnd
 !macroend
 
-!ifdef BACKUP | RESTORE
+!ifdef ADDUSER | BACKUP | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: GetSQLiteSchemaVersion
     #
