@@ -81,6 +81,8 @@ my $non_spacing_tags = "a|abbr|acronym|b|big|blink" . # PROFILE BLOCK START
     "|cite|code|del|dfn|em|font|i|img|ins|kbd|q|s" .
     "|samp|small|span|strike|strong|sub|sup|tt|u|var"; # PROFILE BLOCK STOP
 
+my $eol = "\015\012";
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -1211,9 +1213,16 @@ sub parse_line
                     next;
                 }
 
-                # If we have an email header then just keep the part after the :
+                # Append to argument if the next line begins with whitespace (isn't a new header)
 
-                if ( $line =~ /^([A-Za-z-]+):[ \t]*([^\n\r]*)/ )  {
+                if ( $line =~ /^([\t ].+)([^\r\n]+)/ ) {
+                    $self->{argument__} .= "$eol$1$2";
+                    next;
+                }
+
+                # If we have an email header then split it into the header and its argument
+
+                if ( $line =~ /^([A-Za-z\-]+):[ \t]*([^\n\r]*)/ )  {
 
                     # Parse the last header
 
@@ -1226,11 +1235,6 @@ sub parse_line
                     next;
                 }
 
-                # Append to argument if the next line begins with whitespace (isn't a new header)
-
-                if ( $line =~ /^([\t ].*?)(\r\n|\r|\n)/ ) {
-                    $self->{argument__} .= "\015\012" . $1;
-                }
                 next;
             }
 
@@ -1411,7 +1415,6 @@ sub get_header
     return $self->{$header . '__'};
 }
 
-
 # ---------------------------------------------------------------------------------------------
 #
 # parse_header - Performs parsing operations on a message header
@@ -1541,7 +1544,12 @@ sub parse_header
                 return ($mime, $encoding);
             }
         }
-        return ($mime, $encoding);
+
+        if ( $argument =~ /name=\"(.*)\"/i ) {
+            $self->add_attachment_filename( $1 );
+        }
+
+        return ( $mime, $encoding );
     }
 
     # Look for the different encodings in a MIME document, when we hit base64 we will
@@ -1564,11 +1572,100 @@ sub parse_header
 
     $argument = $self->decode_string($argument) unless ($header =~ /^(Received|Content\-Type|Content\-Disposition)$/i);
 
+    if ( $header =~ /^Content-Disposition$/i ) {
+        $self->handle_disposition( $argument );
+	return ( $mime, $encoding );
+    }
+
     add_line( $self, $argument, 0, $prefix );
 
     return ($mime, $encoding);
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# match_attachment_filename - Matches a line  like 'attachment; filename="<filename>"
+#
+# $line         The line to match
+# Returns       The first match (= "attchment" if found)
+#               The second match (= name of the file if found)
+#	
+# ---------------------------------------------------------------------------------------------
+sub match_attachment_filename
+{
+    my ( $self, $line ) = @_;
+
+    $line =~ /\s*(.*);\s*filename=\"(.*)\"/;
+
+    return ( $1, $2 );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# file_extension - Splits a filename into name and extension
+#
+# $filename     The filename to split
+# Returns       The name of the file
+#               The extension of the file
+#	
+# ---------------------------------------------------------------------------------------------
+sub file_extension
+{
+    my ( $self, $filename ) = @_;
+
+    $filename =~ s/(.*)\.(.*)$//;
+
+    if ( length( $1 ) > 0 ) {
+        return ( $1, $2 );
+    } else {
+        return ( $filename, "" );
+    }
+}
+# ---------------------------------------------------------------------------------------------
+#
+# add_attachment_filename - Adds a file name and extension as pseudo words attchment_name
+#                         and attachment_ext
+#
+# $filename     The filename to add to the list of words
+#	
+# ---------------------------------------------------------------------------------------------
+sub add_attachment_filename
+{
+    my ( $self, $filename ) = @_;
+	
+    if ( length( $filename ) > 0) {
+        print "Add filename $filename\n" if $self->{debug};
+
+        my ( $name, $ext ) = $self->file_extension( $filename );
+
+        if ( length( $name ) > 0) {
+            $self->update_pseudoword( 'mimename', $name, 0, $name );
+        }
+
+        if ( length( $ext ) > 0 ) {
+            $self->update_pseudoword( 'mimeextension', $ext, 0, $ext );
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# handle_disposition - Parses Content-Disposition header to extract filename.
+#                      If filename found, at the file name and extension to the word list
+#
+# $params     The parameters of the Content-Disposition header
+#	
+# ---------------------------------------------------------------------------------------------
+sub handle_disposition
+{
+    my ( $self, $params ) = @_;
+	
+    my ( $attachment, $filename ) = $self->match_attachment_filename( $params );
+
+    if ( $attachment eq 'attachment' ) {
+        $self->add_attachment_filename( $filename ) ;
+    }
+}
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -1578,7 +1675,6 @@ sub parse_header
 # $encoding     The value of any current encoding scheme
 #
 # ---------------------------------------------------------------------------------------------
-
 sub splitline
 {
     my ( $self, $line, $encoding) = @_;

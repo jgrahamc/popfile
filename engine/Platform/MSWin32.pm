@@ -62,9 +62,14 @@ sub initialize
     my ( $self ) = @_;
 
     $self->config_( 'trayicon', 1 );
+    $self->config_( 'console',  0 );
 
     $self->register_configuration_item_( 'configuration',
                                          'windows_trayicon',
+                                         $self );
+
+    $self->register_configuration_item_( 'configuration',
+                                         'windows_console',
                                          $self );
 
     return 1;
@@ -109,6 +114,26 @@ sub configure_item
         $body .= "</td></tr></table>\n";
     }
 
+    if ( $name eq 'windows_console' ) {
+        $body .= "<span class=\"configurationLabel\">$$language{Windows_Console}:</span><br />\n";
+        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
+
+        if ( $self->config_( 'console' ) == 0 ) {
+            $body .= "<form action=\"/configuration\">\n";
+            $body .= "<span class=\"securityWidgetStateOff\">$$language{No}</span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowConsoleOn\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"windows_console\" value=\"1\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        } else {
+            $body .= "<form action=\"/configuration\">\n";
+            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowConsoleOff\" name=\"toggle\" value=\"$$language{ChangeToNo}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"windows_console\" value=\"0\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        }
+        $body .= "</td></tr></table>\n";
+    }
+
     return $body;
 }
 
@@ -131,16 +156,18 @@ sub validate_item
     if ( $name eq 'windows_trayicon' ) {
         if ( defined($$form{windows_trayicon}) ) {
             $self->config_( 'trayicon', $$form{windows_trayicon} );
-
-            if ( $$form{windows_trayicon} == 0 ) {
-                $self->{hideicon__} = Win32::API->new( "Platform/POPFileIcon.dll", "HideIcon", "", "N" );
-                $self->{hideicon__}->Call();
-                undef $self->{hideicon__};
-	    }
+            return $$language{Windows_NextTime};
         }
     }
 
-    return '';
+    if ( $name eq 'windows_console' ) {
+        if ( defined($$form{windows_console}) ) {
+            $self->config_( 'console', $$form{windows_console} );
+            return $$language{Windows_NextTime};
+        }
+    }
+
+   return '';
 }
 
 1;

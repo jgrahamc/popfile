@@ -764,5 +764,12 @@ sub debug
     $self->{debug__} = $debug;
 }
 
+sub module_config
+{
+    my ( $self, $module, $item, $value ) = @_;
+
+    return $self->{components__}{core}{config}->module_config_( $module, $item, $value );
+}
+
 1;
 
