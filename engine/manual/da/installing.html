@@ -1,0 +1,87 @@
+<html><head><title>POPFile Dokumentation</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile Dokumentation</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Førstegangs-opsætning:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%>Trin 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installering</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Trin 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Opsætning af spande</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Trin 3<br><font size=+1><b>&nbsp;<a href="email.html">E-postprogrammer</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>Trin 4<br><font size=+1><b>&nbsp;<a href="training.html">Træning</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>Brug af POPFile med:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Sikker adgangskode-godkendelse</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Andre proxier</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Flere e-postkonti</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+<h2>Installering af POPFile</h2>
+
+<p>POPFile fås i to versioner: En Windowsversion med installationsprogram og en krydsplatformsversion til de teknisk orienterede brugere. Når de først er installeret, er de to versioner ens.</p>
+
+<h3>Windowsversion med installationsprogram</h3>
+
+<p>Hent installationsprogrammet fra <a href=http://sourceforge.net/project/showfiles.php?group_id=63137>POPFiles downloadside</a>, kør <tt>setup.exe</tt> og følg anvisningerne. Du kan enten starte POPFile fra startmenuen (Start > Programmer > POPFile > Run POPFile in Background), eller du kan genstarte, hvorefter POPFile vil køre automatisk. <b>Vigtigt:</b> Der vil ikke blive vist noget på din skærm! Læs afsnittet "Tilgå POPFile" nedenfor, for at undersøge om det kører korrekt.</p>
+
+<h4>Systemkrav</h4>
+
+<p>Du får brug for flere ting for at komme i gang med POPFile.</p>
+<ol>
+<li>Den seneste udgave af POPFile.</li>
+<li>En e-postkonto, der bruger POP3-protokollen (det gør de fleste konti, men du kan ikke bruge POPFile med webbaserede tjenester som f.eks. Hotmail og Yahoo! Mail uden ekstra software).</li>
+<li>Omtrent 2MB ledig plads på harddisken</li>
+</ol>
+
+<p>Du kan finde den seneste udgave af POPFile som en zip-fil i toppen af pakkelisten på <a href="http://sourceforge.net/project/showfiles.php?group_id=63137">POPFiles
+downloadside</a>. Windowsbrugere bør vælge filen i afsnittet mærket "Windows Only".</p>
+<p>POPFile selv fylder godt og vel en megabyte. Ordlisterne (kaldet korpusset), der bruges til at klassificere dine breve, vil tage yderligere noget plads, afhængigt af, hvor meget post, du bruger til at træne POPFile, og af hvor mange spande du opretter. </p>
+
+<h3>Krydsplatformsversion</h3>
+
+<p>Få <a href="http://www.perl.com">Perl</a> til at køre på din maskine, download POPFile-Perl-zippen fra <a href=http://popfile.sourceforge.net/>POPFiles Hjemmeside</a>, og udpak den til en mappe efter dit valg. På Windowsplatforme kan du så starte programmet med kommandoen <tt>perl popfile.pl</tt>.
+
+<hr>
+
+<h2>Undersøg om POPFile kører korrekt</h2>
+
+<p>POPFile har ikke en traditionel brugerflade som de fleste programmer - du tilgår det fra din browser. Bare rolig - med mindre du fortæller det noget andet, kan ingen udenfor din maskine få adgang til POPFile.</p>
+
+<p>For at tilgå POPFile, skal du gå til <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a>, eller (for Windowsversionen) klikke på "POPFile Web Interface"-linket i din Startmenu. <b>Vigtigt</b>: Hvis du i løbet af installationsprocessen har valgt en anden port at tale med POPFile på, skal du erstatte "8080" med det nummer, du valgte.</p>
+
+<p>Hvis du får en fejlmeddelelse, så undersøg, om POPFile virkelig kører, og om du har indstillet portnummeret rigtigt (det burde være 8080, men hvis du har ændret det, er du også nødt til at ændre nummeret i den webadresse, du går til).</p>
+
+<p>Hvis du ser en POPFile-skærm, så tillykke! Nu er det tid at indstille, hvordan du vil have din post sorteret. <a href="firsttime.html">Lad os fortsætte til opsætningen af spandene. &gt;&gt;</a></p>
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Links:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Hjemmeside</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Fora</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Fejldatabase</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>

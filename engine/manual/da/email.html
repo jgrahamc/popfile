@@ -1,0 +1,442 @@
+<html><head><title>POPFile Dokumentation</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile Dokumentation</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Førstegangs-opsætning:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>Trin 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installering</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Trin 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Opsætning af spande</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#cccc99 width=15% align=center>Trin 3<br><font size=+1><b>&nbsp;<a href="email.html">E-postprogrammer</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>Trin 4<br><font size=+1><b>&nbsp;<a href="training.html">Træning</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>Brug af POPFile med:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Sikker adgangskode-godkendelse</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Andre proxier</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Flere e-postkonti</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+
+
+
+
+<h2>At få dit e-postprogram til at snakke sammen med POPFile</h2>
+
+
+
+<p>POPFile fungerer som en <i>proxy-server</i>. Dit e-postprogram snakker med POPFile, som snakker med din e-postserver på dets vegne. I stedet for at dit e-postprogram modtager brevene direkte, fanger POPFile dem først og skanner dem for at beslutte, hvilken spand de skal lande i.</p>
+
+
+
+<p>Når det er besluttet - det tager kun en brøkdel af et sekund - gør POPFile en af to ting: Det kan tilføje et mærke som [dette] til begyndelsen af emnelinien, hvilket betyder, at simple filtreringsprogrammer, som Microsoft Outlook Express, kan levere posten, hvor de skal, eller det kan tilføje en ny header:</p>
+
+
+
+<p><b>X-Text-Classification: personlig</b></p>
+
+
+
+ <p>- som mere avancerede e-postprogrammer, f.eks. Eudora, kan benytte til at filtrere ud fra.</p>
+
+
+
+<p>Du er nødt til at gøre to ting for at få dit e-postprogram til at snakke med POPFile:
+
+
+
+<ol><li>Indstille dit e-postprogram til at snakke med POPFile og
+
+<li>indstille dine postfiltre, så brevene bliver sorteret rigtigt.</ol></p>
+
+
+
+<p>Lad os indstille e-postindstillingerne først. Vi vil sætte filtrene op om et øjeblik.
+
+
+
+<p>Nedenfor er der anvisninger til nogle af de mere populære e-postprogrammer. Til andre - eller til avancerede brugere - er der her nogle generelle instruktioner:</p>
+
+
+
+<p><ul><li>Sæt POP-servernavnet i dit e-postprogram til 127.0.0.1, og skriv den originale adresse ned.
+
+<li>Lav POP3-brugernavnet om til [original-POP3-serveraddresse]:[username].
+
+<li>Lad kodeordet stå som det er.</ul></p>
+
+
+
+<p>Se <a href=spa.html>Brug af POPFile med sikker adgangskode-godkendelse</a> for konti, der bruger sikker adgangskode-godkendelse</p>
+
+
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+
+
+<td colspan=3 align="center">
+
+
+
+Find dit e-postprogram og følg kolonnen nedad. Selv om instruktionerne kan se komplicerede ud, tager de faktisk kun et par minutter - og det er svært at gå fejl. (skriv for en sikkerheds skyld dine oprindelige indstillinger ned, hvis du skulle få brug for at fortryde.)
+
+
+
+</td></tr><tr>
+
+
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Outlook</h3>
+
+
+
+<ul>
+
+<li>Vælg menuen "Funktioner->Konti..." i Outlook. Vinduet "Internetkonti" kommer frem. <a href=./o_popfile1_da.gif>[skærmbillede]</a>
+
+<li>Vælg den konto du vil arbejde med og klik på "Egenskaber".
+
+Gå til fanebladet "Servere" og notér navnet på din POP3-server. <a href=./o_popfile2_da.gif>[skærmbillede]</a>
+
+<li>Ret servernavnet i boksen "Indgående post (POP3)" til <b>127.0.0.1</b> og ret kontonavnet til en kombination af det gamle kontonavn og den oprindelige serveradresse, adskilt af et kolon. <a href=./o_popfile3_da.gif>[skærmbillede]</a>
+
+<li>Det vil sige, at hvis den oprindelige serveradresse til "Indgående post (POP3)" var <b>my.mail.com</b> og dit kontonavn var <b>jdoe</b>, så skal dit nye kontonavn være <b>my.mail.com:jdoe</b>
+
+<li>Du behøver ikke at ændre kodeordet.
+
+<li>Tryk "OK" og "Luk".
+
+<li>Sørg for, at POPFile kører, og al post vil blive leveret gennem POPFile!
+
+<li>Du er nødt til at sørge for, at POPFile bliver startet sammen med Windows. Hvis du bruger Windowsversionen med installationsprogram, kan du trække linket "Start POPFile in Background" fra POPFile-mappen i din startmenu til <b>Start</b>-mappen. Windows vil så starte POPFile, hver gang den selv starter.
+
+<li>Vigtigt! Hvis POPFile ikke kører, vil posten ikke nå igennem - og dit e-postprogram vil ikke opnå forbindelse!
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+
+
+<h3 align=center>Outlook Express</h3>
+
+
+
+<ul>
+
+<li>Vælg Funktioner->Konti... i Outlook Express.  Dialogen "Internetkonti" vil komme frem. <a href=./oe_popfile1_da.gif>[skærmbillede]</a>
+
+<li>Vælg den konto du vil ændre til at benytte POPFile og klik på "Egenskaber". <a href=./oe_popfile2_da.gif>[skærmbillede]</a>
+
+<li>Vælg fanebladet "Servere". Notér serveradressen i "Indgående post (POP3)" og kontonavnet i afsnittet "Server til indgående post". <a href=./oe_popfile3_da.gif>[skærmbillede]</a>
+
+<li>Ret servernavnet i "Indgående post (POP3)" til <b>127.0.0.1</b> og ret kotonavnet i afsnittet "Server til indgående post" til kombinationen af det oprindelige servernavn og det oprindelige kontonavn, adskilt af et kolon. <a href=./oe_popfile4_da.gif>[skærmbillede]</a>
+
+<li>Det vil sige, at hvis den oprindelige serveradresse til "Indgående post (POP3)" var <b>my.mail.com</b>, og dit kontonavn var <b>jdoe</b>, så skal dit nye kontonavn være <b>my.mail.com:jdoe</b>
+
+<li>Du behøver ikke at ændre kodeordet.
+
+<li>Tryk "OK" og "Luk"
+
+<li>Sørg for, at POPFile kører, og al post vil blive leveret gennem POPFile!
+
+<li>Du er nødt til at sørge for, at POPFile bliver startet sammen med Windows. Hvis du bruger Windowsversionen med installationsprogram, kan du trække linket "Start POPFile in Background" fra POPFile-mappen i din startmenu til <b>Start</b>-mappen. Windows vil så starte POPFile, hver gang den selv starter.
+
+<li>Vigtigt! Hvis POPFile ikke kører, vil posten ikke nå igennem - og dit e-postprogram vil ikke opnå forbindelse!
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCCCFF" valign="top">
+
+
+
+<h3 align=center>Eudora</h3>
+
+
+
+<ul>
+
+<li>Vælg Tools->Options...-menuen i Eudora. Options-dialogen vil komme frem. <a href=../e_popfile1.gif>[skærmbillede]</a>
+
+<li>Notér adressen på din postserver i rubrikken "Mail Server (incoming)" og brugernavnet i rubrikken "Login Name". <a href=../e_popfile2.gif>[skærmbillede]</a>
+
+<li>Ret serveradressen i rubrikken "Mail Server (incoming)" til <b>127.0.0.1</b> og ret brugernavnet i rubrikken "Login Name" til kombinationen af den oprindelige serveradresse og det oprindelige brugernavn, adskilt af et kolon. <a href=../e_popfile3.gif>[skærmbillede]</a>
+
+<li>Det vil sige, at hvis den oprindelige serveradresse [Mail Server (incoming)] var <b>my.mail.com</b> og dit brugernavn [Login Name] var <b>jdoe</b>, så skal dit nye brugernavn være <b>my.mail.com:jdoe</b>
+
+<li>Du behøver ikke at ændre kodeordet.
+
+<li>Tryk OK.
+
+<li>Sørg for, at POPFile kører, og al post vil blive leveret gennem POPFile!
+
+<li>Du er nødt til at sørge for, at POPFile bliver startet sammen med Windows. Hvis du bruger Windowsversionen med installationsprogram, kan du trække linket "Start POPFile in Background" fra POPFile-mappen i din startmenu til <b>Start</b>-mappen. Windows vil så starte POPFile, hver gang den selv starter.
+
+<li>Vigtigt! Hvis POPFile ikke kører, vil posten ikke nå igennem - og dit e-postprogram vil ikke opnå forbindelse!
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Pegasus</h3>
+
+
+
+<ul>
+
+<li> Vælg "Tools->Internet Options...", fanebladet "Receiving (POP3)" i Pegasus. <a href=../p_popfile1.gif>[skærmbillede]</a>
+
+<li> Vælg punktet "POP3 Host" i afsnittet "General settings for receiving mail via POP3". Notér navnet på POP3-værten ("POP3 host"). <a href=../p_popfile2.gif>[skærmbillede]</a>
+
+<li> Ret navnet på POP3-værten til <b>127.0.0.1</b>
+
+
+<li>Ret brugernavnet i punktet "User name" til kombinationen af det oprindelige navn på POP3-værten og brugernavnet, adskilt af et kolon. <a href=../p_popfile3.gif>[skærmbillede]</a>
+
+<li>Det vil sige, at hvis den oprindelige POP3-vært hed <b>my.mail.com</b> og dit brugernavn var <b>jdoe</b>, så skal dit nye brugernavn være <b>my.mail.com:jdoe</b>
+
+<li>Du behøver ikke at ændre kodeordet.
+
+<li>Klik "OK" for at gemme ændringerne.
+
+<li>Sørg for, at POPFile kører, og al post vil blive leveret gennem POPFile!
+
+<li>Du er nødt til at sørge for, at POPFile bliver startet sammen med Windows. Hvis du bruger Windowsversionen med installationsprogram, kan du trække linket "Start POPFile in Background" fra POPFile-mappen i din startmenu til <b>Start</b>-mappen. Windows vil så starte POPFile, hver gang den selv starter.
+
+<li>Vigtigt! Hvis POPFile ikke kører, vil posten ikke nå igennem - og dit e-postprogram vil ikke opnå forbindelse!
+
+</ul>
+
+
+
+</td></tr></table>
+
+
+
+<p>Okay. Nu, hvor det er gjort, er det tid at sætte dine postfiltre op, så dit e-postprogram kan sortere dine breve ud i passende foldere, efter at POPFile har gjort sit.</p>
+
+
+
+<p>Avancerede brugere - eller brugere af Outlook Express - har mulighed for at modificere emnelinien ved at tilføje et  [klassifikations]-mærke. Funktionen ligger på fanebladet "Indstillinger" i kontrolcenteret. Uanset, om emnelinie-modifikation er slået til eller fra, vil headeren <b>X-Text-Classification</b> stadig blive tilføjet.</p>
+
+
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+
+
+<td colspan=3 align="center">
+
+
+
+Find dit e-postprogram og følg kolonnen nedad. Selv om instruktionerne kan se komplicerede ud, tager de faktisk kun et par minutter - og det er svært at gå fejl. (Skriv for en sikkerheds skyld dine oprindelige indstillinger ned, hvis du skulle få brug for at fortryde.)
+
+
+
+</td></tr><tr>
+
+
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Outlook</h3>
+
+
+
+<ul>
+
+<li>Vælg punktet "Guiden regler..." i menuen "Funktioner" i Outlook. <a href=./o_filter1_da.gif>[skærmbillede]</a>
+
+<li>Guiden "Regler" kommer frem. Klik på "Ny" og vælg "Undersøg meddelelser, når de ankommer". <a href=./o_filter2_da.gif>[skærmbillede]</a>
+
+<li>Outlook kan bruge <b>X-Text-Classification</b>-headeren, som tillader postfiltreringen at foregå helt i baggrunden. Klik på "Næste" og vælg <i>med bestemte ord i meddelelsens brevhoved</i> i feltet "Hvilke betingelser skal kontrolleres?".
+
+<li>Klik på det understregede <i>bestemte ord</i>  i feltet "Beskrivelse af regel..." og skriv "X-Text-Classification: " efterfulgt af navnet på en af dine spande i den boks som kommer frem. Klik "OK".
+
+<li>Klik "Næste" og vælg <i>flyt den til mappen <mappenavn></i>.
+
+<li>Klik på det understregede <i>mappenavn</i> i feltet "Beskrivelse af regel...". En liste over mapper kommer frem. Vælg den mappe, du vil have brevene flyttet til, og klik "OK".
+
+<li>Tryk "OK" og "Udfør".
+
+<li>Gentag processen for hver af dine spande og tryk "OK".
+
+<li>Du er færdig!
+
+<li>Bemærk: Gå til <a href="http://127.0.0.1:8080">POPFiles kontrolcenter</a>, fanebladet "Indstillinger" og check, at "Emnelinie-modifikation" er slået <b>fra</b>.
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+
+
+<h3 align=center>Outlook Express</h3>
+
+
+
+<ul>
+
+<li>Vælg "Funktioner->Meddelelsesregler->Post..." i Outlook Express. <a href=./oe_filter1_da.gif>[skærmbillede]</a>
+
+<li>Vinduet "Ny Postregel" kommer frem.  <a href=./oe_filter2_da.gif>[skærmbillede]</a>
+
+<li>Outlook Express kan ikke bruge <b>X-Text-Classification</b>-headeren, som ville tillade postfiltreringen at foregå helt i baggrunden. Så i stedet for må du klikke på <i>Hvor emnelinien indeholder bestemte ord</i> (Punkt 1) og på <i>Flyt til den angivne mappe</i> (Punkt 2) <a href=./oe_filter3_da.gif>[skærmbillede]</a>
+
+<li>Klik på det blå, fremhævede link <i>indeholder bestemte ord</i> under punkt 3. Vinduet "Skriv bestemte ord" kommer frem. <a href=./oe_filter4_da.gif>[skærmbillede]</a>
+
+<li>Skriv navnet på en af dine spande, omgivet af [skarpe parenteser] og tryk "OK". Klik på det blå, fremhævede link "<i>angivne</i>". Vinduet "Flyt" kommer frem. Klik på den mappe, du vil have brevene flyttet til, og tryk "OK". <a href=./oe_filter5_da.gif>[skærmbillede]</a>
+
+<li>Tryk "OK".
+
+<li>Gentag processen for hver af dine spande og tryk "OK".
+
+<li>Du er færdig!
+
+<li>Bemærk: Gå til <a href="http://127.0.0.1:8080">POPFiles kontrolcenter</a>, fanebladet "Indstillinger" og check, at "Emnelinie-modifikation" er slået <b>til</b>.
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCCCFF" valign="top">
+
+
+
+<h3 align=center>Eudora</h3>
+
+
+
+<p>Eudora kan filtrere på baggrund af en hvilken som helst mail-header, og det betyder, at postfiltreringen kan foregå helt i baggrunden, uden at ændre emnelinien.</p>
+
+
+
+<ul>
+
+<li>Vælg "Tools->Filters"-menuen. <a href=../e_filter1.gif>[skærmbillede]</a>
+
+<li>Vinduet "Filters" kommer frem. Klik "New" for at lave et nyt filter. <a href=../e_filter2.gif>[skærmbillede]</a>
+
+<li>Skriv "<b>X-Text-Classification</b>" i "Header"-feltet. Skriv navnet på en af dine spande i feltet ved siden af "contains". Tilføj <b>Ikke</b> [skarpe parenteser] rundt om navnet. <a href=../e_filter3.gif>[skærmbillede]</a>
+
+<li>Vælg "<b>Transfer To</b>" i det første felt i afsnittet "Action" og vælg den mappe, du vil overføre posten fra denne spand til. <a href=../e_filter4.gif>[skærmbillede]</a>
+
+
+<li>Gentag processen for hver af dine spande, luk vinduet "Filters" og svar "Yes", når du bliver spurgt, om du vil gemme ændringerne.
+
+<li>Du er færdig!
+
+<li>Bemærk: Gå til <a href="http://127.0.0.1:8080">POPFiles kontrolcenter</a>, fanebladet "Indstillinger" og check, at "Emnelinie-modifikation" er slået <b>fra</b>.
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Pegasus</h3>
+
+
+
+<ul>
+
+<li>   Vælg "Tools->Mail Filtering Rules ->Edit New Mail Filtering Rules->Rules Applied When Folder is Opened" i Pegasus. <a href=../p_filter1.gif>[skærmbillede]</a>
+
+<li>   Vinduet "New Mail Filtering Rules" kommer frem. <a href=../p_filter2.gif>[skærmbillede]</a>
+
+<li>   Klik på knappen "Add rule". Vinduet "Create a New Filtering Rule" kommer frem. <a href=../p_filter3.gif>[skærmbillede]</a>
+
+<li>   Klik på knappen "Expression". Bemærk: Ved at bruge "Expression", vil Pegasus filtrere posten, også selv om POPFiles emnelinie-modifikation er slået fra. Hvis du bruger "header"-filtret, skal emnelinie-modifikationen være slået til.
+
+<li>   Vælg boksen "If this regular expression".
+
+<li>   Skriv først "<b>X-Text-Classification:</b>", dernæst navnet på en af dine spande, f.eks: "<b>X-Text-Classification: spam</b>" <a href=../p_filter4.gif>[skærmbillede]</a>
+
+<li>   Vælg radioknappen "Headers or body".
+
+<li>   Vælg "Move" fra "Action"-listen.
+
+<li>  Klik "Set".
+
+<li>  Vælg den folder, du vil have dine breve flyttet til, f.eks. "spam"
+
+<li>  Klik "OK" for at tilføje reglen til regellisten.
+
+<li>  Gentag processen for hver af dine spande.
+
+<li>  Rækkefølgen, som reglerne aktiveres i, kan ændres ved at bruge de røde og blå op/ned-pile i vinduet "New Mail Filter Rules".
+
+<li>  Klik på "Save"-knappen for at gemme ændringerne.
+
+<li>  Klik på "Close"-knappen.
+
+<li>  Du er færdig!
+
+<li>Bemærk: Gå til <a href="http://127.0.0.1:8080">POPFiles kontrolcenter</a>, fanebladet "Indstillinger" og check, at "Emnelinie-modifikation" er slået <b>fra</b>.
+
+</ul>
+
+
+
+</td></tr></table>
+
+
+
+<h2>Det var det! ...men...</h2>
+
+
+
+På trods af alt dette kan POPFile stadig ikke filtrere post. Hvorfor ikke? <i>Det ved ikke, hvad dine spande betyder.</i> Det har ingen som helst ide om, hvad "spam" og "rigtig" betyder, eller hvad "arbejde" og "personlig" er. Det ved ikke engang, hvilket sprog dine breve er skrevet på - og det er ligeglad. Du er nødt til at træne det op til at kende spam fra almindelig post, eller ét projekt fra et andet. Du gør dette gennem <b>træning</b> - og <a href="training.html">det er det næste, vi kommer til</a>.
+
+
+
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Links:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Hjemmeside</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Fora</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Fejldatabase</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+</body></html>
