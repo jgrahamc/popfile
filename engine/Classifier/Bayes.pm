@@ -607,6 +607,7 @@ sub classify_file
         foreach my $word (@wordrank) {
             if ( $wi < 20 && $wordprob{$word} / $wtprob{$word} >= 0.25 ) {
                 my $wordstr = $word;
+                my $long    = $wordstr;
                 if ( length($wordstr)>14 )  {
                     $wordstr =~ /(.{12})/;
                     $wordstr = "$1...";
@@ -614,7 +615,7 @@ sub classify_file
                 my $wordcolor = get_color($self, $word);
                 my $wordprobstr = sprintf("%12.4f", $wordprob{$word} / $wtprob{$word});
                 my $otherprobstr = sprintf("%12.4f", $wbprob{$word}{$ranking[0]} / $wtprob{$word});
-                $self->{scores} .= "<tr><td><font color=$wordcolor>$wordstr</font></td>";
+                $self->{scores} .= "<tr><td><font color=$wordcolor><a title=\"$long\">$wordstr</a></font></td>";
                 $self->{scores} .= "<td><font color=$wordcolor>$wordprobstr</font></td><td>&nbsp;</td>";
                 $self->{scores} .= "<td><font color=$self->{colors}{$ranking[0]}>$otherprobstr</font></td></tr>";
             }

@@ -813,7 +813,7 @@ sub parse_stream
                 
                 if ( $line =~ /^\r\n/) {
                     $self->{in_headers} = 0;
-                    print "Header parsing complete.\r" if $self->{debug};
+                    print "Header parsing complete.\n" if $self->{debug};
                 }
                                                 
                 # If we have an email header then just keep the part after the :
