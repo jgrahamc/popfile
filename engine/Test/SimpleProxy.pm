@@ -97,8 +97,6 @@ sub service_server
     # check for connections
 
     if ( defined( $self->{remote_client__} ) ) {
-        $self->log_( "service_server: remote client is connected" );
-
         my $handle = $self->{remote_client__};
 
         # If there's data in the send pipe then write it out line by line
@@ -112,7 +110,6 @@ sub service_server
 
         if ( defined( $self->{remote_client_selector__}->can_read(0) ) ) {
             my $line = <$handle>;
-            $self->log_( "Phony server has received $line" );
             $self->{received__} .= $line;
 	}
     } else {
@@ -150,12 +147,6 @@ sub child__
 
     my $remote = $self->verify_connected_( 0, $client, 'localhost', $self->{server_port__} );
 
-    if ( defined( $remote ) && $remote->connected ) {
-        $self->log_( "Child connected to server" );
-    } else {
-        $self->log_( "Child failed to connect to server" );
-    }
-
     # Create two selectors so that we can see if the client or the remote
     # have something to send and can echo between the two
 
@@ -166,7 +157,6 @@ sub child__
         if ( defined( $remote_selector->can_read(0) ) ) {
             my $line = <$remote>;
             if ( defined( $line ) ) {
-                $self->log_( "Echoing $line from remote to client" );
                 print $client $line;
 	    } else {
                 last;
@@ -174,12 +164,10 @@ sub child__
         }
         if ( defined( $client_selector->can_read(0) ) ) {
             my $line = <$client>;
-            $self->log_( "Echoing $line from client to remote" );
             print $remote $line;
         }
     }
 
-    $self->log_( "Child terminated" );
     close $remote;
     close $pipe;
 }
@@ -191,8 +179,6 @@ sub received
     my ( $self ) = @_;
     my $received = $self->{received__};
 
-
-    $self->log_( "Received $received" );
     $self->{received__} = '';
 
     return $received;
