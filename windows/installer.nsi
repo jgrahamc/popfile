@@ -97,7 +97,7 @@
 # /NOSPACES
 #
 # Two environment variables are used to specify the location of the POPFile PROGRAM files and
-# the User Data. At present POPFIle does not work properly if the values in these variables
+# the User Data. At present POPFile does not work properly if the values in these variables
 # contain spaces. As a workaround, we use short file name format to ensure there are no spaces.
 # However some systems do not support short file names (using short file names on NTFS systems
 # can have a significant impact on performance, for example) and in these cases we insist upon
@@ -743,7 +743,7 @@ Section "POPFile" SecPOPFile
   ; The folder arrangement used for this build:
   ;
   ; (a) $INSTDIR         -  main POPFile installation folder, holds popfile.pl and several
-  ;                         other *.pl scripts, popfile*.exe, popfile*.exe plus three of the
+  ;                         other *.pl scripts, runpopfile.exe, popfile*.exe plus three of the
   ;                         minimal Perl files (perl.exe, wperl.exe and perl58.dll)
   ;
   ; (b) $INSTDIR\kakasi  -  holds the Kakasi package used to process Japanese email
@@ -752,13 +752,13 @@ Section "POPFile" SecPOPFile
   ; (c) $INSTDIR\lib     -  minimal Perl installation (except for the three files stored
   ;                         in the $INSTDIR folder to avoid runtime problems)
   ;
-  ; (d) $INSTDIR\*       -  the remaining POPFile folders (Classifier, languages, manual, etc)
+  ; (d) $INSTDIR\*       -  the remaining POPFile folders (Classifier, languages, skins, etc)
   ;
   ; For this build, each user is expected to have separate user data folders. By default each
   ; user data folder will contain popfile.cfg, stopwords, stopwords.default, popfile.db,
   ; the messages folder, etc. The 'Add POPFile User' wizard (adduser.exe) is responsible for
   ; creating/updating these user data folders and for handling conversion of existing flat file
-  ; or BerkeleyDB corpus files to the new SQL database.
+  ; or BerkeleyDB corpus files to the new SQL database format.
   ;
   ; For increased flexibility, some global user variables are used in addition to $INSTDIR
   ; (this makes it easier to change the folder structure used by the installer).
@@ -1047,9 +1047,13 @@ save_HKCU_root_sfn:
 
   SetShellVarContext all
   Delete "$SMSTARTUP\Run POPFile.lnk"
+  Delete "$SMSTARTUP\Run POPFile in background.lnk"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
 
   SetShellVarContext current
   Delete "$SMSTARTUP\Run POPFile.lnk"
+  Delete "$SMSTARTUP\Run POPFile in background.lnk"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
 
   ; Create the START MENU entries
 
@@ -1142,18 +1146,6 @@ uninst_shortcut:
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
                  "$G_ROOTDIR\stop_pf.exe" "/showerrors $G_GUI"
-
-  ; Remove redundant links (used by earlier versions of POPFile)
-
-  SetShellVarContext all
-
-  Delete "$SMSTARTUP\Run POPFile in background.lnk"
-  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
-
-  SetShellVarContext current
-
-  Delete "$SMSTARTUP\Run POPFile in background.lnk"
-  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
 
   ; Create entry in the Control Panel's "Add/Remove Programs" list
 
@@ -2242,15 +2234,11 @@ menucleanup:
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
   Delete "$SMSTARTUP\Run POPFile.lnk"
 
-  SetShellVarContext current
-
-  StrCmp $G_WINUSERTYPE "Admin" 0 tidymenu
-  SetShellVarContext all
-
-tidymenu:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk"
   RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
 
+  ; Restore the default NSIS context
+  
   SetShellVarContext current
 
   SetDetailsPrint textonly
@@ -2262,7 +2250,7 @@ SectionEnd
 #--------------------------------------------------------------------------
 # Uninstaller Section: 'un.POPFile Core'
 #
-# Files are explicitly deleted (instead of just using wildcards or RMDir /r commands)
+# Files are explicitly deleted (instead of just using wildcards or 'RMDir /r' commands)
 # in an attempt to avoid unexpectedly deleting any files create by the user after installation.
 # Current commands only cover most recent versions of POPFile - need to add commands to cover
 # more of the early versions of POPFile.
