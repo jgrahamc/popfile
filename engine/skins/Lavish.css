@@ -4,7 +4,7 @@ body {
   padding-left: 0px;
   padding-bottom: 0px;
   margin: 5px;
-  color: #000000;
+  color: #ffffff;
   padding-top: 0px;
   font-family: sans-serif;
   background-color: #000000;
@@ -21,6 +21,7 @@ body {
   border-collapse: collapse;
   background-color: #000000;
   border-bottom-style: none;
+  color: #ffffff;
 
 }
 
@@ -185,6 +186,7 @@ td.head {
   background-image: url(lavishImages/buttonSelected.gif);
   width: 124px;
   color: #000000;
+  background-color: transparent;
   background-repeat: no-repeat;
 
 }
@@ -194,6 +196,7 @@ td.head {
   background-image: url(lavishImages/buttonUnselected.gif);
   width: 124px;
   color: #000000;
+  background-color: transparent;
   background-repeat: no-repeat;
 
 }
@@ -209,14 +212,15 @@ td.head {
 
 }
 
-tr.roweven {
+tr.rowEven {
 
   font-size: 8pt;
   color: #FFFFFF;
+  background-color: transparent;
 
 }
 
-tr.rowodd {
+tr.rowOdd {
 
   font-size: 8pt;
   color: #ffffff;
@@ -227,6 +231,7 @@ tr.rowodd {
 tr.rowHighlighted {
 
   color: #EEEEEE;
+  background-color: transparent;
 
 }
 
@@ -394,6 +399,7 @@ td.footerBody {
   color: #FFFFFF;
   font-family: sans-serif;
   text-align: center;
+  background-color: transparent;
 
 }
 
@@ -430,6 +436,7 @@ td.historyNavigatorBottom {
   font-weight: bold;
   font-size: 10pt;
   color: #000000;
+  background-color: transparent;
 
 }
 
@@ -438,6 +445,7 @@ td.historyNavigatorBottom {
   font-weight: bold;
   font-size: 10pt;
   color: #FFFFFF;
+  background-color: transparent;
 
 }
 
@@ -445,6 +453,7 @@ a {
 
   font-size: 10pt;
   color: white;
+  background-color: transparent;
 
 }
 
@@ -484,6 +493,7 @@ input {
 hr {
 
   color: #EFEFF7;
+  background-color: transparent;
 
 }
 
