@@ -68,6 +68,16 @@ Update                                  Ändern
 Refresh                                 Aktualisieren
 FAQ                                     FAQ
 ID                                      ID
+Date                                    Datum
+Arrived                                 Eingang
+
+# This is a regular expression pattern that is used to convert
+# a number into a friendly looking number (for the US and UK this
+# means comma separated at the thousands)
+
+Locale_Thousands                       .
+Locale_Decimal                         ,
+Locale_Date                            %d.%m.%y %T
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Kontrollzentrum
@@ -93,6 +103,7 @@ Configuration_Error4                    Die Seitengröße muß zwischen 1 und 1000 
 Configuration_Error5                    Die Anzahl der Tage im Verlauf muß zwischen 1 und 366 liegen.
 Configuration_Error6                    Der TCP Timeout muß zwischen 10 und 300 liegen.
 Configuration_Error7                    Der XML-RPC Port muß zwischen 1 und 65535 liegen.
+Configuration_Error8                    Der SOCKS V Proxy Port muß zwischen 1 und 65535 liegen.
 Configuration_POP3Port                  POP3 Port
 Configuration_POP3Update                Neuer POP3 Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
 Configuration_XMLRPCUpdate              Neuer XML-RPC Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
@@ -138,6 +149,11 @@ Configuration_GeneralSkins              Skins
 Configuration_SmallSkins                kleine Skins
 Configuration_TinySkins                 sehr kleine Skins
 Configuration_CurrentLogFile            &lt;aktuelle Protokolldatei&gt;
+Configuration_SOCKSServer               SOCKS V Proxy Host
+Configuration_SOCKSPort                 SOCKS V Proxy Port
+Configuration_SOCKSPortUpdate           SOCKS V Proxy Port geändert auf %s
+Configuration_SOCKSServerUpdate         SOCKS V Proxy Host geändert auf %s
+Configuration_Fields                    Spalten im Verlauf
 
 Advanced_Error1                         '%s' ist bereits in der Liste der ignorierten Wörter
 Advanced_Error2                         Ignorierte Wörtern können nur alphanumerische, ., _, -, oder @ Zeichen enthalten
@@ -170,6 +186,7 @@ History_ChangedTo                       Geändert: <font color="%s">%s</font>
 History_Already                         Neu eingestuft als <font color="%s">%s</font>
 History_RemoveAll                       Alle entfernen
 History_RemovePage                      Diese Seite entfernen
+History_RemoveChecked                   Ausgewählte Einträge löschen
 History_Remove                          Um Einträge im Verlauf zu löschen, klicken Sie auf
 History_SearchMessage                   Nach Absender/Betreff suchen
 History_NoMessages                      keine Nachrichten
