@@ -149,7 +149,7 @@
 
   ; Delay (in milliseconds) used inside the timeout loop
 
-  !define C_SHUTDOWN_DELAY    500
+  !define C_SHUTDOWN_DELAY    1000
 
   ;-------------------------------------------------------------------------------
   ; Constants for the timeout loop used after issuing a POPFile 'startup' request
@@ -161,7 +161,7 @@
 
   ; Delay (in milliseconds) used inside the timeout loop
 
-  !define C_STARTUP_DELAY    500
+  !define C_STARTUP_DELAY    1000
 
   ;------------------------------------------------
   ; Define PFI_VERBOSE to get more compiler output
@@ -2369,7 +2369,7 @@ FunctionEnd
 
 Function RunUI
 
-  ExecShell "open" "http://127.0.0.1:$G_GUI"
+  ExecShell "open" "$SMPROGRAMS\${MUI_PRODUCT}\POPFile User Interface.url"
 
 FunctionEnd
 
