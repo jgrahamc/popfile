@@ -23,7 +23,6 @@ select, input, textarea {
   border: 1px outset #000000;
   background-color: #BAB8C6;
   color: black;
-  font-size: 1em;
   font-weight: normal;
   margin: 0px 0px 0px 0px;
   padding: 0px 0px 0px 0px;
@@ -34,41 +33,30 @@ select, input, textarea {
   background-color: transparent;
 }
 
-
 .submit, .toggleOn, .toggleOff, .deleteButton, .undoButton, .reclassifyButton {
   border: none;
   color: #FFFFFF;
-  background-color: transparent;
+  background: url(button.gif) no-repeat;
   font-size: 1em;
   font-weight: bold;
   margin: 0;
   padding: 0;
   height: 22px;
   width: 99px;
-  background-image: url(button.gif);
   cursor: pointer;
 }
 
-#securityAcceptPOP3Off {
-  width: 17em;
-  background-image: none;
-  color: #FFFFFF;
-  background-color: #545B7E;
-  border: 1px outset #000000;
+.helpMessage .submit, .toggleOn, .toggleOff, .removeButton {
+  background: url(button2.gif) repeat;
+  width: auto;
+  padding: 0 1em 0 1em;
 }
-#securityAcceptHTTPOff {
-  width: 17em;
-  background-image: none;
-  color: #FFFFFF;
-  background-color: #545B7E;
-  border: 1px outset #000000;
-}
-
 
 .shell, .shellTop {
   background-color: #424d63;
   color: #FFFFFF;
   border-collapse: collapse;
+  border-spacing: 0px;
 }
 
 .shellTopCenter {
