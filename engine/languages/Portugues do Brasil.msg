@@ -40,7 +40,7 @@ Next                                    Próximo
 From                                    De
 Subject                                 Assunto
 Cc                                      Cc
-Classification                          Classificação
+Classification                          Balde
 Reclassify                              Reclassificar
 Probability                             Probabilidade
 Scores                                  Pontos
@@ -68,6 +68,18 @@ Word                                    Palavra
 Count                                   Quantidade
 Update                                  Alterar
 Refresh                                 Atualizar
+FAQ                                     FAQ
+ID                                      ID
+Date                                    Data
+Arrived                                 Chegada
+
+# This is a regular expression pattern that is used to convert
+# a number into a friendly looking number (for the US and UK this
+# means comma separated at the thousands)
+
+Locale_Thousands                       .
+Locale_Decimal                         ,
+Locale_Date                            %D %T
 
 # The header and footer that appear on every UI page
 Header_Title                            Centro de Controle do POPFile
@@ -93,6 +105,7 @@ Configuration_Error4                    O tamanho da página deve ser um número e
 Configuration_Error5                    O número de dias no histórico deve ser um número entre 1 e 366
 Configuration_Error6                    O tempo limite TCP deve ser um número entre 10 e 300
 Configuration_Error7                    A porta de escuta XML-RPC deve ser um número entre 1 e 65535
+Configuration_Error8                    A porta do proxy SOCKS V deve ser um número entre 1 e 65535
 Configuration_POP3Port                  Porta de escuta POP3
 Configuration_POP3Update                A porta POP3 foi alterada para %s; esta alteração não terá efeito até que você reinicie o POPFile
 Configuration_XMLRPCUpdate              A porta XML-RPC foi alterada para %s; esta alteração não terá efeito até que você reinicie o POPFile
@@ -138,6 +151,11 @@ Configuration_GeneralSkins              Skins
 Configuration_SmallSkins                Small Skins
 Configuration_TinySkins                 Tiny Skins
 Configuration_CurrentLogFile            &lt;arquivo de log atual&gt;
+Configuration_SOCKSServer               Endereço do proxy SOCKS V
+Configuration_SOCKSPort                 Porta do proxy SOCKS V
+Configuration_SOCKSPortUpdate           Alterada a porta do proxy SOCKS V para %s
+Configuration_SOCKSServerUpdate         Alterado o endereço do proxy SOCKS V para %s
+Configuration_Fields                    Colunas do Histórico
 
 Advanced_Error1                         '%s' já está na lista de Palavras Ignoradas
 Advanced_Error2                         Palavras ignoradas podem somente conter caracteres alfanuméricos, ., _, -, ou @
@@ -151,7 +169,8 @@ Advanced_RemoveWord                     Remover palavra
 Advanced_AllParameters                  Todos os Parâmetros do POPFile
 Advanced_Parameter                      Parâmetro
 Advanced_Value                          Valor
-Advanced_Warning                        Esta é a lista completa dos parâmetros do POPFile.  Somente para usuários avançados: você pode alterar qualquer um e clicar em Alterar; não há verificação de validade.
+Advanced_Warning                        Esta é a lista completa dos parâmetros do POPFile.  Somente para usuários avançados: você pode alterar qualquer um e clicar em Alterar; não há verificação de validade.  Ítens em negrito estão diferentes da configuração padrão.
+Advanced_ConfigFile                     Arquivo de configuração:
 
 History_Filter                          &nbsp;(apenas mostrando o balde <font color="%s">%s</font>)
 History_FilterBy                        Filtrar Por
@@ -169,6 +188,7 @@ History_ChangedTo                       Alterado para <font color="%s">%s</font>
 History_Already                         Reclassificado como <font color="%s">%s</font>
 History_RemoveAll                       Remover Tudo
 History_RemovePage                      Remover a Página
+History_RemoveChecked                   Remover Marcados
 History_Remove                          Para remover entradas do histórico clique
 History_SearchMessage                   Procurar Remetente/Assunto
 History_NoMessages                      Nenhuma mensagem
@@ -177,6 +197,12 @@ History_ShowNoMagnet                    desmagnetizado
 History_Magnet                          &nbsp;(mostrando apenas mensagens classificadas por ímã)
 History_NoMagnet                        &nbsp;(mostrando apenas mensagens não classificadas por ímã)
 History_ResetSearch                     Limpar
+History_ChangedClass                    Deveria classificar agora como
+History_Purge                           Deletar Agora
+History_Increase			Incrementar
+History_Decrease			Decrementar
+History_Column_Characters		Alterar a largura das colunas De, Para, Cc e Assunto
+History_Automatic			Automático
 
 Password_Title                          Senha
 Password_Enter                          Digite a senha
@@ -186,11 +212,12 @@ Password_Error1                         Senha incorreta
 Security_Error1                         A porta deve ser um número entre 1 e 65535
 Security_Stealth                        Modo Stealth/Operação Servidor
 Security_NoStealthMode                  Não (Modo Stealth)
+Security_StealthMode                    (Modo Stealth)
 Security_ExplainStats                   (Com isto ligado o POPFile envia uma vez por dia os seguintes três valores para um script em www.usethesource.com: bc (o número total de baldes que você tem), mc (o número total de mensagens que o POPFile classificou) e ec (o número total de erros de classificação).  Isto fica guardado em um arquivo e eu vou usar para publicar algumas estatísticas sobre como as pessoas usam o POPFile e o quão bem ele funciona.  Meu servidor web mantém seus arquivos de log por mais ou menos 5 dias e então os deleta; eu não estou guardando nenhuma conexão entre as estatístcas e os endereços IP de cada um.)
 Security_ExplainUpdate                  (Com isto ligado o POPFile envia uma vez por dia os seguintes três valores para um script em www.usethesource.com: ma (o número maior da versão do seu POPFile), mi (o número menor da versão do seu POPFile) e bn (o número do build da sua versão do POPFile). O POPFile recebe uma resposta na forma de um gráfico que aparece no topo da página se uma nova versão estiver disponível.  Meu servidor web mantém seus arquivos de log por mais ou menos 5 dias e então os deleta; eu não estou guardando nenhuma conexão entre as verificações de versão e os endereços IP de cada um.)
 Security_PasswordTitle                  Senha da Interface de Usuário
 Security_Password                       Senha
-Security_PasswordUpdate                 Alterada a senha para %s
+Security_PasswordUpdate                 Alterada a senha
 Security_AUTHTitle                      Servidores Remotos
 Security_SecureServer                   Servidor POP3 SPA/AUTH
 Security_SecureServerUpdate             Alterado o servidor seguro POP3 SPA/AUTH para %s; esta alteração não terá efeito até que você reinicie o POPFile
@@ -228,13 +255,13 @@ Bucket_Error3                           Criado o balde %s
 Bucket_Error4                           Por favor digite uma palavra que não seja em branco
 Bucket_Error5                           Renomeado o balde %s para %s
 Bucket_Error6                           Excluído o balde %s
-Bucket_Title                            Sumário
-Bucket_BucketName                       Nome do Balde
+Bucket_Title                            Configuração do Balde
+Bucket_BucketName                       Nome do<br>Balde
 Bucket_WordCount                        Contagem de Palavras
 Bucket_WordCounts                       Contagens de Palavras
-Bucket_UniqueWords                      Palavras Únicas
-Bucket_SubjectModification              Modificação do Assunto
-Bucket_ChangeColor                      Trocar Cor
+Bucket_UniqueWords                      Palavras Distintas
+Bucket_SubjectModification              Modificação do<br>Cabeçalho Assunto
+Bucket_ChangeColor                      Cor do<br>Balde
 Bucket_NotEnoughData                    Dados insuficientes
 Bucket_ClassificationAccuracy           Precisão da Classificação
 Bucket_EmailsClassified                 Mensagens classificadas
@@ -259,7 +286,7 @@ Bucket_LookupMostLikely                 <b>%s</b> é mais provável de aparecer em
 Bucket_DoesNotAppear                    <p><b>%s</b> não aparece em nenhum dos baldes
 Bucket_DisabledGlobally                 Desabilitado globalmente
 Bucket_To                               para
-Bucket_Quarantine                       Quarentena
+Bucket_Quarantine                       Mensagem de<br>Quarentena
 
 SingleBucket_Title                      Detalhes para %s
 SingleBucket_WordCount                  Contagem de palavras do balde
@@ -267,7 +294,7 @@ SingleBucket_TotalWordCount             Contagem total de palavras
 SingleBucket_Percentage                 Percentual do total
 SingleBucket_WordTable                  Tabela de Palavras para %s
 SingleBucket_Message1                   Clique em uma letra no índice para ver a lista de palavras que começam com tal letra.  Clique em qualquer palavra para procurar sua probabilidade para todos os baldes.
-SingleBucket_Unique                     %s únicas
+SingleBucket_Unique                     %s distinta
 SingleBucket_ClearBucket                Remover Todas Palavras
 
 Session_Title                           Sessão do POPFile Expirada
