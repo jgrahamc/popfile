@@ -531,6 +531,12 @@ sub classify_file
 
     my $correction = -$logbuck;
 
+	# This is used to halve the probability for any spam words, since we store log(P)
+	# for each word and do log(P0) + log(P1) we calculate half the probability for 
+	# spam words by adding log(0.5).  log(P)+log(0.5) = log(P * 0.5) = log(P/2)
+	
+	my $spam_resistance = log(0.5);
+
     # Switching from using *= to += and using the log of every probability instead
 
     foreach my $word (keys %{$self->{parser}->{words}}) {
@@ -543,8 +549,19 @@ sub classify_file
         foreach my $bucket (@buckets) {
             my $probability = get_value( $self, $bucket, $word );
 
-            $probability = $self->{not_likely} if ( $probability == 0 );
+            $probability = $self->{not_likely} if ( $probability <= 0 );
             $wmax = $probability if ( $wmax < $probability );
+
+			# Because people treat spam as a very special case of email we need to be extra
+			# careful that we do not put something in a spam bucket that is not.  It is acceptable
+			# to most people to start getting spam in their inbox and then have to retrain but
+			# it is not acceptable the other way around.
+			#
+			# Halve the likelihood of getting in the spam bucket for each word
+
+			if ( $bucket eq 'spam' ) {
+				$probability += $spam_resistance;
+			}
 
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
             # and we multiply by the number of times that the word occurs
@@ -628,18 +645,7 @@ sub classify_file
     my $class = 'unclassified';
 
     if ( ( $total != 0 ) && ( $score{$ranking[0]} > log($self->{unclassified} * $total) ) ) {
-   
-        # Because people treat spam as a very special case of email we need to be extra
-        # careful that we do not put something in a spam bucket that is not.  It is acceptable
-        # to most people to start getting spam in their inbox and then have to retrain but
-        # it is not acceptable the other way around.
-        #
-        # I came up with the number 2^44 by staring at a bunch of my own false positives, 
-        # maybe it's wrong, maybe not
-        
-        if ( ( $ranking[0] ne 'spam' ) || ( ( $score{$ranking[1]} + 44 ) < $score{$ranking[0]} ) ) {
-            $class = $ranking[0];
-        }
+		$class = $ranking[0];
     }
 
     if ( $self->{wordscores} ) {
