@@ -19,7 +19,7 @@ sub new
     my $type = shift;
     my $self;
 
-    $self->{stop} = (  
+    $self->{stop} = {
           'able', 1, 
           'about', 1, 
           'above', 1, 
@@ -479,7 +479,7 @@ sub new
           'yours', 1, 
           'yourself', 1, 
           'yourselves', 1, 
-          'zero', 1 );
+          'zero', 1 };
 
     return bless $self, $type;
 }
@@ -499,14 +499,16 @@ sub mangle
 
     # all words are treated as lowercase
     
-    $word = lc(word);
-    
+    $word = lc($word);
+
     # stop words are ignored
     
-    if ( $self->{stop}{$word} == 1 ) 
+    if ( $self->{stop}{$word} ) 
     {
         return '';
     }
+
+    return $word;
 }
 
 1;

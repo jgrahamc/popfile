@@ -102,11 +102,11 @@ sub split_mail_message
         
         while ( $line =~ s/([A-Za-z]{3,})// )
         {
-            my $word = $mangler->$mangle($1);
+            my $word = $mangler->mangle($1);
             
             if ( $word ne '' ) 
             {
-                $words{$1} += 1;
+                $words{$word} += 1;
             }
         }
     }
