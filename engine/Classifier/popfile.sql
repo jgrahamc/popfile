@@ -510,7 +510,7 @@ insert into user_template ( name, def, form ) values ( 'html_wordtable_format', 
 -- The default columns to show in the History page.  The order here
 -- is important, as is the presence of a + (show this column) or -
 -- (hide this column) in the value.  By default we show everything
-insert into user_template ( name, def, form ) values ( 'html_columns', '+inserted,+from,+to,-cc,+subject,-date,-size,+bucket,', '%s' );
+insert into user_template ( name, def, form ) values ( 'html_columns', '+id,+inserted,+from,+to,-cc,+subject,-date,-size,+bucket,+reclassify,', '%s' );
 
 -- An overriden date format set by the user, if empty then the
 -- Locale_Date from the language file is used (see pretty_date__)

@@ -28,6 +28,8 @@ ManualLanguage                          en
 # This is where to find the FAQ on the Wiki
 FAQLink                                 FrequentlyAskedQuestions
 
+
+
 # Common words that are used on their own all over the interface
 Apply                                   Apply
 On                                      On
@@ -74,6 +76,8 @@ ID                                      ID
 Date                                    Date
 Arrived                                 Arrived
 Size                                    Size
+Up                                      Up
+Down                                    Down
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this

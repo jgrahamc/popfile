@@ -67,7 +67,9 @@ my %headers_table = ( 'from',    'From',            # PROFILE BLOCK START
                       'date',    'Date',
                       'inserted', 'Arrived',
                       'size',    'Size',
-                      'bucket',  'Classification'); # PROFILE BLOCK STOP
+                      'bucket',  'Classification',
+                      'id',      'ID',
+                      'reclassify', 'Reclassify'); # PROFILE BLOCK STOP
 
 
 #----------------------------------------------------------------------------
@@ -369,7 +371,7 @@ sub url_handler__
     }
 
     if ( $url =~ /(popfile.*\.log)/ ) {
-        $self->http_file_( $client, $self->logger_()->debug_filename(),
+        $self->http_file_( $client, $self->logger()->debug_filename(),
             'text/plain' );
         return 1;
     }
@@ -425,30 +427,22 @@ sub url_handler__
     # display, the page table maps the pages to the functions that
     # handle them and the related template
 
-    my %page_table = ( 'administration' => [ \&administration_page,      'administration-page.thtml'      ],       # PROFILE BLOCK START
-                       'configuration'  => [ \&configuration_page, 'configuration-page.thtml' ],
-                       'buckets'        => [ \&corpus_page,        'corpus-page.thtml'        ],
-                       'magnets'        => [ \&magnet_page,        'magnet-page.thtml'        ],
-                       'advanced'       => [ \&advanced_page,      'advanced-page.thtml'      ],
-                       'history'        => [ \&history_page,       'history-page.thtml'       ],
-                       'view'           => [ \&view_page,          'view-page.thtml'          ] );     # PROFILE BLOCK STOP
+    my %page_table = ( 'security'      => [ \&security_page,      'security-page.thtml'      ],       # PROFILE BLOCK START
+                       'configuration' => [ \&configuration_page, 'configuration-page.thtml' ],
+                       'buckets'       => [ \&corpus_page,        'corpus-page.thtml'        ],
+                       'magnets'       => [ \&magnet_page,        'magnet-page.thtml'        ],
+                       'advanced'      => [ \&advanced_page,      'advanced-page.thtml'      ],
+                       'history'       => [ \&history_page,       'history-page.thtml'       ],
+                       'view'          => [ \&view_page,          'view-page.thtml'          ] );     # PROFILE BLOCK STOP
 
-    my %url_table = ( '/administration' => 'administration', # PROFILE BLOCK START
-                      '/configuration'  => 'configuration',
-                      '/buckets'        => 'buckets',
-                      '/magnets'        => 'magnets',
-                      '/advanced'       => 'advanced',
-                      '/view'           => 'view',
-                      '/history'        => 'history',
-                      '/'               => 'history' );      # PROFILE BLOCK STOP
-
-    # Check to see if this user has administration rights, if they do not
-    # then remove the administration and advanced URLs
-
-    if ( !$self->user_global_config_( 1, 'can_admin' ) ) {
-        delete $url_table{administration};
-        delete $url_table{advanced};
-    }
+    my %url_table = ( '/security'      => 'security',       # PROFILE BLOCK START
+                      '/configuration' => 'configuration',
+                      '/buckets'       => 'buckets',
+                      '/magnets'       => 'magnets',
+                      '/advanced'      => 'advanced',
+                      '/view'          => 'view',
+                      '/history'       => 'history',
+                      '/'              => 'history' );      # PROFILE BLOCK STOP
 
     # Any of the standard pages can be found in the url_table, the
     # other pages are probably files on disk
@@ -719,17 +713,53 @@ sub configuration_page
 
     if ( defined( $self->{form_}{update_fields} ) ) {
         my @columns = split(',', $self->user_config_( 1, 'columns' ));
-        my $new_columns = '';
+        my $new_columns = '';        
+        my $down_col = '';        
+        my $up_col = '';
+        my $last_col = '';
+        my $this_col = '';
+        
+        $up_col = $1 if $self->{form_}{updown} =~ /(.*?)_up/;        
+        $down_col = $1 if $self->{form_}{updown} =~ /(.*?)_down/;
+
         foreach my $column (@columns) {
             $column =~ s/^(\+|\-)//;
             if ( defined($self->{form_}{$column})) {
-                $new_columns .= '+';
+                $this_col = '+' . $column;
             } else {
-                $new_columns .= '-';
+                $this_col = '-' . $column;                
+            }           
+
+            
+            if ( $up_col ne '' && $up_col eq $column ) {
+                # If the column is moving up, add it, and let the last column
+                # fall through          
+                $new_columns .= $this_col . ',';                
+                $up_col = $this_col;
+                $self->log_(3, "moved $column up");
+            } elsif ( $down_col eq $column ) {                
+                $new_columns .= $last_col . ',' if ( $last_col ne '');
+                # If the column is moving down, save it (along with +-)
+                $last_col = $this_col;
+                $down_col = $this_col;
+                $self->log_(3, "moving $column down");
+            } else  {
+                if ( $down_col ne '' && $last_col eq $down_col ) {
+                    # If the previous column was moving down, print current column
+                    # then last column
+                    $new_columns .= $this_col . ',';
+                    $new_columns .= $last_col . ',';
+                    $last_col = '';
+                    $self->log_(3, "moved $down_col down");
+                } else {
+                    $new_columns .= $last_col . ',' if ( $last_col ne '');
+                    $self->log_(3, "printed $last_col");
+                    $last_col = $this_col;                    
+                }                
             }
-            $new_columns .= $column;
-            $new_columns .= ',';
         }
+
+        $new_columns .= $last_col if ($last_col ne '');
         $self->user_config_( 1, 'columns', $new_columns );
     }
 
@@ -773,7 +803,9 @@ sub configuration_page
 
     my @columns = split(',', $self->user_config_( 1, 'columns' ));
     my @column_data;
+    my $colcount = 0;
     foreach my $column (@columns) {
+        $colcount++;
         my %row;
         $column =~ /(\+|\-)/;
         my $selected = ($1 eq '+')?'checked':'';
@@ -782,6 +814,14 @@ sub configuration_page
         $row{Configuration_Localized_Field_Name} =
             $self->{language__}{$headers_table{$column}};
         $row{Configuration_Field_Value} = $selected;
+        
+        $row{Configuration_Required_Field} = 1 if ($column eq 'id' || $column eq 'reclassify');
+        
+        $row{Configuration_Localized_Up} = $self->{language__}{'Up'};
+        $row{Configuration_Localized_Down} = $self->{language__}{'Down'};
+        $row{Configuration_Move_Up_Disabled} = 1 if ($colcount == 1);
+        $row{Configuration_Move_Down_Disabled} = 1 if ($colcount > $#columns);
+        
         push ( @column_data, \%row );
     }
     $templ->param( 'Configuration_Loop_History_Columns' => \@column_data );
@@ -817,12 +857,12 @@ sub configuration_page
 
 #----------------------------------------------------------------------------
 #
-# administration_page - get the administration page
+# security_page - get the security configuration page
 #
 # $client     The web browser to send the results to
 #
 #----------------------------------------------------------------------------
-sub administration_page
+sub security_page
 {
     my ( $self, $client, $templ ) = @_;
 
@@ -2239,23 +2279,34 @@ sub history_page
         # Work out which columns to show by splitting the columns
         # parameter at commas keeping all the items that start with a
         # +, and then strip the +
+        # ORDER IS SIGNIFICANT
 
         my @columns = split( ',', $self->user_config_( 1, 'columns' ) );
         my @header_data;
-        my $colspan = 1;
+        my $colspan = -1;
         my $length = 90;
+        
+        
+        # Populate header information (sort, label)
         foreach my $header (@columns) {
-            my %row_data;
+            my %col_data;
             $header =~ /^(.)/;
             next if ( $1 eq '-' );
             $colspan++;
-            $header =~ s/^.//;
-            $row_data{History_Fields} =
+            $header =~ s/^.//;            
+            
+            $col_data{"History_If_$header"} = 1;
+            
+            $col_data{Localize_Reclassify} = $self->{language__}{Reclassify};
+            
+            $col_data{History_Fields} =
                 $self->print_form_fields_(1,1,
                     ('filter','session','search','negate'));
-            $row_data{History_Sort}   =
+            
+            # Negate the search direction here, this will be prepended to the header name
+            $col_data{History_Sort}   =
                 ( $self->{form_}{sort} eq $header )?'-':'';
-            $row_data{History_Header} = $header;
+            $col_data{History_Header} = $header;
 
             my $label = '';
             if ( defined $self->{language__}{ $headers_table{$header} }) {
@@ -2263,14 +2314,17 @@ sub history_page
             } else {
                 $label = $headers_table{$header};
             }
-            $row_data{History_Label} = $label;
-            $row_data{History_If_Sorted} =
+            $col_data{History_Label} = $label;
+            $col_data{History_If_Sorted} =
                 ( $self->{form_}{sort} =~ /^\-?\Q$header\E$/ );
-            $row_data{History_If_Sorted_Ascending} =
+            $col_data{History_If_Sorted_Ascending} =
                 ( $self->{form_}{sort} !~ /^-/ );
-            push ( @header_data, \%row_data );
+            push ( @header_data, \%col_data );
             $length -= 10;
         }
+        
+        $colspan = 1 if ($colspan < 1);
+        
         $templ->param( 'History_Loop_Headers' => \@header_data );
         $templ->param( 'History_Colspan' => $colspan );
 
@@ -2299,70 +2353,135 @@ sub history_page
             }
             $self->user_config_( 1, 'column_characters', $length );
         }
+        
         foreach my $row (@rows) {
             my %row_data;
-            my $mail_file = $row_data{History_Mail_File} = $$row[0];
+            my $mail_file = $$row[0];
+            
+            # this is a little messy. 2d array, row, then column, column in
+            # configured specific order (as with headers)
+            
+            my $col_data;
+            
+            my @columns = split( ',', $self->user_config_( 1,  'columns' ) );
             foreach my $header (@columns) {
+                $col_data = {};
+                
+                # label the column for the template
                 $header =~ /(.)(.+)/;
-                $row_data{"History_If_$2"} = ( $1 eq '+')?1:0;
-            }
-            $row_data{History_Arrived}       = $self->pretty_date__( $$row[7] );
-            $row_data{History_From}          = $$row[1];
-            $row_data{History_To}            = $$row[2];
-            $row_data{History_Cc}            = $$row[3];
-            $row_data{History_Date}          = $self->pretty_date__( $$row[5] );
-            $row_data{History_Subject}       = $$row[4];
-            $row_data{History_Short_From}    = $self->shorten__( $$row[1], $length );
-            $row_data{History_Short_To}      = $self->shorten__( $$row[2], $length );
-            $row_data{History_Short_Cc}      = $self->shorten__( $$row[3], $length );
-            $row_data{History_Short_Subject} = $self->shorten__( $$row[4], $length );
-            my $bucket = $row_data{History_Bucket} = $$row[8];
-            $row_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $self->{api_session__},
-                                                                          $bucket,
-                                                                          'color' );
-            $row_data{History_If_Reclassified} = ( $$row[9] != 0 );
-            $row_data{History_I}             = $$row[0];
-            $row_data{History_I1}            = $$row[0];
-            $row_data{History_Fields}        = $self->print_form_fields_(0,1,('start_message','session','filter','search','sort','negate' ) );
-            $row_data{History_If_Not_Pseudo} = !$self->classifier_()->is_pseudo_bucket( $self->{api_session__},
-                                                                           $bucket );
-            $row_data{History_If_Magnetized} = ($$row[11] ne '');
-            $row_data{History_Magnet}        = $$row[11];
-            my $size = $$row[12];
-            if ( defined $size ) {
-                if ( $size >= 1024 * 1024 ) {
-                    $row_data{History_Size} = sprintf $self->{language__}{History_Size_MegaBytes}, $size / ( 1024 * 1024 );
+                $$col_data{"History_If_$2"} = ( $1 eq '+')?1:0;
+                
+                $header =~ s/^(.)//;
+                
+                # This does breach the HTML::Template advice on TEMPL_IF's and perl if's
+                # but the alternative is to repeat all of this data for every cell
+                
+                if ($header eq 'id') {
+                    $$col_data{History_I1}            = $$row[0];
+                    next;
                 }
-                elsif ( $size >= 1024 ) {
-                    $row_data{History_Size} = sprintf $self->{language__}{History_Size_KiloBytes}, $size / 1024;
+                    
+                
+                if ($header eq 'inserted') {
+                    $$col_data{History_Arrived}       = $self->pretty_date__( $$row[7] );                    
+                    next;
                 }
-                else {
-                    $row_data{History_Size} = sprintf $self->{language__}{History_Size_Bytes}, $size;
+                
+                if ($header eq 'from') {
+                    $$col_data{History_From}          = $$row[1];
+                    $$col_data{History_Short_From}    = $self->shorten__( $$row[1], $length );
+                    next;                
                 }
+                
+                if ($header eq 'to') {
+                    $$col_data{History_To}            = $$row[2];
+                    $$col_data{History_Short_To}      = $self->shorten__( $$row[2], $length );
+                    next;                
+                }
+                
+                if ($header eq 'cc') {
+                    $$col_data{History_Cc}            = $$row[3];
+                    $$col_data{History_Short_Cc}      = $self->shorten__( $$row[3], $length );
+                    next;                
+                }                
+                
+                if ($header eq 'subject') {
+                    $$col_data{History_Subject}       = $$row[4];                
+                    $$col_data{History_Short_Subject} = $self->shorten__( $$row[4], $length );
+                    $$col_data{History_Mail_File}     = $$row[0];
+                    $$col_data{History_Fields}        = $self->print_form_fields_(0,1,('start_message','session','filter','search','sort','negate' ) );
+                    next;                
+                }
+                
+                if ($header eq 'date') {
+                    $$col_data{History_Date}          = $self->pretty_date__( $$row[5] );
+                    next;                
+                }
+                
+                if ($header eq 'size') {
+                    my $size = $$row[12];
+                    if ( defined $size ) {
+                        if ( $size >= 1024 * 1024 ) {
+                            $$col_data{History_Size} = sprintf $self->{language__}{History_Size_MegaBytes}, $size / ( 1024 * 1024 );
+                        }
+                        elsif ( $size >= 1024 ) {
+                            $$col_data{History_Size} = sprintf $self->{language__}{History_Size_KiloBytes}, $size / 1024;
+                        }
+                        else {
+                            $$col_data{History_Size} = sprintf $self->{language__}{History_Size_Bytes}, $size;
+                        }
+                    }
+                    else {
+                        $$col_data{History_Size} = "?";
+                    }
+                    next;                
+                }
+                
+                if ($header eq 'bucket') {
+                    my $bucket = $$col_data{History_Bucket} = $$row[8];
+                    $$col_data{History_If_Magnetized} = ($$row[11] ne '');
+                    $$col_data{History_If_Not_Pseudo} = !$self->classifier_()->is_pseudo_bucket( $self->{api_session__},
+                                                                                $bucket );
+                    $$col_data{Session_Key} = $self->{session_key__};                    
+                    $$col_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $self->{api_session__},
+                                                                                $bucket,
+                                                                                'color' );
+                    next;                
+                }
+                
+                if ($header eq 'reclassify') {
+                    my $bucket = $$col_data{History_Bucket} = $$row[8];
+                    $$col_data{History_If_Magnetized} = ($$row[11] ne '');
+                    $$col_data{History_If_Reclassified} = ( $$row[9] != 0 );
+                    $$col_data{Localize_History_Reclassified} = $self->{language__}{History_Reclassified};
+                    $$col_data{History_I}             = $$row[0];
+                    $$col_data{History_Magnet}        = $$row[11];
+                    $$col_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $self->{api_session__},
+                                                                                $bucket,
+                                                                                'color' );
+                    $$col_data{Localize_Undo} = $self->{language__}{Undo};
+                    $$col_data{History_Loop_Loop_Buckets} = \@bucket_data;    
+                    next;                
+                }
+            } continue {
+                push(@{$row_data{History_Loop_Message_Columns}}, \%{$col_data});
             }
-            else {
-                $row_data{History_Size} = "?";
+            $last = $$row[7];
+            
+            if ( ( $last != -1 ) && ( $self->{form_}{sort} =~ /inserted/ ) && ( $self->user_config_( 1,  'session_dividers' ) ) ) {
+                $row_data{History_If_Session} = ( abs( $$row[7] - $last ) > 300 );
+                $row_data{History_Colspan} = $colspan+1;
             }
-            $row_data{History_Loop_Loop_Buckets} = \@bucket_data;
+            
             if ( defined $self->{feedback}{$mail_file} ) {
                 $row_data{History_If_Feedback} = 1;
                 $row_data{History_Feedback} = $self->{feedback}{$mail_file};
                 delete $self->{feedback}{$mail_file};
             }
-            $row_data{Session_Key} = $self->{session_key__};
-
-            if ( ( $last != -1 ) && ( $self->{form_}{sort} =~ /inserted/ ) && ( $self->user_config_( 1, 'session_dividers' ) ) ) {
-                $row_data{History_If_Session} = ( abs( $$row[7] - $last ) > 300 );
-                $row_data{History_Colspan} = $colspan+1;
-            }
-
-            $last = $$row[7];
-
-            $row_data{Localize_History_Reclassified} = $self->{language__}{History_Reclassified};
-            $row_data{Localize_Undo} = $self->{language__}{Undo};
-            push ( @history_data, \%row_data );
+            
+            push ( @history_data, \%row_data );                
         }
-        $templ->param( 'History_Loop_Messages' => \@history_data );
+        $templ->param( 'History_Loop_Messages_Rows' => \@history_data );
     }
 
     $self->http_ok( $client, $templ, 0 );
@@ -2673,8 +2792,7 @@ sub load_template__
                    'Common_Bottom_LastLogin' => $self->{last_login__},
                    'Common_Bottom_Version'   => $self->version(),
                    'If_Show_Bucket_Help'     => $self->user_config_( 1, 'show_bucket_help' ),
-                   'If_Show_Training_Help'   => $self->user_config_( 1, 'show_training_help' ),
-                   'Common_Middle_If_CanAdmin' => $self->user_global_config_( 1, 'can_admin' ) );
+                   'If_Show_Training_Help'   => $self->user_config_( 1, 'show_training_help' ) );
 
     foreach my $fixup (keys %fixups) {
         if ( $templ->query( name => $fixup ) ) {
