@@ -41,7 +41,7 @@ sub load_word_table
         {
             if ( $1 != 1 ) 
             {
-                print "Incompatible corpus version in $file\n";
+                print "Incompatible corpus version in $bucket\n";
                 return;
             }
             
