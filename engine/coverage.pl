@@ -25,7 +25,7 @@ my @line_files = glob '*.lne';
 foreach my $file (@line_files) {
 
     # Each LNE has a file name of ModuleName.PID.lne and the ModuleName has had
-    # / or :: converted to -
+    # / or :: converted to #
 
     $file =~ /^(.+)\.pm\.(-?\d+)\.lne$/;
 
@@ -36,8 +36,14 @@ foreach my $file (@line_files) {
 
     open SOURCE_FILE, "<../$module.pm";
     open LINE_DATA, "<$file";
+    #$module = $file;
 
     my $current_line = 0;
+    $count{$module}{executed} = [];
+
+
+    $count{$module}{total_executable_lines} = 0;
+    $count{$module}{total_lines} = 0;
 
     while ( <SOURCE_FILE> ) {
         # Keep count of the total number of lines in this file
@@ -49,27 +55,35 @@ foreach my $file (@line_files) {
 
         if ( $state =~ /1/ ) {
             $count{$module}{total_executable_lines} += 1;
-            $count{$module}{total_executed} += 1;
-	} else {
-	    if ( $state =~ /0/ ) {
-                $count{$module}{total_executable_lines} += 1;
-	    } else {
-            }
+            $count{$module}{executed}[$current_line] = 1;
+        } elsif ( $state =~ /0/ ) {
+            $count{$module}{total_executable_lines} += 1;
+        } else {
         }
     }
 
     close LINE_DATA;
     close SOURCE_FILE;
 
-    $files{$module} = int(100 * $count{$module}{total_executed} / $count{$module}{total_executable_lines}) unless ( $count{$module}{total_executable_lines} == 0 );
-
     unlink $file;
 }
 
+foreach my $module ( keys( %count ) )
+{
+    my $total_executed = 0;
+    foreach my $line ( 0 .. $#{$count{$module}{executed}} ) {
+        $total_executed++ if ($count{$module}{executed}[$line]);
+    }
+
+    $files{$module} = int(100 * $total_executed / $count{$module}{total_executable_lines}) unless ( $count{$module}{total_executable_lines} == 0 );
+}
+
+
 foreach my $file (sort {$files{$b} <=> $files{$a}} keys %files) {
+
     my $clean = $file;
     $clean =~ s/^\.\.\/\///;
-		
+
     print sprintf( "Coverage of %-32s %d%%\n", "$clean...", $files{$file});
 }
 
