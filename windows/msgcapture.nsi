@@ -93,7 +93,7 @@
   ; (two commonly used exceptions to this rule are 'IO_NL' and 'MB_NL')
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION             "0.0.58"
+  !define C_VERSION             "0.0.59"
 
   !define C_OUTFILE             "msgcapture.exe"
 
@@ -368,10 +368,12 @@ FunctionEnd
 Section default
 
   !define L_PFI_ROOT      $R9   ; path to the POPFile program (popfile.pl, and other files)
-  !define L_PFI_USER      $R8  ; path to user's 'popfile.cfg' file
+  !define L_PFI_USER      $R8   ; path to user's 'popfile.cfg' file
   !define L_RESULT        $R7
   !define L_TEMP          $R6
   !define L_TRAYICON      $R5   ; system tray icon enabled ("i" ) or disabled ("") flag
+  !define L_OPTIONS       $R4   ; POPFile 0.23.0 no longer displays startup messages by default
+                                ; so we use the --verbose=1 option to turn them back on
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_MSGCAP_RIGHTCLICK)"
@@ -427,6 +429,17 @@ found_cfg:
   Pop ${L_TRAYICON}         ; "i" if system tray icon enabled, "" if it is disabled
   DetailPrint "POPFILE_ROOT = ${L_PFI_ROOT}"
   DetailPrint "POPFILE_USER = ${L_PFI_USER}"
+
+  ; Starting with the 0.23.0 release, POPFile no longer displays startup messages
+  ; so we use the 'verbose' option to turn them on. Earlier POPFile releases do not
+  ; recognize this option and will not run if it is used, so we use the Database.pm
+  ; file as a simple POPFile version test (this file was first used in 0.23.0)
+
+  StrCpy ${L_OPTIONS} ""
+  IfFileExists "${L_PFI_ROOT}\POPFile\Database.pm" 0 look_for_exe
+  StrCpy ${L_OPTIONS} "--verbose=1"
+
+look_for_exe:
   IfFileExists "${L_PFI_ROOT}\popfile${L_TRAYICON}f.exe" found_exe
   DetailPrint ""
   DetailPrint "Fatal error: cannot find POPFile program"
@@ -445,11 +458,11 @@ found_exe:
 
   StrCmp $G_TIMEOUT "0" no_timeout
   StrCpy ${L_TEMP} "/TIMEOUT=$G_TIMEOUT000"
-  nsExec::ExecToLog ${L_TEMP} '"${L_PFI_ROOT}\popfile${L_TRAYICON}f.exe"'
+  nsExec::ExecToLog ${L_TEMP} '"${L_PFI_ROOT}\popfile${L_TRAYICON}f.exe" ${L_OPTIONS}'
   Goto get_result
 
 no_timeout:
-  nsExec::ExecToLog '"${L_PFI_ROOT}\popfile${L_TRAYICON}f.exe"'
+  nsExec::ExecToLog '"${L_PFI_ROOT}\popfile${L_TRAYICON}f.exe" ${L_OPTIONS}'
 
 get_result:
   Pop ${L_RESULT}
