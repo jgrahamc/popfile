@@ -30,6 +30,9 @@ use POPFile::Module;
 #   Modified by             Sam Schinke (sschinke@users.sourceforge.net)
 #   Patches by              David Lang (davidlang@users.sourceforge.net)
 #
+#   A proposed roadmap for this module is available at
+#   http://popfile.sourceforge.net/cgi-bin/wiki.pl?ExperimentalModules/ImapRoadmap
+#
 # ---------------------------------------------------------------------------------------------
 
 
@@ -224,7 +227,7 @@ sub stop
     # Logout for each connected folder
 
     foreach my $folder ( keys %{$self->{folders__}} ) {
-        if ( $self->{imap__}{$folder} ne '' ) {
+        if ( exists $self->{imap__}{$folder} ) {
             $self->logout( $self->{imap__}{$folder} );
         }
     }
@@ -260,13 +263,6 @@ sub service
         # Update the cached debug_level value
         $self->{debug__} = $self->config_( 'debug_level' );
 
-        # Check whether we already have open connections.
-        # If not, connect and login for each of our folders
-
-        if ( ( keys %{$self->{folders__}} ) == 0 ) {
-            $self->connect_folders__();
-        }
-
         # Since say() as well as get_response() can throw an exception, i.e. die if
         # they detect a lost connection, we eval the following code to be able
         # to catch the exception. We also tell Perl to ignore broken pipes.
@@ -274,14 +270,21 @@ sub service
         eval {
             local $SIG{'PIPE'} = 'IGNORE';
             local $SIG{'__DIE__'};
-            # Do the real job now that we have a connection
+            
+            # Check whether we already have open connections.
+            # If not, connect and login for each of our folders
 
+            if ( (( keys %{$self->{folders__}} ) == 0 ) || (( keys %{$self->{imap__}} ) == 0 ) ) {
+                $self->connect_folders__();
+            }
+
+            # Do the real job now that we have a connection
 
             # Loop over all our folders:
 
             foreach my $folder ( keys %{$self->{folders__}} ) {
 
-                if ( $self->{imap__}{$folder} ne '' ) {
+                if ( exists $self->{imap__}{$folder} ) {
 
                     $self->scan_folder( $self->{imap__}{$folder}, $folder );
 
@@ -295,6 +298,7 @@ sub service
         if ( $@ ) {
             if ( $@ =~ /The connection to the IMAP server was lost/ ) {
                 $self->log_( $@ );
+                $self->{imap__} = ();
             }
             else {
                 die $@;
@@ -331,8 +335,9 @@ sub connect_folders__
 {
     my ( $self ) = @_;
 
+    $self->log_( "Building list of serviced folders." );
 
-    # Built a list of folders and their flags
+    # Build a list of folders and their flags
 
     # watched folders
     foreach ( $self->watched_folders__() ) {
@@ -362,40 +367,44 @@ sub connect_folders__
 
     foreach my $folder ( keys %{$self->{folders__}} ) {
 
-        if ( (! exists $self->{imap__}{$folder} ) || $self->{imap__}{$folder} eq '' ) {
+        my $error = '';
 
-            my $error = '';
+        $self->log_( "Trying to connect to ". $self->config_( 'hostname' ) . " for folder $folder." );
+        $self->{imap__}{$folder} = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
 
-            $self->{imap__}{$folder} = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
+        if ( defined $self->{imap__}{$folder} ) {
+            if ( $self->login( $self->{imap__}{$folder} ) ) {
 
-            if ( defined $self->{imap__}{$folder} ) {
-                if ( $self->login( $self->{imap__}{$folder} ) ) {
+                # Build a list of IMAP mailboxes if we haven't already got one:
 
-                    # Build a list of IMAP mailboxes if we haven't already got one:
-
-                    unless ( @{$self->{mailboxes__}} ) {
-                        $self->get_mailbox_list( $self->{imap__}{$folder} );
-                    }
-
-                    # Change to folder
-
-                    $self->say( $self->{imap__}{$folder}, "SELECT \"$folder\"" );
-                    if ( $self->get_response( $self->{imap__}{$folder} ) != 1 ) {
-                        $error = "Could not SELECT folder $folder.";
-                    }
-
-                } else {
-                    $error = "Could not LOGIN for folder $folder.";
+                unless ( @{$self->{mailboxes__}} ) {
+                    $self->get_mailbox_list( $self->{imap__}{$folder} );
                 }
-            }
-            else {
-                $error = "Could not CONNECT for folder $folder.";
-            }
 
-            if ( $error ne '' ) {
-                $self->{imap__}{$folder} = '';
-                $self->log_( $error );
+                # Change to folder
+
+                $self->say( $self->{imap__}{$folder}, "SELECT \"$folder\"" );
+                if ( $self->get_response( $self->{imap__}{$folder} ) != 1 ) {
+                    $error = "Could not SELECT folder $folder.";
+                }
+
+            } else {
+                $error = "Could not LOGIN for folder $folder.";
             }
+        }
+        else {
+            $error = "Could not CONNECT for folder $folder.";
+        }
+
+        if ( $error ne '' ) {
+            $self->log_( $error );
+            
+            # This is drastic: If one of our connections fail, we remove
+            # _all_ our connections from the imap__ hash and last out
+            # of the loop, we also clear the folders hash.
+            $self->{imap__} = ();
+            $self->{folders__} = ();
+            last;
         }
     }
 }
@@ -923,7 +932,6 @@ sub say
     my $cmdstr = sprintf "A%05d %s", $self->{tag__}, $command;
 
     unless( print $imap $cmdstr, $eol ) {
-        $self->{imap__} = '';
         die( "The connection to the IMAP server was lost. Could not talk to the server." );
     }
 
@@ -967,7 +975,6 @@ sub get_response
 
         # Check for lost connections:
         if ( $response eq '' && ! defined $buf ) {
-            $self->{imap__} = '';
             die( "The connection to the IMAP server was lost. Could not listen to the server." );
         }
 
@@ -1014,24 +1021,22 @@ sub get_response
 
         # Log the result
 
-        if ( $self->{debug__} ) {
 
-            # RegExp that determines what to log according to the debug level
-            my $re = '';
+        # RegExp that determines what to log according to the debug level
+        my $re = '\d (BAD|NO)';
 
-            if ( $self->{debug__} == 1 ) {
-                $re = '\d (OK|BAD|NO)';
-            }
-            elsif ( $self->{debug__} == 2 ) {
-                $re = '(\d (OK|BAD|NO))|(^\*)';
-            }
-            elsif ( $self->{debug__} == 3 ) {
-                $re = '';
-            }
+        if ( $self->{debug__} == 1 ) {
+            $re = '\d (OK|BAD|NO)';
+        }
+        elsif ( $self->{debug__} == 2 ) {
+            $re = '(\d (OK|BAD|NO))|(^\*)';
+        }
+        elsif ( $self->{debug__} == 3 ) {
+            $re = '';
+        }
 
-            foreach ( split /$eol/, $response ) {
-                $self->log_( ">> $_" ) if /$re/;
-            }
+        foreach ( split /$eol/, $response ) {
+            $self->log_( ">> $_" ) if /$re/;
         }
 
         # Increment tag for the next command/reply sequence:
