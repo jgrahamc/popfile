@@ -436,7 +436,7 @@ sub echo_to_dot
 
         print $client $_;
 
-        if ( /^\.(\r\n|\r|\n)$/ )
+        if ( /^\.[\r\n]+$/ )
         {   
             last;
         }
