@@ -119,7 +119,6 @@ sub initialize
     $self->config_( 'login', '' );
     $self->config_( 'password', '' );
     $self->config_( 'update_interval', 20 );
-    $self->config_( 'byte_limit', 0 );
     $self->config_( 'expunge', 0 );
     $self->config_( 'use_ssl', 0 );
 
@@ -1409,7 +1408,13 @@ sub fetch_message_part__
         $self->log_( 1, "Fetching message $msg" );
     }
 
-    $self->say__( $folder, "UID FETCH $msg (FLAGS BODY.PEEK[$part])" );
+    if ( $part eq 'TEXT' || $part eq '' ) {
+        my $limit = $self->global_config_( 'message_cutoff' );
+        $self->say__( $folder, "UID FETCH $msg (FLAGS BODY.PEEK[$part]<0.$limit>)" );
+    }
+    else {
+        $self->say__( $folder, "UID FETCH $msg (FLAGS BODY.PEEK[$part])" );
+    }
 
     my $result = $self->get_response__( $folder );
 
@@ -2081,9 +2086,6 @@ sub configure_item
 
         # Update interval in seconds
         $templ->param( IMAP_interval => $self->config_( 'update_interval' ) );
-
-        # How many bytes should we use for classification?
-        $templ->param( IMAP_byte_limit => $self->config_( 'byte_limit' ) );
     }
 }
 
@@ -2275,15 +2277,6 @@ sub validate_item
             }
             else {
                 $templ->param( IMAP_if_interval_error => 1 );
-            }
-
-            # byte limit
-            if ( defined $$form{imap_options_byte_limit} && $$form{imap_options_byte_limit} =~ m/^\d+\s*$/ ) {
-                $self->config_( 'byte_limit', $$form{imap_options_byte_limit} );
-                $templ->param( IMAP_if_bytelimit_error => 0 );
-            }
-            else {
-                $templ->param( IMAP_if_bytelimit_error => 1 );
             }
         }
         return;

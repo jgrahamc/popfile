@@ -26,24 +26,6 @@
     <input type="text" name="imap_options_update_interval" value="<TMPL_VAR NAME="IMAP_interval">" />
     <p />
 
-    <label class="configurationLabel">
-        <TMPL_VAR NAME="Localize_Imap_Bytelimit">
-    </label>
-    <br />
-    <input name="imap_options_byte_limit" type="text" value="<TMPL_VAR NAME="IMAP_byte_limit">" />
-    <br />
-
-    <TMPL_IF NAME="IMAP_if_bytelimit_error">
-
-    <blockquote>
-        <div class="error01">
-            <TMPL_VAR NAME="Localize_Imap_BytelimitError">
-        </div>
-    </blockquote>
-
-    </TMPL_IF>
-
-    <p />
     <input type="submit" class="submit" name="update_imap_5_options" value="<TMPL_VAR NAME="Localize_Apply">" />
     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
     <hr width="60%" align="center" />
