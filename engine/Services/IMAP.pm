@@ -60,8 +60,6 @@ sub new
 
     $self->name( 'imap' );
 
-    $self->{classifier__} = 0;
-
     # Here are the variables used by this module:
 
     # A place to store the last response that the IMAP server sent us
@@ -97,8 +95,6 @@ sub new
     # If you provide a hash as a key and if that key exists, the value
     # will be the folder where the original message was placed (or left) in.
     $self->{hash_values__} = ();
-
-    $self->{history__} = 0;
 
     return $self;
 }
@@ -213,7 +209,7 @@ sub stop
     my ( $self ) = @_;
 
     if ( $self->{api_session__} ne '' ) {
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
+        $self->classifier_()->release_session_key( $self->{api_session__} );
     }
 
     foreach ( keys %{$self->{folders__}} ) {
@@ -243,7 +239,7 @@ sub service
 
         # Check to see if we have obtained a session key yet
         if ( $self->{api_session__} eq '' ) {
-            $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
+            $self->{api_session__} = $self->classifier_()->get_session_key( 'admin', '' );
         }
 
         # Since say__() as well as get_response__() can throw an exception, i.e. die if
@@ -348,7 +344,7 @@ sub build_folder_list__
     }
 
     # output folders
-    foreach my $bucket ( $self->{classifier__}->get_all_buckets( $self->{api_session__} ) ) {
+    foreach my $bucket ( $self->classifier_()->get_all_buckets( $self->{api_session__} ) ) {
 
         my $folder = $self->folder_for_bucket__( $bucket );
 
@@ -409,7 +405,7 @@ sub connect_folders__
                 &&
             ! exists $self->{folders__}{$folder}{watched}
                 &&
-            $self->{classifier__}->is_pseudo_bucket( $self->{api_session__},
+            $self->classifier_()->is_pseudo_bucket( $self->{api_session__},
                                     $self->{folders__}{$folder}{output} ) ) {
                 next;
         }
@@ -665,7 +661,7 @@ sub classify_message
 
         if ( $part eq 'HEADER' ) {
             seek $pseudo_mailer, 0, 0;
-            ( $class, $slot, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, 1, '', undef, 0, undef );
+            ( $class, $slot, $magnet_used ) = $self->classifier_()->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, 1, '', undef, 0, undef );
 
             if ( $magnet_used ) {
                 $self->log_( 0, "Message was classified as $class using a magnet." );
@@ -681,7 +677,7 @@ sub classify_message
         # a look and make it save the message to history:
         seek $pseudo_mailer, 0, 0;
 
-        ( $class, $slot, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, 0, '', undef, 0, undef );
+        ( $class, $slot, $magnet_used ) = $self->classifier_()->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, 0, '', undef, 0, undef );
 
         close $pseudo_mailer;
         unlink $file;
@@ -764,12 +760,12 @@ sub reclassify_message
     }
     close TMP;
 
-    my $slot = $self->{history__}->get_slot_from_hash( $hash );
+    my $slot = $self->history_()->get_slot_from_hash( $hash );
 
-    $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $new_bucket, $file );
+    $self->classifier_()->add_message_to_bucket( $self->{api_session__}, $new_bucket, $file );
 
-    $self->{classifier__}->reclassified( $self->{api_session__}, $old_bucket, $new_bucket, 0 );
-    $self->{history__}->change_slot_classification( $slot, $new_bucket, $self->{api_session__}, 0);
+    $self->classifier_()->reclassified( $self->{api_session__}, $old_bucket, $new_bucket, 0 );
+    $self->history_()->change_slot_classification( $slot, $new_bucket, $self->{api_session__}, 0);
 
     $self->log_( 0, "Reclassified the message with UID $msg from bucket $old_bucket to bucket $new_bucket." );
 
@@ -1753,25 +1749,6 @@ sub uid_next__
 }
 
 
-
-# SETTER
-
-sub classifier
-{
-    my ( $self, $classifier ) = @_;
-
-    $self->{classifier__} = $classifier;
-}
-
-
-sub history
-{
-    my ( $self, $history ) = @_;
-
-    $self->{history__} = $history;
-}
-
-
 #----------------------------------------------------------------------------
 # get hash
 #
@@ -1821,7 +1798,7 @@ sub get_hash
         my $subject  = ${$header{'subject'}}[0];
         my $received = ${$header{'received'}}[0];
 
-        my $hash = $self->{history__}->get_message_hash( $mid, $date, $subject, $received );
+        my $hash = $self->history_()->get_message_hash( $mid, $date, $subject, $received );
 
         $self->log_( 1, "Hashed message: $subject." );
         $self->log_( 1, "Message $msg has hash value $hash" );
@@ -1852,7 +1829,7 @@ sub can_classify__
 {
     my ( $self, $hash ) = @_;
 
-    my $slot = $self->{history__}->get_slot_from_hash( $hash );
+    my $slot = $self->history_()->get_slot_from_hash( $hash );
 
     if ( $slot  ne '' ) {
         $self->log_( 1, "Message was already classified (slot $slot)." );
@@ -1884,12 +1861,12 @@ sub can_reclassify__
 
     # We must already know the message
 
-    my $slot = $self->{history__}->get_slot_from_hash( $hash );
+    my $slot = $self->history_()->get_slot_from_hash( $hash );
 
     if ( $slot ne '' ) {
 
         my ( $id, $from, $to, $cc, $subject, $date, $hash, $inserted, $bucket, $reclassified ) =
-                    $self->{history__}->get_slot_fields( $slot );
+                    $self->history_()->get_slot_fields( $slot );
 
         $self->log_( 2, "get_slot_fields returned the following information:" );
         $self->log_( 2, "id:            $id" );
@@ -2031,7 +2008,7 @@ sub configure_item
         else {
             $templ->param( IMAP_if_mailboxes => 1 );
 
-            my @buckets = $self->{classifier__}->get_all_buckets( $self->{api_session__} );
+            my @buckets = $self->classifier_()->get_all_buckets( $self->{api_session__} );
 
             my @outer_loop = ();
 
@@ -2194,7 +2171,7 @@ sub validate_item
 
                     # pseudo buckets are free to map wherever they like since
                     # we will never reclassify to them anyway
-                    unless ( $self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) {
+                    unless ( $self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) {
                         $folders{ $folder }++;
                     }
                 }
@@ -2317,7 +2294,7 @@ sub train_on_archive__
         my $bucket = $self->{folders__}{$folder}{output};
 
         # Skip pseudobuckets and the INBOX
-        next if $self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $bucket );
+        next if $self->classifier_()->is_pseudo_bucket( $self->{api_session__}, $bucket );
         next if $folder eq 'INBOX';
 
         $self->log_( 0, "Training on messages in folder $folder to bucket $bucket." );
@@ -2344,7 +2321,7 @@ sub train_on_archive__
             }
             close TMP;
 
-            $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $bucket, $file );
+            $self->classifier_()->add_message_to_bucket( $self->{api_session__}, $bucket, $file );
 
             $self->log_( 0, "Training on the message with UID $msg to bucket $bucket." );
 
