@@ -279,7 +279,7 @@ sub remove_mail_files
         if ( $mail_file =~ /popfile([0-9]+)_([0-9]+)\.msg/ ) 
         {
             # If older than now - 2 day then delete
-            if ( $1 < (time - 2 * $seconds_per_day) ) 
+            if ( $1 < (time - $configuration{history_days} * $seconds_per_day) ) 
             {
                 my $class_file = $mail_file;
                 $class_file =~ s/msg$/cls/;
@@ -804,6 +804,7 @@ sub popfile_homepage
     my $port_error = '';
     my $ui_port_error = '';
     my $page_size_error = '';
+    my $history_days_error = '';
     my $timeout_error = '';
     my $separator_error = '';
 
@@ -874,6 +875,19 @@ sub popfile_homepage
         }
     }
 
+    if ( defined($form{history_days}) )
+    {
+        if ( ( $form{history_days} >= 1 ) && ( $form{history_days} <= 366 ) )
+        {
+            $configuration{history_days} = $form{history_days};
+        }
+        else
+        {
+            $history_days_error = "<blockquote><font color=red size=+1>The number of days in the history must be a number between 1 and 366</font></blockquote>";
+            delete $form{history_days};
+        }
+    }
+
     if ( defined($form{timeout}) )
     {
         if ( ( $form{timeout} >= 10 ) && ( $form{timeout} <= 300 ) )
@@ -895,6 +909,8 @@ sub popfile_homepage
     $body .= "Updated user interface web port to $configuration{ui_port}; this change will not take affect until you restart POPFile" if ( defined($form{ui_port}) );
     $body .= "<p><hr><h2>History View</h2><p><form action=/configuration><b>Number of emails per page:</b> <br><input name=page_size type=text value=$configuration{page_size}><input type=submit name=update_page_size value=Apply><input type=hidden name=session value=$session_key></form>$page_size_error";    
     $body .= "Updated number of emails per page to $configuration{page_size}" if ( defined($form{page_size}) );
+    $body .= "<p><p><form action=/configuration><b>Number of days of history to keep:</b> <br><input name=history_days type=text value=$configuration{history_days}><input type=submit name=update_history_days value=Apply><input type=hidden name=session value=$session_key></form>$history_days_error";    
+    $body .= "Updated number of days of history to $configuration{history_days}" if ( defined($form{history_days}) );
     $body .= "<p><hr><h2>Skins</h2><p><form action=/configuration><b>Choose skin:</b> <br><input type=hidden name=session value=$session_key><select name=skin>";
     for my $i (0..$#skins)
     {
@@ -2711,7 +2727,6 @@ sub aborting
 
 print "POPFile Engine v$major_version.$minor_version.$build_version starting\n";
 
-$SIG{BREAK} = \&aborting;
 $SIG{ABRT}  = \&aborting;
 $SIG{TERM}  = \&aborting;
 $SIG{INT}   = \&aborting;
@@ -2720,20 +2735,21 @@ calculate_today();
 
 # Set up reasonable defaults for the configuration parameters.  These may be 
 # overwritten immediately when we read the configuration file
-$configuration{debug}     = 0;
-$configuration{port}      = 110;
-$configuration{ui_port}   = 8080;
-$configuration{subject}   = 1;
-$configuration{server}    = '';
-$configuration{sport}     = 110;
-$configuration{page_size} = 20;
-$configuration{timeout}   = 60;
-$configuration{localpop}  = 1;
-$configuration{localui}   = 1;
-$configuration{mcount}    = 0;
-$configuration{ecount}    = 0;
-$configuration{separator} = ':';
-$configuration{skin}      = 'default';
+$configuration{debug}        = 0;
+$configuration{port}         = 110;
+$configuration{ui_port}      = 8080;
+$configuration{subject}      = 1;
+$configuration{server}       = '';
+$configuration{sport}        = 110;
+$configuration{page_size}    = 20;
+$configuration{timeout}      = 60;
+$configuration{localpop}     = 1;
+$configuration{localui}      = 1;
+$configuration{mcount}       = 0;
+$configuration{ecount}       = 0;
+$configuration{separator}    = ':';
+$configuration{skin}         = 'default';
+$configuration{history_days} = 2;
 
 # Load skins
 load_skins();
