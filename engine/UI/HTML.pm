@@ -344,6 +344,8 @@ sub url_handler__
 		$template_root = 'skins/default/';
 		$file = $self->get_root_path_( "$template_root$filename" );
 	}
+	
+	$self->log_(2, "Skin file $filename mapped to $file");
 
 	# some file types we don't want accessed directly
 	if ( $filename =~ /.*?(\.thtml)/ ) {
