@@ -69,10 +69,10 @@ my $header = "<html><head><title>POPFile Control Center</title><style type=text/
 <META HTTP-EQUIV=Cache-Control CONTENT=no-cache><META HTTP-EQUIV=Refresh CONTENT=600></head>\
 <body><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr> \
 <td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>\
-<table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;POPFile Control Center<td align=right><a href=/shutdown?session=SESSKEY>Shutdown</a>&nbsp;<tr height=3><td colspan=2></td></tr></table>\
+<table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;POPFile Control Center<td align=right valign=middle><a href=/shutdown?session=SESSKEY>Shutdown</a>&nbsp;<tr height=3><td colspan=3></td></tr></table>\
 </td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td> \
 </tr></table>\
-<p>\
+<p align=center>UPDATECHECK\
 <table class=menu cellspacing=0><tr>\
 <td class=TAB2 align=center><a href=/history?session=SESSKEY>History</a></td><td class=menu_spacer></td>\
 <td class=TAB1 align=center><a href=/buckets?session=SESSKEY>Buckets</a></td><td class=menu_spacer></td>\
@@ -574,6 +574,17 @@ sub http_ok
     my $time = localtime;
     $text =~ s/TIME/$time/;
     $text =~ s/LASTUSER/$lastuser/;
+
+    if ( $today ne $configuration{last_update_check} )
+    {
+        calculate_today();
+        $text =~ s/UPDATECHECK/<a href=http:\/\/sourceforge.net\/project\/showfiles.php?group_id=63137><img border=0 src=http:\/\/www.usethesource.com\/cgi-bin\/popfile_update.pl?ma=$major_version&mi=$minor_version&bu=$build_version><\/a>/;
+        $configuration{last_update_check} = $today;
+    }
+    else
+    {
+        $text =~ s/UPDATECHECK//;
+    }
     
     my $http_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
     $http_header .= length($text);
@@ -2367,7 +2378,7 @@ sub run_popfile
                         }
 
                         $msg_headers .= "X-Text-Classification: $classification$eol";
-                        $temp_file =~ s/messages\/(.*)/\1/;
+                        $temp_file =~ s/messages\/(.*)/$1/;
                         $msg_headers .= "X-POPFile-Link: http://127.0.0.1:8080/history?jump_to_message=$temp_file";
                         $msg_headers .= "$eol$eol";
 
@@ -2517,6 +2528,7 @@ $configuration{skin}         = 'default';
 $configuration{history_days} = 2;
 $configuration{corpus}       = 'corpus';
 $configuration{unclassified_probability} = 0;
+$configuration{last_update_check} = 0;
 
 # Load skins
 load_skins();
