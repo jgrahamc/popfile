@@ -285,7 +285,7 @@ sub start
     # different from the charset POPFile uses for Japanese
     # characters(EUC-JP).
 
-    if ( defined( $self->module_config_( 'html', 'language' ) ) && 
+    if ( defined( $self->module_config_( 'html', 'language' ) ) &&
        ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) ) {
         use POSIX qw( locale_h );
         setlocale( LC_COLLATE, 'C' );
@@ -2201,6 +2201,9 @@ sub classify
                             }
                             $bucket_row{View_Score_Probability} = $wordprobstr;
                         }
+                        else {
+                            push @score, 0;
+                        }
                         push ( @per_bucket, \%bucket_row );
                     }
                     $row_data{View_Score_Loop_Per_Bucket} = \@per_bucket;
@@ -2220,7 +2223,7 @@ sub classify
             }
             $templ->param( 'View_Score_Loop_Words' => \@word_data );
 
-            if ( $self->{wmformat__} eq 'score' ) {
+            if ( $self->{wmformat__} eq 'score' && ( ( keys %chart ) >  0 ) ) {
                 # Draw a chart that shows how the decision between the top
                 # two buckets was made.
 
@@ -2229,7 +2232,7 @@ sub classify
                 my @chart_data;
                 my $max_chart = $chart{$words[0]};
                 my $min_chart = $chart{$words[$#words]};
-                my $scale = ( $max_chart > $min_chart )?400 / ( $max_chart - $min_chart ):0;
+                my $scale = ( $max_chart > $min_chart ) ? ( 400 / ( $max_chart - $min_chart ) ) : 0;
                 my $width = int( 400 / ( $#words + 1 ) );
                 if ( $width < 1 ) {
                     $width = 1;
@@ -2289,7 +2292,7 @@ sub classify
 #
 # $session  - A valid session key returned by a call to get_session_key
 # $mail     - an open stream to read the email from
-# $client   - an open stream to write the modified email to 
+# $client   - an open stream to write the modified email to
 # $nosave   - set to 1 indicates that this should not save to history
 # $class    - if we already know the classification
 # $slot     - Must be defined if $class is set
