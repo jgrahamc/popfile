@@ -417,8 +417,8 @@ sub tweak_sqlite
         $self->log_( 1, "Performing tweak $tweak to $state" );
 
         if ( $tweak == 1 ) {
-            $self->{db__}->do( 'pragma synchronous=' .
-                               $state?'OFF':'NORMAL' . ';' );
+            my $sync = $state?'off':'normal';
+            $self->{db__}->do( "pragma synchronous=$sync;" );
         }    
     }
 }

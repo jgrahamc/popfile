@@ -432,7 +432,9 @@ test_assert_equal( $h->get_query_size( $q ), 3 );
 
 $file = $h->get_slot_file( 2 );
 test_assert( ( -e $file ) );
+$h->start_deleting();
 $h->delete_slot( 2, 0 );
+$h->stop_deleting();
 test_assert( !( -e $file ) );
 
 $h->set_query( $q, '', '', '', 0 );
