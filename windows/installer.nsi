@@ -81,6 +81,19 @@
   !define MUI_LICENSEPAGE_CHECKBOX
 
   ;-----------------------------------------
+  ; General Settings - Finish Page Settings
+  ;-----------------------------------------
+
+  ; Offer to display the POPFile User Interface (The 'CheckRunStatus' function ensures this
+  ; option is only offered if the installer has started POPFile running)
+
+  !define MUI_FINISHPAGE_SHOWREADME "http://127.0.0.1:${GUI}/"
+
+  ; Allow user to check the log file (by clicking "Show Details" button on the "Install" page)
+
+#  !define MUI_FINISHPAGE_NOAUTOCLOSE
+
+  ;-----------------------------------------
   ; General Settings - Other Settings
   ;-----------------------------------------
 
@@ -114,6 +127,11 @@
 
   !define MUI_CUSTOMFUNCTION_DIRECTORY_LEAVE CheckExistingConfig
 
+  ; Use a "pre" function for the 'Finish' page to ensure installer only offers to display
+  ; POPFile User Interface if user has chosen to start POPFile from the installer.
+
+  !define MUI_CUSTOMFUNCTION_FINISH_PRE CheckRunStatus
+
 #--------------------------------------------------------------------------
 # User Registers (Global)
 #--------------------------------------------------------------------------
@@ -137,6 +155,9 @@
   !insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_WELCOME_INFO_TEXT \
       "This wizard will guide you through the installation of ${MUI_PRODUCT}.\r\n\r\n\
       It is recommended that you close all other applications before starting Setup.\r\n\r\n"
+
+  !insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_FINISH_SHOWREADME \
+      "Display the POPFile User Interface"
 
   !insertmacro MUI_LANGUAGE "English"
 
@@ -1074,11 +1095,9 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Installer Function: StartPOPFilePage (generates a custom page)
 #
-# This function offers to start the newly installed POPFile and also offers to display the
-# POPFile User Interface.
+# This function offers to start the newly installed POPFile.
 #
-# A "leave" function (CheckLaunchOptions) is used to validate and act upon the selections
-# made by the user.
+# A "leave" function (CheckLaunchOptions) is used to act upon the selections made by the user.
 #--------------------------------------------------------------------------
 
 Function StartPOPFilePage
@@ -1094,54 +1113,36 @@ FunctionEnd
 # Installer Function: CheckLaunchOptions
 # (the "leave" function for the custom page created by "StartPOPFilePage")
 #
-# This function is used to validate the start POPFile options selected by the user.
-# If the selections are not valid, user is asked to make an alternative selection,
-# otherwise this function will perform the selected actions.
+# This function is used to action the "start POPFile" options selected by the user.
+# The user is allowed to return to this page and change their selections, so the
+# previous state is stored in the INI file used for this custom page.
 #--------------------------------------------------------------------------
 
 Function CheckLaunchOptions
 
   !define L_RESULT      $R9
-  !define L_SHOWUI      $R8
-  !define L_TEMP        $R7
+  !define L_TEMP        $R8
 
   Push ${L_RESULT}
-  Push ${L_SHOWUI}
   Push ${L_TEMP}
 
-  ; Field 2 = 'Do not run POPFile' radio button, field 5 = 'Display UI' checkbox
+  ; Field 2 = 'Do not run POPFile' radio button
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_SHOWUI} "ioC.ini" "Field 5" "State"
+  StrCmp ${L_TEMP} "0" run_popfile
 
-  StrCmp ${L_SHOWUI} "0" selection_ok
-  StrCmp ${L_TEMP} "0" selection_ok
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
+  StrCmp ${L_TEMP} "" exit_without_banner
+  StrCmp ${L_TEMP} "no" exit_without_banner
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "no"
 
-  MessageBox MB_OK "Sorry, the POPFile User Interface only works when POPFile is running !\
-      $\r$\n$\r$\n\
-      If you wish to display the User Interface, you must also select one of the 'Run POPFile'\
-      options."
-
-  ; Stay with the custom page created by "StartPOPFilePage"
-
-  Pop ${L_TEMP}
-  Pop ${L_SHOWUI}
-  Pop ${L_RESULT}
-  Abort
-
-selection_ok:
-
-  ; If user does not want to start POPFIle now, there is nothing left to do here
-
-  StrCmp ${L_TEMP} "1" exit_without_banner
-  
-  Banner::show /NOUNLOAD /set 76 "Preparing to start POPFile now." "Please be patient..."
-
-  ; Before starting the newly installed POPFile, ensure that no other version of POPFile
-  ; is running on the same UI port as the newly installed version.
+  ; User has changed their mind: Shutdown the newly installed version of POPFile
 
   NSISdl::download_quiet http://127.0.0.1:${GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_RESULT}    ; Get the return value (and ignore it)
+  goto exit_without_banner
+
+run_popfile:
 
   ; Field 4 = 'Run POPFile in background' radio button
 
@@ -1150,17 +1151,40 @@ selection_ok:
 
   ; Run POPFile in a DOS box
 
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
+  StrCmp ${L_TEMP} "DOS-box" exit_without_banner
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "DOS-box"
+
+  Banner::show /NOUNLOAD /set 76 "Preparing to start POPFile now." "Please be patient..."
+
+  ; Before starting the newly installed POPFile, ensure that no other version of POPFile
+  ; is running on the same UI port as the newly installed version.
+
+  NSISdl::download_quiet http://127.0.0.1:${GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  Pop ${L_RESULT}    ; Get the return value (and ignore it)
+
   ExecShell "open" "$SMPROGRAMS\POPFile\Run POPFile.lnk"
-  goto display_ui
+  goto wait_for_popfile
 
 run_in_background:
 
   ; Run POPFile without a DOS box
 
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
+  StrCmp ${L_TEMP} "background" exit_without_banner
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "background"
+
+  Banner::show /NOUNLOAD /set 76 "Preparing to start POPFile now." "Please be patient..."
+
+  ; Before starting the newly installed POPFile, ensure that no other version of POPFile
+  ; is running on the same UI port as the newly installed version.
+
+  NSISdl::download_quiet http://127.0.0.1:${GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  Pop ${L_RESULT}    ; Get the return value (and ignore it)
+
   ExecShell "open" "$SMPROGRAMS\POPFile\Run POPFile in background.lnk"
 
-display_ui:
-  StrCmp ${L_SHOWUI} "0" exit_now
+wait_for_popfile:
 
   ; Wait until POPFile is ready to display the UI (may take a second or so)
 
@@ -1169,27 +1193,56 @@ display_ui:
 check_if_ready:
   NSISdl::download_quiet http://127.0.0.1:${GUI} "$PLUGINSDIR\ui.htm"
   Pop ${L_RESULT}                        ; Did POPFile return an HTML page?
-  StrCmp ${L_RESULT} "success" launch_browser
+  StrCmp ${L_RESULT} "success" remove_banner
   Sleep 250   ; milliseconds
   IntOp ${L_TEMP} ${L_TEMP} - 1
-  IntCmp ${L_TEMP} 0 launch_browser launch_browser check_if_ready
+  IntCmp ${L_TEMP} 0 remove_banner remove_banner check_if_ready
 
-launch_browser:
-  ExecShell "open" "http://127.0.0.1:${GUI}/"
-
-exit_now:
+remove_banner:
   Banner::destroy
-  
+
 exit_without_banner:
 
-  ; Allow next page in the installation sequence to be shown
-
   Pop ${L_TEMP}
-  Pop ${L_SHOWUI}
   Pop ${L_RESULT}
 
   !undef L_RESULT
-  !undef L_SHOWUI
+  !undef L_TEMP
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckRunStatus
+# (the "pre" function for the 'Finish' page)
+#
+# The 'Finish' page contains a single CheckBox to control whether or not the installer
+# starts the POPFile User Interface. The User Interface only works when POPFile is running,
+# so we must ensure this CheckBox can only be ticked if the installer has started POPFile.
+#--------------------------------------------------------------------------
+
+Function CheckRunStatus
+
+  !define L_TEMP        $R9
+
+  Push ${L_TEMP}
+
+  ; Field 4 is the 'ReadMe' CheckBox on the 'Finish' page (assuming there is no 'Run' CheckBox)
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "Flags" ""
+
+  ; Get the status of the 'Do not run POPFile' radio button on the previous page of installer
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "State"
+  StrCmp ${L_TEMP} "0" selection_ok
+
+  ; User has not started POPFile so we cannot offer to display the POPFile User Interface
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "State" "0"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "Flags" "DISABLED"
+
+selection_ok:
+  Pop ${L_TEMP}
+
   !undef L_TEMP
 
 FunctionEnd
@@ -1385,7 +1438,7 @@ FunctionEnd
     !undef DECIMAL_DIGIT
 
   FunctionEnd
-!macroend  
+!macroend
 
 #--------------------------------------------------------------------------
 # Installer Function: StrCheckDecimal
@@ -1467,7 +1520,7 @@ Section "Uninstall"
   !define L_REG_SUBKEY  $R6
   !define L_REG_VALUE   $R7
   !define L_TEMP        $R8
-  
+
   IfFileExists $INSTDIR\popfile.pl skip_confirmation
     MessageBox MB_YESNO "It does not appear that POPFile is installed in the \
         directory '$INSTDIR'.$\r$\nContinue anyway (not recommended)" IDYES skip_confirmation
