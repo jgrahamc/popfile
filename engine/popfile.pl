@@ -102,6 +102,11 @@ my @skins;
 # The name of the last user to pass through POPFile
 my $lastuser = 'none';
 
+# Used to keep the history information around so that we don't have to reglob every time we hit the
+# history page
+my @history_cache;
+my $downloaded_mail = 0;
+
 # ---------------------------------------------------------------------------------------------
 #
 # parse_command_line - Parse ARGV
@@ -247,6 +252,7 @@ sub remove_debug_files
 sub remove_mail_files
 {
     my @mail_files = glob "messages/popfile*.msg";
+    my $result = 0;
 
     calculate_today();
     
@@ -263,10 +269,13 @@ sub remove_mail_files
                 $class_file =~ s/msg$/cls/;
                 unlink($mail_file);
                 unlink($class_file);
-                debug( "Deleting $mail_file/$class_file on $today" );
+                debug( "Deleting $mail_file $class_file on $today" );
+                $result = 1;
             }
         }
     }
+    
+    return $result;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1447,9 +1456,13 @@ sub history_page
     # Handle clearing the history files
     if ( ( defined($form{clear}) ) && ( $form{clear} eq 'Remove+All' ) )
     {
-        my @mail_files = glob "messages/popfile*.msg";
+        # If the history cache is empty then we need to reload it now
+        if ( $#history_cache < 0 ) 
+        {
+            @history_cache = sort compare_mf glob "messages/popfile*.msg";
+        }
 
-        foreach my $mail_file (@mail_files)
+        foreach my $mail_file (@history_cache)
         {
             my $class_file = $mail_file;
             $class_file =~ s/msg$/cls/;
@@ -1458,36 +1471,48 @@ sub history_page
         }
         $configuration{mail_count} = 0;
         $configuration{last_count} = 0;
-        
+
+        $#history_cache = -1;        
         return http_redirect('/history');
     }
 
     if ( ( defined($form{clear}) ) && ( $form{clear} eq 'Remove+Page' ) )
     {
-        my @mail_files = sort compare_mf glob "messages/popfile*.msg";
-
+        # If the history cache is empty then we need to reload it now
+        if ( $#history_cache < 0 ) 
+        {
+            @history_cache = sort compare_mf glob "messages/popfile*.msg";
+        }
+        
         foreach my $i ( $form{start_message} .. $form{start_message} + $configuration{page_size} - 1 )
         {
-            my $class_file = $mail_files[$i];
+            my $class_file = $history_cache[$i];
             $class_file =~ s/msg$/cls/;
             if ( $class_file ne '' ) 
             {
-                unlink($mail_files[$i]);
+                unlink($history_cache[$i]);
                 unlink($class_file);
             }
         }
-        
+
+        $#history_cache = -1;        
         return http_redirect("/history?session=$session_key");
     }
 
-    remove_mail_files();
-
-    my @mail_files = glob "messages/popfile*.msg";
-
-    foreach my $i ( 0 .. $#mail_files )
+    # If we just changed the number of mail files on the disk (deleted some or added some)
+    # or the history is empty then reload the history
+    if ( ( remove_mail_files() ) || ( $downloaded_mail ) || ( $#history_cache < 0 ) )
     {
-        $mail_files[$i] =~ /(popfile.*\.msg)/;
-        $mail_files[$i] = $1;
+        @history_cache = sort compare_mf glob "messages/popfile*.msg";
+        $downloaded_mail = 0;
+
+        foreach my $i ( 0 .. $#history_cache )
+        {
+            $history_cache[$i] =~ /(popfile.*\.msg)/;
+            $history_cache[$i] = $1;
+        }
+        
+        debug( "Reloaded history cache from disk" );
     }
 
     # Handle the reinsertion of a message file
@@ -1550,18 +1575,16 @@ sub history_page
         $classifier->update_constants();        
     }
 
-    @mail_files = sort compare_mf @mail_files;
-
     my $search_message = "<blockquote><font color=red>Search term not found in History</font></blockquote>";
     my $highlight_message = '';
 
     if ( ( defined($form{search}) ) && ( $form{search} ne '' ) )
     {
-        for my $i ( 0..$#mail_files )
+        for my $i ( 0..$#history_cache )
         {
             my $mail_file;
             my $subject = '';
-            $mail_file = $mail_files[$i];
+            $mail_file = $history_cache[$i];
 
             open MAIL, "<messages/$mail_file";
             while (<MAIL>) 
@@ -1595,7 +1618,7 @@ sub history_page
         $search_message = '';
     }
     
-    if ( $#mail_files >= 0 ) 
+    if ( $#history_cache >= 0 ) 
     {
         $body .= "<table width=100%><tr><td></td><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";            
         my $start_message = 0;
@@ -1604,9 +1627,9 @@ sub history_page
             $start_message = $form{start_message};
         }
         my $stop_message = $start_message + $configuration{page_size} - 1;
-        if ( $stop_message >= $#mail_files ) 
+        if ( $stop_message >= $#history_cache ) 
         {
-            $stop_message = $#mail_files;
+            $stop_message = $#history_cache;
         }
 
         my $stripe = 0;
@@ -1616,7 +1639,7 @@ sub history_page
             my $mail_file;
             my $from = '';
             my $subject = '';
-            $mail_file = $mail_files[$i];
+            $mail_file = $history_cache[$i];
 
             open MAIL, "<messages/$mail_file";
             while (<MAIL>) 
@@ -1796,7 +1819,7 @@ sub history_page
         $body .= "</table><form action=/history><b>To remove entries in the history click: <input type=submit name=clear value='Remove All'>";
         $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit name=search Value=Find></form>$search_message";
 
-        if ( $configuration{page_size} <= $#mail_files )
+        if ( $configuration{page_size} <= $#history_cache )
         {
             $body .= "<p><center>Jump to message: ";
             if ( $start_message != 0 ) 
@@ -1806,7 +1829,7 @@ sub history_page
                 $body .= "&session=$session_key>< Previous</a> ";
             }
             my $i = 0;
-            while ( $i <= $#mail_files )
+            while ( $i <= $#history_cache )
             {
                 if ( $i == $start_message ) 
                 {
@@ -1822,7 +1845,7 @@ sub history_page
                 $body .= " ";
                 $i += $configuration{page_size};
             }
-            if ( $start_message < ( $#mail_files - $configuration{page_size} ) ) 
+            if ( $start_message < ( $#history_cache - $configuration{page_size} ) ) 
             {
                 $body .= "<a href=/history?start_message=";
                 $body .= $start_message + $configuration{page_size};
@@ -2287,6 +2310,7 @@ sub run_popfile
                         my $class_file = "messages/$mail_filename" . "_$configuration{mail_count}.cls";
                         $configuration{mail_count} += 1;
                         $configuration{mcount}     += 1;
+                        $downloaded_mail            = 1;
 
                         open TEMP, ">$temp_file";
 
