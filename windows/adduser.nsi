@@ -872,15 +872,15 @@ update_config:
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
 
   SetOutPath $G_USERDIR
-  Delete $G_USERDIR\uninstall.exe
-  WriteUninstaller $G_USERDIR\uninstall.exe
+  Delete $G_USERDIR\uninstalluser.exe
+  WriteUninstaller $G_USERDIR\uninstalluser.exe
 
   ; Create entry in the Control Panel's "Add/Remove Programs" list
 
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_Data" \
               "DisplayName" "${C_PFI_PRODUCT} ($G_WINUSERNAME)"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_Data" \
-              "UninstallString" "$G_USERDIR\uninstall.exe"
+              "UninstallString" "$G_USERDIR\uninstalluser.exe"
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_Data" \
               "NoModify" "1"
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_Data" \
@@ -4387,7 +4387,7 @@ skip_messages:
 
 complete_uninstall:
   Delete $G_USERDIR\install.ini
-  Delete "$G_USERDIR\Uninstall.exe"
+  Delete "$G_USERDIR\uninstalluser.exe"
 
   RMDir $G_USERDIR
 
