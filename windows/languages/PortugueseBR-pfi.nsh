@@ -62,8 +62,12 @@
 # Customised versions of strings used on standard MUI pages
 #==========================================================================
 
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; Used by the main POPFile installer (main script: installer.nsi)
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #--------------------------------------------------------------------------
-# Standard MUI Page - Welcome
+# Standard MUI Page - Welcome (for the main POPFile installer)
 #
 # The sequence \r\n\r\n inserts a blank line (note that the PFI_LANG_WELCOME_INFO_TEXT string
 # should end with a \r\n\r\n$_CLICK sequence).
@@ -73,25 +77,27 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_ADMIN_TEXT   "NOTA IMPORTANTE:\r\n\r\nO usuário corrente NÃO tem direitos de 'Administrador'.\r\n\r\nSe suporte a multi-usuário é requerido, é recomendado que você cancele esta instalação e use uma conta de 'Administrador' para instalar o POPFile."
 
 #--------------------------------------------------------------------------
-# Standard MUI Page - Directory Page (for the POPFile program files)
+# Standard MUI Page - Directory Page (for the main POPFile installer)
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TITLE        "Escolha o Local de Instalação dos Arquivos de Programa"
 !insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TEXT_DESTN   "Pasta de Destino para o Programa POPFile"
 
 #--------------------------------------------------------------------------
-# Standard MUI Page - Directory Page (for the POPFile User Data files)
-#--------------------------------------------------------------------------
-
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TITLE        "Escolha o Local dos Dados do POPFile para '$G_WINUSERNAME'"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_SUBTITLE     "Escolha a pasta para guardar os Dados do POPFile para '$G_WINUSERNAME'"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "Esta versão do POPFile usa conjuntos de arquivos de dados separados para cada usuário.$\r$\n$\r$\nO Instalador vai usar a seguinte pasta para os dados do POPFile pertencentes ao usuário'$G_WINUSERNAME'. Para usar uma pasta diferente para este usuário, clique em Procurar e selecione uma outra pasta. $_CLICK"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_DESTN   "Pasta a ser usada para guardar os dados do POPFile para '$G_WINUSERNAME'"
-
-#--------------------------------------------------------------------------
-# Standard MUI Page - Installation Page
+# Standard MUI Page - Finish (for the main POPFile installer)
 #
-# (used by the 'Corpus Conversion Monitor' utility)
+# The PFI_LANG_FINISH_RUN_TEXT text should be a short phrase (not a long paragraph)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_FINISH_RUN_TEXT      "Interface de Usuário do POPFile"
+
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; Used by 'Monitor Corpus Conversion' utility (main script: MonitorCC.nsi)
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Installation Page (for the 'Monitor Corpus Conversion' utility)
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TITLE        "Conversão do Corpus do POPFile"
@@ -100,13 +106,58 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "Completada a Conversão do Corpus do POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "Clique em Fechar para continuar"
 
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; Used by 'Add POPFile User' wizard (main script: adduser.nsi)
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 #--------------------------------------------------------------------------
-# Standard MUI Page - Finish
+# Standard MUI Page - Welcome (for the 'Add POPFile User' wizard)
 #
-# The PFI_LANG_FINISH_RUN_TEXT text should be a short phrase (not a long paragraph)
+# The sequence \r\n\r\n inserts a blank line (note that the PFI_LANG_ADDUSER_INFO_TEXT string
+# should end with a \r\n\r\n$_CLICK sequence).
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_FINISH_RUN_TEXT      "Interface de Usuário do POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_INFO_TEXT    "This wizard will guide you through the configuration of POPFile for the '$G_WINUSERNAME' user.\r\n\r\nIt is recommended that you close all other applications before continuing.\r\n\r\n$_CLICK"
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Directory Page (for the 'Add POPFile User' wizard)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TITLE        "Escolha o Local dos Dados do POPFile para '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_SUBTITLE     "Escolha a pasta para guardar os Dados do POPFile para '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "Esta versão do POPFile usa conjuntos de arquivos de dados separados para cada usuário.$\r$\n$\r$\nO Instalador vai usar a seguinte pasta para os dados do POPFile pertencentes ao usuário'$G_WINUSERNAME'. Para usar uma pasta diferente para este usuário, clique em Procurar e selecione uma outra pasta. $_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_DESTN   "Pasta a ser usada para guardar os dados do POPFile para '$G_WINUSERNAME'"
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Installation Page (for the 'Add POPFile User' wizard)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_TITLE        "Configuring POPFile for '$G_WINUSERNAME' user"
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_SUBTITLE     "Please wait while the POPFile configuration files are updated for this user"
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Finish (for the 'Add POPFile User' wizard)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_FINISH_INFO "POPFile has been configured for the '$G_WINUSERNAME' user.\r\n\r\nClick Finish to close this wizard."
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Uninstall Confirmation Page (for the 'Add POPFile User' wizard)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TITLE        "Uninstall POPFile data for '$G_WINUSERNAME' user"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_SUBTITLE     "Remove POPFile configuration data for this user from your computer"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TEXT_TOP     "The POPFile configuration data for the '$G_WINUSERNAME' user will be uninstalled from the following folder. $_CLICK"
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Uninstallation Page (for the 'Add POPFile User' wizard)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_TITLE       "Uninstalling POPFile data for '$G_WINUSERNAME' user"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_SUBTITLE    "Please wait while the POPFile configuration files for this user are deleted"
+
 
 #==========================================================================
 # Strings used for custom pages, message boxes and banners
@@ -479,8 +530,12 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_5             "Removendo todos os arquivos da pasta do POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_6             "Nota: impossível remover todos os arquivos da pasta do POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_7             "Problemas nos dados"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_8             "Removing all files from POPFile 'User Data' directory"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_9             "Note: unable to remove all files from POPFile 'User Data' directory"
 
 ; Message Box text strings
+
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDIFFUSER_1      "'$G_WINUSERNAME' is attempting to remove data belonging to another user"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_1      "Não parece que o POPFile esteja instalado nesta pasta"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "Continuar mesmo assim (não recomendado) ?"
@@ -500,6 +555,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_4         "Clique em 'Sim' para manter estes dados (para tentar outra vez mais tarde)"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Você quer remover todos os arquivos da sua pasta do POPFile ?$\r$\n$\r$\n(Se você tiver qualquer coisa que você criou e quer manter, clique Não)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Do you want to remove all files in your POPFile 'User Data' directory?$\r$\n$\r$\n(If you have anything you created that you want to keep, click No)"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "Nota"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "não pode ser removido."
