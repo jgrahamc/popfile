@@ -2673,7 +2673,7 @@ sub history_page
 
         $body .= "<option value=__filter__magnet>\n&lt;$self->{language}{History_ShowMagnet}&gt;\n" ;
         $body .= "</option>\n";
-        $body .= "<option value=\unclassified\"" . ($self->{form}{filter} eq 'unclassified'?' selected':'') . ">&lt;unclassified&gt;</option>\n";
+        $body .= "<option value=\"unclassified\"" . (($self->{form}{filter} eq 'unclassified')?' selected':'') . ">&lt;unclassified&gt;</option>\n";
         $body .= "</select>\n"; 
         $body .="<input type=submit class=submit name=setfilter value=\"$self->{language}{Filter}\">\n</form>\n";
 
