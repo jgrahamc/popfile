@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.47"
+  !define C_PFI_VERSION  "0.2.48"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -331,7 +331,7 @@
 #   but they can use only the characters abcdefghijklmnopqrstuvwxyz_-0123456789
 #
   !define CBP_SUGGESTION_LIST "$(PFI_LANG_CBP_SUGGESTED_NAMES)"
-#  
+#
 #----------------------------------------------------------------------------------------
 # Make the CBP package available
 #----------------------------------------------------------------------------------------
@@ -816,6 +816,20 @@ Section "POPFile" SecPOPFile
   DetailPrint "$(PFI_LANG_INST_PROG_REGSET)"
   SetDetailsPrint listonly
 
+  IfFileExists "$G_USERDIR\*.*" userdir_exists
+  ClearErrors
+  CreateDirectory "$G_USERDIR"
+  IfErrors 0 userdir_exists
+  SetDetailsPrint both
+  DetailPrint "Fatal error: unable to create folder for the 'User Data' files"
+  SetDetailsPrint listonly
+  MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "Error: Unable to create folder for the 'User Data' files\
+      ${MB_NL}${MB_NL}\
+      ($G_USERDIR)"
+  Abort
+
+userdir_exists:
+
   ; If we are installing over a previous version, ensure that version is not running
 
   Call MakeUserDirSafe
@@ -893,15 +907,6 @@ find_root_sfn:
 save_root_sfn:
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP_2}"
 
-  IfFileExists "$G_USERDIR\*.*" userdir_exists
-  ClearErrors
-  CreateDirectory "$G_USERDIR"
-  IfErrors 0 userdir_exists
-  MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "Error: Unable to create folder for user data\
-      ${MB_NL}${MB_NL}\
-      ($G_USERDIR)"
-
-userdir_exists:
   WriteINIStr "$G_USERDIR\install.ini" "Settings" "Owner" "$G_WINUSERNAME"
   WriteINIStr "$G_USERDIR\install.ini" "Settings" "Class" "$G_WINUSERTYPE"
   WriteINIStr "$G_USERDIR\install.ini" "Settings" "LastU" "adduser.exe"
@@ -990,18 +995,18 @@ stopwords:
 
   ; If we are upgrading and the user did not have a 'stopwords' file then do not install one
   ; (but still update the default file to the one distributed with 'our' version of POPFile)
-  
+
   IfFileExists "$G_USERDIR\popfile.cfg" 0 copy_stopwords
   IfFileExists "$G_USERDIR\stopwords" 0 copy_default_stopwords
-  
+
   ; We are upgrading an existing installation which uses 'stopwords'. If 'our' default list is
   ; the same as the list used by the existing installation then there is no need to find out
   ; what we are supposed to do with the 'stopwords' file
-  
+
   Call CompareStopwords
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "same" copy_default_stopwords
-  
+
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "POPFile 'stopwords' $(PFI_LANG_MBSTPWDS_1)\
       ${MB_NL}${MB_NL}\
