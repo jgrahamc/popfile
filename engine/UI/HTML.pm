@@ -288,8 +288,8 @@ sub deliver
     # Get the new file in the history
 
     if ( $type eq 'NEWFL' ) {
+        $self->log_( "Got NEWFL for $message" );
         $self->new_history_file__( $message );
-        $self->{need_resort__} = 1;
     }
 
     # If a day has passed then clean up the history
@@ -2314,6 +2314,17 @@ sub sort_filter_history
 {
     my ( $self, $filter, $search, $sort ) = @_;
 
+    # If the need_resort__ is set then we reindex the history indexes
+
+    if ( $self->{need_resort__} == 1 ) {
+        my $i = 0;
+
+        foreach my $key (sort compare_mf keys %{$self->{history__}}) {
+            $self->{history__}{$key}{index} = $i;
+            $i += 1;
+        }
+    }
+
     # Place entries in the history_keys array based on three critera:
     #
     # 1. Whether the bucket they are classified in matches the $filter
@@ -2533,6 +2544,7 @@ sub load_history_cache__
     }
 
     $self->{history_invalid__} = 0;
+    $self->{need_resort__}     = 0;
     $self->sort_filter_history( '', '', '' );
 }
 
@@ -2616,7 +2628,11 @@ sub new_history_file__
     $self->{history__}{$file}{short_from}    = $short_from;
     $self->{history__}{$file}{cull}          = 0;
 
-    $index = $self->history_size() if ( !defined( $index ) );
+    if ( !defined( $index ) ) {
+        $index = 0;
+        $self->{need_resort__} = 1;
+    }
+
     $self->{history__}{$file}{index}         = $index;
 }
 

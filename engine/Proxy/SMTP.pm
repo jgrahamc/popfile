@@ -244,6 +244,8 @@ sub child__
 
     close $mail if defined( $mail );
     close $client;
+    print $pipe "CMPLT$eol";
+    close $pipe;
 }
 
 # ---------------------------------------------------------------------------------------------

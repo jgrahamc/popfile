@@ -194,13 +194,14 @@ sub flush_child_data_
         if ( defined( $message ) ) {
             $message =~ s/[\r\n]//g;
 
+            $self->log_( "Child proxy message $message" );
+
             if ( $message =~ /CLASS:(.*)/ ) {
 
                 # Post a message to the MQ indicating that we just handled
                 # a message with a specific classification
 
                 $self->mq_post_( 'CLASS', $1, '' );
-                $self->log_( "Incrementing $1" );
 	    }
 
             if ( $message =~ /NEWFL:(.*)/ ) {

@@ -401,8 +401,8 @@ sub child__
                     ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '' );
 
                     # Tell the parent that we just handled a mail
-                    print $pipe "CLASS:$class$eol";
                     print $pipe "NEWFL:$history_file$eol";
+                    print $pipe "CLASS:$class$eol";
 
                     # Note locally that file has been retrieved
                     $downloaded{$count} = 1;
@@ -439,6 +439,7 @@ sub child__
 
     close $mail if defined( $mail );
     close $client;
+    print $pipe "CMPLT$eol";
     close $pipe;
 
     $self->log_( "POP3 forked child done" );

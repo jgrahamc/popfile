@@ -309,6 +309,7 @@ sub child__
 
     close $news if defined( $news );
     close $client;
+    print $pipe "CMPLT$eol";
     close $pipe;
 
     $self->log_( "NNTP forked child done" );
