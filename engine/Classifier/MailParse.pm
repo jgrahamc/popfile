@@ -654,9 +654,9 @@ sub parse_stream
                             my $boundary = $argument;
                             
                             #TODO: add boundary to self->{ut}
-                            $boundary = <MSG> if ( !( $argument =~ /boundary= ?[\"]?(.*)[\"]?/ )); 
+                            $boundary = <MSG> if ( !( $argument =~ /boundary=\"(.*)\"/ )); 
     
-                            if ( $boundary =~ /boundary= ?[\"]?(.*)[\"]?/ )  {
+                            if ( $boundary =~ /boundary=\"(.*)\"/ )  {
                                 print "Set mime boundary to $1\n" if $self->{debug};
     
                                 $mime = $1;
