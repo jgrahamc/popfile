@@ -41,7 +41,10 @@ sub new
 
     # Colors assigned to each bucket
     $self->{colors}            = {};
-   
+
+    # Precomputed top 10 words in each bucket
+    $self->{top10}             = {};
+    
     return bless $self, $type;
 }
 
@@ -87,6 +90,10 @@ sub load_word_matrix
     my ($self) = @_;
     my @colors = ( 'red', 'green', 'blue', 'brown', 'orange', 'purple', 'magenta', 'cyan' );
     my $c      = 0;
+
+    $self->{matrix}     = {};
+    $self->{total}      = {};
+    $self->{full_total} = 0;
     
     print "Loading the corpus...\n" if $self->{debug};
     
@@ -112,7 +119,8 @@ sub load_word_matrix
         }
 
         # Each line in the word table is a word and a count
-
+        $self->{total}{$bucket} = 0;
+    
         while (<WORDS>)
         {
             if ( /(.+) (.+)/ )
@@ -131,6 +139,21 @@ sub load_word_matrix
         for my $word (keys %{$self->{matrix}{$bucket}})
         {
             $self->{matrix}{$bucket}{$word} /= $self->{total}{$bucket};
+        }
+
+        $self->{top10}{$bucket} = "<tr><td><font color=$self->{colors}{$bucket}>$bucket</font><td>$self->{total}{$bucket}<td><td>";
+        my @ranking = sort {$self->{matrix}{$bucket}{$b} <=> $self->{matrix}{$bucket}{$a}} keys %{$self->{matrix}{$bucket}};
+        for my $i ( 0.. 9 )
+        {
+            if ( $ranking[$i] ne '' ) 
+            {
+                $self->{top10}{$bucket} .= "$ranking[$i]";
+
+                if ( $i != 9 ) 
+                {
+                    $self->{top10}{$bucket} .= ', ';
+                }
+            }
         }
         
         print " $self->{total}{$bucket} words\n" if $self->{debug};

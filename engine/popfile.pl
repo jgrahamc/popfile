@@ -17,7 +17,7 @@ use Classifier::Bayes;
 
 # This version number
 my $major_version = 0;
-my $minor_version = 12;
+my $minor_version = 13;
 
 # A list of the messages currently on the server, each entry in this list
 # is a hash containing the following items
@@ -68,7 +68,26 @@ my $mail;
 # The classifier object
 my $classifier;
 
+# Constant used by the log rotation code
 my $seconds_per_day = 60 * 60 * 24;
+
+# These two variables are used to create the HTML UI for POPFile
+my $header = "<html><head><title>POPFile VERSION</title><link title=jgcstyle rel=stylesheet href=http://www.jgc.org/jgc_style.css type=text/css></head>\
+<body bgcolor=#ffffff><h1><span class=useem>POPFile VERSION</span></h1>\
+<table width=100% cellspacing=0><tr><td width=2></td>\
+<td bgcolor=TAB0 width=10% align=center><font size=+1><b>&nbsp;<a href=/>Configuration</a></b></font></td><td width=2></td>\
+<td align=center bgcolor=TAB1 width=10%><font size=+1><b>&nbsp;<a href=/corpus>Corpus</a></b></font></td><td width=2></td>\
+<td align=center bgcolor=TAB2 width=10%><font size=+1><b>&nbsp;<a href=/history>History</a></b></font></td>\
+<td width=100%>&nbsp;</td></tr>\
+<tr height=5 bgcolor=#ffff99><td height=5 colspan=7 bgcolor=#ffff99></td></tr></table>\
+<table width=100% cellpadding=12 cellspacing=0><tr><td width=50% valign=top bgcolor=#ffff99>";
+my $footer = "<p><hr></tr></table><p></body></html>";
+
+# Hash used to store form parameters
+my %form = {};
+
+# Used for creating file names for storing messages in 
+my $mail_filename = '';
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -170,12 +189,42 @@ sub remove_debug_files
     {
         # Extract the epoch information from the popfile log file name
         
-        if ( $debug_file =~ /popfile([0-9]*)\.log/ ) 
+        if ( $debug_file =~ /popfile([0-9]+)\.log/ ) 
         {
             # If older than now - 3 days then delete
             if ( $1 < ( time - 3 * $seconds_per_day ) ) 
             {
                 unlink($debug_file);
+            }
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# remove_mail_files - Remove old popfile saved mail files
+#
+# Removes the popfile*.msg files that are older than one day
+#
+# ---------------------------------------------------------------------------------------------
+sub remove_mail_files
+{
+    my @mail_files = glob "popfile*.msg";
+    
+    foreach my $mail_file (@mail_files)
+    {
+        # Extract the epoch information from the popfile mail file name
+        
+        if ( $mail_file =~ /popfile([0-9]+)_([0-9]+)\.msg/ ) 
+        {
+            # If older than now - 1 day then delete
+            if ( $1 < ( time - $seconds_per_day ) ) 
+            {
+                my $class_file = $mail_file;
+                $class_file =~ s/msg$/cls/;
+                unlink($mail_file);
+                unlink($class_file);
+                $configuration{mail_count} = 0;
             }
         }
     }
@@ -592,6 +641,418 @@ sub flush_extra
 
 # ---------------------------------------------------------------------------------------------
 #
+# http_ok - Output a standard HTTP 200 message with a body of data
+#
+# $text      The body of the page
+#
+# ---------------------------------------------------------------------------------------------
+sub http_ok
+{
+    my ( $text, $selected ) = @_;
+    my @tab = ( 'lightblue', 'lightblue', 'lightblue' );
+    $tab[$selected] = '#ffff99';
+    
+    $text = $header . $text . $footer;
+    
+    $text =~ s/TAB0/$tab[0]/;
+    $text =~ s/TAB1/$tab[1]/;
+    $text =~ s/TAB2/$tab[2]/;
+    
+    my $header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
+    $header .= length($text);
+    $header .= "$eol$eol";
+    return $header . $text;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# http_error - Output a standard HTTP error message
+#
+# $error      The error number
+#
+# ---------------------------------------------------------------------------------------------
+sub http_error
+{
+    my ($error) = @_;
+
+    return "HTTP/1.0 $error Error$eol$eol";    
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# popfile_homepage - get the popfile homepage
+#
+# ---------------------------------------------------------------------------------------------
+sub popfile_homepage
+{
+    my $body = "<h2>Configuration Options</h2>";
+
+    if ( ( $form{debug} >= 1 ) && ( $form{debug} <= 4 ) )
+    {
+        $configuration{debug} = $form{debug}-1;
+    }
+
+    if ( ( $form{subject} >= 1 ) && ( $form{subject} <= 2 ) )
+    {
+        $configuration{subject} = $form{subject}-1;
+    }
+
+    if ( $form{update_port} eq 'Apply' )
+    {
+        $configuration{port} = $form{port};
+    }
+
+    if ( $form{update_server} eq 'Apply' )
+    {
+        $configuration{server} = $form{server};
+    }
+
+    if ( $form{update_sport} eq 'Apply' )
+    {
+        $configuration{sport} = $form{sport};
+    }
+
+    $body .= "<p><form action=/><b>POP3 listen port:</b><br><input name=port type=text value=$configuration{port}><input type=submit name=update_port value=Apply></form>";    
+    $body .= "Updated port to $configuration{port}; this change will not take affect until you restart POPFile" if ( $form{update_port} eq 'Apply' );
+    $body .= "<p><hr><p><form action=/><b>Secure server:</b> <br><input name=server type=text value=$configuration{server}><input type=submit name=update_server value=Apply></form>";    
+    $body .= "Updated secure server to $configuration{server}; this change will not take affect until you restart POPFile" if ( $form{update_server} eq 'Apply' );
+    $body .= "<p><form action=/><b>Secure port:</b> <br><input name=sport type=text value=$configuration{sport}><input type=submit name=update_sport value=Apply></form>";    
+    $body .= "Updated port to $configuration{sport}; this change will not take affect until you restart POPFile" if ( $form{update_sport} eq 'Apply' );
+    $body .= "<p><hr><p><b>Subject line modification:</b><br>";    
+    $body .= "<b>" if ( $configuration{subject} == 0 );
+    $body .= "<a href=/?subject=1><font color=blue>Off</font></a> ";
+    $body .= "</b>" if ( $configuration{subject} == 0 );
+    $body .= "<b>" if ( $configuration{subject} == 1 );
+    $body .= "<a href=/?subject=2><font color=blue>On</font></a> ";
+    $body .= "</b>" if ( $configuration{subject} == 1 );
+    $body .= "<p><b>Debugging output:</b><br>";
+    $body .= "<b>" if ( $configuration{debug} == 0 );
+    $body .= "<a href=/?debug=1><font color=blue>None</font></a> ";
+    $body .= "</b>" if ( $configuration{debug} == 0 );
+    $body .= "<b>" if ( $configuration{debug} == 1 );
+    $body .= "<a href=/?debug=2><font color=blue>To File</font></a> ";
+    $body .= "</b>" if ( $configuration{debug} == 1 );
+    $body .= "<b>" if ( $configuration{debug} == 2 );
+    $body .= "<a href=/?debug=3><font color=blue>To Screen</font></a> ";
+    $body .= "</b>" if ( $configuration{debug} == 2 );
+    $body .= "<b>" if ( $configuration{debug} == 3 );
+    $body .= "<a href=/?debug=4><font color=blue>To Screen and File</font></a>";
+    $body .= "</b>" if ( $configuration{debug} == 3 );
+    
+    return http_ok($body,0); 
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# corpus_page - the corpus management page
+#
+# ---------------------------------------------------------------------------------------------
+sub corpus_page
+{
+    my $result;
+    my $create_message = '';
+    my $delete_message = '';
+    if ( $form{create} eq 'Create' )
+    {
+        $form{name} = lc($form{name});
+        if ( $classifier->{total}{$form{name}} > 0 ) 
+        {
+            $create_message .= "<blockquote><b>Bucket named $form{name} already exists</b></blockquote>";
+        } 
+        else 
+        {
+            mkdir( 'corpus' );
+            mkdir( "corpus/$form{name}" );
+            open NEW, ">corpus/$form{name}/table";
+            print NEW "\n";
+            close NEW;
+            $classifier->load_word_matrix();
+
+            $create_message = "<blockquote><b>Created bucket named $form{name}</b></blockquote>";
+        }
+    }
+
+    if ( $form{delete} eq 'Delete' )
+    {
+        $form{name} = lc($form{name});
+        unlink( "corpus/$form{name}/table" );
+        rmdir( "corpus/$form{name}" );
+
+        $delete_message = "<blockquote><b>Deleted bucket $form{name}</b></blockquote>";
+        $classifier->load_word_matrix();
+    }
+    
+    if ( $form{upload} eq 'Upload' )
+    {
+        debug( "Told to upload $form{file} into $form{name}" );
+        my %words;
+        
+        open WORDS, "<corpus/$form{name}/table";
+        while (<WORDS>)
+        {
+            if ( /(.+) (.+)/ )
+            {
+                $words{$1} = $2;
+            }
+        }
+        close WORDS;
+
+        $classifier->{parser}->parse_stream($form{file});
+
+        foreach my $word (keys %{$classifier->{parser}->{words}})
+        {
+            $words{$word} += $classifier->{parser}->{words}{$word};
+        }
+        
+        open WORDS, ">corpus/$form{name}/table";
+        foreach my $word (keys %words)
+        {
+            print WORDS "$word $words{$word}\n";
+        }
+        close WORDS;
+        
+        $classifier->load_word_matrix();
+    }
+    
+    my $body = "<h2>Summary</h2><table width=75%><tr><td><b>Bucket Name</b><td><b>Total Words</b><td>&nbsp;<td><b>Top 10 words</b>";
+    
+    foreach my $bucket (keys %{$classifier->{total}})
+    {
+        $body .= $classifier->{top10}{$bucket};
+    }
+    
+    $body .= "<tr><td><td><hr><b>$classifier->{full_total}</b><td><td></table>";
+
+    $body .= "<p><hr><h2>Learn</h2>";
+    $body .= "<h3>Upload file into a bucket</h3><form action=/corpus><b>Bucket: </b><select name=name>";
+    foreach my $bucket (keys %{$classifier->{total}})
+    {
+        $body .= "<option value=$bucket>$bucket</option>";
+    }
+    
+    $body .= "</select> <b>File:</b> <input type=file name=file> <input type=submit name=upload value=Upload></form>";
+
+    $body .= "<p><hr><h2>Maintenance</h2>";
+    $body .= "<p><form action=/corpus><b>Create bucket with name:</b> <br><input name=name type=text> <input type=submit name=create value=Create></form>$create_message";
+    
+    $body .= "<p><form action=/corpus><b>Delete bucket named:</b> <br><select name=name>";
+    foreach my $bucket (keys %{$classifier->{total}})
+    {
+        $body .= "<option value=$bucket>$bucket</option>";
+    }
+    $body .= "</select> <input type=submit name=delete value=Delete></form>$delete_message";
+
+    $body .= "<p><hr><h2>Lookup</h2><form action=/corpus><p><b>Lookup word in corpus: </b><br><input name=word type=text> <input type=submit name=lookup value=Lookup></form>";
+
+    if ( $form{lookup} eq 'Lookup' ) 
+    {
+        my $word = $classifier->{mangler}->mangle($form{word});
+        
+        $body .= "<blockquote><b>Lookup result for $form{word}</b><p>";
+        
+        if ( $word ne '' ) 
+        {
+            my $max = 0;
+            my $max_bucket = '';
+            foreach my $bucket (keys %{$classifier->{total}})
+            {
+                if ( $classifier->{matrix}{$bucket}{$word} )
+                {
+                    $body .= "<b>$form{word}</b> appears in <font color=$classifier->{colors}{$bucket}>$bucket</font> with probability $classifier->{matrix}{$bucket}{$word}<br>";
+                    if ( $classifier->{matrix}{$bucket}{$word} > $max )
+                    {
+                        $max = $classifier->{matrix}{$bucket}{$word};
+                        $max_bucket = $bucket;
+                    }
+                }
+            }
+            
+            if ( $max_bucket ne '' )
+            {
+                $body .= "<p><b>$form{word}</b> is most likely to appear in <font color=$classifier->{colors}{$max_bucket}>$max_bucket</font>";
+            }
+            else
+            {
+                $body .= "<p><b>$form{word}</b> does not appear in the corpus";
+            }
+        } 
+        else
+        {
+            $body .= "Cannot lookup word $form{word} because it is not a valid word";
+        }
+        
+        $body .= "</blockquote>";
+    }
+    
+    return http_ok($body,1);
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# history_page - get the message classification history page
+#
+# ---------------------------------------------------------------------------------------------
+sub history_page
+{
+    my $body = "<h2>Messages in the last 24 hours</h2><table width=75%><tr><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";
+    my @mail_files = glob "popfile*.msg";
+
+    # Handle the reinsertion of a message file
+    if ( $form{shouldbe} ne '' )
+    {
+        my %words;
+        
+        open WORDS, "<corpus/$form{shouldbe}/table";
+        while (<WORDS>)
+        {
+            if ( /(.+) (.+)/ )
+            {
+                $words{$1} = $2;
+            }
+        }
+        close WORDS;
+
+        $classifier->{parser}->parse_stream($form{file});
+
+        foreach my $word (keys %{$classifier->{parser}->{words}})
+        {
+            $words{$word} += $classifier->{parser}->{words}{$word};
+        }
+        
+        open WORDS, ">corpus/$form{shouldbe}/table";
+        foreach my $word (keys %words)
+        {
+            print WORDS "$word $words{$word}\n";
+        }
+        close WORDS;
+        
+        my $class_file = $form{file};
+        $class_file =~ s/msg$/cls/;
+        open CLASS, ">$class_file";
+        print CLASS "$form{shouldbe}$eol";
+        close CLASS;
+        
+        $classifier->load_word_matrix();
+    }
+
+    foreach my $mail_file (@mail_files)
+    {
+        my $from;
+        my $subject;
+        
+        open MAIL, "<$mail_file";
+        while (<MAIL>) 
+        {
+            if ( /^From: (.*)/ )
+            {
+                $from = $1;
+            }
+            if ( /^Subject: (.*)/ )
+            {
+                $subject = $1;
+            }
+            if (( $from ne '' ) && ( $subject ne '' ) ) 
+            {
+                last;
+            }
+        }
+        close MAIL;
+        
+        $body .= "<tr";
+        $body .= " bgcolor=lightgreen" if ($form{view} eq $mail_file) || ($form{file} eq $mail_file);
+        $body .= "><td>$from<td><a href=/history?view=$mail_file>$subject</a><td>";
+        my $class_file = $mail_file;
+        $class_file =~ s/msg$/cls/;
+        open CLASS, "<$class_file";
+        my $bucket = <CLASS>;
+        $bucket =~ s/[\r\n]//g;
+        close CLASS;
+        $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Reclassify as: ";
+        foreach my $abucket (keys %{$classifier->{total}})
+        {
+            if ( $abucket ne $bucket ) 
+            {
+                $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file><font color=$classifier->{colors}{$abucket}>$abucket</font></a> ";
+            }
+        }
+        $body .= "</td>";
+        
+        # Check to see if we want to view a message
+        if ( $form{view} eq $mail_file )
+        {
+            $body .= "<tr><td colspan=4>";
+            $classifier->{parser}->{color} = 1;
+            $classifier->{parser}->{bayes} = $classifier;
+            $body .= $classifier->{parser}->parse_stream($form{view});
+            $classifier->{parser}->{color} = 0;
+            $body .=  "<hr><tr><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";
+        }
+        
+        if ( $form{file} eq $mail_file )
+        {
+            $body .= "<tr><td><td>Changed to <font color=$classifier->{colors}{$form{shouldbe}}>$form{shouldbe}</font><td><td>";
+        }
+    }
+
+    $body .= "</table>";
+    
+    return http_ok($body,2); 
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# handle_url - Handle a URL request
+#
+# $url         URL to process
+#
+# ---------------------------------------------------------------------------------------------
+sub handle_url
+{
+    my ($url) = @_;
+
+    # See if there are any form parameters and if there are parse them into the %form hash
+    %form = {};
+    
+    if ( $url =~ s/\?(.*)// ) 
+    {
+        my $arguments = $1;
+        
+        while ( $arguments =~ s/(.*?)=(.*?)(&|\r|\n|$)// )
+        {
+            my $arg = $1;
+            $form{$arg} = $2;
+            
+            while ( ( $form{$arg} =~ /%([0-9A-F][0-9A-F])/i ) != 0 )
+            {
+                debug( "$1" );
+                my $from = "%$1";
+                my $to   = chr(hex("0x$1"));
+                $to =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\\1/g;
+                $form{$arg} =~ s/$from/$to/g;
+            }
+        }
+    }
+    
+    if ( $url eq '/' ) 
+    {
+        return popfile_homepage();
+    }
+    
+    if ( $url eq '/corpus' )
+    {
+        return corpus_page();
+    }
+
+    if ( $url eq '/history' )
+    {
+        return history_page();
+    }
+    
+    return http_error(404);
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # run_popfile - a POP3 proxy server 
 #
 # $listen_port    (optional) the port to listen on
@@ -606,15 +1067,22 @@ sub run_popfile
     my $listen_port    = shift;
     my $connect_server = shift;
     my $connect_port   = shift;
+    my $ui_port        = shift;
     
     my $server = IO::Socket::INET->new( Proto     => 'tcp',
                                         LocalPort => $listen_port,
                                         Listen    => SOMAXCONN,
                                         Reuse     => 1 );
 
+    my $ui     = IO::Socket::INET->new( Proto     => 'tcp',
+                                        LocalPort => $ui_port,
+                                        Listen    => SOMAXCONN,
+                                        Reuse     => 1 );
+
     # This is used to perform select calls on the $server socket so that we can decide when there is 
     # a call waiting an accept it without having to block
-    my $selector         = new IO::Select( $server  );
+    my $selector   = new IO::Select( $server );
+    my $uiselector = new IO::Select( $ui     );
     
     print "POPFile Engine v$major_version.$minor_version ready\n";
     
@@ -626,7 +1094,46 @@ sub run_popfile
         # See if there's a connection waiting on the $server by getting the list of handles with data to
         # read, if the handle is the server then we're off.  Note the 0.1 second delay here when waiting
         # around.  This means that we don't hog the processor while waiting for connections.
-        my ($ready) = $selector->can_read(0.1);
+        my ($ready)   = $selector->can_read(0.1);
+        my ($uiready) = $uiselector->can_read(0.1);
+
+        # Handle HTTP requests for the UI
+        if ( $uiready == $ui ) 
+        {
+            if ( my $client = $ui->accept() )
+            {
+                # Check that this is a connection from the local machine, if it's not then we drop it immediately
+                # without any further processing.  We don't want to allow remote users to admin POPFile
+                my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
+
+                if ( $remote_host == inet_aton( "127.0.0.1" ) )
+                {
+                    if ( my $request = <$client> )
+                    {
+                        debug( $request );
+                        while ( <$client> ) 
+                        {
+                            if ( !/(.*): (.*)/ ) 
+                            {
+                                last;
+                            }
+                        }
+
+                        if ( $request =~ /GET (.*) HTTP\/1\./ )
+                        {
+                            my $url = $1;
+                            print $client handle_url($url);
+                        }
+                        else
+                        {
+                            print $client http_error(500);
+                        }                  
+                    }
+                }
+                
+                close $client;
+            }
+        }
         
         # If the $server is ready then we can go ahead and accept the connection
         if ( $ready == $server )
@@ -927,9 +1434,12 @@ sub run_popfile
                             my $got_full_body = 0;  # Did we get the full body
 
                             my $getting_headers = 1;
+                            
+                            my $temp_file = "$mail_filename" . "_$configuration{mail_count}.msg";
+                            my $class_file = "$mail_filename" . "_$configuration{mail_count}.cls";
+                            $configuration{mail_count} += 1;
 
-
-                            open TEMP, ">temp.tmp";
+                            open TEMP, ">$temp_file";
                             
                             while ( <$mail> )
                             {   
@@ -947,7 +1457,6 @@ sub run_popfile
                                 # here exactly
                                 if ( $line =~ /^\.\r\n$/ )
                                 {
-                                    $got_full_body = 1;
                                     last;
                                 }
 
@@ -955,7 +1464,7 @@ sub run_popfile
                                 {
                                     if ( $line =~ /[A-Z0-9]/i ) 
                                     {
-                                        print TEMP "$line$eol";
+                                        print TEMP $line;
             
                                         if ( $configuration{subject} ) 
                                         {
@@ -989,10 +1498,7 @@ sub run_popfile
                             close TEMP;
 
                             # Do the text classification and parse the result
-                            my $classification = $classifier->classify_file("temp.tmp");
-
-                            # Remove the temporary file
-                            unlink("temp.tmp");
+                            my $classification = $classifier->classify_file($temp_file);
 
                             debug ("Classification: $classification" );
                             
@@ -1008,18 +1514,11 @@ sub run_popfile
                             # Echo the text of the message to the client
                             print $client $msg_headers;
                             print $client $msg_body;
+                            print $client ".$eol";
 
-                            # Retrieve any more of the body
-                            if ( !$got_full_body )
-                            {
-                                debug( "Echoing rest of message" );
-                                echo_to_dot( $mail, $client );
-                            }
-                            else
-                            {
-                                debug( "Full message was received" );
-                                print $client ".$eol";
-                            }
+                            open CLASS, ">$class_file";
+                            print CLASS "$classification$eol";
+                            close CLASS;
 
                         flush_extra( $mail, $client );
                         next;
@@ -1144,11 +1643,13 @@ $SIG{INT}   = \&aborting;
 # Create the name of the debug file for the debug() function
 my $today = int( time / $seconds_per_day ) * $seconds_per_day;
 $debug_filename = "popfile$today.log";
+$mail_filename  = "popfile$today";
 
 # Set up reasonable defaults for the configuration parameters.  These may be 
 # overwritten immediately when we read the configuration file
 $configuration{debug}    = 0;
 $configuration{port}     = 110;
+$configuration{ui_port}  = 8080;
 $configuration{subject}  = 1;
 $configuration{server}   = '';
 $configuration{sport}    = '';
@@ -1174,8 +1675,11 @@ $classifier->load_word_matrix();
 
 debug( "POPFile Engine v$major_version.$minor_version running" );
 
+# Fix up the page template with the current version number
+$header =~ s/VERSION/v$major_version\.$minor_version/g;
+
 # Run the POP server and handle requests
-run_popfile($configuration{port}, $configuration{server}, $configuration{sport});
+run_popfile($configuration{port}, $configuration{server}, $configuration{sport}, $configuration{ui_port});
 
 print "    Saving configuration\n";
 

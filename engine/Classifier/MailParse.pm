@@ -88,7 +88,10 @@ sub update_word
         if ( $self->{color} )
         {
             my $color   = $self->{bayes}->get_color($mword);
-            $self->{ut} =~ s/($word)/<b><font color=$color>\1<\/font><\/b>/g;
+            if ( ( $self->{ut} =~ s/($word)/<b><font color=$color>\1<\/font><\/b>/g ) == 0 )
+            {
+                $self->{ut} .= "Found in encoded data <font color=$color>$word<\/font>\r\n";
+            }
         }
         else
         {
@@ -160,19 +163,16 @@ sub parse_stream
 
     my $content_type = '';
 
+    # Used to return a colorize page
+    
+    my $colorized = '';
+
     $self->{words}     = {};
     $self->{msg_total} = 0;
 
     if ( $self->{color} )
     {
-        print "<html><body><h2>Color Key</h2><table>";
-        for my $bucket (keys %{$self->{bayes}->{matrix}})
-        {
-            print "<tr><td><b><font color=$self->{bayes}->{colors}{$bucket}>$self->{bayes}->{colors}{$bucket}</font></b><td>$bucket";
-        }
-        print "<tr><td><b>black</b><td>unclassified or infrequent</table>";
-        print "<h2>Message</h2>";
-        print "<pre>";
+        $colorized .= "<tt>";
     }
 
     open MSG, "<$file";
@@ -190,7 +190,7 @@ sub parse_stream
         {
             if ( $self->{ut} ne '' ) 
             {
-                print $self->{ut};
+                $colorized .= $self->{ut};
             }
     
             $self->{ut} = $line;
@@ -220,14 +220,14 @@ sub parse_stream
                 $decoded    .= un_base64( $self, $line );
                 if ( $decoded =~ /[^A-Za-z\-\.]$/ ) 
                 {
-                    $self->{ut} = $decoded if $self->{color};
+                    $self->{ut} = $line if $self->{color};
                     add_line( $self, $decoded );
                     $decoded = '';
                     if ( $self->{color} ) 
                     {
                         if ( $self->{ut} ne '' ) 
                         {
-                            print $self->{ut};
+                            $colorized .= $self->{ut};
                             $self->{ut} = '';
                         }
                     }
@@ -336,16 +336,19 @@ sub parse_stream
         }
     }
 
+    close MSG;
+    
     if ( $self->{color} ) 
     {
         if ( $self->{ut} ne '' ) 
         {
-            print $self->{ut};
-            print "</pre></body></html>";
+            $colorized .= $self->{ut};
+            $colorized .= "</tt>";
+            $colorized =~ s/\r\n/<br>/g;
         }
+        
+        return $colorized;
     }
-    
-    close MSG;
 }
 
 1;
