@@ -309,15 +309,15 @@
 
   !ifndef ENGLISH_MODE
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build" "Multi-Language (with Kakasi) using global DIR variables"
+      VIAddVersionKey "Build" "Multi-Language (with Kakasi) using new structure"
     !else
-      VIAddVersionKey "Build" "Multi-Language (without Kakasi) using global DIR variables"
+      VIAddVersionKey "Build" "Multi-Language (without Kakasi) using new structure"
     !endif
   !else
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build" "English-Mode (with Kakasi) using global DIR variables"
+      VIAddVersionKey "Build" "English-Mode (with Kakasi) using new structure"
     !else
-      VIAddVersionKey "Build" "English-Mode (without Kakasi) using global DIR variables"
+      VIAddVersionKey "Build" "English-Mode (without Kakasi) using new structure"
     !endif
   !endif
 
@@ -765,9 +765,9 @@ Function PFIGUIInit
 
 mutex_ok:
   SearchPath $G_NOTEPAD notepad.exe
-  
+
   ; Assume user displays the release notes
-  
+
   StrCpy $G_STARTUP "no banner"
 
   MessageBox MB_YESNO|MB_ICONQUESTION \
@@ -791,7 +791,7 @@ notes_ignored:
   ; so we display a banner to reassure the user. The banner will be removed by 'CheckUserRights'
 
   StrCpy $G_STARTUP "banner displayed"
-  
+
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
 
 continue:
@@ -838,33 +838,49 @@ Section "POPFile" SecPOPFile
   SetDetailsPrint listonly
 
   ; Before POPFile 0.21.0, POPFile and the minimal Perl shared the same folder structure.
-  ; Phase 1 of the multi-user support introduced in 0.21.0 may require some slight changes
-  ; to the folder structure (initial investigations suggest that perl.exe, wperl.exe and the
-  ; perl58.dll may need to be placed in a different folder from the other minimal Perl files).
+  ; Phase 1 of the multi-user support introduced in 0.21.0 requires some slight changes
+  ; to the folder structure (to permit POPFile to be run from any folder after setting the
+  ; POPFILE_ROOT and POPFILE_USER environment variables to the appropriate values).
 
-  ; A possible folder arrangement could be:
+  ; The folder arrangement used for this build:
   ;
-  ; (a) $INSTDIR         - the top-level installation folder (wrapper*.exe and uninstall.exe),
-  ; (b) $INSTDIR\bin     - holds only perl.exe, wperl.exe and perl58.dll
-  ; (c) $INSTDIR\lib     - POPFile and minimal Perl, same structure as used in earlier versions
-  ; (d) $INSTDIR\backup  - holds a backup copy of the old flat file or BerkeleyDB corpus
-  ; (e) $INSTDIR\kakasi  - holds the (optional) Kakasi package used to process Japanese email
+  ; (a) $INSTDIR              - main POPFile installation folder, holds popfile.pl and several
+  ;                             other *.pl scripts, popfile*.exe, wrapper*.exe plus three of the
+  ;                             minimal Perl files (perl.exe, wperl.exe and perl58.dll)
+  ;
+  ; (b) $INSTDIR\kakasi       - holds the Kakasi package used to process Japanese email
+  ;                             (only installed when Japanese support is required)
+  ;
+  ; (c) $INSTDIR\lib          - minimal Perl installation (except for the three files stored
+  ;                             in the $INSTDIR folder to avoid runtime problems)
+  ;
+  ; (d) $INSTDIR\user         - default user data (for the user running the installer)
+  ;
+  ; (e) $INSTDIR\user\backup  - holds a backup copy of the old flat file or BerkeleyDB corpus
+  ;                             (only created if conversion of the default corpus was required)
+  ;
+  ; (f) $INSTDIR\*       - the remaining POPFile folders (Classifier, languages, manual, etc)
+  ;
+  ; NOTE: If we are upgrading a prior version of POPFile, the user data is found in $INSTDIR
+  ; so we use $INSTDIR and $INSTDIR\backup instead of $INSTDIR\user and $INSTDIR\user\backup
 
   ; For increased flexibility, four global user variables are used in addition to $INSTDIR
-  ; (this makes it easier to change the folder structure used by the installer)
+  ; (this makes it easier to change the folder structure used by the installer).
 
-  ; For this build, the original folder structure is maintained which means that the working
-  ; directory must always be set to the installation folder before running POPFile (otherwise
-  ; a fatal 'Perl' error occurs immediately)
+  StrCpy $G_ROOTDIR   "$INSTDIR"
+  StrCpy $G_MPBINDIR  "$INSTDIR"
+  StrCpy $G_MPLIBDIR  "$INSTDIR\lib"
 
-  StrCpy $G_ROOTDIR   $INSTDIR
-  StrCpy $G_USERDIR   $INSTDIR
-  StrCpy $G_MPBINDIR  $INSTDIR
-  StrCpy $G_MPLIBDIR  $INSTDIR
+  ; The fourth global variable ($G_USERDIR) is initialised by the 'CheckExistingConfig' function
 
   ; If we are installing over a previous version, ensure that version is not running
 
   Call MakeItSafe
+
+  ; Starting with 0.21.0, a new structure is used for the minimal Perl (to enable POPFile to
+  ; be started from any folder, once POPFILE_ROOT and POPFILE_USER have been initialised)
+
+  Call MinPerlRestructure
 
   ; Retrieve the POP3 and GUI ports from the ini and get whether we install the
   ; POPFile run in the Startup group
@@ -1033,7 +1049,6 @@ update_config:
   File "${C_PERL_DIR}\lib\lib.pm"
   File "${C_PERL_DIR}\lib\locale.pm"
   File "${C_PERL_DIR}\lib\POSIX.pm"
-  File "${C_PERL_DIR}\lib\re.pm"
   File "${C_PERL_DIR}\lib\SelectSaver.pm"
   File "${C_PERL_DIR}\lib\Socket.pm"
   File "${C_PERL_DIR}\lib\strict.pm"
@@ -1224,7 +1239,7 @@ SectionEnd
 # If we are performing an upgrade of a 'flat file' or 'BerkeleyDB' version of POPFile, we make
 # a backup of the old corpus structure. Note that if a backup already exists, we do nothing.
 #
-# The backup is created in the '$INSTDIR\backup' folder. Information on the backup is stored
+# The backup is created in the '$G_USERDIR\backup' folder. Information on the backup is stored
 # in the 'backup.ini' file to assist in restoring the old corpus. A copy of 'popfile.cfg'
 # is also placed in the backup folder.
 #
@@ -1251,9 +1266,9 @@ Section "-NonSQLCorpusBackup" SecBackup
   Push ${L_TEMP}
 
   IfFileExists "$G_USERDIR\popfile.cfg" 0 exit
-  IfFileExists "$INSTDIR\backup\nonsql\*.*" exit
+  IfFileExists "$G_USERDIR\backup\nonsql\*.*" exit
 
-  ; Save installation-specific data for use by the 'Corpus Conversion' utility
+  ; Save installation-specific data for use by the 'Monitor Corpus Conversion' utility
 
   WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "PERLDIR" "$G_MPBINDIR"
   WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "ROOTDIR" "$G_ROOTDIR"
@@ -1291,12 +1306,12 @@ corpus_check:
   StrCmp ${L_BUCKET_NAME} "" check_bucket_count
 
 got_bucket_name:
-  
+
   IfFileExists "${L_CORPUS_PATH}\${L_BUCKET_NAME}\*.*" 0 corpus_check
-  
+
   ; Have found a folder, so we make a note to make it easier to remove the folder after
   ; corpus conversion has been completed (folder will only be removed if it is empty)
-  
+
   IntOp ${L_FOLDER_COUNT} ${L_FOLDER_COUNT} + 1
   WriteINIStr "$PLUGINSDIR\corpus.ini" "FolderList" "MaxNum" ${L_FOLDER_COUNT}
   WriteINIStr "$PLUGINSDIR\corpus.ini" "FolderList" \
@@ -1349,29 +1364,29 @@ check_bucket_count:
   DetailPrint "$(PFI_LANG_INST_PROG_CORPUS)"
   SetDetailsPrint listonly
 
-  CreateDirectory "$INSTDIR\backup\nonsql"
-  CopyFiles "$G_USERDIR\popfile.cfg" "$INSTDIR\backup\popfile.cfg"
-  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "CorpusPath" "${L_CORPUS_PATH}"
+  CreateDirectory "$G_USERDIR\backup\nonsql"
+  CopyFiles "$G_USERDIR\popfile.cfg" "$G_USERDIR\backup\popfile.cfg"
+  WriteINIStr "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "CorpusPath" "${L_CORPUS_PATH}"
 
   StrCpy ${L_TEMP} ${L_CORPUS_PATH}
   Push ${L_TEMP}
   Call GetParent
   Pop ${L_TEMP}
-  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "ParentPath" "${L_TEMP}"
+  WriteINIStr "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "ParentPath" "${L_TEMP}"
   StrLen ${L_TEMP} ${L_TEMP}
   IntOp ${L_TEMP} ${L_TEMP} + 1
   StrCpy ${L_TEMP} ${L_CORPUS_PATH} "" ${L_TEMP}
-  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "BackupPath" "$INSTDIR\backup\nonsql"
+  WriteINIStr "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "BackupPath" "$G_USERDIR\backup\nonsql"
 
   ClearErrors
-  CopyFiles /SILENT "${L_CORPUS_PATH}" "$INSTDIR\backup\nonsql\"
+  CopyFiles /SILENT "${L_CORPUS_PATH}" "$G_USERDIR\backup\nonsql\"
   IfErrors 0 continue
   DetailPrint "Error detected when making corpus backup"
   MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_MBCORPUS_1)"
 
 continue:
-  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Corpus" "${L_TEMP}"
-  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status" "new"
+  WriteINIStr "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Corpus" "${L_TEMP}"
+  WriteINIStr "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Status" "new"
 
   File "/oname=$PLUGINSDIR\monitorcc.exe" "monitorcc.exe"
 
@@ -1754,7 +1769,7 @@ not_admin:
 
 exit:
   Pop ${L_WELCOME_TEXT}
-  
+
   StrCmp $G_STARTUP "no banner" no_banner
 
   ; Remove the banner which was displayed by the 'PFIGUIInit' function
@@ -1898,6 +1913,54 @@ exit_now:
 FunctionEnd
 
 #--------------------------------------------------------------------------
+# Installer Function: MinPerlRestructure
+#
+# Prior to POPFile 0.21.0, POPFile really only supported one user so the location of the
+# popfile.cfg configuration file was hard-coded and the minimal Perl files were intermingled
+# with the POPFile files. POPFile 0.21.0 introduces some multi-user support which means that
+# the location of the configuration file is now supplied via an environment variable to allow
+# POPFile to be run from any folder.  As a result, some rearrangement of the minimal Perl files
+# is required (to avoid Perl runtime errors).
+#--------------------------------------------------------------------------
+
+!macro MinPerlMove SUBFOLDER
+
+  !insertmacro PFI_UNIQUE_ID
+
+  IfFileExists "$INSTDIR\${SUBFOLDER}\*.*" 0 skip_${PFI_UNIQUE_ID}
+  Rename "$INSTDIR\${SUBFOLDER}" "$G_MPLIBDIR\${SUBFOLDER}"
+
+skip_${PFI_UNIQUE_ID}:
+
+!macroend
+
+Function MinPerlRestructure
+
+  IfFileExists "$G_MPLIBDIR\*.*" exit
+
+  CreateDirectory $G_MPLIBDIR
+
+  CopyFiles /SILENT /FILESONLY "$INSTDIR\*.pm" "$G_MPLIBDIR\*.pm"
+  Delete "$INSTDIR\*.pm"
+
+  !insertmacro MinPerlMove "auto"
+  !insertmacro MinPerlMove "Carp"
+  !insertmacro MinPerlMove "DBD"
+  !insertmacro MinPerlMove "Digest"
+  !insertmacro MinPerlMove "Exporter"
+  !insertmacro MinPerlMove "File"
+  !insertmacro MinPerlMove "Getopt"
+  !insertmacro MinPerlMove "IO"
+  !insertmacro MinPerlMove "MIME"
+  !insertmacro MinPerlMove "String"
+  !insertmacro MinPerlMove "Sys"
+  !insertmacro MinPerlMove "Text"
+  !insertmacro MinPerlMove "warnings"
+
+exit:
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Installer Function: CheckExistingConfig
 # (the "leave" function for the DIRECTORY selection page)
 #
@@ -1937,11 +2000,25 @@ Function CheckExistingConfig
   ; Warn the user if we are about to upgrade an existing installation
   ; and allow user to select a different directory if they wish
 
+  ; This function initialises the $G_USERDIR global user variable for use elsewhere in installer
+
+  ; All versions prior to 0.21.0 stored popfile.pl and popfile.cfg in the same folder
+
   StrCpy $G_ROOTDIR $INSTDIR
   StrCpy $G_USERDIR $INSTDIR
 
-  IfFileExists "$G_ROOTDIR\popfile.pl" warning
   IfFileExists "$G_USERDIR\popfile.cfg" warning
+
+  ; Check if we are installing over a version which uses the new folder structure
+
+  StrCpy $G_USERDIR "$INSTDIR\user"
+  IfFileExists "$G_USERDIR\popfile.cfg" warning
+
+  ; We looked for 'popfile.cfg' first as we want to pick up the current settings (if any)
+  ; now we use a Perl script as our last chance to detect a previous installation
+
+  IfFileExists "$G_ROOTDIR\popfile.pl" warning
+
   Goto continue
 
 warning:
@@ -4522,7 +4599,7 @@ lastaction_background:
   StrCpy ${L_CONSOLE} "0"
 
 display_banner:
-  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status"
+  ReadINIStr ${L_TEMP} "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Status"
   StrCmp ${L_TEMP} "new" exit_without_banner
 
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_LAUNCH_BANNER_1)" "$(PFI_LANG_LAUNCH_BANNER_2)"
@@ -4593,24 +4670,24 @@ Function ConvertCorpus
 
   !define L_FOLDER_COUNT  $R9
   !define L_FOLDER_PATH   $R8
-  
+
   Push ${L_FOLDER_COUNT}
   Push ${L_FOLDER_PATH}
-  
+
   HideWindow
   ExecWait '"$PLUGINSDIR\monitorcc.exe" "$PLUGINSDIR\corpus.ini"'
   BringToFront
-  
+
   ; Now remove any empty corpus folders (POPFile has deleted the files as they are converted)
-  
+
   ReadINIStr ${L_FOLDER_COUNT} "$PLUGINSDIR\corpus.ini" "FolderList" "MaxNum"
 
 loop:
   ReadINIStr ${L_FOLDER_PATH} "$PLUGINSDIR\corpus.ini" "FolderList" "Path-${L_FOLDER_COUNT}"
   StrCmp  ${L_FOLDER_PATH} "" try_next_one
-  
+
   ; Remove this corpus bucket folder if it is completely empty
-  
+
   RMDir ${L_FOLDER_PATH}
 
 try_next_one:
@@ -4621,7 +4698,7 @@ exit:
 
   ; Remove the corpus folder if it is completely empty
 
-  ReadINIStr ${L_FOLDER_PATH} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "CorpusPath"
+  ReadINIStr ${L_FOLDER_PATH} "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "CorpusPath"
   RMDir ${L_FOLDER_PATH}
 
   Pop ${L_FOLDER_PATH}
@@ -4681,10 +4758,10 @@ corpus_conversion_check:
   ; until it has been completed before displaying the 'Finish' page (corpus conversion may take
   ; several minutes, during which time the UI will appear to have 'locked up')
 
-  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status"
+  ReadINIStr ${L_TEMP} "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Status"
   StrCmp ${L_TEMP} "new" 0 selection_ok
 
-  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status" "old"
+  WriteINIStr "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Status" "old"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Settings" "BackEnabled" "0"
   Call ConvertCorpus
   Goto selection_ok
@@ -4739,30 +4816,47 @@ Function un.onInit
   !insertmacro MUI_UNGETLANGUAGE
 
   ; Before POPFile 0.21.0, POPFile and the minimal Perl shared the same folder structure.
-  ; Phase 1 of the multi-user support introduced in 0.21.0 may require some slight changes
-  ; to the folder structure (initial investigations suggest that perl.exe, wperl.exe and the
-  ; perl58.dll may need to be placed in a different folder from the other minimal Perl files).
+  ; Phase 1 of the multi-user support introduced in 0.21.0 requires some slight changes
+  ; to the folder structure (to permit POPFile to be run from any folder after setting the
+  ; POPFILE_ROOT and POPFILE_USER environment variables to the appropriate values).
 
-  ; A possible folder arrangement could be:
+  ; The folder arrangement used for this build:
   ;
-  ; (a) $INSTDIR         - the top-level installation folder (wrapper*.exe and uninstall.exe),
-  ; (b) $INSTDIR\bin     - holds only perl.exe, wperl.exe and perl58.dll
-  ; (c) $INSTDIR\lib     - POPFile and minimal Perl, same structure as used in earlier versions
-  ; (d) $INSTDIR\backup  - holds a backup copy of the old flat file or BerkeleyDB corpus
-  ; (e) $INSTDIR\kakasi  - holds the (optional) Kakasi package used to process Japanese email
+  ; (a) $INSTDIR              - main POPFile installation folder, holds popfile.pl and several
+  ;                             other *.pl scripts, popfile*.exe, wrapper*.exe plus three of the
+  ;                             minimal Perl files (perl.exe, wperl.exe and perl58.dll)
+  ;
+  ; (b) $INSTDIR\kakasi       - holds the Kakasi package used to process Japanese email
+  ;                             (only installed when Japanese support is required)
+  ;
+  ; (c) $INSTDIR\lib          - minimal Perl installation (except for the three files stored
+  ;                             in the $INSTDIR folder to avoid runtime problems)
+  ;
+  ; (d) $INSTDIR\user         - default user data (for the user running the installer)
+  ;
+  ; (e) $INSTDIR\user\backup  - holds a backup copy of the old flat file or BerkeleyDB corpus
+  ;                             (only created if conversion of the default corpus was required)
+  ;
+  ; (f) $INSTDIR\*       - the remaining POPFile folders (Classifier, languages, manual, etc)
+  ;
+  ; NOTE: If we are upgrading a prior version  of POPFile, the user data is found in $INSTDIR
+  ; so we use $INSTDIR and $INSTDIR\backup instead of $INSTDIR\user and $INSTDIR\user\backup
 
   ; For increased flexibility, four global user variables are used in addition to $INSTDIR
-  ; (this makes it easier to change the folder structure used by the installer)
+  ; (this makes it easier to change the folder structure used by the installer).
 
-  ; For this build, the original folder structure is maintained which means that the working
-  ; directory must always be set to the installation folder before running POPFile (otherwise
-  ; a fatal 'Perl' error occurs immediately)
+  StrCpy $G_ROOTDIR   "$INSTDIR"
+  StrCpy $G_USERDIR   "$INSTDIR\user"
+  StrCpy $G_MPBINDIR  "$INSTDIR"
+  StrCpy $G_MPLIBDIR  "$INSTDIR\lib"
 
-  StrCpy $G_ROOTDIR   $INSTDIR
-  StrCpy $G_USERDIR   $INSTDIR
-  StrCpy $G_MPBINDIR  $INSTDIR
-  StrCpy $G_MPLIBDIR  $INSTDIR
+  ; If we are uninstalling an upgraded installation, the default user data may be in $INSTDIR
+  ; instead of $INSTDIR\user
 
+  IfFileExists "$G_USERDIR\popfile.cfg" exit
+  StrCpy $G_USERDIR   "$INSTDIR"
+
+exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -5116,6 +5210,8 @@ end_eudora_restore:
 
   Delete $G_ROOTDIR\languages\*.msg
   RMDir $G_ROOTDIR\languages
+
+  ; Win95 generates an error message if 'RMDir /r' is used on a non-existent directory
 
   IfFileExists "$G_USERDIR\corpus\*.*" 0 skip_nonsql_corpus
   RMDir /r $G_USERDIR\corpus
