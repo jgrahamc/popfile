@@ -31,7 +31,6 @@ use POPFile::Module;
 use strict;
 use warnings;
 use locale;
-use Win32;
 
 #----------------------------------------------------------------------------
 # new
