@@ -9,6 +9,7 @@
 
 use strict;
 use Classifier::Bayes;
+use Classifier::WordMangle;
 use POPFile::Configuration;
 use POPFile::MQ;
 use POPFile::Logger;
@@ -22,6 +23,7 @@ if ( $#ARGV == -1 ) {
     my $l = new POPFile::Logger;
     my $b = new Classifier::Bayes;
     my $u = new UI::HTML;
+    my $w = new Classifier::WordMangle;
 
     $u->configuration( $c );
     $u->mq( $mq );
@@ -45,6 +47,14 @@ if ( $#ARGV == -1 ) {
 
     $c->initialize();
     $l->initialize();
+
+    $w->configuration( $c );
+    $w->mq( $mq );
+    $w->logger( $l );
+
+    $w->start();
+
+    $b->{parser__}->mangle( $w );
     $b->initialize();
     $u->initialize();
 

@@ -680,6 +680,12 @@ sub update_tag
                         $self->update_pseudoword( 'html', 'imgremotesrc', $encoded, $original );
                     }
                 }
+
+                if ( ( $host ne '' ) && ( $tag =~ /^iframe$/i ) ) {
+                    if ( $host ne 'localhost' ) {
+                        $self->update_pseudoword( 'html', 'iframeremotesrc', $encoded, $original );
+                    }
+                }
             }
 
             next;
