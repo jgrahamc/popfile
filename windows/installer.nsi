@@ -1035,10 +1035,10 @@ Section "Kakasi" SecKakasi
   File /r "${C_PERL_DIR}\lib\auto\Encode\*"
 
   SetOutPath $INSTDIR\Text
-  File "${C_PERL_DIR}\lib\Text\Kakasi.pm"
+  File "${C_PERL_DIR}\site\lib\Text\Kakasi.pm"
 
   SetOutPath $INSTDIR\auto\Text\Kakasi
-  File "${C_PERL_DIR}\lib\auto\Text\Kakasi\*"
+  File "${C_PERL_DIR}\site\lib\auto\Text\Kakasi\*"
 
 SectionEnd
 
