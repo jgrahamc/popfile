@@ -127,7 +127,7 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT       "PFI Testbed"
-  !define C_PFI_VERSION       "0.11.1"
+  !define C_PFI_VERSION       "0.11.2"
 
   Name                        "${C_PFI_PRODUCT}"
   Caption                     "${C_PFI_PRODUCT} ${C_PFI_VERSION} Setup"
@@ -157,7 +157,6 @@
   !define C_UNINST_PROG_SHUTDOWN_DELAY  2500
   !define C_UNINST_PROG_SHORT_DELAY     2500
   !define C_UNINST_PROG_CORE_DELAY      2500
-  !define C_UNINST_PROG_EMAIL_DELAY     2500
   !define C_UNINST_PROG_SKINS_DELAY     2500
   !define C_UNINST_PROG_PERL_DELAY      2500
 
@@ -173,13 +172,10 @@
 
   ; This script uses 'User Variables' (with names starting with 'G_') to hold GLOBAL data.
 
-  Var G_USERDIR            ; used to pass popfile.cfg folder path to CBP package
-
   Var G_STARTUP            ; holds the parameters supplied, if any, when starting setup.exe)
   Var G_NOTEPAD            ; path to notepad.exe ("" = not found in search path)
 
   Var G_WINUSERNAME        ; current Windows user login name
-  Var G_WINUSERTYPE        ; user group ('Admin', 'Power', 'User', 'Guest' or 'Unknown')
 
   ; NSIS provides 20 general purpose user registers:
   ; (a) $R0 to $R9   are used as local registers
@@ -304,7 +300,7 @@
 
   ; Use a custom '.onGUIInit' function to add language-specific texts to custom page INI files
 
-  !define MUI_CUSTOMFUNCTION_GUIINIT          PFIGUIInit
+  !define MUI_CUSTOMFUNCTION_GUIINIT          "PFIGUIInit"
 
   ;----------------------------------------------------------------
   ; Language Settings for MUI pages
@@ -464,9 +460,9 @@
 # Reserve the files required by the installer (to improve performance)
 #--------------------------------------------------------------------------
 
-  ;Things that need to be extracted on startup (keep these lines before any File command!)
-  ;Only useful for BZIP2 compression
-  ;Use ReserveFile for your own Install Options ini files too!
+  ; Things that need to be extracted on startup (keep these lines before any File command!)
+  ; Only useful when solid compression is used (by default, solid compression is enabled
+  ; for BZIP2 and LZMA compression)
 
   !insertmacro MUI_RESERVEFILE_LANGDLL
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
@@ -511,7 +507,7 @@ loop:
   Push ${L_TEMP}
   Call TrimNewlines
   Pop ${L_TEMP}
-  FileWrite ${L_OUTPUT_FILE_HANDLE} ${L_TEMP}$\r$\n
+  FileWrite ${L_OUTPUT_FILE_HANDLE} "${L_TEMP}$\r$\n"
   Goto loop
 
 close_files:
@@ -541,7 +537,7 @@ Function PFIGUIInit
 
   MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_INSTALLER_MUTEX)"
 
-  SearchPath $G_NOTEPAD notepad.exe
+  SearchPath $G_NOTEPAD "notepad.exe"
 
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "$(PFI_LANG_MBRELNOTES_1)\
@@ -569,17 +565,11 @@ Section "POPFile" SecPOPFile
 
   SectionIn RO
 
-  !define L_CFG   $R9   ; file handle
-
-  Push ${L_CFG}
-
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_UPGRADE)"
   SetDetailsPrint listonly
 
   Sleep ${C_INST_PROG_UPGRADE_DELAY}
-
-  StrCpy $G_USERDIR $INSTDIR
 
   ; If we are installing over a previous version, (try to) ensure that version is not running
 
@@ -593,13 +583,14 @@ Section "POPFile" SecPOPFile
   DetailPrint "$(PFI_LANG_INST_PROG_CORE)"
   SetDetailsPrint listonly
 
-  SetOutPath $INSTDIR
+  SetOutPath "$INSTDIR"
 
   File "${C_RELEASE_NOTES}"
   CopyFiles /SILENT /FILESONLY "$PLUGINSDIR\${C_README}.txt" "$INSTDIR\${C_README}.txt"
   File "translator.htm"
   File "transauw.exe"
   File "transmcc.exe"
+  File "..\..\engine\license"
 
   Sleep ${C_INST_PROG_CORE_DELAY}
 
@@ -614,9 +605,9 @@ Section "POPFile" SecPOPFile
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
 
-  SetOutPath $INSTDIR
-  Delete $INSTDIR\uninst_testbed.exe
-  WriteUninstaller $INSTDIR\uninst_testbed.exe
+  SetOutPath "$INSTDIR"
+  Delete "$INSTDIR\uninst_testbed.exe"
+  WriteUninstaller "$INSTDIR\uninst_testbed.exe"
 
   ; Create the START MENU entries
 
@@ -628,7 +619,7 @@ Section "POPFile" SecPOPFile
   ; ('SetOutPath' is one way to change the value of $OUTDIR)
 
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
-  SetOutPath $INSTDIR
+  SetOutPath "$INSTDIR"
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Add POPFile User Demo.lnk" \
                  "$INSTDIR\transauw.exe"
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Corpus Conversion Demo.lnk" \
@@ -654,10 +645,6 @@ Section "POPFile" SecPOPFile
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
-
-  Pop ${L_CFG}
-
-  !undef L_CFG
 
 SectionEnd
 
@@ -737,15 +724,6 @@ SectionEnd
 
 Function CheckPerlRequirementsPage
 
-  !define L_TEMP      $R9
-  !define L_VERSION   $R8
-
-  Push ${L_TEMP}
-  Push ${L_VERSION}
-
-  Call GetIEVersion
-  Pop ${L_VERSION}
-
   ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioG.ini" "Settings" "RTL" "$(^RTL)"
@@ -764,12 +742,6 @@ Function CheckPerlRequirementsPage
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_PERLREQ_TITLE)" " "
 
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioG.ini"
-
-  Pop ${L_VERSION}
-  Pop ${L_TEMP}
-
-  !undef L_TEMP
-  !undef L_VERSION
 
 FunctionEnd
 
@@ -798,22 +770,12 @@ Function CheckUserRights
   ; (UserInfo works on Win98SE so perhaps it is only Win95 that fails ?)
 
   StrCpy $G_WINUSERNAME "UnknownUser"
-  StrCpy $G_WINUSERTYPE "Admin"
   Goto not_admin
 
 got_name:
 	Pop $G_WINUSERNAME
-  StrCmp $G_WINUSERNAME "" 0 get_usertype
+  StrCmp $G_WINUSERNAME "" 0 not_admin
   StrCpy $G_WINUSERNAME "UnknownUser"
-
-get_usertype:
-  UserInfo::GetAccountType
-	Pop $G_WINUSERTYPE
-  StrCmp $G_WINUSERTYPE "Admin" not_admin
-  StrCmp $G_WINUSERTYPE "Power" not_admin
-  StrCmp $G_WINUSERTYPE "User" not_admin
-  StrCmp $G_WINUSERTYPE "Guest" not_admin
-  StrCpy $G_WINUSERTYPE "Unknown"
 
 not_admin:
 
@@ -859,11 +821,25 @@ FunctionEnd
 
 Function CheckExistingConfig
 
+  ; Try to avoid installing the translator testbed in a 'real' POPFile folder
+
+  IfFileExists "$INSTDIR\popfile.cfg" reject
+  IfFileExists "$INSTDIR\popfile.exe" reject
+  IfFileExists "$INSTDIR\uninstall.exe" reject
+  IfFileExists "$INSTDIR\uninstalluser.exe" reject
+
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_1)\
       $\r$\n$\r$\n\
       $INSTDIR\
       $\r$\n$\r$\n$\r$\n\
       $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES continue
+  Abort
+
+reject:
+  MessageBox MB_OK|MB_ICONSTOP \
+    "The folder '$INSTDIR' appears to be part of your POPFile installation.\
+    $\r$\n$\r$\n\
+    Please select a different installation folder for this test program"
   Abort
 
 continue:
@@ -914,15 +890,6 @@ FunctionEnd
 
 Section "Uninstall"
 
-  !define L_CFG         $R9   ; used as file handle
-  !define L_EXE         $R7   ; full path of the EXE to be monitored
-  !define L_LNE         $R5   ; a line from popfile.cfg
-  !define L_OLDUI       $R4   ; holds old-style UI port (if previous POPFile is an old version)
-  !define L_REG_KEY     $R3   ; L_REG_* registers are used to  restore Outlook Express settings
-  !define L_REG_SUBKEY  $R2
-  !define L_REG_VALUE   $R1
-  !define L_TEMP        $R0
-
   SetDetailsPrint listonly
 
   IfFileExists "$INSTDIR\PFI Testbed\uninst_transauw.exe" 0 root_uninstall
@@ -946,22 +913,12 @@ skip_confirmation:
   ; (UserInfo works on Win98SE so perhaps pr*pit is only Win95 that fails ?)
 
   StrCpy $G_WINUSERNAME "UnknownUser"
-  StrCpy $G_WINUSERTYPE "Admin"
   Goto continue
 
 got_name:
 	Pop $G_WINUSERNAME
-  StrCmp $G_WINUSERNAME "" 0 get_usertype
+  StrCmp $G_WINUSERNAME "" 0 continue
   StrCpy $G_WINUSERNAME "UnknownUser"
-
-get_usertype:
-  UserInfo::GetAccountType
-	Pop $G_WINUSERTYPE
-  StrCmp $G_WINUSERTYPE "Admin" continue
-  StrCmp $G_WINUSERTYPE "Power" continue
-  StrCmp $G_WINUSERTYPE "User" continue
-  StrCmp $G_WINUSERTYPE "Guest" continue
-  StrCpy $G_WINUSERTYPE "Unknown"
 
 continue:
   SetDetailsPrint textonly
@@ -991,73 +948,15 @@ continue:
 
   Sleep ${C_UNINST_PROG_CORE_DELAY}
 
-  Delete $INSTDIR\popfile.cfg.bak
+  Delete "$INSTDIR\*.change.txt"
+  Delete "$INSTDIR\translator.htm"
+  Delete "$INSTDIR\license"
 
-  ; Note: 'translator.htm' is not deleted here
-  ; (this ensures the message box showing the 'PFI_LANG_UN_MBREMDIR_1' string appears later on)
-
-  Delete $INSTDIR\*.gif
-  Delete $INSTDIR\*.change
-  Delete $INSTDIR\*.change.txt
-  Delete $INSTDIR\license
-  Delete $INSTDIR\popfile.cfg
-  Delete $INSTDIR\expchanges.txt
-  Delete $INSTDIR\expconfig.txt
-  Delete $INSTDIR\outchanges.txt
-  Delete $INSTDIR\outconfig.txt
-
-  IfFileExists "$INSTDIR\popfile.reg.dummy" 0 no_reg_file
-
-  SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROG_OUTEXPRESS)"
-  SetDetailsPrint listonly
-
-  ; Read the registry settings found in popfile.reg.dummy and restore them
-  ; it there are any.   All are assumed to be in HKCU
-
-  ClearErrors
-  FileOpen ${L_CFG} $INSTDIR\popfile.reg.dummy r
-  IfErrors skip_registry_restore
-  Sleep ${C_UNINST_PROG_EMAIL_DELAY}
-
-  DetailPrint "$(PFI_LANG_UN_LOG_OPENED): popfile.reg.dummy"
-
-restore_loop:
-  FileRead ${L_CFG} ${L_REG_KEY}
-  Push ${L_REG_KEY}
-  Call un.TrimNewlines
-  Pop ${L_REG_KEY}
-  IfErrors skip_registry_restore
-  FileRead ${L_CFG} ${L_REG_SUBKEY}
-  Push ${L_REG_SUBKEY}
-  Call un.TrimNewlines
-  Pop ${L_REG_SUBKEY}
-  IfErrors skip_registry_restore
-  FileRead ${L_CFG} ${L_REG_VALUE}
-  Push ${L_REG_VALUE}
-  Call un.TrimNewlines
-  Pop ${L_REG_VALUE}
-  IfErrors skip_registry_restore
-
-  ; Testbed does NOT restore Outlook Express settings (it never changed them during 'install')
-
-  DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) ${L_REG_SUBKEY}: ${L_REG_VALUE}"
-  goto restore_loop
-
-skip_registry_restore:
-  FileClose ${L_CFG}
-  DetailPrint "$(PFI_LANG_UN_LOG_DELROOTDIR): popfile.reg.dummy"
-  Delete $INSTDIR\popfile.reg.dummy
-
-no_reg_file:
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROG_SKINS)"
   SetDetailsPrint listonly
 
   Sleep ${C_UNINST_PROG_SKINS_DELAY}
-
-  Delete $INSTDIR\languages\*.msg
-  RMDir $INSTDIR\languages
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROG_PERL)"
@@ -1068,35 +967,24 @@ no_reg_file:
   Delete "$INSTDIR\uninst_transauw.exe"
   Delete "$INSTDIR\uninst_testbed.exe"
 
-  RMDir $INSTDIR
+  RMDir "$INSTDIR"
 
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}"
   DeleteRegKey HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI"
   DeleteRegKey /ifempty HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}"
   DeleteRegKey /ifempty HKCU "SOFTWARE\POPFile Project"
 
-  ; if $INSTDIR was removed, skip these next ones
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_1)" IDNO exit
+  DetailPrint "$(PFI_LANG_UN_LOG_DELUSERDIR)"
+  Delete "$INSTDIR\*.*"
+  RMDir /r "$INSTDIR"
+  DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_UN_MBREMERR_1): $INSTDIR $(PFI_LANG_UN_MBREMERR_2)"
 
-  IfFileExists $INSTDIR 0 Removed
-    MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_1)" IDNO Removed
-    DetailPrint "$(PFI_LANG_UN_LOG_DELUSERDIR)"
-    Delete $INSTDIR\*.* ; this would be skipped if the user hits no
-    RMDir /r $INSTDIR
-    DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
-    MessageBox MB_OK|MB_ICONEXCLAMATION \
-        "$(PFI_LANG_UN_MBREMERR_1): $INSTDIR $(PFI_LANG_UN_MBREMERR_2)"
-Removed:
-
+exit:
   SetDetailsPrint both
 
-  !undef L_CFG
-  !undef L_EXE
-  !undef L_LNE
-  !undef L_OLDUI
-  !undef L_REG_KEY
-  !undef L_REG_SUBKEY
-  !undef L_REG_VALUE
-  !undef L_TEMP
 SectionEnd
 
 #--------------------------------------------------------------------------
