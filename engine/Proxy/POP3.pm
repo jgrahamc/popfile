@@ -247,14 +247,15 @@ sub child__
         #    using RETR
         #
         # 2. The toptoo configuration controls whether email downloaded using the
-        #    TOP command is classified or not (note that it is *never* placed in
-        #    the history; with the expection of (1) above).  There are two cases:
+        #    TOP command is classified or not (It may be downloaded and cached for
+        #    bandwidth efficiency, and thus appear in the history).
+        #    There are two cases:
         #
         # 2a If toptoo is 0 then POPFile will pass a TOP from the client through
         #    as a TOP and do no classification on the message.
         #
-        # 2b If toptoo is 1 then POPFile first does a RETR on the message without
-        #    saving it in the history so that it can get the classification on the
+        # 2b If toptoo is 1 then POPFile first does a RETR on the message and
+        #    saves it in the history so that it can get the classification on the
         #    message which is stores in $class.  Then it gets the message again
         #    by sending the TOP command and passing the result through
         #    classify_and_modify passing in the $class determined above.  This means
@@ -264,9 +265,15 @@ sub child__
         #    TOP always returns the full headers and then n lines of the body so
         #    we are guaranteed to be able to do our header modifications.
         #
-        #    NOTE using toptoo=1 on a slow link could cause performance problems,
-        #    it is only intended for use where there is high bandwidth between
-        #    POPFile and the POP3 server.
+        #    NOTE messages retrieved using TOPTOO are visible in the history as they
+        #    are "cached" to avoid requiring repeated downloads if the client issues
+        #    a RETR for the message in the same session   
+        #
+        #    NOTE using toptoo=1 on a slow link could cause performance problems, in
+        #    cases where only the headers, but not classification, is required.
+        #    toptoo=1 is, however, appropriate for normal use via a mail client and
+        #    won't significantly increase bandwidth unless the mail client is selectively
+        #    downloading messages based on non-classification data in the TOP headers.
 
         if ( $command =~ /TOP (.*) (.*)/i ) {
             if ( $2 ne '99999999' )  {
@@ -344,6 +351,7 @@ sub child__
         if ( ( $command =~ /RETR (.*)/i ) || ( $command =~ /TOP (.*) 99999999/i ) )  {
             my $count = $1;
             my $class;
+
             my $file = $self->{classifier__}->history_filename($download_count, $count);
 
             my $short_file = $file;
@@ -354,15 +362,8 @@ sub child__
 
                 $self->log_( "Printing message from cache" );
 
-                if (0) {
-                    # Ensure a .CRLF is on the end of the file (may be neccessary)
-                    open APPEND, ">>$file";
-                    binmode APPEND;
-                    print APPEND ".$eol";
-                    close APPEND;
-                }
-
                 # Give the client an +OK:
+
                 print $client "+OK file data cached by POPFile$eol";
 
                 # Load the last classification
@@ -379,8 +380,8 @@ sub child__
                     $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, 0, 1, '' );
 
                     print $pipe "CLASS:$class$eol";
-
                 }
+
                 close RETRFILE;
                 print $client ".$eol";
                 next;
