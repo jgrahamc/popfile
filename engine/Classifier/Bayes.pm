@@ -186,14 +186,14 @@ sub write_parameters
 
 # ---------------------------------------------------------------------------------------------
 #
-# get_color_
+# get_color
 #
 # Retrieves the color for a specific word, color is the most likely bucket
 #
 # $word     Word to get the color of
 #
 # ---------------------------------------------------------------------------------------------
-sub get_color_
+sub get_color
 {
     my ($self, $word) = @_;
 
@@ -649,7 +649,7 @@ sub classify_file
                     $wordstr =~ /(.{12})/;
                     $wordstr = "$1...";
                 }
-                my $wordcolor = get_color_($self, $word);
+                my $wordcolor = get_color($self, $word);
                 my $wordprobstr = sprintf("%12.4f", $wordprob{$word} / $wtprob{$word});
                 my $otherprobstr = sprintf("%12.4f", $wbprob{$word}{$ranking[0]} / $wtprob{$word});
                 $self->{scores__} .= "<tr>\n<td><font color=\"$wordcolor\"><a title=\"$long\">$wordstr</a></font></td>\n";
@@ -1030,6 +1030,29 @@ sub set_bucket_parameter
     my ( $self, $bucket, $parameter, $value ) = @_;
 
     $self->{parameters__}{$bucket}{$parameter} = $value;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_html_colored_message
+#
+# Parser a mail message stored in a file and returns HTML representing the message
+# with coloring of the words
+#
+# $file           The file to parse
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_html_colored_message
+{
+    my ( $self, $file ) = @_;
+
+    $self->{parser__}->{color__} = 1;
+    $self->{parser__}->{bayes__} = bless $self;
+    my $result = $self->{parser__}->parse_stream($file);
+    $self->{parser__}->{color__} = 0;	
+
+    return $result;
 }
 
 1;

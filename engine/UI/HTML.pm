@@ -2960,10 +2960,7 @@ sub history_page
                 $body .= "<tr>\n<td class=\"openMessageBody\">";
 
                 if ( $self->{history__}{$mail_file}{magnet} eq '' )  {
-                    $self->{classifier__}->{parser}->{color} = 1;
-                    $self->{classifier__}->{parser}->{bayes} = $self->{classifier__};
-                    $body .= $self->{classifier__}->{parser}->parse_stream($self->global_config_( 'msgdir' ) . "$self->{form__}{view}");
-                    $self->{classifier__}->{parser}->{color} = 0;
+                    $body .= $self->{classifier__}->get_html_colored_message($self->global_config_( 'msgdir' ) . $self->{form__}{view});
                 } else {
                     $self->{history__}{$mail_file}{magnet} =~ /(.+): ([^\r\n]+)/;
                     my $header = $1;

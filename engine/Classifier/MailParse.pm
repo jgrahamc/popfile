@@ -153,7 +153,7 @@ sub update_word
         $mword = $prefix . ':' . $mword if ( $prefix ne '' );
 
         if ( $self->{color__} ) {
-            my $color = $self->{bayes}->get_color($mword);
+            my $color = $self->{bayes__}->get_color($mword);
             if ( $encoded == 0 )  {
                 $after = '&' if ( $after eq '>' );
                 if ( !( $self->{ut__} =~ s/($before)\Q$word\E($after)/$1<b><font color=\"$color\">$word<\/font><\/b>$2/ ) ) {
