@@ -120,8 +120,9 @@ sub new
     # This stores the current UI sessions that are in progress.  It
     # maps an API session to the last time this entry was used.
     #
-    # lastused           When this cookie was last read or written
-    # user               The database user id
+    # lastused                  When this cookie was last read or written
+    # user                      The database user id
+    # search/sort/filter/negate History page options
 
     $self->{sessions__} = ();
 
@@ -160,8 +161,8 @@ sub initialize
     $self->config_( 'cache_templates', 0 );
 
     # Controls whether or not we die if a template variable is missing
-    # when we try to set it.  Setting it to 1 can be useful for debugging
-    # purposes
+    # when we try to set it.  Setting it to 1 can be useful for
+    # debugging purposes
 
     $self->config_( 'strict_templates', 0 );
 
@@ -283,28 +284,50 @@ sub deliver
 # is valid then make an entry in the sessions hash.
 #
 # $cookie        The decrypted cookie string
+# $client        The client from which we received the cookie
 #
 # Returns undef for a bad cookie, or bad session.
 #
 #----------------------------------------------------------------------------
 sub handle_cookie__
 {
-    my ( $self, $cookie ) = @_;
+    my ( $self, $cookie, $client ) = @_;
 
-    $cookie =~ /^([^ ]+) (\d+) ([^ ]+) ([^ ]+)$/;
-    my ( $garbage, $timeset, $session, $checksum ) = ( $1, $2, $3, $4 );
+    $cookie =~ /^([^ ]+) (\d+) ([^ ]+) ([^ ]+) ([^ ]+)$/;
+    my ( $garbage, $timeset, $session, $client_name, $checksum ) = ( $1, $2, $3, $4, $5 );
 
     if ( !defined( $checksum ) ) {
         return undef;
     }
 
-    $self->log_( 2, "Received cookie: [$cookie] [$garbage] [$timeset] [$session] [$checksum]" );
+    $self->log_( 2, "Received cookie: [$cookie] [$garbage] [$timeset] [$session] [$client_name] [$checksum]" );
 
     # First check that the checksum is valid.  This will check the
     # cookie has not been tampered with and the decryption worked
 
-    if ( md5_hex( "$garbage $timeset $session " ) ne $checksum ) {
+    if ( md5_hex( "$garbage $timeset $session $client_name " ) ne $checksum ) {
         $self->log_( 0, "Invalid cookie received, checksum failed" );
+        return undef;
+    }
+
+    # Check that the cookie came from the peer that we expect it from
+    # to prevent someone from being able to steal a cookie and reuse
+    # it
+
+    my $peer = $client->peername;
+    my ($peer_port, $peer_addr) = sockaddr_in($peer);
+    my $peer_name = inet_ntoa($peer_addr);
+
+    if ( $client_name ne $peer_name ) {
+        $self->log_( 0, "Rejecting cookie because of invalid client $client_name for $peer_name" );
+        return undef;
+    }
+
+    # Now see if this cookie is just old and should be rejected anyway
+    # (more than two weeks old)
+
+    if ( $timeset < time - 2*7*24*60*60 ) {
+        $self->log_( 0, "Rejecting old cookie" );
         return undef;
     }
 
@@ -317,6 +340,13 @@ sub handle_cookie__
         return $session;
     }
 
+    # Let's see if the session key is the magic string LOGGED-OUT
+    # in which case there's no session
+
+    if ( $session eq 'LOGGED-OUT' ) {
+        return undef;
+    }
+
     # Otherwise check that the session ID is still valid in the API.
 
     my $user = $self->classifier_()->valid_session_key__( $session );
@@ -324,6 +354,11 @@ sub handle_cookie__
     if ( defined( $user ) ) {
         $self->{sessions__}{$session}{lastused} = time;
         $self->{sessions__}{$session}{user} = $user;
+        $self->{sessions__}{$session}{sort} = '';
+        $self->{sessions__}{$session}{filter} = '';
+        $self->{sessions__}{$session}{search} = '';
+        $self->{sessions__}{$session}{negate} = '';
+
         return $session;
     } else {
         return undef;
@@ -334,14 +369,15 @@ sub handle_cookie__
 #
 # set_cookie__
 #
-# $session         Valid session key
+# $session       Valid session key
+# $client        The client we are sending the cookie to
 #
-# Returns a Set-Cookie: header from a session ke
+# Returns a Set-Cookie: header from a session
 #
 #----------------------------------------------------------------------------
 sub set_cookie__
 {
-    my ( $self, $session ) = @_;
+    my ( $self, $session, $client ) = @_;
 
     if ( !defined( $session ) ) {
         return '';
@@ -353,6 +389,7 @@ sub set_cookie__
         # Piece of random data, base64 encoded
         # Time this cookie is being set
         # Value of the $session variable
+        # The IP address of the client that set the cookie
         # MD5 checksum of the data (hex encoded)
 
         $cookie_string =  encode_base64( makerandom_octet( Length => 16,
@@ -363,6 +400,10 @@ sub set_cookie__
         $cookie_string .= ' ';
         $cookie_string .= $session;
         $cookie_string .= ' ';
+        my $peer = $client->peername;
+        my ($peer_port, $peer_addr) = sockaddr_in($peer);
+        my $peer_name = inet_ntoa($peer_addr);
+        $cookie_string .= "$peer_name ";
         $cookie_string .= md5_hex( $cookie_string );
 
         $self->log_( 2, "Sending cookie: $cookie_string" );
@@ -408,7 +449,7 @@ sub url_handler__
     my $session;
 
     if ( $cookie ne '' ) {
-        $session = $self->handle_cookie__( $cookie );
+        $session = $self->handle_cookie__( $cookie, $client );
     }
 
     # See if there are any form parameters and if there are parse them
@@ -446,13 +487,18 @@ sub url_handler__
     # from the path if possible (including the skin name in the URL helps
     # prevent caching
 
-    if ( defined( $session ) && ( $url =~ /skins\/(([^\/]+)\/(([^\/]+\/)+)?)?([^\/]+)$/ ) ) {
+    if ( $url =~ /skins\/(([^\/]+)\/(([^\/]+\/)+)?)?([^\/]+)$/ ) {
+        my $user = 1;
         my $path = ( $1 || '');
         my $path_skin = ( $2 || '');
         my $path_not_skin = ( $3 || '' );
         my $filename = ( $5 || '' );
 
-        my $config_skin = $self->user_config_( $self->{sessions__}{$session}{user}, 'skin' );
+        if ( defined( $session ) ) {
+            $user = $self->{sessions__}{$session}{user};
+        }
+
+        my $config_skin = $self->user_config_( $user, 'skin' );
 
         my %mime_extensions = qw( gif image/gif
                                   png image/png
@@ -575,13 +621,20 @@ sub url_handler__
         return 1;
     }
 
-    if ( $url eq '/shutdown' )  {
+    if ( $url eq '/logout' ) {
+        $self->http_redirect_( $client, '/', 'LOGGED-OUT' );
+        return 1;
+    }
+
+    if ( ( $url eq '/shutdown' ) &&
+         ( $self->user_global_config_( $self->{sessions__}{$session}{user},
+               'can_admin' ) ) )  {
         my $http_header = "HTTP/1.1 200 OK\r\n";
         $http_header .= "Connection: close\r\n";
         $http_header .= "Pragma: no-cache\r\n";
         $http_header .= "Expires: 0\r\n";
         $http_header .= "Cache-Control: no-cache\r\n";
-        $http_header .= $self->set_cookie__( $session );
+        $http_header .= $self->set_cookie__( $session, $client );
         $http_header .= "Content-Type: text/html";
         $http_header .= "; charset=$self->{language__}{LanguageCharset}\r\n";
         $http_header .= "Content-Length: ";
@@ -700,7 +753,6 @@ sub bmp_file__
         $color = $self->classifier_()->{parser__}->map_color( $color );
     }
 
-
     if ( $color =~ /^([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/ ) {
         my $bmp = '424d3a0000000000000036000000280000000100000001000000010018000000000004000000eb0a0000eb0a00000000000000000000' . "$3$2$1" . '00';
         my $file = '';
@@ -792,7 +844,7 @@ sub http_ok
     # Make the cookie to be returned for this session, if there's no
     # session then clear the cookie
 
-    $http_header .= $self->set_cookie__( $session );
+    $http_header .= $self->set_cookie__( $session, $client );
     $http_header .= "Content-Type: text/html";
     $http_header .= "; charset=$self->{language__}{LanguageCharset}\r\n";
     $http_header .= "Content-Length: ";
@@ -1612,7 +1664,8 @@ sub magnet_page
                 if ( $found == 0 ) {
                     foreach my $current_mtext (@mtexts) {
 
-                    # Skip mangnet definition if it consists only of white spaces
+                    # Skip magnet definition if it consists only of
+                    # white spaces
 
                     if ( $current_mtext =~ /^[ \t]*$/ ) {
                         next;
@@ -2383,12 +2436,11 @@ sub history_reclassify
 
     if ( defined( $self->{form_}{change} ) ) {
 
-        # Look for all entries in the form of the form
-        # reclassify_X and see if they have values, those
-        # that have values indicate a reclassification
+        # Look for all entries in the form of the form reclassify_X
+        # and see if they have values, those that have values indicate
+        # a reclassification
 
-        # Set up %messages to map a slot ID to the new
-        # bucket
+        # Set up %messages to map a slot ID to the new bucket
 
         my %messages;
 
@@ -2422,9 +2474,9 @@ sub history_undo
 {
     my( $self, $session ) = @_;
 
-    # Look for all entries in the form of the form
-    # undo_X and see if they have values, those
-    # that have values indicate a reclassification
+    # Look for all entries in the form of the form undo_X and see if
+    # they have values, those that have values indicate a
+    # reclassification
 
     foreach my $key (keys %{$self->{form_}}) {
         if ( $key =~ /^undo_([0-9]+)$/ ) {
@@ -2474,9 +2526,9 @@ sub history_page
     # passed in or not so that we don't have to worry about undefined
     # values later on in the function
 
-    $self->{form_}{sort}   = $self->{old_sort__} || '-inserted' if ( !defined( $self->{form_}{sort}   ) );
-    $self->{form_}{search} = (!defined($self->{form_}{setsearch})?$self->{old_search__}:'') || '' if ( !defined( $self->{form_}{search} ) );
-    $self->{form_}{filter} = (!defined($self->{form_}{setfilter})?$self->{old_filter__}:'') || '' if ( !defined( $self->{form_}{filter} ) );
+    $self->{form_}{sort}   = $self->{sessions__}{$session}{sort} || '-inserted' if ( !defined( $self->{form_}{sort}   ) );
+    $self->{form_}{search} = (!defined($self->{form_}{setsearch})?$self->{sessions__}{$session}{search}:'') || '' if ( !defined( $self->{form_}{search} ) );
+    $self->{form_}{filter} = (!defined($self->{form_}{setfilter})?$self->{sessions__}{$session}{filter}:'') || '' if ( !defined( $self->{form_}{filter} ) );
 
     # If the user hits the Reset button on a search then we need to
     # clear the search value but make it look as though they hit the
@@ -2500,32 +2552,33 @@ sub history_page
     # Cache some values to keep interface widgets updated if history
     # is re-accessed without parameters
 
-    $self->{old_sort__} = $self->{form_}{sort};
+    $self->{sessions__}{$session}{sort} = $self->{form_}{sort};
 
-    # We are using a checkbox for negate, so we have to
-    # use an empty hidden input of the same name and
-    # check for multiple occurences or any of the name
-    # being defined
+    # We are using a checkbox for negate, so we have to use an empty
+    # hidden input of the same name and check for multiple occurences
+    # or any of the name being defined
 
     if ( !defined( $self->{form_}{negate} ) ) {
 
         # if none of our negate inputs are active,
         # this is a "clean" access of the history
 
-        $self->{form_}{negate} = $self->{old_negate__} || '';
+        $self->{form_}{negate} = $self->{sessions__}{$session}{negate} || '';
 
     } elsif ( defined( $self->{form_}{negate_array} ) ) {
         for ( @{$self->{form_}{negate_array}} ) {
             if ($_ ne '') {
                 $self->{form_}{negate} = 'on';
-                $self->{old_negate__} = 'on';
+                $self->{sessions__}{$session}{negate} = 'on';
                 last;
             }
         }
     } else {
-        # We have a negate form, but no array.. this is likely
-        # the hidden input, so this is not a "clean" visit
-        $self->{old_negate__} = $self->{form_}{negate};
+
+        # We have a negate form, but no array.. this is likely the
+        # hidden input, so this is not a "clean" visit
+
+        $self->{sessions__}{$session}{negate} = $self->{form_}{negate};
     }
 
     # Information from submit buttons isn't always preserved if the
@@ -2533,12 +2586,14 @@ sub history_page
     # sets the button-values as though they had been pressed
 
     # Set setsearch if search changed and setsearch is undefined
-    $self->{form_}{setsearch} = 'on' if ( ( ( !defined($self->{old_search__}) && ($self->{form_}{search} ne '') ) || ( defined($self->{old_search__}) && ( $self->{old_search__} ne $self->{form_}{search} ) ) ) && !defined($self->{form_}{setsearch} ) );
-    $self->{old_search__} = $self->{form_}{search};
+
+    $self->{form_}{setsearch} = 'on' if ( ( ( !defined($self->{sessions__}{$session}{search}) && ($self->{form_}{search} ne '') ) || ( defined($self->{sessions__}{$session}{search}) && ( $self->{sessions__}{$session}{search} ne $self->{form_}{search} ) ) ) && !defined($self->{form_}{setsearch} ) );
+    $self->{sessions__}{$session}{search} = $self->{form_}{search};
 
     # Set setfilter if filter changed and setfilter is undefined
-    $self->{form_}{setfilter} = 'Filter' if ( ( ( !defined($self->{old_filter__}) && ($self->{form_}{filter} ne '') ) || ( defined($self->{old_filter__}) && ( $self->{old_filter__} ne $self->{form_}{filter} ) ) ) && !defined($self->{form_}{setfilter} ) );
-    $self->{old_filter__} = $self->{form_}{filter};
+
+    $self->{form_}{setfilter} = 'Filter' if ( ( ( !defined($self->{sessions__}{$session}{filter}) && ($self->{form_}{filter} ne '') ) || ( defined($self->{sessions__}{$session}{filter}) && ( $self->{sessions__}{$session}{filter} ne $self->{form_}{filter} ) ) ) && !defined($self->{form_}{setfilter} ) );
+    $self->{sessions__}{$session}{filter} = $self->{form_}{filter};
 
     # Set up the text that will appear at the top of the history page
     # indicating the current filter and search settings
@@ -2555,13 +2610,13 @@ sub history_page
     # important possibilities:
     #
     # clearpage is defined: this will delete everything on the page
-    # which means we will call delete_slot in the history with the
-    # ID of ever message displayed.   The IDs are encoded in the
-    # hidden rowid_* form elements.
+    # which means we will call delete_slot in the history with the ID
+    # of ever message displayed.  The IDs are encoded in the hidden
+    # rowid_* form elements.
     #
     # clearchecked is defined: this will delete the messages that are
-    # checked (i.e. the check box has been clicked).  The check box
-    # is called remove_* in the form_ hash once we get here.
+    # checked (i.e. the check box has been clicked).  The check box is
+    # called remove_* in the form_ hash once we get here.
     #
     # The third possibility is clearall which is handled below and
     # uses the delete_query API of History.
@@ -2811,9 +2866,12 @@ sub history_page
                              $v =sprintf $self->{language__}{History_Size_Bytes}, $size;
                          }
                      }
-                     # Replace any &nbsp; entities from the language files with
-                     # the corresponding character (\xa0). Otherwise HTML::Template
-                     # would escape the & with &amp;
+
+                     # Replace any &nbsp; entities from the language
+                     # files with the corresponding character
+                     # (\xa0). Otherwise HTML::Template would escape
+                     # the & with &amp;
+
                      $v =~ s/&nbsp;/\xA0/g;
 
                      $col_data{History_Cell_Value} = $v;
@@ -2902,7 +2960,7 @@ sub http_redirect_
 
     my $header = "HTTP/1.0 302 Found\r\n";
     $header .= "Location: $url\r\n";
-    $header .= $self->set_cookie__( $session );
+    $header .= $self->set_cookie__( $session, $client );
     $header .= "\r\n";
 
     print $client $header;
@@ -2941,8 +2999,8 @@ sub view_page
         $self->{form_}{format} = $self->user_config_( $self->{sessions__}{$session}{user}, 'wordtable_format' );
     }
 
-    # If a format change was requested for the word matrix, record it in the
-    # configuration and in the classifier options.
+    # If a format change was requested for the word matrix, record it
+    # in the configuration and in the classifier options.
 
     $self->classifier_()->wmformat( $self->{form_}{format} );
 
@@ -3068,20 +3126,20 @@ sub view_page
             $line =~ s/[\r\n]+/<br \/>/g;
 
             # TODO: This code is now useless because the magnet itself
-            # doesn't contain the information about which header we are
-            # looking for.  Ultimately, we need to fix this but I decided
-            # for v0.22.0 release to not make further changes and leave this
-            # code as unfixed.
+            # doesn't contain the information about which header we
+            # are looking for.  Ultimately, we need to fix this but I
+            # decided for v0.22.0 release to not make further changes
+            # and leave this code as unfixed.
 
             # if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ ) {
             #    my $head = $1;
             #    my $arg  = $2;
-
+            #
             #    if ( $head =~ /\Q$header\E/i ) {
-
+            #
             #        $text =~ s/</&lt;/g;
             #        $text =~ s/>/&gt;/g;
-
+            #
             #        if ( $arg =~ /\Q$text\E/i ) {
             #            my $new_color = $self->classifier_()->get_bucket_color( $session, $bucket );
             #            $line =~ s/(\Q$text\E)/<b><font color=\"$new_color\">$1<\/font><\/b>/;
@@ -3278,14 +3336,15 @@ sub localize_template__
 
     # Localize the template in use.
     #
-    # Templates are automatically localized.  Any TMPL_VAR that begins with
-    # Localize_ will be fixed up automatically with the appropriate string
-    # for the language in use.  For example if you write
+    # Templates are automatically localized.  Any TMPL_VAR that begins
+    # with Localize_ will be fixed up automatically with the
+    # appropriate string for the language in use.  For example if you
+    # write
     #
     #     <TMPL_VAR name="Localize_Foo_Bar">
     #
-    # this will automatically be converted to the string associated with
-    # Foo_Bar in the current language file.
+    # this will automatically be converted to the string associated
+    # with Foo_Bar in the current language file.
 
     my @vars = $templ->param();
 
@@ -3485,8 +3544,8 @@ sub print_form_fields_
 #
 #    configure_item( 'foo', loaded foo-bar.thtml, language hash )
 #
-# and needs to fill the template variables.  Then it will receive
-# a call to its
+# and needs to fill the template variables.  Then it will receive a
+# call to its
 #
 #    validate_item( 'foo', loaded foo-bar.thtml, language hash, form hash )
 #
@@ -3583,8 +3642,8 @@ sub language
 #
 # shutdown_page__
 #
-#   Determines the text to send in response to a click on the
-#   shutdown link.
+#   Determines the text to send in response to a click on the shutdown
+#   link.
 #
 #----------------------------------------------------------------------------
 sub shutdown_page__
@@ -3621,8 +3680,8 @@ sub shutdown_page__
 
     my $text = $templ->output();
 
-    # Replace the reference to the favicon, we won't be able
-    # to handle that request
+    # Replace the reference to the favicon, we won't be able to handle
+    # that request
 
     $text =~ s/<link rel="icon" href="favicon\.ico">//;
 

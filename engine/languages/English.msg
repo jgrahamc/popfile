@@ -79,6 +79,7 @@ Up                                      Up
 Down                                    Down
 Go                                      Go
 Edit                                    Edit
+Logout                                  Logout
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this
