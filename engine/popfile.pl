@@ -100,6 +100,12 @@ sub pipeready
 {
 	my ( $pipe ) = @_;
 
+	# Check that the $pipe is still a valid handle
+	
+	if ( !defined( $pipe ) ) {
+		return 0;
+	}
+
 	if ( $on_windows ) {
 		
 		# I am NOT doing a select() here because that does not work 
