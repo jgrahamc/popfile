@@ -193,3 +193,6 @@ sans
 border
 mbox
 htm
+header:From
+header:To
+header:Subject
