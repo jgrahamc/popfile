@@ -67,7 +67,7 @@ sub service
     my ( $self ) = @_;
 
     if ( !defined( $self->{getmessage__} ) ) {
-        $self->{getmessage__} = Win32::API->new( "Platform/POPFileIcon.dll", "int GetMenuMessage()" );
+        $self->{getmessage__} = Win32::API->new( "Platform/POPFileIcon.dll", "GetMenuMessage", "", "N" );
     }
 
     my $event = $self->{getmessage__}->Call();
@@ -77,12 +77,14 @@ sub service
 
     if ( $event == 2 ) {
 
+        my $execute = Win32::API->new( "Shell32", "ShellExecute", "NPPPPN", "N" );
+
         # Get the port that the UI is running on and then use the
         # windows start function to start the browser running
 
         my $url = 'http://127.0.0.1:' . $self->module_config_( 'html', 'port' );
 
-        system( "start $url" );
+        $execute->Call( 0, "open", $url, "", "", 0 );
     }
 
     # Exit action from try context menu - return 0, to cause exit
