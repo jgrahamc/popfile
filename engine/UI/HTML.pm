@@ -347,22 +347,24 @@ sub url_handler__
 	
 	$self->log_(2, "Skin file $filename mapped to $file");
 
-	# some file types we don't want accessed directly
-	if ( $filename =~ /.*?(\.thtml)/ ) {
-		$self->log_( 0, "Direct access to $filename prevented" );
-		return 0;
-	}
-	
+
 	# determine mime type from extension -- crude, but we only expect a few mime types
 	
-	my $mime = "text/plain";
+	my $mime;
 	
 	if ( $file =~ /.*?([^\.]+)$/ ) {
 		$mime = $mime_extensions{$1} if ( defined( $1 ) )
 	}
 	
-	$self->http_file_( $client, $file, $mime );
-        return 1;	
+	# only allow access to file types explicitly permitted by inclusion in the 
+	# %mime_extensions hash
+	if ( defined($mime) ) {
+		$self->http_file_( $client, $file, $mime );
+	} else {
+		$self->log_( 0, "Unknown mime type loaded from skins folder. $filename" );
+		$self->http_error_( $client, 404 );
+	}
+	return 1;
     }
     
     
