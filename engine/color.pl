@@ -16,8 +16,12 @@ use Classifier::Bayes;
 if ( $#ARGV == 0 ) 
 {
     my $m = new Classifier::MailParse;
-    
     $m->{bayes} = new Classifier::Bayes;
+    
+    if ( $m->{bayes}->initialize() == 0 ) {
+        die "Failed to start while initializing the classifier module";
+    }
+
     $m->{bayes}->load_word_matrix();
     $m->{color} = 1;
     print $m->parse_stream($ARGV[0]);
