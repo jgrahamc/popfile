@@ -421,7 +421,7 @@ sub security_page
     } 
     $body .= "<p>(With this turned up POPFile sends once per day the following three values to a script on www.usethesource.com: bc (the total number of buckets that you have), mc (the total number of messages that POPFile has classified) and ec (the total number of classification errors).  These get stored in a file and I will use this to publish some statistics about how people use POPFile and how well it works.  My web server keeps its log files for about 5 days and then they get deleted; I am not storing any connection between the statistics and individual IP addresses.)";
 
-    $body .= "<p><hr><h2>User Interface Password</h2><p><form action=/security><b>Password:</b> <br><input name=password type=text value=$configuration{password}> <input type=submit class=submit name=update_server value=Apply> <input type=hidden name=session value=$session_key></form>";    
+    $body .= "<p><hr><h2>User Interface Password</h2><p><form action=/security><b>Password:</b> <br><input name=password type=password value=$configuration{password}> <input type=submit class=submit name=update_server value=Apply> <input type=hidden name=session value=$session_key></form>";    
     $body .= "Updated password to $configuration{password}" if ( defined($form{password}) );
     
     $body .= "<p><hr><h2>Secure Password Authentication/AUTH</h2><p><form action=/security><b>Secure server:</b> <br><input name=server type=text value=$configuration{server}><input type=submit class=submit name=update_server value=Apply><input type=hidden name=session value=$session_key></form>";    
@@ -1881,7 +1881,7 @@ sub get_response
     }
 
     # Send the command (followed by the appropriate EOL) to the mail server
-    tee( $mail, "$command$eol" );
+    tee( $mail, $command. $eol );
     
     my $response;
     
@@ -2163,26 +2163,6 @@ sub run_popfile
                     last;
                 }
 
-                # The HELO command results in a very simple response from us.  We just echo that
-                # we are ready for commands
-                if ( $command =~ /HELO/i ) {
-                    tee( $client, "+OK HELO POPFile Server Ready$eol" );
-                    next;
-                }
-
-                # In the case of PASS, NOOP, XSENDER, STAT, DELE and RSET commands we simply pass it through to 
-                # the real mail server for processing and echo the response back to the client
-                if ( ( $command =~ /PASS (.*)/i )    || 
-                     ( $command =~ /NOOP/i )         ||
-                     ( $command =~ /STAT/i )         ||
-                     ( $command =~ /XSENDER (.*)/i ) ||
-                     ( $command =~ /DELE (.*)/i )    ||
-                     ( $command =~ /RSET/i ) ) {
-                    echo_response( $mail, $client, $command );
-                    flush_extra( $mail, $client, 0 );
-                    next;
-                }
-
                 # The USER command is a special case because we modify the syntax of POP3 a little
                 # to expect that the username being passed is actually of the form host:username where
                 # host is the actual remote mail server to contact and username is the username to 
@@ -2190,13 +2170,15 @@ sub run_popfile
                 # will pull email from.  Doing this means we can act as a proxy for multiple mail clients
                 # and mail accounts
                 if ( $command =~ /USER (.+)(:(\d+))?$configuration{separator}(.+)/i ) {
+                    debug( "USER command [$1] [$2] [$3] [$4]" );
+
                     if ( $1 ne '' )  {
                         if ( verify_connected( $client, $1, $3 || 110 ) )  {
                             $lastuser = $4;
 
                             # Pass through the USER command with the actual user name for this server,
                             # and send the reply straight to the client
-                            echo_response( $mail, $client, "USER $4" );
+                            echo_response( $mail, $client, 'USER ' . $4 );
                         } else {
                             last;
                         }
@@ -2312,6 +2294,26 @@ sub run_popfile
                     flush_extra( $mail, $client, 0 );
                     next;
                 }                
+
+                # The HELO command results in a very simple response from us.  We just echo that
+                # we are ready for commands
+                if ( $command =~ /HELO/i ) {
+                    tee( $client, "+OK HELO POPFile Server Ready$eol" );
+                    next;
+                }
+
+                # In the case of PASS, NOOP, XSENDER, STAT, DELE and RSET commands we simply pass it through to 
+                # the real mail server for processing and echo the response back to the client
+                if ( ( $command =~ /PASS (.*)/i )    || 
+                     ( $command =~ /NOOP/i )         ||
+                     ( $command =~ /STAT/i )         ||
+                     ( $command =~ /XSENDER (.*)/i ) ||
+                     ( $command =~ /DELE (.*)/i )    ||
+                     ( $command =~ /RSET/i ) ) {
+                    echo_response( $mail, $client, $command );
+                    flush_extra( $mail, $client, 0 );
+                    next;
+                }
 
                 # The client is requesting a specific message.  
                 # Note the horrible hack here where we detect a command of the form TOP x 99999999 this
