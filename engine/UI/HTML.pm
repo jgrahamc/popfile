@@ -1317,17 +1317,25 @@ sub magnet_page
                 }
                 # to validate, must replace & with &amp;
                 # stan todo note: come up with a smarter regex, this one's a bludgeon
+                # another todo: Move this stuff into a function to make text
+                # safe for inclusion in a form field
                 my $validatingMagnet = $magnet;
                 $validatingMagnet =~ s/&/&amp;/g;
                 $validatingMagnet =~ s/</&lt;/g;
                 $validatingMagnet =~ s/>/&gt;/g;
+                
+                # escape quotation characters to avoid orphan data within tags
+                # todo: function to make arbitrary data safe for inclusion within
+                # a html tag attribute (inside double-quotes)
+                
+                $validatingMagnet =~ s/\"/\&quot\;/g;                
                 $body .= ">\n<td><select name=\"type$i\" id=\"magnetsAddType\">\n";
 
 		for my $mtype (keys %magnet_types) {
                     my $selected = ( $mtype eq $type )?"selected":"";
                     $body .= "<option value=\"$mtype\" $selected>\n$self->{language__}{$magnet_types{$mtype}}</option>\n";
 		}
-                $body .= "</select>: <input type=\"text\" name=\"text$i\" value=\"$validatingMagnet\" /></td>\n";
+                $body .= "</select>: <input type=\"text\" name=\"text$i\" value=\"$validatingMagnet\" size=\"" . length($magnet) . "\" /></td>\n";
                 $body .= "<td><select name=\"bucket$i\" id=\"magnetsAddBucket\">\n";
 
                 my @buckets = $self->{classifier__}->get_buckets();
@@ -2836,7 +2844,7 @@ sub history_page
                     }
                     $body .= "</select>\n";
                 } else {
-                    $body .= " ($self->{language__}{History_MagnetUsed}: $self->{history__}{$mail_file}{magnet})";
+                    $body .= " ($self->{language__}{History_MagnetUsed}: " . splitline( $self->{history__}{$mail_file}{magnet}, 0 ) . ")";
                 }
             }
 
@@ -2936,18 +2944,16 @@ sub view_page
         $body .= "&gt;&gt;</a>";
     }
 
+    $body .= "</td>\n";
+    
+    $body .= "<td class=\"openMessageCloser\">";
+    $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">\n";
+    $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
     $body .= "</td>\n</tr>\n</table>\n";
 
     # message
 
     $body .= "<table class=\"openMessageTable\" cellpadding=\"10%\" cellspacing=\"0\" width=\"100%\" summary=\"$self->{language__}{History_OpenMessageSummary}\">\n";
-
-    # Close button
-
-    # $body .= "<tr>\n<td class=\"openMessageCloser\">";
-    # $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">\n";
-    # $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
-    # $body .= "</td>\n</tr>\n";
 
     $body .= "<tr><td>";
     $body .= "<form id=\"HistoryMainForm\" action=\"/history\" method=\"POST\">\n";
@@ -2978,7 +2984,7 @@ sub view_page
         	}
         	$body .= "</select>\n<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />";
         } else {
-	        $body .= " ($self->{language__}{History_MagnetUsed}: $self->{history__}{$mail_file}{magnet})";
+	        $body .= " ($self->{language__}{History_MagnetUsed}: " . splitline( $self->{history__}{$mail_file}{magnet} , 0) . ")";
         }
     }
 
@@ -3369,6 +3375,34 @@ sub register_configuration_item
    my ( $self, $type, $name, $object ) = @_;
 
    $self->{dynamic_ui__}{$type}{$name} = $object;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# splitline - Escapes characters so a line will print as plain-text within a HTML document.
+#
+# $line         The line to escape
+# $encoding     The value of any current encoding scheme
+#
+# ---------------------------------------------------------------------------------------------
+
+sub splitline
+{
+    my ($line, $encoding) = @_;
+    $line =~ s/([^\r\n]{100,120} )/$1\r\n/g;
+    $line =~ s/([^ \r\n]{120})/$1\r\n/g;        
+
+    $line =~ s/</&lt;/g;
+    $line =~ s/>/&gt;/g;
+
+    if ( $encoding =~ /quoted\-printable/i ) {
+        $line =~ s/=3C/&lt;/g;
+        $line =~ s/=3E/&gt;/g;
+    }
+
+    $line =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
+    
+    return $line;        
 }
 
 # GETTERS/SETTERS

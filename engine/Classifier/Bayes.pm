@@ -540,7 +540,7 @@ sub classify_file
                 $regex =~ s/[@\$]/\./g;
 
                 if ( $noattype =~ m/\Q$regex\E/i ) {
-                    $self->{scores__}        = "<b>Magnet Used</b><p>Classified to <font color=\"$self->{colors__}{$bucket}\">$bucket</font> because of magnet $type: $magnet</p>";
+                    $self->{scores__}        = "<b>Magnet Used</b><p>Classified to <font color=\"$self->{colors__}{$bucket}\">$bucket</font> because of magnet $type: " . Classifier::MailParse::splitline($magnet,0) . "</p>";
                     $self->{magnet_used__}   = 1;
                     $self->{magnet_detail__} = "$type: $magnet";
 
