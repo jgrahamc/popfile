@@ -446,6 +446,8 @@ sub update_tag
                         $self->update_pseudoword( 'html', 'imgremotesrc', $encoded, $original );
         	    }
                 }
+
+                next;
             }
 
             add_url( $self, $value, $encoded, $quote, $end_quote, '' );
@@ -535,7 +537,7 @@ sub update_tag
         # Tags with a charset
 
         if ( ( $attribute =~ /^content$/i ) && ( $tag =~ /^meta$/i ) ) {
-            if ( $value=~ /charset=(.{1,40})[\"\>]?/ ) {
+            if ( $value=~ /charset=([^ ]{1,40})[\"\>]?/ ) {
                 update_word( $self, $1, $encoded, '', '', '' );
             }
         }
@@ -619,6 +621,8 @@ sub add_url
     # Extract authorization information from the URL (e.g. http://foo@bar.com)
 
     $authinfo = $1 if ( $url =~ s/^(([[:alpha:]0-9\-_\.\;\:\&\=\+\$\,]+)(\@|\%40))+// );
+
+    $self->update_pseudoword( 'html', 'authorization', $encoded, $oldurl ) if ( defined( $authinfo ) && ( $authinfo ne '' ) );
 
     if ( $url =~ s/^(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro|[[:alpha:]]{2})([^[:alpha:]0-9\-_\.]|$)/$4/i ) {
         $host = "$1$3";
@@ -1020,7 +1024,7 @@ sub parse_stream
 
             # Look for =?foo? syntax that identifies a charset
 
-            if ( $line =~ /=\?(.{1,40})\?/ ) {
+            if ( $line =~ /=\?([^ ]{1,40})\?/ ) {
                 update_word( $self, $1, 0, '', '', 'charset' );
             }
 
@@ -1191,7 +1195,7 @@ sub parse_header
 
     # Check the encoding type in all RFC 2047 encoded headers
 
-    if ( $argument =~ /=\?(.{1,40})\?(Q|B)/i ) {
+    if ( $argument =~ /=\?([^ ]{1,40})\?(Q|B)/i ) {
             update_word( $self, $1, 0, '', '', 'charset' );
     }
 
@@ -1214,7 +1218,7 @@ sub parse_header
 
         $argument = $self->decode_string( $argument );
 
-        if ( $argument =~ /=\?(.{1,40})\?/ ) {
+        if ( $argument =~ /=\?([^ ]{1,40})\?/ ) {
             update_word( $self, $1, 0, '', '', 'charset' );
         }
 
@@ -1259,7 +1263,7 @@ sub parse_header
     # Look for MIME
 
     if ( $header =~ /^Content-Type$/i ) {
-        if ( $argument =~ /charset=\"?([^\"]{1,40})\"?/ ) {
+        if ( $argument =~ /charset=\"?([^\" ]{1,40})\"?/ ) {
             update_word( $self, $1, 0, '' , '', 'charset' );
         }
 
