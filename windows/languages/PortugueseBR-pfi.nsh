@@ -261,7 +261,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_2   "ESTE PROCESSO PODE LEVAR VÁRIOS MINUTOS (se o corpus for grande)."
 !insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_3   "AVISO"
 !insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_4   "NÃO feche a janela de console do POPFile!"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_5   "Quando aparecer 'POPFile Engine v0.20.0 running' na janela de console, isto significa que"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_5   "Quando aparecer 'POPFile Engine vX.X.X running' na janela de console, isto significa que"
 !insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_6   "- O POPFile está pronto para usar"
 !insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_7   "- O POPFile pode ser desligado com segurança usando o Menu Iniciar"
 !insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_8   "Clique Avançar para converter o corpus."
