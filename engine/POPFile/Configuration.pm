@@ -59,6 +59,29 @@ sub initialize
 
     $self->config_( 'piddir', './' );
 
+    # This counter is used when creating unique IDs for message stored
+    # in the history.  The history message files have the format
+    #
+    # popfile{download_count}={message_count}.msg
+    #
+    # Where the download_count is derived from this value and the
+    # message_count is a local counter within that download, for sorting
+    # purposes must sort on download_count and then message_count
+
+    $self->global_config_( 'download_count', 0 );
+
+    # Subject modification (global setting is on)
+    $self->global_config_( 'subject', 1 );
+
+    # Adding the X-Text-Classification on
+    $self->global_config_( 'xtc', 1 );
+
+    # Adding the X-POPFile-Link is no
+    $self->global_config_( 'xpl', 1 );
+
+    # The default location for the message files
+    $self->global_config_( 'msgdir', 'messages/' );
+
     return 1;
 }
 

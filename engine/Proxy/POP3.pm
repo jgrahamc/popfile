@@ -35,8 +35,10 @@ sub new
 
     $self->name( 'pop3' );
 
-    $self->{child_}            = \&child__;
-    $self->{flush_child_data_} = \&flush_child_data__;
+    $self->{child_} = \&child__;
+    $self->{connection_timeout_error_} = '-ERR no response from mail server';
+    $self->{connection_failed_error_}  = '-ERR can\'t connect to';
+    $self->{good_response_}            = '^\+OK';
 
     return $self;
 }
@@ -72,68 +74,10 @@ sub initialize
     $self->global_config_( 'mcount', 0 );
     $self->global_config_( 'ecount', 0 );
 
-    # This counter is used when creating unique IDs for message stored
-    # in the history.  The history message files have the format
-    #
-    # popfile{download_count}={message_count}.msg
-    #
-    # Where the download_count is derived from this value and the
-    # message_count is a local counter within that download, for sorting
-    # purposes must sort on download_count and then message_count
-    $self->config_( 'download_count', 0 );
-
     # The separator within the POP3 username is :
     $self->config_( 'separator', ':' );
 
     return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# flush_child_data__
-#
-# Called to flush data from the pipe of each child as we go, I did this because there
-# appears to be a problem on Windows where the pipe gets a lot of read data in it and
-# then causes the child not to be terminated even though we are done.  Also this is nice
-# because we deal with the statistics as we go
-#
-# $handle   The handle of the child's pipe
-#
-# ---------------------------------------------------------------------------------------------
-sub flush_child_data__
-{
-    my ( $self, $handle ) = @_;
-
-    my $stats_changed = 0;
-
-    while ( &{$self->{pipeready_}}($handle) )
-    {
-        my $class = <$handle>;
-
-        if ( defined( $class ) ) {
-            $class =~ s/[\r\n]//g;
-
-            $self->{classifier__}->set_bucket_parameter( $class, 'count',
-                $self->{classifier__}->get_bucket_parameter( $class, 'count' ) + 1 );
-            $self->global_config_( 'mcount', $self->global_config_( 'mcount' ) + 1 );
-            $stats_changed                                    = 1;
-
-            $self->log_( "Incrementing $class" );
-        } else {
-            # This is here so that we get in errorneous position where the pipeready
-            # function is returning that there's data, but there is none, in fact the
-            # pipe is dead then we break the cycle here.  This was happening to me when
-            # I tested POPFile running under cygwin.
-
-            last;
-        }
-    }
-
-    if ( $stats_changed ) {
-        $self->{ui__}->invalidate_history_cache();
-        $self->{configuration__}->save_configuration();
-        $self->{classifier__}->write_parameters();
-    }
 }
 
 # ---------------------------------------------------------------------------------------------
