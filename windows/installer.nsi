@@ -745,10 +745,6 @@ update_config:
   File "${C_PERL_DIR}\site\lib\BerkeleyDB.pm"
   File "${C_PERL_DIR}\lib\UNIVERSAL.pm"
   
-  SetOutPath $INSTDIR\BerkeleyDB
-  File "${C_PERL_DIR}\site\lib\BerkeleyDB\Btree.pm"
-  File "${C_PERL_DIR}\site\lib\BerkeleyDB\Hash.pm"
-
   SetOutPath $INSTDIR\auto\BerkeleyDB
   File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\autosplit.ix"
   File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\BerkeleyDB.bs"
@@ -2220,7 +2216,6 @@ remove_perl:
   !insertmacro SafeRecursiveRMDir  "$INSTDIR\Text"
   !insertmacro SafeRecursiveRMDir  "$INSTDIR\warnings"
   !insertmacro SafeRecursiveRMDir  "$INSTDIR\Win32"
-  !insertmacro SafeRecursiveRMDir  "$INSTDIR\BerkeleyDB"
 
   StrCmp ${L_UPGRADE} "yes" Removed
 
