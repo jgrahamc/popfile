@@ -1,10 +1,9 @@
 #--------------------------------------------------------------------------
 # Japanese-pfi.nsh
 #
-# This file contains additional "Japanese" text strings used by the Windows installer
-# for POPFile (these strings are unique to POPFile).
-#
-# See 'Japanese-mui.nsh' for the strings which modify standard NSIS MUI messages.
+# This file contains the "Japanese" text strings used by the Windows installer
+# for POPFile (includes customised versions of strings provided by NSIS and
+# strings which are unique to POPFile).
 #
 # These strings are grouped according to the page/window where they are used
 #
@@ -53,6 +52,33 @@
 #--------------------------------------------------------------------------
 
 !define PFI_LANG  "JAPANESE"
+
+#==========================================================================
+# Customised versions of strings used on standard MUI pages
+#==========================================================================
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Welcome
+#
+# The sequence \r\n\r\n inserts a blank line (note that the MUI_TEXT_WELCOME_INFO_TEXT string
+# should end with a \r\n\r\n$_CLICK sequence).
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_TEXT_WELCOME_INFO_TEXT \
+"このウィザードは、POPFile のインストールをガイドしていきます。\r\n\r\nセットアップを開始する前に、他のすべてのアプリケーションを終了することを推奨します。\r\n\r\n$_CLICK"
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Finish
+#
+# The MUI_TEXT_FINISH_RUN text should be a short phrase (not a long paragraph)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_TEXT_FINISH_RUN \
+"POPFile ユーザーインターフェースを起動"
+
+#==========================================================================
+# Strings used for custom pages, message boxes and banners
+#==========================================================================
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
@@ -270,33 +296,33 @@
 
 ; Uninstall Progress Reports displayed above the progress bar
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_1        "POPFile をシャットダウン中..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_2        "「スタートメニュー」から POPFile を削除中..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_3        "POPFile のコアファイルを削除中..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_4        "Outlook Express の設定を元に戻しています..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_5        "POPFile のスキンファイルを削除中..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_6        "最小バージョンの Perl を削除中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_1        "POPFile をシャットダウン中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_2        "「スタートメニュー」から POPFile を削除中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_3        "POPFile のコアファイルを削除中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_4        "Outlook Express の設定を元に戻しています..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_5        "POPFile のスキンファイルを削除中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_6        "最小バージョンの Perl を削除中..."
 
 ; Uninstall Log Messages
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_1             "POPFile をシャットダウンします。ポート番号:"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_2             "オープン"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_3             "復元"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_4             "クローズ"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_5             "POPFile ディレクトリ以下の全てのファイルを削除中"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_6             "注意: POPFile ディレクトリ以下の全てのファイルを削除できませんでした。"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_1             "POPFile をシャットダウンします。ポート番号:"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_2             "オープン"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_3             "復元"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_4             "クローズ"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_5             "POPFile ディレクトリ以下の全てのファイルを削除中"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_6             "注意: POPFile ディレクトリ以下の全てのファイルを削除できませんでした。"
 
 ; Message Box text strings
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_1      "POPFile は次のディレクトリにインストールされていないようです:"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_2      "それでも続行しますか(推奨できません)？"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_1      "POPFile は次のディレクトリにインストールされていないようです:"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "それでも続行しますか(推奨できません)？"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_ABORT_1           "アンインストールはユーザーより中止されました"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_ABORT_1           "アンインストールはユーザーより中止されました"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMDIR_1        "POPFile ディレクトリ以下の全てのファイルを削除しますか？$\r$\n$\r$\n(残したいファイルがあれば No をクリックして下さい。)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "POPFile ディレクトリ以下の全てのファイルを削除しますか？$\r$\n$\r$\n(残したいファイルがあれば No をクリックして下さい。)"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_1        "注意"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_2        "は削除できませんでした。"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "注意"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "は削除できませんでした。"
 
 #--------------------------------------------------------------------------
 # Mark the end of the language data

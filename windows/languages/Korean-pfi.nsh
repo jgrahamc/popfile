@@ -1,10 +1,9 @@
 #--------------------------------------------------------------------------
 # Korean-pfi.nsh
 #
-# This file contains additional "Korean" text strings used by the Windows installer
-# for POPFile (these strings are unique to POPFile).
-#
-# See 'Korean-mui.nsh' for the strings which modify standard NSIS MUI messages.
+# This file contains the "Korean" text strings used by the Windows installer
+# for POPFile (includes customised versions of strings provided by NSIS and
+# strings which are unique to POPFile).
 #
 # These strings are grouped according to the page/window where they are used
 #
@@ -53,6 +52,33 @@
 #--------------------------------------------------------------------------
 
 !define PFI_LANG  "KOREAN"
+
+#==========================================================================
+# Customised versions of strings used on standard MUI pages
+#==========================================================================
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Welcome
+#
+# The sequence \r\n\r\n inserts a blank line (note that the MUI_TEXT_WELCOME_INFO_TEXT string
+# should end with a \r\n\r\n$_CLICK sequence).
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_TEXT_WELCOME_INFO_TEXT \
+"이 마법사는 귀하의 컴퓨터에 POPFile(팝파일)을 설치할 것입니다.\r\n\r\n설치를 시작하기 전에 모든 프로그램을 종료시킬 것을 권장합니다.\r\n\r\n$_CLICK"
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Finish
+#
+# The MUI_TEXT_FINISH_RUN text should be a short phrase (not a long paragraph)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_TEXT_FINISH_RUN \
+"팝파일 사용자 화면"
+
+#==========================================================================
+# Strings used for custom pages, message boxes and banners
+#==========================================================================
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
@@ -270,33 +296,33 @@
 
 ; Uninstall Progress Reports displayed above the progress bar
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_1        "POPFile 종료 중..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_2        "'시작' 메뉴 중 POPFile 항목을 삭제 중..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_3        "POPFile 핵심 파일을 삭제 중..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_4        "아웃룩 익스프레스 설정을 복원 중..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_5        "POPFile 스킨 파일 삭제 중..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_6        "Perl 최소 설치 파일 삭제 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_1        "POPFile 종료 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_2        "'시작' 메뉴 중 POPFile 항목을 삭제 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_3        "POPFile 핵심 파일을 삭제 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_4        "아웃룩 익스프레스 설정을 복원 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_5        "POPFile 스킨 파일 삭제 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_6        "Perl 최소 설치 파일 삭제 중..."
 
 ; Uninstall Log Messages
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_1             "POPFile을 종료 중 - 포트:"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_2             "열림"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_3             "복원됨"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_4             "닫힘"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_5             "POPFile 디렉토리의 모든 파일을 제거 중."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_6             "참고: POPFile 디렉토리로부터 모든 파일을 제거할 수 없습니다."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_1             "POPFile을 종료 중 - 포트:"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_2             "열림"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_3             "복원됨"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_4             "닫힘"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_5             "POPFile 디렉토리의 모든 파일을 제거 중."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_6             "참고: POPFile 디렉토리로부터 모든 파일을 제거할 수 없습니다."
 
 ; Message Box text strings
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_1      "POPFile이 디렉토리에 설치되지 않은 것 같습니다."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_2      "그래도 계속하시겠습니까?(권장하지 않음)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_1      "POPFile이 디렉토리에 설치되지 않은 것 같습니다."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "그래도 계속하시겠습니까?(권장하지 않음)"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_ABORT_1           "사용자에 의해 언인스톨이 취소됨"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_ABORT_1           "사용자에 의해 언인스톨이 취소됨"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMDIR_1        "POPFile 디렉토리의 모든 파일을 제거하시겠습니까?$\r$\n$\r$\n(직접 생성하신 파일이 있고, 보존하고 싶으시면 '아니오'를 클릭하십시오"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "POPFile 디렉토리의 모든 파일을 제거하시겠습니까?$\r$\n$\r$\n(직접 생성하신 파일이 있고, 보존하고 싶으시면 '아니오'를 클릭하십시오"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_1        "참고"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_2        "는 제거될 수 없었습니다."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "참고"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "는 제거될 수 없었습니다."
 
 #--------------------------------------------------------------------------
 # Mark the end of the language data

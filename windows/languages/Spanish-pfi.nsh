@@ -1,10 +1,9 @@
 #--------------------------------------------------------------------------
 # Spanish-pfi.nsh
 #
-# This file contains additional "Spanish" text strings used by the Windows installer
-# for POPFile (these strings are unique to POPFile).
-#
-# See 'Spanish-mui.nsh' for the strings which modify standard NSIS MUI messages.
+# This file contains the "Spanish" text strings used by the Windows installer
+# for POPFile (includes customised versions of strings provided by NSIS and
+# strings which are unique to POPFile).
 #
 # These strings are grouped according to the page/window where they are used
 #
@@ -53,6 +52,33 @@
 #--------------------------------------------------------------------------
 
 !define PFI_LANG  "SPANISH"
+
+#==========================================================================
+# Customised versions of strings used on standard MUI pages
+#==========================================================================
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Welcome
+#
+# The sequence \r\n\r\n inserts a blank line (note that the MUI_TEXT_WELCOME_INFO_TEXT string
+# should end with a \r\n\r\n$_CLICK sequence).
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_TEXT_WELCOME_INFO_TEXT \
+"Este programa instalará POPFile en su ordenador.\r\n\r\nSe recomienda que cierre todas las demás aplicaciones antes de iniciar la Instalación.\r\n\r\n$_CLICK"
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Finish
+#
+# The MUI_TEXT_FINISH_RUN text should be a short phrase (not a long paragraph)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_TEXT_FINISH_RUN \
+"POPFile Interfaz de usuario"
+
+#==========================================================================
+# Strings used for custom pages, message boxes and banners
+#==========================================================================
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
@@ -270,33 +296,33 @@
 
 ; Uninstall Progress Reports displayed above the progress bar
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_1        "Cerrando POPFile..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_2        "Borrando elementos del 'Menu de Inicio' para POPFile..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_3        "Borrando archivos esenciales de POPFile..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_4        "Recuperando valores de Outlook Express..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_5        "Borrando skins de POPFile..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_6        "Borrando archivos minimos de Perl..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_1        "Cerrando POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_2        "Borrando elementos del 'Menu de Inicio' para POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_3        "Borrando archivos esenciales de POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_4        "Recuperando valores de Outlook Express..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_5        "Borrando skins de POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_6        "Borrando archivos minimos de Perl..."
 
 ; Uninstall Log Messages
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_1             "Cerrando POPFile usando puerto"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_2             "Abierto"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_3             "Recuperado"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_4             "Cerrado"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_5             "Eliminando todos los archivos de la carpeta de POPFile"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_6             "Nota: incapaz de eliminar todos los archivos de la carpeta de POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_1             "Cerrando POPFile usando puerto"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_2             "Abierto"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_3             "Recuperado"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_4             "Cerrado"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_5             "Eliminando todos los archivos de la carpeta de POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_6             "Nota: incapaz de eliminar todos los archivos de la carpeta de POPFile"
 
 ; Message Box text strings
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_1      "No parece que POPFile esté instalado en esta carpeta"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_2      "Continuar de todas formas (no recomendado) ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_1      "No parece que POPFile esté instalado en esta carpeta"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "Continuar de todas formas (no recomendado) ?"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_ABORT_1           "Desinstalación abortada por el usuario"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_ABORT_1           "Desinstalación abortada por el usuario"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMDIR_1        "¿Quiere eliminar todos los archivos en su carpeta de POPFile?$\r$\n$\r$\n(Si quiere guardar algo que usted haya creado, haga clic en No)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "¿Quiere eliminar todos los archivos en su carpeta de POPFile?$\r$\n$\r$\n(Si quiere guardar algo que usted haya creado, haga clic en No)"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_1        "Nota"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_2        "no se pudo eliminar."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "Nota"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "no se pudo eliminar."
 
 #--------------------------------------------------------------------------
 # Mark the end of the language data

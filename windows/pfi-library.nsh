@@ -56,14 +56,6 @@
   !macroend
 
   ;--------------------------------------------------------------------------
-  ; Used in the '*-pfi.nsh' files to define the text strings for the uninstaller
-  ;--------------------------------------------------------------------------
-
-  !macro PFI_LANG_UNSTRING NAME VALUE
-    !insertmacro PFI_LANG_STRING "un.${NAME}" "${VALUE}"
-  !macroend
-
-  ;--------------------------------------------------------------------------
   ; Used in '*-pfi.nsh' files to define the text strings for fields in a custom page INI file
   ;--------------------------------------------------------------------------
 
@@ -83,16 +75,13 @@
   ; Used in 'installer.nsi' to define the languages to be supported
   ;--------------------------------------------------------------------------
 
-  ; Macro used to load the three files required for each language:
-  ; (1) '*-mui.nsh' contains the customisations to be applied to the standard MUI text strings
-  ; (2) '*-pfi.nsh' contains the text strings used for custom pages, progress reports and logs
-  ; (3) the GPL license text (at present every language uses the 'English' version of the GPL)
+  ; Macro used to load the files required for each language:
+  ; (1) The MUI_LANGUAGE macro loads the standard MUI text strings for a particular language
+  ; (2) '*-pfi.nsh' contains the text strings used for pages, progress reports, logs etc
 
   !macro PFI_LANG_LOAD LANG
-    !include "languages\${LANG}-mui.nsh"
     !insertmacro MUI_LANGUAGE "${LANG}"
     !include "languages\${LANG}-pfi.nsh"
-    LicenseData /LANG=${LANG} "..\engine\license"
   !macroend
 
   ;--------------------------------------------------------------------------
@@ -275,18 +264,18 @@ loop:
   StrCmp ${L_PARAM} "windows_console " got_console
   FileWrite ${L_NEW_CFG} ${L_LNE}
   Goto loop
- 
+
 got_console:
   FileWrite ${L_NEW_CFG} "windows_console ${L_MODE}$\r$\n"
   Goto loop
-  
+
 copy_done:
   FileClose ${L_OLD_CFG}
   FileClose ${L_NEW_CFG}
-  
+
   Delete "$INSTDIR\popfile.cfg"
   Rename "$PLUGINSDIR\new.cfg" "$INSTDIR\popfile.cfg"
-  
+
   Pop ${L_PARAM}
   Pop ${L_LNE}
   Pop ${L_OLD_CFG}
@@ -352,120 +341,6 @@ FunctionEnd
 
 #==============================================================================================
 #
-# Functions used only by the uninstaller
-#
-#==============================================================================================
-
-#--------------------------------------------------------------------------
-# Function: un.GetHistoryPath
-#
-# This function is used by the uninstaller when uninstalling a previous version of POPFile.
-# It uses 'popfile.cfg' file to determine the full path of the directory where the message
-# history files are stored. By default POPFile stores these files in the '$INSTDIR\messages'
-# directory but the 'popfile.cfg' file can define a different location, using a variety of
-# paths (eg relative, absolute, local or even remote).
-#
-# If 'popfile.cfg' is found in the specified folder, we use the history parameter (if present)
-# otherwise we assume the default location is to be used (the sub-folder called 'messages').
-#
-# Note that the path specified in 'popfile.cfg' uses a trailing slash (which we do not return)
-#
-# Inputs:
-#         (top of stack)          - the path where 'popfile.cfg' is to be found
-#
-# Outputs:
-#         (top of stack)          - string containing full (unambiguous) path to message history
-#
-#  Usage Example:
-#         Push $INSTDIR
-#         Call un.GetHistoryPath
-#         Pop $R0
-#
-#         ($R0 will be "C:\Program Files\POPFile\messages" if POPFile is installed in default
-#          location and if the history parameter in 'popfile.cfg' is set to 'messages/')
-#--------------------------------------------------------------------------
-
-;Function un.GetHistoryPath
-;
-;  !define L_FILE_HANDLE   $R9
-;  !define L_HISTORY       $R8
-;  !define L_RESULT        $R7
-;  !define L_SOURCE        $R6
-;  !define L_TEMP          $R5
-;
-;  Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
-;  Push ${L_RESULT}
-;  Exch
-;  Push ${L_HISTORY}
-;  Push ${L_FILE_HANDLE}
-;  Push ${L_TEMP}
-;
-;  StrCpy ${L_HISTORY} ""
-;
-;  IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default_locn
-;  ClearErrors
-;  FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
-;
-;loop:
-;  FileRead ${L_FILE_HANDLE} ${L_TEMP}
-;  IfErrors cfg_file_done
-;  StrCpy ${L_RESULT} ${L_TEMP} 7
-;  StrCmp ${L_RESULT} "msgdir " got_old_msgdir
-;  StrCpy ${L_RESULT} ${L_TEMP} 14
-;  StrCmp ${L_RESULT} "GLOBAL_msgdir " got_new_msgdir
-;  Goto loop
-;
-;got_old_msgdir:
-;  StrCpy ${L_HISTORY} ${L_TEMP} "" 7
-;  Goto loop
-;
-;got_new_msgdir:
-;  StrCpy ${L_HISTORY} ${L_TEMP} "" 14
-;  Goto loop
-;
-;cfg_file_done:
-;  FileClose ${L_FILE_HANDLE}
-;  Push ${L_HISTORY}
-;  Call un.TrimNewlines
-;  Pop ${L_HISTORY}
-;  StrCmp ${L_HISTORY} "" use_default_locn use_cfg_data
-;
-;use_default_locn:
-;  StrCpy ${L_RESULT} "${L_SOURCE}\messages"
-;  Goto got_result
-;
-;use_cfg_data:
-;  StrCpy ${L_TEMP} ${L_HISTORY} 1 -1
-;  StrCmp ${L_TEMP} "/" strip_slash no_trailing_slash
-;  StrCmp ${L_TEMP} "\" 0 no_trailing_slash
-;
-;strip_slash:
-;  StrCpy ${L_HISTORY} ${L_HISTORY} -1
-;
-;no_trailing_slash:
-;  Push ${L_SOURCE}
-;  Push ${L_HISTORY}
-;  Call un.GetDataPath
-;  Pop ${L_RESULT}
-;
-;got_result:
-;  Pop ${L_TEMP}
-;  Pop ${L_FILE_HANDLE}
-;  Pop ${L_HISTORY}
-;  Pop ${L_SOURCE}
-;  Exch ${L_RESULT}  ; place full path of 'messages' directory on top of the stack
-;
-;  !undef L_FILE_HANDLE
-;  !undef L_HISTORY
-;  !undef L_RESULT
-;  !undef L_SOURCE
-;  !undef L_TEMP
-;
-;FunctionEnd
-
-
-#==============================================================================================
-#
 # Macro-based Functions used by the installer and by the uninstaller
 #
 #==============================================================================================
@@ -509,26 +384,26 @@ FunctionEnd
 
 !macro GetCorpusPath UN
   Function ${UN}GetCorpusPath
-  
+
     !define L_CORPUS        $R9
     !define L_FILE_HANDLE   $R8
     !define L_RESULT        $R7
     !define L_SOURCE        $R6
     !define L_TEMP          $R5
-  
+
     Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
     Push ${L_RESULT}
     Exch
     Push ${L_CORPUS}
     Push ${L_FILE_HANDLE}
     Push ${L_TEMP}
-  
+
     StrCpy ${L_CORPUS} ""
-  
+
     IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default_locn
     ClearErrors
     FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
-  
+
   loop:
     FileRead ${L_FILE_HANDLE} ${L_TEMP}
     IfErrors cfg_file_done
@@ -537,22 +412,22 @@ FunctionEnd
     StrCpy ${L_RESULT} ${L_TEMP} 13
     StrCmp ${L_RESULT} "bayes_corpus " got_new_corpus
     Goto loop
-  
+
   got_old_corpus:
     StrCpy ${L_CORPUS} ${L_TEMP} "" 7
     Goto loop
-  
+
   got_new_corpus:
     StrCpy ${L_CORPUS} ${L_TEMP} "" 13
     Goto loop
-  
+
   cfg_file_done:
     FileClose ${L_FILE_HANDLE}
     Push ${L_CORPUS}
     Call ${UN}TrimNewlines
     Pop ${L_CORPUS}
     StrCmp ${L_CORPUS} "" use_default_locn use_cfg_data
-  
+
   use_default_locn:
     StrCpy ${L_RESULT} ${L_SOURCE}\corpus
     Goto got_result
@@ -570,20 +445,20 @@ FunctionEnd
     Push ${L_CORPUS}
     Call ${UN}GetDataPath
     Pop ${L_RESULT}
-  
+
   got_result:
     Pop ${L_TEMP}
     Pop ${L_FILE_HANDLE}
     Pop ${L_CORPUS}
     Pop ${L_SOURCE}
     Exch ${L_RESULT}  ; place full path of 'corpus' directory on top of the stack
-  
+
     !undef L_CORPUS
     !undef L_FILE_HANDLE
     !undef L_RESULT
     !undef L_SOURCE
     !undef L_TEMP
-  
+
   FunctionEnd
 !macroend
 
@@ -644,69 +519,69 @@ FunctionEnd
 
 !macro GetDataPath UN
   Function ${UN}GetDataPath
-  
+
     !define L_BASEDIR     $R9
     !define L_DATA        $R8
     !define L_RESULT      $R7
     !define L_TEMP        $R6
-  
+
     Exch ${L_DATA}        ; the 'data folder' parameter (often a relative path)
     Exch
     Exch ${L_BASEDIR}      ; the 'base directory' used for cases where 'data folder' is relative
     Push ${L_RESULT}
     Push ${L_TEMP}
-  
+
     StrCmp ${L_DATA} "" 0 strip_quotes
     StrCpy ${L_DATA} ${L_BASEDIR}
     Goto got_path
-  
+
   strip_quotes:
-  
+
     ; Strip leading/trailing quotes, if any
-  
+
     StrCpy ${L_TEMP} ${L_DATA} 1
     StrCmp ${L_TEMP} '"' 0 slashconversion
     StrCpy ${L_DATA} ${L_DATA} "" 1
     StrCpy ${L_TEMP} ${L_DATA} 1 -1
     StrCmp ${L_TEMP} '"' 0 slashconversion
     StrCpy ${L_DATA} ${L_DATA} -1
-  
+
   slashconversion:
     StrCmp ${L_DATA} "." source_folder
     Push ${L_DATA}
     Call ${UN}StrBackSlash            ; ensure parameter uses backslashes
     Pop ${L_DATA}
-  
+
     StrCpy ${L_TEMP} ${L_DATA} 2
     StrCmp ${L_TEMP} ".\" sub_folder
     StrCmp ${L_TEMP} "\\" got_path
-  
+
     StrCpy ${L_TEMP} ${L_DATA} 3
     StrCmp ${L_TEMP} "..\" relative_folder
-  
+
     StrCpy ${L_TEMP} ${L_DATA} 1
     StrCmp ${L_TEMP} "\" basedir_drive
-  
+
     StrCpy ${L_TEMP} ${L_DATA} 1 1
     StrCmp ${L_TEMP} ":" got_path
-  
+
     ; Assume path can be safely added to 'base directory'
-  
+
     StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
     Goto got_path
-  
+
   source_folder:
     StrCpy ${L_DATA} ${L_BASEDIR}
     Goto got_path
-  
+
   sub_folder:
     StrCpy ${L_DATA} ${L_DATA} "" 2
     StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
     Goto got_path
-  
+
   relative_folder:
     StrCpy ${L_RESULT} ${L_BASEDIR}
-  
+
   relative_again:
     StrCpy ${L_DATA} ${L_DATA} "" 3
     Push ${L_RESULT}
@@ -716,22 +591,22 @@ FunctionEnd
     StrCmp ${L_TEMP} "..\" relative_again
     StrCpy ${L_DATA} ${L_RESULT}\${L_DATA}
     Goto got_path
-  
+
   basedir_drive:
     StrCpy ${L_TEMP} ${L_BASEDIR} 2
     StrCpy ${L_DATA} ${L_TEMP}${L_DATA}
-  
+
   got_path:
     Pop ${L_TEMP}
     Pop ${L_RESULT}
     Pop ${L_BASEDIR}
     Exch ${L_DATA}  ; place full path to the data directory on top of the stack
-  
+
     !undef L_BASEDIR
     !undef L_DATA
     !undef L_RESULT
     !undef L_TEMP
-  
+
   FunctionEnd
 !macroend
 
@@ -785,24 +660,24 @@ FunctionEnd
     Exch $R0    ; Input string with slashes
     Push $R1    ; Output string using backslashes
     Push $R2    ; Current character
-  
+
     StrCpy $R1 ""
     StrCmp $R0 $R1 nothing_to_do
-  
+
   loop:
     StrCpy $R2 $R0 1
     StrCpy $R0 $R0 "" 1
     StrCmp $R2 "/" found
     StrCpy $R1 "$R1$R2"
     StrCmp $R0 "" done loop
-  
+
   found:
     StrCpy $R1 "$R1\"
     StrCmp $R0 "" done loop
-  
+
   done:
     StrCpy $R0 $R1
-  
+
   nothing_to_do:
     Pop $R2
     Pop $R1
@@ -865,14 +740,14 @@ FunctionEnd
     Push $R3
     StrLen $R3 $R0
     StrCpy $R1 0
-  
+
   loop:
     IntOp $R1 $R1 - 1
     IntCmp $R1 -$R3 exit exit
     StrCpy $R2 $R0 1 $R1
     StrCmp $R2 "\" exit
     Goto loop
-  
+
   exit:
     StrCpy $R0 $R0 $R1
     Pop $R3
@@ -1179,7 +1054,7 @@ FunctionEnd
     FileOpen ${L_FILE_HANDLE} "${L_EXE}" a
     FileClose ${L_FILE_HANDLE}
     IfErrors exit
-    
+
   unlocked_exit:
     StrCpy ${L_EXE} ""
 

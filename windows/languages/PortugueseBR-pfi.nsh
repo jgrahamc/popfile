@@ -1,12 +1,9 @@
 #--------------------------------------------------------------------------
 # PortugueseBR-pfi.nsh
 #
-# Translated by Adriano Rafael Gomes <adrianorg@users.sourceforge.net>
-#
-# This file contains additional "PortugueseBR" text strings used by the Windows installer
-# for POPFile (these strings are unique to POPFile).
-#
-# See 'PortugueseBR-mui.nsh' for the strings which modify standard NSIS MUI messages.
+# This file contains the "PortugueseBR" text strings used by the Windows installer
+# for POPFile (includes customised versions of strings provided by NSIS and
+# strings which are unique to POPFile).
 #
 # These strings are grouped according to the page/window where they are used
 #
@@ -55,6 +52,33 @@
 #--------------------------------------------------------------------------
 
 !define PFI_LANG  "PORTUGUESEBR"
+
+#==========================================================================
+# Customised versions of strings used on standard MUI pages
+#==========================================================================
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Welcome
+#
+# The sequence \r\n\r\n inserts a blank line (note that the MUI_TEXT_WELCOME_INFO_TEXT string
+# should end with a \r\n\r\n$_CLICK sequence).
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_TEXT_WELCOME_INFO_TEXT \
+"Este assistente te guiará durante a instalação do POPFile.\r\n\r\nÉ recomendado que você feche todas as outras aplicações antes de iniciar a Instalação.\r\n\r\n$_CLICK"
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Finish
+#
+# The MUI_TEXT_FINISH_RUN text should be a short phrase (not a long paragraph)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_TEXT_FINISH_RUN \
+"Interface de Usuário do POPFile"
+
+#==========================================================================
+# Strings used for custom pages, message boxes and banners
+#==========================================================================
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
@@ -272,33 +296,33 @@
 
 ; Uninstall Progress Reports displayed above the progress bar
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_1        "Desligando o POPFile..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_2        "Deletando entradas no 'Menu Iniciar' para o POPFile..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_3        "Deletando arquivos principais do POPFile..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_4        "Restaurando configurações do Outlook Express..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_5        "Deletando arquivos de skins do POPFile..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_6        "Deletando arquivos mínimos do Perl..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_1        "Desligando o POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_2        "Deletando entradas no 'Menu Iniciar' para o POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_3        "Deletando arquivos principais do POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_4        "Restaurando configurações do Outlook Express..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_5        "Deletando arquivos de skins do POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_6        "Deletando arquivos mínimos do Perl..."
 
 ; Uninstall Log Messages
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_1             "Desligando o POPFile usando a porta"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_2             "Aberto"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_3             "Restaurado"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_4             "Fechado"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_5             "Removendo todos os arquivos da pasta do POPFile"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_6             "Nota: impossível remover todos os arquivos da pasta do POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_1             "Desligando o POPFile usando a porta"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_2             "Aberto"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_3             "Restaurado"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_4             "Fechado"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_5             "Removendo todos os arquivos da pasta do POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_6             "Nota: impossível remover todos os arquivos da pasta do POPFile"
 
 ; Message Box text strings
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_1      "Não parece que o POPFile esteja instalado nesta pasta"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_2      "Continuar mesmo assim (não recomendado) ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_1      "Não parece que o POPFile esteja instalado nesta pasta"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "Continuar mesmo assim (não recomendado) ?"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_ABORT_1           "Desinstalação cancelada pelo usuário"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_ABORT_1           "Desinstalação cancelada pelo usuário"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMDIR_1        "Você quer remover todos os arquivos da sua pasta do POPFile ?$\r$\n$\r$\n(Se você tiver qualquer coisa que você criou e quer manter, clique Não)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Você quer remover todos os arquivos da sua pasta do POPFile ?$\r$\n$\r$\n(Se você tiver qualquer coisa que você criou e quer manter, clique Não)"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_1        "Nota"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_2        "não pode ser removido."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "Nota"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "não pode ser removido."
 
 #--------------------------------------------------------------------------
 # Mark the end of the language data

@@ -1,10 +1,9 @@
 #--------------------------------------------------------------------------
 # German-pfi.nsh
 #
-# This file contains additional "German" text strings used by the Windows installer
-# for POPFile (these strings are unique to POPFile).
-#
-# See 'German-mui.nsh' for the strings which modify standard NSIS MUI messages.
+# This file contains the "German" text strings used by the Windows installer
+# for POPFile (includes customised versions of strings provided by NSIS and
+# strings which are unique to POPFile).
 #
 # These strings are grouped according to the page/window where they are used
 #
@@ -53,6 +52,33 @@
 #--------------------------------------------------------------------------
 
 !define PFI_LANG  "GERMAN"
+
+#==========================================================================
+# Customised versions of strings used on standard MUI pages
+#==========================================================================
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Welcome
+#
+# The sequence \r\n\r\n inserts a blank line (note that the MUI_TEXT_WELCOME_INFO_TEXT string
+# should end with a \r\n\r\n$_CLICK sequence).
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_TEXT_WELCOME_INFO_TEXT \
+"Dieser Assistent wird Sie durch die Installation von POPFile begleiten.\r\n\r\nEs wird empfohlen vor der Installation alle anderen Programme zu schließen.\r\n\r\n$_CLICK"
+
+#--------------------------------------------------------------------------
+# Standard MUI Page - Finish
+#
+# The MUI_TEXT_FINISH_RUN text should be a short phrase (not a long paragraph)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_TEXT_FINISH_RUN \
+"POPFile Benutzeroberfläche"
+
+#==========================================================================
+# Strings used for custom pages, message boxes and banners
+#==========================================================================
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
@@ -270,33 +296,33 @@
 
 ; Uninstall Progress Reports displayed above the progress bar
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_1        "POPFile beenden..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_2        "Startmenü-Einträge von POPFile löschen..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_3        "Kernkomponenten löschen..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_4        "Outlook Express Einstellungen wiederherstellen..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_5        "Skins löschen..."
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_PROGRESS_6        "Minimal-Perl-Umgebung löschen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_1        "POPFile beenden..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_2        "Startmenü-Einträge von POPFile löschen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_3        "Kernkomponenten löschen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_4        "Outlook Express Einstellungen wiederherstellen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_5        "Skins löschen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_6        "Minimal-Perl-Umgebung löschen..."
 
 ; Uninstall Log Messages
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_1             "Beende POPFile am Port"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_2             "Geöffnet"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_3             "Wiederhergestellt"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_4             "Geschlossen"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_5             "Alle Dateien im POPFile-Verzeichnis löschen"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_LOG_6             "Hinweis: Es konnten nicht alle Dateien im POPFile-Verzeichnis gelöscht werden"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_1             "Beende POPFile am Port"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_2             "Geöffnet"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_3             "Wiederhergestellt"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_4             "Geschlossen"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_5             "Alle Dateien im POPFile-Verzeichnis löschen"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_6             "Hinweis: Es konnten nicht alle Dateien im POPFile-Verzeichnis gelöscht werden"
 
 ; Message Box text strings
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_1      "POPFile scheint nicht im folgenden Verzeichnis installiert zu sein:"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBNOTFOUND_2      "Trotzdem fortfahren (nicht empfohlen)?"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_1      "POPFile scheint nicht im folgenden Verzeichnis installiert zu sein:"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "Trotzdem fortfahren (nicht empfohlen)?"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_ABORT_1           "Deinstallation vom Anwender abgebrochen"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_ABORT_1           "Deinstallation vom Anwender abgebrochen"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMDIR_1        "Wollen Sie alle Dateien im POPFile-Verzeichnis löschen? (Wenn Sie irgendetwas erstellt haben, was sie behalten möchten, wählen Sie Nein)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Wollen Sie alle Dateien im POPFile-Verzeichnis löschen? (Wenn Sie irgendetwas erstellt haben, was sie behalten möchten, wählen Sie Nein)"
 
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_1        "Hinweis"
-!insertmacro PFI_LANG_UNSTRING PFI_LANG_MBREMERR_2        "konnte nicht entfernt werden."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "Hinweis"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "konnte nicht entfernt werden."
 
 #--------------------------------------------------------------------------
 # Mark the end of the language data
