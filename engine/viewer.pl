@@ -3,6 +3,8 @@
 #
 # viewer.pl --- Used to view information about bucket probabilities
 #
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
 # ---------------------------------------------------------------------------------------------
 
 use strict;

@@ -4,6 +4,8 @@ package Classifier::WordMangle;
 #
 # WordMangle.pm --- Mangle words for better classification
 #
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
 # ---------------------------------------------------------------------------------------------
 
 use strict;

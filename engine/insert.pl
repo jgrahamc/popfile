@@ -3,6 +3,8 @@
 #
 # insert.pl --- Inserts a mail message into a specific bucket
 #
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
 # ---------------------------------------------------------------------------------------------
 
 use strict;

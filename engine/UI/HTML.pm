@@ -2,6 +2,8 @@
 #
 # This package contains an HTML UI for POPFile
 #
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
 #----------------------------------------------------------------------------
 package UI::HTML;
 
@@ -1901,7 +1903,7 @@ sub history_page
 
         load_history_cache( $self, $self->{form}{filter}, '', $self->{form}{sort}) if ( history_cache_empty( $self ) );
 
-        foreach my $i (keys %{$self->{history_keys}}) {
+        foreach my $i ($self->{history_keys}) {
             my $mail_file = $self->{history}{$i}{file};
             my $class_file = $mail_file;
             $class_file =~ s/msg$/cls/;

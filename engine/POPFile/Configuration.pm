@@ -5,6 +5,8 @@
 # register specific parameters with this module.  This module also handles
 # POPFile's command line parsing
 #
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
 #----------------------------------------------------------------------------
 package POPFile::Configuration;
 

@@ -7,7 +7,7 @@
 # server using POP3.  Inserts an extra header X-Text-Classification: into the mail header to 
 # tell the client whether the mail is spam or not based on a text classification algorithm
 #
-# Originally created by John Graham-Cumming starting in 2001
+# Copyright (c) 2001-2003 John Graham-Cumming
 #
 # ---------------------------------------------------------------------------------------------
 

@@ -3,6 +3,8 @@
 #
 # bayes.pl --- Classify a mail message manually
 #
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
 # ---------------------------------------------------------------------------------------------
 
 use strict;

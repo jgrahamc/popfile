@@ -3,6 +3,8 @@
 #
 # color.pl --- Used to view a colorized email message
 #
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
 # ---------------------------------------------------------------------------------------------
 
 use strict;

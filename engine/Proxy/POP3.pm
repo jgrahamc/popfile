@@ -2,6 +2,8 @@
 #
 # This module handles proxying the POP3 protocol for POPFile. 
 #
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
 # ---------------------------------------------------------------------------------------------
 package Proxy::POP3;
 

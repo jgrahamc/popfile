@@ -4,6 +4,8 @@ package Classifier::MailParse;
 #
 # MailParse.pm --- Parse a mail message or messages into words
 #
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
 # ---------------------------------------------------------------------------------------------
 
 use strict;

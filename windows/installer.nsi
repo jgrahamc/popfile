@@ -1,3 +1,7 @@
+;
+; Copyright (c) 2001-2003 John Graham-Cumming
+;
+
 !define MUI_PRODUCT "POPFile"
 !define MUI_VERSION "0.18"
 

@@ -2,6 +2,8 @@
 #
 # tests.pl  - Unit tests for POPFile
 #
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
 # ---------------------------------------------------------------------------------------------
 
 use Test;

@@ -4,6 +4,8 @@ package Classifier::Bayes;
 #
 # Bayes.pm --- Naive Bayes text classifier
 #
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
 # ---------------------------------------------------------------------------------------------
 
 use strict;

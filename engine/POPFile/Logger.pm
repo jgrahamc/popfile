@@ -3,6 +3,8 @@
 # This module handles POPFile's logger.  It is used to save debugging 
 # information to disk or to send it to the screen.
 #
+# Copyright (c) 2001-2003 John Graham-Cumming
+#
 #----------------------------------------------------------------------------
 package POPFile::Logger;
 
