@@ -89,7 +89,7 @@
     !define MUI_VERSION   "0.20.0 (English)"
   !endif
 
-  !define C_README        "v0.19.0.change"
+  !define C_README        "v0.19.1.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
 
   ; Root directory for the Perl files used to build the installer
@@ -1138,6 +1138,10 @@ Function SetOptionsPage
   Push ${L_PORTLIST}
   Push ${L_RESULT}
 
+  ; Ensure custom page shows the "Shutdown" warning message box.
+  
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Settings" "NumFields" "7"
+  
   IfFileExists "$INSTDIR\popfile.pl" 0 continue
 
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
