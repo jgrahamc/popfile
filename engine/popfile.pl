@@ -105,6 +105,8 @@ my $lastuser = 'none';
 # Used to keep the history information around so that we don't have to reglob every time we hit the
 # history page
 my @history_cache;
+my @from_cache;
+my @subject_cache;
 my $downloaded_mail = 0;
 
 # ---------------------------------------------------------------------------------------------
@@ -1527,6 +1529,9 @@ sub history_page
         }
         
         debug( "Reloaded history cache from disk" );
+            
+        $#from_cache = -1;
+        $#subject_cache = -1;
     }
 
     # Handle the reinsertion of a message file
@@ -1655,62 +1660,75 @@ sub history_page
             my $subject = '';
             $mail_file = $history_cache[$i];
 
-            open MAIL, "<messages/$mail_file";
-            while (<MAIL>) 
+            if ( ( $subject_cache[$i] eq '' ) || ( $from_cache[$i] eq '' ) ) 
             {
-                if ( /^From:(.*)/i )
+                open MAIL, "<messages/$mail_file";
+                while (<MAIL>) 
                 {
-                    if ( $from eq '' ) 
+                    if ( /^From:(.*)/i )
                     {
-                        $from = $1;
-                        $from =~ s/<(.*)>/&lt;$1&gt;/g;
-                        $from =~ s/\"(.*)\"/$1/g;
+                        if ( $from eq '' ) 
+                        {
+                            $from = $1;
+                            $from =~ s/<(.*)>/&lt;$1&gt;/g;
+                            $from =~ s/\"(.*)\"/$1/g;
+                        }
+                    }
+                    if ( /^Subject:(.*)/i )
+                    {
+                        if ( $subject eq '' ) 
+                        {
+                            $subject = $1;
+                            $subject =~ s/<(.*)>/&lt;$1&gt;/g;
+                            $subject =~ s/\"(.*)\"/$1/g;
+                        }
+                    }
+                    if (( $from ne '' ) && ( $subject ne '' ) ) 
+                    {
+                        last;
                     }
                 }
-                if ( /^Subject:(.*)/i )
+                close MAIL;
+
+                if ( $from eq '' ) 
                 {
-                    if ( $subject eq '' ) 
-                    {
-                        $subject = $1;
-                        $subject =~ s/<(.*)>/&lt;$1&gt;/g;
-                        $subject =~ s/\"(.*)\"/$1/g;
-                    }
+                    $from = "&lt;no from line&gt;";
                 }
-                if (( $from ne '' ) && ( $subject ne '' ) ) 
+                if ( !( $subject =~ /[^ \t\r\n]/ ) ) 
                 {
-                    last;
+                    $subject = "&lt;no subject line&gt;";
                 }
-            }
-            close MAIL;
 
-            if ( $from eq '' ) 
+                if ( length($from)>40 ) 
+                {
+                    $from =~ /(.{40})/;
+                    $from = "$1...";
+                }
+
+                $from =~ s/</&lt;/g;
+                $from =~ s/>/&gt;/g;
+
+                if ( length($subject)>40 ) 
+                {
+                    $subject =~ s/=20/ /g;
+                    $subject =~ /(.{40})/;
+                    $subject = "$1...";
+                }
+
+                $subject =~ s/</&lt;/g;
+                $subject =~ s/>/&gt;/g;
+                
+                $from_cache[$i]    = $from;
+                $subject_cache[$i] = $subject;
+                debug( "Got $from and $subject from disk" );
+            } 
+            else
             {
-                $from = "&lt;no from line&gt;";
+                $from    = $from_cache[$i];
+                $subject = $subject_cache[$i]; 
+                debug( "Got $from and $subject from cache" );
             }
-            if ( !( $subject =~ /[^ \t\r\n]/ ) ) 
-            {
-                $subject = "&lt;no subject line&gt;";
-            }
-
-            if ( length($from)>40 ) 
-            {
-                $from =~ /(.{40})/;
-                $from = "$1...";
-            }
-
-            $from =~ s/</&lt;/g;
-            $from =~ s/>/&gt;/g;
-
-            if ( length($subject)>40 ) 
-            {
-                $subject =~ s/=20/ /g;
-                $subject =~ /(.{40})/;
-                $subject = "$1...";
-            }
-
-            $subject =~ s/</&lt;/g;
-            $subject =~ s/>/&gt;/g;
-
+            
             # If the user has more than 4 buckets then we'll present a drop down list of buckets, otherwise we present simple
             # links
             my @buckets = sort keys %{$classifier->{total}};
