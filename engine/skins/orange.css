@@ -19,7 +19,7 @@ body {
 .shell {
     background-color: #ffffcc;
     border: 3px #ff9966 solid;
-	 color: black;
+     color: black;
 }
 
 .head a {
@@ -46,33 +46,33 @@ body {
 
 .rowEven {
     background-color: #ffffcc;
-	 color: black;
+     color: black;
 }
 
 .rowOdd {
     background-color: #ffcc99;
-	 color: black;
+     color: black;
 }
 
 hr {
     color: gray; 
-	 background-color: transparent;
+     background-color: transparent;
 }
 
 table.stabColor01 {
-	border: 1px solid Black;
+    border: 1px solid #ffcc99;
 }
 
 table.stabColor03 {
-	border: 3px solid Black;
+    border: 3px solid #ffcc99;
 }
 
 td.stabColor01 {
-	border: 1px solid Black;
+    border: 1px solid #ffcc99;
 }
 
 td.naked {
-	padding: 0px; 
-	margin: 0px; 
-	border: none
+    padding: 0px; 
+    margin: 0px; 
+    border: none
 }
