@@ -1,8 +1,8 @@
 #--------------------------------------------------------------------------
 #
 # pfi-library.nsi --- This is a collection of library functions and macro
-#                     definitions used by 'installer.nsi', the NSIS script
-#                     used to create the Windows installer for POPFile.
+#                     definitions used by various NSIS scripts used to build
+#                     (and test) the Windows installer for POPFile.
 #
 # Copyright (c) 2001-2004 John Graham-Cumming
 #
@@ -34,12 +34,12 @@
 #
 #--------------------------------------------------------------------------
 
-!macro PFI_UNIQUE_ID
-  !ifdef PFI_UNIQUE_ID
-    !undef PFI_UNIQUE_ID
-  !endif
-  !define PFI_UNIQUE_ID ${__LINE__}
-!macroend
+  !macro PFI_UNIQUE_ID
+    !ifdef PFI_UNIQUE_ID
+      !undef PFI_UNIQUE_ID
+    !endif
+    !define PFI_UNIQUE_ID ${__LINE__}
+  !macroend
 
 #--------------------------------------------------------------------------
 #
@@ -151,31 +151,31 @@
 #
 #--------------------------------------------------------------------------
 
-!macro SafeRecursiveRMDir PATH
-
-  !insertmacro PFI_UNIQUE_ID
-
-  StrCmp ${L_SUBCORPUS} "no" Label_A_${PFI_UNIQUE_ID}
-  Push ${L_CORPUS}
-  Push "${PATH}"
-  Call un.StrStr
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" 0 Label_C_${PFI_UNIQUE_ID}
-
-Label_A_${PFI_UNIQUE_ID}:
-  StrCmp ${L_SUBHISTORY} "no" Label_B_${PFI_UNIQUE_ID}
-  Push ${L_HISTORY}
-  Push "${PATH}"
-  Call un.StrStr
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" 0 Label_C_${PFI_UNIQUE_ID}
-
-Label_B_${PFI_UNIQUE_ID}:
-  RMDir /r "${PATH}"
-
-Label_C_${PFI_UNIQUE_ID}:
-
-!macroend
+  !macro SafeRecursiveRMDir PATH
+  
+    !insertmacro PFI_UNIQUE_ID
+  
+    StrCmp ${L_SUBCORPUS} "no" Label_A_${PFI_UNIQUE_ID}
+    Push ${L_CORPUS}
+    Push "${PATH}"
+    Call un.StrStr
+    Pop ${L_TEMP}
+    StrCmp ${L_TEMP} "" 0 Label_C_${PFI_UNIQUE_ID}
+  
+  Label_A_${PFI_UNIQUE_ID}:
+    StrCmp ${L_SUBHISTORY} "no" Label_B_${PFI_UNIQUE_ID}
+    Push ${L_HISTORY}
+    Push "${PATH}"
+    Call un.StrStr
+    Pop ${L_TEMP}
+    StrCmp ${L_TEMP} "" 0 Label_C_${PFI_UNIQUE_ID}
+  
+  Label_B_${PFI_UNIQUE_ID}:
+    RMDir /r "${PATH}"
+  
+  Label_C_${PFI_UNIQUE_ID}:
+  
+  !macroend
 
 
 #==============================================================================================
@@ -192,61 +192,61 @@ Label_C_${PFI_UNIQUE_ID}:
 #==============================================================================================
 
 !ifndef TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Installer Function: GetFileSize
-  #
-  # Returns the size (in bytes) of the filename passed on the stack
-  # (if file not found, returns -1)
-  #
-  # Inputs:
-  #         (top of stack)     - filename of file to be checked
-  # Outputs:
-  #         (top of stack)     - length of the file (in bytes)
-  #                              or '-1' if file not found
-  #                              or '-2' if error occurred
-  #
-  # Usage:
-  #         Push "corpus\spam\table"
-  #         Call GetFileSize
-  #         Pop $R0
-  #
-  #         ($R0 now holds the size (in bytes) of the 'spam' bucket's 'table' file)
-  #
-  #--------------------------------------------------------------------------
-
-  Function GetFileSize
-
-    !define L_FILENAME  $R9
-    !define L_RESULT    $R8
-
-    Exch ${L_FILENAME}
-    Push ${L_RESULT}
-    Exch
-
-    IfFileExists ${L_FILENAME} find_size
-    StrCpy ${L_RESULT} "-1"
-    Goto exit
-
-  find_size:
-    ClearErrors
-    FileOpen ${L_RESULT} ${L_FILENAME} r
-    FileSeek ${L_RESULT} 0 END ${L_FILENAME}
-    FileClose ${L_RESULT}
-    IfErrors 0 return_size
-    StrCpy ${L_RESULT} "-2"
-    Goto exit
-
-  return_size:
-    StrCpy ${L_RESULT} ${L_FILENAME}
-
-  exit:
-    Pop ${L_FILENAME}
-    Exch ${L_RESULT}
-
-    !undef L_FILENAME
-    !undef L_RESULT
-
-  FunctionEnd
+    #--------------------------------------------------------------------------
+    # Installer Function: GetFileSize
+    #
+    # Returns the size (in bytes) of the filename passed on the stack
+    # (if file not found, returns -1)
+    #
+    # Inputs:
+    #         (top of stack)     - filename of file to be checked
+    # Outputs:
+    #         (top of stack)     - length of the file (in bytes)
+    #                              or '-1' if file not found
+    #                              or '-2' if error occurred
+    #
+    # Usage:
+    #         Push "corpus\spam\table"
+    #         Call GetFileSize
+    #         Pop $R0
+    #
+    #         ($R0 now holds the size (in bytes) of the 'spam' bucket's 'table' file)
+    #
+    #--------------------------------------------------------------------------
+    
+    Function GetFileSize
+    
+      !define L_FILENAME  $R9
+      !define L_RESULT    $R8
+    
+      Exch ${L_FILENAME}
+      Push ${L_RESULT}
+      Exch
+    
+      IfFileExists ${L_FILENAME} find_size
+      StrCpy ${L_RESULT} "-1"
+      Goto exit
+    
+    find_size:
+      ClearErrors
+      FileOpen ${L_RESULT} ${L_FILENAME} r
+      FileSeek ${L_RESULT} 0 END ${L_FILENAME}
+      FileClose ${L_RESULT}
+      IfErrors 0 return_size
+      StrCpy ${L_RESULT} "-2"
+      Goto exit
+    
+    return_size:
+      StrCpy ${L_RESULT} ${L_FILENAME}
+    
+    exit:
+      Pop ${L_FILENAME}
+      Exch ${L_RESULT}
+    
+      !undef L_FILENAME
+      !undef L_RESULT
+    
+    FunctionEnd
 !endif
 
 
@@ -356,277 +356,271 @@ Label_C_${PFI_UNIQUE_ID}:
 !endif
 
 
-!ifndef ADDUSER & TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Installer Function: GetParameters
-  #
-  # Returns the command-line parameters (if any) supplied when the installer was started
-  #
-  # Inputs:
-  #         none
-  # Outputs:
-  #         (top of stack)     - all of the parameters supplied on the command line (may be "")
-  #
-  # Usage:
-  #         Call GetParameters
-  #         Pop $R0
-  #
-  #         (if 'setup.exe /outlook' was used to start the installer, $R0 will hold '/outlook')
-  #
-  #--------------------------------------------------------------------------
-
-  Function GetParameters
-
-    Push $R0
-    Push $R1
-    Push $R2
-    Push $R3
-
-    StrCpy $R2 1
-    StrLen $R3 $CMDLINE
-
-    ; Check for quote or space
-
-    StrCpy $R0 $CMDLINE $R2
-    StrCmp $R0 '"' 0 +3
-    StrCpy $R1 '"'
-    Goto loop
-
-    StrCpy $R1 " "
-
-  loop:
-    IntOp $R2 $R2 + 1
-    StrCpy $R0 $CMDLINE 1 $R2
-    StrCmp $R0 $R1 get
-    StrCmp $R2 $R3 get
-    Goto loop
-
-  get:
-    IntOp $R2 $R2 + 1
-    StrCpy $R0 $CMDLINE 1 $R2
-    StrCmp $R0 " " get
-    StrCpy $R0 $CMDLINE "" $R2
-
-    Pop $R3
-    Pop $R2
-    Pop $R1
-    Exch $R0
-
-  FunctionEnd
+!ifndef ADDUSER
+    #--------------------------------------------------------------------------
+    # Installer Function: GetParameters
+    #
+    # Returns the command-line parameters (if any) supplied when the installer was started
+    #
+    # Inputs:
+    #         none
+    # Outputs:
+    #         (top of stack)     - all of the parameters supplied on the command line (may be "")
+    #
+    # Usage:
+    #         Call GetParameters
+    #         Pop $R0
+    #
+    #         (if 'setup.exe /outlook' was used to start the installer, $R0 will hold '/outlook')
+    #
+    #--------------------------------------------------------------------------
+    
+    Function GetParameters
+    
+      Push $R0
+      Push $R1
+      Push $R2
+      Push $R3
+    
+      StrCpy $R2 1
+      StrLen $R3 $CMDLINE
+    
+      ; Check for quote or space
+    
+      StrCpy $R0 $CMDLINE $R2
+      StrCmp $R0 '"' 0 +3
+      StrCpy $R1 '"'
+      Goto loop
+    
+      StrCpy $R1 " "
+    
+    loop:
+      IntOp $R2 $R2 + 1
+      StrCpy $R0 $CMDLINE 1 $R2
+      StrCmp $R0 $R1 get
+      StrCmp $R2 $R3 get
+      Goto loop
+    
+    get:
+      IntOp $R2 $R2 + 1
+      StrCpy $R0 $CMDLINE 1 $R2
+      StrCmp $R0 " " get
+      StrCpy $R0 $CMDLINE "" $R2
+    
+      Pop $R3
+      Pop $R2
+      Pop $R1
+      Exch $R0
+    
+    FunctionEnd
 !endif
 
 
-#--------------------------------------------------------------------------
-# Installer Function: GetSeparator
-#
-# Returns the character to be used as the separator when configuring an e-mail account.
-# If the character is not defined in popfile.cfg, the default separator (':') is returned
-#
-# Inputs:
-#         none
-# Outputs:
-#         (top of stack)     - character to be used as the separator
-#
-# Usage:
-#         Call GetSeparator
-#         Pop $R0
-#
-#         ($R0 at this point is ":" unless popfile.cfg has altered the default setting)
-#
-#--------------------------------------------------------------------------
-
-Function GetSeparator
-
-  !define L_CFG         $R9   ; file handle
-  !define L_LNE         $R8   ; a line from the popfile.cfg file
-  !define L_PARAM       $R7
-  !define L_SEPARATOR   $R6   ; character used to separate the pop3 server from the username
-
-  Push ${L_SEPARATOR}
-  Push ${L_CFG}
-  Push ${L_LNE}
-  Push ${L_PARAM}
-
-  StrCpy ${L_SEPARATOR} ""
-
-  ClearErrors
-
-  FileOpen  ${L_CFG} "$G_USERDIR\popfile.cfg" r
-
-loop:
-  FileRead   ${L_CFG} ${L_LNE}
-  IfErrors separator_done
-
-  StrCpy ${L_PARAM} ${L_LNE} 10
-  StrCmp ${L_PARAM} "separator " old_separator
-  StrCpy ${L_PARAM} ${L_LNE} 15
-  StrCmp ${L_PARAM} "pop3_separator " new_separator
-  Goto loop
-
-old_separator:
-  StrCpy ${L_SEPARATOR} ${L_LNE} 1 10
-  Goto loop
-
-new_separator:
-  StrCpy ${L_SEPARATOR} ${L_LNE} 1 15
-  Goto loop
-
-separator_done:
-  FileClose ${L_CFG}
-  StrCmp ${L_SEPARATOR} "" default
-  StrCmp ${L_SEPARATOR} "$\r" default
-  StrCmp ${L_SEPARATOR} "$\n" 0 exit
-
-default:
-  StrCpy ${L_SEPARATOR} ":"
-
-exit:
-  Pop ${L_PARAM}
-  Pop ${L_LNE}
-  Pop ${L_CFG}
-  Exch ${L_SEPARATOR}
-
-  !undef L_CFG
-  !undef L_LNE
-  !undef L_PARAM
-  !undef L_SEPARATOR
-
-FunctionEnd
+!ifndef TRANSLATOR
+    #--------------------------------------------------------------------------
+    # Installer Function: GetSeparator
+    #
+    # Returns the character to be used as the separator when configuring an e-mail account.
+    # If the character is not defined in popfile.cfg, the default separator (':') is returned
+    #
+    # Inputs:
+    #         none
+    # Outputs:
+    #         (top of stack)     - character to be used as the separator
+    #
+    # Usage:
+    #         Call GetSeparator
+    #         Pop $R0
+    #
+    #         ($R0 at this point is ":" unless popfile.cfg has altered the default setting)
+    #
+    #--------------------------------------------------------------------------
+    
+    Function GetSeparator
+    
+      !define L_CFG         $R9   ; file handle
+      !define L_LNE         $R8   ; a line from the popfile.cfg file
+      !define L_PARAM       $R7
+      !define L_SEPARATOR   $R6   ; character used to separate the pop3 server from the username
+    
+      Push ${L_SEPARATOR}
+      Push ${L_CFG}
+      Push ${L_LNE}
+      Push ${L_PARAM}
+    
+      StrCpy ${L_SEPARATOR} ""
+    
+      ClearErrors
+    
+      FileOpen  ${L_CFG} "$G_USERDIR\popfile.cfg" r
+    
+    loop:
+      FileRead   ${L_CFG} ${L_LNE}
+      IfErrors separator_done
+    
+      StrCpy ${L_PARAM} ${L_LNE} 10
+      StrCmp ${L_PARAM} "separator " old_separator
+      StrCpy ${L_PARAM} ${L_LNE} 15
+      StrCmp ${L_PARAM} "pop3_separator " new_separator
+      Goto loop
+    
+    old_separator:
+      StrCpy ${L_SEPARATOR} ${L_LNE} 1 10
+      Goto loop
+    
+    new_separator:
+      StrCpy ${L_SEPARATOR} ${L_LNE} 1 15
+      Goto loop
+    
+    separator_done:
+      FileClose ${L_CFG}
+      StrCmp ${L_SEPARATOR} "" default
+      StrCmp ${L_SEPARATOR} "$\r" default
+      StrCmp ${L_SEPARATOR} "$\n" 0 exit
+    
+    default:
+      StrCpy ${L_SEPARATOR} ":"
+    
+    exit:
+      Pop ${L_PARAM}
+      Pop ${L_LNE}
+      Pop ${L_CFG}
+      Exch ${L_SEPARATOR}
+    
+      !undef L_CFG
+      !undef L_LNE
+      !undef L_PARAM
+      !undef L_SEPARATOR
+    
+    FunctionEnd
+!endif
 
 
 !ifndef TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Installer Function: SetConsoleMode
-  #
-  # Used to set required console mode in 'popfile.cfg'
-  #
-  # Inputs:
-  #         (top of stack)     - required console mode (0 = disabled, 1 = enabled)
-  #
-  # Outputs:
-  #         none
-  #
-  # Usage:
-  #         Push "1"
-  #         Call SetConsoleMode
-  #
-  #--------------------------------------------------------------------------
-
-  Function SetConsoleMode
-
-    !define L_NEW_CFG     $R9   ; file handle used for clean copy
-    !define L_OLD_CFG     $R8   ; file handle for old version
-    !define L_LNE         $R7   ; a line from the popfile.cfg file
-    !define L_MODE        $R6   ; new console mode
-    !define L_PARAM       $R5
-
-    Exch ${L_MODE}
-    Push ${L_NEW_CFG}
-    Push ${L_OLD_CFG}
-    Push ${L_LNE}
-    Push ${L_PARAM}
-
-    ClearErrors
-    FileOpen  ${L_OLD_CFG} "$G_USERDIR\popfile.cfg" r
-    FileOpen  ${L_NEW_CFG} "$PLUGINSDIR\new.cfg" w
-
-  loop:
-    FileRead   ${L_OLD_CFG} ${L_LNE}
-    IfErrors copy_done
-
-    StrCpy ${L_PARAM} ${L_LNE} 16
-    StrCmp ${L_PARAM} "windows_console " got_console
-    FileWrite ${L_NEW_CFG} ${L_LNE}
-    Goto loop
-
-  got_console:
-    FileWrite ${L_NEW_CFG} "windows_console ${L_MODE}$\r$\n"
-    Goto loop
-
-  copy_done:
-    FileClose ${L_OLD_CFG}
-    FileClose ${L_NEW_CFG}
-
-    Delete "$G_USERDIR\popfile.cfg"
-    Rename "$PLUGINSDIR\new.cfg" "$G_USERDIR\popfile.cfg"
-
-    Pop ${L_PARAM}
-    Pop ${L_LNE}
-    Pop ${L_OLD_CFG}
-    Pop ${L_NEW_CFG}
-    Pop ${L_MODE}
-
-    !undef L_NEW_CFG
-    !undef L_OLD_CFG
-    !undef L_LNE
-    !undef L_MODE
-    !undef L_PARAM
-
-  FunctionEnd
+    #--------------------------------------------------------------------------
+    # Installer Function: SetConsoleMode
+    #
+    # Used to set required console mode in 'popfile.cfg'
+    #
+    # Inputs:
+    #         (top of stack)     - required console mode (0 = disabled, 1 = enabled)
+    #
+    # Outputs:
+    #         none
+    #
+    # Usage:
+    #         Push "1"
+    #         Call SetConsoleMode
+    #
+    #--------------------------------------------------------------------------
+    
+    Function SetConsoleMode
+    
+      !define L_NEW_CFG     $R9   ; file handle used for clean copy
+      !define L_OLD_CFG     $R8   ; file handle for old version
+      !define L_LNE         $R7   ; a line from the popfile.cfg file
+      !define L_MODE        $R6   ; new console mode
+      !define L_PARAM       $R5
+    
+      Exch ${L_MODE}
+      Push ${L_NEW_CFG}
+      Push ${L_OLD_CFG}
+      Push ${L_LNE}
+      Push ${L_PARAM}
+    
+      ClearErrors
+      FileOpen  ${L_OLD_CFG} "$G_USERDIR\popfile.cfg" r
+      FileOpen  ${L_NEW_CFG} "$PLUGINSDIR\new.cfg" w
+    
+    loop:
+      FileRead   ${L_OLD_CFG} ${L_LNE}
+      IfErrors copy_done
+    
+      StrCpy ${L_PARAM} ${L_LNE} 16
+      StrCmp ${L_PARAM} "windows_console " got_console
+      FileWrite ${L_NEW_CFG} ${L_LNE}
+      Goto loop
+    
+    got_console:
+      FileWrite ${L_NEW_CFG} "windows_console ${L_MODE}$\r$\n"
+      Goto loop
+    
+    copy_done:
+      FileClose ${L_OLD_CFG}
+      FileClose ${L_NEW_CFG}
+    
+      Delete "$G_USERDIR\popfile.cfg"
+      Rename "$PLUGINSDIR\new.cfg" "$G_USERDIR\popfile.cfg"
+    
+      Pop ${L_PARAM}
+      Pop ${L_LNE}
+      Pop ${L_OLD_CFG}
+      Pop ${L_NEW_CFG}
+      Pop ${L_MODE}
+    
+      !undef L_NEW_CFG
+      !undef L_OLD_CFG
+      !undef L_LNE
+      !undef L_MODE
+      !undef L_PARAM
+    
+    FunctionEnd
 !endif
 
 
-#--------------------------------------------------------------------------
-# Installer Function: StrStripLZS
-#
-# Strips any combination of leading zeroes and spaces from a string.
-#
-# Inputs:
-#         (top of stack)     - string to be processed
-# Outputs:
-#         (top of stack)     - processed string (with no leading zeroes or spaces)
-#
-# Usage:
-#         Push "  123"        ; the strings "000123" or " 0 0 0123" will give same result
-#         Call StrStripLZS
-#         Pop $R0
-#
-#         ($R0 at this point is "123")
-#
-#--------------------------------------------------------------------------
-
-Function StrStripLZS
-
-  !define L_CHAR      $R9
-  !define L_STRING    $R8
-
-  Exch ${L_STRING}
-  Push ${L_CHAR}
-
-loop:
-  StrCpy ${L_CHAR} ${L_STRING} 1
-  StrCmp ${L_CHAR} "" done
-  StrCmp ${L_CHAR} " " strip_char
-  StrCmp ${L_CHAR} "0" strip_char
-  Goto done
-
-strip_char:
-  StrCpy ${L_STRING} ${L_STRING} "" 1
-  Goto loop
-
-done:
-  Pop ${L_CHAR}
-  Exch ${L_STRING}
-
-  !undef L_CHAR
-  !undef L_STRING
-
-FunctionEnd
+!ifndef TRANSLATOR
+    #--------------------------------------------------------------------------
+    # Installer Function: StrStripLZS
+    #
+    # Strips any combination of leading zeroes and spaces from a string.
+    #
+    # Inputs:
+    #         (top of stack)     - string to be processed
+    # Outputs:
+    #         (top of stack)     - processed string (with no leading zeroes or spaces)
+    #
+    # Usage:
+    #         Push "  123"        ; the strings "000123" or " 0 0 0123" will give same result
+    #         Call StrStripLZS
+    #         Pop $R0
+    #
+    #         ($R0 at this point is "123")
+    #
+    #--------------------------------------------------------------------------
+    
+    Function StrStripLZS
+    
+      !define L_CHAR      $R9
+      !define L_STRING    $R8
+    
+      Exch ${L_STRING}
+      Push ${L_CHAR}
+    
+    loop:
+      StrCpy ${L_CHAR} ${L_STRING} 1
+      StrCmp ${L_CHAR} "" done
+      StrCmp ${L_CHAR} " " strip_char
+      StrCmp ${L_CHAR} "0" strip_char
+      Goto done
+    
+    strip_char:
+      StrCpy ${L_STRING} ${L_STRING} "" 1
+      Goto loop
+    
+    done:
+      Pop ${L_CHAR}
+      Exch ${L_STRING}
+    
+      !undef L_CHAR
+      !undef L_STRING
+    
+    FunctionEnd
+!endif
 
 
 #==============================================================================================
 #
 # Macro-based Functions used by the installer and by the uninstaller (in alphabetic order)
-#
-#   ;-----------------------------------------------------------------------------------------
-#   ; 'GetLocalTime' is used by other time-related macros, so it must be defined before them
-#   ;-----------------------------------------------------------------------------------------
-#
-#    Macro:                GetLocalTime
-#    Installer Function:   GetLocalTime
-#    Uninstaller Function: un.GetLocalTime
-#
-#   ;-----------------------------------------------------------------------------------------
 #
 #    Macro:                CheckIfLocked
 #    Installer Function:   CheckIfLocked
@@ -648,6 +642,10 @@ FunctionEnd
 #    Installer Function:   GetTimeStamp
 #    Uninstaller Function: un.GetTimeStamp
 #
+#    Macro:                GetLocalTime
+#    Installer Function:   GetLocalTime
+#    Uninstaller Function: un.GetLocalTime
+#
 #    Macro:                GetParent
 #    Installer Function:   GetParent
 #    Uninstaller Function: un.GetParent
@@ -655,6 +653,10 @@ FunctionEnd
 #    Macro:                GetTimeStamp
 #    Installer Function:   GetTimeStamp
 #    Uninstaller Function: un.GetTimeStamp
+#
+#    Macro:                ShutdownViaUI
+#    Installer Function:   ShutdownViaUI
+#    Uninstaller Function: un.ShutdownViaUI
 #
 #    Macro:                StrBackSlash
 #    Installer Function:   StrBackSlash
@@ -677,113 +679,6 @@ FunctionEnd
 #    Uninstaller Function: un.WaitUntilUnlocked
 #
 #==============================================================================================
-
-
-#--------------------------------------------------------------------------
-# Macro: GetLocalTime
-#
-# The installation process and the uninstall process may need a function which gets the
-# local time from Windows (to generate data and/or time stamps, etc). This macro makes
-# maintenance easier by ensuring that both processes use identical functions, with
-# the only difference being their names.
-#
-# Normally this function will be used by a higher level one which returns a suitable string.
-#
-# NOTE:
-# The !insertmacro GetLocalTime "" and !insertmacro GetLocalTime "un." commands are included
-# in this file so 'installer.nsi' and/or other library functions in 'pfi-library.nsh' can use
-# 'Call GetLocalTime' and 'Call un.GetLocalTime' without additional preparation.
-#
-# Inputs:
-#         (none)
-# Outputs:
-#         (top of stack)     - year         (4-digits)
-#         (top of stack - 1) - month        (1 to 12)
-#         (top of stack - 2) - day of week  (0 = Sunday, 6 = Saturday)
-#         (top of stack - 3) - day          (1 - 31)
-#         (top of stack - 4) - hours        (0 - 23)
-#         (top of stack - 5) - minutes      (0 - 59)
-#         (top of stack - 6) - seconds      (0 - 59)
-#         (top of stack - 7) - milliseconds (0 - 999)
-#
-#  Usage (after macro has been 'inserted'):
-#
-#         Call GetLocalTime
-#         Pop $Year
-#         Pop $Month
-#         Pop $DayOfWeek
-#         Pop $Day
-#         Pop $Hours
-#         Pop $Minutes
-#         Pop $Seconds
-#         Pop $Milliseconds
-#--------------------------------------------------------------------------
-
-!macro GetLocalTime UN
-  Function ${UN}GetLocalTime
-
-    # Preparing Variables
-
-    Push $1
-    Push $2
-    Push $3
-    Push $4
-    Push $5
-    Push $6
-    Push $7
-    Push $8
-
-    # Calling the Function GetLocalTime from Kernel32.dll
-
-    System::Call '*(&i2, &i2, &i2, &i2, &i2, &i2, &i2, &i2) i .r1'
-    System::Call 'kernel32::GetLocalTime(i) i(r1)'
-    System::Call '*$1(&i2, &i2, &i2, &i2, &i2, &i2, &i2, &i2)(.r8, .r7, .r6, .r5, .r4, .r3, .r2, .r1)'
-
-    # Returning to User
-
-    Exch $8
-    Exch
-    Exch $7
-    Exch
-    Exch 2
-    Exch $6
-    Exch 2
-    Exch 3
-    Exch $5
-    Exch 3
-    Exch 4
-    Exch $4
-    Exch 4
-    Exch 5
-    Exch $3
-    Exch 5
-    Exch 6
-    Exch $2
-    Exch 6
-    Exch 7
-    Exch $1
-    Exch 7
-
-  FunctionEnd
-!macroend
-
-#--------------------------------------------------------------------------
-# Installer Function: GetLocalTime
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-!insertmacro GetLocalTime ""
-
-!ifndef TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Uninstaller Function: un.GetLocalTime
-  #
-  # This function is used during the uninstall process
-  #--------------------------------------------------------------------------
-
-  !insertmacro GetLocalTime "un."
-!endif
 
 
 #--------------------------------------------------------------------------
@@ -851,13 +746,13 @@ FunctionEnd
 !endif
 
 !ifndef TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Uninstaller Function: un.CheckIfLocked
-  #
-  # This function is used during the uninstall process
-  #--------------------------------------------------------------------------
-
-  !insertmacro CheckIfLocked "un."
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.CheckIfLocked
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
+  
+    !insertmacro CheckIfLocked "un."
 !endif
 
 
@@ -980,13 +875,13 @@ FunctionEnd
 !macroend
 
 !ifndef TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Installer Function: GetCorpusPath
-  #
-  # This function is used during the installation process
-  #--------------------------------------------------------------------------
-
-  !insertmacro GetCorpusPath ""
+    #--------------------------------------------------------------------------
+    # Installer Function: GetCorpusPath
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro GetCorpusPath ""
 !endif
 
 #--------------------------------------------------------------------------
@@ -1130,13 +1025,13 @@ FunctionEnd
 !macroend
 
 !ifndef TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Installer Function: GetDataPath
-  #
-  # This function is used during the installation process
-  #--------------------------------------------------------------------------
-
-  !insertmacro GetDataPath ""
+    #--------------------------------------------------------------------------
+    # Installer Function: GetDataPath
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro GetDataPath ""
 !endif
 
 #--------------------------------------------------------------------------
@@ -1416,22 +1311,133 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-#--------------------------------------------------------------------------
-# Installer Function: GetDateTimeStamp
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-!insertmacro GetDateTimeStamp ""
+!ifndef TRANSLATOR
+    #--------------------------------------------------------------------------
+    # Installer Function: GetDateTimeStamp
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro GetDateTimeStamp ""
+!endif
 
 !ifndef TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Uninstaller Function: un.GetDateTimeStamp
-  #
-  # This function is used during the uninstall process
-  #--------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.GetDateTimeStamp
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro GetDateTimeStamp "un."
+!endif
 
-  !insertmacro GetDateTimeStamp "un."
+
+#--------------------------------------------------------------------------
+# Macro: GetLocalTime
+#
+# The installation process and the uninstall process may need a function which gets the
+# local time from Windows (to generate data and/or time stamps, etc). This macro makes
+# maintenance easier by ensuring that both processes use identical functions, with
+# the only difference being their names.
+#
+# Normally this function will be used by a higher level one which returns a suitable string.
+#
+# NOTE:
+# The !insertmacro GetLocalTime "" and !insertmacro GetLocalTime "un." commands are included
+# in this file so 'installer.nsi' and/or other library functions in 'pfi-library.nsh' can use
+# 'Call GetLocalTime' and 'Call un.GetLocalTime' without additional preparation.
+#
+# Inputs:
+#         (none)
+# Outputs:
+#         (top of stack)     - year         (4-digits)
+#         (top of stack - 1) - month        (1 to 12)
+#         (top of stack - 2) - day of week  (0 = Sunday, 6 = Saturday)
+#         (top of stack - 3) - day          (1 - 31)
+#         (top of stack - 4) - hours        (0 - 23)
+#         (top of stack - 5) - minutes      (0 - 59)
+#         (top of stack - 6) - seconds      (0 - 59)
+#         (top of stack - 7) - milliseconds (0 - 999)
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Call GetLocalTime
+#         Pop $Year
+#         Pop $Month
+#         Pop $DayOfWeek
+#         Pop $Day
+#         Pop $Hours
+#         Pop $Minutes
+#         Pop $Seconds
+#         Pop $Milliseconds
+#--------------------------------------------------------------------------
+
+!macro GetLocalTime UN
+  Function ${UN}GetLocalTime
+
+    # Preparing Variables
+
+    Push $1
+    Push $2
+    Push $3
+    Push $4
+    Push $5
+    Push $6
+    Push $7
+    Push $8
+
+    # Calling the Function GetLocalTime from Kernel32.dll
+
+    System::Call '*(&i2, &i2, &i2, &i2, &i2, &i2, &i2, &i2) i .r1'
+    System::Call 'kernel32::GetLocalTime(i) i(r1)'
+    System::Call '*$1(&i2, &i2, &i2, &i2, &i2, &i2, &i2, &i2)(.r8, .r7, .r6, .r5, .r4, .r3, .r2, .r1)'
+
+    # Returning to User
+
+    Exch $8
+    Exch
+    Exch $7
+    Exch
+    Exch 2
+    Exch $6
+    Exch 2
+    Exch 3
+    Exch $5
+    Exch 3
+    Exch 4
+    Exch $4
+    Exch 4
+    Exch 5
+    Exch $3
+    Exch 5
+    Exch 6
+    Exch $2
+    Exch 6
+    Exch 7
+    Exch $1
+    Exch 7
+
+  FunctionEnd
+!macroend
+
+!ifndef TRANSLATOR
+    #--------------------------------------------------------------------------
+    # Installer Function: GetLocalTime
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro GetLocalTime ""
+!endif
+
+!ifndef TRANSLATOR & TRANSLATOR_AUW
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.GetLocalTime
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro GetLocalTime "un."
 !endif
 
 
@@ -1493,13 +1499,13 @@ FunctionEnd
 !macroend
 
 !ifndef TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Installer Function: GetParent
-  #
-  # This function is used during the installation process
-  #--------------------------------------------------------------------------
-
-  !insertmacro GetParent ""
+    #--------------------------------------------------------------------------
+    # Installer Function: GetParent
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro GetParent ""
 !endif
 
 #--------------------------------------------------------------------------
@@ -1602,6 +1608,110 @@ FunctionEnd
 
 
 #--------------------------------------------------------------------------
+# Macro: ShutdownViaUI
+#
+# The installation process and the uninstall process both use a function which attempts to
+# shutdown POPFile using the User Interface (UI) invisibly (i.e. no browser window is used).
+# This macro makes maintenance easier by ensuring that both processes use identical functions,
+# with the only difference being their names.
+#
+# To avoid the need to parse the HTML page downloaded by NSISdl, we call NSISdl again if the
+# first call succeeds. If the second call succeeds, we assume the UI is password protected.
+# As a debugging aid, we don't overwrite the first HTML file with the result of the second call.
+#
+# NOTE:
+# The !insertmacro ShutdownViaUI "" and !insertmacro ShutdownViaUI "un." commands are included
+# in this file so 'installer.nsi' can use 'Call ShutdownViaUI' and 'Call un.ShutdownViaUI'
+# without additional preparation.
+#
+# Inputs:
+#         (top of stack)            - UI port to be used when issuing the shutdown request
+#
+# Outputs:
+#         (top of stack)            - string containing one of the following result codes:
+#                                     (a) success   - UI shutdown request appeared to work
+#                                     (b) failure   - UI shutdown request failed
+#                                     (c) password? - failure: UI may be password protected
+#                                     (d) badport   - failure: invalid UI port supplied
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Push "8080"
+#         Call ShutdownViaUI
+#         Pop $R0
+#
+#         (if $R0 at this point is "password?" then POPFile is still running)
+#
+#--------------------------------------------------------------------------
+
+!macro ShutdownViaUI UN
+  Function ${UN}ShutdownViaUI
+  
+    !define L_RESULT    $R9
+    !define L_UIPORT    $R8
+    
+    Exch ${L_UIPORT}
+    Push ${L_RESULT}
+    Exch
+    
+    StrCmp ${L_UIPORT} "" badport
+    Push ${L_UIPORT}
+    Call  ${UN}StrCheckDecimal
+    Pop ${L_UIPORT}
+    StrCmp ${L_UIPORT} "" badport
+    IntCmp ${L_UIPORT} 1 port_ok badport
+    IntCmp ${L_UIPORT} 65535 port_ok port_ok
+  
+  badport:
+    StrCpy ${L_RESULT} "badport"
+    Goto exit
+    
+  port_ok:
+    NSISdl::download_quiet http://127.0.0.1:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_1.htm"
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "success" try_again
+    StrCpy ${L_RESULT} "failure"
+    Goto exit
+  
+  try_again:
+    Sleep 3000
+    NSISdl::download_quiet http://127.0.0.1:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_2.htm"
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "success" password
+    StrCpy ${L_RESULT} "success"
+    Goto exit
+  
+  password:
+    StrCpy ${L_RESULT} "password?"
+  
+  exit:
+    Pop ${L_UIPORT}
+    Exch ${L_RESULT}
+      
+    !undef L_RESULT
+    !undef L_UIPORT
+  
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: ShutdownViaUI
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+;!insertmacro ShutdownViaUI ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.ShutdownViaUI
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro ShutdownViaUI "un."
+
+
+#--------------------------------------------------------------------------
 # Macro: StrBackSlash
 #
 # The installation process and the uninstall process both use a function which converts all
@@ -1625,7 +1735,7 @@ FunctionEnd
 #         Call StrBackSlash
 #         Pop $R0
 #
-#         ($R0 at this point is ""C:\Program Files\Directory\Whatever")
+#         ($R0 at this point is "C:\Program Files\Directory\Whatever")
 #
 #--------------------------------------------------------------------------
 
@@ -1660,13 +1770,13 @@ FunctionEnd
 !macroend
 
 !ifndef TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Installer Function: StrBackSlash
-  #
-  # This function is used during the installation process
-  #--------------------------------------------------------------------------
-
-  !insertmacro StrBackSlash ""
+    #--------------------------------------------------------------------------
+    # Installer Function: StrBackSlash
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro StrBackSlash ""
 !endif
 
 #--------------------------------------------------------------------------
@@ -1676,6 +1786,7 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 ;!insertmacro StrBackSlash "un."
+
 
 #--------------------------------------------------------------------------
 # Macro: StrCheckDecimal
@@ -1753,22 +1864,24 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-#--------------------------------------------------------------------------
-# Installer Function: StrCheckDecimal
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-!insertmacro StrCheckDecimal ""
+!ifndef TRANSLATOR
+    #--------------------------------------------------------------------------
+    # Installer Function: StrCheckDecimal
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro StrCheckDecimal ""
+!endif
 
 !ifndef TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Uninstaller Function: un.StrCheckDecimal
-  #
-  # This function is used during the uninstall process
-  #--------------------------------------------------------------------------
-
-  !insertmacro StrCheckDecimal "un."
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.StrCheckDecimal
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
+  
+    !insertmacro StrCheckDecimal "un."
 !endif
 
 
@@ -1834,22 +1947,24 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-#--------------------------------------------------------------------------
-# Installer Function: StrStr
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
-
-!insertmacro StrStr ""
+!ifndef TRANSLATOR
+    #--------------------------------------------------------------------------
+    # Installer Function: StrStr
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro StrStr ""
+!endif
 
 !ifndef ADDUSER & TRANSLATOR & TRANSLATOR_AUW
-      #--------------------------------------------------------------------------
-      # Uninstaller Function: un.StrStr
-      #
-      # This function is used during the uninstall process
-      #--------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.StrStr
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
 
-       !insertmacro StrStr "un."
+    !insertmacro StrStr "un."
 !endif
 
 
@@ -1903,21 +2018,23 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-#--------------------------------------------------------------------------
-# Installer Function: TrimNewlines
-#
-# This function is used during the installation process
-#--------------------------------------------------------------------------
+!ifndef TRANSLATOR_AUW
+    #--------------------------------------------------------------------------
+    # Installer Function: TrimNewlines
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro TrimNewlines ""
 
-!insertmacro TrimNewlines ""
-
-#--------------------------------------------------------------------------
-# Uninstaller Function: un.TrimNewlines
-#
-# This function is used during the uninstall process
-#--------------------------------------------------------------------------
-
-!insertmacro TrimNewlines "un."
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.TrimNewlines
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
+    
+    !insertmacro TrimNewlines "un."
+!endif
 
 
 #--------------------------------------------------------------------------
@@ -1978,21 +2095,21 @@ FunctionEnd
 !macroend
 
 !ifndef TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Installer Function: WaitUntilUnlocked
-  #
-  # This function is used during the installation process
-  #--------------------------------------------------------------------------
-
-  !insertmacro WaitUntilUnlocked ""
-
-  #--------------------------------------------------------------------------
-  # Uninstaller Function: un.WaitUntilUnlocked
-  #
-  # This function is used during the uninstall process
-  #--------------------------------------------------------------------------
-
-  !insertmacro WaitUntilUnlocked "un."
+    #--------------------------------------------------------------------------
+    # Installer Function: WaitUntilUnlocked
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+  
+    !insertmacro WaitUntilUnlocked ""
+  
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.WaitUntilUnlocked
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
+  
+    !insertmacro WaitUntilUnlocked "un."
 !endif
 
 #--------------------------------------------------------------------------
