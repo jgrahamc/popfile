@@ -44,7 +44,7 @@ sub new
 
     # Hash used to store form parameters
 
-    $self->{form__}            = {};
+    $self->{form__}            = {};    
 
     # Session key to make the UI safer
 
@@ -2573,10 +2573,9 @@ sub history_page
     # pressed. This compares values in some fields and sets the button-values as
     # though they had been pressed
     
-    # Set setsearch if search changed and setsearch is undefined
-    my $old_search;
-    $self->{form__}{setsearch} = 'on' if ( ( ( !defined($old_search) && defined $self->{form__}{search} ) || ( defined($old_search) && ( $old_search ne $self->{form__}{search} ) ) ) && !defined($self->{form__}{setsearch} ) );
-    $old_search = $self->{form__}{search} if ( defined($self->{form__}{search}) );
+    # Set setsearch if search changed and setsearch is undefined    
+    $self->{form__}{setsearch} = 'on' if ( ( ( !defined($self->{old_search__}) && defined $self->{form__}{search} ) || ( defined($self->{old_search__}) && ( $self->{old_search__} ne $self->{form__}{search} ) ) ) && !defined($self->{form__}{setsearch} ) );
+    $self->{old_search__} = $self->{form__}{search} if ( defined($self->{form__}{search}) );
 
 
     # If the user is asking for a new sort option then it needs to get
