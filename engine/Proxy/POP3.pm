@@ -185,9 +185,14 @@ sub child__
 
     # Compile some configurable regexp's once
 
-    my $transparent  = '^USER ([^:])+$';
-    my $user_command = 'USER ([^:]+)(:(\d+))?' . $self->config_( 'separator' ) . '([^:]+)(:([^:]+))?';
-    my $apop_command = 'APOP ([^:]+)(:(\d+))?' . $self->config_( 'separator' ) . '([^:]+) (.*?)';
+    my $s = $self->config_( 'separator' );
+    $s =~ s/(\$|\@|\[|\]|\(|\)|\||\?|\*|\.|\^|\+)/\\$1/;
+
+    my $transparent  = "^USER ([^$s])+\$";
+    my $user_command = "USER ([^$s]+)($s(\\d+))?$s([^$s]+)($s([^$s]+))?";
+    my $apop_command = "APOP ([^$s]+)($s(\\d+))?$s([^$s]+) (.*?)";
+
+    $self->log_( 2, "Regexps: $transparent, $user_command, $apop_command" );
 
     # Retrieve commands from the client and process them until the
     # client disconnects or we get a specific QUIT command
@@ -237,7 +242,7 @@ sub child__
             next;
         }
 
-        if ( $command =~ /$user_command/io ) {
+        if ( $command =~ /$user_command/i ) {
             if ( $1 ne '' )  {
                 my ( $host, $port, $user, $options ) = ($1, $3, $4, $6);
 

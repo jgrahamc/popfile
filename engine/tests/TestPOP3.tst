@@ -365,6 +365,7 @@ $l->mq( $mq );
 $l->logger( $l );
 
 $l->initialize();
+$l->config_( 'level', 2 );
 
 $w->configuration( $c );
 $w->mq( $mq );
@@ -397,6 +398,7 @@ $b->config_( 'hostname', '127.0.0.1' );
 $b->{parser__}->mangle( $w );
 $b->start();
 $h->start();
+$l->start();
 
         my $p = new Proxy::POP3;
 
@@ -530,6 +532,12 @@ if ( $pid == 0 ) {
 
                 if ( $command =~ /__TOPTOO/ ) {
                     $p->config_( 'toptoo', 1 );
+                    print $uwriter "OK\n";
+                    next;
+                }
+
+                if ( $command =~ /__SEPCHANGE (.)/ ) {
+                    $p->config_( 'separator', $1 );
                     print $uwriter "OK\n";
                     next;
                 }
@@ -1893,8 +1901,105 @@ if ( $pid == 0 ) {
 
         close $client;
 
-done:
+        # Make sure that changing the separator doesn't break
+        # anything
+
+        print $dwriter "__SEPCHANGE Q\n";
+        my $line = <$ureader>;
+        test_assert_equal( $line, "OK\n" );
+
+        $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        $result = <$client>;
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "USER gooduser$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Welcome gooduser$eol" );
+
+        print $client "QUIT$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Bye$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
+        close $client;
+
+        print $dwriter "__SECUREBAD\n";
+        $line = <$ureader>;
+        test_assert_equal( $line, "OK\n" );
+
+        $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        $result = <$client>;
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "USER 127.0.0.1Q8110Qgooduser$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Welcome gooduser$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
+        close $client;
+
+        print $dwriter "__SEPCHANGE \$\n";
+        my $line = <$ureader>;
+        test_assert_equal( $line, "OK\n" );
+
+        $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        $result = <$client>;
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "USER 127.0.0.1\$8110\$gooduser$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Welcome gooduser$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
+        close $client;
+
+
         # Send the remote server a special message that makes it die
+        print $dwriter "__SEPCHANGE :\n";
+        my $line = <$ureader>;
+        test_assert_equal( $line, "OK\n" );
 
         $client = IO::Socket::INET->new(
                         Proto    => "tcp",
