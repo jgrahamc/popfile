@@ -150,3 +150,6 @@ $cl->parse_stream( 'tests/TestMailParse013.tst' );
 ok( $cl->{from},    'RN <rrr@nnnnnnnnn.com>'                        );
 ok( $cl->{to},      '"Armlet Forum" <armlet-forum@news.palmos.com>' );
 ok( $cl->{subject}, '(Archive Copy) RE: CW v9 and armlets...'       );
+$cl->parse_stream( 'tests/TestMailParse018.tst' );
+$cl->{to} =~ /(\Qbugtracker\E@\Qrelativity.com\E)/;
+ok( $1, 'bugtracker@relativity.com' );

@@ -337,6 +337,9 @@ sub update_tag
         
         return;
     }
+
+	# Count the number of TD elements
+	increment_word( $self, 'html:td' ) if ( $tag =~ /^td$/i );
  
     my $attribute;
     my $value;
@@ -375,9 +378,6 @@ sub update_tag
 
         my $parse_script_uri = 0;
 
-		# Count the number of TD elements
-		increment_word( $self, 'html:td' ) if ( $tag =~ /^td$/i );
-        
         # Tags with src attributes
 
         if ( ( $attribute =~ /^src$/i ) &&
