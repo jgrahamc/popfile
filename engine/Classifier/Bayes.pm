@@ -350,6 +350,9 @@ sub load_word_matrix_
     my @buckets = glob $self->config_( 'corpus' ) . '/*';
 
     foreach my $bucket (@buckets) {
+
+        next if ( lc($bucket) ne $bucket );
+
         my $color = '';
 
         # See if there's a color file specified
@@ -412,10 +415,12 @@ sub load_word_matrix_
 #
 # Loads an individual bucket
 #
+# $bucket            The bucket name
+#
 # ---------------------------------------------------------------------------------------------
 sub load_bucket_
 {
-    my ($self, $bucket) = @_;
+    my ( $self, $bucket ) = @_;
 
     $bucket =~ /([[:alpha:]0-9-_]+)$/;
     $bucket =  $1;
@@ -940,11 +945,11 @@ sub history_load_class
 #
 # write_line__
 #
-# Writes a line to a file and parses it
+# Writes a line to a file and parses it unless the classification is already known
 #
 # $file         File handle for file to write line to
 # $line         The line to write
-# $class        The current classification
+# $class        (optional) The current classification
 #
 # ---------------------------------------------------------------------------------------------
 sub write_line__
@@ -1314,7 +1319,11 @@ sub get_count_for_word
 
     my $value = $self->get_value_( $bucket, $word );
 
-    return int( exp( $value ) * $self->get_bucket_word_count( $bucket ) + 0.5 );
+    if ( $value == 0 ) {
+         return 0;
+    } else {
+        return int( exp( $value ) * $self->get_bucket_word_count( $bucket ) + 0.5 );
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1468,7 +1477,7 @@ sub delete_bucket
     my ( $self, $bucket ) = @_;
 
     if ( !defined( $self->{total__}{$bucket} ) ) {
-        return;
+        return 0;
     }
 
     my $bucket_directory = $self->config_( 'corpus' ) . "/$bucket";
@@ -1480,6 +1489,8 @@ sub delete_bucket
     rmdir( $bucket_directory );
 
     $self->load_word_matrix_();
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1497,12 +1508,14 @@ sub rename_bucket
     my ( $self, $old_bucket, $new_bucket ) = @_;
 
     if ( !defined( $self->{total__}{$old_bucket} ) ) {
-        return;
+        return 0;
     }
 
     rename($self->config_( 'corpus' ) . "/$old_bucket" , $self->config_( 'corpus' ) . "/$new_bucket");
 
     $self->load_word_matrix_();
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------

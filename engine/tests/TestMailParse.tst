@@ -39,9 +39,8 @@ $b->configuration( $c );
 $b->mq( $mq );
 $b->logger( $l );
 
-
 $b->initialize();
-$b->start();
+test_assert( $b->start() );
 
 my $cl = new Classifier::MailParse;
 
@@ -205,10 +204,10 @@ for my $color_test (@color_tests) {
     test_assert_equal( $check, $html, $color_test );
 
     if ( $check ne $html ) {
-        open FILE, ">$color_test.expecting";
+        open FILE, ">$color_test.expecting.html";
         print FILE $check;
         close FILE;
-        open FILE, ">$color_test.got";
+        open FILE, ">$color_test.got.html";
         print FILE $html;
         close FILE;
     }
