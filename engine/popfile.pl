@@ -1939,6 +1939,12 @@ sub handle_url
     
     debug( $url );
 
+    if ( $url eq '/jump_to_message' ) 
+    {
+        $form{session} = $session_key;
+        $url = '/history';
+    }
+
     if ( ( $url eq '/' ) || (!defined($form{session})) || ( $form{session} ne $session_key ) )
     {
         %form = ();
@@ -2446,7 +2452,7 @@ sub run_popfile
 
                         $msg_headers .= "X-Text-Classification: $classification$eol";
                         $temp_file =~ s/messages\/(.*)/$1/;
-                        $msg_headers .= "X-POPFile-Link: http://127.0.0.1:8080/history?jump_to_message=$temp_file";
+                        $msg_headers .= "X-POPFile-Link: http://127.0.0.1:$configuration{ui_port}/jump_to_message?view=$temp_file";
                         $msg_headers .= "$eol$eol";
 
                         # Echo the text of the message to the client
