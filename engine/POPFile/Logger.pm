@@ -192,7 +192,20 @@ sub debug
 
         $message = "$`$1$3 XXXXXX$4" if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/i );
         $message =~ s/[\012\015]+$//g;
-        $message .= "\n";
+
+        # Since we write to the log file in binmode (so that embedded CR and LF characters
+        # are left untouched) we need to add the correct line ending for the platform
+        # here.
+
+        if ( $^O =~ /MSWin/i ) {
+            $message .= "\015\012";
+	} else {
+            if ( $^O =~ /Mac/i ) {
+                $message .= "\015";
+	    } else {
+                $message .= "\012";
+	    }
+	}
 
         my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime;
         $year += 1900;
