@@ -288,6 +288,20 @@ MATCH Magnetic Attraction for Ferrous Females
 NOTMATCH Testing Refresh
 CLICK reset_filter_search
 
+# Check that reclassification doesn't clear the negate
+# flag
+
+HIDDEN 0
+SETINPUT filter __filter__magnet
+SETINPUTN negate 2 on
+CLICK setfilter
+NOTMATCH Magnetic Attraction for Ferrous Females
+MATCH Testing Refresh
+CLICK change
+NOTMATCH Magnetic Attraction for Ferrous Females
+MATCH Testing Refresh
+CLICK reset_filter_search
+
 # Check sorting
 
 MATCH
