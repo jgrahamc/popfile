@@ -89,7 +89,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define C_VERSION   "0.5.4"       ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.5.5"       ; see 'VIProductVersion' comment below for format details
 
   ; Specify EXE filename and icon for the 'installer'
 
@@ -111,7 +111,7 @@
 
   ; Delay between the two shutdown requests (in milliseconds)
 
-  !define C_DLGAP                    3000
+  !define C_DLGAP                    2000
 
 #--------------------------------------------------------------------------
 
@@ -264,6 +264,10 @@ try_password_again:
   NSISdl::download_quiet ${C_DLTIMEOUT} http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown_2.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" 0 password_ok
+  Push "$PLUGINSDIR\shutdown_2.htm"
+  Call GetFileSize
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} 0 password_ok
   StrCmp ${L_REPORT} "none" error_exit
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "Silent shutdown with password using port '${L_GUI}' failed\
@@ -301,6 +305,10 @@ try_again:
   NSISdl::download_quiet ${C_DLTIMEOUT} http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown_2.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" 0 shutdown_ok
+  Push "$PLUGINSDIR\shutdown_2.htm"
+  Call GetFileSize
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} 0 shutdown_ok
   StrCmp ${L_REPORT} "none" error_exit
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "Silent shutdown using port '${L_GUI}' failed\
@@ -339,6 +347,12 @@ shutdown_ok:                             ; Return error code 0 (success)
       (port '${L_GUI}' used)"
 
 exit:
+  !undef L_GUI
+  !undef L_PARAMS
+  !undef L_PASSWORD
+  !undef L_REPORT
+  !undef L_RESULT
+  !undef L_TEMP
 SectionEnd
 
 
@@ -354,7 +368,7 @@ SectionEnd
 # Outputs:
 #         (top of stack)   - the command-line parameters supplied (if any)
 #
-#  Usage:
+# Usage:
 #         Call GetParameters
 #         Pop $R0
 #
@@ -408,7 +422,7 @@ FunctionEnd
 #         (top of stack)       - the remaining parameters (if any)
 #         (top of stack - 1)   - the first parameter found in the list
 #
-#  Usage:
+# Usage:
 #         Push "ABC 123 XYZ"
 #         Call GetNextParam
 #         Pop $R0
@@ -477,7 +491,7 @@ FunctionEnd
 # Outputs:
 #         (top of stack)   - the input string (if valid) or "" (if invalid)
 #
-#  Usage:
+# Usage:
 #         Push "12345"
 #         Call StrCheckInteger
 #         Pop $R0
@@ -527,6 +541,64 @@ done:
   Exch $0           ; place result on top of the stack
 
   !undef DECIMAL_DIGIT
+
+FunctionEnd
+
+
+#--------------------------------------------------------------------------
+# General Purpose Library Function: GetFileSize
+#--------------------------------------------------------------------------
+#
+# This function returns the size (in bytes) of the specified file. If the file
+# cannot be found then -1 is returned. If an error is detected, -2 is returned.
+#
+# Inputs:
+#         (top of stack)     - filename of file to be checked
+# Outputs:
+#         (top of stack)     - length of the file (in bytes)
+#                              or '-1' if file not found
+#                              or '-2' if error occurred
+#
+# Usage:
+#         Push "corpus\spam\table"
+#         Call GetFileSize
+#         Pop $R0
+#
+#         ($R0 now holds the size (in bytes) of the 'spam' bucket's 'table' file)
+#
+#--------------------------------------------------------------------------
+
+Function GetFileSize
+
+  !define L_FILENAME  $R9
+  !define L_RESULT    $R8
+
+  Exch ${L_FILENAME}
+  Push ${L_RESULT}
+  Exch
+
+  IfFileExists ${L_FILENAME} find_size
+  StrCpy ${L_RESULT} "-1"
+  Goto exit
+
+find_size:
+  ClearErrors
+  FileOpen ${L_RESULT} ${L_FILENAME} r
+  FileSeek ${L_RESULT} 0 END ${L_FILENAME}
+  FileClose ${L_RESULT}
+  IfErrors 0 return_size
+  StrCpy ${L_RESULT} "-2"
+  Goto exit
+
+return_size:
+  StrCpy ${L_RESULT} ${L_FILENAME}
+
+exit:
+  Pop ${L_FILENAME}
+  Exch ${L_RESULT}
+
+  !undef L_FILENAME
+  !undef L_RESULT
 
 FunctionEnd
 

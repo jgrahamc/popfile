@@ -174,7 +174,6 @@
 #
 # Functions used only during installation of POPFile or User Data files (in alphabetic order)
 #
-#    Installer Function: GetFileSize
 #    Installer Function: GetIEVersion
 #    Installer Function: GetParameters
 #    Installer Function: GetSeparator
@@ -182,64 +181,6 @@
 #    Installer Function: StrStripLZS
 #
 #==============================================================================================
-
-!ifdef ADDUSER
-    #--------------------------------------------------------------------------
-    # Installer Function: GetFileSize
-    #
-    # Returns the size (in bytes) of the filename passed on the stack
-    # (if file not found, returns -1)
-    #
-    # Inputs:
-    #         (top of stack)     - filename of file to be checked
-    # Outputs:
-    #         (top of stack)     - length of the file (in bytes)
-    #                              or '-1' if file not found
-    #                              or '-2' if error occurred
-    #
-    # Usage:
-    #         Push "corpus\spam\table"
-    #         Call GetFileSize
-    #         Pop $R0
-    #
-    #         ($R0 now holds the size (in bytes) of the 'spam' bucket's 'table' file)
-    #
-    #--------------------------------------------------------------------------
-
-    Function GetFileSize
-
-      !define L_FILENAME  $R9
-      !define L_RESULT    $R8
-
-      Exch ${L_FILENAME}
-      Push ${L_RESULT}
-      Exch
-
-      IfFileExists ${L_FILENAME} find_size
-      StrCpy ${L_RESULT} "-1"
-      Goto exit
-
-    find_size:
-      ClearErrors
-      FileOpen ${L_RESULT} ${L_FILENAME} r
-      FileSeek ${L_RESULT} 0 END ${L_FILENAME}
-      FileClose ${L_RESULT}
-      IfErrors 0 return_size
-      StrCpy ${L_RESULT} "-2"
-      Goto exit
-
-    return_size:
-      StrCpy ${L_RESULT} ${L_FILENAME}
-
-    exit:
-      Pop ${L_FILENAME}
-      Exch ${L_RESULT}
-
-      !undef L_FILENAME
-      !undef L_RESULT
-
-    FunctionEnd
-!endif
 
 
 !ifndef ADDUSER & RUNPOPFILE & TRANSLATOR_AUW
@@ -636,6 +577,10 @@ FunctionEnd
 #    Installer Function:   GetTimeStamp
 #    Uninstaller Function: un.GetTimeStamp
 #
+#    Macro:                GetFileSize
+#    Installer Function:   GetFileSize
+#    Uninstaller Function: un.GetFileSize
+#
 #    Macro:                GetLocalTime
 #    Installer Function:   GetLocalTime
 #    Uninstaller Function: un.GetLocalTime
@@ -699,7 +644,7 @@ FunctionEnd
 #         (top of stack)     - if file is no longer in use, an empty string ("") is returned
 #                              otherwise the input string is returned
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Push "$INSTDIR\wperl.exe"
 #         Call CheckIfLocked
@@ -783,7 +728,7 @@ FunctionEnd
 #         (top of stack)   - if a locked EXE file is found, its full path is returned otherwise
 #                            an empty string ("") is returned (to show that no files are locked)
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Push "C:\Program Files\POPFile"
 #         Call FindLockedPFE
@@ -901,7 +846,7 @@ FunctionEnd
 # Outputs:
 #         (top of stack)          - string containing the full (unambiguous) path to the corpus
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Push $G_USERDIR
 #         Call un.GetCorpusPath
@@ -1037,7 +982,7 @@ FunctionEnd
 #         (top of stack)          - string containing the full (unambiguous) path to the data
 #                                   (the string "" is returned if input data was null)
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Push $G_USERDIR
 #         Push "../../corpus"
@@ -1177,7 +1122,7 @@ FunctionEnd
 # Outputs:
 #         (top of stack)     - string holding current date (eg '07-Dec-2003')
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Call un.GetDateStamp
 #         Pop $R9
@@ -1309,7 +1254,7 @@ FunctionEnd
 # Outputs:
 #         (top of stack)     - string with current date and time (eg '08-Dec-2003 @ 23:01:59')
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Call GetDateTimeStamp
 #         Pop $R9
@@ -1449,6 +1394,94 @@ FunctionEnd
 
 
 #--------------------------------------------------------------------------
+# Macro: GetFileSize
+#
+# The installation process and the uninstall process may need a function which gets the
+# size (in bytes) of a particular file. This macro makes maintenance easier by ensuring
+# that both processes use identical functions, with the only difference being their names.
+#
+# If the specified file is not found, the function returns -1
+#
+# NOTE:
+# The !insertmacro GetFileSize "" and !insertmacro GetFileSize "un." commands are included
+# in this file so the NSIS script and/or other library functions in 'pfi-library.nsh' can use
+# 'Call GetFileSize' and 'Call un.GetFileSize' without additional preparation.
+#
+# Inputs:
+#         (top of stack)     - filename of file to be checked
+# Outputs:
+#         (top of stack)     - length of the file (in bytes)
+#                              or '-1' if file not found
+#                              or '-2' if error occurred
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push "corpus\spam\table"
+#         Call GetFileSize
+#         Pop $R0
+#
+#         ($R0 now holds the size (in bytes) of the 'spam' bucket's 'table' file)
+#
+#--------------------------------------------------------------------------
+
+!macro GetFileSize UN
+    Function ${UN}GetFileSize
+
+      !define L_FILENAME  $R9
+      !define L_RESULT    $R8
+
+      Exch ${L_FILENAME}
+      Push ${L_RESULT}
+      Exch
+
+      IfFileExists ${L_FILENAME} find_size
+      StrCpy ${L_RESULT} "-1"
+      Goto exit
+
+    find_size:
+      ClearErrors
+      FileOpen ${L_RESULT} ${L_FILENAME} r
+      FileSeek ${L_RESULT} 0 END ${L_FILENAME}
+      FileClose ${L_RESULT}
+      IfErrors 0 return_size
+      StrCpy ${L_RESULT} "-2"
+      Goto exit
+
+    return_size:
+      StrCpy ${L_RESULT} ${L_FILENAME}
+
+    exit:
+      Pop ${L_FILENAME}
+      Exch ${L_RESULT}
+
+      !undef L_FILENAME
+      !undef L_RESULT
+
+    FunctionEnd
+!macroend
+
+!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+    #--------------------------------------------------------------------------
+    # Installer Function: GetFileSize
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+
+    !insertmacro GetFileSize ""
+!endif
+
+!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.GetFileSize
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
+
+    !insertmacro GetFileSize "un."
+!endif
+
+
+#--------------------------------------------------------------------------
 # Macro: GetLocalTime
 #
 # The installation process and the uninstall process may need a function which gets the
@@ -1475,7 +1508,7 @@ FunctionEnd
 #         (top of stack - 6) - seconds      (0 - 59)
 #         (top of stack - 7) - milliseconds (0 - 999)
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Call GetLocalTime
 #         Pop $Year
@@ -1577,7 +1610,7 @@ FunctionEnd
 # Outputs:
 #         (top of stack)          - the parent part of the input string (e.g. C:\A\B)
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Push "C:\Program Files\Directory\Whatever"
 #         Call un.GetParent
@@ -1651,7 +1684,7 @@ FunctionEnd
 # Outputs:
 #         (top of stack)     - string holding current time (eg '23:01:59')
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Call GetTimeStamp
 #         Pop $R9
@@ -1754,7 +1787,7 @@ FunctionEnd
 #
 #                                   "badport"    (meaning failure: invalid UI port supplied)
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Push "8080"
 #         Call ShutdownViaUI
@@ -1774,7 +1807,7 @@ FunctionEnd
 
     ; Delay between the two shutdown requests (in milliseconds)
 
-    !define C_SVU_DLGAP           3000
+    !define C_SVU_DLGAP           2000
     ;--------------------------------------------------------------------------
 
     !define L_RESULT    $R9
@@ -1786,7 +1819,7 @@ FunctionEnd
 
     StrCmp ${L_UIPORT} "" badport
     Push ${L_UIPORT}
-    Call  ${UN}StrCheckDecimal
+    Call ${UN}StrCheckDecimal
     Pop ${L_UIPORT}
     StrCmp ${L_UIPORT} "" badport
     IntCmp ${L_UIPORT} 1 port_ok badport
@@ -1807,12 +1840,16 @@ FunctionEnd
     Sleep ${C_SVU_DLGAP}
     NSISdl::download_quiet ${C_SVU_DLTIMEOUT} http://127.0.0.1:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_2.htm"
     Pop ${L_RESULT}
-    StrCmp ${L_RESULT} "success" password
-    StrCpy ${L_RESULT} "success"
+    StrCmp ${L_RESULT} "success" 0 shutdown_ok
+    Push "$PLUGINSDIR\shutdown_2.htm"
+    Call ${UN}GetFileSize
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} 0 shutdown_ok
+    StrCpy ${L_RESULT} "password?"
     Goto exit
 
-  password:
-    StrCpy ${L_RESULT} "password?"
+  shutdown_ok:
+    StrCpy ${L_RESULT} "success"
 
   exit:
     Pop ${L_UIPORT}
@@ -1864,7 +1901,7 @@ FunctionEnd
 # Outputs:
 #         (top of stack)            - string containing backslashes (e.g. "C:\This\and\That")
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Push "C:/Program Files/Directory/Whatever"
 #         Call StrBackSlash
@@ -1944,7 +1981,7 @@ FunctionEnd
 # Outputs:
 #         (top of stack)   - the input string (if valid) or "" (if invalid)
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Push "12345"
 #         Call un.StrCheckDecimal
@@ -2039,7 +2076,7 @@ FunctionEnd
 # Outputs:
 #         (top of stack)     - string starting with the match, if any
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Push "this is a long string"
 #         Push "long"
@@ -2121,7 +2158,7 @@ FunctionEnd
 # Outputs:
 #         (top of stack)   - the input string with the trailing newlines (if any) removed
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Push "whatever$\r$\n"
 #         Call un.TrimNewlines
@@ -2195,7 +2232,7 @@ FunctionEnd
 # Outputs:
 #         (none)
 #
-#  Usage (after macro has been 'inserted'):
+# Usage (after macro has been 'inserted'):
 #
 #         Push "$INSTDIR\wperl.exe"
 #         Call WaitUntilUnlocked
