@@ -109,8 +109,8 @@ $components{pop3}       = new Proxy::POP3;
 
 # This version number
 $components{config}->{major_version} = 0;
-$components{config}->{minor_version} = 17;
-$components{config}->{build_version} = 10;
+$components{config}->{minor_version} = 18;
+$components{config}->{build_version} = 0;
 
 print "POPFile Engine v$components{config}->{major_version}.$components{config}->{minor_version}.$components{config}->{build_version} starting\n";
 

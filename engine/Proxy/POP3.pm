@@ -99,7 +99,7 @@ sub initialize
     # This counter is used when creating unique IDs for message stored
     # in the history.  The history message files have the format
     #
-    # popfile{download_count}_{message_count}.msg
+    # popfile{download_count}={message_count}.msg
     #
     # Where the download_count is derived from this value and the 
     # message_count is a local counter within that download, for sorting
@@ -448,7 +448,7 @@ sub child
         }
     }
 
-    close $mail;
+    close $mail if defined( $mail );
     close $client;
 }
 
@@ -495,8 +495,8 @@ sub classify_and_modify
     # Whether we are currently reading the mail headers or not
     my $getting_headers = 1;
 
-    my $temp_file  = "messages/popfile$dcount" . "_$mcount.msg";
-    my $class_file = "messages/popfile$dcount" . "_$mcount.cls";
+    my $temp_file  = "messages/popfile$dcount" . "=$mcount.msg";
+    my $class_file = "messages/popfile$dcount" . "=$mcount.cls";
     $self->{configuration}->{configuration}{mcount}     += 1 if ( !$nosave );
     $self->{ui}->{history_invalid}                       = 1 if ( !$nosave );
 

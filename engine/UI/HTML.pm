@@ -1016,7 +1016,7 @@ sub corpus_page
     
     $body .= "</table><form action=/buckets><input type=hidden name=session value=$self->{session_key}><input type=submit class=submit name=reset_stats value='$self->{language}{Bucket_ResetStatistics}'>";
     
-    if ( $self->{configuration}{last_reset} ne '' ) {
+    if ( $self->{configuration}->{configuration}{last_reset} ne '' ) {
         $body .= "<br>($self->{language}{Bucket_LastReset}: $self->{configuration}->{configuration}{last_reset})";
     }
     
@@ -1134,11 +1134,11 @@ sub compare_mf
     my $am;
     my $bm;
     
-    if ( $a =~ /popfile(.*)_(.*)\.msg/ )  {
+    if ( $a =~ /popfile(.*)=(.*)\.msg/ )  {
         $ad = $1;
         $am = $2;
         
-        if ( $b =~ /popfile(.*)_(.*)\.msg/ ) {
+        if ( $b =~ /popfile(.*)=(.*)\.msg/ ) {
             $bd = $1;
             $bm = $2;
     
@@ -1167,7 +1167,7 @@ sub load_history_cache
 {
     my ( $self, $filter, $search ) = @_;
     
-    my @history_files = sort compare_mf glob "messages/popfile*.msg";
+    my @history_files = sort compare_mf glob "messages/popfile*=*.msg";
     $self->{history}         = {};
     $self->{history_invalid} = 0;
     my $j = 0;
@@ -1599,7 +1599,7 @@ sub history_page
             $body .= $i+1 . "<td>";
             my $bucket       = $self->{history}{$i}{bucket};
             my $reclassified = $self->{history}{$i}{reclassified}; 
-            $mail_file =~ /popfile\d+_(\d+)\.msg/;
+            $mail_file =~ /popfile\d+=(\d+)\.msg/;
             $body .= $from;
             $body .= "<td><a href=/history?view=$mail_file&start_message=$start_message&session=$self->{session_key}&filter=$self->{form}{filter}#$mail_file>$subject</a><td>";
             if ( $reclassified )  {
@@ -1937,7 +1937,7 @@ sub remove_mail_files
 {
     my ( $self ) = @_;
     
-    my @mail_files = glob "messages/popfile*.msg";
+    my @mail_files = glob "messages/popfile*=*.???";
     my $result = 0;
 
     calculate_today( $self );
@@ -1945,14 +1945,19 @@ sub remove_mail_files
     foreach my $mail_file (@mail_files) {
         
         # Extract the epoch information from the popfile mail file name
+        
         my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($mail_file);          
         if ( $ctime < (time - $self->{configuration}->{configuration}{history_days} * $seconds_per_day) )  {
-            my $class_file = $mail_file;
-            $class_file =~ s/msg$/cls/;
             unlink($mail_file);
-            unlink($class_file);
             $result = 1;
         }
+    }
+    
+    # Clean up old style msg/cls files
+    
+    @mail_files = glob "messages/popfile*_*.???";
+    foreach my $mail_file (@mail_files) {
+        unlink($mail_file);
     }
     
     return $result;
