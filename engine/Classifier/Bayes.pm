@@ -31,6 +31,8 @@ use POPFile::Module;
 #
 # ---------------------------------------------------------------------------------------------
 
+use Time::HiRes qw( usleep ualarm gettimeofday tv_interval );
+
 use strict;
 use warnings;
 use locale;
@@ -1443,10 +1445,16 @@ sub classify
     $self->{magnet_used__}   = 0;
     $self->{magnet_detail__} = '';
 
+    my $t0 = [gettimeofday];
+    my $elapsed;
+
     if ( defined( $file ) ) {
         $self->{parser__}->parse_file( $file,
                                        $self->module_config_( 'html', 'language' ),
                                        $self->global_config_( 'message_cutoff'   ) );
+        $elapsed = tv_interval ( $t0, [gettimeofday]);
+        print "Time for parse $elapsed\n";
+        $t0 = [gettimeofday];
     }
 
     # Check to see if this email should be classified based on a magnet
@@ -1461,6 +1469,10 @@ sub classify
             }
         }
     }
+
+    $elapsed = tv_interval ( $t0, [gettimeofday]);
+    print "Time for magnet check $elapsed\n";
+    $t0 = [gettimeofday];
 
     # If the user has not defined any buckets then we escape here return unclassified
     return "unclassified" if ( $#buckets == -1 );
@@ -1561,7 +1573,11 @@ sub classify
         my $wmax = -10000;
 
         foreach my $bucket (@buckets) {
-            my $probability = defined($matrix{$id}{$bucket})?log( $matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket} ):0;
+            my $probability = 0;
+ 
+            if ( defined($matrix{$id}{$bucket}) && ( $matrix{$id}{$bucket} > 0 ) ) {
+                $probability = log( $matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket} );
+	    }
 
             $matchcount{$bucket} += $self->{parser__}{words__}{$idmap{$id}} if ($probability != 0);
             $probability = $self->{not_likely__}{$userid} if ( $probability == 0 );
@@ -1575,6 +1591,10 @@ sub classify
             $correction += $wmax * $self->{parser__}{words__}{$idmap{$id}};
         }
     }
+
+    $elapsed = tv_interval ( $t0, [gettimeofday]);
+    print "Time for classification $elapsed\n";
+    $t0 = [gettimeofday];
 
     # Now sort the scores to find the highest and return that bucket as the classification
 
@@ -1787,7 +1807,8 @@ sub classify
         }
     }
 
-    $self->log_( "Done classification at " . time );
+    $elapsed = tv_interval ( $t0, [gettimeofday]);
+    print "Time for rest $elapsed\n";
 
     return $class;
 }
