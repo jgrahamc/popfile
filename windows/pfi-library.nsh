@@ -169,6 +169,36 @@
 
   !macroend
 
+#--------------------------------------------------------------------------
+#
+# Macro used by 'installer.nsi' when rearranging existing skins
+#
+#--------------------------------------------------------------------------
+
+  !macro SkinMove OLDNAME NEWNAME
+
+      !insertmacro PFI_UNIQUE_ID
+
+      IfFileExists "$G_ROOTDIR\skins\${OLDNAME}.css" 0 skip_${PFI_UNIQUE_ID}
+      CreateDirectory "$G_ROOTDIR\skins\${NEWNAME}"
+      Rename "$G_ROOTDIR\skins\${OLDNAME}.css" "$G_ROOTDIR\skins\${NEWNAME}\style.css"
+
+    skip_${PFI_UNIQUE_ID}:
+
+  !macroend
+
+#--------------------------------------------------------------------------
+#
+# Macro used by 'installer.nsi' when uninstalling the new style skins
+#
+#--------------------------------------------------------------------------
+
+  !macro DeleteSkin FOLDER
+      Delete "${FOLDER}\*.css"
+      Delete "${FOLDER}\*.gif"
+      Delete "${FOLDER}\*.thtml"
+      RmDir  "${FOLDER}"
+  !macroend
 
 #==============================================================================================
 #
