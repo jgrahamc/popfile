@@ -25,6 +25,9 @@ LanguageDirection                       rtl
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          ar
 
+# This is where to find the FAQ on the Wiki
+FAQLink                                 FrequentlyAskedQuestions
+
 # Common words that are used on their own all over the interface
 Apply                                   تطبيق
 On                                      نشط
@@ -66,6 +69,28 @@ Word                                    كلمة
 Count                                   مجموع
 Update                                  تحديث
 Refresh                                 تحديث
+FAQ                                     أسئلة شائعة
+ID                                      ID
+Date                                    تاريخ
+Arrived                                 وصول
+Size                                    حجم
+
+# This is a regular expression pattern that is used to convert
+# a number into a friendly looking number (for the US and UK this
+# means comma separated at the thousands)
+
+Locale_Thousands                       ,
+Locale_Decimal                         .
+
+# The Locale_Date uses the format strings in Perl's Date::Format
+# module to set the date format for the UI.  There are two possible
+# ways to specify it.
+#
+# <format>            Just one simple format used for all dates
+# <<format> | <format> The first format is used for dates less than
+#                     7 days from now, the second for all other dates
+
+Locale_Date                            %a %R | %D %R
 
 # The header and footer that appear on every UI page
 Header_Title                            مركز تحكم POPFile
@@ -83,6 +108,7 @@ Footer_Forums                           منتدى
 Footer_FeedMe                           تبرّع
 Footer_RequestFeature                   أطلب ميزة
 Footer_MailingList                      مجموعة بريدية
+Footer_Wiki                             وثائق
 
 Configuration_Error1                    حرف الفصل يحب أن يكون مفرداً
 Configuration_Error2                    بوابة الإتصال لواجهة المستخدم يجب أن تكون رقماً بين 1 و 65535
@@ -91,6 +117,7 @@ Configuration_Error4                    حجم الصفحة يحب أن يكون
 Configuration_Error5                    عدد أيام المحفوظات يحب أن يكون رقماً بين 1 و 366
 Configuration_Error6                    زمن إنهاء إتصال TCP يجب أن يكون رقماً بين 10 و 300
 Configuration_Error7                    بوابة إتصال XML RPC يجب أن تكون رقماً بين 1 و 65535
+Configuration_Error8                    بوابة إتصال Socks V يجب أن تكون رقماً بين 1 و 65535
 Configuration_POP3Port                  بوابة إتصال POP3
 Configuration_POP3Update                لقد تم تعديل بوابة إتصال POP3 إلى %s؛ هذا التعديل لن يكون فعالا إلى أن يتم إعادة تشغيل POPFile
 Configuration_XMLRPCUpdate              لقد تم تعديل بوابة إتصال XML-RPC إلى %s؛ هذا التعديل لن يكون فعالا إلى أن يتم إعادة تشغيل POPFile
@@ -136,6 +163,11 @@ Configuration_GeneralSkins              سمة الواجهة
 Configuration_SmallSkins                سمات صغيرة
 Configuration_TinySkins                 سمات صغيرة جداً
 Configuration_CurrentLogFile            &lt;ملف السجل الحالي&gt;
+Configuration_SOCKSServer               ملقم وكيل خادم SOCKS V
+Configuration_SOCKSPort                 بوابة إتصال ملقم وكيل SOCKS V
+Configuration_SOCKSPortUpdate           تم تعديل بوابة إتصال ملقم وكيل SOCKS V إلى %s
+Configuration_SOCKSServerUpdate         تم تعديل خادم ملقم وكيل SOCKS V إلى %s
+Configuration_Fields                    أعمدة المحفوظات
 
 Advanced_Error1                         '%s' موجودة مسبقاً في لائحة الكلمات المهملة
 Advanced_Error2                         الكلمات المهملة يمكن أن تحتوي فقط احرف أو ارقام أو . أو _ أو - أو @
@@ -166,16 +198,27 @@ History_MagnetUsed                      مغناطيس مستعمل
 History_MagnetBecause                   <b>مغناطيس مستعمل</b><p>صنف إلى <font color="%s">%s</font> بسبب المغناطيس %s </p>
 History_ChangedTo                       تم تغيره إلى <font color="%s">%s</font>
 History_Already                         أعيد تصنيفه إلى <font color="%s">%s</font>
-History_RemoveAll                       إحذف الكل
-History_RemovePage                      إحذف الصفحة
+History_RemoveAll                       حذف الكل
+History_RemovePage                      حذف الصفحة
+History_RemoveChecked                   حذف المختار
 History_Remove                          لحذف مدخلات من المحفوظات إضغط
 History_SearchMessage                   إبحث مرسل/موضوع
 History_NoMessages                      لا توجد رسائل
 History_ShowMagnet                      ممغنط
-History_ShowNoMagnet                    غير ممغنط
+History_Negate_Search                   أعكس البحث/التصنيف
 History_Magnet                          &nbsp;(عرض الرسائل المصنفة مغناطيسياً فقط)
 History_NoMagnet                        &nbsp;(عرض الرسائل غير المصنفة مغناطيسياً فقط)
 History_ResetSearch                     تصفير البحث
+History_ChangedClass                    سيتم تصنيفه الآن كما
+History_Purge                           إحذف الآن
+History_Increase                        زِد
+History_Decrease                        خفّض
+History_Column_Characters               قم بتغيير عرض أعمدة مرسل، مستقبل، Cc، موضوع
+History_Automatic                       تلقائي
+History_Reclassified                    أعيد تصنيقه
+History_Size_Bytes                      %d&nbsp;B
+History_Size_KiloBytes                  %.1f&nbsp;KB
+History_Size_MegaBytes                  %.1f&nbsp;MB
 
 Password_Title                          كلمة المرور
 Password_Enter                          أدخل كلمة المرور
@@ -185,6 +228,7 @@ Password_Error1                         كلمة المرور خاطئة
 Security_Error1                         البوابة يجب أن تكون رقماً بين 1 و 65535
 Security_Stealth                        نظام الإخفاء/عمليات الخادم
 Security_NoStealthMode                  لا (نظام الإخفاء)
+Security_StealthMode                    (Stealth Mode)
 Security_ExplainStats                   (عندما يكون فعالاً يقوم POPFile بإرسال القيم الثلاث التالية إلى www.usethesource.com مرة واحدة في اليوم: bc (إجمالي عدد الدلاء التي عندك)، mc (إجمالي عدد الرسائل التي صنفها POPFile) و ec (إجمالي عدد أخطاء التصنيف). هذه القيم تخزن في ملف ومن ثم يتم إستعمالها لنشر إحصاءات عن كيفية استعمال الناس لـ POPFile ومدى نجاهة. الخادم الأساسي يقوم بحفظ السجلات لمدة 5 أيام ومن ثم يتم حذفها؛ ليس هناك سجلات تربط بين الإحصاءات وعناوين IP الفردية).
 Security_ExplainUpdate                  (عندما يكون فعالاً يقوم POPFile بإرسال القيم الثلاث التالية إلى www.usethesource.com مرة واحدة في اليوم: ma (رقم الإصدار الأعلى لنسخة POPFile المركبة)، mi (رقم الإصدار الأدنى لنسخة POPFile المركبة) و bn (رقم البنية لنسخة POPFile المركبة). POPFile يحصل على جواب على شكل صورة تظهر في أعلى الصفحة إذا ما كان هناك تحديث. الخادم الأساسي يقوم بحفظ السجلات لمدة 5 أيام ومن ثم يتم حذفها؛ ليس هناك سجلات تربط بين تفحص التحديثات وعناوين IP الفردية).
 Security_PasswordTitle                  كلمة المرور لواجهة المستخدم
@@ -280,8 +324,9 @@ View_WordMatrix                         مصفوفة الكلمات
 View_WordProbabilities                  عرض إحتمالية الكلمات
 View_WordFrequencies                    عرض تردد الكلمات
 View_WordScores                         عرض نتائج الكلمات
+View_Chart                              رسْم القرار
 
-Windows_TrayIcon                        إعرض ايقونة POPFile في شريط المهام؟
+Windows_TrayIcon                        عرض ايقونة POPFile في شريط المهام؟
 Windows_Console                         تشغيل POPFile في نافذة نصية؟
 Windows_NextTime                        <p><font color="red">هذا التعديل لن يكون فقالاً إلى أن يتم إعادة تشغيل POPFile</font>
 
@@ -301,4 +346,32 @@ Configuration_InsertionTableSummary     This table contains buttons that determi
 Security_MainTableSummary               This table provides sets of controls that affect the security of the overall configuration of POPFile, whether it should automatically check for updates to the program, and whether statistics about POPFile's performance should be sent to the central datastore of the program's author for general information.
 Advanced_MainTableSummary               This table provides a list of words that POPFile ignores when classifying message due to their relative frequency in message in general.  They are organized per row according to the first letter of the words.
 
+Imap_Bucket2Folder                      البريد للدلو <b>%s</b> يذهب للمجلد
+Imap_MapError                           لا يمكن تحويل اكثر من دلو واحد لكل مجلد!
+Imap_Server                             خادم IMAP:
+Imap_ServerNameError                    الرجاء إدخال اسم الحادم!
+Imap_Port                               بوابة إتصال IMAP:
+Imap_PortError                          الرجاء إدخال رقم بوابة صحيح!
+Imap_Login                              إسم مستخدم IMAP:
+Imap_LoginError                         الرجاء إدخال إسم المستخدم!
+Imap_Password                           كلمة المرور لحساب IMAP:
+Imap_PasswordError                      الرجاء إدخال كلمة المرور!
+Imap_Expunge                            مسح الرسائل المحذوفه من المجلدات المراقبة.
+Imap_Interval                           فترة التحديث بالثواني:
+Imap_IntervalError                      الرجاء إدخال فترة بين 10 و 3600 ثانية.
+Imap_Bytelimit                          بايت لكل رسالة من أجل التصنيف. أدخل 0 (Null) لإستعمال الرسالة كاملة:
+Imap_BytelimitError                     الرجاء إدخال رقم.
+Imap_RefreshFolders                     تحديث قائمة المجلدات
+Imap_Now                                الآن!
+Imap_UpdateError1                       لم تتم عملية الدخول. الرجاء التأكد من إسم المستخدم وكلمة المرور.
+Imap_UpdateError2                       فشلت عملية الإتصال بالخادم. الرجاء التأكد من إسم الخادم ورقم بوابة الإتصال والتأكد من أن الإتصال مع الشبكة موجود.
+Imap_UpdateError3                       الرجاء إعداد تفاصيل الإتصال أولاً.
+Imap_NoConnectionMessage                الرجاء إعداد تفاصيل الإتصال أولاً. بعد الإنتهاء منه، سوف تظهر في هذه الصفحة المزيد من الخيارات.
+Imap_WatchMore                          مجلد لعرض المجلدات المراقبة
+Imap_WatchedFolder                      مجلد مراقب رقم
 
+Shutdown_Message                        تم إقفال POPFile
+
+Help_Training                           عند إستعمالك POPFile لأول مرة، فإنه لا يعرف أي شيء ويحتاج لبعض التدريب. يحتاج POPFile للتدريب على رسائل لكل دلو، التدريب يتم عند إعادة تصنيف رسالة قام POPFile بتصنيفها بشكل خاطئ. ستحتاج أيضاً إلى إعداد برنامج البريد ليقوم بترتيب البريد حسب تصنيفات POPFile. يمكن العثور على التعليمات لإعداد برامج البريد في <a href="http://popfile.sourceforge.net/manual/ar/email.html">صفحات تعليمات POPFile</a>.
+Help_Bucket_Setup                       يحتاج POPFile إلى دلوين على الأقل بالإضافة إلى دلو غير-المصنف. ما يجعل POPFile فريداً هو أنه يستطيع تصنيف بريد اكثر من هذا، تستطيع ان يكون عندك أي عدد من الدلاء. أبسط إعداد هو أن يكون عندك الدلاء "spam"، "personal"، "work".
+Help_No_More                            لا تعرض هذا مرة أخرى
