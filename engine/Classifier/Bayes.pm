@@ -218,6 +218,7 @@ sub load_word_matrix
 
     $self->{matrix}     = {};
     $self->{total}      = {};
+    $self->{magnets}    = {};
     $self->{full_total} = 0;
     
     print "Loading the corpus...\n" if $self->{debug};
