@@ -5,7 +5,7 @@
 #
 # Copyright (c) 2003 John Graham-Cumming
 
-export POPFILE_VERSION=0.19.0
+include vars.mak
 
 .PHONY: test package windows core manual skins
 
@@ -26,7 +26,7 @@ POPFILE_ZIP := popfile-$(POPFILE_VERSION).zip
 BUILD_ZIP=wzzip -P $(POPFILE_ZIP) -a $^
 $(POPFILE_ZIP): core manual skins
 
-core: popfile.pl pix.gif black.gif insert.pl Classifier/*.pm POPFile/*.pm Proxy/POP3.pm Proxy/Proxy.pm UI/HT??.pm *.change license
+core: popfile.pl otto.gif pix.gif black.gif insert.pl Classifier/*.pm POPFile/*.pm Proxy/POP3.pm Proxy/Proxy.pm UI/HT??.pm *.change license
 	rm -f $(POPFILE_ZIP)
 	$(BUILD_ZIP)
 

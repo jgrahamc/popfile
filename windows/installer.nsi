@@ -14,7 +14,7 @@
 #--------------------------------------------------------------------------
 
   !define MUI_PRODUCT "POPFile"
-  !define MUI_VERSION "0.19.0 RC3"
+  !define MUI_VERSION "0.19.0RC3"
   !include "MUI.nsh"
 
 #----------------------------------------------------------------------------------------
@@ -221,6 +221,7 @@ Section "POPFile" SecPOPFile
   File "..\engine\*.pl"
   File "..\engine\pix.gif"
   File "..\engine\black.gif"
+  File "..\engine\otto.gif"
   
   IfFileExists "$INSTDIR\stopwords" stopwords_found
   File "..\engine\stopwords"
