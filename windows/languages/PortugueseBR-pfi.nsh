@@ -7,7 +7,7 @@
 #
 # These strings are grouped according to the page/window where they are used
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2003-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -87,8 +87,8 @@
 # Standard MUI Page - Installation Page (for the main POPFile installer)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_TITLE     "Program Files Installed"
-!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_SUBTITLE  "${C_PFI_PRODUCT} must be configured before it can be used"
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_TITLE     "Arquivos de Programa Instalados"
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_SUBTITLE  "${C_PFI_PRODUCT} deve ser configurado antes de ser usado"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish (for the main POPFile installer)
@@ -492,8 +492,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO         "Não (a 'Interface de Usuário' não pode ser usada se o POPFile não for iniciado)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "Executar o POPFile (em uma janela)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "Executar o POPFile em segundo plano (nenhuma janela é exibida)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Run POPFile (do not show system tray icon)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Run POPFile with system tray icon (default setting)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Executar o POPFile (não exibir o ícone na bandeja do sistema)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Executar o POPFile com o ícone na bandeja do sistema (configuração padrão)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "Uma vez que o POPFile tenha sido iniciado, você pode exibir a 'Interface de Usuário'"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(a) dando um duplo-clique no ícone do POPFile na bandeja do sistema,   OU"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(b) usando Iniciar --> Programas --> POPFile --> Interface de Usuário do POPFile."
