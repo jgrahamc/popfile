@@ -177,6 +177,63 @@ Label_C_${PFI_UNIQUE_ID}:
 #
 #==============================================================================================
 
+#--------------------------------------------------------------------------
+# Installer Function: GetParameters
+#
+# Returns the command-line parameters (if any) supplied when the installer was started
+#
+# Inputs:
+#         none
+# Outputs:
+#         (top of stack)     - all of the parameters supplied on the command line (may be "")
+#
+# Usage:
+#         Call GetParameters
+#         Pop $R0
+#
+#         (if 'setup.exe /outlook' was used to start the installer, $R0 will hold '/outlook')
+#
+#--------------------------------------------------------------------------
+ 
+Function GetParameters
+
+  Push $R0
+  Push $R1
+  Push $R2
+  Push $R3
+
+  StrCpy $R2 1
+  StrLen $R3 $CMDLINE
+
+  ; Check for quote or space
+
+  StrCpy $R0 $CMDLINE $R2
+  StrCmp $R0 '"' 0 +3
+  StrCpy $R1 '"'
+  Goto loop
+
+  StrCpy $R1 " "
+
+loop:
+  IntOp $R2 $R2 + 1
+  StrCpy $R0 $CMDLINE 1 $R2
+  StrCmp $R0 $R1 get
+  StrCmp $R2 $R3 get
+  Goto loop
+
+get:
+  IntOp $R2 $R2 + 1
+  StrCpy $R0 $CMDLINE 1 $R2
+  StrCmp $R0 " " get
+  StrCpy $R0 $CMDLINE "" $R2
+ 
+  Pop $R3
+  Pop $R2
+  Pop $R1
+  Exch $R0
+
+FunctionEnd
+
 
 #--------------------------------------------------------------------------
 # Installer Function: GetSeparator
@@ -474,62 +531,6 @@ done:
 
   !undef L_REGDATA
   !undef L_TEMP
-
-FunctionEnd
-
-
-#==============================================================================================
-# Function StrLower
-#==============================================================================================
-# The current CVS code only works properly if the short-filename path uses lowercase
-#
-#  Usage Example:
-#
-#    Push "C:\PROGRA~1\SQLPFILE"
-#    Call StrLower
-#    Pop $R0
-#
-#   ($R0 at this point is "c:\progra~1\sqlpfile")
-#
-#==============================================================================================
-
-Function StrLower
-
-  !define C_LOWERCASE    "abcdefghijklmnopqrstuvwxyz"
-
-  Exch $0   ; The input string
-  Push $2   ; Holds the result
-  Push $3   ; A character from the input string
-  Push $4   ; The offset to a character in the "validity check" string
-  Push $5   ; A character from the "validity check" string
-  Push $6   ; Holds the current "validity check" string
-
-  StrCpy $2 ""
-
-next_input_char:
-  StrCpy $3 $0 1              ; Get next character from the input string
-  StrCmp $3 "" done
-  StrCpy $6 ${C_LOWERCASE}$3  ; Add character to end of "validity check" to guarantee a match
-  StrCpy $0 $0 "" 1
-  StrCpy $4 -1
-
-next_valid_char:
-  IntOp $4 $4 + 1
-  StrCpy $5 $6 1 $4   ; Extract next "valid" character (from "validity check" string)
-  StrCmp $3 $5 0 next_valid_char  ; we will ALWAYS find a match in the "validity check" string
-  StrCpy $2 $2$5      ; Use "valid" character to ensure we store lowercase letters in the result
-  goto next_input_char
-
-done:
-  StrCpy $0 $2      ; Result is a string with no uppercase letters
-  Pop $6
-  Pop $5
-  Pop $4
-  Pop $3
-  Pop $2
-  Exch $0           ; place result on top of the stack
-
-  !undef C_LOWERCASE
 
 FunctionEnd
 
