@@ -165,7 +165,6 @@ sub start
                                     $self->{configuration}->{configuration}{localui}  == 1 ? (LocalAddr => 'localhost') : (),
                                      LocalPort => $self->{configuration}->{configuration}{ui_port},
                                      Listen    => SOMAXCONN,
-                                     Reuse     => 1 ) or return 0;
                                      Reuse     => 1 );
 
     if ( !defined( $self->{server} ) ) {
