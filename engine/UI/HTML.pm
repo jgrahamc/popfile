@@ -558,7 +558,21 @@ $self->log_( "url_handler__ $url" );
     }
 
     if ( $url eq '/shutdown' )  {
-        $self->http_ok( $client, "POPFile shutdown", -1 );
+        my $http_header = "HTTP/1.1 200 OK\r\n";
+        $http_header .= "Connection: close\r\n";
+        $http_header .= "Pragma: no-cache\r\n";
+        $http_header .= "Expires: 0\r\n";
+        $http_header .= "Cache-Control: no-cache\r\n";
+        $http_header .= "Content-Type: text/html";
+        $http_header .= "; charset=$self->{language__}{LanguageCharset}\r\n";
+        $http_header .= "Content-Length: ";
+
+        my $text = 'POPFile has shut down';
+
+        $http_header .= length($text);
+        $http_header .= "$eol$eol";
+
+        print $client $http_header . $text;
         return 0;
     }
 
