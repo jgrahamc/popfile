@@ -16,6 +16,7 @@ Content-Transfer-Encoding: 7bit
 Message-ID: <EKARDIAX6Mmasdf78970016@ekardia>
 X-OriginalArrivalTime: 18 Jan 2003 06:26:40.0656 (UTC)
 FILETIME=[8FDC2900:01BAAAABA]
+
 I think you answered my ad longtime ago if it was not you I am sorry.
 If it was I could not answer
 you because my Eudora died and I could not get it to work but my friend got
