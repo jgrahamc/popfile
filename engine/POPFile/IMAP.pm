@@ -1230,8 +1230,10 @@ sub raw_get_response
             return -2;
         }
     }
-
-    return -3;
+    else {
+        $imap->shutdown( 2 );
+        return;
+    }
 }
 
 
