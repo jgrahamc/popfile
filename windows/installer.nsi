@@ -134,7 +134,9 @@ Section "POPFile" SecPOPFile
   File "..\engine\Classifier\*.pm"
 
   SetOutPath $INSTDIR\manual
-  File "..\engine\manual\*.html"
+  File "..\engine\manual\*.gif"
+  SetOutPath $INSTDIR\manual\en
+  File "..\engine\manual\en\*.html"
 
   SetOutPath $INSTDIR\languages
   File "..\engine\languages\English.msg"
@@ -254,6 +256,14 @@ Section "Languages" SecLangs
 
   SetOutPath $INSTDIR\languages
   File "..\engine\languages\*.msg"
+
+  SetOutPath $INSTDIR\manual\br
+  File "..\engine\manual\br\*.html"
+  SetOutPath $INSTDIR\manual\de
+  File "..\engine\manual\de\*.html"
+  File "..\engine\manual\de\*.gif"
+  SetOutPath $INSTDIR\manual\no
+  File "..\engine\manual\no\*.html"
 
 SectionEnd
 
