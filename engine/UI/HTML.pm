@@ -605,6 +605,8 @@ sub html_common_top
     $result .= "<meta http-equiv=\"Cache-Control\" content=\"no-cache\">\n";
     $result .= "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=$self->{language__}{LanguageCharset}\">\n</head>\n";
 
+    $result .= "<link rel=\"icon\" href=\"favicon.ico\">\n";
+
     # If we are handling the shutdown page, then send the CSS along with the
     # page to avoid a request back from the browser _after_ we've shutdown,
     # otherwise, send the link to the CSS file so it is cached by the browser.
@@ -621,11 +623,7 @@ sub html_common_top
     } else {
         $result .= "<link rel=\"stylesheet\" type=\"text/css\" ";
         $result .= "href=\"skins/" . $self->config_( 'skin' ) . ".css\" title=\"" . $self->config_( 'skin' ) . "\">\n";
-	$result .= "<link rel=\"shortcut icon\" type=\"image/x-icon\" ";
-	$result .= "href=\"favicon.ico\">\n";
     }
-
-    $result .= "<link rel=\"icon\" href=\"popfile.ico\" type=\"image/ico\">\n";
 
     return $result;
 }
