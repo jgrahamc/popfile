@@ -809,7 +809,7 @@ sub corpus_page
         $classifier->calculate_top10();
     }
     
-    if ( ( $form{create} eq 'Create' ) && ( $form{name} ne '' ) )
+    if ( $form{name} ne '' )
     {
         $form{name} = lc($form{name});
         if ( $classifier->{total}{$form{name}} > 0 ) 
