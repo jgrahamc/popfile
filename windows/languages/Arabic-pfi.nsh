@@ -33,16 +33,16 @@
 #--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_MB* text used for message boxes):
 #
-#   (1) The sequence  $\r$\n        inserts a newline
-#   (2) The sequence  $\r$\n$\r\$n  inserts a blank line
+#   (1) The sequence  ${MB_NL}          inserts a newline
+#   (2) The sequence  ${MB_NL}${MB_NL}  inserts a blank line
 #
 # (the 'PFI_LANG_CBP_MBCONTERR_2' message box string which is listed under the heading
 # 'Custom Page - POPFile Classification Bucket Creation' includes some examples)
 #--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_IO_ text used for custom pages):
 #
-#   (1) The sequence  \r\n      inserts a newline
-#   (2) The sequence  \r\n\r\n  inserts a blank line
+#   (1) The sequence  ${IO_NL}          inserts a newline
+#   (2) The sequence  ${IO_NL}${IO_NL}  inserts a blank line
 #
 # (the 'PFI_LANG_CBP_IO_INTRO' custom page string which is listed under the heading
 # 'Custom Page - POPFile Classification Bucket Creation' includes some examples)
@@ -61,6 +61,22 @@
 
 !define PFI_LANG  "ARABIC"
 
+#--------------------------------------------------------------------------
+# Symbols used to avoid confusion over where the line breaks occur.
+# (normally these symbols will be defined before this file is 'included')
+#
+# ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+# ${MB_NL} is used for MessageBox-style 'new line' sequences.
+#--------------------------------------------------------------------------
+
+!ifndef IO_NL
+  !define IO_NL     "\r\n"
+!endif
+
+!ifndef MB_NL
+  !define MB_NL     "$\r$\n"
+!endif
+
 #==========================================================================
 # Customised versions of strings used on standard MUI pages
 #==========================================================================
@@ -72,12 +88,12 @@
 #--------------------------------------------------------------------------
 # Standard MUI Page - Welcome (for the main POPFile installer)
 #
-# The sequence \r\n\r\n inserts a blank line (note that the PFI_LANG_WELCOME_INFO_TEXT string
-# should end with a \r\n\r\n$_CLICK sequence).
+# The sequence ${IO_NL}${IO_NL} inserts a blank line (note that the PFI_LANG_WELCOME_INFO_TEXT string
+# should end with a ${IO_NL}${IO_NL}$_CLICK sequence).
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT    "”Ì”«⁄œﬂ Â–« «·„—‘œ Œ·«· ⁄„·Ì…  ‰’Ì» POPFile.\r\n\r\n„‰ «·√›÷· ≈€·«ﬁ «·»—«„Ã «·√Œ—Ï ﬁ»· «·„ «»⁄….\r\n\r\n$_CLICK"
-!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_ADMIN_TEXT   "„·«ÕŸ… „Â„…:\r\n\r\n«·„” Œœ„ «·Õ«·Ì ·« Ì„·ﬂ ’·«ÕÌ… 'Administrator'.\r\n\r\n≈–« ﬂ«‰ «·œ⁄„ ·⁄œ… „” Œœ„Ì‰ „ÿ·Ê»° „‰ «·√›÷· ≈·€«¡ Â–« «· ‰’Ì» Ê≈” ⁄„«· Õ”«» 'Administrator' · ‰’Ì» POPFile."
+!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT    "”Ì”«⁄œﬂ Â–« «·„—‘œ Œ·«· ⁄„·Ì…  ‰’Ì» POPFile.${IO_NL}${IO_NL}„‰ «·√›÷· ≈€·«ﬁ «·»—«„Ã «·√Œ—Ï ﬁ»· «·„ «»⁄….${IO_NL}${IO_NL}$_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_ADMIN_TEXT   "„·«ÕŸ… „Â„…:${IO_NL}${IO_NL}«·„” Œœ„ «·Õ«·Ì ·« Ì„·ﬂ ’·«ÕÌ… 'Administrator'.${IO_NL}${IO_NL}≈–« ﬂ«‰ «·œ⁄„ ·⁄œ… „” Œœ„Ì‰ „ÿ·Ê»° „‰ «·√›÷· ≈·€«¡ Â–« «· ‰’Ì» Ê≈” ⁄„«· Õ”«» 'Administrator' · ‰’Ì» POPFile."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Directory Page (for the main POPFile installer)
@@ -126,11 +142,11 @@
 #--------------------------------------------------------------------------
 # Standard MUI Page - Welcome (for the 'Add POPFile User' wizard)
 #
-# The sequence \r\n\r\n inserts a blank line (note that the PFI_LANG_ADDUSER_INFO_TEXT string
-# should end with a \r\n\r\n$_CLICK sequence).
+# The sequence ${IO_NL}${IO_NL} inserts a blank line (note that the PFI_LANG_ADDUSER_INFO_TEXT string
+# should end with a ${IO_NL}${IO_NL}$_CLICK sequence).
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_INFO_TEXT    "”Ì—‘œﬂ Â–« «·„—‘œ Œ·«· ⁄„·Ì… ≈⁄œ«œ POPFile ··„” Œœ„ '$G_WINUSERNAME'.\r\n\r\n„‰ «·√›÷· ≈€·«ﬁ «·»—«„Ã «·√Œ—Ï ﬁ»· «·„ «»⁄….\r\n\r\n$_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_INFO_TEXT    "”Ì—‘œﬂ Â–« «·„—‘œ Œ·«· ⁄„·Ì… ≈⁄œ«œ POPFile ··„” Œœ„ '$G_WINUSERNAME'.${IO_NL}${IO_NL}„‰ «·√›÷· ≈€·«ﬁ «·»—«„Ã «·√Œ—Ï ﬁ»· «·„ «»⁄….${IO_NL}${IO_NL}$_CLICK"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Directory Page (for the 'Add POPFile User' wizard)
@@ -138,7 +154,7 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TITLE        "≈Œ »«— „Ã·œ „⁄·Ê„«  POPFile ··„” Œœ„ '$G_WINUSERNAME'"
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_SUBTITLE     "≈Œ — „Ã·œ Õ›Ÿ „⁄·Ê„«  POPFile ··„” Œœ„ '$G_WINUSERNAME'"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "Â–Â «·≈’œ«—… „‰ POPFile  ” ⁄„· „Ã„Ê⁄«  „‰›’·… „‰ „·›«  «·„⁄·Ê„«  ·ﬂ· „” Œœ„.$\r$\n$\r$\n”ÌﬁÊ„ »—‰«„Ã «·≈⁄œ«œ »≈” ⁄„«· «·„Ã·œ «· «·Ì ·Õ›Ÿ „⁄·Ê„«  POPFile «·Œ«’… »«·„” Œœ„ '$G_WINUSERNAME'. ·≈” ⁄„«· „Ã·œ ¬Œ— ·Â–« «·„” Œœ„° ≈÷€ÿ ⁄·Ï ⁄—÷ Ê√Œ — „Ã·œ ¬Œ—. $_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "Â–Â «·≈’œ«—… „‰ POPFile  ” ⁄„· „Ã„Ê⁄«  „‰›’·… „‰ „·›«  «·„⁄·Ê„«  ·ﬂ· „” Œœ„.${MB_NL}${MB_NL}”ÌﬁÊ„ »—‰«„Ã «·≈⁄œ«œ »≈” ⁄„«· «·„Ã·œ «· «·Ì ·Õ›Ÿ „⁄·Ê„«  POPFile «·Œ«’… »«·„” Œœ„ '$G_WINUSERNAME'. ·≈” ⁄„«· „Ã·œ ¬Œ— ·Â–« «·„” Œœ„° ≈÷€ÿ ⁄·Ï ⁄—÷ Ê√Œ — „Ã·œ ¬Œ—. $_CLICK"
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_DESTN   "«·„Ã·œ «·„” Œœ„ ·Õ›Ÿ „⁄·Ê„«  POPFile «·Œ«’… »«·„” Œœ„ '$G_WINUSERNAME'"
 
 #--------------------------------------------------------------------------
@@ -152,7 +168,7 @@
 # Standard MUI Page - Finish (for the 'Add POPFile User' wizard)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_FINISH_INFO " „ ≈⁄œ«œ POPFile ··„” Œœ„ '$G_WINUSERNAME'.\r\n\r\n≈÷€Ÿ ≈‰Â«¡ ·≈€·«ﬁ Â–« «·„—‘œ."
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_FINISH_INFO " „ ≈⁄œ«œ POPFile ··„” Œœ„ '$G_WINUSERNAME'.${IO_NL}${IO_NL}≈÷€Ÿ ≈‰Â«¡ ·≈€·«ﬁ Â–« «·„—‘œ."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall Confirmation Page (for the 'Add POPFile User' wizard)
@@ -221,12 +237,12 @@
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "”Ì” ⁄„· «·„ ’›Õ «·≈› —«÷Ì ·⁄—÷ Ê«ÃÂ… ≈” ⁄„«· POPFile („—ﬂ“ «· Õﬂ„).\r\n\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "·« Ì ÿ·» POPFile „ ’›Õ „Õœœ° ”Ì⁄„· „⁄ «Ì „ ’›Õ.\r\n\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "”Ì „  ‰’Ì» ‰”Œ… „’€—… „‰ Perl ( „ ﬂ «»… POPFile »Ê«”ÿ… Perl).\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "”Ì” ⁄„· «·„ ’›Õ «·≈› —«÷Ì ·⁄—÷ Ê«ÃÂ… ≈” ⁄„«· POPFile („—ﬂ“ «· Õﬂ„).${IO_NL}${IO_NL}"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "·« Ì ÿ·» POPFile „ ’›Õ „Õœœ° ”Ì⁄„· „⁄ «Ì „ ’›Õ.${IO_NL}${IO_NL}"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "”Ì „  ‰’Ì» ‰”Œ… „’€—… „‰ Perl ( „ ﬂ «»… POPFile »Ê«”ÿ… Perl).${IO_NL}${IO_NL}"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4    "Ì ÿ·» Perl «·„“Êœ „⁄ POPFile »⁄÷ „ﬂÊ‰«  Internet Explorer Ê·Â–« Ì ÿ·» ÊÃÊœ Internet Explorer 5.5 (√Ê „« »⁄œÂ«)."
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_5    "·ﬁœ ≈ﬂ ‘› «·„‰’¯» ÊÃÊœ Internet Explorer ›Ì Â–« «·‰Ÿ«„"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "„‰ «·„„ﬂ‰ √‰ »⁄÷ „Ì“«  POPFile ·‰  ⁄„· »‘ﬂ· ’ÕÌÕ ⁄·Ï Â–« «·‰Ÿ«„.\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "„‰ «·„„ﬂ‰ √‰ »⁄÷ „Ì“«  POPFile ·‰  ⁄„· »‘ﬂ· ’ÕÌÕ ⁄·Ï Â–« «·‰Ÿ«„.${IO_NL}${IO_NL}"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_7    "≈–« Ê«ÃÂ  „‘«ﬂ· „⁄ POPFile° ›≈‰ «· —ﬁÌ… «·Ï ‰”Œ… ÃœÌœ… „‰ Internet Explorer „„ﬂ‰ «‰  ”«⁄œ."
 
 #--------------------------------------------------------------------------
@@ -329,6 +345,18 @@
 # Custom Page - POPFile Classification Bucket Creation
 #--------------------------------------------------------------------------
 
+; POPFile requires at least TWO buckets in order to work properly. PFI_LANG_CBP_DEFAULT_BUCKETS
+; defines the default buckets and PFI_LANG_CBP_SUGGESTED_NAMES defines a list of suggested names
+; to help the user get started with POPFile. Both lists use the | character as a name separator.
+
+; Bucket names can only use the characters abcdefghijklmnopqrstuvwxyz_-0123456789
+; (any names which contain invalid characters will be ignored by the installer)
+
+; Empty lists ("") are allowed (but are not very user-friendly)
+
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_DEFAULT_BUCKETS  "spam|personal|work|other"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_SUGGESTED_NAMES  "admin|business|computers|family|financial|general|hobby|inbox|junk|list-admin|miscellaneous|not_spam|other|personal|recreation|school|security|shopping|spam|travel|work"
+
 ; Page Title and Sub-title displayed in the page header
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_TITLE            "≈‰‘«¡ œ·«¡  ’‰Ì› POPFile"
@@ -336,19 +364,19 @@
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_INTRO         "»⁄œ «· ‰’Ì»° „‰ «·”Â·  €ÌÌ— ⁄œœ «·œ·«¡ (Ê«”«„ÌÂ«) · ·«∆„ ≈Õ Ì«Ã« ﬂ.\r\n\r\n≈”„«„Ì «·œ·«¡ ÌÃ» √‰  ﬂÊ‰ ﬂ·„«  „›—œ…° Ê ” ⁄„· «·√Õ—› »‘ﬂ· ’€Ì— „‰ a ≈·Ï z° «—ﬁ«„ 0 ≈·Ï 9° - Ê _."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_CREATE        "\r\n≈‰‘«¡ œ·Ê ÃœÌœ ≈„« »≈Œ Ì«— ≈”„ „‰ «··«∆Õ… ›Ì «·√”›· √Ê ﬂ «»… ≈”„ „‰ ≈Œ Ì«—ﬂ."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_DELETE        "\r\n·Õ–› œ·Ê Ê«Õœ √Ê √ﬂÀ— „‰ «··«∆Õ…° ⁄·¯„ «·„—»⁄ 'Õ–›' «·„·«∆„ Ê≈÷€ÿ '„ «»⁄…'."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_INTRO         "»⁄œ «· ‰’Ì»° „‰ «·”Â·  €ÌÌ— ⁄œœ «·œ·«¡ (Ê«”«„ÌÂ«) · ·«∆„ ≈Õ Ì«Ã« ﬂ.${IO_NL}${IO_NL}≈”„«„Ì «·œ·«¡ ÌÃ» √‰  ﬂÊ‰ ﬂ·„«  „›—œ…° Ê ” ⁄„· «·√Õ—› »‘ﬂ· ’€Ì— „‰ a ≈·Ï z° «—ﬁ«„ 0 ≈·Ï 9° - Ê _."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_CREATE        "${IO_NL}≈‰‘«¡ œ·Ê ÃœÌœ ≈„« »≈Œ Ì«— ≈”„ „‰ «··«∆Õ… ›Ì «·√”›· √Ê ﬂ «»… ≈”„ „‰ ≈Œ Ì«—ﬂ."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_DELETE        "${IO_NL}·Õ–› œ·Ê Ê«Õœ √Ê √ﬂÀ— „‰ «··«∆Õ…° ⁄·¯„ «·„—»⁄ 'Õ–›' «·„·«∆„ Ê≈÷€ÿ '„ «»⁄…'."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_LISTHDR       "œ·«¡ „” ⁄„·… „ˆ‰ ﬁˆ»· POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_REMOVE        "Õ–›"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_CONTINUE      "„ «»⁄…"
 
 ; Text strings used for status messages under the bucket list
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_1         "\r\n·«  ÊÃœ «·Õ«Ã… ·≈÷«›… œ·«¡ √Œ—Ï"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_2         "\r\nÌÃ»  ⁄—Ì› ⁄·Ï «·√ﬁ· œ·ÊÌ‰ ≈À‰Ì‰"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_3         "\r\nÌ·“„ ⁄·Ï «·√ﬁ· œ·Ê ¬Œ—"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_4         "\r\n·« Ì” ÿÌ⁄ «·„‰’¯» √ﬂÀ— „‰"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_1         "${IO_NL}·«  ÊÃœ «·Õ«Ã… ·≈÷«›… œ·«¡ √Œ—Ï"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_2         "${IO_NL}ÌÃ»  ⁄—Ì› ⁄·Ï «·√ﬁ· œ·ÊÌ‰ ≈À‰Ì‰"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_3         "${IO_NL}Ì·“„ ⁄·Ï «·√ﬁ· œ·Ê ¬Œ—"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_4         "${IO_NL}·« Ì” ÿÌ⁄ «·„‰’¯» √ﬂÀ— „‰"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_5         "œ·«¡"
 
 ; Message box text strings
@@ -367,7 +395,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_4       "«·—Ã«¡ ≈Œ Ì«— ≈”„ ¬Œ— ··œ·Ê «·ÃœÌœ."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_1      "ÌÕ «Ã POPFile ≈·Ï œ·ÊÌ‰ √À‰Ì‰ ⁄·Ï «·≈ﬁ· ﬁ»· √‰ Ì „ﬂ‰ „‰  ’‰Ì› «·»—Ìœ."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_2      "«·—Ã«¡ ≈œŒ«· ≈”„ ·œ·Ê ··≈‰‘«¡°$\r$\n$\r$\n≈„« »≈Œ Ì«— ≈”„ „ﬁ —Õ „‰ «··«∆Õ…$\r$\n$\r$\n√Ê »ﬂ «»… ≈”„ „‰ ≈Œ Ì«—ﬂ."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_2      "«·—Ã«¡ ≈œŒ«· ≈”„ ·œ·Ê ··≈‰‘«¡°${MB_NL}${MB_NL}≈„« »≈Œ Ì«— ≈”„ „ﬁ —Õ „‰ «··«∆Õ…${MB_NL}${MB_NL}√Ê »ﬂ «»… ≈”„ „‰ ≈Œ Ì«—ﬂ."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_3      "ÌÃ»  ⁄—Ì› œ·ÊÌ‰ ⁄·Ï «·√ﬁ· ﬁ»· «·„ «»⁄… ›Ì  ‰’Ì» POPFile."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_1         "ÂÊ ⁄œœ «·œ·«¡ «·„⁄—›… · ” ⁄„· »Ê«”ÿ… POPFile."
@@ -377,7 +405,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_1       "·„ Ì” ÿ⁄ «·„‰’¯» ≈‰‘«¡"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_2       "„‰"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_3       "«·œ·«¡ «· Ì ≈Œ — Â«."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4       "»⁄œ  ‰’Ì» POPFile  ” ÿÌ⁄ ≈” ⁄„«· 'Ê«ÃÂ… «·„” Œœ„'$\r$\n$\r$\n Ê·ÊÕ… «· Õﬂ„ ·≈‰‘«¡ «·œ·«¡ «·‰«ﬁ’…."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4       "»⁄œ  ‰’Ì» POPFile  ” ÿÌ⁄ ≈” ⁄„«· 'Ê«ÃÂ… «·„” Œœ„'${MB_NL}${MB_NL} Ê·ÊÕ… «· Õﬂ„ ·≈‰‘«¡ «·œ·«¡ «·‰«ﬁ’…."
 
 #--------------------------------------------------------------------------
 # Custom Page - Email Client Reconfiguration
@@ -390,8 +418,8 @@
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1    "»—«„Ã «·»—Ìœ «·„⁄·¯„… »Ê«”ÿ… (*) Ì„ﬂ‰ ≈⁄œ«œÂ« »‘ﬂ·  ·ﬁ«∆Ì° ≈› —«÷« »√‰ «·Õ”«»«  «·„” ⁄„·… »”Ìÿ….\r\n\r\n„‰ «·√›÷· √‰ Ì „ ≈⁄œ«œ «·Õ”«»«  «· Ì  ” ⁄„· «·„’«œﬁ… «·¬„‰… »‘ﬂ· ÌœÊÌ."
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2    "„Â„: «·—Ã«¡ ≈€·«ﬁ »—«„Ã «·»—Ìœ «·„—«œ ≈⁄œ«œÂ« »‘ﬂ·  ·ﬁ«∆Ì «·¬‰\r\n\r\nÂ–Â «·„Ì“… ·«  “«· ﬁÌœ «· ÿÊÌ— („À«·: »⁄÷ Õ”«»«  Outlook ·« Ì „ ≈ﬂ ‘«›Â« √ÕÌ«‰«).\r\n\r\n«·—Ã«¡ ›Õ’ √‰ «·≈⁄œ«œ«   „¯  »‘ﬂ· ’ÕÌÕ (ﬁ»· ≈” ⁄„«· »—‰«„Ã «·»—Ìœ)."
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1    "»—«„Ã «·»—Ìœ «·„⁄·¯„… »Ê«”ÿ… (*) Ì„ﬂ‰ ≈⁄œ«œÂ« »‘ﬂ·  ·ﬁ«∆Ì° ≈› —«÷« »√‰ «·Õ”«»«  «·„” ⁄„·… »”Ìÿ….${IO_NL}${IO_NL}„‰ «·√›÷· √‰ Ì „ ≈⁄œ«œ «·Õ”«»«  «· Ì  ” ⁄„· «·„’«œﬁ… «·¬„‰… »‘ﬂ· ÌœÊÌ."
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2    "„Â„: «·—Ã«¡ ≈€·«ﬁ »—«„Ã «·»—Ìœ «·„—«œ ≈⁄œ«œÂ« »‘ﬂ·  ·ﬁ«∆Ì «·¬‰${IO_NL}${IO_NL}Â–Â «·„Ì“… ·«  “«· ﬁÌœ «· ÿÊÌ— („À«·: »⁄÷ Õ”«»«  Outlook ·« Ì „ ≈ﬂ ‘«›Â« √ÕÌ«‰«).${IO_NL}${IO_NL}«·—Ã«¡ ›Õ’ √‰ «·≈⁄œ«œ«   „¯  »‘ﬂ· ’ÕÌÕ (ﬁ»· ≈” ⁄„«· »—‰«„Ã «·»—Ìœ)."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_CANCEL    " „ ≈·€«¡ ⁄„·Ì… ≈⁄œ«œ »—‰«„Ã «·»—Ìœ „‰ ﬁ»· «·„” Œœ„"
 
@@ -440,7 +468,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_EMAILHDR   "⁄‰Ê«‰ »—Ìœ ≈·ﬂ —Ê‰Ì"
 !insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_SERVERHDR  "Œ«œ„"
 !insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_USRNAMEHDR "≈”„ „” Œœ„"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_FOOTNOTE   "⁄·¯„ «·„—»⁄(‹« ) ·≈⁄œ«œ «·Õ”«»(‹« ).\r\n⁄‰œ ≈“«·… POPFile Ì „ ≈⁄«œ… «·≈⁄œ«œ«  «·√’·Ì…."
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_FOOTNOTE   "⁄·¯„ «·„—»⁄(‹« ) ·≈⁄œ«œ «·Õ”«»(‹« ).${IO_NL}⁄‰œ ≈“«·… POPFile Ì „ ≈⁄«œ… «·≈⁄œ«œ«  «·√’·Ì…."
 
 ; Message Box to confirm changes to Outlook/Outlook Express account configuration
 
@@ -603,8 +631,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_3         "≈÷€ÿ '·«' ·≈Â„«· Â–Â «·√Œÿ«¡ ÊÕ–› ﬂ· ‘Ì¡"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_4         "≈÷€ÿ '‰⁄„' ··„Õ«›Ÿ… ⁄·Ï Â–Â «·„⁄·Ê„«  (··”„«Õ ·„Õ«Ê·… √Œ—Ï ·«Õﬁ«)"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Â·  —Ìœ Õ–› ﬂ· «·„·›«  ›Ì „Ã·œ POPFileø$\r$\n$\r$\n(≈–« ﬂ«‰ Â‰«ﬂ √‘Ì«¡  Õ «ÃÂ«° ≈÷€ÿ ·«)"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Â·  —Ìœ Õ–› ﬂ· «·„·›«  ›Ì „Ã·œ '„⁄·Ê„«  «·„” Œœ„' «·Œ«’ »‹ˆPOPFileø$\r$\n$\r$\n(≈–« ﬂ«‰ Â‰«ﬂ √‘Ì«¡  Õ «ÃÂ«° ≈÷€ÿ ·«)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Â·  —Ìœ Õ–› ﬂ· «·„·›«  ›Ì „Ã·œ POPFileø${MB_NL}${MB_NL}$G_ROOTDIR${MB_NL}${MB_NL}(≈–« ﬂ«‰ Â‰«ﬂ √‘Ì«¡  Õ «ÃÂ«° ≈÷€ÿ ·«)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Â·  —Ìœ Õ–› ﬂ· «·„·›«  ›Ì „Ã·œ '„⁄·Ê„«  «·„” Œœ„' «·Œ«’ »‹ˆPOPFileø${MB_NL}${MB_NL}$G_USERDIR${MB_NL}${MB_NL}(≈–« ﬂ«‰ Â‰«ﬂ √‘Ì«¡  Õ «ÃÂ«° ≈÷€ÿ ·«)"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Do you want to remove all files in your 'Recent Messages' directory?"
 

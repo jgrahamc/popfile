@@ -33,16 +33,16 @@
 #--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_MB* text used for message boxes):
 #
-#   (1) The sequence  $\r$\n        inserts a newline
-#   (2) The sequence  $\r$\n$\r\$n  inserts a blank line
+#   (1) The sequence  ${MB_NL}          inserts a newline
+#   (2) The sequence  ${MB_NL}${MB_NL}  inserts a blank line
 #
 # (the 'PFI_LANG_CBP_MBCONTERR_2' message box string which is listed under the heading
 # 'Custom Page - POPFile Classification Bucket Creation' includes some examples)
 #--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_IO_ text used for custom pages):
 #
-#   (1) The sequence  \r\n      inserts a newline
-#   (2) The sequence  \r\n\r\n  inserts a blank line
+#   (1) The sequence  ${IO_NL}          inserts a newline
+#   (2) The sequence  ${IO_NL}${IO_NL}  inserts a blank line
 #
 # (the 'PFI_LANG_CBP_IO_INTRO' custom page string which is listed under the heading
 # 'Custom Page - POPFile Classification Bucket Creation' includes some examples)
@@ -61,6 +61,22 @@
 
 !define PFI_LANG  "PORTUGUESEBR"
 
+#--------------------------------------------------------------------------
+# Symbols used to avoid confusion over where the line breaks occur.
+# (normally these symbols will be defined before this file is 'included')
+#
+# ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+# ${MB_NL} is used for MessageBox-style 'new line' sequences.
+#--------------------------------------------------------------------------
+
+!ifndef IO_NL
+  !define IO_NL     "\r\n"
+!endif
+
+!ifndef MB_NL
+  !define MB_NL     "$\r$\n"
+!endif
+
 #==========================================================================
 # Customised versions of strings used on standard MUI pages
 #==========================================================================
@@ -72,12 +88,12 @@
 #--------------------------------------------------------------------------
 # Standard MUI Page - Welcome (for the main POPFile installer)
 #
-# The sequence \r\n\r\n inserts a blank line (note that the PFI_LANG_WELCOME_INFO_TEXT string
-# should end with a \r\n\r\n$_CLICK sequence).
+# The sequence ${IO_NL}${IO_NL} inserts a blank line (note that the PFI_LANG_WELCOME_INFO_TEXT string
+# should end with a ${IO_NL}${IO_NL}$_CLICK sequence).
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT    "Este assistente te guiará durante a instalação do POPFile.\r\n\r\nÉ recomendado que você feche todas as outras aplicações antes de iniciar a Instalação.\r\n\r\n$_CLICK"
-!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_ADMIN_TEXT   "NOTA IMPORTANTE:\r\n\r\nO usuário corrente NÃO tem direitos de 'Administrador'.\r\n\r\nSe suporte a multi-usuário é requerido, é recomendado que você cancele esta instalação e use uma conta de 'Administrador' para instalar o POPFile."
+!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT    "Este assistente te guiará durante a instalação do POPFile.${IO_NL}${IO_NL}É recomendado que você feche todas as outras aplicações antes de iniciar a Instalação.${IO_NL}${IO_NL}$_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_ADMIN_TEXT   "NOTA IMPORTANTE:${IO_NL}${IO_NL}O usuário corrente NÃO tem direitos de 'Administrador'.${IO_NL}${IO_NL}Se suporte a multi-usuário é requerido, é recomendado que você cancele esta instalação e use uma conta de 'Administrador' para instalar o POPFile."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Directory Page (for the main POPFile installer)
@@ -127,11 +143,11 @@
 #--------------------------------------------------------------------------
 # Standard MUI Page - Welcome (for the 'Add POPFile User' wizard)
 #
-# The sequence \r\n\r\n inserts a blank line (note that the PFI_LANG_ADDUSER_INFO_TEXT string
-# should end with a \r\n\r\n$_CLICK sequence).
+# The sequence ${IO_NL}${IO_NL} inserts a blank line (note that the PFI_LANG_ADDUSER_INFO_TEXT string
+# should end with a ${IO_NL}${IO_NL}$_CLICK sequence).
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_INFO_TEXT    "Este assistente vai guiar você pela configuração do POPFile para o usuário '$G_WINUSERNAME'.\r\n\r\nÉ recomendado que você feche todas as outras aplicações antes de continuar.\r\n\r\n$_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_INFO_TEXT    "Este assistente vai guiar você pela configuração do POPFile para o usuário '$G_WINUSERNAME'.${IO_NL}${IO_NL}É recomendado que você feche todas as outras aplicações antes de continuar.${IO_NL}${IO_NL}$_CLICK"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Directory Page (for the 'Add POPFile User' wizard)
@@ -139,7 +155,7 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TITLE        "Escolha o Local dos Dados do POPFile para '$G_WINUSERNAME'"
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_SUBTITLE     "Escolha a pasta para guardar os Dados do POPFile para '$G_WINUSERNAME'"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "Esta versão do POPFile usa conjuntos de arquivos de dados separados para cada usuário.$\r$\n$\r$\nO Instalador vai usar a seguinte pasta para os dados do POPFile pertencentes ao usuário'$G_WINUSERNAME'. Para usar uma pasta diferente para este usuário, clique em Procurar e selecione uma outra pasta. $_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "Esta versão do POPFile usa conjuntos de arquivos de dados separados para cada usuário.${MB_NL}${MB_NL}O Instalador vai usar a seguinte pasta para os dados do POPFile pertencentes ao usuário'$G_WINUSERNAME'. Para usar uma pasta diferente para este usuário, clique em Procurar e selecione uma outra pasta. $_CLICK"
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_DESTN   "Pasta a ser usada para guardar os dados do POPFile para '$G_WINUSERNAME'"
 
 #--------------------------------------------------------------------------
@@ -153,7 +169,7 @@
 # Standard MUI Page - Finish (for the 'Add POPFile User' wizard)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_FINISH_INFO "O POPFile foi configurado para o usuário '$G_WINUSERNAME'.\r\n\r\nClique em Finalizar para fechar este assistente."
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_FINISH_INFO "O POPFile foi configurado para o usuário '$G_WINUSERNAME'.${IO_NL}${IO_NL}Clique em Finalizar para fechar este assistente."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall Confirmation Page (for the 'Add POPFile User' wizard)
@@ -222,12 +238,12 @@
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "O browser padrão é usado para exibir a Interface de Usuário do POPFile (seu centro de controle).\r\n\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "O POPFile não requer um browser específico, ele funcionará com praticamente qualquer browser.\r\n\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "Uma versão mínima do Perl está para ser instalada (o POPFile é escrito em Perl).\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "O browser padrão é usado para exibir a Interface de Usuário do POPFile (seu centro de controle).${IO_NL}${IO_NL}"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "O POPFile não requer um browser específico, ele funcionará com praticamente qualquer browser.${IO_NL}${IO_NL}"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "Uma versão mínima do Perl está para ser instalada (o POPFile é escrito em Perl).${IO_NL}${IO_NL}"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4    "O Perl fornecido com o POPFile faz uso de alguns componentes do Internet Explorer e requer o Internet Explorer 5.5 (ou uma versão mais atual)."
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_5    "O instalador detectou que este sistema tem o Internet Explorer"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "É possível que algumas características do POPFile não funcionem corretamente neste sistema.\r\n\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "É possível que algumas características do POPFile não funcionem corretamente neste sistema.${IO_NL}${IO_NL}"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_7    "Se você tiver algum problema com o POPFile, uma atualização para uma versão mais nova do Internet Explorer pode ajudar."
 
 #--------------------------------------------------------------------------
@@ -330,6 +346,18 @@
 # Custom Page - POPFile Classification Bucket Creation
 #--------------------------------------------------------------------------
 
+; POPFile requires at least TWO buckets in order to work properly. PFI_LANG_CBP_DEFAULT_BUCKETS
+; defines the default buckets and PFI_LANG_CBP_SUGGESTED_NAMES defines a list of suggested names
+; to help the user get started with POPFile. Both lists use the | character as a name separator.
+
+; Bucket names can only use the characters abcdefghijklmnopqrstuvwxyz_-0123456789
+; (any names which contain invalid characters will be ignored by the installer)
+
+; Empty lists ("") are allowed (but are not very user-friendly)
+
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_DEFAULT_BUCKETS  "spam|personal|work|other"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_SUGGESTED_NAMES  "admin|business|computers|family|financial|general|hobby|inbox|junk|list-admin|miscellaneous|not_spam|other|personal|recreation|school|security|shopping|spam|travel|work"
+
 ; Page Title and Sub-title displayed in the page header
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_TITLE            "Criação de Balde de Classificação do POPFile"
@@ -337,7 +365,7 @@
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_INTRO         "Depois da instalação, o POPFile torna fácil alterar o número de baldes (e seus nomes) para satisfazer suas necessidades.\r\n\r\nOs nomes dos baldes devem ser palavras únicas, usando letras minúsculas, dígitos de 0 a 9, hífens e sublinhados."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_INTRO         "Depois da instalação, o POPFile torna fácil alterar o número de baldes (e seus nomes) para satisfazer suas necessidades.${IO_NL}${IO_NL}Os nomes dos baldes devem ser palavras únicas, usando letras minúsculas, dígitos de 0 a 9, hífens e sublinhados."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_CREATE        "Crie um novo balde selecionando um nome da lista abaixo ou digitando um nome de sua escolha."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_DELETE        "Para deletar um ou mais baldes da lista, marque a(s) caixa(s) 'Remover' relevante(s) e clique no botão 'Continuar'."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_LISTHDR       "Baldes a serem usados pelo POPFile"
@@ -368,7 +396,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_4       "Por favor escolha um nome diferente para o novo balde."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_1      "O POPFile requer PELO MENOS DOIS baldes para poder classificar seus emails."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_2      "Por favor entre o nome de um balde para ser criado,$\r$\n$\r$\nescolhendo um nome sugerido da lista$\r$\n$\r$\nou digitando um nome de sua escolha."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_2      "Por favor entre o nome de um balde para ser criado,${MB_NL}${MB_NL}escolhendo um nome sugerido da lista${MB_NL}${MB_NL}ou digitando um nome de sua escolha."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_3      "Você deve definir PELO MENOS DOIS baldes antes de continuar sua instalação do POPFile."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_1         "baldes foram definidos para uso do POPFile."
@@ -378,7 +406,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_1       "O instalador não foi capaz de criar"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_2       "de"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_3       "baldes que você selecionou."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4       "Uma vez que o POPFile tenha sido instalado, você pode usar seu painél de controle$\r$\n$\r$\n na 'Interface de Usuário' para criar o(s) balde(s) que faltar(em)."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4       "Uma vez que o POPFile tenha sido instalado, você pode usar seu painél de controle${MB_NL}${MB_NL} na 'Interface de Usuário' para criar o(s) balde(s) que faltar(em)."
 
 #--------------------------------------------------------------------------
 # Custom Page - Email Client Reconfiguration
@@ -391,8 +419,8 @@
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1    "Clientes de email marcados (*) podem ser reconfigurados automaticamente, assumindo que contas simples sejam usadas.\r\n\r\nÉ altamente recomendado que contas que requeiram autenticação sejam configuradas manualmente."
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2    "IMPORTANTE: POR FAVOR FECHE OS CLIENTES DE EMAIL RECONFIGURÁVEIS AGORA\r\n\r\nEsta característica ainda está em desenvolvimento (algumas contas do Outlook podem não serem detectadas).\r\n\r\nPor favor verifique se a reconfiguração foi bem sucedida (antes de usar o cliente de email)."
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1    "Clientes de email marcados (*) podem ser reconfigurados automaticamente, assumindo que contas simples sejam usadas.${IO_NL}${IO_NL}É altamente recomendado que contas que requeiram autenticação sejam configuradas manualmente."
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2    "IMPORTANTE: POR FAVOR FECHE OS CLIENTES DE EMAIL RECONFIGURÁVEIS AGORA${IO_NL}${IO_NL}Esta característica ainda está em desenvolvimento (algumas contas do Outlook podem não serem detectadas).${IO_NL}${IO_NL}Por favor verifique se a reconfiguração foi bem sucedida (antes de usar o cliente de email)."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_CANCEL    "Reconfiguração do cliente de email cancelada pelo usuário"
 
@@ -441,7 +469,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_EMAILHDR   "Endereço de Email"
 !insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_SERVERHDR  "Servidor"
 !insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_USRNAMEHDR "Nome do Usuário"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_FOOTNOTE   "Marque a(s) caixa(s) para reconfigurar a(s) conta(s).\r\nSe você desinstalar o POPFile as configurações originais serão restauradas."
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_FOOTNOTE   "Marque a(s) caixa(s) para reconfigurar a(s) conta(s).${IO_NL}Se você desinstalar o POPFile as configurações originais serão restauradas."
 
 ; Message Box to confirm changes to Outlook/Outlook Express account configuration
 
@@ -604,8 +632,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_3         "Clique em 'Não' para ignorar estes erros e deletar tudo"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_4         "Clique em 'Sim' para manter estes dados (para tentar outra vez mais tarde)"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Você quer remover todos os arquivos da sua pasta do POPFile ?$\r$\n$\r$\n(Se você tiver qualquer coisa que você criou e quer manter, clique Não)"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Você quer remover todos os arquivos do seu diretório 'User Data' do POPFile?$\r$\n$\r$\n(Se você tiver qualquer coisa que você criou e quer manter, clique em Não)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Você quer remover todos os arquivos da sua pasta do POPFile ?${MB_NL}${MB_NL}$G_ROOTDIR${MB_NL}${MB_NL}(Se você tiver qualquer coisa que você criou e quer manter, clique Não)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Você quer remover todos os arquivos do seu diretório 'User Data' do POPFile?${MB_NL}${MB_NL}$G_USERDIR${MB_NL}${MB_NL}(Se você tiver qualquer coisa que você criou e quer manter, clique em Não)"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Você quer remover todos os arquivos do seu diretório 'Mensagens Recentes'?"
 
