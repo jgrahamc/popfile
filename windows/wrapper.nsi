@@ -3,8 +3,6 @@
 # wrapper.nsi --- A simple utility to run POPFile after ensuring the necessary
 #                 environment variables exist. These environment variables are
 #                 defined using data found in 'wrapper.ini' (for easy alteration).
-#                 If 'wrapper.ini' is not found in the current directory,
-#                 the utility asks for permission to create the file there.
 #
 # Copyright (c) 2001-2004 John Graham-Cumming
 #
@@ -25,7 +23,8 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #-------------------------------------------------------------------------------------------
 #
-#  This version was tested using "NSIS 2 Release Candidate 2" released 5 January 2004
+#  This version was tested using "NSIS 2 Release Candidate 2" released 5 January 2004,
+#  with the 9 January 2004 (20:44 GMT) NSIS CVS snapshot update applied.
 #
 #-------------------------------------------------------------------------------------------
 # Compile-time command-line switches (used by 'makensis.exe')
@@ -56,36 +55,55 @@
 # starting POPFile).
 #
 # [Configuration]
+#  UserName=see note (1) below
+#  UserLock=see note (2) below
+#  SearchResult=see note (3) below
 #  POPFileFolder=path to the folder containing the POPFile program files
 #  UserDataFolder=path to the folder containing the user's POPFile configuration files
 #
 # [Environment]
-#  POPFILE_ROOT=short-filename path to the POPFile program files
-#  POPFILE_USER=short-filename path to the user's POPFile configuration files
+#  POPFILE_ROOT=short-filename path (using lowercase!) to the POPFile program files
+#  POPFILE_USER=short-filename path (using lowercase!) to the user's POPFile configuration files
 #
 # NOTES:
 #
-# (1) The POPFile installer defaults to single-user case so it creates a default 'wrapper.ini'
-#     file in the installation folder, containing only 3 lines:
+# (1) The wrapper utility uses the Windows login name of the current user to identify the
+#     owner of the 'wrapper.ini' file.
+#
+# (2) If 'UserLock=Yes' the wrapper utility will only allow the named user to use the data
+#     defined in wrapper.ini. If 'UserLock=No' then no user name checks are performed by the
+#     utility, though it will suggest that better results can be achieved if each user has
+#     their own set of POPFile data. If there is no 'UserLock' entry, 'UserLock=Yes' is assumed.
+#
+# (3) 'SearchResult' indicates how the wrapper utility found the POPFile program's location.
+#
+# (4) The POPFile installer assumes the single-user case so it creates a default 'wrapper.ini'
+#     file in the installation folder, containing only 6 lines:
 #
 #     [Configuration]
+#     UserName=see below
+#     UserLock=Yes
+#     SearchResult=Installer
 #     POPFileFolder=C:\Program Files\POPFile
 #     UserDataFolder=C:\Program Files\POPFile
 #
-#     (assuming the default installation folder was used)
+#     ('UserName' is the user running the installer; the 'POPFileFolder' & 'UserDataFolder'
+#     paths shown above assume the default installation folder was used for POPFile)
 #
-# (2) When the 'wrapper' utility finds this default 'wrapper.ini' file, it will add a new
+# (5) When the 'wrapper' utility finds this default 'wrapper.ini' file, it will add a new
 #     section to it:
 #
 #     [Environment]
-#     POPFILE_ROOT=C:\PROGRA~1\POPFILE
+#     POPFILE_ROOT=c:\progra~1\popfile
 #     POPFILE_USER=.
 #
-#    (notice that the POPFILE_USER value uses a relative path)
+#     (notice that the POPFILE_USER value uses a relative path).
+#
+#     Current CVS code does not convert old-style corpus files when uppercase is used for paths.
 #-------------------------------------------------------------------------------------------
 
   Name    "POPFile Wrapper Utility"
-  !define C_VERSION   "0.3.1"     ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.4.0"     ; see 'VIProductVersion' comment below for format details
 
   ; The default NSIS caption is "Name Setup" so we override it here
 
@@ -145,37 +163,115 @@ Section default
   !define L_CMPRE         $R8   ; used to look for config parameter
   !define L_CONSOLE       $R7   ; 0 = run in background, 1 = run in console window
   !define L_DATA          $R6
-  !define L_POPFILE_ROOT  $R5   ; holds full path to the main POPFile folder
-  !define L_POPFILE_USER  $R4   ; holds path to the user's 'popfile.cfg' file
+  !define L_INIFOLDER     $R5   ; full path name of the folder used to hold 'wrapper.ini' file
+  !define L_LOCKNAME      $R4   ; owner of the 'wrapper.ini' file
+  !define L_POPFILE_ROOT  $R3   ; holds full path to the main POPFile folder
+  !define L_POPFILE_USER  $R2   ; holds path to the user's 'popfile.cfg' file
+  !define L_USERNAME      $R1   ; current Windows login username (or 'UnknownUser' if Win95?)
 
-  !define L_RESERVED      $0    ; register $0 is used to return result from System.dll
+  !define L_RESERVED      $0    ; register $0 is used to return the result from System.dll call
+
+  ; Get current Windows login username
+
+	ClearErrors
+	UserInfo::GetName
+	IfErrors 0 name_found
+  StrCpy ${L_USERNAME} "UnknownUser"
+  Goto got_name
+
+name_found:
+	Pop ${L_USERNAME}
+
+got_name:
 
   ; Expect to find 'wrapper.ini' in the current directory
   ; (if not found, we ask for permission to create it there)
-  
-  IfFileExists ".\Wrapper.ini" continue
-  GetFullPathName ${L_DATA} "."
-  MessageBox MB_YESNO|MB_ICONQUESTION "Unable to find user's POPFile configuration data in\
+
+  GetFullPathName ${L_INIFOLDER} "."
+  IfFileExists ".\wrapper.ini" use_wrapper_ini
+  MessageBox MB_YESNO|MB_ICONQUESTION "Unable to find user's WRAPPER.INI data file in\
       $\r$\n$\r$\n\
-      ${L_DATA}\
+      ${L_INIFOLDER}\
       $\r$\n$\r$\n\
-      Click 'Yes' to create user data here or 'No' to quit"\
+      Click 'Yes' to create data for '${L_USERNAME}' here or 'No' to quit"\
       IDNO error_exit
 
-continue:
-  ReadINIStr ${L_POPFILE_ROOT} ".\Wrapper.ini" "Configuration" "POPFileFolder"
+  ; Create new 'wrapper.ini' file for this user (and 'lock' it)
+
+  WriteINIStr ".\wrapper.ini" "Configuration" "UserName" "${L_USERNAME}"
+  ClearErrors
+  WriteINIStr ".\wrapper.ini" "Configuration" "UserLock" "Yes"
+  IfErrors FileWriteError
+  Goto look_for_popfile
+
+use_wrapper_ini:
+  ReadINIStr ${L_LOCKNAME} ".\wrapper.ini" "Configuration" "UserName"
+  StrCmp ${L_LOCKNAME} "" read_config_data      ; cannot lock data if it has no owner
+
+  ReadINIStr ${L_DATA} ".\wrapper.ini" "Configuration" "UserLock"
+  StrCmp ${L_DATA} "" data_locked
+  StrCmp ${L_DATA} "Yes" data_locked
+  MessageBox MB_OK|MB_ICONINFORMATION "User '${L_USERNAME}' is using configuration data in\
+      $\r$\n$\r$\n\
+      ${L_INIFOLDER}\wrapper.ini\
+      $\r$\n$\r$\n\
+      (which belongs to user '${L_LOCKNAME}')\
+      $\r$\n$\r$\n\
+      For best results, users should have separate POPFile data files."
+  Goto read_config_data
+
+data_locked:
+  StrCmp ${L_LOCKNAME} ${L_USERNAME} read_config_data
+  MessageBox MB_OK|MB_ICONSTOP "User '${L_USERNAME}' unable to use configuration data in\
+      $\r$\n$\r$\n\
+      ${L_INIFOLDER}\wrapper.ini\
+      $\r$\n$\r$\n\
+      (the data file belongs to '${L_LOCKNAME}' and is locked)"
+  Goto error_exit
+
+read_config_data:
+  ReadINIStr ${L_POPFILE_ROOT} ".\wrapper.ini" "Configuration" "POPFileFolder"
   StrCmp ${L_POPFILE_ROOT} "" 0 got_pf_path
 
-  ReadRegStr ${L_POPFILE_ROOT} HKLM "SOFTWARE\POPFile" InstallLocation
-  StrCmp ${L_POPFILE_ROOT} "" 0 got_new_pf_path
+look_for_popfile:
 
+  ; Search order:
+  ; (1) folder containing the wrapper utility
+  ; (2) most recent registry entry for POPFile
+  ; (3) default installation folder for POPFile
+
+  StrCpy ${L_POPFILE_ROOT} $EXEDIR
+  IfFileExists "${L_POPFILE_ROOT}\popfile.pl" 0 try_registry
+  ClearErrors
+  WriteINIStr ".\wrapper.ini" "Configuration" "SearchResult" "Wrapper location"
+  WriteINIStr ".\wrapper.ini" "Configuration" "POPFileFolder" "${L_POPFILE_ROOT}"
+  IfErrors FileWriteError
+  Goto pf_ok
+
+try_registry:
+  ReadRegStr ${L_POPFILE_ROOT} HKLM "SOFTWARE\POPFile" InstallLocation
+  StrCmp ${L_POPFILE_ROOT} "" try_default_locn
+  ClearErrors
+  WriteINIStr ".\wrapper.ini" "Configuration" "SearchResult" "Registry (HKLM)"
+  IfErrors FileWriteError
+  Goto got_new_pf_path
+
+try_default_locn:
   StrCpy ${L_POPFILE_ROOT} "C:\Program Files\POPFile"
-  IfFileExists "${L_POPFILE_ROOT}\*.*" got_new_pf_path
+  IfFileExists "${L_POPFILE_ROOT}\*.*" 0 pf_not_found
+  ClearErrors
+  WriteINIStr ".\wrapper.ini" "Configuration" "SearchResult" "Default location"
+  IfErrors FileWriteError
+  Goto got_new_pf_path
+
+pf_not_found:
   MessageBox MB_OK|MB_ICONSTOP "Unable to find POPFile installation"
   Goto error_exit
 
 got_new_pf_path:
-  WriteINIStr ".\Wrapper.ini" "Configuration" "POPFileFolder" "${L_POPFILE_ROOT}"
+  ClearErrors
+  WriteINIStr ".\wrapper.ini" "Configuration" "POPFileFolder" "${L_POPFILE_ROOT}"
+  IfErrors FileWriteError
 
 got_pf_path:
   IfFileExists "${L_POPFILE_ROOT}\*.*" got_pf_folder
@@ -192,13 +288,15 @@ got_pf_folder:
   Goto error_exit
 
 pf_ok:
-  ReadINIStr ${L_POPFILE_USER} ".\Wrapper.ini" "Configuration" "UserDataFolder"
+  ReadINIStr ${L_POPFILE_USER} ".\wrapper.ini" "Configuration" "UserDataFolder"
   StrCmp ${L_POPFILE_USER} "" 0 got_ud_path
-  
-  ; Use current directory for POPFile configuration data
-  
-  StrCpy ${L_POPFILE_USER} ${L_DATA}
-  WriteINIStr ".\Wrapper.ini" "Configuration" "UserDataFolder" "${L_POPFILE_USER}"
+
+  ; Use the 'wrapper.ini' folder for the (new) POPFile configuration data
+
+  StrCpy ${L_POPFILE_USER} ${L_INIFOLDER}
+  ClearErrors
+  WriteINIStr ".\wrapper.ini" "Configuration" "UserDataFolder" "${L_POPFILE_USER}"
+  IfErrors FileWriteError
 
 got_ud_path:
   IfFileExists "${L_POPFILE_USER}\*.*" got_ud_folder
@@ -216,8 +314,20 @@ got_ud_folder:
   StrCpy ${L_POPFILE_USER} "."
 
 save_environment:
-  WriteINIStr ".\Wrapper.ini" "Environment" "POPFILE_ROOT" "${L_POPFILE_ROOT}"
-  WriteINIStr ".\Wrapper.ini" "Environment" "POPFILE_USER" "${L_POPFILE_USER}"
+
+  ; Need to use lowercase otherwise old-style (flat file or BDB) corpus will not be imported
+
+  Push ${L_POPFILE_ROOT}
+  Call StrLower
+  Pop ${L_POPFILE_ROOT}
+  Push ${L_POPFILE_USER}
+  Call StrLower
+  Pop ${L_POPFILE_USER}
+
+  ClearErrors
+  WriteINIStr ".\wrapper.ini" "Environment" "POPFILE_ROOT" "${L_POPFILE_ROOT}"
+  WriteINIStr ".\wrapper.ini" "Environment" "POPFILE_USER" "${L_POPFILE_USER}"
+  IfErrors FileWriteError
 
   System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_ROOT", "${L_POPFILE_ROOT}").r0'
   StrCmp $0 0 0 root_set_ok
@@ -228,6 +338,14 @@ root_set_ok:
   System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_USER", "${L_POPFILE_USER}").r0'
   StrCmp $0 0 0 user_set_ok
   MessageBox MB_OK|MB_ICONSTOP "Can't set POPFILE_USER environment variable"
+  Goto error_exit
+
+FileWriteError:
+  MessageBox MB_OK|MB_ICONSTOP "User '${L_USERNAME}' unable to save configuration data in\
+      $\r$\n$\r$\n\
+      ${L_INIFOLDER}\wrapper.ini\
+      $\r$\n$\r$\n\
+      (file permissions problem?)"
   Goto error_exit
 
 user_set_ok:
@@ -277,8 +395,12 @@ error_exit:
   !undef L_CMPRE
   !undef L_CONSOLE
   !undef L_DATA
+  !undef L_INIFOLDER
+  !undef L_LOCKNAME
   !undef L_POPFILE_ROOT
   !undef L_POPFILE_USER
+  !undef L_USERNAME
+
   !undef L_RESERVED
 
 SectionEnd
@@ -330,6 +452,68 @@ get:
   Pop $R2
   Pop $R1
   Exch $R0
+FunctionEnd
+
+
+#--------------------------------------------------------------------------
+# Function StrLower
+#
+# Converts uppercase letters in a string into lowercase letters. Other characters unchanged.
+#
+# Inputs:
+#         (top of stack)          - input string
+#
+# Outputs:
+#         (top of stack)          - output string
+#
+#  Usage Example:
+#
+#    Push "C:\PROGRA~1\SQLPFILE"
+#    Call StrLower
+#    Pop $R0
+#
+#   ($R0 at this point is "c:\progra~1\sqlpfile")
+#
+#--------------------------------------------------------------------------
+
+Function StrLower
+
+  !define C_LOWERCASE    "abcdefghijklmnopqrstuvwxyz"
+
+  Exch $0   ; The input string
+  Push $2   ; Holds the result
+  Push $3   ; A character from the input string
+  Push $4   ; The offset to a character in the "validity check" string
+  Push $5   ; A character from the "validity check" string
+  Push $6   ; Holds the current "validity check" string
+
+  StrCpy $2 ""
+
+next_input_char:
+  StrCpy $3 $0 1              ; Get next character from the input string
+  StrCmp $3 "" done
+  StrCpy $6 ${C_LOWERCASE}$3  ; Add character to end of "validity check" to guarantee a match
+  StrCpy $0 $0 "" 1
+  StrCpy $4 -1
+
+next_valid_char:
+  IntOp $4 $4 + 1
+  StrCpy $5 $6 1 $4               ; Extract next from "validity check" string
+  StrCmp $3 $5 0 next_valid_char  ; We will ALWAYS find a match in the "validity check" string
+  StrCpy $2 $2$5                  ; Use "validity check" char to ensure result uses lowercase
+  goto next_input_char
+
+done:
+  StrCpy $0 $2                ; Result is a string with no uppercase letters
+  Pop $6
+  Pop $5
+  Pop $4
+  Pop $3
+  Pop $2
+  Exch $0                     ; place result on top of the stack
+
+  !undef C_LOWERCASE
+
 FunctionEnd
 
 ;-------------
