@@ -34,30 +34,6 @@ use POSIX ":sys_wait_h";
 
 my $eol = "\015\012";
 
-sub forker
-{
-    pipe my $reader, my $writer;
-    my $pid = fork();
-
-    if ( !defined( $pid ) ) {
-        close $reader;
-        close $writer;
-        return (undef, undef);
-    }
-
-    if ( $pid == 0 ) {
-        close $reader;
-
-        use IO::Handle;
-        $writer->autoflush(1);
-
-        return (0, $writer);
-    }
-
-    close $writer;
-    return ($pid, $reader);
-}
-
 sub pipeready
 {
     my ( $pipe ) = @_;
@@ -265,6 +241,33 @@ my $mq = new POPFile::MQ;
 my $l = new POPFile::Logger;
 my $b = new Classifier::Bayes;
 
+sub forker
+{
+    pipe my $reader, my $writer;
+    $b->prefork();
+    my $pid = fork();
+
+    if ( !defined( $pid ) ) {
+        close $reader;
+        close $writer;
+        return (undef, undef);
+    }
+
+    if ( $pid == 0 ) {
+       $b->forked();
+        close $reader;
+
+        use IO::Handle;
+        $writer->autoflush(1);
+
+        return (0, $writer);
+    }
+
+    $b->postfork();
+    close $writer;
+    return ($pid, $reader);
+}
+
 $c->configuration( $c );
 $c->mq( $mq );
 $c->logger( $l );
@@ -287,6 +290,7 @@ $b->logger( $l );
 
 $b->initialize();
 $b->module_config_( 'html', 'port', 8080 );
+$b->module_config_( 'html', 'language', 'English' );
 $b->config_( 'hostname', '127.0.0.1' );
 $b->start();
 
@@ -371,6 +375,7 @@ if ( $pid == 0 ) {
         $p->{version_} = 'test suite';
         $p->initialize();
         $p->config_( 'port', $port );
+        $p->config_( 'force_fork', 1 );
         $p->global_config_( 'timeout', 1 );
         $p->start();
 
