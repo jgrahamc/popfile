@@ -2241,11 +2241,20 @@ sub history_page
     $self->history_reclassify();
     $self->history_undo();
 
-    # Handle removal of one or more items from the history page, the
-    # remove_array form, if defined, will contain all the indexes into
-    # history_keys that need to be deleted. If undefined, the remove
-    # form element will contain the single index to be deleted. We
-    # pass each file that needs deleting into the
+    # Handle removal of one or more items from the history page.  Two
+    # important possibilities:
+    #
+    # clearpage is defined: this will delete everything on the page
+    # which means we will call delete_slot in the history with the
+    # ID of ever message displayed.   The IDs are encoded in the
+    # hidden rowid_* form elements.
+    #
+    # clearchecked is defined: this will delete the messages that are
+    # checked (i.e. the check box has been clicked).  The check box
+    # is called remove_* in the form_ hash once we get here.
+    #
+    # The third possibility is clearall which is handled below and
+    # uses the delete_query API of History.
 
     if ( defined( $self->{form_}{clearpage} ) ) {
 
