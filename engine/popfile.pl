@@ -1854,7 +1854,7 @@ sub run_popfile
                 # pass through to that server and represents the account on the remote machine that we
                 # will pull email from.  Doing this means we can act as a proxy for multiple mail clients
                 # and mail accounts
-                if ( $command =~ /USER (.*):((.*):)?(.*)/i )
+                if ( $command =~ /USER (.+)(:(\d+))?$configuration{separator}(.*)/i )
                 {
                     if ( verify_connected( $client, $1, $3 || 110 ) ) 
                     {
@@ -2365,6 +2365,7 @@ $configuration{localui}   = 1;
 $configuration{mcount}    = 0;
 $configuration{ecount}    = 0;
 $configuration{reinforce} = 1;
+$configuration{separator} = ':';
 
 # Calculate a session key
 $session_key = '';
