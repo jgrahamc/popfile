@@ -219,7 +219,7 @@
 !insertmacro PFI_LANG_STRING DESC_SecPOPFile               "Instala os arquivos principais necessários para o POPFile, incluindo uma versão mínima do Perl."
 !insertmacro PFI_LANG_STRING DESC_SecSkins                 "Instala skins do POPFile que permitem a você trocar a aparência da interface de usuário do POPFile."
 !insertmacro PFI_LANG_STRING DESC_SecLangs                 "Instala versões da interface de usuário em outras línguas."
-!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Installs the POPFile XMLRPC module (for access to the POPFile API) and the Perl support it requires."
+!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Instala o módulo XMLRPC do POPFile (para acessar a API do POPFile) e o suporte do Perl requerido."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
@@ -264,7 +264,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORPUS     "Fazendo o backup do corpus. Isto pode levar alguns segundos..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      "Instalando os arquivos de skins do POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "Instalando os arquivos de línguas do POPFile..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Installing POPFile XMLRPC files..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Instalando os arquivos XMLRPC do POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "Clique em Avançar para continuar"
 
 ; Installation Log Messages
