@@ -835,8 +835,8 @@ sub classify_file
 sub history_filename
 {
     my ( $self, $dcount, $mcount, $ext) = @_;
-    
-    return $self->global_config_( 'msgdir' ) . "popfile$dcount" . "=$mcount" . (defined $ext?$ext:".msg");    
+
+    return $self->global_config_( 'msgdir' ) . "popfile$dcount" . "=$mcount" . (defined $ext?$ext:'.msg');
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1571,9 +1571,9 @@ sub remove_message_from_bucket
 sub echo_to_dot_
 {
     my ( $self, $mail, $client, $file ) = @_;
-    
+
     # These if statements are repetitive to keep the inner loops efficient
-    
+
     if ( defined($file) && defined($client) ) {
         # echo to file and stream
 
@@ -1581,10 +1581,10 @@ sub echo_to_dot_
         while ( <$mail> ) {
             # Check for an abort
             last if ( $self->{alive_} == 0 );
-    
+
             print $client $_;
             print FILE $_;
-    
+
             # The termination has to be a single line with exactly a dot on it and nothing
             # else other than line termination characters.  This is vital so that we do
             # not mistake a line beginning with . as the end of the block
@@ -1597,9 +1597,9 @@ sub echo_to_dot_
         while ( <$mail> ) {
             # Check for an abort
             last if ( $self->{alive_} == 0 );
-    
-            print $client $_;            
-    
+
+            print $client $_;
+
             # The termination has to be a single line with exactly a dot on it and nothing
             # else other than line termination characters.  This is vital so that we do
             # not mistake a line beginning with . as the end of the block
@@ -1612,9 +1612,9 @@ sub echo_to_dot_
         while ( <$mail> ) {
             # Check for an abort
             last if ( $self->{alive_} == 0 );
-    
+
             print FILE $_;
-    
+
             # The termination has to be a single line with exactly a dot on it and nothing
             # else other than line termination characters.  This is vital so that we do
             # not mistake a line beginning with . as the end of the block
@@ -1624,16 +1624,16 @@ sub echo_to_dot_
     } else {
         # consume without echoing
 
-        while ( <$mail> ) {            
+        while ( <$mail> ) {
             # Check for an abort
             last if ( $self->{alive_} == 0 );
-    
+
             # The termination has to be a single line with exactly a dot on it and nothing
             # else other than line termination characters.  This is vital so that we do
             # not mistake a line beginning with . as the end of the block
             last if ( /^\.(\r\n|\r|\n)$/ );
         }
-    }    
+    }
 }
 
 # ---------------------------------------------------------------------------------------------

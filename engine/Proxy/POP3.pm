@@ -112,8 +112,8 @@ sub initialize
 sub child__
 {
     my ( $self, $client, $download_count, $pipe ) = @_;
-    
-    # Hash of indexes of downloaded messages    
+
+    # Hash of indexes of downloaded messages
     my %downloaded;
 
     # Number of messages downloaded in this session
@@ -271,9 +271,8 @@ sub child__
         if ( $command =~ /TOP (.*) (.*)/i ) {
             if ( $2 ne '99999999' )  {
                 if ( $self->config_( 'toptoo' ) ) {
-                    
                     my $count = $1;
-                    
+
                     if ( $self->echo_response_($mail, $client, "RETR $1" ) ) {
 
                         # Classify without echoing to client, saving file for later RETR's
@@ -343,19 +342,18 @@ sub child__
         # Note the horrible hack here where we detect a command of the form TOP x 99999999 this
         # is done so that fetchmail can be used with POPFile.
         if ( ( $command =~ /RETR (.*)/i ) || ( $command =~ /TOP (.*) 99999999/i ) )  {
-            
             my $count = $1;
             my $class;
-            
             my $file = $self->{classifier__}->history_filename($download_count, $count);
+
             my $short_file = $file;
             $short_file =~ s/^[^\/]*\///;
-            
+
             if (defined($downloaded{$count}) && open( RETRFILE, "<$file" ) ) {
                 # File has been fetched and classified already
-                
+
                 $self->log_( "Printing message from cache" );
-                
+
                 if (0) {
                     # Ensure a .CRLF is on the end of the file (may be neccessary)
                     open APPEND, ">>$file";
@@ -379,10 +377,10 @@ sub child__
                     # If the class wasn't saved properly, classify from disk normally
 
                     $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, 0, 1, '' );
-                    
+
                     print $pipe "CLASS:$class$eol";
 
-                }                
+                }
                 close RETRFILE;
                 print $client ".$eol";
                 next;
@@ -396,7 +394,7 @@ sub child__
 
                     # Tell the parent that we just handled a mail
                     print $pipe "CLASS:$class$eol";
-                    
+
                     # Note locally that file has been retrieved
                     $downloaded{$count} = 1;
 
