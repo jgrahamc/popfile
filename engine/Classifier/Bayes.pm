@@ -110,13 +110,13 @@ sub initialize
     my ( $self ) = @_;
 
     # Subject modification (global setting is on)
-    $self->config_( 'subject', 1 );
+    $self->global_config_( 'subject', 1 );
 
     # Adding the X-Text-Classification on
-    $self->config_( 'xtc', 1 );
+    $self->global_config_( 'xtc', 1 );
 
     # Adding the X-POPFile-Link is no
-    $self->config_( 'xpl', 1 );
+    $self->global_config_( 'xpl', 1 );
 
     # No default unclassified probability
     $self->config_( 'unclassified_probability', 0 );
@@ -800,7 +800,7 @@ sub classify_and_modify
 
     # Add the Subject line modification or the original line back again
     if ( $classification ne 'unclassified' ) {
-        if ( $self->config_( 'subject' ) ) {
+        if ( $self->global_config_( 'subject' ) ) {
             # Don't add the classification unless it is not present
             if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&
                  ( $self->{parameters__}{$classification}{subject} == 1 ) &&
@@ -818,7 +818,7 @@ sub classify_and_modify
     }
 
     # Add the XTC header
-    $msg_head_after .= "X-Text-Classification: $classification$eol" if ( ( $self->config_( 'xtc' )          ) &&
+    $msg_head_after .= "X-Text-Classification: $classification$eol" if ( ( $self->global_config_( 'xtc' ) ) &&
                                                                          ( $self->{parameters__}{$classification}{quarantine} == 0 ) );
 
     # Add the XPL header
@@ -827,10 +827,10 @@ sub classify_and_modify
     my $xpl = '';
 
     $xpl .= "<http://";
-    $xpl .= $self->config_( 'localpop' )?"127.0.0.1":$self->{hostname__};
-    $xpl .= ":$self->config_( 'ui_port' )/jump_to_message?view=$temp_file>$eol";
+    $xpl .= $self->module_config_( 'pop3', 'local' )?"127.0.0.1":$self->{hostname__};
+    $xpl .= ":" . $self->module_config_( 'ui', 'port' ) . "/jump_to_message?view=$temp_file>$eol";
 
-    if ( $self->config_( 'xpl' ) && ( $self->{parameters__}{$classification}{quarantine} == 0 ) ) {
+    if ( $self->global_config_( 'xpl' ) && ( $self->{parameters__}{$classification}{quarantine} == 0 ) ) {
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
     }
 
@@ -845,10 +845,10 @@ sub classify_and_modify
 
         if ( $classification ne 'unclassified' ) {
             if ( $self->{parameters__}{$classification}{quarantine} == 1 ) {
-                print $client "From: $self->{parser__}->{from}$eol";
-                print $client "To: $self->{parser__}->{to}$eol";
-                print $client "Date: $self->{parser__}->{date}$eol";
-                if ( $self->config_( 'subject' ) ) {
+                print $client "From: " . $self->{parser__}->get_header( 'from' ) . "$eol";
+                print $client "To: " . $self->{parser__}->get_header( 'to' ) . "$eol";
+                print $client "Date: " . $self->{parser__}->get_header( 'date' ) . "$eol";
+                if ( $self->global_config_( 'subject' ) ) {
                     # Don't add the classification unless it is not present
                     if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&
                          ( $self->{parameters__}{$classification}{subject} == 1 ) ) {
@@ -856,15 +856,15 @@ sub classify_and_modify
                     }
                 }
                 print $client "Subject:$msg_subject$eol";
-                print $client "X-Text-Classification: $classification$eol" if ( $self->config_( 'xtc' ) );
-                print $client 'X-POPFile-Link: ' . $xpl if ( $self->config_( 'xpl' ) );
+                print $client "X-Text-Classification: $classification$eol" if ( $self->global_config_( 'xtc' ) );
+                print $client 'X-POPFile-Link: ' . $xpl if ( $self->global_config_( 'xpl' ) );
                 print $client "Content-Type: multipart/report; boundary=\"$temp_file\"$eol$eol--$temp_file$eol";
                 print $client "Content-Type: text/plain$eol$eol";
                 print $client "POPFile has quarantined a message.  It is attached to this email.$eol$eol";
                 print $client "Quarantined Message Detail$eol$eol";
-                print $client "Original From: $self->{parser__}->{from}$eol";
-                print $client "Original Subject: $self->{parser__}->{subject}$eol";
-                print $client "Original To: $self->{parser__}->{to}$eol$eol";
+                print $client "Original From: " . $self->{parser__}->get_header('from') . "$eol";
+                print $client "Original To: " . $self->{parser__}->get_header('to') . "$eol";
+                print $client "Original Subject: " . $self->{parser__}->get_header('subject') . "$eol";
                 print $client "To examine the email open the attachment. To change this mail's classification go to $xpl$eol";
                 print $client "--$temp_file$eol";
                 print $client "Content-Type: message/rfc822$eol$eol";
@@ -958,23 +958,6 @@ sub get_bucket_unique_count
     my ( $self, $bucket ) = @_;
 
     return $self->{unique__}{$bucket};
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# get_bucket_word_list
-#
-# Returns a list of the words in a bucket
-#
-# $bucket      The name of the bucket for which the list is to be obtained
-#
-# ---------------------------------------------------------------------------------------------
-
-sub get_bucket_word_list
-{
-    my ( $self, $bucket ) = @_;
-
-    return sort keys %{$self->{matrix__}{$bucket}};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1157,41 +1140,105 @@ sub add_message_to_bucket
 {
     my ( $self, $file, $bucket ) = @_;
 
+    my %words;
+
+    if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
+        while (<WORDS>) {
+            if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
+                if ( $1 != $self->{corpus_version__} )  {
+                    print "Incompatible corpus version in $bucket\n";
+                    return;
+                }
+
+                next;
+            }
+
+            if ( /([^\s]+) (\d+)/ ) {
+                my $word = $self->{mangler__}->mangle($1,1);
+                my $value = $2;
+                $value =~ s/[\r\n]//g;
+                if ( $value > 0 )  {
+                    $words{$word} = $value;
+                }
+            }
+        }
+
+        close WORDS;
+    }
+
     $self->{parser__}->parse_stream( $file );
 
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
-# TODO	$self->set_value_( $bucket, $word, $ += $self->{parser__}->{words__}{$word};
-	$self->{total__}{$bucket}         += $self->{parser__}->{words__}{$word};
+        $words{$word} += $self->{parser__}->{words__}{$word};
     }
-
-    $self->update_constants_();
-    $self->write_parameters();
-    $self->save_bucket_( $bucket );
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# save_bucket_
-#
-# Save the current word scores in a bucket to disk
-#
-# $bucket          Name for the bucket to save
-#
-# ---------------------------------------------------------------------------------------------
-
-sub save_bucket_
-{
-    my ( $self, $bucket ) = @_;
 
     if ( open WORDS, '>' . $self->config_( 'corpus' ) . "/$bucket/table" ) {
         print WORDS "__CORPUS__ __VERSION__ 1\n";
-        foreach my $word ( keys %{$self->{matrix__}{$bucket}}) {
-            print WORDS "$word $self->{matrix__}{$bucket}{$word}\n";
+        foreach my $word (sort keys %words) {
+            print WORDS "$word $words{$word}\n";
         }
         close WORDS;
     }
 
-    $self->load_bucket_($self->config_( 'corpus' ) . "/$bucket");
+    $self->load_word_matrix_();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# remove_message_from_bucket
+#
+# Parses a mail message and updates the statistics in the specified bucket
+#
+# $file            Name of file containing mail message to parse
+# $bucket          Name of the bucket to be updated
+#
+# ---------------------------------------------------------------------------------------------
+
+sub remove_message_from_bucket
+{
+    my ( $self, $file, $bucket ) = @_;
+
+    my %words;
+
+    if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
+        while (<WORDS>) {
+            if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
+                if ( $1 != $self->{corpus_version__} )  {
+                    print "Incompatible corpus version in $bucket\n";
+                    return;
+                }
+
+                next;
+            }
+
+            if ( /([^\s]+) (\d+)/ ) {
+                my $word = $self->{mangler__}->mangle($1,1);
+                my $value = $2;
+                $value =~ s/[\r\n]//g;
+                if ( $value > 0 )  {
+                    $words{$word} = $value;
+                }
+            }
+        }
+
+        close WORDS;
+    }
+
+    $self->{parser__}->parse_stream( $file );
+
+    foreach my $word (keys %{$self->{parser__}->{words__}}) {
+        $words{$word} -= $self->{parser__}->{words__}{$word};
+    }
+
+    if ( open WORDS, '>' . $self->config_( 'corpus' ) . "/$bucket/table" ) {
+        print WORDS "__CORPUS__ __VERSION__ 1\n";
+        foreach my $word (sort keys %words) {
+            print WORDS "$word $words{$word}\n";
+        }
+        close WORDS;
+    }
+
+    $self->load_word_matrix_();
 }
 
 # ---------------------------------------------------------------------------------------------

@@ -60,10 +60,10 @@ sub initialize
     $self->config_( 'sport', 110 );
 
     # The default timeout in seconds for POP3 commands
-    $self->config_( 'timeout', 60 );
+    $self->global_config_( 'timeout', 60 );
 
     # Only accept connections from the local machine for POP3
-    $self->config_( 'local', 1 ); # TODO localpop
+    $self->config_( 'local', 1 );
 
     # Whether to do classification on TOP as well
     $self->config_( 'toptoo', 0 );
@@ -97,13 +97,12 @@ sub initialize
 # then causes the child not to be terminated even though we are done.  Also this is nice
 # because we deal with the statistics as we go
 #
-# $kid      PID of a child of POP3.pm
 # $handle   The handle of the child's pipe
 #
 # ---------------------------------------------------------------------------------------------
 sub flush_child_data__
 {
-    my ( $self, $kid, $handle ) = @_;
+    my ( $self, $handle ) = @_;
 
     my $stats_changed = 0;
 
@@ -114,11 +113,12 @@ sub flush_child_data__
         if ( defined( $class ) ) {
             $class =~ s/[\r\n]//g;
 
-# TODO            $self->{classifier__}->{parameters}{$class}{count} += 1;
+            $self->{classifier__}->set_bucket_parameter( $class, 'count',
+                $self->{classifier__}->get_bucket_parameter( $class, 'count' ) + 1 );
             $self->global_config_( 'mcount', $self->global_config_( 'mcount' ) + 1 );
             $stats_changed                                    = 1;
 
-            $self->log_( "Incrementing $class for $kid" );
+            $self->log_( "Incrementing $class" );
         } else {
             # This is here so that we get in errorneous position where the pipeready
             # function is returning that there's data, but there is none, in fact the

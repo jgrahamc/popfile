@@ -1136,5 +1136,18 @@ sub decode_string
 	return $mystring;
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# get_header - Returns the value of the from, to, subject or cc header
+#
+# $header      Name of header to return (note must be lowercase)
+#
+# ---------------------------------------------------------------------------------------------
+sub get_header
+{
+    my ( $self, $header ) = @_;
+
+    return $self->{$header . '__'};
+}
 
 1;

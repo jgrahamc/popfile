@@ -243,7 +243,7 @@ sub config_
 {
     my ( $self, $name, $value ) = @_;
 
-    return $self->{configuration__}->parameter( $self->{name__} . '_' . $name, $value );
+    return $self->module_config_( $self->{name__}, $name, $value );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -263,7 +263,28 @@ sub global_config_
 {
     my ( $self, $name, $value ) = @_;
 
-    return $self->{configuration__}->parameter( "GLOBAL_$name", $value );
+    return $self->module_config_( 'GLOBAL', $name, $value );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# module_config_
+#
+# Called by a subclass to get or set a module specific configuration parameter
+#
+# $module            The name of the module that owns the parameter (e.g. 'pop3')
+# $name              The name of the parameter (e.g. 'port')
+# $value             (optional) The value to set
+#
+# If called with just a $module and $name then module_config_() will return the current value
+# of the configuration parameter.
+#
+# ---------------------------------------------------------------------------------------------
+sub module_config_
+{
+    my ( $self, $module, $name, $value ) = @_;
+
+    return $self->{configuration__}->parameter( $module . "_" . $name, $value );
 }
 
 # GETTER/SETTER methods.  Note that I do not expect documentation of these unless they

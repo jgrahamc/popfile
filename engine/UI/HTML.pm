@@ -591,8 +591,8 @@ sub html_common_bottom
 
     my $result = "<table class=\"footer\" summary=\"\">\n<tr>\n";
     $result .= "<td class=\"footerBody\">\n";
-    $result .= "POPFile $self->{configuration}{major_version}.$self->{configuration}{minor_version}.";
-    $result .= "$self->{configuration}{build_version} - \n";
+    $result .= "POPFile X.X.";
+    $result .= "X - \n";
     $result .= "<a class=\"bottomLink\" href=\"";
 
     # To save space on the download of POPFile only the English language manual
@@ -699,10 +699,10 @@ sub configuration_page
     my $separator_error = '';
 
     $self->config_( 'skin', $self->{form__}{skin} )      if ( defined($self->{form__}{skin}) );
-    $self->config_( 'debug', $self->{form__}{debug}-1 )   if ( ( defined($self->{form__}{debug}) ) && ( ( $self->{form__}{debug} >= 1 ) && ( $self->{form__}{debug} <= 4 ) ) );
-    $self->config_( 'subject', $self->{form__}{subject}-1 ) if ( ( defined($self->{form__}{subject}) ) && ( ( $self->{form__}{subject} >= 1 ) && ( $self->{form__}{subject} <= 2 ) ) );
-    $self->config_( 'xtc', $self->{form__}{xtc}-1 )     if ( ( defined($self->{form__}{xtc}) ) && ( ( $self->{form__}{xtc} >= 1 ) && ( $self->{form__}{xtc} <= 2 ) ) );
-    $self->config_( 'xpl', $self->{form__}{xpl}-1 )     if ( ( defined($self->{form__}{xpl}) ) && ( ( $self->{form__}{xpl} >= 1 ) && ( $self->{form__}{xpl} <= 2 ) ) );
+    $self->global_config_( 'debug', $self->{form__}{debug}-1 )   if ( ( defined($self->{form__}{debug}) ) && ( ( $self->{form__}{debug} >= 1 ) && ( $self->{form__}{debug} <= 4 ) ) );
+    $self->global_config_( 'subject', $self->{form__}{subject}-1 ) if ( ( defined($self->{form__}{subject}) ) && ( ( $self->{form__}{subject} >= 1 ) && ( $self->{form__}{subject} <= 2 ) ) );
+    $self->global_config_( 'xtc', $self->{form__}{xtc}-1 )     if ( ( defined($self->{form__}{xtc}) ) && ( ( $self->{form__}{xtc} >= 1 ) && ( $self->{form__}{xtc} <= 2 ) ) );
+    $self->global_config_( 'xpl', $self->{form__}{xpl}-1 )     if ( ( defined($self->{form__}{xpl}) ) && ( ( $self->{form__}{xpl} >= 1 ) && ( $self->{form__}{xpl} <= 2 ) ) );
 
     if ( defined($self->{form__}{language}) ) {
         if ( $self->config_( 'language' ) ne $self->{form__}{language} ) {
@@ -713,7 +713,7 @@ sub configuration_page
 
     if ( defined($self->{form__}{separator}) ) {
         if ( length($self->{form__}{separator}) == 1 ) {
-            $self->config_( 'separator', $self->{form__}{separator} );
+            $self->module_config_( 'pop3', 'separator', $self->{form__}{separator} );
         } else {
             $separator_error = "<blockquote>\n<div class=\"error01\">\n";
             $separator_error .= "$self->{language__}{Configuration_Error1}</div>\n</blockquote>\n";
@@ -733,7 +733,7 @@ sub configuration_page
 
     if ( defined($self->{form__}{port}) ) {
         if ( ( $self->{form__}{port} >= 1 ) && ( $self->{form__}{port} < 65536 ) ) {
-            $self->config_( 'port', $self->{form__}{port} );
+            $self->module_config_( 'pop3', 'port', $self->{form__}{port} );
         } else {
             $port_error = "<blockquote><div class=\"error01\">$self->{language__}{Configuration_Error3}</div></blockquote>";
             delete $self->{form__}{port};
@@ -760,7 +760,7 @@ sub configuration_page
 
     if ( defined($self->{form__}{timeout}) ) {
         if ( ( $self->{form__}{timeout} >= 10 ) && ( $self->{form__}{timeout} <= 300 ) ) {
-            $self->config_( 'timeout', $self->{form__}{timeout} );
+            $self->global_config_( 'timeout', $self->{form__}{timeout} );
         } else {
             $timeout_error = "<blockquote><div class=\"error01\">$self->{language__}{Configuration_Error6}</div></blockquote>";
             $self->{form__}{update_timeout} = '';
@@ -856,7 +856,7 @@ sub configuration_page
     # Subject line modification widget
     $body .= "<table width=\"100%\" summary=\"$self->{language__}{Configuration_InsertionTableSummary}\">\n<tr>\n";
     $body .= "<th valign=\"baseline\" scope=\"row\">\n<span class=\"configurationLabel\">$self->{language__}{Configuration_SubjectLine}:</span>\n</th>\n";
-    if ( $self->config_( 'subject' ) == 1 ) {
+    if ( $self->global_config_( 'subject' ) == 1 ) {
         $body .= "<td valign=\"baseline\" align=\"right\">\n";
         $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
         $body .= "<span class=\"configWidgetStateOn\">$self->{language__}{On}</span>\n";
@@ -874,7 +874,7 @@ sub configuration_page
 
     # X-Text-Classification insertion widget
     $body .= "</tr>\n<tr>\n<th valign=\"baseline\" scope=\"row\">\n<span class=\"configurationLabel\">$self->{language__}{Configuration_XTCInsertion}:</span></th>\n";
-    if ( $self->config_( 'xtc' ) == 1 ) {
+    if ( $self->global_config_( 'xtc' ) == 1 ) {
         $body .= "<td valign=\"baseline\" align=\"right\">\n";
         $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
         $body .= "<span class=\"configWidgetStateOn\">$self->{language__}{On}</span>\n";
@@ -892,7 +892,7 @@ sub configuration_page
 
     # X-POPFile-Link insertion widget
     $body .= "</tr>\n<tr>\n<th valign=\"baseline\" scope=\"row\">\n<span class=\"configurationLabel\">$self->{language__}{Configuration_XPLInsertion}:</span></th>\n";
-    if ( $self->config_( 'xpl' ) == 1 ) {
+    if ( $self->global_config_( 'xpl' ) == 1 ) {
         $body .= "<td valign=\"baseline\" align=\"right\">\n";
         $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
         $body .= "<span class=\"configWidgetStateOn\">$self->{language__}{On}</span>\n";
@@ -916,18 +916,18 @@ sub configuration_page
     # POP3 Listen Port widget
     $body .= "<form action=\"/configuration\">\n";
     $body .= "<label class=\"configurationLabel\" for=\"configPopPort\">$self->{language__}{Configuration_POP3Port}:</label><br />\n";
-    $body .= "<input name=\"port\" type=\"text\" id=\"configPopPort\" value=\"" . $self->config_( 'port' ) . "\" />\n";
+    $body .= "<input name=\"port\" type=\"text\" id=\"configPopPort\" value=\"" . $self->module_config_( 'pop3', 'port' ) . "\" />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_port\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$port_error\n";
-    $body .= sprintf( $self->{language__}{Configuration_POP3Update}, $self->config_( 'port' ) ) if ( defined($self->{form__}{port}) );
+    $body .= sprintf( $self->{language__}{Configuration_POP3Update}, $self->module_config_( 'pop3', 'port' ) ) if ( defined($self->{form__}{port}) );
 
     # Separator Character widget
     $body .= "\n<form action=\"/configuration\">\n";
     $body .= "<label class=\"configurationLabel\" for=\"configSeparator\">$self->{language__}{Configuration_Separator}:</label><br />\n";
-    $body .= "<input name=\"separator\" id=\"configSeparator\" type=\"text\" value=\"" . $self->config_( 'separator' ) . "\" />\n";
+    $body .= "<input name=\"separator\" id=\"configSeparator\" type=\"text\" value=\"" . $self->module_config_( 'pop3', 'separator' ) . "\" />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_separator\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$separator_error\n";
-    $body .= sprintf( $self->{language__}{Configuration_SepUpdate}, $self->config_( 'separator' ) ) if ( defined($self->{form__}{separator}) );
+    $body .= sprintf( $self->{language__}{Configuration_SepUpdate}, $self->module_config_( 'pop3', 'separator' ) ) if ( defined($self->{form__}{separator}) );
 
     # User Interface Port widget
     $body .= "\n<form action=\"/configuration\">\n";
@@ -945,10 +945,10 @@ sub configuration_page
     # TCP Conn TO widget
     $body .= "<form action=\"/configuration\">\n";
     $body .= "<label class=\"configurationLabel\" for=\"configTCPTimeout\">$self->{language__}{Configuration_TCPTimeoutSecs}:</label><br />\n";
-    $body .= "<input name=\"timeout\" type=\"text\" id=\"configTCPTimeout\" value=\"" . $self->config_( 'timeout' ) . "\" />\n";
+    $body .= "<input name=\"timeout\" type=\"text\" id=\"configTCPTimeout\" value=\"" . $self->global_config_( 'timeout' ) . "\" />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_timeout\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$timeout_error";
-    $body .= sprintf( $self->{language__}{Configuration_TCPTimeoutUpdate}, $self->config_( 'timeout' ) ) if ( defined($self->{form__}{timeout}) );
+    $body .= sprintf( $self->{language__}{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) if ( defined($self->{form__}{timeout}) );
     $body .= "</td>\n";
 
     # Logging panel
@@ -959,16 +959,16 @@ sub configuration_page
     $body .= "<input type=\"hidden\" value=\"$self->{session_key__}\" name=\"session\" />\n";
     $body .= "<select name=\"debug\" id=\"configLogging\">\n";
     $body .= "<option value=\"1\"";
-    $body .= " selected=\"selected\"" if ( $self->config_( 'debug' ) == 0 );
+    $body .= " selected=\"selected\"" if ( $self->global_config_( 'debug' ) == 0 );
     $body .= ">$self->{language__}{Configuration_None}</option>\n";
     $body .= "<option value=\"2\"";
-    $body .= " selected=\"selected\"" if ( $self->config_( 'debug' ) == 1 );
+    $body .= " selected=\"selected\"" if ( $self->global_config_( 'debug' ) == 1 );
     $body .= ">$self->{language__}{Configuration_ToFile}</option>\n";
     $body .= "<option value=\"3\"";
-    $body .= " selected=\"selected\"" if ( $self->config_( 'debug' ) == 2 );
+    $body .= " selected=\"selected\"" if ( $self->global_config_( 'debug' ) == 2 );
     $body .= ">$self->{language__}{Configuration_ToScreen}</option>\n";
     $body .= "<option value=\"4\"";
-    $body .= " selected=\"selected\"" if ( $self->config_( 'debug' ) == 3 );
+    $body .= " selected=\"selected\"" if ( $self->global_config_( 'debug' ) == 3 );
     $body .= ">$self->{language__}{Configuration_ToScreenFile}</option>\n";
     $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"submit_debug\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "</form>\n</td>\n</tr>\n</table>\n";
@@ -1316,7 +1316,7 @@ sub magnet_page
     my $magnet_message = '';
     if ( ( defined($self->{form__}{type}) ) && ( $self->{form__}{bucket} ne '' ) && ( $self->{form__}{text} ne '' ) ) {
         my $found = 0;
-        for my $bucket (keys %{$self->{classifier__}->{magnets}}) {
+        for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
             if ( defined($self->{classifier__}->{magnets}{$bucket}{$self->{form__}{type}}{$self->{form__}{text}}) ) {
                 $found  = 1;
                 $magnet_message = "<blockquote>\n<div class=\"error02\">\n<b>";
@@ -1587,7 +1587,7 @@ sub corpus_page
         }
         $self->{classifier__}->write_parameters();
         $self->config_( 'last_reset', localtime );
-        $self->{configuration}->save_configuration();
+        $self->{configuration__}->save_configuration();
     }
 
     if ( defined($self->{form__}{showbucket}) )  {
@@ -1681,7 +1681,7 @@ sub corpus_page
         $body .= "<td width=\"1%\">&nbsp;</td><td align=\"right\">$number</td><td width=\"1%\">&nbsp;</td>\n";
         $body .= "<td align=\"right\">$unique</td><td width=\"1%\">&nbsp;</td>";
 
-        if ( $self->config_( 'subject' ) == 1 )  {
+        if ( $self->global_config_( 'subject' ) == 1 )  {
 
             # Subject Modification on/off widget
 
@@ -1729,8 +1729,8 @@ sub corpus_page
         $body .= "<td>&nbsp;</td>\n<td align=\"left\">\n<table class=\"colorChooserTable\" cellpadding=\"0\" cellspacing=\"1\" summary=\"\">\n<tr>\n";
         my $color = $self->{classifier__}->get_bucket_color($bucket);
         $body .= "<td bgcolor=\"$color\">\n<img class=\"colorChooserImg\" border=\"0\" alt='" . sprintf( $self->{language__}{Bucket_CurrentColor}, $bucket, $color ) . "' src=\"pix.gif\" width=\"10\" height=\"20\" /></td>\n<td>&nbsp;</td>\n";
-        for my $i ( 0 .. $#{$self->{classifier__}->{possible_colors}} ) {
-            my $color = $self->{classifier__}->{possible_colors}[$i];
+        for my $i ( 0 .. $#{$self->{classifier__}->{possible_colors__}} ) {
+            my $color = $self->{classifier__}->{possible_colors__}[$i];
             if ( $color ne $self->{classifier__}->get_bucket_color($bucket) )  {
                 $body .= "<td bgcolor=\"$color\" title=\"". sprintf( $self->{language__}{Bucket_SetColorTo}, $bucket, $color ) . "\">\n";
                 $body .= "<a class=\"colorChooserLink\" href=\"/buckets?color=$color&amp;bucket=$bucket&amp;session=$self->{session_key__}\">\n";
@@ -1750,7 +1750,7 @@ sub corpus_page
     my $pecount = pretty_number( $self,  $self->global_config_( 'ecount' ) );
     my $accuracy = $self->{language__}{Bucket_NotEnoughData};
     my $percent = 0;
-    if ( $self->config_( 'mcount' ) > 0 )  {
+    if ( $self->global_config_( 'mcount' ) > 0 )  {
         $percent = int( 10000 * ( $self->global_config_( 'mcount' ) - $self->global_config_( 'ecount' ) ) / $self->global_config_( 'mcount' ) ) / 100;
         $accuracy = "$percent%";
     }
@@ -1908,7 +1908,7 @@ sub corpus_page
    $body .= "</div>\n";
 
     if ( ( defined($self->{form__}{lookup}) ) || ( defined($self->{form__}{word}) ) ) {
-       my $word = $self->{classifier__}->{mangler}->mangle($self->{form__}{word}, 1);
+       my $word = $self->{classifier__}->{mangler__}->mangle($self->{form__}{word}, 1);
 
         $body .= "<blockquote>\n";
 
@@ -1928,8 +1928,8 @@ sub corpus_page
             my $max_bucket = '';
             my $total = 0;
             foreach my $bucket (@buckets) {
-                if ( $self->{classifier__}->get_value( $bucket, $word ) != 0 ) {
-                    my $prob = exp( $self->{classifier__}->get_value( $bucket, $word ) );
+                if ( $self->{classifier__}->get_value_( $bucket, $word ) != 0 ) {
+                    my $prob = exp( $self->{classifier__}->get_value_( $bucket, $word ) );
                     $total += $prob;
                     if ( $max_bucket eq '' ) {
                         $body .= $heading;
@@ -1949,8 +1949,8 @@ sub corpus_page
             }
 
             foreach my $bucket (@buckets) {
-                if ( $self->{classifier__}->get_value( $bucket, $word ) != 0 ) {
-                    my $prob    = exp( $self->{classifier__}->get_value( $bucket, $word ) );
+                if ( $self->{classifier__}->get_value_( $bucket, $word ) != 0 ) {
+                    my $prob    = exp( $self->{classifier__}->get_value_( $bucket, $word ) );
                     my $n       = ($total > 0)?$prob / $total:0;
                     my $score   = ($#buckets >= 0)?log($n)/log(@buckets)+1:0;
                     my $normal  = sprintf("%.10f", $n);
@@ -2433,10 +2433,12 @@ sub history_reclassify
 		$self->{classifier__}->add_message_to_bucket( $self->global_config_( 'msgdir' ) . $mail_file, $newbucket );
                 $self->global_config_( 'ecount', $self->global_config_( 'ecount' ) + 1 ) if ( $newbucket ne $bucket );
 
-                $self->{logger}->debug( "Reclassifying $mail_file from $bucket to $newbucket" );
+                $self->log_( "Reclassifying $mail_file from $bucket to $newbucket" );
 
-# TODO                $self->{classifier__}->set_parameters( $newbucket, count} += 1;
-# TODO                $self->{classifier__}->{parameters}{$bucket}{count}    -= 1;
+                $self->{classifier__}->set_bucket_parameter( $newbucket, 'count', 
+		    $self->{classifier__}->get_bucket_parameter( $newbucket, 'count' ) + 1 );
+                $self->{classifier__}->set_bucket_parameter( $bucket, 'count', 
+		    $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1 );
 
                 # Update the class file
 
@@ -2451,9 +2453,9 @@ sub history_reclassify
 
                 # Add message feedback
 
-                $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, $self->{classifier__}->get_bucket_color($newbucket), $newbucket )
+                $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, $self->{classifier__}->get_bucket_color($newbucket), $newbucket );
 
-# TODO		$self->{configuration}->save_configuration();
+	        $self->{configuration__}->save_configuration();
             }
         }
     }
@@ -2480,14 +2482,17 @@ sub history_undo
             # Only undo if the message has been classified...
 
             if ( defined( $usedtobe ) ) {
-                $self->{classifier__}->remove_message_from_bucket($self->global_config_( 'msgdir' ) . $mail_file);
+                $self->{classifier__}->remove_message_from_bucket($self->global_config_( 'msgdir' ) . $mail_file, $bucket);
 
                 $self->log_( "Undoing $mail_file from $bucket to $usedtobe" );
 
                 if ( $bucket ne $usedtobe ) {
                     $self->global_config_( 'ecount', $self->global_config_( 'ecount' ) - 1 ) if ( $self->global_config_( 'ecount' ) > 0 );
-# TODO                    $self->{classifier__}->{parameters}{$bucket}{count}   -= 1;
-# TODO                    $self->{classifier__}->{parameters}{$usedtobe}{count} += 1;
+
+		    $self->{classifier__}->set_bucket_parameter( $bucket, 'count',
+		        $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1 );
+		    $self->{classifier__}->set_bucket_parameter( $usedtobe, 'count',
+		        $self->{classifier__}->get_bucket_parameter( $usedtobe, 'count' ) + 1 );
                 }
 
                 # Since we have just changed the classification of this file and it has
@@ -2504,6 +2509,8 @@ sub history_undo
                 # Add message feedback
 
                 $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, ($self->{classifier__}->get_bucket_color($usedtobe) || ''), $usedtobe );
+
+	        $self->{configuration__}->save_configuration();
             }
         }
     }

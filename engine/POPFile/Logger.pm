@@ -53,7 +53,7 @@ sub initialize
     my ( $self ) = @_;
 
     # Start with debugging to file
-    $self->config_( 'debug', 1 );
+    $self->global_config_( 'debug', 1 );
 
     # The default location for log files
     $self->config_( 'logdir', './' );
@@ -132,7 +132,7 @@ sub debug
 {
     my ( $self, $message ) = @_;
 
-    if ( $self->config_( 'debug' ) > 0 ) {
+    if ( $self->global_config_( 'debug' ) > 0 ) {
         # Check to see if we are handling the USER/PASS command and if we are then obscure the
         # account information
         $message = "$`$1$3 XXXXXX$4" if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ );
@@ -142,14 +142,14 @@ sub debug
         my $now = localtime;
         my $msg = "$now ($$): $message";
 
-        if ( $self->config_( 'debug' ) & 1 )  {
+        if ( $self->global_config_( 'debug' ) & 1 )  {
             open DEBUG, ">>$self->{debug_filename__}";
             binmode DEBUG;
             print DEBUG $msg;
             close DEBUG;
         }
 
-        print $msg if ( $self->config_( 'debug' ) & 2 );
+        print $msg if ( $self->global_config_( 'debug' ) & 2 );
     }
 }
 

@@ -175,7 +175,7 @@ sub save_configuration
     my ( $self ) = @_;
 
     if ( open CONFIG, ">popfile.cfg" ) {
-        foreach my $key (keys %{$self->{configuration_parameters__}}) {
+        foreach my $key (sort keys %{$self->{configuration_parameters__}}) {
             print CONFIG "$key $self->{configuration_parameters__}{$key}\n";
         }
 
