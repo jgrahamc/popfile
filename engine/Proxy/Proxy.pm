@@ -448,6 +448,7 @@ sub flush_extra_
 # $client   The local mail client (created with IO::) that needs the response
 # $command  The text of the command to send (we add an EOL)
 # $null_resp Allow a null response
+# $suppress If set to 1 then the response does not go to the client
 #
 # Send $command to $mail, receives the response and echoes it to the $client and the debug
 # output.  Returns the response
@@ -456,9 +457,10 @@ sub flush_extra_
 
 sub get_response_
 {
-    my ( $self, $mail, $client, $command, $null_resp ) = @_;
+    my ( $self, $mail, $client, $command, $null_resp, $suppress ) = @_;
 
     $null_resp = 0 if (!defined $null_resp);
+    $suppress  = 0 if (!defined $suppress);
 
     unless ( defined($mail) && $mail->connected ) {
        # $mail is undefined - return an error intead of crashing
@@ -480,8 +482,10 @@ sub get_response_
         $response = <$mail>;
 
         if ( $response ) {
+
             # Echo the response up to the mail client
-            $self->tee_( $client, $response );
+
+            $self->tee_( $client, $response ) if ( !$suppress );
             return $response;
         }
     }
@@ -504,6 +508,7 @@ sub get_response_
 # $mail     The stream (created with IO::) to send the message to (the remote mail server)
 # $client   The local mail client (created with IO::) that needs the response
 # $command  The text of the command to send (we add an EOL)
+# $suppress If set to 1 then the response does not go to the client
 #
 # Send $command to $mail, receives the response and echoes it to the $client and the debug
 # output.  Returns true if the response was +OK and false if not
@@ -511,11 +516,11 @@ sub get_response_
 # ---------------------------------------------------------------------------------------------
 sub echo_response_
 {
-    my ( $self, $mail, $client, $command ) = @_;
+    my ( $self, $mail, $client, $command, $suppress ) = @_;
 
     # Determine whether the response began with the string +OK.  If it did then return 1
     # else return 0
-    return ( $self->get_response_( $mail, $client, $command ) =~ /$self->{good_response_}/ );
+    return ( $self->get_response_( $mail, $client, $command, 0, $suppress ) =~ /$self->{good_response_}/ );
 }
 
 # ---------------------------------------------------------------------------------------------
