@@ -300,6 +300,7 @@ sub load_bucket
     $bucket =~ /([[:alpha:]0-9-_]+)$/;
     $bucket =  $1;
     $self->{parameters}{$bucket}{subject} = 1;
+    $self->{parameters}{$bucket}{count}   = 0;
     $self->{total}{$bucket}  = 0;
     $self->{unique}{$bucket} = 0;
     $self->{matrix}{$bucket} = ();
@@ -448,6 +449,11 @@ sub classify_file
         }
     }
 
+    if ( $#buckets == -1 ) 
+    {
+        return "unclassified";
+    }
+
     # The score hash will contain the likelihood that the given message is in each
     # bucket, the buckets are the keys for score
 
@@ -458,7 +464,7 @@ sub classify_file
     my %wtprob;
     my %wbprob;
     
-    for my $bucket (keys %{$self->{total}})
+    for my $bucket (@buckets)
     {
         $score{$bucket} = $self->{bucket_start}{$bucket};
     }

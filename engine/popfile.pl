@@ -789,15 +789,34 @@ sub corpus_page
         }
     }    
     
-    my $body = "<h2>Summary</h2><table width=100% cellspacing=0 cellpadding=0><tr><td><b>Bucket Name</b><td width=10>&nbsp;<td align=right><b>Word Count</b><td width=10>&nbsp;<td align=right><b>Unique Words</b><td width=10>&nbsp;<td align=center><b>Subject Modification</b><td width=20>&nbsp;<td align=left><b>Change Color</b>";
+    my $body = "<h2>Summary</h2><table width=100% cellspacing=0 cellpadding=0><tr><td><b>Bucket Name</b><td width=10>&nbsp;<td align=right><b>Word Count</b><td width=10>&nbsp;<td align=right><b>Unique Words</b><td width=10>&nbsp;<td align=right><b>Emails Classified</b><td width=10>&nbsp;<td align=center><b>Subject Modification</b><td width=20>&nbsp;<td align=left><b>Change Color</b>";
 
     my @buckets = sort keys %{$classifier->{total}};
     my $stripe = 0;
     
+    my $total_count = 0;
     foreach my $bucket (@buckets)
     {
-        my $number = pretty_number( $classifier->{total}{$bucket} );
-        my $unique = pretty_number( $classifier->{unique}{$bucket} );
+        $total_count += $classifier->{parameters}{$bucket}{count};
+    }
+    
+    foreach my $bucket (@buckets)
+    {
+        my $number  = pretty_number( $classifier->{total}{$bucket} );
+        my $unique  = pretty_number( $classifier->{unique}{$bucket} );
+        my $count   = pretty_number( $classifier->{parameters}{$bucket}{count} );
+        my $percent;
+        
+        if ( $total_count == 0 )
+        {
+            $percent = "0%";
+        }
+        else
+        {
+            $percent = int( $classifier->{parameters}{$bucket}{count} * 10000 / $total_count ) / 100;
+            $percent .= "%";
+        }
+        
         $body .= "<tr";
         if ( $stripe == 1 ) 
         {
@@ -808,7 +827,7 @@ sub corpus_page
             $body .= " class=row_odd";
         }
         $stripe = 1 - $stripe;
-        $body .= "><td><a href=/buckets?session=$session_key&showbucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td width=10>&nbsp;<td align=right>$number<td width=10>&nbsp;<td align=right>$unique<td width=10>&nbsp;";
+        $body .= "><td><a href=/buckets?session=$session_key&showbucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td width=10>&nbsp;<td align=right>$number<td width=10>&nbsp;<td align=right>$unique<td width=10>&nbsp;<td align=right>$count ($percent)<td width=10>&nbsp;";
         if ( $configuration{subject} == 1 ) 
         {
             $body .= "<td align=center>";
@@ -1805,6 +1824,8 @@ sub save_configuration
         
         close CONFIG;
     }
+
+    $classifier->write_parameters();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2583,6 +2604,11 @@ sub run_popfile
 
                         # Do the text classification and parse the result
                         $classification = $classifier->classify_file($temp_file);
+
+                        if ( $classification ne 'unclassified' )
+                        {
+                            $classifier->{parameters}{$classification}{count} += 1;
+                        }
 
                         debug ("Classification: $classification" );
 
