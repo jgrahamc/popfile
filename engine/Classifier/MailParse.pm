@@ -198,6 +198,8 @@ sub parse_stream
     
     my $colorized = '';
 
+    my $in_html_tag = 0;
+
     $self->{words}     = {};
     $self->{msg_total} = 0;
     $self->{from}      = '';
@@ -326,9 +328,47 @@ sub parse_stream
 
             if ( $content_type =~ /html/ ) 
             {
-                $line =~ s/<[\/]?[A-Za-z]+[^>]*?>/ /g;
-                $line =~ s/<[\/]?[A-Za-z]+[^>]*?$/ /;
-                $line =~ s/^[^>]*?>/ /;
+                if ( $in_html_tag ) 
+                {
+                    if ( $line =~ s/.*?>/ / )
+                    {
+                        $in_html_tag = 0;
+                    }
+                    else
+                    {
+                        $line = '';
+                        next;
+                    }
+                }
+                    
+                while ( $line =~ s/<[\/]?([A-Za-z]+)([^>]*?)>/ / ) 
+                {
+                    my $tag = $1;
+                    my $arg = $2;
+                    
+                    print "HTML tag $tag with argument " . $arg . "\n" if ($self->{debug});
+                    
+                    if ( $tag =~ /^img$/i ) 
+                    {
+                        if ( $arg =~ /src=\"?http:\/\/([^\/]+)\// ) 
+                        {
+                            update_word( $self, $1, 0, '\/', '\/' );
+                        }
+                    }
+
+                    if ( $tag =~ /^a$/i ) 
+                    {
+                        if ( $arg =~ /href=\"?http:\/\/([^\/]+)\// ) 
+                        {
+                            update_word( $self, $1, 0, '\/', '\/' );
+                        }
+                    }
+                }
+                
+                if ( $line =~ s/<[^>]*$// ) 
+                {
+                    $in_html_tag = 1;
+                }
             }
 
             # If we have an email header then just keep the part after the :
