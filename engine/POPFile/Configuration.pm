@@ -46,6 +46,11 @@ sub new
 sub initialize
 {
     my ( $self ) = @_;
+
+    # This is the location where we store the PID of POPFile in a file
+    # called popfile.pid
+    
+    $self->{configuration}{piddir} = './';
     
     return 1;
 }
@@ -61,6 +66,11 @@ sub start
 {
     my ( $self ) = @_;
 
+    if ( open PID, ">$self->{configuration}{piddir}popfile.pid" ) {
+        print PID "$$\n"; 
+        close PID;
+    }
+
     return 1;
 }
 
@@ -74,6 +84,8 @@ sub start
 sub stop
 {
     my ( $self ) = @_;
+    
+    unlink( "$self->{configuration}{piddir}popfile.pid" );
 }
 
 # ---------------------------------------------------------------------------------------------
