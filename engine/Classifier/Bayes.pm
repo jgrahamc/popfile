@@ -80,6 +80,7 @@ sub new
 
     # The magnets that cause attraction to certain buckets
     $self->{magnets__}           = {};
+    $self->{magnet_count__}      = 0;
 
     # The unclassified cutoff probability
     $self->{unclassified__}      = 0.5;
@@ -305,10 +306,10 @@ sub load_word_matrix_
     my ($self) = @_;
     my $c      = 0;
 
-    $self->{matrix__}     = {};
-    $self->{total__}      = {};
-    $self->{magnets__}    = {};
-    $self->{full_total__} = 0;
+    $self->{matrix__}       = {};
+    $self->{total__}        = {};
+    $self->{magnets__}      = {};
+    $self->{full_total__}   = 0;
 
     my @buckets = glob $self->config_( 'corpus' ) . '/*';
 
@@ -403,7 +404,7 @@ sub load_bucket_
         }
         close PARAMS;
     } else {
-        $self->write_parameters();        
+        $self->write_parameters();
     }
 
     # See if there are magnets defined
@@ -473,6 +474,31 @@ sub load_bucket_
 
         close WORDS;
     }
+
+    $self->calculate_magnet_count__();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# calculate_magnet_count__
+#
+# Count the number of magnets currently defined and store in the magnet_count__
+# variable for retrievable through magnet_count()
+#
+# ---------------------------------------------------------------------------------------------
+sub calculate_magnet_count__
+{
+    my ($self) = @_;
+
+    $self->{magnet_count__} = 0;
+
+    for my $bucket (keys %{$self->{total__}}) {
+        for my $type (keys %{$self->{magnets__}{$bucket}})  {
+            for my $from (keys %{$self->{magnets__}{$bucket}{$type}})  {
+                $self->{magnet_count__} += 1;
+            }
+        }
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -537,7 +563,7 @@ sub classify_file
             $noattype = $self->{parser__}->get_header($type);
             $noattype =~ s/[@\$]/\./g;
 
-        for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
+            for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
                 my $regex;
 
                 $regex = $magnet;
@@ -1521,6 +1547,7 @@ sub create_magnet
 
     $self->{magnets__}{$bucket}{$type}{$text} = 1;
     $self->save_magnets__();
+    $self->calculate_magnet_count__();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1557,6 +1584,7 @@ sub delete_magnet
 
     delete $self->{magnets__}{$bucket}{$type}{$text};
     $self->save_magnets__();
+    $self->calculate_magnet_count__();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1616,6 +1644,13 @@ sub scores
 
     $self->{scores__} = $value if (defined $value);
     return $self->{scores__};
+}
+
+sub magnet_count
+{
+    my ( $self ) = @_;
+
+    return $self->{magnet_count__};
 }
 
 1;

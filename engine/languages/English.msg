@@ -47,6 +47,7 @@ Lookup                                  Lookup
 Word                                    Word
 Count                                   Count
 Update                                  Update
+Refresh                                 Refresh
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Control Center
@@ -192,6 +193,7 @@ Magnet_Explanation                      Three types of magnets are available:</b
 Magnet_MagnetType                       Magnet type
 Magnet_Value                            Value
 Magnet_Always                           Always goes to bucket
+Magnet_Jump                             Jump to magnet page
 
 Bucket_Error1                           Bucket names can only contain the letters a to z in lower case, numbers 0 to 9,  plus - and _
 Bucket_Error2                           Bucket named %s already exists

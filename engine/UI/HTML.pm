@@ -539,7 +539,11 @@ sub html_common_middle
     $result .= "<td class=\"shellBottomRight\"></td>\n</tr>\n</table>\n";
 
     # update check
-    $result .= "<table align=\"center\" summary=\"\">\n<tr>\n<td class=\"logo2menuSpace\">$update_check</td></tr></table>\n";
+    if ( $update_check ne '' ) {
+        $result .= "<table align=\"center\" summary=\"\">\n<tr>\n<td class=\"logo2menuSpace\">$update_check</td></tr></table>\n";
+    } else {
+        $result .= "<p>";
+    }
 
     # menu start
     $result .= "<table class=\"menu\" cellspacing=\"0\" summary=\"$self->{language__}{Header_MenuSummary}\">\n";
@@ -562,7 +566,7 @@ sub html_common_middle
 
     # Magnets menu item
     $result .= "<td class=\"$tab[4]\" align=\"center\">\n";
-    $result .= "<a class=\"menuLink\" href=\"/magnets?session=$self->{session_key__}\">";
+    $result .= "<a class=\"menuLink\" href=\"/magnets?session=$self->{session_key__}&amp;start_magnet=0\">";
     $result .= "\n$self->{language__}{Header_Magnets}</a>\n";
     $result .= "</td>\n<td class=\"menuSpacer\"></td>\n";
 
@@ -624,8 +628,8 @@ sub html_common_bottom
     # both the BODY and the complete page
 
     my $result = "<table class=\"footer\" summary=\"\">\n<tr>\n";
-    $result .= "<td class=\"footerBody\">\n";
-    $result .= "POPFile $self->{version_} - \n";
+    $result .= "<td class=\"footerBody\">";
+    $result .= "<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/\">$self->{language__}{Footer_HomePage}</a><br>\n";
     $result .= "<a class=\"bottomLink\" href=\"";
 
     # To save space on the download of POPFile only the English language manual
@@ -639,14 +643,15 @@ sub html_common_bottom
     }
 
     $result .= "/manual.html\">\n";
-    $result .= "$self->{language__}{Footer_Manual}</a> - \n";
+    $result .= "$self->{language__}{Footer_Manual}</a><br>\n";
 
-    $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/docman/display_doc.php?docid=14421&amp;group_id=63137\">FAQ</a> - \n";
-    $result .= "<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/\">$self->{language__}{Footer_HomePage}</a> - \n";
-    $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/forum/forum.php?forum_id=213876\">$self->{language__}{Footer_FeedMe}</a> - \n";
-    $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959\">$self->{language__}{Footer_RequestFeature}</a> - \n";
-    $result .= "<a class=\"bottomLink\" href=\"http://lists.sourceforge.net/lists/listinfo/popfile-announce\">$self->{language__}{Footer_MailingList}</a> - \n";
-    $result .= "($time)\n";
+    $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/docman/display_doc.php?docid=14421&amp;group_id=63137\">FAQ</a><br>\n";
+
+    $result .= "</td><td class=\"footerBody\">\n<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/\"><img src=\"otto.gif\" border=\"0\"></a><br>$self->{version_}<br>($time)</td>\n";
+
+    $result .= "<td class=\"footerBody\"><a class=\"bottomLink\" href=\"http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959\">$self->{language__}{Footer_RequestFeature}</a><br>\n";
+    $result .= "<a class=\"bottomLink\" href=\"http://lists.sourceforge.net/lists/listinfo/popfile-announce\">$self->{language__}{Footer_MailingList}</a><br>\n";
+    $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/forum/forum.php?forum_id=213876\">$self->{language__}{Footer_FeedMe}</a>\n";
 
     # comment out these next 3 lines prior to shipping code
     # enable them during development to check validation
@@ -800,10 +805,12 @@ sub configuration_page
     $body .= "</form>\n</td>\n";
 
     # History View panel
+
     $body .= "<td class=\"settingsPanel\" width=\"33%\" valign=\"top\">\n";
     $body .= "<h2 class=\"configuration\">$self->{language__}{Configuration_HistoryView}</h2>\n";
 
     # Emails per Page widget
+
     $body .= "<form action=\"/configuration\">\n";
     $body .= "<label class=\"configurationLabel\" for=\"configPageSize\">$self->{language__}{Configuration_History}:</label><br />\n";
     $body .= "<input name=\"page_size\" id=\"configPageSize\" type=\"text\" value=\"" . $self->config_( 'page_size' ) . "\" />\n";
@@ -812,6 +819,7 @@ sub configuration_page
     $body .= sprintf( $self->{language__}{Configuration_HistoryUpdate}, $self->config_( 'page_size' ) ) if ( defined($self->{form_}{page_size}) );
 
     # Days of History to Keep widget
+
     $body .= "\n<form action=\"/configuration\">\n";
     $body .= "<label class=\"configurationLabel\" for=\"configHistoryDays\">$self->{language__}{Configuration_Days}:</label> <br />\n";
     $body .= "<input name=\"history_days\" id=\"configHistoryDays\" type=\"text\" value=\"" . $self->config_( 'history_days' ) . "\" />\n";
@@ -821,10 +829,12 @@ sub configuration_page
     $body .= sprintf( $self->{language__}{Configuration_DaysUpdate}, $self->config_( 'history_days' ) ) if ( defined($self->{form_}{history_days}) );
 
     # Classification Insertion panel
+
     $body .= "</td>\n<td class=\"settingsPanel\" width=\"33%\" valign=\"top\">\n";
     $body .= "<h2 class=\"configuration\">$self->{language__}{Configuration_ClassificationInsertion}</h2>\n";
 
     # Subject line modification widget
+
     $body .= "<table width=\"100%\" summary=\"$self->{language__}{Configuration_InsertionTableSummary}\">\n<tr>\n";
     $body .= "<th valign=\"baseline\" scope=\"row\">\n<span class=\"configurationLabel\">$self->{language__}{Configuration_SubjectLine}:</span>\n</th>\n";
     if ( $self->global_config_( 'subject' ) == 1 ) {
@@ -844,6 +854,7 @@ sub configuration_page
     }
 
     # X-Text-Classification insertion widget
+
     $body .= "</tr>\n<tr>\n<th valign=\"baseline\" scope=\"row\">\n<span class=\"configurationLabel\">$self->{language__}{Configuration_XTCInsertion}:</span></th>\n";
     if ( $self->global_config_( 'xtc' ) == 1 ) {
         $body .= "<td valign=\"baseline\" align=\"right\">\n";
@@ -862,6 +873,7 @@ sub configuration_page
     }
 
     # X-POPFile-Link insertion widget
+
     $body .= "</tr>\n<tr>\n<th valign=\"baseline\" scope=\"row\">\n<span class=\"configurationLabel\">$self->{language__}{Configuration_XPLInsertion}:</span></th>\n";
     if ( $self->global_config_( 'xpl' ) == 1 ) {
         $body .= "<td valign=\"baseline\" align=\"right\">\n";
@@ -881,6 +893,7 @@ sub configuration_page
     $body .= "</tr>\n</table>\n<br />\n";
 
     # Listen Ports panel
+
     $body .= "</td>\n</tr>\n<tr>\n<td class=\"settingsPanel\" width=\"33%\" valign=\"top\">\n";
     $body .= "<h2 class=\"configuration\">$self->{language__}{Configuration_ListenPorts}</h2>\n";
 
@@ -894,6 +907,7 @@ sub configuration_page
 
 
     # User Interface Port widget
+
     $body .= "\n<form action=\"/configuration\">\n";
     $body .= "<label class=\"configurationLabel\" for=\"configUIPort\">$self->{language__}{Configuration_UI}:</label><br />\n";
     $body .= "<input name=\"ui_port\" id=\"configUIPort\" type=\"text\" value=\"" . $self->config_( 'port' ) . "\" />\n";
@@ -903,10 +917,12 @@ sub configuration_page
     $body .= "<br />\n</td>\n";
 
     # TCP Connection Timeout panel
+
     $body .= "<td class=\"settingsPanel\" width=\"33%\" valign=\"top\">\n";
     $body .= "<h2 class=\"configuration\">$self->{language__}{Configuration_TCPTimeout}</h2>\n";
 
     # TCP Conn TO widget
+
     $body .= "<form action=\"/configuration\">\n";
     $body .= "<label class=\"configurationLabel\" for=\"configTCPTimeout\">$self->{language__}{Configuration_TCPTimeoutSecs}:</label><br />\n";
     $body .= "<input name=\"timeout\" type=\"text\" id=\"configTCPTimeout\" value=\"" . $self->global_config_( 'timeout' ) . "\" />\n";
@@ -916,6 +932,7 @@ sub configuration_page
     $body .= "</td>\n";
 
     # Logging panel
+
     $body .= "<td class=\"settingsPanel\" width=\"33%\" valign=\"top\">\n";
     $body .= "<h2 class=\"configuration\">$self->{language__}{Configuration_Logging}</h2>\n";
     $body .= "<form action=\"/configuration\">\n";
@@ -1215,6 +1232,13 @@ sub advanced_page
     http_ok($self, $client,$body,5);
 }
 
+sub max
+{
+    my ( $a, $b ) = @_;
+
+    return ( $a > $b )?$a:$b;
+}
+
 # ---------------------------------------------------------------------------------------------
 #
 # magnet_page - the list of bucket magnets
@@ -1241,12 +1265,18 @@ sub magnet_page
     }
 
     if ( defined( $self->{form_}{count} ) && ( defined( $self->{form_}{update} ) || defined( $self->{form_}{create} ) ) ) {
-        $self->{classifier__}->clear_magnets() if ( defined( $self->{form_}{update} ) );
-
         for my $i ( 1 .. $self->{form_}{count} ) {
             my $mtype   = $self->{form_}{"type$i"};
             my $mtext   = $self->{form_}{"text$i"};
             my $mbucket = $self->{form_}{"bucket$i"};
+
+            if ( defined( $self->{form_}{update} ) ) {
+                my $otype   = $self->{form_}{"otype$i"};
+                my $otext   = $self->{form_}{"otext$i"};
+                my $obucket = $self->{form_}{"obucket$i"};
+
+                $self->{classifier__}->delete_magnet( $obucket, $otype, $otext );
+	    }
 
             if ( ( defined($mbucket) ) && ( $mbucket ne '' ) && ( $mtext ne '' ) ) {
                 my $found = 0;
@@ -1288,16 +1318,39 @@ sub magnet_page
                     $mtext =~ s/[ \t]+$//;
 
                     $self->{classifier__}->create_magnet( $mbucket, $mtype, $mtext );
-                    $magnet_message .= "<blockquote>" . sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $mtext", $mbucket ) . "</blockquote>";
+                    if ( !defined( $self->{form_}{update} ) ) {
+                        $magnet_message .= "<blockquote>" . sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $mtext", $mbucket ) . "</blockquote>";
+                    }
 		}
             }
         }
     }
 
     # Current Magnets panel
+
     my $body = "<h2 class=\"magnets\">$self->{language__}{Magnet_CurrentMagnets}</h2>\n";
 
+    my $start_magnet = $self->{form_}{start_magnet};
+    my $stop_magnet  = $self->{form_}{stop_magnet};
+    my $magnet_count = $self->{classifier__}->magnet_count();
+    my $navigator = '';
+
+    if ( !defined( $start_magnet ) ) {
+        $start_magnet = 0;
+    }
+
+    if ( !defined( $stop_magnet ) ) {
+        $stop_magnet = $start_magnet + $self->config_( 'page_size' ) - 1;
+    }
+
+    if ( $self->config_( 'page_size' ) < $magnet_count ) {
+        $navigator = $self->get_magnet_navigator( $start_magnet, $stop_magnet, $magnet_count );
+    }
+
+    $body .= $navigator;
+
     # magnet listing headings
+
     $body .= "<form action=\"/magnets\">\n";
     $body .= "<table width=\"75%\" class=\"magnetsTable\" summary=\"$self->{language__}{Magnet_MainTableSummary}\">\n";
     $body .= "<caption>$self->{language__}{Magnet_Message1}</caption>\n";
@@ -1307,12 +1360,20 @@ sub magnet_page
 
     my %magnet_types = $self->{classifier__}->get_magnet_types();
     my $i = 0;
+    my $count = -1;
 
     # magnet listing
+
     my $stripe = 0;
+
     for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
         for my $type ($self->{classifier__}->get_magnet_types_in_bucket($bucket)) {
             for my $magnet ($self->{classifier__}->get_magnets( $bucket, $type))  {
+                $count += 1;
+   	        if ( ( $count < $start_magnet ) || ( $count > $stop_magnet ) ) {
+                    next;
+		}
+
                 $i += 1;
                 $body .= "<tr ";
                 if ( $stripe )  {
@@ -1324,23 +1385,25 @@ sub magnet_page
                 # stan todo note: come up with a smarter regex, this one's a bludgeon
                 # another todo: Move this stuff into a function to make text
                 # safe for inclusion in a form field
+
                 my $validatingMagnet = $magnet;
                 $validatingMagnet =~ s/&/&amp;/g;
                 $validatingMagnet =~ s/</&lt;/g;
                 $validatingMagnet =~ s/>/&gt;/g;
-                
+
                 # escape quotation characters to avoid orphan data within tags
                 # todo: function to make arbitrary data safe for inclusion within
                 # a html tag attribute (inside double-quotes)
-                
-                $validatingMagnet =~ s/\"/\&quot\;/g;                
+
+                $validatingMagnet =~ s/\"/\&quot\;/g;
+
                 $body .= ">\n<td><select name=\"type$i\" id=\"magnetsAddType\">\n";
 
 		for my $mtype (keys %magnet_types) {
                     my $selected = ( $mtype eq $type )?"selected":"";
                     $body .= "<option value=\"$mtype\" $selected>\n$self->{language__}{$magnet_types{$mtype}}</option>\n";
 		}
-                $body .= "</select>: <input type=\"text\" name=\"text$i\" value=\"$validatingMagnet\" size=\"" . length($magnet) . "\" /></td>\n";
+                $body .= "</select>: <input type=\"text\" name=\"text$i\" value=\"$validatingMagnet\" size=\"" . max(length($magnet),50) . "\" /></td>\n";
                 $body .= "<td><select name=\"bucket$i\" id=\"magnetsAddBucket\">\n";
 
                 my @buckets = $self->{classifier__}->get_buckets();
@@ -1352,6 +1415,11 @@ sub magnet_page
 
                 $body .= "<td>\n";
                 $body .= "<input type=\"checkbox\" class=\"deleteButton\" name=\"remove$i\" />$self->{language__}{Remove}\n";
+
+                $body .= "<input name=\"otype$i\" type=\"hidden\" value=\"$type\" />";
+                $body .= "<input name=\"otext$i\" type=\"hidden\" value=\"$validatingMagnet\" />";
+                $body .= "<input name=\"obucket$i\" type=\"hidden\" value=\"$bucket\" />";
+
                 $body .= "</td>\n";
                 $body .= "</tr>";
                 $stripe = 1 - $stripe;
@@ -1360,22 +1428,29 @@ sub magnet_page
     }
 
     $body .= "<tr><td></td><td><input type=\"submit\" class=\"deleteButton\" name=\"update\" value=\"$self->{language__}{Update}\" /></td><td><input type=\"submit\" class=\"deleteButton\" name=\"delete\" value=\"$self->{language__}{Remove}\" /></td></tr></table>";
-    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n<br /><br />\n";
-    $body .= "<input type=\"hidden\" name=\"count\" value=\"$i\" />\n</form>\n<br /><br />\n<hr />\n";
+    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
+    $body .= "<input type=\"hidden\" name=\"start_magnet\" value=\"$start_magnet\" />\n";
+    $body .= "<input type=\"hidden\" name=\"count\" value=\"$i\" />\n</form>\n<br /><br />\n";
+
+    $body .= $navigator;
 
     # Create New Magnet panel
-    $body .= "<h2 class=\"magnets\">$self->{language__}{Magnet_CreateNew}</h2>\n";
+
+    $body .= "<hr />\n<h2 class=\"magnets\">$self->{language__}{Magnet_CreateNew}</h2>\n";
     $body .= "<table cellspacing=\"0\" summary=\"\">\n<tr>\n<td>\n";
     $body .= "<b>$self->{language__}{Magnet_Explanation}\n";
     $body .= "</td>\n</tr>\n</table>\n";
 
     # optional widget placement
+
     $body .= "<div class=\"magnetsNewWidget\">\n";
 
     # New Magnets form
+
     $body .= "<form action=\"/magnets\">\n";
 
     # Magnet Type widget
+
     $body .= "<label class=\"magnetsLabel\" for=\"magnetsAddType\">$self->{language__}{Magnet_MagnetType}:</label><br />\n";
     $body .= "<select name=\"type1\" id=\"magnetsAddType\">\n";
 
@@ -1398,6 +1473,7 @@ sub magnet_page
         $body .= "<option value=\"$bucket\">$bucket</option>\n";
     }
     $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"create\" value=\"$self->{language__}{Create}\" />\n";
+    $body .= "<input type=\"hidden\" name=\"start_magnet\" value=\"$start_magnet\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$magnet_message\n";
     $body .="<br />\n";
 
@@ -2339,6 +2415,54 @@ sub get_history_navigator
         $body .= $self->print_form_fields_(0,1,('session','filter','search','sort')) . "\">$self->{language__}{Next} ></a>]";
     }
 
+   $body .= " (<a class=\"history\" href=\"/history?session=$self->{session_key__}&amp;setfilter=\">$self->{language__}{Refresh}</a>)\n";
+
+    return $body;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_magnet_navigator
+#
+# Return the HTML for the Next, Previous and page numbers for magnet navigation
+#
+# $start_magnet  - The number of the first magnet
+# $stop_magnet   - The number of the last magnet
+# $magnet_count  - Total number of magnets
+#
+# ---------------------------------------------------------------------------------------------
+sub get_magnet_navigator
+{
+    my ( $self, $start_magnet, $stop_magnet, $magnet_count ) = @_;
+
+    my $body = "$self->{language__}{Magnet_Jump}: ";
+
+    if ( $start_magnet != 0 )  {
+        $body .= "[<a href=\"/magnets?start_magnet=";
+        $body .= $start_magnet - $self->config_( 'page_size' );
+        $body .= $self->print_form_fields_(0,1,('session')) . "\">< $self->{language__}{Previous}</a>] ";
+    }
+    my $i = 0;
+    my $count = 0;
+    while ( $i < $magnet_count ) {
+        $count += 1;
+        if ( $i == $start_magnet )  {
+            $body .= "<b>";
+            $body .= $count . "</b>";
+        } else {
+            $body .= "[<a href=\"/magnets?start_magnet=$i" . $self->print_form_fields_(0,1,('session')). "\">";
+            $body .= $count . "</a>]";
+        }
+
+        $body .= " ";
+        $i += $self->config_( 'page_size' );
+    }
+    if ( $start_magnet < ( $magnet_count - $self->config_( 'page_size' ) ) )  {
+        $body .= "[<a href=\"/magnets?start_magnet=";
+        $body .= $start_magnet + $self->config_( 'page_size' );
+        $body .= $self->print_form_fields_(0,1,('session')) . "\">$self->{language__}{Next} ></a>]";
+    }
+
     return $body;
 }
 
@@ -2742,7 +2866,7 @@ sub history_page
         return $self->http_redirect_( $client, "/history?" . $self->print_form_fields_(1,0,('start_message','filter','search','sort','session') ) );
     }
 
-    my $body = '';
+    my $body    = '';
 
     if ( !$self->history_cache_empty() )  {
         my $highlight_message = '';
@@ -2967,7 +3091,7 @@ sub view_page
     if ( $index > 0 ) {
         $body .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index - 1 ];
         $body .= "&start_message=". ((( $index - 1 ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' )));
-        $body .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "\">&lt;&lt;";
+        $body .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "\">&lt; ";
         $body .= $self->{language__}{Previous};
         $body .= "</a> ";
     }
@@ -2977,7 +3101,7 @@ sub view_page
         $body .= "&start_message=". ((( $index + 1 ) < ( $start_message + $self->config_( 'page_size' ) ) )?$start_message:($start_message + $self->config_( 'page_size' )));
         $body .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "\"> ";
         $body .= $self->{language__}{Next};
-        $body .= "&gt;&gt;</a>";
+        $body .= " &gt;</a>";
     }
 
     $body .= "</td>\n";
@@ -3038,34 +3162,34 @@ sub view_page
         my $header = $1;
         my $text   = $2;
         $body .= "<tt>";
-        
+
         open MESSAGE, '<' . $self->global_config_( 'msgdir' ) . $mail_file;
         my $line;
         # process each line of the message
         while ($line = <MESSAGE>) {
             $line =~ s/</&lt;/g;
             $line =~ s/>/&gt;/g;
-            
+
             $line =~ s/([^\r\n]{100,150} )/$1<br \/>/g;
             $line =~ s/([^ \r\n]{150})/$1<br \/>/g;
             $line =~ s/[\r\n]+/<br \/>/g;
-            
+
             if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ ) {
                 my $head = $1;
                 my $arg  = $2;
-                
+
                 if ( $head =~ /\Q$header\E/i ) {
-                    
+
                     $text =~ s/</&lt;/g;
                     $text =~ s/>/&gt;/g;
-                    
+
                     if ( $arg =~ /\Q$text\E/i ) {
                           my $new_color = $self->{classifier__}->get_bucket_color($bucket);
                           $line =~ s/(\Q$text\E)/<b><font color=\"$new_color\">$1<\/font><\/b>/;
                     }
                 }
             }
-    
+
             $body .= $line;
         }
         close MESSAGE;
@@ -3075,29 +3199,28 @@ sub view_page
     $body .= "</td>\n</tr>\n";
 
     $body .= "<tr><td class=\"top20\" valign=\"top\">\n";
-    
+
     if ($self->{history__}{$mail_file}{magnet} eq '') {
-        
+
         # Enable saving of word-scores
-    
+
         $self->{classifier__}->wordscores( 1 );
-    
+
         # Build the scores by classifying the message
-    
+
         $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . $mail_file, $self);
-    
+
         # Disable, print, and clear saved word-scores
-    
+
         $self->{classifier__}->wordscores( 0 );
         $body .= $self->{classifier__}->scores();
         $self->{classifier__}->scores('');
-        
     } else {
         $body .= sprintf(   $self->{language__}{History_MagnetBecause},
                             $color, $bucket,
                             Classifier::MailParse::splitline($self->{history__}{$mail_file}{magnet},0)
                             );
-    }    
+    }
 
     # Close button
 
@@ -3399,13 +3522,12 @@ sub print_form_fields_
             $formstring .= "$amp" if ($count > 0);
             $formstring .= "$field=$self->{form_}{$field}";
             $count++;
-        }        
+        }
     }
 
     return $formstring if ($count > 0);
     return '';
 }
-
 
 # ---------------------------------------------------------------------------------------------
 # register_configuration_item
@@ -3482,8 +3604,9 @@ sub register_configuration_item
 sub splitline
 {
     my ($line, $encoding) = @_;
+
     $line =~ s/([^\r\n]{100,120} )/$1\r\n/g;
-    $line =~ s/([^ \r\n]{120})/$1\r\n/g;        
+    $line =~ s/([^ \r\n]{120})/$1\r\n/g;
 
     $line =~ s/</&lt;/g;
     $line =~ s/>/&gt;/g;
@@ -3494,8 +3617,8 @@ sub splitline
     }
 
     $line =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
-    
-    return $line;        
+
+    return $line;
 }
 
 # GETTERS/SETTERS

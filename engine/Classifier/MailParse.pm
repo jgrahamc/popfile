@@ -892,34 +892,34 @@ sub parse_stream
             next if ( !defined($line) );
 
             print ">>> $line" if $self->{debug};
-            
+
             if ($self->{color__}) {
 
                 if (!$self->{in_html_tag__}) {
                     $colorized .= $self->{ut__};
                     $self->{ut__} = '';
-                }            
-    
+                }
+
                 $self->{ut__} .= splitline($line, $encoding);
             }
 
             if ($self->{in_headers__}) {
-                
+
                 # temporary colorization while in headers is handled within parse_header
-                
+
                 $self->{ut__} = '';
 
                 # Check for blank line signifying end of headers
 
                 if ( $line =~ /^(\r\n|\r|\n)/) {
-                    
-                     # Parse the last header                                         
-                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);                    
+
+                     # Parse the last header
+                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);
 
                     # Clear the saved headers
                     $header   = '';
                     $argument = '';
-                    
+
                     $self->{ut__} .= splitline("\015\012", 0);
 
                     $self->{in_headers__} = 0;
@@ -934,8 +934,8 @@ sub parse_stream
                 if ( $line =~ /^([A-Za-z-]+):[ \t]*([^\n\r]*)/ )  {
 
                     # Parse the last header
-                    
-                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding) if ($header ne '');                    
+
+                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding) if ($header ne '');
 
                     # Save the new information for the current header
 
@@ -945,7 +945,7 @@ sub parse_stream
                 }
 
                 # Append to argument if the next line begins with whitespace (isn't a new header)
-                
+
                 if ( $line =~ /^([\t ].*?)(\r\n|\r|\n)/ ) {
                     $argument .= "\015\012" . $1;
                 }
@@ -1046,7 +1046,7 @@ sub parse_stream
 
     $colorized .= clear_out_base64( $self );
     close MSG;
-    
+
     $self->{in_html_tag__} = 0;
 
     if ( $self->{color__} )  {
@@ -1122,8 +1122,8 @@ sub decode_string
     # Therefore, it will be better to store the decoded text in a temporary variable and substitute
     # the original string with it later. Thus, this subroutine returns the real decoded result.
 
-    my ( $self, $mystring ) = @_;    
-    
+    my ( $self, $mystring ) = @_;
+
     my $decode_it = '';
 
     while ( $mystring =~ /=\?[\w-]+\?(B|Q)\?(.*)\?=/ig ) {
@@ -1136,9 +1136,9 @@ sub decode_string
            $decode_it = decode_qp( $decode_it );
            $mystring =~ s/=\?[\w-]+\?Q\?(.*)\?=/$decode_it/i;
         }
-    }     
-        	
-	return $mystring;
+    }
+
+    return $mystring;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1175,7 +1175,7 @@ sub parse_header
     if ( $self->{color__} ) {
         my $color     = $self->{bayes__}->get_color( "header:$header" );
 
-        $self->{ut__} =  "<b><font color=\"$color\">$header</font></b>: " . splitline( $argument . "\015\012", $encoding );        
+        $self->{ut__} =  "<b><font color=\"$color\">$header</font></b>: $argument\015\012";
     }
 
     # After a discussion with Tim Peters and some looking at emails
@@ -1222,7 +1222,7 @@ sub parse_header
 
         if ( $header =~ /^To$/i ) {
             $prefix = 'to';
-            $self->{to__} = $argument if ( $self->{to__} eq '' );            
+            $self->{to__} = $argument if ( $self->{to__} eq '' );
         }
 
         if ( $header =~ /^Cc$/i ) {
