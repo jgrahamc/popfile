@@ -1,3 +1,4 @@
+
 # POPFILE LOADABLE MODULE 3
 package Classifier::Bayes;
 
@@ -39,7 +40,6 @@ use IO::Handle;
 use DBI;
 use Digest::MD5 qw( md5_hex );
 use MIME::Base64;
-use File::Copy;
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
