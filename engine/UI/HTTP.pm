@@ -321,6 +321,8 @@ sub http_error_
 {
     my ( $self, $client, $error ) = @_;
 
+    $self->log_( 0, "HTTP error $error returned" );
+
     print $client "HTTP/1.0 $error Error$eol$eol";
 }
 
