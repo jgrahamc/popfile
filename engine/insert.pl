@@ -104,7 +104,7 @@ sub split_mail_message
 
     print "Parsing message '$message'...\n";
 
-    $parser->{debug} = 1;
+#    $parser->{debug} = 1;
     $parser->parse_stream($message);
     
     foreach $word (keys %{$parser->{words}})
