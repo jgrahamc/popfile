@@ -26,7 +26,7 @@
             </table>
 
             <div class="advancedWidgets">
-                <form action="/advanced">
+                <form action="/advanced" method="post">
                     <label class="advancedLabel" for="advancedAddWordText"><TMPL_VAR NAME="Localize_Advanced_AddWord">:</label><br />
                     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                     <input type="text" id="advancedAddWordText" name="newword" />
@@ -41,7 +41,7 @@
 
                 </TMPL_IF>
 
-                <form action="/advanced">
+                <form action="/advanced" method="post">
                     <label class="advancedLabel" for="advancedRemoveWordText"><TMPL_VAR NAME="Localize_Advanced_RemoveWord">:</label><br />
                     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                     <input type="text" id="advancedRemoveWordText" name="word" />
