@@ -532,7 +532,7 @@ sub commit_history__
             ${$header{$h}}[0] =
                  $self->classifier_()->{parser__}->decode_string(
                      ${$header{$h}}[0] );
-            
+
             if ( !defined ${$header{$h}}[0] || ${$header{$h}}[0] =~ /^\s*$/ ) {
                 if ( $h ne 'cc' ) {
                     ${$header{$h}}[0] = "<$h header missing>";
@@ -540,7 +540,7 @@ sub commit_history__
                     ${$header{$h}}[0] = '';
                 }
             }
-            
+
             ${$header{$h}}[0] =~ s/\0//g;
             ${$header{$h}}[0] = $self->db_()->quote( ${$header{$h}}[0] );
         }

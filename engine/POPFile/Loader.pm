@@ -71,7 +71,7 @@ sub new
     # 1     POPFile::Logger
     # 2     POPFile::Database, Classifier::WordMangle
     # 3     Classifier::Bayes, POPFile::History
-    # 4     Proxy::*, Services::*
+    # 4     Proxy::*, Services::*, Platform::*
     # 5     UI::*
     #
     # This has maps run levels to lists of modules to load
