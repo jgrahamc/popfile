@@ -2948,7 +2948,8 @@ sub history_page
             }
 
             $body .= "</td>\n<td>\n";
-            $body .= "<input type=\"checkbox\" class=\"checkbox\" name=\"remove\" value=\"" . ( $i+1 ) . "\" />$self->{language}{Remove}\n";
+            $body .= "<label class=\"removeLabel\" for=\"remove_" . ( $i+1 ) . "\">$self->{language}{Remove}</label>\n";
+            $body .= "<input type=\"checkbox\" id=\"remove_" . ( $i+1 ) . "\" class=\"checkbox\" name=\"remove\" value=\"" . ( $i+1 ) . "\" />\n";
             $body .= "</td>\n</tr>\n";
 
 
