@@ -41,7 +41,6 @@ a:hover {
 .shell, .shellTop {
   color: #000000;
   background-color: #bcd5ea;
-  /*order: 3px #88b5dd solid; */
   border: 2px #ffffff groove;
   margin: 0;
 }

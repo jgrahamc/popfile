@@ -1175,7 +1175,11 @@ sub parse_header
     if ( $self->{color__} ) {
         my $color     = $self->{bayes__}->get_color( "header:$header" );
 
-        $self->{ut__} =  "<b><font color=\"$color\">$header</font></b>: $argument\015\012";
+        my $fix_argument = $argument;
+        $fix_argument =~ s/</&lt;/g;
+        $fix_argument =~ s/>/&gt;/g;
+
+        $self->{ut__} =  "<b><font color=\"$color\">$header</font></b>: $fix_argument\015\012";
     }
 
     # After a discussion with Tim Peters and some looking at emails
