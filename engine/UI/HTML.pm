@@ -2340,15 +2340,17 @@ sub history_page
         if ( defined($self->{form}{view}) ) {
             my $found = 0;
             foreach my $i ($start_message ..  $stop_message) {
-                $i = $self->{history_keys}[$i];
-                if ( $self->{form}{view} eq $self->{history}{$i}{file} )  {
-                    $found = 1;
-                    last;
+                if ( defined ( $self->{history_keys}[$i] ) ) {
+                    $i = $self->{history_keys}[$i];
+                    if ( $self->{form}{view} eq $self->{history}{$i}{file} )  {
+                        $found = 1;
+                        last;
+                    }
                 }
             }
 
             if ( $found == 0 ) {
-                foreach my $i ( 0 .. history_size( $self ) )  {
+                foreach my $i ( 0 .. ( history_size( $self ) - 1 ) )  {
                     $i = $self->{history_keys}[$i];
                     if ( $self->{form}{view} eq $self->{history}{$i}{file} ) {
                         $start_message = $i;
