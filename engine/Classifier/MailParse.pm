@@ -1663,7 +1663,7 @@ sub parse_line
 
                 # Append to argument if the next line begins with whitespace (isn't a new header)
 
-                if ( $line =~ /^([\t ].+)([^\r\n]+)/ ) {
+                if ( $line =~ /^([\t ])([^\r\n]+)/ ) {
                     $self->{argument__} .= "$eol$1$2";
                     next;
                 }
@@ -1913,7 +1913,7 @@ sub parse_header
     $fix_argument =~ s/</&lt;/g;
     $fix_argument =~ s/>/&gt;/g;
 
-    $argument =~ s/(\r\n|\r|\n)/ /g;
+    $argument =~ s/(\r\n|\r|\n)//g;
     $argument =~ s/^[ \t]+//;
 
     if ( $self->update_pseudoword( 'header', $header, 0, $header ) ) {
