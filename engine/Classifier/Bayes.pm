@@ -606,38 +606,9 @@ sub db_connect__
     my $dbpresent;
     my $sqlite = ( $dbconnect =~ /sqlite/i );
 
-    if ( $sqlite ) {        
+    if ( $sqlite ) {
         $dbname = $self->get_user_path_( $self->config_( 'database' ) );
-        $dbpresent = ( -e $dbname ) || 0;
-        
-        # We check to make sure we're not using DBD::SQLite 1.05 or greater
-        # If so, we'll use DBD::SQLite2, which is still compatible with old
-        # databases
-        
-        my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dbconnect);        
-        
-        if ($driver eq 'SQLite') {
-        
-            my %db_versions = %{DBI->installed_versions};
-            
-            if ($db_versions{'DBD::SQLite'} >= $self->config_( 'bad_sqlite_version' )) {
-                # We don't work with this version.
-                # Check for SQLite2, which we do work with                
-                if (defined( $db_versions{'DBD::SQLite2'} ) )
-                {
-                    $self->log_(0, "Substituting DBD::SQLite2 for DBD::SQLite >1.05");
-                    $self->log_(0, "It is recommended to change dbconnect to DBD::SQLite2");
-                    $dbconnect = $scheme . ":SQLite2:" . ((defined($attr_string))?"$attr_string:":'') . $driver_dsn;
-                } else {
-                    # Die here, since the errors on 1.05, using an old .db
-                    # file are very difficult to understand, and DBD::SQLite2
-                    # isn't available
-                    $self->log_(0, "Please install DBD::SQLite2, and change the dbconnect configuration parameter");
-                    return( 0 );
-                }
-            }
-        }        
-        
+        $dbpresent = ( -e $dbname ) || 0;                
     } else {
         $dbname = $self->config_( 'database' );
         $dbpresent = 1;
@@ -654,6 +625,26 @@ sub db_connect__
     $self->{db__} = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
                                   $self->config_( 'dbuser' ),
                                   $self->config_( 'dbauth' ) );  # PROFILE BLOCK STOP
+                                  
+    $self->log_( 0, "Using SQLite library version " . $self->{db__}{sqlite_version});
+    
+    # We check to make sure we're not using DBD::SQLite 1.05 or greater
+    # which uses SQLite V 3 If so, we'll use DBD::SQLite2 and SQLite 2.8,
+    # which is still compatible with old databases
+    
+    if ( $self->{db__}{sqlite_version} gt $self->config_('bad_sqlite_version' ) )  {
+        $self->log_( 0, "Substituting DBD::SQLite2 for DBD::SQLite 1.05" );        
+        $self->log_( 0, "Please install DBD::SQLite2 and set dbconnect to use DBD::SQLite2" );
+        
+        $dbconnect =~ s/SQLite/SQLite2/;
+        
+        undef $self->{db__};
+#         $self->db_disconnect__();
+        
+        $self->{db__} = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
+                                      $self->config_( 'dbuser' ),
+                                      $self->config_( 'dbauth' ) );  # PROFILE BLOCK STOP        
+    }
 
     if ( !defined( $self->{db__} ) ) {
         $self->log_( 0, "Failed to connect to database and got error $DBI::errstr" );
@@ -3264,7 +3255,7 @@ sub get_html_colored_message
     $self->{parser__}->{color_idmap__}  = undef;
     $self->{parser__}->{color_userid__} = undef;
     $self->{parser__}->{bayes__} = bless $self;
-
+    
     my $result = $self->{parser__}->parse_file( $file,   # PROFILE BLOCK START
            $self->global_config_( 'message_cutoff'   ) ); # PROFILE BLOCK STOP
 
