@@ -627,6 +627,13 @@ sub bucket_page
     http_ok($client,$body,1);
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# bar_chart_100 - Output an HTML bar chart
+#
+# %values       A hash of bucket names with values
+#
+# ---------------------------------------------------------------------------------------------
 sub bar_chart_100 
 {
     my (%values) = @_;
@@ -1062,7 +1069,7 @@ sub history_page
         $filtered = " (just showing bucket <font color=$classifier->{colors}{$form{filter}}>$form{filter}</font>)" if ( $form{filter} ne '' );
     }
 
-    $filtered .= " (search for subject $form{search})" if ( defined($form{search}) );
+    $filtered .= " (searched for subject $form{search})" if ( defined($form{search}) );
 
     my $body = ''; 
 
@@ -1262,6 +1269,8 @@ sub history_page
                 $body .= "&session=$session_key&filter=$form{filter}>Next ></a>";
             }
             $body .= "</table>";
+        } else {
+            $body .="<h2>Recent Messages$filtered</h2>"; 
         }
         
         $body .= "<table width=100%><tr valign=bottom><td></td><td><b>From</b><td><b>Subject</b><td><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all>&lt;Show All&gt;</option>";
