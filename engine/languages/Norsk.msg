@@ -14,7 +14,7 @@ Add                                     Legg til
 Remove                                  Fjern
 Previous                                Forrige
 Next                                    Neste
-From                                    Fra
+>From                                    Fra
 Subject                                 Emne
 Classification                          Klassifisering
 Reclassify                              Re-klassifisering
@@ -40,7 +40,7 @@ Lookup                                  Søk etter
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Kontrollsenter
-Header_Shutdown                         Lukk
+Header_Shutdown                         Lukk POPFile
 Header_History                          Logg
 Header_Buckets                          Bøtter
 Header_Configuration                    Konfigurering
@@ -112,8 +112,8 @@ History_NoFrom                          ingen Fra-linje
 History_NoSubject                       ingen Emne-linje
 History_ClassifyAs                      klassifisert som
 History_MagnetUsed                      Magnet brukt
-History_ChangedTo                       Bytt til <font color=%s>%s
-History_Already                         Allerede re-klassifisert som <font color=%s>%s</font>
+History_ChangedTo                       Endret til <font color=%s>%s
+History_Already                         Re-klassifisert som <font color=%s>%s</font>
 History_RemoveAll                       Fjern alle
 History_RemovePage                      Fjern side
 History_Remove                          For å fjerne oppføringer i loggen, klikk
