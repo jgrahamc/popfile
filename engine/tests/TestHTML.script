@@ -36,6 +36,7 @@
 # MATCH <data>      Match the return from last URL fetch against the data
 # MATCH/ENDMATCH    Encloses a block of test to find in the return from the last URL fetch
 # CODE/ENDCODE      Arbitrary code that should be executed
+# INPUTIS a b       Assert that form item a has value b
 #
 # Expect that the following are available to you within the MATCH/ENDMATCH block
 #
@@ -44,6 +45,7 @@
 # $content          String containing the return from the last URL fetch
 # $sk               The current HTML UI session key
 # $version          Same as $h->version()
+# @forms            All HTML forms in the last content downloaded
 
 # Test the simplest functionality of the HTML interface
 
@@ -176,6 +178,9 @@ ENDMATCH
 
 # TODO Configuration Page
 
+URL http://127.0.0.1:$port/configuration
+GET
+
 # TODO Check skin change
 # TODO Check language change
 # TODO Check logger change
@@ -183,12 +188,18 @@ ENDMATCH
 # TODO Check history days change
 # TODO Check change timeout
 # TODO Check change POP3 port
+
+INPUTIS pop3_port 110
+
 # TODO Check change separator
 # TODO Check Subject Line Modification
 # TODO Check XTC
 # TODO Check XPL
 # TODO Check XMLRPC port
 # TODO Check UI port
+
+INPUTIS ui_port $port
+
 # TODO Check SMTP port
 # TODO Check NNTP port
 # TODO Check NNTP separator

@@ -22,7 +22,50 @@
 #
 # ---------------------------------------------------------------------------------------------
 
+# Set up the test corpus and use the Test msg and cls files
+# to create a current history set
+
+test_assert( `rm -rf corpus` == 0 );
+test_assert( `cp -R corpus.base corpus` == 0 );
+test_assert( `rm -rf corpus/CVS` == 0 );
+test_assert( `rm -rf messages` == 0 );
+
+mkdir 'messages';
+my @messages = glob '*.msg';
+
+my $count = 0;
+foreach my $msg (@messages) {
+    test_assert( `cp $msg messages/popfile0=$count.msg` == 0 );
+    $msg =~ s/\.msg$/\.cls/;
+    test_assert( `cp $msg messages/popfile0=$count.cls` == 0 );
+    $count += 1;
+}
+
 use POSIX ":sys_wait_h";
+
+use HTML::Form;
+my @forms;
+
+# Helper function that finds an input with a specific name
+# in the @forms collection and returns or sets its value
+
+sub form_input
+{
+    my ( $name, $value ) = @_;
+
+    foreach my $form (@forms) {
+        my $input = $form->find_input( $name );
+
+        if ( defined( $input ) ) {
+            $input->value( $value ) if defined( $value );
+            return $input->value();
+	}
+    }
+
+    test_assert( 0, "Unable to find form element '$name'" );
+
+    return undef;
+}
 
 sub pipeready
 {
@@ -42,13 +85,12 @@ sub pipeready
     }
 }
 
-test_assert( `rm -rf messages` == 0 );
-
 use Classifier::Bayes;
 use UI::HTML;
 use POPFile::Configuration;
 use POPFile::MQ;
 use POPFile::Logger;
+use Proxy::POP3;
 
 my $c = new POPFile::Configuration;
 my $mq = new POPFile::MQ;
@@ -76,6 +118,15 @@ $b->logger( $l );
 
 $b->initialize();
 
+my $p = new Proxy::POP3;
+
+$p->configuration( $c );
+$p->mq( $mq );
+$p->logger( $l );
+$p->classifier( $b );
+$p->version( 'testsuite' );
+$p->initialize();
+
 our $h = new UI::HTML;
 
 $h->configuration( $c );
@@ -87,6 +138,8 @@ $h->version( 'testsuite' );
 our $version = $h->version();
 
 our $sk = $h->{session_key__};
+
+$mq->service();
 
 test_assert_equal( $h->url_encode_( ']' ), '%5d' );
 test_assert_equal( $h->url_encode_( '[' ), '%5b' );
@@ -145,19 +198,25 @@ if ( $pid == 0 ) {
         $line =~ s/^[\t ]+//g;
         $line =~ s/[\r\n\t ]+$//g;
 
-        $line = interpolate( $line );
-
         if ( $line =~ /^#/ ) {
             next;
 	}
 
-        if ( $line =~ /^URL (.+)/ ) {
+        $line = interpolate( $line );
+
+        if ( $line =~ /^URL (.+)$/ ) {
             $url = url( $1 );
+            next;
+	}
+
+        if ( $line =~ /^INPUTIS (.+) (.+)$/ ) {
+            test_assert_equal( form_input( $1 ), $2 );
             next;
 	}
 
         if ( $line =~ /^GET$/ ) {
             $content = get($url);
+            @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
             next;
 	}
 
@@ -184,6 +243,25 @@ if ( $pid == 0 ) {
 	    }
 
             test_assert_regexp( $content, "\Q$block\E" );
+            next;
+        }
+
+        if ( $line =~ /^CODE$/ ) {
+            my $block;
+
+            while ( $line = <SCRIPT> ) {
+                $line =~ s/^[\t ]+//g;
+                $line =~ s/[\r\n\t ]+$//g;
+
+	        if ( $line =~ /^ENDCODE$/ ) {
+                    last;
+	        }
+
+                $block .= "\n" unless ( $block eq '' );
+                $block .= $line;
+	    }
+
+            eval( $block );
             next;
         }
     }
