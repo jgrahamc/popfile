@@ -1081,6 +1081,7 @@ install_schema:
   File "${C_PERL_DIR}\lib\Exporter\*"
 
   SetOutPath "$G_MPLIBDIR\File"
+  File "${C_PERL_DIR}\lib\File\Copy.pm"
   File "${C_PERL_DIR}\lib\File\Glob.pm"
   File "${C_PERL_DIR}\lib\File\Spec.pm"
 
