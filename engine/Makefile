@@ -104,14 +104,20 @@ BUILD_ZIP=wzzip -P $(POPFILE_ZIP) -a $^
 xplat: $(POPFILE_ZIP)
 $(POPFILE_ZIP): core manual skins POPFile/popfile_version
 
-core: popfile.pl otto.gif pix.gif black.gif bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/POP3.pm Proxy/Proxy.pm UI/HT??.pm v$(POPFILE_VERSION).change license stopwords favicon.ico $(POPFILE_VERSION_FILE) Classifier/popfile.sql
+core: popfile.pl otto.gif pix.gif black.gif bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/*.pm Services/*.pm UI/*.pm v$(POPFILE_VERSION).change license stopwords favicon.ico $(POPFILE_VERSION_FILE) Classifier/popfile.sql
 	rm -f $(POPFILE_ZIP)
 	$(BUILD_ZIP)
 
 manual: manual/*.gif manual/en/*.html languages/*.msg
 	$(BUILD_ZIP)
 
-skins: skins/*.css skins/*.gif  skins/*/*.gif
+.PHONY: skins_css skins_gif skins_thtml
+skins: skins_css skins_gif skins_thtml
+skins_css: skins/*/*.css
+	$(BUILD_ZIP)
+skins_gif: skins/*/*.gif  skins/*/*.gif
+	$(BUILD_ZIP)
+skins_thtml: skins/*/*.thtml
 	$(BUILD_ZIP)
 
 # package builds a zip file containing the POPFile package and the windows

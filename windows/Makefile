@@ -32,21 +32,45 @@ $(POPFILE_WINDOWS_ZIP): setup.exe
 	rm -f $@
 	$(BUILD_ZIP)
 
-setup.exe: ../engine/*.pl ../engine/Classifier/*.pm ../engine/skins/*.css ../engine/skins/*.gif ../engine/v$(POPFILE_VERSION).change
+setup.exe: installer.nsi ../engine/*.pl ../engine/POPFile/*.pm ../engine/Classifier/*.pm ../engine/Proxy/*.pm ../engine/UI/*.pm ../engine/Platform/MSWin32.pm ../engine/skins/*/*.css ../engine/skins/*/*.gif ../engine/skins/*/*.thtml ../engine/v$(POPFILE_VERSION).change
 setup.exe: stop_pf.exe ../engine/popfile.exe ../engine/popfileb.exe ../engine/popfileib.exe ../engine/popfilef.exe ../engine/popfileif.exe ../engine/popfile-service.exe
-setup.exe: runpopfile.exe adduser.exe monitorcc.exe
-setup.exe: installer.nsi ioA.ini ioB.ini CBP.nsh
+setup.exe: runpopfile.exe adduser.exe monitorcc.exe stop_pf.exe msgcapture.exe
+setup.exe: ioG.ini pfi-library.nsh WriteEnvStr.nsh
+setup.exe: languages/*-pfi.nsh hdr-common.bmp special.bmp remove.ico
+setup.exe: UI/pfi_headerbmpr.exe UI/pfi_modern.exe POPFileIcon/popfile.ico
+setup.exe: test/pfidiag.exe
+setup.exe:
 	@$(MAKENSIS)
 
-stop_pf.exe: stop_popfile.nsi
+stop_pf.exe: stop_popfile.nsi pfi-library.nsh shutdown.ico
 	@$(MAKENSIS)
 
-runpopfile.exe: runpopfile.nsi
+runpopfile.exe: runpopfile.nsi pfi-library.nsh languages/English-pfi.nsh
+runpopfile.exe: POPFileIcon/popfile.ico
+runpopfile.exe:
 	@makensis.exe $<
 
 monitorcc.exe: MonitorCC.nsi
+monitorcc.exe: WriteEnvStr.nsh pfi-languages.nsh
+monitorcc.exe: languages/*-pfi.nsh hdr-common.bmp
+monitorcc.exe: UI/pfi_headerbmpr.exe UI/pfi_modern.exe POPFileIcon/popfile.ico
+monitorcc.exe:
 	@makensis.exe $<
 
-adduser.exe: adduser.nsi monitorcc.exe
+adduser.exe: adduser.nsi monitorcc.exe ioA.ini ioB.ini ioC.ini ioE.ini ioF.ini
+adduser.exe: pfi-library.nsh WriteEnvStr.nsh pfi-languages.nsh
+adduser.exe: languages/*-pfi.nsh hdr-common.bmp special.bmp remove.ico
+adduser.exe: UI/pfi_headerbmpr.exe UI/pfi_modern.exe POPFileIcon/popfile.ico
+adduser.exe:
 	@makensis.exe $<
 
+msgcapture.exe: msgcapture.nsi pfi-library.nsh hdr-common.bmp
+msgcapture.exe: UI/pfi_headerbmpr.exe UI/pfi_modern.exe POPFileIcon/popfile.ico
+msgcapture.exe:
+	@makensis.exe $<
+
+test/pfidiag.exe: test/pfidiag.nsi test/pfinfo.ico
+test/pfidiag.exe: pfi-library.nsh hdr-common.bmp UI/pfi_headerbmpr.exe
+test/pfidiag.exe: UI/pfi_modern.exe
+test/pfidiag.exe:
+	@makensis.exe $<
