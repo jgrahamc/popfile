@@ -4,7 +4,7 @@
 #                     definitions for inclusion in the NSIS scripts used
 #                     to create (and test) the POPFile Windows installer.
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2003-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -215,7 +215,7 @@
 #    Installer Function: GetIEVersion
 #    Installer Function: GetParameters
 #    Installer Function: GetSeparator
-#    Installer Function: SetConsoleMode
+#    Installer Function: SetTrayIconMode
 #    Installer Function: StrStripLZS
 #
 #==============================================================================================
@@ -481,23 +481,23 @@ FunctionEnd
 
 !ifdef ADDUSER
     #--------------------------------------------------------------------------
-    # Installer Function: SetConsoleMode
+    # Installer Function: SetTrayIconMode
     #
-    # Used to set required console mode in 'popfile.cfg'
+    # Used to set required system tray icon mode in 'popfile.cfg'
     #
     # Inputs:
-    #         (top of stack)     - required console mode (0 = disabled, 1 = enabled)
+    #         (top of stack)     - required system tray icon  mode (0 = disabled, 1 = enabled)
     #
     # Outputs:
     #         none
     #
     # Usage:
     #         Push "1"
-    #         Call SetConsoleMode
+    #         Call SetTrayIconMode
     #
     #--------------------------------------------------------------------------
 
-    Function SetConsoleMode
+    Function SetTrayIconMode
 
       !define L_NEW_CFG     $R9   ; file handle used for clean copy
       !define L_OLD_CFG     $R8   ; file handle for old version
@@ -525,9 +525,9 @@ FunctionEnd
       StrCmp ${L_TEXTEND} "<eol>" 0 copy_lne
       StrCmp ${L_LNE} "$\n" copy_lne
 
-      StrCpy ${L_PARAM} ${L_LNE} 16
-      StrCmp ${L_PARAM} "windows_console " 0 copy_lne
-      FileWrite ${L_NEW_CFG} "windows_console ${L_MODE}$\r$\n"
+      StrCpy ${L_PARAM} ${L_LNE} 17
+      StrCmp ${L_PARAM} "windows_trayicon " 0 copy_lne
+      FileWrite ${L_NEW_CFG} "windows_trayicon ${L_MODE}$\r$\n"
       Goto loop
 
     copy_lne:

@@ -7,7 +7,7 @@
 #                 to run POPFile for the first time. Some simple "repair work" can also
 #                 be done using this wizard.
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -58,11 +58,12 @@
 #
 # This command-line switch is used when this wizard is called by the main installer program
 # (setup.exe) and makes the wizard skip the language selection dialog. When this switch is used
-# and an upgrade installation is being performed, the wizard does NOT show the DIRECTORY page
-# which selects the folder to be used for the 'User Data' because this build of the wizard can
-# only upgrade existing data 'in situ' (displaying the DIRECTORY page could be taken as an
-# indication that the wizard will automatically transfer the existing user data to whatever
-# location is selected).
+# and an upgrade installation is being performed, the wizard asks if the existing configuration
+# data is to be upgraded (instead of simply displaying the DIRECTORY page which selects the
+# folder to be used for the 'User Data') because this build of the wizard can only upgrade the
+# existing data 'in situ'. If user does not choose the upgrade the existing data then the normal
+# DIRECTORY page is displayed with the normal default 'User Data' location as the default folder
+# (the user is free to select an alternative location).
 #
 # /installreboot
 #
@@ -157,7 +158,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.16"
+  !define C_PFI_VERSION  "0.2.17"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -260,7 +261,7 @@
   VIAddVersionKey "ProductName"      "POPFile User wizard"
   VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "© 2004  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "Add/Remove POPFile User wizard"
   VIAddVersionKey "FileVersion"       "${C_PFI_VERSION}"
 
@@ -4231,8 +4232,8 @@ Function StartPOPFilePage_Init
 
   !insertmacro PFI_IO_TEXT "ioC.ini" "1" "$(PFI_LANG_LAUNCH_IO_INTRO)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "2" "$(PFI_LANG_LAUNCH_IO_NO)"
-  !insertmacro PFI_IO_TEXT "ioC.ini" "3" "$(PFI_LANG_LAUNCH_IO_DOSBOX)"
-  !insertmacro PFI_IO_TEXT "ioC.ini" "4" "$(PFI_LANG_LAUNCH_IO_BCKGRND)"
+  !insertmacro PFI_IO_TEXT "ioC.ini" "3" "$(PFI_LANG_LAUNCH_IO_NOICON)"
+  !insertmacro PFI_IO_TEXT "ioC.ini" "4" "$(PFI_LANG_LAUNCH_IO_TRAYICON)"
 
   !insertmacro PFI_IO_TEXT "ioC.ini" "6" "$(PFI_LANG_LAUNCH_IO_NOTE_1)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "7" "$(PFI_LANG_LAUNCH_IO_NOTE_2)"
@@ -4258,7 +4259,7 @@ FunctionEnd
 
 Function StartPOPFilePage
 
-  !define L_CFG    $R9
+  !define L_CFG    $R9    ; file handle used to access 'popfile.cfg'
   !define L_TEMP   $R8
 
   Push ${L_CFG}
@@ -4287,7 +4288,8 @@ close_file:
   IfRebootFlag 0 page_enabled
 
   ; We are running on a Win9x system which must be rebooted before Kakasi can be used,
-  ; so we are unable to offer to start POPFile at this point
+  ; so we are unable to offer to start POPFile at this point (corpus conversion is handled
+  ; as a special case)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "State" "1"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "State" "0"
@@ -4302,7 +4304,7 @@ close_file:
 
 page_enabled:
 
-  ; clear all three radio buttons ('do not start', 'use console', 'run in background')
+  ; clear all three radio buttons ('do not start', 'disable icon', 'enable icon')
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "State" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "State" "0"
@@ -4313,20 +4315,20 @@ page_enabled:
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "" use_inherited_data
-  StrCmp ${L_TEMP} "console" console
-  StrCmp ${L_TEMP} "background" background
+  StrCmp ${L_TEMP} "disableicon" disableicon
+  StrCmp ${L_TEMP} "enableicon" enableicon
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "State" "1"
   Goto display_the_page
 
 use_inherited_data:
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Inherited" "Console"
-  StrCmp ${L_TEMP} "0" background
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Inherited" "TrayIcon"
+  StrCmp ${L_TEMP} "1" enableicon
 
-console:
+disableicon:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "State" "1"
   Goto display_the_page
 
-background:
+enableicon:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "State" "1"
 
 display_the_page:
@@ -4357,10 +4359,10 @@ FunctionEnd
 Function CheckLaunchOptions
 
   !define L_CFG         $R9   ; file handle
-  !define L_EXE         $R8   ; full path of perl EXE to be monitored
+  !define L_EXE         $R8   ; full path of Perl EXE to be monitored
   !define L_TEMP        $R7
-  !define L_TRAY        $R6   ; set to 'i' if system tray enabled, otherwise set to ""
-  !define L_CONSOLE     $R5   ; new console mode: 0 = disabled, 1 = enabled
+  !define L_TRAY        $R6   ; system tray icon mode: 1 = enabled, 0 = disabled
+  !define L_CONSOLE     $R5   ; set to 'b' for background mode or 'f' for foreground mode
 
   Push ${L_CFG}
   Push ${L_EXE}
@@ -4368,10 +4370,10 @@ Function CheckLaunchOptions
   Push ${L_TRAY}
   Push ${L_CONSOLE}
 
-  StrCpy ${L_TRAY} "i"    ; the default is to enable the system tray icon
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Inherited" "TrayIcon"
-  StrCmp ${L_TEMP} "1" check_radio_buttons
-  StrCpy ${L_TRAY} ""
+  StrCpy ${L_CONSOLE} "b"    ; the default is to run in the background (no console window shown)
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Inherited" "Console"
+  StrCmp ${L_TEMP} "0" check_radio_buttons
+  StrCpy ${L_CONSOLE} "f"    ; run in foreground (i.e. run in a console window/DOS box)
 
 check_radio_buttons:
 
@@ -4384,14 +4386,14 @@ check_radio_buttons:
   StrCmp ${L_TEMP} "" exit_without_banner
   StrCmp ${L_TEMP} "no" exit_without_banner
 
-  ; Selection has been changed from 'use console' or 'run in background' to 'do not run POPFile'
+  ; Selection has been changed from 'disableicon' or 'enableicon' to 'do not run POPFile'
 
-  StrCmp ${L_TEMP} "background" background_to_no
-  StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_TRAY}f.exe"
+  StrCmp ${L_TEMP} "enableicon" enable_to_no
+  StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_CONSOLE}.exe"
   Goto lastaction_no
 
-background_to_no:
-  StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_TRAY}b.exe"
+enable_to_no:
+  StrCpy ${L_EXE} "$G_ROOTDIR\popfilei${L_CONSOLE}.exe"
 
 lastaction_no:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Run Status" "LastAction" "no"
@@ -4400,7 +4402,7 @@ lastaction_no:
 
   Push $G_GUI
   Call ShutdownViaUI
-  Pop ${L_TEMP}    ; Get the return value (and ignore it)
+  Pop ${L_TEMP}
   StrCmp ${L_TEMP} "password?" 0 exit_without_banner
   DetailPrint "Unable to shutdown automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
@@ -4414,49 +4416,48 @@ run_popfile:
 
   ; Set ${L_EXE} to "" as we do not yet know if we are going to monitor a file in $G_ROOTDIR
 
-  ; If we run POPFile in the background, we display a banner until the UI responds (to provide
-  ; some user feedback since it can take a few seconds for POPFile to start up).
+  ; If we run POPFile in the background, we display a banner to provide some user feedback
+  ; since it can take a few seconds for POPFile to start up.
 
   ; If we run POPFile in a console window, we do not display a banner because on some systems
   ; the console window might cause the banner DLL to lock up and this in turn locks up the
-  ; installer (on most systems the console window should appear quickly enough to provide the
-  ; necessary user feedback).
+  ; installer.
 
   StrCpy ${L_EXE} ""
 
-  ; Field 4 = 'Run POPFile in background' radio button
+  ; Field 4 = 'Run POPFile with system tray icon' radio button (this is the default mode)
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 4" "State"
-  StrCmp ${L_TEMP} "1" run_in_background
+  StrCmp ${L_TEMP} "1" run_with_icon
 
-  ; Run POPFile using console window
+  ; Run POPFile with no system tray icon
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Run Status" "LastAction"
-  StrCmp ${L_TEMP} "console" exit_without_banner
-  StrCmp ${L_TEMP} "no" lastaction_console
-  StrCmp ${L_TEMP} "" lastaction_console
-  StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_TRAY}b.exe"
+  StrCmp ${L_TEMP} "disableicon" exit_without_banner
+  StrCmp ${L_TEMP} "no" lastaction_disableicon
+  StrCmp ${L_TEMP} "" lastaction_disableicon
+  StrCpy ${L_EXE} "$G_ROOTDIR\popfilei${L_CONSOLE}.exe"
 
-lastaction_console:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Run Status" "LastAction" "console"
-  StrCpy ${L_CONSOLE} "1"
+lastaction_disableicon:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Run Status" "LastAction" "disableicon"
+  StrCpy ${L_TRAY} "0"
   Goto corpus_conv_check
 
-run_in_background:
+run_with_icon:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Run Status" "LastAction"
-  StrCmp ${L_TEMP} "background" exit_without_banner
-  StrCmp ${L_TEMP} "no" lastaction_background
-  StrCmp ${L_TEMP} "" lastaction_background
-  StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_TRAY}f.exe"
+  StrCmp ${L_TEMP} "enableicon" exit_without_banner
+  StrCmp ${L_TEMP} "no" lastaction_enableicon
+  StrCmp ${L_TEMP} "" lastaction_enableicon
+  StrCpy ${L_EXE} "$G_ROOTDIR\popfile${L_CONSOLE}.exe"
 
-lastaction_background:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Run Status" "LastAction" "background"
-  StrCpy ${L_CONSOLE} "0"
+lastaction_enableicon:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "pfi-cfg.ini" "Run Status" "LastAction" "enableicon"
+  StrCpy ${L_TRAY} "1"
 
 corpus_conv_check:
   ReadINIStr ${L_TEMP} "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Status"
   StrCmp ${L_TEMP} "new" exit_without_banner
-  StrCmp ${L_CONSOLE} 1 do_not_show_banner
+  StrCmp ${L_CONSOLE} "f" do_not_show_banner
 
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_LAUNCH_BANNER_1)" "$(PFI_LANG_LAUNCH_BANNER_2)"
 
@@ -4467,16 +4468,25 @@ do_not_show_banner:
 
   Push $G_GUI
   Call ShutdownViaUI
-  Pop ${L_TEMP}    ; Get the return value (and ignore it)
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "password?" 0 continue
+  DetailPrint "Unable to shutdown automatically - manual intervention requested"
+  MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBMANSHUT_2)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBMANSHUT_3)"
+
+continue:
   Push ${L_EXE}
   Call WaitUntilUnlocked
-  Push ${L_CONSOLE}
-  Call SetConsoleMode
+  Push ${L_TRAY}
+  Call SetTrayIconMode
   SetOutPath $G_ROOTDIR
   ClearErrors
   Exec '"$G_ROOTDIR\popfile.exe"'
-  IfErrors 0 continue
-  StrCmp ${L_CONSOLE} 1 error_msg
+  IfErrors 0 startup_ok
+  StrCmp ${L_CONSOLE} "f" error_msg
   Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
 
@@ -4489,7 +4499,7 @@ error_msg:
       Click 'OK' once POPFile has been started."
   Goto exit_without_banner
 
-continue:
+startup_ok:
 
   ; A simple time delay is used to give POPFile time to get ready to display the UI. It takes
   ; time for POPFile to start up and be able to generate the UI pages - attempts to access the
@@ -4502,7 +4512,7 @@ continue:
 
   Sleep ${C_UI_STARTUP_DELAY}
 
-  StrCmp ${L_CONSOLE} 1 exit_without_banner
+  StrCmp ${L_CONSOLE} "f" exit_without_banner
   Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
 
