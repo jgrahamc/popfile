@@ -117,7 +117,7 @@ sub initialize
     # connections
 
     $self->config_( 'socks_server', '' );
-    $self->config_( 'socks_port',   0 );
+    $self->config_( 'socks_port',   1080 );
 
     return 1;
 }
