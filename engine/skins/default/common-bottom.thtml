@@ -20,7 +20,7 @@
         </td>
         <td class="footerBody">
             <a class="bottomLink" href="http://popfile.sourceforge.net/">
-                <img src="/skins/default/otto.gif" border="0" alt="" /></a>
+                <img src="otto.gif" border="0" alt="" /></a>
             <br />
             <TMPL_VAR NAME="Common_Bottom_Version">
             <br />
