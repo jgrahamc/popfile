@@ -682,7 +682,7 @@ sub classify_file
         $self->{scores__} .= "<table class=\"top20Words\">\n";
         $self->{scores__} .= "<tr>\n<th scope=\"col\">$language{Word}</th><th>&nbsp;</th><th scope=\"col\">$language{Count}</th><th>&nbsp;</th>\n";
 
-        foreach my $ix (0..(@buckets > 7? 7: @buckets)) {
+        foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
             my $bucket = $ranking[$ix];
             my $bucketcolor  = $self->get_bucket_color( $bucket );
             $self->{scores__} .= "<th><font color=\"$bucketcolor\">$bucket</font></th><th>&nbsp;</th>";
@@ -710,7 +710,7 @@ sub classify_file
 
                 my $base_probability = $self->get_value_( $ranking[0], $word );
 
-                foreach my $ix (0..(@buckets > 7? 7: @buckets)) {
+                foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
                     my $bucket = $ranking[$ix];
                     my $probability  = get_value_( $self, $bucket, $word );
                     my $color        = 'black';
