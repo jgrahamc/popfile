@@ -38,11 +38,9 @@ use locale;
 my %components;
 
 # This is the ONLY PIECE OF PLATFORM SPECIFIC CODE IN POPFILE and all it does is 
-# force Windows use to have v5.8.0 because that's the version with good fork() support
+# force Windows users to have v5.8.0 because that's the version with good fork() support
 # everyone else can use 5.6.1.  This is probably only temporary because at some point
 # I am going to force 5.8.0 for everyone because of the better Unicode support
-
-print $^O;
 
 if ( $^O eq 'MSWin32' ) {
 	require v5.8.0;
