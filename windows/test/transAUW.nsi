@@ -49,7 +49,7 @@
 # /install
 #
 # This command-line switch is used when this wizard is called by the main testbed program
-# (pfi-testbed.exe) and makes the wizard skip the language selection dialog and WELCOME page.
+# (pfi-testbed.exe) and makes the wizard skip the language selection dialog.
 #
 #--------------------------------------------------------------------------
 
@@ -83,7 +83,7 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT      "PFI Testbed"
-  !define C_PFI_VERSION      "0.1.2"
+  !define C_PFI_VERSION      "0.1.16"
 
   !ifndef ENGLISH_MODE
     !define C_PFI_VERSION_ID "${C_PFI_VERSION} (ML)"
@@ -160,7 +160,10 @@
   Var G_FONT               ; font we use to modify the field
 
   Var G_WINUSERNAME        ; current Windows user login name
-  Var G_WINUSERTYPE        ; user group ('Admin', 'Power', 'User', 'Guest' or 'Unknown')
+
+  Var G_PLS_FIELD_1        ; used to customize translated text strings
+
+  Var G_TEMP
 
   ; NSIS provides 20 general purpose user registers:
   ; (a) $R0 to $R9   are used as local registers
@@ -216,7 +219,11 @@
 #   ; Default bucket selection (use "" if no buckets are to be pre-selected)
 #
 #   !define CBP_DEFAULT_LIST "inbox|spam|personal|work"
-  !define CBP_DEFAULT_LIST "spam|personal|work|other"
+#
+#   Allow the names of the default buckets to be translated, as long as they
+#   use only the characters abcdefghijklmnopqrstuvwxyz_-0123456789
+#
+;;  !define CBP_DEFAULT_LIST "$(PFI_LANG_CBP_DEFAULT_BUCKETS)"
 #
 #   ; List of suggestions for bucket names (use "" if no suggestions are required)
 #
@@ -224,6 +231,12 @@
 #   "admin|business|computers|family|financial|general|hobby|inbox|junk|list-admin|\
 #   miscellaneous|not_spam|other|personal|recreation|school|security|shopping|spam|\
 #   travel|work"
+#
+#   Allow the names of the suggested bucket names to be translated, as long as they
+#   use only the characters abcdefghijklmnopqrstuvwxyz_-0123456789
+#
+;;  !define CBP_SUGGESTION_LIST "$(PFI_LANG_CBP_SUGGESTED_NAMES)"
+#
 #----------------------------------------------------------------------------------------
 # Make the CBP package available
 #----------------------------------------------------------------------------------------
@@ -340,11 +353,6 @@
   ; Installer Page - Welcome
   ;---------------------------------------------------
 
-  ; Use a "pre" function to decide whether or not to show the WELCOME page
-  ; (if called from main testbed (pfi-testbed.exe) there is no need for another WELCOME page)
-
-  !define MUI_PAGE_CUSTOMFUNCTION_PRE         "CheckStartMode"
-
   !define MUI_WELCOMEPAGE_TEXT                "$(PFI_LANG_ADDUSER_INFO_TEXT)"
 
   ; Use a "leave" function to decide upon a suitable initial value for the user data folder
@@ -357,6 +365,11 @@
   ;---------------------------------------------------
   ; Installer Page - Select user data Directory
   ;---------------------------------------------------
+
+  ; Use a "pre" function to let user know that the testbed uses a fixed location for the
+  ; user data (so it ignores whatever is selected via the DIRECTORY page)
+
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE       "UseFixedDataDir"
 
   ; Use a "leave" function to look for an existing 'popfile.cfg' and use it to determine some
   ; initial settings for this installation.
@@ -530,6 +543,8 @@
 
 Function .onInit
 
+  StrCpy $G_TEMP ""
+
   ; The main testbed (pfi-testbed.exe) simulates the installation of the POPFile Program files
   ; and then calls this wizard to simulate the creation/updating of the POPFile User Data for
   ; the current user. The command-line switch '/install' is used to suppress this wizard's
@@ -562,28 +577,12 @@ extract_files:
 
 	ClearErrors
 	UserInfo::GetName
-	IfErrors 0 got_name
-
-  ; Assume Win9x system, so user has 'Admin' rights (To do: look for username in Registry?)
-  ; (UserInfo works on Win98SE so perhaps it is only Win95 that fails ?)
-
-  StrCpy $G_WINUSERNAME "UnknownUser"
-  StrCpy $G_WINUSERTYPE "Admin"
-  Goto exit
-
-got_name:
+	IfErrors unknown_user
 	Pop $G_WINUSERNAME
-  StrCmp $G_WINUSERNAME "" 0 get_usertype
-  StrCpy $G_WINUSERNAME "UnknownUser"
+  StrCmp $G_WINUSERNAME "" 0 exit
 
-get_usertype:
-  UserInfo::GetAccountType
-	Pop $G_WINUSERTYPE
-  StrCmp $G_WINUSERTYPE "Admin" exit
-  StrCmp $G_WINUSERTYPE "Power" exit
-  StrCmp $G_WINUSERTYPE "User" exit
-  StrCmp $G_WINUSERTYPE "Guest" exit
-  StrCpy $G_WINUSERTYPE "Unknown"
+unknown_user:
+  StrCpy $G_WINUSERNAME "UnknownUser"
 
 exit:
 FunctionEnd
@@ -631,12 +630,8 @@ Section "POPFile" SecPOPFile
 
   SectionIn RO
 
-  !define L_CFG   $R9   ; file handle
-
-  Push ${L_CFG}
-
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_INST_PROG_UPGRADE)"
+  DetailPrint "$(PFI_LANG_INST_PROG_REGSET)"
   SetDetailsPrint listonly
 
   Sleep ${C_INST_PROG_UPGRADE_DELAY}
@@ -661,9 +656,9 @@ Section "POPFile" SecPOPFile
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
 
-  SetOutPath $G_USERDIR
-  Delete $G_USERDIR\uninst_transauw.exe
-  WriteUninstaller $G_USERDIR\uninst_transauw.exe
+  SetOutPath "$G_USERDIR"
+  Delete "$G_USERDIR\uninst_transauw.exe"
+  WriteUninstaller "$G_USERDIR\uninst_transauw.exe"
 
   ; Create the START MENU entries
 
@@ -675,7 +670,7 @@ Section "POPFile" SecPOPFile
   ; ('SetOutPath' is one way to change the value of $OUTDIR)
 
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}\Add User Demo"
-  SetOutPath $G_USERDIR
+  SetOutPath "$G_USERDIR"
   CreateShortCut \
       "$SMPROGRAMS\${C_PFI_PRODUCT}\Add User Demo\Uninstall Testbed Data ($G_WINUSERNAME).lnk" \
       "$G_USERDIR\uninst_transauw.exe"
@@ -701,9 +696,23 @@ Section "POPFile" SecPOPFile
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
 
-  Pop ${L_CFG}
+SectionEnd
 
-  !undef L_CFG
+#--------------------------------------------------------------------------
+# Installer Section: Pre-0.22.0 SQLite Database Backup component (always 'installed')
+#--------------------------------------------------------------------------
+
+Section "-SQLCorpusBackup" SecSQLBackup
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_SQLBACKUP)"
+  SetDetailsPrint listonly
+
+  Sleep ${C_INST_PROG_NONSQL_DELAY}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
 
 SectionEnd
 
@@ -714,7 +723,7 @@ SectionEnd
 Section "-NonSQLCorpusBackup" SecBackup
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_INST_PROG_CORPUS)"
+  DetailPrint "$(PFI_LANG_INST_PROG_FINDCORPUS)"
   SetDetailsPrint listonly
 
   Sleep ${C_INST_PROG_NONSQL_DELAY}
@@ -729,28 +738,22 @@ Section "-NonSQLCorpusBackup" SecBackup
 SectionEnd
 
 #--------------------------------------------------------------------------
-# Installer Function: CheckStartMode
-# The "pre" function for the WELCOME page.
-#
-# If called from the main installer, no need to display another WELCOME page
+# Installer Section: MakeBatchFile (always 'installed')
 #--------------------------------------------------------------------------
 
-Function CheckStartMode
+Section "-MakeBatchFile" SecMakeBatch
 
-  ; The main testbed (pfi-testbed.exe) simulates the installation of the POPFile Program files
-  ; and then calls this wizard to simulate the creation/updating of the POPFile User Data for
-  ; the current user. The command-line switch '/install' is used to suppress this wizard's
-  ; WELCOME page and language selection dialog when it is called from pfi-testbed.exe.
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_MAKEBAT)"
+  SetDetailsPrint listonly
 
-  StrCmp $G_STARTUP "/install" 0 show_WELCOME_page
+  Sleep ${C_INST_PROG_NONSQL_DELAY}
 
-  ; Need to call the WELCOME page's "leave" function (to initialise $G_USERDIR)
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
 
-  Call ChooseDefaultDataDir
-  Abort
-
-show_WELCOME_page:
-FunctionEnd
+SectionEnd
 
 #--------------------------------------------------------------------------
 # Installer Function: MakeItSafe
@@ -766,9 +769,10 @@ Function MakeItSafe
   Banner::destroy
   Sleep ${C_INST_RUN_BANNER_DELAY}
 
-  DetailPrint "$(PFI_LANG_INST_LOG_SHUTDOWN) 9876"
+  DetailPrint "$(PFI_LANG_INST_LOG_SHUTDOWN) 1234"
   DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
 
+  StrCpy $G_PLS_FIELD_1 "POPFile"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
     $\r$\n$\r$\n\
     $(PFI_LANG_MBMANSHUT_2)\
@@ -831,17 +835,51 @@ exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
+# Installer Function: Use FixedDataDir
+# (the "pre" function for the DIRECTORY page)
+#--------------------------------------------------------------------------
+
+Function UseFixedDataDir
+
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1037
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_USERDIR_TITLE)"
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1038
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_USERDIR_SUBTITLE)"
+
+  MessageBox MB_OK|MB_ICONINFORMATION "This test program will store the 'User Data' in\
+      $\r$\n$\r$\n\
+      $EXEDIR\PFI Testbed\
+      $\r$\n$\r$\n\
+      (it ignores the folder you select in the next page)"
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Installer Function: CheckExistingDataDir
 # (the "leave" function for the DIRECTORY page)
 #--------------------------------------------------------------------------
 
 Function CheckExistingDataDir
 
+  StrCmp $G_TEMP "restore" first_msg
+  StrCpy $G_TEMP "restore"
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_INST_BTN_RESTORE)"
+  Abort
+
+first_msg:
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_3)\
       $\r$\n$\r$\n\
       $G_USERDIR\
       $\r$\n$\r$\n$\r$\n\
-      $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES continue
+      $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES next_msg
+
+next_msg:
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_4)\
+      $\r$\n$\r$\n\
+      $G_USERDIR\
+      $\r$\n$\r$\n$\r$\n\
+      $(PFI_LANG_DIRSELECT_MBWARN_5)" IDYES continue
 
 continue:
 FunctionEnd
@@ -911,8 +949,8 @@ Function SetOptionsPage
   Call StrStr
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" 0 POP3_is_in_list
-  StrCpy ${L_PORTLIST} ${L_PORTLIST}|$G_POP3
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "ListItems" ${L_PORTLIST}
+  StrCpy ${L_PORTLIST} "${L_PORTLIST}|$G_POP3"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "ListItems" "${L_PORTLIST}"
 
 POP3_is_in_list:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_PORTLIST} "ioA.ini" "Field 4" "ListItems"
@@ -921,8 +959,8 @@ POP3_is_in_list:
   Call StrStr
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" 0 GUI_is_in_list
-  StrCpy ${L_PORTLIST} ${L_PORTLIST}|$G_GUI
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "ListItems" ${L_PORTLIST}
+  StrCpy ${L_PORTLIST} "${L_PORTLIST}|$G_GUI"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "ListItems" "${L_PORTLIST}"
 
 GUI_is_in_list:
 
@@ -930,17 +968,26 @@ GUI_is_in_list:
   ; then offer to keep this facility in place.
 
   IfFileExists "$SMSTARTUP\Run POPFile in background.lnk" 0 show_defaults
-    !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 5" "State" 1
+    !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 5" "State" "1"
 
 show_defaults:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "State" $G_POP3
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "State" $G_GUI
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "State" "$G_POP3"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "State" "$G_GUI"
 
   ; Now display the custom page and wait for the user to make their selections.
   ; The function "CheckPortOptions" will check the validity of the selections
   ; and refuse to proceed until suitable ports have been chosen.
 
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioA.ini"
+  !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioA.ini"
+  Pop $G_HWND                 ; HWND of dialog we want to modify
+
+  ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
+
+  GetDlgItem $G_DLGITEM $G_HWND 1204            ; Field 5 = 'Run POPFile at startup' checkbox
+  CreateFont $G_FONT "MS Shell Dlg" 10 700      ; use larger & bolder version of the font in use
+  SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
+
+  !insertmacro MUI_INSTALLOPTIONS_SHOW
 
   Pop ${L_RESULT}
   Pop ${L_PORTLIST}
@@ -1475,8 +1522,8 @@ display_list:
 
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
-  GetDlgItem $G_DLGITEM $G_HWND 1200              ; Field 1 = IDENTITY label (above the box)
-  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  GetDlgItem $G_DLGITEM $G_HWND 1200            ; Field 1 = IDENTITY label (above the box)
+  CreateFont $G_FONT "MS Shell Dlg" 8 700       ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
@@ -2657,8 +2704,8 @@ Function StartPOPFilePage_Init
 
   !insertmacro PFI_IO_TEXT "ioC.ini" "1" "$(PFI_LANG_LAUNCH_IO_INTRO)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "2" "$(PFI_LANG_LAUNCH_IO_NO)"
-  !insertmacro PFI_IO_TEXT "ioC.ini" "3" "$(PFI_LANG_LAUNCH_IO_DOSBOX)"
-  !insertmacro PFI_IO_TEXT "ioC.ini" "4" "$(PFI_LANG_LAUNCH_IO_BCKGRND)"
+  !insertmacro PFI_IO_TEXT "ioC.ini" "3" "$(PFI_LANG_LAUNCH_IO_NOICON)"
+  !insertmacro PFI_IO_TEXT "ioC.ini" "4" "$(PFI_LANG_LAUNCH_IO_TRAYICON)"
 
   !insertmacro PFI_IO_TEXT "ioC.ini" "6" "$(PFI_LANG_LAUNCH_IO_NOTE_1)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "7" "$(PFI_LANG_LAUNCH_IO_NOTE_2)"
@@ -2754,14 +2801,7 @@ wait_for_popfile:
 
   ; Wait until POPFile is ready to display the UI (may take a second or so)
 
-  StrCpy ${L_TEMP} 5   ; Timeout limit to avoid an infinite loop
-
-check_if_ready:
-  Sleep 250   ; milliseconds
-  IntOp ${L_TEMP} ${L_TEMP} - 1
-  IntCmp ${L_TEMP} 0 remove_banner remove_banner check_if_ready
-
-remove_banner:
+  Sleep 1000   ; milliseconds
   Banner::destroy
 
 exit_without_banner:
@@ -2852,7 +2892,7 @@ Function un.onInit
   ; For increased flexibility, several global user variables are used (this makes it easier
   ; to change the folder structure used by the wizard)
 
-  StrCpy $G_USERDIR   $INSTDIR
+  StrCpy $G_USERDIR   "$INSTDIR"
 
   ReadRegStr $G_ROOTDIR HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
 
@@ -2861,28 +2901,12 @@ Function un.onInit
 
 	ClearErrors
 	UserInfo::GetName
-	IfErrors 0 got_name
-
-  ; Assume Win9x system, so user has 'Admin' rights
-  ; (UserInfo works on Win98SE so perhaps it is only Win95 that fails ?)
-
-  StrCpy $G_WINUSERNAME "UnknownUser"
-  StrCpy $G_WINUSERTYPE "Admin"
-  Goto exit
-
-got_name:
+ 	IfErrors unknown_user
 	Pop $G_WINUSERNAME
-  StrCmp $G_WINUSERNAME "" 0 get_usertype
-  StrCpy $G_WINUSERNAME "UnknownUser"
+  StrCmp $G_WINUSERNAME "" 0 exit
 
-get_usertype:
-  UserInfo::GetAccountType
-	Pop $G_WINUSERTYPE
-  StrCmp $G_WINUSERTYPE "Admin" exit
-  StrCmp $G_WINUSERTYPE "Power" exit
-  StrCmp $G_WINUSERTYPE "User" exit
-  StrCmp $G_WINUSERTYPE "Guest" exit
-  StrCpy $G_WINUSERTYPE "Unknown"
+unknown_user:
+  StrCpy $G_WINUSERNAME "UnknownUser"
 
 exit:
 FunctionEnd
@@ -2906,32 +2930,6 @@ look_for_popfile:
       $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES skip_confirmation
 
 skip_confirmation:
-	ClearErrors
-	UserInfo::GetName
-	IfErrors 0 got_name
-
-  ; Assume Win9x system, so user has 'Admin' rights
-  ; (UserInfo works on Win98SE so perhaps pr*pit is only Win95 that fails ?)
-
-  StrCpy $G_WINUSERNAME "UnknownUser"
-  StrCpy $G_WINUSERTYPE "Admin"
-  Goto continue
-
-got_name:
-	Pop $G_WINUSERNAME
-  StrCmp $G_WINUSERNAME "" 0 get_usertype
-  StrCpy $G_WINUSERNAME "UnknownUser"
-
-get_usertype:
-  UserInfo::GetAccountType
-	Pop $G_WINUSERTYPE
-  StrCmp $G_WINUSERTYPE "Admin" continue
-  StrCmp $G_WINUSERTYPE "Power" continue
-  StrCmp $G_WINUSERTYPE "User" continue
-  StrCmp $G_WINUSERTYPE "Guest" continue
-  StrCpy $G_WINUSERTYPE "Unknown"
-
-continue:
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROG_SHUTDOWN)"
   SetDetailsPrint listonly
@@ -2940,6 +2938,30 @@ continue:
   DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
 
   Sleep ${C_UNINST_PROG_SHUTDOWN_DELAY}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_UN_PROG_DBMSGDIR)"
+  SetDetailsPrint listonly
+
+  Sleep ${C_UNINST_PROG_SHORT_DELAY}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_UN_PROG_CONFIG)"
+  SetDetailsPrint listonly
+
+  Sleep ${C_UNINST_PROG_SHORT_DELAY}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_UN_PROG_EXESTATUS)"
+  SetDetailsPrint listonly
+
+  Sleep ${C_UNINST_PROG_SHORT_DELAY}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_UN_PROG_REGISTRY)"
+  SetDetailsPrint listonly
+
+  Sleep ${C_UNINST_PROG_SHORT_DELAY}
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROG_SHORT)"
@@ -2973,7 +2995,8 @@ exp_continue:
   DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) POP3 User Name: an.example"
   DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) POP3 Server: mail.my.isp.com"
   DetailPrint "$(PFI_LANG_UN_LOG_RESTORED) POP3 Port: 110"
-  DetailPrint "$(PFI_LANG_UN_LOG_DATAPROBS)"
+  DetailPrint "popfile.reg.dummy: $(PFI_LANG_UN_LOG_DATAPROBS)"
+  DetailPrint "$(PFI_LANG_UN_LOG_CLOSED) popfile.reg.dummy"
   DetailPrint "$(PFI_LANG_UN_LOG_DELROOTDIR): popfile.reg.dummy"
 
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
@@ -3032,10 +3055,10 @@ end_out_restore:
 eud_continue:
   Sleep ${C_UNINST_PROG_EMAIL_DELAY}
 
-  Delete $G_USERDIR\expchanges.txt
-  Delete $G_USERDIR\expconfig.txt
-  Delete $G_USERDIR\outchanges.txt
-  Delete $G_USERDIR\outconfig.txt
+  Delete "$G_USERDIR\expchanges.txt"
+  Delete "$G_USERDIR\expconfig.txt"
+  Delete "$G_USERDIR\outchanges.txt"
+  Delete "$G_USERDIR\outconfig.txt"
 
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_3)\
@@ -3047,11 +3070,7 @@ eud_continue:
 end_eud_restore:
   Sleep ${C_UNINST_PROG_EMAIL_DELAY}
 
-  RMDir /r $G_USERDIR\corpus
-
-  Delete $G_USERDIR\stopwords
-  Delete $G_USERDIR\stopwords.bak
-  Delete $G_USERDIR\stopwords.default
+  RMDir /r "$G_USERDIR\corpus"
 
   MessageBox MB_YESNO|MB_ICONSTOP \
     "$(PFI_LANG_UN_MBRERUN_1)\
@@ -3092,6 +3111,13 @@ Removed:
   DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBREMERR_1): $G_USERDIR $(PFI_LANG_UN_MBREMERR_2)"
+
+ MessageBox MB_YESNO|MB_ICONQUESTION \
+   "$(PFI_LANG_UN_MBDELMSGS_1)\
+   $\r$\n$\r$\n\
+   ($G_USERDIR\messages)" IDNO section_exit
+
+section_exit:
   SetDetailsPrint both
 
 SectionEnd

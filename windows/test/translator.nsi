@@ -127,7 +127,7 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT       "PFI Testbed"
-  !define C_PFI_VERSION       "0.11.3"
+  !define C_PFI_VERSION       "0.11.10"
 
   Name                        "${C_PFI_PRODUCT}"
   Caption                     "${C_PFI_PRODUCT} ${C_PFI_VERSION} Setup"
@@ -152,7 +152,11 @@
   !define C_INST_PROG_SHORT_DELAY       2500
   !define C_INST_PROG_SKINS_DELAY       2500
   !define C_INST_PROG_LANGS_DELAY       2500
+  !define C_INST_PROG_NNTP_DELAY        2500
+  !define C_INST_PROG_SMTP_DELAY        2500
   !define C_INST_PROG_XMLRPC_DELAY      2500
+  !define C_INST_PROG_IMAP_DELAY        2500
+  !define C_INST_PROG_SOCKS_DELAY       2500
 
   !define C_UNINST_PROG_SHUTDOWN_DELAY  2500
   !define C_UNINST_PROG_SHORT_DELAY     2500
@@ -176,6 +180,11 @@
   Var G_NOTEPAD            ; path to notepad.exe ("" = not found in search path)
 
   Var G_WINUSERNAME        ; current Windows user login name
+
+  Var G_PLS_FIELD_1        ; used to customize translated text strings
+
+  Var G_TEMP
+  Var G_DLGITEM
 
   ; NSIS provides 20 general purpose user registers:
   ; (a) $R0 to $R9   are used as local registers
@@ -387,6 +396,11 @@
   ; Installer Page - Install files
   ;---------------------------------------------------
 
+  ; Override the standard "Installation complete..." page header
+
+  !define MUI_INSTFILESPAGE_FINISHHEADER_TEXT     "$(PFI_LANG_INSTFINISH_TITLE)"
+  !define MUI_INSTFILESPAGE_FINISHHEADER_SUBTEXT  "$(PFI_LANG_INSTFINISH_SUBTITLE)"
+
   !insertmacro MUI_PAGE_INSTFILES
 
   ;---------------------------------------------------
@@ -482,6 +496,8 @@ Function .onInit
   Push ${L_INPUT_FILE_HANDLE}
   Push ${L_OUTPUT_FILE_HANDLE}
   Push ${L_TEMP}
+
+  StrCpy $G_TEMP ""
 
   ; Conditional compilation: if ENGLISH_MODE is defined, support only 'English'
 
@@ -684,8 +700,46 @@ Section "Languages" SecLangs
 
 SectionEnd
 
+SubSection /e "Optional modules" SubSecOptional
+
 #--------------------------------------------------------------------------
-# Installer Section: (optional) POPFile XMLRPC component
+# Installer Section: (optional) POPFile NNTP proxy (default = not selected)
+#--------------------------------------------------------------------------
+
+Section /o "NNTP proxy" SecNNTP
+
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+  Sleep ${C_INST_PROG_NNTP_DELAY}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Installer Section: (optional) POPFile SMTP proxy (default = not selected)
+#--------------------------------------------------------------------------
+
+Section /o "SMTP proxy" SecSMTP
+
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+  Sleep ${C_INST_PROG_SMTP_DELAY}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Installer Section: (optional) POPFile XMLRPC component (default = not selected)
 #--------------------------------------------------------------------------
 
 Section "XMLRPC" SecXMLRPC
@@ -703,14 +757,57 @@ Section "XMLRPC" SecXMLRPC
 SectionEnd
 
 #--------------------------------------------------------------------------
+# Installer Section: (optional) POPFile IMAP component (default = not selected)
+#--------------------------------------------------------------------------
+
+Section /o "IMAP" SecIMAP
+
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+  Sleep ${C_INST_PROG_IMAP_DELAY}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Installer Section: (optional) Perl IO::Socket::Socks module (default = not selected)
+#--------------------------------------------------------------------------
+
+Section /o "SOCKS" SecSOCKS
+
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+  Sleep ${C_INST_PROG_SOCKS_DELAY}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
+
+SectionEnd
+
+SubSectionEnd
+
+#--------------------------------------------------------------------------
 # Component-selection page descriptions
 #--------------------------------------------------------------------------
 
   !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile} $(DESC_SecPOPFile)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}   $(DESC_SecSkins)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}   $(DESC_SecLangs)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}  $(DESC_SecXMLRPC)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile}     $(DESC_SecPOPFile)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}       $(DESC_SecSkins)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}       $(DESC_SecLangs)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SubSecOptional} $(DESC_SubSecOptional)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecNNTP}        $(DESC_SecNNTP)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSMTP}        $(DESC_SecSMTP)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}      $(DESC_SecXMLRPC)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}        $(DESC_SecIMAP)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSOCKS}       $(DESC_SecSOCKS)
   !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 #--------------------------------------------------------------------------
@@ -806,6 +903,7 @@ Function MakeItSafe
   DetailPrint "$(PFI_LANG_INST_LOG_SHUTDOWN) 9876"
   DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
 
+  StrCpy $G_PLS_FIELD_1 "POPFile"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
     $\r$\n$\r$\n\
     $(PFI_LANG_MBMANSHUT_2)\
@@ -820,6 +918,17 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 Function CheckExistingConfig
+
+  StrCmp $G_TEMP "upgrade" check_dir
+  StrCpy $G_TEMP "upgrade"
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_INST_BTN_UPGRADE)"
+;;  FindWindow $G_DLGITEM "#32770" "" $HWNDPARENT
+;;  GetDlgItem $G_DLGITEM $G_DLGITEM 1006
+;;  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_ROOTDIR_TEXT_TOP_UP)"
+  Abort
+
+check_dir:
 
   ; Try to avoid installing the translator testbed in a 'real' POPFile folder
 
@@ -843,6 +952,12 @@ reject:
   Abort
 
 continue:
+  StrCpy $G_PLS_FIELD_1 "POPFile IMAP"
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(MBCOMPONENT_PROB_1)\
+      $\r$\n$\r$\n\
+      $(MBCOMPONENT_PROB_2)" IDNO exit
+
+exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
