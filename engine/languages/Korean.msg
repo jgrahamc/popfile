@@ -276,6 +276,9 @@ View_ShowFrequencies                    단어 빈도 보기
 View_ShowProbabilities                  단어 확률 보기
 View_ShowScores                         단어 점수 보기
 View_WordMatrix                         단어 표
+View_WordProbabilities                  단어 확률 표시 중
+View_WordFrequencies                    단어 빈도 표시 중
+View_WordScores                         단어 점수 표시 중
 
 Windows_TrayIcon                        팝파일 아이콘을 윈도우즈 시스템 트레이에 표시하시겠습니까?
 Windows_Console                         팝파일 메시지를 콘솔창에 표시하시겠습니까?

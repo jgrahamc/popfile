@@ -277,6 +277,9 @@ View_ShowFrequencies                    単語の頻度を表示
 View_ShowProbabilities                  単語の確率を表示
 View_ShowScores                         単語の得点を表示
 View_WordMatrix                         単語マトリクス
+View_WordProbabilities                  確率
+View_WordFrequencies                    頻度
+View_WordScores                         得点
 
 Windows_TrayIcon                        POPFile のアイコンを Windows システムトレイに表示しますか？
 Windows_Console                         POPFile のメッセージをコンソールウィンドウに出力しますか？
