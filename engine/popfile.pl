@@ -434,7 +434,7 @@ sub echo_to_dot
             last;
         }
 
-        print $client $_;
+        tee( $client, $_ );
 
         if ( /^\.[\r\n]+$/ )
         {   
