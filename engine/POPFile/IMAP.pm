@@ -662,7 +662,7 @@ sub folder_uid_status__
 
     $self->log_( "Checking UIDVALIDITY of folder $folder" ) if $self->{debug__};
 
-    $self->say( $imap, "STATUS $folder (UIDVALIDITY UIDNEXT)" );
+    $self->say( $imap, "STATUS \"$folder\" (UIDVALIDITY UIDNEXT)" );
     my $response = $self->get_response( $imap );
 
     if ( $response == 1 ) {
