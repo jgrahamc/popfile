@@ -442,11 +442,11 @@ sub classify_file
     
     my @buckets = keys %{$self->{total}};
 
-    for my $bucket (keys %{$self->{magnets}}) 
+    for my $bucket (sort keys %{$self->{magnets}}) 
     {
-        for my $type (keys %{$self->{magnets}{$bucket}})
+        for my $type (sort keys %{$self->{magnets}{$bucket}})
         {
-            for my $magnet (keys %{$self->{magnets}{$bucket}{$type}})
+            for my $magnet (sort keys %{$self->{magnets}{$bucket}{$type}})
             {
                 if ( $self->{parser}->{$type} =~ /\Q$magnet\E/i )
                 {
