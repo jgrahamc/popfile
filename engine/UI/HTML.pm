@@ -765,10 +765,19 @@ sub configuration_page
         ( $self->{form_}{debug} <= 4 ) ) ) {
        $self->global_config_( 'debug', $self->{form_}{debug}-1 );
    }
+
     if ( defined($self->{form_}{language}) ) {
         if ( $self->config_( 'language' ) ne $self->{form_}{language} ) {
             $self->config_( 'language', $self->{form_}{language} );
+            if ( $self->config_( 'language' ) ne 'English' ) {
+                $self->load_language( 'English' );
+            }
             $self->load_language( $self->config_( 'language' ) );
+
+            # Force a template relocalization because the language has been
+            # changed which changes the localization of the template
+
+            $self->localize_template__( $templ );
         }
     }
 
@@ -2778,6 +2787,23 @@ sub load_template__
         }
     }
 
+    $self->localize_template__( $templ );
+
+    return $templ;
+}
+
+#----------------------------------------------------------------------------
+#
+# localize_template__
+#
+# Localize a template by converting all the Localize_X variables to the
+# appropriate variable X from the language__ hash.
+#
+#----------------------------------------------------------------------------
+sub localize_template__
+{
+    my ( $self, $templ ) = @_;
+
     # Localize the template in use.
     #
     # Templates are automatically localized.  Any TMPL_VAR that begins with
@@ -2796,8 +2822,6 @@ sub load_template__
             $templ->param( $var => $self->{language__}{$1} );
         }
     }
-
-    return $templ;
 }
 
 #----------------------------------------------------------------------------

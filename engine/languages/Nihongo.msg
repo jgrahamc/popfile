@@ -25,6 +25,10 @@ LanguageDirection                       ltr
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          jp
 
+
+# This is where to find the FAQ on the Wiki
+FAQLink                                 JP_FrequentlyAskedQuestions
+
 # Common words that are used on their own all over the interface
 Apply                                   ลฌอั
 On                                      ON

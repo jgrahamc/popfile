@@ -231,7 +231,7 @@ sub child__
                     next;
                 }
             } else {
-                $self->tee_(  $client, "-ERR No secure server specified$eol" );
+                $self->tee_(  $client, "-ERR Transparent proxying not configured: set secure server/port$eol" );
             }
 
             next;

@@ -25,6 +25,9 @@ LanguageDirection                       ltr
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          en
 
+# This is where to find the FAQ on the Wiki
+FAQLink                                 FrequentlyAskedQuestions
+
 # Common words that are used on their own all over the interface
 Apply                                   Apply
 On                                      On
@@ -105,7 +108,7 @@ Footer_Forums                           Forums
 Footer_FeedMe                           Donate
 Footer_RequestFeature                   Request Feature
 Footer_MailingList                      Mailing List
-Footer_Wiki                             Additional Documentation
+Footer_Wiki                             Documentation
 
 Configuration_Error1                    The separator character must be a single character
 Configuration_Error2                    The user interface port must be a number between 1 and 65535
@@ -232,10 +235,10 @@ Security_PasswordTitle                  User Interface Password
 Security_Password                       Password
 Security_PasswordUpdate                 Updated password
 Security_AUTHTitle                      Remote Servers
-Security_SecureServer                   POP3 SPA/AUTH server
-Security_SecureServerUpdate             Updated POP3 SPA/AUTH secure server to %s; this change will not take affect until you restart POPFile
-Security_SecurePort                     POP3 SPA/AUTH port
-Security_SecurePortUpdate               Updated POP3 SPA/AUTH port to %s; this change will not take affect until you restart POPFile
+Security_SecureServer                   Remote POP3 server (SPA/AUTH or transparent proxy)
+Security_SecureServerUpdate             Updated remote POP3 server to %s
+Security_SecurePort                     Remote POP3 port (SPA/AUTH or transparent proxy)
+Security_SecurePortUpdate               Updated remote POP3 server port to %s
 Security_SMTPServer                     SMTP chain server
 Security_SMTPServerUpdate               Updated SMTP chain server to %s; this change will not take affect until you restart POPFile
 Security_SMTPPort                       SMTP chain port

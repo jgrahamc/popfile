@@ -599,6 +599,13 @@ if ( $pid == 0 ) {
         test_assert_equal( $result,
             "-ERR can't connect to 127.0.0.1:8111$eol" );
 
+        # Try a failed transparent proxying
+
+        print $client "USER gooduser$eol";
+        $result = <$client>;
+        test_assert_equal( $result,
+            "-ERR Transparent proxying not configured: set secure server/port$eol" );
+
         # Check that we can connect to the remote POP3 server 
         # (should still be waiting for us)
 
@@ -1840,6 +1847,38 @@ if ( $pid == 0 ) {
         print $client "done$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK Done$eol" );
+
+        print $client "QUIT$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Bye$eol" );
+
+        my $cd = 10;
+        while ( $cd-- ) {
+            select( undef, undef, undef, 0.1 );
+            $mq->service();
+            $h->service();
+        }
+
+        close $client;
+
+        # Test successful transparent proxying, we have a test
+        # for the failure case above
+
+        $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        $result = <$client>;
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "USER gooduser$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Welcome gooduser$eol" );
 
         print $client "QUIT$eol";
         $result = <$client>;
