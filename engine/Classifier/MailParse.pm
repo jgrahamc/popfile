@@ -34,31 +34,31 @@ use MIME::QuotedPrint;
 # HTML entity mapping to character codes, this maps things like &amp; to their corresponding
 # character code
 
-my %entityhash = ('aacute'  => 224,     'Aacute'  => 202,     'Acirc'   => 203,     'acirc'   => 225, # PROFILE BLOCK START
-                  'acute'   => 189,     'AElig'   => 207,     'aelig'   => 229,     'Agrave'  => 201,
-                  'agrave'  => 223,     'amp'     => 38,      'Aring'   => 206,     'aring'   => 228,
-                  'atilde'  => 226,     'Atilde'  => 204,     'Auml'    => 196,     'auml'    => 228,
-                  'brvbar'  => 166,     'ccedil'  => 230,     'Ccedil'  => 208,     'cedil'   => 193,
-                  'cent'    => 162,     'copy'    => 169,     'curren'  => 164,     'deg'     => 185,
-                  'divide'  => 246,     'Eacute'  => 210,     'eacute'  => 232,     'ecirc'   => 233,
-                  'Ecirc'   => 211,     'Egrave'  => 209,     'egrave'  => 231,     'ETH'     => 217,
-                  'eth'     => 239,     'Euml'    => 212,     'euml'    => 234,     'frac12'  => 198,
-                  'frac14'  => 197,     'frac34'  => 199,     'iacute'  => 236,     'Iacute'  => 214,
-                  'icirc'   => 237,     'Icirc'   => 215,     'iexcl'   => 161,     'igrave'  => 235,
-                  'Igrave'  => 213,     'iquest'  => 200,     'iuml'    => 238,     'Iuml'    => 216,
-                  'laquo'   => 180,     'macr'    => 184,     'micro'   => 190,     'middot'  => 192,
-                  'nbsp'    => 160,     'not'     => 181,     'ntilde'  => 240,     'Ntilde'  => 218,
-                  'oacute'  => 242,     'Oacute'  => 210,     'Ocirc'   => 211,     'ocirc'   => 243,
-                  'Ograve'  => 219,     'ograve'  => 241,     'ordf'    => 170,     'ordm'    => 195,
-                  'oslash'  => 247,     'Oslash'  => 215,     'Otilde'  => 212,     'otilde'  => 244,
-                  'Ouml'    => 214,     'ouml'    => 246,     'para'    => 191,     'plusmn'  => 186,
-                  'pound'   => 163,     'raquo'   => 196,     'reg'     => 183,     'sect'    => 167,
-                  'shy'     => 182,     'sup1'    => 194,     'sup2'    => 187,     'sup3'    => 188,
-                  'szlig'   => 223,     'thorn'   => 253,     'THORN'   => 221,     'times'   => 214,
-                  'Uacute'  => 217,     'uacute'  => 249,     'ucirc'   => 250,     'Ucirc'   => 218,
-                  'ugrave'  => 248,     'Ugrave'  => 216,     'uml'     => 168,     'Uuml'    => 220,
-                  'uuml'    => 252,     'Yacute'  => 220,     'yacute'  => 252,     'yen'     => 165,
-                  'yuml'    => 254); # PROFILE BLOCK STOP
+my %entityhash = ('aacute'  => 225,     'Aacute'  => 193,     'Acirc'   => 194,     'acirc'   => 226, # PROFILE BLOCK START
+                  'acute'   => 180,     'AElig'   => 198,     'aelig'   => 230,     'Agrave'  => 192,
+                  'agrave'  => 224,     'amp'     => 38,      'Aring'   => 197,     'aring'   => 229,
+                  'atilde'  => 227,     'Atilde'  => 195,     'Auml'    => 196,     'auml'    => 228,
+                  'brvbar'  => 166,     'ccedil'  => 231,     'Ccedil'  => 199,     'cedil'   => 184,
+                  'cent'    => 162,     'copy'    => 169,     'curren'  => 164,     'deg'     => 176,
+                  'divide'  => 247,     'Eacute'  => 201,     'eacute'  => 233,     'ecirc'   => 234,
+                  'Ecirc'   => 202,     'Egrave'  => 200,     'egrave'  => 232,     'ETH'     => 208,
+                  'eth'     => 240,     'Euml'    => 203,     'euml'    => 235,     'frac12'  => 189,
+                  'frac14'  => 188,     'frac34'  => 190,     'iacute'  => 237,     'Iacute'  => 205,
+                  'icirc'   => 238,     'Icirc'   => 206,     'iexcl'   => 161,     'igrave'  => 236,
+                  'Igrave'  => 204,     'iquest'  => 191,     'iuml'    => 239,     'Iuml'    => 207,
+                  'laquo'   => 171,     'macr'    => 175,     'micro'   => 181,     'middot'  => 183,
+                  'nbsp'    => 160,     'not'     => 172,     'ntilde'  => 241,     'Ntilde'  => 209,
+                  'oacute'  => 243,     'Oacute'  => 211,     'Ocirc'   => 212,     'ocirc'   => 244,
+                  'Ograve'  => 210,     'ograve'  => 242,     'ordf'    => 170,     'ordm'    => 186,
+                  'oslash'  => 248,     'Oslash'  => 216,     'Otilde'  => 213,     'otilde'  => 245,
+                  'Ouml'    => 214,     'ouml'    => 246,     'para'    => 182,     'plusmn'  => 177,
+                  'pound'   => 163,     'raquo'   => 187,     'reg'     => 174,     'sect'    => 167,
+                  'shy'     => 173,     'sup1'    => 185,     'sup2'    => 178,     'sup3'    => 179,
+                  'szlig'   => 223,     'thorn'   => 254,     'THORN'   => 222,     'times'   => 215,
+                  'Uacute'  => 218,     'uacute'  => 250,     'ucirc'   => 251,     'Ucirc'   => 219,
+                  'ugrave'  => 249,     'Ugrave'  => 217,     'uml'     => 168,     'Uuml'    => 220,
+                  'uuml'    => 252,     'Yacute'  => 221,     'yacute'  => 253,     'yen'     => 165,
+                  'yuml'    => 255 ); # PROFILE BLOCK STOP
 
 #----------------------------------------------------------------------------
 # new
