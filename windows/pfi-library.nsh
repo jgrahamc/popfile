@@ -31,15 +31,16 @@
 #
 # The following symbols are used to construct the expressions defining the required subset:
 #
-# (1) ADDUSER          defined in adduser.nsi ('Add POPFile User' wizard)
-# (2) BACKUP           defined in backup.nsi (POPFile 'User Data' Backup utility)
-# (3) INSTALLER        defined in installer.nsi (the main installer program, setup.exe)
-# (4) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
-# (5) PFIDIAG          defined in test\pfidiag.nsi (helps diagnose installer-related problems)
-# (6) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
-# (7) STOP_POPFILE     define in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
-# (8) TRANSLATOR       defined in translator.nsi (main installer translations test program)
-# (9) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
+#  (1) ADDUSER          defined in adduser.nsi ('Add POPFile User' wizard)
+#  (2) BACKUP           defined in backup.nsi (POPFile 'User Data' Backup utility)
+#  (3) INSTALLER        defined in installer.nsi (the main installer program, setup.exe)
+#  (4) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
+#  (5) PFIDIAG          defined in test\pfidiag.nsi (helps diagnose installer-related problems)
+#  (6) RESTORE          defined in restore.nsi (POPFile 'User Data' Restore utility)
+#  (7) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
+#  (8) STOP_POPFILE     define in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
+#  (9) TRANSLATOR       defined in translator.nsi (main installer translations test program)
+# (10) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
 #--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
@@ -864,7 +865,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER
+!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: CheckIfLocked
     #
@@ -978,7 +979,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER
+!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: FindLockedPFE
     #
@@ -1126,7 +1127,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP
+!ifdef ADDUSER
     #--------------------------------------------------------------------------
     # Installer Function: GetCorpusPath
     #
@@ -1220,11 +1221,11 @@
     Push ${L_DATA}
     Call ${UN}StrBackSlash            ; ensure parameter uses backslashes
     Pop ${L_DATA}
-    
+
     StrCmp ${L_DATA} ".\" source_folder
-    
+
     ; Strip trailing slash (so we always return a result without a trailing slash)
-    
+
     StrCpy ${L_TEMP} ${L_DATA} 1 -1
     StrCmp ${L_TEMP} '\' 0 analyse_data
     StrCpy ${L_DATA} ${L_DATA} -1
@@ -1288,7 +1289,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | RUNPOPFILE
+!ifdef ADDUSER | BACKUP | RESTORE | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: GetDataPath
     #
@@ -1577,7 +1578,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | MSGCAPTURE | PFIDIAG | TRANSLATOR_AUW
+!ifdef ADDUSER | BACKUP | MSGCAPTURE | PFIDIAG | RESTORE | TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetDateTimeStamp
     #
@@ -1665,7 +1666,7 @@
     FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER | STOP_POPFILE
+!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE | STOP_POPFILE
     #--------------------------------------------------------------------------
     # Installer Function: GetFileSize
     #
@@ -1774,7 +1775,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | MSGCAPTURE | PFIDIAG | TRANSLATOR_AUW
+!ifdef ADDUSER | BACKUP | MSGCAPTURE | PFIDIAG | RESTORE | TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetLocalTime
     #
@@ -1926,7 +1927,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP
+!ifdef ADDUSER
     #--------------------------------------------------------------------------
     # Installer Function: GetMessagesPath
     #
@@ -2004,7 +2005,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | RUNPOPFILE
+!ifdef ADDUSER | BACKUP | RESTORE | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: GetParent
     #
@@ -2170,7 +2171,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP
+!ifdef ADDUSER
     #--------------------------------------------------------------------------
     # Installer Function: GetSQLdbPathName
     #
@@ -2576,7 +2577,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER
+!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: ServiceCall
     #
@@ -2653,7 +2654,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER
+!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: ServiceRunning
     #
@@ -2850,7 +2851,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER
+!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE
     #--------------------------------------------------------------------------
     # Installer Function: ShutdownViaUI
     #
@@ -2929,7 +2930,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | RUNPOPFILE
+!ifdef ADDUSER | BACKUP | RESTORE | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: StrBackSlash
     #
@@ -3180,7 +3181,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | BACKUP | INSTALLER | TRANSLATOR
+!ifdef ADDUSER | BACKUP | INSTALLER | RESTORE | TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: TrimNewlines
     #
