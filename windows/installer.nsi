@@ -173,6 +173,9 @@ Section "Minimal Perl" SecPerl
   SetOutPath $INSTDIR\Sys
   File "C:\Perl\lib\Sys\*"
 
+  SetOutPath $INSTDIR\Text
+  File "C:\Perl\lib\Text\ParseWords.pm"
+
   SetOutPath $INSTDIR\IO\Socket
   File "C:\Perl\lib\IO\Socket\*"
 
@@ -244,8 +247,6 @@ skip_confirmation:
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
   RMDir $SMPROGRAMS\POPFile
 
-
-  Delete $INSTDIR\popfile.cfg
   Delete $INSTDIR\*.log
   Delete $INSTDIR\*.pl
   Delete $INSTDIR\*.gif
@@ -271,6 +272,8 @@ skip_confirmation:
   Delete $INSTDIR\Sys\Hostname\*.*
   RMDir /r $INSTDIR\Sys\Hostname
   RMDir /r $INSTDIR\Sys
+  Delete $INSTDIR\Text\*.pm
+  RMDir /r $INSTDIR\Text
   Delete $INSTDIR\auto\DynaLoader\*.*
   Delete $INSTDIR\auto\File\Glob\*.*
   Delete $INSTDIR\auto\IO\*.*
@@ -282,8 +285,6 @@ skip_confirmation:
   Delete $INSTDIR\warnings\*.*
   RMDir $INSTDIR\warnings
   
-  RMDir /r $INSTDIR\messages
-  RMDir /r $INSTDIR\corpus
   Delete "$INSTDIR\modern.exe"
   Delete "$INSTDIR\Uninstall.exe"
 
