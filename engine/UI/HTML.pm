@@ -91,7 +91,7 @@ sub initialize
     $self->{configuration}->{configuration}{msgdir}            = 'messages/';
 
     # Use the default skin
-    $self->{configuration}->{configuration}{skin}              = 'default';
+    $self->{configuration}->{configuration}{skin}              = 'SimplyBlue';
 
     # Keep the history for two days
     $self->{configuration}->{configuration}{history_days}      = 2;
