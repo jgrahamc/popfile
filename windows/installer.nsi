@@ -2073,6 +2073,20 @@ close_file:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "Flags" "DISABLED"
+  
+  ; If we are upgrading POPFile, the corpus might have to be converted from flat file format
+  
+  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
+  StrCmp ${L_TEMP} "new" 0 display_the_page
+  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "old"
+  
+  ; Corpus conversion will occur when POPFile is started - this may take several minutes,
+  ; so we ensure that POPFile will not be run in the background when it is run for the
+  ; first time (by using the Start Menu or by running 'popfile.exe').
+  
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "1"
+  Push "1"
+  Call SetConsoleMode
   Goto display_the_page
 
 page_enabled:
