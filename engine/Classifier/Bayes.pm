@@ -27,7 +27,7 @@ use POPFile::Module;
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 #   Modified by              Sam Schinke    (sschinke@users.sourceforge.net)
-#   Merged with db code from Scott Leighton (helphand@users.sourceforge.net) 
+#   Merged with db code from Scott Leighton (helphand@users.sourceforge.net)
 #
 # ---------------------------------------------------------------------------------------------
 
@@ -86,16 +86,16 @@ sub new
     # To save time we also 'prepare' some commonly used SQL statements and cache
     # them here, see the function db_connect__ for details
 
-    $self->{db_get_buckets__} = 0; 
-    $self->{db_get_wordid__} = 0; 
-    $self->{db_get_word_count__} = 0; 
-    $self->{db_put_word_count__} = 0; 
-    $self->{db_get_bucket_unique_count__} = 0; 
-    $self->{db_get_unique_word_count__} = 0; 
-    $self->{db_get_bucket_word_count__} = 0; 
-    $self->{db_get_full_total__} = 0; 
+    $self->{db_get_buckets__} = 0;
+    $self->{db_get_wordid__} = 0;
+    $self->{db_get_word_count__} = 0;
+    $self->{db_put_word_count__} = 0;
+    $self->{db_get_bucket_unique_count__} = 0;
+    $self->{db_get_unique_word_count__} = 0;
+    $self->{db_get_bucket_word_count__} = 0;
+    $self->{db_get_full_total__} = 0;
     $self->{db_get_bucket_parameter__} = 0;
-    $self->{db_set_bucket_parameter__} = 0; 
+    $self->{db_set_bucket_parameter__} = 0;
     $self->{db_get_bucket_parameter_default__} = 0;
     $self->{db_get_buckets_with_magnets__} = 0;
 
@@ -193,7 +193,7 @@ sub initialize
     # This is the 'connect' string used by DBI to connect to the database, if
     # you decide to change from using SQLite to some other database (e.g. MySQL,
     # Oracle, ... ) this *should* be all you need to change.  The additional
-    # parameters user and auth are needed for some databases.   
+    # parameters user and auth are needed for some databases.
     #
     # Note that the dbconnect string will be interpolated before being passed
     # to DBI and the variable $dbname can be used within it and it resolves to
@@ -453,7 +453,7 @@ sub upgrade_predatabase_data__
 
         next unless ( -d $bucket );
         next unless ( ( -e "$bucket/table" ) || ( -e "$bucket/table.db" ) );
-     
+
         return 0 if ( !$self->upgrade_bucket__( $bucket ) );
 
         my $color = '';
@@ -639,12 +639,12 @@ sub upgrade_bucket__
                 $self->log_( "$wc" );
             }
 
-            next if ( $word =~ /^__POPFILE__(LOG__TOTAL|TOTAL|USER)__$/ );             
+            next if ( $word =~ /^__POPFILE__(LOG__TOTAL|TOTAL|USER)__$/ );
 
 	    $wc += 1;
             $self->set_value_( $bucket, $word, $h{$word} );
 	}
-        
+
         $self->log_( "(completed ", $wc-1, " words)" );
         $self->{db__}->commit;
         untie %h;
@@ -755,7 +755,7 @@ sub classify
     $self->{magnet_detail__} = '';
 
     if ( defined( $file ) ) {
-        $self->{parser__}->parse_file( $file, 
+        $self->{parser__}->parse_file( $file,
                                        $self->module_config_( 'html', 'language' ),
                                        $self->global_config_( 'message_cutoff'   ) );
     }
@@ -1378,7 +1378,7 @@ sub classify_and_modify
           ( $quarantine == 0 ) )  {                                          # PROFILE BLOCK STOP
          $msg_subject = " $modification$msg_subject";
     }
- 
+
     $msg_head_before .= 'Subject:' . $msg_subject;
     $msg_head_before .= $crlf;
 
@@ -1434,7 +1434,7 @@ sub classify_and_modify
            print $client "$crlf--$nopath_temp_file$crlf";
            print $client "Content-Type: message/rfc822$crlf$crlf";
         }
- 
+
         print $client $msg_head_before;
         print $client $msg_head_after;
         print $client $msg_body;
@@ -1445,7 +1445,7 @@ sub classify_and_modify
     if ( $quarantine && $echo ) {
         $before_dot = "$crlf--$nopath_temp_file--$crlf";
     }
- 
+
     my $need_dot = 0;
 
     if ( $got_full_body ) {
@@ -1461,7 +1461,7 @@ sub classify_and_modify
 
     # In some cases it's possible (and totally illegal to get a . in the middle of the message,
     # to cope with the we call flush_extra_ here to remove an extra stuff the POP3 server is sending
-    
+
     $self->flush_extra_( $mail, $client );
 
     if ( !$nosave ) {
@@ -1627,23 +1627,23 @@ sub get_bucket_word_prefixes
 # $len      Word length
 #
 # ---------------------------------------------------------------------------------------------
-sub substr_euc 
+sub substr_euc
 {
     my ( $str, $pos, $len ) = @_;
     my $result_str;
     my $char;
     my $count = 0;
-    if ( !$pos ) { 
-        $pos = 0; 
+    if ( !$pos ) {
+        $pos = 0;
     }
-    if ( !$len ) { 
-        $len = length( $str ); 
+    if ( !$len ) {
+        $len = length( $str );
     }
-    
+
     for ( $pos = 0; $count < $len; $pos++ ) {
         $char = substr( $str, $pos, 1 );
-        if ( $char =~ /[\x80-\xff]/ ) { 
-            $char = substr( $str, $pos++, 2 ); 
+        if ( $char =~ /[\x80-\xff]/ ) {
+            $char = substr( $str, $pos++, 2 );
         }
         $result_str .= $char;
         $count++;
@@ -1763,7 +1763,7 @@ sub get_bucket_parameter
 {
     my ( $self, $bucket, $parameter ) = @_;
 
-    $self->{db_get_bucket_parameter__}->execute( $self->{db_bucketid__}{$bucket}{id}, 
+    $self->{db_get_bucket_parameter__}->execute( $self->{db_bucketid__}{$bucket}{id},
                                                  $self->{db_parameterid__}{$parameter} );
     my $result = $self->{db_get_bucket_parameter__}->fetchrow_arrayref;
 
@@ -1771,7 +1771,7 @@ sub get_bucket_parameter
     # get the default value
 
     if ( !defined( $result ) ) {
-        $self->{db_get_bucket_parameter_default__}->execute( 
+        $self->{db_get_bucket_parameter_default__}->execute(
             $self->{db_parameterid__}{$parameter} );
         $result = $self->{db_get_bucket_parameter_default__}->fetchrow_arrayref;
     }
@@ -1825,7 +1825,7 @@ sub get_html_colored_message
 
     # Pass language parameter to parse_file()
 
-    my $result = $self->{parser__}->parse_file( $file, 
+    my $result = $self->{parser__}->parse_file( $file,
                                                 $self->module_config_( 'html', 'language' ),
                                                 $self->global_config_( 'message_cutoff'   ) );
 
@@ -1848,8 +1848,8 @@ sub create_bucket
     my ( $self, $bucket ) = @_;
 
     my $userid = $self->{db_userid__};
-    $self->{db__}->do( 
-        "insert or ignore into buckets ( 'userid', 'name', 'pseudo' ) values ( $userid, '$bucket', 0 );" ); 
+    $self->{db__}->do(
+        "insert or ignore into buckets ( 'userid', 'name', 'pseudo' ) values ( $userid, '$bucket', 0 );" );
     $self->db_update_cache__();
 }
 
@@ -1867,8 +1867,8 @@ sub delete_bucket
     my ( $self, $bucket ) = @_;
 
     my $userid = $self->{db_userid__};
-    $self->{db__}->do( 
-        "delete from buckets where buckets.userid = $userid and buckets.name = '$bucket';" ); 
+    $self->{db__}->do(
+        "delete from buckets where buckets.userid = $userid and buckets.name = '$bucket';" );
     $self->db_update_cache__();
 
     return 1;
@@ -1889,8 +1889,8 @@ sub rename_bucket
     my ( $self, $old_bucket, $new_bucket ) = @_;
 
     my $userid = $self->{db_userid__};
-    my $result = $self->{db__}->do( 
-        "update buckets set name = '$new_bucket' where buckets.userid = $userid and buckets.name = '$old_bucket';" ); 
+    my $result = $self->{db__}->do(
+        "update buckets set name = '$new_bucket' where buckets.userid = $userid and buckets.name = '$old_bucket';" );
 
     if ( !defined( $result ) || ( $result == -1 ) ) {
         return 0;
@@ -1940,7 +1940,7 @@ sub add_messages_to_bucket
     # Pass language parameter to parse_file()
 
     foreach my $file (@files) {
-        $self->{parser__}->parse_file( $file, 
+        $self->{parser__}->parse_file( $file,
                                        $self->module_config_( 'html', 'language' ),
                                        $self->global_config_( 'message_cutoff'   ) );
         $self->add_words_to_bucket__( $bucket, 1 );
@@ -1987,7 +1987,7 @@ sub remove_message_from_bucket
 
     $self->{db__}->begin_work;
 
-    $self->{parser__}->parse_file( $file, 
+    $self->{parser__}->parse_file( $file,
                                    $self->module_config_( 'html', 'language' ),
                                    $self->global_config_( 'message_cutoff'   ) );
     $self->add_words_to_bucket__( $bucket, -1 );
@@ -2017,7 +2017,7 @@ sub remove_message_from_bucket
 sub echo_to_dot_
 {
     my ( $self, $mail, $client, $file, $before ) = @_;
- 
+
     my $hit_dot = 0;
 
     my $isopen = open FILE, "$file" if ( defined( $file ) );
@@ -2098,7 +2098,7 @@ sub get_magnet_types_in_bucket
     my $h = $self->{db__}->prepare( "select magnet_types.type from magnet_types, magnets, buckets
         where magnet_types.id = magnets.mtid and
               magnets.bucketid = buckets.id and
-              buckets.id = $bucketid 
+              buckets.id = $bucketid
               group by magnet_types.type
               order by magnet_types.type;" );
 
@@ -2200,7 +2200,7 @@ sub create_magnet
 
     my $mtid = $result->[0];
 
-    $self->{db__}->do( "insert into magnets ( bucketid, mtid, value ) 
+    $self->{db__}->do( "insert into magnets ( bucketid, mtid, value )
                                      values ( $bucketid, $mtid, '$text' );" );
 }
 
@@ -2250,7 +2250,7 @@ sub delete_magnet
 
     my $mtid = $result->[0];
 
-    $self->{db__}->do( "delete from magnets 
+    $self->{db__}->do( "delete from magnets
                             where magnets.bucketid = $bucketid and
                                   magnets.mtid = $mtid and
                                   magnets.value = '$text';" );
@@ -2411,7 +2411,7 @@ sub db_connect__
         $self->log_( "Failed to connect to database and got error DBI:errstr" );
         return 0;
     }
-   
+
     if ( !$dbpresent ) {
         if ( -e $self->get_root_path_( 'Classifier/popfile.sql' ) ) {
             my $schema = '';
@@ -2439,7 +2439,7 @@ sub db_connect__
 	}
     }
 
-    # Now prepare common SQL statements for use, as a matter of convention the 
+    # Now prepare common SQL statements for use, as a matter of convention the
     # parameters to each statement always appear in the following order:
     #
     # user
@@ -2447,46 +2447,46 @@ sub db_connect__
     # word
     # parameter
 
-    $self->{db_get_buckets__} = $self->{db__}->prepare( 
-   	     'select name, id, pseudo from buckets 
+    $self->{db_get_buckets__} = $self->{db__}->prepare(
+   	     'select name, id, pseudo from buckets
                   where buckets.userid = ?;' );
 
-    $self->{db_get_wordid__} = $self->{db__}->prepare( 
-	     'select id from words 
+    $self->{db_get_wordid__} = $self->{db__}->prepare(
+	     'select id from words
                   where words.word = ? limit 1;' );
 
-    $self->{db_get_word_count__} = $self->{db__}->prepare( 
+    $self->{db_get_word_count__} = $self->{db__}->prepare(
 	     'select matrix.count from matrix
-                  where matrix.bucketid = ? and 
+                  where matrix.bucketid = ? and
                         matrix.wordid = ? limit 1;' );
 
-    $self->{db_put_word_count__} = $self->{db__}->prepare( 
+    $self->{db_put_word_count__} = $self->{db__}->prepare(
 	   'insert or replace into matrix ( bucketid, wordid, count ) values ( ?, ?, ? );' );
 
-    $self->{db_get_bucket_unique_count__} = $self->{db__}->prepare( 
-	     'select count(*) from matrix 
+    $self->{db_get_bucket_unique_count__} = $self->{db__}->prepare(
+	     'select count(*) from matrix
                   where matrix.bucketid = ?;' );
 
-    $self->{db_get_bucket_word_count__} = $self->{db__}->prepare( 
+    $self->{db_get_bucket_word_count__} = $self->{db__}->prepare(
 	     'select sum(matrix.count) from matrix
                   where matrix.bucketid = ?;' );
 
-    $self->{db_get_unique_word_count__} = $self->{db__}->prepare( 
+    $self->{db_get_unique_word_count__} = $self->{db__}->prepare(
 	     'select count(matrix.wordid) from matrix, buckets
                   where matrix.bucketid = buckets.id and
                         buckets.userid = ?;' );
 
-    $self->{db_get_full_total__} = $self->{db__}->prepare( 
-	     'select sum(matrix.count) from matrix, buckets 
-                  where buckets.userid = ? and     
-                        matrix.bucketid = buckets.id;' ); 
+    $self->{db_get_full_total__} = $self->{db__}->prepare(
+	     'select sum(matrix.count) from matrix, buckets
+                  where buckets.userid = ? and
+                        matrix.bucketid = buckets.id;' );
 
     $self->{db_get_bucket_parameter__} = $self->{db__}->prepare(
              'select bucket_params.value from bucket_params
-                  where bucket_params.bucketid = ?and  
+                  where bucket_params.bucketid = ? and
                         bucket_params.btid = ?;' );
 
-    $self->{db_set_bucket_parameter__} = $self->{db__}->prepare( 
+    $self->{db_set_bucket_parameter__} = $self->{db__}->prepare(
 	   'insert or replace into bucket_params ( bucketid, btid, value ) values ( ?, ?, ? );' );
 
     $self->{db_get_bucket_parameter_default__} = $self->{db__}->prepare(
@@ -2522,16 +2522,16 @@ sub db_disconnect__
 {
     my ( $self ) = @_;
 
-    $self->{db_get_buckets__}->finish; 
-    $self->{db_get_wordid__}->finish; 
-    $self->{db_get_word_count__}->finish; 
-    $self->{db_put_word_count__}->finish; 
-    $self->{db_get_bucket_unique_count__}->finish; 
-    $self->{db_get_bucket_word_count__}->finish; 
-    $self->{db_get_unique_word_count__}->finish; 
-    $self->{db_get_full_total__}->finish; 
+    $self->{db_get_buckets__}->finish;
+    $self->{db_get_wordid__}->finish;
+    $self->{db_get_word_count__}->finish;
+    $self->{db_put_word_count__}->finish;
+    $self->{db_get_bucket_unique_count__}->finish;
+    $self->{db_get_bucket_word_count__}->finish;
+    $self->{db_get_unique_word_count__}->finish;
+    $self->{db_get_full_total__}->finish;
     $self->{db_get_bucket_parameter__}->finish;
-    $self->{db_set_bucket_parameter__}->finish; 
+    $self->{db_set_bucket_parameter__}->finish;
     $self->{db_get_bucket_parameter_default__}->finish;
     $self->{db_get_buckets_with_magnets__}->finish;
 
@@ -2581,7 +2581,7 @@ sub db_get_user_id__
 {
     my ( $self, $name ) = @_;
 
-    my $result = $self->{db__}->selectrow_arrayref( "select users.id from users where 
+    my $result = $self->{db__}->selectrow_arrayref( "select users.id from users where
                                                          users.name = '$name';" );
 
     return $result->[0];
@@ -2598,10 +2598,10 @@ sub db_get_user_id__
 # $word             word to lookup
 #
 # ---------------------------------------------------------------------------------------------
-sub db_get_word_count__ 
+sub db_get_word_count__
 {
     my ( $self, $bucket, $word ) = @_;
-    
+
     $self->{db_get_wordid__}->execute( $word );
     my $result = $self->{db_get_wordid__}->fetchrow_arrayref;
     if ( !defined( $result ) ) {
@@ -2628,10 +2628,10 @@ sub db_get_word_count__
 #
 # $bucket           bucket word is in
 # $word             word to update
-# $count            new count value 
+# $count            new count value
 #
 # ---------------------------------------------------------------------------------------------
-sub db_put_word_count__ 
+sub db_put_word_count__
 {
     my ( $self, $bucket, $word, $count ) = @_;
 
@@ -2641,12 +2641,12 @@ sub db_put_word_count__
 
     $word = $self->{db__}->quote($word);
 
-    my $result = $self->{db__}->selectrow_arrayref("select words.id from words 
+    my $result = $self->{db__}->selectrow_arrayref("select words.id from words
                                                         where words.word = $word limit 1;");
 
     if ( !defined( $result ) ) {
         $self->{db__}->do( "insert into words ( word ) values ( $word );" );
-        $result = $self->{db__}->selectrow_arrayref("select words.id from words 
+        $result = $self->{db__}->selectrow_arrayref("select words.id from words
                                                          where words.word = $word limit 1;");
     }
 
@@ -2669,7 +2669,7 @@ sub db_put_word_count__
 # $word             word to delete
 #
 # ---------------------------------------------------------------------------------------------
-sub db_delete_word__ 
+sub db_delete_word__
 {
     my ( $self, $bucket, $word ) = @_;
 
