@@ -1307,10 +1307,10 @@ SectionEnd
 # If no match is found or if the UI language file does not exist, the default UI language
 # is used (it is left to POPFile to determine which language to use).
 #
-# By the time this section is executed, the function 'CheckExistingDataDir' in conjunction with
-# the processing performed in the "POPFile" section will have removed all UI language settings
-# from 'popfile.cfg' so all we have to do is append the UI setting to the file. If we do not
-# append anything, POPFile will choose the default language.
+# By the time this section is executed, the function 'CheckExistingConfigData' in conjunction
+# with the processing performed in the "POPFile" section will have removed all UI language
+# settings from 'popfile.cfg' so all we have to do is append the UI setting to the file. If we
+# do not append anything, POPFile will choose the default language.
 #--------------------------------------------------------------------------
 
 Section "-Languages" SecLangs
@@ -1800,6 +1800,13 @@ copy_lne:
 done:
   FileClose ${L_CFG}
 
+  ; Ensure the 'clean copy' ends with end-of-line terminator so we can safely append data to it
+
+  StrCmp ${L_TEXTEND} "<eol>" add_to_the_copy
+  FileWrite ${L_CLEANCFG} "$\r$\n"
+
+add_to_the_copy:
+
   ; Before closing the clean copy of 'popfile.cfg' we add the most recent settings for the
   ; system tray icon and console mode, if valid values were found. If no valid values were
   ; found, we add nothing to the clean copy. A record of our findings is stored in the file
@@ -1979,18 +1986,18 @@ Function SetOptionsPage
   Push ${L_PORTLIST}
   Push ${L_RESULT}
 
-  ; The function "CheckExistingDataDir" loads $G_POP3 and $G_GUI with the settings found in
+  ; The function 'CheckExistingConfigData' loads $G_POP3 and $G_GUI with the settings found in
   ; a previously installed "popfile.cfg" file or if no such file is found, it loads the
   ; POPFile default values. Now we display these settings and allow the user to change them.
 
   ; The POP3 and GUI port numbers must be in the range 1 to 65535 inclusive, and they
-  ; must be different. This function assumes that the values "CheckExistingDataDir" has loaded
+  ; must be different. This function assumes that the values loaded by 'CheckExistingConfigData'
   ; into $G_POP3 and $G_GUI are valid.
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_OPTIONS_TITLE)" "$(PFI_LANG_OPTIONS_SUBTITLE)"
 
-  ; If the POP3 (or GUI) port determined by "CheckExistingDataDir" is not present in the list of
-  ; possible values for the POP3 (or GUI) combobox, add it to the end of the list.
+  ; If the POP3 (or GUI) port determined by 'CheckExistingConfigData' is not present in the
+  ; list of possible values for the POP3 (or GUI) combobox, add it to the end of the list.
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_PORTLIST} "ioA.ini" "Field 2" "ListItems"
   Push "|${L_PORTLIST}|"
@@ -2169,7 +2176,7 @@ Function MakeUserDirSafe
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" exit_now
 
-  ; If we are upgrading an existing installation then 'CheckExistingDataDir' will have
+  ; If we are upgrading an existing installation then 'CheckExistingConfigData' will have
   ; extracted the GUI port parameters from the existing popfile.cfg file
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_GUI_PORT} "pfi-cfg.ini" "Inherited" "NewStyleUI"
