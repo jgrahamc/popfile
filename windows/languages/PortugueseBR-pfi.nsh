@@ -277,11 +277,11 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_1     "Por favor FECHE o programa de email e clique 'Repetir' para reconfigurá-lo"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_2     "(Você pode clicar 'Ignorar' para reconfigurá-lo, mas isto não é recomendado)"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_3     "Clique 'Abortar' para pular a reconfiguração deste programa de email"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_3     "Clique 'Anular' para pular a reconfiguração deste programa de email"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_4     "Por favor FECHE o programa de email e clique 'Repetir' para restaurar a configuração"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_5     "(Você pode clicar 'Ignorar' para restaurar a configuração, mas isto não é recomendado)"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_6     "Clique 'Abortar' para pular a restauração da configuração original"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_6     "Clique 'Anular' para pular a restauração da configuração original"
 
 #--------------------------------------------------------------------------
 # Custom Page - Reconfigure Outlook/Outlook Express
