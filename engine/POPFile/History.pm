@@ -139,30 +139,6 @@ sub stop
     # added to the queue and before service() is called
 
     $self->commit_history__();
-
-    # TODO REMOVE THIS CODE BEFORE RELEASE
-
-    my $h = $self->db__()->prepare( "select id from history where sort_from = '';" );
-    $h->execute;
-    my @work;
-    while ( my @row = $h->fetchrow_array ) {
-        push @work, $row[0];
-    }
-    $self->db__()->begin_work;
-    foreach my $id ( @work ) {
-        my @hdr = $self->db__()->selectrow_array( "select hdr_from, hdr_to, hdr_cc from history where id = $id;" );
-        for my $i (0..2) {
-            $hdr[$i] = lc($hdr[$i]);
-            $hdr[$i] =~ s/[<>\"]//g;
-            $hdr[$i] =~ s/^[ \t]+//;
-            $hdr[$i] = $self->db__()->quote( $hdr[$i] );
-        }
-        $self->db__()->do( "update history set sort_from = $hdr[0],
-                                               sort_to   = $hdr[1],
-                                               sort_cc   = $hdr[2]
-                                           where id = $id;" );
-    }
-    $self->db__()->commit;
 }
 
 #----------------------------------------------------------------------------
@@ -589,6 +565,7 @@ sub commit_history__
             $sort_headers{$h} = lc($sort_headers{$h} || '');
             $sort_headers{$h} =~ s/[\"<>]//g;
             $sort_headers{$h} =~ s/^[ \t]+//g;
+            $sort_headers{$h} =~ s/\0//g;
             $sort_headers{$h} = $self->db__()->quote(
                 $sort_headers{$h} );
         }
@@ -610,6 +587,7 @@ sub commit_history__
             ${$header{$h}}[0] =
                  $self->{classifier__}->{parser__}->decode_string(
                      ${$header{$h}}[0] );
+            ${$header{$h}} =~ s/\0//g;
             ${$header{$h}}[0] = $self->db__()->quote( ${$header{$h}}[0] );
         }
 
