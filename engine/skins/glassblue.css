@@ -1,0 +1,98 @@
+body {
+  background-color: #999999;
+  font-family: font-family: Verdana;
+  color: white;
+}
+
+a {
+    color: white;
+    text-decoration: none;
+}
+
+
+input, select, submit {
+  color: black;
+  background-color: #999999;
+  border: 1px white outset;
+  font-size: 9pt;
+  font-weight: normal;
+}
+
+.shell {
+   background-color: #344FB2;
+   border: 1px black outset;
+   width: 98%;
+}
+
+.head {
+  font-weight: normal;
+  letter-spacing: 0.4em;
+  text-transform: capitalize;
+  font-size: 11pt;
+}
+
+.head a {
+  font-size: 9pt;
+  text-decoration: none;
+  letter-spacing: 0.0em;
+}
+
+.menu {
+  font-size: 9pt;
+}
+
+.menu a {
+   color: white;
+   text-decoration: none;
+}
+
+.menu_selected {
+  background-color: #23367D;
+  width: 80px;
+  border: 1px black solid;
+  height: 20px;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+}
+
+.menu_standard {
+  background-color: #344FB2;
+  width: 80px;
+  border: 1px black solid;
+  height: 20px;
+  letter-spacing: 0.1em;
+}
+
+.main {
+  font-size: 11px;
+}
+
+h2 {
+  font-size: 11pt;
+  font-weight: bold;
+  text-transform: capitalize;
+}
+.content {
+  font-size: 9pt;
+  font-weight: normal;
+}
+
+.content th {
+  font-size: 9pt;
+  font-weight: normal;
+}
+
+.row_even {
+    background-color: #6B76A1;
+}
+
+.row_odd {
+    background-color: #344FB2;
+}
+
+.footer {
+   background-color: #344FB2;
+   border: 1px black solid;
+}
+
+
