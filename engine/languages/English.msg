@@ -118,6 +118,7 @@ History_SearchMessage                   Search From/Subject
 History_NoMessages                      No messages
 History_ShowMagnet                      Magnetized
 History_Magnet                          &nbsp;(just showing magnet classified messages)
+History_ResetSearch                     Reset
 
 Password_Title                          Password
 Password_Enter                          Enter password

@@ -1780,38 +1780,8 @@ sub load_history_cache
     foreach my $i ( 0 .. $#history_files ) {
         $history_files[$i] =~ /(popfile.*\.msg)/;
         $history_files[$i] = $1;
-        my $class_file = $history_files[$i];
-        my $magnet     = '';
-        $class_file =~ s/msg$/cls/;
-        
-        my $bucket;
-        my $reclassified;
-        
-        # Something may have happened to the class file, this avoids errors
 
-        if ( open CLASS, "<$self->{configuration}->{configuration}{msgdir}$class_file" ) {
-            $bucket = <CLASS>;
-            if ( $bucket =~ /([^ ]+) MAGNET (.+)/ ) {
-                $bucket = $1;
-                $magnet = $2;
-            } else {
-                $magnet = '';
-            }
-        
-            $reclassified = 0;
-            if ( $bucket =~ /RECLASSIFIED/ ) {
-                $bucket       = <CLASS>;
-                $reclassified = 1;
-            }
-            close CLASS;
-            $bucket =~ s/[\r\n]//g;
-        } else {
-
-            # This means the CLASS file failed to open -- we don't know what to do with this file
-            # Give it the "classfileerror" bucket for now
-            
-            $bucket = "classfileerror";
-        }
+        (my $reclassified, my $bucket, my $usedtobe, my $magnet) = history_load_class($self, $history_files[$i]);
         
         if ( ( $filter eq '' ) || ( $bucket eq $filter ) || ( ( $filter eq '__filter__magnet' ) && ( $magnet ne '' ) ) ) {
             my $found   = 1;
@@ -1820,10 +1790,10 @@ sub load_history_cache
             
             if ( ( $search ne '' ) || ( $sort ne '' ) ) {
                 $found = ( $search eq '' );
-                
+                                
                 open MAIL, "<$self->{configuration}->{configuration}{msgdir}$history_files[$i]";
                 while (<MAIL>)  {
-                    if ( /[A-Z0-9]/i )  {
+                    if ( ! /^$eol/i )  {
                         if ( /^From:(.*)/i ) {
                             $from = $1;
                             if ( ( $search ne '' ) && ( $from =~ /\Q$search\E/i ) ) {
@@ -1936,6 +1906,281 @@ sub get_history_navigator
     
     return $body;
 }
+
+# history_write_class - write the class file for a message.
+#
+# $filename     The name of the message to write the class for
+# $reclassified Boolean, true if the message has been reclassified
+# $bucket       the name of the bucket the message is in
+# $usedtobe     the name of the bucket the messages used to be in
+# $magnet:      the magnet, if any, used to reclassify the message
+#
+# ---------------------------------------------------------------------------------------------
+sub history_write_class {
+    
+    my ( $self, $filename, $reclassified, $bucket, $usedtobe, $magnet ) = @_;
+    
+    $filename =~ s/msg$/cls/;
+    
+    open CLASS, ">$self->{configuration}->{configuration}{msgdir}$filename";
+    
+    if ( defined $magnet && $magnet ne '' ) {
+        print CLASS "$bucket MAGNET $magnet$eol";
+    } elsif (defined $reclassified && $reclassified == 1) {
+        print CLASS "RECLASSIFIED$eol";
+        print CLASS "$bucket$eol";
+        if (defined $usedtobe && $usedtobe ne '') {
+            print CLASS "$usedtobe$eol";
+        }
+    } else {
+        print CLASS "$bucket$eol";
+    }
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# history_load_class - load the class file for a message.
+#
+# returns: ( reclassified, bucket, usedtobe, magnet )
+#   values: 
+#       reclassified:   boolean, true if message has been reclassified
+#       bucket:         string, the bucket the message is in presently, classfileerror if an error occurs
+#       usedtobe:       string, the bucket the message used to be in (null if not reclassified)
+#       magnet:         string, the magnet
+#
+# $filename     The name of the message to load the class for
+#
+# ---------------------------------------------------------------------------------------------
+sub history_load_class {
+    
+    my ( $self, $filename ) = @_;
+    $filename =~ s/msg$/cls/;
+
+    my $reclassified = 0;
+    my $bucket = "classfileerror";
+    my $usedtobe;
+    my $magnet = '';
+       
+    if ( open CLASS, "<$self->{configuration}->{configuration}{msgdir}$filename" ) {
+        $bucket = <CLASS>;
+        if ( $bucket =~ /([^ ]+) MAGNET (.+)/ ) {
+            $bucket = $1;
+            $magnet = $2;
+        }
+        
+        $reclassified = 0;
+        if ( $bucket =~ /RECLASSIFIED/ ) {
+            $bucket       = <CLASS>;
+            $usedtobe = <CLASS>;
+            $reclassified = 1;
+            $usedtobe =~ s/[\r\n]//g;     
+        }
+        close CLASS;
+        $bucket =~ s/\r|\n//g;               
+    } else {
+        print "Error: $self->{configuration}->{configuration}{msgdir}$filename: $!\n";
+    }
+    return ( $reclassified, $bucket, $usedtobe, $magnet );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# history_reclassify - handle the reclassification of messages on the history page
+#
+# ---------------------------------------------------------------------------------------------
+sub history_reclassify
+{
+    my ( $self ) = @_;
+            
+    if (  defined $self->{form}{change} && $self->{form}{change} eq $self->{language}{Reclassify} ) {
+        my %temp_words;
+                                
+        my %messages;
+        
+        # Translate message numbers to filenames
+                
+        foreach my $i ( $self->{form}{start_message}  .. $self->{form}{start_message} + $self->{configuration}->{configuration}{page_size} - 1) {
+            if (defined $self->{history_keys}[$i] ) {
+                $i = $self->{history_keys}[$i] + 1;
+            } else {
+                $i = undef;
+            }
+                                    
+            if (defined $i && defined $self->{form}{$i} && $self->{form}{$i} ne '' ) {                
+                $messages{ $self->{history}{ $i - 1 }{file} }  = $self->{form}{$i};                
+            }
+        }        
+        
+        while ((my $message, my $newbucket) = each %messages) {
+
+            # Load the class file
+               
+            ( my $reclassified, my $bucket, my $usedtobe, my $magnet) = history_load_class( $self, $message );
+                       
+            # Only reclassify messages that havn't been reclassified before
+            
+            if ( !$reclassified ) {
+                # load the bucket corpus once
+                if (!defined $temp_words{$newbucket} ) {
+                    open WORDS, "<$self->{configuration}->{configuration}{corpus}/$newbucket/table";
+                    while (<WORDS>) {
+                        if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
+                            if ( $1 != 1 )  {
+                                print "Incompatible corpus version in $self->{form}{shouldbe}\n";
+                                return;
+                            }
+                            
+                            next;
+                        }
+                        $temp_words{$newbucket}{$1} = $2 if ( /(.+) (.+)/ );
+                    }
+                    close WORDS;                    
+                }
+                                        
+                # Parse the messages and tally the word-count
+                
+                $self->{classifier}->{parser}->parse_stream("$self->{configuration}->{configuration}{msgdir}$message");
+            
+                foreach my $word (keys %{$self->{classifier}->{parser}->{words}}) {
+                    $self->{classifier}->{full_total}   += $self->{classifier}->{parser}->{words}{$word};
+                    $temp_words{$newbucket}{$word}      += $self->{classifier}->{parser}->{words}{$word};
+                }
+                
+                # Update statistics
+
+                $self->{configuration}->{configuration}{ecount} += 1 if ( $newbucket ne $bucket );
+                $self->{classifier}->{parameters}{$newbucket}{count} += 1; 
+                $self->{classifier}->{parameters}{$bucket}{count} -= 1;
+                $self->{classifier}->write_parameters();
+                
+                # Update the class file
+                
+                history_write_class($self, $message, 1, $newbucket, ( $bucket || "unclassified" ) , '');
+                
+                # Add message feedback
+                
+                $self->{feedback}{$message} = sprintf( $self->{language}{History_ChangedTo}, $self->{classifier}->{colors}{$newbucket}, $newbucket )
+            }            
+        }
+        
+        # Commit the buckets
+        
+        foreach my $abucket ( keys %temp_words ) {
+            open WORDS, ">$self->{configuration}->{configuration}{corpus}/$abucket/table";
+            print WORDS "__CORPUS__ __VERSION__ 1\n";
+            foreach my $word ( keys %{$temp_words{$abucket}} ) {
+                print WORDS "$word $temp_words{$abucket}{$word}\n" if ( $temp_words{$abucket}{$word} > 0 );
+            }
+            close WORDS;
+            $self->{classifier}->load_bucket("$self->{configuration}->{configuration}{corpus}/$abucket");
+        }
+        $self->{classifier}->update_constants();
+        $self->{history_invalid} = 1;        
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# history_undo - handle undoing of reclassifications of messages on the history page
+#
+# ---------------------------------------------------------------------------------------------
+sub history_undo
+{
+    my( $self ) = @_;
+
+    if ( defined($self->{form}{undo}) ) {
+        my %temp_words;
+        
+        # This is a kludge, the undo function can actually handle multiple messages in the file_array
+        # But we only have single-message undo in the UI presently. Copy over and proceed.
+        
+        if ( $self->{form}{undo} ne '__Bulk__Undo__Value' ) {
+            push( @{$self->{form}{file_array}}, $self->{form}{undo} )
+        }
+        
+        
+        for my $i ( 0 .. $#{$self->{form}{file_array}} ) {
+            
+            my $message = $self->{history}{ ($self->{form}{file_array}[$i] - 1) }{file};
+                      
+            # Load the class file
+                
+            ( my $reclassified, my $bucket, my $usedtobe, my $magnet) = history_load_class( $self, $message );
+            
+            # Only undo if the message has been classified...
+            
+            if ( defined $usedtobe ) {
+                
+                # load the corpus once
+                if ( !defined $temp_words{$bucket} ) {
+                    $temp_words{$bucket} = {};
+                    
+                    open WORDS, "<$self->{configuration}->{configuration}{corpus}/$bucket/table";                
+                    while (<WORDS>) {
+                        if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
+                            if ( $1 != 1 )  {
+                                print "Incompatible corpus version in $bucket\n";
+                                return;
+                            }
+                            
+                            next;
+                        }
+                        
+                        $temp_words{$bucket}{$1} = $2 if ( /(.+) (.+)/ );
+                    }
+                     close WORDS;
+                }
+                # Find the words
+
+                $self->{classifier}->{parser}->parse_stream("$self->{configuration}->{configuration}{msgdir}$message");
+
+                # Tally the words
+
+                foreach my $word (keys %{$self->{classifier}->{parser}->{words}}) {
+                    $self->{classifier}->{full_total} -= $self->{classifier}->{parser}->{words}{$word};
+                    $temp_words{$bucket}{$word}       -= $self->{classifier}->{parser}->{words}{$word};
+                    
+                    delete $temp_words{$bucket}{$word} if ( $temp_words{$bucket}{$word} <= 0 );
+                }              
+
+                # Update statistics
+                
+                if ( $bucket ne $usedtobe ) {
+                    $self->{configuration}->{configuration}{ecount} -= 1 if ( $self->{configuration}->{configuration}{ecount} > 0 );
+                    $self->{classifier}->{parameters}{$bucket}{count}   -= 1;
+                    $self->{classifier}->{parameters}{$usedtobe}{count} += 1;
+                    $self->{classifier}->write_parameters();
+                }
+                
+                # Update the class file
+                                
+                history_write_class( $self, $message, 0, ( $usedtobe || "unclassified" ), '', '');
+                
+                # Add message feedback
+                
+                $self->{feedback}{$message} = sprintf( $self->{language}{History_ChangedTo}, ($self->{classifier}->{colors}{$usedtobe} || ''), $usedtobe ); 
+            }
+        
+            # Commit the buckets
+            
+            foreach my $abucket ( keys %temp_words ) {            
+                open WORDS, ">$self->{configuration}->{configuration}{corpus}/$abucket/table";
+                print WORDS "__CORPUS__ __VERSION__ 1\n";
+                foreach my $word ( keys %{$temp_words{$abucket}} ) {
+                    print WORDS "$word $temp_words{$abucket}{$word}\n" if ( $temp_words{$abucket}{$word} > 0 );
+                }
+                close WORDS;
+                $self->{classifier}->load_bucket("$self->{configuration}->{configuration}{corpus}/$abucket");
+            }
+            
+            $self->{classifier}->update_constants();
+            $self->{history_invalid} = 1;
+        }
+    
+    }
+}
+
 # ---------------------------------------------------------------------------------------------
 #
 # history_page - get the message classification history page
@@ -1951,6 +2196,19 @@ sub history_page
         $self->{form}{sort} = ''; 
     }
     
+    if ( defined $self->{form}{resetsearch} ) {
+        $self->{form}{search} = '';
+        $self->{history_invalid} = 1;
+    }
+    
+    if ( !defined $self->{form}{search} ) {
+    	$self->{form}{search} = '';
+    }
+    
+    if ( !defined $self->{form}{filter} ) {
+    	$self->{form}{filter} = "__filter__all";
+    }    
+    
     my $filtered = '';    
     if ( !defined($self->{form}{filter}) || ( $self->{form}{filter} eq '__filter__all' ) )  {
         $self->{form}{filter} = '';
@@ -1962,85 +2220,13 @@ sub history_page
         }
     }
 
-    $filtered .= sprintf( $self->{language}{History_Search}, $self->{form}{search} ) if ( defined($self->{form}{search}) );
+    $filtered .= sprintf( $self->{language}{History_Search}, $self->{form}{search} ) if ( defined( $self->{form}{search} ) && $self->{form}{search} ne '');
 
     my $body = ''; 
 
     # Handle undo
-    if ( defined($self->{form}{undo}) ) {
-        my %temp_words;
-        
-        open WORDS, "<$self->{configuration}->{configuration}{corpus}/$self->{form}{badbucket}/table";
-        while (<WORDS>) {
-            if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
-                if ( $1 != 1 )  {
-                    print "Incompatible corpus version in $self->{form}{badbucket}\n";
-                    return;
-                }
-                
-                next;
-            }
-            
-            $temp_words{$1} = $2 if ( /(.+) (.+)/ );
-        }
-        close WORDS;
-
-        $self->{classifier}->{parser}->parse_stream("$self->{configuration}->{configuration}{msgdir}$self->{form}{undo}");
-
-        foreach my $word (keys %{$self->{classifier}->{parser}->{words}}) {
-            $self->{classifier}->{full_total} -= $self->{classifier}->{parser}->{words}{$word};
-            $temp_words{$word}        -= $self->{classifier}->{parser}->{words}{$word};
-            
-            delete $temp_words{$word} if ( $temp_words{$word} <= 0 );
-        }
-        
-        open WORDS, ">$self->{configuration}->{configuration}{corpus}/$self->{form}{badbucket}/table";
-        print WORDS "__CORPUS__ __VERSION__ 1\n";
-        foreach my $word (keys %temp_words) {
-            print WORDS "$word $temp_words{$word}\n" if ( $temp_words{$word} > 0 );
-        }
-        close WORDS;
-        $self->{classifier}->load_bucket("$self->{configuration}->{configuration}{corpus}/$self->{form}{badbucket}");
-        $self->{classifier}->update_constants();
-        
-        my $class_file = "$self->{configuration}->{configuration}{msgdir}$self->{form}{undo}";
-        $class_file =~ s/msg$/cls/;
-        
-        # The bucket the message was reclassified to
-        my $usedtobe;
-
-        # The bucket the message was classified from
-        my $classification;
-        
-        # Load the class file to compare the old classification
-        open CLASS, "<$class_file";        
-
-        my $bucket = <CLASS>;
-        if ( ( defined( $bucket ) ) && ( $bucket =~ /RECLASSIFIED/ ) ) {
-            $bucket   = <CLASS>;
-            $usedtobe = <CLASS>;
-            $bucket   =~ s/[\r\n]//g; 
-            $usedtobe =~ s/[\r\n]//g; 
-        }
-        close CLASS;
-        
-        $classification = $usedtobe;
-
-        if ( $bucket ne $usedtobe ) {
-            $self->{configuration}->{configuration}{ecount} -= 1 if ( $self->{configuration}->{configuration}{ecount} > 0 );
-            $self->{classifier}->{parameters}{$bucket}{count}   -= 1;
-            $self->{classifier}->{parameters}{$usedtobe}{count} += 1;
-            $self->{classifier}->write_parameters();
-        }
-          
-        open CLASS, ">$class_file";
-        print CLASS "$classification$eol";
-        close CLASS;
-        
-        $self->{history_invalid} = 1;
-        http_redirect( $self, $client,"/history?session=$self->{session_key}&sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}#$self->{form}{undo}");
-        return;
-    }
+    
+    history_undo( $self );
 
     if ( defined($self->{form}{remove}) ) {
         my $mail_file = $self->{form}{remove};
@@ -2104,64 +2290,13 @@ sub history_page
         $self->{form}{sort} = $self->{form}{setsort}; 
     }
 
-    load_history_cache( $self, $self->{form}{filter}, '', $self->{form}{sort}) if ( ( remove_mail_files( $self ) ) || ( $self->{history_invalid} == 1 ) || ( history_cache_empty( $self ) ) || ( defined($self->{form}{setfilter}) ) || ( defined($self->{form}{setsort}) ) );
-
     # Handle the reinsertion of a message file
-
-    if ( ( defined($self->{form}{shouldbe} ) ) && ( $self->{form}{shouldbe} ne '' ) ) {
-        my %temp_words;
-        
-        open WORDS, "<$self->{configuration}->{configuration}{corpus}/$self->{form}{shouldbe}/table";
-        while (<WORDS>) {
-            if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
-                if ( $1 != 1 )  {
-                    print "Incompatible corpus version in $self->{form}{shouldbe}\n";
-                    return;
-                }
-                
-                next;
-            }
-            
-            $temp_words{$1} = $2 if ( /(.+) (.+)/ );
-        }
-        close WORDS;
-
-        $self->{classifier}->{parser}->parse_stream("$self->{configuration}->{configuration}{msgdir}$self->{form}{file}");
-
-        foreach my $word (keys %{$self->{classifier}->{parser}->{words}}) {
-            $self->{classifier}->{full_total} += $self->{classifier}->{parser}->{words}{$word};
-            $temp_words{$word}                += $self->{classifier}->{parser}->{words}{$word};
-        }
-        
-        open WORDS, ">$self->{configuration}->{configuration}{corpus}/$self->{form}{shouldbe}/table";
-        print WORDS "__CORPUS__ __VERSION__ 1\n";
-        foreach my $word (keys %temp_words) {
-           print WORDS "$word $temp_words{$word}\n" if ( $temp_words{$word} > 0 );
-        }
-        close WORDS;
-        
-        my $class_file = "$self->{configuration}->{configuration}{msgdir}$self->{form}{file}";
-        $class_file =~ s/msg$/cls/;
-        open CLASS, ">$class_file";
-        print CLASS "RECLASSIFIED$eol$self->{form}{shouldbe}$eol$self->{form}{usedtobe}$eol";
-        close CLASS;
-        
-        $self->{configuration}->{configuration}{ecount} += 1 if ( $self->{form}{shouldbe} ne $self->{form}{usedtobe} );
-        $self->{classifier}->{parameters}{$self->{form}{shouldbe}}{count} += 1; 
-        $self->{classifier}->{parameters}{$self->{form}{usedtobe}}{count} -= 1; 
-        $self->{classifier}->write_parameters();
-
-        $self->{classifier}->load_bucket("$self->{configuration}->{configuration}{corpus}/$self->{form}{shouldbe}");
-        $self->{classifier}->update_constants();    
-        load_history_cache( $self, $self->{form}{filter},'',$self->{form}{sort});
-        
-        http_redirect( $self, $client,"/history?session=$self->{session_key}&sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}#$self->{form}{file}");
-        return;
-    }
+    
+    history_reclassify( $self );
 
     my $highlight_message = '';
 
-    load_history_cache( $self, $self->{form}{filter}, $self->{form}{search}, $self->{form}{sort}) if ( ( defined($self->{form}{search}) ) && ( $self->{form}{search} ne '' ) );
+    load_history_cache( $self, $self->{form}{filter}, ($self->{form}{search} || '') , $self->{form}{sort}) if ( (defined $self->{form}{search} && $self->{form}{search} ne '') || ( remove_mail_files( $self ) ) || ( $self->{history_invalid} == 1 ) || ( history_cache_empty( $self ) ) || ( defined($self->{form}{setfilter}) ) || ( defined($self->{form}{setsort}) ) );
     
     if ( !history_cache_empty( $self ) )  {
         my $start_message = 0;
@@ -2205,35 +2340,54 @@ sub history_page
             $body .= "</td>\n</tr>\n</table>\n";
         } else {
             $body .="<h2 class=\"history\">$self->{language}{History_Title}$filtered</h2>\n"; 
-        }
+        }       
         
         # History widgets top
         $body .= "<table class=\"historyWidgetsTop\">\n<tr>\n";
         
         # Search Subject widget
-        $body .= "<td colspan=\"2\"><form action=\"/history\">";
-        $body .= "<input type=hidden name=filter value=\"$self->{form}{filter}\">";
-        $body .= "<input type=hidden name=sort value=\"$self->{form}{sort}\">";
-        $body .= "<input type=hidden name=session value=\"$self->{session_key}\">";
+        $body .= "<td colspan=\"2\">";
+        $body .= "<form action=\"/history\">\n";        
         $body .= "<span class=\"historyLabel\">$self->{language}{History_SearchMessage}:&nbsp;</span>";
-        $body .= "<input type=\"text\" name=\"search\"> ";
-        $body .= "<input type=submit class=submit name=searchbutton value=\"$self->{language}{Find}\"></form>\n</td>\n" ;
+
+        $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form}{sort}\">\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n";
+        $body .= "<input type=\"hidden\" name=\"filter\" value=\"$self->{form}{filter}\">\n";
+        
+        $body .= "<input type=\"text\" name=\"search\"";
+        $body .= "value=\"$self->{form}{search}\"" if (defined $self->{form}{search});
+        $body .= "> \n" ;
+        $body .= "<input type=submit class=submit name=searchbutton value=\"$self->{language}{Find}\">\n";
+        $body .= "<input type=\"submit\" class=\"submit\" name=\"resetsearch\" value=\"$self->{language}{History_ResetSearch}\">";
+        $body .= "</form>\n";
+        $body .= "</td>\n" ;
 
         # Filter widget
-        $body .= "<td colspan=\"3\">\n<form action=\"/history\">\n" ;
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n" ;
-        $body .= "<select name=\"filter\"><option value=\"__filter__all\">&lt;$self->{language}{History_ShowAll}&gt;</option>\n";
-        
+        $body .= "<td colspan=\"3\">\n" ;
+        $body .= "<form action=\"/history\">\n";
+        $body .= "<input type=\"hidden\" name=\"search\" value=\"$self->{form}{search}\">\n";
+        $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form}{sort}\">\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n";
+        $body .= "<select name=\"filter\"><option value=\"__filter__all\"" . ($self->{form}{filter} eq '__filter__all'?' selected':'') . ">&lt;$self->{language}{History_ShowAll}&gt;</option>\n";
         my @buckets = sort keys %{$self->{classifier}->{total}};
         foreach my $abucket (@buckets) {
             $body .= "<option value=\"$abucket\"";
             $body .= " selected" if ( ( defined($self->{form}{filter}) ) && ( $self->{form}{filter} eq $abucket ) );
             $body .= ">$abucket</option>";
         }
-        $body .= "<option value=\"__filter__magnet\">&lt;$self->{language}{History_ShowMagnet}&gt;</option>\n" ;
-        $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\">\n" ;
-        $body .= "</form>";
+        $body .= "<option value=\"__filter__magnet\"" . ($self->{form}{filter} eq '__filter__magnet'?'selected':'') . ">&lt;$self->{language}{History_ShowMagnet}&gt;</option>\n" ;
+        $body .= "<option value=\"unclassified\"" . ($self->{form}{filter} eq 'unclassified'?'selected':'') . ">&lt;unclassified&gt;</option>\n";        $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\">\n" ;
+        $body .= "</form>\n";
         $body .= "</td></tr></table>" ;
+        
+        # History page main form
+        
+        $body .= "<form id=\"HistoryMainForm\" action=\"/history\" method=\"get\">\n";
+        $body .= "<input type=\"hidden\" name=\"search\" value=\"$self->{form}{search}\">\n";
+        $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form}{sort}\">\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n";
+        $body .= "<input type=\"hidden\" name=\"start_message\" value=\"$start_message\">\n";
+        $body .= "<input type=\"hidden\" name=\"filter\" value=\"$self->{form}{filter}\">\n";
         
         # History messages
         $body .= "<table width=\"100%\">\n" ;
@@ -2287,7 +2441,7 @@ sub history_page
             if ( ( $self->{history}{$i}{subject} eq '' ) || ( $self->{history}{$i}{from} eq '' ) )  {
                 open MAIL, "<$self->{configuration}->{configuration}{msgdir}$mail_file";
                 while (<MAIL>)  {
-                    if ( /[A-Z0-9]/i )  {
+                    if ( !/^$eol/ )  {
                         if ( /^From:(.*)/i ) {
                             if ( $from eq '' )  {
                                 $from = $1;
@@ -2348,13 +2502,7 @@ sub history_page
 
             $short_subject =~ s/</&lt;/g;
             $short_subject =~ s/>/&gt;/g;
-            
-            # If the user has more than 4 buckets then we'll present a drop down list of buckets, otherwise we present simple
-            # links
-
-            my $drop_down = ( $#buckets > 4 );
-
-            $body .= "<form action=\"/history\">\n<input type=\"hidden\" name=\"filter\" value=\"$self->{form}{filter}\">" if ( $drop_down );
+                      
             $body .= "<tr";
             if ( ( ( defined($self->{form}{view}) ) && ( $self->{form}{view} eq $mail_file ) ) || ( ( defined($self->{form}{file}) && ( $self->{form}{file} eq $mail_file ) ) ) || ( $highlight_message eq $mail_file ) ) {
                 $body .= " class=\"rowHighlighted\"";
@@ -2367,6 +2515,8 @@ sub history_page
 
             $body .= "><td>";
             $body .= "<a name=\"$mail_file\"></a>";
+            # for per-message checkboxes
+            # $body .= "<input type=\"checkbox\" name=\"f\" value=\"" . ($i + 1) . "\">\n";
             $body .= $i+1 . "<td>";
             my $bucket       = $self->{history}{$i}{bucket};
             my $reclassified = $self->{history}{$i}{reclassified}; 
@@ -2375,43 +2525,31 @@ sub history_page
             $body .= "<td>\n<a class=\"messageLink\" title=\"$subject\" href=\"/history?view=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}#$mail_file\">\n" ;
             $body .= "$short_subject</a><td>";
             if ( $reclassified )  {
-                $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font><td>" . sprintf( $self->{language}{History_Already}, $self->{classifier}->{colors}{$bucket}, $bucket ) . " - <a href=\"/history?undo=$mail_file&amp;session=$self->{session_key}&amp;badbucket=$bucket&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}&amp;start_message=$start_message#$mail_file\">[$self->{language}{Undo}]</a>";
+                $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font><td>" . sprintf( $self->{language}{History_Already}, ($self->{classifier}->{colors}{$bucket} || ''), ($bucket || '') ) . " - <a href=\"/history?undo=" . ( $i+1 ) . "&amp;session=$self->{session_key}&amp;badbucket=$bucket&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}&amp;start_message=$start_message#$mail_file\">[$self->{language}{Undo}]</a>";
             } else {
-                if ( $bucket eq 'unclassified' || !defined $self->{classifier}->{colors}{$bucket})  {
+                if ( !defined $self->{classifier}->{colors}{$bucket})  {
                     $body .= "$bucket<td>";
                 } else {
                     $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font><td>";
                 }
 
                 if ( $self->{history}{$i}{magnet} eq '' )  {
-                    if ( $drop_down ) {
-                        $body .= " <input type=submit class=submit name=change value=\"$self->{language}{Reclassify}\">\n" ;
-                        $body .= "<input type=hidden name=usedtobe value=\"$bucket\"><select name=shouldbe>\n";
-                    } else {
-                        $body .= "$self->{language}{History_ClassifyAs}: ";
-                    }
-
+                    $body .= "<select name=\"" . ($i + 1 ) . "\">\n";
+                    
+                    # Show a blank bucket field                    
+                    $body .= "<option selected></option>\n";
+            
                     foreach my $abucket (@buckets) {
-                        if ( $drop_down )  {
-                            $body .= "<option value=\"$abucket\"";
-                            $body .= " selected" if ( $abucket eq $bucket );
-                            $body .= ">$abucket</option>"
-                        } else {
-                            $body .= "<a href=\"/history?shouldbe=$abucket&amp;file=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key}&amp;usedtobe=$bucket&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}#$mail_file\">\n" ;
-                            $body .= "<font color=$self->{classifier}->{colors}{$abucket}>[$abucket]</font></a> ";
-                        }
+                        $body .= "<option value=\"$abucket\"";                     
+                        $body .= ">$abucket</option>"
                     }
-
-                    $body .= "<input type=\"hidden\" name=\"file\" value=\"$mail_file\">\n" ;
-                    $body .= "<input type=\"hidden\" name=\"start_message\" value=\"$start_message\">\n" ;
-                    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">" if ( $drop_down );
+                    $body .= "</select>\n";
                 } else {
                     $body .= " ($self->{language}{History_MagnetUsed}: $self->{history}{$i}{magnet})";
                 }
             }
 
             $body .= "</td><td><a class=\"removeLink\" href=\"/history?session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}&amp;start_message=$start_message&amp;remove=$mail_file&amp;start_message=$start_message\">[$self->{language}{Remove}]</a></td>";
-            $body .= "</form>" if ( $drop_down );
 
             # Check to see if we want to view a message
             if ( ( defined($self->{form}{view}) ) && ( $self->{form}{view} eq $mail_file ) ) {
@@ -2464,7 +2602,8 @@ sub history_page
                     }
                     close MESSAGE;
                     $body .= "</tt>";
-                }
+                }        
+        
                 $body .= "</td>\n</tr>\n" ;
                 
                 # Close button
@@ -2477,10 +2616,23 @@ sub history_page
                 $body .= $self->{classifier}->{scores};
             }
 
-            $body .= "<tr class=\"rowHighlighted\"><td><td>" . sprintf( $self->{language}{History_ChangedTo}, $self->{classifier}->{colors}{$self->{form}{shouldbe}}, $self->{form}{shouldbe} ) if ( ( defined($self->{form}{file}) ) && ( $self->{form}{file} eq $mail_file ) );
+            if ( defined $self->{feedback}{$mail_file} ) {
+                $body .= "<tr class=\"rowHighlighted\"><td>&nbsp;</td><td>$self->{feedback}{$mail_file}</td>\n";
+                delete $self->{feedback}{$mail_file};
+            }
+
+            # $body .= "<tr class=\"rowHighlighted\"><td><td>" . sprintf( $self->{language}{History_ChangedTo}, $self->{classifier}->{colors}{$self->{form}{shouldbe}}, $self->{form}{shouldbe} ) if ( ( defined($self->{form}{file}) ) && ( $self->{form}{file} eq $mail_file ) );
         }
+        
+        $body .= "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>\n" ;
+        $body .= " <input type=submit class=submit name=change value=\"$self->{language}{Reclassify}\">\n" ;
+        $body .= "</td></tr>\n" ;
 
         $body .= "</table>\n" ;
+        
+        #END main history form
+        
+        $body .= "</form>\n";
         
         # History buttons bottom
         $body .= "<table class=\"historyButtonsBottom\">\n<tr>\n<td>\n";
@@ -2581,6 +2733,10 @@ sub parse_form
         }
 
         $self->{form}{$arg} =~ s/\+/ /g;
+        
+        # Push the value onto an array to allow for multiple values of the same name
+        
+        push( @{ $self->{form}{$arg . "_array"} }, $self->{form}{$arg} );
     }
 }
 

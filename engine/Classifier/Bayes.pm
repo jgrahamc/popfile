@@ -720,7 +720,7 @@ sub classify_and_modify
         }
 
         if ( $getting_headers )  {
-            if ( $line =~ /[A-Z0-9]/i )  {
+            if ( !( $line =~ /^$eol/ ) )  {
                 $message_size += length $line;                                        
                 print TEMP $line;
 
@@ -740,6 +740,7 @@ sub classify_and_modify
                 }
             } else {
                 print TEMP $eol;
+                $message_size += length $eol;
                 $getting_headers = 0;
             }
         } else {
