@@ -279,14 +279,14 @@ slashconversion:
   Call un.StrBackSlash            ; ensure corpus path uses backslashes
   Pop ${L_CORPUS}
   
-  StrCpy ${L_TEMP} "$OUTDIR"      ; Save current working directory
+  GetFullPathName ${L_TEMP} ".\"
   
   ; Ensure relative paths are handled properly (${L_SOURCE} holds path to 'popfile.cfg' file)
   
-  StrCpy "$OUTDIR" "${L_SOURCE}"
+  SetOutPath "${L_SOURCE}"
   GetFullPathName ${L_RESULT} "${L_CORPUS}"
  
-  StrCpy "$OUTDIR" ${L_TEMP}      ; Restore current working directory
+  SetOutPath "${L_TEMP}"
   
   ; If 'corpus' path parameter was not valid, GetFullPathName returns ""
   
