@@ -113,8 +113,6 @@ sub start
 {
     my ( $self ) = @_;
     
-    print "    Loading buckets...\n";
-
     if ( $self->{configuration}->{configuration}{unclassified_probability} != 0 )  {
         $self->{unclassified} = $self->{configuration}->{configuration}{unclassified_probability};
     }

@@ -96,8 +96,11 @@ $components{ui}->{classifier}            = $components{classifier};
 # The proxy needs to talk to the ui
 $components{pop3}->{ui}                  = $components{ui};
 
+print "    Initializing... ";
+
 # Tell each module to initialize itself
-for my $c (keys %components) {
+for my $c (sort keys %components) {
+    print "{$c} ";
     if ( $components{$c}->initialize() == 0 ) {
         die "Failed to start while initializing the $c module";
     }
@@ -105,21 +108,22 @@ for my $c (keys %components) {
     $components{$c}->{alive} = 1;
 }
 
-print "    Loading configuration\n";
-
 # Load the configuration from disk and then apply any command line
 # changes that override the saved configuration
 $components{config}->load_configuration();
 $components{config}->parse_command_line();
 
+print "\n    Starting...     ";
+
 # Now that the configuration is set tell each module to begin operation
-for my $c (keys %components) {
+for my $c (sort keys %components) {
+    print "{$c} ";
     if ( $components{$c}->start() == 0 ) {
         die "Failed to start while starting the $c module";
     }
 }
 
-print "    Cleaning stale log files\n";
+print "\n    Cleaning stale log files\n";
 
 # Remove old log files
 $components{pop3}->remove_debug_files();
@@ -142,13 +146,16 @@ while ( $alive == 1 ) {
     select(undef, undef, undef, 0.01);
 }
 
+print "    Stopping... ";
+
 # Shutdown all the modules
-for my $c (keys %components) {
+for my $c (sort keys %components) {
+    print "{$c} ";
     $components{$c}->{alive} = 0;
     $components{$c}->stop();
 }
 
-print "    Saving configuration\n";
+print "\n    Saving configuration\n";
 
 # Write the final configuration to disk
 $components{config}->save_configuration();

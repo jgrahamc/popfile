@@ -189,7 +189,7 @@ sub service
                 my $pid = fork();
                 
                 if ( !defined( $pid ) ) {
-                    debug( "Could not fork!" );
+                    debug( $self, "Could not fork!" );
                     close $client;
                     return 1;
                 }
