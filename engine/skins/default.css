@@ -4,7 +4,7 @@ H1,H2,H3,P,TD {
 
 body {
   background-color: #FFFFFF;
-  font-family: sans-serif;
+  font-family: sans-serif; 
   color: #000000;
 }
 
@@ -15,8 +15,8 @@ body {
 
 .shell {
     background-color: #ededca;
-    border: 3px #cccc99 solid;
-     color: #000000;
+    border: 3px #cccc99 solid; 
+    color: #000000;
 }
 
 .head a {

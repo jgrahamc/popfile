@@ -733,7 +733,7 @@ sub configuration_page
         $body .= "[$self->{language}{TurnOff}]</a> ";
     } else {
         $body .= "<td><b>$self->{language}{Off}</b>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/configuration?xpl=2&amp;session=$self->{session_key}\"\n" ;
+        $body .= "<a class=\"changeSettingLink\" href=\"/configuration?xpl=2&amp;session=$self->{session_key}\">\n" ;
         $body .= "[$self->{language}{TurnOn}]</a>";
     }
     $body .= "</td>\n</tr>\n</table>\n<br />\n";
