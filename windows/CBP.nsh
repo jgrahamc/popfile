@@ -25,7 +25,7 @@
   ;   <start of code block>
   ;
   ;   #----------------------------------------------------------------------------------------
-  ;   # CBP Configuration Data (leave lines commented-out if defaults are satisfactory)
+  ;   # CBP Configuration Data (to change the default settings, un-comment appropriate lines)
   ;   #----------------------------------------------------------------------------------------
   ;   #   ; Maximum number of buckets handled (in range 2 to 8)
   ;   #
@@ -33,12 +33,12 @@
   ;   #
   ;   #   ; Default bucket selection (use "" if no buckets are to be pre-selected)
   ;   #
-  ;   #   !define CBP_DEFAULT_LIST "in-box|junk|personal|work"
+  ;   #   !define CBP_DEFAULT_LIST "inbox|spam|personal|work"
   ;   #
   ;   #   ; List of suggestions for bucket names (use "" if no suggestions are required)
   ;   #
   ;   #   !define CBP_SUGGESTION_LIST \
-  ;   #   "admin|business|computers|family|financial|general|hobby|in-box|junk|list-admin|\
+  ;   #   "admin|business|computers|family|financial|general|hobby|inbox|junk|list-admin|\
   ;   #   miscellaneous|not_spam|other|personal|recreation|school|security|shopping|spam|\
   ;   #   travel|work"
   ;   #----------------------------------------------------------------------------------------
@@ -69,7 +69,7 @@
   ; Default setting 2:
   ; -----------------
   ;
-  ;     !define CBP_DEFAULT_LIST "in-box|junk|personal|work"
+  ;     !define CBP_DEFAULT_LIST "inbox|spam|personal|work"
   ;
   ; The default list of bucket names presented when the "Create Bucket" page first appears.
   ; This list should contain a series of valid bucket names, separated by "|" characters.
@@ -82,7 +82,7 @@
   ; -----------------
   ;
   ;     !define CBP_SUGGESTION_LIST \
-  ;     "admin|business|computers|family|financial|general|hobby|in-box|junk|list-admin|\
+  ;     "admin|business|computers|family|financial|general|hobby|inbox|junk|list-admin|\
   ;     miscellaneous|not_spam|other|personal|recreation|school|security|shopping|spam|\
   ;     travel|work"
   ;
@@ -123,10 +123,15 @@
 # The CBP package is only used to create POPFile buckets when the installer is used to install
 # POPFile in a folder which does not contain any corpus files from a previous installation.
 #
-# For flexibility, the path to be searched is passed on the stack instead of being hard-coded.
+# For flexibility, the folder to be searched is passed on the stack instead of being hard-coded.
+# If 'popfile.cfg' is found in the specified folder, we use the corpus parameter (if present)
+# otherwise we look for corpus files in the sub-folder called 'corpus'.
+#
+# The full path used when searching for a corpus is stored in the CBP package's INI file
+# for use when creating the buckets.
 #----------------------------------------------------------------------------------------------
 # Inputs:
-#   (top of stack)                - the path where the corpus is expected to exist
+#   (top of stack)                - the path where 'popfile.cfg' or the corpus is expected to be
 #                                   (normally this will be the same as $INSTDIR)
 #----------------------------------------------------------------------------------------------
 # Outputs:
@@ -142,10 +147,12 @@
 #   (none)
 #----------------------------------------------------------------------------------------------
 # Global CBP Constants Used:
-#   (none)
+#   CBP_C_INIFILE                 - name of the INI file used to create the custom page
 #----------------------------------------------------------------------------------------------
 # CBP Functions Called:
-#   (none)
+#   CBP_GetParent                 - used when converting relative path to absolute path
+#   CBP_StrBackSlash              - converts all slashes in a string into backslashes
+#   CBP_TrimNewlines              - strips trailing Carriage Returns and/or Newlines from string
 #----------------------------------------------------------------------------------------------
 # Called By:
 #   CBP_CreateBucketsPage         - the function which "controls" the "Create Buckets" page
@@ -161,16 +168,117 @@
 
 Function CBP_CheckCorpusStatus
 
-  !define CBP_L_FILE_HANDLE   $R9
-  !define CBP_L_RESULT        $R8
-  !define CBP_L_SOURCE        $R7
+  !define CBP_L_CORPUS        $R9
+  !define CBP_L_FILE_HANDLE   $R8
+  !define CBP_L_RESULT        $R7
+  !define CBP_L_SOURCE        $R6
+  !define CBP_L_TEMP          $R5
 
-  Exch ${CBP_L_SOURCE}          ; where we are supposed to look for the corpus files
+  Exch ${CBP_L_SOURCE}          ; where we are supposed to look for the corpus data
   Push ${CBP_L_RESULT}
   Exch
+  Push ${CBP_L_CORPUS}
   Push ${CBP_L_FILE_HANDLE}
+  Push ${CBP_L_TEMP}
+  
+  StrCpy ${CBP_L_CORPUS} ""
+  
+  IfFileExists ${CBP_L_SOURCE}\popfile.cfg 0 check_default_corpus_locn
 
-  FindFirst ${CBP_L_FILE_HANDLE} ${CBP_L_RESULT} ${CBP_L_SOURCE}\corpus\*.*
+  ClearErrors
+  FileOpen ${CBP_L_FILE_HANDLE} ${CBP_L_SOURCE}\popfile.cfg r
+
+loop:
+  FileRead ${CBP_L_FILE_HANDLE} ${CBP_L_TEMP}
+  IfErrors cfg_file_done
+  StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 7
+  StrCmp ${CBP_L_RESULT} "corpus " got_old_corpus
+  StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 13
+  StrCmp ${CBP_L_RESULT} "bayes_corpus " got_new_corpus
+  Goto loop
+  
+got_old_corpus:
+  StrCpy ${CBP_L_CORPUS} ${CBP_L_TEMP} "" 7
+  Goto loop
+
+got_new_corpus:
+  StrCpy ${CBP_L_CORPUS} ${CBP_L_TEMP} "" 13
+  Goto loop
+
+cfg_file_done:
+  FileClose ${CBP_L_FILE_HANDLE}
+
+  Push ${CBP_L_CORPUS}
+  Call CBP_TrimNewlines
+  Pop ${CBP_L_CORPUS}
+  StrCmp ${CBP_L_CORPUS} "" check_default_corpus_locn
+  
+  ; A non-null corpus parameter has been found in 'popfile.cfg'
+  ; Strip leading/trailing quotes, if any
+
+  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 1
+  StrCmp ${CBP_L_TEMP} '"' 0 slashconversion
+  StrCpy ${CBP_L_CORPUS} ${CBP_L_CORPUS} "" 1
+  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 1 -1
+  StrCmp ${CBP_L_TEMP} '"' 0 slashconversion
+  StrCpy ${CBP_L_CORPUS} ${CBP_L_CORPUS} -1
+
+slashconversion:
+  Push ${CBP_L_CORPUS}
+  Call CBP_StrBackSlash            ; ensure corpus path uses backslashes
+  Pop ${CBP_L_CORPUS}
+
+  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 2
+  StrCmp ${CBP_L_TEMP} ".\" sub_folder
+
+  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 3
+  StrCmp ${CBP_L_TEMP} "..\" relative_folder
+
+  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 1
+  StrCmp ${CBP_L_TEMP} "\" instdir_drive
+  
+  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 1 1
+  StrCmp ${CBP_L_TEMP} ":" look_for_corpus_files
+  
+  ; Assume path can be safely added to $INSTDIR
+  
+  StrCpy ${CBP_L_CORPUS} $INSTDIR\${CBP_L_CORPUS}
+  Goto look_for_corpus_files
+  
+sub_folder:
+  StrCpy ${CBP_L_CORPUS} ${CBP_L_CORPUS} "" 2
+  StrCpy ${CBP_L_CORPUS} $INSTDIR\${CBP_L_CORPUS}
+  Goto look_for_corpus_files
+  
+relative_folder:
+  StrCpy ${CBP_L_RESULT} $INSTDIR
+  
+relative_again:
+  StrCpy ${CBP_L_CORPUS} ${CBP_L_CORPUS} "" 3
+  Push ${CBP_L_RESULT}
+  Call CBP_GetParent
+  Pop ${CBP_L_RESULT}
+  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 3
+  StrCmp ${CBP_L_TEMP} "..\" relative_again
+  StrCpy ${CBP_L_CORPUS} ${CBP_L_RESULT}\${CBP_L_CORPUS}
+  Goto look_for_corpus_files
+  
+instdir_drive:
+  StrCpy ${CBP_L_TEMP} $INSTDIR 2
+  StrCpy ${CBP_L_CORPUS} ${CBP_L_TEMP}${CBP_L_CORPUS}
+  Goto look_for_corpus_files
+  
+check_default_corpus_locn:
+  StrCpy ${CBP_L_CORPUS} ${CBP_L_SOURCE}\corpus
+  
+look_for_corpus_files:
+
+  ; Save path in INI file for later use by 'CBP_MakePOPFileBucket'
+  
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
+      "CBP Data" "CorpusPath" ${CBP_L_CORPUS}
+
+  FindFirst ${CBP_L_FILE_HANDLE} ${CBP_L_RESULT} ${CBP_L_CORPUS}\*.*
 
   ; If the "corpus" directory does not exist "${CBP_L_FILE_HANDLE}" will be empty
 
@@ -202,13 +310,17 @@ clean_install:
 return_result:
   FindClose ${CBP_L_FILE_HANDLE}
 
+  Pop ${CBP_L_TEMP}
   Pop ${CBP_L_FILE_HANDLE}
+  Pop ${CBP_L_CORPUS}
   Pop ${CBP_L_SOURCE}
   Exch ${CBP_L_RESULT}  ; place "clean", "empty" or "dirty" on top of the stack
 
+  !undef CBP_L_CORPUS
   !undef CBP_L_FILE_HANDLE
   !undef CBP_L_RESULT
   !undef CBP_L_SOURCE
+  !undef CBP_L_TEMP
 
 FunctionEnd
 
@@ -220,6 +332,9 @@ FunctionEnd
 # The names of the buckets to be created are extracted from the INI file used to create the
 # custom page used by the CBP package. It is assumed that the bucket names are found in
 # consecutive fields in the INI file.
+#
+# The INI file also holds the full path to the folder where the buckets are to be created
+# (this path is determined by 'CBP_CheckCorpusStatus' because the location is not hard-coded).
 #
 # Almost no error checking is performed upon the input parameters.
 #
@@ -259,22 +374,30 @@ FunctionEnd
 
 Function CBP_MakePOPFileBuckets
 
-  !define CBP_L_COUNT         $R9    ; holds number of buckets not yet created
-  !define CBP_L_CREATE_NAME   $R8    ; name of bucket to be created
-  !define CBP_L_FILE_HANDLE   $R7
-  !define CBP_L_FIRST_FIELD   $R6    ; holds field number where first bucket name is stored
-  !define CBP_L_LOOP_LIMIT    $R5    ; used to terminate the processing loop
-  !define CBP_L_NAME          $R4    ; used when checking the corpus directory
-  !define CBP_L_PTR           $R3    ; used to access the names in the bucket list
+  !define CBP_L_CORPUS        $R9    ; holds the full path for the 'corpus' folder
+  !define CBP_L_COUNT         $R8    ; holds number of buckets not yet created
+  !define CBP_L_CREATE_NAME   $R7    ; name of bucket to be created
+  !define CBP_L_FILE_HANDLE   $R6
+  !define CBP_L_FIRST_FIELD   $R5    ; holds field number where first bucket name is stored
+  !define CBP_L_LOOP_LIMIT    $R4    ; used to terminate the processing loop
+  !define CBP_L_NAME          $R3    ; used when checking the corpus directory
+  !define CBP_L_PTR           $R2    ; used to access the names in the bucket list
 
   Exch ${CBP_L_COUNT}         ; get number of buckets to be created
   Exch
   Exch ${CBP_L_FIRST_FIELD}   ; get number of the field containing the first bucket name
+
+  Push ${CBP_L_CORPUS}
   Push ${CBP_L_CREATE_NAME}
   Push ${CBP_L_FILE_HANDLE}
   Push ${CBP_L_LOOP_LIMIT}
   Push ${CBP_L_NAME}
   Push ${CBP_L_PTR}
+
+  ; Retrieve the corpus path (as determined by CBP_CheckCorpusStatus)
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${CBP_L_CORPUS} "${CBP_C_INIFILE}" \
+      "CBP Data" "CorpusPath"
 
   ; Now we create the buckets selected by the user. At present this code is only executed
   ; for a "fresh" install, one where there are no corpus files, so we can simply create a
@@ -293,7 +416,7 @@ next_bucket:
 
   ; Double-check that the bucket we are about to create does not exist
 
-  FindFirst ${CBP_L_FILE_HANDLE} ${CBP_L_NAME} $INSTDIR\corpus\${CBP_L_CREATE_NAME}\*.*
+  FindFirst ${CBP_L_FILE_HANDLE} ${CBP_L_NAME} ${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}\*.*
   StrCmp ${CBP_L_FILE_HANDLE} "" ok_to_create_bucket
   FindClose ${CBP_L_FILE_HANDLE}
   goto incrm_ptr
@@ -301,8 +424,8 @@ next_bucket:
 ok_to_create_bucket:
   FindClose ${CBP_L_FILE_HANDLE}
   ClearErrors
-  CreateDirectory $INSTDIR\corpus\${CBP_L_CREATE_NAME}
-  FileOpen ${CBP_L_FILE_HANDLE} $INSTDIR\corpus\${CBP_L_CREATE_NAME}\table w
+  CreateDirectory ${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}
+  FileOpen ${CBP_L_FILE_HANDLE} ${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}\table w
   FileWrite ${CBP_L_FILE_HANDLE} "$\r$\n"
   FileClose ${CBP_L_FILE_HANDLE}
   IfErrors  incrm_ptr
@@ -318,9 +441,12 @@ finished_now:
   Pop ${CBP_L_LOOP_LIMIT}
   Pop ${CBP_L_FILE_HANDLE}
   Pop ${CBP_L_CREATE_NAME}
+  Pop ${CBP_L_CORPUS}
   Pop ${CBP_L_FIRST_FIELD}
+  
   Exch ${CBP_L_COUNT}       ; top of stack now has number of buckets we were unable to create
 
+  !undef CBP_L_CORPUS
   !undef CBP_L_COUNT
   !undef CBP_L_CREATE_NAME
   !undef CBP_L_FILE_HANDLE
@@ -802,23 +928,19 @@ Function CBP_CreateBucketsPage
   Push ${CBP_L_RESULT}
   Push ${CBP_L_TEMP}
 
+  IfFileExists "$PLUGINSDIR\${CBP_C_INIFILE}" use_INI_file
+  Call CBP_CreateINIfile
+
+use_INI_file:
+
   ; We only offer to create POPFile buckets if we are not upgrading an existing POPFile system
 
   Push $INSTDIR
   Call CBP_CheckCorpusStatus
   Pop ${CBP_L_RESULT}
-  StrCmp ${CBP_L_RESULT} "clean" display_bucket_page
-  StrCmp ${CBP_L_RESULT} "empty" display_bucket_page
+  StrCmp ${CBP_L_RESULT} "dirty" finished_now
 
-  ; The corpus directory exists and is not empty, so we exit without offering to create buckets
-
-  Goto finished_now
-
-display_bucket_page:
-  IfFileExists "$PLUGINSDIR\${CBP_C_INIFILE}" use_INI_file
-  Call CBP_CreateINIfile
-
-use_INI_file:
+  ; The corpus directory does not exist or is empty
 
   !insertmacro MUI_HEADER_TEXT "POPFile Classification Bucket Creation" \
       "POPFile needs AT LEAST TWO buckets in order to be able to classify your email"
@@ -1658,6 +1780,187 @@ done:
 
   Pop $R2
   Exch $R1
+FunctionEnd
+
+#==============================================================================================
+# Function CBP_TrimNewlines
+#==============================================================================================
+# Used to remove any Carriage-Returns and/or Newlines from the end of a string
+# (if string does not have any trailing Carriage-Returns or Newlines, it is returned unchanged)
+#----------------------------------------------------------------------------------------------
+# Inputs:
+#   (top of stack)                - string which may end with Carriage-Returns and/or Newlines
+#----------------------------------------------------------------------------------------------
+# Outputs:
+#   (top of stack)                - string with no Carriage Returns or Newlines at the end
+#----------------------------------------------------------------------------------------------
+# Global Registers Destroyed:
+#   (none)
+#
+# Local Registers Destroyed:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# Global CBP Constants Used:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# CBP Functions Called:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# Called By:
+#   CBP_CheckCorpusStatus         - checks if we are performing a "clean" installation
+#----------------------------------------------------------------------------------------------
+#  Usage Example:
+#
+#    Push "whatever$\r$\n"
+#    Call CBP_TrimNewlines
+#    Pop $R0
+#
+#   ($R0 at this point is "whatever")
+#
+#==============================================================================================
+
+Function CBP_TrimNewlines
+  Exch $R0
+  Push $R1
+  Push $R2
+  StrCpy $R1 0
+
+loop:
+  IntOp $R1 $R1 - 1
+  StrCpy $R2 $R0 1 $R1
+  StrCmp $R2 "$\r" loop
+  StrCmp $R2 "$\n" loop
+  IntOp $R1 $R1 + 1
+  IntCmp $R1 0 no_trim_needed
+  StrCpy $R0 $R0 $R1
+    
+no_trim_needed:
+  Pop $R2
+  Pop $R1
+  Exch $R0
+FunctionEnd
+
+#==============================================================================================
+# Function CBP_StrBackSlash
+#==============================================================================================
+# Used to convert all slashes in a string to backslashes
+#----------------------------------------------------------------------------------------------
+# Inputs:
+#   (top of stack)                - string containing slashes (e.g. "C:/This/and/That")
+#----------------------------------------------------------------------------------------------
+# Outputs:
+#   (top of stack)                - string containing backslashes (e.g. "C:\This\and\That")
+#----------------------------------------------------------------------------------------------
+# Global Registers Destroyed:
+#   (none)
+#
+# Local Registers Destroyed:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# Global CBP Constants Used:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# CBP Functions Called:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# Called By:
+#   CBP_CheckCorpusStatus         - checks if we are performing a "clean" installation
+#----------------------------------------------------------------------------------------------
+#  Usage Example:
+#
+#    Push "C:/Program Files/Directory/Whatever"
+#    Call CBP_StrBackSlash
+#    Pop $R0
+#
+#   ($R0 at this point is ""C:\Program Files\Directory"\Whatever)
+#
+#==============================================================================================
+
+Function CBP_StrBackSlash
+  Exch $R0    ; Input string with slashes
+  Push $R1    ; Output string using backslashes
+  Push $R2    ; Current character
+
+  StrCpy $R1 ""
+  StrCmp $R0 $R1 nothing_to_do
+
+loop:
+  StrCpy $R2 $R0 1
+  StrCpy $R0 $R0 "" 1
+  StrCmp $R2 "/" found
+  StrCpy $R1 "$R1$R2"
+  StrCmp $R0 "" done loop
+
+found:
+  StrCpy $R1 "$R1\"
+  StrCmp $R0 "" done loop
+
+done:
+  StrCpy $R0 $R1
+  
+nothing_to_do:
+  Pop $R2
+  Pop $R1
+  Exch $R0
+FunctionEnd
+
+#==============================================================================================
+# Function CBP_GetParent
+#==============================================================================================
+# Used to extract the parent directory from a path.
+#
+# NB: Path is assumed to use backslashes (\)
+#----------------------------------------------------------------------------------------------
+# Inputs:
+#   (top of stack)                - string containing a path (e.g. C:\A\B\C)
+#----------------------------------------------------------------------------------------------
+# Outputs:
+#   (top of stack)                - the parent part of the input string (e.g. C:\A\B)
+#----------------------------------------------------------------------------------------------
+# Global Registers Destroyed:
+#   (none)
+#
+# Local Registers Destroyed:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# Global CBP Constants Used:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# CBP Functions Called:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# Called By:
+#   CBP_CheckCorpusStatus         - checks if we are performing a "clean" installation
+#----------------------------------------------------------------------------------------------
+#  Usage Example:
+#
+#    Push "C:\Program Files\Directory\Whatever"
+#    Call CBP_GetParent
+#    Pop $R0
+#
+#   ($R0 at this point is ""C:\Program Files\Directory")
+#
+#==============================================================================================
+
+Function CBP_GetParent
+  Exch $R0
+  Push $R1
+  Push $R2
+  
+  StrCpy $R1 -1
+  
+loop:
+  StrCpy $R2 $R0 1 $R1
+  StrCmp $R2 "" exit
+  StrCmp $R2 "\" exit
+  IntOp $R1 $R1 - 1
+  Goto loop
+  
+exit:
+  StrCpy $R0 $R0 $R1
+  Pop $R2
+  Pop $R1
+  Exch $R0
 FunctionEnd
 
 #==============================================================================================
