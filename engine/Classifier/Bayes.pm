@@ -437,9 +437,9 @@ sub classify_file
     # Set up the initial score as P(bucket)
   
     my %score;
-	my %wordprob;
-	my %wtprob;
-	my %wbprob;
+    my %wordprob;
+    my %wtprob;
+    my %wbprob;
     
     for my $bucket (keys %{$self->{total}})
     {
@@ -471,11 +471,11 @@ sub classify_file
     foreach my $word (keys %{$self->{parser}->{words}})
     {
         my $wmax = -10000;
-		if ($self->{wordscores}) {
-			$wtprob{$word} = 0;
-			$wbprob{$word} = {};
-		}
-		
+        if ($self->{wordscores}) {
+            $wtprob{$word} = 0;
+            $wbprob{$word} = {};
+        }
+        
         foreach my $bucket (@buckets)
         {
             my $probability = get_value( $self, $bucket, $word );
@@ -495,9 +495,9 @@ sub classify_file
 
             $score{$bucket} += ( $probability * $self->{parser}{words}{$word} );
             if ($self->{wordscores}) {
-				$wtprob{$word} += exp($probability);
-				$wbprob{$word}{$bucket} = exp($probability);
-			}
+                $wtprob{$word} += exp($probability);
+                $wbprob{$word}{$bucket} = exp($probability);
+            }
         }
         
         if ($wmax > $self->{not_likely})
@@ -508,7 +508,7 @@ sub classify_file
         {
             $correction += $wmax * $self->{parser}{words}{$word};
         }
-		$wordprob{$word} = exp($wmax);
+        $wordprob{$word} = exp($wmax);
     }
 
     # Now sort the scores to find the highest and return that bucket as the classification
@@ -517,8 +517,8 @@ sub classify_file
     my @wordrank;
     if ($self->{wordscores})
     {
-	    @wordrank = sort {($wordprob{$b} / $wtprob{$b}) <=> ($wordprob{$a} / $wtprob{$a})} keys %wordprob;
-	}
+        @wordrank = sort {($wordprob{$b} / $wtprob{$b}) <=> ($wordprob{$a} / $wtprob{$a})} keys %wordprob;
+    }
 
     my %raw_score;
     my $base_score = $score{$ranking[0]};
@@ -557,31 +557,31 @@ sub classify_file
     }
     $self->{scores} .= "</table>";
 
-	if ($self->{wordscores})
-	{
-		$self->{scores} .= "<table><tr><td colspan=4>&nbsp;</td></tr><tr><td><b>Word</b></td><td><b>Prob</b></td><td>&nbsp;</td><td><font color=$self->{colors}{$ranking[0]}>&nbsp;<b>$ranking[0]</b></font></td></tr>";
-		my $wi = 0;
-		foreach my $word (@wordrank)
-		{
-			if ( $wi < 20 && $wordprob{$word} / $wtprob{$word} >= 0.25 ) {
-				my $wordstr = $word;
-				if ( length($wordstr)>14 ) 
-				{
-					$wordstr =~ /(.{12})/;
-					$wordstr = "$1...";
-				}
-				my $wordcolor = get_color($self, $word);
-				my $wordprobstr = sprintf("%12.4f", $wordprob{$word} / $wtprob{$word});
-				my $otherprobstr = sprintf("%12.4f", $wbprob{$word}{$ranking[0]} / $wtprob{$word});
-				$self->{scores} .= "<tr><td><font color=$wordcolor>$wordstr</font></td>";
-				$self->{scores} .= "<td><font color=$wordcolor>$wordprobstr</font></td><td>&nbsp;</td>";
-				$self->{scores} .= "<td><font color=$self->{colors}{$ranking[0]}>$otherprobstr</font></td></tr>";
-			}
-			$wi += 1;
-		}
+    if ($self->{wordscores})
+    {
+        $self->{scores} .= "<table><tr><td colspan=4>&nbsp;</td></tr><tr><td><b>Word</b></td><td><b>Prob</b></td><td>&nbsp;</td><td><font color=$self->{colors}{$ranking[0]}><b>$ranking[0]</b></font></td></tr>";
+        my $wi = 0;
+        foreach my $word (@wordrank)
+        {
+            if ( $wi < 20 && $wordprob{$word} / $wtprob{$word} >= 0.25 ) {
+                my $wordstr = $word;
+                if ( length($wordstr)>14 ) 
+                {
+                    $wordstr =~ /(.{12})/;
+                    $wordstr = "$1...";
+                }
+                my $wordcolor = get_color($self, $word);
+                my $wordprobstr = sprintf("%12.4f", $wordprob{$word} / $wtprob{$word});
+                my $otherprobstr = sprintf("%12.4f", $wbprob{$word}{$ranking[0]} / $wtprob{$word});
+                $self->{scores} .= "<tr><td><font color=$wordcolor>$wordstr</font></td>";
+                $self->{scores} .= "<td><font color=$wordcolor>$wordprobstr</font></td><td>&nbsp;</td>";
+                $self->{scores} .= "<td><font color=$self->{colors}{$ranking[0]}>$otherprobstr</font></td></tr>";
+            }
+            $wi += 1;
+        }
 
-		$self->{scores} .= "</table>";
-	}
+        $self->{scores} .= "</table><p>";
+    }
 
     # If no bucket has a probability better than 0.5, call the message "unclassified".
 
