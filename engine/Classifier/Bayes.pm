@@ -1111,6 +1111,26 @@ sub get_word_count
 
 # ---------------------------------------------------------------------------------------------
 #
+# get_count_for_word
+#
+# Returns the number of times the word occurs in a bucket
+#
+# $bucket          The bucket we are asking about
+# $word            The word we are asking about
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_count_for_word
+{
+    my ( $self, $bucket, $word ) = @_;
+
+    my $value = $self->get_value_( $bucket, $word );
+ 
+    return int( exp( $value ) * $self->get_bucket_word_count( $bucket ) + 0.5 );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # get_bucket_unique_count
 #
 # Returns the unique word count (excluding duplicates) for the passed in bucket

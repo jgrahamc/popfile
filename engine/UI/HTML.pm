@@ -1537,7 +1537,7 @@ sub bucket_page
 
 	    while ( $j =~ m/\G\|(.*?) L?\-?[\.\d]+\|/g ) {
 	      my $word = $1;
-	      $temp{$word} = int( exp( $self->{classifier__}->get_value_( $self->{form_}{showbucket}, $word ) ) * $bucket_count + 1 );
+	      $temp{$word} = $self->{classifier__}->get_count_for_word( $self->{form_}{showbucket}, $word );
 	    }
 
 	    $body .= "</td></tr><tr><td colspan=2>&nbsp;</td></tr><tr>\n<td valign=\"top\">\n<b>$first</b>\n</td>\n<td valign=\"top\">\n<table><tr valign=\"top\">";
