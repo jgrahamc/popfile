@@ -336,6 +336,11 @@ sub url_handler__
         return 1;
     }
 
+    if ( $url =~ /\/(.+\.png)/ ) {
+        $self->http_file_( $client, $1, 'image/png' );
+        return 1;
+    }
+
     if ( $url =~ /(skins\/.+\.css)/ ) {
         $self->http_file_( $client, $1, 'text/css' );
         return 1;
