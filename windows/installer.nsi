@@ -500,6 +500,26 @@
   ; Use a "leave" function to look for 'popfile.cfg' in the directory selected for this install
 
   !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "CheckExistingConfig"
+  
+  ; This page is used to select the folder for the POPFile PROGRAM files
+  
+  !define MUI_PAGE_HEADER_TEXT                "$(PFI_LANG_ROOTDIR_TITLE)"
+  !define MUI_DIRECTORYPAGE_TEXT_DESTINATION  "$(PFI_LANG_ROOTDIR_TEXT_DESTN)"
+
+  !insertmacro MUI_PAGE_DIRECTORY
+
+  ;---------------------------------------------------
+  ; Installer Page - Select user data Directory
+  ;---------------------------------------------------
+
+  ; This page is used to select the folder for the POPFile USER DATA files
+
+  !define MUI_DIRECTORYPAGE_VARIABLE          "$G_USERDIR"
+
+  !define MUI_PAGE_HEADER_TEXT                "$(PFI_LANG_USERDIR_TITLE)"
+  !define MUI_PAGE_HEADER_SUBTEXT             "$(PFI_LANG_USERDIR_SUBTITLE)"
+  !define MUI_DIRECTORYPAGE_TEXT_TOP          "$(PFI_LANG_USERDIR_TEXT_TOP)"
+  !define MUI_DIRECTORYPAGE_TEXT_DESTINATION  "$(PFI_LANG_USERDIR_TEXT_DESTN)"
 
   !insertmacro MUI_PAGE_DIRECTORY
 
@@ -572,6 +592,11 @@
   !define MUI_FINISHPAGE_SHOWREADME
   !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
   !define MUI_FINISHPAGE_SHOWREADME_FUNCTION "ShowReadMe"
+
+  ; Use a "leave" function for the 'Finish' page to remove any empty corpus folders left
+  ; behind after POPFile has converted any buckets created by the CBP package.
+
+  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "RemoveEmptyCBPCorpus"
 
   !insertmacro MUI_PAGE_FINISH
 
@@ -861,7 +886,7 @@ Section "POPFile" SecPOPFile
   ;
   ; (f) $INSTDIR\*       - the remaining POPFile folders (Classifier, languages, manual, etc)
   ;
-  ; NOTE: If we are upgrading a prior version of POPFile, the user data is found in $INSTDIR
+  ; NOTE: If we are upgrading a prior version  of POPFile, the user data is found in $INSTDIR
   ; so we use $INSTDIR and $INSTDIR\backup instead of $INSTDIR\user and $INSTDIR\user\backup
 
   ; For increased flexibility, four global user variables are used in addition to $INSTDIR
@@ -870,16 +895,17 @@ Section "POPFile" SecPOPFile
   StrCpy $G_ROOTDIR   "$INSTDIR"
   StrCpy $G_MPBINDIR  "$INSTDIR"
   StrCpy $G_MPLIBDIR  "$INSTDIR\lib"
-
+  
   ; The fourth global variable ($G_USERDIR) is initialised by the 'CheckExistingConfig' function
+  ; and may be changed by the user via the second DIRECTORY page.
 
   ; If we are installing over a previous version, ensure that version is not running
 
   Call MakeItSafe
-
+  
   ; Starting with 0.21.0, a new structure is used for the minimal Perl (to enable POPFile to
   ; be started from any folder, once POPFILE_ROOT and POPFILE_USER have been initialised)
-
+  
   Call MinPerlRestructure
 
   ; Retrieve the POP3 and GUI ports from the ini and get whether we install the
@@ -921,6 +947,16 @@ Section "POPFile" SecPOPFile
   File "stop_pf.exe"
   File "sqlite.exe"
 
+  ; Create a shortcut to make it easier to run the SQLite utility
+  ; (should this shortcut be an option created only for advanced users ?)
+  
+  ; 'CreateShortCut' uses '$OUTDIR' as the working directory for the shortcut
+  ; ('SetOutPath' is one way to change the value of $OUTDIR)
+
+  SetOutPath $G_USERDIR
+  CreateShortCut "$G_USERDIR\Run SQLite utility.lnk" \
+                 "$G_ROOTDIR\sqlite.exe" "popfile.db"
+
   ; Create default configuration data for use by the 'wrapper' utilities
 
   WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserName"       "$G_WINUSERNAME"
@@ -929,6 +965,8 @@ Section "POPFile" SecPOPFile
   WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "PerlBinFolder"  "$G_MPBINDIR"
   WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "POPFileFolder"  "$G_ROOTDIR"
   WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserDataFolder" "$G_USERDIR"
+  
+  SetOutPath $G_ROOTDIR
 
   File "..\engine\popfile.pl"
   File "..\engine\insert.pl"
@@ -2012,21 +2050,21 @@ Function CheckExistingConfig
 
   ; Warn the user if we are about to upgrade an existing installation
   ; and allow user to select a different directory if they wish
-
+  
   ; This function initialises the $G_USERDIR global user variable for use elsewhere in installer
 
   ; All versions prior to 0.21.0 stored popfile.pl and popfile.cfg in the same folder
-
+  
   StrCpy $G_ROOTDIR $INSTDIR
   StrCpy $G_USERDIR $INSTDIR
 
   IfFileExists "$G_USERDIR\popfile.cfg" warning
-
+  
   ; Check if we are installing over a version which uses the new folder structure
 
   StrCpy $G_USERDIR "$INSTDIR\user"
   IfFileExists "$G_USERDIR\popfile.cfg" warning
-
+  
   ; We looked for 'popfile.cfg' first as we want to pick up the current settings (if any)
   ; now we use a Perl script as our last chance to detect a previous installation
 
@@ -4819,6 +4857,52 @@ exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
+# Installer Function: RemoveEmptyCBPCorpus
+#--------------------------------------------------------------------------
+
+Function RemoveEmptyCBPCorpus
+
+  !define L_FOLDER_COUNT  $R9
+  !define L_FOLDER_PATH   $R8
+
+  Push ${L_FOLDER_COUNT}
+  Push ${L_FOLDER_PATH}
+  
+  ; Now remove any empty corpus folders left behind after POPFile has converted the buckets
+  ; (if any) created by the CBP package.
+
+  ReadINIStr ${L_FOLDER_COUNT} "$PLUGINSDIR\${CBP_C_INIFILE}" "FolderList" "MaxNum"
+  StrCmp  ${L_FOLDER_COUNT} "" exit
+
+loop:
+  ReadINIStr ${L_FOLDER_PATH} "$PLUGINSDIR\${CBP_C_INIFILE}" "FolderList" "Path-${L_FOLDER_COUNT}"
+  StrCmp  ${L_FOLDER_PATH} "" try_next_one
+
+  ; Remove this corpus bucket folder if it is completely empty
+
+  RMDir ${L_FOLDER_PATH}
+
+try_next_one:
+  IntOp ${L_FOLDER_COUNT} ${L_FOLDER_COUNT} - 1
+  IntCmp ${L_FOLDER_COUNT} 0 corpus_root corpus_root loop
+
+corpus_root:
+
+  ; Remove the corpus folder if it is completely empty
+
+  ReadINIStr ${L_FOLDER_PATH} "$PLUGINSDIR\${CBP_C_INIFILE}" "CBP Data" "CorpusPath"
+  RMDir ${L_FOLDER_PATH}
+
+exit:
+  Pop ${L_FOLDER_PATH}
+  Pop ${L_FOLDER_COUNT}
+
+  !undef L_FOLDER_COUNT
+  !undef L_FOLDER_PATH
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Initialise the uninstaller
 #--------------------------------------------------------------------------
 
@@ -4862,10 +4946,10 @@ Function un.onInit
   StrCpy $G_USERDIR   "$INSTDIR\user"
   StrCpy $G_MPBINDIR  "$INSTDIR"
   StrCpy $G_MPLIBDIR  "$INSTDIR\lib"
-
+  
   ; If we are uninstalling an upgraded installation, the default user data may be in $INSTDIR
   ; instead of $INSTDIR\user
-
+  
   IfFileExists "$G_USERDIR\popfile.cfg" exit
   StrCpy $G_USERDIR   "$INSTDIR"
 
@@ -5225,12 +5309,13 @@ end_eudora_restore:
   RMDir $G_ROOTDIR\languages
 
   ; Win95 generates an error message if 'RMDir /r' is used on a non-existent directory
-
+  
   IfFileExists "$G_USERDIR\corpus\*.*" 0 skip_nonsql_corpus
   RMDir /r $G_USERDIR\corpus
 
 skip_nonsql_corpus:
   Delete $G_USERDIR\popfile.db
+  Delete "$G_USERDIR\Run SQLite utility.lnk"
 
   IfFileExists "$G_USERDIR\messages\*." 0 skip_messages
   RMDir /r $G_USERDIR\messages
@@ -5239,6 +5324,8 @@ skip_messages:
   Delete $G_USERDIR\stopwords
   Delete $G_USERDIR\stopwords.bak
   Delete $G_USERDIR\stopwords.default
+  
+  RMDir $G_USERDIR
 
   IfFIleExists "$INSTDIR\kakasi\*.*" 0 skip_kakasi
   RMDir /r "$INSTDIR\kakasi"
