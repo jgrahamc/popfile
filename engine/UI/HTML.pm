@@ -2145,7 +2145,11 @@ sub corpus_page
     $body .= "</div>\n";
 
     if ( ( defined($self->{form_}{lookup}) ) || ( defined($self->{form_}{word}) ) ) {
-       my $word = $self->{classifier__}->{mangler__}->mangle($self->{form_}{word}, 1);
+        my $word = $self->{form_}{word};
+
+        if ( !( $word =~ /^header:/ ) ) {
+           $word = $self->{classifier__}->{mangler__}->mangle($word, 1);
+        }
 
         $body .= "<blockquote>\n";
 
@@ -2154,7 +2158,7 @@ sub corpus_page
         my $heading = "<table class=\"lookupResultsTable\" cellpadding=\"10%\" cellspacing=\"0\" summary=\"$self->{language__}{Bucket_LookupResultsSummary}\">\n";
         $heading .= "<tr>\n<td>\n";
         $heading .= "<table summary=\"\">\n";
-        $heading .= "<caption><strong>$self->{language__}{Bucket_LookupMessage2} $self->{form_}{word}</strong><br /><br /></caption>";
+        $heading .= "<caption><strong>$self->{language__}{Bucket_LookupMessage2} $word</strong><br /><br /></caption>";
         $heading .= "<tr>\n<th scope=\"col\">$self->{language__}{Bucket}</th>\n<th>&nbsp;</th>\n";
         $heading .= "<th scope=\"col\">$self->{language__}{Frequency}</th>\n<th>&nbsp;</th>\n";
         $heading .= "<th scope=\"col\">$self->{language__}{Probability}</th>\n<th>&nbsp;</th>\n";
@@ -2208,10 +2212,10 @@ sub corpus_page
 
             if ( $max_bucket ne '' ) {
                 $body .= "</table>\n<br /><br />";
-                $body .= sprintf( $self->{language__}{Bucket_LookupMostLikely}, $self->{form_}{word}, $self->{classifier__}->get_bucket_color($max_bucket), $max_bucket);
+                $body .= sprintf( $self->{language__}{Bucket_LookupMostLikely}, $word, $self->{classifier__}->get_bucket_color($max_bucket), $max_bucket);
                 $body .= "</td>\n</tr>\n</table>";
             } else {
-                $body .= sprintf( $self->{language__}{Bucket_DoesNotAppear}, $self->{form_}{word} );
+                $body .= sprintf( $self->{language__}{Bucket_DoesNotAppear}, $word );
             }
         } else {
             $body .= "<div class=\"error01\">$self->{language__}{Bucket_Error4}</div>";
