@@ -64,14 +64,23 @@ Configuration_Error3                    The POP3 listen port must be a number be
 Configuration_Error4                    The page size must be a number between 1 and 1000
 Configuration_Error5                    The number of days in the history must be a number between 1 and 366
 Configuration_Error6                    The TCP timeout must be a number between 10 and 300
+Configuration_Error7                    The XML RPC listen port must be a number between 1 and 65535
 Configuration_POP3Port                  POP3 listen port
-Configuration_POP3Update                Updated port to %s; this change will not take affect until you restart POPFile
-Configuration_Separator                 Separator character
-Configuration_SepUpdate                 Updated separator to %s
+Configuration_POP3Update                Updated POP3 port to %s; this change will not take affect until you restart POPFile
+Configuration_XMLRPCUpdate              Updated XML-RPC port to %s; this change will not take affect until you restart POPFile
+Configuration_XMLRPCPort                XML-RPC listen port
+Configuration_SMTPPort                  SMTP listen port
+Configuration_SMTPUpdate                Updated SMTP port to %s; this change will not take affect until you restart POPFile
+Configuration_NNTPPort                  NNTP listen port
+Configuration_NNTPUpdate                Updated NNTP port to %s; this change will not take affect until you restart POPFile
+Configuration_POP3Separator             POP3 host:port:user separator character
+Configuration_NNTPSeparator             NNTP host:port:user separator character
+Configuration_POP3SepUpdate             Updated POP3 separator to %s
+Configuration_NNTPSepUpdate             Updated NNTP separator to %s
 Configuration_UI                        User interface web port
 Configuration_UIUpdate                  Updated user interface web port to %s; this change will not take affect until you restart POPFile
-Configuration_History                   Number of emails per page
-Configuration_HistoryUpdate             Updated number of emails per page to %s
+Configuration_History                   Number of messages per page
+Configuration_HistoryUpdate             Updated number of messages per page to %s
 Configuration_Days                      Number of days of history to keep
 Configuration_DaysUpdate                Updated number of days of history to %s
 Configuration_UserInterface             User Interface
@@ -79,12 +88,12 @@ Configuration_Skins                     Skins
 Configuration_SkinsChoose               Choose skin
 Configuration_Language                  Language
 Configuration_LanguageChoose            Choose language
-Configuration_ListenPorts               Listen Ports
+Configuration_ListenPorts               Module Options
 Configuration_HistoryView               History View
-Configuration_TCPTimeout                TCP Connection Timeout
-Configuration_TCPTimeoutSecs            TCP connection timeout in seconds
-Configuration_TCPTimeoutUpdate          Updated TCP connection timeout to %s
-Configuration_ClassificationInsertion   E-Mail Text Insertion
+Configuration_TCPTimeout                Connection Timeout
+Configuration_TCPTimeoutSecs            Connection timeout in seconds
+Configuration_TCPTimeoutUpdate          Updated connection timeout to %s
+Configuration_ClassificationInsertion   Message Text Insertion
 Configuration_SubjectLine               Subject line modification
 Configuration_XTCInsertion              X-Text-Classification Header
 Configuration_XPLInsertion              X-POPFile-Link Header
@@ -135,7 +144,7 @@ Password_Enter                          Enter password
 Password_Go                             Go!
 Password_Error1                         Incorrect password
 
-Security_Error1                         The secure port must be a number between 1 and 65535
+Security_Error1                         The port must be a number between 1 and 65535
 Security_Stealth                        Stealth Mode/Server Operation
 Security_NoStealthMode                  No (Stealth Mode)
 Security_ExplainStats                   (With this turned on POPFile sends once per day the following three values to a script on www.usethesource.com: bc (the total number of buckets that you have), mc (the total number of messages that POPFile has classified) and ec (the total number of classification errors).  These get stored in a file and I will use this to publish some statistics about how people use POPFile and how well it works.  My web server keeps its log files for about 5 days and then they get deleted; I am not storing any connection between the statistics and individual IP addresses.)
@@ -143,13 +152,20 @@ Security_ExplainUpdate                  (With this turned on POPFile sends once 
 Security_PasswordTitle                  User Interface Password
 Security_Password                       Password
 Security_PasswordUpdate                 Updated password to %s
-Security_AUTHTitle                      Secure Password Authentication/AUTH
-Security_SecureServer                   Secure server
-Security_SecureServerUpdate             Updated secure server to %s; this change will not take affect until you restart POPFile
-Security_SecurePort                     Secure port
-Security_SecurePortUpdate               Updated port to %s; this change will not take affect until you restart POPFile
+Security_AUTHTitle                      Remote Servers
+Security_SecureServer                   POP3 SPA/AUTH server
+Security_SecureServerUpdate             Updated POP3 SPA/AUTH secure server to %s; this change will not take affect until you restart POPFile
+Security_SecurePort                     POP3 SPA/AUTH port
+Security_SecurePortUpdate               Updated POP3 SPA/AUTH port to %s; this change will not take affect until you restart POPFile
+Security_SMTPServer                     SMTP chain server
+Security_SMTPServerUpdate               Updated SMTP chain server to %s; this change will not take affect until you restart POPFile
+Security_SMTPPort                       SMTP chain port
+Security_SMTPPortUpdate                 Updated SMTP chain port to %s; this change will not take affect until you restart POPFile
 Security_POP3                           Accept POP3 connections from remote machines (requires POPFile restart)
+Security_SMTP                           Accept SMTP connections from remote machines (requires POPFile restart)
+Security_NNTP                           Accept NNTP connections from remote machines (requires POPFile restart)
 Security_UI                             Accept HTTP (User Interface) connections from remote machines  (requires POPFile restart)
+Security_XMLRPC                         Accept XML-RPC connections from remote machines (requires POPFile restart)
 Security_UpdateTitle                    Automatic Update Checking
 Security_Update                         Check daily for updates to POPFile
 Security_StatsTitle                     Reporting Statistics
@@ -161,7 +177,7 @@ Magnet_Error3                           Create new magnet '%s' in bucket '%s'
 Magnet_CurrentMagnets                   Current Magnets
 Magnet_Message1                         The following magnets cause mail to always be classified into the specified bucket.
 Magnet_CreateNew                        Create New Magnet
-Magnet_Explanation                      Three types of magnets are available:</b> <ul><li><b>From address or name:</b> For example: john@company.com to match a specific address, <br />company.com to match everyone who sends from company.com, <br />John Doe to match a specific person, John to match all Johns</li><li><b>To address or name:</b> Like a From: magnet but for the To: address in an email</li> <li><b>Subject words:</b> For example: hello to match all messages with hello in the subject</li></ul>
+Magnet_Explanation                      Three types of magnets are available:</b> <ul><li><b>From address or name:</b> For example: john@company.com to match a specific address, <br />company.com to match everyone who sends from company.com, <br />John Doe to match a specific person, John to match all Johns</li><li><b>To address or name:</b> Like a From: magnet but for the To: address in a message</li> <li><b>Subject words:</b> For example: hello to match all messages with hello in the subject</li></ul>
 Magnet_MagnetType                       Magnet type
 Magnet_Value                            Value
 Magnet_Always                           Always goes to bucket
@@ -181,8 +197,8 @@ Bucket_SubjectModification              Subject Modification
 Bucket_ChangeColor                      Change Color
 Bucket_NotEnoughData                    Not enough data
 Bucket_ClassificationAccuracy           Classification Accuracy
-Bucket_EmailsClassified                 Emails classified
-Bucket_EmailsClassifiedUpper            Emails Classified
+Bucket_EmailsClassified                 Messages classified
+Bucket_EmailsClassifiedUpper            Messages Classified
 Bucket_ClassificationErrors             Classification errors
 Bucket_Accuracy                         Accuracy
 Bucket_ClassificationCount              Classification Count
@@ -217,17 +233,17 @@ Session_Error                           Your POPFile session has expired.  This 
 
 Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.
 History_MainTableSummary                This table shows the sender and subject of recently received messages and allows them to be reviewed and reclassified.  Clicking on the subject line will show the full message text, along with information about why it was classified as it was.  The 'Should be' column allows you to specify which bucket the message belongs in, or to undo that change.  The 'Delete' column allows you to delete specific messages from the history if you don't need them anymore.
-History_OpenMessageSummary              This table contains the full text of an email message, with the words that are used for classification highlighted according to the bucket that was most relevant for each.
-Bucket_MainTableSummary                 This table provides an overview of the classification buckets.  Each row shows the bucket name, the word count total for that bucket, the actual number of individual words in each bucket, whether the email's subject line will be modified when it gets classified to that bucket, whether to quarantine the messages received in that bucket, and a table to pick the color used in displaying anything related to that bucket in the control center.
-Bucket_StatisticsTableSummary           This table provides three sets of statistics on the overall performance of POPFile.  The first is how accurate its classification is, the second is how many emails have been classified, and to which buckets, and the third is how many words are in each bucket, and what their relative percentages are.
+History_OpenMessageSummary              This table contains the full text of a message message, with the words that are used for classification highlighted according to the bucket that was most relevant for each.
+Bucket_MainTableSummary                 This table provides an overview of the classification buckets.  Each row shows the bucket name, the word count total for that bucket, the actual number of individual words in each bucket, whether the message's subject line will be modified when it gets classified to that bucket, whether to quarantine the messages received in that bucket, and a table to pick the color used in displaying anything related to that bucket in the control center.
+Bucket_StatisticsTableSummary           This table provides three sets of statistics on the overall performance of POPFile.  The first is how accurate its classification is, the second is how many messages have been classified, and to which buckets, and the third is how many words are in each bucket, and what their relative percentages are.
 Bucket_MaintenanceTableSummary          This table contains forms that allow you to create, delete or rename buckets, and to lookup a word in all of the buckets to see its relative probabilities.
-Bucket_AccuracyChartSummary             This table graphically represents the accuracy of the email classification.
-Bucket_BarChartSummary                  This table graphically represents a percentage allocation for each of the different buckets.  It is used for both number of emails classified, and total word counts.
-Bucket_LookupResultsSummary             This table shows the probabilities associated with any given word of the corpus.  For each bucket, it shows the frequency that that word occurs, the probability that it will occur in that bucket, and the overall effect on the score of the bucket if that word exists in an email.
+Bucket_AccuracyChartSummary             This table graphically represents the accuracy of the message classification.
+Bucket_BarChartSummary                  This table graphically represents a percentage allocation for each of the different buckets.  It is used for both number of messages classified, and total word counts.
+Bucket_LookupResultsSummary             This table shows the probabilities associated with any given word of the corpus.  For each bucket, it shows the frequency that that word occurs, the probability that it will occur in that bucket, and the overall effect on the score of the bucket if that word exists in a message.
 Bucket_WordListTableSummary             This table provides a listing of all the words for a particular bucket, organized by common first letter for each row.
-Magnet_MainTableSummary                 This table shows the list of magnets that are used to automatically classify email according to fixed rules.  Each row shows how the magnet is defined, what bucket it is intended for, and a button to delete the magnet.
+Magnet_MainTableSummary                 This table shows the list of magnets that are used to automatically classify message according to fixed rules.  Each row shows how the magnet is defined, what bucket it is intended for, and a button to delete the magnet.
 Configuration_MainTableSummary          This table contains a number of forms to allow you to control the configuration of POPFile.
-Configuration_InsertionTableSummary     This table contains buttons that determine whether or not certain modifications are made to the headers or subject line of the email before it is passed on to the email client.
+Configuration_InsertionTableSummary     This table contains buttons that determine whether or not certain modifications are made to the headers or subject line of the message before it is passed on to the message client.
 Security_MainTableSummary               This table provides sets of controls that affect the security of the overall configuration of POPFile, whether it should automatically check for updates to the program, and whether statistics about POPFile's performance should be sent to the central datastore of the program's author for general information.
-Advanced_MainTableSummary               This table provides a list of words that POPFile ignores when classifying email due to their relative frequency in email in general.  They are organized per row according to the first letter of the words.
+Advanced_MainTableSummary               This table provides a list of words that POPFile ignores when classifying message due to their relative frequency in message in general.  They are organized per row according to the first letter of the words.
 

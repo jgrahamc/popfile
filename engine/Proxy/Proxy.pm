@@ -91,10 +91,12 @@ sub start
                                     Reuse     => 1 );
 
     if ( !defined( $self->{server__} ) ) {
+        my $port = $self->config_( 'port' );
+        my $name = $self->name();
         print <<EOM;
 
-\nCouldn't start the $self->name() proxy because POPFile could not bind to the
-POP3 listen port $self->config_( 'port' ). This could be because there is another service
+\nCouldn't start the $name proxy because POPFile could not bind to the
+listen port $port. This could be because there is another service
 using that port or because you do not have the right privileges on
 your system (On Unix systems this can happen if you are not root
 and the port you specified is less than 1024).

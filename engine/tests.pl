@@ -109,7 +109,17 @@ sub test_assert_equal
 
 my @tests = glob 'tests/*.tst';
 
+# Either match all the possible tests, or take the first argument
+# on the command line and use it as a regular expression that must
+# match the name of the TST file for the test suite in that file
+# to be run
+
+my $pattern = '.*';
+$pattern = "$ARGV[0].*" if ( $#ARGV == 0 );
+
 foreach my $test (@tests) {
+
+    if ( $test =~ /$pattern/ ) {
 
 	# This works by reading the entire suite into the $suite variable
 	# and then changing calls to test_assert_equal so that they include 
@@ -140,6 +150,7 @@ foreach my $test (@tests) {
 	} else {
 		print "ok (" . ( $test_count - $current_test_count ) . " ok)";
 	}
+    }
 }
 
 print "\n\n$test_count tests, " . ( $test_count - $test_failures ) . " ok, $test_failures failed\n\n";

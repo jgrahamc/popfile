@@ -1,9 +1,6 @@
 # POPFILE LOADABLE MODULE
 package UI::HTML;
 
-use POPFile::Module;
-@ISA = ("POPFile::Module");
-
 #----------------------------------------------------------------------------
 #
 # This package contains an HTML UI for POPFile
@@ -11,7 +8,9 @@ use POPFile::Module;
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
 #----------------------------------------------------------------------------
-package UI::HTML;
+
+use UI::HTTP;
+@ISA = ("UI::HTTP");
 
 use strict;
 use warnings;
@@ -36,15 +35,11 @@ my $seconds_per_day = 60 * 60 * 24;
 sub new
 {
     my $type = shift;
-    my $self = POPFile::Module->new();
+    my $self = UI::HTTP->new();
 
     # The classifier (Classifier::Bayes)
 
     $self->{classifier__}      = 0;
-
-    # Hash used to store form parameters
-
-    $self->{form__}            = {};    
 
     # Session key to make the UI safer
 
@@ -100,9 +95,9 @@ sub new
 
     bless $self, $type;
 
-    # This is the HTML module which we know as the ui module
+    # This is the HTML module which we know as the HTML module
 
-    $self->name( 'ui' );
+    $self->name( 'html' );
 
     return $self;
 }
@@ -179,6 +174,9 @@ sub initialize
     $self->remove_mail_files();
     $self->calculate_today();
 
+    # The parent needs a reference to the url handler function
+    $self->{url_handler_} = \&url_handler__;
+
     return 1;
 }
 
@@ -213,43 +211,7 @@ sub start
     $self->load_history_cache__();
     $self->sort_filter_history( '', '', '' );
 
-    $self->{server} = IO::Socket::INET->new( Proto     => 'tcp',
-                                    $self->config_( 'local' )  == 1 ? (LocalAddr => 'localhost') : (),
-                                     LocalPort => $self->config_( 'port' ),
-                                     Listen    => SOMAXCONN,
-                                     Reuse     => 1 );
-
-    if ( !defined( $self->{server} ) ) {
-        print <<EOM;
-
-\nCouldn't start the HTTP interface because POPFile could not bind to the
-HTTP port $self->config_( 'port' ). This could be because there is another service
-using that port or because you do not have the right privileges on
-your system (On Unix systems this can happen if you are not root
-and the port you specified is less than 1024).
-
-EOM
-
-        return 0;
-    }
-
-    $self->{selector} = new IO::Select( $self->{server} );
-
-    return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# stop
-#
-# Called when the interface must shutdown
-#
-# ---------------------------------------------------------------------------------------------
-sub stop
-{
-    my ( $self ) = @_;
-
-    close $self->{server} if ( defined( $self->{server} ) );
+    return $self->SUPER::start();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -263,90 +225,152 @@ sub service
 {
     my ( $self ) = @_;
 
-    my $code = 1;
+    $self->remove_mail_files();
 
-    # See if there's a connection waiting for us, if there is we accept it handle a single
-    # request and then exit
-    my ( $uiready ) = $self->{selector}->can_read(0);
+    return $self->SUPER::service();
+}
 
-    # Handle HTTP requests for the UI
-    if ( ( defined($uiready) ) && ( $uiready == $self->{server} ) ) {
-        if ( my $client = $self->{server}->accept() ) {
-            # Check that this is a connection from the local machine, if it's not then we drop it immediately
-            # without any further processing.  We don't want to allow remote users to admin POPFile
-            my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
+# ---------------------------------------------------------------------------------------------
+#
+# url_handler__ - Handle a URL request
+#
+# $client     The web browser to send the results to
+# $url        URL to process
+# $command    The HTTP command used (GET or POST)
+# $content    Any non-header data in the HTTP command
+#
+# Checks the session
+# key and refuses access unless it matches.  Serves up a small set of specific urls that are
+# the main UI pages and then any GIF file in the POPFile directory and CSS files in the skins
+# subdirectory
+#
+# ---------------------------------------------------------------------------------------------
+sub url_handler__
+{
+    my ( $self, $client, $url, $command, $content ) = @_;
 
-            if ( ( $self->config_( 'local' ) == 0 ) ||
-                 ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
+    # See if there are any form parameters and if there are parse them into the %form hash
 
-                # Read the request line (GET or POST) from the client and if we manage to do that
-                # then read the rest of the HTTP headers grabbing the Content-Length and using
-                # it to read any form POST content into $content
+    delete $self->{form_};
 
-                if ( ( defined($client) ) && ( my $request = <$client> ) ) {
-                    my $content_length = 0;
-                    my $content;
+    # Remove a # element
 
-                    while ( <$client> )  {
-                        $content_length = $1 if ( /Content-Length: (\d+)/i );
-                        last                 if ( !/[A-Z]/i );
-                    }
+    $url =~ s/#.*//;
 
-                    if ( $content_length > 0 ) {
-                        $content = '';
-                        $client->read( $content, $content_length, length( $content ) );
-                    }
+    # If the URL was passed in through a GET then it may contain form arguments
+    # separated by & signs, which we parse out into the $self->{form_} where the
+    # key is the argument name and the value the argument value, for example if
+    # you have foo=bar in the URL then $self->{form_}{foo} is bar.
 
-                    if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {
-                        $client->autoflush(1);
-                        $code = $self->handle_url($client, $2, $1, $content);
-                    } else {
-                        http_error( $self, $client, 500 );
-                    }
-                }
-            }
-
-            close $client;
+    if ( $command =~ /GET/i ) {
+        if ( $url =~ s/\?(.*)// )  {
+            $self->parse_form__( $1 );
         }
     }
 
-    $self->remove_mail_files();
+    # If the URL was passed in through a POST then look for the POST data
+    # and parse it filling the $self->{form_} in the same way as for GET
+    # arguments
 
-    return $code;
-}
+    if ( $command =~ /POST/i ) {
+        $content =~ s/[\r\n]//g;
+        $self->parse_form__( $content );
+    }
 
-# ---------------------------------------------------------------------------------------------
-#
-# forked
-#
-# Called when someone forks POPFile
-#
-# ---------------------------------------------------------------------------------------------
-sub forked
-{
-    my ( $self ) = @_;
+    if ( $url eq '/jump_to_message' )  {
+        my $found = 0;
+        my $file = $self->{form_}{view};
+        foreach my $akey ( keys %{ $self->{history__} } ) {
+            if ($akey eq $file) {
+                $found = 1;
+                last;
+            }
+        }
 
-    close $self->{server};
-}
+        #Reset any filters
+        $self->{form_}{filter}    = '';
+        $self->{form_}{search}    = '';
+        $self->{form_}{setsearch} = 1;
 
-# ---------------------------------------------------------------------------------------------
-#
-# http_redirect - tell the browser to redirect to a url
-#
-# $client   The web browser to send redirect to
-# $url      Where to go
-#
-# Return a valid HTTP/1.0 header containing a 302 redirect message to the passed in URL
-#
-# ---------------------------------------------------------------------------------------------
-sub http_redirect
-{
-    my ( $self, $client, $url ) = @_;
+        # Force a history_reload if we did not find this file in the history cache
+        # but we do find it on disk using perl's -e file test operator (returns
+        # true if the file exists).
 
-    my $header = "HTTP/1.0 302 Found\r\nLocation: ";
-    $header .= $url;
-    $header .= "$eol$eol";
-    print $client $header;
+        $self->invalidate_history_cache() if ( !$found && ( -e ($self->global_config_( 'msgdir' ) . "$file") ) );
+        $self->http_redirect_( $client, "/history?session=$self->{session_key__}&start_message=0&view=$self->{form_}{view}#$self->{form_}{view}" );
+        return 1;
+    }
+
+    if ( $url =~ /\/(.+\.gif)/ ) {
+        $self->http_file_( $client, $1, 'image/gif' );
+        return 1;
+    }
+
+    if ( $url =~ /(skins\/.+\.css)/ ) {
+        $self->http_file_( $client, $1, 'text/css' );
+        return 1;
+    }
+
+    if ( $url =~ /(manual\/.+\.html)/ ) {
+        $self->http_file_( $client, $1, 'text/html' );
+        return 1;
+    }
+
+    # Check the password
+    if ( $url eq '/password' )  {
+        if ( $self->{form_}{password} eq $self->config_( 'password' ) )  {
+            change_session_key( $self );
+            delete $self->{form_}{password};
+            $self->{form_}{session} = $self->{session_key__};
+            if ( defined( $self->{form_}{redirect} ) ) {
+                $url = $self->{form_}{redirect};
+            } else {
+                $url = '/';
+            }
+        } else {
+            password_page( $self, $client, 1, '/' );
+            return 1;
+        }
+    }
+
+    # If there's a password defined then check to see if the user already knows the
+    # session key, if they don't then drop to the password screen
+    if ( ( (!defined($self->{form_}{session})) || ($self->{form_}{session} eq '' ) || ( $self->{form_}{session} ne $self->{session_key__} ) ) && ( $self->config_( 'password' ) ne '' ) ) {
+        password_page( $self, $client, 0, $url );
+        return 1;
+    }
+
+    if ( ( defined($self->{form_}{session}) ) && ( $self->{form_}{session} ne $self->{session_key__} ) ) {
+        session_page( $self, $client, 0, $url );
+        return 1;
+    }
+
+    if ( ( $url eq '/' ) || (!defined($self->{form_}{session})) ) {
+        delete $self->{form_};
+    }
+
+    if ( $url eq '/shutdown' )  {
+        http_ok( $self, $client, "POPFile shutdown", -1 );
+        return 0;
+    }
+
+    my %url_table = (   '/security'      => \&security_page,
+                        '/configuration' => \&configuration_page,
+                        '/buckets'       => \&corpus_page,
+                        '/magnets'       => \&magnet_page,
+                        '/advanced'      => \&advanced_page,
+                        '/history'       => \&history_page,
+                        '/'              => \&history_page );
+
+    # Any of the standard pages can be found in the url_table, the other pages are probably
+    # files on disk
+    if ( defined($url_table{$url}) )  {
+        &{$url_table{$url}}($self, $client);
+        return 1;
+    }
+
+    http_error_($self, $client, 404);
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -588,8 +612,7 @@ sub html_common_bottom
 
     my $result = "<table class=\"footer\" summary=\"\">\n<tr>\n";
     $result .= "<td class=\"footerBody\">\n";
-    $result .= "POPFile X.X.";
-    $result .= "X - \n";
+    $result .= "POPFile $self->{version_} - \n";
     $result .= "<a class=\"bottomLink\" href=\"";
 
     # To save space on the download of POPFile only the English language manual
@@ -629,55 +652,6 @@ sub html_common_bottom
 
 # ---------------------------------------------------------------------------------------------
 #
-# http_file - Read a file from disk and send it to the other end
-#
-# $client     The web browser to send the results to
-# $file       The file to read (always assumed to be a GIF right now)
-# $type       Set this to the HTTP return type (e.g. text/html or image/gif)
-#
-# Returns the contents of a file formatted into an HTTP 200 message or an HTTP 404 if the
-# file does not exist
-#
-# ---------------------------------------------------------------------------------------------
-sub http_file
-{
-    my ( $self, $client, $file, $type ) = @_;
-    my $contents = '';
-    if ( open FILE, "<$file" ) {
-        binmode FILE;
-        while (<FILE>) {
-            $contents .= $_;
-        }
-        close FILE;
-
-        my $header = "HTTP/1.0 200 OK\r\nContent-Type: $type\r\nContent-Length: ";
-        $header .= length($contents);
-        $header .= "$eol$eol";
-        print $client $header . $contents;
-    } else {
-        http_error( $self, $client, 404 );
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# http_error - Output a standard HTTP error message
-#
-# $client     The web browser to send the results to
-# $error      The error number
-#
-# Return a simple HTTP error message in HTTP 1/0 format
-#
-# ---------------------------------------------------------------------------------------------
-sub http_error
-{
-    my ( $self, $client, $error ) = @_;
-
-    print $client "HTTP/1.0 $error Error$eol$eol";
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # configuration_page - get the configuration options
 #
 # $client     The web browser to send the results to
@@ -695,72 +669,59 @@ sub configuration_page
     my $timeout_error = '';
     my $separator_error = '';
 
-    $self->config_( 'skin', $self->{form__}{skin} )      if ( defined($self->{form__}{skin}) );
-    $self->global_config_( 'debug', $self->{form__}{debug}-1 )   if ( ( defined($self->{form__}{debug}) ) && ( ( $self->{form__}{debug} >= 1 ) && ( $self->{form__}{debug} <= 4 ) ) );
-    $self->global_config_( 'subject', $self->{form__}{subject}-1 ) if ( ( defined($self->{form__}{subject}) ) && ( ( $self->{form__}{subject} >= 1 ) && ( $self->{form__}{subject} <= 2 ) ) );
-    $self->global_config_( 'xtc', $self->{form__}{xtc}-1 )     if ( ( defined($self->{form__}{xtc}) ) && ( ( $self->{form__}{xtc} >= 1 ) && ( $self->{form__}{xtc} <= 2 ) ) );
-    $self->global_config_( 'xpl', $self->{form__}{xpl}-1 )     if ( ( defined($self->{form__}{xpl}) ) && ( ( $self->{form__}{xpl} >= 1 ) && ( $self->{form__}{xpl} <= 2 ) ) );
+    $self->config_( 'skin', $self->{form_}{skin} )      if ( defined($self->{form_}{skin}) );
+    $self->global_config_( 'debug', $self->{form_}{debug}-1 )   if ( ( defined($self->{form_}{debug}) ) && ( ( $self->{form_}{debug} >= 1 ) && ( $self->{form_}{debug} <= 4 ) ) );
+    $self->global_config_( 'subject', $self->{form_}{subject}-1 ) if ( ( defined($self->{form_}{subject}) ) && ( ( $self->{form_}{subject} >= 1 ) && ( $self->{form_}{subject} <= 2 ) ) );
+    $self->global_config_( 'xtc', $self->{form_}{xtc}-1 )     if ( ( defined($self->{form_}{xtc}) ) && ( ( $self->{form_}{xtc} >= 1 ) && ( $self->{form_}{xtc} <= 2 ) ) );
+    $self->global_config_( 'xpl', $self->{form_}{xpl}-1 )     if ( ( defined($self->{form_}{xpl}) ) && ( ( $self->{form_}{xpl} >= 1 ) && ( $self->{form_}{xpl} <= 2 ) ) );
 
-    if ( defined($self->{form__}{language}) ) {
-        if ( $self->config_( 'language' ) ne $self->{form__}{language} ) {
-            $self->config_( 'language', $self->{form__}{language} );
+    for my $name (keys %{$self->{dynamic_ui__}{configuration}}) {
+        $body .= $self->{dynamic_ui__}{configuration}{$name}->validate_item( $name,
+                                                                             \%{$self->{language__}},
+                                                                             \%{$self->{form_}} );
+    }
+
+    if ( defined($self->{form_}{language}) ) {
+        if ( $self->config_( 'language' ) ne $self->{form_}{language} ) {
+            $self->config_( 'language', $self->{form_}{language} );
             load_language( $self,  $self->config_( 'language' ) );
         }
     }
 
-    if ( defined($self->{form__}{separator}) ) {
-        if ( length($self->{form__}{separator}) == 1 ) {
-            $self->module_config_( 'pop3', 'separator', $self->{form__}{separator} );
-        } else {
-            $separator_error = "<blockquote>\n<div class=\"error01\">\n";
-            $separator_error .= "$self->{language__}{Configuration_Error1}</div>\n</blockquote>\n";
-            delete $self->{form__}{separator};
-        }
-    }
-
-    if ( defined($self->{form__}{ui_port}) ) {
-        if ( ( $self->{form__}{ui_port} >= 1 ) && ( $self->{form__}{ui_port} < 65536 ) ) {
-            $self->config_( 'port', $self->{form__}{ui_port} );
+    if ( defined($self->{form_}{ui_port}) ) {
+        if ( ( $self->{form_}{ui_port} >= 1 ) && ( $self->{form_}{ui_port} < 65536 ) ) {
+            $self->config_( 'port', $self->{form_}{ui_port} );
         } else {
             $ui_port_error = "<blockquote>\n<div class=\"error01\">\n";
             $ui_port_error .= "$self->{language__}{Configuration_Error2}</div>\n</blockquote>\n";
-            delete $self->{form__}{ui_port};
+            delete $self->{form_}{ui_port};
         }
     }
 
-    if ( defined($self->{form__}{port}) ) {
-        if ( ( $self->{form__}{port} >= 1 ) && ( $self->{form__}{port} < 65536 ) ) {
-            $self->module_config_( 'pop3', 'port', $self->{form__}{port} );
-        } else {
-            $port_error = "<blockquote><div class=\"error01\">$self->{language__}{Configuration_Error3}</div></blockquote>";
-            delete $self->{form__}{port};
-        }
-    }
-
-    if ( defined($self->{form__}{page_size}) ) {
-        if ( ( $self->{form__}{page_size} >= 1 ) && ( $self->{form__}{page_size} <= 1000 ) ) {
-            $self->config_( 'page_size', $self->{form__}{page_size} );
+    if ( defined($self->{form_}{page_size}) ) {
+        if ( ( $self->{form_}{page_size} >= 1 ) && ( $self->{form_}{page_size} <= 1000 ) ) {
+            $self->config_( 'page_size', $self->{form_}{page_size} );
         } else {
             $page_size_error = "<blockquote><div class=\"error01\">$self->{language__}{Configuration_Error4}</div></blockquote>";
-            delete $self->{form__}{page_size};
+            delete $self->{form_}{page_size};
         }
     }
 
-    if ( defined($self->{form__}{history_days}) ) {
-        if ( ( $self->{form__}{history_days} >= 1 ) && ( $self->{form__}{history_days} <= 366 ) ) {
-            $self->config_( 'history_days', $self->{form__}{history_days} );
+    if ( defined($self->{form_}{history_days}) ) {
+        if ( ( $self->{form_}{history_days} >= 1 ) && ( $self->{form_}{history_days} <= 366 ) ) {
+            $self->config_( 'history_days', $self->{form_}{history_days} );
         } else {
             $history_days_error = "<blockquote><div class=\"error01\">$self->{language__}{Configuration_Error5}</div></blockquote>";
-            delete $self->{form__}{history_days};
+            delete $self->{form_}{history_days};
         }
     }
 
-    if ( defined($self->{form__}{timeout}) ) {
-        if ( ( $self->{form__}{timeout} >= 10 ) && ( $self->{form__}{timeout} <= 300 ) ) {
-            $self->global_config_( 'timeout', $self->{form__}{timeout} );
+    if ( defined($self->{form_}{timeout}) ) {
+        if ( ( $self->{form_}{timeout} >= 10 ) && ( $self->{form_}{timeout} <= 300 ) ) {
+            $self->global_config_( 'timeout', $self->{form_}{timeout} );
         } else {
             $timeout_error = "<blockquote><div class=\"error01\">$self->{language__}{Configuration_Error6}</div></blockquote>";
-            $self->{form__}{update_timeout} = '';
+            $self->{form_}{update_timeout} = '';
         }
     }
 
@@ -835,7 +796,7 @@ sub configuration_page
     $body .= "<input name=\"page_size\" id=\"configPageSize\" type=\"text\" value=\"" . $self->config_( 'page_size' ) . "\" />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_page_size\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$page_size_error\n";
-    $body .= sprintf( $self->{language__}{Configuration_HistoryUpdate}, $self->config_( 'page_size' ) ) if ( defined($self->{form__}{page_size}) );
+    $body .= sprintf( $self->{language__}{Configuration_HistoryUpdate}, $self->config_( 'page_size' ) ) if ( defined($self->{form_}{page_size}) );
 
     # Days of History to Keep widget
     $body .= "\n<form action=\"/configuration\">\n";
@@ -844,7 +805,7 @@ sub configuration_page
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_history_days\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
     $body .= "</form>\n$history_days_error\n";
-    $body .= sprintf( $self->{language__}{Configuration_DaysUpdate}, $self->config_( 'history_days' ) ) if ( defined($self->{form__}{history_days}) );
+    $body .= sprintf( $self->{language__}{Configuration_DaysUpdate}, $self->config_( 'history_days' ) ) if ( defined($self->{form_}{history_days}) );
 
     # Classification Insertion panel
     $body .= "</td>\n<td class=\"settingsPanel\" width=\"33%\" valign=\"top\">\n";
@@ -910,21 +871,14 @@ sub configuration_page
     $body .= "</td>\n</tr>\n<tr>\n<td class=\"settingsPanel\" width=\"33%\" valign=\"top\">\n";
     $body .= "<h2 class=\"configuration\">$self->{language__}{Configuration_ListenPorts}</h2>\n";
 
-    # POP3 Listen Port widget
-    $body .= "<form action=\"/configuration\">\n";
-    $body .= "<label class=\"configurationLabel\" for=\"configPopPort\">$self->{language__}{Configuration_POP3Port}:</label><br />\n";
-    $body .= "<input name=\"port\" type=\"text\" id=\"configPopPort\" value=\"" . $self->module_config_( 'pop3', 'port' ) . "\" />\n";
-    $body .= "<input type=\"submit\" class=\"submit\" name=\"update_port\" value=\"$self->{language__}{Apply}\" />\n";
-    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$port_error\n";
-    $body .= sprintf( $self->{language__}{Configuration_POP3Update}, $self->module_config_( 'pop3', 'port' ) ) if ( defined($self->{form__}{port}) );
+    # Insert all the items that are dynamically created from the modules that are loaded
 
-    # Separator Character widget
-    $body .= "\n<form action=\"/configuration\">\n";
-    $body .= "<label class=\"configurationLabel\" for=\"configSeparator\">$self->{language__}{Configuration_Separator}:</label><br />\n";
-    $body .= "<input name=\"separator\" id=\"configSeparator\" type=\"text\" value=\"" . $self->module_config_( 'pop3', 'separator' ) . "\" />\n";
-    $body .= "<input type=\"submit\" class=\"submit\" name=\"update_separator\" value=\"$self->{language__}{Apply}\" />\n";
-    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$separator_error\n";
-    $body .= sprintf( $self->{language__}{Configuration_SepUpdate}, $self->module_config_( 'pop3', 'separator' ) ) if ( defined($self->{form__}{separator}) );
+    for my $name (sort keys %{$self->{dynamic_ui__}{configuration}}) {
+        $body .= $self->{dynamic_ui__}{configuration}{$name}->configure_item( $name,
+                                                                              \%{$self->{language__}},
+                                                                              $self->{session_key__} );
+    }
+
 
     # User Interface Port widget
     $body .= "\n<form action=\"/configuration\">\n";
@@ -932,7 +886,7 @@ sub configuration_page
     $body .= "<input name=\"ui_port\" id=\"configUIPort\" type=\"text\" value=\"" . $self->config_( 'port' ) . "\" />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_ui_port\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$ui_port_error";
-    $body .= sprintf( $self->{language__}{Configuration_UIUpdate}, $self->config_( 'port' ) ) if ( defined($self->{form__}{ui_port}) );
+    $body .= sprintf( $self->{language__}{Configuration_UIUpdate}, $self->config_( 'port' ) ) if ( defined($self->{form_}{ui_port}) );
     $body .= "<br />\n</td>\n";
 
     # TCP Connection Timeout panel
@@ -945,7 +899,7 @@ sub configuration_page
     $body .= "<input name=\"timeout\" type=\"text\" id=\"configTCPTimeout\" value=\"" . $self->global_config_( 'timeout' ) . "\" />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_timeout\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$timeout_error";
-    $body .= sprintf( $self->{language__}{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) if ( defined($self->{form__}{timeout}) );
+    $body .= sprintf( $self->{language__}{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) if ( defined($self->{form_}{timeout}) );
     $body .= "</td>\n";
 
     # Logging panel
@@ -988,20 +942,21 @@ sub security_page
     my $server_error = '';
     my $port_error   = '';
 
-    $self->config_( 'password', $self->{form__}{password} )         if ( defined($self->{form__}{password}) );
-    $self->module_config_( 'pop3', 'secure_server', $self->{form__}{server} )           if ( defined($self->{form__}{server}) );
-    $self->module_config_( 'pop3', 'local', $self->{form__}{localpop}-1 )     if ( defined($self->{form__}{localpop}) );
-    $self->config_( 'local', $self->{form__}{localui}-1 )      if ( defined($self->{form__}{localui}) );
-    $self->config_( 'update_check', $self->{form__}{update_check}-1 ) if ( defined($self->{form__}{update_check}) );
-    $self->config_( 'send_stats', $self->{form__}{send_stats}-1 )   if ( defined($self->{form__}{send_stats}) );
+    $self->config_( 'password', $self->{form_}{password} )         if ( defined($self->{form_}{password}) );
+    $self->config_( 'local', $self->{form_}{localui}-1 )      if ( defined($self->{form_}{localui}) );
+    $self->config_( 'update_check', $self->{form_}{update_check}-1 ) if ( defined($self->{form_}{update_check}) );
+    $self->config_( 'send_stats', $self->{form_}{send_stats}-1 )   if ( defined($self->{form_}{send_stats}) );
 
-    if ( defined($self->{form__}{sport}) ) {
-        if ( ( $self->{form__}{sport} >= 1 ) && ( $self->{form__}{sport} < 65536 ) ) {
-            $self->module_config_( 'pop3', 'secure_port', $self->{form__}{sport} );
-        } else {
-            $port_error = "<blockquote><div class=\"error01\">$self->{language__}{Security_Error1}</div></blockquote>";
-            delete $self->{form__}{sport};
-        }
+    for my $name (keys %{$self->{dynamic_ui__}{security}}) {
+        $body .= $self->{dynamic_ui__}{security}{$name}->validate_item( $name,
+                                                                             \%{$self->{language__}},
+                                                                             \%{$self->{form_}} );
+    }
+
+    for my $name (keys %{$self->{dynamic_ui__}{chain}}) {
+        $body .= $self->{dynamic_ui__}{chain}{$name}->validate_item( $name,
+                                                                             \%{$self->{language__}},
+                                                                             \%{$self->{form_}} );
     }
 
     $body .= "<table class=\"settingsTable\" width=\"100%\" cellpadding=\"10%\" cellspacing=\"0\" summary=\"$self->{language__}{Security_MainTableSummary}\">\n<tr>\n";
@@ -1010,24 +965,11 @@ sub security_page
     $body .= "<td class=\"settingsPanel\" width=\"50%\" valign=\"top\">\n";
     $body .= "<h2 class=\"security\">$self->{language__}{Security_Stealth}</h2>\n";
 
-    # Accept POP3 from Remote Machines widget
-    $body .= "<span class=\"securityLabel\">$self->{language__}{Security_POP3}:</span><br />\n";
-
-    $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
-    if ( $self->module_config_( 'pop3', 'local' ) == 1 ) {
-        $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
-        $body .= "<span class=\"securityWidgetStateOff\">$self->{language__}{Security_NoStealthMode}</span>\n";
-        $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securityAcceptPOP3On\" name=\"toggle\" value=\"$self->{language__}{ChangeToYes}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"localpop\" value=\"1\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n";
-    } else {
-        $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
-        $body .= "<span class=\"securityWidgetStateOn\">$self->{language__}{Yes}</span>\n";
-        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptPOP3Off\" name=\"toggle\" value=\"$self->{language__}{ChangeToNo} (Stealth Mode)\" />\n";
-        $body .= "<input type=\"hidden\" name=\"localpop\" value=\"2\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n";
+    for my $name (sort keys %{$self->{dynamic_ui__}{security}}) {
+        $body .= $self->{dynamic_ui__}{security}{$name}->configure_item( $name,
+                                                                              \%{$self->{language__}},
+                                                                              $self->{session_key__} );
     }
-    $body .= "</td></tr></table>\n";
 
     # Accept HTTP from Remote Machines widget
     $body .= "<span class=\"securityLabel\">$self->{language__}{Security_UI}:</span><br />\n";
@@ -1047,7 +989,21 @@ sub security_page
         $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n";
     }
     $body .= "</td></tr></table>\n";
-    $body .= "</td>\n";
+
+    # Secure Password Authentication/AUTH panel
+    $body .= "<hr><h2 class=\"security\">$self->{language__}{Security_AUTHTitle}</h2>\n";
+
+    # optional widgets placement
+    $body .= "<div class=\"securityAuthWidgets\">\n";
+
+    for my $name (sort keys %{$self->{dynamic_ui__}{chain}}) {
+        $body .= $self->{dynamic_ui__}{chain}{$name}->configure_item( $name,
+                                                                              \%{$self->{language__}},
+                                                                              $self->{session_key__} );
+    }
+
+    # end optional widgets placement
+    $body .= "</div>\n</td>\n";
 
     # User Interface Password panel
     $body .= "<td class=\"settingsPanel\" width=\"50%\" valign=\"top\" >\n";
@@ -1062,14 +1018,13 @@ sub security_page
     $body .= "<input type=\"password\" id=\"securityPassword\" name=\"password\" value=\"" . $self->config_( 'password' ) . "\" />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_server\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n";
-    $body .= sprintf( $self->{language__}{Security_PasswordUpdate}, $self->config_( 'password' ) ) if ( defined($self->{form__}{password}) );
+    $body .= sprintf( $self->{language__}{Security_PasswordUpdate}, $self->config_( 'password' ) ) if ( defined($self->{form_}{password}) );
 
    # end optional widget placement
-   $body .= "</div>\n</td>\n</tr>\n";
+   $body .= "</div>\n";
 
     # Automatic Update Checking panel
-    $body .= "<tr>\n<td class=\"settingsPanel\" width=\"50%\" valign=\"top\">\n";
-    $body .= "<h2 class=\"security\">$self->{language__}{Security_UpdateTitle}</h2>\n";
+    $body .= "<hr><h2 class=\"security\">$self->{language__}{Security_UpdateTitle}</h2>\n";
 
     # Check Daily for Updates widget
     $body .= "<span class=\"securityLabel\">$self->{language__}{Security_Update}:</span><br />\n";
@@ -1091,11 +1046,10 @@ sub security_page
     $body .= "</td></tr></table>\n";
 
     # explanation of same
-    $body .= "<div class=\"securityExplanation\">$self->{language__}{Security_ExplainUpdate}</div>\n</td>\n";
+    $body .= "<div class=\"securityExplanation\">$self->{language__}{Security_ExplainUpdate}</div>\n";
 
     # Reporting Statistics panel
-    $body .= "<td class=\"settingsPanel\" width=\"50%\" valign=\"top\">\n";
-    $body .= "<h2 class=\"security\">$self->{language__}{Security_StatsTitle}</h2>\n";
+    $body .= "<hr><h2 class=\"security\">$self->{language__}{Security_StatsTitle}</h2>\n";
 
     # Send Statistics Daily widget
     $body .= "<span class=\"securityLabel\">$self->{language__}{Security_Stats}:</span>\n<br />\n";
@@ -1117,32 +1071,6 @@ sub security_page
     $body .= "</td></tr></table>\n";
     # explanation of same
     $body .= "<div class=\"securityExplanation\">$self->{language__}{Security_ExplainStats}</div>\n</td>\n</tr>\n";
-
-    # Secure Password Authentication/AUTH panel
-    $body .= "<tr>\n<td class=\"settingsPanel\" width=\"100%\" valign=\"top\" colspan=\"2\">\n";
-    $body .= "<h2 class=\"security\">$self->{language__}{Security_AUTHTitle}</h2>\n";
-
-    # optional widgets placement
-    $body .= "<div class=\"securityAuthWidgets\">\n";
-
-    # Secure Server widget
-    $body .= "<form action=\"/security\">\n";
-    $body .= "<label class=\"securityLabel\" for=\"securitySecureServer\">$self->{language__}{Security_SecureServer}:</label><br />\n";
-    $body .= "<input type=\"text\" name=\"server\" id=\"securitySecureServer\" value=\"" . $self->module_config_( 'pop3', 'secure_server' ) . "\" />\n";
-    $body .= "<input type=\"submit\" class=\"submit\" name=\"update_server\" value=\"$self->{language__}{Apply}\" />\n";
-    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n";
-    $body .= sprintf( $self->{language__}{Security_SecureServerUpdate}, $self->module_config_( 'pop3', 'secure_server' ) ) if ( defined($self->{form__}{server}) );
-
-    # Secure Port widget
-    $body .= "<form action=\"/security\">\n";
-    $body .= "<label class=\"securityLabel\" for=\"securitySecurePort\">$self->{language__}{Security_SecurePort}:</label><br />\n";
-    $body .= "<input type=\"text\" name=\"sport\" id=\"securitySecurePort\" value=\"" . $self->module_config_( 'pop3', 'secure_port' ) . "\" />\n";
-    $body .= "<input type=\"submit\" class=\"submit\" name=\"update_sport\" value=\"$self->{language__}{Apply}\" />\n";
-    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$port_error";
-    $body .= sprintf( $self->{language__}{Security_SecurePortUpdate}, $self->module_config_( 'pop3', 'secure_port' ) ) if ( defined($self->{form__}{sport}) );
-
-    # end optional widgets placement
-    $body .= "</div>\n</td>\n</tr>\n";
 
     $body .= "</table>\n";
 
@@ -1184,29 +1112,29 @@ sub advanced_page
 
     my $add_message = '';
     my $deletemessage = '';
-    if ( defined($self->{form__}{newword}) ) {
-        $self->{form__}{newword} = lc($self->{form__}{newword});
-        if ( defined($self->{classifier__}->{parser}->{mangle}->{stop}{$self->{form__}{newword}}) ) {
-            $add_message = "<blockquote><div class=\"error02\"><b>". sprintf( $self->{language__}{Advanced_Error1}, $self->{form__}{newword} ) . "</b></div></blockquote>";
+    if ( defined($self->{form_}{newword}) ) {
+        $self->{form_}{newword} = lc($self->{form_}{newword});
+        if ( defined($self->{classifier__}->{parser}->{mangle}->{stop}{$self->{form_}{newword}}) ) {
+            $add_message = "<blockquote><div class=\"error02\"><b>". sprintf( $self->{language__}{Advanced_Error1}, $self->{form_}{newword} ) . "</b></div></blockquote>";
         } else {
-            if ( $self->{form__}{newword} =~ /[^[:alpha:][0-9]\._\-@]/ ) {
+            if ( $self->{form_}{newword} =~ /[^[:alpha:][0-9]\._\-@]/ ) {
                 $add_message = "<blockquote><div class=\"error02\"><b>$self->{language__}{Advanced_Error2}</b></div></blockquote>";
             } else {
-                $self->{classifier__}->{parser}->{mangle}->{stop}{$self->{form__}{newword}} = 1;
+                $self->{classifier__}->{parser}->{mangle}->{stop}{$self->{form_}{newword}} = 1;
                 $self->{classifier__}->{parser}->{mangle}->save_stop_words();
-                $add_message = "<blockquote>" . sprintf( $self->{language__}{Advanced_Error3}, $self->{form__}{newword} ) . "</blockquote>";
+                $add_message = "<blockquote>" . sprintf( $self->{language__}{Advanced_Error3}, $self->{form_}{newword} ) . "</blockquote>";
             }
         }
     }
 
-    if ( defined($self->{form__}{word}) ) {
-        $self->{form__}{word} = lc($self->{form__}{word});
-        if ( !defined($self->{classifier__}->{parser}->{mangle}->{stop}{$self->{form__}{word}}) ) {
-            $deletemessage = "<blockquote><div class=\"error02\"><b>" . sprintf( $self->{language__}{Advanced_Error4} , $self->{form__}{word} ) . "</b></div></blockquote>";
+    if ( defined($self->{form_}{word}) ) {
+        $self->{form_}{word} = lc($self->{form_}{word});
+        if ( !defined($self->{classifier__}->{parser}->{mangle}->{stop}{$self->{form_}{word}}) ) {
+            $deletemessage = "<blockquote><div class=\"error02\"><b>" . sprintf( $self->{language__}{Advanced_Error4} , $self->{form_}{word} ) . "</b></div></blockquote>";
         } else {
-            delete $self->{classifier__}->{parser}->{mangle}->{stop}{$self->{form__}{word}};
+            delete $self->{classifier__}->{parser}->{mangle}->{stop}{$self->{form_}{word}};
             $self->{classifier__}->{parser}->{mangle}->save_stop_words();
-            $deletemessage = "<blockquote>" . sprintf( $self->{language__}{Advanced_Error5}, $self->{form__}{word} ) . "</blockquote>";
+            $deletemessage = "<blockquote>" . sprintf( $self->{language__}{Advanced_Error5}, $self->{form_}{word} ) . "</blockquote>";
         }
     }
 
@@ -1281,26 +1209,6 @@ sub advanced_page
 
 # ---------------------------------------------------------------------------------------------
 #
-# url_encode
-#
-# $text     Text to encode for URL safety
-#
-# Encode a URL so that it can be safely passed in a URL as per RFC2396
-#
-# ---------------------------------------------------------------------------------------------
-
-sub url_encode
-{
-    my ( $self, $text ) = @_;
-
-    $text =~ s/ /\+/;
-    $text =~ s/([^a-zA-Z0-9_\-.+])/sprintf("%%%02x",ord($1))/eg;
-
-    return $text;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # magnet_page - the list of bucket magnets
 #
 # $client     The web browser to send the results to
@@ -1311,25 +1219,25 @@ sub magnet_page
     my ( $self, $client ) = @_;
 
     my $magnet_message = '';
-    if ( ( defined($self->{form__}{type}) ) && ( $self->{form__}{bucket} ne '' ) && ( $self->{form__}{text} ne '' ) ) {
+    if ( ( defined($self->{form_}{type}) ) && ( $self->{form_}{bucket} ne '' ) && ( $self->{form_}{text} ne '' ) ) {
         my $found = 0;
         for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
-            my %magnets = $self->{classifier__}->get_magnets( $bucket, $self->{form__}{type} );
-            if ( defined( $magnets{$self->{form__}{text}}) ) {
+            my %magnets = $self->{classifier__}->get_magnets( $bucket, $self->{form_}{type} );
+            if ( defined( $magnets{$self->{form_}{text}}) ) {
                 $found  = 1;
                 $magnet_message = "<blockquote>\n<div class=\"error02\">\n<b>";
-                $magnet_message .= sprintf( $self->{language__}{Magnet_Error1}, "$self->{form__}{type}: $self->{form__}{text}", $bucket );
+                $magnet_message .= sprintf( $self->{language__}{Magnet_Error1}, "$self->{form_}{type}: $self->{form_}{text}", $bucket );
                 $magnet_message .= "</b>\n</div>\n</blockquote>\n";
             }
         }
 
         if ( $found == 0 )  {
             for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
-            my %magnets = $self->{classifier__}->get_magnets( $bucket, $self->{form__}{type} );
+            my %magnets = $self->{classifier__}->get_magnets( $bucket, $self->{form_}{type} );
                 for my $from (keys %magnets)  {
-                    if ( ( $self->{form__}{text} =~ /\Q$from\E/ ) || ( $from =~ /\Q$self->{form__}{text}\E/ ) )  {
+                    if ( ( $self->{form_}{text} =~ /\Q$from\E/ ) || ( $from =~ /\Q$self->{form_}{text}\E/ ) )  {
                         $found = 1;
-                        $magnet_message = "<blockquote><div class=\"error02\"><b>" . sprintf( $self->{language__}{Magnet_Error2}, "$self->{form__}{type}: $self->{form__}{text}", "$self->{form__}{type}: $from", $bucket ) . "</b></div></blockquote>";
+                        $magnet_message = "<blockquote><div class=\"error02\"><b>" . sprintf( $self->{language__}{Magnet_Error2}, "$self->{form_}{type}: $self->{form_}{text}", "$self->{form_}{type}: $from", $bucket ) . "</b></div></blockquote>";
                     }
                 }
             }
@@ -1342,16 +1250,16 @@ sub magnet_page
             # the browser when the magnet is displayed but is matched in the regular expression
             # that does the magnet matching and will cause failures... so strip off the whitespace
 
-            $self->{form__}{text} =~ s/^[ \t]+//;
-            $self->{form__}{text} =~ s/[ \t]+$//;
+            $self->{form_}{text} =~ s/^[ \t]+//;
+            $self->{form_}{text} =~ s/[ \t]+$//;
 
-            $self->{classifier__}->create_magnet( $self->{form__}{bucket}, $self->{form__}{type}, $self->{form__}{text});
-            $magnet_message = "<blockquote>" . sprintf( $self->{language__}{Magnet_Error3}, "$self->{form__}{type}: $self->{form__}{text}", $self->{form__}{bucket} ) . "</blockquote>";
+            $self->{classifier__}->create_magnet( $self->{form_}{bucket}, $self->{form_}{type}, $self->{form_}{text});
+            $magnet_message = "<blockquote>" . sprintf( $self->{language__}{Magnet_Error3}, "$self->{form_}{type}: $self->{form_}{text}", $self->{form_}{bucket} ) . "</blockquote>";
         }
     }
 
-    if ( defined($self->{form__}{dtype}) )  {
-        $self->{classifier__}->delete_magnet( $self->{form__}{bucket}, $self->{form__}{dtype}, $self->{form__}{dmagnet});
+    if ( defined($self->{form_}{dtype}) )  {
+        $self->{classifier__}->delete_magnet( $self->{form_}{bucket}, $self->{form_}{dtype}, $self->{form_}{dmagnet});
     }
 
     # Current Magnets panel
@@ -1454,17 +1362,17 @@ sub bucket_page
     my ( $self, $client ) = @_;
 
     my $body = "<h2 class=\"buckets\">";
-    $body .= sprintf( $self->{language__}{SingleBucket_Title}, "<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form__}{showbucket}) . "\">$self->{form__}{showbucket}</font>");
+    $body .= sprintf( $self->{language__}{SingleBucket_Title}, "<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form_}{showbucket}) . "\">$self->{form_}{showbucket}</font>");
     $body .= "</h2>\n<table summary=\"\">\n<tr>\n<th scope=\"row\" class=\"bucketsLabel\">$self->{language__}{SingleBucket_WordCount}</th>\n";
     $body .= "<td>&nbsp;</td>\n<td align=\"right\">\n";
-    $body .= pretty_number( $self, $self->{classifier__}->get_bucket_word_count($self->{form__}{showbucket}));
-    $body .= "</td>\n<td>\n(" . sprintf( $self->{language__}{SingleBucket_Unique}, pretty_number( $self,  $self->{classifier__}->get_bucket_unique_count($self->{form__}{showbucket})) ). ")";
+    $body .= pretty_number( $self, $self->{classifier__}->get_bucket_word_count($self->{form_}{showbucket}));
+    $body .= "</td>\n<td>\n(" . sprintf( $self->{language__}{SingleBucket_Unique}, pretty_number( $self,  $self->{classifier__}->get_bucket_unique_count($self->{form_}{showbucket})) ). ")";
     $body .= "</td>\n</tr>\n<tr>\n<th scope=\"row\" class=\"bucketsLabel\">$self->{language__}{SingleBucket_TotalWordCount}</th>\n";
     $body .= "<td>&nbsp;</td>\n<td align=\"right\">\n" . pretty_number( $self, $self->{classifier__}->get_word_count());
 
     my $percent = "0%";
     if ( $self->{classifier__}->get_word_count() > 0 )  {
-        $percent = int( 10000 * $self->{classifier__}->get_bucket_word_count($self->{form__}{showbucket}) / $self->{classifier__}->get_word_count() ) / 100;
+        $percent = int( 10000 * $self->{classifier__}->get_bucket_word_count($self->{form_}{showbucket}) / $self->{classifier__}->get_word_count() ) / 100;
         $percent = "$percent%";
     }
     $body .= "</td>\n<td></td>\n</tr>\n<tr><td colspan=\"3\"><hr /></td></tr>\n";
@@ -1472,10 +1380,10 @@ sub bucket_page
     $body .= "<td></td>\n<td align=\"right\">$percent</td>\n<td></td>\n</tr>\n</table>\n";
 
     $body .= "<h2 class=\"buckets\">";
-    $body .= sprintf( $self->{language__}{SingleBucket_WordTable},  "<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form__}{showbucket}) . "\">$self->{form__}{showbucket}" ) ;
+    $body .= sprintf( $self->{language__}{SingleBucket_WordTable},  "<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form_}{showbucket}) . "\">$self->{form_}{showbucket}" ) ;
     $body .= "</font>\n</h2>\n$self->{language__}{SingleBucket_Message1}\n<br /><br />\n<table summary=\"$self->{language__}{Bucket_WordListTableSummary}\">\n";
 
-    for my $i (@{$self->{classifier__}->get_bucket_word_list($self->{form__}{showbucket})}) {
+    for my $i (@{$self->{classifier__}->get_bucket_word_list($self->{form_}{showbucket})}) {
         if ( defined($i) )  {
             my $j = $i;
 
@@ -1489,18 +1397,18 @@ sub bucket_page
             # Highlight any words used this session
 
             $j =~ s/([^ ]+) (L\-[\.\d]+)/\*$1 $2<\/font>/g;
-            $j =~ s/L(\-[\.\d]+)/int( $self->{classifier__}->get_bucket_word_count($self->{form__}{showbucket}) * exp($1) + 0.5 )/ge;
+            $j =~ s/L(\-[\.\d]+)/int( $self->{classifier__}->get_bucket_word_count($self->{form_}{showbucket}) * exp($1) + 0.5 )/ge;
 
             # Add the link to the corpus lookup
 
-            $j =~ s/([^ ,\*]+) ([^ ,\*]+)/"<a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key__}\&amp;lookup=Lookup\&amp;word=" . url_encode($self,$1) . "#Lookup\">$1<\/a> $2"/ge;
+            $j =~ s/([^ ,\*]+) ([^ ,\*]+)/"<a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key__}\&amp;lookup=Lookup\&amp;word=" . url_encode_($self,$1) . "#Lookup\">$1<\/a> $2"/ge;
 
             # Add the bucket color if this word was used this session. IMPORTANT: this regex relies
             # on the fact that Classifier::WordMangle (mangle) removes astericks from all corpus words
             # and therefore assumes that any asterick was placed the by the highlight regex several
             # lines above.
 
-# TODO            $j =~ s/([\*])/<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form__}{showbucket}) . "\">$1/g;
+# TODO            $j =~ s/([\*])/<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form_}{showbucket}) . "\">$1/g;
             $body .= "<tr>\n<td valign=\"top\">\n<b>$first</b>\n</td>\n<td valign=\"top\">\n$j</td>\n</tr>\n";
         }
     }
@@ -1576,7 +1484,7 @@ sub corpus_page
 {
     my ( $self, $client ) = @_;
 
-    if ( defined($self->{form__}{reset_stats}) ) {
+    if ( defined($self->{form_}{reset_stats}) ) {
         $self->global_config_( 'mcount', 0 );
         $self->global_config_( 'ecount', 0 );
         for my $bucket ($self->{classifier__}->get_buckets()) {
@@ -1587,7 +1495,7 @@ sub corpus_page
         $self->{configuration__}->save_configuration();
     }
 
-    if ( defined($self->{form__}{showbucket}) )  {
+    if ( defined($self->{form_}{showbucket}) )  {
         bucket_page( $self, $client);
         return;
     }
@@ -1597,48 +1505,48 @@ sub corpus_page
     my $deletemessage = '';
     my $rename_message = '';
 
-    if ( ( defined($self->{form__}{color}) ) && ( defined($self->{form__}{bucket}) ) ) {
-        open COLOR, '>' . $self->config_( 'corpus' ) . "/$self->{form__}{bucket}/color";
-        print COLOR "$self->{form__}{color}\n";
+    if ( ( defined($self->{form_}{color}) ) && ( defined($self->{form_}{bucket}) ) ) {
+        open COLOR, '>' . $self->config_( 'corpus' ) . "/$self->{form_}{bucket}/color";
+        print COLOR "$self->{form_}{color}\n";
         close COLOR;
-        $self->{classifier__}->set_bucket_color($self->{form__}{bucket}, $self->{form__}{color});
+        $self->{classifier__}->set_bucket_color($self->{form_}{bucket}, $self->{form_}{color});
     }
 
-    if ( ( defined($self->{form__}{bucket}) ) && ( defined($self->{form__}{subject}) ) && ( $self->{form__}{subject} > 0 ) ) {
-        $self->{classifier__}->set_bucket_parameter( $self->{form__}{bucket}, 'subject', $self->{form__}{subject} - 1 );
+    if ( ( defined($self->{form_}{bucket}) ) && ( defined($self->{form_}{subject}) ) && ( $self->{form_}{subject} > 0 ) ) {
+        $self->{classifier__}->set_bucket_parameter( $self->{form_}{bucket}, 'subject', $self->{form_}{subject} - 1 );
     }
 
-    if ( ( defined($self->{form__}{bucket}) ) &&  ( defined($self->{form__}{quarantine}) ) && ( $self->{form__}{quarantine} > 0 ) ) {
-        $self->{classifier__}->set_bucket_parameter( $self->{form__}{bucket}, 'quarantine', $self->{form__}{quarantine} - 1 );
+    if ( ( defined($self->{form_}{bucket}) ) &&  ( defined($self->{form_}{quarantine}) ) && ( $self->{form_}{quarantine} > 0 ) ) {
+        $self->{classifier__}->set_bucket_parameter( $self->{form_}{bucket}, 'quarantine', $self->{form_}{quarantine} - 1 );
     }
 
-    if ( ( defined($self->{form__}{cname}) ) && ( $self->{form__}{cname} ne '' ) ) {
-        if ( $self->{form__}{cname} =~ /[^[:lower:]\-_]/ )  {
+    if ( ( defined($self->{form_}{cname}) ) && ( $self->{form_}{cname} ne '' ) ) {
+        if ( $self->{form_}{cname} =~ /[^[:lower:]\-_]/ )  {
             $create_message = "<blockquote><div class=\"error01\">$self->{language__}{Bucket_Error1}</div></blockquote>";
         } else {
-            if ( ( defined($self->{classifier__}->get_bucket_word_count($self->{form__}{cname})) ) && ( $self->{classifier__}->get_bucket_word_count($self->{form__}{cname}) > 0 ) )  {
-                $create_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error2}, $self->{form__}{cname} ) . "</b></blockquote>";
+            if ( ( defined($self->{classifier__}->get_bucket_word_count($self->{form_}{cname})) ) && ( $self->{classifier__}->get_bucket_word_count($self->{form_}{cname}) > 0 ) )  {
+                $create_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error2}, $self->{form_}{cname} ) . "</b></blockquote>";
             } else {
-                $self->{classifier__}->create_bucket( $self->{form__}{cname} );
-                $create_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error3}, $self->{form__}{cname} ) . "</b></blockquote>";
+                $self->{classifier__}->create_bucket( $self->{form_}{cname} );
+                $create_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error3}, $self->{form_}{cname} ) . "</b></blockquote>";
             }
        }
     }
 
-    if ( ( defined($self->{form__}{delete}) ) && ( $self->{form__}{name} ne '' ) ) {
-        $self->{form__}{name} = lc($self->{form__}{name});
-    $self->{classifier__}->delete_bucket( $self->{form__}{name} );
-        $deletemessage = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error6}, $self->{form__}{name} ) . "</b></blockquote>";
+    if ( ( defined($self->{form_}{delete}) ) && ( $self->{form_}{name} ne '' ) ) {
+        $self->{form_}{name} = lc($self->{form_}{name});
+    $self->{classifier__}->delete_bucket( $self->{form_}{name} );
+        $deletemessage = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error6}, $self->{form_}{name} ) . "</b></blockquote>";
     }
 
-    if ( ( defined($self->{form__}{newname}) ) && ( $self->{form__}{oname} ne '' ) ) {
-        if ( $self->{form__}{newname} =~ /[^[:lower:]\-_]/ )  {
+    if ( ( defined($self->{form_}{newname}) ) && ( $self->{form_}{oname} ne '' ) ) {
+        if ( $self->{form_}{newname} =~ /[^[:lower:]\-_]/ )  {
             $rename_message = "<blockquote><div class=\"error01\">$self->{language__}{Bucket_Error1}</div></blockquote>";
         } else {
-            $self->{form__}{oname} = lc($self->{form__}{oname});
-            $self->{form__}{newname} = lc($self->{form__}{newname});
-        $self->{classifier__}->rename_bucket( $self->{form__}{oname}, $self->{form__}{newname} );            
-            $rename_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error5}, $self->{form__}{oname}, $self->{form__}{newname} ) . "</b></blockquote>";
+            $self->{form_}{oname} = lc($self->{form_}{oname});
+            $self->{form_}{newname} = lc($self->{form_}{newname});
+        $self->{classifier__}->rename_bucket( $self->{form_}{oname}, $self->{form_}{newname} );            
+            $rename_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error5}, $self->{form_}{oname}, $self->{form_}{newname} ) . "</b></blockquote>";
         }
     }
 
@@ -1904,8 +1812,8 @@ sub corpus_page
     # end optional widget placement
     $body .= "</div>\n";
 
-    if ( ( defined($self->{form__}{lookup}) ) || ( defined($self->{form__}{word}) ) ) {
-       my $word = $self->{classifier__}->{mangler__}->mangle($self->{form__}{word}, 1);
+    if ( ( defined($self->{form_}{lookup}) ) || ( defined($self->{form_}{word}) ) ) {
+       my $word = $self->{classifier__}->{mangler__}->mangle($self->{form_}{word}, 1);
 
         $body .= "<blockquote>\n";
 
@@ -1914,13 +1822,13 @@ sub corpus_page
         my $heading = "<table class=\"lookupResultsTable\" cellpadding=\"10%\" cellspacing=\"0\" summary=\"$self->{language__}{Bucket_LookupResultsSummary}\">\n";
         $heading .= "<tr>\n<td>\n";
         $heading .= "<table summary=\"\">\n";
-        $heading .= "<caption><strong>$self->{language__}{Bucket_LookupMessage2} $self->{form__}{word}</strong><br /><br /></caption>";
+        $heading .= "<caption><strong>$self->{language__}{Bucket_LookupMessage2} $self->{form_}{word}</strong><br /><br /></caption>";
         $heading .= "<tr>\n<th scope=\"col\">$self->{language__}{Bucket}</th>\n<th>&nbsp;</th>\n";
         $heading .= "<th scope=\"col\">$self->{language__}{Frequency}</th>\n<th>&nbsp;</th>\n";
         $heading .= "<th scope=\"col\">$self->{language__}{Probability}</th>\n<th>&nbsp;</th>\n";
         $heading .= "<th scope=\"col\">$self->{language__}{Score}</th>\n</tr>\n";
 
-        if ( $self->{form__}{word} ne '' ) {
+        if ( $self->{form_}{word} ne '' ) {
             my $max = 0;
             my $max_bucket = '';
             my $total = 0;
@@ -1968,10 +1876,10 @@ sub corpus_page
 
             if ( $max_bucket ne '' ) {
                 $body .= "</table>\n<br /><br />";
-                $body .= sprintf( $self->{language__}{Bucket_LookupMostLikely}, $self->{form__}{word}, $self->{classifier__}->get_bucket_color($max_bucket), $max_bucket);
+                $body .= sprintf( $self->{language__}{Bucket_LookupMostLikely}, $self->{form_}{word}, $self->{classifier__}->get_bucket_color($max_bucket), $max_bucket);
                 $body .= "</td>\n</tr>\n</table>";
             } else {
-                $body .= sprintf( $self->{language__}{Bucket_DoesNotAppear}, $self->{form__}{word} );
+                $body .= sprintf( $self->{language__}{Bucket_DoesNotAppear}, $self->{form_}{word} );
             }
         } else {
             $body .= "<div class=\"error01\">$self->{language__}{Bucket_Error4}</div>";
@@ -2279,7 +2187,7 @@ sub get_history_navigator
     if ( $start_message != 0 )  {
         $body .= "[<a href=\"/history?start_message=";
         $body .= $start_message - $self->config_( 'page_size' );
-        $body .= "&amp;session=$self->{session_key__}&amp;sort=$self->{form__}{sort}&amp;search=$self->{form__}{search}&amp;filter=$self->{form__}{filter}\">< $self->{language__}{Previous}</a>] ";
+        $body .= "&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">< $self->{language__}{Previous}</a>] ";
     }
     my $i = 0;
     while ( $i < $self->history_size() ) {
@@ -2287,7 +2195,7 @@ sub get_history_navigator
             $body .= "<b>";
             $body .= $i+1 . "</b>";
         } else {
-            $body .= "[<a href=\"/history?start_message=$i&amp;session=$self->{session_key__}&amp;search=$self->{form__}{search}&amp;sort=$self->{form__}{sort}&amp;filter=$self->{form__}{filter}\">";
+            $body .= "[<a href=\"/history?start_message=$i&amp;session=$self->{session_key__}&amp;search=$self->{form_}{search}&amp;sort=$self->{form_}{sort}&amp;filter=$self->{form_}{filter}\">";
             $body .= $i+1 . "</a>]";
         }
 
@@ -2297,7 +2205,7 @@ sub get_history_navigator
     if ( $start_message < ( $self->history_size() - $self->config_( 'page_size' ) ) )  {
         $body .= "[<a href=\"/history?start_message=";
         $body .= $start_message + $self->config_( 'page_size' );
-        $body .= "&amp;session=$self->{session_key__}&amp;sort=$self->{form__}{sort}&amp;search=$self->{form__}{search}&amp;filter=$self->{form__}{filter}\">$self->{language__}{Next} ></a>]";
+        $body .= "&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">$self->{language__}{Next} ></a>]";
     }
 
     return $body;
@@ -2392,26 +2300,26 @@ sub history_reclassify
 {
     my ( $self ) = @_;
 
-    if ( defined( $self->{form__}{change} ) ) {
+    if ( defined( $self->{form_}{change} ) ) {
 
         # This hash will map filenames of MSG files in the history to the
         # new classification that they should be, it is built by iterating
-        # through the $self->{form__} looking for entries with the message number
+        # through the $self->{form_} looking for entries with the message number
         # of each message that is displayed and then creating an entry in
-        # %messages if there is a corresponding entry in $self->{form__} for
+        # %messages if there is a corresponding entry in $self->{form_} for
         # that message number
 
         my %messages;
 
-        foreach my $i ( $self->{form__}{start_message}  .. $self->{form__}{start_message} + $self->config_( 'page_size' ) - 1) {
+        foreach my $i ( $self->{form_}{start_message}  .. $self->{form_}{start_message} + $self->config_( 'page_size' ) - 1) {
             my $mail_file = $self->{history_keys__}[$i];
 
             # The first check makes sure we didn't run off the end of the history table
             # the second that there is something defined for this message number and the
             # third that this message number has a value (i.e. a bucket name)
 
-            if ( defined( $mail_file ) && defined( $self->{form__}{$i} ) && ( $self->{form__}{$i} ne '' ) ) {
-                $messages{$mail_file} = $self->{form__}{$i};
+            if ( defined( $mail_file ) && defined( $self->{form_}{$i} ) && ( $self->{form_}{$i} ne '' ) ) {
+                $messages{$mail_file} = $self->{form_}{$i};
             }
         }
 
@@ -2467,7 +2375,7 @@ sub history_undo
 {
     my( $self ) = @_;
 
-    foreach my $key (keys %{$self->{form__}}) {
+    foreach my $key (keys %{$self->{form_}}) {
         if ( $key =~ /^undo_([0-9]+)$/ ) {
             my $mail_file = $self->{history_keys__}[$1];
             my %temp_corpus;
@@ -2528,21 +2436,21 @@ sub get_search_filter_widget
     my $body = "<form action=\"/history\">\n";
     $body .= "<label class=\"historyLabel\" for=\"historySearch\">$self->{language__}{History_SearchMessage}:</label>\n";
     $body .= "<input type=\"text\" id=\"historySearch\" name=\"search\" ";
-    $body .= "value=\"$self->{form__}{search}\"" if (defined $self->{form__}{search});
+    $body .= "value=\"$self->{form_}{search}\"" if (defined $self->{form_}{search});
     $body .= " />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"setsearch\" value=\"$self->{language__}{Find}\" />\n";
     $body .= "&nbsp;&nbsp;<label class=\"historyLabel\" for=\"historyFilter\">$self->{language__}{History_FilterBy}:</label>\n";
-    $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form__}{sort}\" />\n";
+    $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form_}{sort}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
     $body .= "<select name=\"filter\" id=\"historyFilter\">\n<option value=\"\"></option>";
     my @buckets = $self->{classifier__}->get_buckets();
     foreach my $abucket (@buckets) {
         $body .= "<option value=\"$abucket\"";
-        $body .= " selected" if ( ( defined($self->{form__}{filter}) ) && ( $self->{form__}{filter} eq $abucket ) );
+        $body .= " selected" if ( ( defined($self->{form_}{filter}) ) && ( $self->{form_}{filter} eq $abucket ) );
         $body .= ">$abucket</option>\n";
     }
-    $body .= "<option value=\"__filter__magnet\"" . ($self->{form__}{filter} eq '__filter__magnet'?' selected':'') . ">&lt;$self->{language__}{History_ShowMagnet}&gt;</option>\n";
-    $body .= "<option value=\"unclassified\"" . ($self->{form__}{filter} eq 'unclassified'?' selected':'') . ">&lt;unclassified&gt;</option>\n";
+    $body .= "<option value=\"__filter__magnet\"" . ($self->{form_}{filter} eq '__filter__magnet'?' selected':'') . ">&lt;$self->{language__}{History_ShowMagnet}&gt;</option>\n";
+    $body .= "<option value=\"unclassified\"" . ($self->{form_}{filter} eq 'unclassified'?' selected':'') . ">&lt;unclassified&gt;</option>\n";
     $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language__}{Filter}\" />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"reset_filter_search\" value=\"$self->{language__}{History_ResetSearch}\" />\n";
     $body .= "</form>\n";
@@ -2565,49 +2473,49 @@ sub history_page
     # in or not so that we don't have to worry about undefined values later
     # on in the function
 
-    $self->{form__}{sort}   = '' if ( !defined( $self->{form__}{sort}   ) );
-    $self->{form__}{search} = '' if ( !defined( $self->{form__}{search} ) );
-    $self->{form__}{filter} = '' if ( !defined( $self->{form__}{filter} ) );
+    $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
+    $self->{form_}{search} = '' if ( !defined( $self->{form_}{search} ) );
+    $self->{form_}{filter} = '' if ( !defined( $self->{form_}{filter} ) );
     
     # Information from submit buttons isn't always preserved if the buttons aren't
     # pressed. This compares values in some fields and sets the button-values as
     # though they had been pressed
     
     # Set setsearch if search changed and setsearch is undefined    
-    $self->{form__}{setsearch} = 'on' if ( ( ( !defined($self->{old_search__}) && ($self->{form__}{search} ne '') ) || ( defined($self->{old_search__}) && ( $self->{old_search__} ne $self->{form__}{search} ) ) ) && !defined($self->{form__}{setsearch} ) );
-    $self->{old_search__} = $self->{form__}{search};
+    $self->{form_}{setsearch} = 'on' if ( ( ( !defined($self->{old_search__}) && ($self->{form_}{search} ne '') ) || ( defined($self->{old_search__}) && ( $self->{old_search__} ne $self->{form_}{search} ) ) ) && !defined($self->{form_}{setsearch} ) );
+    $self->{old_search__} = $self->{form_}{search};
 
 
     # If the user is asking for a new sort option then it needs to get
     # stored in the sort form variable so that it can be used for subsequent
     # page views of the History to keep the sort in place
 
-    $self->{form__}{sort} = $self->{form__}{setsort} if ( defined( $self->{form__}{setsort} ) );
+    $self->{form_}{sort} = $self->{form_}{setsort} if ( defined( $self->{form_}{setsort} ) );
 
     # If the user hits the Reset button on a search then we need to clear
     # the search value but make it look as though they hit the search button
     # so that sort_filter_history will get called below to get the right values
     # in history_keys
 
-    if ( defined( $self->{form__}{reset_filter_search} ) ) {
-        $self->{form__}{filter}    = '';
-        $self->{form__}{search}    = '';
-        $self->{form__}{setsearch} = 1;
+    if ( defined( $self->{form_}{reset_filter_search} ) ) {
+        $self->{form_}{filter}    = '';
+        $self->{form_}{search}    = '';
+        $self->{form_}{setsearch} = 1;
     }
 
     # Set up the text that will appear at the top of the history page
     # indicating the current filter and search settings
 
     my $filtered = '';
-    if ( !( $self->{form__}{filter} eq '' ) ) {
-        if ( $self->{form__}{filter} eq '__filter__magnet' ) {
+    if ( !( $self->{form_}{filter} eq '' ) ) {
+        if ( $self->{form_}{filter} eq '__filter__magnet' ) {
             $filtered .= $self->{language__}{History_Magnet};
         } else {
-            $filtered = sprintf( $self->{language__}{History_Filter}, $self->{classifier__}->get_bucket_color($self->{form__}{filter}), $self->{form__}{filter} ) if ( $self->{form__}{filter} ne '' );
+            $filtered = sprintf( $self->{language__}{History_Filter}, $self->{classifier__}->get_bucket_color($self->{form_}{filter}), $self->{form_}{filter} ) if ( $self->{form_}{filter} ne '' );
         }
     }
 
-    $filtered .= sprintf( $self->{language__}{History_Search}, $self->{form__}{search} ) if ( $self->{form__}{search} ne '' );
+    $filtered .= sprintf( $self->{language__}{History_Search}, $self->{form_}{search} ) if ( $self->{form_}{search} ne '' );
 
     # Handle the reinsertion of a message file or the user hitting the
     # undo button
@@ -2619,7 +2527,7 @@ sub history_page
     # all the indexes into history_keys that need to be deleted.  We pass each file that needs
     # deleting into the history_delete_file helper
 
-    if ( defined( $self->{form__}{deletemessage} ) ) {
+    if ( defined( $self->{form_}{deletemessage} ) ) {
 
         # Remove the list of marked messages using the array of "remove" checkboxes, the fact
         # that deletemessage is defined will later on cause a call to sort_filter_history
@@ -2627,23 +2535,23 @@ sub history_page
         # in the cache.  Note that there is no need to invalidate the history cache since
         # we are in control of deleting messages
 
-        for my $i ( 0 .. $#{$self->{form__}{remove_array}} ) {
-            $self->history_delete_file( $self->{history_keys__}[$self->{form__}{remove_array}[$i] - 1], 0);
+        for my $i ( 0 .. $#{$self->{form_}{remove_array}} ) {
+            $self->history_delete_file( $self->{history_keys__}[$self->{form_}{remove_array}[$i] - 1], 0);
         }
     }
 
     # Handle clearing the history files, there are two options here, clear the current page
     # or clear all the files in the cache
 
-    if ( defined( $self->{form__}{clearall} ) ) {
+    if ( defined( $self->{form_}{clearall} ) ) {
         foreach my $i (0 .. $self->history_size()-1 ) {
             $self->history_delete_file( $self->{history_keys__}[$i],
                                         $self->config_( 'archive' ) );
         }
     }
 
-    if ( defined($self->{form__}{clearpage}) ) {
-        foreach my $i ( $self->{form__}{start_message} .. $self->{form__}{start_message} + $self->config_( 'page_size' ) - 1 ) {
+    if ( defined($self->{form_}{clearpage}) ) {
+        foreach my $i ( $self->{form_}{start_message} .. $self->{form_}{start_message} + $self->config_( 'page_size' ) - 1 ) {
             if ( defined( $self->{history_keys__}[$i] ) ) {
                 $self->history_delete_file( $self->{history_keys__}[$i],
                                             $self->config_( 'archive' ) );
@@ -2656,32 +2564,32 @@ sub history_page
     # applied.  The watch word here is to avoid doing work
 
     $self->load_history_cache__() if ( $self->{history_invalid__} == 1 );
-    $self->sort_filter_history( $self->{form__}{filter},
-                                $self->{form__}{search},
-                                $self->{form__}{sort} ) if ( ( defined( $self->{form__}{setfilter}     ) ) ||
-                                                            ( defined( $self->{form__}{setsort}       ) ) ||
-                                                            ( defined( $self->{form__}{setsearch}     ) ) ||
-                                                            ( defined( $self->{form__}{deletemessage} ) ) ||
-                                                            ( defined( $self->{form__}{clearall}      ) ) ||
-                                                            ( defined( $self->{form__}{clearpage}     ) ) );
+    $self->sort_filter_history( $self->{form_}{filter},
+                                $self->{form_}{search},
+                                $self->{form_}{sort} ) if ( ( defined( $self->{form_}{setfilter}     ) ) ||
+                                                            ( defined( $self->{form_}{setsort}       ) ) ||
+                                                            ( defined( $self->{form_}{setsearch}     ) ) ||
+                                                            ( defined( $self->{form_}{deletemessage} ) ) ||
+                                                            ( defined( $self->{form_}{clearall}      ) ) ||
+                                                            ( defined( $self->{form_}{clearpage}     ) ) );
     my $body = '';
 
     if ( !$self->history_cache_empty() )  {
         my $highlight_message = '';
         my $start_message = 0;
 
-        $start_message = $self->{form__}{start_message} if ( ( defined($self->{form__}{start_message}) ) && ($self->{form__}{start_message} > 0 ) );
+        $start_message = $self->{form_}{start_message} if ( ( defined($self->{form_}{start_message}) ) && ($self->{form_}{start_message} > 0 ) );
         my $stop_message  = $start_message + $self->config_( 'page_size' ) - 1;
 
         # Verify that a message we are being asked to view (perhaps from a /jump_to_message URL) is actually between
         # the $start_message and $stop_message, if it is not then move to that message
 
-        if ( defined($self->{form__}{view}) ) {
+        if ( defined($self->{form_}{view}) ) {
             my $found = 0;
             foreach my $i ($start_message ..  $stop_message) {
                 if ( defined ( $self->{history_keys__}[$i] ) ) {
                     my $mail_file = $self->{history_keys__}[$i];
-                    if ( $self->{form__}{view} eq $mail_file )  {
+                    if ( $self->{form_}{view} eq $mail_file )  {
                         $found = 1;
                         last;
                     }
@@ -2691,7 +2599,7 @@ sub history_page
             if ( $found == 0 ) {
                 foreach my $i ( 0 .. ( $self->history_size() - 1 ) )  {
                     my $mail_file = $self->{history_keys__}[$i];
-                    if ( $self->{form__}{view} eq $mail_file ) {
+                    if ( $self->{form_}{view} eq $mail_file ) {
                         $start_message = $i;
                         $stop_message  = $i + $self->config_( 'page_size' ) - 1;
                         last;
@@ -2726,28 +2634,28 @@ sub history_page
         # History page main form
 
         $body .= "<form id=\"HistoryMainForm\" action=\"/history\" method=\"POST\">\n";
-        $body .= "<input type=\"hidden\" name=\"search\" value=\"$self->{form__}{search}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form__}{sort}\" />\n";
+        $body .= "<input type=\"hidden\" name=\"search\" value=\"$self->{form_}{search}\" />\n";
+        $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form_}{sort}\" />\n";
         $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
         $body .= "<input type=\"hidden\" name=\"start_message\" value=\"$start_message\" />\n";
-        $body .= "<input type=\"hidden\" name=\"filter\" value=\"$self->{form__}{filter}\" />\n";
+        $body .= "<input type=\"hidden\" name=\"filter\" value=\"$self->{form_}{filter}\" />\n";
 
         # History messages
         $body .= "<table class=\"historyTable\" width=\"100%\" summary=\"$self->{language__}{History_MainTableSummary}\">\n";
         # column headers
         $body .= "<tr valign=\"bottom\">\n";
         $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-        $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form__}{filter}&amp;setsort=\">";
-        if ( $self->{form__}{sort} eq '' ) {
+        $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form_}{filter}&amp;setsort=\">";
+        if ( $self->{form_}{sort} eq '' ) {
             $body .= "<em class=\"historyLabelSort\">ID</em>";
         } else {
             $body .= "ID";
         }
         $body .= "</a>\n</th>\n";
         $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-        $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form__}{filter}&amp;setsort=from\">";
+        $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form_}{filter}&amp;setsort=from\">";
 
-        if ( $self->{form__}{sort} eq 'from' ) {
+        if ( $self->{form_}{sort} eq 'from' ) {
             $body .= "<em class=\"historyLabelSort\">$self->{language__}{From}</em>";
         } else {
             $body .= "$self->{language__}{From}";
@@ -2755,9 +2663,9 @@ sub history_page
 
         $body .= "</a>\n</th>\n";
         $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-        $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form__}{filter}&amp;setsort=subject\">";
+        $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form_}{filter}&amp;setsort=subject\">";
 
-        if ( $self->{form__}{sort} eq 'subject' ) {
+        if ( $self->{form_}{sort} eq 'subject' ) {
             $body .= "<em class=\"historyLabelSort\">$self->{language__}{Subject}</em>";
         } else {
             $body .= "$self->{language__}{Subject}";
@@ -2765,9 +2673,9 @@ sub history_page
 
         $body .= "</a>\n</th>\n";
         $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-        $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form__}{filter}&amp;setsort=bucket\">";
+        $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form_}{filter}&amp;setsort=bucket\">";
 
-        if ( $self->{form__}{sort} eq 'bucket' ) {
+        if ( $self->{form_}{sort} eq 'bucket' ) {
             $body .= "<em class=\"historyLabelSort\">$self->{language__}{Classification}</em>";
         } else {
             $body .= "$self->{language__}{Classification}";
@@ -2789,7 +2697,7 @@ sub history_page
             my $reclassified  = $self->{history__}{$mail_file}{reclassified};
 
             $body .= "<tr";
-            if ( ( ( defined($self->{form__}{view}) ) && ( $self->{form__}{view} eq $mail_file ) ) || ( ( defined($self->{form__}{file}) && ( $self->{form__}{file} eq $mail_file ) ) ) || ( $highlight_message eq $mail_file ) ) {
+            if ( ( ( defined($self->{form_}{view}) ) && ( $self->{form_}{view} eq $mail_file ) ) || ( ( defined($self->{form_}{file}) && ( $self->{form_}{file} eq $mail_file ) ) ) || ( $highlight_message eq $mail_file ) ) {
                 $body .= " class=\"rowHighlighted\"";
             } else {
                 $body .= " class=\"";
@@ -2803,7 +2711,7 @@ sub history_page
             $body .= $i+1 . "</td>\n<td>";
             $mail_file =~ /popfile\d+=(\d+)\.msg$/;
             $body .= "<a title=\"$from\">$short_from</a></td>\n";
-            $body .= "<td><a class=\"messageLink\" title=\"$subject\" href=\"/history?view=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form__}{sort}&amp;filter=$self->{form__}{filter}&amp;search=$self->{form__}{search}#$mail_file\">";
+            $body .= "<td><a class=\"messageLink\" title=\"$subject\" href=\"/history?view=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;filter=$self->{form_}{filter}&amp;search=$self->{form_}{search}#$mail_file\">";
             $body .= "$short_subject</a></td>\n<td>";
             if ( $reclassified )  {
                 $body .= "<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></td>\n<td>";
@@ -2827,7 +2735,7 @@ sub history_page
                     }
                     $body .= "</select>\n";
 
-                    if ( ( defined($self->{form__}{view}) ) && ( $self->{form__}{view} eq $mail_file ) ) {
+                    if ( ( defined($self->{form_}{view}) ) && ( $self->{form_}{view} eq $mail_file ) ) {
                         $body .= "<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />";
                     }
                 } else {
@@ -2842,13 +2750,13 @@ sub history_page
 
 
             # Check to see if we want to view a message
-            if ( ( defined($self->{form__}{view}) ) && ( $self->{form__}{view} eq $mail_file ) ) {
+            if ( ( defined($self->{form_}{view}) ) && ( $self->{form_}{view} eq $mail_file ) ) {
                 $body .= "<tr>\n<td></td>\n<td colspan=\"5\" valign=\"top\">\n";
                 $body .= "<table class=\"openMessageTable\" cellpadding=\"10%\" cellspacing=\"0\" width=\"100%\" summary=\"$self->{language__}{History_OpenMessageSummary}\">\n";
 
                 # Close button
                 $body .= "<tr>\n<td class=\"openMessageCloser\">\n";
-                $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form__}{sort}&amp;search=$self->{form__}{search}&amp;filter=$self->{form__}{filter}\">\n";
+                $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">\n";
                 $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span></a>\n";
                 $body .= "<br /><br />\n</td>\n</tr>\n";
 
@@ -2856,14 +2764,14 @@ sub history_page
                 $body .= "<tr>\n<td class=\"openMessageBody\">";
 
                 if ( $self->{history__}{$mail_file}{magnet} eq '' )  {
-                    $body .= $self->{classifier__}->get_html_colored_message($self->global_config_( 'msgdir' ) . $self->{form__}{view});
+                    $body .= $self->{classifier__}->get_html_colored_message($self->global_config_( 'msgdir' ) . $self->{form_}{view});
                 } else {
                     $self->{history__}{$mail_file}{magnet} =~ /(.+): ([^\r\n]+)/;
                     my $header = $1;
                     my $text   = $2;
                     $body .= "<tt>";
 
-                    open MESSAGE, '<' . $self->global_config_( 'msgdir' ) . "$self->{form__}{view}";
+                    open MESSAGE, '<' . $self->global_config_( 'msgdir' ) . "$self->{form_}{view}";
                     my $line;
                     # process each line of the message
                     while ($line = <MESSAGE>) {
@@ -2896,12 +2804,12 @@ sub history_page
 
                 # Close button
                 $body .= "<tr>\n<td class=\"openMessageCloser\">";
-                $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form__}{sort}&amp;search=$self->{form__}{search}&amp;filter=$self->{form__}{filter}\">\n";
+                $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">\n";
                 $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
                 $body .= "</td>\n</tr>\n</table>\n";
 
                 $body .= "<table><tr><td class=\"top20\" valign=\"top\">\n";
-                $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . "$self->{form__}{view}");
+                $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . "$self->{form_}{view}");
                 $body .= $self->{classifier__}->{scores__};
                 $body .= "</tr></table></td>\n</tr>\n";
             }
@@ -2911,7 +2819,7 @@ sub history_page
                 delete $self->{feedback}{$mail_file};
             }
 
-            # $body .= "<tr class=\"rowHighlighted\"><td><td>" . sprintf( $self->{language__}{History_ChangedTo}, " . $self->{classifier__}->get_bucket_color($self->{form__}{shouldbe}) . ", $self->{form__}{shouldbe} ) if ( ( defined($self->{form__}{file}) ) && ( $self->{form__}{file} eq $mail_file ) );
+            # $body .= "<tr class=\"rowHighlighted\"><td><td>" . sprintf( $self->{language__}{History_ChangedTo}, " . $self->{classifier__}->get_bucket_color($self->{form_}{shouldbe}) . ", $self->{form_}{shouldbe} ) if ( ( defined($self->{form_}{file}) ) && ( $self->{form_}{file} eq $mail_file ) );
         }
 
         $body .= "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td><input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />\n</td><td><input type=\"submit\" class=\"deleteButton\" name=\"deletemessage\" value=\"$self->{language__}{Remove}\" />\n</td></tr>\n";
@@ -2924,8 +2832,8 @@ sub history_page
 
         # History buttons bottom
         $body .= "<table class=\"historyWidgetsBottom\" summary=\"\">\n<tr>\n<td>\n";
-        $body .= "<form action=\"/history\">\n<input type=\"hidden\" name=\"filter\" value=\"$self->{form__}{filter}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form__}{sort}\" />\n";
+        $body .= "<form action=\"/history\">\n<input type=\"hidden\" name=\"filter\" value=\"$self->{form_}{filter}\" />\n";
+        $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form_}{sort}\" />\n";
         $body .= "<span class=\"historyLabel\">$self->{language__}{History_Remove}:&nbsp;</span>\n";
         $body .= "<input type=\"submit\" class=\"submit\" name=\"clearall\" value=\"$self->{language__}{History_RemoveAll}\" />\n";
         $body .= "<input type=\"submit\" class=\"submit\" name=\"clearpage\" value=\"$self->{language__}{History_RemovePage}\" />\n";
@@ -2980,186 +2888,6 @@ sub session_page
 {
     my ( $self, $client ) = @_;
     http_ok($self, $client, "<h2 class=\"session\">$self->{language__}{Session_Title}</h2><br /><br />$self->{language__}{Session_Error}", 99);
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# parse_form    - parse form data and fill in $self->{form__}
-#
-# $form         The text of the form arguments (e.g. foo=bar&baz=fou)
-#
-# ---------------------------------------------------------------------------------------------
-sub parse_form
-{
-    my ( $self, $arguments ) = @_;
-
-    # Normally the browser should have done &amp; to & translation on
-    # URIs being passed onto us, but there was a report that someone
-    # was having a problem with form arguments coming through with
-    # something like http://127.0.0.1/history?session=foo&amp;filter=bar
-    # which would mess things up in the argument splitter so this code
-    # just changes &amp; to & for safety
-
-    $arguments =~ s/&amp;/&/g;
-
-    while ( $arguments =~ m/\G(.*?)=(.*?)(&|\r|\n|$)/g ) {
-        my $arg = $1;
-        $self->{form__}{$arg} = $2;
-
-        # Expand %7E (hex) escapes in the form data
-
-        $self->{form__}{$arg} =~ s/%([0-9A-F][0-9A-F])/chr hex $1/gie;
-
-        $self->{form__}{$arg} =~ s/\+/ /g;
-
-        # Push the value onto an array to allow for multiple values of the same name
-
-        push( @{ $self->{form__}{$arg . "_array"} }, $self->{form__}{$arg} );
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# handle_url - Handle a URL request
-#
-# $client     The web browser to send the results to
-# $url        URL to process
-# $command    The HTTP command used (GET or POST)
-# $content    Any non-header data in the HTTP command
-#
-# Takes a URL and splits it into the URL portion and form arguments specified in the command
-# filling out the %form hash with the form elements and their values.  Checks the session
-# key and refuses access unless it matches.  Serves up a small set of specific urls that are
-# the main UI pages and then any GIF file in the POPFile directory and CSS files in the skins
-# subdirectory
-#
-# ---------------------------------------------------------------------------------------------
-sub handle_url
-{
-    my ( $self, $client, $url, $command, $content ) = @_;
-
-    # See if there are any form parameters and if there are parse them into the %form hash
-
-    delete $self->{form__};
-
-    # Remove a # element
-
-    $url =~ s/#.*//;
-
-    # If the URL was passed in through a GET then it may contain form arguments
-    # separated by & signs, which we parse out into the $self->{form__} where the
-    # key is the argument name and the value the argument value, for example if
-    # you have foo=bar in the URL then $self->{form__}{foo} is bar.
-
-    if ( $command =~ /GET/i ) {
-        if ( $url =~ s/\?(.*)// )  {
-            $self->parse_form( $1 );
-        }
-    }
-
-    # If the URL was passed in through a POST then look for the POST data
-    # and parse it filling the $self->{form__} in the same way as for GET
-    # arguments
-
-    if ( $command =~ /POST/i ) {
-        $content =~ s/[\r\n]//g;
-        $self->parse_form( $content );
-    }
-
-    if ( $url eq '/jump_to_message' )  {
-        my $found = 0;
-        my $file = $self->{form__}{view};
-        foreach my $akey ( keys %{ $self->{history__} } ) {
-            if ($akey eq $file) {
-                $found = 1;
-                last;
-            }
-        }
-        
-        #Reset any filters
-        $self->{form__}{filter}    = '';
-        $self->{form__}{search}    = '';
-        $self->{form__}{setsearch} = 1;
-
-        # Force a history_reload if we did not find this file in the history cache
-        # but we do find it on disk using perl's -e file test operator (returns
-        # true if the file exists).
-
-        $self->invalidate_history_cache() if ( !$found && ( -e ($self->global_config_( 'msgdir' ) . "$file") ) );
-        $self->http_redirect( $client, "/history?session=$self->{session_key__}&start_message=0&view=$self->{form__}{view}#$self->{form__}{view}" );
-        return 1;
-    }
-
-    if ( $url =~ /\/(.+\.gif)/ ) {
-        http_file( $self,  $client, $1, 'image/gif' );
-        return 1;
-    }
-
-    if ( $url =~ /(skins\/.+\.css)/ ) {
-        http_file( $self,  $client, $1, 'text/css' );
-        return 1;
-    }
-
-    if ( $url =~ /(manual\/.+\.html)/ ) {
-        http_file( $self,  $client, $1, 'text/html' );
-        return 1;
-    }
-
-    # Check the password
-    if ( $url eq '/password' )  {
-        if ( $self->{form__}{password} eq $self->config_( 'password' ) )  {
-            change_session_key( $self );
-            delete $self->{form__}{password};
-            $self->{form__}{session} = $self->{session_key__};
-            if ( defined( $self->{form__}{redirect} ) ) {
-                $url = $self->{form__}{redirect};
-            } else {
-                $url = '/';
-            }
-        } else {
-            password_page( $self, $client, 1, '/' );
-            return 1;
-        }
-    }
-
-    # If there's a password defined then check to see if the user already knows the
-    # session key, if they don't then drop to the password screen
-    if ( ( (!defined($self->{form__}{session})) || ($self->{form__}{session} eq '' ) || ( $self->{form__}{session} ne $self->{session_key__} ) ) && ( $self->config_( 'password' ) ne '' ) ) {
-        password_page( $self, $client, 0, $url );
-        return 1;
-    }
-
-    if ( ( defined($self->{form__}{session}) ) && ( $self->{form__}{session} ne $self->{session_key__} ) ) {
-        session_page( $self, $client, 0, $url );
-        return 1;
-    }
-
-    if ( ( $url eq '/' ) || (!defined($self->{form__}{session})) ) {
-        delete $self->{form__};
-    }
-
-    if ( $url eq '/shutdown' )  {
-        http_ok( $self, $client, "POPFile shutdown", -1 );
-        return 0;
-    }
-
-    my %url_table = (   '/security'      => \&security_page,
-                        '/configuration' => \&configuration_page,
-                        '/buckets'       => \&corpus_page,
-                        '/magnets'       => \&magnet_page,
-                        '/advanced'      => \&advanced_page,
-                        '/history'       => \&history_page,
-                        '/'              => \&history_page );
-
-    # Any of the standard pages can be found in the url_table, the other pages are probably
-    # files on disk
-    if ( defined($url_table{$url}) )  {
-        &{$url_table{$url}}($self, $client);
-        return 1;
-    }
-
-    http_error($self, $client, 404);
-    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -3342,11 +3070,10 @@ sub history_delete_file
     # Now remove the files from the disk, remove both the msg file containing
     # the mail message and its associated CLS file
 
-    unlink( $self->global_config_( 'msgdir' ) . "$mail_file" );
+    unlink( $self->global_config_( 'msgdir' ) . $mail_file );
     $mail_file =~ s/msg$/cls/;
-    unlink( $self->global_config_( 'msgdir' ) . "$mail_file" );
+    unlink( $self->global_config_( 'msgdir' ) . $mail_file );
 }
-
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -3361,18 +3088,87 @@ sub history_delete_file
 sub history_copy_file
 {
     my ( $self, $from, $to_dir, $to_name ) = @_;
+
     if ( open( FROM, "<$from") ) {
-      if ( open( TO, ">$to_dir\/$to_name") ) {
+        if ( open( TO, ">$to_dir\/$to_name") ) {
             binmode FROM;
             binmode TO;
+
             while (<FROM>) {
                 print TO $_;
             }
-        close TO;
+
+            close TO;
         }
+
         close FROM;
     }
 }
+
+# ---------------------------------------------------------------------------------------------
+# register_configuration_item
+#
+#     $type            The type of item (configuration, security or chain)
+#     $name            The name of the item
+#     $object          Reference to the object calling this method
+#
+# This seemingly innocent method disguises a lot.  It is called by modules that wish to
+# register that they have specific elements of UI that need to be dynamically added to the
+# Configuration and Security screens of POPFile.  This is done so that the HTML module does
+# not need to know about the modules that are loaded, their individual configuration elements
+# or how to do validation
+#
+# A module calls this method for each separate UI element (normally an HTML form that handles
+# a single configuration option) and passes in three pieces of information:
+#
+# The type is the position in the UI where the element is to be displayed. configuration means
+# on the Configuration screen under "Module Options"; security means on the Security page
+# and is used exclusively for stealth mode operation right now; chain is also on the security
+# page and is used for identifying chain servers (in the case of SMTP the chained server and
+# for POP3 the SPA server)
+#
+# The name (this is usually the name of the configuration option this registration is for, but
+# any unique ID is acceptable).
+#
+# A reference to itself.
+#
+# When this module needs to display an element of UI it will call the object's configure_item
+# public method passing in the name of the element required, a reference to the hash containing
+# the current language strings and the session ID.  configure_item must return the complete
+# HTML for the item
+#
+# When the module needs to validate it will call the object's validate_item interface passing
+# in the name of the element, a reference to the language hash and a reference to the form
+# hash which has been parsed.  validate_item returns HTML if it desires containing a
+# confirmation or error message, or may return nothing if there was nothing in the form of
+# interest to that specific module
+#
+# Example the module foo has a configuration item called bar which it needs a UI for, and
+# so it calls
+#
+#    register_configuration_item( 'configuration', 'foo_bar', $self )
+#
+# later it will receive a call to its
+#
+#    configure_item( 'foo_bar', language hash, session key )
+#
+# and needs to return the HTML for the foo_bar item.  Then it will may receive a call to its
+#
+#    validate_item( 'foo_bar', language hash, form hash )
+#
+# and needs to check the form for information from any form it created and returned from the
+# call to configure_item and update its own state.  It can optionally return HTML that
+# will be displayed at the top of the page
+#
+# ---------------------------------------------------------------------------------------------
+sub register_configuration_item
+{
+   my ( $self, $type, $name, $object ) = @_;
+
+   $self->{dynamic_ui__}{$type}{$name} = $object;
+}
+
+# GETTERS/SETTERS
 
 sub classifier
 {

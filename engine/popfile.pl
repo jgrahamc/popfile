@@ -188,6 +188,8 @@ sub load_modules
 {
      my ( $directory, $type ) = @_;
 
+     print "\n         {$type:";
+
      # Look for all the .pm files in named directory and then see which of them
      # are POPFile modules indicated by the first line of the file being and
      # comment (# POPFILE LOADABLE MODULE) and load that module into the %components
@@ -211,10 +213,12 @@ sub load_modules
 
                     $components{$type}{$name} = $mod;
 
-                    print " {$name}";
+                    print " $name";
                }
           }
      }
+
+     print '} ';
 }
 
 #
@@ -222,6 +226,11 @@ sub load_modules
 # MAIN
 #
 #
+
+my ( $major_version, $minor_version, $build_version ) = ( 0, 19, 0 );
+my $version_string = "v$major_version.$minor_version.$build_version";
+
+print "\nPOPFile Engine $version_string loading\n";
 
 $SIG{QUIT}  = \&aborting;
 $SIG{ABRT}  = \&aborting;
@@ -238,7 +247,7 @@ $SIG{CHLD}  = $on_windows?'IGNORE':\&reaper;
 # Create the main objects that form the core of POPFile.  Consists of the configuration
 # modules, the classifier, the UI (currently HTML based), and the POP3 proxy.
 
-print "    Loading... ";
+print "\n    Loading... ";
 
 # Look for a module called Platform::<platform> where <platform> is the value of $^O
 # and if it exists then load it as a component of POPFile.  IN this way we can have
@@ -253,52 +262,49 @@ if ( -e "Platform/$platform.pm" ) {
    my $mod  = new $platform;
    my $name = $mod->name();
    $components{core}{$name} = $mod;
-   print " {$name}";
+   print "\n         {core: $name}";
 }
 
 load_modules( 'POPFile',    'core'       );
 load_modules( 'Classifier', 'classifier' );
-load_modules( 'UI',         'ui'         );
+load_modules( 'UI',         'interface' );
 load_modules( 'Proxy',      'proxy'      );
 
-# The version number
-
-$components{core}{config}->{major_version} = 0;
-$components{core}{config}->{minor_version} = 19;
-$components{core}{config}->{build_version} = 0;
-
-print "\nPOPFile Engine v$components{core}{config}->{major_version}.$components{core}{config}->{minor_version}.$components{core}{config}->{build_version} starting";
+print "\n\nPOPFile Engine $version_string starting";
 
 # Link each of the main objects with the configuration object so that they can set their
 # default parameters all or them also get access to the logger
 
 foreach my $type (keys %components) {
      foreach my $name (keys %{$components{$type}}) {
+          $components{$type}{$name}->version(       $version_string           );
           $components{$type}{$name}->configuration( $components{core}{config} );
           $components{$type}{$name}->logger(        $components{core}{logger} ) if ( $name ne 'logger' );
      }
 }
 
-# All proxies need access to the classifier and the UI
+# All proxies need access to the classifier and the interface
 
 foreach my $name (keys %{$components{proxy}}) {
      $components{proxy}{$name}->classifier( $components{classifier}{bayes} );
-     $components{proxy}{$name}->ui(         $components{ui}{ui} );
+     $components{proxy}{$name}->ui(         $components{interface}{html} );
 }
 
-# All UI components need access to the classifier
+# All interface components need access to the classifier and the UI
 
-foreach my $name (keys %{$components{ui}}) {
-     $components{ui}{$name}->classifier( $components{classifier}{bayes} );
+foreach my $name (keys %{$components{interface}}) {
+     $components{interface}{$name}->classifier( $components{classifier}{bayes} );
+     $components{interface}{$name}->ui(         $components{interface}{html} ) if ( $name ne 'html' );
 }
 
-print "\n    Initializing... ";
+print "\n\n    Initializing... ";
 
 # Tell each module to initialize itself
 
 foreach my $type (keys %components) {
+     print "\n         {$type:";
      foreach my $name (keys %{$components{$type}}) {
-          print "{$name} ";
+          print " $name";
           flush STDOUT;
           if ( $components{$type}{$name}->initialize() == 0 ) {
                die "Failed to start while initializing the $name module";
@@ -308,6 +314,7 @@ foreach my $type (keys %components) {
           $components{$type}{$name}->forker(    \&forker );
           $components{$type}{$name}->pipeready( \&pipeready );
      }
+     print '} ';
 }
 
 # Load the configuration from disk and then apply any command line
@@ -316,21 +323,23 @@ foreach my $type (keys %components) {
 $components{core}{config}->load_configuration();
 $components{core}{config}->parse_command_line();
 
-print "\n    Starting...     ";
+print "\n\n    Starting...     ";
 
 # Now that the configuration is set tell each module to begin operation
 
 foreach my $type (keys %components) {
+     print "\n         {$type:";
      foreach my $name (keys %{$components{$type}}) {
-          print "{$name} ";
+          print " $name";
           flush STDOUT;
           if ( $components{$type}{$name}->start() == 0 ) {
                die "Failed to start while starting the $name module";
           }
      }
+     print '} ';
 }
 
-print "\nPOPFile Engine v$components{core}{config}->{major_version}.$components{core}{config}->{minor_version}.$components{core}{config}->{build_version} running\n";
+print "\n\nPOPFile Engine $version_string running\n";
 flush STDOUT;
 
 # MAIN LOOP - Call each module's service() method to all it to
@@ -362,26 +371,32 @@ while ( $alive == 1 ) {
     }
 }
 
-print "    Stopping... ";
+print "\n\nPOPFile Engine $version_string stopping\n";
+flush STDOUT;
+
+print "\n    Stopping... ";
 
 # Shutdown all the modules
 
 foreach my $type (keys %components) {
+      print "\n         {$type:";
      foreach my $name (keys %{$components{$type}}) {
-          print "{$name} ";
+          print " $name";
 	  flush STDOUT;
           $components{$type}{$name}->alive(0);
           $components{$type}{$name}->stop();
      }
+
+     print '} ';
 }
 
-print "\n    Saving configuration\n";
+print "\n\n    Saving configuration\n";
 flush STDOUT;
 
 # Write the final configuration to disk
 
 $components{core}{config}->save_configuration();
 
-print "POPFile Engine v$components{core}{config}->{major_version}.$components{core}{config}->{minor_version}.$components{core}{config}->{build_version} terminating\n";
+print "\nPOPFile Engine $version_string terminated\n";
 
 # ---------------------------------------------------------------------------------------------

@@ -373,4 +373,15 @@ sub name
     return $self->{name__};
 }
 
+sub version
+{
+    my ( $self, $value ) = @_;
+
+    if ( defined( $value ) ) {
+        $self->{version_} = $value;
+    }
+
+    return $self->{version_};
+}
+
 1;

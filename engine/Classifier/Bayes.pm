@@ -831,8 +831,8 @@ sub classify_and_modify
     my $xpl = '';
 
     $xpl .= "<http://";
-    $xpl .= $self->module_config_( 'pop3', 'local' )?"127.0.0.1":$self->{hostname__};
-    $xpl .= ":" . $self->module_config_( 'ui', 'port' ) . "/jump_to_message?view=$temp_file>$eol";
+    $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->{hostname__};
+    $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$temp_file>$eol";
 
     if ( $self->global_config_( 'xpl' ) && ( $self->{parameters__}{$classification}{quarantine} == 0 ) ) {
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
@@ -898,8 +898,6 @@ sub classify_and_modify
 
     return $classification;
 }
-
-# GETTER/SETTERS
 
 # ---------------------------------------------------------------------------------------------
 #

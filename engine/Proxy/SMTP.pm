@@ -67,6 +67,25 @@ sub initialize
 
     $self->config_( 'local', 1 );
 
+    # Tell the user interface module that we having a configuration
+    # item that needs a UI component
+
+    $self->{ui__}->register_configuration_item( 'configuration',
+                                                'smtp_port',
+                                                $self );
+
+    $self->{ui__}->register_configuration_item( 'security',
+                                                'smtp_local',
+                                                $self );
+
+    $self->{ui__}->register_configuration_item( 'chain',
+                                                'smtp_server',
+                                                $self );
+
+    $self->{ui__}->register_configuration_item( 'chain',
+                                                'smtp_server_port',
+                                                $self );
+
     return 1;
 }
 
@@ -91,7 +110,7 @@ sub child__
     my $mail;
 
     # Tell the client that we are ready for commands and identify our version number
-    $self->tee_(  $client, "220 SMTP POPFile (vTODO.TODO.TODO) server ready$eol" );
+    $self->tee_(  $client, "220 SMTP POPFile ($self->{version_}) server ready$eol" );
 
     # Retrieve commands from the client and process them until the client disconnects or
     # we get a specific QUIT command
@@ -108,10 +127,10 @@ sub child__
         if ( $command =~ /HELO|EHLO/i ) {
             if ( $self->config_( 'chain_server' ) )  {
                 if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'chain_server' ),  $self->config_( 'chain_port' ) ) )  {
-                    
+
                     $self->smtp_echo_response_( $mail, $client, $command );
 
-                    
+
                 } else {
                     last;
                 }
@@ -199,20 +218,130 @@ sub child__
 # Returns true if the initial response is a 2xx or 3xx series (as defined by {good_response_}
 #
 # ---------------------------------------------------------------------------------------------
-
-
-
 sub smtp_echo_response_
 {
     my ($self, $mail, $client, $command) = @_;
     my $response = $self->get_response_( $mail, $client, $command );
-    
+
     if ( $response =~ /^[23]\d\d-/ ) {
         $self->echo_to_regexp_($mail, $client, qr/^\d\d\d /, 1);
     }
     return ( $response =~ /$self->{good_response_}/ );
 }
 
-                
+# ---------------------------------------------------------------------------------------------
+#
+# configure_item
+#
+#    $name            The name of the item being configured, was passed in by the call
+#                     to register_configuration_item
+#    $language        Reference to the hash holding the current language
+#    $session_key     The current session key
+#
+#  Must return the HTML for this item
+# ---------------------------------------------------------------------------------------------
+
+sub configure_item
+{
+    my ( $self, $name, $language, $session_key ) = @_;
+
+    my $body;
+
+    if ( $name eq 'smtp_port' ) {
+        $body .= "<form action=\"/configuration\">\n";
+        $body .= "<label class=\"configurationLabel\" for=\"configPopPort\">$$language{Configuration_SMTPPort}:</label><br />\n";
+        $body .= "<input name=\"smtp_port\" type=\"text\" id=\"configPopPort\" value=\"" . $self->config_( 'port' ) . "\" />\n";
+        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_smtp_port\" value=\"$$language{Apply}\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+    }
+
+    if ( $name eq 'smtp_local' ) {
+        $body .= "<span class=\"securityLabel\">$$language{Security_SMTP}:</span><br />\n";
+
+        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
+        if ( $self->config_( 'local' ) == 1 ) {
+            $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
+            $body .= "<span class=\"securityWidgetStateOff\">$$language{Security_NoStealthMode}</span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securityAcceptPOP3On\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"smtp_local\" value=\"1\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        } else {
+            $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
+            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptPOP3Off\" name=\"toggle\" value=\"$$language{ChangeToNo} (Stealth Mode)\" />\n";
+            $body .= "<input type=\"hidden\" name=\"smtp_local\" value=\"2\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        }
+        $body .= "</td></tr></table>\n";
+     }
+
+    if ( $name eq 'smtp_server' ) {
+        $body .= "<form action=\"/security\">\n";
+        $body .= "<label class=\"securityLabel\" for=\"securitySecureServer\">$$language{Security_SMTPServer}:</label><br />\n";
+        $body .= "<input type=\"text\" name=\"smtp_chain_server\" id=\"securitySecureServer\" value=\"" . $self->config_( 'chain_server' ) . "\" />\n";
+        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_smtp_server\" value=\"$$language{Apply}\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+    }
+
+    if ( $name eq 'smtp_server_port' ) {
+        $body .= "<form action=\"/security\">\n";
+        $body .= "<label class=\"securityLabel\" for=\"securitySecurePort\">$$language{Security_SMTPPort}:</label><br />\n";
+        $body .= "<input type=\"text\" name=\"smtp_chain_server_port\" id=\"securitySecurePort\" value=\"" . $self->config_( 'chain_port' ) . "\" />\n";
+        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_smtp_server_port\" value=\"$$language{Apply}\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+    }
+
+    return $body;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# validate_item
+#
+#    $name            The name of the item being configured, was passed in by the call
+#                     to register_configuration_item
+#    $language        Reference to the hash holding the current language
+#    $form            Hash containing all form items
+#
+#  Must return the HTML for this item
+# ---------------------------------------------------------------------------------------------
+
+sub validate_item
+{
+    my ( $self, $name, $language, $form ) = @_;
+
+    if ( $name eq 'smtp_port' ) {
+        if ( defined($$form{smtp_port}) ) {
+            if ( ( $$form{smtp_port} >= 1 ) && ( $$form{smtp_port} < 65536 ) ) {
+                $self->config_( 'port', $$form{smtp_port} );
+                return '<blockquote>' . sprintf( $$language{Configuration_POP3Update} . '</blockquote>' , $self->config_( 'port' ) );
+             } else {
+                 return "<blockquote><div class=\"error01\">$$language{Configuration_Error3}</div></blockquote>";
+             }
+        }
+    }
+
+    if ( $name eq 'smtp_local' ) {
+        $self->config_( 'local', $$form{smtp_local}-1 ) if ( defined($$form{smtp_local}) );
+    }
+
+    if ( $name eq 'smtp_server' ) {
+         $self->config_( 'chain_server', $$form{smtp_chain_server} ) if ( defined($$form{smtp_chain_server}) );
+         return sprintf( "<blockquote>" . $$language{Security_SMTPServerUpdate} . "</blockquote>", $self->config_( 'chain_server' ) ) if ( defined($$form{smtp_chain_server}) );
+    }
+
+    if ( $name eq 'smtp_server_port' ) {
+        if ( defined($$form{smtp_chain_server_port}) ) {
+            if ( ( $$form{smtp_chain_server_port} >= 1 ) && ( $$form{smtp_chain_server_port} < 65536 ) ) {
+                $self->config_( 'chain_port', $$form{smtp_chain_server_port} );
+                return sprintf( "<blockquote>" . $$language{Security_SMTPPortUpdate} . "</blockquote>", $self->config_( 'chain_port' ) ) if ( defined($$form{smtp_chain_chain_port}) );
+            } else {
+                return "<blockquote><div class=\"error01\">$$language{Security_Error1}</div></blockquote>";
+            }
+        }
+    }
+
+    return '';
+}
 
 1;

@@ -234,20 +234,20 @@ sub upgrade_parameter__
 
 		     # Parameters that are now handled by UI::HTML
 
-		     'archive',                  'ui_archive',
-		     'archive_classes',          'ui_archive_classes',
-		     'archive_dir',              'ui_archive_dir',
-		     'history_days',             'ui_history_days',
-		     'language',                 'ui_language',
-		     'last_reset',               'ui_last_reset',
-		     'last_update_check',        'ui_last_update_check',
-		     'localui',                  'ui_local',
-		     'page_size',                'ui_page_size',
-		     'password',                 'ui_password',
-		     'send_stats',               'ui_send_stats',
-		     'skin',                     'ui_skin',
-		     'test_language',            'ui_test_language',
-		     'update_check',             'ui_update_check'
+		     'archive',                  'html_archive',
+		     'archive_classes',          'html_archive_classes',
+		     'archive_dir',              'html_archive_dir',
+		     'history_days',             'html_history_days',
+		     'language',                 'html_language',
+		     'last_reset',               'html_last_reset',
+		     'last_update_check',        'html_last_update_check',
+		     'localui',                  'html_local',
+		     'page_size',                'html_page_size',
+		     'password',                 'html_password',
+		     'send_stats',               'html_send_stats',
+		     'skin',                     'html_skin',
+		     'test_language',            'html_test_language',
+		     'update_check',             'html_update_check'
     );
 
     if ( defined( $upgrades{$parameter} ) ) {

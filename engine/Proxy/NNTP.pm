@@ -66,6 +66,21 @@ sub initialize
 
     $self->config_( 'separator', ':');
 
+    # Tell the user interface module that we having a configuration
+    # item that needs a UI component
+
+    $self->{ui__}->register_configuration_item( 'configuration',
+                                                'nntp_port',
+                                                $self );
+
+    $self->{ui__}->register_configuration_item( 'configuration',
+                                                'nntp_separator',
+                                                $self );
+
+    $self->{ui__}->register_configuration_item( 'security',
+                                                'nntp_local',
+                                                $self );
+
     return 1;
 }
 
@@ -121,13 +136,13 @@ sub child__
         }
 
         if ($connection_state eq 'username needed') {
-            
+
             # NOTE: This syntax is ambiguous if the NNTP username is a short (under 5 digit) string (eg, 32123).
             # If this is the case, run "perl popfile.pl -nntp_separator /" and change your kludged username
             # appropriately (syntax would then be server[:port][/username])
             my $user_command = '^ *AUTHINFO USER ([^:]+)(:([\d]{1,5}))?(\\' . $self->config_( 'separator' ) . '(.+))?';
 
-            if ( $command =~ /$user_command/i ) {                          
+            if ( $command =~ /$user_command/i ) {
                 my $server   = $1;
                 # hey, the port has to be in range at least
                 my $port     = $3 if ( defined($3) && ($3 > 0) && ($3 < 65536) );
@@ -294,3 +309,108 @@ sub child__
 
     $self->log_( "NNTP forked child done" );
 }
+
+# ---------------------------------------------------------------------------------------------
+#
+# configure_item
+#
+#    $name            The name of the item being configured, was passed in by the call
+#                     to register_configuration_item
+#    $language        Reference to the hash holding the current language
+#    $session_key     The current session key
+#
+#  Must return the HTML for this item
+# ---------------------------------------------------------------------------------------------
+
+sub configure_item
+{
+    my ( $self, $name, $language, $session_key ) = @_;
+
+    my $body;
+
+    if ( $name eq 'nntp_port' ) {
+        $body .= "<form action=\"/configuration\">\n";
+        $body .= "<label class=\"configurationLabel\" for=\"configPopPort\">$$language{Configuration_NNTPPort}:</label><br />\n";
+        $body .= "<input name=\"nntp_port\" type=\"text\" id=\"configPopPort\" value=\"" . $self->config_( 'port' ) . "\" />\n";
+        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_nntp_port\" value=\"$$language{Apply}\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+    }
+
+    # Separator Character widget
+    if ( $name eq 'nntp_separator' ) {
+        $body .= "\n<form action=\"/configuration\">\n";
+        $body .= "<label class=\"configurationLabel\" for=\"configSeparator\">$$language{Configuration_NNTPSeparator}:</label><br />\n";
+        $body .= "<input name=\"nntp_separator\" id=\"configSeparator\" type=\"text\" value=\"" . $self->config_( 'separator' ) . "\" />\n";
+        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_nntp_separator\" value=\"$$language{Apply}\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+    }
+
+    if ( $name eq 'nntp_local' ) {
+        $body .= "<span class=\"securityLabel\">$$language{Security_NNTP}:</span><br />\n";
+
+        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
+        if ( $self->config_( 'local' ) == 1 ) {
+            $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
+            $body .= "<span class=\"securityWidgetStateOff\">$$language{Security_NoStealthMode}</span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securityAcceptPOP3On\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"nntp_local\" value=\"1\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        } else {
+            $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
+            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptPOP3Off\" name=\"toggle\" value=\"$$language{ChangeToNo} (Stealth Mode)\" />\n";
+            $body .= "<input type=\"hidden\" name=\"nntp_local\" value=\"2\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        }
+        $body .= "</td></tr></table>\n";
+     }
+
+    return $body;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# validate_item
+#
+#    $name            The name of the item being configured, was passed in by the call
+#                     to register_configuration_item
+#    $language        Reference to the hash holding the current language
+#    $form            Hash containing all form items
+#
+#  Must return the HTML for this item
+# ---------------------------------------------------------------------------------------------
+
+sub validate_item
+{
+    my ( $self, $name, $language, $form ) = @_;
+
+    if ( $name eq 'nntp_port' ) {
+        if ( defined($$form{nntp_port}) ) {
+            if ( ( $$form{nntp_port} >= 1 ) && ( $$form{nntp_port} < 65536 ) ) {
+                $self->config_( 'port', $$form{nntp_port} );
+                return '<blockquote>' . sprintf( $$language{Configuration_NNTPUpdate} . '</blockquote>' , $self->config_( 'port' ) );
+             } else {
+                 return "<blockquote><div class=\"error01\">$$language{Configuration_Error3}</div></blockquote>";
+             }
+        }
+    }
+
+    if ( $name eq 'nntp_separator' ) {
+        if ( defined($$form{nntp_separator}) ) {
+            if ( length($$form{nntp_separator}) == 1 ) {
+                $self->config_( 'separator', $$form{separator} );
+                return '<blockquote>' . sprintf( $$language{Configuration_NNTPSepUpdate} . '</blockquote>' , $self->config_( 'separator' ) );
+            } else {
+                return "<blockquote>\n<div class=\"error01\">\n$$language{Configuration_Error1}</div>\n</blockquote>\n";
+            }
+        }
+    }
+
+    if ( $name eq 'nntp_local' ) {
+        $self->config_( 'local', $$form{nntp_local}-1 ) if ( defined($$form{nntp_local}) );
+    }
+
+    return '';
+}
+
+1;

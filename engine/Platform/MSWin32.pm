@@ -70,7 +70,7 @@ sub start
                             -height => 200 );
     $self->{icon__}    = new Win32::GUI::Icon('popfile.ico');
     $self->{notify__}  = $self->{window__}->AddNotifyIcon(
-                            -name => "NI",
+                            -name => "Platform::MSWin32::POPFileIcon",
                             -id   => 1,
                             -icon => $self->{icon__},
                             -tip  => "POPFile running; right click icon to terminate" );
@@ -89,7 +89,7 @@ sub stop
 {
     my ( $self ) = @_;
 
-    $self->{window__}->NI->Delete( -id => 1 );
+#    $self->{window__}->->Delete( -id => 1 );
     Win32::GUI::DoEvents();
 }
 
@@ -100,9 +100,10 @@ sub stop
 #
 # ---------------------------------------------------------------------------------------------
 
-sub NI_RightClick
+sub POPFileIcon_RightClick
 {
-    1;
+    print "rc"; 
+1;
 }
 
 1;
