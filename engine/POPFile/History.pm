@@ -677,7 +677,7 @@ sub start_deleting
 {
     my ( $self ) = @_;
 
-    $self->classifier_()->tweak_sqlite( 1, 1, $self->db_() );
+    $self->database_()->tweak_sqlite( 1, 1, $self->db_() );
 }
 
 #----------------------------------------------------------------------------
@@ -692,7 +692,7 @@ sub stop_deleting
 {
     my ( $self ) = @_;
 
-    $self->classifier_()->tweak_sqlite( 1, 0, $self->db_() );
+    $self->database_()->tweak_sqlite( 1, 0, $self->db_() );
 }
 
 #----------------------------------------------------------------------------
