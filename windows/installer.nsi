@@ -180,6 +180,11 @@
   !endif
 
   !define C_PFI_PRODUCT  "POPFile"
+
+  ; Name to be used for the installer program file (also used for the 'Version Information')
+
+  !define C_OUTFILE     "setup.exe"
+
   Name                   "${C_PFI_PRODUCT}"
 
   !define C_PFI_VERSION  "${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}${C_POPFILE_RC}"
@@ -287,18 +292,19 @@
   VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "POPFile Automatic email classification"
   VIAddVersionKey "FileVersion"      "${C_PFI_VERSION}"
+  VIAddVersionKey "OriginalFilename" "${C_OUTFILE}"
 
   !ifndef ENGLISH_MODE
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build"        "Multi-Language IMAP NNTP SMTP XMLRPC (with Kakasi)"
+      VIAddVersionKey "Build"        "Multi-Language installer (with Kakasi)"
     !else
-      VIAddVersionKey "Build"        "Multi-Language IMAP NNTP SMTP XMLRPC (without Kakasi)"
+      VIAddVersionKey "Build"        "Multi-Language installer (without Kakasi)"
     !endif
   !else
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build"        "English-Mode IMAP NNTP SMTP XMLRPC (with Kakasi)"
+      VIAddVersionKey "Build"        "English-Mode installer (with Kakasi)"
     !else
-      VIAddVersionKey "Build"        "English-Mode IMAP NNTP SMTP XMLRPC (without Kakasi)"
+      VIAddVersionKey "Build"        "English-Mode installer (without Kakasi)"
     !endif
   !endif
 
@@ -336,8 +342,7 @@
   ; and on all pages of the uninstaller.
 
   !define MUI_HEADERIMAGE
-##  !define MUI_HEADERIMAGE_BITMAP              "hdr-common.bmp"
-  !define MUI_HEADERIMAGE_BITMAP              "test\hdr-common-cvs.bmp"
+  !define MUI_HEADERIMAGE_BITMAP              "hdr-common.bmp"
   !define MUI_HEADERIMAGE_RIGHT
 
   ;----------------------------------------------------------------
@@ -362,8 +367,7 @@
 
   ; The "Special" bitmap appears on the 'WELCOME' and 'FINISH' pages
 
-##  !define MUI_WELCOMEFINISHPAGE_BITMAP        "special.bmp"
-  !define MUI_WELCOMEFINISHPAGE_BITMAP        "test\special-cvs.bmp"
+  !define MUI_WELCOMEFINISHPAGE_BITMAP        "special.bmp"
 
   ;----------------------------------------------------------------
   ;  Interface Settings - Installer FINISH Page Interface Settings
@@ -544,7 +548,8 @@
 #--------------------------------------------------------------------------
 
   ; Specify NSIS output filename
-  OutFile "setup.exe"
+
+  OutFile "${C_OUTFILE}"
 
   ; Ensure CRC checking cannot be turned off using the /NCRC command-line switch
 
@@ -1595,30 +1600,38 @@ Section /o "XMLRPC" SecXMLRPC
 
 SectionEnd
 
-#--------------------------------------------------------------------------
-# Installer Section: (optional) POPFile IMAP component (default = not selected)
-#
-# If this component is selected, the installer installs the experimental IMAP module.
-#--------------------------------------------------------------------------
-
-Section /o "IMAP" SecIMAP
-
-  SetDetailsPrint textonly
-  DetailPrint "Installing IMAP module..."
-  SetDetailsPrint listonly
-
-  ; Early versions of the IMAP.pm module were found in the 'POPFile' sub-folder but as part
-  ; of the preparation for the 0.22.0 release it was moved to the new 'Server' sub-folder
-
-  SetOutpath "$G_ROOTDIR\Server"
-  File "..\engine\Server\IMAP.pm"
-  Delete "$G_ROOTDIR\POPFile\IMAP.pm"
-
-  SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
-  SetDetailsPrint listonly
-
-SectionEnd
+#-------------------------------------------
+# IMAP is not included in the 0.22.0 release
+# -------------------------------------------
+;;
+;;#--------------------------------------------------------------------------
+;;# Installer Section: (optional) POPFile IMAP component (default = not selected)
+;;#
+;;# If this component is selected, the installer installs the experimental IMAP module.
+;;#--------------------------------------------------------------------------
+;;
+;;Section /o "IMAP" SecIMAP
+;;
+;;  SetDetailsPrint textonly
+;;  DetailPrint "Installing IMAP module..."
+;;  SetDetailsPrint listonly
+;;
+;;  ; Early versions of the IMAP.pm module were found in the 'POPFile' sub-folder but as part
+;;  ; of the preparation for the 0.22.0 release it was moved to the new 'Server' sub-folder
+;;
+;;  SetOutpath "$G_ROOTDIR\Server"
+;;  File "..\engine\Server\IMAP.pm"
+;;  Delete "$G_ROOTDIR\POPFile\IMAP.pm"
+;;
+;;  SetDetailsPrint textonly
+;;  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+;;  SetDetailsPrint listonly
+;;
+;;SectionEnd
+;;
+#-------------------------------------------
+# IMAP is not included in the 0.22.0 release
+# -------------------------------------------
 
 #--------------------------------------------------------------------------
 # Installer Section: (optional) Perl IO::Socket::Socks module (default = not selected)
@@ -1651,8 +1664,14 @@ SubSectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecNNTP}    "POPFile NNTP proxy"
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSMTP}    "POPFile SMTP proxy"
     !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}  $(DESC_SecXMLRPC)
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}  \
-        "Installs POPFile's experimental IMAP module"
+#-------------------------------------------
+# IMAP is not included in the 0.22.0 release
+# -------------------------------------------
+;;    !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}  \
+;;        "Installs POPFile's experimental IMAP module"
+#-------------------------------------------
+# IMAP is not included in the 0.22.0 release
+# -------------------------------------------
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSOCKS}  \
         "Installs extra Perl components which allow the POPFile proxies to use SOCKS"
     !ifndef NO_KAKASI
