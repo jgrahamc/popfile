@@ -1,0 +1,74 @@
+body {
+  background-color: #919AC9;
+  border: none;
+  font-family: verdana;
+  color: white;
+}
+
+a {
+    color: white;
+}
+
+input, select, submit {
+  color: white;
+  background-color: #363E68;
+  border: 1px #919AC9 solid;
+  font-weight: bold;
+  font-family: verdana;
+}
+
+.shell {
+   background-color: #4C558E;
+   border: 3px #363E68 solid;
+}
+
+.head {
+  font-weight: normal;
+  font-size: 22pt;
+}
+
+.head a {
+  font-size: 12pt;
+}
+
+.menu {
+  font-size: 14pt;
+  font-weight: bold;
+}
+
+.menu a {
+   color: white;
+}
+
+.menu_selected {
+  background-color: #363E68;
+  width: 150px;
+}
+
+.menu_standard {
+  background-color: #4C558E;
+  width: 150px;
+}
+
+.main {
+}
+
+.content {
+}
+
+.content th {
+}
+
+.row_even {
+    background-color: #4C558E;
+}
+
+.row_odd {
+    background-color: #363E68;
+}
+
+.footer {
+    background-color: #4C558E;
+    border: 3px #252A49 solid;
+}
+

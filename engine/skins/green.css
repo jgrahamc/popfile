@@ -1,0 +1,85 @@
+body {
+  background-color: #D7E9D9;
+  font-family: arial;
+  color: white;
+}
+
+a {
+    color: white;
+}
+
+input, select, submit {
+  color: white;
+  background-color: #7AAC80;
+  border: 1px white solid;
+  font-size: 8pt;
+  font-weight: normal;
+}
+
+.shell {
+   background-color: #7AAC80;
+   border: 1px white dashed;
+}
+
+.head {
+  font-weight: normal;
+  font-size: 12pt;
+}
+
+.head a {
+  font-size: 10pt;
+}
+
+.menu {
+  font-size: 10pt;
+}
+
+.menu a {
+   color: white;
+}
+
+.menu_selected {
+  background-color: #7AAC80;
+  width: 65px;
+  border: 1px white dashed;
+  height: 20px;
+}
+
+.menu_standard {
+  background-color: #2A582F;
+  width: 80px;
+  border: 1px black solid;
+  height: 20px;
+}
+
+.main {
+  font-size: 12px;
+}
+
+h2 {
+  font-size: 12pt;
+  font-weight: bold;
+}
+.content {
+  font-size: 10pt;
+  font-weight: normal;
+}
+
+.content th {
+  font-size: 10pt;
+  font-weight: normal;
+}
+
+.row_even {
+    background-color: #2A582F;
+}
+
+.row_odd {
+    background-color: #3A8643;
+}
+
+.footer {
+   background-color: #7AAC80;
+   border: 1px white dashed;
+}
+
