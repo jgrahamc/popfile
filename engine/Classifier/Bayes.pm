@@ -162,6 +162,9 @@ sub load_word_matrix
     $self->{matrix}     = {};
     $self->{total}      = {};
     $self->{full_total} = 0;
+    $self->{top10}      = {};
+    $self->{top10value} = {};
+    $self->{top10html}  = {};
     
     print "Loading the corpus...\n" if $self->{debug};
     
