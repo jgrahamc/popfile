@@ -76,17 +76,17 @@
 # Standard MUI Page - Directory Page (for the POPFile program files)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TITLE        "Choose Program Files Install Location"
-!insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TEXT_DESTN   "Destination Folder for the POPFile Program"
+!insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TITLE        "Escolha o Local de Instalação dos Arquivos de Programa"
+!insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TEXT_DESTN   "Pasta de Destino para o Programa POPFile"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Directory Page (for the POPFile User Data files)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TITLE        "Choose POPFile Data Location for '$G_WINUSERNAME'"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_SUBTITLE     "Choose the folder in which to store the POPFile Data for '$G_WINUSERNAME'"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "This version of POPFile uses separate sets of data files for each user.$\r$\n$\r$\nSetup will use the following folder for the POPFile data belonging to the '$G_WINUSERNAME' user. To use a different folder for this user, click Browse and select another folder. $_CLICK"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_DESTN   "Folder to be used to store the POPFile data for '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TITLE        "Escolha o Local dos Dados do POPFile para '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_SUBTITLE     "Escolha a pasta para guardar os Dados do POPFile para '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "Esta versão do POPFile usa conjuntos de arquivos de dados separados para cada usuário.$\r$\n$\r$\nO Instalador vai usar a seguinte pasta para os dados do POPFile pertencentes ao usuário'$G_WINUSERNAME'. Para usar uma pasta diferente para este usuário, clique em Procurar e selecione uma outra pasta. $_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_DESTN   "Pasta a ser usada para guardar os dados do POPFile para '$G_WINUSERNAME'"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Installation Page
