@@ -87,6 +87,7 @@ my @history_cache;
 my @from_cache;
 my @subject_cache;
 my @bucket_cache;
+my @magnet_cache;
 my @reclassified_cache;
 my $downloaded_mail = 0;
 
@@ -1101,8 +1102,9 @@ sub load_history_cache
     $#history_cache      = -1;
     $#bucket_cache       = -1;
     $#reclassified_cache = -1;
-    $#from_cache = -1;
-    $#subject_cache = -1;
+    $#from_cache         = -1;
+    $#subject_cache      = -1;
+    $#magnet_cache       = -1;
     $downloaded_mail     = 0;
     my $j = 0;
 
@@ -1117,9 +1119,19 @@ sub load_history_cache
         $history[$i] =~ /(popfile.*\.msg)/;
         $history[$i] = $1;
         my $class_file = $history[$i];
+        my $magnet     = '';
         $class_file =~ s/msg$/cls/;
         open CLASS, "<messages/$class_file";
         my $bucket       = <CLASS>;
+        if ( $bucket =~ /([^ ]+) MAGNET (.+)/ )
+        {
+            $bucket = $1;
+            $magnet = $2;
+        }
+        else
+        {
+            $magnet = '';
+        }
         my $reclassified = 0;
         if ( $bucket =~ /RECLASSIFIED/ ) {
             $bucket       = <CLASS>;
@@ -1132,6 +1144,7 @@ sub load_history_cache
             $history_cache[$j]      = $history[$i];
             $bucket_cache[$j]       = $bucket;
             $reclassified_cache[$j] = $reclassified;
+            $magnet_cache[$j]       = $magnet;
             
             $j += 1;
         }
@@ -1531,8 +1544,6 @@ sub history_page
             $body .= $i+1 . "<td>";
             my $bucket       = $bucket_cache[$i];
             my $reclassified = $reclassified_cache[$i]; 
-            
-            close CLASS;
             $mail_file =~ /popfile\d+_(\d+)\.msg/;
             my $bold = ( ( $configuration{last_count} <= $1 ) && ( $reclassified == 0 ) );
             $body .= "<b>" if $bold;
@@ -1558,32 +1569,39 @@ sub history_page
                     $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>";
                 }
 
-                if ( $drop_down )
+                if ( $magnet_cache[$i] eq '' ) 
                 {
-                    $body .= " <input type=submit name=change value=Reclassify> <input type=hidden name=usedtobe value=$bucket><select name=shouldbe>";
-                }
-                else
-                {
-                    $body .= "Classify as: ";
-                }
-
-                foreach my $abucket (@buckets)
-                {
-                    if ( $drop_down ) 
+                    if ( $drop_down )
                     {
-                        $body .= "<option value=$abucket";
-                        $body .= " selected" if ( $abucket eq $bucket );
-                        $body .= ">$abucket</option>"
+                        $body .= " <input type=submit name=change value=Reclassify> <input type=hidden name=usedtobe value=$bucket><select name=shouldbe>";
                     }
                     else
                     {
-                        $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$session_key&usedtobe=$bucket&filter=$form{filter}><font color=$classifier->{colors}{$abucket}>[$abucket]</font></a> ";
+                        $body .= "Classify as: ";
+                    }
+
+                    foreach my $abucket (@buckets)
+                    {
+                        if ( $drop_down ) 
+                        {
+                            $body .= "<option value=$abucket";
+                            $body .= " selected" if ( $abucket eq $bucket );
+                            $body .= ">$abucket</option>"
+                        }
+                        else
+                        {
+                            $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$session_key&usedtobe=$bucket&filter=$form{filter}><font color=$classifier->{colors}{$abucket}>[$abucket]</font></a> ";
+                        }
+                    }
+
+                    if ( $drop_down )
+                    {
+                        $body .= "</select><input type=hidden name=file value=$mail_file><input type=hidden name=start_message value=$start_message><input type=hidden name=session value=$session_key>";
                     }
                 }
-
-                if ( $drop_down )
+                else
                 {
-                    $body .= "</select><input type=hidden name=file value=$mail_file><input type=hidden name=start_message value=$start_message><input type=hidden name=session value=$session_key>";
+                    $body .= " (Magnet used: $magnet_cache[$i])";
                 }
             }
             $body .= "</td>";
@@ -1597,10 +1615,51 @@ sub history_page
             if ( ( defined($form{view}) ) && ( $form{view} eq $mail_file ) )
             {
                 $body .= "<tr><td><td colspan=3><table border=3 bordercolor=$stab_color cellspacing=0 cellpadding=6><tr><td>";
-                $classifier->{parser}->{color} = 1;
-                $classifier->{parser}->{bayes} = $classifier;
-                $body .= $classifier->{parser}->parse_stream("messages/$form{view}");
-                $classifier->{parser}->{color} = 0;
+                if ( $magnet_cache[$i] eq '' ) 
+                {
+                    $classifier->{parser}->{color} = 1;
+                    $classifier->{parser}->{bayes} = $classifier;
+                    $body .= $classifier->{parser}->parse_stream("messages/$form{view}");
+                    $classifier->{parser}->{color} = 0;
+                }
+                else
+                {
+                    $magnet_cache[$i] =~ /(.+): ([^\r\n]+)/;
+                    my $header = $1;
+                    my $text   = $2;
+                    $body .= "<tt>";
+
+                    open MESSAGE, "<messages/$form{view}";
+                    my $line;
+                    while ($line = <MESSAGE>)
+                    {
+                        $line =~ s/</&lt;/g;
+                        $line =~ s/>/&gt;/g;
+                        $line =~ s/([^\r\n]{100,150} )/$1<br>/g;
+                        $line =~ s/([^ \r\n]{150})/$1<br>/g;
+                        $line =~ s/[\r\n]+/<br>/g;
+                        
+                        if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ )
+                        {
+                            my $head = $1;
+                            my $arg  = $2;
+                            
+                            if ( $head =~ /$header/i ) 
+                            {
+                                debug( "$head matched against $header (checking $arg against $text)" );
+                                if ( $arg =~ /$text/i ) 
+                                {
+                                    debug( "$arg matched against $text" );
+                                    $line =~ s/($text)/<b><font color=$classifier->{colors}{$bucket_cache[$i]}>$1<\/font><\/b>/;
+                                }
+                            }
+                        }
+                        
+                        $body .= $line;
+                    }
+                    close MESSAGE;
+                    $body .= "</tt>";
+                }
                 $body .= "<p align=right><a href=/history?start_message=$start_message&session=$session_key&filter=$form{filter}><b>Close</b></a></table><td valign=top>";
                 $classifier->classify_file("messages/$form{view}");
                 $body .= $classifier->{scores};
@@ -1652,7 +1711,7 @@ sub history_page
     }
     else
     {
-        $body .= "<b>No messages in history.</b><p><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all></option>";
+        $body .= "<b>No messages in history.</b><p><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all>&lt;Show All&gt;</option>";
         
         my @buckets = sort keys %{$classifier->{total}};
         foreach my $abucket (@buckets)
@@ -2725,7 +2784,14 @@ sub run_popfile
                         } 
 
                         open CLASS, ">$class_file";
-                        print CLASS "$classification$eol";
+                        if ( $classifier->{magnet_used} == 0 ) 
+                        {
+                            print CLASS "$classification$eol";
+                        }
+                        else
+                        {
+                            print CLASS "$classification MAGNET $classifier->{magnet_detail}$eol";
+                        }
                         close CLASS;
 
                         $configuration{last_count} = $current_count;

@@ -75,6 +75,11 @@ sub new
     # The unclassified cutoff probability
     $self->{unclassified}      = 0.5;
     
+    # Used to tell the caller whether a magnet was used in the last 
+    # mail classification
+    $self->{magnet_used}       = 0;
+    $self->{magnet_detail}     = '';
+    
     return bless $self, $type;
 }
 
@@ -423,6 +428,9 @@ sub classify_file
     my ($self, $file) = @_;
     my $msg_total = 0;
 
+    $self->{magnet_used}   = 0;
+    $self->{magnet_detail} = 0;
+
     print "Parsing message '$file'..." if $self->{debug};
 
     $self->{parser}->parse_stream($file);
@@ -442,7 +450,10 @@ sub classify_file
             {
                 if ( $self->{parser}->{$type} =~ /\Q$magnet\E/i )
                 {
-                    $self->{scores} = "<b>Magnet Used</b><p>Classified to <font color=$self->{colors}{$bucket}>$bucket</font> because of magnet $type: $magnet";
+                    $self->{scores}        = "<b>Magnet Used</b><p>Classified to <font color=$self->{colors}{$bucket}>$bucket</font> because of magnet $type: $magnet";
+                    $self->{magnet_used}   = 1;
+                    $self->{magnet_detail} = "$type: $magnet";
+                    
                     return $bucket;
                 }
             }
