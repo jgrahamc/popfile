@@ -372,6 +372,11 @@ sub load_word_matrix
 
     update_constants($self);
 
+	# unclassified will always have the color black, note that unclassified is not
+	# actually a bucket 
+	
+	$self->{colors}{unclassified} = 'black';
+	
     print "Corpus loaded with $self->{full_total} entries\n" if $self->{debug};
 }
 
