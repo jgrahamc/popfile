@@ -975,7 +975,7 @@ sub history_page
         $classifier->load_word_matrix();
     }
 
-    foreach my $mail_file (@mail_files)
+    foreach my $mail_file (sort {$b cmp $a} @mail_files)
     {
         my $from;
         my $subject;
