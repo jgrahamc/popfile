@@ -2053,7 +2053,7 @@ sub corpus_page
     }
 
     if ( defined($self->{form_}{showbucket}) )  {
-        $self->bucket_page( $client, $templ );
+        $self->bucket_page( $client, $templ, $template, $page, $session );
         return;
     }
 
