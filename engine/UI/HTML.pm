@@ -1821,7 +1821,7 @@ sub history_page
     }
 
     # Handle clearing the history files
-    if ( ( defined($self->{form}{clear}) ) && ( $self->{form}{clear} eq 'Remove All' ) ) {
+    if ( defined($self->{form}{clearall}) ) {
         # If the history cache is empty then we need to reload it now
         load_history_cache( $self, $self->{form}{filter}, '') if ( history_cache_empty( $self ) );
 
@@ -1838,7 +1838,7 @@ sub history_page
         return;
     }
 
-    if ( ( defined($self->{form}{clear}) ) && ( $self->{form}{clear} eq 'Remove Page' ) ) {
+    if ( defined($self->{form}{clearpage}) ) {
         # If the history cache is empty then we need to reload it now
         load_history_cache( $self, $self->{form}{filter}, '') if ( history_cache_empty( $self ) );
         
@@ -2080,8 +2080,6 @@ sub history_page
 
                 if ( $self->{history}{$i}{magnet} eq '' )  {
                     if ( $drop_down ) {
-                        #$body .= " <input type=\"submit\" class=\"submit\" name=\"change\" value=\"$self->{language}{Reclassify}\">\n" ;
-                        #$body .= " <input type=\"hidden\" name=\"usedtobe\" value=\"$bucket\">\n<select name=\"shouldbe\">\n";
                         $body .= " <input type=submit class=submit name=change value=\"$self->{language}{Reclassify}\">\n" ;
                         $body .= "<input type=hidden name=usedtobe value=\"$bucket\"><select name=shouldbe>\n";
                     } else {
@@ -2094,14 +2092,11 @@ sub history_page
                             $body .= " selected" if ( $abucket eq $bucket );
                             $body .= ">$abucket</option>"
                         } else {
-                            # stan todo bug fix at work
-                            # $body .= "<a href=\"/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$self->{session_key}&usedtobe=$bucket&filter=$self->{form}{filter}#$mail_file\"><font color=\"$self->{classifier}->{colors}{$abucket}\">[$abucket]</font></a> ";
                             $body .= "<a href=\"/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$self->{session_key}&usedtobe=$bucket&filter=$self->{form}{filter}#$mail_file\">\n" ;
                             $body .= "<font color=$self->{classifier}->{colors}{$abucket}>[$abucket]</font></a> ";
                         }
                     }
 
-                    #$body .= "</select>\n<input type=\"hidden\" name=\"file\" value=\"$mail_file\">\n" ;
                     $body .= "<input type=\"hidden\" name=\"file\" value=\"$mail_file\">\n" ;
                     $body .= "<input type=\"hidden\" name=\"start_message\" value=\"$start_message\">\n" ;
                     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">" if ( $drop_down );
@@ -2166,8 +2161,8 @@ sub history_page
 
         $body .= "</table>\n<form action=\"/history\">\n<input type=hidden name=filter value=\"$self->{form}{filter}\">\n" ;
         $body .= "<b>$self->{language}{History_Remove}:&nbsp;</b>\n" ;
-        $body .= "<input type=submit class=submit name=clear value=\"$self->{language}{History_RemoveAll}\">\n";
-        $body .= "<input type=submit class=submit name=clear value=\"$self->{language}{History_RemovePage}\">\n" ;
+        $body .= "<input type=submit class=submit name=clearall value=\"$self->{language}{History_RemoveAll}\">\n";
+        $body .= "<input type=submit class=submit name=clearpage value=\"$self->{language}{History_RemovePage}\">\n" ;
         $body .= "<input type=hidden name=session value=\"$self->{session_key}\">\n" ;
         $body .= "<input type=hidden name=start_message value=\"$start_message\">\n</form>\n" ;
         $body .= "<table width=\"100%\">\n<tr>\n<td align=\"left\"><form action=\"/history\">" ;
@@ -2191,10 +2186,6 @@ sub history_page
         $body .= "<option value=__filter__magnet>\n&lt;$self->{language}{History_ShowMagnet}&gt;\n" ;
         $body .= "</option>\n</select>\n" ;
         $body .="<input type=submit class=submit name=setfilter value=\"$self->{language}{Filter}\">\n</form>\n";
-        #$body .= "<option value=__filter__magnet>&lt;$self->{language}{History_ShowMagnet}&gt;
-        #</option></select>
-        #<input type=submit class=submit name=setfilter value='$self->{language}{Filter}'></form>";
-
     }
     
     http_ok($self, $client,$body,2); 
