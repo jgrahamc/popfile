@@ -1,0 +1,495 @@
+<html><head><title>POPFile ドキュメンテーション</title><style type=text/css>H1,H2,H3,P,TD {font-family: "ＭＳ Ｐゴシック";}</style>
+<meta http-equiv=Content-Type content="text/html; charset=Shift_JIS">
+</head>
+
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile ドキュメンテーション</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+
+<table width=100% cellspacing=0><tr>
+
+<td width=15% align=center><font size=+1><b>初期設定:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%>ステップ 1<br><font size=+1><b>&nbsp;<a href="installing.html">インストール</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center>ステップ 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">バケツのセットアップ</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#cccc99 width=15% align=center>ステップ 3<br><font size=+1><b>&nbsp;<a href="email.html">メールソフト</a></b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%>ステップ 4<br><font size=+1><b>&nbsp;<a href="training.html">トレーニング</a></b></font></td>
+
+<td width=25%>&nbsp;</td></tr>
+
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+
+<tr height=1><td colspan=10></td></tr>
+
+</table>
+
+<table width=100% cellspacing=0><tr>
+
+
+
+<td width=40% align=right><font size=+1><b>POPFile の特別な使い方:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">ファイアウォール</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Password Authentication</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">その他のプロキシー</a></b></font><br></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">複数メールアカウント</a></b></font></td>
+
+</tr>
+
+
+
+</table>
+
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+
+
+
+
+<h2>メールソフトを POPFile と連係させる</h2>
+
+
+
+<p>POPFile は <i>プロキシサーバー</i> として動作します。メールプログラムは POPFile とつながり、POPFile はメールプログラムの代わりにメールサーバーに接続します。メールプログラムが直接メッセージを受け取る代わりに、POPFile がまずそのメッセージを受け取って、どのバケツに振り分けるかを決めるためにスキャンします。</p>
+
+
+
+<p>一瞬のうちに振り分け先を決めると、POPFile は次のいずれかをおこないます。[spam] のようなタグを件名の最初に追加して、Microsoft Outlook Express が持つようなシンプルなフィルタリング機能でメールを振り分けられるようにするか、あるいは Microsoft Outlook が持つような高度なフィルタリング機能に対応して、以下のような新しいメールヘッダーを追加することができます。</p>
+
+
+
+<p><b>X-Text-Classification: personal</b></p>
+
+
+
+<p>メールソフトはこのヘッダーをフィルターとして使うことができます。</p>
+
+
+
+<p>メールソフトを POPFile と連係させるには、次の二つのことをしなければなりません。
+
+
+
+<ol><li>メールソフトの設定を変更して POPFile と接続するようにし、そして、
+
+<li>分類がきちんとおこなわれるようにメールフィルターをセットアップしなければなりません。</ol></p>
+
+
+
+<p>まずメールソフトの設定変更からやりましょう。フィルターのセットアップについてはその後、続けておこないます。
+
+
+
+<p>以下はいくつかの有名なメールソフトにそれぞれ対応した説明です。ほかのメールソフトを使用している場合、あるいは上級者のための一般的な説明は次の通りです：</p>
+
+
+
+<p><ul><li>メールソフトの POP3 サーバー名を 127.0.0.1 に変更します。元のアドレスは控えておきます。
+
+<li>POP3 ユーザー名を [元の POP3 サーバーアドレス]:[ユーザー名] に変更します。
+
+<li>パスワードはそのままです。</ul></p>
+
+
+
+<p>Secure Password Authentication を使用しているアカウントについては、<a href=spa.html>POPFile の特別な使い方: Secure Password Authentication</a> を参照してください。</p>
+
+
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+
+
+<td colspan=3 align="center">
+
+
+
+使っているメールソフトに対応した欄の指示に従ってください。ややこしいように見えますが、実際には2分ほどで設定変更できます。間違えることも少ないでしょう。(念のために、元に戻せるよう始めの設定値をどこかにひかえておくのがよいでしょう)
+
+
+
+</td></tr><tr>
+
+
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Outlook</h3>
+
+
+
+<ul>
+
+<li>Outlook のメニューより「ツール」->「電子メール アカウント」を選びます。「電子メール アカウント」のダイアログボックスが開きます。 <a href=../o_popfile1.gif>[スクリーンショット]</a>
+
+<li>「既存の電子メール アカウントの表示と変更」を選び、「次へ」をクリックします。POPFile を使用するアカウントを選び、「変更...」をクリックします。
+
+「受信メール サーバー(POP3)」と「ユーザー名」の値をひかえておきます。<a href=../o_popfile2.gif>[スクリーンショット]</a>
+
+<li>「受信メール サーバー(POP3)」の値を <b>127.0.0.1</b> に変更し、「ユーザー名」の値は元の「受信メール サーバー(POP3)」の値と元の「ユーザー名」とをコロンでつなげた値に変更します。 <a href=../o_popfile3.gif>[スクリーンショット]</a>
+
+<li>つまり、元の「受信メール サーバー(POP3)」の値が <b>my.mail.com</b> で「ユーザー名」が <b>jdoe</b> だとすると、新しい「ユーザー名」は <b>my.mail.com:jdoe</b> となります。
+
+<li>パスワードは変更する必要はありません。
+
+<li>「次へ」をクリックし、次に「完了」をクリックします。
+
+<li>POPFile を起動して、全ての電子メールが POPFile を経由してメールソフトに配信されるのを確認してください。
+
+<li>Windows が起動するときにはいつでも POPFile も起動するようにしてください。Windows インストーラーバージョンを使用していれば、「スタート」メニューの下の「POPFile」グループから「Start POPFile in Background」リンクを<b>「スタートアップ」</b>グループにドラッグすればよいでしょう。そうすれば、Windows は常に POPFile を起動するようになります。
+
+<li>重要！POPFile が起動していないと、電子メールは配信されず、メールソフトは正常にメールサーバーと接続することができません！
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+
+
+<h3 align=center>Outlook Express</h3>
+
+
+
+<ul>
+
+<li>Outlook Express のメニューより「ツール」->「アカウント」を選びます。「インターネット アカウント」のダイアログボックスが開きます。 <a href=../oe_popfile1.gif>[スクリーンショット]</a>
+
+<li>POPFile を使用するために設定を変更するアカウントを選び、「プロパティ」をクリックします。 <a href=../oe_popfile2.gif>[スクリーンショット]</a>
+
+<li>「サーバー」タブを選びます。「受信メール (POP3)」と「アカウント名」の値をひかえておきます。 <a href=../oe_popfile3.gif>[スクリーンショット]</a>
+
+<li>「受信メール (POP3)」の値を <b>127.0.0.1</b> に変更し、「アカウント名」の値は元の「受信メール (POP3)」の値と元の「アカウント名」とをコロンでつなげた値に変更します。 <a href=../oe_popfile4.gif>[スクリーンショット]</a>
+
+<li>つまり、元の「受信メール (POP3)」の値が <b>my.mail.com</b> で「アカウント名」が <b>jdoe</b> だとすると、新しい「アカウント名」は <b>my.mail.com:jdoe</b> となります。
+
+<li>パスワードは変更する必要はありません。
+
+<li>「OK」をクリックし、次に「閉じる」をクリックします。
+
+<li>POPFile を起動して、全ての電子メールが POPFile を経由してメールソフトに配信されるのを確認してください。
+
+<li>Windows が起動するときにはいつでも POPFile も起動するようにしてください。Windows インストーラーバージョンを使用していれば、「スタート」メニューの下の「POPFile」グループから「Start POPFile in Background」リンクを<b>「スタートアップ」</b>グループにドラッグすればよいでしょう。そうすれば、Windows は常に POPFile を起動するようになります。
+
+<li>重要！POPFile が起動していないと、電子メールは配信されず、メールソフトは正常にメールサーバーと接続することができません！
+
+</ul>
+
+
+
+</td><!-- <td width=25% bgcolor="#CCCCFF" valign="top">
+
+
+
+<h3 align=center>Eudora</h3>
+
+
+
+<ul>
+
+<li>In Eudora select the Tools->Options... menu option.  The Options dialog will appear. <a href=../e_popfile1.gif>[screenshot]</a>
+
+<li>Make a note of the Mail Server (incoming) server name and the Login Name. <a href=../e_popfile2.gif>[screenshot]</a>
+
+<li>Change the Mail Server (incoming) server name to <b>127.0.0.1</b> and change the Login Name to the combination of the original
+
+Mail Server (incoming) server name and the original Login Name separated by a colon.  <a href=../e_popfile3.gif>[screenshot]</a>
+
+<li>So, if the original Mail Server (incoming) server name was <b>my.mail.com</b> and your username was <b>jdoe</b>, your new username would be <b>my.mail.com:jdoe</b>
+
+<li>You don't need to change the password.
+
+<li>Hit OK.
+
+<li>Ensure that POPFile is running and all mail will be delivered through POPFile.
+
+<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <b>Startup</b> group. Now, Windows will load POPFile each time.
+
+<li>Important! If POPFile isn't loaded, the mail will not get through - and your email program won't connect!
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Pegasus</h3>
+
+
+
+<ul>
+
+<li>   In Pegasus select the Tools->Internet Options... Receiving (POP3) tab. The POP3 account setup page will appear.
+
+<li>   Under General settings for receiving mail using POP3, select the POP3 Host dialog box. Make a note of the current POP3 host.
+
+<li>   Change the POP3 Host to <b>127.0.0.1</b>
+
+<li>   Under General settings for receiving mail using POP3, select the User name dialog box. Make a note of the current User name.
+
+<li>   Change the User name to the combination of the original POP3 Host name and the original User name separated by a colon.
+
+<li>   So, if the original POP3 host was <b>my.mail.com</b> and your User name was <b>jdoe</b>, your new User name would be <b>my.mail.com:jdoe</b>
+
+<li>   You don't need to change the password.
+
+<li>   Click the OK Button to save the changes.
+
+<li>   Ensure that POPFile is running and all mail will be delivered through POPFile!
+
+<li>   You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version of POPFile, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the Start -> Programs -> Startup group. Now, Windows will load POPFile each time.
+
+</ul>
+
+
+
+</td> --></tr></table>
+
+
+
+<p>次にメールのフィルターを設定します。これによって、POPFile がメールの分類を行った後、メールプログラムはそのメールを受け取り、適切なフォルダに仕分けします。</p>
+
+
+
+<p>拡張機能として、メールの件名に[分類先]タグを追加することができます。Web ユーザーインターフェースの「設定」タブの右上の方で設定します。この拡張機能を使う使わないに関わらず、<b>X-Text-Classification</b> ヘッダーは追加されます。</p>
+
+
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+
+
+<td colspan=3 align="center">
+
+
+
+
+使っているメールソフトに対応した欄の指示に従ってください。ややこしいように見えますが、実際には2分ほどで設定変更できます。間違えることも少ないでしょう。(念のために、元に戻せるよう始めの設定値をどこかにひかえておくのがよいでしょう)
+
+
+
+</td></tr><tr>
+
+
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Outlook</h3>
+
+
+
+<ul>
+
+<li>Outlook のメニューより「ツール」->「自動仕訳ウィザード...」を選びます。<a href=../o_filter1.gif>[スクリーンショット]</a>
+
+<li>自動仕訳ウィザードが開きます。「新規作成...」をクリックし、「新しいルールを作成」を選びます。<a href=../o_filter2.gif>[スクリーンショット]</a>
+
+<li>Outlook はメールのフィルタリングが完全にバックグラウンドで行われるように、仕訳に <b>X-Text-Classification</b> ヘッダーを使うことができます。「次へ」をクリックし、<i>メッセージヘッダーに特定の文字が含まれる場合</i> を選びます。
+
+<li>グレーにハイライトされた <i>特定の文字</i> リンクをクリックし、"X-Text-Classification: " に続けてバケツ名をテキストボックスに入力し、「追加」、次いで「OK」をクリックします。
+
+<li>「次へ」をクリックし、<i>指定フォルダへ移動する</i> を選びます。
+
+<li>グレーにハイライトされた <i>指定</i> をクリックするとフォルダのリスト
+が表示されます。バケツに分類されたメールの移動先フォルダを選び、「OK」をクリックします。
+
+<li>「OK」をクリックし、「完了」をクリックします。
+
+<li>各バケツごとに以上のプロセスを繰り返します。
+
+<li>終了です！
+
+<li>補足: <a href="http://127.0.0.1:8080">POPFile web インターフェース</a>の「設定」タブ上で、「件名の変更」を<b>オフ</b> にします。
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+
+
+<h3 align=center>Outlook Express</h3>
+
+
+
+<ul>
+
+<li>Outlook Express のメニューより「ツール」->「メッセージ ルール」->「メール...」を選びます。 <a href=../oe_filter1.gif>[スクリーンショット]</a>
+
+<li>「メッセージ ルール」画面が開きます。 <a href=../oe_filter2.gif>[スクリーンショット]</a>
+
+<li>Outlook Express はメールのフィルタリングを完全にバックグラウンドで行うことができる <b>X-Text-Classification</b> ヘッダーを使うことができません。そこで、代わりに<i>件名に指定した言葉が含まれる場合</i>をクリックし、また
+
+<i>指定したフォルダに移動する</i>もクリックします。 <a href=../oe_filter3.gif>[スクリーンショット]</a>
+
+<li>青でハイライトされた <i>指定した言葉</i> リンクをクリックすると、「単語の入力」ダイアログボックスが開きます。 <a href=../oe_filter4.gif>[スクリーンショット]</a>
+
+<li>[大括弧]で囲んだバケツの名前一つを入力し、「OK」をクリックします。今度は、青でハイライトされた <i>指定したフォルダ</i> をクリックすると、「移動」ダイアログボックスが開きます。 バケツに分類されたメールの移動先フォルダを選び、「OK」をクリックします。 <a href=../oe_filter5.gif>[スクリーンショット]</a>
+
+<li>「OK」をクリックします。
+
+<li>各バケツごとに以上のプロセスを繰り返します。
+
+<li>終了です！
+
+<li>補足: <a href="http://127.0.0.1:8080">POPFile web インターフェース</a>の「設定」タブ上で、「件名の変更」を<b>オン</b> にします。
+
+
+
+</ul>
+
+
+
+</td><!-- <td width=25% bgcolor="#CCCCFF" valign="top">
+
+
+
+<h3 align=center>Eudora</h3>
+
+
+
+<p>Eudora allows filtering based on any mail header, which is great - everything can be done completely in the background, without changing the subject line!</p>
+
+
+
+<ul>
+
+<li>Select the Tools->Filters menu.  <a href=../e_filter1.gif>[screenshot]</a>
+
+<li>The Filters window appears.  Click New to create a new filter.  <a href=../e_filter2.gif>[screenshot]</a>
+
+<li>In the Header box type <b>X-Text-Classification</b> and in the box next to contains type the name of one of your buckets. <b>Don't</b> add square brackets around it.  <a href=../e_filter3.gif>[screenshot]</a>
+
+<li>The select <b>Transfer To</b> in the first Action box and select the mailbox you want to file message from this bucket into.  <a href=../e_filter4.gif>[screenshot]</a>
+
+<li>Repeat this for each of your buckets.
+
+<li>Close the Filters windows and say Yes when asked to save changes.
+
+<li>You're done!
+
+<li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>off</b>.
+
+</ul>
+
+
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+<h3 align=center>Pegasus</h3>
+
+
+
+<ul>
+
+<li>   In Pegasus select the Tools->Mail Filtering Rules ->Edit New Mail Filtering Rules ->Rules Applied When Folder is Opened.
+
+<li>   The New Mail Filtering Rules window appears.
+
+<li>   Click the New Rule button. The Create a New Filtering Rule window appears.
+
+<li>   Click on the Expression button.  Note that using the Expression filter will work even if the POPFile Subject Line Modification option is turned off. If you use the Header filter, the POPFile Subject Line Modification option must be turned on.
+
+<li>   Select the If this regular expression dialog box
+
+<li>   Enter the name of one of your buckets, preceded <b>X-Text-Classification:</b>, for example: <b>X-Text-Classification: spam</b>
+
+<li>   Select the Headers or body radio button
+
+<li>   Select the desired action from the Action drop down list. For example Move
+
+<li>   If an action such as Move or Forward has been chosen, click the Set button.
+
+<li>   Select the destination folder or enter the forward to address as appropriate for the Action selected.
+
+<li>   Click the OK button to add the rule to the rule list.
+
+<li>   Repeat the process for each rule you need.
+
+<li>   The order in which the filter rules are applied can be adjusted using the red / blue (up / down) arrows in the New Mail Filter Rules window.
+
+<li>   Select the Save button to save the rules set changes.
+
+<li>   Select the OK button.
+
+<li>   You're done!
+
+</ul>
+
+
+
+</td>--></tr></table>
+
+
+
+<h2>これで完了です!... ただし...</h2>
+
+
+
+設定はこれで完了ですが、これだけでは POPFile は電子メールをフィルタリングしません。なぜなら、<i>POPFile はまだ設定されたバケツが何を意味するのかわからないからです。</i>「spam」(ごみメール) や 「genuine」(本物) が何を意味するのか、「work」(仕事用)や 「personal」(私用)が何を意味するのかわからないのです。そればかりか、電子メールに使われている言語が何かということでさえわからないのですが、そんなことは一向に構いません。ごみメールと普通のメールとを分別するには、あるいはあるプロジェクト関連のメールをその他のメールから選り分けるには POPFile をトレーニングする必要があります。<a href="training.html">次のステップ</a>の <b>トレーニング</b> でその方法を見ていきましょう。
+
+
+
+</td></tr></table>
+
+<br>
+
+<table width=100% cellspacing=0><tr>
+
+<td width=15% align=center><font size=+1><b>リンク:</b></font></td>
+
+<td width=2></td>
+
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">ホームページ</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">フォーラム</a></b></font></td>
+
+<td width=2></td>
+
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">バグデータベース</a></b></font></td>
+
+<td width=55%>&nbsp;</td></tr>
+
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+
+<tr height=1><td colspan=10></td></tr>
+
+</table>
+
+
+
+</body></html>

@@ -1,0 +1,77 @@
+<html><head><title>POPFile ドキュメンテーション</title><style type=text/css>H1,H2,H3,P,TD {font-family: "ＭＳ Ｐゴシック";}</style>
+<meta http-equiv=Content-Type content="text/html; charset=Shift_JIS">
+
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile ドキュメンテーション</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>初期設定:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>ステップ 1<br><font size=+1><b>&nbsp;<a href="installing.html">インストール</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>ステップ 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">バケツのセットアップ</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>ステップ 3<br><font size=+1><b>&nbsp;<a href="email.html">メールソフト</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>ステップ 4<br><font size=+1><b>&nbsp;<a href="training.html">トレーニング</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>POPFile の特別な使い方:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">ファイアウォール</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Password Authentication</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">その他のプロキシー</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">複数メールアカウント</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+<h2>POPFile と Secure Password Authentication との併用</h2>
+
+<p>web インターフェースの「セキュリティ」タブを選び、Secure Password Authentication サーバーのサーバー名とポート番号を入力します。あとは、メールソフトの受信メールサーバーを 127.0.0.1 に変更するだけです。ユーザー名は変える必要はありません。</p>
+
+<p>残念ながら、今のところ一つの POPFile インストレーションに対して持てる SPA アカウントは一つだけです。</p>
+
+<h2>MSN Secure Password Authentication に関する注意</h2>
+
+<ol>
+<li> popfile を以下のコマンドにより起動します。
+(以下の通りそのままに入力します)
+<blockquote><b>perl popfile.pl -port 110 -server pop3.email.msn.com -sport
+110</b></blockquote>
+
+<li> アカウントの「サーバー」ページの設定が以下の通りであることを確認してください。
+<p>
+受信メール (POP3): 127.0.0.1<br>
+アカウント名: <i>MSNのアカウント名のみ</i>
+<p>
+「セキュリティで保護されたパスワード認証でログオンする」をチェックしてください。
+<p>
+「詳細設定」タブでは、「受信メール (POP3)」のポート番号が 110 であること、および「このサーバーはセキュリティで保護された接続（SSL）が必要」 がチェックされていないことを確認してください。
+<p>
+<li>これで、「Mail Icon drop down」のアカウント名をクリックすればメールをチェックすることができます。
+</ol>
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>リンク:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">ホームページ</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">フォーラム</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">バグデータベース</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>

@@ -1,0 +1,131 @@
+<html><head><title>POPFile ドキュメンテーション</title><style type=text/css>H1,H2,H3,P,TD {font-family: "ＭＳ Ｐゴシック";}</style>
+<meta http-equiv=Content-Type content="text/html; charset=Shift_JIS">
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile ドキュメンテーション</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>初期設定:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>ステップ 1<br><font size=+1><b>&nbsp;<a href="installing.html">インストール</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>ステップ 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">バケツのセットアップ</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>ステップ 3<br><font size=+1><b>&nbsp;<a href="email.html">メールソフト</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>ステップ 4<br><font size=+1><b>&nbsp;<a href="training.html">トレーニング</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>POPFile の特別な使い方:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">ファイアウォール</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Password Authentication</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">その他のプロキシー</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">複数メールアカウント</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+<h2>POPFile とウィルススキャナーのようなその他のプロキシーとの併用</h2>
+
+<p>Norton Antivirus のいくつかのバージョンがそうであるように、メールソフトの設定を変えてしまうようなメールスキャンプロキシーを使用している場合には、POPFile は通常の設定では動きません。メールプロキシーが代わりにメールを横取りしてしまいます。POPFile をメールスキャナーと接続するように設定しなくてはいけません。(もしウィルススキャナーが「受信メール サーバー(POP3)」の設定を変更していないようであれば、以下の指示に従う必要はありません。)</p>
+
+<p>(すなわち、基本的には、電子メールはスキャナーによってダウンロードされ、POPFile に渡され、そして最後にメールソフトに渡されるのです。)</p>
+
+<p>さて、メールスキャナーによってその動作は異なるので、以下の手順に従っていきましょう:
+
+<ol><li>電子メールスキャナーを無効にし、通常の設定に戻す。
+<li>POPFile の POP3 ポート番号を変更する。
+<li>POPFile の変更したポート番号と接続できるようにメールソフトを設定する。
+<li>新しい設定で、電子メールスキャナーを再び有効にする。</ol></p>
+
+<h3>電子メールスキャナーを無効にする</h3>
+
+<p>電子メールスキャナーそれぞれの方法に従ってください。</p>
+
+<h3>POPFile のポートを変更する</h3>
+
+<p>Web インターフェースの「設定」タブで、 <b>POP3 ポート番号</b> を近い番号(123 を推奨)に変更します。「適用」をクリックします。</p>
+
+<h3>メールソフトのポート番号を変更する</h3>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=3 align="center">
+
+使っているメールソフトに対応した欄の指示に従ってください。ややこしいように見えますが、実際には2分ほどで設定変更できます。間違えることも少ないでしょう。(念のために、元に戻せるよう始めの設定値をどこかにひかえておくのがよいでしょう)
+
+</td></tr><tr>
+
+<td width=33% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Outlook</h3>
+
+<ul>
+<li>「ツール」->「電子メール アカウント」を選びます。
+<li>「既存の電子メール アカウントの表示と変更」を選び、「次へ」をクリックします。
+<li>POPFile を使用するアカウントを選び、「変更...」をクリックします。
+<li>「詳細設定」ボタンをクリックします。
+<li>「詳細設定」タブをクリックします。
+<li>「受信サーバー (POP3)」の横には、既に選んだポート番号と同じ番号を入力します。（123 を推奨しました。）
+<li>「OK」をクリックします。以上の手順を POPFile を使いたい各アカウントごとに繰り返します。
+</ul>
+
+</td><td width=34% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>Outlook Express</h3>
+
+<ul>
+<li>「ツール」->「アカウント」を選びます。
+<li>アカウントを選び、「プロパティ」をクリックします。
+<li>「詳細設定」タブをクリックします。
+<li>「受信サーバー (POP3)」の横には、既に選んだポート番号と同じ番号を入力します。（123 を推奨しました。）
+<li>「OK」をクリックします。以上の手順を POPFile を使いたい各アカウントごとに繰り返します。
+</ul>
+
+</td><!--<td width=33% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<ul>
+<li>Eudora's port setting is in its hidden, 'esoteric' settings.
+<li>Go to 'My Computer' and navigate to the directory that Eudora is installed in - it's usually C:\Program Files\Qualcomm\Eudora
+<li>Click on the 'extrastuff' folder.
+<li>Select the 'esoteric.epi' file, and copy it using the Edit > Copy menu.
+<li>Go back to the main Eudora folder, and paste it using Edit > Paste.
+<li>Start Eudora.
+<li>Go to the Tools -> Options menu.
+<li>Scroll to the bottom of the list of option menus and choose 'Ports & Protocols'.
+<li>Next to 'POP3', enter the same number as you chose earlier (we recommended 123).
+<li>Click OK. You're done.
+</ul>
+
+</td>--></tr></table>
+
+<h3>電子メールスキャナーを再び有効にする。</h3>
+
+スキャナーを再起動(方法については各スキャナーのマニュアルを参照してください)すれば、全て自動的にセットアップされるはずです。これで、電子メールはスキャンされ、分類されるはずです。
+
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>リンク:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">ホームページ</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">フォーラム</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">バグデータベース</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>

@@ -1,0 +1,91 @@
+<html><head><title>POPFile ドキュメンテーション</title><style type=text/css>H1,H2,H3,P,TD {font-family: "ＭＳ Ｐゴシック";}</style>
+<meta http-equiv=Content-Type content="text/html; charset=Shift_JIS">
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile ドキュメンテーション</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>初期設定:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%>ステップ 1<br><font size=+1><b>&nbsp;<a href="installing.html">インストール</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>ステップ 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">バケツのセットアップ</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>ステップ 3<br><font size=+1><b>&nbsp;<a href="email.html">メールソフト</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>ステップ 4<br><font size=+1><b>&nbsp;<a href="training.html">トレーニング</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>POPFile の特別な使い方:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">ファイアウォール</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Password Authentication</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">その他のプロキシー</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">複数メールアカウント</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+<h2>POPFile のインストール</h2>
+
+<p>POPFile には2つのバージョンがあります。簡単にインストールできる Windows バージョンと上級者のためのクロスプラットフォームバージョンです。一旦インストールされたら、これらは全く同じものです。</p>
+
+<h3>簡単インストールの Windows バージョン</h3>
+
+<p><a href=http://sourceforge.net/project/showfiles.php?group_id=63137>POPFile Download Page</a> より Windows インストーラーをダウンロードして、<tt>setup.exe</tt> を実行し、指示に従ってインストールします。 POPFile を起動するにはスタートメニュー(スタート > プログラム > POPFile > Run POPFile in Background) から起動するか、コンピューターを再起動すれば自動的に起動します。<b>重要:</b> 起動しても画面には何も現れません！ちゃんと動いているかどうかをチェックする方法を知りたければ、以下の「POPFile がちゃんと動いているかどうかチェックする」を読んでください。</p>
+
+<p><font color="red">(訳者注: POPFile は現在のところ、それだけでは日本語のメールを正しく分類することはできません。日本語化パッチをあてる必要があります。日本語化パッチの情報は<a href="http://sourceforge.net/forum/?group_id=63137">フォーラム</a>や<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502958">パッチ</a>で見つけることができますので、最新の情報を参照してください。)</font>
+</p>
+
+<h4>システム要件</h4>
+
+<p>POPFile を使うためにはいくつか必要なものがあります。</p>
+<ol>
+<li>最新バージョンの POPFile</li>
+<li>POP3 プロトコル対応のメールアカウント(ほとんどのアカウントは POP3 対応ですが、Hotmail や Yahoo! Mail<font color="red">(訳者注: Yahoo! Japan が提供する Yahoo! Mail はまだ POP3 対応のようです)</font>のようなウェブメールは、特別なソフトウェアなしでは POPFile は使えません)</li>
+<li>約 2MB の空きディスクスペース</li>
+</ol>
+
+<p>最新バージョンの POPFile は <a href="http://sourceforge.net/project/showfiles.php?group_id=63137">POPFile
+download page</a> の各パッケージリストの一番上、zip 形式のファイルとして手に入れることができます。Windows ユーザーは POPFile for Windows とラベルされたセクションからファイルをダウンロードするのがよいでしょう。</p>
+<p>POPFile 自体は1メガバイト強しかディスクスペースを占めません。メールを分類するために使われる corpus と呼ばれる単語リストはさらにいくらかのディスクスペースを必要とし、そのサイズは POPFile を訓練するために使うメールの数と振り分けのために作るバケツの数によって変わります。</p>
+
+<h3>クロスプラットフォームバージョン</h3>
+
+<p><a href="http://www.perl.com">Perl</a> が実行できる環境を整え、<a href=http://popfile.sourceforge.net/>POPFile ホームページ</a>より POPFile Perl zip をダウンロードして適当なディレクトリに展開します。Windows プラットフォーム上なら、コマンド <tt>perl popfile.pl</tt> で起動します。
+
+<hr>
+
+<h2>POPFile がちゃんと動いているかどうかチェックする</h2>
+
+<p>POPFile は通常のプログラムのようなユーザーインターフェースを持っていません。Web ブラウザからアクセスするのです。心配は無用です。特に口外しないかぎり、他の誰かが別のマシンからアクセスしてくることはできません。</p>
+
+<p>POPFile を表示するには、<a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a>にアクセスするか、(Windows バージョンに限り) スタートメニューから「POPFile Web Interface」リンクを選択します。<b>重要</b>: もし Windows 版のインストール中、POPFile にアクセスするためのポート番号を別の番号に変更していたなら、"8080" の部分をその変更した番号に変えてください。</p>
+
+<p>もしエラーメッセージが表示されるなら、ちゃんと POPFile が起動しているかどうか、そして正しいポート番号にアクセスしているかどうかを確認してください。(ポート番号は 8080 ですが、もし変更していたなら、アクセスする web アドレスでも変更しないといけません)</p>
+
+<p>POPFile のスクリーンが表示されたなら、おめでとうございます！次はメールの振り分け方法を設定します。<a href="firsttime.html">バケツの設定に移りましょう。 &gt;&gt;</a></p>
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>リンク:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">ホームページ</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">フォーラム</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">バグデータベース</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>
