@@ -20,7 +20,6 @@
 
 include ..\engine\vars.mak
 
-POPFILE_WINDOWS_ZIP := popfile-$(POPFILE_VERSION)-windows.zip
 BUILD_ZIP=../engine/wzzip -P $(POPFILE_WINDOWS_ZIP) -a $^
 
 all: build

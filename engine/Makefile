@@ -76,7 +76,6 @@ windows: winexe; @$(MAKE) -C ../windows
 
 # build a ZIPped up package of POPFile
 
-POPFILE_ZIP := popfile-$(POPFILE_VERSION).zip
 BUILD_ZIP=wzzip -P $(POPFILE_ZIP) -a $^
 xplat: $(POPFILE_ZIP)
 $(POPFILE_ZIP): core manual skins
@@ -99,13 +98,6 @@ package: $(POPFILE_ZIP) windows
 # Used to convert the ZIP files to RC ZIP files and 
 # upload to SourceForge
 
-rc: CP_ZIP      = popfile-$(POPFILE_VERSION)$(RC).zip
-rc: WINDOWS_ZIP = ../windows/popfile-$(POPFILE_VERSION)$(RC)-windows.zip
-
 rc: 
-	rm -f $(CP_ZIP)
-	rm -f $(WINDOWS_ZIP)
-	mv $(POPFILE_ZIP) $(CP_ZIP)	
-	mv ../windows/popfile-$(POPFILE_VERSION)-windows.zip $(WINDOWS_ZIP)
-	chmod go+r $(CP_ZIP) $(WINDOWS_ZIP)
+	chmod go+r $(POPFILE_ZIP) $(POPFILE_WINDOWS_ZIP)
 	scp -p $(CP_ZIP) $(WINDOWS_ZIP) jgrahamc@popfile.sourceforge.net:/home/groups/p/po/popfile/htdocs
