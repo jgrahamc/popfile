@@ -63,13 +63,15 @@ sub initialize
 
     $self->config_( 'trayicon', 1 );
     $self->config_( 'console',  0 );
-
+    
     $self->register_configuration_item_( 'configuration',
                                          'windows_trayicon',
+                                         'windows-trayicon-configuration.thtml',
                                          $self );
 
     $self->register_configuration_item_( 'configuration',
                                          'windows_console',
+                                         'windows-console-configuration.thtml',
                                          $self );
 
     return 1;
@@ -79,62 +81,24 @@ sub initialize
 #
 # configure_item
 #
-#    $name            The name of the item being configured, was passed in by the call
-#                     to register_configuration_item
-#    $language        Reference to the hash holding the current language
-#    $session_key     The current session key
+#    $name            Name of this item
+#    $templ           The loaded template that was passed as a parameter
+#                     when registering
+#    $language        Current language
 #
-#  Must return the HTML for this item
 # ---------------------------------------------------------------------------------------------
 
 sub configure_item
 {
-    my ( $self, $name, $language, $session_key ) = @_;
+    my ( $self, $name, $templ, $language ) = @_;
 
-    my $body;
-
-    # Tray icon widget
     if ( $name eq 'windows_trayicon' ) {
-        $body .= "<span class=\"configurationLabel\">$$language{Windows_TrayIcon}:</span><br />\n";
-        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
-
-        if ( $self->config_( 'trayicon' ) == 0 ) {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<span class=\"securityWidgetStateOff\">$$language{No}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOn\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"windows_trayicon\" value=\"1\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        } else {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOff\" name=\"toggle\" value=\"$$language{ChangeToNo}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"windows_trayicon\" value=\"0\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        }
-        $body .= "</td></tr></table>\n";
+        $templ->param( 'windows_icon_on' => $self->config_( 'trayicon' ) );
     }
 
     if ( $name eq 'windows_console' ) {
-        $body .= "<span class=\"configurationLabel\">$$language{Windows_Console}:</span><br />\n";
-        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
-
-        if ( $self->config_( 'console' ) == 0 ) {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<span class=\"securityWidgetStateOff\">$$language{No}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowConsoleOn\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"windows_console\" value=\"1\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        } else {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowConsoleOff\" name=\"toggle\" value=\"$$language{ChangeToNo}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"windows_console\" value=\"0\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        }
-        $body .= "</td></tr></table>\n";
+        $templ->param( 'windows_console_on' => $self->config_( 'console' ) );
     }
-
-    return $body;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -143,27 +107,27 @@ sub configure_item
 #
 #    $name            The name of the item being configured, was passed in by the call
 #                     to register_configuration_item
-#    $language        Reference to the hash holding the current language
+#    $templ           The loaded template
+#    $language        The language currently in use
 #    $form            Hash containing all form items
 #
-#  Must return the HTML for this item
 # ---------------------------------------------------------------------------------------------
 
 sub validate_item
 {
-    my ( $self, $name, $language, $form ) = @_;
+    my ( $self, $name, $templ, $language, $form ) = @_;
 
     if ( $name eq 'windows_trayicon' ) {
         if ( defined($$form{windows_trayicon}) ) {
             $self->config_( 'trayicon', $$form{windows_trayicon} );
-            return $$language{Windows_NextTime};
+            $templ->param( 'feedback' => 1 );
         }
     }
 
     if ( $name eq 'windows_console' ) {
         if ( defined($$form{windows_console}) ) {
             $self->config_( 'console', $$form{windows_console} );
-            return $$language{Windows_NextTime};
+            $templ->param( 'feedback' => 1 );
         }
     }
 
