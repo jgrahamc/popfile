@@ -67,7 +67,6 @@ sub initialize
     return 1;
 }
 
-
 # ---------------------------------------------------------------------------------------------
 #
 # start
@@ -89,6 +88,24 @@ sub start
                                          'windows_trayicon_and_console',
                                          'windows-configuration.thtml',
                                          $self );
+
+    # Now try to cleanup a mess that PerlApp/PerlTray might have left
+    # behind in the $TEMP.  For some reason even though we build with
+    # --clean it leaves behind empty directories in the TEMP directory
+    # in the form $TEMP/pdk-USER-PID
+    #
+    # We try to delete everything that is in that form but does not have 
+    # our PID
+
+    my @temp = glob $ENV{TEMP} . "/pdk-" . $ENV{USER} . "-*";
+
+    foreach my $dir (@temp) {
+        if ( $dir =~ /pdk\-.+\-(\d+)$/ ) {
+	    if ( $$ != $1 ) {
+                rmdir $dir;
+	    }
+        }
+    }
 
     return $self->SUPER::start();
 }
