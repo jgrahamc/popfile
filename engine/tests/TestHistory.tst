@@ -138,6 +138,7 @@ test_assert_equal( $#result, -1 );
 
 open FILE, ">$file";
 print FILE <<EOF;
+Received: Today
 From: John Graham-Cumming <nospam\@jgc.org>
 To: Everyone <nospam-everyone\@jgc.org>
 Cc: People <no-spam-people\@jgc.org>
@@ -176,9 +177,10 @@ $h->service();
 
 my $hash = $h->get_message_hash( '1234', 
     'Sun, 25 Jul 2020 03:46:32 -0700', 
-    'this is the subject line' );
+    'this is the subject line',
+    'Today' );
 
-test_assert_equal( $hash, 'bd9ff908e7f4925637c263e8e355f69a' );
+test_assert_equal( $hash, 'b3acb78f29968d1565ab3c55230c6547' );
 test_assert_equal( $slot1, $h->get_slot_from_hash( $hash ) );
 
 # Check that the two messages were correctly inserted into

@@ -194,7 +194,9 @@ sub debug
 {
     my ( $self, $level, $message ) = @_;
 
-    if ( $level > $self->config_( 'level' ) ) {
+    # The -1 means that no logging will happen before we've been initialized
+
+    if ( $level > ( $self->config_( 'level' ) || -1 ) ) {
         return;
     }
 

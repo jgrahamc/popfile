@@ -390,29 +390,33 @@ sub commit_history__
         #    committed set to 1
 
         my %header;
-        my $last;
 
         if ( open FILE, "<$file" ) {
+            my $last;
             while ( <FILE> ) {
-                if ( /^[\r\n]*$/ ) {
+                s/[\r\n]//g;
+
+                if ( /^$/ ) {
                     last;
                 }
 
-                if ( /^([^ \t]+):[ \t]*([^\r\n]+)/ ) {
-                    $last = lc($1);
-                    $header{$last} .= $2;
+                if ( /^([^ \t]+):[ \t]*(.+)$/ ) {
+                    $last = lc $1;
+                    push @{$header{$last}}, $2;
+
                 } else {
                     if ( defined $last ) {
-                        $header{$last} .= $_;
+                        ${$header{$last}}[$#{$header{$last}}] .= $_;
                     }
                 }
             }
             close FILE;
         }
 
-        my $hash = $self->get_message_hash( $header{'message-id'},
-                                            $header{date},
-                                            $header{subject} );
+        my $hash = $self->get_message_hash( ${$header{'message-id'}}[0],
+                                            ${$header{'date'}}[0],
+                                            ${$header{'subject'}}[0],
+                                            ${$header{'received'}}[0] );
         $hash = $self->db__()->quote( $hash );
 
         # Make sure that the headers we are going to insert into
@@ -421,11 +425,11 @@ sub commit_history__
         my @required = ( 'from', 'to', 'cc', 'subject' );
 
         foreach my $h (@required) {
-            if ( !defined $header{$h} ) {
-                $header{$h} = '';
+            if ( !defined ${$header{$h}}[0] ) {
+                ${$header{$h}}[0] = '';
             }
 
-            $header{$h} = $self->db__()->quote( $header{$h} );
+            ${$header{$h}}[0] = $self->db__()->quote( ${$header{$h}}[0] );
         }
 
         # If we do not have a date header then set the date to
@@ -433,10 +437,10 @@ sub commit_history__
         # using Date::Parse to interpret it and turn it into the
         # Unix epoch.
 
-        if ( !defined( $header{date} ) ) {
-            $header{date} = 0;
+        if ( !defined( ${$header{date}}[0] ) ) {
+            ${$header{date}}[0] = 0;
         } else {
-            $header{date} = str2time( $header{date} );
+            ${$header{date}}[0] = str2time( ${$header{date}}[0] );
         }
 
         # Get the date/time now which will be stored in the database
@@ -457,18 +461,18 @@ sub commit_history__
         my $magnetid = 0;
 
         my $result = $self->db__()->do(
-            "update history set hdr_from    = $header{from},
-                                hdr_to      = $header{to},
-                                hdr_date    = $header{date},
-                                hdr_cc      = $header{cc},
-                                hdr_subject = $header{subject},
+            "update history set hdr_from    = ${$header{from}}[0],
+                                hdr_to      = ${$header{to}}[0],
+                                hdr_date    = ${$header{date}}[0],
+                                hdr_cc      = ${$header{cc}}[0],
+                                hdr_subject = ${$header{subject}}[0],
                                 committed   = 1,
                                 bucketid    = $bucketid,
                                 usedtobe    = 0,
                                 magnetid    = $magnetid,
                                 inserted    = $now,
                                 hash        = $hash
-                            where id = $slot;" );
+                                where id = $slot;" );
     }
 
     $self->{commit_list__} = ();
@@ -590,6 +594,7 @@ sub get_slot_file
 # messageid              The message id header
 # date                   The date header
 # subject                The subject header
+# received               First Received header line
 #
 # Note that the values passed in are everything after the : in
 # header without the trailing \r or \n.  If a header is missing
@@ -598,13 +603,14 @@ sub get_slot_file
 #----------------------------------------------------------------------------
 sub get_message_hash
 {
-    my ( $self, $messageid, $date, $subject ) = @_;
+    my ( $self, $messageid, $date, $subject, $received ) = @_;
 
     $messageid = '' if ( !defined( $messageid ) );
     $date      = '' if ( !defined( $date      ) );
     $subject   = '' if ( !defined( $subject   ) );
+    $received  = '' if ( !defined( $received  ) );
 
-    return md5_hex( "[$messageid][$date][$subject]" );
+    return md5_hex( "[$messageid][$date][$subject][$received]" );
 }
 
 #----------------------------------------------------------------------------
