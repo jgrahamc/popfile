@@ -2114,8 +2114,10 @@ sub sort_filter_history
     } else {
 		# Here's a quick shortcut so that we don't have to iterate
 		# if there's no work for us to do
-	
-		@{$self->{history_keys_}} = sort compare_mf @{$self->{history_keys_}};
+
+		if ( $self->history_size() > 0 ) {
+			@{$self->{history_keys_}} = sort compare_mf @{$self->{history_keys_}};
+		}
 	}    
 }
 
