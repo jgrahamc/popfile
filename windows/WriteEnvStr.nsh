@@ -286,7 +286,7 @@ FunctionEnd
 #         None
 #
 # Outputs:
-#         (top of stack)   - the input string (if valid) or "" (if invalid)
+#         (top of stack)   - 0 (running on Win9x system) or 1 (running on a more modern OS)
 #
 #  Usage (after macro has been 'inserted'):
 #
