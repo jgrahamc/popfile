@@ -5,6 +5,30 @@
 !define MUI_PRODUCT "POPFile" 
 !define MUI_VERSION "0.18.1"
 !include "MUI.nsh"
+
+#----------------------------------------------------------------------------------------
+# CBP Configuration Data (leave lines commented-out if defaults are satisfactory)
+#----------------------------------------------------------------------------------------
+#   ; Maximum number of buckets handled (in range 2 to 8)
+#
+#   !define CBP_MAX_BUCKETS 8
+#
+#   ; Default bucket selection (use "" if no buckets are to be pre-selected)
+#
+#   !define CBP_DEFAULT_LIST "in-box|junk|personal|work"
+#
+#   ; List of suggestions for bucket names (use "" if no suggestions are required)
+#
+#   !define CBP_SUGGESTION_LIST \
+#   "admin|business|computers|family|financial|general|hobby|in-box|junk|list-admin|\
+#   miscellaneous|not_spam|other|personal|recreation|school|security|shopping|spam|\
+#   travel|work"
+#----------------------------------------------------------------------------------------
+# Make the CBP package available
+#----------------------------------------------------------------------------------------
+
+!include CBP.nsh
+
 ;--------------------------------
 ;Configuration
   
@@ -52,9 +76,10 @@
   !insertmacro MUI_PAGECOMMAND_WELCOME
   !insertmacro MUI_PAGECOMMAND_COMPONENTS
   !insertmacro MUI_PAGECOMMAND_DIRECTORY
-  Page custom SetOptionsPage  ": Options"
+  Page custom SetOptionsPage "" ": Options"
   !insertmacro MUI_PAGECOMMAND_INSTFILES
-  Page custom SetOutlookOrOutlookExpressPage  ": Configure Outlook Express"
+  !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS ": Create POPFile Buckets"
+  Page custom SetOutlookOrOutlookExpressPage "" ": Configure Outlook Express"
   !insertmacro MUI_PAGECOMMAND_FINISH
 
   ;Component-selection page
