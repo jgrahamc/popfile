@@ -170,7 +170,9 @@ foreach my $test (@tests) {
 		$suite .= $line;
 	}
 	close SUITE;
-	eval $suite;
+	if ( !defined( eval $suite ) ) {
+            print "Error in $test: $@";
+	}
 	
 	if ( $test_failures > $current_error_count ) {
 		print "failed (" . ( $test_count - $current_test_count ) . " ok, " . ( $test_failures - $current_error_count ) . " failed)\n";
