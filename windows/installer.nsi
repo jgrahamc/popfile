@@ -851,8 +851,9 @@ Section "POPFile" SecPOPFile
   ; For increased flexibility, some global user variables are used in addition to $INSTDIR
   ; (this makes it easier to change the folder structure used by the installer).
 
-  StrCpy $G_ROOTDIR   "$INSTDIR"
-  StrCpy $G_MPLIBDIR  "$INSTDIR\lib"
+  ; $G_ROOTDIR is initialised by 'CheckExistingProgDir' (the DIRECTORY page's "leave" function)
+
+  StrCpy $G_MPLIBDIR  "$G_ROOTDIR\lib"
 
   IfFileExists "$G_ROOTDIR\*.*" rootdir_exists
   ClearErrors
@@ -899,7 +900,7 @@ continue:
   WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Minor Version" "${C_POPFILE_MINOR_VERSION}"
   WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Revision" "${C_POPFILE_REVISION}"
   WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile RevStatus" "${C_POPFILE_RC}"
-  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath" "$INSTDIR"
+  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath" "$G_ROOTDIR"
   WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "setup.exe"
   WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "$G_ROOTDIR"
   StrCmp $G_SFN_DISABLED "0" find_HKLM_root_sfn
@@ -918,7 +919,7 @@ current_user_root:
   WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Minor Version" "${C_POPFILE_MINOR_VERSION}"
   WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Revision" "${C_POPFILE_REVISION}"
   WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile RevStatus" "${C_POPFILE_RC}"
-  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath" "$INSTDIR"
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath" "$G_ROOTDIR"
   WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "setup.exe"
   WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "$G_ROOTDIR"
   StrCmp $G_SFN_DISABLED "0" find_HKCU_root_sfn
@@ -1531,13 +1532,13 @@ SectionEnd
       ; Install Kakasi package
       ;--------------------------------------------------------------------------
 
-      SetOutPath "$INSTDIR"
+      SetOutPath "$G_ROOTDIR"
       File /r "${C_KAKASI_DIR}\kakasi"
 
       ; Add Environment Variables for Kakasi
 
       Push "ITAIJIDICTPATH"
-      Push "$INSTDIR\kakasi\share\kakasi\itaijidict"
+      Push "$G_ROOTDIR\kakasi\share\kakasi\itaijidict"
 
       StrCmp $G_WINUSERTYPE "Admin" all_users_1
       Call WriteEnvStr
@@ -1548,7 +1549,7 @@ SectionEnd
 
     next_var:
       Push "KANWADICTPATH"
-      Push "$INSTDIR\kakasi\share\kakasi\kanwadict"
+      Push "$G_ROOTDIR\kakasi\share\kakasi\kanwadict"
 
       StrCmp $G_WINUSERTYPE "Admin" all_users_2
       Call WriteEnvStr
@@ -1572,13 +1573,13 @@ SectionEnd
 
     set_vars_now:
       System::Call 'Kernel32::SetEnvironmentVariableA(t, t) \
-                    i("ITAIJIDICTPATH", "$INSTDIR\kakasi\share\kakasi\itaijidict").r0'
+                    i("ITAIJIDICTPATH", "$G_ROOTDIR\kakasi\share\kakasi\itaijidict").r0'
       StrCmp ${L_RESERVED} 0 0 itaiji_set_ok
       MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (ITAIJIDICTPATH)"
 
     itaiji_set_ok:
       System::Call 'Kernel32::SetEnvironmentVariableA(t, t) \
-                    i("KANWADICTPATH", "$INSTDIR\kakasi\share\kakasi\kanwadict").r0'
+                    i("KANWADICTPATH", "$G_ROOTDIR\kakasi\share\kakasi\kanwadict").r0'
       StrCmp ${L_RESERVED} 0 0 continue
       MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (KANWADICTPATH)"
 
