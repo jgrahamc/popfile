@@ -84,7 +84,11 @@ sub service
 
         my $url = 'http://127.0.0.1:' . $self->module_config_( 'html', 'port' );
 
-        $execute->Call( 0, "open", $url, "", "", 0 );
+        if ( defined( $execute ) ) {
+            $execute->Call( 0, "open", $url, "", "", 0 );
+	} else {
+            system( "start $url" );
+        }
     }
 
     # Exit action from try context menu - return 0, to cause exit
