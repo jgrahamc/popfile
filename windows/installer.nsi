@@ -62,7 +62,7 @@
   ; if one icon file contains a 32x32 16-colour image and a 16x16 16-colour image then the other
   ; file cannot just contain a 32x32 16-colour image, it must also have a 16x16 16-colour image.
   
-  !define MUI_ICON    "..\engine\Platform\popfile.ico"
+  !define MUI_ICON    "POPFileIcon\popfile.ico"
   !define MUI_UNICON  "remove.ico" 
 
   !define MUI_UNINSTALLER
