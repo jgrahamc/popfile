@@ -846,7 +846,7 @@ sub html_common_bottom
 
     my $faq_prefix = ( $self->config_( 'language' ) eq 'Nihongo' )?'JP_':'';
 
-    $result .= "<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/cgi-bin/wiki.pl?$faq_prefix" . "FrequentlyAskedQuestions\">FAQ</a><br>\n";
+    $result .= "<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/cgi-bin/wiki.pl?$faq_prefix" . "FrequentlyAskedQuestions\">$self->{language__}{FAQ}</a><br>\n";
 
     $result .= "</td><td class=\"footerBody\">\n<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/\"><img src=\"otto.gif\" border=\"0\" alt=\"\"></a><br>$self->{version_}<br>($time - $self->{last_login__})</td>\n";
 
@@ -1173,7 +1173,7 @@ sub security_page
     } else {
         $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
         $body .= "<span class=\"securityWidgetStateOn\">$self->{language__}{Yes}</span>\n";
-        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptHTTPOff\" name=\"toggle\" value=\"$self->{language__}{ChangeToNo} (Stealth Mode)\" />\n";
+        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptHTTPOff\" name=\"toggle\" value=\"$self->{language__}{ChangeToNo} $self->{language__}{Security_StealthMode}\" />\n";
         $body .= "<input type=\"hidden\" name=\"localui\" value=\"2\" />\n";
         $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n";
     }
