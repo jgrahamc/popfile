@@ -2393,7 +2393,7 @@ sub db_connect__
     # here using the file 'popfile.sql' which should be located in the same directory
     # the Classifier/Bayes.pm module
 
-    our $dbname = $self->get_user_path_( $self->config_( 'database' ) );
+    my $dbname = $self->get_user_path_( $self->config_( 'database' ) );
     my $dbpresent = ( -e $dbname ) || 0;
 
     # Now perform the connect, note that this is database independent at this point, the
