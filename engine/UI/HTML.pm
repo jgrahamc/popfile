@@ -851,6 +851,16 @@ sub handle_configuration_bar__
     }
     $templ->param( 'Configuration_Loop_Languages' => \@language_loop );
 
+    if ( defined($self->{form_}{hide_configbar}) ) {
+        $self->user_config_( 1, 'show_configbars', 0 );
+        $templ->param( 'If_Show_Config_Bars' => 0 );
+    }
+
+    if ( defined ($self->{form_}{show_configbar}) ) {
+        $self->user_config_( 1, 'show_configbars', 1 );
+        $templ->param( 'If_Show_Config_Bars' => 1 );
+    }
+
     return $templ;
 }
 
@@ -2870,6 +2880,7 @@ sub load_template__
                    'Common_Bottom_Version'   => $self->version(),
                    'If_Show_Bucket_Help'     => $self->user_config_( 1, 'show_bucket_help' ),
                    'If_Show_Training_Help'   => $self->user_config_( 1, 'show_training_help' ),
+                   'If_Show_Config_Bars'     => $self->user_config_( 1, 'show_configbars' ),
                    'Common_Middle_If_CanAdmin' => $self->user_global_config_( 1, 'can_admin' ),
                    'Configuration_Action'      => $page );
 

@@ -1,4 +1,4 @@
--- POPFILE SCHEMA 5
+-- POPFILE SCHEMA 6
 -- ---------------------------------------------------------------------------
 --
 -- popfile.schema - POPFile's database schema
@@ -475,7 +475,7 @@ insert into user_template ( name, def, form ) values ( 'bayes_xpl_angle', 0, '%d
 -- Keep the history for two days
 insert into user_template ( name, def, form ) values ( 'history_history_days', 2, '%d' );
 
--- Checking for updates if off by default
+-- Checking for updates is off by default
 insert into user_template ( name, def, form ) values ( 'html_update_check', 0, '%d' );
 
 -- Sending of statistics is off
@@ -544,6 +544,11 @@ insert into user_template ( name, def, form ) values ( 'imap_uidvalidities', '',
 insert into user_template ( name, def, form ) values ( 'imap_update_interval', 20, '%d' );
 insert into user_template ( name, def, form ) values ( 'imap_use_ssl', 0, '%d' );
 insert into user_template ( name, def, form ) values ( 'imap_watched_folders', 'INBOX', '%s' );
+
+-- Show the config bar at the bottom of each page defaults to on
+insert into user_template ( name, def, form ) values ( 'html_show_configbars', 1, '%d' );
+
+
 
 -- The adminisrator (user 1) can_admin
 

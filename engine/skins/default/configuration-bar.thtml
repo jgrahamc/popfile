@@ -1,70 +1,91 @@
-   <tr>
-      <td class="settingsPanel configBar" width="100%" align="center">
-          <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-          <div class="configBarOption">
-                <label class="configurationLabel" for="configSkin">
-                    <TMPL_VAR NAME="Localize_Configuration_SkinsChoose">:
-                </label>
+<TMPL_IF NAME="If_Show_Config_Bars">
 
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-                <select name="skin" id="configSkin">
-                    <optgroup label="<TMPL_VAR NAME="Localize_Configuration_GeneralSkins">">
+    <tr>
+        <td class="settingsPanel configBar" width="100%" align="center">
+            <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
+                <div class="configBarOption">
+                    <label class="configurationLabel" for="configSkin">
+                        <TMPL_VAR NAME="Localize_Configuration_SkinsChoose">:
+                    </label>
 
-                        <TMPL_LOOP NAME="Configuration_Loop_General_Skins">
+                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+                    <select name="skin" id="configSkin">
+                        <optgroup label="<TMPL_VAR NAME="Localize_Configuration_GeneralSkins">">
 
-                        <option value="<TMPL_VAR NAME="Configuration_General_Skin">" <TMPL_VAR NAME="Configuration_General_Selected">>
-                            <TMPL_VAR NAME="Configuration_General_Skin">
+                            <TMPL_LOOP NAME="Configuration_Loop_General_Skins">
+
+                            <option value="<TMPL_VAR NAME="Configuration_General_Skin">" <TMPL_VAR NAME="Configuration_General_Selected">>
+                                <TMPL_VAR NAME="Configuration_General_Skin">
+                            </option>
+
+                            </TMPL_LOOP>
+
+                        </optgroup>
+
+                        <optgroup label="<TMPL_VAR NAME="Localize_Configuration_SmallSkins">">
+
+                            <TMPL_LOOP NAME="Configuration_Loop_Small_Skins">
+
+                            <option value="<TMPL_VAR NAME="Configuration_Small_Skin">" <TMPL_VAR NAME="Configuration_Small_Selected">>
+                                <TMPL_VAR NAME="Configuration_Small_Skin">
+                            </option>
+
+                            </TMPL_LOOP>
+
+                        </optgroup>
+                        <optgroup label="<TMPL_VAR NAME="Localize_Configuration_TinySkins">">
+
+                            <TMPL_LOOP NAME="Configuration_Loop_Tiny_Skins">
+
+                            <option value="<TMPL_VAR NAME="Configuration_Tiny_Skin">" <TMPL_VAR NAME="Configuration_Tiny_Selected">>
+                                <TMPL_VAR NAME="Configuration_Tiny_Skin">
+                            </option>
+
+                            </TMPL_LOOP>
+
+                        </optgroup>
+                    </select>
+                    <input type="submit" class="submit" name="change_skin" value="<TMPL_VAR NAME="Localize_Apply">" />
+                </div>
+
+                <div class="configBarOption">
+
+                    <label class="configurationLabel" for="configLanguage">
+                        <TMPL_VAR NAME="Localize_Configuration_LanguageChoose">:
+                    </label>
+
+                    <select name="language" id="configLanguage">
+
+                        <TMPL_LOOP NAME="Configuration_Loop_Languages">
+
+                        <option value="<TMPL_VAR NAME="Configuration_Language">" <TMPL_VAR NAME="Configuration_Selected_Language">>
+                            <TMPL_VAR NAME="Configuration_Language">
                         </option>
 
                         </TMPL_LOOP>
 
-                    </optgroup>
-
-                    <optgroup label="<TMPL_VAR NAME="Localize_Configuration_SmallSkins">">
-
-                        <TMPL_LOOP NAME="Configuration_Loop_Small_Skins">
-
-                        <option value="<TMPL_VAR NAME="Configuration_Small_Skin">" <TMPL_VAR NAME="Configuration_Small_Selected">>
-                            <TMPL_VAR NAME="Configuration_Small_Skin">
-                        </option>
-
-                        </TMPL_LOOP>
-
-                    </optgroup>
-                    <optgroup label="<TMPL_VAR NAME="Localize_Configuration_TinySkins">">
-
-                        <TMPL_LOOP NAME="Configuration_Loop_Tiny_Skins">
-
-                        <option value="<TMPL_VAR NAME="Configuration_Tiny_Skin">" <TMPL_VAR NAME="Configuration_Tiny_Selected">>
-                            <TMPL_VAR NAME="Configuration_Tiny_Skin">
-                        </option>
-
-                        </TMPL_LOOP>
-
-                    </optgroup>
-                </select>
-                <input type="submit" class="submit" name="change_skin" value="<TMPL_VAR NAME="Localize_Apply">" />
-          </div>
-
-          <div class="configBarOption">
-
-                <label class="configurationLabel" for="configLanguage">
-                    <TMPL_VAR NAME="Localize_Configuration_LanguageChoose">:
-                </label>
-
-                <select name="language" id="configLanguage">
-
-                    <TMPL_LOOP NAME="Configuration_Loop_Languages">
-
-                    <option value="<TMPL_VAR NAME="Configuration_Language">" <TMPL_VAR NAME="Configuration_Selected_Language">>
-                        <TMPL_VAR NAME="Configuration_Language">
-                    </option>
-
-                    </TMPL_LOOP>
-
-                </select>
-                <input type="submit" class="submit" name="change_language" value="<TMPL_VAR NAME="Localize_Apply">" />
-          </div>
-          </form>
+                    </select>
+                    <input type="submit" class="submit" name="change_language" value="<TMPL_VAR NAME="Localize_Apply">" />
+                </div>
+                
+                <div class="configBarOption">
+                    <input type="submit" class="submit" name="hide_configbar" value="<TMPL_VAR NAME="Localize_Configuration_Hide_Bar">" />
+                </div>
+            </form>
         </td>
-   </tr>
+    </tr>
+    
+<TMPL_ELSE>
+
+    <tr>
+        <td class="settingsPanel configBar" width="100%" align="center">
+            <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
+                <div class="configBarOption">
+                    <input type="submit" class="submit" name="show_configbar" value="<TMPL_VAR NAME="Localize_Configuration_Show_Bar">" />
+                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+                </div>
+            </form>
+        </td>
+    </tr>
+
+</TMPL_IF>

@@ -175,6 +175,8 @@ Configuration_SOCKSPort                 SOCKS V proxy port
 Configuration_SOCKSPortUpdate           Updated SOCKS V proxy port to %s
 Configuration_SOCKSServerUpdate         Updated SOCKS V proxy host to %s
 Configuration_Fields                    Add history columns
+Configuration_Hide_Bar                  Hide configuration bar
+Configuration_Show_Bar                  Show configuration bar
 
 Advanced_Error1                         '%s' already in the Ignored Words list
 Advanced_Error2                         Ignored words can only contain alphanumeric, ., _, -, or @ characters
