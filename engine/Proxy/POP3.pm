@@ -549,7 +549,11 @@ sub child__
     $self->yield_( $ppipe, $pid );
     close $pipe;
 
-    $self->log_( "POP3 forked child done" );
+    if ( $pid != 0 ) {
+        $self->log_( "POP3 forked child done" );
+    } else {
+        $self->log_( "POP3 proxy done" );
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
