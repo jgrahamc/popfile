@@ -834,6 +834,10 @@ sub parse_stream
                                          
                     ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);
                     
+                    # Clear the saved headers
+                    $header   = '';
+                    $argument = '';          
+                                 
                     $self->{in_headers__} = 0;
                     print "Header parsing complete.\n" if $self->{debug};
                 }                
