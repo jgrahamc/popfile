@@ -291,11 +291,15 @@ sub CORE_load_directory_modules
     # comment (# POPFILE LOADABLE MODULE) and load that module into the %{$self->{components__}}
     # hash getting the name from the module by calling name()
 
-    my @modules = glob "$directory/*.pm";
+    opendir MODULES, $directory;
 
-    foreach my $module (@modules) {
-         $self->CORE_load_module($module, $type);
+    while ( my $entry = readdir MODULES ) {
+        if ( $entry =~ /\.pm$/ ) {
+            $self->CORE_load_module( "$directory/$entry", $type );
+	}
     }
+
+    closedir MODULES;
 
     print '} ' if $self->{debug__};
 }

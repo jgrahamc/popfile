@@ -353,6 +353,7 @@ sub service
 
                     $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $writer, $reader, $$ );
                     $self->{flush_child_data_}( $self, $reader );
+                    close $reader;
                 }
             }
 
