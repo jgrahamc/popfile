@@ -64,14 +64,14 @@ sub new
     #
     # The subkeys are
     #
-    #    cull            Used internally by load_history_cache (see there for details)
+    #   cull            Used internally by load_history_cache (see there for details)
     #   from            The address the email was from
-    #   short_from        Version of from with max 40 characters
-    #     subject            The subject of the email
-    #   short_subject    Version of subject with max 40 characters
-    #    magnet            If a magnet was used to classify the mail contains the magnet string
-    #    bucket            The classification of the mail
-    #    reclassified    1 if the mail has already been reclassified
+    #   short_from      Version of from with max 40 characters
+    #   subject         The subject of the email
+    #   short_subject   Version of subject with max 40 characters
+    #   magnet          If a magnet was used to classify the mail contains the magnet string
+    #   bucket          The classification of the mail
+    #   reclassified    1 if the mail has already been reclassified
     # 
     # The history_keys array stores the list of keys in the history hash and are a 
     # (perhaps strict) subset of the keys of $self->{history} set by calls to 
@@ -2775,7 +2775,6 @@ sub history_page
                                                             ( defined( $self->{form}{deletemessage} ) ) || 
                                                             ( defined( $self->{form}{clearall}      ) ) || 
                                                             ( defined( $self->{form}{clearpage}     ) ) );
-
     my $body = '';
 
     if ( !$self->history_cache_empty() )  {
@@ -3369,7 +3368,7 @@ sub remove_mail_files
     $self->calculate_today();
 
     if ( $self->{today} > $yesterday ) {    
-        my @mail_files = glob "$self->{configuration}->{configuration}{msgdir}popfile*=*.???";
+        my @mail_files = glob "$self->{configuration}->{configuration}{msgdir}popfile*=*.msg";
 
         foreach my $mail_file (@mail_files) {
             my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($mail_file);
@@ -3415,7 +3414,7 @@ sub history_delete_file
 {
     my ( $self, $mail_file, $archive ) = @_;
     
-    $mail_file =~ /(popfile.+\=.+\.msg)$/;
+    $mail_file =~ /(popfile.+\=.+\.msg)/;
     $mail_file = $1;
 
     if ( $archive ) {
