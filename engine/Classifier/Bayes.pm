@@ -784,4 +784,31 @@ sub classify_and_modify
     return $classification;
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# echo_to_dot
+#
+# $mail     The stream (created with IO::) to send the message to (the remote mail server)
+# $client   The local mail client (created with IO::) that needs the response
+#
+# echo all information from the $mail server until a single line with a . is seen
+#
+# ---------------------------------------------------------------------------------------------
+sub echo_to_dot 
+{
+    my ( $self, $mail, $client ) = @_;
+    
+    while ( <$mail> ) {
+        # Check for an abort
+        last if ( $self->{alive} == 0 );
+
+        print $client $_;
+
+        # The termination has to be a single line with exactly a dot on it and nothing
+        # else other than line termination characters.  This is vital so that we do
+        # not mistake a line beginning with . as the end of the block
+        last if ( /^\.(\r\n|\r|\n)$/ );
+    }
+}
+
 1;
