@@ -71,24 +71,26 @@ sub spin
 
 sub test_report
 {
-        my ( $ok, $test, $file, $line, $context ) = @_;
+    my ( $ok, $test, $context ) = @_;
 
-        spin( $line );
+    my ($package, $file, $line) = caller(1);  
 
-        $test_count += 1;
+    spin( $line );
 
-        if ( !$ok ) {
-                $fail_messages .= "\n    $file:$line failed '$test'";
-                if ( defined( $context ) ) {
-                        $fail_messages .= " ($context)";
-                }
-                $test_failures += 1;
-            print "Test fail at $file:$line ($test) ($context)\n";
-        } else {
-#            print "Test pass at $file:$line ($test) ($context)\n";
+    $test_count += 1;
+
+    if ( !$ok ) {
+        $fail_messages .= "\n    $file:$line failed '$test'";
+        if ( defined( $context ) ) {
+            $fail_messages .= " ($context)";
         }
+        $test_failures += 1;
+        print "Test fail at $file:$line ($test) ($context)\n";
+    } else {
+#       print "Test pass at $file:$line ($test) ($context)\n";
+    }
 
-        flush STDOUT;
+    flush STDOUT;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -107,9 +109,9 @@ sub test_report
 
 sub test_assert
 {
-        my ( $file, $line,  $test, $context ) = @_;
+        my ( $test, $context ) = @_;
 
-        test_report( eval( $test ), $test, $file, $line, $context );
+        test_report( eval( $test ), $test, $context );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -131,7 +133,7 @@ sub test_assert
 
 sub test_assert_equal
 {
-    my ( $file, $line, $test, $expected, $context ) = @_;
+    my ( $test, $expected, $context ) = @_;
     my $result;
 
     $test = '' unless (defined($test));
@@ -148,7 +150,7 @@ sub test_assert_equal
         $result = ( $test eq $expected );
     }
 
-    test_report( $result, "expecting [$expected] and got [$test]", $file, $line, $context );
+    test_report( $result, "expecting [$expected] and got [$test]", $context );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -171,18 +173,18 @@ sub test_assert_equal
 
 sub test_assert_regexp
 {
-    my ( $file, $line, $test, $expected, $context ) = @_;
+    my ( $test, $expected, $context ) = @_;
     my $result = ( $test =~ /$expected/m );
 
-    test_report( $result, "expecting to match [$expected] and got [$test]", $file, $line, $context );
+    test_report( $result, "expecting to match [$expected] and got [$test]", $context );
 }
 
 sub test_assert_not_regexp
 {
-    my ( $file, $line, $test, $expected, $context ) = @_;
+    my ( $test, $expected, $context ) = @_;
     my $result = !( $test =~ /$expected/m );
 
-    test_report( $result, "unexpected match of [$expected]", $file, $line, $context );
+    test_report( $result, "unexpected match of [$expected]", $context );
 }
 
 # MAIN
@@ -225,19 +227,8 @@ foreach my $test (@tests) {
         $fail_messages = '';
         my $suite;
         my $ln   = 0;
-        open SUITE, "<$test";
-        while (<SUITE>) {
-                my $line = $_;
-                $ln += 1;
-                $line =~ s/(test_assert_not_regexp\()/$1 '$test', $ln,/g;
-                $line =~ s/(test_assert_regexp\()/$1 '$test', $ln,/g;
-                $line =~ s/(test_assert_equal\()/$1 '$test', $ln,/g;
-                $line =~ s/(test_assert\()/$1 '$test', $ln,/g;
-                $suite .= $line;
-        }
-        close SUITE;
 
-        my $ran = eval( $suite );
+        my $ran = do $test;
 
         print "\b";
 
