@@ -7,6 +7,7 @@ package Classifier::Bayes;
 # ---------------------------------------------------------------------------------------------
 
 use strict;
+use Classifier::WordMangle;
 
 #----------------------------------------------------------------------------
 # new
@@ -30,6 +31,9 @@ sub new
     
     # Total number of words in all buckets
     $self->{full_total}        = 0;     
+
+    # The word mangler used to clean up words
+    $self->{mangler}           = new Classifier::WordMangle;
    
     return bless $self, $type;
 }
@@ -109,8 +113,13 @@ sub classify_file
         
         while ( $line =~ s/([A-Za-z]{3,})// )
         {
-            $words{$1} += 1;
-            $msg_total     += 1;
+            my $word = $self->{mangler}->mangle($1);
+            
+            if ( $word ne '' ) 
+            {
+                $words{$word} += 1;
+                $msg_total += 1;
+            }
         }
     }
 
