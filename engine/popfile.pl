@@ -1510,7 +1510,7 @@ sub compare_mf
 # ---------------------------------------------------------------------------------------------
 sub history_page
 {
-    my $body = "<h2>Recent Messages</h2><table width=100%><tr><td></td><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";
+    my $body = "<h2>Recent Messages</h2>"; 
 
     # Handle undo
     if ( defined($form{undo}) )
@@ -1682,231 +1682,240 @@ sub history_page
     }
 
     @mail_files = sort compare_mf @mail_files;
-    my $start_message = 0;
-    if ( ( defined($form{start_message}) ) && ($form{start_message} > 0 ) )
-    {
-        $start_message = $form{start_message};
-    }
-    my $stop_message = $start_message + $configuration{page_size} - 1;
-    if ( $stop_message >= $#mail_files ) 
-    {
-        $stop_message = $#mail_files;
-    }
     
-    my $stripe = 0;
-    
-    foreach my $i ($start_message ..  $stop_message)
+    if ( $#mail_files >= 0 ) 
     {
-        my $mail_file;
-        my $from = '';
-        my $subject = '';
-        $mail_file = $mail_files[$i];
-    
-        open MAIL, "<messages/$mail_file";
-        while (<MAIL>) 
+        $body .= "<table width=100%><tr><td></td><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";            
+        my $start_message = 0;
+        if ( ( defined($form{start_message}) ) && ($form{start_message} > 0 ) )
         {
-            if ( /^From:(.*)/i )
+            $start_message = $form{start_message};
+        }
+        my $stop_message = $start_message + $configuration{page_size} - 1;
+        if ( $stop_message >= $#mail_files ) 
+        {
+            $stop_message = $#mail_files;
+        }
+
+        my $stripe = 0;
+
+        foreach my $i ($start_message ..  $stop_message)
+        {
+            my $mail_file;
+            my $from = '';
+            my $subject = '';
+            $mail_file = $mail_files[$i];
+
+            open MAIL, "<messages/$mail_file";
+            while (<MAIL>) 
             {
-                if ( $from eq '' ) 
+                if ( /^From:(.*)/i )
                 {
-                    $from = $1;
-                    $from =~ s/<(.*)>/&lt;$1&gt;/g;
-                    $from =~ s/\"(.*)\"/$1/g;
+                    if ( $from eq '' ) 
+                    {
+                        $from = $1;
+                        $from =~ s/<(.*)>/&lt;$1&gt;/g;
+                        $from =~ s/\"(.*)\"/$1/g;
+                    }
+                }
+                if ( /^Subject:(.*)/i )
+                {
+                    if ( $subject eq '' ) 
+                    {
+                        $subject = $1;
+                        $subject =~ s/<(.*)>/&lt;$1&gt;/g;
+                        $subject =~ s/\"(.*)\"/$1/g;
+                    }
+                }
+                if (( $from ne '' ) && ( $subject ne '' ) ) 
+                {
+                    last;
                 }
             }
-            if ( /^Subject:(.*)/i )
+            close MAIL;
+
+            if ( $from eq '' ) 
             {
-                if ( $subject eq '' ) 
+                $from = "&lt;no from line&gt;";
+            }
+            if ( !( $subject =~ /[^ \t\r\n]/ ) ) 
+            {
+                $subject = "&lt;no subject line&gt;";
+            }
+
+            if ( length($from)>40 ) 
+            {
+                $from =~ /(.{40})/;
+                $from = "$1...";
+            }
+
+            if ( length($subject)>40 ) 
+            {
+                $subject =~ s/=20/ /g;
+                $subject =~ /(.{40})/;
+                $subject = "$1...";
+            }
+
+            # If the user has more than 4 buckets then we'll present a drop down list of buckets, otherwise we present simple
+            # links
+            my @buckets = sort keys %{$classifier->{total}};
+            my $drop_down = ( $#buckets > 4 );
+
+            if ( $drop_down ) 
+            {
+                $body .= "<form action=/history>";
+            }
+            $body .= "<a name=$mail_file>";
+            $body .= "<tr";
+            if ( ( ( defined($form{view}) ) && ( $form{view} eq $mail_file ) ) || ( ( defined($form{file}) && ( $form{file} eq $mail_file ) ) ) )
+            {
+                $body .= " bgcolor=$highlight_color";
+            }
+            else
+            {
+                if ( $stripe ) 
                 {
-                    $subject = $1;
-                    $subject =~ s/<(.*)>/&lt;$1&gt;/g;
-                    $subject =~ s/\"(.*)\"/$1/g;
-                }
-            }
-            if (( $from ne '' ) && ( $subject ne '' ) ) 
-            {
-                last;
-            }
-        }
-        close MAIL;
-
-        if ( $from eq '' ) 
-        {
-            $from = "&lt;no from line&gt;";
-        }
-        if ( !( $subject =~ /[^ \t\r\n]/ ) ) 
-        {
-            $subject = "&lt;no subject line&gt;";
-        }
-        
-        if ( length($from)>40 ) 
-        {
-            $from =~ /(.{40})/;
-            $from = "$1...";
-        }
-        
-        if ( length($subject)>40 ) 
-        {
-            $subject =~ s/=20/ /g;
-            $subject =~ /(.{40})/;
-            $subject = "$1...";
-        }
-        
-        # If the user has more than 4 buckets then we'll present a drop down list of buckets, otherwise we present simple
-        # links
-        my @buckets = sort keys %{$classifier->{total}};
-        my $drop_down = ( $#buckets > 4 );
-
-        if ( $drop_down ) 
-        {
-            $body .= "<form action=/history>";
-        }
-        $body .= "<a name=$mail_file>";
-        $body .= "<tr";
-        if ( ( ( defined($form{view}) ) && ( $form{view} eq $mail_file ) ) || ( ( defined($form{file}) && ( $form{file} eq $mail_file ) ) ) )
-        {
-            $body .= " bgcolor=$highlight_color";
-        }
-        else
-        {
-            if ( $stripe ) 
-            {
-                $body .= " class=row_even"; 
-            }
-            else
-            {
-                $body .= " class=row_odd"; 
-            }
-        }
-
-        $stripe = 1 - $stripe;
-        
-        $body .= "><td>";
-        $body .= $i+1 . "<td>";
-        my $class_file = $mail_file;
-        $class_file =~ s/msg$/cls/;
-        open CLASS, "<messages/$class_file";
-        my $bucket = <CLASS>;
-        my $reclassified = 0;
-        if ( $bucket =~ /RECLASSIFIED/ ) {
-            $bucket = <CLASS>;
-            $reclassified = 1;
-        }
-        $bucket =~ s/[\r\n]//g;
-        close CLASS;
-        $mail_file =~ /popfile\d+_(\d+)\.msg/;
-        my $bold = ( ( $configuration{last_count} <= $1 ) && ( $reclassified == 0 ) );
-        $body .= "<b>" if $bold;
-        $body .= $from;
-        $body .= "</b>" if $bold;
-        $body .= "<td>";
-        $body .= "<b>" if $bold;
-        $body .= "<a href=/history?view=$mail_file&start_message=$start_message&session=$session_key#$mail_file>$subject</a>";
-        $body .= "</b>" if $bold;
-        $body .= "<td>";
-        if ( $reclassified ) 
-        {
-            $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified as <font color=$classifier->{colors}{$bucket}>$bucket</font> - <a href=/history?undo=$mail_file&session=$session_key&badbucket=$bucket>[Undo]</a>";
-        } 
-        else
-        {
-            if ( $bucket eq 'unclassified' ) 
-            {
-                $body .= "$bucket<td>";
-            }
-            else
-            {
-                $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>";
-            }
-            
-            if ( $drop_down )
-            {
-                $body .= " <input type=submit name=change value=Reclassify> <input type=hidden name=usedtobe value=$bucket><select name=shouldbe>";
-            }
-            else
-            {
-                $body .= "Classify as: ";
-            }
-            
-            foreach my $abucket (@buckets)
-            {
-                if ( $drop_down ) 
-                {
-                    $body .= "<option value=$abucket>$abucket</option>"
+                    $body .= " class=row_even"; 
                 }
                 else
                 {
-                    $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$session_key&usedtobe=$bucket><font color=$classifier->{colors}{$abucket}>[$abucket]</font></a> ";
+                    $body .= " class=row_odd"; 
                 }
             }
-            
-            if ( $drop_down )
+
+            $stripe = 1 - $stripe;
+
+            $body .= "><td>";
+            $body .= $i+1 . "<td>";
+            my $class_file = $mail_file;
+            $class_file =~ s/msg$/cls/;
+            open CLASS, "<messages/$class_file";
+            my $bucket = <CLASS>;
+            my $reclassified = 0;
+            if ( $bucket =~ /RECLASSIFIED/ ) {
+                $bucket = <CLASS>;
+                $reclassified = 1;
+            }
+            $bucket =~ s/[\r\n]//g;
+            close CLASS;
+            $mail_file =~ /popfile\d+_(\d+)\.msg/;
+            my $bold = ( ( $configuration{last_count} <= $1 ) && ( $reclassified == 0 ) );
+            $body .= "<b>" if $bold;
+            $body .= $from;
+            $body .= "</b>" if $bold;
+            $body .= "<td>";
+            $body .= "<b>" if $bold;
+            $body .= "<a href=/history?view=$mail_file&start_message=$start_message&session=$session_key#$mail_file>$subject</a>";
+            $body .= "</b>" if $bold;
+            $body .= "<td>";
+            if ( $reclassified ) 
             {
-                $body .= "</select><input type=hidden name=file value=$mail_file><input type=hidden name=start_message value=$start_message><input type=hidden name=session value=$session_key>";
+                $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified as <font color=$classifier->{colors}{$bucket}>$bucket</font> - <a href=/history?undo=$mail_file&session=$session_key&badbucket=$bucket>[Undo]</a>";
+            } 
+            else
+            {
+                if ( $bucket eq 'unclassified' ) 
+                {
+                    $body .= "$bucket<td>";
+                }
+                else
+                {
+                    $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>";
+                }
+
+                if ( $drop_down )
+                {
+                    $body .= " <input type=submit name=change value=Reclassify> <input type=hidden name=usedtobe value=$bucket><select name=shouldbe>";
+                }
+                else
+                {
+                    $body .= "Classify as: ";
+                }
+
+                foreach my $abucket (@buckets)
+                {
+                    if ( $drop_down ) 
+                    {
+                        $body .= "<option value=$abucket>$abucket</option>"
+                    }
+                    else
+                    {
+                        $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$session_key&usedtobe=$bucket><font color=$classifier->{colors}{$abucket}>[$abucket]</font></a> ";
+                    }
+                }
+
+                if ( $drop_down )
+                {
+                    $body .= "</select><input type=hidden name=file value=$mail_file><input type=hidden name=start_message value=$start_message><input type=hidden name=session value=$session_key>";
+                }
+            }
+            $body .= "</td>";
+
+            if ( $drop_down ) 
+            {
+                $body .= "</form>";
+            }
+
+            # Check to see if we want to view a message
+            if ( ( defined($form{view}) ) && ( $form{view} eq $mail_file ) )
+            {
+                $body .= "<tr><td><td colspan=3><table border=3 bordercolor=$stab_color cellspacing=0 cellpadding=6><tr><td>";
+                $classifier->{parser}->{color} = 1;
+                $classifier->{parser}->{bayes} = $classifier;
+                $body .= $classifier->{parser}->parse_stream("messages/$form{view}");
+                $classifier->{parser}->{color} = 0;
+                $body .= "<p align=right><a href=/history?start_message=$start_message&session=$session_key><b>Close</b></a></table><td valign=top>";
+                $classifier->classify_file("messages/$form{view}");
+                $body .= $classifier->{scores};
+            }
+
+            if ( ( defined($form{file}) ) && ( $form{file} eq $mail_file ) )
+            {
+                $body .= "<tr><td><td>Changed to <font color=$classifier->{colors}{$form{shouldbe}}>$form{shouldbe}</font><td><td>";
             }
         }
-        $body .= "</td>";
-        
-        if ( $drop_down ) 
+
+        $body .= "</table><form action=/history><b>To remove entries in the history click: <input type=submit name=clear value='Remove All'>";
+        $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form>";
+
+        if ( $configuration{page_size} <= $#mail_files )
         {
-            $body .= "</form>";
-        }
-        
-        # Check to see if we want to view a message
-        if ( ( defined($form{view}) ) && ( $form{view} eq $mail_file ) )
-        {
-            $body .= "<tr><td><td colspan=3><table border=3 bordercolor=$stab_color cellspacing=0 cellpadding=6><tr><td>";
-            $classifier->{parser}->{color} = 1;
-            $classifier->{parser}->{bayes} = $classifier;
-            $body .= $classifier->{parser}->parse_stream("messages/$form{view}");
-            $classifier->{parser}->{color} = 0;
-            $body .= "<p align=right><a href=/history?start_message=$start_message&session=$session_key><b>Close</b></a></table><td valign=top>";
-            $classifier->classify_file("messages/$form{view}");
-            $body .= $classifier->{scores};
-        }
-        
-        if ( ( defined($form{file}) ) && ( $form{file} eq $mail_file ) )
-        {
-            $body .= "<tr><td><td>Changed to <font color=$classifier->{colors}{$form{shouldbe}}>$form{shouldbe}</font><td><td>";
+            $body .= "<p><center>Jump to message: ";
+            if ( $start_message != 0 ) 
+            {
+                $body .= "<a href=/history?start_message=";
+                $body .= $start_message - $configuration{page_size};
+                $body .= "&session=$session_key>< Previous</a> ";
+            }
+            my $i = 0;
+            while ( $i <= $#mail_files )
+            {
+                if ( $i == $start_message ) 
+                {
+                    $body .= "<b>";
+                    $body .= $i+1 . "</b>";
+                }
+                else 
+                {
+                    $body .= "<a href=/history?start_message=$i&session=$session_key>";
+                    $body .= $i+1 . "</a>";
+                }
+
+                $body .= " ";
+                $i += $configuration{page_size};
+            }
+            if ( $start_message < ( $#mail_files - $configuration{page_size} ) ) 
+            {
+                $body .= "<a href=/history?start_message=";
+                $body .= $start_message + $configuration{page_size};
+                $body .= "&session=$session_key>Next ></a>";
+            }
+            $body .= "</center>";
         }
     }
-
-    $body .= "</table><form action=/history><b>To remove entries in the history click: <input type=submit name=clear value='Remove All'>";
-    $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form>";
-
-    if ( $configuration{page_size} <= $#mail_files )
+    else
     {
-        $body .= "<p><center>Jump to message: ";
-        if ( $start_message != 0 ) 
-        {
-            $body .= "<a href=/history?start_message=";
-            $body .= $start_message - $configuration{page_size};
-            $body .= "&session=$session_key>< Previous</a> ";
-        }
-        my $i = 0;
-        while ( $i <= $#mail_files )
-        {
-            if ( $i == $start_message ) 
-            {
-                $body .= "<b>";
-                $body .= $i+1 . "</b>";
-            }
-            else 
-            {
-                $body .= "<a href=/history?start_message=$i&session=$session_key>";
-                $body .= $i+1 . "</a>";
-            }
-
-            $body .= " ";
-            $i += $configuration{page_size};
-        }
-        if ( $start_message < ( $#mail_files - $configuration{page_size} ) ) 
-        {
-            $body .= "<a href=/history?start_message=";
-            $body .= $start_message + $configuration{page_size};
-            $body .= "&session=$session_key>Next ></a>";
-        }
-        $body .= "</center>";
+        $body .= "<b>No messages in history.</b><p>";
     }
     
     return http_ok($body,2); 
@@ -2112,7 +2121,7 @@ sub run_popfile
         if  ( ( $configuration{localpop} == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) )
         {
             # Tell the client that we are ready for commands and identify our version number
-            tee( $client, "+OK POP3 popfile (v$major_version.$minor_version) server ready$eol" );
+            tee( $client, "+OK POP3 popfile (v$major_version.$minor_version.$build_version) server ready$eol" );
 
             my $current_count = $configuration{mail_count};
 
