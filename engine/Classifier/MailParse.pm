@@ -159,15 +159,8 @@ sub new
 
     $self->{quickmagnets__}      = {};
 
-    # These store the current HTML background color and font color to
-    # detect "invisible ink" used by spammers
-
-    $self->{htmlbackcolor__} = map_color( $self, 'white' );
-    $self->{htmlbodycolor__} = map_color( $self, 'white' );
-    $self->{htmlfontcolor__} = map_color( $self, 'black' );
-
-    # store the tag that set the foreground/background color so the color can be
-    # unset when the tag closes
+    # store the tag that set the foreground/background color so the
+    # color can be unset when the tag closes
 
     $self->{cssfontcolortag__} = '';
     $self->{cssbackcolortag__} = '';
@@ -177,8 +170,9 @@ sub new
 
     $self->{htmlcolordistance__} = 0;
 
-    # This is a mapping between HTML color names and HTML hexadecimal color values used by the
-    # map_color value to get canonical color values
+    # This is a mapping between HTML color names and HTML hexadecimal
+    # color values used by the map_color value to get canonical color
+    # values
 
     $self->{color_map__} = { 'aliceblue','f0f8ff', 'antiquewhite','faebd7', 'aqua','00ffff', 'aquamarine','7fffd4', 'azure','f0ffff', # PROFILE BLOCK START
         'beige','f5f5dc', 'bisque','ffe4c4', 'black','000000', 'blanchedalmond','ffebcd', 'blue','0000ff', 'blueviolet','8a2be2',
@@ -206,6 +200,15 @@ sub new
         'tan','d2b48c', 'teal','008080', 'thistle','d8bfd8', 'tomato','ff6347', 'turquoise','40e0d0', 'violet','ee82ee', 'wheat','f5deb3',
         'white','ffffff', 'whitesmoke','f5f5f5', 'yellow','ffff00', 'yellowgreen','9acd32' }; # PROFILE BLOCK STOP
 
+    # These store the current HTML background color and font color to
+    # detect "invisible ink" used by spammers
+
+    my $result = bless $self, $type;
+
+    $self->{htmlbackcolor__} = $self->map_color( 'white' );
+    $self->{htmlbodycolor__} = $self->map_color( 'white' );
+    $self->{htmlfontcolor__} = $self->map_color( 'black' );
+
     $self->{content_type__} = '';
     $self->{base64__}       = '';
     $self->{in_html_tag__}  = 0;
@@ -214,15 +217,14 @@ sub new
     $self->{in_headers__}   = 0;
 
     # This is used for switching on/off language specific functionality
+
     $self->{lang__} = '';
-
     $self->{first20__}      = '';
-
 
     # For support Quoted Printable in Japanese text, save encoded text in multiple lines
     $self->{prev__} = '';
 
-    return bless $self, $type;
+    return $result;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -336,8 +338,8 @@ sub map_color
 {
     my ( $self, $color ) = @_;
 
-    # The canonical form is lowercase hexadecimal, so start by lowercasing and stripping any
-    # initial #
+    # The canonical form is lowercase hexadecimal, so start by
+    # lowercasing and stripping any initial #
 
     $color = lc( $color );
 
@@ -354,16 +356,19 @@ sub map_color
 
         my $old_color = $color;
 
-        # Due to a bug/feature in Microsoft Internet Explorer it's possible to use
-        # invalid hexadecimal colors where the number 0 is replaced by any other character
-        # and if the hex has an uneven multiple of 3 number of characters it is padded on
-        # the right with 0s and if the hex is too long, it is divided into even triplets
-        # with the leftmost characters in the triplets being significant. Short (1-char)
-        # triplets are left-padded with 0's
+        # Due to a bug/feature in Microsoft Internet Explorer it's
+        # possible to use invalid hexadecimal colors where the number
+        # 0 is replaced by any other character and if the hex has an
+        # uneven multiple of 3 number of characters it is padded on
+        # the right with 0s and if the hex is too long, it is divided
+        # into even triplets with the leftmost characters in the
+        # triplets being significant. Short (1-char) triplets are
+        # left-padded with 0's
 
         my $quotient = ((length($color) - (length($color) % 3)) / 3 );
 
-        # We go one higher than the quotient if the length isn't an even multiple of 3
+        # We go one higher than the quotient if the length isn't an
+        # even multiple of 3
 
         $quotient += 1 if (length($color) % 3);
 
@@ -402,7 +407,11 @@ sub map_color
         print "hex color $color\n" if ($self->{debug__});
         print "flex-hex detected\n" if ($self->{debug__} && ($color ne $old_color));
 
-        # gross
+        # Add pseudo-word anytime flex hex detected
+
+        if ( $color ne $old_color ) {
+            $self->update_pseudoword( 'trick:flexhex', $old_color, 0, '' );
+        }
 
         return $color;
     }

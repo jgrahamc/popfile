@@ -115,6 +115,18 @@ test_assert_equal( $cl->map_color( 'fff' ), '0f0f0f' );
 test_assert_equal( $cl->map_color( 'aa5cfd0c69af132b3e4f' ), 'aac62b' );
 test_assert_equal( $cl->map_color( '6db6ec49efd278cd0bc92d1e5e072d68'), '6ecde0' );
 
+test_assert_equal( $cl->{words__}{'trick:flexhex:f'}, 1 );
+test_assert_equal( $cl->{words__}{'trick:flexhex:fyfyfy'}, 1 );
+test_assert_equal( $cl->{words__}{'trick:flexhex:f0f0'}, 2 );
+test_assert_equal( $cl->{words__}{'trick:flexhex:aa5cfd0c69af132b3e4f'}, 1 );
+test_assert_equal( $cl->{words__}{'trick:flexhex:fhfgf'}, 1 );
+test_assert_equal( $cl->{words__}{'trick:flexhex:ftfuf'}, 1 );
+test_assert_equal( $cl->{words__}{'trick:flexhex:ff'}, 1 );
+test_assert_equal( $cl->{words__}{'trick:flexhex:fff'}, 1 );
+test_assert_equal( $cl->{words__}{'trick:flexhex:f0f0f'}, 2 );
+test_assert_equal( $cl->{words__}{'trick:flexhex:fofp'}, 1 );
+test_assert_equal( $cl->{words__}{'trick:flexhex:f&f*'}, 1 );
+
 # Check line splitting into words
 $cl->{htmlbackcolor__} = $cl->map_color( 'white' );
 $cl->{htmlfontcolor__} = $cl->map_color( 'black' );
