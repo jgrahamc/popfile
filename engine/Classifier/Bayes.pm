@@ -801,13 +801,13 @@ sub db_put_word_count__
 
     $word = $self->{db__}->quote($word);
 
-    my $result = $self->{db__}->selectrow_arrayref("select words.id from words                # PROFILE BLOCK START
-                                                        where words.word = $word limit 1;");  # PROFILE BLOCK STOP
+    my $result = $self->{db__}->selectrow_arrayref(
+                     "select words.id from words where words.word = $word limit 1;");
 
     if ( !defined( $result ) ) {
         $self->{db__}->do( "insert into words ( word ) values ( $word );" );
-        $result = $self->{db__}->selectrow_arrayref("select words.id from words               # PROFILE BLOCK START
-                                                         where words.word = $word limit 1;"); # PROFILE BLOCK STOP
+        $result = $self->{db__}->selectrow_arrayref(
+                     "select words.id from words where words.word = $word limit 1;");
     }
 
     my $wordid = $result->[0];
