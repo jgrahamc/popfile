@@ -54,6 +54,7 @@ sub new
     # history page
     
     $self->{history}         = {};
+    $self->{history_keys}    = ();
     $self->{history_invalid} = 0;
 
     # A hash containing a mapping between alphanumeric identifiers and appropriate strings used
@@ -1595,19 +1596,22 @@ sub compare_mf
 # Reloads the history cache filtering based on the passed in filter
 #
 # $filter       Name of bucket to filter on
-# $search       Subject line to search for
+# $search       From/Subject line to search for
+# $sort         The field to sort on (from, subject, bucket)
 #
 # ---------------------------------------------------------------------------------------------
 sub load_history_cache 
 {
-    my ( $self, $filter, $search ) = @_;
+    my ( $self, $filter, $search, $sort ) = @_;
+
+    $sort = '' if ( !defined( $sort ) );
     
     my @history_files = sort compare_mf glob "$self->{configuration}->{configuration}{msgdir}popfile*=*.msg";
     $self->{history}         = {};
     $self->{history_invalid} = 0;
     my $j = 0;
 
-    print "Reloading history cache...";
+    print "Reloading history cache...\n";
 
     foreach my $i ( 0 .. $#history_files ) {
         $history_files[$i] =~ /(popfile.*\.msg)/;
@@ -1646,24 +1650,26 @@ sub load_history_cache
         }
         
         if ( ( $filter eq '' ) || ( $bucket eq $filter ) || ( ( $filter eq '__filter__magnet' ) && ( $magnet ne '' ) ) ) {
-            my $found = 1;
+            my $found   = 1;
+            my $from    = '';
+            my $subject = '';
             
-            if ( $search ne '' ) {
-                $found = 0;
+            if ( ( $search ne '' ) || ( $sort ne '' ) ) {
+                $found = ( $search eq '' );
                 
                 open MAIL, "<$self->{configuration}->{configuration}{msgdir}$history_files[$i]";
                 while (<MAIL>)  {
                     if ( /[A-Z0-9]/i )  {
                         if ( /^From:(.*)/i ) {
-                            my $from = $1;
-                            if ( $from =~ /\Q$search\E/i )  {
+                            $from = $1;
+                            if ( ( $search ne '' ) && ( $from =~ /\Q$search\E/i ) ) {
                                 $found = 1;
                                 last;
                             }
                         }
                         if ( /^Subject:(.*)/i ) {
-                            my $subject = $1;
-                            if ( $subject =~ /\Q$search\E/i )  {
+                            $subject = $1;
+                            if ( ( $search ne '' ) && ( $subject =~ /\Q$search\E/i ) ) {
                                 $found = 1;
                                 last;
                             }
@@ -1680,12 +1686,18 @@ sub load_history_cache
                 $self->{history}{$j}{bucket}       = $bucket;
                 $self->{history}{$j}{reclassified} = $reclassified;
                 $self->{history}{$j}{magnet}       = $magnet;
-                $self->{history}{$j}{subject}      = '';
-                $self->{history}{$j}{from}         = '';
+                $self->{history}{$j}{subject}      = $subject;
+                $self->{history}{$j}{from}         = $from;
 
                 $j += 1;
             }
         }
+    }
+    
+    if ( $sort ne '' ) {
+        @{$self->{history_keys}} = sort { $self->{history}{$a}{$sort} cmp $self->{history}{$b}{$sort} } keys %{$self->{history}};
+    } else {
+        @{$self->{history_keys}} = sort { $a <=> $b } keys %{$self->{history}};
     }
 }
 
@@ -1737,7 +1749,7 @@ sub get_history_navigator
     if ( $start_message != 0 )  {
         $body .= "<a href=\"/history?start_message=";
         $body .= $start_message - $self->{configuration}->{configuration}{page_size};
-        $body .= "&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}\">< $self->{language}{Previous}</a> ";
+        $body .= "&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">< $self->{language}{Previous}</a> ";
     }
     my $i = 0;
     while ( $i < history_size( $self ) ) {
@@ -1745,7 +1757,7 @@ sub get_history_navigator
             $body .= "<b>";
             $body .= $i+1 . "</b>";
         } else {
-            $body .= "<a href=\"/history?start_message=$i&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}\">";
+            $body .= "<a href=\"/history?start_message=$i&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">";
             $body .= $i+1 . "</a>";
         }
 
@@ -1755,7 +1767,7 @@ sub get_history_navigator
     if ( $start_message < ( history_size( $self ) - $self->{configuration}->{configuration}{page_size} ) )  {
         $body .= "<a href=\"/history?start_message=";
         $body .= $start_message + $self->{configuration}->{configuration}{page_size};
-        $body .= "&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}\">$self->{language}{Next} ></a>";
+        $body .= "&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">$self->{language}{Next} ></a>";
     }
     
     return $body;
@@ -1771,6 +1783,10 @@ sub history_page
 {
     my ( $self, $client ) = @_;
 
+    if ( !defined($self->{form}{sort}) ) {
+        $self->{form}{sort} = ''; 
+    }
+    
     my $filtered = '';    
     if ( !defined($self->{form}{filter}) || ( $self->{form}{filter} eq '__filter__all' ) )  {
         $self->{form}{filter} = '';
@@ -1862,6 +1878,8 @@ sub history_page
         close CLASS;
         
         $self->{history_invalid} = 1;
+        http_redirect( $self, $client,"/history?session=$self->{session_key}&sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}#$self->{form}{undo}");
+        return;
     }
 
     if ( defined($self->{form}{remove}) ) {
@@ -1871,7 +1889,7 @@ sub history_page
         unlink("$self->{configuration}->{configuration}{msgdir}$mail_file");
         unlink("$self->{configuration}->{configuration}{msgdir}$class_file");
         $self->{history_invalid} = 1;        
-        http_redirect( $self, $client,"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}");
+        http_redirect( $self, $client,"/history?session=$self->{session_key}&sort=$self->{form}{sort}&filter=$self->{form}{filter}");
         return;
     }
     
@@ -1881,9 +1899,9 @@ sub history_page
 
         # If the history cache is empty then we need to reload it now
 
-        load_history_cache( $self, $self->{form}{filter}, '') if ( history_cache_empty( $self ) );
+        load_history_cache( $self, $self->{form}{filter}, '', $self->{form}{sort}) if ( history_cache_empty( $self ) );
 
-        foreach my $i (keys %{$self->{history}}) {
+        foreach my $i (keys %{$self->{history_keys}}) {
             my $mail_file = $self->{history}{$i}{file};
             my $class_file = $mail_file;
             $class_file =~ s/msg$/cls/;
@@ -1892,7 +1910,7 @@ sub history_page
         }
 
         $self->{history_invalid} = 1;        
-        http_redirect( $self, $client,"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}");
+        http_redirect( $self, $client,"/history?session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}");
         return;
     }
 
@@ -1900,9 +1918,10 @@ sub history_page
 
         # If the history cache is empty then we need to reload it now
 
-        load_history_cache( $self, $self->{form}{filter}, '') if ( history_cache_empty( $self ) );
+        load_history_cache( $self, $self->{form}{filter}, '', $self->{form}{sort}) if ( history_cache_empty( $self ) );
         
         foreach my $i ( $self->{form}{start_message} .. $self->{form}{start_message} + $self->{configuration}->{configuration}{page_size} - 1 ) {
+            $i = $self->{history_keys}[$i];
             if ( $i <= history_size( $self ) )  {
                 my $class_file = $self->{history}{$i}{file};
                 $class_file =~ s/msg$/cls/;
@@ -1914,14 +1933,18 @@ sub history_page
         }
 
         $self->{history_invalid} = 1;        
-        http_redirect( $self, $client,"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}");
+        http_redirect( $self, $client,"/history?session=$self->{session_key}&sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}&start_message=$self->{form}{start_message}");
         return;
     }
 
     # If we just changed the number of mail files on the disk (deleted some or added some)
     # or the history is empty then reload the history
 
-    load_history_cache( $self, $self->{form}{filter}, '') if ( ( remove_mail_files( $self ) ) || ( $self->{history_invalid} ) || ( history_cache_empty( $self ) ) || ( defined($self->{form}{setfilter}) ) );
+    if ( defined( $self->{form}{setsort} ) ) {
+        $self->{form}{sort} = $self->{form}{setsort}; 
+    }
+
+    load_history_cache( $self, $self->{form}{filter}, '', $self->{form}{sort}) if ( ( remove_mail_files( $self ) ) || ( $self->{history_invalid} == 1 ) || ( history_cache_empty( $self ) ) || ( defined($self->{form}{setfilter}) ) || ( defined($self->{form}{setsort}) ) );
 
     # Handle the reinsertion of a message file
 
@@ -1970,12 +1993,15 @@ sub history_page
 
         $self->{classifier}->load_bucket("$self->{configuration}->{configuration}{corpus}/$self->{form}{shouldbe}");
         $self->{classifier}->update_constants();    
-        load_history_cache( $self, $self->{form}{filter},'');
+        load_history_cache( $self, $self->{form}{filter},'',$self->{form}{sort});
+        
+        http_redirect( $self, $client,"/history?session=$self->{session_key}&sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}#$self->{form}{file}");
+        return;
     }
 
     my $highlight_message = '';
 
-    load_history_cache( $self, $self->{form}{filter}, $self->{form}{search}) if ( ( defined($self->{form}{search}) ) && ( $self->{form}{search} ne '' ) );
+    load_history_cache( $self, $self->{form}{filter}, $self->{form}{search}, $self->{form}{sort}) if ( ( defined($self->{form}{search}) ) && ( $self->{form}{search} ne '' ) );
     
     if ( !history_cache_empty( $self ) )  {
         my $start_message = 0;
@@ -1988,6 +2014,7 @@ sub history_page
         if ( defined($self->{form}{view}) ) {
             my $found = 0;
             foreach my $i ($start_message ..  $stop_message) {
+                $i = $self->{history_keys}[$i];
                 if ( $self->{form}{view} eq $self->{history}{$i}{file} )  {
                     $found = 1;
                     last;
@@ -1996,6 +2023,7 @@ sub history_page
             
             if ( $found == 0 ) {
                 foreach my $i ( 0 .. history_size( $self ) )  {
+                    $i = $self->{history_keys}[$i];
                     if ( $self->{form}{view} eq $self->{history}{$i}{file} ) {
                         $start_message = $i;
                         $stop_message  = $i + $self->{configuration}->{configuration}{page_size} - 1;
@@ -2016,14 +2044,36 @@ sub history_page
             $body .="<h2>$self->{language}{History_Title}$filtered</h2>\n"; 
         }
         
-        $body .= "<table width=\"100%\">\n<tr valign=\"bottom\">\n<td>\n</td>\n" ;
+        $body .= "<table width=\"100%\">\n<tr valign=\"bottom\">\n<td>\n<a href=/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=>";
+        if ( $self->{form}{sort} eq '' ) {
+            $body .= "<b>ID</b>";
+        } else {
+            $body .= "ID";
+        }
+        $body .= "</a></td>\n" ;
         $body .= "<td>\n<form action=\"/history\">";
         $body .= "<input type=hidden name=filter value=\"$self->{form}{filter}\">" ;
+        $body .= "<input type=hidden name=sort value=\"$self->{form}{sort}\">" ;
         $body .= "<input type=hidden name=session value=\"$self->{session_key}\">" ;
         $body .= "<b>$self->{language}{History_SearchMessage}:&nbsp;</b>" ;
         $body .= "<input type=\"text\" name=\"search\"> " ;
-        $body .= "<input type=submit class=submit name=searchbutton value=\"$self->{language}{Find}\"></form>\n<b>$self->{language}{From}</b>\n<td>\n<b>$self->{language}{Subject}</b>\n" ;
-        $body .= "<td>\n<form action=\"/history\">\n" ;
+        $body .= "<input type=submit class=submit name=searchbutton value=\"$self->{language}{Find}\"></form>\n<a href=/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=from>";
+        
+        if ( $self->{form}{sort} eq 'from' ) {
+            $body .= "<b>$self->{language}{From}</b>";
+        } else {
+            $body .= "$self->{language}{From}";
+        }
+        
+        $body .="</a>\n<td>\n<a href=/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=subject>";
+        
+        if ( $self->{form}{sort} eq 'subject' ) {
+            $body .= "<b>$self->{language}{Subject}</b>";
+        } else {
+            $body .= "$self->{language}{Subject}";
+        }
+        
+        $body .= "</a>\n<td>\n<form action=\"/history\">\n" ;
         $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n" ;
         $body .= "<select name=\"filter\"><option value=\"__filter__all\">&lt;$self->{language}{History_ShowAll}&gt;</option>\n";
         
@@ -2035,12 +2085,20 @@ sub history_page
         }
         $body .= "<option value=\"__filter__magnet\">&lt;$self->{language}{History_ShowMagnet}&gt;</option>\n" ;
         $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\">\n" ;
-        $body .= "</form>\n<b>$self->{language}{Classification}</b>\n" ;
-        $body .= "<td>\n<b>$self->{language}{History_ShouldBe}</b>\n<td><b>$self->{language}{Remove}</b>" ;
+        $body .= "</form>\n<a href=/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=bucket>";
+        
+        if ( $self->{form}{sort} eq 'bucket' ) {
+            $body .= "<b>$self->{language}{Classification}</b>";
+        } else {
+            $body .= "$self->{language}{Classification}";
+        }
+
+        $body .= "</b></a>\n<td>\n<b>$self->{language}{History_ShouldBe}</b>\n<td><b>$self->{language}{Remove}</b>" ;
 
         my $stripe = 0;
 
         foreach my $i ($start_message ..  $stop_message) {
+            $i = $self->{history_keys}[$i];
             my $mail_file;
             my $from          = '';
             my $short_from    = '';
@@ -2055,13 +2113,11 @@ sub history_page
                         if ( /^From:(.*)/i ) {
                             if ( $from eq '' )  {
                                 $from = $1;
-                                $from =~ s/\"(.*)\"/$1/g;
                             }
                         }
                         if ( /^Subject:(.*)/i ) {
                             if ( $subject eq '' )  {
                                 $subject = $1;
-                                $subject =~ s/\"(.*)\"/$1/g;
                             }
                         }
                     } else {
@@ -2072,35 +2128,6 @@ sub history_page
                 }
                 close MAIL;
 
-                $from    = "&lt;$self->{language}{History_NoFrom}&gt;" if ( $from eq '' );
-                $subject = "&lt;$self->{language}{History_NoSubject}&gt;" if ( !( $subject =~ /[^ \t\r\n]/ ) );
-
-                $short_from    = $from;
-                $short_subject = $subject;
-
-                if ( length($short_from)>40 )  {
-                    $short_from =~ /(.{40})/;
-                    $short_from = "$1...";
-                }
-
-                if ( length($short_subject)>40 )  {
-                    $short_subject =~ s/=20/ /g;
-                    $short_subject =~ /(.{40})/;
-                    $short_subject = "$1...";
-                }
-
-                $from =~ s/</&lt;/g;
-                $from =~ s/>/&gt;/g;
-
-                $short_from =~ s/</&lt;/g;
-                $short_from =~ s/>/&gt;/g;
-
-                $subject =~ s/</&lt;/g;
-                $subject =~ s/>/&gt;/g;
-
-                $short_subject =~ s/</&lt;/g;
-                $short_subject =~ s/>/&gt;/g;
-                
                 $self->{history}{$i}{from}          = $from;
                 $self->{history}{$i}{subject}       = $subject;
                 $self->{history}{$i}{short_from} = $short_from;
@@ -2111,6 +2138,38 @@ sub history_page
                 $short_from    = $self->{history}{$i}{short_from}; 
                 $short_subject = $self->{history}{$i}{short_subject}; 
             }
+
+            $from    = "&lt;$self->{language}{History_NoFrom}&gt;" if ( $from eq '' );
+            $subject = "&lt;$self->{language}{History_NoSubject}&gt;" if ( !( $subject =~ /[^ \t\r\n]/ ) );
+
+            $from =~ s/\"(.*)\"/$1/g;
+            $subject =~ s/\"(.*)\"/$1/g;
+
+            $short_from    = $from;
+            $short_subject = $subject;
+
+            if ( length($short_from)>40 )  {
+                $short_from =~ /(.{40})/;
+                $short_from = "$1...";
+            }
+
+            if ( length($short_subject)>40 )  {
+                $short_subject =~ s/=20/ /g;
+                $short_subject =~ /(.{40})/;
+                $short_subject = "$1...";
+            }
+
+            $from =~ s/</&lt;/g;
+            $from =~ s/>/&gt;/g;
+
+            $short_from =~ s/</&lt;/g;
+            $short_from =~ s/>/&gt;/g;
+
+            $subject =~ s/</&lt;/g;
+            $subject =~ s/>/&gt;/g;
+
+            $short_subject =~ s/</&lt;/g;
+            $short_subject =~ s/>/&gt;/g;
             
             # If the user has more than 4 buckets then we'll present a drop down list of buckets, otherwise we present simple
             # links
@@ -2135,10 +2194,10 @@ sub history_page
             my $reclassified = $self->{history}{$i}{reclassified}; 
             $mail_file =~ /popfile\d+=(\d+)\.msg/;
             $body .= "<a title=\"$from\">$short_from</a>";
-            $body .= "<td>\n<a title=\"$subject\" href=\"/history?view=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}#$mail_file\">\n" ;
+            $body .= "<td>\n<a title=\"$subject\" href=\"/history?view=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}#$mail_file\">\n" ;
             $body .= "$short_subject</a><td>";
             if ( $reclassified )  {
-                $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font><td>" . sprintf( $self->{language}{History_Already}, $self->{classifier}->{colors}{$bucket}, $bucket ) . " - <a href=\"/history?undo=$mail_file&amp;session=$self->{session_key}&amp;badbucket=$bucket&amp;filter=$self->{form}{filter}&amp;start_message=$start_message#$mail_file\">[$self->{language}{Undo}]</a>";
+                $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font><td>" . sprintf( $self->{language}{History_Already}, $self->{classifier}->{colors}{$bucket}, $bucket ) . " - <a href=\"/history?undo=$mail_file&amp;session=$self->{session_key}&amp;badbucket=$bucket&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}&amp;start_message=$start_message#$mail_file\">[$self->{language}{Undo}]</a>";
             } else {
                 if ( $bucket eq 'unclassified' || !defined $self->{classifier}->{colors}{$bucket})  {
                     $body .= "$bucket<td>";
@@ -2160,7 +2219,7 @@ sub history_page
                             $body .= " selected" if ( $abucket eq $bucket );
                             $body .= ">$abucket</option>"
                         } else {
-                            $body .= "<a href=\"/history?shouldbe=$abucket&amp;file=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key}&amp;usedtobe=$bucket&amp;filter=$self->{form}{filter}#$mail_file\">\n" ;
+                            $body .= "<a href=\"/history?shouldbe=$abucket&amp;file=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key}&amp;usedtobe=$bucket&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}#$mail_file\">\n" ;
                             $body .= "<font color=$self->{classifier}->{colors}{$abucket}>[$abucket]</font></a> ";
                         }
                     }
@@ -2173,7 +2232,7 @@ sub history_page
                 }
             }
 
-            $body .= "</td><td><a href=/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;start_message=$start_message&amp;remove=$mail_file>[$self->{language}{Remove}]</a></td>";
+            $body .= "</td><td><a href=/history?session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}&amp;start_message=$start_message&amp;remove=$mail_file&amp;start_message=$start_message>[$self->{language}{Remove}]</a></td>";
             $body .= "</form>" if ( $drop_down );
 
             # Check to see if we want to view a message
@@ -2181,7 +2240,7 @@ sub history_page
                 $body .= "<tr>\n<td>\n<td colspan=\"3\">\n" ;
                 $body .= "<table class=\"stabColor03\" cellpadding=\"6\" cellspacing=\"0\">\n" ;
                 $body .= "<tr>\n<td>\n<p align=\"right\">\n" ;
-                $body .= "<a href=\"/history?start_message=$start_message&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}\">\n" ;
+                $body .= "<a href=\"/history?start_message=$start_message&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">\n" ;
                 $body .= "<b>$self->{language}{Close}</b></a>\n<p>\n";
                 
                 if ( $self->{history}{$i}{magnet} eq '' )  {
@@ -2221,7 +2280,7 @@ sub history_page
                     close MESSAGE;
                     $body .= "</tt>";
                 }
-                $body .= "<p align=right><a href=\"/history?start_message=$start_message&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}\"><b>$self->{language}{Close}</b></a></table><td valign=top>";
+                $body .= "<p align=right><a href=\"/history?start_message=$start_message&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\"><b>$self->{language}{Close}</b></a></table><td valign=top>";
                 $self->{classifier}->classify_file("$self->{configuration}->{configuration}{msgdir}$self->{form}{view}");
                 $body .= $self->{classifier}->{scores};
             }
@@ -2229,7 +2288,7 @@ sub history_page
             $body .= "<tr bgcolor=$highlight_color><td><td>" . sprintf( $self->{language}{History_ChangedTo}, $self->{classifier}->{colors}{$self->{form}{shouldbe}}, $self->{form}{shouldbe} ) if ( ( defined($self->{form}{file}) ) && ( $self->{form}{file} eq $mail_file ) );
         }
 
-        $body .= "</table>\n<form action=\"/history\">\n<input type=hidden name=filter value=\"$self->{form}{filter}\">\n" ;
+        $body .= "</table>\n<form action=\"/history\">\n<input type=hidden name=filter value=\"$self->{form}{filter}\">\n<input type=hidden name=sort value=\"$self->{form}{sort}\">" ;
         $body .= "<b>$self->{language}{History_Remove}:&nbsp;</b>\n" ;
         $body .= "<input type=submit class=submit name=clearall value=\"$self->{language}{History_RemoveAll}\">\n";
         $body .= "<input type=submit class=submit name=clearpage value=\"$self->{language}{History_RemovePage}\">\n" ;
@@ -2240,7 +2299,7 @@ sub history_page
         $body .= get_history_navigator( $self, $start_message, $stop_message ) if ( $self->{configuration}->{configuration}{page_size} <= history_size( $self ) );
         $body .= "</table>";
     } else {
-        $body .= "<h2>$self->{language}{History_Title}$filtered</h2><p><b>$self->{language}{History_NoMessages}.</b><p><form action=\"/history\"><input type=hidden name=session value=\"$self->{session_key}\"><select name=filter><option value=__filter__all>&lt;$self->{language}{History_ShowAll}&gt;</option>";
+        $body .= "<h2>$self->{language}{History_Title}$filtered</h2><p><b>$self->{language}{History_NoMessages}.</b><p><form action=\"/history\"><input type=hidden name=session value=\"$self->{session_key}\"><input type=hidden name=sort value=\"$self->{form}{sort}\"><select name=filter><option value=__filter__all>&lt;$self->{language}{History_ShowAll}&gt;</option>";
         
         foreach my $abucket (sort keys %{$self->{classifier}->{total}}) {
             $body .= "<option value=\"$abucket\"";
