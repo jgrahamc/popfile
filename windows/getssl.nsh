@@ -89,6 +89,11 @@
     Section "SSL Support" SecSSL
 !endif
 
+  ; The wizard does not contain the SSL support files so we provide an estimate which
+  ; includes a slack space allowance (based upon the development system's statistics)
+
+  AddSize 2560
+
   !define L_RESULT  $R0  ; used by the 'untgz' plugin to return the result
 
   Push ${L_RESULT}
