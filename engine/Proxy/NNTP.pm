@@ -64,7 +64,7 @@ sub initialize
 
     # The separator within the NNTP user name is :
 
-    $self->config_( 'separator', '@');
+    $self->config_( 'separator', ':');
 
     return 1;
 }
@@ -121,18 +121,23 @@ sub child__
         }
 
         if ($connection_state eq 'username needed') {
-            my $user_command = '^ *AUTHINFO USER ((.+)\\' . $self->config_('separator') . ')?([^\:]+)(:(.*))?';
+            
+            # NOTE: This syntax is ambiguous if the NNTP username is a short (under 5 digit) string (eg, 32123).
+            # If this is the case, run "perl popfile.pl -nntp_separator /" and change your kludged username
+            # appropriately (syntax would then be server[:port][/username])
+            my $user_command = '^ *AUTHINFO USER ([^:]+)(:([\d]{1,5}))?(\\' . $self->config_( 'separator' ) . '(.+))?';
 
-            if ( $command =~ /$user_command/i ) {
-                my $username = $2;
-                my $server   = $3;
-                my $port     = $5;
+            if ( $command =~ /$user_command/i ) {                          
+                my $server   = $1;
+                # hey, the port has to be in range at least
+                my $port     = $3 if ( defined($3) && ($3 > 0) && ($3 < 65536) );
+                my $username = $5;
 
                 if ( $server ne '' )  {
                     if ( $news = $self->verify_connected_( $news, $client, $server, $port || 119 ) )  {
                         if (defined $username) {
 
-			    # Pass through the AUTHINFO command with the actual user name for this server,
+                            # Pass through the AUTHINFO command with the actual user name for this server,
                             # if one is defined, and send the reply straight to the client
 
                             $self->get_response_($news, $client, 'AUTHINFO USER ' . $username );
