@@ -197,7 +197,7 @@ sub initialize
     # is important, as is the presence of a + (show this column) or -
     # (hide this column) in the value.  By default we show everything
 
-    $self->config_( 'columns', 
+    $self->config_( 'columns',
         '+inserted,+from,+to,-cc,+subject,-date,+bucket' );
 
     # An overriden date format set by the user, if empty then the
@@ -266,7 +266,7 @@ sub start
 
     # Ensure that the messages subdirectory exists
 
-    if ( !$self->{history__}->make_directory__( 
+    if ( !$self->{history__}->make_directory__(
         $self->get_user_path_( $self->global_config_( 'msgdir' ) ) ) ) {
         print STDERR "Failed to create the messages subdirectory\n";
         return 0;
@@ -444,8 +444,8 @@ sub url_handler__
     # already knows the session key, if they don't then drop to the
     # password screen
 
-    if ( ( (!defined($self->{form_}{session})) || 
-           ($self->{form_}{session} eq '' ) || 
+    if ( ( (!defined($self->{form_}{session})) ||
+           ($self->{form_}{session} eq '' ) ||
            ( $self->{form_}{session} ne $self->{session_key__} ) ) &&
            ( $self->config_( 'password' ) ne md5_hex( '__popfile__' ) ) ) {
 
@@ -512,7 +512,7 @@ sub url_handler__
         return 1;
     }
 
-    if ( ( defined($self->{form_}{session}) ) && 
+    if ( ( defined($self->{form_}{session}) ) &&
          ( $self->{form_}{session} ne $self->{session_key__} ) ) {
         $self->session_page( $client, 0, $url );
         return 1;
@@ -669,7 +669,7 @@ sub http_ok
 
         if ( $self->config_( 'send_stats' ) ) {
             $templ->param( 'Common_Middle_If_SendStats' => 1 );
-            my @buckets = $self->{c__}->get_buckets( 
+            my @buckets = $self->{c__}->get_buckets(
                 $self->{api_session__} );
             my $bc      = $#buckets + 1;
             $templ->param( 'Common_Middle_Buckets'  => $bc );
@@ -752,7 +752,7 @@ sub configuration_page
     }
 
     if ( defined($self->{form_}{ui_port} ) ) {
-        $templ->param( 'Configuration_UI_Port_Updated' => 
+        $templ->param( 'Configuration_UI_Port_Updated' =>
             sprintf( $self->{language__}{Configuration_UIUpdate},
                 $self->config_( 'port' ) ) );
     }
@@ -1985,12 +1985,12 @@ sub history_reclassify
 
         foreach my $key (keys %{$self->{form_}}) {
             if ( $key =~ /^reclassify_([0-9]+)$/ ) {
-  	        if ( defined( $self->{form_}{$key} ) &&
+                if ( defined( $self->{form_}{$key} ) &&
                      ( $self->{form_}{$key} ne '' ) ) {
                     $messages{$1} = $self->{form_}{$key};
-		}
-	    }
-	}
+                }
+            }
+        }
 
         my %work;
 
@@ -2739,7 +2739,7 @@ sub load_language
 
             if ( /([^\t ]+)[ \t]+(.+)/ ) {
                 my $id  = $1;
-                my $msg = ($self->config_( 'test_language' ))?"<TMPL_VAR name=\"Localize_$1\">":$2;
+                my $msg = ($self->config_( 'test_language' )) ? $1 : $2;
                 $msg =~ s/[\r\n]//g;
 
                 $self->{language__}{$id} = $msg;
@@ -2976,11 +2976,11 @@ sub session_key
 # shutdown_page__
 #
 #   Determines the text to send in response to a click on the
-#   shutdown link.  
+#   shutdown link.
 #----------------------------------------------------------------------------
 sub shutdown_page__
 {
-    my ( $self ) = @_;   
+    my ( $self ) = @_;
 
     # Figure out what style sheet we are using
     my $root = 'skins/' . $self->config_( 'skin' ) . '/';
@@ -2990,7 +2990,7 @@ sub shutdown_page__
     }
 
     # Now load the style sheet
-    
+
     $css = '<style type="text/css">';
     open CSS, "${root}style.css";
     while ( <CSS> ) {
@@ -2998,18 +2998,23 @@ sub shutdown_page__
     }
     $css .= "</style>";
 
-    # Load the template and send its output to $text
-    
+    # Load the template, set the class of the menu tabs, and send the output to $text
+
     my $templ = $self->load_template__( 'shutdown-page.thtml' );
-    my $text = $templ->output();    
-    
+
+    for my $i (0..5) {
+        $templ->param( "Common_Middle_Tab$i" => "menuStandard" );
+    }
+
+    my $text = $templ->output();
+
     # Replace the reference to the favicon, we won't be able
     # to handle that request
     $text =~ s/<link rel="icon" href="favicon\.ico">//;
-    
+
     # Replace the link to the style sheet with the style sheet itself
     $text =~ s/\Q<link rel="stylesheet" type="text\/css" href="${root}style.css" title="POPFile-Style">\E/$css/;
-    
+
     return $text;
 }
 
