@@ -2405,7 +2405,7 @@ sub load_history_cache__
             # Find the class information for this file using the history_load_class helper
             # function, and then parse the MSG file for the From and Subject information
 
-            my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->history_load_class( $history_files[$i] );
+            my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->{classifier__}->history_load_class( $history_files[$i] );
             my $from    = '';
             my $subject = '';
 
@@ -2612,86 +2612,6 @@ sub get_magnet_navigator
     return $body;
 }
 
-# ---------------------------------------------------------------------------------------------
-#
-# history_write_class - write the class file for a message.
-#
-# $filename     The name of the message to write the class for
-# $reclassified Boolean, true if the message has been reclassified
-# $bucket       the name of the bucket the message is in
-# $usedtobe     the name of the bucket the messages used to be in
-# $magnet       the magnet, if any, used to reclassify the message
-#
-# ---------------------------------------------------------------------------------------------
-sub history_write_class
-{
-    my ( $self, $filename, $reclassified, $bucket, $usedtobe, $magnet ) = @_;
-
-    $filename =~ s/msg$/cls/;
-
-    open CLASS, '>' . $self->global_config_( 'msgdir' ) . $filename;
-
-    if ( defined( $magnet ) && ( $magnet ne '' ) ) {
-        print CLASS "$bucket MAGNET $magnet\n";
-    } elsif (defined $reclassified && $reclassified == 1) {
-        print CLASS "RECLASSIFIED\n";
-        print CLASS "$bucket\n";
-        if ( defined( $usedtobe ) && ( $usedtobe ne '' ) ) {
-            print CLASS "$usedtobe\n";
-        }
-    } else {
-        print CLASS "$bucket\n";
-    }
-
-    close CLASS;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# history_load_class - load the class file for a message.
-#
-# returns: ( reclassified, bucket, usedtobe, magnet )
-#   values:
-#       reclassified:   boolean, true if message has been reclassified
-#       bucket:         string, the bucket the message is in presently, unknown class if an error occurs
-#       usedtobe:       string, the bucket the message used to be in (null if not reclassified)
-#       magnet:         string, the magnet
-#
-# $filename     The name of the message to load the class for
-#
-# ---------------------------------------------------------------------------------------------
-sub history_load_class
-{
-    my ( $self, $filename ) = @_;
-
-    $filename =~ s/msg$/cls/;
-
-    my $reclassified = 0;
-    my $bucket = "unknown class";
-    my $usedtobe;
-    my $magnet = '';
-
-    if ( open CLASS, '<' . $self->global_config_( 'msgdir' ) . $filename ) {
-        $bucket = <CLASS>;
-        if ( $bucket =~ /([^ ]+) MAGNET (.+)/ ) {
-            $bucket = $1;
-            $magnet = $2;
-        }
-
-        $reclassified = 0;
-        if ( $bucket =~ /RECLASSIFIED/ ) {
-            $bucket       = <CLASS>;
-            $usedtobe = <CLASS>;
-            $reclassified = 1;
-            $usedtobe =~ s/[\r\n]//g;
-        }
-        close CLASS;
-        $bucket =~ s/[\r\n]//g;
-    } else {
-        $self->log_( "Error: " . $self->global_config_( 'msgdir' ) . "$filename: $!" );
-    }
-    return ( $reclassified, $bucket, $usedtobe, $magnet );
-}
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -2732,7 +2652,7 @@ sub history_reclassify
 
             # Get the current classification for this message
 
-            my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->history_load_class( $mail_file );
+            my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_load_class( $mail_file );
 
             # Only reclassify messages that havn't been reclassified before
 
@@ -2762,7 +2682,7 @@ sub history_reclassify
 
                 # Update the class file
 
-                $self->history_write_class( $mail_file, 1, $newbucket, ( $bucket || "unclassified" ) , '');
+                $self->{classifier__}->history_load_class( $mail_file, 1, $newbucket, ( $bucket || "unclassified" ) , '');
 
                 # Since we have just changed the classification of this file and it has
                 # now been reclassified and has a new bucket name then we need to update the
@@ -2797,7 +2717,7 @@ sub history_undo
 
             # Load the class file
 
-            my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->history_load_class( $mail_file );
+            my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->{classifier__}->history_load_class( $mail_file );
 
             # Only undo if the message has been classified...
 
@@ -2836,7 +2756,7 @@ sub history_undo
 
                 # Update the class file
 
-                $self->history_write_class( $mail_file, 0, ( $usedtobe || "unclassified" ), '', '');
+                $self->{classifier__}->history_load_class( $mail_file, 0, ( $usedtobe || "unclassified" ), '', '');
 
                 # Add message feedback
 
@@ -3610,7 +3530,7 @@ sub history_delete_file
 
         mkdir( $path );
 
-        my ($reclassified, $bucket, $usedtobe, $magnet) = $self->history_load_class( $mail_file );
+        my ($reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_load_class( $mail_file );
 
         if ( ( $bucket ne 'unclassified' ) && ( $bucket ne 'unknown class' ) ) {
             $path .= "\/" . $bucket;

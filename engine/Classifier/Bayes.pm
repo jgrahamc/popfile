@@ -823,6 +823,106 @@ sub classify_file
 
 # ---------------------------------------------------------------------------------------------
 #
+# history_filename
+#
+# Returns a path and filename for a POPFile message based on the session count and message count
+#
+# $dcount   - the unique download/session count for this message
+# $mcount   - the message count for this message
+# $ext      - the extension for this message (defaults to .msg)
+#
+# ---------------------------------------------------------------------------------------------
+sub history_filename
+{
+    my ( $self, $dcount, $mcount, $ext) = @_;
+    
+    return $self->global_config_( 'msgdir' ) . "popfile$dcount" . "=$mcount" . (defined $ext?$ext:".msg");    
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# history_write_class - write the class file for a message.
+#
+# $filename     The name of the message to write the class for
+# $reclassified Boolean, true if the message has been reclassified
+# $bucket       the name of the bucket the message is in
+# $usedtobe     the name of the bucket the messages used to be in
+# $magnet       the magnet, if any, used to reclassify the message
+#
+# ---------------------------------------------------------------------------------------------
+sub history_write_class
+{
+    my ( $self, $filename, $reclassified, $bucket, $usedtobe, $magnet ) = @_;
+
+    $filename =~ s/msg$/cls/;
+
+    open CLASS, '>' . $self->global_config_( 'msgdir' ) . $filename;
+
+    if ( defined( $magnet ) && ( $magnet ne '' ) ) {
+        print CLASS "$bucket MAGNET $magnet\n";
+    } elsif (defined $reclassified && $reclassified == 1) {
+        print CLASS "RECLASSIFIED\n";
+        print CLASS "$bucket\n";
+        if ( defined( $usedtobe ) && ( $usedtobe ne '' ) ) {
+            print CLASS "$usedtobe\n";
+        }
+    } else {
+        print CLASS "$bucket\n";
+    }
+
+    close CLASS;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# history_load_class - load the class file for a message.
+#
+# returns: ( reclassified, bucket, usedtobe, magnet )
+#   values:
+#       reclassified:   boolean, true if message has been reclassified
+#       bucket:         string, the bucket the message is in presently, unknown class if an error occurs
+#       usedtobe:       string, the bucket the message used to be in (null if not reclassified)
+#       magnet:         string, the magnet
+#
+# $filename     The name of the message to load the class for
+#
+# ---------------------------------------------------------------------------------------------
+sub history_load_class
+{
+    my ( $self, $filename ) = @_;
+
+    $filename =~ s/msg$/cls/;
+
+    my $reclassified = 0;
+    my $bucket = "unknown class";
+    my $usedtobe;
+    my $magnet = '';
+
+    if ( open CLASS, '<' . $self->global_config_( 'msgdir' ) . $filename ) {
+        $bucket = <CLASS>;
+        if ( $bucket =~ /([^ ]+) MAGNET (.+)/ ) {
+            $bucket = $1;
+            $magnet = $2;
+        }
+
+        $reclassified = 0;
+        if ( $bucket =~ /RECLASSIFIED/ ) {
+            $bucket       = <CLASS>;
+            $usedtobe = <CLASS>;
+            $reclassified = 1;
+            $usedtobe =~ s/[\r\n]//g;
+        }
+        close CLASS;
+        $bucket =~ s/[\r\n]//g;
+    } else {
+        $self->log_( "Error: " . $self->global_config_( 'msgdir' ) . "$filename: $!" );
+    }
+    return ( $reclassified, $bucket, $usedtobe, $magnet );
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
 # classify_and_modify
 #
 # This method reads an email terminated by . on a line by itself (or the end of stream)
@@ -870,8 +970,8 @@ sub classify_and_modify
     # Whether we are currently reading the mail headers or not
     my $getting_headers = 1;
 
-    my $temp_file  = $self->global_config_( 'msgdir' ) . "popfile$dcount" . "=$mcount.msg";
-    my $class_file = $self->global_config_( 'msgdir' ) . "popfile$dcount" . "=$mcount.cls";
+    my $temp_file  = $self->history_filename($dcount,$mcount, ".msg");
+    my $class_file = $self->history_filename($dcount,$mcount, ".cls");
 
     open TEMP, ">$temp_file";
 
@@ -1049,9 +1149,9 @@ sub classify_and_modify
 
     if ( $got_full_body == 0 )    {
          if ( $echo ) {
-            $self->echo_to_dot_( $mail, $client );
+            $self->echo_to_dot_( $mail, $client, ">>" . $temp_file );
          } else {
-            $self->echo_to_dot_( $mail, undef );
+            $self->echo_to_dot_( $mail, undef, ">>" . $temp_file );
          }
     } else {
         if ( $classification ne 'unclassified' ) {
@@ -1463,25 +1563,77 @@ sub remove_message_from_bucket
 #
 # $mail     The stream (created with IO::) to send the message to (the remote mail server)
 # $client   The local mail client (created with IO::) that needs the response
+# $file     a file to print the response to
 #
 # echo all information from the $mail server until a single line with a . is seen
 #
 # ---------------------------------------------------------------------------------------------
 sub echo_to_dot_
 {
-    my ( $self, $mail, $client ) = @_;
+    my ( $self, $mail, $client, $file ) = @_;
+    
+    # These if statements are repetitive to keep the inner loops efficient
+    
+    if ( defined($file) && defined($client) ) {
+        # echo to file and stream
 
-    while ( <$mail> ) {
-        # Check for an abort
-        last if ( $self->{alive_} == 0 );
+        open FILE, $file;
+        while ( <$mail> ) {
+            # Check for an abort
+            last if ( $self->{alive_} == 0 );
+    
+            print $client $_;
+            print FILE $_;
+    
+            # The termination has to be a single line with exactly a dot on it and nothing
+            # else other than line termination characters.  This is vital so that we do
+            # not mistake a line beginning with . as the end of the block
+            last if ( /^\.(\r\n|\r|\n)$/ );
+        }
+        close FILE;
+    } elsif (defined($client)) {
+        # Echo only to stream
 
-        print $client $_ if ( defined( $client ) );
+        while ( <$mail> ) {
+            # Check for an abort
+            last if ( $self->{alive_} == 0 );
+    
+            print $client $_;            
+    
+            # The termination has to be a single line with exactly a dot on it and nothing
+            # else other than line termination characters.  This is vital so that we do
+            # not mistake a line beginning with . as the end of the block
+            last if ( /^\.(\r\n|\r|\n)$/ );
+        }
+    } elsif (defined($file)) {
+        # Echo only to file
 
-        # The termination has to be a single line with exactly a dot on it and nothing
-        # else other than line termination characters.  This is vital so that we do
-        # not mistake a line beginning with . as the end of the block
-        last if ( /^\.(\r\n|\r|\n)$/ );
-    }
+        open FILE, $file;
+        while ( <$mail> ) {
+            # Check for an abort
+            last if ( $self->{alive_} == 0 );
+    
+            print FILE $_;
+    
+            # The termination has to be a single line with exactly a dot on it and nothing
+            # else other than line termination characters.  This is vital so that we do
+            # not mistake a line beginning with . as the end of the block
+            last if ( /^\.(\r\n|\r|\n)$/ );
+        }
+        close FILE;
+    } else {
+        # consume without echoing
+
+        while ( <$mail> ) {            
+            # Check for an abort
+            last if ( $self->{alive_} == 0 );
+    
+            # The termination has to be a single line with exactly a dot on it and nothing
+            # else other than line termination characters.  This is vital so that we do
+            # not mistake a line beginning with . as the end of the block
+            last if ( /^\.(\r\n|\r|\n)$/ );
+        }
+    }    
 }
 
 # ---------------------------------------------------------------------------------------------

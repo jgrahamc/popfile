@@ -112,9 +112,12 @@ sub initialize
 sub child__
 {
     my ( $self, $client, $download_count, $pipe ) = @_;
+    
+    # Hash of indexes of downloaded messages    
+    my %downloaded;
 
     # Number of messages downloaded in this session
-    my $count = 0;
+    #my $count = 0;
 
     # The handle to the real mail server gets stored here
     my $mail;
@@ -268,12 +271,16 @@ sub child__
         if ( $command =~ /TOP (.*) (.*)/i ) {
             if ( $2 ne '99999999' )  {
                 if ( $self->config_( 'toptoo' ) ) {
+                    
+                    my $count = $1;
+                    
                     if ( $self->echo_response_($mail, $client, "RETR $1" ) ) {
 
-                        # Classify without echoing to client, without saving
-                        # and without over-writing any files ($mcount overriden to 0)
+                        # Classify without echoing to client, saving file for later RETR's
 
-                        my $class = $self->{classifier__}->classify_and_modify( $mail, undef, $download_count, 0, 1, '', 0 );
+                        my $class = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '', 0 );
+
+                        $downloaded{$count} = 1;
 
                         if ( $self->echo_response_($mail, $client, $command ) ) {
 
@@ -336,17 +343,66 @@ sub child__
         # Note the horrible hack here where we detect a command of the form TOP x 99999999 this
         # is done so that fetchmail can be used with POPFile.
         if ( ( $command =~ /RETR (.*)/i ) || ( $command =~ /TOP (.*) 99999999/i ) )  {
-            # Get the message from the remote server, if there's an error then we're done, but if not then
-            # we echo each line of the message until we hit the . at the end
-            if ( $self->echo_response_($mail, $client, $command ) ) {
-                $count += 1;
-                my $class = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '' );
+            
+            my $count = $1;
+            my $class;
+            
+            my $file = $self->{classifier__}->history_filename($download_count, $count);
+            my $short_file = $file;
+            $short_file =~ s/^[^\/]*\///;
+            
+            if (defined($downloaded{$count}) && open( RETRFILE, "<$file" ) ) {
+                # File has been fetched and classified already
+                
+                $self->log_( "Printing message from cache" );
+                
+                if (0) {
+                    # Ensure a .CRLF is on the end of the file (may be neccessary)
+                    open APPEND, ">>$file";
+                    binmode APPEND;
+                    print APPEND ".$eol";
+                    close APPEND;
+                }
 
-                # Tell the parent that we just handled a mail
-                print $pipe "CLASS:$class$eol";
+                # Give the client an +OK:
+                print $client "+OK file data cached by POPFile$eol";
 
-                $self->flush_extra_( $mail, $client, 0 );
+                # Load the last classification
+
+                my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_load_class($short_file);
+
+                if ($bucket ne 'unknown class') {
+                    # echo file, inserting known classification, without saving
+
+                    $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, 0, 1, $bucket );
+                } else {
+                    # If the class wasn't saved properly, classify from disk normally
+
+                    $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, 0, 1, '' );
+                    
+                    print $pipe "CLASS:$class$eol";
+
+                }                
+                close RETRFILE;
+                print $client ".$eol";
                 next;
+            } else {
+                # Retrieve file directly from the server
+
+                # Get the message from the remote server, if there's an error then we're done, but if not then
+                # we echo each line of the message until we hit the . at the end
+                if ( $self->echo_response_($mail, $client, $command ) ) {
+                    $class = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '' );
+
+                    # Tell the parent that we just handled a mail
+                    print $pipe "CLASS:$class$eol";
+                    
+                    # Note locally that file has been retrieved
+                    $downloaded{$count} = 1;
+
+                    $self->flush_extra_( $mail, $client, 0 );
+                    next;
+                }
             }
         }
 
