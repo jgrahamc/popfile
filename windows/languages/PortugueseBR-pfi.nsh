@@ -141,11 +141,11 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_3           "Sobrescrever este arquivo ?"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_4           "Clique 'Sim' para sobrescrever, clique 'Não' para pular fazendo uma cópia de segurança"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1         "Unable to shutdown POPFile automatically."
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2         "Please shutdown POPFile manually now."
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3         "When POPFile has been shutdown, click 'OK' to continue."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1         "Impossível desligar o POPFile automaticamente."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2         "Por favor desligue o POPFile manualmente agora."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3         "Quando o POPFile tiver sido desligado, clique 'OK' para continuar."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBFFCERR_1          "Error detected when the installer tried to backup the old corpus."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBFFCERR_1          "Erro detectado quando o instalador tentou fazer o backup do corpus antigo."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Classification Bucket Creation
@@ -252,19 +252,19 @@
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_TITLE       "POPFile Corpus Conversion"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_SUBTITLE    "The existing corpus must be converted to work with this version of POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_TITLE       "Conversão do Corpus do POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_SUBTITLE    "O corpus existente deve ser convertido para funcionar com esta versão do POPFile"
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_1   "POPFile will now be started in a console window to convert the existing corpus."
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_2   "THIS PROCESS MAY TAKE SEVERAL MINUTES (if the corpus is large)."
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_3   "WARNING"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_4   "Do NOT close the POPFile console window!"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_5   "When 'POPFile Engine v0.20.0 running' appears in the console window, this means"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_6   "- POPFile is ready for use"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_7   "- POPFile can be safely shutdown using the Start Menu"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_8   "Click Next to convert the corpus."
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_1   "O POPFile será iniciado agora em uma janela de console para converter o corpus existente."
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_2   "ESTE PROCESSO PODE LEVAR VÁRIOS MINUTOS (se o corpus for grande)."
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_3   "AVISO"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_4   "NÃO feche a janela de console do POPFile!"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_5   "Quando aparecer 'POPFile Engine v0.20.0 running' na janela de console, isto significa que"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_6   "- O POPFile está pronto para usar"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_7   "- O POPFile pode ser desligado com segurança usando o Menu Iniciar"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_8   "Clique Avançar para converter o corpus."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall POPFile
