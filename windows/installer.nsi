@@ -533,7 +533,28 @@ Function MakeItSafe
   Push ${L_NEW_GUI}
   Push ${L_OLD_GUI}
   Push ${L_RESULT}
+  
+  Push ${CFG}         ; a Global variable
+  
+  ; If we are about to overwrite an existing version which is still running,
+  ; then one of the EXE files will be 'locked' which means we have to shutdown POPFile
 
+  IfFileExists "$INSTDIR\wperl.exe" 0 other_perl
+  SetFileAttributes "$INSTDIR\wperl.exe" NORMAL
+  ClearErrors
+  FileOpen ${CFG} "$INSTDIR\wperl.exe" a
+  FileClose ${CFG}
+  IfErrors attempt_shutdown
+  
+other_perl:
+  IfFileExists "$INSTDIR\perl.exe" 0 exit_now
+  SetFileAttributes "$INSTDIR\perl.exe" NORMAL
+  ClearErrors
+  FileOpen ${CFG} "$INSTDIR\perl.exe" a
+  FileClose ${CFG}
+  IfErrors 0 exit_now
+
+attempt_shutdown:
   !insertmacro MUI_INSTALLOPTIONS_READ "${L_NEW_GUI}" "ioA.ini" "UI Port" "NewStyle"
   !insertmacro MUI_INSTALLOPTIONS_READ "${L_OLD_GUI}" "ioA.ini" "UI Port" "OldStyle"
 
@@ -558,6 +579,8 @@ try_other_port:
   Pop ${L_RESULT} ; Ignore the result
 
 exit_now:
+  Pop ${CFG}          ; a Global variable
+  
   Pop ${L_RESULT}
   Pop ${L_OLD_GUI}
   Pop ${L_NEW_GUI}
@@ -1531,10 +1554,26 @@ Section "Uninstall"
 
 skip_confirmation:
 
-  ; Shutdown POPFile before uninstalling it
+  ; If the POPFile we are about to uninstall is still running,
+  ; then one of the EXE files will be 'locked'
 
+  IfFileExists "$INSTDIR\wperl.exe" 0 other_perl
+  SetFileAttributes "$INSTDIR\wperl.exe" NORMAL
   ClearErrors
+  FileOpen ${CFG} "$INSTDIR\wperl.exe" a
+  FileClose ${CFG}
+  IfErrors attempt_shutdown
+  
+other_perl:
+  IfFileExists "$INSTDIR\perl.exe" 0 skip_shutdown
+  SetFileAttributes "$INSTDIR\perl.exe" NORMAL
+  ClearErrors
+  FileOpen ${CFG} "$INSTDIR\perl.exe" a
+  FileClose ${CFG}
+  IfErrors 0 skip_shutdown
 
+attempt_shutdown:
+  ClearErrors
   FileOpen ${CFG} $INSTDIR\popfile.cfg r
 
 loop:
