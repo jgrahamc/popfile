@@ -36,6 +36,7 @@ use locale;
 use POPFile::Configuration;
 use POPFile::MQ;
 use Platform::MSWin32;
+use POPFile::Logger;
 
 # Load the minimal amount of POPFile to get reliable access to the
 # configuration options and then figure out which popfileXX.exe to run
@@ -43,18 +44,34 @@ use Platform::MSWin32;
 my $c = new POPFile::Configuration;
 my $w = new Platform::MSWin32;
 my $mq = new POPFile::MQ;
+my $l = new POPFile::Logger;
 
 $w->mq( $mq );
 $w->configuration( $c );
 $c->configuration( $c );
+$l->configuration( $c );
+$l->mq( $mq );
+$w->logger( $l );
+$mq->logger( $l );
+$c->logger( $l );
 
 $c->initialize();
 $w->initialize();
+$l->initialize();
 $c->load_configuration();
 
 my $i = $w->config_( 'trayicon' )?'i':'';
 my $f = $w->config_( 'console' )?'f':'b';
 
-my $popfile_exe = "popfile$i$f.exe";
+# Take into account the possible setting of POPFILE_ROOT to 
+# find the other EXEs
+
+my $root = defined($ENV{POPFILE_ROOT})?$ENV{POPFILE_ROOT}:'./';   
+
+if ( $root !~ /[\/\\]$/ ) {
+    $root .= '/';
+}
+
+my $popfile_exe = $root . "popfile$i$f.exe";
 
 exec $popfile_exe;
