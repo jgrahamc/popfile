@@ -93,7 +93,8 @@ skip_gui_set:
   File "..\engine\pix.gif"
   File "..\engine\black.gif"
   
-  FileOpen  ${CFG} $INSTDIR\popfile.cfg w
+  FileOpen  ${CFG} $INSTDIR\popfile.cfg a
+  FileSeek  ${CFG} 0 END
   FileWrite ${CFG} "port ${POP3}$\n"
   FileWrite ${CFG} "ui_port ${GUI}$\n"
   FileClose ${CFG}
