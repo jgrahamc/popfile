@@ -51,7 +51,7 @@
   ;
   ;   (2) Add the "Create POPFile Buckets" page to the list of installer pages:
   ;
-  ;         !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS ": Create POPFile Buckets"
+  ;         !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS
   ;
   ; These two changes will use the default settings in the CBP package. There are three default
   ; settings which can be overridden by un-commenting the appropriate lines in the inserted code
@@ -276,7 +276,7 @@ look_for_corpus_files:
   ; Save path in INI file for later use by 'CBP_MakePOPFileBucket'
   
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
-      "CBP Data" "CorpusPath" ${CBP_L_CORPUS}
+      "CBP Data" "CorpusPath" "${CBP_L_CORPUS}"
 
   FindFirst ${CBP_L_FILE_HANDLE} ${CBP_L_RESULT} ${CBP_L_CORPUS}\*.*
 
@@ -414,7 +414,7 @@ Function CBP_MakePOPFileBuckets
   IntOp ${CBP_L_LOOP_LIMIT} ${CBP_L_PTR} + ${CBP_L_COUNT}
 
 next_bucket:
-  !insertmacro MUI_INSTALLOPTIONS_READ ${CBP_L_CREATE_NAME} "${CBP_C_INIFILE}" \
+  !insertmacro MUI_INSTALLOPTIONS_READ "${CBP_L_CREATE_NAME}" "${CBP_C_INIFILE}" \
       "Field ${CBP_L_PTR}" "Text"
   StrCmp ${CBP_L_CREATE_NAME} "" incrm_ptr
 
@@ -521,7 +521,7 @@ FunctionEnd
 #==============================================================================================
 
   !macro CBP_PAGECOMMAND_SELECTBUCKETS CAPTION
-    Page custom CBP_CreateBucketsPage "" "${CAPTION}"
+    Page custom CBP_CreateBucketsPage "CBP_HandleUserInput" "${CAPTION}"
   !macroend
 
 #==============================================================================================
@@ -549,6 +549,7 @@ FunctionEnd
   !define CBP_C_FIRST_BN_CBOX               15    ; field holding the first check box
   !define CBP_C_FIRST_BN_CBOX_MINUS_ONE     14    ; used when processing the check boxes
   !define CBP_C_FIRST_BN_TEXT                7    ; field holding first bucket name
+  !define CBP_C_LAST_BN_CBOX_PLUS_ONE       23    ; used when processing the check boxes
   !define CBP_C_LAST_BN_TEXT_PLUS_ONE       15    ; used when clearing out the bucket list
 
   ; Set up the limit on the number of buckets the installer can process (in the range 2 to 8)
@@ -876,6 +877,9 @@ FunctionEnd
 # has been entered to create a new bucket and no buckets have been marked for deletion, it is
 # assumed that the user is happy with the current list therefore if at least two buckets are
 # in the list the function creates those buckets and exits.
+#
+# This function enters a display loop, repeatedly displaying the custom page until the "leave"
+# function (CBP_HandleUserInput) indicates that the user has selected enough buckets.
 #----------------------------------------------------------------------------------------------
 # Inputs:
 #   (none)
@@ -892,42 +896,53 @@ FunctionEnd
 # Global CBP Constants Used:
 #   CBP_C_CREATE_BN               - field number of the "Create Bucket" combobox
 #   CBP_C_DEFAULT_BUCKETS         - defines the default bucket selection
-#   CBP_C_FIRST_BN_CBOX           - field holding the first "Remove" check box
 #   CBP_C_FIRST_BN_CBOX_MINUS_ONE - used when determining how many "remove" boxes to show
-#   CBP_C_FIRST_BN_TEXT           - field number of first entry in list of names
+#   CBP_C_LAST_BN_CBOX_PLUS_ONE   - used when clearing all of the "Remove" ticks
 #   CBP_C_INIFILE                 - name of the INI file used to create the custom page
 #   CBP_C_MAX_BNCOUNT             - maximum number of buckets installer can handle
-#   CBP_C_MAX_BN_TEXT_PLUS_ONE    - used to terminate the loop
 #   CBP_C_MESSAGE                 - field number for the progress report message
 #----------------------------------------------------------------------------------------------
 # CBP Functions Called:
-#   CBP_CheckCorpusStatus         - used to determine if this is a "clean" install
 #   CBP_CreateINIfile             - generates the INI file used to define the custom page
-#   CBP_FindBucket                - looks for a name in the bucket list
-#   CBP_MakePOPFileBuckets        - creates the buckets which POPFile will use
+#   CBP_CheckCorpusStatus         - used to determine if this is a "clean" install
 #   CBP_SetDefaultBuckets         - initialises the bucket list when page first shown
-#   CBP_StrCheckName              - used to validate name entered via "Create" combobox
 #   CBP_UpdateAddBucketList       - update list of suggested names seen in "Create" combobox
 #----------------------------------------------------------------------------------------------
 # Called By:
-#   'installer.nsi'               - directly or via the CBP_PAGECOMMAND_SELECTBUCKETS macro
+#   'installer.nsi'               - via the CBP_PAGECOMMAND_SELECTBUCKETS macro
 #----------------------------------------------------------------------------------------------
 #  Usage Example:
-#
-#       Page custom CBP_CreateBucketsPage "" " - Create POPFile Buckets"
-# or
-#       !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS " - Create POPFile Buckets"
+#       !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS
 #==============================================================================================
 
 Function CBP_CreateBucketsPage
 
-  !define CBP_L_COUNT         $R9    ; counts number of buckets selected
-  !define CBP_L_CREATE_NAME   $R8    ; name (input via combobox) of bucket to be created
-  !define CBP_L_LOOP_LIMIT    $R7    ; used when checking the "remove" boxes
-  !define CBP_L_NAME          $R6    ; a bucket name
-  !define CBP_L_PTR           $R5    ; used to access the names in the bucket list
-  !define CBP_L_RESULT        $R4
-  !define CBP_L_TEMP          $R3
+  ; The CBP_CreateBucketsPage function creates a custom page which uses the CBP_HandleUserInput
+  ; function as a "leave" function. The CBP package treats CBP_HandleUserInput as an extension
+  ; of CBP_CreateBucketsPage so they share the same registers. To simplify maintenance, a pair
+  ; of macros are used to specify the shared registers.
+  
+  !macro CBP_HUI_SharedDefs
+    !define CBP_L_COUNT         $R9    ; counts number of buckets selected
+    !define CBP_L_CREATE_NAME   $R8    ; name (input via combobox) of bucket to be created
+    !define CBP_L_LOOP_LIMIT    $R7    ; used when checking the "remove" boxes
+    !define CBP_L_NAME          $R6    ; a bucket name
+    !define CBP_L_PTR           $R5    ; used to access the names in the bucket list
+    !define CBP_L_RESULT        $R4
+    !define CBP_L_TEMP          $R3
+  !macroend
+
+  !macro CBP_HUI_SharedUnDefs
+    !undef CBP_L_COUNT
+    !undef CBP_L_CREATE_NAME
+    !undef CBP_L_LOOP_LIMIT
+    !undef CBP_L_NAME
+    !undef CBP_L_PTR
+    !undef CBP_L_RESULT
+    !undef CBP_L_TEMP
+  !macroend
+  
+  !insertmacro CBP_HUI_SharedDefs
 
   Push ${CBP_L_COUNT}
   Push ${CBP_L_CREATE_NAME}
@@ -952,7 +967,7 @@ use_INI_file:
   ; The corpus directory does not exist or is empty
 
   !insertmacro MUI_HEADER_TEXT "POPFile Classification Bucket Creation" \
-      "POPFile needs AT LEAST TWO buckets in order to be able to classify your email"
+      "POPFile needs AT LEAST TWO buckets$\nin order to be able to classify your email"
 
   ; Reset the bucket list to the default settings
 
@@ -962,10 +977,7 @@ use_INI_file:
   Call CBP_SetDefaultBuckets
   Pop ${CBP_L_COUNT}
 
-  ; Now allow the user to create their own list of buckets for POPFile
-
-get_next_bucket_cmd:
-
+get_more_input:
   ; Update the status message under the list of bucket names
 
   IntCmp ${CBP_L_COUNT} 0 zero_so_far
@@ -995,6 +1007,19 @@ update_lists:
   ; Ensure no bucket selected for creation
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_C_CREATE_BN}" "State" ""
+  
+  ; Ensure no buckets are marked for deletion
+
+  StrCpy ${CBP_L_PTR} ${CBP_C_FIRST_BN_CBOX}
+
+clear_loop:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
+        "Field ${CBP_L_PTR}" "State" "0"
+  IntOp ${CBP_L_PTR} ${CBP_L_PTR} + 1
+  IntCmp ${CBP_L_PTR} ${CBP_C_LAST_BN_CBOX_PLUS_ONE} clear_finished
+  Goto clear_loop
+
+clear_finished:
 
   ; Ensure that only the appropriate "Remove" boxes are shown
 
@@ -1007,13 +1032,77 @@ update_lists:
 
   ; Display the "Bucket Selection Page" and wait for user to enter data and click "Continue"
 
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY_RETURN "${CBP_C_INIFILE}"
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "${CBP_C_INIFILE}"
+  StrCmp ${CBP_L_RESULT} "wait" get_more_input
+
+finished_now:
+
+  Pop ${CBP_L_TEMP}
   Pop ${CBP_L_RESULT}
+  Pop ${CBP_L_PTR}
+  Pop ${CBP_L_NAME}
+  Pop ${CBP_L_LOOP_LIMIT}
+  Pop ${CBP_L_CREATE_NAME}
+  Pop ${CBP_L_COUNT}
 
-  StrCmp ${CBP_L_RESULT} "cancel" finished_now
-  StrCmp ${CBP_L_RESULT} "back" finished_now
+  !insertmacro CBP_HUI_SharedUnDefs
 
-  ; Now check the user input... starting with the "Remove" check boxes as deletion has higher
+FunctionEnd
+
+#==============================================================================================
+# Function CBP_HandleUserInput
+#==============================================================================================
+#
+# This is the "leave" function for the custom page created by 'CBP_CreateBucketsPage'.
+#
+# Note that 'CBP_HandleUserInput' is treated as an extension of 'CBP_CreateBucketsPage' so it
+# does NOT use the stack to save/restore the registers which it uses - instead it shares the
+# same registers used by CBP_CreateBucketsPage.
+#
+# The 'CBP_CreateBucketsPage' function enters a loop which repeatedly displays the custom page
+# until this "leave" function indicates that the necessary buckets have been created. Once the
+# user has selected enough buckets, 'CBP_CreateBucketsPage' will exit from the loop and the
+# installation will proceed to the next page.
+#----------------------------------------------------------------------------------------------
+# Inputs:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# Outputs:
+#   ${CBP_L_RESULT}               - holds "completed" when user has selected enough buckets,
+#                                   holds "wait" if user has not selected enough buckets
+#----------------------------------------------------------------------------------------------
+# Global Registers Destroyed:
+#   (none)
+#
+# Local Registers Destroyed:
+#
+#   WARNING:
+#   This function shares the local registers used by the 'CBP_CreateBucketsPage' function,
+#   as listed in the 'CBP_HUI_SharedDefs' macro which is defined in 'CBP_CreateBucketsPage'.
+#
+#----------------------------------------------------------------------------------------------
+# Global CBP Constants Used:
+#   CBP_C_CREATE_BN               - field number of the "Create Bucket" combobox
+#   CBP_C_FIRST_BN_CBOX           - field holding the first "Remove" check box
+#   CBP_C_FIRST_BN_TEXT           - field number of first entry in list of names
+#   CBP_C_FIRST_BN_CBOX_MINUS_ONE - used when determining how many "remove" boxes to show
+#   CBP_C_INIFILE                 - name of the INI file used to create the custom page
+#   CBP_C_MAX_BNCOUNT             - maximum number of buckets installer can handle
+#----------------------------------------------------------------------------------------------
+# CBP Functions Called:
+#   CBP_FindBucket                - looks for a name in the bucket list
+#   CBP_MakePOPFileBuckets        - creates the buckets which POPFile will use
+#   CBP_StrCheckName              - used to validate name entered via "Create" combobox
+#----------------------------------------------------------------------------------------------
+# Called By:
+#   (this is the "leave" function for the custom page created by "CBP_CreateBucketsPage")
+#==============================================================================================
+
+Function CBP_HandleUserInput
+
+  !insertmacro CBP_HUI_SharedDefs   ; this macro is defined in CBP_CreateBucketsPage
+
+  ; Check the user input... starting with the "Remove" check boxes as deletion has higher
   ; priority (we allow user to "Delete an existing bucket" and "Create a new bucket" when the
   ; bucket list is full)
 
@@ -1022,7 +1111,7 @@ update_lists:
   IntOp ${CBP_L_LOOP_LIMIT} ${CBP_C_FIRST_BN_CBOX} + ${CBP_L_COUNT}
 
 look_for_ticks:
-  !insertmacro MUI_INSTALLOPTIONS_READ ${CBP_L_TEMP} "${CBP_C_INIFILE}" \
+  !insertmacro MUI_INSTALLOPTIONS_READ "${CBP_L_TEMP}" "${CBP_C_INIFILE}" \
       "Field ${CBP_L_PTR}" "State"
   IntCmp ${CBP_L_TEMP} 1 process_deletions
   IntOp ${CBP_L_NAME} ${CBP_L_NAME} + 1
@@ -1030,7 +1119,7 @@ look_for_ticks:
   IntCmp ${CBP_L_PTR} ${CBP_L_LOOP_LIMIT} no_deletes look_for_ticks
 
 no_deletes:
-  !insertmacro MUI_INSTALLOPTIONS_READ ${CBP_L_CREATE_NAME} "${CBP_C_INIFILE}" \
+  !insertmacro MUI_INSTALLOPTIONS_READ "${CBP_L_CREATE_NAME}" "${CBP_C_INIFILE}" \
       "Field ${CBP_C_CREATE_BN}" "State"
   StrCmp ${CBP_L_CREATE_NAME} "" no_user_input create_bucket
 
@@ -1043,20 +1132,20 @@ process_deletions:
   ; will be shown.
 
 pd_loop:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_L_PTR}" "State" 0
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_L_PTR}" "State" "0"
 
 pd_loop2:
   IntOp ${CBP_L_NAME} ${CBP_L_NAME} + 1
   IntOp ${CBP_L_PTR} ${CBP_L_PTR} + 1
   IntCmp ${CBP_L_PTR} ${CBP_L_LOOP_LIMIT} tidy_up
-  !insertmacro MUI_INSTALLOPTIONS_READ ${CBP_L_TEMP} "${CBP_C_INIFILE}" \
+  !insertmacro MUI_INSTALLOPTIONS_READ "${CBP_L_TEMP}" "${CBP_C_INIFILE}" \
       "Field ${CBP_L_PTR}" "State"
   IntCmp ${CBP_L_TEMP} 1 pd_loop
-  !insertmacro MUI_INSTALLOPTIONS_READ ${CBP_L_TEMP} "${CBP_C_INIFILE}" \
+  !insertmacro MUI_INSTALLOPTIONS_READ "${CBP_L_TEMP}" "${CBP_C_INIFILE}" \
       "Field ${CBP_L_NAME}" "Text"
   Exch ${CBP_L_NAME}
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
-      "Field ${CBP_L_NAME}" "Text" ${CBP_L_TEMP}
+      "Field ${CBP_L_NAME}" "Text" "${CBP_L_TEMP}"
   IntOp ${CBP_L_NAME} ${CBP_L_NAME} + 1
   Exch ${CBP_L_NAME}
   goto pd_loop2
@@ -1073,10 +1162,10 @@ clear_bucket:
 
 all_tidy_now:
 
-  ; Bucket list has no gaps in it now!
+  ; Bucket list has no gaps in it now.
   ; User is allowed to delete bucket(s) and create a bucket in one operation
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${CBP_L_CREATE_NAME} "${CBP_C_INIFILE}" \
+  !insertmacro MUI_INSTALLOPTIONS_READ "${CBP_L_CREATE_NAME}" "${CBP_C_INIFILE}" \
       "Field ${CBP_C_CREATE_BN}" "State"
   StrCmp ${CBP_L_CREATE_NAME} "" get_next_bucket_cmd
 
@@ -1094,7 +1183,7 @@ does_not_exist:
   StrCmp ${CBP_L_NAME} "" bad_name
   IntOp ${CBP_L_PTR} ${CBP_L_COUNT} + ${CBP_C_FIRST_BN_TEXT}
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
-      "Field ${CBP_L_PTR}" "Text" ${CBP_L_NAME}
+      "Field ${CBP_L_PTR}" "Text" "${CBP_L_NAME}"
   IntOP ${CBP_L_COUNT} ${CBP_L_COUNT} + 1
   goto get_next_bucket_cmd
 
@@ -1134,6 +1223,10 @@ too_few:
       before continuing with the installation of POPFile."
   goto get_next_bucket_cmd
 
+get_next_bucket_cmd:
+  StrCpy ${CBP_L_RESULT} "wait"
+  Return
+  
 finished_buckets:
   Push ${CBP_C_FIRST_BN_TEXT}
   Push ${CBP_L_COUNT}
@@ -1145,22 +1238,10 @@ finished_buckets:
       its 'User Interface'$\n$\ncontrol panel to create the missing bucket(s)."
 
 finished_now:
+  StrCpy ${CBP_L_RESULT} "completed"
+  Return
 
-  Pop ${CBP_L_TEMP}
-  Pop ${CBP_L_RESULT}
-  Pop ${CBP_L_PTR}
-  Pop ${CBP_L_NAME}
-  Pop ${CBP_L_LOOP_LIMIT}
-  Pop ${CBP_L_CREATE_NAME}
-  Pop ${CBP_L_COUNT}
-
-  !undef CBP_L_COUNT
-  !undef CBP_L_CREATE_NAME
-  !undef CBP_L_LOOP_LIMIT
-  !undef CBP_L_NAME
-  !undef CBP_L_PTR
-  !undef CBP_L_RESULT
-  !undef CBP_L_TEMP
+  !insertmacro CBP_HUI_SharedUnDefs   ; this macro is defined in CBP_CreateBucketsPage
 
 FunctionEnd
 
@@ -1271,7 +1352,7 @@ suggestions_done:
 
 save_suggestions:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
-      "CBP Data" "Suggestions" ${CBP_L_PTR}
+      "CBP Data" "Suggestions" "${CBP_L_PTR}"
 
   ; Set up the default bucket list using the data supplied by the calling routine.
   ; If too many default names are supplied, we quietly ignore the "extra" ones.
@@ -1297,9 +1378,9 @@ loop:
   StrCmp ${CBP_L_RESULT} 0 0 loop ; ignore duplicates
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
-        "Field ${CBP_L_PTR}" "Text" ${CBP_L_NAME}
+        "Field ${CBP_L_PTR}" "Text" "${CBP_L_NAME}"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
-        "Field ${CBP_L_BOX_PTR}" "State" 0
+        "Field ${CBP_L_BOX_PTR}" "State" "0"
   IntOp ${CBP_L_COUNT} ${CBP_L_COUNT} + 1
   IntOp ${CBP_L_BOX_PTR} ${CBP_L_BOX_PTR} + 1
   IntOp ${CBP_L_PTR} ${CBP_L_PTR} + 1
@@ -1312,7 +1393,7 @@ loop:
 
 clear_unused_entry:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_L_PTR}" "Text" ""
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_L_BOX_PTR}" "State" 0
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_L_BOX_PTR}" "State" "0"
   IntOp ${CBP_L_PTR} ${CBP_L_PTR} + 1
   IntOp ${CBP_L_BOX_PTR} ${CBP_L_BOX_PTR} + 1
 
@@ -1585,7 +1666,7 @@ Function CBP_FindBucket
 
 check_next_bucket:
   IntCmp ${CBP_L_PTR} ${CBP_L_LOOP_LIMIT} not_found
-  !insertmacro MUI_INSTALLOPTIONS_READ ${CBP_L_LISTNAME} "${CBP_C_INIFILE}" \
+  !insertmacro MUI_INSTALLOPTIONS_READ "${CBP_L_LISTNAME}" "${CBP_C_INIFILE}" \
       "Field ${CBP_L_PTR}" "Text"
   StrCmp ${CBP_L_NAME} ${CBP_L_LISTNAME} all_done
   IntOp ${CBP_L_PTR} ${CBP_L_PTR} + 1
@@ -1663,7 +1744,7 @@ Function CBP_UpdateAddBucketList
   ; Set up the default list of suggested bucket names (if any).
   ; An empty list is represented by "|" in the INI file
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${CBP_L_SUGGLIST} "${CBP_C_INIFILE}" \
+  !insertmacro MUI_INSTALLOPTIONS_READ "${CBP_L_SUGGLIST}" "${CBP_C_INIFILE}" \
       "CBP Data" "Suggestions"
   StrCmp ${CBP_L_SUGGLIST} "|" suggestions_done
 
@@ -1689,18 +1770,18 @@ suggestions_done:
   ; Now update the combobox with the list of suggestions for bucket names
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
-      "Field ${CBP_C_CREATE_BN}" "ListItems" ${CBP_L_UNUSEDSUGG}
+      "Field ${CBP_C_CREATE_BN}" "ListItems" "${CBP_L_UNUSEDSUGG}"
 
   ; Adjust size of the ComboBox List to keep the display tidy
 
   StrCmp ${CBP_L_UNUSEDSUGG} "" min_size
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
-      "Field ${CBP_C_CREATE_BN}" "Bottom" ${CBP_C_FULL_COMBO_LIST}
+      "Field ${CBP_C_CREATE_BN}" "Bottom" "${CBP_C_FULL_COMBO_LIST}"
   goto end_update
 
 min_size:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
-      "Field ${CBP_C_CREATE_BN}" "Bottom" ${CBP_C_MIN_COMBO_LIST}
+      "Field ${CBP_C_CREATE_BN}" "Bottom" "${CBP_C_MIN_COMBO_LIST}"
 
 end_update:
 
