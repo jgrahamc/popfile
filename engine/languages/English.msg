@@ -111,6 +111,7 @@ Configuration_LoggerOutput              Logger output
 Configuration_GeneralSkins              Skins
 Configuration_SmallSkins                Small Skins
 Configuration_TinySkins                 Tiny Skins
+Configuration_CurrentLogFile            &lt;current log file&gt;
 
 Advanced_Error1                         '%s' already in the Ignored Words list
 Advanced_Error2                         Ignored words can only contain alphanumeric, ., _, -, or @ characters

@@ -303,6 +303,11 @@ sub url_handler__
         return 1;
     }
 
+    if ( $url =~ /(popfile.*\.log)/ ) {
+        $self->http_file_( $client, $1, 'text/plain' );
+        return 1;
+    }
+
     if ( $url =~ /\/(.+\.gif)/ ) {
         $self->http_file_( $client, $1, 'image/gif' );
         return 1;
@@ -925,7 +930,13 @@ sub configuration_page
     $body .= " selected=\"selected\"" if ( $self->global_config_( 'debug' ) == 3 );
     $body .= ">$self->{language__}{Configuration_ToScreenFile}</option>\n";
     $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"submit_debug\" value=\"$self->{language__}{Apply}\" />\n";
-    $body .= "</form>\n</td>\n</tr>\n</table>\n";
+    $body .= "</form>\n";
+
+    if ( $self->global_config_( 'debug' ) & 1 ) {
+        $body .= "<p><a href=\"" . $self->logger()->debug_filename() . "\">$self->{language__}{Configuration_CurrentLogFile}</a>";
+    }
+
+    $body .= "</td>\n</tr>\n</table>\n";
 
     http_ok($self, $client,$body,0);
 }

@@ -154,4 +154,13 @@ sub debug
     }
 }
 
+# GETTERS/SETTERS
+
+sub debug_filename
+{
+    my ( $self ) = @_;
+
+    return $self->{debug_filename__};
+}
+
 1;
