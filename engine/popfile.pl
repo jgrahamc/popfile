@@ -41,17 +41,15 @@ use locale;
 my %components;
 
 # This is the A PIECE OF PLATFORM SPECIFIC CODE and all it does is force Windows users to have 
-# v5.8.0 because that's the version with good fork() support everyone else can use 5.6.1.  This is 
-# probably only temporary because at some point I am going to force 5.8.0 for everyone because of 
-# the better Unicode support
+# v5.8.0 because that's the version with good fork() support everyone else can use whatever they
+# want.  This is  probably only temporary because at some point I am going to force 5.8.0 for 
+# everyone because of the better Unicode support
 
 my $on_windows = 0;
 
 if ( $^O eq 'MSWin32' ) {
 	require v5.8.0;
 	$on_windows = 1;
-} else {
-	require v5.6.1;
 }
 
 use Classifier::Bayes;          # Use the Naive Bayes classifier
