@@ -90,11 +90,11 @@ Configuration_ToScreenFile              To Screen and File
 Configuration_LoggerOutput              Logger output
 
 Advanced_Error1                         '%s' already in the stop word list
-Advanced_Error2                         Stop words can only contains alphanumeric, ., _, -, or @ characters
+Advanced_Error2                         Ignored words can only contains alphanumeric, ., _, -, or @ characters
 Advanced_Error3                         '%s' added to the stop word list
 Advanced_Error4                         '%s' is not in the stop word list
 Advanced_Error5                         '%s' removed from the stop word list
-Advanced_StopWords                      Stop Words
+Advanced_StopWords                      Ignored Words
 Advanced_Message1                       The following words are ignored from all classifications as they occur very frequently.
 Advanced_AddWord                        Add word
 Advanced_RemoveWord                     Remove word
