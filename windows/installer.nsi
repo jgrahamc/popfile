@@ -2268,7 +2268,19 @@ display_banner:
   Call WaitUntilUnlocked
   Push ${L_CONSOLE}
   Call SetConsoleMode
-  ExecShell "open" "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile.lnk"
+  SetOutPath $INSTDIR
+  ClearErrors
+  Exec '"$INSTDIR\popfile.exe"'
+  IfErrors 0 continue
+  Banner::destroy
+  MessageBox MB_OK|MB_TOPMOST "An error occurred when the installer tried to start POPFile.\
+      $\r$\n$\r$\n\
+      Please use 'Start -> Programs -> POPFile -> Run POPFile' now.\
+      $\r$\n$\r$\n\
+      Click 'OK' when the 'POPFile Engine v0.20.0 running' message appears."
+  Goto exit_without_banner
+  
+continue:
 
   ; Wait until POPFile is ready to display the UI (may take a second or so)
 
@@ -2369,7 +2381,7 @@ FunctionEnd
 
 Function RunUI
 
-  ExecShell "open" "$SMPROGRAMS\${MUI_PRODUCT}\POPFile User Interface.url"
+  ExecShell "open" '"$SMPROGRAMS\${MUI_PRODUCT}\POPFile User Interface.url"'
 
 FunctionEnd
 
