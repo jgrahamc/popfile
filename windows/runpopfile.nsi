@@ -44,7 +44,7 @@
 # (or have not yet used) POPFile). The switch can be in uppercase or lowercase.
 #-------------------------------------------------------------------------------------------
 
-  !define C_PFI_VERSION   0.1.4
+  !define C_PFI_VERSION   0.1.5
 
   Name    "Run POPFile"
   Caption "Run POPFile"
@@ -54,7 +54,7 @@
   OutFile runpopfile.exe
 
   ; 'Silent' installers run invisibly
-  
+
   SilentInstall silent
 
   ; This build is for use with the POPFile installer
@@ -147,8 +147,12 @@ got_exe_path:
   Goto add_user
 
 check_root:
-  ReadRegStr ${L_POPFILE_ROOT} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN"
+  ReadRegStr ${L_POPFILE_ROOT} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN"
   StrCmp ${L_POPFILE_ROOT} "" add_user
+  StrCmp ${L_POPFILE_ROOT} "Not supported" 0 check_root_data
+  ReadRegStr ${L_POPFILE_ROOT} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
+
+check_root_data:
   IfFileExists "${L_POPFILE_ROOT}\popfile.pl" 0 bad_root_error
   ReadEnvStr ${L_TEMP} "POPFILE_ROOT"
   StrCmp ${L_TEMP} ${L_POPFILE_ROOT} check_user
@@ -165,8 +169,12 @@ set_root_now:
   Goto exit
 
 check_user:
-  ReadRegStr ${L_POPFILE_USER} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN"
+  ReadRegStr ${L_POPFILE_USER} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN"
   StrCmp ${L_POPFILE_USER} "" add_user
+  StrCmp ${L_POPFILE_USER} "Not supported" 0 check_user_data
+  ReadRegStr ${L_POPFILE_USER} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN"
+
+check_user_data:
   IfFileExists "${L_POPFILE_USER}\*.*" 0 bad_user_error
   ReadEnvStr ${L_TEMP} "POPFILE_USER"
   StrCmp ${L_TEMP} ${L_POPFILE_USER} start_popfile
@@ -207,8 +215,7 @@ can_add_root:
       $\r$\n\
       ${L_POPFILE_ROOT}\popfile.pl)\
       $\r$\n$\r$\n\
-      Click 'Yes' to reconfigure POPFile now" IDNO exit
-  Exec '"${L_EXEFILE}\adduser.exe"'
+      Click 'Yes' to reconfigure POPFile now" IDYES run_adduser
   Goto exit
 
 bad_user_error:
@@ -227,8 +234,7 @@ can_add_user:
       $\r$\n\
       ${L_POPFILE_USER})\
       $\r$\n$\r$\n\
-      Click 'Yes' to reconfigure POPFile now" IDNO exit
-  Exec '"${L_EXEFILE}\adduser.exe"'
+      Click 'Yes' to reconfigure POPFile now" IDYES run_adduser
   Goto exit
 
 no_adduser_error:
@@ -244,6 +250,8 @@ add_user:
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "/startup" exit
   IfFileExists "${L_EXEFILE}\adduser.exe" 0 no_adduser_error
+
+run_adduser:
   Exec '"${L_EXEFILE}\adduser.exe"'
 
 exit:
