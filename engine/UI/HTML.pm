@@ -2056,6 +2056,7 @@ sub load_history_cache__
 
         if ( defined( $self->{history__}{$history_files[$i]} ) ) {
             $self->{history__}{$history_files[$i]}{cull} = 0;
+            $self->{history__}{$history_files[$i]}{index}         = $i;
         } else {
 
             # Find the class information for this file using the history_load_class helper
