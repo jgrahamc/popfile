@@ -8,7 +8,6 @@ package Classifier::MailParse;
 
 use strict;
 use Classifier::WordMangle;
-use Classifier::Bayes;
 
 #----------------------------------------------------------------------------
 # new
