@@ -104,11 +104,7 @@
             <th class="historyLabel" align="left" valign="bottom">
                 <a style="float:left; clear:none;" class="columnRemove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;removecolumn=<TMPL_VAR NAME="History_Header">">
                 <img title="<TMPL_VAR NAME="Localize_History_RemoveColumn">" src="skins/x.gif" border="0" alt=""></a>
-                <span style="float:right;">
-                     <TMPL_IF NAME="History_If_MoveLeft">
-                         <a style="" class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveleft=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/leftarrow.gif" border="0" alt=""></a></TMPL_IF><TMPL_IF NAME="History_If_MoveRight"><a class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveright=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/rightarrow.gif" border="0" alt=""></a>
-                     </TMPL_IF>
-                </span>
+                <span style="float:right;"><TMPL_IF NAME="History_If_MoveLeft"><a style="" class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveleft=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/leftarrow.gif" border="0" alt=""></a></TMPL_IF><TMPL_IF NAME="History_If_MoveRight"><a class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveright=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/rightarrow.gif" border="0" alt=""></a></TMPL_IF></span>
             </th>
 
             </TMPL_LOOP>
