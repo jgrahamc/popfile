@@ -3,7 +3,9 @@
 <TMPL_IF NAME="IMAP_if_connection_configured">
 
 <form action="/configuration" method="post">
-    <label class="configurationLabel"><!-- localize -->Refresh list of folders </label>
+    <label class="configurationLabel">
+        <TMPL_VAR NAME="Localize_Imap_RefreshFolders">
+    </label>
     
     <TMPL_IF NAME="IMAP_update_list_failed">
     
@@ -15,15 +17,14 @@
     
     </TMPL_IF>
     
-    <input type="submit" class="submit" name="do_imap_4_update_mailbox_list" value="now!" />
+    <input type="submit" class="submit" name="do_imap_4_update_mailbox_list" value="<TMPL_VAR NAME="Localize_Imap_Now">" />
     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 </form>
 
 <TMPL_ELSE>
 
     <p>
-        <!-- localize -->Please configure the connection details first. After you have
-        done that, more options will be available on this page.
+        <TMPL_VAR NAME="Localize_Imap_NoConnectionMessage">
     </p>
 
 </TMPL_IF>

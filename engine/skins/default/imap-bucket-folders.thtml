@@ -6,7 +6,11 @@
 
     <TMPL_LOOP NAME="IMAP_loop_buckets">
 
-    <label class="configurationLabel"><!-- localize -->Mail for bucket <b><TMPL_VAR NAME="IMAP_bucket"></b> goes to folder</label><br />
+    <label class="configurationLabel">
+        <!-- localize: TMPL_VAR NAME="IMAP_Bucket_Header" -->Mail for bucket <b><TMPL_VAR NAME="IMAP_bucket"></b> goes to folder
+        
+    </label>
+    <br />
     <select name="imap_folder_for_<TMPL_VAR NAME="IMAP_bucket">">
 
     <TMPL_UNLESS NAME="IMAP_mailbox_defined">
@@ -28,7 +32,7 @@
     <TMPL_IF NAME="IMAP_buckets_to_folders_if_error">
        <blockquote>
         <div class="error01">
-            <!-- localize -->You cannot map more than one bucket to a single folder!
+            <TMPL_VAR NAME="Localize_Imap_MapError">
         </div>
     </blockquote>
     </TMPL_IF>

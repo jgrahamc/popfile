@@ -337,4 +337,26 @@ Configuration_InsertionTableSummary     Diese Tabelle enthält Schaltflächen zur 
 Security_MainTableSummary               Diese Tabelle bietet Einstellungsmöglichkeiten, die die Sicherheit von POPFile insgesamt betreffen, ob es automatisch auf neue Versionen prüfen soll oder ob Statistiken über die Leistung von POPFile an eine zentrale Datenbank zwecks der Erstellung von Gesamtstatistiken geschickt werden sollen.
 Advanced_MainTableSummary               Diese Tabelle enthält eine Liste von Wörtern, die POPFile ignoriert, wenn es eine Nachricht analysiert. Dies betrifft Wörter, die besonders häufig in Nachrichten auftauchen. Diese sind reihenweise alphabetisch nach dem ersten Buchstaben sortiert.
 
-
+Imap_Bucket2Folder						Mail der Kategorie <b>%s</b> kommt in den Ordner
+Imap_MapError                           Sie können nicht mehr als eine Kategorie einem einzelnen Ordner zuordnen!
+Imap_Server                             IMAP Server Hostname:
+Imap_ServerNameError                    Bitte geben Sie den Namen des Servers ein!
+Imap_Port                               IMAP Server Port:
+Imap_PortError                          Bitte geben Sie eine gültige Portnummer ein!
+Imap_Login                              IMAP Benutzername (Login):
+Imap_LoginError                         Bitte geben Sie einen gültigen Benuternamen ein!
+Imap_Password                           Password für IMAP Konto:
+Imap_PasswordError                      Bitte geben Sie ein Passwort an!
+Imap_Expunge                            Gelöschte Nachrichten aus den überwachten Ordnern endgültig löschen.
+Imap_Interval                           Update Intervall in Sekunden:
+Imap_IntervalError                      Bitte geben Sie ein Intervall zwischen 10 und 3600 Sekunden ein.
+Imap_Bytelimit                          Bytes pro Email, die zur Klassifikation genutzt werden. Geben Sie bitte 0 (Null) ein, um die komplette Nachricht zu nutzen.
+Imap_BytelimitError                     Bitte geben Sie eine Zahl ein.
+Imap_RefreshFolders                     Ordnerliste neu laden:
+Imap_Now                                jetzt!
+Imap_UpdateError1                       Login war nicht erfolgreich. Bitte überprüfen Sie Ihren Benutzernamen und das Passwort.
+Imap_UpdateError2                       Verbindung zum Server fehlgeschlagen! Bitte überprüfen Sie den Namen des Servers, den Port und stellen Sie sicher, dass Sie Zugang zum Internet haben.
+Imap_UpdateError3                       Bitte konfigurieren Sie erst die Verbindung zum Server.
+Imap_NoConnectionMessage                Bitte konfigurieren Sie erst die Verbindung zum Server. Nachdem Sie das getan haben, werden Sie an dieser Stelle mehr Konfigurationsmöglichkeiten finden.
+Imap_WatchMore                          : einen weiteren zu überwachenden Ordner
+Imap_WatchedFolder                      Überwachter Ordner Nr.

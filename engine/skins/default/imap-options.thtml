@@ -3,16 +3,20 @@
 <form action="/configuration" method="post">
 
     <input type="checkbox" name="imap_options_expunge" value="1" <TMPL_VAR NAME="IMAP_expunge_is_checked"> />
-    <label class="configurationLabel"><!-- localize -->Expunge deleted messages from watched folders.</label>
+    <label class="configurationLabel">
+        <TMPL_VAR NAME="Localize_Imap_Expunge">
+    </label>
     <br />
 
-    <label class="configurationLabel"><!-- localize -->Update interval in seconds:</label>
+    <label class="configurationLabel">
+        <TMPL_VAR NAME="Localize_Imap_Interval">
+    </label>
 
     <TMPL_IF NAME="IMAP_if_interval_error">
     
     <blockquote>
     	<div class="error01">
-    		<!-- localize -->Please enter an interval between 10 and 3600 seconds.
+    	    <TMPL_VAR NAME="Localize_Imap_IntervalError">
     	</div>
     </blockquote>
     
@@ -22,15 +26,18 @@
     <input type="text" name="imap_options_update_interval" value="<TMPL_VAR NAME="IMAP_interval">" />
     <br />
     
-    <label class="configurationLabel"><!-- localize -->Bytes per message to use for classification. Enter 0 (Null) for the complete message:</label>
+    <label class="configurationLabel">
+        <TMPL_VAR NAME="Localize_Imap_Bytelimit">
+    </label>
     <br />
     <input name="imap_options_byte_limit" type="text" value="<TMPL_VAR NAME="IMAP_byte_limit">" />
     <br />
+    
     <TMPL_IF NAME="IMAP_if_bytelimit_error">
     
     <blockquote>
     	<div class="error01">
-    		<!-- localize -->Please enter a number.
+    	    <TMPL_VAR NAME="Localize_Imap_BytelimitError">
     	</div>
     </blockquote>
     

@@ -1,46 +1,58 @@
 <!--  This is the output of template imap-connection-details.thtml -->
 
 <form action="/configuration" method="post">
-    <label class="configurationLabel"><!-- localize -->IMAP server hostname:</label><br />
+    <label class="configurationLabel">
+        <TMPL_VAR NAME="Localize_Imap_Server">
+    </label>
+    <br />
     <input name="imap_hostname" type="text" value="<TMPL_VAR NAME="IMAP_hostname">" /> <br />
 
     <TMPL_IF NAME="IMAP_connection_if_hostname_error">
     <blockquote>
       <div class="error01">
-        <!-- localize -->Please enter the server's hostname!
+        <TMPL_VAR NAME="Localize_Imap_ServerNameError">
       </div>
     </blockquote>
     </TMPL_IF>
 
-    <label class="configurationLabel"><!-- localize -->IMAP Server port:</label><br />
+    <label class="configurationLabel">
+        <TMPL_VAR NAME="Localize_Imap_Port">
+    </label>
+    <br />
     <input name="imap_port" type="text" value="<TMPL_VAR NAME="IMAP_port">" /><br />
 
     <TMPL_IF NAME="IMAP_connection_if_port_error">
     <blockquote>
       <div class="error01">
-        <!-- localize -->Please enter a valid port number!
+        <TMPL_VAR NAME="Localize_Imap_PortError">
       </div>
     </blockquote>
     </TMPL_IF>
     
-    <label class="configurationLabel"><!-- localize -->IMAP account login:</label><br />
+    <label class="configurationLabel">
+        <TMPL_VAR NAME="Localize_Imap_Login">
+    </label>
+    <br />
     <input name="imap_login" type="text" value="<TMPL_VAR NAME="IMAP_login">" /><br />
 
     <TMPL_IF NAME="IMAP_connection_if_login_error">
     <blockquote>
       <div class="error01">
-        <!-- localize -->Please enter a user/login name!
+        <TMPL_VAR NAME="Localize_Imap_LoginError">
       </div>
     </blockquote>
     </TMPL_IF>
 
-    <label class="configurationLabel"><!-- localize -->Password for IMAP account:</label><br />
+    <label class="configurationLabel">
+        <TMPL_VAR NAME="Localize_Imap_Password">
+    </label>
+    <br />
     <input type="password" name="imap_password" value="<TMPL_VAR NAME="IMAP_password">" /><br />
 
     <TMPL_IF NAME="IMAP_connection_if_password_error">
     <blockquote>
       <div class="error01">
-        <!-- localize -->Please enter a password for the server!
+        <TMPL_VAR NAME="Localize_Imap_PasswordError">
       </div>
     </blockquote>
     </TMPL_IF>

@@ -206,10 +206,10 @@ History_NoMagnet                        &nbsp;(just showing non-magnet classifie
 History_ResetSearch                     Reset
 History_ChangedClass                    Would now classify as
 History_Purge                           Delete Now
-History_Increase			Increase
-History_Decrease			Decrease
-History_Column_Characters		Change width of From, To, Cc and Subject columns
-History_Automatic			Automatic
+History_Increase                        Increase
+History_Decrease                        Decrease
+History_Column_Characters               Change width of From, To, Cc and Subject columns
+History_Automatic                       Automatic
 History_Reclassified                    Reclassified
 
 Password_Title                          Password
@@ -337,4 +337,27 @@ Configuration_InsertionTableSummary     This table contains buttons that determi
 Security_MainTableSummary               This table provides sets of controls that affect the security of the overall configuration of POPFile, whether it should automatically check for updates to the program, and whether statistics about POPFile's performance should be sent to the central datastore of the program's author for general information.
 Advanced_MainTableSummary               This table provides a list of words that POPFile ignores when classifying message due to their relative frequency in message in general.  They are organized per row according to the first letter of the words.
 
+Imap_Bucket2Folder						Mail for bucket <b>%s</b> goes to folder
+Imap_MapError                           You cannot map more than one bucket to a single folder!
+Imap_Server                             IMAP server hostname:
+Imap_ServerNameError                    Please enter the server's hostname!
+Imap_Port                               IMAP Server port:
+Imap_PortError                          Please enter a valid port number!
+Imap_Login                              IMAP account login:
+Imap_LoginError                         Please enter a user/login name!
+Imap_Password                           Password for IMAP account:
+Imap_PasswordError                      Please enter a password for the server!
+Imap_Expunge                            Expunge deleted messages from watched folders.
+Imap_Interval                           Update interval in seconds:
+Imap_IntervalError                      Please enter an interval between 10 and 3600 seconds.
+Imap_Bytelimit                          Bytes per message to use for classification. Enter 0 (Null) for the complete message:
+Imap_BytelimitError                     Please enter a number.
+Imap_RefreshFolders                     Refresh list of folders
+Imap_Now                                now!
+Imap_UpdateError1                       Could not login. Verify your login name and password, please.
+Imap_UpdateError2                       Failed to connect to server. Please check the host name and port and make sure you are online.
+Imap_UpdateError3                       Please configure the connection details first.
+Imap_NoConnectionMessage                Please configure the connection details first. After you have done that, more options will be available on this page.
+Imap_WatchMore                          a folder to list of watched folders
+Imap_WatchedFolder                      Watched folder #
 

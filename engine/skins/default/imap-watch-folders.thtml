@@ -6,7 +6,10 @@
 
     <TMPL_LOOP NAME="IMAP_loop_watched_folders">
 
-    <label class="configurationLabel"><!-- localize -->Watched folder #<TMPL_VAR NAME="IMAP_loop_counter"></label><br />
+    <label class="configurationLabel">
+        <TMPL_VAR NAME="IMAP_WatchedFolder_Msg"><TMPL_VAR NAME="IMAP_loop_counter">
+    </label>
+    <br />
     <select name="imap_folder_<TMPL_VAR NAME="IMAP_loop_counter">">
 
     <TMPL_LOOP NAME="IMAP_loop_mailboxes">

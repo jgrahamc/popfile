@@ -1948,6 +1948,9 @@ sub configure_item
 
                 $data_watched_folders{IMAP_loop_mailboxes} = \@loop_mailboxes;
                 $data_watched_folders{IMAP_loop_counter} = $i;
+                # localize ASAP:
+                $data_watched_folders{IMAP_WatchedFolder_Msg} = "Watched folder #";
+                
                 push @loop_watched_folders, \%data_watched_folders;
             }
 
@@ -1974,10 +1977,6 @@ sub configure_item
         else {
             $template->param( IMAP_if_mailboxes => 1 );
 
-            # What is happening here is basically the same thing that is happening
-            # above for imap_1_watch_folders
-            # Just eplace "watched folders" with "buckets".
-
             my @buckets = $self->{classifier__}->get_all_buckets( $self->{api_session__} );
 
             my @outer_loop = ();
@@ -1987,6 +1986,7 @@ sub configure_item
                 my $output = $self->folder_for_bucket__( $bucket );
 
                 $outer_data{IMAP_mailbox_defined} = (defined $output) ? 1 : 0;
+                #$outer_data{IMAP_Bucket_Header} = sprintf( $$language{Imap_Bucket2Folder}, $bucket );
 
                 my @inner_loop = ();
                 foreach my $mailbox ( @{$self->{mailboxes__}} ) {
@@ -2184,14 +2184,17 @@ sub validate_item
                         }
                         else {
                             $template->param( IMAP_update_list_failed => 'Could not login. Verify your login name and password, please.' );
+                            # should be language__{Imap_UpdateError1}
                         }
                     }
                     else {
                         $template->param( IMAP_update_list_failed => 'Failed to connect to server. Please check the host name and port and make sure you are online.' );
+                        # should be language__{Imap_UpdateError2}
                     }
             }
             else {
                 $template->param( IMAP_update_list_failed => 'Please configure the connection details first.' );
+                # should be language__{Imap_UpdateError3}
             }
         }
         return;
@@ -2227,7 +2230,7 @@ sub validate_item
             }
 
             # byte limit
-            if ( defined $$form{imap_options_byte_limit} ) {
+            if ( defined $$form{imap_options_byte_limit} && $$form{imap_options_byte_limit} =~ m/^\d+\s*$/ ) {
                 $self->config_( 'byte_limit', $$form{imap_options_byte_limit} );
                 $template->param( IMAP_if_bytelimit_error => 0 );
             }
