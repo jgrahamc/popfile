@@ -149,6 +149,13 @@ download:
   Push "${C_UWR_DLL_LIBEAY32}"
   Call GetSSLFile
 
+  !ifdef INSTALLER
+      IfFileExists "$PLUGINSDIR\IO-Socket-SSL.tar.gz" 0 installer_error_exit
+      IfFileExists "$PLUGINSDIR\Net_SSLeay.pm.tar.gz" 0 installer_error_exit
+      IfFileExists "$PLUGINSDIR\ssleay32.dll" 0 installer_error_exit
+      IfFileExists "$PLUGINSDIR\libeay32.dll" 0 installer_error_exit
+  !endif
+
   ; Now install the files required for SSL support
 
   StrCpy $G_MPLIBDIR "$G_ROOTDIR\lib"
