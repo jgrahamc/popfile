@@ -772,7 +772,8 @@ sub corpus_page
         open COLOR, ">corpus/$form{bucket}/color";
         print COLOR "$form{color}\n";
         close COLOR;
-        $classifier->load_word_matrix();
+        $classifier->{colors}{$form{bucket}} = $form{color};
+        $classifier->calculate_top10();
     }
     
     if ( $form{create} eq 'Create' )

@@ -42,6 +42,10 @@ sub new
     # Colors assigned to each bucket
     $self->{colors}            = {};
 
+    # The possible colors for buckets
+    $self->{possible_colors} = [ 'red',  'green',      'blue',      'brown',     'orange',     'purple',      'magenta',  'gray',        'plum',     'silver', 
+                   'pink', 'lightgreen', 'lightblue', 'lightcyan', 'lightcoral', 'lightsalmon', 'lightgrey', 'darkorange', 'darkcyan', 'feldspar' ];
+
     # Precomputed top 10 words in each bucket
     $self->{top10}             = {};
     $self->{top10value}        = {};
@@ -180,8 +184,6 @@ sub compute_top10
 sub load_word_matrix
 {
     my ($self) = @_;
-    my @colors = ( 'red',  'green',      'blue',      'brown',     'orange',     'purple',      'magenta',  'gray',        'plum',     'silver', 
-                   'pink', 'lightgreen', 'lightblue', 'lightcyan', 'lightcoral', 'lightsalmon', 'lightgrey', 'darkorange', 'darkcyan', 'feldspar' );
     my $c      = 0;
 
     $self->{matrix}     = {};
@@ -189,7 +191,6 @@ sub load_word_matrix
     $self->{full_total} = 0;
     $self->{top10}      = {};
     $self->{top10value} = {};
-    $self->{top10html}  = {};
     
     print "Loading the corpus...\n" if $self->{debug};
     
@@ -211,9 +212,9 @@ sub load_word_matrix
 
         if ( $color eq '' ) 
         {
-            if ( $c < $#colors )
+            if ( $c < $#{$self->{possible_colors}} )
             {
-                $self->{colors}{$bucket} = $colors[$c];
+                $self->{colors}{$bucket} = $self->{possible_colors}[$c];
                 $c += 1;
             } 
             else 
@@ -247,31 +248,6 @@ sub load_word_matrix
 
         close WORDS;
 
-        my $number = $self->{total}{$bucket};
-        $number = reverse $number;
-        $number =~ s/(\d{3})/\1,/g;
-        $number = reverse $number;
-        $number =~ s/^,(.*)/\1/;
-        $self->{top10html}{$bucket} = "<tr><td><font color=$self->{colors}{$bucket}>$bucket</font><td align=right>$number<td>&nbsp;<td align=center><table cellpadding=0 cellspacing=0><tr>";
-        for $color (@colors)
-        {
-            $self->{top10html}{$bucket} .= "<td width=10 bgcolor=$color><a href=/buckets?color=$color&bucket=$bucket><img border=0 alt='Set $bucket color to $color' src=http://www.usethesource.com/images/pix.gif width=10 height=20></a></font>";
-        }
-        $self->{top10html}{$bucket} .= "</table></td><td><td>";
-
-        for my $i ( 0 .. 9 )
-        {
-            if ( $self->{top10}{$bucket}{$i} ne '' ) 
-            {
-                $self->{top10html}{$bucket} .= $self->{top10}{$bucket}{$i};
-
-                if ( $i != 9 ) 
-                {
-                    $self->{top10html}{$bucket} .= ', ';
-                }
-            }
-        }
-        
         print " $self->{total}{$bucket} words\n" if $self->{debug};
     }
 
@@ -289,10 +265,57 @@ sub load_word_matrix
 
         $self->{not_likely} = log( 1 / ( 10 * $self->{full_total} ) );
     }
+
+    calculate_top10($self);
     
     print "Corpus loaded with $self->{full_total} entries\n" if $self->{debug};
     
     print "    ... $self->{full_total} words\n";
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# calculate_top10
+#
+# Set up the information about the top 10 words in each bucket and their colors in the 
+# top10html member
+#
+# ---------------------------------------------------------------------------------------------
+
+sub calculate_top10
+{
+    my ($self) = @_;
+    
+    $self->{top10html}  = {};
+
+    foreach my $bucket (keys %{$self->{total}})
+    {
+        my $number = $self->{total}{$bucket};
+        $number = reverse $number;
+        $number =~ s/(\d{3})/\1,/g;
+        $number = reverse $number;
+        $number =~ s/^,(.*)/\1/;
+        $self->{top10html}{$bucket} = "<tr><td><font color=$self->{colors}{$bucket}>$bucket</font><td align=right>$number<td>&nbsp;<td align=center><table cellpadding=0 cellspacing=0><tr>";
+        for my $i ( 0 .. $#{$self->{possible_colors}} )
+        {
+            my $color = $self->{possible_colors}[$i];
+            $self->{top10html}{$bucket} .= "<td width=10 bgcolor=$color><a href=/buckets?color=$color&bucket=$bucket><img border=0 alt='Set $bucket color to $color' src=http://www.usethesource.com/images/pix.gif width=10 height=20></a></font>";
+        }
+        $self->{top10html}{$bucket} .= "</table></td><td><td>";
+
+        for my $i ( 0 .. 9 )
+        {
+            if ( $self->{top10}{$bucket}{$i} ne '' ) 
+            {
+                $self->{top10html}{$bucket} .= $self->{top10}{$bucket}{$i};
+
+                if ( $i != 9 ) 
+                {
+                    $self->{top10html}{$bucket} .= ', ';
+                }
+            }
+        }
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
