@@ -162,7 +162,7 @@ sub add_line
         {
             if (length $1 >= 3)        
             {
-                update_word($self,$1, $encoded, '', '[ \t\n\r]');
+                update_word($self,$1, $encoded, '', '[-,\.\"\'\)\?!:;\/ \t\n\r]');
             }
         }
         
@@ -354,6 +354,10 @@ sub parse_stream
                         update_word($self, $1, 0, '<', '>');
                     }
 
+                    while ( $argument =~ s/([[:alpha:]0-9\-_]+?@[[:alpha:]0-9\-_\.]+)// ) 
+                    {
+                        update_word($self, $1, 0, '', '');
+                    }
 
                     add_line( $self, $argument, 0 );
                     next;

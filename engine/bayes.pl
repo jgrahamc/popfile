@@ -14,6 +14,7 @@ if ( $#ARGV == 0 )
     my $b = new Classifier::Bayes;
     
     $b->{debug} = 1; 
+    $b->{parser}->{debug} = 1;
     $b->load_word_matrix();
 
     my @files   = glob $ARGV[0];
