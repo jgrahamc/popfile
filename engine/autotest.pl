@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # ---------------------------------------------------------------------------------------------
 #
 # autotest.pl --- Used to test classification accuracy

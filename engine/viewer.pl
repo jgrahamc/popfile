@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # ---------------------------------------------------------------------------------------------
 #
 # viewer.pl --- Used to view information about bucket probabilities

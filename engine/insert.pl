@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 # ---------------------------------------------------------------------------------------------
 #
 # insert.pl --- Inserts a mail message into a specific bucket
