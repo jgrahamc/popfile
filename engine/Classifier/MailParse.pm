@@ -862,7 +862,7 @@ sub update_tag
         # Tags with a charset
 
         if ( ( $attribute =~ /^content$/i ) && ( $tag =~ /^meta$/i ) ) {
-            if ( $value=~ /charset=([^ ]{1,40})[\"\>]?/ ) {
+            if ( $value=~ /charset=([^\t\r\n ]{1,40})[\"\>]?/ ) {
                 update_word( $self, $1, $encoded, '', '', '' );
             }
             next;
@@ -875,13 +875,13 @@ sub update_tag
 
             my $style = $self->parse_css_style($value);
 
-            if ($self->{debug__}) {             # PROFILE BLOCK START
-                print "      CSS properties: "; # This is blocked as dead code unless debugging
+            if ($self->{debug__}) {             
+                print "      CSS properties: "; 
                 foreach my $key (keys( %{$style})) {
                     print "$key($style->{$key}), ";
                 }
                 print "\n";
-            }                                   # PROFILE BLOCK STOP
+            }
 
             # CSS font sizing
             if (defined($style->{'font-size'})) {
@@ -1805,7 +1805,7 @@ sub parse_header
 
     # Check the encoding type in all RFC 2047 encoded headers
 
-    if ( $argument =~ /=\?([^ ]{1,40})\?(Q|B)/i ) {
+    if ( $argument =~ /=\?([^\r\n\t ]{1,40})\?(Q|B)/i ) {
             update_word( $self, $1, 0, '', '', 'charset' );
     }
 
@@ -1907,7 +1907,7 @@ sub parse_header
     # Look for MIME
 
     if ( $header =~ /^Content-Type$/i ) {
-        if ( $argument =~ /charset=\"?([^\" ]{1,40})\"?/ ) {
+        if ( $argument =~ /charset=\"?([^\"\r\n\t ]{1,40})\"?/ ) {
             update_word( $self, $1, 0, '' , '', 'charset' );
         }
 
