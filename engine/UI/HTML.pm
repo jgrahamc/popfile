@@ -168,17 +168,17 @@ sub start
                                      Reuse     => 1 );
 
     if ( !defined( $self->{server} ) ) {
-    	print <<EOM;
+        print <<EOM;
 
-\nCouldn't start the HTTP interface because POPFile could not bind to the 
-HTTP port $self->{configuration}->{configuration}{ui_port}. This could be because there is another service 
-using that port or because you do not have the right privileges on 
-your system (On Unix systems this can happen if you are not root 
+\nCouldn't start the HTTP interface because POPFile could not bind to the
+HTTP port $self->{configuration}->{configuration}{ui_port}. This could be because there is another service
+using that port or because you do not have the right privileges on
+your system (On Unix systems this can happen if you are not root
 and the port you specified is less than 1024).
 
 EOM
 
-	return 0;
+    return 0;
     }
 
     $self->{selector} = new IO::Select( $self->{server} );
@@ -354,7 +354,7 @@ sub http_ok
         if ( $self->{configuration}->{configuration}{send_stats} ) {
             my @buckets = keys %{$self->{classifier}->{total}};
             my $bc      = $#buckets + 1;
-            $update_check .= "<img border=\"0\" alt=\"\" src=\"http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=$bc&mc=$self->{configuration}->{configuration}{mcount}&ec=$self->{configuration}->{configuration}{ecount}\" />\n";
+            $update_check .= "<img border=\"0\" alt=\"\" src=\"http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=$bc&amp;mc=$self->{configuration}->{configuration}{mcount}&amp;ec=$self->{configuration}->{configuration}{ecount}\" />\n";
         }
 
         $self->{configuration}->{configuration}{last_update_check} = $self->{today};
@@ -413,7 +413,7 @@ sub html_common_top
         $result .= "</style>\n";
     } else {
         $result .= "<link rel=\"stylesheet\" type=\"text/css\" " ;
-        $result .= "href=\"skins/$self->{configuration}->{configuration}{skin}.css\" title=\"main\">\n" ;
+        $result .= "href=\"skins/$self->{configuration}->{configuration}{skin}.css\" title=\"$self->{configuration}->{configuration}{skin}\">\n" ;
     }
 
     $result .= "<meta http-equiv=\"Pragma\" content=\"no-cache\">\n" ;
@@ -447,7 +447,7 @@ sub html_common_middle
     # tabs and the passed in $text.  Note that the BODY is not closed as the standard
     # footer created by html_common_bottom takes care of that.
 
-    my $result = "<body>\n<table class=\"shellTop\" align=\"center\" width=\"100%\">\n" ;
+    my $result = "<body>\n<table class=\"shellTop\" align=\"center\" width=\"100%\" summary=\"\">\n" ;
 
     # upper whitespace
     $result .= "<tr class=\"shellTopRow\">\n<td class=\"shellTopLeft\"></td>\n<td class=\"shellTopCenter\"></td>\n" ;
@@ -456,7 +456,7 @@ sub html_common_middle
     # logo
     $result .= "<tr>\n<td class=\"shellLeft\"></td>\n" ;
     $result .= "<td class=\"naked\">\n" ;
-    $result .= "<table class=\"head\" cellspacing=\"0\">\n<tr>\n" ;
+    $result .= "<table class=\"head\" cellspacing=\"0\" summary=\"\">\n<tr>\n" ;
     $result .= "<td class=\"head\">$self->{language}{Header_Title}</td>\n" ;
 
     # shutdown
@@ -464,7 +464,7 @@ sub html_common_middle
     $result .= "<a class=\"shutdownLink\" href=\"/shutdown\">$self->{language}{Header_Shutdown}</a>&nbsp;\n" ;
 
     $result .= "</td>\n</tr>\n<tr>\n" ;
-    $result .= "<td height=\"0.5%\" colspan=\"3\"></td>\n</tr>\n" ;
+    $result .= "<td height=\"1%\" colspan=\"3\"></td>\n</tr>\n" ;
     $result .= "</table>\n</td>\n" ; # colspan 2 ?? srk
     $result .= "<td class=\"shellRight\"></td>\n</tr>\n<tr class=\"shellBottomRow\">\n" ;
 
@@ -472,10 +472,10 @@ sub html_common_middle
     $result .= "<td class=\"shellBottomRight\"></td>\n</tr>\n</table>\n" ;
 
     # update check
-    $result .= "<table align=\"center\">\n<tr>\n<td class=\"logo2menuSpace\">$update_check</td></tr></table>\n" ;
+    $result .= "<table align=\"center\" summary=\"\">\n<tr>\n<td class=\"logo2menuSpace\">$update_check</td></tr></table>\n" ;
 
     # menu start
-    $result .= "<table class=\"menu\" cellspacing=\"0\">\n" ;
+    $result .= "<table class=\"menu\" cellspacing=\"0\" summary=\"$self->{language}{Header_MenuSummary}\">\n" ;
     $result .= "<tr>\n" ;
 
     # blank menu item for indentation
@@ -524,7 +524,7 @@ sub html_common_middle
     $result .= "</tr>\n</table>\n" ;
 
     # main content area
-    $result .= "<table class=\"shell\" align=\"center\" width=\"100%\">\n<tr class=\"shellTopRow\">\n" ;
+    $result .= "<table class=\"shell\" align=\"center\" width=\"100%\" summary=\"\">\n<tr class=\"shellTopRow\">\n" ;
     $result .= "<td class=\"shellTopLeft\"></td>\n<td class=\"shellTopCenter\"></td>\n" ;
     $result .= "<td class=\"shellTopRight\"></td>\n</tr>\n<tr>\n" ;
     $result .= "<td class=\"shellLeft\"></td>\n" ;
@@ -556,7 +556,7 @@ sub html_common_bottom
     # POPFile with links to the POPFile home page and other information and closes
     # both the BODY and the complete page
 
-    my $result = "<table class=\"footer\">\n<tr>\n" ;
+    my $result = "<table class=\"footer\" summary=\"\">\n<tr>\n" ;
     $result .= "<td class=\"footerBody\">\n" ;
     $result .= "POPFile $self->{configuration}{major_version}.$self->{configuration}{minor_version}." ;
     $result .= "$self->{configuration}{build_version} - \n" ;
@@ -718,7 +718,7 @@ sub configuration_page
     }
 
     # User Interface panel
-    $body .= "<table class=\"settingsTable\" width=\"100%\" cellpadding=\"10%\" cellspacing=\"0\">\n" ;
+    $body .= "<table class=\"settingsTable\" width=\"100%\" cellpadding=\"10%\" cellspacing=\"0\" summary=\"$self->{language}{Configuration_MainTableSummary}\">\n" ;
     $body .= "<tr>\n<td class=\"settingsPanel\" width=\"33%\" valign=\"top\">\n" ;
     $body .= "<h2 class=\"configuration\">$self->{language}{Configuration_UserInterface}</h2>\n" ;
     $body .= "<form action=\"/configuration\">\n" ;
@@ -726,13 +726,42 @@ sub configuration_page
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n";
     $body .= "<select name=\"skin\" id=\"configSkin\">\n" ;
 
-    for my $i (0..$#{$self->{skins}}) {
-        $body .= "<option value=\"$self->{skins}[$i]\"";
-        $body .= " selected=\"selected\"" if ( $self->{skins}[$i] eq $self->{configuration}->{configuration}{skin} );
-        $body .= ">$self->{skins}[$i]</option>\n";
-    }
+    # Create three groupings for skins
 
-    $body .= "</select>\n<input type=\"submit\" class=\"submit\" value=\"$self->{language}{Apply}\" name=\"change_skin\" />\n" ;
+    # Normal skins
+    $body .= "<optgroup label=\"$self->{language}{Configuration_GeneralSkins}\">\n";
+    for my $i (0..$#{$self->{skins}}) {
+        if ( !( $self->{skins}[$i] =~ /^small/i  ) && !( $self->{skins}[$i] =~ /^tiny/i  ) ) {
+            $body .= "<option value=\"$self->{skins}[$i]\"";
+            $body .= " selected=\"selected\"" if ( $self->{skins}[$i] eq $self->{configuration}->{configuration}{skin} );
+            $body .= ">$self->{skins}[$i]</option>\n";
+        }
+    }
+    $body .= "</optgroup>\n";
+
+    # Small skins
+    $body .= "<optgroup label=\"$self->{language}{Configuration_SmallSkins}\">\n";
+    for my $i (0..$#{$self->{skins}}) {
+        if ( $self->{skins}[$i] =~ /^small/i  ) {
+            $body .= "<option value=\"$self->{skins}[$i]\"";
+            $body .= " selected=\"selected\"" if ( $self->{skins}[$i] eq $self->{configuration}->{configuration}{skin} );
+            $body .= ">$self->{skins}[$i]</option>\n";
+        }
+    }
+    $body .= "</optgroup>\n";
+
+    # Tiny skins
+    $body .= "<optgroup label=\"$self->{language}{Configuration_TinySkins}\">\n";
+    for my $i (0..$#{$self->{skins}}) {
+        if ( $self->{skins}[$i] =~ /^tiny/i  ) {
+            $body .= "<option value=\"$self->{skins}[$i]\"";
+            $body .= " selected=\"selected\"" if ( $self->{skins}[$i] eq $self->{configuration}->{configuration}{skin} );
+            $body .= ">$self->{skins}[$i]</option>\n";
+        }
+    }
+    $body .= "</optgroup>\n";
+
+    $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"change_skin\" value=\"$self->{language}{Apply}\" />\n" ;
     $body .= "</form>\n" ;
 
     # Choose Language widget
@@ -746,7 +775,7 @@ sub configuration_page
         $body .= ">$self->{languages}[$i]</option>\n";
     }
     $body .= "</select>\n" ;
-    $body .= "<input type=\"submit\" class=\"submit\" value=\"$self->{language}{Apply}\" name=\"change_language\" />\n" ;
+    $body .= "<input type=\"submit\" class=\"submit\" name=\"change_language\" value=\"$self->{language}{Apply}\" />\n" ;
     $body .= "</form>\n</td>\n";
 
     # History View panel
@@ -756,16 +785,16 @@ sub configuration_page
     # Emails per Page widget
     $body .= "<form action=\"/configuration\">\n" ;
     $body .= "<label class=\"configurationLabel\" for=\"configPageSize\">$self->{language}{Configuration_History}:</label><br />\n" ;
-    $body .= "<input name=\"page_size\" id=\"configPageSize\" type=\"text\" value=\"$self->{configuration}->{configuration}{page_size}\" />\n" ;
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_page_size\" value=\"$self->{language}{Apply}\" />\n" ;
+    $body .= "<input name=\"page_size\" id=\"configPageSize\" type=\"text\" value=\"$self->{configuration}->{configuration}{page_size}\" />\n" ;
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n$page_size_error\n" ;
     $body .= sprintf( $self->{language}{Configuration_HistoryUpdate}, $self->{configuration}->{configuration}{page_size} ) if ( defined($self->{form}{page_size}) );
 
     # Days of History to Keep widget
     $body .= "\n<form action=\"/configuration\">\n";
     $body .= "<label class=\"configurationLabel\" for=\"configHistoryDays\">$self->{language}{Configuration_Days}:</label> <br />\n" ;
-    $body .= "<input name=\"history_days\" id=\"configHistoryDays\" type=\"text\" value=\"$self->{configuration}->{configuration}{history_days}\" />\n" ;
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_history_days\" value=\"$self->{language}{Apply}\" />\n" ;
+    $body .= "<input name=\"history_days\" id=\"configHistoryDays\" type=\"text\" value=\"$self->{configuration}->{configuration}{history_days}\" />\n" ;
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n" ;
     $body .= "</form>\n$history_days_error\n" ;
     $body .= sprintf( $self->{language}{Configuration_DaysUpdate}, $self->{configuration}->{configuration}{history_days} ) if ( defined($self->{form}{history_days}) );
@@ -775,39 +804,58 @@ sub configuration_page
     $body .= "<h2 class=\"configuration\">$self->{language}{Configuration_ClassificationInsertion}</h2>\n" ;
 
     # Subject line modification widget
-    $body .= "<table>\n<tr>\n<td valign=\"top\"><span class=\"configurationLabel\">$self->{language}{Configuration_SubjectLine}:</span></td>\n";
+    $body .= "<table width=\"100%\" summary=\"$self->{language}{Configuration_InsertionTableSummary}\">\n<tr>\n" ;
+    $body .= "<th valign=\"baseline\" scope=\"row\">\n<span class=\"configurationLabel\">$self->{language}{Configuration_SubjectLine}:</span>\n</th>\n";
     if ( $self->{configuration}->{configuration}{subject} == 1 ) {
-        $body .= "<td>\n<span class=\"configWidgetState\">$self->{language}{On}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/configuration?subject=1&amp;session=$self->{session_key}\">" ;
-        $body .= "[$self->{language}{TurnOff}]</a>\n</td>\n" ;
+        $body .= "<td valign=\"baseline\" align=\"right\">\n";
+        $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
+        $body .= "<span class=\"configWidgetStateOn\">$self->{language}{On}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"configSubjectOff\" name=\"toggle\" value=\"$self->{language}{TurnOff}\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"subject\" value=\"1\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n</td>\n";
     } else {
-        $body .= "<td>\n<span class=\"configWidgetState\">$self->{language}{Off}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/configuration?subject=2&amp;session=$self->{session_key}\">" ;
-        $body .= "[$self->{language}{TurnOn}]</a>\n</td>\n" ;
+        $body .= "<td valign=\"baseline\" align=\"right\">\n";
+        $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
+        $body .= "<span class=\"configWidgetStateOff\">$self->{language}{Off}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"configSubjectOn\" name=\"toggle\" value=\"$self->{language}{TurnOn}\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"subject\" value=\"2\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n</td>\n";
     }
 
     # X-Text-Classification insertion widget
-    $body .= "</tr>\n<tr>\n<td valign=\"top\">\n<span class=\"configurationLabel\">$self->{language}{Configuration_XTCInsertion}:</span></td>\n";
-    if ( $self->{configuration}->{configuration}{xtc} == 1 )  {
-        $body .= "<td>\n<span class=\"configWidgetState\">$self->{language}{On}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/configuration?xtc=1&amp;session=$self->{session_key}\">" ;
-        $body .= "[$self->{language}{TurnOff}]</a>\n</td>\n";
+    $body .= "</tr>\n<tr>\n<th valign=\"baseline\" scope=\"row\">\n<span class=\"configurationLabel\">$self->{language}{Configuration_XTCInsertion}:</span></th>\n";
+    if ( $self->{configuration}->{configuration}{xtc} == 1 ) {
+        $body .= "<td valign=\"baseline\" align=\"right\">\n";
+        $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
+        $body .= "<span class=\"configWidgetStateOn\">$self->{language}{On}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"configXTCOff\" name=\"toggle\" value=\"$self->{language}{TurnOff}\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"xtc\" value=\"1\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n</td>\n";
     } else {
-        $body .= "<td>\n<span class=\"configWidgetState\">$self->{language}{Off}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/configuration?xtc=2&amp;session=$self->{session_key}\">" ;
-        $body .= "[$self->{language}{TurnOn}]</a>\n</td>\n";
+        $body .= "<td valign=\"baseline\" align=\"right\">\n";
+        $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
+        $body .= "<span class=\"configWidgetStateOff\">$self->{language}{Off}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"configXTCOn\" name=\"toggle\" value=\"$self->{language}{TurnOn}\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"xtc\" value=\"2\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n</td>\n";
     }
 
     # X-POPFile-Link insertion widget
-    $body .= "</tr>\n<tr>\n<td valign=\"top\">\n<span class=\"configurationLabel\">$self->{language}{Configuration_XPLInsertion}:</span></td>\n";
-    if ( $self->{configuration}->{configuration}{xpl} == 1 )  {
-        $body .= "<td>\n<span class=\"configWidgetState\">$self->{language}{On}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/configuration?xpl=1&amp;session=$self->{session_key}\">" ;
-        $body .= "[$self->{language}{TurnOff}]</a>\n</td>\n";
+    $body .= "</tr>\n<tr>\n<th valign=\"baseline\" scope=\"row\">\n<span class=\"configurationLabel\">$self->{language}{Configuration_XPLInsertion}:</span></th>\n";
+    if ( $self->{configuration}->{configuration}{xpl} == 1 ) {
+        $body .= "<td valign=\"baseline\" align=\"right\">\n";
+        $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
+        $body .= "<span class=\"configWidgetStateOn\">$self->{language}{On}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"configXPLOff\" name=\"toggle\" value=\"$self->{language}{TurnOff}\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"xpl\" value=\"1\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n</td>\n";
     } else {
-        $body .= "<td>\n<span class=\"configWidgetState\">$self->{language}{Off}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/configuration?xpl=2&amp;session=$self->{session_key}\">" ;
-        $body .= "[$self->{language}{TurnOn}]</a>\n</td>\n";
+        $body .= "<td valign=\"baseline\" align=\"right\">\n";
+        $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
+        $body .= "<span class=\"configWidgetStateOff\">$self->{language}{Off}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"configXPLOn\" name=\"toggle\" value=\"$self->{language}{TurnOn}\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"xpl\" value=\"2\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n</td>\n";
     }
     $body .= "</tr>\n</table>\n<br />\n";
 
@@ -910,7 +958,7 @@ sub security_page
         }
     }
 
-    $body .= "<table class=\"settingsTable\" width=\"100%\" cellpadding=\"10%\" cellspacing=\"0\" >\n<tr>\n" ;
+    $body .= "<table class=\"settingsTable\" width=\"100%\" cellpadding=\"10%\" cellspacing=\"0\" summary=\"$self->{language}{Security_MainTableSummary}\">\n<tr>\n" ;
 
     # Stealth Mode / Server Operation panel
     $body .= "<td class=\"settingsPanel\" width=\"50%\" valign=\"top\">\n" ;
@@ -919,29 +967,41 @@ sub security_page
     # Accept POP3 from Remote Machines widget
     $body .= "<span class=\"securityLabel\">$self->{language}{Security_POP3}:</span><br />\n";
 
+    $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
     if ( $self->{configuration}->{configuration}{localpop} == 1 ) {
-        $body .= "<span class=\"securityWidgetState\">$self->{language}{Security_NoStealthMode}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/security?localpop=1&amp;session=$self->{session_key}\">" ;
-        $body .= "[$self->{language}{ChangeToYes}]</a>\n" ;
+        $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
+        $body .= "<span class=\"securityWidgetStateOff\">$self->{language}{Security_NoStealthMode}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securityAcceptPOP3On\" name=\"toggle\" value=\"$self->{language}{ChangeToYes}\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"localpop\" value=\"1\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n";
     } else {
-        $body .= "<span class=\"securityWidgetState\">$self->{language}{Yes}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/security?localpop=2&amp;session=$self->{session_key}\">" ;
-        $body .= "[$self->{language}{ChangeToNo} (Stealth Mode)]</a>\n" ;
+        $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
+        $body .= "<span class=\"securityWidgetStateOn\">$self->{language}{Yes}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptPOP3Off\" name=\"toggle\" value=\"$self->{language}{ChangeToNo} (Stealth Mode)\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"localpop\" value=\"2\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n";
     }
-    $body .= "<br /><br />\n" ;
+    $body .= "</td></tr></table>\n";
 
     # Accept HTTP from Remote Machines widget
     $body .= "<span class=\"securityLabel\">$self->{language}{Security_UI}:</span><br />\n";
+
+    $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td>\n";
     if ( $self->{configuration}->{configuration}{localui} == 1 ) {
-        $body .= "<span class=\"securityWidgetState\">$self->{language}{Security_NoStealthMode}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/security?localui=1&amp;session=$self->{session_key}\">\n" ;
-        $body .= "[$self->{language}{ChangeToYes}]</a>\n ";
+        $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
+        $body .= "<span class=\"securityWidgetStateOff\">$self->{language}{Security_NoStealthMode}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securityAcceptHTTPOn\" name=\"toggle\" value=\"$self->{language}{ChangeToYes}\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"localui\" value=\"1\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n";
     } else {
-        $body .= "<span class=\"securityWidgetState\">$self->{language}{Yes}</span> " ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/security?localui=2&amp;session=$self->{session_key}\">\n" ;
-        $body .= "[$self->{language}{ChangeToNo} (Stealth Mode)]</a>\n ";
+        $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
+        $body .= "<span class=\"securityWidgetStateOn\">$self->{language}{Yes}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptHTTPOff\" name=\"toggle\" value=\"$self->{language}{ChangeToNo} (Stealth Mode)\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"localui\" value=\"2\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n";
     }
-    $body .= "<br /><br />\n</td>\n" ;
+    $body .= "</td></tr></table>\n";
+    $body .= "</td>\n" ;
 
     # User Interface Password panel
     $body .= "<td class=\"settingsPanel\" width=\"50%\" valign=\"top\" >\n" ;
@@ -968,17 +1028,24 @@ sub security_page
     # Check Daily for Updates widget
     $body .= "<span class=\"securityLabel\">$self->{language}{Security_Update}:</span><br />\n";
 
+    $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td>\n";
     if ( $self->{configuration}->{configuration}{update_check} == 1 ) {
-        $body .= "<span class=\"securityWidgetState\">$self->{language}{Yes}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/security?update_check=1&amp;session=$self->{session_key}\">" ;
-        $body .= "[$self->{language}{ChangeToNo}]</a>\n" ;
+        $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
+        $body .= "<span class=\"securityWidgetStateOn\">$self->{language}{Yes}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityUpdateCheckOff\" name=\"toggle\" value=\"$self->{language}{ChangeToNo}\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"update_check\" value=\"1\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n";
     } else {
-        $body .= "<span class=\"securityWidgetState\">$self->{language}{No}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/security?update_check=2&amp;session=$self->{session_key}\">" ;
-        $body .= "[$self->{language}{ChangeToYes}]</a>\n" ;
+        $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
+        $body .= "<span class=\"securityWidgetStateOff\">$self->{language}{No}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securityUpdateCheckOn\" name=\"toggle\" value=\"$self->{language}{ChangeToYes}\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"update_check\" value=\"2\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n";
     }
+    $body .= "</td></tr></table>\n";
+
     # explanation of same
-    $body .= "<br /><br />\n<div class=\"securityExplanation\">$self->{language}{Security_ExplainUpdate}</div>\n</td>\n";
+    $body .= "<div class=\"securityExplanation\">$self->{language}{Security_ExplainUpdate}</div>\n</td>\n";
 
     # Reporting Statistics panel
     $body .= "<td class=\"settingsPanel\" width=\"50%\" valign=\"top\">\n" ;
@@ -987,17 +1054,23 @@ sub security_page
     # Send Statistics Daily widget
     $body .= "<span class=\"securityLabel\">$self->{language}{Security_Stats}:</span>\n<br />\n";
 
+    $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td>\n";
     if ( $self->{configuration}->{configuration}{send_stats} == 1 ) {
-        $body .= "<span class=\"securityWidgetState\">$self->{language}{Yes}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/security?send_stats=1&amp;session=$self->{session_key}\">" ;
-        $body .= "[$self->{language}{ChangeToNo}]</a>\n";
+        $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
+        $body .= "<span class=\"securityWidgetStateOn\">$self->{language}{Yes}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securitySendStatsOff\" name=\"toggle\" value=\"$self->{language}{ChangeToNo}\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"send_stats\" value=\"1\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n";
     } else {
-        $body .= "<span class=\"securityWidgetState\">$self->{language}{No}</span>\n" ;
-        $body .= "<a class=\"changeSettingLink\" href=\"/security?send_stats=2&amp;session=$self->{session_key}\">" ;
-        $body .= "[$self->{language}{ChangeToYes}]</a>\n";
+        $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
+        $body .= "<span class=\"securityWidgetStateOff\">$self->{language}{No}</span>\n" ;
+        $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securitySendStatsOn\" name=\"toggle\" value=\"$self->{language}{ChangeToYes}\" />\n" ;
+        $body .= "<input type=\"hidden\" name=\"send_stats\" value=\"2\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n";
     }
+    $body .= "</td></tr></table>\n";
     # explanation of same
-    $body .= "<br /><br />\n<div class=\"securityExplanation\">$self->{language}{Security_ExplainStats}</div>\n</td>\n</tr>\n";
+    $body .= "<div class=\"securityExplanation\">$self->{language}{Security_ExplainStats}</div>\n</td>\n</tr>\n";
 
     # Secure Password Authentication/AUTH panel
     $body .= "<tr>\n<td class=\"settingsPanel\" width=\"100%\" valign=\"top\" colspan=\"2\">\n" ;
@@ -1093,7 +1166,7 @@ sub advanced_page
 
     # title and heading
     my $body = "<h2 class=\"advanced\">$self->{language}{Advanced_StopWords}</h2>\n" ;
-    $body .= "$self->{language}{Advanced_Message1}\n<br /><br />\n<table>\n";
+    $body .= "$self->{language}{Advanced_Message1}\n<br /><br />\n<table summary=\"$self->{language}{Advanced_MainTableSummary}\">\n";
 
     # the word census
     my $last = '';
@@ -1109,11 +1182,11 @@ sub advanced_page
             } else {
                 $firstRow = 0;
             }
-            $body .= "<tr><td class=\"advancedAlphabet" ;
+            $body .= "<tr><th scope=\"row\" class=\"advancedAlphabet" ;
             if ($groupCounter == $groupSize) {
                 $body .= "GroupSpacing";
             }
-            $body .= "\"><b>$1</b></td>\n" ;
+            $body .= "\"><b>$1</b></th>\n" ;
             $body .= "<td class=\"advancedWords";
             if ($groupCounter == $groupSize) {
                 $body .= "GroupSpacing";
@@ -1230,7 +1303,7 @@ sub magnet_page
     my $body = "<h2 class=\"magnets\">$self->{language}{Magnet_CurrentMagnets}</h2>\n" ;
 
     # magnet listing headings
-    $body .= "<table width=\"75%\" class=\"magnetsTable\">\n";
+    $body .= "<table width=\"75%\" class=\"magnetsTable\" summary=\"$self->{language}{Magnet_MainTableSummary}\">\n";
     $body .= "<caption>$self->{language}{Magnet_Message1}</caption>\n";
     $body .= "<tr>\n<th class=\"magnetsLabel\" scope=\"col\">$self->{language}{Magnet}</th>\n" ;
     $body .= "<th class=\"magnetsLabel\" scope=\"col\">$self->{language}{Bucket}</th>\n" ;
@@ -1256,9 +1329,16 @@ sub magnet_page
 
                 $body .= ">\n<td>$type: $validatingMagnet</td>\n" ;
                 $body .= "<td><font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font></td>\n" ;
-                $body .= "<td><a class=\"removeLink\" href=\"/magnets?bucket=$bucket&amp;dtype=$type&amp;";
-                $body .= "dmagnet=" . url_encode($self, $validatingMagnet);
-                $body .= "&amp;session=$self->{session_key}\">\n[$self->{language}{Delete}]</a></td>\n";
+
+                # Remove magnet button
+
+                $body .= "<td>\n<form class=\"magnetsDelete\" style=\"margin: 0\" action=\"/magnets\">\n";
+                $body .= "<input type=\"submit\" class=\"deleteButton\" name=\"deleteMagnet\" value=\"$self->{language}{Delete}\" />\n" ;
+                $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
+                $body .= "<input type=\"hidden\" name=\"dtype\" value=\"$type\" />\n";
+                $body .= "<input type=\"hidden\" name=\"dmagnet\" value=\"" . url_encode($self, "$validatingMagnet") . "\" />\n";
+                $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n";
+                $body .= "</form>\n</td>\n";
                 $body .= "</tr>";
                 $stripe = 1 - $stripe;
             }
@@ -1269,7 +1349,7 @@ sub magnet_page
 
     # Create New Magnet panel
     $body .= "<h2 class=\"magnets\">$self->{language}{Magnet_CreateNew}</h2>\n" ;
-    $body .= "<table cellspacing=\"0\">\n<tr>\n<td>\n" ;
+    $body .= "<table cellspacing=\"0\" summary=\"\">\n<tr>\n<td>\n" ;
     $body .= "<b>$self->{language}{Magnet_Explanation}\n" ;
     $body .= "</td>\n</tr>\n</table>\n" ;
 
@@ -1320,7 +1400,7 @@ sub bucket_page
 
     my $body = "<h2 class=\"buckets\">" ;
     $body .= sprintf( $self->{language}{SingleBucket_Title}, "<font color=\"$self->{classifier}->{colors}{$self->{form}{showbucket}}\">$self->{form}{showbucket}</font>") ;
-    $body .= "</h2>\n<table>\n<tr>\n<th scope=\"row\" class=\"bucketsLabel\">$self->{language}{SingleBucket_WordCount}</th>\n" ;
+    $body .= "</h2>\n<table summary=\"\">\n<tr>\n<th scope=\"row\" class=\"bucketsLabel\">$self->{language}{SingleBucket_WordCount}</th>\n" ;
     $body .= "<td>&nbsp;</td>\n<td align=\"right\">\n" ;
     $body .= pretty_number( $self, $self->{classifier}->{total}{$self->{form}{showbucket}});
     $body .= "</td>\n<td>\n(" . sprintf( $self->{language}{SingleBucket_Unique}, pretty_number( $self,  $self->{classifier}->{unique}{$self->{form}{showbucket}}) ). ")";
@@ -1338,7 +1418,7 @@ sub bucket_page
 
     $body .= "<h2 class=\"buckets\">" ;
     $body .= sprintf( $self->{language}{SingleBucket_WordTable},  "<font color=\"$self->{classifier}->{colors}{$self->{form}{showbucket}}\">$self->{form}{showbucket}" )  ;
-    $body .= "</font>\n</h2>\n$self->{language}{SingleBucket_Message1}\n<br /><br />\n<table>\n";
+    $body .= "</font>\n</h2>\n$self->{language}{SingleBucket_Message1}\n<br /><br />\n<table summary=\"$self->{language}{Bucket_WordListTableSummary}\">\n";
 
     for my $i (@{$self->{classifier}->{matrix}{$self->{form}{showbucket}}}) {
         if ( defined($i) )  {
@@ -1409,13 +1489,13 @@ sub bar_chart_100
     $body .= "<tr>\n<td colspan=\"3\">&nbsp;</td>\n</tr>\n<tr>\n<td colspan=\"3\">\n";
 
     if ( $total_count != 0 ) {
-        $body .= "<table class=\"barChart\" width=\"100%\">\n<tr>\n";
+        $body .= "<table class=\"barChart\" width=\"100%\" summary=\"$self->{language}{Bucket_BarChartSummary}\">\n<tr>\n";
         foreach my $bucket (@xaxis) {
             my $percent = int( $values{$bucket} * 10000 / $total_count ) / 100;
             if ( $percent != 0 )  {
                 $body .= "<td bgcolor=\"$self->{classifier}->{colors}{$bucket}\" title=\"$bucket ($percent%)\" width=\"";
                 $body .= (int($percent)<1)?1:int($percent);
-                $body .= "%\"><img src=\"pix.gif\" alt=\"\" height=\"20px\" width=\"1px\" /></td>\n" ;
+                $body .= "%\"><img src=\"pix.gif\" alt=\"\" height=\"20\" width=\"1\" /></td>\n" ;
             }
         }
         $body .= "</tr>\n</table>";
@@ -1468,7 +1548,7 @@ sub corpus_page
         close COLOR;
         $self->{classifier}->{colors}{$self->{form}{bucket}} = $self->{form}{color};
     }
-    
+
     if ( ( defined($self->{form}{bucket}) ) && ( defined($self->{form}{subject}) ) && ( $self->{form}{subject} > 0 ) ) {
         $self->{classifier}->{parameters}{$self->{form}{bucket}}{subject} = $self->{form}{subject} - 1;
         $self->{classifier}->write_parameters();
@@ -1526,7 +1606,7 @@ sub corpus_page
     my $body = "<h2 class=\"buckets\">$self->{language}{Bucket_Title}</h2>\n" ;
 
     # column headings
-    $body .= "<table class=\"bucketsTable\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\">\n<tr>\n" ;
+    $body .= "<table class=\"bucketsTable\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" summary=\"$self->{language}{Bucket_MaintenanceTableSummary}\">\n<tr>\n" ;
     $body .= "<th class=\"bucketsLabel\" scope=\"col\">$self->{language}{Bucket_BucketName}</th>\n" ;
     $body .= "<th width=\"1%\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language}{Bucket_WordCount}</th>\n" ;
     $body .= "<th width=\"1%\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language}{Bucket_UniqueWords}</th>\n" ;
@@ -1563,14 +1643,20 @@ sub corpus_page
             # Subject Modification on/off widget
 
             $body .= "<td align=\"center\">\n";
-            if ( $self->{classifier}->{parameters}{$bucket}{subject} == 0 )  {
-                $body .= "<span class=\"bucketsWidgetState\">$self->{language}{Off}</span>\n" ;
-                $body .= "<a class=\"changeSettingLink\" href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;subject=2\">\n" ;
-                $body .= "[$self->{language}{TurnOn}]</a>\n</td>\n" ;
+            if ( $self->{classifier}->{parameters}{$bucket}{subject} == 0 ) {
+                $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
+                $body .= "<span class=\"bucketsWidgetStateOff\">$self->{language}{Off} </span>\n" ;
+                $body .= "<input type=\"submit\" class=\"toggleOn\" name=\"toggle\" value=\"$self->{language}{TurnOn}\" />\n" ;
+                $body .= "<input type=\"hidden\" name=\"subject\" value=\"2\" />\n";
+                $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
+                $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" /></form></td>\n";
             } else {
-                $body .= "<span class=\"bucketsWidgetState\">$self->{language}{On}</span>\n" ;
-                $body .= "<a class=\"changeSettingLink\" href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;subject=1\">\n" ;
-                $body .= "[$self->{language}{TurnOff}]</a>\n</td>\n";
+                $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
+                $body .= "<span class=\"bucketsWidgetStateOn\">$self->{language}{On} </span>\n" ;
+                $body .= "<input type=\"submit\" class=\"toggleOff\" name=\"toggle\" value=\"$self->{language}{TurnOff}\" />\n" ;
+                $body .= "<input type=\"hidden\" name=\"subject\" value=\"1\" />\n";
+                $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
+                $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" /></form></td>\n";
             }
         } else {
             $body .= "<td align=\"center\">\n$self->{language}{Bucket_DisabledGlobally}\n</td>\n";
@@ -1579,27 +1665,33 @@ sub corpus_page
         # Quarantine on/off widget
 
         $body .= "<td width=\"1%\">&nbsp;</td><td align=\"center\">\n";
-        if ( $self->{classifier}->{parameters}{$bucket}{quarantine} == 0 )  {
-            $body .= "<span class=\"bucketsWidgetState\">$self->{language}{Off}</span> \n" ;
-            $body .= "<a class=\"changeSettingLink\" href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;quarantine=2\">\n" ;
-            $body .= "[$self->{language}{TurnOn}]</a>\n</td>\n" ;
+        if ( $self->{classifier}->{parameters}{$bucket}{quarantine} == 0 ) {
+            $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
+            $body .= "<span class=\"bucketsWidgetStateOff\">$self->{language}{Off} </span>\n" ;
+            $body .= "<input type=\"submit\" class=\"toggleOn\" name=\"toggle\" value=\"$self->{language}{TurnOn}\" />\n" ;
+            $body .= "<input type=\"hidden\" name=\"quarantine\" value=\"2\" />\n";
+            $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" /></form></td>\n";
         } else {
-            $body .= "<span class=\"bucketsWidgetState\">$self->{language}{On}</span> \n" ;
-            $body .= "<a class=\"changeSettingLink\" href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;quarantine=1\">\n" ;
-            $body .= "[$self->{language}{TurnOff}]</a>\n</td>\n";
+            $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
+            $body .= "<span class=\"bucketsWidgetStateOn\">$self->{language}{On} </span>\n" ;
+            $body .= "<input type=\"submit\" class=\"toggleOff\" name=\"toggle\" value=\"$self->{language}{TurnOff}\" />\n" ;
+            $body .= "<input type=\"hidden\" name=\"quarantine\" value=\"1\" />\n";
+            $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" /></form></td>\n";
         }
 
         # Change Color widget
 
-        $body .= "<td>&nbsp;</td>\n<td align=\"left\">\n<table cellpadding=\"0\" cellspacing=\"1px\">\n<tr>\n";
+        $body .= "<td>&nbsp;</td>\n<td align=\"left\">\n<table class=\"colorChooserTable\" cellpadding=\"0\" cellspacing=\"1\" summary=\"\">\n<tr>\n";
         my $color = $self->{classifier}->{colors}{$bucket};
-        $body .= "<td bgcolor=\"$color\">\n<img border=\"0\" alt='" . sprintf( $self->{language}{Bucket_CurrentColor}, $bucket, $color ) . "' src=\"pix.gif\" width=\"10px\" height=\"20px\" /></td>\n<td>&nbsp;</td>\n";
+        $body .= "<td bgcolor=\"$color\">\n<img class=\"colorChooserImg\" border=\"0\" alt='" . sprintf( $self->{language}{Bucket_CurrentColor}, $bucket, $color ) . "' src=\"pix.gif\" width=\"10\" height=\"20\" /></td>\n<td>&nbsp;</td>\n";
         for my $i ( 0 .. $#{$self->{classifier}->{possible_colors}} ) {
             my $color = $self->{classifier}->{possible_colors}[$i];
             if ( $color ne $self->{classifier}->{colors}{$bucket} )  {
                 $body .= "<td bgcolor=\"$color\" title=\"". sprintf( $self->{language}{Bucket_SetColorTo}, $bucket, $color ) . "\">\n" ;
                 $body .= "<a class=\"colorChooserLink\" href=\"/buckets?color=$color&amp;bucket=$bucket&amp;session=$self->{session_key}\">\n" ;
-                $body .= "<img border=\"0\" alt=\"". sprintf( $self->{language}{Bucket_SetColorTo}, $bucket, $color ) . "\" src=\"pix.gif\" width=\"10px\" height=\"20px\" /></a>\n";
+                $body .= "<img class=\"colorChooserImg\" border=\"0\" alt=\"". sprintf( $self->{language}{Bucket_SetColorTo}, $bucket, $color ) . "\" src=\"pix.gif\" width=\"10\" height=\"20\" /></a>\n";
                 $body .= "</td>\n" ;
             }
         }
@@ -1627,13 +1719,13 @@ sub corpus_page
     $body .= "<td align=\"right\">$number</td>\n<td></td>\n<td></td>\n</tr>\n</table>\n<br />\n";
 
     # middle panel group
-    $body .= "<table class=\"settingsTable\" width=\"100%\" cellpadding=\"10%\" cellspacing=\"0\">\n" ;
+    $body .= "<table class=\"settingsTable\" width=\"100%\" cellpadding=\"10%\" cellspacing=\"0\" summary=\"$self->{language}{Bucket_StatisticsTableSummary}\">\n" ;
 
     # Classification Accuracy panel
     $body .= "<tr>\n<td class=\"settingsPanel\" valign=\"top\" width=\"33%\" align=\"center\">\n" ;
     $body .= "<h2 class=\"buckets\">$self->{language}{Bucket_ClassificationAccuracy}</h2>\n" ;
 
-    $body .= "<table>\n" ;
+    $body .= "<table summary=\"\">\n" ;
     # emails classified line
     $body .= "<tr>\n<th scope=\"row\" align=\"left\">$self->{language}{Bucket_EmailsClassified}:</th>\n" ;
     $body .= "<td align=\"right\">$pmcount</td>\n</tr>\n" ;
@@ -1649,7 +1741,8 @@ sub corpus_page
 
     if ( $percent > 0 )  {
         $body .= "<tr>\n<td colspan=\"2\">&nbsp;</td>\n</tr>\n<tr>\n<td colspan=\"2\">\n" ;
-        $body .= "<table class=\"barChart\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\">\n";
+        $body .= "<table class=\"barChart\" id=\"accuracyChart\" width=\"100%\" cellspacing=\"0\"";
+        $body .= " cellpadding=\"0\" border=\"0\" summary=\"$self->{language}{Bucket_AccuracyChartSummary}\">\n";
         $body .= "<tr>\n";
 
         for my $i ( 0..49 ) {
@@ -1659,16 +1752,16 @@ sub corpus_page
             $body .= "\"accuracy94to100\"" if ( $i > 46 );
             $body .= ">";
             if ( ( $i * 2 ) < $percent ) {
-                $body .= "<img class=\"lineImg\" src=\"black.gif\" height=\"4px\" width=\"6px\" alt=\"\" />";
+                $body .= "<img class=\"lineImg\" src=\"black.gif\" height=\"4\" width=\"6\" alt=\"\" />";
             } else {
-                $body .= "<img src=\"pix.gif\" height=\"4px\" width=\"6px\" alt=\"\" />";
+                $body .= "<img src=\"pix.gif\" height=\"4\" width=\"6\" alt=\"\" />";
             }
             $body .= "</td>\n";
         }
-        
+
         # Extra td to hold the vertical spacer gif
-        
-        $body .= "<td><img src=\"pix.gif\" height=\"10px\" width=\"1px\" alt=\"\" /></td>" ;
+
+        $body .= "<td><img src=\"pix.gif\" height=\"10\" width=\"1\" alt=\"\" /></td>" ;
         $body .= "</tr>\n<tr>\n";
         $body .= "<td colspan=\"25\" align=\"left\"><span class=\"graphFont\">0%</span></td>\n";
         $body .= "<td colspan=\"26\" align=\"right\"><span class=\"graphFont\">100%</span></td>\n</tr></table>\n";
@@ -1688,7 +1781,7 @@ sub corpus_page
     $body .= "</form>\n</td>\n<td class=\"settingsPanel\" valign=\"top\" width=\"33%\" align=\"center\">\n" ;
     $body .= "<h2 class=\"buckets\">$self->{language}{Bucket_EmailsClassifiedUpper}</h2>\n" ;
 
-    $body .= "<table>\n<tr>\n";
+    $body .= "<table summary=\"\">\n<tr>\n";
     $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"left\">$self->{language}{Bucket}</th>\n<th>&nbsp;</th>\n" ;
     $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language}{Bucket_ClassificationCount}</th>\n</tr>\n";
 
@@ -1701,7 +1794,7 @@ sub corpus_page
 
     # Word Counts panel
     $body .= "</table>\n</td>\n<td class=\"settingsPanel\" width=\"34%\" valign=\"top\" align=\"center\">\n" ;
-    $body .= "<h2 class=\"buckets\">$self->{language}{Bucket_WordCounts}</h2>\n<table>\n<tr>\n" ;
+    $body .= "<h2 class=\"buckets\">$self->{language}{Bucket_WordCounts}</h2>\n<table summary=\"\">\n<tr>\n" ;
     $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"left\">$self->{language}{Bucket}</th>\n<th>&nbsp;</th>\n" ;
     $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language}{Bucket_WordCount}</th>\n</tr>\n";
 
@@ -1714,7 +1807,7 @@ sub corpus_page
     $body .= "</table>\n</td>\n</tr>\n</table>\n<br />\n" ;
 
     # bottom panel group
-    $body .= "<table class=\"settingsTable\" width=\"100%\" cellpadding=\"10%\" cellspacing=\"0\">\n" ;
+    $body .= "<table class=\"settingsTable\" width=\"100%\" cellpadding=\"10%\" cellspacing=\"0\" summary=\"$self->{language}{Bucket_MaintenanceTableSummary}\">\n" ;
 
     # Maintenance panel
     $body .= "<tr>\n<td class=\"settingsPanel\" valign=\"top\" width=\"50%\">\n" ;
@@ -1769,16 +1862,18 @@ sub corpus_page
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n</form>\n<br />\n";
 
     # end optional widget placement
-    $body .= "</div>\n" ;
+   $body .= "</div>\n" ;
 
     if ( ( defined($self->{form}{lookup}) ) || ( defined($self->{form}{word}) ) ) {
        my $word = $self->{classifier}->{mangler}->mangle($self->{form}{word}, 1);
 
+        $body .= "<blockquote>\n";
+
         # Don't print the headings if there are no entries.
 
-        my $heading = "<table class=\"lookupResultsTable\" cellpadding=\"10%\" cellspacing=\"0\">\n" ;
+        my $heading = "<table class=\"lookupResultsTable\" cellpadding=\"10%\" cellspacing=\"0\" summary=\"$self->{language}{Bucket_LookupResultsSummary}\">\n" ;
         $heading .= "<tr>\n<td>\n" ;
-        $heading .= "<table>\n";
+        $heading .= "<table summary=\"\">\n";
         $heading .= "<caption><strong>$self->{language}{Bucket_LookupMessage2} $self->{form}{word}</strong><br /><br /></caption>" ;
         $heading .= "<tr>\n<th scope=\"col\">$self->{language}{Bucket}</th>\n<th>&nbsp;</th>\n" ;
         $heading .= "<th scope=\"col\">$self->{language}{Frequency}</th>\n<th>&nbsp;</th>\n" ;
@@ -1842,9 +1937,10 @@ sub corpus_page
             $body .= "<div class=\"error01\">$self->{language}{Bucket_Error4}</div>";
         }
 
+        $body .= "\n</blockquote>\n";
     }
 
-    $body .= "\n</td>\n</tr>\n</table>";
+    $body .= "</td>\n</tr>\n</table>";
 
     http_ok($self, $client,$body,1);
 }
@@ -2225,8 +2321,10 @@ sub history_undo
         # This is a kludge, the undo function can actually handle multiple messages in the file_array
         # But we only have single-message undo in the UI presently. Copy over and proceed.
 
+        # Update to pull from the undo_array to allow proper use of multiple-message undo.
+
         if ( $self->{form}{undo} ne '__Bulk__Undo__Value' ) {
-            push( @{$self->{form}{file_array}}, $self->{form}{undo} )
+            push( @{$self->{form}{file_array}}, @{$self->{form}{undo_array}} );
         }
 
 
@@ -2358,9 +2456,16 @@ sub history_page
 
     history_undo( $self );
 
-    if ( defined($self->{form}{remove}) ) {
-        my $mail_file = $self->{form}{remove};
-        history_delete_file($self, "$self->{configuration}->{configuration}{msgdir}$mail_file", 0);
+    # Handle removals
+
+    if ( ( defined $self->{form}{deleteMessage} ) && ( $self->{form}{deleteMessage} eq $self->{language}{Remove} ) ) {
+
+        # Remove the list of marked messages using the array of "remove" checkboxes
+
+        for my $i ( 0 .. $#{$self->{form}{remove_array}} ) {
+            my $message = $self->{history}{ ($self->{form}{remove_array}[$i] - 1) }{file};
+            history_delete_file($self, "$self->{configuration}->{configuration}{msgdir}$message", 0);
+        }
         $self->{history_invalid} = 1;
         http_redirect( $self, $client,"/history?session=$self->{session_key}&sort=$self->{form}{sort}&filter=$self->{form}{filter}");
         return;
@@ -2456,7 +2561,7 @@ sub history_page
         $stop_message = history_size( $self ) - 1 if ( $stop_message >= history_size( $self ) );
 
         if ( $self->{configuration}->{configuration}{page_size} <= history_size( $self ) ) {
-            $body .= "<table width=\"100%\">\n<tr>\n<td align=\"left\">\n" ;
+            $body .= "<table width=\"100%\" summary=\"\">\n<tr>\n<td align=\"left\">\n" ;
             # title
             $body .= "<h2 class=\"history\">$self->{language}{History_Title}$filtered</h2>\n</td>\n" ;
             # navigator
@@ -2468,7 +2573,7 @@ sub history_page
         }
 
         # History widgets top
-        $body .= "<table class=\"historyWidgetsTop\">\n<tr>\n";
+        $body .= "<table class=\"historyWidgetsTop\" summary=\"\">\n<tr>\n";
 
         # Search Subject widget
         $body .= "<td colspan=\"2\">\n";
@@ -2517,42 +2622,42 @@ sub history_page
         $body .= "<input type=\"hidden\" name=\"filter\" value=\"$self->{form}{filter}\" />\n";
 
         # History messages
-        $body .= "<table class=\"historyMessagesTable\" width=\"100%\">\n" ;
+        $body .= "<table class=\"historyTable\" width=\"100%\" summary=\"$self->{language}{History_MainTableSummary}\">\n" ;
         # column headers
         $body .= "<tr valign=\"bottom\">\n";
         $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-        $body .= "<a class=\"historyLabel\" href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=\">";
+        $body .= "<a href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=\">";
         if ( $self->{form}{sort} eq '' ) {
-            $body .= "<em>ID</em>";
+            $body .= "<em class=\"historyLabelSort\">ID</em>";
         } else {
             $body .= "ID";
         }
         $body .= "</a>\n</th>\n" ;
         $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-        $body .= "<a class=\"historyLabel\" href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=from\">";
+        $body .= "<a href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=from\">";
 
         if ( $self->{form}{sort} eq 'from' ) {
-            $body .= "<em>$self->{language}{From}</em>";
+            $body .= "<em class=\"historyLabelSort\">$self->{language}{From}</em>";
         } else {
             $body .= "$self->{language}{From}";
         }
 
         $body .= "</a>\n</th>\n" ;
         $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-        $body .= "<a class=\"historyLabel\" href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=subject\">";
+        $body .= "<a href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=subject\">";
 
         if ( $self->{form}{sort} eq 'subject' ) {
-            $body .= "<em>$self->{language}{Subject}</em>";
+            $body .= "<em class=\"historyLabelSort\">$self->{language}{Subject}</em>";
         } else {
             $body .= "$self->{language}{Subject}";
         }
 
         $body .= "</a>\n</th>\n" ;
         $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-        $body .= "<a class=\"historyLabel\" href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=bucket\">";
+        $body .= "<a href=\"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}&amp;setsort=bucket\">";
 
         if ( $self->{form}{sort} eq 'bucket' ) {
-            $body .= "<em>$self->{language}{Classification}</em>";
+            $body .= "<em class=\"historyLabelSort\">$self->{language}{Classification}</em>";
         } else {
             $body .= "$self->{language}{Classification}";
         }
@@ -2664,8 +2769,10 @@ sub history_page
             if ( $reclassified )  {
                 $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font></td>\n<td>";
                 $body .= sprintf( $self->{language}{History_Already}, ($self->{classifier}->{colors}{$bucket} || ''), ($bucket || '') );
-                $body .= " - <a class=\"undoLink\" href=\"/history?undo=" . ( $i+1 );
-                $body .= "&amp;session=$self->{session_key}&amp;badbucket=$bucket&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}&amp;start_message=$start_message#$mail_file\">[$self->{language}{Undo}]</a>";
+                $body .= "<br /><input type=\"checkbox\" class=\"checkbox\" name=\"undo\" value=\"" . ( $i+1 ) . "\" />\n";
+                $body .= " <input type=\"submit\" class=\"undoButton\" name=\"undoButton\" value=\"$self->{language}{Undo}\" />\n" ;
+
+
             } else {
                 if ( !defined $self->{classifier}->{colors}{$bucket})  {
                     $body .= "$bucket</td>\n<td>";
@@ -2680,22 +2787,25 @@ sub history_page
                     $body .= "<option selected=\"selected\"></option>\n";
 
                     foreach my $abucket (@buckets) {
-                        $body .= "<option value=\"$abucket\"";
-                        $body .= ">$abucket</option>\n"
+                        $body .= "<option value=\"$abucket\">$abucket</option>\n";
                     }
                     $body .= "</select>\n";
-                    $body .= "<input type=\"submit\" class=\"submit\" name=\"change\" value=\"$self->{language}{Reclassify}\" />\n" ;
+                    $body .= "<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language}{Reclassify}\" />\n" ;
                 } else {
                     $body .= " ($self->{language}{History_MagnetUsed}: $self->{history}{$i}{magnet})";
                 }
             }
 
-            $body .= "</td>\n<td><a class=\"removeLink\" href=\"/history?session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}&amp;start_message=$start_message&amp;remove=$mail_file&amp;start_message=$start_message\">[$self->{language}{Remove}]</a></td>\n</tr>\n";
+            $body .= "</td>\n<td>\n";
+            $body .= "<input type=\"checkbox\" class=\"checkbox\" name=\"remove\" value=\"" . ( $i+1 ) . "\" />\n";
+            $body .= "<input type=\"submit\" class=\"deleteButton\" name=\"deleteMessage\" value=\"$self->{language}{Remove}\" />\n" ;
+            $body .= "</td>\n</tr>\n";
+
 
             # Check to see if we want to view a message
             if ( ( defined($self->{form}{view}) ) && ( $self->{form}{view} eq $mail_file ) ) {
                 $body .= "<tr>\n<td></td>\n<td colspan=\"3\" valign=\"top\">\n" ;
-                $body .= "<table class=\"openMessageTable\" cellpadding=\"10%\" cellspacing=\"0\" width=\"100%\">\n" ;
+                $body .= "<table class=\"openMessageTable\" cellpadding=\"10%\" cellspacing=\"0\" width=\"100%\" summary=\"$self->{language}{History_OpenMessageSummary}\">\n" ;
 
                 # Close button
                 $body .= "<tr>\n<td class=\"openMessageCloser\">\n" ;
@@ -2734,7 +2844,7 @@ sub history_page
 
                             if ( $head =~ /$header/i )  {
                                 if ( $arg =~ /$text/i )  {
-                                    $line =~ s/($text)/<b><font title=\"[$self->{history}{$i}{bucket}]\" color=\"$self->{classifier}->{colors}{$self->{history}{$i}{bucket}}\">$1<\/font><\/b>/;
+                                    $line =~ s/($text)/<b><font color\"$self->{classifier}->{colors}{$self->{history}{$i}{bucket}}\">$1<\/font><\/b>/;
                                 }
                             }
                         }
@@ -2750,7 +2860,7 @@ sub history_page
                 # Close button
                 $body .= "<tr>\n<td class=\"openMessageCloser\">" ;
                 $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key}&amp;sort=$self->{form}{sort}&amp;filter=$self->{form}{filter}\">\n" ;
-                $body .= "<span class=\"historyLabel\">$self->{language}{Close}</span></a>\n" ;
+                $body .= "<span class=\"historyLabel\">$self->{language}{Close}</span>\n</a>\n" ;
                 $body .= "</td>\n</tr>\n</table>\n</td>\n" ;
 
                 $body .= "<td class=\"top20\" valign=\"top\">\n";
@@ -2776,7 +2886,7 @@ sub history_page
         $body .= "</form>\n";
 
         # History buttons bottom
-        $body .= "<table class=\"historyWidgetsBottom\">\n<tr>\n<td>\n";
+        $body .= "<table class=\"historyWidgetsBottom\" summary=\"\">\n<tr>\n<td>\n";
         $body .= "<form action=\"/history\">\n<input type=\"hidden\" name=\"filter\" value=\"$self->{form}{filter}\" />\n";
         $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form}{sort}\" />\n" ;
         $body .= "<span class=\"historyLabel\">$self->{language}{History_Remove}:&nbsp;</span>\n" ;
@@ -2787,7 +2897,7 @@ sub history_page
         $body .= "</td>\n</tr>\n</table>\n" ;
 
         # navigator
-        $body .= "<table width=\"100%\">\n<tr>\n<td class=\"historyNavigatorBottom\">\n" ;
+        $body .= "<table width=\"100%\" summary=\"\">\n<tr>\n<td class=\"historyNavigatorBottom\">\n" ;
         $body .= get_history_navigator( $self, $start_message, $stop_message ) if ( $self->{configuration}->{configuration}{page_size} <= history_size( $self ) );
         $body .= "\n</td>\n</tr>\n</table>\n";
     } else {
@@ -2803,7 +2913,7 @@ sub history_page
         $body .= "</option>\n";
         $body .= "<option value=\"unclassified\"" . (($self->{form}{filter} eq 'unclassified')?' selected':'') . ">&lt;unclassified&gt;</option>\n";
         $body .= "</select>\n";
-        $body .="<input type=submit class=submit name=setfilter value=\"$self->{language}{Filter}\" />\n</form>\n";
+        $body .="<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\" />\n</form>\n";
 
     }
 
@@ -2824,10 +2934,11 @@ sub password_page
 
     # Show a page asking for the password with no session key information on it
     $self->{session_key} = '';
-    my $body = "<h2 class=\"password\">$self->{language}{Password_Title}</h2><form action=\"/password\" method=\"post\">" ;
-    $body .= "<input type=hidden name=redirect value=\"$redirect\"><span class=\"passwordLabel\">$self->{language}{Password_Enter}:</span> " ;
-    $body .= "<input type=password name=password> " ;
-    $body .= "<input type=submit class=submit name=submit value=\"$self->{language}{Password_Go}\">\n</form>\n";
+    my $body = "<h2 class=\"password\">$self->{language}{Password_Title}</h2>\n<form action=\"/password\" method=\"post\">\n" ;
+    $body .= "<label class=\"passwordLabel\" for=\"thePassword\">$self->{language}{Password_Enter}: </label>\n" ;
+    $body .= "<input type=\"hidden\" name=\"redirect\" value=\"$redirect\" />\n" ;
+    $body .= "<input type=\"password\" id=\"thePassword\" name=\"password\" />\n" ;
+    $body .= "<input type=\"submit\" class=\"submit\" name=\"submit\" value=\"$self->{language}{Password_Go}\" />\n</form>\n";
     $body .= "<blockquote>\n<div class=\"error02\">$self->{language}{Password_Error1}</div>\n</blockquote>" if ( $error == 1 );
     http_ok($self, $client, $body, 99);
     $self->{session_key} = $session_temp;
@@ -3157,6 +3268,7 @@ sub calculate_today
     $self->{mail_filename}  = "popfile$self->{today}";
 }
 
+
 # ---------------------------------------------------------------------------------------------
 #
 # history_delete_file   - Handle the deletion of archived message files. Deletes .cls
@@ -3204,6 +3316,7 @@ sub history_delete_file
         unlink($mail_file);
     }
 }
+
 
 # ---------------------------------------------------------------------------------------------
 #
