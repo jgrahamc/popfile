@@ -1,22 +1,5 @@
 # Copyright (c) 2001-2003 John Graham-Cumming
-#
-#   This file is part of POPFile
-#
-#   POPFile is free software; you can redistribute it and/or modify
-#   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
-#   (at your option) any later version.
-#
-#   POPFile is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#   GNU General Public License for more details.
-#
-#   You should have received a copy of the GNU General Public License
-#   along with POPFile; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-#
-# Translation Jan Pavloviè (xpavlov@fi.muni.cz) version 1.1
+# Translation Jan Chochola (jchochola@volny.cz)
 
 # Identify the language and character set used for the interface
 LanguageCode                            cz
@@ -27,75 +10,86 @@ ManualLanguage                          en
 
 # Common words that are used on their own all over the interface
 Apply                                   Pouít
-On                                      Zapnuté
-Off                                     Vypnuté
+On                                      Zapnuto
+Off                                     Vypnuto
 TurnOn                                  Zapnout
 TurnOff                                 Vypnout
 Add                                     Pøidat
 Remove                                  Odstranit
-Previous                                Pøedcházející
-Next                                    Nasledující
-From                                    Odesílatel
-Subject                                 Subjekt
+Previous                                Pøedchozí
+Next                                    Následující
+From                                    Od
+Subject                                 Pøedmìt
+Cc                                      Cc 
 Classification                          Klasifikace
-Reclassify                              Rekrasifikovat
+Reclassify                              Znova klasifikovat
+Probability                             Pravdìpodobnost
+Scores                                  Skóre
+QuickMagnets                            <I>QuickMagnet</I>y
 Undo                                    Vrátit
 Close                                   Zavøít
-Find                                    Najít
-Filter                                  Filter
+Find                                    Hledat
+Filter                                  Filtr
 Yes                                     Ano
 No                                      Ne
 ChangeToYes                             Zmìnit na Ano
 ChangeToNo                              Zmìnit na Ne
 Bucket                                  Koš
 Magnet                                  Magnet
-Delete                                  Zmazat
+Delete                                  Odstranit
 Create                                  Vytvoøit
 To                                      Pøíjemce
 Total                                   Celkem
 Rename                                  Pøejmenovat
 Frequency                               Frekvence
-Probability                             Pravdìpodobnost
-Score                                   Hodnocení
 Lookup                                  Hledání
 Word                                    Slovo
 Count                                   Poèet
-Update                                  Aktualizovat
+Update                                  Aktualizace
 Refresh                                 Obnovit
 
 # The header and footer that appear on every UI page
-Header_Title                            POPFile øídící panel
-Header_Shutdown                         Zastavit POPFile
+Header_Title                            Ovládací panel POPFile
+Header_Shutdown                         Ukonèit POPFile
 Header_History                          Historie
 Header_Buckets                          Koše
 Header_Configuration                    Konfigurace
-Header_Advanced                         Rozšíøení
-Header_Security                         Bezpeènost
+Header_Advanced                         Rozšíøené
+Header_Security                         Zabezpeèení
 Header_Magnets                          Magnety
 
-Footer_HomePage                         POPFile domovská stránka
+Footer_HomePage                         Domovská stránka POPFile
 Footer_Manual                           Manuál
-Footer_Forums                           Diskuze
-Footer_FeedMe                           Podpoøit
-Footer_RequestFeature                   Poadavky na funkcionalitu
-Footer_MailingList                      Poštovní skupina
+Footer_Forums                           Fóra
+Footer_FeedMe                           Podpoøte vıvoj
+Footer_RequestFeature                   Poadavek na funkci
+Footer_MailingList                      Mailing List
 
-Configuration_Error1                    Znak oddìlovaèe musí bıt jen jeden znak
-Configuration_Error2                    Port uivatelského rozhraní musí bıt v rozpìtí èísel 1 a 65535
-Configuration_Error3                    Port pro POP3 musí bıt v rozpìtí èísel 1 a 65535
-Configuration_Error4                    Velikost stránky musí bıt v rozpìtí èísel 1 a 1000
-Configuration_Error5                    Poèet dní v historii musí bıt v rozpìtí èísel 1 a 366
-Configuration_Error6                    Hodnota èekání na TCP musí by v rozpìtí èísel 10 a 300
-Configuration_POP3Port                  Port pro POP3
-Configuration_POP3Update                Port zmìnìnı na %s; tato zmìna vstoupí v platnost a po restartu POPFile
-Configuration_Separator                 Znak oddìlovaèe
-Configuration_SepUpdate                 Oddìlovaè zmìnìnı na %s
-Configuration_UI                        Port uivatelského rozhraní
-Configuration_UIUpdate                  Port uivatelského rozhraní zmìnìnı na %s; zmìny budou patrné a po restartu
-Configuration_History                   Poèet zpráv na stránku
-Configuration_HistoryUpdate             Zmìnìnı poèet zpráv na stránku na %s
-Configuration_Days                      Poèet dní uchování historie
-Configuration_DaysUpdate                Zmìnìnı poèet dní uchování historie na %s
+Configuration_Error1                    Oddìlovaè musí bıt jedinı znak
+Configuration_Error2                    Port uivatelského rozhraní musí bıt èíslo mezi 1 a 65535
+Configuration_Error3                    Port protokolu POP3 musí bıt èíslo mezi 1 a 65535
+Configuration_Error4                    Velikost stránky musí bıt èíslo mezi 1 a 1000
+Configuration_Error5                    Poèet dnù platnosti historie musí bıt èíslo mezi 1 a 366
+Configuration_Error6                    Doba èekání TCP musí bıt èíslo mezi 10 a 300
+Configuration_Error7                    Port pro XML-RPC musí bıt èíslo mezi 1 a 65535
+Configuration_POP3Port                  Port protokolu POP3
+Configuration_POP3Update                Novı port POP3 je %s; tato zmìna se projeví a po restartu POPFile
+Configuration_XMLRPCUpdate              Novı port pro XML-RPC je %s; tato zmìna se projeví a po restartu POPFile
+Configuration_XMLRPCPort                Port pro XML-RPC
+Configuration_SMTPPort                  Port protokolu SMTP
+Configuration_SMTPUpdate                Novı port pro SMTP je %s; tato zmìna se projeví a po restartu POPFile
+Configuration_NNTPPort                  Port protokolu NNTP
+Configuration_NNTPUpdate                Novı port pro NNTP je %s; tato zmìna se projeví a po restartu POPFile
+Configuration_POP3Separator             Oddìlovací znak pro POP3 host:port:user
+Configuration_NNTPSeparator             Oddìlovací znak pro NNTP host:port:user
+Configuration_POP3SepUpdate             Novı oddìlovaè pro POP3 je %s
+Configuration_NNTPSepUpdate             Novı oddìlovaè pro NNTP je %s
+Configuration_UI                        Port webového uivatelského rozhraní
+Configuration_UIUpdate                  Novı port webového uivatelského rozhraní je %s; tato zmìna se projeví a po restartu POPFile
+Configuration_History                   Poèet zpráv na stránce
+Configuration_HistoryUpdate             Novı poèet zpráv na stránce je %s
+Configuration_Days                      Poèet dnù platnosti historie
+Configuration_DaysUpdate                Novı poèet dnù platnosti historie je %s
 Configuration_UserInterface             Uivatelské rozhraní
 Configuration_Skins                     Vzhled
 Configuration_SkinsChoose               Zvolit vzhled
@@ -103,155 +97,183 @@ Configuration_Language                  Jazyk
 Configuration_LanguageChoose            Zvolit jazyk
 Configuration_ListenPorts               Porty
 Configuration_HistoryView               Zobrazení historie
-Configuration_POP3Separator             POP3 host:port:user oddìlovací znak
-Configuration_TCPTimeout                Èekání na pøipojení TCP
-Configuration_TCPTimeoutSecs            Èekání na pøipojení TCP v sekundách
-Configuration_TCPTimeoutUpdate          Èekání na pøipojení TCP zmìnìné na %s
-Configuration_ClassificationInsertion   Vkládání textù do zprávy
-Configuration_SubjectLine               Zmìna textu subjektu
+Configuration_TCPTimeout                Èekání na spojení 
+Configuration_TCPTimeoutSecs            Èekání na spojení v sekundách
+Configuration_TCPTimeoutUpdate          Nové èekání na spojení je %s
+Configuration_ClassificationInsertion   Vkládání textu do zprávy
+Configuration_SubjectLine               Zmìna pøedmìtu zprávy
 Configuration_XTCInsertion              Pøidání hlavièky X-Text-Classification
 Configuration_XPLInsertion              Pøidání hlavièky X-POPFile-Link
-Configuration_Logging                   Protokol zpracování
-Configuration_None                      ádnı
+Configuration_Logging                   Protokolování
+Configuration_None                      Není
 Configuration_ToScreen                  Na obrazovku
 Configuration_ToFile                    Do souboru
-Configuration_ToScreenFile              Na obrazovku a do souboru
-Configuration_LoggerOutput              Vıstup protokolu
+Configuration_ToScreenFile              Na obrazovku i do souboru
+Configuration_LoggerOutput              Protokol
 Configuration_GeneralSkins              Vzhled
-Configuration_SmallSkins                Malı vzhled
-Configuration_TinySkins                 Drobnı vzhled
+Configuration_SmallSkins                Malı
+Configuration_TinySkins                 Drobnı
+Configuration_CurrentLogFile            &lt;aktuální protokol&gt;
 
-Advanced_Error1                         '%s' se u nachází v seznamu Ignorovaná slova
-Advanced_Error2                         Ignorovaná slova mùou obsahovat jen: alfanumerické znaky, ., _, -, @
-Advanced_Error3                         '%s' pøidané do seznamu Ignorovaná slova
-Advanced_Error4                         '%s' se nenachází v seznamu Ignorovaná slova
-Advanced_Error5                         '%s' odstranìné ze seznamu Ignorovaná slova
+Advanced_Error1                         '%s' je u v seznamu ignorovanıch slov
+Advanced_Error2                         Ignorovaná slova mohou obsahovat jen alfanumerické znaky a znaky '.', '_', '-' nebo '@'
+Advanced_Error3                         '%s' pøidáno do seznamu ignorovanıch slov
+Advanced_Error4                         '%s' není v seznamu ignorovanıch slov
+Advanced_Error5                         '%s' odstranìno ze seznamu ignorovanıch slov
 Advanced_StopWords                      Ignorovaná slova
-Advanced_Message1                       POPFile ignoruje nasledující, èasto pouívaná slova:
+Advanced_Message1                       POPFile ignoruje tato èasto uívaná slova:
 Advanced_AddWord                        Pøidat slovo
-Advanced_RemoveWord                     Odstranit slovo
+Advanced_RemoveWord                     Odebrat slovo
 
-History_Filter                          &nbsp;(zobrazuje se jen koš <font color="%s">%s</font>)
-History_FilterBy                        Filtrovat podle
-History_Search                          &nbsp;(vyhledávání podle odesilatele/subjektu %s)
+History_Filter                          &nbsp;(zobrazuje se koš <font color="%s">%s</font>)
+History_FilterBy                        Filtr
+History_Search                          &nbsp;(vyhledáno podle Odesílatele/Pøedmìtu %s)
 History_Title                           Poslední zprávy
-History_Jump                            Pøejdi na zprávu
-History_ShowAll                         Zobraz všechny
+History_Jump                            Pøejít ke zprávì
+History_ShowAll                         Ukázat vše
 History_ShouldBe                        Má bıt
-History_NoFrom                          prázdnı øádek odesilatele
-History_NoSubject                       prázdny øádek subjektu
-History_ClassifyAs                      Klasifikuj ako
-History_MagnetUsed                      Pouitı magnet
-History_ChangedTo                       Zmeò na <font color="%s">%s
-History_Already                         U reklasifikované na <font color="%s">%s</font>
-History_RemoveAll                       Odstraò všechno
-History_RemovePage                      Odstraò stranu
-History_Remove                          Pokud chceš smazat záznamy z historie, klikni
-History_SearchMessage                   Hledej odesilatele/subjekt
-History_NoMessages                      ádné zprávy
-History_ShowMagnet                      zmagnetizované
-History_Magnet                          &nbsp;(zobrazují se jen záznamy klasifikované magnetem)
-History_ResetSearch                     Vyprázdnit
+History_NoFrom                          schází øádek 'Odesílatel'
+History_NoSubject                       schází øádek 'Pøedmìt'
+History_ClassifyAs                      Klasifikovat jako
+History_MagnetUsed                      Pouit magnet
+History_MagnetBecause                   <b>Pouit magnet</b><p>Klasifikováno jako <font color="%s">%s</font>, protoe byl pouit magnet %s </p>
+History_ChangedTo                       Zmìnìno na <font color="%s">%s
+History_Already                         Klasifikace ji zmìnìna na <font color="%s">%s</font>
+History_RemoveAll                       Odstranit vše
+History_RemovePage                      Odstranit stránku
+History_Remove                          Kliknout pro odstranìní poloek v historii
+History_SearchMessage                   Hledat Odesílatele/Pøedmìt
+History_NoMessages                      Zpráva nenalezena
+History_ShowMagnet                      zmagnetováno
+History_ShowNoMagnet                    nezmagnetováno
+History_Magnet                          &nbsp;(jen zprávy klasifikované magnetem)
+History_NoMagnet                        &nbsp;(jen zprávy neklasifikované magnetem)
+History_ResetSearch                     Vynulovat
 
 Password_Title                          Heslo
-Password_Enter                          Zadej heslo
-Password_Go                             Vstup!
+Password_Enter                          Vloit heslo
+Password_Go                             Vstoupit
 Password_Error1                         Nesprávné heslo
 
-Security_Error1                         Bezpeènostní port musí bıt v rozpìtí èísel 1 a 65535
-Security_Stealth                        Utajenı mód/Èinnost serveru
-Security_NoStealthMode                  Ne (Utajenı mód)
-Security_ExplainStats                   (Pokud je toto zapnuté, POPFile pošle jednou za den následující tøi hodnoty na stránku www.usethesource.com: bc (celkovı poèet košù, které máš), mc (celkovı poèet zpráv, které POPFile klasifikoval) a ec (celkovı poèet chybnıch klasifikací).  Tyto hodnoty se ukladají do souboru a budou pouité na vyhodnocení nìkterıch statistik o tom jak lidé pouívají POPFile a jak dobøe funguje.  Mùj web server uchováva tyto informacie pøibline 5 dní a poté je smae; Neuchovávam informace propojující statistické údaje s konkrétnímy IP adresamy.)
-Security_ExplainUpdate                  (pokud je toto zapnuté, POPFile pošle jednou za den následující tøi hodnoty na stránku www.usethesource.com: ma (hlavní èíslo verze pouívaného POPFile), mi (vedlejší èíslo verze pouívaného POPFile) a bn (èíslo kompilace pouívaného POPFile).  POPFile dostane odpoveï ve formì obrázku, kterı se zobrazí na vrchu stránky, pokud je k dispozici nová verze.  Mùj web server uchováva tyto informacie pøibline 5 dní a poté je smae; Neuchovávam informace propojující statistické údaje s konkrétnímy IP adresamy.)
+Security_Error1                         Port musí bıt èíslo mezi 1 a 65535
+Security_Stealth                        Utajenı reim/reim serveru
+Security_NoStealthMode                  Ne (Utajenı reim)
+Security_ExplainStats                   (Pokud je to zapnuto, POPFile jedenkrát dennì odešle skriptu na www.usethesource.com následující údaje: <B>bc</B> [celkovı poèet košù], <B>mc</B> [celkovı poèet zpráv, které POPFile klasifikoval] a <B>ec</B> [celkovı poèet chyb klasifikace]. Tyto údaje jsou ukládány a pouiji je pro statistiku o tom, jak lidé POPFile pouívají a jak je úspìšnı. Mùj web server data udruje 5 dnù a pak je ruší. Neukládá se ádná informace o propojení mezi statistikami a pøíslušnımi IP adresami.)
+Security_ExplainUpdate                  (Pokud je to zapnuto, POPFile jedenkrát dennì odešle skriptu na www.usethesource.com následující údaje: <B>ma</B> [hlavní èíslo verze vašeho POPFile], <B>mi</B> [vedlejší èíslo verze] a <B>bn</B> (èíslo sestavení POPFile). Pokud je dostupná nová verze, POPFile to graficky zobrazí v horní èásti stránky. Mùj web server data udruje 5 dnù a pak je ruší. Neukládá se ádná informace o propojení mezi údaji a pøíslušnımi IP adresami.)
 Security_PasswordTitle                  Heslo uivatelského rozhraní
 Security_Password                       Heslo
-Security_PasswordUpdate                 Heslo zmìnìné na %s
-Security_AUTHTitle                      Bezpeèné ovìøování hesla/AUTH
-Security_SecureServer                   POP3 SPA/AUTH server
-Security_SecureServerUpdate             Zabezpeèenı server zmìnìnı na %s; tato zmìna vstoupí v platnost a po restartu POPFile
-Security_SecurePort                     POP3 SPA/AUTH port
-Security_SecurePortUpdate               Port zmìnìnı na %s; tato zmìna vstoupí v platnost a po restartu POPFile
-Security_POP3                           Povol POP3 pøipojení ze vzdálenıch poèítaèù (vyaduje restart POPFile)
-Security_UI                             Povol HTTP (uívatelské rozhraní) pøipojení ze vzdálenıch poèítaèù  (vyaduje restart POPFile)
-Security_UpdateTitle                    Automatická kontrola novıch verzí
-Security_Update                         Kontroluj dennì nové verze programu POPFile
-Security_StatsTitle                     Oznamovat statistiky
-Security_Stats                          Posílat statistiky dennì
+Security_PasswordUpdate                 Nové heslo je %s
+Security_AUTHTitle                      Vzdálené servery
+Security_SecureServer                   Server POP3 SPA/AUTH
+Security_SecureServerUpdate             Novı bezpeènı server POP3 SPA/AUTH je %s; tato zmìna se projeví a po restartu POPFile
+Security_SecurePort                     Port pro POP3 SPA/AUTH
+Security_SecurePortUpdate               Novı port pro POP3 SPA/AUTH je %s; tato zmìna se projeví a po restartu POPFile
+Security_SMTPServer                     Zøetìzenı SMTP server
+Security_SMTPServerUpdate               Novı zøetìzenı SMTP server je %s; tato zmìna se projeví a po restartu POPFile
+Security_SMTPPort                       Port pro zøetìzenı SMTP server
+Security_SMTPPortUpdate                 Novı port pro zøetìzenı SMTP server je %s; tato zmìna se projeví a po restartu POPFile
+Security_POP3                           Pøijmout POP3 spojení od vzdálenıch poèítaèù (vyaduje restart POPFile)
+Security_SMTP                           Pøijmout SMTP spojení od vzdálenıch poèítaèù (vyaduje restart POPFile)
+Security_NNTP                           Pøijmout NNTP spojení od vzdálenıch poèítaèù (vyaduje restart POPFile)
+Security_UI                             Pøijmout HTTP (uivatelské rozhraní) spojení od vzdálenıch poèítaèù (vyaduje restart POPFile)
+Security_XMLRPC                         Pøijmout XML-RPC spojení od vzdálenıch poèítaèù (vyaduje restart POPFile)
+Security_UpdateTitle                    Automatická kontrola verze
+Security_Update                         Dennì kontrolovat dostupnost aktualizace POPFile
+Security_StatsTitle                     Hlášení statistik
+Security_Stats                          Dennì odesílat statistiky
 
-Magnet_Error1                           Magnet '%s' u existuje v koši '%s'
-Magnet_Error2                           Novı magnet '%s' by se bil s existujícim magnetem '%s' v koši '%s' a mohl by zpùsobit dvojsmyslné vısledky.  Novı magnet nebyl pøidanı.
-Magnet_Error3                           Vytvorenı novı magnet '%s' v koši '%s'
-Magnet_CurrentMagnets                   Aktuální magnety
-Magnet_Message1                         Následující magnety klasifikují poštu vdy do urèeného koše.
-Magnet_CreateNew                        Vytvoøi novı magnet
-Magnet_Explanation                      Existují tøi typy magnetù:</b> <ul><li><b>Adresa nebo jméno odesilatele:</b> (políèko From: v pošte) Napø.: john@company.com pro konkrétní adresu, <br />company.com pro kadého odesílatele z adresy company.com, <br />John Doe pro konkrétní osobu, John pro kadného Johna</li><li><b>Adresa nebo jméno pøíjemcù:</b> To samé jako pøedchádzející, ale pro políèko To: pošty</li> <li><b>Slova v subjektu:</b> Napø.: hello zaøadí kadou poštu, která má hello v subjektu</li></ul>
+Magnet_Error1                           Magnet '%s' u je v koši '%s'
+Magnet_Error2                           Novı magnet '%s' koliduje s magnetem '%s' v koši '%s' a mohl by zpùsobit nejednoznaèné vısledky. Novı magnet nebyl pøidán.
+Magnet_Error3                           Vytvoøit novı magnet '%s' v koši '%s'
+Magnet_CurrentMagnets                   Platné magnety
+Magnet_Message1                         Následující magnety zpùsobí, e zprávy budou vdy zaøazeny do urèeného koše.
+Magnet_CreateNew                        Zaloit novı magnet
+Magnet_Explanation                      Jsou dostupné tyto typy magnetù:</b> <ul><li><b>From: Adresa nebo jméno odesílatele:</b> Napøíklad: john@company.com pro konkrétní adresu, <br />company.com pro všechny odesílatele z company.com, <br />John Doe pro konkrétní osobu, John pro všechny Johny</li><li><b>To/Cc: Adresa nebo jméno pøíjemce/pøíjemcù:</b> Obdobnì jako magnet From: pro adresy pøíjemcù (hlavièky To: a Cc:).</li> <li><b>Subject: slova v pøedmìtu</b>Napøíklad: hello pro všechny zprávy se slovem hello v pøedmìtu</li></ul>
 Magnet_MagnetType                       Typ magnetu
 Magnet_Value                            Hodnota
-Magnet_Always                           Zaøadí se vdy do koše
+Magnet_Always                           Zaøadit vdy do koše
+Magnet_Jump                             Pøechod na stránku magnetù
 
-Bucket_Error1                           Názvy košù mùou obsahovat jen znaky od a do z (malé písmo) plus - a _
-Bucket_Error2                           Koš s názvem  %s u existuje
-Bucket_Error3                           Vytvoøenı koš s názvem %s
-Bucket_Error4                           Prosím, nezadávej prázdné názvy
-Bucket_Error5                           Koš je pøejmenovanı z %s na %s
-Bucket_Error6                           Zmazanı koš %s
-Bucket_Title                            Pøehled
-Bucket_BucketName                       Název koše
+Bucket_Error1                           Jména košù mohou obsahovat jen malá písmena 'a' a 'z', èíslice '0' a '9', a znaky '-' a '_'
+Bucket_Error2                           Koš %s ji existuje
+Bucket_Error3                           Koš %s byl zaloen
+Bucket_Error4                           Vlote neprázdné slovo
+Bucket_Error5                           Koš %s byl pøejmenován na %s
+Bucket_Error6                           Koš %s byl odstranìn
+Bucket_Title                            Shrnutí
+Bucket_BucketName                       Jméno koše
 Bucket_WordCount                        Poèet slov
 Bucket_WordCounts                       Poèty slov
-Bucket_UniqueWords                      Jedineèná slova
-Bucket_SubjectModification              Modifikace subjektu
+Bucket_UniqueWords                      Unikátní slova
+Bucket_SubjectModification              Modifikace pøedmìtu
 Bucket_ChangeColor                      Zmìna barvy
-Bucket_NotEnoughData                    Nedostatek údajù
+Bucket_NotEnoughData                    Pøíliš málo dat
 Bucket_ClassificationAccuracy           Pøesnost klasifikace
-Bucket_EmailsClassified                 Klasifikovaná pošta
-Bucket_EmailsClassifiedUpper            Klasifikovaná pošta
+Bucket_EmailsClassified                 Poèet klasifikovanıch zpráv
+Bucket_EmailsClassifiedUpper            Poèet klasifikovanıch zpráv
 Bucket_ClassificationErrors             Chyby klasifikace
 Bucket_Accuracy                         Pøesnost
-Bucket_ClassificationCount              Poèty klasifikace
-Bucket_ResetStatistics                  Vynulování statistiky
-Bucket_LastReset                        Poslední vynulování
-Bucket_CurrentColor                     aktuální bavba %s je %s
-Bucket_SetColorTo                       Nastav barvu %s na %s
+Bucket_ClassificationCount              Poèet klasifikací
+Bucket_ClassificationFP                 Poèet chyb "False Positive"
+Bucket_ClassificationFN                 Poèet chyb "False Negative"
+Bucket_ResetStatistics                  Vynulovat statistiky
+Bucket_LastReset                        Poslední nulování
+Bucket_CurrentColor                     %s má barvu %s
+Bucket_SetColorTo                       Nastavit barvu %s na %s
 Bucket_Maintenance                      Údrba
-Bucket_CreateBucket                     Vytvoø koš s názvem
-Bucket_DeleteBucket                     Sma koš s názvem
-Bucket_RenameBucket                     Pøejmenuj koš s názvem
-Bucket_Lookup                           Vyhledávání
-Bucket_LookupMessage                    Vyhledávání slova v koších
-Bucket_LookupMessage2                   Vısledek hledání pro
-Bucket_LookupMostLikely                 <b>%s</b> se najèastìji nachází v koši <font color="%s">%s</font>
-Bucket_DoesNotAppear                    <p><b>%s</b> se nenachází v ani jednom koši
-Bucket_DisabledGlobally                 Globální vypnutí
+Bucket_CreateBucket                     Zaloit koš s názvem
+Bucket_DeleteBucket                     Odstranit koš s názvem
+Bucket_RenameBucket                     Pøejmenovat koš s názvem
+Bucket_Lookup                           Vyhledání
+Bucket_LookupMessage                    Vyhledat slovo v koších
+Bucket_LookupMessage2                   Vısledky hledání
+Bucket_LookupMostLikely                 <b>%s</b> se nejèastìji objevuje v koši <font color="%s">%s</font>
+Bucket_DoesNotAppear                    <p><b>%s</b> se nenašlo v ádném koši
+Bucket_DisabledGlobally                 Globálnì vypnuto
 Bucket_To                               na
 Bucket_Quarantine                       Karanténa
 
-SingleBucket_Title                      Detail pro %s
+SingleBucket_Title                      Detail %s
 SingleBucket_WordCount                  Poèet slov v koši
 SingleBucket_TotalWordCount             Celkovı poèet slov
-SingleBucket_Percentage                 Procento z celku
+SingleBucket_Percentage                 Procento
 SingleBucket_WordTable                  Tabulka slov pro %s
-SingleBucket_Message1                   Slová oznaèená s (*) byla pouita na klasifikaci v prùbìhu aktuálního spustìní POPFile.  Klikni na kterékoli slovo, pokud chceš vidìt jeho vıskyt ve všech koších.
-SingleBucket_Unique                     %s jedineènıch
+SingleBucket_Message1                   Pro zobrazení slov zaèínajících urèitım písmenem je mono kliknout na toto písmeno v indexu. Kliknutím na slovo se zobrazí jeho pravdìpodobnosti pro všechny koše.
+SingleBucket_Unique                     %s unikátních
+SingleBucket_ClearBucket                Odstranit všechna slova
 
-Session_Title                           Platnost POPFile session vypršela
-Session_Error                           Platnost POPFile session vypršela.  Mohlo to nastat vypnutím a zapnutím POPFile, pøièem si nechal otevøenı webovı prohlíeè.  Prosím, pokud chceš pokraèovat v práci s POPFile, kliknite na nìkterı z vrchních linek.
+Session_Title                           Relace POPFile vypršela
+Session_Error                           Vaše relace POPFile vypršela. To mùe bıt zpùsobeno zastavením a novım spuštìním POPFile, zatímco prohlíeè zùstal otevøenı. Pro pokraèování práce s POPFile je nutno kliknout na nìkterı z odkazù nahoøe.
 
+View_Title                              Pohled na jednu zprávu
 
-Header_MenuSummary                      Tato tabulka je navigaèní menu, které zpøístupòuje všechny ostatní stránky øídícího panelu.
-History_MainTableSummary                Tato tabulka zobrazuje odesílatele a subjekty aktuálnì pøijatıch zpráv a umoòuje jich rozdìlit a klasifikovat.  Kliknutím na text subjektu se zobrazí znìní zprávy, spolu s informací proè byla klasifikována tak, jak byla.  Stoupec 'Má bıt' umoòuje urèi, do kterého koše zpráva patøí, anebo zrušit tuhle zmìnu.  Stoupec 'Odstranit' umoòuje smazat danou správu z historie, pokud ji ji nepotøebuješ.
-History_OpenMessageSummary              Tato tabulka obsahuje celı text zprávy, spolu se zvıraznìnımi slovy, které byly pouité pøi klasifiksci do daného koše.
-Bucket_MainTableSummary                 Tato tabulka obsahuje prehled klasifikaèních košù.  Kadı øádek zobrazuje název koše, celkovı poèet slov v tomto koši, aktuální poèet individuálních slov v kadém koši, zdali bude text subjektu zprávy zmìnìnı pokud bude zpráva klasifikována, èi zaøadit zprávy v tomto koši do karantény a tabulku, kde se dá vybrat barva kterou se bude zobrazovat všechno na øídícím panelu, tıkající se tohoto koše.
-Bucket_StatisticsTableSummary           Tato tabulka poskytuje tøi atatistické pøehtedy o vıkonu POPFile.  První zobrazuje pøesnost klasifikace, druhı kolik zpráv bylo klasifikovanıch a do kterıch košù a tøetí zobrazuje kolik slov obsahuje kterı koš a jaké je jejich relativní procentuální zastoupení.
-Bucket_MaintenanceTableSummary          Tato tabulka obsahuje formuláøe, které umonují vytvoøit, smazat a nebo pøejmenovat koše a vyhledat zastoupení slova ve všech koších a jeho relativní vıskyt.
-Bucket_AccuracyChartSummary             Tato tabulka graficky zobrazuje pøesnost klasifikace zpráv.
-Bucket_BarChartSummary                  Tato tabulka graficky zobrazuje procentuální zaplnìní jednotlivıch košù.  Je pouitá zároveò pro poèet klasifikovanıch zpráv a celkovı poèet slov.
-Bucket_LookupResultsSummary             Tato tabulka zobrazuje pravdìpodobnost pøiøazenou k jednotlivım slovùm v korpuse.  Pro kadı koš zobrazuje frekvenci vıskytu slova, pravdìpodobnost s jakou se vyskytuje v koši a celkovı vliv slova na zaøazaní zprávy do koše pokud se v ní dané slovo vyskytuje.
-Bucket_WordListTableSummary             Tato tabulka zobrazuje seznam všech slov pro koš, slová jsou seøazebá podle poèáteèních znakù pro kadı øádek.
-Magnet_MainTableSummary                 Tato tabulka zobrazuje seznam magnetù, které jsou pouívané na automatické klasifikováníe zpráv podle pøesnıch pravidel.  Kadı øádek zobrazuje jak je magnet definovanı, pro kterı koš slouí a tlaèítko na smazaní magnetu.
-Configuration_MainTableSummary          Tato tabulka obsahuje formuláøe které umoòují konfigurovat POPFile.
-Configuration_InsertionTableSummary     Tato tabulka obsahuje tlaèítka, které urèují zdali se mají a nebo nemají vykonat nìkteré zmìny v záhlaví èi v textu subjektu zprávy døíve, ne se pøedá e-mailovému klientovi.
-Security_MainTableSummary               Tato tabulka poskytuje nìkolik nastavení, které ovlivòují bezpeènost celé konfigurace POPFile, zdali se má vykonávat automatická kontrola existence zmìn programu a zdali se má zasílat statistika zpracování do centrální databáze autora programu.
-Advanced_MainTableSummary               Tato tabulka zobrazuje seznam slov, které POPFile ignoruje pøi klasifikování zpráv z dùvodu jejich relativnì èastého vıskytu ve všech zprávach. Jsou zobrazené v øádcích v závislosti podle prvního znaku.
+Header_MenuSummary                      Tato tabulka tvoøí navigaèní menu umoòující pøístup k jednotlivım stránkám Ovládacího panelu.
 
+History_MainTableSummary                Tato tabulka zobrazuje odesílatele a pøedmìt doruèenıch zpráv a umoòuje jejich prohlédnutí a zmìnu klasifikace. Po kliknutí na pøedmìt se zobrazí celı text zprávy souèasnì s informací, proè byla klasifikována tak, jak byla. Sloupec 'Má bıt' umoòuje urèit koš, do kterého zpráva patøí, nebo odvolat tuto zmìnu. Sloupec 'Odstranit' umoòuje zrušit zprávy, které ji nejsou zapotøebí.
+
+History_OpenMessageSummary              Tato tabulka obsahuje celı text zprávy. Slova pouitá pøi klasifikaci jsou oznaèena barvou koše, pro kterı jsou nejvíce relevantní.
+
+Bucket_MainTableSummary                 Tato tabulka poskytuje pøehled klasifikaèních košù. Kadı øádek obsahuje jméno koše, celkovı poèet slov pro danı koš, aktuální poèet slov, zda je pøi klasifikaci modifikován pøedmìt zprávy, zda jsou zprávy umisovány do karantény, a tabulka pro vıbìr barvy koše.
+
+Bucket_StatisticsTableSummary           Tato tabulka poskytuje tøi sady statistickıch údajù o èinnosti POPFile. První z nich zobrazuje pøesnost klasifikace, druhá poèet klasifikovanıch zpráv pro jednotlivé koše a tøetí poèty slov v jednotlivıch koších a jejich relativní zastoupení.
+
+Bucket_MaintenanceTableSummary          Tato tabulka obsahuje formuláøe pro zakládání, rušení a pøejmenovávání košù a pro vyhledání slova v koších a zjištìní jeho relativní pravdìpodobnosti.
+
+Bucket_AccuracyChartSummary             Tato tabulka graficky znázoròuje pøesnost klasifikace zpráv.
+
+Bucket_BarChartSummary                  Tato tabulka graficky znázoròuje relativní zastoupení klasifikovanıch zpráv a celkového poètu slov pro jednotlivé koše. 
+
+Bucket_LookupResultsSummary             Tato tabulka poskytuje pravdìpodobnosti pro kadé slovo z korpusu. Pro kadı koš je zobrazena frekvence vıskytu slova, pravdìpodobnost, e se v koši objeví, a celkovı vliv na skóre pro danı koš, pokud se ve zprávì vyskytuje.
+
+Bucket_WordListTableSummary             Tato tabulka nabízí seznam všech slov pro danı koš.
+
+Magnet_MainTableSummary                 Tato tabulka zobrazuje seznam všech magnetù, které jsou pouity pro automatickou klasifikaci zpráv podle pevnıch pravidel. Kadı øádek obsahuje informace o tom, jak je magnet definován a pro kterı koš je urèen, a tlaèítko pro jeho zrušení.
+
+Configuration_MainTableSummary          Tato tabulka obsahuje øadu formuláøù urèenıch k nastavování konfigurace POPFile.
+
+Configuration_InsertionTableSummary     Tato tabulka osahuje tlaèítka urèující, zda se budou provádìt urèité modifikace hlavièky zprávy pøed jejím pøedáním poštovnímu klientu.
+
+Security_MainTableSummary               Tato tabulka umoòuje nastavit zabezpeèení konfigurace POPFile, automatickou kontrolu novıch verzí programu a zasílání statistickıch údajù do centrálního úloištì autora.
+
+Advanced_MainTableSummary               Tato tabulka obsahuje seznam slov, která POPFile pøi klasifikaci pro jejich vysokou èetnost ve zprávách ignoruje.
 
