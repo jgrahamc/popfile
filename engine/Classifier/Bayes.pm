@@ -752,12 +752,20 @@ sub classify_and_modify
     my $class_file = "$self->{configuration}->{configuration}{msgdir}popfile$dcount" . "=$mcount.cls";
 
     open TEMP, ">$temp_file";
-    binmode TEMP;
 
     while ( <$mail> ) {
         my $line;
+		my $fileline;
 
         $line = $_;
+
+		# This is done so that we remove the network style end of line CR LF 
+		# and allow Perl to decide on the local system EOL which it will expand
+		# out of \n when this gets written to the temp file
+		
+		$fileline = $line;
+		$fileline =~ s/[\r\n]//g;
+		$fileline .= "\n";
 
         # Check for an abort
 
@@ -774,7 +782,7 @@ sub classify_and_modify
         if ( $getting_headers )  {
             if ( !( $line =~ /^(\r\n|\r|\n)$/i ) )  {
                 $message_size += length $line;
-                print TEMP $line;
+                print TEMP $fileline;
 
                 if ( $line =~ /^Subject:(.*)/i )  {
                     $msg_subject = $1;
@@ -791,14 +799,14 @@ sub classify_and_modify
                     }
                 }
             } else {
-                print TEMP $eol;
+                print TEMP "\n";
                 $message_size += length $eol;
                 $getting_headers = 0;
             }
         } else {
             $message_size += length $line;
-            print TEMP $line;
-            $msg_body .= $line;
+            $msg_body     .= $line;
+            print TEMP $fileline;
         }
 
         # Check to see if too much time has passed and we need to keep the mail client happy
