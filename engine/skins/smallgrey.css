@@ -173,6 +173,10 @@ table.settingsTable, td.settingsPanel {
   padding-top: 8px;
 }
 
+.settingsPanel form {
+  padding-top: 8px;
+}
+
 table.openMessageTable, table.lookupResultsTable {
   border: 2px solid Black;
   padding: 2px;
@@ -276,6 +280,11 @@ td.openMessageCloser {
 }
 
 table.historyWidgetsTop {
+}
+
+form {
+  margin-top: 5px;
+  margin-bottom: 5px;
   width: 100%;
   border-top: 2px solid #cccccc;
   border-bottom: 2px solid #cccccc;
