@@ -179,9 +179,6 @@ sub child__
 
                     next;
                 }
-            } else {
-                $self->tee_(  $client, "-ERR server name not specified in USER command$eol" );
-                last;
             }
 
             $self->flush_extra_( $mail, $client, 0 );
@@ -190,15 +187,15 @@ sub child__
 
         # User is issuing the APOP command to start a session with the remote server
 
-        if ( $command =~ /APOP (.*):((.*):)?(.*) (.*)/i ) {
+        if ( $command =~ /APOP (.+?):((.+):)?([^ ]+) (.*)/i ) {
             if ( $mail = $self->verify_connected_( $mail, $client,  $1, $3 || 110 ) )  {
 
-                # Pass through the USER command with the actual user name for this server,
+                # Pass through the APOP command with the actual user name for this server,
                 # and send the reply straight to the client
 
                 $self->echo_response_($mail, $client, "APOP $4 $5" );
             } else {
-                last;
+                next;
             }
 
             $self->flush_extra_( $mail, $client, 0 );
@@ -230,7 +227,7 @@ sub child__
                         $response = $self->get_response_( $mail, $client, $auth );
                     }
                 } else {
-                    last;
+                    next;
                 }
 
                 $self->flush_extra_( $mail, $client, 0 );
@@ -248,7 +245,7 @@ sub child__
                         $self->echo_to_dot_( $mail, $client );
                     }
                 } else {
-                    last;
+                    next;
                 }
 
                 $self->flush_extra_( $mail, $client, 0 );
@@ -348,11 +345,11 @@ sub child__
         # The CAPA command
 
         if ( $command =~ /CAPA/i ) {
-            if ( $self->config_( 'secure_server' ) ne '' )  {
-                if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
+            if ( $mail || $self->config_( 'secure_server' ) ne '' )  {
+                if ( $mail || ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) ) )  {
                     $self->echo_to_dot_( $mail, $client ) if ( $self->echo_response_($mail, $client, "CAPA" ) );
                 } else {
-                    last;
+                    next;
                 }
             } else {
                 $self->tee_(  $client, "-ERR No secure server specified$eol" );
@@ -480,7 +477,7 @@ sub child__
             next;
         } else {
             $self->tee_(  $client, "-ERR unknown command or bad syntax$eol" );
-            last;
+            next;
         }
     }
 
