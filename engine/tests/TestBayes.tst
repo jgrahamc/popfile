@@ -53,6 +53,7 @@ $POPFile->CORE_start();
 
 my $b = $POPFile->get_module( 'Classifier/Bayes' );
 my $h = $POPFile->get_module( 'POPFile/History' );
+my $l = $POPFile->get_module( 'POPFile/Logger' );
 
 # Test the unclassified_probability parameter
 
@@ -417,18 +418,65 @@ test_assert_equal( $b->magnet_count( $session ), 4 );
 test_assert_equal( $#mags, 0 );
 test_assert_equal( $mags[0], 'personal' );
 
-# send a message through the mq
+# send a message through the mq (doesn't actually use the MQ???)
 
 test_assert_equal( $b->get_bucket_parameter(  $session, 'zeotrope', 'count' ), 0 );
 $b->classified( $session, 'zeotrope' );
 $POPFile->CORE_service(1);
 test_assert_equal( $b->get_bucket_parameter(  $session, 'zeotrope', 'count' ), 1 );
 
-# clear_bucket
+# clear_bucket (Generates orphans !!!)
 
 $b->clear_bucket( $session, 'zeotrope' );
 test_assert_equal( $b->get_bucket_word_count( $session, 'zeotrope' ), 0 );
+# At this point we have orphans
 
+my $orphan_query = $b->db_()->prepare( "select count(*) from words where words.id in (select id from words except select wordid from matrix);" );
+
+my $single_orphan_query = $b->db_()->prepare( "select count( * ) from words where words.word = 'srvexch.reichraming.helopal.com' AND words.id in (select id from words except select wordid from matrix);" );
+
+# Test the total number of orphans
+$orphan_query->execute();
+
+test_assert_equal( $orphan_query->fetchrow_arrayref->[0] , 160 );
+
+$orphan_query->finish;
+
+# Test a few specific orphaned words
+
+$single_orphan_query->execute();
+
+test_assert_equal( $single_orphan_query->fetchrow_arrayref->[0] , 1 );
+
+$single_orphan_query->finish;
+
+# Test clearing of orphans
+
+# This is not the usual delivery method of TICKD, but is better than
+# violating POPFile::Logger internals for a message anyone can send
+
+# THIS DOES NOT WORK, freezes.. calling cleanup directly
+
+# $b->mq_post_( 'TICKD' );
+
+# $POPFile->CORE_service();
+
+$b->cleanup_orphan_words__();
+
+# Test the total number of orphans
+$orphan_query->execute();
+
+test_assert_equal( $orphan_query->fetchrow_arrayref->[0] , 0 );
+
+$orphan_query->finish;
+
+# Test a few specific orphaned words
+
+$single_orphan_query->execute();
+
+test_assert_equal( $single_orphan_query->fetchrow_arrayref->[0] , 0 );
+
+$single_orphan_query->finish;
 # classify a message using a magnet
 
 $b->create_magnet( $session, 'zeotrope', 'from', 'cxcse231@yahoo.com' );

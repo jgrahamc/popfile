@@ -409,8 +409,8 @@ sub reclassified
 sub cleanup_orphan_words__
 {
     my ( $self ) = @_;
-    $self->{db__}->do( "delete from words where words.id in
-                        (select id from words except select wordid from matrix);" );
+    $self->db_()->do( "delete from words where words.id in" .                            # PROFILE BLOCK START
+                        " (select id from words except select wordid from matrix);" );   # PROFILE BLOCK STOP
 }
 
 #----------------------------------------------------------------------------
