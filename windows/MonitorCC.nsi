@@ -45,7 +45,7 @@
 # INI File Structure
 #
 #  [Settings]
-#    PERLDIR=full path to folder where popfileb.exe has been installed (created by installer)
+#    CONVERT=full path to program used to perform the conversion (created by installer)
 #    ROOTDIR=full path to the folder where POPFile has been installed (created by installer)
 #    USERDIR=full path to the folder with the POPFile configuration data (created by installer)
 #    KReboot=either 'yes' or 'no' (created by installer)
@@ -78,7 +78,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.8"
+  !define C_PFI_VERSION  "0.1.9"
 
   ; Mention the version number in the window title
 
@@ -588,9 +588,9 @@ Section ConvertCorpus
   !define L_BYTES_LEFT    $R8     ; number of bytes still to be converted
   !define L_BYTES_RATE    $R7     ; used to estimate the time remaining
   !define L_BUCKET_PATH   $R6     ; full path to a corpus bucket file we are monitoring
-  !define L_CORPUS_SIZE   $R5     ; total number of bytes in all the bucket files in the list
-  !define L_LAST_CHANGE   $R4     ; used to detect when a bucket file has been deleted
-  !define L_MPBINDIR      $R3     ; folder containing popfileb.exe file
+  !define L_CONVERTEXE    $R5     ; holds command (including full path) used to convert corpus
+  !define L_CORPUS_SIZE   $R4     ; total number of bytes in all the bucket files in the list
+  !define L_LAST_CHANGE   $R3     ; used to detect when a bucket file has been deleted
   !define L_NEXT_EXECHECK $R2     ; used to decide when to check POPFile is still running
   !define L_POPFILE_ROOT  $R1     ; environment variable holding path to popfile.pl
   !define L_POPFILE_USER  $R0     ; environment variable holding path to popfile.cfg
@@ -605,9 +605,9 @@ Section ConvertCorpus
   Push ${L_BYTES_LEFT}
   Push ${L_BYTES_RATE}
   Push ${L_BUCKET_PATH}
+  Push ${L_CONVERTEXE}
   Push ${L_CORPUS_SIZE}
   Push ${L_LAST_CHANGE}
-  Push ${L_MPBINDIR}
   Push ${L_NEXT_EXECHECK}
   Push ${L_POPFILE_ROOT}
   Push ${L_POPFILE_USER}
@@ -617,7 +617,8 @@ Section ConvertCorpus
 
   SetDetailsPrint listonly
 
-  ; Get minimal Perl binary ('popfileb.exe') folder location from the INI file
+  ; Get full pathname of the program used to convert the corpus (normally this will be
+  ; equivalent to a fully expanded version of '$G_ROOTDIR\popfileb.exe'.
 
   ; We run POPFile in the background without the system tray icon because corpus conversion
   ; can take several minutes (or even tens of minutes) and we do not want to encourage use of
@@ -625,8 +626,10 @@ Section ConvertCorpus
   ; problems with it not shutting down when the user logs off, so we use 'popfileb.exe' as it
   ; seems to be better behaved.
 
-  ReadINIStr ${L_MPBINDIR} "$G_INIFILE_PATH" "Settings" "PERLDIR"
-  StrCmp  ${L_MPBINDIR} "" no_perl_path
+  ReadINIStr ${L_CONVERTEXE} "$G_INIFILE_PATH" "Settings" "CONVERT"
+  StrCmp  ${L_CONVERTEXE} "" no_conv_path
+  IfFileExists "${L_CONVERTEXE}\*.*" no_conv_path
+  IfFileExists ${L_CONVERTEXE} 0 no_conv_path
 
   ; Get POPFile program ('popfile.pl') folder location from the INI file
 
@@ -654,6 +657,8 @@ Section ConvertCorpus
   System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("ITAIJIDICTPATH", "${L_TEMP}").r0'
   StrCmp ${L_RESERVED} 0 0 itaiji_set_ok
   DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_ENVNOTSET) (ITAIJIDICTPATH)"
+  DetailPrint ""
   DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
   DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (ITAIJIDICTPATH)"
@@ -663,19 +668,25 @@ itaiji_set_ok:
   System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("KANWADICTPATH", "$G_STILL_TO_DO").r0'
   StrCmp ${L_RESERVED} 0 0 kakasi_done
   DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_ENVNOTSET) (KANWADICTPATH)"
+  DetailPrint ""
   DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
   DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (KANWADICTPATH)"
   Abort
 
-no_perl_path:
+no_conv_path:
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_NOPOPFILE) (popfileb.exe?)"
   DetailPrint ""
   DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
   DetailPrint ""
-  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOPOPFILE) (popfileb.exe)"
+  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOPOPFILE) (popfileb.exe?)"
   Abort
 
 no_root_path:
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_NOPOPFILE) (POPFILE_ROOT)"
   DetailPrint ""
   DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
   DetailPrint ""
@@ -684,12 +695,16 @@ no_root_path:
 
 no_user_path:
   DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_NOPOPFILE) (POPFILE_USER)"
+  DetailPrint ""
   DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
   DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOPOPFILE) (POPFILE_USER)"
   Abort
 
 no_itaiji_path:
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_NOKAKASI) (ITAIJIDICTPATH)"
   DetailPrint ""
   DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
   DetailPrint ""
@@ -698,9 +713,29 @@ no_itaiji_path:
 
 no_kanwa_path:
   DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_NOKAKASI) (KANWADICTPATH)"
+  DetailPrint ""
   DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
   DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOKAKASI) (KANWADICTPATH)"
+  Abort
+
+root_not_set:
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_ENVNOTSET) (POPFILE_ROOT)"
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
+  DetailPrint ""
+  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (POPFILE_ROOT)"
+  Abort
+
+user_not_set:
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_ENVNOTSET) (POPFILE_USER)"
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
+  DetailPrint ""
+  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (POPFILE_USER)"
   Abort
 
 start_error:
@@ -718,35 +753,12 @@ not_running:
   Abort
 
 kakasi_done:
-  ReadEnvStr ${L_POPFILE_ROOT} POPFILE_ROOT
-  ReadEnvStr ${L_POPFILE_USER} POPFILE_USER
-
-  GetFullPathName /SHORT ${L_TEMP} $G_ROOTDIR
-  Push ${L_TEMP}
-  Call StrLower
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} ${L_POPFILE_ROOT} root_set_ok
-
-  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_ROOT", "${L_TEMP}").r0'
-  StrCmp ${L_RESERVED} 0 0 root_set_ok
-  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (POPFILE_ROOT)"
-  Goto exit
-
-root_set_ok:
-  GetFullPathName /SHORT ${L_TEMP} $G_USERDIR
-  Push ${L_TEMP}
-  Call StrLower
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} ${L_POPFILE_USER} user_set_ok
-
-  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_USER", "${L_TEMP}").r0'
-  StrCmp ${L_RESERVED} 0 0 user_set_ok
-  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (POPFILE_USER)"
-  Goto exit
-
-user_set_ok:
   ClearErrors
-  Exec '"${L_MPBINDIR}\popfileb.exe"'
+  ReadEnvStr ${L_TEMP} "POPFILE_ROOT"
+  IfErrors root_not_set
+  ReadEnvStr ${L_TEMP} "POPFILE_USER"
+  IfErrors user_not_set
+  Exec '"${L_CONVERTEXE}"'
   IfErrors start_error
 
   ReadINIStr $G_BUCKET_COUNT "$G_INIFILE_PATH" "BucketList" "FileCount"
@@ -771,7 +783,7 @@ user_set_ok:
   ; POPFile is still running (to avoid an infinite loop if popfileb.exe has crashed or been
   ; shutdown). The first check is due at 0 minutes elapsed time.
 
-  StrCpy ${L_NEXT_EXECHECK} 0
+  StrCpy ${L_NEXT_EXECHECK} -1
 
 loop:
   ReadINIStr $G_BUCKET_COUNT "$G_INIFILE_PATH" "BucketList" "FileCount"
@@ -843,7 +855,7 @@ update_display:
 same_bucket:
   IntCmp $G_ELAPSED_TIME ${L_NEXT_EXECHECK} 0 delete_last_entry 0
   IntOp ${L_NEXT_EXECHECK} ${L_NEXT_EXECHECK} + 1
-  Push "${L_MPBINDIR}\popfileb.exe"
+  Push "${L_CONVERTEXE}"
   Call CheckIfLocked
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "" not_running
@@ -873,7 +885,7 @@ all_converted:
   DetailPrint ""
   FlushINI "$G_INIFILE_PATH"
 
-exit:
+#exit:
 
   ; We must now unload the system.dll (this allows NSIS to delete the DLL from $PLUGINSDIR)
 
@@ -886,9 +898,9 @@ exit:
   Pop ${L_POPFILE_USER}
   Pop ${L_POPFILE_ROOT}
   Pop ${L_NEXT_EXECHECK}
-  Pop ${L_MPBINDIR}
   Pop ${L_LAST_CHANGE}
   Pop ${L_CORPUS_SIZE}
+  Pop ${L_CONVERTEXE}
   Pop ${L_BUCKET_PATH}
   Pop ${L_BYTES_RATE}
   Pop ${L_BYTES_LEFT}
@@ -901,9 +913,9 @@ exit:
   !undef L_BYTES_LEFT
   !undef L_BYTES_RATE
   !undef L_BUCKET_PATH
+  !undef L_CONVERTEXE
   !undef L_CORPUS_SIZE
   !undef L_LAST_CHANGE
-  !undef L_MPBINDIR
   !undef L_NEXT_EXECHECK
   !undef L_POPFILE_ROOT
   !undef L_POPFILE_USER
@@ -974,67 +986,6 @@ FunctionEnd
 
 
 #--------------------------------------------------------------------------
-# Installer Function: StrLower
-#
-# Converts uppercase letters in a string into lowercase letters. Other characters unchanged.
-#
-# Inputs:
-#         (top of stack)          - input string
-#
-# Outputs:
-#         (top of stack)          - output string
-#
-#  Usage:
-#
-#    Push "C:\PROGRA~1\SQLPFILE"
-#    Call StrLower
-#    Pop $R0
-#
-#   ($R0 at this point is "c:\progra~1\sqlpfile")
-#
-#--------------------------------------------------------------------------
-
-Function StrLower
-
-  !define C_LOWERCASE    "abcdefghijklmnopqrstuvwxyz"
-
-  Exch $0   ; The input string
-  Push $2   ; Holds the result
-  Push $3   ; A character from the input string
-  Push $4   ; The offset to a character in the "validity check" string
-  Push $5   ; A character from the "validity check" string
-  Push $6   ; Holds the current "validity check" string
-
-  StrCpy $2 ""
-
-next_input_char:
-  StrCpy $3 $0 1              ; Get next character from the input string
-  StrCmp $3 "" done
-  StrCpy $6 ${C_LOWERCASE}$3  ; Add character to end of "validity check" to guarantee a match
-  StrCpy $0 $0 "" 1
-  StrCpy $4 -1
-
-next_valid_char:
-  IntOp $4 $4 + 1
-  StrCpy $5 $6 1 $4               ; Extract next from "validity check" string
-  StrCmp $3 $5 0 next_valid_char  ; We will ALWAYS find a match in the "validity check" string
-  StrCpy $2 $2$5                  ; Use "validity check" char to ensure result uses lowercase
-  goto next_input_char
-
-done:
-  StrCpy $0 $2                ; Result is a string with no uppercase letters
-  Pop $6
-  Pop $5
-  Pop $4
-  Pop $3
-  Pop $2
-  Exch $0                     ; place result on top of the stack
-
-  !undef C_LOWERCASE
-
-FunctionEnd
-
-#--------------------------------------------------------------------------
 # Installer Function: CheckIfLocked
 #
 # Checks if a particular file (an EXE file, for example) is being used. If the specified file
@@ -1076,7 +1027,7 @@ Function CheckIfLocked
 unlocked_exit:
   StrCpy ${L_EXE} ""
 
- exit:
+exit:
   Pop ${L_FILE_HANDLE}
   Exch ${L_EXE}
 
