@@ -1156,10 +1156,8 @@ sub add_url
 
         if ( $hostform eq 'name' ) {
 
-            # recursively add the roots of the domain
-
-            while ( $host =~ s/^([^\.])+\.(.*)$/$2/ ) {
-                update_word( $self, $2, $encoded, '$1', '[<]', $prefix) if ( !defined( $noadd ) );
+            while ( $host =~ s/^([^\.])+\.(.*\.(.*))$/$2/ ) {
+                update_word( $self, $2, $encoded, '[\.]', '[<]', $prefix) if ( !defined( $noadd ) );
             }
         }
     }
