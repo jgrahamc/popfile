@@ -14,7 +14,7 @@ Add                                     Legg til
 Remove                                  Fjern
 Previous                                Forrige
 Next                                    Neste
->From                                    Fra
+From                                    Fra
 Subject                                 Emne
 Classification                          Klassifisering
 Reclassify                              Re-klassifisering
