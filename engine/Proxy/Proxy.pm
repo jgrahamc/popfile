@@ -320,6 +320,49 @@ sub tee_
     print $socket $text if $socket->connected;
 }
 
+
+# ---------------------------------------------------------------------------------------------
+#
+# echo_to_regexp_
+#
+# $mail     The stream (created with IO::) to send the message to (the remote mail server)
+# $client   The local mail client (created with IO::) that needs the response
+# $regexp   The pattern match to terminate echoing, compile using qr/pattern/
+# $verbose  (OPTIONAL) log output if 1, defaults to 0 if unset
+#
+# echo all information from the $mail server until a single line matching $regexp is seen
+#
+# ---------------------------------------------------------------------------------------------
+sub echo_to_regexp_
+{
+    my ( $self, $mail, $client, $regexp, $verbose ) = @_;
+    
+    $verbose = 0 if (!defined($verbose));
+
+    # ASSERT: $regexp =~ /^\/.*\/$/ *shrug*
+    
+    #$regexp =~ s/^\/(.*)\/$/$1/;
+
+    while ( <$mail> ) {
+        # Check for an abort
+        last if ( $self->{alive_} == 0 );
+
+        if (!$verbose) {
+            print $client $_;
+        } else {
+            # This creates log output
+            $self->tee_($client, $_);
+        }
+        
+        my $done = ($_ =~ $regexp);
+        
+        print $regexp . "=~" . $_ . ($done?'1':'0') . "\n" ;
+                
+        last if ( $_ =~ $regexp );
+    }
+}
+
+
 # ---------------------------------------------------------------------------------------------
 #
 # echo_to_dot_
@@ -333,19 +376,12 @@ sub tee_
 sub echo_to_dot_
 {
     my ( $self, $mail, $client ) = @_;
+    
+    # The termination has to be a single line with exactly a dot on it and nothing
+    # else other than line termination characters.  This is vital so that we do
+    # not mistake a line beginning with . as the end of the block
 
-    while ( <$mail> ) {
-        # Check for an abort
-        last if ( $self->{alive_} == 0 );
-
-        print $client $_;
-        #$self->tee_($client, $_);
-
-        # The termination has to be a single line with exactly a dot on it and nothing
-        # else other than line termination characters.  This is vital so that we do
-        # not mistake a line beginning with . as the end of the block
-        last if ( /^\.(\r\n|\r|\n)$/ );
-    }
+    $self->echo_to_regexp_( $mail, $client, qr/^\.(\r\n|\r|\n)$/);
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -426,11 +462,11 @@ sub get_response_
 
             if ( $response ) {
                 # Echo the response up to the mail client
-                $self->tee_( $client, $response );
+                $self->tee_(  $client, $response );
                 return $response;
             }
         }
-
+        
         if (!null_resp) {
             # An error has occurred reading from the mail server
             $self->tee_(  $client, "$self->{connection_timeout_error_}$eol" );
@@ -438,7 +474,7 @@ sub get_response_
         } else {
             $self->tee_($client, "");
             return "";
-        }
+        }        
     }
 
     return $response;
