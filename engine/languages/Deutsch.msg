@@ -9,8 +9,8 @@ TurnOn                                  Einschalten
 TurnOff                                 Ausschalten
 Add                                     Hinzufügen
 Remove                                  Entfernen
-Previous                                Vorherige
-Next                                    Nächste
+Previous                                Zurück
+Next                                    Weiter
 >From                                    Absender
 Subject                                 Betreff
 Classification                          Einstufung
@@ -102,7 +102,7 @@ Advanced_RemoveWord                     Wort löschen
 History_Filter                          &nbsp;(zeige nur Kategorie <font color=%s>%s</font>)
 History_Search                          &nbsp;(gesuchter Betreff: %s)
 History_Title                           Letzte Nachrichten
-History_Jump                            zu Nachricht springen
+History_Jump                            zu Nachricht gehen
 History_ShowAll                         Alle anzeigen
 History_ShouldBe                        Sollte sein
 History_NoFrom                          kein Absender angegeben
@@ -112,12 +112,13 @@ History_MagnetUsed                      Magnet benutzt
 History_ChangedTo                       Geändert: <font color=%s>%s
 History_Already                         Bereits neu eingestuft als <font color=%s>%s</font>
 History_RemoveAll                       Alle entfernen
-History_RemovePage                      Seite entfernen
-History_Remove                          Um Einträge im Verlauf zu löschen, klicken Sie auf:
+History_RemovePage                      Diese Seite entfernen
+History_Remove                          Um Einträge im Verlauf zu löschen, klicken Sie auf
 History_SearchMessage                   Betreff suchen
 History_NoMessages                      keine Nachrichten
 History_ShowMagnet                      Magnetisiert
 History_Magnet                          &nbsp;(zeige nur durch Magnet eingestufte Nachrichten)
+History_ResetSearch                     Zurücksetzen
 
 Password_Title                          Paßwort
 Password_Enter                          Paßwort eingeben
@@ -125,8 +126,8 @@ Password_Go                             Anmelden
 Password_Error1                         Falsches Paßwort
 
 Security_Error1                         Der sichere Port muß zwischen 1 und 65535 liegen.
-Security_Stealth                        Verdeckter Modus/Serverbetrieb
-Security_NoStealthMode                  Nein (verdeckter Modus)
+Security_Stealth                        Stealth Modus/Serverbetrieb
+Security_NoStealthMode                  Nein (Stealth Modus)
 Security_ExplainStats                   (Wenn Sie diese Funktion einschalten, sendet POPFile täglich die drei folgenden Werte an ein Skript auf www.usethesource.com: bc (Anzahl von Ihnen eingerichteter Kategorien), mc (Anzahl von POPFile eingestufter Nachrichten) und ec (Anzahl der Einstufungsfehler). Diese werden in einer Datei gespeichert und benutzt, um öffentliche Statistiken darüber zu erstellen, wie POPFile genutzt wird und wie gut es dabei funktioniert. Die Daten werden etwa 5 Tage auf dem Server gespeichert und dann gelöscht. Zuordnungen zwischen IP-Adressen und statistischen Daten werden nicht gespeichert.)
 Security_ExplainUpdate                  (Wenn Sie diese Funktion einschalten, sendet POPFile täglich die drei folgenden Werte an ein Skript auf www.usethesource.com: ma (die Hauptversionsnummer der POPFile-Installation), mi (die Nebenversionsnummer der POPFile-Installation) und bn (die build-Nummer der POPFile-Installation). POPFile erhält die Antwort in Form einer Grafik, die am Kopf einer Seite erscheint, wenn eine neue Version verfügbar ist. Die Daten werden etwa 5 Tage auf dem Server gespeichert und dann gelöscht. Zuordnungen zwischen IP-Adressen und statistischen Daten werden nicht gespeichert.)
 Security_PasswordTitle                  Paßwort für Benutzeroberfläche
@@ -137,8 +138,8 @@ Security_SecureServer                   gesicherter Server
 Security_SecureServerUpdate             Neuer gesicherter Server: %s; Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
 Security_SecurePort                     gesicherter Port
 Security_SecurePortUpdate               Neuer gesicherter Port %s; Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
-Security_POP3                           POP3 Verbindungen von anderen Rechnern erlauben
-Security_UI                             HTTP (Benutzeroberfläche) Verbindungen von anderen Rechnern erlauben
+Security_POP3                           POP3 Verbindungen von fremden Rechnern erlauben
+Security_UI                             HTTP (Benutzeroberfläche) Verbindungen von fremden Rechnern erlauben
 Security_UpdateTitle                    Automatisch auf Updates prüfen
 Security_Update                         Täglich nach POPFile Updates suchen
 Security_StatsTitle                     Statistik Report
@@ -165,11 +166,11 @@ Bucket_Title                            Zusammenfassung
 Bucket_BucketName                       Kategoriename
 Bucket_WordCount                        Wortanzahl
 Bucket_WordCounts                       Wortanzahl
-Bucket_UniqueWords                      verschieden Wörter
+Bucket_UniqueWords                      verschiedene Wörter
 Bucket_SubjectModification              Betreff ändern
 Bucket_ChangeColor                      Farbe ändern
 Bucket_NotEnoughData                    Nicht genügend Daten
-Bucket_ClassificationAccuracy           Einstufungsgenauigkeit
+Bucket_ClassificationAccuracy           Genauigkeit
 Bucket_EmailsClassified                 Emails klassifiziert
 Bucket_EmailsClassifiedUpper            Emails klassifiziert
 Bucket_ClassificationErrors             Einstufungsfehler
@@ -188,8 +189,9 @@ Bucket_LookupMessage                    Wort in Kategorie nachschlagen
 Bucket_LookupMessage2                   Ergebnis für
 Bucket_LookupMostLikely                 <b>%s</b> erscheint am wahrscheinlichsten in <font color=%s>%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> erscheint in keiner Kategorie
-Bucket_DisabledGlobally                 Global abgeschaltet
+Bucket_DisabledGlobally                 Global deaktiviert
 Bucket_To                               in
+Bucket_Quarantine                       Quarantäne
 
 SingleBucket_Title                      Details für %s
 SingleBucket_WordCount                  Anzahl Worte in dieser Kategorie
@@ -198,3 +200,6 @@ SingleBucket_Percentage                 Anteil an der Gesamtzahl
 SingleBucket_WordTable                  Worttabelle für %s
 SingleBucket_Message1                   Mit (*) gekennzeichnete Wörter wurden in dieser POPFile Sitzung zur Sortierung benutzt. Klicken Sie auf ein beliebiges Wort, um die Wahrscheinlichkeit seines Erscheinens für alle Kategorien anzusehen.
 SingleBucket_Unique                     %s verschiedene
+
+Session_Title                           POPFile Sitzung abgelaufen
+Session_Error                           Ihre POPFile-Sitzung ist abgelaufen. Dies könnte dadurch verursacht worden sein, daß Sie POPFile neu gestartet haben, das Kontrollzentrum aber noch im Browser geöffnet war. Bitte klicken Sie auf einen der oben angezeigten Verweise, um mit der Benutzung von POPFile weitermachen zu können.
