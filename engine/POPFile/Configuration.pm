@@ -67,8 +67,19 @@ sub initialize
     # Where the download_count is derived from this value and the
     # message_count is a local counter within that download, for sorting
     # purposes must sort on download_count and then message_count
+    #
+    # download_count is incremented every time POPFile forks to 
+    # start a session for downloading messages (see Proxy::Proxy::service
+    # for details)
 
     $self->global_config_( 'download_count', 0 );
+
+    # We keep track of the total number of messages downloaded (the mcount)
+    # and the total number of classification errors made (ecount) which is
+    # actually the number of times a message is reclassified in the UI
+
+    $self->global_config_( 'mcount', 0 );
+    $self->global_config_( 'ecount', 0 );
 
     # Subject modification (global setting is on)
     $self->global_config_( 'subject', 1 );
@@ -76,7 +87,7 @@ sub initialize
     # Adding the X-Text-Classification on
     $self->global_config_( 'xtc', 1 );
 
-    # Adding the X-POPFile-Link is no
+    # Adding the X-POPFile-Link is on 
     $self->global_config_( 'xpl', 1 );
 
     # The default location for the message files
