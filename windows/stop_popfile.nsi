@@ -28,14 +28,14 @@
 # Returns error code 0 if shutdown was successful (otherwise returns 1)
 #
 # There is also an optional parameter which selects the reporting mode:
-# /SHOWERRORS, /SHOWALL or /NONE. (/NONE is used as the default if no mode is supplied)
+# /SHOWERRORS, /SHOWALL or /SHOWNONE. (/SHOWNONE is used as the default if no mode is supplied)
 #
 # If '/SHOWERRORS' is specified then a message will be shown if any errors were detected
 # (nothing is displayed if the shutdown was successful).
 #
 # If '/SHOWALL' is specified then a success/fail message will always be shown.
 #
-# If '/NONE' is specified then no messages are displayed.
+# If '/SHOWNONE' is specified then no messages are displayed.
 #
 # Uppercase or lowercase can be used for this optional parameter.
 # If the optional parameter is used, it must be the first parameter.
@@ -72,7 +72,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define VERSION   "0.4.1"       ; see 'VIProductVersion' comment below for format details
+  !define VERSION   "0.4.2"       ; see 'VIProductVersion' comment below for format details
 
   ; Specify EXE filename and icon for the 'installer'
 
@@ -115,7 +115,7 @@ Section Shutdown
   !define L_RESULT   $R6   ; the status returned from the shutdown request
   !define L_TEMP     $R5
 
-  StrCpy ${L_REPORT} "none"               ; default is to display no success or failure messages
+  StrCpy ${L_REPORT} "none"        ; default is to display no success or failure messages
 
   ; It does not matter if the command-line parameters are uppercase or lowercase
 
@@ -141,7 +141,7 @@ Section Shutdown
   StrCmp ${L_TEMP} "" 0 port_checks
   StrCmp ${L_RESULT} "/showerrors" only_errors
   StrCmp ${L_RESULT} "/showall" all_cases
-  StrCmp ${L_RESULT} "/none" other_param
+  StrCmp ${L_RESULT} "/shownone" no_messages
   StrCmp ${L_RESULT} "/?" usage
   StrCmp ${L_RESULT} "/help" usage
   Goto option_error
@@ -158,7 +158,7 @@ usage:
     $\r$\n$\r$\n\
     and the optional <REPORT> is /SHOWERRORS (only error messages shown), /SHOWALL\
     $\r$\n\
-    (success or error messages always shown), or /NONE (no messages - this is the default).\
+    (success or error messages always shown), or /SHOWNONE (no messages - this is the default).\
     $\r$\n$\r$\n\
     A success/fail error code is always returned which can be checked in a batch file:\
     $\r$\n\
@@ -173,6 +173,10 @@ usage:
     $\r$\n$\r$\n\
     Distributed under the terms of the GNU General Public License (GPL)."
   Goto error_exit
+
+no_messages:
+  StrCpy ${L_REPORT} "none"
+  Goto other_param
 
 only_errors:
   StrCpy ${L_REPORT} "errors"
