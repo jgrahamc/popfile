@@ -93,8 +93,10 @@ sub aborting
 # ---------------------------------------------------------------------------------------------
 sub reaper
 {
-    for my $c (keys %components) {
-		$components{$c}->reaper();
+	foreach my $type (keys %components) {
+		foreach my $name (keys %{$components{$type}}) {
+		    $components{$type}{$name}->reaper();
+		}
     }
 
 	$SIG{CHLD} = \&reaper;
