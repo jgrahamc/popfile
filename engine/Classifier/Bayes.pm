@@ -704,10 +704,12 @@ sub classify_and_modify
         $line = $_;
 
         # Check for an abort
+        
         last if ( $self->{alive} == 0 );
 
         # The termination of a message is a line consisting of exactly .CRLF so we detect that
         # here exactly
+        
         if ( $line =~ /^\.(\r\n|\r|\n)$/ ) {
             $got_full_body = 1;
             last;
@@ -759,10 +761,12 @@ sub classify_and_modify
     $classification = ($class ne '')?$class:$self->classify_file($temp_file);
 
     # Add the Subject line modification or the original line back again
-    if ( $self->{configuration}->{configuration}{subject} ) {
-        # Don't add the classification unless it is not present
-        if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $self->{parameters}{$classification}{subject} == 1 ) )  {
-            $msg_subject = "[$classification]$msg_subject";
+    if ( $classification ne 'unclassified' ) {
+        if ( $self->{configuration}->{configuration}{subject} ) {
+            # Don't add the classification unless it is not present
+            if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $self->{parameters}{$classification}{subject} == 1 ) )  {
+                $msg_subject = "[$classification]$msg_subject";
+            }
         }
     }
         
@@ -798,25 +802,27 @@ sub classify_and_modify
         # If the bucket is quarantined then we'll treat it specially by changing the message header to contain
         # information from POPFile and wrapping the original message in a MIME encoding
         
-        if ( $self->{parameters}{$classification}{quarantine} == 1 ) {
-            print $client "From: $self->{parser}->{from}$eol";
-            print $client "To: $self->{parser}->{to}$eol";
-            print $client "Date: " . localtime() . $eol;
-            print $client "Subject: $msg_subject$eol";
-            print $client "X-Text-Classification: $classification$eol" if ( $self->{configuration}->{configuration}{xtc} );            
-            print $client 'X-POPFile-Link: ' . $xpl if ( $self->{configuration}->{configuration}{xpl} );
-            print $client "Content-Type: multipart/report; boundary=\"$temp_file\"$eol$eol--$temp_file$eol";
-            print $client "Content-Type: text/plain$eol$eol";
-            print $client "POPFile has quarantined a message.  It is attached to this email.$eol$eol";
-            print $client "Quarantined Message Detail$eol$eol";
-            print $client "Original From: $self->{parser}->{from}$eol";
-            print $client "Original Subject: $self->{parser}->{subject}$eol";
-            print $client "Original To: $self->{parser}->{to}$eol$eol";
-            print $client "To examine the email open the attachment. To change this mail's classification go to $xpl$eol";
-            print $client "--$temp_file$eol";
-            print $client "Content-Type: message/rfc822$eol$eol";
+        if ( $classification ne 'unclassified' ) {
+            if ( $self->{parameters}{$classification}{quarantine} == 1 ) {
+                print $client "From: $self->{parser}->{from}$eol";
+                print $client "To: $self->{parser}->{to}$eol";
+                print $client "Date: " . localtime() . $eol;
+                print $client "Subject: $msg_subject$eol";
+                print $client "X-Text-Classification: $classification$eol" if ( $self->{configuration}->{configuration}{xtc} );            
+                print $client 'X-POPFile-Link: ' . $xpl if ( $self->{configuration}->{configuration}{xpl} );
+                print $client "Content-Type: multipart/report; boundary=\"$temp_file\"$eol$eol--$temp_file$eol";
+                print $client "Content-Type: text/plain$eol$eol";
+                print $client "POPFile has quarantined a message.  It is attached to this email.$eol$eol";
+                print $client "Quarantined Message Detail$eol$eol";
+                print $client "Original From: $self->{parser}->{from}$eol";
+                print $client "Original Subject: $self->{parser}->{subject}$eol";
+                print $client "Original To: $self->{parser}->{to}$eol$eol";
+                print $client "To examine the email open the attachment. To change this mail's classification go to $xpl$eol";
+                print $client "--$temp_file$eol";
+                print $client "Content-Type: message/rfc822$eol$eol";
+            }
         }
-    
+        
         print $client $msg_head_before;
         print $client $msg_head_after;
         print $client $msg_body;

@@ -31,31 +31,39 @@ sub new
     my $self;
     
     # A reference to the POPFile::Configuration module
+    
     $self->{configuration}   = 0;
     
-    # The classifier
+    # The classifier (Classifier::Bayes)
+    
     $self->{classifier}      = 0;
 
     # Hash used to store form parameters
+    
     $self->{form}            = {};
 
     # Session key to make the UI safer
+    
     $self->{session_key}     = '';
 
     # The available skins
+    
     $self->{skins}           = ();
 
     # Used to keep the history information around so that we don't have to reglob every time we hit the
     # history page
+    
     $self->{history}         = {};
     $self->{history_invalid} = 0;
 
     # A hash containing a mapping between alphanumeric identifiers and appropriate strings used
     # for localization.  The string may contain sprintf patterns for use in creating grammatically
     # correct strings, or simply be a string
+    
     $self->{language}        = {};
 
     # This is the list of available languages
+    
     $self->{languages}       = ();
     
     return bless $self, $type;
@@ -181,23 +189,40 @@ sub service
     
     # See if there's a connection waiting for us, if there is we accept it handle a single
     # request and then exit
+    
     my ( $uiready ) = $self->{selector}->can_read(0);
 
     # Handle HTTP requests for the UI
+    
     if ( ( defined($uiready) ) && ( $uiready == $self->{server} ) ) {
         if ( my $client = $self->{server}->accept() ) {
+        
             # Check that this is a connection from the local machine, if it's not then we drop it immediately
             # without any further processing.  We don't want to allow remote users to admin POPFile
+            
             my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
-
             if ( ( $self->{configuration}->{configuration}{localui} == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
+            
+                # Read the request line (GET or POST) from the client and if we manage to do that
+                # then read the rest of the HTTP headers grabbing the Content-Length and using
+                # it to read any form POST content into $content
+            
                 if ( ( defined($client) ) && ( my $request = <$client> ) ) {
+                    my $content_length = 0;
+                    my $content;
+
                     while ( <$client> )  {
-                        last if ( !/(.*): (.*)/ );
+                        $content_length = $1 if ( /Content-Length: (\d+)/i );
+                        last                 if ( !/[A-Z]/i );
                     }
 
-                    if ( $request =~ /GET (.*) HTTP\/1\./ ) {
-                        $code = handle_url($self, $client, $1);
+                    if ( $content_length > 0 ) {
+                        $content = '';
+                        $client->read( $content, $content_length, length( $content ) );
+                    }
+
+                    if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {
+                        $code = $self->handle_url($client, $2, $1, $content);
                     } else {
                         http_error( $self, $client, 500 );
                     }                  
@@ -581,7 +606,7 @@ sub configuration_page
     $body .= "<table class=\"stabColor01\" width=\"100%\" cellpadding=\"10\" cellspacing=\"0\" >\n" ;
     $body .= "<tr>\n<td class=\"stabColor01\" width=\"33%\" valign=\"top\">\n" ;
     $body .= "<h2>$self->{language}{Configuration_UserInterface}</h2>\n" ;
-    $body .= "<p>\n<form action=\"/configuration\">\n" ;
+    $body .= "<p>\n<form action=\"/configuration\" method=\"post\">\n" ;
     $body .= "<b>$self->{language}{Configuration_SkinsChoose}:</b> <br>\n" ;
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n<select name=\"skin\">\n" ;
 
@@ -633,7 +658,7 @@ sub configuration_page
         $body .= "<a href=\"/configuration?subject=1&amp;session=$self->{session_key}\">\n" ;
         $body .= "<font color=\"blue\">[$self->{language}{TurnOff}]</font>\n</a> \n" ;
     } else {
-        $body .= "<td>\n<b>$self->{language}{Off}</b> \n" ;
+        $body .= "<td>\n$self->{language}{Off} \n" ;
         $body .= "<a href=\"/configuration?subject=2&amp;session=$self->{session_key}\">\n" ;
         $body .= "<font color=\"blue\">[$self->{language}{TurnOn}]</font></a> \n" ;
     }
@@ -641,13 +666,13 @@ sub configuration_page
     if ( $self->{configuration}->{configuration}{xtc} == 1 )  {
         $body .= "<td><b>$self->{language}{On}</b> <a href=\"/configuration?xtc=1&amp;session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOff}]</font></a> ";
     } else {
-        $body .= "<td><b>$self->{language}{Off}</b> <a href=\"/configuration?xtc=2&amp;session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOn}]</font></a>";
+        $body .= "<td>$self->{language}{Off} <a href=\"/configuration?xtc=2&amp;session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOn}]</font></a>";
     }
     $body .= "<tr>\n<td>\n<b>$self->{language}{Configuration_XPLInsertion}:</b> \n";    
     if ( $self->{configuration}->{configuration}{xpl} == 1 )  {
         $body .= "<td><b>$self->{language}{On}</b> <a href=\"/configuration?xpl=1&amp;session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOff}]</font></a> ";
     } else {
-        $body .= "<td><b>$self->{language}{Off}</b> <a href=\"/configuration?xpl=2&amp;session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOn}]</font></a>";
+        $body .= "<td>$self->{language}{Off} <a href=\"/configuration?xpl=2&amp;session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOn}]</font></a>";
     }
     $body .= "</table>";
     
@@ -1283,7 +1308,7 @@ sub corpus_page
         if ( $self->{configuration}->{configuration}{subject} == 1 )  {
             $body .= "<td align=\"center\">\n";
             if ( $self->{classifier}->{parameters}{$bucket}{subject} == 0 )  {
-                $body .= "<b>$self->{language}{Off}</b>\n" ; 
+                $body .= "$self->{language}{Off}\n" ; 
                 $body .= "<a href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;subject=2\">\n" ;
                 $body .= "[$self->{language}{TurnOn}]</a>\n" ;
             } else {
@@ -1297,7 +1322,7 @@ sub corpus_page
 
         $body .= "<td width=\"10\">&nbsp;<td align=\"center\">\n";
         if ( $self->{classifier}->{parameters}{$bucket}{quarantine} == 0 )  {
-            $body .= "<b>$self->{language}{Off}</b>\n" ; 
+            $body .= "$self->{language}{Off}\n" ; 
             $body .= "<a href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;quarantine=2\">\n" ;
             $body .= "[$self->{language}{TurnOn}]</a>\n" ;
         } else {
@@ -2248,10 +2273,46 @@ sub session_page
 
 # ---------------------------------------------------------------------------------------------
 #
+# parse_form    - parse form data and fill in $self->{form}
+#
+# $form         The text of the form arguments (e.g. foo=bar&baz=fou)
+#
+# ---------------------------------------------------------------------------------------------
+sub parse_form
+{
+    my ( $self, $arguments ) = @_;
+
+    # Normally the browser should have done &amp; to & translation on
+    # URIs being passed onto us, but there was a report that someone
+    # was having a problem with form arguments coming through with
+    # something like http://127.0.0.1/history?session=foo&amp;filter=bar
+    # which would mess things up in the argument splitter so this code
+    # just changes &amp; to & for safety
+
+    $arguments =~ s/&amp;/&/g;
+
+    while ( $arguments =~ m/\G(.*?)=(.*?)(&|\r|\n|$)/g ) {
+        my $arg = $1;
+        $self->{form}{$arg} = $2;
+
+        while ( ( $self->{form}{$arg} =~ /%([0-9A-F][0-9A-F])/i ) != 0 ) {
+            my $from = "%$1";
+            my $to   = chr(hex("0x$1"));
+            $self->{form}{$arg} =~ s/$from/$to/g;
+        }
+
+        $self->{form}{$arg} =~ s/\+/ /g;
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # handle_url - Handle a URL request
 #
 # $client     The web browser to send the results to
-# $url         URL to process
+# $url        URL to process
+# $command    The HTTP command used (GET or POST)
+# $content    Any non-header data in the HTTP command
 #
 # Takes a URL and splits it into the URL portion and form arguments specified in the command
 # filling out the %form hash with the form elements and their values.  Checks the session
@@ -2262,42 +2323,36 @@ sub session_page
 # ---------------------------------------------------------------------------------------------
 sub handle_url 
 {
-    my ( $self, $client, $url ) = @_;
+    my ( $self, $client, $url, $command, $content ) = @_;
 
     # See if there are any form parameters and if there are parse them into the %form hash
+
     delete $self->{form};
     
     # Remove a # element
+
     $url =~ s/#.*//;
 
-    print $url . $eol;
+    # If the URL was passed in through a GET then it may contain form arguments
+    # separated by & signs, which we parse out into the $self->{form} where the
+    # key is the argument name and the value the argument value, for example if
+    # you have foo=bar in the URL then $self->{form}{foo} is bar.
 
-    if ( $url =~ s/\?(.*)// )  {
-        my $arguments = $1;
-
-        # Normally the browser should have done &amp; to & translation on
-        # URIs being passed onto us, but there was a report that someone
-        # was having a problem with form arguments coming through with
-        # something like http://127.0.0.1/history?session=foo&amp;filter=bar
-        # which would mess things up in the argument splitter so this code
-        # just changes &amp; to & for safety
-
-        $arguments =~ s/&amp;/&/g;
-        
-        while ( $arguments =~ m/\G(.*?)=(.*?)(&|\r|\n|$)/g ) {
-            my $arg = $1;
-            $self->{form}{$arg} = $2;
-            
-            while ( ( $self->{form}{$arg} =~ /%([0-9A-F][0-9A-F])/i ) != 0 ) {
-                my $from = "%$1";
-                my $to   = chr(hex("0x$1"));
-                $self->{form}{$arg} =~ s/$from/$to/g;
-            }
-
-            $self->{form}{$arg} =~ s/\+/ /g;
+    if ( $command =~ /GET/i ) {
+        if ( $url =~ s/\?(.*)// )  {
+            $self->parse_form( $1 );
         }
     }
 
+    # If the URL was passed in through a POST then look for the POST data 
+    # and parse it filling the $self->{form} in the same way as for GET
+    # arguments
+
+    if ( $command =~ /POST/i ) {
+        $content =~ s/[\r\n]//g;
+        $self->parse_form( $content );
+    }
+    
     if ( $url eq '/jump_to_message' )  {
         $self->{form}{session} = $self->{session_key};
         $url = '/history';
