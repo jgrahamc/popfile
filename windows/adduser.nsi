@@ -1,9 +1,11 @@
 #--------------------------------------------------------------------------
 #
 # adduser.nsi --- This is the NSIS script used to create the 'Add POPFile User' wizard
-#                 which makes it easy to add a new POPFile user. If a multi-user install
-#                 is performed, this wizard is installed in the main POPFile installation
-#                 folder for use when a new user tries to run POPFile for the first time.
+#                 which is used by the POPFile installer (setup.exe) to perform the
+#                 user-specific parts of the installation. This wizard is also installed
+#                 in the main POPFile installation folder for use when a new user tries
+#                 to run POPFile for the first time. Some simple "repair work" can also
+#                 be done using this wizard.
 #
 # Copyright (c) 2001-2004 John Graham-Cumming
 #
@@ -26,9 +28,15 @@
 #--------------------------------------------------------------------------
 
 ; This version of the script has been tested with the "NSIS 2" compiler (final),
-; released 7 February 2004, with no patches applied.
+; released 7 February 2004, with no "official" NSIS patches/CVS updates applied.
 ;
-; Expect 3 compiler warnings, all related to standard NSIS language files which are out-of-date.
+; Expect 3 compiler warnings, all related to standard NSIS language files which are out-of-date
+; (if the default multi-language installer is compiled).
+;
+; NOTE: The language selection menu order used in this script assumes that the NSIS MUI
+; 'Japanese.nsh' language file has been patched to use 'Nihongo' instead of 'Japanese'
+; [see 'SMALL NSIS PATCH REQUIRED' in the 'Support for Japanese text processing' section
+; of the header comment in 'installer.nsi']
 
 #--------------------------------------------------------------------------
 # Compile-time command-line switches (used by 'makensis.exe')
@@ -40,6 +48,17 @@
 # need to ensure all of the non-English *-pfi.nsh files are up-to-date), supply the command-line
 # switch /DENGLISH_MODE when compiling this script. This switch only affects the language used
 # by the wizard, it does not affect which files get installed.
+#
+#--------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------
+# Optional run-time command-line switch (used by 'adduser.exe')
+#--------------------------------------------------------------------------
+#
+# /install
+#
+# This command-line switch is used when this wizard is called by the main installer program
+# (setup.exe) and makes the wizard skip the language selection dialog and WELCOME page.
 #
 #--------------------------------------------------------------------------
 
@@ -97,6 +116,10 @@
   ; 'Add User' wizard overview
   ;------------------------------------------------
 
+  ; This wizard is used by the main POPfile installer ('setup.exe') to perform the user-specific
+  ; configuration for the user who is running the installer. The main installer is now solely
+  ; concerned with installing the POPFile program files and the associated registry entries.
+  ;
   ; This wizard is called when 'runpopfile.exe' is unable to determine appropriate values for
   ; the POPFILE_ROOT and POPFILE_USER environment variables which are used by POPFile 0.21.0
   ; (or later). For example, if a multi-user install was performed then the first time a new
@@ -131,7 +154,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.12"
+  !define C_PFI_VERSION  "0.2.0"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -153,7 +176,7 @@
   !define C_ALT_DEFAULT_USERDATA  "$WINDIR\Application Data\POPFile"
 
   ;--------------------------------------------------------------------------------
-  ; Constants for the timeout loop used after issuing a POPFile 'shutdown' request
+  ; Constants for the timeout loop used by 'WaitUntilUnlocked' and 'un.WaitUntilUnlocked'
   ;--------------------------------------------------------------------------------
 
   ; Timeout loop counter start value (counts down to 0)
@@ -192,13 +215,15 @@
 
   ; This script uses 'User Variables' (with names starting with 'G_') to hold GLOBAL data.
 
+  Var G_PFISETUP           ; parameter passed from main installer (setup.exe)
+
   Var G_ROOTDIR            ; full path to the folder used for the POPFile program files
   Var G_USERDIR            ; full path to the folder containing the 'popfile.cfg' file
   Var G_MPBINDIR           ; full path to the folder used for the minimal Perl EXE and DLL files
 
   Var G_POP3               ; POP3 port (1-65535)
   Var G_GUI                ; GUI port (1-65535)
-  Var G_STARTUP            ; automatic startup flag (1 = yes, 0 = no)
+  Var G_STARTUP            ; POPFile automatic startup flag (1 = yes, 0 = no)
 
   Var G_OOECONFIG_HANDLE   ; to access list of all Outlook/Outlook Express accounts found
   Var G_OOECHANGES_HANDLE  ; to access list of Outlook/Outlook Express configuration changes
@@ -307,14 +332,14 @@
   ; file cannot just contain a 32x32 16-colour image, it must also have a 16x16 16-colour image.
   ; The order of the images in each icon file must also be the same.
 
-  !define MUI_ICON    "POPFileIcon\popfile.ico"
-  !define MUI_UNICON  "remove.ico"
+  !define MUI_ICON                            "POPFileIcon\popfile.ico"
+  !define MUI_UNICON                          "remove.ico"
 
-  ; The "Header" bitmap appears on all pages of the installer (except Welcome & Finish pages)
+  ; The "Header" bitmap appears on all pages of the installer (except WELCOME & FINISH pages)
   ; and on all pages of the uninstaller.
 
   !define MUI_HEADERIMAGE
-  !define MUI_HEADERIMAGE_BITMAP "hdr-common.bmp"
+  !define MUI_HEADERIMAGE_BITMAP              "test\hdr-common-cvs.bmp"
   !define MUI_HEADERIMAGE_RIGHT
 
   ;----------------------------------------------------------------
@@ -325,24 +350,24 @@
   ; two lines of text, e.g. the German version is truncated, so we use a custom UI which
   ; provides slightly wider text areas. Each area is still limited to a single line of text.
 
-  !define MUI_UI "UI\pfi_modern.exe"
+  !define MUI_UI                              "UI\pfi_modern.exe"
 
   ; The 'hdr-common.bmp' logo is only 90 x 57 pixels, much smaller than the 150 x 57 pixel
   ; space provided by the default 'modern_headerbmpr.exe' UI, so we use a custom UI which
   ; leaves more room for the TITLE and SUBTITLE text.
 
-  !define MUI_UI_HEADERIMAGE_RIGHT "UI\pfi_headerbmpr.exe"
+  !define MUI_UI_HEADERIMAGE_RIGHT            "UI\pfi_headerbmpr.exe"
 
   ;----------------------------------------------------------------
-  ;  Interface Settings - Welcome/Finish Page Interface Settings
+  ;  Interface Settings - WELCOME/FINISH Page Interface Settings
   ;----------------------------------------------------------------
 
-  ; The "Special" bitmap appears on the "Welcome" and "Finish" pages
+  ; The "Special" bitmap appears on the "WELCOME" and "FINISH" pages
 
-  !define MUI_WELCOMEFINISHPAGE_BITMAP "special.bmp"
+  !define MUI_WELCOMEFINISHPAGE_BITMAP        "test\special-cvs.bmp"
 
   ;----------------------------------------------------------------
-  ;  Interface Settings - Installer Finish Page Interface Settings
+  ;  Interface Settings - Installer FINISH Page Interface Settings
   ;----------------------------------------------------------------
 
   ; Debug aid: Hide the installation log but let user display it (using "Show details" button)
@@ -363,11 +388,11 @@
 
   ; Use a custom '.onGUIInit' function to add language-specific texts to custom page INI files
 
-  !define MUI_CUSTOMFUNCTION_GUIINIT PFIGUIInit
+  !define MUI_CUSTOMFUNCTION_GUIINIT          PFIGUIInit
 
   ; Use a custom 'un.onGUIInit' function to allow language-specific texts in the username check
 
-  !define MUI_CUSTOMFUNCTION_UNGUIINIT un.PFIGUIInit
+  !define MUI_CUSTOMFUNCTION_UNGUIINIT        un.PFIGUIInit
 
   ;----------------------------------------------------------------
   ; Language Settings for MUI pages
@@ -376,7 +401,7 @@
   ; Same "Language selection" dialog is used for the installer and the uninstaller
   ; so we override the standard "Installer Language" title to avoid confusion.
 
-  !define MUI_LANGDLL_WINDOWTITLE "Add/Remove POPFile User"
+  !define MUI_LANGDLL_WINDOWTITLE             "Add/Remove POPFile User"
 
   ; Always show the language selection dialog, even if a language has been stored in the
   ; registry (the language stored in the registry will be selected as the default language)
@@ -387,24 +412,31 @@
   ; Remember user's language selection and offer this as the default when re-installing
   ; (uninstaller also uses this setting to determine which language is to be used)
 
-  !define MUI_LANGDLL_REGISTRY_ROOT "HKCU"
-  !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI"
-  !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
+  !define MUI_LANGDLL_REGISTRY_ROOT           "HKCU"
+  !define MUI_LANGDLL_REGISTRY_KEY            "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI"
+  !define MUI_LANGDLL_REGISTRY_VALUENAME      "Installer Language"
 
 #--------------------------------------------------------------------------
 # Define the Page order for the installer (and the uninstaller)
 #--------------------------------------------------------------------------
 
   ;---------------------------------------------------
-  ; Installer Page - Welcome
+  ; Installer Page - WELCOME
   ;---------------------------------------------------
 
-  !define MUI_WELCOMEPAGE_TEXT "$(PFI_LANG_ADDUSER_INFO_TEXT)"
+  ; Use a "pre" function to decide whether or not to show the WELCOME page
+  ; (if called from the main installer (setup.exe) there is no need for another WELCOME page)
+
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE         "CheckStartMode"
 
   ; Use a "leave" function to decide upon a suitable initial value for the user data folder
   ; (this initial value is used for the DIRECTORY page used to select 'User Data' location).
 
-  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "ChooseDefaultDataDir"
+  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE       "ChooseDefaultDataDir"
+
+  ; Text used to replace the standard WELCOME page text
+
+  !define MUI_WELCOMEPAGE_TEXT                "$(PFI_LANG_ADDUSER_INFO_TEXT)"
 
   !insertmacro MUI_PAGE_WELCOME
 
@@ -415,7 +447,7 @@
   ; Use a "leave" function to look for an existing 'popfile.cfg' and use it to determine some
   ; initial settings for this installation.
 
-  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "CheckExistingDataDir"
+  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE       "CheckExistingDataDir"
 
   ; This page is used to select the folder for the POPFile USER DATA files
 
@@ -432,7 +464,7 @@
   ; Installer Page - POP3 and UI Port Options
   ;---------------------------------------------------
 
-  Page custom SetOptionsPage "CheckPortOptions"
+  Page custom SetOptionsPage                  "CheckPortOptions"
 
   ;---------------------------------------------------
   ; Installer Page - Install files
@@ -459,43 +491,55 @@
   ; Installer Page - Configure Outlook Express accounts
   ;---------------------------------------------------
 
-  Page custom SetOutlookExpressPage "CheckOutlookExpressRequests"
+  Page custom SetOutlookExpressPage           "CheckOutlookExpressRequests"
 
   ;---------------------------------------------------
   ; Installer Page - Configure Outlook accounts
   ;---------------------------------------------------
 
-  Page custom SetOutlookPage "CheckOutlookRequests"
+  Page custom SetOutlookPage                  "CheckOutlookRequests"
 
   ;---------------------------------------------------
   ; Installer Page - Configure Eudora personalities
   ;---------------------------------------------------
 
-  Page custom SetEudoraPage "CheckEudoraRequests"
+  Page custom SetEudoraPage                   "CheckEudoraRequests"
 
   ;---------------------------------------------------
   ; Installer Page - Choose POPFile launch mode
   ;---------------------------------------------------
 
-  Page custom StartPOPFilePage "CheckLaunchOptions"
+  Page custom StartPOPFilePage                "CheckLaunchOptions"
 
   ;---------------------------------------------------
-  ; Installer Page - Finish (may offer to start UI)
+  ; Installer Page - FINISH (may offer to start UI)
   ;---------------------------------------------------
 
-  !define MUI_FINISHPAGE_TEXT         "$(PFI_LANG_ADDUSER_FINISH_INFO)"
+  !define MUI_FINISHPAGE_TEXT                 "$(PFI_LANG_ADDUSER_FINISH_INFO)"
 
-  ; Use a "pre" function for the 'Finish' page to ensure installer only offers to display
+  ; Use a "pre" function for the 'FINISH' page to ensure installer only offers to display
   ; POPFile User Interface if user has chosen to start POPFile from the installer.
 
-  !define MUI_PAGE_CUSTOMFUNCTION_PRE "CheckRunStatus"
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE         "CheckRunStatus"
+
+  ; Use a "leave" function for the 'FINISH' page to remove any empty corpus folders left
+  ; behind after POPFile has converted the buckets (if any) created by the CBP package.
+  ; (If the user doesn't run POPFile from the installer, these corpus folders will not be empty)
+
+  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE       "RemoveEmptyCBPCorpus"
 
   ; Offer to display the POPFile User Interface (The 'CheckRunStatus' function ensures this
   ; option is only offered if the installer has started POPFile running)
 
   !define MUI_FINISHPAGE_RUN
-  !define MUI_FINISHPAGE_RUN_TEXT     "$(PFI_LANG_FINISH_RUN_TEXT)"
-  !define MUI_FINISHPAGE_RUN_FUNCTION "RunUI"
+  !define MUI_FINISHPAGE_RUN_TEXT             "$(PFI_LANG_FINISH_RUN_TEXT)"
+  !define MUI_FINISHPAGE_RUN_FUNCTION         "RunUI"
+
+  ; Provide a checkbox to let user display the Release Notes for this version of POPFile
+
+  !define MUI_FINISHPAGE_SHOWREADME
+  !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+  !define MUI_FINISHPAGE_SHOWREADME_FUNCTION  "ShowReadMe"
 
   !insertmacro MUI_PAGE_FINISH
 
@@ -607,10 +651,8 @@
   ReserveFile "ioA.ini"
   ReserveFile "ioB.ini"
   ReserveFile "ioC.ini"
-  ReserveFile "ioD.ini"
   ReserveFile "ioE.ini"
   ReserveFile "ioF.ini"
-  ReserveFile "ioG.ini"
 
 #--------------------------------------------------------------------------
 # Installer Function: .onInit - installer starts by offering a choice of languages
@@ -618,19 +660,30 @@
 
 Function .onInit
 
+  ; The command-line switch '/install' is used to suppress this wizard's WELCOME page and
+  ; language selection dialog when the wizard is called from 'setup.exe' during installation.
+
+  Call GetParameters
+  Pop $G_PFISETUP
+  StrCmp $G_PFISETUP "/install" 0 normal_startup
+  ReadRegStr $LANGUAGE \
+             "HKCU" "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Installer Language"
+  Goto extract_files
+
+normal_startup:
+
   ; Conditional compilation: if ENGLISH_MODE is defined, support only 'English'
 
   !ifndef ENGLISH_MODE
         !insertmacro MUI_LANGDLL_DISPLAY
   !endif
 
+extract_files:
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioA.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioB.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioC.ini"
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioD.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioE.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioF.ini"
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioG.ini"
 
   ; The 'UserInfo' plugin may return an error if run on a Win9x system but since Win9x systems
   ; do not support different account types, we treat this error as if user has 'Admin' rights.
@@ -676,17 +729,22 @@ Function PFIGUIInit
 
   !define L_RESERVED            $1    ; used in the system.dll call
 
+  StrCpy $G_ROOTDIR $EXEDIR
+  IfFileExists "$G_ROOTDIR\runpopfile.exe" 0 try_registry
+  IfFileExists "$G_ROOTDIR\popfile.pl" compatible
+
+try_registry:
   ReadRegStr $G_ROOTDIR HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
-  StrCmp $G_ROOTDIR "" 0 found_reg_data
-  MessageBox MB_OK|MB_ICONSTOP "Error: Cannot find compatible version of POPFile !"
+  StrCmp $G_ROOTDIR "" 0 compatible
+  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_COMPAT_NOTFOUND)"
   Abort
 
-found_reg_data:
+compatible:
   Push ${L_RESERVED}
 
   ; Ensure only one copy of this installer is running
 
-  System::Call 'kernel32::CreateMutexA(i 0, i 0, t "OnlyOnePFI_mutex") i .r1 ?e'
+  System::Call 'kernel32::CreateMutexA(i 0, i 0, t "OnlyOnePFI_AUW_mutex") i .r1 ?e'
   Pop ${L_RESERVED}
   StrCmp ${L_RESERVED} 0 mutex_ok
   MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_INSTALLER_MUTEX)"
@@ -744,6 +802,10 @@ Section "POPFile" SecPOPFile
   !define L_RESERVED      $0    ; used in system.dll calls
   Push ${L_RESERVED}
 
+  ; If we are installing over a previous version, ensure that version is not running
+
+  Call MakeUserDirSafe
+
   Push ${L_CFG}
   Push ${L_POPFILE_ROOT}
   Push ${L_POPFILE_USER}
@@ -776,6 +838,7 @@ Section "POPFile" SecPOPFile
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile RevStatus" "${L_TEMP_5}"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "adduser.exe"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Owner" "$G_WINUSERNAME"
+
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "$G_ROOTDIR"
   StrCmp $G_SFN_DISABLED "0" find_root_sfn
   StrCpy ${L_TEMP_2} "Not supported"
@@ -886,7 +949,7 @@ copy_stopwords:
 
 copy_default_stopwords:
   File /oname=stopwords.default "..\engine\stopwords"
-  
+
   FileOpen  ${L_CFG} $PLUGINSDIR\popfile.cfg a
   FileSeek  ${L_CFG} 0 END
   FileWrite ${L_CFG} "pop3_port $G_POP3$\r$\n"
@@ -1340,6 +1403,28 @@ lang_done:
 SectionEnd
 
 #--------------------------------------------------------------------------
+# Installer Function: CheckStartMode
+# The "pre" function for the WELCOME page.
+#
+# If called from the main installer, no need to display another WELCOME page
+#--------------------------------------------------------------------------
+
+Function CheckStartMode
+
+  ; The command-line switch '/install' is used to suppress this wizard's
+  ; WELCOME page and language selection dialog when it is called from 'setup.exe'.
+
+  StrCmp $G_PFISETUP "/install" 0 show_WELCOME_page
+
+  ; Need to call the WELCOME page's "leave" function (to initialise $G_USERDIR)
+
+  Call ChooseDefaultDataDir
+  Abort
+
+show_WELCOME_page:
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Installer Function: ChooseDefaultDataDir
 # (the "leave" function for the WELCOME page)
 #
@@ -1356,10 +1441,20 @@ Function ChooseDefaultDataDir
   ; Starting with the 0.21.0 release, user-specific data is stored in the registry
 
   ReadRegStr $G_USERDIR HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath"
-  StrCmp $G_USERDIR "" use_default_locn
-  Goto exit
+  StrCmp $G_USERDIR "" look_elsewhere
+  IfFileExists "$G_USERDIR\*.*" exit
 
-use_default_locn:
+look_elsewhere:
+
+  ; All versions prior to 0.21.0 stored popfile.pl and popfile.cfg in the same folder
+
+  StrCpy $G_USERDIR $G_ROOTDIR
+  IfFileExists "$G_USERDIR\popfile.cfg" exit
+
+  ; Check if we are installing over a version which uses an early alternative folder structure
+
+  StrCpy $G_USERDIR "$G_ROOTDIR\user"
+  IfFileExists "$G_USERDIR\popfile.cfg" exit
 
   ;----------------------------------------------------------------------
   ; Default location for POPFile User Data files (popfile.cfg and others)
@@ -1446,7 +1541,7 @@ Function CheckExistingDataDir
   Pop ${L_CMPRE}
   StrCmp ${L_CMPRE} "" no_spaces
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "This computer is not configured to support short file names.\
+      "Current configuration does not support short file names\
       $\r$\n$\r$\n\
       Please select a folder location which does not contain spaces"
   Pop ${L_CMPRE}
@@ -1628,7 +1723,7 @@ save_langs:
   Call TrimNewlines
   Pop ${L_OLDUI}
 
-  ; Save the UI port settings (from popfile.cfg) for later use by the 'MakeItSafe' function
+  ; Save the UI port settings (from popfile.cfg) for later use by the 'MakeUserDirSafe' function
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "UI Port" "NewStyle" "$G_GUI"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "UI Port" "OldStyle" "${L_OLDUI}"
@@ -1902,6 +1997,67 @@ good_exit:
 
   !undef L_RESULT
 
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: MakeUserDirSafe
+#
+# If we are installing on top of a previous installation, we try to shut it down
+# (to allow the files to be overwritten without requiring a reboot)
+#--------------------------------------------------------------------------
+
+Function MakeUserDirSafe
+
+  StrCmp $G_PFISETUP "/install" nothing_to_check
+  IfFileExists "$G_USERDIR\popfile.cfg" 0 nothing_to_check
+
+  !define L_GUI_PORT  $R9
+  !define L_RESULT    $R8
+
+  Push ${L_GUI_PORT}
+  Push ${L_RESULT}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_UPGRADE)"
+  SetDetailsPrint listonly
+
+  ; If we are upgrading an existing installation then 'CheckExistingDataDir' will have
+  ; extracted the GUI port parameters from the existing popfile.cfg file
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_GUI_PORT} "ioA.ini" "UI Port" "NewStyle"
+  StrCmp ${L_GUI_PORT} "" try_old_style
+  DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_GUI_PORT} [new style port]"
+  Push ${L_GUI_PORT}
+  Call ShutdownViaUI
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "success" exit_now
+  StrCmp ${L_RESULT} "password?" manual_shutdown
+
+try_old_style:
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_GUI_PORT} "ioA.ini" "UI Port" "OldStyle"
+  StrCmp ${L_GUI_PORT} "" manual_shutdown
+  DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_GUI_PORT} [old style port]"
+  Push ${L_GUI_PORT}
+  Call ShutdownViaUI
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "success" exit_now
+
+manual_shutdown:
+  DetailPrint "Unable to shutdown automatically - manual intervention requested"
+  MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBMANSHUT_2)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBMANSHUT_3)"
+
+exit_now:
+  Pop ${L_RESULT}
+  Pop ${L_GUI_PORT}
+
+  !undef L_GUI_PORT
+  !undef L_RESULT
+
+nothing_to_check:
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -3834,7 +3990,7 @@ Function CheckEudoraRequests
   Push ${L_USER}
 
   ; If user has cancelled Eudora reconfiguration, there is nothing to do
-  
+
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_EMAIL} "ioE.ini" "Settings" "NumFields"
   StrCmp ${L_EMAIL} "1" exit
 
@@ -3921,7 +4077,7 @@ FunctionEnd
 # A "leave" function (CheckLaunchOptions) is used to act upon the selection made by the user.
 #
 # The user is allowed to change their selection by returning to this page (by clicking 'Back'
-# on the 'Finish' page) if corpus conversion is not required.
+# on the 'FINISH' page) if corpus conversion is not required.
 #
 # The [Inherited] section in 'ioC.ini' has information on the system tray icon and console mode
 # settings found in 'popfile.cfg'. Valid values are 0 (disabled), 1 (enabled) and ? (undefined).
@@ -3981,7 +4137,7 @@ page_enabled:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "State" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "State" "0"
 
-  ; If we have returned to this page from the 'Finish' page then we can use the [LastAction]
+  ; If we have returned to this page from the 'FINISH' page then we can use the [LastAction]
   ; data to select the appropriate radio button, otherwise we use the [Inherited] data.
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
@@ -4073,10 +4229,16 @@ lastaction_no:
 
   ; User has changed their mind: Shutdown the newly installed version of POPFile
 
-  NSISdl::download_quiet http://127.0.0.1:$G_GUI/shutdown "$PLUGINSDIR\shutdown.htm"
+  Push $G_GUI
+  Call ShutdownViaUI
   Pop ${L_TEMP}    ; Get the return value (and ignore it)
-  Push ${L_EXE}
-  Call WaitUntilUnlocked
+  StrCmp ${L_TEMP} "password?" 0 exit_without_banner
+  DetailPrint "Unable to shutdown automatically - manual intervention requested"
+  MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBMANSHUT_2)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBMANSHUT_3)"
   Goto exit_without_banner
 
 run_popfile:
@@ -4134,7 +4296,8 @@ do_not_show_banner:
   ; Before starting the newly installed POPFile, ensure that no other version of POPFile
   ; is running on the same UI port as the newly installed version.
 
-  NSISdl::download_quiet http://127.0.0.1:$G_GUI/shutdown "$PLUGINSDIR\shutdown.htm"
+  Push $G_GUI
+  Call ShutdownViaUI
   Pop ${L_TEMP}    ; Get the return value (and ignore it)
   Push ${L_EXE}
   Call WaitUntilUnlocked
@@ -4242,14 +4405,14 @@ FunctionEnd
 
 #--------------------------------------------------------------------------
 # Installer Function: CheckRunStatus
-# (the "pre" function for the 'Finish' page)
+# (the "pre" function for the 'FINISH' page)
 #
-# The 'Finish' page contains two CheckBoxes: one to control whether or not the installer
+# The 'FINISH' page contains two CheckBoxes: one to control whether or not the installer
 # starts the POPFile User Interface and one to control whether or not the 'ReadMe' file is
 # displayed. The User Interface only works when POPFile is running, so we must ensure its
 # CheckBox can only be ticked if the installer has started POPFile.
 #
-# NB: User can switch back and forth between the 'Start POPFile' page and the 'Finish' page
+# NB: User can switch back and forth between the 'Start POPFile' page and the 'FINISH' page
 # (when corpus conversion is not required)
 #--------------------------------------------------------------------------
 
@@ -4269,7 +4432,7 @@ Function CheckRunStatus
 
 no_reboot_reqd:
 
-  ; Enable the 'Run' CheckBox on the 'Finish' page (it may have been disabled on our last visit)
+  ; Enable the 'Run' CheckBox on the 'FINISH' page (it may have been disabled on our last visit)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "Flags" ""
 
@@ -4282,7 +4445,7 @@ no_reboot_reqd:
 corpus_conversion_check:
 
   ; If corpus conversion (from flat file or BerkeleyDB format) is required, we need to wait
-  ; until it has been completed before displaying the 'Finish' page (corpus conversion may take
+  ; until it has been completed before displaying the 'FINISH' page (corpus conversion may take
   ; several minutes, during which time the UI will appear to have 'locked up')
 
   ReadINIStr ${L_TEMP} "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Status"
@@ -4311,13 +4474,79 @@ FunctionEnd
 
 #--------------------------------------------------------------------------
 # Installer Function: RunUI
-# (the "Run" function for the 'Finish' page)
+# (the "Run" function for the 'FINISH' page)
 #--------------------------------------------------------------------------
 
 Function RunUI
 
   ExecShell "open" "http://127.0.0.1:$G_GUI"
 
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: ShowReadMe
+# (the "ReadMe" function for the 'FINISH' page)
+#--------------------------------------------------------------------------
+
+Function ShowReadMe
+
+  IfFileExists "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" 0 exit
+  ExecShell "open" "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk"
+
+exit:
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: RemoveEmptyCBPCorpus
+#
+# If the wizard used the CBP package to create some buckets, there may be
+# some empty corpus folders left behind (after POPFile has converted the
+# buckets to the new SQL format) so we remove these useless empty folders.
+#--------------------------------------------------------------------------
+
+Function RemoveEmptyCBPCorpus
+
+  IfFileExists "$PLUGINSDIR\${CBP_C_INIFILE}" 0 nothing_to_do
+
+  !define L_FOLDER_COUNT  $R9
+  !define L_FOLDER_PATH   $R8
+
+  Push ${L_FOLDER_COUNT}
+  Push ${L_FOLDER_PATH}
+
+  ; Now remove any empty corpus folders left behind after POPFile has converted the buckets
+  ; (if any) created by the CBP package.
+
+  ReadINIStr ${L_FOLDER_COUNT} "$PLUGINSDIR\${CBP_C_INIFILE}" "FolderList" "MaxNum"
+  StrCmp  ${L_FOLDER_COUNT} "" exit
+
+loop:
+  ReadINIStr ${L_FOLDER_PATH} "$PLUGINSDIR\${CBP_C_INIFILE}" "FolderList" "Path-${L_FOLDER_COUNT}"
+  StrCmp  ${L_FOLDER_PATH} "" try_next_one
+
+  ; Remove this corpus bucket folder if it is completely empty
+
+  RMDir ${L_FOLDER_PATH}
+
+try_next_one:
+  IntOp ${L_FOLDER_COUNT} ${L_FOLDER_COUNT} - 1
+  IntCmp ${L_FOLDER_COUNT} 0 corpus_root corpus_root loop
+
+corpus_root:
+
+  ; Remove the corpus folder if it is completely empty
+
+  ReadINIStr ${L_FOLDER_PATH} "$PLUGINSDIR\${CBP_C_INIFILE}" "CBP Data" "CorpusPath"
+  RMDir ${L_FOLDER_PATH}
+
+exit:
+  Pop ${L_FOLDER_PATH}
+  Pop ${L_FOLDER_COUNT}
+
+  !undef L_FOLDER_COUNT
+  !undef L_FOLDER_PATH
+
+nothing_to_do:
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -4377,7 +4606,7 @@ FunctionEnd
 # Uninstaller Function: un.PFIGUIInit
 # (custom un.onGUIInit function)
 #
-# Used to complete the initialisation of the uninstaller using language-specific strings.
+# Used to complete the initialization of the uninstaller using language-specific strings.
 #--------------------------------------------------------------------------
 
 Function un.PFIGUIInit
@@ -4493,7 +4722,8 @@ ui_port_done:
   Pop $G_GUI
   StrCmp $G_GUI "" use_other_port
   DetailPrint "$(PFI_LANG_UN_LOG_1) $G_GUI"
-  NSISdl::download_quiet http://127.0.0.1:$G_GUI/shutdown "$PLUGINSDIR\shutdown.htm"
+  Push $G_GUI
+  Call un.ShutdownViaUI
   Pop ${L_TEMP}
   Goto check_shutdown
 
@@ -4504,7 +4734,8 @@ use_other_port:
   Pop ${L_OLDUI}
   StrCmp ${L_OLDUI} "" remove_user_data
   DetailPrint "$(PFI_LANG_UN_LOG_1) ${L_OLDUI}"
-  NSISdl::download_quiet http://127.0.0.1:${L_OLDUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  Push ${L_OLDUI}
+  Call un.ShutdownViaUI
   Pop ${L_TEMP}
 
 check_shutdown:
@@ -4674,13 +4905,13 @@ appdata_valid:
   RMDir "${C_STD_DEFAULT_USERDATA}"
 
 remove_registry_data:
-  
+
   Call un.IsNT
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} 0 cleanup_registry
-  
+
   ; Delete current user's POPFile environment variables
-  
+
   DeleteRegValue HKCU "Environment" "POPFILE_ROOT"
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
   DeleteRegValue HKCU "Environment" "POPFILE_USER"
@@ -4698,14 +4929,14 @@ cleanup_registry:
   ; if $G_USERDIR was removed, skip these next ones
 
   IfFileExists "$G_USERDIR\*.*" 0 removed
-    
+
     ; Check if the user data was stored in same folder as the POPFile program files
-    
+
     IfFileExists "$G_USERDIR\popfile.pl" removed
     IfFileExists "$G_USERDIR\perl.exe" removed
-    
+
     ; Assume it is safe to offer to remove everything now
-    
+
     MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_2)" IDNO removed
     DetailPrint "$(PFI_LANG_UN_LOG_8)"
     Delete $G_USERDIR\*.* ; this would be skipped if the user hits no
