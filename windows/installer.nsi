@@ -283,7 +283,7 @@
   ; Interface Settings
   ;-----------------------------------------
 
-  ; The 'hdr-common.bmp' icon is only 90 x 57 pixels, much smaller than the 150 x 57 pixel
+  ; The 'hdr-common.bmp' logo is only 90 x 57 pixels, much smaller than the 150 x 57 pixel
   ; space provided by the default 'modern_headerbmpr.exe' UI, so we use a custom UI which
   ; leaves more room for the TITLE and SUBTITLE text.
   
@@ -2150,15 +2150,15 @@ remove_perl:
   DetailPrint "$(un.PFI_LANG_PROGRESS_6)"
   SetDetailsPrint listonly
 
-  !insertmacro SafeRecursiveRMDir "$INSTDIR\auto"
-  !insertmacro SafeRecursiveRMDir "$INSTDIR\Carp"
-  !insertmacro SafeRecursiveRMDir "$INSTDIR\File"
-  !insertmacro SafeRecursiveRMDir "$INSTDIR\IO"
-  !insertmacro SafeRecursiveRMDir "$INSTDIR\MIME"
-  !insertmacro SafeRecursiveRMDir "$INSTDIR\Sys"
-  !insertmacro SafeRecursiveRMDir "$INSTDIR\Text"
-  !insertmacro SafeRecursiveRMDir "$INSTDIR\warnings"
-  !insertmacro SafeRecursiveRMDir "$INSTDIR\Win32"
+  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\auto"
+  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\Carp"
+  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\File"
+  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\IO"
+  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\MIME"
+  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\Sys"
+  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\Text"
+  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\warnings"
+  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\Win32"
 
   StrCmp ${L_UPGRADE} "yes" Removed
 

@@ -99,29 +99,33 @@
 # Macro used by the uninstaller
 # (guards against unexpectedly removing the corpus or message history)
 #
+# Usage:
+#   !insertmacro SafeRecursiveRMDir ${__LINE__} $(L_CORPUS}
+#
+# ${__LINE__} holds the linenumber of the '!insertmacro' command
 #--------------------------------------------------------------------------
 
-!macro SafeRecursiveRMDir PATH
+!macro SafeRecursiveRMDir UNIQUE_ID PATH
 
-  StrCmp ${L_SUBCORPUS} "no" +6       ; if "no" then goto pseudo-label A
+  StrCmp ${L_SUBCORPUS} "no" Label_A_${UNIQUE_ID}
   Push ${L_CORPUS}
   Push "${PATH}"
   Call un.StrStr
   Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" 0 +8            ; if not "" then goto pseudo-label C
+  StrCmp ${L_TEMP} "" 0 Label_C_${UNIQUE_ID}
 
-; pseudo-label A
-  StrCmp ${L_SUBHISTORY} "no" +6      ; if "no" then goto pseudo-label B
+Label_A_${UNIQUE_ID}:
+  StrCmp ${L_SUBHISTORY} "no" Label_B_${UNIQUE_ID}
   Push ${L_HISTORY}
   Push "${PATH}"
   Call un.StrStr
   Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" 0 +2            ; if not "" then goto pseudo-label C
-  
-; pseudo-label B
+  StrCmp ${L_TEMP} "" 0 Label_C_${UNIQUE_ID}
+
+Label_B_${UNIQUE_ID}:
   RMDir /r "${PATH}"
-  
-; pseudo-label C
+
+Label_C_${UNIQUE_ID}:
 
 !macroend
 
@@ -296,7 +300,7 @@ use_cfg_data:
   Push ${L_CORPUS}
   Call un.GetDataPath
   Pop ${L_RESULT}
-  
+
 got_result:
   Pop ${L_TEMP}
   Pop ${L_FILE_HANDLE}
@@ -397,13 +401,13 @@ use_cfg_data:
 
 strip_slash:
   StrCpy ${L_HISTORY} ${L_HISTORY} -1
-  
+
 no_trailing_slash:
   Push ${L_SOURCE}
   Push ${L_HISTORY}
   Call un.GetDataPath
   Pop ${L_RESULT}
-  
+
 got_result:
   Pop ${L_TEMP}
   Pop ${L_FILE_HANDLE}
@@ -460,7 +464,7 @@ Function un.GetDataPath
   Exch ${L_BASEDIR}      ; the 'base directory' used for cases where 'data folder' is relative
   Push ${L_RESULT}
   Push ${L_TEMP}
-  
+
   StrCmp ${L_DATA} "" 0 strip_quotes
   StrCpy ${L_DATA} ${L_BASEDIR}
   Goto got_path
@@ -905,15 +909,15 @@ FunctionEnd
     !define L_EXE           $R9   ; full path to the EXE file which is to be monitored
     !define L_FILE_HANDLE   $R8
     !define L_TIMEOUT       $R7   ; used to avoid an infinite loop
-    
+
     Exch ${L_EXE}
     Push ${L_FILE_HANDLE}
     Push ${L_TIMEOUT}
-    
-    IfFileExists "${L_EXE}" 0 exit_now 
+
+    IfFileExists "${L_EXE}" 0 exit_now
     SetFileAttributes "${L_EXE}" NORMAL
     StrCpy ${L_TIMEOUT} ${C_SHUTDOWN_LIMIT}
-    
+
   check_if_unlocked:
     Sleep ${C_SHUTDOWN_DELAY}
     ClearErrors
@@ -922,12 +926,12 @@ FunctionEnd
     IfErrors 0 exit_now
     IntOp ${L_TIMEOUT} ${L_TIMEOUT} - 1
     IntCmp ${L_TIMEOUT} 0 exit_now exit_now check_if_unlocked
-   
+
    exit_now:
     Pop ${L_TIMEOUT}
     Pop ${L_FILE_HANDLE}
     Pop ${L_EXE}
-    
+
     !undef L_EXE
     !undef L_FILE_HANDLE
     !undef L_TIMEOUT
