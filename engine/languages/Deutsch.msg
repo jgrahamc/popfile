@@ -1,6 +1,7 @@
 # Copyright (c) 2001-2003 John Graham-Cumming
 
 # Identify the language and character set used for the interface
+
 LanguageCode                            de
 LanguageCharset                         ISO-8859-1
 
@@ -50,7 +51,6 @@ Header_Configuration                    Konfiguration
 Header_Advanced                         Erweitert
 Header_Security                         Sicherheit
 Header_Magnets                          Magnete
-
 Footer_HomePage                         POPFile Homepage
 Footer_Manual                           Handbuch
 Footer_Forums                           Foren
@@ -64,26 +64,35 @@ Configuration_Error3                    Der POP3 Port muß zwischen 1 und 65535 l
 Configuration_Error4                    Die Seitengröße muß zwischen 1 und 1000 liegen.
 Configuration_Error5                    Die Anzahl der Tage im Verlauf muß zwischen 1 und 366 liegen.
 Configuration_Error6                    Der TCP Timeout muß zwischen 10 und 300 liegen.
+Configuration_Error7                    Der XML-RPC Port muß zwischen 1 und 65535 liegen.
 Configuration_POP3Port                  POP3 Port
-Configuration_POP3Update                Neuer POP3 Port: %s; Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
-Configuration_Separator                 Trennzeichen
-Configuration_SepUpdate                 Neues Trennzeichen: %s
+Configuration_POP3Update                Neuer POP3 Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Configuration_XMLRPCUpdate              Neuer XML-RPC Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Configuration_XMLRPCPort                XML-RPC Port
+Configuration_SMTPPort                  SMTP Port
+Configuration_SMTPUpdate                Neuer SMPT Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Configuration_NNTPPort                  NNTP Port
+Configuration_NNTPUpdate                Neuer NNTP Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Configuration_POP3Separator             POP3 Server:Port:Benutzer Trennzeichen
+Configuration_NNTPSeparator             NNTP Server:Port:Benutzer Trennzeichen
+Configuration_POP3SepUpdate             Neues POP3 Trennzeichen: %s
+Configuration_NNTPSepUpdate             Neues NNTP Trennzeichen: %s
 Configuration_UI                        Web Port für Kontrollzentrum
-Configuration_UIUpdate                  Neuer Web Port für Kontrollzentrum: %s; Dieser Änderung wird erst nach einem Neustart von POPFile wirksam.
-Configuration_History                   Anzahl Emails pro Seite
-Configuration_HistoryUpdate             Neue Anzahl Emails pro Seite: %s
-Configuration_Days                      Emails x Tage im Verlauf speichern
-Configuration_DaysUpdate                Emails werden nun %s im Verlauf gespeichert
+Configuration_UIUpdate                  Neuer Web Port für Kontrollzentrum: %s - Dieser Änderung wird erst nach einem Neustart von POPFile wirksam.
+Configuration_History                   Anzahl Nachrichten pro Seite
+Configuration_HistoryUpdate             Neue Anzahl Nachrichten pro Seite: %s
+Configuration_Days                      Nachrichten x Tage im Verlauf speichern
+Configuration_DaysUpdate                Nachrichten werden nun %s Tage im Verlauf gespeichert
 Configuration_UserInterface             Benutzeroberfläche
 Configuration_Skins                     Skins
 Configuration_SkinsChoose               Skin auswählen
 Configuration_Language                  Sprache
 Configuration_LanguageChoose            Sprache auswählen
-Configuration_ListenPorts               Porteinstellungen
+Configuration_ListenPorts               Moduleinstellungen
 Configuration_HistoryView               Verlaufsansicht
-Configuration_TCPTimeout                TCP Verbindungstimeout
-Configuration_TCPTimeoutSecs            TCP Verbindungstimeout in Sekunden
-Configuration_TCPTimeoutUpdate          Neuer TCP Verbidungstimeout: %s
+Configuration_TCPTimeout                Verbindungstimeout
+Configuration_TCPTimeoutSecs            Verbindungstimeout in Sekunden
+Configuration_TCPTimeoutUpdate          Neuer Verbidungstimeout: %s
 Configuration_ClassificationInsertion   Einstufung anzeigen
 Configuration_SubjectLine               Betreff-Zeile ändern
 Configuration_XTCInsertion              X-Text-Classification einfügen
@@ -134,7 +143,7 @@ Password_Enter                          Paßwort eingeben
 Password_Go                             Anmelden
 Password_Error1                         Falsches Paßwort
 
-Security_Error1                         Der sichere Port muß zwischen 1 und 65535 liegen.
+Security_Error1                         Der Port muß zwischen 1 und 65535 liegen.
 Security_Stealth                        Stealth Modus/Serverbetrieb
 Security_NoStealthMode                  Nein (Stealth Modus)
 Security_ExplainStats                   (Wenn Sie diese Funktion einschalten, sendet POPFile täglich die drei folgenden Werte an ein Skript auf www.usethesource.com: bc (Anzahl von Ihnen eingerichteter Kategorien), mc (Anzahl von POPFile eingestufter Nachrichten) und ec (Anzahl der Einstufungsfehler). Diese werden in einer Datei gespeichert und benutzt, um öffentliche Statistiken darüber zu erstellen, wie POPFile genutzt wird und wie gut es dabei funktioniert. Die Daten werden etwa 5 Tage auf dem Server gespeichert und dann gelöscht. Zuordnungen zwischen IP-Adressen und statistischen Daten werden nicht gespeichert.)
@@ -142,13 +151,20 @@ Security_ExplainUpdate                  (Wenn Sie diese Funktion einschalten, se
 Security_PasswordTitle                  Paßwort für Benutzeroberfläche
 Security_Password                       Paßwort
 Security_PasswordUpdate                 Neues Paßwort: %s
-Security_AUTHTitle                      gesicherte Kennwortauthentizierung/AUTH
-Security_SecureServer                   gesicherter Server
-Security_SecureServerUpdate             Neuer gesicherter Server: %s; Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
-Security_SecurePort                     gesicherter Port
-Security_SecurePortUpdate               Neuer gesicherter Port %s; Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Security_AUTHTitle                      externe Server
+Security_SecureServer                   POP3 SPA/AUTH Server
+Security_SecureServerUpdate             Neuer POP3 SPA/AUTH Server: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Security_SecurePort                     POP3 SPA/AUTH Port
+Security_SecurePortUpdate               Neuer POP3 SPA/AUTH Port %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Security_SMTPServer                     externer SMTP Server
+Security_SMTPServerUpdate               Neuer externer SMTP Server: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Security_SMTPPort                       externer SMTP port
+Security_SMTPPortUpdate                 Neuer externer SMTP Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
 Security_POP3                           POP3 Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFile)
+Security_SMTP                           SMTP Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFILE)
+Security_NNTP                           NNTP Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFile)
 Security_UI                             HTTP (Benutzeroberfläche) Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFile)
+Security_XMLRPC                         XML-RPC Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFile)
 Security_UpdateTitle                    Automatisch auf Updates prüfen
 Security_Update                         Täglich nach POPFile Updates suchen
 Security_StatsTitle                     Statistik Report
@@ -160,7 +176,7 @@ Magnet_Error3                           Erstelle neuen Magnet '%s' in Kategorie 
 Magnet_CurrentMagnets                   Aktuelle Magnete
 Magnet_Message1                         Die folgenden Magnete ordnen neue Post zwingend in eine angegebene Kategorie ein.
 Magnet_CreateNew                        Neuen Magnet erstellen
-Magnet_Explanation                      Drei Typen von Magneten sind verfügbar: <ul><li>Absenderadresse oder -name:</b> z.B.: hans@firma.de, um eine bestimmte Adresse zu erfassen, <br />firma.de, um jeden zu erfassen, der von firma.de sendet, <br />Hans Mustermann, um eine bestimmte Person zu erfassen; Hans erfaßt jeden Hans</li><li><b>Empfängeradresse oder -name:</b> Wie beim Absender-Magnet nur für die Empfängeradresse in der Email.</li><li><b>Wörter im Betreff:</b> z.B.: "Hallo", um alle Nachrichten mit "Hallo" im Betreff zu erfassen</li></ul>
+Magnet_Explanation                      Drei Typen von Magneten sind verfügbar: <ul><li>Absenderadresse oder -name:</b> z.B.: hans@firma.de, um eine bestimmte Adresse zu erfassen, <br />firma.de, um jeden zu erfassen, der von firma.de sendet, <br />Hans Mustermann, um eine bestimmte Person zu erfassen; Hans erfaßt jeden Hans</li><li><b>Empfängeradresse oder -name:</b> Wie beim Absender-Magnet nur für die Empfängeradresse der Nachricht.</li><li><b>Wörter im Betreff:</b> z.B.: "Hallo", um alle Nachrichten mit "Hallo" im Betreff zu erfassen</li></ul>
 Magnet_MagnetType                       Typ des Magnets
 Magnet_Value                            Wert
 Magnet_Always                           Immer dieser Kategorie zuordnen
@@ -180,8 +196,8 @@ Bucket_SubjectModification              Betreff ändern
 Bucket_ChangeColor                      Farbe ändern
 Bucket_NotEnoughData                    Nicht genügend Daten
 Bucket_ClassificationAccuracy           Genauigkeit
-Bucket_EmailsClassified                 Emails klassifiziert
-Bucket_EmailsClassifiedUpper            Emails klassifiziert
+Bucket_EmailsClassified                 Nachrichten klassifiziert
+Bucket_EmailsClassifiedUpper            Nachrichten klassifiziert
 Bucket_ClassificationErrors             Einstufungsfehler
 Bucket_Accuracy                         Genauigkeit
 Bucket_ClassificationCount              Anzahl Einstufungen
@@ -215,17 +231,17 @@ Session_Error                           Ihre POPFile-Sitzung ist abgelaufen. Die
 
 Header_MenuSummary                      Diese Tabelle ist das Navigationsmenü, das Zugang zu den einzelnen Bereichen des Kontrollzentrums bietet.
 History_MainTableSummary                Diese Tabelle zeigt Absender und Betreff der letzten empfangenen Nachrichten an und ermöglicht es, diese durchzusehen und zu reklassifizieren. Ein Klick auf den Betreff zeigt die vollständige Nachricht an sowie Details, warum diese so und nicht anders klassifiziert wurde. Die Spalte "Sollte sein" ermöglicht es, anzugeben, in welche Kategorie die Nachricht gehört bzw. entsprechende Änderungen rückgängig zu machen. Die Spalte "Delete" ermöglicht es, einzelne Nachrichten aus dem Verlauf zu löschen, falls Sie diese nicht mehr benötigen.
-History_OpenMessageSummary              Diese Tabelle enthält den kompletten Text einer Email. Die Wörter sind entsprechend der Kategorie eingefärbt, in die sie am wahrscheinlichsten passen.
-Bucket_MainTableSummary                 Diese Tabelle bietet einen Überblick über die einzelnen Kategorien. Jede Reihe zeigt Name, Gesamtzahl der Wörter und die Anzahl verschiedener Wörter pro Kategorie an, ob die Betreff-Zeile der Email bei der Klassifizierung geändert wird, ob die Nachrichten dieser Kategorie in Quarantäne gestellt werden sollen, sowie eine Tabelle zur Auswahl einer Farbe, in der alle zu dieser Kategorie gehörenden Elemente im Kontrollzentrum dargestellt werden sollen.
-Bucket_StatisticsTableSummary           Diese Tabelle zeigt drei verschiedene Statistiken bezüglich POPFiles Gesamtleistung an. Die erste: Wie fehlerfrei ist die Einordnung in die entsprechenden Kategorien? Die zweite: Wie viele Emails wurden analysiert und wie wurden sie eingeordnet? Die dritte: Wie viele Wörter gehören zu jeder Kategorie und wie hoch ist der Prozentsatz zur Gesamtzahl?
+History_OpenMessageSummary              Diese Tabelle enthält den kompletten Text einer Nachricht. Die Wörter sind entsprechend der Kategorie eingefärbt, in die sie am wahrscheinlichsten passen.
+Bucket_MainTableSummary                 Diese Tabelle bietet einen Überblick über die einzelnen Kategorien. Jede Reihe zeigt Name, Gesamtzahl der Wörter und die Anzahl verschiedener Wörter pro Kategorie an, ob die Betreff-Zeile der Nachricht bei der Klassifizierung geändert wird, ob die Nachrichten dieser Kategorie in Quarantäne gestellt werden sollen, sowie eine Tabelle zur Auswahl einer Farbe, in der alle zu dieser Kategorie gehörenden Elemente im Kontrollzentrum dargestellt werden sollen.
+Bucket_StatisticsTableSummary           Diese Tabelle zeigt drei verschiedene Statistiken bezüglich POPFiles Gesamtleistung an. Die erste: Wie fehlerfrei ist die Einordnung in die entsprechenden Kategorien? Die zweite: Wie viele Nachrichten wurden analysiert und wie wurden sie eingeordnet? Die dritte: Wie viele Wörter gehören zu jeder Kategorie und wie hoch ist der Prozentsatz zur Gesamtzahl?
 Bucket_MaintenanceTableSummary          Diese Tabelle enthält Formulare zum Erstellen, Löschen und Umbenennen von Kategorien und um die relative Wahrscheinlichkeit der Wörter in jeder einzelnen Kategorie nachzuschlagen. 
-Bucket_AccuracyChartSummary             Diese Tabelle stellt die Genauigkeit der Email Sortierung grafisch dar.
-Bucket_BarChartSummary                  Diese Tabelle stellt einen Prozentanteil grafisch dar. Sie wird sowohl für die Anzahl der eingestuften Emails als auch für die Gesamtzahl der Wörter genutzt.
-Bucket_LookupResultsSummary             Diese Tabelle stellt die Wahrscheinlichkeiten bezüglich jedes angegebenen Wortes dar. Für jede Kategorie wird folgendes angezeigt: Die Häufigkeit, mit der das Wort auftritt, die Wahrscheinlichkeit, daß es in dieser Kategorie auftritt und die Auswirkungen auf die Punktzahl der Kategorie insgesamt, falls das Wort in der Email auftaucht.
+Bucket_AccuracyChartSummary             Diese Tabelle stellt die Genauigkeit der Nachrichten-Sortierung grafisch dar.
+Bucket_BarChartSummary                  Diese Tabelle stellt einen Prozentanteil grafisch dar. Sie wird sowohl für die Anzahl der eingestuften Nachrichten als auch für die Gesamtzahl der Wörter genutzt.
+Bucket_LookupResultsSummary             Diese Tabelle stellt die Wahrscheinlichkeiten bezüglich jedes angegebenen Wortes dar. Für jede Kategorie wird folgendes angezeigt: Die Häufigkeit, mit der das Wort auftritt, die Wahrscheinlichkeit, daß es in dieser Kategorie auftritt und die Auswirkungen auf die Punktzahl der Kategorie insgesamt, falls das Wort in einer Nachricht auftaucht.
 Bucket_WordListTableSummary             Diese Tabelle bietet eine Liste aller Wörter einer bestimmten Kategorie - reihenweise sortiert nach dem ersten Buchstaben.
-Magnet_MainTableSummary                 Diese Tabelle zeigt eine Liste der Magnete an, die dazu benutzt werden, um Emails automatisch nach festen Kriterien zu sortieren. Jede Reihe zeigt an, wie der Magnet definiert ist, in welche Kategorie er einsortiert und eine Schaltfläche, um den Magnet zu löschen.
+Magnet_MainTableSummary                 Diese Tabelle zeigt eine Liste der Magnete an, die dazu benutzt werden, um Nachrichten automatisch nach festen Kriterien zu sortieren. Jede Reihe zeigt an, wie der Magnet definiert ist, in welche Kategorie er einsortiert und eine Schaltfläche, um den Magnet zu löschen.
 Configuration_MainTableSummary          Diese Tabelle enthält einige Formulare zur Konfiguration von POPFile.
-Configuration_InsertionTableSummary     Diese Tabelle enthält Schaltflächen zur Konfiguration, ob bestimmte Änderungen an Kopfzeilen oder Betreff der Email gemacht werden sollen, bevor diese an das Email Programm weitergegeben wird.
+Configuration_InsertionTableSummary     Diese Tabelle enthält Schaltflächen zur Konfiguration, ob bestimmte Änderungen an Kopfzeilen oder Betreff der Nachricht gemacht werden sollen, bevor diese an das entsprechende Programm weitergegeben wird.
 Security_MainTableSummary               Diese Tabelle bietet Einstellungsmöglichkeiten, die die Sicherheit von POPFile insgesamt betreffen, ob es automatisch auf neue Versionen prüfen soll oder ob Statistiken über die Leistung von POPFile an eine zentrale Datenbank zwecks der Erstellung von Gesamtstatistiken geschickt werden sollen.
-Advanced_MainTableSummary               Diese Tabelle enthält eine Liste von Wörtern, die POPFile ignoriert, wenn es eine Email analysiert. Dies betrifft Wörter, die besonders häufig in Emails auftauchen. Diese sind reihenweise alphabetisch nach dem ersten Buchstaben sortiert.
+Advanced_MainTableSummary               Diese Tabelle enthält eine Liste von Wörtern, die POPFile ignoriert, wenn es eine Nachricht analysiert. Dies betrifft Wörter, die besonders häufig in Nachrichten auftauchen. Diese sind reihenweise alphabetisch nach dem ersten Buchstaben sortiert.
 
