@@ -383,7 +383,7 @@ sub parse_stream
                         $self->{from} = $argument if ( $self->{from} eq '' ) ;
                     }
 
-                    $self->{to} = $argument if ( ( $header =~ /To/ ) && ( $self->{to} eq '' ) );
+                    $self->{to} = $argument if ( ( $header =~ /To/i ) && ( $self->{to} eq '' ) );
                     
                     while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))>// )  {
                         update_word($self, $1, 0, ';', '&');
