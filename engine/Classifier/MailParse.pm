@@ -232,13 +232,13 @@ sub add_line
 
             # Pull out any email addresses in the line that are marked with <> and have an @ in them
 
-            while ( $line =~ s/(mailto:)?([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([\) \&\?\:\/ >\&\;])// )  {
+            while ( $line =~ s/(mailto:)?([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+\.[[:alpha:]0-9\-_]+))([\&\?\:\/ >\&\;])// )  {
                 update_word($self, $2, $encoded, ($1?$1:''), '[\&\?\:\/ >\&\;]', $prefix);
                 add_url($self, $3, $encoded, '\@', '[\&\?\:\/]', $prefix);
             }
 
             # Grab domain names
-            while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro)([^[:alpha:]0-9\-_\.]|$)/$4/ )  {
+            while ( $line =~ s/(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro)([^[:alpha:]0-9\-_\.]|$)/$4/i )  {
                  add_url($self, "$1$3", $encoded, '', '', $prefix);
             }
 
