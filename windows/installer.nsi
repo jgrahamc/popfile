@@ -285,9 +285,10 @@
   !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
   !define MUI_FINISHPAGE_SHOWREADME_FUNCTION "ShowReadMe"
 
-  ; Debug aid: Allow log file checking (by clicking "Show Details" button on the "Install" page)
+  ; Debug aid: Display the log during the installation and wait for user to click 'Next' at end
 
-#  !define MUI_FINISHPAGE_NOAUTOCLOSE
+  ShowInstDetails show
+  !define MUI_FINISHPAGE_NOAUTOCLOSE
 
   ;-----------------------------------------
   ; General Settings - Other Settings
@@ -849,7 +850,7 @@ update_config:
 skip_autostart_set:
 
   ; Remove redundant links (used by earlier versions of POPFile)
-  
+
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile in background.lnk"
 
@@ -1220,30 +1221,42 @@ Function MakeItSafe
   ; POPFile v0.20.0 and later may be using one of four popfile*.exe files.
   ; Earlier versions of POPFile (up to and including 0.19.1) may be using wperl.exe or perl.exe.
 
+  DetailPrint "Checking $INSTDIR\popfileb.exe"
+
   Push "$INSTDIR\popfileb.exe"
   Call CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
+
+  DetailPrint "Checking $INSTDIR\popfileib.exe"
 
   Push "$INSTDIR\popfileib.exe"
   Call CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
 
+  DetailPrint "Checking $INSTDIR\popfilef.exe"
+
   Push "$INSTDIR\popfilef.exe"
   Call CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
+
+  DetailPrint "Checking $INSTDIR\popfileif.exe"
 
   Push "$INSTDIR\popfileif.exe"
   Call CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
 
+  DetailPrint "Checking $INSTDIR\wperl.exe"
+
   Push "$INSTDIR\wperl.exe"
   Call CheckIfLocked
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" 0 attempt_shutdown
+
+  DetailPrint "Checking $INSTDIR\perl.exe"
 
   Push "$INSTDIR\perl.exe"
   Call CheckIfLocked
@@ -1259,7 +1272,7 @@ attempt_shutdown:
   Pop ${L_OLD_GUI}
   StrCmp ${L_OLD_GUI} "" try_other_port
 
-  DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_OLD_GUI}"
+  DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_OLD_GUI} [old style port]"
   NSISdl::download_quiet http://127.0.0.1:${L_OLD_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" check_exe
@@ -1270,13 +1283,76 @@ try_other_port:
   Pop ${L_NEW_GUI}
   StrCmp ${L_NEW_GUI} "" check_exe
 
-  DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_NEW_GUI}"
+  DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_NEW_GUI} [new style port]"
   NSISdl::download_quiet http://127.0.0.1:${L_NEW_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_RESULT} ; Ignore the result
 
 check_exe:
+  DetailPrint "Waiting for '${L_EXE}' to unlock after NSISdl request..."
+  DetailPrint "Please be patient, this may take more than 30 seconds"
   Push ${L_EXE}
   Call WaitUntilUnlocked
+  DetailPrint "Checking if '${L_EXE}' is still locked after NSISdl request..."
+  Push ${L_EXE}
+  Call CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" unlocked_exit
+
+  StrCmp ${L_OLD_GUI} "" try_new_style
+
+  DetailPrint "Trying browser request for ${L_OLD_GUI} [old style port]"
+  ClearErrors
+  ExecShell "open" "http://127.0.0.1:${L_OLD_GUI}/shutdown"
+  IfErrors 0 old_ok
+  DetailPrint "ExecShell error detected"
+
+old_ok:
+  DetailPrint "Waiting for 5 seconds..."
+  Sleep 5000
+  BringToFront
+  DetailPrint "Waiting for '${L_EXE}' to unlock after browser request..."
+  DetailPrint "Please be patient, this may take more than 30 seconds"
+  Push ${L_EXE}
+  Call WaitUntilUnlocked
+  DetailPrint "Checking if '${L_EXE}' is still locked after browser request..."
+  Push ${L_EXE}
+  Call CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" unlocked_exit
+
+try_new_style:
+  StrCmp ${L_NEW_GUI} "" manual_shutdown_required
+  DetailPrint "Trying browser request for ${L_NEW_GUI} [new style port]"
+  ClearErrors
+  ExecShell "open" "http://127.0.0.1:${L_NEW_GUI}/shutdown"
+  IfErrors 0 new_ok
+  DetailPrint "ExecShell error detected"
+
+new_ok:
+  DetailPrint "Waiting for 5 seconds..."
+  Sleep 5000
+  BringToFront
+  DetailPrint "Waiting for '${L_EXE}' to unlock after browser request..."
+  DetailPrint "Please be patient, this may take more than 30 seconds"
+  Push ${L_EXE}
+  Call WaitUntilUnlocked
+  DetailPrint "Checking if '${L_EXE}' is still locked after browser request..."
+  Push ${L_EXE}
+  Call CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" unlocked_exit
+
+manual_shutdown_required:
+  DetailPrint "Unable to shutdown automatically - manual intervention requested"
+  MessageBox MB_OK|MB_TOPMOST "Unable to shutdown POPFile automatically.\
+      $\r$\n$\r$\n\
+      Please shutdown POPFile manually now.\
+      $\r$\n$\r$\n\
+      When POPFile has been shutdown, click 'OK' to continue."
+  Goto exit_now
+
+unlocked_exit:
+  DetailPrint "File is now unlocked"
 
 exit_now:
   Pop ${L_RESULT}
@@ -2239,6 +2315,7 @@ run_popfile:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "console" exit_without_banner
   StrCmp ${L_TEMP} "no" lastaction_console
+  StrCmp ${L_TEMP} "" lastaction_console
   StrCpy ${L_EXE} "$INSTDIR\popfile${L_TRAY}b.exe"
 
 lastaction_console:
@@ -2250,6 +2327,7 @@ run_in_background:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "background" exit_without_banner
   StrCmp ${L_TEMP} "no" lastaction_background
+  StrCmp ${L_TEMP} "" lastaction_background
   StrCpy ${L_EXE} "$INSTDIR\popfile${L_TRAY}f.exe"
 
 lastaction_background:
@@ -2279,7 +2357,7 @@ display_banner:
       $\r$\n$\r$\n\
       Click 'OK' when the 'POPFile Engine v0.20.0 running' message appears."
   Goto exit_without_banner
-  
+
 continue:
 
   ; Wait until POPFile is ready to display the UI (may take a second or so)
