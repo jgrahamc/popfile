@@ -32,7 +32,7 @@ test_assert( `rm -rf messages` == 0 );
 
 unlink( 'stopwords' );
 open STOPS, ">stopwords";
-print "one\ntwo\nthree\n";
+print STOPS "one\ntwo\nthree\n";
 close STOPS;
 
 mkdir 'messages';
@@ -281,8 +281,10 @@ if ( $pid == 0 ) {
             next;
 	}
 
-        if ( $line =~ /^(SETINPUT|SETSUBMIT) +([^ ]+) (.+)$/ ) {
-            form_input( $2, $3 );
+        if ( $line =~ /^(SETINPUT|SETSUBMIT) +([^ ]+) ?(.+)?$/ ) {
+            my ( $name, $value ) = ( $2, $3 );
+            $value = '' if ( !defined( $value ) );
+            form_input( $name, $value );
             next if ( $line =~ /^SETINPUT/ );
 	}
 
@@ -300,6 +302,11 @@ if ( $pid == 0 ) {
 
         if ( $line =~ /^MATCH +(.+)$/ ) {
             test_assert_regexp( $content, "\Q$1\E", "From script line $line_number" );
+            next;
+        }
+
+        if ( $line =~ /^NOTMATCH +(.+)$/ ) {
+            test_assert_not_regexp( $content, "\Q$1\E", "From script line $line_number" );
             next;
         }
 

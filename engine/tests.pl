@@ -127,6 +127,7 @@ sub test_assert_equal
 # ---------------------------------------------------------------------------------------------
 #
 # test_assert_regexp    -  Perform a test and assert that its result matches a regexp
+# test_assert_not_regexp - Perform a test and assert that the regexp does not match
 #
 # $file                 The name of the file invoking the test
 # $line                 The line in the $file where the test can be found
@@ -147,6 +148,14 @@ sub test_assert_regexp
     my $result = ( $test =~ /$expected/m );
 
     test_report( $result, "expecting to match [$expected] and got [$test]", $file, $line, $context );
+}
+
+sub test_assert_not_regexp
+{
+    my ( $file, $line, $test, $expected, $context ) = @_;
+    my $result = !( $test =~ /$expected/m );
+
+    test_report( $result, "unexpected to match of [$expected]", $file, $line, $context );
 }
 
 # MAIN
@@ -183,6 +192,7 @@ foreach my $test (@tests) {
         while (<SUITE>) {
                 my $line = $_;
                 $ln += 1;
+                $line =~ s/(test_assert_not_regexp\()/$1 '$test', $ln,/g;
                 $line =~ s/(test_assert_regexp\()/$1 '$test', $ln,/g;
                 $line =~ s/(test_assert_equal\()/$1 '$test', $ln,/g;
                 $line =~ s/(test_assert\()/$1 '$test', $ln,/g;

@@ -31,6 +31,7 @@
 #
 # GET <url>         Get the URL (note the host and port will be added for you)
 # MATCH <data>      Match the return from last URL fetch against the data
+# NOTMATCH <data>   Must not match the return from last URL fetch against the data
 # MATCH/ENDMATCH    Encloses a block of test to find in the return from the last URL fetch
 # CODE/ENDCODE      Arbitrary code that should be executed
 # INPUTIS a b       Assert that form item a has value b
@@ -395,6 +396,7 @@ CONFIGIS html_password secret
 MATCH Updated password to secret
 SETSUBMIT password
 INPUTIS password
+CONFIGIS html_password
 MATCH Updated password to 
 
 # TODO Check SMTP stealth (write when doing TestSMTP)
@@ -415,11 +417,22 @@ MATCH three
 # Check add ignore word
 
 CONFIGIS newword
-SETSUBMIT newword four
-MATCH four
+SETSUBMIT newword four11@.-_
+MATCH four11@.-_
+SETSUBMIT newword ba"d
+MATCH Ignored words can only contain alphanumeric, ., _, -, or @ characters
 
-# TODO Check remove ignore word
-# TODO Check change arbitrary parameter
+# Check remove ignore word
+
+CONFIGIS word
+SETSUBMIT word four11@.-_
+NOTMATCH four11@.-_
+
+# Check change arbitrary parameter
+
+SETSUBMIT parameter_bayes_hostname testhostname
+CONFIGIS bayes_hostname testhostname
+INPUTIS parameter_bayes_hostname testhostname
 
 # TODO Check shutdown operation
 # TODO Check bad session key

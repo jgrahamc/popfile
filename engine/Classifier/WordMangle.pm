@@ -149,6 +149,10 @@ sub add_stopword
 
     $stopword = $self->mangle( $stopword, 0, 1 );
 
+    if ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) {
+        return 0;
+    }
+
     if ( $stopword ne '' ) {
         $self->{stop__}{$stopword} = 1;
         $self->save_stopwords();

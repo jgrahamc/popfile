@@ -47,6 +47,7 @@ test_assert_equal( $w->add_stopword( '' ), 0 );
 test_assert_equal( $w->remove_stopword( '' ), 0 );
 test_assert_equal( $w->add_stopword( 'A1234bef66' ), 0 );
 test_assert_equal( $w->remove_stopword( 'A1234bef66' ), 0 );
+test_assert_equal( $w->add_stopword( 'b*ox' ), 0 );
 
 # Getter/setter
 my %stops = ( 'oneword', 1 );
