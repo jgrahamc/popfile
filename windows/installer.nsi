@@ -42,7 +42,7 @@
 ; servers (so it is NOT subject to the same problems as the 'NSIS Update' feature).
 ;
 ; This version of the script has been tested with NSIS 2.0b4 (CVS) after updating it by using
-; the 11 August 2003 (19:44 GMT) version of the NSIS CVS snapshot.
+; the 27 August 2003 (19:44 GMT) version of the NSIS CVS snapshot.
 
 #--------------------------------------------------------------------------
 # LANGUAGE SUPPORT:
@@ -2194,15 +2194,15 @@ remove_perl:
   DetailPrint "$(un.PFI_LANG_PROGRESS_6)"
   SetDetailsPrint listonly
 
-  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\auto"
-  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\Carp"
-  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\File"
-  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\IO"
-  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\MIME"
-  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\Sys"
-  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\Text"
-  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\warnings"
-  !insertmacro SafeRecursiveRMDir ${__LINE__} "$INSTDIR\Win32"
+  !insertmacro SafeRecursiveRMDir  "$INSTDIR\auto"
+  !insertmacro SafeRecursiveRMDir  "$INSTDIR\Carp"
+  !insertmacro SafeRecursiveRMDir  "$INSTDIR\File"
+  !insertmacro SafeRecursiveRMDir  "$INSTDIR\IO"
+  !insertmacro SafeRecursiveRMDir  "$INSTDIR\MIME"
+  !insertmacro SafeRecursiveRMDir  "$INSTDIR\Sys"
+  !insertmacro SafeRecursiveRMDir  "$INSTDIR\Text"
+  !insertmacro SafeRecursiveRMDir  "$INSTDIR\warnings"
+  !insertmacro SafeRecursiveRMDir  "$INSTDIR\Win32"
 
   StrCmp ${L_UPGRADE} "yes" Removed
 

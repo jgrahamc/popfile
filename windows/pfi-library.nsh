@@ -30,6 +30,19 @@
 
 #--------------------------------------------------------------------------
 #
+# Macro which makes it easy to avoid relative jumps when defining macros
+#
+#--------------------------------------------------------------------------
+
+!macro PFI_UNIQUE_ID
+  !ifdef PFI_UNIQUE_ID
+    !undef PFI_UNIQUE_ID
+  !endif
+  !define PFI_UNIQUE_ID ${__LINE__}
+!macroend
+
+#--------------------------------------------------------------------------
+#
 # Macros used to simplify inclusion/selection of the necessary language files
 #
 #--------------------------------------------------------------------------
@@ -88,10 +101,14 @@
   ;--------------------------------------------------------------------------
 
   !macro UI_LANG_CONFIG PFI_SETTING UI_SETTING
-    StrCmp $LANGUAGE ${LANG_${PFI_SETTING}} 0 +4
+
+    !insertmacro PFI_UNIQUE_ID
+
+    StrCmp $LANGUAGE ${LANG_${PFI_SETTING}} 0 skip_${PFI_UNIQUE_ID}
       IfFileExists "$INSTDIR\languages\${UI_SETTING}.msg" 0 lang_done
       StrCpy ${L_LANG} "${UI_SETTING}"
       Goto lang_save
+    skip_${PFI_UNIQUE_ID}:
   !macroend
 
 #--------------------------------------------------------------------------
@@ -100,32 +117,33 @@
 # (guards against unexpectedly removing the corpus or message history)
 #
 # Usage:
-#   !insertmacro SafeRecursiveRMDir ${__LINE__} $(L_CORPUS}
+#   !insertmacro SafeRecursiveRMDir $(L_CORPUS}
 #
-# ${__LINE__} holds the linenumber of the '!insertmacro' command
 #--------------------------------------------------------------------------
 
-!macro SafeRecursiveRMDir UNIQUE_ID PATH
+!macro SafeRecursiveRMDir PATH
 
-  StrCmp ${L_SUBCORPUS} "no" Label_A_${UNIQUE_ID}
+  !insertmacro PFI_UNIQUE_ID
+
+  StrCmp ${L_SUBCORPUS} "no" Label_A_${PFI_UNIQUE_ID}
   Push ${L_CORPUS}
   Push "${PATH}"
   Call un.StrStr
   Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" 0 Label_C_${UNIQUE_ID}
+  StrCmp ${L_TEMP} "" 0 Label_C_${PFI_UNIQUE_ID}
 
-Label_A_${UNIQUE_ID}:
-  StrCmp ${L_SUBHISTORY} "no" Label_B_${UNIQUE_ID}
+Label_A_${PFI_UNIQUE_ID}:
+  StrCmp ${L_SUBHISTORY} "no" Label_B_${PFI_UNIQUE_ID}
   Push ${L_HISTORY}
   Push "${PATH}"
   Call un.StrStr
   Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" 0 Label_C_${UNIQUE_ID}
+  StrCmp ${L_TEMP} "" 0 Label_C_${PFI_UNIQUE_ID}
 
-Label_B_${UNIQUE_ID}:
+Label_B_${PFI_UNIQUE_ID}:
   RMDir /r "${PATH}"
 
-Label_C_${UNIQUE_ID}:
+Label_C_${PFI_UNIQUE_ID}:
 
 !macroend
 
