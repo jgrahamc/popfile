@@ -1110,8 +1110,8 @@ sub history_page
             $words{$word}                         += $classifier->{parser}->{words}{$word};
             $classifier->{total}{$form{shouldbe}} += $classifier->{parser}->{words}{$word};
             $classifier->{full_total}             += $classifier->{parser}->{words}{$word};
-            $classifier->set_value(     $form{shouldbe}, $word, $words{word} );
-            $classifier->compute_top10( $form{shouldbe}, $word, $words{word} );
+            $classifier->set_value(     $form{shouldbe}, $word, $words{$word} );
+            $classifier->compute_top10( $form{shouldbe}, $word, $words{$word} );
             
             print "$word, $form{shouldbe}, $classifier->{parser}->{words}{$word}, $classifier->{total}{$form{shouldbe}}\n"; 
         }

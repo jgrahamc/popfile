@@ -135,6 +135,7 @@ sub set_value
     my ($self, $bucket, $word, $value) = @_;
     $word =~ /^(.)/;
     my $i = ord($1);
+
     if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|$word (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 ) 
     {
         $self->{matrix}{$bucket}[$i] .= "|$word $value|";
