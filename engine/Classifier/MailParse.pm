@@ -399,7 +399,7 @@ sub map_color
 
         # gross
 
-        return $1;
+        return $color;
     }
 }
 
