@@ -126,7 +126,7 @@ sub classify_file
     {
         $score{$bucket} = $self->{total}{$bucket} / $self->{full_total};
     }
-
+    
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
     # P(word|bucket) ^ word count and multiply to the score
 
@@ -146,31 +146,36 @@ sub classify_file
     
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
             # and we multiply by the number of times that the word occurs
-    
-            $score{$bucket} *= ( $probability ** $self->{parser}->{words}{$word} );
 
-            # This normalizing code is used because we may end up with probability values 
-            # that cause underflow in the arithmetic system.  It figures out which bucket is
-            # currently "winning" and makes sure that its values are greater than 1 by
-            # shifting all scores up by a certain amount
-
-            my $max = 0;
-            
-            foreach my $b (keys %{$self->{total}})
+            for my $i (0 .. $self->{parser}->{words}{$word})
             {
-                if ( $score{$b} > $max ) 
-                {
-                    $max = $score{$b}; 
-                }
-            }
+                my $max;
+                
+                $score{$bucket} *= $probability;
 
-            if ( ( $max < 1 ) && ( $max != 0 ) )
-            {
-                my $normalize = 10 ** int(log(1/$max)/log(10));
+                # This normalizing code is used because we may end up with probability values 
+                # that cause underflow in the arithmetic system.  It figures out which bucket is
+                # currently "winning" and makes sure that its values are greater than 1 by
+                # shifting all scores up by a certain amount
 
+                $max = 0;
+                
                 foreach my $b (keys %{$self->{total}})
                 {
-                    $score{$b} *= $normalize;
+                    if ( $score{$b} > $max ) 
+                    {
+                        $max = $score{$b}; 
+                    }
+                }
+
+                if ( ( $max < 1 ) && ( $max != 0 ) )
+                {
+                    my $normalize = 10 ** int(log(1/$max)/log(10) + 0.5);
+
+                    foreach my $b (keys %{$self->{total}})
+                    {
+                        $score{$b} *= $normalize;
+                    }
                 }
             }
         }
