@@ -1,7 +1,3 @@
-H1,H2,H3,P,TD {
-  font-family: sans-serif;
-}
-
 body {
   background-color: #FFFFFF;
   border: none;
@@ -9,11 +5,12 @@ body {
   color: black;
 }
 
-.head {
+table.head {
   font-weight: normal;
   font-size: 22pt;
   background: #ffffcc;
   color: black;
+  width: 100%;
 }
 
 .shell {
@@ -22,34 +19,35 @@ body {
      color: black;
 }
 
-.head a {
+table.head a {
   font-size: 12pt;
 }
 
 .menu {
   font-size: 14pt;
   font-weight: bold;
+  width: 100%;
 }
 
 .menuSelected {
   background-color: #ff9966;
-  width: 150px;
+  width: 14%;
   color: #1E3B75;
 }
 
 .menuStandard {
   background-color: #ffcc99;
-  width: 150px;
+  width: 14%;
   color: #1E3B75;
 }
 
 
-.rowEven {
+tr.rowEven {
     background-color: #ffffcc;
      color: black;
 }
 
-.rowOdd {
+tr.rowOdd {
     background-color: #ffcc99;
      color: black;
 }
@@ -76,3 +74,115 @@ td.naked {
     margin: 0px; 
     border: none
 }
+
+td.openMessageCloser {
+	text-align: right;
+}
+
+.menuIndent {
+	width: 8%;
+}
+
+td.accuracy0to49 {
+	background-color: red;
+	color: black;
+}
+
+td.accuracy50to93 {
+	background-color: yellow;
+	color: black;
+}
+
+td.accuracy94to100 {
+	background-color: green;
+	color: black;
+}
+
+div.error01 {
+	background-color: transparent;
+	color: red;
+	font-size: larger;
+}
+
+div.error02 {
+	background-color: transparent;
+	color: red;
+}
+
+span.graphFont {
+	font-size: x-small;
+}
+
+span.bucketsLabel {
+	font-weight: bold;
+}
+
+span.magnetsLabel {
+	font-weight: bold;
+}
+
+span.securityLabel {
+	font-weight: bold;
+}
+
+span.configurationLabel {
+	font-weight: bold;
+}
+		
+span.advancedLabel {
+	font-weight: bold;
+}
+		
+span.passwordLabel {
+	font-weight: bold;
+}
+
+span.sessionLabel {
+	font-weight: bold;
+}
+
+table.historyWidgetsTop {
+	width: 100%;
+	margin-left: 1.5em;
+	margin-top: 0.6em;
+	margin-bottom: 1.0em;
+}
+
+table.historyButtonsBottom {
+	width: 100%;
+	margin-top: 0.6em;
+}
+
+td.historyNavigatorTop {
+	text-align: right;
+}
+
+td.historyNavigatorBottom {
+	text-align: right;
+}
+
+tr.rowHighlighted {
+	background-color: #000000;
+	color: #eeeeee;
+}
+
+td.logo2menuSpace { 
+	height: 0.8em;
+}
+
+a.changeSettingLink {
+	background-color: transparent ;
+	color: #0000cc ;
+}
+
+td.footerBody { 
+	text-align: center;
+	padding-left: 5%;
+	padding-right: 5%;
+}
+
+table.footer {
+  width: 100%;
+  margin-top: 1em;
+}
+
