@@ -401,9 +401,9 @@ sub flush_extra_
 #TODO: Implement or remove $error as defined in interface above
 sub get_response_
 {
-    my ( $self, $mail, $client, $command, $error, $use_timeout ) = @_;
+    my ( $self, $mail, $client, $command, $error, $null_resp ) = @_;
 
-    $null_resp = 0 if (!defined $use_timeout);
+    $null_resp = 0 if (!defined $null_resp);
 
     unless ( $mail ) {
        # $mail is undefined - return an error intead of crashing
