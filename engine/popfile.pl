@@ -337,15 +337,15 @@ sub configuration_page
         }
     }
 
-    $body .= "<h2>Listen Ports</h2><p><form action=/configuration><b>POP3 listen port:</b><br><input name=port type=text value=$configuration{port}><input type=submit name=update_port value=Apply><input type=hidden name=session value=$session_key></form>$port_error";    
+    $body .= "<h2>Listen Ports</h2><p><form action=/configuration><b>POP3 listen port:</b><br><input name=port type=text value=$configuration{port}><input type=submit class=submit name=update_port value=Apply><input type=hidden name=session value=$session_key></form>$port_error";    
     $body .= "Updated port to $configuration{port}; this change will not take affect until you restart POPFile" if ( defined($form{port}) );
-    $body .= "<p><form action=/configuration><b>Separator character:</b><br><input name=separator type=text value=$configuration{separator}><input type=submit name=update_separator value=Apply><input type=hidden name=session value=$session_key></form>$separator_error";
+    $body .= "<p><form action=/configuration><b>Separator character:</b><br><input name=separator type=text value=$configuration{separator}><input type=submit class=submit name=update_separator value=Apply><input type=hidden name=session value=$session_key></form>$separator_error";
     $body .= "Updated separator to $configuration{separator}" if ( defined($form{separator}) );
-    $body .= "<p><form action=/configuration><b>User interface web port:</b><br><input name=ui_port type=text value=$configuration{ui_port}><input type=submit name=update_ui_port value=Apply><input type=hidden name=session value=$session_key></form>$ui_port_error";    
+    $body .= "<p><form action=/configuration><b>User interface web port:</b><br><input name=ui_port type=text value=$configuration{ui_port}><input type=submit class=submit name=update_ui_port value=Apply><input type=hidden name=session value=$session_key></form>$ui_port_error";    
     $body .= "Updated user interface web port to $configuration{ui_port}; this change will not take affect until you restart POPFile" if ( defined($form{ui_port}) );
-    $body .= "<p><hr><h2>History View</h2><p><form action=/configuration><b>Number of emails per page:</b> <br><input name=page_size type=text value=$configuration{page_size}><input type=submit name=update_page_size value=Apply><input type=hidden name=session value=$session_key></form>$page_size_error";    
+    $body .= "<p><hr><h2>History View</h2><p><form action=/configuration><b>Number of emails per page:</b> <br><input name=page_size type=text value=$configuration{page_size}><input type=submit class=submit name=update_page_size value=Apply><input type=hidden name=session value=$session_key></form>$page_size_error";    
     $body .= "Updated number of emails per page to $configuration{page_size}" if ( defined($form{page_size}) );
-    $body .= "<p><p><form action=/configuration><b>Number of days of history to keep:</b> <br><input name=history_days type=text value=$configuration{history_days}><input type=submit name=update_history_days value=Apply><input type=hidden name=session value=$session_key></form>$history_days_error";    
+    $body .= "<p><p><form action=/configuration><b>Number of days of history to keep:</b> <br><input name=history_days type=text value=$configuration{history_days}><input type=submit class=submit name=update_history_days value=Apply><input type=hidden name=session value=$session_key></form>$history_days_error";    
     $body .= "Updated number of days of history to $configuration{history_days}" if ( defined($form{history_days}) );
     $body .= "<p><hr><h2>Skins</h2><p><form action=/configuration><b>Choose skin:</b> <br><input type=hidden name=session value=$session_key><select name=skin>";
     for my $i (0..$#skins)
@@ -357,8 +357,8 @@ sub configuration_page
         }
         $body .= ">$skins[$i]</option>";
     }
-    $body .= "</select><input type=submit value=Apply name=change_skin></form>";
-    $body .= "<p><hr><h2>TCP Connection Timeout</h2><p><form action=/configuration><b>TCP connection timeout in seconds:</b> <br><input name=timeout type=text value=$configuration{timeout}><input type=submit name=update_timeout value=Apply><input type=hidden name=session value=$session_key></form>$timeout_error";    
+    $body .= "</select><input type=submit class=submit value=Apply name=change_skin></form>";
+    $body .= "<p><hr><h2>TCP Connection Timeout</h2><p><form action=/configuration><b>TCP connection timeout in seconds:</b> <br><input name=timeout type=text value=$configuration{timeout}><input type=submit class=submit name=update_timeout value=Apply><input type=hidden name=session value=$session_key></form>$timeout_error";    
     $body .= "Updated TCP connection timeout to $configuration{timeout}" if ( defined($form{timeout}) );
     $body .= "<p><hr><h2>Classification Insertion</h2><p>";
     $body .= "<table><tr><td><b>Subject line modification:</b> ";    
@@ -401,7 +401,7 @@ sub configuration_page
     $body .= "<option value=4";
     $body .= " selected" if ( $configuration{debug} == 3 );
     $body .= ">To Screen and File</option>";
-    $body .= "</select><input type=submit name=submit_debug value=Apply></form>";
+    $body .= "</select><input type=submit class=submit name=submit_debug value=Apply></form>";
     
     http_ok($client,$body,0); 
 }
@@ -488,12 +488,12 @@ sub security_page
         $body .= "<b>No</b> <a href=/security?update_check=2&session=$session_key><font color=blue>[Change to Yes]</font></a> ";
     } 
 
-    $body .= "<p><hr><h2>User Interface Password</h2><p><form action=/security><b>Password:</b> <br><input name=password type=text value=$configuration{password}> <input type=submit name=update_server value=Apply> <input type=hidden name=session value=$session_key></form>";    
+    $body .= "<p><hr><h2>User Interface Password</h2><p><form action=/security><b>Password:</b> <br><input name=password type=text value=$configuration{password}> <input type=submit class=submit name=update_server value=Apply> <input type=hidden name=session value=$session_key></form>";    
     $body .= "Updated password to $configuration{password}" if ( defined($form{password}) );
     
-    $body .= "<p><hr><h2>Secure Password Authentication/AUTH</h2><p><form action=/security><b>Secure server:</b> <br><input name=server type=text value=$configuration{server}><input type=submit name=update_server value=Apply><input type=hidden name=session value=$session_key></form>";    
+    $body .= "<p><hr><h2>Secure Password Authentication/AUTH</h2><p><form action=/security><b>Secure server:</b> <br><input name=server type=text value=$configuration{server}><input type=submit class=submit name=update_server value=Apply><input type=hidden name=session value=$session_key></form>";    
     $body .= "Updated secure server to $configuration{server}; this change will not take affect until you restart POPFile" if ( defined($form{server}) );
-    $body .= "<p><form action=/security><b>Secure port:</b> <br><input name=sport type=text value=$configuration{sport}><input type=submit name=update_sport value=Apply><input type=hidden name=session value=$session_key></form>$port_error";    
+    $body .= "<p><form action=/security><b>Secure port:</b> <br><input name=sport type=text value=$configuration{sport}><input type=submit class=submit name=update_sport value=Apply><input type=hidden name=session value=$session_key></form>$port_error";    
     $body .= "Updated port to $configuration{sport}; this change will not take affect until you restart POPFile" if ( defined($form{sport}) );
     
     http_ok($client,$body,3); 
@@ -593,8 +593,8 @@ sub advanced_page
             $need_comma = 1;
         }
     }
-    $body .= "</table><p><form action=/advanced><b>Add word:</b><br><input type=hidden name=session value=$session_key><input type=text name=newword> <input type=submit name=add value=Add></form>$add_message";
-    $body .= "<p><form action=/advanced><b>Delete word:</b><br><input type=hidden name=session value=$session_key><input type=text name=word> <input type=submit name=remove value=Delete></form>$delete_message";
+    $body .= "</table><p><form action=/advanced><b>Add word:</b><br><input type=hidden name=session value=$session_key><input type=text name=newword> <input type=submit class=submit name=add value=Add></form>$add_message";
+    $body .= "<p><form action=/advanced><b>Delete word:</b><br><input type=hidden name=session value=$session_key><input type=text name=word> <input type=submit class=submit name=remove value=Delete></form>$delete_message";
     http_ok($client,$body,5);
 }
 
@@ -705,7 +705,7 @@ sub magnet_page
     {
         $body .= "<option value=$bucket>$bucket</option>";
     }
-    $body .= "</select> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$magnet_message";
+    $body .= "</select> <input type=submit class=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$magnet_message";
     http_ok($client,$body,4);
 }
 
@@ -1004,7 +1004,7 @@ sub corpus_page
         $body .= "<tr><td colspan=25 align=left><font size=1>0%<td colspan=25 align=right><font size=1>100%</table>";
     }
     
-    $body .= "</table><form action=/buckets><input type=hidden name=session value=$session_key><input type=submit name=reset_stats value='Reset Statistics'></form><td  valign=top width=33%><h2>Emails Classified</h2><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Classification Count</b>";
+    $body .= "</table><form action=/buckets><input type=hidden name=session value=$session_key><input type=submit class=submit name=reset_stats value='Reset Statistics'></form><td  valign=top width=33%><h2>Emails Classified</h2><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Classification Count</b>";
 
     my %bar_values;
     for my $bucket (@buckets) 
@@ -1022,23 +1022,23 @@ sub corpus_page
 
     $body .= bar_chart_100( %bar_values );
    
-    $body .= "</table></table><p><hr><h2>Maintenance</h2><p><form action=/buckets><b>Create bucket with name:</b> <br><input name=cname type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
+    $body .= "</table></table><p><hr><h2>Maintenance</h2><p><form action=/buckets><b>Create bucket with name:</b> <br><input name=cname type=text> <input type=submit class=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
     $body .= "<p><form action=/buckets><b>Delete bucket named:</b> <br><select name=name><option value=></option>";
 
     foreach my $bucket (@buckets)
     {
         $body .= "<option value=$bucket>$bucket</option>";
     }
-    $body .= "</select> <input type=submit name=delete value=Delete><input type=hidden name=session value=$session_key></form>$delete_message";
+    $body .= "</select> <input type=submit class=submit name=delete value=Delete><input type=hidden name=session value=$session_key></form>$delete_message";
 
     $body .= "<p><form action=/buckets><b>Rename bucket named:</b> <br><select name=oname><option value=></option>";
     foreach my $bucket (@buckets)
     {
         $body .= "<option value=$bucket>$bucket</option>";
     }
-    $body .= "</select> <b>to</b> <input type=text name=newname> <input type=submit name=rename value=Rename><input type=hidden name=session value=$session_key></form>$rename_message";
+    $body .= "</select> <b>to</b> <input type=text name=newname> <input type=submit class=submit name=rename value=Rename><input type=hidden name=session value=$session_key></form>$rename_message";
 
-    $body .= "<p><hr><a name=Lookup><h2>Lookup</h2><form action=/buckets#Lookup><p><b>Lookup word in corpus: </b><br><input name=word type=text> <input type=submit name=lookup value=Lookup><input type=hidden name=session value=$session_key></form>";
+    $body .= "<p><hr><a name=Lookup><h2>Lookup</h2><form action=/buckets#Lookup><p><b>Lookup word in corpus: </b><br><input name=word type=text> <input type=submit class=submit name=lookup value=Lookup><input type=hidden name=session value=$session_key></form>";
 
     if ( ( defined($form{lookup}) ) || ( defined($form{word}) ) )
     {
@@ -1480,7 +1480,7 @@ sub history_page
             
             $body .= ">$abucket</option>";
         }
-        $body .= "</select><input type=submit name=setfilter value=Filter></form><b>Classification</b><td><b>Should be</b>";            
+        $body .= "</select><input type=submit class=submit name=setfilter value=Filter></form><b>Classification</b><td><b>Should be</b>";            
         my $start_message = 0;
         if ( ( defined($form{start_message}) ) && ($form{start_message} > 0 ) )
         {
@@ -1632,7 +1632,7 @@ sub history_page
                 {
                     if ( $drop_down )
                     {
-                        $body .= " <input type=submit name=change value=Reclassify> <input type=hidden name=usedtobe value=$bucket><select name=shouldbe>";
+                        $body .= " <input type=submit class=submit name=change value=Reclassify> <input type=hidden name=usedtobe value=$bucket><select name=shouldbe>";
                     }
                     else
                     {
@@ -1730,8 +1730,8 @@ sub history_page
             }
         }
 
-        $body .= "</table><form action=/history><input type=hidden name=filter value=$form{filter}><b>To remove entries in the history click: <input type=submit name=clear value='Remove All'>";
-        $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=filter value=$form{filter}><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit name=searchbutton Value=Find></form>$search_message";
+        $body .= "</table><form action=/history><input type=hidden name=filter value=$form{filter}><b>To remove entries in the history click: <input type=submit class=submit name=clear value='Remove All'>";
+        $body .= "<input type=submit class=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=filter value=$form{filter}><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit class=submit name=searchbutton Value=Find></form>$search_message";
 
         if ( $configuration{page_size} <= $#history_cache )
         {
@@ -1784,7 +1784,7 @@ sub history_page
             
             $body .= ">$abucket</option>";
         }
-        $body .= "</select><input type=submit name=setfilter value=Filter></form>";
+        $body .= "</select><input type=submit class=submit name=setfilter value=Filter></form>";
     }
     
     http_ok($client,$body,2); 
@@ -1804,7 +1804,7 @@ sub password_page
     
     # Show a page asking for the password with no session key information on it
     $session_key = '';
-    my $body = "<h2>Password</h2><form action=/password><b>Enter password:</b> <input type=password name=password> <input type=submit name=submit value=Go!></form>";
+    my $body = "<h2>Password</h2><form action=/password><b>Enter password:</b> <input type=password name=password> <input type=submit class=submit name=submit value=Go!></form>";
     $body .= "<blockquote><font color=red>Incorrect password</font></blockquote>" if ( $error == 1 );
     http_ok($client, $body, 99);
     $session_key = $session_temp;
