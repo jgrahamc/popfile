@@ -17,6 +17,7 @@ body {
   border-collapse: collapse;
   background-color: #000000;
   color: #ffffff;
+  border-spacing: 0px;
 }
 
 .shellTopLeft {
