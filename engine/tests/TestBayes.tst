@@ -185,6 +185,15 @@ test_assert_equal( $b->get_bucket_unique_count( $session, $buckets[2]), 3353 );
 test_assert_equal( $b->get_bucket_color( $session, $buckets[0]), 'red' );
 test_assert_equal( $b->get_bucket_color( $session, $buckets[1]), 'green' );
 test_assert_equal( $b->get_bucket_color( $session, $buckets[2]), 'blue' );
+test_assert_equal( $b->get_bucket_color( $session, 'notabucket'), '');
+
+# get_buckets
+
+my @buckets = $b->get_buckets( $session );
+test_assert_equal( $#buckets, 2 );
+test_assert_equal( $buckets[0], 'other' );
+test_assert_equal( $buckets[1], 'personal' );
+test_assert_equal( $buckets[2], 'spam' );
 
 # set_bucket_color
 
@@ -526,11 +535,11 @@ for my $modify_file (@modify_tests) {
 			my $cam_line    = <CAM>;
 			$output_line =~ s/[\r\n]//g;
 			$cam_line =~ s/[\r\n]//g;
-                        if ( ( $output_line ne '.' ) || ( $cam_line ne '' ) ) { 
+                        if ( ( $output_line ne '.' ) || ( $cam_line ne '' ) ) {
    			    test_assert_equal( $output_line, $cam_line, $modify_file );
                         }
 		}
-		
+
 		close CAM;
 		close OUTPUT;
 		unlink( 'popfile0=0.msg' );
