@@ -831,20 +831,20 @@ sub parse_stream
 
                     my $prefix = '';
     
-                    if ( $header =~ /(From|To|Cc|Reply\-To)/i ) {
+                    if ( $header =~ /^(From|To|Cc|Reply\-To)/i ) {
                         if ( $argument =~ /=\?(.{1,40})\?/ ) {
                             update_word( $self, $1, 0, '', '', 'charset' );
                         }
                         
-                        if ( $header =~ /From/i )  {
+                        if ( $header =~ /^From/i )  {
                             $encoding     = '';
                             $self->{content_type} = '';
                             $self->{from} = $argument if ( $self->{from} eq '' ) ;
                             $prefix = 'from';
                         }
 
-                        $prefix = 'to' if ( $header =~ /To/i );
-                        $self->{to} = $argument if ( ( $header =~ /To/i ) && ( $self->{to} eq '' ) );
+                        $prefix = 'to' if ( $header =~ /^To/i );
+                        $self->{to} = $argument if ( ( $header =~ /^To/i ) && ( $self->{to} eq '' ) );
                         
                         while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))>// )  {
                             update_word($self, $1, 0, ';', '&',$prefix);
@@ -860,15 +860,15 @@ sub parse_stream
                         next;
                     }
     
-                    $self->{subject} = $argument if ( ( $header =~ /Subject/i ) && ( $self->{subject} eq '' ) );
+                    $self->{subject} = $argument if ( ( $header =~ /^Subject/i ) && ( $self->{subject} eq '' ) );
 
-                    if ( $header =~ /Subject/i ) {
+                    if ( $header =~ /^Subject/i ) {
                         $prefix = 'subject';
                     }
 
                     # Look for MIME 
                     
-                    if ( $header =~ /Content-Type/i ) { 
+                    if ( $header =~ /^Content-Type/i ) { 
                         if ( $argument =~ /multipart\//i ) { 
                             my $boundary = $argument; 
                                                         
@@ -906,7 +906,7 @@ sub parse_stream
                     # Look for the different encodings in a MIME document, when we hit base64 we will
                     # do a special parse here since words might be broken across the boundaries
     
-                    if ( $header =~ /Content-Transfer-Encoding/i ) {
+                    if ( $header =~ /^Content-Transfer-Encoding/i ) {
                         $encoding = $argument;
                         print "Setting encoding to $encoding\n" if $self->{debug};
                         my $compact_encoding = $encoding;
@@ -917,7 +917,7 @@ sub parse_stream
     
                     # Some headers to discard
     
-                    next if ( $header =~ /(Thread-Index|X-UIDL|Message-ID|X-Text-Classification|X-Mime-Key)/i );
+                    next if ( $header =~ /^(Thread-Index|X-UIDL|Message-ID|X-Text-Classification|X-Mime-Key)/i );
     
                     add_line( $self, $argument, 0, $prefix );
                     
