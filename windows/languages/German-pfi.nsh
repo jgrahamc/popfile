@@ -106,8 +106,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "POPFile Corpus-Konvertierung abgeschlossen"
 !insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "Bitte klicken Sie Beenden, um fortzufahren."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_TITLE     "POPFile Corpus Conversion Failed"
-!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_SUBTITLE  "Please click Cancel to continue"
+!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_TITLE     "POPFile Corpus: Konvertierung fehlgeschlagen"
+!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_SUBTITLE  "Bitte klicken Sie auf Abbrechen, um fortzufahren."
 
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -361,8 +361,8 @@
 # Text used on buttons to skip configuration of email clients
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPALL   "überspringen"
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPONE   "überspringen"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPALL   "Überspringen"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPONE   "Überspringen"
 
 #--------------------------------------------------------------------------
 # Message box warnings that an email client is still running
@@ -457,7 +457,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CANCELLED   "Eudora Konfiguration vom Benutzer abgebrochen"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_1     "POPFile hat die folgenden Eudorabenutzer entdeckt"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_2     " und cann diese automatischa für die Benutzung mit POPFile konfigurieren."
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_2     " und kann diese automatisch für die Benutzung mit POPFile konfigurieren."
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CHECKBOX    "Diesen Benutzer für POPFile einrichten"
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_DOMINANT    "<Dominant> personality"
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_PERSONA     "Benutzer"
@@ -502,7 +502,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ENVNOTSET    "Fehler: Kann Umgebungsvariable nicht setzen"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOKAKASI     "Fehler: Kakasi Pfad nicht gefunden"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "Ein Fehler ist beim Start des Konvertierungsprozesses aufgetreten"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_FATALERR     "A fatal error occurred during the corpus conversion process !"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_FATALERR     "Ein schwerer Fehler ist während der Konvertierung des Corpus aufgetreten!"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ESTIMATE     "Geschätzte Wartezeit: "
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MINUTES      "Minuten"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_WAITING      "(warte auf Konvertierung der ersten Datei)"
