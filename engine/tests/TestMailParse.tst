@@ -43,16 +43,16 @@ $b->start();
 my $cl = new Classifier::MailParse;
 
 # map_color()
-test_assert_equal( $cl->map_color( 'red' ),     'ff0000' ); 
-test_assert_equal( $cl->map_color( 'ff0000' ),  'ff0000' ); 
-test_assert_equal( $cl->map_color( 'FF0000' ),  'ff0000' ); 
-test_assert_equal( $cl->map_color( '#fF0000' ), 'ff0000' ); 
-test_assert_equal( $cl->map_color( '#Ff0000' ), 'ff0000' ); 
-test_assert_equal( $cl->map_color( 'white' ),   'ffffff' ); 
-test_assert_equal( $cl->map_color( 'fFfFFf' ),  'ffffff' ); 
-test_assert_equal( $cl->map_color( 'FFFFFF' ),  'ffffff' ); 
-test_assert_equal( $cl->map_color( '#ffffff' ), 'ffffff' ); 
-test_assert_equal( $cl->map_color( '#FFfFFF' ), 'ffffff' ); 
+test_assert_equal( $cl->map_color( 'red' ),     'ff0000' );
+test_assert_equal( $cl->map_color( 'ff0000' ),  'ff0000' );
+test_assert_equal( $cl->map_color( 'FF0000' ),  'ff0000' );
+test_assert_equal( $cl->map_color( '#fF0000' ), 'ff0000' );
+test_assert_equal( $cl->map_color( '#Ff0000' ), 'ff0000' );
+test_assert_equal( $cl->map_color( 'white' ),   'ffffff' );
+test_assert_equal( $cl->map_color( 'fFfFFf' ),  'ffffff' );
+test_assert_equal( $cl->map_color( 'FFFFFF' ),  'ffffff' );
+test_assert_equal( $cl->map_color( '#ffffff' ), 'ffffff' );
+test_assert_equal( $cl->map_color( '#FFfFFF' ), 'ffffff' );
 
 # Check line splitting into words
 $cl->{htmlbackcolor__} = $cl->map_color( 'white' );
@@ -136,7 +136,7 @@ test_assert_equal( $cl->{words__}{hello},     1 );
 test_assert_equal( $cl->{words__}{visible},   1 );
 test_assert_equal( defined( $cl->{words__}{invisible} ), '' );
 
-# glob the tests directory for files called TestMailParse\d+.msg which consist of messages 
+# glob the tests directory for files called TestMailParse\d+.msg which consist of messages
 # to be parsed with the resulting values for the words hash in TestMailParse\d+.wrd
 
 my @parse_tests = sort glob 'TestMailParse*.msg';
@@ -144,7 +144,7 @@ my @parse_tests = sort glob 'TestMailParse*.msg';
 for my $parse_test (@parse_tests) {
     my $words = $parse_test;
     $words    =~ s/msg/wrd/;
-    
+
     # Parse the document and then check the words hash against the words in the
     # wrd file
 
@@ -185,7 +185,7 @@ my @color_tests = ( 'TestMailParse019.msg' );
 for my $color_test (@color_tests) {
     my $colored = $color_test;
     $colored    =~ s/msg/clr/;
-    
+
     $cl->{color__} = 1;
     $cl->{bayes__} = $b;
     my $html = $cl->parse_file( $color_test );
@@ -196,3 +196,12 @@ for my $color_test (@color_tests) {
     close HTML;
     test_assert_equal( $check, $html );
 }
+
+
+# test decode_string
+
+test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo?="), "foo");
+test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo_bar?="), "foo bar");
+test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo=20bar?="), "foo bar");
+test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo_bar?= =?ISO-8859-1?Q?foo_bar?="), "foo bar foo bar");
+test_assert_equal($cl->decode_string("=?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= =?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?="), "Aladdin:open sesame Aladdin:open sesame");
