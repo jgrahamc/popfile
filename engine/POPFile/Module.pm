@@ -495,7 +495,7 @@ sub user_global_config_
 {
     my ( $self, $user, $name, $value ) = @_;
 
-    return $self->module_config_( $user, 'GLOBAL', $name, $value );
+    return $self->user_module_config_( $user, 'GLOBAL', $name, $value );
 }
 
 # ----------------------------------------------------------------------------
