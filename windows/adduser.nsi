@@ -109,7 +109,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.0"
+  !define C_PFI_VERSION  "0.1.1"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -527,10 +527,10 @@
         !insertmacro PFI_LANG_LOAD "French"
         !insertmacro PFI_LANG_LOAD "Greek"
         !insertmacro PFI_LANG_LOAD "Italian"
-        !insertmacro PFI_LANG_LOAD "Japanese"
         !insertmacro PFI_LANG_LOAD "Korean"
         !insertmacro PFI_LANG_LOAD "Hungarian"
         !insertmacro PFI_LANG_LOAD "Dutch"
+        !insertmacro PFI_LANG_LOAD "Japanese"
         !insertmacro PFI_LANG_LOAD "Norwegian"
         !insertmacro PFI_LANG_LOAD "Polish"
         !insertmacro PFI_LANG_LOAD "Portuguese"
@@ -1178,10 +1178,10 @@ use_installer_lang:
         !insertmacro UI_LANG_CONFIG "FRENCH" "Francais"
         !insertmacro UI_LANG_CONFIG "GREEK" "Hellenic"
         !insertmacro UI_LANG_CONFIG "ITALIAN" "Italiano"
-        !insertmacro UI_LANG_CONFIG "JAPANESE" "Nihongo"
         !insertmacro UI_LANG_CONFIG "KOREAN" "Korean"
         !insertmacro UI_LANG_CONFIG "HUNGARIAN" "Hungarian"
         !insertmacro UI_LANG_CONFIG "DUTCH" "Nederlands"
+        !insertmacro UI_LANG_CONFIG "JAPANESE" "Nihongo"
         !insertmacro UI_LANG_CONFIG "NORWEGIAN" "Norsk"
         !insertmacro UI_LANG_CONFIG "POLISH" "Polish"
         !insertmacro UI_LANG_CONFIG "PORTUGUESE" "Portugues"
@@ -1307,7 +1307,7 @@ check_default_locn:
   Goto continue
 
 warning:
-  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_1)\
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_3)\
       $\r$\n$\r$\n\
       $G_USERDIR\
       $\r$\n$\r$\n$\r$\n\
