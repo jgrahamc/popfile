@@ -53,7 +53,8 @@ our $POPFile = POPFile::Loader->new();
 
 sub PopupMenu
 {
-    my $url = 'http://127.0.0.1:' . $POPFile->module_config( 'html', 'port' );
+    my $url = 'http://' . $POPFile->module_config( 'bayes', 'hostname' ) .
+              ':' . $POPFile->module_config( 'html', 'port' );
 
     return [ [ "*POPFile UI", "Execute '$url'"          ],
              [ "--------"                               ],
