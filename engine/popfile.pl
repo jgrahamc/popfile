@@ -648,6 +648,23 @@ sub flush_extra
 
 # ---------------------------------------------------------------------------------------------
 #
+# http_redirect - tell the browser to redirect to a url
+#
+# $url      Where to go
+#
+# ---------------------------------------------------------------------------------------------
+sub http_redirect
+{
+    my ( $url ) = @_;
+    
+    my $header = "HTTP/1.0 302 Found\r\nLocation: ";
+    $header .= $url;
+    $header .= "$eol$eol";
+    return $header;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # http_ok - Output a standard HTTP 200 message with a body of data
 #
 # $text      The body of the page
@@ -1047,6 +1064,8 @@ sub history_page
         }
         $configuration{mail_count} = 0;
         $configuration{last_count} = 0;
+        
+        return http_redirect('/history');
     }
 
     if ( $form{clear} eq 'Remove+Page' )
@@ -1067,6 +1086,8 @@ sub history_page
         }
         
         $form{start_message} = 0;
+        
+        return http_redirect('/history');
     }
 
     my @mail_files = glob "messages/popfile*.msg";
