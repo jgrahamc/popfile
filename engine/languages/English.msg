@@ -83,7 +83,7 @@ Locale_Decimal                         .
 # ways to specify it.
 #
 # <format>            Just one simple format used for all dates
-# <format> | <format> The first format is used for dates less than
+# <<format> | <format> The first format is used for dates less than
 #                     7 days from now, the second for all other dates
 
 Locale_Date                            %a %R | %D %R

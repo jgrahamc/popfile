@@ -580,21 +580,31 @@ sub commit_history__
         my $bucketid = $self->{classifier__}->get_bucket_id(
                            $session, $bucket );
 
-        my $result = $self->db__()->do(
-            "update history set hdr_from    = ${$header{from}}[0],
-                                hdr_to      = ${$header{to}}[0],
-                                hdr_date    = ${$header{date}}[0],
-                                hdr_cc      = ${$header{cc}}[0],
-                                hdr_subject = ${$header{subject}}[0],
-                                sort_from   = $sort_headers{from},
-                                sort_to     = $sort_headers{to},
-                                sort_cc     = $sort_headers{cc},
-                                committed   = 1,
-                                bucketid    = $bucketid,
-                                usedtobe    = 0,
-                                magnetid    = $magnet,
-                                hash        = $hash
-                                where id = $slot;" );
+        # If we can't get the bucket ID because the bucket doesn't exist
+        # which could happen when we are upgrading the history which
+        # has old bucket names in it then we will remove the entry from the
+        # history and log the failure
+
+        if ( defined( $bucketid ) ) {
+            my $result = $self->db__()->do(
+                "update history set hdr_from    = ${$header{from}}[0],
+                                    hdr_to      = ${$header{to}}[0],
+                                    hdr_date    = ${$header{date}}[0],
+                                    hdr_cc      = ${$header{cc}}[0],
+                                    hdr_subject = ${$header{subject}}[0],
+                                    sort_from   = $sort_headers{from},
+                                    sort_to     = $sort_headers{to},
+                                    sort_cc     = $sort_headers{cc},
+                                    committed   = 1,
+                                    bucketid    = $bucketid,
+                                    usedtobe    = 0,
+                                    magnetid    = $magnet,
+                                    hash        = $hash
+                                    where id = $slot;" );
+        } else {
+            $self->log_( 0, "Couldn't find bucket ID for bucket $bucket when committing $slot" );
+            $self->release_slot( $slot );
+        }
     }
 
     $self->{commit_list__} = ();

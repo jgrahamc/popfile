@@ -967,7 +967,7 @@ sub pretty_date__
         if ( ( $date < time ) &&
              ( $date > ( time - ( 7 * 24 * 60 * 60 ) ) ) ) {
             return time2str( $1, $date );
-	} else {
+        } else {
             return time2str( $2, $date );
         }
     } else {
