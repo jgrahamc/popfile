@@ -2023,7 +2023,7 @@ sub history_page
     # in or not so that we don't have to worry about undefined values later
     # on in the function
 
-    $self->{form_}{sort}   = $self->{old_sort__} || '' if ( !defined( $self->{form_}{sort}   ) );
+    $self->{form_}{sort}   = $self->{old_sort__} || '-inserted' if ( !defined( $self->{form_}{sort}   ) );
     $self->{form_}{search} = (!defined($self->{form_}{setsearch})?$self->{old_search__}:'') || '' if ( !defined( $self->{form_}{search} ) );
     $self->{form_}{filter} = (!defined($self->{form_}{setfilter})?$self->{old_filter__}:'') || '' if ( !defined( $self->{form_}{filter} ) );
 
