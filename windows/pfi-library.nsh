@@ -32,13 +32,14 @@
 # The following symbols are used to construct the expressions defining the required subset:
 #
 # (1) ADDUSER          defined in adduser.nsi ('Add POPFile User' wizard)
-# (2) INSTALLER        defined in installer.nsi (the main installer program, setup.exe)
-# (3) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
-# (4) PFIDIAG          defined in test\pfidiag.nsi (helps diagnose installer-related problems)
-# (5) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
-# (6) STOP_POPFILE     define in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
-# (7) TRANSLATOR       defined in translator.nsi (main installer translations test program)
-# (8) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
+# (2) BACKUP           defined in backup.nsi (POPFile 'User Data' Backup utility)
+# (3) INSTALLER        defined in installer.nsi (the main installer program, setup.exe)
+# (4) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
+# (5) PFIDIAG          defined in test\pfidiag.nsi (helps diagnose installer-related problems)
+# (6) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
+# (7) STOP_POPFILE     define in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
+# (8) TRANSLATOR       defined in translator.nsi (main installer translations test program)
+# (9) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
 #--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
@@ -229,6 +230,73 @@
 
   !macroend
 
+#--------------------------------------------------------------------------
+#
+# Macro used to preserve up to 3 backup copies of a file
+#
+# (Note: input file will be "removed" by renaming it)
+#--------------------------------------------------------------------------
+
+  ;--------------------------------------------------------------------------
+  ; This version generates uses 'DetailsPrint' to generate more meaningful log entries
+  ;--------------------------------------------------------------------------
+
+  !macro BACKUP_123_DP FOLDER FILE
+
+      !insertmacro PFI_UNIQUE_ID
+
+      IfFileExists "${FOLDER}\${FILE}" 0 continue_${PFI_UNIQUE_ID}
+      SetDetailsPrint none
+      IfFileExists "${FOLDER}\${FILE}.bk1" 0 the_first_${PFI_UNIQUE_ID}
+      IfFileExists "${FOLDER}\${FILE}.bk2" 0 the_second_${PFI_UNIQUE_ID}
+      IfFileExists "${FOLDER}\${FILE}.bk3" 0 the_third_${PFI_UNIQUE_ID}
+      Delete "${FOLDER}\${FILE}.bk3"
+
+    the_third_${PFI_UNIQUE_ID}:
+      Rename "${FOLDER}\${FILE}.bk2" "${FOLDER}\${FILE}.bk3"
+      SetDetailsPrint listonly
+      DetailPrint "Backup file '${FILE}.bk3' updated"
+      SetDetailsPrint none
+
+    the_second_${PFI_UNIQUE_ID}:
+      Rename "${FOLDER}\${FILE}.bk1" "${FOLDER}\${FILE}.bk2"
+      SetDetailsPrint listonly
+      DetailPrint "Backup file '${FILE}.bk2' updated"
+      SetDetailsPrint none
+
+    the_first_${PFI_UNIQUE_ID}:
+      Rename "${FOLDER}\${FILE}" "${FOLDER}\${FILE}.bk1"
+      SetDetailsPrint listonly
+      DetailPrint "Backup file '${FILE}.bk1' updated"
+
+    continue_${PFI_UNIQUE_ID}:
+  !macroend
+
+  ;--------------------------------------------------------------------------
+  ; This version does not include any 'DetailsPrint' instructions
+  ;--------------------------------------------------------------------------
+
+  !macro BACKUP_123 FOLDER FILE
+
+      !insertmacro PFI_UNIQUE_ID
+
+      IfFileExists "${FOLDER}\${FILE}" 0 continue_${PFI_UNIQUE_ID}
+      IfFileExists "${FOLDER}\${FILE}.bk1" 0 the_first_${PFI_UNIQUE_ID}
+      IfFileExists "${FOLDER}\${FILE}.bk2" 0 the_second_${PFI_UNIQUE_ID}
+      IfFileExists "${FOLDER}\${FILE}.bk3" 0 the_third_${PFI_UNIQUE_ID}
+      Delete "${FOLDER}\${FILE}.bk3"
+
+    the_third_${PFI_UNIQUE_ID}:
+      Rename "${FOLDER}\${FILE}.bk2" "${FOLDER}\${FILE}.bk3"
+
+    the_second_${PFI_UNIQUE_ID}:
+      Rename "${FOLDER}\${FILE}.bk1" "${FOLDER}\${FILE}.bk2"
+
+    the_first_${PFI_UNIQUE_ID}:
+      Rename "${FOLDER}\${FILE}" "${FOLDER}\${FILE}.bk1"
+
+    continue_${PFI_UNIQUE_ID}:
+  !macroend
 
 #==============================================================================================
 #
@@ -349,62 +417,64 @@
 !endif
 
 
-#--------------------------------------------------------------------------
-# Installer Function: GetParameters
-#
-# Returns the command-line parameters (if any) supplied when the installer was started
-#
-# Inputs:
-#         none
-# Outputs:
-#         (top of stack)     - all of the parameters supplied on the command line (may be "")
-#
-# Usage:
-#         Call GetParameters
-#         Pop $R0
-#
-#         (if 'setup.exe /outlook' was used to start the installer, $R0 will hold '/outlook')
-#
-#--------------------------------------------------------------------------
+!ifndef BACKUP
+    #--------------------------------------------------------------------------
+    # Installer Function: GetParameters
+    #
+    # Returns the command-line parameters (if any) supplied when the installer was started
+    #
+    # Inputs:
+    #         none
+    # Outputs:
+    #         (top of stack)     - all of the parameters supplied on the command line (may be "")
+    #
+    # Usage:
+    #         Call GetParameters
+    #         Pop $R0
+    #
+    #         (if 'setup.exe /outlook' was used to start the installer, $R0 will hold '/outlook')
+    #
+    #--------------------------------------------------------------------------
 
-Function GetParameters
+    Function GetParameters
 
-  Push $R0
-  Push $R1
-  Push $R2
-  Push $R3
+      Push $R0
+      Push $R1
+      Push $R2
+      Push $R3
 
-  StrCpy $R2 1
-  StrLen $R3 $CMDLINE
+      StrCpy $R2 1
+      StrLen $R3 $CMDLINE
 
-  ; Check for quote or space
+      ; Check for quote or space
 
-  StrCpy $R0 $CMDLINE $R2
-  StrCmp $R0 '"' 0 +3
-  StrCpy $R1 '"'
-  Goto loop
+      StrCpy $R0 $CMDLINE $R2
+      StrCmp $R0 '"' 0 +3
+      StrCpy $R1 '"'
+      Goto loop
 
-  StrCpy $R1 " "
+      StrCpy $R1 " "
 
-loop:
-  IntOp $R2 $R2 + 1
-  StrCpy $R0 $CMDLINE 1 $R2
-  StrCmp $R0 $R1 get
-  StrCmp $R2 $R3 get
-  Goto loop
+    loop:
+      IntOp $R2 $R2 + 1
+      StrCpy $R0 $CMDLINE 1 $R2
+      StrCmp $R0 $R1 get
+      StrCmp $R2 $R3 get
+      Goto loop
 
-get:
-  IntOp $R2 $R2 + 1
-  StrCpy $R0 $CMDLINE 1 $R2
-  StrCmp $R0 " " get
-  StrCpy $R0 $CMDLINE "" $R2
+    get:
+      IntOp $R2 $R2 + 1
+      StrCpy $R0 $CMDLINE 1 $R2
+      StrCmp $R0 " " get
+      StrCpy $R0 $CMDLINE "" $R2
 
-  Pop $R3
-  Pop $R2
-  Pop $R1
-  Exch $R0
+      Pop $R3
+      Pop $R2
+      Pop $R1
+      Exch $R0
 
-FunctionEnd
+    FunctionEnd
+!endif
 
 
 !ifdef ADDUSER | TRANSLATOR_AUW
@@ -794,7 +864,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | INSTALLER
+!ifdef ADDUSER | BACKUP | INSTALLER
     #--------------------------------------------------------------------------
     # Installer Function: CheckIfLocked
     #
@@ -908,7 +978,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | INSTALLER
+!ifdef ADDUSER | BACKUP | INSTALLER
     #--------------------------------------------------------------------------
     # Installer Function: FindLockedPFE
     #
@@ -1064,7 +1134,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER
+!ifdef ADDUSER | BACKUP
     #--------------------------------------------------------------------------
     # Installer Function: GetCorpusPath
     #
@@ -1214,7 +1284,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | RUNPOPFILE
+!ifdef ADDUSER | BACKUP | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: GetDataPath
     #
@@ -1591,7 +1661,7 @@ FunctionEnd
     FunctionEnd
 !macroend
 
-!ifdef ADDUSER | INSTALLER | STOP_POPFILE
+!ifdef ADDUSER | BACKUP | INSTALLER | STOP_POPFILE
     #--------------------------------------------------------------------------
     # Installer Function: GetFileSize
     #
@@ -1860,7 +1930,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER
+!ifdef ADDUSER | BACKUP
     #--------------------------------------------------------------------------
     # Installer Function: GetMessagesPath
     #
@@ -1938,7 +2008,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | RUNPOPFILE
+!ifdef ADDUSER | BACKUP | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: GetParent
     #
@@ -2104,7 +2174,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER
+!ifdef ADDUSER | BACKUP
     #--------------------------------------------------------------------------
     # Installer Function: GetSQLdbPathName
     #
@@ -2510,7 +2580,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | INSTALLER
+!ifdef ADDUSER | BACKUP | INSTALLER
     #--------------------------------------------------------------------------
     # Installer Function: ServiceCall
     #
@@ -2518,7 +2588,9 @@ FunctionEnd
     #--------------------------------------------------------------------------
 
     !insertmacro ServiceCall ""
+!endif
 
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.ServiceCall
     #
@@ -2585,7 +2657,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | INSTALLER
+!ifdef ADDUSER | BACKUP | INSTALLER
     #--------------------------------------------------------------------------
     # Installer Function: ServiceRunning
     #
@@ -2593,7 +2665,9 @@ FunctionEnd
     #--------------------------------------------------------------------------
 
     !insertmacro ServiceRunning ""
+!endif
 
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.ServiceRunning
     #
@@ -2780,7 +2854,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | INSTALLER
+!ifdef ADDUSER | BACKUP | INSTALLER
     #--------------------------------------------------------------------------
     # Installer Function: ShutdownViaUI
     #
@@ -2788,7 +2862,9 @@ FunctionEnd
     #--------------------------------------------------------------------------
 
     !insertmacro ShutdownViaUI ""
+!endif
 
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.ShutdownViaUI
     #
@@ -2857,7 +2933,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | RUNPOPFILE
+!ifdef ADDUSER | BACKUP | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: StrBackSlash
     #
@@ -3108,7 +3184,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | INSTALLER | TRANSLATOR
+!ifdef ADDUSER | BACKUP | INSTALLER | TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: TrimNewlines
     #
