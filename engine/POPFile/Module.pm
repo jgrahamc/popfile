@@ -584,9 +584,9 @@ sub slurp_buffer_
         my $c;
         if ( sysread( $handle, $c, $length ) > 0 ) {
             $slurp_data__{"$handle"}{data} .= $c;
-	} else {
+        } else {
             last;
-	}
+        }
     }
 
     my $result = '';
