@@ -143,7 +143,7 @@ History_ClassifyAs                      Classify as
 History_MagnetUsed                      Magnet used
 History_MagnetBecause                   <b>Magnet Used</b><p>Classified to <font color="%s">%s</font> because of magnet %s </p>
 History_ChangedTo                       Changed to <font color="%s">%s
-History_Already                         Already reclassified as <font color="%s">%s</font>
+History_Already                         Reclassified as <font color="%s">%s</font>
 History_RemoveAll                       Remove All
 History_RemovePage                      Remove Page
 History_Remove                          To remove entries in the history click
