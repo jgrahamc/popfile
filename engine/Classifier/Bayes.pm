@@ -1056,7 +1056,7 @@ sub classify_and_modify
     } else {
         if ( $classification ne 'unclassified' ) {
             if ( ( $self->{parameters__}{$classification}{quarantine} == 1 ) && $echo ) {
-                print $client "$eol--$temp_file$eol";
+                print $client "$eol--$temp_file--$eol";
 	        }
         }
 

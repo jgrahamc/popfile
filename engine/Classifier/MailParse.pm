@@ -14,7 +14,6 @@ use Classifier::WordMangle;
 
 use MIME::Base64;
 use MIME::QuotedPrint;
-#require Encode::MIME::Header;
 
 # HTML entity mapping to character codes, this maps things like &amp; to their corresponding
 # character code
