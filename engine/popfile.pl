@@ -2265,7 +2265,7 @@ sub run_popfile
                 {
                     if ( echo_response( $mail, $client, $command ) )
                     {
-                        if ( $1 ne '' ) 
+                        if ( $1 eq '' ) 
                         {
                             echo_to_dot( $mail, $client );
                         }
