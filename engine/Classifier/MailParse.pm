@@ -200,8 +200,11 @@ sub parse_stream
             {
                 $colorized .= $self->{ut};
             }
-    
-            $self->{ut} = $line;
+
+            my $splitline = $line;    
+            $splitline =~ s/([^\r\n]{150})/$1\r\n/g;
+        
+            $self->{ut} = $splitline;
             $self->{ut} =~ s/</&lt;/g;
             $self->{ut} =~ s/>/&gt;/g;
         }
@@ -228,7 +231,12 @@ sub parse_stream
                 $decoded    .= un_base64( $self, $line );
                 if ( $decoded =~ /[^A-Za-z\-\.]$/ ) 
                 {
-                    $self->{ut} = $line if $self->{color};
+                    if ( $self->{color} )
+                    {
+                        my $splitline = $line;    
+                        $splitline =~ s/([^\r\n]{150})/$1\r\n/g;
+                        $self->{ut} = $splitline;
+                    }
                     add_line( $self, $decoded, 1 );
                     $decoded = '';
                     if ( $self->{color} ) 
