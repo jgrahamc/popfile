@@ -15,6 +15,9 @@
             <a class="bottomLink" href="http://popfile.sourceforge.net/manual/<TMPL_VAR NAME="Localize_ManualLanguage">/manual.html">
                 <TMPL_VAR NAME="Localize_Footer_Manual"></a>
             <br />
+            <a class="bottomLink" href="http://popfile.sourceforge.net/cgi-bin/wiki.pl">
+                <TMPL_VAR NAME="Localize_Footer_Wiki"></a>
+            <br />
             <a class="bottomLink" href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions"><TMPL_VAR NAME="Localize_FAQ"></a>
             <br />
         </td>

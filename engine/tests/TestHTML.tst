@@ -138,6 +138,7 @@ use UI::HTML;
 use POPFile::Configuration;
 use POPFile::MQ;
 use POPFile::Logger;
+use POPFile::History;
 use Proxy::POP3;
 
 my $c = new POPFile::Configuration;
@@ -145,6 +146,7 @@ my $mq = new POPFile::MQ;
 my $l = new POPFile::Logger;
 my $b = new Classifier::Bayes;
 my $w = new Classifier::WordMangle;
+my $hi = new POPFile::History;
 
 $b->configuration( $c );
 $b->mq( $mq );
@@ -189,7 +191,16 @@ $p->start();
 test_assert( $p->config_( 'secure_server' ) eq '' );
 
 $b->initialize();
+$hi->configuration( $c );
+$hi->mq( $mq );
+$hi->logger( $l );
+
+$b->history( $hi );
+$hi->classifier( $b );
+
+$hi->initialize();
 test_assert( $b->start() );
+test_assert( $hi->start() );
 
 our $h = new UI::HTML;
 
@@ -577,6 +588,7 @@ if ( $pid == 0 ) {
     }
 
     $b->stop();
+    $hi->stop();
 }
 
 1;

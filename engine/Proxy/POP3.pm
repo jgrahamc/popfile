@@ -108,7 +108,7 @@ sub initialize
     $self->config_( 'welcome_string',
         "POP3 POPFile ($self->{version_}) server ready" );
 
-    return $self->SUPER::initialize();;
+    return $self->SUPER::initialize();
 }
 
 # ---------------------------------------------------------------------------------------------

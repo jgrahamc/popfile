@@ -646,7 +646,8 @@ sub db_connect__
         # rerun the inserts.
 
         my $i = 0;
-        open INSERT, '>' . $self->get_user_path_( 'insert.sql' );
+        my $ins_file = $self->get_user_path_( 'insert.sql' );
+        open INSERT, '>' . $ins_file;
 
         foreach my $table (@tables) {
             next if ( $table eq 'popfile' );
@@ -717,7 +718,7 @@ sub db_connect__
         print "    Restoring old data\n    ";
 
         $self->{db__}->begin_work;
-        open INSERT, '<' . $self->get_user_path_( 'insert.sql' );
+        open INSERT, '<' . $ins_file;
         $i = 0;
         while ( <INSERT> ) {
             if ( ( ++$i % 100 ) == 0 ) {
@@ -730,6 +731,7 @@ sub db_connect__
         close INSERT;
         $self->{db__}->commit;
 
+        unlink $ins_file;
         print "\nDatabase upgrade complete\n\n";
     }
 

@@ -98,7 +98,13 @@ sub initialize
     $self->config_( 'welcome_string',
         "NNTP POPFile ($self->{version_}) server ready" );
 
-    return $self->SUPER::initialize();;
+    if ( !$self->SUPER::initialize() ) {
+        return 0;
+    }
+
+    $self->config_( 'enabled', 0 );
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------

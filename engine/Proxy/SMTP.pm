@@ -86,7 +86,13 @@ sub initialize
     # The welcome string from the proxy is configurable
     $self->config_( 'welcome_string', "SMTP POPFile ($self->{version_}) welcome" );
 
-    return $self->SUPER::initialize();;
+    if ( !$self->SUPER::initialize() ) {
+        return 0;
+    }
+
+    $self->config_( 'enabled', 0 );
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------

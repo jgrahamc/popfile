@@ -104,6 +104,7 @@ Footer_Forums                           Forums
 Footer_FeedMe                           Donate
 Footer_RequestFeature                   Request Feature
 Footer_MailingList                      Mailing List
+Footer_Wiki                             Additional Documentation
 
 Configuration_Error1                    The separator character must be a single character
 Configuration_Error2                    The user interface port must be a number between 1 and 65535

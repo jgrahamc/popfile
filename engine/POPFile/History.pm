@@ -1152,6 +1152,8 @@ sub upgrade_history_files__
 
         $self->commit_history__();
         $self->{classifier__}->release_session_key( $session );
+
+        unlink $self->get_user_path_( 'history_cache' );
     }
 }
 

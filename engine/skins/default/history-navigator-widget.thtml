@@ -20,5 +20,3 @@
 <TMPL_IF NAME="History_Navigator_If_Next">
 [<a href="/history?start_message=<TMPL_VAR NAME="History_Navigator_Next"><TMPL_VAR NAME="History_Navigator_Fields">"><TMPL_VAR NAME="Localize_Next"> &gt;</a>]
 </TMPL_IF>
-
- (<a class="history" href="/history?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Refresh"></a>)

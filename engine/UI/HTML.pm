@@ -684,7 +684,8 @@ sub http_ok
         $self->calculate_today();
 
         if ( $self->config_( 'update_check' ) ) {
-            my ( $major_version, $minor_version, $build_version ) = $self->version() =~ /^v([^.]*)\.([^.]*)\.(.*)$/;
+            my ( $major_version, $minor_version, $build_version ) =
+                $self->version() =~ /^v([^.]*)\.([^.]*)\.(.*)$/;
             $templ->param( 'Common_Middle_If_UpdateCheck' => 1 );
             $templ->param( 'Common_Middle_Major_Version' => $major_version );
             $templ->param( 'Common_Middle_Minor_Version' => $minor_version );
@@ -739,8 +740,11 @@ sub configuration_page
         $templ = $self->load_template__( 'configuration-page.thtml' );
     }
 
-    $self->global_config_( 'debug', $self->{form_}{debug}-1 )   if ( ( defined($self->{form_}{debug}) ) && ( ( $self->{form_}{debug} >= 1 ) && ( $self->{form_}{debug} <= 4 ) ) );
-
+   if ( ( defined($self->{form_}{debug}) ) &&
+        ( ( $self->{form_}{debug} >= 1 ) &&
+        ( $self->{form_}{debug} <= 4 ) ) ) {
+       $self->global_config_( 'debug', $self->{form_}{debug}-1 );
+   }
     if ( defined($self->{form_}{language}) ) {
         if ( $self->config_( 'language' ) ne $self->{form_}{language} ) {
             $self->config_( 'language', $self->{form_}{language} );
@@ -792,12 +796,19 @@ sub configuration_page
         }
     }
 
-    $templ->param( 'Configuration_Page_Size_Updated' => sprintf( $self->{language__}{Configuration_HistoryUpdate}, $self->config_( 'page_size' ) ) ) if ( defined($self->{form_}{page_size} ) );
-    $templ->param( 'Configuration_Page_Size' => $self->config_( 'page_size' ) );
+    if ( defined($self->{form_}{page_size} ) ) {
+        $templ->param( 'Configuration_Page_Size_Updated' =>
+            sprintf( $self->{language__}{Configuration_HistoryUpdate},
+                $self->config_( 'page_size' ) ) )
+    }
+    $templ->param( 'Configuration_Page_Size' =>
+        $self->config_( 'page_size' ) );
 
     if ( defined($self->{form_}{history_days}) ) {
-        if ( ( $self->{form_}{history_days} >= 1 ) && ( $self->{form_}{history_days} <= 366 ) ) {
-            $self->module_config_( 'history', 'history_days', $self->{form_}{history_days} );
+        if ( ( $self->{form_}{history_days} >= 1 ) &&
+             ( $self->{form_}{history_days} <= 366 ) ) {
+            $self->module_config_( 'history', 'history_days',
+                $self->{form_}{history_days} );
         } else {
             $templ->param( 'Configuration_If_History_Days_Error' => 1 );
             delete $self->{form_}{history_days};
@@ -885,13 +896,15 @@ sub configuration_page
         my $selected = ($1 eq '+')?'checked':'';
         $column =~ s/^.//;
         $row{Configuration_Field_Name} = $column;
-        $row{Configuration_Localized_Field_Name} = $self->{language__}{$headers_table{$column}};
+        $row{Configuration_Localized_Field_Name} =
+            $self->{language__}{$headers_table{$column}};
         $row{Configuration_Field_Value} = $selected;
         push ( @column_data, \%row );
     }
     $templ->param( 'Configuration_Loop_History_Columns' => \@column_data );
 
-    # Insert all the items that are dynamically created from the modules that are loaded
+    # Insert all the items that are dynamically created from the
+    # modules that are loaded
 
     my $configuration_html = '';
     my $last_module = '';
@@ -1017,12 +1030,14 @@ sub pretty_number
 # pretty_date__ - format a date as the user wants to see it
 #
 # $date           Epoch seconds
+# $long           Set to 1 if you want only the long date option
 #
 #----------------------------------------------------------------------------
 sub pretty_date__
 {
-    my ( $self, $date ) = @_;
+    my ( $self, $date, $long ) = @_;
 
+    $long = 0 if ( !defined( $long ) );
     my $format = $self->config_( 'date_format' );
 
     if ( $format eq '' ) {
@@ -1032,7 +1047,11 @@ sub pretty_date__
     if ( $format =~ /[\t ]*(.+)[\t ]*\|[\t ]*(.+)/ ) {
         if ( ( $date < time ) &&
              ( $date > ( time - ( 7 * 24 * 60 * 60 ) ) ) ) {
-            return time2str( $1, $date );
+            if ( $long ) {
+                return time2str( $2, $date );
+            } else {
+                return time2str( $1, $date );
+            }
         } else {
             return time2str( $2, $date );
         }
@@ -1057,7 +1076,8 @@ sub advanced_page
     if ( defined( $self->{form_}{update_params} ) ) {
         foreach my $param (sort keys %{$self->{form_}}) {
             if ( $param =~ /parameter_(.*)/ ) {
-                $self->{configuration__}->parameter( $1, $self->{form_}{$param} );
+                $self->{configuration__}->parameter( $1,
+                    $self->{form_}{$param} );
             }
         }
 
@@ -1065,14 +1085,16 @@ sub advanced_page
     }
 
     if ( defined($self->{form_}{newword}) ) {
-        my $result = $self->{c__}->add_stopword( $self->{api_session__}, $self->{form_}{newword} );
+        my $result = $self->{c__}->add_stopword( $self->{api_session__},
+                         $self->{form_}{newword} );
         if ( $result == 0 ) {
             $templ->param( 'Advanced_If_Add_Message' ) = 1;
         }
     }
 
     if ( defined($self->{form_}{word}) ) {
-        my $result = $self->{c__}->remove_stopword( $self->{api_session__}, $self->{form_}{word} );
+        my $result = $self->{c__}->remove_stopword( $self->{api_session__},
+                         $self->{form_}{word} );
         if ( $result == 0 ) {
             $templ->param( 'Advanced_If_Delete_Message' ) = 1;
         }
@@ -1142,7 +1164,8 @@ sub advanced_page
 
     $templ->param( 'Advanced_Loop_Word' => \@word_loop );
 
-    $templ->param( 'Advanced_POPFILE_CFG' => $self->get_user_path_( 'popfile.cfg' ) );
+    $templ->param( 'Advanced_POPFILE_CFG' =>
+        $self->get_user_path_( 'popfile.cfg' ) );
 
     my $last_module = '';
 
@@ -1154,7 +1177,8 @@ sub advanced_page
         my %row_data;
         $row_data{Advanced_Parameter}  = $param;
         $row_data{Advanced_Value}      = $value;
-        $row_data{Advanced_If_Changed} = !$self->{configuration__}->is_default( $param );
+        $row_data{Advanced_If_Changed} =
+            !$self->{configuration__}->is_default( $param );
 
         if ( ( $last_module ne '' ) && ( $last_module ne $1 ) ) {
             $row_data{Advanced_If_New_Module} = 1;
@@ -1194,7 +1218,8 @@ sub magnet_page
 
     if ( defined( $self->{form_}{delete} ) ) {
         for my $i ( 1 .. $self->{form_}{count} ) {
-            if ( defined( $self->{form_}{"remove$i"} ) && ( $self->{form_}{"remove$i"} ) ) {
+            if ( defined( $self->{form_}{"remove$i"} ) &&
+               ( $self->{form_}{"remove$i"} ) ) {
                 my $mtype   = $self->{form_}{"type$i"};
                 my $mtext   = $self->{form_}{"text$i"};
                 my $mbucket = $self->{form_}{"bucket$i"};
@@ -1204,7 +1229,9 @@ sub magnet_page
         }
     }
 
-    if ( defined( $self->{form_}{count} ) && ( defined( $self->{form_}{update} ) || defined( $self->{form_}{create} ) ) ) {
+    if ( defined( $self->{form_}{count} ) &&
+       ( defined( $self->{form_}{update} ) ||
+         defined( $self->{form_}{create} ) ) ) {
         for my $i ( 0 .. $self->{form_}{count} ) {
             my $mtype   = $self->{form_}{"type$i"};
             my $mtext   = $self->{form_}{"text$i"};
@@ -1216,11 +1243,14 @@ sub magnet_page
                 my $obucket = $self->{form_}{"obucket$i"};
 
                 if ( defined( $otype ) ) {
-                    $self->{c__}->delete_magnet( $self->{api_session__}, $obucket, $otype, $otext );
+                    $self->{c__}->delete_magnet( $self->{api_session__},
+                        $obucket, $otype, $otext );
                 }
             }
 
-            if ( ( defined($mbucket) ) && ( $mbucket ne '' ) && ( $mtext ne '' ) ) {
+            if ( ( defined($mbucket) ) &&
+                 ( $mbucket ne '' ) &&
+                 ( $mtext ne '' ) ) {
 
                 # Support for feature request 77646 - import function.
                 # goal is a method of creating multiple magnets all
@@ -1248,9 +1278,12 @@ sub magnet_page
                 my $found = 0;
 
                 foreach my $current_mtext (@mtexts) {
-                    for my $bucket ($self->{c__}->get_buckets_with_magnets( $self->{api_session__} )) {
+                    for my $bucket ($self->{c__}->get_buckets_with_magnets(
+                                        $self->{api_session__} )) {
                         my %magnets;
-                        @magnets{ $self->{c__}->get_magnets( $self->{api_session__}, $bucket, $mtype )} = ();
+                        @magnets{ $self->{c__}->get_magnets(
+                                      $self->{api_session__},
+                                          $bucket, $mtype )} = ();
 
                         if ( exists( $magnets{$current_mtext} ) ) {
                             $found  = 1;
@@ -1327,7 +1360,8 @@ sub magnet_page
     }
 
     if ( $self->config_( 'page_size' ) < $magnet_count ) {
-        $self->set_magnet_navigator__( $templ, $start_magnet, $stop_magnet, $magnet_count );
+        $self->set_magnet_navigator__( $templ, $start_magnet,
+            $stop_magnet, $magnet_count );
     }
 
     $templ->param( 'Magnet_Start_Magnet' => $start_magnet );
@@ -2270,6 +2304,12 @@ sub history_page
 
         my $start_message = 0;
         $start_message = $self->{form_}{start_message} if ( ( defined($self->{form_}{start_message}) ) && ($self->{form_}{start_message} > 0 ) );
+        if ( $start_message > ( $c - $self->config_( 'page_size' ) ) ) {
+            $start_message -= $self->config_( 'page_size' );
+        }
+        if ( $start_message < 0 ) {
+            $start_message = 0;
+        }
         $self->{form_}{start_message} = $start_message;
         $templ->param( 'History_Start_Message' => $start_message );
 
@@ -2336,6 +2376,9 @@ sub history_page
         }
         if ( defined($self->{form_}{decrease}) ) {
             $length--;
+            if ( $length < 5 ) {
+                $length = 5;
+            }
             $self->config_( 'column_characters', $length );
         }
         foreach my $row (@rows) {
@@ -2449,7 +2492,7 @@ sub view_page
     $templ->param( 'View_From'             => $from );
     $templ->param( 'View_To'               => $to );
     $templ->param( 'View_Cc'               => $cc );
-    $templ->param( 'View_Date'             => $self->pretty_date__( $date ) );
+    $templ->param( 'View_Date'             => $self->pretty_date__( $date, 1 ) );
     $templ->param( 'View_Subject'          => $subject );
     $templ->param( 'View_Bucket'           => $bucket );
     $templ->param( 'View_Bucket_Color'     => $color );
@@ -3092,7 +3135,5 @@ sub shutdown_page__
 
     return $text;
 }
-
-
 
 1;

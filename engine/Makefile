@@ -15,7 +15,7 @@ error:
 	@echo "coverage - Run POPFile test suite with coverage information"
 	@echo "test     - Run POPFile test suite"
 	@echo "eachtest - Run POPFile tests one by one"
-	@echo "           (test and coverage pass the TESTARGS variable to the test suite)"
+	@echo "           (test and coverage pass TESTARGS to the test suite)"
 	@echo
 	@echo "windows  - Build Windows executables and installer"
 	@echo "macosx   - Build Mac OS X package installer"
@@ -23,7 +23,7 @@ error:
 	@echo "package  - Build Windows installer, and create"
 	@echo "           ZIP files for Windows and cross-platform"
 	@echo "           version"
-	@echo "rc       - After doing package moves the ZIP files to be RC zip files"
+	@echo "rc       - After doing package moves ZIP files to be RC zip files"
 	@echo "           The RC number is set with the RC parameter so do"
 	@echo "           make rc RC=RC6 for example."
 
@@ -135,8 +135,3 @@ $(POPFILE_VERSION_FILE): vars.mak
 	@echo $(POPFILE_MINOR_VERSION) >> $@
 	@echo $(POPFILE_REVISION) >> $@
 
-killperls:
-	@kill `ps -C perl -o pid=`
-
-print-%:
-	@echo $*=$($*)

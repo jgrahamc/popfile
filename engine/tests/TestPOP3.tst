@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # Tests for POP3.pm
 #
@@ -22,11 +22,12 @@
 #
 #   Modified by     Sam Schinke (sschinke@users.sourceforge.net)
 #
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 use POPFile::Configuration;
 use POPFile::MQ;
 use POPFile::Logger;
+use POPFile::History;
 use Proxy::POP3;
 use Classifier::Bayes;
 use Classifier::WordMangle;
@@ -194,7 +195,8 @@ sub server
 
         if ( $command =~ /DELE (.*)/i ) {
             my $index = $1 - 1;
-            if ( defined( $messages[$index] ) && ( $messages[$index] ne '' ) ) {
+            if ( defined( $messages[$index] ) && 
+                 ( $messages[$index] ne '' ) ) {
                 $messages[$index] = '';
                 print $client "+OK Deleted $1$eol";
             } else {
@@ -205,7 +207,8 @@ sub server
 
         if ( $command =~ /RETR (\d+)/i ) {
             my $index = $1 - 1;
-            if ( defined( $messages[$index] ) && ( $messages[$index] ne '' ) ) {
+            if ( defined( $messages[$index] ) && 
+                 ( $messages[$index] ne '' ) ) {
                  print $client "+OK " . ( -s $messages[$index] ) . "$eol";
 
                  my $slowlftemp = $slowlf;
@@ -287,7 +290,8 @@ sub server
         }
 
         if ( $command =~ /CAPA|AUTH/i ) {
-            print $client "+OK I can handle$eol" . "AUTH$eol" . "USER$eol" . "APOP$eol.$eol";
+            print $client "+OK I can handle$eol" . "AUTH$eol" . 
+                "USER$eol" . "APOP$eol.$eol";
             next;
         }
 
@@ -305,13 +309,14 @@ sub server
 rmtree( 'corpus' );
 test_assert( rec_cp( 'corpus.base', 'corpus' ) );
 test_assert( rmtree( 'corpus/CVS' ) > 0 );
-test_assert( scalar(`rm -rf messages/*`) == 0 ); # todo: make tool independent
+test_assert( scalar(`rm -rf messages/*`) == 0 );
 
 my $c = new POPFile::Configuration;
 my $mq = new POPFile::MQ;
 my $l = new POPFile::Logger;
 my $b = new Classifier::Bayes;
 my $w = new Classifier::WordMangle;
+my $h = new POPFile::History;
 
 sub forker
 {
@@ -369,12 +374,22 @@ $b->configuration( $c );
 $b->mq( $mq );
 $b->logger( $l );
 
+$h->configuration( $c );
+$h->mq( $mq );
+$h->logger( $l );
+
+$b->history( $h );
+$h->classifier( $b );
+
+$h->initialize();
+
 $b->initialize();
 $b->module_config_( 'html', 'port', 8080 );
 $b->module_config_( 'html', 'language', 'English' );
 $b->config_( 'hostname', '127.0.0.1' );
 $b->{parser__}->mangle( $w );
 $b->start();
+$h->start();
 
 # some tests require this directory to be present
 mkdir( 'messages' );
@@ -418,12 +433,8 @@ if ( $pid == 0 ) {
             }
         }
         
-        #print "defined!\n" if (defined($dserverreader) && defined($dserverwriter) );
-
         if ( pipeready( $dserverreader ) ) {
             my $command = <$dserverreader>;
-
-            #print "\npipe read $command\n";
 
             if ( $command =~ /__APOPON/ ) {
                 $apop_server = 1;
@@ -433,17 +444,10 @@ if ( $pid == 0 ) {
 
             if ( $command =~ /__APOPOFF/ ) {
                 $apop_server = 0;
-                #print "\nAPOP OFF!!\n";
                 print $userverwriter "OK\n";
                 next;
             }
-        } else {
-
-            #print "\npipe unready\n";
-
-            #select(undef,undef,undef, 0.5);
         }
-
     }
 
     close $server;
@@ -539,13 +543,7 @@ if ( $pid == 0 ) {
         close $dreader;
         close $uwriter;
 
-        my @kids = keys %{$p->{children__}};
-        while ( $#kids >= 0 ) {
-            $p->reaper();
-            select( undef, undef, undef, 0.25 );
-            @kids = keys %{$p->{children__}};
-        }
-
+        $mq->reaper();
         $p->stop();
 
         exit(0);
@@ -572,22 +570,22 @@ if ( $pid == 0 ) {
         # Make sure that POPFile sends an appropriate banner
 
         my $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         # Try a connection to a server that does not exist
 
         print $client "USER 127.0.0.1:8111:gooduser$eol";
         $result = <$client>;
-        test_assert_equal( $result, "-ERR can't connect to 127.0.0.1:8111$eol" );
+        test_assert_equal( $result,
+            "-ERR can't connect to 127.0.0.1:8111$eol" );
 
-        # Check that we can connect to the remote POP3 server (should still be waiting
-        # for us)
+        # Check that we can connect to the remote POP3 server 
+        # (should still be waiting for us)
 
         print $client "USER 127.0.0.1:8110:gooduser$eol";
         $result = <$client>;
         test_assert_equal( $result, "+OK Welcome gooduser$eol" );
-
-        # TODO check for LOGIN message
 
         # Now send a bad password
 
@@ -699,8 +697,6 @@ if ( $pid == 0 ) {
 
         select( undef, undef, undef, 0.1 );
 
-        # TODO check for NEWFL and CLASS messages
-
         test_assert( -e 'messages/popfile1=1.msg' );
         test_assert( -e 'messages/popfile1=1.cls' );
 
@@ -718,7 +714,8 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile1=1.msg' );
+        my ( $reclassified, $bucket, $usedtobe, $magnet ) =
+            $b->history_read_class( 'popfile1=1.msg' );
         test_assert( !$reclassified );
         test_assert_equal( $bucket, 'spam' );
         test_assert( !defined( $usedtobe ) );
@@ -761,8 +758,6 @@ if ( $pid == 0 ) {
 
         select( undef, undef, undef, 0.1 );
 
-        # TODO check for NEWFL and CLASS messages
-
         test_assert( -e 'messages/popfile1=28.msg' );
         test_assert( -e 'messages/popfile1=28.cls' );
 
@@ -780,7 +775,8 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile1=28.msg' );
+        ( $reclassified, $bucket, $usedtobe, $magnet ) =
+            $b->history_read_class( 'popfile1=28.msg' );
         test_assert( !$reclassified );
         test_assert_equal( $bucket, 'spam' );
         test_assert( !defined( $usedtobe ) );
@@ -892,8 +888,6 @@ if ( $pid == 0 ) {
 
         select( undef, undef, undef, 0.1 );
 
-        # TODO check for NEWFL and CLASS messages
-
         test_assert( -e 'messages/popfile1=7.msg' );
         test_assert( -e 'messages/popfile1=7.cls' );
 
@@ -911,7 +905,8 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile1=7.msg' );
+        ( $reclassified, $bucket, $usedtobe, $magnet ) =
+            $b->history_read_class( 'popfile1=7.msg' );
         test_assert( !$reclassified );
         test_assert_equal( $bucket, 'spam' );
         test_assert( !defined( $usedtobe ) );
@@ -940,7 +935,8 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "USER 127.0.0.1:8110:gooduser$eol";
         $result = <$client>;
@@ -991,7 +987,8 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile2=8.msg' );
+        ( $reclassified, $bucket, $usedtobe, $magnet ) =
+            $b->history_read_class( 'popfile2=8.msg' );
         test_assert( !$reclassified );
         test_assert_equal( $bucket, 'spam' );
         test_assert( !defined( $usedtobe ) );
@@ -1001,7 +998,8 @@ if ( $pid == 0 ) {
 
         print $client "RETR 8$eol";
         $result = <$client>;
-        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=8.msg' ) . " bytes from POPFile cache$eol" );
+        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=8.msg' ) .
+            " bytes from POPFile cache$eol" );
 
         $cam = $messages[7];
         $cam =~ s/msg$/cam/;
@@ -1064,7 +1062,8 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile2=9.msg' );
+        ( $reclassified, $bucket, $usedtobe, $magnet ) =
+            $b->history_read_class( 'popfile2=9.msg' );
         test_assert( !$reclassified );
         test_assert_equal( $bucket, 'spam' );
         test_assert( !defined( $usedtobe ) );
@@ -1072,7 +1071,8 @@ if ( $pid == 0 ) {
 
         print $client "RETR 9$eol";
         $result = <$client>;
-        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=9.msg' ) . " bytes from POPFile cache$eol" );
+        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=9.msg' ) .
+            " bytes from POPFile cache$eol" );
 
         $cam = $messages[8];
         $cam =~ s/msg$/cam/;
@@ -1097,7 +1097,8 @@ if ( $pid == 0 ) {
 
         print $client "RETR 9$eol";
         $result = <$client>;
-        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=9.msg' ) . " bytes from POPFile cache$eol" );
+        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=9.msg' ) .
+            " bytes from POPFile cache$eol" );
 
         $cam = $messages[8];
         $cam =~ s/msg$/cam/;
@@ -1162,7 +1163,8 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile2=28.msg' );
+        ( $reclassified, $bucket, $usedtobe, $magnet ) =
+            $b->history_read_class( 'popfile2=28.msg' );
         test_assert( !$reclassified );
         test_assert_equal( $bucket, 'spam' );
         test_assert( !defined( $usedtobe ) );
@@ -1172,7 +1174,8 @@ if ( $pid == 0 ) {
 
         print $client "RETR 28$eol";
         $result = <$client>;
-        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=28.msg' ) . " bytes from POPFile cache$eol" );
+        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=28.msg' ) 
+            . " bytes from POPFile cache$eol" );
 
         $cam = $messages[27];
         $cam =~ s/msg$/cam/;
@@ -1210,7 +1213,8 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "USER 127.0.0.1:8110:goslow$eol";
         $result = <$client>;
@@ -1266,7 +1270,8 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "USER 127.0.0.1:8110:slowlf$eol";
         $result = <$client>;
@@ -1306,7 +1311,8 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "QUIT$eol";
         $result = <$client>;
@@ -1325,7 +1331,8 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "FOOF$eol";
         $result = <$client>;
@@ -1348,20 +1355,23 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         # Try a connection to a server that does not exist
 
         print $client "APOP 127.0.0.1:8111:gooduser md5$eol";
         $result = <$client>;
-        test_assert_equal( $result, "-ERR APOP not supported between mail client and POPFile.$eol" );
+        test_assert_equal( $result,
+            "-ERR APOP not supported between mail client and POPFile.$eol" );
 
-        # Check that we can connect to the remote POP3 server (should still be waiting
-        # for us)
+        # Check that we can connect to the remote POP3 server 
+        # (should still be waiting for us)
 
         print $client "APOP 127.0.0.1:8110:gooduser md5$eol";
         $result = <$client>;
-        test_assert_equal( $result, "-ERR APOP not supported between mail client and POPFile.$eol" );
+        test_assert_equal( $result, 
+            "-ERR APOP not supported between mail client and POPFile.$eol" );
 
         print $client "QUIT$eol";
         $result = <$client>;
@@ -1378,20 +1388,23 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         # Try a connection to a server that does not exist
 
         print $client "APOP 127.0.0.1:8111:gooduser md5$eol";
         $result = <$client>;
-        test_assert_equal( $result, "-ERR APOP not supported between mail client and POPFile.$eol" );
+        test_assert_equal( $result, 
+            "-ERR APOP not supported between mail client and POPFile.$eol" );
 
-        # Check that we can connect to the remote POP3 server (should still be waiting
-        # for us)
+        # Check that we can connect to the remote POP3 server 
+        # (should still be waiting for us)
 
         print $client "APOP 127.0.0.1:8110:gooduser md5$eol";
         $result = <$client>;
-        test_assert_equal( $result, "-ERR APOP not supported between mail client and POPFile.$eol" );
+        test_assert_equal( $result, 
+            "-ERR APOP not supported between mail client and POPFile.$eol" );
 
         print $client "QUIT$eol";
         $result = <$client>;
@@ -1417,12 +1430,14 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "USER 127.0.0.1:8110:gooduser:apop$eol";
 
         $result = <$client>;
-        test_assert_equal( $result, "-ERR 127.0.0.1 doesn't support APOP, aborting authentication$eol" );
+        test_assert_equal( $result,
+          "-ERR 127.0.0.1 doesn't support APOP, aborting authentication$eol" );
 
         print $client "QUIT$eol";
         $result = <$client>;
@@ -1445,7 +1460,8 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "USER 127.0.0.1:8110:gooduser:apop$eol";
         $result = <$client>;
@@ -1472,7 +1488,8 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "USER 127.0.0.1:8110:baduser:apop$eol";
         
@@ -1501,7 +1518,8 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "USER 127.0.0.1:8110:gooduser:apop$eol";
         
@@ -1530,7 +1548,8 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "CAPA$eol";
         $result = <$client>;
@@ -1549,8 +1568,7 @@ if ( $pid == 0 ) {
         test_assert_equal( $result, "+OK goodbye$eol" );
 
         close $client;
-        
-        
+                
         # re-disable APOP on the server so we don't mess with anything else
 
         print $dserverwriter "__APOPOFF\n";
@@ -1573,19 +1591,23 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "CAPA$eol";
         $result = <$client>;
-        test_assert_equal( $result, "-ERR can't connect to 127.0.0.1:8111$eol" );
+        test_assert_equal( $result,
+            "-ERR can't connect to 127.0.0.1:8111$eol" );
 
         print $client "AUTH$eol";
         $result = <$client>;
-        test_assert_equal( $result, "-ERR can't connect to 127.0.0.1:8111$eol" );
+        test_assert_equal( $result,
+            "-ERR can't connect to 127.0.0.1:8111$eol" );
 
         print $client "AUTH username$eol";
         $result = <$client>;
-        test_assert_equal( $result, "-ERR can't connect to 127.0.0.1:8111$eol" );
+        test_assert_equal( $result,
+            "-ERR can't connect to 127.0.0.1:8111$eol" );
 
         print $client "QUIT$eol";
         $result = <$client>;
@@ -1608,7 +1630,8 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "AUTH$eol";
         $result = <$client>;
@@ -1637,7 +1660,8 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "AUTH gooduser$eol";
         $result = <$client>;
@@ -1669,7 +1693,8 @@ if ( $pid == 0 ) {
         test_assert( $client->connected );
 
         $result = <$client>;
-        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+        test_assert_equal( $result,
+            "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "USER 127.0.0.1:8110:gooduser$eol";
         $result = <$client>;
