@@ -6,7 +6,7 @@ use POPFile::Module;
 
 #----------------------------------------------------------------------------
 #
-# This module handles POPFile's logger.  It is used to save debugging 
+# This module handles POPFile's logger.  It is used to save debugging
 # information to disk or to send it to the screen.
 #
 # Copyright (c) 2001-2003 John Graham-Cumming
@@ -142,8 +142,12 @@ sub debug
         my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime;
         $year += 1900;
         $mon  += 1;
-        my $msg = "$year/$mon/$mday $hour:$min:$sec $$: $message";
 
+        $min  = "0$min"  if ( $min  < 10 );
+        $hour = "0$hour" if ( $hour < 10 );
+        $sec  = "0$sec"  if ( $sec  < 10 );
+
+        my $msg = "$year/$mon/$mday $hour:$min:$sec $$: $message";
 
         if ( $self->global_config_( 'debug' ) & 1 )  {
             open DEBUG, ">>$self->{debug_filename__}";
