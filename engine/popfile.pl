@@ -210,7 +210,7 @@ sub remove_debug_files
         if ( $debug_file =~ /popfile([0-9]+)\.log/ ) 
         {
             # If older than now - 3 days then delete
-            if ( $1 != $today ) 
+            if ( "$1" ne "$today" ) 
             {
                 unlink($debug_file);
             }
@@ -236,7 +236,7 @@ sub remove_mail_files
         if ( $mail_file =~ /popfile([0-9]+)_([0-9]+)\.msg/ ) 
         {
             # If older than now - 1 day then delete
-            if ( $1 != $today ) 
+            if ( "$1" ne "$today" ) 
             {
                 my $class_file = $mail_file;
                 $class_file =~ s/msg$/cls/;
