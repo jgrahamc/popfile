@@ -158,7 +158,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.18"
+  !define C_PFI_VERSION  "0.2.32"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -213,7 +213,10 @@
   Var G_PFIFLAG            ; (a) Installer:
                            ;     POPFile automatic startup flag (1 = yes, 0 = no)
                            ; (b) Uninstaller:
-                           ;     Used to indicate whether or not email settings were restored OK
+                           ;     'normal'  = being run by the user who is the owner
+                           ;     'special' = being run by a user other than the owner
+                           ;     'success' = email settings restored OK (in 'normal' mode)
+                           ;     'fail'    = email settings problem found (in 'normal' mode)
 
   Var G_OOECONFIG_HANDLE   ; to access list of all Outlook/Outlook Express accounts found
   Var G_OOECHANGES_HANDLE  ; to access list of Outlook/Outlook Express configuration changes
@@ -229,6 +232,8 @@
   Var G_WINUSERTYPE        ; user group ('Admin', 'Power', 'User', 'Guest' or 'Unknown')
 
   Var G_SFN_DISABLED       ; 1 = short file names not supported, 0 = short file names available
+
+  Var G_PLS_FIELD_1        ; used to customise translated text strings
 
   ; NSIS provides 20 general purpose user registers:
   ; (a) $R0 to $R9   are used as local registers
@@ -362,7 +367,7 @@
 
   ; Debug aid: Hide the installation log but let user display it (using "Show details" button)
 
-  !define MUI_FINISHPAGE_NOAUTOCLOSE
+##  !define MUI_FINISHPAGE_NOAUTOCLOSE
 
   ;----------------------------------------------------------------
   ;  Interface Settings - Abort Warning Settings
@@ -549,6 +554,8 @@
   ;---------------------------------------------------
   ; Uninstaller Page - Uninstall POPFile
   ;---------------------------------------------------
+
+  ; Override the standard "Uninstalling/Please wait.." page header
 
   !define MUI_PAGE_HEADER_TEXT                "$(PFI_LANG_REMOVING_TITLE)"
   !define MUI_PAGE_HEADER_SUBTEXT             "$(PFI_LANG_REMOVING_SUBTITLE)"
@@ -768,7 +775,7 @@ Section "POPFile" SecPOPFile
   Push ${L_RESERVED}
 
   SetDetailsPrint textonly
-  DetailPrint " "
+  DetailPrint "$(PFI_LANG_INST_PROG_REGSET)"
   SetDetailsPrint listonly
 
   ; If we are installing over a previous version, ensure that version is not running
@@ -922,12 +929,18 @@ set_user_now:
 continue:
   SetOutPath "$G_USERDIR"
 
+  Push $G_USERDIR
+  Call GetSQLdbPathName
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "Not SQLite" stopwords
+
   ; Create a shortcut to make it easier to run the SQLite utility
 
   SetFileAttributes "$G_USERDIR\Run SQLite utility.lnk" NORMAL
   CreateShortCut "$G_USERDIR\Run SQLite utility.lnk" \
                  "$G_ROOTDIR\sqlite.exe" "popfile.db"
 
+stopwords:
   IfFileExists "$G_ROOTDIR\pfi-stopwords.default" 0 update_config_ports
 
   IfFileExists "$G_USERDIR\stopwords" 0 copy_stopwords
@@ -1013,12 +1026,6 @@ update_config:
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
                  "$G_ROOTDIR\runpopfile.exe"
 
-  IfFileExists "$G_ROOTDIR\pfidiag.exe" 0 uninst_shortcut
-  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk" NORMAL
-  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk" \
-                 "$G_ROOTDIR\pfidiag.exe"
-
-uninst_shortcut:
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk" \
                  "$G_USERDIR\uninstalluser.exe"
@@ -1042,11 +1049,11 @@ skip_rel_notes:
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url" \
-              "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/"
+              "InternetShortcut" "URL" "http://${C_UI_URL}:$G_GUI/"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" \
-              "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
+              "InternetShortcut" "URL" "http://${C_UI_URL}:$G_GUI/shutdown"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" \
@@ -1074,10 +1081,42 @@ skip_rel_notes:
   !endif
 
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
+
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
 
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url" NORMAL
+
+  !ifndef ENGLISH_MODE
+      StrCmp $LANGUAGE ${LANG_JAPANESE} japanese_wiki
+  !endif
+
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url" \
+              "InternetShortcut" "URL" \
+              "http://popfile.sourceforge.net/cgi-bin/wiki.pl?POPFileDocumentationProject"
+
+  !ifndef ENGLISH_MODE
+      Goto pfidiagnostic
+
+    japanese_wiki:
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url" \
+                  "InternetShortcut" "URL" \
+                  "http://popfile.sourceforge.net/cgi-bin/wiki.pl?JP_POPFileDocumentationProject"
+
+    pfidiagnostic:
+  !endif
+
+  IfFileExists "$G_ROOTDIR\pfidiag.exe" 0 silent_shutdown
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk"
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (simple).lnk" NORMAL
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (simple).lnk" \
+                 "$G_ROOTDIR\pfidiag.exe"
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (full).lnk" NORMAL
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (full).lnk" \
+                 "$G_ROOTDIR\pfidiag.exe" "/full"
+
+silent_shutdown:
   SetOutPath "$G_ROOTDIR"
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
@@ -1134,6 +1173,93 @@ end_autostart_set:
 SectionEnd
 
 #--------------------------------------------------------------------------
+# Installer Section: Pre-0.22.0 SQLite Database Backup component (always 'installed')
+#
+# If we are performing an upgrade of a POPFile 0.21.0 or 0.21.1 installation, the SQLite
+# database will be upgraded (and the message history converted) so we make a backup of the
+# SQlite database before running POPFile for the first time.
+#
+# The backup is created in the '$G_USERDIR\backup' folder. Information on the backup is stored
+# in the 'backup.ini' file to assist in restoring the old corpus.
+#
+# If SQLite database conversion is required, we will use the 'Message Capture' utility to show
+# the conversion progress reports (instead of running POPFile in a console window)
+#--------------------------------------------------------------------------
+
+Section "-SQLCorpusBackup" SecSQLBackup
+
+  !define L_MESSAGES  $R9
+  !define L_SQL_DB    $R8
+  !define L_TEMP      $R7
+
+  Push ${L_MESSAGES}
+  Push ${L_SQL_DB}
+  Push ${L_TEMP}
+
+  Push $G_USERDIR
+  Call GetMessagesPath
+  Pop ${L_MESSAGES}
+
+  ; If the new style of 'messages' folder is in use, assume SQL database uses the new schema
+  ; so there is no need to make a backup of the existing database
+
+  IfFileExists "${L_MESSAGES}\00\*.*" exit
+
+  ; If the 'messages' folder has messages in it, assume we need to backup the SQL database
+
+  IfFileExists "${L_MESSAGES}\*.msg" 0 exit
+
+  ; If there is no 'popfile.cfg' then we cannot find the SQL database configuration
+
+  IfFileExists "$G_USERDIR\popfile.cfg" 0 exit
+
+  ; If the SQLite backup folder exists, do not attempt to backup the database
+
+  IfFileExists "$G_USERDIR\backup\oldsql\*.*" exit
+
+  Push $G_USERDIR
+  Call GetSQLdbPathName
+  Pop ${L_SQL_DB}
+  StrCmp ${L_SQL_DB} "" exit
+  StrCmp ${L_SQL_DB} "Not SQLite" exit
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_SQLBACKUP)"
+  SetDetailsPrint listonly
+
+  ; An old style SQLite database has been found, so we make a backup copy
+
+  CreateDirectory "$G_USERDIR\backup"
+  WriteINIStr "$G_USERDIR\backup\backup.ini" "OldSQLdatabase" "DatabasePath" "${L_SQL_DB}"
+
+  Push ${L_SQL_DB}
+  Call GetParent
+  Pop ${L_TEMP}
+  WriteINIStr "$G_USERDIR\backup\backup.ini" "OldSQLdatabase" "ParentPath" "${L_TEMP}"
+  StrLen ${L_TEMP} ${L_TEMP}
+  IntOp ${L_TEMP} ${L_TEMP} + 1
+  StrCpy ${L_TEMP} ${L_SQL_DB} "" ${L_TEMP}
+
+  WriteINIStr "$G_USERDIR\backup\backup.ini" "OldSQLdatabase" "BackupPath" "$G_USERDIR\backup\oldsql"
+  WriteINIStr "$G_USERDIR\backup\backup.ini" "OldSQLdatabase" "Database" "${L_TEMP}"
+
+  CreateDirectory "$G_USERDIR\backup\oldsql"
+  CopyFiles "${L_SQL_DB}" "$G_USERDIR\backup\oldsql\${L_TEMP}"
+
+  WriteINIStr "$G_USERDIR\backup\backup.ini" "OldSQLdatabase" "Status" "New"
+
+exit:
+  Pop ${L_TEMP}
+  Pop ${L_SQL_DB}
+  Pop ${L_MESSAGES}
+
+  !undef L_MESSAGES
+  !undef L_SQL_DB
+  !undef L_TEMP
+
+SectionEnd
+
+#--------------------------------------------------------------------------
 # Installer Section: Flat File or BerkeleyDB Corpus Backup component (always 'installed')
 #
 # If we are performing an upgrade of a 'flat file' or 'BerkeleyDB' version of POPFile, we make
@@ -1167,6 +1293,10 @@ Section "-NonSQLCorpusBackup" SecBackup
 
   IfFileExists "$G_USERDIR\popfile.cfg" 0 exit
   IfFileExists "$G_USERDIR\backup\nonsql\*.*" exit
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_FINDCORPUS)"
+  SetDetailsPrint listonly
 
   ; Save installation-specific data for use by the 'Monitor Corpus Conversion' utility
 
@@ -1311,6 +1441,10 @@ nothing_to_backup:
   FindClose ${L_CFG_HANDLE}
 
 exit:
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
+
   Pop ${L_TEMP}
   Pop ${L_FOLDER_COUNT}
   Pop ${L_CORPUS_SIZE}
@@ -1457,6 +1591,10 @@ Section "-MakeBatchFile" SecMakeBatch
   Push ${L_POPFILE_USER}
   Push ${L_TIMESTAMP}
 
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_MAKEBAT)"
+  SetDetailsPrint listonly
+
   Call GetDateTimeStamp
   Pop ${L_TIMESTAMP}
 
@@ -1483,16 +1621,52 @@ Section "-MakeBatchFile" SecMakeBatch
   FileWrite ${L_FILEHANDLE} "set POPFILE_USER=${L_POPFILE_USER}$\r$\n"
   FileWrite ${L_FILEHANDLE} "$\r$\n"
   FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM Do not try to use the 'Debug' and 'Normal' commands at the same time!$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM To run in 'Normal' mode, remove REM from the start of the next line$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM goto normal$\r$\n"
   FileWrite ${L_FILEHANDLE} "REM ---------------------------------------------------------------------$\r$\n"
   FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM --------------------$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM Debug mode$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM --------------------$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "if exist $\"%POPFILE_ROOT%\msgcapture.exe$\" goto msgcapture$\r$\n"
+  FileWrite ${L_FILEHANDLE} "if exist $\"%POPFILE_ROOT%\pfimsgcapture.exe$\" goto pfimsgcapture$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
   FileWrite ${L_FILEHANDLE} "REM Debug command: Start POPFile in foreground using 'popfile.pl'$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
   FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\perl.exe$\" $\"%POPFILE_ROOT%\popfile.pl$\"$\r$\n"
+  FileWrite ${L_FILEHANDLE} "goto exit$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM Debug command: Start POPFile using the 'Message Capture' utility$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} ":msgcapture$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\msgcapture.exe$\" /TIMEOUT=0$\r$\n"
+  FileWrite ${L_FILEHANDLE} "goto exit$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} ":pfimsgcapture$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\pfimsgcapture.exe$\" /TIMEOUT=0$\r$\n"
+  FileWrite ${L_FILEHANDLE} "goto exit$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM --------------------$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM Normal mode$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM --------------------$\r$\n"
   FileWrite ${L_FILEHANDLE} "$\r$\n"
   FileWrite ${L_FILEHANDLE} "REM Normal command: Start POPFile using the settings in 'popfile.cfg'$\r$\n"
-  FileWrite ${L_FILEHANDLE} "REM $\"%POPFILE_ROOT%\popfile.exe$\"$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} ":normal$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\popfile.exe$\"$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM --------------------$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM Exit from batch file$\r$\n"
+  FileWrite ${L_FILEHANDLE} "REM --------------------$\r$\n"
+  FileWrite ${L_FILEHANDLE} "$\r$\n"
+  FileWrite ${L_FILEHANDLE} ":exit$\r$\n"
 
   FileClose ${L_FILEHANDLE}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
 
   Pop ${L_TIMESTAMP}
   Pop ${L_POPFILE_USER}
@@ -2240,7 +2414,8 @@ try_old_style:
   StrCmp ${L_RESULT} "success" exit_now
 
 manual_shutdown:
-  DetailPrint "Unable to shutdown automatically - manual intervention requested"
+  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
+  StrCpy $G_PLS_FIELD_1 "POPFile"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_2)\
@@ -4435,7 +4610,8 @@ lastaction_no:
   Call ShutdownViaUI
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "password?" 0 exit_without_banner
-  DetailPrint "Unable to shutdown automatically - manual intervention requested"
+  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
+  StrCpy $G_PLS_FIELD_1 "POPFile"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_2)\
@@ -4488,6 +4664,8 @@ lastaction_enableicon:
 corpus_conv_check:
   ReadINIStr ${L_TEMP} "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Status"
   StrCmp ${L_TEMP} "new" exit_without_banner
+  ReadINIStr ${L_TEMP} "$G_USERDIR\backup\backup.ini" "OldSQLdatabase" "Status"
+  StrCmp ${L_TEMP} "new" exit_without_banner
   StrCmp ${L_CONSOLE} "f" do_not_show_banner
 
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_LAUNCH_BANNER_1)" "$(PFI_LANG_LAUNCH_BANNER_2)"
@@ -4501,7 +4679,8 @@ do_not_show_banner:
   Call ShutdownViaUI
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "password?" 0 continue
-  DetailPrint "Unable to shutdown automatically - manual intervention requested"
+  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
+  StrCpy $G_PLS_FIELD_1 "POPFile"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_2)\
@@ -4610,6 +4789,18 @@ exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
+# Installer Function: UpgradeSQLdatabase
+#--------------------------------------------------------------------------
+
+Function UpgradeSQLdatabase
+
+  HideWindow
+  ExecWait '"$G_ROOTDIR\msgcapture.exe" /TIMEOUT=PFI'
+  BringToFront
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Installer Function: CheckRunStatus
 # (the "pre" function for the 'FINISH' page)
 #
@@ -4624,8 +4815,10 @@ FunctionEnd
 
 Function CheckRunStatus
 
-  !define L_TEMP        $R9
+  !define L_MESSAGES    $R9
+  !define L_TEMP        $R8
 
+  Push ${L_MESSAGES}
   Push ${L_TEMP}
 
   IfRebootFlag 0 no_reboot_reqd
@@ -4655,11 +4848,31 @@ corpus_conversion_check:
   ; several minutes, during which time the UI will appear to have 'locked up')
 
   ReadINIStr ${L_TEMP} "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Status"
-  StrCmp ${L_TEMP} "new" 0 selection_ok
+  StrCmp ${L_TEMP} "new" 0 check_database
 
   WriteINIStr "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Status" "old"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Settings" "BackEnabled" "0"
   Call ConvertCorpus
+  Goto selection_ok
+
+check_database:
+  ReadINIStr ${L_TEMP} "$G_USERDIR\backup\backup.ini" "OldSQLdatabase" "Status"
+  StrCmp ${L_TEMP} "new" 0 sqlupgrade_check
+  WriteINIStr "$G_USERDIR\backup\backup.ini" "OldSQLdatabase" "Status" "old"
+  Goto sqlupgrade
+
+sqlupgrade_check:
+  Push $G_ROOTDIR
+  Call FindLockedPFE
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" 0 selection_ok
+  Push $G_USERDIR
+  Call GetMessagesPath
+  Pop ${L_MESSAGES}
+  IfFileExists "${L_MESSAGES}\00\*.*" selection_ok
+
+sqlupgrade:
+  Call UpgradeSQLdatabase
   Goto selection_ok
 
 disable_UI_option:
@@ -4673,7 +4886,9 @@ selection_ok:
   BringToFront
 
   Pop ${L_TEMP}
+  Pop ${L_MESSAGES}
 
+  !undef L_MESSAGES
   !undef L_TEMP
 
 FunctionEnd
@@ -4689,7 +4904,7 @@ FunctionEnd
 
 Function RunUI
 
-  ExecShell "open" "http://127.0.0.1:$G_GUI/buckets"
+  ExecShell "open" "http://${C_UI_URL}:$G_GUI/buckets"
 
 FunctionEnd
 
@@ -4838,9 +5053,14 @@ Function un.PFIGUIInit
 
   Push ${L_TEMP}
 
+  ; Assume uninstaller is being run by the correct user
+
+  StrCpy $G_PFIFLAG "normal"
+
   ReadINIStr ${L_TEMP} "$G_USERDIR\install.ini" "Settings" "Owner"
   StrCmp ${L_TEMP} "" continue_uninstall
   StrCmp ${L_TEMP} $G_WINUSERNAME continue_uninstall
+  StrCpy $G_PFIFLAG "special"
   MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
       "$(PFI_LANG_UN_MBDIFFUSER_1) ('${L_TEMP}') !\
       $\r$\n$\r$\n\
@@ -4859,9 +5079,9 @@ FunctionEnd
 #
 #  (1) un.Uninstall Begin    - requests confirmation if appropriate
 #  (2) un.Shutdown POPFile   - shutdown POPFile if necessary (to avoid the need to reboot)
-#  (3) un.User Config        - uninstall configuration files in $G_USERDIR folder
-#  (4) un.Email Settings     - restore Outlook Express/Outlook/Eudora email settings
-#  (5) un.User Data          - remove corpus, message history and other data folders
+#  (3) un.Email Settings     - restore Outlook Express/Outlook/Eudora email settings
+#  (4) un.User Data          - remove corpus, message history and other data folders
+#  (5) un.User Config        - uninstall configuration files in $G_USERDIR folder
 #  (6) un.ShortCuts          - remove shortcuts
 #  (7) un.Environment        - current user's POPFile environment variables
 #  (8) un.Registry Entries   - remove 'Add/Remove Program' data and other registry entries
@@ -4875,6 +5095,12 @@ FunctionEnd
 
 Section "un.Uninstall Begin" UnSecBegin
 
+  StrCmp $G_PFIFLAG "normal" continue
+  DetailPrint ""
+  DetailPrint "*** Uninstaller is being run by the 'wrong' user ***"
+  DetailPrint ""
+
+continue:
   IfFileExists $G_USERDIR\popfile.cfg skip_confirmation
     MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
         "$(PFI_LANG_UN_MBNOTFOUND_1) '$G_USERDIR'.\
@@ -4890,17 +5116,16 @@ SectionEnd
 #--------------------------------------------------------------------------
 
 Section "un.Shutdown POPFile" UnSecShutdown
-  !define L_CFG         $R9   ; used as file handle
-  !define L_EXE         $R8   ; full path of the EXE to be monitored
-  !define L_LNE         $R7   ; a line from popfile.cfg
-  !define L_TEMP        $R6
-  !define L_TEXTEND     $R5   ; used to ensure correct handling of lines longer than 1023 chars
 
-  Push ${L_CFG}
+  !define L_EXE         $R9   ; full path of the EXE to be monitored
+  !define L_TEMP        $R8
+
   Push ${L_EXE}
-  Push ${L_LNE}
   Push ${L_TEMP}
-  Push ${L_TEXTEND}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_UN_PROG_EXESTATUS)"
+  SetDetailsPrint listonly
 
   ; Starting with POPfile 0.21.0 an experimental version of 'popfile-service.exe' was included
   ; to allow POPFile to be run as a Windows service.
@@ -4913,38 +5138,11 @@ Section "un.Shutdown POPFile" UnSecShutdown
   Push $G_ROOTDIR
   Call un.FindLockedPFE
   Pop ${L_EXE}
-  StrCmp ${L_EXE} "" remove_user_data
+  StrCmp ${L_EXE} "" section_exit
 
   ; Need to shutdown POPFile, so we can remove the SQLite database and other user data
 
-  StrCpy $G_GUI ""
-
-  FileOpen ${L_CFG} "$G_USERDIR\popfile.cfg" r
-
-found_eol:
-  StrCpy ${L_TEXTEND} "<eol>"
-
-loop:
-  FileRead ${L_CFG} ${L_LNE}
-  StrCmp ${L_LNE} "" ui_port_done
-  StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
-  StrCmp ${L_LNE} "$\n" loop
-
-  StrCpy ${L_TEMP} ${L_LNE} 10
-  StrCmp ${L_TEMP} "html_port " 0 check_eol
-  StrCpy $G_GUI ${L_LNE} 5 10
-
-  ; Now read file until we get to end of the current line
-  ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
-
-check_eol:
-  StrCpy ${L_TEXTEND} ${L_LNE} 1 -1
-  StrCmp ${L_TEXTEND} "$\n" found_eol
-  StrCmp ${L_TEXTEND} "$\r" found_eol loop
-
-ui_port_done:
-  FileClose ${L_CFG}
-
+  Call un.GetUIport
   StrCmp $G_GUI "" manual_shutdown
   Push $G_GUI
   Call un.TrimNewlines
@@ -4962,51 +5160,27 @@ ui_port_done:
   Push ${L_EXE}
   Call un.CheckIfLocked
   Pop ${L_EXE}
-  StrCmp ${L_EXE} "" remove_user_data
+  StrCmp ${L_EXE} "" section_exit
 
 manual_shutdown:
-  DetailPrint "Unable to shutdown automatically - manual intervention requested"
+  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
+  StrCpy $G_PLS_FIELD_1 "POPFile"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_2)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_3)"
 
-remove_user_data:
-  Pop ${L_TEXTEND}
+section_exit:
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
   Pop ${L_TEMP}
-  Pop ${L_LNE}
   Pop ${L_EXE}
-  Pop ${L_CFG}
 
-  !undef L_CFG
   !undef L_EXE
-  !undef L_LNE
   !undef L_TEMP
-  !undef L_TEXTEND
-
-SectionEnd
-
-#--------------------------------------------------------------------------
-# Uninstaller Section: 'un.User Config'
-#--------------------------------------------------------------------------
-
-Section "un.User Config" UnSecConfig
-
-  Delete "$G_USERDIR\popfile.cfg"
-  Delete "$G_USERDIR\popfile.cfg.bak"
-  Delete "$G_USERDIR\popfile.cfg.bk?"
-  Delete "$G_USERDIR\*.log"
-  Delete "$G_USERDIR\expchanges.txt"
-  Delete "$G_USERDIR\expconfig.txt"
-  Delete "$G_USERDIR\outchanges.txt"
-  Delete "$G_USERDIR\outconfig.txt"
-
-  Delete "$G_USERDIR\stopwords"
-  Delete "$G_USERDIR\stopwords.bak"
-  Delete "$G_USERDIR\stopwords.default"
-
-  Delete "$G_USERDIR\pfi-run.bat"
 
 SectionEnd
 
@@ -5016,13 +5190,17 @@ SectionEnd
 
 Section "un.Email Settings" UnSecEmail
 
+  ; If the uninstaller is being run by the "wrong" user, we cannot restore the email settings
+
+  StrCmp $G_PFIFLAG "special" do_nothing
+
   !define L_TEMP        $R9
   !define L_UNDOFILE    $R8   ; file holding original email client settings
 
   Push ${L_TEMP}
   Push ${L_UNDOFILE}
 
-  ; Use a global user variable to record status (if 'restore' fails we may need to retain data)
+  ; Initialise the status flag (if the email 'restore' fails we may need to retain 'undo' data)
 
   StrCpy $G_PFIFLAG "success"
 
@@ -5111,41 +5289,34 @@ delete_eudora_data:
   Delete "$G_USERDIR\${L_UNDOFILE}"
 
 end_eudora_restore:
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
   Pop ${L_UNDOFILE}
   Pop ${L_TEMP}
 
   !undef L_TEMP
   !undef L_UNDOFILE
 
+do_nothing:
 SectionEnd
 
 #--------------------------------------------------------------------------
 # Uninstaller Section: 'un.User Data'
 #--------------------------------------------------------------------------
 
-Section "un.User Data" UnSecCorpusEtc
+Section "un.User Data" UnSecCorpusMsgDir
 
-  ; If email client problems found, offer to leave uninstaller behind with the error logs etc
+  !define L_MESSAGES  $R9
+  !define L_TEMP      $R8
 
-  StrCmp $G_PFIFLAG "success" uninstall_files
-  MessageBox MB_YESNO|MB_ICONSTOP \
-    "$(PFI_LANG_UN_MBRERUN_1)\
-    $\r$\n$\r$\n\
-    $(PFI_LANG_UN_MBRERUN_2)\
-    $\r$\n$\r$\n\
-    $(PFI_LANG_UN_MBRERUN_3)\
-    $\r$\n$\r$\n\
-    $(PFI_LANG_UN_MBRERUN_4)" IDYES section_exit
+  Push ${L_MESSAGES}
+  Push ${L_TEMP}
 
-uninstall_files:
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
+  DetailPrint "$(PFI_LANG_UN_PROG_DBMSGDIR)"
   SetDetailsPrint listonly
-
-  Delete "$G_USERDIR\install.ini"
-  Delete "$G_USERDIR\uninstalluser.exe"
-  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk"
-  RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
 
   ; Win95 generates an error message if 'RMDir /r' is used on a non-existent directory
 
@@ -5155,21 +5326,66 @@ uninstall_files:
 skip_nonsql_corpus:
   Delete "$G_USERDIR\popfile.db"
 
-  IfFileExists "$G_USERDIR\messages\*." 0 section_exit
-  RMDir /r "$G_USERDIR\messages"
+  Push $G_USERDIR
+  Call un.GetMessagesPath
+  Pop ${L_MESSAGES}
+  StrLen ${L_TEMP} $G_USERDIR
+  StrCpy ${L_TEMP} ${L_MESSAGES} ${L_TEMP}
+  StrCmp ${L_TEMP} $G_USERDIR delete_msgdir
 
-  RMDir "$G_USERDIR"
+  ; The message history is not in a 'User Data' sub-folder so we ask for permission to delete it
 
-  StrCmp $APPDATA "" 0 appdata_valid
-  IfFileExists "${C_ALT_DEFAULT_USERDATA}\*.*" 0 section_exit
-  RMDir "${C_ALT_DEFAULT_USERDATA}"
-  Goto section_exit
+  MessageBox MB_YESNO|MB_ICONQUESTION \
+    "$(PFI_LANG_UN_MBDELMSGS_1)\
+    $\r$\n$\r$\n\
+    (${L_MESSAGES})" IDNO section_exit
 
-appdata_valid:
-  IfFileExists "${C_STD_DEFAULT_USERDATA}\*.*" 0 section_exit
-  RMDir "${C_STD_DEFAULT_USERDATA}"
+delete_msgdir:
+  IfFileExists "${L_MESSAGES}\*." 0 section_exit
+  RMDir /r "${L_MESSAGES}"
 
 section_exit:
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+  Pop ${L_TEMP}
+  Pop ${L_MESSAGES}
+
+  !undef L_MESSAGES
+  !undef L_TEMP
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.User Config'
+#--------------------------------------------------------------------------
+
+Section "un.User Config" UnSecConfig
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_UN_PROG_CONFIG)"
+  SetDetailsPrint listonly
+
+  Delete "$G_USERDIR\popfile.cfg"
+  Delete "$G_USERDIR\popfile.cfg.bak"
+  Delete "$G_USERDIR\popfile.cfg.bk?"
+  Delete "$G_USERDIR\*.log"
+  Delete "$G_USERDIR\expchanges.txt"
+  Delete "$G_USERDIR\expconfig.txt"
+  Delete "$G_USERDIR\outchanges.txt"
+  Delete "$G_USERDIR\outconfig.txt"
+
+  Delete "$G_USERDIR\stopwords"
+  Delete "$G_USERDIR\stopwords.bak"
+  Delete "$G_USERDIR\stopwords.default"
+
+  Delete "$G_USERDIR\pfi-run.bat"
+
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
 SectionEnd
 
 #--------------------------------------------------------------------------
@@ -5180,8 +5396,17 @@ Section "un.ShortCuts" UnSecShortcuts
 
   StrCmp $G_PFIFLAG "fail" do_nothing
 
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_UN_PROG_SHORT)"
+  SetDetailsPrint listonly
+
   Delete "$G_USERDIR\Run SQLite utility.lnk"
-  Delete "$G_USERDIR\PFI Diagnostic utility.lnk"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk"
+  RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
+
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
 
 do_nothing:
 SectionEnd
@@ -5192,6 +5417,7 @@ SectionEnd
 
 Section "un.Environment" UnSecEnvVars
 
+  StrCmp $G_PFIFLAG "special" do_nothing
   StrCmp $G_PFIFLAG "fail" do_nothing
 
   !define L_TEMP      $R9
@@ -5210,6 +5436,10 @@ Section "un.Environment" UnSecEnvVars
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
 section_exit:
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
   Pop ${L_TEMP}
 
   !undef L_TEMP
@@ -5223,11 +5453,16 @@ SectionEnd
 
 Section "un.Registry Entries" UnSecRegistry
 
+  StrCmp $G_PFIFLAG "special" do_nothing
   StrCmp $G_PFIFLAG "fail" do_nothing
 
   !define L_REGDATA   $R9
 
   Push ${L_REGDATA}
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_UN_PROG_REGISTRY)"
+  SetDetailsPrint listonly
 
   ; Clean up registry data if it matches what we are uninstalling
 
@@ -5245,6 +5480,10 @@ other_reg_data:
   DeleteRegKey /ifempty HKCU "Software\POPFile Project"
 
 section_exit:
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
   Pop ${L_REGDATA}
 
   !undef L_REGDATA
@@ -5254,43 +5493,150 @@ SectionEnd
 
 #--------------------------------------------------------------------------
 # Uninstaller Section: 'un.Uninstall End'
+#
+# This is the final section of the uninstaller.
 #--------------------------------------------------------------------------
 
 Section "un.Uninstall End" UnSecEnd
 
-  StrCmp $G_PFIFLAG "fail" exit
+  !define L_DEFAULT   $R9
+  !define L_RESULT    $R8
 
-  ; if $G_USERDIR was removed, skip these next ones
+  Push ${L_DEFAULT}
+  Push ${L_RESULT}
 
-  IfFileExists "$G_USERDIR\*.*" 0 exit
+  ; If email client problems found, offer to leave uninstaller behind with the error logs etc
+
+  StrCmp $G_PFIFLAG "success" uninstall_files
+  MessageBox MB_YESNO|MB_ICONSTOP \
+    "$(PFI_LANG_UN_MBRERUN_1)\
+    $\r$\n$\r$\n\
+    $(PFI_LANG_UN_MBRERUN_2)\
+    $\r$\n$\r$\n\
+    $(PFI_LANG_UN_MBRERUN_3)\
+    $\r$\n$\r$\n\
+    $(PFI_LANG_UN_MBRERUN_4)" IDYES exit
+
+uninstall_files:
+  Delete "$G_USERDIR\install.ini"
+  Delete "$G_USERDIR\uninstalluser.exe"
 
   ; Check if the user data was stored in same folder as the POPFile program files
 
   IfFileExists "$G_USERDIR\popfile.pl" exit
   IfFileExists "$G_USERDIR\perl.exe" exit
 
+  ; Try to remove the 'User Data' folder (this will fail if the folder is not empty)
+
+  RMDir "$G_USERDIR"
+
+  ; If $G_USERDIR was removed, no need to try again
+
+  IfFileExists "$G_USERDIR\*.*" 0 tidy_up
+
   ; Assume it is safe to offer to remove everything now
 
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_2)" IDNO exit
   DetailPrint "$(PFI_LANG_UN_LOG_DELUSERDIR)"
-  Delete "$G_USERDIR\*.*"   ; this would be skipped if the user hits no
+  Delete "$G_USERDIR\*.*"
   RMDir /r "$G_USERDIR"
-  StrCmp $APPDATA "" 0 appdata_valid_x
-  RMDir "${C_ALT_DEFAULT_USERDATA}"
-  Goto check_removal
 
-appdata_valid_x:
-  RMDir "${C_STD_DEFAULT_USERDATA}"
-
-check_removal:
-  IfFileExists "$G_USERDIR\*.*" 0 exit
+  IfFileExists "$G_USERDIR\*.*" 0 tidy_up
   DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBREMERR_1): $G_USERDIR $(PFI_LANG_UN_MBREMERR_2)"
 
+tidy_up:
+  StrCmp $APPDATA "" 0 appdata_valid
+  StrCpy ${L_DEFAULT} "${C_ALT_DEFAULT_USERDATA}"
+  Goto check_parent
+
+appdata_valid:
+  StrCpy ${L_DEFAULT} "${C_STD_DEFAULT_USERDATA}"
+
+check_parent:
+  Push $G_USERDIR
+  Push ${L_DEFAULT}
+  Call un.StrStr
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "" exit
+  RMDir ${L_DEFAULT}
+
 exit:
+  SetDetailsPrint textonly
+  DetailPrint " "
   SetDetailsPrint both
+
+  Pop ${L_RESULT}
+  Pop ${L_DEFAULT}
+
+  !undef L_DEFAULT
+  !undef L_RESULT
+
 SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetUIport
+#
+# Used to extract the UI port setting from popfile.cfg and load it into the
+# global user variable $G_GUI (if setting is not found $G_GUI is set to "")
+# NB: The "raw" parameter is returned (no trimming is performed).
+#
+# This function is used to avoid the annoying progress bar flicker seen when
+# similar code was used in the "un.Shutdown POPFile" section.
+#--------------------------------------------------------------------------
+
+Function un.GetUIport
+
+  !define L_CFG         $R9   ; used as file handle
+  !define L_LNE         $R8   ; a line from popfile.cfg
+  !define L_TEMP        $R7
+  !define L_TEXTEND     $R6   ; used to ensure correct handling of lines longer than 1023 chars
+
+  Push ${L_CFG}
+  Push ${L_LNE}
+  Push ${L_TEMP}
+  Push ${L_TEXTEND}
+
+  StrCpy $G_GUI ""
+
+  FileOpen ${L_CFG} "$G_USERDIR\popfile.cfg" r
+
+found_eol:
+  StrCpy ${L_TEXTEND} "<eol>"
+
+loop:
+  FileRead ${L_CFG} ${L_LNE}
+  StrCmp ${L_LNE} "" ui_port_done
+  StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
+  StrCmp ${L_LNE} "$\n" loop
+
+  StrCpy ${L_TEMP} ${L_LNE} 10
+  StrCmp ${L_TEMP} "html_port " 0 check_eol
+  StrCpy $G_GUI ${L_LNE} 5 10
+
+  ; Now read file until we get to end of the current line
+  ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+check_eol:
+  StrCpy ${L_TEXTEND} ${L_LNE} 1 -1
+  StrCmp ${L_TEXTEND} "$\n" found_eol
+  StrCmp ${L_TEXTEND} "$\r" found_eol loop
+
+ui_port_done:
+  FileClose ${L_CFG}
+
+  Pop ${L_TEXTEND}
+  Pop ${L_TEMP}
+  Pop ${L_LNE}
+  Pop ${L_CFG}
+
+  !undef L_CFG
+  !undef L_LNE
+  !undef L_TEMP
+  !undef L_TEXTEND
+
+FunctionEnd
 
 #--------------------------------------------------------------------------
 # Uninstaller Function: un.RestoreOOE
