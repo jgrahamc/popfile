@@ -100,6 +100,7 @@
                 </label>
                 <br />
                 <input name="history_days" id="configHistoryDays" type="text" value="<TMPL_VAR NAME="Configuration_History_Days">" />
+                <br />
                 <input type="checkbox" class="checkbox" name="purge_history" value="<TMPL_VAR NAME="Localize_History_Purge">" />
                 <TMPL_VAR NAME="Localize_History_Purge">
                 <input type="submit" class="submit" name="update_history_days" value="<TMPL_VAR NAME="Localize_Apply">" />
