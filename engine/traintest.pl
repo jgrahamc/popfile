@@ -20,6 +20,8 @@ my $DEFAULT_WINDOW1 = 100;
 my $DEFAULT_WINDOW2 = 500;
 my $DEFAULT_CLASSIFIER = "bayes";
 my $DEFAULT_ARCHIVE = "archive";
+my $DEFAULT_DUMP = "0";
+my $DEFAULT_CORPUS = "archive_corpus";
 
 $| = 1;
 $, = ", ";
@@ -69,6 +71,8 @@ sub initialize
     $config->parameter("window2",$DEFAULT_WINDOW2);
     $config->parameter("classifier",$DEFAULT_CLASSIFIER);
     $config->parameter("archive_dir",$DEFAULT_ARCHIVE);
+    $config->parameter("dump",$DEFAULT_DUMP);
+    $config->parameter("corpus_out",$DEFAULT_CORPUS);
 
 }
 
@@ -131,18 +135,11 @@ sub reclassify
     foreach my $word (keys %{ $b->{parser__}->{words__} }) {
         my $wordvalue = $wordtab{$bucket."|".$word};
         $wordtab{$bucket."|".$word} += $b->{parser__}->{words__}{$word};
-#        my $wordvalue = $b->get_value($bucket, $word);
-#        $b->set_value($bucket,$word, $wordvalue + $b->{parser}->{words}{$word} );
-#        $b->set_value($bucket,$word, $wordtab{$bucket."|".$word});
+        $b->set_value_($bucket,$word, $wordtab{$bucket."|".$word});
         $b->{total__}{$bucket}        += $b->{parser__}->{words__}{$word};
         $b->{unique__}{$bucket}       += 1 if ($wordvalue == 0);
     }
     $b->{full_total__} += $b->{parser__}{msg_total__};
-    foreach my $word (keys %wordtab) {
-        if ( $word =~ /^\Q$bucket\E\|(.*)$/ ) {
-           $b->set_value_($bucket,$1, $wordtab{$word});
-        }
-    }
     $b->update_constants_();
 }
 
@@ -161,6 +158,34 @@ sub retrain_decider
     } elsif ($toe == 2) {
         return (rand > .5);
     }
+}
+
+sub dump_corpus
+{
+    my ($self) = @_;
+
+    my $dir = $self->{configuration__}->parameter('corpus_out');
+    mkdir($dir);
+    
+    foreach my $abucket ( keys %{$self->{total__}} ) {
+        
+        print "saving $abucket corpus.\n";
+        
+        my $subdir = $dir;
+        $subdir .= "/$abucket";
+
+        mkdir($subdir);
+
+        open CORPUS, ">$dir/$abucket/table";
+        print CORPUS "__CORPUS__ __VERSION__ 1\n";
+        for my $ord ( @{$self->get_bucket_word_list($abucket)} ) {
+            if ( defined($ord) ) {
+                while ($ord =~ s/\|([^ ]+) (\d+)\|//) {
+                    print CORPUS "$1 $2\n";
+                }
+            }
+        }        
+    }    
 }
 
 
@@ -254,12 +279,12 @@ if ( @ARGV[0] ne "-usage")
     $b->initialize();
     initialize( $c );
 
-    $c->load_configuration();    
+    $c->load_configuration();
     
     $c->parse_command_line();
     
 #    $b->{unclassified} = ($c->parameter('unclassified_probability') || 0.0001);
-    $b->{unclassified__} = ($c->parameter("bayes_unclassified_probability") || 0.5);
+    $b->{unclassified__} = log($c->parameter("bayes_unclassified_probability") || 0.5);
     
     # test with or without stop-words    
      if ( $c->parameter("stopwords") eq 0 ) {
@@ -268,7 +293,7 @@ if ( @ARGV[0] ne "-usage")
     }
     
 
-    my $archive = $c->parameter("ui_archive_dir");
+    my $archive = $c->parameter("html_archive_dir");
 
 
     #load the messages
@@ -397,6 +422,12 @@ if ( @ARGV[0] ne "-usage")
     print STDERR "\n";
 
     my $end_time = time;
+    
+    if ($c->parameter("dump")) {
+        dump_corpus($b);
+        
+    }
+    
 
     my $total_messages = $#sorted_messages + 1;
 
@@ -416,5 +447,7 @@ if ( @ARGV[0] ne "-usage")
     print "     -csv:           Filename to save CSV log to, \"auto\" generates a filename\n";
     print "     -toe:           Train Only Errors, defaults to $DEFAULT_TOE\n";
     print "     -stopwords:     Use stop-words, defaults to $DEFAULT_STOP\n";
+    print "     -dump:          Outputs accumulated corpus, defaults to $DEFAULT_DUMP\n";
+    print "     -corpus_out:    Location to save output corpus, defaults to $DEFAULT_CORPUS\n";
 }
 
