@@ -869,9 +869,12 @@ sub parse_stream
                                 $boundary = ($2 || $3);
                                 
                                 $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;                                 
-                                
+                                                                
                                 if ($mime ne '') {
-                                    $mime = "$mime\|$boundary";
+                                    
+                                    # Fortunately the pipe character isn't a valid mime boundary character!
+                                    
+                                    $mime = join('|', $mime, $boundary);
                                 } else {
                                     $mime = $boundary;
                                 }
@@ -927,12 +930,24 @@ sub parse_stream
 
                     print "Hit MIME boundary terminator --$1--\n" if $self->{debug};
 
-                    # Double-escape to match escape stuff.. gross
+                    # escape to match escaped boundary characters
+                                        
+                    $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
+                                        
+                    my $temp_mime;
                     
-                    $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
-                    $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
-
-                    $mime =~ s/(\|$boundary|$boundary\||$boundary)//;
+                    foreach my $aboundary (split(/\|/,$mime)) {
+                        if ($boundary ne $aboundary) {
+                            if (defined $temp_mime) {
+                                $temp_mime = join('|', $temp_mime, $aboundary);
+                            } else {
+                                $temp_mime = $aboundary
+                            }
+                        }                            
+                    }
+                    
+                    $mime = ($temp_mime || '');
+                    
                     print "MIME boundary list now $mime\n" if $self->{debug};
                     $self->{in_headers} = 0;
                 }
