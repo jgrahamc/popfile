@@ -83,6 +83,9 @@ $h->mq( $mq );
 $h->logger( $l );
 $h->classifier( $b );
 $h->initialize();
+$h->version( 'testsuite' );
+
+my $sk = $h->{session_key__};
 
 test_assert_equal( $h->url_encode_( ']' ), '%5d' );
 test_assert_equal( $h->url_encode_( '[' ), '%5b' );
@@ -101,7 +104,6 @@ if ( $pid == 0 ) {
     close $dwriter;
     close $ureader;
 
-    $h->version( 'testsuite' );
     $h->config_( 'port', $port );
     $h->start();
 
@@ -138,10 +140,74 @@ if ( $pid == 0 ) {
     my $url = url( "http://127.0.0.1:$port" );
     my $content = get($url);
 
-    # TODO Look for elements that should appear at the TOP and BOTTOM
+    # Look for elements that should appear at the TOP and BOTTOM
     # of every page
 
+    # Common TOP parts
+
     test_assert_regexp( $content, "<title>POPFile Control Center</title>" );
+    test_assert_regexp( $content, "<html lang=\"en\">" );
+    test_assert_regexp( $content, "<meta http-equiv=\"Pragma\" content=\"no-cache\">" );
+    test_assert_regexp( $content, "<meta http-equiv=\"Expires\" content=\"0\">" );
+    test_assert_regexp( $content, "<meta http-equiv=\"Cache-Control\" content=\"no-cache\">" );
+    test_assert_regexp( $content, "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">" );
+    test_assert_regexp( $content, "<link rel=\"stylesheet\" type=\"text/css\" href=\"skins/SimplyBlue.css\" title=\"SimplyBlue\">" );
+    test_assert_regexp( $content, "<link rel=\"shortcut icon\" type=\"image/x-icon\" href=\"favicon.ico\">" );
+    test_assert_regexp( $content, "<link rel=\"icon\" href=\"popfile.ico\" type=\"image/ico\">" );
+
+    # Common MIDDLE parts (i.e. the tabs)
+
+    test_assert_regexp( $content, "<a class=\"menuLink\" href=\"/history.session=$sk&amp;setfilter=\">" );
+    test_assert_regexp( $content, "History</a>" );
+    test_assert_regexp( $content, "<a class=\"menuLink\" href=\"/buckets.session=$sk\">" );
+    test_assert_regexp( $content, "Buckets</a>" );
+    test_assert_regexp( $content, "<a class=\"menuLink\" href=\"/magnets.session=$sk&amp;start_magnet=0\">" );
+    test_assert_regexp( $content, "Magnets</a>" );
+    test_assert_regexp( $content, "<a class=\"menuLink\" href=\"/configuration.session=$sk\">" );
+    test_assert_regexp( $content, "Configuration</a>" );
+    test_assert_regexp( $content, "<a class=\"menuLink\" href=\"/security.session=$sk\">" );
+    test_assert_regexp( $content, "Security</a>" );
+    test_assert_regexp( $content, "<a class=\"menuLink\" href=\"/advanced.session=$sk\">" );
+    test_assert_regexp( $content, "Advanced</a>" );
+
+    # Common BOTTOM parts
+
+    test_assert_regexp( $content, "<a class=\"bottomLink\" href=\"manual/en/manual.html\">" );
+    test_assert_regexp( $content, "<br>" . $h->version() . "<br>" );
+
+    # Verify that each of the pages highlights the correct item on
+    # the tab bar and hence the simplest level of page serving is working
+    # correctly
+
+    $url = url( "http://127.0.0.1:$port/history" );
+    $content = get($url);
+
+    test_assert_regexp( $content, "<td class=\"menuSelected\" align=\"center\">\n<a class=\"menuLink\" href=\"/history.session=$sk&amp;setfilter=\">" );
+
+    $url = url( "http://127.0.0.1:$port/buckets" );
+    $content = get($url);
+
+    test_assert_regexp( $content, "<td class=\"menuSelected\" align=\"center\">\n<a class=\"menuLink\" href=\"/buckets.session=$sk\">" );
+
+    $url = url( "http://127.0.0.1:$port/magnets" );
+    $content = get($url);
+
+    test_assert_regexp( $content, "<td class=\"menuSelected\" align=\"center\">\n<a class=\"menuLink\" href=\"/magnets.session=$sk&amp;start_magnet=0\">" );
+
+    $url = url( "http://127.0.0.1:$port/configuration" );
+    $content = get($url);
+
+    test_assert_regexp( $content, "<td class=\"menuSelected\" align=\"center\">\n<a class=\"menuLink\" href=\"/configuration.session=$sk\">" );
+
+    $url = url( "http://127.0.0.1:$port/security" );
+    $content = get($url);
+
+    test_assert_regexp( $content, "<td class=\"menuSelected\" align=\"center\">\n<a class=\"menuLink\" href=\"/security.session=$sk\">" );
+
+    $url = url( "http://127.0.0.1:$port/advanced" );
+    $content = get($url);
+
+    test_assert_regexp( $content, "<td class=\"menuSelected\" align=\"center\">\n<a class=\"menuLink\" href=\"/advanced.session=$sk\">" );
 
     # TODO Validate every page in the interface against the W3C HTML 4.01
     # validation service
