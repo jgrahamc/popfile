@@ -584,6 +584,10 @@
 
   !insertmacro MUI_RESERVEFILE_LANGDLL
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
+  ReserveFile "${NSISDIR}\Plugins\Banner.dll"
+  ReserveFile "${NSISDIR}\Plugins\NSISdl.dll"
+  ReserveFile "${NSISDIR}\Plugins\System.dll"
+  ReserveFile "${NSISDIR}\Plugins\UserInfo.dll"
   ReserveFile "ioG.ini"
   ReserveFile "${C_RELEASE_NOTES}"
 
@@ -695,7 +699,7 @@ notes_ignored:
 
   StrCpy $G_PFIFLAG "banner displayed"
 
-  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_BE_PATIENT)" "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
+  Call ShowPleaseWaitBanner
 
 continue:
 
@@ -3277,6 +3281,71 @@ Section "un.Uninstall End" UnSecEnd
 exit:
   SetDetailsPrint both
 SectionEnd
+
+#--------------------------------------------------------------------------
+# Macro-based Functions make it easier to maintain identical functions
+# which are (or might be) used in the installer and in the uninstaller.
+#--------------------------------------------------------------------------
+
+!macro ShowPleaseWaitBanner UN
+  Function ${UN}ShowPleaseWaitBanner
+
+    !ifndef ENGLISH_MODE
+
+      ; The Banner plug-in uses the "MS Shell Dlg" font to display the banner text but
+      ; East Asian versions of Windows 9x do not support this so in these cases we use
+      ; "English" text for the banner (otherwise the text would be unreadable garbage).
+
+      !define L_RESULT    $R9   ; The 'IsNT' function returns 0 if Win9x was detected
+
+      Push ${L_RESULT}
+
+      Call IsNT
+      Pop ${L_RESULT}
+      StrCmp ${L_RESULT} "1" show_banner
+
+      ; Windows 9x has been detected
+
+      StrCmp $LANGUAGE ${LANG_SIMPCHINESE} use_ENGLISH_banner
+      StrCmp $LANGUAGE ${LANG_TRADCHINESE} use_ENGLISH_banner
+      StrCmp $LANGUAGE ${LANG_JAPANESE} use_ENGLISH_banner
+      StrCmp $LANGUAGE ${LANG_KOREAN} use_ENGLISH_banner
+      Goto show_banner
+
+    use_ENGLISH_banner:
+      Banner::show /NOUNLOAD /set 76 "Please be patient." "This may take a few seconds..."
+      Goto continue
+
+      show_banner:
+    !endif
+
+    Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_BE_PATIENT)" "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
+
+    !ifndef ENGLISH_MODE
+      continue:
+        Pop ${L_RESULT}
+
+        !undef L_RESULT
+    !endif
+
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: ShowPleaseWaitBanner
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro ShowPleaseWaitBanner ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.ShowPleaseWaitBanner
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro ShowPleaseWaitBanner "un."
 
 #--------------------------------------------------------------------------
 # End of 'installer.nsi'

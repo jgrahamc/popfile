@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.56"
+  !define C_PFI_VERSION  "0.2.57"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -651,6 +651,10 @@
 
   !insertmacro MUI_RESERVEFILE_LANGDLL
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
+  ReserveFile "${NSISDIR}\Plugins\Banner.dll"
+  ReserveFile "${NSISDIR}\Plugins\NSISdl.dll"
+  ReserveFile "${NSISDIR}\Plugins\System.dll"
+  ReserveFile "${NSISDIR}\Plugins\UserInfo.dll"
   ReserveFile "ioA.ini"
   ReserveFile "ioB.ini"
   ReserveFile "ioC.ini"
@@ -989,7 +993,7 @@ continue:
   ; Create a shortcut to make it easier to run the SQLite utility. There are two versions of
   ; the SQLite utility (one for SQlite 2.x format files and one for SQLite 3.x format files)
   ; so we use 'runsqlite.exe' which automatically selects and runs the appropriate version.
-  
+
   Push $G_USERDIR
   Call GetDatabaseName
   Pop ${L_TEMP}
@@ -2444,7 +2448,7 @@ show_defaults:
   GetDlgItem $G_DLGITEM $G_HWND 1204            ; Field 5 = 'Run POPFile at startup' checkbox
   CreateFont $G_FONT "MS Shell Dlg" 10 700      ; use larger & bolder version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
-  
+
   !ifndef ENGLISH_MODE
     button_text:
   !endif
@@ -2775,7 +2779,7 @@ Function SetEmailClientPage
   ; during which time the user may be tempted to click the 'Next' button. Display a banner to
   ; reassure the user (and hope they do NOT click any buttons)
 
-  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_BE_PATIENT)" "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
+  Call ShowPleaseWaitBanner
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_MAILCFG_TITLE)" "$(PFI_LANG_MAILCFG_SUBTITLE)"
 
@@ -3349,7 +3353,7 @@ Function ConvertOOERegData
   Push ${L_UNDO}
   Push ${L_UNDOFILE}
 
-  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_BE_PATIENT)" "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
+  Call ShowPleaseWaitBanner
 
   ; Original 'popfile.reg' format (2 values per entry, each using 3 lines) imported as 'IniV=1':
   ;
@@ -4019,7 +4023,7 @@ display_list:
     StrCmp $LANGUAGE ${LANG_JAPANESE} show_page
     StrCmp $LANGUAGE ${LANG_KOREAN} show_page
   !endif
-  
+
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
   GetDlgItem $G_DLGITEM $G_HWND 1200              ; Field 1 = IDENTITY label (above the box)
@@ -5187,6 +5191,30 @@ corpus_conv_check:
 
   StrCmp ${L_CONSOLE} "f" do_not_show_banner
 
+  !ifndef ENGLISH_MODE
+
+    ; The Banner plug-in uses the "MS Shell Dlg" font to display the banner text
+    ; but East Asian versions of Windows 9x do not support this so in these cases
+    ; we use "English" text for the banner (otherwise the text would be unreadable garbage).
+
+    Call IsNT
+    Pop ${L_TEMP}
+    StrCmp ${L_TEMP} "1" show_banner
+
+    ; Windows 9x has been detected
+
+    StrCmp $LANGUAGE ${LANG_SIMPCHINESE} use_ENGLISH_banner
+    StrCmp $LANGUAGE ${LANG_TRADCHINESE} use_ENGLISH_banner
+    StrCmp $LANGUAGE ${LANG_JAPANESE} use_ENGLISH_banner
+    StrCmp $LANGUAGE ${LANG_KOREAN} use_ENGLISH_banner
+    Goto show_banner
+
+  use_ENGLISH_banner:
+    Banner::show /NOUNLOAD /set 76 "Preparing to start POPFile." "This may take a few seconds..."
+    Goto do_not_show_banner   ; sic!
+
+  show_banner:
+  !endif
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_LAUNCH_BANNER_1)" "$(PFI_LANG_LAUNCH_BANNER_2)"
 
 do_not_show_banner:
@@ -6676,6 +6704,71 @@ exit_now:
   !undef L_ERRORLOG
 
 FunctionEnd
+
+#--------------------------------------------------------------------------
+# Macro-based Functions make it easier to maintain identical functions
+# which are (or might be) used in the installer and in the uninstaller.
+#--------------------------------------------------------------------------
+
+!macro ShowPleaseWaitBanner UN
+  Function ${UN}ShowPleaseWaitBanner
+
+    !ifndef ENGLISH_MODE
+
+      ; The Banner plug-in uses the "MS Shell Dlg" font to display the banner text but
+      ; East Asian versions of Windows 9x do not support this so in these cases we use
+      ; "English" text for the banner (otherwise the text would be unreadable garbage).
+
+      !define L_RESULT    $R9   ; The 'IsNT' function returns 0 if Win9x was detected
+
+      Push ${L_RESULT}
+
+      Call IsNT
+      Pop ${L_RESULT}
+      StrCmp ${L_RESULT} "1" show_banner
+
+      ; Windows 9x has been detected
+
+      StrCmp $LANGUAGE ${LANG_SIMPCHINESE} use_ENGLISH_banner
+      StrCmp $LANGUAGE ${LANG_TRADCHINESE} use_ENGLISH_banner
+      StrCmp $LANGUAGE ${LANG_JAPANESE} use_ENGLISH_banner
+      StrCmp $LANGUAGE ${LANG_KOREAN} use_ENGLISH_banner
+      Goto show_banner
+
+    use_ENGLISH_banner:
+      Banner::show /NOUNLOAD /set 76 "Please be patient." "This may take a few seconds..."
+      Goto continue
+
+      show_banner:
+    !endif
+
+    Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_BE_PATIENT)" "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
+
+    !ifndef ENGLISH_MODE
+      continue:
+        Pop ${L_RESULT}
+
+        !undef L_RESULT
+    !endif
+
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: ShowPleaseWaitBanner
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro ShowPleaseWaitBanner ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.ShowPleaseWaitBanner
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro ShowPleaseWaitBanner "un."
 
 #--------------------------------------------------------------------------
 # End of 'adduser.nsi'
