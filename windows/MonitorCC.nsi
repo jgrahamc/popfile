@@ -78,7 +78,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.4"
+  !define C_PFI_VERSION  "0.1.5"
 
   ; Mention the version number in the window title
 
@@ -291,10 +291,10 @@
   !insertmacro PFI_LANG_LOAD "French"
   !insertmacro PFI_LANG_LOAD "Greek"
   !insertmacro PFI_LANG_LOAD "Italian"
-  !insertmacro PFI_LANG_LOAD "Japanese"
   !insertmacro PFI_LANG_LOAD "Korean"
   !insertmacro PFI_LANG_LOAD "Hungarian"
   !insertmacro PFI_LANG_LOAD "Dutch"
+  !insertmacro PFI_LANG_LOAD "Japanese"
   !insertmacro PFI_LANG_LOAD "Norwegian"
   !insertmacro PFI_LANG_LOAD "Polish"
   !insertmacro PFI_LANG_LOAD "Portuguese"
