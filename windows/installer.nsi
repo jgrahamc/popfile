@@ -12,14 +12,15 @@
 ; Modified to work with NSIS 2.0b4 (CVS) or later
 
 ; WARNING:
-;    This script requires "NSIS Modern User Interface" version 1.65 (or later)
+;    This script requires "NSIS Modern User Interface" version 1.65 (17 June 2003 or later)
 ;    because it uses the new (simplified) page configuration system.
 
 #--------------------------------------------------------------------------
 
-  !define MUI_PRODUCT "POPFile"
-  !define MUI_VERSION "0.20.0 (CVS)"
-  !define RELEASE_NOTES "..\engine\v0.19.0.change"
+  !define MUI_PRODUCT   "POPFile"
+  !define MUI_VERSION   "0.20.0 (CVS)"
+  !define README        "v0.19.0.change"
+  !define RELEASE_NOTES "..\engine\${README}"
 
   !include "MUI.nsh"
 
@@ -87,7 +88,14 @@
   ; Offer to display the POPFile User Interface (The 'CheckRunStatus' function ensures this
   ; option is only offered if the installer has started POPFile running)
 
-  !define MUI_FINISHPAGE_SHOWREADME "http://127.0.0.1:${GUI}/"
+  !define MUI_FINISHPAGE_RUN
+  !define MUI_FINISHPAGE_RUN_FUNCTION "RunUI"
+
+  ; Display the Release Notes for this version of POPFile
+  
+  !define MUI_FINISHPAGE_SHOWREADME
+  !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+  !define MUI_FINISHPAGE_SHOWREADME_FUNCTION "ShowReadMe"
 
   ; Allow user to check the log file (by clicking "Show Details" button on the "Install" page)
 
@@ -156,8 +164,7 @@
       "This wizard will guide you through the installation of ${MUI_PRODUCT}.\r\n\r\n\
       It is recommended that you close all other applications before starting Setup.\r\n\r\n"
 
-  !insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_FINISH_SHOWREADME \
-      "Display the POPFile User Interface"
+  !insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_FINISH_RUN "Display POPFile &User Interface"
 
   !insertmacro MUI_LANGUAGE "English"
 
@@ -169,7 +176,7 @@
 
   OutFile "setup.exe"
 
-  ; Ensure CRC checking cannot be turned off using the command-line switch
+  ; Ensure CRC checking cannot be turned off using the /NCRC command-line switch
 
   CRCcheck Force
 
@@ -215,6 +222,7 @@
   ReserveFile "ioA.ini"
   ReserveFile "ioB.ini"
   ReserveFile "ioC.ini"
+  ReserveFile "${RELEASE_NOTES}"
 
 #--------------------------------------------------------------------------
 # Initialise the installer
@@ -229,8 +237,9 @@ Function .onInit
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioA.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioB.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioC.ini"
-
-  File /oname=$PLUGINSDIR\release.txt "${RELEASE_NOTES}"
+  
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "${RELEASE_NOTES}" "release.txt"
+  
   MessageBox MB_YESNO "Display POPFile Release Notes ?$\r$\n$\r$\n\
       'Yes' recommended if you are upgrading." IDNO exit
   SearchPath ${L_RESULT} notepad.exe
@@ -276,6 +285,11 @@ Section "POPFile" SecPOPFile
 
   File "..\engine\license"
   File "${RELEASE_NOTES}"
+  SearchPath ${CFG} notepad.exe
+  StrCmp ${CFG} "" 0 readme_ok
+  File /oname=${README}.txt "${RELEASE_NOTES}"
+
+readme_ok:
   File "..\engine\popfile.pl"
   File "..\engine\insert.pl"
   File "..\engine\pix.gif"
@@ -1241,9 +1255,10 @@ FunctionEnd
 # Installer Function: CheckRunStatus
 # (the "pre" function for the 'Finish' page)
 #
-# The 'Finish' page contains a single CheckBox to control whether or not the installer
-# starts the POPFile User Interface. The User Interface only works when POPFile is running,
-# so we must ensure this CheckBox can only be ticked if the installer has started POPFile.
+# The 'Finish' page contains two CheckBoxes: one to control whether or not the installer
+# starts the POPFile User Interface and one to control whether or not the 'ReadMe' file is
+# displayed. The User Interface only works when POPFile is running, so we must ensure its
+# CheckBox can only be ticked if the installer has started POPFile.
 #--------------------------------------------------------------------------
 
 Function CheckRunStatus
@@ -1252,7 +1267,7 @@ Function CheckRunStatus
 
   Push ${L_TEMP}
 
-  ; Field 4 is the 'ReadMe' CheckBox on the 'Finish' page (assuming there is no 'Run' CheckBox)
+  ; Field 4 is the 'Run' CheckBox on the 'Finish' page
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "Flags" ""
 
@@ -1271,6 +1286,38 @@ selection_ok:
 
   !undef L_TEMP
 
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: RunUI
+# (the "Run" function for the 'Finish' page)
+#--------------------------------------------------------------------------
+
+Function RunUI
+  ExecShell "open" "http://127.0.0.1:${GUI}"
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: ShowReadMe
+# (the "ReadMe" function for the 'Finish' page)
+#--------------------------------------------------------------------------
+
+Function ShowReadMe
+  !define L_TEMP  $R9
+  Push ${L_TEMP}
+  
+  SearchPath ${L_TEMP} notepad.exe
+  StrCmp ${L_TEMP} "" use_file_association
+  Exec 'notepad.exe "$INSTDIR\${README}"'
+  goto exit
+  
+use_file_association:
+  ExecShell "open" "$INSTDIR\${README}.txt"
+  
+exit:
+  Pop ${L_TEMP}
+  
+  !undef L_TEMP
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -1616,6 +1663,7 @@ skip_shutdown:
   Delete $INSTDIR\*.exe
   Delete $INSTDIR\*.dll
   Delete $INSTDIR\*.change
+  Delete $INSTDIR\*.change.txt
   Delete $INSTDIR\license
   Delete $INSTDIR\popfile.cfg
 
