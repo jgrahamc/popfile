@@ -179,6 +179,12 @@ for my $parse_test (@parse_tests) {
     my $words = $parse_test;
     $words    =~ s/msg/wrd/;
 
+    # Ignore the special file used for Japanese testing
+
+    if ( $parse_test =~ /TestMailParse026/ ) {
+        next;
+    }
+
     # Parse the document and then check the words hash against the words in the
     # wrd file
 
