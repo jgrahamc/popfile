@@ -752,6 +752,15 @@ sub corpus_page
     my $result;
     my $create_message = '';
     my $delete_message = '';
+    
+    if ( ( $form{color} ne '' ) && ( $form{bucket} ne '' ) )
+    {
+        open COLOR, ">corpus/$form{bucket}/color";
+        print COLOR "$form{color}\n";
+        close COLOR;
+        $classifier->load_word_matrix();
+    }
+    
     if ( $form{create} eq 'Create' )
     {
         $form{name} = lc($form{name});
@@ -814,7 +823,7 @@ sub corpus_page
         $classifier->load_word_matrix();
     }
     
-    my $body = "<h2>Summary</h2><table width=75%><tr><td><b>Bucket Name</b><td><b>Total Words</b><td>&nbsp;<td><b>Top 10 words</b>";
+    my $body = "<h2>Summary</h2><table width=75%><tr><td><b>Bucket Name</b><td><b>Total Words</b><td><b>Change Color</b><td>&nbsp;<td><b>Top 10 words</b>";
     
     foreach my $bucket (keys %{$classifier->{total}})
     {
@@ -1106,7 +1115,7 @@ sub handle_url
     {
         return history_page();
     }
-    
+
     return http_error(404);
 }
 

@@ -88,7 +88,7 @@ sub get_color
 sub load_word_matrix
 {
     my ($self) = @_;
-    my @colors = ( 'red', 'green', 'blue', 'brown', 'orange', 'purple', 'magenta', 'cyan' );
+    my @colors = ( 'red', 'green', 'blue', 'brown', 'orange', 'purple', 'magenta', 'gray' );
     my $c      = 0;
 
     $self->{matrix}     = {};
@@ -102,21 +102,33 @@ sub load_word_matrix
     foreach my $bucket (@buckets)
     {
         print "Loading $bucket..." if $self->{debug};
-        
+
         open WORDS, "<$bucket/table";
 
+        # See if there's a color file specified
+        open COLOR, "<$bucket/color";
         $bucket =~ /([A-Za-z0-9-_]+)$/;
         $bucket =  $1;
+        my $color = <COLOR>;
+        close COLOR;
 
-        if ( $c < $#colors )
+        if ( $color eq '' ) 
         {
-            $self->{colors}{$bucket} = $colors[$c];
-            $c += 1;
-        } 
+            if ( $c < $#colors )
+            {
+                $self->{colors}{$bucket} = $colors[$c];
+                $c += 1;
+            } 
+            else 
+            {
+                $self->{colors}{$bucket} = 'black';
+            }
+        }
         else 
         {
-            $self->{colors}{$bucket} = 'black';
+                $self->{colors}{$bucket} = $color;
         }
+
 
         # Each line in the word table is a word and a count
         $self->{total}{$bucket} = 0;
@@ -141,7 +153,12 @@ sub load_word_matrix
             $self->{matrix}{$bucket}{$word} /= $self->{total}{$bucket};
         }
 
-        $self->{top10}{$bucket} = "<tr><td><font color=$self->{colors}{$bucket}>$bucket</font><td>$self->{total}{$bucket}<td><td>";
+        $self->{top10}{$bucket} = "<tr><td><font color=$self->{colors}{$bucket}>$bucket</font><td>$self->{total}{$bucket}<td><table cellpadding=0 cellspacing=0><tr>";
+        for $color (@colors)
+        {
+            $self->{top10}{$bucket} .= "<td width=20 bgcolor=$color><a href=/corpus?color=$color&bucket=$bucket><img border=0 alt='Set $bucket color to $color' src=http://www.usethesource.com/images/pix.gif width=20 height=20></a></font>";
+        }
+        $self->{top10}{$bucket} .= "</table></td><td><td>";
         my @ranking = sort {$self->{matrix}{$bucket}{$b} <=> $self->{matrix}{$bucket}{$a}} keys %{$self->{matrix}{$bucket}};
         for my $i ( 0.. 9 )
         {
