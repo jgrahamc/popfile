@@ -1,5 +1,6 @@
 From: test@test.com
 To: someone@somewhere.com
+Cc: <someoneelse@somewhere.com>
 Subject: test for various HTML parts
 
 <html>
@@ -16,6 +17,8 @@ Subject: test for various HTML parts
 <table background="http://www.tablebackground.com/bar.gif"><tr><td background="http://www.tdbackground.com/baz.gif"></td></tr></table>
 
 <form action="mailto:someone@outthere.com"></form>
+
+<a href="http://0x10.0x20.0x30.0x40/"><a href="http://10.20.30.40/"><a href="http://010.020.030.040/">
 
 </body>
 </html>

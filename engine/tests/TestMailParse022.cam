@@ -1,5 +1,6 @@
 From: test@test.com
 To: someone@somewhere.com
+Cc: <someoneelse@somewhere.com>
 Subject: [spam] test for various HTML parts
 X-Text-Classification: spam
 X-POPFile-Link: http://127.0.0.1:8080/jump_to_message?view=popfile0=0.msg
@@ -18,6 +19,8 @@ X-POPFile-Link: http://127.0.0.1:8080/jump_to_message?view=popfile0=0.msg
 <table background="http://www.tablebackground.com/bar.gif"><tr><td background="http://www.tdbackground.com/baz.gif"></td></tr></table>
 
 <form action="mailto:someone@outthere.com"></form>
+
+<a href="http://0x10.0x20.0x30.0x40/"><a href="http://10.20.30.40/"><a href="http://010.020.030.040/">
 
 </body>
 </html>

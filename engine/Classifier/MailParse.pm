@@ -1420,7 +1420,6 @@ sub parse_header
         if ( $header =~ /^From$/i )  {
             $self->{from__} = $argument if ( $self->{from__} eq '' ) ;
             $prefix = 'from';
-            push @{$self->{quickmagnets__}{$prefix}}, $argument if ($argument ne '');
         }
 
         if ( $header =~ /^To$/i ) {
@@ -1529,6 +1528,7 @@ sub parse_header
 sub splitline
 {
     my ($line, $encoding) = @_;
+
     $line =~ s/([^\r\n]{100,120} )/$1\r\n/g;
     $line =~ s/([^ \r\n]{120})/$1\r\n/g;
 

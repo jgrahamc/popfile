@@ -205,6 +205,8 @@ for my $color_test (@color_tests) {
     test_assert_equal( $check, $html );
 }
 
+$cl->{color__} = 0;
+
 # test decode_string
 
 test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo?="), "foo");
@@ -212,3 +214,40 @@ test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo_bar?="), "foo bar");
 test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo=20bar?="), "foo bar");
 test_assert_equal($cl->decode_string("=?ISO-8859-1?Q?foo_bar?= =?ISO-8859-1?Q?foo_bar?="), "foo bar foo bar");
 test_assert_equal($cl->decode_string("=?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?= =?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ==?="), "Aladdin:open sesame Aladdin:open sesame");
+
+# test get_header
+
+$cl->parse_file( 'TestMailParse022.msg' );
+test_assert_equal( $cl->get_header( 'from', 'test@test.com' ) );
+test_assert_equal( $cl->get_header( 'to', 'someone@somewhere.com' ) );
+test_assert_equal( $cl->get_header( 'cc', 'someoneelse@somewhere.com' ) );
+test_assert_equal( $cl->get_header( 'subject', 'test for various HTML parts' ) );
+
+# test quickmagnets
+
+my %qm = %{$cl->quickmagnets()};
+my @from = @{$qm{from}};
+my @to = @{$qm{to}};
+my @cc = @{$qm{cc}};
+my @subject = @{$qm{subject}};
+test_assert_equal( $#from, 1 );
+test_assert_equal( $from[0], 'test@test.com' );
+test_assert_equal( $from[1], 'test.com' );
+test_assert_equal( $#to, 1 );
+test_assert_equal( $to[0], 'someone@somewhere.com' );
+test_assert_equal( $to[1], 'somewhere.com' );
+test_assert_equal( $#cc, 1 );
+test_assert_equal( $cc[0], 'someoneelse@somewhere.com' );
+test_assert_equal( $cc[1], 'somewhere.com' );
+test_assert_equal( $#subject, 2 );
+test_assert_equal( $subject[0], 'test' );
+test_assert_equal( $subject[1], 'various' );
+test_assert_equal( $subject[2], 'parts' );
+
+# test first20
+
+$cl->parse_file( 'TestMailParse022.msg' );
+test_assert_equal( $cl->first20(), ' This is the title image' );
+$cl->parse_file( 'TestMailParse021.msg' );
+test_assert_equal( $cl->first20(), ' Take Control of Your Computer With This Top of the Line Software Norton SystemWorks Software Suite Professional Edition Includes Six' );
+
