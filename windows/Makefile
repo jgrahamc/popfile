@@ -29,6 +29,10 @@ $(POPFILE_WINDOWS_ZIP): setup.exe
 	rm -f $@
 	$(BUILD_ZIP)
 
-setup.exe: ../engine/*.pl ../engine/Classifier/*.pm ../engine/skins/*.css ../engine/skins/*.gif
+setup.exe: ../engine/*.pl ../engine/Classifier/*.pm ../engine/skins/*.css ../engine/skins/*.gif ../engine/v$(POPFILE_VERSION).change
+setup.exe: stop_pf.exe ../engine/popfile.exe ../engine/popfileb.exe ../engine/popfileib.exe ../engine/popfilef.exe ../engine/popfileif.exe
 setup.exe: installer.nsi ioA.ini ioB.ini CBP.nsh
+	@../NSIS/makensis.exe /V4 $<
+
+stop_pf.exe: stop_popfile.nsi
 	@../NSIS/makensis.exe /V4 $<
