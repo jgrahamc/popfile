@@ -995,7 +995,7 @@ sub magnet_page
         }
     }
     
-    $body .= "</table><p><hr><p><h2>Create New Magnet</h2><form action=/magnets><b>From address or name:</b><br><input type=text name=from><input type=hidden name=session value=$session_key>";
+    $body .= "</table><p><hr><p><h2>Create New Magnet</h2><form action=/magnets><b>From address or name:</b> (for example: john\@company.com to match a specific address, company.com to match everyone who sends from company.com, John Doe to match a specific person, John to match all Johns)<br><input type=text name=from><input type=hidden name=session value=$session_key>";
     $body .= "<p><b>Always goes to bucket:</b><br><select name=bucket>";
     my @buckets = sort keys %{$classifier->{total}};
     foreach my $bucket (@buckets)
