@@ -2061,6 +2061,10 @@ SectionEnd
 
 Section "un.Local User Data" UnSecUserData
 
+  !define L_RESULT    $R9
+
+  Push ${L_RESULT}
+
   IfFileExists "$G_ROOTDIR\popfile.pl" look_for_uninstalluser
   IfFileExists "$G_ROOTDIR\popfile.exe" look_for_uninstalluser
     MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
@@ -2072,13 +2076,22 @@ Section "un.Local User Data" UnSecUserData
 look_for_uninstalluser:
   IfFileExists "$G_ROOTDIR\uninstalluser.exe" 0 section_exit
 
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
   ; Uninstall the 'User Data' in the PROGRAM folder before uninstalling the PROGRAM files
   ; (note that running 'uninstalluser.exe' with the '_?=dir' option means it will be unable
   ; to delete itself because the program is NOT automatically relocated to the TEMP folder)
 
   HideWindow
-  ExecWait '"$G_ROOTDIR\uninstalluser.exe" _?=$G_ROOTDIR'
+  ExecWait '"$G_ROOTDIR\uninstalluser.exe" _?=$G_ROOTDIR' ${L_RESULT}
   BringToFront
+
+  ; If the 'User Data' uninstaller did not return the normal "success" code (e.g. because user
+  ; cancelled the 'User Data' uninstall) then we must retain the user data and uninstalluser.exe
+
+  StrCmp ${L_RESULT} "0" 0 section_exit
 
   ; If any email settings have NOT been restored and the user wishes to try again later,
   ; the relevant INI file will still exist and we should not remove it or uninstalluser.exe
@@ -2089,6 +2102,14 @@ look_for_uninstalluser:
   Delete "$G_ROOTDIR\uninstalluser.exe"
 
 section_exit:
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+  Pop ${L_RESULT}
+
+  !undef L_RESULT
+
 SectionEnd
 
 #--------------------------------------------------------------------------
@@ -2241,7 +2262,7 @@ SectionEnd
 #--------------------------------------------------------------------------
 # Uninstaller Section: 'un.POPFile Core'
 #
-# Files are explicitly deleted (instead of just using wilcards or RMDir /r commands)
+# Files are explicitly deleted (instead of just using wildcards or RMDir /r commands)
 # in an attempt to avoid unexpectedly deleting any files create by the user after installation.
 # Current commands only cover most recent versions of POPFile - need to add commands to cover
 # more of the early versions of POPFile.
@@ -2338,6 +2359,10 @@ SectionEnd
 
 Section "un.Languages" UnSecLangs
 
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
   Delete "$G_ROOTDIR\languages\*.msg"
   RMDir "$G_ROOTDIR\languages"
 
@@ -2352,6 +2377,10 @@ SectionEnd
 #--------------------------------------------------------------------------
 
 Section "un.Manual" UnSecManual
+
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
 
   Delete "$G_ROOTDIR\manual\en\*.html"
   RMDir "$G_ROOTDIR\manual\en"
@@ -2375,6 +2404,11 @@ Section "un.Kakasi" UnSecKakasi
   Push ${L_TEMP}
 
   IfFileExists "$INSTDIR\kakasi\*.*" 0 section_exit
+  
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
   RMDir /r "$INSTDIR\kakasi"
 
   ;Delete Environment Variables
@@ -2473,8 +2507,35 @@ SectionEnd
 
 Section "un.Registry Entries" UnSecRegistry
 
-  StrCmp $G_WINUSERTYPE "Admin" 0 section_exit
+  !define L_REGDATA $R9
+
+  Push ${L_REGDATA}
+
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+  ; Only remove registry data if it matches what we are uninstalling
+
+  StrCmp $G_WINUSERTYPE "Admin" check_HKLM_data
+
+  ; Uninstalluser.exe deletes all HKCU registry data except for the 'Add/Remove Programs' entry
+
+  ReadRegStr ${L_REGDATA} HKCU \
+      "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" "UninstallString"
+  StrCmp ${L_REGDATA} "$G_ROOTDIR\uninstall.exe" 0 section_exit
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}"
+  Goto section_exit
+
+check_HKLM_data:
+  ReadRegStr ${L_REGDATA} HKLM \
+      "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" "UninstallString"
+  StrCmp ${L_REGDATA} "$G_ROOTDIR\uninstall.exe" 0 other_reg_data
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}"
+
+other_reg_data:
+  ReadRegStr ${L_REGDATA} HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
+  StrCmp ${L_REGDATA} $G_ROOTDIR 0 section_exit
   DeleteRegKey HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI"
   DeleteRegKey /ifempty HKLM "Software\POPFile Project\${C_PFI_PRODUCT}"
   DeleteRegKey /ifempty HKLM "Software\POPFile Project"
@@ -2484,6 +2545,10 @@ section_exit:
   SetDetailsPrint textonly
   DetailPrint " "
   SetDetailsPrint listonly
+
+  Pop ${L_REGDATA}
+
+  !undef L_REGDATA
 
 SectionEnd
 
@@ -2505,7 +2570,8 @@ Section "un.Uninstall End" UnSecEnd
   IfFileExists "$INSTDIR\*.*" 0 exit
 
   ; If 'User Data' uninstaller still exists, we cannot offer to remove the remaining files
-  ; (some email settings have not been restored and the user wants to try again later)
+  ; (some email settings have not been restored and the user wants to try again later or
+  ; the user decided not to uninstall the 'User Data' at the moment)
 
   IfFileExists "$G_ROOTDIR\uninstalluser.exe" exit
 
