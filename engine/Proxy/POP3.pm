@@ -194,7 +194,6 @@ sub child__
                 }
             }
 
-            $self->flush_extra_( $mail, $client, 0 );
             next;
         }
 
@@ -211,7 +210,6 @@ sub child__
                 next;
             }
 
-            $self->flush_extra_( $mail, $client, 0 );
             next;
         }
 
@@ -235,8 +233,6 @@ sub child__
                 } else {
                     next;
                 }
-
-                $self->flush_extra_( $mail, $client, 0 );
             } else {
                 $self->tee_(  $client, "-ERR No secure server specified$eol" );
             }
@@ -253,8 +249,6 @@ sub child__
                 } else {
                     next;
                 }
-
-                $self->flush_extra_( $mail, $client, 0 );
             } else {
                 $self->tee_(  $client, "-ERR No secure server specified$eol" );
             }
@@ -270,7 +264,6 @@ sub child__
                 $self->echo_to_dot_( $mail, $client ) if ( $1 eq '' );
             }
 
-            $self->flush_extra_( $mail, $client, 0 );
             next;
         }
 
@@ -345,7 +338,7 @@ sub child__
                 } else {
                     $self->echo_to_dot_( $mail, $client ) if ( $self->echo_response_($mail, $client, $command ) );
                 }
-                $self->flush_extra_( $mail, $client, 0 );
+
                 next;
             }
 
@@ -366,7 +359,6 @@ sub child__
                 $self->tee_(  $client, "-ERR No secure server specified$eol" );
             }
 
-            $self->flush_extra_( $mail, $client, 0 );
             next;
         }
 
@@ -388,7 +380,6 @@ sub child__
              ( $command =~ /DELE (.*)/i )    ||
              ( $command =~ /RSET/i ) ) {                         # PROFILE BLOCK STOP
             $self->echo_response_($mail, $client, $command );
-            $self->flush_extra_( $mail, $client, 0 );
             next;
         }
 
@@ -464,8 +455,6 @@ sub child__
                     # Note locally that file has been retrieved
 
                     $downloaded{$count} = 1;
-
-                    $self->flush_extra_( $mail, $client, 0 );
                 }
             }
 
@@ -490,7 +479,6 @@ sub child__
 
         if ( $mail && $mail->connected )  {
             $self->echo_response_($mail, $client, $command );
-            $self->flush_extra_( $mail, $client, 0 );
             next;
         } else {
             $self->tee_(  $client, "-ERR unknown command or bad syntax$eol" );

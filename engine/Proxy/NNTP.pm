@@ -256,7 +256,6 @@ sub child__
                     $self->yield_( $ppipe, $pid );
                 }
 
-                $self->flush_extra_( $news, $client, 0 );
                 next;
             }
 
@@ -268,7 +267,6 @@ sub child__
                 # 2xx (200) series response indicates multi-line text follows to .crlf
 
                 $self->echo_to_dot_( $news, $client, 0 ) if ( $response =~ /^2\d\d/ );
-                $self->flush_extra_( $news, $client, 0 );
                 next;
             }
 
@@ -277,7 +275,6 @@ sub child__
             if ( $ command =~ /^ *(HELP)/i ) {
                 my $response = $self->get_response_( $news, $client, $command);
                 $self->echo_to_dot_( $news, $client, 0 ) if ( $response =~ /^1\d\d/ );
-                $self->flush_extra_( $news, $client, 0 );
                 next;
             }
 
@@ -285,7 +282,6 @@ sub child__
 
             if ( $command =~ /^ *(GROUP|STAT|IHAVE|LAST|NEXT|SLAVE|MODE|XPATH)/i ) {
                 $self->get_response_( $news, $client, $command );
-                $self->flush_extra_( $news, $client, 0 );
                 next;
             }
 
@@ -305,7 +301,6 @@ sub child__
                     # Echo to dot doesn't provoke a server response somehow, we add another CRLF
 
                     $self->get_response_( $news, $client, "$eol" );
-                    $self->flush_extra_( $news, $client, 0 );
                 }
                 next;
             }
@@ -316,7 +311,6 @@ sub child__
         if ( $ command =~ /^ *$/ ) {
             if ( $news && $news->connected ) {
                 $self->get_response_($news, $client, $command, 1);
-                $self->flush_extra_( $news, $client, 0 );
                 next;
             }
         }
@@ -325,7 +319,6 @@ sub child__
 
         if ( $news && $news->connected)  {
             $self->echo_response_($news, $client, $command );
-            $self->flush_extra_( $news, $client, 0 );
             next;
         } else {
             $self->tee_(  $client, "500 unknown command or bad syntax$eol" );

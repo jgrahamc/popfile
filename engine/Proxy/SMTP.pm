@@ -157,8 +157,6 @@ sub child__
                 } else {
                     last;
                 }
-
-                $self->flush_extra_( $mail, $client, 0 );
             } else {
                 $self->tee_(  $client, "421 service not available$eol" );
             }
@@ -198,8 +196,6 @@ sub child__
                 } else {
                     last;
                 }
-
-                $self->flush_extra_( $mail, $client, 0 );
             } else {
                 $self->tee_(  $client, "421 service not available$eol" );
             }
@@ -215,7 +211,6 @@ sub child__
              ( $command =~ /HELP/i )          ||
              ( $command =~ /RSET/i ) ) {
             $self->smtp_echo_response_( $mail, $client, $command );
-            $self->flush_extra_( $mail, $client, 0 );
             next;
         }
 
@@ -235,7 +230,6 @@ sub child__
 
                 my $response = <$mail>;
                 $self->tee_( $client, $response );
-                $self->flush_extra_( $mail, $client, 0 );
                 next;
             }
         }
@@ -256,7 +250,6 @@ sub child__
         # Don't know what this is so let's just pass it through and hope for the best
         if ( $mail && $mail->connected )  {
             $self->smtp_echo_response_( $mail, $client, $command );
-            $self->flush_extra_( $mail, $client, 0 );
             next;
         } else {
             $self->tee_(  $client, "500 unknown command or bad syntax$eol" );
