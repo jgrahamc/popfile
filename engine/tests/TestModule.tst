@@ -332,6 +332,7 @@ test_assert( !defined(<TEMP2>) );
 close TEMP2;
 
 open TEMP, ">slurp.tmp";
+binmode TEMP;
 print TEMP "RF\nRF2\n";
 close TEMP;
 
