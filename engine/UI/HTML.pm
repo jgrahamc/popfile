@@ -1317,7 +1317,8 @@ sub magnet_page
     if ( ( defined($self->{form__}{type}) ) && ( $self->{form__}{bucket} ne '' ) && ( $self->{form__}{text} ne '' ) ) {
         my $found = 0;
         for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
-            if ( defined($self->{classifier__}->{magnets}{$bucket}{$self->{form__}{type}}{$self->{form__}{text}}) ) {
+            my %magnets = $self->{classifier__}->get_magnets( $bucket, $self->{form__}{type} );
+            if ( defined( $magnets{$self->{form__}{text}}) ) {
                 $found  = 1;
                 $magnet_message = "<blockquote>\n<div class=\"error02\">\n<b>";
                 $magnet_message .= sprintf( $self->{language__}{Magnet_Error1}, "$self->{form__}{type}: $self->{form__}{text}", $bucket );
@@ -1326,8 +1327,9 @@ sub magnet_page
         }
 
         if ( $found == 0 )  {
-            for my $bucket (keys %{$self->{classifier__}->{magnets}}) {
-                for my $from (keys %{$self->{classifier__}->{magnets}{$bucket}{$self->{form__}{type}}})  {
+            for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
+            my %magnets = $self->{classifier__}->get_magnets( $bucket, $self->{form__}{type} );
+                for my $from (keys %magnets)  {
                     if ( ( $self->{form__}{text} =~ /\Q$from\E/ ) || ( $from =~ /\Q$self->{form__}{text}\E/ ) )  {
                         $found = 1;
                         $magnet_message = "<blockquote><div class=\"error02\"><b>" . sprintf( $self->{language__}{Magnet_Error2}, "$self->{form__}{type}: $self->{form__}{text}", "$self->{form__}{type}: $from", $bucket ) . "</b></div></blockquote>";
@@ -1346,15 +1348,13 @@ sub magnet_page
             $self->{form__}{text} =~ s/^[ \t]+//;
             $self->{form__}{text} =~ s/[ \t]+$//;
 
-            $self->{classifier__}->{magnets}{$self->{form__}{bucket}}{$self->{form__}{type}}{$self->{form__}{text}} = 1;
+	    $self->{classifier__}->create_magnet( $self->{form__}{bucket}, $self->{form__}{type}, $self->{form__}{text});
             $magnet_message = "<blockquote>" . sprintf( $self->{language__}{Magnet_Error3}, "$self->{form__}{type}: $self->{form__}{text}", $self->{form__}{bucket} ) . "</blockquote>";
-            $self->{classifier__}->save_magnets();
         }
     }
 
     if ( defined($self->{form__}{dtype}) )  {
-        delete $self->{classifier__}->{magnets}{$self->{form__}{bucket}}{$self->{form__}{dtype}}{$self->{form__}{dmagnet}};
-        $self->{classifier__}->save_magnets();
+        $self->{classifier__}->delete_magnet( $self->{form__}{bucket}, $self->{form__}{dtype}, $self->{form__}{dmagnet});
     }
 
     # Current Magnets panel
@@ -1369,9 +1369,9 @@ sub magnet_page
 
     # magnet listing
     my $stripe = 0;
-    for my $bucket (sort keys %{$self->{classifier__}->{magnets}}) {
-        for my $type (sort keys %{$self->{classifier__}->{magnets}{$bucket}}) {
-            for my $magnet (sort keys %{$self->{classifier__}->{magnets}{$bucket}{$type}})  {
+    for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
+        for my $type ($self->{classifier__}->get_magnet_types_in_bucket($bucket)) {
+            for my $magnet ($self->{classifier__}->get_magnets( $bucket, $type))  {
                 $body .= "<tr ";
                 if ( $stripe )  {
                     $body .= "class=\"rowEven\"";
@@ -2896,7 +2896,7 @@ sub history_page
 
                 $body .= "<td class=\"top20\" valign=\"top\">\n";
                 $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . "$self->{form__}{view}");
-                $body .= $self->{classifier__}->{scores};
+                $body .= $self->{classifier__}->{scores__};
                 $body .= "</td>\n</tr>\n";
             }
 

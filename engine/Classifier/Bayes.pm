@@ -456,12 +456,12 @@ sub load_bucket_
 
 # ---------------------------------------------------------------------------------------------
 #
-# save_magnets
+# save_magnets__
 #
 # Save all the magnet definitions
 #
 # ---------------------------------------------------------------------------------------------
-sub save_magnets
+sub save_magnets__
 {
     my ($self) = @_;
 
@@ -512,7 +512,7 @@ sub classify_file
 
             my $noattype;
 
-            $noattype = $self->{parser__}->{$type};
+            $noattype = $self->{parser__}->get_header($type);
             $noattype =~ s/[@\$]/\./g;
 
         for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
@@ -1251,6 +1251,7 @@ sub remove_message_from_bucket
 # echo all information from the $mail server until a single line with a . is seen
 #
 # ---------------------------------------------------------------------------------------------
+
 sub echo_to_dot_
 {
     my ( $self, $mail, $client ) = @_;
@@ -1266,6 +1267,95 @@ sub echo_to_dot_
         # not mistake a line beginning with . as the end of the block
         last if ( /^\.(\r\n|\r|\n)$/ );
     }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_buckets_with_magnets
+#
+# Returns the names of the buckets for which magnets are defined
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_buckets_with_magnets
+{
+    my ( $self ) = @_;
+
+    return sort keys %{$self->{magnets__}};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_magnet_types_in_bucket
+#
+# Returns the types of the magnetsd in a specific bucket
+#
+# $bucket          The bucket to search for magnets
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_magnet_types_in_bucket
+{
+    my ( $self, $bucket ) = @_;
+
+    return sort keys %{$self->{magnets__}{$bucket}};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_magnets
+#
+# Returns the magnets of a certain type in a bucket
+#
+# $bucket          The bucket to search for magnets
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_magnets
+{
+    my ( $self, $bucket, $type ) = @_;
+
+    return sort keys %{$self->{magnets__}{$bucket}{$type}};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# create_magnet
+#
+# Make a new magnet
+#
+# $bucket          The bucket the magnet belongs in
+# $type            The magnet type (e.g. from, to or subject)
+# $text            The text of the magnet
+#
+# ---------------------------------------------------------------------------------------------
+
+sub create_magnet
+{
+    my ( $self, $bucket, $type, $text ) = @_;
+
+    $self->{magnets__}{$bucket}{$type}{$text} = 1;
+    $self->save_magnets__();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# delete_magnet
+#
+# Remove a new magnet
+#
+# $bucket          The bucket the magnet belongs in
+# $type            The magnet type (e.g. from, to or subject)
+# $text            The text of the magnet
+#
+# ---------------------------------------------------------------------------------------------
+
+sub delete_magnet
+{
+    my ( $self, $bucket, $type, $text ) = @_;
+
+    delete $self->{magnets__}{$bucket}{$type}{$text};
+    $self->save_magnets__();
 }
 
 1;
