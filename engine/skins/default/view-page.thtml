@@ -52,7 +52,7 @@
                         </td>
                         <td>
                             <font size="+1">
-                                <TMPL_VAR NAME="View_From">
+                                <TMPL_VAR NAME="View_From" ESCAPE=HTML>
                             </font>
                         </td>
                     </tr>
@@ -66,7 +66,7 @@
                         </td>
                         <td>
                             <font size="+1">
-                                <TMPL_VAR NAME="View_Subject">
+                                <TMPL_VAR NAME="View_Subject" ESCAPE=HTML>
                             </font>
                         </td>
                     </tr>

@@ -8,7 +8,7 @@ use Proxy::Proxy;
 #
 # This module handles proxying the SMTP protocol for POPFile.
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -139,16 +139,12 @@ sub start
 # The worker method that is called when we get a good connection from a client
 #
 # $client   - an open stream to a SMTP client
-# $download_count - The unique download count for this session
-# $pipe           - The pipe to the parent process to send messages to
-# $ppipe          - 0 or the parent's end of the pipe
-# $pid            - 0 if this is a child process
 # $session        - API session key
 #
 # ---------------------------------------------------------------------------------------------
 sub child__
 {
-    my ( $self, $client, $download_count, $pipe, $ppipe, $pid, $session ) = @_;
+    my ( $self, $client, $session ) = @_;
 
     # Number of messages downloaded in this session
     my $count = 0;
@@ -169,7 +165,7 @@ sub child__
         # Clean up the command so that it has a nice clean $eol at the end
         $command =~ s/(\015|\012)//g;
 
-        $self->log_( "Command: --$command--" );
+        $self->log_( 2, "Command: --$command--" );
 
         if ( $command =~ /HELO/i ) {
             if ( $self->config_( 'chain_server' ) )  {
@@ -185,9 +181,9 @@ sub child__
 
             next;
         }
-        
+
         # Handle EHLO specially so we can control what ESMTP extensions are negotiated
-        
+
         if ( $command =~ /EHLO/i ) {
             if ( $self->config_( 'chain_server' ) )  {
                 if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'chain_server' ),  $self->config_( 'chain_port' ) ) )  {
@@ -198,20 +194,18 @@ sub child__
 
                     my $unsupported;
 
-                    
-                    
                     # RFC 1830, http://www.faqs.org/rfcs/rfc1830.html
                     # CHUNKING and BINARYMIME both require the support of the "BDAT" command
                     # support of BDAT requires extensive changes to POPFile's internals and
                     # will not be implemented at this time
 
                     $unsupported .= "CHUNKING|BINARYMIME";
-                    
+
                     # append unsupported ESMTP extensions to $unsupported here, important to maintain
                     # format of OPTION|OPTION2|OPTION3
-                    
+
                     $unsupported = qr/250\-$unsupported/;
-                                        
+
                     $self->smtp_echo_response_( $mail, $client, $command, $unsupported );
 
 
@@ -242,13 +236,7 @@ sub child__
             if ( $self->smtp_echo_response_( $mail, $client, $command ) ) {
                 $count += 1;
 
-                my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $client, $mail, $download_count, $count, 0, '' );
-
-                # Tell the parent that we just handled a mail
-                print $pipe "CLASS:$class $session$eol";
-                print $pipe "NEWFL:$history_file$eol";
-                flush $pipe;
-                $self->yield_( $ppipe, $pid );
+                my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $client, $mail, 0, '' );
 
                 my $response = $self->slurp_( $mail );
                 $self->tee_( $client, $response );
@@ -285,10 +273,8 @@ sub child__
     }
 
     close $client;
-    print $pipe "CMPLT$eol";
-    flush $pipe;
-    $self->yield_( $ppipe, $pid );
-    close $pipe;
+    $self->mq_post_( 'CMPLT', $$, '' );
+    $self->log_( 0, "SMTP proxy done" );
 }
 
 # ---------------------------------------------------------------------------------------------

@@ -4,7 +4,7 @@ package Proxy::Proxy;
 #
 # This module implements the base class for all POPFile proxy Modules
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -36,8 +36,6 @@ use IO::Select;
 # A handy variable containing the value of an EOL for networks
 my $eol = "\015\012";
 
-use POSIX ":sys_wait_h";
-
 #----------------------------------------------------------------------------
 # new
 #
@@ -51,21 +49,15 @@ sub new
     my $type = shift;
     my $self = POPFile::Module->new();
 
-    # A reference to the classifier
+    # A reference to the classifier and history
 
     $self->{classifier__}     = 0;
-
-    # List of file handles to read from active children, this
-    # maps the PID for each child to its associated pipe handle
-
-    $self->{children__}        = {};
+    $self->{history__}        = 0;
 
     # Reference to a child() method called to handle a proxy
-    # connection, reference to flush_child_data() method used
-    # to clear out pipes
+    # connection
 
     $self->{child_}            = 0;
-    $self->{flush_child_data_} = \&flush_child_data_;
 
     # Holding variable for MSWin32 pipe handling
 
@@ -194,131 +186,6 @@ sub stop
     # and all the reading ends of pipes to active children
 
     close $self->{server__} if ( defined( $self->{server__} ) );
-
-    for my $kid (keys %{$self->{children__}}) {
-        close $self->{children__}{$kid};
-        delete $self->{children__}{$kid};
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# reaper
-#
-# Called when a child process terminates somewhere in POPFile.  The object should check
-# to see if it was one of its children and do any necessary processing by calling waitpid()
-# on any child handles it has
-#
-# There is no return value from this method
-#
-# ---------------------------------------------------------------------------------------------
-sub reaper
-{
-    my ( $self ) = @_;
-
-    # Look for children that have completed and then flush the data from their
-    # associated pipe and see if any of our children have data ready to read from their pipes,
-
-    my @kids = keys %{$self->{children__}};
-
-    if ( $#kids >= 0 ) {
-        for my $kid (@kids) {
-            if ( waitpid( $kid, &WNOHANG ) == $kid ) {
-                $self->{flush_child_data_}( $self, $self->{children__}{$kid} );
-                close $self->{children__}{$kid};
-                delete $self->{children__}{$kid};
-
-                $self->log_( "Done with $kid (" . scalar(keys %{$self->{children__}}) . " to go)" );
-            }
-        }
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# read_pipe_
-#
-# reads a single message from a pipe in a cross-platform way.
-# returns undef if the pipe has no message
-#
-# $handle   The handle of the pipe to read
-#
-# ---------------------------------------------------------------------------------------------
-sub read_pipe_
-{
-    my ($self, $handle) = @_;
-
-    if ( $^O eq "MSWin32" ) {
-
-        # bypasses bug in -s $pipe under ActivePerl
-
-        my $message;         # PROFILE PLATFORM START MSWin32
-
-        if ( &{ $self->{pipeready_} }($handle) ) {
-
-            # add data to the pipe cache whenever the pipe is ready
-
-            sysread($handle, my $string, -s $handle);
-
-            # push messages onto the end of our cache
-
-            $self->{pipe_cache__} .= $string;
-        }
-
-        # pop the oldest message;
-
-        $message = $1 if (defined($self->{pipe_cache__}) && ( $self->{pipe_cache__} =~ s/(.*?\n)// ) );
-
-        return $message;        # PROFILE PLATFORM STOP
-    } else {
-
-        # do things normally
-
-        if ( &{ $self->{pipeready_} }($handle) ) {
-            return <$handle>;
-        }
-    }
-
-    return undef;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# flush_child_data_
-#
-# Called to flush data from the pipe of each child as we go, I did this because there
-# appears to be a problem on Windows where the pipe gets a lot of read data in it and
-# then causes the child not to be terminated even though we are done.  Also this is nice
-# because we deal with the statistics as we go
-#
-# $handle   The handle of the child's pipe
-#
-# ---------------------------------------------------------------------------------------------
-sub flush_child_data_
-{
-    my ( $self, $handle ) = @_;
-
-    my $stats_changed = 0;
-    my $message;
-
-    while ( ($message = $self->read_pipe_( $handle )) && defined($message) )
-    {
-        $message =~ s/[\r\n]//g;
-
-        $self->log_( "Child proxy message $message" );
-
-        if ( $message =~ /CLASS:([^ ]*) ([^ ]*)/ ) {
-            $self->{classifier__}->classified( $2, $1 );
-        }
-
-        if ( $message =~ /NEWFL:(.*)/ ) {
-            $self->mq_post_( 'NEWFL', $1, '' );
-        }
-
-        if ( $message =~ /LOGIN:(.*)/ ) {
-            $self->mq_post_( 'LOGIN', $1, '' );
-        }
-    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -335,13 +202,6 @@ sub flush_child_data_
 sub service
 {
     my ( $self ) = @_;
-
-    # See if any of the children have passed up statistics data through their
-    # pipes and deal with it now
-
-    for my $kid (keys %{$self->{children__}}) {
-        $self->{flush_child_data_}( $self, $self->{children__}{$kid} );
-    }
 
     # Accept a connection from a client trying to use us as the mail server.  We service one client at a time
     # and all others get queued up to be dealt with later.  We check the alive boolean here to make sure we
@@ -364,11 +224,6 @@ sub service
 
             if  ( ( ( $self->config_( 'local' ) || 0 ) == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
 
-                # Now that we have a good connection to the client fork a subprocess to handle the communication
-                # and set the socket to binmode so that no CRLF translation goes on
-
-                $self->global_config_( 'download_count', $self->global_config_( 'download_count' ) + 1 );
-
                 # If we have force_fork turned on then we will do a fork, otherwise we will handle this
                 # inline, in the inline case we need to create the two ends of a pipe that will be used
                 # as if there was a child process
@@ -378,24 +233,18 @@ sub service
                 if ( $self->config_( 'force_fork' ) ) {
                     my ( $pid, $pipe ) = &{$self->{forker_}};
 
-                    # If we are in the parent process then push the pipe handle onto the children list
-
-                    if ( ( defined( $pid ) ) && ( $pid != 0 ) ) {
-                        $self->{children__}{$pid} = $pipe;
-                    }
-
                     # If we fail to fork, or are in the child process then process this request
 
                     if ( !defined( $pid ) || ( $pid == 0 ) ) {
-                        $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $pipe, 0, $pid, $self->{api_session__} );
-                        $self->{flush_child_data_}( $self, $pipe );
+                        $self->{child_}( $self, $client, $self->{api_session__} );
+# TODO                        $self->{flush_child_data_}( $self, $pipe );
                         exit(0) if ( defined( $pid ) );
                     }
 	        } else {
                     pipe my $reader, my $writer;
 
-                    $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $writer, $reader, $$, $self->{api_session__} );
-                    $self->{flush_child_data_}( $self, $reader );
+                    $self->{child_}( $self, $client, $self->{api_session__} );
+# TODO                    $self->{flush_child_data_}( $self, $reader );
                     close $reader;
                 }
             }
@@ -405,24 +254,6 @@ sub service
     }
 
     return 1;
-}
-
-
-# ---------------------------------------------------------------------------------------------
-#
-# yield_
-#
-# Called by a proxy child process to allow the parent to do work, this only does anything
-# in the case where we didn't fork for the child process
-#
-# ---------------------------------------------------------------------------------------------
-sub yield_
-{
-    my ( $self, $pipe, $pid ) = @_;
-
-    if ( $pid != 0 ) {
-        $self->{flush_child_data_}( $self, $pipe )
-    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -440,11 +271,6 @@ sub forked
     my ( $self ) = @_;
 
     close $self->{server__};
-
-    for my $kid (keys %{$self->{children__}}) {
-        close $self->{children__}{$kid};
-        delete $self->{children__}{$kid};
-    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -462,7 +288,7 @@ sub tee_
     my ( $self, $socket, $text ) = @_;
 
     # Send the message to the debug output and then send it to the appropriate socket
-    $self->log_( $text );
+    $self->log_( 1, $text );
     print $socket $text; # don't print if $socket undef
 }
 
@@ -493,7 +319,7 @@ sub echo_to_regexp_
                 $self->tee_( $client, $line );
             }
         } else {
-            $self->log_("Suppressed: $line");
+            $self->log_( 2, "Suppressed: $line" );
         }
 
 	if ( $line =~ $regexp ) {
@@ -674,7 +500,7 @@ sub verify_connected_
     if ( $mail ) {
         if ( $mail->connected )  {
 
-            $self->log_( "Connected to $hostname:$port timeout " . $self->global_config_( 'timeout' ) );
+            $self->log_( 0, "Connected to $hostname:$port timeout " . $self->global_config_( 'timeout' ) );
 
             # Set binmode on the socket so that no translation of CRLF
             # occurs
@@ -712,7 +538,7 @@ sub verify_connected_
                 }
             }
 
-            $self->log_( "Connection returned: $buf" );
+            $self->log_( 1, "Connection returned: $buf" );
 
             $self->{connect_banner__} = $buf;
 
@@ -732,7 +558,6 @@ sub verify_connected_
     return undef;
 }
 
-
 # ---------------------------------------------------------------------------------------------
 #
 # configure_item
@@ -742,7 +567,6 @@ sub verify_connected_
 #    $templ           The loaded template
 #
 # ---------------------------------------------------------------------------------------------
-
 sub configure_item
 {
     my ( $self, $name, $templ ) = @_;
@@ -764,7 +588,6 @@ sub configure_item
 #
 #  Must return the HTML for this item
 # ---------------------------------------------------------------------------------------------
-
 sub validate_item
 {
     my ( $self, $name, $templ, $language, $form ) = @_;
@@ -788,13 +611,20 @@ sub validate_item
     }
 }
 
-# SETTER
+# SETTERS
 
 sub classifier
 {
     my ( $self, $classifier ) = @_;
 
     $self->{classifier__} = $classifier;
+}
+
+sub history
+{
+    my ( $self, $history ) = @_;
+
+    $self->{history__} = $history;
 }
 
 1;

@@ -7,7 +7,7 @@
 # news server using POP3.  Inserts an extra header X-Text-Classification: into the header to
 # tell the client which category the message belongs in and much more...
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2003-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

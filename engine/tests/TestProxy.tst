@@ -24,6 +24,9 @@
 
 unlink 'popfile.db';
 
+use POPFile::MQ;
+my $mq = new POPFile::MQ;
+
 sub forker
 {
     pipe my $reader, my $writer;
@@ -41,9 +44,12 @@ sub forker
         use IO::Handle;
         $writer->autoflush(1);
 
+        $mq->forked( $writer );
+
         return (0, $writer);
     }
 
+    $mq->postfork( $pid, $reader );
     close $writer;
     return ($pid, $reader);
 }
@@ -68,14 +74,12 @@ sub pipeready
 
 use Classifier::Bayes;
 use POPFile::Configuration;
-use POPFile::MQ;
 use POPFile::Logger;
 use Proxy::Proxy;
 use IO::Handle;
 use IO::Socket;
 
 my $c = new POPFile::Configuration;
-my $mq = new POPFile::MQ;
 my $l = new POPFile::Logger;
 my $p = new Proxy::Proxy
 my $b = new Classifier::Bayes;
@@ -133,7 +137,7 @@ $sp->mq( $mq );
 $sp->logger( $l );
 
 $sp->forker( \&forker );
-$sp->pipeready( \&pipeready );
+$mq->pipeready( \&pipeready );
 
 $sp->classifier( $b );
 
@@ -175,6 +179,8 @@ test_assert_regexp( $sp->received(), 'toserver' );
 
 # Test the tee function, that send a line to the server
 # or client and to the logger
+
+$l->config_( 'level', 2 );
 
 test_assert( $client->connected );
 $sp->tee_( $client, "teed\n" );
@@ -403,11 +409,11 @@ my $r = new Test::MQReceiver;
 
 # Register three different message types
 
-$mq->register( 'NEWFL', $r );
 $mq->register( 'LOGIN', $r );
 
 # Close down the child process
 
+$mq->service();
 $sp->send( '__POPFILE__ABORT__CHILD__' );
 $sp->service_server();
 close $client;
@@ -416,24 +422,21 @@ select( undef, undef, undef, 0.25 );
 
 # Reap the children
 
-my @kids = keys %{$sp->{children__}};
+my @kids = keys %{$mq->{children__}};
 while ( $#kids >= 0 ) {
-    $sp->reaper();
+    $mq->reaper();
     select( undef, undef, undef, 0.25 );
-    @kids = keys %{$sp->{children__}};
+    @kids = keys %{$mq->{children__}};
 }
 
 $sp->stop();
 
 $mq->service();
 my @messages = $r->read();
-test_assert_equal( $#messages, 1 );
+test_assert_equal( $#messages, 0 );
 test_assert_equal( $messages[0][0], 'LOGIN' );
 test_assert_equal( $messages[0][1], 'username' );
 test_assert_equal( $messages[0][2], '' );
-test_assert_equal( $messages[1][0], 'NEWFL' );
-test_assert_equal( $messages[1][1], 'newfile' );
-test_assert_equal( $messages[1][2], '' );
 
 # Make sure that stop will close off the child pipes
 
@@ -444,7 +447,6 @@ $sp->mq( $mq );
 $sp->logger( $l );
 
 $sp->forker( \&forker );
-$sp->pipeready( \&pipeready );
 
 $sp->initialize();
 $sp->config_( 'port', $port );
@@ -464,22 +466,20 @@ $sp->service();
 select( undef, undef, undef, 0.1 );
 $sp->service_server();
 select( undef, undef, undef, 0.1 );
-@kids = keys %{$sp->{children__}};
-my %tmp = %{$sp->{children__}};
+@kids = keys %{$mq->{children__}};
+my %tmp = %{$mq->{children__}};
 test_assert_equal( $#kids, 0 );
 $sp->stop_server();
 $sp->stop();
-@kids = keys %{$sp->{children__}};
-test_assert_equal( $#kids, -1 );
 print $client "__POPFILE__ABORT__CHILD__\n";
 close $client;
 
-%{$sp->{children__}} = %tmp;
-@kids = keys %{$sp->{children__}};
+%{$mq->{children__}} = %tmp;
+@kids = keys %{$mq->{children__}};
 while ( $#kids >= 0 ) {
-    $sp->reaper();
+    $mq->reaper();
     select( undef, undef, undef, 0.25 );
-    @kids = keys %{$sp->{children__}};
+    @kids = keys %{$mq->{children__}};
 }
 
 # Make sure that forked will close off the child pipes
@@ -491,7 +491,6 @@ $sp->mq( $mq );
 $sp->logger( $l );
 
 $sp->forker( \&forker );
-$sp->pipeready( \&pipeready );
 
 $sp->initialize();
 $sp->config_( 'port', $port );
@@ -511,23 +510,21 @@ $sp->service();
 select( undef, undef, undef, 0.1 );
 $sp->service_server();
 select( undef, undef, undef, 0.1 );
-@kids = keys %{$sp->{children__}};
+@kids = keys %{$mq->{children__}};
 test_assert_equal( $#kids, 0 );
-%tmp = %{$sp->{children__}};
+%tmp = %{$mq->{children__}};
 $sp->forked();
-@kids = keys %{$sp->{children__}};
-test_assert_equal( $#kids, -1 );
 $sp->stop_server();
 $sp->stop();
 print $client "__POPFILE__ABORT__CHILD__\n";
 close $client;
 
-%{$sp->{children__}} = %tmp;
-@kids = keys %{$sp->{children__}};
+%{$mq->{children__}} = %tmp;
+@kids = keys %{$mq->{children__}};
 while ( $#kids >= 0 ) {
-    $sp->reaper();
+    $mq->reaper();
     select( undef, undef, undef, 0.25 );
-    @kids = keys %{$sp->{children__}};
+    @kids = keys %{$mq->{children__}};
 }
 
 # Test that verify_connected_ does what we expect
@@ -539,7 +536,6 @@ $sp->mq( $mq );
 $sp->logger( $l );
 
 $sp->forker( \&forker );
-$sp->pipeready( \&pipeready );
 
 $sp->initialize();
 $sp->config_( 'port', $port );
@@ -568,7 +564,6 @@ $sp2->mq( $mq );
 $sp2->logger( $l );
 
 $sp2->forker( \&forker );
-$sp2->pipeready( \&pipeready );
 
 $sp2->initialize();
 $sp2->config_( 'port', -1 );

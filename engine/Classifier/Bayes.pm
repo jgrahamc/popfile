@@ -8,7 +8,7 @@ use POPFile::Module;
 #
 # Bayes.pm --- Naive Bayes text classifier
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -83,6 +83,8 @@ sub new
 
     $self->{db__}                = {};
 
+    $self->{history__}        = 0;
+
     # To save time we also 'prepare' some commonly used SQL statements and cache
     # them here, see the function db_connect__ for details
 
@@ -126,7 +128,8 @@ sub new
                                    'orange',    'purple',     'magenta',    'gray',
                                    'plum',      'silver',     'pink',       'lightgreen',
                                    'lightblue', 'lightcyan',  'lightcoral', 'lightsalmon',
-                                   'lightgrey', 'darkorange', 'darkcyan',   'feldspar' ]; # PROFILE BLOCK STOP
+                                   'lightgrey', 'darkorange', 'darkcyan',   'feldspar',
+                                   'black' ];                                        # PROFILE BLOCK STOP
 
     # Precomputed per bucket probabilities
     $self->{bucket_start__}      = {};
@@ -247,7 +250,9 @@ sub start
     my ( $self ) = @_;
 
     # In Japanese mode, explicitly set LC_COLLATE to C.
-    # This is to avoid Perl crash on Windows because default LC_COLLATE of Japanese Win is Japanese_Japan.932(Shift_JIS), which is different from the charset POPFile uses for Japanese characters(EUC-JP).
+    # This is to avoid Perl crash on Windows because default LC_COLLATE of Japanese Win
+    # is Japanese_Japan.932(Shift_JIS), which is different from the charset POPFile uses
+    # for Japanese characters(EUC-JP).
 
     if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
         use POSIX qw( locale_h );
@@ -489,57 +494,165 @@ sub db_connect__
     # here using the file 'popfile.sql' which should be located in the same directory
     # the Classifier/Bayes.pm module
 
-    my $dbname = $self->get_user_path_( $self->config_( 'database' ) );
-    my $dbpresent = ( -e $dbname ) || 0;
+    # If we are using SQLite then the dbname is actually the name of a file, and
+    # hence we treat it like one, otherwise we leave it alone
+
+    my $dbname;
+    my $dbconnect = $self->config_( 'dbconnect' );
+    my $dbpresent;
+    my $sqlite = ( $dbconnect =~ /sqlite/i );
+
+    if ( $sqlite ) {
+        $dbname = $self->get_user_path_( $self->config_( 'database' ) );
+        $dbpresent = ( -e $dbname ) || 0;
+    } else {
+        $dbname = $self->config_( 'database' );
+        $dbpresent = 1;
+    }
 
     # Now perform the connect, note that this is database independent at this point, the
     # actual database that we connect to is defined by the dbconnect parameter.
 
-    my $dbconnect = $self->config_( 'dbconnect' );
     $dbconnect =~ s/\$dbname/$dbname/g;
 
-    $self->log_( "Attempting to connect to $dbconnect ($dbpresent)" );
+    $self->log_( 0, "Attempting to connect to $dbconnect ($dbpresent)" );
 
     $self->{db__} = DBI->connect( $dbconnect,                    # PROFILE BLOCK START
                                   $self->config_( 'dbuser' ),
                                   $self->config_( 'dbauth' ) );  # PROFILE BLOCK STOP
 
     if ( !defined( $self->{db__} ) ) {
-        $self->log_( "Failed to connect to database and got error $DBI::errstr" );
+        $self->log_( 0, "Failed to connect to database and got error $DBI::errstr" );
         return 0;
     }
 
     if ( !$dbpresent ) {
-        if ( -e $self->get_root_path_( 'Classifier/popfile.sql' ) ) {
-            my $schema = '';
-
-            $self->log_( "Creating database schema" );
-
-            open SCHEMA, '<' . $self->get_root_path_( 'Classifier/popfile.sql' );
-            while ( <SCHEMA> ) {
-                next if ( /^--/ );
-                next if ( !/[a-z;]/ );
-                s/--.*$//;
-
-                # If the line begins 'alter' and we are doing SQLite then ignore
-                # the line
-
-                if ( ( $dbconnect =~ /sqlite/i ) && ( /^alter/i ) ) {
-		    next;
-	        }
-
-                $schema .= $_;
-
-                if ( ( /end;/ ) || ( /\);/ ) ) {
-                    $self->{db__}->do( $schema );
-                    $schema = '';
-		}
-	    }
-            close SCHEMA;
-	} else {
-            $self->log_( "Can't find the database schema" );
+        if ( !$self->insert_schema__( $sqlite ) ) {
             return 0;
 	}
+    }
+
+    # Now check for a need to upgrade the database because the schema has been
+    # changed.   From POPFile v0.22.0 there's a special 'popfile' table inside
+    # the database that contains the schema version number.  If the version number
+    # doesn't match or is missing then do the upgrade.
+
+    open SCHEMA, '<' . $self->get_root_path_( 'Classifier/popfile.sql' );
+    <SCHEMA> =~ /-- POPFILE SCHEMA (\d+)/;
+    my $version = $1;
+    close SCHEMA;
+
+    my $need_upgrade = 1;
+
+    my @tables = $self->{db__}->tables();
+
+    foreach my $table (@tables) {
+        if ( $table eq 'popfile' ) {
+            my @row = $self->{db__}->selectrow_array(
+               'select version from popfile;' );
+
+            if ( $#row == 0 ) {
+                $need_upgrade = ( $row[0] != $version );
+            }
+        }
+    }
+
+    if ( $need_upgrade ) {
+
+        print "\n\nDatabase schema is outdated, performing automatic upgrade\n";
+
+        # The database needs upgrading, so we are going to dump out
+        # all the data in the database as INSERT statements in a
+        # temporary file, then DROP all the tables in the database,
+        # then recreate the schema from the new schema and finally
+        # rerun the inserts.
+
+        my $i = 0;
+        open INSERT, '>' . $self->get_user_path_( 'insert.sql' );
+
+        foreach my $table (@tables) {
+            next if ( $table eq 'popfile' );
+            if ( $sqlite && ( $table =~ /^sqlite_/ ) ) {
+                next;
+	    }
+            if ( $i > 99 ) {
+                print "\n";
+            }
+            print "    Saving table $table\n    ";
+
+            my $t = $self->{db__}->prepare( "select * from $table;" );
+            $t->execute;
+            $i = 0;
+            while ( 1 ) {
+   	        if ( ( ++$i % 100 ) == 0 ) {
+	            print "[$i]";
+                    flush STDOUT;
+	        }
+                my @rows = $t->fetchrow_array;
+
+                last if ( $#rows == -1 );
+
+                print INSERT "INSERT INTO $table (";
+                for my $i (0..$t->{NUM_OF_FIELDS}-1) {
+		    if ( $i != 0 ) {
+                        print INSERT ',';
+		    }
+                    print INSERT $t->{NAME}->[$i];
+		}
+                print INSERT ') VALUES (';
+                for my $i (0..$t->{NUM_OF_FIELDS}-1) {
+		    if ( $i != 0 ) {
+                        print INSERT ',';
+		    }
+                    my $val = $rows[$i];
+                    if ( $t->{TYPE}->[$i] !~ /^int/i ) {
+                        $val = '' if ( !defined( $val ) );
+                        $val = $self->{db__}->quote( $val );
+		    } else {
+                        $val = 'NULL' if ( !defined( $val ) );
+                    }
+                    print INSERT $val;
+    	        }
+                print INSERT ");\n";
+	    }
+	}
+
+        close INSERT;
+
+        if ( $i > 99 ) {
+            print "\n";
+	}
+
+        foreach my $table (@tables) {
+            if ( $sqlite && ( $table =~ /^sqlite_/ ) ) {
+                next;
+	    }
+            print "    Dropping old table $table\n";
+            $self->{db__}->do( "DROP TABLE $table;" );
+	}
+
+        print "    Inserting new database schema\n";
+        if ( !$self->insert_schema__( $sqlite ) ) {
+            return 0;
+	}
+
+        print "    Restoring old data\n    ";
+
+        $self->{db__}->begin_work;
+        open INSERT, '<' . $self->get_user_path_( 'insert.sql' );
+        $i = 0;
+        while ( <INSERT> ) {
+	    if ( ( ++$i % 100 ) == 0 ) {
+	       print "[$i]";
+               flush STDOUT;
+	    }
+            s/[\r\n]//g;
+            $self->{db__}->do( $_ );
+	}
+        close INSERT;
+        $self->{db__}->commit;
+
+        print "\nDatabase upgrade complete\n\n";
     }
 
     # Now prepare common SQL statements for use, as a matter of convention the
@@ -624,6 +737,52 @@ sub db_connect__
     $h->finish;
 
     return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# insert_schema__
+#
+# Insert the POPFile schema in a database
+#
+# $sqlite          Set to 1 if this is a SQLite database
+#
+# ---------------------------------------------------------------------------------------------
+sub insert_schema__
+{
+    my ( $self, $sqlite ) = @_;
+
+    if ( -e $self->get_root_path_( 'Classifier/popfile.sql' ) ) {
+        my $schema = '';
+
+        $self->log_( 0, "Creating database schema" );
+
+        open SCHEMA, '<' . $self->get_root_path_( 'Classifier/popfile.sql' );
+        while ( <SCHEMA> ) {
+            next if ( /^--/ );
+            next if ( !/[a-z;]/ );
+            s/--.*$//;
+
+            # If the line begins 'alter' and we are doing SQLite then ignore
+            # the line
+
+            if ( $sqlite && ( /^alter/i ) ) {
+                next;
+            }
+
+            $schema .= $_;
+
+            if ( ( /end;/ ) || ( /\);/ ) ) {
+                $self->{db__}->do( $schema );
+                $schema = '';
+	    }
+	}
+        close SCHEMA;
+        return 1;
+    } else {
+        $self->log_( 0, "Can't find the database schema" );
+        return 0;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -802,7 +961,7 @@ sub upgrade_predatabase_data__
     my $session = $self->get_session_key( 'admin', '' );
 
     if ( !defined( $session ) ) {
-        $self->log_( "Tried to get the session key for user admin and failed; cannot upgrade old data" );
+        $self->log_( 0, "Tried to get the session key for user admin and failed; cannot upgrade old data" );
         return;
     }
 
@@ -888,10 +1047,10 @@ sub upgrade_bucket__
     # per bucket to off
 
     foreach my $gl ( 'subject', 'xtc', 'xpl' ) {
-        $self->log_( "Checking deprecated parameter GLOBAL_$gl for $bucket\n" );
+        $self->log_( 1, "Checking deprecated parameter GLOBAL_$gl for $bucket\n" );
         my $val = $self->{configuration__}->deprecated_parameter( "GLOBAL_$gl" );
         if ( defined( $val ) && ( $val == 0 ) ) {
-            $self->log_( "GLOBAL_$gl is 0 for $bucket, overriding $gl\n" );
+            $self->log_( 1, "GLOBAL_$gl is 0 for $bucket, overriding $gl\n" );
             $self->set_bucket_parameter( $session, $bucket, $gl, 0 );
         }
     }
@@ -941,7 +1100,7 @@ sub upgrade_bucket__
     # database from it thus performing an automatic upgrade.
 
     if ( -e $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) ) {
-        $self->log_( "Performing automatic upgrade of $bucket corpus from flat file to DBI" );
+        $self->log_( 0, "Performing automatic upgrade of $bucket corpus from flat file to DBI" );
 
         $self->{db__}->begin_work;
 
@@ -957,11 +1116,11 @@ sub upgrade_bucket__
                     $self->{db__}->rollback;
                     return 0;
                 } else {
-   	            $self->log_( "Upgrading bucket $bucket..." );
+   	            $self->log_( 0, "Upgrading bucket $bucket..." );
 
                     while ( <WORDS> ) {
 		        if ( $wc % 100 == 0 ) {
-                            $self->log_( "$wc" );
+                            $self->log_( 0, "$wc" );
 		        }
                         $wc += 1;
                         s/[\r\n]//g;
@@ -971,14 +1130,14 @@ sub upgrade_bucket__
                                 $self->db_put_word_count__( $session, $bucket, $1, $2 );
 			    }
                         } else {
-                            $self->log_( "Found entry in corpus for $bucket that looks wrong: \"$_\" (ignoring)" );
+                            $self->log_( 0, "Found entry in corpus for $bucket that looks wrong: \"$_\" (ignoring)" );
                         }
 		    }
                 }
 
                 if ( $wc > 1 ) {
                     $wc -= 1;
-                    $self->log_( "(completed $wc words)" );
+                    $self->log_( 0, "(completed $wc words)" );
 		}
                 close WORDS;
             } else {
@@ -998,21 +1157,21 @@ sub upgrade_bucket__
     my $bdb_file = $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table.db" );
 
     if ( -e $bdb_file ) {
-        $self->log_( "Performing automatic upgrade of $bucket corpus from BerkeleyDB to DBI" );
+        $self->log_( 0, "Performing automatic upgrade of $bucket corpus from BerkeleyDB to DBI" );
 
         require BerkeleyDB;
 
         my %h;
         tie %h, "BerkeleyDB::Hash", -Filename => $bdb_file;
 
-        $self->log_( "Upgrading bucket $bucket..." );
+        $self->log_( 0, "Upgrading bucket $bucket..." );
         $self->{db__}->begin_work;
 
         my $wc = 1;
 
         for my $word (keys %h) {
 	    if ( $wc % 100 == 0 ) {
-                $self->log_( "$wc" );
+                $self->log_( 0, "$wc" );
             }
 
             next if ( $word =~ /__POPFILE__(LOG__TOTAL|TOTAL|UNIQUE)__/ );
@@ -1024,7 +1183,7 @@ sub upgrade_bucket__
 	}
 
         $wc -= 1;
-        $self->log_( "(completed $wc words)" );
+        $self->log_( 0, "(completed $wc words)" );
         $self->{db__}->commit;
         untie %h;
         unlink $bdb_file;
@@ -1384,7 +1543,7 @@ sub valid_session_key__
 
     if ( !defined( $self->{api_sessions__}{$session} ) ) {
         my ( $package, $filename, $line, $subroutine ) = caller;
-        $self->log_( "Invalid session key $session provided in $package @ $line" );
+        $self->log_( 0, "Invalid session key $session provided in $package @ $line" );
         select( undef, undef, undef, 1 );
     }
 
@@ -1437,7 +1596,7 @@ sub get_session_key
         # username/password combinations at high speed to determine the
         # credentials of a valid user
 
-        $self->log_( "Attempt to login with incorrect credentials for user $user" );
+        $self->log_( 0, "Attempt to login with incorrect credentials for user $user" );
         select( undef, undef, undef, 1 );
         return undef;
     }
@@ -1448,7 +1607,7 @@ sub get_session_key
 
     $self->db_update_cache__( $session );
 
-    $self->log_( "get_session_key returning key $session for user $self->{api_sessions__}{$session}" );
+    $self->log_( 1, "get_session_key returning key $session for user $self->{api_sessions__}{$session}" );
 
     return $session;
 }
@@ -1467,7 +1626,7 @@ sub release_session_key
     my ( $self, $session ) = @_;
 
     if ( defined( $self->{api_sessions__}{$session} ) ) {
-        $self->log_( "release_session_key releasing key $session for user $self->{api_sessions__}{$session}" );
+        $self->log_( 1, "release_session_key releasing key $session for user $self->{api_sessions__}{$session}" );
         delete $self->{api_sessions__}{$session};
     }
 }
@@ -1927,116 +2086,6 @@ sub classify
 
 # ---------------------------------------------------------------------------------------------
 #
-# history_filename
-#
-# Returns a path and filename for a POPFile message based on the session count and message count
-#
-# $dcount   - the unique download/session count for this message
-# $mcount   - the message count for this message
-# $ext      - the extension for this message (defaults to .msg)
-# $path     - 1 to return the path configuration info, 0 to return just the filename (default 0)
-#
-# ---------------------------------------------------------------------------------------------
-sub history_filename
-{
-    my ( $self, $dcount, $mcount, $ext, $path) = @_;
-
-    $path = 0 if (!defined($path));
-
-    return ($path?$self->get_user_path_( $self->global_config_( 'msgdir' ) ):'') . "popfile$dcount" . "=$mcount" . (defined $ext?$ext:'.msg');
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# history_write_class - write the class file for a message.
-#
-# $filename     The name of the message to write the class for
-# $reclassified Boolean, true if the message has been reclassified
-# $bucket       the name of the bucket the message is in
-# $usedtobe     the name of the bucket the messages used to be in
-# $magnet       the magnet, if any, used to reclassify the message
-#
-# ---------------------------------------------------------------------------------------------
-sub history_write_class
-{
-    my ( $self, $filename, $reclassified, $bucket, $usedtobe, $magnet ) = @_;
-
-    $filename =~ s/msg$/cls/;
-    $filename =  $self->get_user_path_( $self->global_config_( 'msgdir' ) . $filename );
-
-    open CLASS, ">$filename";
-
-    if ( defined( $magnet ) && ( $magnet ne '' ) ) {
-        print CLASS "$bucket MAGNET $magnet\n";
-    } else {
-        if ( defined( $reclassified ) && ( $reclassified == 1 ) ) {
-            print CLASS "RECLASSIFIED\n";
-            print CLASS "$bucket\n";
-            if ( defined( $usedtobe ) && ( $usedtobe ne '' ) ) {
-               print CLASS "$usedtobe\n";
-            }
-        } else {
-            print CLASS "$bucket\n";
-        }
-    }
-
-    close CLASS;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# history_read_class - load the class file for a message.
-#
-# returns: ( reclassified, bucket, usedtobe, magnet )
-#   values:
-#       reclassified:   boolean, true if message has been reclassified
-#       bucket:         string, the bucket the message is in presently, unknown class if an error occurs
-#       usedtobe:       string, the bucket the message used to be in (null if not reclassified)
-#       magnet:         string, the magnet
-#
-# $filename     The name of the message to load the class for
-#
-# ---------------------------------------------------------------------------------------------
-sub history_read_class
-{
-    my ( $self, $filename ) = @_;
-
-    $filename =~ s/msg$/cls/;
-
-    my $reclassified = 0;
-    my $bucket = 'unknown class';
-    my $usedtobe;
-    my $magnet = '';
-
-    if ( open CLASS, '<' . $self->get_user_path_( $self->global_config_( 'msgdir' ) . $filename ) ) {
-        $bucket = <CLASS>;
-        if ( defined( $bucket ) && ( $bucket =~ /([^ ]+) MAGNET ([^\r\n]+)/ ) ) {
-            $bucket = $1;
-            $magnet = $2;
-        }
-
-        $reclassified = 0;
-        if ( defined( $bucket ) && ( $bucket =~ /RECLASSIFIED/ ) ) {
-            $bucket       = <CLASS>;
-            $usedtobe = <CLASS>;
-            $reclassified = 1;
-            $usedtobe =~ s/[\r\n]//g;
-        }
-        close CLASS;
-        $bucket =~ s/[\r\n]//g if defined( $bucket );
-    } else {
-        $self->log_( "Error: " . $self->get_user_path_( $self->global_config_( 'msgdir' ) . "$filename: $!" ) );
-
-        return ( undef, $bucket, undef, undef );
-    }
-
-    $bucket = 'unknown class' if ( !defined( $bucket ) );
-
-    return ( $reclassified, $bucket, $usedtobe, $magnet );
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # classify_and_modify
 #
 # This method reads an email terminated by . on a line by itself (or the end of stream)
@@ -2046,8 +2095,6 @@ sub history_read_class
 # $session   A valid session key returned by a call to get_session_key
 # $mail     - an open stream to read the email from
 # $client   - an open stream to write the modified email to
-# $dcount   - the unique download count for this message
-# $mcount   - the message count for this message
 # $nosave   - indicates that the message downloaded should not be saved in the history
 # $class    - if we already know the classification
 # $echo     - 1 to echo to the client, 0 to supress, defaults to 1
@@ -2056,15 +2103,15 @@ sub history_read_class
 #             of line), but if this method is being used with real files you may wish
 #             to pass in \n instead
 #
-# Returns a classification if it worked and the name of the file where the message
-# was saved
+# Returns a classification if it worked and the slot ID of the history item related
+# to this classification
 #
 # IMPORTANT NOTE: $mail and $client should be binmode
 #
 # ---------------------------------------------------------------------------------------------
 sub classify_and_modify
 {
-    my ( $self, $session, $mail, $client, $dcount, $mcount, $nosave, $class, $echo, $crlf ) = @_;
+    my ( $self, $session, $mail, $client, $nosave, $class, $echo, $crlf ) = @_;
 
     $echo = 1    unless (defined $echo);
     $crlf = $eol unless (defined $crlf);
@@ -2093,12 +2140,7 @@ sub classify_and_modify
     # Whether we are currently reading the mail headers or not
     my $getting_headers = 1;
 
-    my $msg_file  = $self->history_filename($dcount,$mcount, ".msg",1);
-    my $temp_file = "$msg_file.tmp";
-    my $nopath_temp_file = $self->history_filename($dcount,$mcount,".msg",0);
-
-    # Get the class-file info without the path, since we'd just need to strip it
-    my $class_file = $self->history_filename($dcount,$mcount, ".cls",0);
+    my ( $slot, $msg_file ) = $self->{history__}->reserve_slot();
 
     # If we don't yet know the classification then start the parser
     if ( $class eq '' ) {
@@ -2109,7 +2151,7 @@ sub classify_and_modify
     # middle of downloading a message and we refresh the history we do not
     # get class file errors
 
-    open TEMP, ">$temp_file" unless $nosave;
+    open MSG, ">$msg_file" unless $nosave;
 
     while ( my $line = $self->slurp_( $mail ) ) {
         my $fileline;
@@ -2142,7 +2184,7 @@ sub classify_and_modify
 
             if ( !( $line =~ /^(\r\n|\r|\n)$/i ) )  {
                 $message_size += length $line;
-                $self->write_line__( $nosave?undef:\*TEMP, $fileline, $class );
+                $self->write_line__( $nosave?undef:\*MSG, $fileline, $class );
 
                 # If there is no echoing occuring, it doesn't matter what we do to these
 
@@ -2177,19 +2219,19 @@ sub classify_and_modify
 
                         # Gather up any header lines that are questionable
 
-                        $self->log_( "Found odd email header: $line" );
+                        $self->log_( 1, "Found odd email header: $line" );
                         $msg_head_q .= $line;
                     }
                 }
             } else {
-                $self->write_line__( $nosave?undef:\*TEMP, "\n", $class );
+                $self->write_line__( $nosave?undef:\*MSG, "\n", $class );
                 $message_size += length $crlf;
                 $getting_headers = 0;
             }
         } else {
             $message_size += length $line;
             $msg_body     .= $line;
-            $self->write_line__( $nosave?undef:\*TEMP, $fileline, $class );
+            $self->write_line__( $nosave?undef:\*MSG, $fileline, $class );
         }
 
         # Check to see if too much time has passed and we need to keep the mail client happy
@@ -2202,7 +2244,7 @@ sub classify_and_modify
         last if ( ( $message_size > $self->global_config_( 'message_cutoff' ) ) && ( $getting_headers == 0 ) );
     }
 
-    close TEMP unless $nosave;
+    close MSG unless $nosave;
 
     # If we don't yet know the classification then stop the parser
     if ( $class eq '' ) {
@@ -2249,7 +2291,7 @@ sub classify_and_modify
 
     $xpl .= "http://";
     $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->config_( 'hostname' );
-    $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$nopath_temp_file$crlf";
+    $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$slot$crlf";
 
     if ( $xpl_insertion && ( $quarantine == 0 ) ) {
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
@@ -2277,7 +2319,7 @@ sub classify_and_modify
            print $client "X-Text-Classification: $classification$crlf" if ( $xtc_insertion );
            print $client 'X-POPFile-Link: ' . $xpl if ( $xpl_insertion );
            print $client "MIME-Version: 1.0$crlf";
-           print $client "Content-Type: multipart/report; boundary=\"$nopath_temp_file\"$crlf$crlf--$nopath_temp_file$crlf";
+           print $client "Content-Type: multipart/report; boundary=\"$slot\"$crlf$crlf--$slot$crlf";
            print $client "Content-Type: text/plain$crlf$crlf";
            print $client "POPFile has quarantined a message.  It is attached to this email.$crlf$crlf";
            print $client "Quarantined Message Detail$crlf$crlf";
@@ -2289,7 +2331,7 @@ sub classify_and_modify
            print $client "$crlf";
            print $client "The first 20 words found in the email are:$crlf$crlf";
            print $client $self->{parser__}->first20();
-           print $client "$crlf--$nopath_temp_file$crlf";
+           print $client "$crlf--$slot$crlf";
            print $client "Content-Type: message/rfc822$crlf$crlf";
         }
 
@@ -2301,7 +2343,7 @@ sub classify_and_modify
     my $before_dot = '';
 
     if ( $quarantine && $echo ) {
-        $before_dot = "$crlf--$nopath_temp_file--$crlf";
+        $before_dot = "$crlf--$slot--$crlf";
     }
 
     my $need_dot = 0;
@@ -2309,7 +2351,7 @@ sub classify_and_modify
     if ( $got_full_body ) {
         $need_dot = 1;
     } else {
-        $need_dot = !$self->echo_to_dot_( $mail, $echo?$client:undef, $nosave?undef:'>>' . $temp_file, $before_dot ) && !$nosave;
+        $need_dot = !$self->echo_to_dot_( $mail, $echo?$client:undef, $nosave?undef:'>>' . $msg_file, $before_dot ) && !$nosave;
     }
 
     if ( $need_dot ) {
@@ -2325,7 +2367,7 @@ sub classify_and_modify
 
         # if we're saving (not nosave) and not echoing, we can safely unload this into the temp file
 
-        if (open FLUSH, ">$temp_file.flush") {
+        if (open FLUSH, ">$msg_file.flush") {
             binmode FLUSH;
 
             # TODO: Do this in a faster way (without flushing to one file then copying to another)
@@ -2336,9 +2378,9 @@ sub classify_and_modify
 
             # append any data we got to the actual temp file
 
-            if ( ( (-s "$temp_file.flush") > 0 ) && ( open FLUSH, "<$temp_file.flush" ) ) {
+            if ( ( (-s "$msg_file.flush") > 0 ) && ( open FLUSH, "<$msg_file.flush" ) ) {
                 binmode FLUSH;
-                if ( open TEMP, ">>$temp_file" ) {
+                if ( open TEMP, ">>$msg_file" ) {
                     binmode TEMP;
 
                     # The only time we get data here is if it is after a CRLF.CRLF
@@ -2354,7 +2396,7 @@ sub classify_and_modify
                 }
                 close FLUSH;
             }
-            unlink("$temp_file.flush");
+            unlink("$msg_file.flush");
         }
     } else {
 
@@ -2364,18 +2406,23 @@ sub classify_and_modify
         $self->flush_extra_( $mail, $client, $echo?0:1);
     }
 
-    if ( !$nosave ) {
-        $self->history_write_class($class_file, undef, $classification, undef, ($self->{magnet_used__}?$self->{magnet_detail__}:undef));
+    if ( $nosave ) {
+        $self->{history__}->release_slot( $slot );
+    } else {
 
-        # Now rename the MSG file, since the class file has been written it's safe for the mesg
-        # file to have the correct name.  If the history cache is reloaded then we wont have a class
-        # file error since it was already written
+        # TODO Make magnet classifications work with database
 
-        unlink $msg_file;
-        rename $temp_file, $msg_file;
+        $self->{history__}->commit_slot( $slot, $classification, 0 );
     }
 
-    return ( $classification, $nopath_temp_file, $self->{magnet_used__} );
+    # If we are saving to the history and we didn't previously know the
+    # classification of a new file
+
+    if ( !$nosave && ( $class eq '' ) ) {
+        $self->classified( $session, $classification );
+    }
+
+    return ( $classification, $slot, $self->{magnet_used__} );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2405,6 +2452,26 @@ sub get_buckets
     }
 
     return @buckets;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_bucket_id
+#
+# Returns the internal ID for a bucket for database calls
+#
+# $session   A valid session key returned by a call to get_session_key
+# $bucket    The bucket name
+#
+# ---------------------------------------------------------------------------------------------
+sub get_bucket_id
+{
+    my ( $self, $session, $bucket ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    return $self->{db_bucketid__}{$userid}{$bucket}{id};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2953,14 +3020,14 @@ sub rename_bucket
     # Make sure that the bucket passed in actually exists
 
     if ( !defined( $self->{db_bucketid__}{$userid}{$old_bucket} ) ) {
-        $self->log_( "Bad bucket name $old_bucket to rename_bucket" );
+        $self->log_( 0, "Bad bucket name $old_bucket to rename_bucket" );
         return 0;
     }
 
     my $id = $self->{db__}->quote( $self->{db_bucketid__}{$userid}{$old_bucket}{id} );
     $new_bucket = $self->{db__}->quote( $new_bucket );
 
-    $self->log_( "Rename bucket $old_bucket to $new_bucket" );
+    $self->log_( 1, "Rename bucket $old_bucket to $new_bucket" );
 
     my $result = $self->{db__}->do( "update buckets set name = $new_bucket where id = $id;" );
 
@@ -3400,6 +3467,20 @@ sub wmformat
 
     $self->{wmformat__} = $value if (defined $value);
     return $self->{wmformat__};
+}
+
+sub db
+{
+    my ( $self ) = @_;
+
+    return $self->{db__};
+}
+
+sub history
+{
+    my ( $self, $history ) = @_;
+
+    $self->{history__} = $history;
 }
 
 1;

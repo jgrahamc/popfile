@@ -260,6 +260,7 @@ test_assert_equal( $c->path_join__( '/foo', 'bar' ), '/foo/bar' );
 test_assert_equal( $c->path_join__( '/foo/', 'bar' ), '/foo/bar' );
 test_assert_equal( $c->path_join__( 'foo/', 'bar' ), 'foo/bar' );
 test_assert_equal( $c->path_join__( 'foo', 'bar' ), 'foo/bar' );
+test_assert_equal( $c->path_join__( 'foo', '\\\\bar' ), '\\\\bar' );
 
 # get_user_path (note Makefile sets POPFILE_USER to ../tests/)
 

@@ -11,7 +11,7 @@ use POPFile::Module;
 # register specific parameters with this module.  This module also handles
 # POPFile's command line parsing
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -98,21 +98,6 @@ sub initialize
 
     $self->config_( 'piddir', './' );
 
-    # This counter is used when creating unique IDs for message stored
-    # in the history.  The history message files have the format
-    #
-    # popfile{download_count}={message_count}.msg
-    #
-    # Where the download_count is derived from this value and the
-    # message_count is a local counter within that download, for sorting
-    # purposes must sort on download_count and then message_count
-    #
-    # download_count is incremented every time POPFile forks to
-    # start a session for downloading messages (see Proxy::Proxy::service
-    # for details)
-
-    $self->global_config_( 'download_count', 0 );
-
     # The default timeout in seconds for POP3 commands
 
     $self->global_config_( 'timeout', 60 );
@@ -125,6 +110,18 @@ sub initialize
     # classification, display or reclassification
 
     $self->global_config_( 'message_cutoff', 100000 );
+
+    # Register for the TICKD message which is sent hourly by the
+    # Logger module.   We use this to hourly save the configuration file
+    # so that POPFile's configuration is saved in case of a hard crash.
+    #
+    # This is particularly needed by the IMAP module which stores some
+    # state related information in the configuration parameters.  Note that
+    # because of the save_needed__ bool there wont be any write to the
+    # disk unless a configuration parameter has been changed since the
+    # last save.  (see parameter())
+
+    $self->mq_register_( 'TICKD', $self );
 
     return 1;
 }
@@ -176,7 +173,7 @@ sub service
 
         if ( !$self->check_pid_() ) {
             $self->write_pid_();
-            $self->log_("New POPFile instance detected and signalled")
+            $self->log_( 0, "New POPFile instance detected and signalled" );
         }
     }
 
@@ -197,6 +194,22 @@ sub stop
     $self->save_configuration();
 
     $self->delete_pid_();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# deliver
+#
+# Called by the message queue to deliver a message
+#
+# ---------------------------------------------------------------------------------------------
+sub deliver
+{
+    my ( $self, $type, $message, $parameter ) = @_;
+
+    if ( $type eq 'TICKD' ) {
+        $self->save_configuration();
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -420,7 +433,6 @@ sub upgrade_parameter__
                      'debug',                    'GLOBAL_debug',
                      'msgdir',                   'GLOBAL_msgdir',
                      'timeout',                  'GLOBAL_timeout',
-                     'download_count',           'GLOBAL_download_count',
 
                      # Parameters that are now handled by POPFile::Logger
 
@@ -437,10 +449,6 @@ sub upgrade_parameter__
 
                      # Parameters that are now handled by UI::HTML
 
-                     'archive',                  'html_archive',
-                     'archive_classes',          'html_archive_classes',
-                     'archive_dir',              'html_archive_dir',
-                     'history_days',             'html_history_days',
                      'language',                 'html_language',
                      'last_reset',               'html_last_reset',
                      'last_update_check',        'html_last_update_check',
@@ -452,6 +460,19 @@ sub upgrade_parameter__
                      'test_language',            'html_test_language',
                      'update_check',             'html_update_check',
                      'ui_port',                  'html_port',
+
+                     # Parameters the have moved from the UI::HTML to
+                     # POPFile::History
+
+                     'archive',                  'history_archive',
+                     'archive_classes',          'history_archive_classes',
+                     'archive_dir',              'history_archive_dir',
+                     'history_days',             'history_history_days',
+                     'html_archive',             'history_archive',
+                     'html_archive_classes',     'history_archive_classes',
+                     'html_archive_dir',         'history_archive_dir',
+                     'html_history_days',        'history_history_days',
+
     ); # PROFILE BLOCK STOP
 
     if ( defined( $upgrades{$parameter} ) ) {
@@ -486,7 +507,7 @@ sub load_configuration
                 if ( defined( $self->{configuration_parameters__}{$parameter} ) ) {
                     $self->{configuration_parameters__}{$parameter} = $value;
 	        } else {
-                    $self->log_( "Discarded unknown parameter '$parameter' from popfile.cfg" );
+                    $self->log_( 0, "Discarded unknown parameter '$parameter' from popfile.cfg" );
                     $self->{deprecated_parameters__}{$parameter} = $value;
                 }
             }
@@ -561,7 +582,9 @@ sub path_join__
 {
     my ( $self, $left, $right ) = @_;
 
-    if ( ( $right =~ /^\// ) || ( $right =~ /^[A-Za-z]:[\/\\]/ ) ) {
+    if ( ( $right =~ /^\// ) ||
+         ( $right =~ /^[A-Za-z]:[\/\\]/ ) ||
+         ( $right =~ /\\\\/ ) ) {
         return $right;
     }
 

@@ -7,7 +7,7 @@ use Proxy::Proxy;
 #
 # A simple test proxy server for testing Proxy::Proxy
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -136,7 +136,7 @@ sub service_server
             }
         }
     } else {
-        $self->log_( "service_server: remote client is not connected" );
+        $self->log_( 0, "service_server: remote client is not connected" );
 
         if ( defined( $self->{remote_selector__}->can_read(0) ) ) {
             $self->{remote_client__} = $self->{remote_server__}->accept();
@@ -159,21 +159,19 @@ sub service_server
 # does is proxy without ANY change between client and server
 #
 # $client   - an open stream to a client
-# $download_count - The unique download count for this session
 #
 # ---------------------------------------------------------------------------------------------
 sub child__
 {
-    my ( $self, $client, $download_count, $pipe, $ppipe, $pid ) = @_;
+    my ( $self, $client, $session ) = @_;
 
-    $self->log_( "Child started" );
+    $self->log_( 0, "Child started" );
 
     # Used to test that we get pipe messages
 
-    print $pipe "CLASS:classification$eol";
-    print $pipe "NEWFL:newfile$eol";
-    print $pipe "LOGIN:username$eol";
-    $self->yield_( $ppipe, $pid );
+    $self->mq_post_( 'CLASS', 'classification', '' );
+    $self->mq_post_( 'NEWFL', 'newfile', '' );
+    $self->mq_post_( 'LOGIN', 'username', '' );
 
     # Connect to the simple server that
 
@@ -203,9 +201,8 @@ sub child__
     }
 
     close $remote if ( defined( $remote ) );
-    close $pipe;
 
-    $self->log_( "Child stopped" );
+    $self->log_( 0, "Child stopped" );
 }
 
 # Getter/setter

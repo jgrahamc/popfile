@@ -3,7 +3,7 @@
 #
 # insert.pl --- Inserts a mail message into a specific bucket
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

@@ -2,7 +2,7 @@
 #
 # Devel::TestCoverage - Module to measure code coverage in the test suite
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

@@ -8,7 +8,7 @@ use POPFile::Module;
 #
 # WordMangle.pm --- Mangle words for better classification
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -86,7 +86,7 @@ sub load_stopwords
 
         close STOPS;
     } else { 
-        $self->log_( "Failed to open stopwords file" );
+        $self->log_( 0, "Failed to open stopwords file" );
     }
 }
 

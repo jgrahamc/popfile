@@ -8,7 +8,7 @@ use Proxy::Proxy;
 #
 # This module handles proxying the NNTP protocol for POPFile.
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -143,16 +143,12 @@ sub start
 # The worker method that is called when we get a good connection from a client
 #
 # $client   - an open stream to a NNTP client
-# $download_count - The unique download count for this session
-# $pipe           - The pipe to the parent process to send messages to
-# $ppipe          - 0 or the parent's end of the pipe
-# $pid            - 0 if this is a child process
 # $session        - API session key
 #
 # ---------------------------------------------------------------------------------------------
 sub child__
 {
-    my ( $self, $client, $download_count, $pipe, $ppipe, $pid, $session ) = @_;
+    my ( $self, $client, $session ) = @_;
 
     # Number of messages downloaded in this session
     my $count = 0;
@@ -176,7 +172,7 @@ sub child__
         # Clean up the command so that it has a nice clean $eol at the end
         $command =~ s/(\015|\012)//g;
 
-        $self->log_( "Command: --$command--" );
+        $self->log_( 2, "Command: --$command--" );
 
         # The news client wants to stop using the server, so send that message through to the
         # real news server, echo the response back up to the client and exit the while.  We will
@@ -275,15 +271,8 @@ sub child__
                 if ( $response =~ /^220 (.*) (.*)$/i) {
                     $count += 1;
 
-                    my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $news, $client, $download_count, $count, 0, '' );
-
-                    # Tell the parent that we just handled a mail
-
-                    print $pipe "CLASS:$class $session$eol";
-                    print $pipe "NEWFL:$history_file$eol";
-                    flush $pipe;
-                    $self->yield_( $ppipe, $pid );
-                }
+                    my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $news, $client, 0, '' );
+		}
 
                 next;
             }
@@ -360,12 +349,8 @@ sub child__
         close $news;
     }
     close $client;
-    print $pipe "CMPLT$eol";
-    flush $pipe;
-    $self->yield_( $ppipe, $pid );
-    close $pipe;
-
-    $self->log_( "NNTP forked child done" );
+    $self->mq_post_( 'CMPLT', $$, '' );
+    $self->log_( 0, "NNTP proxy done" );
 }
 
 # ---------------------------------------------------------------------------------------------

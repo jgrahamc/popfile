@@ -9,7 +9,7 @@ use POPFile::Module;
 # This module handles POPFile's logger.  It is used to save debugging
 # information to disk or to send it to the screen.
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -84,6 +84,14 @@ sub initialize
     # The output format for log files, can be default, tabbed or csv
 
     $self->config_( 'format', 'default' );
+
+    # The log level.  There are three levels of log:
+    #
+    # 0   Critical log messages
+    # 1   Verbose logging
+    # 2   Maximum verbosity
+
+    $self->config_( 'level', 0 );
 
     $self->{last_tickd__} = time;
 
@@ -176,6 +184,7 @@ sub remove_debug_files
 #
 # debug
 #
+# $level      The level of this message
 # $message    A string containing a debug message that may or may not be printed
 #
 # Prints the passed string if the global $debug is true
@@ -183,7 +192,11 @@ sub remove_debug_files
 # ---------------------------------------------------------------------------------------------
 sub debug
 {
-    my ( $self, $message ) = @_;
+    my ( $self, $level, $message ) = @_;
+
+    if ( $level > $self->config_( 'level' ) ) {
+        return;
+    }
 
     if ( $self->global_config_( 'debug' ) > 0 ) {
 

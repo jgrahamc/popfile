@@ -8,7 +8,7 @@
 <table width="100%" summary="">
     <tr>
         <td align="left">
-            <h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"></h2>
+            <h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"> (<TMPL_VAR NAME="History_Count">)</h2>
         </td>
         <td class="historyNavigatorTop">
 
@@ -21,7 +21,7 @@
 
 <TMPL_ELSE>
 
-<h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"></h2>
+<h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"> (<TMPL_VAR NAME="History_Count">)</h2>
 
 </TMPL_IF>
 
@@ -44,6 +44,8 @@
 
     <table class="historyTable" width="100%" summary="<TMPL_VAR NAME="Localize_History_MainTableSummary">">
         <tr valign="bottom">
+
+            <th></th>
 
             <TMPL_LOOP NAME="History_Loop_Headers">
 
@@ -81,9 +83,6 @@
             <th class="historyLabel" scope="col">
                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
             </th>
-            <th class="historyLabel" scope="col">
-                <input type="submit" class="deleteButton" name="deletemessage" value="<TMPL_VAR NAME="Localize_Remove">" />
-            </th>
         </tr>
 
         <TMPL_LOOP NAME="History_Loop_Messages">
@@ -99,17 +98,41 @@
         </TMPL_IF>
 
             <td>
-                <a name="<TMPL_VAR NAME="History_Mail_File">"></a>
-                <TMPL_VAR NAME="History_Index">
+                <input type="checkbox" id="remove_<TMPL_VAR NAME="History_I1">" class="checkbox" name="remove_<TMPL_VAR NAME="History_I1">"/>
             </td>
+            <TMPL_IF NAME="History_If_inserted">
             <td>
-                <a title="<TMPL_VAR NAME="History_From">"><TMPL_VAR NAME="History_Short_From"></a>
+                <a title="<TMPL_VAR NAME="History_Arrived" ESCAPE=HTML>"><TMPL_VAR NAME="History_Arrived" ESCAPE=HTML></a>
             </td>
+            </TMPL_IF>
+            <TMPL_IF NAME="History_If_from">
             <td>
-                <a class="messageLink" title="<TMPL_VAR NAME="History_Subject">" href="/view?view=<TMPL_VAR NAME="History_Mail_File"><TMPL_VAR NAME="History_Fields">">
-                    <TMPL_VAR NAME="History_Short_Subject">
+                <a title="<TMPL_VAR NAME="History_From" ESCAPE=HTML>"><TMPL_VAR NAME="History_Short_From" ESCAPE=HTML></a>
+            </td>
+            </TMPL_IF>
+            <TMPL_IF NAME="History_If_to">
+            <td>
+                <a title="<TMPL_VAR NAME="History_To" ESCAPE=HTML>"><TMPL_VAR NAME="History_Short_To" ESCAPE=HTML></a>
+            </td>
+            </TMPL_IF>
+            <TMPL_IF NAME="History_If_cc">
+            <td>
+                <a title="<TMPL_VAR NAME="History_Cc" ESCAPE=HTML>"><TMPL_VAR NAME="History_Short_Cc" ESCAPE=HTML></a>
+            </td>
+            </TMPL_IF>
+            <TMPL_IF NAME="History_If_subject">
+            <td>
+                <a class="messageLink" title="<TMPL_VAR NAME="History_Subject" ESCAPE=HTML>" href="/view?view=<TMPL_VAR NAME="History_Mail_File"><TMPL_VAR NAME="History_Fields">">
+                    <TMPL_VAR NAME="History_Short_Subject" ESCAPE=HTML>
                 </a>
             </td>
+            </TMPL_IF>
+            <TMPL_IF NAME="History_If_date">
+            <td>
+                <a title="<TMPL_VAR NAME="History_Date" ESCAPE=HTML>"><TMPL_VAR NAME="History_Date"></a>
+            </td>
+            </TMPL_IF>
+            <TMPL_IF NAME="History_If_bucket">
             <td>
 
                 <TMPL_IF NAME="History_If_Not_Pseudo">
@@ -129,6 +152,7 @@
                 </TMPL_IF>
 
             </td>
+            </TMPL_IF>
             <td>
 
                 <TMPL_IF NAME="History_If_Reclassified">
@@ -163,12 +187,6 @@
 
                 </TMPL_IF>
             </td>
-            <td>
-                <label class="removeLabel" for="remove_<TMPL_VAR NAME="History_I1">">
-                    <TMPL_VAR NAME="Localize_Remove">
-                </label>
-                <input type="checkbox" id="remove_<TMPL_VAR NAME="History_I1">" class="checkbox" name="remove_<TMPL_VAR NAME="History_I1">"/>
-            </td>
         </tr>
 
         <TMPL_IF NAME="History_If_Feedback">
@@ -187,12 +205,9 @@
         </TMPL_LOOP>
 
         <tr>
-            <td colspan="4">&nbsp;</td>
+            <td colspan="<TMPL_VAR NAME="History_Colspan">">&nbsp;</td>
             <td>
                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
-            </td>
-            <td>
-                <input type="submit" class="deleteButton" name="deletemessage" value="<TMPL_VAR NAME="Localize_Remove">" />
             </td>
         </tr>
     </table>
@@ -211,7 +226,7 @@
                     <TMPL_VAR NAME="Localize_History_Remove">:&nbsp;
                 </span>
                 <input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" />
-                <input type="submit" class="submit" name="clearpage" value="<TMPL_VAR NAME="Localize_History_RemovePage">" />
+                <input type="submit" class="submit" name="clearchecked" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" />
             </form>
         </td>
     </tr>

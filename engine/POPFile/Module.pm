@@ -2,7 +2,7 @@
 #
 # This is POPFile's top level Module object.
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -97,8 +97,6 @@ use IO::Select;
 # $c->foo() is a public method that modifies $c->{foo_} it always returns the current
 # value of the variable it is referencing and if passed a value sets that corresponding
 # variable
-#
-# Copyright (c) 2001-2003 John Graham-Cumming
 #
 # ---------------------------------------------------------------------------------------------
 
@@ -267,12 +265,15 @@ sub prefork
 # This is called when some module forks POPFile and is within the context of the child
 # process so that this module can close any duplicated file handles that are not needed.
 #
+# $writer            The writing end of a pipe that can be used to send up from
+#                    the child
+#
 # There is no return value from this method
 #
 # ---------------------------------------------------------------------------------------------
 sub forked
 {
-    my ( $self ) = @_;
+    my ( $self, $writer ) = @_;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -282,12 +283,16 @@ sub forked
 # This is called when some module has just forked POPFile.  It is called in the parent
 # process.
 #
+# $pid              The process ID of the new child process
+# $reader           The reading end of a pipe that can be used to read messages from
+#                   the child
+#
 # There is no return value from this method
 #
 # ---------------------------------------------------------------------------------------------
 sub postfork
 {
-    my ( $self ) = @_;
+    my ( $self, $pid, $reader ) = @_;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -311,6 +316,7 @@ sub deliver
 # Called by a subclass to send a message to the logger, the logged message will be prefixed
 # by the name of the module in use
 #
+# $level             The log level (see POPFile::Logger for details)
 # $message           The message to log
 #
 # There is no return value from this method
@@ -318,10 +324,10 @@ sub deliver
 # ---------------------------------------------------------------------------------------------
 sub log_
 {
-    my ( $self, $message ) = @_;
+    my ( $self, $level, $message ) = @_;
 
     my ( $package, $file, $line ) = caller;
-    $self->{logger__}->debug( $self->{name__} . ": $line: " . $message );
+    $self->{logger__}->debug( $level, $self->{name__} . ": $line: " . $message );
 }
 
 # ---------------------------------------------------------------------------------------------

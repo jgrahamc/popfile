@@ -4,7 +4,7 @@ package Test::MQReceiver;
 #
 # Test::MQReceiver.  Helper class for the TestMQ.tst suite.
 #
-# Copyright (c) 2003 John Graham-Cumming
+# Copyright (c) 2003-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

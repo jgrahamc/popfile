@@ -5,7 +5,7 @@ package UI::HTML;
 #
 # This package contains an HTML UI for POPFile
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -36,6 +36,7 @@ use IO::Socket;
 use IO::Select;
 use Digest::MD5 qw( md5_hex );
 use HTML::Template;
+use Date::Format;
 
 # A handy variable containing the value of an EOL for the network
 
@@ -59,6 +60,15 @@ my $three_bytes_euc_jp = '(?:\x8F[\xA1-\xFE][\xA1-\xFE])';
 # EUC-JP characters
 my $euc_jp = "(?:$ascii|$two_bytes_euc_jp|$three_bytes_euc_jp)";
 
+my %headers_table = ( 'from',    'From',            # PROFILE BLOCK START
+                      'to',      'To',
+                      'cc',      'Cc',
+                      'subject', 'Subject',
+                      'date',    'Date',
+                      'inserted', 'Arrived',
+                      'bucket',  'Classification'); # PROFILE BLOCK STOP
+
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -80,45 +90,6 @@ sub new
     # The available skins
 
     $self->{skins__}           = ();
-
-    # Used to keep the history information around so that we don't have to reglob every time we hit the
-    # history page
-    #
-    # The history hash contains information about ALL the files stored in the history
-    # folder (by default messages/) and is updated by the load_history_cache__ method
-    #
-    # Access to the history cache is formatted $self->{history__}{file}{subkey} where
-    # the file is the name of the file that is related to this history entry.
-    #
-    # The subkeys are
-    #
-    #   cull            Used internally by load_history_cache__ (see there for details)
-    #   from            The address the email was from
-    #   short_from      Version of from with max 40 characters
-    #   subject         The subject of the email
-    #   short_subject   Version of subject with max 40 characters
-    #   magnet          If a magnet was used to classify the mail contains the magnet string
-    #   bucket          The classification of the mail
-    #   reclassified    1 if the mail has already been reclassified
-    #
-    # The history_keys array stores the list of keys in the history hash and are a
-    # (perhaps strict) subset of the keys of $self->{history__} set by calls to
-    # sory_filter_history.  history_keys references the elements on history that are
-    # in the current filter, sort or search set.
-    #
-    # If new items have been added to the history the set need_resort__ to 1 to ensure
-    # that the next time a history page is being displayed the appropriate sort, search
-    # and filter is applied
-
-    $self->{history__}         = {};
-    $self->{history_keys__}    = ();
-    $self->{need_resort__}     = 0;
-
-    # Hash containing pre-cached messages loaded upon receipt of NEWFL message. Moved to
-    # $self->{history_keys__} on each invocation of the history page.
-    # Structure is identical to $self->{history_keys__}
-
-    $self->{history_pre_cache__} = {};
 
     # A hash containing a mapping between alphanumeric identifiers and appropriate strings used
     # for localization.  The string may contain sprintf patterns for use in creating grammatically
@@ -186,10 +157,6 @@ sub initialize
 
     $self->config_( 'skin', 'default' );
 
-    # Keep the history for two days
-
-    $self->config_( 'history_days', 2 );
-
     # The last time we checked for an update using the local epoch
 
     $self->config_( 'last_update_check', 0 );
@@ -213,21 +180,6 @@ sub initialize
 
     $self->config_( 'test_language', 0 );
 
-    # If 1, Messages are saved to an archive when they are removed or expired from the history cache
-
-    $self->config_( 'archive', 0, 1 );
-
-    # The directory where messages will be archived to, in sub-directories for each bucket
-
-    $self->config_( 'archive_dir', 'archive' );
-
-    # This is an advanced setting which will save archived files to a randomly numbered
-    # sub-directory, if set to greater than zero, otherwise messages will be saved in the
-    # bucket directory
-    # 0 <= directory name < archive_classes
-
-    $self->config_( 'archive_classes', 0 );
-
     # This setting defines what is displayed in the word matrix: 'freq' for frequencies,
     # 'prob' for probabilities, 'score' for logarithmic scores, if blank then the word
     # table is not shown
@@ -237,6 +189,12 @@ sub initialize
     # Controls whether to cache templates or not
 
     $self->config_( 'cache_templates', 0 );
+
+    # The default columns to show in the History page.  The order here is important, as is
+    # the presence of a + (show this column) or - (hide this column) in the value.  By default
+    # we show everything
+
+    $self->config_( 'columns', '-inserted,+from,+to,+cc,+subject,+date,+bucket' );
 
     # Load skins
 
@@ -256,9 +214,7 @@ sub initialize
 
     # Finally register for the messages that we need to receive
 
-    $self->mq_register_( 'NEWFL', $self );
     $self->mq_register_( 'UIREG', $self );
-    $self->mq_register_( 'TICKD', $self );
     $self->mq_register_( 'LOGIN', $self );
 
     $self->calculate_today();
@@ -284,9 +240,13 @@ sub start
         $self->config_( 'password', md5_hex( '__popfile__' . $self->config_( 'password' ) ) );
     }
 
+    # Get a query session with the History object
+
+    $self->{q__} = $self->{history__}->start_query();
+
     # Ensure that the messages subdirectory exists
 
-    if ( !$self->make_directory__( $self->get_user_path_( $self->global_config_( 'msgdir' ) ) ) ) {
+    if ( !$self->{history__}->make_directory__( $self->get_user_path_( $self->global_config_( 'msgdir' ) ) ) ) {
         print STDERR "Failed to create the messages subdirectory\n";
         return 0;
     }
@@ -298,13 +258,6 @@ sub start
 
     $self->load_language( 'English' );
     $self->load_language( $self->config_( 'language' ) ) if ( $self->config_( 'language' ) ne 'English' );
-
-    # We need to force a history cache reload, note that this needs
-    # to come after loading the language since we might need History_NoFrom
-    # or History_NoSubject in while loading the cache
-
-    $self->load_disk_cache__();
-    $self->load_history_cache__();
 
     # Set the classifier option wmformat__ according to our wordtable_format
     # option.
@@ -325,12 +278,11 @@ sub stop
 {
     my ( $self ) = @_;
 
-    $self->copy_pre_cache__();
-    $self->save_disk_cache__();
-
     if ( $self->{api_session__} ne '' ) {
         $self->{classifier__}->release_session_key( $self->{api_session__} );
     }
+
+    $self->{history__}->stop_query( $self->{q__} );
 
     $self->SUPER::stop();
 }
@@ -356,21 +308,6 @@ sub deliver
         $self->register_configuration_item__( $1, $2, $3, $parameter );
     }
 
-    # Get the new file in the history
-
-    if ( $type eq 'NEWFL' ) {
-        $self->log_( "Got NEWFL for $message" );
-        $self->new_history_file__( $message );
-    }
-
-    # If a day has passed then clean up the history
-
-    if ( $type eq 'TICKD' ) {
-        $self->remove_mail_files();
-    }
-
-    # We keep track of the last username to login to show on the UI
-
     if ( $type eq 'LOGIN' ) {
         $self->{last_login__} = $message;
     }
@@ -394,8 +331,6 @@ sub deliver
 sub url_handler__
 {
     my ( $self, $client, $url, $command, $content ) = @_;
-
-$self->log_( "url_handler__ $url" );
 
     # Check to see if we obtained the session key yet
     if ( $self->{api_session__} eq '' ) {
@@ -517,16 +452,6 @@ $self->log_( "url_handler__ $url" );
 
     if ( $url eq '/jump_to_message' )  {
         my $found = 0;
-        my $file = $self->{form_}{view};
-
-        $self->copy_pre_cache__();
-
-        foreach my $akey ( keys %{ $self->{history__} } ) {
-            if ($akey eq $file) {
-                $found = 1;
-                last;
-            }
-        }
 
         # Reset any filters
 
@@ -534,8 +459,12 @@ $self->log_( "url_handler__ $url" );
         $self->{form_}{search}    = '';
         $self->{form_}{setsearch} = 1;
 
-        if ( $found ) {
-            $self->http_redirect_( $client, "/view?session=$self->{session_key__}&view=$self->{form_}{view}" );
+        # TODO Make this work
+
+        my $slot = $self->{history__}->get_slot_from_hash( $self->{form_}{view} );
+
+        if ( $slot ne '' ) {
+            $self->http_redirect_( $client, "/view?session=$self->{session_key__}&view=$slot" );
         } else {
             $self->http_redirect_( $client, "/history" );
         }
@@ -773,6 +702,22 @@ sub configuration_page
     $templ->param( 'Configuration_TCP_Timeout_Updated' => sprintf( $self->{language__}{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) ) if ( defined($self->{form_}{timeout} ) );
     $templ->param( 'Configuration_TCP_Timeout' => $self->global_config_( 'timeout' ) );
 
+    if ( defined( $self->{form_}{update_fields} ) ) {
+        my @columns = split(',', $self->config_( 'columns' ));
+        my $new_columns = '';
+        foreach my $column (@columns) {
+            $column =~ s/^(\+|\-)//;
+            if ( defined($self->{form_}{$column})) {
+                $new_columns .= '+';
+	    } else {
+                $new_columns .= '-';
+            }
+            $new_columns .= $column;
+            $new_columns .= ',';
+	}
+        $self->config_( 'columns', $new_columns );
+    }
+
     my ( @general_skins, @small_skins, @tiny_skins );
     for my $i (0..$#{$self->{skins__}}) {
         my %row_data;
@@ -810,6 +755,20 @@ sub configuration_page
         push ( @language_loop, \%row_data );
     }
     $templ->param( 'Configuration_Loop_Languages' => \@language_loop );
+
+    my @columns = split(',', $self->config_( 'columns' ));
+    my @column_data;
+    foreach my $column (@columns) {
+        my %row;
+        $column =~ /(\+|\-)/;
+        my $selected = ($1 eq '+')?'checked':'';
+        $column =~ s/^.//;
+        $row{Configuration_Field_Name} = $column;
+        $row{Configuration_Localized_Field_Name} = $self->{language__}{$headers_table{$column}};
+        $row{Configuration_Field_Value} = $selected;
+        push ( @column_data, \%row );
+    }
+    $templ->param( 'Configuration_Loop_History_Columns' => \@column_data );
 
     # Insert all the items that are dynamically created from the modules that are loaded
 
@@ -1326,8 +1285,6 @@ sub bucket_page
     $templ->param( 'Bucket_Word_Count'   => $self->pretty_number( $bucket_count ) );
     $templ->param( 'Bucket_Unique_Count' => sprintf( $self->{language__}{SingleBucket_Unique}, $self->pretty_number( $self->{classifier__}->get_bucket_unique_count( $self->{api_session__}, $self->{form_}{showbucket} ) ) ) );
     $templ->param( 'Bucket_Total_Word_Count' => $self->pretty_number( $self->{classifier__}->get_word_count( $self->{api_session__} ) ) );
-    $templ->param( 'Bucket_Sub_Title' => sprintf( $self->{language__}{SingleBucket_WordTable}, $self->{form_}{showbucket} ) );
-    $templ->param( 'Bucket_Bucket_Name' => $self->{form_}{showbucket} );
 
     my $percent = '0%';
     if ( $self->{classifier__}->get_word_count( $self->{api_session__} ) > 0 )  {
@@ -1752,452 +1709,6 @@ sub compare_mf
 
 # ---------------------------------------------------------------------------------------------
 #
-# sort_filter_history
-#
-# Called to set up the history_keys array with the appropriate order set of keys from the
-# history based on the passed in filter, search and sort settings
-#
-# $filter       Name of bucket to filter on
-# $search       From/Subject line to search for
-# $sort         The field to sort on (from, subject, bucket)
-#
-# ---------------------------------------------------------------------------------------------
-sub sort_filter_history
-{
-    my ( $self, $filter, $search, $sort ) = @_;
-
-    # If the need_resort__ is set then we reindex the history indexes
-
-    if ( $self->{need_resort__} == 1 ) {
-        my $i = 0;
-
-        foreach my $key (sort compare_mf keys %{$self->{history__}}) {
-            $self->{history__}{$key}{index} = $i;
-            $i += 1;
-        }
-    }
-
-    # Place entries in the history_keys array based on three critera:
-    #
-    # 1. Whether the bucket they are classified in matches the $filter
-    # 2. Whether their from/subject matches the $search
-    # 3. In the order of $sort which can be from, subject or bucket
-
-    delete $self->{history_keys__};
-
-    if ( ( $filter ne '' ) || ( $search ne '' ) ) {
-        foreach my $file (sort compare_mf keys %{$self->{history__}}) {
-            if ( ( $filter eq '' ) ||                                                                            # PROFILE BLOCK START
-                 ( $self->{history__}{$file}{bucket} eq $filter ) ||
-                 ( ( $filter eq '__filter__magnet' ) && ( $self->{history__}{$file}{magnet} ne '' ) ) ||
-                 ( ( $filter eq '__filter__no__magnet' ) && ( $self->{history__}{$file}{magnet} eq '' ) ) ) {    # PROFILE BLOCK STOP
-                if ( ( $search eq '' ) ||                                                                        # PROFILE BLOCK START
-                   ( $self->{history__}{$file}{from}    =~ /\Q$search\E/i ) ||
-                   ( $self->{history__}{$file}{subject} =~ /\Q$search\E/i ) ) {                                  # PROFILE BLOCK STOP
-                           if ( defined( $self->{history_keys__} ) ) {
-                            @{$self->{history_keys__}} = (@{$self->{history_keys__}}, $file);
-                        } else {
-                            @{$self->{history_keys__}} = ($file);
-                        }
-                   }
-            }
-        }
-    } else {
-        @{$self->{history_keys__}} = keys %{$self->{history__}};
-    }
-
-    # If a sort is specified then use it to sort the history items by an a subkey
-    # (from, subject or bucket) otherwise use compare_mf to give the history back
-    # in the order the messages were received.  Note that when sorting on a alphanumeric
-    # field we ignore all punctuation characters so that "John and 'John and John
-    # all sort next to each other
-
-    # Ascending or Descending? Ascending is noted by /-field/
-
-    my $descending = 0;
-    if ($sort =~ s/^\-//) {
-        $descending = 1;
-    }
-
-    if ( ( $sort ne '' ) &&                                           # PROFILE BLOCK START
-
-         # If the filter had no messages, this will be undefined
-         # and there are no ways to sort nothing
-
-         defined @{$self->{history_keys__}} ) {                       # PROFILE BLOCK STOP
-
-        @{$self->{history_keys__}} = sort {
-                                            my ($a1,$b1) = ($self->{history__}{$a}{$sort},  # PROFILE BLOCK START
-                                              $self->{history__}{$b}{$sort});               # PROFILE BLOCK STOP
-                                              $a1 =~ s/&(l|g)t;//ig;
-                                              $b1 =~ s/&(l|g)t;//ig;
-                                              $a1 =~ s/[^A-Z0-9]//ig;
-                                              $b1 =~ s/[^A-Z0-9]//ig;
-                                              return ( $a1 cmp $b1 );
-                                          } @{$self->{history_keys__}};
-    } else {
-
-        # Here's a quick shortcut so that we don't have to iterate
-        # if there's no work for us to do
-
-        if ( $self->history_size() > 0 ) {
-            @{$self->{history_keys__}} = sort compare_mf @{$self->{history_keys__}};
-        }
-    }
-
-    @{$self->{history_keys__}} = reverse @{$self->{history_keys__}} if ($descending);
-
-    $self->{need_resort__} = 0;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# load_disk_cache__
-#
-# Preloads the history__ hash with information from the disk which will have been saved
-# the last time we shutdown
-#
-# ---------------------------------------------------------------------------------------------
-sub load_disk_cache__
-{
-    my ( $self ) = @_;
-
-    my $cache_file = $self->get_user_path_( $self->global_config_( 'msgdir' ) . 'history_cache' );
-    if ( !(-e $cache_file) ) {
-        return;
-    }
-
-    open CACHE, "<$cache_file";
-
-    my $first = <CACHE>;
-
-    if ( $first =~ /___HISTORY__ __ VERSION__ 1/ ) {
-        while ( my $line = <CACHE> ) {
-            last if ( !( $line =~ /__HISTORY__ __BOUNDARY__/ ) );
-
-            $line = <CACHE>;
-            $line =~ s/[\r\n]//g;
-            my $key = $line;
-            $line = <CACHE>;
-            $line =~ s/[\r\n]//g;
-            $self->{history__}{$key}{bucket} = $line;
-            $line = <CACHE>;
-            $line =~ s/[\r\n]//g;
-            $self->{history__}{$key}{reclassified} = $line;
-            $line = <CACHE>;
-            $line =~ s/[\r\n]//g;
-            $self->{history__}{$key}{magnet} = $line;
-            $line = <CACHE>;
-            $line =~ s/[\r\n]//g;
-            $self->{history__}{$key}{subject} = $line;
-            $line = <CACHE>;
-            $line =~ s/[\r\n]//g;
-            $self->{history__}{$key}{from} = $line;
-            $line = <CACHE>;
-            $line =~ s/[\r\n]//g;
-            $self->{history__}{$key}{short_subject} = $line;
-            $line = <CACHE>;
-            $line =~ s/[\r\n]//g;
-            $self->{history__}{$key}{short_from} = $line;
-            $self->{history__}{$key}{cull}       = 0;
-        }
-    }
-    close CACHE;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# save_disk_cache__
-#
-# Save the current of the history cache so that it can be reloaded next time on startup
-#
-# ---------------------------------------------------------------------------------------------
-sub save_disk_cache__
-{
-    my ( $self ) = @_;
-
-    if ( $self->{save_cache__} == 0 ) {
-        return;
-    }
-
-    open CACHE, '>' . $self->get_user_path_( $self->global_config_( 'msgdir' ) . 'history_cache' );
-    print CACHE "___HISTORY__ __ VERSION__ 1\n";
-    foreach my $key (keys %{$self->{history__}}) {
-        print CACHE "__HISTORY__ __BOUNDARY__\n";
-        print CACHE "$key\n";
-        print CACHE "$self->{history__}{$key}{bucket}\n";
-        print CACHE "$self->{history__}{$key}{reclassified}\n";
-        print CACHE "$self->{history__}{$key}{magnet}\n";
-        print CACHE "$self->{history__}{$key}{subject}\n";
-        print CACHE "$self->{history__}{$key}{from}\n";
-        print CACHE "$self->{history__}{$key}{short_subject}\n";
-        print CACHE "$self->{history__}{$key}{short_from}\n";
-    }
-    close CACHE;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# load_history_cache__
-#
-# Forces a reload of the history cache from disk.  This works by globbing the history
-# directory and then checking for new files that need to be loaded into the history cache
-# and culling any files that have been removed without telling us
-#
-# ---------------------------------------------------------------------------------------------
-sub load_history_cache__
-{
-    my ( $self ) = @_;
-
-    # We calculate the largest value for the first number in the MSG file
-    # names to verify at the end that the global download_count parameter
-    # has not been corrupted.
-
-    my $max = 0;
-
-    # First we mark every entry in the history cache with cull set to one, after we have
-    # looked through the messages directory for message we will delete any of the entries
-    # in the hash that have cull still set to 1.  cull gets set to 0 everytime we see an
-    # existing history cache entry that is still on the disk, or when we create a new
-    # entry.  Strictly speaking this should not be necessary because when files are deleted
-    # their corresponding history entry is meant to be deleted, but since disk is not 100%
-    # reliable we do this check so that the history cache is in sync with the disk at all
-    # times
-
-    foreach my $key (keys %{$self->{history__}}) {
-        $self->{history__}{$key}{cull} = 1;
-    }
-
-    # Now get all the names of files from the appropriate history subdirectory and run
-    # through them looking for existing entries in the history which must be marked
-    # for non-culling and new entries that need to be added to the end
-
-    opendir MESSAGES, $self->get_user_path_( $self->global_config_( 'msgdir' ) );
-
-    my @history_files;
-
-    while ( my $entry = readdir MESSAGES ) {
-        if ( $entry =~ /(popfile(\d+)=\d+\.msg)$/ ) {
-            $entry = $1;
-
-            if ( $2 > $max ) {
-                $max = $2;
-            }
-
-            if ( defined( $self->{history__}{$entry} ) ) {
-                $self->{history__}{$entry}{cull} = 0;
-            } else {
-                push @history_files, ($entry);
-            }
-        }
-    }
-
-    closedir MESSAGES;
-
-    foreach my $i ( 0 .. $#history_files ) {
-        $self->new_history_file__( $history_files[$i] );
-    }
-
-    # Remove any entries from the history that have been removed from disk, see the big
-    # comment at the start of this function for more detail
-
-    my $index = 0;
-
-    foreach my $key (sort compare_mf keys %{$self->{history__}}) {
-        if ( $self->{history__}{$key}{cull} == 1 ) {
-            delete $self->{history__}{$key};
-        } else {
-            $self->{history__}{$key}{index} = $index;
-            $index += 1;
-        }
-    }
-
-    $self->{need_resort__}     = 0;
-    $self->sort_filter_history( '', '', '' );
-
-    if ( $max > $self->global_config_( 'download_count' ) ) {
-        $self->global_config_( 'download_count', $max+1 );
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# new_history_file__
-#
-# Adds a new file to the history cache
-#
-# $file                The name of the file added
-# $index               (optional) The history keys index
-#
-# ---------------------------------------------------------------------------------------------
-sub new_history_file__
-{
-    my ( $self, $file, $index ) = @_;
-
-    # Find the class information for this file using the history_read_class helper
-    # function, and then parse the MSG file for the From and Subject information
-
-    my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->{classifier__}->history_read_class( $file );
-    my $from    = '';
-    my $subject = '';
-    my $long_header = '';
-
-    $magnet       = '' if ( !defined( $magnet ) );
-    $reclassified = '' if ( !defined( $reclassified ) );
-
-    if ( open MAIL, '<'. $self->get_user_path_( $self->global_config_( 'msgdir' ) . $file ) ) {
-        while ( <MAIL> )  {
-            last if ( /^(\r\n|\r|\n)/ );
-
-            # Support long header that has more than 2 lines
-
-            if ( /^[\t ]+(=\?[\w-]+\?[BQ]\?.*\?=.*)/ ) {
-                if ( $long_header eq 'from' ) {
-                    $from .= $1;
-                    next;
-                }
-
-                if ( $long_header eq 'subject' ) {
-                    $subject .= $1;
-                    next;
-                }
-            } else {
-                if ( /^From: *(.*)/i ) {
-                    $long_header = 'from';
-                    $from = $1;
-                    next;
-                } else {
-                    if ( /^Subject: *(.*)/i ) {
-                        $long_header = 'subject';
-                        $subject = $1;
-                        next;
-                    }
-                }
-                $long_header = '';
-            }
-
-            last if ( ( $from ne '' ) && ( $subject ne '' ) );
-        }
-        close MAIL;
-    }
-
-    $from    = "<$self->{language__}{History_NoFrom}>"    if ( $from eq '' );
-    $subject = "<$self->{language__}{History_NoSubject}>" if ( !( $subject =~ /[^ \t\r\n]/ ) );
-
-    $from    =~ s/\"(.*)\"/$1/g;
-    $subject =~ s/\"(.*)\"/$1/g;
-
-    # TODO Interface violation here, need to clean up
-    # Pass language parameter to decode_string()
-
-    $from    = $self->{classifier__}->{parser__}->decode_string( $from, $self->config_( 'language' ) );
-    $subject = $self->{classifier__}->{parser__}->decode_string( $subject, $self->config_( 'language' ) );
-
-    my ( $short_from, $short_subject ) = ( $from, $subject );
-
-    if ( length($short_from)>40 )  {
-        $short_from =~ /(.{40})/;
-        $short_from = "$1...";
-    }
-
-    if ( length($short_subject)>40 )  {
-        $short_subject =~ s/=20/ /g;
-        $short_subject =~ /(.{40})/;
-        $short_subject = $1;
-
-        # Do not truncate at 39 if the last char is the first byte of DBCS char(pair of two bytes).
-        # Truncate it 1 byte shorter.
-        if ( $self->config_( 'language' ) =~ /^Korean|Nihongo$/ ) {
-            $short_subject =~ s/(([\x80-\xff].)*)[\x80-\xff]?$/$1/;
-            $short_subject .= "...";
-        } else {
-            $short_subject .= "...";
-        }
-    }
-
-    $from =~ s/&/&amp;/g;
-    $from =~ s/</&lt;/g;
-    $from =~ s/>/&gt;/g;
-    $from =~ s/"/&quot;/g;
-
-    $short_from =~ s/&/&amp;/g;
-    $short_from =~ s/</&lt;/g;
-    $short_from =~ s/>/&gt;/g;
-    $short_from =~ s/"/&quot;/g;
-
-    $subject =~ s/&/&amp;/g;
-    $subject =~ s/</&lt;/g;
-    $subject =~ s/>/&gt;/g;
-    $subject =~ s/"/&quot;/g;
-
-    $short_subject =~ s/&/&amp;/g;
-    $short_subject =~ s/</&lt;/g;
-    $short_subject =~ s/>/&gt;/g;
-    $short_subject =~ s/"/&quot;/g;
-
-    # If the index is known, stick it straight into the history else go into
-    # the precache for merging into history when the history is viewed next
-
-    my $cache = 'history__';
-    if ( !defined( $index ) ) {
-        $cache = 'history_pre_cache__';
-    }
-
-    $self->{$cache}{$file}{bucket}        = $bucket;
-    $self->{$cache}{$file}{reclassified}  = $reclassified;
-    $self->{$cache}{$file}{magnet}        = $magnet;
-    $self->{$cache}{$file}{subject}       = $subject;
-    $self->{$cache}{$file}{from}          = $from;
-    $self->{$cache}{$file}{short_subject} = $short_subject;
-    $self->{$cache}{$file}{short_from}    = $short_from;
-    $self->{$cache}{$file}{cull}          = 0;
-
-    if ( !defined( $index ) ) {
-        $index = 0;
-        $self->{need_resort__} = 1;
-    }
-
-    $self->{$cache}{$file}{index}         = $index;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# history_cache_empty
-#
-# Returns whether the cache is empty or not
-#
-# ---------------------------------------------------------------------------------------------
-sub history_cache_empty
-{
-    my ( $self ) = @_;
-
-    return ( $self->history_size() == 0 );
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# history_size
-#
-# Returns the size of the history cache, note that this is actually the size of the
-# history_keys array since that is used to access selected entries in the history cache
-# itself
-#
-# ---------------------------------------------------------------------------------------------
-sub history_size
-{
-    my ( $self ) = @_;
-
-    if ( defined( $self->{history_keys__} ) ) {
-        my @keys = @{$self->{history_keys__}};
-
-        return ($#keys + 1);
-    } else {
-        return 0;
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # set_history_navigator__
 #
 # Fix up the history-navigator-widget.thtml template
@@ -2226,10 +1737,10 @@ sub set_history_navigator__
     my $p = 1;
     my $dots = 0;
     my @nav_data;
-    while ( $i < $self->history_size() ) {
+    while ( $i < $self->{history__}->get_query_size( $self->{q__} ) ) {
         my %row_data;
         if ( ( $i == 0 ) ||
-             ( ( $i + $self->config_( 'page_size' ) ) >= $self->history_size() ) ||
+             ( ( $i + $self->config_( 'page_size' ) ) >= $self->{history__}->get_query_size( $self->{q__} ) ) ||
              ( ( ( $i - 2 * $self->config_( 'page_size' ) ) <= $start_message ) &&
                ( ( $i + 2 * $self->config_( 'page_size' ) ) >= $start_message ) ) ) {
             $row_data{History_Navigator_Page} = $p;
@@ -2255,7 +1766,7 @@ sub set_history_navigator__
     }
     $templ->param( 'History_Navigator_Loop' => \@nav_data );
 
-    if ( $start_message < ( $self->history_size() - $self->config_( 'page_size' ) ) )  {
+    if ( $start_message < ( $self->{history__}->get_query_size( $self->{q__} ) - $self->config_( 'page_size' ) ) )  {
         $templ->param( 'History_Navigator_If_Next' => 1 );
         $templ->param( 'History_Navigator_Next'    => $start_message + $self->config_( 'page_size' ) );
     }
@@ -2296,7 +1807,7 @@ sub set_magnet_navigator__
             $row_data{Magnet_Navigator_If_This_Page} = 0;
             $row_data{Magnet_Navigator_Start_Magnet} = $i;
         }
-        $row_data{Session_Key} = $self->{session_key__};
+
         $i += $self->config_( 'page_size' );
         push ( @page_loop, \%row_data );
     }
@@ -2361,7 +1872,7 @@ sub history_reclassify
             if ( !$reclassified ) {
                 push @{$work{$newbucket}}, $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file );
 
-                $self->log_( "Reclassifying $mail_file from $bucket to $newbucket" );
+                $self->log_( 1, "Reclassifying $mail_file from $bucket to $newbucket" );
 
                 if ( $bucket ne $newbucket ) {
                     my $count = $self->get_bucket_parameter__( $newbucket, 'count' );
@@ -2432,7 +1943,7 @@ sub history_undo
 
                 $self->{save_cache__} = 1;
 
-                $self->log_( "Undoing $mail_file from $bucket to $usedtobe" );
+                $self->log_( 1, "Undoing $mail_file from $bucket to $usedtobe" );
 
                 if ( $bucket ne $usedtobe ) {
                     my $count = $self->get_bucket_parameter__( $bucket, 'count' ) - 1;
@@ -2552,19 +2063,15 @@ sub history_page
     # Handle removal of one or more items from the history page, the remove_array form, if defined,
     # will contain all the indexes into history_keys that need to be deleted. If undefined, the remove
     # form element will contain the single index to be deleted. We pass each file that needs
-    # deleting into the history_delete_file helper
+    # deleting into the 
 
     if ( defined( $self->{form_}{deletemessage} ) ) {
 
-        # Remove the list of marked messages using the array of "remove" checkboxes, the fact
-        # that deletemessage is defined will later on cause a call to sort_filter_history
-        # that will reload the history_keys with the appropriate messages that now exist
-        # in the cache.  Note that there is no need to invalidate the history cache since
-        # we are in control of deleting messages
+        # Remove the list of marked messages using the array of "remove" checkboxes
 
         for my $i ( keys %{$self->{form_}} ) {
             if ( $i =~ /^remove_(\d+)$/ ) {
-                $self->history_delete_file( $self->{history_keys__}[$1 - 1], 0);
+                $self->{history__}->delete_slot( $1 );
             }
         }
     }
@@ -2573,42 +2080,26 @@ sub history_page
     # or clear all the files in the cache
 
     if ( defined( $self->{form_}{clearall} ) ) {
-        foreach my $i (0 .. $self->history_size()-1 ) {
-            $self->history_delete_file( $self->{history_keys__}[$i],   # PROFILE BLOCK START
-                                        $self->config_( 'archive' ) ); # PROFILE BLOCK STOP
+        foreach my $i (0 .. $self->{history__}->get_query_size( $self->{q__} )-1 ) {
+            # TODO
         }
     }
 
     if ( defined($self->{form_}{clearpage}) ) {
-        foreach my $i ( $self->{form_}{start_message} .. $self->{form_}{start_message} + $self->config_( 'page_size' ) - 1 ) {
-            if ( defined( $self->{history_keys__}[$i] ) ) {
-                $self->history_delete_file( $self->{history_keys__}[$i],   # PROFILE BLOCK START
-                                            $self->config_( 'archive' ) ); # PROFILE BLOCK STOP
-            }
-        }
+
+        # TODO
 
         # Check that the start_message now exists, if not then go back a page
 
-        while ( ( $self->{form_}{start_message} + $self->config_( 'page_size' ) ) >= $self->history_size() ) {
+        while ( ( $self->{form_}{start_message} + $self->config_( 'page_size' ) ) >= $self->{history__}->get_query_size( $self->{q__} ) ) {
             $self->{form_}{start_message} -= $self->config_( 'page_size' );
         }
     }
 
-    $self->copy_pre_cache__();
-
-    # If the history cache is invalid then we need to reload it and then if
-    # any of the sort, search or filter options have changed they must be
-    # applied.  The watch word here is to avoid doing work
-
-    $self->sort_filter_history( $self->{form_}{filter}, # PROFILE BLOCK START
-                                $self->{form_}{search},
-                                $self->{form_}{sort} ) if ( ( defined( $self->{form_}{setfilter}     ) ) ||
-                                                            ( defined( $self->{form_}{setsort}       ) ) ||
-                                                            ( defined( $self->{form_}{setsearch}     ) ) ||
-                                                            ( defined( $self->{form_}{deletemessage} ) ) ||
-                                                            ( defined( $self->{form_}{clearall}      ) ) ||
-                                                            ( defined( $self->{form_}{clearpage}     ) ) ||
-                                                            ( $self->{need_resort__} == 1 )            );      # PROFILE BLOCK STOP
+    $self->{history__}->set_query( $self->{q__},
+                                   $self->{form_}{filter},
+                                   $self->{form_}{search},
+                                   $self->{form_}{sort} );
 
     # Redirect somewhere safe if non-idempotent action has been taken
 
@@ -2624,7 +2115,7 @@ sub history_page
     $templ->param( 'History_Field_Sort'    => $self->{form_}{sort} );
     $templ->param( 'History_Field_Filter'  => $self->{form_}{filter} );
     $templ->param( 'History_Filtered'      => $filtered );
-    $templ->param( 'History_If_MultiPage'  => $self->config_( 'page_size' ) <= $self->history_size() );
+    $templ->param( 'History_If_MultiPage'  => $self->config_( 'page_size' ) <= $self->{history__}->get_query_size( $self->{q__} ) );
 
     my @buckets = $self->{classifier__}->get_buckets( $self->{api_session__} );
 
@@ -2654,8 +2145,10 @@ sub history_page
     $templ->param( 'History_Filter_No_Magnet' => ($self->{form_}{filter} eq '__filter__no__magnet')?'selected':'' );
     $templ->param( 'History_Filter_Unclassified' => ($self->{form_}{filter} eq 'unclassified')?'selected':'' );
 
-    if ( !$self->history_cache_empty() )  {
+    my $c = $self->{history__}->get_query_size( $self->{q__} );
+    if ( $c > 0 ) {
         $templ->param( 'History_If_Some_Messages' => 1 );
+        $templ->param( 'History_Count' => $self->pretty_number( $c ) );
 
         my $start_message = 0;
         $start_message = $self->{form_}{start_message} if ( ( defined($self->{form_}{start_message}) ) && ($self->{form_}{start_message} > 0 ) );
@@ -2663,22 +2156,22 @@ sub history_page
         $templ->param( 'History_Start_Message' => $start_message );
 
         my $stop_message  = $start_message + $self->config_( 'page_size' ) - 1;
-        $stop_message = $self->history_size() - 1 if ( $stop_message >= $self->history_size() );
+        $stop_message = $self->{history__}->get_query_size( $self->{q__} ) - 1 if ( $stop_message >= $self->{history__}->get_query_size( $self->{q__} ) );
 
         $self->set_history_navigator__( $templ, $start_message, $stop_message );
 
-        my %headers_table = ( '',        'ID',              # PROFILE BLOCK START
-                              'from',    'From',
-                              'subject', 'Subject',
-                              'bucket',  'Classification'); # PROFILE BLOCK STOP
+        # Work out which columns to show by splitting the columns parameter at commas
+        # keeping all the items that start with a +, and then strip the +
 
-
-        # It would be tempting to do keys %headers_table here but there is not guarantee that
-        # they will come back in the right order
-
+        my @columns = split( ',', $self->config_( 'columns' ) );
         my @header_data;
-        foreach my $header ('', 'from', 'subject', 'bucket') {
+        my $colspan = 1;
+        foreach my $header (@columns) {
             my %row_data;
+            $header =~ /^(.)/;
+            next if ( $1 eq '-' );
+            $colspan++;
+            $header =~ s/^.//;
             $row_data{History_Fields} = $self->print_form_fields_(1,1,('filter','session','search'));
             $row_data{History_Sort}   = ( $self->{form_}{sort} eq $header )?'-':'';
             $row_data{History_Header} = $header;
@@ -2695,28 +2188,44 @@ sub history_page
             push ( @header_data, \%row_data );
         }
         $templ->param( 'History_Loop_Headers' => \@header_data );
+        $templ->param( 'History_Colspan' => $colspan );
+
+        my @rows = $self->{history__}->get_query_rows( $self->{q__},
+                                                       $start_message+1,
+                                                       $stop_message - $start_message );
 
         my @history_data;
-        foreach my $i ($start_message..$stop_message) {
+        my $i = $start_message;
+        @columns = split( ',', $self->config_( 'columns' ) );
+        foreach my $row (@rows) {
             my %row_data;
-            my $mail_file = $row_data{History_Mail_File} = $self->{history_keys__}[$i];
-            $row_data{History_From}          = $self->{history__}{$mail_file}{from};
-            $row_data{History_Subject}       = $self->{history__}{$mail_file}{subject};
-            $row_data{History_Short_From}    = $self->{history__}{$mail_file}{short_from};
-            $row_data{History_Short_Subject} = $self->{history__}{$mail_file}{short_subject};
-            my $bucket = $row_data{History_Bucket} = $self->{history__}{$mail_file}{bucket};
+            my $mail_file = $row_data{History_Mail_File} = $$row[0];
+            foreach my $header (@columns) {
+                $header =~ /(.)(.+)/;
+                $row_data{"History_If_$2"} = ( $1 eq '+')?1:0;
+	    }
+            $row_data{History_Arrived}       = time2str( $self->{language__}{Locale_Date}, $$row[7] );
+            $row_data{History_From}          = $$row[1];
+            $row_data{History_To}            = $$row[2];
+            $row_data{History_Cc}            = $$row[3];
+            $row_data{History_Date}          = time2str( $self->{language__}{Locale_Date}, $$row[5] );
+            $row_data{History_Subject}       = $$row[4];
+            $row_data{History_Short_From}    = $self->shorten__( $$row[1] );
+            $row_data{History_Short_To}      = $self->shorten__( $$row[2] );
+            $row_data{History_Short_Cc}      = $self->shorten__( $$row[3] );
+            $row_data{History_Short_Subject} = $self->shorten__( $$row[4] );
+            my $bucket = $row_data{History_Bucket} = $$row[8];
             $row_data{History_Bucket_Color}  = $self->{classifier__}->get_bucket_parameter( $self->{api_session__},
                                                                           $bucket,
                                                                           'color' );
-            $row_data{History_If_Reclassified} = $self->{history__}{$mail_file}{reclassified};
-            $row_data{History_Index}         = $self->{history__}{$mail_file}{index} + 1;
-            $row_data{History_I}             = $i;
-            $row_data{History_I1}            = $i + 1;
+            $row_data{History_If_Reclassified} = 0;
+            $row_data{History_I}             = $$row[0];
+            $row_data{History_I1}            = $$row[0];
             $row_data{History_Fields}        = $self->print_form_fields_(0,1,('start_message','session','filter','search','sort' ) );
             $row_data{History_If_Not_Pseudo} = !$self->{classifier__}->is_pseudo_bucket( $self->{api_session__},
                                                                            $bucket );
-            $row_data{History_If_Magnetized} = ( $self->{history__}{$mail_file}{magnet} ne '' );
-            $row_data{History_Magnet}        = $self->{history__}{$mail_file}{magnet};
+            $row_data{History_If_Magnetized} = 0;
+            $row_data{History_Magnet}        = '';
             $row_data{History_Loop_Loop_Buckets} = \@bucket_data;
             if ( defined $self->{feedback}{$mail_file} ) {
                 $row_data{History_If_Feedback} = 1;
@@ -2724,9 +2233,6 @@ sub history_page
                 delete $self->{feedback}{$mail_file};
             }
             $row_data{Session_Key} = $self->{session_key__};
-            $row_data{Localize_Remove}     = $self->{language__}{Remove};
-            $row_data{Localize_Undo}       = $self->{language__}{Undo};
-            $row_data{Localize_History_MagnetUsed} = $self->{language__}{History_MagnetUsed};
 
             push ( @history_data, \%row_data );
         }
@@ -2734,6 +2240,38 @@ sub history_page
     }
 
     $self->http_ok( $client, $templ, 0 );
+}
+
+sub shorten__
+{
+    my ( $self, $string ) = @_;
+
+    if ( length($string)>30 )  {
+
+        my $test = $string;
+        $test =~ s/<.+>//;
+        $test =~ s/^[ \t]+//;
+        $test =~ s/[ \t]+$//;
+
+        if ( $test ne '' ) {
+            $string = $test;
+	} else {
+            $string =~ s/[<>]//;
+        }
+
+        $string =~ s/^[\t ]*\"(.+)\"[ \t]*$/$1/;
+        $string =~ s/^[ \t]+//;
+        $string =~ s/[ \t]+$//;
+
+        if ( length($string)>30) {
+            $string =~ /(.{30})/;
+            $string = "$1...";
+	}
+    }
+
+    $string =~ s/^[\t ]*\"(.+)\"[ \t]*$/$1/;
+
+    return $string;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2747,10 +2285,14 @@ sub view_page
 {
     my ( $self, $client, $templ ) = @_;
 
-    my $mail_file     = $self->{form_}{view};
+    my $mail_file     = $self->{history__}->get_slot_file( $self->{form_}{view} );
     my $start_message = $self->{form_}{start_message} || 0;
-    my $reclassified  = $self->{history__}{$mail_file}{reclassified};
-    my $bucket        = $self->{history__}{$mail_file}{bucket};
+
+    my ( $id, $from, $to, $cc, $subject, $date, $hash, $inserted, $bucket, $reclassified ) =
+        $self->{history__}->get_slot_fields( $self->{form_}{view} );
+
+    my $magnet = ''; # TODO
+
     my $color         = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket );
     my $page_size     = $self->config_( 'page_size' );
 
@@ -2766,22 +2308,12 @@ sub view_page
 
     my $index = -1;
 
-    foreach my $i ( 0 .. $self->history_size()-1 ) {
-        if ( $self->{history_keys__}[$i] eq $mail_file ) {
-            use integer;
-            $index         = $i;
-            $start_message = ($i / $page_size ) * $page_size;
-            $self->{form_}{start_message} = $start_message;
-            last;
-        }
-    }
-
     $templ->param( 'View_Fields'           => $self->print_form_fields_(0,1,('filter','session','search','sort')) );
     $templ->param( 'View_All_Fields'       => $self->print_form_fields_(1,1,('start_message','filter','session','search','sort')));
-    $templ->param( 'View_If_Previous'      => ( $index > 0 ) );
-    $templ->param( 'View_Previous'         => $self->{history_keys__}[ $index - 1 ] );
+    $templ->param( 'View_If_Previous'      => ( $index > 0 ) ); # TODO
+    $templ->param( 'View_Previous'         => 0 ); # TODO
     $templ->param( 'View_Previous_Message' => (( $index - 1 ) >= $start_message)?$start_message:($start_message - $page_size));
-    $templ->param( 'View_If_Next'          => ( $index < ( $self->history_size() - 1 ) ) );
+    $templ->param( 'View_If_Next'          => ( $index < ( $self->{history__}->get_query_size( $self->{q__} ) - 1 ) ) );
     $templ->param( 'View_Next'             => $self->{history_keys__}[ $index + 1 ] );
     $templ->param( 'View_Next_Message'     => (( $index + 1 ) < ( $start_message + $page_size ) )?$start_message:($start_message + $page_size));
 
@@ -2789,21 +2321,21 @@ sub view_page
     $templ->param( 'View_Field_Sort'       => $self->{form_}{sort}   );
     $templ->param( 'View_Field_Filter'     => $self->{form_}{filter} );
 
-    $templ->param( 'View_From'             => $self->{history__}{$mail_file}{from}    );
-    $templ->param( 'View_Subject'          => $self->{history__}{$mail_file}{subject} );
-    $templ->param( 'View_Bucket'           => $self->{history__}{$mail_file}{bucket}  );
+    $templ->param( 'View_From'             => $from );
+    $templ->param( 'View_Subject'          => $subject );
+    $templ->param( 'View_Bucket'           => $bucket );
     $templ->param( 'View_Bucket_Color'     => $color );
 
-    $templ->param( 'View_Index'            => $index );
-    $templ->param( 'View_This'             => $self->{history_keys__}[ $index ] );
-    $templ->param( 'View_This_Page'        => (( $index ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' )));
+    $templ->param( 'View_Index'            => $index ); # TODO
+    $templ->param( 'View_This'             => $index ); # TODO
+    $templ->param( 'View_This_Page'        => (( $index ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' ))); # TODO
 
     $templ->param( 'View_If_Reclassified'  => $reclassified );
     if ( $reclassified ) {
         $templ->param( 'View_Already' => sprintf( $self->{language__}{History_Already}, ($color || ''), ($bucket || '') ) );
     } else {
-        $templ->param( 'View_If_Magnetized' => ( $self->{history__}{$mail_file}{magnet} ne '' ) );
-        if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
+        $templ->param( 'View_If_Magnetized' => ( $magnet ne '' ) );
+        if ( $magnet eq '' ) {
             my @bucket_data;
             foreach my $abucket ($self->{classifier__}->get_buckets( $self->{api_session__} )) {
                 my %row_data;
@@ -2813,11 +2345,11 @@ sub view_page
 	    }
             $templ->param( 'View_Loop_Buckets' => \@bucket_data );
         } else {
-            $templ->param( 'View_Magnet' => $self->{history__}{$mail_file}{magnet} );
+            $templ->param( 'View_Magnet' => $magnet );
         }
     }
 
-    if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
+    if ( $magnet eq '' ) {
         my %matrix;
         my %idmap;
 
@@ -2828,12 +2360,12 @@ sub view_page
         # Build the scores by classifying the message, since get_html_colored_message has parsed the message
         # for us we do not need to parse it again and hence we pass in undef for the filename
 
-        my $current_class = $self->{classifier__}->classify( $self->{api_session__}, $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ), $templ, \%matrix, \%idmap );
+        my $current_class = $self->{classifier__}->classify( $self->{api_session__}, $mail_file, $templ, \%matrix, \%idmap );
 
         # Check whether the original classfication is still valid.
         # If not, add a note at the top of the page:
 
-        if ( $current_class ne $self->{history__}{$mail_file}{bucket} ) {
+        if ( $current_class ne $bucket ) {
             my $new_color = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $current_class );
             $templ->param( 'View_If_Class_Changed' => 1 );
             $templ->param( 'View_Class_Changed' => $current_class );
@@ -2845,7 +2377,7 @@ sub view_page
         $self->{classifier__}->wordscores( 0 );
 
         $templ->param( 'View_Message' => $self->{classifier__}->fast_get_html_colored_message(
-            $self->{api_session__}, $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ), \%matrix, \%idmap ) );
+            $self->{api_session__}, $mail_file, \%matrix, \%idmap ) );
 
         # We want to insert a link to change the output format at the start of the word
         # matrix.  The classifier puts a comment in the right place, which we can replace
@@ -2873,12 +2405,12 @@ sub view_page
             $templ->param( 'View_If_Format_Score' => 1 );
         }
     } else {
-        $self->{history__}{$mail_file}{magnet} =~ /(.+): ([^\r\n]+)/;
+        $magnet =~ /(.+): ([^\r\n]+)/;
         my $header = $1;
         my $text   = $2;
         my $body = '<tt>';
 
-        open MESSAGE, '<' . $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file );
+        open MESSAGE, '<' . $mail_file;
         my $line;
 
         while ($line = <MESSAGE>) {
@@ -2912,10 +2444,10 @@ sub view_page
         $templ->param( 'View_Message' => $body );
     }
 
-    if ($self->{history__}{$mail_file}{magnet} ne '') {
+    if ($magnet ne '') {
         $templ->param( 'View_Magnet_Reason' => sprintf( $self->{language__}{History_MagnetBecause},  # PROFILE BLOCK START
                           $color, $bucket,
-                          Classifier::MailParse::splitline($self->{history__}{$mail_file}{magnet},0)
+                          Classifier::MailParse::splitline($magnet,0)
             ) );                                                                                     # PROFILE BLOCK STOP
     }
 
@@ -3150,70 +2682,6 @@ sub load_language
 
 # ---------------------------------------------------------------------------------------------
 #
-# copy_pre_cache__
-#
-# Copies the history_pre_cache into the history
-#
-# ---------------------------------------------------------------------------------------------
-sub copy_pre_cache__
-{
-    my ($self) = @_;
-
-    # Copy the history pre-cache over AFTER any possibly index-based remove operations are complete
-
-    my $index = $self->history_size() + 1;
-    my $added = 0;
-    foreach my $file (sort compare_mf keys %{$self->{history_pre_cache__}} ) {
-        $self->{history__}{$file} = $self->{history_pre_cache__}{$file};
-        $self->{history__}{$file}{index} = $index;
-        $index += 1;
-        $added = 1;
-        delete $self->{history_pre_cache__}{$file};
-        $self->{save_cache__} = 1;
-    }
-
-    $self->{history_pre_cache__} = {};
-    $self->sort_filter_history( '', '', '' ) if ( $added );
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# remove_mail_files - Remove old popfile saved mail files
-#
-# Removes the popfile*.msg files that are older than a number of days configured as
-# history_days.
-#
-# ---------------------------------------------------------------------------------------------
-sub remove_mail_files
-{
-    my ( $self ) = @_;
-
-    opendir MESSAGES, $self->get_user_path_( $self->global_config_( 'msgdir' ) );
-
-    while ( my $mail_file = readdir MESSAGES ) {
-        if ( $mail_file =~ /popfile(\d+)=\d+\.msg$/ ) {
-            my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat( $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ) );
-
-            if ( $ctime < (time - $self->config_( 'history_days' ) * $seconds_per_day) )  {
-                $self->history_delete_file( $mail_file, $self->config_( 'archive' ) );
-                $self->{need_resort__} = 1;
-            }
-        }
-    }
-
-    closedir MESSAGES;
-
-    # Clean up old style msg/cls files
-
-    my @mail_files = glob( $self->get_user_path_( $self->global_config_( 'msgdir' ) . "popfile*_*.???" ) );
-
-    foreach my $mail_file (@mail_files) {
-        unlink($mail_file);
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # calculate_today - set the global $self->{today__} variable to the current day in seconds
 #
 # ---------------------------------------------------------------------------------------------
@@ -3222,92 +2690,6 @@ sub calculate_today
     my ( $self ) = @_;
 
     $self->{today__} = int( time / $seconds_per_day ) * $seconds_per_day;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# history_delete_file   - Handle the deletion of archived message files. Deletes .cls
-#                           files related to any .msg file.
-#
-# $mail_file    - The filename to delete with or without the directory prefix
-# $archive      - Boolean, whether or not to save the file as part of an archive
-#
-# ---------------------------------------------------------------------------------------------
-sub history_delete_file
-{
-    my ( $self, $mail_file, $archive ) = @_;
-
-    $mail_file =~ /(popfile(\d+)\=(\d+)\.msg)$/;
-    $mail_file = $1;
-    $self->log_( "delete: $mail_file" );
-
-    if ( $archive ) {
-        my $path = $self->get_user_path_( $self->config_( 'archive_dir' ) );
-
-        $self->make_directory__( $path );
-
-        my ($reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_read_class( $mail_file );
-
-        if ( ( $bucket ne 'unclassified' ) && ( $bucket ne 'unknown class' ) && ( $bucket ne 'unsure' ) ) {
-            $path .= "\/" . $bucket;
-            $self->make_directory__( $path );
-
-            if ( $self->config_( 'archive_classes' ) > 0) {
-                # archive to a random sub-directory of the bucket archive
-                my $subdirectory = int( rand( $self->config_( 'archive_classes' ) ) );
-                $path .= "\/" . $subdirectory;
-                $self->make_directory__( $path );
-            }
-
-            # Previous comment about this potentially being unsafe (may have placed messages in
-            # unusual places, or overwritten files) no longer applies
-            # Files are now placed in the user directory, in the archive_dir subdirectory
-
-            $self->history_copy_file( $self->get_user_path_( $self->global_config_( 'msgdir' ) . "$mail_file" ), $path, $mail_file );
-        }
-    }
-
-    # Before deleting the file make sure that the appropriate entry in the
-    # history cache is also remove
-
-    delete $self->{history__}{$mail_file};
-
-    # Now remove the files from the disk, remove both the msg file containing
-    # the mail message and its associated CLS file
-
-    unlink( $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ) );
-    $mail_file =~ s/msg$/cls/;
-    unlink( $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ) );
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# history_copy_file     - Copies a file to a specified location and filename
-#
-#   $from       - The source file. May be relative or absolute.
-#   $to_dir     - The destination directory. May be relative or absolute.
-#                   Will not be created if non-existent.
-#   $to_name    - The destination filename.
-#
-# ---------------------------------------------------------------------------------------------
-sub history_copy_file
-{
-    my ( $self, $from, $to_dir, $to_name ) = @_;
-
-    if ( open( FROM, "<$from") ) {
-        if ( open( TO, ">$to_dir\/$to_name") ) {
-            binmode FROM;
-            binmode TO;
-
-            while (<FROM>) {
-                print TO $_;
-            }
-
-            close TO;
-        }
-
-        close FROM;
-    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -3449,28 +2831,6 @@ sub ecount__
     }
 
     return $count;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# make_directory__
-#
-# Wrapper for mkdir that ensures that the path we are making doesn't end in / or \
-# (Done because your can't do mkdir 'foo/' on NextStep.
-#
-# $path        The directory to make
-#
-# Returns whatever mkdir returns
-#
-# ---------------------------------------------------------------------------------------------
-sub make_directory__
-{
-    my ( $self, $path ) = @_;
-
-    $path =~ s/[\\\/]$//;
-
-    return 1 if ( -d $path );
-    return mkdir( $path );
 }
 
 # ---------------------------------------------------------------------------------------------

@@ -9,7 +9,7 @@ package UI::XMLRPC;
 #
 #     Classifier/Bayes.get_buckets
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -303,6 +303,17 @@ sub classifier
     }
 
     return $self->{classifier__};
+}
+
+sub history
+{
+    my ( $self, $value ) = @_;
+
+    if ( defined( $value ) ) {
+        $self->{history__} = $value;
+    }
+
+    return $self->{history__};
 }
 
 1;

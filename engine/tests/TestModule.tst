@@ -76,12 +76,12 @@ test_assert_equal( $mq->{queue__}{DUMMY}[0][1], 'param' );
 use Test::MQReceiver;
 my $r = new Test::MQReceiver;
 $m->mq_register_( 'UIREG', $r );
-$m->register_configuration_item_( 'type', 'name', $c );
+$m->register_configuration_item_( 'type', 'name', 'templ', $c );
 $mq->service();
 my @messages = $r->read();
 test_assert_equal( $#messages, 0 );
 test_assert_equal( $messages[0][0], 'UIREG' );
-test_assert_equal( $messages[0][1], 'type:name' );
+test_assert_equal( $messages[0][1], 'type:name:templ' );
 test_assert_equal( $messages[0][2], $c );
 
 # Check that the logger function works
@@ -94,7 +94,7 @@ $l->initialize();
 $l->calculate_today__();
 $m->global_config_( 'debug', 1 );
 
-$m->log_( 'logmsg' );
+$m->log_( 0, 'logmsg' );
 
 test_assert( $l->{last_ten__}[0] =~ /logmsg/ );
 test_assert_equal( $l->last_ten(), $m->last_ten_log_entries() );

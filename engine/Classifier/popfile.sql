@@ -1,8 +1,9 @@
+-- POPFILE SCHEMA 1
 -- ---------------------------------------------------------------------------------------------
 --
 -- popfile.schema - POPFile's database schema
 --
--- Copyright (c) 2001-2003 John Graham-Cumming
+-- Copyright (c) 2003-2004 John Graham-Cumming
 --
 --   This file is part of POPFile
 --
@@ -24,52 +25,65 @@
 
 -- An ASCII ERD (you might like to find the 'users' table first and work from there)
 --
---      +---------------+       +-----------------+
---      | user_template |       | bucket_template |
---      +---------------+       +-----------------+
---      |      id       |---+   |       id        |---+
---      |     name      |   |   |      name       |   |
---      |     def       |   |   |       def       |   |
---      +---------------+   |   +-----------------+   |
---                          |                         |
---      +---------------+   |     +---------------+   |
---      |  user_params  |   |     | bucket_params |   |
---      +---------------+   |     +---------------+   |
---      |      id       |   |     |      id       |   |
---  +---|    userid     |   | +---|   bucketid    |   |
---  |   |     utid      |---+ |   |     btid      |---+
---  |   |     val       |     |   |     val       |
---  |   +---------------+     |   +---------------+
---  |                         |                      +----------+
---  |                         |                      |  matrix  |      +-------+
---  |                         |   +---------+        +----------+      | words |
---  |      +----------+       |   | buckets |        |    id    |      +-------+
---  |      |   users  |       |   +---------+        |  wordid  |------|  id   |
---  |      +----------+    /--+---|    id   |=====---| bucketid |      |  word |
---  +----==|    id    |---(-------| userid  |     \  |  times   |      +-------+
---      /  |   name   |   |       |  name   |     |  | lastseen |
---      |  | password |   |       | pseudo  |     |  +----------+
---      |  +----------+   |       +---------+     |
---      |                 |                       |
---      |                 |        +-----------+  |
---      |                 |        |  magnets  |  |
---      |   +----------+  |        +-----------+  |     +--------------+
---      |   | history  |  |     +--|    id     |  |     | magnet_types |
---      |   +----------+  |     |  | bucketid  |--+     +--------------+
---      |   |   id     |  |     |  |   mtid    |--------|      id      |
---      +---| userid   |  |     |  |   val     |        |     mtype    |
---          |  frm     |  |     |  |   seq     |        |    header    |
---          |   too    |  |     |  +-----------+        +--------------+
---          |   cc     |  |     |
---          | subject  |  |     |
---          | bucketid |--+     |
---          | usedtobe |--/     |
---          | magnetid |--------+
---          |  message |
---          +----------+
+--      +---------------+         +-----------------+
+--      | user_template |         | bucket_template |
+--      +---------------+         +-----------------+
+--      |      id       |-----+   |       id        |---+
+--      |     name      |     |   |      name       |   |
+--      |     def       |     |   |       def       |   |
+--      +---------------+     |   +-----------------+   |
+--                            |                         |
+--      +---------------+     |     +---------------+   |
+--      |  user_params  |     |     | bucket_params |   |
+--      +---------------+     |     +---------------+   |
+--      |      id       |     |     |      id       |   |
+--  +---|    userid     |     | +---|   bucketid    |   |
+--  |   |     utid      |-----+ |   |     btid      |---+
+--  |   |     val       |       |   |     val       |
+--  |   +---------------+       |   +---------------+
+--  |                           |                      +----------+
+--  |                           |                      |  matrix  |      +-------+
+--  |                           |   +---------+        +----------+      | words |
+--  |      +----------+         |   | buckets |        |    id    |      +-------+
+--  |      |   users  |         |   +---------+        |  wordid  |------|  id   |
+--  |      +----------+      /--+---|    id   |=====---| bucketid |      |  word |
+--  +----==|    id    |-----(-------| userid  |     \  |  times   |      +-------+
+--      /  |   name   |     |       |  name   |     |  | lastseen |
+--      |  | password |     |       | pseudo  |     |  +----------+
+--      |  +----------+     |       +---------+     |
+--      |                   |                       |
+--      |                   |        +-----------+  |
+--      |                   |        |  magnets  |  |
+--      |   +------------+  |        +-----------+  |     +--------------+
+--      |   |   history  |  |     +--|    id     |  |     | magnet_types |
+--      |   +------------+  |     |  | bucketid  |--+     +--------------+
+--      |   |     id     |  |     |  |   mtid    |--------|      id      |
+--      +---|   userid   |  |     |  |   val     |        |     mtype    |
+--          |   hdr_from |  |     |  |   seq     |        |    header    |
+--          |   hdr_to   |  |     |  +-----------+        +--------------+
+--          |   hdr_cc   |  |     |
+--          | hdr_subject|  |     |
+--          |  bucketid  |--+     |
+--          |  usedtobe  |--/     |
+--          |  magnetid  |--------+
+--          |  hdr_date  |
+--          | inserted   |
+--          |    hash    |
+--          | committed  |
+--          +------------+
 --
 
 -- TABLE DEFINITIONS
+
+-- ---------------------------------------------------------------------------------------------
+--
+-- popfile - data about the database
+--
+-- ---------------------------------------------------------------------------------------------
+
+create table popfile ( id integer primary key,
+                       version integer         -- version number of this schema
+                     );
 
 -- ---------------------------------------------------------------------------------------------
 --
@@ -235,7 +249,29 @@ create table magnets( id integer primary key,    -- unique ID for this entry
                       mtid integer,              -- the magnet type
                       val varchar(255),          -- value for the magnet
                       comment varchar(255),      -- user defined comment
-                      seq int                    -- used to set the order of magnets
+                      seq integer                -- used to set the order of magnets
+                    );
+
+-- ---------------------------------------------------------------------------------------------
+--
+-- history - this table contains the items in the POPFile history that
+-- are managed by POPFile::History
+--
+-- ---------------------------------------------------------------------------------------------
+
+create table history( id integer primary key,    -- unique ID for this entry
+                      userid integer,            -- which user owns this
+                      committed integer,         -- 1 if this item has been committed
+                      hdr_from    varchar(255),  -- The From: header            
+                      hdr_to      varchar(255),  -- The To: header            
+                      hdr_cc      varchar(255),  -- The Cc: header            
+                      hdr_subject varchar(255),  -- The Subject: header
+                      hdr_date    date,          -- The Date: header
+                      hash        varchar(255),  -- MD5 message hash
+                      inserted    date,          -- When this was added
+                      bucketid integer,          -- Current classification
+                      usedtobe integer,          -- Previous classification
+                      magnetid integer           -- If classified with magnet
                     );
 
 -- MySQL SPECIFIC 
@@ -258,6 +294,7 @@ alter table user_template modify id int(11) auto_increment;
 alter table users modify id int(11) auto_increment;
 alter table words modify id int(11) auto_increment;
 alter table words modify word binary(255);
+alter table history modify id int(11) auto_increment;
 
 -- TRIGGERS
 
@@ -274,6 +311,7 @@ alter table words modify word binary(255);
 create trigger delete_bucket delete on buckets
              begin
                  delete from matrix where bucketid = old.id;
+                 delete from history where bucketid = old.id;
                  delete from magnets where bucketid = old.id;
                  delete from bucket_params where bucketid = old.id;
              end;
@@ -288,6 +326,7 @@ create trigger delete_bucket delete on buckets
 
 create trigger delete_user delete on users
              begin
+                 delete from history where userid = old.id;
                  delete from buckets where userid = old.id;
                  delete from user_params where userid = old.id;
              end;
@@ -327,6 +366,10 @@ create trigger delete_bucket_template delete on bucket_template
              end;
 
 -- Default data
+
+-- This is schema version 1
+
+insert into popfile ( version ) values ( 1 );
 
 -- There's always a user called 'admin'
 

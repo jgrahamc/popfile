@@ -63,14 +63,14 @@ my @last_ten = $l->last_ten();
 test_assert_equal( $#last_ten, 0 );
 test_assert_equal( $last_ten[0], 'log empty' );
 
-$l->debug( 'test1' );
+$l->debug( 0,  'test1' );
 
 @last_ten = $l->last_ten();
 
 test_assert_equal( $#last_ten, 0 );
 test_assert_regexp( $last_ten[0], 'test1' );
 
-$l->debug( 'test2' );
+$l->debug( 0,  'test2' );
 
 @last_ten = $l->last_ten();
 
@@ -78,16 +78,19 @@ test_assert_equal( $#last_ten, 1 );
 test_assert_regexp( $last_ten[0], 'test1' );
 test_assert_regexp( $last_ten[1], 'test2' );
 
-# test size limiting on last ten
-$l->debug( 'test3' );
-$l->debug( 'test4' );
-$l->debug( 'test5' );
-$l->debug( 'test6' );
-$l->debug( 'test7' );
-$l->debug( 'test8' );
-$l->debug( 'test9' );
-$l->debug( 'test10' );
-$l->debug( 'test11' );
+# test size limiting on last ten, note the test
+# of log level here as well
+$l->config_( 'level', 1 );
+$l->debug( 0,  'test3' );
+$l->debug( 0,  'test4' );
+$l->debug( 0,  'test5' );
+$l->debug( 0,  'test6' );
+$l->debug( 1,  'test7' );
+$l->debug( 2,  'fail'  );
+$l->debug( 0,  'test8' );
+$l->debug( 0,  'test9' );
+$l->debug( 0,  'test10' );
+$l->debug( 0,  'test11' );
 
 @last_ten = $l->last_ten();
 

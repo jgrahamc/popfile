@@ -9,7 +9,7 @@ use Digest::MD5;
 #
 # This module handles proxying the POP3 protocol for POPFile.
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -157,18 +157,15 @@ sub start
 # The worker method that is called when we get a good connection from a client
 #
 # $client         - an open stream to a POP3 client
-# $download_count - The unique download count for this session
-# $pipe           - The pipe to the parent process to send messages to
-# $ppipe          - 0 or the parent's end of the pipe
-# $pid            - 0 if this is a child process
 # $session        - API session key
 #
 # ---------------------------------------------------------------------------------------------
 sub child__
 {
-    my ( $self, $client, $download_count, $pipe, $ppipe, $pid, $session ) = @_;
+    my ( $self, $client, $session ) = @_;
 
-    # Hash of indexes of downloaded messages
+    # Hash of indexes of downloaded messages mapped to their
+    # slot IDs
 
     my %downloaded;
 
@@ -201,7 +198,7 @@ sub child__
 
         $command =~ s/(\015|\012)//g;
 
-        $self->log_( "Command: --$command--" );
+        $self->log_( 2, "Command: --$command--" );
 
         # The USER command is a special case because we modify the syntax of POP3 a little
         # to expect that the username being passed is actually of the form host:username where
@@ -222,9 +219,7 @@ sub child__
             if ( $1 ne '' )  {
                 my ( $host, $port, $user, $options ) = ($1, $3, $4, $6);
 
-                print $pipe "LOGIN:$user$eol";
-                flush $pipe;
-                $self->yield_( $ppipe, $pid );
+                $self->mq_post_( 'LOGIN', $user, '' );
 
                 my $ssl = defined( $options ) && ( $options =~ /ssl/i );
                 $port = 110 if ( !defined( $port ) );
@@ -236,13 +231,13 @@ sub child__
                         # We want to make sure the server sent a real APOP banner, containing <>'s
 
                         $self->{apop_banner__} = $1 if $self->{connect_banner__} =~ /(<[^>]+>)/;
-                        $self->log_( "banner=" . $self->{apop_banner__} ) if defined( $self->{apop_banner__} );
+                        $self->log_( 2, "banner=" . $self->{apop_banner__} ) if defined( $self->{apop_banner__} );
 
                         # any apop banner is ok
 
                         if ( defined($self->{apop_banner__})) {
                             $self->{use_apop__} = 1; #
-                            $self->log_( "auth APOP" );
+                            $self->log_( 2, "auth APOP" );
                             $self->{apop_user__} = $user;
 
                             # tell the client that username was accepted
@@ -265,7 +260,7 @@ sub child__
                         # Pass through the USER command with the actual user name for this server,
                         # and send the reply straight to the client
 
-                        $self->log_( "auth plaintext" );
+                        $self->log_( 2, "auth plaintext" );
                         $self->{use_apop__} = 0;         # signifies a non-apop connection
                         last if ($self->echo_response_( $mail, $client, 'USER ' . $user ) == 2 );
                     }
@@ -291,7 +286,7 @@ sub child__
 
                 $md5->add( $self->{apop_banner__}, $1 );
                 my $md5hex = $md5->hexdigest;
-                $self->log_( "digest='$md5hex'" );
+                $self->log_( 2, "digest='$md5hex'" );
 
                 my ($response, $ok) = $self->get_response_( $mail, $client, "APOP $self->{apop_user__} $md5hex", 0, 1 );
                 if($ok == 1  && $response =~ /$self->{good_response_}/) {
@@ -421,9 +416,9 @@ sub child__
 
                         # Classify without echoing to client, saving file for later RETR's
 
-                        my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, $download_count, $count, 0, '', 0 );
+                        my ( $class, $slot ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, 0, '', 0 );
 
-                        $downloaded{$count} = 1;
+                        $downloaded{$count} = $slot;
 
                         # Note that the 1 here indicates that echo_response_ does not send the response to the
                         # client.  The +OK has already been sent by the RETR
@@ -434,14 +429,7 @@ sub child__
 
                             # Classify with pre-defined class, without saving, echoing to client
 
-                            $self->{classifier__}->classify_and_modify( $session, $mail, $client, $download_count, $count, 1, $class, 1 );
-
-                            # Tell the parent that we just handled a mail
-
-                            print $pipe "CLASS:$class $session$eol";
-                            print $pipe "NEWFL:$history_file$eol";
-                            flush $pipe;
-                            $self->yield_( $ppipe, $pid );
+                            $self->{classifier__}->classify_and_modify( $session, $mail, $client, 1, $class, 1 );
                         }
                     }
                 } else {
@@ -506,18 +494,11 @@ sub child__
         if ( ( $command =~ /RETR (.*)/i ) || ( $command =~ /TOP (.*) 99999999/i ) )  {
             my $count = $1;
             my $class;
+            my $file;
 
-            # With a path
-
-            my $file = $self->{classifier__}->history_filename($download_count, $count, undef, 1);
-
-            # without a path
-
-            my $short_file = $self->{classifier__}->history_filename($download_count, $count, undef, 0);
-
-            #$self->log_( "Class file $file shortens to $short_file" );
-
-            if (defined($downloaded{$count}) && (open RETRFILE, "<$file") ) {
+            if ( defined($downloaded{$count}) &&
+                 ( $file = $self->{history__}->get_slot_file( $downloaded{$count} ) ) &&
+                 (open RETRFILE, "<$file") ) {
 
                 # act like a network stream
 
@@ -525,7 +506,7 @@ sub child__
 
                 # File has been fetched and classified already
 
-                $self->log_( "Printing message from cache" );
+                $self->log_( 1, "Printing message from cache" );
 
                 # Give the client an +OK:
 
@@ -533,25 +514,22 @@ sub child__
 
                 # Load the last classification
 
-                my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_read_class($short_file);
+                my ( $id, $from, $to, $cc, $subject, $date, $hash, $inserted, $bucket, $reclassified ) =
+                    $self->{history__}->get_slot_fields( $downloaded{$count} );
 
                 if ( $bucket ne 'unknown class' ) {
 
                     # echo file, inserting known classification, without saving
 
-                    ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, $download_count, $count, 1, $bucket );
+                    ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, 1, $bucket );
                     print $client ".$eol";
 
                 } else {
 
                     # If the class wasn't saved properly, classify from disk normally
 
-                    ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, $download_count, $count, 1, '' );
+                    ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, 1, '' );
                     print $client ".$eol";
-
-                    print $pipe "CLASS:$class $session$eol";
-                    flush $pipe;
-                    $self->yield_( $ppipe, $pid );
                 }
 
                 close RETRFILE;
@@ -566,20 +544,13 @@ sub child__
 
                 last if ( $response == 2 );
                 if ( $response == 0 ) {
-                    my $history_file;
-                    ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, $download_count, $count, 0, '' );
-
-                    # Tell the parent that we just handled a mail
-
-                    print $pipe "NEWFL:$history_file$eol";
-                    print $pipe "CLASS:$class $session$eol";
-                    flush $pipe;
-                    $self->yield_( $ppipe, $pid );
+                    my $slot;
+                    ( $class, $slot ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, 0, '' );
 
                     # Note locally that file has been retrieved if the full thing has been saved
                     # to disk
 
-                    $downloaded{$count} = 1;
+                    $downloaded{$count} = $slot;
                 }
             }
 
@@ -618,16 +589,8 @@ sub child__
     }
 
     close $client;
-    print $pipe "CMPLT$eol";
-    flush $pipe;
-    $self->yield_( $ppipe, $pid );
-    close $pipe;
-
-    if ( $pid != 0 ) {
-        $self->log_( "POP3 forked child done" );
-    } else {
-        $self->log_( "POP3 proxy done" );
-    }
+    $self->mq_post_( 'CMPLT', $$, '' );
+    $self->log_( 0, "POP3 proxy done" );
 }
 
 # ---------------------------------------------------------------------------------------------

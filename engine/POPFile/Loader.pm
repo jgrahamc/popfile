@@ -11,7 +11,7 @@ package POPFile::Loader;
 # Subroutines not so marked are suitable for use by POPFile-based utilities to assist in loading
 # and executing modules
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -261,7 +261,7 @@ sub CORE_forker
     if ( $pid == 0 ) {
           foreach my $type (keys %{$self->{components__}}) {
                foreach my $name (keys %{$self->{components__}{$type}}) {
-                 $self->{components__}{$type}{$name}->forked();
+                 $self->{components__}{$type}{$name}->forked( $writer );
               }
         }
 
@@ -282,7 +282,7 @@ sub CORE_forker
 
     foreach my $type (keys %{$self->{components__}}) {
         foreach my $name (keys %{$self->{components__}{$type}}) {
-            $self->{components__}{$type}{$name}->postfork();
+            $self->{components__}{$type}{$name}->postfork( $pid, $reader );
         }
     }
 
@@ -501,14 +501,16 @@ sub CORE_link_components
         }
     }
 
-    # All interface components need access to the classifier
+    # All interface components need access to the classifier and history
 
     foreach my $name (keys %{$self->{components__}{interface}}) {
         $self->{components__}{interface}{$name}->classifier( $self->{components__}{classifier}{bayes} );
+        $self->{components__}{interface}{$name}->history( $self->{components__}{core}{history} );
     }
 
     foreach my $name (keys %{$self->{components__}{proxy}}) {
         $self->{components__}{proxy}{$name}->classifier( $self->{components__}{classifier}{bayes} );
+        $self->{components__}{proxy}{$name}->history(    $self->{components__}{core}{history} );
     }
 
     # TODO Clean this up so that the Loader doesn't have to know so much about
@@ -518,6 +520,11 @@ sub CORE_link_components
         $self->{components__}{core}{imap}->classifier( $self->{components__}{classifier}{bayes} );
     }
 
+    # Classifier::Bayes and POPFile::History are friends and are aware
+    # of own another
+
+    $self->{components__}{core}{history}->classifier( $self->{components__}{classifier}{bayes} );
+    $self->{components__}{classifier}{bayes}->history( $self->{components__}{core}{history} );
 
     $self->{components__}{classifier}{bayes}->{parser__}->mangle(
         $self->{components__}{classifier}{wordmangle} );
@@ -660,7 +667,7 @@ sub CORE_service
         if ( $self->{on_windows__} ) {
             foreach my $type (keys %{$self->{components__}}) {
                 foreach my $name (keys %{$self->{components__}{$type}}) {
-                        $self->{components__}{$type}{$name}->reaper();
+                    $self->{components__}{$type}{$name}->reaper();
                 }
             }
         }

@@ -38,7 +38,7 @@ Next                                    Next
 From                                    From
 Subject                                 Subject
 Cc                                      Cc 
-Classification                          Classification
+Classification                          Bucket
 Reclassify                              Reclassify
 Probability                             Probability
 Scores                                  Scores
@@ -68,6 +68,8 @@ Update                                  Update
 Refresh                                 Refresh
 FAQ                                     FAQ
 ID                                      ID
+Date                                    Date
+Arrived                                 Arrived
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this
@@ -75,6 +77,7 @@ ID                                      ID
 
 Locale_Thousands                       ,
 Locale_Decimal                         .
+Locale_Date                            %D %T
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Control Center
@@ -150,6 +153,7 @@ Configuration_SOCKSServer               SOCKS V proxy host
 Configuration_SOCKSPort                 SOCKS V proxy port
 Configuration_SOCKSPortUpdate           Updated SOCKS V proxy port to %s
 Configuration_SOCKSServerUpdate         Updated SOCKS V proxy host to %s
+Configuration_Fields                    History Columns
 
 Advanced_Error1                         '%s' already in the Ignored Words list
 Advanced_Error2                         Ignored words can only contain alphanumeric, ., _, -, or @ characters
@@ -182,6 +186,7 @@ History_ChangedTo                       Changed to <font color="%s">%s</font>
 History_Already                         Reclassified as <font color="%s">%s</font>
 History_RemoveAll                       Remove All
 History_RemovePage                      Remove Page
+History_RemoveChecked                   Remove Selected
 History_Remove                          To remove entries in the history click
 History_SearchMessage                   Search From/Subject
 History_NoMessages                      No messages

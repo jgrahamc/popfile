@@ -38,6 +38,7 @@ use POPFile::Configuration;
 use POPFile::MQ;
 use POPFile::Logger;
 use Classifier::WordMangle;
+use POPFile::History;
 
 # Load the test corpus
 my $c = new POPFile::Configuration;
@@ -45,6 +46,7 @@ my $mq = new POPFile::MQ;
 my $l = new POPFile::Logger;
 my $b = new Classifier::Bayes;
 my $w = new Classifier::WordMangle;
+my $h = new POPFile::History;
 
 $c->configuration( $c );
 $c->mq( $mq );
@@ -72,11 +74,21 @@ $b->configuration( $c );
 $b->mq( $mq );
 $b->logger( $l );
 
+$h->configuration( $c );
+$h->mq( $mq );
+$h->logger( $l );
+
+$b->history( $h );
+$h->classifier( $b );
+
+$h->initialize();
+
 $b->module_config_( 'html', 'language', 'English' );
 $b->{parser__}->mangle( $w );
 $b->initialize();
 
 test_assert( $b->start() );
+test_assert( $h->start() );
 
 # Test the unclassified_probability parameter
 
@@ -531,7 +543,7 @@ my @modify_tests = sort glob 'TestMailParse*.msg';
 
 for my $modify_file (@modify_tests) {
     if ( ( open MSG, "<$modify_file" ) && ( open OUTPUT, ">temp.out" ) ) {
-	    $b->classify_and_modify( $session, \*MSG, \*OUTPUT, 0, 0, 0, '' );
+	    my ( $class, $slot ) = $b->classify_and_modify( $session, \*MSG, \*OUTPUT, 0, '' );
 	    close MSG;
 		close OUTPUT;
 
@@ -546,14 +558,14 @@ for my $modify_file (@modify_tests) {
 			$output_line =~ s/[\r\n]//g;
 			$cam_line =~ s/[\r\n]//g;
                         if ( ( $output_line ne '.' ) || ( $cam_line ne '' ) ) {
+                            next if ( $output_line =~ /X-POPFile-Link/ );
    			    test_assert_equal( $output_line, $cam_line, $modify_file );
                         }
 		}
 
 		close CAM;
 		close OUTPUT;
-		unlink( 'popfile0=0.msg' );
-		unlink( 'popfile0=0.cls' );
+		$h->delete_slot( $slot );
 		unlink( 'temp.out' );
     }
 }
@@ -590,45 +602,6 @@ test_assert( $b->remove_stopword( $session, 'northat' ) );
 test_assert_equal( $#stopwords, 1 );
 test_assert_equal( $stopwords[0], 'andnotthat' );
 test_assert_equal( $stopwords[1], 'notthis' );
-
-# Test history class file reading and writing
-
-unlink( 'messages/*' );
-$b->global_config_( 'msgdir', '../tests/messages/' );
-
-$b->history_write_class( 'one.msg', 0, 'zeotrope' );
-my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'one.msg' );
-test_assert( !$reclassified );
-test_assert_equal( $bucket, 'zeotrope' );
-test_assert( !defined( $usedtobe ) );
-test_assert_equal( $magnet, '' );
-
-$b->history_write_class( 'one.msg', 1, 'zeotrope', 'spam' );
-my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'one.msg' );
-test_assert( $reclassified );
-test_assert_equal( $bucket, 'zeotrope' );
-test_assert_equal( $usedtobe, 'spam' );
-test_assert_equal( $magnet, '' );
-
-$b->history_write_class( 'one.msg', 0, 'zeotrope', undef, 'from: margit' );
-my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'one.msg' );
-test_assert( !$reclassified );
-test_assert_equal( $bucket, 'zeotrope' );
-test_assert( !defined( $usedtobe ) );
-test_assert_equal( $magnet, 'from: margit' );
-
-my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'two.msg' );
-test_assert( !defined( $reclassified ) );
-test_assert_equal( $bucket, 'unknown class' );
-test_assert( !defined( $usedtobe ) );
-test_assert( !defined( $magnet ) );
-
-`touch messages/two.cls`;
-my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'two.msg' );
-test_assert_equal( $reclassified, 0 );
-test_assert_equal( $bucket, 'unknown class' );
-test_assert( !defined( $usedtobe ) );
-test_assert_equal( $magnet, '' );
 
 # echo_to_dot_
 
@@ -880,21 +853,14 @@ $b->set_bucket_parameter( $session, 'spam', 'quarantine', 1 );
 
 open CLIENT, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-my ( $class, $nopath ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 0, 0, '', 1 );
+my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, '', 1 );
 close CLIENT;
 close MAIL;
 
 test_assert_equal( $class, 'spam' );
-test_assert( -e 'messages/popfile0=0.msg' );
-test_assert( -e 'messages/popfile0=0.cls' );
+test_assert( -e $h->get_slot_file( $slot ) );
 
-my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile0=0.msg' );
-test_assert( !$reclassified );
-test_assert_equal( $bucket, 'spam' );
-test_assert( !defined( $usedtobe ) );
-test_assert_equal( $magnet, '' );
-
-my @lookfor = ( '--popfile0=0.msg', 'Quarantined Message Detail', ' This is the body', '--popfile0=0.msg', '--popfile0=0.msg--', '.' );
+my @lookfor = ( "--$slot", 'Quarantined Message Detail', ' This is the body', "--$slot", "--$slot"."--", '.' );
 open CLIENT, "<temp.tmp";
 while ( $#lookfor > -1 ) {
     test_assert( !eof( CLIENT ) );
@@ -913,25 +879,23 @@ unlink( 'messages/popfile0=0.cls' );
 unlink( 'messages/popfile0=0.msg' );
 open CLIENT, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-my ( $class, $nopath ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 0, 1, '', 1 );
+my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 1, '', 1 );
 close CLIENT;
 close MAIL;
 
 test_assert_equal( $class, 'spam' );
-test_assert( !( -e 'messages/popfile0=0.msg' ) );
-test_assert( !( -e 'messages/popfile0=0.cls' ) );
+test_assert( !(-e $h->get_slot_file( $slot ) ) );
 
 # test no echo option
 
 open CLIENT, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-my ( $class, $nopath ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 0, 0, '', 0 );
+my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, '', 0 );
 close CLIENT;
 close MAIL;
 
 test_assert_equal( $class, 'spam' );
-test_assert( -e 'messages/popfile0=0.msg' );
-test_assert( -e 'messages/popfile0=0.cls' );
+test_assert( -e $h->get_slot_file( $slot ) );
 
 test_assert_equal( ( -s 'temp.tmp' ), 0 );
 
@@ -939,19 +903,12 @@ test_assert_equal( ( -s 'temp.tmp' ), 0 );
 
 open CLIENT, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-my ( $class, $nopath ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 0, 0, 'other', 1 );
+my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 'other', 1 );
 close CLIENT;
 close MAIL;
 
 test_assert_equal( $class, 'other' );
-test_assert( -e 'messages/popfile0=0.msg' );
-test_assert( -e 'messages/popfile0=0.cls' );
-
-my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile0=0.msg' );
-test_assert( !$reclassified );
-test_assert_equal( $bucket, 'other' );
-test_assert( !defined( $usedtobe ) );
-test_assert_equal( $magnet, '' );
+test_assert( -e $h->get_slot_file( $slot ) );
 
 # TODO test that stop writes the parameters to disk
 
@@ -996,7 +953,7 @@ if ( $have_text_kakasi ) {
 
   open CLIENT, ">temp.tmp";
   open MAIL, "<TestMailParse026.msg";
-  my ( $class, $nopath ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 0, 0, '', 1 );
+  my ( $class, $slot ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, '', 1 );
   close CLIENT;
   close MAIL;
 
@@ -1011,8 +968,7 @@ if ( $have_text_kakasi ) {
   }
   close MSG;
   close KKS;
-  unlink( 'messages/popfile0=0.msg' );
-  unlink( 'messages/popfile0=0.cls' );
+  $h->delete_slot( $slot );
   unlink( 'temp.out' );
 
   # add_message_to_bucket

@@ -10,7 +10,7 @@
 # popfilef.exe        Run POPFile in the foreground
 # popfileb.exe        Run POPFile in the background
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #

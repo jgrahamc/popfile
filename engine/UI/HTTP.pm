@@ -3,7 +3,7 @@
 # This package contains an HTTP server used as a base class for other
 # modules that service requests over HTTP (e.g. the UI)
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -362,6 +362,17 @@ sub http_file_
     } else {
         http_error_( $self, $client, 404 );
     }
+}
+
+sub history
+{
+    my ( $self, $value ) = @_;
+
+    if ( defined( $value ) ) {
+        $self->{history__} = $value;
+    }
+
+    return $self->{history__};
 }
 
 
