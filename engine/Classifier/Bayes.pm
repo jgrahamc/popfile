@@ -1134,9 +1134,9 @@ sub classify_and_modify
     if ( $classification ne 'unclassified' ) {
         if ( $self->global_config_( 'subject' ) ) {
             # Don't add the classification unless it is not present
-            if ( !( $msg_subject =~ /\Q$modification\E/ ) &&
+            if ( !( $msg_subject =~ /\Q$modification\E/ ) &&                        # PROFILE BLOCK START
                  ( $self->{parameters__}{$classification}{subject} == 1 ) &&
-                 ( $self->{parameters__}{$classification}{quarantine} == 0 ) )  {
+                 ( $self->{parameters__}{$classification}{quarantine} == 0 ) )  {   # PROFILE BLOCK STOP
                 $msg_subject = " $modification$msg_subject";
             }
         }
@@ -1146,8 +1146,8 @@ sub classify_and_modify
     $msg_head_before .= $eol;
 
     # Add the XTC header
-    $msg_head_after .= "X-Text-Classification: $classification$eol" if ( ( $self->global_config_( 'xtc' ) ) &&
-                                                                         ( $self->{parameters__}{$classification}{quarantine} == 0 ) );
+    $msg_head_after .= "X-Text-Classification: $classification$eol" if ( ( $self->global_config_( 'xtc' ) ) && # PROFILE BLOCK START
+                                                                         ( $self->{parameters__}{$classification}{quarantine} == 0 ) ); # PROFILE BLOCK STOP
 
     # Add the XPL header
     my $xpl = '';
@@ -1691,106 +1691,51 @@ sub remove_message_from_bucket
 # echo_to_dot_
 #
 # $mail     The stream (created with IO::) to send the message to (the remote mail server)
-# $client   The local mail client (created with IO::) that needs the response
-# $file     a file to print the response to
-# $before   Optional string to send to client before the dot is sent
+# $client   (optional) The local mail client (created with IO::) that needs the response
+# $file     (optional) A file to print the response to
+# $before   (optional) String to send to client before the dot is sent
 #
 # echo all information from the $mail server until a single line with a . is seen
-# Also echoes the line with . to $client but not to $file
+#
+# NOTE Also echoes the line with . to $client but not to $file
 #
 # ---------------------------------------------------------------------------------------------
 sub echo_to_dot_
 {
     my ( $self, $mail, $client, $file, $before ) = @_;
 
-    # These if statements are repetitive to keep the inner loops efficient
+    open FILE, ">>$file" if ( defined( $file ) );
 
-    if ( defined($file) && defined($client) ) {
-        # echo to file and stream
+    while ( <$mail> ) {
 
-        open FILE, $file;
-        while ( <$mail> ) {
-            # Check for an abort
-            last if ( $self->{alive_} == 0 );
+        # Check for an abort
 
-            # The termination has to be a single line with exactly a dot on it and nothing
-            # else other than line termination characters.  This is vital so that we do
-            # not mistake a line beginning with . as the end of the block
+        last if ( $self->{alive_} == 0 );
 
-            if ( /^\.(\r\n|\r|\n)$/ ) {
-                if ( $before ne '' ) {
-                    print $client $before;
-                    print FILE    $before;
-                }
+        # The termination has to be a single line with exactly a dot on it and nothing
+        # else other than line termination characters.  This is vital so that we do
+        # not mistake a line beginning with . as the end of the block
 
-                print $client $_;
-
-                last;
+        if ( /^\.(\r\n|\r|\n)$/ ) {
+            if ( defined( $before ) && ( $before ne '' ) ) {
+                print $client $before if ( defined( $client ) );
+                print FILE    $before if ( defined( $file ) );
             }
 
-            print $client $_;
-            print FILE    $_;
+            # Note that there is no print FILE here.  This is correct because we
+            # to no want the network terminator . to appear in the file version
+            # of any message
 
+            print $client $_ if ( defined( $client ) );
+            last;
         }
-        close FILE;
-    } elsif (defined($client)) {
-        # Echo only to stream
 
-        while ( <$mail> ) {
-            # Check for an abort
-            last if ( $self->{alive_} == 0 );
+        print $client $_ if ( defined( $client ) );
+        print FILE    $_ if ( defined( $file ) );
 
-            # The termination has to be a single line with exactly a dot on it and nothing
-            # else other than line termination characters.  This is vital so that we do
-            # not mistake a line beginning with . as the end of the block
-
-            if ( /^\.(\r\n|\r|\n)$/ ) {
-                if ( $before ne '' ) {
-                    print $client $before;
-                }
-
-                print $client $_;
-
-                last;
-            }
-
-            print $client $_;
-        }
-    } elsif (defined($file)) {
-        # Echo only to file
-
-        open FILE, $file;
-        while ( <$mail> ) {
-            # Check for an abort
-            last if ( $self->{alive_} == 0 );
-
-            # The termination has to be a single line with exactly a dot on it and nothing
-            # else other than line termination characters.  This is vital so that we do
-            # not mistake a line beginning with . as the end of the block
-
-            if ( /^\.(\r\n|\r|\n)$/ ) {
-                if ( $before ne '' ) {
-                        print FILE $before;
-                }
-                last;
-            }
-
-            print FILE $_;
-        }
-        close FILE;
-    } else {
-        # consume without echoing
-
-        while ( <$mail> ) {
-            # Check for an abort
-            last if ( $self->{alive_} == 0 );
-
-            # The termination has to be a single line with exactly a dot on it and nothing
-            # else other than line termination characters.  This is vital so that we do
-            # not mistake a line beginning with . as the end of the block
-            last if ( /^\.(\r\n|\r|\n)$/ );
-        }
     }
+
+    close FILE if ( defined( $file ) );
 }
 
 # ---------------------------------------------------------------------------------------------
