@@ -1,6 +1,5 @@
-   <tr>
-      
-      <td class="settingsPanel configBar" width="100%" align="center">
+  <tr>
+     <td>
         <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
 
         <div class="configBarOption">
@@ -75,7 +74,6 @@
 
             </TMPL_IF>
         </div>
-
         </form>
-       
-   </tr>
+     </td>
+  </tr>

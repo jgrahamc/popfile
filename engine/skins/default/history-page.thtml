@@ -307,18 +307,18 @@
 <TMPL_INCLUDE NAME="history-javascript.thtml">
 
 <TMPL_INCLUDE NAME="common-before-configuration.thtml">
-
 <TMPL_IF NAME="If_Show_Config_Bars">
      <TMPL_INCLUDE NAME="history-bar.thtml">
      <TMPL_INCLUDE NAME="configuration-bar.thtml">
 <TMPL_ELSE>
+   <tr><td>
      <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
         <div class="toggleConfigBar">
            <input type="submit" class="submit" name="show_configbar" value="<TMPL_VAR NAME="Localize_Configuration_Show_Bar">" />
            <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
         </div>
      </form>
-     
+   </td></tr>
 </TMPL_IF>
 <TMPL_INCLUDE NAME="common-after-configuration.thtml">
 <TMPL_INCLUDE NAME="common-bottom.thtml">

@@ -1,5 +1,5 @@
-    <tr>
-        <td class="settingsPanel configBar" width="100%" align="center">
+  <tr>
+     <td>
             <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                 <div class="configBarOption">
                     <label class="configurationLabel" for="configSkin">
@@ -70,5 +70,5 @@
                     <input type="submit" class="submit" name="hide_configbar" value="<TMPL_VAR NAME="Localize_Configuration_Hide_Bar">" />
                 </div>
             </form>
-        </td>
-    </tr>
+     </td>
+  </tr>
