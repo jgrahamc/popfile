@@ -40,7 +40,7 @@
                 </th>
             </tr>
             <tr>
-                <th class="bucketsLabel" scope="col">
+                <th class="bucketsLabel" scope="col" align="left">
                     <TMPL_VAR NAME="Localize_Bucket_BucketName">
                 </th>
                 <th width="1%">
@@ -93,7 +93,7 @@
         
             </TMPL_IF>
         
-                <td>
+                <td align="left">
         
                     <TMPL_IF NAME="Corpus_If_Bucket_Not_Pseudo">
         
@@ -137,25 +137,25 @@
                 </TMPL_IF>
         
                 <td align="center">
-                    <input type="checkbox" name="<TMPL_VAR NAME="Corpus_Bucket">_subject" <TMPL_IF NAME="Corpus_If_Subject">checked="checked"</TMPL_IF> />
+                    <input type="checkbox" class="checkbox" name="<TMPL_VAR NAME="Corpus_Bucket">_subject" <TMPL_IF NAME="Corpus_If_Subject">checked="checked"</TMPL_IF> />
                 </td>
                 <td width="1%">
                     &nbsp;
                 </td>
                 <td align="center">
-                    <input type="checkbox" name="<TMPL_VAR NAME="Corpus_Bucket">_xtc" <TMPL_IF NAME="Corpus_If_XTC">checked="checked"</TMPL_IF> />
+                    <input type="checkbox" class="checkbox" name="<TMPL_VAR NAME="Corpus_Bucket">_xtc" <TMPL_IF NAME="Corpus_If_XTC">checked="checked"</TMPL_IF> />
                 </td>
                 <td width="1%">
                     &nbsp;
                 </td>
                 <td align="center">
-                    <input type="checkbox" name="<TMPL_VAR NAME="Corpus_Bucket">_xpl" <TMPL_IF NAME="Corpus_If_XPL">checked="checked"</TMPL_IF> />
+                    <input type="checkbox" class="checkbox" name="<TMPL_VAR NAME="Corpus_Bucket">_xpl" <TMPL_IF NAME="Corpus_If_XPL">checked="checked"</TMPL_IF> />
                 </td>
                 <td width="1%">
                     &nbsp;
                 </td>
                 <td align="center">
-                    <input type="checkbox" name="<TMPL_VAR NAME="Corpus_Bucket">_quarantine" <TMPL_IF NAME="Corpus_If_Quarantine">checked="checked"</TMPL_IF> />
+                    <input type="checkbox" class="checkbox" name="<TMPL_VAR NAME="Corpus_Bucket">_quarantine" <TMPL_IF NAME="Corpus_If_Quarantine">checked="checked"</TMPL_IF> />
                 </td>
                 <td width="1%">
                     &nbsp;
@@ -163,7 +163,7 @@
         
                 <TMPL_IF NAME="Corpus_If_Bucket_Not_Pseudo">
         
-                <td>
+                <td align="left">
                     <select name="<TMPL_VAR NAME="Corpus_Bucket">_color">
         
                         <TMPL_LOOP NAME="Corpus_Loop_Loop_Colors">
