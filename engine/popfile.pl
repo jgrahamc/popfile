@@ -422,10 +422,6 @@ sub verify_have_list
                 add_mail_message( $1, $2 );
             }
         }
-        
-        # Sort the message_map using the sizes of the messages stored in @messages.  The sort is
-        # done in ascending order so that messages will be retrieved in ascending order by size
-        @message_map = sort {$messages[$a]{'size'} <=> $messages[$b]{'size'} } @message_map;
     }
     
     return 1;
