@@ -38,8 +38,8 @@
 
 ; INSTALLER SIZE: The LZMA compression method can be used to reduce the size of the 'setup.exe'
 ; file by around 25% compared to the default compression method but at the expense of greatly
-; increased compilation times (LZMA compilation takes almost two and a half times as long as it
-; does when the default compression method is used, based upon some informal tests).
+; increased compilation times (LZMA compilation (with the default LZMA settings) takes almost
+; two and a half times as long as it does when the default compression method is used).
 
 #--------------------------------------------------------------------------
 # POPFile Version Data:
@@ -188,6 +188,20 @@
   !define C_RELEASE_NOTES "..\engine\${C_README}"
 
   ;----------------------------------------------------------------------
+  ; Default location for POPFile User Data files (popfile.cfg and others)
+  ;
+  ; Detection of the 'current user' path for $APPDATA requires Internet Explorer 4 and above.
+  ; Detection of the 'all users' path for $APPDATA requires Internet Explorer 5 and above.
+  ;
+  ; NOTE: Windows 95 systems with Internet Explorer 4 installed also need to have
+  ;       Active Desktop installed, otherwise $APPDATA will not be available. For
+  ;       these cases, an alternative constant is used to define the default location.
+  ;----------------------------------------------------------------------
+
+  !define C_STD_DEFAULT_USERDATA  "$APPDATA\POPFile"
+  !define C_ALT_DEFAULT_USERDATA  "$WINDIR\Application Data\POPFile"
+
+  ;----------------------------------------------------------------------
   ; Root directory for the Perl files (used when building the installer)
   ;----------------------------------------------------------------------
 
@@ -285,11 +299,13 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
 
 #--------------------------------------------------------------------------
-# Use the "Modern User Interface" and standard NSIS Section flag utilities
+# Use the "Modern User Interface", the standard NSIS Section flag utilities
+# and the standard NSIS list of common Windows Messages
 #--------------------------------------------------------------------------
 
   !include "MUI.nsh"
   !include "Sections.nsh"
+  !include WinMessages.nsh
 
 #--------------------------------------------------------------------------
 # Version Information settings (for the installer EXE and uninstaller EXE)
@@ -309,15 +325,15 @@
 
   !ifndef ENGLISH_MODE
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build" "Multi-Language (with Kakasi) using new structure"
+      VIAddVersionKey "Build" "Multi-Language (with Kakasi) multi-user (phase 1)"
     !else
-      VIAddVersionKey "Build" "Multi-Language (without Kakasi) using new structure"
+      VIAddVersionKey "Build" "Multi-Language (without Kakasi) multi-user (phase 1)"
     !endif
   !else
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build" "English-Mode (with Kakasi) using new structure"
+      VIAddVersionKey "Build" "English-Mode (with Kakasi) multi-user (phase 1)"
     !else
-      VIAddVersionKey "Build" "English-Mode (without Kakasi) using new structure"
+      VIAddVersionKey "Build" "English-Mode (without Kakasi) multi-user (phase 1)"
     !endif
   !endif
 
@@ -444,8 +460,8 @@
   ; Remember user's language selection and offer this as the default when re-installing
   ; (uninstaller also uses this setting to determine which language is to be used)
 
-  !define MUI_LANGDLL_REGISTRY_ROOT "HKLM"
-  !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\${C_PFI_PRODUCT}"
+  !define MUI_LANGDLL_REGISTRY_ROOT "HKCU"
+  !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI"
   !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
 
 #--------------------------------------------------------------------------
@@ -456,9 +472,9 @@
   ; Installer Page - Welcome
   ;---------------------------------------------------
 
-  ; Use a "pre" function for the 'Welcome' page to ensure the installer window is visible
-  ; (if the "Release Notes" were displayed, another window could have been positioned
-  ; to obscure the installer window) and to check if the user had 'Admin' rights.
+  ; Use a "pre" function for the 'Welcome' page to get the user name and user rights
+  ; (For this build, if user has 'Admin' rights we perform a multi-user install,
+  ; otherwise we perform a single-user install)
 
   !define MUI_PAGE_CUSTOMFUNCTION_PRE "CheckUserRights"
 
@@ -497,12 +513,15 @@
   ; Installer Page - Select installation Directory
   ;---------------------------------------------------
 
-  ; Use a "leave" function to look for 'popfile.cfg' in the directory selected for this install
+  ; Use a "leave" function to look for an existing 'popfile.cfg' and decide upon a suitable
+  ; default value for the user data folder (this default value is used when displaying the
+  ; DIRECTORY page used to select 'User Data' location). For this build, we do not attempt to
+  ; relocate the user data when upgrading a POPFile installation.
 
   !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "CheckExistingConfig"
-  
+
   ; This page is used to select the folder for the POPFile PROGRAM files
-  
+
   !define MUI_PAGE_HEADER_TEXT                "$(PFI_LANG_ROOTDIR_TITLE)"
   !define MUI_DIRECTORYPAGE_TEXT_DESTINATION  "$(PFI_LANG_ROOTDIR_TEXT_DESTN)"
 
@@ -513,6 +532,7 @@
   ;---------------------------------------------------
 
   ; This page is used to select the folder for the POPFile USER DATA files
+  ; (each user is expected to have separate sets of data files)
 
   !define MUI_DIRECTORYPAGE_VARIABLE          "$G_USERDIR"
 
@@ -594,7 +614,8 @@
   !define MUI_FINISHPAGE_SHOWREADME_FUNCTION "ShowReadMe"
 
   ; Use a "leave" function for the 'Finish' page to remove any empty corpus folders left
-  ; behind after POPFile has converted any buckets created by the CBP package.
+  ; behind after POPFile has converted the buckets (if any) created by the CBP package.
+  ; (If the user doesn't run POPFile from the installer, these corpus folders will not be empty)
 
   !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "RemoveEmptyCBPCorpus"
 
@@ -681,7 +702,7 @@
 #--------------------------------------------------------------------------
 
   InstallDir "$PROGRAMFILES\${C_PFI_PRODUCT}"
-  InstallDirRegKey HKLM "SOFTWARE\${C_PFI_PRODUCT}" InstallLocation
+  InstallDirRegKey HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
 
 #--------------------------------------------------------------------------
 # Reserve the files required by the installer (to improve performance)
@@ -854,40 +875,52 @@ Section "POPFile" SecPOPFile
 
   SectionIn RO
 
-  !define L_CFG   $R9   ; file handle
+  !define L_CFG           $R9   ; file handle
+  !define L_POPFILE_ROOT  $R8   ; path to popfile.pl (used in environment variable)
+  !define L_POPFILE_USER  $R7   ; path to popfile.cfg (used in environment variable)
+  !define L_TEMP          $R6
+  !define L_RESERVED      $0    ; reserved for use in system.dll calls
 
   Push ${L_CFG}
+  Push ${L_POPFILE_ROOT}
+  Push ${L_POPFILE_USER}
+  Push ${L_TEMP}
+  Push ${L_RESERVED}
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_UPGRADE)"
   SetDetailsPrint listonly
 
-  ; Before POPFile 0.21.0, POPFile and the minimal Perl shared the same folder structure.
+  ; Before POPFile 0.21.0, POPFile and the minimal Perl shared the same folder structure
+  ; and there was only one set of user data (stored in the same folder as POPFile).
+
   ; Phase 1 of the multi-user support introduced in 0.21.0 requires some slight changes
   ; to the folder structure (to permit POPFile to be run from any folder after setting the
   ; POPFILE_ROOT and POPFILE_USER environment variables to the appropriate values).
 
   ; The folder arrangement used for this build:
   ;
-  ; (a) $INSTDIR              - main POPFile installation folder, holds popfile.pl and several
-  ;                             other *.pl scripts, popfile*.exe, wrapper*.exe plus three of the
-  ;                             minimal Perl files (perl.exe, wperl.exe and perl58.dll)
+  ; (a) $INSTDIR         -  main POPFile installation folder, holds popfile.pl and several
+  ;                         other *.pl scripts, popfile*.exe, popfile*.exe plus three of the
+  ;                         minimal Perl files (perl.exe, wperl.exe and perl58.dll)
   ;
-  ; (b) $INSTDIR\kakasi       - holds the Kakasi package used to process Japanese email
-  ;                             (only installed when Japanese support is required)
+  ; (b) $INSTDIR\kakasi  -  holds the Kakasi package used to process Japanese email
+  ;                         (only installed when Japanese support is required)
   ;
-  ; (c) $INSTDIR\lib          - minimal Perl installation (except for the three files stored
-  ;                             in the $INSTDIR folder to avoid runtime problems)
+  ; (c) $INSTDIR\lib     -  minimal Perl installation (except for the three files stored
+  ;                         in the $INSTDIR folder to avoid runtime problems)
   ;
-  ; (d) $INSTDIR\user         - default user data (for the user running the installer)
+  ; (d) $INSTDIR\*       -  the remaining POPFile folders (Classifier, languages, manual, etc)
   ;
-  ; (e) $INSTDIR\user\backup  - holds a backup copy of the old flat file or BerkeleyDB corpus
-  ;                             (only created if conversion of the default corpus was required)
+  ; For this build, each user is expected to have separate user data folders. The installer uses
+  ; the $G_USERDIR variable to hold the full path to this folder. By default each folder will
+  ; contain popfile.cfg, stopwords, stopwords.default, popfile.db, the messages folder, etc.
   ;
-  ; (f) $INSTDIR\*       - the remaining POPFile folders (Classifier, languages, manual, etc)
+  ; If an existing flat file or BerkeleyDB corpus has been converted to the new SQL database
+  ; format, a backup copy of the old corpus will be saved in the $G_USERDIR\backup folder.
   ;
-  ; NOTE: If we are upgrading a prior version  of POPFile, the user data is found in $INSTDIR
-  ; so we use $INSTDIR and $INSTDIR\backup instead of $INSTDIR\user and $INSTDIR\user\backup
+  ; If we are upgrading a prior version  of POPFile, the user data is found in $INSTDIR
+  ; so we set $G_USERDIR to $INSTDIR when suggesting a location for the user data.
 
   ; For increased flexibility, four global user variables are used in addition to $INSTDIR
   ; (this makes it easier to change the folder structure used by the installer).
@@ -895,17 +928,17 @@ Section "POPFile" SecPOPFile
   StrCpy $G_ROOTDIR   "$INSTDIR"
   StrCpy $G_MPBINDIR  "$INSTDIR"
   StrCpy $G_MPLIBDIR  "$INSTDIR\lib"
-  
+
   ; The fourth global variable ($G_USERDIR) is initialised by the 'CheckExistingConfig' function
   ; and may be changed by the user via the second DIRECTORY page.
 
   ; If we are installing over a previous version, ensure that version is not running
 
   Call MakeItSafe
-  
+
   ; Starting with 0.21.0, a new structure is used for the minimal Perl (to enable POPFile to
   ; be started from any folder, once POPFILE_ROOT and POPFILE_USER have been initialised)
-  
+
   Call MinPerlRestructure
 
   ; Retrieve the POP3 and GUI ports from the ini and get whether we install the
@@ -915,7 +948,104 @@ Section "POPFile" SecPOPFile
   !insertmacro MUI_INSTALLOPTIONS_READ $G_GUI     "ioA.ini" "Field 4" "State"
   !insertmacro MUI_INSTALLOPTIONS_READ $G_STARTUP "ioA.ini" "Field 5" "State"
 
-  WriteRegStr HKLM "SOFTWARE\${C_PFI_PRODUCT}" InstallLocation $INSTDIR
+  StrCmp $G_WINUSERTYPE "Admin" 0 user_specific
+  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "Installer Language" "$LANGUAGE"
+  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Major Version" "${C_POPFILE_MAJOR_VERSION}"
+  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Minor Version" "${C_POPFILE_MINOR_VERSION}"
+  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Revision" "${C_POPFILE_REVISION}"
+  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile RevStatus" "${C_POPFILE_RC}"
+  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath" "$INSTDIR"
+  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "setup.exe"
+  Push $INSTDIR
+  Call StrLower
+  Pop ${L_TEMP}
+  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "${L_TEMP}"
+  GetFullPathName /SHORT ${L_TEMP} $INSTDIR
+  Push ${L_TEMP}
+  Call StrLower
+  Pop ${L_TEMP}
+  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP}"
+
+user_specific:
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Major Version" "${C_POPFILE_MAJOR_VERSION}"
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Minor Version" "${C_POPFILE_MINOR_VERSION}"
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Revision" "${C_POPFILE_REVISION}"
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile RevStatus" "${C_POPFILE_RC}"
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath" "$INSTDIR"
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "setup.exe"
+  Push $INSTDIR
+  Call StrLower
+  Pop ${L_TEMP}
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "${L_TEMP}"
+  GetFullPathName /SHORT ${L_TEMP} "$INSTDIR"
+  Push ${L_TEMP}
+  Call StrLower
+  Pop ${L_TEMP}
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP}"
+
+  IfFileExists "$G_USERDIR\*.*" userdir_exists
+  ClearErrors
+  CreateDirectory $G_USERDIR
+  IfErrors 0 userdir_exists
+  MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "Error: Unable to create folder for user data\
+      $\r$\n$\r$\n\
+      ($G_USERDIR)"
+
+userdir_exists:
+  WriteINIStr "$G_USERDIR\install.ini" "Settings" "Owner" "$G_WINUSERNAME"
+  WriteINIStr "$G_USERDIR\install.ini" "Settings" "Class" "$G_WINUSERTYPE"
+  WriteINIStr "$G_USERDIR\install.ini" "Settings" "LastU" "setup.exe"
+
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath" "$G_USERDIR"
+  Push $G_USERDIR
+  Call StrLower
+  Pop ${L_TEMP}
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN" "${L_TEMP}"
+  GetFullPathName /SHORT ${L_TEMP} "$G_USERDIR"
+  Push ${L_TEMP}
+  Call StrLower
+  Pop ${L_TEMP}
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN" "${L_TEMP}"
+
+  ; Now ensure the POPFILE_ROOT and POPFILE_USER environment variables have the correct data
+
+  ; On non-Win9x systems we create entries in the registry to do this. On Win9x we could use
+  ; AUTOEXEC.BAT to do something similar but that would require a reboot to action the changes
+  ; required when one user logs off and another logs on, so we don't bother.
+
+  ; On all systems we update these two environment variables NOW (i.e for this process)
+  ; so we can start POPFile from the installer.
+
+  ReadRegStr ${L_POPFILE_ROOT} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN"
+  ReadEnvStr ${L_TEMP} "POPFILE_ROOT"
+  StrCmp ${L_POPFILE_ROOT} ${L_TEMP} root_set_ok
+  Call IsNT
+  Pop ${L_RESERVED}
+  StrCmp ${L_RESERVED} 0 set_root_now
+  WriteRegStr HKCU "Environment" "POPFILE_ROOT" ${L_POPFILE_ROOT}
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+
+set_root_now:
+  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_ROOT", "${L_POPFILE_ROOT}").r0'
+  StrCmp ${L_RESERVED} 0 0 root_set_ok
+  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (POPFILE_ROOT)"
+
+root_set_ok:
+  ReadRegStr ${L_POPFILE_USER} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN"
+  ReadEnvStr ${L_TEMP} "POPFILE_USER"
+  StrCmp ${L_POPFILE_USER} ${L_TEMP} install_files
+  Call IsNT
+  Pop ${L_RESERVED}
+  StrCmp ${L_RESERVED} 0 set_user_now
+  WriteRegStr HKCU "Environment" "POPFILE_USER" ${L_POPFILE_USER}
+  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
+
+set_user_now:
+  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("POPFILE_USER", "${L_POPFILE_USER}").r0'
+  StrCmp ${L_RESERVED} 0 0 install_files
+  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (POPFILE_USER)"
+
+install_files:
 
   ; Install the POPFile Core files
 
@@ -923,33 +1053,37 @@ Section "POPFile" SecPOPFile
   DetailPrint "$(PFI_LANG_INST_PROG_CORE)"
   SetDetailsPrint listonly
 
-  SetOutPath $INSTDIR
-
-  File "wrapper.exe"
-  File "wrapperf.exe"
-  File "wrapperb.exe"
-
   SetOutPath $G_ROOTDIR
+
+  Delete $G_ROOTDIR\wrapper.exe
+  Delete $G_ROOTDIR\wrapperf.exe
+  Delete $G_ROOTDIR\wrapperb.exe
 
   File "..\engine\license"
   File "${C_RELEASE_NOTES}"
   CopyFiles /SILENT /FILESONLY "$PLUGINSDIR\${C_README}.txt" "$G_ROOTDIR\${C_README}.txt"
 
-##  ; Unable to rebuild the popfile*.exe programs to work with current CVS code,
-##  ; so there is no point installing them at the moment.
+  File "..\engine\popfile.exe"
+  File "..\engine\popfilef.exe"
+  File "..\engine\popfileb.exe"
+  File "..\engine\popfileif.exe"
+  File "..\engine\popfileib.exe"
 
-##;  File "..\engine\popfile.exe"
-##;  File "..\engine\popfilef.exe"
-##;  File "..\engine\popfileb.exe"
-##;  File "..\engine\popfileif.exe"
-##;  File "..\engine\popfileib.exe"
-
+  File "runpopfile.exe"
   File "stop_pf.exe"
   File "sqlite.exe"
 
+  StrCmp $G_WINUSERTYPE "Admin" 0 create_shortcuts
+  File "adduser.exe"
+
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\stop_pf.exe" \
+      "" "$G_ROOTDIR\stop_pf.exe"
+
+create_shortcuts:
+
   ; Create a shortcut to make it easier to run the SQLite utility
   ; (should this shortcut be an option created only for advanced users ?)
-  
+
   ; 'CreateShortCut' uses '$OUTDIR' as the working directory for the shortcut
   ; ('SetOutPath' is one way to change the value of $OUTDIR)
 
@@ -957,15 +1091,6 @@ Section "POPFile" SecPOPFile
   CreateShortCut "$G_USERDIR\Run SQLite utility.lnk" \
                  "$G_ROOTDIR\sqlite.exe" "popfile.db"
 
-  ; Create default configuration data for use by the 'wrapper' utilities
-
-  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserName"       "$G_WINUSERNAME"
-  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserLock"       "Yes"
-  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "SearchResult"   "Installer"
-  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "PerlBinFolder"  "$G_MPBINDIR"
-  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "POPFileFolder"  "$G_ROOTDIR"
-  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserDataFolder" "$G_USERDIR"
-  
   SetOutPath $G_ROOTDIR
 
   File "..\engine\popfile.pl"
@@ -1059,8 +1184,15 @@ update_config:
   SetOutPath $G_ROOTDIR\manual\en
   File "..\engine\manual\en\*.html"
 
+  ; Default UI language
+
   SetOutPath $G_ROOTDIR\languages
   File "..\engine\languages\English.msg"
+
+  ; Default UI skin
+
+  SetOutPath $G_ROOTDIR\skins
+  File "..\engine\skins\SimplyBlue.css"
 
   ; Install the Minimal Perl files
 
@@ -1186,9 +1318,6 @@ update_config:
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.exp"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.lib"
 
-  SetOutPath $G_MPLIBDIR\String
-  File "${C_PERL_DIR}\site\lib\String\Interpolate.pm"
-
   SetOutPath $G_MPLIBDIR\DBD
   File "${C_PERL_DIR}\site\lib\DBD\SQLite.pm"
 
@@ -1211,7 +1340,7 @@ update_config:
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
   SetOutPath $INSTDIR
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
-                 "$INSTDIR\wrapper.exe"
+                 "$INSTDIR\runpopfile.exe"
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" \
                  "$INSTDIR\uninstall.exe"
 
@@ -1238,20 +1367,83 @@ update_config:
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
                  "$G_ROOTDIR\stop_pf.exe" "/showerrors $G_GUI"
 
-  StrCmp $G_STARTUP "1" 0 skip_autostart_set
-      SetOutPath $SMSTARTUP
-      SetOutPath $INSTDIR
-      CreateShortCut "$SMSTARTUP\Run POPFile.lnk" \
-                     "$INSTDIR\wrapper.exe"
-skip_autostart_set:
+  SetOutPath $SMSTARTUP
+  SetOutPath $INSTDIR
+  StrCmp $G_STARTUP "1" set_autostart_set
+  Delete "$SMSTARTUP\Run POPFile.lnk"
+  Goto end_autostart_set
+
+set_autostart_set:
+  CreateShortCut "$SMSTARTUP\Run POPFile.lnk" "$INSTDIR\runpopfile.exe" "/startup"
+
+end_autostart_set:
+
+  ; Only admins have full access rights to the 'all users' area. If the 'all users' folder
+  ; is not found, the 'current user' folder will be used
+
+  StrCmp $G_WINUSERTYPE "Admin" 0 remove_redundant_shortcuts
+  SetShellVarContext all
+  SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
+  SetOutPath $INSTDIR
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
+                 "$INSTDIR\runpopfile.exe"
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" \
+                 "$INSTDIR\uninstall.exe"
+
+  SetOutPath $G_ROOTDIR
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" \
+                 "$G_ROOTDIR\${C_README}.txt"
+
+  SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url" \
+              "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/"
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" \
+              "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" \
+              "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
+              "InternetShortcut" "URL" \
+              "http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137"
+
+  SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
+              "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
+
+  SetOutPath $G_ROOTDIR
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
+                 "$G_ROOTDIR\stop_pf.exe" "/showerrors $G_GUI"
+
+  StrCmp $G_STARTUP "1" 0 remove_redundant_shortcuts
+  SetOutPath $SMSTARTUP
+  SetOutPath $INSTDIR
+  CreateShortCut "$SMSTARTUP\Run POPFile.lnk" "$INSTDIR\runpopfile.exe" "/startup"
+
+remove_redundant_shortcuts:
 
   ; Remove redundant links (used by earlier versions of POPFile)
+
+  SetShellVarContext all
+
+  Delete "$SMSTARTUP\Run POPFile in background.lnk"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
+
+  SetShellVarContext current
 
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
 
   ; Create entry in the Control Panel's "Add/Remove Programs" list
 
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
+              "DisplayName" "${C_PFI_PRODUCT} ${C_PFI_VERSION}"
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
+              "UninstallString" "$INSTDIR\uninstall.exe"
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
+              "NoModify" "1"
+  WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
+              "NoRepair" "1"
+
+  StrCmp $G_WINUSERTYPE "Admin" 0 end_section
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
               "DisplayName" "${C_PFI_PRODUCT} ${C_PFI_VERSION}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
@@ -1261,13 +1453,22 @@ skip_autostart_set:
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
               "NoRepair" "1"
 
+end_section:
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
 
+  Pop ${L_RESERVED}
+  Pop ${L_TEMP}
+  Pop ${L_POPFILE_USER}
+  Pop ${L_POPFILE_ROOT}
   Pop ${L_CFG}
 
   !undef L_CFG
+  !undef L_POPFILE_ROOT
+  !undef L_POPFILE_USER
+  !undef L_TEMP
+  !undef L_RESERVED
 
 SectionEnd
 
@@ -1388,7 +1589,7 @@ flat_bucket:
   Call GetFileSize
   Pop ${L_TEMP}
   IntCmp ${L_TEMP} 3 valid_size 0 valid_size
-  
+
   ; Very early versions of POPFile used an empty 'table' file to represent an empty bucket
   ; so we replace these files with an updated flat file version of an empty bucket to avoid
   ; problems when this flat file corpus is converted to the new SQL database format
@@ -1397,7 +1598,7 @@ flat_bucket:
   FileWrite ${L_TEMP} "__CORPUS__ __VERSION__ 1$\r$\n"
   FileClose ${L_TEMP}
   StrCpy ${L_TEMP} 26
- 
+
 valid_size:
   IntOp ${L_CORPUS_SIZE} ${L_CORPUS_SIZE} + ${L_TEMP}
   WriteINIStr "$PLUGINSDIR\corpus.ini" "Bucket-${L_BUCKET_COUNT}" "File_Size" "${L_TEMP}"
@@ -1625,10 +1826,26 @@ SectionEnd
 
       Push ITAIJIDICTPATH
       Push $INSTDIR\kakasi\share\kakasi\itaijidict
+
+      StrCmp $G_WINUSERTYPE "Admin" all_users_1
       Call WriteEnvStr
+      Goto next_var
+
+    all_users_1:
+      Call WriteEnvStrNTAU
+
+    next_var:
       Push KANWADICTPATH
       Push $INSTDIR\kakasi\share\kakasi\kanwadict
+
+      StrCmp $G_WINUSERTYPE "Admin" all_users_2
       Call WriteEnvStr
+      Goto save_data
+
+    all_users_2:
+      Call WriteEnvStrNTAU
+
+    save_data:
 
       ; Save installation-specific data for use by the 'Corpus Conversion' utility
       ; if we are running on a Win9x system and require a reboot to install Kakasi properly.
@@ -2013,7 +2230,7 @@ FunctionEnd
 
 #--------------------------------------------------------------------------
 # Installer Function: CheckExistingConfig
-# (the "leave" function for the DIRECTORY selection page)
+# (the "leave" function for the POPFile Program DIRECTORY selection page)
 #
 # This function is used to extract the POP3 and UI ports from the 'popfile.cfg'
 # configuration file (if any) in the directory used for this installation.
@@ -2048,23 +2265,50 @@ Function CheckExistingConfig
   !define L_LANG_NEW  $R1     ; new style UI lang parameter
   !define L_LANG_OLD  $R0     ; old style UI lang parameter
 
+  ; Only one register pushed for now, in case we bail out via an Abort
+
+  Push ${L_CFG}
+
   ; Warn the user if we are about to upgrade an existing installation
   ; and allow user to select a different directory if they wish
-  
+
   ; This function initialises the $G_USERDIR global user variable for use elsewhere in installer
 
   ; All versions prior to 0.21.0 stored popfile.pl and popfile.cfg in the same folder
-  
+
   StrCpy $G_ROOTDIR $INSTDIR
   StrCpy $G_USERDIR $INSTDIR
 
   IfFileExists "$G_USERDIR\popfile.cfg" warning
-  
+
   ; Check if we are installing over a version which uses the new folder structure
 
   StrCpy $G_USERDIR "$INSTDIR\user"
   IfFileExists "$G_USERDIR\popfile.cfg" warning
-  
+
+  ;----------------------------------------------------------------------
+  ; Default location for POPFile User Data files (popfile.cfg and others)
+  ;
+  ; Windows 95 systems with Internet Explorer 4 installed also need to have
+  ; Active Desktop installed, otherwise $APPDATA will not be available.
+  ;----------------------------------------------------------------------
+
+  StrCmp $APPDATA "" 0 appdata_valid
+  StrCpy $G_USERDIR "${C_ALT_DEFAULT_USERDATA}\$G_WINUSERNAME"
+  Goto check_default_locn
+
+appdata_valid:
+  StrCpy $G_USERDIR "${C_STD_DEFAULT_USERDATA}"
+  Push $G_USERDIR
+  Push $G_WINUSERNAME
+  Call StrStr
+  Pop ${L_CFG}
+  StrCmp ${L_CFG} "" 0 check_default_locn
+  StrCpy $G_USERDIR "$G_USERDIR\$G_WINUSERNAME"
+
+check_default_locn:
+  IfFileExists "$G_USERDIR\popfile.cfg" warning
+
   ; We looked for 'popfile.cfg' first as we want to pick up the current settings (if any)
   ; now we use a Perl script as our last chance to detect a previous installation
 
@@ -2078,11 +2322,13 @@ warning:
       $INSTDIR\
       $\r$\n$\r$\n$\r$\n\
       $(PFI_LANG_DIRSELECT_MBWARN_2)" IDYES continue
+
+  ; We are returning to the DIRECTORY page, so there is only one register to restore
+
+  Pop ${L_CFG}
   Abort
 
 continue:
-
-  Push ${L_CFG}
   Push ${L_CLEANCFG}
   Push ${L_CMPRE}
   Push ${L_LNE}
@@ -2404,7 +2650,7 @@ GUI_is_in_list:
   ; If the StartUp folder contains a link to start POPFile automatically
   ; then offer to keep this facility in place.
 
-  IfFileExists "$SMSTARTUP\Run POPFile in background.lnk" 0 show_defaults
+  IfFileExists "$SMSTARTUP\Run POPFile.lnk" 0 show_defaults
     !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 5" "State" 1
 
 show_defaults:
@@ -3789,7 +4035,7 @@ display_list:
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
   GetDlgItem $G_DLGITEM $G_HWND 1200              ; Field 1 = IDENTITY label (above the box)
-  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  CreateFont $G_FONT "MS Shell Dlg" 8 700         ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
@@ -3820,7 +4066,7 @@ display_list_again:
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
   GetDlgItem $G_DLGITEM $G_HWND 1200              ; Field 1 = IDENTITY label (above the box)
-  CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
+  CreateFont $G_FONT "MS Shell Dlg" 8 700         ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
@@ -4666,7 +4912,7 @@ display_banner:
   Call SetConsoleMode
   SetOutPath $INSTDIR
   ClearErrors
-  Exec '"$INSTDIR\wrapper.exe"'
+  Exec '"$INSTDIR\runpopfile.exe"'
   IfErrors 0 continue
   Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
@@ -4779,10 +5025,6 @@ Function CheckRunStatus
 
   Push ${L_TEMP}
 
-  ; If POPFile is running in a console window, it might be obscuring the installer
-
-  BringToFront
-
   IfRebootFlag 0 no_reboot_reqd
 
   ; We have installed Kakasi on a Win9x system and must reboot before using POPFile
@@ -4822,6 +5064,11 @@ disable_UI_option:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "Flags" "DISABLED"
 
 selection_ok:
+
+  ; If POPFile is running in a console window, it might be obscuring the installer
+
+  BringToFront
+
   Pop ${L_TEMP}
 
   !undef L_TEMP
@@ -4835,7 +5082,7 @@ FunctionEnd
 
 Function RunUI
 
-  ExecShell "open" "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url"
+  ExecShell "open" "http://127.0.0.1:$G_GUI"
 
 FunctionEnd
 
@@ -4867,7 +5114,7 @@ Function RemoveEmptyCBPCorpus
 
   Push ${L_FOLDER_COUNT}
   Push ${L_FOLDER_PATH}
-  
+
   ; Now remove any empty corpus folders left behind after POPFile has converted the buckets
   ; (if any) created by the CBP package.
 
@@ -4912,73 +5159,22 @@ Function un.onInit
 
   !insertmacro MUI_UNGETLANGUAGE
 
-  ; Before POPFile 0.21.0, POPFile and the minimal Perl shared the same folder structure.
-  ; Phase 1 of the multi-user support introduced in 0.21.0 requires some slight changes
-  ; to the folder structure (to permit POPFile to be run from any folder after setting the
-  ; POPFILE_ROOT and POPFILE_USER environment variables to the appropriate values).
-
-  ; The folder arrangement used for this build:
-  ;
-  ; (a) $INSTDIR              - main POPFile installation folder, holds popfile.pl and several
-  ;                             other *.pl scripts, popfile*.exe, wrapper*.exe plus three of the
-  ;                             minimal Perl files (perl.exe, wperl.exe and perl58.dll)
-  ;
-  ; (b) $INSTDIR\kakasi       - holds the Kakasi package used to process Japanese email
-  ;                             (only installed when Japanese support is required)
-  ;
-  ; (c) $INSTDIR\lib          - minimal Perl installation (except for the three files stored
-  ;                             in the $INSTDIR folder to avoid runtime problems)
-  ;
-  ; (d) $INSTDIR\user         - default user data (for the user running the installer)
-  ;
-  ; (e) $INSTDIR\user\backup  - holds a backup copy of the old flat file or BerkeleyDB corpus
-  ;                             (only created if conversion of the default corpus was required)
-  ;
-  ; (f) $INSTDIR\*       - the remaining POPFile folders (Classifier, languages, manual, etc)
-  ;
-  ; NOTE: If we are upgrading a prior version  of POPFile, the user data is found in $INSTDIR
-  ; so we use $INSTDIR and $INSTDIR\backup instead of $INSTDIR\user and $INSTDIR\user\backup
-
-  ; For increased flexibility, four global user variables are used in addition to $INSTDIR
-  ; (this makes it easier to change the folder structure used by the installer).
-
   StrCpy $G_ROOTDIR   "$INSTDIR"
-  StrCpy $G_USERDIR   "$INSTDIR\user"
   StrCpy $G_MPBINDIR  "$INSTDIR"
   StrCpy $G_MPLIBDIR  "$INSTDIR\lib"
-  
+
+  ReadRegStr $G_USERDIR HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath"
+  StrCmp $G_USERDIR "" 0 got_user_path
+
+  StrCpy $G_USERDIR "$INSTDIR\user"
+
   ; If we are uninstalling an upgraded installation, the default user data may be in $INSTDIR
   ; instead of $INSTDIR\user
-  
-  IfFileExists "$G_USERDIR\popfile.cfg" exit
+
+  IfFileExists "$G_USERDIR\popfile.cfg" got_user_path
   StrCpy $G_USERDIR   "$INSTDIR"
 
-exit:
-FunctionEnd
-
-#--------------------------------------------------------------------------
-# Uninstaller Section
-#--------------------------------------------------------------------------
-
-Section "Uninstall"
-
-  !define L_CFG         $R9   ; used as file handle
-  !define L_EXE         $R8   ; full path of the EXE to be monitored
-  !define L_LNE         $R7   ; a line from popfile.cfg
-  !define L_OLDUI       $R6   ; holds old-style UI port (if previous POPFile is an old version)
-  !define L_TEMP        $R5
-  !define L_UNDOFILE    $R4   ; file holding original email client settings
-  !define L_UNDOSTATUS  $R3   ; email client restore flag ('success' or 'fail')
-
-  IfFileExists $G_ROOTDIR\popfile.pl skip_confirmation
-  IfFileExists $G_ROOTDIR\popfile.exe skip_confirmation
-    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
-        "$(PFI_LANG_UN_MBNOTFOUND_1) '$INSTDIR'.\
-        $\r$\n$\r$\n\
-        $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES skip_confirmation
-    Abort "$(PFI_LANG_UN_ABORT_1)"
-
-skip_confirmation:
+got_user_path:
 
   ; Email settings are stored on a 'per user' basis therefore we need to know which user is
   ; running the uninstaller so we can check if the email settings can be safely restored
@@ -5009,6 +5205,41 @@ get_usertype:
   StrCpy $G_WINUSERTYPE "Unknown"
 
 start_uninstall:
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section
+#--------------------------------------------------------------------------
+
+Section "Uninstall"
+
+  !define L_CFG         $R9   ; used as file handle
+  !define L_EXE         $R8   ; full path of the EXE to be monitored
+  !define L_LNE         $R7   ; a line from popfile.cfg
+  !define L_OLDUI       $R6   ; holds old-style UI port (if previous POPFile is an old version)
+  !define L_TEMP        $R5
+  !define L_UNDOFILE    $R4   ; file holding original email client settings
+  !define L_UNDOSTATUS  $R3   ; email client restore flag ('success' or 'fail')
+
+  ReadINIStr ${L_TEMP} "$G_USERDIR\install.ini" "Settings" "Owner"
+  StrCmp ${L_TEMP} "" look_for_popfile
+  StrCmp ${L_TEMP} $G_WINUSERNAME look_for_popfile
+  MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
+      "$(PFI_LANG_UN_MBDIFFUSER_1) ('${L_TEMP}') !\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES look_for_popfile
+  Abort "$(PFI_LANG_UN_ABORT_1)"
+
+look_for_popfile:
+  IfFileExists $G_ROOTDIR\popfile.pl skip_confirmation
+  IfFileExists $G_ROOTDIR\popfile.exe skip_confirmation
+    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
+        "$(PFI_LANG_UN_MBNOTFOUND_1) '$G_ROOTDIR'.\
+        $\r$\n$\r$\n\
+        $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES skip_confirmation
+    Abort "$(PFI_LANG_UN_ABORT_1)"
+
+skip_confirmation:
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROGRESS_1)"
   SetDetailsPrint listonly
@@ -5118,6 +5349,10 @@ remove_shortcuts:
   ; The 'Uninstall' shortcut is NOT deleted here - it may need to be retained if problems are
   ; found when attempting to restore any email client configuration settings
 
+  StrCmp $G_WINUSERTYPE "Admin" 0 menucleanup
+  SetShellVarContext all
+
+menucleanup:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Manual.url"
   RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
@@ -5135,6 +5370,8 @@ remove_shortcuts:
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
   Delete "$SMSTARTUP\Run POPFile.lnk"
 
+  SetShellVarContext current
+
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROGRESS_3)"
   SetDetailsPrint listonly
@@ -5144,14 +5381,16 @@ remove_shortcuts:
   Delete $INSTDIR\wrapperb.exe
   Delete $INSTDIR\wrapper.ini
 
-  Delete $G_ROOTDIR\popfile.pl
-  Delete $G_ROOTDIR\popfile.exe
-  Delete $G_ROOTDIR\*.pm
+  Delete $G_ROOTDIR\runpopfile.exe
+  Delete $G_ROOTDIR\adduser.exe
   Delete $G_ROOTDIR\sqlite.exe
 
   Delete $G_ROOTDIR\*.gif
   Delete $G_ROOTDIR\*.change
   Delete $G_ROOTDIR\*.change.txt
+
+  Delete $G_ROOTDIR\popfile.pl
+  Delete $G_ROOTDIR\*.pm
 
   Delete $G_ROOTDIR\bayes.pl
   Delete $G_ROOTDIR\insert.pl
@@ -5309,7 +5548,7 @@ end_eudora_restore:
   RMDir $G_ROOTDIR\languages
 
   ; Win95 generates an error message if 'RMDir /r' is used on a non-existent directory
-  
+
   IfFileExists "$G_USERDIR\corpus\*.*" 0 skip_nonsql_corpus
   RMDir /r $G_USERDIR\corpus
 
@@ -5324,9 +5563,28 @@ skip_messages:
   Delete $G_USERDIR\stopwords
   Delete $G_USERDIR\stopwords.bak
   Delete $G_USERDIR\stopwords.default
-  
+
   RMDir $G_USERDIR
 
+  IfFileExists $G_USERDIR\*.* 0 userdir_removed
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_2)" IDNO userdir_removed
+  DetailPrint "$(PFI_LANG_UN_LOG_8)"
+  Delete $G_USERDIR\*.* ; this would be skipped if the user hits no
+  RMDir /r $G_USERDIR
+  IfFileExists $G_USERDIR 0 userdir_removed
+  DetailPrint "$(PFI_LANG_UN_LOG_9)"
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_UN_MBREMERR_1): $G_USERDIR $(PFI_LANG_UN_MBREMERR_2)"
+
+userdir_removed:
+  StrCmp $APPDATA "" 0 appdata_valid
+  RMDir "${C_ALT_DEFAULT_USERDATA}"
+  Goto check_kakasi
+
+appdata_valid:
+  RMDir "${C_STD_DEFAULT_USERDATA}"
+
+check_kakasi:
   IfFIleExists "$INSTDIR\kakasi\*.*" 0 skip_kakasi
   RMDir /r "$INSTDIR\kakasi"
 
@@ -5336,6 +5594,19 @@ skip_messages:
   Call un.DeleteEnvStr
   Push ITAIJIDICTPATH
   Call un.DeleteEnvStr
+
+  ; If the 'all users' environment variables refer to this installation, remove them too
+
+  ReadEnvStr ${L_TEMP} "KANWADICTPATH"
+  Push ${L_TEMP}
+  Push $INSTDIR
+  Call un.StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" skip_kakasi
+  Push KANWADICTPATH
+  Call un.DeleteEnvStrNTAU
+  Push ITAIJIDICTPATH
+  Call un.DeleteEnvStrNTAU
 
 skip_kakasi:
   SetDetailsPrint textonly
@@ -5381,16 +5652,34 @@ skip_Win32:
     $(PFI_LANG_UN_MBRERUN_4)" IDYES removed
 
 complete_uninstall:
+  Delete $G_USERDIR\install.ini
+  StrCmp $G_WINUSERTYPE "Admin" 0 tidymenu
+  SetShellVarContext all
+
+tidymenu:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk"
   RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
+
+  SetShellVarContext current
 
   Delete "$INSTDIR\Uninstall.exe"
 
   RMDir $G_ROOTDIR
   RMDir $INSTDIR
 
+  DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}"
+  DeleteRegKey HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI"
+  DeleteRegKey /ifempty HKCU "Software\POPFile Project\${C_PFI_PRODUCT}"
+  DeleteRegKey /ifempty HKCU "Software\POPFile Project"
+
+  StrCmp $G_WINUSERTYPE "Admin" 0 final_check
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}"
-  DeleteRegKey HKLM "SOFTWARE\${C_PFI_PRODUCT}"
+  DeleteRegKey HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI"
+  DeleteRegKey /ifempty HKLM "Software\POPFile Project\${C_PFI_PRODUCT}"
+  DeleteRegKey /ifempty HKLM "Software\POPFile Project"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\stop_pf.exe"
+
+final_check:
 
   ; if $INSTDIR was removed, skip these next ones
 
@@ -5399,7 +5688,7 @@ complete_uninstall:
     DetailPrint "$(PFI_LANG_UN_LOG_5)"
     Delete $INSTDIR\*.* ; this would be skipped if the user hits no
     RMDir /r $INSTDIR
-    IfFileExists $INSTDIR 0 Removed
+    IfFileExists $INSTDIR 0 removed
       DetailPrint "$(PFI_LANG_UN_LOG_6)"
       MessageBox MB_OK|MB_ICONEXCLAMATION \
           "$(PFI_LANG_UN_MBREMERR_1): $INSTDIR $(PFI_LANG_UN_MBREMERR_2)"
