@@ -1329,9 +1329,9 @@ SectionEnd
 #--------------------------------------------------------------------------
 # Installer Section: (optional) POPFile XMLRPC component (default = not selected)
 #
-# If this component is selected, the installer installs the POPFile XMLRPC module
-# and the extra Perl modules required to support it. The XMLRPC module exposes the
-# POPFile API to allow access to many POPFile functions.
+# If this component is selected, the installer installs the POPFile XMLRPC support
+# (UI\XMLRPC.pm and POPFile\API.pm) and the extra Perl modules required by XMLRPC.pm.
+# The XMLRPC module exposes the POPFile API to allow access to many POPFile functions.
 #--------------------------------------------------------------------------
 
 Section /o "XMLRPC" SecXMLRPC
@@ -1344,6 +1344,11 @@ Section /o "XMLRPC" SecXMLRPC
 
   SetOutPath $G_ROOTDIR\UI
   File "..\engine\UI\XMLRPC.pm"
+
+  ; POPFile API component used by XMLRPC.pm
+
+  SetOutPath $G_ROOTDIR\POPFile
+  File "..\engine\POPFile\API.pm"
 
   ; Perl modules required to support the POPFile XMLRPC component
 
