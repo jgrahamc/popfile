@@ -40,11 +40,16 @@ mkdir 'messages';
 my @messages = glob '*.msg';
 
 my $count = 0;
+my $dl    = 0;
 foreach my $msg (@messages) {
-    test_assert( `cp $msg messages/popfile0=$count.msg` == 0 );
+    my $name = "messages/popfile$dl" . "=" . "$count";
+    test_assert( `cp $msg $name.msg` == 0 );
     $msg =~ s/\.msg$/\.cls/;
-    test_assert( `cp $msg messages/popfile0=$count.cls` == 0 );
+    test_assert( `cp $msg $name.cls` == 0 );
     $count += 1;
+    if ( rand(1) > 0.5 ) {
+        $dl += 1;
+    }
 }
 
 use POSIX ":sys_wait_h";
@@ -174,6 +179,7 @@ $h->logger( $l );
 $h->classifier( $b );
 $h->initialize();
 $h->version( 'testsuite' );
+test_assert_equal( $h->language(), 'English' );
 our $version = $h->version();
 
 our $sk = $h->session_key();

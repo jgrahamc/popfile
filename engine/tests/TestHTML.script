@@ -268,6 +268,7 @@ SETSUBMIT skin default
 MATCH <link rel="stylesheet" type="text/css" href="skins/default.css" title="default">
 CONFIGIS html_skin default
 
+
 # Check language change
 
 MATCH <html lang="en">
@@ -513,6 +514,8 @@ MATCH Ignored words can only contain alphanumeric, ., _, -, or @ characters
 CONFIGIS word
 SETSUBMIT word four11@.-_
 NOTMATCH four11@.-_
+SETSUBMIT word ba"d
+MATCH Ignored words can only contain alphanumeric, ., _, -, or @ characters
 
 # Check change arbitrary parameter
 
@@ -649,8 +652,23 @@ MATCH /buckets?color=feldspar&amp;bucket=spam&amp;session=$sk
 GET /buckets?color=feldspar&amp;bucket=spam&amp;session=$sk
 MATCH spam current color is feldspar
 
-# TODO Check individual bucket page for accuracy
-# TODO Check clearing of individual bucket
+# Check individual bucket page for accuracy
+
+MATCH /buckets?session=$sk&amp;showbucket=spam
+GET /buckets?session=$sk&amp;showbucket=spam
+MATCH Detail for <font color="feldspar">spam</font>
+MATCH 12,114
+MATCH (3,353 unique)
+MATCH >100.00%<
+MATCH <a href=/buckets?session=$sk&amp;showbucket=spam&amp;showletter=m><b>m</b></a>
+
+GET /buckets?session=$sk&amp;showbucket=spam&amp;showletter=m
+MATCH <a class="wordListLink" href="/buckets?session=$sk&amp;lookup=Lookup&amp;word=missouri#Lookup"><b>missouri</b></a>
+
+# Check clearing of individual bucket
+
+CLICK clearbucket
+MATCH <td width="1%">&nbsp;</td><td align="right">0</td><td width="1%">&nbsp;</td>
 
 # TODO Check shutdown operation
 # TODO Check bad session key

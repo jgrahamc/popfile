@@ -169,6 +169,10 @@ sub remove_stopword
 
     $stopword = $self->mangle( $stopword, 0, 1 );
 
+    if ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) {
+        return 0;
+    }
+
     if ( $stopword ne '' ) {
         delete $self->{stop__}{$stopword};
         $self->save_stopwords();

@@ -579,8 +579,8 @@ sub http_ok
 
     # Build the full page of HTML by preprending the standard header and append the standard
     # footer
-    $text =  html_common_top($self, $selected) . html_common_middle($self, $text, $update_check, @tab)
-        . html_common_bottom($self);
+    $text =  html_common_top($self, $selected) . html_common_middle($self, $text, $update_check, @tab)  # PROFILE BLOCK START
+        . html_common_bottom($self);                                                                    # PROFILE BLOCK STOP
 
     # Build an HTTP header for standard HTML
     my $http_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
@@ -1725,7 +1725,7 @@ sub bucket_page
     $body .= "<tr><td colspan=2>";
 
     if ( $self->{classifier__}->get_bucket_word_count( $self->{form_}{showbucket} ) > 0 ) {
-      for my $i (@{$self->{classifier__}->get_bucket_word_list($self->{form_}{showbucket})}) {
+      for my $i ($self->{classifier__}->get_bucket_word_list($self->{form_}{showbucket})) {
         if ( defined($i) ) {
           my $j = $i;
           $j =~ /^\|(.)/;
@@ -1782,9 +1782,7 @@ sub bar_chart_100
     my $total_count = 0;
     my @xaxis = sort keys %values;
 
-    if ( $#xaxis < 0 ) {
-        return '';
-    }
+    return '' if ( $#xaxis < 0 );
 
     my @series = sort keys %{$values{$xaxis[0]}};
 
@@ -2294,23 +2292,19 @@ sub compare_mf
     my $am;
     my $bm;
 
-    if ( $a =~ /popfile(\d+)=(\d+)\.msg/ )  {
-        $ad = $1;
-        $am = $2;
+    $a =~ /popfile(\d+)=(\d+)\.msg/;
+    $ad = $1;
+    $am = $2;
 
-        if ( $b =~ /popfile(\d+)=(\d+)\.msg/ ) {
-            $bd = $1;
-            $bm = $2;
+    $b =~ /popfile(\d+)=(\d+)\.msg/;
+    $bd = $1;
+    $bm = $2;
 
-            if ( $ad == $bd ) {
-                return ( $bm <=> $am );
-            } else {
-                return ( $bd <=> $ad );
-            }
-        }
+    if ( $ad == $bd ) {
+        return ( $bm <=> $am );
+    } else {
+        return ( $bd <=> $ad );
     }
-
-    return 0;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -3149,10 +3143,10 @@ sub history_page
 
     # Redirect somewhere safe if non-idempotent action has been taken
 
-    if ( defined( $self->{form_}{deletemessage}  ) ||
+    if ( defined( $self->{form_}{deletemessage}  ) ||  # PROFILE BLOCK START
          defined( $self->{form_}{clearpage}      ) ||
          defined( $self->{form_}{undo}           ) ||
-         defined( $self->{form_}{reclassify}     ) ) {
+         defined( $self->{form_}{reclassify}     ) ) { # PROFILE BLOCK STOP
         return $self->http_redirect_( $client, "/history?" . $self->print_form_fields_(1,0,('start_message','filter','search','sort','session') ) );
     }
 
@@ -3248,8 +3242,8 @@ sub history_page
             my $index         = $self->{history__}{$mail_file}{index} + 1;
 
             $body .= "<tr";
-            if ( ( ( defined($self->{form_}{file}) && ( $self->{form_}{file} eq $mail_file ) ) ) ||
-                 ( $highlight_message eq $mail_file ) ) {
+            if ( ( ( defined($self->{form_}{file}) && ( $self->{form_}{file} eq $mail_file ) ) ) ||  # PROFILE BLOCK START
+                 ( $highlight_message eq $mail_file ) ) {                                            # PROFILE BLOCK STOP
                 $body .= " class=\"rowHighlighted\"";
             } else {
                 $body .= " class=\"";
