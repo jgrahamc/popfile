@@ -97,7 +97,7 @@
 #--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
-# Run-time command-line switch (used by 'setup.exe')
+# Run-time command-line switches (used by 'setup.exe')
 #--------------------------------------------------------------------------
 #
 # /NOSPACES
@@ -113,6 +113,17 @@
 # been disabled, so this command-line switch is provided to force the installer to insist upon
 # paths which do not contain spaces.  The switch can use uppercase or lowercase.
 #
+#
+# /SSL
+#
+# If there are problems downloading the optional SSL support files from the Internet, the
+# installer will skip this part of the installation. If SSL support is required, the SSL
+# files can be added by re-running the installer with the /SSL command-line switch to make
+# it skip everything except the downloading and installation of the SSL support files.
+#
+# The /SSL switch can use uppercase or lowercase.
+#
+# NOTE: If both command-line switches are supplied, they will both be ignored.
 #--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
@@ -262,6 +273,7 @@
   Var G_WINUSERTYPE        ; user group ('Admin', 'Power', 'User', 'Guest' or 'Unknown')
 
   Var G_SFN_DISABLED       ; 1 = short file names not supported, 0 = short file names available
+  Var G_SSL_ONLY           ; 1 = SSL-only installation, 0 = normal installation
 
   Var G_PLS_FIELD_1        ; used to customize translated text strings
 
@@ -299,6 +311,25 @@
 
   !include "pfi-library.nsh"
   !include "WriteEnvStr.nsh"
+
+  ; Macros used for entries in the installation log file
+
+  !macro SECTIONLOG_ENTER NAME
+      SetDetailsPrint listonly
+      DetailPrint "----------------------------------------"
+      DetailPrint "Enter the $\"${NAME}$\" Section"
+      DetailPrint "----------------------------------------"
+      DetailPrint ""
+  !macroend
+
+  !macro SECTIONLOG_EXIT NAME
+      SetDetailsPrint listonly
+      DetailPrint ""
+      DetailPrint "----------------------------------------"
+      DetailPrint "Exit from $\"${NAME}$\" Section"
+      DetailPrint "----------------------------------------"
+      DetailPrint ""
+  !macroend
 
 #--------------------------------------------------------------------------
 # Version Information settings (for the installer EXE and uninstaller EXE)
@@ -473,6 +504,10 @@
   ; Installer Page - Select Components to be installed
   ;---------------------------------------------------
 
+  ; Use a "pre" function to check if only the SSL Support files are to be installed
+
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE         "CheckSSLOnlyFlag"
+
   !insertmacro MUI_PAGE_COMPONENTS
 
   ;---------------------------------------------------
@@ -496,7 +531,8 @@
 
   ;---------------------------------------------------
   ; Installer Page - Show user what we are about to do and get permission to proceed
-  ; (this is the last page shown before the installation starts)
+  ;
+  ; This page must come immediately before the INSTFILES page ('MUI_PAGE_INSTFILES')
   ;---------------------------------------------------
 
   Page custom GetPermissionToInstall
@@ -740,6 +776,8 @@ continue:
 
   !endif
 
+  StrCpy $G_SSL_ONLY "0"    ; assume a full installation is required
+
   ; At present (14 March 2004) POPFile does not work properly if POPFILE_ROOT or POPFILE_USER
   ; are set to values containing spaces. A simple workaround is to use short file name format
   ; values for these environment variables. But some systems may not support short file names
@@ -755,9 +793,13 @@ continue:
 
   Call GetParameters
   Pop ${L_RESERVED}
-  StrCmp ${L_RESERVED} "/nospaces" 0 check_registry
+  StrCmp ${L_RESERVED} "/nospaces" 0 check_ssl
   StrCpy $G_SFN_DISABLED "1"
   Goto exit
+
+check_ssl:
+  StrCmp ${L_RESERVED} "/SSL" 0 check_registry
+  StrCpy $G_SSL_ONLY "1"    ; just download and install the SSL support files
 
 check_registry:
   ReadRegDWORD $G_SFN_DISABLED \
@@ -803,6 +845,31 @@ exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
+# Installer Section: StartLog (this must be the very first section)
+#
+# Creates the log header with information about this installation
+#--------------------------------------------------------------------------
+
+Section "-StartLog"
+
+  SetDetailsPrint listonly
+
+  DetailPrint "------------------------------------------------------------"
+  DetailPrint "$(^Name) v${C_PFI_VERSION}"
+  DetailPrint "------------------------------------------------------------"
+  DetailPrint "Command-line: $CMDLINE"
+  DetailPrint "User Details: $G_WINUSERNAME ($G_WINUSERTYPE)"
+  DetailPrint "PFI Language: $LANGUAGE"
+  DetailPrint "------------------------------------------------------------"
+  Call GetDateTimeStamp
+  Pop $G_PLS_FIELD_1
+  DetailPrint "Installation started $G_PLS_FIELD_1"
+  DetailPrint "------------------------------------------------------------"
+  DetailPrint ""
+
+SectionEnd
+
+#--------------------------------------------------------------------------
 # Installer Section: POPFile component (always installed)
 #
 # (a) If upgrading, shutdown existing version and rearrange minimal Perl files
@@ -814,6 +881,8 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 Section "POPFile" SecPOPFile
+
+  !insertmacro SECTIONLOG_ENTER "POPFile"
 
   ; Make this section mandatory (i.e. it is always installed)
 
@@ -1386,6 +1455,8 @@ end_section:
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
 
+  !insertmacro SECTIONLOG_EXIT "POPFile"
+
   Pop ${L_TEMP}
   Pop ${L_RESULT}
 
@@ -1403,6 +1474,8 @@ SectionEnd
 #--------------------------------------------------------------------------
 
 Section "Skins" SecSkins
+
+  !insertmacro SECTIONLOG_ENTER "Skins"
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_SKINS)"
@@ -1499,6 +1572,8 @@ Section "Skins" SecSkins
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
 
+  !insertmacro SECTIONLOG_EXIT "Skins"
+
 SectionEnd
 
 #--------------------------------------------------------------------------
@@ -1506,6 +1581,8 @@ SectionEnd
 #--------------------------------------------------------------------------
 
 Section "Languages" SecLangs
+
+  !insertmacro SECTIONLOG_ENTER "Languages"
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_LANGS)"
@@ -1517,6 +1594,8 @@ Section "Languages" SecLangs
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
+
+  !insertmacro SECTIONLOG_EXIT "Languages"
 
 SectionEnd
 
@@ -1531,6 +1610,8 @@ SectionEnd
     #--------------------------------------------------------------------------
 
     Section "Kakasi" SecKakasi
+
+      !insertmacro SECTIONLOG_ENTER "Kakasi"
 
       !define L_RESERVED  $0    ; used in system.dll call
 
@@ -1618,6 +1699,8 @@ SectionEnd
 
       !undef L_RESERVED
 
+      !insertmacro SECTIONLOG_EXIT "Kakasi"
+
     SectionEnd
 !endif
 
@@ -1631,8 +1714,12 @@ SubSection /e "Optional modules" SubSecOptional
 
 Section /o "NNTP proxy" SecNNTP
 
+  !insertmacro SECTIONLOG_ENTER "NNTP Proxy"
+
   SetOutPath "$G_ROOTDIR\Proxy"
   File "..\engine\Proxy\NNTP.pm"
+
+  !insertmacro SECTIONLOG_EXIT "NNTP Proxy"
 
 SectionEnd
 
@@ -1644,8 +1731,12 @@ SectionEnd
 
 Section /o "SMTP proxy" SecSMTP
 
+  !insertmacro SECTIONLOG_ENTER "SMTP Proxy"
+
   SetOutPath "$G_ROOTDIR\Proxy"
   File "..\engine\Proxy\SMTP.pm"
+
+  !insertmacro SECTIONLOG_EXIT "SMTP Proxy"
 
 SectionEnd
 
@@ -1658,6 +1749,8 @@ SectionEnd
 #--------------------------------------------------------------------------
 
 Section /o "XMLRPC" SecXMLRPC
+
+  !insertmacro SECTIONLOG_ENTER "XMLRPC"
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_XMLRPC)"
@@ -1711,6 +1804,8 @@ Section /o "XMLRPC" SecXMLRPC
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
 
+  !insertmacro SECTIONLOG_EXIT "XMLRPC"
+
 SectionEnd
 
 #--------------------------------------------------------------------------
@@ -1720,6 +1815,8 @@ SectionEnd
 #--------------------------------------------------------------------------
 
 Section /o "IMAP" SecIMAP
+
+  !insertmacro SECTIONLOG_ENTER "IMAP"
 
   SetDetailsPrint textonly
   DetailPrint "Installing IMAP module..."
@@ -1740,6 +1837,8 @@ Section /o "IMAP" SecIMAP
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
 
+  !insertmacro SECTIONLOG_EXIT "IMAP"
+
 SectionEnd
 
 #--------------------------------------------------------------------------
@@ -1751,8 +1850,12 @@ SectionEnd
 
 Section /o "SOCKS" SecSOCKS
 
+  !insertmacro SECTIONLOG_ENTER "SOCKS"
+
   SetOutPath "$G_MPLIBDIR\IO\Socket"
   File "${C_PERL_DIR}\site\lib\IO\Socket\Socks.pm"
+
+  !insertmacro SECTIONLOG_EXIT "SOCKS"
 
 SectionEnd
 
@@ -1777,6 +1880,50 @@ SectionEnd
   !include "getssl.nsh"
 
 SubSectionEnd
+
+#--------------------------------------------------------------------------
+# Installer Section: StopLog (this must be the very last section)
+#
+# Finishes the log file and saves it (making backups of up to 3 previous logs)
+#--------------------------------------------------------------------------
+
+Section "-StopLog"
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_PROG_SAVELOG) $(PFI_LANG_TAKE_SEVERAL_SECONDS)"
+  SetDetailsPrint listonly
+  Call GetDateTimeStamp
+  Pop $G_PLS_FIELD_1
+  StrCmp $G_SSL_ONLY "0" normal_log
+  DetailPrint "------------------------------------------------------------"
+  DetailPrint "SSL Support installation finished $G_PLS_FIELD_1"
+  DetailPrint "------------------------------------------------------------"
+  Goto save_log
+
+normal_log:
+  DetailPrint "------------------------------------------------------------"
+  DetailPrint "'Add POPFile User' will be called to configure POPFile"
+  IfRebootFlag 0 close_log
+  DetailPrint "(a reboot is required to complete the Kakasi installation)"
+
+close_log:
+  DetailPrint "------------------------------------------------------------"
+  DetailPrint "Main program installation finished $G_PLS_FIELD_1"
+  DetailPrint "------------------------------------------------------------"
+
+save_log:
+
+  ; Save a log showing what was installed
+
+  !insertmacro BACKUP_123_DP "$G_ROOTDIR" "install.log"
+  Push "$G_ROOTDIR\install.log"
+  Call DumpLog
+  DetailPrint "Log report saved in '$G_ROOTDIR\install.log'"
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
+
+SectionEnd
 
 #--------------------------------------------------------------------------
 # Component-selection page descriptions
@@ -1911,7 +2058,7 @@ Function GetPermissionToInstall
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_SUMMARY_TITLE)" "$(PFI_LANG_SUMMARY_SUBTITLE)"
 
-  ; The entires in the "Basic" and "Optional" component lists are indented a little
+  ; The entries in the "Basic" and "Optional" component lists are indented a little
 
   !define C_NLT     "${IO_NL}\t"
 
@@ -1928,29 +2075,36 @@ upgrade:
 
 start_summary:
   StrCpy $G_PLS_FIELD_1 "${L_TEMP}${IO_NL}${IO_NL}\
-      $(PFI_LANG_SUMMARY_BASICLIST)${IO_NL}${C_NLT}\
+      $(PFI_LANG_SUMMARY_BASICLIST)${IO_NL}"
+  StrCpy ${L_TEMP} "${C_NLT}$(PFI_LANG_SUMMARY_NONE)"
+
+  !insertmacro SectionNotSelected ${SecPOPFile} check_skins
+  StrCpy ${L_TEMP} ""
+  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}\
           $(PFI_LANG_SUMMARY_POPFILECORE)${C_NLT}\
           $(PFI_LANG_SUMMARY_MINPERL)${C_NLT}\
           $(PFI_LANG_SUMMARY_DEFAULTSKIN)${C_NLT}\
           $(PFI_LANG_SUMMARY_DEFAULTLANG)"
 
-  ; Now use the current component selections to update the data we will display,
-
+check_skins:
   !insertmacro SectionNotSelected ${SecSkins} check_langs
+  StrCpy ${L_TEMP} ""
   StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}$(PFI_LANG_SUMMARY_EXTRASKINS)"
 
 check_langs:
   !insertmacro SectionNotSelected ${SecLangs} check_kakasi
+  StrCpy ${L_TEMP} ""
   StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}$(PFI_LANG_SUMMARY_EXTRALANGS)"
 
 check_kakasi:
   !ifndef NO_KAKASI
       !insertmacro SectionNotSelected ${SecKakasi} end_basic
+      StrCpy ${L_TEMP} ""
       StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}$(PFI_LANG_SUMMARY_KAKASI)"
 
     end_basic:
   !endif
-  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${IO_NL}${IO_NL}\
+  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${L_TEMP}${IO_NL}${IO_NL}\
       $(PFI_LANG_SUMMARY_OPTIONLIST)${IO_NL}"
 
   ; Check the optional components in alphabetic order
@@ -1991,7 +2145,7 @@ end_optional:
       $(PFI_LANG_SUMMARY_BACKBUTTON)"
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioData.ini" "Field 1" "State" $G_PLS_FIELD_1
-  
+
   ; Set focus to the button labelled "Install" or "Upgrade" (instead of the "Summary" data)
 
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioData.ini"
@@ -2440,6 +2594,40 @@ exit:
 FunctionEnd
 
 #--------------------------------------------------------------------------
+# Installer Function: CheckSSLOnlyFlag
+# (the "pre" function for the COMPONENTS selection page)
+#
+# If only the SSL Support files are to be installed, disable the other
+# POPFile-component sections and skip the COMPONENTS page
+#--------------------------------------------------------------------------
+
+Function CheckSSLOnlyFlag
+
+  StrCmp $G_SSL_ONLY "0" exit
+
+  !insertmacro UnselectSection ${SecPOPFile}
+  !insertmacro UnselectSection ${SecSkins}
+  !insertmacro UnselectSection ${SecLangs}
+  !insertmacro UnselectSection ${SecKakasi}
+  !insertmacro UnselectSection ${SecNNTP}
+  !insertmacro UnselectSection ${SecSMTP}
+  !insertmacro UnselectSection ${SecXMLRPC}
+  !insertmacro UnselectSection ${SecIMAP}
+  !insertmacro UnselectSection ${SecSOCKS}
+
+  !insertmacro SelectSection ${SecSSL}
+
+  ; Do not display the COMPONENTS page
+
+  Abort
+
+exit:
+
+  ; Display the COMPONENTS page
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Installer Function: CheckForExistingLocation
 # (the "pre" function for the POPFile PROGRAM DIRECTORY selection page)
 #
@@ -2492,9 +2680,9 @@ Function CheckExistingProgDir
   !define L_RESULT  $R9
 
   Push ${L_RESULT}
-  
+
   ; Strip trailing slashes (if any) from the path selected by the user
-  
+
   Push $INSTDIR
   Pop $INSTDIR
 
@@ -2559,6 +2747,10 @@ warning:
   Abort
 
 check_options:
+
+  ; If we are only installing the SSL support files, there is no need to check the options
+
+  StrCmp $G_SSL_ONLY "1" continue
 
   ; If user has NOT selected a program component on the COMPONENTS page and we find that the
   ; version we are about to upgrade includes that program component then the user is asked for
@@ -2713,8 +2905,13 @@ FunctionEnd
 
 Function InstallUserData
 
-  ; For this build we skip our own FINISH page and disable the wizard's language selection
-  ; dialog to make the wizard appear as an extension of the main 'setup.exe' installer.
+  ; If we are only downloading and installing the SSL support files, display the FINISH page
+
+  StrCmp $G_SSL_ONLY "1" exit
+
+  ; For normal installations, skip our own FINISH page and disable the "Add POPFile User"
+  ; wizard's language selection dialog to make the wizard appear as an extension of the main
+  ; 'setup.exe' installer.
   ; [Future builds may pass more than just a command-line switch to the wizard]
 
   IfRebootFlag special_case
@@ -2724,6 +2921,10 @@ Function InstallUserData
 special_case:
   Exec '"$G_ROOTDIR\adduser.exe" /installreboot'
   Abort
+
+exit:
+
+  ; Display the FINISH page
 
 FunctionEnd
 
@@ -3461,6 +3662,8 @@ SectionEnd
 
 Section "un.Uninstall End" UnSecEnd
 
+  Delete "$G_ROOTDIR\install.log.*"
+  Delete "$G_ROOTDIR\install.log"
   Delete "$G_ROOTDIR\Uninstall.exe"
   RMDir "$G_ROOTDIR"
 

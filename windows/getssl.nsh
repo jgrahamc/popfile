@@ -85,6 +85,7 @@
 
 !ifdef INSTALLER
     Section /o "SSL Support" SecSSL
+      !insertmacro SECTIONLOG_ENTER "SSL Support"
 !else
     Section "SSL Support" SecSSL
 !endif
@@ -239,6 +240,7 @@ done:
       SetDetailsPrint textonly
       DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
       SetDetailsPrint listonly
+      !insertmacro SECTIONLOG_EXIT "SSL Support"
   !endif
 
   Pop ${L_RESULT}
