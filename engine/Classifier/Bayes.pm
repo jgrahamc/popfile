@@ -238,7 +238,30 @@ sub initialize
 
     $self->config_( 'hostname', $self->{hostname__} );
 
+    $self->mq_register_( 'COMIT', $self );
     return 1;
+}
+
+#----------------------------------------------------------------------------
+#
+# deliver
+#
+# Called by the message queue to deliver a message
+#
+# There is no return value from this method
+#
+#----------------------------------------------------------------------------
+sub deliver
+{
+    my ( $self, $type, $message, $parameter ) = @_;
+
+    if ( $type eq 'COMIT' ) {
+        $parameter =~ /([^:]*):(.*)/;
+        my $class = $1;
+        my $session = $self->get_session_key( 'admin', '' );
+        $self->classified( $session, $class );
+        $self->release_session_key( $session );
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -2523,13 +2546,6 @@ sub classify_and_modify
         $self->{history__}->release_slot( $slot );
     } else {
         $self->{history__}->commit_slot( $slot, $classification, $self->{magnet_detail__} );
-    }
-
-    # If we are saving to the history and we didn't previously know
-    # the classification of a new file
-
-    if ( !$nosave && ( $class eq '' ) ) {
-        $self->classified( $session, $classification );
     }
 
     return ( $classification, $slot, $self->{magnet_used__} );
