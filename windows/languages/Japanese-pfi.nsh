@@ -118,6 +118,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORE      "POPFile のコアファイルをインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL      "最小バージョンの Perl をインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT     "POPFile のショートカットを作成中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FFCBACK   "Making corpus backup. This may take a few seconds..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS     "POPFile のスキンファイルをインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS     "POPFile UI 言語ファイルをインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC    "「次へ」をクリックして続行して下さい。"

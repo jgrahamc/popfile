@@ -118,6 +118,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORE      "Instalando los archivos esenciales de POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL      "Instalando el minimo de archivos Perl..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT     "Creando enlaces para POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FFCBACK   "Making corpus backup. This may take a few seconds..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS     "Instalando skins para POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS     "Instalando archivos de lenguaje para IU de POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC    "Presione Siguiente para continuar"

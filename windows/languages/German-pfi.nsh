@@ -118,6 +118,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORE      "Installiere Kernkomponenten..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL      "Installiere Minimal-Perl-Umgebung..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT     "Erzeuge Verknüpfungen..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FFCBACK   "Making corpus backup. This may take a few seconds..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS     "Installiere Skins..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS     "Installiere Sprachdateien..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC    "Klicken Sie auf Weiter um fortzufahren"

@@ -118,6 +118,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORE      "POPFile 핵심 파일을 설치 중..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL      "Perl 최소 설치 중..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT     "POPFile 바로가기 생성 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FFCBACK   "Making corpus backup. This may take a few seconds..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS     "POPFile 스킨 파일 설치 중..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS     "POPFile UI 언어 파일 설치 중..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC    "계속 진행하기 위해 '다음'을 누르십시오."
