@@ -158,12 +158,12 @@ sub stop
 
 # ---------------------------------------------------------------------------------------------
 #
-# service
+# reaper
 #
-# Called to handle POP3 requests
+# Called to reap our dead POP3 proxy children
 #
 # ---------------------------------------------------------------------------------------------
-sub service
+sub reaper
 {
     my ( $self ) = @_;
 
@@ -204,6 +204,18 @@ sub service
         	$self->{classifier}->write_parameters();
         }
     }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# service
+#
+# Called to handle POP3 requests
+#
+# ---------------------------------------------------------------------------------------------
+sub service
+{
+    my ( $self ) = @_;
 
     # Accept a connection from a client trying to use us as the mail server.  We service one client at a time
     # and all others get queued up to be dealt with later.  We check the alive boolean here to make sure we

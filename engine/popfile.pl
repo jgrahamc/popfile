@@ -29,6 +29,9 @@ use locale;
 # forked()     - called when a module has forked the process.  This is called within the child
 #                process and should be used to clean up 
 #
+# reaper()     - called when a process has terminated to give a module a chance to do 
+#                whatever clean up is needed
+#
 # alive        - Gets set to 1 when the parent wants to kill all the running sub modules
 #
 # forker       - This is a reference to a function (forker) in this file that performs a fork
@@ -37,13 +40,16 @@ use locale;
 # The POPFile classes are stored by reference in the %components hash
 my %components;
 
-# This is the ONLY PIECE OF PLATFORM SPECIFIC CODE IN POPFILE and all it does is 
-# force Windows users to have v5.8.0 because that's the version with good fork() support
-# everyone else can use 5.6.1.  This is probably only temporary because at some point
-# I am going to force 5.8.0 for everyone because of the better Unicode support
+# This is the A PIECE OF PLATFORM SPECIFIC CODE and all it does is force Windows users to have 
+# v5.8.0 because that's the version with good fork() support everyone else can use 5.6.1.  This is 
+# probably only temporary because at some point I am going to force 5.8.0 for everyone because of 
+# the better Unicode support
+
+my $on_windows = 0;
 
 if ( $^O eq 'MSWin32' ) {
 	require v5.8.0;
+	$on_windows = 1;
 } else {
 	require v5.6.1;
 }
@@ -74,6 +80,22 @@ sub aborting
         $components{$c}->{alive} = 0;
 	    $components{$c}->stop();
     }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# reaper
+#
+# Called if we get SIGCHLD and asks each module to do whatever reaping is needed
+#
+# ---------------------------------------------------------------------------------------------
+sub reaper
+{
+    for my $c (keys %components) {
+		$components{$c}->reaper();
+    }
+
+	$SIG{CHLD} = \&reaper;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -139,7 +161,11 @@ $SIG{KILL}  = \&aborting;
 $SIG{STOP}  = \&aborting;
 $SIG{TERM}  = \&aborting;
 $SIG{INT}   = \&aborting;
-$SIG{CHLD}  = 'IGNORE';
+
+# Yuck.  On Windows SIGCHLD isn't calling the reaper under ActiveState 5.8.0
+# so we detect Windows and ignore SIGCHLD and call the reaper code below
+
+$SIG{CHLD}  = $on_windows?'IGNORE':\&reaper;
 
 # Create the main objects that form the core of POPFile.  Consists of the configuration
 # modules, the classifier, the UI (currently HTML based), and the POP3 proxy.
@@ -217,6 +243,13 @@ while ( $alive == 1 ) {
     # Sleep for 0.05 of a second to ensure that POPFile does not hog the machine's
     # CPU
     select(undef, undef, undef, 0.05);
+    
+    # If we are on Windows then reap children here
+    if ( $on_windows ) {
+		for my $c (keys %components) {
+			$components{$c}->reaper();
+		}
+    }
 }
 
 print "    Stopping... ";

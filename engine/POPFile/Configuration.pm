@@ -101,6 +101,18 @@ sub forked
 
 # ---------------------------------------------------------------------------------------------
 #
+# reaper
+#
+# Called to reap our dead children
+#
+# ---------------------------------------------------------------------------------------------
+sub reaper
+{
+    my ( $self ) = @_;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # parse_command_line - Parse ARGV
 #
 # The arguments are the keys of the configuration hash.  Any argument that is not already
