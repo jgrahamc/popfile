@@ -29,7 +29,7 @@ use POPFile::Configuration;
 use POPFile::MQ;
 use POPFile::Logger;
 use POPFile::History;
-use Server::IMAP;
+use Services::IMAP;
 use Classifier::Bayes;
 use Classifier::WordMangle;
 
@@ -67,7 +67,7 @@ else {
     my $b = new Classifier::Bayes;
     my $w = new Classifier::WordMangle;
     my $h = new POPFile::History;
-    my $im = new Server::IMAP;
+    my $im = new Services::IMAP;
 
     $c->configuration( $c );
     $c->mq( $mq );
