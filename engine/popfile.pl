@@ -1413,11 +1413,13 @@ sub run_popfile
     my $ui_port        = shift;
     
     my $server = IO::Socket::INET->new( Proto     => 'tcp',
+                                        LocalAddr => 'localhost', 
                                         LocalPort => $listen_port,
                                         Listen    => SOMAXCONN,
                                         Reuse     => 1 );
 
     my $ui     = IO::Socket::INET->new( Proto     => 'tcp',
+                                        LocalAddr => 'localhost', 
                                         LocalPort => $ui_port,
                                         Listen    => SOMAXCONN,
                                         Reuse     => 1 );
