@@ -127,6 +127,8 @@ sub service
                 my $message   = @$ref[0];
                 my $parameter = @$ref[1];
 
+                $self->log_( 2, "Delivering message $type ($message, $parameter) to " . $waiter->name() );
+
                 $waiter->deliver( $type, $message, $parameter );
             }
         }

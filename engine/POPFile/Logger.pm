@@ -136,7 +136,7 @@ sub service
     # can do clean up tasks that need to be done regularly but not
     # often
 
-    if ( time > ( $self->{last_tickd__} + 60 * 60 ) ) {
+    if ( time > ( $self->{last_tickd__} + 3600 ) ) {
         $self->mq_post_( 'TICKD', '', '' );
         $self->{last_tickd__} = time;
     }

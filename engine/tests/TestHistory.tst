@@ -165,6 +165,9 @@ EOF
 close FILE;
 
 $h->commit_slot( $slot, 'spam', 0 );
+$mq->service();
+$h->service();
+sleep(1);
 $h->commit_slot( $slot1, 'personal', 0 );
 $mq->service();
 $h->service();
@@ -216,7 +219,7 @@ test_assert( defined( $q ) );
 test_assert_regexp( $q, '[0-9a-f]{8}' );
 test_assert( defined( $h->{queries__}{$q} ) );
 
-# Unsorted returns in ID order
+# Unsorted returns in inserted order
 
 $h->set_query( $q, '', '', '' );
 
@@ -358,7 +361,7 @@ test_assert_equal( $h->get_query_size( $q ), 3 );
 
 $file = $h->get_slot_file( 2 );
 test_assert( ( -e $file ) );
-$h->delete_slot( 2 );
+$h->delete_slot( 2, 0 );
 test_assert( !( -e $file ) );
 
 $h->set_query( $q, '', '', '' );
@@ -366,20 +369,21 @@ test_assert_equal( $h->get_query_size( $q ), 2 );
 
 @rows = $h->get_query_rows( $q, 1, 2 );
 test_assert_equal( $#rows, 1 );
-test_assert_equal( $rows[0][1], 'John Graham-Cumming <nospam@jgc.org>' );
-test_assert_equal( $rows[1][1], 'Another Person' );
+test_assert_equal( $rows[0][1], 'Another Person' );
+test_assert_equal( $rows[1][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
-# Now try history cleanup, should just leave one entry
-
-$h->cleanup_history__();
-$h->set_query( $q, '', '', '' );
-test_assert_equal( $h->get_query_size( $q ), 1 );
-
-@rows = $h->get_query_rows( $q, 1, 1 );
-test_assert_equal( $#rows, 0 );
-test_assert_equal( $rows[0][1], 'John Graham-Cumming <nospam@jgc.org>' );
+# Now try history cleanup, should leave nothing
 
 $h->stop_query( $q );
+
+$h->config_( 'history_days', 0 );
+$h->cleanup_history__();
+
+my $qq = $h->start_query();
+$h->set_query( $qq, '', '', '' );
+test_assert_equal( $h->get_query_size( $qq ), 0 );
+$h->stop_query( $qq );
+
 test_assert( !defined( $h->{queries__}{$q} ) );
 
 $h->stop();

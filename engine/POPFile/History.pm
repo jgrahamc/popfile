@@ -99,7 +99,7 @@ sub initialize
     # If 1, Messages are saved to an archive when they are removed or expired
     # from the history cache
 
-    $self->config_( 'archive', 0, 1 );
+    $self->config_( 'archive', 0 );
 
     # The directory where messages will be archived to, in sub-directories for
     # each bucket
@@ -473,12 +473,7 @@ sub commit_history__
 
     $self->{commit_list__} = ();
     $self->{classifier__}->release_session_key( $session );
-
-    # Force requery since the messages have changed
-
-    foreach my $id (keys %{$self->{queries__}}) {
-        $self->{queries__}{$id}{fields} = '';
-    }
+    $self->force_requery__();
 }
 
 # ---------------------------------------------------------------------------
@@ -497,8 +492,9 @@ sub delete_slot
     my ( $self, $slot, $archive ) = @_;
 
     my $file = $self->get_slot_file( $slot );
+    $self->log_( 2, "delete_slot called for slot $slot, file $file" );
 
-    if ( $archive ) {
+    if ( $archive && $self->config_( 'archive' ) ) {
         my $path = $self->get_user_path_( $self->config_( 'archive_dir' ) );
 
         $self->make_directory__( $path );
@@ -538,12 +534,8 @@ sub delete_slot
     # and also invalidate the caches of any open queries since they
     # may have been affected
 
-    $self->db__()->do( "delete from history where id = $slot;" );
-    unlink $file;
-
-    foreach my $id (keys %{$self->{queries__}}) {
-        $self->{queries__}{$id}{fields} = '';
-    }
+    $self->release_slot( $slot );
+    $self->force_requery__();
 }
 
 #----------------------------------------------------------------------------
@@ -850,7 +842,7 @@ sub get_query_rows
                 undef, $start + $count - $size )} );
     }
 
-    my ( $from, $to ) = ( $start-1, $start+$count-1 );
+    my ( $from, $to ) = ( $start-1, $start+$count-2 );
 
     $self->log_( 2, "Returning $from..$to" );
 
@@ -1015,12 +1007,15 @@ sub cleanup_history__
 
     my $seconds_per_day = 24 * 60 * 60;
     my $old = time - $self->config_( 'history_days' ) * $seconds_per_day;
+    $self->db__()->begin_work;
     my $d = $self->db__()->prepare( "select id from history
-                                         where hdr_date < $old;" );
+                                         where inserted < $old;" );
     $d->execute;
-    while ( my @row = $d->fetchrow_array() ) {
-        $self->delete_slot( $row[0] );
+    my @row;
+    while ( @row = $d->fetchrow_array ) {
+        $self->delete_slot( $row[0], 1 );
     }
+    $self->db__()->commit;
 }
 
 # ---------------------------------------------------------------------------
@@ -1050,6 +1045,24 @@ sub copy_file__
         }
 
         close FROM;
+    }
+}
+
+# ---------------------------------------------------------------------------
+#
+# force_requery__
+#
+# Called when the database has changed to invalidate any queries that are
+# open so that cached data is not returned and the database is requeried
+#
+# ---------------------------------------------------------------------------
+sub force_requery__
+{
+    my ( $self ) = @_;
+    # Force requery since the messages have changed
+
+    foreach my $id (keys %{$self->{queries__}}) {
+        $self->{queries__}{$id}{fields} = '';
     }
 }
 
