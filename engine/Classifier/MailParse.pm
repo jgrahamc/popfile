@@ -43,6 +43,10 @@ my $eksc = "(?:$ksc5601|[\x81-\xC6][\x41-\xFE])"; #extended ksc
 
 # These are used for Japanese support
 
+my %encoding_candidates = (
+    'Nihongo' => [ 'shiftjis', 'euc-jp', '7bit-jis' ]
+);
+
 my $ascii = '[\x00-\x7F]'; # ASCII chars
 my $two_bytes_euc_jp = '(?:[\x8E\xA1-\xFE][\xA1-\xFE])'; # 2bytes EUC-JP chars
 my $three_bytes_euc_jp = '(?:\x8F[\xA1-\xFE][\xA1-\xFE])'; # 3bytes EUC-JP chars
@@ -1335,7 +1339,6 @@ sub parse_html
 # HTML version of message if color__ is set
 #
 # $file     The file to open and parse
-# $lang     Pass in the current interface language for language specific parsing
 # $max_size The maximum size of message to parse, or 0 for unlimited
 # $reset    If set to 0 then the list of words from a previous parse is not reset, this
 #           can be used to do multiple parses and build a single word list.  By default
@@ -1344,16 +1347,11 @@ sub parse_html
 # ---------------------------------------------------------------------------------------------
 sub parse_file
 {
-    # $lang is used for switching on/off language specific functionality
-
-    my ( $self, $file, $lang, $max_size, $reset ) = @_;
+    my ( $self, $file, $max_size, $reset ) = @_;
 
     $reset    = 1 if ( !defined( $reset    ) );
     $max_size = 0 if ( !defined( $max_size ) );
 
-    $lang = '' unless ( defined($lang) );
-
-    $self->{lang__} = $lang;
     $self->start_parse( $reset );
 
     my $size_read = 0;
@@ -1526,6 +1524,11 @@ sub parse_line
             next if ( !defined($line) );
 
             print ">>> $line" if $self->{debug__};
+
+            if ( $self->{lang__} eq 'Nihongo' ) {
+                $line = convert_encoding( $line, $self->{charset__}, 'euc-jp', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
+                $line = parse_line_with_kakasi( $self, $line );
+            }
 
             if ($self->{color__} ne '' ) {
 
@@ -1733,14 +1736,16 @@ sub decode_string
     my ( $self, $mystring, $lang ) = @_;
 
     my $decode_it = '';
+    my $charset = '';
 
     while ( $mystring =~ /=\?([\w-]+)\?(B|Q)\?(.*?)\?=/ig ) {
         if ($2 eq "B" || $2 eq "b") {
+            $charset = $1;
             $decode_it = decode_base64( $3 );
 
             # for Japanese header
-            if ((uc($1) eq "ISO-2022-JP") && ( $lang eq 'Nihongo' )) {
-                $decode_it = convert_encoding($decode_it, "iso-2022-jp", "euc-jp");
+            if ($lang eq 'Nihongo') {
+                $decode_it = convert_encoding( $decode_it, $charset, 'euc-jp', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
             }
 
             $mystring =~ s/=\?[\w-]+\?B\?(.*?)\?=/$decode_it/i;
@@ -1751,8 +1756,8 @@ sub decode_string
                 $decode_it = decode_qp( $decode_it );
 
                 # for Japanese header
-                if ((uc($1) eq "ISO-2022-JP") && ( $lang eq 'Nihongo' )) {
-                    $decode_it = convert_encoding($decode_it, "iso-2022-jp", "euc-jp");
+                if ($lang eq 'Nihongo') {
+                    $decode_it = convert_encoding( $decode_it, $charset, 'euc-jp', '7bit-jis', @{$encoding_candidates{$self->{lang__}}} );
                 }
 
                 $mystring =~ s/=\?[\w-]+\?Q\?(.*?)\?=/$decode_it/i;
@@ -1884,6 +1889,11 @@ sub parse_header
         $prefix = 'subject';
         $argument = $self->decode_string( $argument, $self->{lang__} );
         if ( $self->{subject__} eq '' ) {
+
+            # In Japanese mode, parse subject with kakasi
+
+            $argument = parse_line_with_kakasi( $self, $argument ) if ( $self->{lang__} eq 'Nihongo' && $argument ne '' );
+
             $self->{subject__} = $argument;
             $self->{subject__} =~ s/[\t\r\n]//g;
 	}
@@ -1921,6 +1931,7 @@ sub parse_header
 
     if ( $header =~ /^Content-Type$/i ) {
         if ( $argument =~ /charset=\"?([^\"\r\n\t ]{1,40})\"?/ ) {
+            $self->{charset__} = $1;
             update_word( $self, $1, 0, '' , '', 'charset' );
         }
 
@@ -2302,15 +2313,67 @@ sub mangle
 # $string       The string to be converted
 # $from         Original encoding
 # $to           The encoding which the string is converted to
+# $default      The default encoding that is used when $from is invalid or not defined
+# @candidates   Candidate encodings for guessing
 # ---------------------------------------------------------------------------------------------
 sub convert_encoding
 {
-    my ( $string, $from, $to ) = @_;
+    my ( $string, $from, $to, $default, @candidates ) = @_;
+
     require Encode;
+    require Encode::Guess;
 
-    Encode::from_to($string, $from, $to);
+    # First, guess the encoding.
 
+    my $enc = Encode::Guess::guess_encoding( $string, @candidates );
+
+    if(ref $enc){
+       $from= $enc->name;
+    } else {
+
+        # If guess does not work, check whether $from is valid.
+
+        if (!(Encode::resolve_alias($from))) {
+
+            # Use $default as $from when $from is invalid.
+
+            $from = $default; 
+        }
+    }
+
+    Encode::from_to($string, $from, $to) unless ($from eq $to);
     return $string;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# parse_line_with_kakasi
+#
+# Parse a line with Kakasi
+#
+# Japanese needs to be parsed by language processing filter, "Kakasi"
+# before it is passed to Bayes classifier because words are not splitted
+# by spaces.
+#
+# $line          The line to be parsed
+#
+# ---------------------------------------------------------------------------------------------
+sub parse_line_with_kakasi
+{
+    my ( $self, $line ) = @_;
+
+    # This is used to parse Japanese
+    require Text::Kakasi;
+
+    # Split Japanese line into words using Kakasi Wakachigaki
+    # mode(-w is passed to Kakasi as argument). Both input and ouput
+    # encoding are EUC-JP.
+
+    Text::Kakasi::getopt_argv("kakasi", "-w -ieuc -oeuc");
+    $line = Text::Kakasi::do_kakasi($line);
+    Text::Kakasi::close_kanwadict();
+
+    return $line;
 }
 
 1;

@@ -246,6 +246,14 @@ sub start
 {
     my ( $self ) = @_;
 
+    # In Japanese mode, explicitly set LC_COLLATE to C.
+    # This is to avoid Perl crash on Windows because default LC_COLLATE of Japanese Win is Japanese_Japan.932(Shift_JIS), which is different from the charset POPFile uses for Japanese characters(EUC-JP).
+
+    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+        use POSIX qw( locale_h );
+        setlocale( LC_COLLATE, 'C' ); 
+    }
+
     # Pass in the current interface language for language specific parsing
 
     $self->{parser__}->{lang__}  = $self->module_config_( 'html', 'language' );
@@ -463,61 +471,6 @@ sub update_constants__
     } else {
         $self->{not_likely__}{$userid} = 0;
     }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# parse_with_kakasi__
-#
-# Parse Japanese mail message with Kakasi
-#
-# Japanese needs to be parsed by language processing filter, "Kakasi"
-# before it is passed to Bayes classifier because words are not splitted
-# by spaces.
-#
-# $file           The file to parse
-#
-# ---------------------------------------------------------------------------------------------
-sub parse_with_kakasi__
-{
-    my ( $self, $file, $dcount, $mcount ) = @_;
-
-    # This is used for Japanese support
-    require Encode;
-
-    # This is used to parse Japanese
-    require Text::Kakasi;
-
-    my $temp_file  = $self->get_user_path_( $self->global_config_( 'msgdir' ) . "kakasi$dcount" . "=$mcount.msg" );
-
-    # Split Japanese email body into words using Kakasi Wakachigaki
-    # mode(-w is passed to Kakasi as argument). The most common charset of
-    # Japanese email is ISO-2022-JP, alias is jis, so -ijis and -ojis
-    # are passed to tell Kakasi the input charset and the output charset
-    # explicitly.
-    #
-    # After Kakasi processing, Encode::from_to is used to convert into UTF-8.
-    #
-    # Japanese email charset is assumed to be ISO-2022-JP. Needs to expand for
-    # other possible charset, such as Shift_JIS, EUC-JP, UTF-8.
-
-    Text::Kakasi::getopt_argv("kakasi", "-w -ijis -ojis");
-    open KAKASI_IN, "<$file";
-    open KAKASI_OUT, ">$temp_file";
-
-    while( <KAKASI_IN> ){
-        my $kakasi_out;
-
-	$kakasi_out = Text::Kakasi::do_kakasi($_);
-        Encode::from_to($kakasi_out, "iso-2022-jp", "euc-jp");
-        print KAKASI_OUT $kakasi_out;
-    }
-
-    close KAKASI_OUT;
-    close KAKASI_IN;
-    Text::Kakasi::close_kanwadict();
-    unlink( $file );
-    rename( $temp_file, $file );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1204,13 +1157,7 @@ sub add_words_to_bucket__
     # then update those counts and write them back to the database.
 
     my $words;
-    if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
-         no locale;
-         $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
-    } else {
-         $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
-    }
-
+    $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
     $self->{get_wordids__} = $self->{db__}->prepare(        # PROFILE BLOCK START
              "select id, word
                   from words
@@ -1589,14 +1536,11 @@ sub classify
 
     $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
 
-    # Pass language parameter to parse_file()
-
     $self->{magnet_used__}   = 0;
     $self->{magnet_detail__} = '';
 
     if ( defined( $file ) ) {
         $self->{parser__}->parse_file( $file,                                           # PROFILE BLOCK START
-                                       $self->module_config_( 'html', 'language' ),
                                        $self->global_config_( 'message_cutoff'   ) );   # PROFILE BLOCK STOP
     }
 
@@ -1681,13 +1625,7 @@ sub classify
     #        is irrelevant in deciding which the winning bucket is.
 
     my $words;
-    if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
-        no locale;
-        $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
-    } else {
-        $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
-    }
-
+    $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
     $self->{get_wordids__} = $self->{db__}->prepare(  # PROFILE BLOCK START
              "select id, word
                   from words
@@ -2273,16 +2211,7 @@ sub classify_and_modify
     # Do the text classification and update the counter for that bucket that we just downloaded
     # an email of that type
 
-    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
-
-        # Parse Japanese mail message with Kakasi
-
-        $self->parse_with_kakasi__( $temp_file, $dcount, $mcount );
-
-        $classification = ($class ne '')?$class:$self->classify( $session, $temp_file);
-    } else {
-        $classification = ($class ne '')?$class:$self->classify( $session, undef);
-    }
+    $classification = ($class ne '')?$class:$self->classify( $session, undef);
 
     my $subject_modification = $self->get_bucket_parameter( $session, $classification, 'subject'    );
     my $xtc_insertion        = $self->get_bucket_parameter( $session, $classification, 'xtc'        );
@@ -2652,11 +2581,9 @@ sub get_bucket_word_prefixes
     # and may cause perl crash.
 
     if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
-        no locale;
         return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc__($_,0,1)} @{$result};
     } else {
         if  ( $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
-    	    no locale;
             return grep {$_ ne $prev && ($prev = $_, 1)} sort map {$_ =~ /([\x20-\x80]|$eksc)/} @{$result};
         } else {
             return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)}  @{$result};
@@ -2901,11 +2828,8 @@ sub get_html_colored_message
     $self->{parser__}->{color_userid__} = undef;
     $self->{parser__}->{bayes__} = bless $self;
 
-    # Pass language parameter to parse_file()
-
-    my $result = $self->{parser__}->parse_file( $file,   # PROFILE BLOCK START                     
-          $self->module_config_( 'html', 'language' ),
-          $self->global_config_( 'message_cutoff'   ) ); # PROFILE BLOCK STOP
+    my $result = $self->{parser__}->parse_file( $file,   # PROFILE BLOCK START
+           $self->global_config_( 'message_cutoff'   ) ); # PROFILE BLOCK STOP
 
     $self->{parser__}->{color__} = '';
 
@@ -2938,10 +2862,7 @@ sub fast_get_html_colored_message
     $self->{parser__}->{color_userid__} = $userid;
     $self->{parser__}->{bayes__}        = bless $self;
 
-    # Pass language parameter to parse_file()
-
     my $result = $self->{parser__}->parse_file( $file,
-                                                $self->module_config_( 'html', 'language' ),
                                                 $self->global_config_( 'message_cutoff'   ) );
 
     $self->{parser__}->{color__} = '';
@@ -3072,8 +2993,6 @@ sub add_messages_to_bucket
         return 0;
     }
 
-    # Pass language parameter to parse_file()
-
     # This is done to clear out the word list because in the loop
     # below we are going to not reset the word list on each parse
 
@@ -3082,7 +3001,6 @@ sub add_messages_to_bucket
 
     foreach my $file (@files) {
         $self->{parser__}->parse_file( $file,  # PROFILE BLOCK START
-            $self->module_config_( 'html', 'language' ),
             $self->global_config_( 'message_cutoff'   ),
             0 );  # PROFILE BLOCK STOP (Do not reset word list)
     }
@@ -3132,10 +3050,7 @@ sub remove_message_from_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    # Pass language parameter to parse_file()
-
     $self->{parser__}->parse_file( $file,               # PROFILE BLOCK START
-         $self->module_config_( 'html', 'language' ),
          $self->global_config_( 'message_cutoff'   ) ); # PROFILE BLOCK STOP
     $self->add_words_to_bucket__( $session, $bucket, -1 );
 
