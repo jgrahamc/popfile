@@ -612,7 +612,7 @@ sub chi2
         $sum  += $term;
     }
 
-    return $sum;
+    return ($sum<1)?$sum:1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -718,7 +718,7 @@ sub classify
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
 
     foreach my $bucket (@buckets) {
-        $chi{$bucket} = chi2( $score{$bucket}, 2 * $matchcount{$ranking[0]}, -int($score{$ranking[0]}/log(10)) * log(10) );
+        $chi{$bucket} = chi2( $score{$bucket}, 2 * $matchcount{$bucket}, -int($score{$ranking[0]}/log(10)) * log(10) );
     }
 
     # If no bucket has a probability better than 0.5, call the message "unclassified".
@@ -731,7 +731,12 @@ sub classify
     # Now take a look at the top two chi tests, if they are close to each other then
     # we are unsure
 
-    if ( ( $chi{$ranking[0]} * 0.5 ) < $chi{$ranking[1]} ) {
+    my $c0 = 1.0 - $chi{$ranking[0]};
+    my $c1 = 1.0 - $chi{$ranking[1]};
+
+    my $certainty = ($c1-$c0 + 1) / 2;
+
+    if ( $certainty < 0.9 ) {
         $class = 'unsure';
     }
 
@@ -779,7 +784,7 @@ sub classify
             $self->{scores__} .= "<tr><td></td><td><input type=\"submit\" class=\"submit\" name=\"create\" value=\"$language{Create}\" /></td></tr></table></form>";
         }
 
-        $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<b>Verdict: <font color=\"$self->{colors__}{$class}\">$class</font></b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
+        $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<b>Verdict: <font color=\"$self->{colors__}{$class}\">$class ($certainty)</font></b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
         $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\">$language{Probability}</th></tr>\n";
 
         foreach my $b (@ranking) {
