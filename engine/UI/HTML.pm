@@ -1570,10 +1570,10 @@ sub corpus_page
         $row_data{Corpus_Bucket_Color}  = $self->get_bucket_parameter__( $bucket, 'color' );
         $row_data{Corpus_Bucket_Unique} = $self->pretty_number(  $self->{classifier__}->get_bucket_unique_count( $self->{api_session__}, $bucket ) );
         $row_data{Corpus_If_Bucket_Not_Pseudo} = !$self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $bucket );
-        $row_data{Corpus_If_Subject}    = $self->get_bucket_parameter__( $bucket, 'subject' );
-        $row_data{Corpus_If_XTC}        = $self->get_bucket_parameter__( $bucket, 'xtc' );
-        $row_data{Corpus_If_XPL}        = $self->get_bucket_parameter__( $bucket, 'xpl' );
-        $row_data{Corpus_If_Quarantine} = $self->get_bucket_parameter__( $bucket, 'quarantine' );
+        $row_data{Corpus_If_Subject}    = !$self->get_bucket_parameter__( $bucket, 'subject' );
+        $row_data{Corpus_If_XTC}        = !$self->get_bucket_parameter__( $bucket, 'xtc' );
+        $row_data{Corpus_If_XPL}        = !$self->get_bucket_parameter__( $bucket, 'xpl' );
+        $row_data{Corpus_If_Quarantine} = !$self->get_bucket_parameter__( $bucket, 'quarantine' );
         $row_data{Localize_On}          = $self->{language__}{On};
         $row_data{Localize_Off}         = $self->{language__}{Off};
         $row_data{Localize_TurnOn}      = $self->{language__}{TurnOn};
@@ -3009,7 +3009,6 @@ sub load_template__
 
     foreach my $var (@vars) {
         if ( $var =~ /^Localize_(.*)/ ) {
-            $self->log_( "Localize $1" );
             $templ->param( $var => $self->{language__}{$1} );
         }
     }
