@@ -2224,10 +2224,10 @@ Function SetEmailClientPage_Init
   ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "Settings" "RTL" "$(^RTL)"
-  
+
   ; We use the 'Back' button as an easy way to skip all the email client reconfiguration pages
   ; (but we still check if there are any old-style uninstall data files to be converted)
-  
+
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" \
               "Settings" "BackButtonText" "$(PFI_LANG_MAILCFG_IO_SKIPALL)"
 
@@ -2329,11 +2329,11 @@ Function SetOutlookOutlookExpressPage_Init
   ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" "Settings" "RTL" "$(^RTL)"
-  
+
   ; We use the 'Back' button as an easy way to skip the 'Outlook Express' or 'Outlook'
   ; reconfiguration (but we still check if there are any old-style uninstall data files
   ; to be converted)
-  
+
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" \
               "Settings" "BackButtonText" "$(PFI_LANG_MAILCFG_IO_SKIPONE)"
 
@@ -3710,9 +3710,9 @@ Function SetEudoraPage_Init
   ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Settings" "RTL" "$(^RTL)"
-  
+
   ; We use the 'Back' button as an easy way to skip the 'Eudora' reconfiguration
-  
+
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" \
               "Settings" "BackButtonText" "$(PFI_LANG_MAILCFG_IO_SKIPONE)"
 
@@ -4171,6 +4171,7 @@ close_file:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "Flags" "DISABLED"
 
   ; If we are upgrading POPFile, the corpus might have to be converted from flat file format
+  ; or from BerkeleyDB format to the new SQL database format (installer uses SQLite package)
 
   ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status"
   StrCmp ${L_TEMP} "new" 0 display_the_page
@@ -4507,8 +4508,9 @@ no_reboot_reqd:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "State"
   StrCmp ${L_TEMP} "1" disable_UI_option
 
-  ; If flat file corpus conversion is required, we cannot offer to display the POPFile UI
-  ; (conversion may take several minutes, during which time the UI will be unresponsive)
+  ; If corpus conversion (from flat file or BerkeleyDB format) is required, we cannot offer to
+  ; display the POPFile UI (conversion may take several minutes, during which time the UI will
+  ; be unresponsive)
 
   ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status"
   StrCmp ${L_TEMP} "new" 0 selection_ok
@@ -4828,7 +4830,6 @@ remove_shortcuts:
   Goto end_oe_restore
 
 delete_oe_data:
-  FlushINI "$INSTDIR\${L_UNDOFILE}"
   Delete "$INSTDIR\${L_UNDOFILE}"
   Delete "$INSTDIR\popfile.reg.bk*"
 
@@ -4858,7 +4859,6 @@ end_oe_restore:
   Goto end_outlook_restore
 
 delete_outlook_data:
-  FlushINI "$INSTDIR\${L_UNDOFILE}"
   Delete "$INSTDIR\${L_UNDOFILE}"
   Delete "$INSTDIR\outlook.reg.bk*"
 
@@ -4888,7 +4888,6 @@ end_outlook_restore:
   Goto end_eudora_restore
 
 delete_eudora_data:
-  FlushINI "$INSTDIR\${L_UNDOFILE}"
   Delete "$INSTDIR\${L_UNDOFILE}"
 
 end_eudora_restore:
@@ -5084,7 +5083,7 @@ Function un.RestoreOOE
   Push ${L_ERRORLOG}
 
   IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 nothing_to_restore
-  
+
   Call un.GetDateTimeStamp
   Pop ${L_TEMP}
 
@@ -5215,6 +5214,7 @@ save_result:
   FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}$\r$\n$\r$\n"
   FileClose ${L_ERRORLOG}
   DetailPrint "$(PFI_LANG_UN_LOG_4): ${L_UNDOFILE}"
+  FlushINI "$INSTDIR\${L_UNDOFILE}"
 
 exit_now:
   Pop ${L_ERRORLOG}
@@ -5347,7 +5347,7 @@ check_if_running:
              IDABORT nothing_to_restore IDRETRY check_if_running
 
 restore_eudora:
-  
+
   Call un.GetDateTimeStamp
   Pop ${L_TEMP}
 
@@ -5492,6 +5492,7 @@ save_result:
   FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}$\r$\n$\r$\n"
   FileClose ${L_ERRORLOG}
   DetailPrint "$(PFI_LANG_UN_LOG_4): ${L_UNDOFILE}"
+  FlushINI "$INSTDIR\${L_UNDOFILE}"
 
 exit_now:
   Pop ${L_ERRORLOG}
