@@ -2170,7 +2170,7 @@ sub run_popfile
                                     $last_timeout = time;
                                 }
                                 
-                                if ( $message_size > 100000 ) 
+                                if ( ( $message_size > 100000 ) && ( $getting_headers == 0 ) )
                                 {
                                     last;
                                 }

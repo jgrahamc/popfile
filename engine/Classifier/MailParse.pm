@@ -118,39 +118,49 @@ sub update_word
 
 sub add_line
 {
-    my ($self, $line, $encoded) = @_;
-
-    # Pull out any email addresses in the line that are marked with <> and have an @ in them
-
-    while ( $line =~ s/<([A-Za-z0-9\-_]+?@[A-Za-z0-9\-_\.]+?)>// ) 
+    my ($self, $bigline, $encoded) = @_;
+    my $p = 0;
+    
+    # If the line is really long then split at every 1k and feed it to the parser below
+    
+    while ( $p < length($bigline) )
     {
-        update_word($self, $1, $encoded);
-    }
+        my $line = substr($bigline, $p, 1024);
+        
+        # Pull out any email addresses in the line that are marked with <> and have an @ in them
 
-    # Grab domain names
-
-    while ( $line =~ s/(([A-Za-z][A-Za-z0-9\-_]+\.){2,})([A-Za-z0-9\-_]+)([^A-Za-z0-9\-_]|$)/$4/ ) 
-    {
-        update_word($self, "$1$3", $encoded);
-    }
-
-    # Grab IP addresses
-
-    while ( $line =~ s/(([12]?\d{1,2}\.){3}[12]?\d{1,2})// ) 
-    {
-        update_word($self, "$1", $encoded);
-    }
-
-    # Only care about words between 3 and 45 characters since short words like
-    # an, or, if are too common and the longest word in English (according to
-    # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
-
-    while ( $line =~ s/([A-Za-z][A-Za-z\']{0,44})[-,\.\"\'\)\?!:;\/]{0,5}([ \t\n\r]|$)/ / )
-    {
-        if (length $1 >= 3)        
+        while ( $line =~ s/<([A-Za-z0-9\-_]+?@[A-Za-z0-9\-_\.]+?)>// ) 
         {
-            update_word($self,$1, $encoded);
+            update_word($self, $1, $encoded);
         }
+
+        # Grab domain names
+
+        while ( $line =~ s/(([A-Za-z][A-Za-z0-9\-_]+\.){2,})([A-Za-z0-9\-_]+)([^A-Za-z0-9\-_]|$)/$4/ ) 
+        {
+            update_word($self, "$1$3", $encoded);
+        }
+
+        # Grab IP addresses
+
+        while ( $line =~ s/(([12]?\d{1,2}\.){3}[12]?\d{1,2})// ) 
+        {
+            update_word($self, "$1", $encoded);
+        }
+
+        # Only care about words between 3 and 45 characters since short words like
+        # an, or, if are too common and the longest word in English (according to
+        # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
+
+        while ( $line =~ s/([A-Za-z][A-Za-z\']{0,44})[-,\.\"\'\)\?!:;\/]{0,5}([ \t\n\r]|$)/ / )
+        {
+            if (length $1 >= 3)        
+            {
+                update_word($self,$1, $encoded);
+            }
+        }
+        
+        $p += 1024;
     }
 }
 
