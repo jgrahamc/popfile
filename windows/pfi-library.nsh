@@ -1767,6 +1767,16 @@ FunctionEnd
 !macro ShutdownViaUI UN
   Function ${UN}ShutdownViaUI
 
+    ;--------------------------------------------------------------------------
+    ; Override the default timeout for NSISdl requests (specifies timeout in milliseconds)
+
+    !define C_SVU_DLTIMEOUT       /TIMEOUT=10000
+
+    ; Delay between the two shutdown requests (in milliseconds)
+
+    !define C_SVU_DLGAP           3000
+    ;--------------------------------------------------------------------------
+
     !define L_RESULT    $R9
     !define L_UIPORT    $R8
 
@@ -1787,15 +1797,15 @@ FunctionEnd
     Goto exit
 
   port_ok:
-    NSISdl::download_quiet http://127.0.0.1:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_1.htm"
+    NSISdl::download_quiet ${C_SVU_DLTIMEOUT} http://127.0.0.1:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_1.htm"
     Pop ${L_RESULT}
     StrCmp ${L_RESULT} "success" try_again
     StrCpy ${L_RESULT} "failure"
     Goto exit
 
   try_again:
-    Sleep 3000
-    NSISdl::download_quiet http://127.0.0.1:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_2.htm"
+    Sleep ${C_SVU_DLGAP}
+    NSISdl::download_quiet ${C_SVU_DLTIMEOUT} http://127.0.0.1:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_2.htm"
     Pop ${L_RESULT}
     StrCmp ${L_RESULT} "success" password
     StrCpy ${L_RESULT} "success"
@@ -1807,6 +1817,9 @@ FunctionEnd
   exit:
     Pop ${L_UIPORT}
     Exch ${L_RESULT}
+
+    !undef C_SVU_DLTIMEOUT
+    !undef C_SVU_DLGAP
 
     !undef L_RESULT
     !undef L_UIPORT

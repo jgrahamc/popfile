@@ -89,7 +89,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define C_VERSION   "0.5.3"       ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.5.4"       ; see 'VIProductVersion' comment below for format details
 
   ; Specify EXE filename and icon for the 'installer'
 
@@ -101,23 +101,35 @@
 
   SilentInstall silent
 
+  ;-------------------------------------------------------------------------------
+  ; Time delay constants used in conjunction with the NSISdl plugin
+  ;-------------------------------------------------------------------------------
+
+  ; Override the default timeout for NSISdl requests (specifies timeout in milliseconds)
+
+  !define C_DLTIMEOUT                /TIMEOUT=10000
+
+  ; Delay between the two shutdown requests (in milliseconds)
+
+  !define C_DLGAP                    3000
+
 #--------------------------------------------------------------------------
 
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion "${C_VERSION}.1"
+  VIProductVersion                   "${C_VERSION}.1"
 
-  VIAddVersionKey "ProductName" "POPFile Silent Shutdown Utility - stops POPFile without \
-                  opening a browser window."
-  VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sourceforge.net"
-  VIAddVersionKey "CompanyName" "The POPFile Project"
-  VIAddVersionKey "LegalCopyright" "© 2003-2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription" "POPFile Silent Shutdown Utility"
-  VIAddVersionKey "FileVersion" "${C_VERSION}"
+  VIAddVersionKey "ProductName"      "POPFile Silent Shutdown Utility - stops POPFile without \
+                                     opening a browser window."
+  VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sourceforge.net"
+  VIAddVersionKey "CompanyName"      "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"   "© 2003-2004  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"  "POPFile Silent Shutdown Utility"
+  VIAddVersionKey "FileVersion"      "${C_VERSION}"
 
-  VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script" "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
+  VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
 
 #----------------------------------------------------------------------------------------
 
@@ -237,7 +249,7 @@ port_checks:
   ; If first attempt appears to succeed, we must try again to check if POPFile has shutdown
   ; (we cannot tell the difference between 'shutdown' and 'incorrect password' responses)
 
-  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown_1.htm"
+  NSISdl::download_quiet ${C_DLTIMEOUT} http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown_1.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" try_password_again
   StrCmp ${L_REPORT} "none" error_exit
@@ -248,8 +260,8 @@ port_checks:
   Goto error_exit
 
 try_password_again:
-  Sleep 5000
-  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown_2.htm"
+  Sleep ${C_DLGAP}
+  NSISdl::download_quiet ${C_DLTIMEOUT} http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown_2.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" 0 password_ok
   StrCmp ${L_REPORT} "none" error_exit
@@ -274,7 +286,7 @@ no_password_supplied:
   ; If first attempt appears to succeed, we must try again to check if POPFile has shutdown
   ; (we cannot tell the difference between 'shutdown' and 'enter password' responses)
 
-  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown_1.htm"
+  NSISdl::download_quiet ${C_DLTIMEOUT} http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown_1.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" try_again
   StrCmp ${L_REPORT} "none" error_exit
@@ -285,8 +297,8 @@ no_password_supplied:
   Goto error_exit
 
 try_again:
-  Sleep 5000
-  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown_2.htm"
+  Sleep ${C_DLGAP}
+  NSISdl::download_quiet ${C_DLTIMEOUT} http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown_2.htm"
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" 0 shutdown_ok
   StrCmp ${L_REPORT} "none" error_exit
