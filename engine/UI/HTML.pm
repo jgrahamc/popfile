@@ -279,6 +279,32 @@ sub url_handler__
         $self->parse_form__( $content );
     }
 
+    # Check the password
+
+    if ( $url eq '/password' )  {
+        if ( $self->{form_}{password} eq $self->config_( 'password' ) )  {
+            change_session_key( $self );
+            delete $self->{form_}{password};
+            $self->{form_}{session} = $self->{session_key__};
+            if ( defined( $self->{form_}{redirect} ) ) {
+                $url = $self->{form_}{redirect};
+            } else {
+                $url = '/';
+            }
+        } else {
+            password_page( $self, $client, 1, '/' );
+            return 1;
+        }
+    }
+
+    # If there's a password defined then check to see if the user already knows the
+    # session key, if they don't then drop to the password screen
+
+    if ( ( (!defined($self->{form_}{session})) || ($self->{form_}{session} eq '' ) || ( $self->{form_}{session} ne $self->{session_key__} ) ) && ( $self->config_( 'password' ) ne '' ) ) {
+        password_page( $self, $client, 0, $url );
+        return 1;
+    }
+
     if ( $url eq '/jump_to_message' )  {
         my $found = 0;
         my $file = $self->{form_}{view};
@@ -325,30 +351,6 @@ sub url_handler__
 
     if ( $url =~ /(manual\/.+\.html)/ ) {
         $self->http_file_( $client, $1, 'text/html' );
-        return 1;
-    }
-
-    # Check the password
-    if ( $url eq '/password' )  {
-        if ( $self->{form_}{password} eq $self->config_( 'password' ) )  {
-            change_session_key( $self );
-            delete $self->{form_}{password};
-            $self->{form_}{session} = $self->{session_key__};
-            if ( defined( $self->{form_}{redirect} ) ) {
-                $url = $self->{form_}{redirect};
-            } else {
-                $url = '/';
-            }
-        } else {
-            password_page( $self, $client, 1, '/' );
-            return 1;
-        }
-    }
-
-    # If there's a password defined then check to see if the user already knows the
-    # session key, if they don't then drop to the password screen
-    if ( ( (!defined($self->{form_}{session})) || ($self->{form_}{session} eq '' ) || ( $self->{form_}{session} ne $self->{session_key__} ) ) && ( $self->config_( 'password' ) ne '' ) ) {
-        password_page( $self, $client, 0, $url );
         return 1;
     }
 
