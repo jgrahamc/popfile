@@ -2207,7 +2207,7 @@ sub classify
             my @chart_data;
             my $max_chart = $chart{$words[0]};
             my $min_chart = $chart{$words[$#words]};
-            my $scale = 400 / ( $max_chart - $min_chart );
+            my $scale = ( $max_chart > $min_chart )?400 / ( $max_chart - $min_chart ):0;
             my $width = 400 / $#words;
             my $color = $self->get_bucket_color( $session, $ranking[0] );
             foreach my $word (@words) {
