@@ -109,7 +109,7 @@ Footer_Forums                           フォーラム
 Footer_FeedMe                           寄付
 Footer_RequestFeature                   要望
 Footer_MailingList                      メーリングリスト
-Footer_Wiki                             追加ドキュメント
+Footer_Wiki                             ドキュメント
 
 Configuration_Error1                    区切り文字は1文字だけにしてください。
 Configuration_Error2                    ユーザーインターフェース用ポート番号は1から65535までにしてください。
@@ -236,10 +236,10 @@ Security_PasswordTitle                  ユーザーインターフェースパスワード
 Security_Password                       パスワード
 Security_PasswordUpdate                 パスワードを %s に変更しました
 Security_AUTHTitle                      リモートサーバー
-Security_SecureServer                   POP3 SPA/AUTH サーバー
-Security_SecureServerUpdate             POP3 SPA/AUTH サーバーを %s に変更しました。この変更は POPFile を再起動するまで有効になりません。
-Security_SecurePort                     POP3 SPA/AUTH ポート番号
-Security_SecurePortUpdate               POP3 SPA/AUTH ポート番号を %s に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Security_SecureServer                   リモート POP3 サーバー (SPA/AUTH または 透過プロキシ)
+Security_SecureServerUpdate             リモート POP3 サーバーを %s に変更しました。
+Security_SecurePort                     リモート POP3 ポート番号 (SPA/AUTH または 透過プロキシ)
+Security_SecurePortUpdate               リモート POP3 ポート番号を %s に変更しました。
 Security_SMTPServer                     SMTP チェーンサーバー
 Security_SMTPServerUpdate               SMTP チェーンサーバーを %s に変更しました。この変更は POPFile を再起動するまで有効になりません。
 Security_SMTPPort                       SMTP チェーンポート番号
