@@ -131,7 +131,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.3"
+  !define C_PFI_VERSION  "0.1.4"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -759,6 +759,7 @@ Section "POPFile" SecPOPFile
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Revision" "${L_TEMP_4}"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile RevStatus" "${L_TEMP_5}"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "adduser.exe"
+  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Owner" "$G_WINUSERNAME"
 
   Push $G_ROOTDIR
   Call StrLower
