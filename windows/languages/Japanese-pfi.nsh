@@ -90,8 +90,8 @@
 # Standard MUI Page - Installation Page (for the main POPFile installer)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_TITLE     "Program Files Installed"
-!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_SUBTITLE  "${C_PFI_PRODUCT} must be configured before it can be used"
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_TITLE     "プログラムファイルがインストールされました。"
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_SUBTITLE  "${C_PFI_PRODUCT} を使用するにはその前に設定がされていなければなりません。"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish (for the main POPFile installer)
@@ -116,8 +116,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "POPFile Corpus の変換は完了しました。"
 !insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "続行するには「閉じる」をクリックして下さい。"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_TITLE     "POPFile Corpus Conversion Failed"
-!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_SUBTITLE  "Please click Cancel to continue"
+!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_TITLE     "POPFile Corpus の変換に失敗しました。"
+!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_SUBTITLE  "続行するには「キャンセル」をクリックして下さい。"
 
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -187,7 +187,7 @@
 # Message displayed when 'Add User' does not seem to be part of the current version
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_COMPAT_NOTFOUND      "Error: Compatible version of ${C_PFI_PRODUCT} not found !"
+!insertmacro PFI_LANG_STRING PFI_LANG_COMPAT_NOTFOUND      "エラー: ${C_PFI_PRODUCT} の互換性のあるバージョンが見つかりません！"
 
 #--------------------------------------------------------------------------
 # Message displayed when installer exits because another copy is running
@@ -202,8 +202,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1   "次の場所に以前にインストールされた POPFile が見つかりました:"
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2   "アップグレードしますか？"
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_3   "次の場所に以前の設定データが見つかりました:"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_4   "Restored configuration data found"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_5   "Do you want to use the restored data ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_4   "リストアされた設定データが見つかりました。"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_5   "リストアされたデータを使用しますか？"
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
@@ -237,7 +237,7 @@
 !insertmacro PFI_LANG_STRING DESC_SecPOPFile               "POPFile のコアファイルをインストールします。最小バージョンの Perl も含みます。"
 !insertmacro PFI_LANG_STRING DESC_SecSkins                 "POPFile ユーザーインターフェースのデザインを変えることができる POPFile スキンをインストールします。"
 !insertmacro PFI_LANG_STRING DESC_SecLangs                 "POPFile UI の英語以外のバージョンをインストールします。"
-!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Installs the POPFile XMLRPC module (for access to the POPFile API) and the Perl support it requires."
+!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "(POPFile API へのアクセスを可能にする)POPFile XMLRPC モジュールと必要な Perl モジュールをインストールします。"
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
@@ -276,11 +276,11 @@
 ; When upgrading an existing installation, change the normal "Install" button to "Upgrade"
 ; (the page with the "Install" button will vary depending upon the page order in the script)
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_UPGRADE     "Upgrade"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_UPGRADE     "アップグレード"
 
 ; When resetting POPFile to use newly restored 'User Data', change "Install" button to "Restore"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_RESTORE     "Restore"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_RESTORE     "リストア"
 
 ; Installation Progress Reports displayed above the progress bar
 
@@ -291,11 +291,11 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORPUS     "corpus(コーパス、単語ファイル)のバックアップを作成中。しばらくお待ち下さい..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      "POPFile のスキンファイルをインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "POPFile UI 言語ファイルをインストール中..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Installing POPFile XMLRPC files..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_REGSET     "Updating registry settings and environment variables..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SQLBACKUP  "Backing up the old SQLite database..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FINDCORPUS "Looking for existing flat-file or BerkeleyDB corpus..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_MAKEBAT    "Generating the 'pfi-run.bat' batch file..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "POPFile XMLRPC ファイルをインストール中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_REGSET     "レジストリ情報と環境変数を更新中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SQLBACKUP  "古い SQLite データベースをバックアップ中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FINDCORPUS "フラットファイルまたは BerkeleyDB のコーパスを探しています..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_MAKEBAT    "'pfi-run.bat' バッチファイルを生成中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "「次へ」をクリックして続行して下さい。"
 
 ; Installation Log Messages
@@ -510,8 +510,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO         "いいえ(ユーザーインターフェースは POPFile を起動しないと使えません)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "POPFile を起動(コンソール)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "POPFile をバックグラウンドで起動(コンソールなし)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Run POPFile (do not show system tray icon)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Run POPFile with system tray icon"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "POPFile を起動(システムトレイアイコンを表示しない)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "POPFile を起動(システムトレイアイコンを表示)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "POPFile を起動すれば以下の方法でユーザーインターフェースを使用できます。"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(a) システムトレイ中の POPFile アイコンをダブルクリック"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(b) スタート --> プログラム --> POPFile --> POPFile User Interface を選択"
@@ -531,8 +531,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOPOPFILE    "エラー: POPFile のパスが見つかりません。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ENVNOTSET    "エラー: 環境変数をセットすることができません。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOKAKASI     "エラー: Kakasi のパスが見つかりません。"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "corpus 変換のプロセスを起動中にエラーが発生しました。"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_FATALERR     "A fatal error occurred during the corpus conversion process !"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "Corpus 変換のプロセスを起動中にエラーが発生しました。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_FATALERR     "Corpus 変換のプロセス中に致命的なエラーが発生しました！"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ESTIMATE     "予想残り時間: "
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MINUTES      "分"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_WAITING      "(最初のファイルが変換されるのを待っています。)"
@@ -555,10 +555,10 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_PERL         "最小バージョンの Perl を削除中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTLOOK      "Outlook の設定を元に戻しています..."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EUDORA       "Eudora の設定を元に戻しています..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_DBMSGDIR     "Deleting corpus and 'Recent Messages' directory..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EXESTATUS    "Checking program status..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CONFIG       "Deleting configuration data..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_REGISTRY     "Deleting POPFile registry entries..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_DBMSGDIR     "corpus と 'Recent Messages' ディレクトリを削除中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EXESTATUS    "プログラムのステータスをチェック中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CONFIG       "設定データを削除中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_REGISTRY     "POPFile のレジストリエントリーを削除中..."
 
 ; Uninstall Log Messages
 
@@ -567,7 +567,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_RESTORED      "Restored"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_CLOSED        "Closed"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTDIR    "Removing all files from POPFile directory"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTERR    "Note: unable to remove all files from POPFile 'User Data' directory"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTERR    "Note: unable to remove all files from POPFile directory"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DATAPROBS     "Data problems"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERDIR    "Removing all files from POPFile 'User Data' directory"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERERR    "Note: unable to remove all files from POPFile 'User Data' directory"
@@ -596,7 +596,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "POPFile ディレクトリ以下の全てのファイルを削除しますか？$\r$\n$\r$\n(残したいファイルがあれば No をクリックして下さい。)"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "POPFile「ユーザーデータ」ディレクトリ以下の全てのファイルを削除しますか？$\r$\n$\r$\n(残したいファイルがあれば No をクリックして下さい。)"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Do you want to remove all files in your 'Recent Messages' directory?"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "'Recent Messages' ディレクトリ中の全てのファイルを削除しますか？"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "注意"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "は削除できませんでした。"
