@@ -134,21 +134,26 @@ sub get_value
     my ($self, $bucket, $word) = @_;
     $word =~ /^(.)/;
     my $i = ord($1);
-    if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E L([\-\.\d]+)\|/ ) != 0 ) 
+    
+    if ( defined($self->{matrix}{$bucket}[$i]) )
     {
-        return $1;
-    } 
-
-    if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E (\d+)\|/ ) != 0 ) 
-    {
-        my $newvalue = log($1 / $self->{total}{$bucket});
-        set_value( $self, $bucket, $word, "L$newvalue" );
-        return $newvalue;
-    } 
-    else
-    {
-        return 0;
+        if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E L([\-\.\d]+)\|/ ) != 0 ) 
+        {
+            return $1;
+        } 
     }
+    
+    if ( defined($self->{matrix}{$bucket}[$i]) )
+    {
+        if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E (\d+)\|/ ) != 0 ) 
+        {
+            my $newvalue = log($1 / $self->{total}{$bucket});
+            set_value( $self, $bucket, $word, "L$newvalue" );
+            return $newvalue;
+        } 
+    }
+
+    return 0;
 }
 
 sub set_value
