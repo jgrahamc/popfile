@@ -216,7 +216,7 @@ sub remove_debug_files
 # ---------------------------------------------------------------------------------------------
 sub remove_mail_files
 {
-    my @mail_files = glob "popfile*.msg";
+    my @mail_files = glob "messages/popfile*.msg";
     
     foreach my $mail_file (@mail_files)
     {
@@ -1015,7 +1015,7 @@ sub history_page
     # Handle clearing the history files
     if ( $form{clear} eq 'Remove+All' )
     {
-        my @mail_files = glob "popfile*.msg";
+        my @mail_files = glob "messages/popfile*.msg";
 
         foreach my $mail_file (@mail_files)
         {
@@ -1028,7 +1028,13 @@ sub history_page
         $configuration{last_count} = 0;
     }
 
-    my @mail_files = glob "popfile*.msg";
+    my @mail_files = glob "messages/popfile*.msg";
+
+    foreach my $i ( 0 .. $#mail_files )
+    {
+        $mail_files[$i] =~ /(popfile.*\.msg)/;
+        $mail_files[$i] = $1;
+    }
 
     # Handle the reinsertion of a message file
     if ( $form{shouldbe} ne '' )
@@ -1045,7 +1051,7 @@ sub history_page
         }
         close WORDS;
 
-        $classifier->{parser}->parse_stream($form{file});
+        $classifier->{parser}->parse_stream("messages/$form{file}");
 
         foreach my $word (keys %{$classifier->{parser}->{words}})
         {
@@ -1063,7 +1069,7 @@ sub history_page
         }
         close WORDS;
         
-        my $class_file = $form{file};
+        my $class_file = "messages/$form{file}";
         $class_file =~ s/msg$/cls/;
         open CLASS, ">$class_file";
         print CLASS "RECLASSIFIED$eol$form{shouldbe}$eol";
@@ -1089,7 +1095,7 @@ sub history_page
         my $subject;
         $mail_file = $mail_files[$i];
     
-        open MAIL, "<$mail_file";
+        open MAIL, "<messages/$mail_file";
         while (<MAIL>) 
         {
             if ( /^From: (.*)/ )
@@ -1146,7 +1152,7 @@ sub history_page
         $body .= $i+1 . "<td>";
         my $class_file = $mail_file;
         $class_file =~ s/msg$/cls/;
-        open CLASS, "<$class_file";
+        open CLASS, "<messages/$class_file";
         my $bucket = <CLASS>;
         my $reclassified = 0;
         if ( $bucket =~ /RECLASSIFIED/ ) {
@@ -1215,7 +1221,7 @@ sub history_page
             $body .= "<tr><td><td colspan=3><table border=3 bordercolor=$stab_color cellspacing=0 cellpadding=6><tr><td>";
             $classifier->{parser}->{color} = 1;
             $classifier->{parser}->{bayes} = $classifier;
-            $body .= $classifier->{parser}->parse_stream($form{view});
+            $body .= $classifier->{parser}->parse_stream("messages/$form{view}");
             $classifier->{parser}->{color} = 0;
             $body .= "<p align=right><a href=/history?start_message=$start_message><b>Close</b></a></table><td valign=top><b>Color Key</b><p>";
             
@@ -1712,8 +1718,8 @@ sub run_popfile
 
                             my $getting_headers = 1;
                             
-                            my $temp_file = "$mail_filename" . "_$configuration{mail_count}.msg";
-                            my $class_file = "$mail_filename" . "_$configuration{mail_count}.cls";
+                            my $temp_file = "messages/$mail_filename" . "_$configuration{mail_count}.msg";
+                            my $class_file = "messages/$mail_filename" . "_$configuration{mail_count}.cls";
                             $configuration{mail_count} += 1;
 
                             open TEMP, ">$temp_file";
@@ -1951,6 +1957,9 @@ $configuration{subject}   = 1;
 $configuration{server}    = '';
 $configuration{sport}     = '';
 $configuration{page_size} = 20;
+
+# Ensure that the messages subdirectory exists
+mkdir( 'messages' );
 
 print "    Loading configuration\n";
 
