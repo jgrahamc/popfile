@@ -93,6 +93,8 @@ test_assert_equal( $cl->map_color( '#FFfFFF' ), 'ffffff' );
 
 test_assert_equal( $cl->map_color( '#F0F0F0' ), 'f0f0f0' );
 test_assert_equal( $cl->map_color( 'F0F0F0' ), 'f0f0f0' );
+
+# flex-hex
 test_assert_equal( $cl->map_color( '#FyFyFy' ), 'f0f0f0' );
 test_assert_equal( $cl->map_color( 'FtFtFt' ), 'f0f0f0' );
 
@@ -105,6 +107,13 @@ test_assert_equal( $cl->map_color( '#F0F0' ), 'f0f000' );
 test_assert_equal( $cl->map_color( 'F0F0' ), 'f0f000' );
 test_assert_equal( $cl->map_color( '#FoFp' ), 'f0f000' );
 test_assert_equal( $cl->map_color( 'F&F*' ), 'f0f000' );
+
+# odd size flex-hex (per internet explorer parsing)
+test_assert_equal( $cl->map_color( 'f' ), '0f0000' );
+test_assert_equal( $cl->map_color( 'ff' ), '0f0f00' );
+test_assert_equal( $cl->map_color( 'fff' ), '0f0f0f' );
+test_assert_equal( $cl->map_color( 'aa5cfd0c69af132b3e4f' ), 'aac62b' );
+test_assert_equal( $cl->map_color( '6db6ec49efd278cd0bc92d1e5e072d68'), '6ecde0' );
 
 # Check line splitting into words
 $cl->{htmlbackcolor__} = $cl->map_color( 'white' );
