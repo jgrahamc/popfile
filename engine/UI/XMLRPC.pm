@@ -41,6 +41,8 @@ use IO::Select;
 
 require XMLRPC::Transport::HTTP;
 
+my $eol = "\015\012";
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -181,16 +183,22 @@ sub service
                  ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {   # PROFILE BLOCK STOP
                 my $request = $client->get_request();
 
-                $self->{server__}->request( $request );
+                # Note that handle() relies on the $request being perfectly valid, so here we
+                # check that it is, if it is not then we don't want to call handle and we'll
+                # return out own error
 
-                # Note the direct call to SOAP::Transport::HTTP::Server::handle() here, this is
-                # because we have taken the code from XMLRPC::Transport::HTTP::Server::handle()
-                # and reproduced a modification of it here, accepting a single request and handling
-                # it.  This call to the parent of XMLRPC::Transport::HTTP::Server will actually
-                # deal with the request
+                if ( defined( $request ) ) {
+                    $self->{server__}->request( $request );
 
-                $self->{server__}->SOAP::Transport::HTTP::Server::handle();
-                $client->send_response( $self->{server__}->response );
+                    # Note the direct call to SOAP::Transport::HTTP::Server::handle() here, this is
+                    # because we have taken the code from XMLRPC::Transport::HTTP::Server::handle()
+                    # and reproduced a modification of it here, accepting a single request and handling
+                    # it.  This call to the parent of XMLRPC::Transport::HTTP::Server will actually
+                    # deal with the request
+
+                    $self->{server__}->SOAP::Transport::HTTP::Server::handle();
+                    $client->send_response( $self->{server__}->response );
+		}
                 $client->close();
             }
         }
