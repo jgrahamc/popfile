@@ -76,11 +76,11 @@
   ;
   ;   <end of code block>
   ;
-  ;   (2) Ensure global user variable G_CFGDIR contains the path to the relevant 'popfile.cfg'
+  ;   (2) Ensure global user variable G_USERDIR contains the path to the relevant 'popfile.cfg'
   ;       configuration file. For example, if installer.nsi is using $INSTDIR\data\popfile.cfg
   ;      then installer.nsi should ensure a statement equivalent to
   ;
-  ;         StrCpy $G_CFGDIR  "$INSTDIR\data"
+  ;         StrCpy $G_USERDIR  "$INSTDIR\data"
   ;
   ;      is executed before the "Create POPFile Buckets" custom page function is executed
   ;      (i.e. before the code inserted by the CBP_PAGECOMMAND_SELECTBUCKETS macro is executed).
@@ -240,7 +240,7 @@
 #----------------------------------------------------------------------------------------------
 #  Usage Example:
 #
-#         Push $G_CFGDIR
+#         Push $G_USERDIR
 #         Call CBP_CheckCorpusStatus
 #         Pop $R0
 #
@@ -1223,10 +1223,10 @@ use_INI_file:
 
   ; We only offer to create POPFile buckets if we are not upgrading an existing POPFile system
 
-  ; Global user variable G_CFGDIR contains full path to folder where popfile.cfg can be found
+  ; Global user variable G_USERDIR contains full path to folder where popfile.cfg can be found
   ; (value set up by installer.nsi before this function is called)
 
-  Push $G_CFGDIR
+  Push $G_USERDIR
   Call CBP_CheckCorpusStatus
   Pop ${CBP_L_RESULT}
   StrCmp ${CBP_L_RESULT} "dirty" finished_now
