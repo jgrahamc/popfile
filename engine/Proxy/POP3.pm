@@ -307,11 +307,11 @@ sub child__
         #    downloading messages based on non-classification data in the TOP headers.
 
         if ( $command =~ /TOP (.*) (.*)/i ) {
+            my $count = $1;
+
             if ( $2 ne '99999999' )  {
                 if ( $self->config_( 'toptoo' ) ) {
-                    my $count = $1;
-
-                    if ( $self->echo_response_($mail, $client, "RETR $1" ) ) {
+                    if ( $self->echo_response_($mail, $client, "RETR $count" ) ) {
 
                         # Classify without echoing to client, saving file for later RETR's
 
@@ -319,11 +319,14 @@ sub child__
 
                         $downloaded{$count} = 1;
 
-                        if ( $self->echo_response_($mail, $client, $command ) ) {
+                        # Note that the 1 here indicates that echo_response_ does not send the response to the
+                        # client.  The +OK has already been sent by the RETR
+
+                        if ( $self->echo_response_($mail, $client, $command, 1 ) ) {
 
                             # Classify with pre-defined class, without saving, echoing to client
 
-                            $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, 0, 1, $class, 1 );
+                            $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 1, $class, 1 );
 
                             # Tell the parent that we just handled a mail
 
