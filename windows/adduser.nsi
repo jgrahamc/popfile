@@ -131,7 +131,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.5"
+  !define C_PFI_VERSION  "0.1.6"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -861,24 +861,26 @@ copy_stopwords:
 
 copy_default_stopwords:
   File /oname=stopwords.default "..\engine\stopwords"
+  
   FileOpen  ${L_CFG} $PLUGINSDIR\popfile.cfg a
   FileSeek  ${L_CFG} 0 END
   FileWrite ${L_CFG} "pop3_port $G_POP3$\r$\n"
   FileWrite ${L_CFG} "html_port $G_GUI$\r$\n"
   FileClose ${L_CFG}
   IfFileExists "$G_USERDIR\popfile.cfg" 0 update_config
-  SetFileAttributes "$G_USERDIR\popfile.cfg" NORMAL
-  IfFileExists "$G_USERDIR\popfile.cfg.bak" 0 make_cfg_backup
-  MessageBox MB_YESNO|MB_ICONQUESTION \
-      "$(PFI_LANG_MBCFGBK_1) 'popfile.cfg' $(PFI_LANG_MBCFGBK_2) ('popfile.cfg.bak').\
-      $\r$\n$\r$\n\
-      $(PFI_LANG_MBCFGBK_3)\
-      $\r$\n$\r$\n\
-      $(PFI_LANG_MBCFGBK_4)" IDNO update_config
-  SetFileAttributes "$G_USERDIR\popfile.cfg.bak" NORMAL
+  IfFileExists "$G_USERDIR\popfile.cfg.bk1" 0 the_first
+  IfFileExists "$G_USERDIR\popfile.cfg.bk2" 0 the_second
+  IfFileExists "$G_USERDIR\popfile.cfg.bk3" 0 the_third
+  Delete "$G_USERDIR\popfile.cfg.bk3"
 
-make_cfg_backup:
-  CopyFiles /SILENT /FILESONLY $G_USERDIR\popfile.cfg $G_USERDIR\popfile.cfg.bak
+the_third:
+  Rename "$G_USERDIR\popfile.cfg.bk2" "$G_USERDIR\popfile.cfg.bk3"
+
+the_second:
+  Rename "$G_USERDIR\popfile.cfg.bk1" "$G_USERDIR\popfile.cfg.bk2"
+
+the_first:
+  Rename "$G_USERDIR\popfile.cfg" "$G_USERDIR\popfile.cfg.bk1"
 
 update_config:
   CopyFiles /SILENT /FILESONLY $PLUGINSDIR\popfile.cfg $G_USERDIR\
@@ -4361,6 +4363,7 @@ check_shutdown:
 remove_user_data:
   Delete $G_USERDIR\popfile.cfg
   Delete $G_USERDIR\popfile.cfg.bak
+  Delete $G_USERDIR\popfile.cfg.bk?
   Delete $G_USERDIR\*.log
   Delete $G_USERDIR\expchanges.txt
   Delete $G_USERDIR\expconfig.txt
