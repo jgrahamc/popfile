@@ -55,6 +55,8 @@ sub new
 
     $self->{last_ten__} = ();
 
+    $self->{initialize_called__} = 0;
+
     bless($self, $class);
 
     $self->name( 'logger' );
@@ -72,6 +74,8 @@ sub new
 sub initialize
 {
     my ( $self ) = @_;
+
+    $self->{initialize_called__} = 1;
 
     # Start with debugging to file
 
@@ -194,9 +198,11 @@ sub debug
 {
     my ( $self, $level, $message ) = @_;
 
-    # The -1 means that no logging will happen before we've been initialized
+    if ( $self->{initialize_called__} == 0 ) {
+        return;
+    }
 
-    if ( $level > ( $self->config_( 'level' ) || -1 ) ) {
+    if ( $level > $self->config_( 'level' ) ) {
         return;
     }
 
@@ -229,7 +235,7 @@ sub debug
         $min  = "0$min"  if ( $min  < 10 );
         $hour = "0$hour" if ( $hour < 10 );
         $sec  = "0$sec"  if ( $sec  < 10 );
-   
+
         my $delim = ' ';
         $delim = '\t' if ( $self->config_( 'format' ) eq 'tabbed' );
         $delim = ',' if ( $self->config_( 'format' ) eq 'csv' );
