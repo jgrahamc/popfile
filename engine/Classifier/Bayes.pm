@@ -38,7 +38,6 @@ use Classifier::MailParse;
 use IO::Handle;
 use DBI;
 use Digest::MD5 qw( md5_hex );
-use File::Basename;
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -857,10 +856,6 @@ sub upgrade_predatabase_data__
     my @buckets = glob $self->get_user_path_( $self->config_( 'corpus' ) . '/*' );
 
     foreach my $bucket (@buckets) {
-
-        # A bucket directory must be lowercase
-
-        next if ( lc(basename($bucket)) ne basename($bucket) );
 
         # A bucket directory must be a directory
 
