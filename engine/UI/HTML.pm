@@ -2334,7 +2334,7 @@ sub corpus_page
 
     $body .= "</td>\n</tr>\n</table>";
 
-    http_ok($self, $client,$body,1);
+    $self->http_ok( $client, $body, 1 );
 }
 
 # ---------------------------------------------------------------------------------------------

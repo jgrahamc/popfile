@@ -2438,15 +2438,14 @@ sub get_bucket_unique_count
 #
 # get_unique_word_count
 #
-# Returns the unique word count (excluding duplicates) for the passed all buckets
+# Returns the unique word count (excluding duplicates) for all buckets
 #
 # $session   A valid session key returned by a call to get_session_key
-# $bucket    The name of the bucket to get the word count for
 #
 # ---------------------------------------------------------------------------------------------
 sub get_unique_word_count
 {
-    my ( $self, $bucket, $session ) = @_;
+    my ( $self, $session ) = @_;
 
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );

@@ -159,6 +159,10 @@ test_assert_equal( $b->get_count_for_word( $session, $buckets[0], 'foo'), 0 );
 test_assert_equal( $b->get_count_for_word( $session, $buckets[1], 'foo'), 1 );
 test_assert_equal( $b->get_count_for_word( $session, $buckets[2], 'foo'), 0 );
 
+# get_unique_word_count
+
+test_assert_equal( $b->get_unique_word_count( $session ), 4012 );
+
 # get_bucket_unique_count
 
 test_assert_equal( $b->get_bucket_unique_count( $session, $buckets[0]), 656 );
