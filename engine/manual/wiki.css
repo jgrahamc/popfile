@@ -1,0 +1,58 @@
+H1 a:link {
+	color: black;
+}
+
+.wikiheader a:link, a:link {
+	color: black;
+	text-decoration: underline;
+	}
+H1 a:visited, .wikiheader a:visited, a:visited {
+	color: gray;
+	text-decoration: none;
+       }
+ H1 a:hover, .wikiheader a:hover , a:hover{
+	color: white;
+	background: #EFB310;
+	text-decoration: none;
+	}
+H1 a:active,  .wikiheader a:active, a:active {
+	color: red;
+	text-decoration: none;
+	}
+.wikitext, p, body {
+	font-family: Verdana,Times,Serif;
+	font-size: 1em;
+	}
+h1, h2, h3, h4 {
+	color: #EFB310;
+	}
+h1, .wikiheader {
+	font-size: 1.15em;
+	}
+h2 {
+	font-size: 1.1em;
+	}
+h3 {
+	font-size: 1.05em;
+	font-style:italic;
+	}
+h3 {
+	font-size: 1.08em;
+	font-weight:bold;
+	}
+
+pre { font-size:.9em }
+
+.wikifooter {
+	color: gray;
+	}
+/* .wikipageedit a:link, .wikipageedit a:visited, .wikipageedit a:active {
+	color: red;
+	} */
+.wikipagelink {
+
+	}
+ul {
+	list-style-type:square;
+	}
+
