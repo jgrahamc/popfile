@@ -255,16 +255,8 @@ $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_message_cutoff 100000' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_msgdir messages/' );
-<<<<<<< TestConfiguration.tst
 $line = <FILE>;
-=======
-#$line = <FILE>;
-#test_assert_regexp( $line, 'GLOBAL_subject 1' );
-$line = <FILE>;
->>>>>>> 1.12
 test_assert_regexp( $line, 'GLOBAL_timeout 60' );
-#$line = <FILE>;
-#test_assert_regexp( $line, 'GLOBAL_xpl 1' );
 $line = <FILE>;
 test_assert_regexp( $line, 'logger_format default' );
 $line = <FILE>;
