@@ -1301,6 +1301,8 @@ sub history_page
         {
             $configuration{ecount} -= 1;
         }
+        
+        $downloaded_mail = 1;
     }
 
     # Handle clearing the history files
