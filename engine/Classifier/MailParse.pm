@@ -1297,7 +1297,6 @@ sub decode_string
 
     while ( $mystring =~ /=\?[\w-]+\?(B|Q)\?(.*?)\?=/ig ) {
         if ($1 eq "B") {
-            print $2;
             $decode_it = decode_base64( $2 );
             $mystring =~ s/=\?[\w-]+\?B\?(.*?)\?=/$decode_it/i;
         } elsif ($1 eq "Q") {
