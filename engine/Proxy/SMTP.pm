@@ -105,10 +105,13 @@ sub child__
 
         $self->log_( "Command: --$command--" );
 
-        if ( $command =~ /HELO/ ) {
+        if ( $command =~ /HELO|EHLO/i ) {
             if ( $self->config_( 'chain_server' ) )  {
                 if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'chain_server' ),  $self->config_( 'chain_port' ) ) )  {
-                    $self->echo_response_( $mail, $client, $command );
+                    
+                    $self->smtp_echo_response_( $mail, $client, $command );
+
+                    
                 } else {
                     last;
                 }
@@ -124,11 +127,11 @@ sub child__
         if ( ( $command =~ /MAIL FROM:/i )    ||
              ( $command =~ /RCPT TO:/i )      ||
              ( $command =~ /VRFY/i )          ||
-             ( $command =~ /EXPN/i )            ||
+             ( $command =~ /EXPN/i )          ||
              ( $command =~ /NOOP/i )          ||
              ( $command =~ /HELP/i )          ||
              ( $command =~ /RSET/i ) ) {
-            $self->echo_response_( $mail, $client, $command );
+            $self->smtp_echo_response_( $mail, $client, $command );
             $self->flush_extra_( $mail, $client, 0 );
             next;
         }
@@ -136,7 +139,7 @@ sub child__
         if ( $command =~ /DATA/i ) {
             # Get the message from the remote server, if there's an error then we're done, but if not then
             # we echo each line of the message until we hit the . at the end
-            if ( $self->echo_response_( $mail, $client, $command ) ) {
+            if ( $self->smtp_echo_response_( $mail, $client, $command ) ) {
                 $count += 1;
 
 		my $class = $self->{classifier__}->classify_and_modify( $client, $mail, $download_count, $count, 0, '' );
@@ -156,7 +159,7 @@ sub child__
         # close the connection immediately
         if ( $command =~ /QUIT/i ) {
             if ( $mail )  {
-                $self->echo_response_( $mail, $client, $command );
+                $self->smtp_echo_response_( $mail, $client, $command );
                 close $mail;
             } else {
                 $self->tee_(  $client, "221 goodbye$eol" );
@@ -166,7 +169,7 @@ sub child__
 
         # Don't know what this is so let's just pass it through and hope for the best
         if ( $mail && $mail->connected )  {
-            $self->echo_response_( $mail, $client, $command );
+            $self->smtp_echo_response_( $mail, $client, $command );
             $self->flush_extra_( $mail, $client, 0 );
             next;
         } else {
@@ -178,5 +181,38 @@ sub child__
     close $mail if defined( $mail );
     close $client;
 }
+
+# ---------------------------------------------------------------------------------------------
+#
+# smtp_echo_response_
+#
+# $mail     The stream (created with IO::) to send the message to (the remote mail server)
+# $client   The local mail client (created with IO::) that needs the response
+# $command  The text of the command to send (we add an EOL)
+#
+# Send $command to $mail, receives the response and echoes it to the $client and the debug
+# output.
+#
+# This subroutine returns responses from the server as defined in appendix E of
+# RFC 821, allowing multi-line SMTP responses.
+#
+# Returns true if the initial response is a 2xx or 3xx series (as defined by {good_response_}
+#
+# ---------------------------------------------------------------------------------------------
+
+
+
+sub smtp_echo_response_
+{
+    my ($self, $mail, $client, $command) = @_;
+    my $response = $self->get_response_( $mail, $client, $command );
+    
+    if ( $response =~ /^[23]\d\d-/ ) {
+        $self->echo_to_regexp_($mail, $client, qr/^\d\d\d /, 1);
+    }
+    return ( $response =~ /$self->{good_response_}/ );
+}
+
+                
 
 1;
