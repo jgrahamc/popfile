@@ -17,7 +17,7 @@ if ( $#ARGV == 0 )
     $m->{bayes} = new Classifier::Bayes;
     $m->{bayes}->load_word_matrix();
     $m->{color} = 1;
-    $m->parse_stream($ARGV[0]);
+    print $m->parse_stream($ARGV[0]);
 }
 else
 {
