@@ -101,6 +101,7 @@ $l->mq( $mq );
 $l->logger( $l );
 
 $l->initialize();
+$l->start();
 
 $mq->configuration( $c );
 $mq->mq( $mq );

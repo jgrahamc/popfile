@@ -133,9 +133,9 @@ sub test_report
 
 sub test_assert
 {
-    my ( $file, $line,  $test, $context ) = @_;
+    my ( $file, $line, $test, $context ) = @_;
 
-    my $result = eval( $test );
+    my $result = $test;
     test_report( $result, $test, $file, $line, $context );
 
     return $result;
