@@ -248,7 +248,8 @@ Section "POPFile" SecPOPFile
    
   File "..\engine\license"
   File "${RELEASE_NOTES}"
-  File "..\engine\*.pl"
+  File "..\engine\popfile.pl"
+  File "..\engine\insert.pl"
   File "..\engine\pix.gif"
   File "..\engine\black.gif"
   File "..\engine\otto.gif"
