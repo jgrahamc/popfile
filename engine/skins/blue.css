@@ -1,7 +1,3 @@
-H1,H2,H3,P,TD {
-  font-family: sans-serif;
-}
-
 body {
   background-color: #919AC9;
   border: none;
@@ -10,9 +6,8 @@ body {
 }
 
 a {
-    color: white;
-	 background-color: #919AC9
-	 ;
+	color: white;
+	background-color: transparent;
 }
 
 input, select, submit {
@@ -29,23 +24,34 @@ input, select, submit {
 	color: white;
 }
 
-.head {
-  font-weight: normal;
-  font-size: 22pt;
+table.head {
+  width: 100%;
+  background-color : #4C558E;
+  color: white;
 }
 
-.head a {
-  font-size: 12pt;
+td.head {
+  font-weight: normal;
+  font-size: 22pt;
+  background-color : #4C558E;
+  color: white;
+}
+
+a.shutdownLink {
+	background-color : #4C558E;
+	color: white;
+	font-size: 12pt;
 }
 
 .menu {
   font-size: 14pt;
   font-weight: bold;
+  width: 100%;
 }
 
 .menu a {
    color: white;
-	background-color: #919ac9;
+	background-color: transparent;
 }
 
 .menuSelected {
@@ -61,19 +67,13 @@ input, select, submit {
 }
 
 
-.rowEven {
+tr.rowEven {
     background-color: #4C558E;
 	 color: white;
 }
 
-.rowOdd {
+tr.rowOdd {
     background-color: #363E68;
-	 color: white;
-}
-
-.footer {
-    background-color: #4C558E;
-    border: 3px #252A49 solid;
 	 color: white;
 }
 
@@ -93,5 +93,80 @@ td.naked {
 	padding: 0px; 
 	margin: 0px; 
 	border: none
+}
+
+a.bottomLink {
+	background-color : transparent;
+	color: white;
+}
+
+.menuIndent {
+	width: 8%;
+}
+
+table.historyWidgetsTop {
+	width: 100%;
+	margin-left: 1.5em;
+	margin-top: 0.6em;
+	margin-bottom: 1.0em;
+}
+
+td.historyNavigatorTop {
+	text-align: right;
+	padding-right: 0.5em;
+}
+
+td.historyNavigatorBottom {
+	text-align: right;
+	padding-right: 0.5em;
+	padding-bottom: 1.0em;
+}
+
+table.historyButtonsBottom {
+	width: 100%;
+	margin-left: 0.5em;
+	margin-top: 1.5em;
+}
+
+a.messageLink:link {
+	background-color : transparent;
+	color: white;
+}
+
+td.openMessageCloser {
+	text-align: right;
+}
+
+a.changeSettingLink {
+	background-color: transparent ;
+	color: #ddeeff ;
+}
+
+table.footer {
+	width: 100%;
+	margin-top: 1em;
+}
+
+td.footerBody { 
+	text-align: center;
+	padding-left: 5%;
+	padding-right: 5%;
+    background-color: #4C558E;
+    border: 3px #252A49 solid;
+	 color: white;
+}
+
+h2.security {
+	color: white;
+	background-color: transparent;
+}
+
+h2.advanced {
+	color: white;
+	background-color: transparent;
+}
+
+td.logo2menuSpace { 
+	height: 0.8em;
 }
 
