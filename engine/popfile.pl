@@ -673,6 +673,30 @@ sub http_ok
 
 # ---------------------------------------------------------------------------------------------
 #
+# http_file - Read a file from disk and send it to the other end
+#
+# $file       The file to read (always assumed to be a GIF right now)
+#
+# ---------------------------------------------------------------------------------------------
+sub http_file
+{
+    my ($file) = @_;
+    my $contents = '';
+    open FILE, "<$file";
+    while (<FILE>)
+    {
+        $contents .= $_;
+    }
+    close FILE;
+    
+    my $header = "HTTP/1.0 200 OK\r\nContent-Type: image/gif\r\nContent-Length: ";
+    $header .= length($contents);
+    $header .= "$eol$eol";
+    return $header . $contents;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # http_error - Output a standard HTTP error message
 #
 # $error      The error number
@@ -1286,6 +1310,11 @@ sub handle_url
     if ( ( $url eq '/history' ) || ( $url eq '/' ) )
     {
         return history_page();
+    }
+
+    if ( $url =~ /(pix\.gif)/ )
+    {
+        return http_file( $1 );
     }
 
     return http_error(404);

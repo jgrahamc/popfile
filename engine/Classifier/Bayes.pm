@@ -300,13 +300,13 @@ sub calculate_top10
         $number =~ s/^,(.*)/\1/;
         $self->{top10html}{$bucket} = "<tr><td><font color=$self->{colors}{$bucket}>$bucket</font><td align=right>$number<td>&nbsp;<td align=center><table cellpadding=0 cellspacing=0><tr>";
         my $color = $self->{colors}{$bucket};
-        $self->{top10html}{$bucket} .= "<td width=10 bgcolor=$color><img border=0 alt='$bucket current color is $color' src=http://www.usethesource.com/images/pix.gif width=10 height=20><td>&nbsp; </td>";
+        $self->{top10html}{$bucket} .= "<td width=10 bgcolor=$color><img border=0 alt='$bucket current color is $color' src=pix.gif width=10 height=20><td>&nbsp; </td>";
         for my $i ( 0 .. $#{$self->{possible_colors}} )
         {
             my $color = $self->{possible_colors}[$i];
             if ( $color ne $self->{colors}{$bucket} ) 
             {
-                $self->{top10html}{$bucket} .= "<td width=10 bgcolor=$color><a href=/buckets?color=$color&bucket=$bucket><img border=0 alt='Set $bucket color to $color' src=http://www.usethesource.com/images/pix.gif width=10 height=20></a>";
+                $self->{top10html}{$bucket} .= "<td width=10 bgcolor=$color><a href=/buckets?color=$color&bucket=$bucket><img border=0 alt='Set $bucket color to $color' src=pix.gif width=10 height=20></a>";
             } 
         }
         $self->{top10html}{$bucket} .= "</table></td><td><td>";
