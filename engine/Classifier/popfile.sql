@@ -29,7 +29,7 @@
 --      +---------------+       +-----------------+
 --      |      id       |---+   |       id        |---+
 --      |     name      |   |   |      name       |   |
---      |   def         |   |   |     def         |   |
+--      |     def       |   |   |       def       |   |
 --      +---------------+   |   +-----------------+   |
 --                          |                         |
 --      +---------------+   |     +---------------+   |
@@ -48,8 +48,9 @@
 --  |      +----------+    /--+---|    id   |=====---| bucketid |      |  word |
 --  +----==|    id    |---(-------| userid  |     \  |  count   |      +-------+
 --      /  |   name   |   |       |  name   |     |  | lastseen |
---      |  | password |   |       +---------+     |  +----------+
---      |  +----------+   |                       |
+--      |  | password |   |       | pseudo  |     |  +----------+
+--      |  +----------+   |       +---------+     |
+--      |                 |                       |
 --      |                 |        +-----------+  |
 --      |                 |        |  magnets  |  |
 --      |   +----------+  |        +-----------+  |     +--------------+
@@ -57,7 +58,7 @@
 --      |   +----------+  |     |  | bucketid  |--+     +--------------+
 --      |   |   id     |  |     |  |   mtid    |--------|      id      |
 --      +---| userid   |  |     |  |  value    |        |     type     |
---          |  from    |  |     |  +-----------+        |    header    |
+--          |  frm     |  |     |  +-----------+        |    header    |
 --          |   to     |  |     |                       +--------------+
 --          |   cc     |  |     |
 --          | subject  |  |     |
@@ -346,8 +347,18 @@ create trigger delete_bucket_template delete on bucket_template
 insert into users ( 'name', 'password' ) values ( 'admin', '' );
 
 -- These are the possible parameters for a bucket
+--
+-- subject      1 if should do subject modification for message classified to this bucket
+-- xtc          1 if should add X-Text-Classification header
+-- xpl          1 if should add X-POPFile-Link header
+-- fncount      Number of messages that were incorrectly classified, and meant to go into
+--                  this bucket but did not
+-- fpcount      Number of messages that were incorrectly classified into this bucket
+-- quarantine   1 if should quaratine (i.e. RFC822 wrap) messages in this bucket
+-- count        Total number of messages classified into this bucket
+-- color        The color used for this bucket in the UI
 
-insert into bucket_template ( 'name', 'def' ) values ( 'subject',    '1' );
+insert into bucket_template ( 'name', 'def' ) values ( 'subject',    '1' ); 
 insert into bucket_template ( 'name', 'def' ) values ( 'xtc',        '1' );
 insert into bucket_template ( 'name', 'def' ) values ( 'xpl',        '1' );
 insert into bucket_template ( 'name', 'def' ) values ( 'fncount',    '0' );
@@ -364,3 +375,4 @@ insert into magnet_types ( 'type', 'header' ) values ( 'subject', 'Subject' );
 insert into magnet_types ( 'type', 'header' ) values ( 'cc',      'Cc'      );
 
 -- END
+
