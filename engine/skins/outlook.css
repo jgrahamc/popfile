@@ -1,3 +1,7 @@
+H1,H2,H3,P,TD {
+  font-family: sans-serif;
+}
+
 body {
   background-color: #FFFFFF;
   border: none;
@@ -50,30 +54,34 @@ input, select {
   font-weight: bold;
 }
 
-.menu_selected {
+.menuSelected {
   background-color: #7495C5;
   width: 150px;
   border-color: #FFFFFF;
   border-style: groove groove none groove;
   border-width: 2px;
+  color: black;
 }
 
-.menu_standard {
+.menuStandard {
   background-color: #D4D0C8;
   width: 150px;
   border-color: #FFFFFF;
   border-style: groove groove none groove;
   border-width: 2px;
+  color: black;
 }
 
-.row_even {
+.rowEven {
   background-color: #C6CBD2;
   border: 1px #000000 solid;
+  color: black;
 }
 
-.row_odd {
+.rowOdd {
   background-color: #D9DEE7;
   border: 1px #000000 solid;
+  color: black;
 }
 
 a:link {
@@ -115,8 +123,6 @@ p {
 td {
   font-family: verdana, arial, serif;
   font-size: 10pt;
-  color: #000000;
-
 }
  
 b {
@@ -126,3 +132,21 @@ b {
   color: #000000;
   background-color: transparent;
 } 
+
+table.stabColor01 {
+	border: 1px solid Black;
+}
+
+table.stabColor03 {
+	border: 3px solid Black;
+}
+
+td.stabColor01 {
+	border: 1px solid Black;
+}
+
+td.naked {
+	padding: 0px; 
+	margin: 0px; 
+	border: none
+}

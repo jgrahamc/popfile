@@ -1,11 +1,16 @@
+H1,H2,H3,P,TD {
+  font-family: sans-serif;
+}
+
 body {
   background-color: #999999;
-  font-family: font-family: Verdana;
+  font-family: Verdana, sans-serif;
   color: white;
 }
 
 a {
     color: white;
+	 background-color: #24259B;
 }
 
 
@@ -21,6 +26,7 @@ input, select, submit {
    background-color: #344FB2;
    border: 1px black outset;
    width: 98%;
+	color: white;
 }
 
 .head {
@@ -43,23 +49,26 @@ input, select, submit {
 .menu a {
    color: white;
    text-decoration: none;
+	background-color: transparent;
 }
 
-.menu_selected {
+.menuSelected {
   background-color: #23367D;
   width: 80px;
   border: 1px black solid;
   height: 20px;
   font-weight: bold;
   letter-spacing: 0.1em;
+  color: white;
 }
 
-.menu_standard {
+.menuStandard {
   background-color: #344FB2;
   width: 80px;
   border: 1px black solid;
   height: 20px;
   letter-spacing: 0.1em;
+  color: white;
 }
 
 .main {
@@ -81,17 +90,38 @@ h2 {
   font-weight: normal;
 }
 
-.row_even {
+.rowEven {
     background-color: #6B76A1;
+	 color: white;
 }
 
-.row_odd {
+.rowOdd {
     background-color: #344FB2;
+	 color: white;
 }
 
 .footer {
    background-color: #344FB2;
    border: 1px black solid;
+	color: white;
+}
+
+table.stabColor01 {
+	border: 1px solid Black;
+}
+
+table.stabColor03 {
+	border: 3px solid Black;
+}
+
+td.stabColor01 {
+	border: 1px solid Black;
+}
+
+td.naked {
+	padding: 0px; 
+	margin: 0px; 
+	border: none
 }
 
 

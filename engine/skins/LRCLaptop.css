@@ -1,3 +1,7 @@
+H1,H2,H3,P,TD {
+  font-family: sans-serif;
+}
+
 .content
   {
   font-size: 8pt;
@@ -40,39 +44,43 @@
   font-weight: bold;
   }
 
-.menu_selected
+.menuSelected
   {
   background-color: #cccc99;
   font-size: 8pt;
   font-weight: bold;
   width: 150px;
+  color: black;
   }
 
-.menu_spacer
+.menuSpacer
   {
   width: 1px;
   }
 
-.menu_standard
+.menuStandard
   {
   background-color: #ededca;
   font-size: 8pt;
   font-weight: normal;
   width: 150px;
+  color: black;
   }
 
-.row_even
+.rowEven
   {
   background-color: #ededca;
   font-size: 8pt;
   font-weight: normal;
+  color: black;
   }
 
-.row_odd
+.rowOdd
   {
   background-color: #dfdfaf;
   font-size: 8pt;
   font-weight: normal;
+  color: black;
   }
 
 .shell
@@ -81,6 +89,7 @@
   border: 3px #cccc99 solid;
   font-size: 8pt;
   font-weight: normal;
+  color: black;
   }
 
 a.dash:link
@@ -160,3 +169,24 @@ tr
   font-size: 8pt;
   font-weight: normal;
   }
+
+table.stabColor01 {
+	border: 1px solid Black;
+}
+
+table.stabColor03 {
+	border: 3px solid Black;
+}
+
+td.stabColor01 {
+	border: 1px solid Black;
+}
+
+td.naked {
+	padding: 0px; 
+	margin: 0px; 
+	border: none
+}
+
+
+

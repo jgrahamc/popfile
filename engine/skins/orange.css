@@ -1,18 +1,25 @@
+H1,H2,H3,P,TD {
+  font-family: sans-serif;
+}
+
 body {
   background-color: #FFFFFF;
   border: none;
   font-family: sans-serif;
+  color: black;
 }
 
 .head {
   font-weight: normal;
   font-size: 22pt;
   background: #ffffcc;
+  color: black;
 }
 
 .shell {
     background-color: #ffffcc;
     border: 3px #ff9966 solid;
+	 color: black;
 }
 
 .head a {
@@ -24,37 +31,48 @@ body {
   font-weight: bold;
 }
 
-.menu_selected {
+.menuSelected {
   background-color: #ff9966;
   width: 150px;
+  color: #1E3B75;
 }
 
-.menu_standard {
+.menuStandard {
   background-color: #ffcc99;
   width: 150px;
+  color: #1E3B75;
 }
 
-.main {
-}
 
-.content {
-}
-
-.content th {
-}
-
-.row_even {
+.rowEven {
     background-color: #ffffcc;
+	 color: black;
 }
 
-.row_odd {
+.rowOdd {
     background-color: #ffcc99;
-}
-
-.footer {
+	 color: black;
 }
 
 hr {
     color: gray; 
+	 background-color: transparent;
 }
 
+table.stabColor01 {
+	border: 1px solid Black;
+}
+
+table.stabColor03 {
+	border: 3px solid Black;
+}
+
+td.stabColor01 {
+	border: 1px solid Black;
+}
+
+td.naked {
+	padding: 0px; 
+	margin: 0px; 
+	border: none
+}

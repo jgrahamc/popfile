@@ -1,3 +1,7 @@
+H1,H2,H3,P,TD {
+  font-family: sans-serif;
+}
+
 BODY {
 BACKGROUND-COLOR : #CCCCDD; 
 BACKGROUND-IMAGE : url("chipped_obsidian.gif"); 
@@ -18,6 +22,7 @@ COLOR : #000000;
 FONT-FAMILY : "Bookman Old Style", "New Century Schoolbook", Times, serif; 
 FONT-SIZE : 175%; 
 FONT-WEIGHT : BOLD; 
+background-color: black;
 } 
 .SHELL {
 BORDER-BOTTOM : 3PX SOLID #000033; 
@@ -33,15 +38,18 @@ A:LINK {
 BORDER-BOTTOM : 1PX DASHED ; 
 TEXT-DECORATION : NONE; 
 COLOR : #EEEEEE; 
+background-color: transparent;
 } 
 A:VISITED {
 BORDER-BOTTOM : 1PX SOLID #000066; 
 TEXT-DECORATION : NONE; 
 COLOR : #000066; 
+background-color: transparent;
 } 
 A:HOVER {
 BORDER-BOTTOM : 3PX SOLID #FF0000; 
 COLOR : #FF0000; 
+background-color: transparent;
 } 
 A.DASH:LINK {
 BORDER-BOTTOM : 1PX DASHED #EEEEEE; 
@@ -62,10 +70,6 @@ FONT-FAMILY : "New Century Schoolbook", Times, serif;
 FONT-FAMILY : "New Century Schoolbook", Times, serif; 
 FONT-SIZE : 100%; 
 } 
-.MENU {
-FONT-WEIGHT : BOLD; 
-FONT-SIZE : 140%; 
-} 
 .MAIN {
 FONT-SIZE : 12PX; 
 } 
@@ -79,10 +83,10 @@ FONT-WEIGHT : BOLD;
 } 
 .MENU {
 FONT-WEIGHT : BOLD;
-FONT-SIZE : 140%
+FONT-SIZE : 140%;
 BACKGROUND-IMAGE : url("metalback.gif");
 }
-.MENU_STANDARD {
+.MENUSTANDARD {
 BACKGROUND-COLOR : #DDDDDD;
 BACKGROUND-IMAGE : url("metalback.gif");
 BORDER-BOTTOM : #000033 3PX SOLID; 
@@ -90,8 +94,9 @@ BORDER-LEFT : #EEEEEE 3PX SOLID;
 BORDER-RIGHT : #000033 3PX SOLID; 
 BORDER-TOP : #EEEEEE 3PX SOLID; 
 WIDTH : 150PX; 
+color: black;
 }
-.MENU_SELECTED {
+.MENUSELECTED {
 BACKGROUND-IMAGE : url("metalback.gif");
 BORDER-BOTTOM : #EEEEEE 3px solid; 
 BORDER-LEFT : #000033 3px solid; 
@@ -99,10 +104,11 @@ BORDER-RIGHT : #EEEEEE 3px solid;
 BORDER-TOP : #000033 3px solid; 
 WIDTH : 150px; 
 }
-.MENU_SPACER {
+.MENUSPACER {
 BACKGROUND-COLOR : #CCCCDD;
 BACKGROUND-IMAGE : url("chipped_obsidian.gif");
 WIDTH : 5px; 
+color: black;
 }
 .FOOTER {
 BACKGROUND-COLOR : #CCCCFF; 
@@ -154,3 +160,21 @@ FONT-SIZE : 100%;
 MARGIN-LEFT : 3PX; 
 MARGIN-RIGHT : 3PX; 
 } 
+
+table.stabColor01 {
+	border: 1px solid Black;
+}
+
+table.stabColor03 {
+	border: 3px solid Black;
+}
+
+td.stabColor01 {
+	border: 1px solid Black;
+}
+
+td.naked {
+	padding: 0px; 
+	margin: 0px; 
+	border: none
+}

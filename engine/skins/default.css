@@ -1,6 +1,11 @@
+H1,H2,H3,P,TD {
+  font-family: sans-serif;
+}
+
 body {
   background-color: #FFFFFF;
   font-family: sans-serif;
+  color: #000000;
 }
 
 .head {
@@ -11,6 +16,7 @@ body {
 .shell {
     background-color: #ededca;
     border: 3px #cccc99 solid;
+	 color: #000000;
 }
 
 .head a {
@@ -22,32 +28,42 @@ body {
   font-weight: bold;
 }
 
-.menu_selected {
+.menuSelected {
   background-color: #cccc99;
   width: 150px;
+  color: #000000;
 }
 
-.menu_standard {
+.menuStandard {
   background-color: #ededca;
   width: 150px;
+  color: #000000;
 }
 
-.main {
-}
-
-.content {
-}
-
-.content th {
-}
-
-.row_even {
+.rowEven {
     background-color: #ededca;
+	 color: #000000;
 }
 
-.row_odd {
+.rowOdd {
     background-color: #dfdfaf;
+	 color: #000000;
 }
 
-.footer {
+table.stabColor01 {
+	border: 1px solid Black;
+}
+
+table.stabColor03 {
+	border: 3px solid Black;
+}
+
+td.stabColor01 {
+	border: 1px solid Black;
+}
+
+td.naked {
+	padding: 0px; 
+	margin: 0px; 
+	border: none
 }

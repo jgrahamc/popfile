@@ -1,3 +1,7 @@
+H1,H2,H3,P,TD {
+  font-family: sans-serif;
+}
+
 body {
 background-color : #ccccdd; 
 color : #000009; 
@@ -34,11 +38,13 @@ a:link {
 border-bottom : 1px solid ; 
 color : blue;
 text-decoration : none; 
+background-color: transparent;
 } 
 a:visited {
 border-bottom : 1px dashed ; 
 color : #000088;
 text-decoration : none; 
+background-color: transparent;
 } 
 a:hover {
 border-bottom : 1px solid ; 
@@ -50,6 +56,7 @@ border-bottom : 1px solid ;
 a.dash:visited {
 border-bottom : 1px dashed ; 
 color : #000088;
+background-color: transparent;
 } 
 a.dash:hover {
 border-bottom : 3px solid ; 
@@ -67,6 +74,7 @@ font-size : 100%;
 .menu {
 font-weight : bold; 
 font-size : 140%; 
+
 } 
 .main {
 font-size : 12px; 
@@ -79,37 +87,35 @@ font-weight : normal;
 font-size : 80%; 
 font-weight : bold; 
 } 
-.row_even {
+.rowEven {
 	background-color : #dddddd;
 	color : #000009; 
 }
 
-.row_odd {
+.rowOdd {
 	background-color: #eeeeee;
 	color : #000009; 
 }
 
-.menu {
-	font-weight: bold;
-	font-size: 140%
-}
-.menu_selected {
+.menuSelected {
 	border-bottom: #eeeeee 3px solid; 
 	border-left: #aaaaaa 3px solid; 
 	border-right: #eeeeee 3px solid; 
 	border-top: #aaaaaa 3px solid; 
 	width: 17%; 
 	background-color: #ccccff;
+	color: black;
 }
-.menu_standard {
+.menuStandard {
 	border-bottom: #aaaaaa 3px solid; 
 	border-left: #eeeeee 3px solid; 
 	border-right: #aaaaaa 3px solid; 
 	border-top: #eeeeee 3px solid; 
 	width: 17%; 
-	background-color: #ccccff
+	background-color: #ccccff;
+	color: black;
 }
-.menu_spacer {
+.menuSpacer {
 	width: 1px; 
 }
 .footer {
@@ -159,3 +165,20 @@ font-size : 100%;
 font-family : courier, monospace; 
 } 
 
+table.stabColor01 {
+	border: 1px solid Black;
+}
+
+table.stabColor03 {
+	border: 3px solid Black;
+}
+
+td.stabColor01 {
+	border: 1px solid Black;
+}
+
+td.naked {
+	padding: 0px; 
+	margin: 0px; 
+	border: none
+}
