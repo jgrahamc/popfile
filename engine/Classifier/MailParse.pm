@@ -56,10 +56,11 @@ sub new
     
     $self->{color}     = 0;
     
-    # This will store the from, to and subject from the last parse
+    # This will store the from, to, cc and subject from the last parse
     
     $self->{from}      = '';
     $self->{to}        = '';
+    $self->{cc}        = '';
     $self->{subject}   = '';
 
     # These store the current HTML background color and font color to
@@ -756,6 +757,7 @@ sub parse_stream
     $self->{msg_total} = 0;
     $self->{from}      = '';
     $self->{to}        = '';
+    $self->{cc}        = '';
     $self->{subject}   = '';
     $self->{ut}        = '';
 
@@ -832,6 +834,25 @@ sub parse_stream
                     my $prefix = '';
     
                     if ( $header =~ /^(From|To|Cc|Reply\-To)/i ) {
+                        
+                        # Concatenate multi-line fields (To, CC)
+                        
+                        if ( ( $header =~ /^To/i ) || ( $header =~ /^Cc/i ) ) {
+                            my $currpos = tell MSG;
+                            my $tempread = <MSG>;
+                            while ( $tempread =~ s/^[ \t]+(.*?)[\r\n]+// )  {
+                                if ( $1 ne '' ) {
+                                    $argument .= $1;
+                                    $currpos = tell MSG;
+                                    $tempread = <MSG>;
+                                } else {
+                                    last;
+                                }
+                            }
+                            seek MSG, $currpos, 0;
+                            print "\n$header: [[$argument]]\n" if $self->{debug};
+                        }
+
                         if ( $argument =~ /=\?(.{1,40})\?/ ) {
                             update_word( $self, $1, 0, '', '', 'charset' );
                         }
@@ -846,11 +867,14 @@ sub parse_stream
                         $prefix = 'to' if ( $header =~ /^To/i );
                         $self->{to} = $self->decode_string( $argument ) if ( ( $header =~ /^To/i ) && ( $self->{to} eq '' ) );
                         
+                        $prefix = 'cc' if ( $header =~ /^Cc/i );
+                        $self->{cc} = $self->decode_string( $argument ) if ( ( $header =~ /^Cc/i ) && ( $self->{cc} eq '' ) );
+                        
                         while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))>// )  {
                             update_word($self, $1, 0, ';', '&',$prefix);
                             add_url($self, $2, 0, '@', '[&<]',$prefix);
                         }
-    
+
                         while ( $argument =~ s/([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+))// )  {
                             update_word($self, $1, 0, '', '',$prefix);
                             add_url($self, $2, 0, '@', '',$prefix);

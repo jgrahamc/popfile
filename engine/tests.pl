@@ -9,6 +9,8 @@
 
 use strict;
 
+require IO::handle;
+
 # Look for all the TST files in the tests/ subfolder and run
 # each of them by including them in this file with the use statement
 
@@ -43,6 +45,8 @@ sub test_report
  		}
  		$test_failures += 1;
  	}
+ 	
+ 	flush STDOUT;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -115,6 +119,7 @@ foreach my $test (@tests) {
 	my $current_error_count = $test_failures;
 	
 	print "\nRunning $test... ";
+ 	flush STDOUT;
 	$fail_messages = '';
 	my $suite;
 	my $ln   = 0;
