@@ -323,7 +323,7 @@ if ( @ARGV[0] ne "-usage")
             $b->{colors__}{$abucket} = "black";
             
             if ($abucket ne 'unclassified') {
-                foreach my $current_fraction ( sort keys( %{ $self->{messages}->{buckets}{$abucket}{subdirs}} )) {
+                foreach my $current_fraction ( 0 .. ( $c->parameter("xcnt") -1 ) ) {
         
                     # Do the hippy-hippy corpus-building shake
                     if ($current_fraction ne $exclude_fraction) {
