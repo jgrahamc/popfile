@@ -2,7 +2,7 @@ package POPFile::Mutex;
 
 #----------------------------------------------------------------------------
 #
-# This is a mutex object that uses flock() to provide exclusive access
+# This is a mutex object that uses mkdir() to provide exclusive access
 # to a region on a per thread or per process basis.
 #
 # Copyright (c) 2001-2004 John Graham-Cumming
@@ -26,7 +26,6 @@ package POPFile::Mutex;
 #----------------------------------------------------------------------------
 
 use strict;
-use Fcntl qw(:DEFAULT :flock);
 
 #----------------------------------------------------------------------------
 # new
@@ -42,6 +41,7 @@ sub new
     my $self;
 
     $self->{name__} = "popfile_mutex_${name}.mtx";
+    release( $self );
 
     return bless $self, $type;
 }
@@ -62,7 +62,7 @@ sub acquire
     # If acquire() has been called without a matching release() then
     # fail at once
 
-    if ( defined( $self->{handle__} ) ) {
+    if ( defined( $self->{locked__} ) ) {
         return 0;
     }
 
@@ -71,22 +71,17 @@ sub acquire
     $timeout = 0xFFFFFFFF if ( !defined( $timeout ) );
     my $now = time;
 
-    # Try to grab the lock on this file exclusively during the timeout
-    # period
+    # Try to create a directory during the timeout period
 
-    if ( open $self->{handle__}, ">$self->{name__}" ) {
-        do {
-            my $result = flock( $self->{handle__}, LOCK_EX | LOCK_NB );
-            if ( $result ) {
-                return 1;
-            }
-            select( undef, undef, undef, 0.01 );
-        } while ( time < ( $now + $timeout ) );
-    }
+    do {
+        if ( mkdir( $self->{name__}, 0755 ) ) { # Create a directory
+            $self->{locked__} = 1;
+            return 1;
+        }
+        select( undef, undef, undef, 0.01 );
+    } while ( time < ( $now + $timeout ) );
 
-    # Timed out so return 0 and clear the handle
-    $self->release();
-
+    # Timed out so return 0
     return 0;
 }
 
@@ -101,10 +96,8 @@ sub release
 {
     my ( $self ) = @_;
 
-    if ( defined( $self->{handle__} ) ) {
-        close $self->{handle__};
-        $self->{handle__} = undef;
-    }
+    rmdir( $self->{name__} ); # Delete the Mutex directory
+    $self->{locked__} = undef;
 }
 
 1;
