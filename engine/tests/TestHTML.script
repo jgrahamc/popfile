@@ -274,10 +274,18 @@ SETINPUT filter __filter__magnet
 CLICK setfilter
 MATCH Magnetic Attraction for Ferrous Females
 NOTMATCH Testing Refresh
-SETINPUT negate on
+HIDDEN 0
+SETINPUTN negate 2 on
 CLICK setfilter
 NOTMATCH Magnetic Attraction for Ferrous Females
 MATCH Testing Refresh
+SETINPUTN negate 2 off
+CLICK setfilter
+MATCH Magnetic Attraction for Ferrous Females
+NOTMATCH Testing Refresh
+CLICK setfilter
+MATCH Magnetic Attraction for Ferrous Females
+NOTMATCH Testing Refresh
 CLICK reset_filter_search
 
 # Check sorting
