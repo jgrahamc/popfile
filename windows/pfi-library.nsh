@@ -56,7 +56,7 @@
 # (by using this constant in the executable's "Version Information" data).
 #--------------------------------------------------------------------------
 
-  !define C_PFI_LIBRARY_VERSION     "0.1.2"
+  !define C_PFI_LIBRARY_VERSION     "0.1.3"
 
 #--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
@@ -275,6 +275,19 @@
 
   !macroend
 
+#--------------------------------------------------------------------------
+#
+# Macro used by 'adduser.nsi' to update HKCU registry data using HKLM data
+#
+#--------------------------------------------------------------------------
+
+  !macro Copy_HKLM_to_HKCU VAR NAME
+  
+    ReadRegStr ${VAR} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "${NAME}"
+    WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "${NAME}" ${VAR}
+
+  !macroend
+  
 #--------------------------------------------------------------------------
 #
 # Macro used to preserve up to 3 backup copies of a file

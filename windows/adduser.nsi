@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.63"
+  !define C_PFI_VERSION  "0.2.64"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -840,10 +840,6 @@ Section "POPFile" SecPOPFile
   !define L_POPFILE_ROOT  $R8
   !define L_POPFILE_USER  $R7
   !define L_TEMP          $R6
-  !define L_TEMP_2        $R5
-  !define L_TEMP_3        $R4
-  !define L_TEMP_4        $R3
-  !define L_TEMP_5        $R2
 
   !define L_RESERVED      $0    ; used in system.dll calls
   Push ${L_RESERVED}
@@ -875,10 +871,6 @@ userdir_exists:
   Push ${L_POPFILE_ROOT}
   Push ${L_POPFILE_USER}
   Push ${L_TEMP}
-  Push ${L_TEMP_2}
-  Push ${L_TEMP_3}
-  Push ${L_TEMP_4}
-  Push ${L_TEMP_5}
 
   ; If the wizard is in the same folder as POPFile, check the HKLM data is still valid
 
@@ -893,14 +885,14 @@ userdir_exists:
   StrCmp ${L_TEMP} "$G_ROOTDIR" update_HKCU_data
   WriteRegStr HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "$G_ROOTDIR"
   StrCmp $G_SFN_DISABLED "0" find_HKLM_root_sfn
-  StrCpy ${L_TEMP_2} "Not supported"
+  StrCpy ${L_TEMP} "Not supported"
   Goto save_HKLM_root_sfn
 
 find_HKLM_root_sfn:
-  GetFullPathName /SHORT ${L_TEMP_2} "$G_ROOTDIR"
+  GetFullPathName /SHORT ${L_TEMP} "$G_ROOTDIR"
 
 save_HKLM_root_sfn:
-  WriteRegStr HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP_2}"
+  WriteRegStr HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP}"
 
   IfFileExists "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" 0 update_HKCU_data
   IfFileExists "$G_ROOTDIR\uninstall.exe" 0 update_HKCU_data
@@ -919,30 +911,35 @@ update_HKCU_data:
   ; For flexibility, several global user variables are used to access installation folders
   ; (1) $G_ROOTDIR is initialized by the 'PFIGUIInit' function
   ; (2) $G_USERDIR is normally initialized by the 'User Data' DIRECTORY page
-
-  ReadRegStr ${L_TEMP_2} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Major Version"
-  ReadRegStr ${L_TEMP_3} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Minor Version"
-  ReadRegStr ${L_TEMP_4} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Revision"
-  ReadRegStr ${L_TEMP_5} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile RevStatus"
-
-  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Major Version" "${L_TEMP_2}"
-  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Minor Version" "${L_TEMP_3}"
-  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Revision" "${L_TEMP_4}"
-  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile RevStatus" "${L_TEMP_5}"
+  
+  ReadRegStr ${L_TEMP} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
+  Push ${L_TEMP}
+  Call GetCompleteFPN
+  Pop ${L_TEMP}
+  StrCmp $G_ROOTDIR ${L_TEMP} 0 update_author
+  
+  ; The version data in the registry applies to the POPFile programs we have found, so copy it
+  
+  !insertmacro Copy_HKLM_to_HKCU "${L_TEMP}" "POPFile Major Version"
+  !insertmacro Copy_HKLM_to_HKCU "${L_TEMP}" "POPFile Minor Version"
+  !insertmacro Copy_HKLM_to_HKCU "${L_TEMP}" "POPFile Revision"
+  !insertmacro Copy_HKLM_to_HKCU "${L_TEMP}" "POPFile RevStatus"
+  
+update_author:
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "adduser.exe"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Owner" "$G_WINUSERNAME"
 
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath" "$G_ROOTDIR"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "$G_ROOTDIR"
   StrCmp $G_SFN_DISABLED "0" find_root_sfn
-  StrCpy ${L_TEMP_2} "Not supported"
+  StrCpy ${L_TEMP} "Not supported"
   Goto save_root_sfn
 
 find_root_sfn:
-  GetFullPathName /SHORT ${L_TEMP_2} "$G_ROOTDIR"
+  GetFullPathName /SHORT ${L_TEMP} "$G_ROOTDIR"
 
 save_root_sfn:
-  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP_2}"
+  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP}"
 
   WriteINIStr "$G_USERDIR\install.ini" "Settings" "Owner" "$G_WINUSERNAME"
   WriteINIStr "$G_USERDIR\install.ini" "Settings" "Class" "$G_WINUSERTYPE"
@@ -951,14 +948,14 @@ save_root_sfn:
   DeleteRegValue HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN" "$G_USERDIR"
   StrCmp $G_SFN_DISABLED "0" find_user_sfn
-  StrCpy ${L_TEMP_2} "Not supported"
+  StrCpy ${L_TEMP} "Not supported"
   Goto save_user_sfn
 
 find_user_sfn:
-  GetFullPathName /SHORT ${L_TEMP_2} "$G_USERDIR"
+  GetFullPathName /SHORT ${L_TEMP} "$G_USERDIR"
 
 save_user_sfn:
-  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN" "${L_TEMP_2}"
+  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN" "${L_TEMP}"
 
   ; Now ensure the POPFILE_ROOT and POPFILE_USER environment variables have the correct data
 
@@ -1123,17 +1120,17 @@ update_config_ports:
 
   ; Use registry data to construct the name of the NOTEPAD-compatible release notes file
 
-  ReadRegStr ${L_TEMP}  HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Major Version"
-  ReadRegStr ${L_TEMP_2} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Minor Version"
-  StrCpy ${L_TEMP} "v${L_TEMP}.${L_TEMP_2}"
-  ReadRegStr ${L_TEMP_2} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Revision"
-  StrCpy ${L_TEMP} "${L_TEMP}.${L_TEMP_2}.change.txt"
-  IfFileExists "$G_ROOTDIR\${L_TEMP}" 0 skip_rel_notes
+  ReadRegStr ${L_RESERVED}  HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Major Version"
+  ReadRegStr ${L_TEMP} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Minor Version"
+  StrCpy ${L_RESERVED} "v${L_RESERVED}.${L_TEMP}"
+  ReadRegStr ${L_TEMP} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Revision"
+  StrCpy ${L_RESERVED} "${L_RESERVED}.${L_TEMP}.change.txt"
+  IfFileExists "$G_ROOTDIR\${L_RESERVED}" 0 skip_rel_notes
 
   SetOutPath "$G_ROOTDIR"
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" \
-                 "$G_ROOTDIR\${L_TEMP}"
+                 "$G_ROOTDIR\${L_RESERVED}"
 
 skip_rel_notes:
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
@@ -1249,10 +1246,6 @@ end_autostart_set:
   DetailPrint "$(PFI_LANG_BE_PATIENT)"
   SetDetailsPrint listonly
 
-  Pop ${L_TEMP_5}
-  Pop ${L_TEMP_4}
-  Pop ${L_TEMP_3}
-  Pop ${L_TEMP_2}
   Pop ${L_TEMP}
   Pop ${L_POPFILE_USER}
   Pop ${L_POPFILE_ROOT}
@@ -1265,10 +1258,6 @@ end_autostart_set:
   !undef L_POPFILE_ROOT
   !undef L_POPFILE_USER
   !undef L_TEMP
-  !undef L_TEMP_2
-  !undef L_TEMP_3
-  !undef L_TEMP_4
-  !undef L_TEMP_5
 
 SectionEnd
 
