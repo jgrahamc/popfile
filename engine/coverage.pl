@@ -22,7 +22,7 @@ my %files;
 
 my @line_files = glob '*.lne';
 
-foreach my $file (@line_files) {
+foreach my $file (sort @line_files) {
 
     # Each LNE has a file name of ModuleName.PID.lne and the ModuleName has had
     # / or :: converted to #
@@ -38,26 +38,18 @@ foreach my $file (@line_files) {
     open LINE_DATA, "<$file";
 
     my $current_line = 0;
-    $count{$module}{executed} = [];
-
-
-    $count{$module}{total_executable_lines} = 0;
-    $count{$module}{total_lines} = 0;
 
     while ( <SOURCE_FILE> ) {
-        # Keep count of the total number of lines in this file
-
-        $current_line                += 1;
-        $count{$module}{total_lines} += 1;
+        $current_line += 1;
 
    	my $state = <LINE_DATA>;
 
         if ( $state =~ /1/ ) {
-            $count{$module}{total_executable_lines} += 1;
-            $count{$module}{executed}[$current_line] = 1;
+            $count{$module}{executed}{$current_line} = 1;
         } elsif ( $state =~ /0/ ) {
-            $count{$module}{total_executable_lines} += 1;
-#            print "$module.pm:$current_line $_";
+	    if ( $count{$module}{executed}{$current_line} != 1 ) {
+                $count{$module}{executed}{$current_line} = 0;
+	    }
         }
     }
 
@@ -69,14 +61,18 @@ foreach my $file (@line_files) {
 
 foreach my $module ( keys( %count ) )
 {
-    my $total_executed = 0;
-    foreach my $line ( 0 .. $#{$count{$module}{executed}} ) {
-        if ($count{$module}{executed}[$line]) {
+    my $total_executed     = 0;
+    my $total_not_executed = 0;
+
+    foreach my $line ( keys %{$count{$module}{executed}} ) {
+        if ($count{$module}{executed}{$line} == 1) {
             $total_executed += 1;
-	}
+	} else {
+            $total_not_executed += 1;
+        }
     }
 
-    $files{$module} = int(100 * $total_executed / $count{$module}{total_executable_lines}) unless ( $count{$module}{total_executable_lines} == 0 );
+    $files{$module} = int(100 * $total_executed / ( $total_executed + $total_not_executed ));
 }
 
 
