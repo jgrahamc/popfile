@@ -40,7 +40,7 @@ ALLEXES := $(SETUP) $(INSTALLER) $(RUNPOPFILE) $(ADDUSER) $(MONITORCC) $(STOP_PF
 
 all: build
 build: $(POPFILE_WINDOWS_ZIP)
-$(POPFILE_WINDOWS_ZIP): $(SETUP)
+$(POPFILE_WINDOWS_ZIP): $(SETUP) addssl.zip
 	rm -f $@
 	$(BUILD_ZIP)
 clean:

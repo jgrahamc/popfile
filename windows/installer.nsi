@@ -956,6 +956,7 @@ app_paths:
   SetOutPath "$G_ROOTDIR"
 
   File "..\engine\popfile.pl"
+  File "..\engine\popfile.pck"
   File "..\engine\insert.pl"
   File "..\engine\bayes.pl"
   File "..\engine\pipe.pl"
