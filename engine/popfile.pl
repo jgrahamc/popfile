@@ -885,10 +885,8 @@ sub corpus_page
             {
                 if ( $classifier->get_value( $bucket, $word ) != 0 )
                 {
-                    my $prob = $classifier->get_value( $bucket, $word );
-                    my $w = $prob + log( $classifier->{total}{$bucket} / $classifier->{full_total} );
-                    $prob = 1 / ( -$prob );
-                    $w    = 1 / ( -$w    );
+                    my $prob = exp($classifier->get_value( $bucket, $word ));
+                    my $w = $prob * $classifier->{total}{$bucket} / $classifier->{full_total};
                     if ( $w > $max )
                     {
                         $max = $w;
@@ -901,13 +899,37 @@ sub corpus_page
             {
                 if ( $classifier->get_value( $bucket, $word ) != 0 )
                 {
-                    my $prob = $classifier->get_value( $bucket, $word );
-                    my $w = $prob + log( $classifier->{total}{$bucket} / $classifier->{full_total} );
-                    $prob = 1 / ( -$prob );
-                    $w    = 1 / ( -$w    );
+                    my $prob = exp($classifier->get_value( $bucket, $word ));
+                    my $w = $prob * $classifier->{total}{$bucket} / $classifier->{full_total};
                     my $weighted = "$w";
                     my $bold;
                     my $endbold;
+                    if ( $prob =~ s/e\-(\d+)//i )
+                    {
+                        my $exp = $1;
+                        $prob     =~ /(.*)\.(.*)/;
+                        my $left  = $1;
+                        my $right = $2;
+                        my $pad;
+                        for my $i (1 .. $exp-1)
+                        {
+                            $pad .= "0";
+                        }
+                        $prob = "0.$pad$left$right";
+                    }
+                    if ( $weighted =~ s/e\-(\d+)//i )
+                    {
+                        my $exp = $1;
+                        $weighted     =~ /(.*)\.(.*)/;
+                        my $left  = $1;
+                        my $right = $2;
+                        my $pad;
+                        for my $i (1 .. $exp-1)
+                        {
+                            $pad .= "0";
+                        }
+                        $weighted = "0.$pad$left$right";
+                    }
                     $bold = "<b>" if ( $max == $w );
                     $endbold = "<b>" if ( $max == $w );
                     $body .= "<tr><td>$bold<font color=$classifier->{colors}{$bucket}>$bucket</font>$endbold<td><td>$bold<tt>$prob</tt>$endbold<td><td>$bold<tt>$weighted</tt>$endbold";
