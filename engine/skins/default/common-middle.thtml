@@ -23,7 +23,7 @@
             <td class="shellBottomRight"></td>
         </tr>
     </table>
-    <p />
+    <br />
     <table class="menu" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Header_MenuSummary>">
         <tr>
             <td class="menuIndent">&nbsp;</td>
