@@ -27,7 +27,7 @@
 #--------------------------------------------------------------------------
 
 ; This version of the script has been tested with the "NSIS 2 Release Candidate 2" compiler,
-; released 5 January 2004, with the NSIS CVS snapshot from 9 January 2004 (20:44 GMT) applied.
+; released 5 January 2004, with the NSIS CVS snapshot from 12 January 2004 (08:44 GMT) applied.
 
 ; IMPORTANT WARNING:
 ; This script should not be built with any earlier version than "NSIS 2 Release Candidate 2"
@@ -1159,17 +1159,17 @@ skip_autostart_set:
 SectionEnd
 
 #--------------------------------------------------------------------------
-# Installer Section: Flat File Corpus Backup component (always 'installed')
+# Installer Section: Flat File or BerkeleyDB Corpus Backup component (always 'installed')
 #
-# If we are performing an upgrade of a 'flat file' version of POPFile, we make a backup of the
-# flat file corpus structure. Note that if a backup already exists, we do nothing.
+# If we are performing an upgrade of a 'flat file' or 'BerkeleyDB' version of POPFile, we make
+# a backup of the old corpus structure. Note that if a backup already exists, we do nothing.
 #
 # The backup is created in the '$INSTDIR\backup' folder. Information on the backup is stored
-# in the 'backup.ini' file to assist in restoring the flat file corpus. A copy of 'popfile.cfg'
+# in the 'backup.ini' file to assist in restoring the old corpus. A copy of 'popfile.cfg'
 # is also placed in the backup folder.
 #--------------------------------------------------------------------------
 
-Section "-FlatFileBackup" SecBackup
+Section "-NonSQLCorpusBackup" SecBackup
 
   !define L_CFG_HANDLE    $R9     ; handle for "popfile.cfg"
   !define L_CORPUS_PATH   $R8     ; full path to the corpus
@@ -1180,7 +1180,7 @@ Section "-FlatFileBackup" SecBackup
   Push ${L_TEMP}
 
   IfFileExists "$INSTDIR\popfile.cfg" 0 exit
-  IfFileExists "$INSTDIR\backup\backup.ini" exit
+  IfFileExists "$INSTDIR\backup\nonsql\*.*" exit
 
   ; Use data in 'popfile.cfg' to generate the full path to the corpus folder
 
@@ -1205,38 +1205,39 @@ corpus_check:
   ; a BerkeleyDB file or a flat-file corpus file. We stop our search as
   ; soon as we find either type of file (i.e. we do not examine every bucket)
 
-  IfFileExists "${L_CORPUS_PATH}\${L_TEMP}\table.db" nothing_to_backup
+  IfFileExists "${L_CORPUS_PATH}\${L_TEMP}\table.db" backup_corpus
   IfFileExists "${L_CORPUS_PATH}\${L_TEMP}\table" backup_corpus
   Goto corpus_check
 
 backup_corpus:
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_INST_PROG_FFCBACK)"
+  DetailPrint "$(PFI_LANG_INST_PROG_CORPUS)"
   SetDetailsPrint listonly
 
-  CreateDirectory "$INSTDIR\backup"
+  CreateDirectory "$INSTDIR\backup\nonsql"
   CopyFiles "$INSTDIR\popfile.cfg" "$INSTDIR\backup\popfile.cfg"
-  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "CorpusPath" "${L_CORPUS_PATH}"
+  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "CorpusPath" "${L_CORPUS_PATH}"
 
   StrCpy ${L_TEMP} ${L_CORPUS_PATH}
   Push ${L_TEMP}
   Call GetParent
   Pop ${L_TEMP}
-  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "ParentPath" "${L_TEMP}"
+  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "ParentPath" "${L_TEMP}"
   StrLen ${L_TEMP} ${L_TEMP}
   IntOp ${L_TEMP} ${L_TEMP} + 1
   StrCpy ${L_TEMP} ${L_CORPUS_PATH} "" ${L_TEMP}
+  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "BackupPath" "$INSTDIR\backup\nonsql"
 
   ClearErrors
-  CopyFiles /SILENT "${L_CORPUS_PATH}\*.*" "$INSTDIR\backup\${L_TEMP}"
+  CopyFiles /SILENT "${L_CORPUS_PATH}\*.*" "$INSTDIR\backup\nonsql\${L_TEMP}"
   IfErrors 0 continue
   DetailPrint "Error detected when making corpus backup"
-  MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_MBFFCERR_1)"
+  MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_MBCORPUS_1)"
 
 continue:
-  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Corpus" "${L_TEMP}"
-  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "new"
+  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Corpus" "${L_TEMP}"
+  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status" "new"
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
@@ -2223,6 +2224,10 @@ Function SetEmailClientPage_Init
   ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "Settings" "RTL" "$(^RTL)"
+  
+  ; We use the 'Back' button as an easy way to skip all the email client reconfiguration pages
+  ; (but we still check if there are any old-style uninstall data files to be converted)
+  
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" \
               "Settings" "BackButtonText" "$(PFI_LANG_MAILCFG_IO_SKIPALL)"
 
@@ -2324,6 +2329,11 @@ Function SetOutlookOutlookExpressPage_Init
   ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" "Settings" "RTL" "$(^RTL)"
+  
+  ; We use the 'Back' button as an easy way to skip the 'Outlook Express' or 'Outlook'
+  ; reconfiguration (but we still check if there are any old-style uninstall data files
+  ; to be converted)
+  
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" \
               "Settings" "BackButtonText" "$(PFI_LANG_MAILCFG_IO_SKIPONE)"
 
@@ -3700,6 +3710,9 @@ Function SetEudoraPage_Init
   ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Settings" "RTL" "$(^RTL)"
+  
+  ; We use the 'Back' button as an easy way to skip the 'Eudora' reconfiguration
+  
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" \
               "Settings" "BackButtonText" "$(PFI_LANG_MAILCFG_IO_SKIPONE)"
 
@@ -4159,7 +4172,7 @@ close_file:
 
   ; If we are upgrading POPFile, the corpus might have to be converted from flat file format
 
-  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
+  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status"
   StrCmp ${L_TEMP} "new" 0 display_the_page
 
   ; Corpus conversion will occur when POPFile is started - this may take several minutes,
@@ -4318,7 +4331,7 @@ lastaction_background:
   StrCpy ${L_CONSOLE} "0"
 
 display_banner:
-  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
+  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status"
   StrCmp ${L_TEMP} "new" exit_without_banner
 
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_LAUNCH_BANNER_1)" "$(PFI_LANG_LAUNCH_BANNER_2)"
@@ -4392,23 +4405,23 @@ Function ConvertCorpusPage_Init
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioD.ini" "Settings" "RTL" "$(^RTL)"
 
-  !insertmacro PFI_IO_TEXT "ioD.ini" "1" "$(PFI_LANG_FLATFILE_IO_NOTE_1)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "2" "$(PFI_LANG_FLATFILE_IO_NOTE_2)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "3" "$(PFI_LANG_FLATFILE_IO_NOTE_3)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "4" "$(PFI_LANG_FLATFILE_IO_NOTE_4)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "5" "$(PFI_LANG_FLATFILE_IO_NOTE_5)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "6" "$(PFI_LANG_FLATFILE_IO_NOTE_6)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "7" "$(PFI_LANG_FLATFILE_IO_NOTE_7)"
-  !insertmacro PFI_IO_TEXT "ioD.ini" "8" "$(PFI_LANG_FLATFILE_IO_NOTE_8)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "1" "$(PFI_LANG_NONSQLDB_IO_NOTE_1)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "2" "$(PFI_LANG_NONSQLDB_IO_NOTE_2)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "3" "$(PFI_LANG_NONSQLDB_IO_NOTE_3)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "4" "$(PFI_LANG_NONSQLDB_IO_NOTE_4)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "5" "$(PFI_LANG_NONSQLDB_IO_NOTE_5)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "6" "$(PFI_LANG_NONSQLDB_IO_NOTE_6)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "7" "$(PFI_LANG_NONSQLDB_IO_NOTE_7)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "8" "$(PFI_LANG_NONSQLDB_IO_NOTE_8)"
 
 FunctionEnd
 
 #--------------------------------------------------------------------------
 # Installer Function: ConvertCorpusPage (generates a custom page)
 #
-# Displays custom page when an existing flat file corpus has to be converted to the new
-# BerkeleyDB format. Conversion may take several minutes during which time the POPFile
-# User Interface will be unresponsive.
+# Displays custom page when an existing flat file or BerkeleyDB corpus has to be converted to
+# the new SQL format (this installer installs the SQLite package). Conversion may take several
+# minutes during which time the POPFile User Interface will be unresponsive.
 #--------------------------------------------------------------------------
 
 Function ConvertCorpusPage
@@ -4417,10 +4430,10 @@ Function ConvertCorpusPage
 
   Push ${L_TEMP}
 
-  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
+  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status"
   StrCmp ${L_TEMP} "new" 0 exit
 
-  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_FLATFILE_TITLE)" "$(PFI_LANG_FLATFILE_SUBTITLE)"
+  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_NONSQLDB_TITLE)" "$(PFI_LANG_NONSQLDB_SUBTITLE)"
 
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioD.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
@@ -4478,7 +4491,7 @@ Function CheckRunStatus
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioD.ini" "Settings" "NumFields" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Settings" "BackEnabled" "0"
 
-  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "old"
+  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status" "old"
 
   Goto selection_ok
 
@@ -4497,10 +4510,10 @@ no_reboot_reqd:
   ; If flat file corpus conversion is required, we cannot offer to display the POPFile UI
   ; (conversion may take several minutes, during which time the UI will be unresponsive)
 
-  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status"
+  ReadINIStr ${L_TEMP} "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status"
   StrCmp ${L_TEMP} "new" 0 selection_ok
 
-  WriteINIStr "$INSTDIR\backup\backup.ini" "FlatFileCorpus" "Status" "old"
+  WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status" "old"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Settings" "BackEnabled" "0"
 
   ; When 'popfile.exe' is used to run POPFile, the 'windows_console' parameter in 'popfile.cfg'
