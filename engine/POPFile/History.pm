@@ -548,7 +548,7 @@ sub commit_history__
         my @required = ( 'from', 'to', 'cc', 'subject' );
 
         foreach my $h (@required) {
-            if ( !defined ${$header{$h}}[0] ) {
+            if ( !defined ${$header{$h}}[0] || ${$header{$h}}[0] =~ /^\s*$/ ) {
                 if ( $h ne 'cc' ) {
                     ${$header{$h}}[0] = "<$h header missing>";
                 } else {
