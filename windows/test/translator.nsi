@@ -10,7 +10,7 @@
 #                    (1) transauw.exe (built using the 'transAUW.nsi' NSIS script)
 #                    (2) transmcc.exe (built using the 'transMCC.nsi' NSIS script)
 #
-# Copyright (c) 2004 John Graham-Cumming
+# Copyright (c) 2004-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -139,7 +139,7 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT       "PFI Testbed"
-  !define C_PFI_VERSION       "0.11.13"
+  !define C_PFI_VERSION       "0.11.14"
 
   Name                        "${C_PFI_PRODUCT}"
   Caption                     "${C_PFI_PRODUCT} ${C_PFI_VERSION} Setup"
@@ -220,31 +220,6 @@
   !include "MUI.nsh"
 
 #--------------------------------------------------------------------------
-# Version Information settings (for the installer EXE and uninstaller EXE)
-#--------------------------------------------------------------------------
-
-  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
-  ; representing the following values: Major.Minor.Release.Build
-
-  VIProductVersion                   "${C_PFI_VERSION}.0"
-
-  VIAddVersionKey "ProductName"      "POPFile Installer Language Testbed"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
-  VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription"  "POPFile Installer Language Testbed"
-  VIAddVersionKey "FileVersion"      "${C_PFI_VERSION_ID}"
-
-  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
-
-  !ifndef ENGLISH_MODE
-    VIAddVersionKey "Build Type"     "Multi-Language Testbed"
-  !else
-    VIAddVersionKey "Build Type"     "English-Only Testbed"
-  !endif
-
-#--------------------------------------------------------------------------
 # Include private library functions and macro definitions
 #--------------------------------------------------------------------------
 
@@ -253,6 +228,34 @@
   !define TRANSLATOR
 
   !include "..\pfi-library.nsh"
+
+#--------------------------------------------------------------------------
+# Version Information settings (for the installer EXE and uninstaller EXE)
+#--------------------------------------------------------------------------
+
+  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
+  ; representing the following values: Major.Minor.Release.Build
+
+  VIProductVersion                          "${C_PFI_VERSION}.0"
+
+  VIAddVersionKey "ProductName"             "POPFile Installer Language Testbed"
+  VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
+  VIAddVersionKey "CompanyName"             "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"         "POPFile Installer Language Testbed"
+  VIAddVersionKey "FileVersion"             "${C_PFI_VERSION_ID}"
+
+  VIAddVersionKey "Build Date/Time"         "${__DATE__} @ ${__TIME__}"
+  !ifdef C_PFI_LIBRARY_VERSION
+    VIAddVersionKey "Build Library Version" "${C_PFI_LIBRARY_VERSION}"
+  !endif
+  VIAddVersionKey "Build Script"            "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
+
+  !ifndef ENGLISH_MODE
+    VIAddVersionKey "Build Type"            "Multi-Language Testbed"
+  !else
+    VIAddVersionKey "Build Type"            "English-Only Testbed"
+  !endif
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages

@@ -5,7 +5,7 @@
 #                  easy to check the various language strings used by the
 #                  real utility.
 #
-# Copyright (c) 2004 John Graham-Cumming
+# Copyright (c) 2004-2005 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -74,7 +74,7 @@
   !define C_PFI_PRODUCT      "Corpus Conversion Testbed"
   Name                       "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION      "0.1.6"
+  !define C_PFI_VERSION      "0.1.7"
 
   ; Mention the version number in the window title
 
@@ -105,19 +105,22 @@
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion                   "${C_PFI_VERSION}.0"
+  VIProductVersion                          "${C_PFI_VERSION}.0"
 
-  VIAddVersionKey "ProductName"      "${C_PFI_PRODUCT}"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
-  VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription"  "POPFile Corpus Conversion Testbed"
-  VIAddVersionKey "FileVersion"      "${C_PFI_VERSION}"
+  VIAddVersionKey "ProductName"             "${C_PFI_PRODUCT}"
+  VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
+  VIAddVersionKey "CompanyName"             "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"         "POPFile Corpus Conversion Testbed"
+  VIAddVersionKey "FileVersion"             "${C_PFI_VERSION}"
 
-  VIAddVersionKey "Build"            "Multi-Language"
+  VIAddVersionKey "Build"                   "Multi-Language"
 
-  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Date/Time"         "${__DATE__} @ ${__TIME__}"
+  !ifdef C_PFI_LIBRARY_VERSION
+    VIAddVersionKey "Build Library Version" "${C_PFI_LIBRARY_VERSION}"
+  !endif
+  VIAddVersionKey "Build Script"            "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages

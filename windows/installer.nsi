@@ -290,40 +290,6 @@
   !include "WinMessages.nsh"
 
 #--------------------------------------------------------------------------
-# Version Information settings (for the installer EXE and uninstaller EXE)
-#--------------------------------------------------------------------------
-
-  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
-  ; representing the following values: Major.Minor.Release.Build
-
-  VIProductVersion "${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}.0"
-
-  VIAddVersionKey "ProductName"      "${C_PFI_PRODUCT}"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
-  VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription"  "POPFile Automatic email classification"
-  VIAddVersionKey "FileVersion"      "${C_PFI_VERSION}"
-  VIAddVersionKey "OriginalFilename" "${C_OUTFILE}"
-
-  !ifndef ENGLISH_MODE
-    !ifndef NO_KAKASI
-      VIAddVersionKey "Build"        "Multi-Language installer (with Kakasi)"
-    !else
-      VIAddVersionKey "Build"        "Multi-Language installer (without Kakasi)"
-    !endif
-  !else
-    !ifndef NO_KAKASI
-      VIAddVersionKey "Build"        "English-Mode installer (with Kakasi)"
-    !else
-      VIAddVersionKey "Build"        "English-Mode installer (without Kakasi)"
-    !endif
-  !endif
-
-  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
-
-#--------------------------------------------------------------------------
 # Include private library functions and macro definitions
 #--------------------------------------------------------------------------
 
@@ -333,6 +299,43 @@
 
   !include "pfi-library.nsh"
   !include "WriteEnvStr.nsh"
+
+#--------------------------------------------------------------------------
+# Version Information settings (for the installer EXE and uninstaller EXE)
+#--------------------------------------------------------------------------
+
+  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
+  ; representing the following values: Major.Minor.Release.Build
+
+  VIProductVersion "${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}.0"
+
+  VIAddVersionKey "ProductName"             "${C_PFI_PRODUCT}"
+  VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
+  VIAddVersionKey "CompanyName"             "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"         "POPFile Automatic email classification"
+  VIAddVersionKey "FileVersion"             "${C_PFI_VERSION}"
+  VIAddVersionKey "OriginalFilename"        "${C_OUTFILE}"
+
+  !ifndef ENGLISH_MODE
+    !ifndef NO_KAKASI
+      VIAddVersionKey "Build"               "Multi-Language installer (with Kakasi)"
+    !else
+      VIAddVersionKey "Build"               "Multi-Language installer (without Kakasi)"
+    !endif
+  !else
+    !ifndef NO_KAKASI
+      VIAddVersionKey "Build"               "English-Mode installer (with Kakasi)"
+    !else
+      VIAddVersionKey "Build"               "English-Mode installer (without Kakasi)"
+    !endif
+  !endif
+
+  VIAddVersionKey "Build Date/Time"         "${__DATE__} @ ${__TIME__}"
+  !ifdef C_PFI_LIBRARY_VERSION
+    VIAddVersionKey "Build Library Version" "${C_PFI_LIBRARY_VERSION}"
+  !endif
+  VIAddVersionKey "Build Script"            "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages

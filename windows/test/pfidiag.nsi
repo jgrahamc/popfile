@@ -4,7 +4,7 @@
 #                 to assist in solving problems with POPFile installations created
 #                 by the Windows installer for POPFile v0.21.0 (or later).
 #
-# Copyright (c) 2004  John Graham-Cumming
+# Copyright (c) 2004-2005  John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -60,7 +60,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.50"
+  !define C_VERSION   "0.0.51"
 
   !define C_OUTFILE   "pfidiag.exe"
 
@@ -83,26 +83,6 @@
   !include "MUI.nsh"
 
 #--------------------------------------------------------------------------
-# Version Information settings (for the utility's EXE file)
-#--------------------------------------------------------------------------
-
-  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
-  ; representing the following values: Major.Minor.Release.Build
-
-  VIProductVersion                   "${C_VERSION}.0"
-
-  VIAddVersionKey "ProductName"      "PFI Diagnostic Utility"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
-  VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription"  "PFI Diagnostic Utility"
-  VIAddVersionKey "FileVersion"      "${C_VERSION}"
-  VIAddVersionKey "OriginalFilename" "${C_OUTFILE}"
-
-  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
-
-#--------------------------------------------------------------------------
 # Include private library functions and macro definitions
 #--------------------------------------------------------------------------
 
@@ -111,6 +91,29 @@
   !define PFIDIAG
 
   !include "..\pfi-library.nsh"
+
+#--------------------------------------------------------------------------
+# Version Information settings (for the utility's EXE file)
+#--------------------------------------------------------------------------
+
+  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
+  ; representing the following values: Major.Minor.Release.Build
+
+  VIProductVersion                          "${C_VERSION}.0"
+
+  VIAddVersionKey "ProductName"             "PFI Diagnostic Utility"
+  VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
+  VIAddVersionKey "CompanyName"             "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"         "PFI Diagnostic Utility"
+  VIAddVersionKey "FileVersion"             "${C_VERSION}"
+  VIAddVersionKey "OriginalFilename"        "${C_OUTFILE}"
+
+  VIAddVersionKey "Build Date/Time"         "${__DATE__} @ ${__TIME__}"
+  !ifdef C_PFI_LIBRARY_VERSION
+    VIAddVersionKey "Build Library Version" "${C_PFI_LIBRARY_VERSION}"
+  !endif
+  VIAddVersionKey "Build Script"            "${__FILE__}$\r$\n(${__TIMESTAMP__})"
 
 #--------------------------------------------------------------------------
 # Macros used to simplify many of the tests

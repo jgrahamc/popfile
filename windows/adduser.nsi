@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.59"
+  !define C_PFI_VERSION  "0.2.60"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -279,30 +279,44 @@
   !include "WinMessages.nsh"
 
 #--------------------------------------------------------------------------
+# Include private library functions and macro definitions
+#--------------------------------------------------------------------------
+
+  ; Avoid compiler warnings by disabling the functions and definitions we do not use
+
+  !define ADDUSER
+
+  !include "pfi-library.nsh"
+  !include "WriteEnvStr.nsh"
+
+#--------------------------------------------------------------------------
 # Version Information settings (for the installer EXE and uninstaller EXE)
 #--------------------------------------------------------------------------
 
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion                   "${C_PFI_VERSION}.0"
+  VIProductVersion                          "${C_PFI_VERSION}.0"
 
-  VIAddVersionKey "ProductName"      "POPFile User wizard"
-  VIAddVersionKey "Comments"         "POPFile Homepage: http://getpopfile.org"
-  VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription"  "Add/Remove POPFile User wizard"
-  VIAddVersionKey "FileVersion"       "${C_PFI_VERSION}"
-  VIAddVersionKey "OriginalFilename" "${C_OUTFILE}"
+  VIAddVersionKey "ProductName"             "POPFile User wizard"
+  VIAddVersionKey "Comments"                "POPFile Homepage: http://getpopfile.org/"
+  VIAddVersionKey "CompanyName"             "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"          "Copyright (c) 2005  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"         "Add/Remove POPFile User wizard"
+  VIAddVersionKey "FileVersion"             "${C_PFI_VERSION}"
+  VIAddVersionKey "OriginalFilename"        "${C_OUTFILE}"
 
   !ifndef ENGLISH_MODE
-    VIAddVersionKey "Build"          "Multi-Language"
+    VIAddVersionKey "Build"                 "Multi-Language"
   !else
-    VIAddVersionKey "Build"          "English-Mode"
+    VIAddVersionKey "Build"                 "English-Mode"
   !endif
 
-  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script"     "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Date/Time"         "${__DATE__} @ ${__TIME__}"
+  !ifdef C_PFI_LIBRARY_VERSION
+    VIAddVersionKey "Build Library Version" "${C_PFI_LIBRARY_VERSION}"
+  !endif
+  VIAddVersionKey "Build Script"            "${__FILE__}${MB_NL}(${__TIMESTAMP__})"
 
 #----------------------------------------------------------------------------------------
 # CBP Configuration Data (to override defaults, un-comment the lines below and modify them)
@@ -337,17 +351,6 @@
 #----------------------------------------------------------------------------------------
 
   !include CBP.nsh
-
-#--------------------------------------------------------------------------
-# Include private library functions and macro definitions
-#--------------------------------------------------------------------------
-
-  ; Avoid compiler warnings by disabling the functions and definitions we do not use
-
-  !define ADDUSER
-
-  !include "pfi-library.nsh"
-  !include "WriteEnvStr.nsh"
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages
