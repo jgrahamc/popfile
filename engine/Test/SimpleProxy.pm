@@ -20,7 +20,7 @@ use IO::Socket;
 use IO::Select;
 
 # A handy variable containing the value of an EOL for networks
-my $eol = "\015\012";
+my $eol = "\n";
 
 #----------------------------------------------------------------------------
 # new
@@ -42,6 +42,8 @@ sub new
     $self->{send__} = '';
     $self->{received__} = '';
 
+    $self->{server_port__} = 10000 + int(rand(2000));
+
     return $self;
 }
 
@@ -54,7 +56,7 @@ sub stop_server
 {
     my ( $self ) = @_;
 
-    close $self->{remote_server__};
+    close $self->{remote_server__} if ( defined( $self->{remote_server__} ) );
 }
 
 #----------------------------------------------------------------------------
@@ -73,7 +75,7 @@ sub start_server
 
     $self->{remote_server__} = IO::Socket::INET->new( Proto     => 'tcp',
                                     LocalAddr => 'localhost',
-                                    LocalPort => 10000,
+                                    LocalPort => $self->{server_port__},
                                     Listen    => SOMAXCONN,
                                     Reuse     => 1 );
 
@@ -101,8 +103,9 @@ sub service_server
 
         # If there's data in the send pipe then write it out line by line
 
-        while ( $self->{send__} =~ s/(.+)[\r\n]+// ) {
+        while ( $self->{send__} =~ s/^([^\r\n]+)[\r\n]+// ) {
             $self->tee_( $handle, "$1$eol" );
+            select( undef, undef, undef, 0.1 );
 	}
 
         # If there's data available to read then read it into the received
@@ -145,7 +148,7 @@ sub child__
 
     # Connect to the simple server that
 
-    my $remote = $self->verify_connected_( 0, $client, 'localhost', 10000 );
+    my $remote = $self->verify_connected_( 0, $client, 'localhost', $self->{server_port__} );
 
     if ( defined( $remote ) && $remote->connected ) {
         $self->log_( "Child connected to server" );
@@ -188,6 +191,8 @@ sub received
     my ( $self ) = @_;
     my $received = $self->{received__};
 
+
+    $self->log_( "Received $received" );
     $self->{received__} = '';
 
     return $received;
