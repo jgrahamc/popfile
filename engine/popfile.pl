@@ -91,6 +91,9 @@ my @magnet_cache;
 my @reclassified_cache;
 my $downloaded_mail = 0;
 
+# Just our hostname
+my $hostname;
+
 #
 #
 # USER INTERFACE
@@ -2453,7 +2456,7 @@ sub run_popfile
         {
             # Tell the client that we are ready for commands and identify our version number
             tee( $client, "+OK POP3 popfile (v$major_version.$minor_version.$build_version) server ready$eol" );
-
+            
             my $current_count = $configuration{mail_count};
 
             # Retrieve commands from the client and process them until the client disconnects or
@@ -2815,7 +2818,14 @@ sub run_popfile
 
                         $msg_headers .= "X-Text-Classification: $classification$eol" if ( $configuration{xtc} );
                         $temp_file =~ s/messages\/(.*)/$1/;
-                        $msg_headers .= "X-POPFile-Link: http://127.0.0.1:$configuration{ui_port}/jump_to_message?view=$temp_file$eol" if ( $configuration{xpl} );
+                        
+                        if ( $configuration{xpl} )
+                        {
+                            $msg_headers .= "X-POPFile-Link: http://";
+                            $msg_headers .= $configuration{localpop}?"127.0.0.1":$hostname;
+                            $msg_headers .= ":$configuration{ui_port}/jump_to_message?view=$temp_file$eol";
+                        }
+                        
                         $msg_headers .= "$eol";
 
                         # Echo the text of the message to the client
@@ -3017,6 +3027,12 @@ if ( $configuration{unclassified_probability} != 0 )
     $classifier->{unclassified} = $configuration{unclassified_probability};
 }
 $classifier->load_word_matrix();
+
+# Get the hostname for use in the X-POPFile-Link header
+use Sys::Hostname;
+$hostname = hostname;
+
+debug( "We are $hostname" );
 
 debug( "POPFile Engine v$major_version.$minor_version.$build_version running" );
 
