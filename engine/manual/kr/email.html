@@ -1,0 +1,285 @@
+<html><head><title>팝파일 설명서</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>팝파일<small>(POPFile)</small> 설명서</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>처음 설치할 때:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>1 단계<br><font size=+1><b>&nbsp;<a href="installing.html">설치하기</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>2 단계<br><font size=+1><b>&nbsp;<a href="firsttime.html">버킷 설정</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#cccc99 width=15% align=center>3 단계<br><font size=+1><b>&nbsp;<a href="email.html">메일 프로그램</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>4 단계<br><font size=+1><b>&nbsp;<a href="training.html">훈련시키기</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>다음 환경에의 적용:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">방화벽</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">보안 암호 인증</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">다른 프락시</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">복수의 메일 계정</a></b></font></td>
+</tr>
+
+</table>
+
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+<h2>메일 프로그램이 팝파일과 연동하도록 설정</h2>
+
+<p>팝파일은 <i>proxy server</i>로서 작동합니다. 여러분이 사용하시는 아웃룩 같은 메일 프로그램은 팝파일에 접속하고, 팝파일은 이메일 서버에 접속합니다.
+메일 프로그램이 메일 서버로부터 직접적으로 메일을 가져오는 대신, 팝파일이 먼저 가져오고, 검색한 후 메일이 어느 버킷에 들어가야 하는지 결정합니다.
+<p>일단 결정이 되면 (몇분의 1초밖엔 안 걸림) 팝파일은 다음 두가지 중 하나를 합니다 - [spam] 같은 문자열을 제목의 처음에 삽입하여 아웃룩 익스프레스 같은 프로그램
+메시지 규칙을 적용할 수 있도록 하거나, 혹은 좀더 강력한 아웃룩 같은 프로그램을 위해 다음과 같은 새로운 메일 헤더(보이지 않음)를 추가합니다.
+<br>
+<i>X-Text-Classification: personal</i><br> 이것을 이용하여 메시지 규칙을 적용할 수 있습니다.</p>
+
+<p>메일 프로그램이 팝파일과 연동하려면 다음 2가지 작업을 해줘야 합니다.
+<ol><li>메일 프로그램의 설정을 변경하여 팝파일에 접속하도록 함.
+<li>메일 프로그램이 메일을 분류하도록 메시지 규칙을 설정.
+</ol></p>
+
+<p>우선 메일 설정부터 변경하도록 합시다. 메시지 규칙은 곧 이어 설정할 것입니다.
+<p>아래에는 몇몇 유명한 메일 프로그램에 대한 절차가 있습니다. 다른 프로그램 사용자, 또는 고급 사용자를 위해 일반적인 절차를 설명하겠습니다.
+</p>
+
+<p><ul><li>POP3 서버를 127.0.0.1로 바꾸고 원래 주소를 적어놓는다.
+<li>POP3 사용자명을 [원래 쓰던 서버 주소]:[사용자명]으로 바꾼다.
+<li>비밀번호는 손대지 않는다.</ul></p>
+
+<p>보안 암호 인증을 쓰는 계정은 <a href=spa.html>보안 암호 인증</a> 항목을 참조하십시오.</p>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=3 align="center">
+사용하시는 메일 프로그램에 대한 설명대로 따라 하십시오. 방법이 복잡해 보일지도 모르지만 사실 2분정도 밖엔 안 걸립니다.<br>
+게다가 틀리게 하실 가능성도 거의 없습니다.(혹시 모르니 원래 설정을 종이에 적어 놓으십시오.)<br>
+* 페가수스나 유도라를 사용하시는 분은 <a href=email_other_con.html target=other>여기를</a> 클릭하십시오.
+</td></tr><tr>
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>아웃룩</h3>
+
+<ul>
+
+<li>도구->전자 메일 계정 메뉴를 선택하십시오. 전자 메일 계정 창이 뜰 것입니다.
+<a href=o_popfile1_kr.gif>[스크린샷]</a>
+<li>"기존의 전자 메일 계정 보기 또는 변경"을 클릭하시고 "다음" 버튼을 클릭하십시오.
+팝파일에 연동할 계정을 선택하시고 "변경(C)..." 클릭.
+받는 메일 서버(POP3) 칸의 서버명과 로그온 정보 항목의 사용자 이름(U)을 종이에 적어두십시오.<a href=o_popfile2_kr.gif>[스크린샷]</a>
+<li>받는 메일 서버(POP3) 를 <b>127.0.0.1</b>로 변경하십시오. 로그온 정보 항목의 사용자 이름(U)도 변경하시되, 
+원래의 "받는 메일 서버(POP3)" 서버명에 <b>:</b>를 덧붙이고, 원래의 "사용자 이름(U)" 을 덧붙인 형태로로 변경하십시오.
+<br>(사용자 정보 항목의 사용자 이름(Y)는 전혀 바꿀 필요 없습니다. 로그온 정보 항목의 사용자 이름(U)을 바꾸셔야 합니다)
+<a href=o_popfile3_kr.gif>[스크린 샷]</a>
+<li>즉, 예를들어 원래의 "받는 메일 서버(POP3)" 명이 <b>my.mail.com</b> 이고, "사용자 이름(U)" 이 <b>jdoe</b> 이라면 
+새 사용자 이름(U)은 <b>my.mail.com:jdoe</b> 가 됩니다.
+<li>암호는 바꾸실 필요 없습니다.
+<li>"다음"을 누르고 마침을 누르세요.
+<li>팝파일이 실행중임을 확인하십시오. 이제부터 팝파일을 거쳐서 메일이 배달될 것입니다.
+<li>윈도우가 시작될때마다 항상 팝파일이 시작되어야 합니다. 윈도우즈 인스톨러 보전을 사용하신다면 시작 메뉴의 프로그램 그룹의 시작 프로그램에
+'Start POPFile in Background' 단축 아이콘이 있는지 확인하십시오. (없으면 시작 메뉴의 POPFile 그룹 중 'Start POPFile in Background'
+단축 아이콘을 <b>시작 프로그램</b> 그룹에 드래그 앤 드랍하시면 됩니다.
+이제 윈도우즈는 시작시마다 팝파일을 실행할 것입니다.
+<li>중요!! 만약 팝파일이 실행중이 아니면 메일 프로그램이 접속에 실패하게 되고 메일을 받을 수 없습니다.
+</ul>
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>아웃룩 익스프레스</h3>
+
+<ul>
+<li>아웃룩 익스프레스에서 도구 -> 계정 항목을 선택하십시오. 인터넷 계정 창이 나타날 것입니다.
+<a href=oe_popfile1_kr.gif>[스크린 샷]</a>
+<li>팝파일을 적용할 계정을 선택하시고 "속성(P)"를 클릭하십시오.<a href=oe_popfile2_kr.gif>[스크린 샷]</a>
+<li>서버 탭을 선택하십시오. "받는 메일(POP3)" 칸의 서버명과 받는 메일 서버 항목의 "계정 이름(C)" 항목을 적어 두십시오. 
+<a href=oe_popfile3_kr.gif>[스크린 샷]</a>
+<li>"받는 메일(POP3)" 칸의 서버명을 <b>127.0.0.1</b>로 바꾸시고, 받는 메일 서버 항목의 "계정 이름(C)" 을 
+원래의 "받는 메일(POP3)" 서버명 에 <b>:</b>을 덧붙이고, 원래의 "계정 이름" 을 덧붙인 형태로 변경하십시오. <a href=oe_popfile4_kr.gif>[스크린 샷]</a>
+<li>즉, 예를 들어 원래의 "받는 메일(POP3)" 서버명이 <b>my.mail.com</b> 이었고, 계정이름이 <b>jdoe</b> 였다면, 새 계정 이름은 <b>my.mail.com:jdoe</b>이 됩니다.
+<li>암호(P) 는 바꾸실 필요 없습니다.
+<li>"확인"을 클릭하신 후 "닫기"를 클릭하십시오.
+<li>팝파일이 실행중임을 확인하십시오. 이제부터 팝파일을 거쳐서 메일이 배달될 것입니다. 
+<li>윈도우 시작시에 항상 팝파일이 실행되어야 합니다. 인스톨러를 이용하여 설치하였으면 특별한 조작은 필요 없습니다만 
+혹시라도 자동 실행이 안될 경우 시작 메뉴의 POPFile 그룹의 "Start POPFile in Background" 라는 단축 아이콘을 <b>시작프로그램</b> 그룹에
+ 드래그 앤 드랍하면 됩니다. 그러면 윈도우 시작시에 매번 팝파일을 시작하게 됩니다.
+<li>중요!! 만약 팝파일이 실행중이 아니면 메일 프로그램이 접속에 실패하게 되고 메일을 받을 수 없습니다.
+</ul>
+
+</td>
+<!--
+<td width=25% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<ul>
+
+<li>In Eudora select the Tools->Options... menu option.  The Options dialog will appear. <a href=../e_popfile1.gif>[screenshot]</a>
+<li>Make a note of the Mail Server (incoming) server name and the Login Name. <a href=../e_popfile2.gif>[screenshot]</a>
+<li>Change the Mail Server (incoming) server name to <b>127.0.0.1</b> and change the Login Name to the combination of the original
+Mail Server (incoming) server name and the original Login Name separated by a colon.  <a href=../e_popfile3.gif>[screenshot]</a>
+<li>So, if the original Mail Server (incoming) server name was <b>my.mail.com</b> and your username was <b>jdoe</b>, your new username would be <b>my.mail.com:jdoe</b>
+<li>You don't need to change the password.
+<li>Hit OK.
+<li>Ensure that POPFile is running and all mail will be delivered through POPFile.
+<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <b>Startup</b> group. Now, Windows will load POPFile each time.
+<li>Important! If POPFile isn't loaded, the mail will not get through - and your email program won't connect!
+</ul>
+</td>
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Pegasus</h3>
+
+<ul>
+<li>   In Pegasus select the Tools->Internet Options... Receiving (POP3) tab. The POP3 account setup page will appear.
+<li>   Under General settings for receiving mail using POP3, select the POP3 Host dialog box. Make a note of the current POP3 host.
+<li>   Change the POP3 Host to <b>127.0.0.1</b>
+<li>   Under General settings for receiving mail using POP3, select the User name dialog box. Make a note of the current User name.
+<li>   Change the User name to the combination of the original POP3 Host name and the original User name separated by a colon.
+<li>   So, if the original POP3 host was <b>my.mail.com</b> and your User name was <b>jdoe</b>, your new User name would be <b>my.mail.com:jdoe</b>
+<li>   You don't need to change the password.
+<li>   Click the OK Button to save the changes.
+<li>   Ensure that POPFile is running and all mail will be delivered through POPFile!
+<li>   You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version of POPFile, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the Start -> Programs -> Startup group. Now, Windows will load POPFile each time.
+</ul>
+
+</td> -->
+</tr>
+</table>
+
+<p>자, 위 설정이 끝났으면 메시지 규칙을 설정할 차례입니다. 그래야 팝파일의 분류작업 결과를 메일 프로그램이 활용할 수 있게 되고,
+활용할 수 있어야 메일을 적절한 폴더에 넣을 수 있습니다.
+</p>
+<p>참고로, [분류]문자열을 메일의 제목에 넣을 것인지 안 넣을 것인지 설정할 수 있습니다. 웹 UI 화면의 버킷 페이지 상단의 의 "제목 변경" 부분에서 정할 수 있고,
+<b>만약 스팸 과 비 스팸 두가지로만 분류하시겠다면 스팸 버킷에는 "제목 변경"을 "사용"으로 설정하시고, 비 스팸 버킷에는 "사용 안함"으로 설정하시면
+좀더 깔끔합니다.</b> 어느경우에도 <i>X-Text-Classification</i> 헤더는 항상 추가됩니다.(보이지는 않음)
+</p>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=3 align="center">
+
+사용하시는 메일 프로그램에 대한 설명대로 따라 하십시오. 방법이 복잡해 보일지도 모르지만 사실 몇분정도 밖엔 안 걸립니다.<br>
+게다가 틀리게 하실 가능성도 거의 없습니다.(혹시 모르니 원래 설정을 종이에 적어 놓으십시오.)<br>
+* 페가수스나 유도라를 사용하시는 분은 <a href=email_other_filter.html target=other>여기를</a> 클릭하십시오.
+
+</td></tr><tr>
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>아웃룩</h3>
+
+<ul>
+<li>아웃룩에서 도구->규칙마법사 를 선택하십시오. <a href=o_filter1_kr.gif>[스크린 샷]</a>
+<li>규칙 마법사가 나타납니다. 새로 만들기 를 클릭하시고 "새 규칙으로 시작" 을 선택하십시오. <a href=o_filter2_kr.gif>[스크린 샷]</a>
+<li>아웃룩은 <b>X-Text-Classification</b> 라는 메일 헤더를 사용할 수 있으므로 메일 분류의 흔적이 남지 않습니다. 
+"다음" 버튼을 누르시고 <i>"메시지 머리글에 지정 단어이(가) 포함된 경우"</i> 에 체크표시 하십시오.
+<li>자, 아래쪽 창의 <i>지정 단어</i> 를 클릭하시고 새로 생긴 창에 "X-Text-Classification: " 뒤에 버킷 이름 중 하나를 덧붙인 형태로 입력하십시오.
+그런 다음 "추가"를 누르시고 "확인"을 누르십시오.
+<li>"다음"을 클릭하시고 <i>"지정 폴더로 이동"</i> 에 체크표시 하십시오.
+<li>아래 창의<i>"지정"</i> 이라는 단어를 클릭하면 폴더 목록이 나타납니다. 버킷에 해당하는 메일을 담고 싶은 폴더를 선택하시고 확인을 클릭하십시오.
+<li>"마침" 버튼을 클릭하십시오.
+<li>각 버킷에 대해 위의 절차를 반복하시고 확인 버튼을 눌러서 규칙 마법사를 닫으십시오.
+<li>이상으로 설정 끝입니다!
+<li>참고: <a href="http://127.0.0.1:8080" target=newpop>팝파일 웹 화면</a>의 "설정" 탭에서, "제목 변경" 옵션이 <b>사용않음</b>으로 되어있는지 확인하십시오.
+</ul>
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>아웃룩 익스프레스</h3>
+
+<ul>
+<li>아웃룩 익스프레스의 도구->메시지 규칙->메일... 메뉴를 선택하십시오. <a href=oe_filter1_kr.gif>[스크린 샷]</a>
+<li>메시지 규칙 창이 나타날 것입니다. <a href=oe_filter2_kr.gif>[스크린 샷]</a><br>
+이미 메시지 규칙이 있을 경우에는 메시지 규칙 창이 나타납니다. <a href=oe_filter2_2_kr.gif>[스크린 샷]</a> 이 경우, "새로 만들기(N)..."을 클릭하십시오.
+<li>아웃룩 익스프레스는 <b>X-Text-Classification</b> 헤더를 처리하지 못합니다. 따라서 <i>"제목란에 특정 단어 포함"</i> 에 체크표시 하시고, 
+ "2. 규칙의 동작 선택" 항목에서 <i>"지정된 폴더로 이동"</i> 을 체크표시 하십시오.<a href=oe_filter3_kr.gif>[스크린 샷]</a>
+<li>이제 화면 하단의 파란 색 <i>"특정 단어 포함"</i> 을 클릭하시면 특정 단어 입력 창이 나타납니다. <a href=oe_filter4_kr.gif>[스크린 샷]</a>
+<li>팝파일의 버킷 이름중 하나를 [괄호]을 둘러싼 후 입력하시고 "추가"를 클릭 후 "확인"을 클릭하십시오.
+이제 파란 색 <i>"지정된"</i> 이라는 단어를 클릭하십시오. "이동" 대화창이 나타납니다. 버킷에 해당하는 메일을 옮길 폴더를 선택하고
+"확인"을 클릭하십시오. <a href=oe_filter5_kr.gif>[스크린 샷]</a>
+<li>"확인"을 클릭하십시오.
+<li>각각의 버킷에 대해 위 과정을 반복하시고, 확인 버튼을 눌러 끝내십시오.
+<li>이상으로 설정 끝입니다!
+<li>참고: <a href="http://127.0.0.1:8080">팝파일 웹 화면</a>의 "설정" 탭에서 "제목 바꿈" 옵션이 <b>"사용 중"</b>으로 설정되어 있는지 확인하십시오.
+</ul>
+
+</td>
+<!--
+<td width=25% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<p>Eudora allows filtering based on any mail header, which is great - everything can be done completely in the background, without changing the subject line!</p>
+
+<ul>
+<li>Select the Tools->Filters menu.  <a href=../e_filter1.gif>[screenshot]</a>
+<li>The Filters window appears.  Click New to create a new filter.  <a href=../e_filter2.gif>[screenshot]</a>
+<li>In the Header box type <b>X-Text-Classification</b> and in the box next to contains type the name of one of your buckets. <b>Don't</b> add square brackets around it.  <a href=../e_filter3.gif>[screenshot]</a>
+<li>The select <b>Transfer To</b> in the first Action box and select the mailbox you want to file message from this bucket into.  <a href=../e_filter4.gif>[screenshot]</a>
+<li>Repeat this for each of your buckets.
+<li>Close the Filters windows and say Yes when asked to save changes.
+<li>You're done!
+<li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>off</b>.
+</ul>
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Pegasus</h3>
+
+<ul>
+<li>   In Pegasus select the Tools->Mail Filtering Rules ->Edit New Mail Filtering Rules ->Rules Applied When Folder is Opened.
+<li>   The New Mail Filtering Rules window appears.
+<li>   Click the New Rule button. The Create a New Filtering Rule window appears.
+<li>   Click on the Expression button.  Note that using the Expression filter will work even if the POPFile Subject Line Modification option is turned off. If you use the Header filter, the POPFile Subject Line Modification option must be turned on.
+<li>   Select the If this regular expression dialog box
+<li>   Enter the name of one of your buckets, preceded <b>X-Text-Classification:</b>, for example: <b>X-Text-Classification: spam</b>
+<li>   Select the Headers or body radio button
+<li>   Select the desired action from the Action drop down list. For example Move
+<li>   If an action such as Move or Forward has been chosen, click the Set button.
+<li>   Select the destination folder or enter the forward to address as appropriate for the Action selected.
+<li>   Click the OK button to add the rule to the rule list.
+<li>   Repeat the process for each rule you need.
+<li>   The order in which the filter rules are applied can be adjusted using the red / blue (up / down) arrows in the New Mail Filter Rules window.
+<li>   Select the Save button to save the rules set changes.
+<li>   Select the OK button.
+<li>   You're done!
+</ul>
+
+</td>
+-->
+</tr></table>
+<br>
+<h2>이것이 해야할 일의 전부입니다! ... 그러나...</h2>
+
+이런 설정에도 불구하고, 팝파일은 아직은 메일 분류를 하지 않을겁니다. 왜냐고요?
+<i>여러분이 설정하신 버킷의 의미를 모르기 때문입니다.</i> 'spam'과 'genuine' 버킷이 무슨 의미인지, 'work' 와 'personal' 버킷이 무엇인지 전혀 알지 못합니다.
+심지어 메일이 어떤 언어로 되어 있는지도 모릅니다 - 그리고 관심갖지도 않습니다.
+여러분이 스팸과 일반 메일을 구별하도록 <b>훈련시키셔야</b> 합니다.
+<a href="training.html">자, 이제, 훈련에 대해 알아봅시다. &gt;&gt;</a>.
+
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>웹 링크:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">홈 페이지</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">게시판(영문)</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">버그 목록</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>

@@ -1,0 +1,102 @@
+<html><head><title>팝파일 설명서</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>팝파일<small>(POPFile)</small> 설명서</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>처음 설치할 때:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%>1 단계<br><font size=+1><b>&nbsp;<a href="installing.html">설치하기</a></b></font></td>
+<td width=2></td>                                
+<td bgcolor=#ededca width=15% align=center>2 단계<br><font size=+1><b>&nbsp;<a href="firsttime.html">버킷 설정</a></b></font></td>
+<td width=2></td>                                
+<td bgcolor=#ededca width=15% align=center>3 단계<br><font size=+1><b>&nbsp;<a href="email.html">메일 프로그램</a></b></font></td>
+<td width=2></td>                                
+<td align=center bgcolor=#ededca width=15%>4 단계<br><font size=+1><b>&nbsp;<a href="training.html">훈련시키기</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>다음 환경에의 적용:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">방화벽</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">보안 암호 인증</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">다른 프락시</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">복수의 메일 계정</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+<h2>팝파일 설치하기</h2>
+
+<p>팝파일은 2가지 버전으로 배포됩니다 - 설치가 쉬운 윈도우즈용과 연구용 크로스 플랫폼용. 일단 설치 되면 두 버전은 같습니다.</p>
+
+<h3>설치가 쉬운 윈도우즈 버전</h3>
+
+<p> <a href=http://sourceforge.net/project/showfiles.php?group_id=63137>팝 파일 다운로드 페이지</a>에서 윈도우즈 인스톨러를 다운로드 하십시오. 
+그리고 <tt>setup.exe</tt>을 실행시키고 화면에 나오는 설명대로 따라하십시오. 시작 메뉴로부터 팝파일을 실행 시킬 수 있으며 (시작 > 프로그램 > POPFile > Run POPFile in Background),
+또는 리부팅하면 자동으로 실행됩니다. <br>
+<b>중요 사항:</b> 화면에는 아무것도 표시되지 않습니다! 제대로 실행중인 것을 확인하는 방법은
+아래의 "팝파일 정상실행 확인하기" 섹션을 읽으십시오.</p>
+
+<h4>시스템 요구사항</h4>
+
+<p>팝파일을 실행하기 위해서는 몇가지 필요한 사항이 있습니다.</p>
+<ol>
+<li>최신 버전의 팝파일</li>
+<li>POP3를 지원하는 메일 계정(일반 사내/교내 계정은 대부분 지원합니다만 라이코스, 다음 메일 등의 웹 메일은 대부분 지원하지 않습니다.)
+  아웃룩이나 아웃룩 익스프레스를 사용하고 계신다면 POP3를 지원하는 계정이라 봐도 거의 틀림없습니다.</li>
+<li>약 2MB의 디스크 공간</li>
+</ol>
+
+<p>최신 팝파일 배포본은 <a href="http://sourceforge.net/project/showfiles.php?group_id=63137">팝파일 다운로드 페이지</a>의 목록 맨 위에서 zip 파일 형태로
+ 다운로드 하실 수 있습니다.
+ 윈도우즈 사용자는 Windows Only 라는 부분에서 받으시면 됩니다.</p>
+<p>팝파일 자체는 몇메가밖에 차지하지 않습니다. 이메일을 분류하는데 쓰이는 단어 목록(코퍼스라 불립니다)은 
+추가적으로 디스크 용량을 차지하는데, 이 용량은 팝파일이 처리하는 메일 양과 사용하실 버킷 수와 연관됩니다. </p>
+
+<h3>크로스 플랫폼 버전</h3>
+<p>참고: 프로그래머나 전산에 관심이 많으신 분들만 필요한 버전입니다. 일반 사용자는 전혀 필요 없습니다.
+<p><a href="http://www.perl.com">Perl</a>을 설치후 실행시키시고, Popfile Perl zip 파일을 <a href=http://popfile.sourceforge.net/>팝파일 홈페이지</a>에서 받아
+원하시는 디렉토리에 압축해제 하십시오. 윈도우즈에서는 <tt>perl popfile.pl</tt>이라는 명령어로 실행 시키십시오.
+
+<hr>
+
+<h2>팝파일 정상실행 확인하기</h2>
+
+<p>팝파일은 다른 프로그램들처럼 일반적인 UI 화면이 없고 익스플로러 등의 웹 브라우저를 통해 조작하게 되어 있습니다. 
+걱정마십시오. 특별히 지정하지 않는 한 외부사용자들은 접근이 불가능합니다.
+</p>
+
+<p>팝파일 화면을 보기 위해서는 <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a>를 익스플로러 등의 브라우저에 입력하거나,
+(윈도우즈 버전에서는) 시작 메뉴의 'POPFile User Interface'를 클릭하십시오. <b>중요 사항</b>: 
+윈도우즈용 설치 과정 중 팝파일 제어를 다른 포트를 통해 하도록 설정하셨으면 위 링크중 "8080" 부분을 설정하셨던 값으로 대체하십시오.
+ 
+
+<p>웹 브라우저에서 에러메시지가 나오면 팝파일이 실제 실행중인지 확인하시고 포트번호가 정확한지 확인하십시오. 
+(8080이 초기값입니다만, 만약 변경하셨으면 웹브라우저로 열어볼 주소도 바꾸셔야 합니다.)</p>
+
+<p>팝파일 화면이 보이신다면.... 축하드립니다! 자 이제 메일을 어떻게 분류할지에 대한 설정을 할 차례입니다.
+<a href="firsttime.html">버킷 설정으로 진행합시다. &gt;&gt;</a></p>
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>웹 링크:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">홈 페이지</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">게시판(영문)</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">버그 목록</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>

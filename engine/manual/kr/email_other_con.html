@@ -1,0 +1,49 @@
+<html><head><title>팝파일 설명서</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0>
+
+<tr>
+
+<td width=25% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<ul>
+
+<li>In Eudora select the Tools->Options... menu option.  The Options dialog will appear. <a href=../e_popfile1.gif>[screenshot]</a>
+<li>Make a note of the Mail Server (incoming) server name and the Login Name. <a href=../e_popfile2.gif>[screenshot]</a>
+<li>Change the Mail Server (incoming) server name to <b>127.0.0.1</b> and change the Login Name to the combination of the original
+Mail Server (incoming) server name and the original Login Name separated by a colon.  <a href=../e_popfile3.gif>[screenshot]</a>
+<li>So, if the original Mail Server (incoming) server name was <b>my.mail.com</b> and your username was <b>jdoe</b>, your new username would be <b>my.mail.com:jdoe</b>
+<li>You don't need to change the password.
+<li>Hit OK.
+<li>Ensure that POPFile is running and all mail will be delivered through POPFile.
+<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <b>Startup</b> group. Now, Windows will load POPFile each time.
+<li>Important! If POPFile isn't loaded, the mail will not get through - and your email program won't connect!
+</ul>
+</td>
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Pegasus</h3>
+
+<ul>
+<li>   In Pegasus select the Tools->Internet Options... Receiving (POP3) tab. The POP3 account setup page will appear.
+<li>   Under General settings for receiving mail using POP3, select the POP3 Host dialog box. Make a note of the current POP3 host.
+<li>   Change the POP3 Host to <b>127.0.0.1</b>
+<li>   Under General settings for receiving mail using POP3, select the User name dialog box. Make a note of the current User name.
+<li>   Change the User name to the combination of the original POP3 Host name and the original User name separated by a colon.
+<li>   So, if the original POP3 host was <b>my.mail.com</b> and your User name was <b>jdoe</b>, your new User name would be <b>my.mail.com:jdoe</b>
+<li>   You don't need to change the password.
+<li>   Click the OK Button to save the changes.
+<li>   Ensure that POPFile is running and all mail will be delivered through POPFile!
+<li>   You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version of POPFile, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the Start -> Programs -> Startup group. Now, Windows will load POPFile each time.
+</ul>
+
+</td>
+</tr>
+</table>
+
+</body></html>

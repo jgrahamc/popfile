@@ -1,0 +1,51 @@
+<html><head><title>팝파일 설명서</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td width=25% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<p>Eudora allows filtering based on any mail header, which is great - everything can be done completely in the background, without changing the subject line!</p>
+
+<ul>
+<li>Select the Tools->Filters menu.  <a href=../e_filter1.gif>[screenshot]</a>
+<li>The Filters window appears.  Click New to create a new filter.  <a href=../e_filter2.gif>[screenshot]</a>
+<li>In the Header box type <b>X-Text-Classification</b> and in the box next to contains type the name of one of your buckets. <b>Don't</b> add square brackets around it.  <a href=../e_filter3.gif>[screenshot]</a>
+<li>The select <b>Transfer To</b> in the first Action box and select the mailbox you want to file message from this bucket into.  <a href=../e_filter4.gif>[screenshot]</a>
+<li>Repeat this for each of your buckets.
+<li>Close the Filters windows and say Yes when asked to save changes.
+<li>You're done!
+<li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>off</b>.
+</ul>
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Pegasus</h3>
+
+<ul>
+<li>   In Pegasus select the Tools->Mail Filtering Rules ->Edit New Mail Filtering Rules ->Rules Applied When Folder is Opened.
+<li>   The New Mail Filtering Rules window appears.
+<li>   Click the New Rule button. The Create a New Filtering Rule window appears.
+<li>   Click on the Expression button.  Note that using the Expression filter will work even if the POPFile Subject Line Modification option is turned off. If you use the Header filter, the POPFile Subject Line Modification option must be turned on.
+<li>   Select the If this regular expression dialog box
+<li>   Enter the name of one of your buckets, preceded <b>X-Text-Classification:</b>, for example: <b>X-Text-Classification: spam</b>
+<li>   Select the Headers or body radio button
+<li>   Select the desired action from the Action drop down list. For example Move
+<li>   If an action such as Move or Forward has been chosen, click the Set button.
+<li>   Select the destination folder or enter the forward to address as appropriate for the Action selected.
+<li>   Click the OK button to add the rule to the rule list.
+<li>   Repeat the process for each rule you need.
+<li>   The order in which the filter rules are applied can be adjusted using the red / blue (up / down) arrows in the New Mail Filter Rules window.
+<li>   Select the Save button to save the rules set changes.
+<li>   Select the OK button.
+<li>   You're done!
+</ul>
+
+</td>
+
+</tr></table>
+
+</body></html>
