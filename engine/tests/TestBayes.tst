@@ -8,6 +8,7 @@
 
 test_assert( `rm -rf corpus` == 0 );
 test_assert( `cp -R corpus.base corpus` == 0 );
+test_assert( `rm -rf corpus/CVS` == 0 );
 
 unlink 'stopwords';
 test_assert( `cp stopwords.base stopwords` == 0 );

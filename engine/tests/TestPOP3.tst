@@ -230,6 +230,7 @@ sub server
 
 test_assert( `rm -rf corpus` == 0 );
 test_assert( `cp -R corpus.base corpus` == 0 );
+test_assert( `rm -rf corpus/CVS` == 0 );
 
 my $c = new POPFile::Configuration;
 my $mq = new POPFile::MQ;
