@@ -1584,7 +1584,7 @@ sub parse_header
 
         # These headers at least can be decoded
 
-        $argument = $self->decode_string( $argument );
+        $argument = $self->decode_string( $argument , $self->{lang__} );
 
         if ( $header =~ /^From$/i )  {
             $self->{from__} = $argument if ( $self->{from__} eq '' ) ;
@@ -1618,7 +1618,7 @@ sub parse_header
     if ( $header =~ /^Subject$/i ) {
 
         $prefix = 'subject';
-        $argument = $self->decode_string( $argument );
+        $argument = $self->decode_string( $argument, $self->{lang__} );
         $self->{subject__} = $argument if ( ( $self->{subject__} eq '' ) );
     }
 
@@ -1683,7 +1683,7 @@ sub parse_header
 
     # Some headers should never be RFC 2047 decoded
 
-    $argument = $self->decode_string($argument) unless ($header =~ /^(Received|Content\-Type|Content\-Disposition)$/i);
+    $argument = $self->decode_string($argument, $self->{lang__}) unless ($header =~ /^(Received|Content\-Type|Content\-Disposition)$/i);
 
     if ( $header =~ /^Content-Disposition$/i ) {
         $self->handle_disposition( $argument );
