@@ -338,7 +338,7 @@ Configuration_InsertionTableSummary     This table contains buttons that determi
 Security_MainTableSummary               This table provides sets of controls that affect the security of the overall configuration of POPFile, whether it should automatically check for updates to the program, and whether statistics about POPFile's performance should be sent to the central datastore of the program's author for general information.
 Advanced_MainTableSummary               This table provides a list of words that POPFile ignores when classifying message due to their relative frequency in message in general.  They are organized per row according to the first letter of the words.
 
-Imap_Bucket2Folder						Mail for bucket <b>%s</b> goes to folder
+Imap_Bucket2Folder                      Mail for bucket <b>%s</b> goes to folder
 Imap_MapError                           You cannot map more than one bucket to a single folder!
 Imap_Server                             IMAP server hostname:
 Imap_ServerNameError                    Please enter the server's hostname!
@@ -362,3 +362,4 @@ Imap_NoConnectionMessage                Please configure the connection details 
 Imap_WatchMore                          a folder to list of watched folders
 Imap_WatchedFolder                      Watched folder no 
 
+Shutdown_Message                        POPFile has shut down

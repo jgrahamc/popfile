@@ -532,7 +532,7 @@ sub url_handler__
         $http_header .= "; charset=$self->{language__}{LanguageCharset}\r\n";
         $http_header .= "Content-Length: ";
 
-        my $text = 'POPFile has shut down';
+        my $text = $self->shutdown_page__();
 
         $http_header .= length($text);
         $http_header .= "$eol$eol";
@@ -2970,5 +2970,49 @@ sub session_key
 
     return $self->{session_key__};
 }
+
+
+#----------------------------------------------------------------------------
+# shutdown_page__
+#
+#   Determines the text to send in response to a click on the
+#   shutdown link.  
+#----------------------------------------------------------------------------
+sub shutdown_page__
+{
+    my ( $self ) = @_;   
+
+    # Figure out what style sheet we are using
+    my $root = 'skins/' . $self->config_( 'skin' ) . '/';
+    my $css = $self->get_root_path_( $root . 'style.css' );
+    if ( !( -e $css ) ) {
+        $root = 'skins/default/';
+    }
+
+    # Now load the style sheet
+    
+    $css = '<style type="text/css">';
+    open CSS, "${root}style.css";
+    while ( <CSS> ) {
+        $css .= $_;
+    }
+    $css .= "</style>";
+
+    # Load the template and send its output to $text
+    
+    my $templ = $self->load_template__( 'shutdown-page.thtml' );
+    my $text = $templ->output();    
+    
+    # Replace the reference to the favicon, we won't be able
+    # to handle that request
+    $text =~ s/<link rel="icon" href="favicon\.ico">//;
+    
+    # Replace the link to the style sheet with the style sheet itself
+    $text =~ s/\Q<link rel="stylesheet" type="text\/css" href="${root}style.css" title="POPFile-Style">\E/$css/;
+    
+    return $text;
+}
+
+
 
 1;

@@ -1,0 +1,7 @@
+<TMPL_INCLUDE NAME="common-top.thtml">
+
+<TMPL_INCLUDE NAME="common-middle.thtml">
+
+<h2><TMPL_VAR NAME="Localize_Shutdown_Message"></h2>
+
+<TMPL_INCLUDE NAME="common-bottom.thtml">

@@ -316,6 +316,7 @@ View_WordMatrix                         Wort Matrix
 View_WordProbabilities                  zeige Wahrscheinlichkeit des Auftretens
 View_WordFrequencies                    zeige Häufigkeit des Auftretens
 View_WordScores                         zeige Bewertung des Wortes
+View_Chart                              Entscheidungs-Diagramm
 
 Windows_TrayIcon                        POPFile-Symbol neben der Uhr anzeigen?
 Windows_Console                         POPFile in einem Konsolenfenster ausführen?
@@ -337,7 +338,7 @@ Configuration_InsertionTableSummary     Diese Tabelle enthält Schaltflächen zur 
 Security_MainTableSummary               Diese Tabelle bietet Einstellungsmöglichkeiten, die die Sicherheit von POPFile insgesamt betreffen, ob es automatisch auf neue Versionen prüfen soll oder ob Statistiken über die Leistung von POPFile an eine zentrale Datenbank zwecks der Erstellung von Gesamtstatistiken geschickt werden sollen.
 Advanced_MainTableSummary               Diese Tabelle enthält eine Liste von Wörtern, die POPFile ignoriert, wenn es eine Nachricht analysiert. Dies betrifft Wörter, die besonders häufig in Nachrichten auftauchen. Diese sind reihenweise alphabetisch nach dem ersten Buchstaben sortiert.
 
-Imap_Bucket2Folder						Mail der Kategorie <b>%s</b> kommt in den Ordner
+Imap_Bucket2Folder                      Mail der Kategorie <b>%s</b> kommt in den Ordner
 Imap_MapError                           Sie können nicht mehr als eine Kategorie einem einzelnen Ordner zuordnen!
 Imap_Server                             IMAP Server Hostname:
 Imap_ServerNameError                    Bitte geben Sie den Namen des Servers ein!
@@ -360,3 +361,5 @@ Imap_UpdateError3                       Bitte konfigurieren Sie erst die Verbind
 Imap_NoConnectionMessage                Bitte konfigurieren Sie erst die Verbindung zum Server. Nachdem Sie das getan haben, werden Sie an dieser Stelle mehr Konfigurationsmöglichkeiten finden.
 Imap_WatchMore                          : einen weiteren zu überwachenden Ordner
 Imap_WatchedFolder                      Überwachter Ordner Nr.
+
+Shutdown_Message                        POPFile wurde beendet
