@@ -289,12 +289,12 @@ sub set_value
     my ($self, $bucket, $word, $value) = @_;
 
     if ( $word ne '' ) {
-		$word =~ /^(.)/;
-		my $i = ord($1);
+        $word =~ /^(.)/;
+        my $i = ord($1);
 
-		$self->{matrix}{$bucket}[$i] = '' if ( !defined($self->{matrix}{$bucket}[$i]) );
-		$self->{matrix}{$bucket}[$i] .= "|$word $value|" if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 );
-	}
+        $self->{matrix}{$bucket}[$i] = '' if ( !defined($self->{matrix}{$bucket}[$i]) );
+        $self->{matrix}{$bucket}[$i] .= "|$word $value|" if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 );
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -372,11 +372,11 @@ sub load_word_matrix
 
     update_constants($self);
 
-	# unclassified will always have the color black, note that unclassified is not
-	# actually a bucket 
-	
-	$self->{colors}{unclassified} = 'black';
-	
+    # unclassified will always have the color black, note that unclassified is not
+    # actually a bucket 
+    
+    $self->{colors}{unclassified} = 'black';
+    
     print "Corpus loaded with $self->{full_total} entries\n" if $self->{debug};
 }
 
@@ -428,22 +428,22 @@ sub load_bucket
             # an upgrade smooth.
 
             if ( /^([^ ]+) (.+)$/ )  {
-            	my $type  = $1;
-            	my $value = $2;
+                my $type  = $1;
+                my $value = $2;
 
-            	$value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
+                $value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
                 $self->{magnets}{$bucket}{$type}{$value} = 1;
             } else {
 
-            	# This branch is used to catch the original magnets in an
-            	# old version of POPFile that were just there for from
-            	# addresses only
+                # This branch is used to catch the original magnets in an
+                # old version of POPFile that were just there for from
+                # addresses only
 
-            	if ( /^(.+)$/ ) {
-					my $value = $1;
-					$value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
-	                $self->{magnets}{$bucket}{from}{$1} = 1;
-	            }
+                if ( /^(.+)$/ ) {
+                    my $value = $1;
+                    $value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
+                    $self->{magnets}{$bucket}{from}{$1} = 1;
+                }
             }
         }
         close MAGNETS;
@@ -537,16 +537,16 @@ sub classify_file
     for my $bucket (sort keys %{$self->{magnets}})  {
         for my $type (sort keys %{$self->{magnets}{$bucket}}) {
 
-	    # You cannot use @ or $ inside a \Q\E regular expression and hence
-	    # we have to change the $magnet and the text we are comparing against
-	    # by changing the $ and @ signs to .
+        # You cannot use @ or $ inside a \Q\E regular expression and hence
+        # we have to change the $magnet and the text we are comparing against
+        # by changing the $ and @ signs to .
 
             my $noattype;
 
             $noattype = $self->{parser}->{$type};
             $noattype =~ s/[@\$]/\./g;
 
-	    for my $magnet (sort keys %{$self->{magnets}{$bucket}{$type}}) {
+        for my $magnet (sort keys %{$self->{magnets}{$bucket}{$type}}) {
                 my $regex;
 
                 $regex = $magnet;
@@ -698,7 +698,7 @@ sub classify_file
     my $class = 'unclassified';
 
     if ( ( $total != 0 ) && ( $score{$ranking[0]} > log($self->{unclassified} * $total) ) ) {
-		$class = $ranking[0];
+        $class = $ranking[0];
     }
 
     if ( $self->{wordscores} ) {
@@ -760,17 +760,17 @@ sub classify_and_modify
 
     while ( <$mail> ) {
         my $line;
-		my $fileline;
+        my $fileline;
 
         $line = $_;
 
-		# This is done so that we remove the network style end of line CR LF 
-		# and allow Perl to decide on the local system EOL which it will expand
-		# out of \n when this gets written to the temp file
-		
-		$fileline = $line;
-		$fileline =~ s/[\r\n]//g;
-		$fileline .= "\n";
+        # This is done so that we remove the network style end of line CR LF 
+        # and allow Perl to decide on the local system EOL which it will expand
+        # out of \n when this gets written to the temp file
+        
+        $fileline = $line;
+        $fileline =~ s/[\r\n]//g;
+        $fileline .= "\n";
 
         # Check for an abort
 
@@ -834,7 +834,7 @@ sub classify_and_modify
     if ( $classification ne 'unclassified' ) {
         if ( $self->{configuration}->{configuration}{subject} ) {
             # Don't add the classification unless it is not present
-            if ( !( $msg_subject =~ /\[$classification\]/ ) && 
+            if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) && 
                  ( $self->{parameters}{$classification}{subject} == 1 ) &&
                  ( $self->{parameters}{$classification}{quarantine} == 0 ) )  {
                 $msg_subject = " [$classification]$msg_subject";
@@ -851,7 +851,7 @@ sub classify_and_modify
 
     # Add the XTC header
     $msg_head_after .= "X-Text-Classification: $classification$eol" if ( ( $self->{configuration}->{configuration}{xtc}          ) &&
-      																     ( $self->{parameters}{$classification}{quarantine} == 0 ) );
+                                                                         ( $self->{parameters}{$classification}{quarantine} == 0 ) );
 
     # Add the XPL header
     $temp_file =~ s/messages\/(.*)/$1/;
@@ -880,13 +880,13 @@ sub classify_and_modify
                 print $client "From: $self->{parser}->{from}$eol";
                 print $client "To: $self->{parser}->{to}$eol";
                 print $client "Date: $self->{parser}->{date}$eol";
-				if ( $self->{configuration}->{configuration}{subject} ) {
-					# Don't add the classification unless it is not present
-					if ( !( $msg_subject =~ /\[$classification\]/ ) && 
-						 ( $self->{parameters}{$classification}{subject} == 1 ) ) {
-						$msg_subject = " [$classification]$msg_subject";
-					}
-				}
+                if ( $self->{configuration}->{configuration}{subject} ) {
+                    # Don't add the classification unless it is not present
+                    if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) && 
+                         ( $self->{parameters}{$classification}{subject} == 1 ) ) {
+                        $msg_subject = " [$classification]$msg_subject";
+                    }
+                }
                 print $client "Subject:$msg_subject$eol";
                 print $client "X-Text-Classification: $classification$eol" if ( $self->{configuration}->{configuration}{xtc} );
                 print $client 'X-POPFile-Link: ' . $xpl if ( $self->{configuration}->{configuration}{xpl} );

@@ -2992,9 +2992,9 @@ sub history_page
                             my $head = $1;
                             my $arg  = $2;
 
-                            if ( $head =~ /$header/i )  {
-                                if ( $arg =~ /$text/i )  {
-                                    $line =~ s/($text)/<b><font color\"$self->{classifier}->{colors}{$self->{history_}{$mail_file}{bucket}}\">$1<\/font><\/b>/;
+                            if ( $head =~ /\Q$header\E/i )  {
+                                if ( $arg =~ /\Q$text\E/i )  {
+                                    $line =~ s/(\Q$text\E)/<b><font color\"$self->{classifier}->{colors}{$self->{history_}{$mail_file}{bucket}}\">$1<\/font><\/b>/;
                                 }
                             }
                         }
