@@ -2740,8 +2740,8 @@ sub history_page
         }
 
 
-        $body .= "<th class=\"historyLabel\" scope=\"col\">$self->{language__}{History_ShouldBe}</th>\n";
-        $body .= "<th class=\"historyLabel\" scope=\"col\">$self->{language__}{Remove}</th>\n</tr>\n";
+        $body .= "<th class=\"historyLabel\" scope=\"col\"><input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" /></th>\n";
+        $body .= "<th class=\"historyLabel\" scope=\"col\"><input type=\"submit\" class=\"deleteButton\" name=\"deletemessage\" value=\"$self->{language__}{Remove}\" /></th>\n</tr>\n";
 
         my $stripe = 0;
 
