@@ -2221,7 +2221,7 @@ sub corpus_page
         my $word = $self->{form_}{word};
 
         if ( !( $word =~ /^[A-Za-z0-9\-_]+:/ ) ) {
-           $word = $self->{classifier__}->{mangler__}->mangle($word, 1);
+           $word = $self->{classifier__}->{parser__}->{mangle__}->mangle($word, 1);
         }
 
         $body .= "<blockquote>\n";
