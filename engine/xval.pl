@@ -297,7 +297,9 @@ if ( @ARGV[0] ne "-usage")
 
     #load the messages
 
-    $self->{messages} = find_messages($archive);    
+    $self->{messages} = find_messages($archive);
+
+    my @error_array;
         
     foreach my $exclude_fraction (0 .. ( $c->parameter("xcnt") - 1) ) {
         
@@ -351,12 +353,13 @@ if ( @ARGV[0] ne "-usage")
         
         foreach my $abucket ( keys %{ $self->{messages}->{buckets} } ) {
             print "classifying messages in $abucket/$exclude_fraction\n" if $debug;
-            
+
             foreach my $amessage ( keys %{$self->{messages}->{buckets}{$abucket}{subdirs}{$exclude_fraction}} ) {
                 $class = $b->classify_file($self->{messages}->{messages}{$amessage}{long});
                 if ($class ne $abucket) {
                     $errors++;
                     print "$class ne $abucket\n" if $debug;
+                    push( @error_array, $self->{messages}->{messages}{$amessage}{long});
                 }
                 $total++;
             }
@@ -367,15 +370,20 @@ if ( @ARGV[0] ne "-usage")
         print "batch $exclude_fraction: $errors out of $total wrong. $accuracy% accurate\n";
         $exclude_fraction++;
     }
+    
+    print "errors:\n";
+    print @error_array;
+    
 } else {
 
     print "xval.pl - perform cross-validation tests on archived messages\n\n";
     print "Usage: traintest.pl [-usage] [-parameter value [-parameter value] ...]\n";
     print "     -usage:         Displays this screen\n";
     print "  Other Parameters     Use\n";
+    print "     -xcnt:          The number of bins to use\n";
     print "     -archive_dir:   Location to seek an archive\n";
     print "     -stopwords:     Use stop-words, defaults to $DEFAULT_STOP\n";
     print "     -dump:          Outputs accumulated corpus, defaults to $DEFAULT_DUMP\n";
-    print "     -corpus_out:    Location to save output corpus, defaults to $DEFAULT_CORPUS\n";
+    print "     -corpus_out:    Location to save output corpus, defaults to $DEFAULT_CORPUS\n";    
 }
 
