@@ -372,7 +372,7 @@ sub html_common_middle
     $result .= "<td class=\"border_bottomRight\"></td>\n</tr>\n</table>\n" ;
     $result .= "<p align=\"center\">$update_check\n<table class=\"menu\" cellspacing=\"0\">\n" ;
     $result .= "<tr align=\"center\">\n<td class=\"$tab[2]\" align=\"center\">\n" ;
-    $result .= "<a href=\"/history?setfilter=&session=$self->{session_key}&filter=\">" ;
+    $result .= "<a href=\"/history?setfilter=&amp;session=$self->{session_key}&amp;filter=\">" ;
     
     $result .= "\n$self->{language}{Header_History}</a>\n" ;
     $result .= "</td>\n<td class=\"menu_spacer\"></td>\n<td class=\"$tab[1]\" align=\"center\">\n" ;
@@ -426,7 +426,7 @@ sub html_common_bottom
     
     $result .= "<a href=\"http://popfile.sourceforge.net/\">$self->{language}{Footer_HomePage}</a> - \n\t\t\t\t\t" ;
     $result .= "<a href=\"http://sourceforge.net/forum/forum.php?forum_id=213876\">$self->{language}{Footer_FeedMe}</a> - \n\t\t\t\t" ;
-    $result .= "<a href=\"http://sourceforge.net/tracker/index.php?group_id=63137&atid=502959\">$self->{language}{Footer_RequestFeature}</a> - \n\t\t\t\t\t" ;
+    $result .= "<a href=\"http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959\">$self->{language}{Footer_RequestFeature}</a> - \n\t\t\t\t\t" ;
     $result .= "<a href=\"http://lists.sourceforge.net/lists/listinfo/popfile-announce\">$self->{language}{Footer_MailingList}</a> - \n\t\t\t\t\t" ;
     $result .= "($time) - ($lastuser)\n\t\t\t\t\t" ;
     
@@ -631,24 +631,24 @@ sub configuration_page
     $body .= "<table>\n<tr>\n<td><b>$self->{language}{Configuration_SubjectLine}:</b> \n"; 
     if ( $self->{configuration}->{configuration}{subject} == 1 ) {
         $body .= "<td>\n<b>$self->{language}{On}</b> \n" ;
-        $body .= "<a href=\"/configuration?subject=1&session=$self->{session_key}\">\n" ;
+        $body .= "<a href=\"/configuration?subject=1&amp;session=$self->{session_key}\">\n" ;
         $body .= "<font color=\"blue\">[$self->{language}{TurnOff}]</font>\n</a> \n" ;
     } else {
         $body .= "<td>\n<b>$self->{language}{Off}</b> \n" ;
-        $body .= "<a href=\"/configuration?subject=2&session=$self->{session_key}\">\n" ;
+        $body .= "<a href=\"/configuration?subject=2&amp;session=$self->{session_key}\">\n" ;
         $body .= "<font color=\"blue\">[$self->{language}{TurnOn}]</font></a> \n" ;
     }
     $body .= "<tr>\n<td>\n<b>$self->{language}{Configuration_XTCInsertion}:</b> \n";    
     if ( $self->{configuration}->{configuration}{xtc} == 1 )  {
-        $body .= "<td><b>$self->{language}{On}</b> <a href=\"/configuration?xtc=1&session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOff}]</font></a> ";
+        $body .= "<td><b>$self->{language}{On}</b> <a href=\"/configuration?xtc=1&amp;session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOff}]</font></a> ";
     } else {
-        $body .= "<td><b>$self->{language}{Off}</b> <a href=\"/configuration?xtc=2&session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOn}]</font></a>";
+        $body .= "<td><b>$self->{language}{Off}</b> <a href=\"/configuration?xtc=2&amp;session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOn}]</font></a>";
     }
     $body .= "<tr>\n<td>\n<b>$self->{language}{Configuration_XPLInsertion}:</b> \n";    
     if ( $self->{configuration}->{configuration}{xpl} == 1 )  {
-        $body .= "<td><b>$self->{language}{On}</b> <a href=\"/configuration?xpl=1&session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOff}]</font></a> ";
+        $body .= "<td><b>$self->{language}{On}</b> <a href=\"/configuration?xpl=1&amp;session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOff}]</font></a> ";
     } else {
-        $body .= "<td><b>$self->{language}{Off}</b> <a href=\"/configuration?xpl=2&session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOn}]</font></a>";
+        $body .= "<td><b>$self->{language}{Off}</b> <a href=\"/configuration?xpl=2&amp;session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{TurnOn}]</font></a>";
     }
     $body .= "</table>";
     
@@ -750,22 +750,22 @@ sub security_page
     
     if ( $self->{configuration}->{configuration}{localpop} == 1 ) {
         $body .= "<b>$self->{language}{Security_NoStealthMode}</b>\n" ;
-        $body .= " <a href=\"/security?localpop=1&session=$self->{session_key}\">\n" ;
+        $body .= " <a href=\"/security?localpop=1&amp;session=$self->{session_key}\">\n" ;
         $body .= "<font color=\"blue\">[$self->{language}{ChangeToYes}]</font></a>\n" ;
     } else {
         $body .= "<b>$self->{language}{Yes}</b>\n" ;
-        $body .= " <a href=\"/security?localpop=2&session=$self->{session_key}\">\n" ;
+        $body .= " <a href=\"/security?localpop=2&amp;session=$self->{session_key}\">\n" ;
         $body .= "<font color=\"blue\">[$self->{language}{ChangeToNo} (Stealth Mode)]</font></a>\n" ;
     } 
     
     $body .= "<p><b>$self->{language}{Security_UI}:</b><br>\n";
     if ( $self->{configuration}->{configuration}{localui} == 1 ) {
         $body .= "<b>$self->{language}{Security_NoStealthMode}</b>\n" ;
-        $body .= "<a href=\"/security?localui=1&session=$self->{session_key}\">\n" ;
+        $body .= "<a href=\"/security?localui=1&amp;session=$self->{session_key}\">\n" ;
         $body .= "<font color=\"blue\">[$self->{language}{ChangeToYes}]</font></a>\n ";
     } else {
         $body .= "<b>$self->{language}{Yes}</b> " ;
-        $body .= "<a href=\"/security?localui=2&session=$self->{session_key}\">\n" ;
+        $body .= "<a href=\"/security?localui=2&amp;session=$self->{session_key}\">\n" ;
         $body .= "<font color=\"blue\">[$self->{language}{ChangeToNo} (Stealth Mode)]</font></a>\n ";
     } 
 
@@ -785,11 +785,11 @@ sub security_page
     
     if ( $self->{configuration}->{configuration}{update_check} == 1 ) {
         $body .= "<b>$self->{language}{Yes}</b>\n" ;
-        $body .= "<a href=\"/security?update_check=1&session=$self->{session_key}\">\n" ;
+        $body .= "<a href=\"/security?update_check=1&amp;session=$self->{session_key}\">\n" ;
         $body .= "<font color=\"blue\">[$self->{language}{ChangeToNo}]</font>\n</a>\n" ;
     } else {
         $body .= "<b>$self->{language}{No}</b>\n" ;
-        $body .= "<a href=\"/security?update_check=2&session=$self->{session_key}\">\n" ;
+        $body .= "<a href=\"/security?update_check=2&amp;session=$self->{session_key}\">\n" ;
         $body .= "<font color=\"blue\">[$self->{language}{ChangeToYes}]</font>\n</a>\n" ;
     } 
     
@@ -801,9 +801,9 @@ sub security_page
     $body .= "<p>\n<b>$self->{language}{Security_Stats}:</b>\n<br>\n";
     
     if ( $self->{configuration}->{configuration}{send_stats} == 1 ) {
-        $body .= "<b>$self->{language}{Yes}</b> <a href=\"/security?send_stats=1&session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{ChangeToNo}]</font></a> ";
+        $body .= "<b>$self->{language}{Yes}</b> <a href=\"/security?send_stats=1&amp;session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{ChangeToNo}]</font></a> ";
     } else {
-        $body .= "<b>$self->{language}{No}</b> <a href=\"/security?send_stats=2&session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{ChangeToYes}]</font></a> ";
+        $body .= "<b>$self->{language}{No}</b> <a href=\"/security?send_stats=2&amp;session=$self->{session_key}\"><font color=\"blue\">[$self->{language}{ChangeToYes}]</font></a> ";
     } 
     $body .= "<p>$self->{language}{Security_ExplainStats}";
     
@@ -1001,14 +1001,8 @@ sub magnet_page
                     $body .= " class=\"rowOdd\""; 
                 }
                 
-                #
                 # to validate, must replace & with &amp;
                 # stan todo note: come up with a smarter regex, this one's a bludgeon
-                #
-                # NOTE from JGC: Stan the right way to do this is to change the encode()
-                # function that is intended to do this type of URL encoding and is used
-                # elsewhere
-                #
                 
                 my $validatingMagnet = $magnet ;
                 $validatingMagnet =~ s/&/&amp;/g ;
@@ -1017,9 +1011,9 @@ sub magnet_page
                 
                 $body .= "><td>$type: $validatingMagnet\n" ;
                 $body .= "<td><font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font><td>\n" ;
-                $body .= "<a href=\"/magnets?bucket=$bucket&dtype=$type&";
+                $body .= "<a href=\"/magnets?bucket=$bucket&amp;dtype=$type&amp;";
                 $body .= encode($self, "dmagnet=$validatingMagnet");
-                $body .= "&session=$self->{session_key}\">\n[$self->{language}{Delete}]</a>\n";
+                $body .= "&amp;session=$self->{session_key}\">\n[$self->{language}{Delete}]</a>\n";
                 $stripe = 1 - $stripe;
             }
         }
@@ -1098,7 +1092,7 @@ sub bucket_page
             my $first = $1;
             $j =~ s/([^ ]+) (L\-[\.\d]+)/\*$1 $2<\/font>/g;
             $j =~ s/L(\-[\.\d]+)/int( $self->{classifier}->{total}{$self->{form}{showbucket}} * exp($1) + 0.5 )/ge;
-            $j =~ s/([^ ,\*]+) ([^ ,\*]+)/<a href=\/buckets\?session=$self->{session_key}\&lookup=Lookup\&word=$1#Lookup>$1<\/a> $2/g;
+            $j =~ s/([^ ,\*]+) ([^ ,\*]+)/<a href=\/buckets\?session=$self->{session_key}\&amp;lookup=Lookup\&amp;word=$1#Lookup>$1<\/a> $2/g;
             $body .= "<tr><td valign=\"top\"><b>$first</b><td valign=\"top\">$j";
         }
     }
@@ -1276,7 +1270,7 @@ sub corpus_page
             $body .= " class=\"rowOdd\"";
         }
         $stripe = 1 - $stripe;
-        $body .= "><td><a href=\"/buckets?session=$self->{session_key}&showbucket=$bucket\">\n" ;
+        $body .= "><td><a href=\"/buckets?session=$self->{session_key}&amp;showbucket=$bucket\">\n" ;
         $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font></a>\n" ;
         $body .= "<td width=\"10\">&nbsp;<td align=\"right\">$number<td width=\"10\">&nbsp;\n" ;
         $body .= "<td align=\"right\">$unique<td width=\"10\">&nbsp;";
@@ -1285,11 +1279,11 @@ sub corpus_page
             $body .= "<td align=\"center\">\n";
             if ( $self->{classifier}->{parameters}{$bucket}{subject} == 0 )  {
                 $body .= "<b>$self->{language}{Off}</b>\n" ; 
-                $body .= "<a href=\"/buckets?session=$self->{session_key}&bucket=$bucket&subject=2\">\n" ;
+                $body .= "<a href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;subject=2\">\n" ;
                 $body .= "[$self->{language}{TurnOn}]</a>\n" ;
             } else {
                 $body .= "<b>$self->{language}{On}</b> \n" ;
-                $body .= "<a href=\"/buckets?session=$self->{session_key}&bucket=$bucket&subject=1\">\n" ;
+                $body .= "<a href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;subject=1\">\n" ;
                 $body .= "[$self->{language}{TurnOff}]</a>\n ";
             }
         } else {
@@ -1302,7 +1296,7 @@ sub corpus_page
             my $color = $self->{classifier}->{possible_colors}[$i];
             if ( $color ne $self->{classifier}->{colors}{$bucket} )  {
                 $body .= "<td width=\"10\" bgcolor=\"$color\">\n" ;
-                $body .= "<a href=\"/buckets?color=$color&bucket=$bucket&session=$self->{session_key}\">\n" ;
+                $body .= "<a href=\"/buckets?color=$color&amp;bucket=$bucket&amp;session=$self->{session_key}\">\n" ;
                 $body .= "<img border=\"0\" alt='". sprintf( $self->{language}{Bucket_SetColorTo}, $bucket, $color ) . "' src=\"pix.gif\" width=\"10\" height=\"20\"></a>\n";
             } 
         }
@@ -1692,7 +1686,7 @@ sub get_history_navigator
     if ( $start_message != 0 )  {
         $body .= "<a href=\"/history?start_message=";
         $body .= $start_message - $self->{configuration}->{configuration}{page_size};
-        $body .= "&session=$self->{session_key}&filter=$self->{form}{filter}\">< $self->{language}{Previous}</a> ";
+        $body .= "&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}\">< $self->{language}{Previous}</a> ";
     }
     my $i = 0;
     while ( $i < history_size( $self ) ) {
@@ -1700,7 +1694,7 @@ sub get_history_navigator
             $body .= "<b>";
             $body .= $i+1 . "</b>";
         } else {
-            $body .= "<a href=\"/history?start_message=$i&session=$self->{session_key}&filter=$self->{form}{filter}\">";
+            $body .= "<a href=\"/history?start_message=$i&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}\">";
             $body .= $i+1 . "</a>";
         }
 
@@ -1710,7 +1704,7 @@ sub get_history_navigator
     if ( $start_message < ( history_size( $self ) - $self->{configuration}->{configuration}{page_size} ) )  {
         $body .= "<a href=\"/history?start_message=";
         $body .= $start_message + $self->{configuration}->{configuration}{page_size};
-        $body .= "&session=$self->{session_key}&filter=$self->{form}{filter}\">$self->{language}{Next} ></a>";
+        $body .= "&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}\">$self->{language}{Next} ></a>";
     }
     
     return $body;
@@ -1836,7 +1830,7 @@ sub history_page
         }
 
         $self->{history_invalid} = 1;        
-        http_redirect( $self, $client,"/history?session=$self->{session_key}&filter=$self->{form}{filter}");
+        http_redirect( $self, $client,"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}");
         return;
     }
 
@@ -1858,7 +1852,7 @@ sub history_page
         }
 
         $self->{history_invalid} = 1;        
-        http_redirect( $self, $client,"/history?session=$self->{session_key}&filter=$self->{form}{filter}");
+        http_redirect( $self, $client,"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}");
         return;
     }
 
@@ -1928,6 +1922,7 @@ sub history_page
 
         # Verify that a message we are being asked to view (perhaps from a /jump_to_message URL) is actually between
         # the $start_message and $stop_message, if it is not then move to that message
+
         if ( defined($self->{form}{view}) ) {
             my $found = 0;
             foreach my $i ($start_message ..  $stop_message) {
@@ -2073,10 +2068,10 @@ sub history_page
             my $reclassified = $self->{history}{$i}{reclassified}; 
             $mail_file =~ /popfile\d+=(\d+)\.msg/;
             $body .= "<a title=\"$from\">$short_from</a>";
-            $body .= "<td>\n<a title=\"$subject\" href=\"/history?view=$mail_file&start_message=$start_message&session=$self->{session_key}&filter=$self->{form}{filter}#$mail_file\">\n" ;
+            $body .= "<td>\n<a title=\"$subject\" href=\"/history?view=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}#$mail_file\">\n" ;
             $body .= "$short_subject</a><td>";
             if ( $reclassified )  {
-                $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font><td>" . sprintf( $self->{language}{History_Already}, $self->{classifier}->{colors}{$bucket}, $bucket ) . " - <a href=\"/history?undo=$mail_file&session=$self->{session_key}&badbucket=$bucket&filter=$self->{form}{filter}&start_message=$start_message#$mail_file\">[$self->{language}{Undo}]</a>";
+                $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font><td>" . sprintf( $self->{language}{History_Already}, $self->{classifier}->{colors}{$bucket}, $bucket ) . " - <a href=\"/history?undo=$mail_file&amp;session=$self->{session_key}&amp;badbucket=$bucket&amp;filter=$self->{form}{filter}&amp;start_message=$start_message#$mail_file\">[$self->{language}{Undo}]</a>";
             } else {
                 if ( $bucket eq 'unclassified' || !defined $self->{classifier}->{colors}{$bucket})  {
                     $body .= "$bucket<td>";
@@ -2101,8 +2096,8 @@ sub history_page
                             $body .= ">$abucket</option>"
                         } else {
                             # stan todo bug fix at work
-                            # $body .= "<a href=\"/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$self->{session_key}&usedtobe=$bucket&filter=$self->{form}{filter}#$mail_file\"><font color=\"$self->{classifier}->{colors}{$abucket}\">[$abucket]</font></a> ";
-                            $body .= "<a href=\"/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$self->{session_key}&usedtobe=$bucket&filter=$self->{form}{filter}#$mail_file\">\n" ;
+                            # $body .= "<a href=\"/history?shouldbe=$abucket&amp;file=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key}&amp;usedtobe=$bucket&amp;filter=$self->{form}{filter}#$mail_file\"><font color=\"$self->{classifier}->{colors}{$abucket}\">[$abucket]</font></a> ";
+                            $body .= "<a href=\"/history?shouldbe=$abucket&amp;file=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key}&amp;usedtobe=$bucket&amp;filter=$self->{form}{filter}#$mail_file\">\n" ;
                             $body .= "<font color=$self->{classifier}->{colors}{$abucket}>[$abucket]</font></a> ";
                         }
                     }
@@ -2124,7 +2119,7 @@ sub history_page
                 $body .= "<tr>\n<td>\n<td colspan=\"3\">\n" ;
                 $body .= "<table class=\"stabColor03\" cellpadding=\"6\" cellspacing=\"0\">\n" ;
                 $body .= "<tr>\n<td>\n<p align=\"right\">\n" ;
-                $body .= "<a href=\"/history?start_message=$start_message&session=$self->{session_key}&filter=$self->{form}{filter}\">\n" ;
+                $body .= "<a href=\"/history?start_message=$start_message&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}\">\n" ;
                 $body .= "<b>$self->{language}{Close}</b></a>\n<p>\n";
                 
                 if ( $self->{history}{$i}{magnet} eq '' )  {
@@ -2162,7 +2157,7 @@ sub history_page
                     close MESSAGE;
                     $body .= "</tt>";
                 }
-                $body .= "<p align=right><a href=\"/history?start_message=$start_message&session=$self->{session_key}&filter=$self->{form}{filter}\"><b>$self->{language}{Close}</b></a></table><td valign=top>";
+                $body .= "<p align=right><a href=\"/history?start_message=$start_message&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}\"><b>$self->{language}{Close}</b></a></table><td valign=top>";
                 $self->{classifier}->classify_file("messages/$self->{form}{view}");
                 $body .= $self->{classifier}->{scores};
             }
@@ -2197,10 +2192,6 @@ sub history_page
         $body .= "<option value=__filter__magnet>\n&lt;$self->{language}{History_ShowMagnet}&gt;\n" ;
         $body .= "</option>\n</select>\n" ;
         $body .="<input type=submit class=submit name=setfilter value=\"$self->{language}{Filter}\">\n</form>\n";
-        #$body .= "<option value=__filter__magnet>&lt;$self->{language}{History_ShowMagnet}&gt;
-        #</option></select>
-        #<input type=submit class=submit name=setfilter value='$self->{language}{Filter}'></form>";
-
     }
     
     http_ok($self, $client,$body,2); 
@@ -2270,8 +2261,17 @@ sub handle_url
 
     if ( $url =~ s/\?(.*)// )  {
         my $arguments = $1;
+
+        # Normally the browser should have done &amp; to & translation on
+        # URIs being passed onto us, but there was a report that someone
+        # was having a problem with form arguments coming through with
+        # something like http://127.0.0.1/history?session=foo&amp;filter=bar
+        # which would mess things up in the argument splitter so this code
+        # just changes &amp; to & for safety
+
+        $arguments =~ s/&amp;/&/g;
         
-        while ( $arguments =~ s/(.*?)=(.*?)(&|\r|\n|$)// ) {
+        while ( $arguments =~ m/\G(.*?)=(.*?)(&|\r|\n|$)/g ) {
             my $arg = $1;
             $self->{form}{$arg} = $2;
             
