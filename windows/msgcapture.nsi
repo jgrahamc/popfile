@@ -55,7 +55,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION             "0.0.52"
+  !define C_VERSION             "0.0.53"
 
   ; The default timeout is 30 seconds
 
@@ -216,6 +216,7 @@
   !insertmacro PFI_MSGCAP_TEXT "PFI_LANG_MSGCAP_RIGHTCLICK"     "Right-click in the window below to copy the report to the clipboard"
 
   !insertmacro PFI_MSGCAP_TEXT "PFI_LANG_MSGCAP_CLICKCLOSE"     "Please click 'Close' to continue with the installation"
+  !insertmacro PFI_MSGCAP_TEXT "PFI_LANG_MSGCAP_CLICKCANCEL"    "Please click 'Cancel' to continue with the installation"
 
 #--------------------------------------------------------------------------
 # General settings
@@ -351,6 +352,15 @@ start_failed:
   DetailPrint "Fatal error: unable to start '${L_PFI_ROOT}\popfile${L_TRAYICON}f.exe' program"
 
 fatal_error:
+  StrCmp $G_MODE_FLAG "" fatal_error_exit
+  DetailPrint ""
+  DetailPrint "############################################################"
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_MSGCAP_CLICKCANCEL)"
+  DetailPrint ""
+  DetailPrint "############################################################"
+
+fatal_error_exit:
   Abort
 
 found_cfg:
