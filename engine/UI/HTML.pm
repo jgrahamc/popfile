@@ -557,9 +557,9 @@ sub html_common_bottom
 
     # comment out these next 3 lines prior to shipping code
     # enable them during development to check validation
-     my $validationLinks = "Validate: <a href=\"http://validator.w3.org/check/referer\">HTML 4.01</a> - \n" ;
-     $validationLinks .= "<a href=\"http://jigsaw.w3.org/css-validator/check/referer\">CSS-1</a>" ;
-     $result .= " - $validationLinks\n" ;
+    # my $validationLinks = "Validate: <a href=\"http://validator.w3.org/check/referer\">HTML 4.01</a> - \n" ;
+    # $validationLinks .= "<a href=\"http://jigsaw.w3.org/css-validator/check/referer\">CSS-1</a>" ;
+    # $result .= " - $validationLinks\n" ;
 
     $result .= "</td>\n</tr>\n</table>\n</body>\n</html>\n" ;
 
@@ -707,7 +707,7 @@ sub configuration_page
     $body .= "<table class=\"stabColor01\" width=\"100%\" cellpadding=\"10\" cellspacing=\"0\" >\n" ;
     $body .= "<tr>\n<td class=\"stabColor01\" width=\"33%\" valign=\"top\">\n" ;
     $body .= "<h2 class=\"configuration\">$self->{language}{Configuration_UserInterface}</h2>\n" ;
-    $body .= "<p></p>\n<form action=\"/configuration\">\n" ;
+    $body .= "<form action=\"/configuration\">\n" ;
     $body .= "<span class=\"configurationLabel\">$self->{language}{Configuration_SkinsChoose}:</span><br />\n" ;
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n<select name=\"skin\">\n" ;
 
@@ -760,37 +760,43 @@ sub configuration_page
     $body .= "<h2 class=\"configuration\">$self->{language}{Configuration_ClassificationInsertion}</h2>\n" ;
 
     # Subject line modification widget
-    $body .= "<table>\n<tr>\n<td><span class=\"configurationLabel\">$self->{language}{Configuration_SubjectLine}:</span></td>\n";
+    $body .= "<table>\n<tr>\n<td valign=\"top\"><span class=\"configurationLabel\">$self->{language}{Configuration_SubjectLine}:</span></td>\n";
     if ( $self->{configuration}->{configuration}{subject} == 1 ) {
-        $body .= "<td>\n<b>$self->{language}{On}</b>\n" ;
+        $body .= "<td>\n<span class=\"configWidgetState\">" ;
+        $body .= "$self->{language}{On}</span> \n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/configuration?subject=1&amp;session=$self->{session_key}\">" ;
         $body .= "[$self->{language}{TurnOff}]</a>\n</td>\n" ;
     } else {
-        $body .= "<td>\n<b>$self->{language}{Off}</b>\n" ;
+        $body .= "<td>\n<span class=\"configWidgetState\">" ;
+        $body .= "$self->{language}{Off}</span>\n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/configuration?subject=2&amp;session=$self->{session_key}\">" ;
         $body .= "[$self->{language}{TurnOn}]</a>\n</td>\n" ;
     }
 
     # X-Text-Classification insertion widget
-    $body .= "</tr>\n<tr>\n<td>\n<span class=\"configurationLabel\">$self->{language}{Configuration_XTCInsertion}:</span></td>\n";
+    $body .= "</tr>\n<tr>\n<td valign=\"top\">\n<span class=\"configurationLabel\">$self->{language}{Configuration_XTCInsertion}:</span></td>\n";
     if ( $self->{configuration}->{configuration}{xtc} == 1 )  {
-        $body .= "<td>\n<b>$self->{language}{On}</b>\n" ;
+        $body .= "<td>\n<span class=\"configWidgetState\">" ;
+        $body .= "$self->{language}{On}</span>\n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/configuration?xtc=1&amp;session=$self->{session_key}\">" ;
         $body .= "[$self->{language}{TurnOff}]</a>\n</td>\n";
     } else {
-        $body .= "<td>\n<b>$self->{language}{Off}</b>\n" ;
+        $body .= "<td>\n<span class=\"configWidgetState\">" ;
+        $body .= "$self->{language}{Off}</span>\n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/configuration?xtc=2&amp;session=$self->{session_key}\">" ;
         $body .= "[$self->{language}{TurnOn}]</a>\n</td>\n";
     }
 
     # X-POPFile-Link insertion widget
-    $body .= "</tr>\n<tr>\n<td>\n<span class=\"configurationLabel\">$self->{language}{Configuration_XPLInsertion}:</span></td>\n";
+    $body .= "</tr>\n<tr>\n<td valign=\"top\">\n<span class=\"configurationLabel\">$self->{language}{Configuration_XPLInsertion}:</span></td>\n";
     if ( $self->{configuration}->{configuration}{xpl} == 1 )  {
-        $body .= "<td>\n<b>$self->{language}{On}</b>\n" ;
+        $body .= "<td>\n<span class=\"configWidgetState\">" ;
+        $body .= "$self->{language}{On}</span>\n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/configuration?xpl=1&amp;session=$self->{session_key}\">" ;
         $body .= "[$self->{language}{TurnOff}]</a>\n</td>\n";
     } else {
-        $body .= "<td>\n<b>$self->{language}{Off}</b>\n" ;
+        $body .= "<td>\n<span class=\"configWidgetState\">" ;
+        $body .= "$self->{language}{Off}</span>\n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/configuration?xpl=2&amp;session=$self->{session_key}\">" ;
         $body .= "[$self->{language}{TurnOn}]</a>\n</td>\n";
     }
@@ -906,11 +912,11 @@ sub security_page
     $body .= "<span class=\"securityLabel\">$self->{language}{Security_POP3}:</span><br />\n";
 
     if ( $self->{configuration}->{configuration}{localpop} == 1 ) {
-        $body .= "<span class=\"securityBinaryWidgetState\"><b>$self->{language}{Security_NoStealthMode}</b></span>\n" ;
+        $body .= "<span class=\"securityWidgetState\">$self->{language}{Security_NoStealthMode}</span>\n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/security?localpop=1&amp;session=$self->{session_key}\">" ;
         $body .= "[$self->{language}{ChangeToYes}]</a>\n" ;
     } else {
-        $body .= "<span class=\"securityBinaryWidgetState\"><b>$self->{language}{Yes}</b></span>\n" ;
+        $body .= "<span class=\"securityWidgetState\">$self->{language}{Yes}</span>\n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/security?localpop=2&amp;session=$self->{session_key}\">" ;
         $body .= "[$self->{language}{ChangeToNo} (Stealth Mode)]</a>\n" ;
     }
@@ -919,11 +925,11 @@ sub security_page
     # Accept HTTP from Remote Machines widget
     $body .= "<span class=\"securityLabel\">$self->{language}{Security_UI}:</span><br />\n";
     if ( $self->{configuration}->{configuration}{localui} == 1 ) {
-        $body .= "<span class=\"securityBinaryWidgetState\"><b>$self->{language}{Security_NoStealthMode}</b></span>\n" ;
+        $body .= "<span class=\"securityWidgetState\">$self->{language}{Security_NoStealthMode}</span>\n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/security?localui=1&amp;session=$self->{session_key}\">\n" ;
         $body .= "[$self->{language}{ChangeToYes}]</a>\n ";
     } else {
-        $body .= "<span class=\"securityBinaryWidgetState\"><b>$self->{language}{Yes}</b></span> " ;
+        $body .= "<span class=\"securityWidgetState\">$self->{language}{Yes}</span> " ;
         $body .= "<a class=\"changeSettingLink\" href=\"/security?localui=2&amp;session=$self->{session_key}\">\n" ;
         $body .= "[$self->{language}{ChangeToNo} (Stealth Mode)]</a>\n ";
     }
@@ -954,11 +960,11 @@ sub security_page
     $body .= "<span class=\"securityLabel\">$self->{language}{Security_Update}:</span><br />\n";
 
     if ( $self->{configuration}->{configuration}{update_check} == 1 ) {
-        $body .= "<span class=\"securityBinaryWidgetState\"><b>$self->{language}{Yes}</b></span>\n" ;
+        $body .= "<span class=\"securityWidgetState\">$self->{language}{Yes}</span>\n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/security?update_check=1&amp;session=$self->{session_key}\">" ;
         $body .= "[$self->{language}{ChangeToNo}]</a>\n" ;
     } else {
-        $body .= "<span class=\"securityBinaryWidgetState\"><b>$self->{language}{No}</b></span>\n" ;
+        $body .= "<span class=\"securityWidgetState\">$self->{language}{No}</span>\n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/security?update_check=2&amp;session=$self->{session_key}\">" ;
         $body .= "[$self->{language}{ChangeToYes}]</a>\n" ;
     }
@@ -973,11 +979,11 @@ sub security_page
     $body .= "<span class=\"securityLabel\">$self->{language}{Security_Stats}:</span>\n<br />\n";
 
     if ( $self->{configuration}->{configuration}{send_stats} == 1 ) {
-        $body .= "<span class=\"securityBinaryWidgetState\"><b>$self->{language}{Yes}</b></span>\n" ;
+        $body .= "<span class=\"securityWidgetState\">$self->{language}{Yes}</span>\n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/security?send_stats=1&amp;session=$self->{session_key}\">" ;
         $body .= "[$self->{language}{ChangeToNo}]</a>\n";
     } else {
-        $body .= "<span class=\"securityBinaryWidgetState\"><b>$self->{language}{No}</b></span>\n" ;
+        $body .= "<span class=\"securityWidgetState\">$self->{language}{No}</span>\n" ;
         $body .= "<a class=\"changeSettingLink\" href=\"/security?send_stats=2&amp;session=$self->{session_key}\">" ;
         $body .= "[$self->{language}{ChangeToYes}]</a>\n";
     }
@@ -1012,6 +1018,7 @@ sub security_page
 
     http_ok($self, $client,$body,3);
 }
+
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -1542,29 +1549,39 @@ sub corpus_page
         $body .= "<td align=\"right\">$unique</td><td width=\"10\">&nbsp;</td>";
 
         if ( $self->{configuration}->{configuration}{subject} == 1 )  {
+            
+            # Subject Modification on/off widget
             $body .= "<td align=\"center\">\n";
             if ( $self->{classifier}->{parameters}{$bucket}{subject} == 0 )  {
-                $body .= "<b>$self->{language}{Off}</b>\n" ;
+                $body .= "<span class=\"bucketsWidgetState\">" ;
+                $body .= "$self->{language}{Off}</span>\n" ;
                 $body .= "<a class=\"changeSettingLink\" href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;subject=2\">\n" ;
                 $body .= "[$self->{language}{TurnOn}]</a>\n</td>\n" ;
             } else {
-                $body .= "<b>$self->{language}{On}</b> \n" ;
+                $body .= "<span class=\"bucketsWidgetState\">" ;
+                $body .= "$self->{language}{On}</span> \n" ;
                 $body .= "<a class=\"changeSettingLink\" href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;subject=1\">\n" ;
                 $body .= "[$self->{language}{TurnOff}]</a>\n</td>\n";
             }
         } else {
             $body .= "<td align=\"center\">\n$self->{language}{Bucket_DisabledGlobally}\n</td>\n";
         }
+        
+        # Quarantine on/off widget
         $body .= "<td width=\"10\">&nbsp;</td><td align=\"center\">\n";
         if ( $self->{classifier}->{parameters}{$bucket}{quarantine} == 0 )  {
-            $body .= "$self->{language}{Off}\n" ;
+            $body .= "<span class=\"bucketsWidgetState\">" ;
+            $body .= "$self->{language}{Off}</span>\n" ;
             $body .= "<a class=\"changeSettingLink\" href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;quarantine=2\">\n" ;
             $body .= "[$self->{language}{TurnOn}]</a>\n</td>\n" ;
         } else {
-            $body .= "<b>$self->{language}{On}</b> \n" ;
+            $body .= "<span class=\"bucketsWidgetState\">" ;
+            $body .= "$self->{language}{On}</span> \n" ;
             $body .= "<a class=\"changeSettingLink\" href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;quarantine=1\">\n" ;
             $body .= "[$self->{language}{TurnOff}]</a>\n</td>\n";
         }
+        
+        # Change Color widget
         $body .= "<td>&nbsp;</td>\n<td align=\"left\">\n<table cellpadding=\"0\" cellspacing=\"1\">\n<tr>\n";
         my $color = $self->{classifier}->{colors}{$bucket};
         $body .= "<td width=\"10\" bgcolor=\"$color\">\n<img border=\"0\" alt='" . sprintf( $self->{language}{Bucket_CurrentColor}, $bucket, $color ) . "' src=\"pix.gif\" width=\"10\" height=\"20\" /></td>\n<td>&nbsp;</td>\n";
@@ -1582,6 +1599,7 @@ sub corpus_page
         $body .= "</tr>\n";
     }
 
+    # figure some performance numbers
     my $number = pretty_number( $self,  $self->{classifier}->{full_total} );
     my $pmcount = pretty_number( $self,  $self->{configuration}->{configuration}{mcount} );
     my $pecount = pretty_number( $self,  $self->{configuration}->{configuration}{ecount} );
@@ -1592,6 +1610,7 @@ sub corpus_page
         $accuracy = "$percent%";
     }
 
+    # finish off Summary panel
     $body .= "<tr>\n<td colspan=\"3\"><hr /></td>\n</tr>\n";
     $body .= "<tr>\n<th class=\"bucketsLabel\" scope=\"row\">$self->{language}{Total}</th>\n<td width=\"10\"></td>\n";
     $body .= "<td align=\"right\">$number</td>\n<td></td>\n<td></td>\n</tr>\n</table>\n<br />\n";
