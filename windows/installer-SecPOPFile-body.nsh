@@ -286,16 +286,6 @@ install_schema:
 
   ;-----------------------------------------------------------------------
 
-  ; 'English' version of the QuickStart Guide
-
-  SetOutPath "$G_ROOTDIR\manual"
-  File "..\engine\manual\*.gif"
-
-  SetOutPath "$G_ROOTDIR\manual\en"
-  File "..\engine\manual\en\*.html"
-
-  ;-----------------------------------------------------------------------
-
   ; Default UI language
 
   SetOutPath "$G_ROOTDIR\languages"
@@ -325,6 +315,7 @@ install_schema:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Manual.url"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url"
 
   SetShellVarContext current
   Delete "$SMSTARTUP\Run POPFile.lnk"
@@ -332,6 +323,7 @@ install_schema:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Manual.url"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url"
 
   ; Create the START MENU entries
 
@@ -381,10 +373,6 @@ create_shortcuts:
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" \
               "InternetShortcut" "URL" "http://${C_UI_URL}:$G_GUI/shutdown"
-
-  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" NORMAL
-  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" \
-              "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" NORMAL
 
