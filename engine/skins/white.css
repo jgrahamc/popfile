@@ -4,29 +4,19 @@ body {
   color: Black;
 }
 
-	
-
-.head {
-  font-weight: normal;
-  font-size: 22pt;
-}
-
 .shell {
     background-color: white;
     border: 3px #778899 solid;
 	 color: Black;
 }
 
-.head a {
-  font-size: 12pt;
-}
-
 .menu {
   font-size: 14pt;
   font-weight: bold;
+  width: 100%;
 }
 
-.menu_selected {
+.menuSelected {
   background-color: #cccccc;
   width: 150px;
   border-style: solid;
@@ -35,7 +25,7 @@ body {
   color: Black;
 }
 
-.menu_standard {
+.menuStandard {
   background-color: white;
   width: 150px;
   border-style: solid;
@@ -44,20 +34,86 @@ body {
   color: Black;
 }
 
-.row_even {
+tr.rowEven {
     background-color: white;
 	 color: Black;
-	 	
 	 }
 
-	.row_odd { 
+tr.rowOdd { 
 	background-color: #EEEEEE;
 	color: Black;
-		}
+}
+
 		
-	
-   
 
 	
+
+td.head {
+  font-weight: normal;
+  font-size: 22pt;
+  background-color: white;
+  color: black;
+}
+ 
+table.head {
+  font-weight: normal;
+  width: 100%;
+  background-color: white;
+  color: black;
+}
+
+
+.menuIndent {
+	width: 8%;
+}
+
+table.historyWidgetsTop {
+	width: 100%;
+	margin-left: 1.5em;
+	margin-top: 0.6em;
+	margin-bottom: 1.0em;
+}
+
+td.historyNavigatorTop {
+	text-align: right;
+	padding-right: 0.5em;
+}
+
+td.historyNavigatorBottom {
+	text-align: right;
+	padding-right: 0.5em;
+	padding-bottom: 1.0em;
+}
+
+table.historyButtonsBottom {
+	width: 100%;
+	margin-left: 0.5em;
+	margin-top: 1.5em;
+}
+
+td.logo2menuSpace { 
+	height: 0.8em;
+}
+
+table.footer {
+	width: 100%;
+	margin-top: 1em;
+}
+
+td.footerBody { 
+	text-align: center;
+	padding-left: 5%;
+	padding-right: 5%;
+}
+
+td.openMessageCloser {
+	text-align: right;
+}
+
+
+	
+
+
+
 
 
