@@ -230,7 +230,7 @@ and the port you specified is less than 1024).
 
 EOM
 
-    return 0;
+        return 0;
     }
 
     $self->{selector} = new IO::Select( $self->{server} );
@@ -605,7 +605,7 @@ sub html_common_bottom
     $result .= "/manual.html\">\n";
     $result .= "$self->{language__}{Footer_Manual}</a> - \n";
 
-    $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137\">FAQ</a> - \n";
+    $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/docman/display_doc.php?docid=14421&amp;group_id=63137\">FAQ</a> - \n";
     $result .= "<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/\">$self->{language__}{Footer_HomePage}</a> - \n";
     $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/forum/forum.php?forum_id=213876\">$self->{language__}{Footer_FeedMe}</a> - \n";
     $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959\">$self->{language__}{Footer_RequestFeature}</a> - \n";
@@ -832,16 +832,16 @@ sub configuration_page
     # Emails per Page widget
     $body .= "<form action=\"/configuration\">\n";
     $body .= "<label class=\"configurationLabel\" for=\"configPageSize\">$self->{language__}{Configuration_History}:</label><br />\n";
-    $body .= "<input type=\"submit\" class=\"submit\" name=\"update_page_size\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input name=\"page_size\" id=\"configPageSize\" type=\"text\" value=\"" . $self->config_( 'page_size' ) . "\" />\n";
+    $body .= "<input type=\"submit\" class=\"submit\" name=\"update_page_size\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$page_size_error\n";
     $body .= sprintf( $self->{language__}{Configuration_HistoryUpdate}, $self->config_( 'page_size' ) ) if ( defined($self->{form__}{page_size}) );
 
     # Days of History to Keep widget
     $body .= "\n<form action=\"/configuration\">\n";
     $body .= "<label class=\"configurationLabel\" for=\"configHistoryDays\">$self->{language__}{Configuration_Days}:</label> <br />\n";
-    $body .= "<input type=\"submit\" class=\"submit\" name=\"update_history_days\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input name=\"history_days\" id=\"configHistoryDays\" type=\"text\" value=\"" . $self->config_( 'history_days' ) . "\" />\n";
+    $body .= "<input type=\"submit\" class=\"submit\" name=\"update_history_days\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
     $body .= "</form>\n$history_days_error\n";
     $body .= sprintf( $self->{language__}{Configuration_DaysUpdate}, $self->config_( 'history_days' ) ) if ( defined($self->{form__}{history_days}) );
@@ -1345,7 +1345,7 @@ sub magnet_page
             $self->{form__}{text} =~ s/^[ \t]+//;
             $self->{form__}{text} =~ s/[ \t]+$//;
 
-	    $self->{classifier__}->create_magnet( $self->{form__}{bucket}, $self->{form__}{type}, $self->{form__}{text});
+            $self->{classifier__}->create_magnet( $self->{form__}{bucket}, $self->{form__}{type}, $self->{form__}{text});
             $magnet_message = "<blockquote>" . sprintf( $self->{language__}{Magnet_Error3}, "$self->{form__}{type}: $self->{form__}{text}", $self->{form__}{bucket} ) . "</blockquote>";
         }
     }
@@ -1437,8 +1437,8 @@ sub magnet_page
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$magnet_message\n";
     $body .="<br />\n";
 
-   # end optional widget placement
-   $body .= "</div>\n";
+    # end optional widget placement
+    $body .= "</div>\n";
 
     http_ok($self, $client,$body,4);
 }
@@ -1627,7 +1627,7 @@ sub corpus_page
 
     if ( ( defined($self->{form__}{delete}) ) && ( $self->{form__}{name} ne '' ) ) {
         $self->{form__}{name} = lc($self->{form__}{name});
-	$self->{classifier__}->delete_bucket( $self->{form__}{name} );
+    $self->{classifier__}->delete_bucket( $self->{form__}{name} );
         $deletemessage = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error6}, $self->{form__}{name} ) . "</b></blockquote>";
     }
 
@@ -1637,7 +1637,7 @@ sub corpus_page
         } else {
             $self->{form__}{oname} = lc($self->{form__}{oname});
             $self->{form__}{newname} = lc($self->{form__}{newname});
-	    $self->{classifier__}->rename_bucket( $self->{form__}{oname}, $self->{form__}{newname} );            
+        $self->{classifier__}->rename_bucket( $self->{form__}{oname}, $self->{form__}{newname} );            
             $rename_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error5}, $self->{form__}{oname}, $self->{form__}{newname} ) . "</b></blockquote>";
         }
     }
@@ -1885,8 +1885,8 @@ sub corpus_page
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
     $body .= "</form>\n$rename_message\n<br />\n";
 
-   # end optional widget placement
-   $body .= "</div>\n</td>\n";
+    # end optional widget placement
+    $body .= "</div>\n</td>\n";
 
     # Lookup panel
     $body .= "<td class=\"settingsPanel\" valign=\"top\" width=\"50%\">\n<a name=\"Lookup\"></a>\n";
@@ -1902,7 +1902,7 @@ sub corpus_page
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n<br />\n";
 
     # end optional widget placement
-   $body .= "</div>\n";
+    $body .= "</div>\n";
 
     if ( ( defined($self->{form__}{lookup}) ) || ( defined($self->{form__}{word}) ) ) {
        my $word = $self->{classifier__}->{mangler__}->mangle($self->{form__}{word}, 1);
@@ -2163,8 +2163,8 @@ sub load_history_cache__
                 close MAIL;
             }
 
-            $from    = "&lt;$self->{language__}{History_NoFrom}&gt;"    if ( $from eq '' );
-            $subject = "&lt;$self->{language__}{History_NoSubject}&gt;" if ( !( $subject =~ /[^ \t\r\n]/ ) );
+            $from    = "<$self->{language__}{History_NoFrom}>"    if ( $from eq '' );
+            $subject = "<$self->{language__}{History_NoSubject}>" if ( !( $subject =~ /[^ \t\r\n]/ ) );
 
             $from    =~ s/\"(.*)\"/$1/g;
             $subject =~ s/\"(.*)\"/$1/g;
@@ -2427,15 +2427,15 @@ sub history_reclassify
             # Only reclassify messages that havn't been reclassified before
 
             if ( !$reclassified ) {
-		$self->{classifier__}->add_message_to_bucket( $self->global_config_( 'msgdir' ) . $mail_file, $newbucket );
+                $self->{classifier__}->add_message_to_bucket( $self->global_config_( 'msgdir' ) . $mail_file, $newbucket );
                 $self->global_config_( 'ecount', $self->global_config_( 'ecount' ) + 1 ) if ( $newbucket ne $bucket );
 
                 $self->log_( "Reclassifying $mail_file from $bucket to $newbucket" );
 
                 $self->{classifier__}->set_bucket_parameter( $newbucket, 'count', 
-		    $self->{classifier__}->get_bucket_parameter( $newbucket, 'count' ) + 1 );
+                $self->{classifier__}->get_bucket_parameter( $newbucket, 'count' ) + 1 );
                 $self->{classifier__}->set_bucket_parameter( $bucket, 'count', 
-		    $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1 );
+                $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1 );
 
                 # Update the class file
 
@@ -2452,7 +2452,7 @@ sub history_reclassify
 
                 $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, $self->{classifier__}->get_bucket_color($newbucket), $newbucket );
 
-	        $self->{configuration__}->save_configuration();
+                $self->{configuration__}->save_configuration();
             }
         }
     }
@@ -2486,10 +2486,10 @@ sub history_undo
                 if ( $bucket ne $usedtobe ) {
                     $self->global_config_( 'ecount', $self->global_config_( 'ecount' ) - 1 ) if ( $self->global_config_( 'ecount' ) > 0 );
 
-		    $self->{classifier__}->set_bucket_parameter( $bucket, 'count',
-		        $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1 );
-		    $self->{classifier__}->set_bucket_parameter( $usedtobe, 'count',
-		        $self->{classifier__}->get_bucket_parameter( $usedtobe, 'count' ) + 1 );
+                    $self->{classifier__}->set_bucket_parameter( $bucket, 'count',
+                    $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1 );
+                    $self->{classifier__}->set_bucket_parameter( $usedtobe, 'count',
+                    $self->{classifier__}->get_bucket_parameter( $usedtobe, 'count' ) + 1 );
                 }
 
                 # Since we have just changed the classification of this file and it has
@@ -2507,7 +2507,7 @@ sub history_undo
 
                 $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, ($self->{classifier__}->get_bucket_color($usedtobe) || ''), $usedtobe );
 
-	        $self->{configuration__}->save_configuration();
+                $self->{configuration__}->save_configuration();
             }
         }
     }
@@ -2871,7 +2871,7 @@ sub history_page
 
                             if ( $head =~ /\Q$header\E/i )  {
                                 if ( $arg =~ /\Q$text\E/i )  {
-				    my $new_color = $self->{classifier__}->get_bucket_color($self->{history__}{$mail_file}{bucket});
+                                    my $new_color = $self->{classifier__}->get_bucket_color($self->{history__}{$mail_file}{bucket});
                                     $line =~ s/(\Q$text\E)/<b><font color=\"$new_color\">$1<\/font><\/b>/;
                                 }
                             }
