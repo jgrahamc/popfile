@@ -310,9 +310,16 @@ sub load_bucket
         while ( <MAGNETS> ) 
         {
             s/[\r\n]//g;
-            if ( /^(.+)$/ ) 
+            if ( /^(.+) (.+)$/ ) 
             {
-                $self->{magnets}{$bucket}{$1} = 1;
+                $self->{magnets}{$bucket}{$1}{$2} = 1;
+            } 
+            else 
+            {
+                if ( /^(.+)$/ ) 
+                {
+                    $self->{magnets}{$bucket}{from}{$1} = 1;
+                }
             }
         }
         close MAGNETS;
@@ -372,9 +379,9 @@ sub save_magnets
     {
         open MAGNET, ">corpus/$bucket/magnets";
         
-        for my $from (keys %{$self->{magnets}{$bucket}}) 
+        for my $from (keys %{$self->{magnets}{$bucket}{from}}) 
         {
-            print MAGNET "$from\n";
+            print MAGNET "from $from\n";
         }
         
         close MAGNET;
@@ -410,7 +417,7 @@ sub classify_file
 
     for my $bucket (keys %{$self->{magnets}}) 
     {
-        for my $from (keys %{$self->{magnets}{$bucket}})
+        for my $from (keys %{$self->{magnets}{$bucket}{from}})
         {
             if ( $self->{parser}->{from} =~ /\Q$from\E/ )
             {

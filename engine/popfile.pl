@@ -966,13 +966,13 @@ sub magnet_page
 {
     if ( defined($form{from}) )
     {
-        $classifier->{magnets}{$form{bucket}}{$form{from}} = 1;
+        $classifier->{magnets}{$form{bucket}}{from}{$form{from}} = 1;
         $classifier->save_magnets();
     }
 
     if ( defined($form{dfrom}) ) 
     {
-        delete $classifier->{magnets}{$form{bucket}}{$form{dfrom}};
+        delete $classifier->{magnets}{$form{bucket}}{from}{$form{dfrom}};
         $classifier->save_magnets();
     }
     
@@ -981,7 +981,7 @@ sub magnet_page
     
     for my $bucket (keys %{$classifier->{magnets}})
     {
-        for my $from (keys %{$classifier->{magnets}{$bucket}}) 
+        for my $from (keys %{$classifier->{magnets}{$bucket}{from}}) 
         {
             $body .= "<tr><td>$from<td><font color=$classifier->{colors}{$bucket}>$bucket</font><td><a href=/magnets?bucket=$bucket&dfrom=$from&session=$session_key>Delete</a>";
         }
