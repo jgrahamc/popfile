@@ -60,7 +60,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION   "0.0.43"
+  !define C_VERSION   "0.0.44"
 
   ;--------------------------------------------------------------------------
   ; The default NSIS caption is "$(^Name) Setup" so we override it here
@@ -385,6 +385,8 @@ start_report:
   DetailPrint "HKLM: InstallPath = < ${L_REGDATA} >"
   ReadRegStr ${L_REGDATA} HKLM "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_LFN"
   DetailPrint "HKLM: RootDir_LFN = < ${L_REGDATA} >"
+  Push ${L_REGDATA}
+  Call CheckForTrailingSlash
   StrCpy ${L_EXPECTED_ROOT} ${L_REGDATA}
   ReadRegStr ${L_REGDATA} HKLM "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_SFN"
   StrCmp ${L_REGDATA} "Not supported" 0 short_HKLM_root
@@ -395,7 +397,11 @@ start_report:
 
 short_HKLM_root:
   DetailPrint "HKLM: RootDir_SFN = < ${L_REGDATA} >"
+  Push ${L_REGDATA}
+  Call CheckForTrailingSlash
   GetFullPathName /SHORT ${L_EXPECTED_ROOT} ${L_EXPECTED_ROOT}
+  StrCpy ${L_TEMP} ${L_EXPECTED_ROOT} 1 -1
+  StrCmp ${L_TEMP} "\" end_HKLM_root
   StrCmp ${L_EXPECTED_ROOT} ${L_REGDATA} end_HKLM_root
   DetailPrint "^^^^^ Error ^^^^^"
   DetailPrint "Expected Root SFN = < ${L_EXPECTED_ROOT} >"
@@ -420,6 +426,8 @@ end_HKLM_root:
 
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_LFN"
   DetailPrint "HKCU: RootDir_LFN = < ${L_REGDATA} >"
+  Push ${L_REGDATA}
+  Call CheckForTrailingSlash
   StrCpy ${L_EXPECTED_ROOT} ${L_REGDATA}
   StrCpy ${L_STATUS_ROOT} ""
   IfFileExists "${L_REGDATA}\popfile.pl" root_sfn
@@ -435,7 +443,11 @@ root_sfn:
 
 short_HKCU_root:
   DetailPrint "HKCU: RootDir_SFN = < ${L_REGDATA} >"
+  Push ${L_REGDATA}
+  Call CheckForTrailingSlash
   GetFullPathName /SHORT ${L_EXPECTED_ROOT} ${L_EXPECTED_ROOT}
+  StrCpy ${L_TEMP} ${L_EXPECTED_ROOT} 1 -1
+  StrCmp ${L_TEMP} "\" end_HKCU_root
   StrCmp ${L_EXPECTED_ROOT} ${L_REGDATA} end_HKCU_root
   DetailPrint "^^^^^ Error ^^^^^"
   DetailPrint "Expected Root SFN = < ${L_EXPECTED_ROOT} >"
@@ -445,6 +457,8 @@ end_HKCU_root:
 
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_LFN"
   DetailPrint "HKCU: UserDir_LFN = < ${L_REGDATA} >"
+  Push ${L_REGDATA}
+  Call CheckForTrailingSlash
   StrCpy ${L_POPFILE_USER} ${L_REGDATA}
   StrCpy ${L_EXPECTED_USER} ${L_REGDATA}
   StrCpy ${L_STATUS_USER} ""
@@ -461,7 +475,11 @@ user_sfn:
 
 short_HKCU_user:
   DetailPrint "HKCU: UserDir_SFN = < ${L_REGDATA} >"
+  Push ${L_REGDATA}
+  Call CheckForTrailingSlash
   GetFullPathName /SHORT ${L_EXPECTED_USER} ${L_EXPECTED_USER}
+  StrCpy ${L_TEMP} ${L_EXPECTED_USER} 1 -1
+  StrCmp ${L_TEMP} "\" end_HKCU_user
   StrCmp ${L_EXPECTED_USER} ${L_REGDATA} end_HKCU_user
   DetailPrint "^^^^^ Error ^^^^^"
   DetailPrint "Expected User SFN = < ${L_EXPECTED_USER} >"
@@ -568,6 +586,8 @@ folder_found:
 simple_HKCU_locns:
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "RootDir_LFN"
   DetailPrint "Program folder    = < ${L_REGDATA} >"
+  Push ${L_REGDATA}
+  Call CheckForTrailingSlash
   StrCpy ${L_EXPECTED_ROOT} ${L_REGDATA}
   StrCpy ${L_STATUS_ROOT} ""
   IfFileExists "${L_REGDATA}\popfile.pl" simple_root_sfn
@@ -583,7 +603,11 @@ simple_root_sfn:
 
 short_simple_root:
   DetailPrint "SFN equivalent    = < ${L_REGDATA} >"
+  Push ${L_REGDATA}
+  Call CheckForTrailingSlash
   GetFullPathName /SHORT ${L_EXPECTED_ROOT} ${L_EXPECTED_ROOT}
+  StrCpy ${L_TEMP} ${L_EXPECTED_ROOT} 1 -1
+  StrCmp ${L_TEMP} "\" end_simple_root
   StrCmp ${L_EXPECTED_ROOT} ${L_REGDATA} end_simple_root
   DetailPrint "^^^^^ Error ^^^^^"
   DetailPrint "Expected value    = < ${L_EXPECTED_ROOT} >"
@@ -593,6 +617,8 @@ end_simple_root:
 
   ReadRegStr ${L_REGDATA} HKCU "${C_PFI_PRODUCT_REGISTRY_ENTRY}" "UserDir_LFN"
   DetailPrint "User Data folder  = < ${L_REGDATA} >"
+  Push ${L_REGDATA}
+  Call CheckForTrailingSlash
   StrCpy ${L_EXPECTED_USER} ${L_REGDATA}
   StrCpy ${L_STATUS_USER} ""
   IfFileExists "${L_REGDATA}\popfile.cfg" simple_user_sfn
@@ -608,7 +634,11 @@ simple_user_sfn:
 
 short_simple_user:
   DetailPrint "SFN equivalent    = < ${L_REGDATA} >"
+  Push ${L_REGDATA}
+  Call CheckForTrailingSlash
   GetFullPathName /SHORT ${L_EXPECTED_USER} ${L_EXPECTED_USER}
+  StrCpy ${L_TEMP} ${L_EXPECTED_USER} 1 -1
+  StrCmp ${L_TEMP} "\" end_simple_user
   StrCmp ${L_EXPECTED_USER} ${L_REGDATA} end_simple_user
   DetailPrint "^^^^^ Error ^^^^^"
   DetailPrint "Expected value    = < ${L_EXPECTED_USER} >"
@@ -639,6 +669,8 @@ check_env_vars:
 
 compare_root_var:
   Push ${L_POPFILE_ROOT}
+  Call CheckForTrailingSlash
+  Push ${L_POPFILE_ROOT}
   Call CheckForSpaces
   StrCmp ${L_EXPECTED_ROOT} ${L_POPFILE_ROOT} check_user
   Push ${L_EXPECTED_ROOT}
@@ -656,6 +688,8 @@ check_user:
   StrCmp ${L_POPFILE_USER} "" check_vars
 
 compare_user_var:
+  Push ${L_POPFILE_USER}
+  Call CheckForTrailingSlash
   Push ${L_POPFILE_USER}
   Call CheckForSpaces
   StrCmp ${L_EXPECTED_USER} ${L_POPFILE_USER} check_vars
@@ -817,7 +851,7 @@ FunctionEnd
 # Usage:
 #
 #         Push "an example"
-#         Call IsNT
+#         Call CheckForSpaces
 #
 #         (an error message will be added to the log)
 #
@@ -841,6 +875,49 @@ exit:
   !undef L_TEMP
 
 FunctionEnd
+
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckForTrailingSlash
+#
+# This function logs an error message if there is a trailing slash in the input string
+#
+# Inputs:
+#         (top of stack)   - input string
+#
+# Outputs:
+#         (none)
+#
+# Usage:
+#
+#         Push "C:\Program Files\POPFile\"
+#         Call CheckForTrailingSlash
+#
+#         (an error message will be added to the log)
+#
+#--------------------------------------------------------------------------
+
+Function CheckForTrailingSlash
+
+  !define L_STRING  $R9
+  !define L_TEMP    $R8
+
+  Exch ${L_STRING}
+  Push ${L_TEMP}
+
+  StrCpy ${L_TEMP} ${L_STRING} 1 -1
+  StrCmp ${L_TEMP} "\" 0 exit
+  DetailPrint "^^^^^ Error ^^^^^   The above value should not end with '\' character"
+
+exit:
+  Pop ${L_TEMP}
+  Pop ${L_STRING}
+
+  !undef L_STRING
+  !undef L_TEMP
+
+FunctionEnd
+
 
 #--------------------------------------------------------------------------
 # End of 'pfidiag.nsi'
