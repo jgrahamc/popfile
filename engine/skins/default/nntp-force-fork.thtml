@@ -1,4 +1,3 @@
-<br />
 <span class="configurationLabel">
     <TMPL_VAR NAME="Localize_Configuration_NNTPFork">:
 </span>
