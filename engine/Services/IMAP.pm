@@ -683,7 +683,7 @@ sub classify_message
         ( $class, $slot, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, 0, '', undef, 0, undef );
 
         close $pseudo_mailer;
-        unlink "imap.tmp";
+        unlink $file;
 
         if ( $magnet_used || $part eq 'TEXT' ) {
 
@@ -765,14 +765,14 @@ sub reclassify_message
 
     my $slot = $self->{history__}->get_slot_from_hash( $hash );
 
-    $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $new_bucket, "imap.tmp" );
+    $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $new_bucket, $file );
 
     $self->{classifier__}->reclassified( $self->{api_session__}, $old_bucket, $new_bucket, 0 );
     $self->{history__}->change_slot_classification( $slot, $new_bucket, $self->{api_session__}, 0);
 
     $self->log_( 0, "Reclassified the message with UID $msg from bucket $old_bucket to bucket $new_bucket." );
 
-    unlink "imap.tmp";
+    unlink $file;
 }
 
 
@@ -2343,11 +2343,11 @@ sub train_on_archive__
             }
             close TMP;
 
-            $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $bucket, "imap.tmp" );
+            $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $bucket, $file );
 
             $self->log_( 0, "Training on the message with UID $msg to bucket $bucket." );
 
-            unlink "imap.tmp";
+            unlink $file;
 
         }
     }
