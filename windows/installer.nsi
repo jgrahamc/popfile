@@ -523,7 +523,7 @@ skip_autostart_set:
               "NoRepair" "1"
   
   SetDetailsPrint textonly
-  DetailPrint ""
+  DetailPrint "Click Next to continue"
   SetDetailsPrint listonly
 
 SectionEnd
@@ -547,7 +547,7 @@ Section "Skins" SecSkins
   File "..\engine\skins\sleetImages\*.gif"
   
   SetDetailsPrint textonly
-  DetailPrint ""
+  DetailPrint "Click Next to continue"
   SetDetailsPrint listonly
 
 SectionEnd
@@ -566,7 +566,7 @@ Section "Languages" SecLangs
   File "..\engine\languages\*.msg"
   
   SetDetailsPrint textonly
-  DetailPrint ""
+  DetailPrint "Click Next to continue"
   SetDetailsPrint listonly
 
 SectionEnd
