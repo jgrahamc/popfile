@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.52"
+  !define C_PFI_VERSION  "0.2.53"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -4766,15 +4766,24 @@ got_schemas:
 disable_the_NO_button:
 
   ; The installer will start POPFile so we can display corpus conversion or database upgrade
-  ; messages which are normally hidden. Therefore we disable the option which allows the user
-  ; to stop the installer from starting POPFile (radio buttons are used for these options so
-  ; we select the "run without system tray icon" option).
+  ; messages which are normally hidden. Therefore we disable the radio button option which
+  ; allows the user to stop the installer from starting POPFile
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "Flags" "DISABLED"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "State" "0"   ; 'do not start'
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "State" "0"   ; 'disable tray icon'
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "State" "0"   ; 'enable tray icon'
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "State" "0"
+  ; If we are upgrading use the same system tray icon setting as the old installation,
+  ; otherwise use the default setting (system tray icon enabled)
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Inherited" "TrayIcon"
+  StrCmp ${L_TEMP} "0" disable_tray_icon
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "State" "1"
+  Goto exit
+
+disable_tray_icon:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "State" "1"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "State" "0"
 
 exit:
   Pop ${L_TEMP}
@@ -4838,21 +4847,30 @@ close_file:
 
   IfRebootFlag 0 page_enabled
 
-  ; We are running on a Win9x system which must be rebooted before Kakasi can be used,
-  ; so we are unable to offer to start POPFile at this point (corpus conversion and
-  ; SQL database upgrades are handled as special cases)
+  ; We are running on a Win9x system which must be rebooted before Kakasi can be used
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 1" "Flags"
   StrCmp ${L_TEMP} "DISABLED" display_the_page
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "Flags"
-  StrCmp ${L_TEMP} "DISABLED" disable_radio_buttons
+  ; If this is a "clean" install (i.e. we have just created some buckets for this user)
+  ; then we do not need to start POPFile before we reboot
 
+  ReadINIStr ${L_TEMP} "$PLUGINSDIR\${CBP_C_INIFILE}" "FolderList" "MaxNum"
+  StrCmp  ${L_TEMP} "" 0 do_not_start_popfile
+
+  ; If, however, corpus conversion or a SQL database upgrade is required, we treat this as
+  ; a special case and start POPFile now so we can monitor the conversion/upgrade because
+  ; this process may take several minutes (and it is simpler to monitor it now instead of
+  ; waiting until after the reboot).
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "Flags"
+  StrCmp ${L_TEMP} "DISABLED" display_the_page
+
+do_not_start_popfile:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "State" "1"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "State" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "State" "0"
 
-disable_radio_buttons:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 1" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "Flags" "DISABLED"
@@ -5036,7 +5054,7 @@ lastaction_enableicon:
 
 corpus_conv_check:
 
-  ; To indicate the special cases where the installer is to start POPFile to peform corpus or
+  ; To indicate the special cases where the installer is to start POPFile to perform corpus or
   ; database conversion, 'CheckCorpusUpgradeStatus' clears the "No" radio button and disables it
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "Flags"
@@ -5086,6 +5104,13 @@ error_msg:
   Goto exit_without_banner
 
 launch_conversion_monitor:
+
+  ; Update the system tray icon setting in 'popfile.cfg' (even though it may be ignored for
+  ; some special cases, we need to honour the user's selection for subsequent activations)
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 4" "State"
+  Push ${L_TEMP}
+  Call SetTrayIconMode
 
   ; If corpus conversion (from flat file or BerkeleyDB format) is required, we run the
   ; 'Corpus Conversion Monitor' which displays progress messages because the conversion
