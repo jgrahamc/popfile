@@ -136,14 +136,14 @@ if ($pid == 0) {
 
     my $session = XMLRPC::Lite 
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
-    -> call('Classifier/Bayes.get_session_key','admin', '')
+    -> call('POPFile/API.get_session_key','admin', '')
     -> result;
  
     test_assert( $session ne '' );
 
     my $set_bucket_color = XMLRPC::Lite
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
-    -> call('Classifier/Bayes.set_bucket_color', $session, 'personal', 'somecolour')
+    -> call('POPFile/API.set_bucket_color', $session, 'personal', 'somecolour')
     -> result;
 
     test_assert_equal( $set_bucket_color, 1 );
@@ -152,34 +152,27 @@ if ($pid == 0) {
 
     my $bucket_color = XMLRPC::Lite
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
-    -> call('Classifier/Bayes.get_bucket_color', $session, 'personal')
+    -> call('POPFile/API.get_bucket_color', $session, 'personal')
     -> result;
 
     test_assert_equal( $bucket_color, 'somecolour' );
 
     select(undef,undef,undef,.2);
 
-    XMLRPC::Lite 
+    my $buckets = XMLRPC::Lite
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
-    -> call('Classifier/Bayes.release_session_key', $session );
-
-    my $alive = XMLRPC::Lite
-    -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
-    -> call('Classifier/Bayes.alive')
+    -> call('POPFile/API.get_buckets', $session )
     -> result;
 
-    test_assert($alive);
+    test_assert_equal( @$buckets[0], 'other' );
+    test_assert_equal( @$buckets[1], 'personal' );
+    test_assert_equal( @$buckets[2], 'spam' );
 
     select(undef,undef,undef,.2);
 
-    $alive = XMLRPC::Lite
+    XMLRPC::Lite 
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
-    -> call('Classifier/Bayes.alive',0)
-    -> result;
-
-    test_assert(!$alive);
-
-    select(undef,undef,undef,1);
+    -> call('POPFile/API.release_session_key', $session );
 }
 
 

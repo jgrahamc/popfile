@@ -34,6 +34,8 @@ package UI::XMLRPC;
 use POPFile::Module;
 @ISA = ("POPFile::Module");
 
+use POPFile::API;
+
 use strict;
 use warnings;
 use locale;
@@ -82,6 +84,8 @@ sub initialize
     # Only accept connections from the local machine
 
     $self->config_( 'local', 1 );
+
+    $self->{api__} = new POPFile::API;
 
     return 1;
 }
@@ -142,11 +146,13 @@ EOM
     }
 
     # All requests will get dispatched to the main Classifier::Bayes object, for example
-    # the get_bucket_color interface is accessed with the method name
+    # the get_bucket_color interface is accessed with the method name.  The actual
+    # dispatch is via the POPFile::API object which we create in initialize above.
     #
-    #     Classifier/Bayes.get_bucket_color
+    #     POPFile/API.get_bucket_color
 
-    $self->{server__}->dispatch_to( $self->{classifier__} );
+    $self->{api__}->{c} = $self->{classifier__};
+    $self->{server__}->dispatch_to( $self->{api__} );
 
     # DANGER WILL ROBINSON!  In order to make a polling XML-RPC server I am using
     # the XMLRPC::Transport::HTTP::Daemon class which uses blocking I/O.  This would
@@ -155,7 +161,7 @@ EOM
     # blocking doesn't help much because then we get an unstoppable child.
     #
     # So the solution relies on knowing the internals of XMLRPC::Transport::HTTP::Daemon
-    # which is actuall a SOAP::Transport::HTTP::Daemon which has a HTTP::Daemon (stored
+    # which is actually a SOAP::Transport::HTTP::Daemon which has a HTTP::Daemon (stored
     # in a private variable called _daemon.  HTTP::Daemon is an IO::Socket::INET which means
     # we can create a selector on it, so here we access a PRIVATE variable on the XMLRPC
     # object.  This is very bad behaviour, but it works until someone changes XMLRPC.
