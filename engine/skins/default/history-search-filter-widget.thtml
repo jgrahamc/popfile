@@ -5,7 +5,7 @@
 
     <TMPL_IF NAME="History_If_Search">
 
-    <input type="text" id="historySearch" name="search" value="<TMPL_VAR NAME="History_Field_Search">" />
+    <input type="text" id="historySearch" name="search" value="<TMPL_VAR ESCAPE=HTML NAME="History_Field_Search">" />
 
     </TMPL_IF>
 
