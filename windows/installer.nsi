@@ -284,6 +284,10 @@ Section "Skins" SecSkins
   SetOutPath $INSTDIR\skins
   File "..\engine\skins\*.css"
   File "..\engine\skins\*.gif"
+  SetOutPath $INSTDIR\skins\lavishImages
+  File "..\engine\skins\lavishImages\*.gif"
+  SetOutPath $INSTDIR\skins\sleetImages
+  File "..\engine\skins\sleetImages\*.gif"
 
 SectionEnd
 
@@ -537,6 +541,10 @@ skip_registry_restore:
   RMDir $INSTDIR\Exporter
   Delete $INSTDIR\skins\*.css
   Delete $INSTDIR\skins\*.gif
+  Delete $INSTDIR\skins\lavishImages\*.gif
+  Delete $INSTDIR\skins\sleetImages\*.gif
+  RMDir $INSTDIR\skins\sleetImages
+  RMDir $INSTDIR\skins\lavishImages
   RMDir $INSTDIR\skins
   Delete $INSTDIR\manual\en\*.html
   RMDir $INSTDIR\manual\en
