@@ -84,3 +84,32 @@ foreach my $file (sort {$files{$b} <=> $files{$a}} keys %files) {
     print sprintf( "Coverage of %-32s %d%%\n", "$clean...", $files{$file});
 }
 
+print "\nCreating HTML coverage files...\n\n";
+
+foreach my $file (sort {$files{$b} <=> $files{$a}} keys %files) {
+
+    my $clean = $file;
+    $clean    =~ s/^\.\.\/\///;
+
+    open HTML, ">../$clean.html";
+    open FILE, "<../$clean.pm";
+
+    print HTML "<html><head><title>$clean.pm</title></head><body><pre>";
+
+    my $line = 0;
+
+    while ( <FILE> ) {
+        $line += 1;
+        my $color = (defined($count{$file}{executed}{$line}) && ($count{$file}{executed}{$line}==0))?"red":"green";
+        my $block = ($color eq 'red')?"red":"white";
+        print HTML "<span style=\"background: $block\">&nbsp;</span><font color=$color>$_</font>";
+    }
+
+    print HTML "</pre></body></html>";
+
+    close FILE;
+    close HTML;
+
+    print "Saved coverage view for $clean.pm in $clean.html\n";
+}
+
