@@ -194,7 +194,7 @@ sub parse_stream
 
         # For the Mac we do further splitting of the line at the CR characters
         
-        while ( $read =~ s/(.*?\r)// ) 
+        while ( $read =~ s/(.*?\r)([^\n])/\2/ ) 
         {
             my $line = $1;
              
@@ -372,7 +372,6 @@ sub parse_stream
 
         $colorized .= "</tt>";
         $colorized =~ s/\r\n/<br>/g;
-        $colorized =~ s/\r/<br>/g;
         
         return $colorized;
     }

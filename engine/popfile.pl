@@ -80,11 +80,11 @@ my $stab_color      = '#cccc99';
 my $highlight_color = '#cccc99';
 
 # These two variables are used to create the HTML UI for POPFile
-my $header = "<html><head><title>POPFile Maintenance</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>\
+my $header = "<html><head><title>POPFile Control Center</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>\
 <META HTTP-EQUIV=Pragma CONTENT=no-cache>\
 <META HTTP-EQUIV=Expires CONTENT=0>\
 <META HTTP-EQUIV=Cache-Control CONTENT=no-cache></head>\
-<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=$main_color>&nbsp;&nbsp;<font size=+3>POPFile Maintenance</font><td bgcolor=$main_color align=right><a href=/shutdown?session=SESSKEY>Shutdown</a>&nbsp;<tr height=3 bgcolor=$stab_color><td colspan=2 height=3 bgcolor=$stab_color></td></tr></table><p>\
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=$main_color>&nbsp;&nbsp;<font size=+3>POPFile Control Center</font><td bgcolor=$main_color align=right><a href=/shutdown?session=SESSKEY>Shutdown</a>&nbsp;<tr height=3 bgcolor=$stab_color><td colspan=2 height=3 bgcolor=$stab_color></td></tr></table><p>\
 <table width=100% cellspacing=0><tr>\
 <td align=center bgcolor=TAB2 width=10%><font size=+1><b>&nbsp;<a href=/history?session=SESSKEY>History</a></b></font></td><td width=2></td>\
 <td align=center bgcolor=TAB1 width=10%><font size=+1><b>&nbsp;<a href=/buckets?session=SESSKEY>Buckets</a></b></font></td><td width=2></td>\
@@ -1600,7 +1600,7 @@ sub history_page
         {
             $body .= "<a href=/history?start_message=";
             $body .= $start_message - $configuration{page_size};
-            $body .= "&session=$session_key>Previous</a> ";
+            $body .= "&session=$session_key>< Previous</a> ";
         }
         my $i = 0;
         while ( $i <= $#mail_files )
@@ -1623,7 +1623,7 @@ sub history_page
         {
             $body .= "<a href=/history?start_message=";
             $body .= $start_message + $configuration{page_size};
-            $body .= "&session=$session_key>Next</a>";
+            $body .= "&session=$session_key>Next ></a>";
         }
         $body .= "</center>";
     }
