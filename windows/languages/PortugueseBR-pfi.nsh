@@ -84,8 +84,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TITLE        "Conversão do Corpus do POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUBTITLE     "O corpus existente deve ser convertido para funcionar com esta versão do POPFile"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "POPFile Corpus Conversion Completed"
-!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "Please click Close to continue"
+!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "Completada a Conversão do Corpus do POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "Clique em Fechar para continuar"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish
@@ -111,7 +111,7 @@
 # Message displayed when installer exits because another copy is running
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INSTALLER_MUTEX     "Another copy of the POPFile installer is already running !"
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTALLER_MUTEX     "Uma outra cópia do instalador do POPFile já está rodando!"
 
 #--------------------------------------------------------------------------
 # Message box warning that a previous installation has been found
@@ -137,13 +137,13 @@
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1   "The default browser is used to display the POPFile User Interface (its control centre).\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1   "O browser padrão é usado para exibir a Interface de Usuário do POPFile (seu centro de controle).\r\n"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2   "O POPFile não requer um browser específico, ele funcionará com praticamente qualquer browser.\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3   "A minimal version of Perl is about to be installed (POPFile is written in Perl).\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4   "The Perl supplied with POPFile makes use of some Internet Explorer components and requires Internet Explorer 5.5 (or a later version).\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3   "Uma versão mínima do Perl está para ser instalada (o POPFile é escrito em Perl).\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4   "O Perl fornecido com o POPFile faz uso de alguns componentes do Internet Explorer e requer o Internet Explorer 5.5 (ou uma versão mais atual).\r\n"
 !insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_5   "O instalador detectou que este sistema tem o Internet Explorer"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6   "It is possible that some features of POPFile may not work properly on this system.\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_7   "If you have any problems with POPFile, an upgrade to a newer version of Internet Explorer may help."
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6   "É possível que algumas características do POPFile não funcionem corretamente neste sistema.\r\n"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_7   "Se você tiver algum problema com o POPFile, uma atualização para uma versão mais nova do Internet Explorer pode ajudar."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Choose Components
@@ -428,20 +428,20 @@
 # Standard MUI Page - Installation Page (for the 'Corpus Conversion Monitor' utility)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MUTEX        "Another copy of the 'Corpus Conversion Monitor' is already running !"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PRIVATE      "The 'Corpus Conversion Monitor' is part of the POPFile installer"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOFILE       "Error: Corpus conversion data file does not exist !"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOPOPFILE    "Error: POPFile path missing"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ENVNOTSET    "Error: Unable to set an environment variable"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOKAKASI     "Error: Kakasi path missing"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "An error occurred when starting the corpus conversion process"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ESTIMATE     "Estimated time remaining: "
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MINUTES      "minutes"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_WAITING      "(waiting for first file to be converted)"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TOTALFILES   "There are $G_BUCKET_COUNT bucket files to be converted"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PROGRESS_N   "After $G_ELAPSED_TIME.$G_DECPLACES minutes there are $G_STILL_TO_DO files left to convert"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PROGRESS_1   "After $G_ELAPSED_TIME.$G_DECPLACES minutes there is one file left to convert"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUMMARY      "Corpus Conversion took $G_ELAPSED_TIME.$G_DECPLACES minutes"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MUTEX        "Uma outra cópia do 'Monitor de Conversão do Corpus' já está rodando!"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PRIVATE      "O 'Monitor de Conversão do Corpus' é parte do instalador do POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOFILE       "Erro: o arquivo de dados da conversão do Corpus não existe!"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOPOPFILE    "Erro: falta o caminho do POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ENVNOTSET    "Erro: Impossível setar uma variável de ambiente"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOKAKASI     "Erro: falta o caminho do Kakasi"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "Ocorreu um erro ao iniciar o processo de conversão do corpus"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ESTIMATE     "Tempo restante estimado: "
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MINUTES      "minutos"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_WAITING      "(esperando pelo primeiro arquivo a ser convertido)"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TOTALFILES   "Existem $G_BUCKET_COUNT arquivos de balde para serem convertidos"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PROGRESS_N   "Depois de $G_ELAPSED_TIME.$G_DECPLACES minutos existem $G_STILL_TO_DO arquivos para converter"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PROGRESS_1   "Depois de $G_ELAPSED_TIME.$G_DECPLACES minutos existe um arquivo para converter"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUMMARY      "A Conversão do Corpus levou $G_ELAPSED_TIME.$G_DECPLACES minutos"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall POPFile
