@@ -69,9 +69,12 @@ sub load_word_matrix
         {
             if ( /(.+) (.+)/ )
             {
-                $self->{matrix}{$bucket}{$1} = $2;
-                $self->{total}{$bucket}     += $2;
-                $self->{full_total}         += $2;
+                if ( $2 >= 5 ) 
+                {
+                    $self->{matrix}{$bucket}{$1} = $2;
+                    $self->{total}{$bucket}     += $2;
+                    $self->{full_total}         += $2;
+                }
             }
         }
 
