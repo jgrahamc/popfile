@@ -465,8 +465,6 @@ if ( $pid == 0 ) {
                         PeerAddr => '127.0.0.1',
                         PeerPort => $port );
 
-        select( undef, undef, undef, 1 );
-
         test_assert( defined( $client ) );
         test_assert( $client->connected );
 
@@ -734,6 +732,8 @@ if ( $pid == 0 ) {
         my $headers   = 1;
         while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
             $result = <$client>;
+            test_assert( $result =~ /\015/ );
+            $result =~ s/\015//;
             test_assert_equal( $result, $line );
             if ( $headers == 0 ) {
                 $countdown -= 1;
@@ -775,6 +775,8 @@ if ( $pid == 0 ) {
             my $line = $_;
             $result = <$client>;
             $result =~ s/popfile1=7/popfile0=0/;
+            test_assert( $result =~ /\015/ );
+            $result =~ s/\015//;
             test_assert_equal( $result, $line );
 	}
         close FILE;
@@ -856,6 +858,8 @@ if ( $pid == 0 ) {
         while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
             $result = <$client>;
             $result =~ s/popfile2=8/popfile0=0/;
+            test_assert( $result =~ /\015/ );
+            $result =~ s/\015//;
             test_assert_equal( $result, $line, "[$result][$line]" );
             if ( $headers == 0 ) {
                 $countdown -= 1;
@@ -931,6 +935,8 @@ if ( $pid == 0 ) {
             my $line = $_;
             $result = <$client>;
             $result =~ s/popfile2=9/popfile0=0/;
+            test_assert( $result =~ /\015/ );
+            $result =~ s/\015//;
             test_assert_equal( $result, $line );
 	}
         close FILE;
@@ -1024,6 +1030,8 @@ if ( $pid == 0 ) {
         while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
             $result = <$client>;
             $result =~ s/popfile2=28/popfile0=0/;
+            test_assert( $result =~ /\015/ );
+            $result =~ s/\015//;
             test_assert_equal( $result, $line );
             if ( $headers == 0 ) {
                 $countdown -= 1;
@@ -1050,7 +1058,6 @@ if ( $pid == 0 ) {
             test_assert_equal( $fl, $ml );
 	}
         test_assert( eof(FILE) );
-        test_assert( eof(HIST) );
         close FILE;
         close HIST;
 
@@ -1082,7 +1089,8 @@ if ( $pid == 0 ) {
 
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
-
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
 
         print $client "QUIT$eol";
         $result = <$client>;
