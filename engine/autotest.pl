@@ -37,7 +37,7 @@ if ( $#ARGV == -1 )
             }
             else
             {
-                print "\n$file should be in $class but is in $classification"; 
+                print "\n$file should be in $class but is in $classification..."; 
                 $fail += 1;
             }
         }   

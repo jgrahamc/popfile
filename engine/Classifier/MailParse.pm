@@ -137,9 +137,12 @@ sub add_line
     # an, or, if are too common and the longest word in English (according to
     # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
 
-    while ( $line =~ s/([A-Za-z][A-Za-z\']{2,44})[,\.\"\'\)\?!:;\/]{0,2}([ \t\n\r]|$)/ / )
+    while ( $line =~ s/([A-Za-z][A-Za-z\']{0,44})[-,\.\"\'\)\?!:;\/]{0,5}([ \t\n\r]|$)/ / )
     {
-        update_word($self,$1, $encoded);
+        if (length $1 >= 3)        
+        {
+            update_word($self,$1, $encoded);
+        }
     }
 }
 

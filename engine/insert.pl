@@ -114,11 +114,11 @@ sub split_mail_message
 
 # main
 
-if ( $#ARGV == 1 ) 
+if ( $#ARGV >= 1 ) 
 {
     load_word_table($ARGV[0]);
 
-    my @files   = glob $ARGV[1];
+    my @files   = map { glob } @ARGV[1 .. $#ARGV];
     foreach my $file (@files)
     {
         split_mail_message($file);

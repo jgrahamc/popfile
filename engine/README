@@ -31,19 +31,7 @@ more complicated.  If you want to sort family mail, from spam, from work
 mail, from a specific mailing list, the just create those four buckets and
 fill them with mail.  POPFile does the rest.
 
-Note that bucket names can consist of alphanumeric characters, - and _.
-
-Buckets are created automatically when you insert email into the POPFile
-system. To insert mail use the insert.pl script.  For example to insert a
-message into the spam bucket when the message is stored in a file called
-message.txt type
-
-perl insert.pl spam message.txt
-
-POPFile also optimizes download speed.  By sorting mail into ascending order
-of size downloads seem much faster on slow connections.  When downloading a
-lot of mail across a slow link POPFile gives you the small mails first and
-fast and delays big mails until the end.
+Note that bucket names can consist of alpha characters only.
 
 It inserts the X-Text-Classification header into every mail message with a
 single argument: the bucket POPFile believes this mail belongs in.  By

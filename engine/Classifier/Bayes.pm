@@ -46,11 +46,6 @@ sub new
     $self->{possible_colors} = [ 'red',  'green',      'blue',      'brown',     'orange',     'purple',      'magenta',  'gray',        'plum',     'silver', 
                    'pink', 'lightgreen', 'lightblue', 'lightcyan', 'lightcoral', 'lightsalmon', 'lightgrey', 'darkorange', 'darkcyan', 'feldspar' ];
 
-    # Precomputed top 10 words in each bucket
-    $self->{top10}             = {};
-    $self->{top10value}        = {};
-    $self->{top10html}         = {};
-    
     # Precomputed per bucket probabilities
     $self->{bucket_start}      = {};
 
@@ -75,7 +70,7 @@ sub get_color
 {
     my ($self, $word) = @_;
     
-    my $max   = 0;
+    my $max   = -10000;
     my $color = 'black';
     
     for my $bucket (keys %{$self->{total}})
@@ -84,10 +79,6 @@ sub get_color
         
         if ( $prob != 0 ) 
         {
-            $prob     = exp($prob);
-            $prob    *= $self->{total}{$bucket};
-            $prob    /= $self->{full_total};
-        
             if ( $prob > $max ) 
             {
                 $max   = $prob;
@@ -142,44 +133,6 @@ sub set_value
     }
 }
 
-sub compute_top10
-{
-    my ($self, $bucket, $word, $value) = @_;
-    my @values = keys %{$self->{top10value}{$bucket}};
-
-    if ( $#values == 9 ) 
-    {
-        for my $i ( 0 .. 9 )
-        {
-            if ( $self->{top10value}{$bucket}{$i} < $value )
-            {
-                my $j = 9;
-                while ( $i < $j )
-                {
-                    $self->{top10value}{$bucket}{$j} = $self->{top10value}{$bucket}{$j-1};
-                    $self->{top10}{$bucket}{$j}      = $self->{top10}{$bucket}{$j-1};
-                    $j -= 1;
-                }
-                
-                $self->{top10value}{$bucket}{$i} = $value;
-                $self->{top10}{$bucket}{$i}      = $word;
-                last;
-            }
-        }
-    }
-    else
-    {
-        my $i = 0;
-        if ( $#values >= 0 ) 
-        {
-            $i = $#values+1;
-        }
-        $self->{top10value}{$bucket}{$i} = $value;
-        $self->{top10}{$bucket}{$i}      = $word;
-        
-    }
-}
-
 # ---------------------------------------------------------------------------------------------
 #
 # load_word_matrix
@@ -196,8 +149,6 @@ sub load_word_matrix
     $self->{matrix}     = {};
     $self->{total}      = {};
     $self->{full_total} = 0;
-    $self->{top10}      = {};
-    $self->{top10value} = {};
     
     print "Loading the corpus...\n" if $self->{debug};
     
@@ -237,7 +188,6 @@ sub load_word_matrix
 
         # Each line in the word table is a word and a count
         $self->{total}{$bucket} = 0;
-        $self->{top10bottom}{$bucket} = 0;
     
         while (<WORDS>)
         {
@@ -260,7 +210,6 @@ sub load_word_matrix
                 $self->{total}{$bucket}        += $value;
                 $self->{full_total}            += $value;
                 set_value( $self, $bucket, $word, $value );
-                compute_top10( $self, $bucket, $word, $value );
             }
         }
 
@@ -269,77 +218,14 @@ sub load_word_matrix
         print " $self->{total}{$bucket} words\n" if $self->{debug};
     }
 
-    calculate_top10($self);
-    
-    print "Corpus loaded with $self->{full_total} entries\n" if $self->{debug};
-    
-    print "    ... $self->{full_total} words\n";
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# calculate_top10
-#
-# Set up the information about the top 10 words in each bucket and their colors in the 
-# top10html member
-#
-# ---------------------------------------------------------------------------------------------
-
-sub calculate_top10
-{
-    my ($self) = @_;
-    
-    $self->{top10html}  = {};
-
-    foreach my $bucket (keys %{$self->{total}})
+    if ( $self->{full_total} > 0 ) 
     {
-        my $number = $self->{total}{$bucket};
-        $number = reverse $number;
-        $number =~ s/(\d{3})/\1,/g;
-        $number = reverse $number;
-        $number =~ s/^,(.*)/\1/;
-        $self->{top10html}{$bucket} = "<tr><td><font color=$self->{colors}{$bucket}>$bucket</font><td align=right>$number<td>&nbsp;<td align=center><table cellpadding=0 cellspacing=0><tr>";
-        my $color = $self->{colors}{$bucket};
-        $self->{top10html}{$bucket} .= "<td width=10 bgcolor=$color><img border=0 alt='$bucket current color is $color' src=pix.gif width=10 height=20><td>&nbsp; </td>";
-        for my $i ( 0 .. $#{$self->{possible_colors}} )
-        {
-            my $color = $self->{possible_colors}[$i];
-            if ( $color ne $self->{colors}{$bucket} ) 
-            {
-                $self->{top10html}{$bucket} .= "<td width=10 bgcolor=$color><a href=/buckets?color=$color&bucket=$bucket><img border=0 alt='Set $bucket color to $color' src=pix.gif width=10 height=20></a>";
-            } 
-        }
-        $self->{top10html}{$bucket} .= "</table></td><td><td>";
-
-        for my $i ( 0 .. 9 )
-        {
-            if ( $self->{top10}{$bucket}{$i} ne '' ) 
-            {
-                $self->{top10html}{$bucket} .= $self->{top10}{$bucket}{$i};
-
-                if ( $i != 9 ) 
-                {
-                    $self->{top10html}{$bucket} .= ', ';
-                }
-            }
-        }
-    }
-    
-    if ( $self->{full_total} != 0 )
-    {
-        foreach my $bucket (keys %{$self->{total}})
-        {
-            if ( $self->{total}{$bucket} != 0 ) 
-            {
-                $self->{bucket_start}{$bucket} = log( $self->{total}{$bucket} / $self->{full_total} );
-            }
-        }
-
-        # The probability used for words that are not present in the corpus
-
         $self->{not_likely} = log( 1 / ( 10 * $self->{full_total} ) );
     }
 
+    print "Corpus loaded with $self->{full_total} entries\n" if $self->{debug};
+    
+    print "    ... $self->{full_total} words\n";
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -378,44 +264,106 @@ sub classify_file
     
     my @buckets = keys %{$self->{total}};
 
+    my $logbuck = 0;
+    if ( $#buckets > 0 )
+    {
+       $logbuck = log( $#buckets );
+    }
+
+    # Ideally, the "raw score" in the score display would reflect the sum of the
+    # scores for the individual words, as shown by the lookup GUI.  Actually
+    # doing this requires a fair amount of computation to compute the sum of the
+    # probabilities.  If we assume that only the most probable choice is significant
+    # (that is, that the max probability and the sum of the probabilities are the
+    # same), we do much less computation, and still end up with results that are
+    # "close enough for jazz".  Note that this makes *no* difference for
+    # classification - it only matters for the debug (bayes.pl) display.
+
+    my $correction = -$logbuck;
+
     # Switching from using *= to += and using the log of every probability instead
 
-    foreach my $word (keys %{$self->{parser}->{words}}) 
+    foreach my $word (keys %{$self->{parser}->{words}})
     {
+        my $wmax = -10000;
+
         foreach my $bucket (@buckets)
         {
             my $probability = get_value( $self, $bucket, $word );
-            
-            if ( $probability == 0 ) 
+
+            if ( $probability == 0 )
             {
                 $probability = $self->{not_likely};
             }
-    
+
+            if ( $wmax < $probability )
+            {
+               $wmax = $probability;
+            }
+
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
             # and we multiply by the number of times that the word occurs
 
             $score{$bucket} += ( $probability * $self->{parser}{words}{$word} );
         }
-    }
-
-    # Now sort the scores to find the highest and return that bucket as the classification
-    
-    my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
-
-    if ( $self->{debug} ) 
-    {
-        foreach my $b (@ranking)
+        
+        if ($wmax > $self->{not_likely})
         {
-            print "    Bucket $b has score ";
-            print exp($score{$b});
-            print "\n";
+            $correction += ($wmax - $logbuck) * $self->{parser}{words}{$word};
+        }
+        else
+        {
+            $correction += $wmax * $self->{parser}{words}{$word};
         }
     }
 
-    if ( $score{$ranking[0]} == 0 ) 
+    # Now sort the scores to find the highest and return that bucket as the classification
+
+    my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
+
+    my %raw_score;
+    my $base_score = $score{$ranking[0]};
+    my $total = 0;
+
+    # Compute the total of all the scores to generate the normalized scores and probability
+    # estimate.  $total is always 1 after the first loop iteration, so any additional term
+    # less than 2 ** -54 is insignificant, and need not be computed.
+
+    foreach my $b (@ranking)
+    {
+        $raw_score{$b} = $score{$b};
+        $score{$b} -= $base_score;
+        if ($score{$b} > 54 * log(0.5))
+        {
+           $total += exp($score{$b});
+        }
+    }
+
+    if ( $self->{debug} )
+    {
+        print "Bucket              Raw score      Normalized     Estimated prob\n\n";
+        foreach my $b (@ranking)
+        {
+             my $prob = exp($score{$b})/$total;
+             my $probstr;
+             if ($prob >= 0.1 || $prob == 0.0)
+             {
+                 $probstr = sprintf("%12.6f", $prob);
+             }
+             else
+             {
+                 $probstr = sprintf("%17.6e", $prob);
+             }
+             printf("%-15s%15.6f%15.6f %s\n", $b, ($raw_score{$b} - $correction)/$logbuck, ($score{$b} - log($total))/$logbuck + 1, $probstr);
+        }
+    }
+
+    # If no bucket has a probability better than 0.5, call the message "unclassified".
+
+    if ( ( $total == 0 ) || ( $score{$ranking[0]} <= log(0.5 * $total) ) )
     {
         return "unclassified";
-    } 
+    }
     else
     {
         return $ranking[0];
