@@ -1559,7 +1559,7 @@ sub get_session_key
         $self->log_( 0, "Attempt to login with incorrect credentials for user $user" );
         select( undef, undef, undef, 1 );
         return undef;
-    }s
+    }
 
     my $session = $self->generate_unique_session_key__();
 
