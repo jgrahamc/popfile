@@ -958,7 +958,7 @@ sub bucket_page
             $j =~ s/\|\|/, /g;
             $j =~ s/\|//g;
             $j =~ s/([^ ]+) (L\-[\.\d]+)/<font color=$classifier->{colors}{$form{showbucket}}>\1 \2<\/font>/g;
-            $j =~ s/L(\-[\.\d]+)/int(exp(eval(\1)))/ge;
+            $j =~ s/L(\-[\.\d]+)/int( $classifier->{total}{$form{showbucket}} * exp($1) + 0.5 )/ge;
             $j =~ /^(.)/;
             $body .= "<tr><td valign=top><b>$1</b><td valign=top>$j";
         }
