@@ -219,6 +219,7 @@
 !insertmacro PFI_LANG_STRING DESC_SecPOPFile               "POPFile에 필요한 핵심 파일(Perl의 최소설치 버전 포함)을 설치합니다."
 !insertmacro PFI_LANG_STRING DESC_SecSkins                 "사용자 인터페이스 화면의 모양을 바꿀 수 있는 POPFile 스킨을 설치합니다."
 !insertmacro PFI_LANG_STRING DESC_SecLangs                 "POPFile 사용자화면의 다국어 버전을 설치합니다."
+!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Installs the POPFile XMLRPC module (for access to the POPFile API) and the Perl support it requires."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
@@ -275,11 +276,6 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_2           "이 파일을 업데이트 하시겠습니까?"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3           "'예'를 누르면 업데이트합니다. (이전 파일은 다음으로 저장될 것입니다:"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4           "'아니오'를 누르면 이전 파일을 보존합니다. (새 파일은 다음으로 저장될 것입니다:"
-
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_1            "백업:"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_2            "이 이미 존재합니다."
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_3            "이 파일을 덮어 쓰시겠습니까?"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_4            "'예'를 누르시면 덮어 씁니다. '아니오'를 누르시면 백업을 만들지 않습니다."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "Unable to shutdown POPFile automatically."
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "Please shutdown POPFile manually now."

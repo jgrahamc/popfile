@@ -26,6 +26,11 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 #--------------------------------------------------------------------------
+#
+# Translation created by: (nobody)
+# Translation updated by: (nobody)
+#
+#--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_MB* text used for message boxes):
 #
 #   (1) The sequence  $\r$\n        inserts a newline
@@ -214,6 +219,7 @@
 !insertmacro PFI_LANG_STRING DESC_SecPOPFile               "Installs the core files needed by POPFile, including a minimal version of Perl."
 !insertmacro PFI_LANG_STRING DESC_SecSkins                 "Installs POPFile skins that allow you to change the look and feel of the POPFile user interface."
 !insertmacro PFI_LANG_STRING DESC_SecLangs                 "Installs non-English language versions of the POPFile UI."
+!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Installs the POPFile XMLRPC module (for access to the POPFile API) and the Perl support it requires."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
@@ -270,11 +276,6 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_2           "OK to update this file ?"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3           "Click 'Yes' to update it (old file will be saved as"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4           "Click 'No' to keep the old file (new file will saved as"
-
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_1            "Backup copy of"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_2            "already exists"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_3            "OK to overwrite this file?"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_4            "Click 'Yes' to overwrite, click 'No' to skip making a backup copy"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "Unable to shutdown POPFile automatically."
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "Please shutdown POPFile manually now."

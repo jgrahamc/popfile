@@ -219,6 +219,7 @@
 !insertmacro PFI_LANG_STRING DESC_SecPOPFile               "Instalar los archivos esenciales de POPFile, incluyendo una versión mínima de Perl."
 !insertmacro PFI_LANG_STRING DESC_SecSkins                 "Instalar skins de POPFile que le permitirán cambiar el aspecto del interface de usuario de POPFile."
 !insertmacro PFI_LANG_STRING DESC_SecLangs                 "Instalar versiones de idiomas no-Ingleses para el IU de POPFile."
+!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Installs the POPFile XMLRPC module (for access to the POPFile API) and the Perl support it requires."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
@@ -275,11 +276,6 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_2           "¿Desea actualizarlo?"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3           "Clic 'Si' para actualizarlo (el anterior se guardará como"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4           "Clic 'No' para seguir con el anterior (el nuevo se guardará como"
-
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_1            "Copia de seguridad de"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_2            "ya existe"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_3            "¿OK para sobrescribirla?"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_4            "Clic 'Si' para sobrescribirla, clic 'No' para saltar el hacer una copia"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "Unable to shutdown POPFile automatically."
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "Please shutdown POPFile manually now."

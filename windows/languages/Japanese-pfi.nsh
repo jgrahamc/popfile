@@ -219,6 +219,7 @@
 !insertmacro PFI_LANG_STRING DESC_SecPOPFile               "POPFile のコアファイルをインストールします。最小バージョンの Perl も含みます。"
 !insertmacro PFI_LANG_STRING DESC_SecSkins                 "POPFile ユーザーインターフェースのデザインを変えることができる POPFile スキンをインストールします。"
 !insertmacro PFI_LANG_STRING DESC_SecLangs                 "POPFile UI の英語以外のバージョンをインストールします。"
+!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Installs the POPFile XMLRPC module (for access to the POPFile API) and the Perl support it requires."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
@@ -275,11 +276,6 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_2           "アップデートしてもよろしいですか？"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3           "アップデートするには「Yes」をクリックして下さい。(古いファイルは次の名前で保存されます:"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4           "古いファイルを残すには「No」をクリックして下さい。(新しいファイルは次の名前で保存されます:"
-
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_1            "ファイル"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_2            "のバックアップは既に存在します。"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_3            "上書きしてもよろしいですか？"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_4            "上書きするには「Yes」、バックアップをスキップするなら「No」をクリックしてください。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "POPFile を自動的にシャットダウンすることができませんでした。"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "POPFile を手動でシャットダウンして下さい。"

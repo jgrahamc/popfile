@@ -5,8 +5,6 @@
 # for POPFile (includes customised versions of strings provided by NSIS and
 # strings which are unique to POPFile).
 #
-# Translated by: Rami Kattan
-#
 # These strings are grouped according to the page/window where they are used
 #
 # Copyright (c) 2001-2004 John Graham-Cumming
@@ -26,6 +24,11 @@
 #   You should have received a copy of the GNU General Public License
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+#--------------------------------------------------------------------------
+#
+# Translation created by: Rami Kattan (rkattan at users.sourceforge.net)
+# Translation updated by:
 #
 #--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_MB* text used for message boxes):
@@ -103,6 +106,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "≈‰ Â«¡  ÕÊÌ· „œÊ¯‰… POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "«·—Ã«¡ «·÷€ÿ ⁄·Ï ≈€·«ﬁ ··„ «»⁄…"
 
+!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_TITLE     "POPFile Corpus Conversion Failed"
+!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_SUBTITLE  "Please click Cancel to continue"
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ; Used by 'Add POPFile User' wizard (main script: adduser.nsi)
@@ -213,6 +218,7 @@
 !insertmacro PFI_LANG_STRING DESC_SecPOPFile               " ‰’Ì» «·„·›«  «·√”«”Ì… «·„Õ «Ã… „‰ ﬁˆ»· POPFile° »«·≈÷«›… ≈·Ï ‰”Œ… „’€—… „‰ Perl."
 !insertmacro PFI_LANG_STRING DESC_SecSkins                 " ‰’Ì» ”„«  POPFile «· Ì  ”„Õ ·ﬂ » €ÌÌ— ‘ﬂ· Ê«ÃÂ… «·„” Œœ„."
 !insertmacro PFI_LANG_STRING DESC_SecLangs                 " ‰’Ì» ·€«  √Œ—Ï €Ì— «·≈‰Ã·Ì“Ì… „‰ Ê«ÃÂ… ≈” Œœ«„ POPFile."
+!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Installs the POPFile XMLRPC module (for access to the POPFile API) and the Perl support it requires."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
@@ -269,11 +275,6 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_2           "Â·  Ê«›ﬁ ⁄·Ï  ÕœÌÀ Â–« «·„·› ø"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3           "≈÷€ÿ '‰⁄„' · ÕœÌÀ «·„·› (”Ì „ Õ›Ÿ «·„·› «·”«»ﬁ »≈”„"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4           "√÷€ÿ '·«' · —ﬂ «·„·› «·”«»ﬁ (”Ì „ Õ›Ÿ «·„·› «·ÃœÌœ »≈”„"
-
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_1            "‰”Œ… ≈Õ Ì«ÿÌ… „‰"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_2            "„ÊÃÊœ „”»ﬁ«"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_3            "Â·  Ê«›ﬁ ⁄·Ï ≈⁄«œ… ﬂ «»… Â–« «·„·›ø"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_4            "≈÷€ÿ '‰⁄„' ·≈⁄«œ… «·ﬂ «»…° ≈÷€ÿ '·«' · ŒÿÌ ⁄„· ‰”Œ… ≈Õ Ì«ÿÌ…"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "·«  ÊÃœ «·≈„ﬂ«‰Ì… ·≈€·«ﬁ POPFile »‘ﬂ·  ·ﬁ«∆Ì."
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "«·—Ã«¡ ≈€·«ﬁ POPFile »‘ﬂ· ÌœÊÌ «·¬‰."
@@ -496,6 +497,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ENVNOTSET    "Œ··: ·„ Ìﬂ‰ »«·≈„ﬂ«‰ ≈⁄œ«œ „ €Ì— »Ì∆… ⁄«„"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOKAKASI     "Œ··: ·„ Ì „ «·⁄ÀÊ— ⁄·Ï „”«— Kakasi"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "·ﬁœ Õ’· Œ·· √À‰«¡  ‘€Ì· ⁄„·Ì…  ÕÊÌ· «·„œÊ¯‰…"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_FATALERR     "A fatal error occurred during the corpus conversion process !"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ESTIMATE     "«·“„‰ «·„ »ﬁÌ: "
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MINUTES      "œﬁ«∆ﬁ"
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_WAITING      "(≈‰ Ÿ«—  ÕÊÌ· «·„·› «·√Ê·)"
