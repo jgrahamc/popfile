@@ -44,6 +44,8 @@
 # Installer Configuration
 #--------------------------------------------------------------------------
 
+  !define MUI_CUSTOMPAGECOMMANDS
+
   !define MUI_WELCOMEPAGE
   !define MUI_LICENSEPAGE
   ; Select either "accept/do not accept" radio buttons or "accept" checkbox for the license page
@@ -56,17 +58,15 @@
   !define MUI_ABORTWARNING
   !define MUI_FINISHPAGE
 
-  !define MUI_UNINSTALLER
-  !define MUI_UNCONFIRMPAGE
-
-  !define MUI_CUSTOMPAGECOMMANDS
-
   ; The icon files for the installer and uninstaller must have the same structure. For example,
   ; if one icon file contains a 32x32 16-colour image and a 16x16 16-colour image then the other
   ; file cannot just contain a 32x32 16-colour image, it must also have a 16x16 16-colour image.
   
   !define MUI_ICON    "..\engine\Platform\popfile.ico"
   !define MUI_UNICON  "remove.ico" 
+
+  !define MUI_UNINSTALLER
+  !define MUI_UNCONFIRMPAGE
 
 #--------------------------------------------------------------------------
 # User Registers (Global)
@@ -332,6 +332,13 @@ update_config:
   SetOutPath $INSTDIR\warnings
   File "C:\Perl58\lib\warnings\register.pm"
 
+  ; Create the uninstall program BEFORE creating the shortcut to it
+  ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
+  
+  SetOutPath $INSTDIR
+  Delete $INSTDIR\uninstall.exe
+  WriteUninstaller $INSTDIR\uninstall.exe
+
   ; Create the START MENU entries
 
   SetOutPath $SMPROGRAMS\POPFile
@@ -362,10 +369,6 @@ update_config:
       CreateShortCut "$SMSTARTUP\Run POPFile in background.lnk" \
                      "$INSTDIR\wperl.exe" popfile.pl
 skip_autostart_set:
-
-  SetOutPath $INSTDIR
-  Delete $INSTDIR\uninstall.exe
-  WriteUninstaller $INSTDIR\uninstall.exe
   
   ; Create entry in the Control Panel's "Add/Remove Programs" list
 
