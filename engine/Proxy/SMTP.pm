@@ -73,21 +73,21 @@ sub initialize
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-    $self->{ui__}->register_configuration_item( 'configuration',
-                                                'smtp_port',
-                                                $self );
+    $self->register_configuration_item_( 'configuration',
+                                         'smtp_port',
+                                         $self );
 
-    $self->{ui__}->register_configuration_item( 'security',
-                                                'smtp_local',
-                                                $self );
+    $self->register_configuration_item_( 'security',
+                                         'smtp_local',
+                                         $self );
 
-    $self->{ui__}->register_configuration_item( 'chain',
-                                                'smtp_server',
-                                                $self );
+    $self->register_configuration_item_( 'chain',
+                                         'smtp_server',
+                                         $self );
 
-    $self->{ui__}->register_configuration_item( 'chain',
-                                                'smtp_server_port',
-                                                $self );
+    $self->register_configuration_item_( 'chain',
+                                         'smtp_server_port',
+                                          $self );
 
     return 1;
 }

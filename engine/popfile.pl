@@ -90,8 +90,6 @@ sub pipeready
     }
 }
 
-
-
 # ---------------------------------------------------------------------------------------------
 #
 # reaper
@@ -235,7 +233,7 @@ sub load_modules
 #
 #
 
-my ( $major_version, $minor_version, $build_version ) = ( 0, 19, 0 );
+my ( $major_version, $minor_version, $build_version ) = ( 0, 20, 0 );
 my $version_string = "v$major_version.$minor_version.$build_version";
 
 print "\nPOPFile Engine $version_string loading\n";
@@ -251,6 +249,11 @@ $SIG{INT}   = \&aborting;
 # so we detect Windows and ignore SIGCHLD and call the reaper code below
 
 $SIG{CHLD}  = $on_windows?'IGNORE':\&reaper;
+
+# I've seen spurious ALRM signals happen on Windows so here we for safety
+# say that we want to ignore them
+
+$SIG{ALRM}  = 'IGNORE';
 
 # Create the main objects that form the core of POPFile.  Consists of the configuration
 # modules, the classifier, the UI (currently HTML based), and the POP3 proxy.
@@ -288,21 +291,18 @@ foreach my $type (keys %components) {
           $components{$type}{$name}->version(       $version_string           );
           $components{$type}{$name}->configuration( $components{core}{config} );
           $components{$type}{$name}->logger(        $components{core}{logger} ) if ( $name ne 'logger' );
+          $components{$type}{$name}->mq(            $components{core}{mq}     );
      }
 }
 
-# All proxies need access to the classifier and the interface
-
-foreach my $name (keys %{$components{proxy}}) {
-     $components{proxy}{$name}->classifier( $components{classifier}{bayes} );
-     $components{proxy}{$name}->ui(         $components{interface}{html} );
-}
-
-# All interface components need access to the classifier and the UI
+# All interface components need access to the classifier
 
 foreach my $name (keys %{$components{interface}}) {
      $components{interface}{$name}->classifier( $components{classifier}{bayes} );
-     $components{interface}{$name}->ui(         $components{interface}{html} ) if ( $name ne 'html' );
+}
+
+foreach my $name (keys %{$components{proxy}}) {
+     $components{proxy}{$name}->classifier( $components{classifier}{bayes} );
 }
 
 print "\n\n    Initializing... ";
@@ -398,13 +398,6 @@ foreach my $type (keys %components) {
      print '} ';
 }
 
-print "\n\n    Saving configuration\n";
-flush STDOUT;
-
-# Write the final configuration to disk
-
-$components{core}{config}->save_configuration();
-
-print "\nPOPFile Engine $version_string terminated\n";
+print "\n\nPOPFile Engine $version_string terminated\n";
 
 # ---------------------------------------------------------------------------------------------

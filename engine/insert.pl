@@ -25,34 +25,34 @@ my %words;
 sub load_word_table
 {
     my ($bucket) = @_;
-    
+
     # Make sure that the bucket mentioned exists, if it doesn't the create an empty
     # directory and word table
 
     mkdir("corpus");
     mkdir("corpus/$bucket");
-    
+
     print "Loading word table for bucket '$bucket'...\n";
-    
+
     open WORDS, "<corpus/$bucket/table";
-    
+
     # Each line in the word table is a word and a count
-    
+
     while (<WORDS>) {
         if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
             if ( $1 != 1 ) {
                 print "Incompatible corpus version in $bucket\n";
                 return;
             }
-            
+
             next;
         }
-            
+
         if ( /(.+) (.+)/ ) {
             $words{$1} = $2;
         }
     }
-    
+
     close WORDS;
 }
 
@@ -71,16 +71,16 @@ sub save_word_table
     my ($bucket) = @_;
 
     print "Saving word table for bucket '$bucket'...\n";
-    
+
     open WORDS, ">corpus/$bucket/table";
     print WORDS "__CORPUS__ __VERSION__ 1\n";
-    
+
     # Each line in the word table is a word and a count
-    
+
     foreach my $word (keys %words) {
         print WORDS "$word $words{$word}\n";
     }
-    
+
     close WORDS;
 }
 
@@ -103,15 +103,15 @@ sub split_mail_message
     print "Parsing message '$message'...\n";
 
     $parser->parse_stream($message);
-    
-    foreach $word (keys %{$parser->{words}}) {
-        $words{$word} += $parser->{words}{$word};
+
+    foreach $word (keys %{$parser->{words__}}) {
+        $words{$word} += $parser->{words__}{$word};
     }
 }
 
 # main
 
-if ( $#ARGV >= 1 ) 
+if ( $#ARGV >= 1 )
 {
     load_word_table($ARGV[0]);
 
@@ -122,13 +122,13 @@ if ( $#ARGV >= 1 )
     } else {
         @files   = map { glob } @ARGV[1 .. $#ARGV];
     }
-    
+
     foreach my $file (@files) {
         split_mail_message($file);
     }
-    
+
     save_word_table($ARGV[0]);
-    
+
     print "done.\n";
 } else {
     print "insert.pl - insert mail messages into a specific bucket\n\n";

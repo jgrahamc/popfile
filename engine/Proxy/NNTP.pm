@@ -72,17 +72,17 @@ sub initialize
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-    $self->{ui__}->register_configuration_item( 'configuration',
-                                                'nntp_port',
-                                                $self );
+    $self->register_configuration_item_( 'configuration',
+                                         'nntp_port',
+                                         $self );
 
-    $self->{ui__}->register_configuration_item( 'configuration',
-                                                'nntp_separator',
-                                                $self );
+    $self->register_configuration_item_( 'configuration',
+                                         'nntp_separator',
+                                         $self );
 
-    $self->{ui__}->register_configuration_item( 'security',
-                                                'nntp_local',
-                                                $self );
+    $self->register_configuration_item_( 'security',
+                                         'nntp_local',
+                                         $self );
 
     return 1;
 }

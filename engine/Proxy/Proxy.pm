@@ -189,17 +189,23 @@ sub flush_child_data_
 
     while ( &{$self->{pipeready_}}($handle) )
     {
-        my $class = <$handle>;
+        my $message = <$handle>;
 
-        if ( defined( $class ) ) {
-            $class =~ s/[\r\n]//g;
+        if ( defined( $message ) ) {
+            $message =~ s/[\r\n]//g;
 
-            $self->{classifier__}->set_bucket_parameter( $class, 'count',
-                $self->{classifier__}->get_bucket_parameter( $class, 'count' ) + 1 );
-            $self->global_config_( 'mcount', $self->global_config_( 'mcount' ) + 1 );
-            $stats_changed                                    = 1;
+            if ( $message =~ /CLASS:(.*)/ ) {
 
-            $self->log_( "Incrementing $class" );
+                # Post a message to the MQ indicating that we just handled
+                # a message with a specific classification
+
+                $self->mq_post_( 'CLASS', $1, '' );
+                $self->log_( "Incrementing $1" );
+	    }
+
+            if ( $message =~ /LOGIN:(.*)/ ) {
+                $self->mq_post_( 'LOGIN', $1, '' );
+	    }
         } else {
             # This is here so that we get in errorneous position where the pipeready
             # function is returning that there's data, but there is none, in fact the
@@ -208,12 +214,6 @@ sub flush_child_data_
 
             last;
         }
-    }
-
-    if ( $stats_changed ) {
-        $self->{ui__}->invalidate_history_cache();
-        $self->{configuration__}->save_configuration();
-        $self->{classifier__}->write_parameters();
     }
 }
 
@@ -583,28 +583,13 @@ sub verify_connected_
     return undef;
 }
 
-# GETTERS/SETTERS
+# SETTER
 
 sub classifier
 {
-    my ( $self, $value ) = @_;
+    my ( $self, $classifier ) = @_;
 
-    if ( defined( $value ) ) {
-        $self->{classifier__} = $value;
-    }
-
-    return $self->{classifier__};
-}
-
-sub ui
-{
-    my ( $self, $value ) = @_;
-
-    if ( defined( $value ) ) {
-        $self->{ui__} = $value;
-    }
-
-    return $self->{ui__};
+    $self->{classifier__} = $classifier;
 }
 
 1;

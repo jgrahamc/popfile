@@ -36,6 +36,10 @@ sub new
     # $self->{configuration_parameters__}{parameter}
     $self->{configuration_parameters__} = {};
 
+    # Name of the PID file that we created
+
+    $self->{pid_file__} = '';
+
     bless $self, $type;
 
     $self->name( 'config' );
@@ -74,13 +78,6 @@ sub initialize
 
     $self->global_config_( 'download_count', 0 );
 
-    # We keep track of the total number of messages downloaded (the mcount)
-    # and the total number of classification errors made (ecount) which is
-    # actually the number of times a message is reclassified in the UI
-
-    $self->global_config_( 'mcount', 0 );
-    $self->global_config_( 'ecount', 0 );
-
     # The default timeout in seconds for POP3 commands
     $self->global_config_( 'timeout', 60 );
 
@@ -110,7 +107,22 @@ sub start
 {
     my ( $self ) = @_;
 
-    if ( open PID, '>' . $self->config_( 'piddir' ) . 'popfile.pid' ) {
+    # Check to see if the PID file is present, if it is then another POPFile
+    # may be running, warn the user and terminate
+
+    $self->{pid_file__} = $self->config_( 'piddir' ) . 'popfile.pid';
+
+    if ( -e $self->{pid_file__} ) {
+        my $error = "\n\nAnother copy of POPFile appears to be running.  \nIf this is not the case then" .
+            " delete the file \n$self->{pid_file__} and restart POPFile.\n\n";
+
+        print $error;
+        $self->log_( $error );
+
+        return 0;
+    }
+
+    if ( open PID, ">$self->{pid_file__}" ) {
         print PID "$$\n";
         close PID;
     }
@@ -129,7 +141,9 @@ sub stop
 {
     my ( $self ) = @_;
 
-    unlink( $self->config_( 'piddir' ) . 'popfile.pid' );
+    $self->save_configuration();
+
+    unlink( $self->{pid_file__} );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -210,8 +224,6 @@ sub upgrade_parameter__
 		     # Parameters that are now global to POPFile
 
 		     'debug',                    'GLOBAL_debug',
-		     'ecount',                   'GLOBAL_ecount',
-		     'mcount',                   'GLOBAL_mcount',
 		     'msgdir',                   'GLOBAL_msgdir',
 		     'subject',                  'GLOBAL_subject',
 		     'timeout',                  'GLOBAL_timeout',
@@ -328,6 +340,15 @@ sub parameter
   }
 
   return $self->{configuration_parameters__}{$name};
+}
+
+# GETTER
+
+sub configuration_parameters
+{
+    my ( $self ) = @_;
+
+    return sort keys %{$self->{configuration_parameters__}};
 }
 
 1;

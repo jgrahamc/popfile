@@ -126,6 +126,11 @@ sub initialize
     # Allow the user to override the hostname
     $self->config_( 'hostname', $self->{hostname__} );
 
+    # We want to hear about classification events so that we can
+    # update statistics
+
+    $self->mq_register_( 'CLASS', $self );
+
     return 1;
 }
 
@@ -163,6 +168,26 @@ sub stop
     my ( $self ) = @_;
 
     $self->write_parameters();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# deliver
+#
+# Called by the message queue to deliver a message
+#
+# There is no return value from this method
+#
+# ---------------------------------------------------------------------------------------------
+sub deliver
+{
+    my ( $self, $type, $message, $parameter ) = @_;
+
+    if ( $type eq 'CLASS' ) {
+        $self->set_bucket_parameter( $message, 'count',
+        $self->get_bucket_parameter( $message, 'count' ) + 1 );
+        $self->write_parameters();
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -242,6 +267,19 @@ sub get_value_
     return 0;
 }
 
+sub set_value_
+{
+    my ($self, $bucket, $word, $value) = @_;
+
+    if ( $word ne '' ) {
+        $word =~ /^(.)/;
+        my $i = ord($1);
+
+        $self->{matrix__}{$bucket}[$i] = '' if ( !defined($self->{matrix__}{$bucket}[$i]) );
+        $self->{matrix__}{$bucket}[$i] .= "|$word $value|" if ( ( $self->{matrix__}{$bucket}[$i] =~ s/\|\Q$word\E [\-\.\d]+\|/\|$word $value\|/ ) == 0 );
+    }
+}
+
 # ---------------------------------------------------------------------------------------------
 #
 # get_sort_value_ behaves the same as get_value_, except that it returns not_likely__ rather
@@ -251,22 +289,14 @@ sub get_value_
 # ---------------------------------------------------------------------------------------------
 sub get_sort_value_
 {
-    my ($self, $bucket, $word) = @_;
-    my $v = get_value_($self, $bucket, $word);
-    return $self->{not_likely__} if $v == 0;
-    return $v;
-}
+    my ( $self, $bucket, $word ) = @_;
 
-sub set_value_
-{
-    my ($self, $bucket, $word, $value) = @_;
+    my $v = $self->get_value_( $bucket, $word );
 
-    if ( $word ne '' ) {
-        $word =~ /^(.)/;
-        my $i = ord($1);        
-
-        $self->{matrix__}{$bucket}[$i] = '' if ( !defined($self->{matrix__}{$bucket}[$i]) );
-        $self->{matrix__}{$bucket}[$i] .= "|$word $value|" if ( ( $self->{matrix__}{$bucket}[$i] =~ s/\|\Q$word\E [\-\.\d]+\|/\|$word $value\|/ ) == 0 );        
+    if ( $v == 0 ) {
+        return $self->{not_likely__};
+    } else {
+        return $v;
     }
 }
 
@@ -380,7 +410,6 @@ sub load_word_matrix_
 # Loads an individual bucket
 #
 # ---------------------------------------------------------------------------------------------
-
 sub load_bucket_
 {
     my ($self, $bucket) = @_;
@@ -678,33 +707,32 @@ sub classify_file
             $self->{scores__} .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />";
             $self->{scores__} .= "<input type=\"hidden\" name=\"count\" value=\"" . ($mlen + 1) . "\" />";
             $self->{scores__} .= "<hr><b>$language{QuickMagnets}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Magnet}</th>\n<th>$language{Magnet_Always}</th>\n";
-            
+
             my %types = get_magnet_types();
-           
+
             foreach my $type ( keys %types ) {
 
                 if (defined $qm{$type})
                 {
                     $i += 1;
-    
-                    
+
                     $self->{scores__} .= "<tr><td scope=\"col\">$type: ";
                     $self->{scores__} .= "<select name=\"text$i\" id=\"\">\n";
-                    
+
                     foreach my $magnet ( 0 .. $#{$qm{$type}} ) {
                         $self->{scores__} .= "<option>" . Classifier::MailParse::splitline(@{$qm{$type}}[$magnet], 0) . "</option>\n";
                     }
-                    $self->{scores__} .= "</select>\n";                
+                    $self->{scores__} .= "</select>\n";
                     $self->{scores__} .= "</td><td>";
-                    $self->{scores__} .= "<input type=\"hidden\" name=\"type$i\" id=\"magnetsAddType\" value=\"$type\"/>";                
+                    $self->{scores__} .= "<input type=\"hidden\" name=\"type$i\" id=\"magnetsAddType\" value=\"$type\"/>";
                     $self->{scores__} .= "<select name=\"bucket$i\" id=\"magnetsAddBucket\">\n<option value=\"\"></option>\n";
-    
+
                     foreach my $bucket (@buckets) {
                         $self->{scores__} .= "<option value=\"$bucket\">$bucket</option>\n";
                     }
-    
+
                     $self->{scores__} .= "</select></td></tr>";
-                }                
+                }
 	    }
 
             $self->{scores__} .= "<tr><td></td><td><input type=\"submit\" class=\"submit\" name=\"create\" value=\"$language{Create}\" /></td></tr></table></form>";
@@ -898,18 +926,16 @@ sub classify_and_modify
 
                     if ( $line =~ /(^[ \t])|([:])/ ) {
                         if ( $msg_subject eq '' )  {
-                            $msg_head_before .= $msg_head_q . $line;                            
+                            $msg_head_before .= $msg_head_q . $line;
                         } else {
                             $msg_head_after  .= $msg_head_q . $line;
                         }
                         $msg_head_q = '';
                     } else {
                         # Gather up any lines that are questionable
-                        
-                        $msg_head_q .= $line;                        
+
+                        $msg_head_q .= $line;
                     }
-                    
-                    
                 }
             } else {
                 print TEMP "\n";
@@ -1057,7 +1083,6 @@ sub classify_and_modify
 # Returns a list containing all the bucket names sorted into alphabetic order
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_buckets
 {
     my ( $self ) = @_;
@@ -1074,7 +1099,6 @@ sub get_buckets
 # $bucket      The name of the bucket for which the word count is desired
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_bucket_word_count
 {
     my ( $self, $bucket ) = @_;
@@ -1092,7 +1116,6 @@ sub get_bucket_word_count
 # $bucket      The name of the bucket for which the word count is desired
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_bucket_word_list
 {
     my ( $self, $bucket ) = @_;
@@ -1111,7 +1134,6 @@ sub get_bucket_word_list
 # Returns the total word count (including duplicates)
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_word_count
 {
     my ( $self ) = @_;
@@ -1129,13 +1151,12 @@ sub get_word_count
 # $word            The word we are asking about
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_count_for_word
 {
     my ( $self, $bucket, $word ) = @_;
 
     my $value = $self->get_value_( $bucket, $word );
- 
+
     return int( exp( $value ) * $self->get_bucket_word_count( $bucket ) + 0.5 );
 }
 
@@ -1148,7 +1169,6 @@ sub get_count_for_word
 # $bucket      The name of the bucket for which the word count is desired
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_bucket_unique_count
 {
     my ( $self, $bucket ) = @_;
@@ -1165,7 +1185,6 @@ sub get_bucket_unique_count
 # $bucket      The name of the bucket for which the color is requested
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_bucket_color
 {
     my ( $self, $bucket ) = @_;
@@ -1183,7 +1202,6 @@ sub get_bucket_color
 # $color       The new color
 #
 # ---------------------------------------------------------------------------------------------
-
 sub set_bucket_color
 {
     my ( $self, $bucket, $color ) = @_;
@@ -1201,7 +1219,6 @@ sub set_bucket_color
 # $parameter   The name of the parameter
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_bucket_parameter
 {
     my ( $self, $bucket, $parameter ) = @_;
@@ -1226,7 +1243,6 @@ sub get_bucket_parameter
 # $value       The new value
 #
 # ---------------------------------------------------------------------------------------------
-
 sub set_bucket_parameter
 {
     my ( $self, $bucket, $parameter, $value ) = @_;
@@ -1245,7 +1261,6 @@ sub set_bucket_parameter
 # $file           The file to parse
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_html_colored_message
 {
     my ( $self, $file ) = @_;
@@ -1268,7 +1283,6 @@ sub get_html_colored_message
 # $bucket          Name for the new bucket
 #
 # ---------------------------------------------------------------------------------------------
-
 sub create_bucket
 {
     my ( $self, $bucket ) = @_;
@@ -1293,7 +1307,6 @@ sub create_bucket
 # $bucket          Name of the bucket to delete
 #
 # ---------------------------------------------------------------------------------------------
-
 sub delete_bucket
 {
     my ( $self, $bucket ) = @_;
@@ -1319,7 +1332,6 @@ sub delete_bucket
 # $new_bucket          The new name of the bucket
 #
 # ---------------------------------------------------------------------------------------------
-
 sub rename_bucket
 {
     my ( $self, $old_bucket, $new_bucket ) = @_;
@@ -1339,7 +1351,6 @@ sub rename_bucket
 # $bucket          Name of the bucket to be updated
 #
 # ---------------------------------------------------------------------------------------------
-
 sub add_message_to_bucket
 {
     my ( $self, $file, $bucket ) = @_;
@@ -1398,7 +1409,6 @@ sub add_message_to_bucket
 # $bucket          Name of the bucket to be updated
 #
 # ---------------------------------------------------------------------------------------------
-
 sub remove_message_from_bucket
 {
     my ( $self, $file, $bucket ) = @_;
@@ -1457,7 +1467,6 @@ sub remove_message_from_bucket
 # echo all information from the $mail server until a single line with a . is seen
 #
 # ---------------------------------------------------------------------------------------------
-
 sub echo_to_dot_
 {
     my ( $self, $mail, $client ) = @_;
@@ -1465,7 +1474,7 @@ sub echo_to_dot_
     while ( <$mail> ) {
         # Check for an abort
         last if ( $self->{alive_} == 0 );
-        
+
         print $client $_ if ( defined( $client ) );
 
         # The termination has to be a single line with exactly a dot on it and nothing
@@ -1482,7 +1491,6 @@ sub echo_to_dot_
 # Returns the names of the buckets for which magnets are defined
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_buckets_with_magnets
 {
     my ( $self ) = @_;
@@ -1499,7 +1507,6 @@ sub get_buckets_with_magnets
 # $bucket          The bucket to search for magnets
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_magnet_types_in_bucket
 {
     my ( $self, $bucket ) = @_;
@@ -1516,7 +1523,6 @@ sub get_magnet_types_in_bucket
 # $bucket         The bucket to clear
 #
 # ---------------------------------------------------------------------------------------------
-
 sub clear_bucket
 {
     my ( $self, $bucket ) = @_;
@@ -1535,7 +1541,6 @@ sub clear_bucket
 # Removes every magnet currently defined
 #
 # ---------------------------------------------------------------------------------------------
-
 sub clear_magnets
 {
     my ( $self ) = @_;
@@ -1553,7 +1558,6 @@ sub clear_magnets
 # $type            The magnet type (e.g. from, to or subject)
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_magnets
 {
     my ( $self, $bucket, $type ) = @_;
@@ -1572,7 +1576,6 @@ sub get_magnets
 # $text            The text of the magnet
 #
 # ---------------------------------------------------------------------------------------------
-
 sub create_magnet
 {
     my ( $self, $bucket, $type, $text ) = @_;
@@ -1589,7 +1592,6 @@ sub create_magnet
 # Get a hash mapping magnet types (e.g. from) to magnet names (e.g. From);
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_magnet_types
 {
     return ( 'from'    => 'From',
@@ -1609,7 +1611,6 @@ sub get_magnet_types
 # $text            The text of the magnet
 #
 # ---------------------------------------------------------------------------------------------
-
 sub delete_magnet
 {
     my ( $self, $bucket, $type, $text ) = @_;
@@ -1626,7 +1627,6 @@ sub delete_magnet
 # Gets the complete list of stop words
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_stopword_list
 {
     my ( $self ) = @_;
@@ -1645,7 +1645,6 @@ sub get_stopword_list
 # Return 0 for a bad stop word, and 1 otherwise
 #
 # ---------------------------------------------------------------------------------------------
-
 sub add_stopword
 {
     my ( $self, $stopword ) = @_;

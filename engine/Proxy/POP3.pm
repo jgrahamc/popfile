@@ -76,25 +76,25 @@ sub initialize
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-    $self->{ui__}->register_configuration_item( 'configuration',
-                                                'pop3_port',
-                                                $self );
+    $self->register_configuration_item_( 'configuration',
+                                         'pop3_port',
+                                         $self );
 
-    $self->{ui__}->register_configuration_item( 'configuration',
-                                                'pop3_separator',
-                                                $self );
+    $self->register_configuration_item_( 'configuration',
+                                         'pop3_separator',
+                                         $self );
 
-    $self->{ui__}->register_configuration_item( 'security',
-                                                'pop3_local',
-                                                $self );
+    $self->register_configuration_item_( 'security',
+                                         'pop3_local',
+                                         $self );
 
-    $self->{ui__}->register_configuration_item( 'chain',
-                                                'pop3_secure_server',
-                                                $self );
+    $self->register_configuration_item_( 'chain',
+                                         'pop3_secure_server',
+                                         $self );
 
-    $self->{ui__}->register_configuration_item( 'chain',
-                                                'pop3_secure_server_port',
-                                                $self );
+    $self->register_configuration_item_( 'chain',
+                                         'pop3_secure_server_port',
+                                         $self );
 
     return 1;
 }
@@ -141,8 +141,9 @@ sub child__
         # will pull email from.  Doing this means we can act as a proxy for multiple mail clients
         # and mail accounts
 	my $user_command = 'USER (.+)(:(\d+))?' . $self->config_( 'separator' ) . '(.+)';
-        if ( $command =~ /$user_command/i ) { 
+        if ( $command =~ /$user_command/i ) {
             if ( $1 ne '' )  {
+                print $pipe "LOGIN:$4$eol";
                 if ( $mail = $self->verify_connected_( $mail, $client, $1, $3 || 110 ) )  {
                     # Pass through the USER command with the actual user name for this server,
                     # and send the reply straight to the client
@@ -281,7 +282,7 @@ sub child__
                             $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, 0, 1, $class, 1 );
 
                             # Tell the parent that we just handled a mail
-                            print $pipe "$class$eol";
+                            print $pipe "CLASS:$class$eol";
                         }
                     }
                 } else {
@@ -342,7 +343,7 @@ sub child__
                 my $class = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '' );
 
                 # Tell the parent that we just handled a mail
-                print $pipe "$class$eol";
+                print $pipe "CLASS:$class$eol";
 
                 $self->flush_extra_( $mail, $client, 0 );
                 next;

@@ -63,7 +63,7 @@ sub initialize
     # The default location for log files
     $self->config_( 'logdir', './' );
 
-    remove_debug_files( $self );
+    calculate_today__( $self );
 
     return 1;
 }
@@ -98,6 +98,11 @@ sub remove_debug_files
     calculate_today__( $self );
 
     if ( $self->{today__} > $yesterday ) {
+
+        # Inform other modules that a day has passed
+
+        $self->mq_post_( 'TICKD', '', '' );
+
         my @debug_files = glob( $self->config_( 'logdir' ) . 'popfile*.log' );
 
         foreach my $debug_file (@debug_files) {

@@ -15,11 +15,11 @@ use Classifier::Bayes;
 if ( $#ARGV == 0 ) 
 {
     my $b = new Classifier::Bayes;
-    
+
     if ( $b->initialize() == 0 ) {
         die "Failed to start while initializing the classifier module";
     }
-    
+
     $b->{debug} = 1; 
     $b->{parser}->{debug} = 0;
     $b->load_word_matrix();
@@ -29,7 +29,7 @@ if ( $#ARGV == 0 )
     {
         print "$file is '" . $b->classify_file($file) . "'\n";
     }
-    
+
     foreach my $word (keys %{$b->{parser}->{words}}) {
         print "$word $b->{parser}->{words}{$word}\n";
     }

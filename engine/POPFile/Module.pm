@@ -40,11 +40,19 @@ package POPFile::Module;
 #                through the %components hash.  The name returned here will be the name
 #                used as the key for this module in %components
 #
+# deliver()    - called by the message queue to deliver a message
+#
 # The following methods are PROTECTED and should be accessed by sub classes:
 #
 # log_()       - sends a string to the logger
 #
 # config_()    - gets or sets a configuration parameter for this module
+#
+# mq_post_()   - post a message to the central message queue
+#
+# mq_register_() register for messages from the message queue
+#
+# register_configuration_item_() register a UI configuration item
 #
 # A note on the naming
 #
@@ -93,6 +101,10 @@ sub new
     # A reference to the POPFile::Logger module
 
     $self->{logger__}        = 0; # PRIVATE
+
+    # A reference to the POPFile::MQ module
+
+    $self->{mq__}            = 0;
 
     # The name of this module
 
@@ -221,7 +233,7 @@ sub prefork
 # forked
 #
 # This is called when some module forks POPFile and is within the context of the child
-# process so that this module can close any duplicated file handles that are not needed. 
+# process so that this module can close any duplicated file handles that are not needed.
 #
 # There is no return value from this method
 #
@@ -229,6 +241,20 @@ sub prefork
 sub forked
 {
     my ( $self ) = @_;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# deliver
+#
+# Called by the message queue to deliver a message
+#
+# There is no return value from this method
+#
+# ---------------------------------------------------------------------------------------------
+sub deliver
+{
+    my ( $self, $type, $message, $parameter ) = @_;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -272,6 +298,41 @@ sub config_
 
 # ---------------------------------------------------------------------------------------------
 #
+# mq_post_
+#
+# Called by a subclass to post a message to the message queue
+#
+# $type              Type of message to send
+# $message           Message to send
+# $parameter         Message parameters
+#
+# ---------------------------------------------------------------------------------------------
+sub mq_post_
+{
+    my ( $self, $type, $message, $parameter ) = @_;
+
+    return $self->{mq__}->post( $type, $message, $parameter );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# mq_register_
+#
+# Called by a subclass to register with the message queue for messages
+#
+# $type              Type of message to send
+# $object            Callback object
+#
+# ---------------------------------------------------------------------------------------------
+sub mq_register_
+{
+    my ( $self, $type, $object ) = @_;
+
+    return $self->{mq__}->register( $type, $object );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # global_config_
 #
 # Called by a subclass to get or set a global (i.e. not module specific) configuration parameter
@@ -311,6 +372,22 @@ sub module_config_
     return $self->{configuration__}->parameter( $module . "_" . $name, $value );
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# register_configuration_item_
+#
+# Called by a subclass to register a UI element
+#
+# $type, $name, $object     See register_configuration_item in UI::HTML
+#
+# ---------------------------------------------------------------------------------------------
+sub register_configuration_item_
+{
+    my ( $self, $type, $name, $object ) = @_;
+
+    return $self->mq_post_( 'UIREG', "$type:$name", $object );
+}
+
 # GETTER/SETTER methods.  Note that I do not expect documentation of these unless they
 # are non-trivial since the documentation would be a waste of space
 #
@@ -330,6 +407,17 @@ sub module_config_
 #
 # This method access the foo_ variable for reading or writing, $c->foo() read foo_ and
 # $c->foo( 'foo' ) writes foo_
+
+sub mq
+{
+    my ( $self, $value ) = @_;
+
+    if ( defined( $value ) ) {
+        $self->{mq__} = $value;
+    }
+
+    return $self->{mq__};
+}
 
 sub configuration
 {

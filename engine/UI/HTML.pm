@@ -91,6 +91,10 @@ sub new
 
     $self->{languages__}       = ();
 
+    # The last user to login via a proxy
+
+    $self->{last_login__}      = '';
+
     # Must call bless before attempting to call any methods
 
     bless $self, $type;
@@ -192,6 +196,15 @@ sub initialize
 
     $self->{url_handler_} = \&url_handler__;
 
+    # Finally register for the messages that we need to receive
+
+    $self->mq_register_( 'CLASS', $self );
+    $self->mq_register_( 'UIREG', $self );
+    $self->mq_register_( 'TICKD', $self );
+    $self->mq_register_( 'LOGIN', $self );
+
+    $self->calculate_today();
+
     return 1;
 }
 
@@ -205,11 +218,6 @@ sub initialize
 sub start
 {
     my ( $self ) = @_;
-
-    # This needs to occur at launch, but after initialization
-
-    $self->remove_mail_files();
-    $self->calculate_today();
 
     # Ensure that the messages subdirectory exists
 
@@ -231,23 +239,49 @@ sub start
     $self->load_history_cache__();
     $self->sort_filter_history( '', '', '' );
 
+    $self->remove_mail_files();
+
     return $self->SUPER::start();
 }
 
 # ---------------------------------------------------------------------------------------------
 #
-# service
+# deliver
 #
-# Called to handle interface requests
+# Called by the message queue to deliver a message
+#
+# There is no return value from this method
 #
 # ---------------------------------------------------------------------------------------------
-sub service
+sub deliver
 {
-    my ( $self ) = @_;
+    my ( $self, $type, $message, $parameter ) = @_;
 
-    $self->remove_mail_files();
+    # Handle registration of UI components
 
-    return $self->SUPER::service();
+    if ( $type eq 'UIREG' ) {
+        $message =~ /(.*):(.*)/;
+
+        $self->register_configuration_item__( $1, $2, $parameter );
+    }
+
+    # Invalidate the history cache if a classification occurs
+
+    if ( $type eq 'CLASS' ) {
+        $self->invalidate_history_cache();
+    }
+
+    # If a day has passed then clean up the history
+
+    if ( $type eq 'TICKD' ) {
+        $self->remove_mail_files();
+    }
+
+    # We keep track of the last username to login to show on the UI
+
+    if ( $type eq 'LOGIN' ) {
+        $self->{last_login__} = $message;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -368,8 +402,6 @@ sub url_handler__
 
         $redirect_url =~ s/&$//;
 
-        $self->log_( "Correct password will redirect to $redirect_url" );
-
         password_page( $self, $client, 0, $redirect_url );
 
         return 1;
@@ -423,17 +455,18 @@ sub url_handler__
         return 0;
     }
 
-    my %url_table = (   '/security'      => \&security_page,
-                        '/configuration' => \&configuration_page,
-                        '/buckets'       => \&corpus_page,
-                        '/magnets'       => \&magnet_page,
-                        '/advanced'      => \&advanced_page,
-                        '/history'       => \&history_page,
-                        '/view'          => \&view_page,
-                        '/'              => \&history_page );
+    my %url_table = ( '/security'      => \&security_page,
+                      '/configuration' => \&configuration_page,
+                      '/buckets'       => \&corpus_page,
+                      '/magnets'       => \&magnet_page,
+                      '/advanced'      => \&advanced_page,
+                      '/history'       => \&history_page,
+                      '/view'          => \&view_page,
+                      '/'              => \&history_page );
 
     # Any of the standard pages can be found in the url_table, the other pages are probably
     # files on disk
+
     if ( defined($url_table{$url}) )  {
         &{$url_table{$url}}($self, $client);
         return 1;
@@ -467,6 +500,7 @@ sub http_ok
 
     # Check to see if we've checked for updates today.  If we have not then insert a reference to an image
     # that is generated through a CGI on UseTheSource.  Also send stats to the same site if that is allowed
+
     if ( $self->{today} ne $self->config_( 'last_update_check' ) ) {
         calculate_today( $self );
 
@@ -479,7 +513,7 @@ sub http_ok
         if ( $self->config_( 'send_stats' ) ) {
             my @buckets = $self->{classifier__}->get_buckets();
             my $bc      = $#buckets + 1;
-            $update_check .= "<img border=\"0\" alt=\"\" src=\"http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=$bc&amp;mc=" . $self->global_config_( 'mcount' ) . "&amp;ec=" . $self->global_config_( 'ecount' ) . "\" />\n";
+            $update_check .= "<img border=\"0\" alt=\"\" src=\"http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=$bc&amp;mc=" . $self->mcount__() . "&amp;ec=" . $self->global_config_( 'ecount' ) . "\" />\n";
         }
 
         $self->config_( 'last_update_check', $self->{today}, 1 );
@@ -540,6 +574,8 @@ sub html_common_top
         $result .= "<link rel=\"stylesheet\" type=\"text/css\" ";
         $result .= "href=\"skins/" . $self->config_( 'skin' ) . ".css\" title=\"" . $self->config_( 'skin' ) . "\">\n";
     }
+
+    $result .= "<link rel=\"icon\" href=\"popfile.ico\" type=\"image/ico\">\n";
 
     $result .= "<meta http-equiv=\"Pragma\" content=\"no-cache\">\n";
     $result .= "<meta http-equiv=\"Expires\" content=\"0\">\n";
@@ -705,7 +741,7 @@ sub html_common_bottom
 
     $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/docman/display_doc.php?docid=14421&amp;group_id=63137\">FAQ</a><br>\n";
 
-    $result .= "</td><td class=\"footerBody\">\n<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/\"><img src=\"otto.gif\" border=\"0\" alt=\"\"></a><br>$self->{version_}<br>($time)</td>\n";
+    $result .= "</td><td class=\"footerBody\">\n<a class=\"bottomLink\" href=\"http://popfile.sourceforge.net/\"><img src=\"otto.gif\" border=\"0\" alt=\"\"></a><br>$self->{version_}<br>($time - $self->{last_login__})</td>\n";
 
     $result .= "<td class=\"footerBody\"><a class=\"bottomLink\" href=\"http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959\">$self->{language__}{Footer_RequestFeature}</a><br>\n";
     $result .= "<a class=\"bottomLink\" href=\"http://lists.sourceforge.net/lists/listinfo/popfile-announce\">$self->{language__}{Footer_MailingList}</a><br>\n";
@@ -1222,6 +1258,18 @@ sub advanced_page
 {
     my ( $self, $client ) = @_;
 
+    # Handle updating the parameter table
+
+    if ( defined( $self->{form_}{update_params} ) ) {
+        foreach my $param (sort keys %{$self->{form_}}) {
+            if ( $param =~ /parameter_(.*)/ ) {
+                $self->{configuration__}->parameter( $1, $self->{form_}{$param} );
+    	    }
+        }
+
+        $self->{configuration__}->save_configuration();
+    }
+
     my $add_message = '';
     my $deletemessage = '';
     if ( defined($self->{form_}{newword}) ) {
@@ -1232,7 +1280,6 @@ sub advanced_page
     }
 
     if ( defined($self->{form_}{word}) ) {
-      $self->log_($self->{form_}{word} );
         my $result = $self->{classifier__}->remove_stopword( $self->{form_}{word} );
         if ( $result == 0 ) {
             $deletemessage = "<blockquote><div class=\"error02\"><b>$self->{language__}{Advanced_Error2}</b></div></blockquote>";
@@ -1240,7 +1287,7 @@ sub advanced_page
     }
 
     # title and heading
-    my $body = "<h2 class=\"advanced\">$self->{language__}{Advanced_StopWords}</h2>\n";
+    my $body = "<table cellpadding=\"10%\" cellspacing=\"0\" class=\"settingsTable\"><tr><td class=\"settingsPanel\" valign=\"top\"><h2 class=\"advanced\">$self->{language__}{Advanced_StopWords}</h2>\n";
     $body .= "$self->{language__}{Advanced_Message1}\n<br /><br />\n<table summary=\"$self->{language__}{Advanced_MainTableSummary}\">\n";
 
     # the word census
@@ -1308,7 +1355,27 @@ sub advanced_page
     # end optional widget placement
     $body .= "</div>\n";
 
-    http_ok($self, $client,$body,5);
+    $body .= "</td><td class=\"settingsPanel\" width=\"50%\" valign=\"top\"><h2 class=\"advanced\">$self->{language__}{Advanced_AllParameters}</h2>\n<p>$self->{language__}{Advanced_Warning}";
+
+    $body .= "<form action=\"/advanced\" method=\"POST\">\n";
+    $body .= "<table width=\"100%\"><tr><th width=\"50%\">$self->{language__}{Advanced_Parameter}</th><th width=\"50%\">$self->{language__}{Advanced_Value}</th></tr>\n";
+
+    my $last_module = '';
+
+    foreach my $param ($self->{configuration__}->configuration_parameters()) {
+        my $value = $self->{configuration__}->parameter( $param );
+        $param =~ /^([^_]+)_/;
+        if ( ( $last_module ne '' ) && ( $last_module ne $1 ) ) {
+            $body .= "<tr><td colspan=\"2\"><hr></td></tr>";
+        }
+        $last_module = $1;
+        $body .= "<tr><td>$param</td><td><input type=\"text\" name=\"parameter_$param\" value=\"$value\">";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</td></tr>\n";
+    }
+
+    $body .= "</table><p><input type=\"submit\" value=\"$self->{language__}{Update}\" name=\"update_params\"></form></td></tr></table>";
+
+    $self->http_ok( $client, $body, 5 );
 }
 
 sub max
@@ -1585,8 +1652,7 @@ sub bucket_page
 
     my $percent = "0%";
     if ( $self->{classifier__}->get_word_count() > 0 )  {
-        $percent = int( 10000 * $bucket_count / $self->{classifier__}->get_word_count() ) / 100;
-        $percent = "$percent%";
+        $percent = sprintf( '%6.2f%%', int( 10000 * $bucket_count / $self->{classifier__}->get_word_count() ) / 100 );
     }
     $body .= "</td>\n<td></td>\n</tr>\n<tr><td colspan=\"3\"><hr /></td></tr>\n";
     $body .= "<tr>\n<th scope=\"row\" class=\"bucketsLabel\">$self->{language__}{SingleBucket_Percentage}</th>\n";
@@ -1680,10 +1746,9 @@ sub bar_chart_100
 
             if ( $s == 0 ) {
                 if ( $total_count == 0 ) {
-                    $percent = " (0%)";
+                    $percent = " (  0.00%)";
                 } else {
-                   $percent = " ( " . int( $value * 10000 / $total_count ) / 100;
-                    $percent .= "%)";
+                   $percent = sprintf( ' (%.2f%%)', int( $value * 10000 / $total_count ) / 100 );
                 }
 	    }
 
@@ -1734,9 +1799,7 @@ sub corpus_page
     }
 
     if ( defined($self->{form_}{reset_stats}) ) {
-        $self->global_config_( 'mcount', 0 );
-        $self->global_config_( 'ecount', 0 );
-        for my $bucket ($self->{classifier__}->get_buckets()) {
+        foreach my $bucket ($self->{classifier__}->get_buckets()) {
             $self->{classifier__}->set_bucket_parameter( $bucket, 'count', 0 );
             $self->{classifier__}->set_bucket_parameter( $bucket, 'fpcount', 0 );
             $self->{classifier__}->set_bucket_parameter( $bucket, 'fncount', 0 );
@@ -1797,7 +1860,7 @@ sub corpus_page
         } else {
             $self->{form_}{oname} = lc($self->{form_}{oname});
             $self->{form_}{newname} = lc($self->{form_}{newname});
-        $self->{classifier__}->rename_bucket( $self->{form_}{oname}, $self->{form_}{newname} );            
+        $self->{classifier__}->rename_bucket( $self->{form_}{oname}, $self->{form_}{newname} );
             $rename_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error5}, $self->{form_}{oname}, $self->{form_}{newname} ) . "</b></blockquote>";
         }
     }
@@ -1903,14 +1966,14 @@ sub corpus_page
     # figure some performance numbers
 
     my $number = pretty_number( $self,  $self->{classifier__}->get_word_count() );
-    my $pmcount = pretty_number( $self,  $self->global_config_( 'mcount' ) );
-    my $pecount = pretty_number( $self,  $self->global_config_( 'ecount' ) );
+    my $pmcount = pretty_number( $self,  $self->mcount__() );
+    my $pecount = pretty_number( $self,  $self->ecount__() );
     my $accuracy = $self->{language__}{Bucket_NotEnoughData};
     my $percent = 0;
-    if ( $self->global_config_( 'mcount' ) > $self->global_config_( 'ecount' ) )  {
-        $percent = int( 10000 * ( $self->global_config_( 'mcount' ) - $self->global_config_( 'ecount' ) ) / $self->global_config_( 'mcount' ) ) / 100;
+    if ( $self->mcount__() > $self->ecount__() ) {
+        $percent = int( 10000 * ( $self->mcount__() - $self->ecount__() ) / $self->mcount__() ) / 100;
         $accuracy = "$percent%";
-    }
+      }
 
      # finish off Summary panel
 
@@ -2110,7 +2173,7 @@ sub corpus_page
                         $total += 0.1 / $self->{classifier__}->get_word_count();
                     }
                 }
-            }
+	    }
 
             foreach my $bucket (@buckets) {
                 if ( $self->{classifier__}->get_value_( $bucket, $word ) != 0 ) {
@@ -2226,7 +2289,7 @@ sub sort_filter_history
         foreach my $file (sort compare_mf keys %{$self->{history__}}) {
             if ( ( $filter eq '' ) ||
                  ( $self->{history__}{$file}{bucket} eq $filter ) ||
-                 ( ( $filter eq '__filter__magnet' ) && ( $self->{history__}{$file}{magnet} ne '' ) ) || 
+                 ( ( $filter eq '__filter__magnet' ) && ( $self->{history__}{$file}{magnet} ne '' ) ) ||
                  ( ( $filter eq '__filter__no__magnet' ) && ( $self->{history__}{$file}{magnet} eq '' ) ) ) {
                 if ( ( $search eq '' ) ||
                    ( $self->{history__}{$file}{from}    =~ /\Q$search\E/i ) ||
@@ -2266,6 +2329,8 @@ sub sort_filter_history
         @{$self->{history_keys__}} = sort {
                                             my ($a1,$b1) = ($self->{history__}{$a}{$sort},
                                               $self->{history__}{$b}{$sort});
+                                              $a1 =~ s/&(l|g)t;//ig;
+                                              $b1 =~ s/&(l|g)t;//ig;
                                               $a1 =~ s/[^A-Z0-9]//ig;
                                               $b1 =~ s/[^A-Z0-9]//ig;
                                               return ( $a1 cmp $b1 );
@@ -2558,8 +2623,8 @@ sub get_magnet_navigator
 # $magnet       the magnet, if any, used to reclassify the message
 #
 # ---------------------------------------------------------------------------------------------
-sub history_write_class {
-
+sub history_write_class
+{
     my ( $self, $filename, $reclassified, $bucket, $usedtobe, $magnet ) = @_;
 
     $filename =~ s/msg$/cls/;
@@ -2595,9 +2660,10 @@ sub history_write_class {
 # $filename     The name of the message to load the class for
 #
 # ---------------------------------------------------------------------------------------------
-sub history_load_class {
-
+sub history_load_class
+{
     my ( $self, $filename ) = @_;
+
     $filename =~ s/msg$/cls/;
 
     my $reclassified = 0;
@@ -3062,14 +3128,14 @@ sub history_page
             $body .= "<td><a class=\"messageLink\" title=\"$subject\" href=\"/view?view=$mail_file" . $self->print_form_fields_(0,1,('start_message','session','filter','search','sort')) . "\">";
             $body .= "$short_subject</a></td>\n<td>";
             if ( $reclassified )  {
-                $body .= "<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></td>\n<td>";
+                $body .= "<a href=\"buckets?session=$self->{session_key__}&showbucket=$bucket\"><font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></a></td>\n<td>";
                 $body .= sprintf( $self->{language__}{History_Already}, ($self->{classifier__}->get_bucket_color($bucket) || ''), ($bucket || '') );
                 $body .= " <input type=\"submit\" class=\"undoButton\" name=\"undo_$i\" value=\"$self->{language__}{Undo}\">\n";
             } else {
                 if ( !defined($self->{classifier__}->get_bucket_color($bucket)))  {
                     $body .= "$bucket</td>\n<td>";
                 } else {
-                    $body .= "<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></td>\n<td>";
+                    $body .= "<a href=\"buckets?session=$self->{session_key__}&showbucket=$bucket\"><font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></a></td>\n<td>";
                 }
 
                 if ( $self->{history__}{$mail_file}{magnet} eq '' )  {
@@ -3148,8 +3214,7 @@ sub view_page
     my $reclassified  = $self->{history__}{$mail_file}{reclassified};
     my $bucket        = $self->{history__}{$mail_file}{bucket};
     my $color         = $self->{classifier__}->get_bucket_color($bucket);
-    
-    my $page_size     = $self->config_( 'page_size' );    
+    my $page_size     = $self->config_( 'page_size' );
 
     $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
     $self->{form_}{search} = '' if ( !defined( $self->{form_}{search} ) );
@@ -3491,27 +3556,23 @@ sub load_language
 sub remove_mail_files
 {
     my ( $self ) = @_;
-    my $yesterday = defined($self->{today})?$self->{today}:0;
-    $self->calculate_today();
 
-    if ( $self->{today} > $yesterday ) {
-        my @mail_files = glob( $self->global_config_( 'msgdir' ) . "popfile*=*.msg" );
+    my @mail_files = glob( $self->global_config_( 'msgdir' ) . "popfile*=*.msg" );
 
-        foreach my $mail_file (@mail_files) {
-            my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($mail_file);
+    foreach my $mail_file (@mail_files) {
+        my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($mail_file);
 
-            if ( $ctime < (time - $self->config_( 'history_days' ) * $seconds_per_day) )  {
-                $self->history_delete_file( $mail_file, $self->config_( 'archive' ) );
-            }
+        if ( $ctime < (time - $self->config_( 'history_days' ) * $seconds_per_day) )  {
+            $self->history_delete_file( $mail_file, $self->config_( 'archive' ) );
         }
+    }
 
-         # Clean up old style msg/cls files
+    # Clean up old style msg/cls files
 
-        @mail_files = glob( $self->global_config_( 'msgdir' ) . "popfile*_*.???" );
+    @mail_files = glob( $self->global_config_( 'msgdir' ) . "popfile*_*.???" );
 
-        foreach my $mail_file (@mail_files) {
-            unlink($mail_file);
-        }
+    foreach my $mail_file (@mail_files) {
+        unlink($mail_file);
     }
 }
 
@@ -3656,7 +3717,7 @@ sub print_form_fields_
 }
 
 # ---------------------------------------------------------------------------------------------
-# register_configuration_item
+# register_configuration_item__
 #
 #     $type            The type of item (configuration, security or chain)
 #     $name            The name of the item
@@ -3711,7 +3772,7 @@ sub print_form_fields_
 # will be displayed at the top of the page
 #
 # ---------------------------------------------------------------------------------------------
-sub register_configuration_item
+sub register_configuration_item__
 {
    my ( $self, $type, $name, $object ) = @_;
 
@@ -3745,6 +3806,43 @@ sub splitline
     $line =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
 
     return $line;
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# mcount__, ecount__ get the total message count, or the total error count
+#
+# ---------------------------------------------------------------------------------------------
+
+sub mcount__
+{
+    my ( $self ) = @_;
+
+    my $count = 0;
+
+    my @buckets = $self->{classifier__}->get_buckets();
+
+    foreach my $bucket (@buckets) {
+        $count += $self->{classifier__}->get_bucket_parameter( $bucket, 'count' );
+    }
+
+    return $count;
+}
+
+sub ecount__
+{
+    my ( $self ) = @_;
+
+    my $count = 0;
+
+    my @buckets = $self->{classifier__}->get_buckets();
+
+    foreach my $bucket (@buckets) {
+        $count += $self->{classifier__}->get_bucket_parameter( $bucket, 'fpcount' );
+    }
+
+    return $count;
 }
 
 # GETTERS/SETTERS

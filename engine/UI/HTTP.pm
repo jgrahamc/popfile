@@ -212,6 +212,8 @@ sub parse_form__
     while ( $arguments =~ m/\G(.*?)=(.*?)(&|\r|\n|$)/g ) {
         my $arg = $1;
 
+        my $need_array = defined( $self->{form_}{$arg} );
+
         $self->{form_}{$arg} = $2;
         $self->{form_}{$arg} =~ s/\+/ /g;
 
@@ -221,7 +223,9 @@ sub parse_form__
 
         # Push the value onto an array to allow for multiple values of the same name
 
-        push( @{ $self->{form_}{$arg . "_array"} }, $self->{form_}{$arg} );
+        if ( $need_array ) {
+            push( @{ $self->{form_}{$arg . "_array"} }, $self->{form_}{$arg} );
+	}
     }
 }
 

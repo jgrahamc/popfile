@@ -64,13 +64,13 @@ sub initialize
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-    $self->{ui__}->register_configuration_item( 'configuration',
-                                                'xmlrpc_port',
-                                                $self );
+    $self->register_configuration_item_( 'configuration',
+                                         'xmlrpc_port',
+                                         $self );
 
-    $self->{ui__}->register_configuration_item( 'security',
-                                                'xmlrpc_local',
-                                                $self );
+    $self->register_configuration_item_( 'security',
+                                         'xmlrpc_local',
+                                          $self );
 
     return 1;
 }
@@ -279,17 +279,6 @@ sub classifier
     }
 
     return $self->{classifier__};
-}
-
-sub ui
-{
-    my ( $self, $value ) = @_;
-
-    if ( defined( $value ) ) {
-        $self->{ui__} = $value;
-    }
-
-    return $self->{ui__};
 }
 
 1;
