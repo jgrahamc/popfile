@@ -500,9 +500,14 @@ sub flush_slurp_data__
         # just save it
 
         if ( $slurp_data__{"$handle"}{data} eq '' ) {
-            if ( defined( $slurp_data__{"$handle"}{select}->can_read(0.1) ) ) {
+            if ( ( !($handle =~ /socket/i) && ($^O eq 'MSWin32' ) ) ||
+                 defined( $slurp_data__{"$handle"}{select}->can_read(0.1) ) ) {
+
+                #$self->log_("slurping past CR");
                 my $c;
-                if ( sysread( $handle, $c, 1 ) == 1 ) {
+                my $retcode = sysread( $handle, $c, 1 );
+                if ( $retcode == 1 ) {
+                    $self->log_("slurped past CR: [$c]");
                     if ( $c eq "\012" ) {
                         $cr .= $c;
                     } else {
@@ -623,17 +628,28 @@ sub flush_extra_
     $discard = 0 if ( !defined( $discard ) );
 
     # If slurp has any data, we want it
-    if ( $self->slurp_data_size__($mail) ) {        
-        
+    if ( $self->slurp_data_size__($mail) ) {
+
         print $client $slurp_data__{"$mail"}{data} if ( $discard != 1);
         $slurp_data__{"$mail"}{data} = '';
     }
 
-    my $selector   = new IO::Select( $mail );
+    my $ready;
+
+    if (($^O eq 'MSWin32') && !($mail =~ /socket/i) ) {
+
+        # select only works reliably on IO::Sockets in Win32, so we always read files
+
+        $ready = $mail;
+    } else {
+        my $selector   = new IO::Select( $mail );
+        ( $ready ) = $selector->can_read(0.01);
+    }
+
+
     my $buf        = '';
     my $max_length = 8192;
 
-    my ( $ready ) = $selector->can_read(0.01);
     if ( defined( $ready ) && ( $ready == $mail ) ) {
         my $n = sysread( $mail, $buf, $max_length, length $buf );
 
