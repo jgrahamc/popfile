@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.49"
+  !define C_PFI_VERSION  "0.2.50"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -977,11 +977,13 @@ continue:
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "Not SQLite" stopwords
 
-  ; Create a shortcut to make it easier to run the SQLite utility
+  ; Create a shortcut to make it easier to run the SQLite utility. There are two versions of
+  ; the SQLite utility (one for SQlite 2.x format files and one for SQLite 3.x format files)
+  ; so we use 'runsqlite.exe' which automatically selects and runs the appropriate version.
 
   SetFileAttributes "$G_USERDIR\Run SQLite utility.lnk" NORMAL
   CreateShortCut "$G_USERDIR\Run SQLite utility.lnk" \
-                 "$G_ROOTDIR\sqlite.exe" "popfile.db"
+                 "$G_ROOTDIR\runsqlite.exe" "popfile.db"
 
 stopwords:
   IfFileExists "$G_ROOTDIR\pfi-stopwords.default" 0 update_config_ports
@@ -2571,21 +2573,21 @@ Function CompareStopwords
   !define L_USR_FILE    $R7   ; handle used to access existing installation's stopwords list
   !define L_USR_WORD    $R6
   !define L_RESULT      $R5
-  
+
   !define C_STD_LIST    "$G_ROOTDIR\pfi-stopwords.default"
   !define C_USR_LIST    "$G_USERDIR\stopwords"
-  
+
   Push ${L_RESULT}
   Push ${L_STD_FILE}
   Push ${L_STD_WORD}
   Push ${L_USR_FILE}
   Push ${L_USR_WORD}
-  
+
   StrCpy ${L_RESULT}  "different"
-  
+
   FileOpen ${L_STD_FILE} "${C_STD_LIST}" r
   FileOpen ${L_USR_FILE} "${C_USR_LIST}" r
-  
+
 loop:
   FileRead ${L_STD_FILE} ${L_STD_WORD}
   Push ${L_STD_WORD}
@@ -2608,16 +2610,16 @@ close_files:
   Pop ${L_STD_WORD}
   Pop ${L_STD_FILE}
   Exch ${L_RESULT}
-  
+
   !undef C_STD_LIST
   !undef C_USR_LIST
-  
+
   !undef L_STD_FILE
   !undef L_STD_WORD
   !undef L_USR_FILE
   !undef L_USR_WORD
   !undef L_RESULT
-  
+
 FunctionEnd
 
 #--------------------------------------------------------------------------
