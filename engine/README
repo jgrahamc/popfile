@@ -1,4 +1,4 @@
-                          README for POPFILE
+README for POPFILE
 
 
 1. Where do I get POPFile?
@@ -63,7 +63,7 @@ You need to tell POPFile the server name and port number that your email
 server is running on when you start the program.  Suppose that the server
 was pop.secureserver.com running on port 123; you would type
 
-	perl popfile.pl 110 pop.secureserver.com 123
+	perl popfile.pl -port 110 -sserver pop.secureserver.com -sport 123
 
 to start POPFile listening on port 110 and ready to connect to
 pop.secureserver.com on port 123 when it sees a secure authentication.
@@ -101,7 +101,7 @@ Change Mail Server to 127.0.0.1
 Change login name to old-mail-server-name:login name
 Click OK
 
-This will only affect the ‘<Dominant>’ Eudora user. If you have multiple
+This will only affect the ‘’ Eudora user. If you have multiple
 users configured in Eudora, you’ll need to follow a separate process for
 each additional user:
 
@@ -116,7 +116,7 @@ Select the Generic Properties tab
 Change the login name to old-server-name:login name
 Click OK
 
-9. Is there a version for <my favorite operating system>?
+9. Is there a version for ?
 
 POPFile has currently only been tested on Windows, but should work on many
 other systems.
@@ -125,13 +125,15 @@ other systems.
 
 The POPFile command line is as follows:
 
-perl popfile.pl <listen-port> <connect-server> <connect-port>
+perl popfile.pl   
 
-All options are optional and are as follows:
+All options are optional (:-) and are as follows:
 
-	listen-port		The port to proxy on, by default this is 110		
-	connect-server	The remote server to connect to, read question
-	connect-port	5 (AUTH) for an explanation of these options
+	-port 		The port to proxy on, by default this is 110		
+                -sserver 	The remote server to connect to, read question
+                -sport 	5 (AUTH) for an explanation of these options
+                -subject           0 for no Subject line modification, 1 for Subject line modification
+                -debug            0 means no debug information, 1 means debug to file, 2 means debug to console, 3 means both
 	
 The simplest execution of POPFile is 
 
@@ -166,7 +168,7 @@ perl insert.pl work work.*
 
 13. How do I configure POPFile?
 
-EXPLAIN popfile.cfg
+Use the command line options.
 
 14. A complete example
 
@@ -189,7 +191,7 @@ expects.
 
 Then run POPFile on some port other than 110:
 
-	perl popfile.pl 111
+	perl popfile.pl -port 111
 
 And tell the email client to contact the server on 127.0.0.1 and port 111.
 
@@ -232,7 +234,7 @@ proxy?
 
 20. How do I turn off modification of the Subject: line?
 
-Edit popfile.cfg and change the line subject 1 to subject 0.
+Run perl popfile.pl -subject 0
 
 21. When talking about the X-Text-Classification header, is there a useful
 shortform?
@@ -240,3 +242,4 @@ shortform?
 Yes.  You can call it the X-T-C header which is pronounced ecstacy.
 Appropriate when you think of all the porn spam that POPFile will be
 removing from your mail box every day.
+
