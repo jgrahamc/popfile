@@ -24,13 +24,32 @@
 #
 # ----------------------------------------------------------------------------
 
-use POPFile::Configuration;
-use POPFile::MQ;
-use POPFile::Logger;
-use POPFile::History;
+
+use POPFile::Loader;
+my $POPFile = POPFile::Loader->new();
+$POPFile->CORE_loader_init();
+$POPFile->CORE_signals();
+
+my %valid = ( 'POPFile/Logger' => 1,
+              'POPFile/MQ'     => 1,
+              'POPFile/Configuration' => 1,
+              'POPFile/Database' => 1,
+              'POPFile/History' => 1,
+              'Classifier/Bayes' => 1,
+              'Classifier/WordMangle' => 1 );
+
+$POPFile->CORE_load( 0, \%valid );
+$POPFile->CORE_initialize();
+$POPFile->CORE_config( 1 );
+$POPFile->CORE_start();
+
+my $mq = $POPFile->get_module('POPFile::MQ');
+my $l = $POPFile->get_module('POPFile::Logger');
+my $b = $POPFile->get_module('Classifier::Bayes');
+my $h = $POPFile->get_module('POPFile::History');
+my $db = $POPFile->get_module('POPFile::Database');
+
 use Proxy::POP3;
-use Classifier::Bayes;
-use Classifier::WordMangle;
 use IO::Handle;
 use IO::Socket;
 use Digest::MD5;
@@ -43,24 +62,6 @@ my $cr = "\015";
 my $lf = "\012";
 
 my $eol = "$cr$lf";
-
-sub pipeready
-{
-    my ( $pipe ) = @_;
-
-    if ( !defined( $pipe ) ) {
-        return 0;
-    }
-
-    if ( $^O eq 'MSWin32' ) {
-        return ( defined( fileno( $pipe ) ) && ( ( -s $pipe ) > 0 ) );
-    } else {
-        my $rin = '';
-        vec( $rin, fileno( $pipe ), 1 ) = 1;
-        my $ready = select( $rin, undef, undef, 0.01 );
-        return ( $ready > 0 );
-    }
-}
 
 sub server
 {
@@ -195,7 +196,7 @@ sub server
 
         if ( $command =~ /DELE (.*)/i ) {
             my $index = $1 - 1;
-            if ( defined( $messages[$index] ) && 
+            if ( defined( $messages[$index] ) &&
                  ( $messages[$index] ne '' ) ) {
                 $messages[$index] = '';
                 print $client "+OK Deleted $1$eol";
@@ -207,7 +208,7 @@ sub server
 
         if ( $command =~ /RETR (\d+)/i ) {
             my $index = $1 - 1;
-            if ( defined( $messages[$index] ) && 
+            if ( defined( $messages[$index] ) &&
                  ( $messages[$index] ne '' ) ) {
                  print $client "+OK " . ( -s $messages[$index] ) . "$eol";
 
@@ -290,7 +291,7 @@ sub server
         }
 
         if ( $command =~ /CAPA|AUTH/i ) {
-            print $client "+OK I can handle$eol" . "AUTH$eol" . 
+            print $client "+OK I can handle$eol" . "AUTH$eol" .
                 "USER$eol" . "APOP$eol.$eol";
             next;
         }
@@ -311,12 +312,23 @@ test_assert( rec_cp( 'corpus.base', 'corpus' ) );
 test_assert( rmtree( 'corpus/CVS' ) > 0 );
 test_assert( scalar(`rm -rf messages/*`) == 0 );
 
-my $c = new POPFile::Configuration;
-my $mq = new POPFile::MQ;
-my $l = new POPFile::Logger;
-my $b = new Classifier::Bayes;
-my $w = new Classifier::WordMangle;
-my $h = new POPFile::History;
+# $l->config_( 'level', 1 );
+# $l->global_config_( 'debug', 3 ); # uncomment to debug to console
+
+$b->module_config_( 'html', 'port', 8080 );
+$b->module_config_( 'html', 'language', 'English' );
+$b->config_( 'hostname', '127.0.0.1' );
+
+# To test POP3's use of MQ, we need to receive messages
+use Test::MQReceiver;
+
+my $rmq = new Test::MQReceiver;
+
+$mq->register( 'UIREG', $rmq );
+
+my $p = new Proxy::POP3;
+
+$p->loader( $POPFile );
 
 sub forker
 {
@@ -325,6 +337,8 @@ sub forker
     $b->prefork();
     $mq->prefork();
     $h->prefork();
+    $db->prefork();
+    $p->prefork();
     my $pid = fork();
 
     if ( !defined( $pid ) ) {
@@ -337,6 +351,8 @@ sub forker
         $b->forked( $writer );
         $mq->forked( $writer );
         $h->forked( $writer );
+        $db->forked( $writer );
+#       $p->forked( $writer );
         close $reader;
 
         use IO::Handle;
@@ -350,81 +366,281 @@ sub forker
     $b->postfork( $pid, $reader );
     $mq->postfork( $pid, $reader );
     $h->postfork( $pid, $reader );
+    $db->postfork( $pid, $reader );
+    $p->postfork( $pid, $reader );
     close $writer;
     return ($pid, $reader);
 }
 
-$c->configuration( $c );
-$c->mq( $mq );
-$c->logger( $l );
+$p->forker( \&forker );
+$p->pipeready( $POPFile->{pipeready__} );
+$p->setchildexit( $POPFile->{childexit__} );
 
-$c->initialize();
+$p->{version_} = 'test suite';
+$p->initialize();
 
-$l->configuration( $c );
-$l->mq( $mq );
-$l->logger( $l );
+my $port = 9000 + int(rand(1000));
 
-$l->initialize();
-$l->config_( 'level', 2 );
+$p->config_( 'port', $port );
+$p->config_( 'force_fork', 0 );
+$p->global_config_( 'timeout', 1 );
 
-$w->configuration( $c );
-$w->mq( $mq );
-$w->logger( $l );
+$p->config_( 'enabled', 0 );
+test_assert_equal( $p->start(), 2 );
+$p->config_( 'enabled', 1 );
+test_assert_equal( $p->start(), 1 );
+test_assert_equal( $p->{server__}, $p->{selector__}->exists( $p->{server__} ) );
 
-$w->start();
 
-$mq->configuration( $c );
-$mq->mq( $mq );
-$mq->logger( $l );
-$mq->pipeready( \&pipeready );
 
-$b->configuration( $c );
-$b->mq( $mq );
-$b->logger( $l );
+# Test dynamic UI
 
-$h->configuration( $c );
-$h->mq( $mq );
-$h->logger( $l );
+# $p->start() should send UIREG messages:
 
-$b->history( $h );
-$h->classifier( $b );
+$mq->service();
+my @messages = $rmq->read();
 
-$h->initialize();
+test_assert_equal( $#messages, 3 );
 
-$b->initialize();
-$b->module_config_( 'html', 'port', 8080 );
-$b->module_config_( 'html', 'language', 'English' );
-$b->config_( 'hostname', '127.0.0.1' );
-$b->{parser__}->mangle( $w );
-$b->start();
-$h->start();
-$l->start();
+test_assert_equal( $messages[0][0], 'UIREG' );
+test_assert_equal( $#{$messages[0][1]}, 3 );
+test_assert_equal( $messages[0][1][0], 'configuration' );
+test_assert_equal( $messages[0][1][1], 'pop3_configuration' );
+test_assert_equal( $messages[0][1][2], 'pop3-configuration-panel.thtml' );
+test_assert_equal( ref $messages[0][1][3], 'Proxy::POP3' );
 
-        my $p = new Proxy::POP3;
+test_assert_equal( $messages[1][0], 'UIREG' );
+test_assert_equal( $#{$messages[1][1]}, 3 );
+test_assert_equal( $messages[1][1][0], 'security' );
+test_assert_equal( $messages[1][1][1], 'pop3_security' );
+test_assert_equal( $messages[1][1][2], 'pop3-security-panel.thtml' );
+test_assert_equal( ref $messages[1][1][3], 'Proxy::POP3' );
 
-        $p->configuration( $c );
-        $p->mq( $mq );
-        $p->logger( $l );
-        $p->classifier( $b );
+test_assert_equal( $messages[2][0], 'UIREG' );
+test_assert_equal( $#{$messages[2][1]}, 3 );
+test_assert_equal( $messages[2][1][0], 'chain' );
+test_assert_equal( $messages[2][1][1], 'pop3_chain' );
+test_assert_equal( $messages[2][1][2], 'pop3-chain-panel.thtml' );
+test_assert_equal( ref $messages[2][1][3], 'Proxy::POP3' );
 
-        $p->forker( \&forker );
-        $p->pipeready( \&pipeready );
+test_assert_equal( $messages[3][0], 'UIREG' );
+test_assert_equal( $#{$messages[3][1]}, 3 );
+test_assert_equal( $messages[3][1][0], 'configuration' );
+test_assert_equal( $messages[3][1][1], 'pop3_socks_configuration' );
+test_assert_equal( $messages[3][1][2], 'socks-widget.thtml' );
+test_assert_equal( ref $messages[3][1][3], 'Proxy::POP3' );
 
-        $p->{version_} = 'test suite';
-        $p->initialize();
 
-        my $port = 9000 + int(rand(1000));
+# Test configure_item
 
-        $p->config_( 'port', $port );
-        $p->config_( 'force_fork', 0 );
-        $p->global_config_( 'timeout', 1 );
+use Test::SimpleTemplate;
 
-        $p->config_( 'enabled', 0 );
-        test_assert_equal( $p->start(), 2 );
-        $p->config_( 'enabled', 1 );
-        test_assert_equal( $p->start(), 1 );
-        $p->{api_session__} = $b->get_session_key( 'admin', '' );
-        $p->history( $h );
+my $templ = new Test::SimpleTemplate;
+
+# nothing happens for unknown configuration item names
+
+$p->configure_item('foo', $templ);
+my $params = $templ->{params__};
+test_assert_equal( scalar( keys(%{$params}) ), 0);
+
+# the right things have to happen for known configuration item names
+
+$p->configure_item('pop3_socks_configuration', $templ);
+$params = $templ->{params__};
+test_assert_equal( scalar( keys( %{$params} ) ), 3);
+test_assert_equal( $templ->param( 'Socks_Widget_Name' ), 'pop3' );
+test_assert_equal( $templ->param( 'Socks_Server' ), $p->config_( 'socks_server' ) );
+test_assert_equal( $templ->param( 'Socks_Port'   ), $p->config_( 'socks_port' ) );
+$templ->{params__} = {};
+
+$p->configure_item('pop3_configuration', $templ);
+$params = $templ->{params__};
+test_assert_equal( scalar( keys( %{$params} ) ), 3);
+test_assert_equal( $templ->param( 'POP3_Configuration_If_Force_Fork' ), !$p->config_( 'force_fork' ) );
+test_assert_equal( $templ->param( 'POP3_Configuration_Port' ), $p->config_( 'port' ) );
+test_assert_equal( $templ->param( 'POP3_Configuration_Separator'   ), $p->config_( 'separator' ) );
+
+delete $templ->{params__};
+
+$p->configure_item('pop3_security', $templ);
+$params = $templ->{params__};
+test_assert_equal( scalar( keys( %{$params} ) ), 1);
+test_assert_equal( $templ->param( 'POP3_Security_Local' ), $p->config_( 'local' ) );
+
+delete $templ->{params__};
+
+$p->configure_item('pop3_chain', $templ);
+$params = $templ->{params__};
+test_assert_equal( scalar( keys( %{$params} ) ), 2);
+test_assert_equal( $templ->param( 'POP3_Chain_Secure_Server' ), $p->config_( 'secure_server' ) );
+test_assert_equal( $templ->param( 'POP3_Chain_Secure_Port' ), $p->config_( 'secure_port' ) );
+
+delete $templ->{params__};
+
+
+# test changing/validating of configuration values
+
+my $form = {};
+my $language= {};
+
+my ($status, $error);
+
+test_assert_equal( $p->config_( 'socks_port' ), 1080 );
+
+$form->{pop3_socks_port} = 10080;
+$language->{Configuration_SOCKSPortUpdate} = "socks port update %s";
+
+($status, $error) = $p->validate_item( 'pop3_socks_configuration', $templ, $language, $form );
+
+test_assert_equal( $status, "socks port update 10080");
+test_assert_equal( defined( $error), defined(undef) );
+test_assert_equal( $p->config_( 'socks_port' ), 10080 );
+
+$p->config_( 'socks_port', 1080 );
+
+$form->{pop3_socks_port} = 'aaa';
+$language->{Configuration_Error8} = "configuration error 8";
+
+($status, $error) = $p->validate_item( 'pop3_socks_configuration', $templ, $language, $form );
+
+test_assert_equal( $error, "configuration error 8");
+test_assert_equal( defined( $status), defined(undef) );
+test_assert_equal( $p->config_( 'socks_port' ), 1080 );
+
+$form->{pop3_socks_server} = 'example.com';
+$language->{Configuration_SOCKSServerUpdate} = 'socks server update %s';
+delete $form->{pop3_socks_port};
+
+($status, $error) = $p->validate_item( 'pop3_socks_configuration', $templ, $language, $form );
+
+test_assert_equal( $status, "socks server update example.com");
+test_assert_equal( defined( $error ), defined(undef) );
+test_assert_equal( $p->config_( 'socks_server' ), 'example.com' );
+
+$form->{pop3_socks_port} = '10081';
+$form->{pop3_socks_server} = 'subdomain.example.com';
+
+($status, $error) = $p->validate_item( 'pop3_socks_configuration', $templ, $language, $form );
+
+test_assert_equal( $status, "socks port update 10081\nsocks server update subdomain.example.com");
+test_assert_equal( defined( $error ), defined(undef) );
+test_assert_equal( $p->config_( 'socks_server' ), 'subdomain.example.com' );
+test_assert_equal( $p->config_( 'socks_port' ), 10081 );
+
+$p->config_( 'socks_server', '' );
+
+
+test_assert_equal( $p->config_( 'port' ), $port );
+
+$language->{Configuration_POP3Update} = "pop3 port update %s";
+$form->{pop3_port} = $port + 1;
+
+($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
+
+test_assert_equal( $status, "pop3 port update " . ($port + 1) );
+test_assert_equal( defined($error), defined(undef) );
+test_assert_equal( $p->config_('port'), $port + 1);
+
+$p->config_('port', $port);
+
+$form->{pop3_port} = 'aaa';
+$language->{Configuration_Error3} = "configuration error 3";
+
+($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
+
+test_assert_equal( $error, "configuration error 3");
+test_assert_equal( defined( $status), defined(undef) );
+test_assert_equal( $p->config_( 'port' ), $port );
+
+delete $form->{pop3_port};
+
+test_assert_equal( $p->config_("separator"), ':');
+
+$language->{ 'Configuration_POP3SepUpdate'} = "pop3 separator update %s";
+$form->{pop3_separator} = "'";
+
+($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
+test_assert_equal( $status, "pop3 separator update '");
+test_assert_equal( defined( $error), defined(undef) );
+test_assert_equal( $p->config_( 'separator' ), "'" );
+
+$p->config_( 'separator', ':' );
+
+$form->{pop3_separator} = "aaaaa";
+$language->{'Configuration_Error1'} = "configuration error 1";
+
+($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
+
+test_assert_equal( $error, "configuration error 1");
+test_assert_equal( defined( $status), defined(undef) );
+test_assert_equal( $p->config_( 'separator' ), ':' );
+
+delete $form->{pop3_separator};
+
+test_assert_equal( $p->config_('force_fork'), 0);
+$form->{pop3_force_fork} = 1;
+
+($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
+test_assert_equal( defined( $status ), defined( undef ));
+test_assert_equal( defined( $error ), defined( undef ) );
+test_assert_equal( $p->config_( 'force_fork' ), 1 );
+
+$form->{pop3_force_fork} = 'aaaaa';
+
+($status, $error) = $p->validate_item( 'pop3_configuration', $templ, $language, $form );
+test_assert_equal( defined( $status ), defined( undef ));
+test_assert_equal( defined( $error ), defined( undef ) );
+test_assert_equal( $p->config_( 'force_fork' ), 1 );
+
+delete $form->{pop3_force_fork};
+$p->config_('force_fork', 0);
+
+test_assert_equal( $p->config_( 'local' ), 1 );
+
+$form->{pop3_local} = 1;
+($status, $error) = $p->validate_item( 'pop3_security', $templ, $language, $form );
+test_assert_equal( defined( $status ), defined( undef ));
+test_assert_equal( defined( $error ), defined( undef ) );
+test_assert_equal( $p->config_( 'local' ), 0 );
+
+$p->config_( 'local', 1 );
+
+my $old_config_value = $p->config_('secure_server');
+
+$form->{server} = "www.example.com";
+$language->{Security_SecureServerUpdate} = "secure server update %s";
+
+($status, $error) = $p->validate_item( 'pop3_chain', $templ, $language, $form );
+test_assert_equal( $status, "secure server update www.example.com");
+test_assert_equal( defined( $error ), defined( undef ) );
+test_assert_equal( $p->config_( 'secure_server' ), 'www.example.com' );
+
+delete $form->{server};
+$p->config_('secure_server', $old_config_value );
+
+$old_config_value = $p->config_('secure_port');
+
+$form->{sport} = "10110";
+$language->{Security_SecurePortUpdate} = "secure port update %s";
+
+($status, $error) = $p->validate_item( 'pop3_chain', $templ, $language, $form );
+test_assert_equal( $status, "secure port update 10110");
+test_assert_equal( defined( $error ), defined( undef ) );
+test_assert_equal( $p->config_( 'secure_port' ), 10110 );
+
+$form->{sport} = 'aaaaaaa';
+
+$language->{Security_Error1} = "security error 1";
+($status, $error) = $p->validate_item( 'pop3_chain', $templ, $language, $form );
+test_assert_equal( defined( $status ), defined( undef ) );
+test_assert_equal( $error, "security error 1");
+test_assert_equal( $p->config_( 'secure_port' ), 10110 );
+
+delete $form->{server};
+$p->config_('secure_port', $old_config_value );
+
+
+$p->{api_session__} = $b->get_session_key( 'admin', '' );
 
 # some tests require this directory to be present
 mkdir( 'messages' );
@@ -457,7 +673,7 @@ if ( $pid == 0 ) {
                                     Reuse     => 1 );
 
     my $selector = new IO::Select( $server );
-    
+
     my $apop_server = 0;
 
     while ( 1 ) {
@@ -467,8 +683,8 @@ if ( $pid == 0 ) {
                 close $client;
             }
         }
-        
-        if ( pipeready( $dserverreader ) ) {
+
+        if ( &{$POPFile->{pipeready__}}( $dserverreader ) ) {
             my $command = <$dserverreader>;
 
             if ( $command =~ /__APOPON/ ) {
@@ -514,6 +730,8 @@ if ( $pid == 0 ) {
 
         # CHILD THAT WILL RUN THE POP3 PROXY
 
+        $p->log_(0, "I am the POP3 proxy on port " . $p->config_('port') );
+
         close $dwriter;
         close $ureader;
 
@@ -521,8 +739,9 @@ if ( $pid == 0 ) {
 
         while ( 1 ) {
             last if !$p->service();
+#            $p->log_(2, "POP3 proxy loop instance");
 
-            if ( pipeready( $dreader ) ) {
+            if ( &{$POPFile->{pipeready__}}( $dreader ) ) {
                 my $command = <$dreader>;
 
                 if ( $command =~ /__QUIT/ ) {
@@ -572,7 +791,7 @@ if ( $pid == 0 ) {
         close $dreader;
         close $uwriter;
         $dwriter->autoflush(1);
-        
+
         close $dserverreader;
         close $userverwriter;
         $dserverwriter->autoflush(1);
@@ -614,7 +833,7 @@ if ( $pid == 0 ) {
         test_assert_equal( $result,
             "-ERR Transparent proxying not configured: set secure server/port$eol" );
 
-        # Check that we can connect to the remote POP3 server 
+        # Check that we can connect to the remote POP3 server
         # (should still be waiting for us)
 
         print $client "USER 127.0.0.1:8110:gooduser$eol";
@@ -633,7 +852,7 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "+OK Now logged in$eol" );
 
-        my $cd = 10;
+        $cd = 10;
         while ( $cd-- ) {
             select( undef, undef, undef, 0.1 );
             $mq->service();
@@ -734,7 +953,7 @@ if ( $pid == 0 ) {
         # the files to disk
 
         my $slot_file = $h->get_slot_file( 1 );
-        my $cd = 10;
+        $cd = 10;
         while ( $cd-- ) {
             select( undef, undef, undef, 0.1 );
             $mq->service();
@@ -795,8 +1014,8 @@ if ( $pid == 0 ) {
 
         select( undef, undef, undef, 0.1 );
 
-        my $slot_file = $h->get_slot_file( 2 );
-        my $cd = 10;
+        $slot_file = $h->get_slot_file( 2 );
+        $cd = 10;
         while ( $cd-- ) {
             select( undef, undef, undef, 0.1 );
             $mq->service();
@@ -809,7 +1028,8 @@ if ( $pid == 0 ) {
         binmode FILE;
         test_assert( open HIST, "<$slot_file" );
         binmode HIST;
-        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+        my $fl;
+        while ( ( $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
             $fl =~ s/[\r\n]//g;
             $ml =~ s/[\r\n]//g;
             test_assert_equal( $fl, $ml );
@@ -819,7 +1039,7 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) = $h->get_slot_fields( 2 );
+        ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) = $h->get_slot_fields( 2 );
         test_assert_equal( $bucket, 'spam' );
         test_assert_equal( $usedtobe, 0 );
         test_assert_equal( $magnet, 0 );
@@ -921,8 +1141,8 @@ if ( $pid == 0 ) {
 
         select( undef, undef, undef, 0.1 );
 
-        my $slot_file = $h->get_slot_file( 3 );
-        my $cd = 10;
+        $slot_file = $h->get_slot_file( 3 );
+        $cd = 10;
         while ( $cd-- ) {
             select( undef, undef, undef, 0.1 );
             $mq->service();
@@ -945,7 +1165,7 @@ if ( $pid == 0 ) {
         close FILE;
         close HIST;
 
-        my ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) = $h->get_slot_fields( 3 );
+        ( $id, $hdr_from, $hdr_to, $hdr_cc, $hdr_subject, $hdr_date, $hash, $inserted, $bucket, $usedtobe, $bucketid, $magnet ) = $h->get_slot_fields( 3 );
         test_assert_equal( $bucket, 'spam' );
         test_assert_equal( $usedtobe, 0 );
         test_assert_equal( $magnet, 0 );
@@ -971,7 +1191,7 @@ if ( $pid == 0 ) {
         my $line = <$ureader>;
         test_assert_equal( $line, "OK\n" );
 
-        my $client = IO::Socket::INET->new(
+        $client = IO::Socket::INET->new(
                         Proto    => "tcp",
                         PeerAddr => 'localhost',
                         PeerPort => $port );
@@ -987,7 +1207,7 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, "+OK Welcome gooduser$eol" );
 
-        my $cd = 10;
+        $cd = 10;
         while ( $cd-- ) {
             select( undef, undef, undef, 0.1 );
             $mq->service();
@@ -1475,12 +1695,12 @@ if ( $pid == 0 ) {
         test_assert_equal( $result,
             "-ERR APOP not supported between mail client and POPFile.$eol" );
 
-        # Check that we can connect to the remote POP3 server 
+        # Check that we can connect to the remote POP3 server
         # (should still be waiting for us)
 
         print $client "APOP 127.0.0.1:8110:gooduser md5$eol";
         $result = <$client>;
-        test_assert_equal( $result, 
+        test_assert_equal( $result,
             "-ERR APOP not supported between mail client and POPFile.$eol" );
 
         print $client "QUIT$eol";
@@ -1512,15 +1732,15 @@ if ( $pid == 0 ) {
 
         print $client "APOP 127.0.0.1:8111:gooduser md5$eol";
         $result = <$client>;
-        test_assert_equal( $result, 
+        test_assert_equal( $result,
             "-ERR APOP not supported between mail client and POPFile.$eol" );
 
-        # Check that we can connect to the remote POP3 server 
+        # Check that we can connect to the remote POP3 server
         # (should still be waiting for us)
 
         print $client "APOP 127.0.0.1:8110:gooduser md5$eol";
         $result = <$client>;
-        test_assert_equal( $result, 
+        test_assert_equal( $result,
             "-ERR APOP not supported between mail client and POPFile.$eol" );
 
         print $client "QUIT$eol";
@@ -1537,14 +1757,14 @@ if ( $pid == 0 ) {
         close $client;
 
         # Test POPFile->server APOP
-        
+
         # Server that doesn't do APOP at all
-        
+
         print $dserverwriter "__APOPOFF\n";
 
         $line = <$userverreader>;
         test_assert_equal( $line, "OK\n" );
-        
+
         $client = IO::Socket::INET->new(
                         Proto    => "tcp",
                         PeerAddr => 'localhost',
@@ -1621,7 +1841,7 @@ if ( $pid == 0 ) {
         }
 
         close $client;
-        
+
         # Bad user
 
         $client = IO::Socket::INET->new(
@@ -1637,7 +1857,7 @@ if ( $pid == 0 ) {
             "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "USER 127.0.0.1:8110:baduser:apop$eol";
-        
+
         $result = <$client>;
         test_assert_equal( $result, "+OK hello baduser$eol" );
 
@@ -1658,7 +1878,7 @@ if ( $pid == 0 ) {
         }
 
         close $client;
-        
+
         # Good user, bad pass
 
         $client = IO::Socket::INET->new(
@@ -1674,7 +1894,7 @@ if ( $pid == 0 ) {
             "+OK POP3 POPFile (test suite) server ready$eol" );
 
         print $client "USER 127.0.0.1:8110:gooduser:apop$eol";
-        
+
         $result = <$client>;
         test_assert_equal( $result, "+OK hello gooduser$eol" );
 
@@ -1734,11 +1954,11 @@ if ( $pid == 0 ) {
         }
 
         close $client;
-                
+
         # re-disable APOP on the server so we don't mess with anything else
 
         print $dserverwriter "__APOPOFF\n";
-        
+
         $line = <$userverreader>;
         test_assert_equal( $line, "OK\n" );
 
@@ -2038,10 +2258,10 @@ if ( $pid == 0 ) {
         close $dwriter;
         close $ureader;
 
-        while ( waitpid( $pid, &WNOHANG ) != $pid ) {
-        }
-        while ( waitpid( $pid2, &WNOHANG ) != $pid2 ) {
-        }
+#        while ( waitpid( $pid, &WNOHANG ) != $pid ) {
+#        }
+#        while ( waitpid( $pid2, &WNOHANG ) != $pid2 ) {
+#        }
 
         $b->stop();
     }

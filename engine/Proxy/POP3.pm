@@ -742,7 +742,7 @@ sub validate_item
         }
 
         if ( defined($$form{pop3_force_fork}) ) {
-            $self->config_( 'force_fork', $$form{pop3_force_fork} );
+            $self->config_( 'force_fork', $$form{pop3_force_fork} ) if ($$form{pop3_force_fork} eq 1 || $$form{pop3_force_fork} eq 0);
         }
 
         return($status_message, $error_message);
