@@ -728,7 +728,7 @@ continue:
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioF.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioG.ini"
 
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "${C_RELEASE_NOTES}" "${C_README}"
+  File "/oname=$PLUGINSDIR\${C_README}" "${C_RELEASE_NOTES}"
 
   ; Ensure the release notes are in a format which the standard Windows NOTEPAD.EXE can use.
   ; When the "POPFile" section is processed, the converted release notes will be copied to the
@@ -782,13 +782,20 @@ Function PFIGUIInit
       $(PFI_LANG_MBRELNOTES_2)" IDNO continue
 
   StrCmp $G_NOTEPAD "" use_file_association
-  ExecWait 'notepad.exe "$PLUGINSDIR\${C_README}.txt"'
+  Exec 'notepad.exe "$PLUGINSDIR\${C_README}.txt"'
   GoTo continue
 
 use_file_association:
   ExecShell "open" "$PLUGINSDIR\${C_README}.txt"
 
 continue:
+
+  ; There may be a slight delay at this point and on some systems the 'Welcome' page may appear
+  ; in two stages (first an empty MUI page appears and a little later the page contents appear).
+  ; This looks a little strange (and may prompt the user to start clicking buttons too soon)
+  ; so we display a banner to reassure the user. This banner will be removed by 'CheckUserRights'
+
+  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
 
   ; Insert appropriate language strings into the custom page INI files
   ; (the CBP package creates its own INI file so there is no need for a CBP *Page_Init function)
@@ -1545,10 +1552,10 @@ FunctionEnd
 # Installer Function: CheckUserRights
 # (the "pre" function for the WELCOME page)
 #
-# Try to ensure the installer window is not hidden behind any other windows.
-#
 # On systems which support different types of user, recommend that POPFile is installed by
 # a user with 'Administrative' rights (this makes it easier to use POPFile's multi-user mode).
+#
+# Try to ensure the installer window is not hidden behind any other windows.
 #--------------------------------------------------------------------------
 
 Function CheckUserRights
@@ -1556,11 +1563,6 @@ Function CheckUserRights
   !define L_WELCOME_TEXT  $R9
 
   Push ${L_WELCOME_TEXT}
-
-  ; After showing the release notes, the installer may not be "on top" so try to correct this.
-  ; (On Windows XP this command may only flash the installer's task bar icon)
-
-  BringToFront
 
   ; The 'UserInfo' plugin may return an error if run on a Win9x system but since Win9x systems
   ; do not support different account types, we treat this error as if user has 'Admin' rights.
@@ -1602,6 +1604,17 @@ not_admin:
       $(PFI_LANG_WELCOME_ADMIN_TEXT)"
 
 exit:
+
+  ; Remove the banner which was displayed by the 'PFIGUIInit' function
+
+  Sleep ${C_MIN_BANNER_DISPLAY_TIME}
+  Banner::destroy
+
+  ; After showing the release notes, the installer may not be "on top" so try to correct this.
+  ; (On Windows XP this command only flashes the installer's task bar icon)
+
+  BringToFront
+  
   Pop ${L_WELCOME_TEXT}
 
   !undef L_WELCOME_TEXT
