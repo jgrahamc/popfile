@@ -933,6 +933,7 @@ sub history_page
             unlink($class_file);
         }
         $configuration{mail_count} = 0;
+        $configuration{last_count} = 0;
     }
 
     my @mail_files = glob "popfile*.msg";
@@ -997,6 +998,15 @@ sub history_page
             }
         }
         close MAIL;
+
+        if ( $from eq '' ) 
+        {
+            $from = "&lt;no from line&gt;";
+        }
+        if ( $subject eq '' ) 
+        {
+            $subject = "&lt;no subject line&gt;";
+        }
         
         if ( length($from)>64 ) 
         {
@@ -1012,7 +1022,7 @@ sub history_page
         
         $body .= "<tr";
         $body .= " bgcolor=lightgreen" if ($form{view} eq $mail_file) || ($form{file} eq $mail_file);
-        $body .= "><td>$from<td><a href=/history?view=$mail_file>$subject</a><td>";
+        $body .= "><td>";
         my $class_file = $mail_file;
         $class_file =~ s/msg$/cls/;
         open CLASS, "<$class_file";
@@ -1024,6 +1034,16 @@ sub history_page
         }
         $bucket =~ s/[\r\n]//g;
         close CLASS;
+        $mail_file =~ /popfile\d+_(\d+)\.msg/;
+        my $bold = ( ( $configuration{last_count} <= $1 ) && ( $reclassified == 0 ) );
+        $body .= "<b>" if $bold;
+        $body .= "$from";
+        $body .= "</b>" if $bold;
+        $body .= "<td>";
+        $body .= "<b>" if $bold;
+        $body .= "<a href=/history?view=$mail_file>$subject</a>";
+        $body .= "</b>" if $bold;
+        $body .= "<td>";
         if ( $reclassified ) 
         {
             $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified";
@@ -1217,12 +1237,14 @@ sub run_popfile
             # Tell the client that we are ready for commands and identify our version number
             tee( $client, "+OK POP3 popfile (v$major_version.$minor_version) server ready$eol" );
 
+            my $current_count = $configuration{mail_count};
+
             # Retrieve commands from the client and process them until the client disconnects or
             # we get a specific QUIT command
             while  ( <$client> )
             {
                 my $command;
-                
+
                 $command = $_;
                 
                 # Clean up the command so that it has a nice clean $eol at the end
@@ -1587,6 +1609,8 @@ sub run_popfile
                             open CLASS, ">$class_file";
                             print CLASS "$classification$eol";
                             close CLASS;
+    
+                            $configuration{last_count} = $current_count;
 
                         flush_extra( $mail, $client );
                         next;
