@@ -1019,7 +1019,11 @@ sub classify_and_modify
     }
 
     if ( $got_full_body == 0 )    {
-        $self->echo_to_dot_( $mail, $client ) if ( $echo );
+         if ( $echo ) {
+            $self->echo_to_dot_( $mail, $client );
+         } else {
+            $self->echo_to_dot_( $mail, undef );
+         }
     } else {
         if ( $classification ne 'unclassified' ) {
             if ( ( $self->{parameters__}{$classification}{quarantine} == 1 ) && $echo ) {
@@ -1456,8 +1460,8 @@ sub echo_to_dot_
     while ( <$mail> ) {
         # Check for an abort
         last if ( $self->{alive_} == 0 );
-
-        print $client $_;
+        
+        print $client $_ if ( defined( $client ) );
 
         # The termination has to be a single line with exactly a dot on it and nothing
         # else other than line termination characters.  This is vital so that we do
