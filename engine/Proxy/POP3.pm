@@ -178,9 +178,10 @@ sub service
                 my $handle = $self->{children}{$kid};
                 
                 while ( <$handle> ) {
-                    s/[\r\n]//g;
+                    my $class = $_;
+                    $class =~ s/[\r\n]//g;
 
-                    $self->{classifier}->{parameters}{$_}{count}     += 1;
+                    $self->{classifier}->{parameters}{$class}{count} += 1;
                     $self->{configuration}->{configuration}{mcount}  += 1;
 
                     debug( $self, "Incrementing $_" );
