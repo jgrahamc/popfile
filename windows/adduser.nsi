@@ -168,7 +168,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.40"
+  !define C_PFI_VERSION  "0.2.41"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -966,7 +966,20 @@ stopwords:
   StrCpy ${L_TEMP} $G_PFISETUP 9
   StrCmp ${L_TEMP} "/restore=" copy_default_stopwords
 
-  IfFileExists "$G_USERDIR\stopwords" 0 copy_stopwords
+  ; If we are upgrading and the user did not have a 'stopwords' file then do not install one
+  ; (but still update the default file to the one distributed with 'our' version of POPFile)
+  
+  IfFileExists "$G_USERDIR\popfile.cfg" 0 copy_stopwords
+  IfFileExists "$G_USERDIR\stopwords" 0 copy_default_stopwords
+  
+  ; We are upgrading an existing installation which uses 'stopwords'. If 'our' default list is
+  ; the same as the list used by the existing installation then there is no need to find out
+  ; what we are supposed to do with the 'stopwords' file
+  
+  Call CompareStopwords
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "same" copy_default_stopwords
+  
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "POPFile 'stopwords' $(PFI_LANG_MBSTPWDS_1)\
       $\r$\n$\r$\n\
@@ -2500,6 +2513,71 @@ exit_now:
   !undef L_RESULT
 
 nothing_to_check:
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: CompareStopwords
+#
+# Check if 'our' default stopwords list ($G_ROOTDIR\pfi-stopwords.default) is the
+# same as the one used by the installation we are upgrading ($G_USERDIR\stopwords).
+# These lists may use CRLF or LF as the end-of-line marker so file size is not tested.
+# Return "same" or "different" result string.
+#--------------------------------------------------------------------------
+
+Function CompareStopwords
+
+  !define L_STD_FILE    $R9   ; handle used to access 'our' default stopwords list
+  !define L_STD_WORD    $R8
+  !define L_USR_FILE    $R7   ; handle used to access existing installation's stopwords list
+  !define L_USR_WORD    $R6
+  !define L_RESULT      $R5
+  
+  !define C_STD_LIST    "$G_ROOTDIR\pfi-stopwords.default"
+  !define C_USR_LIST    "$G_USERDIR\stopwords"
+  
+  Push ${L_RESULT}
+  Push ${L_STD_FILE}
+  Push ${L_STD_WORD}
+  Push ${L_USR_FILE}
+  Push ${L_USR_WORD}
+  
+  StrCpy ${L_RESULT}  "different"
+  
+  FileOpen ${L_STD_FILE} "${C_STD_LIST}" r
+  FileOpen ${L_USR_FILE} "${C_USR_LIST}" r
+  
+loop:
+  FileRead ${L_STD_FILE} ${L_STD_WORD}
+  Push ${L_STD_WORD}
+  Call TrimNewlines
+  Pop ${L_STD_WORD}
+  FileRead ${L_USR_FILE} ${L_USR_WORD}
+  Push ${L_USR_WORD}
+  Call TrimNewlines
+  Pop ${L_USR_WORD}
+  StrCmp ${L_STD_WORD} ${L_USR_WORD} 0 close_files
+  StrCmp ${L_STD_WORD} "" 0 loop
+  StrCpy ${L_RESULT} "same"
+
+close_files:
+  FileClose ${L_STD_FILE}
+  FileClose ${L_USR_FILE}
+
+  Pop ${L_USR_WORD}
+  Pop ${L_USR_FILE}
+  Pop ${L_STD_WORD}
+  Pop ${L_STD_FILE}
+  Exch ${L_RESULT}
+  
+  !undef C_STD_LIST
+  !undef C_USR_LIST
+  
+  !undef L_STD_FILE
+  !undef L_STD_WORD
+  !undef L_USR_FILE
+  !undef L_USR_WORD
+  !undef L_RESULT
+  
 FunctionEnd
 
 #--------------------------------------------------------------------------
