@@ -60,12 +60,14 @@ macosx: ; @$(MAKE) -C ../macosx
 
 # Builds the tray application using PerlTray
 
-winexe: popfile.exe popfileb.exe popfilef.exe popfileib.exe popfileif.exe trayicon.ico ../windows/POPFileIcon/popfile.ico
+winexe: popfile.exe popfileb.exe popfilef.exe popfileib.exe popfileif.exe trayicon.ico ../windows/POPFileIcon/popfile.ico popfile-service.exe
 
-TRAY_OPTIONS = --exe $@ --force --clean --dependent --xclude --icon ../windows/POPFileIcon/popfile.ico --icon trayicon.ico --script $< --info CompanyName="The POPFile Project" --info LegalCopyright="Copyright (c) 2003 John Graham-Cumming" --info ProductName=POPFile --info ProductVersion=$(POPFILE_VERSION).0 --info FileDescription=POPFile --info FileVersion=$(POPFILE_VERSION).0
-ifeq ($(TRAY_DEBUG),1)
-TRAY_OPTIONS += --debug
+COMMON_EXE_OPTIONS = --exe $@ --force --clean --dependent --xclude --icon ../windows/POPFileIcon/popfile.ico --icon trayicon.ico --script $< --info CompanyName="The POPFile Project" --info LegalCopyright="Copyright (c) 2003 John Graham-Cumming" --info ProductName=POPFile --info ProductVersion=$(POPFILE_VERSION).0 --info FileDescription=POPFile --info FileVersion=$(POPFILE_VERSION).0
+ifeq ($(EXE_DEBUG),1)
+COMMON_EXE_OPTIONS += --debug
 endif
+
+TRAY_OPTIONS = $(COMMON_EXE_OPTIONS)
 
 popfile.exe: popfile-windows.pl
 	perlapp --gui $(TRAY_OPTIONS)
@@ -81,6 +83,13 @@ popfilef.exe: popfile.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
 
 popfileb.exe: popfile.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
 	perlapp --gui $(TRAY_OPTIONS)
+
+# Builds a Windows service version of POPFile using PerlSvc
+
+SVC_OPTIONS = $(COMMON_EXE_OPTIONS) --lib c:/cygwin/home/Administrator/engine
+
+popfile-service.exe: popfile-service.pl
+	perlsvc $(SVC_OPTIONS)
 
 # windows builds the Windows installer
 

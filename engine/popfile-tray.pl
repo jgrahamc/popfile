@@ -34,6 +34,10 @@ use POPFile::Loader;
 
 use PerlTray;
 
+# Used to determine whether we've already called POPFile::Loader::CORE_stop 
+
+our $already_stopped = 0;
+
 # POPFile is actually loaded by the POPFile::Loader object which does all
 # the work
 
@@ -90,6 +94,24 @@ sub Timer
 
 # ---------------------------------------------------------------------------------------------
 #
+# Shutdown
+#
+# Called by PerlTray when Windows is shutting down or the current user is logging off
+#
+# ---------------------------------------------------------------------------------------------
+
+sub Shutdown
+{
+    my ( $logoff ) = @_;
+
+    if ( !$already_stopped ) {
+        $POPFile->CORE_stop();
+        $already_stopped = 1;
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # popfile_shutdown
 #
 # Called by PerlTray when the user click Shutdown on the pop up menu
@@ -98,7 +120,10 @@ sub Timer
 
 sub popfile_shutdown
 {
-    $POPFile->CORE_stop();
+    if ( !$already_stopped ) {
+        $POPFile->CORE_stop();
+        $already_stopped = 1;
+    }
 
     exit(0);
 }
