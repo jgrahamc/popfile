@@ -349,7 +349,7 @@ sub get_value_
 
     if ( defined( $value ) ) {
         my $total = $self->get_bucket_word_count( $bucket );
-        return log( $value ) - log( $total );
+        return log( $value / $total );
     } else {
         return 0;
     }
@@ -444,13 +444,13 @@ sub update_constants_
     my ($self) = @_;
 
     if ( $self->{full_total__} > 0 )  {
-        $self->{not_likely__} = -log( $self->{full_total__} ) - log(10);
+        $self->{not_likely__} = -log( $self->{full_total__} / 10 );
 
         foreach my $bucket (keys %{$self->{matrix__}}) {
             my $total = $self->get_bucket_word_count( $bucket );
 
             if ( $total != 0 ) {
-                $self->{bucket_start__}{$bucket} = log( $total ) - log( $self->{full_total__} );
+                $self->{bucket_start__}{$bucket} = log( $total / $self->{full_total__} );
             } else {
                 $self->{bucket_start__}{$bucket} = 0;
             }
