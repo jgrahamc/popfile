@@ -35,13 +35,16 @@
 # /startup
 #
 # If this command-line switch is present, the utility does not call the 'Add POPFile User'
-# wizard if POPFILE_ROOT and POPFILE_USER are undefined and no suitable registry data is found.
-# This switch is intended for use in the Start Menu's 'StartUp' group when all users share the
-# same Start Menu (to avoid unexpected 'Add POPFile User' activity if some users do not use
+# wizard if the HKCU registry data appears to belong to a different user or if the POPFILE_ROOT
+# and POPFILE_USER environment variables are undefined and the wizard is unable to find suitable
+# registry data to initialise them.
+#
+# This switch is intended for use in the Start Menu's 'StartUp' folder when all users share the
+# same StartUp folder (to avoid unexpected 'Add POPFile User' activity if some users do not use
 # (or have not yet used) POPFile). The switch can be in uppercase or lowercase.
 #-------------------------------------------------------------------------------------------
 
-  !define C_PFI_VERSION   0.1.0
+  !define C_PFI_VERSION   0.1.3
 
   Name    "Run POPFile"
   Caption "Run POPFile"
@@ -50,6 +53,8 @@
 
   OutFile runpopfile.exe
 
+  ; 'Silent' installers run invisibly
+  
   SilentInstall silent
 
   ; This build is for use with the POPFile installer
@@ -85,14 +90,14 @@
 # A simple front-end for POPFile's starter program (popfile.exe)
 #--------------------------------------------------------------------------
 
-Section x
+Section default
 
   !define L_EXEFILE       $R9   ; where we expect to find popfile.exe and (perhaps) adduser.exe
-  !define L_POPFILE_ROOT  $R8   ; path to popfile.pl (and other files)
+  !define L_POPFILE_ROOT  $R8   ; path to the POPFile program (popfile.pl, and other files)
   !define L_POPFILE_USER  $R7   ; path to user's popfile.cfg file
   !define L_TEMP          $R6
   !define L_WINOS_FLAG    $R5   ; 1 = modern Windows system, 0 = Win9x system
-  !define L_WINUSERNAME   $R4
+  !define L_WINUSERNAME   $R4   ; Windows login name used to confirm validity of HKCU data
 
   !define L_RESERVED      $0    ; used in system.dll calls
 
@@ -115,7 +120,7 @@ check_registry:
   StrCpy ${L_EXEFILE} $EXEDIR
   IfFileExists "${L_EXEFILE}\popfile.exe" got_exe_path
 
-  ; Minimal Perl not found, so look for an alternative ActivePerl installation
+  ; Assume the minimal Perl is not available, so look for an alternative ActivePerl installation
 
   SearchPath ${L_EXEFILE} perl.exe
   StrCmp ${L_EXEFILE} "" perl_missing
@@ -137,11 +142,11 @@ perl_missing:
 
 got_exe_path:
   ReadRegStr ${L_TEMP} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Owner"
-  StrCmp ${L_TEMP} ${L_WINUSERNAME} read_data
-  StrCmp ${L_TEMP} "" read_data
+  StrCmp ${L_TEMP} ${L_WINUSERNAME} check_data
+  StrCmp ${L_TEMP} "" check_data
   Goto add_user
 
-read_data:
+check_data:
   ReadEnvStr ${L_POPFILE_ROOT} "POPFILE_ROOT"
   ReadEnvStr ${L_POPFILE_USER} "POPFILE_USER"
   StrCmp ${L_POPFILE_ROOT} "" set_root
