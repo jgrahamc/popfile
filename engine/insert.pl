@@ -120,7 +120,17 @@ if ( $#ARGV >= 1 )
 {
     load_word_table($ARGV[0]);
 
-    my @files   = map { glob } @ARGV[1 .. $#ARGV];
+    my @files;
+
+    if ($^O =~ /linux/)
+    {
+        @files = @ARGV[1 .. $#ARGV];
+    }
+    else
+    {
+        @files   = map { glob } @ARGV[1 .. $#ARGV];
+    }
+    
     foreach my $file (@files)
     {
         split_mail_message($file);
