@@ -244,14 +244,18 @@ sub child__
                 
                 # 3xx (300) series response indicates multi-line text should be sent, up to .crlf
                 if ($response =~ /^3\d\d/ ) {
+                    
+                    # Echo from the client to the server
+                    
                     $self->echo_to_dot_( $client, $news, 0 );
                     
-                    # Echo to dot consumes the dot. We recreate it.
+                    # Echo to dot doesn't provoke a server response somehow, we add another CRLF
                     
-                    $self->get_response_( $news, $client, ".$eol" );
+                    $self->get_response_( $news, $client, "$eol" );
                                     
                     # The client may have some cruft after the .crlf,
                     # the server will respond, the client may(?) echo something back                
+                    $self->flush_extra_( $news, $client, 0 );
                     $self->flush_extra_( $client, $news, 0 );
                     $self->flush_extra_( $news, $client, 0 );
                     $self->flush_extra_( $client, $news, 0 );
