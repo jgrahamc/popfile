@@ -18,6 +18,7 @@ use Classifier::Bayes;
 # This version number
 my $major_version = 0;
 my $minor_version = 16;
+my $build_version = 1;
 
 # A list of the messages currently on the server, each entry in this list
 # is a hash containing the following items
@@ -1899,8 +1900,8 @@ $classifier->load_word_matrix();
 debug( "POPFile Engine v$major_version.$minor_version running" );
 
 # Fix up the page template with the current version number
-$header =~ s/VERSION/v$major_version\.$minor_version/g;
-$footer =~ s/VERSION/v$major_version\.$minor_version/g;
+$header =~ s/VERSION/v$major_version\.$minor_version\.$build_version/g;
+$footer =~ s/VERSION/v$major_version\.$minor_version\.$build_version/g;
 
 # Run the POP server and handle requests
 run_popfile($configuration{port}, $configuration{server}, $configuration{sport}, $configuration{ui_port});
