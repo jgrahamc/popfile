@@ -1,8 +1,26 @@
 # Copyright (c) 2001-2003 John Graham-Cumming
+#
+#   This file is part of POPFile
+#
+#   POPFile is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   POPFile is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with POPFile; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
 
 # Identify the language and character set used for the interface
 LanguageCode                            de
 LanguageCharset                         ISO-8859-1
+LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          de
@@ -19,12 +37,12 @@ Previous                                Zurück
 Next                                    Weiter
 From                                    Absender
 Subject                                 Betreff
-Cc                                      CC
+Cc                                      Cc
 Classification                          Einstufung
 Reclassify                              Neu einstufen
 Probability                             Wahrscheinlichkeit
 Scores                                  Auswertung
-QuickMagnets                            Blitz-Magnete
+QuickMagnets                            Sofort-Magnete
 Undo                                    widerrufen
 Close                                   Schließen
 Find                                    Suchen
@@ -81,6 +99,9 @@ Configuration_SMTPPort                  SMTP Port
 Configuration_SMTPUpdate                Neuer SMPT Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
 Configuration_NNTPPort                  NNTP Port
 Configuration_NNTPUpdate                Neuer NNTP Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Configuration_POPFork                   Simultane POP3-Verbindungen erlauben
+Configuration_SMTPFork                  Simultane SMPT-Verbindungen erlauben
+Configuration_NNTPFork                  Simultane NNTP-Verbindungen erlauben
 Configuration_POP3Separator             POP3 Server:Port:Benutzer Trennzeichen
 Configuration_NNTPSeparator             NNTP Server:Port:Benutzer Trennzeichen
 Configuration_POP3SepUpdate             Neues POP3 Trennzeichen: %s
@@ -142,8 +163,8 @@ History_NoSubject                       kein Betreff
 History_ClassifyAs                      eingestuft als
 History_MagnetUsed                      Magnet benutzt
 History_MagnetBecause                   <b>Magnet benutzt</b><p>Eingestuft als <font color="%s">%s</font> durch Magnet %s </p>
-History_ChangedTo                       Geändert: <font color="%s">%s
-History_Already                         Bereits neu eingestuft als <font color="%s">%s</font>
+History_ChangedTo                       Geändert: <font color="%s">%s</font>
+History_Already                         Neu eingestuft als <font color="%s">%s</font>
 History_RemoveAll                       Alle entfernen
 History_RemovePage                      Diese Seite entfernen
 History_Remove                          Um Einträge im Verlauf zu löschen, klicken Sie auf
@@ -253,6 +274,8 @@ Session_Error                           Ihre POPFile-Sitzung ist abgelaufen. Die
 View_Title                              Nachrichtenansicht
 
 Windows_TrayIcon                        POPFile-Symbol neben der Uhr anzeigen?
+Windows_Console                         Nachrichten in einem Konsolenfenster ausgeben?
+Windows_NextTime                        <p><font color="red">Diese Änderung wird erst beim nächsten Start von POPFile wirksam.</font>
 
 Header_MenuSummary                      Diese Tabelle ist das Navigationsmenü, das Zugang zu den einzelnen Bereichen des Kontrollzentrums bietet.
 History_MainTableSummary                Diese Tabelle zeigt Absender und Betreff der letzten empfangenen Nachrichten an und ermöglicht es, diese durchzusehen und zu reklassifizieren. Ein Klick auf den Betreff zeigt die vollständige Nachricht an sowie Details, warum diese so und nicht anders klassifiziert wurde. Die Spalte "Sollte sein" ermöglicht es, anzugeben, in welche Kategorie die Nachricht gehört bzw. entsprechende Änderungen rückgängig zu machen. Die Spalte "Delete" ermöglicht es, einzelne Nachrichten aus dem Verlauf zu löschen, falls Sie diese nicht mehr benötigen.
