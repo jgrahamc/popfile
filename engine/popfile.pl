@@ -17,6 +17,9 @@ use locale;
 # Use the Naive Bayes classifier
 use Classifier::Bayes;
 
+use IO::Socket;
+use IO::Select;
+
 # This version number
 my $major_version = 0;
 my $minor_version = 17;
@@ -60,30 +63,6 @@ my $tab_color       = '#ededca';
 my $stab_color      = '#cccc99';
 my $highlight_color = '#cccc99';
 
-# These two variables are used to create the HTML UI for POPFile
-my $header = "<html><head><title>POPFile Control Center</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>\
-<link rel=stylesheet type=text/css href='CURRENT_SKIN' title=main></link> \
-<META HTTP-EQUIV=Pragma CONTENT=no-cache>\
-<META HTTP-EQUIV=Expires CONTENT=0>\
-<META HTTP-EQUIV=Cache-Control CONTENT=no-cache><META HTTP-EQUIV=Refresh CONTENT=600></head>\
-<body><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr> \
-<td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>\
-<table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;POPFile Control Center<td align=right valign=middle><a href=/shutdown?session=SESSKEY>Shutdown</a>&nbsp;<tr height=3><td colspan=3></td></tr></table>\
-</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td> \
-</tr></table>\
-<p align=center>UPDATECHECK\
-<table class=menu cellspacing=0><tr>\
-<td class=TAB2 align=center><a href=/history?session=SESSKEY>History</a></td><td class=menu_spacer></td>\
-<td class=TAB1 align=center><a href=/buckets?session=SESSKEY>Buckets</a></td><td class=menu_spacer></td>\
-<td class=TAB4 align=center><a href=/magnets?session=SESSKEY>Magnets</a></td><td class=menu_spacer></td>\
-<td class=TAB0 align=center><a href=/configuration?session=SESSKEY>Configuration</a></td><td class=menu_spacer></td>\
-<td class=TAB3 align=center><a href=/security?session=SESSKEY>Security</a></td><td class=menu_spacer></td>\
-<td class=TAB5 align=center><a href=/advanced?session=SESSKEY>Advanced</a></td></tr>\
-</table>\
-<table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr> \
-<td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>";
-my $footer = "</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center><table class=footer><tr><td>POPFile VERSION - <a href=http://popfile.sourceforge.net/manual/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a> - (TIME) - (LASTUSER)</td></tr></table></body></html>";
-
 # Hash used to store form parameters
 my %form = ();
 
@@ -107,511 +86,90 @@ my $lastuser = 'none';
 my @history_cache;
 my @from_cache;
 my @subject_cache;
+my @bucket_cache;
+my @reclassified_cache;
 my $downloaded_mail = 0;
 
-# ---------------------------------------------------------------------------------------------
 #
-# parse_command_line - Parse ARGV
 #
-# ---------------------------------------------------------------------------------------------
-sub parse_command_line 
-{
-    if ( $#ARGV >= 0 ) 
-    {
-        my $i = 0;
-        
-        while ( $i < $#ARGV ) 
-        {
-            if ( $ARGV[$i] =~ /^-(.+)$/ )
-            {
-                if ( defined($configuration{$1}) )
-                {
-                    if ( $i < $#ARGV )
-                    {
-                        $configuration{$1} = $ARGV[$i+1];
-                        $i += 2;
-                    }
-                    else
-                    {
-                        print "Missing argument for $ARGV[$i]\n";
-                        last;
-                    }
-                }
-                else
-                {
-                    print "Unknown command line option $ARGV[$i]\n";
-                    last;
-                }
-            }
-            else
-            {
-                print "Expected a command line option and got $ARGV[$i]\n";
-                last;
-            }
-        }
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
+# USER INTERFACE
 #
-# load_skins
 #
-# ---------------------------------------------------------------------------------------------
-
-sub load_skins
-{
-    @skins = glob 'skins/*.css';
-    
-    for my $i (0..$#skins)
-    {
-        $skins[$i] =~ s/.*\/(.+)\.css/$1/;
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# load_configuration -  Loads the current configuration of popfile into the %configuration
-#           hash from a local file.  The format is a very simple set of lines
-#           containing a space separated name and value pair
-#
-# ---------------------------------------------------------------------------------------------
-sub load_configuration
-{
-    if ( open CONFIG, "<popfile.cfg" )
-    {
-        while ( <CONFIG> )
-        {
-            if ( /(\S+) (\S+)/ )
-            {
-                $configuration{$1} = $2;
-            }
-        }
-        
-        close CONFIG;
-    }
-    else
-    {
-        $configuration{debug} = 2;
-        debug( "Couldn't find the popfile.cfg file" );
-        $configuration{debug} = 0;
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# save_configuration -  Saves the current configuration of popfile from the %configuration
-#           hash to a local file.
-#
-# ---------------------------------------------------------------------------------------------
-sub save_configuration
-{
-    if ( open CONFIG, ">popfile.cfg" )
-    {
-        foreach my $key (keys %configuration)
-        {
-            print CONFIG "$key $configuration{$key}\n";
-        }
-        
-        close CONFIG;
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# remove_debug_files - Remove old popfile log files
-#
-# Removes popfile log files that are older than 3 days
-#
-# ---------------------------------------------------------------------------------------------
-sub remove_debug_files
-{
-    my @debug_files = glob "popfile*.log";
-
-    calculate_today();
-    
-    foreach my $debug_file (@debug_files)
-    {
-        # Extract the epoch information from the popfile log file name
-        
-        if ( $debug_file =~ /popfile([0-9]+)\.log/ ) 
-        {
-            # If older than now - 3 days then delete
-            if ( $1 < (time - 3 * $seconds_per_day) ) 
-            {
-                unlink($debug_file);
-            }
-        }
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# remove_mail_files - Remove old popfile saved mail files
-#
-# Removes the popfile*.msg files that are older than one day
-#
-# ---------------------------------------------------------------------------------------------
-sub remove_mail_files
-{
-    my @mail_files = glob "messages/popfile*.msg";
-    my $result = 0;
-
-    calculate_today();
-    
-    foreach my $mail_file (@mail_files)
-    {
-        # Extract the epoch information from the popfile mail file name
-        
-        if ( $mail_file =~ /popfile([0-9]+)_([0-9]+)\.msg/ ) 
-        {
-            # If older than now - 2 day then delete
-            if ( $1 < (time - $configuration{history_days} * $seconds_per_day) ) 
-            {
-                my $class_file = $mail_file;
-                $class_file =~ s/msg$/cls/;
-                unlink($mail_file);
-                unlink($class_file);
-                debug( "Deleting $mail_file $class_file on $today" );
-                $result = 1;
-            }
-        }
-    }
-    
-    return $result;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# debug - print debug messages
-#
-# $_    A string containing a debug message that may or may not be printed
-#
-# Prints the passed string if the global $debug is true
-#
-# ---------------------------------------------------------------------------------------------
-sub debug
-{
-    my ( $message ) = @_;
-    
-    if ( $configuration{debug} > 0 )
-    {
-        # Check to see if we are handling the USER/PASS command and if we are then obscure the
-        # account information
-        if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ ) 
-        {
-            $message = "$`$1$3 XXXXXX$4";
-        }
-        
-        chomp $message;
-        $message .= "\n";
-
-        my $now = localtime;
-        my $msg = "$now: $message";
-        
-        if ( $configuration{debug} & 1 ) 
-        {
-            open DEBUG, ">>$debug_filename";
-            binmode DEBUG;
-            print DEBUG $msg;
-            close DEBUG;
-        }
-        
-        if ( $configuration{debug} & 2 )
-        {
-            print $msg;
-        }
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-# 
-# tee - outputs a string to a stream and the debug
-#
-# $socket   The stream (created with IO::) to send the string to
-# $text     The text to output
-#
-# Sends $text to $socket and sends $text to debug output
-#
-# ---------------------------------------------------------------------------------------------
-sub tee
-{
-    my ( $socket, $text ) = @_;
-
-    # Send the message to the debug output and then send it to the appropriate socket
-    debug( $text ); 
-    print $socket $text if $socket->connected;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# get_response - send a message to a remote server and echo the response to a local client
-#
-# $mail     The stream (created with IO::) to send the message to (the remote mail server)
-# $client   The local mail client (created with IO::) that needs the response
-# $command  The text of the command to send (we add an EOL)
-#
-# Send $command to $mail, receives the response and echoes it to the $client and the debug 
-# output.  Returns the response
-#
-# ---------------------------------------------------------------------------------------------
-sub get_response
-{
-    my ( $mail, $client, $command ) = @_;
-    
-    unless ( $mail )
-    {
-       # $mail is undefined - return an error intead of crashing
-       tee( $client, "-ERR error communicating with mail server" );
-       return 0;
-    }
-
-    # Send the command (followed by the appropriate EOL) to the mail server
-    tee( $mail, "$command$eol" );
-    
-    my $response;
-    
-    # Retrieve a single string containing the response
-    if ( $mail->connected )
-    {
-        $response = <$mail>;
-        
-        if ( $response )
-        {
-            # Echo the response up to the mail client
-            tee( $client, $response );
-        }
-        else
-        {
-            # An error has occurred reading from the mail server
-            tee( $client, "-ERR no response from mail server" );
-            return 0;
-        }
-    }
-    
-    return $response;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# echo_response - send a message to a remote server and echo the response to a local client
-#
-# $mail     The stream (created with IO::) to send the message to (the remote mail server)
-# $client   The local mail client (created with IO::) that needs the response
-# $command  The text of the command to send (we add an EOL)
-#
-# Send $command to $mail, receives the response and echoes it to the $client and the debug 
-# output.  Returns true if the response was +OK and false if not
-#
-# ---------------------------------------------------------------------------------------------
-sub echo_response
-{
-    my ( $mail, $client, $command ) = @_;
-    
-    my $response = get_response( $mail, $client, $command );
-    
-    # Determine whether the response began with the string +OK.  If it did then return 1
-    # else return 0
-    return ( $response =~ /^\+OK/ );
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# echo_to_dot - echo all information from the $mail server until a single line with a . is seen
-#
-# $mail     The stream (created with IO::) to send the message to (the remote mail server)
-# $client   The local mail client (created with IO::) that needs the response
-#
-# ---------------------------------------------------------------------------------------------
-sub echo_to_dot
-{
-    my ($mail, $client) = @_;
-    
-    while ( <$mail> )
-    {
-        # Check for an abort
-        if ( $alive == 0 )
-        {
-            last;
-        }
-
-        tee( $client, $_ );
-
-        if ( /^\.(\r\n|\r|\n)$/ )
-        {   
-            last;
-        }
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# verify_connected - Called to check that we are connected
-#
-# $mail        The handle of the real mail server
-# $hostname    The host name of the remote server
-# $port        The port
-#
-# ---------------------------------------------------------------------------------------------
-sub verify_connected
-{
-    my ($client, $hostname, $port) = @_;
-    
-    calculate_today();
-    
-    # Check to see if we are already connected
-    if ( $mail)
-    {
-        if ( $mail->connected ) 
-        {
-            return 1;
-        }
-    }
-    
-    # Connect to the real mail server on the standard port
-    $mail = IO::Socket::INET->new(
-                Proto    => "tcp",
-                PeerAddr => $hostname,
-                PeerPort => $port );
-
-    # Check that the connect succeeded for the remote server
-    if ( $mail )
-    {                 
-        if ( $mail->connected ) 
-        {
-            # Wait 10 seconds for a response from the remote server and if 
-            # there isn't one then give up trying to connect
-            my $selector = new IO::Select( $mail );
-            last unless () = $selector->can_read($configuration{timeout});
-            
-            # Read the response from the real server and say OK
-            my $buf        = '';
-            my $max_length = 8192;
-            my $n          = sysread( $mail, $buf, $max_length, length $buf );
-            
-            debug( "Connection returned: $buf" );
-            if ( !( $buf =~ /[\r\n]/ ) )
-            {
-                for my $i ( 0..4 )
-                {
-                    flush_extra( $mail, $client );
-                }
-            }
-            return 1;
-        }
-    }
-
-    # Tell the client we failed
-    tee( $client, "-ERR failed to connect to $hostname:$port$eol" );
-    
-    return 0;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# flush_extra - Read extra data from the mail server and send to client, this is to handle
-#               POP servers that just send data when they shouldn't.  I've seen one that sends
-#               debug messages!
-#
-# $mail        The handle of the real mail server
-# $client      The mail client talking to us
-#
-# ---------------------------------------------------------------------------------------------
-sub flush_extra
-{
-    my ($mail, $client) = @_;
-    
-    if ( $mail )
-    {
-        if ( $mail->connected )
-        {
-            my $selector   = new IO::Select( $mail );
-            my $buf        = '';
-            my $max_length = 8192;
-
-            while( 1 )
-            {
-                last unless () = $selector->can_read(0.1);
-                unless( my $n = sysread( $mail, $buf, $max_length, length $buf ) )
-                {
-                    last;
-                }
-                
-                tee( $client, $buf );
-            }
-        }
-    }
-}
 
 # ---------------------------------------------------------------------------------------------
 #
 # http_redirect - tell the browser to redirect to a url
 #
+# $client   The web browser to send redirect to
 # $url      Where to go
+#
+# Return a valid HTTP/1.0 header containing a 302 redirect message to the passed in URL
 #
 # ---------------------------------------------------------------------------------------------
 sub http_redirect
 {
-    my ( $url ) = @_;
+    my ( $client, $url ) = @_;
     
     my $header = "HTTP/1.0 302 Found\r\nLocation: ";
     $header .= $url;
     $header .= "$eol$eol";
-    return $header;
+    print $client $header;
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # http_ok - Output a standard HTTP 200 message with a body of data
 #
+# $client    The web browser to send result to
 # $text      The body of the page
+# $selected  Which tab is to be selected
+#
+# Returns an HTTP 200 message with a body of data passed in $text wrapping it with the standard
+# $header and $footer.  The $header is updated with the appropriate tab selected, and the 
+# various elements in the $footer are updated.  This function also checks whether POPFile is 
+# up to date and if it is not it inserts the appropriate image to tell the user to update.
 #
 # ---------------------------------------------------------------------------------------------
 sub http_ok
 {
-    my ( $text, $selected ) = @_;
+    my ( $client, $text, $selected ) = @_;
     my @tab = ( 'menu_standard', 'menu_standard', 'menu_standard', 'menu_standard', 'menu_standard', 'menu_standard' );
     $tab[$selected] = 'menu_selected';
-    
-    $text = $header . $text . $footer;
-    
-    $text =~ s/TAB0/$tab[0]/;
-    $text =~ s/TAB1/$tab[1]/;
-    $text =~ s/TAB2/$tab[2]/;
-    $text =~ s/TAB3/$tab[3]/;
-    $text =~ s/TAB4/$tab[4]/;
-    $text =~ s/TAB5/$tab[5]/;
-    $text =~ s/CURRENT_SKIN/skins\/$configuration{skin}\.css/;
     my $time = localtime;
-    $text =~ s/TIME/$time/;
-    $text =~ s/LASTUSER/$lastuser/;
+    my $update_check = ''; 
 
+    # Check to see if we've checked for updates today.  If we have not then insert a reference to an image
+    # that is generated through a CGI on UseTheSource.
     if ( $today ne $configuration{last_update_check} )
     {
         calculate_today();
-        $text =~ s/UPDATECHECK/<a href=http:\/\/sourceforge.net\/project\/showfiles.php?group_id=63137><img border=0 src=http:\/\/www.usethesource.com\/cgi-bin\/popfile_update.pl?ma=$major_version&mi=$minor_version&bu=$build_version><\/a>/;
+        $update_check = "<a href=http://sourceforge.net/project/showfiles.php?group_id=63137><img border=0 src=http://www.usethesource.com/cgi-bin/popfile_update.pl?ma=$major_version&mi=$minor_version&bu=$build_version></a>";
         $configuration{last_update_check} = $today;
     }
-    else
-    {
-        $text =~ s/UPDATECHECK//;
-    }
+    
+    $text = "<html><head><title>POPFile Control Center</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style><link rel=stylesheet type=text/css href='skins/$configuration{skin}.css' title=main></link><META HTTP-EQUIV=Pragma CONTENT=no-cache><META HTTP-EQUIV=Expires CONTENT=0><META HTTP-EQUIV=Cache-Control CONTENT=no-cache><META HTTP-EQUIV=Refresh CONTENT=600></head><body><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'><table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;POPFile Control Center<td align=right valign=middle><a href=/shutdown?session=SESSKEY>Shutdown</a>&nbsp;<tr height=3><td colspan=3></td></tr></table></td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center>$update_check<table class=menu cellspacing=0><tr><td class=$tab[2] align=center><a href=/history?session=$session_key&setfilter=Filter&filter=>History</a></td><td class=menu_spacer></td><td class=$tab[1] align=center><a href=/buckets?session=$session_key>Buckets</a></td><td class=menu_spacer></td><td class=$tab[4] align=center><a href=/magnets?session=$session_key>Magnets</a></td><td class=menu_spacer></td><td class=$tab[0] align=center><a href=/configuration?session=$session_key>Configuration</a></td><td class=menu_spacer></td><td class=$tab[3] align=center><a href=/security?session=$session_key>Security</a></td><td class=menu_spacer></td><td class=$tab[5] align=center><a href=/advanced?session=$session_key>Advanced</a></td></tr></table><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>" . $text . "</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center><table class=footer><tr><td>POPFile $major_version.$minor_version.$build_version - <a href=http://popfile.sourceforge.net/manual/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a> - ($time) - ($lastuser)</td></tr></table></body></html>";
     
     my $http_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
     $http_header .= length($text);
     $http_header .= "$eol$eol";
-    return $http_header . $text;
+    print $client $http_header . $text;
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # http_file - Read a file from disk and send it to the other end
 #
+# $client     The web browser to send the results to
 # $file       The file to read (always assumed to be a GIF right now)
+# $type       Set this to the HTTP return type (e.g. text/html or image/gif)
+#
+# Returns the contents of a file formatted into an HTTP 200 message or an HTTP 404 if the
+# file does not exist
 #
 # ---------------------------------------------------------------------------------------------
 sub http_file
 {
-    my ($file, $type) = @_;
+    my ($client, $file, $type) = @_;
     my $contents = '';
     if ( open FILE, "<$file" )
     {
@@ -624,33 +182,42 @@ sub http_file
         my $header = "HTTP/1.0 200 OK\r\nContent-Type: $type\r\nContent-Length: ";
         $header .= length($contents);
         $header .= "$eol$eol";
-        return $header . $contents;
+        print $client $header . $contents;
     }
-    
-    return http_error(404);
+    else
+    {
+        http_error($client, 404);
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # http_error - Output a standard HTTP error message
 #
+# $client     The web browser to send the results to
 # $error      The error number
+#
+# Return a simple HTTP error message in HTTP 1/0 format
 #
 # ---------------------------------------------------------------------------------------------
 sub http_error
 {
-    my ($error) = @_;
+    my ($client, $error) = @_;
 
-    return "HTTP/1.0 $error Error$eol$eol";    
+    print $client "HTTP/1.0 $error Error$eol$eol";    
 }
 
 # ---------------------------------------------------------------------------------------------
 #
-# popfile_homepage - get the popfile homepage
+# configuration_page - get the configuration options
+#
+# $client     The web browser to send the results to
 #
 # ---------------------------------------------------------------------------------------------
-sub popfile_homepage
+sub configuration_page
 {
+    my ($client) = @_;
+    
     my $body;
     my $port_error = '';
     my $ui_port_error = '';
@@ -799,16 +366,20 @@ sub popfile_homepage
     $body .= ">To Screen and File</option>";
     $body .= "</select><input type=submit name=submit_debug value=Apply></form>";
     
-    return http_ok($body,0); 
+    http_ok($client,$body,0); 
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # security_page - get the security configuration page
 #
+# $client     The web browser to send the results to
+#
 # ---------------------------------------------------------------------------------------------
 sub security_page
 {
+    my ($client) = @_;
+    
     my $body;
     my $server_error = '';
     my $port_error   = '';
@@ -865,7 +436,7 @@ sub security_page
     $body .= "<p><form action=/security><b>Secure port:</b> <br><input name=sport type=text value=$configuration{sport}><input type=submit name=update_sport value=Apply><input type=hidden name=session value=$session_key></form>$port_error";    
     $body .= "Updated port to $configuration{sport}; this change will not take affect until you restart POPFile" if ( defined($form{sport}) );
     
-    return http_ok($body,3); 
+    http_ok($client,$body,3); 
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -873,6 +444,9 @@ sub security_page
 # pretty_number - format a number with ,s every 1000
 #
 # $number       The number to format
+#
+# TODO: replace this with something that uses locale information to format numbers in a way
+# that is specific to the locale since not everyone likes ,s every 1000.
 #
 # ---------------------------------------------------------------------------------------------
 sub pretty_number
@@ -891,9 +465,13 @@ sub pretty_number
 #
 # advanced_page - very advanced configuration options
 #
+# $client     The web browser to send the results to
+#
 # ---------------------------------------------------------------------------------------------
 sub advanced_page 
 {
+    my ($client) = @_;
+    
     my $add_message = '';
     my $delete_message = '';
     if ( defined($form{newword}) )
@@ -957,26 +535,49 @@ sub advanced_page
     }
     $body .= "</table><p><form action=/advanced><b>Add word:</b><br><input type=hidden name=session value=$session_key><input type=text name=newword> <input type=submit name=add value=Add></form>$add_message";
     $body .= "<p><form action=/advanced><b>Delete word:</b><br><input type=hidden name=session value=$session_key><input type=text name=word> <input type=submit name=remove value=Delete></form>$delete_message";
-    return http_ok($body,5);
+    http_ok($client,$body,5);
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# encode
+#
+# $text     Text to encode for URL safety
+#
+# Encode a URL so that it can be safely passed in a URL
+#
+# ---------------------------------------------------------------------------------------------
+
+sub encode
+{
+    my ($text) = @_;
+    
+    $text =~ s/ /\+/;
+    
+    return $text;
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # magnet_page - the list of bucket magnets
 #
+# $client     The web browser to send the results to
+#
 # ---------------------------------------------------------------------------------------------
 sub magnet_page 
 {
+    my ($client) = @_;
+    
     my $magnet_message = '';
-    if ( ( defined($form{from}) ) && ( $form{bucket} ne '' ) )
+    if ( ( defined($form{type}) ) && ( $form{bucket} ne '' ) && ( $form{text} ne '' ) )
     {
         my $found = 0;
         for my $bucket (keys %{$classifier->{magnets}})
         {
-            if ( defined($classifier->{magnets}{$bucket}{from}{$form{from}}) )
+            if ( defined($classifier->{magnets}{$bucket}{$form{type}}{$form{text}}) )
             {
                 $found  = 1;
-                $magnet_message = "<blockquote><font color=red><b>Magnet '$form{from}' already exists in bucket '$bucket'</b></font></blockquote>";
+                $magnet_message = "<blockquote><font color=red><b>Magnet '$form{type}: $form{text}' already exists in bucket '$bucket'</b></font></blockquote>";
             }
         }
 
@@ -984,12 +585,12 @@ sub magnet_page
         {
             for my $bucket (keys %{$classifier->{magnets}})
             {
-                for my $from (keys %{$classifier->{magnets}{$bucket}{from}}) 
+                for my $from (keys %{$classifier->{magnets}{$bucket}{$form{type}}}) 
                 {
-                    if ( ( $form{from} =~ /\Q$from\E/ ) || ( $from =~ /\Q$form{from}\E/ ) ) 
+                    if ( ( $form{text} =~ /\Q$from\E/ ) || ( $from =~ /\Q$form{text}\E/ ) ) 
                     {
                         $found = 1;
-                        $magnet_message = "<blockquote><font color=red><b>New magnet '$form{from}' clashes with magnet '$from' in bucket '$bucket' and could cause ambiguous results.  New magnet was not added.</b></font></blockquote>";
+                        $magnet_message = "<blockquote><font color=red><b>New magnet '$form{type}: $form{text}' clashes with magnet '$form{type}: $from' in bucket '$bucket' and could cause ambiguous results.  New magnet was not added.</b></font></blockquote>";
                     }
                 }
             }
@@ -997,58 +598,68 @@ sub magnet_page
         
         if ( $found == 0 )
         {
-            $classifier->{magnets}{$form{bucket}}{from}{$form{from}} = 1;
+            $classifier->{magnets}{$form{bucket}}{$form{type}}{$form{text}} = 1;
             $classifier->save_magnets();
-            $magnet_message = "<blockquote>Create new magnet '$form{from}' in bucket '$form{bucket}'</blockquote>";
+            $magnet_message = "<blockquote>Create new magnet '$form{type}: $form{text}' in bucket '$form{bucket}'</blockquote>";
+            $classifier->save_magnets();
         }
     }
 
-    if ( defined($form{dfrom}) ) 
+    if ( defined($form{dtype}) ) 
     {
-        delete $classifier->{magnets}{$form{bucket}}{from}{$form{dfrom}};
+        delete $classifier->{magnets}{$form{bucket}}{$form{dtype}}{$form{dmagnet}};
         $classifier->save_magnets();
     }
     
-    my $body = '<h2>Current Magnets</h2><p>The following magnets cause mail from specified email addresses to always be classified into the specified bucket.';
-    $body .= "<p><table width=50%><tr><td><b>From</b><td><b>Bucket</b><td><b>Delete</b>";
+    my $body = '<h2>Current Magnets</h2><p>The following magnets cause mail to always be classified into the specified bucket.';
+    $body .= "<p><table width=50%><tr><td><b>Magnet</b><td><b>Bucket</b><td><b>Delete</b>";
     
     my $stripe = 0;
     for my $bucket (keys %{$classifier->{magnets}})
     {
-        for my $from (keys %{$classifier->{magnets}{$bucket}{from}}) 
+        for my $type (keys %{$classifier->{magnets}{$bucket}})
         {
-            $body .= "<tr "; 
-            if ( $stripe ) 
+            for my $magnet (keys %{$classifier->{magnets}{$bucket}{$type}}) 
             {
-                $body .= " class=row_even"; 
+                $body .= "<tr "; 
+                if ( $stripe ) 
+                {
+                    $body .= " class=row_even"; 
+                }
+                else
+                {
+                    $body .= " class=row_odd"; 
+                }
+                $body .= "><td>$type: $magnet<td><font color=$classifier->{colors}{$bucket}>$bucket</font><td><a href=/magnets?bucket=$bucket&dtype=$type&";
+                $body .= encode("dmagnet=$magnet");
+                $body .= "&session=$session_key>[Delete]</a>";
+                $stripe = 1 - $stripe;
             }
-            else
-            {
-                $body .= " class=row_odd"; 
-            }
-            $body .= "><td>$from<td><font color=$classifier->{colors}{$bucket}>$bucket</font><td><a href=/magnets?bucket=$bucket&dfrom=$from&session=$session_key>[Delete]</a>";
-            $stripe = 1 - $stripe;
         }
     }
     
-    $body .= "</table><p><hr><p><h2>Create New Magnet</h2><form action=/magnets><b>From address or name:</b> (for example: john\@company.com to match a specific address, company.com to match everyone who sends from company.com, John Doe to match a specific person, John to match all Johns)<br><input type=text name=from><input type=hidden name=session value=$session_key>";
-    $body .= "<p><b>Always goes to bucket:</b><br><select name=bucket><option value=></option>";
+    $body .= "</table><p><hr><p><h2>Create New Magnet</h2><form action=/magnets><b>Three types of magnets are available: <ul><li>From address or name:</b> For example: john\@company.com to match a specific address, <br>company.com to match everyone who sends from company.com, <br>John Doe to match a specific person, John to match all Johns<li><b>To address or name:</b> Like a From: magnet but for the To: address in an email<li><b>Subject words:</b> For example: hello to match all messages with hello in the subject</ul><br><b>Magnet Type:</b><br><select name=type><option value=from>From</option><option value=to>To</option><option value=subject>Subject</option></select><input type=hidden name=session value=$session_key>";
+    $body .= "<p><b>Value:</b><br><input type=text name=text><p><b>Always goes to bucket:</b><br><select name=bucket><option value=></option>";
     my @buckets = sort keys %{$classifier->{total}};
     foreach my $bucket (@buckets)
     {
         $body .= "<option value=$bucket>$bucket</option>";
     }
     $body .= "</select> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$magnet_message";
-    return http_ok($body,4);
+    http_ok($client,$body,4);
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # bucket_page - information about a specific bucket
 #
+# $client     The web browser to send the results to
+#
 # ---------------------------------------------------------------------------------------------
 sub bucket_page 
 {
+    my ($client) = @_;
+    
     my $body = "<h2>Detail for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</font></h2><p><table><tr><td><b>Bucket word count</b><td>&nbsp;<td align=right>". pretty_number($classifier->{total}{$form{showbucket}});
     $body .= "<td>(" . pretty_number( $classifier->{unique}{$form{showbucket}}) . " unique)";
     $body .= "<tr><td><b>Total word count</b><td>&nbsp;<td align=right>" . pretty_number($classifier->{full_total});
@@ -1078,16 +689,20 @@ sub bucket_page
     }
     $body .= "</table>";
  
-    return http_ok($body,1);
+    http_ok($client,$body,1);
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # corpus_page - the corpus management page
 #
+# $client     The web browser to send the results to
+#
 # ---------------------------------------------------------------------------------------------
 sub corpus_page
 {
+    my ($client) = @_;
+    
     if ( defined($form{reset_stats}) )
     {
         $configuration{mcount} = 0;
@@ -1097,7 +712,7 @@ sub corpus_page
     
     if ( defined($form{showbucket}) ) 
     {
-        return bucket_page();
+        bucket_page($client);
     }
     
     my $result;
@@ -1355,7 +970,7 @@ sub corpus_page
         $body .= "</blockquote>";
     }
 
-    return http_ok($body,1);
+    http_ok($client,$body,1);
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1385,12 +1000,86 @@ sub compare_mf
 
 # ---------------------------------------------------------------------------------------------
 #
+# load_history_cache
+#
+# Reloads the history cache filtering based on the passed in filter
+#
+# $filter       Number of bucket to filter on
+#
+# ---------------------------------------------------------------------------------------------
+sub load_history_cache
+{
+    my ($filter) = @_;
+    
+    my @history          = sort compare_mf glob "messages/popfile*.msg";
+    $#history_cache      = -1;
+    $#bucket_cache       = -1;
+    $#reclassified_cache = -1;
+    $#from_cache = -1;
+    $#subject_cache = -1;
+    $downloaded_mail     = 0;
+    my $j = 0;
+
+    if ( $#history == -1 ) 
+    {
+        $configuration{mail_count} = 0;
+        $configuration{last_count} = 0;
+    }
+
+    foreach my $i ( 0 .. $#history )
+    {
+        $history[$i] =~ /(popfile.*\.msg)/;
+        $history[$i] = $1;
+        my $class_file = $history[$i];
+        $class_file =~ s/msg$/cls/;
+        open CLASS, "<messages/$class_file";
+        my $bucket       = <CLASS>;
+        my $reclassified = 0;
+        if ( $bucket =~ /RECLASSIFIED/ ) {
+            $bucket       = <CLASS>;
+            $reclassified = 1;
+        }
+        $bucket =~ s/[\r\n]//g;
+        
+        if ( ( $filter eq '' ) || ( $bucket eq $filter ) ) 
+        {
+            $history_cache[$j]      = $history[$i];
+            $bucket_cache[$j]       = $bucket;
+            $reclassified_cache[$j] = $reclassified;
+            
+            $j += 1;
+        }
+    }
+
+    debug( "Reloaded history cache from disk" );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # history_page - get the message classification history page
+#
+# $client     The web browser to send the results to
 #
 # ---------------------------------------------------------------------------------------------
 sub history_page
 {
-    my $body = "<h2>Recent Messages</h2>"; 
+    my ($client) = @_;
+
+    my $filtered = '';    
+    if ( !defined($form{filter}) || ( $form{filter} eq '__filter__all' ) ) 
+    {
+        $form{filter} = '';
+    } 
+    else
+    {
+        if ( $form{filter} ne '' ) 
+        {
+            $filtered = " (just showing bucket <font color=$classifier->{colors}{$form{filter}}>$form{filter}</font>)";
+        }
+    }
+
+    my $body = "<h2>Recent Messages$filtered</h2>"; 
+
 
     # Handle undo
     if ( defined($form{undo}) )
@@ -1456,18 +1145,12 @@ sub history_page
     }
 
     # Handle clearing the history files
-    if ( ( defined($form{clear}) ) && ( $form{clear} eq 'Remove+All' ) )
+    if ( ( defined($form{clear}) ) && ( $form{clear} eq 'Remove All' ) )
     {
         # If the history cache is empty then we need to reload it now
         if ( $#history_cache < 0 ) 
         {
-            @history_cache = sort compare_mf glob "messages/popfile*.msg";
-
-            foreach my $i ( 0 .. $#history_cache )
-            {
-                $history_cache[$i] =~ /(popfile.*\.msg)/;
-                $history_cache[$i] = $1;
-            }
+            load_history_cache($form{filter});
         }
 
         foreach my $mail_file (@history_cache)
@@ -1478,25 +1161,18 @@ sub history_page
             unlink("messages/$class_file");
             debug( "Removing $mail_file because of Remove All" );
         }
-        $configuration{mail_count} = 0;
-        $configuration{last_count} = 0;
 
         $#history_cache = -1;        
-        return http_redirect('/history');
+        http_redirect($client,"/history?session=$session_key&filter=$form{filter}");
+        return;
     }
 
-    if ( ( defined($form{clear}) ) && ( $form{clear} eq 'Remove+Page' ) )
+    if ( ( defined($form{clear}) ) && ( $form{clear} eq 'Remove Page' ) )
     {
         # If the history cache is empty then we need to reload it now
         if ( $#history_cache < 0 ) 
         {
-            @history_cache = sort compare_mf glob "messages/popfile*.msg";
-
-            foreach my $i ( 0 .. $#history_cache )
-            {
-                $history_cache[$i] =~ /(popfile.*\.msg)/;
-                $history_cache[$i] = $1;
-            }
+            load_history_cache($form{filter});
         }
         
         foreach my $i ( $form{start_message} .. $form{start_message} + $configuration{page_size} - 1 )
@@ -1515,26 +1191,15 @@ sub history_page
         }
 
         $#history_cache = -1;        
-        return http_redirect("/history?session=$session_key");
+        http_redirect($client,"/history?session=$session_key&filter=$form{filter}");
+        return;
     }
 
     # If we just changed the number of mail files on the disk (deleted some or added some)
     # or the history is empty then reload the history
-    if ( ( remove_mail_files() ) || ( $downloaded_mail ) || ( $#history_cache < 0 ) )
+    if ( ( remove_mail_files() ) || ( $downloaded_mail ) || ( $#history_cache < 0 ) || ( defined($form{setfilter}) ) )
     {
-        @history_cache = sort compare_mf glob "messages/popfile*.msg";
-        $downloaded_mail = 0;
-
-        foreach my $i ( 0 .. $#history_cache )
-        {
-            $history_cache[$i] =~ /(popfile.*\.msg)/;
-            $history_cache[$i] = $1;
-        }
-        
-        debug( "Reloaded history cache from disk" );
-            
-        $#from_cache = -1;
-        $#subject_cache = -1;
+        load_history_cache($form{filter});
     }
 
     # Handle the reinsertion of a message file
@@ -1594,7 +1259,8 @@ sub history_page
         }
 
         $classifier->load_bucket("$configuration{corpus}/$form{shouldbe}");
-        $classifier->update_constants();        
+        $classifier->update_constants();    
+        load_history_cache($form{filter});
     }
 
     my $search_message = "<blockquote><font color=red>Search term not found in History</font></blockquote>";
@@ -1642,7 +1308,21 @@ sub history_page
     
     if ( $#history_cache >= 0 ) 
     {
-        $body .= "<table width=100%><tr><td></td><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";            
+        $body .= "<table width=100%><tr valign=bottom><td></td><td><b>From</b><td><b>Subject</b><td><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all></option>";
+        
+        my @buckets = sort keys %{$classifier->{total}};
+        foreach my $abucket (@buckets)
+        {
+            $body .= "<option value=$abucket";
+            
+            if ( ( defined($form{filter}) ) && ( $form{filter} eq $abucket ) )
+            {
+                $body .= " selected";
+            }
+            
+            $body .= ">$abucket</option>";
+        }
+        $body .= "</select><input type=submit name=setfilter value=Filter></form><b>Classification</b><td><b>Should be</b>";            
         my $start_message = 0;
         if ( ( defined($form{start_message}) ) && ($form{start_message} > 0 ) )
         {
@@ -1734,12 +1414,12 @@ sub history_page
             
             # If the user has more than 4 buckets then we'll present a drop down list of buckets, otherwise we present simple
             # links
-            my @buckets = sort keys %{$classifier->{total}};
+
             my $drop_down = ( $#buckets > 4 );
 
             if ( $drop_down ) 
             {
-                $body .= "<form action=/history>";
+                $body .= "<form action=/history><input type=hidden name=filter value=$form{filter}>";
             }
             $body .= "<a name=$mail_file>";
             $body .= "<tr";
@@ -1763,16 +1443,9 @@ sub history_page
 
             $body .= "><td>";
             $body .= $i+1 . "<td>";
-            my $class_file = $mail_file;
-            $class_file =~ s/msg$/cls/;
-            open CLASS, "<messages/$class_file";
-            my $bucket = <CLASS>;
-            my $reclassified = 0;
-            if ( $bucket =~ /RECLASSIFIED/ ) {
-                $bucket = <CLASS>;
-                $reclassified = 1;
-            }
-            $bucket =~ s/[\r\n]//g;
+            my $bucket       = $bucket_cache[$i];
+            my $reclassified = $reclassified_cache[$i]; 
+            
             close CLASS;
             $mail_file =~ /popfile\d+_(\d+)\.msg/;
             my $bold = ( ( $configuration{last_count} <= $1 ) && ( $reclassified == 0 ) );
@@ -1781,12 +1454,12 @@ sub history_page
             $body .= "</b>" if $bold;
             $body .= "<td>";
             $body .= "<b>" if $bold;
-            $body .= "<a href=/history?view=$mail_file&start_message=$start_message&session=$session_key#$mail_file>$subject</a>";
+            $body .= "<a href=/history?view=$mail_file&start_message=$start_message&session=$session_key&filter=$form{filter}#$mail_file>$subject</a>";
             $body .= "</b>" if $bold;
             $body .= "<td>";
             if ( $reclassified ) 
             {
-                $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified as <font color=$classifier->{colors}{$bucket}>$bucket</font> - <a href=/history?undo=$mail_file&session=$session_key&badbucket=$bucket>[Undo]</a>";
+                $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified as <font color=$classifier->{colors}{$bucket}>$bucket</font> - <a href=/history?undo=$mail_file&session=$session_key&badbucket=$bucket&filter=$form{filter}>[Undo]</a>";
             } 
             else
             {
@@ -1812,11 +1485,13 @@ sub history_page
                 {
                     if ( $drop_down ) 
                     {
-                        $body .= "<option value=$abucket>$abucket</option>"
+                        $body .= "<option value=$abucket";
+                        $body .= " selected" if ( $abucket eq $bucket );
+                        $body .= ">$abucket</option>"
                     }
                     else
                     {
-                        $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$session_key&usedtobe=$bucket><font color=$classifier->{colors}{$abucket}>[$abucket]</font></a> ";
+                        $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$session_key&usedtobe=$bucket&filter=$form{filter}><font color=$classifier->{colors}{$abucket}>[$abucket]</font></a> ";
                     }
                 }
 
@@ -1840,7 +1515,7 @@ sub history_page
                 $classifier->{parser}->{bayes} = $classifier;
                 $body .= $classifier->{parser}->parse_stream("messages/$form{view}");
                 $classifier->{parser}->{color} = 0;
-                $body .= "<p align=right><a href=/history?start_message=$start_message&session=$session_key><b>Close</b></a></table><td valign=top>";
+                $body .= "<p align=right><a href=/history?start_message=$start_message&session=$session_key&filter=$form{filter}><b>Close</b></a></table><td valign=top>";
                 $classifier->classify_file("messages/$form{view}");
                 $body .= $classifier->{scores};
             }
@@ -1851,8 +1526,8 @@ sub history_page
             }
         }
 
-        $body .= "</table><form action=/history><b>To remove entries in the history click: <input type=submit name=clear value='Remove All'>";
-        $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit name=search Value=Find></form>$search_message";
+        $body .= "</table><form action=/history><input type=hidden name=filter value=$form{filter}><b>To remove entries in the history click: <input type=submit name=clear value='Remove All'>";
+        $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=filter value=$form{filter}><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit name=search Value=Find></form>$search_message";
 
         if ( $configuration{page_size} <= $#history_cache )
         {
@@ -1861,7 +1536,7 @@ sub history_page
             {
                 $body .= "<a href=/history?start_message=";
                 $body .= $start_message - $configuration{page_size};
-                $body .= "&session=$session_key>< Previous</a> ";
+                $body .= "&session=$session_key&filter=$form{filter}>< Previous</a> ";
             }
             my $i = 0;
             while ( $i <= $#history_cache )
@@ -1873,7 +1548,7 @@ sub history_page
                 }
                 else 
                 {
-                    $body .= "<a href=/history?start_message=$i&session=$session_key>";
+                    $body .= "<a href=/history?start_message=$i&session=$session_key&filter=$form{filter}>";
                     $body .= $i+1 . "</a>";
                 }
 
@@ -1884,34 +1559,54 @@ sub history_page
             {
                 $body .= "<a href=/history?start_message=";
                 $body .= $start_message + $configuration{page_size};
-                $body .= "&session=$session_key>Next ></a>";
+                $body .= "&session=$session_key&filter=$form{filter}>Next ></a>";
             }
             $body .= "</center>";
         }
     }
     else
     {
-        $body .= "<b>No messages in history.</b><p>";
+        $body .= "<b>No messages in history.</b><p><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all></option>";
+        
+        my @buckets = sort keys %{$classifier->{total}};
+        foreach my $abucket (@buckets)
+        {
+            $body .= "<option value=$abucket";
+            
+            if ( ( defined($form{filter}) ) && ( $form{filter} eq $abucket ) )
+            {
+                $body .= " selected";
+            }
+            
+            $body .= ">$abucket</option>";
+        }
+        $body .= "</select><input type=submit name=setfilter value=Filter></form>";
     }
     
-    return http_ok($body,2); 
+    http_ok($client,$body,2); 
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # handle_url - Handle a URL request
 #
+# $client     The web browser to send the results to
 # $url         URL to process
+#
+# Takes a URL and splits it into the URL portion and form arguments specified in the command
+# filling out the %form hash with the form elements and their values.  Checks the session
+# key and refuses access unless it matches.  Serves up a small set of specific urls that are
+# the main UI pages and then any GIF file in the POPFile directory and CSS files in the skins
+# subdirectory
 #
 # ---------------------------------------------------------------------------------------------
 sub handle_url
 {
-    my ($url) = @_;
+    my ($client, $url) = @_;
 
     # See if there are any form parameters and if there are parse them into the %form hash
     %form = ();
 
-    # Remove a # element
     # Remove a # element
     $url =~ s/#.*//;
 
@@ -1929,9 +1624,11 @@ sub handle_url
                 debug( "$1" );
                 my $from = "%$1";
                 my $to   = chr(hex("0x$1"));
-                $to =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
+                $to =~ s/(\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
                 $form{$arg} =~ s/$from/$to/g;
             }
+
+            $form{$arg} =~ s/\+/ /g;
 
             debug( "$arg = $form{$arg}" );
         }
@@ -1949,69 +1646,523 @@ sub handle_url
     {
         %form = ();
     }
-    
-    if ( $url eq '/security' ) 
-    {
-        return security_page();
-    }
-    
-    if ( $url eq '/configuration' ) 
-    {
-        return popfile_homepage();
-    }
-    
-    if ( $url eq '/buckets' )
-    {
-        return corpus_page();
-    }
 
-    if ( $url eq '/magnets' )
+    my %url_table = (   '/security'      => \&security_page, 
+                        '/configuration' => \&configuration_page,
+                        '/buckets'       => \&corpus_page,
+                        '/magnets'       => \&magnet_page, 
+                        '/advanced'      => \&advanced_page,
+                        '/history'       => \&history_page,
+                        '/'              => \&history_page );
+                        
+    # Any of the standard pages can be found in the url_table, the other pages are probably
+    # files on disk
+    if ( defined($url_table{$url}) ) 
     {
-        return magnet_page();
-    }
-
-    if ( $url eq '/advanced' )
-    {
-        return advanced_page();
-    }
-
-    if ( ( $url eq '/history' ) || ( $url eq '/' ) )
-    {
-        return history_page();
+        &{$url_table{$url}}($client);
+        return;
     }
 
     if ( $url eq '/shutdown' ) 
     {
         $alive = 0;
-        return http_ok("POPFile shutdown", 0);
+        http_ok($client, "POPFile shutdown", 0);
+        return;
     }
 
     if ( $url =~ /\/(.+\.gif)/ )
     {
-        return http_file( $1, 'image/gif' );
+        http_file( $client, $1, 'image/gif' );
+        return;
     }
 
     if ( $url =~ /(skins\/.+\.css)/ )
     {
-        return http_file( $1, 'text/css' );
+        http_file( $client, $1, 'text/css' );
+        return;
     }
 
-    return http_error(404);
+    http_error($client, 404);
 }
+
+#
+#
+# UTILITY FUNCTIONS
+#
+#
+
+# ---------------------------------------------------------------------------------------------
+#
+# parse_command_line - Parse ARGV
+#
+# The arguments are the keys of the %configuration hash.  Any argument that is not already
+# defined in the hash generates an error, there must be an even number of ARGV elements because
+# each command argument has to have a value.
+#
+# ---------------------------------------------------------------------------------------------
+sub parse_command_line 
+{
+    # It's ok for the command line to be blank, the values of %configuration will be drawn from
+    # the default values defined at the start of the code and those read from the configuration
+    # file
+    
+    if ( $#ARGV >= 0 ) 
+    {
+        my $i = 0;
+        
+        while ( $i < $#ARGV ) 
+        {
+            # A command line argument must start with a -
+            
+            if ( $ARGV[$i] =~ /^-(.+)$/ )
+            {
+                if ( defined($configuration{$1}) )
+                {
+                    if ( $i < $#ARGV )
+                    {
+                        $configuration{$1} = $ARGV[$i+1];
+                        $i += 2;
+                    }
+                    else
+                    {
+                        print "Missing argument for $ARGV[$i]\n";
+                        last;
+                    }
+                }
+                else
+                {
+                    print "Unknown command line option $ARGV[$i]\n";
+                    last;
+                }
+            }
+            else
+            {
+                print "Expected a command line option and got $ARGV[$i]\n";
+                last;
+            }
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# load_skins
+#
+# Gets the names of all the CSS files in the skins subdirectory and loads them into the skins
+# array.  The directory and .css portion of the file name is removed to give a simple name
+#
+# ---------------------------------------------------------------------------------------------
+
+sub load_skins
+{
+    @skins = glob 'skins/*.css';
+    
+    for my $i (0..$#skins)
+    {
+        $skins[$i] =~ s/.*\/(.+)\.css/$1/;
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# load_configuration
+#
+# Loads the current configuration of popfile into the %configuration hash from a local file.  
+# The format is a very simple set of lines containing a space separated name and value pair
+#
+# ---------------------------------------------------------------------------------------------
+sub load_configuration
+{
+    if ( open CONFIG, "<popfile.cfg" )
+    {
+        while ( <CONFIG> )
+        {
+            if ( /(\S+) (\S+)/ )
+            {
+                $configuration{$1} = $2;
+            }
+        }
+        
+        close CONFIG;
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# save_configuration
+#
+# Saves the current configuration of popfile from the %configuration hash to a local file.
+#
+# ---------------------------------------------------------------------------------------------
+sub save_configuration
+{
+    if ( open CONFIG, ">popfile.cfg" )
+    {
+        foreach my $key (keys %configuration)
+        {
+            print CONFIG "$key $configuration{$key}\n";
+        }
+        
+        close CONFIG;
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# remove_debug_files
+#
+# Removes popfile log files that are older than 3 days
+#
+# ---------------------------------------------------------------------------------------------
+sub remove_debug_files
+{
+    my @debug_files = glob "popfile*.log";
+
+    calculate_today();
+    
+    foreach my $debug_file (@debug_files)
+    {
+        # Extract the epoch information from the popfile log file name
+        
+        if ( $debug_file =~ /popfile([0-9]+)\.log/ ) 
+        {
+            # If older than now - 3 days then delete
+
+            if ( $1 < (time - 3 * $seconds_per_day) ) 
+            {
+                unlink($debug_file);
+            }
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# remove_mail_files - Remove old popfile saved mail files
+#
+# Removes the popfile*.msg files that are older than a number of days configured as 
+# history_days.
+#
+# ---------------------------------------------------------------------------------------------
+sub remove_mail_files
+{
+    my @mail_files = glob "messages/popfile*.msg";
+    my $result = 0;
+
+    calculate_today();
+    
+    foreach my $mail_file (@mail_files)
+    {
+        # Extract the epoch information from the popfile mail file name
+        
+        if ( $mail_file =~ /popfile([0-9]+)_([0-9]+)\.msg/ ) 
+        {
+            # If older than now - some number of days then delete
+
+            if ( $1 < (time - $configuration{history_days} * $seconds_per_day) ) 
+            {
+                my $class_file = $mail_file;
+                $class_file =~ s/msg$/cls/;
+                unlink($mail_file);
+                unlink($class_file);
+                $result = 1;
+            }
+        }
+    }
+    
+    return $result;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# debug
+#
+# $message    A string containing a debug message that may or may not be printed
+#
+# Prints the passed string if the global $debug is true
+#
+# ---------------------------------------------------------------------------------------------
+sub debug
+{
+    my ( $message ) = @_;
+    
+    if ( $configuration{debug} > 0 )
+    {
+        # Check to see if we are handling the USER/PASS command and if we are then obscure the
+        # account information
+        if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ ) 
+        {
+            $message = "$`$1$3 XXXXXX$4";
+        }
+        
+        chomp $message;
+        $message .= "\n";
+
+        my $now = localtime;
+        my $msg = "$now: $message";
+        
+        if ( $configuration{debug} & 1 ) 
+        {
+            open DEBUG, ">>$debug_filename";
+            binmode DEBUG;
+            print DEBUG $msg;
+            close DEBUG;
+        }
+        
+        if ( $configuration{debug} & 2 )
+        {
+            print $msg;
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+# 
+# tee
+#
+# $socket   The stream (created with IO::) to send the string to
+# $text     The text to output
+#
+# Sends $text to $socket and sends $text to debug output
+#
+# ---------------------------------------------------------------------------------------------
+sub tee
+{
+    my ( $socket, $text ) = @_;
+
+    # Send the message to the debug output and then send it to the appropriate socket
+    debug( $text ); 
+    print $socket $text if $socket->connected;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_response
+#
+# $mail     The stream (created with IO::) to send the message to (the remote mail server)
+# $client   The local mail client (created with IO::) that needs the response
+# $command  The text of the command to send (we add an EOL)
+#
+# Send $command to $mail, receives the response and echoes it to the $client and the debug 
+# output.  Returns the response
+#
+# ---------------------------------------------------------------------------------------------
+sub get_response
+{
+    my ( $mail, $client, $command ) = @_;
+    
+    unless ( $mail )
+    {
+       # $mail is undefined - return an error intead of crashing
+       tee( $client, "-ERR error communicating with mail server" );
+       return 0;
+    }
+
+    # Send the command (followed by the appropriate EOL) to the mail server
+    tee( $mail, "$command$eol" );
+    
+    my $response;
+    
+    # Retrieve a single string containing the response
+    if ( $mail->connected )
+    {
+        $response = <$mail>;
+        
+        if ( $response )
+        {
+            # Echo the response up to the mail client
+            tee( $client, $response );
+        }
+        else
+        {
+            # An error has occurred reading from the mail server
+            tee( $client, "-ERR no response from mail server" );
+            return 0;
+        }
+    }
+    
+    return $response;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# echo_response
+#
+# $mail     The stream (created with IO::) to send the message to (the remote mail server)
+# $client   The local mail client (created with IO::) that needs the response
+# $command  The text of the command to send (we add an EOL)
+#
+# Send $command to $mail, receives the response and echoes it to the $client and the debug 
+# output.  Returns true if the response was +OK and false if not
+#
+# ---------------------------------------------------------------------------------------------
+sub echo_response
+{
+    my ( $mail, $client, $command ) = @_;
+    
+    my $response = get_response( $mail, $client, $command );
+    
+    # Determine whether the response began with the string +OK.  If it did then return 1
+    # else return 0
+    return ( $response =~ /^\+OK/ );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# echo_to_dot
+#
+# $mail     The stream (created with IO::) to send the message to (the remote mail server)
+# $client   The local mail client (created with IO::) that needs the response
+#
+# echo all information from the $mail server until a single line with a . is seen
+#
+# ---------------------------------------------------------------------------------------------
+sub echo_to_dot
+{
+    my ($mail, $client) = @_;
+    
+    while ( <$mail> )
+    {
+        # Check for an abort
+        if ( $alive == 0 )
+        {
+            last;
+        }
+
+        tee( $client, $_ );
+
+        # The termination has to be a single line with exactly a dot on it and nothing
+        # else other than line termination characters.  This is vital so that we do
+        # not mistake a line beginning with . as the end of the block
+        if ( /^\.(\r\n|\r|\n)$/ )
+        {   
+            last;
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# verify_connected
+#
+# $mail        The handle of the real mail server
+# $client      The handle to the mail client
+# $hostname    The host name of the remote server
+# $port        The port
+#
+# Check that we are connected to $hostname on port $port putting the open handle in $mail.
+# Any messages need to be sent to $client
+#
+# ---------------------------------------------------------------------------------------------
+sub verify_connected
+{
+    my ($client, $hostname, $port) = @_;
+    
+    calculate_today();
+    
+    # Check to see if we are already connected
+    if ( $mail )
+    {
+        if ( $mail->connected ) 
+        {
+            return 1;
+        }
+    }
+    
+    # Connect to the real mail server on the standard port
+    $mail = IO::Socket::INET->new(
+                Proto    => "tcp",
+                PeerAddr => $hostname,
+                PeerPort => $port );
+
+    # Check that the connect succeeded for the remote server
+    if ( $mail )
+    {                 
+        if ( $mail->connected ) 
+        {
+            # Wait 10 seconds for a response from the remote server and if 
+            # there isn't one then give up trying to connect
+            my $selector = new IO::Select( $mail );
+            last unless () = $selector->can_read($configuration{timeout});
+            
+            # Read the response from the real server and say OK
+            my $buf        = '';
+            my $max_length = 8192;
+            my $n          = sysread( $mail, $buf, $max_length, length $buf );
+            
+            debug( "Connection returned: $buf" );
+            if ( !( $buf =~ /[\r\n]/ ) )
+            {
+                for my $i ( 0..4 )
+                {
+                    flush_extra( $mail, $client );
+                }
+            }
+            return 1;
+        }
+    }
+
+    # Tell the client we failed
+    tee( $client, "-ERR failed to connect to $hostname:$port$eol" );
+    
+    return 0;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# flush_extra - Read extra data from the mail server and send to client, this is to handle
+#               POP servers that just send data when they shouldn't.  I've seen one that sends
+#               debug messages!
+#
+# $mail        The handle of the real mail server
+# $client      The mail client talking to us
+#
+# ---------------------------------------------------------------------------------------------
+sub flush_extra
+{
+    my ($mail, $client) = @_;
+    
+    if ( $mail )
+    {
+        if ( $mail->connected )
+        {
+            my $selector   = new IO::Select( $mail );
+            my $buf        = '';
+            my $max_length = 8192;
+
+            while( 1 )
+            {
+                last unless () = $selector->can_read(0.1);
+                unless( my $n = sysread( $mail, $buf, $max_length, length $buf ) )
+                {
+                    last;
+                }
+                
+                tee( $client, $buf );
+            }
+        }
+    }
+}
+
+#
+#
+# POP3 PROXY
+#
+#
 
 # ---------------------------------------------------------------------------------------------
 #
 # run_popfile - a POP3 proxy server 
 #
 # $listen_port    (optional) the port to listen on
+# $connect_server Hostname of server to connect to if AUTH used
+# $connect_port   Port on $connect_server to connect to
+# $ui_port        Port to run the UI on
 #
 # ---------------------------------------------------------------------------------------------
 sub run_popfile
 {
     # Listen for connections on our port 110 (or a user specific port)
-    use IO::Socket;
-    use IO::Select;
-    
     my $listen_port    = shift;
     my $connect_server = shift;
     my $connect_port   = shift;
@@ -2071,12 +2222,11 @@ sub run_popfile
 
                         if ( $request =~ /GET (.*) HTTP\/1\./ )
                         {
-                            my $url = $1;
-                            print $client handle_url($url);
+                            handle_url($client, $1);
                         }
                         else
                         {
-                            print $client http_error(500);
+                            http_error($client, 500);
                         }                  
                     }
                 }
@@ -2561,18 +2711,23 @@ sub calculate_today
 
 # ---------------------------------------------------------------------------------------------
 #
-# aborting    Called if we are going to be aborted or are being asked to abort our operation
-#         Sets the alive flag to 0 that will cause us to abort at the next convenient
-#         moment
+# aborting    
+#
+# Called if we are going to be aborted or are being asked to abort our operation. Sets the 
+# alive flag to 0 that will cause us to abort at the next convenient moment
 #
 # ---------------------------------------------------------------------------------------------
 sub aborting
 {
-    debug("Forced to abort via signal");
+    debug("Aborting because of signal from operating system/user");
     $alive = 0;
 }
 
-# ---------------------------------------------------------------------------------------------
+#
+#
+# MAIN
+#
+#
 
 print "POPFile Engine v$major_version.$minor_version.$build_version starting\n";
 
@@ -2641,11 +2796,6 @@ if ( $configuration{unclassified_probability} != 0 )
 $classifier->load_word_matrix();
 
 debug( "POPFile Engine v$major_version.$minor_version.$build_version running" );
-
-# Fix up the page template with the current version number
-$header =~ s/VERSION/v$major_version\.$minor_version\.$build_version/g;
-$footer =~ s/VERSION/v$major_version\.$minor_version\.$build_version/g;
-$header =~ s/SESSKEY/$session_key/g;
 
 # Run the POP server and handle requests
 run_popfile($configuration{port}, $configuration{server}, $configuration{sport}, $configuration{ui_port});
