@@ -109,25 +109,30 @@ sub start
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-#    $self->register_configuration_item_( 'configuration',
-#                                         'smtp_port',
-#                                         $self );
+    $self->register_configuration_item_( 'configuration',
+                                         'smtp_port',
+                                         'smtp-port.thtml',
+                                         $self );
 
-#    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
-#                                         'smtp_force_fork',
-#                                         $self );                      # PROFILE BLOCK STOP
+    $self->register_configuration_item_( 'configuration',
+                                         'smtp_force_fork',
+                                         'smtp-force-fork.thtml',
+                                         $self );
 
-#    $self->register_configuration_item_( 'security',
-#                                         'smtp_local',
-#                                         $self );
+    $self->register_configuration_item_( 'security',
+                                         'smtp_local',
+                                         'smtp-security-local.thtml',
+                                         $self );
 
-#    $self->register_configuration_item_( 'chain',
-#                                         'smtp_server',
-#                                         $self );
+    $self->register_configuration_item_( 'chain',
+                                         'smtp_server',
+                                         'smtp-chain-server.thtml',
+                                         $self );
 
-#    $self->register_configuration_item_( 'chain',
-#                                         'smtp_server_port',
-#                                          $self );
+    $self->register_configuration_item_( 'chain',
+                                         'smtp_server_port',
+                                         'smtp-chain-server-port.thtml',
+                                         $self );
 
     return $self->SUPER::start();;
 }
@@ -310,85 +315,39 @@ sub smtp_echo_response_
 #
 # configure_item
 #
-#    $name            The name of the item being configured, was passed in by the call
-#                     to register_configuration_item
-#    $language        Reference to the hash holding the current language
-#    $session_key     The current session key
+#    $name            Name of this item
+#    $templ           The loaded template that was passed as a parameter
+#                     when registering
+#    $language        Current language
 #
-#  Must return the HTML for this item
 # ---------------------------------------------------------------------------------------------
 
 sub configure_item
 {
-    my ( $self, $name, $language, $session_key ) = @_;
-
-    my $body = '';
+    my ( $self, $name, $templ, $language ) = @_;
 
     if ( $name eq 'smtp_port' ) {
-        $body .= "<form action=\"/configuration\">\n";
-        $body .= "<label class=\"configurationLabel\" for=\"configPopPort\">$$language{Configuration_SMTPPort}:</label><br />\n";
-        $body .= "<input name=\"smtp_port\" type=\"text\" id=\"configPopPort\" value=\"" . $self->config_( 'port' ) . "\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_smtp_port\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        $templ->param( 'smtp_port' => $self->config_( 'port' ) );
     }
 
     if ( $name eq 'smtp_local' ) {
-        $body .= "<span class=\"securityLabel\">$$language{Security_SMTP}:</span><br />\n";
-
-        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
-        if ( $self->config_( 'local' ) == 1 ) {
-            $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
-            $body .= "<span class=\"securityWidgetStateOff\">$$language{Security_NoStealthMode}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securityAcceptPOP3On\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"smtp_local\" value=\"1\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        } else {
-            $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
-            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptPOP3Off\" name=\"toggle\" value=\"$$language{ChangeToNo} $$language{Security_StealthMode}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"smtp_local\" value=\"2\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        }
-        $body .= "</td></tr></table>\n";
+        $templ->param( 'smtp_local_on' => $self->config_( 'local' ) );
      }
 
     if ( $name eq 'smtp_server' ) {
-        $body .= "<form action=\"/security\">\n";
-        $body .= "<label class=\"securityLabel\" for=\"securitySecureServer\">$$language{Security_SMTPServer}:</label><br />\n";
-        $body .= "<input type=\"text\" name=\"smtp_chain_server\" id=\"securitySecureServer\" value=\"" . $self->config_( 'chain_server' ) . "\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_smtp_server\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        $templ->param( 'smtp_chain_server' => $self->config_( 'chain_server' ) );
     }
 
     if ( $name eq 'smtp_server_port' ) {
-        $body .= "<form action=\"/security\">\n";
-        $body .= "<label class=\"securityLabel\" for=\"securitySecurePort\">$$language{Security_SMTPPort}:</label><br />\n";
-        $body .= "<input type=\"text\" name=\"smtp_chain_server_port\" id=\"securitySecurePort\" value=\"" . $self->config_( 'chain_port' ) . "\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_smtp_server_port\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        $templ->param( 'smtp_chain_port' => $self->config_( 'chain_port' ) );
     }
 
     if ( $name eq 'smtp_force_fork' ) {
-        $body .= "<span class=\"configurationLabel\">$$language{Configuration_SMTPFork}:</span><br />\n";
-        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
-
-        if ( $self->config_( 'force_fork' ) == 0 ) {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<span class=\"securityWidgetStateOff\">$$language{No}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOn\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"smtp_force_fork\" value=\"1\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        } else {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"windowTrayIconOff\" name=\"toggle\" value=\"$$language{ChangeToNo}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"smtp_force_fork\" value=\"0\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        }
-        $body .= "</td></tr></table>\n";
+        $templ->param( 'smtp_force_fork_on' => $self->config_( 'force_fork' ) );
     }
 
-    return $body . $self->SUPER::configure_item( $name, $language, $session_key );
+
+    #$self->SUPER::configure_item( $name, $templ, $language );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -397,43 +356,49 @@ sub configure_item
 #
 #    $name            The name of the item being configured, was passed in by the call
 #                     to register_configuration_item
-#    $language        Reference to the hash holding the current language
+#    $templ           The loaded template
+#    $language        The language currently in use
 #    $form            Hash containing all form items
 #
-#  Must return the HTML for this item
 # ---------------------------------------------------------------------------------------------
 
 sub validate_item
 {
-    my ( $self, $name, $language, $form ) = @_;
+    my ( $self, $name, $templ, $language, $form ) = @_;
 
     if ( $name eq 'smtp_port' ) {
         if ( defined($$form{smtp_port}) ) {
             if ( ( $$form{smtp_port} >= 1 ) && ( $$form{smtp_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{smtp_port} );
-                return '<blockquote>' . sprintf( $$language{Configuration_POP3Update} . '</blockquote>' , $self->config_( 'port' ) );
+                $templ->param( 'smtp_port_feedback' => sprintf( $$language{Configuration_SMTPUpdate}, $self->config_( 'port' ) ) );
              } else {
-                 return "<blockquote><div class=\"error01\">$$language{Configuration_Error3}</div></blockquote>";
+                $templ->param( 'smtp_port_feedback' => "<div class=\"error01\">$$language{Configuration_Error3}</div>" );
              }
         }
     }
 
     if ( $name eq 'smtp_local' ) {
-        $self->config_( 'local', $$form{smtp_local}-1 ) if ( defined($$form{smtp_local}) );
+        if ( defined $$form{smtp_local} ) {
+            $self->config_( 'local', $$form{smtp_local} );
+        }
     }
 
     if ( $name eq 'smtp_server' ) {
-         $self->config_( 'chain_server', $$form{smtp_chain_server} ) if ( defined($$form{smtp_chain_server}) );
-         return sprintf( "<blockquote>" . $$language{Security_SMTPServerUpdate} . "</blockquote>", $self->config_( 'chain_server' ) ) if ( defined($$form{smtp_chain_server}) );
+        if ( defined $$form{smtp_chain_server} ) {
+            $self->config_( 'chain_server', $$form{smtp_chain_server} );
+            $templ->param( 'smtp_server_feedback' => sprintf $$language{Security_SMTPServerUpdate}, $self->config_( 'chain_server' ) ) ;
+        }
     }
 
     if ( $name eq 'smtp_server_port' ) {
-        if ( defined($$form{smtp_chain_server_port}) ) {
+        if ( defined $$form{smtp_chain_server_port} ) {
+
             if ( ( $$form{smtp_chain_server_port} >= 1 ) && ( $$form{smtp_chain_server_port} < 65536 ) ) {
                 $self->config_( 'chain_port', $$form{smtp_chain_server_port} );
-                return sprintf( "<blockquote>" . $$language{Security_SMTPPortUpdate} . "</blockquote>", $self->config_( 'chain_port' ) ) if ( defined($$form{smtp_chain_chain_port}) );
-            } else {
-                return "<blockquote><div class=\"error01\">$$language{Security_Error1}</div></blockquote>";
+                $templ->param( 'smtp_port_feedback' => sprintf $$language{Security_SMTPPortUpdate}, $self->config_( 'chain_port' ) );
+            }
+            else {
+                $templ->param( 'smtp_port_feedback' => "<div class=\"error01\">$$language{Security_Error1}</div>" );
             }
         }
     }
@@ -444,7 +409,7 @@ sub validate_item
         }
     }
 
-    return $self->SUPER::validate_item( $name, $language, $form );
+    #$self->SUPER::validate_item( $name, $templ, $language, $form );
 }
 
 1;

@@ -1,0 +1,18 @@
+<form action="/security" method="post">
+    <label class="securityLabel" for="securitySecurePort">
+        <TMPL_VAR NAME="Localize_Security_SMTPPort">:
+    </label>
+    <br />
+    <input type="text" name="smtp_chain_server_port" id="securitySecurePort" value="<TMPL_VAR NAME="smtp_chain_port">" />
+    <input type="submit" class="submit" name="update_smtp_server_port" value="<TMPL_VAR NAME="Localize_Apply">" />
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+
+    <TMPL_IF NAME="smtp_port_feedback">
+
+    <blockquote>
+        <TMPL_VAR NAME="smtp_port_feedback">
+    </blockquote>
+
+    </TMPL_IF>
+
+</form>
