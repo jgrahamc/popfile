@@ -183,7 +183,7 @@
 #==============================================================================================
 
 
-!ifndef ADDUSER & RUNPOPFILE & TRANSLATOR_AUW
+!ifndef ADDUSER & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetIEVersion
     #
@@ -2198,7 +2198,9 @@ FunctionEnd
     #--------------------------------------------------------------------------
 
     !insertmacro TrimNewlines ""
+!endif
 
+!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.TrimNewlines
     #
