@@ -577,7 +577,7 @@ sub classify_file
     my $msg_total = 0;
 
     $self->{magnet_used__}   = 0;
-    $self->{magnet_detail__} = 0;
+    $self->{magnet_detail__} = '';
 
     $self->{parser__}->parse_stream($file);
 
@@ -1164,13 +1164,8 @@ sub classify_and_modify
     }
 
     if ( !$nosave ) {
-        open CLASS, ">$class_file";
-        if ( $self->{magnet_used__} == 0 )  {
-            print CLASS "$classification\n";
-        } else {
-            print CLASS "$classification MAGNET $self->{magnet_detail__}\n";
-        }
-        close CLASS;
+        $class_file =~ s/^([^\/])*\///;
+        $self->history_write_class($class_file, undef, $classification, undef, ($self->{magnet_used__}?$self->{magnet_detail__}:undef))
     }
 
     return $classification;
