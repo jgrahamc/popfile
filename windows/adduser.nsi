@@ -57,12 +57,12 @@
 # /install
 #
 # This command-line switch is used when this wizard is called by the main installer program
-# (setup.exe) and makes the wizard skip the language selection dialog and WELCOME page. When
-# this switch is used and an upgrade installation is being performed, the wizard does NOT show
-# the DIRECTORY page which selects the folder to be used for the 'User Data' because this build
-# of the wizard can only upgrade existing data 'in situ' (displaying the DIRECTORY page could be
-# taken as an indication that the wizard will automatically transfer the existing user data to
-# whatever location is selected).
+# (setup.exe) and makes the wizard skip the language selection dialog. When this switch is used
+# and an upgrade installation is being performed, the wizard does NOT show the DIRECTORY page
+# which selects the folder to be used for the 'User Data' because this build of the wizard can
+# only upgrade existing data 'in situ' (displaying the DIRECTORY page could be taken as an
+# indication that the wizard will automatically transfer the existing user data to whatever
+# location is selected).
 #
 # /installreboot
 #
@@ -71,6 +71,7 @@
 # required in order to create the system-wide environment variables used by the package. Since
 # the main installer quits before calling the wizard, it is up to the wizard to force the reboot
 # if one is required.
+#
 #--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
@@ -122,7 +123,7 @@
   ; configuration for the user who is running the installer. The main installer is now solely
   ; concerned with installing the POPFile program files and the associated registry entries.
   ;
-  ; This wizard is called when 'runpopfile.exe' is unable to determine appropriate values for
+  ; This wizard is also used when 'runpopfile.exe' is unable to determine appropriate values for
   ; the POPFILE_ROOT and POPFILE_USER environment variables which are used by POPFile 0.21.0
   ; (or later). For example, if a multi-user install was performed then the first time a new
   ; user tries to use the standard 'Run POPFile' shortcut there will be no HKCU registry data
@@ -156,7 +157,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.9"
+  !define C_PFI_VERSION  "0.2.11"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -208,7 +209,10 @@
 
   Var G_POP3               ; POP3 port (1-65535)
   Var G_GUI                ; GUI port (1-65535)
-  Var G_STARTUP            ; POPFile automatic startup flag (1 = yes, 0 = no)
+  Var G_PFIFLAG            ; (a) Installer:
+                           ;     POPFile automatic startup flag (1 = yes, 0 = no)
+                           ; (b) Uninstaller:
+                           ;     Used to indicate whether or not email settings were restored OK
 
   Var G_OOECONFIG_HANDLE   ; to access list of all Outlook/Outlook Express accounts found
   Var G_OOECHANGES_HANDLE  ; to access list of Outlook/Outlook Express configuration changes
@@ -373,11 +377,11 @@
 
   ; Use a custom '.onGUIInit' function to add language-specific texts to custom page INI files
 
-  !define MUI_CUSTOMFUNCTION_GUIINIT          PFIGUIInit
+  !define MUI_CUSTOMFUNCTION_GUIINIT          "PFIGUIInit"
 
   ; Use a custom 'un.onGUIInit' function to allow language-specific texts in the username check
 
-  !define MUI_CUSTOMFUNCTION_UNGUIINIT        un.PFIGUIInit
+  !define MUI_CUSTOMFUNCTION_UNGUIINIT        "un.PFIGUIInit"
 
   ;----------------------------------------------------------------
   ; Language Settings for MUI pages
@@ -409,11 +413,6 @@
   ; Installer Page - WELCOME
   ;---------------------------------------------------
 
-  ; Use a "pre" function to decide whether or not to show the WELCOME page
-  ; (if called from the main installer (setup.exe) there is no need for another WELCOME page)
-
-  !define MUI_PAGE_CUSTOMFUNCTION_PRE         "CheckStartMode"
-
   ; Use a "leave" function to decide upon a suitable initial value for the user data folder
   ; (this initial value is used for the DIRECTORY page used to select 'User Data' location).
 
@@ -432,7 +431,8 @@
   ; Use a "pre" function to determine if this page should be displayed. This build of the
   ; wizard cannot relocate an existing set of user data, so when the wizard is called from
   ; the main 'setup.exe' installer to upgrade an existing installation, the DIRECTORY page
-  ; is bypassed, we use the existing location and upgrade any old-style corpus files there.
+  ; is bypassed, we use the existing location and upgrade any old-style corpus files there
+  ; (the user is allowed to choose a different location, to avoid upgrading existing data).
 
   !define MUI_PAGE_CUSTOMFUNCTION_PRE         "CheckUserDirStatus"
 
@@ -613,8 +613,8 @@
 Function .onInit
 
   ; The command-line switch '/install' (or '/installreboot') is used to suppress this wizard's
-  ; language selection dialog (and the WELCOME page) when the wizard is called from 'setup.exe'
-  ; during installation of POPFile.
+  ; language selection dialog when the wizard is called from 'setup.exe' during installation
+  ; of POPFile.
 
   Call GetParameters
   Pop $G_PFISETUP
@@ -686,7 +686,7 @@ Function PFIGUIInit
 
   !define L_RESERVED            $1    ; used in the system.dll call
 
-  StrCpy $G_ROOTDIR $EXEDIR
+  StrCpy $G_ROOTDIR "$EXEDIR"
   IfFileExists "$G_ROOTDIR\runpopfile.exe" 0 try_registry
   IfFileExists "$G_ROOTDIR\popfile.pl" compatible
 
@@ -811,14 +811,14 @@ Section "POPFile" SecPOPFile
   Goto save_root_sfn
 
 find_root_sfn:
-  GetFullPathName /SHORT ${L_TEMP_2} $G_ROOTDIR
+  GetFullPathName /SHORT ${L_TEMP_2} "$G_ROOTDIR"
 
 save_root_sfn:
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP_2}"
 
   IfFileExists "$G_USERDIR\*.*" userdir_exists
   ClearErrors
-  CreateDirectory $G_USERDIR
+  CreateDirectory "$G_USERDIR"
   IfErrors 0 userdir_exists
   MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "Error: Unable to create folder for user data\
       $\r$\n$\r$\n\
@@ -836,7 +836,7 @@ userdir_exists:
   Goto save_user_sfn
 
 find_user_sfn:
-  GetFullPathName /SHORT ${L_TEMP_2} $G_USERDIR
+  GetFullPathName /SHORT ${L_TEMP_2} "$G_USERDIR"
 
 save_user_sfn:
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN" "${L_TEMP_2}"
@@ -888,7 +888,7 @@ set_user_now:
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (POPFILE_USER)"
 
 continue:
-  SetOutPath $G_USERDIR
+  SetOutPath "$G_USERDIR"
 
   ; Create a shortcut to make it easier to run the SQLite utility
 
@@ -920,7 +920,7 @@ copy_default_stopwords:
   CopyFiles /SILENT /FILESONLY "$G_ROOTDIR\pfi-stopwords.default" "$G_USERDIR\stopwords.default"
 
 update_config_ports:
-  FileOpen  ${L_CFG} $PLUGINSDIR\popfile.cfg a
+  FileOpen  ${L_CFG} "$PLUGINSDIR\popfile.cfg" a
   FileSeek  ${L_CFG} 0 END
   FileWrite ${L_CFG} "pop3_port $G_POP3$\r$\n"
   FileWrite ${L_CFG} "html_port $G_GUI$\r$\n"
@@ -941,7 +941,7 @@ the_first:
   Rename "$G_USERDIR\popfile.cfg" "$G_USERDIR\popfile.cfg.bk1"
 
 update_config:
-  CopyFiles /SILENT /FILESONLY $PLUGINSDIR\popfile.cfg $G_USERDIR\
+  CopyFiles /SILENT /FILESONLY "$PLUGINSDIR\popfile.cfg" "$G_USERDIR\"
 
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
@@ -949,9 +949,9 @@ update_config:
   ; NOTE: The main POPFile installer uses 'uninstall.exe' so we have to use a different name
   ; in case the user has selected the main POPFile directory for the user data
 
-  SetOutPath $G_USERDIR
-  Delete $G_USERDIR\uninstalluser.exe
-  WriteUninstaller $G_USERDIR\uninstalluser.exe
+  SetOutPath "$G_USERDIR"
+  Delete "$G_USERDIR\uninstalluser.exe"
+  WriteUninstaller "$G_USERDIR\uninstalluser.exe"
 
   ; Create the START MENU entries
 
@@ -975,7 +975,7 @@ update_config:
   ReadRegStr $G_ROOTDIR HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
 
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
-  SetOutPath $G_ROOTDIR
+  SetOutPath "$G_ROOTDIR"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
@@ -1000,7 +1000,7 @@ uninst_shortcut:
   StrCpy ${L_TEMP} "${L_TEMP}.${L_TEMP_2}.change.txt"
   IfFileExists "$G_ROOTDIR\${L_TEMP}" 0 skip_rel_notes
 
-  SetOutPath $G_ROOTDIR
+  SetOutPath "$G_ROOTDIR"
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" \
                  "$G_ROOTDIR\${L_TEMP}"
@@ -1046,18 +1046,18 @@ skip_rel_notes:
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
 
-  SetOutPath $G_ROOTDIR
+  SetOutPath "$G_ROOTDIR"
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
                  "$G_ROOTDIR\stop_pf.exe" "/showerrors $G_GUI"
 
-  StrCmp $G_STARTUP "1" set_autostart_set
+  StrCmp $G_PFIFLAG "1" set_autostart_set
   Delete "$SMSTARTUP\Run POPFile.lnk"
   Goto end_autostart_set
 
 set_autostart_set:
-  SetOutPath $SMSTARTUP
-  SetOutPath $G_ROOTDIR
+  SetOutPath "$SMSTARTUP"
+  SetOutPath "$G_ROOTDIR"
   SetFileAttributes "$SMSTARTUP\Run POPFile.lnk" NORMAL
   CreateShortCut "$SMSTARTUP\Run POPFile.lnk" "$G_ROOTDIR\runpopfile.exe" "/startup"
 
@@ -1154,7 +1154,7 @@ Section "-NonSQLCorpusBackup" SecBackup
   StrCpy ${L_BUCKET_COUNT} 0
   WriteINIStr "$PLUGINSDIR\corpus.ini" "BucketList" "FileCount" ${L_BUCKET_COUNT}
 
-  FindFirst ${L_CFG_HANDLE} ${L_BUCKET_NAME} ${L_CORPUS_PATH}\*.*
+  FindFirst ${L_CFG_HANDLE} ${L_BUCKET_NAME} "${L_CORPUS_PATH}\*.*"
 
   ; If the "corpus" directory does not exist then "${L_CFG_HANDLE}" will be empty
 
@@ -1387,7 +1387,7 @@ use_installer_lang:
   goto lang_done
 
 lang_save:
-  FileOpen  ${L_CFG} $G_USERDIR\popfile.cfg a
+  FileOpen  ${L_CFG} "$G_USERDIR\popfile.cfg" a
   FileSeek  ${L_CFG} 0 END
   FileWrite ${L_CFG} "html_language ${L_LANG}$\r$\n"
   FileClose ${L_CFG}
@@ -1404,31 +1404,6 @@ lang_done:
   !undef L_LANG
 
 SectionEnd
-
-#--------------------------------------------------------------------------
-# Installer Function: CheckStartMode
-# The "pre" function for the WELCOME page.
-#
-# If called from the main installer, no need to display another WELCOME page
-#--------------------------------------------------------------------------
-
-Function CheckStartMode
-
-  ; The command-line switch '/install' (or '/installreboot') is used to suppress this wizard's
-  ; language selection dialog and WELCOME page when it is called from 'setup.exe'.
-
-  StrCmp $G_PFISETUP "/install" skip_WELCOME_page
-  StrCmp $G_PFISETUP "/installreboot" 0 show_WELCOME_page
-
-skip_WELCOME_page:
-
-  ; Need to call the WELCOME page's "leave" function (to initialise $G_USERDIR)
-
-  Call ChooseDefaultDataDir
-  Abort
-
-show_WELCOME_page:
-FunctionEnd
 
 #--------------------------------------------------------------------------
 # Installer Function: ChooseDefaultDataDir
@@ -1454,7 +1429,7 @@ look_elsewhere:
 
   ; All versions prior to 0.21.0 stored popfile.pl and popfile.cfg in the same folder
 
-  StrCpy $G_USERDIR $G_ROOTDIR
+  StrCpy $G_USERDIR "$G_ROOTDIR"
   IfFileExists "$G_USERDIR\popfile.cfg" exit
 
   ; Check if we are installing over a version which uses an early alternative folder structure
@@ -1648,8 +1623,8 @@ Function CheckExistingConfigData
 
   ClearErrors
 
-  FileOpen  ${L_CFG} $G_USERDIR\popfile.cfg r
-  FileOpen  ${L_CLEANCFG} $PLUGINSDIR\popfile.cfg w
+  FileOpen  ${L_CFG} "$G_USERDIR\popfile.cfg" r
+  FileOpen  ${L_CLEANCFG} "$PLUGINSDIR\popfile.cfg" w
 
 loop:
   FileRead   ${L_CFG} ${L_LNE}
@@ -1878,7 +1853,7 @@ FunctionEnd
 # whether or not POPFile should be started automatically when Windows starts.
 #
 # This function loads the validated values into $G_POP3 and $G_GUI and also
-# sets $G_STARTUP to the state of the 'Run POPFile at Windows startup' checkbox
+# sets $G_PFIFLAG to the state of the 'Run POPFile at Windows startup' checkbox
 #
 # A "leave" function (CheckPortOptions) is used to validate the port
 # selections made by the user.
@@ -1906,22 +1881,22 @@ Function SetOptionsPage
   ; possible values for the POP3 (or GUI) combobox, add it to the end of the list.
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_PORTLIST} "ioA.ini" "Field 2" "ListItems"
-  Push |${L_PORTLIST}|
-  Push |$G_POP3|
+  Push "|${L_PORTLIST}|"
+  Push "|$G_POP3|"
   Call StrStr
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" 0 POP3_is_in_list
-  StrCpy ${L_PORTLIST} ${L_PORTLIST}|$G_POP3
+  StrCpy ${L_PORTLIST} "${L_PORTLIST}|$G_POP3"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "ListItems" ${L_PORTLIST}
 
 POP3_is_in_list:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_PORTLIST} "ioA.ini" "Field 4" "ListItems"
-  Push |${L_PORTLIST}|
-  Push |$G_GUI|
+  Push "|${L_PORTLIST}|"
+  Push "|$G_GUI|"
   Call StrStr
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" 0 GUI_is_in_list
-  StrCpy ${L_PORTLIST} ${L_PORTLIST}|$G_GUI
+  StrCpy ${L_PORTLIST} "${L_PORTLIST}|$G_GUI"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "ListItems" ${L_PORTLIST}
 
 GUI_is_in_list:
@@ -1958,7 +1933,7 @@ show_defaults:
 
   ; Retrieve the state of the 'Run POPFile automatically when Windows starts' checkbox
 
-  !insertmacro MUI_INSTALLOPTIONS_READ $G_STARTUP "ioA.ini" "Field 5" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $G_PFIFLAG "ioA.ini" "Field 5" "State"
 
   Pop ${L_RESULT}
   Pop ${L_PORTLIST}
@@ -3398,7 +3373,7 @@ display_list:
 
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
-  GetDlgItem $G_DLGITEM $G_HWND 1200             ; Field 1 = IDENTITY label (above the box)
+  GetDlgItem $G_DLGITEM $G_HWND 1200              ; Field 1 = IDENTITY label (above the box)
   CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
@@ -3427,7 +3402,7 @@ display_list_again:
 
   ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
 
-  GetDlgItem $G_DLGITEM $G_HWND 1200              ; Field 1 = IDENTITY label (above the box)
+  GetDlgItem $G_DLGITEM $G_HWND 1200             ; Field 1 = IDENTITY label (above the box)
   CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
@@ -3482,7 +3457,7 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Installer Function: CheckOutlookRequests
 #
-# This function is used to confirm any Outlook Express account reconfiguration requests
+# This function is used to confirm any Outlook account reconfiguration requests
 #--------------------------------------------------------------------------
 
 Function CheckOutlookRequests
@@ -4379,7 +4354,8 @@ do_not_show_banner:
   Banner::destroy
 
 error_msg:
-  MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "An error occurred when the installer tried to start POPFile.\
+  MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST \
+      "An error occurred when the installer tried to start POPFile.\
       $\r$\n$\r$\n\
       Please use 'Start -> Programs -> POPFile -> Run POPFile' now.\
       $\r$\n$\r$\n\
@@ -4388,7 +4364,7 @@ error_msg:
 
 continue:
 
-  ; A simple time delay is used to give POPFile time to get ready to display the UI (it takes
+  ; A simple time delay is used to give POPFile time to get ready to display the UI. It takes
   ; time for POPFile to start up and be able to generate the UI pages - attempts to access the
   ; UI too quickly will result in a browser error message (which must be cancelled by the user)
   ; and an empty browser window (which must be refreshed by the user). Earlier versions of the
@@ -4615,6 +4591,20 @@ exit:
 nothing_to_do:
 FunctionEnd
 
+
+#####################################################################################
+#                                                                                   #
+#   ##    ##  ##    ##   ##   ##    ##   #####  ########  #####    ##      ##       #
+#   ##    ##  ###   ##   ##   ###   ##  ##   ##    ##    ##   ##   ##      ##       #
+#   ##    ##  ####  ##   ##   ####  ##  ##         ##    ##   ##   ##      ##       #
+#   ##    ##  ## ## ##   ##   ## ## ##   #####     ##    #######   ##      ##       #
+#   ##    ##  ##  ####   ##   ##  ####       ##    ##    ##   ##   ##      ##       #
+#   ##    ##  ##   ###   ##   ##   ###  ##   ##    ##    ##   ##   ##      ##       #
+#    ######   ##    ##   ##   ##    ##   #####     ##    ##   ##   ######  ######   #
+#                                                                                   #
+#####################################################################################
+
+
 #--------------------------------------------------------------------------
 # Initialise the uninstaller
 #--------------------------------------------------------------------------
@@ -4632,7 +4622,7 @@ Function un.onInit
   ; For increased flexibility, several global user variables are used (this makes it easier
   ; to change the folder structure used by the wizard)
 
-  StrCpy $G_USERDIR   $INSTDIR
+  StrCpy $G_USERDIR   "$INSTDIR"
 
   ReadRegStr $G_ROOTDIR HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
 
@@ -4697,26 +4687,25 @@ continue_uninstall:
 FunctionEnd
 
 #--------------------------------------------------------------------------
-# Uninstaller Section
+# Uninstaller Sections (this build uses all of these and executes them in the order shown)
 #
-# (a) Shutdown POPFile if necessary
-# (b) Remove current user's POPFile configuration files
-# (c) Restore current user's email client settings (Outlook Express, Outlook and Eudora)
-# (d) Remove current user's corpus folders and message history
-# (e) Remove current user's POPFILE_ROOT and POPFILE_USER environment variables
-# (f) Remove the 'Add/Remove Program' data and other registry entries for current user
-# (g) Offer to remove remaining files/folders in 'User Data' folder (if safe to do so)
+#  (1) un.Uninstall Begin    - requests confirmation if appropriate
+#  (2) un.Shutdown POPFile   - shutdown POPFile if necessary (to avoid the need to reboot)
+#  (3) un.User Config        - uninstall configuration files in $G_USERDIR folder
+#  (4) un.Email Settings     - restore Outlook Express/Outlook/Eudora email settings
+#  (5) un.User Data          - remove corpus, message history and other data folders
+#  (6) un.ShortCuts          - remove shortcuts
+#  (7) un.Environment        - current user's POPFile environment variables
+#  (8) un.Registry Entries   - remove 'Add/Remove Program' data and other registry entries
+#  (9) un.Uninstall End      - remove remaining files/folders (if it is safe to do so)
+#
 #--------------------------------------------------------------------------
 
-Section "Uninstall"
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Uninstall Begin' (the first section in the uninstaller)
+#--------------------------------------------------------------------------
 
-  !define L_CFG         $R9   ; used as file handle
-  !define L_EXE         $R8   ; full path of the EXE to be monitored
-  !define L_LNE         $R7   ; a line from popfile.cfg
-  !define L_OLDUI       $R6   ; holds old-style UI port (if previous POPFile is an old version)
-  !define L_TEMP        $R5
-  !define L_UNDOFILE    $R4   ; file holding original email client settings
-  !define L_UNDOSTATUS  $R3   ; email client restore flag ('success' or 'fail')
+Section "un.Uninstall Begin" UnSecBegin
 
   IfFileExists $G_USERDIR\popfile.cfg skip_confirmation
     MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
@@ -4726,6 +4715,25 @@ Section "Uninstall"
     Abort "$(PFI_LANG_UN_ABORT_1)"
 
 skip_confirmation:
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Shutdown POPFile'
+#--------------------------------------------------------------------------
+
+Section "un.Shutdown POPFile" UnSecShutdown
+  !define L_CFG         $R9   ; used as file handle
+  !define L_EXE         $R8   ; full path of the EXE to be monitored
+  !define L_LNE         $R7   ; a line from popfile.cfg
+  !define L_OLDUI       $R6   ; holds old-style UI port (if previous POPFile is an old version)
+  !define L_TEMP        $R5
+
+  Push ${L_CFG}
+  Push ${L_EXE}
+  Push ${L_LNE}
+  Push ${L_OLDUI}
+  Push ${L_TEMP}
+
   Push $G_ROOTDIR
   Call un.FindLockedPFE
   Pop ${L_EXE}
@@ -4802,18 +4810,55 @@ check_shutdown:
       $(PFI_LANG_MBMANSHUT_3)"
 
 remove_user_data:
-  Delete $G_USERDIR\popfile.cfg
-  Delete $G_USERDIR\popfile.cfg.bak
-  Delete $G_USERDIR\popfile.cfg.bk?
-  Delete $G_USERDIR\*.log
-  Delete $G_USERDIR\expchanges.txt
-  Delete $G_USERDIR\expconfig.txt
-  Delete $G_USERDIR\outchanges.txt
-  Delete $G_USERDIR\outconfig.txt
+  Pop ${L_TEMP}
+  Pop ${L_OLDUI}
+  Pop ${L_LNE}
+  Pop ${L_EXE}
+  Pop ${L_CFG}
 
-  ;------------------------------------
+  !undef L_CFG
+  !undef L_EXE
+  !undef L_LNE
+  !undef L_OLDUI
+  !undef L_TEMP
+SectionEnd
 
-  StrCpy ${L_UNDOSTATUS} "success"
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.User Config'
+#--------------------------------------------------------------------------
+
+Section "un.User Config" UnSecConfig
+
+  Delete "$G_USERDIR\popfile.cfg"
+  Delete "$G_USERDIR\popfile.cfg.bak"
+  Delete "$G_USERDIR\popfile.cfg.bk?"
+  Delete "$G_USERDIR\*.log"
+  Delete "$G_USERDIR\expchanges.txt"
+  Delete "$G_USERDIR\expconfig.txt"
+  Delete "$G_USERDIR\outchanges.txt"
+  Delete "$G_USERDIR\outconfig.txt"
+
+  Delete "$G_USERDIR\stopwords"
+  Delete "$G_USERDIR\stopwords.bak"
+  Delete "$G_USERDIR\stopwords.default"
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Email Settings'
+#--------------------------------------------------------------------------
+
+Section "un.Email Settings" UnSecEmail
+
+  !define L_TEMP        $R9
+  !define L_UNDOFILE    $R8   ; file holding original email client settings
+
+  Push ${L_TEMP}
+  Push ${L_UNDOFILE}
+
+  ; Use a global user variable to record status (if 'restore' fails we may need to retain data)
+
+  StrCpy $G_PFIFLAG "success"
 
   ;------------------------------------
   ; Restore 'Outlook Express' settings
@@ -4827,7 +4872,7 @@ remove_user_data:
   Pop ${L_TEMP}
 
   StrCmp ${L_TEMP} "success" delete_oe_data
-  StrCpy ${L_UNDOSTATUS} "fail"
+  StrCpy $G_PFIFLAG "fail"
   DetailPrint "$(PFI_LANG_UN_LOG_DATAPROBS): ${L_UNDOFILE}"
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_1)\
@@ -4856,7 +4901,7 @@ end_oe_restore:
   Pop ${L_TEMP}
 
   StrCmp ${L_TEMP} "success" delete_outlook_data
-  StrCpy ${L_UNDOSTATUS} "fail"
+  StrCpy $G_PFIFLAG "fail"
   DetailPrint "$(PFI_LANG_UN_LOG_DATAPROBS): ${L_UNDOFILE}"
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_2)\
@@ -4885,7 +4930,7 @@ end_outlook_restore:
   Pop ${L_TEMP}
 
   StrCmp ${L_TEMP} "success" delete_eudora_data
-  StrCpy ${L_UNDOSTATUS} "fail"
+  StrCpy $G_PFIFLAG "fail"
   DetailPrint "$(PFI_LANG_UN_LOG_DATAPROBS): ${L_UNDOFILE}"
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBCLIENT_3)\
@@ -4900,36 +4945,23 @@ delete_eudora_data:
   Delete "$G_USERDIR\${L_UNDOFILE}"
 
 end_eudora_restore:
+  Pop ${L_UNDOFILE}
+  Pop ${L_TEMP}
 
-  ;------------------------------------
+  !undef L_TEMP
+  !undef L_UNDOFILE
 
-  SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
-  SetDetailsPrint listonly
+SectionEnd
 
-  ; Win95 generates an error message if 'RMDir /r' is used on a non-existent directory
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.User Data'
+#--------------------------------------------------------------------------
 
-  IfFileExists "$G_USERDIR\corpus\*.*" 0 skip_nonsql_corpus
-  RMDir /r $G_USERDIR\corpus
+Section "un.User Data" UnSecCorpusEtc
 
-skip_nonsql_corpus:
-  Delete $G_USERDIR\popfile.db
-  Delete "$G_USERDIR\Run SQLite utility.lnk"
-  Delete "$G_USERDIR\PFI Diagnostic utility.lnk"
+  ; If email client problems found, offer to leave uninstaller behind with the error logs etc
 
-  IfFileExists "$G_USERDIR\messages\*." 0 skip_messages
-  RMDir /r $G_USERDIR\messages
-
-skip_messages:
-  Delete $G_USERDIR\stopwords
-  Delete $G_USERDIR\stopwords.bak
-  Delete $G_USERDIR\stopwords.default
-
-  ;------------------------------------
-  ; If email client problems found, offer to leave uninstaller behind with the relevant files
-  ;------------------------------------
-
-  StrCmp ${L_UNDOSTATUS} "success" complete_uninstall
+  StrCmp $G_PFIFLAG "success" uninstall_files
   MessageBox MB_YESNO|MB_ICONSTOP \
     "$(PFI_LANG_UN_MBRERUN_1)\
     $\r$\n$\r$\n\
@@ -4937,28 +4969,72 @@ skip_messages:
     $\r$\n$\r$\n\
     $(PFI_LANG_UN_MBRERUN_3)\
     $\r$\n$\r$\n\
-    $(PFI_LANG_UN_MBRERUN_4)" IDYES exit
+    $(PFI_LANG_UN_MBRERUN_4)" IDYES section_exit
 
-complete_uninstall:
-  Delete $G_USERDIR\install.ini
+uninstall_files:
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
+  SetDetailsPrint listonly
+
+  Delete "$G_USERDIR\install.ini"
   Delete "$G_USERDIR\uninstalluser.exe"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk"
   RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
 
-  RMDir $G_USERDIR
+  ; Win95 generates an error message if 'RMDir /r' is used on a non-existent directory
+
+  IfFileExists "$G_USERDIR\corpus\*.*" 0 skip_nonsql_corpus
+  RMDir /r "$G_USERDIR\corpus"
+
+skip_nonsql_corpus:
+  Delete "$G_USERDIR\popfile.db"
+
+  IfFileExists "$G_USERDIR\messages\*." 0 section_exit
+  RMDir /r "$G_USERDIR\messages"
+
+  RMDir "$G_USERDIR"
 
   StrCmp $APPDATA "" 0 appdata_valid
+  IfFileExists "${C_ALT_DEFAULT_USERDATA}\*.*" 0 section_exit
   RMDir "${C_ALT_DEFAULT_USERDATA}"
-  Goto remove_registry_data
+  Goto section_exit
 
 appdata_valid:
+  IfFileExists "${C_STD_DEFAULT_USERDATA}\*.*" 0 section_exit
   RMDir "${C_STD_DEFAULT_USERDATA}"
 
-remove_registry_data:
+section_exit:
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.ShortCuts'
+#--------------------------------------------------------------------------
+
+Section "un.ShortCuts" UnSecShortcuts
+
+  StrCmp $G_PFIFLAG "fail" do_nothing
+
+  Delete "$G_USERDIR\Run SQLite utility.lnk"
+  Delete "$G_USERDIR\PFI Diagnostic utility.lnk"
+
+do_nothing:
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Environment'
+#--------------------------------------------------------------------------
+
+Section "un.Environment" UnSecEnvVars
+
+  StrCmp $G_PFIFLAG "fail" do_nothing
+
+  !define L_TEMP        $R9
+
+  Push ${L_TEMP}
 
   Call un.IsNT
   Pop ${L_TEMP}
-  StrCmp ${L_TEMP} 0 cleanup_registry
+  StrCmp ${L_TEMP} 0 section_exit
 
   ; Delete current user's POPFile environment variables
 
@@ -4967,14 +5043,56 @@ remove_registry_data:
   DeleteRegValue HKCU "Environment" "POPFILE_USER"
   SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
 
-cleanup_registry:
+section_exit:
+  Pop ${L_TEMP}
 
-  ; Clean up registry data
+  !undef L_TEMP
 
+do_nothing:
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Registry Entries'
+#--------------------------------------------------------------------------
+
+Section "un.Registry Entries" UnSecRegistry
+
+  StrCmp $G_PFIFLAG "fail" do_nothing
+
+  !define L_REGDATA   $R9
+
+  Push ${L_REGDATA}
+
+  ; Clean up registry data if it matches what we are uninstalling
+
+  ReadRegStr ${L_REGDATA} HKCU \
+      "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_Data" \
+      "UninstallString"
+  StrCmp ${L_REGDATA} "$G_USERDIR\uninstalluser.exe" 0 other_reg_data
   DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}_Data"
+
+other_reg_data:
+  ReadRegStr ${L_REGDATA} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN"
+  StrCmp ${L_REGDATA} $G_USERDIR 0 section_exit
   DeleteRegKey HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI"
   DeleteRegKey /ifempty HKCU "Software\POPFile Project\${C_PFI_PRODUCT}"
   DeleteRegKey /ifempty HKCU "Software\POPFile Project"
+
+section_exit:
+  Pop ${L_REGDATA}
+
+  !undef L_REGDATA
+
+do_nothing:
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Uninstall End'
+#--------------------------------------------------------------------------
+
+Section "un.Uninstall End" UnSecEnd
+
+  StrCmp $G_PFIFLAG "fail" exit
 
   ; if $G_USERDIR was removed, skip these next ones
 
@@ -4989,8 +5107,8 @@ cleanup_registry:
 
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_2)" IDNO exit
   DetailPrint "$(PFI_LANG_UN_LOG_DELUSERDIR)"
-  Delete $G_USERDIR\*.* ; this would be skipped if the user hits no
-  RMDir /r $G_USERDIR
+  Delete "$G_USERDIR\*.*"   ; this would be skipped if the user hits no
+  RMDir /r "$G_USERDIR"
   StrCmp $APPDATA "" 0 appdata_valid_x
   RMDir "${C_ALT_DEFAULT_USERDATA}"
   Goto check_removal
@@ -4998,22 +5116,14 @@ cleanup_registry:
 appdata_valid_x:
   RMDir "${C_STD_DEFAULT_USERDATA}"
 
-  check_removal:
-    IfFileExists $G_USERDIR 0 exit
-      DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
-      MessageBox MB_OK|MB_ICONEXCLAMATION \
-          "$(PFI_LANG_UN_MBREMERR_1): $G_USERDIR $(PFI_LANG_UN_MBREMERR_2)"
+check_removal:
+  IfFileExists "$G_USERDIR\*.*" 0 exit
+  DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_UN_MBREMERR_1): $G_USERDIR $(PFI_LANG_UN_MBREMERR_2)"
 
 exit:
   SetDetailsPrint both
-
-  !undef L_CFG
-  !undef L_EXE
-  !undef L_LNE
-  !undef L_OLDUI
-  !undef L_TEMP
-  !undef L_UNDOFILE
-
 SectionEnd
 
 #--------------------------------------------------------------------------
