@@ -927,11 +927,36 @@ sub pretty_number
 
 # ---------------------------------------------------------------------------------------------
 #
+# bucket_page - information about a specific bucket
+#
+# ---------------------------------------------------------------------------------------------
+sub bucket_page 
+{
+    my $body = "<h2>Detail for <font color=$classifier->{colors}{$form{bucket}}>$form{bucket}</a></h2><p><table><tr><td><b>Bucket word count</b><td>&nbsp;<td align=right>". pretty_number($classifier->{total}{$form{bucket}});
+    $body .= "<tr><td><b>Total word count</b><td>&nbsp;<td align=right>" . pretty_number($classifier->{full_total});
+    my $percent = "0%";
+    if ( $classifier->{full_total} > 0 ) 
+    {
+        $percent = int( 10000 * $classifier->{total}{$form{bucket}} / $classifier->{full_total} ) / 100;
+        $percent = "$percent%";
+    }
+    $body .= "<tr><td><hr><b>Percentage of total</b><td>&nbsp;<td align=right><hr>$percent</table>";
+ 
+    return http_ok($body,1);
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # corpus_page - the corpus management page
 #
 # ---------------------------------------------------------------------------------------------
 sub corpus_page
 {
+    if ( $form{bucket} ne '' ) 
+    {
+        return bucket_page();
+    }
+    
     my $result;
     my $create_message = '';
     my $delete_message = '';
@@ -947,9 +972,9 @@ sub corpus_page
     
     if ( $form{name} ne '' )
     {
-        if ( $form{name} =~ /[^a-z]/ ) 
+        if ( $form{name} =~ /[^a-z\-_]/ ) 
         {
-            $create_message = "<blockquote><font color=red size=+1>Bucket names can only contain the letters a to z in lower case</font></blockquote>";
+            $create_message = "<blockquote><font color=red size=+1>Bucket names can only contain the letters a to z in lower case plus - and _</font></blockquote>";
         }
         else
         {
@@ -1027,9 +1052,9 @@ sub corpus_page
 
     if ( $form{newname} ne '' )
     {
-        if ( $form{newname} =~ /[^a-z]/ ) 
+        if ( $form{newname} =~ /[^a-z\-_]/ ) 
         {
-            $rename_message = "<blockquote><font color=red size=+1>Bucket names can only contain the letters a to z in lower case</font></blockquote>";
+            $rename_message = "<blockquote><font color=red size=+1>Bucket names can only contain the letters a to z in lower case plus - and _</font></blockquote>";
         }
         else
         {
@@ -1056,7 +1081,7 @@ sub corpus_page
             $body .= " bgcolor=$stripe_color";
         }
         $stripe = 1 - $stripe;
-        $body .= "><td><font color=$classifier->{colors}{$bucket}>$bucket</font><td align=right>$number<td>&nbsp;<td align=left bgcolor=$main_color><table cellpadding=0 cellspacing=1><tr>";
+        $body .= "><td><a href=/buckets?session=$session_key&bucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td align=right>$number<td>&nbsp;<td align=left bgcolor=$main_color><table cellpadding=0 cellspacing=1><tr>";
         my $color = $classifier->{colors}{$bucket};
         $body .= "<td width=10 bgcolor=$color><img border=0 alt='$bucket current color is $color' src=pix.gif width=10 height=20><td>&nbsp;";
         for my $i ( 0 .. $#{$classifier->{possible_colors}} )
@@ -1670,14 +1695,14 @@ sub run_popfile
                                          LocalAddr => 'localhost', 
                                          LocalPort => $ui_port,
                                          Listen    => SOMAXCONN,
-                                         Reuse     => 1 ) or die "Couldn't open the GUI port $ui_port";
+                                         Reuse     => 1 ) or die "Couldn't open the local GUI port $ui_port";
     }
     else
     {
         $ui     = IO::Socket::INET->new( Proto     => 'tcp',
                                          LocalPort => $ui_port,
                                          Listen    => SOMAXCONN,
-                                         Reuse     => 1 ) or die "Couldn't open the GUI port $ui_port";
+                                         Reuse     => 1 ) or die "Couldn't open the server GUI port $ui_port";
     }
 
     # This is used to perform select calls on the $server socket so that we can decide when there is 
