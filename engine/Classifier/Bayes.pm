@@ -285,6 +285,7 @@ sub load_bucket
     $self->{parameters}{$bucket}{subject} = 1;
     $self->{total}{$bucket}  = 0;
     $self->{unique}{$bucket} = 0;
+    $self->{matrix}{$bucket} = ();
 
     # See if there's a color file specified
     if ( open PARAMS, "<corpus/$bucket/params" )
