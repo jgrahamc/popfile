@@ -415,10 +415,7 @@ sub upgrade_parameter__
 
                      'debug',                    'GLOBAL_debug',
                      'msgdir',                   'GLOBAL_msgdir',
-                     'subject',                  'GLOBAL_subject',
                      'timeout',                  'GLOBAL_timeout',
-                     'xpl',                      'GLOBAL_xpl',
-                     'xtc',                      'GLOBAL_xtc',
                      'download_count',           'GLOBAL_download_count',
 
                      # Parameters that are now handled by POPFile::Logger

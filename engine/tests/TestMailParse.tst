@@ -222,19 +222,21 @@ test_assert_equal( $1, 'bugtracker@rltvty.com' );
 # Check that multi-line To: and CC: headers get handled properly
 $cl->parse_file( 'TestMailParse021.msg' );
 $cl->{to__} =~ s/[\r\n]//g;
-test_assert_equal( $cl->{to__},      'dsmith@ctaz.com, dsmith@dol.net, dsmith@dirtur.com, dsmith@dialpoint.net, dsmith@crosscountybank.com, 	<dsmith@cybersurf.net>, <dsmith@dotnet.com>, <dsmith@db.com>, <dsmith@cs.com>	, <dsmith@crossville.com>, 	<dsmith@dreamscape.com>, <dsmith@cvnc.net>, <dsmith@dmrtc.net>, <dsmith@datarecall.net>, 	<dsmith@dasia.net>' );
+test_assert_equal( $cl->{to__},      'dsmith@ctaz.com, dsmith@dol.net, dsmith@dirtur.com, dsmith@dialpoint.net, dsmith@crosscountybank.com, <dsmith@cybersurf.net>, <dsmith@dotnet.com>, <dsmith@db.com>, <dsmith@cs.com>, <dsmith@crossville.com>, <dsmith@dreamscape.com>, <dsmith@cvnc.net>, <dsmith@dmrtc.net>, <dsmith@datarecall.net>, <dsmith@dasia.net>' );
 $cl->{cc__} =~ s/[\r\n]//g;
-test_assert_equal( $cl->{cc__},      'dsmith@dmi.net, dsmith@datamine.net, dsmith@crusader.com, dsmith@datasync.com, 	<dsmith@doorpi.net>, <dsmith@dnet.net>, <dsmith@cybcon.com>, <dsmith@csonline.net>, 	<dsmith@directlink.net>, <dsmith@cvip.net>, <dsmith@dragonbbs.com>, <dsmith@crosslinkinc.com>, 	<dsmith@dccnet.com>, <dsmith@dakotacom.net>' );
+test_assert_equal( $cl->{cc__},      'dsmith@dmi.net, dsmith@datamine.net, dsmith@crusader.com, dsmith@datasync.com, <dsmith@doorpi.net>, <dsmith@dnet.net>, <dsmith@cybcon.com>, <dsmith@csonline.net>, <dsmith@directlink.net>, <dsmith@cvip.net>, <dsmith@dragonbbs.com>, <dsmith@crosslinkinc.com>, <dsmith@dccnet.com>, <dsmith@dakotacom.net>' );
 
 # Test colorization
 
 my @color_tests = ( 'TestMailParse015.msg', 'TestMailParse019.msg' );
 
+my $session = $b->get_session_key( 'admin', '' );
+
 for my $color_test (@color_tests) {
     my $colored = $color_test;
     $colored    =~ s/msg/clr/;
 
-    $cl->{color__} = 1;
+    $cl->{color__} = $session;
     $cl->{bayes__} = $b;
     my $html = $cl->parse_file( $color_test );
 
@@ -254,7 +256,7 @@ for my $color_test (@color_tests) {
     }
 }
 
-$cl->{color__} = 0;
+$cl->{color__} = '';
 
 # test decode_string
 
@@ -267,9 +269,9 @@ test_assert_equal($cl->decode_string("=?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ=
 # test get_header
 
 $cl->parse_file( 'TestMailParse022.msg' );
-test_assert_equal( $cl->get_header( 'from'), 'test@test.com'  );
-test_assert_equal( $cl->get_header( 'to'), 'someone@somewhere.com'  );
-test_assert_equal( $cl->get_header( 'cc'), '<someoneelse@somewhere.com>'  );
+test_assert_equal( $cl->get_header( 'from' ), 'test@test.com'  );
+test_assert_equal( $cl->get_header( 'to' ), 'someone@somewhere.com'  );
+test_assert_equal( $cl->get_header( 'cc' ), '<someoneelse@somewhere.com>'  );
 test_assert_equal( $cl->get_header( 'subject'), 'test for various HTML parts' );
 
 # test quickmagnets

@@ -64,9 +64,6 @@ test_assert_equal( $c->initialize(), 1 );
 test_assert_equal( $c->config_( 'piddir' ), './' );
 test_assert_equal( $c->global_config_( 'download_count' ), 0 );
 test_assert_equal( $c->global_config_( 'timeout' ), 60 );
-#test_assert_equal( $c->global_config_( 'xtc' ), 1 );
-#test_assert_equal( $c->global_config_( 'xpl' ), 1 );
-#test_assert_equal( $c->global_config_( 'subject' ), 1 );
 test_assert_equal( $c->global_config_( 'msgdir' ), 'messages/' );
 
 
@@ -258,9 +255,13 @@ $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_message_cutoff 100000' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_msgdir messages/' );
+<<<<<<< TestConfiguration.tst
+$line = <FILE>;
+=======
 #$line = <FILE>;
 #test_assert_regexp( $line, 'GLOBAL_subject 1' );
 $line = <FILE>;
+>>>>>>> 1.12
 test_assert_regexp( $line, 'GLOBAL_timeout 60' );
 #$line = <FILE>;
 #test_assert_regexp( $line, 'GLOBAL_xpl 1' );
@@ -294,10 +295,7 @@ my %upgrades = (     'corpus',                   'bayes_corpus',
 		     'piddir',                   'config_piddir',
 		     'debug',                    'GLOBAL_debug',
 		     'msgdir',                   'GLOBAL_msgdir',
-		     'subject',                  'GLOBAL_subject',
 		     'timeout',                  'GLOBAL_timeout',
-		     'xpl',                      'GLOBAL_xpl',
-		     'xtc',                      'GLOBAL_xtc',
 		     'download_count',           'GLOBAL_download_count',
 		     'logdir',                   'logger_logdir',
 		     'localpop',                 'pop3_local',

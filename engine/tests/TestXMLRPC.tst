@@ -24,6 +24,7 @@
 #
 # ---------------------------------------------------------------------------------------------
 
+unlink 'popfile.db';
 
 use Classifier::MailParse;
 use Classifier::Bayes;
@@ -126,21 +127,32 @@ if ($pid == 0) {
     select(undef,undef,undef,1);
     use XMLRPC::Lite;
 
+    my $session = XMLRPC::Lite 
+    -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
+    -> call('Classifier/Bayes.get_session_key','admin', '')
+    -> result;
+ 
+    test_assert( $session ne '' );
+
     my $set_bucket_color = XMLRPC::Lite
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
-    -> call('Classifier/Bayes.set_bucket_color','foobarbaz', 'somecolour')
+    -> call('Classifier/Bayes.set_bucket_color', $session, 'personal', 'somecolour')
     -> result;
 
     select(undef,undef,undef,.2);
 
     my $bucket_color = XMLRPC::Lite
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
-    -> call('Classifier/Bayes.get_bucket_color','foobarbaz')
+    -> call('Classifier/Bayes.get_bucket_color', $session, 'personal')
     -> result;
 
-    test_assert_equal($bucket_color,"somecolour");
+    test_assert_equal( $bucket_color, 'somecolour' );
 
     select(undef,undef,undef,.2);
+
+    XMLRPC::Lite 
+    -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
+    -> call('Classifier/Bayes.release_session_key', $session );
 
     my $alive = XMLRPC::Lite
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")

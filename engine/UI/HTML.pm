@@ -277,7 +277,7 @@ sub start
 
     # Ensure that the messages subdirectory exists
 
-    mkdir( 'messages' );
+    mkdir( $self->get_user_path_( $self->global_config_( 'msgdir' ) ) );
 
     # Load the current configuration from disk and then load up the
     # appropriate language, note that we always load English first
@@ -379,6 +379,13 @@ sub url_handler__
 {
     my ( $self, $client, $url, $command, $content ) = @_;
 
+    $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
+
+    if ( !defined( $self->{api_session__} ) ) {
+        $self->http_error_( $client, 500 );
+        return;
+    }
+
     # See if there are any form parameters and if there are parse them into the %form hash
 
     delete $self->{form_};
@@ -409,26 +416,31 @@ sub url_handler__
 
     if ( $url =~ /\/(.+\.gif)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'image/gif' );
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     if ( $url =~ /\/(.+\.png)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'image/png' );
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     if ( $url =~ /\/(.+\.ico)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'image/x-icon' );
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     if ( $url =~ /(skins\/.+\.css)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'text/css' );
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     if ( $url =~ /(manual\/.+\.html)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'text/html' );
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
@@ -446,7 +458,8 @@ sub url_handler__
                 }
             }
         } else {
-            password_page( $self, $client, 1, '/' );
+            $self->password_page( $client, 1, '/' );
+            $self->{classifier__}->release_session_key( $self->{api_session__} );
             return 1;
         }
     }
@@ -488,6 +501,7 @@ sub url_handler__
         $redirect_url =~ s/&$//;
 
         $self->password_page( $client, 0, $redirect_url );
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
 
         return 1;
     }
@@ -516,16 +530,20 @@ sub url_handler__
         } else {
             $self->http_redirect_( $client, "/history" );
         }
+
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     if ( $url =~ /(popfile.*\.log)/ ) {
         $self->http_file_( $client, $self->get_user_path_( $self->module_config_( 'logger', 'logdir' ) . $1 ), 'text/plain' );
+        $self->{classifier__}->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     if ( ( defined($self->{form_}{session}) ) && ( $self->{form_}{session} ne $self->{session_key__} ) ) {
-        session_page( $self, $client, 0, $url );
+        $self->session_page( $client, 0, $url );
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
@@ -534,7 +552,8 @@ sub url_handler__
     }
 
     if ( $url eq '/shutdown' )  {
-        http_ok( $self, $client, "POPFile shutdown", -1 );
+        $self->http_ok( $client, "POPFile shutdown", -1 );
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 0;
     }
 
@@ -552,10 +571,12 @@ sub url_handler__
 
     if ( defined($url_table{$url}) )  {
         &{$url_table{$url}}($self, $client);
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
-    $self->http_error_($client, 404);
+    $self->http_error_( $client, 404 );
+    $self->{classifier__}->release_session_key( $self->{api_session__} );
     return 1;
 }
 
@@ -594,7 +615,7 @@ sub http_ok
         }
 
         if ( $self->config_( 'send_stats' ) ) {
-            my @buckets = $self->{classifier__}->get_buckets();
+            my @buckets = $self->{classifier__}->get_buckets( $self->{api_session__} );
             my $bc      = $#buckets + 1;
             $update_check .= "<img border=\"0\" alt=\"\" src=\"http://www.usethesource.com/cgi-bin/popfile_stats.pl?bc=$bc&amp;mc=" . $self->mcount__() . "&amp;ec=" . $self->ecount__() . "\" />\n";
         }
@@ -1181,8 +1202,12 @@ sub security_page
 
     # Password widget
     $body .= "<form action=\"/security\" method=\"post\">\n";
-    $body .= "<label class=\"securityLabel\" for=\"securityPassword\">$self->{language__}{Security_Password}:</label> <br />\n";
-    $body .= "<input type=\"password\" id=\"securityPassword\" name=\"password\" value=\"" . $self->config_( 'password' ) . "\" />\n";
+    $body .= "<label class=\"securityLabel\" for=\"securityPassword\">$self->{language__}{Security_Password}:</label> <br />\n"; 
+    if ( $self->config_( 'password' ) eq md5_hex( '__popfile__' ) ) {
+        $body .= "<input type=\"password\" id=\"securityPassword\" name=\"password\" value=\"\" />\n";
+    } else {
+        $body .= "<input type=\"password\" id=\"securityPassword\" name=\"password\" value=\"" . $self->config_( 'password' ) . "\" />\n";
+    }
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_server\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n";
     $body .= $self->{language__}{Security_PasswordUpdate} if ( defined($self->{form_}{password}) );
@@ -1292,14 +1317,14 @@ sub advanced_page
     my $add_message = '';
     my $deletemessage = '';
     if ( defined($self->{form_}{newword}) ) {
-        my $result = $self->{classifier__}->add_stopword( $self->{form_}{newword} );
+        my $result = $self->{classifier__}->add_stopword( $self->{api_session__}, $self->{form_}{newword} );
         if ( $result == 0 ) {
             $add_message = "<blockquote><div class=\"error02\"><b>$self->{language__}{Advanced_Error2}</b></div></blockquote>";
         }
     }
 
     if ( defined($self->{form_}{word}) ) {
-        my $result = $self->{classifier__}->remove_stopword( $self->{form_}{word} );
+        my $result = $self->{classifier__}->remove_stopword( $self->{api_session__}, $self->{form_}{word} );
         if ( $result == 0 ) {
             $deletemessage = "<blockquote><div class=\"error02\"><b>$self->{language__}{Advanced_Error2}</b></div></blockquote>";
         }
@@ -1315,7 +1340,7 @@ sub advanced_page
     my $groupCounter = 0;
     my $groupSize = 5;
     my $firstRow = 1;
-    my @words = $self->{classifier__}->get_stopword_list();
+    my @words = $self->{classifier__}->get_stopword_list( $self->{api_session__} );
 
     for my $word (sort @words) {
         my $c;
@@ -1437,7 +1462,7 @@ sub magnet_page
                 my $mtext   = $self->{form_}{"text$i"};
                 my $mbucket = $self->{form_}{"bucket$i"};
 
-                $self->{classifier__}->delete_magnet( $mbucket, $mtype, $mtext );
+                $self->{classifier__}->delete_magnet( $self->{api_session__}, $mbucket, $mtype, $mtext );
             }
         }
     }
@@ -1454,16 +1479,16 @@ sub magnet_page
                 my $obucket = $self->{form_}{"obucket$i"};
 
                 if ( defined( $otype ) ) {
-                    $self->{classifier__}->delete_magnet( $obucket, $otype, $otext );
+                    $self->{classifier__}->delete_magnet( $self->{api_session__}, $obucket, $otype, $otext );
 		}
             }
 
             if ( ( defined($mbucket) ) && ( $mbucket ne '' ) && ( $mtext ne '' ) ) {
                 my $found = 0;
 
-                for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
+                for my $bucket ($self->{classifier__}->get_buckets_with_magnets( $self->{api_session__} )) {
                     my %magnets;
-                    @magnets{ $self->{classifier__}->get_magnets( $bucket, $mtype )} = ();
+                    @magnets{ $self->{classifier__}->get_magnets( $self->{api_session__}, $bucket, $mtype )} = ();
 
                     if ( exists( $magnets{$mtext} ) ) {
                         $found  = 1;
@@ -1475,9 +1500,9 @@ sub magnet_page
                 }
 
                 if ( $found == 0 )  {
-                    for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
+                    for my $bucket ($self->{classifier__}->get_buckets_with_magnets( $self->{api_session__} )) {
                         my %magnets;
-                        @magnets{ $self->{classifier__}->get_magnets( $bucket, $mtype )} = ();
+                        @magnets{ $self->{classifier__}->get_magnets( $self->{api_session__}, $bucket, $mtype )} = ();
 
                         for my $from (keys %magnets)  {
                             if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
@@ -1499,7 +1524,7 @@ sub magnet_page
                     $mtext =~ s/^[ \t]+//;
                     $mtext =~ s/[ \t]+$//;
 
-                    $self->{classifier__}->create_magnet( $mbucket, $mtype, $mtext );
+                    $self->{classifier__}->create_magnet( $self->{api_session__}, $mbucket, $mtype, $mtext );
                     if ( !defined( $self->{form_}{update} ) ) {
                         $magnet_message .= "<blockquote>" . sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $mtext", $mbucket ) . "</blockquote>";
                     }
@@ -1514,7 +1539,7 @@ sub magnet_page
 
     my $start_magnet = $self->{form_}{start_magnet};
     my $stop_magnet  = $self->{form_}{stop_magnet};
-    my $magnet_count = $self->{classifier__}->magnet_count();
+    my $magnet_count = $self->{classifier__}->magnet_count( $self->{api_session__} );
     my $navigator = '';
 
     if ( !defined( $start_magnet ) ) {
@@ -1540,7 +1565,7 @@ sub magnet_page
     $body .= "<th class=\"magnetsLabel\" scope=\"col\">$self->{language__}{Bucket}</th>\n";
     $body .= "<th class=\"magnetsLabel\" scope=\"col\">$self->{language__}{Remove}</th>\n</tr>\n";
 
-    my %magnet_types = $self->{classifier__}->get_magnet_types();
+    my %magnet_types = $self->{classifier__}->get_magnet_types( $self->{api_session__} );
     my $i = 0;
     my $count = -1;
 
@@ -1548,9 +1573,12 @@ sub magnet_page
 
     my $stripe = 0;
 
-    for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
-        for my $type ($self->{classifier__}->get_magnet_types_in_bucket($bucket)) {
-            for my $magnet ($self->{classifier__}->get_magnets( $bucket, $type))  {
+    for my $bucket ($self->{classifier__}->get_buckets_with_magnets( $self->{api_session__} )) {
+	$self->log_( "Magnet bucket: $bucket" );
+        for my $type ($self->{classifier__}->get_magnet_types_in_bucket( $self->{api_session__}, $bucket )) {
+   	    $self->log_( "Magnet type: $type" );
+            for my $magnet ($self->{classifier__}->get_magnets( $self->{api_session__}, $bucket, $type ))  {
+  	        $self->log_( "Magnet: $magnet" );
                 $count += 1;
                 if ( ( $count < $start_magnet ) || ( $count > $stop_magnet ) ) {
                     next;
@@ -1588,10 +1616,10 @@ sub magnet_page
                 $body .= "</select>: <input type=\"text\" name=\"text$i\" value=\"$validatingMagnet\" size=\"" . max(length($magnet),50) . "\" /></td>\n";
                 $body .= "<td><select name=\"bucket$i\" id=\"magnetsAddBucket\">\n";
 
-                my @buckets = $self->{classifier__}->get_buckets();
+                my @buckets = $self->{classifier__}->get_buckets( $self->{api_session__} );
                 foreach my $mbucket (@buckets) {
                     my $selected = ( $bucket eq $mbucket )?"selected":"";
-                    my $bcolor   = $self->{classifier__}->get_bucket_color( $mbucket );
+                    my $bcolor   = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $mbucket );
                     $body .= "<option value=\"$mbucket\" $selected style=\"color: $bcolor\">$mbucket</option>\n";
                 }
                 $body .= "</select></td>\n";
@@ -1651,9 +1679,9 @@ sub magnet_page
     $body .= "<label class=\"magnetsLabel\" for=\"magnetsAddBucket\">$self->{language__}{Magnet_Always}:</label><br />\n";
     $body .= "<select name=\"bucket0\" id=\"magnetsAddBucket\">\n<option value=\"\"></option>\n";
 
-    my @buckets = $self->{classifier__}->get_buckets();
+    my @buckets = $self->{classifier__}->get_buckets( $self->{api_session__} );
     foreach my $bucket (@buckets) {
-        my $bcolor = $self->{classifier__}->get_bucket_color( $bucket );
+        my $bcolor = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket );
         $body .= "<option value=\"$bucket\" style=\"color: $bcolor\">$bucket</option>\n";
     }
     $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"create\" value=\"$self->{language__}{Create}\" />\n";
@@ -1677,20 +1705,20 @@ sub bucket_page
 {
     my ( $self, $client ) = @_;
 
-    my $bucket_count = $self->{classifier__}->get_bucket_word_count( $self->{form_}{showbucket} );
+    my $bucket_count = $self->{classifier__}->get_bucket_word_count( $self->{api_session__}, $self->{form_}{showbucket} );
 
     my $body = "<h2 class=\"buckets\">";
-    $body .= sprintf( $self->{language__}{SingleBucket_Title}, "<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form_}{showbucket}) . "\">$self->{form_}{showbucket}</font>");
+    $body .= sprintf( $self->{language__}{SingleBucket_Title}, "<font color=\"" . $self->{classifier__}->get_bucket_color( $self->{api_session__}, $self->{form_}{showbucket}) . "\">$self->{form_}{showbucket}</font>");
     $body .= "</h2>\n<table summary=\"\">\n<tr>\n<th scope=\"row\" class=\"bucketsLabel\">$self->{language__}{SingleBucket_WordCount}</th>\n";
     $body .= "<td>&nbsp;</td>\n<td align=\"right\">\n";
     $body .= pretty_number( $self, $bucket_count);
-    $body .= "</td>\n<td>\n(" . sprintf( $self->{language__}{SingleBucket_Unique}, pretty_number( $self,  $self->{classifier__}->get_bucket_unique_count($self->{form_}{showbucket})) ). ")";
+    $body .= "</td>\n<td>\n(" . sprintf( $self->{language__}{SingleBucket_Unique}, pretty_number( $self,  $self->{classifier__}->get_bucket_unique_count( $self->{api_session__}, $self->{form_}{showbucket})) ). ")";
     $body .= "</td>\n</tr>\n<tr>\n<th scope=\"row\" class=\"bucketsLabel\">$self->{language__}{SingleBucket_TotalWordCount}</th>\n";
-    $body .= "<td>&nbsp;</td>\n<td align=\"right\">\n" . pretty_number( $self, $self->{classifier__}->get_word_count());
+    $body .= "<td>&nbsp;</td>\n<td align=\"right\">\n" . pretty_number( $self, $self->{classifier__}->get_word_count( $self->{api_session__} ));
 
     my $percent = "0%";
-    if ( $self->{classifier__}->get_word_count() > 0 )  {
-        $percent = sprintf( '%6.2f%%', int( 10000 * $bucket_count / $self->{classifier__}->get_word_count() ) / 100 );
+    if ( $self->{classifier__}->get_word_count( $self->{api_session__} ) > 0 )  {
+        $percent = sprintf( '%6.2f%%', int( 10000 * $bucket_count / $self->{classifier__}->get_word_count( $self->{api_session__} ) ) / 100 );
     }
     $body .= "</td>\n<td></td>\n</tr>\n<tr><td colspan=\"3\"><hr /></td></tr>\n";
     $body .= "<tr>\n<th scope=\"row\" class=\"bucketsLabel\">$self->{language__}{SingleBucket_Percentage}</th>\n";
@@ -1702,17 +1730,17 @@ sub bucket_page
     $body .= "</form>";
 
     $body .= "<h2 class=\"buckets\">";
-    $body .= sprintf( $self->{language__}{SingleBucket_WordTable},  "<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form_}{showbucket}) . "\">$self->{form_}{showbucket}" ) ;
+    $body .= sprintf( $self->{language__}{SingleBucket_WordTable},  "<font color=\"" . $self->{classifier__}->get_bucket_color( $self->{api_session__}, $self->{form_}{showbucket} ) . "\">$self->{form_}{showbucket}" ) ;
     $body .= "</font>\n</h2>\n$self->{language__}{SingleBucket_Message1}\n<br /><br />\n<table summary=\"$self->{language__}{Bucket_WordListTableSummary}\">\n";
     $body .= "<tr><td colspan=2>";
 
-    if ( $self->{classifier__}->get_bucket_word_count( $self->{form_}{showbucket} ) > 0 ) {
-        for my $i ($self->{classifier__}->get_bucket_word_prefixes($self->{form_}{showbucket})) {
+    if ( $self->{classifier__}->get_bucket_word_count( $self->{api_session__}, $self->{form_}{showbucket} ) > 0 ) {
+        for my $i ($self->{classifier__}->get_bucket_word_prefixes( $self->{api_session__}, $self->{form_}{showbucket} )) {
             if ( defined( $self->{form_}{showletter} ) && ( $i eq $self->{form_}{showletter} ) ) {
                 my %temp;
 
-                for my $j ( $self->{classifier__}->get_bucket_word_list( $self->{form_}{showbucket}, $i ) ) {
-                    $temp{$j} = $self->{classifier__}->get_count_for_word( $self->{form_}{showbucket}, $j );
+                for my $j ( $self->{classifier__}->get_bucket_word_list( $self->{api_session__}, $self->{form_}{showbucket}, $i ) ) {
+                    $temp{$j} = $self->{classifier__}->get_count_for_word( $self->{api_session__}, $self->{form_}{showbucket}, $j );
                 }
 
                 $body .= "</td></tr><tr><td colspan=2>&nbsp;</td></tr><tr>\n<td valign=\"top\">\n<b>$i</b>\n</td>\n<td valign=\"top\">\n<table><tr valign=\"top\">";
@@ -1761,7 +1789,7 @@ sub bar_chart_100
     }
 
     for my $bucket (@xaxis)  {
-        $body .= "<tr>\n<td align=\"left\"><font color=\"". $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></td>\n<td>&nbsp;</td>";
+        $body .= "<tr>\n<td align=\"left\"><font color=\"". $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket ) . "\">$bucket</font></td>\n<td>&nbsp;</td>";
 
         for my $s (@series) {
             my $value = $values{$bucket}{$s} || 0;
@@ -1790,7 +1818,7 @@ sub bar_chart_100
         foreach my $bucket (@xaxis) {
             my $percent = int( $values{$bucket}{0} * 10000 / $total_count ) / 100;
             if ( $percent != 0 )  {
-                $body .= "<td bgcolor=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\" title=\"$bucket ($percent%)\" width=\"";
+                $body .= "<td bgcolor=\"" . $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket ) . "\" title=\"$bucket ($percent%)\" width=\"";
                 $body .= (int($percent)<1)?1:int($percent);
                 $body .= "%\"><img src=\"pix.gif\" alt=\"\" height=\"20\" width=\"1\" /></td>\n";
             }
@@ -1819,14 +1847,14 @@ sub corpus_page
     my ( $self, $client ) = @_;
 
     if ( defined( $self->{form_}{clearbucket} ) ) {
-        $self->{classifier__}->clear_bucket( $self->{form_}{showbucket} );
+        $self->{classifier__}->clear_bucket( $self->{api_session__}, $self->{form_}{showbucket} );
     }
 
     if ( defined($self->{form_}{reset_stats}) ) {
-        foreach my $bucket ($self->{classifier__}->get_buckets()) {
-            $self->{classifier__}->set_bucket_parameter( $bucket, 'count', 0 );
-            $self->{classifier__}->set_bucket_parameter( $bucket, 'fpcount', 0 );
-            $self->{classifier__}->set_bucket_parameter( $bucket, 'fncount', 0 );
+        foreach my $bucket ($self->{classifier__}->get_all_buckets( $self->{api_session__} )) {
+            $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'count', 0 );
+            $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'fpcount', 0 );
+            $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'fncount', 0 );
         }
         my $lasttime = localtime;
         $self->config_( 'last_reset', $lasttime );
@@ -1847,23 +1875,23 @@ sub corpus_page
         open COLOR, '>' . $self->get_user_path_( $self->module_config_( 'bayes', 'corpus' ) . "/$self->{form_}{bucket}/color" );
         print COLOR "$self->{form_}{color}\n";
         close COLOR;
-        $self->{classifier__}->set_bucket_color($self->{form_}{bucket}, $self->{form_}{color});
+        $self->{classifier__}->set_bucket_color( $self->{api_session__}, $self->{form_}{bucket}, $self->{form_}{color});
     }
 
     if ( ( defined($self->{form_}{bucket}) ) && ( defined($self->{form_}{subject}) ) && ( $self->{form_}{subject} > 0 ) ) {
-        $self->{classifier__}->set_bucket_parameter( $self->{form_}{bucket}, 'subject', $self->{form_}{subject} - 1 );
+        $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $self->{form_}{bucket}, 'subject', $self->{form_}{subject} - 1 );
     }
 
     if ( ( defined($self->{form_}{bucket}) ) && ( defined($self->{form_}{xtc}) ) && ( $self->{form_}{xtc} > 0 ) ) {
-        $self->{classifier__}->set_bucket_parameter( $self->{form_}{bucket}, 'xtc', $self->{form_}{xtc} - 1 );
+        $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $self->{form_}{bucket}, 'xtc', $self->{form_}{xtc} - 1 );
     }
 
     if ( ( defined($self->{form_}{bucket}) ) && ( defined($self->{form_}{xpl}) ) && ( $self->{form_}{xpl} > 0 ) ) {
-        $self->{classifier__}->set_bucket_parameter( $self->{form_}{bucket}, 'xpl', $self->{form_}{xpl} - 1 );
+        $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $self->{form_}{bucket}, 'xpl', $self->{form_}{xpl} - 1 );
     }
 
     if ( ( defined($self->{form_}{bucket}) ) &&  ( defined($self->{form_}{quarantine}) ) && ( $self->{form_}{quarantine} > 0 ) ) {
-        $self->{classifier__}->set_bucket_parameter( $self->{form_}{bucket}, 'quarantine', $self->{form_}{quarantine} - 1 );
+        $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $self->{form_}{bucket}, 'quarantine', $self->{form_}{quarantine} - 1 );
     }
 
     # This regular expression defines the characters that are NOT valid
@@ -1875,10 +1903,10 @@ sub corpus_page
         if ( $self->{form_}{cname} =~ /$invalid_bucket_chars/ )  {
             $create_message = "<blockquote><div class=\"error01\">$self->{language__}{Bucket_Error1}</div></blockquote>";
         } else {
-            if ( ( defined($self->{classifier__}->get_bucket_word_count($self->{form_}{cname})) ) && ( $self->{classifier__}->get_bucket_word_count($self->{form_}{cname}) > 0 ) )  {
+            if ( ( defined($self->{classifier__}->get_bucket_word_count( $self->{api_session__}, $self->{form_}{cname} )) ) && ( $self->{classifier__}->get_bucket_word_count( $self->{api_session__}, $self->{form_}{cname} ) > 0 ) )  {
                 $create_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error2}, $self->{form_}{cname} ) . "</b></blockquote>";
             } else {
-                $self->{classifier__}->create_bucket( $self->{form_}{cname} );
+                $self->{classifier__}->create_bucket( $self->{api_session__}, $self->{form_}{cname} );
                 $create_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error3}, $self->{form_}{cname} ) . "</b></blockquote>";
             }
        }
@@ -1886,7 +1914,7 @@ sub corpus_page
 
     if ( ( defined($self->{form_}{delete}) ) && ( $self->{form_}{name} ne '' ) ) {
         $self->{form_}{name} = lc($self->{form_}{name});
-    $self->{classifier__}->delete_bucket( $self->{form_}{name} );
+    $self->{classifier__}->delete_bucket( $self->{api_session__}, $self->{form_}{name} );
         $deletemessage = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error6}, $self->{form_}{name} ) . "</b></blockquote>";
     }
 
@@ -1896,7 +1924,7 @@ sub corpus_page
         } else {
             $self->{form_}{oname} = lc($self->{form_}{oname});
             $self->{form_}{newname} = lc($self->{form_}{newname});
-        $self->{classifier__}->rename_bucket( $self->{form_}{oname}, $self->{form_}{newname} );
+        $self->{classifier__}->rename_bucket( $self->{api_session__}, $self->{form_}{oname}, $self->{form_}{newname} );
             $rename_message = "<blockquote><b>" . sprintf( $self->{language__}{Bucket_Error5}, $self->{form_}{oname}, $self->{form_}{newname} ) . "</b></blockquote>";
         }
     }
@@ -1914,19 +1942,19 @@ sub corpus_page
     $body .= "<th width=\"1%\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"center\">$self->{language__}{Bucket_Quarantine}</th>\n";
     $body .= "<th width=\"2%\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"left\">$self->{language__}{Bucket_ChangeColor}</th>\n</tr>\n";
 
-    my @buckets = $self->{classifier__}->get_buckets();
+    my @buckets = $self->{classifier__}->get_buckets( $self->{api_session__} );
     my $stripe = 0;
 
     my $total_count = 0;
     foreach my $bucket (@buckets) {
-        $total_count += $self->{classifier__}->get_bucket_parameter( $bucket, 'count' );
+        $total_count += $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'count' );
     }
 
-    my @pseudos = $self->{classifier__}->get_pseudo_buckets();
+    my @pseudos = $self->{classifier__}->get_pseudo_buckets( $self->{api_session__} );
     push @buckets, @pseudos;
 
     foreach my $bucket (@buckets) {
-        my $unique  = pretty_number( $self,  $self->{classifier__}->get_bucket_unique_count($bucket) );
+        my $unique  = pretty_number( $self,  $self->{classifier__}->get_bucket_unique_count( $self->{api_session__}, $bucket ) );
 
         $body .= "<tr";
         if ( $stripe == 1 )  {
@@ -1936,15 +1964,15 @@ sub corpus_page
         }
         $stripe = 1 - $stripe;
         $body .= '><td>';
-        if ( !$self->{classifier__}->is_pseudo_bucket( $bucket ) ) {
+        if ( !$self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) {
             $body .= "<a href=\"/buckets?session=$self->{session_key__}&amp;showbucket=$bucket\">\n";
 	}
-        $body .= "<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font>";
-        if ( !$self->{classifier__}->is_pseudo_bucket( $bucket ) ) {
+        $body .= "<font color=\"" . $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket ) . "\">$bucket</font>";
+        if ( !$self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) {
             $body .= '</a>';
 	}
         $body .= "</td>\n<td width=\"1%\">&nbsp;</td>\n";
-        if ( !$self->{classifier__}->is_pseudo_bucket( $bucket ) ) {
+        if ( !$self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) {
             $body .= "<td align=\"right\">$unique</td><td width=\"1%\">&nbsp;</td>";
 	} else {
             $body .= "<td align=\"right\">&nbsp;</td><td width=\"1%\">&nbsp;</td>";
@@ -1953,7 +1981,7 @@ sub corpus_page
         # Subject Modification on/off widget
 
         $body .= "<td align=\"center\">\n";
-        if ( $self->{classifier__}->get_bucket_parameter( $bucket, 'subject' ) == 0 ) {
+        if ( $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'subject' ) == 0 ) {
             $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
             $body .= "<span class=\"bucketsWidgetStateOff\">$self->{language__}{Off} </span>\n";
             $body .= "<input type=\"submit\" class=\"toggleOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
@@ -1972,7 +2000,7 @@ sub corpus_page
         # XTC on/off widget
 
         $body .= "<td width=\"1%\">&nbsp;</td><td align=\"center\">\n";
-        if ( $self->{classifier__}->get_bucket_parameter( $bucket, 'xtc' ) == 0 ) {
+        if ( $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'xtc' ) == 0 ) {
             $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
             $body .= "<span class=\"bucketsWidgetStateOff\">$self->{language__}{Off} </span>\n";
             $body .= "<input type=\"submit\" class=\"toggleOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
@@ -1991,7 +2019,7 @@ sub corpus_page
         # XPL on/off widget
 
         $body .= "<td width=\"1%\">&nbsp;</td><td align=\"center\">\n";
-        if ( $self->{classifier__}->get_bucket_parameter( $bucket, 'xpl' ) == 0 ) {
+        if ( $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'xpl' ) == 0 ) {
             $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
             $body .= "<span class=\"bucketsWidgetStateOff\">$self->{language__}{Off} </span>\n";
             $body .= "<input type=\"submit\" class=\"toggleOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
@@ -2010,7 +2038,7 @@ sub corpus_page
         # Quarantine on/off widget
 
         $body .= "<td width=\"1%\">&nbsp;</td><td align=\"center\">\n";
-        if ( $self->{classifier__}->get_bucket_parameter( $bucket, 'quarantine' ) == 0 ) {
+        if ( $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'quarantine' ) == 0 ) {
             $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
             $body .= "<span class=\"bucketsWidgetStateOff\">$self->{language__}{Off} </span>\n";
             $body .= "<input type=\"submit\" class=\"toggleOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
@@ -2028,13 +2056,13 @@ sub corpus_page
 
         # Change Color widget
 
-        if ( !$self->{classifier__}->is_pseudo_bucket( $bucket ) ) {
+        if ( !$self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $bucket ) ) {
             $body .= "<td>&nbsp;</td>\n<td align=\"left\">\n<table class=\"colorChooserTable\" cellpadding=\"0\" cellspacing=\"1\" summary=\"\">\n<tr>\n";
-            my $color = $self->{classifier__}->get_bucket_color($bucket);
+            my $color = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket );
             $body .= "<td bgcolor=\"$color\" title='" . sprintf( $self->{language__}{Bucket_CurrentColor}, $bucket, $color ) . "'>\n<img class=\"colorChooserImg\" border=\"0\" alt='" . sprintf( $self->{language__}{Bucket_CurrentColor}, $bucket, $color ) . "' src=\"pix.gif\" width=\"10\" height=\"20\" /></td>\n<td>&nbsp;</td>\n";
             for my $i ( 0 .. $#{$self->{classifier__}->{possible_colors__}} ) {
                 my $color = $self->{classifier__}->{possible_colors__}[$i];
-                if ( $color ne $self->{classifier__}->get_bucket_color($bucket) )  {
+                if ( $color ne $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket ) )  {
                     $body .= "<td bgcolor=\"$color\" title=\"". sprintf( $self->{language__}{Bucket_SetColorTo}, $bucket, $color ) . "\">\n";
                     $body .= "<a class=\"colorChooserLink\" href=\"/buckets?color=$color&amp;bucket=$bucket&amp;session=$self->{session_key__}\">\n";
                     $body .= "<img class=\"colorChooserImg\" border=\"0\" alt=\"". sprintf( $self->{language__}{Bucket_SetColorTo}, $bucket, $color ) . "\" src=\"pix.gif\" width=\"10\" height=\"20\" /></a>\n";
@@ -2052,7 +2080,7 @@ sub corpus_page
 
     # figure some performance numbers
 
-    my $number = pretty_number( $self,  $self->{classifier__}->get_unique_word_count() );
+    my $number = pretty_number( $self,  $self->{classifier__}->get_unique_word_count( $self->{api_session__} ) );
     my $pmcount = pretty_number( $self,  $self->mcount__() );
     my $pecount = pretty_number( $self,  $self->ecount__() );
     my $accuracy = $self->{language__}{Bucket_NotEnoughData};
@@ -2139,9 +2167,9 @@ sub corpus_page
 
     my %bar_values;
     for my $bucket (@buckets)  {
-        $bar_values{$bucket}{0} = $self->{classifier__}->get_bucket_parameter( $bucket, 'count' );
-        $bar_values{$bucket}{1} = $self->{classifier__}->get_bucket_parameter( $bucket, 'fpcount' );
-        $bar_values{$bucket}{2} = $self->{classifier__}->get_bucket_parameter( $bucket, 'fncount' );
+        $bar_values{$bucket}{0} = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'count' );
+        $bar_values{$bucket}{1} = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'fpcount' );
+        $bar_values{$bucket}{2} = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'fncount' );
     }
 
     $body .= bar_chart_100( $self, %bar_values );
@@ -2152,12 +2180,12 @@ sub corpus_page
     $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"left\">$self->{language__}{Bucket}</th>\n<th>&nbsp;</th>\n";
     $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language__}{Bucket_WordCount}</th>\n</tr>\n";
 
-    @buckets = $self->{classifier__}->get_buckets();
+    @buckets = $self->{classifier__}->get_buckets( $self->{api_session__} );
 
     delete $bar_values{unclassified};
 
     for my $bucket (@buckets)  {
-        $bar_values{$bucket}{0} = $self->{classifier__}->get_bucket_word_count($bucket);
+        $bar_values{$bucket}{0} = $self->{classifier__}->get_bucket_word_count( $self->{api_session__}, $bucket );
         delete $bar_values{$bucket}{1};
         delete $bar_values{$bucket}{2};
     }
@@ -2187,7 +2215,7 @@ sub corpus_page
     $body .= "<select name=\"name\" id=\"bucketsDeleteBucket\">\n<option value=\"\"></option>\n";
 
     foreach my $bucket (@buckets) {
-        my $bcolor = $self->{classifier__}->get_bucket_color( $bucket );
+        my $bcolor = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket );
         $body .= "<option value=\"$bucket\" style=\"color: $bcolor\">$bucket</option>\n";
     }
     $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"delete\" value=\"$self->{language__}{Delete}\" />\n";
@@ -2198,7 +2226,7 @@ sub corpus_page
     $body .= "<select name=\"oname\" id=\"bucketsRenameBucketFrom\">\n<option value=\"\"></option>\n";
 
     foreach my $bucket (@buckets) {
-        my $bcolor = $self->{classifier__}->get_bucket_color( $bucket );
+        my $bcolor = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket );
         $body .= "<option value=\"$bucket\" style=\"color: $bcolor\">$bucket</option>\n";
     }
     $body .= "</select>\n<label class=\"bucketsLabel\" for=\"bucketsRenameBucketTo\">$self->{language__}{Bucket_To}</label>\n";
@@ -2251,8 +2279,8 @@ sub corpus_page
             my $max_bucket = '';
             my $total = 0;
             foreach my $bucket (@buckets) {
-                if ( $self->{classifier__}->get_value_( $bucket, $word ) != 0 ) {
-                    my $prob = exp( $self->{classifier__}->get_value_( $bucket, $word ) );
+                if ( $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word ) != 0 ) {
+                    my $prob = exp( $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word ) );
                     $total += $prob;
                     if ( $max_bucket eq '' ) {
                         $body .= $heading;
@@ -2265,15 +2293,15 @@ sub corpus_page
                 # Take into account the probability the Bayes calculation applies
                 # for the buckets in which the word is not found.
                 else {
-                    if ( $self->{classifier__}->get_word_count() > 0 ) {
-                        $total += 0.1 / $self->{classifier__}->get_word_count();
+                    if ( $self->{classifier__}->get_word_count( $self->{api_session__} ) > 0 ) {
+                        $total += 0.1 / $self->{classifier__}->get_word_count( $self->{api_session__} );
                     }
                 }
             }
 
             foreach my $bucket (@buckets) {
-                if ( $self->{classifier__}->get_value_( $bucket, $word ) != 0 ) {
-                    my $prob    = exp( $self->{classifier__}->get_value_( $bucket, $word ) );
+                if ( $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word ) != 0 ) {
+                    my $prob    = exp( $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word ) );
                     my $n       = ($total > 0)?$prob / $total:0;
                     my $score   = ($#buckets >= 0)?(log($prob)-$self->{classifier__}->{not_likely__})/log(10.0):0;
                     my $normal  = sprintf("%.10f", $n);
@@ -2286,7 +2314,7 @@ sub corpus_page
                     }
                     $bold    = "<b>"  if ( $max == $prob );
                     $endbold = "</b>" if ( $max == $prob );
-                    $body .= "<tr>\n<td>$bold<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font>$endbold</td>\n";
+                    $body .= "<tr>\n<td>$bold<font color=\"" . $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket ) . "\">$bucket</font>$endbold</td>\n";
                     $body .= "<td></td>\n<td>$bold<tt>$probf</tt>$endbold</td>\n<td></td>\n";
                     $body .= "<td>$bold<tt>$normal</tt>$endbold</td>\n<td></td>\n<td>$bold<tt>$score</tt>$endbold</td>\n</tr>\n";
                 }
@@ -2294,7 +2322,7 @@ sub corpus_page
 
             if ( $max_bucket ne '' ) {
                 $body .= "</table>\n<br /><br />";
-                $body .= sprintf( $self->{language__}{Bucket_LookupMostLikely}, $word, $self->{classifier__}->get_bucket_color($max_bucket), $max_bucket);
+                $body .= sprintf( $self->{language__}{Bucket_LookupMostLikely}, $word, $self->{classifier__}->get_bucket_color( $self->{api_session__}, $max_bucket ), $max_bucket);
                 $body .= "</td>\n</tr>\n</table>";
             } else {
                 $body .= sprintf( $self->{language__}{Bucket_DoesNotAppear}, $word );
@@ -2942,19 +2970,19 @@ sub history_reclassify
                 $self->log_( "Reclassifying $mail_file from $bucket to $newbucket" );
 
                 if ( $bucket ne $newbucket ) {
-                    my $count = $self->{classifier__}->get_bucket_parameter( $newbucket, 'count' );
-                    $self->{classifier__}->set_bucket_parameter( $newbucket, 'count', $count+1 );
+                    my $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $newbucket, 'count' );
+                    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $newbucket, 'count', $count+1 );
 
-                    $count = $self->{classifier__}->get_bucket_parameter( $bucket, 'count' );
+                    $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'count' );
                     $count -= 1;
                     $count = 0 if ( $count < 0 ) ;
-                    $self->{classifier__}->set_bucket_parameter( $bucket, 'count', $count );
+                    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'count', $count );
 
-                    my $fncount = $self->{classifier__}->get_bucket_parameter( $newbucket, 'fncount' );
-                    $self->{classifier__}->set_bucket_parameter( $newbucket, 'fncount', $fncount+1 );
+                    my $fncount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $newbucket, 'fncount' );
+                    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $newbucket, 'fncount', $fncount+1 );
 
-                    my $fpcount = $self->{classifier__}->get_bucket_parameter( $bucket, 'fpcount' );
-                    $self->{classifier__}->set_bucket_parameter( $bucket, 'fpcount', $fpcount+1 );
+                    my $fpcount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'fpcount' );
+                    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'fpcount', $fpcount+1 );
                 }
 
                 # Update the class file
@@ -2970,7 +2998,7 @@ sub history_reclassify
 
                 # Add message feedback
 
-                $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, $self->{classifier__}->get_bucket_color($newbucket), $newbucket );
+                $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, $self->{classifier__}->get_bucket_color( $self->{api_session__}, $newbucket ), $newbucket );
 
                 $self->{configuration__}->save_configuration();
             }
@@ -2980,7 +3008,7 @@ sub history_reclassify
         # them doing bulk updates
 
         foreach my $newbucket (keys %work) {
-            $self->{classifier__}->add_messages_to_bucket( $newbucket, @{$work{$newbucket}} );
+            $self->{classifier__}->add_messages_to_bucket( $self->{api_session__}, $newbucket, @{$work{$newbucket}} );
         }
     }
 }
@@ -3006,27 +3034,27 @@ sub history_undo
             # Only undo if the message has been classified...
 
             if ( defined( $usedtobe ) ) {
-                $self->{classifier__}->remove_message_from_bucket( $bucket, $self->global_config_( 'msgdir' ) . $mail_file);
+                $self->{classifier__}->remove_message_from_bucket( $self->{api_session__}, $bucket, $self->global_config_( 'msgdir' ) . $mail_file);
 
                 $self->{save_cache__} = 1;
 
                 $self->log_( "Undoing $mail_file from $bucket to $usedtobe" );
 
                 if ( $bucket ne $usedtobe ) {
-                    my $count = $self->{classifier__}->get_bucket_parameter( $bucket, 'count' ) - 1;
+                    my $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'count' ) - 1;
                     $count = 0 if ( $count < 0 );
-                    $self->{classifier__}->set_bucket_parameter( $bucket, 'count', $count );
+                    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'count', $count );
 
-                    $count = $self->{classifier__}->get_bucket_parameter( $usedtobe, 'count' ) + 1;
-                    $self->{classifier__}->set_bucket_parameter( $usedtobe, 'count', $count );
+                    $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $usedtobe, 'count' ) + 1;
+                    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $usedtobe, 'count', $count );
 
-                    my $fncount = $self->{classifier__}->get_bucket_parameter( $bucket, 'fncount' ) - 1;
+                    my $fncount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'fncount' ) - 1;
                     $fncount = 0 if ( $fncount < 0 );
-                    $self->{classifier__}->set_bucket_parameter( $bucket, 'fncount', $fncount );
+                    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'fncount', $fncount );
 
-                    my $fpcount = $self->{classifier__}->get_bucket_parameter( $usedtobe, 'fpcount' ) - 1;
+                    my $fpcount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $usedtobe, 'fpcount' ) - 1;
                     $fpcount = 0 if ( $fpcount < 0 );
-                    $self->{classifier__}->set_bucket_parameter( $usedtobe, 'fpcount', $fpcount );
+                    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $usedtobe, 'fpcount', $fpcount );
                 }
 
                 # Since we have just changed the classification of this file and it has
@@ -3042,7 +3070,7 @@ sub history_undo
 
                 # Add message feedback
 
-                $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, ($self->{classifier__}->get_bucket_color($usedtobe) || ''), $usedtobe );
+                $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, ($self->{classifier__}->get_bucket_color( $self->{api_session__}, $usedtobe ) || ''), $usedtobe );
 
                 $self->{configuration__}->save_configuration();
             }
@@ -3072,9 +3100,9 @@ sub get_search_filter_widget
     $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form_}{sort}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
     $body .= "<select name=\"filter\" id=\"historyFilter\">\n<option value=\"\"></option>";
-    my @buckets = $self->{classifier__}->get_buckets();
+    my @buckets = $self->{classifier__}->get_buckets( $self->{api_session__} );
     foreach my $abucket (@buckets) {
-        my $bcolor = $self->{classifier__}->get_bucket_color( $abucket );
+        my $bcolor = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $abucket );
         $body .= "<option value=\"$abucket\"";
         $body .= " selected" if ( ( defined($self->{form_}{filter}) ) && ( $self->{form_}{filter} eq $abucket ) );
         $body .= " style=\"color: $bcolor\">$abucket</option>\n";
@@ -3146,7 +3174,7 @@ sub history_page
             if ( $filter eq '__filter__no__magnet' ) {
                 $filtered .= $self->{language__}{History_NoMagnet};
             } else {
-                $filtered = sprintf( $self->{language__}{History_Filter}, $self->{classifier__}->get_bucket_color($self->{form_}{filter}), $self->{form_}{filter} ) if ( $self->{form_}{filter} ne '' );
+                $filtered = sprintf( $self->{language__}{History_Filter}, $self->{classifier__}->get_bucket_color( $self->{api_session__}, $self->{form_}{filter} ), $self->{form_}{filter} ) if ( $self->{form_}{filter} ne '' );
             }
         }
     }
@@ -3255,7 +3283,7 @@ sub history_page
         $body .= "<table class=\"historyWidgetsTop\" summary=\"\">\n<tr>\n";
 
         # Search From/Subject widget
-        my @buckets = $self->{classifier__}->get_buckets();
+        my @buckets = $self->{classifier__}->get_buckets( $self->{api_session__} );
         $body .= "<td colspan=\"5\" valign=middle>\n";
         $body .= $self->get_search_filter_widget();
         $body .= "</td>\n</tr>\n</table>\n";
@@ -3335,11 +3363,11 @@ sub history_page
             my $sbs = ($bucket ne 'unclassified')?"<a href=\"buckets?session=$self->{session_key__}&amp;showbucket=$bucket\">":'';
             my $sbe = ($bucket ne 'unclassified')?'</a>':'';
             if ( $reclassified )  {
-                $body .= "$sbs<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font>$sbe</td>\n<td>";
-                $body .= sprintf( $self->{language__}{History_Already}, ($self->{classifier__}->get_bucket_color($bucket) || ''), ($bucket || '') );
+                $body .= "$sbs<font color=\"" . $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket ) . "\">$bucket</font>$sbe</td>\n<td>";
+                $body .= sprintf( $self->{language__}{History_Already}, ($self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket ) || ''), ($bucket || '') );
                 $body .= " <input type=\"submit\" class=\"undoButton\" name=\"undo_$i\" value=\"$self->{language__}{Undo}\">\n";
             } else {
-                $body .= "$sbs<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font>$sbe</td>\n<td>";
+                $body .= "$sbs<font color=\"" . $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket ) . "\">$bucket</font>$sbe</td>\n<td>";
 
                 if ( $self->{history__}{$mail_file}{magnet} eq '' )  {
                     $body .= "\n<select name=\"$i\">\n";
@@ -3348,7 +3376,7 @@ sub history_page
                     $body .= "<option selected=\"selected\"></option>\n";
 
                     foreach my $abucket (@buckets) {
-                        my $bcolor = $self->{classifier__}->get_bucket_color( $abucket );
+                        my $bcolor = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $abucket );
                         $body .= "<option value=\"$abucket\" style=\"color: $bcolor\">$abucket</option>\n";
                     }
                     $body .= "</select>\n";
@@ -3415,7 +3443,7 @@ sub view_page
     my $start_message = $self->{form_}{start_message} || 0;
     my $reclassified  = $self->{history__}{$mail_file}{reclassified};
     my $bucket        = $self->{history__}{$mail_file}{bucket};
-    my $color         = $self->{classifier__}->get_bucket_color($bucket);
+    my $color         = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket );
     my $page_size     = $self->config_( 'page_size' );
 
     $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
@@ -3499,8 +3527,8 @@ sub view_page
                 # Show a blank bucket field
                 $body .= "<option selected=\"selected\"></option>\n";
 
-                foreach my $abucket ($self->{classifier__}->get_buckets()) {
-                    my $bcolor = $self->{classifier__}->get_bucket_color( $abucket );
+                foreach my $abucket ($self->{classifier__}->get_buckets( $self->{api_session__} )) {
+                    my $bcolor = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $abucket );
                     $body .= "<option value=\"$abucket\" style=\"color: $bcolor\">$abucket</option>\n";
                 }
                 $body .= "</select>\n<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />";
@@ -3519,7 +3547,7 @@ sub view_page
     my $fmtlinks;
 
     if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
-        $body .= $self->{classifier__}->get_html_colored_message( $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ) );
+        $body .= $self->{classifier__}->get_html_colored_message( $self->{api_session__}, $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ) );
 
         # We want to insert a link to change the output format at the start of the word
         # matrix.  The classifier puts a comment in the right place, which we can replace
@@ -3568,7 +3596,7 @@ sub view_page
         # Build the scores by classifying the message, since get_html_colored_message has parsed the message
         # for us we do not need to parse it again and hence we pass in undef for the filename
 
-        $self->{classifier__}->classify( undef, $self );
+        $self->{classifier__}->classify( $self->{api_session__}, undef, $self );
 
         # Disable, print, and clear saved word-scores
 
@@ -3600,7 +3628,7 @@ sub view_page
                     $text =~ s/>/&gt;/g;
 
                     if ( $arg =~ /\Q$text\E/i ) {
-                          my $new_color = $self->{classifier__}->get_bucket_color($bucket);
+                          my $new_color = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $bucket );
                           $line =~ s/(\Q$text\E)/<b><font color=\"$new_color\">$1<\/font><\/b>/;
                     }
                 }
@@ -4059,10 +4087,10 @@ sub mcount__
 
     my $count = 0;
 
-    my @buckets = $self->{classifier__}->get_buckets();
+    my @buckets = $self->{classifier__}->get_buckets( $self->{api_session__} );
 
     foreach my $bucket (@buckets) {
-        $count += $self->{classifier__}->get_bucket_parameter( $bucket, 'count' );
+        $count += $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'count' );
     }
 
     return $count;
@@ -4074,10 +4102,10 @@ sub ecount__
 
     my $count = 0;
 
-    my @buckets = $self->{classifier__}->get_buckets();
+    my @buckets = $self->{classifier__}->get_buckets( $self->{api_session__} );
 
     foreach my $bucket (@buckets) {
-        $count += $self->{classifier__}->get_bucket_parameter( $bucket, 'fpcount' );
+        $count += $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'fpcount' );
     }
 
     return $count;

@@ -22,6 +22,8 @@
 #
 # ---------------------------------------------------------------------------------------------
 
+unlink 'popfile.db';
+
 sub forker
 {
     pipe my $reader, my $writer;
@@ -64,6 +66,7 @@ sub pipeready
     }
 }
 
+use Classifier::Bayes;
 use POPFile::Configuration;
 use POPFile::MQ;
 use POPFile::Logger;
@@ -75,12 +78,19 @@ my $c = new POPFile::Configuration;
 my $mq = new POPFile::MQ;
 my $l = new POPFile::Logger;
 my $p = new Proxy::Proxy
+my $b = new Classifier::Bayes;
 
 $c->configuration( $c );
 $c->mq( $mq );
 $c->logger( $l );
 
 $c->initialize();
+
+$b->configuration( $c );
+$b->mq( $mq );
+$b->logger( $l );
+
+$b->initialize();
 
 $l->configuration( $c );
 $l->mq( $mq );
@@ -97,6 +107,10 @@ $p->mq( $mq );
 $p->logger( $l );
 
 $p->initialize();
+$p->classifier( $b );
+
+$b->module_config_( 'html', 'language', 'English' );
+$b->start();
 
 test_assert_equal( $p->config_( 'enabled' ), 1 );
 
@@ -120,6 +134,8 @@ $sp->logger( $l );
 
 $sp->forker( \&forker );
 $sp->pipeready( \&pipeready );
+
+$sp->classifier( $b );
 
 $sp->initialize();
 $sp->config_( 'port', $port );
@@ -213,7 +229,7 @@ $line = <TEMP>;
 test_assert( !defined( $line ) );
 close TEMP;
 
-$line = <$client>;
+$line = $sp->slurp_( $client );
 test_assert_regexp( $line, 'after1' );
 
 # Test echo_to_regexp_ with logging
@@ -240,7 +256,7 @@ test_assert_regexp( $lastten[$#lastten], 'matchTHis2' );
 test_assert_regexp( $lastten[$#lastten-1], 'Suppressed: before22' );
 test_assert_regexp( $lastten[$#lastten-2], 'before21' );
 
-$line = <$client>;
+$line = $sp->slurp_( $client );
 test_assert_regexp( $line, 'after2' );
 
 # Test echo_to_dot_
@@ -264,7 +280,7 @@ $line = <TEMP>;
 test_assert( !defined( $line ) );
 close TEMP;
 
-$line = <$client>;
+$line = $sp->slurp_( $client );
 test_assert_regexp( $line, 'after' );
 
 # Test flush_extra_
@@ -387,7 +403,6 @@ my $r = new Test::MQReceiver;
 
 # Register three different message types
 
-$mq->register( 'CLASS', $r );
 $mq->register( 'NEWFL', $r );
 $mq->register( 'LOGIN', $r );
 
@@ -412,16 +427,13 @@ $sp->stop();
 
 $mq->service();
 my @messages = $r->read();
-test_assert_equal( $#messages, 2 );
-test_assert_equal( $messages[0][0], 'CLASS' );
-test_assert_equal( $messages[0][1], 'classification' );
+test_assert_equal( $#messages, 1 );
+test_assert_equal( $messages[0][0], 'LOGIN' );
+test_assert_equal( $messages[0][1], 'username' );
 test_assert_equal( $messages[0][2], '' );
-test_assert_equal( $messages[1][0], 'LOGIN' );
-test_assert_equal( $messages[1][1], 'username' );
+test_assert_equal( $messages[1][0], 'NEWFL' );
+test_assert_equal( $messages[1][1], 'newfile' );
 test_assert_equal( $messages[1][2], '' );
-test_assert_equal( $messages[2][0], 'NEWFL' );
-test_assert_equal( $messages[2][1], 'newfile' );
-test_assert_equal( $messages[2][2], '' );
 
 # Make sure that stop will close off the child pipes
 
@@ -436,6 +448,8 @@ $sp->pipeready( \&pipeready );
 
 $sp->initialize();
 $sp->config_( 'port', $port );
+
+$sp->classifier( $b );
 
 test_assert_equal( $sp->start(), 1 );
 test_assert_equal( $sp->start_server(), 1 );
@@ -481,6 +495,8 @@ $sp->pipeready( \&pipeready );
 
 $sp->initialize();
 $sp->config_( 'port', $port );
+
+$sp->classifier( $b );
 
 test_assert_equal( $sp->start(), 1 );
 test_assert_equal( $sp->start_server(), 1 );
@@ -528,6 +544,8 @@ $sp->pipeready( \&pipeready );
 $sp->initialize();
 $sp->config_( 'port', $port );
 
+$sp->classifier( $b );
+
 $sp->{connection_failed_error_} = 'failed error';
 
 undef $client;
@@ -555,6 +573,8 @@ $sp2->pipeready( \&pipeready );
 $sp2->initialize();
 $sp2->config_( 'port', -1 );
 
+$sp2->classifier( $b );
+
 open (STDERR, ">stdout.tmp");
 test_assert( !$sp2->start() );
 close STDERR;
@@ -567,5 +587,7 @@ close TEMP;
 
 $sp->stop();
 $sp2->stop();
+
+$b->stop();
 
 1;

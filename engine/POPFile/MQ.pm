@@ -23,9 +23,6 @@ use POPFile::Module;
 #
 # The current list of types is
 #
-#     CLASS    A message was classified, message is the bucket and the
-#              parameter is null (comes from Proxy::Proxy)
-#
 #     UIREG    Register a UI component, message is the component type
 #              and the parameter is a the element and reference to the
 #              object registering (comes from any component)

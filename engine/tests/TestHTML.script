@@ -687,44 +687,6 @@ CONFIGIS  pop3_force_fork 0
 SETSUBMIT pop3_force_fork 1
 INPUTIS   pop3_force_fork 0
 
-# Check Subject Line Modification
-
-INPUTIS subject 1
-CONFIGIS GLOBAL_subject 1
-SETSUBMIT subject 1
-INPUTIS subject 2
-CONFIGIS GLOBAL_subject 0
-
-GET /buckets
-MATCH Disabled globally
-
-GET /configuration
-SETSUBMIT subject 2
-INPUTIS subject 1
-CONFIGIS GLOBAL_subject 1
-
-# Check XTC
-
-INPUTIS xtc 1
-CONFIGIS GLOBAL_xtc 1
-SETSUBMIT xtc 1
-INPUTIS xtc 2
-CONFIGIS GLOBAL_xtc 0
-SETSUBMIT xtc 2
-INPUTIS xtc 1
-CONFIGIS GLOBAL_xtc 1
-
-# Check XPL
-
-INPUTIS xpl 1
-CONFIGIS GLOBAL_xpl 1
-SETSUBMIT xpl 1
-INPUTIS xpl 2
-CONFIGIS GLOBAL_xpl 0
-SETSUBMIT xpl 2
-INPUTIS xpl 1
-CONFIGIS GLOBAL_xpl 1
-
 # Check UI port
 
 INPUTIS   ui_port $port
@@ -808,14 +770,14 @@ CONFIGIS html_send_stats 1
 # Check password
 
 INPUTIS password
-CONFIGIS html_password
+CONFIGIS html_password b61124a488acc5f4406e74272629ee86
 SETSUBMIT password secret
-CONFIGIS html_password secret
-MATCH Updated password to secret
+CONFIGIS html_password d5a642c75542722fd0e20993ee36765d
+MATCH Updated password
 SETSUBMIT password
 INPUTIS password
-CONFIGIS html_password
-MATCH Updated password to 
+CONFIGIS html_password b61124a488acc5f4406e74272629ee86
+MATCH Updated password 
 
 # Advanced Page
 
@@ -888,11 +850,8 @@ MATCH <a href="/buckets?session=$sk&amp;showbucket=spam">
 MATCH <a href="/buckets?session=$sk&amp;showbucket=personal">
 MATCH <a href="/buckets?session=$sk&amp;showbucket=other">
 
-MATCH >1,785<
 MATCH >656<
-MATCH >103<
 MATCH >3<
-MATCH >12,114<
 MATCH >3,353<
 
 MATCH >14,002<

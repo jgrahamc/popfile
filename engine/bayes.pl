@@ -74,6 +74,8 @@ if ( $#ARGV >= 0 ) {
 
     $b->start();
 
+    my $session = $b->get_session_key( 'admin', '' );
+
     my @files;
 
     if ($^O =~ /linux/) {
@@ -92,7 +94,7 @@ if ( $#ARGV >= 0 ) {
 
     if ( $code == 0 ) {
         foreach my $file (@files) {
-            print "`$file' is `" . $b->classify( $file ) . "'\n";
+            print "`$file' is `" . $b->classify( $session, $file ) . "'\n";
         }
 
         foreach my $word (sort keys %{$b->{parser__}->{words__}}) {
@@ -100,6 +102,7 @@ if ( $#ARGV >= 0 ) {
         }
     }
 
+    $b->release_session_key( $session );
     $b->stop();
     $l->stop();
     $mq->stop();

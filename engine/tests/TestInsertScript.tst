@@ -137,12 +137,13 @@ $b->initialize();
 
 test_assert( $b->start() );
 
-#test_assert( $b->is_bucket('personal') );
+my $session = $b->get_session_key( 'admin', '' );
 
 foreach my $word (keys %words) {
-    test_assert_equal( $b->get_base_value_( 'personal', $word ), $words{$word}, "personal: $word $words{$word}" );
+    test_assert_equal( $b->get_base_value_( $session, 'personal', $word ), $words{$word}, "personal: $word $words{$word}" );
 }
 
+$b->release_session_key( $session );
 $b->stop();
 
 1;

@@ -99,13 +99,6 @@ sub new
     $self->{db_get_bucket_parameter_default__} = 0;
     $self->{db_get_buckets_with_magnets__} = 0;
 
-    # To save more time we keep a record of the user id for admin, and a hash of the
-    # bucket ids for that user, this minimizes the complexity of the database joins
-    # we have to do, and since there is a small amount of this data that is (mostly)
-    # fixed its a good optimization to cache it in memory.
-
-    $self->{db_userid__}         = 0;
-
     # Caches the name of each bucket and relates it to both the bucket ID in the
     # database and whether it is pseudo or not
     #
@@ -134,7 +127,7 @@ sub new
     $self->{bucket_start__}      = {};
 
     # A very unlikely word
-    $self->{not_likely__}        = 0;
+    $self->{not_likely__}        = {};
 
     # The expected corpus version
     #
@@ -234,11 +227,6 @@ sub initialize
 
     $self->config_( 'hostname', $self->{hostname__} );
 
-    # We want to hear about classification events so that we can
-    # update statistics
-
-    $self->mq_register_( 'CLASS', $self );
-
     return 1;
 }
 
@@ -283,21 +271,19 @@ sub stop
 
 # ---------------------------------------------------------------------------------------------
 #
-# deliver
+# classified
 #
-# Called by the message queue to deliver a message
+# Called to inform the module about a classification event
 #
 # There is no return value from this method
 #
 # ---------------------------------------------------------------------------------------------
-sub deliver
+sub classified
 {
-    my ( $self, $type, $message, $parameter ) = @_;
+    my ( $self, $session, $class ) = @_;
 
-    if ( $type eq 'CLASS' ) {
-        $self->set_bucket_parameter( $message, 'count',
-            $self->get_bucket_parameter( $message, 'count' ) + 1 );
-    }
+    $self->set_bucket_parameter( $session, $class, 'count', 
+        $self->get_bucket_parameter( $session, $class, 'count' ) + 1 );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -306,23 +292,24 @@ sub deliver
 #
 # Retrieves the color for a specific word, color is the most likely bucket
 #
+# $session  Session key returned by get_session_key
 # $word     Word to get the color of
 #
 # ---------------------------------------------------------------------------------------------
 sub get_color
 {
-    my ($self, $word) = @_;
+    my ( $self, $session, $word ) = @_;
 
     my $max   = -10000;
     my $color = 'black';
 
-    for my $bucket ($self->get_buckets()) {
-        my $prob = get_value_( $self, $bucket, $word );
+    for my $bucket ($self->get_buckets( $session )) {
+        my $prob = $self->get_value_( $session, $bucket, $word );
 
         if ( $prob != 0 )  {
             if ( $prob > $max )  {
                 $max   = $prob;
-                $color = $self->get_bucket_parameter( $bucket, 'color' );
+                $color = $self->get_bucket_parameter( $session, $bucket, 'color' );
             }
         }
     }
@@ -341,9 +328,9 @@ sub get_color
 # ---------------------------------------------------------------------------------------------
 sub get_value_
 {
-    my ( $self, $bucket, $word ) = @_;
+    my ( $self, $session, $bucket, $word ) = @_;
 
-    my $value = $self->db_get_word_count__( $bucket, $word );
+    my $value = $self->db_get_word_count__( $session, $bucket, $word );
 
     if ( defined( $value ) && ( $value > 0 ) ) {
 
@@ -353,7 +340,7 @@ sub get_value_
         # log( $value ) - $cached and this turned out to be
         # much slower than this single log with a division in it
 
-        return log( $value / $self->get_bucket_word_count( $bucket ) );
+        return log( $value / $self->get_bucket_word_count( $session, $bucket ) );
     } else {
         return 0;
     }
@@ -361,9 +348,9 @@ sub get_value_
 
 sub get_base_value_
 {
-    my ( $self, $bucket, $word ) = @_;
+    my ( $self, $session, $bucket, $word ) = @_;
 
-    my $value = $self->db_get_word_count__( $bucket, $word );
+    my $value = $self->db_get_word_count__( $session, $bucket, $word );
 
     if ( defined( $value ) ) {
         return $value;
@@ -382,9 +369,9 @@ sub get_base_value_
 # ---------------------------------------------------------------------------------------------
 sub set_value_
 {
-    my ( $self, $bucket, $word, $value ) = @_;
+    my ( $self, $session, $bucket, $word, $value ) = @_;
 
-    $self->db_put_word_count__( $bucket, $word, $value );
+    $self->db_put_word_count__( $session, $bucket, $word, $value );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -396,12 +383,16 @@ sub set_value_
 # ---------------------------------------------------------------------------------------------
 sub get_sort_value_
 {
-    my ( $self, $bucket, $word ) = @_;
+    my ( $self, $session, $bucket, $word ) = @_;
 
-    my $v = $self->get_value_( $bucket, $word );
+    my $v = $self->get_value_( $session, $bucket, $word );
 
     if ( $v == 0 ) {
-        return $self->{not_likely__};
+        
+        my $userid = $self->valid_session_key__( $session );
+        return undef if ( !defined( $userid ) );
+
+        return $self->{not_likely__}{$userid};
     } else {
         return $v;
     }
@@ -416,20 +407,23 @@ sub get_sort_value_
 # ---------------------------------------------------------------------------------------------
 sub update_constants__
 {
-    my ($self) = @_;
+    my ( $self, $session ) = @_;
 
-    my $wc = $self->get_word_count();
+    my $wc = $self->get_word_count( $session );
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     if ( $wc > 0 )  {
-        $self->{not_likely__} = -log( 10 * $wc );
+        $self->{not_likely__}{$userid} = -log( 10 * $wc );
 
-        foreach my $bucket ($self->get_buckets()) {
-            my $total = $self->get_bucket_word_count( $bucket );
+        foreach my $bucket ($self->get_buckets( $session )) {
+            my $total = $self->get_bucket_word_count( $session, $bucket );
 
             if ( $total != 0 ) {
-                $self->{bucket_start__}{$bucket} = log( $total / $wc );
+                $self->{bucket_start__}{$userid}{$bucket} = log( $total / $wc );
             } else {
-                $self->{bucket_start__}{$bucket} = 0;
+                $self->{bucket_start__}{$userid}{$bucket} = 0;
             }
         }
     }
@@ -541,7 +535,6 @@ sub db_connect__
                 $schema .= $_;
 
                 if ( ( /end;/ ) || ( /\);/ ) ) {
-                    $self->log_( "Performing SQL command: $schema" );
                     $self->{db__}->do( $schema );
                     $schema = '';
 		}
@@ -624,8 +617,6 @@ sub db_connect__
     }
     $h->finish;
 
-    $self->db_update_cache__();
-
     return 1;
 }
 
@@ -669,43 +660,25 @@ sub db_disconnect__
 # ---------------------------------------------------------------------------------------------
 sub db_update_cache__
 {
-    my ( $self ) = @_;
+    my ( $self, $session ) = @_;
 
-    $self->{db_userid__} = $self->db_get_user_id__( 'admin' );
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
-    delete $self->{db_bucketid__};
-    $self->{db_get_buckets__}->execute( $self->{db_userid__} );
+    delete $self->{db_bucketid__}{$userid};
+    $self->{db_get_buckets__}->execute( $userid );
     while ( my $row = $self->{db_get_buckets__}->fetchrow_arrayref ) {
-        $self->{db_bucketid__}{$row->[0]}{id} = $row->[1];
-        $self->{db_bucketid__}{$row->[0]}{pseudo} = $row->[2];
+        $self->{db_bucketid__}{$userid}{$row->[0]}{id} = $row->[1];
+        $self->{db_bucketid__}{$userid}{$row->[0]}{pseudo} = $row->[2];
     }
 
-    for my $bucket (keys %{$self->{db_bucketid__}}) {
-        $self->{db_get_bucket_word_count__}->execute( $self->{db_bucketid__}{$bucket}{id} );
+    for my $bucket (keys %{$self->{db_bucketid__}{$userid}}) {
+        $self->{db_get_bucket_word_count__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id} );
         my $row = $self->{db_get_bucket_word_count__}->fetchrow_arrayref;
-        $self->{db_bucketcount__}{$bucket} = $row->[0];
+        $self->{db_bucketcount__}{$userid}{$bucket} = $row->[0];
     }
 
-    $self->update_constants__();
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# db_get_user_id__
-#
-# Returns the unique ID for a named user
-#
-# $name         Name of user to look up
-#
-# ---------------------------------------------------------------------------------------------
-sub db_get_user_id__
-{
-    my ( $self, $name ) = @_;
-
-    my $result = $self->{db__}->selectrow_arrayref( "select users.id from users where
-                                                         users.name = '$name';" );
-
-    return $result->[0];
+    $self->update_constants__( $session );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -715,13 +688,17 @@ sub db_get_user_id__
 # Return the 'count' value for a word in a bucket.  If the word is not found in that
 # bucket then returns undef.
 #
+# $session          Valid session ID from get_session_key
 # $bucket           bucket word is in
 # $word             word to lookup
 #
 # ---------------------------------------------------------------------------------------------
 sub db_get_word_count__
 {
-    my ( $self, $bucket, $word ) = @_;
+    my ( $self, $session, $bucket, $word ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     $self->{db_get_wordid__}->execute( $word );
     my $result = $self->{db_get_wordid__}->fetchrow_arrayref;
@@ -731,7 +708,7 @@ sub db_get_word_count__
 
     my $wordid = $result->[0];
 
-    $self->{db_get_word_count__}->execute( $self->{db_bucketid__}{$bucket}{id}, $wordid );
+    $self->{db_get_word_count__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id}, $wordid );
     $result = $self->{db_get_word_count__}->fetchrow_arrayref;
     if ( defined( $result ) ) {
          return $result->[0];
@@ -747,6 +724,7 @@ sub db_get_word_count__
 # Update 'count' value for a word in a bucket, if the update fails then returns 0
 # otherwise is returns 1
 #
+# $session          Valid session ID from get_session_key
 # $bucket           bucket word is in
 # $word             word to update
 # $count            new count value
@@ -754,7 +732,10 @@ sub db_get_word_count__
 # ---------------------------------------------------------------------------------------------
 sub db_put_word_count__
 {
-    my ( $self, $bucket, $word, $count ) = @_;
+    my ( $self, $session, $bucket, $word, $count ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     # We need to have two things before we can start, the id of the word in the words
     # table (if there's none then we need to add the word), the bucket id in the buckets
@@ -772,7 +753,7 @@ sub db_put_word_count__
     }
 
     my $wordid = $result->[0];
-    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
 
     $self->{db_put_word_count__}->execute( $bucketid, $wordid, $count );
 
@@ -813,6 +794,17 @@ sub upgrade_predatabase_data__
     my ( $self ) = @_;
     my $c      = 0;
 
+    # There's an assumption here that this is the single user version of POPFile
+    # and hence what we do is cheat and get a session key assuming that the user
+    # name is admin with password ''
+
+    my $session = $self->get_session_key( 'admin', '' );
+
+    if ( !defined( $session ) ) {
+        $self->log_( "Tried to get the session key for user admin and failed; cannot upgrade old data" );
+        return;
+    }
+
     my @buckets = glob $self->get_user_path_( $self->config_( 'corpus' ) . '/*' );
 
     foreach my $bucket (@buckets) {
@@ -826,7 +818,7 @@ sub upgrade_predatabase_data__
         next unless ( -d $bucket );
         next unless ( ( -e "$bucket/table" ) || ( -e "$bucket/table.db" ) );
 
-        return 0 if ( !$self->upgrade_bucket__( $bucket ) );
+        return 0 if ( !$self->upgrade_bucket__( $session, $bucket ) );
 
         my $color = '';
 
@@ -853,12 +845,12 @@ sub upgrade_predatabase_data__
         $bucket =~ /([[:alpha:]0-9-_]+)$/;
         $bucket =  $1;
 
-        $self->set_bucket_color( $bucket, ($color eq '')?$self->{possible_colors__}[$c]:$color );
+        $self->set_bucket_color( $session, $bucket, ($color eq '')?$self->{possible_colors__}[$c]:$color );
 
         $c = ($c+1) % ($#{$self->{possible_colors__}}+1);
     }
 
-    $self->db_update_cache__();
+    $self->release_session_key( $session );
 
     return 1;
 }
@@ -869,27 +861,28 @@ sub upgrade_predatabase_data__
 #
 # Loads an individual bucket
 #
+# $session           Valid session key from get_session_key
 # $bucket            The bucket name
 #
 # ---------------------------------------------------------------------------------------------
 sub upgrade_bucket__
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $session, $bucket ) = @_;
 
     $bucket =~ /([[:alpha:]0-9-_]+)$/;
     $bucket =  $1;
 
-    $self->create_bucket( $bucket );
+    $self->create_bucket( $session, $bucket );
 
-    $self->set_bucket_parameter( $bucket, 'subject',    1 );
-    $self->set_bucket_parameter( $bucket, 'count',      0 );
-    $self->set_bucket_parameter( $bucket, 'quarantine', 0 );
+    $self->set_bucket_parameter( $session, $bucket, 'subject',    1 );
+    $self->set_bucket_parameter( $session, $bucket, 'count',      0 );
+    $self->set_bucket_parameter( $session, $bucket, 'quarantine', 0 );
 
     if ( open PARAMS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/params" ) ) {
         while ( <PARAMS> )  {
             s/[\r\n]//g;
             if ( /^([[:lower:]]+) ([^\r\n\t ]+)$/ )  {
-                $self->set_bucket_parameter( $bucket, $1, $2 );
+                $self->set_bucket_parameter( $session, $bucket, $1, $2 );
             }
         }
         close PARAMS;
@@ -918,7 +911,7 @@ sub upgrade_bucket__
                 $value =~ s/[ \t]+$//g;
 
                 $value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
-                $self->create_magnet( $bucket, $type, $value );
+                $self->create_magnet( $session, $bucket, $type, $value );
             } else {
 
                 # This branch is used to catch the original magnets in an
@@ -928,7 +921,7 @@ sub upgrade_bucket__
                 if ( /^(.+)$/ ) {
                     my $value = $1;
                     $value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
-                    $self->create_magnet( $bucket, 'from', $value );
+                    $self->create_magnet( $session, $bucket, 'from', $value );
                 }
             }
         }
@@ -968,7 +961,7 @@ sub upgrade_bucket__
 
                         if ( /^([^\s]+) (\d+)$/ ) {
   			    if ( $2 != 0 ) {
-                                $self->set_value_( $bucket, $1, $2 );
+                                $self->set_value_( $session, $bucket, $1, $2 );
 			    }
                         } else {
                             $self->log_( "Found entry in corpus for $bucket that looks wrong: \"$_\" (ignoring)" );
@@ -1016,7 +1009,7 @@ sub upgrade_bucket__
             next if ( $word =~ /^__POPFILE__(LOG__TOTAL|TOTAL|USER)__$/ );
 
 	    $wc += 1;
-            $self->set_value_( $bucket, $word, $h{$word} );
+            $self->set_value_( $session, $bucket, $word, $h{$word} );
 	}
 
         $self->log_( "(completed ", $wc-1, " words)" );
@@ -1035,6 +1028,7 @@ sub upgrade_bucket__
 # Helper the determines if a specific string matches a certain magnet type in a bucket, used
 # by magnet_match_
 #
+# $session         Valid session from get_session_key
 # $match           The string to match
 # $bucket          The bucket to check
 # $type            The magnet type to check
@@ -1042,7 +1036,10 @@ sub upgrade_bucket__
 # ---------------------------------------------------------------------------------------------
 sub magnet_match_helper__
 {
-    my ( $self, $match, $bucket, $type ) = @_;
+    my ( $self, $session, $match, $bucket, $type ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     $match = lc($match);
 
@@ -1052,7 +1049,7 @@ sub magnet_match_helper__
 
     my @magnets;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $h = $self->{db__}->prepare(
         "select magnets.val from magnets, users, buckets, magnet_types
              where buckets.id = $bucketid and
@@ -1090,6 +1087,7 @@ sub magnet_match_helper__
 #
 # Helper the determines if a specific string matches a certain magnet type in a bucket
 #
+# $session         Valid session from get_session_key
 # $match           The string to match
 # $bucket          The bucket to check
 # $type            The magnet type to check
@@ -1097,9 +1095,9 @@ sub magnet_match_helper__
 # ---------------------------------------------------------------------------------------------
 sub magnet_match__
 {
-    my ( $self, $match, $bucket, $type ) = @_;
+    my ( $self, $session, $match, $bucket, $type ) = @_;
 
-    return $self->magnet_match_helper__( $match, $bucket, $type );
+    return $self->magnet_match_helper__( $session, $match, $bucket, $type );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1131,17 +1129,18 @@ sub write_line__
 # Takes words previously parsed by the mail parser and adds/subtracts them to/from a bucket,
 # this is a helper used by add_messages_to_bucket, remove_message_from_bucket
 #
+# $session        Valid session from get_session_key
 # $bucket         Bucket to add to
 # $subtract       Set to -1 means subtract the words, set to 1 means add
 #
 # ---------------------------------------------------------------------------------------------
 sub add_words_to_bucket__
 {
-    my ( $self, $bucket, $subtract ) = @_;
+    my ( $self, $session, $bucket, $subtract ) = @_;
 
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
-        $self->set_value_( $bucket, $word, $subtract * $self->{parser__}->{words__}{$word} + # PROFILE BLOCK START
-            $self->get_base_value_( $bucket, $word ) );                                      # PROFILE BLOCK STOP
+        $self->set_value_( $session, $bucket, $word, $subtract * $self->{parser__}->{words__}{$word} + # PROFILE BLOCK START
+            $self->get_base_value_( $session, $bucket, $word ) );                                      # PROFILE BLOCK STOP
     }
 }
 
@@ -1304,8 +1303,9 @@ sub valid_session_key__
     # will delay all use of that API by one second.  Of course in normal use when the
     # user knows the username/password or session key then there is no delay
 
-    if ( !defined( $self->{api_session__}{$session} ) ) {
-        $self->log_( "Invalid session key $session provided" );
+    if ( !defined( $self->{api_sessions__}{$session} ) ) {
+        my ( $package, $filename, $line, $subroutine ) = caller;
+        $self->log_( "Invalid session key $session provided in $package @ $line" );
         select( undef, undef, undef, 1 );
     }
 
@@ -1365,6 +1365,10 @@ sub get_session_key
 
     $self->{api_sessions__}{$session} = $result->[0];
 
+    $self->db_update_cache__( $session );
+
+    $self->log_( "get_session_key returning key $session for user $self->{api_sessions__}{$session}" );
+
     return $session;
 }
 
@@ -1382,6 +1386,7 @@ sub release_session_key
     my ( $self, $session ) = @_;
 
     if ( defined( $self->{api_sessions__}{$session} ) ) {
+        $self->log_( "release_session_key releasing key $session for user $self->{api_sessions__}{$session}" );
         delete $self->{api_sessions__}{$session};
     }
 }
@@ -1390,6 +1395,7 @@ sub release_session_key
 #
 # classify
 #
+# $session   A valid session key returned by a call to get_session_key
 # $file      The name of the file containing the text to classify (or undef to use
 #            the data already in the parser)
 # $ui        Reference to the UI used when doing colorization
@@ -1400,8 +1406,11 @@ sub release_session_key
 # ---------------------------------------------------------------------------------------------
 sub classify
 {
-    my ( $self, $file, $ui ) = @_;
+    my ( $self, $session, $file, $ui ) = @_;
     my $msg_total = 0;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     $self->log_( "Begin classification at " . time );
 
@@ -1421,11 +1430,11 @@ sub classify
     # Check to see if this email should be classified based on a magnet
     # Get the list of buckets
 
-    my @buckets = $self->get_buckets();
+    my @buckets = $self->get_buckets( $session );
 
-    for my $bucket ($self->get_buckets_with_magnets())  {
-        for my $type ($self->get_magnet_types_in_bucket( $bucket )) {
-	    if ( $self->magnet_match__( $self->{parser__}->get_header($type), $bucket, $type ) ) {
+    for my $bucket ($self->get_buckets_with_magnets( $session ))  {
+        for my $type ($self->get_magnet_types_in_bucket( $session, $bucket )) {
+	    if ( $self->magnet_match__( $session, $self->{parser__}->get_header($type), $bucket, $type ) ) {
                 return $bucket;
             }
         }
@@ -1445,7 +1454,7 @@ sub classify
     my %matchcount;
 
     for my $bucket (@buckets) {
-        $score{$bucket} = $self->{bucket_start__}{$bucket};
+        $score{$bucket} = $self->{bucket_start__}{$userid}{$bucket};
         $matchcount{$bucket} = 0;
     }
 
@@ -1468,10 +1477,10 @@ sub classify
         my $wmax = -10000;
 
         foreach my $bucket (@buckets) {
-            my $probability = $self->get_value_( $bucket, $word );
+            my $probability = $self->get_value_( $session, $bucket, $word );
 
             $matchcount{$bucket} += $self->{parser__}{words__}{$word} if ($probability != 0);
-            $probability = $self->{not_likely__} if ( $probability == 0 );
+            $probability = $self->{not_likely__}{$userid} if ( $probability == 0 );
             $wmax = $probability if ( $wmax < $probability );
 
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
@@ -1480,8 +1489,8 @@ sub classify
             $score{$bucket} += ( $probability * $self->{parser__}{words__}{$word} );
         }
 
-        if ($wmax > $self->{not_likely__}) {
-            $correction += $self->{not_likely__} * $self->{parser__}{words__}{$word};
+        if ($wmax > $self->{not_likely__}{$userid}) {
+            $correction += $self->{not_likely__}{$userid} * $self->{parser__}{words__}{$word};
         } else {
             $correction += $wmax * $self->{parser__}{words__}{$word};
         }
@@ -1525,14 +1534,14 @@ sub classify
         my $session_key = $ui->session_key();
 
         if ( $mlen >= 0 ) {
-            my @buckets = $self->get_buckets();
+            my @buckets = $self->get_buckets( $session );
             my $i = 0;
             $self->{scores__} .= "<form action=\"/magnets\" method=\"get\">\n";
             $self->{scores__} .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />";
             $self->{scores__} .= "<input type=\"hidden\" name=\"count\" value=\"" . ($mlen + 1) . "\" />";
             $self->{scores__} .= "<hr><b>$language{QuickMagnets}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Magnet}</th>\n<th>$language{Magnet_Always}</th>\n";
 
-            my %types = $self->get_magnet_types();
+            my %types = $self->get_magnet_types( $session );
 
             foreach my $type ( keys %types ) {
 
@@ -1592,7 +1601,7 @@ sub classify
                  }
              }
 
-             my $color = $self->get_bucket_color( $b );
+             my $color = $self->get_bucket_color( $session, $b );
 
              if ($self->{wmformat__} eq 'score') {
                 $rawstr = sprintf("%12.6f", ($raw_score{$b} - $correction)/$log10);
@@ -1615,7 +1624,7 @@ sub classify
 
             foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
                 my $bucket = $ranking[$ix];
-                my $bucketcolor  = $self->get_bucket_color( $bucket );
+                my $bucketcolor  = $self->get_bucket_color( $session, $bucket );
                 $self->{scores__} .= "<th><font color=\"$bucketcolor\">$bucket</font></th><th>&nbsp;</th>";
             }
 
@@ -1631,7 +1640,7 @@ sub classify
                     my $sumfreq = 0;
                     my %wval;
                     foreach my $bucket (@ranking) {
-                        $wval{$bucket} = exp(get_sort_value_( $self, $bucket, $word ));
+                        $wval{$bucket} = exp( $self->get_sort_value_( $session, $bucket, $word ));
                         $sumfreq += $wval{$bucket};
                     }
                     foreach my $bucket (@ranking) {
@@ -1644,40 +1653,40 @@ sub classify
             if ($self->{wmformat__} eq 'prob') {
                 @ranked_words = sort {$wordprobs{$ranking[0],$b} <=> $wordprobs{$ranking[0],$a}} keys %{$self->{parser__}->{words__}};
             } else {
-                @ranked_words = sort {$self->get_sort_value_( $ranking[0], $b ) <=> $self->get_sort_value_( $ranking[0], $a )} keys %{$self->{parser__}->{words__}};
+                @ranked_words = sort {$self->get_sort_value_( $session, $ranking[0], $b ) <=> $self->get_sort_value_( $session, $ranking[0], $a )} keys %{$self->{parser__}->{words__}};
             }
 
             foreach my $word (@ranked_words) {
                 my $known = 0;
 
                 foreach my $bucket (@ranking) {
-                    if ( $self->get_base_value_( $bucket, $word ) != 0 ) {
+                    if ( $self->get_base_value_( $session, $bucket, $word ) != 0 ) {
                         $known = 1;
                         last;
                     }
                 }
 
                 if ( $known == 1 ) {
-                    my $wordcolor = $self->get_color( $word );
+                    my $wordcolor = $self->get_color( $session, $word );
                     my $count     = $self->{parser__}->{words__}{$word};
 
                     $self->{scores__} .= "<tr>\n<td><font color=\"$wordcolor\">$word</font></td><td>&nbsp;</td><td>$count</td><td>&nbsp;</td>\n";
 
-                    my $base_probability = $self->get_value_( $ranking[0], $word );
+                    my $base_probability = $self->get_value_( $session, $ranking[0], $word );
 
                     foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
                         my $bucket = $ranking[$ix];
-                        my $probability  = $self->get_value_( $bucket, $word );
+                        my $probability  = $self->get_value_( $session, $bucket, $word );
                         my $color        = 'black';
 
                         if ( $probability >= $base_probability || $base_probability == 0 ) {
-                            $color = $self->get_bucket_color( $bucket );
+                            $color = $self->get_bucket_color( $session, $bucket );
                         }
 
                         if ( $probability != 0 ) {
                             my $wordprobstr;
                             if ($self->{wmformat__} eq 'score') {
-                                $wordprobstr  = sprintf("%12.4f", ($probability - $self->{not_likely__})/$log10 );
+                                $wordprobstr  = sprintf("%12.4f", ($probability - $self->{not_likely__}{$userid})/$log10 );
                             } else {
                                 if ($self->{wmformat__} eq 'prob') {
                                     $wordprobstr  = sprintf("%12.4f", $wordprobs{$bucket,$word});
@@ -1823,6 +1832,7 @@ sub history_read_class
 # from a handle and creates an entry in the history, outputting the same email on another
 # handle with the appropriate header modifications and insertions
 #
+# $session   A valid session key returned by a call to get_session_key
 # $mail     - an open stream to read the email from
 # $client   - an open stream to write the modified email to
 # $dcount   - the unique download count for this message
@@ -1843,7 +1853,7 @@ sub history_read_class
 # ---------------------------------------------------------------------------------------------
 sub classify_and_modify
 {
-    my ( $self, $mail, $client, $dcount, $mcount, $nosave, $class, $echo, $crlf ) = @_;
+    my ( $self, $session, $mail, $client, $dcount, $mcount, $nosave, $class, $echo, $crlf ) = @_;
 
     $echo = 1    unless (defined $echo);
     $crlf = $eol unless (defined $crlf);
@@ -1995,15 +2005,15 @@ sub classify_and_modify
 
         $self->parse_with_kakasi__( $temp_file, $dcount, $mcount );
 
-        $classification = ($class ne '')?$class:$self->classify($temp_file);
+        $classification = ($class ne '')?$class:$self->classify( $session, $temp_file);
     } else {
-        $classification = ($class ne '')?$class:$self->classify(undef);
+        $classification = ($class ne '')?$class:$self->classify( $session, undef);
     }
 
-    my $subject_modification = $self->get_bucket_parameter( $classification, 'subject'    );
-    my $xtc_insertion        = $self->get_bucket_parameter( $classification, 'xtc'        );
-    my $xpl_insertion        = $self->get_bucket_parameter( $classification, 'xpl'        );
-    my $quarantine           = $self->get_bucket_parameter( $classification, 'quarantine' );
+    my $subject_modification = $self->get_bucket_parameter( $session, $classification, 'subject'    );
+    my $xtc_insertion        = $self->get_bucket_parameter( $session, $classification, 'xtc'        );
+    my $xpl_insertion        = $self->get_bucket_parameter( $session, $classification, 'xpl'        );
+    my $quarantine           = $self->get_bucket_parameter( $session, $classification, 'quarantine' );
 
     my $modification = $self->config_( 'subject_mod_left' ) . $classification . $self->config_( 'subject_mod_right' );
 
@@ -2087,7 +2097,7 @@ sub classify_and_modify
     if ( $got_full_body ) {
         $need_dot = 1;
     } else {
-        $need_dot = !$self->echo_to_dot_( $mail, $echo?$client:undef, $nosave?undef:'>>' . $temp_file, $before_dot );
+        $need_dot = !$self->echo_to_dot_( $mail, $echo?$client:undef, $nosave?undef:'>>' . $temp_file, $before_dot ) && !$nosave;
     }
 
     if ( $need_dot ) {
@@ -2096,17 +2106,17 @@ sub classify_and_modify
     }
 
     # In some cases it's possible (and totally illegal) to get a . in the middle of the message,
-    # to cope with the we call flush_extra_ here to remove an extra stuff the POP3 server is sending
+    # to cope with the we call flush_extra_ here to remove any extra stuff the POP3 server is sending
     # Make sure to supress output if we are not echoing, and to save to file if not echoing and saving
 
     if ( !($nosave || $echo) ) {
 
         # if we're saving (not nosave) and not echoing, we can safely unload this into the temp file
 
-        if (open FLUSH, ">>$temp_file.flush") {
+        if (open FLUSH, ">$temp_file.flush") {
             binmode FLUSH;
 
-            #TODO: Do this in a faster way (without flushing to one file then copying to another)
+            # TODO: Do this in a faster way (without flushing to one file then copying to another)
             # (perhaps a select on $mail to predict if there is flushable data)
 
             $self->flush_extra_( $mail, \*FLUSH, 0);
@@ -2114,9 +2124,9 @@ sub classify_and_modify
 
             # append any data we got to the actual temp file
 
-            if ((-s "$temp_file.flush" > 0) && open FLUSH, "<$temp_file.flush") {
+            if ( ( (-s "$temp_file.flush") > 0 ) && ( open FLUSH, "<$temp_file.flush" ) ) {
                 binmode FLUSH;
-                if (open TEMP, ">>$temp_file") {
+                if ( open TEMP, ">>$temp_file" ) {
                     binmode TEMP;
 
                     # The only time we get data here is if it is after a CRLF.CRLF
@@ -2126,7 +2136,7 @@ sub classify_and_modify
 
                     print TEMP $_ while (<FLUSH>);
 
-                    #NOTE: The last line flushed MAY be a CRLF.CRLF, which isn't actually part of the message body
+                    # NOTE: The last line flushed MAY be a CRLF.CRLF, which isn't actually part of the message body
 
                     close TEMP;
                 }
@@ -2162,17 +2172,22 @@ sub classify_and_modify
 #
 # Returns a list containing all the real bucket names sorted into alphabetic order
 #
+# $session   A valid session key returned by a call to get_session_key
+#
 # ---------------------------------------------------------------------------------------------
 sub get_buckets
 {
-    my ( $self ) = @_;
+    my ( $self, $session ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     # Note that get_buckets does not return pseudo buckets
 
     my @buckets;
 
-    for my $b (sort keys %{$self->{db_bucketid__}}) {
-        if ( $self->{db_bucketid__}{$b}{pseudo} == 0 ) {
+    for my $b (sort keys %{$self->{db_bucketid__}{$userid}}) {
+        if ( $self->{db_bucketid__}{$userid}{$b}{pseudo} == 0 ) {
             push @buckets, ($b);
 	}
     }
@@ -2186,17 +2201,47 @@ sub get_buckets
 #
 # Returns a list containing all the pseudo bucket names sorted into alphabetic order
 #
+# $session   A valid session key returned by a call to get_session_key
+#
 # ---------------------------------------------------------------------------------------------
 sub get_pseudo_buckets
 {
-    my ( $self ) = @_;
+    my ( $self, $session ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     my @buckets;
 
-    for my $b (sort keys %{$self->{db_bucketid__}}) {
-        if ( $self->{db_bucketid__}{$b}{pseudo} == 1 ) {
+    for my $b (sort keys %{$self->{db_bucketid__}{$userid}}) {
+        if ( $self->{db_bucketid__}{$userid}{$b}{pseudo} == 1 ) {
             push @buckets, ($b);
 	}
+    }
+
+    return @buckets;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_all_buckets
+#
+# Returns a list containing all the bucket names sorted into alphabetic order
+#
+# $session   A valid session key returned by a call to get_session_key
+#
+# ---------------------------------------------------------------------------------------------
+sub get_all_buckets
+{
+    my ( $self, $session ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    my @buckets;
+
+    for my $b (sort keys %{$self->{db_bucketid__}{$userid}}) {
+         push @buckets, ($b);
     }
 
     return @buckets;
@@ -2208,12 +2253,18 @@ sub get_pseudo_buckets
 #
 # Returns 1 if the named bucket is pseudo
 #
+# $session   A valid session key returned by a call to get_session_key
+# $bucket    The bucket to check
+#
 # ---------------------------------------------------------------------------------------------
 sub is_pseudo_bucket
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $session, $bucket ) = @_;
 
-    return $self->{db_bucketid__}{$bucket}{pseudo};
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    return $self->{db_bucketid__}{$userid}{$bucket}{pseudo};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2236,14 +2287,18 @@ sub is_bucket
 #
 # Returns the total word count (including duplicates) for the passed in bucket
 #
+# $session     A valid session key returned by a call to get_session_key
 # $bucket      The name of the bucket for which the word count is desired
 #
 # ---------------------------------------------------------------------------------------------
 sub get_bucket_word_count
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $session, $bucket ) = @_;
 
-    return $self->{db_bucketcount__}{$bucket};
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    return $self->{db_bucketcount__}{$userid}{$bucket};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2252,15 +2307,19 @@ sub get_bucket_word_count
 #
 # Returns a list of words all with the same first character
 #
+# $session     A valid session key returned by a call to get_session_key
 # $bucket      The name of the bucket for which the word count is desired
 # $prefix      The first character of the words
 #
 # ---------------------------------------------------------------------------------------------
 sub get_bucket_word_list
 {
-    my ( $self, $bucket, $prefix ) = @_;
+    my ( $self, $session, $bucket, $prefix ) = @_;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $result = $self->{db__}->selectcol_arrayref(
         "select words.word from matrix, words
          where matrix.wordid  = words.id and
@@ -2276,16 +2335,20 @@ sub get_bucket_word_list
 #
 # Returns a list of all the initial letters of words in a bucket
 #
+# $session     A valid session key returned by a call to get_session_key
 # $bucket      The name of the bucket for which the word count is desired
 #
 # ---------------------------------------------------------------------------------------------
 sub get_bucket_word_prefixes
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $session, $bucket ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     my $prev = '';
 
-    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $result = $self->{db__}->selectcol_arrayref(
         "select words.word from matrix, words
          where matrix.wordid  = words.id and
@@ -2315,12 +2378,17 @@ sub get_bucket_word_prefixes
 #
 # Returns the total word count (including duplicates)
 #
+# $session   A valid session key returned by a call to get_session_key
+#
 # ---------------------------------------------------------------------------------------------
 sub get_word_count
 {
-    my ( $self ) = @_;
+    my ( $self, $session ) = @_;
 
-    $self->{db_get_full_total__}->execute( $self->{db_userid__} );
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    $self->{db_get_full_total__}->execute( $userid );
     return $self->{db_get_full_total__}->fetchrow_arrayref->[0];
 }
 
@@ -2330,15 +2398,19 @@ sub get_word_count
 #
 # Returns the number of times the word occurs in a bucket
 #
+# $session         A valid session key returned by a call to get_session_key
 # $bucket          The bucket we are asking about
 # $word            The word we are asking about
 #
 # ---------------------------------------------------------------------------------------------
 sub get_count_for_word
 {
-    my ( $self, $bucket, $word ) = @_;
+    my ( $self, $session, $bucket, $word ) = @_;
 
-    return $self->get_base_value_( $bucket, $word );
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    return $self->get_base_value_( $session, $bucket, $word );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2347,14 +2419,18 @@ sub get_count_for_word
 #
 # Returns the unique word count (excluding duplicates) for the passed in bucket
 #
+# $session     A valid session key returned by a call to get_session_key
 # $bucket      The name of the bucket for which the word count is desired
 #
 # ---------------------------------------------------------------------------------------------
 sub get_bucket_unique_count
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $session, $bucket ) = @_;
 
-    $self->{db_get_bucket_unique_count__}->execute( $self->{db_bucketid__}{$bucket}{id} );
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    $self->{db_get_bucket_unique_count__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id} );
     return $self->{db_get_bucket_unique_count__}->fetchrow_arrayref->[0];
 }
 
@@ -2364,12 +2440,18 @@ sub get_bucket_unique_count
 #
 # Returns the unique word count (excluding duplicates) for the passed all buckets
 #
+# $session   A valid session key returned by a call to get_session_key
+# $bucket    The name of the bucket to get the word count for
+#
 # ---------------------------------------------------------------------------------------------
 sub get_unique_word_count
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $bucket, $session ) = @_;
 
-    $self->{db_get_unique_word_count__}->execute( $self->{db_userid__} );
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    $self->{db_get_unique_word_count__}->execute( $userid );
     return $self->{db_get_unique_word_count__}->fetchrow_arrayref->[0];
 }
 
@@ -2379,14 +2461,20 @@ sub get_unique_word_count
 #
 # Returns the color associated with a bucket
 #
+# $session   A valid session key returned by a call to get_session_key
 # $bucket      The name of the bucket for which the color is requested
 #
+# NOTE  This API is DEPRECATED in favor of calling get_bucket_parameter for
+#       the parameter named 'color'
 # ---------------------------------------------------------------------------------------------
 sub get_bucket_color
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $session, $bucket ) = @_;
 
-    return $self->get_bucket_parameter( $bucket, 'color' );
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    return $self->get_bucket_parameter( $session, $bucket, 'color' );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2395,15 +2483,21 @@ sub get_bucket_color
 #
 # Returns the color associated with a bucket
 #
+# $session     A valid session key returned by a call to get_session_key
 # $bucket      The name of the bucket for which the color is requested
 # $color       The new color
 #
+# NOTE  This API is DEPRECATED in favor of calling set_bucket_parameter for
+#       the parameter named 'color'
 # ---------------------------------------------------------------------------------------------
 sub set_bucket_color
 {
-    my ( $self, $bucket, $color ) = @_;
+    my ( $self, $session, $bucket, $color ) = @_;
 
-    $self->set_bucket_parameter( $bucket, 'color', $color );
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    $self->set_bucket_parameter( $session, $bucket, 'color', $color );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2412,15 +2506,19 @@ sub set_bucket_color
 #
 # Returns the value of a per bucket parameter
 #
+# $session     A valid session key returned by a call to get_session_key
 # $bucket      The name of the bucket
 # $parameter   The name of the parameter
 #
 # ---------------------------------------------------------------------------------------------
 sub get_bucket_parameter
 {
-    my ( $self, $bucket, $parameter ) = @_;
+    my ( $self, $session, $bucket, $parameter ) = @_;
 
-    $self->{db_get_bucket_parameter__}->execute( $self->{db_bucketid__}{$bucket}{id},
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    $self->{db_get_bucket_parameter__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id},
                                                  $self->{db_parameterid__}{$parameter} );
     my $result = $self->{db_get_bucket_parameter__}->fetchrow_arrayref;
 
@@ -2446,6 +2544,7 @@ sub get_bucket_parameter
 #
 # Sets the value associated with a bucket specific parameter
 #
+# $session     A valid session key returned by a call to get_session_key
 # $bucket      The name of the bucket
 # $parameter   The name of the parameter
 # $value       The new value
@@ -2453,9 +2552,12 @@ sub get_bucket_parameter
 # ---------------------------------------------------------------------------------------------
 sub set_bucket_parameter
 {
-    my ( $self, $bucket, $parameter, $value ) = @_;
+    my ( $self, $session, $bucket, $parameter, $value ) = @_;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $btid     = $self->{db_parameterid__}{$parameter};
 
     $self->{db_set_bucket_parameter__}->execute( $bucketid, $btid, $value );
@@ -2470,14 +2572,18 @@ sub set_bucket_parameter
 # Parser a mail message stored in a file and returns HTML representing the message
 # with coloring of the words
 #
+# $session        A valid session key returned by a call to get_session_key
 # $file           The file to parse
 #
 # ---------------------------------------------------------------------------------------------
 sub get_html_colored_message
 {
-    my ( $self, $file ) = @_;
+    my ( $self, $session, $file ) = @_;
 
-    $self->{parser__}->{color__} = 1;
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    $self->{parser__}->{color__} = $session;
     $self->{parser__}->{bayes__} = bless $self;
 
     # Pass language parameter to parse_file()
@@ -2486,7 +2592,7 @@ sub get_html_colored_message
                                                 $self->module_config_( 'html', 'language' ),
                                                 $self->global_config_( 'message_cutoff'   ) );
 
-    $self->{parser__}->{color__} = 0;
+    $self->{parser__}->{color__} = '';
 
     return $result;
 }
@@ -2497,17 +2603,22 @@ sub get_html_colored_message
 #
 # Creates a new bucket, returns 1 if the creation succeeded
 #
-# $bucket          Name for the new bucket
+# $session     A valid session key returned by a call to get_session_key
+# $bucket      Name for the new bucket
 #
 # ---------------------------------------------------------------------------------------------
 sub create_bucket
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $session, $bucket ) = @_;
 
-    my $userid = $self->{db_userid__};
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
     $self->{db__}->do(
         "insert or ignore into buckets ( 'userid', 'name', 'pseudo' ) values ( $userid, '$bucket', 0 );" );
-    $self->db_update_cache__();
+    $self->db_update_cache__( $session );
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2516,17 +2627,20 @@ sub create_bucket
 #
 # Deletes a bucket, returns 1 if the delete succeeded
 #
-# $bucket          Name of the bucket to delete
+# $session     A valid session key returned by a call to get_session_key
+# $bucket      Name of the bucket to delete
 #
 # ---------------------------------------------------------------------------------------------
 sub delete_bucket
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $session, $bucket ) = @_;
 
-    my $userid = $self->{db_userid__};
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
     $self->{db__}->do(
         "delete from buckets where buckets.userid = $userid and buckets.name = '$bucket';" );
-    $self->db_update_cache__();
+    $self->db_update_cache__( $session );
 
     return 1;
 }
@@ -2537,22 +2651,25 @@ sub delete_bucket
 #
 # Renames a bucket, returns 1 if the rename succeeded
 #
+# $session             A valid session key returned by a call to get_session_key
 # $old_bucket          The old name of the bucket
 # $new_bucket          The new name of the bucket
 #
 # ---------------------------------------------------------------------------------------------
 sub rename_bucket
 {
-    my ( $self, $old_bucket, $new_bucket ) = @_;
+    my ( $self, $session, $old_bucket, $new_bucket ) = @_;
 
-    my $userid = $self->{db_userid__};
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
     my $result = $self->{db__}->do(
         "update buckets set name = '$new_bucket' where buckets.userid = $userid and buckets.name = '$old_bucket';" );
 
     if ( !defined( $result ) || ( $result == -1 ) ) {
         return 0;
     } else {
-        $self->db_update_cache__();
+        $self->db_update_cache__( $session );
         return 1;
     }
 }
@@ -2563,13 +2680,21 @@ sub rename_bucket
 #
 # Parses mail messages and updates the statistics in the specified bucket
 #
+# $session         A valid session key returned by a call to get_session_key
 # $bucket          Name of the bucket to be updated
 # @files           List of file names to parse
 #
 # ---------------------------------------------------------------------------------------------
 sub add_messages_to_bucket
 {
-    my ( $self, $bucket, @files ) = @_;
+    my ( $self, $session, $bucket, @files ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket}{id} ) ) {
+        return 0;
+    }
 
     $self->{db__}->begin_work;
 
@@ -2579,11 +2704,11 @@ sub add_messages_to_bucket
         $self->{parser__}->parse_file( $file,
                                        $self->module_config_( 'html', 'language' ),
                                        $self->global_config_( 'message_cutoff'   ) );
-        $self->add_words_to_bucket__( $bucket, 1 );
+        $self->add_words_to_bucket__( $session, $bucket, 1 );
     }
 
     $self->{db__}->commit;
-    $self->db_update_cache__();
+    $self->db_update_cache__( $session );
 
     return 1;
 }
@@ -2594,15 +2719,19 @@ sub add_messages_to_bucket
 #
 # Parses a mail message and updates the statistics in the specified bucket
 #
+# $session         A valid session key returned by a call to get_session_key
 # $bucket          Name of the bucket to be updated
 # $file            Name of file containing mail message to parse
 #
 # ---------------------------------------------------------------------------------------------
 sub add_message_to_bucket
 {
-    my ( $self, $bucket, $file ) = @_;
+    my ( $self, $session, $bucket, $file ) = @_;
 
-    return $self->add_messages_to_bucket( $bucket, $file );
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    return $self->add_messages_to_bucket( $session, $bucket, $file );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2611,13 +2740,17 @@ sub add_message_to_bucket
 #
 # Parses a mail message and updates the statistics in the specified bucket
 #
+# $session         A valid session key returned by a call to get_session_key
 # $bucket          Name of the bucket to be updated
 # $file            Name of file containing mail message to parse
 #
 # ---------------------------------------------------------------------------------------------
 sub remove_message_from_bucket
 {
-    my ( $self, $bucket, $file ) = @_;
+    my ( $self, $session, $bucket, $file ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     # Pass language parameter to parse_file()
 
@@ -2626,10 +2759,10 @@ sub remove_message_from_bucket
     $self->{parser__}->parse_file( $file,
                                    $self->module_config_( 'html', 'language' ),
                                    $self->global_config_( 'message_cutoff'   ) );
-    $self->add_words_to_bucket__( $bucket, -1 );
+    $self->add_words_to_bucket__( $session, $bucket, -1 );
 
     $self->{db__}->commit;
-    $self->db_update_cache__();
+    $self->db_update_cache__( $session );
 
     return 1;
 }
@@ -2640,14 +2773,19 @@ sub remove_message_from_bucket
 #
 # Returns the names of the buckets for which magnets are defined
 #
+# $session     A valid session key returned by a call to get_session_key
+#
 # ---------------------------------------------------------------------------------------------
 sub get_buckets_with_magnets
 {
-    my ( $self ) = @_;
+    my ( $self, $session ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     my @result;
 
-    $self->{db_get_buckets_with_magnets__}->execute( $self->{db_userid__} );
+    $self->{db_get_buckets_with_magnets__}->execute( $userid );
     while ( my $row = $self->{db_get_buckets_with_magnets__}->fetchrow_arrayref ) {
         push @result, ($row->[0]);
     }
@@ -2661,16 +2799,20 @@ sub get_buckets_with_magnets
 #
 # Returns the types of the magnets in a specific bucket
 #
-# $bucket          The bucket to search for magnets
+# $session     A valid session key returned by a call to get_session_key
+# $bucket      The bucket to search for magnets
 #
 # ---------------------------------------------------------------------------------------------
 sub get_magnet_types_in_bucket
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $session, $bucket ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     my @result;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $h = $self->{db__}->prepare( "select magnet_types.mtype from magnet_types, magnets, buckets
         where magnet_types.id = magnets.mtid and
               magnets.bucketid = buckets.id and
@@ -2693,17 +2835,21 @@ sub get_magnet_types_in_bucket
 #
 # Removes all words from a bucket
 #
+# $session        A valid session key returned by a call to get_session_key
 # $bucket         The bucket to clear
 #
 # ---------------------------------------------------------------------------------------------
 sub clear_bucket
 {
-    my ( $self, $bucket ) = @_;
+    my ( $self, $session, $bucket ) = @_;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
 
     $self->{db__}->do( "delete from matrix where matrix.bucketid = $bucketid;" );
-    $self->db_update_cache__();
+    $self->db_update_cache__( $session );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2712,13 +2858,18 @@ sub clear_bucket
 #
 # Removes every magnet currently defined
 #
+# $session     A valid session key returned by a call to get_session_key
+#
 # ---------------------------------------------------------------------------------------------
 sub clear_magnets
 {
-    my ( $self ) = @_;
+    my ( $self, $session ) = @_;
 
-    for my $bucket (keys %{$self->{db_bucketid__}}) {
-        my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    for my $bucket (keys %{$self->{db_bucketid__}{$userid}}) {
+        my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
         $self->{db__}->do( "delete from magnets where magnets.bucketid = $bucketid" );
     }
 }
@@ -2729,17 +2880,21 @@ sub clear_magnets
 #
 # Returns the magnets of a certain type in a bucket
 #
+# $session         A valid session key returned by a call to get_session_key
 # $bucket          The bucket to search for magnets
 # $type            The magnet type (e.g. from, to or subject)
 #
 # ---------------------------------------------------------------------------------------------
 sub get_magnets
 {
-    my ( $self, $bucket, $type ) = @_;
+    my ( $self, $session, $bucket, $type ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     my @result;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $h = $self->{db__}->prepare( "select magnets.val from magnets, magnet_types
         where magnets.bucketid = $bucketid and
               magnet_types.id = magnets.mtid and
@@ -2760,6 +2915,7 @@ sub get_magnets
 #
 # Make a new magnet
 #
+# $session         A valid session key returned by a call to get_session_key
 # $bucket          The bucket the magnet belongs in
 # $type            The magnet type (e.g. from, to or subject)
 # $text            The text of the magnet
@@ -2767,10 +2923,12 @@ sub get_magnets
 # ---------------------------------------------------------------------------------------------
 sub create_magnet
 {
-    my ( $self, $bucket, $type, $text ) = @_;
+    my ( $self, $session, $bucket, $type, $text ) = @_;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
+    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $result = $self->{db__}->selectrow_arrayref("select magnet_types.id from magnet_types
                                                         where magnet_types.mtype = '$type';" );
 
@@ -2786,10 +2944,15 @@ sub create_magnet
 #
 # Get a hash mapping magnet types (e.g. from) to magnet names (e.g. From);
 #
+# $session     A valid session key returned by a call to get_session_key
+#
 # ---------------------------------------------------------------------------------------------
 sub get_magnet_types
 {
-    my ( $self ) = @_;
+    my ( $self, $session ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     my %result;
 
@@ -2810,6 +2973,7 @@ sub get_magnet_types
 #
 # Remove a new magnet
 #
+# $session         A valid session key returned by a call to get_session_key
 # $bucket          The bucket the magnet belongs in
 # $type            The magnet type (e.g. from, to or subject)
 # $text            The text of the magnet
@@ -2817,10 +2981,12 @@ sub get_magnet_types
 # ---------------------------------------------------------------------------------------------
 sub delete_magnet
 {
-    my ( $self, $bucket, $type, $text ) = @_;
+    my ( $self, $session, $bucket, $type, $text ) = @_;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
+    my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $result = $self->{db__}->selectrow_arrayref("select magnet_types.id from magnet_types
                                                         where magnet_types.mtype = '$type';" );
 
@@ -2838,10 +3004,15 @@ sub delete_magnet
 #
 # Gets the complete list of stop words
 #
+# $session     A valid session key returned by a call to get_session_key
+#
 # ---------------------------------------------------------------------------------------------
 sub get_stopword_list
 {
-    my ( $self ) = @_;
+    my ( $self, $session ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     return $self->{parser__}->{mangle__}->stopwords();
 }
@@ -2852,12 +3023,16 @@ sub get_stopword_list
 #
 # Gets the number of magnets that are defined
 #
+# $session     A valid session key returned by a call to get_session_key
+#
 # ---------------------------------------------------------------------------------------------
 sub magnet_count
 {
-    my ( $self ) = @_;
+    my ( $self, $session ) = @_;
 
-    my $userid = $self->{db_userid__};
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
     my $result = $self->{db__}->selectrow_arrayref( "select count(*) from magnets, buckets
         where buckets.userid = $userid and
               magnets.bucketid = buckets.id;" );
@@ -2875,6 +3050,7 @@ sub magnet_count
 #
 # Adds or removes a stop word
 #
+# $session     A valid session key returned by a call to get_session_key
 # $stopword    The word to add or remove
 #
 # Return 0 for a bad stop word, and 1 otherwise
@@ -2882,7 +3058,10 @@ sub magnet_count
 # ---------------------------------------------------------------------------------------------
 sub add_stopword
 {
-    my ( $self, $stopword ) = @_;
+    my ( $self, $session, $stopword ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     # Pass language parameter to add_stopword()
 
@@ -2891,12 +3070,24 @@ sub add_stopword
 
 sub remove_stopword
 {
-    my ( $self, $stopword ) = @_;
+    my ( $self, $session, $stopword ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
 
     # Pass language parameter to remove_stopword()
 
     return $self->{parser__}->{mangle__}->remove_stopword( $stopword, $self->module_config_( 'html', 'language' ) );
 }
+
+# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
+#       _____   _____   _____  _______ _____        _______     _______  _____  _____
+#      |_____] |     | |_____] |______   |   |      |______     |_____| |_____]   |  
+#      |       |_____| |       |       __|__ |_____ |______     |     | |       __|__
+#                                                     
+# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------
 
 # GETTERS/SETTERS
 

@@ -160,11 +160,12 @@ sub start
 # $pipe           - The pipe to the parent process to send messages to
 # $ppipe          - 0 or the parent's end of the pipe
 # $pid            - 0 if this is a child process
+# $session        - API session key
 #
 # ---------------------------------------------------------------------------------------------
 sub child__
 {
-    my ( $self, $client, $download_count, $pipe, $ppipe, $pid ) = @_;
+    my ( $self, $client, $download_count, $pipe, $ppipe, $pid, $session ) = @_;
 
     # Hash of indexes of downloaded messages
 
@@ -346,7 +347,7 @@ sub child__
 
                         # Classify without echoing to client, saving file for later RETR's
 
-                        my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '', 0 );
+                        my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, $download_count, $count, 0, '', 0 );
 
                         $downloaded{$count} = 1;
 
@@ -359,11 +360,11 @@ sub child__
 
                             # Classify with pre-defined class, without saving, echoing to client
 
-                            $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 1, $class, 1 );
+                            $self->{classifier__}->classify_and_modify( $session, $mail, $client, $download_count, $count, 1, $class, 1 );
 
                             # Tell the parent that we just handled a mail
 
-                            print $pipe "CLASS:$class$eol";
+                            print $pipe "CLASS:$class $session$eol";
                             print $pipe "NEWFL:$history_file$eol";
                             flush $pipe;
                             $self->yield_( $ppipe, $pid );
@@ -465,15 +466,17 @@ sub child__
 
                     # echo file, inserting known classification, without saving
 
-                    ($class, undef) = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, $count, 1, $bucket );
+                    ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, $download_count, $count, 1, $bucket );
+                    print $client ".$eol";
 
                 } else {
 
                     # If the class wasn't saved properly, classify from disk normally
 
-                    ($class, undef) = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, $count, 1, '' );
+                    ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, $download_count, $count, 1, '' );
+                    print $client ".$eol";
 
-                    print $pipe "CLASS:$class$eol";
+                    print $pipe "CLASS:$class $session$eol";
                     flush $pipe;
                     $self->yield_( $ppipe, $pid );
                 }
@@ -490,12 +493,12 @@ sub child__
                 last if ( $response == 2 );
                 if ( $response == 0 ) {
                     my $history_file;
-                    ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '' );
+                    ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, $download_count, $count, 0, '' );
 
                     # Tell the parent that we just handled a mail
 
                     print $pipe "NEWFL:$history_file$eol";
-                    print $pipe "CLASS:$class$eol";
+                    print $pipe "CLASS:$class $session$eol";
                     flush $pipe;
                     $self->yield_( $ppipe, $pid );
 

@@ -62,8 +62,11 @@ if ( $#ARGV == -1 ) {
 
     $b->start();
 
-    $b->classify_and_modify(\*STDIN, \*STDOUT, 0, 0, 1, '', 1, "\n") . "'\n";
+    my $session = $b->get_session_key( 'admin', '' );
 
+    $b->classify_and_modify( $session, \*STDIN, \*STDOUT, 0, 0, 1, '', 1, "\n") . "'\n";
+
+    $b->release_session_key( $session );
     $b->stop();
     $l->stop();
     $mq->stop();

@@ -71,6 +71,7 @@ if ( $#ARGV > 0 ) {
     $c->load_configuration();
 
     $b->start();
+    my $session = $b->get_session_key( 'admin', '' );
 
     my @files;
 
@@ -92,15 +93,16 @@ if ( $#ARGV > 0 ) {
     }
 
     if ( $code == 0 ) {
-        if ( !$b->is_bucket($ARGV[0]) ) {
+        if ( !$b->is_bucket( $session, $ARGV[0]) ) {
             print STDERR "Error: Bucket `$ARGV[0]' does not exist, insert aborted.\n";
             $code = 1;
         } else {
-            $b->add_messages_to_bucket( $ARGV[0], @files );
+            $b->add_messages_to_bucket( $session, $ARGV[0], @files );
             print "Added ", $#files+1, " files to `$ARGV[0]'\n";
         }
     }
 
+    $b->release_session_key( $session );
     $b->stop();
     $l->stop();
     $mq->stop();

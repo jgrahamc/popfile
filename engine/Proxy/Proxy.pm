@@ -257,7 +257,6 @@ sub read_pipe_
     return undef;
 }
 
-
 # ---------------------------------------------------------------------------------------------
 #
 # flush_child_data_
@@ -275,7 +274,6 @@ sub flush_child_data_
     my ( $self, $handle ) = @_;
 
     my $stats_changed = 0;
-
     my $message;
 
     while ( ($message = $self->read_pipe_( $handle )) && defined($message) )
@@ -284,12 +282,8 @@ sub flush_child_data_
 
         $self->log_( "Child proxy message $message" );
 
-        if ( $message =~ /CLASS:(.*)/ ) {
-
-            # Post a message to the MQ indicating that we just handled
-            # a message with a specific classification
-
-            $self->mq_post_( 'CLASS', $1, '' );
+        if ( $message =~ /CLASS:([^ ]*) ([^ ]*)/ ) {
+            $self->{classifier__}->classified( $2, $1 );
         }
 
         if ( $message =~ /NEWFL:(.*)/ ) {
@@ -362,14 +356,19 @@ sub service
                     # If we fail to fork, or are in the child process then process this request
 
                     if ( !defined( $pid ) || ( $pid == 0 ) ) {
-                        $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $pipe, 0, $pid );
+                        my $session = $self->{classifier__}->get_session_key( 'admin', '' );
+                        $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $pipe, 0, $pid, $session );
+                        $self->{flush_child_data_}( $self, $pipe );
+                        $self->{classifier__}->release_session_key( $session );
                         exit(0) if ( defined( $pid ) );
                     }
 	        } else {
                     pipe my $reader, my $writer;
 
-                    $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $writer, $reader, $$ );
+                    my $session = $self->{classifier__}->get_session_key( 'admin', '' );
+                    $self->{child_}( $self, $client, $self->global_config_( 'download_count' ), $writer, $reader, $$, $session );
                     $self->{flush_child_data_}( $self, $reader );
+                    $self->{classifier__}->release_session_key( $session );
                     close $reader;
                 }
             }
@@ -460,12 +459,8 @@ sub echo_to_regexp_
     $log = 0 if (!defined($log));
 
     while ( my $line = $self->slurp_( $mail ) ) {
-        # Check for an abort
-
-        last if ( $self->{alive_} == 0 );
-
         if (!defined($suppress) || !( $line =~ $suppress )) {
-            if (!$log) {
+            if ( !$log ) {
                 print $client $line;
             } else {
                 $self->tee_( $client, $line );
@@ -474,7 +469,9 @@ sub echo_to_regexp_
             $self->log_("Suppressed: $line");
         }
 
-        last if ( $line =~ $regexp );
+	if ( $line =~ $regexp ) {
+            last;
+	}
     }
 }
 

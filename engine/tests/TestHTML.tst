@@ -34,6 +34,7 @@ test_assert( (`rm -rf corpus/personal/CVS` || 0) == 0 );
 test_assert( (`rm -rf messages` || 0) == 0 );
 `rm -f __db.*`;
 unlink 'popfile.cfg';
+unlink 'popfile.db';
 
 unlink( 'stopwords' );
 test_assert( (`cp stopwords.base stopwords` || 0 ) == 0 );
@@ -202,8 +203,6 @@ test_assert(1);
 $h->initialize();
 test_assert(1);
 $h->version( 'vtest.suite.ver' );
-my $lang = $h->language();
-test_assert_equal( $lang, 'English' );
 our $version = $h->version();
 
 test_assert(1);
@@ -214,8 +213,6 @@ test_assert( defined( $sk ) );
 test_assert( $sk ne '' );
 
 $mq->service();
-
-$h->global_config_( 'ecount', 1 );
 
 test_assert_equal( $h->url_encode_( ']' ), '%5d' );
 test_assert_equal( $h->url_encode_( '[' ), '%5b' );
@@ -241,6 +238,9 @@ if ( $pid == 0 ) {
 
     $h->config_( 'port', $port );
     $h->start();
+
+    my %lang = $h->language();
+    test_assert_equal( $lang{LanguageCode}, 'en' );
 
     while ( 1 ) {
         $h->service();
@@ -306,7 +306,9 @@ if ( $pid == 0 ) {
 	    }
 
             if ( $command =~ /^__GETPARAMETER ([^ ]+) (.+)/ ) {
-                my $value = $b->get_bucket_parameter( $1, $2 );
+                my $session = $b->get_session_key( 'admin', '' );
+                my $value = $b->get_bucket_parameter( $session, $1, $2 );
+                $b->release_session_key( $session );
                 print $uwriter "OK $value\n";
                 next;
 	    }
@@ -319,8 +321,9 @@ if ( $pid == 0 ) {
 	    }
 
             if ( $command =~ /^__CHECKMAGNET ([^ ]+) ([^ ]+) ([^\r\n]+)/ ) {
+                my $session = $b->get_session_key( 'admin', '' );
                 my $found = 0;
-                for my $magnet ($b->get_magnets( $1, $2 ) ) {
+                for my $magnet ($b->get_magnets( $session, $1, $2 ) ) {
 		    if ( $magnet eq $3 ) {
                         print $uwriter "OK\n";
                         $found = 1;
@@ -328,6 +331,7 @@ if ( $pid == 0 ) {
 		    }
 		}
 
+                $b->release_session_key( $session );
                 print $uwriter "ERR\n" if ( !$found );
                 next;
 	    }

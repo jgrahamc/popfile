@@ -140,11 +140,15 @@ sub start
 #
 # $client   - an open stream to a SMTP client
 # $download_count - The unique download count for this session
+# $pipe           - The pipe to the parent process to send messages to
+# $ppipe          - 0 or the parent's end of the pipe
+# $pid            - 0 if this is a child process
+# $session        - API session key
 #
 # ---------------------------------------------------------------------------------------------
 sub child__
 {
-    my ( $self, $client, $download_count, $pipe, $ppipe, $pid ) = @_;
+    my ( $self, $client, $download_count, $pipe, $ppipe, $pid, $session ) = @_;
 
     # Number of messages downloaded in this session
     my $count = 0;
@@ -238,10 +242,10 @@ sub child__
             if ( $self->smtp_echo_response_( $mail, $client, $command ) ) {
                 $count += 1;
 
-                my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $client, $mail, $download_count, $count, 0, '' );
+                my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $client, $mail, $download_count, $count, 0, '' );
 
                 # Tell the parent that we just handled a mail
-                print $pipe "CLASS:$class$eol";
+                print $pipe "CLASS:$class $session$eol";
                 print $pipe "NEWFL:$history_file$eol";
                 flush $pipe;
                 $self->yield_( $ppipe, $pid );

@@ -101,10 +101,27 @@ $session = $b->get_session_key( 'admin', '' );
 test_assert( defined( $session ) );
 test_assert( $session ne '' );
 $b->release_session_key( $session );
+$session = $b->get_session_key( 'admin', '' );
+test_assert( $session ne '' );
+
+# get_all_buckets
+
+my @all_buckets = $b->get_all_buckets( $session );
+test_assert_equal( $#all_buckets, 3 );
+test_assert_equal( $all_buckets[0], 'other' );
+test_assert_equal( $all_buckets[1], 'personal' );
+test_assert_equal( $all_buckets[2], 'spam' );
+test_assert_equal( $all_buckets[3], 'unclassified' );
+
+# get_pseudo_buckets
+
+my @pseudo_buckets = $b->get_pseudo_buckets( $session );
+test_assert_equal( $#pseudo_buckets, 0 );
+test_assert_equal( $pseudo_buckets[0], 'unclassified' );
 
 # get_buckets
 
-my @buckets = $b->get_buckets();
+my @buckets = $b->get_buckets( $session );
 test_assert_equal( $#buckets, 2 );
 test_assert_equal( $buckets[0], 'other' );
 test_assert_equal( $buckets[1], 'personal' );
@@ -112,72 +129,72 @@ test_assert_equal( $buckets[2], 'spam' );
 
 # get_bucket_word_count
 
-test_assert_equal( $b->get_bucket_word_count($buckets[0]), 1785 );
-test_assert_equal( $b->get_bucket_word_count($buckets[1]), 103 );
-test_assert_equal( $b->get_bucket_word_count($buckets[2]), 12114 );
+test_assert_equal( $b->get_bucket_word_count( $session, $buckets[0]), 1785 );
+test_assert_equal( $b->get_bucket_word_count( $session, $buckets[1]), 103 );
+test_assert_equal( $b->get_bucket_word_count( $session, $buckets[2]), 12114 );
 
 # get_bucket_word_list and prefixes
 
-my @words = $b->get_bucket_word_prefixes( 'personal' );
+my @words = $b->get_bucket_word_prefixes( $session, 'personal' );
 test_assert_equal( $#words, 1 );
 test_assert_equal( $words[0], 'b' );
 test_assert_equal( $words[1], 'f' );
 
-@words = $b->get_bucket_word_list( 'personal', 'b' );
+@words = $b->get_bucket_word_list( $session, 'personal', 'b' );
 test_assert_equal( $#words, 1 );
 test_assert_equal( $words[0], 'bar' );
 test_assert_equal( $words[1], 'baz' );
 
-@words = $b->get_bucket_word_list( 'personal', 'f' );
+@words = $b->get_bucket_word_list( $session, 'personal', 'f' );
 test_assert_equal( $#words, 0 );
 test_assert_equal( $words[0], 'foo' );
 
 # get_word_count
 
-test_assert_equal( $b->get_word_count(), 14002 );
+test_assert_equal( $b->get_word_count( $session ), 14002 );
 
 # get_count_for_word
 
-test_assert_equal( $b->get_count_for_word($buckets[0], 'foo'), 0 );
-test_assert_equal( $b->get_count_for_word($buckets[1], 'foo'), 1 );
-test_assert_equal( $b->get_count_for_word($buckets[2], 'foo'), 0 );
+test_assert_equal( $b->get_count_for_word( $session, $buckets[0], 'foo'), 0 );
+test_assert_equal( $b->get_count_for_word( $session, $buckets[1], 'foo'), 1 );
+test_assert_equal( $b->get_count_for_word( $session, $buckets[2], 'foo'), 0 );
 
 # get_bucket_unique_count
 
-test_assert_equal( $b->get_bucket_unique_count($buckets[0]), 656 );
-test_assert_equal( $b->get_bucket_unique_count($buckets[1]), 3 );
-test_assert_equal( $b->get_bucket_unique_count($buckets[2]), 3353 );
+test_assert_equal( $b->get_bucket_unique_count( $session, $buckets[0]), 656 );
+test_assert_equal( $b->get_bucket_unique_count( $session, $buckets[1]), 3 );
+test_assert_equal( $b->get_bucket_unique_count( $session, $buckets[2]), 3353 );
 
 # get_bucket_color
 
-test_assert_equal( $b->get_bucket_color($buckets[0]), 'red' );
-test_assert_equal( $b->get_bucket_color($buckets[1]), 'green' );
-test_assert_equal( $b->get_bucket_color($buckets[2]), 'blue' );
+test_assert_equal( $b->get_bucket_color( $session, $buckets[0]), 'red' );
+test_assert_equal( $b->get_bucket_color( $session, $buckets[1]), 'green' );
+test_assert_equal( $b->get_bucket_color( $session, $buckets[2]), 'blue' );
 
 # set_bucket_color
 
-test_assert_equal( $b->get_bucket_color($buckets[0]), 'red' );
-$b->set_bucket_color( $buckets[0], 'yellow' );
-test_assert_equal( $b->get_bucket_color($buckets[0]), 'yellow' );
-$b->set_bucket_color( $buckets[0], 'red' );
-test_assert_equal( $b->get_bucket_color($buckets[0]), 'red' );
+test_assert_equal( $b->get_bucket_color( $session, $buckets[0]), 'red' );
+$b->set_bucket_color( $session, $buckets[0], 'yellow' );
+test_assert_equal( $b->get_bucket_color( $session, $buckets[0]), 'yellow' );
+$b->set_bucket_color( $session, $buckets[0], 'red' );
+test_assert_equal( $b->get_bucket_color( $session, $buckets[0]), 'red' );
 
 # get_bucket_parameter
 
-test_assert( !defined( $b->get_bucket_parameter( $buckets[0], 'dummy' ) ) );
-test_assert_equal( $b->get_bucket_parameter( $buckets[0], 'quarantine' ), 0 );
-test_assert_equal( $b->get_bucket_parameter( $buckets[0], 'subject' ), 1 );
+test_assert( !defined( $b->get_bucket_parameter( $session, $buckets[0], 'dummy' ) ) );
+test_assert_equal( $b->get_bucket_parameter( $session, $buckets[0], 'quarantine' ), 0 );
+test_assert_equal( $b->get_bucket_parameter( $session, $buckets[0], 'subject' ), 1 );
 
 # set_bucket_parameter
 
-test_assert_equal( $b->get_bucket_parameter( $buckets[0], 'quarantine' ), 0 );
-test_assert( $b->set_bucket_parameter( $buckets[0], 'quarantine', 1 ) );
-test_assert_equal( $b->get_bucket_parameter( $buckets[0], 'quarantine' ), 1 );
-test_assert( $b->set_bucket_parameter( $buckets[0], 'quarantine', 0 ) );
+test_assert_equal( $b->get_bucket_parameter( $session, $buckets[0], 'quarantine' ), 0 );
+test_assert( $b->set_bucket_parameter( $session, $buckets[0], 'quarantine', 1 ) );
+test_assert_equal( $b->get_bucket_parameter( $session, $buckets[0], 'quarantine' ), 1 );
+test_assert( $b->set_bucket_parameter( $session, $buckets[0], 'quarantine', 0 ) );
 
 # get_html_colored_message
 
-my $html = $b->get_html_colored_message( 'TestMailParse019.msg' );
+my $html = $b->get_html_colored_message(  $session, 'TestMailParse019.msg' );
 open FILE, "<TestMailParse019.clr";
 my $check = <FILE>;
 close FILE;
@@ -195,43 +212,43 @@ if ( $html ne $check ) {
 
 # create_bucket
 
-$b->create_bucket( 'zebra' );
+$b->create_bucket( $session, 'zebra' );
 
-@buckets = $b->get_buckets();
+@buckets = $b->get_buckets( $session );
 test_assert_equal( $#buckets, 3 );
 test_assert_equal( $buckets[0], 'other' );
 test_assert_equal( $buckets[1], 'personal' );
 test_assert_equal( $buckets[2], 'spam' );
 test_assert_equal( $buckets[3], 'zebra' );
 
-test_assert_equal( $b->get_bucket_parameter( 'zebra', 'count' ), 0 );
-test_assert_equal( $b->get_bucket_parameter( 'zebra', 'subject' ), 1 );
-test_assert_equal( $b->get_bucket_parameter( 'zebra', 'quarantine' ), 0 );
+test_assert_equal( $b->get_bucket_parameter(  $session, 'zebra', 'count' ), 0 );
+test_assert_equal( $b->get_bucket_parameter(  $session, 'zebra', 'subject' ), 1 );
+test_assert_equal( $b->get_bucket_parameter(  $session, 'zebra', 'quarantine' ), 0 );
 
-test_assert_equal( $b->get_bucket_word_count( 'zebra' ), 0 );
-test_assert_equal( $b->get_bucket_unique_count( 'zebra' ), 0 );
+test_assert_equal( $b->get_bucket_word_count(  $session, 'zebra' ), 0 );
+test_assert_equal( $b->get_bucket_unique_count(  $session, 'zebra' ), 0 );
 
-test_assert_equal( $b->get_word_count(), 14002 );
+test_assert_equal( $b->get_word_count( $session ), 14002 );
 
 # rename_bucket
 
-test_assert( $b->rename_bucket( 'zebra', 'zeotrope' ) );
+test_assert( $b->rename_bucket(  $session, 'zebra', 'zeotrope' ) );
 
-@buckets = $b->get_buckets();
+@buckets = $b->get_buckets( $session );
 test_assert_equal( $#buckets, 3 );
 test_assert_equal( $buckets[0], 'other' );
 test_assert_equal( $buckets[1], 'personal' );
 test_assert_equal( $buckets[2], 'spam' );
 test_assert_equal( $buckets[3], 'zeotrope' );
 
-test_assert_equal( $b->get_bucket_parameter( 'zeotrope', 'count' ), 0 );
-test_assert_equal( $b->get_bucket_parameter( 'zeotrope', 'subject' ), 1 );
-test_assert_equal( $b->get_bucket_parameter( 'zeotrope', 'quarantine' ), 0 );
+test_assert_equal( $b->get_bucket_parameter( $session, 'zeotrope', 'count' ), 0 );
+test_assert_equal( $b->get_bucket_parameter( $session, 'zeotrope', 'subject' ), 1 );
+test_assert_equal( $b->get_bucket_parameter( $session, 'zeotrope', 'quarantine' ), 0 );
 
-test_assert_equal( $b->get_bucket_word_count( 'zeotrope' ), 0 );
-test_assert_equal( $b->get_bucket_unique_count( 'zeotrope' ), 0 );
+test_assert_equal( $b->get_bucket_word_count( $session, 'zeotrope' ), 0 );
+test_assert_equal( $b->get_bucket_unique_count( $session, 'zeotrope' ), 0 );
 
-test_assert_equal( $b->get_word_count(), 14002 );
+test_assert_equal( $b->get_word_count( $session ), 14002 );
 
 # add_message_to_bucket
 
@@ -245,31 +262,31 @@ while ( <WORDS> ) {
 }
 close WORDS;
 
-test_assert( $b->add_message_to_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
+test_assert( $b->add_message_to_bucket( $session, 'zeotrope', 'TestMailParse021.msg' ) );
 
 foreach my $word (keys %words) {
-    test_assert_equal( $b->get_base_value_( 'zeotrope', $word ), $words{$word}, "zeotrope: $word $words{$word}" );
+    test_assert_equal( $b->get_base_value_( $session, 'zeotrope', $word ), $words{$word}, "zeotrope: $word $words{$word}" );
 }
 
-test_assert( $b->add_message_to_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
+test_assert( $b->add_message_to_bucket( $session, 'zeotrope', 'TestMailParse021.msg' ) );
 
 foreach my $word (keys %words) {
-    test_assert_equal( $b->get_base_value_( 'zeotrope', $word ), $words{$word}*2, "zeotrope: $word $words{$word}" );
+    test_assert_equal( $b->get_base_value_( $session, 'zeotrope', $word ), $words{$word}*2, "zeotrope: $word $words{$word}" );
 }
 
 # remove_message_from_bucket
 
-test_assert( $b->remove_message_from_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
-test_assert( $b->remove_message_from_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
+test_assert( $b->remove_message_from_bucket( $session, 'zeotrope', 'TestMailParse021.msg' ) );
+test_assert( $b->remove_message_from_bucket( $session, 'zeotrope', 'TestMailParse021.msg' ) );
 
-test_assert_equal( $b->get_bucket_word_count( 'zeotrope' ), 0 );
+test_assert_equal( $b->get_bucket_word_count( $session, 'zeotrope' ), 0 );
 
 # add_messages_to_bucket
 
-test_assert( $b->add_messages_to_bucket( 'zeotrope', ( 'TestMailParse021.msg', 'TestMailParse021.msg' ) ) );
+test_assert( $b->add_messages_to_bucket( $session, 'zeotrope', ( 'TestMailParse021.msg', 'TestMailParse021.msg' ) ) );
 
 foreach my $word (keys %words) {
-    test_assert_equal( $b->get_base_value_( 'zeotrope', $word ), $words{$word}*2, "zeotrope: $word $words{$word}" );
+    test_assert_equal( $b->get_base_value_( $session, 'zeotrope', $word ), $words{$word}*2, "zeotrope: $word $words{$word}" );
 }
 
 # Test corrupting the corpus
@@ -299,24 +316,24 @@ foreach my $word (keys %words) {
 
 # create_magnet
 
-test_assert_equal( $b->magnet_count(), 4 );
-$b->create_magnet( 'zeotrope', 'from', 'francis' );
-test_assert_equal( $b->magnet_count(), 5 );
+test_assert_equal( $b->magnet_count( $session ), 4 );
+$b->create_magnet( $session, 'zeotrope', 'from', 'francis' );
+test_assert_equal( $b->magnet_count( $session ), 5 );
 
 # get_buckets_with_magnets
 
-my @mags = $b->get_buckets_with_magnets();
+my @mags = $b->get_buckets_with_magnets( $session );
 test_assert_equal( $#mags, 1 );
 test_assert_equal( $mags[0], 'personal' );
 test_assert_equal( $mags[1], 'zeotrope' );
 
 # get_magnet_type_in_bucket
 
-my @types = $b->get_magnet_types_in_bucket( 'zeotrope' );
+my @types = $b->get_magnet_types_in_bucket(  $session, 'zeotrope' );
 test_assert_equal( $#types, 0 );
 test_assert_equal( $types[0], 'from' );
 
-@types = $b->get_magnet_types_in_bucket( 'personal' );
+@types = $b->get_magnet_types_in_bucket(  $session, 'personal' );
 test_assert_equal( $#types, 2 );
 test_assert_equal( $types[0], 'from' );
 test_assert_equal( $types[1], 'subject' );
@@ -324,59 +341,59 @@ test_assert_equal( $types[2], 'to' );
 
 # get_magnets
 
-my @magnets = $b->get_magnets( 'zeotrope', 'from' );
+my @magnets = $b->get_magnets(  $session, 'zeotrope', 'from' );
 test_assert_equal( $#magnets, 0 );
 test_assert_equal( $magnets[0], 'francis' );
 
-@magnets = $b->get_magnets( 'personal', 'from' );
+@magnets = $b->get_magnets( $session, 'personal', 'from' );
 test_assert_equal( $#magnets, 1 );
 test_assert_equal( $magnets[0], 'foo' );
 test_assert_equal( $magnets[1], 'oldstyle' );
-@magnets = $b->get_magnets( 'personal', 'to' );
+@magnets = $b->get_magnets( $session, 'personal', 'to' );
 test_assert_equal( $#magnets, 0 );
 test_assert_equal( $magnets[0], 'baz@baz.com' );
-@magnets = $b->get_magnets( 'personal', 'subject' );
+@magnets = $b->get_magnets( $session, 'personal', 'subject' );
 test_assert_equal( $#magnets, 0 );
 test_assert_equal( $magnets[0], 'bar' );
 
 # magnet_match__
 
-test_assert( $b->magnet_match__( 'foo', 'personal', 'from' ) );
-test_assert( $b->magnet_match__( 'barfoo', 'personal', 'from' ) );
-test_assert( $b->magnet_match__( 'foobar', 'personal', 'from' ) );
-test_assert( $b->magnet_match__( 'oldstylemagnet', 'personal', 'from' ) );
-test_assert( !$b->magnet_match__( 'fo', 'personal', 'from' ) );
-test_assert( !$b->magnet_match__( 'fobar', 'personal', 'from' ) );
-test_assert( !$b->magnet_match__( 'oldstylmagnet', 'personal', 'from' ) );
+test_assert( $b->magnet_match__( $session, 'foo', 'personal', 'from' ) );
+test_assert( $b->magnet_match__( $session, 'barfoo', 'personal', 'from' ) );
+test_assert( $b->magnet_match__( $session, 'foobar', 'personal', 'from' ) );
+test_assert( $b->magnet_match__( $session, 'oldstylemagnet', 'personal', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'fo', 'personal', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'fobar', 'personal', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'oldstylmagnet', 'personal', 'from' ) );
 
-test_assert( $b->magnet_match__( 'baz@baz.com', 'personal', 'to' ) );
-test_assert( $b->magnet_match__( 'dobaz@baz.com', 'personal', 'to' ) );
-test_assert( $b->magnet_match__( 'dobaz@baz.com.edu', 'personal', 'to' ) );
-test_assert( !$b->magnet_match__( 'bam@baz.com', 'personal', 'to' ) );
-test_assert( !$b->magnet_match__( 'doba@baz.com', 'personal', 'to' ) );
-test_assert( !$b->magnet_match__( 'dobz@baz.com.edu', 'personal', 'to' ) );
+test_assert( $b->magnet_match__( $session, 'baz@baz.com', 'personal', 'to' ) );
+test_assert( $b->magnet_match__( $session, 'dobaz@baz.com', 'personal', 'to' ) );
+test_assert( $b->magnet_match__( $session, 'dobaz@baz.com.edu', 'personal', 'to' ) );
+test_assert( !$b->magnet_match__( $session, 'bam@baz.com', 'personal', 'to' ) );
+test_assert( !$b->magnet_match__( $session, 'doba@baz.com', 'personal', 'to' ) );
+test_assert( !$b->magnet_match__( $session, 'dobz@baz.com.edu', 'personal', 'to' ) );
 
-$b->create_magnet( 'zeotrope', 'from', '@yahoo.com' );
-test_assert( $b->magnet_match__( 'baz@yahoo.com', 'zeotrope', 'from' ) );
-test_assert( $b->magnet_match__( 'foo@yahoo.com', 'zeotrope', 'from' ) );
-test_assert( !$b->magnet_match__( 'foo@yaho.com', 'zeotrope', 'from' ) );
-$b->delete_magnet( 'zeotrope', 'from', '@yahoo.com' );
+$b->create_magnet( $session, 'zeotrope', 'from', '@yahoo.com' );
+test_assert( $b->magnet_match__( $session, 'baz@yahoo.com', 'zeotrope', 'from' ) );
+test_assert( $b->magnet_match__( $session, 'foo@yahoo.com', 'zeotrope', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'foo@yaho.com', 'zeotrope', 'from' ) );
+$b->delete_magnet( $session, 'zeotrope', 'from', '@yahoo.com' );
 
-$b->create_magnet( 'zeotrope', 'from', '__r' );
-test_assert( !$b->magnet_match__( 'baz@rahoo.com', 'zeotrope', 'from' ) );
-test_assert( $b->magnet_match__( '@__r', 'zeotrope', 'from' ) );
-$b->delete_magnet( 'zeotrope', 'from', '__r' );
+$b->create_magnet( $session, 'zeotrope', 'from', '__r' );
+test_assert( !$b->magnet_match__( $session, 'baz@rahoo.com', 'zeotrope', 'from' ) );
+test_assert( $b->magnet_match__( $session, '@__r', 'zeotrope', 'from' ) );
+$b->delete_magnet( $session, 'zeotrope', 'from', '__r' );
 
-$b->create_magnet( 'zeotrope', 'from', 'foo$bar' );
-test_assert( !$b->magnet_match__( 'foo@bar', 'zeotrope', 'from' ) );
-test_assert( !$b->magnet_match__( 'foo$baz', 'zeotrope', 'from' ) );
-test_assert( $b->magnet_match__( 'foo$bar', 'zeotrope', 'from' ) );
-test_assert( $b->magnet_match__( 'foo$barum', 'zeotrope', 'from' ) );
-$b->delete_magnet( 'zeotrope', 'from', 'foo$bar' );
+$b->create_magnet( $session, 'zeotrope', 'from', 'foo$bar' );
+test_assert( !$b->magnet_match__( $session, 'foo@bar', 'zeotrope', 'from' ) );
+test_assert( !$b->magnet_match__( $session, 'foo$baz', 'zeotrope', 'from' ) );
+test_assert( $b->magnet_match__( $session, 'foo$bar', 'zeotrope', 'from' ) );
+test_assert( $b->magnet_match__( $session, 'foo$barum', 'zeotrope', 'from' ) );
+$b->delete_magnet( $session, 'zeotrope', 'from', 'foo$bar' );
 
 # get_magnet_types
 
-my %mtypes = $b->get_magnet_types();
+my %mtypes = $b->get_magnet_types( $session );
 my @mkeys = keys %mtypes;
 test_assert_equal( $#mkeys, 3 );
 test_assert_equal( $mtypes{from}, 'From' );
@@ -386,44 +403,44 @@ test_assert_equal( $mtypes{cc}, 'Cc' );
 
 # delete_magnet
 
-$b->delete_magnet( 'zeotrope', 'from', 'francis' );
-test_assert_equal( $b->magnet_count(), 4 );
+$b->delete_magnet( $session, 'zeotrope', 'from', 'francis' );
+test_assert_equal( $b->magnet_count( $session ), 4 );
 
-@mags = $b->get_buckets_with_magnets();
+@mags = $b->get_buckets_with_magnets( $session );
 test_assert_equal( $#mags, 0 );
 test_assert_equal( $mags[0], 'personal' );
 
 # send a message through the mq
 
-test_assert_equal( $b->get_bucket_parameter( 'zeotrope', 'count' ), 0 );
-$b->mq_post_( 'CLASS', 'zeotrope' );
+test_assert_equal( $b->get_bucket_parameter(  $session, 'zeotrope', 'count' ), 0 );
+$b->classified( $session, 'zeotrope' );
 $mq->service();
-test_assert_equal( $b->get_bucket_parameter( 'zeotrope', 'count' ), 1 );
+test_assert_equal( $b->get_bucket_parameter(  $session, 'zeotrope', 'count' ), 1 );
 
 # clear_bucket
 
-$b->clear_bucket( 'zeotrope' );
-test_assert_equal( $b->get_bucket_word_count('zeotrope'), 0 );
+$b->clear_bucket( $session, 'zeotrope' );
+test_assert_equal( $b->get_bucket_word_count( $session, 'zeotrope' ), 0 );
 
 # classify a message using a magnet
 
-$b->create_magnet( 'zeotrope', 'from', 'cxcse231@yahoo.com' );
-test_assert_equal( $b->classify( 'TestMailParse021.msg' ), 'zeotrope' );
+$b->create_magnet( $session, 'zeotrope', 'from', 'cxcse231@yahoo.com' );
+test_assert_equal( $b->classify( $session, 'TestMailParse021.msg' ), 'zeotrope' );
 test_assert_equal( $b->{magnet_detail__}, 'from: cxcse231@yahoo.com' );
 test_assert( $b->{magnet_used__} );
 
 # clear_magnets
 
-$b->clear_magnets();
-test_assert_equal( $b->magnet_count(), 0 );
-@mags = $b->get_buckets_with_magnets();
+$b->clear_magnets( $session );
+test_assert_equal( $b->magnet_count( $session ), 0 );
+@mags = $b->get_buckets_with_magnets( $session );
 test_assert_equal( $#mags, -1 );
 
 # delete_bucket
 
-test_assert( $b->delete_bucket( 'zeotrope' ) );
+test_assert( $b->delete_bucket( $session, 'zeotrope' ) );
 
-@buckets = $b->get_buckets();
+@buckets = $b->get_buckets( $session );
 test_assert_equal( $#buckets, 2 );
 test_assert_equal( $buckets[0], 'other' );
 test_assert_equal( $buckets[1], 'personal' );
@@ -431,18 +448,18 @@ test_assert_equal( $buckets[2], 'spam' );
 
 # getting and setting values
 
-test_assert_equal( $b->get_value_( 'personal', 'foo' ), log(1/103) );
-test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), log(1/103) );
+test_assert_equal( $b->get_value_( $session, 'personal', 'foo' ), log(1/103) );
+test_assert_equal( $b->get_sort_value_( $session, 'personal', 'foo' ), log(1/103) );
 
-$b->set_value_( 'personal', 'foo', 0 );
-test_assert_equal( $b->get_value_( 'personal', 'foo' ), 0 );
-test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), $b->{not_likely__} );
+$b->set_value_( $session, 'personal', 'foo', 0 );
+test_assert_equal( $b->get_value_( $session, 'personal', 'foo' ), 0 );
+test_assert_equal( $b->get_sort_value_( $session, 'personal', 'foo' ), $b->{not_likely__}{1} );
 
-$b->set_value_( 'personal', 'foo', 100 );
-$b->db_update_cache__();
-test_assert_equal( $b->get_base_value_( 'personal', 'foo' ), 100 );
-test_assert_equal( $b->get_value_( 'personal', 'foo' ), log(100/202) );
-test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), log(100/202) );
+$b->set_value_( $session, 'personal', 'foo', 100 );
+$b->db_update_cache__( $session );
+test_assert_equal( $b->get_base_value_( $session, 'personal', 'foo' ), 100 );
+test_assert_equal( $b->get_value_( $session, 'personal', 'foo' ), log(100/202) );
+test_assert_equal( $b->get_sort_value_( $session, 'personal', 'foo' ), log(100/202) );
 
 # glob the tests directory for files called TestMailParse\d+.msg which consist of messages
 # to be parsed with the resulting classification in TestMailParse.cls
@@ -460,7 +477,7 @@ for my $class_test (@class_tests) {
     	close CLASS;
     }
 
-    test_assert_equal( $b->classify( $class_test ), $class, $class_test );
+    test_assert_equal( $b->classify( $session, $class_test ), $class, $class_test );
 }
 
 # glob the tests directory for files called TestMailParse\d+.msg which consist of messages
@@ -473,13 +490,13 @@ $b->global_config_( 'xtc',  1 );
 $b->global_config_( 'xpl',  1 );
 $b->module_config_( 'pop3', 'local', 1 );
 $b->global_config_( 'subject',  1 );
-$b->set_bucket_parameter( 'spam', 'subject', 1 );
+$b->set_bucket_parameter( $session, 'spam', 'subject', 1 );
 
 my @modify_tests = sort glob 'TestMailParse*.msg';
 
 for my $modify_file (@modify_tests) {
     if ( ( open MSG, "<$modify_file" ) && ( open OUTPUT, ">temp.out" ) ) {
-	    $b->classify_and_modify( \*MSG, \*OUTPUT, 0, 0, 0, '' );
+	    $b->classify_and_modify( $session, \*MSG, \*OUTPUT, 0, 0, 0, '' );
 	    close MSG;
 		close OUTPUT;
 
@@ -493,7 +510,9 @@ for my $modify_file (@modify_tests) {
 			my $cam_line    = <CAM>;
 			$output_line =~ s/[\r\n]//g;
 			$cam_line =~ s/[\r\n]//g;
-			test_assert_equal( $output_line, $cam_line, $modify_file );
+                        if ( ( $output_line ne '.' ) || ( $cam_line ne '' ) ) { 
+   			    test_assert_equal( $output_line, $cam_line, $modify_file );
+                        }
 		}
 		
 		close CAM;
@@ -515,15 +534,15 @@ $b->{parser__}->{mangle__}->load_stopwords();
 
 # get_stopword_list
 
-my @stopwords = sort $b->get_stopword_list();
+my @stopwords = sort $b->get_stopword_list( $session );
 test_assert_equal( $#stopwords, 1 );
 test_assert_equal( $stopwords[0], 'andnotthat' );
 test_assert_equal( $stopwords[1], 'notthis' );
 
 # add_stopword
 
-test_assert( $b->add_stopword( 'northat' ) );
-@stopwords = sort $b->get_stopword_list();
+test_assert( $b->add_stopword( $session, 'northat' ) );
+@stopwords = sort $b->get_stopword_list( $session );
 test_assert_equal( $#stopwords, 2 );
 test_assert_equal( $stopwords[0], 'andnotthat' );
 test_assert_equal( $stopwords[1], 'northat' );
@@ -531,8 +550,8 @@ test_assert_equal( $stopwords[2], 'notthis' );
 
 # remove_stopword
 
-test_assert( $b->remove_stopword( 'northat' ) );
-@stopwords = sort $b->get_stopword_list();
+test_assert( $b->remove_stopword( $session, 'northat' ) );
+@stopwords = sort $b->get_stopword_list( $session );
 test_assert_equal( $#stopwords, 1 );
 test_assert_equal( $stopwords[0], 'andnotthat' );
 test_assert_equal( $stopwords[1], 'notthis' );
@@ -802,11 +821,11 @@ close TEMP;
 
 # test quarantining of a message
 
-$b->set_bucket_parameter( 'spam', 'quarantine', 1 );
+$b->set_bucket_parameter( $session, 'spam', 'quarantine', 1 );
 
 open CLIENT, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-my ( $class, $nopath ) = $b->classify_and_modify( \*MAIL, \*CLIENT, 0, 0, 0, '', 1 );
+my ( $class, $nopath ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 0, 0, '', 1 );
 close CLIENT;
 close MAIL;
 
@@ -839,7 +858,7 @@ unlink( 'messages/popfile0=0.cls' );
 unlink( 'messages/popfile0=0.msg' );
 open CLIENT, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-my ( $class, $nopath ) = $b->classify_and_modify( \*MAIL, \*CLIENT, 0, 0, 1, '', 1 );
+my ( $class, $nopath ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 0, 1, '', 1 );
 close CLIENT;
 close MAIL;
 
@@ -851,7 +870,7 @@ test_assert( !( -e 'messages/popfile0=0.cls' ) );
 
 open CLIENT, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-my ( $class, $nopath ) = $b->classify_and_modify( \*MAIL, \*CLIENT, 0, 0, 0, '', 0 );
+my ( $class, $nopath ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 0, 0, '', 0 );
 close CLIENT;
 close MAIL;
 
@@ -865,7 +884,7 @@ test_assert_equal( ( -s 'temp.tmp' ), 0 );
 
 open CLIENT, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-my ( $class, $nopath ) = $b->classify_and_modify( \*MAIL, \*CLIENT, 0, 0, 0, 'other', 1 );
+my ( $class, $nopath ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 0, 0, 'other', 1 );
 close CLIENT;
 close MAIL;
 
@@ -899,21 +918,21 @@ if ( $have_text_kakasi ) {
 
   # Test Japanese magnet. GOMI means "trash" in Japanese.
 
-  $b->create_bucket( 'gomi' );
+  $b->create_bucket( $session, 'gomi' );
 
   # create_magnet
 
-  $b->clear_magnets();
-  $b->create_magnet( 'gomi', 'subject', chr(0xcc) . chr(0xa4) );
-  test_assert_equal( $b->classify( 'TestMailParse026.msg' ), 'gomi' );
+  $b->clear_magnets( $session );
+  $b->create_magnet( $session, 'gomi', 'subject', chr(0xcc) . chr(0xa4) );
+  test_assert_equal( $b->classify( $session, 'TestMailParse026.msg' ), 'gomi' );
 
-  test_assert_equal( $b->magnet_count(), 1 );
-  $b->create_magnet( 'gomi', 'subject', chr(0xa5) . chr(0xc6) . chr(0xa5) . chr(0xb9) . chr(0xa5) . chr(0xc8));
-  test_assert_equal( $b->magnet_count(), 2 );
+  test_assert_equal( $b->magnet_count( $session ), 1 );
+  $b->create_magnet( $session, 'gomi', 'subject', chr(0xa5) . chr(0xc6) . chr(0xa5) . chr(0xb9) . chr(0xa5) . chr(0xc8));
+  test_assert_equal( $b->magnet_count( $session ), 2 );
 
   # get_magnets
 
-  my @magnets = $b->get_magnets( 'gomi', 'subject' );
+  my @magnets = $b->get_magnets( $session, 'gomi', 'subject' );
   test_assert_equal( $#magnets, 1 );
   test_assert_equal( $magnets[0], chr(0xa5) . chr(0xc6) . chr(0xa5) . chr(0xb9) . chr(0xa5) . chr(0xc8) );
   test_assert_equal( $magnets[1], chr(0xcc) . chr(0xa4) );
@@ -922,7 +941,7 @@ if ( $have_text_kakasi ) {
 
   open CLIENT, ">temp.tmp";
   open MAIL, "<TestMailParse026.msg";
-  my ( $class, $nopath ) = $b->classify_and_modify( \*MAIL, \*CLIENT, 0, 0, 0, '', 1 );
+  my ( $class, $nopath ) = $b->classify_and_modify( $session, \*MAIL, \*CLIENT, 0, 0, 0, '', 1 );
   close CLIENT;
   close MAIL;
 
@@ -953,15 +972,15 @@ if ( $have_text_kakasi ) {
   }
   close WORDS;
 
-  test_assert( $b->add_message_to_bucket( 'gomi', 'TestMailParse026.kks' ) );
+  test_assert( $b->add_message_to_bucket( $session, 'gomi', 'TestMailParse026.kks' ) );
 
   foreach my $word (keys %words) {
-    test_assert_equal( $b->get_base_value_( 'gomi', $word ), $words{$word}, "gomi: $word $words{$word}" );
+    test_assert_equal( $b->get_base_value_( $session, 'gomi', $word ), $words{$word}, "gomi: $word $words{$word}" );
   }
 
   # get_bucket_word_prefixes
 
-  my @words = $b->get_bucket_word_prefixes( 'gomi' );
+  my @words = $b->get_bucket_word_prefixes( $session, 'gomi' );
   test_assert_equal( $#words, 19 );
   test_assert_equal( $words[17], chr(0xa4) . chr(0xb3) );
   test_assert_equal( $words[18], chr(0xa4) . chr(0xc7) );
@@ -969,8 +988,8 @@ if ( $have_text_kakasi ) {
 
   # remove_message_from_bucket
 
-  test_assert( $b->remove_message_from_bucket( 'gomi', 'TestMailParse026.kks' ) );
-  test_assert_equal( $b->get_bucket_word_count( 'gomi' ), 0 );
+  test_assert( $b->remove_message_from_bucket( $session, 'gomi', 'TestMailParse026.kks' ) );
+  test_assert_equal( $b->get_bucket_word_count( $session, 'gomi' ), 0 );
 } else {
     print "\nWarning: Japanese tests skipped because Text::Kakasi was not found\n";
 }

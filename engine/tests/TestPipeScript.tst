@@ -25,6 +25,7 @@
 test_assert( `rm -rf messages` == 0 );
 test_assert( `rm -rf corpus` == 0 );
 test_assert( `cp -R corpus.base corpus` == 0 );
+unlink 'popfile.db';
 unlink 'popfile.cfg';
 test_assert( `rm -rf corpus/CVS` == 0 );
 

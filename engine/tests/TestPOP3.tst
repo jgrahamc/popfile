@@ -465,6 +465,8 @@ if ( $pid == 0 ) {
                         PeerAddr => '127.0.0.1',
                         PeerPort => $port );
 
+        select( undef, undef, undef, 1 );
+
         test_assert( defined( $client ) );
         test_assert( $client->connected );
 
@@ -638,7 +640,11 @@ if ( $pid == 0 ) {
         binmode FILE;
         while ( <FILE> ) {
             my $line = $_;
+            $b->log_( "Got $_" );
             $result = <$client>;
+            my $logline = "File [$_], $client [$result]";
+            $logline =~ s/[\r\n]//g;
+            $b->log_( $logline );
             $result =~ s/popfile1=28/popfile0=0/;
             $result =~ s/\r|\n//g;
             $line   =~ s/\r|\n//g;
@@ -898,8 +904,10 @@ if ( $pid == 0 ) {
         binmode FILE;
         $headers   = 1;
         while ( my $line = <FILE> ) {
+            $b->log_( "RETR 8 after TOP 8 got line [$line]" );
             $line =~ s/[\r\n]//g;
             $result = <$client>;
+            $b->log_( "RETR 8 after TOP 8 got from client [$result]" );
             $result =~ s/[\r\n]//g;
             $result =~ s/popfile2=8/popfile0=0/;
             test_assert_equal( $result, $line );

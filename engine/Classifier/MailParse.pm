@@ -133,9 +133,10 @@ sub new
 
     $self->{ut__}        = '';
 
-    # Specifies the parse mode, 1 means color the output
+    # Specifies the parse mode, '' means no color output, if non-zero
+    # then color output using a specific session key stored here
 
-    $self->{color__}     = 0;
+    $self->{color__}     = '';
 
     # This will store the from, to, cc and subject from the last parse
     $self->{from__}      = '';
@@ -321,11 +322,11 @@ sub update_pseudoword
     my $mword = $self->{mangle__}->mangle("$prefix:$word",1);
 
     if ( $mword ne '' ) {
-        if ( $self->{color__} ) {
+        if ( $self->{color__} ne '' ) {
             if ( $encoded == 1 )  {
                 $literal =~ s/</&lt;/g;
                 $literal =~ s/>/&gt;/g;
-                my $color = $self->{bayes__}->get_color($mword);
+                my $color = $self->{bayes__}->get_color( $self->{color__}, $mword);
                 my $to    = "<b><font color=\"$color\"><a title=\"$mword\">$literal</a></font></b>";
                 $self->{ut__} .= $to . ' ';
 	    }
@@ -365,8 +366,8 @@ sub update_word
             push @{$self->{quickmagnets__}{$prefix}}, $word;
         }
 
-        if ( $self->{color__} ) {
-            my $color = $self->{bayes__}->get_color($mword);
+        if ( $self->{color__} ne '' ) {
+            my $color = $self->{bayes__}->get_color( $self->{color__}, $mword);
             if ( $encoded == 0 )  {
                 $after = '&' if ( $after eq '>' );
                 if ( !( $self->{ut__} =~ s/($before)\Q$word\E($after)/$1<b><font color=\"$color\">$word<\/font><\/b>$2/ ) ) {
@@ -1153,7 +1154,7 @@ sub parse_file
 
     $self->stop_parse();
 
-    if ( $self->{color__} )  {
+    if ( $self->{color__} ne '' )  {
         $self->{colorized__} .= $self->{ut__} if ( $self->{ut__} ne '' );
 
         $self->{colorized__} .= "</tt>";
@@ -1231,7 +1232,7 @@ sub start_parse
     # Used to return a colorize page
 
     $self->{colorized__} = '';
-    $self->{colorized__} .= "<tt>" if ( $self->{color__} );
+    $self->{colorized__} .= "<tt>" if ( $self->{color__} ne '' );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1284,7 +1285,7 @@ sub parse_line
 
             print ">>> $line" if $self->{debug__};
 
-            if ($self->{color__}) {
+            if ($self->{color__} ne '' ) {
 
                 if (!$self->{in_html_tag__}) {
                     $self->{colorized__} .= $self->{ut__};
@@ -1417,7 +1418,7 @@ sub parse_line
             if ( $self->{encoding__} =~ /quoted\-printable/i ) {
                 $line       = decode_qp( $line );
                 $line       =~ s/[\r\n]+$/ /g;
-                $self->{ut__} = decode_qp( $self->{ut__} ) if ( $self->{color__} );
+                $self->{ut__} = decode_qp( $self->{ut__} ) if ( $self->{color__} ne '' );
             }
 
             parse_html( $self, $line, 0 );
@@ -1442,7 +1443,7 @@ sub clear_out_base64
     if ( $self->{base64__} ne '' ) {
         my $decoded = '';
 
-        $self->{ut__}     = '' if $self->{color__};
+        $self->{ut__}     = '' if ( $self->{color__} ne '' );
         $self->{base64__} =~ s/ //g;
 
         print "Base64 data: " . $self->{base64__} . "\n" if ($self->{debug__});
@@ -1452,9 +1453,9 @@ sub clear_out_base64
 
         print "Decoded: " . $decoded . "\n" if ($self->{debug__});
 
-        $self->{ut__} = "<b>Found in encoded data:</b> " . $self->{ut__} if ( $self->{color__} );
+        $self->{ut__} = "<b>Found in encoded data:</b> " . $self->{ut__} if ( $self->{color__} ne '' );
 
-            if ( $self->{color__} )  {
+            if ( $self->{color__} ne '' )  {
                 if ( $self->{ut__} ne '' )  {
                     $colorized = $self->{ut__};
                     $self->{ut__} = '';
@@ -1560,12 +1561,12 @@ sub parse_header
     $fix_argument =~ s/>/&gt;/g;
 
     if ( $self->update_pseudoword( 'header', $header, 0, $header ) ) {
-        if ( $self->{color__} ) {
-            my $color     = $self->{bayes__}->get_color( "header:$header" );
+        if ( $self->{color__} ne '' ) {
+            my $color     = $self->{bayes__}->get_color( $self->{color__}, "header:$header" );
             $self->{ut__} =  "<b><font color=\"$color\">$header</font></b>: $fix_argument\015\012";
         }
     } else {
-        if ( $self->{color__} ) {
+        if ( $self->{color__} ne '' ) {
             $self->{ut__} =  "$header: $fix_argument\015\012";
         }
     }
@@ -1596,18 +1597,27 @@ sub parse_header
         $argument = $self->decode_string( $argument , $self->{lang__} );
 
         if ( $header =~ /^From$/i )  {
-            $self->{from__} = $argument if ( $self->{from__} eq '' ) ;
             $prefix = 'from';
+            if ( $self->{from__} eq '' ) {
+                $self->{from__} = $argument;
+                $self->{from__} =~ s/[\t\r\n]//g;
+	    }
         }
 
         if ( $header =~ /^To$/i ) {
             $prefix = 'to';
-            $self->{to__} = $argument if ( $self->{to__} eq '' );
+            if ( $self->{to__} eq '' ) {
+                $self->{to__} = $argument;
+                $self->{to__} =~ s/[\t\r\n]//g;
+	    }
         }
 
         if ( $header =~ /^Cc$/i ) {
             $prefix = 'cc';
-            $self->{cc__} = $argument if ( $self->{cc__} eq '' );
+            if ( $self->{cc__} eq '' ) {
+                $self->{cc__} = $argument;
+                $self->{cc__} =~ s/[\t\r\n]//g;
+	    }
         }
 
         while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))>// )  {
@@ -1628,7 +1638,10 @@ sub parse_header
 
         $prefix = 'subject';
         $argument = $self->decode_string( $argument, $self->{lang__} );
-        $self->{subject__} = $argument if ( ( $self->{subject__} eq '' ) );
+        if ( $self->{subject__} eq '' ) {
+            $self->{subject__} = $argument;
+            $self->{subject__} =~ s/[\t\r\n]//g;
+	}
     }
 
     $self->{date__} = $argument if ( $header =~ /^Date$/i );
