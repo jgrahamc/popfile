@@ -1461,7 +1461,7 @@ sub magnet_page
     }
 
     if ( defined( $self->{form_}{count} ) && ( defined( $self->{form_}{update} ) || defined( $self->{form_}{create} ) ) ) {
-        for my $i ( 1 .. $self->{form_}{count} ) {
+        for my $i ( 0 .. $self->{form_}{count} ) {
             my $mtype   = $self->{form_}{"type$i"};
             my $mtext   = $self->{form_}{"text$i"};
             my $mbucket = $self->{form_}{"bucket$i"};
@@ -1471,7 +1471,9 @@ sub magnet_page
                 my $otext   = $self->{form_}{"otext$i"};
                 my $obucket = $self->{form_}{"obucket$i"};
 
-                $self->{classifier__}->delete_magnet( $obucket, $otype, $otext );
+                if ( defined( $otype ) ) {
+                    $self->{classifier__}->delete_magnet( $obucket, $otype, $otext );
+		}
             }
 
             if ( ( defined($mbucket) ) && ( $mbucket ne '' ) && ( $mtext ne '' ) ) {
@@ -1650,7 +1652,7 @@ sub magnet_page
     # Magnet Type widget
 
     $body .= "<label class=\"magnetsLabel\" for=\"magnetsAddType\">$self->{language__}{Magnet_MagnetType}:</label><br />\n";
-    $body .= "<select name=\"type1\" id=\"magnetsAddType\">\n";
+    $body .= "<select name=\"type0\" id=\"magnetsAddType\">\n";
 
     for my $mtype (keys %magnet_types) {
         $body .= "<option value=\"$mtype\">\n$self->{language__}{$magnet_types{$mtype}}</option>\n";
@@ -1660,11 +1662,11 @@ sub magnet_page
 
     # Value widget
     $body .= "<label class=\"magnetsLabel\" for=\"magnetsAddText\">$self->{language__}{Magnet_Value}:</label><br />\n";
-    $body .= "<input type=\"text\" name=\"text1\" id=\"magnetsAddText\" />\n<br /><br />\n";
+    $body .= "<input type=\"text\" name=\"text0\" id=\"magnetsAddText\" />\n<br /><br />\n";
 
     # Always Goes to Bucket widget
     $body .= "<label class=\"magnetsLabel\" for=\"magnetsAddBucket\">$self->{language__}{Magnet_Always}:</label><br />\n";
-    $body .= "<select name=\"bucket1\" id=\"magnetsAddBucket\">\n<option value=\"\"></option>\n";
+    $body .= "<select name=\"bucket0\" id=\"magnetsAddBucket\">\n<option value=\"\"></option>\n";
 
     my @buckets = $self->{classifier__}->get_buckets();
     foreach my $bucket (@buckets) {

@@ -155,7 +155,7 @@ sub test_assert_not_regexp
     my ( $file, $line, $test, $expected, $context ) = @_;
     my $result = !( $test =~ /$expected/m );
 
-    test_report( $result, "unexpected to match of [$expected]", $file, $line, $context );
+    test_report( $result, "unexpected match of [$expected]", $file, $line, $context );
 }
 
 # MAIN

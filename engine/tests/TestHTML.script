@@ -39,6 +39,8 @@
 # SUBMIT a          Finds the form with input a and submits it
 # SETSUBMIT a b     Just like doing SETINPUT a b followed by SUBMIT a
 # CONFIGIS a b      Verify that config item a has value b
+# MAGNETIS a b c    Checks that magnet c exists in bucket a with type b
+# CLICK a           Click the button called a
 #
 # Expect that the following are available to you within the MATCH/ENDMATCH block
 #
@@ -161,14 +163,114 @@ ENDMATCH
 # TODO Check individual bucket page for accuracy
 # TODO Check clearing of individual bucket
 
-# TODO Magnets Page
+# Magnets Page
 
-# TODO Check that predefined magnets are presetn
-# TODO Check magnet creation
-# TODO Check magnet change value
-# TODO Check magnet change type
-# TODO Check magnet change bucket
-# TODO Check magnet deletion
+GET /magnets
+
+# Check that predefined magnets are present
+
+INPUTIS text1 foo
+INPUTIS bucket1 personal
+INPUTIS type1 from
+INPUTIS text2 oldstyle
+INPUTIS bucket2 personal
+INPUTIS type2 from
+INPUTIS text3 bar
+INPUTIS bucket3 personal
+INPUTIS type3 subject
+INPUTIS text4 baz\@baz.com
+INPUTIS bucket4 personal
+INPUTIS type4 to
+
+# Check magnet creation
+
+SETINPUT  text0 newmagnet
+SETINPUT  type0 subject
+SETSUBMIT bucket0 spam
+INPUTIS   text5 newmagnet
+INPUTIS   type5 subject
+INPUTIS   bucket5 spam
+MAGNETIS  spam subject newmagnet
+
+# Check magnet change value
+
+SETSUBMIT text5 newmagnetvalue
+INPUTIS   text5 newmagnetvalue
+INPUTIS   type5 subject
+INPUTIS   bucket5 spam
+MAGNETIS  spam subject newmagnetvalue
+INPUTIS text1 foo
+INPUTIS bucket1 personal
+INPUTIS type1 from
+INPUTIS text2 oldstyle
+INPUTIS bucket2 personal
+INPUTIS type2 from
+INPUTIS text3 bar
+INPUTIS bucket3 personal
+INPUTIS type3 subject
+INPUTIS text4 baz\@baz.com
+INPUTIS bucket4 personal
+INPUTIS type4 to
+
+# Check magnet change type
+
+SETSUBMIT type5 to
+INPUTIS   type5 to
+INPUTIS   text5 newmagnetvalue
+INPUTIS   bucket5 spam
+MAGNETIS  spam to newmagnetvalue
+INPUTIS text1 foo
+INPUTIS bucket1 personal
+INPUTIS type1 from
+INPUTIS text2 oldstyle
+INPUTIS bucket2 personal
+INPUTIS type2 from
+INPUTIS text3 bar
+INPUTIS bucket3 personal
+INPUTIS type3 subject
+INPUTIS text4 baz\@baz.com
+INPUTIS bucket4 personal
+INPUTIS type4 to
+
+# Check magnet change bucket
+
+SETSUBMIT bucket5 personal
+INPUTIS   bucket5 personal
+INPUTIS   text5 newmagnetvalue
+INPUTIS   type5 to
+MAGNETIS  personal to newmagnetvalue
+INPUTIS text1 foo
+INPUTIS bucket1 personal
+INPUTIS type1 from
+INPUTIS text2 oldstyle
+INPUTIS bucket2 personal
+INPUTIS type2 from
+INPUTIS text3 bar
+INPUTIS bucket3 personal
+INPUTIS type3 subject
+INPUTIS text4 baz\@baz.com
+INPUTIS bucket4 personal
+INPUTIS type4 to
+
+# Check magnet deletion
+
+SETINPUT remove5 on
+CLICK delete
+NOTMATCH newmagnetvalue
+NOTMATCH type5
+
+SETINPUT remove1 on
+SETINPUT remove3 on
+CLICK delete
+NOTMATCH "foo"
+NOTMATCH bar
+INPUTIS text1 oldstyle
+INPUTIS bucket1 personal
+INPUTIS type1 from
+INPUTIS text2 baz\@baz.com
+INPUTIS bucket2 personal
+INPUTIS type2 to
+NOTMATCH type3
 
 # Configuration Page
 

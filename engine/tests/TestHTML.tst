@@ -205,14 +205,28 @@ if ( $pid == 0 ) {
         if ( pipeready( $dreader ) ) {
             my $command = <$dreader>;
 
-            if ( $command =~ /__QUIT/ ) {
+            if ( $command =~ /^__QUIT/ ) {
                 print $uwriter "OK\n";
                 last;
 	    }
 
-            if ( $command =~ /__GETCONFIG (.+)/ ) {
+            if ( $command =~ /^__GETCONFIG (.+)/ ) {
                 my $value = $c->parameter( $1 );
                 print $uwriter "OK $value\n";
+                next;
+	    }
+
+            if ( $command =~ /^__CHECKMAGNET ([^ ]+) ([^ ]+) ([^\r\n]+)/ ) {
+                my $found = 0;
+                for my $magnet ($b->get_magnets( $1, $2 ) ) {
+		    if ( $magnet eq $3 ) {
+                        print $uwriter "OK\n";
+                        $found = 1;
+                        last;
+		    }
+		}
+
+                print $uwriter "ERR\n" if ( !$found );
                 next;
 	    }
 	}
@@ -262,13 +276,37 @@ if ( $pid == 0 ) {
             next;
 	}
 
+        if ( $line =~ /^CLICK +(.+)$/ ) {
+            my $name = $1;
+            my ( $form, $input ) = find_form( $name );
+            my $request = undef;
+            $request = $form->click( $name ) if ( defined( $form ) );
+            if ( defined( $request ) ) {
+                my $response = $ua->request( $request );
+                $content = $response->content;
+                @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
+	    }
+            next;
+	}
+
         if ( $line =~ /^CONFIGIS +([^ ]+) ?(.+)?$/ ) {
             my ( $option, $expected ) = ( $1, $2 );
             $expected = '' if ( !defined( $expected ) );
             print $dwriter "__GETCONFIG $option\n";
             my $reply = <$ureader>;
-            $reply =~ /^OK (.+)$/;
+            $reply =~ /^OK ([^\r\n]+)/;
             test_assert_equal( $1, $expected, "From script line $line_number" );
+            next;
+	}
+
+        if ( $line =~ /^MAGNETIS +([^ ]+) ([^ ]+) (.+)$/ ) {
+            my ( $bucket, $type, $magnet ) = ( $1, $2, $3 );
+            print $dwriter "__CHECKMAGNET $bucket $type $magnet\n";
+            my $reply = <$ureader>;
+
+            if ( !( $reply =~ /^OK/ ) ) {
+                test_assert( 0, "From script line $line_number" );
+	    }
             next;
 	}
 
