@@ -214,13 +214,6 @@ sub child__
                     $response = $self->get_response_( $mail, $client, $command );
 
                     while ( ( ! ( $response =~ /\+OK/ ) ) && ( ! ( $response =~ /-ERR/ ) ) ) {
-
-                        # Check for an abort
-
-                        if ( $self->{alive} == 0 ) {
-                            last;
-                        }
-
                         my $auth;
                         $auth = <$client>;
                         $auth =~ s/(\015|\012)$//g;
