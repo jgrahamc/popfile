@@ -17,7 +17,7 @@ Add                                     Adicionar
 Remove                                  Remover
 Previous                                Anterior
 Next                                    Próximo
->From                                    De
+From                                    De
 Subject                                 Assunto
 Classification                          Classificação
 Reclassify                              Reclassificar
@@ -101,7 +101,7 @@ Configuration_TinySkins                 Skins Bem Pequenos
 Advanced_Error1                         '%s' já está na lista de Palavras Ignoradas
 Advanced_Error2                         Palavras ignoradas podem somente conter caracteres alfanuméricos, ., _, -, ou @
 Advanced_Error3                         '%s' adicionado na lista de Palavras Ignoradas
-Advanced_Error4                         '%s' não estã na lista de Palavras Ignoradas
+Advanced_Error4                         '%s' não está na lista de Palavras Ignoradas
 Advanced_Error5                         '%s' removido da lista de Palavras Ignoradas
 Advanced_StopWords                      Palavras Ignoradas
 Advanced_Message1                       O POPFile ignora as seguintes palavras freqüentemente usadas:
