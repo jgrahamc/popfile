@@ -112,6 +112,19 @@ sub initialize
     # If this is 1 then when the language is loaded we will use the language string identifier as the
     # string shown in the UI.  This is used to test whether which identifiers are used where.
     $self->{configuration}->{configuration}{test_language}     = 0;
+    
+    # If 1, Messages are saved to an archive when they are removed or expired from the history cache
+    $self->{configuration}->{configuration}{archive}            = 0;
+    
+    # The directory where messages will be archived to, in sub-directories for each bucket
+    $self->{configuration}->{configuration}{archive_dir}        = "archive";
+    
+    # This is an advanced setting which will save archived files to a randomly numbered
+    # sub-directory, if set to greater than zero, otherwise messages will be saved in the
+    # bucket directory
+    # 0 <= directory name < archive_classes
+    $self->{configuration}->{configuration}{archive_classes}    = 0;
+
 
     # Load skins
     load_skins($self);
@@ -1970,6 +1983,7 @@ sub history_load_class {
     
     my ( $self, $filename ) = @_;
     $filename =~ s/msg$/cls/;
+    $filename =~ s/^\Q$self->{configuration}->{configuration}{msgdir}\E//;
 
     my $reclassified = 0;
     my $bucket = "classfileerror";
@@ -2243,11 +2257,8 @@ sub history_page
     history_undo( $self );
 
     if ( defined($self->{form}{remove}) ) {
-        my $mail_file = $self->{form}{remove};
-        my $class_file = $mail_file;
-        $class_file =~ s/msg$/cls/;
-        unlink("$self->{configuration}->{configuration}{msgdir}$mail_file");
-        unlink("$self->{configuration}->{configuration}{msgdir}$class_file");
+        my $mail_file = $self->{form}{remove};        
+        history_delete_file($self, "$self->{configuration}->{configuration}{msgdir}$mail_file", 0); 
         $self->{history_invalid} = 1;        
         http_redirect( $self, $client,"/history?session=$self->{session_key}&sort=$self->{form}{sort}&filter=$self->{form}{filter}");
         return;
@@ -2262,11 +2273,8 @@ sub history_page
         load_history_cache( $self, $self->{form}{filter}, '', $self->{form}{sort}) if ( history_cache_empty( $self ) );
 
         foreach my $i (0..history_size($self)-1) {
-            my $mail_file = $self->{history}{$self->{history_keys}[$i]}{file};
-            my $class_file = $mail_file;
-            $class_file =~ s/msg$/cls/;
-            unlink("$self->{configuration}->{configuration}{msgdir}$mail_file");
-            unlink("$self->{configuration}->{configuration}{msgdir}$class_file");
+            my $mail_file = $self->{history}{$self->{history_keys}[$i]}{file};            
+            history_delete_file($self, "$self->{configuration}->{configuration}{msgdir}$mail_file", $self->{configuration}->{configuration}{archive});
         }
 
         $self->{history_invalid} = 1;        
@@ -2284,11 +2292,8 @@ sub history_page
             if ( defined $self->{history_keys}[$i]) {
                 $i = $self->{history_keys}[$i];
                 if ( $i <= history_size( $self ) )  {
-                    my $class_file = $self->{history}{$i}{file};
-                    $class_file =~ s/msg$/cls/;
-                    if ( $class_file ne '' )  {
-                        unlink("$self->{configuration}->{configuration}{msgdir}$self->{history}{$i}{file}");
-                        unlink("$self->{configuration}->{configuration}{msgdir}$class_file");
+                    if ( $self->{history}{$i}{file} ne '' )  {
+                        history_delete_file($self,"$self->{configuration}->{configuration}{msgdir}$self->{history}{$i}{file}",$self->{configuration}->{configuration}{archive});
                     }
                 }
             }
@@ -3000,7 +3005,7 @@ sub remove_mail_files
         
         my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($mail_file);          
         if ( $ctime < (time - $self->{configuration}->{configuration}{history_days} * $seconds_per_day) )  {
-            unlink($mail_file);
+            history_delete_file($self,$mail_file,$self->{configuration}->{configuration}{archive});
             $result = 1;
         }
     }
@@ -3026,6 +3031,88 @@ sub calculate_today
     
     $self->{today} = int( time / $seconds_per_day ) * $seconds_per_day;
     $self->{mail_filename}  = "popfile$self->{today}";
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# history_delete_file   - Handle the deletion of archived message files. Deletes .cls
+#                           files related to any .msg file.
+#
+# $mail_file    - The filename to delete
+# $archive      - Boolean, whether or not to save the file as part of an archive
+#
+# ---------------------------------------------------------------------------------------------
+
+sub history_delete_file
+{
+    my ( $self, $mail_file, $archive ) = @_;
+    
+    print "|||";
+    
+    print "$mail_file\n";
+    
+    my $name = $mail_file;
+    $name =~ s/^.*\/(.*)$/$1/;
+    
+    if ( $mail_file =~ /\.msg$/ ) {
+        
+        if ( $archive ) {
+            
+            my $path = $self->{configuration}->{configuration}{archive_dir};
+            mkdir( $path );
+            
+            (my $reclassified, my $bucket, my $usedtobe, my $magnet) = history_load_class($self, $mail_file);
+            
+            if ( ( $bucket ne 'unclassified' ) && ( $bucket ne 'classfileerror' ) ) {        
+                $path .= "\/" . $bucket;
+                mkdir( $path );
+                
+                if ( $self->{configuration}->{configuration}{archive_classes} > 0) {        
+                    # archive to a random sub-directory of the bucket archive
+                    my $subdirectory = int( rand( $self->{configuration}->{configuration}{archive_classes} ) );
+                    $path .= "\/" . $subdirectory;
+                    mkdir( $path );
+                }
+                                
+                # XXX This may be UNSAFE        
+    
+                history_copy_file($self, $mail_file, $path, $name);
+            }
+        }
+
+        unlink($mail_file);
+        $mail_file =~ s/msg$/cls/;
+        unlink($mail_file);
+    }    
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# history_copy_file     - Copies a file to a specified location and filename
+#
+#   $from       - The source file. May be relative or absolute.
+#   $to_dir     - The destination directory. May be relative or absolute. 
+#                   Will not be created if non-existent.
+#   $to_name    - The destination filename.
+#
+# ---------------------------------------------------------------------------------------------
+
+sub history_copy_file
+{
+    my ( $self, $from, $to_dir, $to_name ) = @_;
+    
+    print "...\n";
+            
+    if ( open( FROM, "<$from") && open( TO, ">$to_dir\/$to_name") ) {
+        binmode FROM;
+        while (<FROM>) {
+            print TO $_;
+        }
+        close FROM;
+        close TO;            
+    }    
 }
 
 1;
