@@ -44,7 +44,7 @@
 # (or have not yet used) POPFile). The switch can be in uppercase or lowercase.
 #-------------------------------------------------------------------------------------------
 
-  !define C_PFI_VERSION   0.1.3
+  !define C_PFI_VERSION   0.1.4
 
   Name    "Run POPFile"
   Caption "Run POPFile"
@@ -142,22 +142,16 @@ perl_missing:
 
 got_exe_path:
   ReadRegStr ${L_TEMP} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Owner"
-  StrCmp ${L_TEMP} ${L_WINUSERNAME} check_data
-  StrCmp ${L_TEMP} "" check_data
+  StrCmp ${L_TEMP} ${L_WINUSERNAME} check_root
+  StrCmp ${L_TEMP} "" check_root
   Goto add_user
 
-check_data:
-  ReadEnvStr ${L_POPFILE_ROOT} "POPFILE_ROOT"
-  ReadEnvStr ${L_POPFILE_USER} "POPFILE_USER"
-  StrCmp ${L_POPFILE_ROOT} "" set_root
-  StrCmp ${L_POPFILE_USER} "" set_user
-  IfFileExists "${L_POPFILE_ROOT}\popfile.pl" 0 bad_root_error
-  IfFileExists "${L_POPFILE_USER}\*.*" start_popfile bad_user_error
-
-set_root:
+check_root:
   ReadRegStr ${L_POPFILE_ROOT} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN"
   StrCmp ${L_POPFILE_ROOT} "" add_user
   IfFileExists "${L_POPFILE_ROOT}\popfile.pl" 0 bad_root_error
+  ReadEnvStr ${L_TEMP} "POPFILE_ROOT"
+  StrCmp ${L_TEMP} ${L_POPFILE_ROOT} check_user
   Call IsNT
   Pop ${L_WINOS_FLAG}
   StrCmp ${L_WINOS_FLAG} 0 set_root_now
@@ -171,13 +165,11 @@ set_root_now:
   Goto exit
 
 check_user:
-  StrCmp ${L_POPFILE_USER} "" set_user
-  IfFileExists "${L_POPFILE_USER}\*.*" start_popfile bad_user_error
-
-set_user:
   ReadRegStr ${L_POPFILE_USER} HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN"
   StrCmp ${L_POPFILE_USER} "" add_user
   IfFileExists "${L_POPFILE_USER}\*.*" 0 bad_user_error
+  ReadEnvStr ${L_TEMP} "POPFILE_USER"
+  StrCmp ${L_TEMP} ${L_POPFILE_USER} start_popfile
   Call IsNT
   Pop ${L_WINOS_FLAG}
   StrCmp ${L_WINOS_FLAG} 0 set_user_now
