@@ -2495,7 +2495,10 @@ sub run_popfile
                 {
                     if ( echo_response( $mail, $client, $command ) )
                     {
-                        echo_to_dot( $mail, $client );
+                        if ( $1 eq '' )
+                        {
+                            echo_to_dot( $mail, $client );
+                        }
                     }
 
                     flush_extra( $mail, $client );
