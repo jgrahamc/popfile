@@ -74,11 +74,11 @@ $m->deliver();
 # Check that the MQ interface functions work
 
 $m->mq_register_( 'NOTYPE', $m );
-$m->mq_post_( 'DUMMY', 'msg', 'param' );
+$m->mq_post_( 'NOTYPE', 'msg', 'param' );
 
 test_assert_equal( $mq->{waiters__}{NOTYPE}[0], $m );
-test_assert_equal( $mq->{queue__}{DUMMY}[0][0], 'msg' );
-test_assert_equal( $mq->{queue__}{DUMMY}[0][1], 'param' );
+test_assert_equal( $mq->{queue__}{NOTYPE}[0][0], 'msg' );
+test_assert_equal( $mq->{queue__}{NOTYPE}[0][1], 'param' );
 
 # Check that register UI item sends the right message
 use Test::MQReceiver;
