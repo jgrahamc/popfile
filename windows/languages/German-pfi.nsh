@@ -539,7 +539,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTERR    "Hinweis: Es konnten nicht alle Dateien im POPFile-Verzeichnis gelöscht werden"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DATAPROBS     "Datenprobleme"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERDIR    "Lösche alle Dateien aus dem POPFile Benutzerdaten-VerzeichnisRemoving all files from POPFile 'User Data' directory"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DElUSERERR    "HINWEIS: Nicht alle Dateien konnten aus den Benutzerdaten-Verzeichnis gelöscht werden"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERERR    "HINWEIS: Nicht alle Dateien konnten aus den Benutzerdaten-Verzeichnis gelöscht werden"
 
 ; Message Box text strings
 

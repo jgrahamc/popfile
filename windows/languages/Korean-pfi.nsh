@@ -539,7 +539,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTERR    "참고: POPFile 디렉토리로부터 모든 파일을 제거할 수 없습니다."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DATAPROBS     "Data problems"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERDIR    "Removing all files from POPFile 'User Data' directory"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DElUSERERR    "Note: unable to remove all files from POPFile 'User Data' directory"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERERR    "Note: unable to remove all files from POPFile 'User Data' directory"
 
 ; Message Box text strings
 

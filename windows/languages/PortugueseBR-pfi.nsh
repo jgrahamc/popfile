@@ -539,7 +539,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTERR    "Nota: impossível remover todos os arquivos da pasta do POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DATAPROBS     "Problemas nos dados"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERDIR    "Removendo todos os arquivos do diretório 'User Data' do POPFile"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DElUSERERR    "Nota: impossível remover todos os arquivos do diretório 'User Data' do POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERERR    "Nota: impossível remover todos os arquivos do diretório 'User Data' do POPFile"
 
 ; Message Box text strings
 
