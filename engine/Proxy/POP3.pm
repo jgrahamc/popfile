@@ -504,7 +504,7 @@ sub child__
                     last if ( $response == 2 );
                     if ( $response == 0 ) {
                         $self->echo_to_dot_( $mail, $client );
-		    }
+            		}
                 }
 
                 next;
@@ -523,7 +523,7 @@ sub child__
                     last if ( $response == 2 );
                     if ( $response == 0 ) {
                         $self->echo_to_dot_( $mail, $client );
-		    }
+            		}
                 } else {
                     next;
                 }
@@ -691,13 +691,13 @@ sub configure_item
     } else {
         if ( $name eq 'pop3_security' ) {
             $templ->param( 'POP3_Security_Local' => ( $self->config_( 'local' ) == 1 ) );
-	} else {
-            if ( $name eq 'pop3_chain' ) {
+    	} else {
+    	    if ( $name eq 'pop3_chain' ) {
                 $templ->param( 'POP3_Chain_Secure_Server' => $self->config_( 'secure_server' ) );
                 $templ->param( 'POP3_Chain_Secure_Port' => $self->config_( 'secure_port' ) );
-	    } else {
+        	} else {
                 $self->SUPER::configure_item( $name, $templ, $language );
-	    }
+        	}
         }
     }
 }
@@ -718,24 +718,26 @@ sub validate_item
 {
     my ( $self, $name, $templ, $language, $form ) = @_;
 
+    my ($status_message,$error_message);
+
     if ( $name eq 'pop3_configuration' ) {
         if ( defined($$form{pop3_port}) ) {
             if ( ( $$form{pop3_port} >= 1 ) && ( $$form{pop3_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{pop3_port} );
-                $templ->param( 'POP3_Configuration_If_Port_Updated' => 1 );
-                $templ->param( 'POP3_Configuration_Port_Updated' => sprintf( $$language{Configuration_POP3Update}, $self->config_( 'port' ) ) );
+                $status_message = sprintf( $$language{Configuration_POP3Update}, $self->config_( 'port' ) );
             } else {
-                $templ->param( 'POP3_Configuration_If_Port_Error' => 1 );
+                $error_message .= $$language{Configuration_Error3};
             }
         }
 
         if ( defined($$form{pop3_separator}) ) {
             if ( length($$form{pop3_separator}) == 1 ) {
                 $self->config_( 'separator', $$form{pop3_separator} );
-                $templ->param( 'POP3_Configuration_If_Sep_Updated' => 1 );
-                $templ->param( 'POP3_Configuration_Sep_Updated' => sprintf( $$language{Configuration_POP3SepUpdate}, $self->config_( 'separator' ) ) );
+                $status_message .= "\n" if ( defined( $status_message ) );
+                $status_message .= sprintf( $$language{Configuration_POP3SepUpdate}, $self->config_( 'separator' ) )
             } else {
-                $templ->param( 'POP3_Configuration_If_Sep_Error' => 1 );
+                $error_message .= "\n" if ( defined( $error_message ) );
+                $error_message .= $$language{Configuration_Error1};
             }
         }
 
@@ -743,35 +745,33 @@ sub validate_item
             $self->config_( 'force_fork', $$form{pop3_force_fork} );
         }
 
-        return;
+        return($status_message, $error_message);
     }
 
     if ( $name eq 'pop3_security' ) {
         $self->config_( 'local', $$form{pop3_local}-1 ) if ( defined($$form{pop3_local}) );
 
-        return;
+        return(undef, undef);
     }
 
     if ( $name eq 'pop3_chain' ) {
         if ( defined( $$form{server} ) ) {
             $self->config_( 'secure_server', $$form{server} );
-            $templ->param( 'POP3_Chain_If_Server_Updated' => 1 );
-            $templ->param( 'POP3_Chain_Server_Updated' => sprintf( $$language{Security_SecureServerUpdate}, $self->config_( 'secure_server' ) ) );
-	}
+            $status_message .= sprintf( $$language{Security_SecureServerUpdate}, $self->config_( 'secure_server' ) );
+       }
 
         if ( defined($$form{sport}) ) {
             if ( ( $$form{sport} >= 1 ) && ( $$form{sport} < 65536 ) ) {
                 $self->config_( 'secure_port', $$form{sport} );
-                $templ->param( 'POP3_Chain_If_Port_Updated' => 1 );
-                $templ->param( 'POP3_Chain_Port_Updated' => sprintf( $$language{Security_SecurePortUpdate}, $self->config_( 'secure_port' ) ) );
+                $status_message .= sprintf( $$language{Security_SecurePortUpdate}, $self->config_( 'secure_port' ) );
             } else {
-                $templ->param( 'POP3_Chain_If_Port_Error' => 1 );
+                $error_message .= $$language{Security_Error1};
             }
         }
 
-        return;
+        return( $status_message, $error_message );
     }
 
-    $self->SUPER::validate_item( $name, $templ, $language, $form );
+    return $self->SUPER::validate_item( $name, $templ, $language, $form );
 }
 

@@ -7,14 +7,6 @@
     <input type="submit" class="submit" name="update_<TMPL_VAR NAME="Socks_Widget_Name">_socks_server" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
 
-<TMPL_IF NAME="Socks_Widget_If_Server_Updated">
-
-<blockquote>
-    <TMPL_VAR NAME="Socks_Widget_Server_Updated">
-</blockquote>
-
-</TMPL_IF>
-
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
     <label class="configurationLabel" for="configSOCKSPort">
         <TMPL_VAR NAME="Localize_Configuration_SOCKSPort">:
@@ -23,21 +15,3 @@
     <input name="<TMPL_VAR NAME="Socks_Widget_Name">_socks_port" type="text" id="configSOCKSPort" value="<TMPL_VAR NAME="Socks_Port">" />
     <input type="submit" class="submit" name="update_<TMPL_VAR NAME="Socks_Widget_Name">_socks_port" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
-
-<TMPL_IF NAME="Socks_Widget_If_Port_Error">
-
-<blockquote>
-    <div class="error01">
-        <TMPL_VAR NAME="Localize_Configuration_Error8">
-    </div>
-</blockquote>
-
-</TMPL_IF>
-
-<TMPL_IF NAME="Socks_Widget_If_Port_Updated">
-
-<blockquote>
-    <TMPL_VAR NAME="Socks_Widget_Port_Updated">
-</blockquote>
-
-</TMPL_IF>

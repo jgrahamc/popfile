@@ -7,24 +7,6 @@
     <input type="submit" class="submit" name="update_pop3_port" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
 
-<TMPL_IF NAME="POP3_Configuration_If_Port_Error">
-
-<blockquote>
-    <div class="error01">
-        <TMPL_VAR NAME="Localize_Configuration_Error3">
-    </div>
-</blockquote>
-
-</TMPL_IF>
-
-<TMPL_IF NAME="POP3_Configuration_If_Port_Updated">
-
-<blockquote>
-    <TMPL_VAR NAME="POP3_Configuration_Port_Updated">
-</blockquote>
-
-</TMPL_IF>
-
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
     <label class="configurationLabel" for="configSeparator">
         <TMPL_VAR NAME="Localize_Configuration_POP3Separator">:
@@ -33,24 +15,6 @@
     <input name="pop3_separator" id="configSeparator" type="text" value="<TMPL_VAR NAME="POP3_Configuration_Separator">" />
     <input type="submit" class="submit" name="update_pop3_separator" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
-
-<TMPL_IF NAME="POP3_Configuration_If_Sep_Error">
-
-<blockquote>
-    <div class="error01">
-        <TMPL_VAR NAME="Localize_Configuration_Error1">
-    </div>
-</blockquote>
-
-</TMPL_IF>
-
-<TMPL_IF NAME="POP3_Configuration_If_Sep_Updated">
-
-<blockquote>
-    <TMPL_VAR NAME="POP3_Configuration_Sep_Updated">
-</blockquote>
-
-</TMPL_IF>
 
 <span class="configurationLabel">
     <TMPL_VAR NAME="Localize_Configuration_POPFork">:

@@ -222,7 +222,7 @@ sub service
             if ( $self->{api_session__} eq '' ) {
                 $self->{api_session__} =
                     $self->classifier_()->get_session_key( 'admin', '' );
-   	        }
+            }
 
             # Check that this is a connection from the local machine,
             # if it's not then we drop it immediately without any
@@ -255,7 +255,7 @@ sub service
                             &{$self->{childexit_}}(0)
                         }
                     }
-	        } else {
+            } else {
                     pipe my $reader, my $writer;
 
                     $self->{child_}( $self, $client, $self->{api_session__} );
@@ -339,9 +339,9 @@ sub echo_to_regexp_
             $self->log_( 2, "Suppressed: $line" );
         }
 
-	if ( $line =~ $regexp ) {
+        if ( $line =~ $regexp ) {
             last;
-	}
+        }
     }
 }
 
@@ -457,7 +457,7 @@ sub echo_response_
     if ( $ok == 1 ) {
         if ( $response =~ /$self->{good_response_}/ ) {
             return 0;
-	} else {
+    } else {
             return 1;
         }
     } else {
@@ -505,7 +505,7 @@ sub verify_connected_
                         Proto    => "tcp",
                         PeerAddr => $hostname,
                         PeerPort => $port ); # PROFILE BLOCK STOP
-	} else {
+    } else {
             $mail = IO::Socket::INET->new( # PROFILE BLOCK START
                         Proto    => "tcp",
                         PeerAddr => $hostname,
@@ -524,7 +524,7 @@ sub verify_connected_
 
             if ( !$ssl ) {
                 binmode( $mail );
-	    }
+            }
 
             # Wait 10 seconds for a response from the remote server and if
             # there isn't one then give up trying to connect
@@ -603,7 +603,6 @@ sub configure_item
 #    $language        Reference to the hash holding the current language
 #    $form            Hash containing all form items
 #
-#  Must return the HTML for this item
 # ----------------------------------------------------------------------------
 sub validate_item
 {
@@ -611,21 +610,24 @@ sub validate_item
 
     my $me = $self->name();
 
+    my ($status, $error);
+
     if ( defined($$form{"$me" . "_socks_port"}) ) {
         if ( ( $$form{"$me" . "_socks_port"} >= 1 ) && ( $$form{"$me" . "_socks_port"} < 65536 ) ) {
             $self->config_( 'socks_port', $$form{"$me" . "_socks_port"} );
-            $templ->param( 'Socks_Widget_If_Port_Updated' => 1 );
-            $templ->param( 'Socks_Widget_Port_Updated' => sprintf( $$language{Configuration_SOCKSPortUpdate}, $self->config_( 'socks_port' ) ) );
+            $status = sprintf( $$language{Configuration_SOCKSPortUpdate}, $self->config_( 'socks_port' ) );
         } else {
-            $templ->param( 'Socks_Widget_If_Port_Error' => 1 );
+            $error = $$language{Configuration_Error8};
         }
     }
 
     if ( defined($$form{"$me" . "_socks_server"}) ) {
         $self->config_( 'socks_server', $$form{"$me" . "_socks_server"} );
-        $templ->param( 'Socks_Widget_If_Server_Updated' => 1 );
-        $templ->param( 'Socks_Widget_Server_Updated' => sprintf( $$language{Configuration_SOCKSServerUpdate}, $self->config_( 'socks_server' ) ) );
+        $status .= "\n" if (defined $status);
+        $status .= sprintf( $$language{Configuration_SOCKSServerUpdate}, $self->config_( 'socks_server' ) );
     }
+
+    return( $status, $error );
 }
 
 1;

@@ -1096,24 +1096,34 @@ sub administration_page
     $templ->param( 'Security_If_Update_Check' => ( $self->user_config_( $self->{sessions__}{$session}{user}, 'update_check' ) == 1 ) );
     $templ->param( 'Security_If_Send_Stats' => ( $self->user_config_( $self->{sessions__}{$session}{user}, 'send_stats' ) == 1 ) );
 
+    my ($status_message, $error_message);
     my %security_templates;
 
     for my $name (keys %{$self->{dynamic_ui__}{security}}) {
         $security_templates{$name} = $self->load_template__( $self->{dynamic_ui__}{security}{$name}{template}, $page, $session );
-        $self->{dynamic_ui__}{security}{$name}{object}->validate_item( $name,
+        ($status_message, $error_message) = $self->{dynamic_ui__}{security}{$name}{object}->validate_item( $name,
                                                                        $security_templates{$name},
                                                                        \%{$self->{language__}},
                                                                        \%{$self->{form_}} );
+
+        # Tell the user anything the dynamic UI was interested in sharing
+        $self->status_message__($templ,$status_message) if ( defined( $status_message ));
+        $self->error_message__($templ, $error_message)  if ( defined( $error_message ));
     }
 
     my %chain_templates;
 
     for my $name (keys %{$self->{dynamic_ui__}{chain}}) {
         $chain_templates{$name} = $self->load_template__( $self->{dynamic_ui__}{chain}{$name}{template}, $page, $session );
-        $self->{dynamic_ui__}{chain}{$name}{object}->validate_item( $name,
+        ($status_message, $error_message) = $self->{dynamic_ui__}{chain}{$name}{object}->validate_item( $name,
                                                                     $chain_templates{$name},
                                                                     \%{$self->{language__}},
                                                                     \%{$self->{form_}} );
+
+        # Tell the user anything the dynamic UI was interested in sharing
+        $self->status_message__($templ,$status_message) if ( defined( $status_message ));
+        $self->error_message__($templ, $error_message)  if ( defined( $error_message ));
+
     }
 
     my $security_html = '';
@@ -1147,16 +1157,19 @@ sub administration_page
     # first
 
     my %dynamic_templates;
-
     for my $name (keys %{$self->{dynamic_ui__}{configuration}}) {
         $dynamic_templates{$name} = $self->load_template__(
             $self->{dynamic_ui__}{configuration}{$name}{template}, $page,
             $session );
-        $self->{dynamic_ui__}{configuration}{$name}{object}->validate_item(
+        ($status_message, $error_message) = $self->{dynamic_ui__}{configuration}{$name}{object}->validate_item(
             $name,
             $dynamic_templates{$name},
             \%{$self->{language__}},
             \%{$self->{form_}} );
+
+        # Tell the user anything the dynamic UI was interested in sharing
+        $self->status_message__($templ,$status_message) if ( defined( $status_message ));
+        $self->error_message__($templ, $error_message)  if ( defined( $error_message ));
     }
 
     if ( defined($self->{form_}{ui_port}) ) {
@@ -1164,14 +1177,13 @@ sub administration_page
              ( $self->{form_}{ui_port} < 65536 ) ) {
             $self->config_( 'port', $self->{form_}{ui_port} );
         } else {
-            $templ->param( 'Configuration_If_UI_Port_Error' => 1 );
+            $self->error_message__( $templ, $self->{language__}{Configuration_Error2} );
             delete $self->{form_}{ui_port};
         }
     }
 
     if ( defined($self->{form_}{ui_port} ) ) {
-        $templ->param( 'Configuration_UI_Port_Updated' =>
-            sprintf( $self->{language__}{Configuration_UIUpdate},
+        $self->status_message__( $templ, sprintf( $self->{language__}{Configuration_UIUpdate},
                 $self->config_( 'port' ) ) );
     }
     $templ->param( 'Configuration_UI_Port' => $self->config_( 'port' ) );
@@ -1180,12 +1192,12 @@ sub administration_page
         if ( ( $self->{form_}{timeout} >= 10 ) && ( $self->{form_}{timeout} <= 300 ) ) {
             $self->global_config_( 'timeout', $self->{form_}{timeout} );
         } else {
-            $templ->param( 'Configuration_If_TCP_Timeout_Error' => 1 );
+            $self->error_message__( $self->{language__}{Configuration_Error6} );
             delete $self->{form_}{timeout};
         }
     }
 
-    $templ->param( 'Configuration_TCP_Timeout_Updated' => sprintf( $self->{language__}{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) ) if ( defined($self->{form_}{timeout} ) );
+    $self->status_message__( sprintf( $self->{language__}{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) ) if ( defined($self->{form_}{timeout} ) );
     $templ->param( 'Configuration_TCP_Timeout' => $self->global_config_( 'timeout' ) );
 
     # Insert all the items that are dynamically created from the
@@ -1384,7 +1396,7 @@ sub users_page
             $row_data{Users_Parameter} = $param;
             my ( $val, $default ) = $self->classifier_()->get_user_parameter_from_id( $id, $param );
             $row_data{Users_Value} = $val;
-            $row_data{Users_If_Changed} = !$default; 
+            $row_data{Users_If_Changed} = !$default;
             push ( @parameter_list, \%row_data );
         }
         $templ->param( 'Users_Loop_Parameter' => \@parameter_list );
@@ -3235,6 +3247,8 @@ sub status_message__
 sub error_message__
 {
     my ( $self, $templ, $message ) = @_;
+
+    $message =~ s/\n/<br \/>/;
 
     my $old = $templ->param( 'Header_Error' ) || '';
     $templ->param( 'Header_If_Error' => 1 );

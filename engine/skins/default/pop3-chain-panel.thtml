@@ -7,14 +7,6 @@
     <input type="submit" class="submit" name="update_server" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
 
-<TMPL_IF NAME="POP3_Chain_If_Server_Updated">
-
-<blockquote>
-    <TMPL_VAR NAME="POP3_Chain_Server_Updated">
-</blockquote>
-
-</TMPL_IF>
-
 <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
     <label class="securityLabel" for="securitySecurePort">
         <TMPL_VAR NAME="Localize_Security_SecurePort">:
@@ -23,21 +15,3 @@
     <input type="text" name="sport" id="securitySecurePort" value="<TMPL_VAR NAME="POP3_Chain_Secure_Port">" />
     <input type="submit" class="submit" name="update_sport" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
-
-<TMPL_IF NAME="POP3_Chain_If_Port_Error">
-
-<blockquote>
-    <div class="error01">
-        <TMPL_VAR NAME="Localize_Security_Error1">
-    </div>
-</blockquote>
-
-</TMPL_IF>
-
-<TMPL_IF NAME="POP3_Chain_If_Port_Updated">
-
-<blockquote>
-    <TMPL_VAR NAME="POP3_Chain_Port_Updated">
-</blockquote>
-
-</TMPL_IF>

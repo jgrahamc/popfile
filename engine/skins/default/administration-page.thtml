@@ -162,18 +162,6 @@
                 <input type="submit" class="submit" name="update_ui_port" value="<TMPL_VAR NAME="Localize_Apply">" />
 
             </form>
-
-            <TMPL_IF NAME="Configuration_If_UI_Port_Error">
-
-            <blockquote>
-                <div class="error01">
-                    <TMPL_VAR NAME="Localize_Configuration_Error2">
-                </div>
-            </blockquote>
-
-            </TMPL_IF>
-
-            <TMPL_VAR NAME="Configuration_UI_Port_Updated">
             <TMPL_VAR NAME="Configuration_Dynamic">
         </td>
     </tr>
