@@ -86,7 +86,7 @@ sub service
 
     # Iterate through all the messages in all the queues
 
-    for my $type (keys %{$self->{queue__}}) {
+    for my $type (sort keys %{$self->{queue__}}) {
          while ( my $ref = shift @{$self->{queue__}{$type}} ) {
              for my $waiter (@{$self->{waiters__}{$type}}) {
                 my $message   = @$ref[0];
