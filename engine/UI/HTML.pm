@@ -347,7 +347,7 @@ sub url_handler__
 
     if ( $command =~ /GET/i ) {
         if ( $url =~ s/\?(.*)// )  {
-            $self->parse_form__( $1 );
+            $self->parse_form_( $1 );
         }
     }
 
@@ -357,7 +357,7 @@ sub url_handler__
 
     if ( $command =~ /POST/i ) {
         $content =~ s/[\r\n]//g;
-        $self->parse_form__( $content );
+        $self->parse_form_( $content );
     }
 
     if ( $url =~ /\/(.+\.gif)/ ) {
@@ -390,7 +390,7 @@ sub url_handler__
             if ( defined( $self->{form_}{redirect} ) ) {
                 $url = $self->{form_}{redirect};
                 if ( $url =~ s/\?(.*)// )  {
-                    $self->parse_form__( $1 );
+                    $self->parse_form_( $1 );
                 }
             } else {
                 $url = '/';
@@ -420,7 +420,7 @@ sub url_handler__
 
             if ( $k ne 'session' ) {
 
-                # If we are dealing with an array of values (see parse_form__
+                # If we are dealing with an array of values (see parse_form_
                 # for details) then we need to unpack it into separate entries),
                 # we ignore non-array values since all values have an array equivalent
 

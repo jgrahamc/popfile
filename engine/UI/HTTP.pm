@@ -186,12 +186,6 @@ sub forked
 # $command    The HTTP command used (GET or POST)
 # $content    Any non-header data in the HTTP command
 #
-# Takes a URL and splits it into the URL portion and form arguments specified in the command
-# filling out the %form hash with the form elements and their values.  Checks the session
-# key and refuses access unless it matches.  Serves up a small set of specific urls that are
-# the main UI pages and then any GIF file in the POPFile directory and CSS files in the skins
-# subdirectory
-#
 # ---------------------------------------------------------------------------------------------
 sub handle_url
 {
@@ -202,12 +196,12 @@ sub handle_url
 
 # ---------------------------------------------------------------------------------------------
 #
-# parse_form__    - parse form data and fill in $self->{form_}
+# parse_form_    - parse form data and fill in $self->{form_}
 #
 # $arguments         The text of the form arguments (e.g. foo=bar&baz=fou)
 #
 # ---------------------------------------------------------------------------------------------
-sub parse_form__
+sub parse_form_
 {
     my ( $self, $arguments ) = @_;
 
@@ -249,7 +243,6 @@ sub parse_form__
 # Encode a URL so that it can be safely passed in a URL as per RFC2396
 #
 # ---------------------------------------------------------------------------------------------
-
 sub url_encode_
 {
     my ( $self, $text ) = @_;
