@@ -23,7 +23,7 @@ use IO::Select;
 # This version number
 my $major_version = 0;
 my $minor_version = 17;
-my $build_version = 8;
+my $build_version = 9;
 
 # The name of the debug file
 my $debug_filename;
