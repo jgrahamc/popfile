@@ -112,7 +112,7 @@ my %slurp_data__;
 #----------------------------------------------------------------------------
 # new
 #
-#   Class new() function, all real work gets done by initialize and 
+#   Class new() function, all real work gets done by initialize and
 #   the things set up here are more for documentation purposes than
 #   anything so that you know that they exists
 #
@@ -479,7 +479,7 @@ sub flush_slurp_data__
 
     if ( $slurp_data__{"$handle"}{data} =~ s/^([^\015\012]*\012)// ) {
         return $1;
-    }	
+    }
 
     # Look for CRLF
 
@@ -494,7 +494,7 @@ sub flush_slurp_data__
     if ( $slurp_data__{"$handle"}{data} =~ s/^([^\015\012]*\015)// ) {
         my $cr = $1;
 
-        # If we have removed everything from the buffer then see if there's 
+        # If we have removed everything from the buffer then see if there's
         # another character available to read, if there is then get it and check
         # to see if it is LF (in which case this is a line ending CRLF), otherwise
         # just save it
@@ -517,6 +517,15 @@ sub flush_slurp_data__
 
     return '';
 }
+
+sub slurp_data_size__
+{
+    my ($self, $handle) = @_;
+
+    return length($slurp_data__{"$handle"}{data});
+
+}
+
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -554,7 +563,7 @@ sub slurp_
     while ( sysread( $handle, $c, 160 ) > 0 ) {
         $self->log_( "slurp_ read [$c]" );
         $slurp_data__{"$handle"}{data} .= $c;
- 
+
         $result = $self->flush_slurp_data__( $handle );
 
         if ( $result ne '' ) {
@@ -566,7 +575,7 @@ sub slurp_
     # CRLF so return the line, otherwise we are reading at the end of the
     # stream/file so return undef
 
-    my $remaining = $slurp_data__{"$handle"}{data}; 
+    my $remaining = $slurp_data__{"$handle"}{data};
     $self->done_slurp_( $handle );
 
     if ( $remaining eq '' ) {
@@ -612,6 +621,13 @@ sub flush_extra_
     my ( $self, $mail, $client, $discard ) = @_;
 
     $discard = 0 if ( !defined( $discard ) );
+
+    # If slurp has any data, we want it
+    if ( $self->slurp_data_size__($mail) ) {        
+        
+        print $client $slurp_data__{"$mail"}{data} if ( $discard != 1);
+        $slurp_data__{"$mail"}{data} = '';
+    }
 
     my $selector   = new IO::Select( $mail );
     my $buf        = '';
