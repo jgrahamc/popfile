@@ -90,9 +90,9 @@
 
             </TMPL_LOOP>
 
-            <th class="historyLabel" scope="col" align="left">
+            <td class="historyLabel" scope="col" align="left">
                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
-            </th>
+            </td>
         </tr>
 
         <TMPL_LOOP NAME="History_Loop_Messages">
