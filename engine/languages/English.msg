@@ -93,6 +93,7 @@ Configuration_Error4                    The page size must be a number between 1
 Configuration_Error5                    The number of days in the history must be a number between 1 and 366
 Configuration_Error6                    The TCP timeout must be a number between 10 and 300
 Configuration_Error7                    The XML RPC listen port must be a number between 1 and 65535
+Configuration_Error8                    The SOCKS V proxy port must be a number between 1 and 65535
 Configuration_POP3Port                  POP3 listen port
 Configuration_POP3Update                Updated POP3 port to %s; this change will not take affect until you restart POPFile
 Configuration_XMLRPCUpdate              Updated XML-RPC port to %s; this change will not take affect until you restart POPFile
@@ -138,6 +139,10 @@ Configuration_GeneralSkins              Skins
 Configuration_SmallSkins                Small Skins
 Configuration_TinySkins                 Tiny Skins
 Configuration_CurrentLogFile            &lt;current log file&gt;
+Configuration_SOCKSServer               SOCKS V proxy host
+Configuration_SOCKSPort                 SOCKS V proxy port
+Configuration_SOCKSPortUpdate           Updated SOCKS V proxy port to %s
+Configuration_SOCKSServerUpdate         Updated SOCKS V proxy host to %s
 
 Advanced_Error1                         '%s' already in the Ignored Words list
 Advanced_Error2                         Ignored words can only contain alphanumeric, ., _, -, or @ characters

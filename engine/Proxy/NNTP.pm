@@ -384,7 +384,7 @@ sub configure_item
 {
     my ( $self, $name, $language, $session_key ) = @_;
 
-    my $body;
+    my $body = '';
 
     if ( $name eq 'nntp_port' ) {
         $body .= "<form action=\"/configuration\">\n";
@@ -443,7 +443,7 @@ sub configure_item
         $body .= "</td></tr></table>\n";
     }
 
-    return $body;
+    return $body . $self->SUPER::configure_item( $name, $language, $session_key );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -495,7 +495,7 @@ sub validate_item
         }
     }
 
-    return '';
+    return $self->SUPER::validate_item( $name, $language, $form );
 }
 
 1;

@@ -32,6 +32,7 @@ use POPFile::Module;
 use IO::Handle;
 use IO::Socket;
 use IO::Select;
+use IO::Socket::Socks;
 
 # A handy variable containing the value of an EOL for networks
 my $eol = "\015\012";
@@ -112,6 +113,12 @@ sub initialize
 
     $self->config_( 'enabled', 1 );
 
+    # The following parameters are for SOCKS proxy handling on outbound
+    # connections
+
+    $self->config_( 'socks_server', '' );
+    $self->config_( 'socks_port',   0 );
+
     return 1;
 }
 
@@ -157,6 +164,16 @@ EOM
     # a call waiting an accept it without having to block
 
     $self->{selector__} = new IO::Select( $self->{server__} );
+
+    # Tell the UI about the SOCKS parameters
+
+    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
+                                         $self->name() . '_socks_server',
+                                         $self );                      # PROFILE BLOCK STOP
+
+    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
+                                         $self->name() . '_socks_port',
+                                         $self );                      # PROFILE BLOCK STOP
 
     return 1;
 }
@@ -629,11 +646,21 @@ sub verify_connected_
     # Check to see if we are already connected
     return $mail if ( $mail && $mail->connected );
 
-    # Connect to the real mail server on the standard port
-   $mail = IO::Socket::INET->new( # PROFILE BLOCK START
-                Proto    => "tcp",
-                PeerAddr => $hostname,
-                PeerPort => $port ); # PROFILE BLOCK STOP
+    # Connect to the real mail server on the standard port, if we are using
+    # SOCKS then go through the proxy server
+
+    if ( $self->config_( 'socks_server' ) ne '' ) {
+        $mail = IO::Socket::Socks->new( # PROFILE BLOCK START
+                    ProxyAddr => $self->config_( 'socks_server' ),
+                    ProxyPort => $self->config_( 'socks_port' ),
+                    ConnectAddr  => $hostname,
+                    ConnectPort  => $port ); # PROFILE BLOCK STOP
+    } else {
+        $mail = IO::Socket::INET->new( # PROFILE BLOCK START
+                    Proto    => "tcp",
+                    PeerAddr => $hostname,
+                    PeerPort => $port ); # PROFILE BLOCK STOP
+    }
 
     # Check that the connect succeeded for the remote server
     if ( $mail ) {
@@ -693,6 +720,83 @@ sub verify_connected_
     $self->tee_(  $client, "$self->{connection_failed_error_} $hostname:$port$eol" );
 
     return undef;
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# configure_item
+#
+#    $name            The name of the item being configured, was passed in by the call
+#                     to register_configuration_item
+#    $language        Reference to the hash holding the current language
+#    $session_key     The current session key
+#
+#  Must return the HTML for this item
+# ---------------------------------------------------------------------------------------------
+
+sub configure_item
+{
+    my ( $self, $name, $language, $session_key ) = @_;
+
+    my $body = '';
+    my $me = $self->name();
+
+    # SOCKS Server widget
+    if ( $name eq $me . '_socks_server' ) {
+        $body .= "<form action=\"/configuration\">\n";
+        $body .= "<label class=\"configurationLabel\" for=\"SOCKSServer\">$$language{Configuration_SOCKSServer}:</label><br />\n";
+        $body .= "<input type=\"text\" name=\"$me" . "_socks_server\" id=\"SOCKSServer\" value=\"" . $self->config_( 'socks_server' ) . "\" />\n";
+        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_$me" . "_socks_server\" value=\"$$language{Apply}\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+    }
+
+    # SOCKS Port widget
+    if ( $name eq $me . '_socks_port' ) {
+        $body .= "<form action=\"/configuration\">\n";
+        $body .= "<label class=\"configurationLabel\" for=\"configSOCKSPort\">$$language{Configuration_SOCKSPort}:</label><br />\n";
+        $body .= "<input name=\"$me" . "_socks_port\" type=\"text\" id=\"configSOCKSPort\" value=\"" . $self->config_( 'socks_port' ) . "\" />\n";
+        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_$me" . "_socks_port\" value=\"$$language{Apply}\" />\n";
+        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+    }
+
+    return $body;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# validate_item
+#
+#    $name            The name of the item being configured, was passed in by the call
+#                     to register_configuration_item
+#    $language        Reference to the hash holding the current language
+#    $form            Hash containing all form items
+#
+#  Must return the HTML for this item
+# ---------------------------------------------------------------------------------------------
+
+sub validate_item
+{
+    my ( $self, $name, $language, $form ) = @_;
+
+    my $me = $self->name();
+    if ( $name eq $me . '_socks_port' ) {
+        if ( defined($$form{"$me" . "_socks_port"}) ) {
+            if ( ( $$form{"$me" . "_socks_port"} >= 1 ) && ( $$form{"$me" . "_socks_port"} < 65536 ) ) {
+                $self->config_( 'socks_port', $$form{"$me" . "_socks_port"} );
+                return '<blockquote>' . sprintf( $$language{Configuration_SOCKSPortUpdate} . '</blockquote>' , $self->config_( 'socks_port' ) );
+             } else {
+                 return "<blockquote><div class=\"error01\">$$language{Configuration_Error8}</div></blockquote>";
+             }
+        }
+    }
+
+    if ( $name eq $me . '_socks_server' ) {
+         $self->config_( 'socks_server', $$form{"$me" . "_socks_server"} ) if ( defined($$form{"$me" . "_socks_server"}) );
+         return sprintf( "<blockquote>" . $$language{Configuration_SOCKSServerUpdate} . "</blockquote>", $self->config_( 'socks_server' ) ) if ( defined($$form{"$me" . "_socks_server"}) );
+    }
+
+    return '';
 }
 
 # SETTER

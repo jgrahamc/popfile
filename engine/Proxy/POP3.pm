@@ -642,7 +642,7 @@ sub configure_item
 {
     my ( $self, $name, $language, $session_key ) = @_;
 
-    my $body;
+    my $body = '';
 
     # POP3 Listen Port widget
     if ( $name eq 'pop3_port' ) {
@@ -721,7 +721,7 @@ sub configure_item
         $body .= "</td></tr></table>\n";
     }
 
-    return $body;
+    return $body . $self->SUPER::configure_item( $name, $language, $session_key );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -788,7 +788,7 @@ sub validate_item
         }
     }
 
-    return '';
+    return $self->SUPER::validate_item( $name, $language, $form );
 }
 
 # TODO echo_response_ that calls echo_response_ with the extra parameters

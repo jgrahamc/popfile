@@ -1405,6 +1405,8 @@ sub valid_session_key__
 # calling get_session_key with a valid username and password.   Once done call the method
 # release_session_key.
 #
+# See POPFile::API for more details
+#
 # ---------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------
 
