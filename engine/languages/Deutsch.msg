@@ -72,6 +72,9 @@ ID                                      ID
 Date                                    Datum
 Arrived                                 Eingang
 Size                                    Größe
+Go                                      Los
+Edit                                    Bearbeiten
+Logout                                  Abmelden
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this
@@ -98,7 +101,9 @@ Header_Buckets                          Kategorien
 Header_Configuration                    Konfiguration
 Header_Advanced                         Erweitert
 Header_Security                         Sicherheit
+Header_Administration                   Administration
 Header_Magnets                          Magnete
+Header_Users                            Benutzer
 
 Footer_HomePage                         POPFile Homepage
 Footer_Manual                           Handbuch
@@ -166,6 +171,8 @@ Configuration_SOCKSPort                 SOCKS V Proxy Port
 Configuration_SOCKSPortUpdate           SOCKS V Proxy Port geändert auf %s
 Configuration_SOCKSServerUpdate         SOCKS V Proxy Host geändert auf %s
 Configuration_Fields                    Spalten im Verlauf
+Configuration_Hide_Bar                  Konfigurationsleiste ausblenden
+Configuration_Show_Bar                  Konfigurationsleites anzeigen
 
 Advanced_Error1                         '%s' ist bereits in der Liste der ignorierten Wörter
 Advanced_Error2                         Ignorierte Wörtern können nur alphanumerische, ., _, -, oder @ Zeichen enthalten
@@ -182,6 +189,23 @@ Advanced_Value                          Wert
 Advanced_Warning                        Dies ist eine komplette Liste aller Parameter Ihrer POPFile Konfiguration. Nur für fortgeschrittene Anwender: Sie können jeden Wert ändern und durch einen Klick auf "Ändern" bestätigen. Eingaben werden nicht auf Gültigkeit überprüft!
 Advanced_ConfigFile                     Konfigurationsdatei:
 
+Users_Create                            Neuen Benutzer anlegen
+Users_Remove                            Bestehenden Benutzer löschen
+Users_Edit                              Benutzereinstellungen bearbeiten
+Users_CopyFrom                          Einstellungen übernehmen von Benutzer
+Users_RemoveUser                        Benutzer löschen
+Users_CreateUser                        Anlegen des neuen Bentuzers
+Users_EditUser                          Benutzer bearbeiten
+Users_Parameters                        Parameter
+Users_Created                           Benutzer '%s' wurde angelegt
+Users_Not_Created                       Benutzer '%s' konnte nicht angelegt werden
+Users_Created_And_Cloned                Benutzer '%s' wurde als Klon von '%s' angelegt
+Users_Not_Created_Exists                Benutzer '%s' existiert bereits
+Users_Created_Not_Cloned                Benutzer '%s' wurde angelegt, aber Übernahme der Einstellungen von '%s' schlug fehl
+Users_Removed                           Benutzer '%s' wurde gelöscht
+Users_Removed_Failed                    Benutzer '%s' konnte nicht entfernt werden
+Users_Removed_Failed_Admin              Benutzer '%s' konnte nicht entfernt werden: zuerst die Administrationsrechte entfernen
+
 History_Filter                          &nbsp;(zeige nur Kategorie <font color="%s">%s</font>)
 History_FilterBy                        Filtern nach
 History_Search                          &nbsp;(gesuchter Absender/Betreff: %s)
@@ -192,6 +216,9 @@ History_ShouldBe                        Sollte sein
 History_NoFrom                          kein Absender angegeben
 History_NoSubject                       kein Betreff
 History_ClassifyAs                      eingestuft als
+History_RemoveColumn                    Spalte entfernen
+History_MoveLeft                        nach links bewegen
+History_MoveRight                       nach rechts bewegen
 History_MagnetUsed                      Magnet benutzt
 History_MagnetBecause                   <b>Magnet benutzt</b><p>Eingestuft als <font color="%s">%s</font> durch Magnet %s </p>
 History_ChangedTo                       Geändert: <font color="%s">%s</font>
@@ -217,9 +244,11 @@ History_Reclassified                    Neu eingestuft
 History_Size_Bytes                      %d&nbsp;B
 History_Size_KiloBytes                  %.1f&nbsp;KB
 History_Size_MegaBytes                  %.1f&nbsp;MB
+History_Click_To_Sort                   Anklicken um nach dem Inhalt dieser Spalte zu sortieren
 
 Password_Title                          Paßwort
-Password_Enter                          Paßwort eingeben
+Password_Password                       Paßwort
+Password_Username                       Benutzer
 Password_Go                             Anmelden
 Password_Error1                         Falsches Paßwort
 
@@ -287,6 +316,7 @@ Bucket_ClassificationFP                 falsch positiv
 Bucket_ClassificationFN                 falsch negativ
 Bucket_ResetStatistics                  Statistiken zurücksetzen
 Bucket_LastReset                        Läuft seit
+Bucket_MessagesPerDay                   Nachrichten pro Tag:
 Bucket_CurrentColor                     Derzeitige Farbe von %s ist %s
 Bucket_SetColorTo                       Setze Farbe von %s auf %s
 Bucket_Maintenance                      Verwaltung
@@ -326,7 +356,7 @@ View_Chart                              Entscheidungs-Diagramm
 
 Windows_TrayIcon                        POPFile-Symbol neben der Uhr anzeigen?
 Windows_Console                         POPFile in einem Konsolenfenster ausführen?
-Windows_NextTime                        <p><font color="red">Diese Änderung wird erst beim nächsten Start von POPFile wirksam.</font>
+Windows_NextTime                        Diese Änderung wird erst beim nächsten Start von POPFile wirksam.
 
 Header_MenuSummary                      Diese Tabelle ist das Navigationsmenü, das Zugang zu den einzelnen Bereichen des Kontrollzentrums bietet.
 History_MainTableSummary                Diese Tabelle zeigt Absender und Betreff der letzten empfangenen Nachrichten an und ermöglicht es, diese durchzusehen und zu reklassifizieren. Ein Klick auf den Betreff zeigt die vollständige Nachricht an sowie Details, warum diese so und nicht anders klassifiziert wurde. Die Spalte "Sollte sein" ermöglicht es, anzugeben, in welche Kategorie die Nachricht gehört bzw. entsprechende Änderungen rückgängig zu machen. Die Spalte "Delete" ermöglicht es, einzelne Nachrichten aus dem Verlauf zu löschen, falls Sie diese nicht mehr benötigen.
@@ -344,8 +374,9 @@ Configuration_InsertionTableSummary     Diese Tabelle enthält Schaltflächen zur 
 Security_MainTableSummary               Diese Tabelle bietet Einstellungsmöglichkeiten, die die Sicherheit von POPFile insgesamt betreffen, ob es automatisch auf neue Versionen prüfen soll oder ob Statistiken über die Leistung von POPFile an eine zentrale Datenbank zwecks der Erstellung von Gesamtstatistiken geschickt werden sollen.
 Advanced_MainTableSummary               Diese Tabelle enthält eine Liste von Wörtern, die POPFile ignoriert, wenn es eine Nachricht analysiert. Dies betrifft Wörter, die besonders häufig in Nachrichten auftauchen. Diese sind reihenweise alphabetisch nach dem ersten Buchstaben sortiert.
 
-Imap_Bucket2Folder                      Mail der Kategorie <b>%s</b> kommt in den Ordner
+Imap_Bucket2Folder                      Mail der Kategorie '<b>%s</b>' kommt in den Ordner
 Imap_MapError                           Sie können nicht mehr als eine Kategorie einem einzelnen Ordner zuordnen!
+Imap_MapUpdated                         Kategorie '%s' wurde Ordner '%s' zugeordnet.
 Imap_Server                             IMAP Server Hostname:
 Imap_ServerNameError                    Bitte geben Sie den Namen des Servers ein!
 Imap_Port                               IMAP Server Port:
@@ -354,19 +385,23 @@ Imap_Login                              IMAP Benutzername (Login):
 Imap_LoginError                         Bitte geben Sie einen gültigen Benuternamen ein!
 Imap_Password                           Password für IMAP Konto:
 Imap_PasswordError                      Bitte geben Sie ein Passwort an!
+Imap_ConnectionDetailsUpdated           Die IMAP Verbindungsdetails wurden aktualisiert. Bitte laden Sie jetzt die Liste der Ordner neu.
 Imap_Expunge                            Gelöschte Nachrichten aus den überwachten Ordnern endgültig löschen.
 Imap_Interval                           Update Intervall in Sekunden:
 Imap_IntervalError                      Bitte geben Sie ein Intervall zwischen 10 und 3600 Sekunden ein.
-Imap_Bytelimit                          Bytes pro Email, die zur Klassifikation genutzt werden. Geben Sie bitte 0 (Null) ein, um die komplette Nachricht zu nutzen.
-Imap_BytelimitError                     Bitte geben Sie eine Zahl ein.
+Imap_OptionsUpdated                     Die IMAP Optionen wurden erfolgreicht aktualisiert.
 Imap_RefreshFolders                     Ordnerliste neu laden:
 Imap_Now                                jetzt!
 Imap_UpdateError1                       Login war nicht erfolgreich. Bitte überprüfen Sie Ihren Benutzernamen und das Passwort.
 Imap_UpdateError2                       Verbindung zum Server fehlgeschlagen! Bitte überprüfen Sie den Namen des Servers, den Port und stellen Sie sicher, dass Sie Zugang zum Internet haben.
 Imap_UpdateError3                       Bitte konfigurieren Sie erst die Verbindung zum Server.
+Imap_UpdateOK                           Die Ordnerliste wurde erfolgreich geladen.
 Imap_NoConnectionMessage                Bitte konfigurieren Sie erst die Verbindung zum Server. Nachdem Sie das getan haben, werden Sie an dieser Stelle mehr Konfigurationsmöglichkeiten finden.
 Imap_WatchMore                          : einen weiteren zu überwachenden Ordner
+Imap_WatchedFolderAdded                 Ein Ordner wurde hinzugefügt. Bitte wählen Sie jetzt den gewünschten Ordner.
 Imap_WatchedFolder                      Überwachter Ordner Nr.
+Imap_WatchedFoldersUpdated              Liste der überwachten Ordner wurde aktualisiert.
+Imap_WatchedFolderRemoved               Ordner '%s' wurde aus der Liste der überwachten Ordner entfernt
 
 Shutdown_Message                        POPFile wurde beendet
 
