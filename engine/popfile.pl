@@ -842,9 +842,9 @@ sub corpus_page
     }
     $body .= "</select> <input type=submit name=delete value=Delete></form>$delete_message";
 
-    $body .= "<p><hr><h2>Lookup</h2><form action=/corpus><p><b>Lookup word in corpus: </b><br><input name=word type=text> <input type=submit name=lookup value=Lookup></form>";
+    $body .= "<p><hr><a name=Lookup><h2>Lookup</h2><form action=/corpus#Lookup><p><b>Lookup word in corpus: </b><br><input name=word type=text> <input type=submit name=lookup value=Lookup></form>";
 
-    if ( $form{lookup} eq 'Lookup' ) 
+    if ( ( $form{lookup} eq 'Lookup' ) || ( $form{word} ne '' ) )
     {
         my $word = $classifier->{mangler}->mangle($form{word});
         
@@ -894,7 +894,23 @@ sub corpus_page
 # ---------------------------------------------------------------------------------------------
 sub history_page
 {
-    my $body = "<h2>Messages in the last 24 hours</h2><table width=75%><tr><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";
+    my $body = "<h2>Messages in the last 24 hours</h2><table width=100%><tr><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";
+
+    # Handle clearing the history files
+    if ( $form{clear} eq 'Clear+All' )
+    {
+        my @mail_files = glob "popfile*.msg";
+
+        foreach my $mail_file (@mail_files)
+        {
+            my $class_file = $mail_file;
+            $class_file =~ s/msg$/cls/;
+            unlink($mail_file);
+            unlink($class_file);
+        }
+        $configuration{mail_count} = 0;
+    }
+
     my @mail_files = glob "popfile*.msg";
 
     # Handle the reinsertion of a message file
@@ -958,6 +974,18 @@ sub history_page
         }
         close MAIL;
         
+        if ( length($from)>64 ) 
+        {
+            $from =~ /(.{64})/;
+            $from = "$1...";
+        }
+        
+        if ( length($subject)>64 ) 
+        {
+            $subject =~ /(.{64})/;
+            $subject = "$1...";
+        }
+        
         $body .= "<tr";
         $body .= " bgcolor=lightgreen" if ($form{view} eq $mail_file) || ($form{file} eq $mail_file);
         $body .= "><td>$from<td><a href=/history?view=$mail_file>$subject</a><td>";
@@ -994,7 +1022,7 @@ sub history_page
         }
     }
 
-    $body .= "</table>";
+    $body .= "</table><form><b>To remove all entries in the history click here: <input type=submit name=clear value='Clear All'></form>";
     
     return http_ok($body,2); 
 }
@@ -1032,6 +1060,9 @@ sub handle_url
             }
         }
     }
+    
+    # Remove a # element
+    $url =~ s/#.*//;
     
     if ( $url eq '/' ) 
     {
