@@ -76,6 +76,18 @@
 "IMPORTANT NOTICE:\r\n\r\nThe current user does NOT have 'Administrator' rights.\r\n\r\nIf multi-user support is required, it is recommended that you cancel this installation and use an 'Administrator' account to install POPFile."
 
 #--------------------------------------------------------------------------
+# Standard MUI Page - Installation Page
+#
+# (used by the 'Corpus Conversion Monitor' utility)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TITLE        "POPFile Corpus Konvertierung"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUBTITLE     "Der bestehende Corpus muß konvertiert werden, um mit der neuen Version von POPFile verwendet werden zu können."
+
+!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "POPFile Corpus Conversion Completed"
+!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "Please click Close to continue"
+
+#--------------------------------------------------------------------------
 # Standard MUI Page - Finish
 #
 # The PFI_LANG_FINISH_RUN_TEXT text should be a short phrase (not a long paragraph)
@@ -94,6 +106,12 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1     "Bitte haben Sie einen Moment Geduld."
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "Dies kann einige Sekunden dauern..."
+
+#--------------------------------------------------------------------------
+# Message displayed when installer exits because another copy is running
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTALLER_MUTEX     "Another copy of the POPFile installer is already running !"
 
 #--------------------------------------------------------------------------
 # Message box warning that a previous installation has been found
@@ -404,24 +422,23 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_BANNER_2     "Dies kann einige Sekunden dauern..."
 
 #--------------------------------------------------------------------------
-# Custom Page - Flat file or BerkeleyDB format corpus needs to be converted to new format
+# Standard MUI Page - Installation Page (for the 'Corpus Conversion Monitor' utility)
 #--------------------------------------------------------------------------
 
-; Page Title and Sub-title displayed in the page header
-
-!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_TITLE       "POPFile Corpus Konvertierung"
-!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_SUBTITLE    "Der bestehende Corpus muß konvertiert werden, um mit der neuen Version von POPFile verwendet werden zu können."
-
-; Text displayed on the custom page
-
-!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_1   "POPFile wird nun in einem Konsolenfenster gestartet, um den bestehenden Corpus zu konvertieren."
-!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_2   "DIESER VORGANG KANN EINIGE MINUTEN DAUERN (falls der Corpus sehr groß ist)."
-!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_3   "WARNUNG"
-!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_4   "Schließen Sie das POPFile Konsolenfenster UNTER KEINEM UMSTÄNDEN!"
-!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_5   "Sollte 'POPFile Engine v${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION} running' im Konsolenfenster erscheinen, bedeutet dies, daß"
-!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_6   "- POPFile einsatzbereit ist"
-!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_7   "- POPFile sicher über den Startmenü-Eintrag  beendet werden kann"
-!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_8   "Klicken Sie auf 'Weiter', um den Corpus zu konvertieren."
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MUTEX        "Another copy of the 'Corpus Conversion Monitor' is already running !"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PRIVATE      "The 'Corpus Conversion Monitor' is part of the POPFile installer"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOFILE       "Error: Corpus conversion data file does not exist !"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOPOPFILE    "Error: POPFile path missing"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ENVNOTSET    "Error: Unable to set an environment variable"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOKAKASI     "Error: Kakasi path missing"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "An error occurred when starting the corpus conversion process"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ESTIMATE     "Estimated time remaining: "
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MINUTES      "minutes"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_WAITING      "(waiting for first file to be converted)"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TOTALFILES   "There are $G_BUCKET_COUNT bucket files to be converted"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PROGRESS_N   "After $G_ELAPSED_TIME.$G_DECPLACES minutes there are $G_STILL_TO_DO files left to convert"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PROGRESS_1   "After $G_ELAPSED_TIME.$G_DECPLACES minutes there is one file left to convert"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUMMARY      "Corpus Conversion took $G_ELAPSED_TIME.$G_DECPLACES minutes"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall POPFile
