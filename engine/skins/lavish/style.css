@@ -277,16 +277,7 @@ a {
   background-color: transparent;
 }
 
-select {
-  border-right: #FFFFFF 2px solid;
-  border-top: #000000 2px solid;
-  border-left: #000000 2px solid;
-  border-bottom: #FFFFFF 2px solid;
-  color: #FFFFFF;
-  background-color: #313131;
-}
-
-input {
+select, input, textarea {
   border-right: #FFFFFF 2px solid;
   border-top: #000000 2px solid;
   border-left: #000000 2px solid;
@@ -326,4 +317,11 @@ a:link:hover, a:visited:hover {
 
 tr.rowBoundary {
   background-color: #050505;
+}
+
+div.helpMessage {
+  background-color: #101010;
+  border: 1px solid #FFFFFF;
+  padding: 0.4em;
+  padding-bottom: 0;
 }

@@ -290,3 +290,10 @@ span.securityWidgetState {
 tr.rowBoundary {
   background-color: black;
 }
+
+div.helpMessage {
+  background-color: #cd853f;
+  border: 1px solid black;
+  padding: 0.3em;
+  padding-bottom: 0;
+}

@@ -260,3 +260,10 @@ div.error02 {
   color: red;
 }
 
+div.helpMessage {
+  background-color: #88b5dd;
+  border: 2px #ffffff groove;
+  padding: 0.4em;
+  padding-bottom: 0;
+}
+

@@ -73,7 +73,7 @@ a.dash:visited {
 body {
   font-size: 8pt;
   font-weight: normal;
-   font-family: sans-serif;
+  font-family: sans-serif;
 }
 
 h2 {
@@ -81,17 +81,7 @@ h2 {
   font-weight: bold;
 }
 
-input {
-  font-size: 8pt;
-  font-weight: normal;
-}
-
-select {
-  font-size: 8pt;
-  font-weight: normal;
-}
-
-.submit {
+input, select, textarea, .submit {
   font-size: 8pt;
   font-weight: normal;
 }
@@ -254,4 +244,11 @@ span.securityWidgetState {
 
 tr.rowBoundary {
   background-color: #cccc99;
+}
+
+div.helpMessage {
+  background-color: #DFDFAF;
+  border: 2px solid #CCCC99;
+  padding: 0.4em;
+  padding-bottom: 0;
 }

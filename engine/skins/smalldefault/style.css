@@ -16,7 +16,6 @@ body {
 table.head {
   font-weight: normal;
   width: 100%;
-
 }
 
 .top, .bottom, .borderTopLeft, .borderTop, .borderTopRight, .borderLeft, .borderRight, .borderBottomLeft, .borderBottom, .borderBottomRight {
@@ -282,7 +281,7 @@ td.footerBody {
   color: #000000;
 }
 
-input, .submit, select {
+input, select, .submit {
   font-family: tahoma, sans-serif;
   font-size: 8pt;
   font-weight: normal;
@@ -297,17 +296,24 @@ tt {
 }
 
 span.bucketsWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.configWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.securityWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 tr.rowBoundary {
   background-color: #cccc99;
+}
+
+div.helpMessage {
+  background-color: #DFDFAF;
+  border: 2px solid #CCCC99;
+  padding: 0.4em;
+  padding-bottom: 0;
 }

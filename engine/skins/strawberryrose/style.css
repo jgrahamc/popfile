@@ -39,9 +39,9 @@ td {
 
 /* An undecorated table cell - center of shell tables */
 td.naked {
-	padding: 0;
-	margin: 0;
-	border: none
+  padding: 0;
+  margin: 0;
+  border: none
 }
 
 /* Text input and drop-down selections */
@@ -197,18 +197,18 @@ input, select {
 
 /* The big Shutdown link */
 .shutdownLink {
-	font-weight: bold;
-	color: black;
-	background-color: transparent;
+  font-weight: bold;
+  color: black;
+  background-color: transparent;
 }
 
 /* For links in the menu tabs */
 .menuLink {
-	font-weight:bold;
-	color: black;
-	background-color: transparent;
-	display: block;
-	width: 100%;
+  font-weight:bold;
+  color: black;
+  background-color: transparent;
+  display: block;
+  width: 100%;
 }
 
 /* For column headers (for sorting) on the History page */
@@ -236,13 +236,13 @@ input, select {
 /* For the navigation pages on the History page */
 td.historyNavigatorTop :link, td.historyNavigatorBottom :link,
 td.historyNavigatorTop :visited, td.historyNavigatorBottom :visited {
-	color: rgb(99, 6, 1);
-	background-color: rgb(220, 90, 110);
+  color: rgb(99, 6, 1);
+  background-color: rgb(220, 90, 110);
 }
 td.historyNavigatorTop :link:hover, td.historyNavigatorBottom :link:hover,
 td.historyNavigatorTop :visited:hover, td.historyNavigatorBottom :visited:hover {
-	color: rgb(99, 6, 1);
-	background-color: rgb(255, 170, 204);
+  color: rgb(99, 6, 1);
+  background-color: rgb(255, 170, 204);
 }
 
 /* For viewing messages on the History page */
@@ -421,7 +421,7 @@ tr.rowHighlighted {
 
 /* Open message table */
 table.openMessageTable {
-	border: 2px solid black;
+  border: 2px solid black;
 }
 
 /* Don't put borders in the openMessage table */
@@ -436,10 +436,13 @@ td.openMessageBody {
 }
 
 td.openMessageCloser {
-	text-align: right;
-	color: black;
-	background-color: #7CE238;
-	font-weight: bold;
+  text-align: right;
+  color: black;
+  font-weight: bold;
+}
+
+td.openMessageCloser a {
+  background-color: #7CE238;
 }
 
 /* Top-20 stuff */
@@ -472,18 +475,18 @@ tr.rowEven {
 
 /* Accuracy statistics bar colors*/
 .accuracy0to49 {
-	color: black;
-	background-color: red;
+  color: black;
+  background-color: red;
 }
 
 .accuracy50to93 {
-	color: black;
-	background-color: yellow;
+  color: black;
+  background-color: yellow;
 }
 
 .accuracy94to100 {
-	color: black;
-	background-color: green;
+  color: black;
+  background-color: green;
 }
 
 .lineImg {
@@ -492,7 +495,7 @@ tr.rowEven {
 
 /* Bar chart legend font */
 span.graphFont {
-	font-size: x-small;
+  font-size: x-small;
 }
 
 
@@ -505,31 +508,31 @@ span.graphFont {
 }
 
 .bucketsLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .magnetsLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .securityLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .configurationLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .advancedLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .passwordLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .sessionLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .configWidgetStateOn, .bucketsWidgetStateOn, .securityWidgetStateOn {
@@ -538,17 +541,25 @@ span.graphFont {
 
 
 /*********************************************************/
-/* Errors */
+/* Messages */
 
 div.error01 {
-	color: red;
-	background-color: black;
-	font-size: larger;
+  color: red;
+  background-color: black;
+  font-size: larger;
 }
 
 div.error02 {
-	color: red;
-	background-color: black;
+  color: red;
+  background-color: black;
+}
+
+div.helpMessage {
+  color: black;
+  background-color: #A4CA4A;
+  border: 1px solid transparent;
+  padding: 0.3em;
+  padding-bottom: 0;
 }
 
 /*********************************************************/

@@ -202,3 +202,10 @@ tr.rowBoundary {
   background-color: #EEEEEE;
   height: 0.3em;
 }
+
+div.helpMessage {
+  background-color: #EEEEEE;
+  border: 2px solid #778899;
+  padding: 0.3em;
+  padding-bottom: 0;
+}

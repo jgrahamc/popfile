@@ -21,7 +21,7 @@ h2 {
   background-color: #ffff99;
 }
 
-input, select {
+input, select, textarea {
   border-right: #000000 1px solid;
   border-top: #000000 1px solid;
   border-left: #000000 1px solid;
@@ -289,4 +289,11 @@ span.securityWidgetState {
 
 tr.rowBoundary {
   background-color: yellow;
+}
+
+div.helpMessage {
+  background-color: #fffacd;
+  border: 1px solid black;
+  padding: 0.3em;
+  padding-bottom: 0;
 }

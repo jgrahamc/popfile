@@ -11,8 +11,7 @@ h2 {
   font-weight: bold;
 }
 
-.shell, .shellTop
-{
+.shell, .shellTop {
   border-right: #000000 2px solid;
   border-top: #000000 2px solid;
   margin: 0px;
@@ -22,8 +21,7 @@ h2 {
   background-color: #ffcc66;
 }
 
-input, select
-{
+input, select, textarea {
   border-right: #000000 1px solid;
   border-top: #000000 1px solid;
   border-left: #000000 1px solid;
@@ -172,7 +170,6 @@ td.settingsPanel {
   border: 1px solid #000000;
 }
 
-
 .menuIndent {
   width: 2%;
 }
@@ -292,4 +289,11 @@ span.securityWidgetState {
 
 tr.rowBoundary {
   background-color: #faebd7;
+}
+
+div.helpMessage {
+  background-color: #ff9900;
+  border: 1px solid black;
+  padding: 0.3em;
+  padding-bottom: 0;
 }

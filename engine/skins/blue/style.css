@@ -10,7 +10,7 @@ a {
   background-color: transparent;
 }
 
-input, select, .submit {
+input, select, textarea, .submit {
   color: white;
   background-color: #363E68;
   border: 1px #919AC9 solid;
@@ -78,15 +78,15 @@ tr.rowOdd {
 }
 
 table.settingsTable {
-  border: 1px solid Black;
+  border: 1px solid #363E68;
 }
 
 table.openMessageTable, table.lookupResultsTable {
-  border: 3px solid Black;
+  border: 3px solid #363E68;
 }
 
 td.settingsPanel {
-  border: 1px solid Black;
+  border: 1px solid #363E68;
 }
 
 td.naked {
@@ -256,4 +256,10 @@ span.securityWidgetState {
 
 tr.rowBoundary {
   background-color: white;
+}
+
+div.helpMessage {
+  border: 2px solid #363E68;
+  padding: 0.4em;
+  padding-bottom: 0;
 }

@@ -20,8 +20,7 @@ commenting.  But that means its not fully valid CSS2.
 05-03-03: Center footer better and add "icon" in Mozilla, maybe Opera head fix
 05-05-03: Changed a lot of head stuff, got rid of absolute positioning
 05-21-03: Did what I could to fix the changes 0.19 RC3 made to the footer
-06-12-04: Add support for session seperator (RowBoundary) for 0.22
-07-15-04: A little code cleanup.
+07-29-04: Add support for some new 0.22 classes and some code cleanup.
 */
 
 body {
@@ -343,6 +342,14 @@ div.securityExplanation {
   margin-bottom: 0.8em;
   margin-top: 0;
   font-size: 95%;
+}
+
+div.helpMessage {
+  background-color: InfoBackground;
+  border: 1px solid black;
+  padding: 0.4em;
+  margin: 0.3em;
+  padding-bottom: 0;
 }
 
 span.graphFont {

@@ -168,7 +168,7 @@ select {
   margin-right: 3px; 
 } 
 
-input {
+input, textarea {
   background-image: url("metalback.gif"); 
   background-color: #b8b4c0; 
   border-bottom: 3px solid #000033; 
@@ -326,4 +326,14 @@ span.securityWidgetState {
 .historyLabel em {
   font-weight: bold;
   font-style: normal;
+}
+
+div.helpMessage {
+  background-color: transparent;
+  border-bottom: #eeeeee 3px solid;
+  border-left: #000033 3px solid;
+  border-right: #eeeeee 3px solid;
+  border-top: #000033 3px solid;
+  padding: 0.3em;
+  padding-bottom: 0;
 }

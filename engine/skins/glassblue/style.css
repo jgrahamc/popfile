@@ -13,7 +13,7 @@ a {
   background-color: transparent;
 }
 
-input, select, .submit {
+input, select, textarea, .submit {
   color: black;
   background-color: #C1C1C1;
   border: 1px white outset;
@@ -257,4 +257,11 @@ span.securityWidgetState {
 
 tr.rowBoundary {
   background-color: #23367D;
+}
+
+div.helpMessage {
+  background-color: #23367D;
+  border: 1px solid #6B76A1;
+  padding: 0.3em;
+  padding-bottom: 0;
 }

@@ -16,7 +16,7 @@ body {
   margin: 0px 0px 0px 0px;
 }
 
-input, select {
+input, select, textarea {
   color: #000000;
   background-color: #F2F0F0;
   border: 1px #000000 solid;
@@ -282,4 +282,12 @@ span.securityWidgetState {
 
 tr.rowBoundary {
   background-color: #808080;
+}
+
+div.helpMessage {
+  color: black;
+  background-color: #C6CBD2;
+  border: 1px solid #000000;
+  padding: 0.3em;
+  padding-bottom: 0;
 }

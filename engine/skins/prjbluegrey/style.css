@@ -71,11 +71,11 @@ a.dash:hover {
   border-bottom : 3px solid;
 }
 
-h1 , h2 {
+h1, h2 {
   font-family : "new century schoolbook", times, serif; 
 }
 
-h3 , h4 , h5 , h6 {
+h3, h4, h5, h6 {
   font-family : "new century schoolbook", times, serif; 
 }
 
@@ -123,6 +123,7 @@ h3 , h4 , h5 , h6 {
   background-color: #ccccff;
   color: black;
 }
+
 .menuStandard {
   border-bottom: #aaaaaa 3px solid; 
   border-left: #eeeeee 3px solid; 
@@ -182,7 +183,7 @@ select {
   font-family : Arial, "Lucinda Sans", sans-serif; 
 }
 
-input {
+input, textarea {
   margin-left : 3px; 
   margin-right : 3px; 
   color : #000009; 
@@ -335,4 +336,14 @@ span.securityWidgetState {
 
 tr.rowBoundary {
   background-color: transparent;
+}
+
+div.helpMessage {
+  background-color: transparent;
+  border-bottom: #eeeeee 3px solid; 
+  border-left: #aaaaaa 3px solid; 
+  border-right: #eeeeee 3px solid; 
+  border-top: #aaaaaa 3px solid; 
+  padding: 0.3em;
+  padding-bottom: 0;
 }

@@ -19,7 +19,7 @@ hr {
   height: 1px;
 }
 
-select, input {
+select, input, textarea {
   border: 1px outset #000000;
   background-color: #BAB8C6;
   color: black;
@@ -372,11 +372,11 @@ span.graphFont {
 .footer {
   background-image: url(menu.gif);
   margin-top: 10px;
-  margin-left: 10%;
-  margin-right: 10%;
+  margin-left: 8%;
+  margin-right: 8%;
   height: 22px;
-  width: 80%;
-  font-size: 1em;
+  width: 84%;
+  font-size: 0.9em;
   background-color: transparent;
   color: #000000;
 }
@@ -407,4 +407,11 @@ table.footer br {
 
 tr.rowBoundary {
   background-color: #888888;
+}
+
+div.helpMessage {
+  background-color: #545F74;
+  border: 1px solid #888888;
+  padding: 0.4em;
+  padding-bottom: 0;
 }
