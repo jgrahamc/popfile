@@ -10,20 +10,25 @@
 use strict;
 use Classifier::MailParse;
 use Classifier::Bayes;
+use POPFile::Configuration;
 
 # main
 
 if ( $#ARGV == 0 ) 
 {
     my $m = new Classifier::MailParse;
-    $m->{bayes} = new Classifier::Bayes;
+    $m->{bayes__} = new Classifier::Bayes;
+    $m->{configuration__} = new POPFile::Configuration;
+    $m->{configuration__}->{configuration__} = $m->{configuration__};
+    $m->{bayes__}->{configuration__} = $m->{configuration__};
     
-    if ( $m->{bayes}->initialize() == 0 ) {
+    
+    if ( $m->{bayes__}->initialize() == 0 ) {
         die "Failed to start while initializing the classifier module";
     }
 
-    $m->{bayes}->load_word_matrix();
-    $m->{color} = 1;
+    $m->{bayes__}->load_word_matrix_();
+    $m->{color__} = 1;
     print $m->parse_stream($ARGV[0]);
 }
 else

@@ -36,7 +36,7 @@ sub new
     my $self = POPFile::Module->new();
 
     # Set this to 1 to get scores for individual words in message detail
-    $self->{wordscores__}        = 1;
+    $self->{wordscores__}        = 0;
 
     # Just our hostname
     $self->{hostname__}        = '';
@@ -1467,4 +1467,50 @@ sub remove_stopword
     return $self->{parser__}->{mangle__}->remove_stopword( $stopword );
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# get_scores - Gets the HTMLized (for now) listing of word scores
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_scores
+{
+    my ( $self ) = @_;
+    
+    return $self->{scores__};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# clear_scores - clears the listing of word scores
+#
+# ---------------------------------------------------------------------------------------------
+
+sub clear_scores
+{
+    my ( $self ) = @_;
+    
+    $self->{scores__} = '';
+    
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# toggle_score - Enables and disables the saving of word scores
+#
+# $value        1 for enabled, 0 for disabled
+#
+# ---------------------------------------------------------------------------------------------
+
+sub toggle_score
+{
+    my ( $self, $value ) = @_;
+    
+    $self->{wordscores__} = $value;
+}
+
+
+
 1;
+

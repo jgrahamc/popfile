@@ -2870,8 +2870,18 @@ sub history_page
                 $body .= "</td>\n</tr>\n</table>\n";
 
                 $body .= "<table><tr><td class=\"top20\" valign=\"top\">\n";
+                
+                # Enable saving of word-scores
+
+                $self->{classifier__}->toggle_score( 1 );
+                
                 $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . "$self->{form_}{view}", $self);
-                $body .= $self->{classifier__}->{scores__};
+                                
+                
+                $self->{classifier__}->toggle_score( 0 );
+                $body .= $self->{classifier__}->get_scores();
+                $self->{classifier__}->clear_scores();
+                
                 $body .= "</tr></table></td>\n</tr>\n";
             }
 
