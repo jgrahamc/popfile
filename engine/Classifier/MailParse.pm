@@ -30,7 +30,7 @@ sub new
     $self->{msg_total} = 0;
     
     # Debug messages?
-    $self->{debug}     = 0;
+    $self->{debug}     = 1;
     
     return bless $self, $type;
 }
@@ -136,14 +136,45 @@ sub parse_stream
     {
         my $line = $_;
     
+        print $line if $self->{debug};
+
+        # If we are doing base64 decoding then look for suitable lines and remove them 
+        # for decoding
+    
+        if ( $encoding =~ /base64/i )
+        {
+            my $decoded = '';
+            while ( ( $line =~ /^[A-Za-z0-9+\/]{72}[\n\r]?$/ ) || ( $line =~ /^[A-Za-z0-9+\/]+=?[\n\r]?$/ ) )
+            {
+                $decoded .= un_base64( $self, $line );
+                $line = <MSG>;
+            }
+            
+            add_line( $self, $decoded );
+        }
+
+        # If we are in a mime document then spot the boundaries
+        my $re = qr/$mime/;
+        if ( ( $mime ne '' ) && ( $line =~ /$re/ ) )
+        {
+            print "Hit mime boundary\n" if $self->{debug};
+            $encoding = '';
+            next;
+        }
+    
         # If we have an email header then just keep the part after the :
         
-        if ( /^([A-Za-z-]+): ([^\n\r]*)/ ) 
+        if ( $line =~ /^([A-Za-z-]+): ([^\n\r]*)/ ) 
         {
             my $header   = $1;
             my $argument = $2;
             
             print "Header ($header) ($argument)\n" if ($self->{debug});
+
+            if ( $header =~ /From/ ) 
+            {
+                $encoding = '';
+            }
             
             # Handle the From, To and Cc headers and extract email addresses
             # from them and treat them as words
@@ -160,20 +191,19 @@ sub parse_stream
                 next;
             }
             
-            # Some headers to discard
-            if ( $header =~ /(Thread-Index|X-UIDL|Message-ID|X-Text-Classification)/i ) 
-            {
-                next;
-            }
-            
             # Look for MIME
             
-            if ( ( $header =~ /Content-Type/i ) && ( $argument =~ /multipart\/mixed;/i ) )
+            if ( ( $header =~ /Content-Type/i ) && ( $argument =~ /multipart\//i ) )
             {
-                my $boundary = <MSG>;
+                my $boundary = $argument;
+                if ( !( $argument =~ /boundary=\"(.*)\"/ ))
+                {
+                    $boundary = <MSG>;
+                }
                 
                 if ( $boundary =~ /boundary=\"(.*)\"/ ) 
                 {
+                    print "Set mime boundary to $1\n" if $self->{debug};
                     $mime = $1;
                 }
                 
@@ -187,24 +217,13 @@ sub parse_stream
             {
                 $encoding = $argument;
                 
-                if ( $encoding =~ /base64/i ) 
-                {
-                    my $body;
-                    
-                    while ( <MSG> )
-                    {
-                        if ( /$mime/ ) 
-                        {
-                            last;
-                        }
-                        
-                        $body .= un_base64($self, $_);
-                    }
-                    
-                    add_line( $self, $body );
-                    
-                    next;
-                }
+                next;
+            }
+
+            # Some headers to discard
+            if ( $header =~ /(Thread-Index|X-UIDL|Message-ID|X-Text-Classification)/i ) 
+            {
+                next;
             }
             
             add_line( $self, $argument );
