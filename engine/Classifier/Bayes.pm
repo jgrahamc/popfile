@@ -932,6 +932,7 @@ sub classify_and_modify
                 print $client "Subject:$msg_subject$eol";
                 print $client "X-Text-Classification: $classification$eol" if ( $self->global_config_( 'xtc' ) );
                 print $client 'X-POPFile-Link: ' . $xpl if ( $self->global_config_( 'xpl' ) );
+                print $client "MIME-Version: 1.0$eol";
                 print $client "Content-Type: multipart/report; boundary=\"$temp_file\"$eol$eol--$temp_file$eol";
                 print $client "Content-Type: text/plain$eol$eol";
                 print $client "POPFile has quarantined a message.  It is attached to this email.$eol$eol";
@@ -955,6 +956,12 @@ sub classify_and_modify
     if ( $got_full_body == 0 )    {
         $self->echo_to_dot_( $mail, $client ) if ( !$nosave );
     } else {
+        if ( $classification ne 'unclassified' ) {
+            if ( $self->{parameters__}{$classification}{quarantine} == 1 ) {
+                print $client "$eol--$temp_file$eol";
+	    }
+        }
+
         print $client ".$eol" if ( !$nosave );
     }
 
