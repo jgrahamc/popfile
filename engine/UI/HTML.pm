@@ -2964,7 +2964,7 @@ sub history_reclassify
             # Only reclassify messages that haven't been reclassified before
 
             if ( !$reclassified ) {
-                push @{$work{$newbucket}}, $self->global_config_( 'msgdir' ) . $mail_file;
+                push @{$work{$newbucket}}, $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file );
 
                 $self->log_( "Reclassifying $mail_file from $bucket to $newbucket" );
 
@@ -3033,7 +3033,7 @@ sub history_undo
             # Only undo if the message has been classified...
 
             if ( defined( $usedtobe ) ) {
-                $self->{classifier__}->remove_message_from_bucket( $self->{api_session__}, $bucket, $self->global_config_( 'msgdir' ) . $mail_file);
+                $self->{classifier__}->remove_message_from_bucket( $self->{api_session__}, $bucket, $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ) );
 
                 $self->{save_cache__} = 1;
 
@@ -3853,7 +3853,7 @@ sub remove_mail_files
 
     while ( my $mail_file = readdir MESSAGES ) {
         if ( $mail_file =~ /popfile(\d+)=\d+\.msg$/ ) {
-            my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat( $self->global_config_( 'msgdir' ) . $mail_file);
+            my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat( $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ) );
 
             if ( $ctime < (time - $self->config_( 'history_days' ) * $seconds_per_day) )  {
                 $self->history_delete_file( $mail_file, $self->config_( 'archive' ) );
@@ -3865,7 +3865,7 @@ sub remove_mail_files
 
     # Clean up old style msg/cls files
 
-    my @mail_files = glob( $self->global_config_( 'msgdir' ) . "popfile*_*.???" );
+    my @mail_files = glob( $self->get_user_path_( $self->global_config_( 'msgdir' ) . "popfile*_*.???" ) );
 
     foreach my $mail_file (@mail_files) {
         unlink($mail_file);
@@ -3922,7 +3922,7 @@ sub history_delete_file
             # TODO This may be UNSAFE, please write a better comment that explains
             # why this might be unsafe.  What does unsafe mean in this context?
 
-            $self->history_copy_file( $self->global_config_( 'msgdir' ) . "$mail_file", $path, $mail_file );
+            $self->history_copy_file( $self->get_user_path_( $self->global_config_( 'msgdir' ) . "$mail_file" ), $path, $mail_file );
         }
     }
 
@@ -3934,9 +3934,9 @@ sub history_delete_file
     # Now remove the files from the disk, remove both the msg file containing
     # the mail message and its associated CLS file
 
-    unlink( $self->global_config_( 'msgdir' ) . $mail_file );
+    unlink( $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ) );
     $mail_file =~ s/msg$/cls/;
-    unlink( $self->global_config_( 'msgdir' ) . $mail_file );
+    unlink( $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ) );
 }
 
 # ---------------------------------------------------------------------------------------------
