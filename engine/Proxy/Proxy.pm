@@ -339,7 +339,8 @@ sub echo_to_dot_
         last if ( $self->{alive_} == 0 );
 
         print $client $_;
-
+        #$self->tee_($client, $_);
+        
         # The termination has to be a single line with exactly a dot on it and nothing
         # else other than line termination characters.  This is vital so that we do
         # not mistake a line beginning with . as the end of the block
@@ -390,14 +391,19 @@ sub flush_extra_
 # $client   The local mail client (created with IO::) that needs the response
 # $command  The text of the command to send (we add an EOL)
 # $error    The error string if the response fails
+# $null_resp Allow a null response
 #
 # Send $command to $mail, receives the response and echoes it to the $client and the debug
 # output.  Returns the response
 #
 # ---------------------------------------------------------------------------------------------
+
+#TODO: Implement or remove $error as defined in interface above
 sub get_response_
 {
-    my ( $self, $mail, $client, $command, $error ) = @_;
+    my ( $self, $mail, $client, $command, $error, $use_timeout ) = @_;
+
+    $null_resp = 0 if (!defined $use_timeout);
 
     unless ( $mail ) {
        # $mail is undefined - return an error intead of crashing
@@ -413,7 +419,7 @@ sub get_response_
     # Retrieve a single string containing the response
     if ( $mail->connected ) {
         my $selector = new IO::Select( $mail );
-        my ($ready) = $selector->can_read($self->global_config_( 'timeout' ));
+        my ($ready) = $selector->can_read( (!$null_resp,$self->global_config_( 'timeout' ),.5) );
 
         if ( ( defined( $ready ) ) && ( $ready == $mail ) ) {
             $response = <$mail>;
@@ -424,10 +430,15 @@ sub get_response_
                 return $response;
             }
         }
-
-        # An error has occurred reading from the mail server
-        $self->tee_(  $client, "$self->{connection_timeout_error_}$eol" );
-        return $self->{connection_timeout_error_};
+        
+        if (!null_resp) {
+            # An error has occurred reading from the mail server
+            $self->tee_(  $client, "$self->{connection_timeout_error_}$eol" );
+            return $self->{connection_timeout_error_};
+        } else {
+            $self->tee_($client, "");
+            return "";
+        }        
     }
 
     return $response;
