@@ -324,9 +324,8 @@ sub tee_
 
     # Send the message to the debug output and then send it to the appropriate socket
     $self->log_( $text );
-    print $socket $text if $socket->connected;
+    print $socket $text;
 }
-
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -356,7 +355,7 @@ sub echo_to_regexp_
             if (!$log) {
                 print $client $_;
             } else {
-                $self->tee_($client, $_);
+                $self->tee_( $client, $_ );
             }
         } else {
             $self->log_("Suppressed: $_");
@@ -404,22 +403,23 @@ sub flush_extra_
 {
     my ( $self, $mail, $client, $discard ) = @_;
 
-    if ( $mail ) {
-        if ( $mail->connected ) {
-            my $selector   = new IO::Select( $mail );
-            my $buf        = '';
-            my $max_length = 8192;
+    $discard = 0 if ( !defined( $discard ) );
 
-            while( 1 ) {
-                last unless () = $selector->can_read(0.01);
-                last unless ( my $n = sysread( $mail, $buf, $max_length, length $buf ) );
+    my $selector   = new IO::Select( $mail );
+    my $buf        = '';
+    my $max_length = 8192;
 
-                $self->tee_(  $client, $buf ) if ( $discard != 1 );
-                return $buf;
-            }
-        }
+    my ( $ready ) = $selector->can_read(0.01);
+
+    if ( $ready == $mail ) {
+       my $n = sysread( $mail, $buf, $max_length, length $buf );
+
+        if ( $n > 0 ) {
+            $self->tee_( $client, $buf ) if ( $discard != 1 );
+	}
     }
-    return '';
+
+   return $buf;
 }
 
 # ---------------------------------------------------------------------------------------------
