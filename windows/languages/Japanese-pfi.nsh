@@ -439,9 +439,9 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_OUT         "警告: Outlook が起動中です！"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EUD         "警告: Eudora が起動中です！"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_1      "メールクライアントをシャットダウンした後、「再試行」をクリックして下さい。"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_2      "(「無視」をクリックすれば続行できますが、この操作はあまりお勧めできません。)"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_3      "「中止」をクリックしてこのメールクライアントの設定変更をスキップして下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_1      "メールクライアントをシャットダウンした後、「再試行」を押して下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_2      "(「無視」を押せば続行できますが、あまり推奨しない操作です。)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_3      "「中止」を押すとメールクライアントの設定変更をスキップします。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_4      "メールクライアントをシャットダウンした後、「再試行」をクリックして元の設定に戻して下さい。"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_5      "(「無視」をクリックすれば設定を元に戻せますが、この操作はあまりお勧めできません。)"
