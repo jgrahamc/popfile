@@ -4811,7 +4811,7 @@ remove_shortcuts:
       $(PFI_LANG_UN_MBEMAIL_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_oe_restore
-  ExecShell "open" "$INSTDIR\${L_UNDOFILE}"
+  ExecShell "open" "$INSTDIR\${L_UNDOFILE}.errors.txt"
   Goto end_oe_restore
 
 delete_oe_data:
@@ -4841,7 +4841,7 @@ end_oe_restore:
       $(PFI_LANG_UN_MBEMAIL_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_outlook_restore
-  ExecShell "open" "$INSTDIR\${L_UNDOFILE}"
+  ExecShell "open" "$INSTDIR\${L_UNDOFILE}.errors.txt"
   Goto end_outlook_restore
 
 delete_outlook_data:
@@ -4871,7 +4871,7 @@ end_outlook_restore:
       $(PFI_LANG_UN_MBEMAIL_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_eudora_restore
-  ExecShell "open" "$INSTDIR\${L_UNDOFILE}"
+  ExecShell "open" "$INSTDIR\${L_UNDOFILE}.errors.txt"
   Goto end_eudora_restore
 
 delete_eudora_data:
@@ -5053,6 +5053,7 @@ Function un.RestoreOOE
   !define L_UNDOFILE    $R1
   !define L_USERNAME    $R0
   !define L_USERTYPE    $9
+  !define L_ERRORLOG    $8
 
   Exch ${L_MESSAGE}
   Exch
@@ -5067,8 +5068,21 @@ Function un.RestoreOOE
   Push ${L_TEMP}
   Push ${L_USERNAME}
   Push ${L_USERTYPE}
+  Push ${L_ERRORLOG}
 
   IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 nothing_to_restore
+  
+  Call un.GetDateTimeStamp
+  Pop ${L_TEMP}
+
+  FileOpen  ${L_ERRORLOG} "$INSTDIR\${L_UNDOFILE}.errors.txt" a
+  FileSeek  ${L_ERRORLOG} 0 END
+  FileWrite ${L_ERRORLOG} "Time  : ${L_TEMP}\
+      $\r$\n\
+      Action: ${L_MESSAGE}\
+      $\r$\n\
+      User  : $G_WINUSERNAME\
+      $\r$\n"
 
   SetDetailsPrint textonly
   DetailPrint "${L_MESSAGE}"
@@ -5148,17 +5162,20 @@ skip_port_restore:
 
 foreign_ooe_undo:
   WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (different user)"
+  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (different user)$\r$\n"
   StrCpy ${L_MESSAGE} "foreign"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_ooe_undo
 
 ooe_undo_not_valid:
   WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (data no longer valid)"
+  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (data no longer valid)$\r$\n"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_ooe_undo
 
 skip_ooe_undo:
   WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (undo data incomplete)"
+  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (undo data incomplete)$\r$\n"
   StrCpy ${L_MESSAGE} "corrupt"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
 
@@ -5167,6 +5184,7 @@ next_ooe_undo:
   IntCmp ${L_INDEX} 0 quit_restore quit_restore read_ooe_undo_entry
 
 ooe_restore_corrupt:
+  FileWrite ${L_ERRORLOG} "Error : [History] data corrupted$\r$\n"
   StrCpy ${L_MESSAGE} "corrupt"
   DetailPrint "$(^Skipped)${L_UNDOFILE}"
   Goto quit_restore
@@ -5176,9 +5194,17 @@ nothing_to_restore:
   Goto exit_now
 
 quit_restore:
+  StrCpy ${L_TEMP} ${L_MESSAGE}
+  StrCmp ${L_TEMP} "success" save_result
+  StrCpy ${L_TEMP} "failure"
+
+save_result:
+  FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}$\r$\n$\r$\n"
+  FileClose ${L_ERRORLOG}
   DetailPrint "$(PFI_LANG_UN_LOG_4): ${L_UNDOFILE}"
 
 exit_now:
+  Pop ${L_ERRORLOG}
   Pop ${L_USERTYPE}
   Pop ${L_USERNAME}
   Pop ${L_TEMP}
@@ -5203,6 +5229,7 @@ exit_now:
   !undef L_UNDOFILE
   !undef L_USERNAME
   !undef L_USERTYPE
+  !undef L_ERRORLOG
 
 FunctionEnd
 
@@ -5267,6 +5294,7 @@ Function un.RestoreEudora
   !define L_UNDOFILE    $R0
   !define L_USERNAME    $9    ; used to check validity of email client data 'undo' data
   !define L_USERTYPE    $8    ; used to check validity of email client data 'undo' data
+  !define L_ERRORLOG    $7
 
   Exch ${L_MESSAGE}
   Exch
@@ -5282,6 +5310,7 @@ Function un.RestoreEudora
   Push ${L_TEMP}
   Push ${L_USERNAME}
   Push ${L_USERTYPE}
+  Push ${L_ERRORLOG}
 
   IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 nothing_to_restore
 
@@ -5305,6 +5334,19 @@ check_if_running:
              IDABORT nothing_to_restore IDRETRY check_if_running
 
 restore_eudora:
+  
+  Call un.GetDateTimeStamp
+  Pop ${L_TEMP}
+
+  FileOpen  ${L_ERRORLOG} "$INSTDIR\${L_UNDOFILE}.errors.txt" a
+  FileSeek  ${L_ERRORLOG} 0 END
+  FileWrite ${L_ERRORLOG} "Time  : ${L_TEMP}\
+      $\r$\n\
+      Action: ${L_MESSAGE}\
+      $\r$\n\
+      User  : $G_WINUSERNAME\
+      $\r$\n"
+
   DetailPrint "$(PFI_LANG_UN_LOG_2): ${L_UNDOFILE}"
   ClearErrors
   ReadINIStr ${L_INDEX} "$INSTDIR\${L_UNDOFILE}" "History" "ListSize"
@@ -5397,17 +5439,20 @@ log_port_restore:
 
 foreign_eudora_undo:
   WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (different user)"
+  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (different user)$\r$\n"
   StrCpy ${L_MESSAGE} "foreign"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_eudora_undo
 
 eudora_undo_not_valid:
   WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (data no longer valid)"
+  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (data no longer valid)$\r$\n"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_eudora_undo
 
 skip_eudora_undo:
   WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (undo data incomplete)"
+  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (undo data incomplete)$\r$\n"
   StrCpy ${L_MESSAGE} "corrupt"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
 
@@ -5416,6 +5461,7 @@ next_eudora_undo:
   IntCmp ${L_INDEX} 0 quit_restore quit_restore read_eudora_undo_entry
 
 eudora_restore_corrupt:
+  FileWrite ${L_ERRORLOG} "Error : [History] data corrupted$\r$\n"
   StrCpy ${L_MESSAGE} "corrupt"
   DetailPrint "$(^Skipped)${L_UNDOFILE}"
   Goto quit_restore
@@ -5425,9 +5471,17 @@ nothing_to_restore:
   Goto exit_now
 
 quit_restore:
+  StrCpy ${L_TEMP} ${L_MESSAGE}
+  StrCmp ${L_TEMP} "success" save_result
+  StrCpy ${L_TEMP} "failure"
+
+save_result:
+  FileWrite ${L_ERRORLOG} "Result: ${L_TEMP}$\r$\n$\r$\n"
+  FileClose ${L_ERRORLOG}
   DetailPrint "$(PFI_LANG_UN_LOG_4): ${L_UNDOFILE}"
 
 exit_now:
+  Pop ${L_ERRORLOG}
   Pop ${L_USERTYPE}
   Pop ${L_USERNAME}
   Pop ${L_TEMP}
@@ -5453,6 +5507,7 @@ exit_now:
   !undef L_UNDOFILE
   !undef L_USERNAME
   !undef L_USERTYPE
+  !undef L_ERRORLOG
 
 FunctionEnd
 
