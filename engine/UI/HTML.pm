@@ -617,6 +617,12 @@ sub html_common_top
     $result .= "\"http://www.w3.org/TR/html4/loose.dtd\">\n";
     $result .= "<html lang=\"$self->{language__}{LanguageCode}\">\n<head>\n<title>$self->{language__}{Header_Title}</title>\n";
 
+    $result .= "<meta http-equiv=\"Pragma\" content=\"no-cache\">\n";
+    $result .= "<meta http-equiv=\"Expires\" content=\"0\">\n";
+
+    $result .= "<meta http-equiv=\"Cache-Control\" content=\"no-cache\">\n";
+    $result .= "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=$self->{language__}{LanguageCharset}\">\n</head>\n";
+
     # If we are handling the shutdown page, then send the CSS along with the
     # page to avoid a request back from the browser _after_ we've shutdown,
     # otherwise, send the link to the CSS file so it is cached by the browser.
@@ -638,12 +644,6 @@ sub html_common_top
     }
 
     $result .= "<link rel=\"icon\" href=\"popfile.ico\" type=\"image/ico\">\n";
-
-    $result .= "<meta http-equiv=\"Pragma\" content=\"no-cache\">\n";
-    $result .= "<meta http-equiv=\"Expires\" content=\"0\">\n";
-
-    $result .= "<meta http-equiv=\"Cache-Control\" content=\"no-cache\">\n";
-    $result .= "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=$self->{language__}{LanguageCharset}\">\n</head>\n";
 
     return $result;
 }
@@ -670,7 +670,7 @@ sub html_common_middle
     # tabs and the passed in $text.  Note that the BODY is not closed as the standard
     # footer created by html_common_bottom takes care of that.
 
-    my $result = "<body>\n<table class=\"shellTop\" align=\"center\" width=\"100%\" summary=\"\">\n";
+    my $result = "<body dir=\"$self->{language__}{LanguageDirection}\">\n<table class=\"shellTop\" align=\"center\" width=\"100%\" summary=\"\">\n";
 
     # upper whitespace
     $result .= "<tr class=\"shellTopRow\">\n<td class=\"shellTopLeft\"></td>\n<td class=\"shellTopCenter\"></td>\n";
@@ -755,7 +755,7 @@ sub html_common_middle
     $result .= "<td class=\"shellTopLeft\"></td>\n<td class=\"shellTopCenter\"></td>\n";
     $result .= "<td class=\"shellTopRight\"></td>\n</tr>\n<tr>\n";
     $result .= "<td class=\"shellLeft\"></td>\n";
-    $result .= "<td align=\"left\" class=\"naked\">\n" . $text . "\n</td>\n";
+    $result .= "<td class=\"naked\">\n" . $text . "\n</td>\n";
 
     $result .= "<td class=\"shellRight\"></td>\n</tr>\n";
     $result .= "<tr class=\"shellBottomRow\">\n<td class=\"shellBottomLeft\"></td>\n";
