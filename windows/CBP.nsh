@@ -17,11 +17,15 @@
 #   This is required to ensure 'language' strings can be combined with other strings.
 #----------------------------------------------------------------------------------------------
 
+!ifndef PFI_VERBOSE
+  !verbose 3
+!endif
+
 !ifdef CBP.nsh_included
   !error "$\r$\n$\r$\nFatal error: CBP.nsh has been included more than once!$\r$\n"
 !else
 !define CBP.nsh_included
-
+ 
 #//////////////////////////////////////////////////////////////////////////////////////////////
 #
 #                           External interface - starts here
