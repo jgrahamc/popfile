@@ -757,6 +757,11 @@ sub classify_and_modify
         }
 
         if ( $getting_headers )  {
+
+            # Kill header lines containing only whitespace (Exim does this)
+
+            next if ( $line =~ /^[ \t]+(\r\n|\r|\n)$/i );            
+            
             if ( !( $line =~ /^(\r\n|\r|\n)$/i ) )  {
                 $message_size += length $line;
                 print TEMP $fileline;
