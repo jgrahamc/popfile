@@ -410,7 +410,8 @@ sub http_ok
 
         if ( $self->config_( 'update_check' ) ) {
             $update_check = "<a href=\"http://sourceforge.net/project/showfiles.php?group_id=63137\">\n";
-            $update_check .= "<img border=\"0\" alt=\"\" src=\"http://www.usethesource.com/cgi-bin/popfile_update.pl?ma=$self->{configuration}{major_version}&amp;mi=$self->{configuration}{minor_version}&amp;bu=$self->{configuration}{build_version}\" />\n</a>\n";
+            my ( $major_version, $minor_version, $build_version ) = $self->version() =~ /^v([^.]*)\.([^.]*)\.(.*)$/;
+            $update_check .= "<img border=\"0\" alt=\"\" src=\"http://www.usethesource.com/cgi-bin/popfile_update.pl?ma=" . $major_version . "&amp;mi=" . $minor_version . "&amp;bu=" . $build_version . "\" />\n</a>\n";
         }
 
         if ( $self->config_( 'send_stats' ) ) {
@@ -2998,57 +2999,70 @@ sub view_page
     if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
       $body .= $self->{classifier__}->get_html_colored_message($self->global_config_( 'msgdir' ) . $mail_file);
     } else {
-      $self->{history__}{$mail_file}{magnet} =~ /(.+): ([^\r\n]+)/;
-      my $header = $1;
-      my $text   = $2;
-      $body .= "<tt>";
-
-      open MESSAGE, '<' . $self->global_config_( 'msgdir' ) . $mail_file;
-      my $line;
-      # process each line of the message
-      while ($line = <MESSAGE>) {
-	$line =~ s/</&lt;/g;
-	$line =~ s/>/&gt;/g;
-
-	$line =~ s/([^\r\n]{100,150} )/$1<br \/>/g;
-	$line =~ s/([^ \r\n]{150})/$1<br \/>/g;
-	$line =~ s/[\r\n]+/<br \/>/g;
-
-	if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ ) {
-	  my $head = $1;
-	  my $arg  = $2;
-
-	  if ( $head =~ /\Q$header\E/i ) {
-	    if ( $arg =~ /\Q$text\E/i ) {
-	      my $new_color = $self->{classifier__}->get_bucket_color($self->{history__}{$mail_file}{bucket});
-	      $line =~ s/(\Q$text\E)/<b><font color=\"$new_color\">$1<\/font><\/b>/;
-	    }
-	  }
-	}
-
-	$body .= $line;
-      }
-      close MESSAGE;
-      $body .= "</tt>\n";
+        $self->{history__}{$mail_file}{magnet} =~ /(.+): ([^\r\n]+)/;
+        my $header = $1;
+        my $text   = $2;
+        $body .= "<tt>";
+        
+        open MESSAGE, '<' . $self->global_config_( 'msgdir' ) . $mail_file;
+        my $line;
+        # process each line of the message
+        while ($line = <MESSAGE>) {
+            $line =~ s/</&lt;/g;
+            $line =~ s/>/&gt;/g;
+            
+            $line =~ s/([^\r\n]{100,150} )/$1<br \/>/g;
+            $line =~ s/([^ \r\n]{150})/$1<br \/>/g;
+            $line =~ s/[\r\n]+/<br \/>/g;
+            
+            if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ ) {
+                my $head = $1;
+                my $arg  = $2;
+                
+                if ( $head =~ /\Q$header\E/i ) {
+                    
+                    $text =~ s/</&lt;/g;
+                    $text =~ s/>/&gt;/g;
+                    
+                    if ( $arg =~ /\Q$text\E/i ) {
+                          my $new_color = $self->{classifier__}->get_bucket_color($bucket);
+                          $line =~ s/(\Q$text\E)/<b><font color=\"$new_color\">$1<\/font><\/b>/;
+                    }
+                }
+            }
+    
+            $body .= $line;
+        }
+        close MESSAGE;
+        $body .= "</tt>\n";
     }
 
     $body .= "</td>\n</tr>\n";
 
     $body .= "<tr><td class=\"top20\" valign=\"top\">\n";
-
-    # Enable saving of word-scores
-
-    $self->{classifier__}->wordscores( 1 );
-
-    # Build the scores by classifying the message
-
-    $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . $mail_file, $self);
-
-    # Disable, print, and clear saved word-scores
-
-    $self->{classifier__}->wordscores( 0 );
-    $body .= $self->{classifier__}->scores();
-    $self->{classifier__}->scores('');
+    
+    if ($self->{history__}{$mail_file}{magnet} eq '') {
+        
+        # Enable saving of word-scores
+    
+        $self->{classifier__}->wordscores( 1 );
+    
+        # Build the scores by classifying the message
+    
+        $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . $mail_file, $self);
+    
+        # Disable, print, and clear saved word-scores
+    
+        $self->{classifier__}->wordscores( 0 );
+        $body .= $self->{classifier__}->scores();
+        $self->{classifier__}->scores('');
+        
+    } else {
+        $body .= sprintf(   $self->{language__}{History_MagnetBecause},
+                            $color, $bucket,
+                            Classifier::MailParse::splitline($self->{history__}{$mail_file}{magnet},0)
+                            );
+    }    
 
     # Close button
 
