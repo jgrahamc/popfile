@@ -6,6 +6,9 @@
 #
 # ---------------------------------------------------------------------------------------------
 
+unlink 'stopwords';
+`cp stopwords.base stopwords`;
+
 use Classifier::MailParse;
 use Classifier::Bayes;
 use POPFile::Configuration;
@@ -154,9 +157,14 @@ for my $parse_test (@parse_tests) {
     while ( <WORDS> ) {
         if ( /(.+) (\d+)/ ) {
             test_assert_equal( $cl->{words__}{$1}, $2, "$words $1 $2" );
+            delete $cl->{words__}{$1};
         }
     }
     close WORDS;
+
+    foreach my $missed (keys %{$cl->{words__}}) {
+        test_assert( 0, "$missed $cl->{words__}{$missed} missing in $words" );
+    }
 }
 
 # Check that from, to and subject get set correctly when parsing a message
@@ -180,7 +188,7 @@ test_assert_equal( $cl->{cc__},      'dsmith@dmi.net, dsmith@datamine.net, dsmit
 
 # Test colorization
 
-my @color_tests = ( 'TestMailParse019.msg' );
+my @color_tests = ( 'TestMailParse015.msg', 'TestMailParse019.msg' );
 
 for my $color_test (@color_tests) {
     my $colored = $color_test;
@@ -196,7 +204,6 @@ for my $color_test (@color_tests) {
     close HTML;
     test_assert_equal( $check, $html );
 }
-
 
 # test decode_string
 

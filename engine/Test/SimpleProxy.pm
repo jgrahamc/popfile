@@ -185,7 +185,7 @@ sub child__
         }
     }
 
-    close $remote;
+    close $remote if ( defined( $remote ) );
     close $pipe;
 
     $self->log_( "Child stopped" );

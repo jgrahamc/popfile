@@ -386,7 +386,7 @@ sub add_line
 
             # Pull out any email addresses in the line that are marked with <> and have an @ in them
 
-            while ( $line =~ s/(mailto:)?([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+\.[[:alpha:]0-9\-_]+))([\&\)\?\:\/ >\&\;])// )  {
+            while ( $line =~ s/(mailto:)?([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+\.[[:alpha:]0-9\-_]+))([\"\&\)\?\:\/ >\&\;])// )  {
                 update_word($self, $2, $encoded, ($1?$1:''), '[\&\?\:\/ >\&\;]', $prefix);
                 add_url($self, $3, $encoded, '\@', '[\&\?\:\/]', $prefix);
             }
@@ -555,11 +555,8 @@ sub update_tag
                         $self->update_pseudoword( 'html', 'imgremotesrc', $encoded, $original );
                     }
                 }
-
-                next;
             }
 
-            add_url( $self, $value, $encoded, $quote, $end_quote, '' );
             next;
         }
 
@@ -570,7 +567,7 @@ sub update_tag
             # Look for mailto:'s
 
             if ($value =~ /^mailto:/i) {
-                if ( $tag =~ /^a$/ && $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/]|$)/i )  {
+                if ( $tag =~ /^a$/ && $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/\" \t]|$)/i )  {
                    update_word( $self, $1, $encoded, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
                    add_url( $self, $2, $encoded, '@', ($3?'[\\\&\?\:\/]':$end_quote), '' );
                 }
@@ -601,7 +598,7 @@ sub update_tag
         # Tags that load sounds
 
         if ( $attribute =~ /^bgsound$/i && $tag =~ /^body$/i ) {
-            add_url( $self, $2, $encoded, $quote, $end_quote, '' );
+            add_url( $self, $value, $encoded, $quote, $end_quote, '' );
             next;
         }
 
@@ -676,7 +673,7 @@ sub update_tag
 
             # mailto forms
 
-            if ( $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/])/i )  {
+            if ( $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/\" \t]|$)/i )  {
                update_word( $self, $1, $encoded, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
                add_url( $self, $2, $encoded, '@', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
             }
