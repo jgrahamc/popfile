@@ -1,13 +1,32 @@
 # Copyright (c) 2001-2003 John Graham-Cumming
+# Translated by Adriano Rafael Gomes <adrianorg@users.sourceforge.net>
 # Updated by Fernando de Alcantara Correia <facorreia@users.sourceforge.net> to v0.19.1
+#
+#   This file is part of POPFile
+#
+#   POPFile is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   POPFile is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with POPFile; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
 
 # Identify the language and character set used for the interface
 LanguageCode                            br
 LanguageCharset                         ISO-8859-1
+LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          br
- 
+
 # Common words that are used on their own all over the interface
 Apply                                   Aplicar
 On                                      Ligado
@@ -20,7 +39,7 @@ Previous                                Anterior
 Next                                    Próximo
 From                                    De
 Subject                                 Assunto
-Cc                                      Cc 
+Cc                                      Cc
 Classification                          Classificação
 Reclassify                              Reclassificar
 Probability                             Probabilidade
@@ -52,7 +71,7 @@ Refresh                                 Atualizar
 
 # The header and footer that appear on every UI page
 Header_Title                            Centro de Controle do POPFile
-Header_Shutdown                         Desligar
+Header_Shutdown                         Desligar o POPFile
 Header_History                          Histórico
 Header_Buckets                          Baldes
 Header_Configuration                    Configuração
@@ -63,7 +82,7 @@ Header_Magnets                          Ímãs
 Footer_HomePage                         POPFile Home Page
 Footer_Manual                           Manual
 Footer_Forums                           Forums
-Footer_FeedMe                           Me Mantenha!
+Footer_FeedMe                           Contribua
 Footer_RequestFeature                   Pedir uma Característica
 Footer_MailingList                      Lista de Email
 
@@ -104,8 +123,8 @@ Configuration_TCPTimeoutSecs            Tempo limite de conexão em segundos
 Configuration_TCPTimeoutUpdate          Alterado o tempo limite de conexão para %s
 Configuration_ClassificationInsertion   Inserção de Texto na Mensagem
 Configuration_SubjectLine               Modificação de linha de assunto
-Configuration_XTCInsertion              Inserção de X-Text-Classification
-Configuration_XPLInsertion              Inserção de X-POPFile-Link
+Configuration_XTCInsertion              Cabeçalho X-Text-Classification
+Configuration_XPLInsertion              Cabeçalho X-POPFile-Link
 Configuration_Logging                   Logging
 Configuration_None                      Nada
 Configuration_ToScreen                  Na Tela
@@ -117,19 +136,23 @@ Configuration_SmallSkins                Small Skins
 Configuration_TinySkins                 Tiny Skins
 Configuration_CurrentLogFile            &lt;arquivo de log atual&gt;
 
-Advanced_Error1                         '%s' já está na lista de palavras ignoradas
+Advanced_Error1                         '%s' já está na lista de Palavras Ignoradas
 Advanced_Error2                         Palavras ignoradas podem somente conter caracteres alfanuméricos, ., _, -, ou @
-Advanced_Error3                         '%s' adicionado na lista de palavras ignoradas
-Advanced_Error4                         '%s' não estã na lista de palavras ignoradas
-Advanced_Error5                         '%s' removido da lista de palavras ignoradas
+Advanced_Error3                         '%s' adicionado na lista de Palavras Ignoradas
+Advanced_Error4                         '%s' não está na lista de Palavras Ignoradas
+Advanced_Error5                         '%s' removido da lista de Palavras Ignoradas
 Advanced_StopWords                      Palavras Ignoradas
-Advanced_Message1                       As seguintes palavras são ignoradas de todas as classificações porque ocorrem muito freqüentemente.
+Advanced_Message1                       O POPFile ignora as seguintes palavras freqüentemente usadas:
 Advanced_AddWord                        Adicionar palavra
 Advanced_RemoveWord                     Remover palavra
+Advanced_AllParameters                  Todos os Parâmetros do POPFile
+Advanced_Parameter                      Parâmetro
+Advanced_Value                          Valor
+Advanced_Warning                        Esta é a lista completa dos parâmetros do POPFile.  Somente para usuários avançados: você pode alterar qualquer um e clicar em Alterar; não há verificação de validade.
 
 History_Filter                          &nbsp;(apenas mostrando o balde <font color="%s">%s</font>)
-History_FilterBy                        Filter By
-History_Search                          &nbsp;(procurado pelo assunto %s)
+History_FilterBy                        Filtrar Por
+History_Search                          &nbsp;(procurado por remetente/assunto %s)
 History_Title                           Mensagens Recentes
 History_Jump                            Ir para a mensagem
 History_ShowAll                         Exibir Tudo
@@ -138,16 +161,16 @@ History_NoFrom                          sem linha de
 History_NoSubject                       sem linha de assunto
 History_ClassifyAs                      Classificar como
 History_MagnetUsed                      Ímã usado
-History_MagnetBecause                   <b>Ímã utilizado</b><p>Classificado para <font color="%s">%s</font> por causa do ímã %s </p>
+History_MagnetBecause                   <b>Ímã Utilizado</b><p>Classificado para <font color="%s">%s</font> por causa do ímã %s </p>
 History_ChangedTo                       Alterado para <font color="%s">%s
-History_Already                         Já reclassificado como <font color="%s">%s</font>
+History_Already                         Reclassificado como <font color="%s">%s</font>
 History_RemoveAll                       Remover Tudo
 History_RemovePage                      Remover a Página
 History_Remove                          Para remover entradas do histórico clique
 History_SearchMessage                   Procurar Remetente/Assunto
 History_NoMessages                      Nenhuma mensagem
-History_ShowMagnet                      Magnetizado
-History_ShowNoMagnet                    Desmagnetizado
+History_ShowMagnet                      magnetizado
+History_ShowNoMagnet                    desmagnetizado
 History_Magnet                          &nbsp;(mostrando apenas mensagens classificadas por ímã)
 History_NoMagnet                        &nbsp;(mostrando apenas mensagens não classificadas por ímã)
 History_ResetSearch                     Limpar
@@ -167,22 +190,22 @@ Security_Password                       Senha
 Security_PasswordUpdate                 Alterada a senha para %s
 Security_AUTHTitle                      Servidores Remotos
 Security_SecureServer                   Servidor POP3 SPA/AUTH
-Security_SecureServerUpdate             Alterado o servidor POP3 SPA/AUTH para %s; esta alteração não terá efeito até que você reinicie o POPFile
+Security_SecureServerUpdate             Alterado o servidor seguro POP3 SPA/AUTH para %s; esta alteração não terá efeito até que você reinicie o POPFile
 Security_SecurePort                     Porta POP3 SPA/AUTH
 Security_SecurePortUpdate               Alterada a porta POP3 SPA/AUTH para %s; esta alteração não terá efeito até que você reinicie o POPFile
-Security_SMTPServer                     Servidor de cadeia SMTP
-Security_SMTPServerUpdate               Alterado o servidor de cadeia SMTP para %s; esta alteração não terá efeito até que você reinicie o POPFile
-Security_SMTPPort                       Porta de cadeia SMTP
-Security_SMTPPortUpdate                 Alterada a porta de cadeia SMTP para %s; esta alteração não terá efeito até que você reinicie o POPFile
-Security_POP3                           Aceitar conexões POP3 de máquinas remotas
-Security_SMTP                           Aceitar conexões SMTP de máquinas remotas (requer reinício do POPFile)
-Security_NNTP                           Aceitar conexões NNTP de máquinas remotas (requer reinício do POPFile)
-Security_UI                             Aceitar conexões HTTP (Interface de Usuário) de máquinas remotas (requer reinício do POPFile)
-Security_XMLRPC                         Aceitar conexões XML-RPC de máquinas remotas (requer reinício do POPFile)
+Security_SMTPServer                     Servidor da cadeia SMTP
+Security_SMTPServerUpdate               Alterado o servidor da cadeia SMTP para %s; esta alteração não terá efeito até que você reinicie o POPFile
+Security_SMTPPort                       Porta da cadeia SMTP
+Security_SMTPPortUpdate                 Alterada a porta da cadeia SMTP para %s; esta alteração não terá efeito até que você reinicie o POPFile
+Security_POP3                           Aceitar conexões POP3 de máquinas remotas (requer reiniciar o POPFile)
+Security_SMTP                           Aceitar conexões SMTP de máquinas remotas (requer reiniciar o POPFile)
+Security_NNTP                           Aceitar conexões NNTP de máquinas remotas (requer reiniciar o POPFile)
+Security_UI                             Aceitar conexões HTTP (Interface de Usuário) de máquinas remotas (requer reiniciar o POPFile)
+Security_XMLRPC                         Aceitar conexões XML-RPC de máquinas remotas (requer reiniciar o POPFile)
 Security_UpdateTitle                    Verificação Automática de Atualização
 Security_Update                         Verificar diariamente atualizações para o POPFile
 Security_StatsTitle                     Reportar Estatísticas
-Security_Stats                          Enviar estatísticas para o John diariamente
+Security_Stats                          Enviar estatísticas diariamente
 
 Magnet_Error1                           Ímã '%s' já existe no balde '%s'
 Magnet_Error2                           O novo ímã '%s' conflita com o ímã '%s' no balde '%s' e pode causar resultados ambíguos.  O novo ímã não foi adicionado.
@@ -194,7 +217,7 @@ Magnet_Explanation                      Estes tipos de ímã estão disponíveis:</b
 Magnet_MagnetType                       Tipo do ímã
 Magnet_Value                            Valor
 Magnet_Always                           Sempre vai para o balde
-Magnet_Jump                             Ir para a página de ímã
+Magnet_Jump                             Ir para a página de ímãs
 
 Bucket_Error1                           Nomes de balde somente podem conter as letras de a até z minúsculas, números de 0 a 9, mais - e _
 Bucket_Error2                           O balde %s já existe
@@ -240,7 +263,7 @@ SingleBucket_WordCount                  Contagem de palavras do balde
 SingleBucket_TotalWordCount             Contagem total de palavras
 SingleBucket_Percentage                 Percentual do total
 SingleBucket_WordTable                  Tabela de Palavras para %s
-SingleBucket_Message1                   Clique em uma letra no índice para ver uma lista das palavras que iniciam com aquela letra. Clique em qualquer palavra para pesquisar a sua probabilidade para todos os baldes.
+SingleBucket_Message1                   Clique em uma letra no índice para ver a lista de palavras que começam com tal letra.  Clique em qualquer palavra para procurar sua probabilidade para todos os baldes.
 SingleBucket_Unique                     %s únicas
 SingleBucket_ClearBucket                Remover Todas Palavras
 
@@ -249,9 +272,11 @@ Session_Error                           A sua sessão do POPFile expirou.  Isto p
 
 View_Title                              Visão de Única Mensagem
 
+Windows_TrayIcon                        Exibir o ícone do POPFile na bandeja do sistema?
+
 Header_MenuSummary                      Esta tabela é o menu de navegação que possibilita acesso a cada uma das diferentes páginas do centro de controle.
 History_MainTableSummary                Esta tabela mostra o remetente e o assunto das mensagens recebidas recentemente e permite que elas sejam revisadas e reclassificadas.  Clicar na linha de assunto vai mostrar o texto inteiro da mensagem, juntamente com informação sobre por que ela foi classificada como o foi.  A coluna 'Deveria ser' permite que você especifique a que balde a mensagem pertence, ou desfazer esta mudança.  A coluna 'Remover' permite que você exclua mensagens específicas do histórico se você não precisar mais delas.
-History_OpenMessageSummary              Esta tabela contém o texto integral de uma mensagem, com as palavras que são usadas para classificação destacadas de acordo com o balde que foi mais relevante para elas. 
+History_OpenMessageSummary              Esta tabela contém o texto integral de uma mensagem, com as palavras que são usadas para classificação destacadas de acordo com o balde que foi mais relevante para elas.
 Bucket_MainTableSummary                 Esta tabela fornece uma visão geral dos baldes de classificação.  Cada linha mostra o nome do balde, a contagem total de palavras para aquele balde, o número real de palavras individuais em cada balde, se o assunto da mensagem vai ser modificado quando ele for classificado para aquele balde, se as mensagens recebidas naquele balde devem ficar em quarentena, e uma tabela para escolher a cor usada para mostrar qualquer coisa relacionada àquele balde no centro de controle.
 Bucket_StatisticsTableSummary           Esta tabela fornece três conjuntos de estatísticas sobre o desempenho geral do PopFile.  A primeira é a exatidão da classificação, a segunda é quantas mensagens foram classificadas, e para quais baldes, e a terceira é quantas palavras existem em cada balde, e as suas porcentagens relativas.
 Bucket_MaintenanceTableSummary          Esta tabela contém formulários que permitem que você crie, exclua ou renomeie baldes, e para procurar uma palavra em todos os baldes e ver as suas probabilidades relativas.
@@ -264,4 +289,3 @@ Configuration_MainTableSummary          Esta tabela contém alguns formulários qu
 Configuration_InsertionTableSummary     Esta tabela contém botões para determinar se certas modificações são feitas no cabeçalho ou no assunto da mensagem antes que ela seja encaminhada para o programa cliente de mensagens.
 Security_MainTableSummary               Esta tabela fornece conjuntos de controles que afetam a segurança da configuração geral do PopFile, se ele deve procurar automaticamente por atualizações do programa, e se estatísticas sobre o desempenho do PopFile devem ser enviadas ao banco de dados central do autor do programa para informação geral.
 Advanced_MainTableSummary               Esta tabela fornece uma lista de palavras que o PopFile ignora quando classifica mensagens por causa da sua freqüência relativa nas mensagens em geral.  Elas são organizadas por linha de acordo com a primeira letra das palavras.
-
