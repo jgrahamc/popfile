@@ -492,6 +492,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO         "No (el 'Interface de Usuario' no se puede utilizar si no se inicia POPFile)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "Arrancar POPFile (en una ventana)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "Arrancar POPFile en segundo plano (no se muestra ventana)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Run POPFile (do not show system tray icon)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Run POPFile with system tray icon (default setting)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "Una vez que se haya iniciado POPFile, puede ver el 'Interface de Usuario' mediante"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(a) doble-clic el el icono de POPFile en la bandeja de sistema, o"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(b) usando Inicio --> Programas --> POPFile --> POPFile User Interface."
