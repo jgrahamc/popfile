@@ -91,6 +91,8 @@ sub un_base64
 sub update_word 
 {
     my ($self, $word, $encoded, $before, $after) = @_;
+
+    print "--- $word ($before) ($after)\n" if ($self->{debug});
     
     my $mword = $self->{mangle}->mangle($word);
     
@@ -184,15 +186,15 @@ sub update_tag
     print "HTML tag $tag with argument " . $arg . "\n" if ($self->{debug});
 
     if ( ( $tag =~ /^img$/i ) || ( $tag =~ /^frame$/i ) ) {
-        update_word( $self, $3, 0, $1, $4 ) if ( $arg =~ /src[ \t]*=[ \t]*[\"\']?http:\/(\/(.+:)?)([^ \/\">]+)([ \/\">]|$)/i );
+        return update_word( $self, $3, 0, $1, $4 ) if ( $arg =~ /src[ \t]*=[ \t]*[\"\']?http:\/(\/(.+:)?)([^ \/\">]+)([ \/\">]|$)/i );
     }
 
     if ( $tag =~ /^a$/i )  {
-        update_word( $self, $3, 0, $1, $4 ) if ( $arg =~ /href[ \t]*=[ \t]*[\"\']?http:\/(\/(.+:)?)([^ \/\">]+)([ \/\">]|$)/i );
+        return update_word( $self, $3, 0, $1, $4 ) if ( $arg =~ /href[ \t]*=[ \t]*[\"\']?http:\/(\/(.+:)?)([^ \/\">]+)([ \/\">]|$)/i );
     }
 
     if ( $tag =~ /^form$/i )  {
-        update_word( $self, 3, 0, $1, $4 ) if ( $arg =~ /action[ \t]*=[ \t]*([\"\']?(http:\/\/)?)([^ \"]+)([ \/\">]|$)/i );
+        return update_word( $self, $3, 0, $1, $4 ) if ( $arg =~ /action[ \t]*=[ \t]*([\"\']?(http:\/\/)?)([^ \/\">]+)([ \/\">]|$)/i );
     }
 }
 
@@ -336,8 +338,8 @@ sub parse_stream
 
             if ( $content_type =~ /html/ )  {
                 if ( $in_html_tag )  {
-                    $html_arg .= " " . $line;
-                    if ( $line =~ s/.*?>/ / ) {
+                    if ( $line =~ s/(.*?)>/ / ) {
+                        $html_arg .= $1;
                         $in_html_tag = 0;
                         $html_tag =~ s/=\n ?//g if ( $encoding =~ /quoted\-printable/ );
                         $html_arg =~ s/=\n ?//g if ( $encoding =~ /quoted\-printable/ );
@@ -345,6 +347,7 @@ sub parse_stream
                         $html_tag = '';
                         $html_arg = '';
                     } else {
+                        $html_arg .= " " . $line;
                         $line = '';
                         next;
                     }
