@@ -190,6 +190,7 @@ sub server
 
         if ( $command =~ /TOP (.*) (.*)/i ) {
             my $index = $1 - 1;
+            my $countdown = $2;
 	    if ( $messages[$index] ne '' ) {
                  print $client "+OK " . ( -s $messages[$index] ) . "$eol";
 
@@ -197,13 +198,12 @@ sub server
                  while ( <FILE> ) {
                      print $client $_;
 
-                     if ( !/[^ \t\r\n]/ ) {
+                     if ( /^[\r\n]+$/ ) {
                          last;
 		     }
 		 }
-                 my $countdown = $2;
-                 while ( <FILE> && ( $countdown > 0 ) ) {
-                     print $client $_;
+                 while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
+                     print $client $line;
                      $countdown -= 1;
 		 }
                  close FILE;
@@ -533,9 +533,104 @@ if ( $pid == 0 ) {
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
 
+        # Check what happens when TOP fails
+
+        print $client "TOP $notexist 22$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "-ERR No such message $notexist$eol" );
+
         # Check the basic TOP command
 
-        # TODO
+        unlink( 'messages/popfile1=5.msg' );
+        unlink( 'messages/popfile1=5.cls' );
+
+        my $countdown = 2;
+        print $client "TOP 5 $countdown$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK " . ( -s $messages[4] ) . "$eol" );
+
+        test_assert( open FILE, "<$messages[4]" );
+        my $headers   = 1;
+        while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
+            $result = <$client>;
+            test_assert_equal( $result, $line );
+            if ( $headers == 0 ) {
+                $countdown -= 1;
+	    }
+            if ( $line =~ /^[\r\n]+$/ ) {
+                $headers = 0;
+	    }
+	}
+        close FILE;
+
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+
+        # This delay is here because Windows was having a little trouble
+        # with the files created by the RETR not existing and I have a little
+        # rest here while Windows wakes from its afternoon nap and writes
+        # the files to disk
+
+        select( undef, undef, undef, 0.1 );
+
+        test_assert( !(-e 'messages/popfile1=5.msg') );
+        test_assert( !(-e 'messages/popfile1=5.cls') );
+
+        # Check that TOP x 99999999 is the same as RETR x for fetchmail
+        # compatibility
+
+        test_assert( !(-e 'messages/popfile1=7.msg') );
+        test_assert( !(-e 'messages/popfile1=7.cls') );
+
+        print $client "TOP 7 99999999$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK " . ( -s $messages[6] ) . "$eol" );
+        my $cam = $messages[6];
+        $cam =~ s/msg$/cam/;
+
+        test_assert( open FILE, "<$cam" );
+        while ( <FILE> ) {
+            my $line = $_;
+            $result = <$client>;
+            $result =~ s/popfile1=7/popfile0=0/;
+            test_assert_equal( $result, $line );
+	}
+        close FILE;
+
+        $result = <$client>;
+        test_assert_equal( $result, "$eol" );
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+
+        # This delay is here because Windows was having a little trouble
+        # with the files created by the RETR not existing and I have a little
+        # rest here while Windows wakes from its afternoon nap and writes
+        # the files to disk
+
+        select( undef, undef, undef, 0.1 );
+
+        # TODO check for NEWFL and CLASS messages
+
+        test_assert( -e 'messages/popfile1=7.msg' );
+        test_assert( -e 'messages/popfile1=7.cls' );
+
+        test_assert( open FILE, "<$messages[6]" );
+        test_assert( open HIST, "<messages/popfile1=7.msg" );
+        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+            $fl =~ s/[\r\n]//g;
+            $ml =~ s/[\r\n]//g;
+            test_assert_equal( $fl, $ml );
+	}
+        test_assert( eof(FILE) );
+        test_assert( eof(HIST) );
+        close FILE;
+        close HIST;
+
+        my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile1=7.msg' );
+        test_assert( !$reclassified );
+        test_assert_equal( $bucket, 'spam' );
+        test_assert( !defined( $usedtobe ) );
+        test_assert_equal( $magnet, '' );
 
         # Check that we echo the remote servers QUIT response
 
@@ -551,7 +646,7 @@ if ( $pid == 0 ) {
 
         # TODO -pop3_toptoo tests with caching behavior
 
-        # TODO SPA/AUTH tests with good and bad remote servers
+        # TODO SPA/AUTH tests with good, bad and missing remote servers
 
         while ( waitpid( $pid, &WNOHANG ) != $pid ) {
         }
