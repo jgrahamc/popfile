@@ -782,11 +782,13 @@ sub classify
     my ( $self, $file, $ui ) = @_;
     my $msg_total = 0;
 
+    # Pass language parameter to parse_file()
+
     $self->{magnet_used__}   = 0;
     $self->{magnet_detail__} = '';
 
     if ( defined( $file ) ) {
-        $self->{parser__}->parse_file( $file );
+        $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
     }
 
     # Check to see if this email should be classified based on a magnet
@@ -808,19 +810,42 @@ sub classify
             $noattype =~ s/@/__POPFILE_AT__/g;
             $noattype =~ s/\$/__POPFILE_DOLLAR__/g;
 
-            for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
-                my $regex;
+            # In Japanese mode, disable locale.
+            # Sorting Japanese with "use locale" is memory and time consuming,
+            # and may cause perl crash.
 
-                $regex = $magnet;
-                $regex =~ s/@/__POPFILE_AT__/g;
-                $regex =~ s/\$/__POPFILE_DOLLAR__/g;
+            if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+                no locale;
+                for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
+                    my $regex;
 
-                if ( $noattype =~ m/\Q$regex\E/i ) {
-                    $self->{scores__}        = '';
-                    $self->{magnet_used__}   = 1;
-                    $self->{magnet_detail__} = "$type: $magnet";
+                    $regex = $magnet;
+                    $regex =~ s/@/__POPFILE_AT__/g;
+                    $regex =~ s/\$/__POPFILE_DOLLAR__/g;
 
-                    return $bucket;
+                    if ( $noattype =~ m/\Q$regex\E/i ) {
+                        $self->{scores__}        = '';
+                        $self->{magnet_used__}   = 1;
+                        $self->{magnet_detail__} = "$type: $magnet";
+
+                        return $bucket;
+                    }
+                }
+            } else {
+                for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
+                    my $regex;
+
+                    $regex = $magnet;
+                    $regex =~ s/@/__POPFILE_AT__/g;
+                    $regex =~ s/\$/__POPFILE_DOLLAR__/g;
+
+                    if ( $noattype =~ m/\Q$regex\E/i ) {
+                        $self->{scores__}        = '';
+                        $self->{magnet_used__}   = 1;
+                        $self->{magnet_detail__} = "$type: $magnet";
+
+                        return $bucket;
+                    }
                 }
             }
         }
@@ -854,7 +879,7 @@ sub classify
     # which is unrepresented in a bucket zero.  This correction affects only
     # the values displayed in scores__; it has no effect on the classification
     # process.
-  
+
     my $correction = 0;
 
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
@@ -873,7 +898,7 @@ sub classify
 
             $score{$bucket} += ( $probability * $self->{parser__}{words__}{$word} );
         }
-  
+
         if ($wmax > $self->{not_likely__}) {
             $correction += $self->{not_likely__} * $self->{parser__}{words__}{$word};
         } else {
@@ -914,9 +939,7 @@ sub classify
         $certainty = 1.0;
     }
 
-
     $class = 'unsure' if ( $certainty < 0.4 );
-
 
     # Compute the total of all the scores to generate the normalized scores and probability
     # estimate.  $total is always 1 after the first loop iteration, so any additional term
@@ -975,7 +998,7 @@ sub classify
         }
 
         $self->{scores__} .= "<a name=\"scores\">";
-        
+
         # If there are fewer than 2 buckets, there is no "verdict " to mention.
         if (@buckets > 1) {
             $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<b>Verdict: <font color=\"$self->{colors__}{$class}\">$class ($certainty  $chi{$ranking[0]} $chi{$ranking[1]})</font></b><p>\n";
@@ -1017,11 +1040,11 @@ sub classify
         }
 
         $self->{scores__} .= "</table><hr>";
- 
+
         # We want a link to change the format here.  But only the UI knows how to build
         # that link.  So we just insert a comment which can be replaced by the UI.  There's
         # probably a better way.
-   
+
         $self->{scores__} .= "<!--format--><p>";
         $self->{scores__} .= "<table class=\"top20Words\">\n";
         $self->{scores__} .= "<tr>\n<th scope=\"col\">$language{Word}</th><th>&nbsp;</th><th scope=\"col\">$language{Count}</th><th>&nbsp;</th>\n";
@@ -1035,10 +1058,10 @@ sub classify
         $self->{scores__} .= "</tr>";
 
         my %wordprobs;
-  
+
         # If the word matrix is supposed to show probabilities, compute them,
         # saving the results in %wordprobs.
-  
+
         if ( $self->{wmformat__} eq 'prob') {
             foreach my $word (keys %{$self->{parser__}->{words__}}) {
                 my $sumfreq = 0;
@@ -1052,7 +1075,7 @@ sub classify
                 }
             }
         }
-   
+
         my @ranked_words;
         if ($self->{wmformat__} eq 'prob') {
             @ranked_words = sort {$wordprobs{$ranking[0],$b} <=> $wordprobs{$ranking[0],$a}} keys %{$self->{parser__}->{words__}};
@@ -1399,6 +1422,12 @@ sub classify_and_modify
 
     close TEMP;
 
+    # Parse Japanese mail message with Kakasi
+
+    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+        parse_with_kakasi( $self, $temp_file, $dcount, $mcount );
+    }
+
     # If we don't yet know the classification then stop the parser
     if ( $class eq '' ) {
         $self->{parser__}->stop_parse();
@@ -1725,7 +1754,11 @@ sub get_html_colored_message
 
     $self->{parser__}->{color__} = 1;
     $self->{parser__}->{bayes__} = bless $self;
-    my $result = $self->{parser__}->parse_file( $file );
+
+    # Pass language parameter to parse_file()
+
+    my $result = $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
+
     $self->{parser__}->{color__} = 0;
 
     return $result;
@@ -1860,11 +1893,24 @@ sub add_messages_to_bucket
         return 0;
     }
 
-    foreach my $file (@files) {
-        $self->{parser__}->parse_file( $file );
+    # Pass language parameter to parse_file()
 
-        foreach my $word (keys %{$self->{parser__}->{words__}}) {
-            $self->set_value_( $bucket, $word, $self->{parser__}->{words__}{$word} + $self->get_base_value_( $bucket, $word ) );
+    foreach my $file (@files) {
+        $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
+
+       # In Japanese mode, disable locale.
+       # Sorting Japanese with "use locale" is memory and time consuming,
+       # and may cause perl crash.
+
+       if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+            no locale;
+            foreach my $word (keys %{$self->{parser__}->{words__}}) {
+                $self->set_value_( $bucket, $word, $self->{parser__}->{words__}{$word} + $self->get_base_value_( $bucket, $word ) );
+            }
+        } else {
+            foreach my $word (keys %{$self->{parser__}->{words__}}) {
+                $self->set_value_( $bucket, $word, $self->{parser__}->{words__}{$word} + $self->get_base_value_( $bucket, $word ) );
+            }
         }
     }
 
@@ -1911,10 +1957,23 @@ sub remove_message_from_bucket
         return 0;
     }
 
-    $self->{parser__}->parse_file( $file );
+    # Pass language parameter to parse_file()
 
-    foreach my $word (keys %{$self->{parser__}->{words__}}) {
-        $self->set_value_( $bucket, $word, $self->get_base_value_( $bucket, $word ) - $self->{parser__}->{words__}{$word} );
+    $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
+
+    # In Japanese mode, disable locale.
+    # Sorting Japanese with "use locale" is memory and time consuming,
+    # and may cause perl crash.
+
+    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+        no locale;
+        foreach my $word (keys %{$self->{parser__}->{words__}}) {
+            $self->set_value_( $bucket, $word, $self->get_base_value_( $bucket, $word ) - $self->{parser__}->{words__}{$word} );
+        }
+    } else {
+        foreach my $word (keys %{$self->{parser__}->{words__}}) {
+            $self->set_value_( $bucket, $word, $self->get_base_value_( $bucket, $word ) - $self->{parser__}->{words__}{$word} );
+         }
     }
 
     $self->load_word_matrix_();
@@ -2066,7 +2125,16 @@ sub get_magnets
 {
     my ( $self, $bucket, $type ) = @_;
 
-    return sort keys %{$self->{magnets__}{$bucket}{$type}};
+    # In Japanese mode, disable locale.
+    # Sorting Japanese with "use locale" is memory and time consuming,
+    # and may cause perl crash.
+
+    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+        no locale;
+        return sort keys %{$self->{magnets__}{$bucket}{$type}};
+    } else {
+        return sort keys %{$self->{magnets__}{$bucket}{$type}};
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2203,11 +2271,67 @@ sub magnet_count
 
     return $self->{magnet_count__};
 }
-   
+
+# ---------------------------------------------------------------------------------------------
+#
+# parse_with_kakasi
+#
+# Parse Japanese mail message with Kakasi
+#
+# Japanese needs to be parsed by language processing filter, "Kakasi"
+# before it is passed to Bayes classifier because words are not splitted
+# by spaces.
+#
+# $file           The file to parse
+#
+# ---------------------------------------------------------------------------------------------
+sub parse_with_kakasi
+{
+    my ( $self, $file, $dcount, $mcount ) = @_;
+
+    # This is used for Japanese support
+    require Encode;
+
+    # This is used to parse Japanese
+    require Text::Kakasi;
+
+    my $temp_file  = $self->global_config_( 'msgdir' ) . "kakasi$dcount" . "=$mcount.msg";
+    print $temp_file;
+
+    # Split Japanese email body into words using Kakasi Wakachigaki
+    # mode(-w is passed to Kakasi as argument). The most common charset of
+    # Japanese email is ISO-2022-JP, alias is jis, so -ijis and -ojis
+    # are passed to tell Kakasi the input charset and the output charset
+    # explicitly.
+    #
+    # After Kakasi processing, Encode::from_to is used to convert into UTF-8.
+    #
+    # Japanese email charset is assumed to be ISO-2022-JP. Needs to expand for
+    # other possible charset, such as Shift_JIS, EUC-JP, UTF-8.
+
+    Text::Kakasi::getopt_argv("kakasi", "-w -ijis -ojis");
+    open KAKASI_IN, "<$file";
+    open KAKASI_OUT, ">$temp_file";
+
+    while( <KAKASI_IN> ){
+        my $kakasi_out;
+
+	$kakasi_out = Text::Kakasi::do_kakasi($_);
+        Encode::from_to($kakasi_out, "iso-2022-jp", "euc-jp");
+        print KAKASI_OUT $kakasi_out;
+    }
+
+    close KAKASI_OUT;
+    close KAKASI_IN;
+    Text::Kakasi::close_kanwadict();
+    unlink( $file );
+    rename( $temp_file, $file );
+}
+
 sub wmformat
 {
     my ( $self, $value ) = @_;
- 
+
     $self->{wmformat__} = $value if (defined $value);
     return $self->{wmformat__};
 }

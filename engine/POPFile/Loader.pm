@@ -566,7 +566,7 @@ sub CORE_start
         print '} ' if $self->{debug__};
     }
 
-    print "\n\nPOPFile Engine ", $self->CORE_version(), " running\n" if $self->{debug__};
+    print "\n\nPOPFile Engine ", scalar($self->CORE_version()), " running\n" if $self->{debug__};
     flush STDOUT;
 }
 

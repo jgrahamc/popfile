@@ -43,6 +43,20 @@ my $eol = "\015\012";
 
 my $seconds_per_day = 60 * 60 * 24;
 
+# These are used for Japanese support
+
+# ASCII characters
+my $ascii = '[\x00-\x7F]';
+
+# EUC-JP 2 byte characters
+my $two_bytes_euc_jp = '(?:[\x8E\xA1-\xFE][\xA1-\xFE])'; 
+
+# EUC-JP 3 byte characters
+my $three_bytes_euc_jp = '(?:\x8F[\xA1-\xFE][\xA1-\xFE])';
+
+# EUC-JP characters
+my $euc_jp = "(?:$ascii|$two_bytes_euc_jp|$three_bytes_euc_jp)";
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -1339,36 +1353,79 @@ sub advanced_page
     my $firstRow = 1;
     my @words = $self->{classifier__}->get_stopword_list();
 
-    for my $word (sort @words) {
-        $word =~ /^(.)/;
-        if ( $1 ne $last )  {
-            if (! $firstRow) {
-                $body .= "</td></tr>\n";
+    # In Japanese mode, disable locale.
+    # Sorting Japanese with "use locale" is memory and time consuming,
+    # and may cause perl crash.
+
+    if ( $self->config_( 'language' ) eq 'Nihongo' ) {
+        no locale;
+        for my $word (sort @words) {
+
+            # First character of stop word is EUC-JP in Japanese mode
+
+            $word =~ /^($euc_jp)/;
+
+            if ( $1 ne $last )  {
+                if ( !$firstRow ) {
+                    $body .= "</td></tr>\n";
+                } else {
+                    $firstRow = 0;
+                }
+                $body .= "<tr><th scope=\"row\" class=\"advancedAlphabet";
+                if ( $groupCounter == $groupSize ) {
+                    $body .= "GroupSpacing";
+                }
+                $body .= "\"><b>$1</b></th>\n";
+                $body .= "<td class=\"advancedWords";
+                if ( $groupCounter == $groupSize ) {
+                    $body .= "GroupSpacing";
+                    $groupCounter = 0;
+                }
+                $body .= "\">";
+                $last = $1;
+                $need_comma = 0;
+                $groupCounter += 1;
+            }
+            if ( $need_comma == 1 ) {
+                $body .= ", $word";
             } else {
-                $firstRow = 0;
+                $body .= $word;
+                $need_comma = 1;
             }
-            $body .= "<tr><th scope=\"row\" class=\"advancedAlphabet";
-            if ($groupCounter == $groupSize) {
-                $body .= "GroupSpacing";
-            }
-            $body .= "\"><b>$1</b></th>\n";
-            $body .= "<td class=\"advancedWords";
-            if ($groupCounter == $groupSize) {
-                $body .= "GroupSpacing";
-                $groupCounter = 0;
-            }
-            $body .= "\">";
-
-
-            $last = $1;
-            $need_comma = 0;
-            $groupCounter += 1;
         }
-        if ( $need_comma == 1 ) {
-            $body .= ", $word";
-        } else {
-            $body .= $word;
-            $need_comma = 1;
+    } else {
+        for my $word (sort @words) {
+            $word =~ /^(.)/;
+
+            if ( $1 ne $last )  {
+                if (! $firstRow) {
+                    $body .= "</td></tr>\n";
+                } else {
+                    $firstRow = 0;
+                }
+                $body .= "<tr><th scope=\"row\" class=\"advancedAlphabet";
+                if ($groupCounter == $groupSize) {
+                    $body .= "GroupSpacing";
+                }
+                $body .= "\"><b>$1</b></th>\n";
+                $body .= "<td class=\"advancedWords";
+                if ($groupCounter == $groupSize) {
+                    $body .= "GroupSpacing";
+                    $groupCounter = 0;
+                }
+                $body .= "\">";
+
+
+                $last = $1;
+                $need_comma = 0;
+                $groupCounter += 1;
+            }
+            if ( $need_comma == 1 ) {
+                $body .= ", $word";
+            } else {
+                $body .= $word;
+                $need_comma = 1;
+            }
         }
     }
 
@@ -2570,12 +2627,36 @@ sub new_history_file__
     my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->{classifier__}->history_read_class( $file );
     my $from    = '';
     my $subject = '';
+    my $long_header = '';
 
     if ( open MAIL, '<'. $self->global_config_( 'msgdir' ) . $file ) {
         while ( <MAIL> )  {
             last          if ( /^(\r\n|\r|\n)/ );
-            $from = $1    if ( /^From: *(.*)/i );
-            $subject = $1 if ( /^Subject: *(.*)/i );
+
+            # Support long header that has more than 2 lines by JI
+
+            if(/^[\t ]+(=\?[\w-]+\?[BQ]\?.*\?=.*)/){
+                if($long_header eq 'from'){
+                    $from .= $1;
+                    next;
+                }
+                if($long_header eq 'subject'){
+                    $subject .= $1;
+                    next;
+                }
+            }else{
+                if(/^From: *(.*)/i){
+                    $long_header = 'from';
+                    $from = $1;
+                    next;
+                }elsif (/^Subject: *(.*)/i){
+                    $long_header = 'subject';
+                    $subject = $1;
+                    next;
+                }
+                $long_header = '';
+            }
+
             last if ( ( $from ne '' ) && ( $subject ne '' ) );
         }
         close MAIL;

@@ -31,6 +31,27 @@ use Classifier::WordMangle;
 use MIME::Base64;
 use MIME::QuotedPrint;
 
+# These are used for Japanese support
+
+use Encode;
+my $ascii = '[\x00-\x7F]'; # ASCII chars
+my $two_bytes_euc_jp = '(?:[\x8E\xA1-\xFE][\xA1-\xFE])'; # 2bytes EUC-JP chars
+my $three_bytes_euc_jp = '(?:\x8F[\xA1-\xFE][\xA1-\xFE])'; # 3bytes EUC-JP chars
+my $euc_jp = "(?:$ascii|$two_bytes_euc_jp|$three_bytes_euc_jp)"; # EUC-JP chars
+
+# Symbols in EUC-JP chars which cannot be considered a part of words
+my $symbol_row1_euc_jp = '(?:[\xA1][\xA1-\xBB\xBD-\xFE])';
+my $symbol_row2_euc_jp = '(?:[\xA2][\xA1-\xFE])';
+my $symbol_row8_euc_jp = '(?:[\xA8][\xA1-\xFE])';
+my $symbol_euc_jp = "(?:$symbol_row1_euc_jp|$symbol_row2_euc_jp|$symbol_row8_euc_jp)";
+
+# Cho-on kigou(symbol in Japanese), a special symbol which can appear in middle of words
+my $cho_on_symbol = '(?:\xA1\xBC)';
+
+# Non-symbol EUC-JP chars
+my $non_symbol_two_bytes_euc_jp = '(?:[\x8E\xA3-\xA7\xB0-\xFE][\xA1-\xFE])'; 
+my $non_symbol_euc_jp = "(?:$non_symbol_two_bytes_euc_jp|$three_bytes_euc_jp|$cho_on_symbol)";
+
 # HTML entity mapping to character codes, this maps things like &amp; to their corresponding
 # character code
 
@@ -172,6 +193,10 @@ sub new
     $self->{html_tag__}     = '';
     $self->{html_arg__}     = '';
     $self->{in_headers__}   = 0;
+
+    # This is used for switching on/off language specific functionality
+    $self->{lang__} = '';
+
     $self->{first20__}      = '';
 
     return bless $self, $type;
@@ -461,17 +486,45 @@ sub add_line
                 $self->update_pseudoword( 'trick', 'dottedwords', $encoded, "$1$2" );
             }
 
-            # Only care about words between 3 and 45 characters since short words like
-            # an, or, if are too common and the longest word in English (according to
-            # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
+            if ( $self->{lang__} eq 'Nihongo' ) {
+                # In Japanese mode, non-symbol EUC-JP characters should be
+                # matched.
+                #
+                # ^$euc_jp*? is added to avoid incorrect matching.
+                # For example, EUC-JP char represented by code A4C8, should not
+                # match the middle of two EUC-JP chars represented by CCA4 and
+                # C8BE, the second byte of the first char and the first byte of
+                # the second char.
 
-            while ( $line =~ s/([[:alpha:]][[:alpha:]\']{1,44})([_\-,\.\"\'\)\?!:;\/& \t\n\r]{0,5}|$)// ) {
-                if ( ( $self->{in_headers__} == 0 ) && ( $self->{first20count__} < 20 ) ) {
-                    $self->{first20count__} += 1;
-                    $self->{first20__} .= " $1";
+                while ( $line =~ s/^$euc_jp*?(([A-Za-z]|$non_symbol_euc_jp)([A-Za-z\']|$non_symbol_euc_jp){1,44})([_\-,\.\"\'\)\?!:;\/& \t\n\r]{0,5}|$)//ox ) {
+                    if ( ( $self->{in_headers__} == 0 ) && ( $self->{first20count__} < 20 ) ) {
+                        $self->{first20count__} += 1;
+                        $self->{first20__} .= " $1";
+                    }
+
+                    my $matched_word = $1;
+
+                    # In Japanese, 2 characters words are common, so care about
+                    # words between 2 and 45 characters
+
+                    if (((length $matched_word >= 3) && ($matched_word =~ /[A-Za-z]/)) || ((length $matched_word >= 2) && ($matched_word =~ /$non_symbol_euc_jp/))) {
+                        update_word($self, $matched_word, $encoded, '', '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]'."|$symbol_euc_jp", $prefix);
+                    }
                 }
 
-                update_word($self,$1, $encoded, '', '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]', $prefix) if (length $1 >= 3);
+            } else {
+                # Only care about words between 3 and 45 characters since short words like
+                # an, or, if are too common and the longest word in English (according to
+                # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
+
+                while ( $line =~ s/([[:alpha:]][[:alpha:]\']{1,44})([_\-,\.\"\'\)\?!:;\/& \t\n\r]{0,5}|$)// ) {
+                    if ( ( $self->{in_headers__} == 0 ) && ( $self->{first20count__} < 20 ) ) {
+                        $self->{first20count__} += 1;
+                        $self->{first20__} .= " $1";
+                    }
+
+                    update_word($self,$1, $encoded, '', '[_\-,\.\"\'\)\?!:;\/ &\t\n\r]', $prefix) if (length $1 >= 3);
+                }
             }
 
             $p += 1024;
@@ -1025,11 +1078,15 @@ sub parse_html
 # HTML version of message if color__ is set
 #
 # $file     The file to open and parse
+# $lang     Pass in the current interface language for language specific parsing
 #
 # ---------------------------------------------------------------------------------------------
 sub parse_file
 {
-    my ( $self, $file ) = @_;
+    # $lang is used for switching on/off language specific functionality
+
+    my ( $self, $file, $lang ) = @_;
+    $self->{lang__} = $lang;
 
     $self->start_parse();
 
@@ -1384,15 +1441,27 @@ sub decode_string
 
     my $decode_it = '';
 
-    while ( $mystring =~ /=\?[\w-]+\?(B|Q)\?(.*?)\?=/ig ) {
-        if ($1 eq "B" || $1 eq "b") {
-            $decode_it = decode_base64( $2 );
+    while ( $mystring =~ /=\?([\w-]+)\?(B|Q)\?(.*?)\?=/ig ) {
+        if ($2 eq "B" || $2 eq "b") {
+            $decode_it = decode_base64( $3 );
+
+            # for Japanese header
+            if (uc($1) eq "ISO-2022-JP") {
+                Encode::from_to($decode_it, "iso-2022-jp", "euc-jp");
+            }
+
             $mystring =~ s/=\?[\w-]+\?B\?(.*?)\?=/$decode_it/i;
         } else {
-            if ($1 eq "Q" || $1 eq "q") {
-                $decode_it = $2;
+            if ($2 eq "Q" || $2 eq "q") {
+                $decode_it = $3;
                 $decode_it =~ s/\_/=20/g;
                 $decode_it = decode_qp( $decode_it );
+
+                # for Japanese header
+                if (uc($1) eq "ISO-2022-JP") {
+                    Encode::from_to($decode_it, "iso-2022-jp", "euc-jp");
+                }
+
                 $mystring =~ s/=\?[\w-]+\?Q\?(.*?)\?=/$decode_it/i;
             }
         }
