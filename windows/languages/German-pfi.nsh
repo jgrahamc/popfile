@@ -196,12 +196,14 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INSTALLER_MUTEX      "Eine andere Version des POPFile-Installationsprogramms läuft bereits!"
 
 #--------------------------------------------------------------------------
-# Message box warning that a previous installation has been found
+# Message box warnings used when verifying the installation folder chosen by user
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1   "Vorhandene Installation gefunden:"
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2   "Wollen Sie die bestehende Version aktualisieren?"
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_3   "Ältere Konfigurationsdaten gefunden:"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_4   "Restored configuration data found"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_5   "Do you want to use the restored data ?"
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
@@ -275,6 +277,10 @@
 ; (the page with the "Install" button will vary depending upon the page order in the script)
 
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_UPGRADE     "Upgrade"
+
+; When resetting POPFile to use newly restored 'User Data', change "Install" button to "Restore"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_RESTORE     "Restore"
 
 ; Installation Progress Reports displayed above the progress bar
 
