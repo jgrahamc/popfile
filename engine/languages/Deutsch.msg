@@ -60,7 +60,7 @@ Total                                   Insgesamt
 Rename                                  Umbenennen
 Frequency                               Häufigkeit
 Probability                             Wahrscheinlichkeit
-Score                                   Auswertung
+Score                                   Bewertung
 Lookup                                  Nachschlagen
 Word                                    Wort
 Count                                   Anzahl
@@ -272,9 +272,16 @@ Session_Title                           POPFile Sitzung abgelaufen
 Session_Error                           Ihre POPFile-Sitzung ist abgelaufen. Dies könnte dadurch verursacht worden sein, daß Sie POPFile neu gestartet haben, das Kontrollzentrum aber noch im Browser geöffnet war. Bitte klicken Sie auf einen der oben angezeigten Verweise, um mit der Benutzung von POPFile weitermachen zu können.
 
 View_Title                              Nachrichtenansicht
+View_ShowFrequencies                    Zeige Häufigkeit des Auftretens
+View_ShowProbabilities                  Zeige Wahrscheinlichkeit des Auftretens
+View_ShowScores                         Zeige Bewertung des Wortes
+View_WordMatrix                         Wort Matrix
+View_WordProbabilities                  zeige Wahrscheinlichkeit des Auftretens
+View_WordFrequencies                    zeige Häufigkeit des Auftretens
+View_WordScores                         zeige Bewertung des Wortes
 
 Windows_TrayIcon                        POPFile-Symbol neben der Uhr anzeigen?
-Windows_Console                         Nachrichten in einem Konsolenfenster ausgeben?
+Windows_Console                         POPFile in einem Konsolenfenster ausführen?
 Windows_NextTime                        <p><font color="red">Diese Änderung wird erst beim nächsten Start von POPFile wirksam.</font>
 
 Header_MenuSummary                      Diese Tabelle ist das Navigationsmenü, das Zugang zu den einzelnen Bereichen des Kontrollzentrums bietet.

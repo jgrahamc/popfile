@@ -82,7 +82,7 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_POP3     "Wählen Sie den Standart-Port für POP3-Verbindungen (110 empfohlen)"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI      "Wählen Sie den Standard-Port für Verbindungen zur Benutzeroberfläche (8080 empfohlen)"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP  "POPFile mit Windows starten (läuft unsichtbar im Hintergrund)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP  "POPFile mit Windows starten"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_WARNING  "WICHTIGER HINWEIS"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE  "WENN SIE POPFILE UPDATEN: SETUP WIRD DIE VORHANDENE VERSION BEENDEN, FALLS DIESE IM HINTERGRUND LÄUFT"
 
@@ -118,7 +118,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORE      "Installiere Kernkomponenten..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL      "Installiere Minimal-Perl-Umgebung..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT     "Erzeuge Verknüpfungen..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FFCBACK   "Making corpus backup. This may take a few seconds..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FFCBACK   "Erstelle Corpus Backup. Dies kann einige Sekunden dauern..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS     "Installiere Skins..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS     "Installiere Sprachdateien..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC    "Klicken Sie auf Weiter um fortzufahren"
