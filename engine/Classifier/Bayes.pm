@@ -83,9 +83,6 @@ sub new
     # The magnets that cause attraction to certain buckets
     $self->{magnets}           = {};
     
-    # Where the corpus is stored
-    $self->{corpus}            = 'corpus';
-    
     # The unclassified cutoff probability
     $self->{unclassified}      = 0.5;
     
@@ -190,7 +187,7 @@ sub write_parameters
     my ($self) = @_;
     
     for my $bucket (keys %{$self->{total}})  {
-        open PARAMS, ">$self->{corpus}/$bucket/params";
+        open PARAMS, ">$self->{configuration}->{configuration}{corpus}/$bucket/params";
         for my $param (keys %{$self->{parameters}{$bucket}}) {
             print PARAMS "$param $self->{parameters}{$bucket}{$param}\n";
         }
@@ -316,7 +313,7 @@ sub load_word_matrix
     
     print "Loading the corpus...\n" if $self->{debug};
     
-    my @buckets = glob "$self->{corpus}/*";
+    my @buckets = glob "$self->{configuration}->{configuration}{corpus}/*";
     
     foreach my $bucket (@buckets) {
         my $color = '';
@@ -378,7 +375,7 @@ sub load_bucket
     $self->{magnets}{$bucket} = {};
 
     # See if there's a color file specified
-    if ( open PARAMS, "<$self->{corpus}/$bucket/params" ) {
+    if ( open PARAMS, "<$self->{configuration}->{configuration}{corpus}/$bucket/params" ) {
         while ( <PARAMS> )  {
             s/[\r\n]//g;
             if ( /^([[:lower:]]+) ([^\r\n\t ]+)$/ )  {
@@ -389,7 +386,7 @@ sub load_bucket
     }
 
     # See if there are magnets defined
-    if ( open MAGNETS, "<$self->{corpus}/$bucket/magnets" ) {
+    if ( open MAGNETS, "<$self->{configuration}->{configuration}{corpus}/$bucket/magnets" ) {
         while ( <MAGNETS> )  {
             s/[\r\n]//g;
             
@@ -423,7 +420,7 @@ sub load_bucket
     # Each line in the word table is a word and a count
     $self->{total}{$bucket} = 0;
 
-    if ( open WORDS, "<$self->{corpus}/$bucket/table" )  {
+    if ( open WORDS, "<$self->{configuration}->{configuration}{corpus}/$bucket/table" )  {
         while (<WORDS>) {
             if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
                 if ( $1 != $self->{corpus_version} )  {
@@ -464,7 +461,7 @@ sub save_magnets
     my ($self) = @_;
     
     for my $bucket (keys %{$self->{total}}) {
-        open MAGNET, ">$self->{corpus}/$bucket/magnets";
+        open MAGNET, ">$self->{configuration}->{configuration}{corpus}/$bucket/magnets";
         
         for my $type (keys %{$self->{magnets}{$bucket}})  {        
             for my $from (keys %{$self->{magnets}{$bucket}{$type}})  {
