@@ -2,6 +2,7 @@
 package Proxy::POP3;
 
 use Proxy::Proxy;
+use Digest::MD5;
 @ISA = ("Proxy::Proxy");
 
 # ---------------------------------------------------------------------------------------------
@@ -57,6 +58,15 @@ sub new
     $self->{connection_timeout_error_} = '-ERR no response from mail server';
     $self->{connection_failed_error_}  = '-ERR can\'t connect to';
     $self->{good_response_}            = '^\+OK';
+
+    # Client requested APOP
+    $self->{use_apop__} = 0;
+
+    # APOP username
+    $self->{apop_user__} = '';
+
+    # The APOP portion of the banner sent by the POP3 server
+    $self->{apop_banner__} = undef;
 
     return $self;
 }
@@ -142,8 +152,8 @@ sub start
                                          'pop3_secure_server_port',
                                          $self );                      # PROFILE BLOCK STOP
 
-    if ( $self->config_( 'welcome_string' ) =~ /^POP3 POPFile \(v\d+\.\d+\.\d+\) server ready$/ ) {
-        $self->config_( 'welcome_string', "POP3 POPFile ($self->{version_}) server ready" );
+    if ( $self->config_( 'welcome_string' ) =~ /^POP3 POPFile \(v\d+\.\d+\.\d+\) server ready$/ ) { # PROFILE BLOCK START
+        $self->config_( 'welcome_string', "POP3 POPFile ($self->{version_}) server ready" );        # PROFILE BLOCK STOP
     }
 
     return $self->SUPER::start();
@@ -175,9 +185,19 @@ sub child__
 
     my $mail;
 
+    $self->{apop_banner__} = undef;
+    $self->{use_apop__} = 0;
+    $self->{apop_user__} = '';
+
     # Tell the client that we are ready for commands and identify our version number
 
     $self->tee_( $client, "+OK " . $self->config_( 'welcome_string' ) . "$eol" );
+
+    # Compile some configurable regexp's once
+
+    my $user_command = 'USER ([^:]+)(:(\d+))?' . $self->config_( 'separator' ) . '([^:]+)(:([^:]+))?';
+
+    my $apop_command = 'APOP ([^:]+)(:(\d+))?' . $self->config_( 'separator' ) . '([^:]+) (.*?)';
 
     # Retrieve commands from the client and process them until the client disconnects or
     # we get a specific QUIT command
@@ -199,20 +219,53 @@ sub child__
         # pass through to that server and represents the account on the remote machine that we
         # will pull email from.  Doing this means we can act as a proxy for multiple mail clients
         # and mail accounts
+        # When the client issues the command "USER host:username:apop" POPFile must acknowledge
+        # the command and be prepared to compute the md5 digest of the user's password and the
+        # real pop server's banner upon receipt of a PASS command.
 
-        my $user_command = 'USER (.+?)(:(\d+))?' . $self->config_( 'separator' ) . '(.+)';
-        if ( $command =~ /$user_command/i ) {
+        if ( $command =~ /$user_command/io ) {
             if ( $1 ne '' )  {
-                print $pipe "LOGIN:$4$eol";
+                my ($host, $port, $user, $is_apop_user) = ($1, $3, $4, $6);
+
+                print $pipe "LOGIN:$user$eol";
                 flush $pipe;
                 $self->yield_( $ppipe, $pid );
 
-                if ( $mail = $self->verify_connected_( $mail, $client, $1, $3 || 110 ) )  {
+                if ( $mail = $self->verify_connected_( $mail, $client, $host, $port || 110 ) )  {
 
-                    # Pass through the USER command with the actual user name for this server,
-                    # and send the reply straight to the client
+                    if ( defined($is_apop_user) && $is_apop_user =~ /apop/i ) {
 
-                    last if ( $self->echo_response_($mail, $client, 'USER ' . $4 ) == 2 );
+                        # We want to make sure the server sent a real APOP banner, containing <>'s
+
+                        $self->{apop_banner__} = $1 if $self->{connect_banner__} =~ /(<[^>]+>)/;
+                        $self->log_( "banner=" . $self->{apop_banner__} ) if defined( $self->{apop_banner__} );
+
+                        # any apop banner is ok
+
+                        if ( defined($self->{apop_banner__})) {
+                            $self->{use_apop__} = 1; #
+                            $self->log_( "auth APOP" );
+                            $self->{apop_user__} = $user;
+                            # tell the client that username was accepted
+                            $self->tee_( $client, "+OK hello $user$eol" );
+                            next; # don't flush_extra, we didn't send anything to the real server
+                        } else {
+                            # If the client asked for APOP, and the server doesn't have the correct
+                            # banner, give a meaningful error instead of whatever error the server
+                            # might have if we try to make up a hash
+
+                            $self->{use_apop__} = 0;
+                            $self->tee_( $client, "-ERR $host doesn't support APOP, aborting authentication$eol" );
+                            next;
+                        }
+                    } else {
+                        # Pass through the USER command with the actual user name for this server,
+                        # and send the reply straight to the client
+                        $self->log_( "auth plaintext" );
+                        $self->{use_apop__} = 0;         # signifies a non-apop connection
+                        last if ($self->echo_response_( $mail, $client, 'USER ' . $user ) == 2 );
+                    }
+
                 } else {
 
                     # If the login fails then we want to continue in the unlogged in state
@@ -227,17 +280,34 @@ sub child__
 
         # User is issuing the APOP command to start a session with the remote server
 
-        if ( $command =~ /APOP (.+?):((.+):)?([^ ]+) (.*)/i ) {
-            if ( $mail = $self->verify_connected_( $mail, $client,  $1, $3 || 110 ) )  {
+        if ( ( $command =~ /PASS (.*)/i ) ) {
+            if ( $self->{use_apop__} ) {
+                # authenticate with APOP
+                my $md5 = Digest::MD5->new;
 
-                # Pass through the APOP command with the actual user name for this server,
-                # and send the reply straight to the client
+                $md5->add( $self->{apop_banner__}, $1 );
+                my $md5hex = $md5->hexdigest;
+                $self->log_( "digest='$md5hex'" );
 
-                last if ( $self->echo_response_($mail, $client, "APOP $4 $5" ) == 2 );
-            } else {
-                next;
-            }
+                my ($response, $ok) = $self->get_response_( $mail, $client, "APOP $self->{apop_user__} $md5hex", 0, 1 );
+                if($ok == 1  && $response =~ /$self->{good_response_}/) {
+                    # authentication OK, toss the hello response and return password ok
+                    $self->tee_( $client, "+OK password ok$eol" );
+                } else {
+                    $self->tee_( $client, "$response" );
+                }
+             } else {
+               last if ($self->echo_response_($mail, $client, $command) == 2 );
+             }
+             next;
+        }
 
+        # User is issuing the APOP command to start a session with the remote server
+        # We'd need a copy of the plaintext password to support this.
+        if ( $command =~ /$apop_command/io ) {
+            $self->tee_( $client, "-ERR APOP not supported between mail client and POPFile.$eol" );
+
+            # TODO: Consider implementing a host:port:username:secret hash syntax for proxying the APOP command
             next;
         }
 
@@ -416,12 +486,11 @@ sub child__
         # In the case of PASS, NOOP, XSENDER, STAT, DELE and RSET commands we simply pass it through to
         # the real mail server for processing and echo the response back to the client
 
-        if ( ( $command =~ /PASS (.*)/i )    ||                  # PROFILE BLOCK START
-             ( $command =~ /NOOP/i )         ||
+        if ( ( $command =~ /NOOP/i )         ||                 # PROFILE BLOCK START
              ( $command =~ /STAT/i )         ||
              ( $command =~ /XSENDER (.*)/i ) ||
              ( $command =~ /DELE (.*)/i )    ||
-             ( $command =~ /RSET/i ) ) {                         # PROFILE BLOCK STOP
+             ( $command =~ /RSET/i ) ) {                        # PROFILE BLOCK STOP
             last if ( $self->echo_response_($mail, $client, $command ) == 2 );
             next;
         }
@@ -444,7 +513,7 @@ sub child__
 
             #$self->log_( "Class file $file shortens to $short_file" );
 
-            if (defined($downloaded{$count}) && open( RETRFILE, "<$file" ) ) {
+            if (defined($downloaded{$count}) && (open RETRFILE, "<$file") ) {
 
                 # act like a network stream
 
@@ -490,10 +559,15 @@ sub child__
                 # we echo each line of the message until we hit the . at the end
 
                 my $response = $self->echo_response_($mail, $client, $command );
+
+                $self->log_("slurp data size in bytes: " . $self->slurp_data_size__($mail) );
+
                 last if ( $response == 2 );
                 if ( $response == 0 ) {
                     my $history_file;
                     ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, $download_count, $count, 0, '' );
+
+                    $self->log_("slurp data size in bytes: " . $self->slurp_data_size__($mail) );
 
                     # Tell the parent that we just handled a mail
 

@@ -69,7 +69,7 @@ sub new
 
     # Holding variable for MSWin32 pipe handling
 
-    $self->{pipe_cache__};
+    $self->{pipe_cache__} = {};
 
     # This is where we keep the session with the Classifier::Bayes
     # module
@@ -91,6 +91,9 @@ sub new
     # that the last command succeeded)
     #
     # $self->{good_response_}            = '';
+
+    # Connect Banner returned by the real server
+    $self->{connect_banner__} = '';
 
     return bless $self, $type;
 }
@@ -129,7 +132,7 @@ sub start
     # Open the socket used to receive request for proxy service
 
     $self->{server__} = IO::Socket::INET->new( Proto     => 'tcp', # PROFILE BLOCK START
-                                    $self->config_( 'local' ) == 1 ? (LocalAddr => 'localhost') : (),
+                                    ($self->config_( 'local' ) || 0) == 1 ? (LocalAddr => 'localhost') : (),
                                     LocalPort => $self->config_( 'port' ),
                                     Listen    => SOMAXCONN,
                                     Reuse     => 1 ); # PROFILE BLOCK STOP
@@ -251,7 +254,7 @@ sub read_pipe_
 
         # pop the oldest message;
 
-        $message = $1 if ($self->{pipe_cache__} =~ s/(.*?\n)//);
+        $message = $1 if (defined($self->{pipe_cache__}) && ( $self->{pipe_cache__} =~ s/(.*?\n)// ) );
 
         return $message;        # PROFILE PLATFORM STOP
     } else {
@@ -346,7 +349,7 @@ sub service
 
             my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
 
-            if  ( ( $self->config_( 'local' ) == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
+            if  ( ( ( $self->config_( 'local' ) || 0 ) == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
 
                 # Now that we have a good connection to the client fork a subprocess to handle the communication
                 # and set the socket to binmode so that no CRLF translation goes on
@@ -447,7 +450,7 @@ sub tee_
 
     # Send the message to the debug output and then send it to the appropriate socket
     $self->log_( $text );
-    print $socket $text;
+    print $socket $text; # don't print if $socket undef
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -673,6 +676,8 @@ sub verify_connected_
             }
 
             $self->log_( "Connection returned: $buf" );
+
+            $self->{connect_banner__} = $buf;
 
             # Clean up junk following a newline
 
