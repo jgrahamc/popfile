@@ -145,7 +145,7 @@
 
   ; Timeout loop counter start value (counts down to 0)
 
-  !define C_SHUTDOWN_LIMIT    10
+  !define C_SHUTDOWN_LIMIT    20
 
   ; Delay (in milliseconds) used inside the timeout loop
 
@@ -157,7 +157,7 @@
 
   ; Timeout loop counter start value (counts down to 0)
 
-  !define C_STARTUP_LIMIT    10
+  !define C_STARTUP_LIMIT    20
 
   ; Delay (in milliseconds) used inside the timeout loop
 
