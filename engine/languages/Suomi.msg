@@ -5,7 +5,7 @@ LanguageCode                            fi
 LanguageCharset                         ISO-8859-15
 
 # This is used to get the appropriate subdirectory for the manual
-ManualLanguage                          fi
+ManualLanguage                          en
 
 # Common words that are used on their own all over the interface
 Apply                                   K&auml;yt&auml;
@@ -19,8 +19,12 @@ Previous                                Edellinen
 Next                                    Seuraava
 From                                    L&auml;hett&auml;j&auml;
 Subject                                 Aihe
+Cc                                      Kopio
 Classification                          Luokitus
 Reclassify                              Luokittele uudelleen
+Probability                             Todenn&auml;k&ouml;isyys
+Scores                                  Pistem&auml;&auml;r&auml;t
+QuickMagnets                            Pikamagneetit
 Undo                                    Peru
 Close                                   Sulje
 Find                                    Etsi
@@ -40,6 +44,9 @@ Frequency                               Esiintymistiheys
 Probability                             Todenn&auml;k&ouml;isyys
 Score                                   Pistem&auml;&auml;r&auml;
 Lookup                                  Etsi
+Word                                    Sana
+Count                                   M&auml;&auml;r&auml;
+Update                                  P&auml;ivit&auml;
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile hallinta
@@ -60,14 +67,23 @@ Footer_MailingList                      Postituslista
 
 Configuration_Error1                    Erotusmerkin pit&auml;&auml; olla yksitt&auml;inen merkki
 Configuration_Error2                    K&auml;ytt&ouml;liittym&auml;n porttinumero pit&auml;&auml; olla 1:n ja 65535:n v&auml;lilt&auml;
-Configuration_Error3                    POP3 kuunteluportin numero pit&auml;&auml; olla 1:n ja 65535:n v&auml;lilt&auml;
+Configuration_Error3                    POP3-kuunteluportin numero pit&auml;&auml; olla 1:n ja 65535:n v&auml;lilt&auml;
 Configuration_Error4                    Sivun koon pit&auml;&auml; olla 1:n ja 1000:n v&auml;lilt&auml;
 Configuration_Error5                    Historian p&auml;ivien m&auml;&auml;r&auml; pit&auml;&auml; olla 1:n ja 366:n v&auml;lilt&auml;
-Configuration_Error6                    TCP odotusajan pit&auml;&auml; olla 10:n ja 300:n v&auml;lilt&auml;
-Configuration_POP3Port                  POP3 kuunteluportti
+Configuration_Error6                    TCP aikakatkaisun pit&auml;&auml; olla 10:n ja 300:n v&auml;lilt&auml;
+Configuration_Error7                    XML RPC:n kuunteluportti pit&auml;&auml; olla 1:n ja 65536:n v&auml;lilt&auml;.
+Configuration_POP3Port                  POP3-kuunteluportti
 Configuration_POP3Update                POP3-portiksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
-Configuration_Separator                 Erotusmerkki
-Configuration_SepUpdate                 Erotusmerkiksi vaihdettu %s
+Configuration_XMLRPCUpdate              XML-RPC-portiksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
+Configuration_XMLRPCPort                XML-RPC kuunteluportti
+Configuration_SMTPPort                  SMTP-kuunteluportti
+Configuration_SMTPUpdate                SMTP-portiksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
+Configuration_NNTPPort                  NNTP-kuunteluportti
+Configuration_NNTPUpdate                NNTP-portiksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
+Configuration_POP3Separator             POP3:n is&auml;nt&auml;:portti:k&auml;ytt&auml;j&auml; erotusmerkki
+Configuration_NNTPSeparator             NNTP:n is&auml;nt&auml;:portti:k&auml;ytt&auml;j&auml; erotusmerkki
+Configuration_POP3SepUpdate             POP3-erotusmerkiksi vaihdettu %s
+Configuration_NNTPSepUpdate             NNTP-erotusmerkiksi vaihdettu %s
 Configuration_UI                        K&auml;ytt&ouml;liittym&auml;n porttinumero
 Configuration_UIUpdate                  K&auml;ytt&ouml;liittym&auml;n porttinumeroksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
 Configuration_History                   Viestien m&auml;&auml;r&auml; sivua kohti
@@ -81,9 +97,9 @@ Configuration_Language                  Kieliasetukset
 Configuration_LanguageChoose            Valitse kieli
 Configuration_ListenPorts               Kuunnellut portit
 Configuration_HistoryView               Viestihistoria
-Configuration_TCPTimeout                TCP-yhteyden odotusaika
-Configuration_TCPTimeoutSecs            TCP-yhteyden odotusaika sekunteina
-Configuration_TCPTimeoutUpdate          TCP-yhteyden odotusajaksi asetettu %s sekuntia
+Configuration_TCPTimeout                TCP-yhteyden aikakatkaisu
+Configuration_TCPTimeoutSecs            TCP-yhteyden aikakatkaisu sekunteina
+Configuration_TCPTimeoutUpdate          TCP-yhteyden aikakatkaisuksi asetettu %s sekuntia
 Configuration_ClassificationInsertion   Luokituksen n&auml;kyvyys
 Configuration_SubjectLine               Aiherivin muuttaminen
 Configuration_XTCInsertion              X-Text-Classification -otsikon lis&auml;ys
@@ -94,12 +110,13 @@ Configuration_ToScreen                  Ruudulle
 Configuration_ToFile                    Tiedostoon
 Configuration_ToScreenFile              Ruudulle ja tiedostoon
 Configuration_LoggerOutput              Kirjaus
-Configuration_GeneralSkins              Skins
-Configuration_SmallSkins                Small Skins
-Configuration_TinySkins                 Tiny Skins
+Configuration_GeneralSkins              Tavalliset
+Configuration_SmallSkins                Pienet
+Configuration_TinySkins                 Todella pienet
+Configuration_CurrentLogFile            &lt;t&auml;m&auml;nhetkinen lokitiedosto&gt;
 
 Advanced_Error1                         Sana '%s' on jo huomiotta j&auml;tett&auml;vien sanojen listassa
-Advanced_Error2                         Huomiotta j&auml;tett&auml;v&auml;t sanat voivat sis&auml;lt&auml;&auml; vain kirjaimia ja numeroita sek&auml; seuraavia merkkej&auml;: "._-@"
+Advanced_Error2                         Huomiotta j&auml;tett&auml;v&auml;t sanat voivat sis&auml;lt&auml;&auml; vain kirjaimia ja numeroita sek&auml; seuraavia merkkej&auml;: &quot;._-@&quot;
 Advanced_Error3                         Sana '%s' lis&auml;tty huomiotta j&auml;tett&auml;vien sanojen listaan
 Advanced_Error4                         Sana '%s' ei ole huomiotta j&auml;tett&auml;vien sanojen listassa
 Advanced_Error5                         Sana '%s' poistettu huomiotta j&auml;tett&auml;vien sanojen listasta
@@ -108,7 +125,7 @@ Advanced_Message1                       Seuraavia sanoja ei oteta huomioon viest
 Advanced_AddWord                        Lis&auml;&auml; sana
 Advanced_RemoveWord                     Poista sana
 
-History_Filter                          &nbsp;(N&auml;kyviss&auml; vain sangon <font color="%s">%s</font> sis&auml;lt&ouml;)
+History_Filter                          &nbsp;(N&auml;kyviss&auml; vain sangon <font color=&quot;%s&quot;>%s</font> sis&auml;lt&ouml;)
 History_FilterBy                        Filter By
 History_Search                          &nbsp;(Etsitty aihetta %s)
 History_Title                           Viimeaikaiset viestit
@@ -119,15 +136,18 @@ History_NoFrom                          Ei l&auml;hett&auml;j&auml;tietoa
 History_NoSubject                       Ei aihetta
 History_ClassifyAs                      Luokittele
 History_MagnetUsed                      K&auml;ytetty magneettia
-History_ChangedTo                       Luokitukseksi vaihdettu <font color="%s">%s
-History_Already                         Viesti on jo uudelleenluokiteltu sankoon <font color="%s">%s</font>
+History_MagnetBecause                   <b>Magneettia k&auml;ytetty</b><p>Viesti luokiteltu sankoon <font color=&quot;%s&quot;>%s</font> magneetilla %s</p>
+History_ChangedTo                       Luokitukseksi vaihdettu <font color=&quot;%s&quot;>%s
+History_Already                         Viesti on jo uudelleenluokiteltu sankoon <font color=&quot;%s&quot;>%s</font>
 History_RemoveAll                       Poista kaikki
 History_RemovePage                      Poista sivu
 History_Remove                          Paina t&auml;st&auml; poistaaksesi n&auml;m&auml; viestit viestihistoriasta
 History_SearchMessage                   Etsi l&auml;hett&auml;jien ja aiheiden joukosta
 History_NoMessages                      Ei viestej&auml;
 History_ShowMagnet                      Magneeteilla luokitellut
+History_ShowNoMagnet                    Magneeteilla luokittelemattomat
 History_Magnet                          &nbsp;(N&auml;kyviss&auml; vain magneeteilla luokitellut viestit)
+History_NoMagnet                        &nbsp;(N&auml;kyviss&auml; vain magneeteilla luokittelemattomat viestit)
 History_ResetSearch                     Peruuta
 
 Password_Title                          Salasana
@@ -138,8 +158,8 @@ Password_Error1                         V&auml;&auml;r&auml; salasana
 Security_Error1                         Suojattun portti pit&auml;&auml; olla 1:n ja 65535:n v&auml;lilt&auml;
 Security_Stealth                        Piilotila/Palvelintoiminta
 Security_NoStealthMode                  Ei (Piilotila)
-Security_ExplainStats                   Kun t&auml;m&auml; asetus on p&auml;&auml;ll&auml;, POPFile l&auml;hett&auml;&auml; kerran p&auml;iv&auml;ss&auml; seuraavat kolme arvoa osoitteeseen www.usetehsource.com: bc (sankojen kokonaism&auml;&auml;r&auml;), mc (POPFilen luokittelemien viestien m&auml;&auml;r&auml;) ja ec (luokitteluvirheiden m&auml;&auml;r&auml;). N&auml;it&auml; tietoja k&auml;ytet&auml;&auml;n POPFilen k&auml;ytt&ouml;tavoista ja toimintatarkkuudesta kertovien tilastojen laatimiseen. Webpalvelin s&auml;ilytt&auml;&auml; lokitiedostoja noin 5:n p&auml;iv&auml;n ajan, jonka j&auml;lkeen ne poistetaan. Mink&auml;&auml;nlaista tietoa tilastojen ja IP-osoitteiden v&auml;lill&auml; ei s&auml;ilytet&auml;.
-Security_ExplainUpdate                  Kun t&auml;m&auml; asetus on p&auml;&auml;ll&auml;, POPFile l&auml;hett&auml;&auml; kerran p&auml;iv&auml;ss&auml; seuraavat kolme arvoa osoitteeseen www.usetehsource.com: ma (POPFilen iso versionumero), mi (POPFilen pieni versionumero) ja bn (POPFilen k&auml;&auml;nn&ouml;snumero). POPFile saa vastauksen kuvana, joka n&auml;kyy sivun yl&auml;laidassa, kun uusi versio on saatavilla. Webpalvelin s&auml;ilytt&auml;&auml; lokitiedostoja noin 5:n p&auml;iv&auml;n ajan, jonka j&auml;lkeen ne poistetaan. Mink&auml;&auml;nlaista tietoa p&auml;ivitystarkistusten ja IP-osoitteiden v&auml;lill&auml; ei s&auml;ilytet&auml;.
+Security_ExplainStats                   Kun t&auml;m&auml; asetus on p&auml;&auml;ll&auml;, POPFile l&auml;hett&auml;&auml; kerran p&auml;iv&auml;ss&auml; seuraavat kolme arvoa osoitteeseen www.usethesource.com: bc (sankojen kokonaism&auml;&auml;r&auml;), mc (POPFilen luokittelemien viestien m&auml;&auml;r&auml;) ja ec (luokitteluvirheiden m&auml;&auml;r&auml;). N&auml;it&auml; tietoja k&auml;ytet&auml;&auml;n POPFilen k&auml;ytt&ouml;tavoista ja toimintatarkkuudesta kertovien tilastojen laatimiseen. Webpalvelin s&auml;ilytt&auml;&auml; lokitiedostoja noin 5:n p&auml;iv&auml;n ajan, jonka j&auml;lkeen ne poistetaan. Mink&auml;&auml;nlaista tietoa tilastojen ja IP-osoitteiden v&auml;lill&auml; ei s&auml;ilytet&auml;.
+Security_ExplainUpdate                  Kun t&auml;m&auml; asetus on p&auml;&auml;ll&auml;, POPFile l&auml;hett&auml;&auml; kerran p&auml;iv&auml;ss&auml; seuraavat kolme arvoa osoitteeseen www.usethesource.com: ma (POPFilen iso versionumero), mi (POPFilen pieni versionumero) ja bn (POPFilen k&auml;&auml;nn&ouml;snumero). POPFile saa vastauksen kuvana, joka n&auml;kyy sivun yl&auml;laidassa, kun uusi versio on saatavilla. Webpalvelin s&auml;ilytt&auml;&auml; lokitiedostoja noin 5:n p&auml;iv&auml;n ajan, jonka j&auml;lkeen ne poistetaan. Mink&auml;&auml;nlaista tietoa p&auml;ivitystarkistusten ja IP-osoitteiden v&auml;lill&auml; ei s&auml;ilytet&auml;.
 Security_PasswordTitle                  K&auml;ytt&ouml;liittym&auml;n salasana
 Security_Password                       Salasana
 Security_PasswordUpdate                 Salasanaksi vaihdettu %s
@@ -148,8 +168,15 @@ Security_SecureServer                   Suojattu palvelin
 Security_SecureServerUpdate             Suojatuksi palvelimeksi asetettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
 Security_SecurePort                     Suojattu portti
 Security_SecurePortUpdate               Portiksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
-Security_POP3                           Hyv&auml;ksy POP3-yhteydet muilta koneilta
-Security_UI                             Hyv&auml;ksy HTTP-yhteydet (POPFilen hallinta) muilta koneilta
+Security_SMTPServer                     SMTP-ketjupalvelin
+Security_SMTPServerUpdate               SMTP-ketjupalvelimeksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
+Security_SMTPPort                       SMTP-ketjuportti
+Security_SMTPPortUpdate                 SMTP-ketjuportiksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
+Security_POP3                           Hyv&auml;ksy POP3-yhteydet muilta koneilta (Vaatii POPFilen uudelleenk&auml;ynnistyksen)
+Security_SMTP                           Hyv&auml;ksy SMTP-yhteydet muilta koneilta (Vaatii POPFilen uudelleenk&auml;ynnistyksen)
+Security_NNTP                           Hyv&auml;ksy NNTP-yhteydet muilta koneilta (Vaatii POPFilen uudelleenk&auml;ynnistyksen)
+Security_UI                             Hyv&auml;ksy HTTP-yhteydet (POPFilen hallinta) muilta koneilta (Vaatii POPFilen uudelleenk&auml;ynnistyksen)
+Security_XMLRPC                         Hyv&auml;ksy XML-RPC-yhteydet muilta koneilta (Vaatii POPFilen uudelleenk&auml;ynnistyksen)
 Security_UpdateTitle                    Automaattinen p&auml;ivitystarkistus
 Security_Update                         Tarkista p&auml;ivitt&auml;in onko POPFilest&auml; tullut uutta versiota.
 Security_StatsTitle                     Tilastotietojen raportointi
@@ -166,7 +193,7 @@ Magnet_MagnetType                       Magneetin tyyppi
 Magnet_Value                            arvo
 Magnet_Always                           laitetaan aina sankoon
 
-Bucket_Error1                           Sangon nimess&auml; saa olla ainoastaan pieni&auml; kirjaimia a:sta z:aan, sek&auml; merkkej&auml; "-" ja "_"
+Bucket_Error1                           Sangon nimess&auml; saa olla ainoastaan pieni&auml; kirjaimia a:sta z:aan, sek&auml; merkkej&auml; &quot;-&quot; ja &quot;_&quot;
 Bucket_Error2                           Sanko nimelt&auml; %s on jo olemassa
 Bucket_Error3                           Luotiin sanko nimelt&auml; %s
 Bucket_Error4                           Sangon nimess&auml; pit&auml;&auml; olla joitakin merkkej&auml;
@@ -186,6 +213,8 @@ Bucket_EmailsClassifiedUpper            Viestej&auml; luokiteltu
 Bucket_ClassificationErrors             Luokitteluvirheit&auml;
 Bucket_Accuracy                         Tarkkuus
 Bucket_ClassificationCount              Luokittelum&auml;&auml;r&auml;t
+Bucket_ClassificationFP                 V&auml;&auml;r&auml;t positiiviset
+Bucket_ClassificationFN                 V&auml;&auml;r&auml;t negatiiviset
 Bucket_ResetStatistics                  Nollaa tilastot
 Bucket_LastReset                        Viime nollaus
 Bucket_CurrentColor                     Sangon %s t&auml;m&auml;nhetkinen v&auml;ri on %s
@@ -197,7 +226,7 @@ Bucket_RenameBucket                     Muuta sangon
 Bucket_Lookup                           Etsint&auml;
 Bucket_LookupMessage                    Etsi sanaa sangoista
 Bucket_LookupMessage2                   Etsint&auml;tulos sanalle
-Bucket_LookupMostLikely                 Sana <b>%s</b> esiintyy suurimmalla todenn&auml;k&ouml;isyydell&auml; sangossa <font color="%s">%s</font>
+Bucket_LookupMostLikely                 Sana <b>%s</b> esiintyy suurimmalla todenn&auml;k&ouml;isyydell&auml; sangossa <font color=&quot;%s&quot;>%s</font>
 Bucket_DoesNotAppear                    <p>Sana <b>%s</b> ei esiinny miss&auml;&auml;n sangossa
 Bucket_DisabledGlobally                 Poistettu yleisesti k&auml;yt&ouml;st&auml;
 Bucket_To                               nimeksi
@@ -210,23 +239,25 @@ SingleBucket_Percentage                 Osuus kokonaism&auml;&auml;r&auml;st&aum
 SingleBucket_WordTable                  Sanataulukko sangolle nimelt&auml; %s
 SingleBucket_Message1                   T&auml;hdell&auml; (*) merkittyj&auml; sanoja on k&auml;ytetty luokitteluun t&auml;m&auml;n istunnon aikana. Napsauta sanaa n&auml;hd&auml;ksesi sen esiintymistodenn&auml;k&ouml;isyyden kaikissa sangoissa.
 SingleBucket_Unique                     %s erillist&auml; sanaa
+SingleBucket_ClearBucket                Poista kaikki sanat
 
 Session_Title                           POPFile-istunto vanhentunut
 Session_Error                           POPFile-instuntosi on vanhentunut. T&auml;m&auml; voi johtua siit&auml;, ett&auml; olet k&auml;ynnist&auml;nyt POPFilen uudelleen niin, ett&auml; selaimesi oli p&auml;&auml;ll&auml;. Napsauta ylh&auml;&auml;ll&auml; olevia linkkej&auml; jatkaaksesi POPFilen k&auml;ytt&ouml;&auml;.
 
-Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.
-History_MainTableSummary                This table shows the sender and subject of recently received messages and allows them to be reviewed and reclassified.  Clicking on the subject line will show the full message text, along with information about why it was classified as it was.  The 'Should be' column allows you to specify which bucket the message belongs in, or to undo that change.  The 'Delete' column allows you to delete specific messages from the history if you don't need them anymore.
-History_OpenMessageSummary              This table contains the full text of an email message, with the words that are used for classification highlighted according to the bucket that was most relevant for each.
-Bucket_MainTableSummary                 This table provides an overview of the classification buckets.  Each row shows the bucket name, the word count total for that bucket, the actual number of individual words in each bucket, whether the email's subject line will be modified when it gets classified to that bucket, whether to quarantine the messages received in that bucket, and a table to pick the color used in displaying anything related to that bucket in the control center.
-Bucket_StatisticsTableSummary           This table provides three sets of statistics on the overall performance of PopFile.  The first is how accurate its classification is, the second is how many emails have been classified, and to which buckets, and the third is how many words are in each bucket, and what their relative percentages are.
-Bucket_MaintenanceTableSummary          This table contains forms that allow you to create, delete or rename buckets, and to lookup a word in all of the buckets to see its relative probabilities.
-Bucket_AccuracyChartSummary             This table graphically represents the accuracy of the email classification.
-Bucket_BarChartSummary                  This table graphically represents a percentage allocation for each of the different buckets.  It is used for both number of emails classified, and total word counts.
-Bucket_LookupResultsSummary             This table shows the probabilities associated with any given word of the corpus.  For each bucket, it shows the frequency that that word occurs, the probability that it will occur in that bucket, and the overall effect on the score of the bucket if that word exists in an email.
-Bucket_WordListTableSummary             This table provides a listing of all the words for a particular bucket, organized by common first letter for each row.
-Magnet_MainTableSummary                 This table shows the list of magnets that are used to automatically classify email according to fixed rules.  Each row shows how the magnet is defined, what bucket it is intended for, and a button to delete the magnet.
-Configuration_MainTableSummary          This table contains a number of forms to allow you to control the configuration of PopFile.
-Configuration_InsertionTableSummary     This table contains buttons that determine whether or not certain modifications are made to the headers or subject line of the email before it is passed on to the email client.
-Security_MainTableSummary               This table provides sets of controls that affect the security of the overall configuration of PopFile, whether it should automatically check for updates to the program, and whether statistics about PopFile's performance should be sent to the central datastore of the program's author for general information.
-Advanced_MainTableSummary               This table provides a list of words that PopFile ignores when classifying email due to their relative frequency in email in general.  They are organized per row according to the first letter of the words.
+View_Title                              Yksitt&auml;isen viestin n&auml;kym&auml;
 
+Header_MenuSummary                      T&auml;ss&auml; taulukossa on navigointivalikko jonka avulla voit k&auml;ytt&auml;&auml; POPFilen hallinnan eri sivuja.
+History_MainTableSummary                T&auml;ss&auml; taulukossa n&auml;kyy viime aikoina saapuneiden viestien l&auml;hett&auml;j&auml;t ja aiheet. Viestej&auml; voi sen avulla tutkia ja uudelleenluokitella. Aiherivin napsautuksella n&auml;kyy koko vietin teksti, sek&auml; tietoa siit&auml; miksi viesti luokiteltiin niin kuin luokiteltiin. &quot;Pit&auml;isi olla&quot;-sarakkeen avulla voit kertoa mihin sankoon viesti kuuluu, tai kumoa muutoksen. Poista-sarakkeen avulla voit poistaa yksitt&auml;isi&auml; viestej&auml; viestihistoriasta, jos et tarvitse niit&auml; en&auml;&auml;.
+History_OpenMessageSummary              T&auml;ss&auml; taulukossa n&auml;kyy viestin koko teksti niin, ett&auml; luokitteluun k&auml;ytetyt sanat on korostettu sen mukaan mihin sankoon sana todenn&auml;k&ouml;isimmin kuuluu.
+Bucket_MainTableSummary                 T&auml;ss&auml; taulukossa n&auml;kyy yleiskuva luokittelusangoista. Joka rivi n&auml;ytt&auml;&auml; sangon nimen, sangon sanam&auml;&auml;r&auml;n, yksitt&auml;isten sanojen m&auml;&auml;r&auml;n, muutetaanko viestin otsikkoa, jos se luokitellaan sankoon, laitetaanko sankoon kuuluvat viestit karanteeniin, sek&auml; sankoon viitatessa k&auml;ytett&auml;v&auml;n v&auml;rin.
+Bucket_StatisticsTableSummary           T&auml;ss&auml; taulukossa on kolme tilastoa jtka kuvaavat POPFilen tehokkuutta. Ensimm&auml;inen kertoo luokittelutarkkuuden, toinen montako vieti&auml; on luokiteltu ja mihin sankoihin, ja kolmas kertoo montako sanaa kussakin sangossa on, ja montako prosenttia sangon sanojen m&auml;&auml;r&auml; on kaikista sanoista.
+Bucket_MaintenanceTableSummary          T&auml;ss&auml; taulukossa on lomakkeita, joiden avulla voit luoda, poistaa ja nimet&auml; sankoja ja etsi&auml; sanaa kaikista sangoista ja tarkastaa sen todenn&auml;k&ouml;isyys niiss&auml;.
+Bucket_AccuracyChartSummary             T&auml;ss&auml; taulukossa n&auml;kuu luokittelutarkkuus graafisesti.
+Bucket_BarChartSummary                  T&auml;ss&auml; taulukossa n&auml;kyy eri sankojen osuudet kokonaisuudesta. Sit&auml; k&auml;ytet&auml;&auml;n sek&auml; luokiteltujen viestien m&auml;&auml;r&auml;n esitt&auml;miseen, ett&auml; sanam&auml;&auml;rien esitt&auml;miseen.
+Bucket_LookupResultsSummary             T&auml;ss&auml; taulukossa n&auml;kyy sanan esiintymistodenn&auml;k&ouml;isyys kaikissa sanakirjoissa. Se n&auml;ytt&auml;&auml; joka sankoa kohden sanan esiintymistiheyden ja -todenn&auml;k&ouml;isyyden, sek&auml; sanan pistem&auml;&auml;r&auml;n mik&auml;li se esiintyy viestiss&auml;.
+Bucket_WordListTableSummary             T&auml;ss&auml; taulukossa on sangon sanalista. Lista on j&auml;rjestetty etukirjaimen mukaan.
+Magnet_MainTableSummary                 T&auml;ss&auml; taulukossa n&auml;kyy viestien kiinte&auml;&auml;n luokitteluun k&auml;ytettyjen magneettien lista. Joka rivill&auml; n&auml;kyy miten magneetti on m&auml;&auml;ritelty, mihin sankoon se on tarkoitettu, ja nappi magneetin poistoa varten.
+Configuration_MainTableSummary          T&auml;ss&auml; taulukossa on lomakkeita POPFilen asetusten muuttamiseen.
+Configuration_InsertionTableSummary     T&auml;ss&auml; taulukossa on nappeja, joiden avulla m&auml;&auml;ritell&auml;&auml; muutetanko vietin otsikkotietoja tai aihetta ennen kuin se annetaan email-ohjelmalle.
+Security_MainTableSummary               T&auml;ss&auml; taulukossa on s&auml;&auml;t&ouml;j&auml;, joilla voit vaikuttaa POPFilen turvallisuusasetuksiin, saako POPFile tarkistaa onko uusi versio ilmestynyt, ja saako POPFilen toiminnasta kertovia tilastoja l&auml;hett&auml;&auml; ohjelman tekij&auml;n keskustietokantaan.
+Advanced_MainTableSummary               T&auml;ss&auml; taulukossa on lista sanoista, jotka POPFile j&auml;tt&auml;&auml; huomiotta niiden yleisyyden takia. Ne on j&auml;rjestetty aakkosj&auml;rjestykseen.
