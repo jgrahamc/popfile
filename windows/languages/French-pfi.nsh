@@ -27,22 +27,22 @@
 #
 #--------------------------------------------------------------------------
 #
-# Translation created by: (nobody)
+# Translation created by: Olivier Guillion (olivier at myriad-online.com)
 # Translation updated by: (nobody)
 #
 #--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_MB* text used for message boxes):
 #
-#   (1) The sequence  $\r$\n        inserts a newline
-#   (2) The sequence  $\r$\n$\r\$n  inserts a blank line
+#   (1) The sequence  ${MB_NL}          inserts a newline
+#   (2) The sequence  ${MB_NL}${MB_NL}  inserts a blank line
 #
 # (the 'PFI_LANG_CBP_MBCONTERR_2' message box string which is listed under the heading
 # 'Custom Page - POPFile Classification Bucket Creation' includes some examples)
 #--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_IO_ text used for custom pages):
 #
-#   (1) The sequence  \r\n      inserts a newline
-#   (2) The sequence  \r\n\r\n  inserts a blank line
+#   (1) The sequence  ${IO_NL}          inserts a newline
+#   (2) The sequence  ${IO_NL}${IO_NL}  inserts a blank line
 #
 # (the 'PFI_LANG_CBP_IO_INTRO' custom page string which is listed under the heading
 # 'Custom Page - POPFile Classification Bucket Creation' includes some examples)
@@ -61,6 +61,9 @@
 
 !define PFI_LANG  "FRENCH"
 
+!define IO_NL     "\r\n"
+!define MB_NL     "$\r$\n"
+
 #==========================================================================
 # Customised versions of strings used on standard MUI pages
 #==========================================================================
@@ -72,26 +75,26 @@
 #--------------------------------------------------------------------------
 # Standard MUI Page - Welcome (for the main POPFile installer)
 #
-# The sequence \r\n\r\n inserts a blank line (note that the PFI_LANG_WELCOME_INFO_TEXT string
-# should end with a \r\n\r\n$_CLICK sequence).
+# The sequence ${IO_NL}${IO_NL} inserts a blank line (note that the PFI_LANG_WELCOME_INFO_TEXT string
+# should end with a ${IO_NL}${IO_NL}$_CLICK sequence).
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT    "Vous êtes sur le point d'installer POPFile sur votre ordinateur.\r\n\r\nAvant de débuter l'installation, il est recommandé de fermer toutes les autres applications.\r\n\r\n$_CLICK"
-!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_ADMIN_TEXT   "IMPORTANT NOTICE:\r\n\r\nThe current user does NOT have 'Administrator' rights.\r\n\r\nIf multi-user support is required, it is recommended that you cancel this installation and use an 'Administrator' account to install POPFile."
+!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT    "Vous êtes sur le point d'installer POPFile sur votre ordinateur.${IO_NL}${IO_NL}Avant de débuter l'installation, il est recommandé de fermer toutes les autres applications.${IO_NL}${IO_NL}$_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_ADMIN_TEXT   "NOTE IMPORTANTE :${IO_NL}${IO_NL}L'utilisateur actuel n'a PAS les droits 'Administrateur'.${IO_NL}${IO_NL}Si la gestion multi-utilisateurs est nécessaire, il est préférable d'abandonner cette installation et d'utiliser un compte 'Administrateur' pour installer POPFile."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Directory Page (for the main POPFile installer)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TITLE        "Choose Program Files Install Location"
-!insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TEXT_DESTN   "Destination Folder for the POPFile Program"
+!insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TITLE        "Sélectionnez l'emplacement d'installation des fichiers du programme"
+!insertmacro PFI_LANG_STRING PFI_LANG_ROOTDIR_TEXT_DESTN   "Dossier de destination du programme POPFile"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Installation Page (for the main POPFile installer)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_TITLE     "Program Files Installed"
-!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_SUBTITLE  "${C_PFI_PRODUCT} must be configured before it can be used"
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_TITLE     "Les fichiers du programme sont installés"
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTFINISH_SUBTITLE  "${C_PFI_PRODUCT} doit être configuré avant de pouvoir être utilisé"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish (for the main POPFile installer)
@@ -99,7 +102,7 @@
 # The PFI_LANG_FINISH_RUN_TEXT text should be a short phrase (not a long paragraph)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_FINISH_RUN_TEXT      "POPFile Interface Utilisateur"
+!insertmacro PFI_LANG_STRING PFI_LANG_FINISH_RUN_TEXT      "Interface Utilisateur de POPFile"
 
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -110,14 +113,14 @@
 # Standard MUI Page - Installation Page (for the 'Monitor Corpus Conversion' utility)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TITLE        "POPFile Corpus Conversion"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUBTITLE     "The existing corpus must be converted to work with this version of POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TITLE        "Conversion du Corpus de POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUBTITLE     "Le corpus existant doit être converti pour fonctionner avec cette version de POPFile"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "POPFile Corpus Conversion Completed"
-!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "Please click Close to continue"
+!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_TITLE     "Conversion du corpus de POPFile terminée"
+!insertmacro PFI_LANG_STRING PFI_LANG_ENDCONVERT_SUBTITLE  "Cliquez 'Fermer' pour continuer"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_TITLE     "POPFile Corpus Conversion Failed"
-!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_SUBTITLE  "Please click Cancel to continue"
+!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_TITLE     "La conversion du corpus de POPFile a échoué"
+!insertmacro PFI_LANG_STRING PFI_LANG_BADCONVERT_SUBTITLE  "Cliquez 'Annuler' pour continuer"
 
 
 ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -127,49 +130,49 @@
 #--------------------------------------------------------------------------
 # Standard MUI Page - Welcome (for the 'Add POPFile User' wizard)
 #
-# The sequence \r\n\r\n inserts a blank line (note that the PFI_LANG_ADDUSER_INFO_TEXT string
-# should end with a \r\n\r\n$_CLICK sequence).
+# The sequence ${IO_NL}${IO_NL} inserts a blank line (note that the PFI_LANG_ADDUSER_INFO_TEXT string
+# should end with a ${IO_NL}${IO_NL}$_CLICK sequence).
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_INFO_TEXT    "This wizard will guide you through the configuration of POPFile for the '$G_WINUSERNAME' user.\r\n\r\nIt is recommended that you close all other applications before continuing.\r\n\r\n$_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_INFO_TEXT    "Cet assistant va vous guider lors de la configuration de POPFile pour l'utilisateur '$G_WINUSERNAME'.${IO_NL}${IO_NL}Il est recommandé de fermer toutes les autres applications avant de continuer.${IO_NL}${IO_NL}$_CLICK"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Directory Page (for the 'Add POPFile User' wizard)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TITLE        "Choose POPFile Data Location for '$G_WINUSERNAME'"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_SUBTITLE     "Choose the folder in which to store the POPFile Data for '$G_WINUSERNAME'"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "This version of POPFile uses separate sets of data files for each user.$\r$\n$\r$\nSetup will use the following folder for the POPFile data belonging to the '$G_WINUSERNAME' user. To use a different folder for this user, click Browse and select another folder. $_CLICK"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_DESTN   "Folder to be used to store the POPFile data for '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TITLE        "Sélectionnez l'emplacement des données de POPFile pour '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_SUBTITLE     "Choisissez le dossier dans lequel ranger les données de POPFile pour '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "Cette version de POPFile utilise des jeux de fichiers de données différents pour chaque utilisateur.${MB_NL}${MB_NL}L'installateur utilisera les dossiers suivants pour les données de POPFile appartenant à l'utilisateur  '$G_WINUSERNAME'. Pour utiliser un dossier différent pour cet utilisateur, cliquez sur 'Parcourir' et sélectionnez un autre dossier. $_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_DESTN   "Dossier à utiliser pour stocker les données de POPFile de '$G_WINUSERNAME'"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Installation Page (for the 'Add POPFile User' wizard)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_TITLE        "Configuring POPFile for '$G_WINUSERNAME' user"
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_SUBTITLE     "Please wait while the POPFile configuration files are updated for this user"
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_TITLE        "Configuration de POPFile pour l'utilisateur '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_SUBTITLE     "Veuillez patienter pendant que les fichiers de configuration de POPFile sont mis à jour pour cet utilisateur"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish (for the 'Add POPFile User' wizard)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_FINISH_INFO "POPFile has been configured for the '$G_WINUSERNAME' user.\r\n\r\nClick Finish to close this wizard."
+!insertmacro PFI_LANG_STRING PFI_LANG_ADDUSER_FINISH_INFO "POPFile a été configuré pour l'utilisateur '$G_WINUSERNAME'.${IO_NL}${IO_NL}Cliquez sur 'Fermer' pour fermer cet assistant."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall Confirmation Page (for the 'Add POPFile User' wizard)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TITLE        "Uninstall POPFile data for '$G_WINUSERNAME' user"
-!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_SUBTITLE     "Remove POPFile configuration data for this user from your computer"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TITLE        "Désinstallation des données de POPFile pour l'utilisateur '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_SUBTITLE     "Supprime les données de configuration de POPFile pour cet utilisateur"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TEXT_TOP     "The POPFile configuration data for the '$G_WINUSERNAME' user will be uninstalled from the following folder. $_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMUSER_TEXT_TOP     "Les données de configuration de POPFile pour l'utilisateur '$G_WINUSERNAME' vont être désinstallées du dossier suivant. $_CLICK"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstallation Page (for the 'Add POPFile User' wizard)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_TITLE       "Uninstalling POPFile data for '$G_WINUSERNAME' user"
-!insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_SUBTITLE    "Please wait while the POPFile configuration files for this user are deleted"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_TITLE       "Désinstallation des données de POPFile pour l'utilisateur '$G_WINUSERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_REMOVING_SUBTITLE    "Veuillez patienter pendant la suppression des données de POPFile pour cet utilisateur"
 
 
 #==========================================================================
@@ -180,37 +183,37 @@
 # General purpose banner text (also suitable for page titles/subtitles)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_BE_PATIENT           "Please be patient."
-!insertmacro PFI_LANG_STRING PFI_LANG_TAKE_A_FEW_SECONDS   "This may take a few seconds..."
+!insertmacro PFI_LANG_STRING PFI_LANG_BE_PATIENT           "Veuillez patienter."
+!insertmacro PFI_LANG_STRING PFI_LANG_TAKE_A_FEW_SECONDS   "Ceci peut prendre quelques secondes..."
 
 #--------------------------------------------------------------------------
 # Message displayed when 'Add User' does not seem to be part of the current version
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_COMPAT_NOTFOUND      "Error: Compatible version of ${C_PFI_PRODUCT} not found !"
+!insertmacro PFI_LANG_STRING PFI_LANG_COMPAT_NOTFOUND      "Erreur: aucune version compatible de ${C_PFI_PRODUCT} n'a été trouvée !"
 
 #--------------------------------------------------------------------------
 # Message displayed when installer exits because another copy is running
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INSTALLER_MUTEX      "Another copy of the POPFile installer is already running !"
+!insertmacro PFI_LANG_STRING PFI_LANG_INSTALLER_MUTEX      "Une autre instance de l'installateur de POPFile est déjà en cours d'exécution !"
 
 #--------------------------------------------------------------------------
 # Message box warnings used when verifying the installation folder chosen by user
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1   "Previous installation found at"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2   "Do you want to upgrade it ?"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_3   "Previous configuration data found at"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_4   "Restored configuration data found"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_5   "Do you want to use the restored data ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1   "Installation précédente trouvée à"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2   "Voulez-vous la mettre à jour ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_3   "Données de configuration précédentes trouvées à"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_4   "Données de configuration restaurées trouvées"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_5   "Voulez-vous utiliser les données restaurées ?"
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_1         "Display POPFile Release Notes ?"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_2         "'Yes' recommended if you are upgrading POPFile (you may need to backup BEFORE upgrading)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_1         "Voir les 'Release Notes' de POPFile ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_2         "'Oui' recommandé si vous effectuez une mise à jour de POPFile (vous pouvez avoir besoin d'effectuer une sauvegarde AVANT de mettre à jour)"
 
 #--------------------------------------------------------------------------
 # Custom Page - Check Perl Requirements
@@ -218,37 +221,37 @@
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_TITLE        "Out-of-date System Components Detected"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_TITLE        "Composants système non à jour détectés"
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "The default browser is used to display the POPFile User Interface (its control centre).\r\n\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "POPFile does not require a specific browser, it will work with almost any browser.\r\n\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "A minimal version of Perl is about to be installed (POPFile is written in Perl).\r\n\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4    "The Perl supplied with POPFile makes use of some Internet Explorer components and requires Internet Explorer 5.5 (or a later version)."
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_5    "The installer has detected that this system has Internet Explorer"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "It is possible that some features of POPFile may not work properly on this system.\r\n\r\n"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_7    "If you have any problems with POPFile, an upgrade to a newer version of Internet Explorer may help."
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1    "Le navigateur par défaut est utilisé pour visualiser l'interface utilisateur de POPFile (son centre de contrôle).${IO_NL}${IO_NL}"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2    "POPFile ne nécessite pas un navigateur spécifique, il fonctionnera avec la plupart des navigateurs.${IO_NL}${IO_NL}"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3    "Une version minimale de Perl va être installée (POPFile est écrit en Perl).${IO_NL}${IO_NL}"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_4    "Le Perl fourni avec POPFile utilise certains composants d'Internet Explorer et nécessite Internet Explorer 5.5 (ou une version plus récente)."
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_5    "L'installateur a détecté que ce système possède Internet Explorer"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_6    "Il est possible que certaines fonctions de POPFile ne fonctionnent pas correctement sur ce système.${IO_NL}${IO_NL}"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_7    "Si vous avez des problèmes lors de l'utilisation de POPFile, une mise à jour d'Internet Explorer en une version plus récente peut s'avérer utile."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Choose Components
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING DESC_SecPOPFile               "Installs the core files needed by POPFile, including a minimal version of Perl."
-!insertmacro PFI_LANG_STRING DESC_SecSkins                 "Installs POPFile skins that allow you to change the look and feel of the POPFile user interface."
-!insertmacro PFI_LANG_STRING DESC_SecLangs                 "Installs non-English language versions of the POPFile UI."
+!insertmacro PFI_LANG_STRING DESC_SecPOPFile               "Installe les fichiers de base nécessaires à POPFile, comprenant une version minimale de Perl."
+!insertmacro PFI_LANG_STRING DESC_SecSkins                 "Installe les habillages de POPFile qui vous permettent de changer l'apparence de l'interface utilisateur de POPFile."
+!insertmacro PFI_LANG_STRING DESC_SecLangs                 "Installe les versions en langue non Anglaise de l'interface de POPFile."
 
-!insertmacro PFI_LANG_STRING DESC_SubSecOptional           "Extra POPFile components (for advanced users)"
-!insertmacro PFI_LANG_STRING DESC_SecIMAP                  "Installs the POPFile IMAP module"
-!insertmacro PFI_LANG_STRING DESC_SecNNTP                  "Installs POPFile's NNTP proxy"
-!insertmacro PFI_LANG_STRING DESC_SecSMTP                  "Installs POPFile's SMTP proxy"
-!insertmacro PFI_LANG_STRING DESC_SecSOCKS                 "Installs extra Perl components which allow the POPFile proxies to use SOCKS"
-!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Installs the POPFile XMLRPC module (for access to the POPFile API) and the Perl support it requires."
+!insertmacro PFI_LANG_STRING DESC_SubSecOptional           "Composants supplémentaires de POPFile (utilisateurs expérimentés)"
+!insertmacro PFI_LANG_STRING DESC_SecIMAP                  "Installe le module IMAP de POPFile"
+!insertmacro PFI_LANG_STRING DESC_SecNNTP                  "Installe le proxy NNTP de POPFile"
+!insertmacro PFI_LANG_STRING DESC_SecSMTP                  "Installe le proxy SMTP de POPFile"
+!insertmacro PFI_LANG_STRING DESC_SecSOCKS                 "Installe les composants supplémentaires du Perl permettant aux proxies de POPFile d'utiliser SOCKS"
+!insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "Installe le module XMLRPC de POPFile (pour accéder à l'API de POPFile) et le support Perl nécessaire."
 
 ; Text strings used when user has NOT selected a component found in the existing installation
 
-!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_1            "Do you want to upgrade the existing $G_PLS_FIELD_1 component ?"
-!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_2            "(using out of date POPFile components can cause problems)"
+!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_1            "Voulez-vous mettre à jour le composant $G_PLS_FIELD_1 existant ?"
+!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_2            "(l'utilisation de composants de POPFile non à jour peut entraîner des problèmes)"
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
@@ -256,29 +259,29 @@
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_TITLE        "POPFile Installation Options"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_SUBTITLE     "Leave these options unchanged unless you need to change them"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_TITLE        "Options d'installation de POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_SUBTITLE     "Laissez ces options inchangées sauf si vraiment nécessaire"
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_POP3      "Choose the default port number for POP3 connections (110 recommended)"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI       "Choose the default port for 'User Interface' connections (8080 recommended)"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP   "Run POPFile automatically when Windows starts"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_WARNING   "IMPORTANT WARNING"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE   "If UPGRADING POPFile --- the installer will SHUTDOWN existing version"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_POP3      "Choisissez le numéro de port par défaut pour les connexions POP3 (110 recommandé)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI       "Choisissez le port par défaut pour l'Interface Utilisateur (8080 recommandé)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP   "Démarrer POPFile automatiquement lors du démarrage de Windows"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_WARNING   "AVIS IMPORTANT"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE   "SI VOUS METTEZ POPFILE A JOUR --- L'INSTALLATEUR VA FERMER LA VERSION EXISTANTE"
 
 ; Message Boxes used when validating user's selections
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_1     "The POP3 port cannot be set to"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_2     "The port must be a number in the range 1 to 65535."
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_3     "Please change your POP3 port selection."
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_1     "Le port POP3 ne peut pas être fixé à"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_2     "Le port doit être un nombre compris entre 1 et 65535."
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_3     "Veuillez modifier le port POP3."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_1      "The 'User Interface' port cannot be set to"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_2      "The port must be a number in the range 1 to 65535."
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_3      "Please change your 'User Interface' port selection."
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_1      "Le port de l'Interface Utilisateur ne peut pas être fixé à"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_2      "Le port doit être un nombre compris entre 1 et 65535."
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_3      "Veuillez modifier le port de l'Interface Utilisateur"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_1     "The POP3 port must be different from the 'User Interface' port."
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_2     "Please change your port selections."
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_1     "Le port POP3 doit être différent du port de l'Interface Utilisateur."
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_2     "Veuillez modifier votre sélection des ports."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Installing POPFile
@@ -287,98 +290,110 @@
 ; When upgrading an existing installation, change the normal "Install" button to "Upgrade"
 ; (the page with the "Install" button will vary depending upon the page order in the script)
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_UPGRADE     "Upgrade"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_UPGRADE     "Mettre à jour"
 
 ; When resetting POPFile to use newly restored 'User Data', change "Install" button to "Restore"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_RESTORE     "Restore"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_RESTORE     "Restaurer"
 
 ; Installation Progress Reports displayed above the progress bar
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_UPGRADE    "Checking if this is an upgrade installation..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORE       "Installing POPFile core files..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL       "Installing minimal Perl files..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT      "Creating POPFile shortcuts..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORPUS     "Making corpus backup. This may take a few seconds..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      "Installing POPFile skin files..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "Installing POPFile UI language files..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Installing POPFile XMLRPC files..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_REGSET     "Updating registry settings and environment variables..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SQLBACKUP  "Backing up the old SQLite database..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FINDCORPUS "Looking for existing flat-file or BerkeleyDB corpus..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_MAKEBAT    "Generating the 'pfi-run.bat' batch file..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "Cliquez sur Suivant pour continuer"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_UPGRADE    "Je vérifie s'il s'agit de l'installation d'une mise à jour..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORE       "Installation des fichiers de base de POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL       "Installation des fichiers minimaux du Perl..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT      "Creation des raccourcis de POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORPUS     "Sauvegarde du corpus. Ceci peut prendre quelques secondes..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      "Installation des fichiers d'habillage de POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "Installation des fichiers de langue de l'interface de POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Installation des fichiers XMLRPC de POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_REGSET     "Mise à jour du registre et des variables d'environnement..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SQLBACKUP  "Sauvegarde de l'ancienne base de données SQLite..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FINDCORPUS "Recherche des fichiers de corpus en mode texte ou BerkeleyDB..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_MAKEBAT    "Génération du fichier de commande 'pfi-run.bat'..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "Cliquez sur 'Suivant' pour continuer"
 
 ; Installation Log Messages
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_LOG_SHUTDOWN    "Shutting down previous version of POPFile using port"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_LOG_SHUTDOWN    "Fermeture de la version précédente de POPFile en utilisant le port"
 
 ; Message Box text strings
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_1           "file from previous installation found."
-!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_2           "OK to update this file ?"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3           "Click 'Yes' to update it (old file will be saved as"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4           "Click 'No' to keep the old file (new file will saved as"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_1           "fichiers d'une installation précédente trouvés."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_2           "D'accord pour mettre à jour ce fichier ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3           "Cliquez 'Oui' pour le mettre à jour (l'ancien fichier sera sauvegardé sous le nom"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4           "Cliquez 'Non' pour conserver l'ancien fichier (le nouveau fichier sera sauvegardé sous le nom"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "Unable to shutdown '$G_PLS_FIELD_1' automatically."
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "Please shutdown '$G_PLS_FIELD_1' manually now."
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3          "When '$G_PLS_FIELD_1' has been shutdown, click 'OK' to continue."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "Impossible de fermer '$G_PLS_FIELD_1' automatiquement."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "Veuillez fermer '$G_PLS_FIELD_1' manuellement maintenant."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3          "Quand '$G_PLS_FIELD_1' sera fermé, cliquez sur 'OK' pour continuer."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCORPUS_1           "Error detected when the installer tried to backup the old corpus."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCORPUS_1           "Erreur détectée lors de la tentative de sauvegarde de l'ancien corpus."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Classification Bucket Creation
 #--------------------------------------------------------------------------
 
+; POPFile requires at least TWO buckets in order to work properly. PFI_LANG_CBP_DEFAULT_BUCKETS
+; defines the default buckets and PFI_LANG_CBP_SUGGESTED_NAMES defines a list of suggested names
+; to help the user get started with POPFile. Both lists use the | character as a name separator.
+
+; Bucket names can only use the characters abcdefghijklmnopqrstuvwxyz_-0123456789
+; (any names which contain invalid characters will be ignored by the installer)
+
+; Empty lists ("") are allowed (but are not very user-friendly)
+
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_DEFAULT_BUCKETS  "spam|personnel|professionnel|autre"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_SUGGESTED_NAMES  "admin|affaires|autre|boite_de_reception|divers|etudes|famille|finances|general|informatique|list-admin|loisirs|non_spam|personnel|pourriel|professionnel|recreation|securite|shopping|spam|voyages"
+
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_TITLE            "POPFile Classification Bucket Creation"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_SUBTITLE         "POPFile needs AT LEAST TWO buckets in order to be able to classify your email"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_TITLE            "Création des catégories de classifications de POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_SUBTITLE         "POPFile a besoin D'AU MOINS DEUX catégories pour pouvoir classifier vos messages"
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_INTRO         "After installation, POPFile makes it easy to change the number of buckets (and their names) to suit your needs.\r\n\r\nBucket names must be single words, using lowercase letters, digits 0 to 9, hyphens and underscores."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_CREATE        "Create a new bucket by either selecting a name from the list below or typing a name of your own choice."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_DELETE        "To delete one or more buckets from the list, tick the relevant 'Remove' box(es) then click the 'Continue' button."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_LISTHDR       "Buckets to be used by POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_INTRO         "Après installation, il vous sera facile de changer le nombre (et le nom) des catégories pour correspondre à vos besoins.${IO_NL}${IO_NL}Les noms des catégories doivent être en un seul mot, n'utilisant que des minuscules, des chiffres de 0 à 9, des tirets et des soulignés."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_CREATE        "Créez une nouvelle catégorie soit en délectionnant un nom dans la liste ci-dessois, ou en tapant le nom de votre choix."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_DELETE        "Pour supprimer une ou plusieurs catégories de la liste, cochez les cases 'Retirer' correspondantes et cliquez sur le bouton 'Continuer'."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_LISTHDR       "Catégorie à utiliser dans POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_REMOVE        "Retirer"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_CONTINUE      "Continuer"
 
 ; Text strings used for status messages under the bucket list
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_1         "There is no need to add more buckets"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_2         "You must define AT LEAST TWO buckets"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_3         "At least one more bucket is required"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_4         "Installer cannot create more than"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_5         "buckets"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_1         "Il est inutile d'ajouter d'autres catégories"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_2         "Vous devez définir AU MOINS DEUX catégories"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_3         "Au moins une catégorie de plus est nécessaire"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_4         "L'installateur ne peut pas créer plus de"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_5         "catégories"
 
 ; Message box text strings
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_1       "A bucket called"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_2       "has already been defined."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_3       "Please choose a different name for the new bucket."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_1       "Une catégorie nommée"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_2       "a déjà été définie."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDUPERR_3       "Veuillez choisir un autre nom pour la nouvelle catégorie."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_1       "The installer can only create up to"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_2       "buckets."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_3       "Once POPFile has been installed you can create more than"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_1       "L'installateur ne peut créer que jusqu'à"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_2       "catégories."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAXERR_3       "Une fois que POPFile a été installé vous pouvez créer plus de"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_1       "The name"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_2       "is not a valid name for a bucket."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_3       "Les noms de catégories ne peuvent contenir que les minuscules de a to z ainsi que - and _"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_4       "Please choose a different name for the new bucket."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_1       "Le nom"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_2       "n'est pas un nom valide pour une catégorie."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_3       "Les noms de catégories ne peuvent contenir que les minuscules de a à z ainsi que - and _"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_4       "Veuillez choisir un autre nom pour la nouvelle catégorie."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_1      "POPFile requires AT LEAST TWO buckets before it can classify your email."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_2      "Please enter the name of a bucket to be created,$\r$\n$\r$\neither by picking a suggested name from the drop-down list$\r$\n$\r$\nor by typing in a name of your own choice."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_3      "You must define AT LEAST TWO buckets before continuing with the installation of POPFile."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_1      "POPFile a besoin d'AU MOINS DEUX catégories pour pouvoir classifier vos messages."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_2      "Veuillez entrer le nom de la catégorie à créer${MB_NL}${MB_NL}soit en le choisissant dans la liste${MB_NL}${MB_NL}soit en tapant le nom de votre choix."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_3      "Vous devez définir AU MOINS DEUX catégories avant de poursuivre l'installation de POPFile."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_1         "buckets have been defined for use by POPFile."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_2         "Do you want to configure POPFile to use these buckets?"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_3         "Click 'No' if you wish to change your bucket selections."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_1         "catégories ont été définies pour être utilisées par POPFile."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_2         "Voulez-vous configurer POPFile pour utiliser ces catégories ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_3         "Cliquez sur 'Non' si vous désirer modifier votre choix des catégories."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_1       "The installer was unable to create"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_2       "of the"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_3       "buckets you selected."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4       "Once POPFile has been installed you can use its 'User Interface'$\r$\n$\r$\ncontrol panel to create the missing bucket(s)."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_1       "L'installateur n'a pas pu créer"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_2       "des"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_3       "catégories que vous avez choisies."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4       "Une fois POPFile installé, vous pouvez utiliser le panneau de contrôle${MB_NL}${MB_NL}de l'interface utilisateur pour créer les catégories manquantes."
 
 #--------------------------------------------------------------------------
 # Custom Page - Email Client Reconfiguration
@@ -386,38 +401,38 @@
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_TITLE        "Email Client Configuration"
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_SUBTITLE     "POPFile can reconfigure several email clients for you"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_TITLE        "Configuration du client de messagerie"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_SUBTITLE     "POPFile peut reconfigurer divers clients de messagerie automatiquement"
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1    "Mail clients marked (*) can be reconfigured automatically, assuming simple accounts are used.\r\n\r\nIt is strongly recommended that accounts which require authentication are configured manually."
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2    "IMPORTANT: PLEASE SHUT DOWN THE RECONFIGURABLE EMAIL CLIENTS NOW\r\n\r\nThis feature is still under development (e.g. some Outlook accounts may not be detected).\r\n\r\nPlease check that the reconfiguration was successful (before using the email client)."
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1    "Les clients de messagerie marqués par (*) peuvent être reconfigurés automatiquement, à condition que des comptes simples soient utilisés.${IO_NL}${IO_NL}Il est fortement recommandé de configurer manuellement les comptes nécessitant une authentification."
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2    "IMPORTANT: VEUILLEZ FERMER LES CLIENTS DE MESSAGERIES MAINTENANT${IO_NL}${IO_NL}Cette fonctionnalité est encore en cours de développement (p. ex. certains comptes Outlook peuvent ne pas être détectés).${IO_NL}${IO_NL}Veuillez vérifier que la reconfiguration a bien été effectuée avant d'utiliser votre client de messagerie)."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_CANCEL    "Email client reconfiguration cancelled by user"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_CANCEL    "Reconfiguration du client de messagerie abandonnée par l'utilisateur"
 
 #--------------------------------------------------------------------------
 # Text used on buttons to skip configuration of email clients
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPALL   "Skip All"
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPONE   "Skip Client"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPALL   "Ignorer tous"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPONE   "Ignorer le client"
 
 #--------------------------------------------------------------------------
 # Message box warnings that an email client is still running
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EXP         "WARNING: Outlook Express appears to be running !"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_OUT         "WARNING: Outlook appears to be running !"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EUD         "WARNING: Eudora appears to be running !"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EXP         "ATTENTION: Outlook Express est en cours d'utilisation !"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_OUT         "ATTENTION: Outlook est en cours d'utilisation !"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EUD         "ATTENTION: Eudora est en cours d'utilisation !"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_1      "Please SHUT DOWN the email program then click 'Retry' to reconfigure it"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_2      "(You can click 'Ignore' to reconfigure it, but this is not recommended)"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_3      "Click 'Abort' to skip the reconfiguration of this email program"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_1      "Veuillez FERMER le programme de messagerie et cliquer sur 'Réessayer' pour le reconfiguer"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_2      "(Vous pouvez cliquer sur 'Ignorer' pour le reconfigurer, mais ceci n'est pas recommandé)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_3      "Cliquez sur 'Abandonner' pour ne pas effectuer la reconfiguration de ce programme de messagerie"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_4      "Please SHUT DOWN the email program then click 'Retry' to restore the settings"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_5      "(You can click 'Ignore' to restore the settings, but this is not recommended)"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_6      "Click 'Abort' to skip the restoring of the original settings"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_4      "Veuillez FERMER le programme de messagerie et cliquer sur 'Réessayer' pour restaurer les paramètres"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_5      "(Vous pouvez cliquer sur 'Ignorer' pour restaurer les paramètres, mais ceci n'est pas recommandé)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_6      "Cliquez sur 'Abandonner' pour ne pas effectuer la restauration des paramètres d'origine"
 
 #--------------------------------------------------------------------------
 # Custom Page - Reconfigure Outlook/Outlook Express
@@ -425,62 +440,62 @@
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_TITLE         "Reconfigure Outlook Express"
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_SUBTITLE      "POPFile can reconfigure Outlook Express for you"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_TITLE         "Reconfigurer Outlook Express"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_SUBTITLE      "POPFile peut reconfigurer Outlook Express à votre place"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_TITLE         "Reconfigure Outlook"
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_SUBTITLE      "POPFile can reconfigure Outlook for you"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_TITLE         "Reconfigurer Outlook"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_SUBTITLE      "POPFile peut reconfigurer Outlook à votre place"
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_IO_CANCELLED  "Outlook Express reconfiguration cancelled by user"
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_IO_CANCELLED  "Outlook reconfiguration cancelled by user"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_IO_CANCELLED  "Reconfiguration d'Outlook Express abandonnée par l'utilisateur"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_IO_CANCELLED  "Reconfiguration d'Outlook abandonnée par l'utilisateur"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_BOXHDR     "accounts"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_ACCOUNTHDR "Account"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_EMAILHDR   "Email address"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_SERVERHDR  "Server"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_USRNAMEHDR "Username"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_FOOTNOTE   "Tick box(es) to reconfigure account(s).\r\nIf you uninstall POPFile the original settings will be restored."
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_BOXHDR     "comptes"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_ACCOUNTHDR "Compte"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_EMAILHDR   "Adresse électronique"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_SERVERHDR  "Serveur"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_USRNAMEHDR "Nom d'utilisateur"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_FOOTNOTE   "Cocher les cases pour reconfigurer les comptes.${IO_NL}Si vous désinstallez POPFile, les paramètres d'origine seront restaurés."
 
 ; Message Box to confirm changes to Outlook/Outlook Express account configuration
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_MBIDENTITY    "Outlook Express Identity :"
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_MBACCOUNT     "Outlook Express Account :"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_MBIDENTITY    "Identité Outlook Express :"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_MBACCOUNT     "Compte Outlook Express :"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_MBIDENTITY    "Outlook User :"
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_MBACCOUNT     "Outlook Account :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_MBIDENTITY    "Utilisateur Outlook :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_MBACCOUNT     "Compte Outlook :"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBEMAIL       "Email address :"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBSERVER      "POP3 server :"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBUSERNAME    "POP3 username :"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBOEPORT      "POP3 port :"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBOLDVALUE    "currently"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBQUESTION    "Reconfigure this account to work with POPFile ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBEMAIL       "Adresse électronique :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBSERVER      "Serveur POP3 :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBUSERNAME    "Nom d'utilisateur POP3 :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBOEPORT      "Port POP3 :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBOLDVALUE    "actuellement"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBQUESTION    "Reconfigurer ce compte pour fonctionner avec POPFile ?"
 
 ; Title and Column headings for report/log files
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_BEFORE    "Outlook Express Settings before any changes were made"
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_AFTER     "Changes made to Outlook Express Settings"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_BEFORE    "Paramètres d'Outlook Express avant que les modifications soient effectuées"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_AFTER     "Modifications apportées aux paramètres d'Outlook Express"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_BEFORE    "Outlook Settings before any changes were made"
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_AFTER     "Changes made to Outlook Settings"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_BEFORE    "Paramètres d'Outlook avant que les modifications soient effectuées"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_AFTER     "Modifications apportées aux paramètres d'Outlook"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_END       "(end)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_END       "(fin)"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_IDENTITY  "'IDENTITY'"
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_IDENTITY  "'OUTLOOK USER'"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_IDENTITY  "'IDENTITE'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_IDENTITY  "'UTILISATEUR OUTLOOK'"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_ACCOUNT   "'ACCOUNT'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_ACCOUNT   "'COMPTE'"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_EMAIL     "'EMAIL ADDRESS'"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_SERVER    "'POP3 SERVER'"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_USER      "'POP3 USERNAME'"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_PORT      "'POP3 PORT'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_EMAIL     "'ADRESSE ELECTRONIQUE'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_SERVER    "'SERVEUR POP3'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_USER      "'UTILISATEUR POP3'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_PORT      "'PORT POP3'"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWSERVER "'NEW POP3 SERVER'"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWUSER   "'NEW POP3 USERNAME'"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWPORT   "'NEW POP3 PORT'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWSERVER "'NOUVEAU SERVEUR POP3'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWUSER   "'NOUVEL UTILISATEUR POP3'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWPORT   "'NOUVEAU PORT POP3'"
 
 #--------------------------------------------------------------------------
 # Custom Page - Reconfigure Eudora
@@ -488,23 +503,23 @@
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_TITLE          "Reconfigure Eudora"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_SUBTITLE       "POPFile can reconfigure Eudora for you"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_TITLE          "Reconfigurer Eudora"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_SUBTITLE       "POPFile peut reconfigurer Eudora à votre place"
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CANCELLED   "Eudora reconfiguration cancelled by user"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CANCELLED   "Reconfiguration d'Eudora abandonnée par l'utilisateur"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_1     "POPFile has detected the following Eudora personality"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_2     " and can automatically configure it to work with POPFile"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CHECKBOX    "Reconfigure this personality to work with POPFile"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_DOMINANT    "<Dominant> personality"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_PERSONA     "personality"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_EMAIL       "Email address:"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_SERVER      "POP3 server:"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_USERNAME    "POP3 username:"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_POP3PORT    "POP3 port:"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_RESTORE     "If you uninstall POPFile the original settings will be restored"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_1     "POPFile a détecté les personnalités Eudora suivantes"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_2     " et peut les configurer automatiquement pour fonctionner avec POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CHECKBOX    "Reconfigurer cette personnalité pour fonctionner avec POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_DOMINANT    "personnalité <Dominante>"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_PERSONA     "personnalité"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_EMAIL       "Adresse électronique :"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_SERVER      "Serveur POP3 :"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_USERNAME    "Nom d'utilisateur POP3 :"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_POP3PORT    "Port POP3 :"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_RESTORE     "Si vous désinstallez POPFile, les paramètres d'origine seront restaurés."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile can now be started
@@ -512,45 +527,45 @@
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_TITLE         "POPFile can now be started"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_SUBTITLE      "The POPFile User Interface only works if POPFile has been started"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_TITLE         "POPFile peut maintenant être démarré"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_SUBTITLE      "L'interface utilisateur de POPFile ne fonctionne que si POPFile a été démarré"
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_INTRO      "Start POPFile now ?"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO         "No (the 'User Interface' cannot be used if POPFile is not started)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "Run POPFile (in a window)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "Run POPFile in background (no window displayed)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Run POPFile (do not show system tray icon)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Run POPFile with system tray icon"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "Once POPFile has been started, you can display the 'User Interface' by"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(a) double-clicking the POPFile icon in the system tray,   OR"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(b) using Start --> Programs --> POPFile --> POPFile User Interface."
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_INTRO      "Démarrer POPFile maintenant ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO         "Non (l'Interface Utilisateur ne peut pas être utilisée si POPFile n'est pas lancé)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "Démarrer POPFile (dans une fenêtre)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "Démarrer POPFile en tâche de fond (aucune fenêtre visible)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Démarrer POPFile (pas d'icône dans la barre de tâches)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Démarrer POPFile avec une icône dans la barre de tâches"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "Une fois POPFile démarré, vous pouvez utiliser l'Interface Utilisateur"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(a) en double-cliquant l'icône de POPFile dans la barre de tâches, OU"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(b) en utilisant Démarrer --> Programmes --> POPFile --> Interface Utilisateur de POPFile."
 
 ; Banner message displayed whilst waiting for POPFile to start
 
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_BANNER_1      "Preparing to start POPFile."
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_BANNER_2      "This may take a few seconds..."
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_BANNER_1      "Préparation au démarrage de POPFile."
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_BANNER_2      "Ceci peut prendre quelques secondes..."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Installation Page (for the 'Corpus Conversion Monitor' utility)
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MUTEX        "Another copy of the 'Corpus Conversion Monitor' is already running !"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PRIVATE      "The 'Corpus Conversion Monitor' is part of the POPFile installer"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOFILE       "Error: Corpus conversion data file does not exist !"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOPOPFILE    "Error: POPFile path missing"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ENVNOTSET    "Error: Unable to set an environment variable"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOKAKASI     "Error: Kakasi path missing"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "An error occurred when starting the corpus conversion process"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_FATALERR     "A fatal error occurred during the corpus conversion process !"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ESTIMATE     "Estimated time remaining: "
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MUTEX        "Une autre instance de 'Corpus Conversion Monitor' est déjà en cours d'exécution !"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PRIVATE      "'Corpus Conversion Monitor' fait partie de l'installateur de POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOFILE       "Erreur : le fichier de données de la conversion de Corpus n'existe pas !"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOPOPFILE    "Erreur : chemin d'accès à POPFile manquant"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ENVNOTSET    "Erreur : Impossible de fixer une variable d'environnement"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_NOKAKASI     "Erreur : Chemin d'accès à Kakasi manquant"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_STARTERR     "Une erreur est survenue lors du lancement du processus de conversion de corpus"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_FATALERR     "Une erreur fatale est survenue lors du processus de conversion de corpus !"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_ESTIMATE     "Temps restant estimé : "
 !insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_MINUTES      "minutes"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_WAITING      "(waiting for first file to be converted)"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TOTALFILES   "There are $G_BUCKET_COUNT bucket files to be converted"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PROGRESS_N   "After $G_ELAPSED_TIME.$G_DECPLACES minutes there are $G_STILL_TO_DO files left to convert"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PROGRESS_1   "After $G_ELAPSED_TIME.$G_DECPLACES minutes there is one file left to convert"
-!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUMMARY      "Corpus Conversion took $G_ELAPSED_TIME.$G_DECPLACES minutes"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_WAITING      "(attente du premier fichier à convertir)"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_TOTALFILES   "Il y a $G_BUCKET_COUNT fichiers de catégories à convertir"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PROGRESS_N   "Après $G_ELAPSED_TIME.$G_DECPLACES minutes, il reste $G_STILL_TO_DO fichiers à convertir"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_PROGRESS_1   "Après $G_ELAPSED_TIME.$G_DECPLACES minutes il reste un fichier à convertir"
+!insertmacro PFI_LANG_STRING PFI_LANG_CONVERT_SUMMARY      "La conversion de Corpus a pris $G_ELAPSED_TIME.$G_DECPLACES minutes"
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall POPFile
@@ -558,63 +573,66 @@
 
 ; Uninstall Progress Reports displayed above the progress bar
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SHUTDOWN     "Shutting down POPFile..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SHORT        "Deleting 'Start Menu' entries for POPFile..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CORE         "Deleting POPFile core files..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTEXPRESS   "Restoring Outlook Express settings..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SKINS        "Deleting POPFile skins files..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_PERL         "Deleting minimal Perl files..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTLOOK      "Restoring Outlook settings..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EUDORA       "Restoring Eudora settings..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_DBMSGDIR     "Deleting corpus and 'Recent Messages' directory..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EXESTATUS    "Checking program status..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CONFIG       "Deleting configuration data..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_REGISTRY     "Deleting POPFile registry entries..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SHUTDOWN     "Fermeture de POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SHORT        "Suppression des entrées de POPFile dans le menu Démarrer..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CORE         "Suppression des fichiers de base de POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTEXPRESS   "Restauration des paramètres d'Outlook Express..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_SKINS        "Suppression des fichiers d'habillage de POPFile..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_PERL         "Suppression des fichiers minimaux du Perl..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTLOOK      "Restauration des paramètres d'Outlook..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EUDORA       "Restauration des paramètres d'Eudora..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_DBMSGDIR     "Suppression du corpus et du répertoire 'Messages récents'..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EXESTATUS    "Vérification de l'état du programme..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CONFIG       "Suppression des données de configuration..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_REGISTRY     "Suppression des entrées du registre de POPFile..."
 
 ; Uninstall Log Messages
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_SHUTDOWN      "Shutting down POPFile using port"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_OPENED        "Opened"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_RESTORED      "Restored"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_CLOSED        "Closed"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTDIR    "Removing all files from POPFile directory"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTERR    "Note: unable to remove all files from POPFile directory"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DATAPROBS     "Data problems"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERDIR    "Removing all files from POPFile 'User Data' directory"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERERR    "Note: unable to remove all files from POPFile 'User Data' directory"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_SHUTDOWN      "Fermeture de POPFile en utilisant le port"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_OPENED        "Ouvert"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_RESTORED      "Restauré"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_CLOSED        "Fermé"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTDIR    "Suppression de tous les fichiers du répertoire de POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELROOTERR    "Note : impossible de supprimer tous les fichiers du répertoire de POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DATAPROBS     "Problèmes de données"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERDIR    "Suppression de tous les fichiers du répertoire 'Données Utilisateur' de POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_DELUSERERR    "Note : impossible de supprimer tous les fichiers du répertoire 'Données Utilisateur' de POPFile"
 
 ; Message Box text strings
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDIFFUSER_1      "'$G_WINUSERNAME' is attempting to remove data belonging to another user"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDIFFUSER_1      "'$G_WINUSERNAME' tente de supprimer des données appartenant à un autre utilisateur"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_1      "It does not appear that POPFile is installed in the directory"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "Continue anyway (not recommended) ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_1      "POPFile ne semble pas installé dans le répertoire"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "Continuer quand même (non recommandé) ?"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_ABORT_1           "Uninstall aborted by user"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_ABORT_1           "Désinstallation abandonnée par l'utilisateur"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_1        "'Outlook Express' problem !"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_2        "'Outlook' problem !"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_3        "'Eudora' problem !"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_1        "Problème 'Outlook Express' !"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_2        "Problème 'Outlook' !"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_3        "Problème 'Eudora' !"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBEMAIL_1         "Unable to restore some original settings"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBEMAIL_2         "Display the error report ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBEMAIL_1         "Impossible de restaurer certains paramètres d'origine"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBEMAIL_2         "Montrer le rapport d'erreur ?"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_1         "Some email client settings have not been restored !"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_2         "(Details can be found in $INSTDIR folder)"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_3         "Click 'No' to ignore these errors and delete everything"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_4         "Click 'Yes' to keep this data (to allow another attempt later)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_1         "Certains paramètres du client de messagerie n'ont pas été restaurés !"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_2         "(Des détails sont disponibles dans le répertoire $INSTDIR)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_3         "Cliquez 'Non' pour ignorer ces erreurs et tout supprimer"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_4         "Cliquez 'Oui' pour conserver ces données (et permettre une nouvelle tentative ultérieurement)"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Do you want to remove all files in your POPFile directory?$\r$\n$\r$\n(If you have anything you created that you want to keep, click No)"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Do you want to remove all files in your POPFile 'User Data' directory?$\r$\n$\r$\n(If you have anything you created that you want to keep, click No)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Voulez-vous supprimer tous les fichiers de votre répertoire de POPFile ?${MB_NL}${MB_NL}(S'il contient quoi que ce soit que vous avez créé et désirez conserver, cliquez 'Non')"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Voulez-vous supprimer tous les fichiers de votre répertoire 'Données Utilisateur' de POPFile ?${MB_NL}${MB_NL}(S'il contient quoi que ce soit que vous avez créé et désirez conserver, cliquez 'Non')"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Do you want to remove all files in your 'Recent Messages' directory?"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Voulez-vous supprimer tous les fichiers de votre répertoire 'Messages récents' ?"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "Note"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "could not be removed."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "n'a pas pu être supprimé."
 
 #--------------------------------------------------------------------------
 # Mark the end of the language data
 #--------------------------------------------------------------------------
+
+!undef IO_NL
+!undef MB_NL
 
 !undef PFI_LANG
 
