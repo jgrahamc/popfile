@@ -1,5 +1,4 @@
-MIME-Version: 1.0
-
+# Copyright (c) 2001-2003 John Graham-Cumming
 
 # Identify the language and character set used for the interface
 LanguageCode                            en

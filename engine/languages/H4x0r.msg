@@ -1,5 +1,4 @@
-MIME-Version: 1.0
-
+# Copyright (c) 2001-2003 John Graham-Cumming
 
 LanguageCode                            en
 LanguageCharset                         ISO-8859-1
@@ -13,7 +12,7 @@ Add                                     4dd
 Remove                                  R3m0v3
 Previous                                Pr3v10u5
 Next                                    N3xt
->From                                    Fr0m
+From                                    Fr0m
 Subject                                 5ubj3ct
 Classification                          Cl4s51f1c4t10n
 Reclassify                              R3cl4s51fy
