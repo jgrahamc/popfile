@@ -3413,9 +3413,10 @@ sub calculate_today
 sub history_delete_file
 {
     my ( $self, $mail_file, $archive ) = @_;
-    
+        
     $mail_file =~ /(popfile.+\=.+\.msg)/;
     $mail_file = $1;
+    print "delete: $mail_file\n";
 
     if ( $archive ) {
         my $path = $self->{configuration}->{configuration}{archive_dir};
@@ -3475,9 +3476,9 @@ sub history_copy_file
             while (<FROM>) {
                 print TO $_;
             }
-        close FROM;
-        }
         close TO;
+        }
+        close FROM;
     }
 }
 

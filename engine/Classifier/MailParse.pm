@@ -256,11 +256,13 @@ sub add_line
             # TODO: find a way to make this (and other similar stuff) highlight
             #       without using the encoded content printer or modifying $self->{ut}
 
-            foreach my $space (' ', '\'', '*', '^', '`' ){
-                while ( $line =~ s/ (([A-Z]\Q$space\E){2,15}[A-Z])( |\Q$space\E|[!\?])/ /i ) {
-                    my $word = $1;
+            foreach my $space (' ', '\'', '*', '^', '`', '  ', '\38' ){
+                while ( $line =~ s/( |^)(([A-Z]\Q$space\E){2,15}[A-Z])( |\Q$space\E|[!\?])/ /i ) {
+                    my $word = $2;
+                    print "$word ->" if $self->{debug};
                     $word    =~ s/\Q$space\E//g;
-                    update_word( $self, $word, $encoded, ' ', ' ', '' );
+                    print "$word\n" if $self->{debug};
+                    update_word( $self, $word, $encoded, ' ', ' ', $prefix);
                     increment_word( $self, 'trick:spacedout' );
                 }
             }
