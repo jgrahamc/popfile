@@ -39,6 +39,7 @@ use IO::Handle;
 use DBI;
 use Digest::MD5 qw( md5_hex );
 use MIME::Base64;
+use File::Copy;
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -161,6 +162,12 @@ sub new
 
     $self->{api_sessions__}      = {};
 
+    # Used to indicate whether we are using SQLite and what the full
+    # path and name of the database is if we are.
+
+    $self->{db_is_sqlite__}      = 0;
+    $self->{db_name__}           = '';
+
     # Must call bless before attempting to call any methods
 
     bless $self, $type;
@@ -204,24 +211,24 @@ sub initialize
     # database, if you decide to change from using SQLite to some
     # other database (e.g. MySQL, Oracle, ... ) this *should* be all
     # you need to change.  The additional parameters user and auth are
-    # needed for some databases.
+    # needed for some databases. 
     #
-    # Note that the dbconnect string will be interpolated before being
-    # passed to DBI and the variable $dbname can be used within it and
-    # it resolves to the full path to the database named in the
-    # database parameter above.
+    # Note that the dbconnect string
+    # will be interpolated before being passed to DBI and the variable
+    # $dbname can be used within it and it resolves to the full path
+    # to the database named in the database parameter above.
 
     $self->config_( 'dbconnect', 'dbi:SQLite:dbname=$dbname' );
     $self->config_( 'dbuser', '' ); $self->config_( 'dbauth', '' );
-    
-    # SQLite 1.05+ have some problems we are resolving. 
-    # This lets us give a nice message and then disable
-    # the version checking later
+
+    # SQLite 1.05+ have some problems we are resolving.  This lets us
+    # give a nice message and then disable the version checking later
     
     $self->config_( 'bad_sqlite_version', '3.0.0' );
 
-    # No default unclassified weight is the number of times more sure POPFile
-    # must be of the top class vs the second class, default is 100 times more
+    # No default unclassified weight is the number of times more sure
+    # POPFile must be of the top class vs the second class, default is
+    # 100 times more
 
     $self->config_( 'unclassified_weight', 100 );
 
@@ -232,7 +239,8 @@ sub initialize
 
     $self->config_( 'corpus', 'corpus' );
 
-    # The characters that appear before and after a subject modification
+    # The characters that appear before and after a subject
+    # modification
 
     $self->config_( 'subject_mod_left',  '[' );
     $self->config_( 'subject_mod_right', ']' );
@@ -245,21 +253,28 @@ sub initialize
 
     $self->config_( 'hostname', $self->{hostname__} );
 
-    # If set to 1 then the X-POPFile-Link will have < > around the
-    # URL (i.e. X-POPFile-Link: <http://foo.bar>) when set to 0 there
-    # are none (i.e. X-POPFile-Link: http://foo.bar)
+    # If set to 1 then the X-POPFile-Link will have < > around the URL
+    # (i.e. X-POPFile-Link: <http://foo.bar>) when set to 0 there are
+    # none (i.e. X-POPFile-Link: http://foo.bar)
 
     $self->config_( 'xpl_angle', 0 );
 
     # This is a bit mask used to control options when we are using the
-    # default SQLite database.   By default all the options are on.
+    # default SQLite database.  By default all the options are on.
     #
     # 1 = Asynchronous deletes
+    # 2 = Backup database every hour
     
     $self->config_( 'sqlite_tweaks', 0xFFFFFFFF );
 
     $self->mq_register_( 'COMIT', $self );
     $self->mq_register_( 'RELSE', $self );
+
+    # Register for the TICKD message which is sent hourly by the
+    # Logger module.  We use this to hourly save the database if bit 1
+    # of the sqlite_tweaks is set and we are using SQLite
+
+    $self->mq_register_( 'TICKD', $self );
 
     return 1;
 }
@@ -284,6 +299,10 @@ sub deliver
     if ( $type eq 'RELSE' ) {
         $self->release_session_key_private__( $message[0] );
     }    
+
+    if ( $type eq 'TICKD' ) {
+        $self->backup_database__();
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -353,6 +372,29 @@ sub classified
 
     $self->set_bucket_parameter( $session, $class, 'count',             # PROFILE BLOCK START
         $self->get_bucket_parameter( $session, $class, 'count' ) + 1 ); # PROFILE BLOCK STOP
+}
+
+#----------------------------------------------------------------------------
+#
+# backup_database__
+#
+# Called when the TICKD message is received each hour and if we are using
+# the default SQLite database will make a copy with the .backup extension
+#
+#----------------------------------------------------------------------------
+sub backup_database__
+{
+    my ( $self ) = @_;
+
+    # If database backup is turned on and we are using SQLite then
+    # backup the database by copying it
+
+    if ( ( $self->config_( 'sqlite_tweaks' ) & 2 ) && 
+         $self->{db_is_sqlite__} ) {
+        if ( !copy( $self->{db_name__}, $self->{db_name__} . ".backup" ) ) {
+	    $self->log_( 0, "Failed to backup database ".$self->{db_name__} );
+        }
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -620,6 +662,14 @@ sub db_connect__
         $dbname = $self->config_( 'database' );
         $dbpresent = 1;
     }
+
+    # Record whether we are using SQLite or not and the name of the
+    # database so that other routines can access it; this is used by
+    # the backup_database__ routine to make a backup copy of the
+    # database when using SQLite.
+
+    $self->{db_is_sqlite__} = $sqlite;
+    $self->{db_name__}      = $dbname;
 
     # Now perform the connect, note that this is database independent
     # at this point, the actual database that we connect to is defined
