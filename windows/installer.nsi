@@ -1525,7 +1525,7 @@ Function SetOptionsPage
   IfFileExists "$INSTDIR\popfile.exe" 0 continue
 
 upgrade_uninstall:
-  MessageBox MB_YESNO|MB_ICONEXCLAMATION \
+  MessageBox MB_YESNO|MB_ICONEXCLAMATION|MB_DEFBUTTON2  \
       "$(PFI_LANG_OPTIONS_MBUNINST_1) '$INSTDIR'\
       $\r$\n$\r$\n\
       $(PFI_LANG_OPTIONS_MBUNINST_2)\
