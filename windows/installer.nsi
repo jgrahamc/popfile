@@ -1424,10 +1424,19 @@ update_config:
               "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" \
               "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
+  
+  StrCmp $LANGUAGE ${LANG_JAPANESE} japanese_faq
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
               "InternetShortcut" "URL" \
-              "http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137"
+              "http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions"
+  Goto support
 
+japanese_faq:
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
+              "InternetShortcut" "URL" \
+              "http://popfile.sourceforge.net/cgi-bin/wiki.pl?JP_FrequentlyAskedQuestions"
+
+support:
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
@@ -1471,10 +1480,19 @@ multi_user_case:
               "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" \
               "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
+
+  StrCmp $LANGUAGE ${LANG_JAPANESE} japanese_faq_multi_user
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
               "InternetShortcut" "URL" \
-              "http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137"
+              "http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions"
+  Goto support_multi_user
 
+japanese_faq_multi_user:
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
+              "InternetShortcut" "URL" \
+              "http://popfile.sourceforge.net/cgi-bin/wiki.pl?JP_FrequentlyAskedQuestions"
+
+support_multi_user:
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"

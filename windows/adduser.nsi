@@ -131,7 +131,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.6"
+  !define C_PFI_VERSION  "0.1.7"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -941,10 +941,19 @@ skip_rel_notes:
               "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" \
               "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
+  
+  StrCmp $LANGUAGE ${LANG_JAPANESE} japanese_faq
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
               "InternetShortcut" "URL" \
-              "http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137"
+              "http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions"
+  Goto support
 
+japanese_faq:
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
+              "InternetShortcut" "URL" \
+              "http://popfile.sourceforge.net/cgi-bin/wiki.pl?JP_FrequentlyAskedQuestions"
+
+support:
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
