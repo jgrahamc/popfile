@@ -1017,7 +1017,7 @@ sub configuration_page
     }
 
     if ( $self->global_config_( 'debug' ) != 0 ) {
-        my @log_entries = @{$self->last_ten_log_entries()};
+        my @log_entries = $self->last_ten_log_entries();
 
         if ( $#log_entries >= -1 ) {
             $body .= '<p><tt>';

@@ -188,7 +188,12 @@ sub last_ten
 {
     my ( $self ) = @_;
 
-    return $self->{last_ten__};
+    if ( $#{$self->{last_ten__}} >= 0 ) {
+        return @{$self->{last_ten__}};
+    } else {
+        my @temp = ( 'log empty' );
+        return @temp;
+    }
 }
 
 1;
