@@ -2792,7 +2792,7 @@ sub history_page
             $body .= ">\n<td>";
             $body .= "<a name=\"$mail_file\"></a>";
             $body .= $i+1 . "</td>\n<td>";
-            $mail_file =~ /popfile\d+=(\d+)\.msg/;
+            $mail_file =~ /popfile\d+=(\d+)\.msg$/;
             $body .= "<a title=\"$from\">$short_from</a></td>\n";
             $body .= "<td><a class=\"messageLink\" title=\"$subject\" href=\"/history?view=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form__}{sort}&amp;filter=$self->{form__}{filter}&amp;search=$self->{form__}{search}#$mail_file\">";
             $body .= "$short_subject</a></td>\n<td>";
@@ -3186,7 +3186,7 @@ sub load_languages
     @{$self->{languages__}} = glob 'languages/*.msg';
 
     for my $i (0..$#{$self->{languages__}}) {
-        $self->{languages__}[$i] =~ s/.*\/(.+)\.msg/$1/;
+        $self->{languages__}[$i] =~ s/.*\/(.+)\.msg$/$1/;
     }
 }
 
@@ -3296,7 +3296,7 @@ sub history_delete_file
 {
     my ( $self, $mail_file, $archive ) = @_;
 
-    $mail_file =~ /(popfile.+\=.+\.msg)/;
+    $mail_file =~ /(popfile.+\=.+\.msg)$/;
     $mail_file = $1;
     $self->log_( "delete: $mail_file" );
 
