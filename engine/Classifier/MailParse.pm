@@ -105,7 +105,7 @@ sub update_word
             my $color = $self->{bayes}->get_color($mword);
             if ( $encoded == 0 )  {
                 $after = '&' if ( $after eq '>' );
-                $self->{ut} =~ s/($before)\Q$word\E($after)/$1<b><span class=$color>$word<\/span><\/b>$2/;
+                $self->{ut} =~ s/($before)\Q$word\E($after)/$1<b><font color=$color>$word<\/font><\/b>$2/;
             } else {
                 $self->{ut} .= "Found in encoded data <font color=$color>$word<\/font>\r\n";
             }
