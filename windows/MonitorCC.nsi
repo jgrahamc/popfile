@@ -83,7 +83,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.13"
+  !define C_PFI_VERSION  "0.1.14"
 
   ; Mention the version number in the window title
 
@@ -519,14 +519,13 @@ Function GetLocalTimeAsMin100
   ; $1 contains the low  order Int32
   ; $2 contains the high order Int32
 
-  ; Adjust low order Int32 if it is negative
+  ; High order Int32 adjustment required if low order Int32 is negative
 
   StrCpy $3 $1 1
-  StrCmp $3 "-" 0 low_order_ok
-  System::Int64Op  $1 + 4294967296
-  Pop $1
+  StrCmp $3 "-" 0 convert_to_int64
+  IntOp $2 $2 + 1
 
-low_order_ok:
+convert_to_int64:
   System::Int64Op  $2 * 4294967296
   pop $3
   System::Int64Op  $3 + $1
