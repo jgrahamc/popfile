@@ -102,6 +102,7 @@ foreach my $file (sort {$files{$b} <=> $files{$a}} keys %files) {
         $line += 1;
         my $color = (defined($count{$file}{executed}{$line}) && ($count{$file}{executed}{$line}==0))?"red":"green";
         my $block = ($color eq 'red')?"red":"white";
+        s/&/&amp;/g;
         s/</&lt;/g;
         s/>/&gt;/g;
         print HTML "<span style=\"background: $block\">&nbsp;</span><font color=$color>$_</font>";
