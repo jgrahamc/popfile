@@ -56,11 +56,12 @@ for my $class_test (@class_tests) {
 
 $b->config_( 'msgdir', 'tests/' );
 $b->module_config_( 'html', 'port', 8080 );
-$b->config_( 'xtc',  1 );
-$b->config_( 'xpl',  1 );
+$b->global_config_( 'xtc',  1 );
+$b->global_config_( 'xpl',  1 );
 $b->module_config_( 'pop3', 'local', 1 );
 $b->module_config_( 'subject',  1 );
 $b->set_bucket_parameter( 'spam', 'subject', 1 );
+$b->set_bucket_parameter( 'spam', 'quarantine', 0 );
 
 my @modify_tests = sort glob 'tests/TestMailParse*.msg';
 
@@ -80,7 +81,7 @@ for my $modify_file (@modify_tests) {
 			my $cam_line    = <CAM>;
 			$output_line =~ s/[\r\n]//g;
 			$cam_line =~ s/[\r\n]//g;
-			test_assert_equal( $cam_line, $output_line, $modify_file );
+			test_assert_equal( $output_line, $cam_line, $modify_file );
 		}
 		
 		close CAM;
