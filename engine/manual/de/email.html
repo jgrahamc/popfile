@@ -1,0 +1,248 @@
+<html><head><title>POPFile Dokumentation</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile Dokumentation</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Erstinstallation:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15% valign=top>Schritt 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installieren</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center valign=top>Schritt 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Kategorien einrichten</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#cccc99 width=15% align=center valign=top>Schritt 3<br><font size=+1><b>&nbsp;<a href="email.html">Email Programme</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15% valign=top>Schritt 4<br><font size=+1><b>&nbsp;<a href="training.html">Training</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>POPFile verwenden mit:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">gesicherter Kennwort- authentifizierung</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">anderen Proxies</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">mehreren Email-Konten</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+<h2>Email Programm einrichten</h2>
+
+<p>POPFile arbeitet als sogenannter <i>proxy server</i>. Ihr Email Programm stellt eine Verbindung mit POPFile her. POPFile stellt daraufhin eine Verbindung mit dem Email Server her. Statt also die Nachrichten direkt vom Server abzuholen, versucht das Email Progamm, die Nachrichten von POPFile zu bekommen. POPFile l&auml;dt dann die Emails vom Server, analysiert sie, ordnet sie in eine Kategorie ein und gibt sie dann an das Email Programm weiter.</p>
+
+<p>Wenn es entschieden hat, in welche Kategorie die neue Email geh&ouml;rt - was nur den Bruchteil einer Sekunde dauert - macht POPFile folgendes: Es kann einen Hinweis der Form [Hinweis] am Anfang der Betreff-Zeile einf&uuml;gen. Einfache Filter wie bei Microsoft Outlook Express k&ouml;nnen dann entscheiden, wie sie diese Email behandeln sollen. Ebenso - f&uuml;r Email Programme mit ausgereifteren Filtern, wie z.B. Eudora - kann es einen neuen "Header" in die Email einf&uuml;gen, wie z.B.:</p>
+
+<p><b>X-Text-Classification: personal</b></p>
+
+<p>Ihr Email Programm kann diesen nun verwenden, um die Email entsprechend zu filtern.</p>
+
+<p>Zun&auml;chst einmal m&uuml;ssen Sie jedoch zwei Dinge tun, damit Ihr Email Programm mit POPFile zusammenarbeitet:</p>
+
+<ol><li>Die Server-Einstellungen bearbeiten, damit das Email Programm die Emails &uuml;ber POPFile abruft, und
+<li>entsprechende Filter einrichten, damit das Programm die Emails richtig bearbeitet.</ol></p>
+
+<p>Fangen wir mit den Server-Einstellungen an. Die Filter richten wir danach ein.</p>
+
+<p>Weiter unten finden Sie Anleitungen f&uuml;r einige verbreitete Email Programme. F&uuml;r andere Programme bzw. fortgeschritten Anwender hier kurz die allgemeinen Schritte:
+
+<p><ul><li>Notieren Sie die Adresse Ihres POP3-Servers und &auml;ndern Sie diesen in 127.0.0.1
+<li>&Auml;ndern Sie den Benutzernamen in [urspr&uuml;ngliche-POP3-Server-Adresse]:[Benutzername]
+<li>Das Passwort m&uuml;ssen Sie nicht &auml;ndern.</ul></p>
+
+<p>F&uuml;r Accounts, die eine sichere Passwortauthentifikation benutzen, schauen Sie unter <a href="spa.html">POPFile verwenden mit: gesicherter Kennwortauthentifizierung</a> nach.</p>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=3 align="center">
+
+W&auml;hlen Sie einfach Ihr Email Programm aus und folgen Sie der Spalte nach unten. Auch wenn diese Anweisungen vielleicht kompliziert aussehen: Die Einrichtung dauert nur etwa zwei Minuten - und es ist schwer, dabei etwas falsch zu machen. (Dennoch ist es nicht verkehrt, sich die urspr&uuml;nglichen Einstellungen zu notieren, um Sie notfalls wiederherstellen zu k&ouml;nnen.)
+
+</td></tr><tr>
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Outlook</h3>
+
+<ul>
+	<li>Starten Sie Outlook und w&auml;hlen Sie Extras -> Email Konten... in der Men&uuml;zeile. Es erscheint nun der Dialog zum Einstellen der Email Konten
+	<li>W&auml;hlen Sie "Vorhandene Email Konten anzeigen oder bearbeiten" und klicken Sie auf "Weiter". W&auml;hlen Sie das Konto, f&uuml;r das Sie POPFile einrichten wollen, und w&auml;hlen Sie "Bearbeiten".
+Notieren Sie sich die Adresse des "Posteingangssever (POP3)" und den Benutzernamen. <a href=o_popfile2.png>[screenshot]</a>
+<li>&Auml;ndern Sie die Adresse des Posteingangsservers (POP3) in <b>127.0.0.1</b> und &auml;ndern Sie den Benutzernamen in eine Kombination aus dem urspr&uuml;nglichen
+Posteingangsserver (POP3) und dem urspr&uuml;nglichen Benutzernamen getrennt durch einen Doppelpunkt. <a href=o_popfile3.png>[screenshot]</a>
+<li>Wenn also der urspr&uuml;ngliche Posteingangsserver (POP3) <b>my.mail.com</b> und Ihr Benutzername <b>jdoe</b> war, ist Ihr neuer Benutzername <b>my.mail.com:jdoe</b>
+<li>Das Passwort mu&szlig; nicht ge&auml;ndert werden.
+<li>Klicken Sie "Weiter" und dann "Beenden"
+<li>Vergewissern, da&szlig; POPFile l&auml;uft. Ab sofort wird jede Email &uuml;ber POPFile empfangen.
+<li>Sie m&uuml;ssen nun sicherstellen, da&szlig; POPFile bei jedem Start von Windows ebenfalls geladen wird. Wenn Sie die Windows Version verwenden, k&ouml;nnen Sie einfach die Verkn&uuml;pfung "Start POPFile in Background" aus der POPFile Gruppe im Startmen&uuml; in die "Autostart" Gruppe kopieren. Windows wird dann bei jedem hochfahren automatisch POPFile starten.
+<li>Wichtig! Wenn POPFile nicht geladen wurde, k&ouml;nnen Sie auch keine Emails abrufen. Ihr Email Programm wird dann melden, daﬂ es keine Verbindung herstellen kann.
+</ul>
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>Outlook Express</h3>
+
+<ul>
+<li>Starten Sie Outlook Express und w&auml;hlen Sie Extras -> Konten in der Men&uuml;zeile. Es erscheint nun ein Dialog zum Einstellen der Konten. <a href=oe_popfile1.jpg>[screenshot]</a>
+<li>W&auml;hlen Sie das Konto, f&uuml;r das Sie POPFile einrichten wollen, und klicken Sie auf "Eigenschaften". <a href=oe_popfile2.jpg>[screenshot]</a>
+<li>W&auml;hlen Sie das Register "Server".  Notieren Sie sich die Adresse des Posteingangsservers (POP3) und den Benutzernamen. <a href=oe_popfile3.jpg>[screenshot]</a>
+<li>&Auml;ndern Sie den Posteingangsserver (POP3) in <b>127.0.0.1</b> und den Benutzernamen in eine Kombination aus dem urspr&uuml;nglichen Posteingangsserver (POP3) und dem urspr&uuml;nglichen Benutzernamen getrennt durch einen Doppelpunkt. <a href=oe_popfile4.jpg>[screenshot]</a>
+<li>Wenn Ihr urspr&uuml;nglicher Posteingangsserver <b>my.mail.com</b> und Ihr Benutzername <b>jdoe</b> war, dann ist Ihr neuer Benutzername <b>my.mail.com:jdoe</b>.
+<li>Das Passwort mu&szlig; nicht ge&auml;ndert werden.
+<li>W&auml;hlen Sie "OK" und dann "Schlie&szlig;en".
+<li>Vergewissern Sie sich, da&szlig; POPFile l&auml;uft. Ab sofort wird jede Email &uuml;ber POPFile empfangen.
+<li>Sie m&uuml;ssen nun sicherstellen, da&szlig; POPFile bei jedem Start von Windows ebenfalls geladen wird. Wenn Sie die Windows Version verwenden, k&ouml;nnen Sie einfach die Verkn&uuml;pfung "Start POPFile in Background" aus der POPFile Gruppe im Startmen&uuml; in die "Autostart" Gruppe kopieren. Windows wird dann bei jedem hochfahren automatisch POPFile starten.
+<li>Wichtig! Wenn POPFile nicht geladen wurde, k&ouml;nnen Sie auch keine Emails abrufen. Ihr Email Programm wird dann melden, daﬂ es keine Verbindung herstellen kann.
+</ul>
+
+</td><td width=25% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<ul>
+	<li>Starten Sie Eudora und w&auml;hlen Sie Extras -> Optionen... in der Men&uuml;zeile. Es erscheint nun der Optionen Dialog. <a href=e_popfile1.gif>[screenshot]</a>
+<li>Notieren Sie sich die Adresse des Mail-Server (eingehend) und den Anmeldenamen. <a href=e_popfile2.gif>[screenshot]</a>
+<li>&Auml;ndern Sie den Mail-Server (eingehend) in <b>127.0.0.1</b> und den Anmeldenamen in eine Kombination aus dem urspr&uuml;nglichen Mail-Server (eingehend) und dem urspr&uuml;nglichen Anmeldenamen getrennt durch einen Doppelpunkt.  <a href=e_popfile3.gif>[screenshot]</a>
+<li>Wenn Ihr urspr&uuml;nglicher Mail-Server (eingehend) <b>my.mail.com</b> und Ihr Anmeldename <b>jdoe</b> war, dann ist Ihr neuer Anmeldename <b>my.mail.com:jdoe</b>.
+<li>Das Passwort mu&szlig; nicht ge&auml;ndert werden.
+<li>Klicken Sie auf "OK".
+<li>Vergewissern Sie sich, da&szlig; POPFile l&auml;ft. Ab sofort wird jede Email &uuml;ber POPFile empfangen.
+<li>Sie m&uuml;ssen nun sicherstellen, da&szlig; POPFile bei jedem Start von Windows ebenfalls geladen wird. Wenn Sie die Windows Version verwenden, k&ouml;nnen Sie einfach die Verkn&uuml;pfung "Start POPFile in Background" aus der POPFile Gruppe im Startmen&uuml; in die "Autostart" Gruppe kopieren. Windows wird dann bei jedem hochfahren automatisch POPFile starten.
+<li>Wichtig! Wenn POPFile nicht geladen wurde, k&ouml;nnen Sie auch keine Emails abrufen. Ihr Email Programm wird dann melden, daﬂ es keine Verbindung herstellen kann.
+</ul>
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Pegasus</h3>
+
+<ul>
+	<li>Starten Sie Pegasus und w&auml;hlen Sie Extras -> Internet-Einstellungen. Es erscheint der Dialog "Einstellungen f&uuml;r Internet-Mail".
+	<li>W&auml;hlen Sie das Register "Abholung (POP3)" und notieren Sie sich den "POP3 Host" unter "Allgemeine Einstellungen zur Mailabholung via POP3".
+	<li>&Auml;ndern Sie den POP3 Host in <b>127.0.0.1</b>
+<li>Notieren Sie sich den Benutzernamen.
+<li>&Auml;ndern Sie den Benutzernamen in eine Kombination aus dem urspr&uuml;nglichen POP3 Host und dem bisherigen Benutzernamen getrennt durch einen Doppelpunkt.
+<li>Wenn Ihr urspr&uuml;nglicher POP3 Host <b>my.mail.com</b> und Ihr Benutzername <b>jdoe</b> war, dann ist Ihr neuer Benutzername <b>my.mail.com:jdoe</b>.
+<li>Das Passwort mu&szlig; nicht ge&auml;ndert werden.
+<li>Klicken Sie auf OK und speichern Sie die &Auml;nderungen.
+<li>Vergewissern Sie sich, da&szlig; POPFile l&auml;ft. Ab sofort wird jede Email &uuml;ber POPFile empfangen.
+<li>Sie m&uuml;ssen nun sicherstellen, da&szlig; POPFile bei jedem Start von Windows ebenfalls geladen wird. Wenn Sie die Windows Version verwenden, k&ouml;nnen Sie einfach die Verkn&uuml;pfung "Start POPFile in Background" aus der POPFile Gruppe im Startmen&uuml; in die "Autostart" Gruppe kopieren. Windows wird dann bei jedem hochfahren automatisch POPFile starten.
+<li>Wichtig! Wenn POPFile nicht geladen wurde, k&ouml;nnen Sie auch keine Emails abrufen. Ihr Email Programm wird dann melden, daﬂ es keine Verbindung herstellen kann.
+</ul>
+
+</td></tr></table>
+
+<p>Jetzt, wo wir diesen Punkt erfolgreich abgeschlossen haben, ist es an der Zeit, die Filter einzurichten, so daﬂ Ihr Email Programm das Ergebnis von POPFile verwenden kann, um die Emails in den richtigen Ordner zu verschieben.</p>
+
+<p>F&uuml;r fortgeschrittene Anwender: Sie haben die M&ouml;glichkeit, die Betreff-Zeile um eine [classification] Information erweitern zu lassen. Sie finden die Einstellung im web interface unter "Configure" <i>(dt: Konfigurieren)</i> relativ weit unten. Unabh&auml;ngig davon, ob Sie diese Option ein- oder ausschalten, wird in jedem Fall der <b>X-Text-Classification</b> header hinzugef&uuml;gt.</p>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=3 align="center">
+
+W&auml;hlen Sie einfach Ihr Email Programm aus und folgen Sie der Spalte nach unten. Auch wenn diese Anweisungen vielleicht kompliziert aussehen: Die Einrichtung dauert nur etwa zwei Minuten - und es ist schwer, dabei etwas falsch zu machen. (Dennoch ist es nicht verkehrt, sich die urspr&uuml;nglichen Einstellungen zu notieren, um Sie notfalls wiederherstellen zu k&ouml;nnen.)
+
+</td></tr><tr>
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Outlook</h3>
+
+<ul>
+<li>W&auml;hlen Sie in Outlook Extras -> Regel-Assistent... <a href=o_filter1.png>[screenshot]</a>
+<li>Der Regel-Assistent erscheint nun. Klicken Sie auf "Neu..." und w&auml;hlen Sie "Regel ohne Vorlage erstellen".  <a href=o_filter2.png>[screenshot]</a>
+<li>Outlook kann den <b>X-Text-Classification</b> Header verwenden. Dies erlaubt ein v&ouml;llig unsichtbares Filtern der Emails im Hintergrund. Klicken Sie auf "Weiter" und w&auml;hlen <i>mit bestimmten W&ouml;rtern im Betreff</i>.
+<li>Klicken Sie nun auf den grau hervorgehobenen Link <i>bestimmte W&ouml;rter</i> und geben Sie "X-Text-Classification: " gefolgt von dem Namen einer der von Ihnen eingerichteten Kategorien ein und klicken Sie "Hinzuf&uuml;gen" und dann "OK".
+<li>Klicken Sie auf "Weiter" und w&auml;hlen Sie <i>in einen bestimmten Ordner verschieben</i>.
+<li>Klicken Sie auf das grau hervorgehobene Wort <i>Ordner</i> und eine Liste mit Ordnern erscheint. W&auml;hlen Sie einen beliebigen Ordner aus, in den die Nachrichten verschoben werden sollen, die von POPFile in diese Kategorie eingeordnet wurden, und w&auml;hlen Sie OK.
+<li>Klicken Sie auf OK und dann Fertigstellen.
+<li>Wiederholen Sie diesen Vorgang f&uuml;r jede Kategorie.
+<li>Damit ist die Einrichtung abgeschlossen.
+<li>Ein kleiner Hinweis: Vergewissern Sie sich, da&szlig; im <a href="http://127.0.0.1:8080">POPFile Web Interface</a> unter "Configuration" die Option "Subject Line Modification" abgeschaltet ist (<b>Off</b>). Wenn dort "On" erscheint, klicken Sie auf "Turn Off" <i>(dt: Abschalten)</i>.
+</ul>
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>Outlook Express</h3>
+
+<ul>
+<li>W&auml;hlen Sie in Outlook Express Extras -> Nachrichtenregeln -> E-Mail... <a href=oe_filter1.jpg>[screenshot]</a>
+<li>Das Fenster "Neue E-Mail Regel" erscheint.  <a href=oe_filter2.jpg>[screenshot]</a>
+<li>Outlook Express kann den <b>X-Text-Classification</b> Header nicht verwenden. Dieser w&uuml;rde ein v&ouml;llig unsichtbares Filtern der Emails im Hintergrund erm&ouml;glichen. Klicken Sie also auf <i>Enth&auml;lt den Text "Text" in der Betreffzeile</i> sowie <i>In den Ordner "..." verschieben</i>  <a href=oe_filter3.jpg>[screenshot]</a>
+<li>Klicken Sie nun auf den blau hervorgehobenen Link <i>"Text"</i>. Es erscheint der Dialog "Suchbegriffe eingeben". <a href=oe_filter4.jpg>[screenshot]</a>
+<li>Geben Sie in [eckigen Klammern] den Namen einer der von Ihnen eingerichteten Kategorien ein und klicken Sie auf OK. Klicken Sie nun auf das blau hervorgehobene Wort <i>"..."</i>. Es erscheint der Dialog "Verschieben". W&auml;hlen Sie den Ordner, in den die Nachrichten dieser Kategorie verschoben werden sollen, und klicken Sie auf OK. <a href=oe_filter5.jpg>[screenshot]</a>
+<li>Klicken Sie auf OK.
+<li>Wiederholen Sie diesen Vorgang f&uuml;r jede Kategorie.
+<li>Damit ist die Einrichtung abgeschlossen.
+<li>Ein kleiner Hinweis: Vergewissern Sie sich, da&szlig; im <a href="http://127.0.0.1:8080">POPFile Web Interface</a> unter "Configuration" die Option "Subject Line Modification" aktiviert ist (<b>on</b>). Wenn dort ein "Off" erscheint, klicken Sie auf "Turn On" <i>(dt: Einschalten)</i>.
+</ul>
+
+</td><td width=25% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<p>Eudora erlaubt das Erstellen von Filtern basierend auf jedem beliebigem Header. F&uuml;r unsere Zwecke ist das von enormem Vorteil, da somit der gesamte Vorgang vollst&auml;ndig im Hintergrund ablaufen kann, ohne da&szlig; wir die Betreff-Zeile &auml;ndern m&uuml;ssen.</p>
+
+<ul>
+<li>W&auml;hlen Sie im Men&uuml; Extras -> Filter.  <a href=e_filter1.gif>[screenshot]</a>
+<li>Das Fenster "Filter" erscheint nun. Klicken Sie auf "Neu", um einen neuen Filter anzulegen. <a href=e_filter2.gif>[screenshot]</a>
+<li>Geben Sie in das Textfeld "Kopfzeile:" <b>X-Text-Classification</b> und in das Textfeld neben "enth&auml;lt" den Namen einer der von Ihnen eingerichtete Kategorien ein. Setzen Sie <b>auf keinen Fall</b> eckige Klammern um den Namen. <a href=e_filter3.gif>[screenshot]</a>
+<li>W&auml;hlen Sie unter "Aktion" im ersten Feld <b>&Uuml;bertragen in</b> und im Feld daneben die Mailbox, in die Sie Nachrichten der entsprechenden Kategorie verschieben wollen. <a href=e_filter4.gif>[screenshot]</a>
+<li>Wiederholen Sie diesen Vorgang f&uuml;r jede Kategorie.
+<li>Schlie&szlig;en Sie das Fenster "Filter" und beantworten Sie die Frage, ob Sie die &Auml;nderungen speichern wollen, mit Ja.
+<li>Damit ist die Einrichtung abgeschlossen.
+<li>Ein kleiner Hinweis: Vergewissern Sie sich, da&szlig; im <a href="http://127.0.0.1:8080">POPFile Web Interface</a> unter "Configuration" die Option "Subject Line Modification" abgeschaltet ist (<b>Off</b>). Wenn dort "On" erscheint, klicken Sie auf "Turn Off" <i>(dt: Abschalten)</i>.
+</ul>
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Pegasus</h3>
+
+<ul>
+<li>W&auml;hlen Sie Extras -> Filterregeln -> Filterregeln f&uuml;r neue Post bearbeiten -> bei ge&ouml;ffnetem Eingangsordner.
+<li>Das Fenster "Filterregeln f&uuml;r neue Post" erscheint.
+<li>Klicken Sie auf "Neue Regel". Das Fenster "Eine neue Filterregel erzeugen" erscheint.
+<li>Klicken Sie auf die Schaltfl&auml;che "Ausdruck". Ein Filter auf Basis von regul&auml;ren Ausdr&uuml;cken funktioniert auch dann, wenn die "Subject Line Modification" in POPFile ausgeschaltet ist. Wenn Sie einen Filter auf Basis von Kopfeintr&auml;gen verwenden, mu&szlig; die "Subject Line Modification" in POPFile eingeschaltet sein.
+<li>W&auml;hlen Sie das Textfeld unter "Wenn dieser regul&auml;re Ausdruck" aus.
+<li>Geben Sie <b>X-Text-Classification:</b> gefolgt von dem Namen einer der von Ihnen eingerichteten Kategorien ein, z.B.: <b>X-Text-Classification: spam</b>
+<li>Markieren Sie die Option "Kopfeintr&auml;ge oder Text".
+<li>W&auml;hlen Sie die gew&uuml;nschte Option aus der Liste mit Aktionen, z.B. "Verschieben".
+<li>Wenn Sie eine Aktion wie "Verschieben" oder "Weiterleiten" gew&auml;hlt haben, klicken Sie auf "Einstellen...".
+<li>W&auml;hlen Sie das gew&uuml;nschte Verzeichnis bzw. die Adresse, an die die Email weitergeleitet werden soll.
+<li>Klicken Sie auf OK, um die Regel zu aktivieren.
+<li>Wiederholen Sie diesen Vorgang f&uuml;r jede Regel, die Sie ben&ouml;tigen.
+<li>Die Reihenfolge, in der die Filter ausgef¸hrt werden, kann mit dem roten bzw. dem blauen Pfeil im Fenster "Filterregeln f&uuml;r neue Post" angepa&szlig;t werden.
+<li>Klicken Sie auf "Speichern", um die &Auml;nderungen an den Regeln abzuspeichern.
+<li>Klicken Sie auf OK.
+<li>Damit ist die Einrichtung abgeschlossen.
+</ul>
+
+</td></tr></table>
+
+<h2>Das war es schon... aber...</h2>
+
+Trotz allem filtert POPFile nun immer noch keine Emails. Warum? Ganz einfach: <i>Es wei&szlig; nicht, was die ganzen Kategorien, die Sie eingerichtet haben, bedeuten sollen.</i> Es kann weder mit Namen wie "spam" oder "echt" etwas anfangen, noch wei&szlig; es, was "arbeit" oder "privat" sein soll. Es wei&szlig; nicht einmal, in welcher Sprache die Emails verfa&szlig;t wurde - und es ist ihm auch relativ egal. Sie m&uuml;ssen ihm nun beibringen, Spam und regul&auml;re Email oder einzelne Projekte voneinander zu unterscheiden. Das geht nur durch <b>Training</b>:
+
+<p align=right><a href="training.html">Training &gt;&gt;</a></p>
+
+<p align=center>POPFile v0.17.3 Handbuch - <a href=http://popfile.sourceforge.net/>POPFile Homepage</a></td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=18% align=center><font size=+1><b>Verweise:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=18%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Startseite</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=18% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Foren</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=18% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Fehlerdatenbank</a></b></font></td>
+<td width=43%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>

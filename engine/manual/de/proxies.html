@@ -1,0 +1,130 @@
+<html><head><title>POPFile Dokumentation</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile Dokumentation</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Erstinstallation:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15% valign=top>Schritt 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installieren</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center valign=top>Schritt 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Kategorien einrichten</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center valign=top>Schritt 3<br><font size=+1><b>&nbsp;<a href="email.html">Email Programme</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15% valign=top>Schritt 4<br><font size=+1><b>&nbsp;<a href="training.html">Training</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>POPFile verwenden mit:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">gesicherter Kennwort- authentifizierung</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#cccc99 width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">anderen Proxies</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">mehreren Email-Konten</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+<h2>POPFile mit anderen Proxies wie z.B. Virenscannern verwenden</h2>
+
+<p>Wenn Sie zum Scannen der Emails einen Proxy wie z.B. Norton Antivirus verwenden, der Ihre Emailkonfiguration ge&auml;ndert hat, k&ouml;nnen Sie nat&uuml;rlich nicht gleichzeitig in Ihrem Email Programm den Virenscanner-Proxy und POPFile eintragen. Sie m&uuml;ssen POPFile also so konfigurieren, da&szlig; es mit dem Email Scanner zusammenarbeitet. (Wenn Ihr Virenscanner Ihre POP3 Servereinstellungen nicht ge&auml;ndert hat, ist es nicht n&ouml;tig, diesen Anweisungen hier zu folgen.)</p>
+
+<p>(Am Ende sieht das dann so aus: Emails werden vom Virenscanner heruntergeladen, an POPFile weitergereicht und schlie&szlig;lich dem Email Programm &uuml;bergeben.)</p>
+
+<p>Da verschiede Email Scanner unterschiedlich arbeiten, werden wir folgendes tun:
+
+<ol><li>Deaktivieren Sie den Email Scanner
+<li>Konfigurieren Sie POPFile, damit es die Verbindungen &uuml;ber einen anderen Port abh&ouml;rt
+<li>Sagen Sie Ihrem Email Programm, da&szlig; es einen anderen Port verwenden soll
+<li>Reaktiveren Sie Ihren Email Scanner mit den neuen Einstellungen</ol></p>
+
+<h3>Deaktiveren Sie Ihren Email Scanner</h3>
+
+<p>Befolgen Sie dazu die Anweisungen des Herstellers.</p>
+
+<h3>&Auml;ndern Sie POPFiles Port</h3>
+
+<p>&Ouml;ffnen Sie im <a href="http://127.0.0.1:8080">Web Interface</a> das Register "Configuration" und &auml;ndern Sie <b>POP3 Listen Port</b> in eine &auml;hnliche Nummer (wir empfehlen 123). Klicken Sie auf "Apply".</p>
+
+<h3>&Auml;ndern Sie den Port im Email Programm</h3>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=3 align="center">
+
+W&auml;hlen Sie einfach Ihr Email Programm aus und folgen Sie der Spalte nach unten. Auch wenn diese Anweisungen vielleicht kompliziert aussehen: Die Einrichtung dauert nur etwa zwei Minuten - und es ist schwer, dabei etwas falsch zu machen. (Dennoch ist es nicht verkehrt, sich die urspr&uuml;nglichen Einstellungen zu notieren, um Sie notfalls wiederherstellen zu k&ouml;nnen.)
+
+</td></tr><tr>
+
+<td width=33% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Outlook</h3>
+
+<ul>
+<li>&Ouml;ffnen Sie Extras -> Email Konten.
+<li>W&auml;hlen Sie "Vorhandene Email Konten anzeigen oder bearbeiten" und klicken Sie auf "Weiter".
+<li>W&auml;hlen Sie das entsprechende Konto aus und klicken Sie auf "Bearbeiten".
+<li>Klicken Sie auf "Weitere Einstellungen".
+<li>Klicken Sie auf das Register "Erweitert".
+<li>Geben Sie neben Posteingangsserver (POP3) diesselbe Nummer ein, die Sie vorhin gew&auml;hlt haben (wir haben 123 empfohlen).
+<li>Klicken Sie auf OK und wiederholen Sie diesen Vorgang f&uuml;r jedes Konto, f&uuml;r das Sie POPFile einrichten wollen.
+</ul>
+
+</td><td width=34% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>Outlook Express</h3>
+
+<ul>
+<li>&Ouml;ffnen Sie Extras -> Konten.
+<li>W&auml;hlen Sie das entsprechende Konto aus und klicken Sie auf "Eigenschaften".
+<li>Klicken Sie auf das Register "Erweitert".
+<li>Geben Sie neben Posteingangsserver (POP3) diesselbe Nummer ein, die Sie vorhin gew&auml;hlt haben (wir haben 123 empfohlen).
+<li>Klicken Sie auf OK und wiederholen Sie diesen Vorgang f&uuml;r jedes Konto, f&uuml;r das Sie POPFile einrichten wollen.
+</ul>
+
+</td><td width=33% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<ul>
+<li>Die Porteinstellungen in Eudora sind leider etwas versteckt.
+<li>&Ouml;ffnen Sie den "Arbeitsplatz" und wechseln Sie von dort aus in das Verzeichnis, in dem Eudora installiert ist. Normalerweise: C:\Programme\Qualcomm\Eudora
+<li>&Ouml;ffnen Sie den Ordner "extrastuff".
+<li>Markieren Sie die Datei "esoteric.epi" und kopieren Sie diese mit Bearbeiten -> Kopieren.
+<li>Gehen Sie zur&uuml;ck in den Eudora-Ordner und f&uuml;gen Sie die Datei mit Bearbeiten -> Einf&uuml;gen ein.
+<li>Starten Sie Eudora.
+<li>&Ouml;ffnen Sie Extras -> Optionen.
+<li>Scrollen Sie die Liste bis ganz ans Ende und klicken Sie dort auf "Anschl&uuml;sse".
+<li>Geben Sie neben "POP-Anschluss (110)" diesselbe Nummer ein, die Sie vorhin gew&auml;hlt haben (wir haben 123 empfohlen).
+<li>Klicken Sie auf OK. Die Konfiguration ist damit abgeschlossen.
+</ul>
+
+</td></tr></table>
+
+<h3>Reaktiveren Sie den Email Scanner</h3>
+
+Reaktiveren Sie den Scanner (eine Anleitung finden Sie notfalls im entsprechenden Handbuch). Dieser sollte dann automatisch alles entsprechend einrichten. Ihre Emails sollten von nun an gescannt und sortiert werden.
+
+<p align=center>POPFile v0.17.3 Handbuch - <a href=http://popfile.sourceforge.net/>POPFile Homepage</a></td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=18% align=center><font size=+1><b>Verweise:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=18%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Startseite</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=18% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Foren</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=18% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Fehlerdatenbank</a></b></font></td>
+<td width=43%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>

@@ -1,0 +1,75 @@
+<html><head><title>POPFile Dokumentation</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile Dokumentation</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Erstinstallation:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15% valign=top>Schritt 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installieren</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center valign=top>Schritt 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Kategorien einrichten</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center valign=top>Schritt 3<br><font size=+1><b>&nbsp;<a href="email.html">Email Programme</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15% valign=top>Schritt 4<br><font size=+1><b>&nbsp;<a href="training.html">Training</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>POPFile verwenden mit:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#cccc99 width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">gesicherter Kennwort- authentifizierung</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">anderen Proxies</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">mehreren Email-Konten</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+<h2>POPFile mit gesicherter Kenntwortauthentifizierung verwenden</h2>
+
+<p>&Ouml;ffnen Sie im <a href="http://127.0.0.1:8080">Web Interface</a> das Register "Security" und geben Sie Adresse (Secure server) und Port (Secure port) des entsprechend gesicherten Servers an. Wenn Sie das erledigt haben, m&uuml;ssen Sie lediglich in Ihrem Email Programm als Server "127.0.0.1" eingeben. Den Benutzernamen m&uuml;ssen Sie nicht ver&auml;ndern.</p>
+
+<p>Ungl&uuml;cklicherweise kann derzeit nur ein Account mit gesicherter Kennwortauthentifizierung pro Installation von POPFile verwendet werden.</p>
+
+<h2>Ein Hinweis zur gesicherten Kennwortauthentifizierung bei MSN</h2>
+
+<ol>
+<li>Sie m&uuml;ssen POPFile mit dem folgenden Befehl starten (geben Sie ihn genau so ein):
+<blockquote><b>perl popfile.pl -port 110 -server pop3.email.msn.com -sport
+110</b></blockquote>
+
+<li>Geben Sie bei den Servereinstellungen Ihres Accounts folgende Informationen ein:
+<p>
+Posteingangsserver: 127.0.0.1<br>
+Benutzername: IHR_MSN_BENUTZERNAME
+<p>
+Vergewissern Sie sich, daﬂ "Anmeldung durch gesicherte Kennwortauthentifizierung" ausgew&auml;hlt ist.
+<p>
+Stellen Sie sicher, daﬂ unter "Erweitert" der Port f&uuml;r den Posteingang (POP3) 110 und die Option "Dieser Server erfordert eine sichere Verbindung (SSL)" NICHT ausgew&auml;hlt ist.
+<p>
+<li>Sie sollten nun in der Lage sein, Ihre Emails abzurufen.
+</ol>
+
+<p align=center>POPFile v0.17.3 Handbuch - <a href=http://popfile.sourceforge.net/>POPFile Homepage</a></td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=18% align=center><font size=+1><b>Verweise:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=18%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Startseite</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=18% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Foren</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=18% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Fehlerdatenbank Database</a></b></font></td>
+<td width=43%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>
