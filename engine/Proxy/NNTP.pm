@@ -47,14 +47,14 @@ sub new
 #
 # initialize
 #
-# Called to initialize the POP3 proxy module
+# Called to initialize the NNTP proxy module
 #
 # ---------------------------------------------------------------------------------------------
 sub initialize
 {
     my ( $self ) = @_;
 
-    # Default ports for POP3 service and the user interface
+    # Default ports for NNTP service and the user interface
 
     $self->config_( 'port', 119 );
 
@@ -75,7 +75,7 @@ sub initialize
 #
 # The worker method that is called when we get a good connection from a client
 #
-# $client   - an open stream to a POP3 client
+# $client   - an open stream to a NNTP client
 # $download_count - The unique download count for this session
 #
 # ---------------------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ sub child__
         $self->log_( "Command: --$command--" );
 
         # The news client wants to stop using the server, so send that message through to the
-        # real mail server, echo the response back up to the client and exit the while.  We will
+        # real news server, echo the response back up to the client and exit the while.  We will
         # close the connection immediately
         if ( $command =~ /^ *QUIT/i ) {
             if ( $news )  {
@@ -278,7 +278,7 @@ sub child__
             $self->flush_extra_( $news, $client, 0 );
             next;
         } else {
-            $self->tee_(  $client, "-ERR unknown command or bad syntax$eol" );
+            $self->tee_(  $client, "500 unknown command or bad syntax$eol" );
             last;
         }
     }
@@ -289,6 +289,3 @@ sub child__
 
     $self->log_( "NNTP forked child done" );
 }
-
-# TODO echo_response_ that calls echo_response_ with the extra parameters
-# required et al.
