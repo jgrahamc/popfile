@@ -103,7 +103,7 @@
 #-------------------------------------------------------------------------------------------
 
   Name    "POPFile Wrapper Utility"
-  !define C_VERSION   "0.4.1"     ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.4.2"     ; see 'VIProductVersion' comment below for format details
 
   ; The default NSIS caption is "Name Setup" so we override it here
 
@@ -165,9 +165,10 @@ Section default
   !define L_DATA          $R6
   !define L_INIFOLDER     $R5   ; full path name of the folder used to hold 'wrapper.ini' file
   !define L_LOCKNAME      $R4   ; owner of the 'wrapper.ini' file
-  !define L_POPFILE_ROOT  $R3   ; holds full path to the main POPFile folder
-  !define L_POPFILE_USER  $R2   ; holds path to the user's 'popfile.cfg' file
-  !define L_USERNAME      $R1   ; current Windows login username (or 'UnknownUser' if Win95?)
+  !define L_POPFILE_EXE   $R3
+  !define L_POPFILE_ROOT  $R2   ; holds full path to the main POPFile folder
+  !define L_POPFILE_USER  $R1   ; holds path to the user's 'popfile.cfg' file
+  !define L_USERNAME      $R0   ; current Windows login username (or 'UnknownUser' if Win95?)
 
   !define L_RESERVED      $0    ; register $0 is used to return the result from System.dll call
 
@@ -308,6 +309,7 @@ got_ud_path:
   Goto error_exit
 
 got_ud_folder:
+  GetFullPathName ${L_POPFILE_EXE} ${L_POPFILE_ROOT}
   GetFullPathName /SHORT ${L_POPFILE_ROOT} ${L_POPFILE_ROOT}
   GetFullPathName /SHORT ${L_POPFILE_USER} ${L_POPFILE_USER}
   StrCmp ${L_POPFILE_ROOT} ${L_POPFILE_USER} 0 save_environment
@@ -350,11 +352,9 @@ FileWriteError:
 
 user_set_ok:
   !ifdef BACKGROUND
-            SetOutPath "${L_POPFILE_ROOT}"
-            Exec '"${L_POPFILE_ROOT}\wperl.exe" "${L_POPFILE_ROOT}\popfile.pl"'
+            Exec '"${L_POPFILE_EXE}\wperl.exe" "${L_POPFILE_EXE}\popfile.pl"'
   !else ifdef FOREGROUND
-            SetOutPath "${L_POPFILE_ROOT}"
-            Exec '"${L_POPFILE_ROOT}\perl.exe" "${L_POPFILE_ROOT}\popfile.pl"'
+            Exec '"${L_POPFILE_EXE}\perl.exe" "${L_POPFILE_EXE}\popfile.pl"'
   !else
             StrCpy ${L_CONSOLE} "1"
             StrCpy ${L_DATA} ${L_POPFILE_USER}
@@ -379,13 +379,11 @@ user_set_ok:
       done:
             FileClose ${L_CFG}
             StrCmp ${L_CONSOLE} "0" background
-            SetOutPath "${L_POPFILE_ROOT}"
-            Exec '"${L_POPFILE_ROOT}\perl.exe" "${L_POPFILE_ROOT}\popfile.pl"'
+            Exec '"${L_POPFILE_EXE}\perl.exe" "${L_POPFILE_EXE}\popfile.pl"'
             Goto Exit
 
       background:
-            SetOutPath "${L_POPFILE_ROOT}"
-            Exec '"${L_POPFILE_ROOT}\wperl.exe" "${L_POPFILE_ROOT}\popfile.pl"'
+            Exec '"${L_POPFILE_EXE}\wperl.exe" "${L_POPFILE_EXE}\popfile.pl"'
 
       exit:
   !endif
@@ -397,6 +395,7 @@ error_exit:
   !undef L_DATA
   !undef L_INIFOLDER
   !undef L_LOCKNAME
+  !undef L_POPFILE_EXE
   !undef L_POPFILE_ROOT
   !undef L_POPFILE_USER
   !undef L_USERNAME
