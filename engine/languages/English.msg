@@ -393,8 +393,6 @@ Imap_Expunge                            Expunge deleted messages from watched fo
 Imap_Interval                           Update interval in seconds:
 Imap_IntervalError                      Please enter an interval between 10 and 3600 seconds.
 Imap_OptionsUpdated                     IMAP options were successfully updated.
-Imap_Bytelimit                          Bytes per message to use for classification. Enter 0 (Null) for the complete message:
-Imap_BytelimitError                     Please enter a number.
 Imap_RefreshFolders                     Refresh list of folders
 Imap_Now                                now!
 Imap_UpdateError1                       Could not login. Verify your login name and password, please.

@@ -361,8 +361,6 @@ Imap_PasswordError                      Por favor informe uma senha para o servi
 Imap_Expunge                            Expurgar mensagens deletadas de pastas em observação.
 Imap_Interval                           Intervalo de atualização em segundos:
 Imap_IntervalError                      Por favor informe um intervalo entre 10 e 3600 segundos.
-Imap_Bytelimit                          Bytes por mensagem para usar para classificação. Informe 0 (Nulo) para usar a mensagem completa:
-Imap_BytelimitError                     Por favor informe um número.
 Imap_RefreshFolders                     Atualizar a lista de pastas
 Imap_Now                                agora!
 Imap_UpdateError1                       Não é possível logar. Verifique seu nome de usuário e senha, por favor.

@@ -362,8 +362,6 @@ Imap_PasswordError                      Lütfen sunucu için bir parola girin!
 Imap_Expunge                            Silinen mesajlarý izlenen klasörlerden kaldýr.
 Imap_Interval                           Güncelleme aralýðý, saniye:
 Imap_IntervalError                      Lütfen 10 ile 3600 saniye arasýnda bir sayý girin.
-Imap_Bytelimit                          Her mesajýn sýnýflandýrýlmasýnda kullanýlacak bayt. Tüm mesaj için 0 girin:
-Imap_BytelimitError                     Lütfen bir sayý girin.
 Imap_RefreshFolders                     Klasör listesini yenile
 Imap_Now                                þimdi!
 Imap_UpdateError1                       Oturum açýlamýyor. Lütfen oturum açma adýný ve parolayý kontrol edin.

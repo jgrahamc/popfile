@@ -359,8 +359,6 @@ Imap_PasswordError                      T&auml;yt&auml; palvelimen salasana.
 Imap_Expunge                            Poista viestit vahdituista kansioista.
 Imap_Interval                           P&auml;ivitysv&auml;li sekunneissa.
 Imap_IntervalError                      T&auml;yt&auml; p&auml;ivitysv&auml;li 10 ja 3600 sekunnin v&auml;lilt&auml;.
-Imap_Bytelimit                          Luokitteluun k&auml;ytett&auml;v&auml; tavum&auml;&auml;r&auml;. Kirjoita 0 (nolla), jos haluat k&auml;ytt&auml;&auml; koko viesti&auml;:
-Imap_BytelimitError                     T&auml;yt&auml; numero.
 Imap_RefreshFolders                     P&auml;ivit&auml; kansiolista.
 Imap_Now                                nyt
 Imap_UpdateError1                       Kirjautuminen ep&auml;onnistui. Tarkista tunnus ja salasana.

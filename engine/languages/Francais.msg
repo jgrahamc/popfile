@@ -356,8 +356,6 @@ Imap_PasswordError                      Veuillez entrer un mot de passe pour le 
 Imap_Expunge                            Effacer les messages supprimés des dossiers surveillés
 Imap_Interval                           Période de rafraîchissement en secondes :
 Imap_IntervalError                      Veuillez entrer un délai compris entre 10 et 3600 secondes.
-Imap_Bytelimit                          Par message, nombre d'octets pris en compte pour la classification. Entrez 0 (zéro) pour le message complet :
-Imap_BytelimitError                     Veuillez entrer un nombre.
 Imap_RefreshFolders                     Actualiser la liste des dossiers
 Imap_Now                                maintenant !
 Imap_UpdateError1                       Impossible de s'identifier. Veuillez vérifier votre nom de compte et votre mot de passe.

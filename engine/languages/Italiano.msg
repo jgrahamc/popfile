@@ -361,8 +361,6 @@ Imap_PasswordError                      Inserisci una password per il server!
 Imap_Expunge                            Elimina messaggi contrassegnati per la cancellazione dalle cartelle sotto controllo.
 Imap_Interval                           Intervallo di aggiornamento in secondi:
 Imap_IntervalError                      Inserisci un intervallo tra 10 e 3600 secondi.
-Imap_Bytelimit                          Byte per messaggio da usare per la classificazione. Inserisci 0 (Null) per il messaggio completo:
-Imap_BytelimitError                     Inserisci un numero.
 Imap_RefreshFolders                     Aggiorna lista delle cartelle
 Imap_Now                                ora!
 Imap_UpdateError1                       Login non riuscito. Verifica il nome per il login e la password.
