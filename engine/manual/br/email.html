@@ -1,66 +1,136 @@
 <html><head><title>Documentação do POPFile</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
 
+
+
 </head>
+
+
 
 <body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>Documentação do POPFile</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
 
+
+
 <table width=100% cellspacing=0><tr>
+
+
 
 <td width=15% align=center><font size=+1><b>Configurando pela Primeira Vez:</b></font></td>
 
+
+
 <td width=2></td>
+
+
 
 <td align=center bgcolor=#ededca width=15%>Passo 1<br><font size=+1><b>&nbsp;<a href="installing.html">Instalando</a></b></font></td>
 
+
+
 <td width=2></td>
+
+
 
 <td bgcolor=#ededca width=15% align=center>Passo 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Configuração de Buckets</a></b></font></td>
 
+
+
 <td width=2></td>
+
+
 
 <td bgcolor=#cccc99 width=15% align=center>Passo 3<br><font size=+1><b>&nbsp;<a href="email.html">Programas de Email</a></b></font></td>
 
+
+
 <td width=2></td>
+
+
 
 <td align=center bgcolor=#ededca width=15%>Passo 4<br><font size=+1><b>&nbsp;<a href="training.html">Treinando</a></b></font></td>
 
+
+
 <td width=25%>&nbsp;</td></tr>
+
+
 
 <tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
 
+
+
 <tr height=1><td colspan=10></td></tr>
+
+
 
 </table>
 
+
+
 <table width=100% cellspacing=0><tr>
+
+
+
+
 
 
 
 <td width=40% align=right><font size=+1><b>Usando o POPFile com:</b></font></td>
 
+
+
 <td width=2></td>
+
+
 
 <td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
 
+
+
 <td width=2></td>
+
+
 
 <td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Autenticação Segura de Senha</a></b></font></td>
 
+
+
 <td width=2></td>
+
+
 
 <td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Outros Proxies</a></b></font><br></td>
 
+
+
 <td width=2></td>
 
+
+
 <td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Múltiplas Contas de Email</a></b></font></td>
+
+
 
 </tr>
 
 
 
+
+
+
+
 </table>
 
+
+
 <table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+
+
+
+
+
 
 
 
@@ -72,7 +142,15 @@
 
 
 
+
+
+
+
 <p>O POPFile funciona como um <i>servidor proxy</i>. Seu programa de email conversa com o POPFile, que conversa com seu servidor de email. Ao invés de seu programa de email pegar as mensagens diretamente, o POPFile as pega primeiro, e as analisa para decidir em qual bucket elas devem ser colocadas.</p>
+
+
+
+
 
 
 
@@ -80,7 +158,15 @@
 
 
 
+
+
+
+
 <p><b>X-Text-Classification: pessoal</b></p>
+
+
+
+
 
 
 
@@ -88,13 +174,27 @@
 
 
 
+
+
+
+
 <p>De qualquer forma, você precisa fazer duas coisas para seu programa de email conversar com o POPFile:
+
+
+
+
 
 
 
 <ol><li>Ajustar as configurações do seu programa de email para fazê-lo conversar com o POPFile, e
 
+
+
 <li>configurar seus filtros de email de maneira que os emails sejam filtrados corretamente.</ol></p>
+
+
+
+
 
 
 
@@ -102,15 +202,31 @@
 
 
 
+
+
+
+
 <p>Abaixo estão as instruções para alguns dos mais populares programas de email. Para outros - ou para usuários avançados - aqui estão as instruções gerais:</p>
+
+
+
+
 
 
 
 <p><ul><li>Troque o nome do servidor POP3 em seu cliente de email para 127.0.0.1, anotando o endereço original.
 
+
+
 <li>Troque o nome do usuário POP3 para [endereço-original-do-servidor-POP3]:[nome-do-usuário]
 
+
+
 <li>Deixe a senha como está</ul></p>
+
+
+
+
 
 
 
@@ -118,7 +234,15 @@
 
 
 
+
+
+
+
 <table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+
+
+
 
 
 
@@ -126,7 +250,15 @@
 
 
 
+
+
+
+
 Apenas escolha seu programa de email e siga a coluna abaixo. Apesar de estas instruções parecerem complicadas, na verdade elas levam apenas em torno de dois minutos - e é fácil acertar. (Só para garantir, faça uma anotação de suas configurações originais caso você precise restaurar algo.)
+
+
+
+
 
 
 
@@ -134,7 +266,15 @@ Apenas escolha seu programa de email e siga a coluna abaixo. Apesar de estas ins
 
 
 
+
+
+
+
 <td width=25% bgcolor="#FFCCCC" valign="top">
+
+
+
+
 
 
 
@@ -142,31 +282,63 @@ Apenas escolha seu programa de email e siga a coluna abaixo. Apesar de estas ins
 
 
 
+
+
+
+
 <ul>
 
-<li>No Outlook selecione o menu Ferramentas->Contas de Email... A janela Contas de Email vai aparecer. <a href=http://popfile.sourceforge.net/manual/o_popfile1.gif>[screenshot]</a>
+
+
+<li>No Outlook selecione o menu Ferramentas->Contas de Email... A janela Contas de Email vai aparecer. <a href=../o_popfile1.gif>[screenshot]</a>
+
+
 
 <li>Clique em Visualizar ou alterar uma conta de email existente e clique em Próximo. Escolha a conta que você quer usar com o POPFile e clique em Alterar...
 
+
+
 Anote o nome do servidor de entrada de email (POP3) e o nome do usuário. <a href=http://popfile.sourceforge.net/manual/o_popfile2.gif>[screenshot]</a>
+
+
 
 <li>Troque o nome do servidor de entrada de email (POP3) para <b>127.0.0.1</b> e troque o nome do usuário para uma combinação do nome do servidor de entrada original
 
- (POP3) e do nome do usuário original separados por dois pontos. <a href=http://popfile.sourceforge.net/manual/o_popfile3.gif>[screenshot]</a>
+
+
+ (POP3) e do nome do usuário original separados por dois pontos. <a href=../o_popfile3.gif>[screenshot]</a>
+
+
 
 <li>Assim, se o nome do servidor de entrada de email (POP3) original for <b>my.mail.com</b> e seu nome de usuário for <b>jdoe</b>, seu novo nome de usuário deverá ser <b>my.mail.com:jdoe</b>
 
+
+
 <li>Você não precisa mudar a senha.
+
+
 
 <li>Clique em Próximo e então em Finalizar.
 
+
+
 <li>Assegure-se de que o POPFile está rodando e todos os emails serão recebidos através do POPFile!
+
+
 
 <li>Você deverá se assegurar de que o POPFile inicie sempre ao iniciar o Windows. Se você usou a versão com instalador para Windows, você pode arrastar o atalho 'Start POPFile in Background' do grupo POPFile no menu Iniciar para o grupo <b>Iniciar</b>. Agora, o Windows irá carregar o POPFile cada vez que iniciar.
 
+
+
 <li>Importante! Se o POPFile não for carregado, os emails não serão recebidos - e o seu programa de email não vai conectar!
 
+
+
 </ul>
+
+
+
+
 
 
 
@@ -174,33 +346,67 @@ Anote o nome do servidor de entrada de email (POP3) e o nome do usuário. <a href
 
 
 
+
+
+
+
 <h3 align=center>Outlook Express</h3>
+
+
+
+
 
 
 
 <ul>
 
-<li>No Outlook Express selecione o menu Ferramentas->Contas... A janela Contas na Internet vai aparecer. <a href=http://popfile.sourceforge.net/manual/oe_popfile1.gif>[screenshot]</a>
 
-<li>Selecione a conta que você quer modificar para usar com o POPFile e clique em Propriedades. <a href=http://popfile.sourceforge.net/manual/oe_popfile2.gif>[screenshot]</a>
 
-<li>Escolha Servidores. Anote o nome do servidor de entrada de email (POP3) e o nome da conta de entrada de email. <a href=http://popfile.sourceforge.net/manual/oe_popfile3.gif>[screenshot]</a>
+<li>No Outlook Express selecione o menu Ferramentas->Contas... A janela Contas na Internet vai aparecer. <a href=../oe_popfile1.gif>[screenshot]</a>
 
-<li>Troque o nome do servidor de entrada de email (POP3) para <b>127.0.0.1</b> e troque o nome da conta de entrada de email para uma combinação do nome do servidor original de entrada de email (POP3) e o nome da conta original de entrada de email separados por dois pontos. <a href=http://popfile.sourceforge.net/manual/oe_popfile4.gif>[screenshot]</a>
+
+
+<li>Selecione a conta que você quer modificar para usar com o POPFile e clique em Propriedades. <a href=../oe_popfile2.gif>[screenshot]</a>
+
+
+
+<li>Escolha Servidores. Anote o nome do servidor de entrada de email (POP3) e o nome da conta de entrada de email. <a href=../oe_popfile3.gif>[screenshot]</a>
+
+
+
+<li>Troque o nome do servidor de entrada de email (POP3) para <b>127.0.0.1</b> e troque o nome da conta de entrada de email para uma combinação do nome do servidor original de entrada de email (POP3) e o nome da conta original de entrada de email separados por dois pontos. <a href=../oe_popfile4.gif>[screenshot]</a>
+
+
 
 <li>Assim, se o nome do servidor de entrada de email (POP3) original for <b>my.mail.com</b> e seu nome de usuário for <b>jdoe</b>, seu novo nome de usuário deverá ser <b>my.mail.com:jdoe</b>
 
+
+
 <li>Você não precisa trocar a senha.
+
+
 
 <li>Clique em OK e então em Fechar.
 
+
+
 <li>Assegure-se de que o POPFile está rodando e todos os emails serão recebidos através do POPFile!
+
+
 
 <li>Você deverá se assegurar de que o POPFile inicie sempre ao iniciar o Windows. Se você usou a versão com instalador para Windows, você pode arrastar o atalho 'Start POPFile in Background' do grupo POPFile no menu Iniciar para o grupo <b>Iniciar</b>. Agora, o Windows irá carregar o POPFile cada vez que iniciar.
 
+
+
 <li>Importante! Se o POPFile não for carregado, os emails não serão recebidos - e o seu programa de email não vai conectar!
 
+
+
 </ul>
+
+
+
+
 
 
 
@@ -208,33 +414,67 @@ Anote o nome do servidor de entrada de email (POP3) e o nome do usuário. <a href
 
 
 
+
+
+
+
 <h3 align=center>Eudora</h3>
+
+
+
+
 
 
 
 <ul>
 
-<li>No Eudora selecione o menu Tools->Options... A janela Options vai aparecer. <a href=http://popfile.sourceforge.net/manual/e_popfile1.gif>[screenshot]</a>
 
-<li>Anote o nome do servidor Mail Server (incoming) e o Login Name. <a href=http://popfile.sourceforge.net/manual/e_popfile2.gif>[screenshot]</a>
+
+<li>No Eudora selecione o menu Tools->Options... A janela Options vai aparecer. <a href=../e_popfile1.gif>[screenshot]</a>
+
+
+
+<li>Anote o nome do servidor Mail Server (incoming) e o Login Name. <a href=../e_popfile2.gif>[screenshot]</a>
+
+
 
 <li>Troque o nome do servidor Mail Server (incoming) para <b>127.0.0.1</b> e troque o Login Name para uma combinação do
 
-nome do servidor Mail Server (incoming) e do Login Name origianl separados por dois pontos. <a href=http://popfile.sourceforge.net/manual/e_popfile3.gif>[screenshot]</a>
+
+
+nome do servidor Mail Server (incoming) e do Login Name origianl separados por dois pontos. <a href=../e_popfile3.gif>[screenshot]</a>
+
+
 
 <li>Assim, se o nome do servidor Mail Server (incoming) original for <b>my.mail.com</b> e seu nome de usuário for <b>jdoe</b>, seu novo nome de usuário será <b>my.mail.com:jdoe</b>
 
+
+
 <li>Você não precisa trocar a senha.
+
+
 
 <li>Clique em OK.
 
+
+
 <li>Assegure-se de que o POPFile está rodando e todos os emails serão recebidos através do POPFile!
+
+
 
 <li>Você deverá se assegurar de que o POPFile inicie sempre ao iniciar o Windows. Se você usou a versão com instalador para Windows, você pode arrastar o atalho 'Start POPFile in Background' do grupo POPFile no menu Iniciar para o grupo <b>Iniciar</b>. Agora, o Windows irá carregar o POPFile cada vez que iniciar.
 
+
+
 <li>Importante! Se o POPFile não for carregado, os emails não serão recebidos - e o seu programa de email não vai conectar!
 
+
+
 </ul>
+
+
+
+
 
 
 
@@ -242,38 +482,77 @@ nome do servidor Mail Server (incoming) e do Login Name origianl separados por d
 
 
 
+
+
+
+
 <h3 align=center>Pegasus</h3>
+
+
+
+
 
 
 
 <ul>
 
+
+
 <li>No Pegasus selecione o menu Tools->Internet Options... Receiving (POP3). A página de configuração de contas POP3 vai aparecer.
+
+
 
 <li>Em Configurações gerais para recebimento de email usando POP3, selecione POP3 Host. Anote host POP3 atual.
 
+
+
 <li>Troque o POP3 Host para <b>127.0.0.1</b>
+
+
 
 <li>Em Configurações gerais para recebimento de email usando POP3, selecione User name. Anote o User name atual.
 
+
+
 <li>Troque o User name para uma combinação do POP3 Host original e o User name original separados por dois pontos.
+
+
 
 <li>Assim, se o POP3 host original for <b>my.mail.com</b> e seu User name for <b>jdoe</b>, seu novo User name será <b>my.mail.com:jdoe</b>
 
+
+
 <li>Você não precisa trocar a senha.
+
+
 
 <li>Clique no botão OK e salve as alterações.
 
+
+
 <li>Assegure-se de que o POPFile está rodando e todos os emails serão recebidos através do POPFile!
+
+
 
 <li>Você deverá se assegurar de que o POPFile inicie sempre ao iniciar o Windows. Se você usou a versão com instalador para Windows, você pode arrastar o atalho 'Start POPFile in Background' do grupo POPFile no menu Iniciar para o grupo <b>Iniciar</b>. Agora, o Windows irá carregar o POPFile cada vez que iniciar.
 
+
+
 <li>Importante! Se o POPFile não for carregado, os emails não serão recebidos - e o seu programa de email não vai conectar!
+
 </ul>
 
 
 
+
+
+
+
 </td></tr></table>
+
+
+
+
 
 
 
@@ -281,7 +560,15 @@ nome do servidor Mail Server (incoming) e do Login Name origianl separados por d
 
 
 
+
+
+
+
 <p>Para usuários avançados, você tem a opção de modificar a linha de assunto para adicionar uma marca de [classificação] ou não. Isto está localizado pelo final da seção Configuração da interface web. Não importa qual opção você escolher, o cabeçalho <b>X-Text-Classification</b> sempre será adicionado.</p>
+
+
+
+
 
 
 
@@ -289,7 +576,15 @@ nome do servidor Mail Server (incoming) e do Login Name origianl separados por d
 
 
 
+
+
+
+
 <td colspan=3 align="center">
+
+
+
+
 
 
 
@@ -297,7 +592,15 @@ Apenas escolha seu programa de email e siga a coluna abaixo. Apesar de estas ins
 
 
 
+
+
+
+
 </td></tr><tr>
+
+
+
+
 
 
 
@@ -305,33 +608,67 @@ Apenas escolha seu programa de email e siga a coluna abaixo. Apesar de estas ins
 
 
 
+
+
+
+
 <h3 align=center>Outlook</h3>
+
+
+
+
 
 
 
 <ul>
 
-<li>No Outlook selecione Ferramentas->Assistente de Regras... <a href=http://popfile.sourceforge.net/manual/o_filter1.gif>[screenshot]</a>
 
-<li>O Assistente de Regras aparece. Clique Nova... e selecione Iniciar com uma regra em branco. <a href=http://popfile.sourceforge.net/manual/o_filter2.gif>[screenshot]</a>
+
+<li>No Outlook selecione Ferramentas->Assistente de Regras... <a href=../o_filter1.gif>[screenshot]</a>
+
+
+
+<li>O Assistente de Regras aparece. Clique Nova... e selecione Iniciar com uma regra em branco. <a href=../o_filter2.gif>[screenshot]</a>
+
+
 
 <li>O Outlook pode usar o cabeçalho <b>X-Text-Classification</b>, o que permite que a filtragem de email ocorra de forma completamente transparente. Clique em Próximo e selecione <i>com palavras específicas no cabeçalho da mensagem</i>.
 
+
+
 <li>Agora clique no link <i>palavras específicas</i> e digite "X-Text-Classification: " seguido pelo nome de um dos buckets e clique em Adicionar, e então clique em OK.
+
+
 
 <li>Clique em Próximo e selecione <i>mover para a pasta especificada</i>.
 
+
+
 <li>Clique na palavra <i>especificada</i> e uma lista de pastas aparece. Selecione qualquer pasta para a qual você quiser mover as mensagens daquele bucket e clique em OK.
+
+
 
 <li>Clique em OK, e então em Finalizar.
 
+
+
 <li>Repita o processo para cada um de seus buckets, e então clique em OK.
+
+
 
 <li>Feito!
 
+
+
 <li>Apenas uma pequena nota: na <a href="http://127.0.0.1:8080">interface web do POPFile</a>, na seção Configuração, verifique se a opção Modificação da Linha de Assunto está <b>desligada</b>.
 
+
+
 </ul>
+
+
+
+
 
 
 
@@ -339,33 +676,67 @@ Apenas escolha seu programa de email e siga a coluna abaixo. Apesar de estas ins
 
 
 
+
+
+
+
 <h3 align=center>Outlook Express</h3>
+
+
+
+
 
 
 
 <ul>
 
-<li>No Outlook Express selecione Ferramentas->Regras para Mensagens->Email... <a href=http://popfile.sourceforge.net/manual/oe_filter1.gif>[screenshot]</a>
 
-<li>A janela Regras para mensagens aparece.  <a href=http://popfile.sourceforge.net/manual/oe_filter2.gif>[screenshot]</a>
+
+<li>No Outlook Express selecione Ferramentas->Regras para Mensagens->Email... <a href=../oe_filter1.gif>[screenshot]</a>
+
+
+
+<li>A janela Regras para mensagens aparece.  <a href=../oe_filter2.gif>[screenshot]</a>
+
+
 
 <li>O Outlook Express não pode usar o cabeçalho <b>X-Text-Classification</b>, o qual permite que a filtragem de email ocorra de forma completamente transparente. Assim ao invés disso, clique em <i>Quando a linha 'Assunto' contiver palavras específicas</i> e tambem clique em
 
-<i>Movê-la para a pasta especificada</i>  <a href=http://popfile.sourceforge.net/manual/oe_filter3.gif>[screenshot]</a>
 
-<li>Agora clique no link <i>contiver palavras específicas</i> e a janela Digitar palavras específicas aparece <a href=http://popfile.sourceforge.net/manual/oe_filter4.gif>[screenshot]</a>
 
-<li>Digite o nome de um de seus buckets, entre [colchetes], e então clique em OK. Agora clique no link <i>especificada</i> e a janela Mover aparece. Clique na pasta para a qual você quer mover suas mensagens deste bucket e clique em OK. <a href=http://popfile.sourceforge.net/manual/oe_filter5.gif>[screenshot]</a>
+<i>Movê-la para a pasta especificada</i>  <a href=../oe_filter3.gif>[screenshot]</a>
+
+
+
+<li>Agora clique no link <i>contiver palavras específicas</i> e a janela Digitar palavras específicas aparece <a href=../oe_filter4.gif>[screenshot]</a>
+
+
+
+<li>Digite o nome de um de seus buckets, entre [colchetes], e então clique em OK. Agora clique no link <i>especificada</i> e a janela Mover aparece. Clique na pasta para a qual você quer mover suas mensagens deste bucket e clique em OK. <a href=../oe_filter5.gif>[screenshot]</a>
+
+
 
 <li>Clique em OK.
 
+
+
 <li>Repita o processo para cada um de seus buckets, e então clique em OK.
+
+
 
 <li>Feito!
 
+
+
 <li>Apenas uma pequena nota: na <a href="http://127.0.0.1:8080">interface web do POPFile</a>, na seção Configuração, verifique se a opção Modificação da Linha de Assunto está <b>ligada</b>.
 
+
+
 </ul>
+
+
+
+
 
 
 
@@ -373,7 +744,15 @@ Apenas escolha seu programa de email e siga a coluna abaixo. Apesar de estas ins
 
 
 
+
+
+
+
 <h3 align=center>Eudora</h3>
+
+
+
+
 
 
 
@@ -381,25 +760,51 @@ Apenas escolha seu programa de email e siga a coluna abaixo. Apesar de estas ins
 
 
 
+
+
+
+
 <ul>
 
-<li>Selecione o menu Tools->Filters. <a href=http://popfile.sourceforge.net/manual/e_filter1.gif>[screenshot]</a>
 
-<li>A janela Filters aparece. Clique em New para criar um novo filtro. <a href=http://popfile.sourceforge.net/manual/e_filter2.gif>[screenshot]</a>
 
-<li>Em Header digite <b>X-Text-Classification</b> e em contains digite o nome de um de seus buckets. <b>Não</b> adicione colchetes ao redor. <a href=http://popfile.sourceforge.net/manual/e_filter3.gif>[screenshot]</a>
+<li>Selecione o menu Tools->Filters. <a href=../e_filter1.gif>[screenshot]</a>
 
-<li>Selecine <b>Transfer To</b> para a primeira Action e selecione a caixa de email para a qual você quer que sejam transferidas as mensagens deste bucket. <a href=http://popfile.sourceforge.net/manual/e_filter4.gif>[screenshot]</a>
+
+
+<li>A janela Filters aparece. Clique em New para criar um novo filtro. <a href=../e_filter2.gif>[screenshot]</a>
+
+
+
+<li>Em Header digite <b>X-Text-Classification</b> e em contains digite o nome de um de seus buckets. <b>Não</b> adicione colchetes ao redor. <a href=../e_filter3.gif>[screenshot]</a>
+
+
+
+<li>Selecine <b>Transfer To</b> para a primeira Action e selecione a caixa de email para a qual você quer que sejam transferidas as mensagens deste bucket. <a href=../e_filter4.gif>[screenshot]</a>
+
+
 
 <li>Repita esta operação para cada um de seus buckets.
 
+
+
 <li>Feche a janela Filters e confirme com Yes quando perguntado sobre salvar as alterações.
+
+
 
 <li>Feito!
 
+
+
 <li>Apenas uma pequena nota: na <a href="http://127.0.0.1:8080">interface web do POPFile</a>, na seção Configuração, verifique se a opção Modificação da Linha de Assunto está <b>desligada</b>.
 
+
+
 </ul>
+
+
+
+
 
 
 
@@ -407,49 +812,99 @@ Apenas escolha seu programa de email e siga a coluna abaixo. Apesar de estas ins
 
 
 
+
+
+
+
 <h3 align=center>Pegasus</h3>
+
+
+
+
 
 
 
 <ul>
 
+
+
 <li>No Pegasus selecione Tools->Mail Filtering Rules ->Edit New Mail Filtering Rules ->Rules Applied When Folder is Opened.
+
+
 
 <li>A janela New Mail Filtering Rules aparece.
 
+
+
 <li>Clique no botão New Rule. A janela Create a New Filtering Rule aparece.
+
+
 
 <li>Clique no botão Expression. Note que usar o filtro Expression vai funcionar mesmo se a opção Modificação da Linha de Assunto do POPFile estiver desligada. Se você usar o filtro Header, a opção Modificação da Linha de Assunto do POPFile deve estar ligada.
 
+
+
 <li>Selecione If this regular expression
+
+
 
 <li>Digite o nome de um de seus buckets, precedido de <b>X-Text-Classification:</b>, por exemplo: <b>X-Text-Classification: spam</b>
 
+
+
 <li>Selecione Headers or body
+
+
 
 <li>Selecione a ação desejada na lista Action. Por exemplo, Move
 
+
+
 <li>Se uma ação como Move ou Forward foi escolhida, clique no botão Set.
+
+
 
 <li>Selecione a pasta de destino ou digite o endereço para encaminhar como for apropriado para a ação Action selecionada.
 
+
+
 <li>Clique no botão OK para adicionar a regra na lista de regras.
+
+
 
 <li>Repita o processo para cada regra que você precisar.
 
+
+
 <li>A ordem em que cada regra de filtro é aplicada pode ser ajustada usando as setas vermelha / azul (para cima / para baixo) da janela New Mail Filter Rules.
+
+
 
 <li>Selecione o botão Save para salvar o conjunto de alterações nas regras.
 
+
+
 <li>Selecione o botão OK.
 
+
+
 <li>Feito!
+
+
 
 </ul>
 
 
 
+
+
+
+
 </td></tr></table>
+
+
+
+
 
 
 
@@ -457,38 +912,77 @@ Apenas escolha seu programa de email e siga a coluna abaixo. Apesar de estas ins
 
 
 
+
+
+
+
 Apesar de tudo isto, o POPFile ainda não filtra email. Porque não? <i>Ele não sabe o que cada um dos buckets que você criou significam.</i> Ele não tem idéia do que significa 'spam' ou 'confiável', ou o que é 'trabalho' ou 'pessoal'. Ele nem mesmo sabe em que língua estão escritos seus emails - e isso não importa. Você precisa treiná-lo para distinguir entre spam e email normal, ou entre um de seus projetos. Você faz isto através de <b>treinamento</b> - e <a href="training.html">nós vamos tratar disto a seguir</a>.
+
+
+
+
 
 
 
 </td></tr></table>
 
+
+
 <br>
+
+
 
 <table width=100% cellspacing=0><tr>
 
+
+
 <td width=15% align=center><font size=+1><b>Links:</b></font></td>
 
+
+
 <td width=2></td>
+
+
 
 <td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Home Page</a></b></font></td>
 
+
+
 <td width=2></td>
+
+
 
 <td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forums</a></b></font></td>
 
+
+
 <td width=2></td>
+
+
 
 <td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Bug Database</a></b></font></td>
 
+
+
 <td width=55%>&nbsp;</td></tr>
+
+
 
 <tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
 
+
+
 <tr height=1><td colspan=10></td></tr>
+
+
 
 </table>
 
 
 
+
+
+
+
 </body></html>
+
