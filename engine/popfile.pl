@@ -478,7 +478,14 @@ sub verify_connected
             my $max_length = 8192;
             my $n          = sysread( $mail, $buf, $max_length, length $buf );
             
-            debug( $buf );
+            debug( "Connection returned: $buf" );
+            if ( !( $buf =~ /[\r\n]/ ) )
+            {
+                for my $i ( 0..4 )
+                {
+                    flush_extra( $mail, $client );
+                }
+            }
             return 1;
         }
     }
@@ -519,11 +526,7 @@ sub flush_extra
                     last;
                 }
                 
-                while( $buf =~ s/^.*?$eol//s )
-                {
-                    my $line = $&;
-                    print $client $line;
-                }
+                tee( $client, $buf );
             }
         }
     }
