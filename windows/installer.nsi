@@ -1373,18 +1373,22 @@ update_config:
   ; 'CreateShortCut' uses '$OUTDIR' as the working directory for the shortcut
   ; ('SetOutPath' is one way to change the value of $OUTDIR)
 
-  ; For this build the following simple scheme is used for the shortcuts:
-  ; (a) a 'POPFile' folder with the standard set of shortcuts is created for the current user
-  ; (b) if the user ticked the relevant checkbox then a 'Run POPFile' shortcut is placed in the
-  ;     current user's StartUp folder.
-  ; (c) if the user did not tick the relevant checkbox then the 'Run POPFile' shortcut is
-  ;     removed from the current user's StartUp folder if the user does not have 'Admin' rights
-  ; (d) if the user has 'Admin' rights, a 'POPFile' folder with the standard set of shortcuts is
-  ;     created for 'all users' if the 'all users' folder is in a different location from that
-  ;     of the current user
-  ; (e) if the user has 'Admin' rights and the user ticked the relevant checkbox then a
-  ;     'Run POPFile' shortcut is placed in the 'all users' StartUp folder if that folder
-  ;     is in a different location from that of the current user
+  ; For this build a (limited) multi-user install is performed when the user has 'Admin' rights
+  ; otherwise a single-user install is performed.
+  ;
+  ; (1) If the user has 'Admin' rights:
+  ;     (a) a POPFile folder with a set of shortcuts is created in the 'All Users' Start Menu
+  ;     (b) if the user ticked the relevant checkbox then a 'Run POPFile' shortcut is created
+  ;         in the 'All Users' StartUp folder
+  ;
+  ; (2) If the user does not have 'Admin' rights:
+  ;    (a) a POPFile folder with a set of shortcuts is created in the 'Current User' Start Menu
+  ;    (b) if the user ticked the relevant checkbox then a 'Run POPFile' shortcut is created in
+  ;        the 'Current User' StartUp folder
+  ;    (c) if the user did not tick the relevant checkbox then the 'Run POPFile' shortcut is
+  ;        removed from the 'Current User' StartUp folder
+
+  StrCmp $G_WINUSERTYPE "Admin" multi_user_case
 
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
   SetOutPath $INSTDIR
@@ -1416,30 +1420,23 @@ update_config:
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
                  "$G_ROOTDIR\stop_pf.exe" "/showerrors $G_GUI"
 
+  StrCmp $G_STARTUP "1" set_autostart
+  Delete "$SMSTARTUP\Run POPFile.lnk"
+  Goto remove_redundant_shortcuts
+
+set_autostart:
   SetOutPath $SMSTARTUP
   SetOutPath $INSTDIR
-  StrCmp $G_STARTUP "1" set_autostart_set
-  StrCmp $G_WINUSERTYPE "Admin" end_autostart_set
-  Delete "$SMSTARTUP\Run POPFile.lnk"
-  Goto end_autostart_set
-
-set_autostart_set:
   CreateShortCut "$SMSTARTUP\Run POPFile.lnk" "$INSTDIR\runpopfile.exe" "/startup"
+  Goto remove_redundant_shortcuts
 
-end_autostart_set:
-  StrCmp $G_WINUSERTYPE "Admin" 0 remove_redundant_shortcuts
+multi_user_case:
 
-  ; Only admins have full access rights to the 'all users' area. If the 'all users' folder
-  ; is not found, NSIS will return the 'current user' folder. To avoid unnecessary work,
-  ; check if the 'all users' data is stored in the same place as the current user' data
-
-  StrCpy ${L_TEMP} $SMPROGRAMS
-  StrCpy ${L_CFG}  $SMSTARTUP
+  ; Only admins have full access rights to the 'all users' area.
+  ; If the 'All Users' folder is not found, NSIS will return the 'Current User' folder.
 
   SetShellVarContext all
 
-  StrCmp $SMPROGRAMS ${L_TEMP} check_startup
-  
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
   SetOutPath $INSTDIR
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
@@ -1470,8 +1467,6 @@ end_autostart_set:
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
                  "$G_ROOTDIR\stop_pf.exe" "/showerrors $G_GUI"
 
-check_startup:
-  StrCmp $SMSTARTUP ${L_CFG} remove_redundant_shortcuts
   StrCmp $G_STARTUP "1" 0 remove_redundant_shortcuts
   SetOutPath $SMSTARTUP
   SetOutPath $INSTDIR
@@ -1493,6 +1488,8 @@ remove_redundant_shortcuts:
 
   ; Create entry in the Control Panel's "Add/Remove Programs" list
 
+  StrCmp $G_WINUSERTYPE "Admin" use_HKLM
+
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
               "DisplayName" "${C_PFI_PRODUCT} ${C_PFI_VERSION}"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
@@ -1501,8 +1498,9 @@ remove_redundant_shortcuts:
               "NoModify" "1"
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
               "NoRepair" "1"
+  Goto end_section
 
-  StrCmp $G_WINUSERTYPE "Admin" 0 end_section
+use_HKLM:
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
               "DisplayName" "${C_PFI_PRODUCT} ${C_PFI_VERSION}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
