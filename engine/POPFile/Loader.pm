@@ -566,7 +566,7 @@ sub CORE_start
         print '} ' if $self->{debug__};
     }
 
-    print "\n\nPOPFile Engine ", $self->version(), " running\n" if $self->{debug__};
+    print "\n\nPOPFile Engine ", $self->CORE_version(), " running\n" if $self->{debug__};
     flush STDOUT;
 }
 
@@ -749,13 +749,6 @@ sub remove_module
 }
 
 # GETTER/SETTER
-
-sub version
-{
-    my ( $self ) = @_;
-
-    return $self->{version_string__};
-}
 
 sub debug
 {
