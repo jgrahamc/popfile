@@ -2,8 +2,8 @@
 ; Copyright (c) 2001-2003 John Graham-Cumming
 ;
 
-!define MUI_PRODUCT "POPFile"
-!define MUI_VERSION "0.18"
+!define MUI_PRODUCT "POPFile TEST VERSION" 
+!define MUI_VERSION "0.XX TEST VERSION DO NOT DISTRIBUTE"
 
 !include "${NSISDIR}\Contrib\Modern UI\System.nsh"
 
@@ -29,7 +29,7 @@
   !insertmacro MUI_LANGUAGE "English"
 
   ;General
-  OutFile "setup2.exe"
+  OutFile "setup.exe"
   
   ;Install Options pages
   
@@ -131,7 +131,16 @@ Section "POPFile" SecPOPFile
   FileClose ${CFG}
 
   SetOutPath $INSTDIR\Classifier
-  File "..\engine\Classifier\*.pm"
+  File "..\engine\Classifier\Bayes.pm"
+  File "..\engine\Classifier\WordMangle.pm"
+  File "..\engine\Classifier\MailParse.pm"
+  SetOutPath $INSTDIR\POPFile
+  File "..\engine\POPFile\Logger.pm"
+  File "..\engine\POPFile\Configuration.pm"
+  SetOutPath $INSTDIR\Proxy
+  File "..\engine\Proxy\POP3.pm"
+  SetOutPath $INSTDIR\UI
+  File "..\engine\UI\HTML.pm"
 
   SetOutPath $INSTDIR\manual
   File "..\engine\manual\*.gif"
@@ -155,7 +164,7 @@ Section "POPFile" SecPOPFile
   WriteINIStr "$SMPROGRAMS\POPFile\Shutdown POPFile.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:${GUI}/shutdown"
   WriteINIStr "$SMPROGRAMS\POPFile\Manual.url" \
-              "InternetShortcut" "URL" "file://$INSTDIR/manual/manual.html"
+              "InternetShortcut" "URL" "file://$INSTDIR/manual/en/manual.html"
   SetOutPath $SMPROGRAMS\POPFile\Support
   WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
@@ -188,7 +197,9 @@ Section "Minimal Perl" SecPerl
   File "C:\Perl58\lib\Errno.pm"
   File "C:\Perl58\lib\Exporter.pm"
   File "C:\Perl58\lib\IO.pm"
+  File "C:\Perl58\lib\integer.pm"
   File "C:\Perl58\lib\locale.pm"
+  File "C:\Perl58\lib\POSIX.pm"
   File "C:\Perl58\lib\SelectSaver.pm"
   File "C:\Perl58\lib\Socket.pm"
   File "C:\Perl58\lib\strict.pm"
@@ -235,6 +246,11 @@ Section "Minimal Perl" SecPerl
 
   SetOutPath $INSTDIR\auto\Sys\Hostname
   File "C:\Perl58\lib\auto\Sys\Hostname\*"
+
+  SetOutPath $INSTDIR\auto\POSIX
+  File "C:\Perl58\lib\auto\POSIX\POSIX.dll"
+  File "C:\Perl58\lib\auto\POSIX\autosplit.ix"
+  File "C:\Perl58\lib\auto\POSIX\load_imports.al"
 
   SetOutPath $INSTDIR\File
   File "C:\Perl58\lib\File\Glob.pm"
@@ -319,7 +335,14 @@ skip_confirmation:
   Delete $INSTDIR\*.pm
   Delete $INSTDIR\*.exe
   Delete $INSTDIR\*.dll
+  Delete $INSTDIR\popfile.cfg
   
+  Delete $INSTDIR\Proxy\*.pm
+  RMDir $INSTDIR\Proxy
+  Delete $INSTDIR\UI\*.pm
+  RMDir $INSTDIR\UI
+  Delete $INSTDIR\POPFile\*.pm
+  RMDir $INSTDIR\POPFile
   Delete $INSTDIR\Classifier\*.pm
   RMDir $INSTDIR\Classifier
   Delete $INSTDIR\Exporter\*.*
@@ -327,12 +350,22 @@ skip_confirmation:
   Delete $INSTDIR\skins\*.css
   Delete $INSTDIR\skins\*.gif
   RMDir $INSTDIR\skins
-  Delete $INSTDIR\manual\*.html
+  Delete $INSTDIR\manual\en\*.html
+  Delete $INSTDIR\manual\br\*.html
+  Delete $INSTDIR\manual\no\*.html
+  Delete $INSTDIR\manual\de\*.html
+  Delete $INSTDIR\manual\de\*.gif
+  RMDir $INSTDIR\manual\en
+  RMDir $INSTDIR\manual\br
+  RMDir $INSTDIR\manual\no
+  RMDir $INSTDIR\manual\de
+  Delete $INSTDIR\manual\*.gif
   RMDir $INSTDIR\manual
   Delete $INSTDIR\languages\*.msg
   RMDir $INSTDIR\languages
 
   Delete $INSTDIR\MIME\*.*
+  RMDir  $INSTDIR\MIME
   Delete $INSTDIR\IO\*.*
   Delete $INSTDIR\IO\Socket\*.*
   RMDir /r $INSTDIR\IO
@@ -343,6 +376,7 @@ skip_confirmation:
   RMDir /r $INSTDIR\Sys
   Delete $INSTDIR\Text\*.pm
   RMDir /r $INSTDIR\Text
+  Delete $INSTDIR\auto\POSIX\*.*
   Delete $INSTDIR\auto\DynaLoader\*.*
   Delete $INSTDIR\auto\File\Glob\*.*
   Delete $INSTDIR\auto\MIME\Base64\*.*
