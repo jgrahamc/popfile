@@ -126,12 +126,14 @@
                                 <TMPL_ELSE>
 
                                 <TMPL_VAR NAME="Localize_History_ShouldBe">:
-                                <select name="<TMPL_VAR NAME="View_Index">">
+                                <select name="reclassify_<TMPL_VAR NAME="View_Index">">
                                     <option selected="selected"></option>
 
                                     <TMPL_LOOP NAME="View_Loop_Buckets">
 
-                                    <option value="<TMPL_VAR NAME="View_Bucket">" style="color: <TMPL_VAR NAME="View_Bucket_Color">"><TMPL_VAR NAME="View_Bucket"></option>
+                                    <option value="<TMPL_VAR NAME="View_Bucket">" style="color: <TMPL_VAR NAME="View_Bucket_Color">">
+                                        <TMPL_VAR NAME="View_Bucket">
+                                    </option>
 
                                     </TMPL_LOOP>
 
