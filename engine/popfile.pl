@@ -693,6 +693,60 @@ sub bucket_page
     http_ok($client,$body,1);
 }
 
+sub bar_chart_100
+{
+    my (%values) = @_;
+    my $body = '';
+    my $total_count = 0;
+
+    for my $bucket (sort keys %values) 
+    {
+        $total_count += $values{$bucket};
+    }
+    
+    for my $bucket (sort keys %values) 
+    {
+        my $count   = pretty_number( $values{$bucket} );
+        my $percent;
+
+        if ( $total_count == 0 )
+        {
+            $percent = "0%";
+        }
+        else
+        {
+            $percent = int( $values{$bucket} * 10000 / $total_count ) / 100;
+            $percent .= "%";
+        }
+        $body .= "<tr><td><font color=$classifier->{colors}{$bucket}>$bucket</font><td>&nbsp;<td align=right>$count ($percent)";
+    }    
+
+    $body .= "<tr><td colspan=3>&nbsp;<tr><td colspan=3><table width=100%><tr>";
+
+    if ( $total_count != 0 )
+    {
+        foreach my $bucket (sort keys %values)
+        {
+            my $percent = int( $values{$bucket} * 10000 / $total_count ) / 100; 
+            if ( $percent != 0 ) 
+            {
+                $body .= "<td bgcolor=$classifier->{colors}{$bucket}><img src=pix.gif alt=\"$bucket ($percent%)\" height=20 width=";
+                $body .= 2 * int($percent);
+                $body .= "></td>";
+            }
+        }
+    }
+
+    $body .= "</table>";
+
+    if ( $total_count != 0 ) 
+    {
+        $body .= "<tr><td colspan=3 align=right><font size=1>100%</font>";
+    }
+
+    return $body;
+}
+
 # ---------------------------------------------------------------------------------------------
 #
 # corpus_page - the corpus management page
@@ -863,7 +917,7 @@ sub corpus_page
         $accuracy = "$percent%";
     } 
 
-    $body .= "<tr><td><hr><b>Total</b><td width=10><hr>&nbsp;<td align=right><hr><b>$number</b><td><td></table><p><hr><table width=50%><tr><td valign=top><h2>Classification Accuracy</h2><table cellspacing=0 cellpadding=0><tr><td>Emails classified:<td align=right>$pmcount<tr><td>Classification errors:<td align=right>$pecount<tr><td><hr>Accuracy:<td align=right><hr>$accuracy";
+    $body .= "<tr><td><hr><b>Total</b><td width=10><hr>&nbsp;<td align=right><hr><b>$number</b><td><td></table><p><hr><table width=100%><tr><td valign=top width=33%><h2>Classification Accuracy</h2><table cellspacing=0 cellpadding=0><tr><td>Emails classified:<td align=right>$pmcount<tr><td>Classification errors:<td align=right>$pecount<tr><td><hr>Accuracy:<td align=right><hr>$accuracy";
     
     if ( $percent > 0 ) 
     {
@@ -889,51 +943,28 @@ sub corpus_page
         }
         $body .= "<tr><td colspan=25 align=left><font size=1>0%<td colspan=25 align=right><font size=1>100%</table>";
     }
-    $body .= "</table><form action=/buckets><input type=hidden name=session value=$session_key><input type=submit name=reset_stats value='Reset Statistics'></form><td  valign=top><h2>Emails Classified</h2><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Classification Count</b>";
+    
+    $body .= "</table><form action=/buckets><input type=hidden name=session value=$session_key><input type=submit name=reset_stats value='Reset Statistics'></form><td  valign=top width=33%><h2>Emails Classified</h2><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Classification Count</b>";
+
+    my %bar_values;
+    for my $bucket (@buckets) 
+    {
+        $bar_values{$bucket} = $classifier->{parameters}{$bucket}{count};
+    }
+
+    $body .= bar_chart_100( %bar_values );
+    $body .= "</table><td width=34% valign=top><h2>Word Counts</h2><p><table><tr><td><b>Bucket</b><td>&nbsp;<td align=right><b>Word Count</b>";
 
     for my $bucket (@buckets) 
     {
-        my $count   = pretty_number( $classifier->{parameters}{$bucket}{count} );
-        my $percent;
-        
-        if ( $total_count == 0 )
-        {
-            $percent = "0%";
-        }
-        else
-        {
-            $percent = int( $classifier->{parameters}{$bucket}{count} * 10000 / $total_count ) / 100;
-            $percent .= "%";
-        }
-        $body .= "<tr><td><font color=$classifier->{colors}{$bucket}>$bucket</font><td>&nbsp;<td align=right>$count ($percent)";
-    }    
-    
-    $body .= "<tr><td colspan=3>&nbsp;<tr><td colspan=3><table width=100%><tr>";
-    
-    if ( $total_count != 0 )
-    {
-        foreach my $bucket (@buckets)
-        {
-            my $percent = int( $classifier->{parameters}{$bucket}{count} * 10000 / $total_count ) / 100; 
-            if ( $percent != 0 ) 
-            {
-                $body .= "<td bgcolor=$classifier->{colors}{$bucket}><img src=pix.gif alt=\"$bucket ($percent%)\" height=20 width=";
-                $body .= 2 * int($percent);
-                $body .= "</td>";
-            }
-        }
+        $bar_values{$bucket} = $classifier->{total}{$bucket};
     }
-    
-    $body .= "</table>";
-    
-    if ( $total_count != 0 ) 
-    {
-        $body .= "<tr><td colspan=3 align=right><font size=1>100%</font>";
-    }
-    
+
+    $body .= bar_chart_100( %bar_values );
+   
     $body .= "</table></table><p><hr><h2>Maintenance</h2><p><form action=/buckets><b>Create bucket with name:</b> <br><input name=cname type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
-    
     $body .= "<p><form action=/buckets><b>Delete bucket named:</b> <br><select name=name><option value=></option>";
+
     foreach my $bucket (@buckets)
     {
         $body .= "<option value=$bucket>$bucket</option>";
