@@ -1,19 +1,21 @@
 package POPFile::Loader;
+
 # ---------------------------------------------------------------------------------------------
 #
 # Loader.pm --- API for loading POPFile loadable modules and encapsulating POPFile application
 #               tasks
 #
-# subroutine names beginning with CORE indicate a subroutine designed for exclusive use of
-# POPFile's core application. subroutines not so marked are suitable for use by POPFile-based
-# utilities to assist in loading and executing modules
+# Subroutine names beginning with CORE indicate a subroutine designed for exclusive use of
+# POPFile's core application (popfile.pl). 
+#
+# Subroutines not so marked are suitable for use by POPFile-based utilities to assist in loading 
+# and executing modules
 #
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
 # ---------------------------------------------------------------------------------------------
 
-
-#----------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------
 # new
 #
 #   Class new() function
@@ -49,15 +51,19 @@ sub new
         $self->{on_windows__} = 1;
     }
 
+    # See CORE_loader_init below for an explanation of these
+
     $self->{aborting__}     = '';
     $self->{pipeready__}    = '';
     $self->{forker__}       = '';
     $self->{reaper__}       = '';
 
-    $self->{major_version__}  = '';
-    $self->{minor_version__}   = '';
-    $self->{build_version__}  = '';
+    # POPFile's version number as individual numbers and as
+    # string
 
+    $self->{major_version__}  = '';
+    $self->{minor_version__}  = '';
+    $self->{build_version__}  = '';
     $self->{version_string__} = '';
 
     bless $self, $type;
@@ -66,15 +72,15 @@ sub new
 }
 
 #---------------------------------------------------------------------------------------------
+#
 # CORE_loader_init
 #
 # Initialize things only needed in CORE
 #
 #---------------------------------------------------------------------------------------------
-
 sub CORE_loader_init
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     # These anonymous subroutine references allow us to call these important
     # functions from anywhere using the reference, granting internal access
@@ -99,7 +105,7 @@ sub CORE_loader_init
 #---------------------------------------------------------------------------------------------
 sub CORE_aborting
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     $self->{alive__} = 0;
     foreach my $type (keys %{$self->{components__}}) {
@@ -157,7 +163,7 @@ sub pipeready
 #---------------------------------------------------------------------------------------------
 sub CORE_reaper
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     foreach my $type (keys %{$self->{components__}}) {
         foreach my $name (keys %{$self->{components__}{$type}}) {
@@ -183,7 +189,7 @@ sub CORE_reaper
 #---------------------------------------------------------------------------------------------
 sub CORE_forker
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     # Tell all the modules that a fork is about to happen
 
@@ -238,7 +244,6 @@ sub CORE_forker
     return ($pid, $reader);
 }
 
-
 #---------------------------------------------------------------------------------------------
 #
 # CORE_load_directory_modules
@@ -278,7 +283,8 @@ sub CORE_load_directory_modules
 # CORE_load_module
 #
 # Called to load a single POPFile Loadable Module (implemented as .pm files with special
-# comment on first line and add it to the components hash.
+# comment on first line) and add it to the components hash.
+#
 # Returns a handle to the module
 #
 # $module           The path of the module to load
@@ -333,6 +339,7 @@ sub load_module_
 }
 
 #---------------------------------------------------------------------------------------------
+#
 # CORE_signals
 #
 # Sets signals to ensure that POPFile handles OS and IPC events
@@ -342,7 +349,7 @@ sub load_module_
 #---------------------------------------------------------------------------------------------
 sub CORE_signals
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     # Redefine POPFile's signals
 
@@ -367,6 +374,7 @@ sub CORE_signals
 }
 
 #---------------------------------------------------------------------------------------------
+#
 # CORE_platform_
 #
 # Loads POPFile's platform-specific code
@@ -374,7 +382,7 @@ sub CORE_signals
 #---------------------------------------------------------------------------------------------
 sub CORE_platform_
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     # Look for a module called Platform::<platform> where <platform> is the value of $^O
     # and if it exists then load it as a component of POPFile.  IN this way we can have
@@ -393,14 +401,15 @@ sub CORE_platform_
 }
 
 #---------------------------------------------------------------------------------------------
-# load
+#
+# CORE_load
 #
 # Loads POPFile's modules
 #
 #---------------------------------------------------------------------------------------------
 sub CORE_load
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     # Create the main objects that form the core of POPFile.  Consists of the configuration
     # modules, the classifier, the UI (currently HTML based), and the POP3 proxy.
@@ -418,14 +427,15 @@ sub CORE_load
 }
 
 #---------------------------------------------------------------------------------------------
-# clink
+#
+# CORE_link_components
 #
 # Links POPFile's modules together to allow them to make use of each-other as objects
 #
 #---------------------------------------------------------------------------------------------
 sub CORE_link_components
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     print "\n\nPOPFile Engine $self->{version_string__} starting" if $self->{debug__};
 
@@ -453,14 +463,15 @@ sub CORE_link_components
 }
 
 #---------------------------------------------------------------------------------------------
-# initialize
+#
+# CORE_initialize
 #
 # Loops across POPFile's modules and initializes them
 #
 #---------------------------------------------------------------------------------------------
 sub CORE_initialize
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     print "\n\n    Initializing... " if $self->{debug__};
 
@@ -485,6 +496,7 @@ sub CORE_initialize
 }
 
 #---------------------------------------------------------------------------------------------
+#
 # CORE_config
 #
 # Loads POPFile's configuration and command-line settings
@@ -492,7 +504,7 @@ sub CORE_initialize
 #---------------------------------------------------------------------------------------------
 sub CORE_config
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     # Load the configuration from disk and then apply any command line
     # changes that override the saved configuration
@@ -502,6 +514,7 @@ sub CORE_config
 }
 
 #---------------------------------------------------------------------------------------------
+#
 # CORE_start
 #
 # Loops across POPFile's modules and starts them
@@ -509,7 +522,7 @@ sub CORE_config
 #---------------------------------------------------------------------------------------------
 sub CORE_start
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     print "\n\n    Starting...     " if $self->{debug__};
 
@@ -529,6 +542,7 @@ sub CORE_start
 }
 
 #---------------------------------------------------------------------------------------------
+#
 # CORE_service
 #
 # This is POPFile. Loops across POPFile's modules and executes their service subroutines then
@@ -538,7 +552,7 @@ sub CORE_start
 #---------------------------------------------------------------------------------------------
 sub CORE_service
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     print "\n\nPOPFile Engine $self->{version_string__} running\n" if $self->{debug__};
     flush STDOUT;
@@ -574,6 +588,7 @@ sub CORE_service
 }
 
 #---------------------------------------------------------------------------------------------
+#
 # CORE_stop
 #
 # Loops across POPFile's modules and stops them
@@ -581,7 +596,7 @@ sub CORE_service
 #---------------------------------------------------------------------------------------------
 sub CORE_stop
 {
-    my ($self) = @_;
+    my ( $self ) = @_;
 
     print "\n\nPOPFile Engine $self->{version_string__} stopping\n" if $self->{debug__};
     flush STDOUT;
@@ -604,9 +619,8 @@ sub CORE_stop
     print "\n\nPOPFile Engine $self->{version_string__} terminated\n" if $self->{debug__};
 }
 
-# GETTERS/SETTERS
-
 #---------------------------------------------------------------------------------------------
+#
 # CORE_version
 #
 # Gets and Sets POPFile's version data. Returns string in scalar context, or (major, minor, build)
@@ -617,7 +631,6 @@ sub CORE_stop
 # $build_version        The build version number
 #
 #---------------------------------------------------------------------------------------------
-
 sub CORE_version
 {
     my ($self,$major_version, $minor_version, $build_version) = @_;
@@ -635,6 +648,7 @@ sub CORE_version
 }
 
 #---------------------------------------------------------------------------------------------
+#
 # get_module
 #
 # Gets a module from components hash. Returns a handle to a module.
@@ -649,10 +663,9 @@ sub CORE_version
 # $type     The type of module
 #
 #---------------------------------------------------------------------------------------------
-
 sub get_module
 {
-    my ($self, $name, $type) = @_;
+    my ( $self, $name, $type ) = @_;
 
     if (!defined($type) && $name =~ /^(.*)::(.*)$/ ) {
         $type = lc($1);
@@ -661,12 +674,11 @@ sub get_module
         $type =~ s/^POPFile$/core/
     }
 
-
     return $self->{components__}{$type}{$name};
 }
 
-
 #---------------------------------------------------------------------------------------------
+#
 # set_module
 #
 # Inserts a module into components hash.
@@ -684,6 +696,7 @@ sub set_module
 }
 
 #---------------------------------------------------------------------------------------------
+#
 # remove_module
 #
 # removes a module from components hash.
@@ -702,20 +715,14 @@ sub remove_module
     delete($self->{components__}{$type}{$name});
 }
 
-
-#---------------------------------------------------------------------------------------------
-# debug
-#
-# POPFile::Loader debugging getter/setter
-#
-#---------------------------------------------------------------------------------------------
+# SETTER
 
 sub debug
 {
-    my ($self, $debug) = @_;
+    my ( $self, $debug ) = @_;
 
     $self->{debug__} = $debug;
 }
 
 1;
-##
+
