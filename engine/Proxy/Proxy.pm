@@ -161,7 +161,7 @@ sub reaper
                 close $self->{children__}{$kid};
                 delete $self->{children__}{$kid};
 
-                $self->log_( "Done with $kid (" . (length(keys %{$self->{children__}})-1) . " to go)" );
+                $self->log_( "Done with $kid (" . scalar(keys %{$self->{children__}}) . " to go)" );
             }
         }
     }
