@@ -1,0 +1,237 @@
+/*********************************************************
+
+	POPFile Klingon Language Companion Stylesheet 
+	version 1.0 beta
+	Ryan Allen (kxmode@yahoo.com)
+	
+/*********************************************************
+/* Main Body */
+
+body {
+  color: #000;
+  background-color: #E13523;
+  font-family: verdana;
+  font-size: 12px;
+  margin: 10px 20px 20px 20px;
+}
+
+/*********************************************************/
+/* General element settings */
+
+hr {
+  color: #FF4E3C;
+  background-color: transparent;
+}
+
+a:link {
+  color: #FFE400;
+  font-weight: bold;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+a:visited {
+  color: #FFE400;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #FFF;
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+input, select {
+	background-color: #FF4E3C;
+	border: 1px solid #000;
+}
+
+/*********************************************************/
+/* Shell structure */
+
+.shell, .shellTop {
+  color: #000;
+  background-color: #E13523;
+  border: 2px #FFE400 groove;
+  margin: 0;
+}
+
+td.naked {
+  padding: 0px;
+  margin: 0px;
+  border: none
+}
+
+table.head, table.footer {
+  width: 100%;
+}
+
+td.head {
+  font-weight: normal;
+  font-size: 10px;
+}
+
+td.footerBody {
+  text-align: center;
+}
+
+td.logo2menuSpace {
+  height: 0.8em;
+}
+
+/*********************************************************/
+/* Menu Settings */
+
+.menu {
+  font-size: 1.2em;
+  font-weight: bold;
+  width: 100%;
+}
+
+.menuSelected {
+  color: #FFE400;
+  background-color: #000;
+  width: 14%;
+  border-color: #FFE400;
+  border-style: groove groove none groove;
+  border-width: 2px;
+}
+
+.menuStandard {
+  background-color: #FFE400;
+  width: 14%;
+  border-color: #FFE400;
+  border-style: groove groove none groove;
+  border-width: 2px;
+}
+.menuStandard a, .menuStandard a:visited, .menuStandard a:hover {
+  color: #000;
+}
+
+.menuIndent {
+  width: 8%;
+}
+
+/*********************************************************/
+/* Table Settings */
+
+table {
+	width: 95%;
+}
+
+table.settingsTable, td.settingsPanel {
+  border: 1px dashed #FFE400;
+}
+
+table.openMessageTable {
+  border: 3px solid #FFE400;
+}
+
+td.openMessageCloser {
+  text-align: right;
+}
+
+td.openMessageBody, .top20Words {
+	background: #DDD;
+	text-align: left;
+}
+
+tr.rowEven {
+  background-color: #FFE400;
+  color: #000;
+}
+
+tr.rowOdd {
+  background-color: #FF8000;
+  color: #000;
+}
+
+tr.rowHighlighted {
+  background-color: #29abff;
+  color: #eeeeee;
+}
+
+table.lookupResultsTable {
+  border: 3px solid #88b5dd;
+}
+
+tr.rowEven a {
+	color: #000;
+}
+
+tr.rowEven a:hover, tr.rowOdd a:hover {
+	color: #B12A1C;
+}
+
+/*********************************************************/
+/* Graphics */
+
+td.accuracy0to49 {
+  background-color: red;
+  color: black;
+}
+
+td.accuracy50to93 {
+  background-color: yellow;
+  color: black;
+}
+
+td.accuracy94to100 {
+  background-color: green;
+  color: black;
+}
+
+span.graphFont {
+  font-size: x-small;
+}
+
+/*********************************************************/
+/* Form Labels */
+
+.historyLabel {
+  font-weight: normal;
+}
+
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+.bucketsLabel, .magnetsLabel, .securityLabel, .configurationLabel, .advancedLabel, .passwordLabel, .sessionLabel, .bucketsWidgetStateOn, .bucketsWidgetStateOff, .configWidgetStateOn, .configWidgetStateOff, .securityWidgetStateOn, .securityWidgetStateOff {
+  font-weight: bold;
+}
+
+/*********************************************************/
+/* Positioning */
+
+table.historyWidgetsTop {
+  width: 100%;
+  margin-left: 1.5em;
+  margin-top: 0.6em;
+  margin-bottom: 1.0em;
+}
+
+table.historyWidgetsBottom {
+  width: 100%;
+  margin-top: 0.6em;
+}
+
+td.historyNavigatorTop, td.historyNavigatorBottom {
+  text-align: right;
+}
+
+/*********************************************************/
+/* Errors */
+
+div.error01 {
+  background-color: transparent;
+  color: red;
+  font-size: larger;
+}
+
+div.error02 {
+  background-color: transparent;
+  color: red;
+}
+
