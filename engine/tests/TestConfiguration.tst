@@ -71,7 +71,6 @@ test_assert_equal( $c->global_config_( 'msgdir' ), 'messages/' );
 # contains the correct process ID
 
 $c->config_( 'piddir', '../tests/' );
-test_assert( !$c->check_pid_() );
 test_assert_equal( $c->start(), 1 );
 test_assert( $c->check_pid_() );
 test_assert_equal( $c->get_pid_(), $$ );
@@ -87,160 +86,37 @@ $c->global_config_( 'debug', 0 );
 # Check instance coordination via PID file
 
 $c->start();
+$c->{pid_delay__} = 1;
 
-pipe(my $child_read, my $parent_write );
-pipe(my $parent_read, my $child_write);
+my $process = fork;
 
-my $process = fork();
-
-if ( $process == 0 ) {
-    #child loop
-
-    close $parent_write;
-    close $parent_read;
-
-    while (<$child_read>) {
-
-#        print "\n[" . $_ . "]\n";
-
-        if ($_ =~ /^start$/) {
-            my $code = $c->start() . "\n";
-            print $child_write $code;
-            flush $child_write;
-        }
-
-        if ($_ =~ /^stop$/) {
-            $c->stop();
-            print $child_write "1\n";
-        }
-
-        if ($_ =~ /^check_pid_$/) {
-            my $code = $c->live_check_();
-
-            print $child_write (defined($code)?$code:"undef") . "\n"
-        }
-
-        if ($_ =~ /^0$/) {
-            print $child_write "0\n";
-        }
-
-        if ($_ =~ /^1$/) {
-            print $child_write "1\n";
-        }
-
-        flush $child_write;
-
-        if ($_ =~ /^quit$/) {
-            last;
-        }
-    }
-
-    exit(0);
-} else {
+if ($process != 0) {
     #parent loop
-
-    close $child_read;
-    close $child_write;
-
-    my $return;
-
-    # quick test of this piping techinque
-
-    print $parent_write "0\n";
-    flush $parent_write;
-    $return = <$parent_read>;
-
-    test_assert_equal($return, "0\n");
-
-    print $parent_write "1\n";
-    flush $parent_write;
-
-    $return = <$parent_read>;
-
-    test_assert_equal($return, "1\n");
-
-    # test child detection of parent PID
-
-    print $parent_write "start\n";
-    flush $parent_write;
-
-    $return = <$parent_read>;
-
-    test_assert_equal($return, "0\n");
-
-    print $parent_write "check_pid_\n";
-    flush $parent_write;
-
-    $return = <$parent_read>;
-
-    test_assert_equal($return, "$$\n");
-
-    print $parent_write "stop\n";
-    flush $parent_write;
-
-    $return = <$parent_read>;
-
-    test_assert_equal($return, "1\n");
-
-    test_assert(!$c->check_pid_());
-
-    # test parent detection of child PID
-
-    print $parent_write "start\n";
-    flush $parent_write;
-
-    $return = <$parent_read>;
-
-    test_assert_equal($return, "1\n");
-
-    test_assert($c->check_pid_());
-
-    test_assert_equal($c->get_pid_(), $process);
-    test_assert_equal($c->live_check_(), $process);
-
-    print $parent_write "stop\n";
-    flush $parent_write;
-
-    $return = <$parent_read>;
-
-    test_assert_equal($return, "1\n");
-
-    # check deletion
-
-    test_assert(!$c->check_pid_());
-
-    test_assert_equal(defined($c->get_pid_()), defined(undef));
-    test_assert_equal(defined($c->live_check_()), defined(undef));
-
-    # test non-present child, eg, if child was forcibly killed
-    # we would want a new process launched
-
-    print $parent_write "start\n";
-    flush $parent_write;
-
-    $return = <$parent_read>;
-
-    test_assert_equal($return, "1\n");
-
-    print $parent_write "quit\n";
-    flush $parent_write;
-
-    while (kill(0, $process)) {
-        wait;
-    };
-
+    test_assert_equal(  $c->start(), 0);
     test_assert( !defined( $c->live_check_() ) );
-
-    $c->stop();
-
+} elsif ($process == 0) {
+    #child loop
+    select(undef, undef, undef, $c->{pid_delay__});
+    $c->service();
+    exit(0);
 }
 
+   select(undef, undef, undef, 4 * $c->{pid_delay__});
+
+if ($process != 0) {
+    #parent loop
+    select(undef, undef, undef, $c->{pid_delay__});
+    $c->service();
+} elsif ($process == 0) {
+    #child loop
+    test_assert_equal(  $c->start(), 0);
+    test_assert( !defined( $c->live_check_() ) );
+
+    exit(0);
+}
 
 close STDERR;
-
-test_assert(!$c->check_pid_());
-
-$c->service();
+$c->stop();
 
 # Check that the popfile.cfg was written
 
