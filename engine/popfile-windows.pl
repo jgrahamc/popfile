@@ -74,4 +74,4 @@ if ( $root !~ /[\/\\]$/ ) {
 
 my $popfile_exe = $root . "popfile$i$f.exe";
 
-exec $popfile_exe;
+exec $popfile_exe, @ARGV;
