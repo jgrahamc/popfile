@@ -669,19 +669,19 @@ sub update_tag
             $self->{htmlbackcolor__} = $self->{htmlbodycolor__};
             $self->compute_html_color_distance();
         }
-        
+
         if ( $self->{cssbackcolortag__} =~ /^$tag/ ) {
             $self->{htmlbackcolor__} = $self->{htmlbodycolor__};
             $self->{cssbackcolortag__} = '';
 
             print "CSS back color reset to $self->{htmlbackcolor__} (tag closed: $tag)\n" if ( $self->{debug__} );
-        }          
-        
+        }
+
         if ( $self->{cssfontcolortag__} =~ /^$tag$/ ) {
             $self->{htmlfontcolor__} = map_color( $self, 'black' );
             $self->{cssfontcolortag__} = '';
 
-            print "CSS font color reset to $self->{htmlfontcolor__} (tag closed: $tag)\n" if ( $self->{debug__} );            
+            print "CSS font color reset to $self->{htmlfontcolor__} (tag closed: $tag)\n" if ( $self->{debug__} );
         }
 
         return;
@@ -924,7 +924,7 @@ sub update_tag
                     $self->{csscolortag__} = $tag;
                     print "      CSS set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug__} );
                     $self->update_pseudoword( 'html', "cssfontcolor$self->{htmlfontcolor__}", $encoded, $original );
-                    
+
                     $self->{cssfontcolortag__} = $tag;
                 }
             }
@@ -972,7 +972,7 @@ sub update_tag
                         $self->{htmlbackcolor__} = $background_color;
                         $self->compute_html_color_distance();
                         print "       CSS set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug__} );
-                        
+
                         $self->{htmlbodycolor__} = $background_color if ( $tag =~ /^body$/i );
                         $self->{cssbackcolortag__} = $tag;
 
@@ -1191,9 +1191,15 @@ sub add_url
         # http://www.0dns.org has a good reference of ccTLD's and their sub-tld's if desired
 
         if ( $hostform eq 'name' ) {
+            # recursively add the roots of the domain
 
-            while ( $host =~ s/^([^\.])+\.(.*\.(.*))$/$2/ ) {
-                update_word( $self, $2, $encoded, '[\.]', '[<]', $prefix) if ( !defined( $noadd ) );
+            while ( $host =~ s/^([^\.]+\.)?(([^\.]+\.?)*)(\.[^\.]+)$/$2$4/ ) {
+
+                if (!defined($1)) {
+                    update_word( $self, $4, $encoded, $2, '[<]', $prefix) if ( !defined( $noadd ) );
+                    last;
+                }
+                update_word( $self, $host, $encoded, $1 || $2, '[<]', $prefix) if ( !defined( $noadd ) );
             }
         }
     }
