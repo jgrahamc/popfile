@@ -188,15 +188,10 @@ sub service
                 $self->{configuration}->{configuration}{download_count} += 1;
                 my $pid = &{$self->{forker}};
                 
-                if ( !defined( $pid ) ) {
-                    debug( $self, "Could not fork!" );
-                    close $client;
-                    return 1;
-                }
-                
-                if ( $pid == 0 ) {
+                # If we fail to fork, or are in the child process then process this request
+                if ( !defined( $pid ) || ( $pid == 0 ) ) {
                     child( $self, $client, $self->{configuration}->{configuration}{download_count} );
-                    exit(0);
+                    exit(0) if ( defined( $pid ) );
                 }
             }
 
@@ -453,7 +448,8 @@ sub child
         }
     }
 
-    close $mail if ( $mail );
+    close $mail;
+    close $client;
 }
 
 # ---------------------------------------------------------------------------------------------

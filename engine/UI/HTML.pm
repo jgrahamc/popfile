@@ -1624,7 +1624,7 @@ sub history_page
 
                     $body .= "</select><input type=hidden name=file value=$mail_file><input type=hidden name=start_message value=$start_message><input type=hidden name=session value=$self->{session_key}>" if ( $drop_down );
                 } else {
-                    $body .= " ($self->{language}{MagnetUsed}: $self->{history}{$i}{magnet})";
+                    $body .= " ($self->{language}{History_MagnetUsed}: $self->{history}{$i}{magnet})";
                 }
             }
 

@@ -14,6 +14,8 @@
 use strict;
 use locale;
 
+use POSIX ":sys_wait_h";
+
 # NOTE: POPFile is constructed from a collection of classes which all have special
 # interface functions and variables:
 #
@@ -174,6 +176,12 @@ while ( $alive == 1 ) {
     # Sleep for 0.01 of a second to ensure that POPFile does not hog the machine's
     # CPU
     select(undef, undef, undef, 0.01);
+
+    # Under ActiveState Perl 5.8.0 on Windows we were seeing a single handle leak per
+    # fork even though all handles were closed in the child process.  It appears that the
+    # IGNORE SIGCHLD is not working and so each time around the loop we do a quick scan for
+    # any child that needs reaping
+    my $kid = waitpid(-1, WNOHANG);
 }
 
 print "    Stopping... ";
