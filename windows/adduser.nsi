@@ -131,7 +131,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.9"
+  !define C_PFI_VERSION  "0.1.10"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -3844,6 +3844,13 @@ Function CheckEudoraRequests
   Push ${L_PORT}
   Push ${L_SERVER}
   Push ${L_USER}
+
+  ; If user has cancelled Eudora reconfiguration, there is nothing to do
+  
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_EMAIL} "ioE.ini" "Settings" "NumFields"
+  StrCmp ${L_EMAIL} "1" exit
+
+  ; If user has not requested reconfiguration of this account, there is nothing to do
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_PERSONA} "ioE.ini" "Field 2" "State"
   StrCmp ${L_PERSONA} "0" exit
