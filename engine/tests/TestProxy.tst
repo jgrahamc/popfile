@@ -153,7 +153,7 @@ $sp->send( 'matchTHis' );
 $sp->send( 'after' );
 $sp->service_server();
 open TEMP, ">temp.tmp";
-$sp->echo_to_regexp_( $sp->{remote_client__}, \*TEMP, qr/TH/ );
+$sp->echo_to_regexp_( $client, \*TEMP, qr/TH/ );
 close TEMP;
 open TEMP, "<temp.tmp";
 my $line = <TEMP>;
@@ -166,7 +166,7 @@ $line = <TEMP>;
 test_assert( !defined( $line ) );
 close TEMP;
 
-my $handle = $sp->{remote_client__};
+my $handle = $client;
 $line = <$handle>;
 test_assert_regexp( $line, 'after' );
 
@@ -178,7 +178,7 @@ $sp->send( '.' );
 $sp->send( 'after' );
 $sp->service_server();
 open TEMP, ">temp.tmp";
-$sp->echo_to_dot_( $sp->{remote_client__}, \*TEMP );
+$sp->echo_to_dot_( $client, \*TEMP );
 close TEMP;
 open TEMP, "<temp.tmp";
 my $line = <TEMP>;
@@ -203,3 +203,5 @@ select( undef, undef, undef, 0.25 );
 # Reap the children
 
 $sp->reaper();
+
+select( undef, undef, undef, 0.25 );

@@ -44,7 +44,9 @@ sub test_report
  			$fail_messages .= " ($context)";
  		}
  		$test_failures += 1;
- 	}
+ 	} else {
+#            print "Test pass at $file:$line\n";
+        }
 	
  	flush STDOUT;
 }

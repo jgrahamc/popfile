@@ -36,7 +36,6 @@ foreach my $file (@line_files) {
 
     open SOURCE_FILE, "<../$module.pm";
     open LINE_DATA, "<$file";
-    #$module = $file;
 
     my $current_line = 0;
     $count{$module}{executed} = [];
@@ -58,7 +57,7 @@ foreach my $file (@line_files) {
             $count{$module}{executed}[$current_line] = 1;
         } elsif ( $state =~ /0/ ) {
             $count{$module}{total_executable_lines} += 1;
-        } else {
+#            print "$module.pm:$current_line $_";
         }
     }
 
@@ -72,7 +71,9 @@ foreach my $module ( keys( %count ) )
 {
     my $total_executed = 0;
     foreach my $line ( 0 .. $#{$count{$module}{executed}} ) {
-        $total_executed++ if ($count{$module}{executed}[$line]);
+        if ($count{$module}{executed}[$line]) {
+            $total_executed += 1;
+	}
     }
 
     $files{$module} = int(100 * $total_executed / $count{$module}{total_executable_lines}) unless ( $count{$module}{total_executable_lines} == 0 );
