@@ -77,7 +77,16 @@ Arrived                                 Arrived
 
 Locale_Thousands                       ,
 Locale_Decimal                         .
-Locale_Date                            %D %R
+
+# The Locale_Date uses the format strings in Perl's Date::Format
+# module to set the date format for the UI.  There are two possible
+# ways to specify it.
+#
+# <format>            Just one simple format used for all dates
+# <format> | <format> The first format is used for dates less than
+#                     7 days from now, the second for all other dates
+
+Locale_Date                            %a %R | %D %R
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Control Center

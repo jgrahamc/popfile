@@ -963,7 +963,16 @@ sub pretty_date__
         $format = $self->{language__}{Locale_Date};
     }
 
-    return time2str( $format, $date );
+    if ( $format =~ /[\t ]*(.+)[\t ]*\|[\t ]*(.+)/ ) {
+        if ( ( $date < time ) &&
+             ( $date > ( time - ( 7 * 24 * 60 * 60 ) ) ) ) {
+            return time2str( $1, $date );
+	} else {
+            return time2str( $2, $date );
+        }
+    } else {
+        return time2str( $format, $date );
+    }
 }
 
 #----------------------------------------------------------------------------
