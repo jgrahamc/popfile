@@ -66,7 +66,7 @@ Configuration_UI                        Web Port für Kontrollzentrum
 Configuration_UIUpdate                  Neuer Web Port für Kontrollzentrum: %s; Dieser Änderung wird erst nach einem Neustart von POPFile wirksam.
 Configuration_History                   Anzahl Emails pro Seite
 Configuration_HistoryUpdate             Neue Anzahl Emails pro Seite: %s
-Configuration_Days  `                   Emails x Tage im Verlauf speichern
+Configuration_Days                      Emails x Tage im Verlauf speichern
 Configuration_DaysUpdate                Emails werden nun %s im Verlauf gespeichert
 Configuration_UserInterface             Benutzeroberfläche
 Configuration_Skins                     Skins

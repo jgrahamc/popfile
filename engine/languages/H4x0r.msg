@@ -62,7 +62,7 @@ Configuration_UI                        U53r 1nt3rf4c3 w3b p0rt
 Configuration_UIUpdate                  Upd4t3d u53r 1nt3rf4c3 w3b p0rt t0 %s; th15 ch4ng3 w1ll n0t t4k3 4ff3ct unt1l y0u r35t4rt P0PF1l3
 Configuration_History                   Numb3r 0f 3m41l5 p3r p4g3
 Configuration_HistoryUpdate             Upd4t3d numb3r 0f 3m41l5 p3r p4g3 t0 %s
-Configuration_Days  `                   Numb3r 0f d4y5 0f h15t0ry t0 k33p
+Configuration_Days                      Numb3r 0f d4y5 0f h15t0ry t0 k33p
 Configuration_DaysUpdate                Upd4t3d numb3r 0f d4y5 0f h15t0ry t0 %s
 Configuration_UserInterface             U53r 1nt3rf4c3
 Configuration_Skins                     Sk1n5
@@ -144,7 +144,7 @@ Magnet_Error3                           Cr34t3 n3w m4gn3t '%s' 1n buck3t '%s'
 Magnet_CurrentMagnets                   Curr3nt M4gn3t5
 Magnet_Message1                         Th3 f0ll0w1ng m4gn3t5 c4u53 m41l t0 4lw4y5 b3 cl4s51f13d 1nt0 th3 5p3c1f13d buck3t.
 Magnet_CreateNew                        Cr34t3 N3w M4gn3t
-Magnet_Explanation                      Thr33 typ35 0f m4gn3t5 4r3 4v41l4bl3: <ul><li>Fr0m 4ddr3s5 0r n4m3:</b> F0r 3x4mpl3: john\@c0mp4ny.c0m t0 m4tch 4 5p3c1f1c 4ddr3s5, <br>c0mp4ny.c0m t0 m4tch 3v3ry0n3 wh0 s3nd5 fr0m c0mp4ny.c0m, <br>J0hn D03 t0 m4tch 4 5p3c1f1c p3r50n, J0hn t0 m4tch 4ll J0hn5<li><b>T0 4ddr3s5 0r n4m3:</b> L1k3 4 Fr0m: m4gn3t but f0r th3 T0: 4ddr3s5 1n 4n 3m41l<li><b>5ubj3ct w0rd5:</b> F0r 3x4mpl3: h3ll0 t0 m4tch 4ll m3ss4g35 w1th h3ll0 1n th3 5ubj3ct</ul>
+Magnet_Explanation                      Thr33 typ35 0f m4gn3t5 4r3 4v41l4bl3: </b> <ul><li><b>Fr0m 4ddr3s5 0r n4m3:</b> F0r 3x4mpl3: john\@c0mp4ny.c0m t0 m4tch 4 5p3c1f1c 4ddr3s5, <br>c0mp4ny.c0m t0 m4tch 3v3ry0n3 wh0 s3nd5 fr0m c0mp4ny.c0m, <br>J0hn D03 t0 m4tch 4 5p3c1f1c p3r50n, J0hn t0 m4tch 4ll J0hn5<li><b>T0 4ddr3s5 0r n4m3:</b> L1k3 4 Fr0m: m4gn3t but f0r th3 T0: 4ddr3s5 1n 4n 3m41l<li><b>5ubj3ct w0rd5:</b> F0r 3x4mpl3: h3ll0 t0 m4tch 4ll m3ss4g35 w1th h3ll0 1n th3 5ubj3ct</ul>
 Magnet_MagnetType                       M4gn3t typ3
 Magnet_Value                            V4lu3
 Magnet_Always                           4lw4y5 g035 t0 buck3t
