@@ -96,6 +96,14 @@ sub initialize
     $self->{popfile_root__} = $ENV{POPFILE_ROOT};
     $self->{popfile_user__} = $ENV{POPFILE_USER};
 
+    if ( !defined( $self->{popfile_root__} ) ) {
+        $self->{popfile_root__} = './';
+    }
+
+    if ( !defined( $self->{popfile_user__} ) ) {
+        $self->{popfile_user__} = './';
+    }
+
     # This is the location where we store the PID of POPFile in a file
     # called popfile.pid
 
