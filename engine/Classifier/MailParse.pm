@@ -921,11 +921,17 @@ sub parse_stream
             if ( ( $mime ne '' ) && ( $line =~ /^\-\-($mime)(\-\-)?/ ) ) {
                 $colorized .= clear_out_base64( $self );
                 
+                # approach each mime part with fresh eyes
+                $encoding = '';
+                
+                
                 if (!defined $2) {
                     print "Hit MIME boundary --$1\n" if $self->{debug};
-                    $encoding = '';
                     $self->{in_headers} = 1;
                 } else {
+                    
+                    $self->{in_headers} = 0;
+                    
                     my $boundary = $1;
 
                     print "Hit MIME boundary terminator --$1--\n" if $self->{debug};
@@ -1036,6 +1042,8 @@ sub clear_out_base64
 
         $self->{ut}     = '' if $self->{color};
         $self->{base64} =~ s/ //g;
+        
+        print "Base64 data: " . $self->{base64} . "\n" if ($self->{debug});
 
         $decoded = decode_base64( $self->{base64} );
         parse_html( $self, $decoded, 1 );
