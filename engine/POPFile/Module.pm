@@ -500,13 +500,16 @@ sub flush_slurp_data__
         # just save it
 
         if ( $slurp_data__{"$handle"}{data} eq '' ) {
+
+            # This unpleasant boolean is to handle the case where we are slurping
+            # a non-socket stream under Win32
+
             if ( ( !($handle =~ /socket/i) && ($^O eq 'MSWin32' ) ) ||
                  defined( $slurp_data__{"$handle"}{select}->can_read(0.1) ) ) {
 
                 my $c;
                 my $retcode = sysread( $handle, $c, 1 );
                 if ( $retcode == 1 ) {
-                    $self->log_("slurped past CR: [$c]");
                     if ( $c eq "\012" ) {
                         $cr .= $c;
                     } else {
@@ -536,7 +539,7 @@ sub slurp_data_size__
 {
     my ( $self, $handle ) = @_;
 
-    return length( $slurp_data__{"$handle"}{data} );
+    return defined($slurp_data__{"$handle"}{data})?length($slurp_data__{"$handle"}{data}):0;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -679,31 +682,44 @@ sub flush_extra_
         $slurp_data__{"$mail"}{data} = '';
     }
 
-    my $ready;
+    # Do we always attempt to read?
+
+    my $always_read = 0;
+    my $selector;
 
     if (($^O eq 'MSWin32') && !($mail =~ /socket/i) ) {
-
         # select only works reliably on IO::Sockets in Win32, so we always read files
+        # on MSWin32
+        # (sysread returns 0 for eof)
 
-        $ready = $mail;
+        $always_read = 1;
     } else {
-        my $selector   = new IO::Select( $mail );
-        ( $ready ) = $selector->can_read(0.01);
+
+        # in all other cases, a selector is used to decide whether to read
+
+        $selector   = new IO::Select( $mail );
+        $always_read = 0;
     }
 
+    my $ready;
 
     my $buf        = '';
+    my $full_buf = '';
     my $max_length = 8192;
+    my $n;
 
-    if ( defined( $ready ) && ( $ready == $mail ) ) {
-        my $n = sysread( $mail, $buf, $max_length, length $buf );
+    while ( $always_read || defined( $selector->can_read(0.01) ) ) {
+        $n = sysread( $mail, $buf, $max_length, length $buf );
 
         if ( $n > 0 ) {
             print $client $buf if ( $discard != 1 );
+            $full_buf .= $buf;
+        } elsif ($n == 0) {
+            last;
         }
     }
 
-   return $buf;
+   return $full_buf;
 }
 
 # GETTER/SETTER methods.  Note that I do not expect documentation of these unless they
