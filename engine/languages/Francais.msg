@@ -20,6 +20,7 @@
 # Identify the language and character set used for the interface
 LanguageCode                            fr
 LanguageCharset                         ISO-8859-1
+LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          fr

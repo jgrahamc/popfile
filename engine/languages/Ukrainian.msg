@@ -27,6 +27,7 @@
 # Identify the language and character set used for the interface
 LanguageCode                            uk
 LanguageCharset                         koi8-u
+LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          en

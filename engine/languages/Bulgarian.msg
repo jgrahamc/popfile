@@ -20,6 +20,7 @@
 # Identify the language and character set used for the interface
 LanguageCode                            bg
 LanguageCharset                         Windows-1251
+LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          bg

@@ -20,6 +20,7 @@
 # Identify the language and character set used for the interface
 LanguageCode                            hu
 LanguageCharset                         ISO-8859-2
+LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          hu

@@ -22,6 +22,7 @@
 # Identify the language and character set used for the interface
 LanguageCode                            cn
 LanguageCharset                         GB2312
+LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          en

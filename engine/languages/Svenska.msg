@@ -21,6 +21,7 @@
 
 LanguageCode				sv
 LanguageCharset				ISO-8859-1
+LanguageDirection                       ltr
 
 # Common words that are used on their own all over the interface
 Apply                                   Verkställ

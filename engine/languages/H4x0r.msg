@@ -20,6 +20,7 @@
 LanguageCode                            en
 LanguageCharset                         ISO-8859-1
 ManualLanguage                          en
+LanguageDirection                       ltr
 Apply                                   4pply
 On                                      0n
 Off                                     0ff
