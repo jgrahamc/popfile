@@ -987,11 +987,18 @@ sub magnet_page
     my $body = '<h2>Current Magnets</h2><p>The following magnets cause mail from specified email addresses to always be classified into the specified bucket.';
     $body .= "<p><table width=50%><tr><td><b>From</b><td><b>Bucket</b><td><b>Delete</b>";
     
+    my $stripe = 0;
     for my $bucket (keys %{$classifier->{magnets}})
     {
         for my $from (keys %{$classifier->{magnets}{$bucket}{from}}) 
         {
-            $body .= "<tr><td>$from<td><font color=$classifier->{colors}{$bucket}>$bucket</font><td><a href=/magnets?bucket=$bucket&dfrom=$from&session=$session_key>Delete</a>";
+            $body .= "<tr "; 
+            if ( $stripe ) 
+            {
+                $body .= " bgcolor=$stripe_color"; 
+            }
+            $body .= "><td>$from<td><font color=$classifier->{colors}{$bucket}>$bucket</font><td><a href=/magnets?bucket=$bucket&dfrom=$from&session=$session_key>Delete</a>";
+            $stripe = 1 - $stripe;
         }
     }
     
