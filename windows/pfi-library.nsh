@@ -56,7 +56,7 @@
 # (by using this constant in the executable's "Version Information" data).
 #--------------------------------------------------------------------------
 
-  !define C_PFI_LIBRARY_VERSION     "0.1.3"
+  !define C_PFI_LIBRARY_VERSION     "0.1.4"
 
 #--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
@@ -153,144 +153,9 @@
         !macroend
 !endif
 
-  ;--------------------------------------------------------------------------
-  ; Used in 'adduser.nsi' to select the POPFile UI language according to the language used
-  ; for the installation process (NSIS language names differ from those used by POPFile's UI)
-  ;--------------------------------------------------------------------------
-
-  !macro UI_LANG_CONFIG PFI_SETTING UI_SETTING
-        !insertmacro PFI_UNIQUE_ID
-
-        StrCmp $LANGUAGE ${LANG_${PFI_SETTING}} 0 skip_${PFI_UNIQUE_ID}
-        IfFileExists "$G_ROOTDIR\languages\${UI_SETTING}.msg" 0 lang_done
-        StrCpy ${L_LANG} "${UI_SETTING}"
-        Goto lang_save
-
-      skip_${PFI_UNIQUE_ID}:
-  !macroend
-
 #--------------------------------------------------------------------------
 #
-# Macros used when writing log files during 'Outlook' and 'Outlook Express' account processing
-#
-#--------------------------------------------------------------------------
-
-  !macro OECONFIG_LOG_ENTRY LOGTYPE VALUE WIDTH
-      !insertmacro PFI_UNIQUE_ID
-
-      Push $R9
-      Push $R8
-
-      StrCpy $R9 "${VALUE}"
-      StrLen $R8 $R9
-      IntCmp $R8 ${WIDTH} copy_${PFI_UNIQUE_ID} 0 copy_${PFI_UNIQUE_ID}
-      StrCpy $R9 "$R9                              " ${WIDTH}
-
-    copy_${PFI_UNIQUE_ID}:
-      FileWrite $G_${LOGTYPE}_HANDLE "$R9  "
-
-      Pop $R8
-      Pop $R9
-  !macroend
-
-  !macro OOECONFIG_BEFORE_LOG VALUE WIDTH
-      !insertmacro OECONFIG_LOG_ENTRY "OOECONFIG" "${VALUE}" "${WIDTH}"
-  !macroend
-
-  !macro OOECONFIG_CHANGES_LOG VALUE WIDTH
-      !insertmacro OECONFIG_LOG_ENTRY "OOECHANGES" "${VALUE}" "${WIDTH}"
-  !macroend
-
-#--------------------------------------------------------------------------
-#
-# Macro used by 'installer.nsi' when rearranging existing minimal Perl system
-#
-#--------------------------------------------------------------------------
-
-  !macro MinPerlMove SUBFOLDER
-
-      !insertmacro PFI_UNIQUE_ID
-
-      IfFileExists "$G_ROOTDIR\${SUBFOLDER}\*.*" 0 skip_${PFI_UNIQUE_ID}
-      Rename "$G_ROOTDIR\${SUBFOLDER}" "$G_MPLIBDIR\${SUBFOLDER}"
-
-    skip_${PFI_UNIQUE_ID}:
-
-  !macroend
-
-#--------------------------------------------------------------------------
-#
-# Macro used by 'installer.nsi' when rearranging existing skins
-#
-#--------------------------------------------------------------------------
-
-  !macro SkinMove OLDNAME NEWNAME
-
-      !insertmacro PFI_UNIQUE_ID
-
-      IfFileExists "$G_ROOTDIR\skins\${OLDNAME}.css" 0 skip_${PFI_UNIQUE_ID}
-      CreateDirectory "$G_ROOTDIR\skins\${NEWNAME}"
-      Rename "$G_ROOTDIR\skins\${OLDNAME}.css" "$G_ROOTDIR\skins\${NEWNAME}\style.css"
-
-    skip_${PFI_UNIQUE_ID}:
-
-  !macroend
-
-#--------------------------------------------------------------------------
-#
-# Macro used by 'installer.nsi' when uninstalling the new style skins
-#
-#--------------------------------------------------------------------------
-
-  !macro DeleteSkin FOLDER
-
-      !insertmacro PFI_UNIQUE_ID
-
-      IfFileExists "${FOLDER}\*.*" 0 skip_${PFI_UNIQUE_ID}
-      Delete "${FOLDER}\*.css"
-      Delete "${FOLDER}\*.gif"
-      Delete "${FOLDER}\*.png"
-      Delete "${FOLDER}\*.thtml"
-      RMDir  "${FOLDER}"
-
-    skip_${PFI_UNIQUE_ID}:
-
-  !macroend
-
-#--------------------------------------------------------------------------
-#
-# Macro used by 'adduser.nsi' to ensure current skin selection uses lowercase
-#
-#--------------------------------------------------------------------------
-
-  !macro SkinCaseChange OLDNAME NEWNAME
-
-      !insertmacro PFI_UNIQUE_ID
-
-      StrCmp ${L_SKIN} "${OLDNAME}" 0 skip_${PFI_UNIQUE_ID}
-      StrCpy ${L_SKIN} "${NEWNAME}"
-      Goto save_skin_setting
-
-    skip_${PFI_UNIQUE_ID}:
-
-  !macroend
-
-#--------------------------------------------------------------------------
-#
-# Macro used by 'adduser.nsi' to update HKCU registry data using HKLM data
-#
-#--------------------------------------------------------------------------
-
-  !macro Copy_HKLM_to_HKCU VAR NAME
-  
-    ReadRegStr ${VAR} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "${NAME}"
-    WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "${NAME}" ${VAR}
-
-  !macroend
-  
-#--------------------------------------------------------------------------
-#
-# Macro used to preserve up to 3 backup copies of a file
+# Macros used to preserve up to 3 backup copies of a file
 #
 # (Note: input file will be "removed" by renaming it)
 #--------------------------------------------------------------------------
@@ -356,9 +221,176 @@
     continue_${PFI_UNIQUE_ID}:
   !macroend
 
+
+#==============================================================================
+#
+# Macros used only by the 'installer.nsi' script:
+#
+#     MinPerlMove
+#     SkinMove
+#     DeleteSkin
+#     SectionNotSelected
+#==============================================================================
+
+!ifdef INSTALLER | TRANSLATOR
+
+  ;--------------------------------------------------------------------------
+  ; 'installer.nsi' macro used when rearranging existing minimal Perl system
+  ;--------------------------------------------------------------------------
+
+    !macro MinPerlMove SUBFOLDER
+
+        !insertmacro PFI_UNIQUE_ID
+
+        IfFileExists "$G_ROOTDIR\${SUBFOLDER}\*.*" 0 skip_${PFI_UNIQUE_ID}
+        Rename "$G_ROOTDIR\${SUBFOLDER}" "$G_MPLIBDIR\${SUBFOLDER}"
+
+      skip_${PFI_UNIQUE_ID}:
+
+    !macroend
+
+  ;--------------------------------------------------------------------------
+  ; 'installer.nsi' macro used when rearranging existing skins
+  ;--------------------------------------------------------------------------
+
+    !macro SkinMove OLDNAME NEWNAME
+
+        !insertmacro PFI_UNIQUE_ID
+
+        IfFileExists "$G_ROOTDIR\skins\${OLDNAME}.css" 0 skip_${PFI_UNIQUE_ID}
+        CreateDirectory "$G_ROOTDIR\skins\${NEWNAME}"
+        Rename "$G_ROOTDIR\skins\${OLDNAME}.css" "$G_ROOTDIR\skins\${NEWNAME}\style.css"
+
+      skip_${PFI_UNIQUE_ID}:
+
+    !macroend
+
+  ;--------------------------------------------------------------------------
+  ; 'installer.nsi' macro used when uninstalling the new style skins
+  ;--------------------------------------------------------------------------
+
+    !macro DeleteSkin FOLDER
+
+        !insertmacro PFI_UNIQUE_ID
+
+        IfFileExists "${FOLDER}\*.*" 0 skip_${PFI_UNIQUE_ID}
+        Delete "${FOLDER}\*.css"
+        Delete "${FOLDER}\*.gif"
+        Delete "${FOLDER}\*.png"
+        Delete "${FOLDER}\*.thtml"
+        RMDir  "${FOLDER}"
+
+      skip_${PFI_UNIQUE_ID}:
+
+    !macroend
+
+  ;--------------------------------------------------------------------------
+  ; 'installer.nsi' macro used when generating data for the "Setup Summary" page
+  ;--------------------------------------------------------------------------
+
+    !macro SectionNotSelected SECTION JUMPIFNOTSELECTED
+        !insertmacro PFI_UNIQUE_ID
+
+        !insertmacro SectionFlagIsSet "${SECTION}" "${SF_SELECTED}" "selected_${PFI_UNIQUE_ID}" "${JUMPIFNOTSELECTED}"
+
+      selected_${PFI_UNIQUE_ID}:
+    !macroend
+
+!endif
+
+
+#==============================================================================
+#
+# Macros used only by the 'adduser.nsi' script:
+#
+#     UI_LANG_CONFIG
+#     OECONFIG_LOG_ENTRY
+#     OOECONFIG_BEFORE_LOG
+#     OOECONFIG_CHANGES_LOG
+#     SkinCaseChange
+#     Copy_HKLM_to_HKCU
+#==============================================================================
+
+!ifdef ADDUSER | TRANSLATOR_AUW
+  ;--------------------------------------------------------------------------
+  ; 'adduser.nsi' macro used to select the POPFile UI language according to the language used
+  ; for the installation process (NSIS language names differ from those used by POPFile's UI)
+  ;--------------------------------------------------------------------------
+
+  !macro UI_LANG_CONFIG PFI_SETTING UI_SETTING
+        !insertmacro PFI_UNIQUE_ID
+
+        StrCmp $LANGUAGE ${LANG_${PFI_SETTING}} 0 skip_${PFI_UNIQUE_ID}
+        IfFileExists "$G_ROOTDIR\languages\${UI_SETTING}.msg" 0 lang_done
+        StrCpy ${L_LANG} "${UI_SETTING}"
+        Goto lang_save
+
+      skip_${PFI_UNIQUE_ID}:
+  !macroend
+
+  ;--------------------------------------------------------------------------
+  ; 'adduser.nsi' macros used to make 'Outlook' & 'Outlook Express' account log files
+  ;--------------------------------------------------------------------------
+
+  !macro OECONFIG_LOG_ENTRY LOGTYPE VALUE WIDTH
+      !insertmacro PFI_UNIQUE_ID
+
+      Push $R9
+      Push $R8
+
+      StrCpy $R9 "${VALUE}"
+      StrLen $R8 $R9
+      IntCmp $R8 ${WIDTH} copy_${PFI_UNIQUE_ID} 0 copy_${PFI_UNIQUE_ID}
+      StrCpy $R9 "$R9                              " ${WIDTH}
+
+    copy_${PFI_UNIQUE_ID}:
+      FileWrite $G_${LOGTYPE}_HANDLE "$R9  "
+
+      Pop $R8
+      Pop $R9
+  !macroend
+
+  !macro OOECONFIG_BEFORE_LOG VALUE WIDTH
+      !insertmacro OECONFIG_LOG_ENTRY "OOECONFIG" "${VALUE}" "${WIDTH}"
+  !macroend
+
+  !macro OOECONFIG_CHANGES_LOG VALUE WIDTH
+      !insertmacro OECONFIG_LOG_ENTRY "OOECHANGES" "${VALUE}" "${WIDTH}"
+  !macroend
+
+  ;--------------------------------------------------------------------------
+  ; 'adduser.nsi' macro used to ensure current skin selection uses lowercase
+  ;--------------------------------------------------------------------------
+
+  !macro SkinCaseChange OLDNAME NEWNAME
+
+      !insertmacro PFI_UNIQUE_ID
+
+      StrCmp ${L_SKIN} "${OLDNAME}" 0 skip_${PFI_UNIQUE_ID}
+      StrCpy ${L_SKIN} "${NEWNAME}"
+      Goto save_skin_setting
+
+    skip_${PFI_UNIQUE_ID}:
+
+  !macroend
+
+  ;--------------------------------------------------------------------------
+  ; 'adduser.nsi' macro used to update HKCU registry data using HKLM data
+  ;--------------------------------------------------------------------------
+
+  !macro Copy_HKLM_to_HKCU VAR NAME
+
+    ReadRegStr ${VAR} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "${NAME}"
+    WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "${NAME}" ${VAR}
+
+  !macroend
+
+!endif
+
+
 #==============================================================================================
 #
-# Functions used only during installation of POPFile or User Data files (in alphabetic order)
+# Functions used only during 'installation' (i.e. not used by any 'uninstall' operations):
 #
 #    Installer Function: GetIEVersion
 #    Installer Function: GetParameters
@@ -773,6 +805,10 @@
 #    Installer Function:   CheckIfLocked
 #    Uninstaller Function: un.CheckIfLocked
 #
+#    Macro:                CheckSQLiteIntegrity
+#    Installer Function:   CheckSQLiteIntegrity
+#    Uninstaller Function: un.CheckSQLiteIntegrity
+#
 #    Macro:                FindLockedPFE
 #    Installer Function:   FindLockedPFE
 #    Uninstaller Function: un.FindLockedPFE
@@ -840,6 +876,10 @@
 #    Macro:                RequestPFIUtilsShutdown
 #    Installer Function:   RequestPFIUtilsShutdown
 #    Uninstaller Function: un.RequestPFIUtilsShutdown
+#
+#    Macro:                RunSQLiteCommand
+#    Installer Function:   RunSQLiteCommand
+#    Uninstaller Function: un.RunSQLiteCommand
 #
 #    Macro:                ServiceCall
 #    Installer Function:   ServiceCall
@@ -961,6 +1001,61 @@
 
     !insertmacro CheckIfLocked "un."
 !endif
+
+
+#--------------------------------------------------------------------------
+# Macro: CheckSQLiteIntegrity
+#
+# The installation process and the uninstall process may both need a function which
+# uses the SQLite command-line utility to perform a database integrity check. This macro
+# makes maintenance easier by ensuring that both processes use identical functions, with
+# the only difference being their names.
+#
+# NOTE:
+# The !insertmacro CheckSQLiteIntegrity "" and !insertmacro CheckSQLiteIntegrity "un."
+# commands are included in this file so the NSIS script can use 'Call CheckSQLiteIntegrity'
+# and 'Call un.CheckSQLiteIntegrity' without additional preparation.
+#
+# Inputs:
+#         (top of stack)     - full pathname of the SQLite database file
+#
+# Outputs:
+#         (top of stack)     - the result from the SQLite command-line utility ('ok' expected)
+#                              If the result is enclosed in parentheses then an error occurred.
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push "popfile.db"
+#         Call CheckSQLiteIntegrity
+#         Pop $R0
+#
+#         ($R0 will be "ok" if the popfile.db file passes the integrity check)
+#--------------------------------------------------------------------------
+
+!macro CheckSQLiteIntegrity UN
+  Function ${UN}CheckSQLiteIntegrity
+
+    Push "pragma integrity_check;"
+    Call ${UN}RunSQLiteCommand
+
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckSQLiteIntegrity
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+;!insertmacro CheckSQLiteIntegrity ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.CheckSQLiteIntegrity
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro CheckSQLiteIntegrity "un."
 
 
 #--------------------------------------------------------------------------
@@ -2818,56 +2913,8 @@
 !macro GetSQLiteSchemaVersion UN
   Function ${UN}GetSQLiteSchemaVersion
 
-    !define L_DATABASE    $R9   ; name of the SQLite database file
-    !define L_RESULT      $R8   ; string returned on top of the stack
-    !define L_SQLITEPATH  $R7   ; path to sqlite.exe utility
-    !define L_SQLITEUTIL  $R6   ; used to run relevant SQLite utility
-    !define L_STATUS      $R5   ; status code returned by SQLite utility
-
-    Exch ${L_DATABASE}
-    Push ${L_RESULT}
-    Exch
-    Push ${L_SQLITEPATH}
-    Push ${L_SQLITEUTIL}
-    Push ${L_STATUS}
-
-    Push ${L_DATABASE}
-    Call ${UN}GetSQLiteFormat
-    Pop ${L_RESULT}
-    StrCpy ${L_SQLITEUTIL} "sqlite.exe"
-    StrCmp ${L_RESULT} "2.x" look_for_sqlite
-    StrCpy ${L_SQLITEUTIL} "sqlite3.exe"
-    StrCmp ${L_RESULT} "3.x" look_for_sqlite
-    Goto exit
-
-  look_for_sqlite:
-    StrCpy ${L_SQLITEPATH} "$EXEDIR"
-    IfFileExists "${L_SQLITEPATH}\${L_SQLITEUTIL}" run_sqlite
-    StrCpy ${L_SQLITEPATH} "$PLUGINSDIR"
-    IfFileExists "${L_SQLITEPATH}\${L_SQLITEUTIL}" run_sqlite
-    StrCpy ${L_RESULT} "(cannot find '${L_SQLITEUTIL}' in '$EXEDIR' or '$PLUGINSDIR')"
-    Goto exit
-
-  run_sqlite:
-    nsExec::ExecToStack '"${L_SQLITEPATH}\${L_SQLITEUTIL}" "${L_DATABASE}" "select version from popfile;"'
-    Pop ${L_STATUS}
-    Call ${UN}TrimNewlines
-    Pop ${L_RESULT}
-    StrCmp ${L_STATUS} "0" exit
-    StrCpy ${L_RESULT} "(${L_RESULT})"
-
-  exit:
-    Pop ${L_STATUS}
-    Pop ${L_SQLITEUTIL}
-    Pop ${L_SQLITEPATH}
-    Pop ${L_DATABASE}
-    Exch ${L_RESULT}
-
-    !undef L_DATABASE
-    !undef L_RESULT
-    !undef L_SQLITEPATH
-    !undef L_SQLITEUTIL
-    !undef L_STATUS
+    Push "select version from popfile;"
+    Call ${UN}RunSQLiteCommand
 
   FunctionEnd
 !macroend
@@ -3125,6 +3172,118 @@
 
     !insertmacro RequestPFIUtilsShutdown "un."
 !endif
+
+
+#--------------------------------------------------------------------------
+# Macro: RunSQLiteCommand
+#
+# The installation process and the uninstall process may both need a function which uses the
+# SQLite command-line utility to run a single command, such as an integrity check. This macro
+# makes maintenance easier by ensuring that both processes use identical functions, with the
+# only difference being their names.
+#
+# NOTE:
+# The !insertmacro RunSQLiteCommand "" and !insertmacro RunSQLiteCommand "un."
+# commands are included in this file so the NSIS script can use 'Call RunSQLiteCommand'
+# and 'Call un.RunSQLiteCommand' without additional preparation.
+#
+# Inputs:
+#         (top of stack)     - the command to be passed to the SQLite command-line utility
+#         (top of stack - 1) - full pathname of the SQLite database file
+#
+# Outputs:
+#         (top of stack)     - the result string returned by the SQLite command-line utility
+#                              If the result is enclosed in parentheses then an error occurred.
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push "popfile.db"
+#         Push "pragma integrity_check;"
+#         Call RunSQLiteCommand
+#         Pop $R0
+#
+#         ($R0 will be "ok" if the popfile.db file passes the integrity check)
+#--------------------------------------------------------------------------
+
+!macro RunSQLiteCommand UN
+  Function ${UN}RunSQLiteCommand
+
+    !define L_COMMAND     $R9   ; the command to be run by the SQLite command-line utility
+    !define L_DATABASE    $R8   ; name of the SQLite database file
+    !define L_RESULT      $R7   ; string returned on top of the stack
+    !define L_SQLITEPATH  $R6   ; path to sqlite.exe utility
+    !define L_SQLITEUTIL  $R5   ; used to run relevant SQLite utility
+    !define L_STATUS      $R4   ; status code returned by SQLite utility
+
+    Exch ${L_COMMAND}
+    Exch
+    Exch ${L_DATABASE}
+    Push ${L_RESULT}
+    Exch 2
+    Push ${L_SQLITEPATH}
+    Push ${L_SQLITEUTIL}
+    Push ${L_STATUS}
+
+    Push ${L_DATABASE}
+    Call ${UN}GetSQLiteFormat
+    Pop ${L_RESULT}
+    StrCpy ${L_SQLITEUTIL} "sqlite.exe"
+    StrCmp ${L_RESULT} "2.x" look_for_sqlite
+    StrCpy ${L_SQLITEUTIL} "sqlite3.exe"
+    StrCmp ${L_RESULT} "3.x" look_for_sqlite
+    Goto exit
+
+  look_for_sqlite:
+    StrCpy ${L_SQLITEPATH} "$EXEDIR"
+    IfFileExists "${L_SQLITEPATH}\${L_SQLITEUTIL}" run_sqlite
+    StrCpy ${L_SQLITEPATH} "$PLUGINSDIR"
+    IfFileExists "${L_SQLITEPATH}\${L_SQLITEUTIL}" run_sqlite
+    StrCpy ${L_RESULT} "(cannot find '${L_SQLITEUTIL}' in '$EXEDIR' or '$PLUGINSDIR')"
+    Goto exit
+
+  run_sqlite:
+    nsExec::ExecToStack '"${L_SQLITEPATH}\${L_SQLITEUTIL}" "${L_DATABASE}" "${L_COMMAND}"'
+    Pop ${L_STATUS}
+    Call ${UN}TrimNewlines
+    Pop ${L_RESULT}
+    StrCmp ${L_STATUS} "0" exit
+    StrCpy ${L_RESULT} "(${L_RESULT})"
+
+  exit:
+    Pop ${L_STATUS}
+    Pop ${L_SQLITEUTIL}
+    Pop ${L_SQLITEPATH}
+    Pop ${L_COMMAND}
+    Pop ${L_DATABASE}
+    Exch ${L_RESULT}
+
+    !undef L_COMMAND
+    !undef L_DATABASE
+    !undef L_RESULT
+    !undef L_SQLITEPATH
+    !undef L_SQLITEUTIL
+    !undef L_STATUS
+
+  FunctionEnd
+!macroend
+
+!ifdef ADDUSER | BACKUP | RESTORE
+    #--------------------------------------------------------------------------
+    # Installer Function: RunSQLiteCommand
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+
+    !insertmacro RunSQLiteCommand ""
+!endif
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.RunSQLiteCommand
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro RunSQLiteCommand "un."
 
 
 #--------------------------------------------------------------------------
@@ -3631,7 +3790,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDSSL | ADDUSER | BACKUP | RESTORE | RUNPOPFILE
+!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | RESTORE | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: StrBackSlash
     #
