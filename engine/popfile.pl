@@ -2157,7 +2157,7 @@ sub run_popfile
                                 }
                                 
                                 # Check to see if too much time has passed and we need to keep the mail client happy
-                                if ( time > ( $last_timeout + 10 ) )
+                                if ( time > ( $last_timeout + 2 ) )
                                 {
                                     print $client "X-POPFile-TimeoutPrevention: $timeout_count$eol";
                                     debug( "Sending timeout prevention header" );
