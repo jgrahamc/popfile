@@ -1408,7 +1408,7 @@ sub parse_header
 
     # Some headers should never be RFC 2047 decoded
 
-    $argument = $self->decode_string($argument) unless ($header =~ /^(Revceived|Content\-Type|Content\-Disposition)$/i);
+    $argument = $self->decode_string($argument) unless ($header =~ /^(Received|Content\-Type|Content\-Disposition)$/i);
 
     add_line( $self, $argument, 0, $prefix );
 
