@@ -196,6 +196,59 @@ sub update_tag
 
 # ---------------------------------------------------------------------------------------------
 #
+# parse_html
+#
+# Parse a line that might contain HTML information
+#
+# $line     A line of text 
+#
+# ---------------------------------------------------------------------------------------------
+sub parse_html
+{
+    my ( $self, $line ) = @_;
+
+    my $code = 0;
+    
+    # Remove HTML comments
+
+    $line =~ s/<!--.*?-->//g;
+
+    # Remove HTML tags completely
+
+    if ( $self->{in_html_tag} )  {
+        if ( $line =~ s/(.*?)>/ / ) {
+            $self->{html_arg} .= $1;
+            $self->{in_html_tag} = 0;
+            $self->{html_tag} =~ s/=\n ?//g;
+            $self->{html_arg} =~ s/=\n ?//g;
+            update_tag( $self, $self->{html_tag}, $self->{html_arg} );
+            $self->{html_tag} = '';
+            $self->{html_arg} = '';
+            $code             = 1;
+        } else {
+            $self->{html_arg} .= " " . $line;
+            $line = '';
+            return 1;
+        }
+    }
+
+    while ( $line =~ s/<[\/]?([A-Za-z]+)([^>]*?)>/ / )  {
+        update_tag( $self, $1, $2 );
+        $code = 1;
+    }
+
+    if ( $line =~ s/<([^ >]+)([^>]*)$// )  {
+        $self->{html_tag} = $1;
+        $self->{html_arg} = $2;
+        $self->{in_html_tag} = 1;
+        $code = 1;
+    }
+
+    return $code;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # parse_stream
 #
 # Read messages from a file stream and parse into a list of words and frequencies
@@ -223,9 +276,9 @@ sub parse_stream
     
     my $colorized = '';
 
-    my $in_html_tag = 0;
-    my $html_tag    = '';
-    my $html_arg    = '';
+    $self->{in_html_tag} = 0;
+    $self->{html_tag}    = '';
+    $self->{html_arg}    = '';
 
     $self->{words}     = {};
     $self->{msg_total} = 0;
@@ -259,7 +312,7 @@ sub parse_stream
                 $splitline =~ s/([^\r\n]{100,120} )/$1\r\n/g;
                 $splitline =~ s/([^ \r\n]{120})/$1\r\n/g;
 
-                if ( !$in_html_tag )  {
+                if ( !$self->{in_html_tag} )  {
                     $colorized .= $self->{ut} if ( $self->{ut} ne '' );
                     
                     $self->{ut} = '';
@@ -295,7 +348,7 @@ sub parse_stream
                             $splitline =~ s/([^\r\n]{120})/$1\r\n/g;
                             $self->{ut} = $splitline;
                         }
-                        add_line( $self, $decoded, 1 );
+                        add_line( $self, $decoded, 1 ) if ( parse_html( $self, $decoded ) == 0 );
                         $decoded = '';
                         if ( $self->{color} )  {
                             if ( $self->{ut} ne '' )  {
@@ -308,12 +361,12 @@ sub parse_stream
                     last if ( !($line = <MSG>) );
                 }
 
-                add_line( $self, $decoded, 1 );
+                add_line( $self, $decoded, 1 ) if ( parse_html( $self, $decoded ) == 0 );
             }
 
             next if ( !defined($line) );
-            $content_type = 'text/html' if ( $line =~ /<html>/i );
-
+            parse_html( $self, $line );
+            
             # Transform some escape characters
 
             if ( $encoding =~ /quoted\-printable/ ) {
@@ -322,40 +375,6 @@ sub parse_stream
                     my $from = "=$1";
                     my $to   = chr(hex("0x$1"));
                     $line =~ s/$from/$to/g;
-                }
-            }
-
-            # Remove HTML comments
-            
-            $line =~ s/<!--.*?-->//g;
-
-            # Remove HTML tags completely
-
-            if ( $content_type =~ /html/ )  {
-                if ( $in_html_tag )  {
-                    if ( $line =~ s/(.*?)>/ / ) {
-                        $html_arg .= $1;
-                        $in_html_tag = 0;
-                        $html_tag =~ s/=\n ?//g if ( $encoding =~ /quoted\-printable/ );
-                        $html_arg =~ s/=\n ?//g if ( $encoding =~ /quoted\-printable/ );
-                        update_tag( $self, $html_tag, $html_arg );
-                        $html_tag = '';
-                        $html_arg = '';
-                    } else {
-                        $html_arg .= " " . $line;
-                        $line = '';
-                        next;
-                    }
-                }
-                    
-                while ( $line =~ s/<[\/]?([A-Za-z]+)([^>]*?)>/ / )  {
-                    update_tag( $self, $1, $2 );
-                }
-                
-                if ( $line =~ s/<([^ >]+)([^>]*)$// )  {
-                    $html_tag = $1;
-                    $html_arg = $2;
-                    $in_html_tag = 1;
                 }
             }
 

@@ -226,7 +226,7 @@ sub child
         # and mail accounts
         if ( $command =~ /USER (.+)(:(\d+))?$self->{configuration}->{configuration}{separator}(.+)/i ) {
             if ( $1 ne '' )  {
-                if ( verify_connected( $self, $mail, $client, $1, $3 || 110 ) )  {
+                if ( $mail = verify_connected( $self, $mail, $client, $1, $3 || 110 ) )  {
                     $self->{lastuser} = $4;
 
                     # Pass through the USER command with the actual user name for this server,
@@ -246,7 +246,7 @@ sub child
 
         # User is issuing the APOP command to start a session with the remote server
         if ( $command =~ /APOP (.*):((.*):)?(.*) (.*)/i ) {
-            if ( verify_connected( $self, $mail, $client,  $1, $3 || 110 ) )  {
+            if ( $mail = verify_connected( $self, $mail, $client,  $1, $3 || 110 ) )  {
                 $self->{lastuser} = $4;
 
                 # Pass through the USER command with the actual user name for this server,
@@ -263,7 +263,7 @@ sub child
         # Secure authentication
         if ( $command =~ /AUTH ([^ ]+)/ ) {
             if ( $self->{configuration}->{configuration}{server} ne '' )  {
-                if ( verify_connected( $self, $mail, $client,  $self->{configuration}->{configuration}{server}, $self->{configuration}->{configuration}{sport} ) )  {
+                if ( $mail = verify_connected( $self, $mail, $client,  $self->{configuration}->{configuration}{server}, $self->{configuration}->{configuration}{sport} ) )  {
                     # Loop until we get -ERR or +OK
                     my $response;
                     $response = get_response( $self, $mail, $client, $command );
@@ -293,7 +293,7 @@ sub child
 
         if ( $command =~ /AUTH/ ) {
             if ( $self->{configuration}->{configuration}{server} ne '' )  {
-                if ( verify_connected( $self, $mail, $client,  $self->{configuration}->{configuration}{server}, $self->{configuration}->{configuration}{sport} ) )  {
+                if ( $mail = verify_connected( $self, $mail, $client,  $self->{configuration}->{configuration}{server}, $self->{configuration}->{configuration}{sport} ) )  {
                     if ( echo_response( $self, $mail, $client, "AUTH" ) ) {
                         echo_to_dot( $self, $mail, $client );
                     }
@@ -335,7 +335,7 @@ sub child
 
         # The CAPA command
         if ( $command =~ /CAPA/i ) {
-            if ( verify_connected( $self, $mail, $client, $self->{configuration}->{configuration}{server}, $self->{configuration}->{configuration}{sport} ) )  {
+            if ( $mail = verify_connected( $self, $mail, $client, $self->{configuration}->{configuration}{server}, $self->{configuration}->{configuration}{sport} ) )  {
                 echo_to_dot( $self, $mail, $client ) if ( echo_response( $self, $mail, $client, "CAPA" ) );
             } else {
                 tee( $self,  $client, "-ERR No secure server specified$eol" );
@@ -579,7 +579,7 @@ sub debug
     if ( $self->{configuration}->{configuration}{debug} > 0 ) {
         # Check to see if we are handling the USER/PASS command and if we are then obscure the
         # account information
-        $message = "$`$1$3 XXXXXX$4" if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ );
+        # $message = "$`$1$3 XXXXXX$4" if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ );
         chomp $message;
         $message .= "\n";
 
@@ -728,7 +728,7 @@ sub verify_connected
     calculate_today( $self );
     
     # Check to see if we are already connected
-    return 1 if ( $mail && $mail->connected );
+    return $mail if ( $mail && $mail->connected );
     
     # Connect to the real mail server on the standard port
    $mail = IO::Socket::INET->new(
@@ -755,14 +755,14 @@ sub verify_connected
                     flush_extra( $self, $mail, $client, 1 );
                 }
             }
-            return 1;
+            return $mail;
         }
     }
 
     # Tell the client we failed
     tee( $self,  $client, "-ERR failed to connect to $hostname:$port$eol" );
     
-    return 0;
+    return undef;
 }
 
 # ---------------------------------------------------------------------------------------------

@@ -1299,6 +1299,7 @@ sub history_page
         close CLASS;
 
         $self->{configuration}->{configuration}{ecount} -= 1 if ( $self->{configuration}->{configuration}{ecount} > 0 );
+        $self->{classifier}->{parameters}{$self->{form}{badbucket}}{count} -= 1; 
         
         $self->{history_invalid} = 1;
     }
@@ -1385,6 +1386,8 @@ sub history_page
         close CLASS;
         
         $self->{configuration}->{configuration}{ecount} += 1 if ( $self->{form}{shouldbe} ne $self->{form}{usedtobe} );
+        $self->{classifier}->{parameters}{$self->{form}{shouldbe}}{count} += 1; 
+        $self->{classifier}->{parameters}{$self->{form}{usedtobe}}{count} -= 1; 
 
         $self->{classifier}->load_bucket("$self->{configuration}->{configuration}{corpus}/$self->{form}{shouldbe}");
         $self->{classifier}->update_constants();    
