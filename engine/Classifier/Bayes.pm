@@ -2018,7 +2018,7 @@ sub echo_to_dot_
             }
 
             # Note that there is no print FILE here.  This is correct because we
-            # to no want the network terminator . to appear in the file version
+            # do no want the network terminator . to appear in the file version
             # of any message
 
             print $client $_ if ( defined( $client ) );
