@@ -26,10 +26,25 @@
 #--------------------------------------------------------------------------
 
 ; This version of the script has been tested with the "NSIS 2" compiler (final),
-; released 7 February 2004, with no patches applied.
+; released 7 February 2004, with no "official" NSIS patches/CVS updates applied.
 ;
-; Expect 3 compiler warnings, all related to standard NSIS language files which are out-of-date.
+; Expect 3 compiler warnings, all related to standard NSIS language files which are out-of-date
+;
+; NOTE: The language selection menu order used in this program assumes that the NSIS MUI
+; 'Japanese.nsh' language file has been patched to use 'Nihongo' instead of 'Japanese'
+; [see 'SMALL NSIS PATCH REQUIRED' in the 'Support for Japanese text processing' section
+; of the header comment at the start of the 'installer.nsi' file]
 
+#--------------------------------------------------------------------------
+# Optional run-time command-line switch (used by 'transmcc.exe')
+#--------------------------------------------------------------------------
+#
+# /abort
+#
+# If this command-line switch is present, the utility displays the fatal error messages
+# and terminates via an 'Abort' instruction in order to display the MUI header text used
+# when corpus conversion has failed.
+#
 #--------------------------------------------------------------------------
 
   ;--------------------------------------------------------------------------
@@ -39,7 +54,7 @@
   !define C_PFI_PRODUCT  "Corpus Conversion Testbed"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.0"
+  !define C_PFI_VERSION  "0.1.1"
 
   ; Mention the version number in the window title
 
@@ -239,6 +254,11 @@
   ; Entries will appear in the drop-down list of languages in the order given below
   ; (the order used here ensures that the list entries appear in alphabetic order).
 
+  ; NOTE: The order used here assumes that the NSIS MUI 'Japanese.nsh' language file has
+  ; been patched to use 'Nihongo' instead of 'Japanese' [see 'SMALL NSIS PATCH REQUIRED'
+  ; in the 'Support for Japanese text processing' section of the header comment at the
+  ; start of the 'installer.nsi' file]
+
   !insertmacro PFI_LANG_LOAD "Arabic"
   !insertmacro PFI_LANG_LOAD "Bulgarian"
   !insertmacro PFI_LANG_LOAD "SimpChinese"
@@ -250,10 +270,10 @@
   !insertmacro PFI_LANG_LOAD "French"
   !insertmacro PFI_LANG_LOAD "Greek"
   !insertmacro PFI_LANG_LOAD "Italian"
-  !insertmacro PFI_LANG_LOAD "Japanese"
   !insertmacro PFI_LANG_LOAD "Korean"
   !insertmacro PFI_LANG_LOAD "Hungarian"
   !insertmacro PFI_LANG_LOAD "Dutch"
+  !insertmacro PFI_LANG_LOAD "Japanese"
   !insertmacro PFI_LANG_LOAD "Norwegian"
   !insertmacro PFI_LANG_LOAD "Polish"
   !insertmacro PFI_LANG_LOAD "Portuguese"
@@ -351,11 +371,11 @@ Section ConvertCorpus
   Call GetParameters
   Pop $G_STILL_TO_DO
   StrCmp $G_STILL_TO_DO "/abort" show_fatal_errors
-  
+
   DetailPrint "PFI_LANG_CONVERT_MUTEX"
   MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_CONVERT_MUTEX)"
   !insertmacro DELETE_LAST_ENTRY
-  
+
   DetailPrint "PFI_LANG_CONVERT_PRIVATE"
   MessageBox MB_OK|MB_ICONINFORMATION "$(PFI_LANG_CONVERT_PRIVATE)"
   !insertmacro DELETE_LAST_ENTRY
