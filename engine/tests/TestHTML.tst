@@ -25,18 +25,18 @@
 # Set up the test corpus and use the Test msg and cls files
 # to create a current history set
 
-test_assert( `rm -rf corpus` == 0 );
-test_assert( `cp -R corpus.base corpus` == 0 );
-test_assert( `rm -rf corpus/CVS` == 0 );
-test_assert( `rm -rf corpus/other/CVS` == 0 );
-test_assert( `rm -rf corpus/spam/CVS` == 0 );
-test_assert( `rm -rf corpus/personal/CVS` == 0 );
-test_assert( `rm -rf messages` == 0 );
-`rm -f __db.*`; 
+test_assert( (`rm -rf corpus` || 0) == 0 );
+test_assert( (`cp -R corpus.base corpus` || 0) == 0 );
+test_assert( (`rm -rf corpus/CVS` || 0) == 0 );
+test_assert( (`rm -rf corpus/other/CVS` || 0) == 0 );
+test_assert( (`rm -rf corpus/spam/CVS` || 0) == 0 );
+test_assert( (`rm -rf corpus/personal/CVS` || 0) == 0 );
+test_assert( (`rm -rf messages` || 0) == 0 );
+`rm -f __db.*`;
 unlink 'popfile.cfg';
 
 unlink( 'stopwords' );
-test_assert( `cp stopwords.base stopwords` == 0 );
+test_assert( (`cp stopwords.base stopwords` || 0 ) == 0 );
 
 mkdir 'messages';
 my @messages = glob '*.msg';
@@ -46,9 +46,9 @@ my $dl    = 0;
 foreach my $msg (@messages) {
     next if ( $msg =~ /TestMailParse026/ );
     my $name = "messages/popfile$dl" . "=" . "$count";
-    test_assert( `cp $msg $name.msg` == 0 );
+    test_assert( (`cp $msg $name.msg` || 0) == 0 );
     $msg =~ s/\.msg$/\.cls/;
-    test_assert( `cp $msg $name.cls` == 0 );
+    test_assert( (`cp $msg $name.cls` || 0) == 0 );
     $count += 1;
     if ( rand(1) > 0.5 ) {
         $dl += 1;
@@ -202,7 +202,8 @@ test_assert(1);
 $h->initialize();
 test_assert(1);
 $h->version( 'vtest.suite.ver' );
-test_assert_equal( $h->language(), 'English' );
+my $lang = $h->language();
+test_assert_equal( $lang, 'English' );
 our $version = $h->version();
 
 test_assert(1);

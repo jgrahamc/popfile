@@ -22,10 +22,10 @@
 #
 # ---------------------------------------------------------------------------------------------
 
-test_assert( `rm -rf messages` == 0 );
-test_assert( `rm -rf corpus` == 0 );
-test_assert( `cp -R corpus.base corpus` == 0 );
-test_assert( `rm -rf corpus/CVS` == 0 );
+test_assert( (`rm -rf messages` || 0 ) == 0 );
+test_assert( (`rm -rf corpus` || 0 ) == 0 );
+test_assert( (`cp -R corpus.base corpus` || 0) == 0 );
+test_assert( (`rm -rf corpus/CVS` || 0 ) == 0 );
 unlink 'stopwords';
 test_assert( `cp stopwords.base stopwords` == 0 );
 
@@ -76,6 +76,7 @@ test_assert( $b->start() );
 my $cl = new Classifier::MailParse;
 
 $cl->mangle( $w );
+$cl->{lang__} = "English";
 # map_color()
 test_assert_equal( $cl->map_color( 'red' ),     'ff0000' );
 test_assert_equal( $cl->map_color( 'ff0000' ),  'ff0000' );
@@ -266,10 +267,10 @@ test_assert_equal($cl->decode_string("=?ISO-8859-1?B?QWxhZGRpbjpvcGVuIHNlc2FtZQ=
 # test get_header
 
 $cl->parse_file( 'TestMailParse022.msg' );
-test_assert_equal( $cl->get_header( 'from', 'test@test.com' ) );
-test_assert_equal( $cl->get_header( 'to', 'someone@somewhere.com' ) );
-test_assert_equal( $cl->get_header( 'cc', 'someoneelse@somewhere.com' ) );
-test_assert_equal( $cl->get_header( 'subject', 'test for various HTML parts' ) );
+test_assert_equal( $cl->get_header( 'from'), 'test@test.com'  );
+test_assert_equal( $cl->get_header( 'to'), 'someone@somewhere.com'  );
+test_assert_equal( $cl->get_header( 'cc'), '<someoneelse@somewhere.com>'  );
+test_assert_equal( $cl->get_header( 'subject'), 'test for various HTML parts' );
 
 # test quickmagnets
 

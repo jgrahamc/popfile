@@ -66,6 +66,8 @@ $b->initialize();
 test_assert( $b->start() );
 
 $x->initialize();
+$x->config_('enabled',1);
+#$x->start();
 
 
 
@@ -94,20 +96,33 @@ my $xport = 12000 + int(rand(2000));
 
 $x->config_("port", $xport);
 
+$b->prefork();
+
 my $pid = fork();
 
 if ($pid == 0) {
     # CHILD THAT WILL RUN THE XMLRPC SERVER
-    $x->start();
+    if ($x->start() == 1) {
 
-    while ( $x->service() && $b->alive()) {
-        select(undef,undef,undef, 0.1);
+        $b->forked();
+
+        test_assert(1, "start passed\n");
+
+        while ( $x->service() && $b->alive()) {
+            select(undef,undef,undef, 0.1);
+        }
+        $x->stop();
+        $b->stop();
+    } else {
+        test_assert(0,"start failed\n");
     }
-    $x->stop();
-    $b->stop();
+
     exit(0);
 } else {
     # PARENT -- test the XMLRPC server
+
+    $b->postfork();
+
     select(undef,undef,undef,1);
     use XMLRPC::Lite;
 
@@ -136,7 +151,7 @@ if ($pid == 0) {
 
     select(undef,undef,undef,.2);
 
-    my $alive = XMLRPC::Lite
+    $alive = XMLRPC::Lite
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
     -> call('Classifier/Bayes.alive',0)
     -> result;

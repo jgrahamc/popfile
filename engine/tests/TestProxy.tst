@@ -189,7 +189,9 @@ $line = <TEMP>;
 test_assert( !defined( $line ) );
 close TEMP;
 
-$line = <$client>;
+$sp->service_server();
+
+$line = $sp->slurp_($client);
 test_assert_regexp( $line, 'after' );
 
 # Test echo_to_regexp_ with suppression
@@ -268,6 +270,7 @@ test_assert_regexp( $line, 'after' );
 # Test flush_extra_
 
 $sp->send( 'flush1' );
+select(undef,undef,undef, 0.5);
 $sp->service_server();
 open TEMP, ">temp.tmp";
 test_assert_regexp( $sp->flush_extra_( $client, \*TEMP ), 'flush1' );
@@ -449,7 +452,7 @@ $sp->service_server();
 select( undef, undef, undef, 0.1 );
 @kids = keys %{$sp->{children__}};
 my %tmp = %{$sp->{children__}};
-test_assert_equal( $#kids, 0 ); 
+test_assert_equal( $#kids, 0 );
 $sp->stop_server();
 $sp->stop();
 @kids = keys %{$sp->{children__}};
@@ -493,7 +496,7 @@ select( undef, undef, undef, 0.1 );
 $sp->service_server();
 select( undef, undef, undef, 0.1 );
 @kids = keys %{$sp->{children__}};
-test_assert_equal( $#kids, 0 ); 
+test_assert_equal( $#kids, 0 );
 %tmp = %{$sp->{children__}};
 $sp->forked();
 @kids = keys %{$sp->{children__}};
