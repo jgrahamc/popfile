@@ -591,42 +591,46 @@ sub classify_file
     # estimate.  $total is always 1 after the first loop iteration, so any additional term
     # less than 2 ** -54 is insignificant, and need not be computed.
 
+    my $ln2 = log(2);
+
     foreach my $b (@ranking) {
         $raw_score{$b} = $score{$b};
         $score{$b} -= $base_score;
-        
-        # ln(2) =~ 0.693147180559945309417232121458177
-        
-        $total += exp($score{$b}) if ($score{$b} > ( -54 * 0.693147180559945309417232121458177 ) );
+
+        $total += exp($score{$b}) if ($score{$b} > ( -54 * $ln2 ) );
     }
 
     if ($self->{wordscores__} && defined($ui) ) {
         my @qm = @{$self->{parser__}->quickmagnets()};
-        my %language = $ui->language();
+        my %language    = $ui->language();
         my $session_key = $ui->session_key();
 
         if ( $#qm >= 0 ) {
-            $self->{scores__} = "<p><b>$language{QuickMagnets}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Magnet}</th>\n<th>$language{Magnet_Always}</th>\n";
+            my @buckets = $self->get_buckets();
+            my $i = 0;
+            $self->{scores__} .= "<form action=\"/magnets\" method=\"POST\">\n";
+            $self->{scores__} .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />";
+            $self->{scores__} .= "<input type=\"hidden\" name=\"count\" value=\"" . ($#qm+1) . "\" />";
+            $self->{scores__} .= "<hr><b>$language{QuickMagnets}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Magnet}</th>\n<th>$language{Magnet_Always}</th>\n";
 
-            foreach my $m (@qm) {
-                $self->{scores__} .= "<tr><td scope=\"col\">$m</td><td>";
+            while ( $#qm >= 0 ) {
+                my $type = shift @qm;
+                my $text = shift @qm;
+                $i += 1;
 
-                $self->{scores__} .= "<form action=\"/magnets\">\n";
-                $self->{scores__} .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />";
-                $self->{scores__} .= "<input type=\"hidden\" name=\"type\" id=\"magnetsAddType\" />";
-                $self->{scores__} .= "<input type=\"hidden\" name=\"text\" id=\"magnetsAddText\" />";
+                $self->{scores__} .= "<tr><td scope=\"col\">$type: $text</td><td>";
+                $self->{scores__} .= "<input type=\"hidden\" name=\"type$i\" id=\"magnetsAddType\" value=\"$type\"/>";
+                $self->{scores__} .= "<input type=\"hidden\" name=\"text$i\" id=\"magnetsAddText\" value=\"$text\"/>";
+                $self->{scores__} .= "<select name=\"bucket$i\" id=\"magnetsAddBucket\">\n<option value=\"\"></option>\n";
 
-                $self->{scores__} .= "<select name=\"bucket\" id=\"magnetsAddBucket\">\n<option value=\"\"></option>\n";
-
-                my @buckets = $self->get_buckets();
                 foreach my $bucket (@buckets) {
                     $self->{scores__} .= "<option value=\"$bucket\">$bucket</option>\n";
                 }
 
-                $self->{scores__} .= "</select><input type=\"submit\" class=\"submit\" name=\"create\" value=\"$language{Create}\" /></form></td></tr>";
+                $self->{scores__} .= "</select></td></tr>";
 	    }
 
-            $self->{scores__} .= "</table>";
+            $self->{scores__} .= "<tr><td></td><td><input type=\"submit\" class=\"submit\" name=\"create\" value=\"$language{Create}\" /></td></tr></table></form>";
 	}
 
         $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
@@ -646,7 +650,7 @@ sub classify_file
         }
 
         $self->{scores__} .= "</table><hr>";
-        $self->{scores__} .= "<table class=\"top20Words\">\n<tr><td colspan=\"4\">&nbsp;</td></tr>\n";
+        $self->{scores__} .= "<table class=\"top20Words\">\n";
         $self->{scores__} .= "<tr>\n<th scope=\"col\">$language{Word}</th><th>&nbsp;</th><th scope=\"col\">$language{Count}</th><th>&nbsp;</th>\n";
 
         foreach my $bucket (@buckets) {

@@ -189,7 +189,7 @@ sub start
     my ( $self ) = @_;
 
     # This needs to occur at launch, but after initialization
-    
+
     $self->remove_mail_files();
     $self->calculate_today();
 
@@ -298,8 +298,8 @@ sub url_handler__
         # but we do find it on disk using perl's -e file test operator (returns
         # true if the file exists).
 
-        $self->invalidate_history_cache() if ( !$found && ( -e ($self->global_config_( 'msgdir' ) . "$file") ) );
-        $self->http_redirect_( $client, "/history?session=$self->{session_key__}&start_message=0&view=$self->{form_}{view}#$self->{form_}{view}" );
+        $self->invalidate_history_cache() if ( !$found && ( -e ( $self->global_config_( 'msgdir' ) . $file ) ) );
+        $self->http_redirect_( $client, "/view?session=$self->{session_key__}&view=$self->{form_}{view}&start_message=$self->{form_}{start_message}" );
         return 1;
     }
 
@@ -362,6 +362,7 @@ sub url_handler__
                         '/magnets'       => \&magnet_page,
                         '/advanced'      => \&advanced_page,
                         '/history'       => \&history_page,
+                        '/view'          => \&view_page,
                         '/'              => \&history_page );
 
     # Any of the standard pages can be found in the url_table, the other pages are probably
@@ -1210,42 +1211,55 @@ sub magnet_page
     my ( $self, $client ) = @_;
 
     my $magnet_message = '';
-    if ( ( defined($self->{form_}{type}) ) && ( $self->{form_}{bucket} ne '' ) && ( $self->{form_}{text} ne '' ) ) {
-        my $found = 0;
-        for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
-            my %magnets = $self->{classifier__}->get_magnets( $bucket, $self->{form_}{type} );
-            if ( defined( $magnets{$self->{form_}{text}}) ) {
-                $found  = 1;
-                $magnet_message = "<blockquote>\n<div class=\"error02\">\n<b>";
-                $magnet_message .= sprintf( $self->{language__}{Magnet_Error1}, "$self->{form_}{type}: $self->{form_}{text}", $bucket );
-                $magnet_message .= "</b>\n</div>\n</blockquote>\n";
-            }
-        }
+    if ( defined( $self->{form_}{count} ) ) {
+        for my $i ( 1 .. $self->{form_}{count} ) {
+            my $mtype   = $self->{form_}{"type$i"};
+            my $mtext   = $self->{form_}{"text$i"};
+            my $mbucket = $self->{form_}{"bucket$i"};
 
-        if ( $found == 0 )  {
-            for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
-            my %magnets = $self->{classifier__}->get_magnets( $bucket, $self->{form_}{type} );
-                for my $from (keys %magnets)  {
-                    if ( ( $self->{form_}{text} =~ /\Q$from\E/ ) || ( $from =~ /\Q$self->{form_}{text}\E/ ) )  {
-                        $found = 1;
-                        $magnet_message = "<blockquote><div class=\"error02\"><b>" . sprintf( $self->{language__}{Magnet_Error2}, "$self->{form_}{type}: $self->{form_}{text}", "$self->{form_}{type}: $from", $bucket ) . "</b></div></blockquote>";
+            if ( ( defined($mbucket) ) && ( $mbucket ne '' ) && ( $mtext ne '' ) ) {
+                my $found = 0;
+
+                for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
+                    my %magnets = $self->{classifier__}->get_magnets( $bucket, $mtype );
+
+                    if ( defined( $magnets{$mtext} ) ) {
+                        $found  = 1;
+                        $magnet_message .= "<blockquote>\n<div class=\"error02\">\n<b>";
+                        $magnet_message .= sprintf( $self->{language__}{Magnet_Error1}, "$mtype: $mtext", $bucket );
+                        $magnet_message .= "</b>\n</div>\n</blockquote>\n";
+                        last;
                     }
                 }
+
+                if ( $found == 0 )  {
+                    for my $bucket ($self->{classifier__}->get_buckets_with_magnets()) {
+                        my %magnets = $self->{classifier__}->get_magnets( $bucket, $mtype );
+
+                        for my $from (keys %magnets)  {
+                            if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
+                                $found = 1;
+                                $magnet_message .= "<blockquote><div class=\"error02\"><b>" . sprintf( $self->{language__}{Magnet_Error2}, "$mtype: $mtext", "$mtype: $from", $bucket ) . "</b></div></blockquote>";
+                                last;
+                            }
+                        }
+                    }
+		}
+
+                if ( $found == 0 ) {
+
+                    # It is possible to type leading or trailing white space in a magnet definition
+                    # which can later cause mysterious failures because the whitespace is eaten by
+                    # the browser when the magnet is displayed but is matched in the regular expression
+                    # that does the magnet matching and will cause failures... so strip off the whitespace
+
+                    $mtext =~ s/^[ \t]+//;
+                    $mtext =~ s/[ \t]+$//;
+
+                    $self->{classifier__}->create_magnet( $mbucket, $mtype, $mtext );
+                    $magnet_message .= "<blockquote>" . sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $mtext", $mbucket ) . "</blockquote>";
+		}
             }
-        }
-
-        if ( $found == 0 ) {
-
-            # It is possible to type leading or trailing white space in a magnet definition
-            # which can later cause mysterious failures because the whitespace is eaten by
-            # the browser when the magnet is displayed but is matched in the regular expression
-            # that does the magnet matching and will cause failures... so strip off the whitespace
-
-            $self->{form_}{text} =~ s/^[ \t]+//;
-            $self->{form_}{text} =~ s/[ \t]+$//;
-
-            $self->{classifier__}->create_magnet( $self->{form_}{bucket}, $self->{form_}{type}, $self->{form_}{text});
-            $magnet_message = "<blockquote>" . sprintf( $self->{language__}{Magnet_Error3}, "$self->{form_}{type}: $self->{form_}{text}", $self->{form_}{bucket} ) . "</blockquote>";
         }
     }
 
@@ -1315,18 +1329,19 @@ sub magnet_page
 
     # Magnet Type widget
     $body .= "<label class=\"magnetsLabel\" for=\"magnetsAddType\">$self->{language__}{Magnet_MagnetType}:</label><br />\n";
-    $body .= "<select name=\"type\" id=\"magnetsAddType\">\n<option value=\"from\">\n$self->{language__}{From}</option>\n";
+    $body .= "<select name=\"type1\" id=\"magnetsAddType\">\n<option value=\"from\">\n$self->{language__}{From}</option>\n";
     $body .= "<option value=\"to\">\n$self->{language__}{To}</option>\n";
     $body .= "<option value=\"subject\">\n$self->{language__}{Subject}</option>\n</select>\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n<br /><br />\n";
+    $body .= "<input type=\"hidden\" name=\"count\" value=\"1\" />\n";
 
     # Value widget
     $body .= "<label class=\"magnetsLabel\" for=\"magnetsAddText\">$self->{language__}{Magnet_Value}:</label><br />\n";
-    $body .= "<input type=\"text\" name=\"text\" id=\"magnetsAddText\" />\n<br /><br />\n";
+    $body .= "<input type=\"text\" name=\"text1\" id=\"magnetsAddText\" />\n<br /><br />\n";
 
     # Always Goes to Bucket widget
     $body .= "<label class=\"magnetsLabel\" for=\"magnetsAddBucket\">$self->{language__}{Magnet_Always}:</label><br />\n";
-    $body .= "<select name=\"bucket\" id=\"magnetsAddBucket\">\n<option value=\"\"></option>\n";
+    $body .= "<select name=\"bucket1\" id=\"magnetsAddBucket\">\n<option value=\"\"></option>\n";
 
     my @buckets = $self->{classifier__}->get_buckets();
     foreach my $bucket (@buckets) {
@@ -2646,34 +2661,6 @@ sub history_page
 
         $start_message = $self->{form_}{start_message} if ( ( defined($self->{form_}{start_message}) ) && ($self->{form_}{start_message} > 0 ) );
         my $stop_message  = $start_message + $self->config_( 'page_size' ) - 1;
-
-        # Verify that a message we are being asked to view (perhaps from a /jump_to_message URL) is actually between
-        # the $start_message and $stop_message, if it is not then move to that message
-
-        if ( defined($self->{form_}{view}) ) {
-            my $found = 0;
-            foreach my $i ($start_message ..  $stop_message) {
-                if ( defined ( $self->{history_keys__}[$i] ) ) {
-                    my $mail_file = $self->{history_keys__}[$i];
-                    if ( $self->{form_}{view} eq $mail_file )  {
-                        $found = 1;
-                        last;
-                    }
-                }
-            }
-
-            if ( $found == 0 ) {
-                foreach my $i ( 0 .. ( $self->history_size() - 1 ) )  {
-                    my $mail_file = $self->{history_keys__}[$i];
-                    if ( $self->{form_}{view} eq $mail_file ) {
-                        $start_message = $i;
-                        $stop_message  = $i + $self->config_( 'page_size' ) - 1;
-                        last;
-                    }
-                }
-            }
-        }
-
         $stop_message = $self->history_size() - 1 if ( $stop_message >= $self->history_size() );
 
         if ( $self->config_( 'page_size' ) <= $self->history_size() ) {
@@ -2758,7 +2745,7 @@ sub history_page
             my $index         = $self->{history__}{$mail_file}{index} + 1;
 
             $body .= "<tr";
-            if ( ( ( defined($self->{form_}{view}) ) && ( $self->{form_}{view} eq $mail_file ) ) || ( ( defined($self->{form_}{file}) && ( $self->{form_}{file} eq $mail_file ) ) ) || ( $highlight_message eq $mail_file ) ) {
+            if ( ( ( defined($self->{form_}{file}) && ( $self->{form_}{file} eq $mail_file ) ) ) || ( $highlight_message eq $mail_file ) ) {
                 $body .= " class=\"rowHighlighted\"";
             } else {
                 $body .= " class=\"";
@@ -2772,7 +2759,7 @@ sub history_page
             $body .= $index . "</td>\n<td>";
             $mail_file =~ /popfile\d+=(\d+)\.msg$/;
             $body .= "<a title=\"$from\">$short_from</a></td>\n";
-            $body .= "<td><a class=\"messageLink\" title=\"$subject\" href=\"/history?view=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;filter=$self->{form_}{filter}&amp;search=$self->{form_}{search}#$mail_file\">";
+            $body .= "<td><a class=\"messageLink\" title=\"$subject\" href=\"/view?view=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;filter=$self->{form_}{filter}&amp;search=$self->{form_}{search}\">";
             $body .= "$short_subject</a></td>\n<td>";
             if ( $reclassified )  {
                 $body .= "<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></td>\n<td>";
@@ -2795,10 +2782,6 @@ sub history_page
                         $body .= "<option value=\"$abucket\">$abucket</option>\n";
                     }
                     $body .= "</select>\n";
-
-                    if ( ( defined($self->{form_}{view}) ) && ( $self->{form_}{view} eq $mail_file ) ) {
-                        $body .= "<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />";
-                    }
                 } else {
                     $body .= " ($self->{language__}{History_MagnetUsed}: $self->{history__}{$mail_file}{magnet})";
                 }
@@ -2810,90 +2793,10 @@ sub history_page
             $body .= "</td>\n</tr>\n";
 
 
-            # Check to see if we want to view a message
-            if ( ( defined($self->{form_}{view}) ) && ( $self->{form_}{view} eq $mail_file ) ) {
-                $body .= "<tr>\n<td></td>\n<td colspan=\"5\" valign=\"top\">\n";
-                $body .= "<table class=\"openMessageTable\" cellpadding=\"10%\" cellspacing=\"0\" width=\"100%\" summary=\"$self->{language__}{History_OpenMessageSummary}\">\n";
-
-                # Close button
-                $body .= "<tr>\n<td class=\"openMessageCloser\">\n";
-                $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">\n";
-                $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span></a>\n";
-                $body .= "<br /><br />\n</td>\n</tr>\n";
-
-                # Message body
-                $body .= "<tr>\n<td class=\"openMessageBody\">";
-
-                if ( $self->{history__}{$mail_file}{magnet} eq '' )  {
-                    $body .= $self->{classifier__}->get_html_colored_message($self->global_config_( 'msgdir' ) . $self->{form_}{view});
-                } else {
-                    $self->{history__}{$mail_file}{magnet} =~ /(.+): ([^\r\n]+)/;
-                    my $header = $1;
-                    my $text   = $2;
-                    $body .= "<tt>";
-
-                    open MESSAGE, '<' . $self->global_config_( 'msgdir' ) . "$self->{form_}{view}";
-                    my $line;
-                    # process each line of the message
-                    while ($line = <MESSAGE>) {
-                        $line =~ s/</&lt;/g;
-                        $line =~ s/>/&gt;/g;
-
-                        $line =~ s/([^\r\n]{100,150} )/$1<br \/>/g;
-                        $line =~ s/([^ \r\n]{150})/$1<br \/>/g;
-                        $line =~ s/[\r\n]+/<br \/>/g;
-
-                        if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ ) {
-                            my $head = $1;
-                            my $arg  = $2;
-
-                            if ( $head =~ /\Q$header\E/i )  {
-                                if ( $arg =~ /\Q$text\E/i )  {
-                                    my $new_color = $self->{classifier__}->get_bucket_color($self->{history__}{$mail_file}{bucket});
-                                    $line =~ s/(\Q$text\E)/<b><font color=\"$new_color\">$1<\/font><\/b>/;
-                                }
-                            }
-                        }
-
-                        $body .= $line;
-                    }
-                    close MESSAGE;
-                    $body .= "</tt>\n";
-                }
-
-                $body .= "</td>\n</tr>\n";
-
-                # Close button
-                $body .= "<tr>\n<td class=\"openMessageCloser\">";
-                $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">\n";
-                $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
-                $body .= "</td>\n</tr>\n</table>\n";
-
-                $body .= "<table><tr><td class=\"top20\" valign=\"top\">\n";
-
-                # Enable saving of word-scores
-
-                $self->{classifier__}->wordscores( 1 );
-
-                # Build the scores by classifying the message
-
-                $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . "$self->{form_}{view}", $self);
-                
-                # Disable, print, and clear saved word-scores
-                
-                $self->{classifier__}->wordscores( 0 );
-                $body .= $self->{classifier__}->get_scores();
-                $self->{classifier__}->clear_scores();
-                
-                $body .= "</tr></table></td>\n</tr>\n";
-            }
-
             if ( defined $self->{feedback}{$mail_file} ) {
                 $body .= "<tr class=\"rowHighlighted\"><td>&nbsp;</td><td>$self->{feedback}{$mail_file}</td>\n";
                 delete $self->{feedback}{$mail_file};
             }
-
-            # $body .= "<tr class=\"rowHighlighted\"><td><td>" . sprintf( $self->{language__}{History_ChangedTo}, " . $self->{classifier__}->get_bucket_color($self->{form_}{shouldbe}) . ", $self->{form_}{shouldbe} ) if ( ( defined($self->{form_}{file}) ) && ( $self->{form_}{file} eq $mail_file ) );
         }
 
         $body .= "<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td><input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />\n</td><td><input type=\"submit\" class=\"deleteButton\" name=\"deletemessage\" value=\"$self->{language__}{Remove}\" />\n</td></tr>\n";
@@ -2925,6 +2828,143 @@ sub history_page
     }
 
     http_ok($self, $client,$body,2);
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# view_page - Shows a single email
+#
+# $client     The web browser to send the results to
+#
+# ---------------------------------------------------------------------------------------------
+sub view_page
+{
+    my ( $self, $client ) = @_;
+
+    my $mail_file     = $self->{form_}{view};
+    my $start_message = $self->{form_}{start_message};
+    my $reclassified  = $self->{history__}{$mail_file}{reclassified};
+    my $bucket        = $self->{history__}{$mail_file}{bucket};
+    my $color         = $self->{classifier__}->get_bucket_color($bucket);
+
+    $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
+    $self->{form_}{search} = '' if ( !defined( $self->{form_}{search} ) );
+    $self->{form_}{filter} = '' if ( !defined( $self->{form_}{filter} ) );
+
+    my $body = "<h2 class=\"buckets\">$self->{language__}{View_Title}</h2>\n";
+
+    $body .= "<table class=\"openMessageTable\" cellpadding=\"10%\" cellspacing=\"0\" width=\"100%\" summary=\"$self->{language__}{History_OpenMessageSummary}\">\n";
+
+    $body .= "<tr><td>";
+    $body .= "<form id=\"HistoryMainForm\" action=\"/history\" method=\"POST\">\n";
+    $body .= "<input type=\"hidden\" name=\"search\" value=\"$self->{form_}{search}\" />\n";
+    $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form_}{sort}\" />\n";
+    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
+    $body .= "<input type=\"hidden\" name=\"start_message\" value=\"$start_message\" />\n";
+    $body .= "<input type=\"hidden\" name=\"filter\" value=\"$self->{form_}{filter}\" />\n";    
+    $body .= "<table><tr><td><font size=+1><p><b>$self->{language__}{From}</b>: </td><td>$self->{history__}{$mail_file}{from}</font></td></tr>";
+    $body .= "<tr><td><font size=+1><b>$self->{language__}{Subject}</b>: </td><td>$self->{history__}{$mail_file}{subject}</font></td></tr>";
+    $body .= "<tr><td><font size=+1><b>$self->{language__}{Classification}</b>: </td><td><font color=\"$color\">$self->{history__}{$mail_file}{bucket}</font></font></td></tr>";
+
+    $body .= "<tr><td><font size=+1>";
+
+    my $index;
+    foreach my $i ( $start_message  .. $start_message + $self->config_( 'page_size' ) - 1) {
+        if ( $self->{history_keys__}[$i] eq $mail_file ) {
+            $index = $i;
+            last;
+        }
+    }
+
+    if ( $reclassified ) {
+      $body .= sprintf( $self->{language__}{History_Already}, ($color || ''), ($bucket || '') );
+      $body .= " <input type=\"submit\" class=\"undoButton\" name=\"undo_$index\" value=\"$self->{language__}{Undo}\">\n";
+    } else {
+      if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
+	$body .= "\n$self->{language__}{History_ShouldBe}: <select name=\"$index\">\n";
+
+	# Show a blank bucket field
+	$body .= "<option selected=\"selected\"></option>\n";
+
+	foreach my $abucket ($self->{classifier__}->get_buckets()) {
+	  $body .= "<option value=\"$abucket\">$abucket</option>\n";
+	}
+	$body .= "</select>\n<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />";
+      } else {
+	$body .= " ($self->{language__}{History_MagnetUsed}: $self->{history__}{$mail_file}{magnet})";
+      }
+    }
+
+    $body .= "</font></td></tr>";
+
+    # Message body
+    $body .= "</table></form></td></tr><tr>\n<td class=\"openMessageBody\"><hr><p>";
+
+    if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
+      $body .= $self->{classifier__}->get_html_colored_message($self->global_config_( 'msgdir' ) . $mail_file);
+    } else {
+      $self->{history__}{$mail_file}{magnet} =~ /(.+): ([^\r\n]+)/;
+      my $header = $1;
+      my $text   = $2;
+      $body .= "<tt>";
+
+      open MESSAGE, '<' . $self->global_config_( 'msgdir' ) . $mail_file;
+      my $line;
+      # process each line of the message
+      while ($line = <MESSAGE>) {
+	$line =~ s/</&lt;/g;
+	$line =~ s/>/&gt;/g;
+
+	$line =~ s/([^\r\n]{100,150} )/$1<br \/>/g;
+	$line =~ s/([^ \r\n]{150})/$1<br \/>/g;
+	$line =~ s/[\r\n]+/<br \/>/g;
+
+	if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ ) {
+	  my $head = $1;
+	  my $arg  = $2;
+
+	  if ( $head =~ /\Q$header\E/i ) {
+	    if ( $arg =~ /\Q$text\E/i ) {
+	      my $new_color = $self->{classifier__}->get_bucket_color($self->{history__}{$mail_file}{bucket});
+	      $line =~ s/(\Q$text\E)/<b><font color=\"$new_color\">$1<\/font><\/b>/;
+	    }
+	  }
+	}
+
+	$body .= $line;
+      }
+      close MESSAGE;
+      $body .= "</tt>\n";
+    }
+
+    $body .= "</td>\n</tr>\n";
+
+    $body .= "<tr><td class=\"top20\" valign=\"top\">\n";
+
+    # Enable saving of word-scores
+
+    $self->{classifier__}->wordscores( 1 );
+
+    # Build the scores by classifying the message
+
+    $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . $mail_file, $self);
+
+    # Disable, print, and clear saved word-scores
+
+    $self->{classifier__}->wordscores( 0 );
+    $body .= $self->{classifier__}->get_scores();
+    $self->{classifier__}->clear_scores();
+
+    # Close button
+
+    $body .= "<tr>\n<td class=\"openMessageCloser\">";
+    $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">\n";
+    $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
+    $body .= "</td>\n</tr>\n";
+
+    $body .= "</tr></table>";
+
+    $self->http_ok( $client, $body, 2 );
 }
 
 # ---------------------------------------------------------------------------------------------

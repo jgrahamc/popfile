@@ -180,7 +180,7 @@ sub update_word
         $mword = $prefix . ':' . $mword if ( $prefix ne '' );
 
         if ( $prefix =~ /(from|to|cc|subject)/i ) {
-            push @{$self->{quickmagnets__}}, ("$prefix: $word");
+            push @{$self->{quickmagnets__}}, ($prefix, $word);
         }
 
         if ( $self->{color__} ) {
