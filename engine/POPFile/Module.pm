@@ -527,8 +527,21 @@ sub flush_slurp_data__
             # This unpleasant boolean is to handle the case where we
             # are slurping a non-socket stream under Win32
 
-            if ( ( ( $handle !~ /socket/i ) && ( $^O eq 'MSWin32' ) ) ||        # PROFILE BLOCK START
-                 defined( $slurp_data__{"$handle"}{select}->can_read( $self->global_config_( 'timeout' ) ) ) ) { # PROFILE BLOCK STOP
+            my $can_read;
+
+            $can_read = ( ( $handle !~ /socket/i ) && ( $^O eq 'MSWin32' ) );
+
+            if ( !$can_read ) {
+                if ( $handle =~ /ssl/i ) {
+                    # If using SSL, check internal buffer of OpenSSL first.
+                    $can_read = ( $handle->pending() > 0 );
+                }
+                if ( !$can_read ) {
+                    $can_read = defined( $slurp_data__{"$handle"}{select}->can_read( $self->global_config_( 'timeout' ) ) );
+                }
+            }
+ 
+            if ( $can_read ) {
 
                 my $c;
                 my $retcode = sysread( $handle, $c, 1 );
