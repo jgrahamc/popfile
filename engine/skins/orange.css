@@ -1,0 +1,60 @@
+body {
+  background-color: #FFFFFF;
+  border: none;
+  font-family: sans-serif;
+}
+
+.head {
+  font-weight: normal;
+  font-size: 22pt;
+  background: #ffffcc;
+}
+
+.shell {
+    background-color: #ffffcc;
+    border: 3px #ff9966 solid;
+}
+
+.head a {
+  font-size: 12pt;
+}
+
+.menu {
+  font-size: 14pt;
+  font-weight: bold;
+}
+
+.menu_selected {
+  background-color: #ff9966;
+  width: 150px;
+}
+
+.menu_standard {
+  background-color: #ffcc99;
+  width: 150px;
+}
+
+.main {
+}
+
+.content {
+}
+
+.content th {
+}
+
+.row_even {
+    background-color: #ffffcc;
+}
+
+.row_odd {
+    background-color: #ffcc99;
+}
+
+.footer {
+}
+
+hr {
+    color: gray; 
+}
+
