@@ -1368,14 +1368,8 @@ sub history_page
 
         foreach my $word (keys %{$classifier->{parser}->{words}})
         {
-            if ( $words{word} == 0 ) 
-            {
-                $classifier->{unique}{$form{shouldbe}} += 1;
-            }
-            $words{$word}                         += $classifier->{parser}->{words}{$word};
-            $classifier->{total}{$form{shouldbe}} += $classifier->{parser}->{words}{$word};
-            $classifier->{full_total}             += $classifier->{parser}->{words}{$word};
-            $classifier->set_value(     $form{shouldbe}, $word, $words{$word} );
+            $classifier->{full_total} += $classifier->{parser}->{words}{$word};
+            $words{$word}             += $classifier->{parser}->{words}{$word};
         }
         
         open WORDS, ">corpus/$form{shouldbe}/table";
@@ -1400,6 +1394,7 @@ sub history_page
             }
         }
 
+        $classifier->load_bucket("corpus/$form{shouldbe}");
         $classifier->update_constants();        
     }
 

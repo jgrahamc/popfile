@@ -226,10 +226,6 @@ sub load_word_matrix
     
     foreach my $bucket (@buckets)
     {
-        print "Loading $bucket..." if $self->{debug};
-
-        open WORDS, "<$bucket/table";
-
         my $color = '';
 
         # See if there's a color file specified
@@ -239,24 +235,11 @@ sub load_word_matrix
             $color =~ s/[\r\n]//g;
             close COLOR;
         }
-
+        
+        load_bucket( $self, $bucket );
         $bucket =~ /([A-Za-z0-9-_]+)$/;
         $bucket =  $1;
-        $self->{parameters}{$bucket}{subject} = 1;
-
-        # See if there's a color file specified
-        if ( open PARAMS, "<corpus/$bucket/params" )
-        {
-            while ( <PARAMS> ) 
-            {
-                s/[\r\n]//g;
-                if ( /^([a-z]+) ([^ ]+)$/ ) 
-                {
-                    $self->{parameters}{$bucket}{$1} = $2;
-                }
-            }
-            close PARAMS;
-        }
+        $self->{full_total} += $self->{total}{$bucket};
         
         if ( $color eq '' ) 
         {
@@ -272,48 +255,81 @@ sub load_word_matrix
         }
         else 
         {
-                $self->{colors}{$bucket} = $color;
+            $self->{colors}{$bucket} = $color;
         }
-
-
-        # Each line in the word table is a word and a count
-        $self->{total}{$bucket} = 0;
-    
-        while (<WORDS>)
-        {
-            if ( /__CORPUS__ __VERSION__ (\d+)/ )
-            {
-                if ( $1 != $self->{corpus_version} ) 
-                {
-                    print "Incompatible corpus version in $bucket\n";
-                    return;
-                }
-                
-                next;
-            }
-            
-            if ( /(.+) (.+)/ )
-            {
-                my $word = $self->{mangler}->mangle($1);
-                my $value = $2;
-                $value =~ s/[\r\n]//g;
-                $self->{total}{$bucket}        += $value;
-                $self->{unique}{$bucket}       += 1;
-                $self->{full_total}            += $value;
-                set_value( $self, $bucket, $word, $value );
-            }
-        }
-
-        close WORDS;
-
-        print " $self->{total}{$bucket} words\n" if $self->{debug};
     }
 
     update_constants($self);
     
     print "Corpus loaded with $self->{full_total} entries\n" if $self->{debug};
-    
-    print "    ... $self->{full_total} words\n";
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# load_bucket
+#
+# Loads an individual bucket
+#
+# ---------------------------------------------------------------------------------------------
+
+sub load_bucket
+{
+    my ($self, $bucket) = @_;
+
+    print "Loading $bucket..." if $self->{debug};
+
+    open WORDS, "<$bucket/table";
+
+    $bucket =~ /([A-Za-z0-9-_]+)$/;
+    $bucket =  $1;
+    $self->{parameters}{$bucket}{subject} = 1;
+    $self->{total}{$bucket}  = 0;
+    $self->{unique}{$bucket} = 0;
+
+    # See if there's a color file specified
+    if ( open PARAMS, "<corpus/$bucket/params" )
+    {
+        while ( <PARAMS> ) 
+        {
+            s/[\r\n]//g;
+            if ( /^([a-z]+) ([^ ]+)$/ ) 
+            {
+                $self->{parameters}{$bucket}{$1} = $2;
+            }
+        }
+        close PARAMS;
+    }
+
+    # Each line in the word table is a word and a count
+    $self->{total}{$bucket} = 0;
+
+    while (<WORDS>)
+    {
+        if ( /__CORPUS__ __VERSION__ (\d+)/ )
+        {
+            if ( $1 != $self->{corpus_version} ) 
+            {
+                print "Incompatible corpus version in $bucket\n";
+                return;
+            }
+
+            next;
+        }
+
+        if ( /(.+) (.+)/ )
+        {
+            my $word = $self->{mangler}->mangle($1);
+            my $value = $2;
+            $value =~ s/[\r\n]//g;
+            $self->{total}{$bucket}        += $value;
+            $self->{unique}{$bucket}       += 1;
+            set_value( $self, $bucket, $word, $value );
+        }
+    }
+
+    close WORDS;
+
+    print " $self->{total}{$bucket} words\n" if $self->{debug};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -357,7 +373,7 @@ sub classify_file
     
     my @buckets = keys %{$self->{total}};
 
-    my $logbuck = 0;
+    my $logbuck = 1;
     if ( $#buckets > 0 )
     {
        $logbuck = log( $#buckets + 1 );
