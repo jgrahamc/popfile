@@ -51,18 +51,5 @@
 "POPFile User Interface"
 
 #--------------------------------------------------------------------------
-# Standard MUI Page - Uninstall Finish
-#--------------------------------------------------------------------------
-
-; As of 27 June 2003, the NSIS MUI language file uses the wrong name for the following
-; two UNTEXT strings.
-
-!insertmacro MUI_LANGUAGEFILE_STRING MUI_UNTEXT_FINISH_TITLE \
-"Poisto valmis"
-
-!insertmacro MUI_LANGUAGEFILE_STRING MUI_UNTEXT_FINISH_SUBTITLE \
-"Ohjelma on poistettu onnistuneesti."
-
-#--------------------------------------------------------------------------
 # End of 'Finnish-mui.nsh'
 #--------------------------------------------------------------------------
