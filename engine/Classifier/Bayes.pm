@@ -7,6 +7,7 @@ package Classifier::Bayes;
 # ---------------------------------------------------------------------------------------------
 
 use strict;
+use warnings;
 use Classifier::MailParse;
 use Classifier::WordMangle;
 
@@ -156,6 +157,11 @@ sub set_value
     $word =~ /^(.)/;
     my $i = ord($1);
 
+    if ( !defined($self->{matrix}{$bucket}[$i]) ) 
+    {
+        $self->{matrix}{$bucket}[$i] = '';
+    }
+
     if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 ) 
     {
         $self->{matrix}{$bucket}[$i] .= "|$word $value|";
@@ -219,28 +225,34 @@ sub load_word_matrix
 
         open WORDS, "<$bucket/table";
 
-        # See if there's a color file specified
-        open COLOR, "<$bucket/color";
-        $bucket =~ /([A-Za-z0-9-_]+)$/;
-        $bucket =  $1;
-        my $color = <COLOR>;
-        $color =~ s/[\r\n]//g;
-        close COLOR;
+        my $color = '';
 
+        # See if there's a color file specified
+        if ( open COLOR, "<$bucket/color" )
+        {
+            $bucket =~ /([A-Za-z0-9-_]+)$/;
+            $bucket =  $1;
+            $color = <COLOR>;
+            $color =~ s/[\r\n]//g;
+            close COLOR;
+        }
+        
         $self->{parameters}{$bucket}{subject} = 1;
 
         # See if there's a color file specified
-        open PARAMS, "<corpus/$bucket/params";
-        while ( <PARAMS> ) 
+        if ( open PARAMS, "<corpus/$bucket/params" )
         {
-            s/[\r\n]//g;
-            if ( /^([a-z]+) ([^ ]+)$/ ) 
+            while ( <PARAMS> ) 
             {
-                $self->{parameters}{$bucket}{$1} = $2;
+                s/[\r\n]//g;
+                if ( /^([a-z]+) ([^ ]+)$/ ) 
+                {
+                    $self->{parameters}{$bucket}{$1} = $2;
+                }
             }
+            close PARAMS;
         }
-        close PARAMS;
-
+        
         if ( $color eq '' ) 
         {
             if ( $c < $#{$self->{possible_colors}} )

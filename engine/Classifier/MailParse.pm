@@ -7,6 +7,7 @@ package Classifier::MailParse;
 # ---------------------------------------------------------------------------------------------
 
 use strict;
+use warnings;
 use Classifier::WordMangle;
 
 #----------------------------------------------------------------------------
@@ -90,7 +91,7 @@ sub update_word
             my $color = $self->{bayes}->get_color($mword);
             if ( $encoded == 0 ) 
             {
-                $self->{ut} =~ s/($word)/<b><font color=$color>\1<\/font><\/b>/g;
+                $self->{ut} =~ s/($word)/<b><font color=$color>$1<\/font><\/b>/g;
             }
             else
             {
@@ -128,7 +129,7 @@ sub add_line
 
     # Grab domain names
 
-    while ( $line =~ s/(([A-Za-z][A-Za-z0-9\-_]+\.){2,})([A-Za-z0-9\-_]+)([^A-Za-z0-9\-_]|$)/\4/ ) 
+    while ( $line =~ s/(([A-Za-z][A-Za-z0-9\-_]+\.){2,})([A-Za-z0-9\-_]+)([^A-Za-z0-9\-_]|$)/$4/ ) 
     {
         update_word($self, "$1$3", $encoded);
     }
@@ -330,7 +331,7 @@ sub parse_stream
                             print "Set mime boundary to $1\n" if $self->{debug};
 
                             $mime = $1;
-                            $mime =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\\1/g;
+                            $mime =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
                         }
                     }
 
