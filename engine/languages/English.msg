@@ -238,6 +238,7 @@ SingleBucket_Percentage                 Percentage of total
 SingleBucket_WordTable                  Word Table for %s
 SingleBucket_Message1                   Click a letter in the index to see the list of words that start with that letter.  Click any word to lookup its probability for all buckets.
 SingleBucket_Unique                     %s unique
+SingleBucket_ClearBucket                Remove All Words
 
 Session_Title                           POPFile Session Expired
 Session_Error                           Your POPFile session has expired.  This could have been caused by starting and stopping POPFile but leaving your web browser open.  Please click one of the links above to continue using POPFile.

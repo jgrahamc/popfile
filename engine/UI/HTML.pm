@@ -1424,45 +1424,52 @@ sub bucket_page
     $body .= "<tr>\n<th scope=\"row\" class=\"bucketsLabel\">$self->{language__}{SingleBucket_Percentage}</th>\n";
     $body .= "<td></td>\n<td align=\"right\">$percent</td>\n<td></td>\n</tr>\n</table>\n";
 
+    $body .= "<form action=\"/buckets\"><input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />";
+    $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$self->{form_}{showbucket}\" />";
+    $body .= "<input type=\"submit\" name=\"clearbucket\" value=\"$self->{language__}{SingleBucket_ClearBucket}\" />";
+    $body .= "</form>";
+
     $body .= "<h2 class=\"buckets\">";
     $body .= sprintf( $self->{language__}{SingleBucket_WordTable},  "<font color=\"" . $self->{classifier__}->get_bucket_color($self->{form_}{showbucket}) . "\">$self->{form_}{showbucket}" ) ;
     $body .= "</font>\n</h2>\n$self->{language__}{SingleBucket_Message1}\n<br /><br />\n<table summary=\"$self->{language__}{Bucket_WordListTableSummary}\">\n";
     $body .= "<tr><td colspan=2>";
 
-    for my $i (@{$self->{classifier__}->get_bucket_word_list($self->{form_}{showbucket})}) {
+    if ( $self->{classifier__}->get_bucket_word_count( $self->{form_}{showbucket} ) > 0 ) {
+      for my $i (@{$self->{classifier__}->get_bucket_word_list($self->{form_}{showbucket})}) {
         if ( defined($i) ) {
-            my $j = $i;
-            $j =~ /^\|(.)/;
-            my $first = $1;
+	  my $j = $i;
+	  $j =~ /^\|(.)/;
+	  my $first = $1;
 
-            if ( defined( $self->{form_}{showletter} ) && ( $first eq $self->{form_}{showletter} ) ) {
-                # Split the entries on the double bars
+	  if ( defined( $self->{form_}{showletter} ) && ( $first eq $self->{form_}{showletter} ) ) {
+	    # Split the entries on the double bars
 
-                my %temp;
+	    my %temp;
 
-                while ( $j =~ m/\G\|(.*?) L?\-?[\.\d]+\|/g ) {
-                    my $word = $1;
-                    $temp{$word} = int( exp( $self->{classifier__}->get_value_( $self->{form_}{showbucket}, $word ) ) * $bucket_count + 1 );
-		}
+	    while ( $j =~ m/\G\|(.*?) L?\-?[\.\d]+\|/g ) {
+	      my $word = $1;
+	      $temp{$word} = int( exp( $self->{classifier__}->get_value_( $self->{form_}{showbucket}, $word ) ) * $bucket_count + 1 );
+	    }
 
-                $body .= "</td></tr><tr><td colspan=2>&nbsp;</td></tr><tr>\n<td valign=\"top\">\n<b>$first</b>\n</td>\n<td valign=\"top\">\n<table><tr valign=\"top\">";
+	    $body .= "</td></tr><tr><td colspan=2>&nbsp;</td></tr><tr>\n<td valign=\"top\">\n<b>$first</b>\n</td>\n<td valign=\"top\">\n<table><tr valign=\"top\">";
 
-                my $count = 0;
+	    my $count = 0;
 
-                for my $word (sort { $temp{$b} <=> $temp{$a} } keys %temp) {
-		    $body .= "</tr><tr valign=\"top\">" if ( ( $count % 6 ) ==  0 );
-                    $body .= "<td><a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key__}\&amp;lookup=Lookup\&amp;word=$word#Lookup\"><b>$word</b><\/a></td><td>$temp{$word}</td><td>&nbsp;</td>";
-                    $count += 1;
-		}
+	    for my $word (sort { $temp{$b} <=> $temp{$a} } keys %temp) {
+	      $body .= "</tr><tr valign=\"top\">" if ( ( $count % 6 ) ==  0 );
+	      $body .= "<td><a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key__}\&amp;lookup=Lookup\&amp;word=$word#Lookup\"><b>$word</b><\/a></td><td>$temp{$word}</td><td>&nbsp;</td>";
+	      $count += 1;
+	    }
 
-                $body .= "</tr></table></td>\n</tr>\n<tr><td colspan=2>&nbsp;</td></tr><tr><td colspan=2>";
+	    $body .= "</tr></table></td>\n</tr>\n<tr><td colspan=2>&nbsp;</td></tr><tr><td colspan=2>";
 
-	    } else {
-                $j = '';
+	  } else {
+	    $j = '';
 
-                $body .= "<a href=/buckets?session=$self->{session_key__}\&amp;showbucket=$self->{form_}{showbucket}\&amp;showletter=$first><b>$first</b></a>\n";
-            }
+	    $body .= "<a href=/buckets?session=$self->{session_key__}\&amp;showbucket=$self->{form_}{showbucket}\&amp;showletter=$first><b>$first</b></a>\n";
+	  }
         }
+      }
     }
 
     $body .= "</td></tr>";
@@ -1548,6 +1555,10 @@ sub bar_chart_100
 sub corpus_page
 {
     my ( $self, $client ) = @_;
+
+    if ( defined( $self->{form_}{clearbucket} ) ) {
+        $self->{classifier__}->clear_bucket( $self->{form_}{bucket} );
+    }
 
     if ( defined($self->{form_}{reset_stats}) ) {
         $self->global_config_( 'mcount', 0 );
@@ -3030,8 +3041,8 @@ sub view_page
     # Disable, print, and clear saved word-scores
 
     $self->{classifier__}->wordscores( 0 );
-    $body .= $self->{classifier__}->get_scores();
-    $self->{classifier__}->clear_scores();
+    $body .= $self->{classifier__}->scores();
+    $self->{classifier__}->scores('');
 
     # Close button
 

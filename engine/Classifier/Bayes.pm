@@ -1025,7 +1025,11 @@ sub get_bucket_word_list
 {
     my ( $self, $bucket ) = @_;
 
-    return $self->{matrix__}{$bucket};
+    if ( $self->get_bucket_word_count( $bucket ) > 0 ) {
+        return $self->{matrix__}{$bucket};
+    } else {
+        return ();
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1116,7 +1120,6 @@ sub get_bucket_parameter
         $param = 0;
     }
 
-    $self->log_( "get_bucket_parameter( $bucket, $parameter ) is $param ");
     return $param;
 }
 
@@ -1135,8 +1138,6 @@ sub get_bucket_parameter
 sub set_bucket_parameter
 {
     my ( $self, $bucket, $parameter, $value ) = @_;
-
-    $self->log_( "set_bucket_parameter( $bucket, $parameter ) to $value ");
 
     $self->{parameters__}{$bucket}{$parameter} = $value;
     $self->write_parameters();
@@ -1414,6 +1415,27 @@ sub get_magnet_types_in_bucket
 
 # ---------------------------------------------------------------------------------------------
 #
+# clear_bucket
+#
+# Removes all words from a bucket
+#
+# $bucket         The bucket to clear
+#
+# ---------------------------------------------------------------------------------------------
+
+sub clear_bucket
+{
+    my ( $self, $bucket ) = @_;
+
+    my $bucket_directory = $self->config_( 'corpus' ) . "/$bucket";
+
+    unlink( "$bucket_directory/table" );
+
+    $self->load_word_matrix_();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # clear_magnets
 #
 # Removes every magnet currently defined
@@ -1542,52 +1564,23 @@ sub remove_stopword
     return $self->{parser__}->{mangle__}->remove_stopword( $stopword );
 }
 
-# ---------------------------------------------------------------------------------------------
-#
-# get_scores - Gets the HTMLized (for now) listing of word scores
-#
-# ---------------------------------------------------------------------------------------------
-
-sub get_scores
-{
-    my ( $self ) = @_;
-    
-    return $self->{scores__};
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# clear_scores - clears the listing of word scores
-#
-# ---------------------------------------------------------------------------------------------
-
-sub clear_scores
-{
-    my ( $self ) = @_;
-    
-    $self->{scores__} = '';
-    
-}
-
-
-# ---------------------------------------------------------------------------------------------
-#
-# wordscores - Enables and disables the saving of word scores
-#
-# $value        1 for enabled, 0 for disabled
-#
-# ---------------------------------------------------------------------------------------------
+# GETTERS/SETTERS
 
 sub wordscores
 {
     my ( $self, $value ) = @_;
-    
+
     $self->{wordscores__} = $value if (defined $value);
-    
     return $self->{wordscores__};
 }
 
+sub scores
+{
+    my ( $self, $value ) = @_;
 
+    $self->{scores__} = $value if (defined $value);
+    return $self->{scores__};
+}
 
 1;
 
