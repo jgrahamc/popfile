@@ -156,7 +156,7 @@ sub stop
             $hdr[$i] =~ s/[<>\"]//g;
             $hdr[$i] =~ s/^[ \t]+//;
             $hdr[$i] = $self->db__()->quote( $hdr[$i] );
-	}
+        }
         $self->db__()->do( "update history set sort_from = $hdr[0],
                                                sort_to   = $hdr[1],
                                                sort_cc   = $hdr[2]
@@ -239,7 +239,7 @@ sub deliver
 #
 # forked
 #
-# This is called inside a child process that has just forked, since the 
+# This is called inside a child process that has just forked, since the
 # child needs access to the database we open it
 #
 # ---------------------------------------------------------------------------
@@ -531,7 +531,7 @@ sub commit_history__
             $sort_headers{$h} =~ s/^[ \t]+//g;
             $sort_headers{$h} = $self->db__()->quote(
                 $sort_headers{$h} );
-	}
+        }
 
         # Make sure that the headers we are going to insert into
         # the database have been defined and are suitably quoted
@@ -540,14 +540,14 @@ sub commit_history__
 
         foreach my $h (@required) {
             if ( !defined ${$header{$h}}[0] ) {
-	        if ( $h ne 'cc' ) {
+                if ( $h ne 'cc' ) {
                     ${$header{$h}}[0] = "<$h header missing>";
-		} else {
+                } else {
                     ${$header{$h}}[0] = '';
                 }
             }
 
-            ${$header{$h}}[0] = 
+            ${$header{$h}}[0] =
                  $self->{classifier__}->{parser__}->decode_string(
                      ${$header{$h}}[0] );
             ${$header{$h}}[0] = $self->db__()->quote( ${$header{$h}}[0] );
@@ -561,7 +561,7 @@ sub commit_history__
         if ( !defined( ${$header{date}}[0] ) ) {
             ${$header{date}}[0] = 0;
         } else {
-            ${$header{date}}[0] = str2time( ${$header{date}}[0] );
+            ${$header{date}}[0] = str2time( ${$header{date}}[0] ) || 0;
         }
 
         # Figure out the ID of the bucket this message has been
@@ -892,9 +892,9 @@ sub set_query
         if ( $sort eq 'bucket' ) {
             $sort = 'buckets.name';
         } else {
-	    if ( $sort =~ /from|to|cc/ ) {
+            if ( $sort =~ /from|to|cc/ ) {
                 $sort = "sort_$sort";
-	    } else {
+            } else {
                 if ( $sort ne 'inserted' ) {
                     $sort = "hdr_$sort";
                 }
@@ -1061,10 +1061,10 @@ sub upgrade_history_files__
 {
     my ( $self ) = @_;
 
-    # See if there are any .MSG files in the msgdir, and if there are 
+    # See if there are any .MSG files in the msgdir, and if there are
     # upgrade them by placing them in the database
 
-    my @msgs = sort compare_mf__ glob $self->get_user_path_( 
+    my @msgs = sort compare_mf__ glob $self->get_user_path_(
         $self->global_config_( 'msgdir' ) . 'popfile*.msg' );
 
     if ( $#msgs != -1 ) {
