@@ -245,6 +245,11 @@
 !insertmacro PFI_LANG_STRING DESC_SecSOCKS                 "POPFile プロキシーが SOCKS を使えるようにするための Perl 追加コンポーネントをインストールします。"
 !insertmacro PFI_LANG_STRING DESC_SecXMLRPC                "(POPFile API へのアクセスを可能にする)POPFile XMLRPC モジュールと必要な Perl モジュールをインストールします。"
 
+; Text strings used when user has NOT selected a component found in the existing installation
+
+!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_1            "Do you want to upgrade the existing $G_PLS_FIELD_1 component ?"
+!insertmacro PFI_LANG_STRING MBCOMPONENT_PROB_2            "(using out of date POPFile components can cause problems)"
+
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Installation Options
 #--------------------------------------------------------------------------
