@@ -596,7 +596,7 @@ sub db_connect__
                         matrix.wordid = ? limit 1;' );
 
     $self->{db_put_word_count__} = $self->{db__}->prepare(
-	   'insert or replace into matrix ( bucketid, wordid, times ) values ( ?, ?, ? );' );
+	   'replace into matrix ( bucketid, wordid, times ) values ( ?, ?, ? );' );
 
     $self->{db_get_bucket_unique_count__} = $self->{db__}->prepare(
 	     'select count(*) from matrix
@@ -624,7 +624,7 @@ sub db_connect__
                         bucket_params.btid = ?;' );
 
     $self->{db_set_bucket_parameter__} = $self->{db__}->prepare(
-	   'insert or replace into bucket_params ( bucketid, btid, val ) values ( ?, ?, ? );' );
+	   'replace into bucket_params ( bucketid, btid, val ) values ( ?, ?, ? );' );
 
     $self->{db_get_bucket_parameter_default__} = $self->{db__}->prepare(
              'select bucket_template.def from bucket_template
@@ -2538,7 +2538,7 @@ sub get_bucket_word_list
         "select words.word from matrix, words
          where matrix.wordid  = words.id and
                matrix.bucketid = $bucketid and
-               substr( words.word, 1, 1 ) = '$prefix';");
+               words.word like '$prefix%';");
 
     return @{$result};
 }
