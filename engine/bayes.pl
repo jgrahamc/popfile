@@ -23,6 +23,10 @@ if ( $#ARGV == 0 )
     {
         print "$file is '" . $b->classify_file($file) . "'\n";
     }
+    
+    foreach my $word (keys %{$b->{parser}->{words}}) {
+        print "$word $b->{parser}->{words}{$word}\n";
+    }
 }
 else
 {
