@@ -1335,11 +1335,11 @@ sub decode_string
     my $decode_it = '';
 
     while ( $mystring =~ /=\?[\w-]+\?(B|Q)\?(.*?)\?=/ig ) {
-        if ($1 eq "B") {
+        if ($1 eq "B" || $1 eq "b") {
             $decode_it = decode_base64( $2 );
             $mystring =~ s/=\?[\w-]+\?B\?(.*?)\?=/$decode_it/i;
         } else {
-            if ($1 eq "Q") {
+            if ($1 eq "Q" || $1 eq "q") {
                 $decode_it = $2;
                 $decode_it =~ s/\_/=20/g;
                 $decode_it = decode_qp( $decode_it );
@@ -1454,6 +1454,7 @@ sub parse_header
     }
 
     if ( $header =~ /^Subject$/i ) {
+
         $prefix = 'subject';
         $argument = $self->decode_string( $argument );
         $self->{subject__} = $argument if ( ( $self->{subject__} eq '' ) );
