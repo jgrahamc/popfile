@@ -21,28 +21,7 @@ use Classifier::Bayes;
 # This version number
 my $major_version = 0;
 my $minor_version = 17;
-my $build_version = 6;
-
-# A list of the messages currently on the server, each entry in this list
-# is a hash containing the following items
-#
-# server_number  The number of this message on the server
-# size           The size of this messag
-# deleted        Whether this message has been deleted
-my @messages;
-
-# A mapping between the message numbers that we will provide and message
-# numbers on the server
-my @message_map;
-
-# The total number of messages that are available for download
-my $message_count = 0;
-
-# The total size of all the messages available for download
-my $total_size = 0;
-
-# The number of the highest message
-my $highest_message = 0;
+my $build_version = 7;
 
 # The name of the debug file
 my $debug_filename;
@@ -452,158 +431,6 @@ sub echo_to_dot
             last;
         }
     }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# add_mail_message - Called to add a mail message to the list of available messages
-#
-# $number       The message number from the remote server
-# $size         The size of the message
-#
-# ---------------------------------------------------------------------------------------------
-sub add_mail_message
-{
-    my ( $number, $size ) = @_;
-    
-    $message_count   += 1;
-    $total_size      += $size;
-    $highest_message += 1;
-
-    $messages[$message_count]{'server_number'} = $number;
-    $messages[$message_count]{'size'}          = $size; 
-    $messages[$message_count]{'deleted'}       = 0;
-    $message_map[$message_count]               = $message_count;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# verify_have_list - Called to check that we have downloaded the list of messages from the mail
-#          server and done the sort on them.  
-#
-# $mail        The handle of the real mail server
-# $client      The mail client talking to us
-#
-# ---------------------------------------------------------------------------------------------
-sub verify_have_list
-{
-    my ( $mail, $client ) = @_;
-    
-    if ( $message_count == 0 )
-    {
-        # Perform a LIST command on the remote server
-        tee( $mail, "LIST$eol" );
-    
-        $highest_message = 0;
-        $total_size      = 0;
-
-        # Start reading each line of the response to the LIST command up to the .       
-        while ( <$mail> )
-        {
-            debug( $_ );
-            
-            # The first line should be a +OK with the information about the number of messages
-            # We don't need this and we simply ignore it
-            if ( /\+OK/i )
-            {
-                next;
-            }
-            
-            # If we get a -ERR then we stop right here since something has gone wrong
-            if ( /\-ERR/i )
-            {
-                # If we get an error on a list command then we treat it as meaning that there 
-                # are no messages and return
-                print $client "+OK POPFile has no messages (LIST returned error)$eol";
-                last;
-            }
-
-            
-            # When we find the . on its own then we are at the end of the list
-            if ( /^\./ )
-            {   
-                last;
-            }
-            
-            # If the message is of the form one number followed by another then its a message with its
-            # length and so we add it to the list of messages and continue
-            if ( /(\d+) (\d+)/ )
-            {
-                add_mail_message( $1, $2 );
-            }
-        }
-    }
-    
-    return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# verify_have_uidl - Called to check that we have downloaded the list of UIDLs
-#
-# $mail        The handle of the real mail server
-# $client      The mail client talking to us
-#
-# ---------------------------------------------------------------------------------------------
-sub verify_have_uidl
-{
-    my ( $mail, $client ) = @_;
-
-    if ( $done_uidl ) 
-    {
-        return 1;
-    }
-
-    if ( verify_have_list( $mail, $client ) )
-    {
-        # Perform a UIDL command, get the UIDLs for each message and store them in the
-        # list of messages
-        tee( $mail, "UIDL$eol" );
-    
-        # Start reading each line of the response to the LIST command up to the .       
-        while ( <$mail> )
-        {
-            debug( $_ );
-            
-            # The first line should be a +OK with the information about the number of messages
-            # We don't need this and we simply ignore it
-            if ( /\+OK/i )
-            {
-                next;
-            }
-            
-            # If we get a -ERR then we stop right here since something has gone wrong
-            if ( /\-ERR/i )
-            {
-                print $client $_;
-                return 0;
-            }
-            
-            if ( /^\./ )
-            {   
-                last;
-            }
-
-            # This gets the UIDL for a message            
-            if ( /(\d+) ([^\r\n]+)/ )
-            {
-                for ( my $i = 1; $i <= $highest_message; $i++ )
-                {
-                    if ( $messages[$message_map[$i]]{'server_number'} == $1 )
-                    {
-                        $messages[$message_map[$i]]{'uidl'} = $2;
-                        last;
-                    }
-                }
-            }
-        }
-        
-        $done_uidl = 1;
-        
-        return 1;
-    }
-    
-    return 0;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2174,7 +2001,7 @@ sub run_popfile
                 # we are ready for commands
                 if ( $command =~ /HELO/i )
                 {
-                    tee( $client, "+OK HELO popfile Server Ready $message_count $total_size$eol" );
+                    tee( $client, "+OK HELO popfile Server Ready$eol" );
                     next;
                 }
 
@@ -2300,15 +2127,7 @@ sub run_popfile
                 # The STAT command returns the number of available messages and the total size in octets
                 if ( $command =~ /STAT/i )
                 {
-                    # Make sure that we have at least once downloaded the list of available messages from
-                    # the remote mail server
-                    if ( verify_have_list( $mail, $client ) )
-                    {
-                        # Return the number of messages that have not been deleted and the total number of
-                        # bytes available
-                        tee( $client, "+OK $message_count $total_size$eol" );
-                    }
-                
+                    echo_response( $mail, $client, $command );
                     flush_extra( $mail, $client );
                     next;
                 }
@@ -2316,38 +2135,9 @@ sub run_popfile
                 # The client is requesting a LIST of the messages
                 if ( $command =~ /LIST ?(.*)?/i )
                 {
-                    # Check that we have at least got the list from the remote server
-                    if ( verify_have_list( $mail, $client ) )
+                    if ( echo_response( $mail, $client, $command ) )
                     {
-                        if ( $1 eq '' ) 
-                        {
-                            # The response is in the form of a +OK with the number of available messages and the total
-                            # size in bytes followed by a sequence of lines each with the message number and length and
-                            # then finally a . on a line on its own
-                            tee( $client, "+OK $message_count $total_size$eol" );
-
-                            for ( my $i = 1; $i <= $highest_message; $i++ )
-                            {
-                                if ( $messages[$message_map[$i]]{'deleted'} == 0 )
-                                {
-                                    tee( $client, "$i $messages[$message_map[$i]]{'size'}$eol" );
-                                }
-                            }
-
-                            tee( $client, ".$eol" );
-                         }
-                         else
-                         {
-                            # The user has asked for information on a single mail message so return it
-                            if ( $message_map[$1] )
-                            {
-                               tee( $client, "+OK $1 $messages[$message_map[$1]]{'size'}$eol" );
-                            }
-                            else
-                            {
-                                tee( $client, "-ERR no such message$eol" );
-                            }
-                         }
+                        echo_to_dot( $mail, $client );
                     }
 
                     flush_extra( $mail, $client );
@@ -2357,44 +2147,9 @@ sub run_popfile
                 # The client is requesting a UIDL list of the messages
                 if ( $command =~ /UIDL ?(.*)?/i )
                 {
-                    my $message;
-                    
-                    $message = $1;
-                    
-                    debug( "UIDL command for message $message" );
-                    
-                    # Check that we have at least got the list from the remote server
-                    if ( verify_have_uidl( $mail, $client ) )
+                    if ( echo_response( $mail, $client, $command ) )
                     {
-                        if ( $message eq '' ) 
-                        {
-                            # The response is in the form of a +OK with the number of available messages and the total
-                            # size in bytes followed by a sequence of lines each with the message number and length and
-                            # then finally a . on a line on its own
-                            tee( $client, "+OK $message_count $total_size$eol" );
-
-                            for ( my $i = 1; $i <= $highest_message; $i++ )
-                            {
-                                if ( $messages[$message_map[$i]]{'deleted'} == 0 )
-                                {
-                                    tee( $client, "$i $messages[$message_map[$i]]{'uidl'}$eol" );
-                                }
-                            }
-
-                            tee( $client, ".$eol" );
-                         }
-                         else
-                         {
-                            # The user has asked for information on a single mail message so return it
-                            if ( $message_map[$message] )
-                            {
-                               tee( $client, "+OK $message $messages[$message_map[$message]]{'uidl'}$eol" );
-                            }
-                            else
-                            {
-                                tee( $client, "-ERR no such message$eol" );
-                            }
-                         }
+                        echo_to_dot( $mail, $client );
                     }
 
                     flush_extra( $mail, $client );
@@ -2404,26 +2159,11 @@ sub run_popfile
                 # The client is requesting a specific message.  
                 if ( $command =~ /TOP (.*) (.*)/i )
                 {
-                    if ( verify_have_list( $mail, $client ) )
+                    if ( echo_response( $mail, $client, $command ) )
                     {
-                        # Get the message from the remote server, if there's an error then we're done, but if not then
-                        # we echo each line of the message until we hit the . at the end
-                        if ( echo_response( $mail, $client, "TOP $messages[$message_map[$1]]{'server_number'} $2" ) )
-                        { 
-                            while ( <$mail> )
-                            {
-                                print $client $_;
-
-                                # The termination of a message is a line consisting of exactly .CRLF so we detect that
-                                # here exactly
-                                if ( $_ =~  /^\.(\r\n|\r|\n)$/ )
-                                {
-                                    last;
-                                }
-                            }
-                        }
+                        echo_to_dot();
                     }
-                    
+
                     flush_extra( $mail, $client );
                     next;
                 }
@@ -2431,11 +2171,7 @@ sub run_popfile
                 # The XSENDER command
                 if ( $command =~ /XSENDER (.*)/i )
                 {
-                    if ( verify_have_list( $mail, $client ) )
-                    {
-                        echo_response( $mail, $client, "XSENDER $messages[$message_map[$1]]{'server_number'}" );
-                    }
-                    
+                    echo_response( $mail, $client, $command );
                     flush_extra( $mail, $client );
                     next;
                 }
@@ -2459,172 +2195,154 @@ sub run_popfile
                 # The client is requesting a specific message.  
                 if ( $command =~ /RETR (.*)/i )
                 {
-                    if ( verify_have_list( $mail, $client ) )
-                    {
-                        # Get the message from the remote server, if there's an error then we're done, but if not then
-                        # we echo each line of the message until we hit the . at the end
-                        if ( echo_response( $mail, $client, "RETR $messages[$message_map[$1]]{'server_number'}" ) )
-                        { 
-                            my $msg_subject;        # The message subject
-                            my $msg_headers;        # Store the message headers here (will add X-Spam to end)
-                            my $msg_body;           # Store the message body here
-                            my $last_timeout   = time;
-                            my $timeout_count  = 0;
-                            my $got_full_body  = 0;
-                            my $message_size   = 0;
-                            my $classification = '';
+                    # Get the message from the remote server, if there's an error then we're done, but if not then
+                    # we echo each line of the message until we hit the . at the end
+                    if ( echo_response( $mail, $client, $command ) )
+                    { 
+                        my $msg_subject;        # The message subject
+                        my $msg_headers;        # Store the message headers here (will add X-Spam to end)
+                        my $msg_body;           # Store the message body here
+                        my $last_timeout   = time;
+                        my $timeout_count  = 0;
+                        my $got_full_body  = 0;
+                        my $message_size   = 0;
+                        my $classification = '';
 
-                            my $getting_headers = 1;
-                            
-                            my $temp_file = "messages/$mail_filename" . "_$configuration{mail_count}.msg";
-                            my $class_file = "messages/$mail_filename" . "_$configuration{mail_count}.cls";
-                            $configuration{mail_count} += 1;
-                            $configuration{mcount}     += 1;
+                        my $getting_headers = 1;
 
-                            open TEMP, ">$temp_file";
-                            
-                            while ( <$mail> )
-                            {   
-                                my $line;
+                        my $temp_file = "messages/$mail_filename" . "_$configuration{mail_count}.msg";
+                        my $class_file = "messages/$mail_filename" . "_$configuration{mail_count}.cls";
+                        $configuration{mail_count} += 1;
+                        $configuration{mcount}     += 1;
 
-                                $line = $_;
+                        open TEMP, ">$temp_file";
 
-                                # Check for an abort
-                                if ( $alive == 0 )
-                                {
-                                    last;
-                                }
+                        while ( <$mail> )
+                        {   
+                            my $line;
 
-                                # The termination of a message is a line consisting of exactly .CRLF so we detect that
-                                # here exactly
-                                if ( $line =~ /^\.(\r\n|\r|\n)$/ )
-                                {
-                                    $got_full_body = 1;
-                                    last;
-                                }
+                            $line = $_;
 
-                                if ( $getting_headers ) 
-                                {
-                                    if ( $line =~ /[A-Z0-9]/i ) 
-                                    {
-                                        $message_size += length $line;                                        
-                                        print TEMP $line;
-            
-                                        if ( $configuration{subject} ) 
-                                        {
-                                            if ( $line =~ /Subject:(.*)/i ) 
-                                            {
-                                                $msg_subject = $1;
-                                                $msg_subject =~ s/(\012|\015)//g;
-                                                next;
-                                            } 
-                                        }
-                                        
-                                        # Strip out the X-Text-Classification header that is in an incoming message
-
-                                        if ( ( $line =~ /X-Text-Classification: /i ) == 0 )
-                                        {
-                                            $msg_headers .= $line;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        $getting_headers = 0;
-                                    }
-                                }
-                                else
-                                {
-                                    $message_size += length $line;
-                                    print TEMP $line;
-                                    $msg_body .= $line;
-                                }
-                                
-                                # Check to see if too much time has passed and we need to keep the mail client happy
-                                if ( time > ( $last_timeout + 2 ) )
-                                {
-                                    print $client "X-POPFile-TimeoutPrevention: $timeout_count$eol";
-                                    debug( "Sending timeout prevention header" );
-                                    $timeout_count += 1;
-                                    $last_timeout = time;
-                                }
-                                
-                                if ( ( $message_size > 100000 ) && ( $getting_headers == 0 ) )
-                                {
-                                    last;
-                                }
-                            }
-
-                            close TEMP;
-
-                            # Do the text classification and parse the result
-                            $classification = $classifier->classify_file($temp_file);
-
-                            debug ("Classification: $classification" );
-                            
-                            # Add the spam header
-                            if ( $configuration{subject} )
+                            # Check for an abort
+                            if ( $alive == 0 )
                             {
-                                # Don't add the classification unless it is not present
-                                if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $classifier->{parameters}{$classification}{subject} == 1 ) ) 
-                                {
-                                    $msg_headers .= "Subject: [$classification]$msg_subject$eol";
-                                } 
-                                else
-                                {
-                                    $msg_headers .= "Subject:$msg_subject$eol";
-                                }
+                                last;
                             }
 
-                            $msg_headers .= "X-Text-Classification: $classification";
-                            $msg_headers .= "$eol$eol";
+                            # The termination of a message is a line consisting of exactly .CRLF so we detect that
+                            # here exactly
+                            if ( $line =~ /^\.(\r\n|\r|\n)$/ )
+                            {
+                                $got_full_body = 1;
+                                last;
+                            }
 
-                            # Echo the text of the message to the client
-                            print $client $msg_headers;
-                            print $client $msg_body;
-                            
-                            if ( $got_full_body == 0 )   
-                            {   
-                                echo_to_dot( $mail, $client );   
-                            }   
-                            else   
-                            {   
-                                print $client ".$eol";    
-                            } 
+                            if ( $getting_headers ) 
+                            {
+                                if ( $line =~ /[A-Z0-9]/i ) 
+                                {
+                                    $message_size += length $line;                                        
+                                    print TEMP $line;
 
-                            open CLASS, ">$class_file";
-                            print CLASS "$classification$eol";
-                            close CLASS;
-    
-                            $configuration{last_count} = $current_count;
+                                    if ( $configuration{subject} ) 
+                                    {
+                                        if ( $line =~ /Subject:(.*)/i ) 
+                                        {
+                                            $msg_subject = $1;
+                                            $msg_subject =~ s/(\012|\015)//g;
+                                            next;
+                                        } 
+                                    }
 
-                        flush_extra( $mail, $client );
-                        next;
+                                    # Strip out the X-Text-Classification header that is in an incoming message
+
+                                    if ( ( $line =~ /X-Text-Classification: /i ) == 0 )
+                                    {
+                                        $msg_headers .= $line;
+                                    }
+                                }
+                                else
+                                {
+                                    $getting_headers = 0;
+                                }
+                            }
+                            else
+                            {
+                                $message_size += length $line;
+                                print TEMP $line;
+                                $msg_body .= $line;
+                            }
+
+                            # Check to see if too much time has passed and we need to keep the mail client happy
+                            if ( time > ( $last_timeout + 2 ) )
+                            {
+                                print $client "X-POPFile-TimeoutPrevention: $timeout_count$eol";
+                                debug( "Sending timeout prevention header" );
+                                $timeout_count += 1;
+                                $last_timeout = time;
+                            }
+
+                            if ( ( $message_size > 100000 ) && ( $getting_headers == 0 ) )
+                            {
+                                last;
+                            }
                         }
+
+                        close TEMP;
+
+                        # Do the text classification and parse the result
+                        $classification = $classifier->classify_file($temp_file);
+
+                        debug ("Classification: $classification" );
+
+                        # Add the spam header
+                        if ( $configuration{subject} )
+                        {
+                            # Don't add the classification unless it is not present
+                            if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $classifier->{parameters}{$classification}{subject} == 1 ) ) 
+                            {
+                                $msg_headers .= "Subject: [$classification]$msg_subject$eol";
+                            } 
+                            else
+                            {
+                                $msg_headers .= "Subject:$msg_subject$eol";
+                            }
+                        }
+
+                        $msg_headers .= "X-Text-Classification: $classification";
+                        $msg_headers .= "$eol$eol";
+
+                        # Echo the text of the message to the client
+                        print $client $msg_headers;
+                        print $client $msg_body;
+
+                        if ( $got_full_body == 0 )   
+                        {   
+                            echo_to_dot( $mail, $client );   
+                        }   
+                        else   
+                        {   
+                            print $client ".$eol";    
+                        } 
+
+                        open CLASS, ">$class_file";
+                        print CLASS "$classification$eol";
+                        close CLASS;
+
+                        $configuration{last_count} = $current_count;
+
+                    flush_extra( $mail, $client );
+                    next;
                     }
                 }
 
                 # Handle the deletion of a message, pass the delete on to the remote server and see if it works.  
-                # If it does work then we mark the message as deleted.  Throughout we ensure that $total_size and 
-                # $message_count are kept accurate
                 if ( $command =~ /DELE (.*)/i )
                 {
-                    if ( verify_have_list( $mail, $client ) )
-                    {
-                        # Try the delete on the real server and if it successful then mark it as deleted
-                        # locally
-                        if ( echo_response( $mail, $client, "DELE $messages[$message_map[$1]]{'server_number'}" ) )
-                        {
-                            if ( $messages[$message_map[$1]]{'deleted'} == 0 )
-                            {
-                                $messages[$message_map[$1]]{'deleted'}  = 1;
-                                $total_size              -= $messages[$message_map[$1]]{'size'};
-                                $message_count           -= 1;
-                            }
-                        }
-
-                        flush_extra( $mail, $client );
-                        next;
-                    }
+                    # Try the delete on the real server and if it successful then mark it as deleted
+                    echo_response( $mail, $client, $command );
+                    flush_extra( $mail, $client );
+                    next;
                 }
 
                 # The mail client wants to stop using the server, so send that message through to the
@@ -2648,18 +2366,7 @@ sub run_popfile
                 # size of all the messages $total_size and the number $message_count
                 if ( $command =~ /RSET/i )
                 {
-                    if ( echo_response( $mail, $client, $command ) ) 
-                    {
-                        $total_size    = 0;
-                        $message_count = $highest_message;
-
-                        for ( my $i = 1; $i <= $highest_message; $i++ )
-                        {
-                            $messages[$i]{'deleted'}  = 0;
-                            $total_size              += $messages[$i]{'size'};
-                        }
-                    }
-
+                    echo_response( $mail, $client, $command );
                     flush_extra( $mail, $client );
                     next;
                 }
@@ -2683,15 +2390,6 @@ sub run_popfile
         }
 
         save_configuration();
-
-        # Clear out the counters that say the number of messages available, everything to zero
-        # to prepare for the next connection
-        $message_count   = 0;
-        $total_size      = 0;
-        $highest_message = 0;
-        $#messages       = 0;
-        $#message_map    = 0;
-        $done_uidl       = 0;
        }
     }
     }
