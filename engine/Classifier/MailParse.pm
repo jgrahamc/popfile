@@ -290,6 +290,8 @@ sub compute_rgb_distance
     # Now apply Pythagoras in 3D to get the distance between them, we return
     # the int because we don't need decimal level accuracy
 
+    print "rgb distance: $left -> $right = " . int( sqrt( $r*$r + $g*$g + $b*$b ) ) . "\n" if $self->{debug__};
+
     return int( sqrt( $r*$r + $g*$g + $b*$b ) );
 }
 
@@ -648,10 +650,13 @@ sub update_tag
 {
     my ( $self, $tag, $arg, $end_tag, $encoded ) = @_;
 
+    # TODO: Make sure $tag only ever gets alphanumeric input (in some cases it
+    #       has been demonstrated that things like ()| etc can end up in $tag
+
     $tag =~ s/[\r\n]//g;
     $arg =~ s/[\r\n]//g;
 
-    print "HTML tag $tag with argument " . $arg . "\n" if ($self->{debug__});
+    print "HTML " . ($end_tag?"closing":'') . " tag $tag with argument " . $arg . "\n" if ($self->{debug__});
 
     # End tags do not require any argument decoding but we do look at them
     # to make sure that we handle /font to change the font color
@@ -670,16 +675,20 @@ sub update_tag
             $self->compute_html_color_distance();
         }
 
-        if ( $self->{cssbackcolortag__} =~ /^$tag/ ) {
+        if ( $tag =~ /^$self->{cssbackcolortag__}$/i ) {
             $self->{htmlbackcolor__} = $self->{htmlbodycolor__};
             $self->{cssbackcolortag__} = '';
+
+            $self->compute_html_color_distance();
 
             print "CSS back color reset to $self->{htmlbackcolor__} (tag closed: $tag)\n" if ( $self->{debug__} );
         }
 
-        if ( $self->{cssfontcolortag__} =~ /^$tag$/ ) {
+        if ( $tag =~ /^$self->{cssfontcolortag__}$/i ) {
             $self->{htmlfontcolor__} = map_color( $self, 'black' );
             $self->{cssfontcolortag__} = '';
+
+            $self->compute_html_color_distance();
 
             print "CSS font color reset to $self->{htmlfontcolor__} (tag closed: $tag)\n" if ( $self->{debug__} );
         }
@@ -870,13 +879,13 @@ sub update_tag
 
         # CSS handling
 
-        if ( !exists(%HTML::Tagset::emptyElement->{lc($tag)}) && $attribute =~ /^style$/i ) {
+        if ( !exists($HTML::Tagset::emptyElement->{lc($tag)}) && $attribute =~ /^style$/i ) {
             print "      Inline style tag found in $tag: $attribute=$value\n" if ( $self->{debug__} );
 
             my $style = $self->parse_css_style($value);
 
-            if ($self->{debug__}) {             
-                print "      CSS properties: "; 
+            if ($self->{debug__}) {
+                print "      CSS properties: ";
                 foreach my $key (keys( %{$style})) {
                     print "$key($style->{$key}), ";
                 }
@@ -921,11 +930,11 @@ sub update_tag
                 if ( $color ne "error" ) {
                     $self->{htmlfontcolor__} = $color;
                     $self->compute_html_color_distance();
-                    $self->{csscolortag__} = $tag;
+
                     print "      CSS set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug__} );
                     $self->update_pseudoword( 'html', "cssfontcolor$self->{htmlfontcolor__}", $encoded, $original );
 
-                    $self->{cssfontcolortag__} = $tag;
+                    $self->{cssfontcolortag__} = lc($tag);
                 }
             }
 
@@ -943,7 +952,7 @@ sub update_tag
                     print "       CSS set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug__} );
 
                     $self->{htmlbodycolor__} = $background_color if ( $tag =~ /^body$/i );
-                    $self->{cssbackcolortag__} = $tag;
+                    $self->{cssbackcolortag__} = lc($tag);
 
                     $self->update_pseudoword( 'html', "cssbackcolor$self->{htmlbackcolor__}", $encoded, $original );
                 }
@@ -974,7 +983,7 @@ sub update_tag
                         print "       CSS set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug__} );
 
                         $self->{htmlbodycolor__} = $background_color if ( $tag =~ /^body$/i );
-                        $self->{cssbackcolortag__} = $tag;
+                        $self->{cssbackcolortag__} = lc($tag);
 
                         $self->update_pseudoword( 'html', "cssbackcolor$self->{htmlbackcolor__}", $encoded, $original );
                     }
@@ -1484,6 +1493,9 @@ sub stop_parse
     #TODO: Fix me
 
     if ( $self->{header__} ne '' ) {
+        $self->parse_header( $self->{header__}, $self->{argument__}, $self->{mime__}, $self->{encoding__} );
+        $self->{header__} = '';
+        $self->{argument__} = '';
     }
 
     $self->{in_html_tag__} = 0;
