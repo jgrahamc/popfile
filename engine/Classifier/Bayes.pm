@@ -180,7 +180,8 @@ sub compute_top10
 sub load_word_matrix
 {
     my ($self) = @_;
-    my @colors = ( 'red', 'green', 'blue', 'brown', 'orange', 'purple', 'magenta', 'gray' );
+    my @colors = ( 'red',  'green',      'blue',      'brown',     'orange',     'purple',      'magenta',  'gray',        'plum',     'silver', 
+                   'pink', 'lightgreen', 'lightblue', 'lightcyan', 'lightcoral', 'lightsalmon', 'lightgrey', 'darkorange', 'darkcyan', 'feldspar' );
     my $c      = 0;
 
     $self->{matrix}     = {};
@@ -254,7 +255,7 @@ sub load_word_matrix
         $self->{top10html}{$bucket} = "<tr><td><font color=$self->{colors}{$bucket}>$bucket</font><td align=right>$number<td>&nbsp;<td align=center><table cellpadding=0 cellspacing=0><tr>";
         for $color (@colors)
         {
-            $self->{top10html}{$bucket} .= "<td width=20 bgcolor=$color><a href=/buckets?color=$color&bucket=$bucket><img border=0 alt='Set $bucket color to $color' src=http://www.usethesource.com/images/pix.gif width=20 height=20></a></font>";
+            $self->{top10html}{$bucket} .= "<td width=10 bgcolor=$color><a href=/buckets?color=$color&bucket=$bucket><img border=0 alt='Set $bucket color to $color' src=http://www.usethesource.com/images/pix.gif width=10 height=20></a></font>";
         }
         $self->{top10html}{$bucket} .= "</table></td><td><td>";
 
