@@ -153,9 +153,39 @@ sub set_value
     $word =~ /^(.)/;
     my $i = ord($1);
 
-    if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|\Q$word\E $value\|/ ) == 0 ) 
+    if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 ) 
     {
         $self->{matrix}{$bucket}[$i] .= "|$word $value|";
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# update_constants
+#
+# Updates not_likely and bucket_start
+#
+# ---------------------------------------------------------------------------------------------
+
+sub update_constants
+{
+    my ($self) = @_;
+    
+    if ( $self->{full_total} > 0 ) 
+    {
+        $self->{not_likely} = log( 1 / ( 10 * $self->{full_total} ) );
+    
+        foreach my $bucket (keys %{$self->{total}})
+        {
+            if ( $self->{total}{$bucket} != 0 )
+            {
+                $self->{bucket_start}{$bucket} = log($self->{total}{$bucket} / $self->{full_total});
+            }
+            else
+            {
+                $self->{bucket_start}{$bucket} = 0;
+            }
+        }
     }
 }
 
@@ -258,11 +288,8 @@ sub load_word_matrix
         print " $self->{total}{$bucket} words\n" if $self->{debug};
     }
 
-    if ( $self->{full_total} > 0 ) 
-    {
-        $self->{not_likely} = log( 1 / ( 10 * $self->{full_total} ) );
-    }
-
+    update_constants();
+    
     print "Corpus loaded with $self->{full_total} entries\n" if $self->{debug};
     
     print "    ... $self->{full_total} words\n";
@@ -295,7 +322,12 @@ sub classify_file
 
     # Set up the initial score as P(bucket)
   
-    my %score = %{$self->{bucket_start}};
+    my %score;
+    
+    for my $bucket (keys %{$self->{total}})
+    {
+        $score{$bucket} = $self->{bucket_start}{$bucket};
+    }
     
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
     # P(word|bucket) ^ word count and multiply to the score

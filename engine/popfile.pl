@@ -18,7 +18,7 @@ use Classifier::Bayes;
 # This version number
 my $major_version = 0;
 my $minor_version = 17;
-my $build_version = 3;
+my $build_version = 4;
 
 # A list of the messages currently on the server, each entry in this list
 # is a hash containing the following items
@@ -170,6 +170,12 @@ sub load_configuration
         }
         
         close CONFIG;
+    }
+    else
+    {
+        $configuration{debug} = 2;
+        debug( "Couldn't find the popfile.cfg file" );
+        $configuration{debug} = 0;
     }
 }
 
@@ -1399,11 +1405,8 @@ sub history_page
                 $configuration{ecount} += 1;
             }
         }
-        
-        if ( $classifier->{full_total} > 0 ) 
-        {
-            $classifier->{not_likely} = log( 1 / ( 10 * $classifier->{full_total} ) );
-        }
+
+        $classifier->update_constants();        
     }
 
     @mail_files = sort compare_mf @mail_files;
@@ -2382,8 +2385,6 @@ print "    Loading configuration\n";
 
 # Load the current configuration from disk
 load_configuration();
-
-debug( $session_key );
 
 # Handle the command line
 parse_command_line();
