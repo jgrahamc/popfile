@@ -291,14 +291,15 @@ sub start
 {
     my ( $self ) = @_;
 
-    # In Japanese mode, explicitly set LC_COLLATE to C.  This is to
-    # avoid Perl crash on Windows because default LC_COLLATE of
-    # Japanese Win is Japanese_Japan.932(Shift_JIS), which is
-    # different from the charset POPFile uses for Japanese
+    # In Japanese or Korean mode, explicitly set LC_COLLATE to C.
+    #
+    # This is to avoid Perl crash on Windows because default
+    # LC_COLLATE of Japanese Win is Japanese_Japan.932(Shift_JIS),
+    # which is different from the charset POPFile uses for Japanese
     # characters(EUC-JP).
 
     if ( defined( $self->module_config_( 'html', 'language' ) ) &&
-       ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) ) {
+       ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ )) {
         use POSIX qw( locale_h );
         setlocale( LC_COLLATE, 'C' );
     }
