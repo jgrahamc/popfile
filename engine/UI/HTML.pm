@@ -2120,20 +2120,7 @@ sub history_page
     # or clear all the files in the cache
 
     if ( defined( $self->{form_}{clearall} ) ) {
-        foreach my $i (0 .. $self->{history__}->get_query_size( $self->{q__} )-1 ) {
-            # TODO
-        }
-    }
-
-    if ( defined($self->{form_}{clearpage}) ) {
-
-        # TODO
-
-        # Check that the start_message now exists, if not then go back a page
-
-        while ( ( $self->{form_}{start_message} + $self->config_( 'page_size' ) ) >= $self->{history__}->get_query_size( $self->{q__} ) ) {
-            $self->{form_}{start_message} -= $self->config_( 'page_size' );
-        }
+        $self->{history__}->delete_query( $self->{q__} );
     }
 
     $self->{history__}->set_query( $self->{q__},

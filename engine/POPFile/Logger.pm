@@ -220,13 +220,13 @@ sub debug
 
         if ( $^O =~ /MSWin/i ) {
             $message .= "\015\012";
-	} else {
+        } else {
             if ( $^O =~ /Mac/i ) {
                 $message .= "\015";
-	    } else {
+            } else {
                 $message .= "\012";
-	    }
-	}
+            }
+        }
 
         my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime;
         $year += 1900;
@@ -237,13 +237,13 @@ sub debug
         $sec  = "0$sec"  if ( $sec  < 10 );
 
         my $delim = ' ';
-        $delim = '\t' if ( $self->config_( 'format' ) eq 'tabbed' );
+        $delim = "\t" if ( $self->config_( 'format' ) eq 'tabbed' );
         $delim = ',' if ( $self->config_( 'format' ) eq 'csv' );
 
         my $msg = "$year/$mon/$mday$delim$hour:$min:$sec$delim$$:$delim$message";
 
         if ( $self->global_config_( 'debug' ) & 1 )  {
-  	    if ( open DEBUG, ">>$self->{debug_filename__}" ) {
+              if ( open DEBUG, ">>$self->{debug_filename__}" ) {
                 binmode DEBUG;
                 print DEBUG $msg;
                 close DEBUG;
