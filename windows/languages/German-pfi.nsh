@@ -172,7 +172,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORE      "Installiere Kernkomponenten..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL      "Installiere Minimal-Perl-Umgebung..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT     "Erzeuge Verknüpfungen..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FFCBACK   "Erstelle Corpus Backup. Dies kann einige Sekunden dauern..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORPUS    "Erstelle Corpus Backup. Dies kann einige Sekunden dauern..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS     "Installiere Skins..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS     "Installiere Sprachdateien..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC    "Klicken Sie auf Weiter um fortzufahren"
@@ -197,7 +197,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2         "Bitte beenden Sie POPFile jetzt manuell."
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3         "Klicken Sie bitte auf 'OK', sobald POPFile beendet wurde, um die Installation fortzusetzen."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBFFCERR_1          "Beim Erstellen eines Backups der alten Corpus Dateien ist ein Fehler aufgetreten."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCORPUS_1          "Beim Erstellen eines Backups der alten Corpus Dateien ist ein Fehler aufgetreten."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Classification Bucket Creation
@@ -404,24 +404,24 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_BANNER_2     "Dies kann einige Sekunden dauern..."
 
 #--------------------------------------------------------------------------
-# Custom Page - Flat file corpus needs to be converted to new format
+# Custom Page - Flat file or BerkeleyDB format corpus needs to be converted to new format
 #--------------------------------------------------------------------------
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_TITLE       "POPFile Corpus Konvertierung"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_SUBTITLE    "Der bestehende Corpus muß konvertiert werden, um mit der neuen Version von POPFile verwendet werden zu können."
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_TITLE       "POPFile Corpus Konvertierung"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_SUBTITLE    "Der bestehende Corpus muß konvertiert werden, um mit der neuen Version von POPFile verwendet werden zu können."
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_1   "POPFile wird nun in einem Konsolenfenster gestartet, um den bestehenden Corpus zu konvertieren."
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_2   "DIESER VORGANG KANN EINIGE MINUTEN DAUERN (falls der Corpus sehr groß ist)."
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_3   "WARNUNG"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_4   "Schließen Sie das POPFile Konsolenfenster UNTER KEINEM UMSTÄNDEN!"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_5   "Sollte 'POPFile Engine v${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION} running' im Konsolenfenster erscheinen, bedeutet dies, daß"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_6   "- POPFile einsatzbereit ist"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_7   "- POPFile sicher über den Startmenü-Eintrag  beendet werden kann"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_8   "Klicken Sie auf 'Weiter', um den Corpus zu konvertieren."
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_1   "POPFile wird nun in einem Konsolenfenster gestartet, um den bestehenden Corpus zu konvertieren."
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_2   "DIESER VORGANG KANN EINIGE MINUTEN DAUERN (falls der Corpus sehr groß ist)."
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_3   "WARNUNG"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_4   "Schließen Sie das POPFile Konsolenfenster UNTER KEINEM UMSTÄNDEN!"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_5   "Sollte 'POPFile Engine v${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION} running' im Konsolenfenster erscheinen, bedeutet dies, daß"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_6   "- POPFile einsatzbereit ist"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_7   "- POPFile sicher über den Startmenü-Eintrag  beendet werden kann"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_8   "Klicken Sie auf 'Weiter', um den Corpus zu konvertieren."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall POPFile

@@ -172,7 +172,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORE      "Instalando os arquivos principais do POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL      "Instalando os arquivos mínimos do Perl..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT     "Criando os atalhos do POPFile..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FFCBACK   "Fazendo o backup do corpus. Isto pode levar alguns segundos..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORPUS    "Fazendo o backup do corpus. Isto pode levar alguns segundos..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS     "Instalando os arquivos de skins do POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS     "Instalando os arquivos de línguas do POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC    "Clique em Avançar para continuar"
@@ -197,7 +197,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2         "Por favor desligue o POPFile manualmente agora."
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3         "Quando o POPFile tiver sido desligado, clique 'OK' para continuar."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBFFCERR_1          "Erro detectado quando o instalador tentou fazer o backup do corpus antigo."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCORPUS_1          "Erro detectado quando o instalador tentou fazer o backup do corpus antigo."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Classification Bucket Creation
@@ -404,24 +404,24 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_BANNER_2     "Isto pode levar alguns segundos..."
 
 #--------------------------------------------------------------------------
-# Custom Page - Flat file corpus needs to be converted to new format
+# Custom Page - Flat file or BerkeleyDB format corpus needs to be converted to new format
 #--------------------------------------------------------------------------
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_TITLE       "Conversão do Corpus do POPFile"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_SUBTITLE    "O corpus existente deve ser convertido para funcionar com esta versão do POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_TITLE       "Conversão do Corpus do POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_SUBTITLE    "O corpus existente deve ser convertido para funcionar com esta versão do POPFile"
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_1   "O POPFile será iniciado agora em uma janela de console para converter o corpus existente."
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_2   "ESTE PROCESSO PODE LEVAR VÁRIOS MINUTOS (se o corpus for grande)."
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_3   "AVISO"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_4   "NÃO feche a janela de console do POPFile!"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_5   "Quando aparecer 'POPFile Engine v${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION} running' na janela de console, isto significa que"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_6   "- O POPFile está pronto para usar"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_7   "- O POPFile pode ser desligado com segurança usando o Menu Iniciar"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_8   "Clique Avançar para converter o corpus."
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_1   "O POPFile será iniciado agora em uma janela de console para converter o corpus existente."
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_2   "ESTE PROCESSO PODE LEVAR VÁRIOS MINUTOS (se o corpus for grande)."
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_3   "AVISO"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_4   "NÃO feche a janela de console do POPFile!"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_5   "Quando aparecer 'POPFile Engine v${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION} running' na janela de console, isto significa que"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_6   "- O POPFile está pronto para usar"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_7   "- O POPFile pode ser desligado com segurança usando o Menu Iniciar"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_8   "Clique Avançar para converter o corpus."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall POPFile

@@ -167,7 +167,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORE     "Installing POPFile core files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL     "Installing minimal Perl files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT     "Creating POPFile shortcuts..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FFCBACK   "Making corpus backup. This may take a few seconds..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORPUS    "Making corpus backup. This may take a few seconds..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS     "Installing POPFile skin files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS     "Installing POPFile UI language files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "Klikkaa Seuraava jatkaaksesi"
@@ -192,7 +192,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2         "Please shutdown POPFile manually now."
 !insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3         "When POPFile has been shutdown, click 'OK' to continue."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBFFCERR_1          "Error detected when the installer tried to backup the old corpus."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCORPUS_1          "Error detected when the installer tried to backup the old corpus."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Classification Bucket Creation
@@ -399,24 +399,24 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_BANNER_2     "This may take a few seconds..."
 
 #--------------------------------------------------------------------------
-# Custom Page - Flat file corpus needs to be converted to new format
+# Custom Page - Flat file or BerkeleyDB format corpus needs to be converted to new format
 #--------------------------------------------------------------------------
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_TITLE       "POPFile Corpus Conversion"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_SUBTITLE    "The existing corpus must be converted to work with this version of POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_TITLE       "POPFile Corpus Conversion"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_SUBTITLE    "The existing corpus must be converted to work with this version of POPFile"
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_1   "POPFile will now be started in a console window to convert the existing corpus."
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_2   "THIS PROCESS MAY TAKE SEVERAL MINUTES (if the corpus is large)."
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_3   "WARNING"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_4   "Do NOT close the POPFile console window!"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_5   "When 'POPFile Engine v${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION} running' appears in the console window, this means"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_6   "- POPFile is ready for use"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_7   "- POPFile can be safely shutdown using the Start Menu"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_8   "Click Next to convert the corpus."
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_1   "POPFile will now be started in a console window to convert the existing corpus."
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_2   "THIS PROCESS MAY TAKE SEVERAL MINUTES (if the corpus is large)."
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_3   "WARNING"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_4   "Do NOT close the POPFile console window!"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_5   "When 'POPFile Engine v${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION} running' appears in the console window, this means"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_6   "- POPFile is ready for use"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_7   "- POPFile can be safely shutdown using the Start Menu"
+!insertmacro PFI_LANG_STRING PFI_LANG_NONSQLDB_IO_NOTE_8   "Click Next to convert the corpus."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall POPFile
