@@ -2114,7 +2114,16 @@ show_defaults:
   ; The function "CheckPortOptions" will check the validity of the selections
   ; and refuse to proceed until suitable ports have been chosen.
 
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioA.ini"
+  !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioA.ini"
+  Pop $G_HWND                 ; HWND of dialog we want to modify
+
+  ; In 'GetDlgItem', use (1200 + Field number - 1) to refer to the field to be changed
+
+  GetDlgItem $G_DLGITEM $G_HWND 1204            ; Field 5 = 'Run POPFile at startup' checkbox
+  CreateFont $G_FONT "MS Shell Dlg" 10 700      ; use larger & bolder version of the font in use
+  SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
+
+  !insertmacro MUI_INSTALLOPTIONS_SHOW
 
   ; Store validated data (for use when the "POPFile" section is processed)
 
@@ -2258,6 +2267,12 @@ Function SetEmailClientPage
   Push ${L_SEPARATOR}
   Push ${L_TEMP}
 
+  ; On older systems with several email clients, the email client scan can take a few seconds
+  ; during which time the user may be tempted to click the 'Next' button. Display a banner to
+  ; reassure the user (and hope they do NOT click any buttons)
+
+  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
+
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_MAILCFG_TITLE)" "$(PFI_LANG_MAILCFG_SUBTITLE)"
 
   StrCpy ${L_CLIENT_INDEX} 0
@@ -2288,6 +2303,8 @@ incrm_index:
 
 display_results:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "Field 2" "State" "${L_CLIENT_LIST}"
+
+  Banner::destroy
 
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY_RETURN "ioF.ini"
   Pop ${L_TEMP}
@@ -3267,6 +3284,9 @@ try_outlook_97:
   StrCpy ${L_OUTLOOK} "Software\Microsoft\Office\7.0\Outlook\OMI Account Manager\Accounts"
 
 got_outlook_path:
+  FindWindow ${L_STATUS} "rctrl_renwnd32"
+  IsWindow ${L_STATUS} 0 open_logfiles
+
   MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_OUT)\
              $\r$\n$\r$\n\
              $(PFI_LANG_MBCLIENT_STOP_1)\
@@ -4484,12 +4504,7 @@ Function CheckRunStatus
   IfRebootFlag 0 no_reboot_reqd
 
   ; We have installed Kakasi on a Win9x system and must reboot before using POPFile
-  ; (replace previous page with a simple "Please wait" one, in case the page appears
-  ; again while the system is rebooting)
 
-  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Settings" "NumFields" "0"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioD.ini" "Settings" "NumFields" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Settings" "BackEnabled" "0"
 
   WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "Status" "old"
