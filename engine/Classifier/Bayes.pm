@@ -136,6 +136,8 @@ sub start
         $self->{unclassified__} = $self->config_( 'unclassified_probability' );
     }
 
+    $self->{unclassified__} = log($self->{unclassified__});
+
     $self->load_word_matrix_();
 
     return 1;
@@ -223,13 +225,8 @@ sub get_value_
     my $i = ord($1);
 
     if ( defined($self->{matrix__}{$bucket}[$i]) ) {
-        return $1 if ( ( $self->{matrix__}{$bucket}[$i] =~ /\|\Q$word\E L([\-\.\d]+)\|/ ) != 0 );
-    }
-
-    if ( defined($self->{matrix__}{$bucket}[$i]) ) {
         if ( ( $self->{matrix__}{$bucket}[$i] =~ /\|\Q$word\E (\d+)\|/ ) != 0 )  {
-            my $newvalue = log($1 / $self->{total__}{$bucket});
-            set_value_( $self, $bucket, $word, "L$newvalue" );
+            my $newvalue = log($1/$self->{total__}{$bucket});
             return $newvalue;
         }
     }
@@ -243,10 +240,10 @@ sub set_value_
 
     if ( $word ne '' ) {
         $word =~ /^(.)/;
-        my $i = ord($1);
+        my $i = ord($1);        
 
         $self->{matrix__}{$bucket}[$i] = '' if ( !defined($self->{matrix__}{$bucket}[$i]) );
-        $self->{matrix__}{$bucket}[$i] .= "|$word $value|" if ( ( $self->{matrix__}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 );
+        $self->{matrix__}{$bucket}[$i] .= "|$word $value|" if ( ( $self->{matrix__}{$bucket}[$i] =~ s/\|\Q$word\E [\-\.\d]+\|/\|$word $value\|/ ) == 0 );        
     }
 }
 
@@ -262,11 +259,14 @@ sub update_constants_
     my ($self) = @_;
 
     if ( $self->{full_total__} > 0 )  {
-        $self->{not_likely__} = log( 1 / ( 10 * $self->{full_total__} ) );
+        
+        # ln(10) =~ 2.30258509299404568401799145468436
+        
+        $self->{not_likely__} = -log( $self->{full_total__} ) - 2.30258509299404568401799145468436;
 
         foreach my $bucket (keys %{$self->{total__}}) {
             if ( $self->{total__}{$bucket} != 0 ) {
-                $self->{bucket_start__}{$bucket} = log($self->{total__}{$bucket} / $self->{full_total__});
+                $self->{bucket_start__}{$bucket} = log( $self->{total__}{$bucket} / $self->{full_total__} );
             } else {
                 $self->{bucket_start__}{$bucket} = 0;
             }
@@ -594,7 +594,10 @@ sub classify_file
     foreach my $b (@ranking) {
         $raw_score{$b} = $score{$b};
         $score{$b} -= $base_score;
-        $total += exp($score{$b}) if ($score{$b} > 54 * log(0.5));
+        
+        # ln(2) =~ 0.693147180559945309417232121458177
+        
+        $total += exp($score{$b}) if ($score{$b} > ( -54 * 0.693147180559945309417232121458177 ) );
     }
 
     $self->{scores__} = "<b>Scores</b><p>\n<table class=\"top20Buckets\">\n<tr>\n<th scope=\"col\">Bucket</th>\n<th>&nbsp;</th>\n";
@@ -672,8 +675,8 @@ sub classify_file
 
     # If no bucket has a probability better than 0.5, call the message "unclassified".
     my $class = 'unclassified';
-
-    if ( ( $total != 0 ) && ( $score{$ranking[0]} > log($self->{unclassified__} * $total) ) ) {
+    
+    if ( ( $total != 0 ) && ( $score{$ranking[0]} > $self->{unclassified__} + log($total) ) ) {
         $class = $ranking[0];
     }
 
