@@ -1511,11 +1511,8 @@ sub classify_and_modify
 
     open TEMP, ">$temp_file" unless $nosave;
 
-    while ( <$mail> ) {
-        my $line;
+    while ( my $line = $self->slurp_( $mail ) ) {
         my $fileline;
-
-        $line = $_;
 
         # This is done so that we remove the network style end of line CR LF
         # and allow Perl to decide on the local system EOL which it will expand

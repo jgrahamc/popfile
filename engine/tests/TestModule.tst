@@ -116,4 +116,126 @@ test_assert_equal( $m->name(), 'newname' );
 $m->version( 'vt.t.t' );
 test_assert_equal( $m->version(), 'vt.t.t' );
 
+# Test the slurp function
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+print TEMP "Line with no ending";
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert_equal( $m->slurp_( \*TEMP ), "Line with no ending" );
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+print TEMP "Line ends with CR\012";
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert_equal( $m->slurp_( \*TEMP ), "Line ends with CR\012" );
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+print TEMP "Line ends with LF\015";
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert_equal( $m->slurp_( \*TEMP ), "Line ends with LF\015" );
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+print TEMP "Line ends with CRLF\015\012";
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert_equal( $m->slurp_( \*TEMP ), "Line ends with CRLF\015\012" );
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+print TEMP "LF\012LF\012";
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert_equal( $m->slurp_( \*TEMP ), "LF\012" );
+test_assert_equal( $m->slurp_( \*TEMP ), "LF\012" );
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+print TEMP "CR\015CR\015";
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert_equal( $m->slurp_( \*TEMP ), "CR\015" );
+test_assert_equal( $m->slurp_( \*TEMP ), "CR\015" );
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+print TEMP "CRLF\015\012CRLF\015\012";
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert_equal( $m->slurp_( \*TEMP ), "CRLF\015\012" );
+test_assert_equal( $m->slurp_( \*TEMP ), "CRLF\015\012" );
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+print TEMP "\012\012\015\015\012\015";
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert_equal( $m->slurp_( \*TEMP ), "\012" );
+test_assert_equal( $m->slurp_( \*TEMP ), "\012" );
+test_assert_equal( $m->slurp_( \*TEMP ), "\015" );
+test_assert_equal( $m->slurp_( \*TEMP ), "\015\012" );
+test_assert_equal( $m->slurp_( \*TEMP ), "\015" );
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+
+open TEMP, ">slurp.tmp";
+binmode TEMP;
+print TEMP ".\012.\012.\015.\015\012.\015.";
+close TEMP;
+
+open TEMP, "<slurp.tmp";
+binmode TEMP;
+test_assert_equal( $m->slurp_( \*TEMP ), ".\012" );
+test_assert_equal( $m->slurp_( \*TEMP ), ".\012" );
+test_assert_equal( $m->slurp_( \*TEMP ), ".\015" );
+test_assert_equal( $m->slurp_( \*TEMP ), ".\015\012" );
+test_assert_equal( $m->slurp_( \*TEMP ), ".\015" );
+test_assert_equal( $m->slurp_( \*TEMP ), "." );
+test_assert( !defined( $m->slurp_( \*TEMP ) ) );
+close TEMP;
+
 1;

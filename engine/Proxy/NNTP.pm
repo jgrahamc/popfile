@@ -351,7 +351,10 @@ sub child__
         }
     }
 
-    close $news if defined( $news );
+    if ( defined( $news ) ) {
+        $self->done_slurp_( $news );
+        close $news;
+    }
     close $client;
     print $pipe "CMPLT$eol";
     flush $pipe;

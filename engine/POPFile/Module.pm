@@ -71,6 +71,8 @@ package POPFile::Module;
 #
 # mq_register_() register for messages from the message queue
 #
+# slurp_()       Reads a line up to CR, CRLF or LF
+#
 # register_configuration_item_() register a UI configuration item
 #
 # A note on the naming
@@ -444,6 +446,80 @@ sub get_root_path_
     my ( $self, $path ) = @_;
 
     return $self->{configuration__}->get_root_path( $path );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# slurp_
+#
+# A replacement for Perl's <> operator on a handle that reads a line until CR, CRLF or LF
+# is encountered.  Returns the line if read (with the CRs and LFs), or undef if at the EOF,
+# blocks waiting for something to read.
+#
+# IMPORTANT NOTE: If you don't read to the end of the stream using slurp_ then there may be
+#                 a small memory leak caused by slurp_'s buffering of data in the Module's
+#                 hash.   To flush it make a call to slurp_ when you know that the handle is
+#                 at the end of the stream, or call done_slurp_ on the handle.
+#
+# $handle            Handle to read from, which should be in binmode
+#
+# ---------------------------------------------------------------------------------------------
+sub slurp_
+{
+    my ( $self, $handle ) = @_;
+
+    my $line = $self->{slurp_buffer__}{"$handle"};
+    undef $self->{slurp_buffer__}{"$handle"};
+    my $c;
+
+    while ( sysread( $handle, $c, 1 ) == 1 ) {
+        $line .= $c;
+
+        # If we hit a CR then it's acceptable that the next character is a LF
+        # in which case we will assume the line ending is CRLF, if it's not
+        # LF then the line ending is CR alone
+
+        if ( ord($c) == 13 ) {
+            if ( sysread( $handle, $c, 1 ) == 1 ) {
+                if ( ord($c) == 10 ) {
+                    return $line . $c;
+		} else {
+                    $self->{slurp_buffer__}{"$handle"} = $c;
+                    return $line;
+		}
+	    } else {
+            
+                # Last character in stream was CR so return the
+                # line
+
+                return $line;
+	    }
+	}
+
+        # If we hit LF then that's the line ending
+
+        if ( ord($c) == 10 ) {
+            return $line;
+	}
+    }   
+
+    # If we get here with something in line then the file ends without any
+    # CRLF so return the line, otherwise we are reading at the end of the
+    # stream/file so return undef
+
+    if ( $line eq '' ) {
+        undef $self->{slurp_buffer__}{"$handle"};
+        return undef;
+    } else {
+        return $line;
+    }
+}
+
+sub done_slurp_
+{
+    my ( $self, $handle ) = @_;
+
+    undef $self->{slurp_buffer__}{"$handle"};
 }
 
 # GETTER/SETTER methods.  Note that I do not expect documentation of these unless they

@@ -172,8 +172,6 @@ sub child__
                 if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'chain_server' ),  $self->config_( 'chain_port' ) ) )  {
 
                     $self->smtp_echo_response_( $mail, $client, $command );
-
-
                 } else {
                     last;
                 }
@@ -248,7 +246,7 @@ sub child__
                 flush $pipe;
                 $self->yield_( $ppipe, $pid );
 
-                my $response = <$mail>;
+                my $response = $self->slurp_( $mail );
                 $self->tee_( $client, $response );
                 next;
             }
@@ -277,7 +275,11 @@ sub child__
         }
     }
 
-    close $mail if defined( $mail );
+    if ( defined( $mail ) ) {
+        $self->done_slurp_( $mail );
+        close $mail;
+    }
+
     close $client;
     print $pipe "CMPLT$eol";
     flush $pipe;

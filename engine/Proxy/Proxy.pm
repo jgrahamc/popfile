@@ -459,22 +459,22 @@ sub echo_to_regexp_
 
     $log = 0 if (!defined($log));
 
-    while ( <$mail> ) {
+    while ( my $line = $self->slurp_( $mail ) ) {
         # Check for an abort
 
         last if ( $self->{alive_} == 0 );
 
-        if (!defined($suppress) || !( $_ =~ $suppress )) {
+        if (!defined($suppress) || !( $line =~ $suppress )) {
             if (!$log) {
-                print $client $_;
+                print $client $line;
             } else {
-                $self->tee_( $client, $_ );
+                $self->tee_( $client, $line );
             }
         } else {
-            $self->log_("Suppressed: $_");
+            $self->log_("Suppressed: $line");
         }
 
-        last if ( $_ =~ $regexp );
+        last if ( $line =~ $regexp );
     }
 }
 
@@ -573,7 +573,7 @@ sub get_response_
     my ($ready) = $selector->can_read( (!$null_resp?$self->global_config_( 'timeout' ):.5) );
 
     if ( ( defined( $ready ) ) && ( $ready == $mail ) ) {
-        $response = <$mail>;
+        $response = $self->slurp_( $mail );
 
         if ( $response ) {
 

@@ -541,7 +541,11 @@ sub child__
         }
     }
 
-    close $mail if defined( $mail );
+    if ( defined( $mail ) ) {
+        $self->done_slurp_( $mail );
+        close $mail;
+    }
+
     close $client;
     print $pipe "CMPLT$eol";
     flush $pipe;
