@@ -1902,7 +1902,7 @@ sub rename_bucket
 
 # ---------------------------------------------------------------------------------------------
 #
-# add_messages_to_bucket
+# add_words_to_bucket
 #
 # Takes words previously parsed by the mail parser and adds/subtracts them to/from a bucket,
 # this is a helper used by add_messages_to_bucket, remove_message_from_bucket
@@ -2408,7 +2408,7 @@ sub db_connect__
                                   $self->config_( 'dbauth' ) );
 
     if ( !defined( $self->{db__} ) ) {
-        $self->log_( "Failed to connect to database and got error DBI:errstr" );
+        $self->log_( "Failed to connect to database and got error $DBI::errstr" );
         return 0;
     }
 
