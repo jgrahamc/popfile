@@ -43,6 +43,7 @@ use Classifier::Bayes;          # Use the Naive Bayes classifier
 use UI::HTML;                   # Load the POPFile HTML user interface
 use POPFile::Configuration;     # POPFile's configuration is handled by this module
 use Proxy::POP3;                # The POP3 proxy engine
+use POPFile::Logger;            # POPFile's logging mechanism
 
 # A handy boolean that tells us whether we are alive or not.  When this is set to 1 then the
 # proxy works normally, when set to 0 (typically by the aborting() function called from a signal)
@@ -106,6 +107,7 @@ $components{config}     = new POPFile::Configuration;
 $components{classifier} = new Classifier::Bayes;
 $components{ui}         = new UI::HTML;
 $components{pop3}       = new Proxy::POP3;
+$components{logger}     = new POPFile::Logger;
 
 # This version number
 $components{config}->{major_version} = 0;
@@ -119,6 +121,7 @@ print "POPFile Engine v$components{config}->{major_version}.$components{config}-
 $components{classifier}->{configuration} = $components{config};
 $components{ui}->{configuration}         = $components{config};
 $components{pop3}->{configuration}       = $components{config};
+$components{logger}->{configuration}     = $components{config};
 
 # The POP3 proxy and UI need to know about the classifier
 $components{pop3}->{classifier}          = $components{classifier};
@@ -126,6 +129,9 @@ $components{ui}->{classifier}            = $components{classifier};
 
 # The proxy needs to talk to the ui
 $components{pop3}->{ui}                  = $components{ui};
+
+# The proxy uses the logger
+$components{pop3}->{logger}              = $components{logger};
 
 print "    Initializing... ";
 
@@ -155,13 +161,7 @@ for my $c (sort keys %components) {
     }
 }
 
-print "\n    Cleaning stale log files\n";
-
-# Remove old log files
-$components{pop3}->remove_debug_files();
-$components{ui}->remove_mail_files();
-
-print "POPFile Engine v$components{config}->{major_version}.$components{config}->{minor_version}.$components{config}->{build_version} running\n";
+print "\nPOPFile Engine v$components{config}->{major_version}.$components{config}->{minor_version}.$components{config}->{build_version} running\n";
 
 # MAIN LOOP - Call each module's service() method to all it to
 #             handle its own requests

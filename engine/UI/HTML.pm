@@ -180,7 +180,7 @@ sub service
     my ( $self ) = @_;
     
     my $code = 1;
-    
+
     # See if there's a connection waiting for us, if there is we accept it handle a single
     # request and then exit
     my ( $uiready ) = $self->{selector}->can_read(0);

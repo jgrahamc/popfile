@@ -19,9 +19,6 @@ use Sys::Hostname;
 # A handy variable containing the value of an EOL for Unix systems
 my $eol = "\015\012";
 
-# Constant used by the log rotation code
-my $seconds_per_day = 60 * 60 * 24;
-
 #----------------------------------------------------------------------------
 # new
 #
@@ -35,11 +32,11 @@ sub new
     # A reference to the POPFile::Configuration module
     $self->{configuration}  = 0;
 
+    # A reference to the POPFile::Logger module
+    $self->{logger}         = 0;
+
     # A reference to the classifier
     $self->{classifier}     = 0;
-    
-    # The name of the debug file
-    $self->{debug_filename} = '';
     
     # The name of the last user to pass through POPFile
     $self->{lastuser}       = 'none';
@@ -64,9 +61,6 @@ sub initialize
 {
     my ( $self ) = @_;
 
-    # Start with debugging to file
-    $self->{configuration}->{configuration}{debug}     = 1;
-    
     # Default ports for POP3 service and the user interface
     $self->{configuration}->{configuration}{port}      = 110;
     
@@ -109,8 +103,6 @@ sub initialize
     # The separator within the POP3 username is :
     $self->{configuration}->{configuration}{separator} = ':';
 
-    calculate_today( $self );
-    
     return 1;
 }
 
@@ -632,26 +624,8 @@ sub classify_and_modify
 sub debug 
 {
     my ( $self, $message ) = @_;
-    
-    if ( $self->{configuration}->{configuration}{debug} > 0 ) {
-        # Check to see if we are handling the USER/PASS command and if we are then obscure the
-        # account information
-        $message = "$`$1$3 XXXXXX$4" if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ );
-        chomp $message;
-        $message .= "\n";
 
-        my $now = localtime;
-        my $msg = "$now ($$): $message";
-        
-        if ( $self->{configuration}->{configuration}{debug} & 1 )  {
-            open DEBUG, ">>$self->{debug_filename}";
-            binmode DEBUG;
-            print DEBUG $msg;
-            close DEBUG;
-        }
-        
-        print $msg if ( $self->{configuration}->{configuration}{debug} & 2 );
-    }
+    $self->{logger}->debug( $message );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -782,8 +756,6 @@ sub verify_connected
 {
     my ( $self, $mail, $client, $hostname, $port ) = @_;
     
-    calculate_today( $self );
-    
     # Check to see if we are already connected
     return $mail if ( $mail && $mail->connected );
     
@@ -852,43 +824,3 @@ sub flush_extra
         }
     }
 }
-
-# ---------------------------------------------------------------------------------------------
-#
-# remove_debug_files
-#
-# Removes popfile log files that are older than 3 days
-#
-# ---------------------------------------------------------------------------------------------
-sub remove_debug_files 
-{
-    my ( $self ) = @_;
-    
-    my @debug_files = glob "popfile*.log";
-
-    calculate_today( $self );
-    
-    foreach my $debug_file (@debug_files) {
-        # Extract the epoch information from the popfile log file name
-        if ( $debug_file =~ /popfile([0-9]+)\.log/ )  {
-            # If older than now - 3 days then delete
-            unlink($debug_file) if ( $1 < (time - 3 * $seconds_per_day) );
-        }
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# calculate_today - set the global $self->{today} variable to the current day in seconds
-#
-# ---------------------------------------------------------------------------------------------
-sub calculate_today 
-{
-    my ( $self ) = @_;
-    
-    # Create the name of the debug file for the debug() function
-    $self->{today} = int( time / $seconds_per_day ) * $seconds_per_day;
-    $self->{mail_filename}  = "popfile$self->{today}";
-    $self->{debug_filename} = "popfile$self->{today}.log";
-}
-1;
