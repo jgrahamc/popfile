@@ -883,7 +883,7 @@ sub administration_page
     my %security_templates;
 
     for my $name (keys %{$self->{dynamic_ui__}{security}}) {
-        $security_templates{$name} = $self->load_template__( $self->{dynamic_ui__}{security}{$name}{template} );
+        $security_templates{$name} = $self->load_template__( $self->{dynamic_ui__}{security}{$name}{template}, $page );
         $self->{dynamic_ui__}{security}{$name}{object}->validate_item( $name,
                                                                        $security_templates{$name},
                                                                        \%{$self->{language__}},
@@ -893,7 +893,7 @@ sub administration_page
     my %chain_templates;
 
     for my $name (keys %{$self->{dynamic_ui__}{chain}}) {
-        $chain_templates{$name} = $self->load_template__( $self->{dynamic_ui__}{chain}{$name}{template} );
+        $chain_templates{$name} = $self->load_template__( $self->{dynamic_ui__}{chain}{$name}{template}, $page );
         $self->{dynamic_ui__}{chain}{$name}{object}->validate_item( $name,
                                                                     $chain_templates{$name},
                                                                     \%{$self->{language__}},
@@ -934,7 +934,7 @@ sub administration_page
 
     for my $name (keys %{$self->{dynamic_ui__}{configuration}}) {
         $dynamic_templates{$name} = $self->load_template__(
-            $self->{dynamic_ui__}{configuration}{$name}{template} );
+            $self->{dynamic_ui__}{configuration}{$name}{template}, $page );
         $self->{dynamic_ui__}{configuration}{$name}{object}->validate_item(
             $name,
             $dynamic_templates{$name},
