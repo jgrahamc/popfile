@@ -48,7 +48,7 @@ sub initialize
     # The default location for log files
     $self->{configuration}->{configuration}{logdir} = './';
 
-    calculate_today( $self );
+    remove_debug_files( $self );
     
     return 1;
 }
