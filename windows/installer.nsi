@@ -155,6 +155,12 @@
 ## !define PFI_VERBOSE
 
   ;--------------------------------------------------------------------------
+  ; Select LZMA compression to reduce 'setup.exe' size by around 30%
+  ;--------------------------------------------------------------------------
+
+  SetCompressor lzma
+
+  ;--------------------------------------------------------------------------
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
@@ -534,7 +540,7 @@
   ; This page is used to select the folder for the POPFile USER DATA files
   ; (each user is expected to have separate sets of data files)
 
-  !define MUI_DIRECTORYPAGE_VARIABLE          "$G_USERDIR"
+  !define MUI_DIRECTORYPAGE_VARIABLE          $G_USERDIR
 
   !define MUI_PAGE_HEADER_TEXT                "$(PFI_LANG_USERDIR_TITLE)"
   !define MUI_PAGE_HEADER_SUBTEXT             "$(PFI_LANG_USERDIR_SUBTITLE)"
@@ -2273,15 +2279,24 @@ Function CheckExistingConfig
 
   Push ${L_CFG}
 
+  ; This function initialises the $G_ROOTDIR and $G_USERDIR global variables for use elsewhere
+
+  StrCpy $G_ROOTDIR $INSTDIR
+
   ; Warn the user if we are about to upgrade an existing installation
   ; and allow user to select a different directory if they wish
 
-  ; This function initialises the $G_USERDIR global user variable for use elsewhere in installer
+  ; Starting with the 0.21.0 release, user-specific data is stored in the registry
+
+  ReadRegStr $G_USERDIR HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath"
+  StrCmp $G_USERDIR "" look_elsewhere
+  IfFileExists "$G_USERDIR\popfile.cfg" warning
+
+look_elsewhere:
 
   ; All versions prior to 0.21.0 stored popfile.pl and popfile.cfg in the same folder
 
-  StrCpy $G_ROOTDIR $INSTDIR
-  StrCpy $G_USERDIR $INSTDIR
+  StrCpy $G_USERDIR $G_ROOTDIR
 
   IfFileExists "$G_USERDIR\popfile.cfg" warning
 
