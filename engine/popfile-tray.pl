@@ -155,4 +155,3 @@ SetIcon( 'trayicon' );
 # function above
 
 Timer();
-

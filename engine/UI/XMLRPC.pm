@@ -232,12 +232,13 @@ sub service
 #    $name            Name of this item
 #    $templ           The loaded template that was passed as a parameter
 #                     when registering
+#    $language        Current language
 #
 # ---------------------------------------------------------------------------------------------
 
 sub configure_item
 {
-    my ( $self, $name, $templ ) = @_;
+    my ( $self, $name, $templ, $language ) = @_;
 
     if ( $name eq 'xmlrpc_port' ) {
         $templ->param ( 'XMLRPC_Port' => $self->config_( 'port' ) );

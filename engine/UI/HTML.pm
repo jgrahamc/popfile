@@ -692,7 +692,7 @@ sub configuration_page
     for my $name (keys %{$self->{dynamic_ui__}{configuration}}) {
         $dynamic_templates{$name} = $self->load_template__(
             $self->{dynamic_ui__}{configuration}{$name}{template} );
-        $self->{dynamic_ui__}{configuration}{$name}{object}->validate_item( 
+        $self->{dynamic_ui__}{configuration}{$name}{object}->validate_item(
             $name,
             $dynamic_templates{$name},
             \%{$self->{language__}},
@@ -838,8 +838,8 @@ sub configuration_page
             $configuration_html .= uc($module);
             $configuration_html .= "</h2>\n";
         }
-        $self->{dynamic_ui__}{configuration}{$name}{object}->configure_item( $name,                       # PROFILE BLOCK START
-                                                                             $dynamic_templates{$name} ); # PROFILE BLOCK STOP
+        $self->{dynamic_ui__}{configuration}{$name}{object}->configure_item(
+            $name, $dynamic_templates{$name}, \%{$self->{language__}} );
         $configuration_html .= $dynamic_templates{$name}->output;
     }
 
@@ -904,16 +904,16 @@ sub security_page
     my $security_html = '';
 
     for my $name (sort keys %{$self->{dynamic_ui__}{security}}) {
-        $self->{dynamic_ui__}{security}{$name}{object}->configure_item( $name,                        # PROFILE BLOCK START
-                                                                        $security_templates{$name} ); # PROFILE BLOCK STOP
+        $self->{dynamic_ui__}{security}{$name}{object}->configure_item(
+            $name, $security_templates{$name}, \%{$self->{language__}} );
         $security_html .= $security_templates{$name}->output;
     }
 
     my $chain_html = '';
 
     for my $name (sort keys %{$self->{dynamic_ui__}{chain}}) {
-        $self->{dynamic_ui__}{chain}{$name}{object}->configure_item( $name,                     # PROFILE BLOCK START
-                                                                     $chain_templates{$name} ); # PROFILE BLOCK STOP
+        $self->{dynamic_ui__}{chain}{$name}{object}->configure_item(
+            $name, $chain_templates{$name}, \%{$self->{language__}} );
         $chain_html .= $chain_templates{$name}->output;
     }
 
@@ -2822,7 +2822,7 @@ sub print_form_fields_
 #
 # later it will receive a call to its
 #
-#    configure_item( 'foo', loaded foo-bar.thtml )
+#    configure_item( 'foo', loaded foo-bar.thtml, language hash )
 #
 # and needs to fill the template variables.  Then it will receive
 # a call to its

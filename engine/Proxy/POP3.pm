@@ -600,12 +600,13 @@ sub child__
 #    $name            Name of this item
 #    $templ           The loaded template that was passed as a parameter
 #                     when registering
+#    $language        Current language
 #
 # ---------------------------------------------------------------------------------------------
 
 sub configure_item
 {
-    my ( $self, $name, $templ ) = @_;
+    my ( $self, $name, $templ, $language ) = @_;
 
     if ( $name eq 'pop3_configuration' ) {
         $templ->param( 'POP3_Configuration_If_Force_Fork' => ( $self->config_( 'force_fork' ) == 0 ) );
@@ -619,7 +620,7 @@ sub configure_item
                 $templ->param( 'POP3_Chain_Secure_Server' => $self->config_( 'secure_server' ) );
                 $templ->param( 'POP3_Chain_Secure_Port' => $self->config_( 'secure_port' ) );
 	    } else {
-                $self->SUPER::configure_item( $name, $templ );
+                $self->SUPER::configure_item( $name, $templ, $language );
 	    }
         }
     }
