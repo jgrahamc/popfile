@@ -924,6 +924,7 @@ app_paths:
   File "..\engine\favicon.ico"
   File "..\engine\black.gif"
   File "..\engine\otto.gif"
+  File "..\engine\otto.png"
 
   SetOutPath "$G_ROOTDIR\Classifier"
   File "..\engine\Classifier\Bayes.pm"
@@ -1002,6 +1003,7 @@ app_paths:
   File "${C_PERL_DIR}\lib\vars.pm"
   File "${C_PERL_DIR}\lib\warnings.pm"
   File "${C_PERL_DIR}\lib\XSLoader.pm"
+  File "${C_PERL_DIR}\site\lib\Win32.pm"
 
   SetOutPath "$G_MPLIBDIR\Carp"
   File "${C_PERL_DIR}\lib\Carp\*"
@@ -1078,6 +1080,9 @@ app_paths:
 
   SetOutPath "$G_MPLIBDIR\auto\Sys\Hostname"
   File "${C_PERL_DIR}\lib\auto\Sys\Hostname\*"
+
+  SetOutPath "$G_MPLIBDIR\auto\Win32"
+  File "${C_PERL_DIR}\site\lib\auto\Win32\Win32.dll"
 
   ; Install Perl modules and library files for BerkeleyDB support
   ; (required in case we have to convert BerkeleyDB corpus files from an earlier version)
