@@ -1400,7 +1400,7 @@ sub history_page
             $body .= "</b>" if $bold;
             $body .= "<td>";
             if ( $reclassified )  {
-                $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified as <font color=$classifier->{colors}{$bucket}>$bucket</font> - <a href=/history?undo=$mail_file&session=$session_key&badbucket=$bucket&filter=$form{filter}&start_message=$start_message>[Undo]</a>";
+                $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified as <font color=$classifier->{colors}{$bucket}>$bucket</font> - <a href=/history?undo=$mail_file&session=$session_key&badbucket=$bucket&filter=$form{filter}&start_message=$start_message#$mail_file>[Undo]</a>";
             } else {
                 if ( $bucket eq 'unclassified' )  {
                     $body .= "$bucket<td>";
@@ -1421,7 +1421,7 @@ sub history_page
                             $body .= " selected" if ( $abucket eq $bucket );
                             $body .= ">$abucket</option>"
                         } else {
-                            $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$session_key&usedtobe=$bucket&filter=$form{filter}><font color=$classifier->{colors}{$abucket}>[$abucket]</font></a> ";
+                            $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$session_key&usedtobe=$bucket&filter=$form{filter}#$mail_file><font color=$classifier->{colors}{$abucket}>[$abucket]</font></a> ";
                         }
                     }
 
@@ -2426,9 +2426,9 @@ sub run_popfile
                         $temp_file =~ s/messages\/(.*)/$1/;
                         
                         if ( $configuration{xpl} ) {
-                            $msg_head_after .= "X-POPFile-Link: http://";
+                            $msg_head_after .= "X-POPFile-Link: <http://";
                             $msg_head_after .= $configuration{localpop}?"127.0.0.1":$hostname;
-                            $msg_head_after .= ":$configuration{ui_port}/jump_to_message?view=$temp_file$eol";
+                            $msg_head_after .= ":$configuration{ui_port}/jump_to_message?view=$temp_file>$eol";
                         }
                         
                         $msg_head_after .= "$eol";
