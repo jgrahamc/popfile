@@ -137,6 +137,10 @@ sub new
 
     $self->{save_cache__}      = 0;
 
+    # Stores a Classifier::Bayes session and is set up on the first UI connection
+ 
+    $self->{api_session__}     = '';
+
     # Must call bless before attempting to call any methods
 
     bless $self, $type;
@@ -316,6 +320,10 @@ sub stop
     $self->copy_pre_cache__();
     $self->save_disk_cache__();
 
+    if ( $self->{api_session__} ne '' ) {
+        $self->{classifier__}->release_session_key( $self->{api_session__} );
+    }
+
     $self->SUPER::stop();
 }
 
@@ -378,6 +386,11 @@ sub deliver
 sub url_handler__
 {
     my ( $self, $client, $url, $command, $content ) = @_;
+
+    # Check to see if we obtained the session key yet
+    if ( $self->{api_session__} eq '' ) {
+        $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
+    }
 
     # See if there are any form parameters and if there are parse them into the %form hash
 
@@ -552,15 +565,12 @@ sub url_handler__
     # files on disk
 
     if ( defined($url_table{$url}) )  {
-        $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
-
         if ( !defined( $self->{api_session__} ) ) {
             $self->http_error_( $client, 500 );
             return;
         }
 
         &{$url_table{$url}}($self, $client);
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 

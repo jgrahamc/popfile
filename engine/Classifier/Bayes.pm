@@ -113,6 +113,10 @@ sub new
 
     $self->{db_parameterid__}    = {};
 
+    # Caches looked up parameter values on a per bucket basis
+
+    $self->{db_parameters__}     = {};
+
     # Used to parse mail messages
     $self->{parser__}            = new Classifier::MailParse;
 
@@ -1025,7 +1029,7 @@ sub upgrade_bucket__
                 $self->log_( "$wc" );
             }
 
-            next if ( $word =~ /^__POPFILE__(LOG__TOTAL|TOTAL|USER)__$/ );
+            next if ( $word =~ /__POPFILE__(LOG__TOTAL|TOTAL|UNIQUE)__/ );
 
 	    $wc += 1;
             $self->set_value_( $session, $bucket, $word, $h{$word} );
@@ -2537,6 +2541,12 @@ sub get_bucket_parameter
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
+    # See if there's a cached value
+
+    if ( defined( $self->{db_parameters__}{$userid}{$bucket}{$parameter} ) ) {
+        return $self->{db_parameters__}{$userid}{$bucket}{$parameter};
+    }
+
     # If there is a non-default value for this parameter then return it.
 
     $self->{db_get_bucket_parameter__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id}, $self->{db_parameterid__}{$parameter} );
@@ -2552,6 +2562,7 @@ sub get_bucket_parameter
     }
 
     if ( defined( $result ) ) {
+        $self->{db_parameters__}{$userid}{$bucket}{$parameter} = $result->[0];
         return $result->[0];
     } else {
         return undef;
@@ -2583,6 +2594,11 @@ sub set_bucket_parameter
     # Exactly one row should be affected by this statement
 
     $self->{db_set_bucket_parameter__}->execute( $bucketid, $btid, $value );
+
+    if ( defined( $self->{db_parameters__}{$userid}{$bucket}{$parameter} ) ) {
+        $self->{db_parameters__}{$userid}{$bucket}{$parameter} = $value;
+    }
+
     return 1;
 }
 
