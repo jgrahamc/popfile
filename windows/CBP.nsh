@@ -701,17 +701,17 @@ Function CBP_CreateINIfile
   ; Constants used to position information on the left-half of the page
 
   !define CBP_INFO_LEFT_MARGIN      0
-  !define CBP_INFO_RIGHT_MARGIN   131
+  !define CBP_INFO_RIGHT_MARGIN   141
 
   ; Constants used to position the bucket names
 
   !define CBP_BN_NAME_LEFT        157
-  !define CBP_BN_NAME_RIGHT       -44
+  !define CBP_BN_NAME_RIGHT       253
 
   ; Constants used to position the "Remove" boxes
 
-  !define CBP_BN_REMOVE_LEFT      255
-  !define CBP_BN_REMOVE_RIGHT     300
+  !define CBP_BN_REMOVE_LEFT      253
+  !define CBP_BN_REMOVE_RIGHT     298
 
   ; Constants used to define the position of the 8 rows in the bucket list
 
@@ -823,14 +823,14 @@ Function CBP_CreateINIfile
   !insertmacro CBP_DEFINE_CONTROL "Field 4" \
       "Label" \
       "$(PFI_LANG_CBP_IO_DELETE)" \
-      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "110" "190"
+      "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "110" "140"
 
   ; Label used to display progress reports
 
   !insertmacro CBP_DEFINE_CONTROL "Field 5" \
       "Label" \
       " " \
-      "155" "-1" "132" "140"
+      "155" "299" "132" "140"
 
   ; Box enclosing the list of bucket names defined so far
 
