@@ -493,7 +493,10 @@ sub scan_folder
     # new messages while we are connected and selected otherwise:
 
     $self->say__( $folder, "NOOP" );
-    $self->get_response__( $folder );
+    my $result = $self->get_response__( $folder );
+    if ( $result != 1 ) {
+        $self->log_( 0, "NOOP failed (return value $result)" );
+    }
 
     my $moved_message = 0;
     my @uids = $self->get_new_message_list( $folder );
@@ -1271,7 +1274,7 @@ sub get_response__
             die "The connection to the IMAP server was lost. Could not listen to the server.";
         }
     }
-    # Or die we get a folder name?
+    # Or did we get a folder name?
     else {
 
         # Is there a socket object stored in the folders hash?
@@ -1321,7 +1324,10 @@ sub get_mailbox_list
     $self->log_( 1, "Getting mailbox list" );
 
     $self->say__( $imap, "LIST \"\" \"*\"" );
-    $self->get_response__( $imap );
+    my $result = $self->get_response__( $imap );
+    if ( $result != 1 ) {
+        $self->log_( 0, "LIST command failed (return value $result)." );
+    }
 
     my @lines = split /$eol/, $self->{last_response__};
     my @mailboxes;
@@ -1520,8 +1526,9 @@ sub get_new_message_list
     $self->log_( 1, "Getting uids ge $uid" );
 
     $self->say__( $folder, "UID SEARCH UID $uid:* UNDELETED" );
-    if ( $self->get_response__( $folder ) != 1 ) {
-        $self->log_( 0, "SEARCH command failed!" );
+    my $result = $self->get_response__( $folder );
+    if ( $result != 1 ) {
+        $self->log_( 0, "SEARCH command failed (return value: $result)!" );
     }
 
     # The server will respond with an untagged search reply.
