@@ -1036,10 +1036,12 @@ sub upgrade_bucket__
             next if ( $word =~ /__POPFILE__(LOG__TOTAL|TOTAL|UNIQUE)__/ );
 
 	    $wc += 1;
-            $self->set_value_( $session, $bucket, $word, $h{$word} );
+            if ( $h{$word} != 0 ) {
+                $self->set_value_( $session, $bucket, $word, $h{$word} );
+	    }
 	}
 
-        $self->log_( "(completed ", $wc-1, " words)" );
+        $self->log_( "(completed " . $wc-1 . " words)" );
         $self->{db__}->commit;
         untie %h;
         unlink $bdb_file;
@@ -1494,7 +1496,6 @@ sub release_session_key
 # Returns the bucket in $buckets with the highest score
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_top_bucket__
 {
     my ( $self, $userid, $id, $matrix, $buckets ) = @_;
@@ -1525,6 +1526,10 @@ sub get_top_bucket__
 # $file      The name of the file containing the text to classify (or undef to use
 #            the data already in the parser)
 # $ui        Reference to the UI used when doing colorization
+# $matrix    (optional) Reference to a hash that will be filled with the word matrix
+#            used in classification
+# $idmap     (optional) Reference to a hash that will map word ids in the $matrix to
+#            actual words
 #
 # Splits the mail message into valid words, then runs the Bayes algorithm to figure out
 # which bucket it belongs in.  Returns the bucket name
@@ -1532,7 +1537,7 @@ sub get_top_bucket__
 # ---------------------------------------------------------------------------------------------
 sub classify
 {
-    my ( $self, $session, $file, $ui ) = @_;
+    my ( $self, $session, $file, $ui, $matrix, $idmap ) = @_;
     my $msg_total = 0;
 
     my $userid = $self->valid_session_key__( $session );
@@ -1631,11 +1636,15 @@ sub classify
     $self->{get_wordids__}->execute;
 
     my @id_list;
-    my %idmap;
+    my %temp_idmap;
+
+    if ( !defined( $idmap ) ) {
+        $idmap = \%temp_idmap; 
+    }
 
     while ( my $row = $self->{get_wordids__}->fetchrow_arrayref ) {
         push @id_list, ($row->[0]);
-        $idmap{$row->[0]} = $row->[1]; 
+        $$idmap{$row->[0]} = $row->[1]; 
     }
      
     $self->{get_wordids__}->finish;           
@@ -1654,10 +1663,14 @@ sub classify
     # %matrix maps wordids and bucket names to counts
     # $matrix{$wordid}{$bucket} == $count
 
-    my %matrix;
+    my %temp_matrix;
+   
+    if ( !defined( $matrix ) ) { 
+        $matrix = \%temp_matrix;
+    }
 
     while ( my $row = $self->{db_classify__}->fetchrow_arrayref ) {
-        $matrix{$row->[1]}{$row->[2]} = $row->[0];
+        $$matrix{$row->[1]}{$row->[2]} = $row->[0];
     }
 
     $self->{db_classify__}->finish;
@@ -1669,20 +1682,20 @@ sub classify
         foreach my $bucket (@buckets) {
             my $probability = 0;
  
-            if ( defined($matrix{$id}{$bucket}) && ( $matrix{$id}{$bucket} > 0 ) ) {
-                $probability = log( $matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket} );
+            if ( defined($$matrix{$id}{$bucket}) && ( $$matrix{$id}{$bucket} > 0 ) ) {
+                $probability = log( $$matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket} );
 	    }
 
-            $matchcount{$bucket} += $self->{parser__}{words__}{$idmap{$id}} if ($probability != 0);
+            $matchcount{$bucket} += $self->{parser__}{words__}{$$idmap{$id}} if ($probability != 0);
             $probability = $self->{not_likely__}{$userid} if ( $probability == 0 );
             $wmax = $probability if ( $wmax < $probability );
-            $score{$bucket} += ( $probability * $self->{parser__}{words__}{$idmap{$id}} );
+            $score{$bucket} += ( $probability * $self->{parser__}{words__}{$$idmap{$id}} );
         }
 
         if ($wmax > $self->{not_likely__}{$userid}) {
-            $correction += $self->{not_likely__}{$userid} * $self->{parser__}{words__}{$idmap{$id}};
+            $correction += $self->{not_likely__}{$userid} * $self->{parser__}{words__}{$$idmap{$id}};
         } else {
-            $correction += $wmax * $self->{parser__}{words__}{$idmap{$id}};
+            $correction += $wmax * $self->{parser__}{words__}{$$idmap{$id}};
         }
     }
 
@@ -1828,7 +1841,7 @@ sub classify
                     my $sumfreq = 0;
                     my %wval;
                     foreach my $bucket (@ranking) {
-                        $wval{$bucket} = $matrix{$id}{$bucket} || 0;
+                        $wval{$bucket} = $$matrix{$id}{$bucket} || 0;
                         $sumfreq += $wval{$bucket};
                     }
                     foreach my $bucket (@ranking) {
@@ -1841,35 +1854,35 @@ sub classify
             if ($self->{wmformat__} eq 'prob') {
                 @ranked_ids = sort {$wordprobs{$ranking[0],$b} <=> $wordprobs{$ranking[0],$a}} @id_list;
             } else {
-                @ranked_ids = sort {($matrix{$b}{$ranking[0]}||0) <=> ($matrix{$a}{$ranking[0]}||0)} @id_list;
+                @ranked_ids = sort {($$matrix{$b}{$ranking[0]}||0) <=> ($$matrix{$a}{$ranking[0]}||0)} @id_list;
             }
 
             foreach my $id (@ranked_ids) {
                 my $known = 0;
 
                 foreach my $bucket (@ranking) {
-                    if ( defined( $matrix{$id}{$bucket} ) ) {
+                    if ( defined( $$matrix{$id}{$bucket} ) ) {
                         $known = 1;
                         last;
                     }
                 }
 
                 if ( $known == 1 ) {
-                    my $wordcolor = $self->get_bucket_color( $session, $self->get_top_bucket__( $userid, $id, \%matrix, \@ranking ) );
-                    my $count = $self->{parser__}->{words__}{$idmap{$id}};
+                    my $wordcolor = $self->get_bucket_color( $session, $self->get_top_bucket__( $userid, $id, $matrix, \@ranking ) );
+                    my $count = $self->{parser__}->{words__}{$$idmap{$id}};
 
-                    $self->{scores__} .= "<tr>\n<td><font color=\"$wordcolor\">$idmap{$id}</font></td><td>&nbsp;</td><td>$count</td><td>&nbsp;</td>\n";
+                    $self->{scores__} .= "<tr>\n<td><font color=\"$wordcolor\">$$idmap{$id}</font></td><td>&nbsp;</td><td>$count</td><td>&nbsp;</td>\n";
 
                     my $base_probability = 0;
-                    if ( defined($matrix{$id}{$ranking[0]}) && ( $matrix{$id}{$ranking[0]} > 0 ) ) {
-                        $base_probability = log( $matrix{$id}{$ranking[0]} / $self->{db_bucketcount__}{$userid}{$ranking[0]} );
+                    if ( defined($$matrix{$id}{$ranking[0]}) && ( $$matrix{$id}{$ranking[0]} > 0 ) ) {
+                        $base_probability = log( $$matrix{$id}{$ranking[0]} / $self->{db_bucketcount__}{$userid}{$ranking[0]} );
 	            }
 
                     foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
                         my $bucket = $ranking[$ix];
                         my $probability = 0;
-                        if ( defined($matrix{$id}{$bucket}) && ( $matrix{$id}{$bucket} > 0 ) ) {
-                            $probability = log( $matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket} );
+                        if ( defined($$matrix{$id}{$bucket}) && ( $$matrix{$id}{$bucket} > 0 ) ) {
+                            $probability = log( $$matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket} );
 	                }
                         my $color        = 'black';
 
@@ -2792,7 +2805,47 @@ sub get_html_colored_message
     return undef if ( !defined( $userid ) );
 
     $self->{parser__}->{color__} = $session;
+    $self->{parser__}->{color_matrix__} = undef;
+    $self->{parser__}->{color_idmap__}  = undef;
+    $self->{parser__}->{color_userid__} = undef;
     $self->{parser__}->{bayes__} = bless $self;
+
+    # Pass language parameter to parse_file()
+
+    my $result = $self->{parser__}->parse_file( $file,
+                                                $self->module_config_( 'html', 'language' ),
+                                                $self->global_config_( 'message_cutoff'   ) );
+
+    $self->{parser__}->{color__} = '';
+
+    return $result;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# fast_get_html_colored_message
+#
+# Parser a mail message stored in a file and returns HTML representing the message
+# with coloring of the words
+#
+# $session        A valid session key returned by a call to get_session_key
+# $file           The file to colorize
+# $matrix         Reference to the matrix hash from a call to classify
+# $idmap          Reference to the idmap hash from a call to classify
+#
+# ---------------------------------------------------------------------------------------------
+sub fast_get_html_colored_message
+{
+    my ( $self, $session, $file, $matrix, $idmap ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    $self->{parser__}->{color__}        = $session;
+    $self->{parser__}->{color_matrix__} = $matrix;
+    $self->{parser__}->{color_idmap__}  = $idmap;
+    $self->{parser__}->{color_userid__} = $userid;
+    $self->{parser__}->{bayes__}        = bless $self;
 
     # Pass language parameter to parse_file()
 

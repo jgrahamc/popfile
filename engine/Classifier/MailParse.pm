@@ -136,7 +136,10 @@ sub new
     # Specifies the parse mode, '' means no color output, if non-zero
     # then color output using a specific session key stored here
 
-    $self->{color__}     = '';
+    $self->{color__}        = '';
+    $self->{color_matrix__} = undef;
+    $self->{color_idmap__}  = undef;
+    $self->{color_userid__} = undef;
 
     # This will store the from, to, cc and subject from the last parse
     $self->{from__}      = '';
@@ -204,6 +207,46 @@ sub new
     $self->{first20__}      = '';
 
     return bless $self, $type;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_color__
+#
+# Gets the color for the passed in word
+#
+# $word          The word to check
+#
+# ---------------------------------------------------------------------------------------------
+sub get_color__
+{
+    my ( $self, $word ) = @_;
+
+    if ( !defined( $self->{color_matrix__} ) ) {
+        return $self->{bayes__}->get_color( $self->{color__}, $word );
+    } else {
+        my $id;
+
+        for my $i (keys %{$self->{color_idmap__}}) {
+            if ( $word eq $self->{color_idmap__}{$i} ) {
+                $id = $i;
+                last;
+	    }
+	}
+
+        if ( defined( $id ) ) {
+            my @buckets = $self->{bayes__}->get_buckets( $self->{color__} );
+
+	    return $self->{bayes__}->get_bucket_color( $self->{color__}, 
+                $self->{bayes__}->get_top_bucket__( 
+                    $self->{color_userid__}, 
+                    $id, 
+                    $self->{color_matrix__},  
+		    \@buckets ) );
+	} else {
+            return 'black';
+	}
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -326,7 +369,7 @@ sub update_pseudoword
             if ( $encoded == 1 )  {
                 $literal =~ s/</&lt;/g;
                 $literal =~ s/>/&gt;/g;
-                my $color = $self->{bayes__}->get_color( $self->{color__}, $mword);
+                my $color = $self->get_color__($mword);
                 my $to    = "<b><font color=\"$color\"><a title=\"$mword\">$literal</a></font></b>";
                 $self->{ut__} .= $to . ' ';
 	    }
@@ -367,7 +410,7 @@ sub update_word
         }
 
         if ( $self->{color__} ne '' ) {
-            my $color = $self->{bayes__}->get_color( $self->{color__}, $mword);
+            my $color = $self->get_color__($mword);
             if ( $encoded == 0 )  {
                 $after = '&' if ( $after eq '>' );
                 if ( !( $self->{ut__} =~ s/($before)\Q$word\E($after)/$1<b><font color=\"$color\">$word<\/font><\/b>$2/ ) ) {
@@ -1575,7 +1618,7 @@ sub parse_header
 
     if ( $self->update_pseudoword( 'header', $header, 0, $header ) ) {
         if ( $self->{color__} ne '' ) {
-            my $color     = $self->{bayes__}->get_color( $self->{color__}, "header:$header" );
+            my $color     = $self->get_color__("header:$header" );
             $self->{ut__} =  "<b><font color=\"$color\">$header</font></b>: $fix_argument\015\012";
         }
     } else {
