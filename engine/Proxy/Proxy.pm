@@ -135,9 +135,10 @@ sub start
                                     Listen    => SOMAXCONN,
                                     Reuse     => 1 ); # PROFILE BLOCK STOP
 
+    my $name = $self->name();
+
     if ( !defined( $self->{server__} ) ) {
         my $port = $self->config_( 'port' );
-        my $name = $self->name();
         print STDERR <<EOM; # PROFILE BLOCK START
 
 \nCouldn't start the $name proxy because POPFile could not bind to the
@@ -159,7 +160,7 @@ EOM
     # Tell the UI about the SOCKS parameters
 
     $self->register_configuration_item_( 'configuration',  # PROFILE BLOCK START
-                                         $self->name() . '-socks-configuration',
+                                         $name . '-socks-configuration',
                                          'socks-widget.thtml',
                                          $self );          # PROFILE BLOCK STOP
 
