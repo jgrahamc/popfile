@@ -353,7 +353,7 @@ Imap_Login                              Nom de compte IMAP :
 Imap_LoginError                         Veuillez entrer un nom de compte !
 Imap_Password                           Mot de passe du compte IMAP :
 Imap_PasswordError                      Veuillez entrer un mot de passe pour le serveur !
-Imap_Expunge                            Effacer les messages supprimés des dossiers consultés
+Imap_Expunge                            Effacer les messages supprimés des dossiers surveillés
 Imap_Interval                           Période de rafraîchissement en secondes :
 Imap_IntervalError                      Veuillez entrer un délai compris entre 10 et 3600 secondes.
 Imap_Bytelimit                          Par message, nombre d'octets pris en compte pour la classification. Entrez 0 (zéro) pour le message complet :
@@ -364,8 +364,8 @@ Imap_UpdateError1                       Impossible de s'identifier. Veuillez vér
 Imap_UpdateError2                       Impossible de se connecter au serveur. Veuillez vérifier le nom du serveur et le port, et vous assurer que vous être en ligne.
 Imap_UpdateError3                       Veuillez configurer préalablement les détails de la connexion.
 Imap_NoConnectionMessage                Veuillez configurer préalablement les détails de la connexion. Une fois cela fait, d'avantage d'options seront disponibles sur cette page.
-Imap_WatchMore                          un dossier à la liste des dis--> a folder to list of watched folders
-Imap_WatchedFolder                      --> Watched folder no
+Imap_WatchMore                          un dossier à la liste des dossiers surveillés
+Imap_WatchedFolder                      Dossier surveillé n°
 
 Shutdown_Message                        POPFile s'est arrêté
 
