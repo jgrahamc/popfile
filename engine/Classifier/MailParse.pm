@@ -298,6 +298,8 @@ sub add_line
 
             $p += 1024;
         }
+    } else {
+    	$self->increment_word( 'trick:invisibleink' );
     }
 }
 
@@ -810,7 +812,7 @@ sub parse_stream
                                                 
                 # If we have an email header then just keep the part after the :
                 
-                if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ )  {
+                if ( $line =~ /^([A-Za-z-]+):[ \t]*([^\n\r]*)/ )  {
                     my $header   = $1;
                     my $argument = $2;
     
