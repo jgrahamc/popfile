@@ -739,34 +739,6 @@ sub save_magnets__
 
 # ---------------------------------------------------------------------------------------------
 #
-# chi2
-#
-# $val       The value on which we do the chi2 test
-# $free      Number of degrees of freedom
-# $modifier  log() of a power of 10 to make values come in range
-#
-# Performs a chi-squared calculation on the passed in log(probability), liberally inspired
-# by code in SpamBayes and work by Gary Robinson
-#
-# ---------------------------------------------------------------------------------------------
-sub chi2
-{
-    my ( $val, $free, $modifier ) = @_;
-
-    my $m    = $val + $modifier;
-    my $sum  = exp(-$m);
-    my $term = $sum;
-
-    for my $i (1..($free/2-1)) {
-        $term *= $m / $i;
-        $sum  += $term;
-    }
-
-    return ($sum<1)?$sum:1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # classify
 #
 # $file      The name of the file containing the text to classify (or undef to use
@@ -914,10 +886,6 @@ sub classify
     my $base_score = $score{$ranking[0]};
     my $total = 0;
 
-    foreach my $bucket (@buckets) {
-        $chi{$bucket} = chi2( $score{$bucket}, $word_count, -int($score{$ranking[0]}/log(10)) * log(10) );
-    }
-
     # If the first and second bucket are too close in their probabilities, call the message
     # unclassified.  Also if there are fewer than 2 buckets.
     my $class = 'unclassified';
@@ -925,21 +893,6 @@ sub classify
     if ( @buckets > 1 && $score{$ranking[0]} > ( $score{$ranking[1]} + $self->{unclassified__} ) ) {
         $class = $ranking[0];
     }
-
-    # Now take a look at the top two chi tests, if they are close to each other then
-    # we are unsure.  If there are fewer than two buckets, the message is unclassified,
-    # and there is no point to looking at the chi result.
-
-    my $certainty;
-    if (@buckets > 1) {
-    my $c0 = 1.0 - $chi{$ranking[0]};
-    my $c1 = 1.0 - $chi{$ranking[1]};
-        $certainty = ($c1-$c0 + 1) / 2;
-    } else {
-        $certainty = 1.0;
-    }
-
-    $class = 'unsure' if ( $certainty < 0.4 );
 
     # Compute the total of all the scores to generate the normalized scores and probability
     # estimate.  $total is always 1 after the first loop iteration, so any additional term
@@ -998,13 +951,8 @@ sub classify
         }
 
         $self->{scores__} .= "<a name=\"scores\">";
+        $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n";
 
-        # If there are fewer than 2 buckets, there is no "verdict " to mention.
-        if (@buckets > 1) {
-            $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<b>Verdict: <font color=\"$self->{colors__}{$class}\">$class ($certainty  $chi{$ranking[0]} $chi{$ranking[1]})</font></b><p>\n";
-        } else {
-            $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n";
-        }
         $self->{scores__} .= "<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
         if ($self->{wmformat__} eq 'score') {
             $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\" align=\"center\">$language{Score}</th><th scope=\"col\">$language{Probability}</th></tr>\n";

@@ -1021,7 +1021,7 @@ sub parse_html
         # handle the tag, if we don't then keep building up the arguments of the tag
 
         if ( $self->{in_html_tag__} )  {
-            if ( $line =~ s/^(.*?)>// ) {
+            if ( $line =~ s/^([^>]*?)>// ) {
                 $self->{html_arg__} .= $1;
                 $self->{in_html_tag__} = 0;
                 $self->{html_tag__} =~ s/=\n ?//g;
@@ -1051,7 +1051,7 @@ sub parse_html
         # vars that record the tag and return 1 to indicate to the caller that we have an
         # unclosed tag
 
-        if ( $line =~ /^<([\/]?)([^ >]+)([^>]*)$/ )  {
+        if ( $line =~ /^<([\/]?)([A-Za-z][^ >]+)([^>]*)$/ )  {
             $self->{html_end}    = ( $1 eq '/' );
             $self->{html_tag__}    = $2;
             $self->{html_arg__}    = $3;
