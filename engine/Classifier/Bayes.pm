@@ -348,7 +348,19 @@ sub load_word_matrix
         # See if there's a color file specified
         if ( open COLOR, "<$bucket/color" ) {
             $color = <COLOR>;
-            $color =~ s/[\r\n]//g;
+            
+            # Someone (who shall remain nameless) went in an manually created
+            # empty color files in their corpus directories which would cause
+            # $color at this point to be undefined and hence you'd get warnings
+            # about undefined variables below.  So this little test is to deal
+            # with that user and to make POPFile a little safer which is always
+            # a good thing
+            
+            if ( !defined( $color ) ) {
+                $color = '';
+            } else {
+                $color =~ s/[\r\n]//g;
+            }
             close COLOR;
         }
 
