@@ -935,6 +935,7 @@ sub corpus_page
     my $result;
     my $create_message = '';
     my $delete_message = '';
+    my $rename_message = '';
     
     if ( ( $form{color} ne '' ) && ( $form{bucket} ne '' ) )
     {
@@ -1023,6 +1024,23 @@ sub corpus_page
         
         $classifier->load_word_matrix();
     }
+
+    if ( $form{newname} ne '' )
+    {
+        if ( $form{newname} =~ /[^a-z]/ ) 
+        {
+            $rename_message = "<blockquote><font color=red size=+1>Bucket names can only contain the letters a to z in lower case</font></blockquote>";
+        }
+        else
+        {
+            $form{name} = lc($form{name});
+            $form{newname} = lc($form{newname});
+            rename("corpus/$form{name}" , "corpus/$form{newname}");
+            $rename_message = "<blockquote><b>Rename bucket $form{name} to $form{newname}</b></blockquote>";
+            $classifier->load_word_matrix();
+        }
+    }    
+    
     
     my $body = "<table width=75%><tr><td valign=top><h2>Summary</h2><table width=100% cellspacing=0 cellpadding=0><tr><td><b>Bucket Name</b><td align=right><b>Total Words</b><td width=50>&nbsp;<td align=left><b>Change Color</b>";
 
@@ -1073,6 +1091,13 @@ sub corpus_page
         $body .= "<option value=$bucket>$bucket</option>";
     }
     $body .= "</select> <input type=submit name=delete value=Delete><input type=hidden name=session value=$session_key></form>$delete_message";
+
+    $body .= "<p><form action=/buckets><b>Rename bucket named:</b> <br><select name=name>";
+    foreach my $bucket (@buckets)
+    {
+        $body .= "<option value=$bucket>$bucket</option>";
+    }
+    $body .= "</select> <b>to</b> <input type=text name=newname> <input type=submit name=rename value=Rename><input type=hidden name=session value=$session_key></form>$rename_message";
 
     $body .= "<p><hr><a name=Lookup><h2>Lookup</h2><form action=/buckets#Lookup><p><b>Lookup word in corpus: </b><br><input name=word type=text> <input type=submit name=lookup value=Lookup><input type=hidden name=session value=$session_key></form>";
 
@@ -1620,18 +1645,40 @@ sub run_popfile
     my $connect_server = shift;
     my $connect_port   = shift;
     my $ui_port        = shift;
+    my $server;
+    my $ui;
     
-    my $server = IO::Socket::INET->new( Proto     => 'tcp',
+    if ( $configuration{localpop} == 1 )
+    {
+        $server = IO::Socket::INET->new( Proto     => 'tcp',
                                         LocalAddr => 'localhost', 
                                         LocalPort => $listen_port,
                                         Listen    => SOMAXCONN,
-                                        Reuse     => 1 ) or die "Couldn't open the POP3 listen port $listen_port";
-
-    my $ui     = IO::Socket::INET->new( Proto     => 'tcp',
-                                        LocalAddr => 'localhost', 
-                                        LocalPort => $ui_port,
+                                        Reuse     => 1 ) or die "Couldn't open the local POP3 listen port $listen_port";
+    }
+    else
+    {
+        $server = IO::Socket::INET->new( Proto     => 'tcp',
+                                        LocalPort => $listen_port,
                                         Listen    => SOMAXCONN,
-                                        Reuse     => 1 ) or die "Couldn't open the GUI port $ui_port";;
+                                        Reuse     => 1 ) or die "Couldn't open the server POP3 listen port $listen_port";
+    }
+    
+    if ( $configuration{localpop} == 1 )
+    {
+        $ui     = IO::Socket::INET->new( Proto     => 'tcp',
+                                         LocalAddr => 'localhost', 
+                                         LocalPort => $ui_port,
+                                         Listen    => SOMAXCONN,
+                                         Reuse     => 1 ) or die "Couldn't open the GUI port $ui_port";
+    }
+    else
+    {
+        $ui     = IO::Socket::INET->new( Proto     => 'tcp',
+                                         LocalPort => $ui_port,
+                                         Listen    => SOMAXCONN,
+                                         Reuse     => 1 ) or die "Couldn't open the GUI port $ui_port";
+    }
 
     # This is used to perform select calls on the $server socket so that we can decide when there is 
     # a call waiting an accept it without having to block
