@@ -462,7 +462,6 @@ sub url_handler__
 
                 # If we are dealing with an array of values (see parse_form_
                 # for details) then we need to unpack it into separate entries),
-                # we ignore non-array values since all values have an array equivalent
 
                 if ( $k =~ /^(.+)_array$/ ) {
                     my $field = $1;
@@ -470,13 +469,15 @@ sub url_handler__
                     foreach my $v (@{$self->{form_}{$k}}) {
                         $redirect_url .= "$field=$v&"
                     }
+                } else {
+                    $redirect_url .= "$k=$self->{form_}{$k}&"
                 }
             }
         }
 
         $redirect_url =~ s/&$//;
 
-        password_page( $self, $client, 0, $redirect_url );
+        $self->password_page( $client, 0, $redirect_url );
 
         return 1;
     }

@@ -368,6 +368,20 @@ GET /jump_to_message?view=popfile10001=1.msg
 NOTMATCH Single Message View
 MATCH Recent Messages
 
+# jump_to_message and a password
+
+GET /security
+INPUTIS password
+CONFIGIS html_password
+SETSUBMIT password secret
+GET /jump_to_message?view=popfile10000=1.msg
+MATCH Enter password:
+SETSUBMIT password secret
+MATCH Single Message View
+MATCH Testing Refresh
+GET /security
+SETSUBMIT password
+
 # Quick Magnets
 
 GET /jump_to_message?view=popfile10000=1.msg
