@@ -110,13 +110,8 @@ sub start
     # item that needs a UI component
 
     $self->register_configuration_item_( 'configuration',
-                                         'smtp_port',
-                                         'smtp-port.thtml',
-                                         $self );
-
-    $self->register_configuration_item_( 'configuration',
-                                         'smtp_force_fork',
-                                         'smtp-force-fork.thtml',
+                                         'smtp_fork_and_port',
+                                         'smtp-configuration.thtml',
                                          $self );
 
     $self->register_configuration_item_( 'security',
@@ -326,8 +321,9 @@ sub configure_item
 {
     my ( $self, $name, $templ, $language ) = @_;
 
-    if ( $name eq 'smtp_port' ) {
+    if ( $name eq 'smtp_fork_and_port' ) {
         $templ->param( 'smtp_port' => $self->config_( 'port' ) );
+        $templ->param( 'smtp_force_fork_on' => $self->config_( 'force_fork' ) );
     }
 
     if ( $name eq 'smtp_local' ) {
@@ -340,10 +336,6 @@ sub configure_item
 
     if ( $name eq 'smtp_server_port' ) {
         $templ->param( 'smtp_chain_port' => $self->config_( 'chain_port' ) );
-    }
-
-    if ( $name eq 'smtp_force_fork' ) {
-        $templ->param( 'smtp_force_fork_on' => $self->config_( 'force_fork' ) );
     }
 
 
@@ -366,7 +358,12 @@ sub validate_item
 {
     my ( $self, $name, $templ, $language, $form ) = @_;
 
-    if ( $name eq 'smtp_port' ) {
+    if ( $name eq 'smtp_fork_and_port' ) {
+
+        if ( defined($$form{smtp_force_fork}) ) {
+            $self->config_( 'force_fork', $$form{smtp_force_fork} );
+        }
+
         if ( defined($$form{smtp_port}) ) {
             if ( ( $$form{smtp_port} >= 1 ) && ( $$form{smtp_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{smtp_port} );
@@ -403,11 +400,6 @@ sub validate_item
         }
     }
 
-    if ( $name eq 'smtp_force_fork' ) {
-        if ( defined($$form{smtp_force_fork}) ) {
-            $self->config_( 'force_fork', $$form{smtp_force_fork} );
-        }
-    }
 
     #$self->SUPER::validate_item( $name, $templ, $language, $form );
 }
