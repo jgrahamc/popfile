@@ -3048,10 +3048,6 @@ sub history_delete_file
 {
     my ( $self, $mail_file, $archive ) = @_;
     
-    print "|||";
-    
-    print "$mail_file\n";
-    
     my $name = $mail_file;
     $name =~ s/^.*\/(.*)$/$1/;
     
@@ -3102,9 +3098,7 @@ sub history_delete_file
 sub history_copy_file
 {
     my ( $self, $from, $to_dir, $to_name ) = @_;
-    
-    print "...\n";
-            
+           
     if ( open( FROM, "<$from") && open( TO, ">$to_dir\/$to_name") ) {
         binmode FROM;
         while (<FROM>) {
