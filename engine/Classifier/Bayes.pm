@@ -974,6 +974,8 @@ sub write_line__
 # Returns a classification if it worked and the name of the file where the message
 # was saved
 #
+# IMPORTANT NOTE: $mail and $client should be binmode
+#
 # ---------------------------------------------------------------------------------------------
 sub classify_and_modify
 {
