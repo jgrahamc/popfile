@@ -17,7 +17,7 @@ use Classifier::Bayes;
 
 # This version number
 my $major_version = 0;
-my $minor_version = 11;
+my $minor_version = 12;
 
 # A list of the messages currently on the server, each entry in this list
 # is a hash containing the following items
@@ -967,6 +967,7 @@ sub run_popfile
                                             {
                                                 $msg_subject = $1;
                                                 $msg_subject =~ s/(\012|\015)//g;
+                                                next;
                                             } 
                                         }
                                         
