@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.66"
+  !define C_PFI_VERSION  "0.2.67"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -1750,7 +1750,7 @@ Section "-MakeBatchFile" SecMakeBatch
   FileWrite ${L_FILEHANDLE} "${MB_NL}"
   FileWrite ${L_FILEHANDLE} "REM Debug command: Start POPFile in foreground using 'popfile.pl'${MB_NL}"
   FileWrite ${L_FILEHANDLE} "${MB_NL}"
-  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\perl.exe$\" $\"%POPFILE_ROOT%\popfile.pl$\"${MB_NL}"
+  FileWrite ${L_FILEHANDLE} "$\"%POPFILE_ROOT%\perl.exe$\" $\"%POPFILE_ROOT%\popfile.pl$\" --verbose=1${MB_NL}"
   FileWrite ${L_FILEHANDLE} "goto exit${MB_NL}"
   FileWrite ${L_FILEHANDLE} "${MB_NL}"
   FileWrite ${L_FILEHANDLE} "REM Debug command: Start POPFile using the 'Message Capture' utility${MB_NL}"
@@ -5286,7 +5286,7 @@ continue:
   Call SetTrayIconMode
   SetOutPath $G_ROOTDIR
   ClearErrors
-  Exec '"$G_ROOTDIR\popfile.exe"'
+  Exec '"$G_ROOTDIR\popfile.exe" --verbose=1'
   IfErrors 0 startup_ok
   StrCmp ${L_CONSOLE} "f" error_msg
   Sleep ${C_MIN_BANNER_DISPLAY_TIME}
