@@ -2450,7 +2450,6 @@ sub parse_with_kakasi
     require Text::Kakasi;
 
     my $temp_file  = $self->global_config_( 'msgdir' ) . "kakasi$dcount" . "=$mcount.msg";
-    print $temp_file;
 
     # Split Japanese email body into words using Kakasi Wakachigaki
     # mode(-w is passed to Kakasi as argument). The most common charset of
