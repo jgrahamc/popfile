@@ -3,7 +3,7 @@
 ;
 
 !define MUI_PRODUCT "POPFile" 
-!define MUI_VERSION "0.18.0 (RC2)"
+!define MUI_VERSION "0.18.0 (RC3)"
 
 !include "${NSISDIR}\Contrib\Modern UI\System.nsh"
 
@@ -280,6 +280,8 @@ Section "Languages" SecLangs
   File "..\engine\manual\de\*.gif"
   SetOutPath $INSTDIR\manual\no
   File "..\engine\manual\no\*.html"
+  SetOutPath $INSTDIR\manual\fr
+  File "..\engine\manual\fr\*.html"
 
 SectionEnd
 
@@ -353,11 +355,13 @@ skip_confirmation:
   Delete $INSTDIR\manual\en\*.html
   Delete $INSTDIR\manual\br\*.html
   Delete $INSTDIR\manual\no\*.html
+  Delete $INSTDIR\manual\fr\*.html
   Delete $INSTDIR\manual\de\*.html
   Delete $INSTDIR\manual\de\*.gif
   RMDir $INSTDIR\manual\en
   RMDir $INSTDIR\manual\br
   RMDir $INSTDIR\manual\no
+  RMDir $INSTDIR\manual\fr
   RMDir $INSTDIR\manual\de
   Delete $INSTDIR\manual\*.gif
   RMDir $INSTDIR\manual
