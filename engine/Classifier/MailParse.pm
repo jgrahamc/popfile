@@ -581,7 +581,7 @@ sub update_tag
                 # TODO: Decide what to do here, ignoring CID's for now
             } else {
 
-                my $host = add_url( $self, $value, $encoded, $quote, $end_quote, '', 1 );
+                my $host = add_url( $self, $value, $encoded, $quote, $end_quote, '' );
 
                 # If the host name is not blank (i.e. there was a hostname in the url
                 # and it was an image, then if the host was not this host then report
@@ -895,7 +895,7 @@ sub add_url
         # special subTLD's can just get their own classification weight (eg, .bc.ca)
         # http://www.0dns.org has a good reference of ccTLD's and their sub-tld's if desired
 
-        if ( $hostform eq "name" ) {
+        if ( $hostform eq 'name' ) {
             while ( $host =~ s/^([^\.])+\.(.*\.(.*))$/$2/ ) {
                 update_word( $self, $2, $encoded, '[\.]', '[<]', $prefix) if ( !defined( $noadd ) );
             }
