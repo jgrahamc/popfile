@@ -37,15 +37,18 @@ use locale;
 # The POPFile classes are stored by reference in the %components hash
 my %components;
 
-# Require at least v5.8.0 of Perl.  This is primarily because of the changes made in
-# Windows ActivePerl to support fork() and this statement can probably be removed on
-# non-Windows platforms, but I've decided to enforce it globally here since I am
-# only testing on 5.8.0 and don't want to guarantee that it works on older version of
-# Perl.  The people who understand this issue will also be capable of getting the
-# latest Perl, the people who don't will be using the Windows installer that installs
-# Perl v5.8.0 for them
+# This is the ONLY PIECE OF PLATFORM SPECIFIC CODE IN POPFILE and all it does is 
+# force Windows use to have v5.8.0 because that's the version with good fork() support
+# everyone else can use 5.6.1.  This is probably only temporary because at some point
+# I am going to force 5.8.0 for everyone because of the better Unicode support
 
-require v5.8.0;
+print $^O;
+
+if ( $^O eq 'MSWin32' ) {
+	require v5.8.0;
+} else {
+	require v5.6.1;
+}
 
 use Classifier::Bayes;          # Use the Naive Bayes classifier
 use UI::HTML;                   # Load the POPFile HTML user interface
