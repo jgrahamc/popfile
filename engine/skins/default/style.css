@@ -17,6 +17,18 @@ body {
   border: 3px #CCCC99 solid;
 }
 
+.shellStatusMessage { 
+  color: #000000;
+  background-color: #EDEDCA;
+  border: 3px #CCCC99 solid;
+}
+
+.shellErrorMessage { 
+  color: #FF0000;
+  background-color: #EDEDCA;
+  border: 3px #CCCC99 solid;
+}
+
 table.head {
   width: 100%;
 }

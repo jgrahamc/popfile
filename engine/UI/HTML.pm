@@ -499,6 +499,7 @@ sub url_handler__
                        'buckets'        => [ \&corpus_page,        'corpus-page.thtml'        ],
                        'magnets'        => [ \&magnet_page,        'magnet-page.thtml'        ],
                        'advanced'       => [ \&advanced_page,      'advanced-page.thtml'      ],
+                       'users'          => [ \&users_page,         'users-page.thtml'         ],
                        'history'        => [ \&history_page,       'history-page.thtml'       ],
                        'view'           => [ \&view_page,          'view-page.thtml'          ] );     # PROFILE BLOCK STOP
 
@@ -506,6 +507,7 @@ sub url_handler__
                       '/buckets'        => 'buckets',
                       '/magnets'        => 'magnets',
                       '/advanced'       => 'advanced',
+                      '/users'          => 'users',
                       '/view'           => 'view',
                       '/history'        => 'history',
                       '/'               => 'history' );      # PROFILE BLOCK STOP
@@ -516,6 +518,7 @@ sub url_handler__
     if ( !$self->user_global_config_( 1, 'can_admin' ) ) {
         delete $url_table{administration};
         delete $url_table{advanced};
+        delete $url_table{users};
     }
 
     # Any of the standard pages can be found in the url_table, the
@@ -607,7 +610,7 @@ sub http_ok
 
     $selected = -1 if ( !defined( $selected ) );
 
-    my @tab = ( 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard' );
+    my @tab = ( 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard', 'menuStandard' );
     $tab[$selected] = 'menuSelected' if ( ( $selected <= $#tab ) && ( $selected >= 0 ) );
 
     for my $i (0..$#tab) {
@@ -684,7 +687,8 @@ sub handle_history_bar__
              ( $self->{form_}{page_size} <= 1000 ) ) {
             $self->user_config_( 1, 'page_size', $self->{form_}{page_size} );
         } else {
-            $templ->param( 'Configuration_If_Page_Size_Error' => 1 );
+            $self->error_message__( $templ,
+                $self->{language__}{Configuration_Error4} );
             delete $self->{form_}{page_size};
         }
     }
@@ -698,6 +702,8 @@ sub handle_history_bar__
             $self->user_module_config_( 1, 'history', 'history_days',
                 $self->{form_}{history_days} );
         } else {
+            $self->error_message__( $templ,
+                $self->{language__}{Configuration_Error5} );
             $templ->param( 'Configuration_If_History_Days_Error' => 1 );
             delete $self->{form_}{history_days};
         }
@@ -1069,6 +1075,117 @@ sub pretty_date__
 
 #----------------------------------------------------------------------------
 #
+# users_page - Handle user creation, deletion, etc.
+#
+# $client     The web browser to send the results to
+#
+#----------------------------------------------------------------------------
+sub users_page
+{
+    my ( $self, $client, $templ, $template, $page ) = @_;
+
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
+                                                    $page );
+
+    # Handle user creation
+
+    if ( exists( $self->{form_}{create} ) && ( $self->{form_}{newuser} ne '' ) ) {
+        my $result = $self->classifier_()->create_user( $self->{api_session__}, $self->{form_}{newuser}, $self->{form_}{clone} );
+        if ( $result == 0 ) {
+            if ( $self->{form_}{clone} ne '' ) {
+                 $self->status_message__( $templ, sprintf( $self->{language__}{Users_Created_And_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone} ) );
+            } else {
+                $self->status_message__( $templ, sprintf( $self->{language__}{Users_Created}, $self->{form_}{newuser} ) );
+            }
+        }
+        if ( $result == 1 ) {
+            $self->error_message__( $templ, sprintf( $self->{language__}{Users_Not_Created_Exists}, $self->{form_}{newuser} ) );
+        }
+        if ( $result == 2 ) {
+            $self->error_message__( $templ, sprintf( $self->{language__}{Users_Not_Created}, $self->{form_}{newuser} ) );
+        }
+        if ( $result == 3 ) {
+            $self->error_message__( $templ, sprintf( $self->{language__}{Users_Created_Not_Cloned}, $self->{form_}{newuser}, $self->{form_}{clone} ) );
+        }
+    }
+
+    # Handle user removal
+
+    if ( exists( $self->{form_}{remove} ) && ( $self->{form_}{toremove} ne '' ) ) {
+        my $result = $self->classifier_()->remove_user( $self->{api_session__}, $self->{form_}{toremove} );
+        if ( $result == 0 ) {
+            $self->status_message__( $templ, sprintf( $self->{language__}{Users_Removed}, $self->{form_}{toremove} ) );
+        }
+        if ( $result == 1 ) {
+            $self->error_message__( $templ, sprintf( $self->{language__}{Users_Removed_Failed}, $self->{form_}{toremove} ) );
+        }
+        if ( $result == 2 ) {
+            $self->error_message__( $templ, sprintf( $self->{language__}{Users_Removed_Failed_Admin}, $self->{form_}{toremove} ) );
+        }
+    }
+
+    # Handle editing the parameters of a user
+
+    if ( defined( $self->{form_}{update_params} ) ) {
+        my $id = $self->classifier_()->get_user_id( $self->{api_session__}, $self->{form_}{editname} );
+        foreach my $param (sort keys %{$self->{form_}}) {
+            if ( $param =~ /parameter_(.*)/ ) {
+                $self->classifier_()->set_user_parameter_from_id( $id,
+                    $1, $self->{form_}{$param} );
+            }
+        }
+    }
+
+    my $users = $self->classifier_()->get_user_list( $self->{api_session__} );
+
+    my @user_loop;
+    my @remove_user_loop;
+    foreach my $user (@$users) {
+        my %row_data;
+        $row_data{Users_Name} = $user;
+        push ( @user_loop, \%row_data);
+        if ( $user ne 'admin' ) {
+            push ( @remove_user_loop, \%row_data);
+        }
+    }
+    if ( $#remove_user_loop != -1 ) {
+        $templ->param( 'Users_Loop_Remove' => \@remove_user_loop );
+        $templ->param( 'Users_If_Remove' => 1 );
+    }
+    $templ->param( 'Users_Loop_Edit' => \@user_loop );
+    $templ->param( 'Users_Loop_Copy' => \@user_loop );
+
+    if ( exists( $self->{form_}{edituser} ) ) {
+        my $id = $self->classifier_()->get_user_id( $self->{api_session__}, $self->{form_}{editname} );
+        my @parameters = $self->classifier_()->get_user_parameter_list( $self->{api_session__} );
+
+        my @parameter_list;
+        my $last = '';
+        foreach my $param (sort @parameters) {
+            my %row_data;
+            $param =~ /^([^_]+)_/;
+            if ( ( $last ne '' ) && ( $last ne $1 ) ) {
+                $row_data{Users_If_New_Module} = 1;
+            } else {
+                $row_data{Users_If_New_Module} = 0;
+            }
+            $last = $1;
+            $row_data{Users_Parameter} = $param;
+            my ( $val, $default ) = $self->classifier_()->get_user_parameter_from_id( $id, $param );
+            $row_data{Users_Value} = $val;
+            $row_data{Users_If_Changed} = !$default; 
+            push ( @parameter_list, \%row_data );
+        }
+        $templ->param( 'Users_Loop_Parameter' => \@parameter_list );
+        $templ->param( 'Users_If_Editing_User' => 1 );
+        $templ->param( 'Users_Edit_User_Name' => $self->{form_}{editname} );
+    }
+
+    $self->http_ok( $client, $templ, 5 );
+}
+
+#----------------------------------------------------------------------------
+#
 # advanced_page - very advanced configuration options
 #
 # $client     The web browser to send the results to
@@ -1207,7 +1324,7 @@ sub advanced_page
 
     $templ->param( 'Advanced_Loop_Parameter' => \@param_loop );
 
-    $self->http_ok( $client, $templ, 5 );
+    $self->http_ok( $client, $templ, 6 );
 }
 
 sub max
@@ -2829,6 +2946,46 @@ sub session_page
 
     my $templ = $self->load_template__( 'session-page.thtml' );
     $self->http_ok( $client, $templ );
+}
+
+#----------------------------------------------------------------------------
+#
+# status_message__
+#
+# Called to cause the next page generated to show a status message
+# (typically at the top)
+#
+# $templ             The current page template
+# $message           The message to display
+#
+#----------------------------------------------------------------------------
+sub status_message__
+{
+    my ( $self, $templ, $message ) = @_;
+
+    my $old = $templ->param( 'Header_Message' ) || '';
+    $templ->param( 'Header_If_Message' => 1 );
+    $templ->param( 'Header_Message' =>($old ne '')?("$message<br />$old" ):$message);
+}
+
+#----------------------------------------------------------------------------
+#
+# error_message__
+#
+# Called to cause the next page generated to show a error message
+# (typically at the top)
+#
+# $templ             The current page template
+# $message           The message to display
+#
+#----------------------------------------------------------------------------
+sub error_message__
+{
+    my ( $self, $templ, $message ) = @_;
+
+    my $old = $templ->param( 'Header_Error' ) || '';
+    $templ->param( 'Header_If_Error' => 1 );
+    $templ->param( 'Header_Error' => ($old ne '')?("$message<br />$old" ):$message);
 }
 
 #----------------------------------------------------------------------------

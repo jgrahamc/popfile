@@ -42,16 +42,6 @@
                 <input type="submit" class="submit" name="update_page_size" value="<TMPL_VAR NAME="Localize_Apply">" />
                 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
-            <TMPL_IF NAME="Configuration_If_Page_Size_Error">
-
-            <blockquote>
-                <div class="error01">
-                    <TMPL_VAR NAME="Localize_Configuration_Error4">
-                </div>
-            </blockquote>
-
-            </TMPL_IF>
-
         </div>
         <div class="configBarOption">
 
@@ -65,15 +55,6 @@
                 <TMPL_VAR NAME="Localize_History_Purge"></span>
                 <input type="submit" class="submit" name="update_history_days" value="<TMPL_VAR NAME="Localize_Apply">" />
 
-            <TMPL_IF NAME="Configuration_If_History_Days_Error">
-
-            <blockquote>
-                <div class="error01">
-                    <TMPL_VAR NAME="Localize_Configuration_Error5">
-                </div>
-            </blockquote>
-
-            </TMPL_IF>
         </div>
         </form>
      </td>

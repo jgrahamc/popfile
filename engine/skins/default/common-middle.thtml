@@ -24,6 +24,14 @@
         </tr>
     </table>
     <br />
+    <TMPL_IF NAME="Header_If_Message">
+    <table class="shellStatusMessage" width="100%"><tr class="shellStatusRow"><td><TMPL_VAR NAME="Header_Message"></td></tr></table>
+    <br />
+    </TMPL_IF>
+    <TMPL_IF NAME="Header_If_Error">
+    <table class="shellErrorMessage" width="100%"><tr class="shellErrorRow"><td><TMPL_VAR NAME="Header_Error"></td></tr></table>
+    <br />
+    </TMPL_IF>
     <table class="menu" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Header_MenuSummary>">
         <tr>
             <td class="menuIndent">&nbsp;</td>
@@ -45,6 +53,10 @@
                 </td>
                 <td class="menuSpacer"></td>
                 <td class="<TMPL_VAR NAME="Common_Middle_Tab5">" align="center">
+                    <a class="menuLink" href="/users?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Users"></a>
+                </td>
+                <td class="menuSpacer"></td>
+                <td class="<TMPL_VAR NAME="Common_Middle_Tab6">" align="center">
                     <a class="menuLink" href="/advanced?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Advanced"></a>
                 </td>
             </TMPL_IF>

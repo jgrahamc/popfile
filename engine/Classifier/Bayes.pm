@@ -99,6 +99,7 @@ sub new
     $self->{db_get_user_parameter_default__} = 0;
     $self->{db_get_buckets_with_magnets__} = 0;
     $self->{db_delete_zero_words__} = 0;
+    $self->{db_get_user_list__} = 0;
 
     # Caches the name of each bucket and relates it to both the bucket
     # ID in the database and whether it is pseudo or not
@@ -123,8 +124,13 @@ sub new
     $self->{db_parameters__}     = {};
 
     # Caches looked up user parameter values on a per user basis
+    # Subkeys are:
+    #
+    # lastused      Time the cache entry was last used
+    # value         The value for the parameter
+    # default       Whether the value is the default or not
 
-    $self->{db_user_parameters__}     = {};
+    $self->{cached_user_parameters__}     = {};
 
     # Used to parse mail messages
 
@@ -689,10 +695,13 @@ sub db_prepare__
                   where matrix.times = 0
                     and matrix.bucketid = ?;' );                                        # PROFILE BLOCK STOP
 
+    $self->{db_get_user_list__} = $self->db_()->prepare(
+             'select id, name from users order by name;' );
+
     # Get the mapping from parameter names to ids into a local hash
 
     my $h = $self->db_()->prepare( "select name, id from bucket_template;" );
-    $h->execute;
+    $h->execute();
     while ( my $row = $h->fetchrow_arrayref ) {
         $self->{db_parameterid__}{$row->[0]} = $row->[1];
     }
@@ -738,6 +747,7 @@ sub db_cleanup__
     $self->{db_get_user_parameter_default__}->finish;
     $self->{db_get_buckets_with_magnets__}->finish;
     $self->{db_delete_zero_words__}->finish;
+    $self->{db_get_user_list__}->finish;
 }
 
 #----------------------------------------------------------------------------
@@ -3034,9 +3044,238 @@ sub get_bucket_parameter
 
 #----------------------------------------------------------------------------
 #
-# get_user_parameter_from_id
+# create_user (ADMIN ONLY)
+#
+# Creates a new user with a given name and optionally copies the
+# configuration of another user.
+#
+# $session     A valid session ID for an administrator
+# $new_user    The name for the new user
+# $clone       (optional) Name of user to clone
+#
+# Returns 0 for success, 1 for user already exists, 2 for other error,
+# 3 for clone failure and undef if caller isn't an admin.
+#
+# ----------------------------------------------------------------------------
+sub create_user
+{
+    my ( $self, $session, $new_user, $clone ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    # Check that this user is an administrator
+
+    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
+
+    if ( $can_admin != 1 ) {
+        return undef;
+    }
+
+    # Check to see if we already have a user with that name
+
+    if ( defined( $self->get_user_id( $session, $new_user ) ) ) {
+        return 1;
+    }
+
+    $self->db_()->do( "insert into users ( name ) values ( '$new_user' );" );
+
+    my $id = $self->get_user_id( $session, $new_user );
+
+    if ( !defined( $id ) ) {
+        return 2;
+    }
+
+    # See if we need to clone the configuration of another user and
+    # only clone non-default values
+
+    if ( defined( $clone ) && ( $clone ne '' ) ) {
+        my $clid = $self->get_user_id( $session, $clone );
+        if ( !defined( $clid ) ) {
+            return 3;
+        }
+        my $h = $self->db_()->prepare( "select utid, val from user_params where userid = $clid;" );
+        $h->execute;
+        my %add;
+        while ( my $row = $h->fetchrow_arrayref ) {
+            $add{$row->[0]} = $row->[1];
+        }
+        $h->finish;
+        foreach my $utid (keys %add) {
+            $self->db_()->do( "insert into user_params ( userid, utid, val ) values ( $id, $utid, '$add{$utid}' );" );
+        }
+    }
+
+    return 0;
+}
+
+#----------------------------------------------------------------------------
+#
+# remove_user (ADMIN ONLY)
+#
+# Removes an existing user
+#
+# $session     A valid session ID for an administrator
+# $user        The name for the new to remove
+#
+# Returns 0 for success, undef for wrong permissions and 1 for user
+# does not exist, 2 means tried to delete admin
+#
+# ----------------------------------------------------------------------------
+sub remove_user
+{
+    my ( $self, $session, $user ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    # Check that this user is an administrator
+
+    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
+
+    if ( $can_admin != 1 ) {
+        return undef;
+    }
+
+    # Check that the named user is not an administrator
+
+    my $id = $self->get_user_id( $session, $user );
+
+    if ( defined( $id ) ) {
+        my ( $val, $def ) = $self->get_user_parameter_from_id( $id,'GLOBAL_can_admin' );
+        if ( $val == 0 ) {
+            $self->db_()->do( "delete from users where name = '$user';" );
+        } else {
+            return 2;
+        }
+    }
+
+    return 0;
+}
+
+#----------------------------------------------------------------------------
+#
+# get_user_list (ADMIN ONLY)
+#
+# Returns a list of all users in the system
+#
+# $session     A valid session ID for an administrator
+#
+#----------------------------------------------------------------------------
+sub get_user_list
+{
+    my ( $self, $session ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    # Check that this user is an administrator
+
+    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
+
+    if ( $can_admin != 1 ) {
+        return undef;
+    }
+
+    my @users;
+    $self->{db_get_user_list__}->execute();
+    while ( my $row = $self->{db_get_user_list__}->fetchrow_arrayref ) {
+        push @users, $row->[1];
+    }
+
+    return \@users;
+}
+
+#----------------------------------------------------------------------------
+#
+# get_user_parameter_list (ADMIN ONLY)
+#
+# Returns a list of all parameters a user can have
+#
+# $session     A valid session ID for an administrator
+#
+#----------------------------------------------------------------------------
+sub get_user_parameter_list
+{
+    my ( $self, $session ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    # Check that this user is an administrator
+
+    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
+
+    if ( $can_admin != 1 ) {
+        return undef;
+    }
+
+    return keys %{$self->{db_user_parameterid__}};
+}
+
+#----------------------------------------------------------------------------
+#
+# get_user_parameter
 #
 # Returns the value of a per user parameter
+#
+# $session     A valid session ID
+# $parameter   The name of the parameter
+#
+#----------------------------------------------------------------------------
+sub get_user_parameter
+{
+    my ( $self, $session, $parameter ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    my ( $val, $def)= $self->get_user_parameter_from_id( $userid, $parameter );
+
+    return $val;
+}
+
+#----------------------------------------------------------------------------
+#
+# get_user_id (ADMIN ONLY)
+#
+# Returns the database ID of a named used
+#
+# $session     A valid session ID
+# $user        The name of the user
+#
+#----------------------------------------------------------------------------
+sub get_user_id
+{
+    my ( $self, $session, $user ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    # Check that this user is an administrator
+
+    my $can_admin = $self->get_user_parameter( $session, 'GLOBAL_can_admin' );
+
+    if ( $can_admin != 1 ) {
+        return undef;
+    }
+
+    my $h = $self->db_()->prepare( "select id from users where name = '$user';" );
+    $h->execute;
+    if ( my $row = $h->fetchrow_arrayref ) {
+        $h->finish;
+        return $row->[0];
+    } else {
+        return undef;
+    }
+}
+
+#----------------------------------------------------------------------------
+#
+# get_user_parameter_from_id
+#
+# Returns the value of a per user parameter (and a boolean that
+# indicates whether this is the default value or not)
 #
 # $user        The ID of the user
 # $parameter   The name of the parameter
@@ -3048,8 +3287,10 @@ sub get_user_parameter_from_id
 
     # See if there's a cached value
 
-    if ( defined( $self->{db_user_parameters__}{$user}{$parameter} ) ) {
-        return $self->{db_user_parameters__}{$user}{$parameter};
+    if ( exists( $self->{cached_user_parameters__}{$user}{$parameter} ) ) {
+        $self->{cache_user_parameters__}{$user}{$parameter}{lastused} = time;
+        return ($self->{cached_user_parameters__}{$user}{$parameter}{value},
+                $self->{cached_user_parameters__}{$user}{$parameter}{default});
     }
 
     # If there is a non-default value for this parameter then return it.
@@ -3060,17 +3301,24 @@ sub get_user_parameter_from_id
     # If this parameter has not been defined for this specific user then
     # get the default value
 
+    my $default = 0;
     if ( !defined( $result ) ) {
         $self->{db_get_user_parameter_default__}->execute(  # PROFILE BLOCK START
             $self->{db_user_parameterid__}{$parameter} );          # PROFILE BLOCK STOP
         $result = $self->{db_get_user_parameter_default__}->fetchrow_arrayref;
+        $default = 1;
     }
 
     if ( defined( $result ) ) {
-        $self->{db_user_parameters__}{$user}{$parameter} = $result->[0];
-        return $result->[0];
+        $self->{cached_user_parameters__}{$user}{$parameter}{value} =
+            $result->[0];
+        $self->{cached_user_parameters__}{$user}{$parameter}{default} =
+            $default;
+        $self->{cached_user_parameters__}{$user}{$parameter}{lastused} =
+            time;
+        return ( $result->[0], $default );
     } else {
-        return undef;
+        return ( undef, undef );
     }
 }
 
@@ -3128,14 +3376,34 @@ sub set_user_parameter_from_id
 {
     my ( $self, $user, $parameter, $value ) = @_;
 
+    # Prevent user 1 from stopping being an admin
+
+    if ( ( $user == 1 ) &&
+         ( $parameter eq 'GLOBAL_can_admin' ) &&
+         ( $value != 1 ) ) {
+        return 0;
+    }
+
     my $utid = $self->{db_user_parameterid__}{$parameter};
 
-    # Exactly one row should be affected by this statement
+    # Check to see if the parameter is being set to the default value
+    # if it is then remove the entry because it is a waste of space
 
-    $self->{db_set_user_parameter__}->execute( $user, $utid, $value );
+    my $default = 0;
+    $self->{db_get_user_parameter_default__}->execute( $utid );
+    my $result = $self->{db_get_user_parameter_default__}->fetchrow_arrayref;
 
-    if ( defined( $self->{db_user_parameters__}{$user}{$parameter} ) ) {
-        $self->{db_user_parameters__}{$user}{$parameter} = $value;
+    if ( $result->[0] eq $value ) {
+        $default = 1;
+        $self->db_()->do( "delete from user_params where userid = $user and utid = $utid;" );
+    } else {
+        $self->{db_set_user_parameter__}->execute( $user, $utid, $value );
+    }
+
+    if ( exists( $self->{cached_user_parameters__}{$user}{$parameter} ) ) {
+        $self->{cached_user_parameters__}{$user}{$parameter}{lastused}= time;
+        $self->{cached_user_parameters__}{$user}{$parameter}{value} = $value;
+        $self->{cached_user_parameters__}{$user}{$parameter}{default}=$default;
     }
 
     return 1;

@@ -543,8 +543,9 @@ sub user_module_config_
         return $self->classifier_()->set_user_parameter_from_id( $user,
                                         $module . "_" . $name, $value );
     } else {
-        return $self->classifier_()->get_user_parameter_from_id( $user,
-                                        $module . "_" . $name );
+        my ( $val, $def ) = $self->classifier_()->get_user_parameter_from_id(
+                                $user, $module . "_" . $name );
+        return $val;
     }
 }
 

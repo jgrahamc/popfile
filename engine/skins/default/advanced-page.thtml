@@ -65,8 +65,8 @@
             <form action="/advanced" method="post">
                 <table width="100%">
                     <tr>
-                        <th width="50%"><TMPL_VAR NAME="Localize_Advanced_Parameter"></th>
-                        <th width="50%"><TMPL_VAR NAME="Localize_Advanced_Value"></th>
+                        <th width="50%" align="left"><TMPL_VAR NAME="Localize_Advanced_Parameter"></th>
+                        <th width="50%" align="left"><TMPL_VAR NAME="Localize_Advanced_Value"></th>
                     </tr>
 
                     <TMPL_LOOP NAME="Advanced_Loop_Parameter">

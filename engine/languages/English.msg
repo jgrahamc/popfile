@@ -78,6 +78,7 @@ Size                                    Size
 Up                                      Up
 Down                                    Down
 Go                                      Go
+Edit                                    Edit
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this
@@ -106,6 +107,7 @@ Header_Advanced                         Advanced
 Header_Security                         Security
 Header_Administration                   Administration
 Header_Magnets                          Magnets
+Header_Users                            Users
 
 Footer_HomePage                         POPFile Home Page
 Footer_Manual                           Manual
@@ -190,6 +192,23 @@ Advanced_Parameter                      Parameter
 Advanced_Value                          Value
 Advanced_Warning                        This is the complete list of POPFile parameters.  Advanced users only: you may change any and click Update; there is no validity checking.  Items shown in bold have been changed from the default setting.
 Advanced_ConfigFile                     Configuration file:
+
+Users_Create                            Create New User
+Users_Remove                            Remove Existing User
+Users_Edit                              Edit User Settings
+Users_CopyFrom                          Copying settings from user
+Users_RemoveUser                        Remove user
+Users_CreateUser                        Create user named
+Users_EditUser                          Edit user
+Users_Parameters                        Parameters
+Users_Created                           Created user '%s'
+Users_Not_Created                       Failed to create user '%s'
+Users_Created_And_Cloned                Created user '%s' as clone of '%s'
+Users_Not_Created_Exists                User '%s' not created: already exists
+Users_Created_Not_Cloned                Created user '%s' but clone of '%s' failed
+Users_Removed                           Removed user '%s'
+Users_Removed_Failed                    Failed to remove user '%s'
+Users_Removed_Failed_Admin              Failed to remove user '%s': disable admin rights first
 
 History_Filter                          &nbsp;(just showing bucket <font color="%s">%s</font>)
 History_FilterBy                        Filter By
