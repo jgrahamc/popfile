@@ -3,12 +3,20 @@
 
 <TMPL_IF NAME="History_If_Some_Messages">
 
+<form id="HistoryMainForm" action="/history" method="POST">
+    <input type="hidden" name="search" value="<TMPL_VAR NAME="History_Field_Search">" />
+    <input type="hidden" name="sort" value="<TMPL_VAR NAME="History_Field_Sort">" />
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+    <input type="hidden" name="start_message" value="<TMPL_VAR NAME="History_Start_Message">" />
+    <input type="hidden" name="filter" value="<TMPL_VAR NAME="History_Field_Filter">" />
+
 <TMPL_IF "History_If_MultiPage">
 
 <table width="100%" summary="">
     <tr>
         <td align="left">
-            <h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"> (<TMPL_VAR NAME="History_Count">)</h2>
+            <h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"> (<TMPL_VAR NAME="History_Count"> <input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" />
+)</h2>
         </td>
         <td class="historyNavigatorTop">
 
@@ -21,19 +29,12 @@
 
 <TMPL_ELSE>
 
-<h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"> (<TMPL_VAR NAME="History_Count">)</h2>
+<h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"> (<TMPL_VAR NAME="History_Count"> <input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" />
+)</h2>
 
 </TMPL_IF>
 
-<table class="historyWidgetsTop" summary="">
-    <tr>
-        <td colspan="5" valign=middle>
-            <!-- the following html was history-search-filter-widget.thtml -->
-            <TMPL_INCLUDE NAME="history-search-filter-widget.thtml">
-            <!-- end of history-search-filter-widget.thtml content -->
-        </td>
-    </tr>
-</table>
+</form>
 
 <form id="HistoryMainForm" action="/history" method="POST">
     <input type="hidden" name="search" value="<TMPL_VAR NAME="History_Field_Search">" />
@@ -43,13 +44,23 @@
     <input type="hidden" name="filter" value="<TMPL_VAR NAME="History_Field_Filter">" />
 
     <table class="historyTable" width="100%" summary="<TMPL_VAR NAME="Localize_History_MainTableSummary">">
+        <tr>
+        <td colspan="<TMPL_VAR NAME="History_Colspan">">
+            <!-- the following html was history-search-filter-widget.thtml -->
+            <TMPL_INCLUDE NAME="history-search-filter-widget.thtml">
+            <!-- end of history-search-filter-widget.thtml content -->
+        </td>
+        </tr>
+        <tr>        
+        <td colspan="<TMPL_VAR NAME="History_Colspan">">&nbsp;</td>
+        </tr>
         <tr valign="bottom">
 
             <th></th>
 
             <TMPL_LOOP NAME="History_Loop_Headers">
 
-            <th class="historyLabel" scope="col">
+            <th class="historyLabel" scope="col" align="left">
                 <a href="/history?<TMPL_VAR NAME="History_Fields">&amp;setsort=<TMPL_VAR NAME="History_Sort"><TMPL_VAR NAME="History_Header">">
 
                     <TMPL_IF NAME="History_If_Sorted">
@@ -80,7 +91,7 @@
 
             </TMPL_LOOP>
 
-            <th class="historyLabel" scope="col">
+            <th class="historyLabel" scope="col" align="left">
                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
             </th>
         </tr>
@@ -204,28 +215,23 @@
 
         </TMPL_LOOP>
 
+        <tr>        
+        <td colspan="<TMPL_VAR NAME="History_Colspan">"></td>
+        </tr>
         <tr>
             <td colspan="<TMPL_VAR NAME="History_Colspan">">
+                <input type="submit" class="submit" name="clearchecked" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" />
                 <span class="historyLabel">
-                    <TMPL_VAR NAME="Localize_History_Column_Characters">: 
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<TMPL_VAR NAME="Localize_History_Column_Characters">: 
                 </span>
                 <input type="submit" class="submit" name="increase" value="<TMPL_VAR NAME="Localize_History_Increase">">
                 <input type="submit" class="submit" name="decrease" value="<TMPL_VAR NAME="Localize_History_Decrease">">
                 <input type="submit" class="submit" name="automatic" value="<TMPL_VAR NAME="Localize_History_Automatic">">
+                <span class="historyLabel">)</span>
             </td>
             <td>
                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
             </td>
-        </tr>
-        <tr>
-            <td colspan="<TMPL_VAR NAME="History_Colspan">">
-                <span class="historyLabel">
-                    <TMPL_VAR NAME="Localize_History_Remove">:&nbsp;
-                </span>
-                <input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" />
-                <input type="submit" class="submit" name="clearchecked" value="<TMPL_VAR NAME="Localize_History_RemoveChecked">" />
-            </td>
-            <td></td>
         </tr>
     </table>
 </form>

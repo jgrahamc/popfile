@@ -199,7 +199,7 @@ History_ChangedClass                    Would now classify as
 History_Purge                           Delete Now
 History_Increase			Increase
 History_Decrease			Decrease
-History_Column_Characters		Change width of From, To, CC and Subject columns
+History_Column_Characters		Change width of From, To, Cc and Subject columns
 History_Automatic			Automatic
 
 Password_Title                          Password
