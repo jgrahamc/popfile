@@ -753,9 +753,14 @@ sub update_tag
             # Adding strings from these, even if they appear to be hostnames, may or
             # may not be beneficial
 
-            if ($value =~ /^cid\:/i ) {
+            if ($value =~ /^(cid)\:/i ) {
 
-                # TODO: Decide what to do here, ignoring CID's for now
+                # Add a pseudo-word when CID source links are detected
+
+                $self->update_pseudoword( 'html', 'cidsrc' );
+
+                # TODO: I've seen virus messages try to use a CID: href
+
 
             } else {
 
@@ -2337,7 +2342,7 @@ sub convert_encoding
 
             # Use $default as $from when $from is invalid.
 
-            $from = $default; 
+            $from = $default;
         }
     }
 
