@@ -1869,9 +1869,15 @@ sub classify
                         $wval{$bucket} = $$matrix{$id}{$bucket} || 0;
                         $sumfreq += $wval{$bucket};
                     }
-                    foreach my $bucket (@ranking) {
-                        $wordprobs{$bucket,$id} = $wval{$bucket} / $sumfreq;
-                    }
+
+                    # If $sumfreq is still zero then this word didn't appear in any buckets
+                    # so we shouldn't create wordprobs entries for it
+
+                    if ( $sumfreq != 0 ) {
+                        foreach my $bucket (@ranking) {
+                            $wordprobs{$bucket,$id} = $wval{$bucket} / $sumfreq;
+                        }
+		    }
                 }
             }
 
