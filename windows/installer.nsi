@@ -1338,7 +1338,7 @@ check_bucket_count:
   WriteINIStr "$INSTDIR\backup\backup.ini" "NonSQLCorpus" "BackupPath" "$INSTDIR\backup\nonsql"
 
   ClearErrors
-  CopyFiles /SILENT "${L_CORPUS_PATH}\*.*" "$INSTDIR\backup\nonsql\${L_TEMP}"
+  CopyFiles /SILENT "${L_CORPUS_PATH}" "$INSTDIR\backup\nonsql\${L_TEMP}\"
   IfErrors 0 continue
   DetailPrint "Error detected when making corpus backup"
   MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_MBCORPUS_1)"
