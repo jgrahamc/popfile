@@ -98,13 +98,23 @@
 # add a suitable '!insertmacro UI_LANG_CONFIG' line in the section which handles the optional
 # 'Languages' component to allow the installer to select the appropriate UI language.
 #--------------------------------------------------------------------------
+# Support for Japanese text processing
+#
+# This version of the installer installs the Kakasi package and the Text::Kakasi Perl module
+# used by POPFile when processing Japanese text. Further information about Kakasi, including
+# 'download' links for the Kakasi package and the Text::Kakasi Perl module, can be found at
+# http://kakasi.namazu.org/
+#
+# This version of the installer also installs the complete Perl 'Encode' collection of modules
+# to complete the Japanese support requirements.
+#--------------------------------------------------------------------------
 
   ;--------------------------------------------------------------------------
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
   !define MUI_PRODUCT   "POPFile"
-  !define MUI_VERSION   "0.20.0 (CVS DB-EXE)"
+  !define MUI_VERSION   "0.20.0 (CVS KAKASI)"
 
   !define C_README        "v0.20.0.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
@@ -114,6 +124,20 @@
   ;----------------------------------------------------------------------
 
   !define C_PERL_DIR      "C:\Perl"
+
+  ;----------------------------------------------------------------------------------
+  ; Root directory for the Kakasi package.
+  ;
+  ; The Kakasi package is distributed as a ZIP file which contains several folders
+  ; (bin, doc, include, lib and share) all of which are under a top level folder
+  ; called 'kakasi'. 'C_KAKASI_DIR' is used to refer to the folder into which the
+  ; Kakasi ZIP file has been unzipped.
+  ;
+  ; The 'itaijidict' file's path should be '${C_KAKASI_DIR}\kakasi\share\kakasi\itaijidict'
+  ; The 'kanwadict'  file's path should be '${C_KAKASI_DIR}\kakasi\share\kakasi\kanwadict'
+  ;----------------------------------------------------------------------------------
+
+  !define C_KAKASI_DIR      "kakasi_package"
 
   ;--------------------------------------------------------------------------------
   ; Constants for the timeout loop used after issuing a POPFile 'shutdown' request
@@ -169,9 +193,9 @@
   VIAddVersionKey "FileVersion" "${MUI_VERSION}"
 
   !ifndef ENGLISH_ONLY
-    VIAddVersionKey "Build" "Multi-Language (CVS DB-EXE)"
+    VIAddVersionKey "Build" "Multi-Language (CVS KAKASI)"
   !else
-    VIAddVersionKey "Build" "English-Only (CVS DB-EXE)"
+    VIAddVersionKey "Build" "English-Only (CVS KAKASI)"
   !endif
 
   VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
@@ -205,6 +229,7 @@
 #--------------------------------------------------------------------------
 
   !include pfi-library.nsh
+  !include WriteEnvStr.nsh
 
 #--------------------------------------------------------------------------
 # Define the Page order for the installer (and the uninstaller)
@@ -681,6 +706,34 @@ update_config:
   SetOutPath $INSTDIR\languages
   File "..\engine\languages\English.msg"
 
+  !ifndef ENGLISH_ONLY
+          StrCmp $LANGUAGE ${LANG_JAPANESE} 0 skip_kakasi_install
+  !endif
+
+  ;--------------------------------------------------------------------------
+  ; Install Kakasi package
+  ;--------------------------------------------------------------------------
+
+  SetOutPath $INSTDIR
+  File /r "${C_KAKASI_DIR}\kakasi"
+
+  ; Add Environment Variables for Kakasi
+
+  Push ITAIJIDICTPATH
+  Push $INSTDIR\kakasi\share\kakasi\itaijidict
+  Call WriteEnvStr
+  Push KANWADICTPATH
+  Push $INSTDIR\kakasi\share\kakasi\kanwadict
+  Call WriteEnvStr
+
+  ;--------------------------------------------------------------------------
+  ; End of Kakasi installation
+  ;--------------------------------------------------------------------------
+  
+  !ifndef ENGLISH_ONLY
+      skip_kakasi_install:
+  !endif
+
   ; Install the Minimal Perl files
 
   SetDetailsPrint textonly
@@ -713,11 +766,23 @@ update_config:
   SetOutPath $INSTDIR\Carp
   File "${C_PERL_DIR}\lib\Carp\*"
 
-  SetOutPath $INSTDIR\Encode
-  File "${C_PERL_DIR}\lib\Encode\Alias.pm"
-  File "${C_PERL_DIR}\lib\Encode\Config.pm"
-  File "${C_PERL_DIR}\lib\Encode\Encoding.pm"
+  !ifndef ENGLISH_ONLY
+          StrCmp $LANGUAGE ${LANG_JAPANESE} full_encode
+          SetOutPath $INSTDIR\Encode
+          File "${C_PERL_DIR}\lib\Encode\Alias.pm"
+          File "${C_PERL_DIR}\lib\Encode\Config.pm"
+          File "${C_PERL_DIR}\lib\Encode\Encoding.pm"
+          Goto encode_done
+      full_encode:
+  !endif
 
+  SetOutPath $INSTDIR\Encode
+  File /r "${C_PERL_DIR}\lib\Encode\*"
+
+  !ifndef ENGLISH_ONLY
+      encode_done:
+  !endif
+  
   SetOutPath $INSTDIR\Exporter
   File "${C_PERL_DIR}\lib\Exporter\*"
 
@@ -738,6 +803,16 @@ update_config:
 
   SetOutPath $INSTDIR\Text
   File "${C_PERL_DIR}\lib\Text\ParseWords.pm"
+  
+ !ifndef ENGLISH_ONLY
+          StrCmp $LANGUAGE ${LANG_JAPANESE} 0 skip_text_kakasi
+  !endif
+  
+    File "${C_PERL_DIR}\lib\Text\Kakasi.pm"
+    
+ !ifndef ENGLISH_ONLY
+      skip_text_kakasi:
+ !endif
 
   SetOutPath $INSTDIR\warnings
   File "${C_PERL_DIR}\lib\warnings\register.pm"
@@ -751,8 +826,20 @@ update_config:
   SetOutPath $INSTDIR\auto\DynaLoader
   File "${C_PERL_DIR}\lib\auto\DynaLoader\*"
 
+  !ifndef ENGLISH_ONLY
+          StrCmp $LANGUAGE ${LANG_JAPANESE} full_auto_encode
+          SetOutPath $INSTDIR\auto\Encode
+          File "${C_PERL_DIR}\lib\auto\Encode\*"
+          Goto auto_encode_done
+      full_auto_encode:
+  !endif
+
   SetOutPath $INSTDIR\auto\Encode
-  File "${C_PERL_DIR}\lib\auto\Encode\*"
+  File /r "${C_PERL_DIR}\lib\auto\Encode\*"
+
+  !ifndef ENGLISH_ONLY
+      auto_encode_done:
+  !endif
 
   SetOutPath $INSTDIR\auto\File\Glob
   File "${C_PERL_DIR}\lib\auto\File\Glob\*"
@@ -773,6 +860,17 @@ update_config:
 
   SetOutPath $INSTDIR\auto\Sys\Hostname
   File "${C_PERL_DIR}\lib\auto\Sys\Hostname\*"
+
+ !ifndef ENGLISH_ONLY
+          StrCmp $LANGUAGE ${LANG_JAPANESE} 0 skip_auto_text_kakasi
+  !endif
+
+  SetOutPath $INSTDIR\auto\Text\Kakasi
+  File "${C_PERL_DIR}\lib\auto\Text\Kakasi\*"
+
+  !ifndef ENGLISH_ONLY
+      skip_auto_text_kakasi:
+  !endif
 
   SetOutPath $INSTDIR\auto\Win32\API
   File "${C_PERL_DIR}\site\lib\auto\Win32\API\*"
@@ -1864,6 +1962,22 @@ check_trayicon:
 close_file:
   FileClose ${L_CFG}
 
+  IfRebootFlag 0 page_enabled
+
+  ; We are running on a Win9x system which must be rebooted before Kakasi can be used,
+  ; so we are unable to offer to start POPFile at this point
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "State" "1"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "State" "0"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "State" "0"
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "Flags" "DISABLED"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "Flags" "DISABLED"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "Flags" "DISABLED"
+  Goto display_the_page
+
+page_enabled:
+
   ; clear all three radio buttons ('do not start', 'use console', 'run in background')
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "State" "0"
@@ -2059,6 +2173,17 @@ Function CheckRunStatus
 
   Push ${L_TEMP}
 
+  IfRebootFlag 0 not_Win9x
+  
+  ; We are running on a Win9x system and must reboot before using POPFile
+  ; (replace previous page with a simple "Please wait" one, in case the page appears
+  ; again while the system is rebooting)
+
+  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Settings" "NumFields" "0"
+  Goto selection_ok
+
+not_Win9x:
   ; Enable the 'Run' CheckBox on the 'Finish' page (it may have been disabled on our last visit)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "Flags" ""
@@ -2295,6 +2420,7 @@ remove_shortcuts:
   SetDetailsPrint listonly
 
   Delete "$SMPROGRAMS\${MUI_PRODUCT}\Support\POPFile Home Page.url"
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\Support\POPFile Manual.url"
   RMDir "$SMPROGRAMS\${MUI_PRODUCT}\Support"
 
   Delete "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile.lnk"
@@ -2432,6 +2558,23 @@ skip_corpus:
   Delete $INSTDIR\stopwords
   Delete $INSTDIR\stopwords.bak
   Delete $INSTDIR\stopwords.default
+
+  ;----------------------------------
+  ; Delete Kakasi - start
+  ;----------------------------------
+
+  RMDir /r "$INSTDIR\kakasi"
+
+  ;Delete Environment Variables
+
+  Push KANWADICTPATH
+  Call un.DeleteEnvStr
+  Push ITAIJIDICTPATH
+  Call un.DeleteEnvStr
+
+  ;----------------------------------
+  ; Delete Kakasi - end
+  ;----------------------------------
 
   StrCmp ${L_UPGRADE} "yes" remove_perl
   RMDir /r "${L_HISTORY}"
