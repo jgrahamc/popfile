@@ -7,11 +7,16 @@
 #                   the POPFILE_ROOT and POPFILE_USER environment variables) for the
 #                   user running the installer.
 #
-#                   Requires the following programs (built using NSIS):
+#                   (A) Requires the following programs (built using NSIS):
 #
-#                   (1) adduser.exe    (NSIS script: adduser.nsi)
-#                   (2) runpopfile.exe (NSIS script: runpopfile.nsi)
-#                   (3) stop_pf.exe    (NSIS script: stop_popfile.nsi)
+#                       (1) adduser.exe     (NSIS script: adduser.nsi)
+#                       (2) msgcapture.exe  (NSIS script: msgcapture.nsi)
+#                       (3) runpopfile.exe  (NSIS script: runpopfile.nsi)
+#                       (4) stop_pf.exe     (NSIS script: stop_popfile.nsi)
+#
+#                   (B) The following programs (built using NSIS) are optional:
+#
+#                       (1) pfidiag.exe     (NSIS script: test\pfidiag.nsi)
 #
 # Copyright (c) 2002-2004 John Graham-Cumming
 #
@@ -238,6 +243,8 @@
 
   Var G_SFN_DISABLED       ; 1 = short file names not supported, 0 = short file names available
 
+  Var G_PLS_FIELD_1        ; used to customise translated text strings
+
   ; NSIS provides 20 general purpose user registers:
   ; (a) $R0 to $R9   are used as local registers
   ; (b) $0 to $9     are used as additional local registers
@@ -278,15 +285,15 @@
 
   !ifndef ENGLISH_MODE
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build"        "Multi-Language experimental IMAP (with Kakasi)"
+      VIAddVersionKey "Build"        "Multi-Language with XMLRPC & IMAP (with Kakasi)"
     !else
-      VIAddVersionKey "Build"        "Multi-Language experimental IMAP (without Kakasi)"
+      VIAddVersionKey "Build"        "Multi-Language with XMLRPC & IMAP (without Kakasi)"
     !endif
   !else
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build"        "English-Mode experimental IMAP (with Kakasi)"
+      VIAddVersionKey "Build"        "English-Mode with XMLRPC & IMAP (with Kakasi)"
     !else
-      VIAddVersionKey "Build"        "English-Mode experimental IMAP (without Kakasi)"
+      VIAddVersionKey "Build"        "English-Mode with XMLRPC & IMAP (with Kakasi)"
     !endif
   !endif
 
@@ -296,6 +303,10 @@
 #--------------------------------------------------------------------------
 # Include private library functions and macro definitions
 #--------------------------------------------------------------------------
+
+  ; Avoid compiler warnings by disabling the functions and definitions we do not use
+
+  !define INSTALLER
 
   !include "pfi-library.nsh"
   !include "WriteEnvStr.nsh"
@@ -320,6 +331,7 @@
   ; and on all pages of the uninstaller.
 
   !define MUI_HEADERIMAGE
+##  !define MUI_HEADERIMAGE_BITMAP              "hdr-common.bmp"
   !define MUI_HEADERIMAGE_BITMAP              "test\hdr-common-cvs.bmp"
   !define MUI_HEADERIMAGE_RIGHT
 
@@ -345,6 +357,7 @@
 
   ; The "Special" bitmap appears on the 'WELCOME' and 'FINISH' pages
 
+##  !define MUI_WELCOMEFINISHPAGE_BITMAP        "special.bmp"
   !define MUI_WELCOMEFINISHPAGE_BITMAP        "test\special-cvs.bmp"
 
   ;----------------------------------------------------------------
@@ -848,8 +861,15 @@ save_HKCU_root_sfn:
   File "sqlite.exe"
   File "adduser.exe"
   File /nonfatal "test\pfidiag.exe"
+  File "msgcapture.exe"
 
-  ; Add 'stop_pf.exe' to 'App Paths' to allow it to be run using Start -> Run -> stop.pf params
+  IfFileExists "$G_ROOTDIR\pfimsgcapture.exe" 0 app_paths
+  Delete "$G_ROOTDIR\pfimsgcapture.exe"
+  File "/oname=pfimsgcapture.exe" "msgcapture.exe"
+
+app_paths:
+
+  ; Add 'stop_pf.exe' to 'App Paths' to allow it to be run using Start -> Run -> stop_pf params
 
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\stop_pf.exe" \
       "" "$G_ROOTDIR\stop_pf.exe"
@@ -874,6 +894,7 @@ save_HKCU_root_sfn:
 
   SetOutPath "$G_ROOTDIR\Platform"
   File "..\engine\Platform\MSWin32.pm"
+  Delete "$G_ROOTDIR\Platform\POPFileIcon.dll"
 
   SetOutPath "$G_ROOTDIR\POPFile"
   File "..\engine\POPFile\MQ.pm"
@@ -976,7 +997,6 @@ save_HKCU_root_sfn:
 
   SetOutPath "$G_MPLIBDIR\IO\Socket"
   File "${C_PERL_DIR}\lib\IO\Socket\*"
-  File "${C_PERL_DIR}\site\lib\IO\Socket\Socks.pm"
 
   SetOutPath "$G_MPLIBDIR\MIME"
   File "${C_PERL_DIR}\lib\MIME\*"
@@ -1070,12 +1090,14 @@ save_HKCU_root_sfn:
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Manual.url"
 
   SetShellVarContext current
   Delete "$SMSTARTUP\Run POPFile.lnk"
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Manual.url"
 
   ; Create the START MENU entries
 
@@ -1107,12 +1129,6 @@ create_shortcuts:
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
                  "$G_ROOTDIR\runpopfile.exe"
 
-  IfFileExists "$G_ROOTDIR\pfidiag.exe" 0 uninst_shortcut
-  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk" NORMAL
-  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk" \
-                 "$G_ROOTDIR\pfidiag.exe"
-
-uninst_shortcut:
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" \
                  "$G_ROOTDIR\uninstall.exe"
@@ -1126,11 +1142,11 @@ uninst_shortcut:
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url" \
-              "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/"
+              "InternetShortcut" "URL" "http://${C_UI_URL}:$G_GUI/"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" \
-              "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
+              "InternetShortcut" "URL" "http://${C_UI_URL}:$G_GUI/shutdown"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" NORMAL
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" \
@@ -1163,6 +1179,37 @@ uninst_shortcut:
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
 
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url" NORMAL
+
+  !ifndef ENGLISH_MODE
+      StrCmp $LANGUAGE ${LANG_JAPANESE} japanese_wiki
+  !endif
+
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url" \
+              "InternetShortcut" "URL" \
+              "http://popfile.sourceforge.net/cgi-bin/wiki.pl?POPFileDocumentationProject"
+
+  !ifndef ENGLISH_MODE
+      Goto pfidiagnostic
+
+    japanese_wiki:
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url" \
+                  "InternetShortcut" "URL" \
+                  "http://popfile.sourceforge.net/cgi-bin/wiki.pl?JP_POPFileDocumentationProject"
+
+    pfidiagnostic:
+  !endif
+
+  IfFileExists "$G_ROOTDIR\pfidiag.exe" 0 silent_shutdown
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk"
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (simple).lnk" NORMAL
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (simple).lnk" \
+                 "$G_ROOTDIR\pfidiag.exe"
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (full).lnk" NORMAL
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (full).lnk" \
+                 "$G_ROOTDIR\pfidiag.exe" "/full"
+
+silent_shutdown:
   SetOutPath "$G_ROOTDIR"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" NORMAL
@@ -1506,6 +1553,20 @@ Section /o "IMAP" SecIMAP
 
 SectionEnd
 
+#--------------------------------------------------------------------------
+# Installer Section: (optional) Perl IO::Socket::Socks module (default = not selected)
+#
+# If this component is selected, the installer installs the Perl Socks module to provide
+# SOCKS V support for all of the POPFile proxies.
+#--------------------------------------------------------------------------
+
+Section /o "SOCKS" SecSOCKS
+
+  SetOutPath "$G_MPLIBDIR\IO\Socket"
+  File "${C_PERL_DIR}\site\lib\IO\Socket\Socks.pm"
+
+SectionEnd
+
 SubSectionEnd
 
 #--------------------------------------------------------------------------
@@ -1523,6 +1584,8 @@ SubSectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}  $(DESC_SecXMLRPC)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}  \
         "Installs POPFile's experimental IMAP module"
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSOCKS}  \
+        "Installs extra Perl components which allow the POPFile proxies to use SOCKS"
     !ifndef NO_KAKASI
       !insertmacro MUI_DESCRIPTION_TEXT ${SecKakasi} "Kakasi (used to process Japanese email)"
     !endif
@@ -1684,6 +1747,9 @@ FunctionEnd
 #
 # If we are installing on top of a previous installation, we try to shut it down
 # (to allow the files to be overwritten without requiring a reboot)
+#
+# We also need to check if any of the PFI utilities are running (to avoid Abort/Retry/Ignore
+# messages or the need to reboot in order to update them)
 #--------------------------------------------------------------------------
 
 Function MakeRootDirSafe
@@ -1708,6 +1774,17 @@ Function MakeRootDirSafe
   Push ${L_RESULT}
   Push ${L_TEXTEND}
 
+  ; Starting with POPFIle 0.22.0 the system tray icon uses 'localhost' instead of '127.0.0.1'
+  ; to display the User Interface (and the installer has been updated to follow suit),  so we
+  ; need to ensure WIn9x systems have a suitable 'hosts' file
+
+  Call IsNT
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "1" continue
+  Call CheckHostsFile
+
+continue:
+
   ; Starting with POPfile 0.21.0 an experimental version of 'popfile-service.exe' was included
   ; to allow POPFile to be run as a Windows service.
 
@@ -1727,7 +1804,7 @@ Function MakeRootDirSafe
   Push $G_ROOTDIR
   Call FindLockedPFE
   Pop ${L_EXE}
-  StrCmp ${L_EXE} "" exit_now
+  StrCmp ${L_EXE} "" check_pfi_utils
 
   ; The program files we are about to update are in use so we need to shut POPFile down
 
@@ -1832,21 +1909,25 @@ check_exe:
   Push ${L_EXE}
   Call CheckIfLocked
   Pop ${L_EXE}
-  StrCmp ${L_EXE} "" unlocked_exit
+  StrCmp ${L_EXE} "" unlocked_now
 
 manual_shutdown:
-  DetailPrint "Unable to shutdown automatically - manual intervention requested"
+  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
+  StrCpy $G_PLS_FIELD_1 "POPFile"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_2)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_3)"
-  Goto exit_now
+  Goto check_pfi_utils
 
-unlocked_exit:
+unlocked_now:
   DetailPrint "File is now unlocked"
 
-exit_now:
+check_pfi_utils:
+  Push $G_ROOTDIR
+  Call RequestPFIUtilsShutdown
+
   Pop ${L_TEXTEND}
   Pop ${L_RESULT}
   Pop ${L_PARAM}
@@ -1906,6 +1987,16 @@ Function MinPerlRestructure
   !insertmacro MinPerlMove "Text"
   !insertmacro MinPerlMove "warnings"
 
+  ; Delete redundant minimal Perl files from earlier installations
+
+  IfFileExists "$G_ROOTDIR\Win32\API.pm" 0 exit
+  Delete "$G_ROOTDIR\Win32\API\Callback.pm"
+  Delete "$G_ROOTDIR\Win32\API\Struct.pm"
+  Delete "$G_ROOTDIR\Win32\API\Type.pm"
+  RMDir "$G_ROOTDIR\Win32\API"
+  Delete "$G_ROOTDIR\Win32\API.pm"
+  RMDir "$G_ROOTDIR\Win32"
+
 exit:
 FunctionEnd
 
@@ -1927,6 +2018,9 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 Function SkinsRestructure
+
+  RMDir "$G_ROOTDIR\skins\lavishImages"
+  RMDir "$G_ROOTDIR\skins\sleetImages"
 
   IfFileExists "$G_ROOTDIR\skins\default\*.thtml" exit
 
@@ -2109,6 +2203,82 @@ continue:
   ; Move on to the next page in the installer
 
   !undef L_RESULT
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckHostsFile
+#
+# Starting with the 0.22.0 release the system tray icon uses 'http://localhost:port' to open
+# the User Interface (earlier versions used 'http://127.0.0.1:port' instead). The installer has
+# been updated to follow suit. Some Windows 9x systems may not have a HOSTS file which defines
+# 'localhost' so we ensure a suitable one exists
+#--------------------------------------------------------------------------
+
+Function CheckHostsFile
+
+  !define L_CFG         $R9
+  !define L_LINE        $R8
+  !define L_LOCALHOST   $R7
+  !define L_TEMP        $R6
+
+  Push ${L_CFG}
+  Push ${L_LINE}
+  Push ${L_LOCALHOST}
+  Push ${L_TEMP}
+
+  IfFileExists "$WINDIR\HOSTS" look_for_localhost
+  FileOpen ${L_CFG} "$WINDIR\HOSTS" w
+  FileWrite ${L_CFG} "# Created by the installer for ${C_PFI_PRODUCT} ${C_PFI_VERSION}$\r$\n"
+  FileWrite ${L_CFG} "$\r$\n"
+  FileWrite ${L_CFG} "127.0.0.1       localhost$\r$\n"
+  FileClose ${L_CFG}
+  Goto exit
+
+look_for_localhost:
+  StrCpy ${L_LOCALHOST} ""
+  FileOpen ${L_CFG} "$WINDIR\HOSTS" r
+
+loop:
+  FileRead ${L_CFG} ${L_LINE}
+  StrCmp ${L_LINE} "" done
+  StrCpy ${L_TEMP} ${L_LINE} 10
+  StrCmp ${L_TEMP} "127.0.0.1 " 0 loop
+  Push ${L_LINE}
+  Call TrimNewlines
+  Push " localhost"
+  Call StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" loop
+  StrCmp ${L_TEMP} " localhost" found
+  StrCpy ${L_TEMP} ${L_TEMP} 11
+  StrCmp ${L_TEMP} " localhost " found
+  Goto loop
+
+found:
+  StrCpy ${L_LOCALHOST} "1"
+
+done:
+  FileClose ${L_CFG}
+  StrCmp ${L_LOCALHOST} "1" exit
+  FileOpen ${L_CFG} "$WINDIR\HOSTS" a
+  FileSeek ${L_CFG} 0 END
+  FileWrite ${L_CFG} "$\r$\n"
+  FileWrite ${L_CFG} "# Inserted by the installer for ${C_PFI_PRODUCT} ${C_PFI_VERSION}$\r$\n"
+  FileWrite ${L_CFG} "$\r$\n"
+  FileWrite ${L_CFG} "127.0.0.1       localhost$\r$\n"
+  FileClose ${L_CFG}
+
+exit:
+  Pop ${L_TEMP}
+  Pop ${L_LOCALHOST}
+  Pop ${L_LINE}
+  Pop ${L_CFG}
+
+  !undef L_CFG
+  !undef L_LINE
+  !undef L_LOCALHOST
+  !undef L_TEMP
 
 FunctionEnd
 
@@ -2373,7 +2543,7 @@ Section "un.Shutdown POPFile" UnSecShutdown
   Push $G_ROOTDIR
   Call un.FindLockedPFE
   Pop ${L_EXE}
-  StrCmp ${L_EXE} "" section_exit
+  StrCmp ${L_EXE} "" check_pfi_utils
 
   ; The program files we are about to remove are in use so we need to shut POPFile down
 
@@ -2420,10 +2590,11 @@ ui_port_done:
   Push $G_GUI
   Call un.ShutdownViaUI
   Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "success" section_exit
+  StrCmp ${L_TEMP} "success" check_pfi_utils
 
 manual_shutdown:
-  DetailPrint "Unable to shutdown automatically - manual intervention requested"
+  DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
+  StrCpy $G_PLS_FIELD_1 "POPFile"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_2)\
@@ -2432,7 +2603,10 @@ manual_shutdown:
 
   ; Assume user has managed to shutdown POPFile
 
-section_exit:
+check_pfi_utils:
+  Push $G_ROOTDIR
+  Call un.RequestPFIUtilsShutdown
+
   SetDetailsPrint textonly
   DetailPrint " "
   SetDetailsPrint listonly
@@ -2467,11 +2641,13 @@ Section "un.Start Menu Entries" UnSecStartMenu
 
 menucleanup:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).lnk"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (simple).lnk"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (full).lnk"
   RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
 
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk"
-  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk"
 
@@ -2520,7 +2696,20 @@ Section "un.POPFile Core" UnSecCore
   Delete "$G_ROOTDIR\adduser.exe"
   Delete "$G_ROOTDIR\sqlite.exe"
   Delete "$G_ROOTDIR\pfidiag.exe"
+  Delete "$G_ROOTDIR\msgcapture.exe"
+  Delete "$G_ROOTDIR\pfimsgcapture.exe"
 
+  IfFileExists "$G_ROOTDIR\pfidiag.exe" try_again
+  IfFileExists "$G_ROOTDIR\msgcapture.exe" try_again
+  IfFileExists "$G_ROOTDIR\msgcapture.exe" 0 continue
+
+try_again:
+  Sleep 1000
+  Delete "$G_ROOTDIR\pfidiag.exe"
+  Delete "$G_ROOTDIR\msgcapture.exe"
+  Delete "$G_ROOTDIR\pfimsgcapture.exe"
+
+continue:
   Delete "$G_ROOTDIR\*.gif"
   Delete "$G_ROOTDIR\*.change"
   Delete "$G_ROOTDIR\*.change.txt"
