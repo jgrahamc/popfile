@@ -435,6 +435,10 @@ sub CORE_signals
 
     $SIG{ALRM}  = 'IGNORE';
 
+    # Ignore broken pipes
+
+    $SIG{PIPE}  = 'IGNORE';
+
     return $SIG;
 }
 

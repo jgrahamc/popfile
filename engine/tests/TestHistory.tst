@@ -1,4 +1,4 @@
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #
 # Tests for History.pm
 #
@@ -20,7 +20,7 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 
 rmtree( 'messages' );
 rmtree( 'corpus' );
@@ -119,13 +119,12 @@ test_assert_equal( $#result, 0 );
 test_assert( $result[0] != 1 );
 
 # Check that release_slot removes the entry from the database
-# and deletes the file, but does not clean up the directory
+# and deletes the file, and does clean up the directory
 
 $h->release_slot( $slot );
 
 test_assert( !( -e $file ) );
-test_assert( ( -e $path ) );
-test_assert( ( -d $path ) );
+test_assert( !( -e $path ) );
 
 @result = $h->{db__}->selectrow_array( "select committed from history where id = $slot;" );
 test_assert_equal( $#result, -1 );
@@ -458,6 +457,12 @@ test_assert_equal( $h->get_query_size( $qq ), 0 );
 $h->stop_query( $qq );
 
 test_assert( !defined( $h->{queries__}{$q} ) );
+
+# Check that the directories are gone too
+
+test_assert( !( -e 'messages/00' ) );
+test_assert( !( -e 'messages/00/00' ) );
+test_assert( !( -e 'messages/00/00/00' ) );
 
 $h->stop();
 $b->stop();

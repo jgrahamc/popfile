@@ -64,13 +64,13 @@ sub new
     return $self;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # initialize
 #
 # Called to initialize the interface
 #
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 sub initialize
 {
     my ( $self ) = @_;
@@ -100,12 +100,11 @@ sub initialize
     $self->{last_tickd__} = time;
 
     $self->mq_register_( 'TICKD', $self );
-    $self->calculate_today__();
 
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #
 # deliver
 #
@@ -113,7 +112,7 @@ sub initialize
 #
 # There is no return value from this method
 #
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 sub deliver
 {
     my ( $self, $type, @message ) = @_;
@@ -125,11 +124,27 @@ sub deliver
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+#
+# start
+#
+# Called to start the logger running
+#
+#----------------------------------------------------------------------------
+sub start
+{
+    my ( $self ) = @_;
+
+    $self->calculate_today__();
+
+    return 1;
+}
+
+# ---------------------------------------------------------------------------
 #
 # service
 #
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 sub service
 {
     my ( $self ) = @_;
@@ -148,11 +163,13 @@ sub service
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #
-# calculate_today - set the global $self->{today} variable to the current day in seconds
+# calculate_today
 #
-# ---------------------------------------------------------------------------------------------
+# Set the global $self->{today} variable to the current day in seconds
+#
+# ---------------------------------------------------------------------------
 sub calculate_today__
 {
     my ( $self ) = @_;
@@ -163,21 +180,23 @@ sub calculate_today__
     # Note that 0 parameter than allows the logdir to be outside the user
     # sandbox
 
-    $self->{debug_filename__} = $self->get_user_path_( $self->config_( 'logdir' ) . "popfile$self->{today__}.log", 0 );
+    $self->{debug_filename__} = $self->get_user_path_(
+        $self->config_( 'logdir' ) . "popfile$self->{today__}.log", 0 );
 }
 
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 #
 # remove_debug_files
 #
 # Removes popfile log files that are older than 3 days
 #
-# ---------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
 sub remove_debug_files
 {
     my ( $self ) = @_;
 
-    my @debug_files = glob( $self->get_user_path_( $self->config_( 'logdir' ) . 'popfile*.log' ) );
+    my @debug_files = glob( $self->get_user_path_(
+                          $self->config_( 'logdir' ) . 'popfile*.log' ) );
 
     foreach my $debug_file (@debug_files) {
         # Extract the epoch information from the popfile log file name
@@ -188,16 +207,17 @@ sub remove_debug_files
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # debug
 #
 # $level      The level of this message
-# $message    A string containing a debug message that may or may not be printed
+# $message    A string containing a debug message that may or may not be 
+#             printed
 #
 # Prints the passed string if the global $debug is true
 #
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 sub debug
 {
     my ( $self, $level, $message ) = @_;
@@ -207,6 +227,10 @@ sub debug
     }
 
     if ( $level > $self->config_( 'level' ) ) {
+        return;
+    }
+
+    if ( $self->{debug_filename__} eq '' ) {
         return;
     }
 

@@ -194,6 +194,12 @@ sub initialize
 
     $self->config_( 'cache_templates', 0 );
 
+    # Controls whether or not we die if a template variable is missing
+    # when we try to set it.  Setting it to 1 can be useful for debugging
+    # purposes
+
+    $self->config_( 'strict_templates', 0 );
+
     # The default columns to show in the History page.  The order here
     # is important, as is the presence of a + (show this column) or -
     # (hide this column) in the value.  By default we show everything
@@ -547,7 +553,9 @@ sub url_handler__
         $http_header .= length($text);
         $http_header .= "$eol$eol";
 
-        print $client $http_header . $text;
+        if ( $client->connected ) {
+            print $client $http_header . $text;
+        }
         return 0;
     }
 
@@ -556,15 +564,16 @@ sub url_handler__
     # the training help item. And if this one is clicked away, both
     # will no longer be shown.
 
-    if ( exists $self->{form_}{nomore_bucket_help} && $self->{form_}{nomore_bucket_help} ) {
+    if ( exists $self->{form_}{nomore_bucket_help} &&
+         $self->{form_}{nomore_bucket_help} ) {
         $self->config_( 'show_bucket_help', 0 );
         $self->config_( 'show_training_help', 1 );
     }
 
-    if ( exists $self->{form_}{nomore_training_help} && $self->{form_}{nomore_training_help} ) {
+    if ( exists $self->{form_}{nomore_training_help} &&
+         $self->{form_}{nomore_training_help} ) {
         $self->config_( 'show_training_help', 0 );
     }
-
 
     # The url table maps URLs that we might receive to pages that we
     # display, the page table maps the pages to the functions that
@@ -650,7 +659,9 @@ sub bmp_file__
         $http_header .= length($file);
         $http_header .= "$eol$eol";
 
-        print $client $http_header . $file;
+        if ( $client->connected ) {
+            print $client $http_header . $file;
+        }
         return 0;
     } else {
         return $self->http_error_( $client, 404 );
@@ -728,7 +739,9 @@ sub http_ok
     $http_header .= length($text);
     $http_header .= "$eol$eol";
 
-    print $client $http_header . $text;
+    if ( $client->connected ) {
+        $client->print( $http_header . $text );
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -2741,7 +2754,7 @@ sub load_template__
         case_sensitive    => 1,
         loop_context_vars => 1,
         cache             => $self->config_( 'cache_templates' ),
-        die_on_bad_params => 0,
+        die_on_bad_params => $self->config_( 'strict_templates' ),
         search_path_on_include => 1,
         path => [$self->get_root_path_( "$root" ),
                  $self->get_root_path_( 'skins/default' ) ]

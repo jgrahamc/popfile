@@ -643,6 +643,8 @@ sub slurp_
     while ( sysread( $handle, $c, 160 ) > 0 ) {
         $slurp_data__{"$handle"}{data} .= $c;
 
+        $self->log_( 2, "Read slurp data $c" );
+
         $result = $self->flush_slurp_data__( $handle );
 
         if ( $result ne '' ) {

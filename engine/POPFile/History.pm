@@ -358,7 +358,32 @@ sub release_slot
     my $delete = "delete from history where history.id = $slot;";
 
     $self->db__()->do( $delete );
-    unlink $self->get_slot_file( $slot );
+
+    my $file = $self->get_slot_file( $slot );
+
+    unlink $file;
+
+    # It's not possible that the directory for the slot file is empty
+    # and we want to delete it so that things get cleaned up automatically
+
+    $file =~ s/popfile[a-f0-9]{2}\.msg$//i;
+
+    my $depth = 3;
+
+    while ( $depth > 0 ) {
+        my @files = glob( $file . '*' );
+
+        if ( $#files == -1 ) {
+            if ( !( rmdir( $file ) ) ) {
+                last;
+            }
+            $file =~ s![a-f0-9]{2}/$!!i;
+        } else {
+            last;
+        }
+
+        $depth--;
+    }
 }
 
 #----------------------------------------------------------------------------

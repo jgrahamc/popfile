@@ -119,11 +119,13 @@ sub service
 
     my $code = 1;
 
-    # See if there's a connection waiting for us, if there is we accept it handle a single
-    # request and then exit
+    # See if there's a connection waiting for us, if there is we
+    # accept it handle a single request and then exit
+
     my ( $ready ) = $self->{selector_}->can_read(0);
 
     # Handle HTTP requests for the UI
+
     if ( ( defined( $ready ) ) && ( $ready == $self->{server_} ) ) {
 
         if ( my $client = $self->{server_}->accept() ) {
@@ -145,7 +147,8 @@ sub service
 
                 $client->autoflush(1);
 
-                if ( ( defined( $client ) ) && ( my $request = $self->slurp_( $client ) ) ) {
+                if ( ( defined( $client ) ) &&
+                     ( my $request = $self->slurp_( $client ) ) ) {
                     my $content_length = 0;
                     my $content;
 
@@ -176,12 +179,15 @@ sub service
 
                     if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {
                         $code = $self->handle_url( $client, $2, $1, $content );
+                        $self->log_( 2,
+                            "HTTP handle_url returned code $code\n" );
                     } else {
-                        http_error_( $self, $client, 500 );
+                        $self->http_error_( $client, 500 );
                     }
                 }
             }
 
+            $self->log_( 2, "Close HTTP connection on $client\n" );
             $self->done_slurp_( $client );
             close $client;
         }
@@ -324,7 +330,9 @@ sub http_error_
 
     $self->log_( 0, "HTTP error $error returned" );
 
-    print $client "HTTP/1.0 $error Error$eol$eol";
+    if ( $client->connected ) {
+        print $client "HTTP/1.0 $error Error$eol$eol";
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
