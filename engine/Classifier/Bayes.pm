@@ -41,7 +41,7 @@ use Digest::MD5 qw( md5_hex );
 use Digest::SHA qw( sha256_hex );
 use MIME::Base64;
 
-use Crypt::Random qw( makerandom_octet );
+use Crypt::Random;
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -1443,7 +1443,7 @@ sub generate_unique_session_key__
     # Generate a long random number, hash it and the time together to
     # get a random session key in hex
 
-    my $random = makerandom_octet( Length => 128, Strength => 1 );
+    my $random = Crypt::Random::makerandom_octet( Length => 128, Strength => 1 );
     my $now = time;
     return sha256_hex( "$random$now" );
 }
