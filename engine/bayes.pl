@@ -41,6 +41,9 @@ if ( $#ARGV == 0 )
     $b->logger( $l );
 
     $b->initialize();
+
+    $c->load_configuration();
+
     $b->start();
 
     my @files   = glob $ARGV[0];

@@ -44,10 +44,12 @@ if ( $#ARGV == -1 )
     $c->mq( $mq );
     $c->logger( $l );
 
-    $l->initialize();
     $c->initialize();
+    $l->initialize();
     $b->initialize();
     $u->initialize();
+
+    $c->load_configuration();
 
     $b->start();
 
