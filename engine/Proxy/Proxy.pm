@@ -22,6 +22,8 @@ package Proxy::Proxy;
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
+#   Modified by     Sam Schinke (sschinke@users.sourceforge.net)
+#
 # ---------------------------------------------------------------------------------------------
 
 use POPFile::Module;
@@ -39,7 +41,7 @@ use POSIX ":sys_wait_h";
 #----------------------------------------------------------------------------
 # new
 #
-#   Class new() function, all real work gets done by initialize and 
+#   Class new() function, all real work gets done by initialize and
 #   the things set up here are more for documentation purposes than
 #   anything so that you know that they exists
 #
@@ -64,6 +66,10 @@ sub new
 
     $self->{child_}            = 0;
     $self->{flush_child_data_} = \&flush_child_data_;
+
+    # Holding variable for MSWin32 pipe handling
+
+    $self->{pipe_cache__};
 
     # This is the error message returned if the connection at any
     # time times out while handling a command
@@ -186,6 +192,59 @@ sub reaper
     }
 }
 
+
+# ---------------------------------------------------------------------------------------------
+#
+# read_pipe_
+#
+# reads a single message from a pipe in a cross-platform way.
+# returns undef if the pipe has no message
+#
+# $handle   The handle of the pipe to read
+#
+# ---------------------------------------------------------------------------------------------
+
+sub read_pipe_
+{
+    my ($self, $handle) = @_;
+
+    if ( $^O eq "MSWin32" ) {
+
+        # PLATFORM SPECIFIC CODE
+        # bypasses bug in -s $pipe under ActivePerl
+
+        my $message;
+
+        if ( ( $self->{pipe_cache__} eq '' ) && &{ $self->{pipeready_} }($handle) ) {
+
+            # refill the cache when it is empty
+
+            sysread($handle, my $string, -s $handle);
+
+            # push messages onto the end of our cache
+
+            $self->{pipe_cache__} .= $string;
+        }
+
+        # pop the oldest message;
+
+        $message = $1 if ($self->{pipe_cache__} =~ s/(.*?\n)//);
+
+        return $message;
+
+    } else {
+
+        # do things normally
+
+        if ( &{ $self->{pipeready_} }($handle) ) {
+            return <$handle>;
+        }
+    }
+
+    return undef;
+}
+
+
 # ---------------------------------------------------------------------------------------------
 #
 # flush_child_data_
@@ -204,37 +263,28 @@ sub flush_child_data_
 
     my $stats_changed = 0;
 
-    while ( &{$self->{pipeready_}}($handle) )
+    my $message;
+
+    while ( ($message = $self->read_pipe_( $handle )) && defined($message) )
     {
-        my $message = <$handle>;
+        $message =~ s/[\r\n]//g;
 
-        if ( defined( $message ) ) {
-            $message =~ s/[\r\n]//g;
+        $self->log_( "Child proxy message $message" );
 
-            $self->log_( "Child proxy message $message" );
+        if ( $message =~ /CLASS:(.*)/ ) {
 
-            if ( $message =~ /CLASS:(.*)/ ) {
+            # Post a message to the MQ indicating that we just handled
+            # a message with a specific classification
 
-                # Post a message to the MQ indicating that we just handled
-                # a message with a specific classification
+            $self->mq_post_( 'CLASS', $1, '' );
+        }
 
-                $self->mq_post_( 'CLASS', $1, '' );
-            }
+        if ( $message =~ /NEWFL:(.*)/ ) {
+            $self->mq_post_( 'NEWFL', $1, '' );
+        }
 
-            if ( $message =~ /NEWFL:(.*)/ ) {
-                $self->mq_post_( 'NEWFL', $1, '' );
-            }
-
-            if ( $message =~ /LOGIN:(.*)/ ) {
-                $self->mq_post_( 'LOGIN', $1, '' );
-            }
-        } else {
-            # This is here so that we get in errorneous position where the pipeready
-            # function is returning that there's data, but there is none, in fact the
-            # pipe is dead then we break the cycle here.  This was happening to me when
-            # I tested POPFile running under cygwin.
-
-            last;
+        if ( $message =~ /LOGIN:(.*)/ ) {
+            $self->mq_post_( 'LOGIN', $1, '' );
         }
     }
 }
