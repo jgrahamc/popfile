@@ -230,7 +230,7 @@
 
   ; Debug aid: Allow log file checking (by clicking "Show Details" button on the "Install" page)
 
-  !define MUI_FINISHPAGE_NOAUTOCLOSE
+#  !define MUI_FINISHPAGE_NOAUTOCLOSE
 
   ;-----------------------------------------
   ; General Settings - Other Settings
@@ -1174,7 +1174,7 @@ Function SetOptionsPage
 
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
   WriteUninstaller $INSTDIR\uninstall.exe
-  ExecWait '"$INSTDIR\uninstall.exe"  _?=$INSTDIR'
+  ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
   IfFileExists "$INSTDIR\popfile.pl" skip_msg_delete
 
   ; No need to display the warning about shutting down POPFile as it has just been uninstalled
