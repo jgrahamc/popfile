@@ -2151,6 +2151,12 @@ sub load_history_cache__
 
     my @history_files = sort compare_mf glob( $self->global_config_( 'msgdir' ) . "popfile*=*.msg" );
 
+    # This will get set the first time we add a new message to the history
+    # cache and is used to control where we place boundaries in the history
+    # to show where a user left off
+
+    my $set_boundary = 0;
+
     foreach my $i ( 0 .. $#history_files ) {
 
         # Strip any directory portion of the name in the current file so that we
@@ -2231,6 +2237,8 @@ sub load_history_cache__
             $self->{history__}{$history_files[$i]}{short_from}    = $short_from;
             $self->{history__}{$history_files[$i]}{cull}          = 0;
             $self->{history__}{$history_files[$i]}{index}         = $i;
+            $self->{history__}{$history_files[$i]}{boundary}      = !$set_boundary;
+            $set_boundary = 1;
         }
     }
 
@@ -2723,7 +2731,7 @@ sub history_page
          defined( $self->{form_}{undo}           ) ||
          defined( $self->{form_}{reclassify}     ) ) {
         return $self->http_redirect_( $client, "/history?" . $self->print_form_fields_(1,0,('start_message','filter','search','sort','session') ) );
-    }                                                            
+    }
 
     my $body = '';
 
@@ -2801,7 +2809,6 @@ sub history_page
             $body .= "</a>\n</th>\n";
         }
 
-
         $body .= "<th class=\"historyLabel\" scope=\"col\"><input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" /></th>\n";
         $body .= "<th class=\"historyLabel\" scope=\"col\"><input type=\"submit\" class=\"deleteButton\" name=\"deletemessage\" value=\"$self->{language__}{Remove}\" /></th>\n</tr>\n";
 
@@ -2816,9 +2823,15 @@ sub history_page
             my $bucket        = $self->{history__}{$mail_file}{bucket};
             my $reclassified  = $self->{history__}{$mail_file}{reclassified};
             my $index         = $self->{history__}{$mail_file}{index} + 1;
+            my $boundary      = $self->{history__}{$mail_file}{boundary};
+
+            if ( $boundary && ( $self->{form_}{sort} eq '' ) && ( $i != $start_message ) ) {
+                $body .= "<tr class=\"rowHighlighted\" height=\"2\"><td colspan=\"6\"></td></tr>";
+	    }
 
             $body .= "<tr";
-            if ( ( ( defined($self->{form_}{file}) && ( $self->{form_}{file} eq $mail_file ) ) ) || ( $highlight_message eq $mail_file ) ) {
+            if ( ( ( defined($self->{form_}{file}) && ( $self->{form_}{file} eq $mail_file ) ) ) || 
+                 ( $highlight_message eq $mail_file ) ) {
                 $body .= " class=\"rowHighlighted\"";
             } else {
                 $body .= " class=\"";
