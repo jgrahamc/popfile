@@ -6,7 +6,7 @@
 #                   in the files "ioA.ini", "ioB.ini", "ioC.ini",
 #                   "ioD.ini", "ioE.ini", "ioF.ini" and "ioG.ini".
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -26,20 +26,18 @@
 #
 #--------------------------------------------------------------------------
 
-; As of 19 November 2003, the latest release of the NSIS compiler is 2.0b4. This release
-; contains significant changes (especially to the MUI which is used by the POPFile installer)
-; which are not backward-compatible (i.e. this POPFile installer script cannot be built by
-; earlier versions of the NSIS compiler).
+; This version of the script has been tested with the "NSIS 2 Release Candidate 2" compiler,
+; released 5 January 2004, with the NSIS CVS snapshot from 9 January 2004 (20:44 GMT) applied.
 
-; This version of the script has been tested with NSIS 2.0b4 dated 19 November 2003 after
-; applying the NSIS CVS snapshot dated 22 December 2003 (08:44 GMT).
+; IMPORTANT WARNING:
+; This script should not be built with any earlier version than "NSIS 2 Release Candidate 2"
+; because earlier versions of the compiler do not handle scripts with more than 192 language
+; strings properly (the resulting installers display garbled screens, making them unusable).
 
-; IMPORTANT:
-; The Outlook and Outlook Express Configuration pages use the NOWORDWRAP flag which requires
-; InstallOptions 2.3 (or later). This means InstallOptions.dll dated 5 Dec 2003 or later
-; (i.e. InstallOptions.dll v1.73 or later). If this script is compiled with an earlier version
-; of the DLL, the account details will not be displayed correctly if any field exceeds the
-; column width.
+; INSTALLER SIZE: The LZMA compression method can be used to reduce the size of the 'setup.exe'
+; file by around 30% compared to the default compression method but at the expense of greatly
+; increased compilation times (LZMA compilation takes almost two and a half times as long as it
+; does when the default compression method is used, based upon some informal tests).
 
 #--------------------------------------------------------------------------
 # POPFile Version Data:
@@ -261,7 +259,7 @@
   VIAddVersionKey "ProductName" "${C_PFI_PRODUCT}"
   VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sourceforge.net"
   VIAddVersionKey "CompanyName" "The POPFile Project"
-  VIAddVersionKey "LegalCopyright" "© 2001-2003  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright" "© 2001-2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "POPFile Automatic email classification"
   VIAddVersionKey "FileVersion" "${C_PFI_VERSION}"
 
@@ -859,7 +857,10 @@ Section "POPFile" SecPOPFile
 
   ; Create default configuration data for use by the 'wrapper' utilities
 
-  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "POPFileFolder" "$INSTDIR"
+  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserName"       "$G_WINUSERNAME"
+  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserLock"       "Yes"
+  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "SearchResult"   "Installer"
+  WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "POPFileFolder"  "$INSTDIR"
   WriteINIStr "$INSTDIR\wrapper.ini" "Configuration" "UserDataFolder" "$INSTDIR"
 
   File "..\engine\popfile.pl"
@@ -986,6 +987,9 @@ update_config:
   SetOutPath $INSTDIR\Carp
   File "${C_PERL_DIR}\lib\Carp\*"
 
+  SetOutPath $INSTDIR\Digest
+  File "${C_PERL_DIR}\lib\Digest\MD5.pm"
+
   SetOutPath $INSTDIR\Exporter
   File "${C_PERL_DIR}\lib\Exporter\*"
 
@@ -1012,6 +1016,9 @@ update_config:
 
   SetOutPath $INSTDIR\warnings
   File "${C_PERL_DIR}\lib\warnings\register.pm"
+
+  SetOutPath $INSTDIR\auto\Digest\MD5
+  File "${C_PERL_DIR}\lib\auto\Digest\MD5\*"
 
   SetOutPath $INSTDIR\auto\DynaLoader
   File "${C_PERL_DIR}\lib\auto\DynaLoader\*"
@@ -2216,6 +2223,8 @@ Function SetEmailClientPage_Init
   ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "Settings" "RTL" "$(^RTL)"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" \
+              "Settings" "BackButtonText" "$(PFI_LANG_MAILCFG_IO_SKIPALL)"
 
   !insertmacro PFI_IO_TEXT "ioF.ini" "1" "$(PFI_LANG_MAILCFG_IO_TEXT_1)"
   !insertmacro PFI_IO_TEXT "ioF.ini" "3" "$(PFI_LANG_MAILCFG_IO_TEXT_2)"
@@ -2275,8 +2284,17 @@ incrm_index:
 display_results:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "Field 2" "State" "${L_CLIENT_LIST}"
 
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY_RETURN "ioF.ini"
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "back" 0 exit
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioF.ini" "ClientEXE" "ConfigStatus" "SkipAll"
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioF.ini" "Settings" "NumFields" "1"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioF.ini" "Settings" "BackEnabled" "0"
+  !insertmacro PFI_IO_TEXT "ioF.ini" "1" "$(PFI_LANG_MAILCFG_IO_CANCEL)"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioF.ini"
 
+exit:
   Pop ${L_TEMP}
   Pop ${L_SEPARATOR}
   Pop ${L_CLIENT_TYPE}
@@ -2306,6 +2324,8 @@ Function SetOutlookOutlookExpressPage_Init
   ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" "Settings" "RTL" "$(^RTL)"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" \
+              "Settings" "BackButtonText" "$(PFI_LANG_MAILCFG_IO_SKIPONE)"
 
   !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_OOECFG_IO_BOXHDR)"
   !insertmacro PFI_IO_TEXT "ioB.ini" "3" "$(PFI_LANG_OOECFG_IO_FOOTNOTE)"
@@ -2385,6 +2405,23 @@ Function SetOutlookExpressPage
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_EXPCFG_TITLE)" "$(PFI_LANG_EXPCFG_SUBTITLE)"
 
+  ; Create timestamp used for all Outlook Express configuration activities
+  ; and convert old-style 'undo' data to the new INI-file format
+
+  Call GetDateTimeStamp
+  Pop ${L_TEMP}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "DateTime" "OutlookExpress" "${L_TEMP}"
+  IfFileExists "$INSTDIR\popfile.reg" 0 check_oe_config_enabled
+  Push "popfile.reg"
+  Call ConvertOOERegData
+
+check_oe_config_enabled:
+
+  ; Check if user decided to skip all email client configuration
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioF.ini" "ClientEXE" "ConfigStatus"
+    StrCmp ${L_STATUS} "SkipAll" exit
+
   ; If Outlook Express is running, ask the user to shut it down now
   ; (user is allowed to ignore our request)
 
@@ -2401,19 +2438,26 @@ check_again:
              $(PFI_LANG_MBCLIENT_STOP_3)"\
              IDRETRY check_again IDIGNORE open_logfiles
 
-  ; Abort has been selected so we do not offer to reconfigure any Outlook Express accounts
+abort_oe_config:
+
+  ; Either 'Abort' has been selected so we do not offer to reconfigure any Outlook Express
+  ; accounts or 'Cancel' has been selected during the Outlook Express configuration process
+  ; so we stop now
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioB.ini" "Settings" "NumFields" "1"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioB.ini" "Settings" "BackEnabled" "0"
   !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_EXPCFG_IO_CANCELLED)"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioB.ini"
-  Goto exit
+  StrCmp $G_OOECONFIG_HANDLE "" exit
+  FileWrite $G_OOECONFIG_HANDLE "$\r$\n$(PFI_LANG_EXPCFG_IO_CANCELLED)$\r$\n"
+  Goto finished_oe_config
 
 open_logfiles:
-  Call GetDateTimeStamp
-  Pop ${L_TEMP}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioB.ini" "Settings" "BackEnabled" "1"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "OutlookExpress"
 
   FileOpen  $G_OOECONFIG_HANDLE "$INSTDIR\expconfig.txt" w
-  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_EXPCFG_LOG_BEFORE) (${L_TEMP})$\r$\n$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_EXPCFG_LOG_BEFORE) (${L_TEMP})$\r$\n$\r$\n"
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_EXPCFG_LOG_IDENTITY)"  20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_EMAIL)"     30
@@ -2423,7 +2467,7 @@ open_logfiles:
 
   FileOpen  $G_OOECHANGES_HANDLE "$INSTDIR\expchanges.txt" a
   FileSeek  $G_OOECHANGES_HANDLE 0 END
-  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_ExpCFG_LOG_AFTER) (${L_TEMP})$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_ExpCFG_LOG_AFTER) (${L_TEMP})$\r$\n$\r$\n"
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_EXPCFG_LOG_IDENTITY)"   20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"    20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWSERVER)"  17
@@ -2614,8 +2658,8 @@ display_list:
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
+  StrCmp ${L_TEMP} "back" abort_oe_config
   StrCmp ${L_TEMP} "cancel" finished_this_guid
-  StrCmp ${L_TEMP} "back" finished_this_guid
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Identity" "PageStatus"
   StrCmp ${L_TEMP} "updated" display_list
@@ -2645,8 +2689,8 @@ display_list_again:
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
+  StrCmp ${L_TEMP} "back" abort_oe_config
   StrCmp ${L_TEMP} "cancel" finished_this_guid
-  StrCmp ${L_TEMP} "back" finished_this_guid
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Identity" "PageStatus"
   StrCmp ${L_TEMP} "updated" display_list_again
@@ -2704,6 +2748,176 @@ exit:
   !undef L_POP3SERVER
   !undef L_EMAILADDRESS
   !undef L_USERNAME
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: ConvertOOERegData
+#
+# This function uses an old-style 'popfile.reg' (or 'outlook.reg') file to build a new
+# 'pfi-outexpress.ini' (or 'pfi-outlook.ini') file. The old-style filename is passed via stack.
+# After new file has been built, old one is renamed (up to 3 versions are kept).
+#--------------------------------------------------------------------------
+
+Function ConvertOOERegData
+
+  !define L_CFG         $R9
+  !define L_PREV_KEY    $R8
+  !define L_REG_FILE    $R7
+  !define L_REG_KEY     $R6
+  !define L_REG_SUBKEY  $R5
+  !define L_REG_VALUE   $R4
+  !define L_TEMP        $R3
+  !define L_UNDO        $R2
+  !define L_UNDOFILE    $R1
+
+  Exch ${L_REG_FILE}
+  Push ${L_CFG}
+  Push ${L_PREV_KEY}
+  Push ${L_REG_KEY}
+  Push ${L_REG_SUBKEY}
+  Push ${L_REG_VALUE}
+  Push ${L_TEMP}
+  Push ${L_UNDO}
+  Push ${L_UNDOFILE}
+
+  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
+
+  ; Original 'popfile.reg' format (2 values per entry, each using 3 lines) imported as 'IniV=1':
+  ;
+  ;                 "Registry key", "POP3 User Name", "original data",
+  ;                 "Registry key", "POP3 Server", "original data"
+  ;
+  ; Revised 'popfile.reg' format (3 values per entry, each using 3 lines) imported as 'IniV=2':
+  ;
+  ;                 "Registry key", "POP3 User Name", "original data",
+  ;                 "Registry key", "POP3 Server", "original data",
+  ;                 "Registry key", "POP3 Port", "original data"
+  ;
+  ; Original 'outlook.reg' format (3 values per entry, each using 3 lines) imported as 'IniV=2':
+  ;
+  ;                 "Registry key", "POP3 User Name", "original data",
+  ;                 "Registry key", "POP3 Server", "original data",
+  ;                 "Registry key", "POP3 Port", "original data"
+
+  StrCpy ${L_PREV_KEY} ""
+
+  StrCmp ${L_REG_FILE} "popfile.reg" outlook_express
+  StrCpy ${L_UNDOFILE} "pfi-outlook.ini"
+  Goto read_old_file
+
+outlook_express:
+  StrCpy ${L_UNDOFILE} "pfi-outexpress.ini"
+
+read_old_file:
+  FileOpen  ${L_CFG} "$INSTDIR\${L_REG_FILE}" r
+
+next_entry:
+  FileRead ${L_CFG} ${L_REG_KEY}
+  StrCmp ${L_REG_KEY} "" end_of_file
+  Push ${L_REG_KEY}
+  Call TrimNewlines
+  Pop ${L_REG_KEY}
+  StrCmp ${L_REG_KEY} "" next_entry
+
+  FileRead ${L_CFG} ${L_REG_SUBKEY}
+  Push ${L_REG_SUBKEY}
+  Call TrimNewlines
+  Pop ${L_REG_SUBKEY}
+  StrCmp ${L_REG_SUBKEY} "" next_entry
+
+  FileRead ${L_CFG} ${L_REG_VALUE}
+  Push ${L_REG_VALUE}
+  Call TrimNewlines
+  Pop ${L_REG_VALUE}
+  StrCmp ${L_REG_VALUE} "" next_entry
+
+  StrCmp ${L_REG_KEY} ${L_PREV_KEY} add_to_current
+  StrCpy ${L_PREV_KEY} ${L_REG_KEY}
+
+  ; New entry detected, so we create a new 'undo' entry for it
+
+  ReadINIStr  ${L_UNDO} "$INSTDIR\${L_UNDOFILE}" "History" "ListSize"
+  StrCmp ${L_UNDO} "" 0 update_list_size
+  StrCpy ${L_UNDO} 1
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "History" "ListSize" "1"
+  Goto add_entry
+
+update_list_size:
+  IntOp ${L_UNDO} ${L_UNDO} + 1
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "History" "ListSize" "${L_UNDO}"
+
+add_entry:
+  StrCmp ${L_REG_FILE} "popfile.reg" outlook_express_stamp
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "Outlook"
+  Goto save_entry
+
+outlook_express_stamp:
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "OutlookExpress"
+
+save_entry:
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "History" "Undo-${L_UNDO}" "Imported on ${L_TEMP}"
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "History" "IniV-${L_UNDO}" "1"
+
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "Restored" "No"
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "RegistryKey" "${L_REG_KEY}"
+
+add_to_current:
+  StrCmp ${L_REG_SUBKEY} "POP3 User Name" 0 not_username
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "POP3UserName" "${L_REG_VALUE}"
+  Goto next_entry
+
+not_username:
+  StrCmp ${L_REG_SUBKEY} "POP3 Server" 0 not_server
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "POP3Server" "${L_REG_VALUE}"
+  Goto next_entry
+
+not_server:
+  StrCmp ${L_REG_SUBKEY} "POP3 Server" 0 next_entry
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_UNDO}" "POP3Port" "${L_REG_VALUE}"
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "History" "IniV-${L_UNDO}" "2"
+  Goto next_entry
+
+end_of_file:
+  FileClose ${L_CFG}
+
+  IfFileExists "$INSTDIR\${L_REG_FILE}.bk1" 0 the_first
+  IfFileExists "$INSTDIR\${L_REG_FILE}.bk2" 0 the_second
+  IfFileExists "$INSTDIR\${L_REG_FILE}.bk3" 0 the_third
+  Delete "$INSTDIR\${L_REG_FILE}.bk3"
+
+the_third:
+  Rename "$INSTDIR\${L_REG_FILE}.bk2" "$INSTDIR\${L_REG_FILE}.bk3"
+
+the_second:
+  Rename "$INSTDIR\${L_REG_FILE}.bk1" "$INSTDIR\${L_REG_FILE}.bk2"
+
+the_first:
+  Rename "$INSTDIR\${L_REG_FILE}" "$INSTDIR\${L_REG_FILE}.bk1"
+
+  Sleep 250           ; ensure banner appears for at least 250ms
+
+  Banner::destroy
+
+  Pop ${L_UNDOFILE}
+  Pop ${L_UNDO}
+  Pop ${L_TEMP}
+  Pop ${L_REG_VALUE}
+  Pop ${L_REG_SUBKEY}
+  Pop ${L_REG_KEY}
+  Pop ${L_PREV_KEY}
+  Pop ${L_CFG}
+  Pop ${L_REG_FILE}
+
+  !undef L_CFG
+  !undef L_PREV_KEY
+  !undef L_REG_FILE
+  !undef L_REG_KEY
+  !undef L_REG_SUBKEY
+  !undef L_REG_VALUE
+  !undef L_TEMP
+  !undef L_UNDO
+  !undef L_UNDOFILE
 
 FunctionEnd
 
@@ -2777,6 +2991,7 @@ Function CheckOutlookExpressRequests
   !define L_TEMP         $R5
   !define L_TEXT_ENTRY   $R4
   !define L_IDENTITY     $R3
+  !define L_UNDO         $R2
 
   !define L_ACCOUNTNAME   $9
   !define L_EMAILADDRESS  $8
@@ -2791,6 +3006,7 @@ Function CheckOutlookExpressRequests
   Push ${L_TEMP}
   Push ${L_TEXT_ENTRY}
   Push ${L_IDENTITY}
+  Push ${L_UNDO}
 
   Push ${L_ACCOUNTNAME}
   Push ${L_EMAILADDRESS}
@@ -2844,33 +3060,28 @@ next_row:
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "updated"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field ${L_CBOX_INDEX}" "Flags" "DISABLED"
 
-  ; To be able to restore the registry to previous settings when we uninstall we
-  ; write a special file called 'popfile.reg' containing the registry settings
-  ; prior to modification.
-  ;
-  ; For each account we save 3 registry settings, each using 3 lines as follows:
-  ;         "Registry key", "POP3 User Name", "original data",
-  ;         "Registry key", "POP3 Server", "original data",
-  ;         "Registry key", "POP3 Port", "original data"
-  ;
-  ; NB: This file format is compatible with previous releases of POPFile.
+  ReadINIStr  ${L_UNDO} "$INSTDIR\pfi-outexpress.ini" "History" "ListSize"
+  StrCmp ${L_UNDO} "" 0 update_list_size
+  StrCpy ${L_UNDO} 1
+  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "History" "ListSize" "1"
+  Goto add_entry
 
-  FileOpen  ${L_TEMP} $INSTDIR\popfile.reg a
-  FileSeek  ${L_TEMP} 0 END
+update_list_size:
+  IntOp ${L_UNDO} ${L_UNDO} + 1
+  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "History" "ListSize" "${L_UNDO}"
 
-  FileWrite ${L_TEMP} "${L_REGKEY}$\n"
-  FileWrite ${L_TEMP} "POP3 User Name$\n"
-  FileWrite ${L_TEMP} "${L_POP3USERNAME}$\n"
+add_entry:
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "OutlookExpress"
+  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "History" "Undo-${L_UNDO}" "Created on ${L_TEMP}"
+  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "History" "User-${L_UNDO}" "$G_WINUSERNAME"
+  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "History" "Type-${L_UNDO}" "$G_WINUSERTYPE"
+  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "History" "IniV-${L_UNDO}" "3"
 
-  FileWrite ${L_TEMP} "${L_REGKEY}$\n"
-  FileWrite ${L_TEMP} "POP3 Server$\n"
-  FileWrite ${L_TEMP} "${L_POP3SERVER}$\n"
-
-  FileWrite ${L_TEMP} "${L_REGKEY}$\n"
-  FileWrite ${L_TEMP} "POP3 Port$\n"
-  FileWrite ${L_TEMP} "${L_POP3PORT}$\n"
-
-  FileClose ${L_TEMP}
+  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "Restored" "No"
+  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "RegistryKey" "${L_REGKEY}"
+  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "POP3UserName" "${L_POP3USERNAME}"
+  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "POP3Server" "${L_POP3SERVER}"
+  WriteINIStr "$INSTDIR\pfi-outexpress.ini" "Undo-${L_UNDO}" "POP3Port" "${L_POP3PORT}"
 
   ; Reconfigure the Outlook Express account
 
@@ -2901,6 +3112,7 @@ exit:
   Pop ${L_EMAILADDRESS}
   Pop ${L_ACCOUNTNAME}
 
+  Pop ${L_UNDO}
   Pop ${L_IDENTITY}
   Pop ${L_TEXT_ENTRY}
   Pop ${L_TEMP}
@@ -2916,6 +3128,7 @@ exit:
   !undef L_TEMP
   !undef L_TEXT_ENTRY
   !undef L_IDENTITY
+  !undef L_UNDO
 
   !undef L_ACCOUNTNAME
   !undef L_EMAILADDRESS
@@ -2995,6 +3208,23 @@ Function SetOutlookPage
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_OUTCFG_TITLE)" "$(PFI_LANG_OUTCFG_SUBTITLE)"
 
+  ; Create timestamp used for all Outlook configuration activities
+  ; and convert old-style 'undo' data to the new INI-file format
+
+  Call GetDateTimeStamp
+  Pop ${L_TEMP}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "DateTime" "Outlook" "${L_TEMP}"
+  IfFileExists "$INSTDIR\outlook.reg" 0 check_for_outlook
+  Push "outlook.reg"
+  Call ConvertOOERegData
+
+check_for_outlook:
+
+  ; Check if user decided to skip all email client configuration
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioF.ini" "ClientEXE" "ConfigStatus"
+    StrCmp ${L_STATUS} "SkipAll" exit
+
   ; Look for Outlook account data - if none found then quit
 
   ReadRegStr ${L_OUTLOOK} HKLM "Software\Microsoft\Internet Account Manager" "Outlook"
@@ -3036,19 +3266,29 @@ got_outlook_path:
              $(PFI_LANG_MBCLIENT_STOP_3)"\
              IDRETRY got_outlook_path IDIGNORE open_logfiles
 
-  ; Abort has been selected so we do not offer to reconfigure any Outlook accounts
+abort_outlook_config:
+
+  ; Either 'Abort' has been selected so we do not offer to reconfigure any Outlook accounts
+  ; or 'Cancel' has been selected during the Outlook configuration process so we stop now
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioB.ini" "Settings" "NumFields" "1"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioB.ini" "Settings" "BackEnabled" "0"
   !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_OUTCFG_IO_CANCELLED)"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioB.ini"
-  Goto exit
+  StrCmp $G_OOECONFIG_HANDLE "" exit
+  FileWrite $G_OOECONFIG_HANDLE "$\r$\n$(PFI_LANG_OUTCFG_IO_CANCELLED)$\r$\n"
+  Goto finished_outlook_config
 
 open_logfiles:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioB.ini" "Settings" "BackEnabled" "1"
+
   Call GetDateTimeStamp
   Pop ${L_TEMP}
 
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "DateTime" "Outlook" "${L_TEMP}"
+
   FileOpen  $G_OOECONFIG_HANDLE "$INSTDIR\outconfig.txt" w
-  FileWrite $G_OOECONFIG_HANDLE "$(PFI_LANG_OUTCFG_LOG_BEFORE) (${L_TEMP})$\r$\n$\r$\n"
+  FileWrite $G_OOECONFIG_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_OUTCFG_LOG_BEFORE) (${L_TEMP})$\r$\n$\r$\n"
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OUTCFG_LOG_IDENTITY)"  20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"   20
   !insertmacro OOECONFIG_BEFORE_LOG  "$(PFI_LANG_OOECFG_LOG_EMAIL)"     30
@@ -3058,7 +3298,7 @@ open_logfiles:
 
   FileOpen  $G_OOECHANGES_HANDLE "$INSTDIR\outchanges.txt" a
   FileSeek  $G_OOECHANGES_HANDLE 0 END
-  FileWrite $G_OOECHANGES_HANDLE "$(PFI_LANG_OUTCFG_LOG_AFTER) (${L_TEMP})$\r$\n$\r$\n"
+  FileWrite $G_OOECHANGES_HANDLE "[$G_WINUSERNAME] $(PFI_LANG_OUTCFG_LOG_AFTER) (${L_TEMP})$\r$\n$\r$\n"
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OUTCFG_LOG_IDENTITY)"   20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_ACCOUNT)"    20
   !insertmacro OOECONFIG_CHANGES_LOG  "$(PFI_LANG_OOECFG_LOG_NEWSERVER)"  17
@@ -3214,8 +3454,8 @@ display_list:
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
+  StrCmp ${L_TEMP} "back" abort_outlook_config
   StrCmp ${L_TEMP} "cancel" finished_outlook_config
-  StrCmp ${L_TEMP} "back" finished_outlook_config
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Identity" "PageStatus"
   StrCmp ${L_TEMP} "updated" display_list
@@ -3245,8 +3485,8 @@ display_list_again:
   !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
   Pop ${L_TEMP}
 
+  StrCmp ${L_TEMP} "back" abort_outlook_config
   StrCmp ${L_TEMP} "cancel" finished_outlook_config
-  StrCmp ${L_TEMP} "back" finished_outlook_config
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Identity" "PageStatus"
   StrCmp ${L_TEMP} "updated" display_list_again
@@ -3301,6 +3541,7 @@ Function CheckOutlookRequests
   !define L_TEMP         $R5
   !define L_TEXT_ENTRY   $R4
   !define L_IDENTITY     $R3
+  !define L_UNDO         $R2
 
   !define L_ACCOUNTNAME   $9
   !define L_EMAILADDRESS  $8
@@ -3315,6 +3556,7 @@ Function CheckOutlookRequests
   Push ${L_TEMP}
   Push ${L_TEXT_ENTRY}
   Push ${L_IDENTITY}
+  Push ${L_UNDO}
 
   Push ${L_ACCOUNTNAME}
   Push ${L_EMAILADDRESS}
@@ -3368,33 +3610,28 @@ next_row:
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Identity" "PageStatus" "updated"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field ${L_CBOX_INDEX}" "Flags" "DISABLED"
 
-  ; To be able to restore the registry to previous settings when we uninstall we
-  ; write a special file called 'outlook.reg' containing the registry settings
-  ; prior to modification.
-  ;
-  ; For each account we save 3 settings, each using 3 lines as follows:
-  ;         "Registry key", "POP3 User Name", "original data",
-  ;         "Registry key", "POP3 Server", "original data",
-  ;         "Registry key", "POP3 Port", "original data"
-  ;
-  ; This format is identical to that used for Outlook Express (but we use a separate file).
+  ReadINIStr  ${L_UNDO} "$INSTDIR\pfi-outlook.ini" "History" "ListSize"
+  StrCmp ${L_UNDO} "" 0 update_list_size
+  StrCpy ${L_UNDO} 1
+  WriteINIStr "$INSTDIR\pfi-outlook.ini" "History" "ListSize" "1"
+  Goto add_entry
 
-  FileOpen  ${L_TEMP} $INSTDIR\outlook.reg a
-  FileSeek  ${L_TEMP} 0 END
+update_list_size:
+  IntOp ${L_UNDO} ${L_UNDO} + 1
+  WriteINIStr "$INSTDIR\pfi-outlook.ini" "History" "ListSize" "${L_UNDO}"
 
-  FileWrite ${L_TEMP} "${L_REGKEY}$\n"
-  FileWrite ${L_TEMP} "POP3 User Name$\n"
-  FileWrite ${L_TEMP} "${L_POP3USERNAME}$\n"
+add_entry:
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "DateTime" "Outlook"
+  WriteINIStr "$INSTDIR\pfi-outlook.ini" "History" "Undo-${L_UNDO}" "Created on ${L_TEMP}"
+  WriteINIStr "$INSTDIR\pfi-outlook.ini" "History" "User-${L_UNDO}" "$G_WINUSERNAME"
+  WriteINIStr "$INSTDIR\pfi-outlook.ini" "History" "Type-${L_UNDO}" "$G_WINUSERTYPE"
+  WriteINIStr "$INSTDIR\pfi-outlook.ini" "History" "IniV-${L_UNDO}" "3"
 
-  FileWrite ${L_TEMP} "${L_REGKEY}$\n"
-  FileWrite ${L_TEMP} "POP3 Server$\n"
-  FileWrite ${L_TEMP} "${L_POP3SERVER}$\n"
-
-  FileWrite ${L_TEMP} "${L_REGKEY}$\n"
-  FileWrite ${L_TEMP} "POP3 Port$\n"
-  FileWrite ${L_TEMP} "${L_POP3PORT}$\n"
-
-  FileClose ${L_TEMP}
+  WriteINIStr "$INSTDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "Restored" "No"
+  WriteINIStr "$INSTDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "RegistryKey" "${L_REGKEY}"
+  WriteINIStr "$INSTDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "POP3UserName" "${L_POP3USERNAME}"
+  WriteINIStr "$INSTDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "POP3Server" "${L_POP3SERVER}"
+  WriteINIStr "$INSTDIR\pfi-outlook.ini" "Undo-${L_UNDO}" "POP3Port" "${L_POP3PORT}"
 
   ; Reconfigure the Outlook account
 
@@ -3425,6 +3662,7 @@ exit:
   Pop ${L_EMAILADDRESS}
   Pop ${L_ACCOUNTNAME}
 
+  Pop ${L_UNDO}
   Pop ${L_IDENTITY}
   Pop ${L_TEXT_ENTRY}
   Pop ${L_TEMP}
@@ -3440,6 +3678,7 @@ exit:
   !undef L_TEMP
   !undef L_TEXT_ENTRY
   !undef L_IDENTITY
+  !undef L_UNDO
 
   !undef L_ACCOUNTNAME
   !undef L_EMAILADDRESS
@@ -3461,6 +3700,8 @@ Function SetEudoraPage_Init
   ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Settings" "RTL" "$(^RTL)"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" \
+              "Settings" "BackButtonText" "$(PFI_LANG_MAILCFG_IO_SKIPONE)"
 
   !insertmacro PFI_IO_TEXT "ioE.ini" "2" "$(PFI_LANG_EUCFG_IO_CHECKBOX)"
   !insertmacro PFI_IO_TEXT "ioE.ini" "3" "$(PFI_LANG_EUCFG_IO_RESTORE)"
@@ -3480,22 +3721,24 @@ FunctionEnd
 
 Function SetEudoraPage
 
-  !define L_ININAME   $R9
-  !define L_LENGTH    $R8
+  !define L_ININAME   $R9   ; used to get full pathname of the Eudora.ini file
+  !define L_LENGTH    $R8   ; used when determining L_ININAME
   !define L_STATUS    $R7
   !define L_TEMP      $R6
-  !define L_TERMCHR   $R5
+  !define L_TERMCHR   $R5   ; used when determining L_ININAME
 
-  !define L_EMAIL     $R4
-  !define L_SERVER    $R3
-  !define L_USER      $R2
-  !define L_PORT      $R1
+  !define L_ACCOUNT   $R4   ; persona details extracted from Eudora.ini file
+  !define L_EMAIL     $R3   ; ditto
+  !define L_SERVER    $R2   ; ditto
+  !define L_USER      $R1   ; ditto
+  !define L_PERPORT   $R0   ; ditto
 
-  !define L_INDEX     $R0
-  !define L_PERSONA   $9
-  !define L_CFGTIME   $8
+  !define L_INDEX     $9   ; used when updating the undo history
+  !define L_PERSONA   $8   ; persona name ('Dominant' entry is called 'Settings')
+  !define L_CFGTIME   $7   ; timestamp used when updating the undo history
 
-  !define L_CHANGED   $7
+  !define L_DOMPORT   $6  ; current pop3 port for Dominant personality
+  !define L_PREVDOM   $5  ; Dominant personality's pop3 port BEFORE we started processing
 
   Push ${L_ININAME}
   Push ${L_LENGTH}
@@ -3503,16 +3746,23 @@ Function SetEudoraPage
   Push ${L_TEMP}
   Push ${L_TERMCHR}
 
+  Push ${L_ACCOUNT}
   Push ${L_EMAIL}
   Push ${L_SERVER}
   Push ${L_USER}
-  Push ${L_PORT}
+  Push ${L_PERPORT}
 
   Push ${L_INDEX}
   Push ${L_PERSONA}
   Push ${L_CFGTIME}
 
-  Push ${L_CHANGED}
+  Push ${L_DOMPORT}
+  Push ${L_PREVDOM}
+
+  ; Check if user decided to skip all email client configuration
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioF.ini" "ClientEXE" "ConfigStatus"
+  StrCmp ${L_STATUS} "SkipAll" exit
 
   ; Look for Eudora registry entry which identifies the relevant INI file
 
@@ -3580,21 +3830,35 @@ check_if_running:
              $(PFI_LANG_MBCLIENT_STOP_3)"\
              IDRETRY check_if_running IDIGNORE continue
 
-  ; 'Abort' has been selected so we do not offer to reconfigure any Eudora accounts
+abort_eudora_config:
+
+  ; Either 'Abort' has been selected so we do not offer to reconfigure any Eudora accounts
+  ; or 'Cancel' has been selected during the Eudora configuration process so we stop now
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioE.ini" "Settings" "NumFields" "1"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioE.ini" "Settings" "BackEnabled" "0"
   !insertmacro PFI_IO_TEXT "ioE.ini" "1" "$(PFI_LANG_EUCFG_IO_CANCELLED)"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioE.ini"
   Goto exit
 
 continue:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE   "ioE.ini" "Settings" "BackEnabled" "1"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioE.ini" "Field 2" "Text"
+  StrCpy ${L_STATUS} "${L_STATUS} ($(PFI_LANG_EUCFG_IO_POP3PORT) $G_POP3)"
+  !insertmacro PFI_IO_TEXT "ioE.ini" "2" "${L_STATUS}"
+
   Call GetDateTimeStamp
   Pop ${L_CFGTIME}
 
-  ; If none of the  accounts are changed, we treat this as a special case and offer to change
-  ; only the POP3 port for Eudora. The ${L_CHANGED} register is used to detect this case.
+  ; Normally all Eudora personalities use whatever port the 'Dominant' personality uses.
+  ; If the default POP3 port is used then there will be no 'POPPort' defined in Eudora.ini file
 
-  StrCpy ${L_CHANGED} ""
+  ReadINIStr ${L_DOMPORT} "${L_ININAME}" "Settings" "POPPort"
+  StrCmp ${L_DOMPORT} "" 0 not_implied_domport
+  StrCpy ${L_DOMPORT} "Default"
+
+not_implied_domport:
+  StrCpy ${L_PREVDOM} ${L_DOMPORT}
 
   ; The <Dominant> personality data is stored separately from that of the other personalities
 
@@ -3606,26 +3870,7 @@ continue:
 get_next_persona:
   IntOp ${L_INDEX} ${L_INDEX} + 1
   ReadINIStr ${L_PERSONA}  "${L_ININAME}" "Personalities" "Persona${L_INDEX}"
-  StrCmp ${L_PERSONA} "" 0 get_details
-  StrCmp ${L_CHANGED} "1" exit
-
-  ; None of the personalities have been changed. Offer to change the POPPort setting if this
-  ; installation uses a different POP3 port from that currently used by Eudora. This makes it
-  ; easy to use Eudora with the newly installed POPFile. Use the "*.*" wildcard for this case.
-
-  StrCmp ${L_PORT} $G_POP3 exit
-
-  !insertmacro PFI_IO_TEXT "ioE.ini" "4" "'<*.*>' $(PFI_LANG_EUCFG_IO_PERSONA)"
-  StrCpy ${L_PERSONA} "*.*"
-  StrCpy ${L_EMAIL} "*.*"
-  StrCpy ${L_SERVER} "*.*"
-  StrCpy ${L_USER} "*.*"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "State" "0"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "Flags" ""
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 3" "Flags" ""
-  Goto update_persona_details
-
-get_details:
+  StrCmp ${L_PERSONA} "" exit
   StrCpy ${L_TEMP} ${L_PERSONA} "" 8
 
   !insertmacro PFI_IO_TEXT "ioE.ini" "4" "'${L_TEMP}' $(PFI_LANG_EUCFG_IO_PERSONA)"
@@ -3635,14 +3880,24 @@ common_to_all:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "Flags" ""
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 3" "Flags" ""
 
-  ReadINIStr ${L_EMAIL}  "${L_ININAME}" "${L_PERSONA}" "POPAccount"
-  ReadINIStr ${L_SERVER} "${L_ININAME}" "${L_PERSONA}" "POPServer"
-  ReadINIStr ${L_USER}   "${L_ININAME}" "${L_PERSONA}" "LoginName"
-  ReadINIStr ${L_STATUS} "${L_ININAME}" "${L_PERSONA}" "UsesPOP"
-  ReadINIStr ${L_PORT}   "${L_ININAME}" "Settings" "POPPort"
+  ReadINIStr ${L_ACCOUNT} "${L_ININAME}" "${L_PERSONA}" "POPAccount"
+  ReadINIStr ${L_EMAIL}   "${L_ININAME}" "${L_PERSONA}" "ReturnAddress"
+  ReadINIStr ${L_SERVER}  "${L_ININAME}" "${L_PERSONA}" "POPServer"
+  ReadINIStr ${L_USER}    "${L_ININAME}" "${L_PERSONA}" "LoginName"
+  ReadINIStr ${L_STATUS}  "${L_ININAME}" "${L_PERSONA}" "UsesPOP"
 
-  StrCmp ${L_EMAIL} "" 0 check_server
-  StrCpy ${L_EMAIL} "N/A"
+  StrCmp ${L_PERSONA} "Settings" 0 not_dominant
+  StrCpy ${L_PERPORT} ${L_DOMPORT}
+  Goto check_account
+
+not_dominant:
+  ReadINIStr ${L_PERPORT} "${L_ININAME}" "${L_PERSONA}" "POPPort"
+  StrCmp ${L_PERPORT} "" 0 check_account
+  StrCpy ${L_PERPORT} "Dominant"
+
+check_account:
+  StrCmp ${L_ACCOUNT} "" 0 check_server
+  StrCpy ${L_ACCOUNT} "N/A"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 3" "Flags" "DISABLED"
 
@@ -3656,14 +3911,10 @@ disable:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 3" "Flags" "DISABLED"
 
 check_username:
-  StrCmp ${L_USER} "" 0 check_port
+  StrCmp ${L_USER} "" 0 check_status
   StrCpy ${L_USER} "N/A"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 2" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 3" "Flags" "DISABLED"
-
-check_port:
-  StrCmp ${L_PORT} "" 0 check_status
-  StrCpy ${L_PORT} "110"
 
 check_status:
   StrCmp ${L_STATUS} 1 update_persona_details
@@ -3671,18 +3922,35 @@ check_status:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 3" "Flags" "DISABLED"
 
 update_persona_details:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 9" "Text" "${L_EMAIL}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 9"  "Text" "${L_EMAIL}"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 10" "Text" "${L_SERVER}"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 11" "Text" "${L_USER}"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 12" "Text" "${L_PORT}"
 
+  StrCmp ${L_PERPORT} "Default" default_pop3
+  StrCmp ${L_PERPORT} "Dominant" 0 explicit_perport
+  StrCmp ${L_PREVDOM} "Default" 0 explicit_domport
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 12" "Text" "(110)"
+  Goto update_intro
+
+default_pop3:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 12" "Text" "Default (110)"
+  Goto update_intro
+
+explicit_domport:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 12" "Text" "(${L_PREVDOM})"
+  Goto update_intro
+
+explicit_perport:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioE.ini" "Field 12" "Text" "${L_PERPORT}"
+
+update_intro:
   StrCpy ${L_TEMP} "."
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioE.ini" "Field 2" "Flags"
   StrCmp ${L_STATUS} "DISABLED" write_intro
   StrCpy ${L_TEMP} "$(PFI_LANG_EUCFG_IO_INTRO_2)"
 
 write_intro:
-    !insertmacro PFI_IO_TEXT "ioE.ini" "1" "$(PFI_LANG_EUCFG_IO_INTRO_1)${L_TEMP}"
+  !insertmacro PFI_IO_TEXT "ioE.ini" "1" "$(PFI_LANG_EUCFG_IO_INTRO_1)${L_TEMP}"
 
   !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioE.ini"
   Pop $G_HWND                 ; HWND of dialog we want to modify
@@ -3693,11 +3961,44 @@ write_intro:
   CreateFont $G_FONT "MS Shell Dlg" 8 700        ; use a 'bolder' version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
-  !insertmacro MUI_INSTALLOPTIONS_SHOW
+  !insertmacro MUI_INSTALLOPTIONS_SHOW_RETURN
+  Pop ${L_STATUS}
+  StrCmp ${L_STATUS} "back" abort_eudora_config
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_STATUS} "ioE.ini" "Field 2" "State"
   StrCmp ${L_STATUS} "1" reconfigure_persona
-  StrCmp ${L_PERSONA} "*.*" exit
+
+  ; This personality is not to be reconfigured. However, if we have changed the POP3 port for
+  ; the Dominant personality and this unchanged entry 'inherited' the Dominant personality's
+  ; POP3 port then we need to ensure the unchanged port uses the old port setting to avoid
+  ; 'breaking' the unchanged personality
+
+  StrCmp ${L_PREVDOM} ${L_DOMPORT} get_next_persona
+  StrCmp ${L_PERPORT} "Dominant" 0 get_next_persona
+
+  ReadINIStr  ${L_STATUS} "$INSTDIR\pfi-eudora.ini" "History" "ListSize"
+  IntOp ${L_STATUS} ${L_STATUS} + 1
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "ListSize" "${L_STATUS}"
+
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Undo-${L_STATUS}" "Created on ${L_CFGTIME}"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Path-${L_STATUS}" "${L_ININAME}"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "User-${L_STATUS}" "$G_WINUSERNAME"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Type-${L_STATUS}" "$G_WINUSERTYPE"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "IniV-${L_STATUS}" "2"
+
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Restored" "No"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Persona" "${L_PERSONA}"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPAccount" "*.*"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPServer" "*.*"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "LoginName" "*.*"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPPort" "Dominant"
+
+  StrCmp ${L_PREVDOM} "Default" inherit_default_pop3
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPPort" ${L_PREVDOM}
+  Goto get_next_persona
+
+inherit_default_pop3:
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPPort" "110"
   Goto get_next_persona
 
 reconfigure_persona:
@@ -3714,36 +4015,38 @@ update_list_size:
 add_entry:
   WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Undo-${L_STATUS}" "Created on ${L_CFGTIME}"
   WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Path-${L_STATUS}" "${L_ININAME}"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "User-${L_STATUS}" "$G_WINUSERNAME"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "Type-${L_STATUS}" "$G_WINUSERTYPE"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "History" "IniV-${L_STATUS}" "2"
 
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Restored" "No"
   WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "Persona" "${L_PERSONA}"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPAccount" "${L_EMAIL}"
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPAccount" "${L_ACCOUNT}"
   WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPServer" "${L_SERVER}"
   WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "LoginName" "${L_USER}"
-  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPPort" "${L_PORT}"
-
-  StrCmp ${L_PERSONA} "*.*" special_case
+  WriteINIStr "$INSTDIR\pfi-eudora.ini" "Undo-${L_STATUS}" "POPPort" "${L_PERPORT}"
 
   WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPAccount" "${L_SERVER}$G_SEPARATOR${L_USER}@127.0.0.1"
   WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPServer"  "127.0.0.1"
   WriteINIStr "${L_ININAME}" "${L_PERSONA}" "LoginName"  "${L_SERVER}$G_SEPARATOR${L_USER}"
-  WriteINIStr "${L_ININAME}" "Settings"     "POPPort"    $G_POP3
-  StrCpy ${L_CHANGED} "1"
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPPort"    $G_POP3
+  StrCmp ${L_PERSONA} "Settings" 0 get_next_persona
+  StrCpy ${L_DOMPORT} $G_POP3
   Goto get_next_persona
 
-special_case:
-  WriteINIStr "${L_ININAME}" "Settings"     "POPPort"    $G_POP3
-
 exit:
-  Pop ${L_CHANGED}
+  Pop ${L_PREVDOM}
+  Pop ${L_DOMPORT}
 
   Pop ${L_CFGTIME}
   Pop ${L_PERSONA}
   Pop ${L_INDEX}
 
-  Pop ${L_PORT}
+  Pop ${L_PERPORT}
   Pop ${L_USER}
   Pop ${L_SERVER}
   Pop ${L_EMAIL}
+  Pop ${L_ACCOUNT}
 
   Pop ${L_TERMCHR}
   Pop ${L_TEMP}
@@ -3757,16 +4060,18 @@ exit:
   !undef L_TEMP
   !undef L_TERMCHR
 
+  !undef L_ACCOUNT
   !undef L_EMAIL
   !undef L_SERVER
   !undef L_USER
-  !undef L_PORT
+  !undef L_PERPORT
 
   !undef L_INDEX
   !undef L_PERSONA
   !undef L_CFGTIME
 
-  !undef L_CHANGED
+  !undef L_DOMPORT
+  !undef L_PREVDOM
 
 FunctionEnd
 
@@ -4271,19 +4576,11 @@ Section "Uninstall"
 
   !define L_CFG         $R9   ; used as file handle
   !define L_EXE         $R8   ; full path of the EXE to be monitored
-  !define L_INDEX       $R7
-  !define L_ININAME     $R6   ; full path to the Eudora INI file modified by the installer
-  !define L_LNE         $R5   ; a line from popfile.cfg
-  !define L_OLDUI       $R4   ; holds old-style UI port (if previous POPFile is an old version)
-  !define L_PERSONA     $R3   ; full section name for a Eudora personality
-  !define L_POP_ACCOUNT $R2   ; L_POP_* used to restore Eudora settings
-  !define L_POP_LOGIN   $R1
-  !define L_POP_PORT    $R0
-  !define L_POP_SERVER  $9
-  !define L_REG_KEY     $8    ; L_REG_* used to restore Outlook/Outlook Express settings
-  !define L_REG_SUBKEY  $7
-  !define L_REG_VALUE   $6
-  !define L_TEMP        $5
+  !define L_LNE         $R7   ; a line from popfile.cfg
+  !define L_OLDUI       $R6   ; holds old-style UI port (if previous POPFile is an old version)
+  !define L_TEMP        $R5
+  !define L_UNDOFILE    $R4   ; file holding original email client settings
+  !define L_UNDOSTATUS  $R3   ; email client restore flag ('success' or 'fail')
 
   IfFileExists $INSTDIR\popfile.pl skip_confirmation
   IfFileExists $INSTDIR\popfile.exe skip_confirmation
@@ -4294,6 +4591,36 @@ Section "Uninstall"
     Abort "$(PFI_LANG_UN_ABORT_1)"
 
 skip_confirmation:
+
+  ; Email settings are stored on a 'per user' basis therefore we need to know which user is
+  ; running the uninstaller so we can check if the email settings can be safely restored
+
+	ClearErrors
+	UserInfo::GetName
+	IfErrors 0 got_name
+
+  ; Assume Win9x system, so user has 'Admin' rights
+  ; (UserInfo works on Win98SE so perhaps it is only Win95 that fails ?)
+
+  StrCpy $G_WINUSERNAME "UnknownUser"
+  StrCpy $G_WINUSERTYPE "Admin"
+  Goto start_uninstall
+
+got_name:
+	Pop $G_WINUSERNAME
+  StrCmp $G_WINUSERNAME "" 0 get_usertype
+  StrCpy $G_WINUSERNAME "UnknownUser"
+
+get_usertype:
+  UserInfo::GetAccountType
+	Pop $G_WINUSERTYPE
+  StrCmp $G_WINUSERTYPE "Admin" start_uninstall
+  StrCmp $G_WINUSERTYPE "Power" start_uninstall
+  StrCmp $G_WINUSERTYPE "User" start_uninstall
+  StrCmp $G_WINUSERTYPE "Guest" start_uninstall
+  StrCpy $G_WINUSERTYPE "Unknown"
+
+start_uninstall:
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROGRESS_1)"
   SetDetailsPrint listonly
@@ -4383,11 +4710,25 @@ use_other_port:
 check_shutdown:
   Push ${L_EXE}
   Call un.WaitUntilUnlocked
+  Push ${L_EXE}
+  Call un.CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" remove_shortcuts
+
+  DetailPrint "Unable to shutdown automatically - manual intervention requested"
+  MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBMANSHUT_2)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_MBMANSHUT_3)"
 
 remove_shortcuts:
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROGRESS_2)"
   SetDetailsPrint listonly
+
+  ; The 'Uninstall' shortcut is NOT deleted here - it may need to be retained if problems are
+  ; found when attempting to restore any email client configuration settings
 
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Manual.url"
@@ -4397,13 +4738,11 @@ remove_shortcuts:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk"
-  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk"
 
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\POPFile User Interface.url"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url"
-  RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
 
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
   Delete "$SMSTARTUP\Run POPFile.lnk"
@@ -4448,224 +4787,101 @@ remove_shortcuts:
   Delete $INSTDIR\license
   Delete $INSTDIR\popfile.cfg
 
-  ; Restore any email client settings which were changed during the install process
+  ;------------------------------------
 
-  IfFileExists "$INSTDIR\popfile.reg" 0 end_oe_restore
+  StrCpy ${L_UNDOSTATUS} "success"
 
-  SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_4)"
-  SetDetailsPrint listonly
+  ;------------------------------------
+  ; Restore 'Outlook Express' settings
+  ;------------------------------------
 
-  ; Read the registry settings found in popfile.reg and restore them
-  ; it there are any.   All are assumed to be in HKCU
+  StrCpy ${L_UNDOFILE} "pfi-outexpress.ini"
+  IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 end_oe_restore
+  Push  ${L_UNDOFILE}
+  Push "$(PFI_LANG_UN_PROGRESS_4)"
+  Call un.RestoreOOE
+  Pop ${L_TEMP}
 
-  ClearErrors
-  FileOpen ${L_CFG} $INSTDIR\popfile.reg r
-  IfErrors quit_oe_restore
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_4)"
-  DetailPrint "$(PFI_LANG_UN_LOG_2): popfile.reg"
+  StrCmp ${L_TEMP} "success" delete_oe_data
+  StrCpy ${L_UNDOSTATUS} "fail"
+  DetailPrint "$(PFI_LANG_UN_LOG_7): ${L_UNDOFILE}"
+  MessageBox MB_YESNO|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_UN_MBCLIENT_1)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_UN_MBEMAIL_1)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_oe_restore
+  ExecShell "open" "$INSTDIR\${L_UNDOFILE}"
+  Goto end_oe_restore
 
-  ; The restore data for an OE account data can have either TWO or THREE entries, as follows:
-
-  ; Entry 1
-  ; Line x    : <Registry key for the OE Account>
-  ; Line x+1  : POP 3 User Name
-  ; Line x+2  : <user name data>
-
-  ; Entry 2
-  ; Line x+3  : <Registry key for the OE Account>
-  ; Line x+4  : POP3 Server
-  ; Line x+5  : <server data>
-
-  ; Entry 3
-  ; Line x+6  : <Registry key for the OE Account>
-  ; Line x+7  : POP3 Port
-  ; Line x+8  : <port number>
-
-  ; NB The third entry (POP3 Port) only exists in post v0.20.1a installations.
-
-restore_oe_loop:
-  FileRead ${L_CFG} ${L_REG_KEY}
-  Push ${L_REG_KEY}
-  Call un.TrimNewlines
-  Pop ${L_REG_KEY}
-  IfErrors quit_oe_restore
-
-  FileRead ${L_CFG} ${L_REG_SUBKEY}
-  Push ${L_REG_SUBKEY}
-  Call un.TrimNewlines
-  Pop ${L_REG_SUBKEY}
-  IfErrors quit_oe_restore
-
-  FileRead ${L_CFG} ${L_REG_VALUE}
-  Push ${L_REG_VALUE}
-  Call un.TrimNewlines
-  Pop ${L_REG_VALUE}
-  IfErrors quit_oe_restore
-
-  StrCmp ${L_REG_SUBKEY} "POP3 Port" 0 oe_string_value
-  WriteRegDWORD HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
-  Goto log_oe_restore
-
-oe_string_value:
-  WriteRegStr HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
-
-log_oe_restore:
-  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_REG_SUBKEY}: ${L_REG_VALUE}"
-  goto restore_oe_loop
-
-quit_oe_restore:
-  FileClose ${L_CFG}
-  DetailPrint "$(PFI_LANG_UN_LOG_4): popfile.reg"
-  Delete $INSTDIR\popfile.reg
+delete_oe_data:
+  FlushINI "$INSTDIR\${L_UNDOFILE}"
+  Delete "$INSTDIR\${L_UNDOFILE}"
+  Delete "$INSTDIR\popfile.reg.bk*"
 
 end_oe_restore:
-  IfFileExists "$INSTDIR\outlook.reg" 0 end_outlook_restore
 
-  SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_7)"
-  SetDetailsPrint listonly
+  ;------------------------------------
+  ; Restore 'Outlook' settings
+  ;------------------------------------
 
-  ; Read the registry settings found in outlook.reg and restore them
-  ; it there are any.   All are assumed to be in HKCU
+  StrCpy ${L_UNDOFILE} "pfi-outlook.ini"
+  IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 end_outlook_restore
+  Push  ${L_UNDOFILE}
+  Push "$(PFI_LANG_UN_PROGRESS_7)"
+  Call un.RestoreOOE
+  Pop ${L_TEMP}
 
-  ClearErrors
-  FileOpen ${L_CFG} $INSTDIR\outlook.reg r
-  IfErrors quit_outlook_restore
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_7)"
-  DetailPrint "$(PFI_LANG_UN_LOG_2): outlook.reg"
+  StrCmp ${L_TEMP} "success" delete_outlook_data
+  StrCpy ${L_UNDOSTATUS} "fail"
+  DetailPrint "$(PFI_LANG_UN_LOG_7): ${L_UNDOFILE}"
+  MessageBox MB_YESNO|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_UN_MBCLIENT_2)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_UN_MBEMAIL_1)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_outlook_restore
+  ExecShell "open" "$INSTDIR\${L_UNDOFILE}"
+  Goto end_outlook_restore
 
-  ; The restore data for an Outlook account data has following structure:
-
-  ; Entry 1
-  ; Line x    : <Registry key for the Outlook Account>
-  ; Line x+1  : POP 3 User Name
-  ; Line x+2  : <user name data>
-
-  ; Entry 2
-  ; Line x+3  : <Registry key for the Outlook Account>
-  ; Line x+4  : POP3 Server
-  ; Line x+5  : <server data>
-
-  ; Entry 3
-  ; Line x+6  : <Registry key for the Outlook Account>
-  ; Line x+7  : POP3 Port
-  ; Line x+8  : <port number>
-
-restore_outlook_loop:
-  FileRead ${L_CFG} ${L_REG_KEY}
-  Push ${L_REG_KEY}
-  Call un.TrimNewlines
-  Pop ${L_REG_KEY}
-  IfErrors quit_outlook_restore
-
-  FileRead ${L_CFG} ${L_REG_SUBKEY}
-  Push ${L_REG_SUBKEY}
-  Call un.TrimNewlines
-  Pop ${L_REG_SUBKEY}
-  IfErrors quit_outlook_restore
-
-  FileRead ${L_CFG} ${L_REG_VALUE}
-  Push ${L_REG_VALUE}
-  Call un.TrimNewlines
-  Pop ${L_REG_VALUE}
-  IfErrors quit_outlook_restore
-
-  StrCmp ${L_REG_SUBKEY} "POP3 Port" 0 outlook_string_value
-  WriteRegDWORD HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
-  Goto log_outlook_restore
-
-outlook_string_value:
-  WriteRegStr HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
-
-log_outlook_restore:
-  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_REG_SUBKEY}: ${L_REG_VALUE}"
-  goto restore_outlook_loop
-
-quit_outlook_restore:
-  FileClose ${L_CFG}
-  DetailPrint "$(PFI_LANG_UN_LOG_4): outlook.reg"
-  Delete $INSTDIR\outlook.reg
+delete_outlook_data:
+  FlushINI "$INSTDIR\${L_UNDOFILE}"
+  Delete "$INSTDIR\${L_UNDOFILE}"
+  Delete "$INSTDIR\outlook.reg.bk*"
 
 end_outlook_restore:
-  IfFileExists "$INSTDIR\pfi-eudora.ini" 0 end_email_restore
 
-  SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_8)"
-  SetDetailsPrint listonly
+  ;------------------------------------
+  ; Restore 'Eudora' settings
+  ;------------------------------------
 
-  ; If Eudora is running, ask the user to shut it down now (user may ignore our request)
+  StrCpy ${L_UNDOFILE} "pfi-eudora.ini"
+  IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 end_eudora_restore
+  Push  ${L_UNDOFILE}
+  Push "$(PFI_LANG_UN_PROGRESS_8)"
+  Call un.RestoreEudora
+  Pop ${L_TEMP}
 
-check_if_running:
-  FindWindow ${L_TEMP} "EudoraMainWindow"
-  IsWindow ${L_TEMP} 0 restore_eudora
+  StrCmp ${L_TEMP} "success" delete_eudora_data
+  StrCpy ${L_UNDOSTATUS} "fail"
+  DetailPrint "$(PFI_LANG_UN_LOG_7): ${L_UNDOFILE}"
+  MessageBox MB_YESNO|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_UN_MBCLIENT_3)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_UN_MBEMAIL_1)\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_UN_MBEMAIL_2)" IDNO end_eudora_restore
+  ExecShell "open" "$INSTDIR\${L_UNDOFILE}"
+  Goto end_eudora_restore
 
-  MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EUD)\
-             $\r$\n$\r$\n\
-             $(PFI_LANG_MBCLIENT_STOP_4)\
-             $\r$\n$\r$\n\
-             $(PFI_LANG_MBCLIENT_STOP_5)\
-             $\r$\n$\r$\n\
-             $(PFI_LANG_MBCLIENT_STOP_6)"\
-             IDABORT end_email_restore IDRETRY check_if_running
+delete_eudora_data:
+  FlushINI "$INSTDIR\${L_UNDOFILE}"
+  Delete "$INSTDIR\${L_UNDOFILE}"
 
-restore_eudora:
-  ClearErrors
-  ReadINIStr ${L_INDEX} "$INSTDIR\pfi-eudora.ini" "History" "ListSize"
-  IfErrors quit_eudora_restore
-  Push ${L_INDEX}
-  Call un.StrCheckDecimal
-  Pop ${L_INDEX}
-  StrCmp ${L_INDEX} "" quit_eudora_restore
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_8)"
+end_eudora_restore:
 
-read_undo_entry:
+  ;------------------------------------
 
-  ; Check the 'undo' entry has all of the necessary values
-
-  ReadINIStr ${L_ININAME} "$INSTDIR\pfi-eudora.ini" "History" "Path-${L_INDEX}"
-  StrCmp ${L_ININAME} "" next_undo
-  IfFileExists ${L_ININAME} 0 next_undo
-
-  ReadINIStr ${L_PERSONA} "$INSTDIR\pfi-eudora.ini" "Undo-${L_INDEX}" "Persona"
-  StrCmp ${L_PERSONA} "" next_undo
-
-  ReadINIStr ${L_POP_ACCOUNT} "$INSTDIR\pfi-eudora.ini" "Undo-${L_INDEX}" "POPAccount"
-  StrCmp ${L_POP_ACCOUNT} "" next_undo
-
-  ReadINIStr ${L_POP_SERVER} "$INSTDIR\pfi-eudora.ini" "Undo-${L_INDEX}" "POPServer"
-  StrCmp ${L_POP_SERVER} "" next_undo
-
-  ReadINIStr ${L_POP_LOGIN} "$INSTDIR\pfi-eudora.ini" "Undo-${L_INDEX}" "LoginName"
-  StrCmp ${L_POP_LOGIN} "" next_undo
-
-  ReadINIStr ${L_POP_PORT} "$INSTDIR\pfi-eudora.ini" "Undo-${L_INDEX}" "POPPort"
-  StrCmp ${L_POP_PORT} "" next_undo
-
-  StrCmp ${L_PERSONA} "*.*" special_case
-
-  ClearErrors
-  ReadINIStr ${L_TEMP} "${L_ININAME}" "${L_PERSONA}" "POPAccount"
-  IfErrors next_undo
-  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPAccount" "${L_POP_ACCOUNT}"
-  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPServer" "${L_POP_SERVER}"
-  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "LoginName" "${L_POP_LOGIN}"
-
-special_case:
-  WriteINIStr "${L_ININAME}" "Settings"     "POPPort" "${L_POP_PORT}"
-
-  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'POPServer': ${L_POP_SERVER}"
-  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'LoginName': ${L_POP_LOGIN}"
-  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'POPPort': ${L_POP_PORT}"
-
-next_undo:
-  IntOp ${L_INDEX} ${L_INDEX} - 1
-  IntCmp ${L_INDEX} 0 quit_eudora_restore quit_eudora_restore read_undo_entry
-
-quit_eudora_restore:
-  Delete $INSTDIR\pfi-eudora.ini
-
-end_email_restore:
   Delete $INSTDIR\Classifier\*.pm
   Delete $INSTDIR\Classifier\popfile.sql
   RMDir $INSTDIR\Classifier
@@ -4731,6 +4947,7 @@ skip_kakasi:
   RMDir /r "$INSTDIR\auto"
   RMDir /r "$INSTDIR\Carp"
   RMDir /r "$INSTDIR\DBD"
+  RMDir /r "$INSTDIR\Digest"
   RMDir /r "$INSTDIR\Encode"
   RMDir /r "$INSTDIR\Exporter"
   RMDir /r "$INSTDIR\File"
@@ -4743,6 +4960,24 @@ skip_kakasi:
   RMDir /r "$INSTDIR\warnings"
   RMDir /r "$INSTDIR\Win32"
 
+  ;------------------------------------
+  ; If email client problems found, offer to leave uninstaller behind with the relevant files
+  ;------------------------------------
+
+  StrCmp ${L_UNDOSTATUS} "success" complete_uninstall
+  MessageBox MB_YESNO|MB_ICONSTOP \
+    "$(PFI_LANG_UN_MBRERUN_1)\
+    $\r$\n$\r$\n\
+    $(PFI_LANG_UN_MBRERUN_2)\
+    $\r$\n$\r$\n\
+    $(PFI_LANG_UN_MBRERUN_3)\
+    $\r$\n$\r$\n\
+    $(PFI_LANG_UN_MBRERUN_4)" IDYES removed
+
+complete_uninstall:
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk"
+  RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
+
   Delete "$INSTDIR\Uninstall.exe"
 
   RMDir $INSTDIR
@@ -4752,8 +4987,8 @@ skip_kakasi:
 
   ; if $INSTDIR was removed, skip these next ones
 
-  IfFileExists $INSTDIR 0 Removed
-    MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_1)" IDNO Removed
+  IfFileExists $INSTDIR 0 removed
+    MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_1)" IDNO removed
     DetailPrint "$(PFI_LANG_UN_LOG_5)"
     Delete $INSTDIR\*.* ; this would be skipped if the user hits no
     RMDir /r $INSTDIR
@@ -4761,27 +4996,465 @@ skip_kakasi:
       DetailPrint "$(PFI_LANG_UN_LOG_6)"
       MessageBox MB_OK|MB_ICONEXCLAMATION \
           "$(PFI_LANG_UN_MBREMERR_1): $INSTDIR $(PFI_LANG_UN_MBREMERR_2)"
-Removed:
+removed:
 
   SetDetailsPrint both
 
   !undef L_CFG
   !undef L_EXE
-  !undef L_INDEX
-  !undef L_ININAME
   !undef L_LNE
   !undef L_OLDUI
+  !undef L_TEMP
+  !undef L_UNDOFILE
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.RestoreOOE
+#
+# Used to restore Outlook or Outlook Express settings using data saved during installation
+#
+# Inputs:
+#         (top of stack)          - text string to be shown in uninstaller window/log
+#         (top of stack - 1)      - the name of the file holding the 'undo' data
+#
+# Outputs:
+#         (top of stack)          - string with one of the following result codes:
+#
+#                                      "nofile"   (meaning no restore data file found)
+#
+#                                      "success"  (meaning all settings restored)
+#
+#                                      "foreign"  (meaning some data belongs to another user
+#                                                  and could not be restored)
+#
+#                                      "corrupt"  (meaning the 'undo' data was corrupted)
+#
+#  Usage:
+#
+#         Push "pfi-outlook.ini"
+#         Push "Restoring Outlook settings..."
+#         Call un.RestoreOOE
+#         Pop $R9
+#
+#         (if $R9 is "foreign", some data was not restored as it doesn't belong to current user)
+#--------------------------------------------------------------------------
+
+Function un.RestoreOOE
+
+  !define L_INDEX       $R9
+  !define L_INIV        $R8
+  !define L_MESSAGE     $R7
+  !define L_POP_PORT    $R6
+  !define L_POP_SERVER  $R5
+  !define L_POP_USER    $R4
+  !define L_REG_KEY     $R3
+  !define L_TEMP        $R2
+  !define L_UNDOFILE    $R1
+  !define L_USERNAME    $R0
+  !define L_USERTYPE    $9
+
+  Exch ${L_MESSAGE}
+  Exch
+  Exch ${L_UNDOFILE}
+
+  Push ${L_INDEX}
+  Push ${L_INIV}
+  Push ${L_POP_PORT}
+  Push ${L_POP_SERVER}
+  Push ${L_POP_USER}
+  Push ${L_REG_KEY}
+  Push ${L_TEMP}
+  Push ${L_USERNAME}
+  Push ${L_USERTYPE}
+
+  IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 nothing_to_restore
+
+  SetDetailsPrint textonly
+  DetailPrint "${L_MESSAGE}"
+  SetDetailsPrint listonly
+
+  ; Read the registry settings found in the 'undo' file and restore them if there are any.
+  ; All are assumed to be in HKCU
+
+  DetailPrint "$(PFI_LANG_UN_LOG_2): ${L_UNDOFILE}"
+  ClearErrors
+  ReadINIStr ${L_INDEX} "$INSTDIR\${L_UNDOFILE}" "History" "ListSize"
+  IfErrors ooe_restore_corrupt
+  Push ${L_INDEX}
+  Call un.StrCheckDecimal
+  Pop ${L_INDEX}
+  StrCmp ${L_INDEX} "" ooe_restore_corrupt
+  DetailPrint "${L_MESSAGE}"
+
+  StrCpy ${L_MESSAGE} "success"
+
+read_ooe_undo_entry:
+
+  ; Check the 'undo' entry has all of the necessary values
+
+  ReadINIStr ${L_TEMP} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored"
+  StrCmp ${L_TEMP} "Yes" next_ooe_undo
+
+  ReadINIStr ${L_INIV} "$INSTDIR\${L_UNDOFILE}" "History" "IniV-${L_INDEX}"
+  IntCmp 3 ${L_INIV} 0 0 skip_user_checks
+
+  ReadINIStr ${L_USERNAME} "$INSTDIR\${L_UNDOFILE}" "History" "User-${L_INDEX}"
+  StrCmp ${L_USERNAME} "" skip_ooe_undo
+  StrCmp ${L_USERNAME} $G_WINUSERNAME 0 foreign_ooe_undo
+
+  ReadINIStr ${L_USERTYPE} "$INSTDIR\${L_UNDOFILE}" "History" "Type-${L_INDEX}"
+  StrCmp ${L_USERTYPE} "" skip_ooe_undo
+
+skip_user_checks:
+  ReadINIStr ${L_REG_KEY} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "RegistryKey"
+  StrCmp ${L_REG_KEY} "" skip_ooe_undo
+
+  ReadINIStr ${L_POP_USER} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POP3UserName"
+  StrCmp ${L_POP_USER} "" skip_ooe_undo
+
+  ReadINIStr ${L_POP_SERVER} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POP3Server"
+  StrCmp ${L_POP_SERVER} "" skip_ooe_undo
+
+  IntCmp 3 ${L_INIV} 0 0 skip_port_check
+
+  ReadINIStr ${L_POP_PORT} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POP3Port"
+  StrCmp ${L_POP_PORT} "" skip_ooe_undo
+
+skip_port_check:
+
+  ; During installation we changed the 'POP3 Server' to '127.0.0.1'
+  ; and if this value still exists, we assume it is safe to restore the original data
+  ; (if the value differs, we do not restore the settings)
+
+  ReadRegStr ${L_TEMP} HKCU ${L_REG_KEY} "POP3 Server"
+  StrCmp ${L_TEMP} "127.0.0.1" 0 ooe_undo_not_valid
+
+  WriteRegStr   HKCU ${L_REG_KEY} "POP3 User Name" ${L_POP_USER}
+  WriteRegStr   HKCU ${L_REG_KEY} "POP3 Server" ${L_POP_SERVER}
+
+  IntCmp 3 ${L_INIV} 0 0 skip_port_restore
+
+  WriteRegDWORD HKCU ${L_REG_KEY} "POP3 Port" ${L_POP_PORT}
+
+skip_port_restore:
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "Yes"
+
+  DetailPrint "$(PFI_LANG_UN_LOG_3) POP3 User Name: ${L_POP_USER}"
+  DetailPrint "$(PFI_LANG_UN_LOG_3) POP3 Server: ${L_POP_SERVER}"
+  DetailPrint "$(PFI_LANG_UN_LOG_3) POP3 Port: ${L_POP_PORT}"
+
+  Goto next_ooe_undo
+
+foreign_ooe_undo:
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (different user)"
+  StrCpy ${L_MESSAGE} "foreign"
+  DetailPrint "$(^Skipped)Undo-${L_INDEX}"
+  Goto next_ooe_undo
+
+ooe_undo_not_valid:
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (data no longer valid)"
+  DetailPrint "$(^Skipped)Undo-${L_INDEX}"
+  Goto next_ooe_undo
+
+skip_ooe_undo:
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (undo data incomplete)"
+  StrCpy ${L_MESSAGE} "corrupt"
+  DetailPrint "$(^Skipped)Undo-${L_INDEX}"
+
+next_ooe_undo:
+  IntOp ${L_INDEX} ${L_INDEX} - 1
+  IntCmp ${L_INDEX} 0 quit_restore quit_restore read_ooe_undo_entry
+
+ooe_restore_corrupt:
+  StrCpy ${L_MESSAGE} "corrupt"
+  DetailPrint "$(^Skipped)${L_UNDOFILE}"
+  Goto quit_restore
+
+nothing_to_restore:
+  StrCpy ${L_MESSAGE} "nofile"
+  Goto exit_now
+
+quit_restore:
+  DetailPrint "$(PFI_LANG_UN_LOG_4): ${L_UNDOFILE}"
+
+exit_now:
+  Pop ${L_USERTYPE}
+  Pop ${L_USERNAME}
+  Pop ${L_TEMP}
+  Pop ${L_REG_KEY}
+  Pop ${L_POP_USER}
+  Pop ${L_POP_SERVER}
+  Pop ${L_POP_PORT}
+  Pop ${L_INIV}
+  Pop ${L_INDEX}
+
+  Pop ${L_UNDOFILE}
+  Exch ${L_MESSAGE}
+
+  !undef L_INDEX
+  !undef L_INIV
+  !undef L_MESSAGE
+  !undef L_POP_PORT
+  !undef L_POP_SERVER
+  !undef L_POP_USER
+  !undef L_REG_KEY
+  !undef L_TEMP
+  !undef L_UNDOFILE
+  !undef L_USERNAME
+  !undef L_USERTYPE
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.RestoreEudora
+#
+# Used to restore Eudora settings using data saved during installation
+#
+# Inputs:
+#         (top of stack)          - text string to be shown in uninstaller window/log
+#         (top of stack - 1)      - the name of the file holding the 'undo' data
+#
+# Outputs:
+#         (top of stack)          - string with one of the following result codes:
+#
+#                                      "nofile"   (meaning no restore data file found)
+#
+#                                      "success"  (meaning all settings restored)
+#
+#                                      "foreign"  (meaning some data belongs to another user
+#                                                  and could not be restored)
+#
+#                                      "corrupt"  (meaning the 'undo' data was corrupted)
+#
+#  Usage:
+#
+#         Push "pfi-eudora.ini"
+#         Push "Restoring Eudora settings..."
+#         Call un.RestoreEudora
+#         Pop $R9
+#
+#         (if $R9 is "foreign", some data was not restored as it doesn't belong to current user)
+#--------------------------------------------------------------------------
+# Notes:
+#
+# (1) Some early versions of the 'SetEudoraPage' function used a special entry in the
+#     pfi-eudora.ini file when only the POPPort entry for the Dominant personality was
+#     changed. Although this special entry is no longer used, un.RestoreEudora still supports
+#     it (for backwards compatibility reasons). The special entry used this format:
+#
+#           [Undo-x]
+#           Persona=*.*
+#           POPAccount=*.*
+#           POPServer=*.*
+#           LoginName=*.*
+#           POPPort=value to be restored
+#
+#     where 'Undo-x' is a normal 'Undo' sequence number
+#--------------------------------------------------------------------------
+
+Function un.RestoreEudora
+
+  !define L_INDEX       $R9
+  !define L_ININAME     $R8   ; full path to the Eudora INI file modified by the installer
+  !define L_MESSAGE     $R7
+  !define L_PERSONA     $R6   ; full section name for a Eudora personality
+  !define L_POP_ACCOUNT $R5   ; L_POP_* used to restore Eudora settings
+  !define L_POP_LOGIN   $R4
+  !define L_POP_PORT    $R3
+  !define L_POP_SERVER  $R2
+  !define L_TEMP        $R1
+  !define L_UNDOFILE    $R0
+  !define L_USERNAME    $9    ; used to check validity of email client data 'undo' data
+  !define L_USERTYPE    $8    ; used to check validity of email client data 'undo' data
+
+  Exch ${L_MESSAGE}
+  Exch
+  Exch ${L_UNDOFILE}
+
+  Push ${L_INDEX}
+  Push ${L_ININAME}
+  Push ${L_PERSONA}
+  Push ${L_POP_ACCOUNT}
+  Push ${L_POP_LOGIN}
+  Push ${L_POP_PORT}
+  Push ${L_POP_SERVER}
+  Push ${L_TEMP}
+  Push ${L_USERNAME}
+  Push ${L_USERTYPE}
+
+  IfFileExists "$INSTDIR\${L_UNDOFILE}" 0 nothing_to_restore
+
+  SetDetailsPrint textonly
+  DetailPrint "${L_MESSAGE}"
+  SetDetailsPrint listonly
+
+  ; If Eudora is running, ask the user to shut it down now (user may ignore our request)
+
+check_if_running:
+  FindWindow ${L_TEMP} "EudoraMainWindow"
+  IsWindow ${L_TEMP} 0 restore_eudora
+
+  MessageBox MB_ABORTRETRYIGNORE|MB_ICONSTOP|MB_DEFBUTTON2 "$(PFI_LANG_MBCLIENT_EUD)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_4)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_5)\
+             $\r$\n$\r$\n\
+             $(PFI_LANG_MBCLIENT_STOP_6)"\
+             IDABORT nothing_to_restore IDRETRY check_if_running
+
+restore_eudora:
+  DetailPrint "$(PFI_LANG_UN_LOG_2): ${L_UNDOFILE}"
+  ClearErrors
+  ReadINIStr ${L_INDEX} "$INSTDIR\${L_UNDOFILE}" "History" "ListSize"
+  IfErrors eudora_restore_corrupt
+  Push ${L_INDEX}
+  Call un.StrCheckDecimal
+  Pop ${L_INDEX}
+  StrCmp ${L_INDEX} "" eudora_restore_corrupt
+  DetailPrint "${L_MESSAGE}"
+
+  StrCpy ${L_MESSAGE} "success"
+
+read_eudora_undo_entry:
+
+  ; Check the 'undo' entry has all of the necessary values
+
+  ReadINIStr ${L_TEMP} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored"
+  StrCmp ${L_TEMP} "Yes" next_eudora_undo
+
+  ReadINIStr ${L_ININAME} "$INSTDIR\${L_UNDOFILE}" "History" "Path-${L_INDEX}"
+  StrCmp ${L_ININAME} "" skip_eudora_undo
+  IfFileExists ${L_ININAME} 0 skip_eudora_undo
+
+  ; Very early versions of the Eudora 'undo' file do not have 'User-x' and 'Type-x' data
+  ; so we ignore these two entries when processing such a file
+
+  ReadINIStr ${L_TEMP} "$INSTDIR\${L_UNDOFILE}" "History" "IniV-${L_INDEX}"
+  StrCmp ${L_TEMP} "" basic_eudora_undo
+
+  ReadINIStr ${L_USERNAME} "$INSTDIR\${L_UNDOFILE}" "History" "User-${L_INDEX}"
+  StrCmp ${L_USERNAME} "" skip_eudora_undo
+  StrCmp ${L_USERNAME} $G_WINUSERNAME 0 foreign_eudora_undo
+
+  ReadINIStr ${L_USERTYPE} "$INSTDIR\${L_UNDOFILE}" "History" "Type-${L_INDEX}"
+  StrCmp ${L_USERTYPE} "" skip_eudora_undo
+
+basic_eudora_undo:
+  ReadINIStr ${L_PERSONA} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Persona"
+  StrCmp ${L_PERSONA} "" skip_eudora_undo
+
+  ReadINIStr ${L_POP_ACCOUNT} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POPAccount"
+  StrCmp ${L_POP_ACCOUNT} "" skip_eudora_undo
+
+  ReadINIStr ${L_POP_SERVER} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POPServer"
+  StrCmp ${L_POP_SERVER} "" skip_eudora_undo
+
+  ReadINIStr ${L_POP_LOGIN} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "LoginName"
+  StrCmp ${L_POP_LOGIN} "" skip_eudora_undo
+
+  ReadINIStr ${L_POP_PORT} "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "POPPort"
+  StrCmp ${L_POP_PORT} "" skip_eudora_undo
+
+  ClearErrors
+  ReadINIStr ${L_TEMP} "${L_ININAME}" "${L_PERSONA}" "POPAccount"
+  IfErrors eudora_undo_not_valid
+
+  StrCmp ${L_POP_ACCOUNT} "*.*" restore_port_only
+
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPAccount" "${L_POP_ACCOUNT}"
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPServer" "${L_POP_SERVER}"
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "LoginName" "${L_POP_LOGIN}"
+
+restore_port_only:
+
+  ; Some early versions of the undo data use "*.*" to change the Dominant personality's port
+
+  StrCmp ${L_PERSONA} "*.*" 0 restore_port
+  StrCpy ${L_PERSONA} "Settings"
+
+restore_port:
+  StrCmp ${L_POP_PORT} "Dominant" remove_port_setting
+  StrCmp ${L_POP_PORT} "Default"  remove_port_setting
+  WriteINIStr "${L_ININAME}" "${L_PERSONA}" "POPPort" "${L_POP_PORT}"
+  Goto restored
+
+remove_port_setting:
+  DeleteINIStr "${L_ININAME}" "${L_PERSONA}" "POPPort"
+
+restored:
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "Yes"
+
+  StrCmp ${L_POP_SERVER} "*.*" log_port_restore
+  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'POPServer': ${L_POP_SERVER}"
+  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'LoginName': ${L_POP_LOGIN}"
+
+log_port_restore:
+  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_PERSONA} 'POPPort': ${L_POP_PORT}"
+
+  Goto next_eudora_undo
+
+foreign_eudora_undo:
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (different user)"
+  StrCpy ${L_MESSAGE} "foreign"
+  DetailPrint "$(^Skipped)Undo-${L_INDEX}"
+  Goto next_eudora_undo
+
+eudora_undo_not_valid:
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (data no longer valid)"
+  DetailPrint "$(^Skipped)Undo-${L_INDEX}"
+  Goto next_eudora_undo
+
+skip_eudora_undo:
+  WriteINIStr "$INSTDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (undo data incomplete)"
+  StrCpy ${L_MESSAGE} "corrupt"
+  DetailPrint "$(^Skipped)Undo-${L_INDEX}"
+
+next_eudora_undo:
+  IntOp ${L_INDEX} ${L_INDEX} - 1
+  IntCmp ${L_INDEX} 0 quit_restore quit_restore read_eudora_undo_entry
+
+eudora_restore_corrupt:
+  StrCpy ${L_MESSAGE} "corrupt"
+  DetailPrint "$(^Skipped)${L_UNDOFILE}"
+  Goto quit_restore
+
+nothing_to_restore:
+  StrCpy ${L_MESSAGE} "nofile"
+  Goto exit_now
+
+quit_restore:
+  DetailPrint "$(PFI_LANG_UN_LOG_4): ${L_UNDOFILE}"
+
+exit_now:
+  Pop ${L_USERTYPE}
+  Pop ${L_USERNAME}
+  Pop ${L_TEMP}
+  Pop ${L_POP_SERVER}
+  Pop ${L_POP_PORT}
+  Pop ${L_POP_LOGIN}
+  Pop ${L_POP_ACCOUNT}
+  Pop ${L_PERSONA}
+  Pop ${L_ININAME}
+  Pop ${L_INDEX}
+
+  Pop ${L_UNDOFILE}
+  Exch ${L_MESSAGE}
+
+  !undef L_INDEX
+  !undef L_ININAME
   !undef L_PERSONA
   !undef L_POP_ACCOUNT
   !undef L_POP_LOGIN
   !undef L_POP_PORT
   !undef L_POP_SERVER
-  !undef L_REG_KEY
-  !undef L_REG_SUBKEY
-  !undef L_REG_VALUE
   !undef L_TEMP
+  !undef L_UNDOFILE
+  !undef L_USERNAME
+  !undef L_USERTYPE
 
-SectionEnd
+FunctionEnd
 
 #--------------------------------------------------------------------------
 # End of 'installer.nsi'
