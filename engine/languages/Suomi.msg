@@ -109,7 +109,7 @@ Configuration_NNTPSepUpdate             NNTP-erotinmerkiksi vaihdettu %s
 Configuration_UI                        K&auml;ytt&ouml;liittym&auml;n porttinumero
 Configuration_UIUpdate                  K&auml;ytt&ouml;liittym&auml;n porttinumeroksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
 Configuration_History                   Viestien m&auml;&auml;r&auml; sivua kohti
-Configuration_HistoryUpdate             Viestien m&auml;&auml;r&auml;ksi sivua kohti asetettu %s viesti&auml;
+Configuration_HistoryUpdate             Viestien m&auml;&auml;r&auml;ksi sivua kohti vaihdettu %s
 Configuration_Days                      Viestihistorian p&auml;ivien lukum&auml;&auml;r&auml;
 Configuration_DaysUpdate                Viestihistorian p&auml;ivien lukum&auml;&auml;r&auml;ksi asetettu %s p&auml;iv&auml;&auml;
 Configuration_UserInterface             K&auml;ytt&ouml;liittym&auml;
@@ -117,15 +117,15 @@ Configuration_Skins                     Ulkon&auml;k&ouml;asetukset
 Configuration_SkinsChoose               Valitse ulkon&auml;k&ouml;
 Configuration_Language                  Kieliasetukset
 Configuration_LanguageChoose            Valitse kieli
-Configuration_ListenPorts               Kuunnellut portit
+Configuration_ListenPorts               Moduulin Asetukset
 Configuration_HistoryView               Viestihistoria
-Configuration_TCPTimeout                TCP-yhteyden aikakatkaisu
-Configuration_TCPTimeoutSecs            TCP-yhteyden aikakatkaisu sekunteina
-Configuration_TCPTimeoutUpdate          TCP-yhteyden aikakatkaisuksi asetettu %s sekuntia
-Configuration_ClassificationInsertion   Luokituksen n&auml;kyvyys
-Configuration_SubjectLine               Aiherivin muuttaminen
-Configuration_XTCInsertion              X-Text-Classification -otsikon lis&auml;ys
-Configuration_XPLInsertion              X-POPFile-Link -otsikon lis&auml;ys
+Configuration_TCPTimeout                Yhteyden aikakatkaisu
+Configuration_TCPTimeoutSecs            Yhteyden aikakatkaisu sekunteina
+Configuration_TCPTimeoutUpdate          Yhteyden aikakatkaisuksi asetettu %s sekuntia
+Configuration_ClassificationInsertion   Viestitekstin lis&auml;ys
+Configuration_SubjectLine               Aiherivin<br>muuttaminen
+Configuration_XTCInsertion              X-Text-Classification<br>-otsikon lis&auml;ys
+Configuration_XPLInsertion              X-POPFile-Link<br>-otsikon lis&auml;ys
 Configuration_Logging                   Loki
 Configuration_None                      Pois p&auml;&auml;lt&auml;
 Configuration_ToScreen                  Ruudulle
@@ -150,12 +150,13 @@ Advanced_AllParameters                  Kaikki POPFilen Parametrit
 Advanced_Parameter                      Parametri
 Advanced_Value                          Arvo
 Advanced_Warning                        T&auml;m&auml; on t&auml;ydellinen lista POPFilen k&auml;ytt&auml;mist&auml; parametreist&auml;. Vaihda arvoja vain jos tied&auml;t mit&auml; teet. Annetun tiedon oikeellisuutta ei tarkisteta.
+Advanced_ConfigFile                     Asetustiedosto:
 
 History_Filter                          &nbsp;(N&auml;kyviss&auml; vain sangon <font color=&quot;%s&quot;>%s</font> sis&auml;lt&ouml;)
-History_FilterBy                        Filter By
+History_FilterBy                        N&auml;yt&auml; vain
 History_Search                          &nbsp;(Etsitty aihetta %s)
 History_Title                           Viimeaikaiset viestit
-History_Jump                            Siirry viestiin
+History_Jump                            Siirry sivulle
 History_ShowAll                         N&auml;yt&auml; kaikki
 History_ShouldBe                        Pit&auml;isi olla
 History_NoFrom                          Ei l&auml;hett&auml;j&auml;tietoa
@@ -163,15 +164,15 @@ History_NoSubject                       Ei aihetta
 History_ClassifyAs                      Luokittele
 History_MagnetUsed                      K&auml;ytetty magneettia
 History_MagnetBecause                   <b>Magneettia k&auml;ytetty</b><p>Viesti luokiteltu sankoon <font color=&quot;%s&quot;>%s</font> magneetilla %s</p>
-History_ChangedTo                       Luokitukseksi vaihdettu <font color=&quot;%s&quot;>%s
-History_Already                         Viesti on jo uudelleenluokiteltu sankoon <font color=&quot;%s&quot;>%s</font>
+History_ChangedTo                       Luokitukseksi vaihdettu <font color="%s">%s</font>
+History_Already                         Luokiteltu jo sankoon <font color=&quot;%s&quot;>%s</font>
 History_RemoveAll                       Poista kaikki
 History_RemovePage                      Poista sivu
 History_Remove                          Paina t&auml;st&auml; poistaaksesi n&auml;m&auml; viestit viestihistoriasta
 History_SearchMessage                   Etsi l&auml;hett&auml;jien ja aiheiden joukosta
 History_NoMessages                      Ei viestej&auml;
-History_ShowMagnet                      Magneeteilla luokitellut
-History_ShowNoMagnet                    Magneeteilla luokittelemattomat
+History_ShowMagnet                      magneeteilla luokitellut
+History_ShowNoMagnet                    magneeteilla luokittelemattomat
 History_Magnet                          &nbsp;(N&auml;kyviss&auml; vain magneeteilla luokitellut viestit)
 History_NoMagnet                        &nbsp;(N&auml;kyviss&auml; vain magneeteilla luokittelemattomat viestit)
 History_ResetSearch                     Peruuta
@@ -181,19 +182,19 @@ Password_Enter                          Sy&ouml;t&auml; salasana
 Password_Go                             Hyv&auml;ksy
 Password_Error1                         V&auml;&auml;r&auml; salasana
 
-Security_Error1                         Suojattun portti pit&auml;&auml; olla 1:n ja 65535:n v&auml;lilt&auml;
+Security_Error1                         Portti pit&auml;&auml; olla 1:n ja 65535:n v&auml;lilt&auml;
 Security_Stealth                        Piilotila/Palvelintoiminta
 Security_NoStealthMode                  Ei (Piilotila)
 Security_ExplainStats                   Kun t&auml;m&auml; asetus on p&auml;&auml;ll&auml;, POPFile l&auml;hett&auml;&auml; kerran p&auml;iv&auml;ss&auml; seuraavat kolme arvoa osoitteeseen www.usethesource.com: bc (sankojen kokonaism&auml;&auml;r&auml;), mc (POPFilen luokittelemien viestien m&auml;&auml;r&auml;) ja ec (luokitteluvirheiden m&auml;&auml;r&auml;). N&auml;it&auml; tietoja k&auml;ytet&auml;&auml;n POPFilen k&auml;ytt&ouml;tavoista ja toimintatarkkuudesta kertovien tilastojen laatimiseen. Webpalvelin s&auml;ilytt&auml;&auml; lokitiedostoja noin 5:n p&auml;iv&auml;n ajan, jonka j&auml;lkeen ne poistetaan. Mink&auml;&auml;nlaista tietoa tilastojen ja IP-osoitteiden v&auml;lill&auml; ei s&auml;ilytet&auml;.
 Security_ExplainUpdate                  Kun t&auml;m&auml; asetus on p&auml;&auml;ll&auml;, POPFile l&auml;hett&auml;&auml; kerran p&auml;iv&auml;ss&auml; seuraavat kolme arvoa osoitteeseen www.usethesource.com: ma (POPFilen iso versionumero), mi (POPFilen pieni versionumero) ja bn (POPFilen k&auml;&auml;nn&ouml;snumero). POPFile saa vastauksen kuvana, joka n&auml;kyy sivun yl&auml;laidassa, kun uusi versio on saatavilla. Webpalvelin s&auml;ilytt&auml;&auml; lokitiedostoja noin 5:n p&auml;iv&auml;n ajan, jonka j&auml;lkeen ne poistetaan. Mink&auml;&auml;nlaista tietoa p&auml;ivitystarkistusten ja IP-osoitteiden v&auml;lill&auml; ei s&auml;ilytet&auml;.
 Security_PasswordTitle                  K&auml;ytt&ouml;liittym&auml;n salasana
 Security_Password                       Salasana
-Security_PasswordUpdate                 Salasanaksi vaihdettu %s
-Security_AUTHTitle                      Suojattu tunnistus/AUTH
-Security_SecureServer                   Suojattu palvelin
-Security_SecureServerUpdate             Suojatuksi palvelimeksi asetettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
-Security_SecurePort                     Suojattu portti
-Security_SecurePortUpdate               Portiksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
+Security_PasswordUpdate                 Salasana vaihdettu
+Security_AUTHTitle                      Et&auml;palvelimet
+Security_SecureServer                   POP3 SPA/AUTH palvelin
+Security_SecureServerUpdate             POP3 SPA/AUTH palvelimeksi asetettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
+Security_SecurePort                     POP3 SPA/AUTH portti
+Security_SecurePortUpdate               POP3 SPA/AUTH -portiksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
 Security_SMTPServer                     SMTP-ketjupalvelin
 Security_SMTPServerUpdate               SMTP-ketjupalvelimeksi vaihdettu %s. Muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;.
 Security_SMTPPort                       SMTP-ketjuportti
@@ -220,19 +221,19 @@ Magnet_Value                            arvo
 Magnet_Always                           laitetaan aina sankoon
 Magnet_Jump                             Siirry sivulle
 
-Bucket_Error1                           Sangon nimess&auml; saa olla ainoastaan pieni&auml; kirjaimia a:sta z:aan, sek&auml; merkkej&auml; &quot;-&quot; ja &quot;_&quot;
+Bucket_Error1                           Sangon nimess&auml; saa olla ainoastaan pieni&auml; kirjaimia a:sta z:aan, numeroita, sek&auml; merkkej&auml; &quot;-&quot; ja &quot;_&quot;
 Bucket_Error2                           Sanko nimelt&auml; %s on jo olemassa
 Bucket_Error3                           Luotiin sanko nimelt&auml; %s
 Bucket_Error4                           Sangon nimess&auml; pit&auml;&auml; olla joitakin merkkej&auml;
 Bucket_Error5                           Vaihdettiin sangon %s nimeksi %s
 Bucket_Error6                           Poistettiin sanko %s
-Bucket_Title                            Tiivistelm&auml;
-Bucket_BucketName                       Sangon nimi
+Bucket_Title                            Sankojen asetukset
+Bucket_BucketName                       Sangon<br>nimi
 Bucket_WordCount                        Sanam&auml;&auml;r&auml;
 Bucket_WordCounts                       Sanam&auml;&auml;r&auml;t
-Bucket_UniqueWords                      Erillisi&auml; sanoja
-Bucket_SubjectModification              Aiheen muutos
-Bucket_ChangeColor                      Vaihda v&auml;ri&auml;
+Bucket_UniqueWords                      Erillisi&auml;<br>sanoja
+Bucket_SubjectModification              Aiherivin<br>muuttaminen
+Bucket_ChangeColor                      Sangon<br>v&auml;ri
 Bucket_NotEnoughData                    Ei tarpeeksi tietoa
 Bucket_ClassificationAccuracy           Luokittelutarkkuus
 Bucket_EmailsClassified                 Viestej&auml; luokiteltu
@@ -253,8 +254,8 @@ Bucket_RenameBucket                     Muuta sangon
 Bucket_Lookup                           Etsint&auml;
 Bucket_LookupMessage                    Etsi sanaa sangoista
 Bucket_LookupMessage2                   Etsint&auml;tulos sanalle
-Bucket_LookupMostLikely                 Sana <b>%s</b> esiintyy suurimmalla todenn&auml;k&ouml;isyydell&auml; sangossa <font color=&quot;%s&quot;>%s</font>
-Bucket_DoesNotAppear                    <p>Sana <b>%s</b> ei esiinny miss&auml;&auml;n sangossa
+Bucket_LookupMostLikely                 Sana <b>%s</b> kuuluu todenn&auml;k&ouml;isimmin sankoon <font color=&quot;%s&quot;>%s</font>
+Bucket_DoesNotAppear                    <p>Sanaa <b>%s</b> ei ole miss&auml;&auml;n sangossa
 Bucket_DisabledGlobally                 Poistettu yleisesti k&auml;yt&ouml;st&auml;
 Bucket_To                               nimeksi
 Bucket_Quarantine                       Karanteeni
@@ -276,9 +277,12 @@ View_ShowFrequencies                    N&auml;yt&auml; sanojen esiintymistiheys
 View_ShowProbabilities                  N&auml;yt&auml; sanojen esiintymistodenn&auml;k&ouml;isyydet
 View_ShowScores                         N&auml;yt&auml; sanojen pistem&auml;&auml;r&auml;t
 View_WordMatrix                         Sanamatriisi
+View_WordProbabilities                  n&auml;yt&ouml;ss&auml; sanojen esiintymistodenn&auml;k&ouml;isyydet
+View_WordFrequencies                    n&auml;yt&ouml;ss&auml; sanojen esiintymistiheys
+View_WordScores                         n&auml;yt&ouml;ss&auml; sanojen pistem&auml;&auml;r&auml;t
 
 Windows_TrayIcon                        N&auml;ytet&auml;&auml;nk&ouml; POPFilen kuvake Windowsin teht&auml;v&auml;palkissa?
-Windows_Console                         Tulostetaanko POPFilen viestit konsoli-ikkunaan?
+Windows_Console                         Ajetaanko POPFile komentokehoitteessa?
 Windows_NextTime                        <p><font color="red">T&auml;m&auml; muutos ei tule voimaan ennen POPFilen uudelleenk&auml;ynnistyst&auml;</font>
 
 Header_MenuSummary                      T&auml;ss&auml; taulukossa on navigointivalikko jonka avulla voit k&auml;ytt&auml;&auml; POPFilen hallinnan eri sivuja.
