@@ -9,12 +9,12 @@
 #
 #--------------------------------------------------------------------------
 
-; Modified to work with NSIS 2.0b4 (CVS) or later
+; Modified to work with NSIS 2.0b3 (CVS) or later
 
 #--------------------------------------------------------------------------
 
   !define MUI_PRODUCT "POPFile"
-  !define MUI_VERSION "0.19.0 (CVS)"
+  !define MUI_VERSION "0.19.0 RC1"
   !include "MUI.nsh"
 
 #----------------------------------------------------------------------------------------
@@ -198,7 +198,7 @@ Section "POPFile" SecPOPFile
   SetOutPath $INSTDIR
    
   File "..\engine\license"
-  File "..\engine\v0.18.1.change"
+  File "..\engine\v0.19.0.change"
   File "..\engine\*.pl"
   File "..\engine\pix.gif"
   File "..\engine\black.gif"
@@ -1073,6 +1073,8 @@ skip_registry_restore:
   RMDir $INSTDIR\manual
   Delete $INSTDIR\languages\*.msg
   RMDir $INSTDIR\languages
+  RMDir /r $INSTDIR\corpus
+  Delete $INSTDIR\stopwords
 
   Delete $INSTDIR\MIME\*.*
   RMDir  $INSTDIR\MIME

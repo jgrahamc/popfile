@@ -365,7 +365,7 @@ FunctionEnd
   !ifdef CBP_DEFAULT_LIST
       !define CBP_C_DEFAULT_BUCKETS `${CBP_DEFAULT_LIST}`
   !else
-      !define CBP_C_DEFAULT_BUCKETS "in-box|junk|personal|work"
+      !define CBP_C_DEFAULT_BUCKETS "inbox|spam|personal|work"
   !endif
 
   ; The list of suggested bucket names for the "Create Bucket" combobox to use
@@ -376,7 +376,7 @@ FunctionEnd
       !define CBP_C_SUGGESTED_BUCKETS `${CBP_SUGGESTION_LIST}`
   !else
       !define CBP_C_SUGGESTED_BUCKETS \
-      "admin|business|computers|family|financial|general|hobby|in-box|junk|list-admin|\
+      "admin|business|computers|family|financial|general|hobby|inbox|junk|list-admin|\
       miscellaneous|not_spam|other|personal|recreation|school|security|shopping|spam|\
       travel|work"
   !endif

@@ -5,6 +5,8 @@
 #
 # Copyright (c) 2003 John Graham-Cumming
 
+export POPFILE_VERSION=0.19.0
+
 .PHONY: test package windows core manual skins
 
 error:
@@ -20,11 +22,12 @@ windows: ; @$(MAKE) -C ../windows
 
 # build a ZIPped up package of POPFile
 
-BUILD_ZIP=wzzip -P popfile.zip -a $^
-popfile.zip: core manual skins
+POPFILE_ZIP := popfile-$(POPFILE_VERSION).zip
+BUILD_ZIP=wzzip -P $(POPFILE_ZIP) -a $^
+$(POPFILE_ZIP): core manual skins
 
-core: popfile.pl pix.gif black.gif insert.pl Classifier/*.pm POPFile/Configuration.pm POPFile/Logger.pm Proxy/POP3.pm UI/HTML.pm *.change license
-	rm -f popfile.zip
+core: popfile.pl pix.gif black.gif insert.pl Classifier/*.pm POPFile/*.pm Proxy/POP3.pm Proxy/Proxy.pm UI/HT??.pm *.change license
+	rm -f $(POPFILE_ZIP)
 	$(BUILD_ZIP)
 
 manual: manual/*.gif manual/en/*.html languages/*.msg
@@ -36,4 +39,4 @@ skins: skins/*.css skins/*.gif  skins/*/*.gif
 # package builds a zip file containing the POPFile package and the windows
 # installer
 
-package: popfile.zip windows
+package: $(POPFILE_ZIP) windows
