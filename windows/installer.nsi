@@ -731,6 +731,45 @@ Function SetOutlookOrOutlookExpressPage
   ;    HKEY_CURRENT_USER\...\Internet Account Manager\Accounts\00000003
   ;    etc
 
+  !define L_LNE         $R9
+  !define L_SEPARATOR   $R8
+  !define L_TEMP        $R3
+  
+  StrCpy ${L_SEPARATOR} ""
+  
+  ClearErrors
+  
+  FileOpen  ${CFG} $INSTDIR\popfile.cfg r
+
+loop:
+  FileRead   ${CFG} ${L_LNE}
+  IfErrors separator_done
+
+  StrCpy ${L_TEMP} ${L_LNE} 10
+  StrCmp ${L_TEMP} "separator " old_separator
+  StrCpy ${L_TEMP} ${L_LNE} 15
+  StrCmp ${L_TEMP} "pop3_separator " new_separator
+  Goto loop
+  
+old_separator:
+  StrCpy ${L_SEPARATOR} ${L_LNE} 1 10
+  Goto loop
+
+new_separator:
+  StrCpy ${L_SEPARATOR} ${L_LNE} 1 15
+  Goto loop
+
+separator_done:
+  Push ${L_SEPARATOR}
+  Call TrimNewlines
+  Pop ${L_SEPARATOR}
+  
+  ; Use separator character from popfile.cfg (if present) otherwise use a semicolon
+  
+  StrCmp ${L_SEPARATOR} "" 0 check_accounts
+  StrCpy ${L_SEPARATOR} ":"
+
+check_accounts:
   StrCpy ${OEID} 0
   
   ; Get the next identity from the registry
@@ -822,7 +861,7 @@ change_oe:
   FileWrite ${CFG} "$R7$\n"    
   FileClose ${CFG}
   
-  WriteRegStr HKCU $R5 "POP3 User Name" "$R7:$R6" 
+  WriteRegStr HKCU $R5 "POP3 User Name" "$R7${L_SEPARATOR}$R6" 
   WriteRegStr HKCU $R5 "POP3 Server" "127.0.0.1"
 
 next_acct_increment:
@@ -835,6 +874,10 @@ finished_this_id:
   goto next_id
 
 finished_oe:
+
+  !undef L_LNE
+  !undef L_SEPARATOR
+  !undef L_TEMP
 
 FunctionEnd
 
