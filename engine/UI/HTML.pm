@@ -86,6 +86,12 @@ sub new
     $self->{history_invalid__} = 0;
     $self->{need_resort__}     = 0;
 
+    # Hash containing pre-cached messages loaded upon receipt of NEWFL message. Moved to
+    # $self->{history_keys__} on each invocation of the history page.
+    # Structure is identical to $self->{history_keys__}
+
+    $self->{history_pre_cache__} = {};
+
     # A hash containing a mapping between alphanumeric identifiers and appropriate strings used
     # for localization.  The string may contain sprintf patterns for use in creating grammatically
     # correct strings, or simply be a string
@@ -2421,10 +2427,10 @@ sub load_disk_cache__
 
     if ( $first =~ /___HISTORY__ __ VERSION__ 1/ ) {
         while ( my $line = <CACHE> ) {
-	    if ( !( $line =~ /__HISTORY__ __BOUNDARY__/ ) ) {
+            if ( !( $line =~ /__HISTORY__ __BOUNDARY__/ ) ) {
                 $self->log_( "Problem in history_cache file, expecting boundary got $line" );
                 last;
-	    }
+            }
 
             $line = <CACHE>;
             $line =~ s/[\r\n]//g;
@@ -2633,14 +2639,23 @@ sub new_history_file__
     $short_subject =~ s/</&lt;/g;
     $short_subject =~ s/>/&gt;/g;
 
-    $self->{history__}{$file}{bucket}        = $bucket;
-    $self->{history__}{$file}{reclassified}  = $reclassified;
-    $self->{history__}{$file}{magnet}        = $magnet;
-    $self->{history__}{$file}{subject}       = $subject;
-    $self->{history__}{$file}{from}          = $from;
-    $self->{history__}{$file}{short_subject} = $short_subject;
-    $self->{history__}{$file}{short_from}    = $short_from;
-    $self->{history__}{$file}{cull}          = 0;
+    # If the index is known, stick it straight into the history else# go into
+    # the precache for merging into history when the history is viewed next
+
+    my $cache = 'history__';
+    if ( !defined( $index ) ) {
+        $cache = 'history_pre_cache__';
+    }
+
+
+    $self->{$cache}{$file}{bucket}        = $bucket;
+    $self->{$cache}{$file}{reclassified}  = $reclassified;
+    $self->{$cache}{$file}{magnet}        = $magnet;
+    $self->{$cache}{$file}{subject}       = $subject;
+    $self->{$cache}{$file}{from}          = $from;
+    $self->{$cache}{$file}{short_subject} = $short_subject;
+    $self->{$cache}{$file}{short_from}    = $short_from;
+    $self->{$cache}{$file}{cull}          = 0;
 
     if ( !defined( $index ) ) {
         $index = 0;
@@ -2846,7 +2861,7 @@ sub history_reclassify
 
                     my $fpcount = $self->{classifier__}->get_bucket_parameter( $bucket, 'fpcount' );
                     $self->{classifier__}->set_bucket_parameter( $bucket, 'fpcount', $fpcount+1 );
-		}
+                }
 
                 # Update the class file
 
@@ -2872,7 +2887,7 @@ sub history_reclassify
 
         foreach my $newbucket (keys %work) {
             $self->{classifier__}->add_messages_to_bucket( $newbucket, @{$work{$newbucket}} );
-	}
+        }
     }
 }
 
@@ -3090,6 +3105,13 @@ sub history_page
         }
     }
 
+    # Copy the history pre-cache over AFTER any possibly index-based remove operations are complete
+    foreach my $file ( keys( %{$self->{history_pre_cache__}} ) ) {
+        $self->{history__}{$file} = $self->{history_pre_cache__}{$file};
+        delete $self->{history_pre_cache__}{$file};        
+    }
+    $self->{history_pre_cache__} = {};
+
     # If the history cache is invalid then we need to reload it and then if
     # any of the sort, search or filter options have changed they must be
     # applied.  The watch word here is to avoid doing work
@@ -3206,7 +3228,7 @@ sub history_page
             my $index         = $self->{history__}{$mail_file}{index} + 1;
 
             $body .= "<tr";
-            if ( ( ( defined($self->{form_}{file}) && ( $self->{form_}{file} eq $mail_file ) ) ) || 
+            if ( ( ( defined($self->{form_}{file}) && ( $self->{form_}{file} eq $mail_file ) ) ) ||
                  ( $highlight_message eq $mail_file ) ) {
                 $body .= " class=\"rowHighlighted\"";
             } else {
@@ -3698,7 +3720,7 @@ sub history_delete_file
 {
     my ( $self, $mail_file, $archive ) = @_;
 
-    $mail_file =~ /(popfile.+\=.+\.msg)$/;
+    $mail_file =~ /(popfile(\d+)\=(\d+)\.msg)$/;
     $mail_file = $1;
     $self->log_( "delete: $mail_file" );
 
