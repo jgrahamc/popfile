@@ -83,22 +83,6 @@ sub new
     # The session id for the current session:
     $self->{api_session__} = '';
 
-    # A hash to map hash values of messages to buckets.
-    $self->{hash_to_bucket__} = ();
-
-    # A hash to map hash values to history file names.
-    $self->{hash_to_history__} = ();
-
-    # A hash to identify reclassified messages
-    $self->{hash_to_reclassed__} = ();
-
-    # This variable controls the amount of information that goes
-    # to the logfile:
-    # 0: basic information, quiet
-    # 1: + commands + OK/BAD/NO responses + untagged responses
-    # 2: + each server response
-    $self->{debug__} = 1;
-
     # A hash to hold per-folder data (watched and output flag + socket connection)
     # This data structure is extremely important to the work done by this
     # module, so don't mess with it!
@@ -117,6 +101,8 @@ sub new
     # If you provide a hash as a key and if that key exists, the value
     # will be the folder where the original message was placed (or left) in.
     $self->{hash_values__} = ();
+
+    $self->{history__} = 0;
 
     return $self;
 }
@@ -139,12 +125,7 @@ sub initialize
     $self->config_( 'password', '' );
     $self->config_( 'update_interval', 20 );
     $self->config_( 'byte_limit', 0 );
-    $self->config_( 'debug_level', $self->{debug__} );
     $self->config_( 'expunge', 0 );
-
-    # A counter to count classified messages.
-    # This value will be used to get unique names for history files.
-    $self->config_( 'class_counter', 0 );
 
     # Those next variables have getter/setter functions and should
     # not be used directly:
@@ -156,6 +137,9 @@ sub initialize
 
     # Diabled by default
     $self->config_( 'enabled', 0 );
+
+    # Training mode is disabled by default:
+    $self->config_( 'training_mode', 0 );
 
     # Set the time stamp for the last update to the current time
     # minus the update interval so that we will connect as soon
@@ -215,15 +199,6 @@ sub start
                                          'imap-options.thtml',
                                          $self );
 
-    # Read the class files for all messages in history
-    # and retrieve hashes and classifications
-    $self->read_cls_files__();
-
-    # remove this in the next version:
-    if ( $self->config_( 'debug_level' ) == 3 ) {
-        $self->config_( 'debug_level' , 2 );
-    }
-
     return $self->SUPER::start();
 }
 
@@ -275,9 +250,6 @@ sub service
             $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
         }
 
-        # Update the cached debug_level value
-        $self->{debug__} = $self->config_( 'debug_level' );
-
         # Since say__() as well as get_response__() can throw an exception, i.e. die if
         # they detect a lost connection, we eval the following code to be able
         # to catch the exception. We also tell Perl to ignore broken pipes.
@@ -286,36 +258,44 @@ sub service
             local $SIG{'PIPE'} = 'IGNORE';
             local $SIG{'__DIE__'};
 
-            # If we haven't yet set up a list of serviced folders, or if the list
-            # was changed by the user, build up a list of folder in $self->{folders__}
+            if ( $self->config_( 'training_mode' ) == 1 ) {
 
-            if ( ( keys %{$self->{folders__}} == 0 ) || ( $self->{folder_change_flag__} == 1 ) ) {
-                $self->build_folder_list__();
+                $self->train_on_archive__();
+
             }
+            else {
 
-            # Try to establish connections, log in, and select for all of our folders
-            $self->connect_folders__();
+                # If we haven't yet set up a list of serviced folders, or if the list
+                # was changed by the user, build up a list of folder in $self->{folders__}
 
-            # Now do the real job
-
-            foreach my $folder ( keys %{$self->{folders__}} ) {
-
-                if ( exists $self->{folders__}{$folder}{imap} ) {
-
-                    $self->scan_folder( $folder );
-
+                if ( ( keys %{$self->{folders__}} == 0 ) || ( $self->{folder_change_flag__} == 1 ) ) {
+                    $self->build_folder_list__();
                 }
-            }
 
-            # Reset the hash containing the hash values we have just seen.
-            $self->{hash_values__} = ();
+                # Try to establish connections, log in, and select for all of our folders
+                $self->connect_folders__();
+
+                # Now do the real job
+
+                foreach my $folder ( keys %{$self->{folders__}} ) {
+
+                    if ( exists $self->{folders__}{$folder}{imap} ) {
+
+                        $self->scan_folder( $folder );
+
+                    }
+                }
+
+                # Reset the hash containing the hash values we have just seen.
+                $self->{hash_values__} = ();
+            }
 
         };
         # if an exception occurred, we try to catch it here
         if ( $@ ) {
             # say__() and get_response__() will die with this message:
             if ( $@ =~ /The connection to the IMAP server was lost/ ) {
-                $self->log_( $@ ); # level 0
+                $self->log_( 0, $@ );
             }
             # If we didn't die but somebody else did, we have empathy.
             else {
@@ -355,7 +335,7 @@ sub build_folder_list__
 {
     my ( $self ) = @_;
 
-    $self->log_( "Building list of serviced folders." ) if $self->{debug__}; # level 1
+    $self->log_( 1, "Building list of serviced folders." );
 
     # At this point, we simply reset the folders hash.
     # This isn't really elegant because it will leave dangling connections
@@ -423,7 +403,7 @@ sub connect_folders__
             next;
         }
 
-        $self->log_( "Trying to connect to ". $self->config_( 'hostname' ) . " for folder $folder." ) if $self->{debug__}; # level 1
+        $self->log_( 1, "Trying to connect to ". $self->config_( 'hostname' ) . " for folder $folder." );
         $self->{folders__}{$folder}{imap} = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
         $self->{folders__}{$folder}{server} = 1;
         $self->{folders__}{$folder}{tag} = 0;
@@ -442,7 +422,7 @@ sub connect_folders__
                 $self->say__( $folder, "SELECT \"$folder\"" );
                 if ( $self->get_response__( $folder ) != 1 ) {
 
-                    $self->log_( "Could not SELECT folder $folder." ); # level 0
+                    $self->log_( 0, "Could not SELECT folder $folder." );
                     $self->say__( $folder, "LOGOUT" );
                     $self->get_response__( $folder );
                     delete $self->{folders__}{$folder}{imap};
@@ -450,17 +430,17 @@ sub connect_folders__
                 else {
                     # And now check that our UIDs are valid
                     unless ( $self->folder_uid_status__( $folder ) ) {
-                        $self->log_( "Changed UIDVALIDITY for folder $folder. Some new messages might have been skipped." ); # level 0
+                        $self->log_( 0, "Changed UIDVALIDITY for folder $folder. Some new messages might have been skipped." );
                     }
                 }
             }
             else {
-                $self->log_( "Could not LOGIN for folder $folder." ); # level 0
+                $self->log_( 0, "Could not LOGIN for folder $folder." );
                 delete $self->{folders__}{$folder}{imap};
             }
         }
         else {
-            $self->log_( "Could not CONNECT for folder $folder." ); # level 0
+            $self->log_( 0, "Could not CONNECT for folder $folder." );
             delete $self->{folders__}{$folder}{imap};
         }
     }
@@ -495,7 +475,7 @@ sub scan_folder
     my $is_watched = ( exists $self->{folders__}{$folder}{watched} ) ? 1 : 0;
     my $is_output = ( exists $self->{folders__}{$folder}{output} ) ? $self->{folders__}{$folder}{output} : '';
 
-    $self->log_( "Looking for new messages in folder $folder." ) if $self->{debug__}; # level 1
+    $self->log_( 1, "Looking for new messages in folder $folder." );
 
     # Do a NOOP first. Certain implementations won't tell us about
     # new messages while we are connected and selected otherwise:
@@ -511,7 +491,7 @@ sub scan_folder
     # empty). Let's iterate over that list.
 
     foreach my $msg ( @uids ) {
-        $self->log_( "Found new message in folder $folder (UID: $msg)" ) if $self->{debug__}; # level 1
+        $self->log_( 1, "Found new message in folder $folder (UID: $msg)" );
 
         my $hash = $self->get_hash( $folder, $msg );
 
@@ -523,12 +503,12 @@ sub scan_folder
 
             my $destination = $self->{hash_values__}{$hash};
             if ( $destination ne $folder ) {
-                $self->log_( "Found duplicate hash value: $hash. Moving the message to $destination." );
+                $self->log_( 0, "Found duplicate hash value: $hash. Moving the message to $destination." );
                 $self->move_message( $folder, $msg, $destination );
                 $moved_message++;
             }
             else {
-                $self->log_( "Found duplicate hash value: $hash. Ignoring duplicate." );
+                $self->log_( 0, "Found duplicate hash value: $hash. Ignoring duplicate in folder $folder." );
             }
 
             next;
@@ -564,7 +544,7 @@ sub scan_folder
         }
 
         # If we get here despite all those next statements, we do nothing and say so
-        $self->log_( "Ignoring message $msg" ) if $self->{debug__}; # level 1
+        $self->log_( 1, "Ignoring message $msg" );
     }
 
     # After we are done with the folder, we issue an EXPUNGE command
@@ -607,14 +587,11 @@ sub classify_message
 
     my $moved_a_msg = '';
 
-    # Increment the global download count
-    $self->global_config_( 'download_count', $self->global_config_( 'download_count' ) + 1 );
-
     # open a temporary file that the classifier will
     # use to read the message in binary, read-write mode:
     my $pseudo_mailer;
     unless ( open $pseudo_mailer, "+>imap.tmp" ) {
-        $self->log_( "Unable to open temporary file. Nothing done to message $msg." ); # level 0
+        $self->log_( 0, "Unable to open temporary file. Nothing done to message $msg." );
 
         return;
     }
@@ -635,7 +612,7 @@ sub classify_message
         my ($ok, @lines ) = $self->fetch_message_part__( $folder, $msg, $part );
 
         unless ( $ok ) {
-            $self->log_( "Could not fetch the $part part of message $msg." ); # level 0
+            $self->log_( 0, "Could not fetch the $part part of message $msg." );
 
             return;
         }
@@ -644,17 +621,17 @@ sub classify_message
             print $pseudo_mailer "$_";
         }
 
-        my ( $class, $history_file, $magnet_used );
+        my ( $class, $slot, $magnet_used );
 
         # If we are dealing with the headers, let the
         # classifier have a non-save go:
 
         if ( $part eq 'HEADER' ) {
             seek $pseudo_mailer, 0, 0;
-            ( $class, $history_file, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, $self->global_config_( 'download_count' ), $msg, 1, '', 0 );
+            ( $class, $slot, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, 1, '', 0 );
 
             if ( $magnet_used ) {
-                $self->log_( "Message $history_file was classified as $class using a magnet." ); # level 0
+                $self->log_( 0, "Message was classified as $class using a magnet." );
                 print $pseudo_mailer "\nThis message was classified based on a magnet.\nThe body of the message was not retrieved from the server.\n";
             }
             else {
@@ -666,10 +643,13 @@ sub classify_message
         # are looking at the complete message. Thus we let the classifier have
         # a look and make it save the message to history:
         seek $pseudo_mailer, 0, 0;
-        ( $class, $history_file, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, $self->global_config_( 'download_count' ), $self->config_( 'class_counter' ), 0, '', 0 );
-        close $pseudo_mailer;
 
-       if ( $magnet_used || $part eq 'TEXT' ) {
+        ( $class, $slot, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, 0, '', 0 );
+
+        close $pseudo_mailer;
+        unlink "imap.tmp";
+
+        if ( $magnet_used || $part eq 'TEXT' ) {
 
             # Move message:
 
@@ -681,16 +661,10 @@ sub classify_message
                 }
             }
             else {
-                $self->log_( "Message cannot be moved because output folder for bucket $class is not defined." ); #level 0
+                $self->log_( 0, "Message cannot be moved because output folder for bucket $class is not defined." );
             }
 
-
-            # Housekeeping:
-
-            # Remember hash of this message in history, etc:
-            $self->was_classified__( $hash, $class, $history_file );
-
-            $self->log_( "Message $history_file was classified as $class." ); # level 0
+            $self->log_( 0, "Message was classified as $class." );
 
             last PART;
         }
@@ -716,7 +690,7 @@ sub classify_message
 #   $folder:     The folder that has received a reclassification request
 #   $msg:        UID of the message (the IMAP folder must be SELECTed)
 #   $old_bucket: The previous classification of the message
-#   $hash:        The hash of the message as computed by get_hash()
+#   $hash:       The hash of the message as computed by get_hash()
 #
 # Return value:
 #
@@ -733,7 +707,7 @@ sub reclassify_message
     my ( $ok, @lines ) = $self->fetch_message_part__( $folder, $msg, '' );
 
     unless ( $ok ) {
-        $self->log_( "Could not fetch message $msg!" ); #level 0
+        $self->log_( 0, "Could not fetch message $msg!" );
 
         return;
     }
@@ -742,7 +716,7 @@ sub reclassify_message
     # I simply use "imap.tmp" as the file name here.
 
     unless ( open TMP, ">imap.tmp" ) {
-        $self->log_( "Cannot open temp file imap.tmp" ); # level 0
+        $self->log_( 0, "Cannot open temp file imap.tmp" );
 
         return;
     };
@@ -752,9 +726,26 @@ sub reclassify_message
     }
     close TMP;
 
-    $self->was_reclassified__( $hash, $new_bucket, "imap.tmp" );
+    # This is copied from html.pm
+    # It (hopefully) keeps our statistics up to date.
+    my $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $new_bucket, 'count' );
+    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $new_bucket, 'count', $count+1 );
 
-    $self->log_( "Reclassified the message with UID $msg from bucket $old_bucket to bucket $new_bucket." ); # level 0
+    $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $old_bucket, 'count' );
+    $count -= 1;
+    $count = 0 if ( $count < 0 ) ;
+    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $old_bucket, 'count', $count );
+
+    my $fncount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $new_bucket, 'fncount' );
+    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $new_bucket, 'fncount', $fncount+1 );
+
+    my $fpcount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $old_bucket, 'fpcount' );
+    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $old_bucket, 'fpcount', $fpcount+1 );
+
+    $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $new_bucket, "imap.tmp" );
+    $self->{classifier__}->remove_message_from_bucket( $self->{api_session__}, $old_bucket, "imap.tmp" );
+
+    $self->log_( 0, "Reclassified the message with UID $msg from bucket $old_bucket to bucket $new_bucket." );
 
     unlink "imap.tmp";
 }
@@ -799,7 +790,7 @@ sub folder_uid_status__
 
     # if we didn't get the value, we have a problem
     unless ( defined $uidvalidity ) {
-        $self->log_( "Could not extract UIDVALIDITY status from server response!" ); # level 0
+        $self->log_( 0, "Could not extract UIDVALIDITY status from server response!" );
         return;
     }
 
@@ -807,7 +798,7 @@ sub folder_uid_status__
     if ( defined $old_val ) {
         if ( $uidvalidity != $old_val ) {
             $self->uid_validity__( $folder, $uidvalidity );
-            $self->log_( "UIDVALIDITY has changed! Expected $old_val, got $uidvalidity." ); # level 0
+            $self->log_( 0, "UIDVALIDITY has changed! Expected $old_val, got $uidvalidity." );
             return;
         }
     }
@@ -837,17 +828,17 @@ sub folder_uid_status__
                 $uidnext = $1;
 
                 unless ( defined $uidnext ) {
-                    $self->log_( "Could not extract UIDNEXT value from server response!!" ); # level 0
+                    $self->log_( 0, "Could not extract UIDNEXT value from server response!!" );
                     return;
                 }
 
                 $self->uid_next__( $folder, $uidnext );
                 $self->uid_validity__( $folder, $uidvalidity );
-                $self->log_( "Updated folder status (UIDVALIDITY and UIDNEXT) for folder $folder." ) if $self->{debug__}; # level 1
+                $self->log_( 1, "Updated folder status (UIDVALIDITY and UIDNEXT) for folder $folder." );
             }
         }
         else {
-            $self->log_( "Could not STATUS folder $folder!!" ); # level 0
+            $self->log_( 0, "Could not STATUS folder $folder!!" );
             return;
         }
     }
@@ -871,7 +862,7 @@ sub connect
 {
     my ( $self, $hostname, $port ) = @_;
 
-    $self->log_( "Connecting to $hostname:$port" ) if $self->{debug__}; # level 1
+    $self->log_( 1, "Connecting to $hostname:$port" );
 
     if ( $hostname ne '' && $port ne '' ) {
 
@@ -887,7 +878,7 @@ sub connect
         # Check that the connect succeeded for the remote server
         if ( $imap ) {
             if ( $imap->connected )  {
-                $self->log_( "Connected to $hostname:$port timeout " . $self->global_config_( 'timeout' ) ); # level 0
+                $self->log_( 0, "Connected to $hostname:$port timeout " . $self->global_config_( 'timeout' ) );
 
                 # Set binmode on the socket so that no translation of CRLF
                 # occurs
@@ -904,13 +895,13 @@ sub connect
 
                 # Read the response from the real server
                 my $buf = $self->slurp_( $imap );
-                $self->log_( ">> $buf" ) if $self->{debug__}; # level 1
+                $self->log_( 1, ">> $buf" );
                 return $imap;
             }
         }
     }
     else {
-        $self->log_( "Invalid port or hostname. Will not connect to server." ); # level 0
+        $self->log_( 0, "Invalid port or hostname. Will not connect to server." );
         return;
     }
 }
@@ -939,7 +930,7 @@ sub login
     my ( $self, $imap ) = @_;
     my ( $login, $pass ) = ( $self->config_( 'login' ), $self->config_( 'password' ) );
 
-    $self->log_( "Logging in" ) if $self->{debug__}; # level 1
+    $self->log_( 1, "Logging in" );
 
     $self->say__( $imap, "LOGIN \"$login\" \"$pass\"" );
 
@@ -970,7 +961,7 @@ sub logout
 {
     my ( $self, $imap_or_folder ) = @_;
 
-    $self->log_( "Logging out" ) if $self->{debug__}; # level 1
+    $self->log_( 1, "Logging out" );
 
     $self->say__( $imap_or_folder, "LOGOUT" );
 
@@ -1013,11 +1004,9 @@ sub raw_say
     }
 
     # Log command
-    if ( $self->{debug__} ) {
-        # Obfuscate login and password for logins:
-        $cmdstr =~ s/^(A\d+) LOGIN ".+?" ".+"$/$1 LOGIN "xxxxx" "xxxxx"/;
-        $self->log_( "<< $cmdstr" ); # level 1
-    }
+    # Obfuscate login and password for logins:
+    $cmdstr =~ s/^(A\d+) LOGIN ".+?" ".+"$/$1 LOGIN "xxxxx" "xxxxx"/;
+    $self->log_( 1, "<< $cmdstr" );
 
     return 1;
 }
@@ -1065,7 +1054,7 @@ sub say__
 
         unless ( exists $self->{folders__}{$imap_or_folder}{imap} ) {
             # No! commit suicide.
-            $self->log_( "Got a folder with no attached socket in say!" );
+            $self->log_( 0, "Got a folder with no attached socket in say!" );
             die( "The connection to the IMAP server was lost. Could not talk to the server." );
         }
 
@@ -1148,6 +1137,7 @@ sub raw_get_response
             if ( $octet_count >= $count_octets ) {
                 $count_octets = 0;
             }
+            $self->log_( 2, ">> $buf" );
         }
 
         # If we aren't counting octets (anymore), we look out for tag
@@ -1155,6 +1145,14 @@ sub raw_get_response
         # for untagged responses that the server might send us unsolicited
         if ( $count_octets == 0 ) {
             if ( $buf =~ /^$actual_tag (OK|BAD|NO)/ ) {
+
+                if ( $1 ne 'OK' ) {
+                    $self->log_( 0, ">> $buf" );
+                }
+                else {
+                    $self->log_( 1, ">> $buf" );
+                }
+
                 last;
             }
 
@@ -1164,19 +1162,21 @@ sub raw_get_response
             if ( $buf =~ /^\* (.+)/ ) {
                 my $untagged_response = $1;
 
+                $self->log_( 1, ">> $buf" );
+
                 # This should never happen, but under very rare circumstances,
                 # we might get a change of the UIDVALIDITY value while we
                 # are connected
                 if ( $untagged_response =~ /UIDVALIDITY/
                         && $last_command !~ /^SELECT/ ) {
-                    $self->log_( "Got unsolicited UIDVALIDITY response from server while reading response for $last_command." ); # level 0
+                    $self->log_( 0, "Got unsolicited UIDVALIDITY response from server while reading response for $last_command." );
                 }
 
                 # This could happen, but will be caught by the eval in service().
                 # Nevertheless, we look out for unsolicited bye-byes here.
                 if ( $untagged_response =~ /^BYE/
                         && $last_command !~ /^LOGOUT/ ) {
-                    $self->log_( "Got unsolicited BYE response from server while reading response for $last_command." ); # level 0
+                    $self->log_( 0, "Got unsolicited BYE response from server while reading response for $last_command." );
                 }
             }
         }
@@ -1192,22 +1192,6 @@ sub raw_get_response
 
 
     if ( $response ) {
-
-        # Do logging
-        if ( $response ) {
-            foreach ( split /$eol/, $response ) {
-
-                if ( $self->{debug__} == 0 ) {
-                    $self->log_( ">> $_" ) if /\d (NO|BAD)/;
-                }
-                elsif ( $self->{debug__} == 1 ) {
-                    $self->log_( ">> $_" ) if /(\d (OK|NO|BAD))|(^\*)/;
-                }
-                elsif ( $self->{debug__} == 2 ) {
-                    $self->log_( ">> $_" );
-                }
-            }
-        }
 
         # determine our return value
 
@@ -1225,10 +1209,11 @@ sub raw_get_response
         }
         # Someting else, probably a different tag, but who knows?
         else {
-            $self->log_( "!!! Server said something unexpected !!!" ); # level 0
+            $self->log_( 0, "!!! Server said something unexpected !!!" );
             return -2;
         }
     }
+
     return -3;
 }
 
@@ -1277,7 +1262,7 @@ sub get_response__
 
         # Is there a socket object stored in the folders hash?
         unless ( exists $self->{folders__}{$imap_or_folder}{imap} ) {
-            $self->log_( "Got a folder with no attached socket in get_response!" );
+            $self->log_( 0, "Got a folder with no attached socket in get_response!" );
             die( "The connection to the IMAP server was lost. Could not listen to the server." );
         }
 
@@ -1319,7 +1304,7 @@ sub get_mailbox_list
 {
     my ( $self, $imap ) = @_;
 
-    $self->log_( "Getting mailbox list" ) if $self->{debug__}; # level 1
+    $self->log_( 1, "Getting mailbox list" );
 
     $self->say__( $imap, "LIST \"\" \"*\"" );
     $self->get_response__( $imap );
@@ -1373,10 +1358,10 @@ sub fetch_message_part__
     my ( $self, $folder, $msg, $part ) = @_;
 
     if ( $part ne '' ) {
-        $self->log_( "Fetching $part of message $msg" ) if $self->{debug__}; # level 1
+        $self->log_( 1, "Fetching $part of message $msg" );
     }
     else {
-        $self->log_( "Fetching message $msg" ) if $self->{debug__}; # level 1
+        $self->log_( 1, "Fetching message $msg" );
     }
 
     $self->say__( $folder, "UID FETCH $msg (FLAGS BODY.PEEK[$part])" );
@@ -1384,10 +1369,10 @@ sub fetch_message_part__
     my $result = $self->get_response__( $folder );
 
     if ( $part ne '' ) {
-        $self->log_( "Got $part of message # $msg, result: $result." ) if $self->{debug__}; # level 1
+        $self->log_( 1, "Got $part of message # $msg, result: $result." );
     }
     else {
-        $self->log_( "Got message # $msg, result: $result." ) if $self->{debug__}; # level 1
+        $self->log_( 1, "Got message # $msg, result: $result." );
     }
 
     if ( $result == 1 ) {
@@ -1432,11 +1417,11 @@ sub fetch_message_part__
                 pop @lines;
                 pop @lines;
 
-                $self->log_( "Could not find octet count in server's response!" ); # level 0
+                $self->log_( 0, "Could not find octet count in server's response!" );
             }
         }
         else {
-            $self->log_( "Unexpected server response to the FETCH command!" ); # level 0
+            $self->log_( 0, "Unexpected server response to the FETCH command!" );
         }
 
         return 1, @lines;
@@ -1468,7 +1453,7 @@ sub move_message
 {
     my ( $self, $folder, $msg, $destination ) = @_;
 
-    $self->log_( "Moving message $msg to $destination" ) if $self->{debug__}; # level 1
+    $self->log_( 1, "Moving message $msg to $destination" );
 
     my $ok = 0;
 
@@ -1484,11 +1469,11 @@ sub move_message
             $ok = $self->get_response__( $folder );
         }
         else {
-            $self->log_( "Could not copy message ($ok)!" ); # level 0
+            $self->log_( 0, "Could not copy message ($ok)!" );
         }
     }
     else {
-        $self->log_( "We don't yet know how to move messages between servers");
+        $self->log_( 0, "We don't yet know how to move messages between servers" );
     }
 
     return ( $ok ? 1 : 0 );
@@ -1518,7 +1503,7 @@ sub get_new_message_list
 
     my $uid = $self->uid_next__( $folder );
 
-    $self->log_( "Getting uids ge $uid" ) if $self->{debug__}; # level 1
+    $self->log_( 1, "Getting uids ge $uid" );
 
     $self->say__( $folder, "UID SEARCH UID $uid:* UNDELETED" );
     $self->get_response__( $folder );
@@ -1659,7 +1644,7 @@ sub uid_validity__
             $all .= "$key$cfg_separator$value$cfg_separator";
         }
         $self->config_( 'uidvalidities', $all );
-        $self->log_( "Updated UIDVALIDITY value for folder $folder to $uidval." ) if $self->{debug__}; # level 1
+        $self->log_( 1, "Updated UIDVALIDITY value for folder $folder to $uidval." );
     }
     # get
     else {
@@ -1703,7 +1688,7 @@ sub uid_next__
             $all .= "$key$cfg_separator$value$cfg_separator";
         }
         $self->config_( 'uidnexts', $all );
-        $self->log_( "Updated UIDNEXT value for folder $folder to $uidnext." ) if $self->{debug__}; # level 1
+        $self->log_( 1, "Updated UIDNEXT value for folder $folder to $uidnext." );
     }
     # get
     else {
@@ -1725,70 +1710,13 @@ sub classifier
     $self->{classifier__} = $classifier;
 }
 
-######################################################################################
-# A temporary solution to find out about known messages.
-# This will be replaced by something less hacky, once the
-# history is in the database and I know how to communicate with
-# the history.
 
-
-#----------------------------------------------------------------------------
-# read_cls_files__
-#
-# This function globs for .cls files in the messages directory.
-# It opens each file, reads the bucket the message was classified
-# to and possibly a hash value for the message
-# It several hashes (Perl hashes that is)
-#----------------------------------------------------------------------------
-
-sub read_cls_files__
+sub history
 {
-    my ( $self ) = @_;
+    my ( $self, $history ) = @_;
 
-    my @cls_files = glob( $self->get_user_path_( $self->global_config_( 'msgdir' ) . '*.cls' ) );
-
-    foreach my $cls ( @cls_files ) {
-
-        if ( open CLS, "<$cls" ) {
-
-            my $bucket;
-            my $hash;
-
-            my $first = <CLS>;
-            chop $first;
-
-            # We won't remember magnetized messages. We shouldn't reclassify them anyway.
-            unless ( $first =~ /MAGNET/ ) {
-
-                if ( $first =~ /RECLASSIFIED/ ) {
-                    $bucket = <CLS>;
-                    chop $bucket;
-                    <CLS>;  # old bucket, but we don't care.
-                    $hash = <CLS>;
-                    if ( defined $hash ) {
-                        chop $hash;
-                        $self->{hash_to_reclassed__}{$hash} = 1;
-                    }
-                }
-                # A normal class file with only one line ( not counting the hash)
-                else {
-                    $bucket = $first;
-                    $hash = <CLS>;
-                    chop $hash if defined $hash;
-                }
-
-                if ( defined $hash ) {
-                    $self->{hash_to_bucket__}{$hash} = $bucket;
-                    my $histfile = $cls;
-                    $histfile =~ s|.+/(.+)cls$|${1}msg|;
-                    $self->{hash_to_history__}{$hash} = $histfile;
-                }
-            }
-            close CLS;
-        }
-    }
+    $self->{history__} = $history;
 }
-
 
 
 #----------------------------------------------------------------------------
@@ -1815,53 +1743,47 @@ sub get_hash
 
     if ( $ok ) {
 
-        my $date = '';
-        my $mid = '';
-        my $subject = '';
-        my $received = '';
+        my %header;
+        my $last;
 
-        my $response = '';
         foreach ( @lines ) {
-            $response .= "$_";
+
+            s/[\r\n]//g;
+
+            last if /^$/;
+
+            if ( /^([^ \t]+):[ \t]*(.*)$/ ) {
+                $last = lc $1;
+                push @{$header{$last}}, $2;
+            }
+            else {
+                if ( defined $last ) {
+                    ${$header{$last}}[$#{$header{$last}}] .= $_;
+                }
+            }
         }
 
-        # Remove newlines inside header fields:
-        $response =~ s/$eol\s+/ /sg;
-        # But make sure that the trailing new line is still there:
-        $response .= $eol;
+        my $mid      = ${$header{'message-id'}}[0];
+        my $date     = ${$header{'date'}}[0];
+        my $subject  = ${$header{'subject'}}[0];
+        my $received = ${$header{'received'}}[0];
 
-        if ( $mid eq '' && $response =~ /^(message-id:.*?)$eol/ism ) {
-            $mid = $1;
-        }
+        # remove those log_ calls once we can be sure everything works:
+        $self->log_( 1, "Just for debugging purposes:" );
+        $self->log_( 1, "mid:      $mid." );
+        $self->log_( 1, "date:     $date." );
+        $self->log_( 1, "subject:  $subject." );
+        $self->log_( 1, "received: $received." );
 
-        if ( $date eq '' && $response =~ /^(date:.*?)$eol/ism ) {
-            $date = $1;
-        }
+        my $hash = $self->{history__}->get_message_hash( $mid, $date, $subject, $received );
 
-        if ( $received eq '' && $response =~ /^(received:.*?)$eol/ism ) {
-            $received = $1;
-        }
-
-        if ( $subject eq '' && $response =~ /^(subject:.*?)$eol/ism ) {
-            $subject = $1;
-        }
-
-        # remove those log_ calls once we can be sure that the regexes work:
-        $self->log_( "Just for debugging purposes:" );
-        $self->log_( "mid:      $mid" );
-        $self->log_( "date:     $date" );
-        $self->log_( "subject:  $subject" );
-        $self->log_( "received: $received" );
-
-        my $hash = md5_hex( "[$mid][$date][$subject][$received]" );
-
-        $self->log_( "Hashed message. $subject." ) if $self->{debug__}; # level 1
-        $self->log_( "Message $msg has hash value $hash" ) if $self->{debug__}; # level 1
+        $self->log_( 1, "Hashed message: $subject." );
+        $self->log_( 1, "Message $msg has hash value $hash" );
 
         return $hash;
     }
     else {
-        $self->log_( "Could not FETCH the header fields of message $msg!" ); # level 0
+        $self->log_( 0, "Could not FETCH the header fields of message $msg!" );
         return;
     }
 }
@@ -1884,11 +1806,14 @@ sub can_classify__
 {
     my ( $self, $hash ) = @_;
 
-    if ( exists $self->{hash_to_bucket__}{$hash} ) {
-        $self->log_( "Message was already classified." ) if $self->{debug__}; # level 1
+    my $slot = $self->{history__}->get_slot_from_hash( $hash );
+
+    if ( $slot  ne '' ) {
+        $self->log_( 1, "Message was already classified (slot $slot)." );
         return 0;
     }
     else {
+        $self->log_( 1, "The message is not in history." );
         return 1;
     }
 }
@@ -1912,197 +1837,47 @@ sub can_reclassify__
     my ( $self, $hash, $new_bucket ) = @_;
 
     # We must know the message
-    if ( exists $self->{hash_to_bucket__}{$hash} ) {
+
+    my $slot = $self->{history__}->get_slot_from_hash( $hash );
+
+    if ( $slot ne '' ) {
+
+        my ( $id, $from, $to, $cc, $subject, $date, $hash, $inserted, $bucket, $reclassified ) =
+                    $self->{history__}->get_slot_fields( $slot );
+
+        $self->log_( 2, "get_slot_fields returned the following information:" );
+        $self->log_( 2, "id:            $id" );
+        $self->log_( 2, "from:          $from" );
+        $self->log_( 2, "to:            $to" );
+        $self->log_( 2, "cc:            $cc" );
+        $self->log_( 2, "subject:       $subject");
+        $self->log_( 2, "date:          $date" );
+        $self->log_( 2, "hash:          $hash" );
+        $self->log_( 2, "inserted:      $inserted" );
+        $self->log_( 2, "bucket:        $bucket" );
+        $self->log_( 2, "reclassified:  $reclassified" );
 
         # We must not reclassify a reclassified message
-        if ( !exists $self->{hash_to_reclassed__}{$hash} ) {
+        if ( ! $reclassified ) {
 
             # new and old bucket must be different
-            if ( $new_bucket ne $self->{hash_to_bucket__}{$hash} ) {
-                return $self->{hash_to_bucket__}{$hash};
+            if ( $new_bucket ne $bucket ) {
+                return $bucket;
             }
             else {
-                $self->log_( "Will not reclassify to same bucket ($new_bucket)." ) if $self->{debug__}; # level 1
+                $self->log_( 1, "Will not reclassify to same bucket ($new_bucket)." );
             }
         }
         else {
-            $self->log_( "The message was already reclassified." ) if $self->{debug__}; # level 1
+            $self->log_( 1, "The message was already reclassified." );
         }
     }
     else {
-        $self->log_( "Message is unknown and cannot be reclassified." ) if $self->{debug__}; # level 1
+        $self->log_( 1, "Message is unknown and cannot be reclassified." );
     }
 
     return;
 }
-
-#----------------------------------------------------------------------------
-#   was_reclassified__
-#
-# This function MUST be called after a message was reclassified to
-# keep the internal records up to date and to change the class file
-# of that message.
-#
-# arguments:
-#   $hash:      The hash value of the message
-#   $bucket:    The bucket the message was classified to
-#   $msg_file:  Name of an existing file that contains the message
-# there is no return value
-#----------------------------------------------------------------------------
-
-sub was_reclassified__
-{
-    my ( $self, $hash, $bucket, $msg_file ) = @_;
-
-    my $hst_file = $self->{hash_to_history__}{$hash};
-    my $old_class = $self->{hash_to_bucket__}{$hash};
-
-    $self->change_cls_file__( $hst_file, $hash, $bucket, $old_class );
-
-    $self->{hash_to_reclassed__}{$hash} = 1;
-    $self->{hash_to_bucket__}{$hash} = $bucket;
-
-    # This is copied from html.pm
-    # It (hopefully) keeps our statistics up to date.
-    my $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'count' );
-    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'count', $count+1 );
-
-    $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $old_class, 'count' );
-    $count -= 1;
-    $count = 0 if ( $count < 0 ) ;
-    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $old_class, 'count', $count );
-
-    my $fncount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'fncount' );
-    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'fncount', $fncount+1 );
-
-    my $fpcount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $old_class, 'fpcount' );
-    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $old_class, 'fpcount', $fpcount+1 );
-
-    $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $bucket, $msg_file );
-    $self->{classifier__}->remove_message_from_bucket( $self->{api_session__}, $old_class, $msg_file );
-
-    $self->mq_post_( 'NEWFL', $self->get_msg_file__( $hash ), '' );
-}
-
-
-
-
-#----------------------------------------------------------------------------
-# was_classified__
-#
-# This function MUST be called after a message was classified. It updates
-# internal records and the corresponding class file
-#
-# arguments:
-#   $hash:      The hash value of that message
-#   $bucket:    The bucket the message was classified to
-#   $msg_file:  The name of the message file in history (no path, just file name)
-# there is no return value
-#----------------------------------------------------------------------------
-
-sub was_classified__
-{
-    my ( $self, $hash, $bucket, $msg_file ) = @_;
-
-    $self->change_cls_file__( $msg_file, $hash, $bucket );
-    $self->{hash_to_bucket__}{$hash} = $bucket;
-    $self->{hash_to_history__}{$hash} = $msg_file;
-
-    # Increment bucket count.
-    $self->{classifier__}->classified( $self->{api_session__}, $bucket );
-
-    # Inform the rest of POPFile about a new message in history.
-    $self->mq_post_( 'NEWFL', $msg_file , '' );
-
-    # Update the class_counter var
-    $self->config_( 'class_counter', $self->config_( 'class_counter' ) + 1 );
-}
-
-
-
-#----------------------------------------------------------------------------
-# change_cls_file__
-#
-# This gets called after a message was classified or reclassified
-# by either was_classified__() or was_reclassified__().
-# It rewrites the class file that belongs to the
-# messages ton include our hash value
-#
-# arguments:
-#   $msg_file:      Name of the msg file in history (no path, just file name)
-#   $hash:          the hash value of this message
-#   $class:         The current classification of this message
-#   $magnet_used:   If true, the cls file will contain
-#   $oldclass:      The old classification if we were reclassifying. This may be undefined.
-# there is no return value
-#----------------------------------------------------------------------------
-
-sub change_cls_file__
-{
-    my ( $self, $msg_file, $hash, $class, $oldclass ) = @_;
-
-    my $cls_path = $self->get_user_path_( $self->global_config_( 'msgdir' ) . $msg_file );
-    $cls_path =~ s/\.msg/.cls/;
-
-    # What we will do here depends whether we were called after classification
-    # or after reclassification.
-
-    # after reclassification
-    if ( defined $oldclass ) {
-        if ( open CLS, ">$cls_path" ) {
-            print CLS "RECLASSIFIED\n$class\n$oldclass\n$hash\n";
-            close CLS;
-        }
-        else {
-            $self->log_( "Could not open cls file $cls_path." ); # level 0
-        }
-    }
-
-    # after classification:
-    else {
-        if ( open CLS, "<$cls_path" ) {
-            my $first = <CLS>;
-            close CLS;
-            if ( open CLS, ">$cls_path" ) {
-                print CLS "$first$hash\n";
-                close CLS;
-            }
-            else {
-                $self->log_( "Could not write to cls file $cls_path." ); # level 0
-            }
-        }
-        else {
-            $self->log_( "Could not read cls file $cls_path." ); # level 0
-        }
-
-        $self->log_( "Updated class file $cls_path. Class: $class. Hash: $hash." ) if $self->{debug__}; # level 1
-    }
-}
-
-
-#----------------------------------------------------------------------------
-# get_msg_file__
-#
-# Takes the hash of a message as its argument
-# and returns the name of the history msg file retrieved from the internal
-# hash or undef on error
-#----------------------------------------------------------------------------
-
-sub get_msg_file__
-{
-    my ( $self, $hash ) = @_;
-
-    if ( exists $self->{hash_to_history__}{$hash} ) {
-        my $msg_file = $self->{hash_to_history__}{$hash};
-        $msg_file =~ s/\.cls/.msg/;
-
-        return $msg_file;
-    }
-    else {
-        return;
-    }
-}
-
 
 
 
@@ -2273,17 +2048,6 @@ sub configure_item
 
         # How many bytes should we use for classification?
         $template->param( IMAP_byte_limit => $self->config_( 'byte_limit' ) );
-
-        # Which debug level do we use to feed the logger?
-        my @loop = ();
-        for my $i ( 0 .. 2 ) {
-            my %data = ();
-
-            $data{IMAP_selected} = ( $i == $self->{debug__} ) ? 'selected="selected"' : '';
-            $data{IMAP_level} = $i;
-            push @loop, \%data;
-        }
-        $template->param( IMAP_debug_levels => \@loop );
     }
 }
 
@@ -2482,16 +2246,83 @@ sub validate_item
             else {
                 $template->param( IMAP_if_bytelimit_error => 1 );
             }
-
-            # debug level
-            $self->{debug__} = $$form{imap_options_debug_level};
-            $self->config_( 'debug_level', $self->{debug__} );
         }
         return;
     }
 
 
     $self->SUPER::validate_item( $name, $template, $language, $form );
+}
+
+
+sub train_on_archive__
+{
+    my ( $self ) = @_;
+
+    $self->log_( 0, "Training on existing archive." );
+
+    # Reset the folders hash and build it again.
+
+    %{$self->{folders__}} = ();
+    $self->build_folder_list__();
+
+    # eliminate all watched folders
+    foreach my $folder ( keys %{$self->{folders__}} ) {
+        if ( exists $self->{folders__}{$folder}{watched} ) {
+            delete $self->{folders__}{$folder};
+        }
+    }
+
+    # Connect to server
+    $self->connect_folders__();
+
+    foreach my $folder ( keys %{$self->{folders__}} ) {
+
+        # Set uidnext value to 0. We will train on all messages.
+        $self->uid_next__( $folder, 0 );
+        my @uids = $self->get_new_message_list( $folder );
+        my $bucket = $self->{folders__}{$folder}{output};
+
+        # Skip pseudobuckets and the INBOX
+        next if $self->{classifier__}->is_pseudo_bucket( $self->{api_session__}, $bucket );
+        next if $folder eq 'INBOX';
+
+        $self->log_( 0, "Training on messages in folder $folder to bucket $bucket." );
+
+        foreach my $msg ( @uids ) {
+
+            my ( $ok, @lines ) = $self->fetch_message_part__( $folder, $msg, '' );
+
+            $self->uid_next__( $folder, $msg );
+
+            unless ( $ok ) {
+                $self->log_( 0, "Could not fetch message $msg!" );
+                next;
+            }
+
+            unless ( open TMP, ">imap.tmp" ) {
+                $self->log_( 0, "Cannot open temp file imap.tmp" );
+                next;
+            };
+
+            foreach ( @lines ) {
+                print TMP "$_\n";
+            }
+    		close TMP;
+
+            $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $bucket, "imap.tmp" );
+
+            $self->log_( 0, "Training on the message with UID $msg to bucket $bucket." );
+
+            unlink "imap.tmp";
+
+        }
+    }
+    # Again, reset folders__ hash.
+    %{$self->{folders__}} = ();
+
+    # And disable training mode so we won't do this again the next time service is called.
+    $self->config_( 'training_mode', 0 );
 }
 
 

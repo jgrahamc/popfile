@@ -6,7 +6,7 @@
 
     <TMPL_LOOP NAME="IMAP_loop_buckets">
 
-    <label class="configurationLabel"><!-- localize -->Mail for bucket <TMPL_VAR NAME="IMAP_bucket"> goes to folder</label><br />
+    <label class="configurationLabel"><!-- localize -->Mail for bucket <b><TMPL_VAR NAME="IMAP_bucket"></b> goes to folder</label><br />
     <select name="imap_folder_for_<TMPL_VAR NAME="IMAP_bucket">">
 
     <TMPL_UNLESS NAME="IMAP_mailbox_defined">
