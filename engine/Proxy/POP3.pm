@@ -432,7 +432,7 @@ sub child
                 echo_response( $self, $mail, $client, $command );
                 close $mail;
             } else {
-                tee( $self,  $client, "+OK goodbye" );
+                tee( $self,  $client, "+OK goodbye$eol" );
             }
             last;
         }
@@ -709,7 +709,7 @@ sub get_response
             tee( $self,  $client, $response );
         } else {
             # An error has occurred reading from the mail server
-            tee( $self,  $client, "-ERR no response from mail server" );
+            tee( $self,  $client, "-ERR no response from mail server$eol" );
             return "-ERR";
         }
     }
