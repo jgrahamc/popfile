@@ -30,7 +30,6 @@
                 <input type="checkbox" class="checkbox" name="purge_history" value="<TMPL_VAR NAME="Localize_History_Purge">" />
                 <TMPL_VAR NAME="Localize_History_Purge">
                 <input type="submit" class="submit" name="update_history_days" value="<TMPL_VAR NAME="Localize_Apply">" />
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
             <TMPL_IF NAME="Configuration_If_History_Days_Error">
 
@@ -63,7 +62,6 @@
 
                 </TMPL_LOOP>
                 <input type="submit" class="submit" name="update_fields" value="<TMPL_VAR NAME="Localize_Apply">" />
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
         </td>
     </tr>
 </table>
