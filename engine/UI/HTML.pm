@@ -1416,7 +1416,7 @@ sub corpus_page
     # Emails Classified panel
     $body .= "</form>\n<td class=\"stabColor01\" valign=\"top\" width=\"33%\" align=\"center\">\n" ;
     $body .= "<h2>$self->{language}{Bucket_EmailsClassifiedUpper}</h2>\n<p>\n" ;
-    $body .= "<table>\n<tr>\n<td><b>$self->{language}{Bucket}</b>\n" ;
+    $body .= "<table>\n<tr>\n<td align=\"left\"><b>$self->{language}{Bucket}</b>\n" ;
     $body .= "<td>&nbsp;\n<td><b>$self->{language}{Bucket_ClassificationCount}</b>\n";
 
     my %bar_values;
