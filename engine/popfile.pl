@@ -211,6 +211,8 @@ sub save_configuration
 sub remove_debug_files
 {
     my @debug_files = glob "popfile*.log";
+
+    calculate_today();
     
     foreach my $debug_file (@debug_files)
     {
@@ -237,6 +239,8 @@ sub remove_debug_files
 sub remove_mail_files
 {
     my @mail_files = glob "messages/popfile*.msg";
+
+    calculate_today();
     
     foreach my $mail_file (@mail_files)
     {
@@ -2487,6 +2491,19 @@ sub run_popfile
 
 # ---------------------------------------------------------------------------------------------
 #
+# calculate_today - set the global $today variable to the current day in seconds
+#
+# ---------------------------------------------------------------------------------------------
+sub calculate_today
+{
+    # Create the name of the debug file for the debug() function
+    $today = int( time / $seconds_per_day ) * $seconds_per_day;
+    $debug_filename = "popfile$today.log";
+    $mail_filename  = "popfile$today";
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # aborting    Called if we are going to be aborted or are being asked to abort our operation
 #         Sets the alive flag to 0 that will cause us to abort at the next convenient
 #         moment
@@ -2507,10 +2524,7 @@ $SIG{ABRT}  = \&aborting;
 $SIG{TERM}  = \&aborting;
 $SIG{INT}   = \&aborting;
 
-# Create the name of the debug file for the debug() function
-$today = int( time / $seconds_per_day ) * $seconds_per_day;
-$debug_filename = "popfile$today.log";
-$mail_filename  = "popfile$today";
+calculate_today();
 
 # Set up reasonable defaults for the configuration parameters.  These may be 
 # overwritten immediately when we read the configuration file
