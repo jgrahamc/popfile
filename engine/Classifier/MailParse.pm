@@ -685,7 +685,7 @@ sub update_tag
 
     my $original;
 
-    while ( $arg =~ s/[ \t]*((\w+)[ \t]*=[ \t]*(([\"\'])(.*?)\4|(\w+)($|([ \t>]))))// ) {
+    while ( $arg =~ s/^[ \t]*((\w+)[ \t]*=[ \t]*(([\"\'])(.*?)\4|([^ \t>]+)($|([ \t>]))))// ) {
         $original  = $1;
         $attribute = $2;
         $value     = $5 || $6;
@@ -882,6 +882,12 @@ sub update_tag
             if (defined($style->{'visibility'})) {
                 $self->update_pseudoword( 'html', "cssvisibility" . $style->{'visibility'}, $encoded, $original );
             }
+            
+            # CSS display
+            if (defined($style->{'display'})) {
+                $self->update_pseudoword( 'html', "cssdisplay" . $style->{'display'}, $encoded, $original );
+            }
+
 
             # CSS foreground coloring
 
