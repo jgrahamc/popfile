@@ -51,20 +51,44 @@ test_assert_equal( $c->global_config_( 'xpl' ), 1 );
 test_assert_equal( $c->global_config_( 'subject' ), 1 );
 test_assert_equal( $c->global_config_( 'msgdir' ), 'messages/' );
 
+
 # Check that the PID file gets created and then deleted and
 # contains the correct process ID
+
 $c->config_( 'piddir', '../tests/' );
 test_assert_equal( $c->start(), 1 );
-test_assert( ( -e 'popfile.pid' ) );
-open PIDFILE, '<popfile.pid';
-my $pid = <PIDFILE>;
-close PIDFILE;
-test_assert_equal( $pid, $$ );
+test_assert( $c->check_pid_() );
+test_assert_equal( $c->get_pid_(), $$ );
 open (STDERR, ">stdout.tmp");
-test_assert_equal( $c->start(), 0 );
+test_assert_equal( $c->start(), 1 );
+$c->stop();
+test_assert( !$c->check_pid_() );
+
+
+# disable logging
+
+$c->global_config_( 'debug', 0 );
+
+# Check instance coordination via PID file
+
+$c->start();
+$c->{pid_delay__} = 1;
+
+my $process = fork;
+
+if ($process != 0) {
+    #parent loop
+    test_assert_equal(  $c->start(), 0);
+    test_assert( !defined( $c->live_check_() ) );
+} elsif ($process == 0) {
+    #child loop
+    select(undef, undef, undef, $c->{pid_delay__});
+    $c->service();
+    exit(0);
+}
+
 close STDERR;
 $c->stop();
-test_assert( !( -e 'popfile.pid' ) );
 
 # Check that parameter upgrading works
 
