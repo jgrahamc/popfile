@@ -1617,8 +1617,8 @@ sub parse_line
             }
 
             # Decode \x??
-            if ( $self->{lang__} eq 'Nihongo' ) {
-                $line =~ s/\\x([A-F0-9]{2})/pack("C", hex($1))/eig;
+            if ( $self->{lang__} eq 'Nihongo' && !$self->{in_headers__} ) {
+                $line =~ s/\\x([8-9A-F][A-F0-9])/pack("C", hex($1))/eig;
             }
 
             if ( $self->{lang__} eq 'Nihongo' ) {
