@@ -65,13 +65,13 @@ test_assert( $b->start() );
 
 # Test the unclassifier_probability parameter
 
-test_assert_equal( $b->{unclassified__}, log(0.5) );
-$b->config_( 'unclassified_probability', 0.42 );
+test_assert_equal( $b->{unclassified__}, log(100) );
+$b->config_( 'unclassified_weight', 10 );
 test_assert( $b->start() );
-test_assert_equal( $b->{unclassified__}, log(0.42) );
-$b->config_( 'unclassified_probability', 0.5 );
+test_assert_equal( $b->{unclassified__}, log(10) );
+$b->config_( 'unclassified_weight', 5 );
 test_assert( $b->start() );
-test_assert_equal( $b->{unclassified__}, log(0.5) );
+test_assert_equal( $b->{unclassified__}, log(5) );
 
 # test the API functions
 
@@ -517,27 +517,27 @@ $b->{parser__}->{mangle__}->load_stopwords();
 
 # get_stopword_list
 
-my @stopwords = $b->get_stopword_list();
+my @stopwords = sort $b->get_stopword_list();
 test_assert_equal( $#stopwords, 1 );
-test_assert_equal( $stopwords[0], 'notthis' );
-test_assert_equal( $stopwords[1], 'andnotthat' );
+test_assert_equal( $stopwords[0], 'andnotthat' );
+test_assert_equal( $stopwords[1], 'notthis' );
 
 # add_stopword
 
 test_assert( $b->add_stopword( 'northat' ) );
-@stopwords = $b->get_stopword_list();
+@stopwords = sort $b->get_stopword_list();
 test_assert_equal( $#stopwords, 2 );
-test_assert_equal( $stopwords[0], 'northat' );
-test_assert_equal( $stopwords[1], 'notthis' );
-test_assert_equal( $stopwords[2], 'andnotthat' );
+test_assert_equal( $stopwords[0], 'andnotthat' );
+test_assert_equal( $stopwords[1], 'northat' );
+test_assert_equal( $stopwords[2], 'notthis' );
 
 # remove_stopword
 
 test_assert( $b->remove_stopword( 'northat' ) );
-@stopwords = $b->get_stopword_list();
+@stopwords = sort $b->get_stopword_list();
 test_assert_equal( $#stopwords, 1 );
-test_assert_equal( $stopwords[0], 'notthis' );
-test_assert_equal( $stopwords[1], 'andnotthat' );
+test_assert_equal( $stopwords[0], 'andnotthat' );
+test_assert_equal( $stopwords[1], 'notthis' );
 
 # Test history class file reading and writing
 
@@ -582,7 +582,7 @@ test_assert( !defined( $magnet ) );
 open FILE, ">messages/one.msg";
 print FILE "From: test\@test.com\n";
 print FILE "Subject: Your attention please\n\n";
-print FILE "This is the body\n.\n";
+print FILE "This is the body www.supersizewebhosting.com www.gamelink.com\n.\n";
 close FILE;
 
 # Four possibilities for echo_to_dot_ depending on whether we give

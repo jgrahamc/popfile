@@ -527,7 +527,7 @@ $sp2->forker( \&forker );
 $sp2->pipeready( \&pipeready );
 
 $sp2->initialize();
-$sp2->config_( 'port', 0 );
+$sp2->config_( 'port', -1 );
 
 open (STDERR, ">stdout.tmp");
 test_assert( !$sp2->start() );

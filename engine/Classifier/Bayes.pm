@@ -504,9 +504,11 @@ sub load_bucket_
         if ( defined( $first ) && ( $first =~ s/^__CORPUS__ __VERSION__ (\d+)// ) ) {
             if ( $1 != $self->{corpus_version__} )  {
                 print STDERR "Incompatible corpus version in $bucket\n";
+                close WORDS;
                 return 0;
             }
         } else {
+            close WORDS;
             return 0;
         }
 
@@ -518,12 +520,6 @@ sub load_bucket_
                 my $word  = $1;
                 my $value = $2;
                 if ( $value > 0 )  {
-
-                    # Here we do a simple "add one" smoothing on the data being
-                    # loaded
-
-                    $value += 1;
-
                     $self->{total__}{$bucket}        += $value;
                     $self->{unique__}{$bucket}       += 1;
                     set_value_( $self, $bucket, $word, $value );
@@ -741,7 +737,7 @@ sub classify
 
     my $certainty = ($c1-$c0 + 1) / 2;
 
-    if ( $certainty < 0.9 ) {
+    if ( $certainty < 0.4 ) {
         $class = 'unsure';
     }
 
@@ -763,15 +759,14 @@ sub classify
 
             foreach my $type ( keys %types ) {
 
-                if (defined $qm{$type})
-                {
+                if (defined $qm{$type}) {
                     $i += 1;
 
                     $self->{scores__} .= "<tr><td scope=\"col\">$type: ";
                     $self->{scores__} .= "<select name=\"text$i\" id=\"\">\n";
 
-                    foreach my $magnet ( 0 .. $#{$qm{$type}} ) {
-                        $self->{scores__} .= "<option>" . Classifier::MailParse::splitline(@{$qm{$type}}[$magnet], 0) . "</option>\n";
+                    foreach my $magnet ( @{$qm{$type}} ) {
+                        $self->{scores__} .= "<option>$magnet</option>\n";
                     }
                     $self->{scores__} .= "</select>\n";
                     $self->{scores__} .= "</td><td>";

@@ -207,7 +207,7 @@ $line = <FILE>;
 test_assert( defined( $line ) );
 test_assert( $line =~ /^$eol$/ );
 $line = <FILE>;
-test_assert_equal( $line, "somechars\n" );
+test_assert_equal( $line, "somechars$eol" );
 $line = <FILE>;
 test_assert( !defined( $line ) );
 close FILE;
@@ -222,7 +222,7 @@ $h2->logger( $l );
 
 $h2->initialize();
 $h2->name( 'simple' );
-$h2->config_( 'port', 0 );
+$h2->config_( 'port', -1 );
 
 open (STDERR, ">stdout.tmp");
 test_assert( !$h2->start() );

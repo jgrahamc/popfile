@@ -125,6 +125,8 @@ $c->stop();
 
 open FILE, "<popfile.cfg";
 my $line = <FILE>;
+test_assert_regexp( $line, 'config_piddir ../tests/' );
+$line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_debug 0' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_download_count 0' );
@@ -138,8 +140,6 @@ $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_xpl 1' );
 $line = <FILE>;
 test_assert_regexp( $line, 'GLOBAL_xtc 1' );
-$line = <FILE>;
-test_assert_regexp( $line, 'config_piddir ../tests/' );
 $line = <FILE>;
 test_assert_regexp( $line, 'logger_logdir ./' );
 $line = <FILE>;

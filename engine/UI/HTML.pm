@@ -90,16 +90,12 @@ sub new
     # sory_filter_history.  history_keys references the elements on history that are
     # in the current filter, sort or search set.
     #
-    # history_invalid is set to cause the history cache to be reloaded by a call to
-    # load_history_cache__, and is set by a call to invalidate_history_cache
-    #
     # If new items have been added to the history the set need_resort__ to 1 to ensure
     # that the next time a history page is being displayed the appropriate sort, search
     # and filter is applied
 
     $self->{history__}         = {};
     $self->{history_keys__}    = ();
-    $self->{history_invalid__} = 0;
     $self->{need_resort__}     = 0;
 
     # Hash containing pre-cached messages loaded upon receipt of NEWFL message. Moved to
@@ -262,11 +258,8 @@ sub start
     # to come after loading the language since we might need History_NoFrom
     # or History_NoSubject in while loading the cache
 
-    $self->invalidate_history_cache();
     $self->load_disk_cache__();
     $self->load_history_cache__();
-
-    $self->remove_mail_files();
 
     return $self->SUPER::start();
 }
@@ -283,7 +276,6 @@ sub stop
     my ( $self ) = @_;
 
     $self->copy_pre_cache__();
-
     $self->save_disk_cache__();
 }
 
@@ -412,8 +404,6 @@ sub url_handler__
                 if ( $url =~ s/\?(.*)// )  {
                     $self->parse_form_( $1 );
                 }
-            } else {
-                $url = '/';
             }
         } else {
             password_page( $self, $client, 1, '/' );
@@ -465,7 +455,7 @@ sub url_handler__
         my $found = 0;
         my $file = $self->{form_}{view};
 
-        $self->copy_pre_cache__() if ($self->{need_resort__});
+        $self->copy_pre_cache__();
 
         foreach my $akey ( keys %{ $self->{history__} } ) {
             if ($akey eq $file) {
@@ -480,12 +470,7 @@ sub url_handler__
         $self->{form_}{search}    = '';
         $self->{form_}{setsearch} = 1;
 
-        # Force a history_reload if we did not find this file in the history cache
-        # but we do find it on disk using perl's -e file test operator (returns
-        # true if the file exists).
-
-        $self->invalidate_history_cache() if ( !$found );
-        if ( -e ( $self->global_config_( 'msgdir' ) . $file ) ) {
+        if ( $found ) {
             $self->http_redirect_( $client, "/view?session=$self->{session_key__}&view=$self->{form_}{view}" );
         } else {
             $self->http_redirect_( $client, "/history" );
@@ -2267,8 +2252,6 @@ sub corpus_page
             } else {
                 $body .= sprintf( $self->{language__}{Bucket_DoesNotAppear}, $word );
             }
-        } else {
-            $body .= "<div class=\"error01\">$self->{language__}{Bucket_Error4}</div>";
         }
 
         $body .= "\n</blockquote>\n";
@@ -2304,21 +2287,6 @@ sub compare_mf
     } else {
         return ( $bd <=> $ad );
     }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# invalidate_history_cache
-#
-# Called to notify the module that new files have been added to the history cache on disk
-# and the cache needs to be reloaded.
-#
-# ---------------------------------------------------------------------------------------------
-sub invalidate_history_cache
-{
-    my ( $self ) = @_;
-
-    $self->{history_invalid__} = 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2582,7 +2550,6 @@ sub load_history_cache__
         }
     }
 
-    $self->{history_invalid__} = 0;
     $self->{need_resort__}     = 0;
     $self->sort_filter_history( '', '', '' );
 
@@ -2685,7 +2652,7 @@ sub new_history_file__
         $self->{need_resort__} = 1;
     }
 
-    $self->{history__}{$file}{index}         = $index;
+    $self->{$cache}{$file}{index}         = $index;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -3101,12 +3068,10 @@ sub history_page
         # in the cache.  Note that there is no need to invalidate the history cache since
         # we are in control of deleting messages
 
-        if ( defined($self->{form_}{remove_array}) ) {
-            for my $i ( 0 .. $#{$self->{form_}{remove_array}} ) {
-                $self->history_delete_file( $self->{history_keys__}[$self->{form_}{remove_array}[$i] - 1], 0);
-            }
-        } elsif ( defined($self->{form_}{remove}) ) {
-            $self->history_delete_file( $self->{history_keys__}[$self->{form_}{remove} - 1], 0);
+        for my $i ( keys %{$self->{form_}} ) {
+	    if ( $i =~ /^remove_(\d+)$/ ) {
+                $self->history_delete_file( $self->{history_keys__}[$1 - 1], 0);
+	    }
         }
     }
 
@@ -3135,7 +3100,6 @@ sub history_page
     # any of the sort, search or filter options have changed they must be
     # applied.  The watch word here is to avoid doing work
 
-    $self->load_history_cache__() if ( $self->{history_invalid__} == 1 );
     $self->sort_filter_history( $self->{form_}{filter}, # PROFILE BLOCK START
                                 $self->{form_}{search},
                                 $self->{form_}{sort} ) if ( ( defined( $self->{form_}{setfilter}     ) ) ||
@@ -3158,7 +3122,6 @@ sub history_page
     my $body    = '';
 
     if ( !$self->history_cache_empty() )  {
-        my $highlight_message = '';
         my $start_message = 0;
 
         $start_message = $self->{form_}{start_message} if ( ( defined($self->{form_}{start_message}) ) && ($self->{form_}{start_message} > 0 ) );
@@ -3247,13 +3210,8 @@ sub history_page
             my $index         = $self->{history__}{$mail_file}{index} + 1;
 
             $body .= "<tr";
-            if ( ( ( defined($self->{form_}{file}) && ( $self->{form_}{file} eq $mail_file ) ) ) ||  # PROFILE BLOCK START
-                 ( $highlight_message eq $mail_file ) ) {                                            # PROFILE BLOCK STOP
-                $body .= " class=\"rowHighlighted\"";
-            } else {
-                $body .= " class=\"";
-                $body .= $stripe?"rowEven\"":"rowOdd\"";
-            }
+            $body .= " class=\"";
+            $body .= $stripe?"rowEven\"":"rowOdd\"";
 
             $stripe = 1 - $stripe;
 
@@ -3269,11 +3227,7 @@ sub history_page
                 $body .= sprintf( $self->{language__}{History_Already}, ($self->{classifier__}->get_bucket_color($bucket) || ''), ($bucket || '') );
                 $body .= " <input type=\"submit\" class=\"undoButton\" name=\"undo_$i\" value=\"$self->{language__}{Undo}\">\n";
             } else {
-                if ( !defined($self->{classifier__}->get_bucket_color($bucket)))  {
-                    $body .= "$bucket</td>\n<td>";
-                } else {
-                    $body .= "<a href=\"buckets?session=$self->{session_key__}&showbucket=$bucket\"><font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></a></td>\n<td>";
-                }
+                $body .= "<a href=\"buckets?session=$self->{session_key__}&showbucket=$bucket\"><font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></a></td>\n<td>";
 
                 if ( $self->{history__}{$mail_file}{magnet} eq '' )  {
                     $body .= "\n<select name=\"$i\">\n";
@@ -3293,7 +3247,7 @@ sub history_page
 
             $body .= "</td>\n<td>\n";
             $body .= "<label class=\"removeLabel\" for=\"remove_" . ( $i+1 ) . "\">$self->{language__}{Remove}</label>\n";
-            $body .= "<input type=\"checkbox\" id=\"remove_" . ( $i+1 ) . "\" class=\"checkbox\" name=\"remove\" value=\"" . ( $i+1 ) . "\" />\n";
+            $body .= "<input type=\"checkbox\" id=\"remove_" . ( $i+1 ) . "\" class=\"checkbox\" name=\"remove_" . ($i+1) . "\"/>\n";
             $body .= "</td>\n</tr>\n";
 
 
@@ -3345,16 +3299,6 @@ sub view_page
 {
     my ( $self, $client ) = @_;
 
-    $self->load_history_cache__() if ( $self->{history_invalid__} == 1 );
-
-    if ( $self->{need_resort__} == 1 ) {
-
-        $self->copy_pre_cache__();
-        $self->sort_filter_history( (defined($self->{form_}{filter})?$self->{form_}{filter}:''),
-                                    (defined($self->{form_}{search})?$self->{form_}{search}:''),
-                                    (defined($self->{form_}{sort})?$self->{form_}{sort}:'') );
-    }
-
     my $mail_file     = $self->{form_}{view};
     my $start_message = $self->{form_}{start_message} || 0;
     my $reclassified  = $self->{history__}{$mail_file}{reclassified};
@@ -3367,33 +3311,15 @@ sub view_page
     $self->{form_}{filter} = '' if ( !defined( $self->{form_}{filter} ) );
 
     my $index = -1;
-    foreach my $i ( $start_message  .. $start_message + $page_size - 1) {
+
+   foreach my $i ( 0 .. $self->history_size()-1 ) {
         if ( $self->{history_keys__}[$i] eq $mail_file ) {
-            $index = $i;
+            use integer;
+            $index         = $i;
+            $start_message = ($i / $page_size ) * $page_size;
+            $self->{form_}{start_message} = $start_message;
             last;
         }
-    }
-
-    # If we fail to find the index of the message we are looking for then
-    # do a full search of the history for it
-
-    if ( $index == -1 ) {
-       foreach my $i ( 0 .. $self->history_size()-1 ) {
-            if ( $self->{history_keys__}[$i] eq $mail_file ) {
-                use integer;
-                $index         = $i;
-                $start_message = ($i / $page_size ) * $page_size;
-                $self->{form_}{start_message} = $start_message;
-                last;
-            }
-        }
-    }
-
-    # If we still can't find the message then return to the history page
-
-    if ( $index == -1 ) {
-        $self->log_("view page cache miss");
-        return $self->http_redirect_( $client, '/history' );
     }
 
     my $body = "<table width=\"100%\" summary=\"\">\n<tr>\n<td align=\"left\">\n";
@@ -3695,6 +3621,7 @@ sub load_language
 }
 
 # ---------------------------------------------------------------------------------------------
+#
 # copy_pre_cache__
 #
 # Copies the history_pre_cache into the history
@@ -3705,11 +3632,19 @@ sub copy_pre_cache__
     my ($self) = @_;
 
     # Copy the history pre-cache over AFTER any possibly index-based remove operations are complete
-    foreach my $file ( keys( %{$self->{history_pre_cache__}} ) ) {
-        $self->{history__}{$file} = \%{$self->{history_pre_cache__}{$file}};
+
+    my $index = $self->history_size() + 1;
+    my $added = 0;
+    foreach my $file (sort compare_mf keys %{$self->{history_pre_cache__}} ) {
+        $self->{history__}{$file} = $self->{history_pre_cache__}{$file};
+        $self->{history__}{$file}{index} = $index;
+        $index += 1;
+        $added = 1;
         delete $self->{history_pre_cache__}{$file};
     }
+
     $self->{history_pre_cache__} = {};
+    $self->sort_filter_history( '', '', '' ) if ( $added );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -3727,7 +3662,7 @@ sub remove_mail_files
     opendir MESSAGES, $self->global_config_( 'msgdir' );
 
     while ( my $mail_file = readdir MESSAGES ) {
-        if ( $mail_file =~ /popfile\d+=\d+\.msg$/ ) {
+        if ( $mail_file =~ /popfile(\d+)=\d+\.msg$/ ) {
             my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat( $self->global_config_( 'msgdir' ) . $mail_file);
 
             if ( $ctime < (time - $self->config_( 'history_days' ) * $seconds_per_day) )  {
@@ -3783,7 +3718,7 @@ sub history_delete_file
 
         my ($reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_read_class( $mail_file );
 
-        if ( ( $bucket ne 'unclassified' ) && ( $bucket ne 'unknown class' ) ) {
+        if ( ( $bucket ne 'unclassified' ) && ( $bucket ne 'unknown class' ) && ( $bucket ne 'unsure' ) ) {
             $path .= "\/" . $bucket;
             mkdir( $path );
 
@@ -3883,8 +3818,7 @@ sub print_form_fields_
         }
     }
 
-    return $formstring if ($count > 0);
-    return '';
+    return ($count>0)?$formstring:'';
 }
 
 # ---------------------------------------------------------------------------------------------

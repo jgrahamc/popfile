@@ -36,6 +36,7 @@
 # CODE/ENDCODE      Arbitrary code that should be executed
 # INPUTIS a b       Assert that form item a has value b
 # SETINPUT a b      Sets the form item a to value b
+# SETINPUTN a b c   Sets the bth input named a to c
 # SUBMIT a          Finds the form with input a and submits it
 # SETSUBMIT a b     Just like doing SETINPUT a b followed by SUBMIT a
 # CONFIGIS a b      Verify that config item a has value b
@@ -252,7 +253,19 @@ MATCH <a href="/history?session=$sk&amp;setsort=bucket"><em class="historyLabelS
 NOTMATCH <a href="buckets?session=$sk&showbucket=personal"><font color="green">personal</font></a>
 GET /history?session=$sk&amp;setsort=
 
-# TODO Check reclassification
+# Check reclassification
+
+GET /history
+MATCH Testing Refresh
+SETINPUT 0 spam
+CLICK change
+MATCH Changed to <font color="blue">spam</font>
+MATCH Reclassified as <font color="blue">spam</font>
+
+# Check undo
+
+CLICK undo_0
+MATCH Changed to <font color="green">personal</font>
 
 # Check click through from bucket name
 
@@ -270,9 +283,9 @@ MATCH Testing Refresh
 MATCH John
 MATCH <font color=\"green\">personal</font>
 MATCH Scores
-MATCH 0.769209
-MATCH 0.230763
-MATCH 2.829186e-05
+MATCH 0. [28 zeroes] 265393
+MATCH 0. [29 zeroes] 796179
+MATCH 0. [33 zeroes] 976128
 MATCH <font color="red">here</font>
 MATCH 0.0017
 MATCH 0.0034
@@ -288,9 +301,9 @@ MATCH Testing Refresh
 MATCH John
 MATCH <font color=\"green\">personal</font>
 MATCH Scores
-MATCH 0.769209
-MATCH 0.230763
-MATCH 2.829186e-05
+MATCH 0. [28 zeroes] 265393
+MATCH 0. [29 zeroes] 796179
+MATCH 0. [33 zeroes] 976128
 MATCH <font color="red">here</font>
 MATCH 0.0017
 MATCH 0.0034
@@ -302,18 +315,56 @@ GET /jump_to_message?view=popfile10001=1.msg
 NOTMATCH Single Message View
 MATCH Recent Messages
 
-# TODO quick magnets
-# TODO reclassify from single message view
+# Quick Magnets
 
-# TODO Check delete one message
+GET /jump_to_message?view=popfile10000=1.msg
+MATCH Single Message View
+MATCH <option>Testing</option>
+MATCH <option>Refresh</option>
+MATCH <option>John</option>
+SETINPUT text2 John
+SETINPUT bucket2 other
+CLICK create
+MATCH Current Magnets
+MATCH <input type="text" name="text1" value="John" size="50" />
+SETINPUT remove1 on
+CLICK delete
 
+# Reclassify from single message view
+
+GET /view?view=popfile10000=1.msg&amp;start_message=0&amp;session=$sk
+MATCH Single Message View
 MATCH Testing Refresh
-GET /history
-#SETINPUT remove on
-#CLICK deletemessage
-#NOTMATCH Testing Refresh
+SETINPUT 0 spam
+CLICK change
+MATCH Changed to <font color="blue">spam</font>
+MATCH Reclassified as <font color="blue">spam</font>
 
-# TODO Check delete some messages
+# Undo on single message view
+
+GET /view?view=popfile10000=1.msg&amp;start_message=0&amp;session=$sk
+MATCH Single Message View
+CLICK undo_0
+MATCH Changed to <font color="green">personal</font>
+
+# Check delete one message
+
+GET /history
+MATCH Testing Refresh
+SETINPUT remove_1 on
+CLICK deletemessage
+MATCH Recent Messages
+NOTMATCH Testing Refresh
+
+# Check delete some messages
+
+MATCH test for various HTML parts
+MATCH Enlarge your package Doctor ApprovedNHOB
+SETINPUT remove_4 on
+SETINPUT remove_5 on
+CLICK deletemessage
+NOTMATCH test for various HTML parts
+NOTMATCH Enlarge your package Doctor ApprovedNHOB
 
 # Check delete page of messages
 
@@ -606,12 +657,6 @@ SETSUBMIT ui_port 0
 MATCH The user interface port must be a number between 1 and 65535
 INPUTIS   ui_port 8081
 
-# TODO Check XMLRPC port (write when doing TestXMLRPC)
-# TODO Check SMTP port (write when doing TestSMTP)
-# TODO Check NNTP port (write when doing TestNNTP)
-# TODO Check NNTP separator (write when doing TestNNTP)
-# TODO Check Windows icon
-
 # Security Page
 
 GET /security
@@ -691,11 +736,6 @@ SETSUBMIT password
 INPUTIS password
 CONFIGIS html_password
 MATCH Updated password to 
-
-# TODO Check SMTP stealth (write when doing TestSMTP)
-# TODO Check SMTP chain options (write when doing TestSMTP)
-# TODO Check NNTP stealth (write when doing TestNNTP)
-# TODO Check XMLRPC stealth (write when doing TestXMLRPC)
 
 # Advanced Page
 
@@ -883,6 +923,19 @@ MATCH <a class="wordListLink" href="/buckets?session=$sk&amp;lookup=Lookup&amp;w
 CLICK clearbucket
 MATCH <td width="1%">&nbsp;</td><td align="right">0</td><td width="1%">&nbsp;</td>
 
+# Test removal of history files that are out of date (old and new style)
+
+CODE
+open TEMP, ">messages/popfile1_1.msg";
+print TEMP, "1\n";
+close TEMP;
+open TEMP, ">messages/popfile1=1.msg";
+print TEMP, "1\n";
+close TEMP;
+ENDCODE
+
+SENDMSG TICKD dummy
+
 # Check the login message
 
 SENDMSG LOGIN iloggedin
@@ -894,7 +947,50 @@ MATCH - iloggedin)
 GET /history?session=123456
 MATCH POPFile Session Expired
 
-# TODO Get ICO, GIF, CSS, PNG, LOG and HTML file
+# Get ICO, GIF, CSS, PNG, LOG and HTML file
+
+CODE
+open TEMP, ">temp.ico";
+print TEMP "10 GOTO 10\n";
+close TEMP;
+ENDCODE
+
+GET /temp.ico
+MATCH 10 GOTO 10
+
+CODE
+rename 'temp.ico', 'temp.gif';
+ENDCODE
+
+GET /temp.gif
+MATCH 10 GOTO 10
+
+CODE
+rename 'temp.gif', 'temp.png';
+ENDCODE
+
+GET /temp.png
+MATCH 10 GOTO 10
+
+CODE
+rename 'temp.png', 'popfile1.log';
+ENDCODE
+
+GET /popfile1.log?session=$sk
+MATCH 10 GOTO 10
+
+CODE
+mkdir 'manual';
+open TEMP, ">manual/temp.html";
+print TEMP "10 GOTO 10\n";
+close TEMP;
+ENDCODE
+
+GET /manual/temp.html
+MATCH 10 GOTO 10
+
+GET /skins/default.css
+MATCH .menuSelected
 
 # Get a page that does not exist
 
@@ -917,6 +1013,15 @@ INPUTIS password
 CONFIGIS html_password
 SETSUBMIT password secret
 GET /advanced?session=123456
+MATCH Enter password:
+SETSUBMIT password wrong
+MATCH Enter password:
+MATCH Incorrect password
+GET /?session=123456
+MATCH Enter password:
+SETSUBMIT password secret
+MATCH Recent Messages
+GET /advanced?session=123456&dummy=foo&dummy=bar
 MATCH Enter password:
 SETSUBMIT password secret
 MATCH All POPFile Parameters

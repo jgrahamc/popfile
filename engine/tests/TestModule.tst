@@ -88,6 +88,7 @@ test_assert_equal( $messages[0][2], $c );
 my $l = new POPFile::Logger;
 $m->logger( $l );
 $l->configuration( $c );
+$l->initialize();
 $l->calculate_today__();
 $m->global_config_( 'debug', 1 );
 

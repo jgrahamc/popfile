@@ -63,10 +63,10 @@ my @forms;
 
 sub find_form
 {
-    my ( $name ) = @_;
+    my ( $name, $nth ) = @_;
 
     foreach my $form (@forms) {
-        my $input = $form->find_input( $name );
+        my $input = $form->find_input( $name, undef, $nth );
 
         if ( defined( $input ) ) {
             return ( $form, $input );
@@ -99,8 +99,8 @@ sub form_submit
 
 sub form_input
 {
-    my ( $name, $value ) = @_;
-    my ( $form, $input ) = find_form( $name );
+    my ( $name, $value, $nth ) = @_;
+    my ( $form, $input ) = find_form( $name, $nth );
 
     if ( defined( $form ) ) {
         $input->value( $value ) if defined( $value );
@@ -216,6 +216,45 @@ if ( $pid == 0 ) {
 
             if ( $command =~ /^__QUIT/ ) {
                 $h->stop();
+
+                # Test the history disk caching function
+
+                open TEMP, ">messages/popfile1=1.msg";
+                print TEMP "From: John\n\nBody\n";
+                close TEMP;
+
+                $h->start();
+                $h->stop();
+
+                $h->start();
+                $h->stop();
+
+                unlink( 'messages/popfile1=1.msg' );
+
+                $h->start();
+                $h->stop();
+
+                open TEMP, ">messages/popfile1=1.msg";
+                print TEMP "From: John\n\nBody\n";
+                close TEMP;
+                open TEMP, ">messages/popfile1=1.cls";
+                print TEMP "spam\n";
+                close TEMP;
+                open TEMP, ">messages/popfile1_1.msg";
+                print TEMP "From: John\n\nBody\n";
+                close TEMP;
+
+                $h->config_( 'archive', 1 );
+                $h->config_( 'archive_dir', 'archive' );
+                $h->config_( 'archive_classes', 1 );
+
+                `date --set='3 days'`;
+                $h->remove_mail_files();
+                `date --set='3 days ago'`;
+                test_assert( !( -e 'messages/popfile1=1.msg' ) );
+                test_assert( !( -e 'messages/popfile1_1.msg' ) );
+                test_assert( -e 'archive/spam/0/popfile1=1.msg' );
+
                 print $uwriter "OK\n";
                 last;
 	    }
@@ -312,9 +351,16 @@ if ( $pid == 0 ) {
             $request = $form->click( $name ) if ( defined( $form ) );
             if ( defined( $request ) ) {
                 my $response = $ua->request( $request );
-                $content = $response->content;
+                if ( $response->code == 302 ) {
+                    $content = get(url("http://127.0.0.1:$port" . $response->headers->header('Location')));
+		} else {
+                    test_assert_equal( $response->code, 200, "From script line $line_number" );
+                    $content = $response->content;
+                }
                 @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
-	    }
+	    } else {
+                test_assert( 0, "Failed to create request form at script line $line_number" );
+            }
             next;
 	}
 
@@ -376,6 +422,13 @@ if ( $pid == 0 ) {
             my ( $name, $expected ) = ( $1, $2 );
             $expected = '' if ( !defined( $expected ) );
             test_assert_equal( form_input( $name ), $expected, "From script line $line_number" );
+            next;
+	}
+
+        if ( $line =~ /^SETINPUTN +([^ ]+) +(\d+) ?(.+)?$/ ) {
+            my ( $name, $nth, $value ) = ( $1, $2, $3 );
+            $value = '' if ( !defined( $value ) );
+            form_input( $name, $value, $nth );
             next;
 	}
 
@@ -449,6 +502,10 @@ if ( $pid == 0 ) {
             eval( $block );
             next;
         }
+
+        if ( $line =~ /[^ \t\r\n]/ ) {
+            test_assert( 0, "Don't understand line $line_number" );
+	}
     }
 
     close SCRIPT;
