@@ -47,6 +47,9 @@
 # (the 'PFI_LANG_CBP_IO_INTRO' custom page string which is listed under the heading
 # 'Custom Page - POPFile Classification Bucket Creation' includes some examples)
 #--------------------------------------------------------------------------
+# Some strings will be customised at run-time using data held in Global User Variables.
+# These variables will have names which start with '$G_', e.g. $G_PLS_FIELD_1
+#--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
   !verbose 3
@@ -277,6 +280,10 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      " ‰’Ì» „·›«  «·”„«  «·≈÷«›Ì…..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      " ‰’Ì» „·›«  «··€«  ≈÷«›Ì…..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     " ‰’Ì» „·›«  XMLRPC..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_REGSET     "Updating registry settings and environment variables..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SQLBACKUP  "Backing up the old SQLite database..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FINDCORPUS "Looking for existing flat-file or BerkeleyDB corpus..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_MAKEBAT    "Generating the 'pfi-run.bat' batch file..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "≈÷€ÿ «· «·Ì ··„ «»⁄…"
 
 ; Installation Log Messages
@@ -290,9 +297,9 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3           "≈÷€ÿ '‰⁄„' · ÕœÌÀ «·„·› (”Ì „ Õ›Ÿ «·„·› «·”«»ﬁ »≈”„"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4           "√÷€ÿ '·«' · —ﬂ «·„·› «·”«»ﬁ (”Ì „ Õ›Ÿ «·„·› «·ÃœÌœ »≈”„"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "·«  ÊÃœ «·≈„ﬂ«‰Ì… ·≈€·«ﬁ POPFile »‘ﬂ·  ·ﬁ«∆Ì."
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "«·—Ã«¡ ≈€·«ﬁ POPFile »‘ﬂ· ÌœÊÌ «·¬‰."
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3          "⁄‰œ„« Ì „ ≈€·«ﬁ POPFile° ≈÷€ÿ '„Ê«›ﬁ' ··„ «»⁄…."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1          "·«  ÊÃœ «·≈„ﬂ«‰Ì… ·≈€·«ﬁ $G_PLS_FIELD_1 »‘ﬂ·  ·ﬁ«∆Ì."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2          "«·—Ã«¡ ≈€·«ﬁ $G_PLS_FIELD_1 »‘ﬂ· ÌœÊÌ «·¬‰."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3          "⁄‰œ„« Ì „ ≈€·«ﬁ $G_PLS_FIELD_1° ≈÷€ÿ '„Ê«›ﬁ' ··„ «»⁄…."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCORPUS_1           " „ «·ﬂ‘› ⁄‰ Œ·· √À‰«¡ ﬁÌ«„ «·„‰’¯» »⁄„· ‰”Œ… ≈Õ Ì«ÿÌ… „‰ «·„œÊ¯‰… «·ﬁœÌ„…."
 
@@ -492,7 +499,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "‘€¯· POPFile (›Ì ‰«›–…)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "‘€¯· POPFile ›Ì «·Œ·›Ì… (»œÊ‰ ≈ŸÂ«— ‰«›–…)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOICON     "Run POPFile (do not show system tray icon)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Run POPFile with system tray icon (default setting)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_TRAYICON   "Run POPFile with system tray icon"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "»⁄œ  ‘€Ì· POPFile° Ì„ﬂ‰ ⁄—÷ 'Ê«ÃÂ… «·„” Œœ„' ⁄‰ ÿ—Ìﬁ"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(√) ÷€ÿ „“œÊÃ ⁄·Ï √ÌﬁÊ‰… POPFile ›Ì ‘—Ìÿ «·„Â«„°  √Ê"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(») ≈” ⁄„«· «»œ√ --> »—«„Ã --> POPFile --> POPFile User Interface."
@@ -536,6 +543,10 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_PERL         "Õ–› „·›«  ‰”Œ… Perl «·„’€—…..."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTLOOK      "≈⁄«œ… ≈⁄œ«œ Outlook..."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EUDORA       "≈⁄«œ… ≈⁄œ«œ Eudora..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_DBMSGDIR     "Deleting corpus and 'Recent Messages' directory..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EXESTATUS    "Checking program status..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CONFIG       "Deleting configuration data..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_REGISTRY     "Deleting POPFile registry entries..."
 
 ; Uninstall Log Messages
 
@@ -572,6 +583,8 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Â·  —Ìœ Õ–› ﬂ· «·„·›«  ›Ì „Ã·œ POPFileø$\r$\n$\r$\n(≈–« ﬂ«‰ Â‰«ﬂ √‘Ì«¡  Õ «ÃÂ«° ≈÷€ÿ ·«)"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Â·  —Ìœ Õ–› ﬂ· «·„·›«  ›Ì „Ã·œ '„⁄·Ê„«  «·„” Œœ„' «·Œ«’ »‹ˆPOPFileø$\r$\n$\r$\n(≈–« ﬂ«‰ Â‰«ﬂ √‘Ì«¡  Õ «ÃÂ«° ≈÷€ÿ ·«)"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Do you want to remove all files in your 'Recent Messages' directory?"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "„·«ÕŸ…"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "·„ Ìﬂ‰ »«·≈„ﬂ«‰ Õ–›Â."
