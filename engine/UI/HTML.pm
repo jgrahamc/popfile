@@ -2607,6 +2607,9 @@ sub history_page
             $from =~ s/\"(.*)\"/$1/g;
             $subject =~ s/\"(.*)\"/$1/g;
 
+			$from    = $self->{classifier}->{parser}->decode_string( $from );
+			$subject = $self->{classifier}->{parser}->decode_string( $subject );
+
             $short_from    = $from;
             $short_subject = $subject;
 
@@ -3148,7 +3151,6 @@ sub calculate_today
     $self->{today} = int( time / $seconds_per_day ) * $seconds_per_day;
     $self->{mail_filename}  = "popfile$self->{today}";
 }
-
 
 # ---------------------------------------------------------------------------------------------
 #

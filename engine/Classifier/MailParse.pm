@@ -833,12 +833,12 @@ sub parse_stream
                         if ( $header =~ /^From/i )  {
                             $encoding     = '';
                             $self->{content_type} = '';
-                            $self->{from} = $argument if ( $self->{from} eq '' ) ;
+                            $self->{from} = $self->decode_string( $argument ) if ( $self->{from} eq '' ) ;
                             $prefix = 'from';
                         }
 
                         $prefix = 'to' if ( $header =~ /^To/i );
-                        $self->{to} = $argument if ( ( $header =~ /^To/i ) && ( $self->{to} eq '' ) );
+                        $self->{to} = $self->decode_string( $argument ) if ( ( $header =~ /^To/i ) && ( $self->{to} eq '' ) );
                         
                         while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))>// )  {
                             update_word($self, $1, 0, ';', '&',$prefix);
@@ -854,7 +854,7 @@ sub parse_stream
                         next;
                     }
     
-                    $self->{subject} = $argument if ( ( $header =~ /^Subject/i ) && ( $self->{subject} eq '' ) );
+                    $self->{subject} = $self->decode_string( $argument ) if ( ( $header =~ /^Subject/i ) && ( $self->{subject} eq '' ) );
 
                     if ( $header =~ /^Subject/i ) {
                         $prefix = 'subject';
@@ -1071,5 +1071,41 @@ sub clear_out_base64
     
     return $colorized;
 }
+
+# ---------------------------------------------------------------------------------------------
+#
+# decode_string - Decode MIME encoded strings used in the header lines in email messages
+#
+# $mystring     - The string that neeeds decode
+#
+# Return the decoded string, this routine recognizes lines of the form
+#
+# =?charset?[BQ]?text?=
+# 
+# A B indicates base64 encoding, a Q indicates quoted printable encoding
+# ---------------------------------------------------------------------------------------------
+sub decode_string
+{
+    # I choose not to use "$mystring = MIME::Base64::decode( $1 );" because some spam mails
+    # have subjects like: "Subject: adjpwpekm =?ISO-8859-1?Q?=B2=E1=A4=D1=AB=C7?= dopdalnfjpw".
+    # Therefore, it will be better to store the decoded text in a temporary variable and substitute
+    # the original string with it later. Thus, this subroutine returns the real decoded result.
+
+    my ( $self, $mystring ) = @_;
+    my $decode_it = '';
+
+    if ( $mystring =~ /=\?[\w-]+\?B\?(.*)\?=/i ) {
+        $decode_it = decode_base64( $1 );
+        $mystring =~ s/=\?[\w-]+\?B\?(.*)\?=/$decode_it/i;
+    } else {
+		if ( $mystring =~ /=\?[\w-]+\?Q\?(.*)\?=/i ) {
+			$decode_it = decode_qp( $1 );
+			$mystring =~ s/=\?[\w-]+\?Q\?(.*)\?=/$decode_it/i;
+		}
+	}
+	
+	return $mystring;
+}
+
 
 1;
