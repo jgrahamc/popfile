@@ -307,3 +307,7 @@ span.configWidgetState {
 span.securityWidgetState {
 	font-weight: bold;
 }
+
+tr.rowBoundary {
+  background-color: #cccc99;
+}

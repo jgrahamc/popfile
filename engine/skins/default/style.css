@@ -116,6 +116,10 @@ tr.rowBoundary {
   border: 3px solid #CCCC99;
 }
 
+tr.rowBoundary {
+  background-color: #CCCC99;
+}
+
 /*********************************************************/
 /* Graphics */
 
@@ -230,4 +234,3 @@ table.historyWidgetsBottom {
 .advancedWidgets {
   margin-top: 1em;
 }
-

@@ -1,267 +1,246 @@
-.content
-  {
+.content {
   font-size: 8pt;
   font-weight : normal;
-  }
+}
 
-.content th
-  {
+.content th {
   font-size: 8pt;
   font-weight : normal;
-  }
+}
 
-.footer
-  {
+.footer {
   font-size: 8pt;
   font-weight : normal;
-  }
+}
 
-
-.main
-  {
+.main {
   font-size: 8pt;
   font-weight: bold;
-  }
+}
 
-.menu
-  {
+.menu {
   width: 100%;
-  }
+}
 
-.menuSelected
-  {
+.menuSelected {
   background-color: #cccc99;
   color: black;
   width: 14%;
-  }
+}
 
-.menuSpacer
-  {
+.menuSpacer {
   width: 1px;
-  }
+}
 
-.menuStandard
-  {
+.menuStandard {
   background-color: #ededca;
   color: black;
   width: 14%;
-  }
+}
 
-.rowEven
-  {
+.rowEven {
   background-color: #ededca;
   font-size: 8pt;
   font-weight: normal;
   color: black;
-  }
+}
 
-.rowOdd
-  {
+.rowOdd {
   background-color: #dfdfaf;
   font-size: 8pt;
   font-weight: normal;
   color: black;
-  }
+}
 
-.shell, .shellTop
-  {
+.shell, .shellTop {
   background-color: #ededca;
   border: 3px #cccc99 solid;
   font-size: 8pt;
   font-weight: normal;
   color: black;
-  }
+}
 
-a.dash:link
-  {
+a.dash:link {
   font-size: 8pt;
   font-weight: normal;
-  }
+}
 
-a.dash:visited
-  {
+a.dash:visited {
   font-size: 8pt;
   font-weight: normal;
-  }
+}
 
-body
-  {
+body {
   font-size: 8pt;
   font-weight: normal;
    font-family: sans-serif;
 }
 
-h2
-  {
+h2 {
   font-size: 8pt;
   font-weight: bold;
-  }
+}
 
-input
-  {
+input {
   font-size: 8pt;
   font-weight: normal;
-  }
+}
 
-select
-  {
+select {
   font-size: 8pt;
   font-weight: normal;
-  }
+}
 
-.submit
-  {
+.submit {
   font-size: 8pt;
   font-weight: normal;
-  }
+}
 
-td
-  {
+td {
   font-size: 8pt;
   font-weight: normal;
-  }
+}
 
-tr
-  {
+tr {
   font-size: 8pt;
   font-weight: normal;
-  }
+}
 
 table.settingsTable {
-	border: 1px solid Black;
+  border: 1px solid #cccc99;
 }
 
 table.openMessageTable, table.lookupResultsTable {
-	border: 3px solid Black;
+  border: 3px solid #cccc99;
 }
 
 td.settingsPanel {
-	border: 1px solid Black;
+  border: 1px solid #cccc99;
 }
 
 td.naked {
-	padding: 0px; 
-	margin: 0px; 
-	border: none
+  padding: 0px; 
+  margin: 0px; 
+  border: none
 }
 
 td.logo2menuSpace { 
-	height: 0.8em;
+  height: 0.8em;
 }
 
 td.head {
   font-weight: bold;
   font-size: 10pt;
- }
+}
  
 table.head {
   width: 100%;
- }
+}
 
 a.shutdownLink {
-	font-size: 8pt;
-	font-weight: bold;
+  font-size: 8pt;
+  font-weight: bold;
 }
 
 table.footer {
-	width: 100%;
-	margin-top: 1em;
+  width: 100%;
+  margin-top: 1em;
 }
 
 td.footerBody { 
-	text-align: center;
-	padding-left: 5%;
-	padding-right: 5%;
+  text-align: center;
+  padding-left: 5%;
+  padding-right: 5%;
 }
 
 td.openMessageCloser {
-	text-align: right;
+  text-align: right;
 }
 
 .menuIndent {
-	width: 8%;
+  width: 8%;
 }
 
 td.accuracy0to49 {
-	background-color: red;
-	color: black;
+  background-color: red;
+  color: black;
 }
 
 td.accuracy50to93 {
-	background-color: yellow;
-	color: black;
+  background-color: yellow;
+  color: black;
 }
 
 td.accuracy94to100 {
-	background-color: green;
-	color: black;
+  background-color: green;
+  color: black;
 }
 
 div.error01 {
-	background-color: transparent;
-	color: red;
-	font-size: larger;
+  background-color: transparent;
+  color: red;
+  font-size: larger;
 }
 
 div.error02 {
-	background-color: transparent;
-	color: red;
+  background-color: transparent;
+  color: red;
 }
 
 span.graphFont {
-	font-size: x-small;
+  font-size: x-small;
 }
 
 .bucketsLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .magnetsLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .securityLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .configurationLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
-		
+    
 .advancedLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
-		
+    
 .passwordLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .sessionLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 a.menuLink {
-	font-weight:bold;
+  font-weight:bold;
 }
 
 td.historyNavigatorTop {
-	text-align: right;
+  text-align: right;
 }
 
 td.historyNavigatorBottom {
-	text-align: right;
+  text-align: right;
 }
 
 span.bucketsWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.configWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.securityWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .historyLabel {
@@ -271,4 +250,8 @@ span.securityWidgetState {
 .historyLabel em {
   font-weight: bold;
   font-style: normal;
+}
+
+tr.rowBoundary {
+  background-color: #cccc99;
 }

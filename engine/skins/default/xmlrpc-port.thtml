@@ -8,7 +8,7 @@
 
         <TMPL_IF NAME="XMLRPC_port_if_error">
 
-        <div class=\"error01\">
+        <div class="error01">
             <TMPL_VAR NAME="Localize_Configuration_Error7">
         </div>
 

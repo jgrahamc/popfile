@@ -5,7 +5,7 @@
 
 <TMPL_INCLUDE NAME="magnet-navigator.thtml">
 
-<form action="/magnets" method="POST">
+<form action="/magnets" method="post">
     <table width="75%" class="magnetsTable" summary="<TMPL_VAR NAME="Localize_Magnet_MainTableSummary">">
         <caption>
             <TMPL_VAR NAME="Localize_Magnet_Message1">
@@ -100,7 +100,7 @@
     </tr>
 </table>
 <div class="magnetsNewWidget">
-    <form action="/magnets" method="POST">
+    <form action="/magnets" method="post">
         <label class="magnetsLabel" for="magnetsAddType">
             <TMPL_VAR NAME="Localize_Magnet_MagnetType">:
         </label>

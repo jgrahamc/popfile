@@ -1,10 +1,11 @@
+/* Sleet by Dan Martin (kraelen) */
+
 body {
   margin: 1%;
   color: #FFFFFF;
   background-color: #7988A5;
   font-family: sans-serif;
   font-size: 67%;
-  text-align: center;
 }
 
 h2 {
@@ -393,13 +394,17 @@ span.graphFont {
 }
 
 table.footer br { 
-display: none; 
+  display: none; 
 } 
 
 .bottomLink { 
-margin: 1em; 
+  margin: 1em; 
 } 
 
 .bottomLink img { 
-display: none; 
-} 
+  display: none; 
+}
+
+tr.rowBoundary {
+  background-color: #888888;
+}

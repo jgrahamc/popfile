@@ -63,7 +63,7 @@
             <p><TMPL_VAR NAME="Localize_Advanced_Warning">
             <p><TMPL_VAR NAME="Localize_Advanced_ConfigFile"> <TMPL_VAR NAME="Advanced_POPFILE_CFG">
 
-            <form action="/advanced" method="POST">
+            <form action="/advanced" method="post">
                 <table width="100%">
                     <tr>
                         <th width="50%"><TMPL_VAR NAME="Localize_Advanced_Parameter"></th>
@@ -76,7 +76,7 @@
 
                     <tr>
                         <td colspan="2">
-                            <hr>
+                            <hr />
                         </td>
                     </tr>
 
@@ -102,7 +102,7 @@
                 </table>
                 <p>
                     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-                    <input type="submit" value="<TMPL_VAR NAME="Localize_Update">" name="update_params">
+                    <input type="submit" class="submit" value="<TMPL_VAR NAME="Localize_Update">" name="update_params">
             </form>
         </td>
     </tr>

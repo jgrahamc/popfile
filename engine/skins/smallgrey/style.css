@@ -233,7 +233,6 @@ td.openMessageCloser {
 .historyLabel em {
   font-weight: bold;
   font-style: normal;
-  color: #000000;
   background-color: #ffffcc;
 }
 
@@ -331,53 +330,58 @@ tt {
 }
 
 span.bucketsWidgetStateOn {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.configWidgetStateOn {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.securityWidgetStateOn {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.bucketsWidgetStateOff {
-	background-color: inherit;
-	color: #666666;
+  background-color: inherit;
+  color: #666666;
 }
 
 span.configWidgetStateOff {
-	background-color: inherit;
-	color: #666666;
+  background-color: inherit;
+  color: #666666;
 }
 
 span.securityWidgetStateOff {
-	background-color: inherit;
-	color: #666666;
+  background-color: inherit;
+  color: #666666;
 }
 
 .toggleOn {
-	background-color: #dddddd;
-	color: #000000;
+  background-color: #dddddd;
+  color: #000000;
 }
 
 .toggleOff {
-	background-color: #bbbbbb;
-	color: #000000;
+  background-color: #bbbbbb;
+  color: #000000;
 }
 
 .bucketsTable input {
-	font-size: 90%;
-	border: 1px;
+  font-size: 90%;
+  border: 1px;
 }
 
 button, .submit, .reclassifyButton {
-	background-color: #dddddd;
-	color: #000000;
+  background-color: #dddddd;
+  color: #000000;
 }
 
 .deleteButton, .historyWidgetsBottom .submit {
-	background-color: #bbbbbb;
-	color: #000000;
+  background-color: #bbbbbb;
+  color: #000000;
+}
+
+tr.rowBoundary {
+  background-color: transparent;
+  height: 0.3em;
 }

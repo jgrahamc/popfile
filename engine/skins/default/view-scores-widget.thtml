@@ -42,11 +42,11 @@
     
     <tr>
         <td>
-            <font color="<TMPL_VAR NAME="View_Score_Bucket_Color">">
+            <span style="color:<TMPL_VAR NAME="View_Score_Bucket_Color">">
                 <b>
                     <TMPL_VAR NAME="View_Score_Bucket">
                 </b>
-            </font>
+            </span>
         </td>
         <td>
             &nbsp;
@@ -136,9 +136,9 @@
         <TMPL_LOOP NAME="View_Score_Loop_Bucket_Header">
         
         <th>
-            <font color="<TMPL_VAR NAME="View_Score_Bucket_Color">">
+            <span style="color:<TMPL_VAR NAME="View_Score_Bucket_Color">">
                 <TMPL_VAR NAME="View_Score_Bucket">
-            </font>
+            </span>
         </th>
         <th>
             &nbsp;
@@ -152,9 +152,9 @@
 
     <tr>
         <td>
-            <font color="<TMPL_VAR NAME="View_Score_Word_Color">">
+            <span style="color:<TMPL_VAR NAME="View_Score_Word_Color">">
                 <TMPL_VAR NAME="View_Score_Word">
-            </font>
+            </span>
         </td>
         <td>
             &nbsp;
@@ -171,9 +171,9 @@
         <TMPL_IF NAME="View_Score_If_Probability">
         
         <td>
-            <font color="<TMPL_VAR NAME="View_Score_Word_Color">">
+            <span style="color:<TMPL_VAR NAME="View_Score_Word_Color">">
                 <TMPL_VAR NAME="View_Score_Probability">
-            </font>
+            </span>
         </td>
 
         <TMPL_ELSE>
@@ -197,7 +197,7 @@
     
     <TMPL_IF NAME="If_chart">
     
-    <hr>
+    <hr />
 
     <b>
         <TMPL_VAR NAME="Localize_View_Chart">
@@ -217,7 +217,7 @@
     <TMPL_LOOP NAME="View_Loop_Chart2">
         <td valign="top">
         <TMPL_IF NAME="View_If_Bar">
-            <img src="autogen_<TMPL_VAR NAME="View_Color">.bmp" width="<TMPL_VAR NAME="View_Width">" height="<TMPL_VAR NAME="View_Height">" alt="<TMPL_VAR NAME="View_Chart_Word">" title="<TMPL_VAR NAME="View_Chart_Word">"><br>
+            <img src="autogen_<TMPL_VAR NAME="View_Color">.bmp" width="<TMPL_VAR NAME="View_Width">" height="<TMPL_VAR NAME="View_Height">" alt="<TMPL_VAR NAME="View_Chart_Word">" title="<TMPL_VAR NAME="View_Chart_Word">"><br />
         </TMPL_IF>
         </td>
     </TMPL_LOOP>

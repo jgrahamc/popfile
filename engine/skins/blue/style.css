@@ -6,8 +6,8 @@ body {
 }
 
 a {
-	color: white;
-	background-color: transparent;
+  color: white;
+  background-color: transparent;
 }
 
 input, select, .submit {
@@ -19,9 +19,9 @@ input, select, .submit {
 }
 
 .shell, .shellTop {
-   background-color: #4C558E;
-   border: 3px #363E68 solid;
-	color: white;
+  background-color: #4C558E;
+  border: 3px #363E68 solid;
+  color: white;
 }
 
 table.head {
@@ -38,9 +38,9 @@ td.head {
 }
 
 a.shutdownLink {
-	background-color : #4C558E;
-	color: white;
-	font-size: 12pt;
+  background-color : #4C558E;
+  color: white;
+  font-size: 12pt;
 }
 
 .menu {
@@ -51,7 +51,7 @@ a.shutdownLink {
 
 .menuLink {
   color: white;
-	background-color: transparent;
+  background-color: transparent;
 }
 
 .menuSelected {
@@ -68,181 +68,181 @@ a.shutdownLink {
 
 
 tr.rowEven {
-    background-color: #4C558E;
-	 color: white;
+  background-color: #4C558E;
+  color: white;
 }
 
 tr.rowOdd {
-    background-color: #363E68;
-	 color: white;
+  background-color: #363E68;
+  color: white;
 }
 
 table.settingsTable {
-	border: 1px solid Black;
+  border: 1px solid Black;
 }
 
 table.openMessageTable, table.lookupResultsTable {
-	border: 3px solid Black;
+  border: 3px solid Black;
 }
 
 td.settingsPanel {
-	border: 1px solid Black;
+  border: 1px solid Black;
 }
 
 td.naked {
-	padding: 0px; 
-	margin: 0px; 
-	border: none
+  padding: 0px; 
+  margin: 0px; 
+  border: none
 }
 
 a.bottomLink {
-	background-color : transparent;
-	color: white;
+  background-color : transparent;
+  color: white;
 }
 
 .menuIndent {
-	width: 8%;
+  width: 8%;
 }
 
 table.historyWidgetsTop {
-	width: 100%;
-	margin-left: 1.5em;
-	margin-top: 0.6em;
-	margin-bottom: 1.0em;
+  width: 100%;
+  margin-left: 1.5em;
+  margin-top: 0.6em;
+  margin-bottom: 1.0em;
 }
 
 td.historyNavigatorTop {
-	text-align: right;
-	padding-right: 0.5em;
+  text-align: right;
+  padding-right: 0.5em;
 }
 
 td.historyNavigatorBottom {
-	text-align: right;
-	padding-right: 0.5em;
-	padding-bottom: 1.0em;
+  text-align: right;
+  padding-right: 0.5em;
+  padding-bottom: 1.0em;
 }
 
 table.historyWidgetsBottom {
-	width: 100%;
-	margin-left: 0.5em;
-	margin-top: 1.5em;
+  width: 100%;
+  margin-left: 0.5em;
+  margin-top: 1.5em;
 }
 
 a.messageLink:link {
-	background-color : transparent;
-	color: white;
+  background-color : transparent;
+  color: white;
 }
 
 td.openMessageCloser {
-	text-align: right;
+  text-align: right;
 }
 
 a.changeSettingLink {
-	background-color: transparent ;
-	color: #ddeeff ;
+  background-color: transparent ;
+  color: #ddeeff ;
 }
 
 table.footer {
-	width: 100%;
-	margin-top: 1em;
+  width: 100%;
+  margin-top: 1em;
 }
 
 td.footerBody { 
-	text-align: center;
-	padding-left: 5%;
-	padding-right: 5%;
-    background-color: #4C558E;
-    border: 3px #252A49 solid;
-	 color: white;
+  text-align: center;
+  padding-left: 5%;
+  padding-right: 5%;
+  background-color: #4C558E;
+  border: 3px #252A49 solid;
+  color: white;
 }
 
 h2.security {
-	color: white;
-	background-color: transparent;
+  color: white;
+  background-color: transparent;
 }
 
 h2.advanced {
-	color: white;
-	background-color: transparent;
+  color: white;
+  background-color: transparent;
 }
 
 td.logo2menuSpace { 
-	height: 0.8em;
+  height: 0.8em;
 }
 
 tr.rowHighlighted {
-	background-color: #000000;
-	color: #eeeeee;
+  background-color: #000030;
+  color: #eeeeee;
 }
 
 span.graphFont {
-	font-size: x-small;
+  font-size: x-small;
 }
 
 .bucketsLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .magnetsLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .securityLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .configurationLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
-		
+    
 .advancedLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
-		
+    
 .passwordLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .sessionLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 div.error01 {
-	background-color: transparent;
-	color: red;
-	font-size: larger;
+  background-color: transparent;
+  color: red;
+  font-size: larger;
 }
 
 div.error02 {
-	background-color: transparent;
-	color: red;
+  background-color: transparent;
+  color: red;
 }
 
 td.accuracy0to49 {
-	background-color: red;
-	color: black;
+  background-color: red;
+  color: black;
 }
 
 td.accuracy50to93 {
-	background-color: yellow;
-	color: black;
+  background-color: yellow;
+  color: black;
 }
 
 td.accuracy94to100 {
-	background-color: green;
-	color: black;
+  background-color: green;
+  color: black;
 }
 
 span.bucketsWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.configWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.securityWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .historyLabel {
@@ -252,4 +252,8 @@ span.securityWidgetState {
 .historyLabel em {
   font-weight: bold;
   font-style: normal;
+}
+
+tr.rowBoundary {
+  background-color: white;
 }

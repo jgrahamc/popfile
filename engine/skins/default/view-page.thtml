@@ -20,7 +20,7 @@
 <table class="openMessageTable" cellpadding="10%" cellspacing="0" width="100%" summary="<TMPL_VAR NAME="Localize_History_OpenMessageSummary">">
     <tr>
         <td>
-            <form id="HistoryMainForm" action="/history" method="POST">
+            <form id="HistoryMainForm" action="/history" method="post">
                 <input type="hidden" name="search" value="<TMPL_VAR NAME="View_Field_Search">" />
                 <input type="hidden" name="sort" value="<TMPL_VAR NAME="View_Field_Sort">" />
                 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
@@ -107,9 +107,9 @@
                                 <b>
                                     <TMPL_VAR NAME="Localize_Classification">
                                 </b>:
-                                <font color="<TMPL_VAR NAME="View_Bucket_Color">">
+                                <span style="color:<TMPL_VAR NAME="View_Bucket_Color">">
                                     <TMPL_VAR NAME="View_Bucket">
-                                </font>
+                                </span>
                             </font>
                         </td>
                     </tr>
@@ -122,9 +122,9 @@
                                 <b>
                                     <TMPL_VAR NAME="Localize_History_ChangedClass">
                                 </b>:
-                                <font color="<TMPL_VAR NAME="View_Class_Changed_Color">">
+                                <span style="color:<TMPL_VAR NAME="View_Class_Changed_Color">">
                                     <TMPL_VAR NAME="View_Class_Changed">
-                                </font>
+                                </span>
                             </font>
                         </td>
                     </tr>

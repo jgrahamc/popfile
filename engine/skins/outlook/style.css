@@ -104,25 +104,25 @@ b {
 } 
 
 table.settingsTable {
-	border: 1px solid Black;
+  border: 1px solid Black;
 }
 
 table.openMessageTable, table.lookupResultsTable {
-	border: 3px solid Black;
+  border: 3px solid Black;
 }
 
 td.settingsPanel {
-	border: 1px solid Black;
+  border: 1px solid Black;
 }
 
 td.naked {
-	padding: 0px; 
-	margin: 0px; 
-	border: none
+  padding: 0px; 
+  margin: 0px; 
+  border: none;
 }
 
 td.logo2menuSpace { 
-	height: 0.8em;
+  height: 0.8em;
 }
 
 td.head {
@@ -143,16 +143,15 @@ td.head {
   margin: 0px 0px 0px 0px;
 }
 
-
 a.shutdownLink {
-	font-size: 9pt;
-	font-weight: bold;
+  font-size: 9pt;
+  font-weight: bold;
 }
 
 td.footerBody { 
-	text-align: center;
-	padding-left: 5%;
-	padding-right: 5%;
+  text-align: center;
+  padding-left: 5%;
+  padding-right: 5%;
 }
 
 table.footer {
@@ -165,112 +164,111 @@ table.footer {
   margin: 1em 0px 0px 0px;
 }
 
-
 td.openMessageCloser {
-	text-align: right;
+  text-align: right;
 }
 
 .menuIndent {
-	width: 8%;
+  width: 8%;
 }
 
 td.accuracy0to49 {
-	background-color: red;
-	color: black;
+  background-color: red;
+  color: black;
 }
 
 td.accuracy50to93 {
-	background-color: yellow;
-	color: black;
+  background-color: yellow;
+  color: black;
 }
 
 td.accuracy94to100 {
-	background-color: green;
-	color: black;
+  background-color: green;
+  color: black;
 }
 
 div.error01 {
-	background-color: transparent;
-	color: red;
-	font-size: larger;
+  background-color: transparent;
+  color: red;
+  font-size: larger;
 }
 
 div.error02 {
-	background-color: transparent;
-	color: red;
+  background-color: transparent;
+  color: red;
 }
 
 span.graphFont {
-	font-size: x-small;
+  font-size: x-small;
 }
 
 .bucketsLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .magnetsLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .securityLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .configurationLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
-		
+    
 .advancedLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
-		
+    
 .passwordLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .sessionLabel {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 a.menuLink {
-	font-weight:bold;
+  font-weight:bold;
 }
 
 table.historyWidgetsTop {
-	width: 100%;
-	margin-left: 1.5em;
-	margin-top: 0.6em;
-	margin-bottom: 1.0em;
+  width: 100%;
+  margin-left: 1.5em;
+  margin-top: 0.6em;
+  margin-bottom: 1.0em;
 }
 
 table.historyWidgetsBottom {
-	width: 100%;
-	margin-top: 0.6em;
+  width: 100%;
+  margin-top: 0.6em;
 }
 
 td.historyNavigatorTop {
-	text-align: right;
+  text-align: right;
 }
 
 td.historyNavigatorBottom {
-	text-align: right;
+  text-align: right;
 }
 
 tr.rowHighlighted {
-	background-color: #000000;
-	color: #eeeeee;
+  background-color: #000000;
+  color: #eeeeee;
 }
 
 span.bucketsWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.configWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.securityWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .historyLabel {
@@ -280,4 +278,8 @@ span.securityWidgetState {
 .historyLabel em {
   font-weight: bold;
   font-style: normal;
+}
+
+tr.rowBoundary {
+  background-color: #808080;
 }

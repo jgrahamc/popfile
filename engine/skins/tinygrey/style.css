@@ -522,3 +522,6 @@ select {
     margin-bottom: 1.0em;
 }
 
+tr.rowBoundary {
+  background-color: #cccccc;
+}

@@ -3,7 +3,7 @@
 
 <TMPL_IF NAME="History_If_Some_Messages">
 
-<form id="HistoryMainForm" action="/history" method="POST">
+<form class="HistoryMainForm" action="/history" method="post">
     <input type="hidden" name="search" value="<TMPL_VAR NAME="History_Field_Search">" />
     <input type="hidden" name="sort" value="<TMPL_VAR NAME="History_Field_Sort">" />
     <input type="hidden" name="negate" value="<TMPL_VAR NAME="History_Field_Negate">" />
@@ -45,7 +45,7 @@
         </tr>
 </table>
 
-<form id="HistoryMainForm" action="/history" method="POST">
+<form class="HistoryMainForm" action="/history" method="post">
     <input type="hidden" name="search" value="<TMPL_VAR NAME="History_Field_Search">" />
     <input type="hidden" name="sort" value="<TMPL_VAR NAME="History_Field_Sort">" />
     <input type="hidden" name="negate" value="<TMPL_VAR NAME="History_Field_Negate">" />
@@ -147,8 +147,6 @@
 
                 <TMPL_IF NAME="History_If_Magnetized">
 
-                    <img title="<TMPL_VAR NAME="History_Magnet">" src="/skins/default/magnet.png">
-
                 </TMPL_IF>
 
                 <TMPL_IF NAME="History_If_Not_Pseudo">
@@ -157,9 +155,9 @@
 
                 </TMPL_IF>
 
-                <font color="<TMPL_VAR NAME="History_Bucket_Color">">
+                <span style="color:<TMPL_VAR NAME="History_Bucket_Color">">
                     <TMPL_VAR NAME="History_Bucket">
-                </font>
+                </span>
 
                 <TMPL_IF NAME="History_If_Not_Pseudo">
 
@@ -178,7 +176,7 @@
                 <TMPL_ELSE>
 
                 <TMPL_IF NAME="History_If_Magnetized">
-
+                    <img title="*MAGNET TYPE*:<TMPL_VAR NAME="History_Magnet">" src="/skins/default/magnet.png"> &nbsp; *TYPE*
                 <TMPL_ELSE>
 
                 <select name="reclassify_<TMPL_VAR NAME="History_I">">
@@ -224,9 +222,9 @@
                 <span class="historyLabel">
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(<TMPL_VAR NAME="Localize_History_Column_Characters">:
                 </span>
-                <input type="submit" class="submit" name="increase" value="<TMPL_VAR NAME="Localize_History_Increase">">
-                <input type="submit" class="submit" name="decrease" value="<TMPL_VAR NAME="Localize_History_Decrease">">
-                <input type="submit" class="submit" name="automatic" value="<TMPL_VAR NAME="Localize_History_Automatic">">
+                <input type="submit" class="submit" name="increase" value="<TMPL_VAR NAME="Localize_History_Increase">" />
+                <input type="submit" class="submit" name="decrease" value="<TMPL_VAR NAME="Localize_History_Decrease">" />
+                <input type="submit" class="submit" name="automatic" value="<TMPL_VAR NAME="Localize_History_Automatic">" />
                 <span class="historyLabel">)</span>
             </td>
             <td>

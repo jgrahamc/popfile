@@ -1,6 +1,7 @@
 H2 {
   font-size: 12pt;
-  font-weight: normal;}
+  font-weight: normal;
+}
 
 body {
   background-color: white;
@@ -9,50 +10,59 @@ body {
   font-size: 8pt;
   font-weight: normal;
   color: #000000;
-  margin: 0px;}
+  margin: 0px;
+}
 
 table.head {
   font-weight: normal;
   width: 100%;
   background-color: #ededca;
-  color: #666666;}
+  color: #666666;
+}
 
 .top, .bottom, .borderTopLeft, .borderTop, .borderTopRight, .borderLeft, .borderRight, .borderBottomLeft, .borderBottom, .borderBottomRight {
   visibility: hidden;
-  display: none;}
+  display: none;
+}
 
 .head, td.head {
   font-weight: bold;
   font-size: 12pt;
   background-color: #ededca;
   color: #666666;
-  padding-left: 5px;}
+  padding-left: 5px;
+}
 
 .shell, .shellTop {
   border: 1px #cccc99 solid;
   background-color: #ededca;
   color: #000000;
   margin: 0px;
-  padding: 0px;}
+  padding: 0px;
+}
 
 .head a {
   font-size: 10pt;
-  font-weight: normal;}
+  font-weight: normal;
+}
 
 .menu {
   font-size: 10pt;
   font-weight: normal;
-  width: 100%;}
+  width: 100%;
+}
 
 .menuIndent {
-  width: 5%;}
+  width: 5%;
+}
 
 .menuSelected, .menuSelected a {
   background-color: #cccc99;
   color: #000000;
   font-size: 10pt;
   font-weight: bold;
-  text-decoration: none;}
+  text-decoration: none;
+}
 
 td.menuSelected {
   border-left: 1px solid #cccc99;
@@ -62,14 +72,16 @@ td.menuSelected {
   padding-right: 1px;
   margin-left: 1px;
   margin-right: 1px;
-  width: 15%;}
+  width: 15%;
+}
 
 .menuStandard, .menuStandard a {
   background-color: #ededca;
   color: #0000ff;
   font-size: 10pt;
   font-weight: bold;
-  text-decoration: none;}
+  text-decoration: none;
+}
 
 td.menuStandard {
   border-left: 1px solid #cccc99;
@@ -79,44 +91,54 @@ td.menuStandard {
   padding-right: 1px;
   margin-left: 1px;
   margin-right: 1px;
-  width: 15%;}
+  width: 15%;
+}
 
 .menuStandard a:hover {
-  text-decoration: underline;}
+  text-decoration: underline;
+}
 
 .rowEven {
   background-color: #ededca;
-  color: #000000;}
+  color: #000000;
+}
 
 .rowOdd {
   background-color: #cccc99;
-  color: #000000;}
+  color: #000000;
+}
 
 .rowEven a, .rowOdd a {
-  text-decoration: none;}
+  text-decoration: none;
+}
 
 .rowEven a:hover, .rowOdd a:hover {
   color: #000000;
-  background-color: #ffffcc;}
+  background-color: #ffffcc;
+}
 
 tr.rowHighlighted {
   background-color: #cccc99;
-  color: #eeeeee;}
+  color: #eeeeee;
+}
 
 table.settingsTable {
   border: 1px solid #cccc99;
   padding: 2px;
-  margin: 0px;}
+  margin: 0px;
+}
 
 table.openMessageTable, table.lookupResultsTable {
   border: 1px solid Black;
   padding: 2px;
-  margin: 0px;}
+  margin: 0px;
+}
 
 td.settingsPanel {
   border: 1px solid #cccc99;
   padding: 2px;
-  margin: 0px;}
+  margin: 0px;
+}
 
 td.naked {
   padding: 0px;
@@ -126,7 +148,8 @@ td.naked {
 td.accuracy0to49 {
   background-color: red;
   color: black;
-  height: 20px;}
+  height: 20px;
+}
 
 td.accuracy50to93 {
   background-color: yellow;
@@ -135,7 +158,8 @@ td.accuracy50to93 {
 td.accuracy94to100 {
   background-color: green;
   color: black;
-  height: 20px;}
+  height: 20px;
+}
 
 div.error01 {
   background-color: transparent;
@@ -143,71 +167,90 @@ div.error01 {
   font-size: larger;}	
 div.error02 {
   background-color: transparent;
-  color: red;}
+  color: red;
+}
 
 td.historyNavigatorTop {  
   text-align: right;
-  padding-right: 2px;}
+  padding-right: 2px;
+}
 
 .historyNavigatorTop a:hover, .historyNavigatorBottom a:hover {
   background-color: #eeeeee;
-  color: #000000;}
+  color: #000000;
+}
 
 td.openMessageCloser {
   text-align: right;
   background-color: #eeeeee;
-  color: #000000;}
+  color: #000000;
+}
 
 .historyLabel {
   font-size: 9pt;
   font-weight: normal;
   text-decoration: none;
   padding-left: 1px;
-  padding-right: 1px;}
+  padding-right: 1px;
+}
 
 .historyLabel em {
   font-weight: bold;
-  font-style: normal;}
+  font-style: normal;
+}
 
 a.historyLabel:hover {
-  text-decoration: underline;}
+  text-decoration: underline;
+}
 
 .bucketsLabel {
-	font-weight: bold;}
+	font-weight: bold;
+}
 
 .magnetsLabel {
-	font-weight: bold;}
+	font-weight: bold;
+}
 
 .securityLabel {
-	font-weight: bold;}
+	font-weight: bold;
+}
 
 .configurationLabel {
-	font-weight: normal;}	
+	font-weight: normal;
+}
 
 .advancedLabel {
-	font-weight: bold;}		
+	font-weight: bold;
+}
+
 .passwordLabel {
-	font-weight: bold;}
+	font-weight: bold;
+}
 
 .sessionLabel {
-	font-weight: bold;}
+	font-weight: bold;
+}
 
 table.historyWidgetsTop {
   width: 100%;
   border-top: 1px solid #cccc99;
-  border-bottom: 1px solid #cccc99;}
+  border-bottom: 1px solid #cccc99;
+}
 
 table.historyWidgetsTop td {
   padding-left: 20px;
-  font-weight: bold;}
+  font-weight: bold;
+}
 
 table.historyWidgetsBottom {
   width: 100%;
-  border-bottom: 2px solid #cccc99;}
+  border-bottom: 2px solid #cccc99;
+}
 
 table.historyWidgetsBottom td {
   padding-left: 20px;
-  font-weight: bold;}
+  font-weight: bold;
+}
 
 table.footer {
   width: 100%;
@@ -215,28 +258,33 @@ table.footer {
   color: #666666;
   border-left: 1px solid #cccc99;
   border-right: 1px solid #cccc99;
-  border-bottom: 1px solid #cccc99;}
+  border-bottom: 1px solid #cccc99;
+}
 
 td.footerBody {
   text-align: center;
   padding-left: 5%;
   padding-right: 5%;
   font-size: 8pt;
-  font-weight: bold;}
+  font-weight: bold;
+}
 
 .bottomLink {
-  text-decoration: none;}
+  text-decoration: none;
+}
 
 .bottomLink:hover {
   background-color: #ffffcc;
-  color: #000000;}
+  color: #000000;
+}
 
 input, .submit, select {
   font-family: tahoma, sans-serif;
   font-size: 8pt;
   font-weight: normal;
   padding: 0px;
-  margin: 0px;}
+  margin: 0px;
+}
 
 tt {
   font-family: "lucida console", courier, sans-serif;
@@ -254,4 +302,8 @@ span.configWidgetState {
 
 span.securityWidgetState {
 	font-weight: bold;
+}
+
+tr.rowBoundary {
+  background-color: #cccc99;
 }

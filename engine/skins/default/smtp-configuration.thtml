@@ -31,7 +31,7 @@
     </tr>
 </table>
 <br />
-<span class="configurationLabel" for="configPopPort">
+<span class="configurationLabel">
     <TMPL_VAR NAME="Localize_Configuration_SMTPPort">:
 </span>
 <table border="0" cellpadding="0" cellspacing="0" summary="">
@@ -44,9 +44,9 @@
             
                 <TMPL_IF NAME="smtp_port_feedback">
                 <p> 
-                    <font color="red">
+                    <div class="error01">
                         <TMPL_VAR NAME="smtp_port_feedback">
-                    </font>
+                    </div>
                 </p>
             
                 </TMPL_IF>

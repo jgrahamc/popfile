@@ -145,6 +145,10 @@ table.lookupResultsTable {
   border: 3px solid #88b5dd;
 }
 
+tr.rowBoundary {
+  background-color: #88b5dd;
+}
+
 /*********************************************************/
 /* Graphics */
 

@@ -91,8 +91,7 @@ tr.rowOdd {
 }
 
 tr.rowHighlighted {
-    background-color: #000000 ;
-    color: #eeeeee ;
+    background-color: #ff9966;
 }
 
 hr {
@@ -101,15 +100,15 @@ hr {
 }
 
 table.settingsTable {
-    border: 1px solid Black;
+    border: 1px solid #ffcc99;
 }
 
 table.openMessageTable, table.lookupResultsTable {
-    border: 3px solid Black;
+    border: 3px solid #ffcc99;
 }
 
 td.settingsPanel {
-    border: 1px solid Black;
+    border: 1px solid #ffcc99;
 }
 
 td.openMessageCloser {
@@ -521,3 +520,6 @@ select {
     margin-bottom: 1.0em;
 }
 
+tr.rowBoundary {
+    background-color: #ff9966;
+}

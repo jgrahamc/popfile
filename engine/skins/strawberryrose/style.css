@@ -1,3 +1,5 @@
+/* StrawberryRose by David Smith (kinematics) */
+
 /*********************************************************/
 /* da Big Kahuna */
 
@@ -115,20 +117,20 @@ input, select {
 
 /* Undo buttons */
 .undoButton {
-  background-color: rgb(0,0,200);
+  background-color: #2C0074;
   border: 2px gray outset;
 }
 .undoButton:active {
-  background-color: rgb(0,0,200);
+  background-color: #400020;
   border: 2px gray inset;
 }
 
 .reclassifyButton {
-  background-color: rgb(0,0,255);
+  background-color: #4b09b7;//#360785;//#400040;
   border: 2px gray outset;
 }
 .reclassifyButton:active {
-  background-color: rgb(0,0,255);
+  background-color: #400040;
   border: 2px gray inset;
 }
 
@@ -301,7 +303,7 @@ td.head {
 
 /* Spacing between header and main */
 td.logo2menuSpace {
-	height: 0.8em;
+  height: 0.8em;
 }
 
 /* The footer table at the bottom of the page */
@@ -316,9 +318,9 @@ table.footer {
 }
 
 td.footerBody {
-	text-align: center;
-	padding-left: 5%;
-	padding-right: 5%;
+  text-align: center;
+  padding-left: 5%;
+  padding-right: 5%;
 }
 
 
@@ -334,7 +336,7 @@ td.footerBody {
 
 /* Spacing on either side of tabs */
 .menuIndent {
-	width: 8%;
+  width: 8%;
 }
 
 /* Spacing in between tabs (usually automatic) */
@@ -366,36 +368,36 @@ td.footerBody {
 
 /* General settings tables and panels */
 table.settingsTable {
-	border: 1px solid black;
+  border: 1px solid #CC1133;
 }
 
 td.settingsPanel {
-	border: 1px solid black;
+  border: 1px solid #CC1133;
   color: #EEEEEE;
-	background-color: #DB6479;
+  background-color: #DB6479;
 }
 
 /*********************************************************/
 /* History page settings */
 
 table.historyWidgetsTop {
-	width: 100%;
-	margin-left: 1.5em;
-	margin-top: 0.6em;
-	margin-bottom: 1.0em;
+  width: 100%;
+  margin-left: 1.5em;
+  margin-top: 0.6em;
+  margin-bottom: 1.0em;
 }
 
 table.historyWidgetsBottom {
-	width: 100%;
-	margin-top: 0.6em;
+  width: 100%;
+  margin-top: 0.6em;
 }
 
 td.historyNavigatorTop {
-	text-align: right;
+  text-align: right;
 }
 
 td.historyNavigatorBottom {
-	text-align: right;
+  text-align: right;
 }
 
 table.historyTable {
@@ -404,8 +406,8 @@ table.historyTable {
 }
 
 tr.rowHighlighted {
-	color: black;
-	background-color: #7CE238;
+  color: black;
+  background-color: #7CE238;
 }
 
 .historyTable td {

@@ -5,9 +5,9 @@ body {
 }
 
 .shell, .shellTop {
-    background-color: white;
-    border: 3px #778899 solid;
-   color: Black;
+  background-color: white;
+  border: 3px #778899 solid;
+  color: Black;
 }
 
 .menu {
@@ -44,10 +44,6 @@ tr.rowOdd {
   color: Black;
 }
 
-    
-
-  
-
 td.head {
   font-weight: normal;
   font-size: 22pt;
@@ -61,7 +57,6 @@ table.head {
   background-color: white;
   color: black;
 }
-
 
 .menuIndent {
   width: 8%;
@@ -141,7 +136,6 @@ tr.rowHighlighted {
   font-weight: bold;
 }
 
-
 .magnetsLabel {
   font-weight: bold;
 }
@@ -154,7 +148,6 @@ tr.rowHighlighted {
   font-weight: bold;
 }
 
-
 span.graphFont {
   font-size: x-small;
 }
@@ -162,7 +155,6 @@ span.graphFont {
 .bucketsLabel {
   font-weight: bold;
 }
-
 
 td.accuracy0to49 {
   background-color: red;
@@ -201,4 +193,12 @@ span.configWidgetState {
 span.securityWidgetState {
   font-weight: bold;
 }
-  
+
+td.settingsPanel {
+  border: 1px solid #EEEEEE;
+}
+
+tr.rowBoundary {
+  background-color: #EEEEEE;
+  height: 0.3em;
+}

@@ -5,5 +5,3 @@
 <link rel="icon" href="favicon.ico">
 <link rel="stylesheet" type="text/css" href="<TMPL_VAR NAME="Skin_Root">style.css" title="POPFile-Style">
 </head>
-
-

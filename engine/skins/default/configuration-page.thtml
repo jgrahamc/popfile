@@ -5,7 +5,7 @@
     <tr>
         <td class="settingsPanel" width="33%" valign="top">
             <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_UserInterface"></h2>
-            <form action="/configuration" method="POST">
+            <form action="/configuration" method="post">
                 <label class="configurationLabel" for="configSkin">
                     <TMPL_VAR NAME="Localize_Configuration_SkinsChoose">:
                 </label>
@@ -50,7 +50,7 @@
                 <input type="submit" class="submit" name="change_skin" value="<TMPL_VAR NAME="Localize_Apply">" />
             </form>
 
-            <form action="/configuration" method="POST">
+            <form action="/configuration" method="post">
                 <label class="configurationLabel" for="configLanguage">
                     <TMPL_VAR NAME="Localize_Configuration_LanguageChoose">:
                 </label>
@@ -72,7 +72,7 @@
         </td>
         <td class="settingsPanel" width="33%" valign="top">
             <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_HistoryView"></h2>
-            <form action="/configuration" method="POST">
+            <form action="/configuration" method="post">
                 <label class="configurationLabel" for="configPageSize">
                     <TMPL_VAR NAME="Localize_Configuration_History">:
                 </label>
@@ -94,7 +94,7 @@
 
             <TMPL_VAR NAME="Configuration_Page_Size_Updated">
 
-            <form action="/configuration" method="POST">
+            <form action="/configuration" method="post">
                 <label class="configurationLabel" for="configHistoryDays">
                     <TMPL_VAR NAME="Localize_Configuration_Days">:
                 </label>
@@ -117,7 +117,7 @@
             </TMPL_IF>
 
             <TMPL_VAR NAME="Configuration_History_Days_Updated">
-            <form action="/configuration" method="POST">
+            <form action="/configuration" method="post">
                 <label class="configurationLabel" for="configUIPort">
                     <TMPL_VAR NAME="Localize_Configuration_Fields">:
                 </label>
@@ -125,7 +125,7 @@
 
                 <TMPL_LOOP NAME="Configuration_Loop_History_Columns">
 
-                <input type="checkbox" id="<TMPL_VAR NAME="Configuration_Field_Name">" class="checkbox" name="<TMPL_VAR NAME="Configuration_Field_Name">" <TMPL_VAR NAME="Configuration_Field_Value">>&nbsp;<TMPL_VAR NAME="Configuration_Localized_Field_Name"><br>
+                <input type="checkbox" id="<TMPL_VAR NAME="Configuration_Field_Name">" class="checkbox" name="<TMPL_VAR NAME="Configuration_Field_Name">" <TMPL_VAR NAME="Configuration_Field_Value">>&nbsp;<TMPL_VAR NAME="Configuration_Localized_Field_Name"><br />
 
                 </TMPL_LOOP>
 
@@ -135,7 +135,7 @@
         </td>
         <td class="settingsPanel" width="33%" valign="top" rowspan="2">
             <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_ListenPorts"></h2>
-            <form action="/configuration" method="POST">
+            <form action="/configuration" method="post">
                 <label class="configurationLabel" for="configUIPort">
                     <TMPL_VAR NAME="Localize_Configuration_UI">:
                 </label>
@@ -162,7 +162,7 @@
     <tr>
         <td class="settingsPanel" width="33%" valign="top">
             <h3 class="configuration"><TMPL_VAR NAME="Localize_Configuration_TCPTimeout"></h3>
-            <form action="/configuration" method="POST">
+            <form action="/configuration" method="post">
                 <label class="configurationLabel" for="configTCPTimeout">
                     <TMPL_VAR NAME="Localize_Configuration_TCPTimeoutSecs">:
                 </label>
@@ -186,7 +186,7 @@
         </td>
         <td class="settingsPanel" width="33%" valign="top">
             <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_Logging"></h2>
-            <form action="/configuration" method="POST">
+            <form action="/configuration" method="post">
                 <label class="configurationLabel" for="configLogging">
                     <TMPL_VAR NAME="Localize_Configuration_LoggerOutput">:
                 </label>
@@ -211,7 +211,7 @@
             <TMPL_IF NAME="Configuration_If_Show_Log">
 
             <p>
-                <a href="popfile_current_log.log?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Configuration_CurrentLogFile"></a>
+                <a href="popfile_current_log.log?session=<TMPL_VAR NAME="Session_Key">" class="downloadLogLink"><TMPL_VAR NAME="Localize_Configuration_CurrentLogFile"></a>
             </p>
 
             </TMPL_IF>
