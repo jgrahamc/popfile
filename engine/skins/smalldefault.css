@@ -1,0 +1,309 @@
+H2 {
+  font-size: 14pt;
+  font-weight: normal;
+}
+
+body {
+  background-color: white;
+  border: none;
+  font-family: tahoma, sans-serif;
+  font-size: 8pt;
+  font-weight: normal;
+  color: #000000;
+  margin: 3px;
+}
+
+table.head {
+  font-weight: normal;
+  width: 100%;
+
+}
+
+.top, .bottom, .borderTopLeft, .borderTop, .borderTopRight, .borderLeft, .borderRight, .borderBottomLeft, .borderBottom, .borderBottomRight {
+  visibility: hidden;
+  display: none;
+}
+
+.head, td.head {
+  font-weight: bold;
+  font-size: 14pt;
+  background-color: #ededca;
+  color: #666666;
+  padding-left: 5px;
+}
+
+.shell, .shellTop {
+  border: 2px #cccc99 solid;
+  background-color: #ededca;
+  color: #000000;
+  margin: 0px;
+  padding: 0px;
+}
+
+.head a {
+  font-size: 12pt;
+  font-weight: normal;
+}
+
+.menu {
+  font-size: 12pt;
+  font-weight: normal;
+  width: 100%;
+}
+
+.menuIndent {
+  width: 5%;
+}
+
+.menuSelected, .menuSelected a {
+  background-color: #cccc99;
+  color: #000000;
+  font-size: 14pt;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+td.menuSelected {
+  border-left: 2px solid #cccc99;
+  border-right: 2px solid #cccc99;
+  border-top: 2px solid #cccc99;
+  padding-left: 2px;
+  padding-right: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
+  width: 15%;
+}
+
+.menuStandard, .menuStandard a {
+  background-color: #ededca;
+  color: #0000ff;
+  font-size: 14pt;
+  font-weight: normal;
+  text-decoration: none;
+}
+
+td.menuStandard {
+  border-left: 2px solid #cccc99;
+  border-right: 2px solid #cccc99;
+  border-top: 2px solid #cccc99;
+  padding-left: 2px;
+  padding-right: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
+  width: 15%;
+}
+
+.menuStandard a:hover {
+  text-decoration: underline;
+}
+
+.rowEven {
+  background-color: #ededca;
+  color: #000000;
+}
+
+.rowOdd {
+  background-color: #cccc99;
+  color: #000000;
+}
+
+.rowEven a, .rowOdd a {
+  text-decoration: none;
+}
+
+.rowEven a:hover, .rowOdd a:hover {
+  color: #000000;
+  background-color: #ffffcc;
+}
+
+tr.rowHighlighted {
+  background-color: #cccc99;
+  color: #eeeeee;
+}
+
+table.settingsTable {
+  border: 1px solid #cccc99;
+  padding: 3px;
+  margin: 0px;
+}
+
+table.openMessageTable, table.lookupResultsTable {
+  border: 2px solid Black;
+  padding: 2px;
+  margin: 0px;
+}
+
+td.settingsPanel {
+  border: 1px solid #cccc99;
+  padding: 3px;
+  margin: 0px;
+}
+
+td.naked {
+  padding: 0px; 
+  margin: 0px; 
+  border: none
+}
+
+td.accuracy0to49 {
+  background-color: red;
+  color: black;
+  height: 20px;
+}
+
+td.accuracy50to93 {
+  background-color: yellow;
+  color: black;
+  height: 20px;
+}
+
+td.accuracy94to100 {
+  background-color: green;
+  color: black;
+  height: 20px;
+}
+
+div.error01 {
+  background-color: transparent;
+  color: red;
+  font-size: larger;
+}
+
+div.error02 {
+  background-color: transparent;
+  color: red;
+}
+
+td.historyNavigatorTop {
+  text-align: right;
+  padding-right: 5px;
+}
+
+.historyNavigatorTop a:hover, .historyNavigatorBottom a:hover {
+  background-color: #eeeeee;
+  color: #000000;
+}
+
+td.openMessageCloser {
+  text-align: right;
+  background-color: #eeeeee;
+  color: #000000;
+}
+
+.historyLabel {
+  font-weight: normal;
+  font-size: 9pt;
+  text-decoration: none;
+  padding-left: 1px;
+  padding-right: 2px;
+}
+
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+a.historyLabel:hover {
+  text-decoration: underline;
+}
+
+.bucketsLabel {
+  font-weight: bold;
+}
+
+.magnetsLabel {
+  font-weight: bold;
+}
+
+.securityLabel {
+  font-weight: bold;
+}
+
+.configurationLabel {
+  font-weight: normal;
+}
+
+.advancedLabel {
+  font-weight: bold;
+}
+
+.passwordLabel {
+  font-weight: bold;
+}
+
+.sessionLabel {
+  font-weight: bold;
+}
+
+table.historyWidgetsTop {
+  width: 100%;
+  border-top: 2px solid #cccc99;
+  border-bottom: 2px solid #cccc99;
+}
+
+table.historyWidgetsTop td {
+  padding-left: 20px;
+  font-weight: bold;
+}
+
+table.historyWidgetsBottom {
+  width: 100%;
+  border-bottom: 2px solid #cccc99;
+}
+
+table.historyWidgetsBottom td {
+  padding-left: 20px;
+  font-weight: bold;
+}
+
+table.footer {
+  width: 100%;
+  background-color: #ededca;
+  color: #666666;
+  border-left: 2px solid #cccc99;
+  border-right: 2px solid #cccc99;
+  border-bottom: 2px solid #cccc99;
+}
+
+td.footerBody { 
+  text-align: center;
+  padding-left: 5%;
+  padding-right: 5%;
+  font-size: 8pt;
+  font-weight: bold;
+}
+
+.bottomLink {
+  text-decoration: none;
+}
+
+.bottomLink:hover {
+  background-color: #ffffcc;
+  color: #000000;
+}
+
+input, .submit, select {
+  font-family: tahoma, sans-serif;
+  font-size: 8pt;
+  font-weight: normal;
+  padding: 0px;
+  margin: 0px;
+}
+
+tt {
+  font-family: "lucida console", courier, sans-serif;
+  font-size: 9pt;
+  font-weight: normal;
+}
+
+span.bucketsWidgetState {
+	font-weight: bold;
+}
+
+span.configWidgetState {
+	font-weight: bold;
+}
+
+span.securityWidgetState {
+	font-weight: bold;
+}
