@@ -1324,6 +1324,8 @@ sub bucket_page
     $templ->param( 'Bucket_Word_Count'   => $self->pretty_number( $bucket_count ) );
     $templ->param( 'Bucket_Unique_Count' => sprintf( $self->{language__}{SingleBucket_Unique}, $self->pretty_number( $self->{classifier__}->get_bucket_unique_count( $self->{api_session__}, $self->{form_}{showbucket} ) ) ) );
     $templ->param( 'Bucket_Total_Word_Count' => $self->pretty_number( $self->{classifier__}->get_word_count( $self->{api_session__} ) ) );
+    $templ->param( 'Bucket_Sub_Title' => sprintf( $self->{language__}{SingleBucket_WordTable}, $self->{form_}{showbucket} ) );
+    $templ->param( 'Bucket_Bucket_Name' => $self->{form_}{showbucket} );
 
     my $percent = '0%';
     if ( $self->{classifier__}->get_word_count( $self->{api_session__} ) > 0 )  {
@@ -2292,7 +2294,7 @@ sub set_magnet_navigator__
             $row_data{Magnet_Navigator_If_This_Page} = 0;
             $row_data{Magnet_Navigator_Start_Magnet} = $i;
         }
-
+        $row_data{Session_Key} = $self->{session_key__};
         $i += $self->config_( 'page_size' );
         push ( @page_loop, \%row_data );
     }
@@ -2721,6 +2723,8 @@ sub history_page
             }
             $row_data{Session_Key} = $self->{session_key__};
             $row_data{Localize_Remove}     = $self->{language__}{Remove};
+            $row_data{Localize_Undo}       = $self->{language__}{Undo};
+            $row_data{Localize_History_MagnetUsed} = $self->{language__}{History_MagnetUsed};
 
             push ( @history_data, \%row_data );
         }
@@ -2907,6 +2911,7 @@ sub view_page
     }
 
     if ($self->{history__}{$mail_file}{magnet} ne '') {
+        print $self->{history__}{$mail_file}{magnet}, "\n";
         $templ->param( 'View_Magnet_Reason' => sprintf( $self->{language__}{History_MagnetBecause},  # PROFILE BLOCK START
                           $color, $bucket,
                           Classifier::MailParse::splitline($self->{history__}{$mail_file}{magnet},0)

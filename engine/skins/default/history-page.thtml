@@ -106,7 +106,7 @@
                 <a title="<TMPL_VAR NAME="History_From">"><TMPL_VAR NAME="History_Short_From"></a>
             </td>
             <td>
-                <a class="messageLink" title="<TMPL_VAR NAME="History_Subject">" href="/view?view=<TMPL_VAR NAME="History_Mail_File">&amp;<TMPL_VAR NAME="History_Fields">">
+                <a class="messageLink" title="<TMPL_VAR NAME="History_Subject">" href="/view?view=<TMPL_VAR NAME="History_Mail_File"><TMPL_VAR NAME="History_Fields">">
                     <TMPL_VAR NAME="History_Short_Subject">
                 </a>
             </td>

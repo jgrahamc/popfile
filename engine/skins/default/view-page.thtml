@@ -8,17 +8,17 @@
             <h2 class="buckets"><TMPL_VAR NAME="Localize_View_Title"></h2>
         </td>
         <td class="historyNavigatorTop">
-        
+
             <TMPL_IF NAME="View_If_Previous">
-            
+
             <a href="/view?view=<TMPL_VAR NAME="View_Previous">&amp;start_message=<TMPL_VAR NAME="View_Previous_Message"><TMPL_VAR NAME="View_Fields">">&lt;<TMPL_VAR NAME="Localize_Previous"></a>
 
             </TMPL_IF>
 
             <TMPL_IF NAME="View_If_Next">
-            
+
             <a href="/view?view=<TMPL_VAR NAME="View_Next">&amp;start_message=<TMPL_VAR NAME="View_Next_Message"><TMPL_VAR NAME="View_Fields">"><TMPL_VAR NAME="Localize_Next">&gt;</a>
-            
+
             </TMPL_IF>
         </td>
 
@@ -38,16 +38,16 @@
                 <input type="hidden" name="search" value="<TMPL_VAR NAME="View_Field_Search">" />
                 <input type="hidden" name="sort" value="<TMPL_VAR NAME="View_Field_Sort">" />
                 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-                <input type="hidden" name="start_message" value="$start_message" />
+                <input type="hidden" name="start_message" value="<TMPL_VAR NAME="View_This_Page">" />
                 <input type="hidden" name="filter" value="<TMPL_VAR NAME="View_Field_Filter">" />
-                
+
                 <table align=left>
                     <tr>
                         <td>
                             <font size="+1">
                                 <b>
                                     <TMPL_VAR NAME="Localize_From">
-                                </b>: 
+                                </b>:
                             </font>
                         </td>
                         <td>
@@ -61,7 +61,7 @@
                             <font size="+1">
                                 <b>
                                     <TMPL_VAR NAME="Localize_Subject">
-                                </b>: 
+                                </b>:
                             </font>
                         </td>
                         <td>
@@ -75,7 +75,7 @@
                             <font size="+1">
                                 <b>
                                     <TMPL_VAR NAME="Localize_Classification">
-                                </b>: 
+                                </b>:
                             </font>
                         </td>
                         <td>
@@ -86,9 +86,9 @@
                             </font>
                         </td>
                     </tr>
-                    
+
                     <TMPL_IF NAME="View_If_Class_Changed">
-                    
+
                     <tr>
                         <td>
                             <font size="+1">
@@ -105,7 +105,7 @@
                             </font>
                         </td>
                     </tr>
-                    
+
                     </TMPL_IF>
 
                     <tr>
@@ -113,34 +113,35 @@
                             <font size="+1">
 
                                 <TMPL_IF NAME="View_If_Reclassified">
-    
+
                                 <TMPL_VAR NAME="View_Already">
                                 <input type="submit" class="undoButton" name="undo_<TMPL_VAR NAME="View_Index">" value="<TMPL_VAR NAME="Localize_Undo">">
-                                
+
                                 <TMPL_ELSE>
-                                
+
                                 <TMPL_IF NAME="View_If_Magnetized">
-                                
+
                                 (<TMPL_VAR NAME="Localize_History_MagnetUsed">: <TMPL_VAR NAME="View_Magnet">)
-                                
+
                                 <TMPL_ELSE>
-                                
-                                <TMPL_VAR NAME="Localize_History_ShouldBe">: 
-                                <select name="$index">
+
+                                <TMPL_VAR NAME="Localize_History_ShouldBe">:
+                                <select name="<TMPL_VAR NAME="View_Index">">
                                     <option selected="selected"></option>
-                                    
+
                                     <TMPL_LOOP NAME="View_Loop_Buckets">
-                                    
+
                                     <option value="<TMPL_VAR NAME="View_Bucket">" style="color: <TMPL_VAR NAME="View_Bucket_Color">"><TMPL_VAR NAME="View_Bucket"></option>
-                                
+
                                     </TMPL_LOOP>
-                                    
+
                                 </select>
                                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
-    
+
                                 </TMPL_IF>
+
                                 </TMPL_IF>
-                            
+
                             </font>
                         </td>
                     </tr>
@@ -152,27 +153,27 @@
         <td class="openMessageBody">
             <hr />
             <TMPL_VAR NAME="View_Message">
-            
-            <!-- the following was inserted by view-quickmagnets-widget.thtml -->
-            <TMPL_INCLUDE NAME="view-quickmagnets-widget.thtml">
-            <!-- end of view-quickmagnets-widget.thtml -->
-
-            <!-- the following was inserted by view-scores-widget.thtml -->
-            <TMPL_INCLUDE NAME="view-scores-widget.thtml">
-            <!-- end of view-scores-widget.thtml -->
-
         </td>
     </tr>
     <tr>
         <td class="top20" valign="top">
 
+            <!-- the following was inserted by view-quickmagnets-widget.thtml -->
+            <TMPL_INCLUDE NAME="view-quickmagnets-widget.thtml">
+            <!-- end of view-quickmagnets-widget.thtml -->
+
             <TMPL_IF NAME="View_If_Magnetized">
-            
+
             <TMPL_VAR NAME="View_Magnet_Reason">
-            
+
             <TMPL_ELSE>
 
+            <!-- the following was inserted by view-scores-widget.thtml -->
+            <TMPL_INCLUDE NAME="view-scores-widget.thtml">
+            <!-- end of view-scores-widget.thtml -->
+
             </TMPL_IF>
+
         </td>
     <tr>
         <td class="openMessageCloser">

@@ -4,63 +4,200 @@
 <h2 class="buckets"><TMPL_VAR NAME="Bucket_Main_Title"></h2>
 
 <table summary="">
-<tr><th scope="row" class="bucketsLabel"><TMPL_VAR NAME="Localize_SingleBucket_WordCount"></th>
-<td>&nbsp;</td>
-<td align="right"><TMPL_VAR NAME="Bucket_Word_Count"></td>
-<td>(<TMPL_VAR NAME="Bucket_Unique_Count">)</td></tr>
-<tr><th scope="row" class="bucketsLabel"><TMPL_VAR NAME="Localize_SingleBucket_TotalWordCount"></th>
-<td>&nbsp;</td><td align="right"><TMPL_VAR NAME="Bucket_Total_Word_Count"></td>
-<td></td></tr>
-<tr><td colspan="3"><hr /></td></tr>
-<tr><th scope="row" class="bucketsLabel"><TMPL_VAR NAME="Localize_SingleBucket_Percentage"></th>
-<td></td><td align="right"><TMPL_VAR NAME="Bucket_Percentage"></td>
-<td></td></tr></table>
+    <tr>
+        <th scope="row" class="bucketsLabel">
+            <TMPL_VAR NAME="Localize_SingleBucket_WordCount">
+        </th>
+        <td>
+            &nbsp;
+        </td>
+        <td align="right">
+            <TMPL_VAR NAME="Bucket_Word_Count">
+        </td>
+        <td>
+            (<TMPL_VAR NAME="Bucket_Unique_Count">)
+        </td>
+    </tr>
+    <tr>
+        <th scope="row" class="bucketsLabel">
+            <TMPL_VAR NAME="Localize_SingleBucket_TotalWordCount">
+        </th>
+        <td>
+            &nbsp;
+        </td>
+        <td align="right">
+            <TMPL_VAR NAME="Bucket_Total_Word_Count">
+        </td>
+        <td>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="3">
+            <hr />
+        </td>
+    </tr>
+    <tr>
+        <th scope="row" class="bucketsLabel">
+            <TMPL_VAR NAME="Localize_SingleBucket_Percentage">
+        </th>
+        <td>
+        </td>
+        <td align="right">
+            <TMPL_VAR NAME="Bucket_Percentage">
+        </td>
+        <td>
+        </td>
+    </tr>
+</table>
 
-<form action="/buckets"><input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-<input type="hidden" name="showbucket" value="$self->{form_}{showbucket}" />
-<input type="submit" name="clearbucket" value="<TMPL_VAR NAME="Localize_SingleBucket_ClearBucket">" />
+<form action="/buckets" method="post">
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+    <input type="hidden" name="showbucket" value="<TMPL_VAR NAME="Bucket_Bucket_Name">" />
+    <input type="submit" name="clearbucket" value="<TMPL_VAR NAME="Localize_SingleBucket_ClearBucket">" />
 </form>
 
 <TMPL_IF NAME="Bucket_If_Has_Words">
-<h2 class="buckets">
-</font></h2><TMPL_VAR NAME="Localize_SingleBucket_Message1">
+
+<h2 class="buckets"><TMPL_VAR NAME="Bucket_Sub_Title"></h2>
+<TMPL_VAR NAME="Localize_SingleBucket_Message1">
 <br />
 <br />
 <table summary="<TMPL_VAR NAME="Localize_Bucket_WordListTableSummary">">
-<tr><td colspan=2>
+    <tr>
+        <td colspan=2>
 
-<TMPL_LOOP NAME="Bucket_Loop_Letters">
+            <TMPL_LOOP NAME="Bucket_Loop_Letters">
 
-<TMPL_IF NAME="Bucket_If_Show_Letter">
-<TMPL_VAR NAME="Bucket_Word_Table_Title"></td></tr>
-<tr><td colspan=2>&nbsp;</td></tr><tr>
-<td valign="top">
-<b><TMPL_VAR NAME="Bucket_Letter"></b>
-</td>
-<td valign="top">
-<table><tr valign="top">
+            <TMPL_IF NAME="Bucket_If_Show_Letter">
 
+            <TMPL_VAR NAME="Bucket_Word_Table_Title">
+        </td>
+    </tr>
+    <tr>
+        <td colspan=2>&nbsp;
+        </td>
+    </tr>
+    <tr>
+        <td valign="top">
+            <b><TMPL_VAR NAME="Bucket_Letter"></b>
+        </td>
+        <td valign="top">
+        <table>
+            <tr valign="top">
 
-<TMPL_LOOP NAME="Bucket_Loop_Loop_Word_Row">
-<td><a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_0">#Lookup"><b><TMPL_VAR NAME="Bucket_Word_0"></b></a></td><td><TMPL_VAR NAME="Bucket_Word_Count_0"></td><td>&nbsp;</td>
-<td><a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_1">#Lookup"><b><TMPL_VAR NAME="Bucket_Word_1"></b></a></td><td><TMPL_VAR NAME="Bucket_Word_Count_1"></td><td>&nbsp;</td>
-<td><a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_2">#Lookup"><b><TMPL_VAR NAME="Bucket_Word_2"></b></a></td><td><TMPL_VAR NAME="Bucket_Word_Count_2"></td><td>&nbsp;</td>
-<td><a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_3">#Lookup"><b><TMPL_VAR NAME="Bucket_Word_3"></b></a></td><td><TMPL_VAR NAME="Bucket_Word_Count_3"></td><td>&nbsp;</td>
-<td><a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_4">#Lookup"><b><TMPL_VAR NAME="Bucket_Word_4"></b></a></td><td><TMPL_VAR NAME="Bucket_Word_Count_4"></td><td>&nbsp;</td>
-<td><a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_5">#Lookup"><b><TMPL_VAR NAME="Bucket_Word_5"></b></a></td><td><TMPL_VAR NAME="Bucket_Word_Count_5"></td><td>&nbsp;</td>
-</tr><tr valign="top">
-</TMPL_LOOP>
+                <TMPL_LOOP NAME="Bucket_Loop_Loop_Word_Row">
 
-</tr></table></td>
-</tr>
-<tr><td colspan=2>&nbsp;</td></tr><tr><td colspan=2>
-<TMPL_ELSE>
-<a href=/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;showbucket=<TMPL_VAR NAME="Bucket_Bucket">&amp;showletter=<TMPL_VAR NAME="Bucket_Letter">><b><TMPL_VAR NAME="Bucket_Letter"></b></a>
-</TMPL_IF>
+                <td>
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_0">#Lookup">
+                        <b>
+                            <TMPL_VAR NAME="Bucket_Word_0">
+                        </b>
+                    </a>
+                </td>
+                <td>
+                    <TMPL_VAR NAME="Bucket_Word_Count_0">
+                </td>
+                <td>
+                    &nbsp;
+                </td>
+                <td>
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_1">#Lookup">
+                        <b>
+                            <TMPL_VAR NAME="Bucket_Word_1">
+                        </b>
+                    </a>
+                </td>
+                <td>
+                    <TMPL_VAR NAME="Bucket_Word_Count_1">
+                </td>
+                <td>
+                    &nbsp;
+                </td>
+                <td>
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_2">#Lookup">
+                        <b>
+                            <TMPL_VAR NAME="Bucket_Word_2">
+                        </b>
+                    </a>
+                </td>
+                <td>
+                    <TMPL_VAR NAME="Bucket_Word_Count_2">
+                </td>
+                <td>
+                    &nbsp;
+                </td>
+                <td>
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_3">#Lookup">
+                        <b>
+                            <TMPL_VAR NAME="Bucket_Word_3">
+                        </b>
+                    </a>
+                </td>
+                <td>
+                    <TMPL_VAR NAME="Bucket_Word_Count_3">
+                </td>
+                <td>
+                    &nbsp;
+                </td>
+                <td>
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_4">#Lookup">
+                        <b>
+                            <TMPL_VAR NAME="Bucket_Word_4">
+                        </b>
+                    </a>
+                </td>
+                <td>
+                    <TMPL_VAR NAME="Bucket_Word_Count_4">
+                </td>
+                <td>
+                    &nbsp;
+                </td>
+                <td>
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_5">#Lookup">
+                        <b>
+                            <TMPL_VAR NAME="Bucket_Word_5">
+                        </b>
+                    </a>
+                </td>
+                <td>
+                    <TMPL_VAR NAME="Bucket_Word_Count_5">
+                </td>
+                <td>
+                    &nbsp;
+                </td>
+            </tr>
+            <tr valign="top">
 
-</TMPL_LOOP>
+                </TMPL_LOOP> <!-- End of loop Bucket_Loop_Loop_Word_Row -->
 
-</td></tr>
+            </tr>
+        </table>
+
+        </td>
+    </tr>
+    <tr>
+        <td colspan=2>
+            &nbsp;
+        </td>
+    </tr>
+    <tr>
+        <td colspan=2>
+
+            <TMPL_ELSE>
+
+            <a href=/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;showbucket=<TMPL_VAR NAME="Bucket_Bucket">&amp;showletter=<TMPL_VAR NAME="Bucket_Letter">>
+                <b>
+                    <TMPL_VAR NAME="Bucket_Letter">
+                </b>
+            </a>
+
+            </TMPL_IF>
+
+            </TMPL_LOOP> <!-- End of loop Bucket_Loop_Letters -->
+
+        </td>
+    </tr>
+
 </TMPL_IF>
 
 </table>

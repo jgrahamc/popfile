@@ -1,17 +1,25 @@
 <TMPL_IF NAME="Magnet_Navigator_Enabled">
 
-<TMPL_VAR NAME="Localize_Magnet_Jump">: 
+<TMPL_VAR NAME="Localize_Magnet_Jump">:
 
 <TMPL_IF NAME="Magnet_Navigator_If_Previous">
+
 [<a href="/magnets?start_magnet=<TMPL_VAR NAME="Magnet_Navigator_Previous">&amp;session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Previous"></a>]
+
 </TMPL_IF>
 
 <TMPL_LOOP NAME="Magnet_Navigator_Loop_Pages">
+
 <TMPL_IF NAME="Magnet_Navigator_If_This_Page">
+
 <b><TMPL_VAR NAME="Magnet_Navigator_Count"></b>
+
 <TMPL_ELSE>
-[<a href="/magnets?start_magnet=$i&amp;session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Magnet_Navigator_Count">]
+
+[<a href="/magnets?start_magnet=<TMPL_VAR NAME="Magnet_Navigator_Start_Magnet">&amp;session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Magnet_Navigator_Count">]
+
 </TMPL_IF>
+
 </TMPL_LOOP>
 
 <TMPL_IF NAME="Magnet_Navigator_If_Next">
