@@ -270,7 +270,7 @@ stopwords_found:
   MessageBox MB_YESNO "Copy of default 'stopwords' already exists ('stopwords.default').$\r$\n\
       $\r$\nOK to overwrite this file?$\r$\n$\r$\n\
       Click 'Yes' to overwrite, click 'No' to skip updating this file" IDNO stopwords_done
-  SetFileAttributes stopwords.default NORMAL
+  SetFileAttributes "$INSTDIR\stopwords.default" NORMAL
 
 use_other_name:
   File /oname=stopwords.default "..\engine\stopwords"
@@ -282,11 +282,12 @@ stopwords_done:
   FileWrite ${CFG} "html_port ${GUI}$\r$\n"
   FileClose ${CFG}
   IfFileExists "$INSTDIR\popfile.cfg" 0 update_config
+  SetFileAttributes "$INSTDIR\popfile.cfg" NORMAL
   IfFileExists "$INSTDIR\popfile.cfg.bak" 0 make_cfg_backup
   MessageBox MB_YESNO "Backup copy of 'popfile.cfg' already exists ('popfile.cfg.bak').$\r$\n\
       $\r$\nOK to overwrite this file?$\r$\n$\r$\n\
       Click 'Yes' to overwrite, click 'No' to skip making a backup copy" IDNO update_config
-  SetFileAttributes popfile.cfg.bak NORMAL
+  SetFileAttributes "$INSTDIR\popfile.cfg.bak" NORMAL
 
 make_cfg_backup:
   CopyFiles $INSTDIR\popfile.cfg $INSTDIR\popfile.cfg.bak
