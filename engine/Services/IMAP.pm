@@ -664,7 +664,7 @@ sub classify_message
 
         if ( $part eq 'HEADER' ) {
             seek $pseudo_mailer, 0, 0;
-            ( $class, $slot, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, 1, '', 0 );
+            ( $class, $slot, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, 1, '', undef, 0, undef );
 
             if ( $magnet_used ) {
                 $self->log_( 0, "Message was classified as $class using a magnet." );
@@ -680,7 +680,7 @@ sub classify_message
         # a look and make it save the message to history:
         seek $pseudo_mailer, 0, 0;
 
-        ( $class, $slot, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, 0, '', 0 );
+        ( $class, $slot, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, 0, '', undef, 0, undef );
 
         close $pseudo_mailer;
         unlink "imap.tmp";
