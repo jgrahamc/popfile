@@ -1043,7 +1043,6 @@ sub pretty_number
     my ( $self, $number ) = @_;
 
     my $c = $self->{language__}{Locale_Thousands};
-    $c =~ s/"//g;
 
     $number = reverse $number;
     $number =~ s/(\d{3})/$1$c/g;
@@ -2933,8 +2932,11 @@ sub load_language
             next if ( /[ \t]*#/ );
 
             if ( /([^\t ]+)[ \t]+(.+)/ ) {
-                my $id  = $1;
-                my $msg = ($self->config_( 'test_language' )) ? $1 : $2;
+                my ( $id, $value )  = ( $1, $2 );
+                if ( $value =~ /\"(.+)\"/ ) {
+                    $value = $1;
+                }
+                my $msg = ($self->config_( 'test_language' )) ? $id : $value;
                 $msg =~ s/[\r\n]//g;
 
                 $self->{language__}{$id} = $msg;
