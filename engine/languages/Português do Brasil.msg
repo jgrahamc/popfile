@@ -274,8 +274,14 @@ Session_Title                           Sessão do POPFile Expirada
 Session_Error                           A sua sessão do POPFile expirou.  Isto pode ter sido causado por iniciar e parar o POPFile mas deixando o navegador web aberto.  Por favor clique em um dos atalhos acima para continuar a usar o POPFile.
 
 View_Title                              Visão de Única Mensagem
+View_ShowFrequencies                    Exibir freqüência das palavras
+View_ShowProbabilities                  Exibir probabilidade das palavras
+View_ShowScores                         Exibir pontuação das palavras
+View_WordMatrix                         Matriz de palavras
 
 Windows_TrayIcon                        Exibir o ícone do POPFile na bandeja do sistema?
+Windows_Console                         Enviar mensagens do POPFile para uma janela de console?
+Windows_NextTime                        <p><font color="red">Esta alteração não terá efeito até que você reinicie o POPFile</font>
 
 Header_MenuSummary                      Esta tabela é o menu de navegação que possibilita acesso a cada uma das diferentes páginas do centro de controle.
 History_MainTableSummary                Esta tabela mostra o remetente e o assunto das mensagens recebidas recentemente e permite que elas sejam revisadas e reclassificadas.  Clicar na linha de assunto vai mostrar o texto inteiro da mensagem, juntamente com informação sobre por que ela foi classificada como o foi.  A coluna 'Deveria ser' permite que você especifique a que balde a mensagem pertence, ou desfazer esta mudança.  A coluna 'Remover' permite que você exclua mensagens específicas do histórico se você não precisar mais delas.
