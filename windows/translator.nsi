@@ -1408,10 +1408,12 @@ Function SetOutlookExpressPage_Init
 
   !insertmacro PFI_IO_TEXT "ioB.ini" "1" "$(PFI_LANG_OECFG_IO_INTRO)"
   !insertmacro PFI_IO_TEXT "ioB.ini" "2" "$(PFI_LANG_OECFG_IO_CHECKBOX)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "3" "$(PFI_LANG_OECFG_IO_EMAIL)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "4" "$(PFI_LANG_OECFG_IO_SERVER)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "5" "$(PFI_LANG_OECFG_IO_USERNAME)"
-  !insertmacro PFI_IO_TEXT "ioB.ini" "6" "$(PFI_LANG_OECFG_IO_RESTORE)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "3" "$(PFI_LANG_OECFG_IO_RESTORE)"
+  
+  !insertmacro PFI_IO_TEXT "ioB.ini" "5" "$(PFI_LANG_OECFG_IO_EMAIL)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "6" "$(PFI_LANG_OECFG_IO_SERVER)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "7" "$(PFI_LANG_OECFG_IO_USERNAME)"
+  !insertmacro PFI_IO_TEXT "ioB.ini" "8" "$(PFI_LANG_OECFG_IO_POP3PORT)"
 
 FunctionEnd
 
@@ -1457,8 +1459,9 @@ Function SetOutlookExpressPage
   !define L_OEDATA      $R3   ; some data (it varies) for current OE account
   !define L_OEPATH      $R2   ; holds part of the path used to access OE account data
   !define L_ORDINALS    $R1   ; "Identity Ordinals" flag (1 = found, 0 = not found)
-  !define L_SEPARATOR   $R0   ; char used to separate the pop3 server from the username
-  !define L_TEMP        $9
+  !define L_PORT        $R0   ; POP3 Port used for an OE Account
+  !define L_SEPARATOR   $9    ; char used to separate the pop3 server from the username
+  !define L_TEMP        $8
 
   Push ${L_ACCOUNT}
   Push ${L_ACCT_INDEX}
@@ -1469,6 +1472,7 @@ Function SetOutlookExpressPage
   Push ${L_OEDATA}
   Push ${L_OEPATH}
   Push ${L_ORDINALS}
+  Push ${L_PORT}
   Push ${L_SEPARATOR}
   Push ${L_TEMP}
 
@@ -1544,10 +1548,17 @@ next_acct:
 
   ; Prepare to display the 'POP3 Server' data
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 8" "Text" ${L_OEDATA}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 10" "Text" ${L_OEDATA}
 
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "SMTP Email Address"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 7" "Text" ${L_OEDATA}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" ${L_OEDATA}
+
+  ReadRegDWORD ${L_PORT} HKCU ${L_ACCOUNT} "POP3 Port"
+  StrCmp ${L_PORT} "" 0 port_ok
+  StrCpy ${L_PORT} "110"
+
+port_ok:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 12" "Text" ${L_PORT}
 
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
 
@@ -1559,7 +1570,7 @@ next_acct:
   Pop ${L_TEMP}
   StrCmp ${L_TEMP} "" 0 try_next_account
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" ${L_OEDATA}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 11" "Text" ${L_OEDATA}
 
   ; Find the Username used by OE for this identity and the OE Account Name
   ; (so we can unambiguously report which email account we are offering to reconfigure).
@@ -1568,7 +1579,7 @@ next_acct:
   StrCpy ${L_IDENTITY} $\"${L_IDENTITY}$\"
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "Account Name"
   StrCpy ${L_OEDATA} $\"${L_OEDATA}$\"
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" "Field 10" "Text" \
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioB.ini" "Field 4" "Text" \
       "${L_OEDATA} $(PFI_LANG_OECFG_IO_LINK_1) ${L_IDENTITY} $(PFI_LANG_OECFG_IO_LINK_2)"
 
   ; Display the OE account data and offer to configure this account to work with POPFile
@@ -1587,6 +1598,11 @@ next_acct:
 change_oe:
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
   ReadRegStr ${L_TEMP} HKCU ${L_ACCOUNT} "POP3 Server"
+  ReadRegDWORD ${L_PORT} HKCU ${L_ACCOUNT} "POP3 Port"
+  StrCmp ${L_PORT} "" 0 save_data
+  StrCpy ${L_PORT} "110"
+
+save_data:
 
   ; To be able to restore the registry to previous settings when we uninstall we
   ; write a special file called popfile.reg.dummy containing the registry settings
@@ -1598,12 +1614,19 @@ change_oe:
 
   FileOpen  ${L_CFG} $INSTDIR\popfile.reg.dummy a
   FileSeek  ${L_CFG} 0 END
+  
   FileWrite ${L_CFG} "${L_ACCOUNT}$\n"
   FileWrite ${L_CFG} "POP3 User Name$\n"
   FileWrite ${L_CFG} "${L_OEDATA}$\n"
+  
   FileWrite ${L_CFG} "${L_ACCOUNT}$\n"
   FileWrite ${L_CFG} "POP3 Server$\n"
   FileWrite ${L_CFG} "${L_TEMP}$\n"
+  
+  FileWrite ${L_CFG} "${L_ACCOUNT}$\n"
+  FileWrite ${L_CFG} "POP3 Port$\n"
+  FileWrite ${L_CFG} "${L_PORT}$\n"
+  
   FileClose ${L_CFG}
 
   ; The testbed does NOT change the Outlook Express settings
@@ -1625,6 +1648,7 @@ finished_oe_config:
 
   Pop ${L_TEMP}
   Pop ${L_SEPARATOR}
+  Pop ${L_PORT}
   Pop ${L_ORDINALS}
   Pop ${L_OEPATH}
   Pop ${L_OEDATA}
@@ -1644,6 +1668,7 @@ finished_oe_config:
   !undef L_OEDATA
   !undef L_OEPATH
   !undef L_ORDINALS
+  !undef L_PORT
   !undef L_SEPARATOR
   !undef L_TEMP
 

@@ -246,6 +246,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_EMAIL      "メールアドレス:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_SERVER     "POP3 サーバー:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_USERNAME   "POP3 ユーザーネーム:"
+!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_POP3PORT   "POP3 port:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_RESTORE    "POPFile をアンインストールすれば元の設定に戻ります。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_LINK_1     "アカウントの"

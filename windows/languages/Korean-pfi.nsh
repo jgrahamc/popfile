@@ -246,6 +246,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_EMAIL      "전자 메일 주소:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_SERVER     "받는 메일(POP3) 서버:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_USERNAME   "계정 이름:"
+!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_POP3PORT   "POP3 port:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_RESTORE    "POPFile을 언인스톨 하시면 원래 설정이 복원될 것입니다."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_LINK_1     "계정 ("

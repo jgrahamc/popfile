@@ -241,6 +241,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_EMAIL      "Email Adresse:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_SERVER     "POP3 Server:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_USERNAME   "POP3 Benutzername:"
+!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_POP3PORT   "POP3 port:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_RESTORE    "Wenn Sie POPFile deinstallieren, werden die alten Einstellungen wiederhergestellt"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_LINK_1     "Account für die"
