@@ -660,7 +660,7 @@ sub parse_stream
                 
                 # Transform some escape characters
                 
-                if ( $encoding =~ /quoted\-printable/ ) {
+                if ( $encoding =~ /quoted\-printable/i ) {
                     $line =~ s/=[\r\n]*$/\n/;
                     $line =~ s/=3d/__popfile_equal__/gi;
                     $line =~ s/=([0-9A-F][0-9A-F])/chr(hex("0x$1"))/egi;

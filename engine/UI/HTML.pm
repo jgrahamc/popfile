@@ -1741,7 +1741,7 @@ sub history_page
 
         foreach my $word (keys %{$self->{classifier}->{parser}->{words}}) {
             $self->{classifier}->{full_total} -= $self->{classifier}->{parser}->{words}{$word};
-            $temp_words{$word}        -= $self->{classifier}->{parser}->{words}{$word};
+            $temp_words{$word}                -= $self->{classifier}->{parser}->{words}{$word};
             
             delete $temp_words{$word} if ( $temp_words{$word} <= 0 );
         }
@@ -1832,7 +1832,7 @@ sub history_page
 
         foreach my $word (keys %{$self->{classifier}->{parser}->{words}}) {
             $self->{classifier}->{full_total} += $self->{classifier}->{parser}->{words}{$word};
-            $temp_words{$word}        += $self->{classifier}->{parser}->{words}{$word};
+            $temp_words{$word}                += $self->{classifier}->{parser}->{words}{$word};
         }
         
         open WORDS, ">$self->{configuration}->{configuration}{corpus}/$self->{form}{shouldbe}/table";
