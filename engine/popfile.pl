@@ -774,6 +774,7 @@ sub corpus_page
     if ( defined($form{showbucket}) ) 
     {
         bucket_page($client);
+        return;
     }
     
     my $result;
