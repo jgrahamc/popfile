@@ -1357,7 +1357,7 @@ sub magnet_page
 
     # magnet listing headings
 
-    $body .= "<form action=\"/magnets\">\n";
+    $body .= "<form action=\"/magnets\" method=\"POST\">\n";
     $body .= "<table width=\"75%\" class=\"magnetsTable\" summary=\"$self->{language__}{Magnet_MainTableSummary}\">\n";
     $body .= "<caption>$self->{language__}{Magnet_Message1}</caption>\n";
     $body .= "<tr>\n<th class=\"magnetsLabel\" scope=\"col\">$self->{language__}{Magnet}</th>\n";
