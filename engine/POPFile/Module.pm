@@ -155,11 +155,6 @@ sub new
 
     $self->{forker_}         = 0;
 
-    # This is a timeout value for selecting before sysreads in our socket IO code
-    # This value (60) is a default.
-
-    $self->{slurp_timeout__} = 60;
-
     return bless $self, $type;
 }
 
@@ -200,8 +195,6 @@ sub initialize
 sub start
 {
     my ( $self ) = @_;
-
-    $self->{slurp_timeout__} = $self->global_config_( 'timeout' );
 
     return 1;
 }
@@ -513,7 +506,7 @@ sub flush_slurp_data__
             # a non-socket stream under Win32
 
             if ( ( ( $handle !~ /socket/i ) && ( $^O eq 'MSWin32' ) ) ||        # PROFILE BLOCK START
-                 defined( $slurp_data__{"$handle"}{select}->can_read( $self->{slurp_timeout__} ) ) ) { # PROFILE BLOCK STOP
+                 defined( $slurp_data__{"$handle"}{select}->can_read( $self->global_config_( 'timeout' ) ) ) ) { # PROFILE BLOCK STOP
 
                 my $c;
                 my $retcode = sysread( $handle, $c, 1 );

@@ -74,6 +74,8 @@ if ( $#ARGV >= 0 ) {
 
     $b->start();
 
+    $b->{parser__}->{debug__} = 1;
+
     my $session = $b->get_session_key( 'admin', '' );
 
     my @files;
