@@ -210,10 +210,12 @@ sub load_word_matrix
             if ( /(.+) (.+)/ )
             {
                 my $word = $self->{mangler}->mangle($1);
-                set_value( $self, $bucket, $word, $2 );
-                $self->{total}{$bucket}        += $2;
-                $self->{full_total}            += $2;
-                compute_top10( $self, $bucket, $word, $2 );
+                my $value = $2;
+                $value =~ s/[\r\n]//g;
+                $self->{total}{$bucket}        += $value;
+                $self->{full_total}            += $value;
+                set_value( $self, $bucket, $word, $value );
+                compute_top10( $self, $bucket, $word, $value );
             }
         }
 
@@ -283,7 +285,7 @@ sub classify_file
     
     foreach my $bucket (keys %{$self->{total}})
     {
-        $score{$bucket} = $self->{total}{$bucket} / $self->{full_total};
+        $score{$bucket} = log( $self->{total}{$bucket} / $self->{full_total} );
     }
 
     # The probability used for words that are not present in the corpus
@@ -297,11 +299,13 @@ sub classify_file
     
     my @buckets = keys %{$self->{total}};
 
+    # Switching from using *= to += and using the log of every probability instead
+
     foreach my $word (keys %{$self->{parser}->{words}}) 
     {
         foreach my $bucket (@buckets)
         {
-            my $probability  = get_value( $self, $bucket, $word ) / $self->{total}{$bucket};
+            my $probability = get_value( $self, $bucket, $word ) / $self->{total}{$bucket};
             
             if ( $probability == 0 ) 
             {
@@ -311,37 +315,7 @@ sub classify_file
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
             # and we multiply by the number of times that the word occurs
 
-            for my $i (1 .. $self->{parser}->{words}{$word})
-            {
-                my $max;
-                
-                $score{$bucket} *= $probability;
-
-                # This normalizing code is used because we may end up with probability values 
-                # that cause underflow in the arithmetic system.  It figures out which bucket is
-                # currently "winning" and makes sure that its values are greater than 1 by
-                # shifting all scores up by a certain amount
-
-                $max = 0;
-                
-                foreach my $b (@buckets)
-                {
-                    if ( $score{$b} > $max ) 
-                    {
-                        $max = $score{$b}; 
-                    }
-                }
-
-                if ( ( $max < 1 ) && ( $max != 0 ) )
-                {
-                    my $normalize = 10 ** int(log(1/$max)/log(10) + 0.5);
-
-                    foreach my $b (@buckets)
-                    {
-                        $score{$b} *= $normalize;
-                    }
-                }
-            }
+            $score{$bucket} += ( log( $probability ) * $self->{parser}{words}{$word} );
         }
     }
 
