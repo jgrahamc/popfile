@@ -62,7 +62,8 @@
 <table width="100%">
     <tr>
         <td align="left">
-<h2 class="history"><TMPL_VAR NAME="Localize_History_Title"> (<TMPL_VAR NAME="History_Count">)</h2><input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" />
+            <h2 class="history"><TMPL_VAR NAME="Localize_History_Title"> (<TMPL_VAR NAME="History_Count">)</h2>
+            <input type="submit" class="submit removeButton" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" />
         </td>
         <td class="historyNavigatorTop" align="right">
 
