@@ -7,6 +7,7 @@ package Classifier::Bayes;
 # ---------------------------------------------------------------------------------------------
 
 use strict;
+use Classifier::MailParse;
 use Classifier::WordMangle;
 
 #----------------------------------------------------------------------------
@@ -32,8 +33,11 @@ sub new
     # Total number of words in all buckets
     $self->{full_total}        = 0;     
 
-    # The word mangler used to clean up words
+    # Used to mangle the corpus when loaded
     $self->{mangler}           = new Classifier::WordMangle;
+
+    # Used to parse mail messages
+    $self->{parser}            = new Classifier::MailParse;
    
     return bless $self, $type;
 }
@@ -103,35 +107,13 @@ sub load_word_matrix
 sub classify_file
 {
     my ($self, $file) = @_;
-    my %words;
     my $msg_total = 0;
 
     print "Parsing message '$file'..." if $self->{debug};
 
-    open MSG, "<$file";
-    
-    # Read each line and find each "word" which we define as a sequence of alpha
-    # characters
-    
-    while (<MSG>)
-    {
-        my $line = $_;
-        
-        while ( $line =~ s/([A-Za-z]{3,})// )
-        {
-            my $word = $self->{mangler}->mangle($1);
-            
-            if ( $word ne '' ) 
-            {
-                $words{$word} += 1;
-                $msg_total += 1;
-            }
-        }
-    }
+    $self->{parser}->parse_stream($file);
 
-    close MSG;
-
-    print " $msg_total words\n" if $self->{debug};
+    print " $self->{parser}->{msg_total} words\n" if $self->{debug};
 
     # The score hash will contain the likelihood that the given message is in each
     # bucket, the buckets are the keys for score
@@ -148,7 +130,7 @@ sub classify_file
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
     # P(word|bucket) ^ word count and multiply to the score
 
-    foreach my $word (keys %words) 
+    foreach my $word (keys %{$self->{parser}->{words}}) 
     {
         foreach my $bucket (keys %{$self->{total}}) 
         {
@@ -165,7 +147,7 @@ sub classify_file
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
             # and we multiply by the number of times that the word occurs
     
-            $score{$bucket} *= ( $probability ** $words{$word} );
+            $score{$bucket} *= ( $probability ** $self->{parser}->{words}{$word} );
 
             # This normalizing code is used because we may end up with probability values 
             # that cause underflow in the arithmetic system.  It figures out which bucket is
@@ -200,7 +182,7 @@ sub classify_file
 
     if ( $self->{debug} ) 
     {
-        foreach my $b (keys %{$self->{total}})
+        foreach my $b (@ranking)
         {
             print "    Bucket $b has score $score{$b}\n";
         }

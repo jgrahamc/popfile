@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------------------------------
 
 use strict;
-use Classifier::WordMangle;
+use Classifier::MailParse;
 
 my %words;
 
@@ -87,43 +87,17 @@ sub save_word_table
 sub split_mail_message
 {
     my ($message) = @_;
-    my $mangler   = new Classifier::WordMangle;
+    my $parser   = new Classifier::MailParse;
+    my $word;
 
     print "Parsing message '$message'...\n";
 
-    open MSG, "<$message";
+    $parser->parse_stream($message);
     
-    # Read each line and find each "word" which we define as a sequence of alpha
-    # characters
-    
-    while (<MSG>)
+    foreach $word (keys %{$parser->{words}})
     {
-        my $line = $_;
-    
-        # If we hit a line that says we are handling base64 content then give up
-        # since we've hit an attachment
-        
-        if ( $line =~ /Content-Transfer-Encoding: base64/i ) 
-        {
-            last;
-        }
-    
-        # Only care about words between 3 and 45 characters since short words like
-        # an, or, if are too common and the longest word in English (according to
-        # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
-    
-        while ( $line =~ s/([A-Za-z]{3,45})// )
-        {
-            my $word = $mangler->mangle($1);
-            
-            if ( $word ne '' ) 
-            {
-                $words{$word} += 1;
-            }
-        }
+        $words{$word} += $parser->{words}{$word};
     }
-    
-    close MSG;
 }
 
 # main
