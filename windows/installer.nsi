@@ -1104,7 +1104,7 @@ FunctionEnd
 
 Function StartPOPFilePage
 
-  !insertmacro MUI_HEADER_TEXT "POPFile is now ready for use" \
+  !insertmacro MUI_HEADER_TEXT "POPFile can now be started" \
                "The POPFile User Interface only works if POPFile has been started"
 
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioC.ini"
@@ -1582,6 +1582,7 @@ skip_shutdown:
   ; Read the registry settings found in popfile.reg and restore them
   ; it there are any.   All are assumed to be in HKCU
   
+  ClearErrors
   FileOpen ${CFG} $INSTDIR\popfile.reg r
   IfErrors skip_registry_restore
   
