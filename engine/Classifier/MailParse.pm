@@ -137,8 +137,9 @@ sub add_line
         
         # Pull out any email addresses in the line that are marked with <> and have an @ in them
 
-        while ( $line =~ s/<([[:alpha:]0-9\-_\.]+?@[[:alpha:]0-9\-_\.]+?)>// )  {
+        while ( $line =~ s/<([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))>// )  {
             update_word($self, $1, $encoded, ';', '&');
+            update_word($self, $2, $encoded, '@', '&');
         }
 
         # Grab domain names
@@ -384,12 +385,14 @@ sub parse_stream
 
                     $self->{to} = $argument if ( ( $header =~ /To/ ) && ( $self->{to} eq '' ) );
                     
-                    while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@[[:alpha:]0-9\-_\.]+?)>// )  {
+                    while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))>// )  {
                         update_word($self, $1, 0, ';', '&');
+                        update_word($self, $2, 0, '@', '&');
                     }
 
-                    while ( $argument =~ s/([[:alpha:]0-9\-_\.]+?@[[:alpha:]0-9\-_\.]+)// )  {
+                    while ( $argument =~ s/([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+))// )  {
                         update_word($self, $1, 0, '', '');
+                        update_word($self, $2, 0, '@', '');
                     }
 
                     add_line( $self, $argument, 0 );
