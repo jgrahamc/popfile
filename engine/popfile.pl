@@ -1877,7 +1877,7 @@ sub get_response
     unless ( $mail ) {
        # $mail is undefined - return an error intead of crashing
        tee( $client, "-ERR error communicating with mail server$eol" );
-       return 0;
+       return "-ERR";
     }
 
     # Send the command (followed by the appropriate EOL) to the mail server
@@ -1895,7 +1895,7 @@ sub get_response
         } else {
             # An error has occurred reading from the mail server
             tee( $client, "-ERR no response from mail server" );
-            return 0;
+            return "-ERR";
         }
     }
     
