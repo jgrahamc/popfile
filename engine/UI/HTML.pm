@@ -1840,8 +1840,13 @@ sub corpus_page
         $self->{classifier__}->set_bucket_parameter( $self->{form_}{bucket}, 'quarantine', $self->{form_}{quarantine} - 1 );
     }
 
+    # This regular expression defines the characters that are NOT valid
+    # within a bucket name
+
+    my $invalid_bucket_chars = '[^[:lower:]\-_0-9]';
+
     if ( ( defined($self->{form_}{cname}) ) && ( $self->{form_}{cname} ne '' ) ) {
-        if ( $self->{form_}{cname} =~ /[^[:lower:]\-_0-9]/ )  {
+        if ( $self->{form_}{cname} =~ /$invalid_bucket_chars/ )  {
             $create_message = "<blockquote><div class=\"error01\">$self->{language__}{Bucket_Error1}</div></blockquote>";
         } else {
             if ( ( defined($self->{classifier__}->get_bucket_word_count($self->{form_}{cname})) ) && ( $self->{classifier__}->get_bucket_word_count($self->{form_}{cname}) > 0 ) )  {
@@ -1860,7 +1865,7 @@ sub corpus_page
     }
 
     if ( ( defined($self->{form_}{newname}) ) && ( $self->{form_}{oname} ne '' ) ) {
-        if ( $self->{form_}{newname} =~ /[^[:lower:]\-_]/ )  {
+        if ( $self->{form_}{newname} =~ /$invalid_bucket_chars/ )  {
             $rename_message = "<blockquote><div class=\"error01\">$self->{language__}{Bucket_Error1}</div></blockquote>";
         } else {
             $self->{form_}{oname} = lc($self->{form_}{oname});
