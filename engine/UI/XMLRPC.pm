@@ -109,14 +109,16 @@ sub start
 
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
-
-    $self->register_configuration_item_( 'configuration',   # PROFILE BLOCK START
+    
+    $self->register_configuration_item_( 'configuration',
                                          'xmlrpc_port',
-                                         $self );           # PROFILE BLOCK STOP
+                                         'xmlrpc-port.thtml',
+                                         $self );
 
-    $self->register_configuration_item_( 'security',        # PROFILE BLOCK START
+    $self->register_configuration_item_( 'security',
                                          'xmlrpc_local',
-                                          $self );          # PROFILE BLOCK STOP
+                                         'xmlrpc-local.thtml',
+                                         $self );
 
     # We use a single XMLRPC::Lite object to handle requests for access to the
     # Classifier::Bayes object
@@ -227,49 +229,29 @@ sub service
 #
 # configure_item
 #
-#    $name            The name of the item being configured, was passed in by the call
-#                     to register_configuration_item
-#    $language        Reference to the hash holding the current language
-#    $session_key     The current session key
+#    $name            Name of this item
+#    $templ           The loaded template that was passed as a parameter
+#                     when registering
 #
-#  Must return the HTML for this item
 # ---------------------------------------------------------------------------------------------
 
 sub configure_item
 {
-    my ( $self, $name, $language, $session_key ) = @_;
-
-    my $body;
+    my ( $self, $name, $templ ) = @_;
 
     if ( $name eq 'xmlrpc_port' ) {
-        $body .= "<form action=\"/configuration\">\n";
-        $body .= "<label class=\"configurationLabel\" for=\"configPopPort\">". $$language{Configuration_XMLRPCPort} . ":</label><br />\n";
-        $body .= "<input name=\"xmlrpc_port\" type=\"text\" id=\"configPopPort\" value=\"" . $self->config_( 'port' ) . "\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_xmlrpc_port\" value=\"" . $$language{Apply} . "\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        $templ->param ( 'XMLRPC_Port' => $self->config_( 'port' ) );
     }
 
     if ( $name eq 'xmlrpc_local' ) {
-        $body .= "<span class=\"securityLabel\">$$language{Security_XMLRPC}:</span><br />\n";
-
-        $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
+        
         if ( $self->config_( 'local' ) == 1 ) {
-            $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
-            $body .= "<span class=\"securityWidgetStateOff\">$$language{Security_NoStealthMode}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securityAcceptPOP3On\" name=\"toggle\" value=\"$$language{ChangeToYes}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"xmlrpc_local\" value=\"1\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        } else {
-            $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
-            $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptPOP3Off\" name=\"toggle\" value=\"$$language{ChangeToNo} (Stealth Mode)\" />\n";
-            $body .= "<input type=\"hidden\" name=\"xmlrpc_local\" value=\"2\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+            $templ->param( 'XMLRPC_local_on' => 1 );
         }
-        $body .= "</td></tr></table>\n";
-     }
-
-    return $body;
+        else {
+            $templ->param( 'XMLRPC_local_on' => 0 );
+        }
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -278,15 +260,15 @@ sub configure_item
 #
 #    $name            The name of the item being configured, was passed in by the call
 #                     to register_configuration_item
-#    $language        Reference to the hash holding the current language
+#    $templ           The loaded template
+#    $language        The language currently in use
 #    $form            Hash containing all form items
 #
-#  Must return the HTML for this item
 # ---------------------------------------------------------------------------------------------
 
 sub validate_item
 {
-    my ( $self, $name, $language, $form ) = @_;
+    my ( $self, $name, $templ, $language, $form ) = @_;
 
     # Just check to see if the XML rpc port was change and check its value
 
@@ -294,9 +276,11 @@ sub validate_item
         if ( defined($$form{xmlrpc_port}) ) {
             if ( ( $$form{xmlrpc_port} >= 1 ) && ( $$form{xmlrpc_port} < 65536 ) ) {
                 $self->config_( 'port', $$form{xmlrpc_port} );
-                return '<blockquote>' . sprintf( $$language{Configuration_XMLRPCUpdate} . '</blockquote>' , $self->config_( 'port' ) );
-            } else {
-                 return "<blockquote><div class=\"error01\">$$language{Configuration_Error7}</div></blockquote>";
+                $templ->param( 'XMLRPC_port_if_error' => 0 );
+                $templ->param( 'XMLRPC_port_updated' => sprintf( $$language{Configuration_XMLRPCUpdate}, $self->config_( 'port' ) ) );
+            } 
+            else {
+                $templ->param( 'XMLRPC_port_if_error' => 1 );
             }
         }
     }
