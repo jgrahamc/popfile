@@ -18,7 +18,7 @@
 #--------------------------------------------------------------------------
 
   !define MUI_PRODUCT "POPFile"
-  !define MUI_VERSION "0.19.0 (CVS)"
+  !define MUI_VERSION "0.20.0 (CVS)"
   !define RELEASE_NOTES "..\engine\v0.19.0.change"
 
   !include "MUI.nsh"
@@ -321,6 +321,7 @@ update_config:
   File "..\engine\Classifier\WordMangle.pm"
   File "..\engine\Classifier\MailParse.pm"
   SetOutPath $INSTDIR\POPFile
+  File "..\engine\POPFile\MQ.pm"
   File "..\engine\POPFile\Logger.pm"
   File "..\engine\POPFile\Module.pm"
   File "..\engine\POPFile\Configuration.pm"
