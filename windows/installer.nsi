@@ -2171,14 +2171,14 @@ not_good:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioG.ini" "Settings" "RTL" "$(^RTL)"
 
   !insertmacro PFI_IO_TEXT "ioG.ini" "1" \
-      "$(PFI_LANG_PERLREQ_IO_TEXT_1)\r\n\
-       $(PFI_LANG_PERLREQ_IO_TEXT_2)\r\n\
-       $(PFI_LANG_PERLREQ_IO_TEXT_3)\r\n\
+      "$(PFI_LANG_PERLREQ_IO_TEXT_1)\
+       $(PFI_LANG_PERLREQ_IO_TEXT_2)\
+       $(PFI_LANG_PERLREQ_IO_TEXT_3)\
        $(PFI_LANG_PERLREQ_IO_TEXT_4)"
 
   !insertmacro PFI_IO_TEXT "ioG.ini" "2" \
       "$(PFI_LANG_PERLREQ_IO_TEXT_5) ${L_VERSION}\r\n\r\n\
-       $(PFI_LANG_PERLREQ_IO_TEXT_6)\r\n\
+       $(PFI_LANG_PERLREQ_IO_TEXT_6)\
        $(PFI_LANG_PERLREQ_IO_TEXT_7)"
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_PERLREQ_TITLE)" " "
