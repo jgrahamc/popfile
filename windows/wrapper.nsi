@@ -56,12 +56,12 @@
 # starting POPFile).
 #
 # [Configuration]
-# POPFileFolder=path to the folder containing the POPFile program files
-# UserDataFolder=path to the folder containing the user's POPFile configuration file(s)
+#  POPFileFolder=path to the folder containing the POPFile program files
+#  UserDataFolder=path to the folder containing the user's POPFile configuration file(s)
 #
 # [Environment]
-# POPFILE_ROOT=short-filename path (in lowercase) to the POPFile program files
-# POPFILE_USER=short-filename path (in lowercase) to the user's configuration file(s)
+#  POPFILE_ROOT=short-filename path (in lowercase) to the POPFile program files
+#  POPFILE_USER=short-filename path (in lowercase) to the user's configuration file(s)
 #
 # NOTES:
 #
@@ -89,7 +89,7 @@
   Name    "POPFile Wrapper Utility"
   Caption "POPFile Wrapper Utility"
 
-  !define VERSION   "0.2.1"     ; see 'VIProductVersion' comment below for format details
+  !define VERSION   "0.2.2"     ; see 'VIProductVersion' comment below for format details
 
   !ifdef BACKGROUND
           OutFile wrapperb.exe
@@ -117,7 +117,7 @@
   VIAddVersionKey "ProductName" "POPFile Wrapper Utility"
   VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sourceforge.net"
   VIAddVersionKey "CompanyName" "The POPFile Project"
-  VIAddVersionKey "LegalCopyright" "© 2001-2003  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright" "© 2003-2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "Start POPFile (with environment variables)"
   VIAddVersionKey "FileVersion" "${VERSION}"
 
@@ -149,8 +149,19 @@ Section default
 
   !define L_RESERVED      $0    ; register $0 is used to return result from System.dll
 
-  ; Expect to find 'wrapper.ini' in the current directory (if not found, we create it there)
+  ; Expect to find 'wrapper.ini' in the current directory
+  ; (if not found, we ask for permission to create it there)
   
+  IfFileExists ".\Wrapper.ini" continue
+  GetFullPathName ${L_DATA} ".\"
+  MessageBox MB_YESNO|MB_ICONQUESTION "Unable to find user's POPFile configuration data in\
+      $\r$\n$\r$\n\
+      ${L_DATA}\
+      $\r$\n$\r$\n\
+      Click 'Yes' to create user data here or 'No' to quit"\
+      IDNO error_exit
+
+continue:
   ReadINIStr ${L_POPFILE_ROOT} ".\Wrapper.ini" "Configuration" "POPFileFolder"
   StrCmp ${L_POPFILE_ROOT} "" 0 got_pf_path
 
