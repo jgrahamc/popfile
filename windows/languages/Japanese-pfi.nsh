@@ -26,6 +26,11 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 #--------------------------------------------------------------------------
+#
+# Translation created by: Junya Ishihara (UTF-8: E79FB3 E58E9F E6B7B3 E4B99F) (jishiha at users.sourceforge.net)
+# Translation updated by: Junya Ishihara (UTF-8: E79FB3 E58E9F E6B7B3 E4B99F) (jishiha at users.sourceforge.net) 
+#
+#--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_MB* text used for message boxes):
 #
 #   (1) The sequence  $\r$\n        inserts a newline
