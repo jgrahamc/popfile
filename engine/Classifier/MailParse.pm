@@ -207,7 +207,7 @@ sub update_tag
     my $attribute;
     my $value;
     
-    #these are used to pass good values to update_word
+    # These are used to pass good values to update_word
     my $quote;
     my $end_quote;
     
@@ -274,9 +274,19 @@ sub update_tag
         }
         
         # Tags that load sounds
-        if ( $ attribute =~ /^bgsound$/i && $tag =~ /^body$/i ) {
+        if ( $attribute =~ /^bgsound$/i && $tag =~ /^body$/i ) {
             add_url( $self, $2, 0, $quote, $end_quote );
             next;
+        }
+
+        # Tags with colors in them
+        if ( ( $attribute =~ /^color$/i ) && ( $tag =~ /^font$/i ) ) {
+            update_word( $self, $value, 0, $quote, $end_quote );
+        }
+                
+        # Tags with background colors
+        if ( ( $attribute =~ /^bgcolor$/i ) && ( $tag =~ /^(td|table|body|tr|th)$/ ) ) {
+            update_word( $self, $value, 0, $quote, $end_quote );
         }
                 
         # Tags with style attributes (this one may impact performance!!!)
