@@ -30,7 +30,7 @@ sub new
     my $self = POPFile::Module->new();
 
     # All the current configuration parameters are stored in this hash which
-    # is intended to be globally accessed by modules that make use of this module, 
+    # is intended to be globally accessed by modules that make use of this module,
     # to register a configuration default entries are made in this hash in the form
     #
     # $self->{configuration_parameters__}{parameter}
@@ -39,6 +39,14 @@ sub new
     # Name of the PID file that we created
 
     $self->{pid_file__} = '';
+
+    # The time to delay checking of the PID file
+
+    $self->{pid_delay__} = 5;
+
+    # The last time the PID was checked
+
+    $self->{pid_check__} = time;
 
     bless $self, $type;
 
@@ -72,7 +80,7 @@ sub initialize
     # message_count is a local counter within that download, for sorting
     # purposes must sort on download_count and then message_count
     #
-    # download_count is incremented every time POPFile forks to 
+    # download_count is incremented every time POPFile forks to
     # start a session for downloading messages (see Proxy::Proxy::service
     # for details)
 
@@ -87,7 +95,7 @@ sub initialize
     # Adding the X-Text-Classification on
     $self->global_config_( 'xtc', 1 );
 
-    # Adding the X-POPFile-Link is on 
+    # Adding the X-POPFile-Link is on
     $self->global_config_( 'xpl', 1 );
 
     # The default location for the message files
@@ -112,21 +120,45 @@ sub start
 
     $self->{pid_file__} = $self->config_( 'piddir' ) . 'popfile.pid';
 
-    if ( -e $self->{pid_file__} ) {
-        my $error = "\n\nAnother copy of POPFile appears to be running.  \nIf this is not the case then delete the file \n$self->{pid_file__} and restart POPFile.\n\n";
-
-        print STDERR $error;
-
+    if (defined($self->live_check_())) {
         return 0;
     }
 
-    if ( open PID, ">$self->{pid_file__}" ) {
-        print PID "$$\n";
-        close PID;
+    $self->write_pid_();
+
+    return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# service
+#
+# service() is a called periodically to give the module a chance to do housekeeping work.
+#
+# If any problem occurs that requires POPFile to shutdown service() should return 0 and
+# the top level process will gracefully terminate POPFile including calling all stop()
+# methods.  In normal operation return 1.#
+# ---------------------------------------------------------------------------------------------
+sub service
+{
+    my ( $self ) = @_;
+
+    my $time = time;
+
+    if ( $self->{pid_check__} <= ( $time - $self->{pid_delay__})) {
+
+        $self->{pid_check__} = $time;
+
+        if ( !$self->check_pid_() ) {
+            $self->write_pid_();
+            $self->log_("New POPFile instance detected and signalled")
+        }
     }
 
     return 1;
 }
+
+
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -141,8 +173,111 @@ sub stop
 
     $self->save_configuration();
 
+    $self->delete_pid_();
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# live_check_
+#
+# Checks if an instance of POPFile is currently running. Takes 10 seconds.
+# Returns the process-ID of the currently running POPFile, undef if none.
+#
+# ---------------------------------------------------------------------------------------------
+sub live_check_
+{
+    my ( $self ) = @_;
+
+    if ( $self->check_pid_() ) {
+
+        my $error = "\n\nA copy of POPFile appears to be running.\n Attempting to signal the previous copy.\n Waiting " . ($self->{pid_delay__} * 2) . " seconds for a reply.\n";
+
+        $self->delete_pid_();
+
+        print STDERR $error;
+
+        select(undef, undef, undef, ($self->{pid_delay__} * 2));
+
+        my $pid = $self->get_pid_();
+
+        if (defined($pid)) {
+            $error = "\n A copy of POPFile is running.\n It has signalled that it is alive with proccess ID: $pid\n";
+            print STDERR $error;
+            return $pid;
+        }
+    }
+    return undef;
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# check_pid_
+#
+# returns 1 if the pid file exists, 0 otherwise
+#
+# ---------------------------------------------------------------------------------------------
+
+sub check_pid_
+{
+    my ( $self ) = @_;
+    return (-e $self->{pid_file__});
+}
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_pid_
+#
+# returns the pidfile proccess ID if a pid file is present, undef otherwise (0 might be a valid PID)
+#
+# ---------------------------------------------------------------------------------------------
+sub get_pid_
+{
+    my ( $self ) = @_;
+
+    if (open PID, $self->{pid_file__}) {
+        my $pid = <PID>;
+        $pid =~ s/[\r\n]//g;
+        close PID;
+        return $pid;
+    }
+
+    return undef;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# write_pid_
+#
+# writes the current process-ID into the pid file
+#
+# ---------------------------------------------------------------------------------------------
+sub write_pid_
+{
+    my ( $self ) = @_;
+
+    if ( open PID, ">$self->{pid_file__}" ) {
+        print PID "$$\n";
+        close PID;
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# delete_pid_
+#
+# deletes the pid file
+#
+# ---------------------------------------------------------------------------------------------
+sub delete_pid_
+{
+    my ( $self ) = @_;
+
     unlink( $self->{pid_file__} );
 }
+
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -283,7 +418,7 @@ sub load_configuration
 
     if ( open CONFIG, "<popfile.cfg" ) {
         while ( <CONFIG> ) {
-            s/(\015|\012)//g; 
+            s/(\015|\012)//g;
             if ( /(\S+) (.+)/ ) {
 	        my $parameter = $1;
 		my $value     = $2;
