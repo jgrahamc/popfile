@@ -147,6 +147,7 @@
   ; Specify NSIS output filename
 
   OutFile "setup.exe"
+
   ; Ensure CRC checking cannot be turned off using the command-line switch
 
   CRCcheck Force
@@ -628,7 +629,7 @@ done:
   Call TrimNewlines
   Pop ${L_OLDUI}
 
-  ; Save the UI port settings found in popfile.cfg for later use by the 'MakeItSafe' function
+  ; Save the UI port settings (from popfile.cfg) for later use by the 'MakeItSafe' function
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "UI Port" "NewStyle" "${GUI}"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "UI Port" "OldStyle" "${L_OLDUI}"
@@ -1312,10 +1313,14 @@ done:
 FunctionEnd
 
 #--------------------------------------------------------------------------
-# Installer Function: StrCheckDecimal
+# Macro: StrCheckDecimal
 #
-# Checks that a given string contains only the digits 0 to 9.
-# (if string contains any invalid characters, "" is returned)
+# The installation process and the uninstall process both use a function which checks if
+# a given string contains a decimal number. This macro makes maintenance easier by ensuring
+# that both processes use identical functions, with the only difference being their names.
+#
+# The 'StrCheckDecimal' and 'un.StrCheckDecimal' functions check that a given string contains
+# only the digits 0 to 9. (if the string contains any invalid characters, "" is returned)
 #
 # Inputs:
 #         (top of stack)   - string which may contain a decimal number
@@ -1330,50 +1335,67 @@ FunctionEnd
 #         ($R0 at this point is "12345")
 #
 #--------------------------------------------------------------------------
+!macro StrCheckDecimal UN
+  Function ${UN}StrCheckDecimal
 
-Function StrCheckDecimal
+    !define DECIMAL_DIGIT    "0123456789"
 
-  !define DECIMAL_DIGIT    "0123456789"
+    Exch $0   ; The input string
+    Push $1   ; Holds the result: either "" (if input is invalid) or the input string (if valid)
+    Push $2   ; A character from the input string
+    Push $3   ; The offset to a character in the "validity check" string
+    Push $4   ; A character from the "validity check" string
+    Push $5   ; Holds the current "validity check" string
 
-  Exch $0   ; The input string
-  Push $1   ; Holds the result: either "" (if input is invalid) or the input string (if valid)
-  Push $2   ; A character from the input string
-  Push $3   ; The offset to a character in the "validity check" string
-  Push $4   ; A character from the "validity check" string
-  Push $5   ; Holds the current "validity check" string
+    StrCpy $1 ""
 
-  StrCpy $1 ""
+  next_input_char:
+    StrCpy $2 $0 1                ; Get the next character from the input string
+    StrCmp $2 "" done
+    StrCpy $5 ${DECIMAL_DIGIT}$2  ; Add it to end of "validity check" to guarantee a match
+    StrCpy $0 $0 "" 1
+    StrCpy $3 -1
 
-next_input_char:
-  StrCpy $2 $0 1                ; Get the next character from the input string
-  StrCmp $2 "" done
-  StrCpy $5 ${DECIMAL_DIGIT}$2  ; Add it to end of "validity check" to guarantee a match
-  StrCpy $0 $0 "" 1
-  StrCpy $3 -1
+  next_valid_char:
+    IntOp $3 $3 + 1
+    StrCpy $4 $5 1 $3             ; Extract next "valid" character (from "validity check" string)
+    StrCmp $2 $4 0 next_valid_char
+    IntCmp $3 10 invalid 0 invalid  ; If match is with the char we added, input string is bad
+    StrCpy $1 $1$4                ; Add "valid" character to the result
+    goto next_input_char
 
-next_valid_char:
-  IntOp $3 $3 + 1
-  StrCpy $4 $5 1 $3             ; Extract next "valid" character (from "validity check" string)
-  StrCmp $2 $4 0 next_valid_char
-  IntCmp $3 10 invalid 0 invalid  ; If match is with the char we added, input string is bad
-  StrCpy $1 $1$4                ; Add "valid" character to the result
-  goto next_input_char
+  invalid:
+    StrCpy $1 ""
 
-invalid:
-  StrCpy $1 ""
+  done:
+    StrCpy $0 $1      ; Result is either a string of decimal digits or ""
+    Pop $5
+    Pop $4
+    Pop $3
+    Pop $2
+    Pop $1
+    Exch $0           ; place result on top of the stack
 
-done:
-  StrCpy $0 $1      ; Result is either a string of decimal digits or ""
-  Pop $5
-  Pop $4
-  Pop $3
-  Pop $2
-  Pop $1
-  Exch $0           ; place result on top of the stack
+    !undef DECIMAL_DIGIT
 
-  !undef DECIMAL_DIGIT
+  FunctionEnd
+!macroend  
 
-FunctionEnd
+#--------------------------------------------------------------------------
+# Installer Function: StrCheckDecimal
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro StrCheckDecimal ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.StrCheckDecimal
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+!insertmacro StrCheckDecimal "un."
 
 #--------------------------------------------------------------------------
 # Macro: TrimNewlines
@@ -1421,7 +1443,7 @@ FunctionEnd
 !insertmacro TrimNewlines ""
 
 #--------------------------------------------------------------------------
-# Uninstaller Function: unTrimNewlines
+# Uninstaller Function: un.TrimNewlines
 #
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
@@ -1434,12 +1456,48 @@ FunctionEnd
 
 Section "Uninstall"
 
+  !define L_LNE         $R4
+  !define L_REG_KEY     $R5
+  !define L_REG_SUBKEY  $R6
+  !define L_REG_VALUE   $R7
+  !define L_TEMP        $R8
+  
   IfFileExists $INSTDIR\popfile.pl skip_confirmation
     MessageBox MB_YESNO "It does not appear that POPFile is installed in the \
         directory '$INSTDIR'.$\r$\nContinue anyway (not recommended)" IDYES skip_confirmation
     Abort "Uninstall aborted by user"
 skip_confirmation:
 
+  ; Shutdown POPFile before uninstalling it
+
+  ClearErrors
+
+  FileOpen ${CFG} $INSTDIR\popfile.cfg r
+
+loop:
+  FileRead ${CFG} ${L_LNE}
+  IfErrors done
+
+  StrCpy ${L_TEMP} ${L_LNE} 10
+  StrCmp ${L_TEMP} "html_port " got_html_port
+  Goto loop
+
+got_html_port:
+  StrCpy ${GUI} ${L_LNE} 5 10
+  Goto loop
+
+done:
+  FileClose ${CFG}
+
+  Push ${GUI}
+  Call un.TrimNewlines
+  Call un.StrCheckDecimal
+  Pop ${GUI}
+  StrCmp ${GUI} "" skip_shutdown
+  NSISdl::download_quiet http://127.0.0.1:${GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  Pop ${L_TEMP}
+
+skip_shutdown:
   Delete $SMPROGRAMS\POPFile\Support\*.url
   RMDir $SMPROGRAMS\POPFile\Support
 
@@ -1463,22 +1521,22 @@ skip_confirmation:
   FileOpen ${CFG} $INSTDIR\popfile.reg r
   IfErrors skip_registry_restore
 restore_loop:
-  FileRead ${CFG} $R5
-  Push $R5
+  FileRead ${CFG} ${L_REG_KEY}
+  Push ${L_REG_KEY}
   Call un.TrimNewlines
-  Pop $R5
+  Pop ${L_REG_KEY}
   IfErrors skip_registry_restore
-  FileRead ${CFG} $R6
-  Push $R6
+  FileRead ${CFG} ${L_REG_SUBKEY}
+  Push ${L_REG_SUBKEY}
   Call un.TrimNewlines
-  Pop $R6
+  Pop ${L_REG_SUBKEY}
   IfErrors skip_registry_restore
-  FileRead ${CFG} $R7
-  Push $R7
+  FileRead ${CFG} ${L_REG_VALUE}
+  Push ${L_REG_VALUE}
   Call un.TrimNewlines
-  Pop $R7
+  Pop ${L_REG_VALUE}
   IfErrors skip_registry_restore
-  WriteRegStr HKCU $R5 $R6 $R7
+  WriteRegStr HKCU ${L_REG_KEY} ${L_REG_SUBKEY} ${L_REG_VALUE}
   goto restore_loop
 
 skip_registry_restore:
@@ -1557,7 +1615,7 @@ skip_registry_restore:
   IfFileExists $INSTDIR 0 Removed
     MessageBox MB_YESNO|MB_ICONQUESTION \
       "Do you want to remove all files in your POPFile directory? (If you have anything \
-you created that you want to keep, click No)" IDNO Removed
+      you created that you want to keep, click No)" IDNO Removed
     Delete $INSTDIR\*.* ; this would be skipped if the user hits no
     RMDir /r $INSTDIR
     IfFileExists $INSTDIR 0 Removed
@@ -1565,6 +1623,11 @@ you created that you want to keep, click No)" IDNO Removed
                  "Note: $INSTDIR could not be removed."
 Removed:
 
+  !undef L_LNE
+  !undef L_REG_KEY
+  !undef L_REG_SUBKEY
+  !undef L_REG_VALUE
+  !undef L_TEMP
 SectionEnd
 
 #--------------------------------------------------------------------------
