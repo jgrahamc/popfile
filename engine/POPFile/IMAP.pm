@@ -131,6 +131,10 @@ sub initialize
     $self->config_( 'debug_level', $self->{debug__} );
     $self->config_( 'expunge', 0 );
 
+    # A counter to count classified messages.
+    # This value will be used to get unique names for history files.
+    $self->config_( 'class_counter', 0 );
+
     # Those next variables have getter/setter functions and should
     # not be used directly:
 
@@ -196,24 +200,9 @@ sub start
                                          $self );
 
     $self->register_configuration_item_( 'configuration',
-                                         'imap_5_update_interval',
-                                         'imap-update-interval.thtml',
+                                         'imap_5_options',
+                                         'imap-options.thtml',
                                          $self );
-
-    $self->register_configuration_item_( 'configuration',
-                                         'imap_6_byte_limit',
-                                         'imap-byte-limit.thtml',
-                                         $self );
-
-    $self->register_configuration_item_( 'configuration',
-                                         'imap_7_debug_level',
-                                         'imap-debug-level.thtml',
-                                         $self );
-
-    $self->register_configuration_item_( 'configuration',
-                                          'imap_8_expunge',
-                                          'imap-expunge.thtml',
-                                          $self );
 
     # Read the class files for all messages in history
     # and retrieve hashes and classifications
@@ -389,14 +378,15 @@ sub check_for_new_messages__
                 next;
             }
 
-            # open a memory file that the classifier will
+            # open a temporary file that the classifier will
             # use to read the message in binary, read-write mode:
             my $pseudo_mailer;
-            unless ( open $pseudo_mailer, "+>:bytes", undef ) {
+            unless ( open $pseudo_mailer, "+>imap.tmp" ) {
                 $self->log_( "Unable to open memory file. Nothing done to message $msg." );
                 $self->log_( "" );
                 next;
             }
+            binmode $pseudo_mailer;
 
             # We don't retrieve the complete message, but handle
             # it in different parts.
@@ -444,10 +434,10 @@ sub check_for_new_messages__
                 # are looking at the complete message. Thus we let the classifier have
                 # a look and make it save the message to history:
                 seek $pseudo_mailer, 0, 0;
-                ( $class, $history_file, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, $self->global_config_( 'download_count' ), $msg, 0, '', 0 );
+                ( $class, $history_file, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, $self->global_config_( 'download_count' ), $self->config_( 'class_counter' ), 0, '', 0 );
                 close $pseudo_mailer;
 
-                if ( $magnet_used || $part eq 'TEXT' ) {
+               if ( $magnet_used || $part eq 'TEXT' ) {
 
                     # Move message:
 
@@ -477,6 +467,9 @@ sub check_for_new_messages__
 
                     # Remember hash of this message in history, etc:
                     $self->was_classified__( $hash, $class, $history_file );
+
+                    # Update the class_counter var
+                    $self->config_( 'class_counter', $self->config_( 'class_counter' ) + 1 );
 
                     next MESSAGE;
                 }
@@ -523,14 +516,13 @@ sub reclassify_on_move__
 
         # We have to be careful if an output folder is also a watched folder
         # Simply incrementing our UIDNEXT value for each message we
-        # look at isn't good enough in this case. It might be a new
+        # look at isn't good enough in this case. There might be a new
         # message that came in after check_for_new_messages had a look at the folder.
         # That's why we keep track of the number of completely new messages and
         # why we update our UIDNEXT value only after we are done with the
         # current folder.
 
         my $new_messages = 0;
-        my $highest_uid = 0;
 
         # If the user has not yet configured a folder for this bucket, do nothing
         if ( ! defined $folder ) {
@@ -546,6 +538,7 @@ sub reclassify_on_move__
         }
 
         my $old_next = $self->uid_next__( $folder );
+
         $self->say( $imap, "SELECT \"$folder\"" );
         unless ( $self->get_response( $imap ) == 1 ) {
             $self->log_( "Could not SELECT folder $folder!" );
@@ -554,13 +547,6 @@ sub reclassify_on_move__
 
         # Get a list of UIDs greater than our old_next value.
         my @uids = $self->get_uids_ge( $imap, $old_next );
-
-        if ( $#uids > -1 ) {
-            $highest_uid = $uids[$#uids];
-        }
-        else {
-            $highest_uid = $old_next;
-        }
 
         foreach my $msg ( @uids ) {
             $self->log_( "" );
@@ -613,9 +599,21 @@ sub reclassify_on_move__
             else {
                 # Perhaps this message couldn't be reclassified because it is completely
                 # new and was thus never classified in the first place?
-                if ( $self->can_classify__( $hash ) ) {
-                    $new_messages++;
-                    $self->log_( "Found a new message while looking for reclassification requests." );
+                # If we are looking at a folder that also serves as a watched folder, we
+                # will not touch the UIDNEXT value so chech_for_new_messages__ will find
+                # the message and deal with it. If this is not a watched folder, the new
+                # message(s) will be ignored.
+
+                my %watched_folders;
+                @watched_folders{ $self->watched_folders__() } = ();
+                if ( exists $watched_folders{$folder} ) {
+                    # This _is_ a watched folder
+
+                    if ( $self->can_classify__( $hash ) ) {
+                        # and this is a new message
+                        $new_messages++;
+                        $self->log_( "Found a new message while looking for reclassification requests." );
+                    }
                 }
                 $self->log_( "Did not reclassify message." );
                 $self->log_( "" );
@@ -626,7 +624,7 @@ sub reclassify_on_move__
             $self->log_( "Found $new_messages new messages in folder $folder" );
         }
         else {
-            $self->uid_next__( $folder, $highest_uid + @uids );
+            $self->uid_next__( $folder, $old_next + @uids );
         }
     }
 }
@@ -948,7 +946,7 @@ sub get_response
                 $re = '\d (OK|BAD|NO)';
             }
             elsif ( $self->{debug__} == 2 ) {
-                $re = '(\d (OK|BAD|NO))|(^*)';
+                $re = '(\d (OK|BAD|NO))|(^\*)';
             }
             elsif ( $self->{debug__} == 3 ) {
                 $re = '';
@@ -1696,6 +1694,7 @@ sub was_classified__
 #   $msg_file:      Name of the msg file in history (no path, just file name)
 #   $hash:          the hash value of this message
 #   $class:         The current classification of this message
+#   $magnet_used:   If true, the cls file will contain
 #   $oldclass:      The old classification if we were reclassifying. This may be undefined.
 # there is no return value
 #----------------------------------------------------------------------------
@@ -1707,24 +1706,37 @@ sub change_cls_file__
     my $cls_path = $self->get_user_path_( $self->global_config_( 'msgdir' ) . $msg_file );
     $cls_path =~ s/\.msg/.cls/;
 
-    if ( open CLS, ">$cls_path" ) {
+    # What we will do here depends whether we were called after classification
+    # or after reclassification.
 
-        # called after reclassification:
-        if ( defined $oldclass ) {
+    # after reclassification
+    if ( defined $oldclass ) {
+        if ( open CLS, ">$cls_path" ) {
             print CLS "RECLASSIFIED\n$class\n$oldclass\n$hash\n";
         }
-        # called after classification:
         else {
-            print CLS "$class\n$hash\n";
-            $self->{hash_to_history__}{$hash} = $msg_file;
+            $self->log_( "Could not open cls file $cls_path." );
         }
-        close CLS;
+    }
 
+    # after classification:
+    else {
+        if ( open CLS, "<$cls_path" ) {
+            my $first = <CLS>;
+            close CLS;
+            if ( open CLS, ">$cls_path" ) {
+                print CLS "$first$hash\n";
+                close CLS;
+            }
+            else {
+                $self->log_( "Could not write to cls file $cls_path." );
+            }
+        }
+        else {
+            $self->log_( "Could not read cls file $cls_path." );
+        }
 
         $self->log_( "Updated class file $cls_path. Class: $class. Hash: $hash." );
-    }
-    else {
-        $self->log_( "Could not open cls file $cls_path." );
     }
 }
 
@@ -1910,19 +1922,20 @@ sub configure_item
     }
 
 
-    # update interval in seconds
-    if ( $name eq 'imap_5_update_interval' ) {
+    # Various options for the IMAP module
+    if ( $name eq 'imap_5_options' ) {
+
+        # Are we expunging after moving messages?
+        my $checked = $self->config_( 'expunge' ) ? 'checked="checked"' : '';
+        $template->param( IMAP_expunge_is_checked => $checked );
+
+        # Update interval in seconds
         $template->param( IMAP_interval => $self->config_( 'update_interval' ) );
-    }
 
-
-    # How many bytes/octets do we use for the classification?
-    if ( $name eq 'imap_6_byte_limit' ) {
+        # How many bytes should we use for classification?
         $template->param( IMAP_byte_limit => $self->config_( 'byte_limit' ) );
-    }
 
-    # How noisy should the log file be?
-    if ( $name eq 'imap_7_debug_level' ) {
+        # Which debug level do we use to feed the logger?
         my @loop = ();
         for my $i ( 0 .. 3 ) {
             my %data = ();
@@ -1932,12 +1945,6 @@ sub configure_item
             push @loop, \%data;
         }
         $template->param( IMAP_debug_levels => \@loop );
-    }
-
-    # Should we expunge after leaving a folder or not?
-    if ( $name eq 'imap_8_expunge' ) {
-        my $checked = $self->config_( 'expunge' ) ? 'checked="checked"' : '';
-        $template->param( IMAP_expunge_is_checked => $checked );
     }
 }
 
@@ -2097,50 +2104,51 @@ sub validate_item
         return;
     }
 
-    # update interval
-    if ( $name eq 'imap_5_update_interval' ) {
-        if ( defined $$form{update_imap_5_update_interval} ) {
-           if ( $$form{imap_5_update_interval} > 10 && $$form{imap_5_update_interval} < 60*60 ) {
-                $self->config_( 'update_interval', $$form{imap_5_update_interval} );
-                $template->param ( IMAP_if_interval_error => 0 );
-            }
-            else {
-                $template->param ( IMAP_if_interval_error => 1 );
-            }
-        }
-        return;
-    }
 
-    # byte limit for message download
-    if ( $name eq 'imap_6_byte_limit' ) {
-        if ( defined $$form{imap_6_byte_limit} ) {
-            $self->config_( 'byte_limit', $$form{imap_6_byte_limit} );
-        }
-        return;
-    }
+    # various options
+    if ( $name eq 'imap_5_options' ) {
 
-    # How noisy should the log file be?
-    if ( $name eq 'imap_7_debug_level' ) {
-        if ( defined $$form{imap_debug_level} ) {
-            $self->{debug__} = $$form{imap_debug_level};
-            $self->config_( 'debug_level', $self->{debug__} );
-        }
-        return;
-    }
+        if ( defined $$form{update_imap_5_options} ) {
 
-
-    # Should we expunge after leaving a folder or not?
-    if ( $name eq 'imap_8_expunge' ) {
-        if ( defined $$form{update_imap_8_expunge} ) {
-            if ( defined $$form{imap_expunge} ) {
+            # expunge or not?
+            if ( defined $$form{imap_options_expunge} ) {
                 $self->config_( 'expunge', 1 );
             }
             else {
                 $self->config_( 'expunge', 0 );
             }
+
+            # update interval
+            my $form_interval = $$form{imap_options_update_interval};
+            if ( defined $form_interval ) {
+                if ( $form_interval > 10 && $form_interval < 60*60 ) {
+                    $self->config_( 'update_interval', $form_interval );
+                    $template->param( IMAP_if_interval_error => 0 );
+                }
+                else {
+                    $template->param( IMAP_if_interval_error => 1 );
+                }
+            }
+            else {
+                $template->param( IMAP_if_interval_error => 1 );
+            }
+
+            # byte limit
+            if ( defined $$form{imap_options_byte_limit} ) {
+                $self->config_( 'byte_limit', $$form{imap_options_byte_limit} );
+                $template->param( IMAP_if_bytelimit_error => 0 );
+            }
+            else {
+                $template->param( IMAP_if_bytelimit_error => 1 );
+            }
+
+            # debug level
+            $self->{debug__} = $$form{imap_options_debug_level};
+            $self->config_( 'debug_level', $self->{debug__} );
         }
         return;
     }
+
 
     $self->SUPER::validate_item( $name, $template, $language, $form );
 }
