@@ -1103,14 +1103,6 @@
     Goto got_result
 
   use_cfg_data:
-    StrCpy ${L_TEMP} ${L_CORPUS} 1 -1
-    StrCmp ${L_TEMP} "/" strip_slash no_trailing_slash
-    StrCmp ${L_TEMP} "\" 0 no_trailing_slash
-
-  strip_slash:
-    StrCpy ${L_CORPUS} ${L_CORPUS} -1
-
-  no_trailing_slash:
     Push ${L_SOURCE}
     Push ${L_CORPUS}
     Call ${UN}GetDataPath
@@ -1164,6 +1156,9 @@
 # names.
 #
 # It is assumed that the 'base directory' is in standard Windows format with no trailing slash.
+#
+# The result is returned without a trailing slash even if the 'data folder' parameter had one,
+# e.g. 'C:\Program Files\POPFile' and './' are converted to 'C:\Program Files\POPFile'
 #
 # The 'data folder' may be supplied in a variety of different formats, for example:
 # corpus, ./corpus, "..\..\corpus", Z:/Data/corpus or even "\\server\share\corpus".
@@ -1225,7 +1220,16 @@
     Push ${L_DATA}
     Call ${UN}StrBackSlash            ; ensure parameter uses backslashes
     Pop ${L_DATA}
+    
+    StrCmp ${L_DATA} ".\" source_folder
+    
+    ; Strip trailing slash (so we always return a result without a trailing slash)
+    
+    StrCpy ${L_TEMP} ${L_DATA} 1 -1
+    StrCmp ${L_TEMP} '\' 0 analyse_data
+    StrCpy ${L_DATA} ${L_DATA} -1
 
+  analyse_data:
     StrCpy ${L_TEMP} ${L_DATA} 2
     StrCmp ${L_TEMP} ".\" sub_folder
     StrCmp ${L_TEMP} "\\" got_path
@@ -1899,14 +1903,6 @@
     Goto got_result
 
   use_cfg_data:
-    StrCpy ${L_TEMP} ${L_MSG_HISTORY} 1 -1
-    StrCmp ${L_TEMP} "/" strip_slash no_trailing_slash
-    StrCmp ${L_TEMP} "\" 0 no_trailing_slash
-
-  strip_slash:
-    StrCpy ${L_MSG_HISTORY} ${L_MSG_HISTORY} -1
-
-  no_trailing_slash:
     Push ${L_SOURCE}
     Push ${L_MSG_HISTORY}
     Call ${UN}GetDataPath
