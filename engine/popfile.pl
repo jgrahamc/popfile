@@ -1186,7 +1186,7 @@ sub corpus_page
 
         my $heading = "<table cellpadding=6 cellspacing=0 border=3 bordercolor=$stab_color><tr><td><b>Lookup result for $form{word}</b><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Frequency</b><td>&nbsp;<td><b>Probability</b><td>&nbsp;<td><b>Score</b>";
 
-        if ( $word ne '' )
+        if ( $form{word} ne '' )
         {
             my $max = 0;
             my $max_bucket = '';
@@ -1237,14 +1237,12 @@ sub corpus_page
 
             if ( $max_bucket ne '' )
             {
-                $body .= "</table><p><b>$form{word}</b> is most likely to appear in <font color=$classifier->{colors}{$max_bucket}>$max_bucket</font>";
+                $body .= "</table><p><b>$form{word}</b> is most likely to appear in <font color=$classifier->{colors}{$max_bucket}>$max_bucket</font></table>";
             }
             else
             {
-                $body .= "</table><p><b>$form{word}</b> does not appear in the corpus";
+                $body .= "<p><b>$form{word}</b> does not appear in the corpus";
             }
-            
-            $body .= "</table>";
         }
         else
         {
