@@ -48,9 +48,6 @@
 #    CONVERT=full path to program used to perform the conversion (created by installer)
 #    ROOTDIR=full path to the folder where POPFile has been installed (created by installer)
 #    USERDIR=full path to the folder with the POPFile configuration data (created by installer)
-#    KReboot=either 'yes' or 'no' (created by installer)
-#    ITAIJIDICTPATH=full path to the 'itaijidict' file (created by installer if KReboot=yes)
-#    KANWADICTPATH=full path to the 'kanwadict' file (created by installer if KReboot=yes)
 #
 #  [FolderList]
 #    MaxNum=number of bucket folders found by installer (each has a Path-n entry in the section)
@@ -78,7 +75,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.11"
+  !define C_PFI_VERSION  "0.1.12"
 
   ; Mention the version number in the window title
 
@@ -606,40 +603,7 @@ Section ConvertCorpus
 
   ReadINIStr $G_USERDIR "$G_INIFILE_PATH" "Settings" "USERDIR"
   StrCmp  $G_USERDIR "" no_user_path
-
-  ReadINIStr ${L_TEMP} "$G_INIFILE_PATH" "Settings" "KReboot"
-  StrCmp ${L_TEMP} "no" kakasi_done
-
-  ; We are running on a Win9x system and a reboot is required to complete the installation
-  ; of the Kakasi package. So we need to set up the two Kakasi environment variables before
-  ; running POPFile to do the corpus conversion before the reboot.
-
-  ReadINIStr ${L_TEMP} "$G_INIFILE_PATH" "Settings" "ITAIJIDICTPATH"
-  StrCmp ${L_TEMP} "" no_itaiji_path
-
-  ReadINIStr $G_STILL_TO_DO "$G_INIFILE_PATH" "Settings" "KANWADICTPATH"
-  StrCmp $G_STILL_TO_DO "" no_kanwa_path
-
-  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("ITAIJIDICTPATH", "${L_TEMP}").r0'
-  StrCmp ${L_RESERVED} 0 0 itaiji_set_ok
-  DetailPrint ""
-  DetailPrint "$(PFI_LANG_CONVERT_ENVNOTSET) (ITAIJIDICTPATH)"
-  DetailPrint ""
-  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
-  DetailPrint ""
-  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (ITAIJIDICTPATH)"
-  Abort
-
-itaiji_set_ok:
-  System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("KANWADICTPATH", "$G_STILL_TO_DO").r0'
-  StrCmp ${L_RESERVED} 0 0 kakasi_done
-  DetailPrint ""
-  DetailPrint "$(PFI_LANG_CONVERT_ENVNOTSET) (KANWADICTPATH)"
-  DetailPrint ""
-  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
-  DetailPrint ""
-  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (KANWADICTPATH)"
-  Abort
+  Goto check_env_vars
 
 no_conv_path:
   DetailPrint ""
@@ -666,24 +630,6 @@ no_user_path:
   DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
   DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOPOPFILE) (POPFILE_USER)"
-  Abort
-
-no_itaiji_path:
-  DetailPrint ""
-  DetailPrint "$(PFI_LANG_CONVERT_NOKAKASI) (ITAIJIDICTPATH)"
-  DetailPrint ""
-  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
-  DetailPrint ""
-  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOKAKASI) (ITAIJIDICTPATH)"
-  Abort
-
-no_kanwa_path:
-  DetailPrint ""
-  DetailPrint "$(PFI_LANG_CONVERT_NOKAKASI) (KANWADICTPATH)"
-  DetailPrint ""
-  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
-  DetailPrint ""
-  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOKAKASI) (KANWADICTPATH)"
   Abort
 
 root_not_set:
@@ -718,7 +664,7 @@ not_running:
   MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "$(PFI_LANG_CONVERT_FATALERR)"
   Abort
 
-kakasi_done:
+check_env_vars:
   ClearErrors
   ReadEnvStr ${L_TEMP} "POPFILE_ROOT"
   IfErrors root_not_set

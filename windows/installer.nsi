@@ -1262,7 +1262,7 @@ SectionEnd
       Call WriteEnvStrNTAU
 
     set_env:
-      IfRebootFlag save_data
+      IfRebootFlag set_vars_now
 
       ; Running on a non-Win9x system which already has the correct Kakaksi environment data
       ; or running on a non-Win9x system
@@ -1274,6 +1274,7 @@ SectionEnd
       ; Running on a non-Win9x system so we ensure the Kakasi environment variables
       ; are updated to match this installation
 
+    set_vars_now:
       System::Call 'Kernel32::SetEnvironmentVariableA(t, t) \
                     i("ITAIJIDICTPATH", "$INSTDIR\kakasi\share\kakasi\itaijidict").r0'
       StrCmp ${L_RESERVED} 0 0 itaiji_set_ok
@@ -1284,17 +1285,6 @@ SectionEnd
                     i("KANWADICTPATH", "$INSTDIR\kakasi\share\kakasi\kanwadict").r0'
       StrCmp ${L_RESERVED} 0 0 continue
       MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (KANWADICTPATH)"
-
-    save_data:
-
-      ; Save installation-specific data for use by the 'Corpus Conversion' utility
-      ; if we are running on a Win9x system and require a reboot to install Kakasi properly.
-
-      WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "KReboot" "yes"
-      WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" \
-                          "ITAIJIDICTPATH" "$INSTDIR\kakasi\share\kakasi\itaijidict"
-      WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" \
-                          "KANWADICTPATH"  "$INSTDIR\kakasi\share\kakasi\kanwadict"
 
     continue:
 
@@ -1922,7 +1912,12 @@ Function InstallUserData
   ; dialog and WELCOME page to make the wizard appear as an extension of the main 'setup.exe'
   ; installer. [Future builds may pass more than just a command-line switch to the wizard]
 
+  IfRebootFlag special_case
   Exec '"$G_ROOTDIR\adduser.exe" /install'
+  Abort
+
+special_case:
+  Exec '"$G_ROOTDIR\adduser.exe" /installreboot'
   Abort
 
 continue:

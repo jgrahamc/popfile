@@ -144,7 +144,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.1"
+  !define C_PFI_VERSION  "0.2.2"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -615,7 +615,11 @@ Function .onInit
 
   Call GetParameters
   Pop $G_PFISETUP
-  StrCmp $G_PFISETUP "/install" 0 normal_startup
+  StrCmp $G_PFISETUP "/install" special_case
+  StrCmp $G_PFISETUP "/installreboot" 0 normal_startup
+  SetRebootFlag true
+
+special_case:
   ReadRegStr $LANGUAGE \
              "HKCU" "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Installer Language"
   Goto extract_files
@@ -1089,7 +1093,6 @@ Section "-NonSQLCorpusBackup" SecBackup
   WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "CONVERT" "$G_ROOTDIR\popfileb.exe"
   WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "ROOTDIR" "$G_ROOTDIR"
   WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "USERDIR" "$G_USERDIR"
-  WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "KReboot"  "no"
 
   ; Use data in 'popfile.cfg' to generate the full path to the corpus folder
 
@@ -1364,7 +1367,10 @@ Function CheckStartMode
   ; The command-line switch '/install' is used to suppress this wizard's
   ; WELCOME page and language selection dialog when it is called from 'setup.exe'.
 
-  StrCmp $G_PFISETUP "/install" 0 show_WELCOME_page
+  StrCmp $G_PFISETUP "/install" skip_WELCOME_page
+  StrCmp $G_PFISETUP "/installreboot" 0 show_WELCOME_page
+
+skip_WELCOME_page:
 
   ; Need to call the WELCOME page's "leave" function (to initialise $G_USERDIR)
 
@@ -1959,6 +1965,7 @@ FunctionEnd
 Function MakeUserDirSafe
 
   StrCmp $G_PFISETUP "/install" nothing_to_check
+  StrCmp $G_PFISETUP "/installreboot" nothing_to_check
   IfFileExists "$G_USERDIR\popfile.cfg" 0 nothing_to_check
 
   !define L_GUI_PORT  $R9
