@@ -70,7 +70,7 @@ if ( $#ARGV == -1 ) {
         my $b = $POPFile->get_module('Classifier::Bayes');
         my $session = $b->get_session_key( 'admin', '' );
 
-        $b->classify_and_modify( $session, \*STDIN, \*STDOUT, 1, '', 1, "\n" );
+        $b->classify_and_modify( $session, \*STDIN, \*STDOUT, 1, '', 0, 1, "\n" );
         $b->release_session_key( $session );
         $POPFile->CORE_stop();
     }
