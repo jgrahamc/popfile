@@ -743,10 +743,10 @@ sub classify
 
                     $self->{scores__} .= "</select></td></tr>";
                 }
-	    }
+            }
 
             $self->{scores__} .= "<tr><td></td><td><input type=\"submit\" class=\"submit\" name=\"create\" value=\"$language{Create}\" /></td></tr></table></form>";
-	}
+        }
 
         $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
         $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\">$language{Probability}</th></tr>\n";
@@ -1210,7 +1210,7 @@ sub classify_and_modify
         print $client $before_dot if ( $before_dot ne '' );
     }
 
-    if ( $echo ) {
+    if ( $echo && $got_full_body ) {
         print $client "$eol.$eol";
     }
 
@@ -1661,6 +1661,7 @@ sub remove_message_from_bucket
 # $before   Optional string to send to client before the dot is sent
 #
 # echo all information from the $mail server until a single line with a . is seen
+# Also echoes the line with . to $client but not to $file
 #
 # ---------------------------------------------------------------------------------------------
 sub echo_to_dot_
@@ -1682,16 +1683,15 @@ sub echo_to_dot_
             # not mistake a line beginning with . as the end of the block
 
             if ( /^\.(\r\n|\r|\n)$/ ) {
-	        if ( $before ne '' ) {
+                if ( $before ne '' ) {
                     print $client $before;
                     print FILE    $before;
-		}
+                }
 
                 print $client $_;
-                print FILE    $_;
 
                 last;
-	    }
+            }
 
             print $client $_;
             print FILE    $_;
@@ -1710,14 +1710,14 @@ sub echo_to_dot_
             # not mistake a line beginning with . as the end of the block
 
             if ( /^\.(\r\n|\r|\n)$/ ) {
-	        if ( $before ne '' ) {
+                if ( $before ne '' ) {
                     print $client $before;
-		}
+                }
 
                 print $client $_;
 
                 last;
-	    }
+            }
 
             print $client $_;
         }
@@ -1734,14 +1734,11 @@ sub echo_to_dot_
             # not mistake a line beginning with . as the end of the block
 
             if ( /^\.(\r\n|\r|\n)$/ ) {
-	        if ( $before ne '' ) {
-                    print FILE $before;
-		}
-
-                print FILE $_;
-
+                if ( $before ne '' ) {
+                        print FILE $before;
+                }
                 last;
-	    }
+            }
 
             print FILE $_;
         }
