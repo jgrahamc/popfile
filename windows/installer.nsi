@@ -2186,7 +2186,7 @@ Function un.onInit
   ; Starting with 0.21.0 the registry is used to store the location of the 'User Data'
   ; (if setup.exe or adduser.exe was used to create/update the 'User Data' for this user)
 
-  ReadRegStr $G_USERDIR HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath"
+  ReadRegStr $G_USERDIR HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN"
   StrCmp $G_USERDIR "" 0 got_user_path
 
   ; Pre-release versions of the 0.21.0 installer used a sub-folder for the default user data
