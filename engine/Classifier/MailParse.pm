@@ -320,10 +320,10 @@ sub parse_stream
             # Transform some escape characters
 
             if ( $encoding =~ /quoted\-printable/ ) {
+                $line =~ s/=[\r\n]*$/=\n/;
                 while ( ( $line =~ /=([0-9A-F][0-9A-F])/i ) != 0 ) {
                     my $from = "=$1";
                     my $to   = chr(hex("0x$1"));
-                    $to =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
                     $line =~ s/$from/$to/g;
                 }
             }
@@ -339,6 +339,8 @@ sub parse_stream
                     $html_arg .= " " . $line;
                     if ( $line =~ s/.*?>/ / ) {
                         $in_html_tag = 0;
+                        $html_tag =~ s/=\n ?//g if ( $encoding =~ /quoted\-printable/ );
+                        $html_arg =~ s/=\n ?//g if ( $encoding =~ /quoted\-printable/ );
                         update_tag( $self, $html_tag, $html_arg );
                         $html_tag = '';
                         $html_arg = '';
