@@ -413,31 +413,31 @@ sub html_common_middle
     $result .= "<td class=\"$tab[2]\" align=\"center\">\n" ;
     $result .= "<a class=\"menuLink\" href=\"/history?setfilter=&amp;session=$self->{session_key}&amp;filter=\">" ;
     $result .= "\n$self->{language}{Header_History}</a>\n" ;
-    $result .= "</td>\n<td class=\"menu_spacer\"></td>\n" ;
+    $result .= "</td>\n<td class=\"menuSpacer\"></td>\n" ;
     
     # Buckets menu item
     $result .= "<td class=\"$tab[1]\" align=\"center\">\n" ;
     $result .= "<a class=\"menuLink\" href=\"/buckets?session=$self->{session_key}\">" ;
     $result .= "\n$self->{language}{Header_Buckets}</a>\n" ;
-    $result .= "</td>\n<td class=\"menu_spacer\"></td>\n" ;
+    $result .= "</td>\n<td class=\"menuSpacer\"></td>\n" ;
     
     # Magnets menu item
     $result .= "<td class=\"$tab[4]\" align=\"center\">\n" ;
     $result .= "<a class=\"menuLink\" href=\"/magnets?session=$self->{session_key}\">" ;
     $result .= "\n$self->{language}{Header_Magnets}</a>\n" ;
-    $result .= "</td>\n<td class=\"menu_spacer\"></td>\n" ;
+    $result .= "</td>\n<td class=\"menuSpacer\"></td>\n" ;
     
     # Configuration menu item
     $result .= "<td class=\"$tab[0]\" align=\"center\">\n" ;
     $result .= "<a class=\"menuLink\" href=\"/configuration?session=$self->{session_key}\">" ;
     $result .= "\n$self->{language}{Header_Configuration}</a>\n" ;
-    $result .= "</td>\n<td class=\"menu_spacer\"></td>\n" ;
+    $result .= "</td>\n<td class=\"menuSpacer\"></td>\n" ;
     
     # Security menu item
     $result .= "<td class=\"$tab[3]\" align=\"center\">\n" ;
     $result .= "<a class=\"menuLink\" href=\"/security?session=$self->{session_key}\">" ;
     $result .= "\n$self->{language}{Header_Security}</a>\n" ;
-    $result .= "</td>\n<td class=\"menu_spacer\"></td>\n" ;
+    $result .= "</td>\n<td class=\"menuSpacer\"></td>\n" ;
     
     # Advanced menu item
     $result .= "<td class=\"$tab[5]\" align=\"center\">\n" ;
