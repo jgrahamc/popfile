@@ -2002,14 +2002,13 @@ sub sort_filter_history
     } else {
         @{$self->{history_keys__}} = keys %{$self->{history__}};
     }
-    
-    
+
     # If a sort is specified then use it to sort the history items by an a subkey
     # (from, subject or bucket) otherwise use compare_mf to give the history back
     # in the order the messages were received.  Note that when sorting on a alphanumeric
     # field we ignore all punctuation characters so that "John and 'John and John
     # all sort next to each other
-    
+
     # Ascending or Descending? Ascending is noted by /-field/
 
     my $descending = 0;
@@ -2017,10 +2016,12 @@ sub sort_filter_history
         $descending = 1;
     }
 
-    if ( $sort ne '' 
+    if ( ( $sort ne '' ) &&
+
          # If the filter had no messages, this will be undefined
          # and there are no ways to sort nothing
-         && defined @{$self->{history_keys__}}) {
+
+         defined @{$self->{history_keys__}} ) {
 
         @{$self->{history_keys__}} = sort {
                                             my ($a1,$b1) = ($self->{history__}{$a}{$sort},
@@ -2030,6 +2031,7 @@ sub sort_filter_history
                                               return ( $a1 cmp $b1 );
                                           } @{$self->{history_keys__}};
     } else {
+
         # Here's a quick shortcut so that we don't have to iterate
         # if there's no work for us to do
 
@@ -2037,7 +2039,7 @@ sub sort_filter_history
             @{$self->{history_keys__}} = sort compare_mf @{$self->{history_keys__}};
         }
     }
-    
+
     @{$self->{history_keys__}} = reverse @{$self->{history_keys__}} if ($descending);
 }
 
@@ -2690,21 +2692,24 @@ sub history_page
 
         # History messages
         $body .= "<table class=\"historyTable\" width=\"100%\" summary=\"$self->{language__}{History_MainTableSummary}\">\n";
-        # column headers
-        
-        my %headers_table = (   '', 'ID',
-                                'from', 'From',
-                                'subject', 'Subject',
-                                'bucket', 'Classification');
-        
-        
+
+        # Column headers
+
+        my %headers_table = ( '',        'ID',
+                              'from',    'From',
+                              'subject', 'Subject',
+                              'bucket',  'Classification');
+
         $body .= "<tr valign=\"bottom\">\n";
-        
-        foreach my $header (keys %headers_table) {
+
+        # It would be tempting to do keys %headers_table here but there is not guarantee that
+        # they will come back in the right order
+
+        foreach my $header (undef, 'from', 'subject', 'bucket') {
             $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
             $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form_}{filter}&amp;setsort=" . ($self->{form_}{sort} eq "$header"?"-":"");
             $body .= "$header\">";
-            
+
             my $label = '';
             if ( defined $self->{language__}{ $headers_table{$header} }) {
                 $label = $self->{language__}{ $headers_table{$header} };
@@ -2713,7 +2718,7 @@ sub history_page
             }
 
             if ( $self->{form_}{sort} =~ /^\-?\Q$header\E$/ ) {
-                $body .= "<em class=\"historyLabelSort\">$label" . ($self->{form_}{sort} =~ /^-/ ? "-" : "+") . "</em>";
+                $body .= "<em class=\"historyLabelSort\">" . ($self->{form_}{sort} =~ /^-/ ? "&lt;" : "&gt;") . "$label</em>";
             } else {
                 $body .= "$label";
             }
