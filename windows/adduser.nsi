@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.51"
+  !define C_PFI_VERSION  "0.2.52"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -4842,10 +4842,17 @@ close_file:
   ; so we are unable to offer to start POPFile at this point (corpus conversion and
   ; SQL database upgrades are handled as special cases)
 
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 1" "Flags"
+  StrCmp ${L_TEMP} "DISABLED" display_the_page
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "Flags"
+  StrCmp ${L_TEMP} "DISABLED" disable_radio_buttons
+
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "State" "1"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "State" "0"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "State" "0"
 
+disable_radio_buttons:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 1" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "Flags" "DISABLED"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "Flags" "DISABLED"
@@ -4948,7 +4955,7 @@ check_radio_buttons:
   StrCmp ${L_TEMP} "0" start_popfile
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "Flags"
-  StrCmp ${L_TEMP} "DISABLED" start_popfile
+  StrCmp ${L_TEMP} "DISABLED" exit_without_banner
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "pfi-cfg.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "" set_lastaction_no
@@ -5029,8 +5036,8 @@ lastaction_enableicon:
 
 corpus_conv_check:
 
-  ; To indicate these special cases the 'CheckCorpusUpgradeStatus' function clears the
-  ; "No" radio button and disables it (at this point we know the "No" button is clear).
+  ; To indicate the special cases where the installer is to start POPFile to peform corpus or
+  ; database conversion, 'CheckCorpusUpgradeStatus' clears the "No" radio button and disables it
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "Flags"
   StrCmp ${L_TEMP} "DISABLED" launch_conversion_monitor
