@@ -1098,13 +1098,14 @@ sub classify_and_modify
                                                                          ( $self->{parameters__}{$classification}{quarantine} == 0 ) );
 
     # Add the XPL header
-    $temp_file =~ s/.*\/([^\/]+)/$1/;
+    my $nopath_temp_file = $temp_file;
+    $nopath_temp_file =~ s/.*\/([^\/]+)/$1/;
 
     my $xpl = '';
 
     $xpl .= "http://";
     $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->config_( 'hostname' );
-    $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$temp_file$eol";
+    $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$nopath_temp_file$eol";
 
     if ( $self->global_config_( 'xpl' ) && ( $self->{parameters__}{$classification}{quarantine} == 0 ) ) {
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
@@ -1135,7 +1136,7 @@ sub classify_and_modify
                 print $client "X-Text-Classification: $classification$eol" if ( $self->global_config_( 'xtc' ) );
                 print $client 'X-POPFile-Link: ' . $xpl if ( $self->global_config_( 'xpl' ) );
                 print $client "MIME-Version: 1.0$eol";
-                print $client "Content-Type: multipart/report; boundary=\"$temp_file\"$eol$eol--$temp_file$eol";
+                print $client "Content-Type: multipart/report; boundary=\"$nopath_temp_file\"$eol$eol--$nopath_temp_file$eol";
                 print $client "Content-Type: text/plain$eol$eol";
                 print $client "POPFile has quarantined a message.  It is attached to this email.$eol$eol";
                 print $client "Quarantined Message Detail$eol$eol";
@@ -1145,7 +1146,7 @@ sub classify_and_modify
                 print $client "To examine the email open the attachment. To change this mail's classification go to $xpl$eol";
                 print $client "The first 20 words found in the email are:$eol$eol";
                 print $client $self->{parser__}->first20();
-                print $client "$eol--$temp_file$eol";
+                print $client "$eol--$nopath_temp_file$eol";
                 print $client "Content-Type: message/rfc822$eol$eol";
             }
         }
