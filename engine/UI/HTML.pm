@@ -2672,7 +2672,7 @@ sub new_history_file__
     # Pass language parameter to decode_string()
 
     $from    = $self->{classifier__}->{parser__}->decode_string( $from, $self->config_( 'language' ) );
-    $subject = $self->{classifier__}->{parser__}->decode_string( $from, $self->config_( 'language' ) );
+    $subject = $self->{classifier__}->{parser__}->decode_string( $subject, $self->config_( 'language' ) );
 
     my ( $short_from, $short_subject ) = ( $from, $subject );
 
