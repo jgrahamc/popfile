@@ -77,8 +77,8 @@ Configuration_POP3Port                  Puerto de escucha POP3
 Configuration_POP3Update                Actualizado el puerto POP3 a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
 Configuration_UI                        Puerto de la interfaz de usuario
 Configuration_UIUpdate                  Puerto de la interfaz de usuario actualizado a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
-Configuration_History                   Número de correos por página
-Configuration_HistoryUpdate             Número de correos por página actualizado a %s
+Configuration_History                   Número de mensajes por página
+Configuration_HistoryUpdate             Número de mensajes por página actualizado a %s
 Configuration_Days                      Número de días a guardar en la historia
 Configuration_DaysUpdate                Número de días a guardar en la historia actualizado a %s
 Configuration_UserInterface             Interfaz de usuario
@@ -86,11 +86,11 @@ Configuration_Skins                     Skins
 Configuration_SkinsChoose               Elegir skin
 Configuration_Language                  Languaje
 Configuration_LanguageChoose            Escoger languaje
-Configuration_ListenPorts               Puertos de escucha
+Configuration_ListenPorts               Opciones del módulo
 Configuration_HistoryView               Vista de la Historia
-Configuration_TCPTimeout                Tiempo límite de la conexión TCP
-Configuration_TCPTimeoutSecs            Tiempo límite de la conexión TCP en segundos
-Configuration_TCPTimeoutUpdate          Tiempo límite de la conexión TCP actualizado a %s
+Configuration_TCPTimeout                Tiempo límite de la conexión 
+Configuration_TCPTimeoutSecs            Tiempo límite de la conexión  en segundos
+Configuration_TCPTimeoutUpdate          Tiempo límite de la conexión  actualizado a %s
 Configuration_ClassificationInsertion   Inserción de la Clasificación
 Configuration_SubjectLine               Modificación del Asunto
 Configuration_XTCInsertion              Añadir cabecera X-Text-Classification
@@ -156,7 +156,7 @@ Password_Enter                          Introduzca contraseña
 Password_Go                             Adelante!
 Password_Error1                         Contraseña Incorrecta
 
-Security_Error1                         El puerto seguro debe ser un número entre 1 and 65535
+Security_Error1                         El puerto debe ser un número entre 1 and 65535
 Security_Stealth                        Modo Invisible/Operación del Servidor
 Security_NoStealthMode                  No (Modo invisible)
 Security_ExplainStats                   (Con esto activado POPFile envía una vez al dia los siguientes tres valores a un script en www.usethesource.com: bc (el número total de categorías que tiene), mc (el número total de correos que POPFile ha clasificado) y ec (el número total de errores clasificación).  Todo esto se guarda en un fichero que usarémos para publicar estadísticas de como usa POPFile la gente y cómo de bien funciona.  Mi servidor web guarda sus ficheros de log 5 días y luego son borrados; no se guarda ninguna conexión entre las estadísticas y las direcciones IP particulares.)
@@ -164,7 +164,7 @@ Security_ExplainUpdate                  (Con esto activado POPFile envía una vez
 Security_PasswordTitle                  Contraseña de la Interfaz de Usuario
 Security_Password                       Contraseña
 Security_PasswordUpdate                 Contraseña actualizada a %s
-Security_AUTHTitle                      Autentificación segura de Contraseña/AUTH
+Security_AUTHTitle                      Servidores Remotos
 Security_SecureServer                   Sevidor POP3 SPA/AUTH seguro
 Security_SecureServerUpdate             Sevidor POP3 SPA/AUTH seguro actualizado a %s; Este cámbio no tendrá efecto hasta que POPFile sea reiniciado
 Security_SecurePort                     Puerto POP3 SPA/AUTH
@@ -203,18 +203,18 @@ Bucket_Error5                           Categoría %s renombrada a %s
 Bucket_Error6                           Categoría %s borrada
 Bucket_Title                            Resumen
 Bucket_BucketName                       Nombre de Categoría
-Bucket_WordCount                        Conteo de Palabras
-Bucket_WordCounts                       Conteos de Palabras
+Bucket_WordCount                        Total (Palabras)
+Bucket_WordCounts                       Total (Palabras)
 Bucket_UniqueWords                      Palabras Únicas
 Bucket_SubjectModification              Modificación del Asunto
 Bucket_ChangeColor                      Cambiar Color
 Bucket_NotEnoughData                    Faltan datos
 Bucket_ClassificationAccuracy           Precisión de la Clasificación
-Bucket_EmailsClassified                 Correos Clasificados
-Bucket_EmailsClassifiedUpper            Correos Clasificados
+Bucket_EmailsClassified                 Mensajes Clasificados
+Bucket_EmailsClassifiedUpper            Mensajes Clasificados
 Bucket_ClassificationErrors             Errores de Clasificación
 Bucket_Accuracy                         Precisión
-Bucket_ClassificationCount              Conteo de Clasificación
+Bucket_ClassificationCount              Total Clasificados
 Bucket_ResetStatistics                  Reiniciar Estadísticas
 Bucket_LastReset                        Último reinicio
 Bucket_CurrentColor                     El color actual de %s es %s
@@ -235,11 +235,11 @@ Bucket_ClassificationFN                 Falsos Negativos
 Bucket_ClassificationFP                 Falsos Positivos
 
 SingleBucket_Title                      Detalles para %s
-SingleBucket_WordCount                  Conteo de palabras de la Categoría
-SingleBucket_TotalWordCount             Conteo de palabras total
+SingleBucket_WordCount                  Total palabras en Categoría
+SingleBucket_TotalWordCount             Total de Palabras 
 SingleBucket_Percentage                 Porcentaje del total
 SingleBucket_WordTable                  Tabla de palabras para %s
-SingleBucket_Message1                   Las palabras marcadas con (*) han sido usadas para la Categoría en esta sesión de POPFile.  "Pincha" en cualquier palabra para conocer su probabilidad en todas las Categorías.
+SingleBucket_Message1                   "Pincha" una letra en el indice para ver las palabras que empiezan por ella.  "Pincha" en cualquier palabra para conocer su probabilidad en todas las Categorías.
 SingleBucket_Unique                     %s únicas
 SingleBucket_ClearBucket                Borrar todas las Palabras
 
