@@ -680,7 +680,7 @@ sub configuration_page
 
     if ( defined($self->{form_}{history_days}) ) {
         if ( ( $self->{form_}{history_days} >= 1 ) && ( $self->{form_}{history_days} <= 366 ) ) {
-            $self->config_( 'history_days', $self->{form_}{history_days} );
+            $self->module_config_( 'history', 'history_days', $self->{form_}{history_days} );
         } else {
             $templ->param( 'Configuration_If_History_Days_Error' => 1 );
             delete $self->{form_}{history_days};
@@ -688,7 +688,7 @@ sub configuration_page
     }
 
     $templ->param( 'Configuration_History_Days_Updated' => sprintf( $self->{language__}{Configuration_DaysUpdate}, $self->config_( 'history_days' ) ) ) if ( defined($self->{form_}{history_days} ) );
-    $templ->param( 'Configuration_History_Days' => $self->config_( 'history_days' ) );
+    $templ->param( 'Configuration_History_Days' => $self->module_config_( 'history', 'history_days' ) );
 
     if ( defined($self->{form_}{timeout}) ) {
         if ( ( $self->{form_}{timeout} >= 10 ) && ( $self->{form_}{timeout} <= 300 ) ) {
