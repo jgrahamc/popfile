@@ -31,12 +31,14 @@
 #
 # URL <url>         Set the URL that is to be fetched
 # GET               Gets the last set URL
-# FORM <id>/ENDFORM Set form elements (foo=bar) and submit the form 
-# POST/ENDPOST      Contains a block of data to be POSTed
 # MATCH <data>      Match the return from last URL fetch against the data
 # MATCH/ENDMATCH    Encloses a block of test to find in the return from the last URL fetch
 # CODE/ENDCODE      Arbitrary code that should be executed
 # INPUTIS a b       Assert that form item a has value b
+# SETINPUT a b      Sets the form item a to value b
+# SUBMIT a          Finds the form with input a and submits it
+# SETSUBMIT a b     Just like doing SETINPUT a b followed by SUBMIT a
+# CONFIGIS a b      Verify that config item a has value b
 #
 # Expect that the following are available to you within the MATCH/ENDMATCH block
 #
@@ -45,7 +47,6 @@
 # $content          String containing the return from the last URL fetch
 # $sk               The current HTML UI session key
 # $version          Same as $h->version()
-# @forms            All HTML forms in the last content downloaded
 
 # Test the simplest functionality of the HTML interface
 
@@ -187,9 +188,17 @@ GET
 # TODO Check history lines change
 # TODO Check history days change
 # TODO Check change timeout
-# TODO Check change POP3 port
 
-INPUTIS pop3_port 110
+# Check change POP3 port
+
+INPUTIS   pop3_port 110
+CONFIGIS  pop3_port 110
+SETSUBMIT pop3_port 111
+INPUTIS   pop3_port 111
+CONFIGIS  pop3_port 111
+SETSUBMIT pop3_port 0
+MATCH The POP3 listen port must be a number between 1 and 65535
+INPUTIS   pop3_port 111
 
 # TODO Check change separator
 # TODO Check Subject Line Modification

@@ -46,23 +46,55 @@ use POSIX ":sys_wait_h";
 use HTML::Form;
 my @forms;
 
+# Helper function that finds a form in @forms with the
+# named input element, returns the form object and input
+# element if found or undef
+
+sub find_form
+{
+    my ( $name ) = @_;
+
+    foreach my $form (@forms) {
+        my $input = $form->find_input( $name );
+
+        if ( defined( $input ) ) {
+            return ( $form, $input );
+	}
+    }
+
+    test_assert( 0, "Unable to find form element '$name'" );
+
+    return ( undef, undef );
+}
+
+# Helper function that finds the form with a specific input
+# by name and returns an HTTP::Request to submit the form
+
+sub form_submit
+{
+    my ( $name ) = @_;
+
+    my ( $form ) = find_form( $name );
+
+    if ( defined( $form ) ) {
+        return $form->click;
+    } else {
+        return undef;
+    }
+}
+
 # Helper function that finds an input with a specific name
 # in the @forms collection and returns or sets its value
 
 sub form_input
 {
     my ( $name, $value ) = @_;
+    my ( $form, $input ) = find_form( $name );
 
-    foreach my $form (@forms) {
-        my $input = $form->find_input( $name );
-
-        if ( defined( $input ) ) {
-            $input->value( $value ) if defined( $value );
-            return $input->value();
-	}
+    if ( defined( $form ) ) {
+        $input->value( $value ) if defined( $value );
+        return $input->value();
     }
-
-    test_assert( 0, "Unable to find form element '$name'" );
 
     return undef;
 }
@@ -158,6 +190,8 @@ if ( $pid == 0 ) {
     close $dwriter;
     close $ureader;
 
+    $uwriter->autoflush(1);
+
     $h->config_( 'port', $port );
     $h->start();
 
@@ -170,6 +204,12 @@ if ( $pid == 0 ) {
             if ( $command =~ /__QUIT/ ) {
                 print $uwriter "OK\n";
                 last;
+	    }
+
+            if ( $command =~ /__GETCONFIG (.+)/ ) {
+                my $value = $c->parameter( $1 );
+                print $uwriter "OK $value\n";
+                next;
 	    }
 	}
     }
@@ -187,12 +227,17 @@ if ( $pid == 0 ) {
     $dwriter->autoflush(1);
 
     use LWP::Simple;
+    use LWP::UserAgent;
     use URI::URL;
     use String::Interpolate 'interpolate';
+
+    my $ua = new LWP::UserAgent;
 
     our $url;
     our $content;
     open SCRIPT, "<TestHTML.script";
+
+    # The commands in this loop are documented in TestHTML.script
 
     while ( my $line = <SCRIPT> ) {
         $line =~ s/^[\t ]+//g;
@@ -204,13 +249,39 @@ if ( $pid == 0 ) {
 
         $line = interpolate( $line );
 
-        if ( $line =~ /^URL (.+)$/ ) {
+        if ( $line =~ /^URL +(.+)$/ ) {
             $url = url( $1 );
             next;
 	}
 
-        if ( $line =~ /^INPUTIS (.+) (.+)$/ ) {
+        if ( $line =~ /^CONFIGIS +([^ ]+) (.+)$/ ) {
+            my ( $option, $expected ) = ( $1, $2 );
+            print $dwriter "__GETCONFIG $option\n";
+            my $reply = <$ureader>;
+            test_assert( $reply =~ /OK (.+)/ );
+            test_assert_equal( $1, $expected );
+            next;
+	}
+
+        if ( $line =~ /^INPUTIS +([^ ]+) (.+)$/ ) {
             test_assert_equal( form_input( $1 ), $2 );
+            next;
+	}
+
+        if ( $line =~ /^(SETINPUT|SETSUBMIT) +([^ ]+) (.+)$/ ) {
+            form_input( $2, $3 );
+            next if ( $line =~ /^SETINPUT/ );
+	}
+
+        # Note drop through here from previous if
+
+        if ( $line =~ /^(SET)?SUBMIT +([^ ]+)/ ) {
+            my $request = form_submit( $2 );
+            if ( defined( $request ) ) {
+	        my $response = $ua->request( $request );
+                $content = $response->content;
+                @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
+	    }
             next;
 	}
 
@@ -220,7 +291,7 @@ if ( $pid == 0 ) {
             next;
 	}
 
-        if ( $line =~ /^MATCH (.+)$/ ) {
+        if ( $line =~ /^MATCH +(.+)$/ ) {
             test_assert_regexp( $content, "\Q$1\E" );
             next;
         }
