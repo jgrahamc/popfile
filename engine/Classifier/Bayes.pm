@@ -125,6 +125,13 @@ sub load_word_matrix
         }
 
         close WORDS;
+
+        # Now adjust the values in the table so that they are probabilities
+        
+        for my $word (keys %{$self->{matrix}{$bucket}})
+        {
+            $self->{matrix}{$bucket}{$word} /= $self->{total}{$bucket};
+        }
         
         print " $self->{total}{$bucket} words\n" if $self->{debug};
     }
@@ -174,13 +181,16 @@ sub classify_file
     
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
     # P(word|bucket) ^ word count and multiply to the score
+    
+    # Get the list of buckets
+    
+    my @buckets = keys %{$self->{total}};
 
     foreach my $word (keys %{$self->{parser}->{words}}) 
     {
-        foreach my $bucket (keys %{$self->{total}}) 
+        foreach my $bucket (@buckets)
         {
-            my $bucket_total = $self->{total}{$bucket};
-            my $probability  = $self->{matrix}{$bucket}{$word} / $bucket_total;
+            my $probability  = $self->{matrix}{$bucket}{$word};
             
             if ( $probability == 0 ) 
             {
@@ -203,7 +213,7 @@ sub classify_file
 
                 $max = 0;
                 
-                foreach my $b (keys %{$self->{total}})
+                foreach my $b (@buckets)
                 {
                     if ( $score{$b} > $max ) 
                     {
@@ -215,7 +225,7 @@ sub classify_file
                 {
                     my $normalize = 10 ** int(log(1/$max)/log(10) + 0.5);
 
-                    foreach my $b (keys %{$self->{total}})
+                    foreach my $b (@buckets)
                     {
                         $score{$b} *= $normalize;
                     }
