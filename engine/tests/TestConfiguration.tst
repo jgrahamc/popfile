@@ -249,43 +249,56 @@ test_assert_regexp( $line, 'Expected a command line option and got baz' );
 
 # path_join__
 
-test_assert_equal( $c->path_join__( 'foo', '/root' ), '/root' );
-test_assert_equal( $c->path_join__( 'foo', '/' ), '/' );
-test_assert_equal( $c->path_join__( 'foo', 'c:\\root' ), 'c:\\root' );
-test_assert_equal( $c->path_join__( 'foo', 'c:\\' ), 'c:\\' );
+test_assert_equal( $c->path_join__( 'foo', '/root', 0 ), '/root' );
+test_assert_equal( $c->path_join__( 'foo', '/', 0 ), '/' );
+test_assert_equal( $c->path_join__( 'foo', 'c:\\root', 0 ), 'c:\\root' );
+test_assert_equal( $c->path_join__( 'foo', 'c:\\', 0 ), 'c:\\' );
+
+test_assert( !defined( $c->path_join__( 'foo', '/root' ) ) );
+test_assert( !defined( $c->path_join__( 'foo', '/' ) ) );
+test_assert( !defined( $c->path_join__( 'foo', 'c:\\root' ) ) );
+test_assert( !defined( $c->path_join__( 'foo', 'c:\\' ) ) );
+
 test_assert_equal( $c->path_join__( '/foo', 'bar' ), '/foo/bar' );
 test_assert_equal( $c->path_join__( '/foo/', 'bar' ), '/foo/bar' );
 test_assert_equal( $c->path_join__( 'foo/', 'bar' ), 'foo/bar' );
 test_assert_equal( $c->path_join__( 'foo', 'bar' ), 'foo/bar' );
-test_assert_equal( $c->path_join__( 'foo', '\\\\bar' ), '\\\\bar' );
+test_assert_equal( $c->path_join__( 'foo', '\\\\bar', 0 ), '\\\\bar' );
+test_assert( !defined( $c->path_join__( 'foo', '\\\\bar' ) ) );
 
 # get_user_path (note Makefile sets POPFILE_USER to ../tests/)
 
 test_assert_equal( $c->get_user_path( 'foo' ), '../tests/foo' );
-test_assert_equal( $c->get_user_path( '/foo' ), '/foo' );
+test_assert_equal( $c->get_user_path( '/foo', 0 ), '/foo' );
+test_assert( !defined( $c->get_user_path( '/foo' ) ) );
 test_assert_equal( $c->get_user_path( 'foo/' ), '../tests/foo/' );
 $c->{popfile_user__} = './';
 test_assert_equal( $c->get_user_path( 'foo' ), './foo' );
-test_assert_equal( $c->get_user_path( '/foo' ), '/foo' );
+test_assert_equal( $c->get_user_path( '/foo', 0 ), '/foo' );
+test_assert( !defined( $c->get_user_path( '/foo' ) ) );
 test_assert_equal( $c->get_user_path( 'foo/' ), './foo/' );
 $c->{popfile_user__} = '.';
 test_assert_equal( $c->get_user_path( 'foo' ), './foo' );
-test_assert_equal( $c->get_user_path( '/foo' ), '/foo' );
+test_assert_equal( $c->get_user_path( '/foo', 0 ), '/foo' );
+test_assert( !defined( $c->get_user_path( '/foo' ) ) );
 test_assert_equal( $c->get_user_path( 'foo/' ), './foo/' );
 $c->{popfile_user__} = '../tests/';
 
 # get_root_path (note Makefile sets POPFILE_ROOT to ../)
 
 test_assert_equal( $c->get_root_path( 'foo' ), '../foo' );
-test_assert_equal( $c->get_root_path( '/foo' ), '/foo' );
+test_assert_equal( $c->get_root_path( '/foo', 0 ), '/foo' );
+test_assert( !defined( $c->get_root_path( '/foo' ) ) );
 test_assert_equal( $c->get_root_path( 'foo/' ), '../foo/' );
 $c->{popfile_root__} = './';
 test_assert_equal( $c->get_root_path( 'foo' ), './foo' );
-test_assert_equal( $c->get_root_path( '/foo' ), '/foo' );
+test_assert_equal( $c->get_root_path( '/foo', 0 ), '/foo' );
+test_assert( !defined( $c->get_root_path( '/foo' ) ) );
 test_assert_equal( $c->get_root_path( 'foo/' ), './foo/' );
 $c->{popfile_root__} = '.';
 test_assert_equal( $c->get_root_path( 'foo' ), './foo' );
-test_assert_equal( $c->get_root_path( '/foo' ), '/foo' );
+test_assert_equal( $c->get_root_path( '/foo', 0 ), '/foo' );
+test_assert( !defined( $c->get_root_path( '/foo' ) ) );
 test_assert_equal( $c->get_root_path( 'foo/' ), './foo/' );
 $c->{popfile_root__} = '../';
 

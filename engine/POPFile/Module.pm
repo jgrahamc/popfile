@@ -461,19 +461,21 @@ sub register_configuration_item_
 #
 # Wrappers for POPFile::Configuration get_user_path and get_root_path
 #
-# $path             The path to modify
+# $path              The path to modify
+# $sandbox           Set to 1 if this path must be sandboxed (i.e. absolute
+#                    paths and paths containing .. are not accepted).
 #
 # ---------------------------------------------------------------------------------------------
 sub get_user_path_
 {
-    my ( $self, $path ) = @_;
+    my ( $self, $path, $sandbox ) = @_;
 
     return $self->{configuration__}->get_user_path( $path );
 }
 
 sub get_root_path_
 {
-    my ( $self, $path ) = @_;
+    my ( $self, $path, $sandbox ) = @_;
 
     return $self->{configuration__}->get_root_path( $path );
 }

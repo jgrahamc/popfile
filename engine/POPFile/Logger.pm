@@ -159,7 +159,11 @@ sub calculate_today__
 
     # Create the name of the debug file for the debug() function
     $self->{today__} = int( time / $seconds_per_day ) * $seconds_per_day;
-    $self->{debug_filename__} = $self->get_user_path_( $self->config_( 'logdir' ) . "popfile$self->{today__}.log" );
+
+    # Note that 0 parameter than allows the logdir to be outside the user
+    # sandbox
+
+    $self->{debug_filename__} = $self->get_user_path_( $self->config_( 'logdir' ) . "popfile$self->{today__}.log", 0 );
 }
 
 # ---------------------------------------------------------------------------------------------

@@ -146,9 +146,11 @@ sub start
     $self->{started__} = 1;
 
     # Check to see if the PID file is present, if it is then another POPFile
-    # may be running, warn the user and terminate
+    # may be running, warn the user and terminate, note the 0 at the end
+    # means that we allow the piddir to be absolute and outside the user
+    # sandbox
 
-    $self->{pid_file__} = $self->get_user_path( $self->config_( 'piddir' ) . 'popfile.pid' );
+    $self->{pid_file__} = $self->get_user_path( $self->config_( 'piddir' ) . 'popfile.pid', 0 );
 
     if (defined($self->live_check_())) {
         return 0;
@@ -563,20 +565,22 @@ sub save_configuration
 # Resolve a path relative to POPFILE_USER or POPFILE_ROOT
 #
 # $path              The path to resolve
+# $sandbox           Set to 1 if this path must be sandboxed (i.e. absolute
+#                    paths and paths containing .. are not accepted).
 #
 # ---------------------------------------------------------------------------------------------
 sub get_user_path
 {
-    my ( $self, $path ) = @_;
+    my ( $self, $path, $sandbox ) = @_;
 
-    return $self->path_join__( $self->{popfile_user__}, $path );
+    return $self->path_join__( $self->{popfile_user__}, $path, $sandbox );
 }
 
 sub get_root_path
 {
-    my ( $self, $path ) = @_;
+    my ( $self, $path, $sandbox ) = @_;
 
-    return $self->path_join__( $self->{popfile_root__}, $path );
+    return $self->path_join__( $self->{popfile_root__}, $path, $sandbox );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -585,18 +589,32 @@ sub get_root_path
 #
 # Join two paths togther
 #
-# $left                The LHS
-# $right               The RHS
+# $left              The LHS
+# $right             The RHS
+# $sandbox           Set to 1 if this path must be sandboxed (i.e. absolute
+#                    paths and paths containing .. are not accepted).
 #
 # ---------------------------------------------------------------------------------------------
 sub path_join__
 {
-    my ( $self, $left, $right ) = @_;
+    my ( $self, $left, $right, $sandbox ) = @_;
+
+    $sandbox = 1 if ( !defined( $sandbox ) );
 
     if ( ( $right =~ /^\// ) ||
          ( $right =~ /^[A-Za-z]:[\/\\]/ ) ||
          ( $right =~ /\\\\/ ) ) {
-        return $right;
+        if ( $sandbox ) {
+            $self->log_( 0, "Attempt to access path $right outside sandbox" );
+            return undef;
+        } else {
+            return $right;
+        }
+    }
+
+    if ( $sandbox && ( $right =~ /\.\./ ) ) {
+        $self->log_( 0, "Attempt to access path $right outside sandbox" );
+        return undef;
     }
 
     $left  =~ s/\/$//;
