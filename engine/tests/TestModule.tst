@@ -28,6 +28,20 @@ use POPFile::Configuration;
 use POPFile::Logger;
 
 my $m = new POPFile::Module;
+my $l = new POPFile::Logger;
+my $mq = new POPFile::MQ;
+my $c = new POPFile::Configuration;
+
+$m->configuration( $c );
+$m->mq( $mq );
+$l->mq( $mq );
+$m->logger( $l );
+$l->logger( $l );
+$c->logger( $l );
+$mq->logger( $l );
+$l->configuration( $c );
+$l->initialize();
+$l->calculate_today__();
 
 # Check that base functions return good values
 
@@ -41,9 +55,6 @@ $m->name( 'test' );
 test_assert_equal( $m->name(), 'test' );
 
 # Check that the configuration functions work
-
-my $c = new POPFile::Configuration;
-$m->configuration( $c );
 
 $m->config_( 'parameter', 'value' );
 test_assert_equal( $m->config_( 'parameter' ), 'value' );
@@ -62,9 +73,6 @@ $m->deliver();
 
 # Check that the MQ interface functions work
 
-my $mq = new POPFile::MQ;
-$m->mq( $mq );
-
 $m->mq_register_( 'NOTYPE', $m );
 $m->mq_post_( 'DUMMY', 'msg', 'param' );
 
@@ -81,17 +89,13 @@ $mq->service();
 my @messages = $r->read();
 test_assert_equal( $#messages, 0 );
 test_assert_equal( $messages[0][0], 'UIREG' );
-test_assert_equal( $messages[0][1], 'type:name:templ' );
-test_assert_equal( $messages[0][2], $c );
+test_assert_equal( $messages[0][1][0], 'type' );
+test_assert_equal( $messages[0][1][1], 'name' );
+test_assert_equal( $messages[0][1][2], 'templ' );
+test_assert_equal( $messages[0][1][3], $c );
 
 # Check that the logger function works
 
-my $l = new POPFile::Logger;
-$l->mq( $mq );
-$m->logger( $l );
-$l->configuration( $c );
-$l->initialize();
-$l->calculate_today__();
 $m->global_config_( 'debug', 1 );
 
 $m->log_( 0, 'logmsg' );

@@ -1,4 +1,4 @@
-<form action="/configuration">
+<form action="/configuration" method="POST">
 <label class="configurationLabel" for="SOCKSServer"><TMPL_VAR NAME="Localize_Configuration_SOCKSServer">:</label><br />
 <input type="text" name="<TMPL_VAR NAME="Socks_Widget_Name">_socks_server" id="SOCKSServer" value="<TMPL_VAR NAME="Socks_Server">" />
 <input type="submit" class="submit" name="update_<TMPL_VAR NAME="Socks_Widget_Name">_socks_server" value="<TMPL_VAR NAME="Localize_Apply">" />
@@ -8,7 +8,7 @@
 <blockquote><TMPL_VAR NAME="Socks_Widget_Server_Updated"></blockquote>
 </TMPL_IF>
 
-<form action="/configuration">
+<form action="/configuration" method="POST">
 <label class="configurationLabel" for="configSOCKSPort"><TMPL_VAR NAME="Localize_Configuration_SOCKSPort">:</label><br />
 <input name="<TMPL_VAR NAME="Socks_Widget_Name">_socks_port" type="text" id="configSOCKSPort" value="<TMPL_VAR NAME="Socks_Port">" />
 <input type="submit" class="submit" name="update_<TMPL_VAR NAME="Socks_Widget_Name">_socks_port" value="<TMPL_VAR NAME="Localize_Apply">" />

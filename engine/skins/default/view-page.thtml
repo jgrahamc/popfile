@@ -7,20 +7,6 @@
         <td align="left">
             <h2 class="buckets"><TMPL_VAR NAME="Localize_View_Title"></h2>
         </td>
-        <td class="historyNavigatorTop">
-
-            <TMPL_IF NAME="View_If_Previous">
-
-            <a href="/view?view=<TMPL_VAR NAME="View_Previous">&amp;start_message=<TMPL_VAR NAME="View_Previous_Message"><TMPL_VAR NAME="View_Fields">">&lt;<TMPL_VAR NAME="Localize_Previous"></a>
-
-            </TMPL_IF>
-
-            <TMPL_IF NAME="View_If_Next">
-
-            <a href="/view?view=<TMPL_VAR NAME="View_Next">&amp;start_message=<TMPL_VAR NAME="View_Next_Message"><TMPL_VAR NAME="View_Fields">"><TMPL_VAR NAME="Localize_Next">&gt;</a>
-
-            </TMPL_IF>
-        </td>
 
         <td class="openMessageCloser">
             <a class="messageLink" href="/history?<TMPL_VAR NAME="View_All_Fields">">
@@ -38,6 +24,7 @@
                 <input type="hidden" name="search" value="<TMPL_VAR NAME="View_Field_Search">" />
                 <input type="hidden" name="sort" value="<TMPL_VAR NAME="View_Field_Sort">" />
                 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+                <input type="hidden" name="negate" value="<TMPL_VAR NAME="View_Field_Negate">" />
                 <input type="hidden" name="start_message" value="<TMPL_VAR NAME="View_This_Page">" />
                 <input type="hidden" name="filter" value="<TMPL_VAR NAME="View_Field_Filter">" />
 
@@ -50,9 +37,51 @@
                                 </b>:
                             </font>
                         </td>
-                        <td>
+                        <td align=left>
                             <font size="+1">
                                 <TMPL_VAR NAME="View_From" ESCAPE=HTML>
+                            </font>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font size="+1">
+                                <b>
+                                    <TMPL_VAR NAME="Localize_To">
+                                </b>:
+                            </font>
+                        </td>
+                        <td>
+                            <font size="+1">
+                                <TMPL_VAR NAME="View_To" ESCAPE=HTML>
+                            </font>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font size="+1">
+                                <b>
+                                    <TMPL_VAR NAME="Localize_Cc">
+                                </b>:
+                            </font>
+                        </td>
+                        <td>
+                            <font size="+1">
+                                <TMPL_VAR NAME="View_Cc" ESCAPE=HTML>
+                            </font>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <font size="+1">
+                                <b>
+                                    <TMPL_VAR NAME="Localize_Date">
+                                </b>:
+                            </font>
+                        </td>
+                        <td>
+                            <font size="+1">
+                                <TMPL_VAR NAME="View_Date" ESCAPE=HTML>
                             </font>
                         </td>
                     </tr>
@@ -70,16 +99,14 @@
                             </font>
                         </td>
                     </tr>
+                </table>
+                <table align=left width=100%>
                     <tr>
                         <td>
                             <font size="+1">
                                 <b>
                                     <TMPL_VAR NAME="Localize_Classification">
                                 </b>:
-                            </font>
-                        </td>
-                        <td>
-                            <font size="+1">
                                 <font color="<TMPL_VAR NAME="View_Bucket_Color">">
                                     <TMPL_VAR NAME="View_Bucket">
                                 </font>
@@ -95,10 +122,6 @@
                                 <b>
                                     <TMPL_VAR NAME="Localize_History_ChangedClass">
                                 </b>:
-                            </font>
-                        </td>
-                        <td>
-                            <font size="+1">
                                 <font color="<TMPL_VAR NAME="View_Class_Changed_Color">">
                                     <TMPL_VAR NAME="View_Class_Changed">
                                 </font>

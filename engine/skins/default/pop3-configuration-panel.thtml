@@ -1,4 +1,4 @@
-<form action="/configuration">
+<form action="/configuration" method="POST">
 <label class="configurationLabel" for="configPopPort"><TMPL_VAR NAME="Localize_Configuration_POP3Port">:</label><br />
 <input name="pop3_port" type="text" id="configPopPort" value="<TMPL_VAR NAME="POP3_Configuration_Port">" />
 <input type="submit" class="submit" name="update_pop3_port" value="<TMPL_VAR NAME="Localize_Apply">" />
@@ -12,7 +12,7 @@
 <blockquote><TMPL_VAR NAME="POP3_Configuration_Port_Updated"></blockquote>
 </TMPL_IF>
 
-<form action="/configuration">
+<form action="/configuration" method="POST">
 <label class="configurationLabel" for="configSeparator"><TMPL_VAR NAME="Localize_Configuration_POP3Separator">:</label><br />
 <input name="pop3_separator" id="configSeparator" type="text" value="<TMPL_VAR NAME="POP3_Configuration_Separator">" />
 <input type="submit" class="submit" name="update_pop3_separator" value="<TMPL_VAR NAME="Localize_Apply">" />
@@ -30,13 +30,13 @@
 <table border="0" cellpadding="0" cellspacing="0" summary=""><tr><td nowrap="nowrap">
 
 <TMPL_IF NAME="POP3_Configuration_If_Force_Fork">
-    <form action="/configuration">
+    <form action="/configuration" method="POST">
     <span class="securityWidgetStateOff"><TMPL_VAR NAME="Localize_No"></span>
     <input type="submit" class="toggleOn" id="windowTrayIconOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
     <input type="hidden" name="pop3_force_fork" value="1" />
     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form>
 <TMPL_ELSE>
-    <form action="/configuration">
+    <form action="/configuration" method="POST">
     <span class="securityWidgetStateOn"><TMPL_VAR NAME="Localize_Yes"></span>
     <input type="submit" class="toggleOff" id="windowTrayIconOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
     <input type="hidden" name="pop3_force_fork" value="0" />

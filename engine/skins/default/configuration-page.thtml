@@ -4,7 +4,7 @@
 <table class="settingsTable" width="100%" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Configuration_MainTableSummary">">
 <tr><td class="settingsPanel" width="33%" valign="top">
 <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_UserInterface"></h2>
-<form action="/configuration">
+<form action="/configuration" method="POST">
 <label class="configurationLabel" for="configSkin"><TMPL_VAR NAME="Localize_Configuration_SkinsChoose">:</label><br />
 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 <select name="skin" id="configSkin">
@@ -36,7 +36,7 @@
 </select><input type="submit" class="submit" name="change_skin" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
 
-<form action="/configuration">
+<form action="/configuration" method="POST">
 <label class="configurationLabel" for="configLanguage"><TMPL_VAR NAME="Localize_Configuration_LanguageChoose">:</label><br />
 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 <select name="language" id="configLanguage">
@@ -51,7 +51,7 @@
 <td class="settingsPanel" width="33%" valign="top">
 <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_HistoryView"></h2>
 
-<form action="/configuration">
+<form action="/configuration" method="POST">
 <label class="configurationLabel" for="configPageSize"><TMPL_VAR NAME="Localize_Configuration_History">:</label><br />
 <input name="page_size" id="configPageSize" type="text" value="<TMPL_VAR NAME="Configuration_Page_Size">" />
 <input type="submit" class="submit" name="update_page_size" value="<TMPL_VAR NAME="Localize_Apply">" />
@@ -61,7 +61,7 @@
 </TMPL_IF>
 <TMPL_VAR NAME="Configuration_Page_Size_Updated">
 
-<form action="/configuration">
+<form action="/configuration" method="POST">
 <label class="configurationLabel" for="configHistoryDays"><TMPL_VAR NAME="Localize_Configuration_Days">:</label> <br />
 <input name="history_days" id="configHistoryDays" type="text" value="<TMPL_VAR NAME="Configuration_History_Days">" />
 <input type="checkbox" class="checkbox" name="purge_history" value="<TMPL_VAR NAME="Localize_History_Purge">" /> <TMPL_VAR NAME="Localize_History_Purge">
@@ -73,7 +73,7 @@
 </TMPL_IF>
 <TMPL_VAR NAME="Configuration_History_Days_Updated">
 
-<form action="/configuration">
+<form action="/configuration" method="POST">
 <label class="configurationLabel" for="configUIPort"><TMPL_VAR NAME="Localize_Configuration_Fields">:</label><br />
 <TMPL_LOOP NAME="Configuration_Loop_History_Columns">
 <input type="checkbox" id="<TMPL_VAR NAME="Configuration_Field_Name">" class="checkbox" name="<TMPL_VAR NAME="Configuration_Field_Name">" <TMPL_VAR NAME="Configuration_Field_Value">>&nbsp;<TMPL_VAR NAME="Configuration_Localized_Field_Name"><br>
@@ -84,7 +84,7 @@
 <td class="settingsPanel" width="33%" valign="top" rowspan="2">
 <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_ListenPorts"></h2>
 
-<form action="/configuration">
+<form action="/configuration" method="POST">
 <label class="configurationLabel" for="configUIPort"><TMPL_VAR NAME="Localize_Configuration_UI">:</label><br />
 <input name="ui_port" id="configUIPort" type="text" value="<TMPL_VAR NAME="Configuration_UI_Port">" />
 <input type="submit" class="submit" name="update_ui_port" value="<TMPL_VAR NAME="Localize_Apply">" />
@@ -100,7 +100,7 @@
 <tr><td class="settingsPanel" width="33%" valign="top">
 <h3 class="configuration"><TMPL_VAR NAME="Localize_Configuration_TCPTimeout"></h3>
 
-<form action="/configuration">
+<form action="/configuration" method="POST">
 <label class="configurationLabel" for="configTCPTimeout"><TMPL_VAR NAME="Localize_Configuration_TCPTimeoutSecs">:</label><br />
 <input name="timeout" type="text" id="configTCPTimeout" value="<TMPL_VAR NAME="Configuration_TCP_Timeout">" />
 <input type="submit" class="submit" name="update_timeout" value="<TMPL_VAR NAME="Localize_Apply">" />
@@ -114,7 +114,7 @@
 
 <td class="settingsPanel" width="33%" valign="top">
 <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_Logging"></h2>
-<form action="/configuration">
+<form action="/configuration" method="POST">
 <label class="configurationLabel" for="configLogging"><TMPL_VAR NAME="Localize_Configuration_LoggerOutput">:</label>
 <input type="hidden" value="<TMPL_VAR NAME="Session_Key">" name="session" />
 <select name="debug" id="configLogging">

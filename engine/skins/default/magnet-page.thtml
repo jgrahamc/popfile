@@ -100,7 +100,7 @@
     </tr>
 </table>
 <div class="magnetsNewWidget">
-    <form action="/magnets">
+    <form action="/magnets" method="POST">
         <label class="magnetsLabel" for="magnetsAddType">
             <TMPL_VAR NAME="Localize_Magnet_MagnetType">:
         </label>

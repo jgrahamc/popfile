@@ -11,13 +11,13 @@
 <span class="securityLabel"><TMPL_VAR NAME="Localize_Security_UI">:</span><br />
 
 <TMPL_IF NAME="Security_If_Local">
-    <form class="securitySwitch" action="/security">
+    <form class="securitySwitch" action="/security" method="POST">
     <span class="securityWidgetStateOff"><TMPL_VAR NAME="Localize_Security_NoStealthMode"></span>
     <input type="submit" class="toggleOn" id="securityAcceptHTTPOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
     <input type="hidden" name="localui" value="1" />
     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form>
 <TMPL_ELSE>
-    <form class="securitySwitch" action="/security">
+    <form class="securitySwitch" action="/security" method="POST">
     <span class="securityWidgetStateOn"><TMPL_VAR NAME="Localize_Yes"></span>
     <input type="submit" class="toggleOff" id="securityAcceptHTTPOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" /> <TMPL_VAR NAME="Localize_Security_StealthMode"> 
     <input type="hidden" name="localui" value="2" />
@@ -53,13 +53,13 @@
 
 <table border="0" cellpadding="0" cellspacing="0" summary=""><tr><td>
 <TMPL_IF NAME="Security_If_Update_Check">
-    <form class="securitySwitch" action="/security">
+    <form class="securitySwitch" action="/security" method="POST">
     <span class="securityWidgetStateOn"><TMPL_VAR NAME="Localize_Yes"></span>
     <input type="submit" class="toggleOff" id="securityUpdateCheckOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
     <input type="hidden" name="update_check" value="1" />
     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form>
 <TMPL_ELSE>
-    <form class="securitySwitch" action="/security">
+    <form class="securitySwitch" action="/security" method="POST">
     <span class="securityWidgetStateOff"><TMPL_VAR NAME="Localize_No"></span>
     <input type="submit" class="toggleOn" id="securityUpdateCheckOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
     <input type="hidden" name="update_check" value="2" />
@@ -74,13 +74,13 @@
 
 <table border="0" cellpadding="0" cellspacing="0" summary=""><tr><td>
 <TMPL_IF NAME="Security_If_Send_Stats">
-    <form class="securitySwitch" action="/security">
+    <form class="securitySwitch" action="/security" method="POST">
     <span class="securityWidgetStateOn"><TMPL_VAR NAME="Localize_Yes"></span>
     <input type="submit" class="toggleOff" id="securitySendStatsOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
     <input type="hidden" name="send_stats" value="1" />
     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form>
 <TMPL_ELSE>
-    <form class="securitySwitch" action="/security">
+    <form class="securitySwitch" action="/security" method="POST">
     <span class="securityWidgetStateOff"><TMPL_VAR NAME="Localize_No"></span>
     <input type="submit" class="toggleOn" id="securitySendStatsOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
     <input type="hidden" name="send_stats" value="2" />

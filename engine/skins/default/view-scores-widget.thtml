@@ -193,6 +193,32 @@
     
     </TMPL_LOOP>
 
-</table>
+    </table>
+    <hr>
+
+    <b>
+        <TMPL_VAR NAME="Localize_View_Chart">
+    </b>
+    <p>
+    <table>
+    <tr>
+    <TMPL_LOOP NAME="View_Loop_Chart1">
+        <td valign="bottom">
+        <TMPL_IF NAME="View_If_Bar">
+            <img src="autogen_<TMPL_VAR NAME="View_Color">.bmp" width="<TMPL_VAR NAME="View_Width">" height="<TMPL_VAR NAME="View_Height">" alt="<TMPL_VAR NAME="View_Chart_Word">" title="<TMPL_VAR NAME="View_Chart_Word">">
+        </TMPL_IF>
+        </td>
+    </TMPL_LOOP>
+    </tr>
+    <tr>
+    <TMPL_LOOP NAME="View_Loop_Chart2">
+        <td valign="top">
+        <TMPL_IF NAME="View_If_Bar">
+            <img src="autogen_<TMPL_VAR NAME="View_Color">.bmp" width="<TMPL_VAR NAME="View_Width">" height="<TMPL_VAR NAME="View_Height">" alt="<TMPL_VAR NAME="View_Chart_Word">" title="<TMPL_VAR NAME="View_Chart_Word">"><br>
+        </TMPL_IF>
+        </td>
+    </TMPL_LOOP>
+    </tr>
+    </table>
 
 </TMPL_IF>

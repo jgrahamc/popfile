@@ -35,6 +35,7 @@ use warnings;
 use locale;
 
 # A handy variable containing the value of an EOL for networks
+
 my $eol = "\015\012";
 
 #----------------------------------------------------------------------------
@@ -73,6 +74,7 @@ sub initialize
     my ( $self ) = @_;
 
     # Disabled by default
+
     $self->config_( 'enabled', 0);
 
     # By default we don't fork on Windows
@@ -92,7 +94,9 @@ sub initialize
     $self->config_( 'separator', ':');
 
     # The welcome string from the proxy is configurable
-    $self->config_( 'welcome_string', "NNTP POPFile ($self->{version_}) server ready" );
+
+    $self->config_( 'welcome_string',
+        "NNTP POPFile ($self->{version_}) server ready" );
 
     return $self->SUPER::initialize();;
 }
@@ -137,8 +141,7 @@ sub start
                                          'nntp-security-local.thtml',
                                          $self );
 
-    return $self->SUPER::start();;
-}
+    return $self->SUPER::start();; }
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -155,35 +158,47 @@ sub child__
     my ( $self, $client, $session ) = @_;
 
     # Number of messages downloaded in this session
+
     my $count = 0;
 
     # The handle to the real news server gets stored here
+
     my $news;
 
-    # The state of the connection (username needed, password needed, authenticated/connected)
+    # The state of the connection (username needed, password needed,
+    # authenticated/connected)
+
     my $connection_state = 'username needed';
 
-    # Tell the client that we are ready for commands and identify our version number
-    $self->tee_( $client, "201 " . $self->config_( 'welcome_string' ) . "$eol" );
+    # Tell the client that we are ready for commands and identify our
+    # version number
 
-    # Retrieve commands from the client and process them until the client disconnects or
-    # we get a specific QUIT command
+    $self->tee_( $client, "201 " . $self->config_( 'welcome_string' ) .
+        "$eol" );
+
+    # Retrieve commands from the client and process them until the
+    # client disconnects or we get a specific QUIT command
+
     while  ( <$client> ) {
         my $command;
 
         $command = $_;
 
         # Clean up the command so that it has a nice clean $eol at the end
+
         $command =~ s/(\015|\012)//g;
 
         $self->log_( 2, "Command: --$command--" );
 
-        # The news client wants to stop using the server, so send that message through to the
-        # real news server, echo the response back up to the client and exit the while.  We will
-        # close the connection immediately
+        # The news client wants to stop using the server, so send that
+        # message through to the real news server, echo the response
+        # back up to the client and exit the while.  We will close the
+        # connection immediately
+
         if ( $command =~ /^ *QUIT/i ) {
             if ( $news )  {
-                last if ( $self->echo_response_( $news, $client, $command ) == 2 );
+                last if ( $self->echo_response_( $news, $client, $command ) ==
+                         2 );
                 close $news;
             } else {
                 $self->tee_( $client, "205 goodbye$eol" );
@@ -193,25 +208,35 @@ sub child__
 
         if ($connection_state eq 'username needed') {
 
-            # NOTE: This syntax is ambiguous if the NNTP username is a short (under 5 digit) string (eg, 32123).
-            # If this is the case, run "perl popfile.pl -nntp_separator /" and change your kludged username
-            # appropriately (syntax would then be server[:port][/username])
-            my $user_command = '^ *AUTHINFO USER ([^:]+)(:([\d]{1,5}))?(\\' . $self->config_( 'separator' ) . '(.+))?';
+            # NOTE: This syntax is ambiguous if the NNTP username is a
+            # short (under 5 digit) string (eg, 32123).  If this is
+            # the case, run "perl popfile.pl -nntp_separator /" and
+            # change your kludged username appropriately (syntax would
+            # then be server[:port][/username])
+
+            my $user_command = '^ *AUTHINFO USER ([^:]+)(:([\d]{1,5}))?(\\' .
+                $self->config_( 'separator' ) . '(.+))?';
 
             if ( $command =~ /$user_command/i ) {
-                my $server   = $1;
+                my $server = $1;
+
                 # hey, the port has to be in range at least
-                my $port     = $3 if ( defined($3) && ($3 > 0) && ($3 < 65536) );
+
+                my $port = $3 if ( defined($3) && ($3 > 0) && ($3 < 65536) );
                 my $username = $5;
 
                 if ( $server ne '' )  {
-                    if ( $news = $self->verify_connected_( $news, $client, $server, $port || 119 ) )  {
+                    if ( $news = $self->verify_connected_( $news, $client,
+                        $server, $port || 119 ) )  {
                         if (defined $username) {
 
-                            # Pass through the AUTHINFO command with the actual user name for this server,
-                            # if one is defined, and send the reply straight to the client
+                            # Pass through the AUTHINFO command with
+                            # the actual user name for this server, if
+                            # one is defined, and send the reply
+                            # straight to the client
 
-                            $self->get_response_($news, $client, 'AUTHINFO USER ' . $username );
+                            $self->get_response_( $news, $client,
+                                'AUTHINFO USER ' . $username );
                             $connection_state = "password needed";
                         } else {
 
@@ -224,7 +249,8 @@ sub child__
                         last;
                     }
                 } else {
-                    $self->tee_( $client, "482 Authentication rejected server name not specified in AUTHINFO USER command$eol" );
+                    $self->tee_( $client,
+                        "482 Authentication rejected server name not specified in AUTHINFO USER command$eol" );
                     last;
                 }
 
@@ -239,7 +265,8 @@ sub child__
             }
         } elsif ( $connection_state eq "password needed" ) {
             if ($command =~ /^ *AUTHINFO PASS (.*)/i) {
-                my ( $response, $ok ) = $self->get_response_($news, $client, $command);
+                my ( $response, $ok ) = $self->get_response_( $news, $client,
+                                            $command);
 
                 if ($response =~ /^281 .*/) {
                     $connection_state = "connected";
@@ -268,14 +295,18 @@ sub child__
 
             # COMMANDS USED DIRECTLY WITH THE REMOTE NNTP SERVER GO HERE
 
-            # The client wants to retrieve an article. We oblige, and insert classification headers.
+            # The client wants to retrieve an article. We oblige, and
+            # insert classification headers.
 
             if ( $command =~ /^ *ARTICLE (.*)/i ) {
-                my ( $response, $ok ) = $self->get_response_( $news, $client, $command);
+                my ( $response, $ok ) = $self->get_response_( $news, $client,
+                                            $command);
                 if ( $response =~ /^220 (.*) (.*)$/i) {
                     $count += 1;
 
-                    my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $news, $client, 0, '' );
+                    my ( $class, $history_file ) =
+                        $self->{classifier__}->classify_and_modify( $session,
+                            $news, $client, 0, '' );
                 }
 
                 next;
@@ -283,26 +314,35 @@ sub child__
 
             # Commands expecting a code + text response
 
-            if ( $command =~ /^ *(LIST|HEAD|BODY|NEWGROUPS|NEWNEWS|LISTGROUP|XGTITLE|XINDEX|XHDR|XOVER|XPAT|XROVER|XTHREAD)/i ) {
-                my ( $response, $ok ) = $self->get_response_( $news, $client, $command);
+            if ( $command =~ 
+                /^ *(LIST|HEAD|BODY|NEWGROUPS|NEWNEWS|LISTGROUP|XGTITLE|XINDEX|XHDR|XOVER|XPAT|XROVER|XTHREAD)/i ) {
+                my ( $response, $ok ) = $self->get_response_( $news,
+                                            $client, $command);
 
-                # 2xx (200) series response indicates multi-line text follows to .crlf
+                # 2xx (200) series response indicates multi-line text
+                # follows to .crlf
 
-                $self->echo_to_dot_( $news, $client, 0 ) if ( $response =~ /^2\d\d/ );
+                if ( $response =~ /^2\d\d/ ) {
+                    $self->echo_to_dot_( $news, $client, 0 );
+                }
                 next;
             }
 
             # Exceptions to 200 code above
 
             if ( $ command =~ /^ *(HELP)/i ) {
-                my ( $response, $ok ) = $self->get_response_( $news, $client, $command);
-                $self->echo_to_dot_( $news, $client, 0 ) if ( $response =~ /^1\d\d/ );
+                my ( $response, $ok ) = $self->get_response_( $news, $client,
+                                            $command);
+                if ( $response =~ /^1\d\d/ ) {
+                    $self->echo_to_dot_( $news, $client, 0 );
+                }
                 next;
             }
 
             # Commands expecting a single-line response
 
-            if ( $command =~ /^ *(GROUP|STAT|IHAVE|LAST|NEXT|SLAVE|MODE|XPATH)/i ) {
+            if ( $command =~ 
+                /^ *(GROUP|STAT|IHAVE|LAST|NEXT|SLAVE|MODE|XPATH)/i ) {
                 $self->get_response_( $news, $client, $command );
                 next;
             }
@@ -310,9 +350,11 @@ sub child__
             # Commands followed by multi-line client response
 
             if ( $command =~ /^ *(IHAVE|POST|XRELPIC)/i ) {
-                my ( $response, $ok ) = $self->get_response_( $news, $client, $command);
+                my ( $response, $ok ) = $self->get_response_( $news, $client,
+                                            $command);
 
-                # 3xx (300) series response indicates multi-line text should be sent, up to .crlf
+                # 3xx (300) series response indicates multi-line text
+                # should be sent, up to .crlf
 
                 if ($response =~ /^3\d\d/ ) {
 
@@ -320,7 +362,8 @@ sub child__
 
                     $self->echo_to_dot_( $client, $news, 0 );
 
-                    # Echo to dot doesn't provoke a server response somehow, we add another CRLF
+                    # Echo to dot doesn't provoke a server response
+                    # somehow, we add another CRLF
 
                     $self->get_response_( $news, $client, "$eol" );
                 }
@@ -332,12 +375,13 @@ sub child__
 
         if ( $ command =~ /^ *$/ ) {
             if ( $news && $news->connected ) {
-                $self->get_response_($news, $client, $command, 1);
+                $self->get_response_( $news, $client, $command, 1 );
                 next;
             }
         }
 
-        # Don't know what this is so let's just pass it through and hope for the best
+        # Don't know what this is so let's just pass it through and
+        # hope for the best
 
         if ( $news && $news->connected)  {
             $self->echo_response_($news, $client, $command );

@@ -1720,7 +1720,8 @@ sub clear_out_base64
 
 # ---------------------------------------------------------------------------------------------
 #
-# decode_string - Decode MIME encoded strings used in the header lines in email messages
+# decode_string - Decode MIME encoded strings used in the header lines
+# in email messages
 #
 # $mystring     - The string that neeeds decode
 #
@@ -1728,20 +1729,25 @@ sub clear_out_base64
 #
 # =?charset?[BQ]?text?=
 #
-# $lang     Pass in the current interface language for language specific encoding conversion
-# A B indicates base64 encoding, a Q indicates quoted printable encoding
+# $lang Pass in the current interface language for language specific
+# encoding conversion A B indicates base64 encoding, a Q indicates
+# quoted printable encoding
 # ---------------------------------------------------------------------------------------------
 sub decode_string
 {
-    # I choose not to use "$mystring = MIME::Base64::decode( $1 );" because some spam mails
-    # have subjects like: "Subject: adjpwpekm =?ISO-8859-1?Q?=B2=E1=A4=D1=AB=C7?= dopdalnfjpw".
-    # Therefore, it will be better to store the decoded text in a temporary variable and substitute
-    # the original string with it later. Thus, this subroutine returns the real decoded result.
+    # I choose not to use "$mystring = MIME::Base64::decode( $1 );"
+    # because some spam mails have subjects like: "Subject: adjpwpekm
+    # =?ISO-8859-1?Q?=B2=E1=A4=D1=AB=C7?= dopdalnfjpw".  Therefore, it
+    # will be better to store the decoded text in a temporary variable
+    # and substitute the original string with it later. Thus, this
+    # subroutine returns the real decoded result.
 
     my ( $self, $mystring, $lang ) = @_;
 
     my $decode_it = '';
     my $charset = '';
+
+    $lang = $self->{lang__} if ( !defined( $lang ) || ( $lang eq '' ) );
 
     while ( $mystring =~ /=\?([\w-]+)\?(B|Q)\?(.*?)\?=/ig ) {
         if ($2 eq "B" || $2 eq "b") {

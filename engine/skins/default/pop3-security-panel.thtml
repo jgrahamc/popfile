@@ -8,20 +8,20 @@
             <form class="securitySwitch" action="/security" method="post">
                 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
-                <TMPL_IF NAME="POP3_Security_Local">
+<TMPL_IF NAME="POP3_Security_Local">
+    <form class="securitySwitch" action="/security" method="POST">
+    <span class="securityWidgetStateOff"><TMPL_VAR NAME="Localize_Security_NoStealthMode"></span>
+    <input type="submit" class="toggleOn" id="securityAcceptPOP3On" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
+    <input type="hidden" name="pop3_local" value="1" />
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form>
+<TMPL_ELSE>
+    <form class="securitySwitch" action="/security" method="POST">
+    <span class="securityWidgetStateOn"><TMPL_VAR NAME="Localize_Yes"></span>
+    <input type="submit" class="toggleOff" id="securityAcceptPOP3Off" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo"> <TMPL_VAR NAME="Localize_Security_StealthMode">" />
+    <input type="hidden" name="pop3_local" value="2" />
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" /></form>
+</TMPL_IF>
 
-                <span class="securityWidgetStateOff"><TMPL_VAR NAME="Localize_Security_NoStealthMode"></span>
-                <input type="submit" class="toggleOn" id="securityAcceptPOP3On" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
-                <input type="hidden" name="pop3_local" value="1" />
-
-                <TMPL_ELSE>
-
-                <span class="securityWidgetStateOn"><TMPL_VAR NAME="Localize_Yes"></span>
-                <input type="submit" class="toggleOff" id="securityAcceptPOP3Off" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" /> <TMPL_VAR NAME="Localize_Security_StealthMode">
-                <input type="hidden" name="pop3_local" value="2" />
-                </TMPL_IF>
-
-            </form>
         </td>
     </tr>
 </table>

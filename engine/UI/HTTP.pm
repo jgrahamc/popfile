@@ -349,9 +349,10 @@ sub http_file_
         }
         close FILE;
 
-        # To prevent the browser for continuously asking for file handled in this way
-        # we calculate the current date and time plus 1 hour to give the browser
-        # cache 1 hour to keep things like graphics and style sheets in cache.
+        # To prevent the browser for continuously asking for file
+        # handled in this way we calculate the current date and time
+        # plus 1 hour to give the browser cache 1 hour to keep things
+        # like graphics and style sheets in cache.
 
         my @day   = ( 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' );
         my @month = ( 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' );

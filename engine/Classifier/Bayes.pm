@@ -2124,6 +2124,7 @@ sub classify
             }
 
             my @word_data;
+            my %chart;
             foreach my $id (@ranked_ids) {
                 my %row_data;
                 my $known = 0;
@@ -2149,6 +2150,7 @@ sub classify
                     }
 
                     my @per_bucket;
+                    my @score;
                     foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
                         my %bucket_row;
                         my $bucket = $ranking[$ix];
@@ -2168,6 +2170,7 @@ sub classify
                             my $wordprobstr;
                             if ($self->{wmformat__} eq 'score') {
                                 $wordprobstr  = sprintf("%12.4f", ($probability - $self->{not_likely__}{$userid})/$log10 );
+                                push ( @score, $wordprobstr );
                             } else {
                                 if ($self->{wmformat__} eq 'prob') {
                                     $wordprobstr  = sprintf("%12.4f", $wordprobs{$bucket,$id});
@@ -2181,10 +2184,64 @@ sub classify
                     }
                     $row_data{View_Score_Loop_Per_Bucket} = \@per_bucket;
 
+                    # If we are doing the word scores then we build up
+                    # a hash that maps the name of a word to a value
+                    # which is the difference between the word scores
+                    # for the top two buckets.  We later use this to
+                    # draw a chart
+
+                    if ( $self->{wmformat__} eq 'score' ) {
+                        $chart{$$idmap{$id}} = $score[0] - $score[1];
+                    }
+
                     push ( @word_data, \%row_data );
                 }
             }
             $templ->param( 'View_Score_Loop_Words' => \@word_data );
+
+            # Draw a chart that shows how the decision between the top
+            # two buckets was made.
+
+            my @words = sort { $chart{$b} <=> $chart{$a} } keys %chart;
+
+            my @chart_data;
+            my $max_chart = $chart{$words[0]};
+            my $min_chart = $chart{$words[$#words]};
+            my $scale = 400 / ( $max_chart - $min_chart );
+            my $width = 400 / $#words;
+            my $color = $self->get_bucket_color( $session, $ranking[0] );
+            foreach my $word (@words) {
+                my %row_data;
+
+                next if ( $chart{$word} == 0 );
+
+                $row_data{View_If_Bar} = ( $chart{$word} > 0 );
+                if ( $chart{$word} > 0 ) {
+                    $row_data{View_Height} = $chart{$word} * $scale;
+                }
+                $row_data{View_Chart_Word} = $word;
+                $row_data{View_Width} = $width;
+                $row_data{View_Color} = $color;
+                push ( @chart_data, \%row_data );
+            }
+            $templ->param( 'View_Loop_Chart1' => \@chart_data );
+            my @chart_data2;
+            $color = $self->get_bucket_color( $session, $ranking[1] );
+            foreach my $word (@words) {
+                my %row_data;
+
+                next if ( $chart{$word} == 0 );
+
+                $row_data{View_If_Bar} = ( $chart{$word} < 0 );
+                if ( $chart{$word} < 0 ) {
+                    $row_data{View_Height} = -$chart{$word} * $scale;
+                }
+                $row_data{View_Chart_Word} = $word;
+                $row_data{View_Width} = $width;
+                $row_data{View_Color} = $color;
+                push ( @chart_data2, \%row_data );
+            }
+            $templ->param( 'View_Loop_Chart2' => \@chart_data2 );
         }
     }
 

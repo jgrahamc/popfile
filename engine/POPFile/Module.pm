@@ -29,81 +29,84 @@ use IO::Select;
 
 # ---------------------------------------------------------------------------------------------
 #
-# This module implements the base class for all POPFile Loadable Modules and
-# contains collection of methods that are common to all POPFile modules and only
-# selected ones need be overriden by subclasses
+# This module implements the base class for all POPFile Loadable
+# Modules and contains collection of methods that are common to all
+# POPFile modules and only selected ones need be overriden by
+# subclasses
 #
-# POPFile is constructed from a collection of classes which all have special
-# PUBLIC interface functions:
+# POPFile is constructed from a collection of classes which all have
+# special PUBLIC interface functions:
 #
-# initialize() - called after the class is created to set default values for internal
-#                variables and global configuration information
+# initialize() - called after the class is created to set default
+# values for internal variables and global configuration information
 #
-# start()      - called once all configuration has been read and POPFile is ready to start
-#                operating
+# start() - called once all configuration has been read and POPFile is
+# ready to start operating
 #
 # stop()       - called when POPFile is shutting down
 #
-# service()    - called by the main POPFile process to allow a submodule to do its own
-#                work (this is optional for modules that do not need to perform any service)
+# service() - called by the main POPFile process to allow a submodule
+# to do its own work (this is optional for modules that do not need to
+# perform any service)
 #
-# prefork()    - called when a module has requested a fork, but before the fork happens
+# prefork() - called when a module has requested a fork, but before
+# the fork happens
 #
-# forked()     - called when a module has forked the process.  This is called within the child
-#                process and should be used to clean up
+# forked() - called when a module has forked the process.  This is
+# called within the child process and should be used to clean up
 #
-# postfork()   - called in the parent process to tell it that the fork has occurred.  This is
-#                like forked but in the parent
+# postfork() - called in the parent process to tell it that the fork
+# has occurred.  This is like forked but in the parent
 #
-# reaper()     - called when a process has terminated to give a module a chance to do
-#                whatever clean up is needed
+# reaper() - called when a process has terminated to give a module a
+# chance to do whatever clean up is needed
 #
-# name()       - returns a simple name for the module by which other modules can get access
-#                through the %components hash.  The name returned here will be the name
-#                used as the key for this module in %components
+# name() - returns a simple name for the module by which other modules
+# can get access through the %components hash.  The name returned here
+# will be the name used as the key for this module in %components
 #
 # deliver()    - called by the message queue to deliver a message
 #
 # The following methods are PROTECTED and should be accessed by sub classes:
 #
-# log_()       - sends a string to the logger
+# log_() - sends a string to the logger
 #
-# config_()    - gets or sets a configuration parameter for this module
+# config_() - gets or sets a configuration parameter for this module
 #
-# mq_post_()   - post a message to the central message queue
+# mq_post_() - post a message to the central message queue
 #
-# mq_register_() register for messages from the message queue
+# mq_register_() - register for messages from the message queue
 #
-# slurp_()       Reads a line up to CR, CRLF or LF
+# slurp_() - Reads a line up to CR, CRLF or LF
 #
-# register_configuration_item_() register a UI configuration item
+# register_configuration_item_() - register a UI configuration item
 #
 # A note on the naming
 #
-# A method or variable that ends with an underscore is PROTECTED and should not be accessed
-# from outside the class (or subclass; in C++ its protected), to access a PROTECTED variable
-# you will find an equivalent getter/setter method with no underscore.
+# A method or variable that ends with an underscore is PROTECTED and
+# should not be accessed from outside the class (or subclass; in C++
+# its protected), to access a PROTECTED variable you will find an
+# equivalent getter/setter method with no underscore.
 #
-# Truly PRIVATE variables are indicated by a double underscore at the end of the name and
-# should not be accessed outside the class without going through a getter/setter and may
-# not be directly accessed by a subclass.
+# Truly PRIVATE variables are indicated by a double underscore at the
+# end of the name and should not be accessed outside the class without
+# going through a getter/setter and may not be directly accessed by a
+# subclass.
 #
 # For example
 #
-# $c->foo__() is a private method
-# $c->{foo__} is a private variable
-# $c->foo_() is a protected method
-# $c->{foo_} is a protected variable
-# $c->foo() is a public method that modifies $c->{foo_} it always returns the current
-# value of the variable it is referencing and if passed a value sets that corresponding
-# variable
+# $c->foo__() is a private method $c->{foo__} is a private variable
+# $c->foo_() is a protected method $c->{foo_} is a protected variable
+# $c->foo() is a public method that modifies $c->{foo_} it always
+# returns the current value of the variable it is referencing and if
+# passed a value sets that corresponding variable
 #
 # ---------------------------------------------------------------------------------------------
 
-# This variable is CLASS wide, not OBJECT wide and is used as temporary storage
-# for the slurp_ methods below.  It needs to be class wide because different objects
-# may call slurp on the same handle as the handle gets passed from object to
-# object.
+# This variable is CLASS wide, not OBJECT wide and is used as
+# temporary storage for the slurp_ methods below.  It needs to be
+# class wide because different objects may call slurp on the same
+# handle as the handle gets passed from object to object.
 
 my %slurp_data__;
 
@@ -143,13 +146,14 @@ sub new
 
     $self->{alive_}          = 1;
 
-    # This is a reference to the pipeready() function in popfile.pl that it used
-    # to determine if a pipe is ready for reading in a cross platform way
+    # This is a reference to the pipeready() function in popfile.pl
+    # that it used to determine if a pipe is ready for reading in a
+    # cross platform way
 
     $self->{pipeready_}      = 0;
 
-    # This is a reference to a function (forker) in popfile.pl that performs a fork
-    # and informs modules that a fork has occurred
+    # This is a reference to a function (forker) in popfile.pl that
+    # performs a fork and informs modules that a fork has occurred
 
     $self->{forker_}         = 0;
 
@@ -160,16 +164,18 @@ sub new
 #
 # initialize
 #
-# Called to initialize the module, the main task that this function should perform is
-# setting up the default values of the configuration options for this object.  This is done
-# through the configuration_ hash value that will point the configuration module.
+# Called to initialize the module, the main task that this function
+# should perform is setting up the default values of the configuration
+# options for this object.  This is done through the configuration_
+# hash value that will point the configuration module.
 #
-# Note that the configuration is not loaded from disk until after every module's initialize
-# has been called, so do not use any of these values until start() is called as they may
-# change
+# Note that the configuration is not loaded from disk until after
+# every module's initialize has been called, so do not use any of
+# these values until start() is called as they may change
 #
-# The method should return 1 to indicate that it initialized correctly, if it returns
-# 0 then POPFile will abort loading immediately
+# The method should return 1 to indicate that it initialized
+# correctly, if it returns 0 then POPFile will abort loading
+# immediately
 #
 # ---------------------------------------------------------------------------------------------
 sub initialize
@@ -185,9 +191,10 @@ sub initialize
 #
 # Called when all configuration information has been loaded from disk.
 #
-# The method should return 1 to indicate that it started correctly, if it returns
-# 0 then POPFile will abort loading immediately, returns 2 if everything OK but this
-# module does not want to continue to be used.
+# The method should return 1 to indicate that it started correctly, if
+# it returns 0 then POPFile will abort loading immediately, returns 2
+# if everything OK but this module does not want to continue to be
+# used.
 #
 # ---------------------------------------------------------------------------------------------
 sub start
@@ -201,8 +208,9 @@ sub start
 #
 # stop
 #
-# Called when POPFile is closing down, this is the last method that will get called before
-# the object is destroyed.  There is not return value from stop().
+# Called when POPFile is closing down, this is the last method that
+# will get called before the object is destroyed.  There is not return
+# value from stop().
 #
 # ---------------------------------------------------------------------------------------------
 sub stop
@@ -214,9 +222,10 @@ sub stop
 #
 # reaper
 #
-# Called when a child process terminates somewhere in POPFile.  The object should check
-# to see if it was one of its children and do any necessary processing by calling waitpid()
-# on any child handles it has
+# Called when a child process terminates somewhere in POPFile.  The
+# object should check to see if it was one of its children and do any
+# necessary processing by calling waitpid() on any child handles it
+# has
 #
 # There is no return value from this method
 #
@@ -230,11 +239,13 @@ sub reaper
 #
 # service
 #
-# service() is a called periodically to give the module a chance to do housekeeping work.
+# service() is a called periodically to give the module a chance to do
+# housekeeping work.
 #
-# If any problem occurs that requires POPFile to shutdown service() should return 0 and
-# the top level process will gracefully terminate POPFile including calling all stop()
-# methods.  In normal operation return 1.
+# If any problem occurs that requires POPFile to shutdown service()
+# should return 0 and the top level process will gracefully terminate
+# POPFile including calling all stop() methods.  In normal operation
+# return 1.
 #
 # ---------------------------------------------------------------------------------------------
 sub service
@@ -262,11 +273,12 @@ sub prefork
 #
 # forked
 #
-# This is called when some module forks POPFile and is within the context of the child
-# process so that this module can close any duplicated file handles that are not needed.
+# This is called when some module forks POPFile and is within the
+# context of the child process so that this module can close any
+# duplicated file handles that are not needed.
 #
-# $writer            The writing end of a pipe that can be used to send up from
-#                    the child
+# $writer The writing end of a pipe that can be used to send up from
+#         the child
 #
 # There is no return value from this method
 #
@@ -280,12 +292,11 @@ sub forked
 #
 # postfork
 #
-# This is called when some module has just forked POPFile.  It is called in the parent
-# process.
+# This is called when some module has just forked POPFile.  It is
+# called in the parent process.
 #
-# $pid              The process ID of the new child process
-# $reader           The reading end of a pipe that can be used to read messages from
-#                   the child
+# $pid The process ID of the new child process $reader The reading end
+#      of a pipe that can be used to read messages from the child
 #
 # There is no return value from this method
 #
@@ -313,8 +324,8 @@ sub deliver
 #
 # log_
 #
-# Called by a subclass to send a message to the logger, the logged message will be prefixed
-# by the name of the module in use
+# Called by a subclass to send a message to the logger, the logged
+# message will be prefixed by the name of the module in use
 #
 # $level             The log level (see POPFile::Logger for details)
 # $message           The message to log
@@ -327,7 +338,8 @@ sub log_
     my ( $self, $level, $message ) = @_;
 
     my ( $package, $file, $line ) = caller;
-    $self->{logger__}->debug( $level, $self->{name__} . ": $line: " . $message );
+    $self->{logger__}->debug( $level, $self->{name__} . ": $line: " .
+        $message );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -388,13 +400,14 @@ sub mq_register_
 #
 # global_config_
 #
-# Called by a subclass to get or set a global (i.e. not module specific) configuration parameter
+# Called by a subclass to get or set a global (i.e. not module
+# specific) configuration parameter
 #
 # $name              The name of the parameter (e.g. 'port')
 # $value             (optional) The value to set
 #
-# If called with just a $name then global_config_() will return the current value
-# of the configuration parameter.
+# If called with just a $name then global_config_() will return the
+# current value of the configuration parameter.
 #
 # ---------------------------------------------------------------------------------------------
 sub global_config_
@@ -410,12 +423,12 @@ sub global_config_
 #
 # Called by a subclass to get or set a module specific configuration parameter
 #
-# $module            The name of the module that owns the parameter (e.g. 'pop3')
-# $name              The name of the parameter (e.g. 'port')
-# $value             (optional) The value to set
+# $module The name of the module that owns the parameter (e.g. 'pop3')
+# $name   The name of the parameter (e.g. 'port') $value (optional) The
+#         value to set
 #
-# If called with just a $module and $name then module_config_() will return the current value
-# of the configuration parameter.
+# If called with just a $module and $name then module_config_() will
+# return the current value of the configuration parameter.
 #
 # ---------------------------------------------------------------------------------------------
 sub module_config_
@@ -431,7 +444,8 @@ sub module_config_
 #
 # Called by a subclass to register a UI element
 #
-# $type, $name, $templ, $object     See register_configuration_item__ in UI::HTML
+# $type, $name, $templ, $object
+#     See register_configuration_item__ in UI::HTML
 #
 # ---------------------------------------------------------------------------------------------
 sub register_configuration_item_
@@ -468,8 +482,8 @@ sub get_root_path_
 #
 # flush_slurp_data__
 #
-# Helper function for slurp_ that returns an empty string if the slurp buffer doesn't
-# contain a complete line, or returns a complete line.
+# Helper function for slurp_ that returns an empty string if the slurp
+# buffer doesn't contain a complete line, or returns a complete line.
 #
 # $handle            Handle to read from, which should be in binmode
 #
@@ -493,22 +507,23 @@ sub flush_slurp_data__
         return $1;
     }
 
-    # Look for CR, here we have to be careful because of the fact that the current
-    # total buffer could be ending with CR and there could actually be an LF to
-    # read, so we check for that situation if we find CR
+    # Look for CR, here we have to be careful because of the fact that
+    # the current total buffer could be ending with CR and there could
+    # actually be an LF to read, so we check for that situation if we
+    # find CR
 
     if ( $slurp_data__{"$handle"}{data} =~ s/^([^\015\012]*\015)// ) {
         my $cr = $1;
 
-        # If we have removed everything from the buffer then see if there's
-        # another character available to read, if there is then get it and check
-        # to see if it is LF (in which case this is a line ending CRLF), otherwise
-        # just save it
+        # If we have removed everything from the buffer then see if
+        # there's another character available to read, if there is
+        # then get it and check to see if it is LF (in which case this
+        # is a line ending CRLF), otherwise just save it
 
         if ( $slurp_data__{"$handle"}{data} eq '' ) {
 
-            # This unpleasant boolean is to handle the case where we are slurping
-            # a non-socket stream under Win32
+            # This unpleasant boolean is to handle the case where we
+            # are slurping a non-socket stream under Win32
 
             if ( ( ( $handle !~ /socket/i ) && ( $^O eq 'MSWin32' ) ) ||        # PROFILE BLOCK START
                  defined( $slurp_data__{"$handle"}{select}->can_read( $self->global_config_( 'timeout' ) ) ) ) { # PROFILE BLOCK STOP
@@ -581,7 +596,8 @@ sub slurp_buffer_
         $slurp_data__{"$handle"}{data} = '';
     } else {
         $result = substr( $slurp_data__{"$handle"}{data}, 0, $length );
-        $slurp_data__{"$handle"}{data} = substr( $slurp_data__{"$handle"}{data}, $length );
+        $slurp_data__{"$handle"}{data} =
+            substr( $slurp_data__{"$handle"}{data}, $length );
     }
 
     return ($result ne '')?$result:undef;
@@ -591,14 +607,16 @@ sub slurp_buffer_
 #
 # slurp_
 #
-# A replacement for Perl's <> operator on a handle that reads a line until CR, CRLF or LF
-# is encountered.  Returns the line if read (with the CRs and LFs), or undef if at the EOF,
-# blocks waiting for something to read.
+# A replacement for Perl's <> operator on a handle that reads a line
+# until CR, CRLF or LF is encountered.  Returns the line if read (with
+# the CRs and LFs), or undef if at the EOF, blocks waiting for
+# something to read.
 #
-# IMPORTANT NOTE: If you don't read to the end of the stream using slurp_ then there may be
-#                 a small memory leak caused by slurp_'s buffering of data in the Module's
-#                 hash.   To flush it make a call to slurp_ when you know that the handle is
-#                 at the end of the stream, or call done_slurp_ on the handle.
+# IMPORTANT NOTE: If you don't read to the end of the stream using
+# slurp_ then there may be a small memory leak caused by slurp_'s
+# buffering of data in the Module's hash.  To flush it make a call to
+# slurp_ when you know that the handle is at the end of the stream, or
+# call done_slurp_ on the handle.
 #
 # $handle            Handle to read from, which should be in binmode
 #
@@ -648,8 +666,8 @@ sub slurp_
 #
 # done_slurp_
 #
-# Call this when have finished calling slurp_ on a handle and need to clean up temporary
-# buffer space used by slurp_
+# Call this when have finished calling slurp_ on a handle and need to
+# clean up temporary buffer space used by slurp_
 #
 # ---------------------------------------------------------------------------------------------
 
@@ -664,11 +682,11 @@ sub done_slurp_
 
 # ---------------------------------------------------------------------------------------------
 #
-# flush_extra_ - Read extra data from the mail server and send to client, this is to handle
-#               POP servers that just send data when they shouldn't.  I've seen one that sends
-#               debug messages!
+# flush_extra_ - Read extra data from the mail server and send to
+# client, this is to handle POP servers that just send data when they
+# shouldn't.  I've seen one that sends debug messages!
 #
-#               Returns the extra data flushed
+# Returns the extra data flushed
 #
 # $mail        The handle of the real mail server
 # $client      The mail client talking to us
@@ -682,6 +700,7 @@ sub flush_extra_
     $discard = 0 if ( !defined( $discard ) );
 
     # If slurp has any data, we want it
+
     if ( $self->slurp_data_size__($mail) ) {
 
         print $client $slurp_data__{"$mail"}{data} if ( $discard != 1 );
@@ -694,8 +713,9 @@ sub flush_extra_
     my $selector;
 
     if (($^O eq 'MSWin32') && !($mail =~ /socket/i) ) {
-        # select only works reliably on IO::Sockets in Win32, so we always read files
-        # on MSWin32 (sysread returns 0 for eof)
+
+        # select only works reliably on IO::Sockets in Win32, so we
+        # always read files on MSWin32 (sysread returns 0 for eof)
 
         $always_read = 1; # PROFILE PLATFORM START MSWin32
                           # PROFILE PLATFORM STOP
@@ -723,18 +743,19 @@ sub flush_extra_
         } else {
             if ($n == 0) {
                 last;
-	    }
+            }
         }
     }
 
    return $full_buf;
 }
 
-# GETTER/SETTER methods.  Note that I do not expect documentation of these unless they
-# are non-trivial since the documentation would be a waste of space
+# GETTER/SETTER methods.  Note that I do not expect documentation of
+# these unless they are non-trivial since the documentation would be a
+# waste of space
 #
-# The only thing to note is the idiom used, stick to that and there's no need to
-# document these
+# The only thing to note is the idiom used, stick to that and there's
+# no need to document these
 #
 #   sub foo
 #   {
@@ -747,8 +768,8 @@ sub flush_extra_
 #       return $self->{foo_};
 #   }
 #
-# This method access the foo_ variable for reading or writing, $c->foo() read foo_ and
-# $c->foo( 'foo' ) writes foo_
+# This method access the foo_ variable for reading or writing,
+# $c->foo() read foo_ and $c->foo( 'foo' ) writes foo_
 
 sub mq
 {

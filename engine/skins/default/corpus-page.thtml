@@ -102,7 +102,7 @@
         </TMPL_IF>
 
         <td align="center">
-            <form class="bucketsSwitch" style="margin: 0" action="/buckets">
+            <form class="bucketsSwitch" style="margin: 0" action="/buckets" method="POST">
 
                 <TMPL_IF NAME="Corpus_If_Subject">
 
@@ -130,7 +130,7 @@
             &nbsp;
         </td>
         <td align="center">
-            <form class="bucketsSwitch" style="margin: 0" action="/buckets">
+            <form class="bucketsSwitch" style="margin: 0" action="/buckets" method="POST">
 
                 <TMPL_IF NAME="Corpus_If_XTC">
 
@@ -158,7 +158,7 @@
             &nbsp;
         </td>
         <td align="center">
-            <form class="bucketsSwitch" style="margin: 0" action="/buckets">
+            <form class="bucketsSwitch" style="margin: 0" action="/buckets" method="POST">
 
                 <TMPL_IF NAME="Corpus_If_XPL">
 
@@ -186,7 +186,7 @@
             &nbsp;
         </td>
         <td align="center">
-            <form class="bucketsSwitch" style="margin: 0" action="/buckets">
+            <form class="bucketsSwitch" style="margin: 0" action="/buckets" method="POST">
 
                 <TMPL_IF NAME="Corpus_If_Quarantine">
 
@@ -217,7 +217,7 @@
         <TMPL_IF NAME="Corpus_If_Bucket_Not_Pseudo">
 
         <td>
-            <form class="bucketsSwitch" style="margin: 0" action="/buckets">
+            <form class="bucketsSwitch" style="margin: 0" action="/buckets" method="POST">
                 <select name="color">
 
                     <TMPL_LOOP NAME="Corpus_Loop_Loop_Colors">
@@ -306,7 +306,7 @@
                 </tr>
                 <tr>
                     <td colspan="2" align="center">
-                        <form action="/buckets">
+                        <form action="/buckets" method="POST">
                             <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                             <input type="submit" class="submit" name="reset_stats" value="<TMPL_VAR NAME="Localize_Bucket_ResetStatistics">" />
 
@@ -370,7 +370,7 @@
         <td class="settingsPanel" valign="top" width="50%">
             <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_Maintenance"></h2>
             <div class="bucketsMaintenanceWidget">
-                <form action="/buckets">
+                <form action="/buckets" method="POST">
                     <label class="bucketsLabel" for="bucketsCreateBucket">
                         <TMPL_VAR NAME="Localize_Bucket_CreateBucket">:
                     </label>
@@ -400,7 +400,7 @@
 
                 </TMPL_IF>
 
-                <form action="/buckets">
+                <form action="/buckets" method="POST">
                     <label class="bucketsLabel" for="bucketsDeleteBucket">
                         <TMPL_VAR NAME="Localize_Bucket_DeleteBucket">:
                     </label>
@@ -431,7 +431,7 @@
 
                 </TMPL_IF>
 
-                <form action="/buckets">
+                <form action="/buckets" method="POST">
                     <label class="bucketsLabel" for="bucketsRenameBucketFrom">
                         <TMPL_VAR NAME="Localize_Bucket_RenameBucket">:
                     </label>
@@ -483,7 +483,7 @@
             <a name="Lookup"></a>
             <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_Lookup"></h2>
             <div class="bucketsLookupWidget">
-                <form action="/buckets#Lookup">
+                <form action="/buckets#Lookup" method="POST">
                     <label class="bucketsLabel" for="bucketsLookup">
                         <TMPL_VAR NAME="Localize_Bucket_LookupMessage">:
                     </label>
