@@ -1,10 +1,10 @@
 X-Auth-No: 
 Return-Path: <csstxja@myrealbox.com>
 Received: from digitalme.com not authenticated [193.97.97.75]
-        by smtp-send.myrealbox.com with NetMail SMTP Agent $Revision$ on Novell NetWare;
+        by smtp-send.myrealbox.com with NetMail SMTP Agent Revision: 1.1  on Novell NetWare;
         Sat, 11 Jan 2003 22:03:10 -0700
 Received: from 65.100.247.142 not authenticated [65.100.247.142]
-        by digitalme.com with Novell NIMS $Revision$ on Novell NetWare;
+        by digitalme.com with Novell NIMS Revision: 1.1  on Novell NetWare;
         Sat, 11 Jan 2003 21:03:05 -0800
 Message-ID: <44747.22535@>
 From: U'S'A  L'o't't'e'r'y  L'T'D <iplvwq@>
