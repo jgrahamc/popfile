@@ -2,79 +2,104 @@
 <TMPL_INCLUDE NAME="common-middle.thtml">
 
 <table cellpadding="10%" cellspacing="0" class="settingsTable">
-<tr>
-<td class="settingsPanel" valign="top"><h2 class="advanced"><TMPL_VAR NAME="Localize_Advanced_StopWords"></h2>
-<TMPL_VAR NAME="Localize_Advanced_Message1">
-<br />
-<br />
-<table summary="<TMPL_VAR NAME="Localize_Advanced_MainTableSummary">">
+    <tr>
+        <td class="settingsPanel" valign="top">
+            <h2 class="advanced"><TMPL_VAR NAME="Localize_Advanced_StopWords"></h2>
+            <TMPL_VAR NAME="Localize_Advanced_Message1">
+            <br />
+            <br />
+            <table summary="<TMPL_VAR NAME="Localize_Advanced_MainTableSummary">">
 
-<TMPL_LOOP NAME="Advanced_Loop_Word">
-<tr>
-<th scope="row" class="<TMPL_VAR NAME="Advanced_Row_Class">">
-<b><TMPL_VAR NAME="Advanced_Character"></b></th>
-<td class="<TMPL_VAR NAME="Advanced_Word_Class">">
-<TMPL_VAR NAME="Advanced_Words">
-</td></tr>
-</TMPL_LOOP>
+                <TMPL_LOOP NAME="Advanced_Loop_Word">
 
-</td></tr></table>
+                <tr>
+                    <th scope="row" class="<TMPL_VAR NAME="Advanced_Row_Class">">
+                        <b><TMPL_VAR NAME="Advanced_Character"></b>
+                    </th>
+                    <td class="<TMPL_VAR NAME="Advanced_Word_Class">">
+                        <TMPL_VAR NAME="Advanced_Words">
+                    </td>
+                </tr>
 
-<div class="advancedWidgets">
+                </TMPL_LOOP>
 
-<form action="/advanced">
-<label class="advancedLabel" for="advancedAddWordText"><TMPL_VAR NAME="Localize_Advanced_AddWord">:</label><br />
-<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-<input type="text" id="advancedAddWordText" name="newword" />
-<input type="submit" class="submit" name="add" value="<TMPL_VAR NAME="Localize_Add">" />
-</form>
+            </table>
 
-<TMPL_IF NAME="Advanced_If_Add_Message">
-<blockquote>
-<div class=\"error02\"><b><TMPL_VAR NAME="Localize_Advanced_Error2"></b></div>
-</blockquote>
-</TMPL_IF>
+            <div class="advancedWidgets">
+                <form action="/advanced">
+                    <label class="advancedLabel" for="advancedAddWordText"><TMPL_VAR NAME="Localize_Advanced_AddWord">:</label><br />
+                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+                    <input type="text" id="advancedAddWordText" name="newword" />
+                    <input type="submit" class="submit" name="add" value="<TMPL_VAR NAME="Localize_Add">" />
+                </form>
 
-<form action="/advanced">
-<label class="advancedLabel" for="advancedRemoveWordText"><TMPL_VAR NAME="Localize_Advanced_RemoveWord">:</label><br />
-<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-<input type="text" id="advancedRemoveWordText" name="word" />
-<input type="submit" class="submit" name="remove" value="<TMPL_VAR NAME="Localize_Remove">" />
-</form>
+                <TMPL_IF NAME="Advanced_If_Add_Message">
 
-<TMPL_IF NAME="Advanced_If_Delete_Message">
-<blockquote>
-<div class=\"error02\"><b><TMPL_VAR NAME="Localize_Advanced_Error2"></b></div>
-</blockquote>
-</TMPL_IF>
+                <blockquote>
+                    <div class="error02"><b><TMPL_VAR NAME="Localize_Advanced_Error2"></b></div>
+                </blockquote>
 
-</div>
+                </TMPL_IF>
 
-</td>
-<td class="settingsPanel" width="50%" valign="top"><h2 class="advanced"><TMPL_VAR NAME="Localize_Advanced_AllParameters"></h2>
-<p><TMPL_VAR NAME="Localize_Advanced_Warning">
-<p><TMPL_VAR NAME="Localize_Advanced_ConfigFile"> <TMPL_VAR NAME="Advanced_POPFILE_CFG">
+                <form action="/advanced">
+                    <label class="advancedLabel" for="advancedRemoveWordText"><TMPL_VAR NAME="Localize_Advanced_RemoveWord">:</label><br />
+                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+                    <input type="text" id="advancedRemoveWordText" name="word" />
+                    <input type="submit" class="submit" name="remove" value="<TMPL_VAR NAME="Localize_Remove">" />
+                </form>
 
-<form action="/advanced" method="POST">
-<table width="100%">
-<tr>
-<th width="50%"><TMPL_VAR NAME="Localize_Advanced_Parameter"></th>
-<th width="50%"><TMPL_VAR NAME="Localize_Advanced_Value"></th>
-</tr>
+                <TMPL_IF NAME="Advanced_If_Delete_Message">
 
+                <blockquote>
+                    <div class="error02"><b><TMPL_VAR NAME="Localize_Advanced_Error2"></b></div>
+                </blockquote>
 
-<TMPL_LOOP NAME="Advanced_Loop_Parameter">
-<TMPL_IF NAME="Advanced_If_New_Module">
-<tr><td colspan=\"2\"><hr></td></tr>
-</TMPL_IF>
-<tr><td><TMPL_VAR NAME="Advanced_Parameter"></td>
-<td><input type="text" name="parameter_<TMPL_VAR NAME="Advanced_Parameter">" value="<TMPL_VAR NAME="Advanced_Value">">
-</td></tr>
-</TMPL_LOOP>
-<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+                </TMPL_IF>
 
+            </div>
+        </td>
+        <td class="settingsPanel" width="50%" valign="top">
+            <h2 class="advanced"><TMPL_VAR NAME="Localize_Advanced_AllParameters"></h2>
+            <p><TMPL_VAR NAME="Localize_Advanced_Warning">
+            <p><TMPL_VAR NAME="Localize_Advanced_ConfigFile"> <TMPL_VAR NAME="Advanced_POPFILE_CFG">
+
+            <form action="/advanced" method="POST">
+                <table width="100%">
+                    <tr>
+                        <th width="50%"><TMPL_VAR NAME="Localize_Advanced_Parameter"></th>
+                        <th width="50%"><TMPL_VAR NAME="Localize_Advanced_Value"></th>
+                    </tr>
+
+                    <TMPL_LOOP NAME="Advanced_Loop_Parameter">
+
+                    <TMPL_IF NAME="Advanced_If_New_Module">
+
+                    <tr>
+                        <td colspan="2">
+                            <hr>
+                        </td>
+                    </tr>
+
+                    </TMPL_IF>
+
+                    <tr>
+                        <td>
+                            <TMPL_VAR NAME="Advanced_Parameter">
+                        </td>
+                        <td>
+                            <input type="text" name="parameter_<TMPL_VAR NAME="Advanced_Parameter">" value="<TMPL_VAR NAME="Advanced_Value">">
+                        </td>
+                    </tr>
+
+                    </TMPL_LOOP>
+
+                </table>
+                <p>
+                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+                    <input type="submit" value="<TMPL_VAR NAME="Localize_Update">" name="update_params">
+            </form>
+        </td>
+    </tr>
 </table>
-<p><input type="submit" value="<TMPL_VAR NAME="Localize_Update">" name="update_params"></form>
-</td></tr></table>
 
 <TMPL_INCLUDE NAME="common-bottom.thtml">
