@@ -17,7 +17,7 @@ use Classifier::Bayes;
 
 # This version number
 my $major_version = 0;
-my $minor_version = 13;
+my $minor_version = 14;
 
 # A list of the messages currently on the server, each entry in this list
 # is a hash containing the following items
@@ -72,13 +72,13 @@ my $classifier;
 my $seconds_per_day = 60 * 60 * 24;
 
 # These two variables are used to create the HTML UI for POPFile
-my $header = "<html><head><title>POPFile VERSION</title><link title=jgcstyle rel=stylesheet href=http://www.jgc.org/jgc_style.css type=text/css></head>\
+my $header = "<html><head><title>POPFile VERSION</title></head>\
 <body bgcolor=#ffffff><h1><span class=useem>POPFile VERSION</span></h1>\
 <table width=100% cellspacing=0><tr><td width=2></td>\
-<td bgcolor=TAB0 width=10% align=center><font size=+1><b>&nbsp;<a href=/>Configuration</a></b></font></td><td width=2></td>\
-<td align=center bgcolor=TAB1 width=10%><font size=+1><b>&nbsp;<a href=/corpus>Corpus</a></b></font></td><td width=2></td>\
-<td align=center bgcolor=TAB2 width=10%><font size=+1><b>&nbsp;<a href=/history>History</a></b></font></td>\
-<td width=100%>&nbsp;</td></tr>\
+<td align=center bgcolor=TAB2 width=10%><font size=+1><b>&nbsp;<a href=/history>History</a></b></font></td><td width=2></td>\
+<td align=center bgcolor=TAB1 width=10%><font size=+1><b>&nbsp;<a href=/buckets>Buckets</a></b></font></td><td width=2></td>\
+<td bgcolor=TAB0 width=10% align=center><font size=+1><b>&nbsp;<a href=/configuration>Configuration</a></b></font></td>\
+<td width=70%>&nbsp;</td></tr>\
 <tr height=5 bgcolor=#ffff99><td height=5 colspan=7 bgcolor=#ffff99></td></tr></table>\
 <table width=100% cellpadding=12 cellspacing=0><tr><td width=50% valign=top bgcolor=#ffff99>";
 my $footer = "<p><hr></tr></table><p></body></html>";
@@ -388,7 +388,7 @@ sub echo_to_dot
 
         print $client $_;
 
-        if ( /^\.\r\n/ )
+        if ( /^\.(\r\n|\r|\n)$/ )
         {   
             last;
         }
@@ -685,7 +685,7 @@ sub http_error
 # ---------------------------------------------------------------------------------------------
 sub popfile_homepage
 {
-    my $body = "<h2>Configuration Options</h2>";
+    my $body;
 
     if ( ( $form{debug} >= 1 ) && ( $form{debug} <= 4 ) )
     {
@@ -695,6 +695,11 @@ sub popfile_homepage
     if ( ( $form{subject} >= 1 ) && ( $form{subject} <= 2 ) )
     {
         $configuration{subject} = $form{subject}-1;
+    }
+
+    if ( $form{update_ui_port} eq 'Apply' )
+    {
+        $configuration{ui_port} = $form{ui_port};
     }
 
     if ( $form{update_port} eq 'Apply' )
@@ -712,31 +717,33 @@ sub popfile_homepage
         $configuration{sport} = $form{sport};
     }
 
-    $body .= "<p><form action=/><b>POP3 listen port:</b><br><input name=port type=text value=$configuration{port}><input type=submit name=update_port value=Apply></form>";    
+    $body .= "<h2>Listen Ports</h2><p><form action=/configuration><b>POP3 listen port:</b><br><input name=port type=text value=$configuration{port}><input type=submit name=update_port value=Apply></form>";    
     $body .= "Updated port to $configuration{port}; this change will not take affect until you restart POPFile" if ( $form{update_port} eq 'Apply' );
-    $body .= "<p><hr><p><form action=/><b>Secure server:</b> <br><input name=server type=text value=$configuration{server}><input type=submit name=update_server value=Apply></form>";    
+    $body .= "<p><form action=/configuration><b>User interface web port:</b><br><input name=ui_port type=text value=$configuration{ui_port}><input type=submit name=update_ui_port value=Apply></form>";    
+    $body .= "Updated user interface web port to $configuration{ui_port}; this change will not take affect until you restart POPFile" if ( $form{update_ui_port} eq 'Apply' );
+    $body .= "<p><hr><h2>Secure Password Authentication/AUTH</h2><p><form action=/configuration><b>Secure server:</b> <br><input name=server type=text value=$configuration{server}><input type=submit name=update_server value=Apply></form>";    
     $body .= "Updated secure server to $configuration{server}; this change will not take affect until you restart POPFile" if ( $form{update_server} eq 'Apply' );
     $body .= "<p><form action=/><b>Secure port:</b> <br><input name=sport type=text value=$configuration{sport}><input type=submit name=update_sport value=Apply></form>";    
     $body .= "Updated port to $configuration{sport}; this change will not take affect until you restart POPFile" if ( $form{update_sport} eq 'Apply' );
-    $body .= "<p><hr><p><b>Subject line modification:</b><br>";    
+    $body .= "<p><hr><h2>Classification Insertion</h2><p><b>Subject line modification:</b><br>";    
     $body .= "<b>" if ( $configuration{subject} == 0 );
-    $body .= "<a href=/?subject=1><font color=blue>Off</font></a> ";
+    $body .= "<a href=/configuration?subject=1><font color=blue>Off</font></a> ";
     $body .= "</b>" if ( $configuration{subject} == 0 );
     $body .= "<b>" if ( $configuration{subject} == 1 );
-    $body .= "<a href=/?subject=2><font color=blue>On</font></a> ";
+    $body .= "<a href=/configuration?subject=2><font color=blue>On</font></a> ";
     $body .= "</b>" if ( $configuration{subject} == 1 );
-    $body .= "<p><b>Debugging output:</b><br>";
+    $body .= "<hr><h2>Logging</h2><b>Logger output:</b><br>";
     $body .= "<b>" if ( $configuration{debug} == 0 );
-    $body .= "<a href=/?debug=1><font color=blue>None</font></a> ";
+    $body .= "<a href=/configuration?debug=1><font color=blue>None</font></a> ";
     $body .= "</b>" if ( $configuration{debug} == 0 );
     $body .= "<b>" if ( $configuration{debug} == 1 );
-    $body .= "<a href=/?debug=2><font color=blue>To File</font></a> ";
+    $body .= "<a href=/configuration?debug=2><font color=blue>To File</font></a> ";
     $body .= "</b>" if ( $configuration{debug} == 1 );
     $body .= "<b>" if ( $configuration{debug} == 2 );
-    $body .= "<a href=/?debug=3><font color=blue>To Screen</font></a> ";
+    $body .= "<a href=/configuration?debug=3><font color=blue>To Screen</font></a> ";
     $body .= "</b>" if ( $configuration{debug} == 2 );
     $body .= "<b>" if ( $configuration{debug} == 3 );
-    $body .= "<a href=/?debug=4><font color=blue>To Screen and File</font></a>";
+    $body .= "<a href=/configuration?debug=4><font color=blue>To Screen and File</font></a>";
     $body .= "</b>" if ( $configuration{debug} == 3 );
     
     return http_ok($body,0); 
@@ -823,17 +830,22 @@ sub corpus_page
         $classifier->load_word_matrix();
     }
     
-    my $body = "<h2>Summary</h2><table width=75%><tr><td><b>Bucket Name</b><td><b>Total Words</b><td><b>Change Color</b><td>&nbsp;<td><b>Top 10 words</b>";
+    my $body = "<h2>Summary</h2><table width=100%><tr><td><b>Bucket Name</b><td align=right><b>Total Words</b><td>&nbsp;<td align=center><b>Change Color</b><td>&nbsp;<td><b>Top 10 words</b>";
     
     foreach my $bucket (keys %{$classifier->{total}})
     {
-        $body .= $classifier->{top10}{$bucket};
+        $body .= $classifier->{top10html}{$bucket};
     }
-    
-    $body .= "<tr><td><td><hr><b>$classifier->{full_total}</b><td><td></table>";
+
+    my $number = $classifier->{full_total};
+    $number = reverse $number;
+    $number =~ s/(\d{3})/\1,/g;
+    $number = reverse $number;
+    $number =~ s/^,(.*)/\1/;
+    $body .= "<tr><td><td align=right><hr><b>$number</b><td><td><td></table>";
 
     $body .= "<p><hr><h2>Learn</h2>";
-    $body .= "<h3>Upload file into a bucket</h3><form action=/corpus><b>Bucket: </b><select name=name>";
+    $body .= "<h3>Upload file into a bucket</h3><form action=/buckets><b>Bucket: </b><select name=name>";
     foreach my $bucket (keys %{$classifier->{total}})
     {
         $body .= "<option value=$bucket>$bucket</option>";
@@ -842,22 +854,22 @@ sub corpus_page
     $body .= "</select> <b>File:</b> <input type=file name=file> <input type=submit name=upload value=Upload></form>";
 
     $body .= "<p><hr><h2>Maintenance</h2>";
-    $body .= "<p><form action=/corpus><b>Create bucket with name:</b> <br><input name=name type=text> <input type=submit name=create value=Create></form>$create_message";
+    $body .= "<p><form action=/buckets><b>Create bucket with name:</b> <br><input name=name type=text> <input type=submit name=create value=Create></form>$create_message";
     
-    $body .= "<p><form action=/corpus><b>Delete bucket named:</b> <br><select name=name>";
+    $body .= "<p><form action=/buckets><b>Delete bucket named:</b> <br><select name=name>";
     foreach my $bucket (keys %{$classifier->{total}})
     {
         $body .= "<option value=$bucket>$bucket</option>";
     }
     $body .= "</select> <input type=submit name=delete value=Delete></form>$delete_message";
 
-    $body .= "<p><hr><a name=Lookup><h2>Lookup</h2><form action=/corpus#Lookup><p><b>Lookup word in corpus: </b><br><input name=word type=text> <input type=submit name=lookup value=Lookup></form>";
+    $body .= "<p><hr><a name=Lookup><h2>Lookup</h2><form action=/buckets#Lookup><p><b>Lookup word in corpus: </b><br><input name=word type=text> <input type=submit name=lookup value=Lookup></form>";
 
     if ( ( $form{lookup} eq 'Lookup' ) || ( $form{word} ne '' ) )
     {
         my $word = $classifier->{mangler}->mangle($form{word});
         
-        $body .= "<blockquote><b>Lookup result for $form{word}</b><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Probability</b>";
+        $body .= "<blockquote><b>Lookup result for $form{word}</b><p><table><tr><td><b>Bucket</b><td>&nbsp;<td><b>Probability</b><td>&nbsp;<td><b>Weighted Probability</b>";
         
         if ( $word ne '' ) 
         {
@@ -865,9 +877,25 @@ sub corpus_page
             my $max_bucket = '';
             foreach my $bucket (keys %{$classifier->{total}})
             {
-                if ( $classifier->{matrix}{$bucket}{$word} )
+                if ( $classifier->get_value( $bucket, $word ) > 0 )
                 {
-                    my $prob = "$classifier->{matrix}{$bucket}{$word}";
+                    my $prob = $classifier->get_value( $bucket, $word ) / $classifier->{total}{$bucket};
+                    my $w = $prob * $classifier->{total}{$bucket} / $classifier->{full_total};
+                    if ( $w > $max )
+                    {
+                        $max = $w;
+                        $max_bucket = $bucket;
+                    }
+                }
+            }
+            
+            foreach my $bucket (keys %{$classifier->{total}})
+            {
+                if ( $classifier->get_value( $bucket, $word ) > 0 )
+                {
+                    my $prob = $classifier->get_value( $bucket, $word ) / $classifier->{total}{$bucket};
+                    my $w = $prob * $classifier->{total}{$bucket} / $classifier->{full_total};
+                    my $weighted = "$w";
                     if ( $prob =~ s/e\-(\d+)//i )
                     {
                         my $exp = $1;
@@ -881,13 +909,25 @@ sub corpus_page
                         }
                         $prob = "0.$pad$left$right";
                     }
-                    
-                    $body .= "<tr><td><font color=$classifier->{colors}{$bucket}>$bucket</font><td><td><tt>$prob</tt>";
-                    if ( $classifier->{matrix}{$bucket}{$word} > $max )
+
+                    if ( $weighted =~ s/e\-(\d+)//i )
                     {
-                        $max = $classifier->{matrix}{$bucket}{$word};
-                        $max_bucket = $bucket;
+                        my $exp = $1;
+                        $weighted    =~ /(.*)\.(.*)/;
+                        my $left  = $1;
+                        my $right = $2;
+                        my $pad;
+                        for my $i (1 .. $exp-1)
+                        {
+                            $pad .= "0";
+                        }
+                        $weighted = "0.$pad$left$right";
                     }
+                    my $bold;
+                    my $endbold;
+                    $bold = "<b>" if ( $max == $w );
+                    $endbold = "<b>" if ( $max == $w );
+                    $body .= "<tr><td>$bold<font color=$classifier->{colors}{$bucket}>$bucket</font>$endbold<td><td>$bold<tt>$prob</tt>$endbold<td><td>$bold<tt>$weighted</tt>$endbold";
                 }
             }
             
@@ -897,7 +937,7 @@ sub corpus_page
             }
             else
             {
-                $body .= "<p><b>$form{word}</b> does not appear in the corpus";
+                $body .= "</table><p><b>$form{word}</b> does not appear in the corpus";
             }
         } 
         else
@@ -913,12 +953,31 @@ sub corpus_page
 
 # ---------------------------------------------------------------------------------------------
 #
+# compare_mf - Compares two mailfiles, used for sorting mail into order
+#
+# ---------------------------------------------------------------------------------------------
+sub compare_mf
+{
+    my $an;
+    my $bn;
+    
+    $a =~ /popfile(.*)_(.*)\.msg/;
+    $an = $2;
+    $b =~ /popfile(.*)_(.*)\.msg/;
+    $bn = $2;
+    
+    return ( $bn <=> $an );
+    
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # history_page - get the message classification history page
 #
 # ---------------------------------------------------------------------------------------------
 sub history_page
 {
-    my $body = "<h2>Messages in the last 24 hours</h2><table width=100%><tr><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";
+    my $body = "<h2>Recent Messages</h2><table width=100%><tr><td></td><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";
 
     # Handle clearing the history files
     if ( $form{clear} eq 'Clear+All' )
@@ -976,17 +1035,33 @@ sub history_page
         $classifier->load_word_matrix();
     }
 
-    foreach my $mail_file (sort {$b cmp $a} @mail_files)
+    @mail_files = sort compare_mf @mail_files;
+    my $start_message = 0;
+    if ( $form{start_message} > 0 ) 
     {
+        $start_message = $form{start_message};
+    }
+    my $stop_message = $start_message + $configuration{page_size} - 1;
+    if ( $stop_message >= $#mail_files ) 
+    {
+        $stop_message = $#mail_files;
+    }
+    
+    foreach my $i ($start_message ..  $stop_message)
+    {
+        my $mail_file;
         my $from;
         my $subject;
-        
+        $mail_file = $mail_files[$i];
+    
         open MAIL, "<$mail_file";
         while (<MAIL>) 
         {
             if ( /^From: (.*)/ )
             {
                 $from = $1;
+                $from =~ s/<(.*)>/&lt;\1&gt;/g;
+                $from =~ s/\"(.*)\"/\1/g;
             }
             if ( /^Subject: (.*)/ )
             {
@@ -1020,9 +1095,11 @@ sub history_page
             $subject = "$1...";
         }
         
+        $body .= "<a name=$mail_file>";
         $body .= "<tr";
         $body .= " bgcolor=lightgreen" if ($form{view} eq $mail_file) || ($form{file} eq $mail_file);
         $body .= "><td>";
+        $body .= $i+1 . "<td>";
         my $class_file = $mail_file;
         $class_file =~ s/msg$/cls/;
         open CLASS, "<$class_file";
@@ -1037,11 +1114,11 @@ sub history_page
         $mail_file =~ /popfile\d+_(\d+)\.msg/;
         my $bold = ( ( $configuration{last_count} <= $1 ) && ( $reclassified == 0 ) );
         $body .= "<b>" if $bold;
-        $body .= "$from";
+        $body .= $from;
         $body .= "</b>" if $bold;
         $body .= "<td>";
         $body .= "<b>" if $bold;
-        $body .= "<a href=/history?view=$mail_file>$subject</a>";
+        $body .= "<a href=/history?view=$mail_file&start_message=$start_message#$mail_file>$subject</a>";
         $body .= "</b>" if $bold;
         $body .= "<td>";
         if ( $reclassified ) 
@@ -1056,7 +1133,7 @@ sub history_page
             {
                 if ( $abucket ne $bucket ) 
                 {
-                    $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file><font color=$classifier->{colors}{$abucket}>$abucket</font></a> ";
+                    $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message><font color=$classifier->{colors}{$abucket}>$abucket</font></a> ";
                 }
             }
         }
@@ -1065,12 +1142,12 @@ sub history_page
         # Check to see if we want to view a message
         if ( $form{view} eq $mail_file )
         {
-            $body .= "<tr><td colspan=4>";
+            $body .= "<tr><td><td colspan=3 bgcolor=lightgreen>";
             $classifier->{parser}->{color} = 1;
             $classifier->{parser}->{bayes} = $classifier;
             $body .= $classifier->{parser}->parse_stream($form{view});
             $classifier->{parser}->{color} = 0;
-            $body .=  "<hr><tr><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";
+            $body .= "<p align=right><a href=/history?start_message=$start_message><b>Close</b></a><td>";
         }
         
         if ( $form{file} eq $mail_file )
@@ -1079,7 +1156,31 @@ sub history_page
         }
     }
 
-    $body .= "</table><form><b>To remove all entries in the history click here: <input type=submit name=clear value='Clear All'></form>";
+    $body .= "</table><form><b>To remove all entries in the history click here: <input type=submit name=clear value='Remove All'></form>";
+    
+    
+    if ( $configuration{page_size} < $#mail_files )
+    {
+        $body .= "<p><center>Jump to message: ";
+        my $i = 0;
+        while ( $i < $#mail_files )
+        {
+            if ( $i == $start_message ) 
+            {
+                $body .= "<b>";
+                $body .= $i+1 . "</b>";
+            }
+            else 
+            {
+                $body .= "<a href=/history?start_message=$i>";
+                $body .= $i+1 . "</a>";
+            }
+
+            $body .= " ";
+            $i += $configuration{page_size};
+        }
+        $body .= "</center>";
+    }
     
     return http_ok($body,2); 
 }
@@ -1097,7 +1198,11 @@ sub handle_url
 
     # See if there are any form parameters and if there are parse them into the %form hash
     %form = {};
-    
+
+    # Remove a # element
+    # Remove a # element
+    $url =~ s/#.*//;
+
     if ( $url =~ s/\?(.*)// ) 
     {
         my $arguments = $1;
@@ -1115,23 +1220,24 @@ sub handle_url
                 $to =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\\1/g;
                 $form{$arg} =~ s/$from/$to/g;
             }
+
+            debug( "$arg = $form{$arg}" );
         }
     }
     
-    # Remove a # element
-    $url =~ s/#.*//;
+    debug( $url );
     
-    if ( $url eq '/' ) 
+    if ( $url eq '/configuration' ) 
     {
         return popfile_homepage();
     }
     
-    if ( $url eq '/corpus' )
+    if ( $url eq '/buckets' )
     {
         return corpus_page();
     }
 
-    if ( $url eq '/history' )
+    if ( ( $url eq '/history' ) || ( $url eq '/' ) )
     {
         return history_page();
     }
@@ -1469,7 +1575,7 @@ sub run_popfile
 
                                 # The termination of a message is a line consisting of exactly .CRLF so we detect that
                                 # here exactly
-                                if ( $_ =~  /^\.\r\n$/ )
+                                if ( $_ =~  /^\.(\r\n|\r|\n)$/ )
                                 {
                                     last;
                                 }
@@ -1522,6 +1628,7 @@ sub run_popfile
                             my $msg_headers;        # Store the message headers here (will add X-Spam to end)
                             my $msg_body;           # Store the message body here
                             my $got_full_body = 0;  # Did we get the full body
+                            my $message_size  = 0;
 
                             my $getting_headers = 1;
                             
@@ -1545,8 +1652,9 @@ sub run_popfile
 
                                 # The termination of a message is a line consisting of exactly .CRLF so we detect that
                                 # here exactly
-                                if ( $line =~ /^\.\r\n$/ )
+                                if ( $line =~ /^\.(\r\n|\r|\n)$/ )
                                 {
+                                    $got_full_body = 1;
                                     last;
                                 }
 
@@ -1555,6 +1663,7 @@ sub run_popfile
                                     if ( $line =~ /[A-Z0-9]/i ) 
                                     {
                                         print TEMP $line;
+                                        $message_size += length $line;
             
                                         if ( $configuration{subject} ) 
                                         {
@@ -1582,6 +1691,14 @@ sub run_popfile
                                 {
                                     print TEMP $line;
                                     $msg_body .= $line;
+                                    $message_size += length $line;
+                                }
+                                
+                                # Stop reading the message if we hit a 500k
+                                
+                                if ( $message_size > 512 * 1024 )
+                                {
+                                    last;
                                 }
                             }
 
@@ -1604,7 +1721,15 @@ sub run_popfile
                             # Echo the text of the message to the client
                             print $client $msg_headers;
                             print $client $msg_body;
-                            print $client ".$eol";
+                            
+                            if ( $got_full_body == 0 )
+                            {
+                                echo_to_dot( $mail, $client);
+                            } 
+                            else
+                            {
+                                print $client ".$eol";
+                            }
 
                             open CLASS, ">$class_file";
                             print CLASS "$classification$eol";
@@ -1739,12 +1864,13 @@ $mail_filename  = "popfile$today";
 
 # Set up reasonable defaults for the configuration parameters.  These may be 
 # overwritten immediately when we read the configuration file
-$configuration{debug}    = 0;
-$configuration{port}     = 110;
-$configuration{ui_port}  = 8080;
-$configuration{subject}  = 1;
-$configuration{server}   = '';
-$configuration{sport}    = '';
+$configuration{debug}     = 0;
+$configuration{port}      = 110;
+$configuration{ui_port}   = 8080;
+$configuration{subject}   = 1;
+$configuration{server}    = '';
+$configuration{sport}     = '';
+$configuration{page_size} = 20;
 
 print "    Loading configuration\n";
 
@@ -1759,7 +1885,7 @@ print "    Cleaning stale log files\n";
 # Remove old log files
 remove_debug_files();
 
-print "    Loading corpus...\n";
+print "    Loading buckets...\n";
 
 # Get the classifier
 $classifier = new Classifier::Bayes;
