@@ -34,7 +34,7 @@
   VIProductVersion "0.19.0.0"
   
   VIAddVersionKey "ProductName" "POPFile"
-  VIAddVersionKey "Comments" "POPFile Homepage: http:// popfile.sourceforge.net"
+  VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sourceforge.net"
   VIAddVersionKey "CompanyName" "POPFile Team"
 #  VIAddVersionKey "LegalTrademarks" "POPFile"
   VIAddVersionKey "LegalCopyright" "© 2001-2003  John Graham-Cumming"
