@@ -202,8 +202,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1   "Instalação anterior encontrada em"
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2   "Você quer atualizá-la?"
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_3   "Dados de configuração anteriores encontrados em"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_4   "Restored configuration data found"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_5   "Do you want to use the restored data ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_4   "Encontrados dados de configuração restaurados"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_5   "Você quer usar os dados restaurados?"
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
@@ -287,11 +287,11 @@
 ; When upgrading an existing installation, change the normal "Install" button to "Upgrade"
 ; (the page with the "Install" button will vary depending upon the page order in the script)
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_UPGRADE     "Upgrade"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_UPGRADE     "Atualizar"
 
 ; When resetting POPFile to use newly restored 'User Data', change "Install" button to "Restore"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_RESTORE     "Restore"
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_BTN_RESTORE     "Restaurar"
 
 ; Installation Progress Reports displayed above the progress bar
 
@@ -303,10 +303,10 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      "Instalando os arquivos de skins do POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "Instalando os arquivos de línguas do POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Instalando os arquivos XMLRPC do POPFile..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_REGSET     "Updating registry settings and environment variables..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SQLBACKUP  "Backing up the old SQLite database..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FINDCORPUS "Looking for existing flat-file or BerkeleyDB corpus..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_MAKEBAT    "Generating the 'pfi-run.bat' batch file..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_REGSET     "Atualizando configurações no registro e variáveis de ambiente..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SQLBACKUP  "Fazendo cópia de segurança da base de dados SQLite antiga..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FINDCORPUS "Procurando por corpus existente em arquivo plano ou BerkeleyDB..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_MAKEBAT    "Gerando o arquivo batch 'pfi-run.bat'..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "Clique em Avançar para continuar"
 
 ; Installation Log Messages
@@ -566,10 +566,10 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_PERL         "Deletando arquivos mínimos do Perl..."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_OUTLOOK      "Restaurando configurações do Outlook..."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EUDORA       "Restaurando configurações do Eudora..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_DBMSGDIR     "Deleting corpus and 'Recent Messages' directory..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EXESTATUS    "Checking program status..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CONFIG       "Deleting configuration data..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_REGISTRY     "Deleting POPFile registry entries..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_DBMSGDIR     "Deletando o corpus e o diretório 'Mensagens Recentes'..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_EXESTATUS    "Verificando o estado do programa..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_CONFIG       "Deletando dados de condiguração..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROG_REGISTRY     "Deletando entradas do POPFile no registro..."
 
 ; Uninstall Log Messages
 
@@ -607,7 +607,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Você quer remover todos os arquivos da sua pasta do POPFile ?$\r$\n$\r$\n(Se você tiver qualquer coisa que você criou e quer manter, clique Não)"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Você quer remover todos os arquivos do seu diretório 'User Data' do POPFile?$\r$\n$\r$\n(Se você tiver qualquer coisa que você criou e quer manter, clique em Não)"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Do you want to remove all files in your 'Recent Messages' directory?"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Você quer remover todos os arquivos do seu diretório 'Mensagens Recentes'?"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_1        "Nota"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMERR_2        "não pode ser removido."
