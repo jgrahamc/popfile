@@ -2227,11 +2227,11 @@ sub compare_mf
     my $am;
     my $bm;
 
-    if ( $a =~ /popfile(.+)=(.+)\.msg/ )  {
+    if ( $a =~ /popfile(\d+)=(\d+)\.msg/ )  {
         $ad = $1;
         $am = $2;
 
-        if ( $b =~ /popfile(.+)=(.+)\.msg/ ) {
+        if ( $b =~ /popfile(\d+)=(\d+)\.msg/ ) {
             $bd = $1;
             $bm = $2;
 

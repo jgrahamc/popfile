@@ -65,7 +65,7 @@ sub new
 
     $self->{quickmagnets__}      = {};
 
-    # These store the current HTML background color and font color to
+    # These store the current HTML background color2 and font color to
     # detect "invisible ink" used by spammers
 
     $self->{htmlbackcolor__} = map_color( $self, 'white' );
@@ -523,11 +523,13 @@ sub update_tag
 
         if ( ( $attribute =~ /^color$/i ) && ( $tag =~ /^font$/i ) ) {
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
+            $self->update_pseudoword( 'html', "fontcolor$value", $encoded, $original );
             $self->{htmlfontcolor__} = map_color($self, $value);
 			print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug} );
         }
 
         if ( ( $attribute =~ /^text$/i ) && ( $tag =~ /^body$/i ) ) {
+            $self->update_pseudoword( 'html', "fontcolor$value", $encoded, $original );
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
             $self->{htmlfontcolor__} = map_color($self, $value);
 			print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug} );
@@ -550,6 +552,7 @@ sub update_tag
 
         if ( ( $attribute =~ /^(bgcolor|back)$/i ) && ( $tag =~ /^(td|table|body|tr|th|font)$/i ) ) {
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
+            $self->update_pseudoword( 'html', "backcolor$value" );
             $self->{htmlbackcolor__} = map_color($self, $value);
 			print "Set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug} );
 
