@@ -177,10 +177,10 @@ sub test_assert_equal
         $result = ( $test eq $expected );
     }
 
-    $test =~ s/\r/0x0D/;
-    $test =~ s/\n/0x0A/;
-    $expected =~ s/\r/0x0D/;
-    $expected =~ s/\n/0x0A/;
+    $test =~ s/\015/0x0D/;
+    $test =~ s/\012/0x0A/;
+    $expected =~ s/\015/0x0D/;
+    $expected =~ s/\012/0x0A/;
 
     test_report( $result, "expecting [$expected] and got [$test]", $file, $line, $context );
 
