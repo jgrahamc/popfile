@@ -24,7 +24,7 @@ Content-Type: multipart/signed; protocol="application/pgp-signature";
  micalg="pgp-sha1"; boundary="=.P.GDOi)uP6IbU+"
 X-Sender: 320021892970-0001@t-dialin.net
 X-Text-Classification: spam
-X-POPFile-Link: <http://127.0.0.1:8080/jump_to_message?view=tests/popfile0=0.msg>
+X-POPFile-Link: <http://127.0.0.1:8080/jump_to_message?view=popfile0=0.msg>
 
 --=.P.GDOi)uP6IbU+
 Content-Type: multipart/mixed;

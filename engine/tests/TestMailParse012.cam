@@ -15,7 +15,7 @@ Content-transfer-encoding: 7bit
 X-UIDL: M-$"!c:b"!57:!!i#1!!
 X-POPFile-Link: <http://127.0.0.1:9090/jump_to_message?view=popfile2146=1.msg>
 X-Text-Classification: spam
-X-POPFile-Link: <http://127.0.0.1:8080/jump_to_message?view=tests/popfile0=0.msg>
+X-POPFile-Link: <http://127.0.0.1:8080/jump_to_message?view=popfile0=0.msg>
 
 <html>
 
