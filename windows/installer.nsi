@@ -108,21 +108,39 @@
   !define C_README        "v0.19.1.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
 
-  ;-----------------------------------------
-  ; Root directory for the Perl files used to build the installer
-  ;-----------------------------------------
+  ;----------------------------------------------------------------------
+  ; Root directory for the Perl files (used when building the installer)
+  ;----------------------------------------------------------------------
 
   !define C_PERL_DIR      "C:\Perl"
-  
-  ;-----------------------------------------
-  ; Delay (in milliseconds) used after issuing a POPFile 'shutdown' request
-  ;-----------------------------------------
-  
-  !define C_SHUTDOWN_DELAY    1500
 
-  ;-----------------------------------------
+  ;--------------------------------------------------------------------------------
+  ; Constants for the timeout loop used after issuing a POPFile 'shutdown' request
+  ;--------------------------------------------------------------------------------
+
+  ; Timeout loop counter start value (counts down to 0)
+
+  !define C_SHUTDOWN_LIMIT    10
+
+  ; Delay (in milliseconds) used inside the timeout loop
+
+  !define C_SHUTDOWN_DELAY    500
+
+  ;-------------------------------------------------------------------------------
+  ; Constants for the timeout loop used after issuing a POPFile 'startup' request
+  ;-------------------------------------------------------------------------------
+
+  ; Timeout loop counter start value (counts down to 0)
+
+  !define C_STARTUP_LIMIT    10
+
+  ; Delay (in milliseconds) used inside the timeout loop
+
+  !define C_STARTUP_DELAY    500
+
+  ;------------------------------------------------
   ; Define PFI_VERBOSE to get more compiler output
-  ;-----------------------------------------
+  ;------------------------------------------------
 
 # !define PFI_VERBOSE
 
@@ -320,14 +338,14 @@
 
   ; Same "Language selection" dialog is used for the installer and the uninstaller
   ; so we override the standard "Installer Language" title to avoid confusion.
-  
+
   !define MUI_TEXT_LANGDLL_WINDOWTITLE "Language Selection"
-  
+
   ; Always show the language selection dialog, even if a language has been stored in the
   ; registry (the language stored in the registry will be selected as the default language)
 
   !define MUI_LANGDLL_ALWAYSSHOW
-  
+
   ; Remember user's language selection and offer this as the default when re-installing
   ; (uninstaller also uses this setting to determine which language is to be used)
 
@@ -877,34 +895,34 @@ SectionEnd
 Function MakeItSafe
 
   !define L_CFG      $R9    ; file handle
-  !define L_NEW_GUI  $R8
-  !define L_OLD_GUI  $R7
-  !define L_RESULT   $R6
+  !define L_EXE      $R8    ; name of EXE file to be monitored
+  !define L_NEW_GUI  $R7
+  !define L_OLD_GUI  $R6
+  !define L_RESULT   $R5
 
   Push ${L_CFG}
+  Push ${L_EXE}
   Push ${L_NEW_GUI}
   Push ${L_OLD_GUI}
   Push ${L_RESULT}
 
-  ; A quick test ignoring fact that popfile.cfg may specify a non-default location for PID file
-
-  IfFileExists "$INSTDIR\popfile.pid" attempt_shutdown
-
   ; If we are about to overwrite an existing version which is still running,
   ; then one of the EXE files will be 'locked' which means we have to shutdown POPFile
 
-  IfFileExists "$INSTDIR\wperl.exe" 0 other_perl
-  SetFileAttributes "$INSTDIR\wperl.exe" NORMAL
+  StrCpy ${L_EXE} "$INSTDIR\wperl.exe"
+  IfFileExists "${L_EXE}" 0 other_perl
+  SetFileAttributes "${L_EXE}" NORMAL
   ClearErrors
-  FileOpen ${L_CFG} "$INSTDIR\wperl.exe" a
+  FileOpen ${L_CFG} "${L_EXE}" a
   FileClose ${L_CFG}
   IfErrors attempt_shutdown
 
 other_perl:
-  IfFileExists "$INSTDIR\perl.exe" 0 exit_now
-  SetFileAttributes "$INSTDIR\perl.exe" NORMAL
+  StrCpy ${L_EXE} "$INSTDIR\perl.exe"
+  IfFileExists "${L_EXE}" 0 exit_now
+  SetFileAttributes "${L_EXE}" NORMAL
   ClearErrors
-  FileOpen ${L_CFG} "$INSTDIR\perl.exe" a
+  FileOpen ${L_CFG} "${L_EXE}" a
   FileClose ${L_CFG}
   IfErrors 0 exit_now
 
@@ -919,28 +937,32 @@ attempt_shutdown:
 
   DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_OLD_GUI}"
   NSISdl::download_quiet http://127.0.0.1:${L_OLD_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
-  Sleep ${C_SHUTDOWN_DELAY}
   Pop ${L_RESULT}
-  StrCmp ${L_RESULT} "success" exit_now
+  StrCmp ${L_RESULT} "success" check_exe
 
 try_other_port:
   Push ${L_NEW_GUI}
   Call StrCheckDecimal
   Pop ${L_NEW_GUI}
-  StrCmp ${L_NEW_GUI} "" exit_now
+  StrCmp ${L_NEW_GUI} "" check_exe
 
   DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_NEW_GUI}"
   NSISdl::download_quiet http://127.0.0.1:${L_NEW_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
-  Sleep ${C_SHUTDOWN_DELAY}
   Pop ${L_RESULT} ; Ignore the result
+
+check_exe:
+  Push ${L_EXE}
+  Call WaitUntilUnlocked
 
 exit_now:
   Pop ${L_RESULT}
   Pop ${L_OLD_GUI}
   Pop ${L_NEW_GUI}
+  Pop ${L_EXE}
   Pop ${L_CFG}
 
   !undef L_CFG
+  !undef L_EXE
   !undef L_NEW_GUI
   !undef L_OLD_GUI
   !undef L_RESULT
@@ -1018,7 +1040,7 @@ loop:
 
   StrCpy ${L_CMPRE} ${L_LNE} 8
   StrCmp ${L_CMPRE} "ui_port " got_ui_port
-  
+
   StrCmp ${L_STRIPLANG} "" transfer
 
   ; do not transfer any UI language settings to the copy of popfile.cfg
@@ -1177,9 +1199,9 @@ Function SetOptionsPage
   Push ${L_RESULT}
 
   ; Ensure custom page shows the "Shutdown" warning message box.
-  
+
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Settings" "NumFields" "7"
-  
+
   IfFileExists "$INSTDIR\popfile.pl" 0 continue
 
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
@@ -1601,7 +1623,7 @@ Function StartPOPFilePage_Init
   !insertmacro PFI_IO_TEXT "ioC.ini" "2" "$(PFI_LANG_LAUNCH_IO_NO)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "3" "$(PFI_LANG_LAUNCH_IO_DOSBOX)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "4" "$(PFI_LANG_LAUNCH_IO_BCKGRND)"
-  
+
   !insertmacro PFI_IO_TEXT "ioC.ini" "6" "$(PFI_LANG_LAUNCH_IO_NOTE_1)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "7" "$(PFI_LANG_LAUNCH_IO_NOTE_2)"
   !insertmacro PFI_IO_TEXT "ioC.ini" "8" "$(PFI_LANG_LAUNCH_IO_NOTE_3)"
@@ -1635,10 +1657,12 @@ FunctionEnd
 
 Function CheckLaunchOptions
 
-  !define L_RESULT      $R9
-  !define L_TEMP        $R8
+  !define L_CFG         $R9   ; file handle
+  !define L_EXE         $R8   ; full path of perl EXE to be monitored
+  !define L_TEMP        $R7
 
-  Push ${L_RESULT}
+  Push ${L_CFG}
+  Push ${L_EXE}
   Push ${L_TEMP}
 
   ; Field 2 = 'Do not run POPFile' radio button
@@ -1649,16 +1673,29 @@ Function CheckLaunchOptions
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "" exit_without_banner
   StrCmp ${L_TEMP} "no" exit_without_banner
+  StrCmp ${L_TEMP} "background" background_to_no
+  StrCpy ${L_EXE} "$INSTDIR\perl.exe"
+  Goto lastaction_no
+
+background_to_no:
+  StrCpy ${L_EXE} "$INSTDIR\wperl.exe"
+
+lastaction_no:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "no"
 
   ; User has changed their mind: Shutdown the newly installed version of POPFile
 
   NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
-  Pop ${L_RESULT}    ; Get the return value (and ignore it)
-  Sleep ${C_SHUTDOWN_DELAY}
-  goto exit_without_banner
+  Pop ${L_TEMP}    ; Get the return value (and ignore it)
+  Push ${L_EXE}
+  Call WaitUntilUnlocked
+  Goto exit_without_banner
 
 run_popfile:
+
+  ; Set ${L_EXE} to "" as we do not yet know if we are going to monitor a file in $INSTDIR
+
+  StrCpy ${L_EXE} ""
 
   ; Field 4 = 'Run POPFile in background' radio button
 
@@ -1669,6 +1706,10 @@ run_popfile:
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "DOS-box" exit_without_banner
+  StrCmp ${L_TEMP} "no" lastaction_DOS_box
+  StrCpy ${L_EXE} "$INSTDIR\wperl.exe"
+
+lastaction_DOS_box:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "DOS-box"
 
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_LAUNCH_BANNER_1)" "$(PFI_LANG_LAUNCH_BANNER_2)"
@@ -1677,9 +1718,9 @@ run_popfile:
   ; is running on the same UI port as the newly installed version.
 
   NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
-  Pop ${L_RESULT}    ; Get the return value (and ignore it)
-  Sleep ${C_SHUTDOWN_DELAY}
-
+  Pop ${L_TEMP}    ; Get the return value (and ignore it)
+  Push ${L_EXE}
+  Call WaitUntilUnlocked
   ExecShell "open" "$SMPROGRAMS\POPFile\Run POPFile.lnk"
   goto wait_for_popfile
 
@@ -1689,6 +1730,10 @@ run_in_background:
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "background" exit_without_banner
+  StrCmp ${L_TEMP} "no" lastaction_background
+  StrCpy ${L_EXE} "$INSTDIR\perl.exe"
+
+lastaction_background:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "background"
 
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_LAUNCH_BANNER_1)" "$(PFI_LANG_LAUNCH_BANNER_2)"
@@ -1697,22 +1742,22 @@ run_in_background:
   ; is running on the same UI port as the newly installed version.
 
   NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
-  Pop ${L_RESULT}    ; Get the return value (and ignore it)
-  Sleep ${C_SHUTDOWN_DELAY}
-
+  Pop ${L_TEMP}    ; Get the return value (and ignore it)
+  Push ${L_EXE}
+  Call WaitUntilUnlocked
   ExecShell "open" "$SMPROGRAMS\POPFile\Run POPFile in background.lnk"
 
 wait_for_popfile:
 
   ; Wait until POPFile is ready to display the UI (may take a second or so)
 
-  StrCpy ${L_TEMP} 10   ; Timeout limit to avoid an infinite loop
+  StrCpy ${L_TEMP} ${C_STARTUP_LIMIT}   ; Timeout limit to avoid an infinite loop
 
 check_if_ready:
   NSISdl::download_quiet http://127.0.0.1:${G_GUI} "$PLUGINSDIR\ui.htm"
-  Pop ${L_RESULT}                        ; Did POPFile return an HTML page?
-  StrCmp ${L_RESULT} "success" remove_banner
-  Sleep 500   ; milliseconds
+  Pop ${L_TEMP}                        ; Did POPFile return an HTML page?
+  StrCmp ${L_TEMP} "success" remove_banner
+  Sleep ${C_STARTUP_DELAY}
   IntOp ${L_TEMP} ${L_TEMP} - 1
   IntCmp ${L_TEMP} 0 remove_banner remove_banner check_if_ready
 
@@ -1722,9 +1767,11 @@ remove_banner:
 exit_without_banner:
 
   Pop ${L_TEMP}
-  Pop ${L_RESULT}
+  Pop ${L_EXE}
+  Pop ${L_CFG}
 
-  !undef L_RESULT
+  !undef L_CFG
+  !undef L_EXE
   !undef L_TEMP
 
 FunctionEnd
@@ -1827,8 +1874,11 @@ Section "Uninstall"
   !define L_TEMP        $R4
   !define L_UPGRADE     $R3   ; "yes" if this is an upgrade, "no" if we are just uninstalling
   !define L_CORPUS      $R2   ; holds full path to the POPFile corpus data
-  !define L_SUBFOLDER   $R1   ; "yes" if corpus is in a subfolder of $INSTDIR, otherwise "no"
+  !define L_SUBCORPUS   $R1   ; "yes" if corpus is in a subfolder of $INSTDIR, otherwise "no"
   !define L_OLDUI       $R0   ; holds old-style UI port (if previous POPFile is an old version)
+  !define L_HISTORY     $9    ; holds full path to the message history data
+  !define L_SUBHISTORY  $8    ; "yes" if history data in subfolder of $INSTDIR, otherwise "no"
+  !define L_EXE         $7    ; full path of the EXE to be monitored
 
   ; When a normal uninstall is performed, the uninstaller is copied to a uniquely named
   ; temporary file and it is that temporary file which is executed (this is how the uninstaller
@@ -1854,7 +1904,7 @@ confirmation:
 
 skip_confirmation:
 
-  StrCpy ${L_SUBFOLDER} "yes"
+  StrCpy ${L_SUBCORPUS} "yes"
 
   Push $INSTDIR
   Call un.GetCorpusPath
@@ -1863,8 +1913,21 @@ skip_confirmation:
   Push $INSTDIR
   Call un.StrStr
   Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" 0 check_msg_folder
+  StrCpy ${L_SUBCORPUS} "no"
+
+check_msg_folder:
+  StrCpy ${L_SUBHISTORY} "yes"
+
+  Push $INSTDIR
+  Call un.GetHistoryPath
+  Pop ${L_HISTORY}
+  Push ${L_HISTORY}
+  Push $INSTDIR
+  Call un.StrStr
+  Pop ${L_TEMP}
   StrCmp ${L_TEMP} "" 0 check_if_running
-  StrCpy ${L_SUBFOLDER} "no"
+  StrCpy ${L_SUBHISTORY} "no"
 
 check_if_running:
 
@@ -1872,33 +1935,31 @@ check_if_running:
   DetailPrint "$(un.PFI_LANG_PROGRESS_1)"
   SetDetailsPrint listonly
 
-  ; A quick test ignoring fact that popfile.cfg may specify a non-default location for PID file
-
-  IfFileExists "$INSTDIR\popfile.pid" attempt_shutdown
-
   ; If the POPFile we are to uninstall is still running, one of the EXE files will be 'locked'
 
-  IfFileExists "$INSTDIR\wperl.exe" 0 other_perl
-  SetFileAttributes "$INSTDIR\wperl.exe" NORMAL
+  StrCpy ${L_EXE} "$INSTDIR\wperl.exe"
+  IfFileExists "${L_EXE}" 0 other_perl
+  SetFileAttributes "${L_EXE}" NORMAL
   ClearErrors
-  FileOpen ${L_CFG} "$INSTDIR\wperl.exe" a
+  FileOpen ${L_CFG} "${L_EXE}" a
   FileClose ${L_CFG}
   IfErrors attempt_shutdown
 
 other_perl:
-  IfFileExists "$INSTDIR\perl.exe" 0 remove_shortcuts
-  SetFileAttributes "$INSTDIR\perl.exe" NORMAL
+  StrCpy ${L_EXE} "$INSTDIR\perl.exe"
+  IfFileExists "${L_EXE}" 0 remove_shortcuts
+  SetFileAttributes "${L_EXE}" NORMAL
   ClearErrors
-  FileOpen ${L_CFG} "$INSTDIR\perl.exe" a
+  FileOpen ${L_CFG} "${L_EXE}" a
   FileClose ${L_CFG}
   IfErrors 0 remove_shortcuts
 
 attempt_shutdown:
   StrCpy ${G_GUI} ""
   StrCpy ${L_OLDUI} ""
-  
+
   ClearErrors
-  FileOpen ${L_CFG} $INSTDIR\popfile.cfg r
+  FileOpen ${L_CFG} "$INSTDIR\popfile.cfg" r
 
 loop:
   FileRead ${L_CFG} ${L_LNE}
@@ -1906,7 +1967,7 @@ loop:
 
   StrCpy ${L_TEMP} ${L_LNE} 10
   StrCmp ${L_TEMP} "html_port " got_html_port
-  
+
   StrCpy ${L_TEMP} ${L_LNE} 8
   StrCmp ${L_TEMP} "ui_port " got_ui_port
   Goto loop
@@ -1918,10 +1979,10 @@ got_html_port:
 got_ui_port:
   StrCpy ${L_OLDUI} ${L_LNE} 5 8
   Goto loop
-  
+
 ui_port_done:
   FileClose ${L_CFG}
-  
+
   StrCmp ${G_GUI} "" use_other_port
   Push ${G_GUI}
   Call un.TrimNewlines
@@ -1931,9 +1992,8 @@ ui_port_done:
   DetailPrint "$(un.PFI_LANG_LOG_1) ${G_GUI}"
   NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_TEMP}
-  Sleep ${C_SHUTDOWN_DELAY}
-  Goto remove_shortcuts
-  
+  Goto check_shutdown
+
 use_other_port:
   Push ${L_OLDUI}
   Call un.TrimNewlines
@@ -1943,10 +2003,12 @@ use_other_port:
   DetailPrint "$(un.PFI_LANG_LOG_1) ${L_OLDUI}"
   NSISdl::download_quiet http://127.0.0.1:${L_OLDUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_TEMP}
-  Sleep ${C_SHUTDOWN_DELAY}
+
+check_shutdown:
+  Push ${L_EXE}
+  Call un.WaitUntilUnlocked
 
 remove_shortcuts:
-
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_2)"
   SetDetailsPrint listonly
@@ -2065,7 +2127,7 @@ skip_corpus:
   Delete $INSTDIR\stopwords.default
 
   StrCmp ${L_UPGRADE} "yes" remove_perl
-  !insertmacro SafeRecursiveRMDir "$INSTDIR\messages"
+  RMDir /r "${L_HISTORY}"
 
 remove_perl:
   SetDetailsPrint textonly
@@ -2114,8 +2176,11 @@ Removed:
   !undef L_TEMP
   !undef L_UPGRADE
   !undef L_CORPUS
-  !undef L_SUBFOLDER
+  !undef L_SUBCORPUS
   !undef L_OLDUI
+  !undef L_HISTORY
+  !undef L_SUBHISTORY
+  !undef L_EXE
 SectionEnd
 
 #--------------------------------------------------------------------------

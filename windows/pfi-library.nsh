@@ -96,24 +96,33 @@
 
 #--------------------------------------------------------------------------
 #
-# Macro used by the uninstaller (guards against unexpectedly removing the corpus)
+# Macro used by the uninstaller
+# (guards against unexpectedly removing the corpus or message history)
 #
 #--------------------------------------------------------------------------
 
 !macro SafeRecursiveRMDir PATH
 
-  ; if corpus is not in a subfolder, no precautions are needed
-
-  StrCmp ${L_SUBFOLDER} "no" +6
+  StrCmp ${L_SUBCORPUS} "no" +6       ; if "no" then goto pseudo-label A
   Push ${L_CORPUS}
   Push "${PATH}"
   Call un.StrStr
-  POP ${L_TEMP}
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" 0 +8            ; if not "" then goto pseudo-label C
 
-  ; if we are about to remove the path containing the corpus, skip the command
-
-  StrCmp ${L_TEMP} "" 0 +2
+; pseudo-label A
+  StrCmp ${L_SUBHISTORY} "no" +6      ; if "no" then goto pseudo-label B
+  Push ${L_HISTORY}
+  Push "${PATH}"
+  Call un.StrStr
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" 0 +2            ; if not "" then goto pseudo-label C
+  
+; pseudo-label B
   RMDir /r "${PATH}"
+  
+; pseudo-label C
+
 !macroend
 
 
@@ -211,10 +220,10 @@ FunctionEnd
 # Function: un.GetCorpusPath
 #
 # This function is used by the uninstaller when uninstalling a previous version of POPFile.
-# It uses the 'corpus' parameter in 'popfile.cfg' file to determine the full path of the
-# directory where the corpus files are stored. By default POPFile stores the corpus in the
-# '$INSTDIR\corpus' directory but the 'popfile.cfg' file can define a different location, using
-# a variety of paths (eg relative, absolute, local or even remote).
+# It uses 'popfile.cfg' file to determine the full path of the directory where the corpus files
+# are stored. By default POPFile stores the corpus in the '$INSTDIR\corpus' directory but the
+# 'popfile.cfg' file can define a different location, using a variety of paths (eg relative,
+# absolute, local or even remote).
 #
 # If 'popfile.cfg' is found in the specified folder, we use the corpus parameter (if present)
 # otherwise we assume the default location is to be used (the sub-folder called 'corpus').
@@ -241,7 +250,7 @@ Function un.GetCorpusPath
   !define L_SOURCE        $R6
   !define L_TEMP          $R5
 
-  Exch ${L_SOURCE}          ; where we are supposed to look for the corpus data
+  Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
   Push ${L_RESULT}
   Exch
   Push ${L_CORPUS}
@@ -304,13 +313,120 @@ got_result:
 FunctionEnd
 
 #--------------------------------------------------------------------------
+# Function: un.GetHistoryPath
+#
+# This function is used by the uninstaller when uninstalling a previous version of POPFile.
+# It uses 'popfile.cfg' file to determine the full path of the directory where the message
+# history files are stored. By default POPFile stores these files in the '$INSTDIR\messages'
+# directory but the 'popfile.cfg' file can define a different location, using a variety of
+# paths (eg relative, absolute, local or even remote).
+#
+# If 'popfile.cfg' is found in the specified folder, we use the history parameter (if present)
+# otherwise we assume the default location is to be used (the sub-folder called 'messages').
+#
+# Note that the path specified in 'popfile.cfg' uses a trailing slash (which we do not return)
+#
+# Inputs:
+#         (top of stack)          - the path where 'popfile.cfg' is to be found
+#
+# Outputs:
+#         (top of stack)          - string containing full (unambiguous) path to message history
+#
+#  Usage Example:
+#         Push $INSTDIR
+#         Call un.GetHistoryPath
+#         Pop $R0
+#
+#         ($R0 will be "C:\Program Files\POPFile\messages" if POPFile is installed in default
+#          location and if the history parameter in 'popfile.cfg' is set to 'messages/')
+#--------------------------------------------------------------------------
+
+Function un.GetHistoryPath
+
+  !define L_FILE_HANDLE   $R9
+  !define L_HISTORY       $R8
+  !define L_RESULT        $R7
+  !define L_SOURCE        $R6
+  !define L_TEMP          $R5
+
+  Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
+  Push ${L_RESULT}
+  Exch
+  Push ${L_HISTORY}
+  Push ${L_FILE_HANDLE}
+  Push ${L_TEMP}
+
+  StrCpy ${L_HISTORY} ""
+
+  IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default_locn
+  ClearErrors
+  FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
+
+loop:
+  FileRead ${L_FILE_HANDLE} ${L_TEMP}
+  IfErrors cfg_file_done
+  StrCpy ${L_RESULT} ${L_TEMP} 7
+  StrCmp ${L_RESULT} "msgdir " got_old_msgdir
+  StrCpy ${L_RESULT} ${L_TEMP} 14
+  StrCmp ${L_RESULT} "GLOBAL_msgdir " got_new_msgdir
+  Goto loop
+
+got_old_msgdir:
+  StrCpy ${L_HISTORY} ${L_TEMP} "" 7
+  Goto loop
+
+got_new_msgdir:
+  StrCpy ${L_HISTORY} ${L_TEMP} "" 14
+  Goto loop
+
+cfg_file_done:
+  FileClose ${L_FILE_HANDLE}
+  Push ${L_HISTORY}
+  Call un.TrimNewlines
+  Pop ${L_HISTORY}
+  StrCmp ${L_HISTORY} "" use_default_locn use_cfg_data
+
+use_default_locn:
+  StrCpy ${L_RESULT} "${L_SOURCE}\messages"
+  Goto got_result
+
+use_cfg_data:
+  StrCpy ${L_TEMP} ${L_HISTORY} 1 -1
+  StrCmp ${L_TEMP} "/" strip_slash no_trailing_slash
+  StrCmp ${L_TEMP} "\" 0 no_trailing_slash
+
+strip_slash:
+  StrCpy ${L_HISTORY} ${L_HISTORY} -1
+  
+no_trailing_slash:
+  Push ${L_SOURCE}
+  Push ${L_HISTORY}
+  Call un.GetDataPath
+  Pop ${L_RESULT}
+  
+got_result:
+  Pop ${L_TEMP}
+  Pop ${L_FILE_HANDLE}
+  Pop ${L_HISTORY}
+  Pop ${L_SOURCE}
+  Exch ${L_RESULT}  ; place full path of 'messages' directory on top of the stack
+
+  !undef L_FILE_HANDLE
+  !undef L_HISTORY
+  !undef L_RESULT
+  !undef L_SOURCE
+  !undef L_TEMP
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Function: un.GetDataPath
 #
 # This function is used to convert a 'base directory' and a 'data folder' parameter (usually
 # relative to the 'base directory') into a single, absolute path. For example, it will convert
 # 'C:\Program Files\POPFile' and 'corpus' into 'C:\Program Files\POPFile\corpus'.
 #
-# It is assumed that the 'base directory' is in standard Windows format.
+# It is assumed that the 'base directory' is in standard Windows format with no trailing slash.
 #
 # The 'data folder' may be supplied in a variety of different formats, for example:
 # corpus, ./corpus, "..\..\corpus", Z:/Data/corpus or even "\\server\share\corpus".
@@ -361,6 +477,7 @@ strip_quotes:
   StrCpy ${L_DATA} ${L_DATA} -1
 
 slashconversion:
+  StrCmp ${L_DATA} "." source_folder
   Push ${L_DATA}
   Call un.StrBackSlash            ; ensure parameter uses backslashes
   Pop ${L_DATA}
@@ -381,6 +498,10 @@ slashconversion:
   ; Assume path can be safely added to 'base directory'
 
   StrCpy ${L_DATA} ${L_BASEDIR}\${L_DATA}
+  Goto got_path
+
+source_folder:
+  StrCpy ${L_DATA} ${L_BASEDIR}
   Goto got_path
 
 sub_folder:
@@ -537,7 +658,8 @@ FunctionEnd
 # Outputs:
 #         (top of stack)     - string starting with the match, if any
 #
-#  Usage:
+#  Usage (after macro has been 'inserted'):
+#
 #         Push "this is a long string"
 #         Push "long"
 #         Call StrStr
@@ -617,7 +739,8 @@ FunctionEnd
 # Outputs:
 #         (top of stack)   - the input string (if valid) or "" (if invalid)
 #
-# Usage:
+#  Usage (after macro has been 'inserted'):
+#
 #         Push "12345"
 #         Call un.StrCheckDecimal
 #         Pop $R0
@@ -706,7 +829,8 @@ FunctionEnd
 # Outputs:
 #         (top of stack)   - the input string with the trailing newlines (if any) removed
 #
-# Usage:
+#  Usage (after macro has been 'inserted'):
+#
 #         Push "whatever$\r$\n"
 #         Call un.TrimNewlines
 #         Pop $R0
@@ -752,6 +876,79 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 !insertmacro TrimNewlines "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: WaitUntilUnlocked
+#
+# The installation process and the uninstall process both use a function which checks if
+# either '$INSTDIR\wperl.exe' or $INSTDIR\perl.exe' is being used. It may take a little
+# while for POPFile to shutdown so the installer/uninstaller calls this function which
+# waits in a loop until the specified EXE file is no longer in use. A timeout counter
+# is used to avoid an infinite loop.
+#
+# Inputs:
+#         (top of stack)     - the full path of the EXE file to be checked
+#
+# Outputs:
+#         (none)
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Push "$INSTDIR\wperl.exe"
+#         Call WaitUntilUnlocked
+#
+#--------------------------------------------------------------------------
+
+!macro WaitUntilUnlocked UN
+  Function ${UN}WaitUntilUnlocked
+    !define L_EXE           $R9   ; full path to the EXE file which is to be monitored
+    !define L_FILE_HANDLE   $R8
+    !define L_TIMEOUT       $R7   ; used to avoid an infinite loop
+    
+    Exch ${L_EXE}
+    Push ${L_FILE_HANDLE}
+    Push ${L_TIMEOUT}
+    
+    IfFileExists "${L_EXE}" 0 exit_now 
+    SetFileAttributes "${L_EXE}" NORMAL
+    StrCpy ${L_TIMEOUT} ${C_SHUTDOWN_LIMIT}
+    
+  check_if_unlocked:
+    Sleep ${C_SHUTDOWN_DELAY}
+    ClearErrors
+    FileOpen ${L_FILE_HANDLE} "${L_EXE}" a
+    FileClose ${L_FILE_HANDLE}
+    IfErrors 0 exit_now
+    IntOp ${L_TIMEOUT} ${L_TIMEOUT} - 1
+    IntCmp ${L_TIMEOUT} 0 exit_now exit_now check_if_unlocked
+   
+   exit_now:
+    Pop ${L_TIMEOUT}
+    Pop ${L_FILE_HANDLE}
+    Exch ${L_EXE}
+    
+    !undef L_EXE
+    !undef L_FILE_HANDLE
+    !undef L_TIMEOUT
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: WaitUntilUnlocked
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro WaitUntilUnlocked ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.WaitUntilUnlocked
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+!insertmacro WaitUntilUnlocked "un."
 
 #--------------------------------------------------------------------------
 # End of 'pfi-library.nsh'
