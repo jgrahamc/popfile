@@ -166,7 +166,7 @@ sub stopwords
     my ( $self, $value ) = @_;
 
     if ( defined( $value ) ) {
-        $self->{stop__} = $value;
+        %{$self->{stop__}} = %{$value};
     }
 
     return keys %{$self->{stop__}};
