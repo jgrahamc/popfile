@@ -22,6 +22,10 @@
 #
 # ---------------------------------------------------------------------------------------------
 
+test_assert( `rm -rf messages` == 0 );
+test_assert( `rm -rf corpus` == 0 );
+test_assert( `cp -R corpus.base corpus` == 0 );
+test_assert( `rm -rf corpus/CVS` == 0 );
 unlink 'stopwords';
 test_assert( `cp stopwords.base stopwords` == 0 );
 
@@ -205,7 +209,7 @@ test_assert_equal( $cl->{cc__},      'dsmith@dmi.net, dsmith@datamine.net, dsmit
 
 # Test colorization
 
-my @color_tests = ( 'TestMailParse015.msg' );
+my @color_tests = ( 'TestMailParse015.msg', 'TestMailParse019.msg' );
 
 for my $color_test (@color_tests) {
     my $colored = $color_test;
@@ -281,3 +285,5 @@ test_assert_equal( $cl->first20(), ' Take Control of Your Computer With This Top
 
 test_assert_equal( $cl->splitline( '=3Chtml=3E', 'quoted-Printable' ), '&lt;html&gt;' );
 test_assert_equal( $cl->splitline( '=3Chtml=3E', '' ), '=3Chtml=3E' );
+
+$b->stop();

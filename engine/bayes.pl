@@ -61,7 +61,6 @@ if ( $#ARGV == 0 ) {
 
     $b->start();
 
-
     my @files   = glob $ARGV[0];
     foreach my $file (@files) {
         print "$file is '" . $b->classify($file) . "'\n";

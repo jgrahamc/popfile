@@ -160,29 +160,39 @@ sub test_assert_not_regexp
 
 # MAIN
 
-my @tests = glob '*.tst';
+my @tests = sort { $b cmp $a } glob '*.tst';
 
 # Either match all the possible tests, or take the first argument
 # on the command line and use it as a regular expression that must
 # match the name of the TST file for the test suite in that file
 # to be run
 
-my $pattern = '.*';
-$pattern = "$ARGV[0].*" if ( $#ARGV == 0 );
+my @patterns= ( '.*' );
+@patterns = split( /,/, $ARGV[0] ) if ( $#ARGV == 0 );
 
 my $code = 0;
 
 foreach my $test (@tests) {
 
-    if ( $test =~ /$pattern/ ) {
+    my $runit = 0;
+
+    foreach my $pattern (@patterns) {
+        if ( $test =~ /$pattern/ ) {
+            $runit = 1;
+            last;
+	  }
+     }
+
+     if ( $runit ) {
 
         # This works by reading the entire suite into the $suite variable
         # and then changing calls to test_assert_equal so that they include
         # the line number and the file they are from, then the $suite is
         # evaluated
+
         my $current_test_count  = $test_count;
         my $current_error_count = $test_failures;
-        
+
         print "\nRunning $test... ";
         flush STDOUT;
         $fail_messages = '';
@@ -199,11 +209,14 @@ foreach my $test (@tests) {
                 $suite .= $line;
         }
         close SUITE;
-        if ( !defined( eval $suite ) ) {
+
+        my $ran = eval( $suite );
+
+        if ( !defined( $ran ) ) {
             print "Error in $test: $@";
             $code = 1;
         }
-        
+
         if ( $test_failures > $current_error_count ) {
                 print "failed (" . ( $test_count - $current_test_count ) . " ok, " . ( $test_failures - $current_error_count ) . " failed)\n";
                 print $fail_messages . "\n";

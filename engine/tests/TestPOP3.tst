@@ -1220,5 +1220,7 @@ if ( $pid == 0 ) {
         }
         while ( waitpid( $pid2, &WNOHANG ) != $pid2 ) {
         }
+
+        $b->stop();
     }
 }

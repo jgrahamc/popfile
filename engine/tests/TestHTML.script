@@ -328,11 +328,23 @@ MATCH 0.769209
 MATCH 0.230763
 MATCH 2.829186e-005
 MATCH <font color="red">here</font>
-MATCH 0.3289
-MATCH 0.6697
+NOTMATCH 0.3289
+NOTMATCH 0.6697
 MATCH <font color="black">John</font>
 MATCH <font color="red">here</font>
 MATCH Body would
+GET /view?view=popfile10000=1.msg&amp;start_message=0&amp;session=$sk&amp;format=prob
+MATCH showing word probabilities
+MATCH 0.3289
+MATCH 0.6697
+GET /view?view=popfile10000=1.msg&amp;start_message=0&amp;session=$sk&amp;format=freq
+MATCH showing word frequencies
+MATCH 0.00165
+MATCH 0.00336
+GET /view?view=popfile10000=1.msg&amp;start_message=0&amp;session=$sk&amp;format=score
+MATCH showing word scores
+MATCH 2.3639
+MATCH 2.6727
 
 # Jump to message
 
@@ -346,8 +358,8 @@ MATCH 0.769209
 MATCH 0.230763
 MATCH 2.829186e-005
 MATCH <font color="red">here</font>
-MATCH 0.3289
-MATCH 0.6697
+NOTMATCH 0.3289
+NOTMATCH 0.6697
 MATCH <font color="black">John</font>
 MATCH <font color="red">here</font>
 MATCH Body would
@@ -814,8 +826,29 @@ NOTMATCH four11@.-_
 SETSUBMIT word ba"d
 MATCH Ignored words can only contain alphanumeric, ., _, -, or @ characters
 
+# TODO Write better tests for stop words in Japanese
+# and Korean
+
+GET /configuration
+SETSUBMIT language Nihongo
+GET /advanced
+MATCH address
+MATCH localhost
+MATCH smtp
+
+GET /configuration
+SETSUBMIT language Korean
+GET /advanced
+MATCH address
+MATCH localhost
+MATCH smtp
+
+GET /configuration
+SETSUBMIT language English
+
 # Check change arbitrary parameter
 
+GET /advanced
 SETSUBMIT parameter_bayes_hostname testhostname
 CONFIGIS bayes_hostname testhostname
 INPUTIS parameter_bayes_hostname testhostname

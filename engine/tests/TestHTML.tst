@@ -316,6 +316,8 @@ if ( $pid == 0 ) {
     close $dreader;
     close $uwriter;
 
+    $h->stop();
+
     exit(0);
 } else {
 
@@ -538,4 +540,5 @@ if ( $pid == 0 ) {
     }
 }
 
+$b->stop();
 

@@ -363,6 +363,16 @@ $line = <TEMP>;
 test_assert_regexp( $line, 'BAD' );
 close TEMP;
 
+# Test echo_response_ with timeout
+
+open TEMP, ">temp.tmp";
+test_assert_equal( $sp->echo_response_( $client, \*TEMP, "HOWRU?" ), 2 );
+close TEMP;
+open TEMP, "<temp.tmp";
+$line = <TEMP>;
+test_assert_regexp( $line, 'timeout error' );
+close TEMP;
+
 # Check that we receive the messages sent up the pipe
 
 use Test::MQReceiver;

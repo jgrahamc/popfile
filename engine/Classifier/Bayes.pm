@@ -72,7 +72,7 @@ sub new
     $self->{wordscores__}        = 0;
 
     # Choice for the format of the "word matrix" display.
-    $self->{wmformat__}          = 'prob';
+    $self->{wmformat__}          = '';
 
     # Just our hostname
     $self->{hostname__}        = '';
@@ -355,8 +355,14 @@ sub get_value_
     my $value = $self->{matrix__}{$bucket}{$word};
 
     if ( defined( $value ) ) {
-        my $total = $self->get_bucket_word_count( $bucket );
-        return log( $value / $total );
+
+        # Profiling notes:
+        #
+        # I tried caching the log of the total value and then doing
+        # log( $value ) - $cached and this turned out to be
+        # much slower than this single log with a division in it
+
+        return log( $value / $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} );
     } else {
         return 0;
     }
@@ -406,11 +412,11 @@ sub set_value_
 
     my $total = $self->get_bucket_word_count( $bucket );
 
-    $total                                         -= $oldvalue;
-    $self->{full_total__}                          -= $oldvalue;
-    $self->{matrix__}{$bucket}{$word}               = $value;
-    $total                                         += $value;
-    $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}  = $total;
+    $total                                              -= $oldvalue;
+    $self->{full_total__}                               -= $oldvalue;
+    $self->{matrix__}{$bucket}{$word}                    = $value;
+    $total                                              += $value;
+    $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}       = $total;
     $self->{full_total__}                          += $value;
 
     if ( $self->{matrix__}{$bucket}{$word} <= 0 ) {
@@ -570,8 +576,8 @@ sub tie_bucket__
                                  -Flags    => DB_CREATE;                                         # PROFILE BLOCK STOP
 
     if ( !defined( $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} ) ) {
-        $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}  = 0;
-        $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} = 0;
+        $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}      = 0;
+        $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__}     = 0;
     }
 }
 
@@ -846,6 +852,42 @@ sub save_magnets__
     }
 }
 
+
+# ---------------------------------------------------------------------------------------------
+#
+# magnet_match__
+#
+# Helper the determines if a specific string matches a certain magnet type in a bucket
+#
+# $noattype        The string to match
+# $bucket          The bucket to check
+# $type            The magnet type to check
+#
+# ---------------------------------------------------------------------------------------------
+
+sub magnet_match__
+{
+    my ( $self, $noattype, $bucket, $type ) = @_;
+
+    for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
+        my $regex;
+
+        $regex = $magnet;
+        $regex =~ s/@/__POPFILE_AT__/g;
+        $regex =~ s/\$/__POPFILE_DOLLAR__/g;
+
+        if ( $noattype =~ m/\Q$regex\E/i ) {
+            $self->{scores__}        = '';
+            $self->{magnet_used__}   = 1;
+            $self->{magnet_detail__} = "$type: $magnet";
+
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 # ---------------------------------------------------------------------------------------------
 #
 # classify
@@ -897,40 +939,11 @@ sub classify
 
             # Disable the locale in Korean mode, too.
 
-            if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ||
-                 $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
+            if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
                 no locale;
-                for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
-                    my $regex;
-
-                    $regex = $magnet;
-                    $regex =~ s/@/__POPFILE_AT__/g;
-                    $regex =~ s/\$/__POPFILE_DOLLAR__/g;
-
-                    if ( $noattype =~ m/\Q$regex\E/i ) {
-                        $self->{scores__}        = '';
-                        $self->{magnet_used__}   = 1;
-                        $self->{magnet_detail__} = "$type: $magnet";
-
-                        return $bucket;
-                    }
-                }
+                return $bucket if ( $self->magnet_match__( $noattype, $bucket, $type ) );
             } else {
-                for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
-                    my $regex;
-
-                    $regex = $magnet;
-                    $regex =~ s/@/__POPFILE_AT__/g;
-                    $regex =~ s/\$/__POPFILE_DOLLAR__/g;
-
-                    if ( $noattype =~ m/\Q$regex\E/i ) {
-                        $self->{scores__}        = '';
-                        $self->{magnet_used__}   = 1;
-                        $self->{magnet_detail__} = "$type: $magnet";
-
-                        return $bucket;
-                    }
-                }
+                return $bucket if ( $self->magnet_match__( $noattype, $bucket, $type ) );
             }
         }
     }
@@ -945,7 +958,6 @@ sub classify
 
     my %score;
     my %matchcount;
-    my %chi;
 
     for my $bucket (@buckets) {
         $score{$bucket} = $self->{bucket_start__}{$bucket};
@@ -1069,7 +1081,7 @@ sub classify
         if ($self->{wmformat__} eq 'score') {
             $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\" align=\"center\">$language{Score}</th><th scope=\"col\">$language{Probability}</th></tr>\n";
         } else {
-        $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\">$language{Probability}</th></tr>\n";
+            $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\">$language{Probability}</th></tr>\n";
         }
 
         my $log10 = log(10.0);
@@ -1091,12 +1103,12 @@ sub classify
                 $probstr = sprintf("%17.6e", $prob);
              }
 
-             if ($self->{wmformat__}  eq 'score') {
+             if ($self->{wmformat__} eq 'score') {
                 $rawstr = sprintf("%12.6f", ($raw_score{$b} - $correction)/$log10);
                 $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td align=right>$rawstr&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
              } else {
-            $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
-        }
+                $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
+             }
         }
 
         $self->{scores__} .= "</table><hr>";
@@ -1106,91 +1118,93 @@ sub classify
         # probably a better way.
 
         $self->{scores__} .= "<!--format--><p>";
-        $self->{scores__} .= "<table class=\"top20Words\">\n";
-        $self->{scores__} .= "<tr>\n<th scope=\"col\">$language{Word}</th><th>&nbsp;</th><th scope=\"col\">$language{Count}</th><th>&nbsp;</th>\n";
+        if ( $self->{wmformat__} ne '' ) {
+            $self->{scores__} .= "<table class=\"top20Words\">\n";
+            $self->{scores__} .= "<tr>\n<th scope=\"col\">$language{Word}</th><th>&nbsp;</th><th scope=\"col\">$language{Count}</th><th>&nbsp;</th>\n";
 
-        foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
-            my $bucket = $ranking[$ix];
-            my $bucketcolor  = $self->get_bucket_color( $bucket );
-            $self->{scores__} .= "<th><font color=\"$bucketcolor\">$bucket</font></th><th>&nbsp;</th>";
-        }
-
-        $self->{scores__} .= "</tr>";
-
-        my %wordprobs;
-
-        # If the word matrix is supposed to show probabilities, compute them,
-        # saving the results in %wordprobs.
-
-        if ( $self->{wmformat__} eq 'prob') {
-            foreach my $word (keys %{$self->{parser__}->{words__}}) {
-                my $sumfreq = 0;
-                my %wval;
-                foreach my $bucket (@ranking) {
-                    $wval{$bucket} = exp(get_sort_value_( $self, $bucket, $word ));
-                    $sumfreq += $wval{$bucket};
-                }
-                foreach my $bucket (@ranking) {
-                    $wordprobs{$bucket,$word} = $wval{$bucket} / $sumfreq;
-                }
-            }
-        }
-
-        my @ranked_words;
-        if ($self->{wmformat__} eq 'prob') {
-            @ranked_words = sort {$wordprobs{$ranking[0],$b} <=> $wordprobs{$ranking[0],$a}} keys %{$self->{parser__}->{words__}};
-        } else {
-            @ranked_words = sort {$self->get_sort_value_( $ranking[0], $b ) <=> $self->get_sort_value_( $ranking[0], $a )} keys %{$self->{parser__}->{words__}};
-        }
-
-        foreach my $word (@ranked_words) {
-            my $known = 0;
-
-            foreach my $bucket (@ranking) {
-                if ( $self->get_value_( $bucket, $word ) != 0 ) {
-                   $known = 1;
-                   last;
-                }
-            }
-
-            if ( $known == 1 ) {
-                my $wordcolor = $self->get_color( $word );
-                my $count     = $self->{parser__}->{words__}{$word};
-
-                $self->{scores__} .= "<tr>\n<td><font color=\"$wordcolor\">$word</font></td><td>&nbsp;</td><td>$count</td><td>&nbsp;</td>\n";
-
-                my $base_probability = $self->get_value_( $ranking[0], $word );
-
-                foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
-                    my $bucket = $ranking[$ix];
-                    my $probability  = $self->get_value_( $bucket, $word );
-                    my $color        = 'black';
-
-                    if ( $probability >= $base_probability || $base_probability == 0 ) {
-                        $color = $self->get_bucket_color( $bucket );
-                    }
-
-                    if ( $probability != 0 ) {
-                        my $wordprobstr;
-                        if ($self->{wmformat__} eq 'score') {
-                            $wordprobstr  = sprintf("%12.4f", ($probability - $self->{not_likely__})/$log10 );
-                        } elsif ($self->{wmformat__} eq 'prob') {
-                            $wordprobstr  = sprintf("%12.4f", $wordprobs{$bucket,$word});
-                        } else {
-                            $wordprobstr  = sprintf("%13.5f", exp($probability) );
-                        }
-
-                        $self->{scores__} .= "<td><font color=\"$color\">$wordprobstr</font></td>\n<td>&nbsp;</td>\n";
-                    } else {
-                        $self->{scores__} .= "<td>&nbsp;</td>\n<td>&nbsp;</td>\n";
-                    }
-                }
+            foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
+                my $bucket = $ranking[$ix];
+                my $bucketcolor  = $self->get_bucket_color( $bucket );
+                $self->{scores__} .= "<th><font color=\"$bucketcolor\">$bucket</font></th><th>&nbsp;</th>";
             }
 
             $self->{scores__} .= "</tr>";
-        }
 
-        $self->{scores__} .= "</table></p>";
+            my %wordprobs;
+
+            # If the word matrix is supposed to show probabilities, compute them,
+            # saving the results in %wordprobs.
+
+            if ( $self->{wmformat__} eq 'prob') {
+                foreach my $word (keys %{$self->{parser__}->{words__}}) {
+                    my $sumfreq = 0;
+                    my %wval;
+                    foreach my $bucket (@ranking) {
+                        $wval{$bucket} = exp(get_sort_value_( $self, $bucket, $word ));
+                        $sumfreq += $wval{$bucket};
+                    }
+                    foreach my $bucket (@ranking) {
+                        $wordprobs{$bucket,$word} = $wval{$bucket} / $sumfreq;
+                    }
+                }
+            }
+
+            my @ranked_words;
+            if ($self->{wmformat__} eq 'prob') {
+                @ranked_words = sort {$wordprobs{$ranking[0],$b} <=> $wordprobs{$ranking[0],$a}} keys %{$self->{parser__}->{words__}};
+            } else {
+                @ranked_words = sort {$self->get_sort_value_( $ranking[0], $b ) <=> $self->get_sort_value_( $ranking[0], $a )} keys %{$self->{parser__}->{words__}};
+            }
+
+            foreach my $word (@ranked_words) {
+                my $known = 0;
+
+                foreach my $bucket (@ranking) {
+                    if ( $self->get_base_value_( $bucket, $word ) != 0 ) {
+                        $known = 1;
+                        last;
+                    }
+                }
+
+                if ( $known == 1 ) {
+                    my $wordcolor = $self->get_color( $word );
+                    my $count     = $self->{parser__}->{words__}{$word};
+
+                    $self->{scores__} .= "<tr>\n<td><font color=\"$wordcolor\">$word</font></td><td>&nbsp;</td><td>$count</td><td>&nbsp;</td>\n";
+
+                    my $base_probability = $self->get_value_( $ranking[0], $word );
+
+                    foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
+                        my $bucket = $ranking[$ix];
+                        my $probability  = $self->get_value_( $bucket, $word );
+                        my $color        = 'black';
+
+                        if ( $probability >= $base_probability || $base_probability == 0 ) {
+                            $color = $self->get_bucket_color( $bucket );
+                        }
+
+                        if ( $probability != 0 ) {
+                            my $wordprobstr;
+                            if ($self->{wmformat__} eq 'score') {
+                                $wordprobstr  = sprintf("%12.4f", ($probability - $self->{not_likely__})/$log10 );
+                            } elsif ($self->{wmformat__} eq 'prob') {
+                                $wordprobstr  = sprintf("%12.4f", $wordprobs{$bucket,$word});
+                            } else {
+                                $wordprobstr  = sprintf("%13.5f", exp($probability) );
+                            }
+
+                            $self->{scores__} .= "<td><font color=\"$color\">$wordprobstr</font></td>\n<td>&nbsp;</td>\n";
+                        } else {
+                            $self->{scores__} .= "<td>&nbsp;</td>\n<td>&nbsp;</td>\n";
+                        }
+                    }
+                }
+
+                $self->{scores__} .= "</tr>";
+            }
+
+            $self->{scores__} .= "</table></p>";
+        }
     }
 
     return $class;
@@ -1654,7 +1668,7 @@ sub get_bucket_word_list
 {
     my ( $self, $bucket, $prefix ) = @_;
 
-    return grep {/^$prefix/} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
+    return grep {/^$prefix/} grep {!/^__POPFILE__/} keys %{$self->{matrix__}{$bucket}};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1679,13 +1693,13 @@ sub get_bucket_word_prefixes
 
     if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
         no locale;
-        return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc($_,0,1)} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
+        return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc($_,0,1)} grep {!/^__POPFILE__/} keys %{$self->{matrix__}{$bucket}};
     } else {
         if  ( $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
     	    no locale;
-            return grep {$_ ne $prev && ($prev = $_, 1)} sort map {$_ =~ /([\x20-\x80]|$eksc)/} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
+            return grep {$_ ne $prev && ($prev = $_, 1)} sort map {$_ =~ /([\x20-\x80]|$eksc)/} grep {!/^__POPFILE__/} keys %{$self->{matrix__}{$bucket}};
         } else {
-            return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
+            return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)} grep {!/^__POPFILE__/} keys %{$self->{matrix__}{$bucket}};
         }
     }
 }
@@ -1976,6 +1990,27 @@ sub rename_bucket
 #
 # add_messages_to_bucket
 #
+# Takes words previously parsed by the mail parser and adds/subtracts them to/from a bucket,
+# this is a helper used by add_messages_to_bucket, remove_message_from_bucket
+#
+# $bucket         Bucket to add to
+# $subtract       Set to -1 means subtract the words, set to 1 means add
+#
+# ---------------------------------------------------------------------------------------------
+sub add_words_to_bucket__
+{
+    my ( $self, $bucket, $subtract ) = @_;
+
+    foreach my $word (keys %{$self->{parser__}->{words__}}) {
+        $self->set_value_( $bucket, $word, $subtract * $self->{parser__}->{words__}{$word} +
+            $self->get_base_value_( $bucket, $word ) );
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# add_messages_to_bucket
+#
 # Parses mail messages and updates the statistics in the specified bucket
 #
 # $bucket          Name of the bucket to be updated
@@ -1998,21 +2033,16 @@ sub add_messages_to_bucket
     foreach my $file (@files) {
         $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
 
-       # In Japanese mode, disable locale.
-       # Sorting Japanese with "use locale" is memory and time consuming,
-       # and may cause perl crash.
+        # In Japanese mode, disable locale.
+        # Sorting Japanese with "use locale" is memory and time consuming,
+        # and may cause perl crash.
 
-       # Disable the locale in Korean mode, too.
-       if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ||
-            $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
+        # Disable the locale in Korean mode, too.
+        if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
             no locale;
-            foreach my $word (keys %{$self->{parser__}->{words__}}) {
-                $self->set_value_( $bucket, $word, $self->{parser__}->{words__}{$word} + $self->get_base_value_( $bucket, $word ) );
-            }
+            $self->add_words_to_bucket__( $bucket, 1 );
         } else {
-            foreach my $word (keys %{$self->{parser__}->{words__}}) {
-                $self->set_value_( $bucket, $word, $self->{parser__}->{words__}{$word} + $self->get_base_value_( $bucket, $word ) );
-            }
+            $self->add_words_to_bucket__( $bucket, 1 );
         }
     }
 
@@ -2068,16 +2098,12 @@ sub remove_message_from_bucket
     # and may cause perl crash.
 
     # Disable the locale in Korean mode, too.
-    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ||
-         $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
+
+    if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
         no locale;
-        foreach my $word (keys %{$self->{parser__}->{words__}}) {
-            $self->set_value_( $bucket, $word, $self->get_base_value_( $bucket, $word ) - $self->{parser__}->{words__}{$word} );
-        }
+        $self->add_words_to_bucket__( $bucket, -1 );
     } else {
-        foreach my $word (keys %{$self->{parser__}->{words__}}) {
-            $self->set_value_( $bucket, $word, $self->get_base_value_( $bucket, $word ) - $self->{parser__}->{words__}{$word} );
-         }
+        $self->add_words_to_bucket__( $bucket, -1 );
     }
 
     $self->load_word_matrix_();
@@ -2194,8 +2220,8 @@ sub clear_bucket
         delete $self->{matrix__}{$bucket}{$word};
     }
 
-    $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} = 0;
-    $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} = 0;
+    $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}      = 0;
+    $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__}     = 0;
 
     $self->load_word_matrix_();
 }
@@ -2235,8 +2261,7 @@ sub get_magnets
 
     # Disable the locale in Korean mode, too.
 
-    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ||
-         $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
+    if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
         no locale;
         return sort keys %{$self->{magnets__}{$bucket}{$type}};
     } else {

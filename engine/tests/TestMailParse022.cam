@@ -1,7 +1,9 @@
-From: test@test.com
+From: 
+	=?iso-8859-1?Q?test@test.com?=
 To: someone@somewhere.com
 Cc: <someoneelse@somewhere.com>
-Subject: [spam] =?iso-8859-1?Q?test for various HTML parts?=
+Subject: [spam] 
+	=?iso-8859-1?Q?test for various HTML parts?=
 Reply-To: =?somecharset?Q?someotherperson@somewhere.com?=
 X-Text-Classification: spam
 X-POPFile-Link: http://127.0.0.1:8080/jump_to_message?view=popfile0=0.msg

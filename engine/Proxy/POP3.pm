@@ -124,6 +124,22 @@ sub initialize
 
 # ---------------------------------------------------------------------------------------------
 #
+# start
+#
+# ---------------------------------------------------------------------------------------------
+sub start
+{
+    my ( $self ) = @_;
+
+    if ( $self->config_( 'welcome_string' ) =~ /^POP3 POPFile \(v\d+\.\d+\.\d+\) server ready$/ ) {
+        $self->config_( 'welcome_string', "POP3 POPFile ($self->{version_}) server ready" );
+    }
+
+    return $self->SUPER::start();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # child__
 #
 # The worker method that is called when we get a good connection from a client

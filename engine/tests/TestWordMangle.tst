@@ -39,15 +39,19 @@ test_assert_equal( $w->mangle( 'BIG:WORD', 1 ), 'big:word' );
 
 # Test stop words
 test_assert_equal( $w->mangle( 'BIGWORD' ), 'bigword' );
-test_assert_equal( $w->add_stopword( 'bigword' ), 1 );
+test_assert_equal( $w->add_stopword( 'bigword', 'English' ), 1 );
 test_assert_equal( $w->mangle( 'BIGWORD' ), '' );
-test_assert_equal( $w->remove_stopword( 'bigword' ), 1 );
+test_assert_equal( $w->remove_stopword( 'bigword', 'Nihongo' ), 1 );
 test_assert_equal( $w->mangle( 'BIGWORD' ), 'bigword' );
-test_assert_equal( $w->add_stopword( '' ), 0 );
-test_assert_equal( $w->remove_stopword( '' ), 0 );
-test_assert_equal( $w->add_stopword( 'A1234bef66' ), 0 );
-test_assert_equal( $w->remove_stopword( 'A1234bef66' ), 0 );
-test_assert_equal( $w->add_stopword( 'b*ox' ), 0 );
+test_assert_equal( $w->add_stopword( '', 'English' ), 0 );
+test_assert_equal( $w->remove_stopword( '', 'English' ), 0 );
+test_assert_equal( $w->add_stopword( 'A1234bef66', 'English' ), 0 );
+test_assert_equal( $w->remove_stopword( 'A1234bef66', 'English' ), 0 );
+test_assert_equal( $w->add_stopword( 'b*ox', 'English' ), 0 );
+
+# Test Japanese
+test_assert_equal( $w->add_stopword( chr(0x8e) . chr(0xa0), 'Nihongo' ), 0 );
+test_assert_equal( $w->remove_stopword( chr(0x8e) . chr(0xa0), 'Nihongo' ), 0 );
 
 # Getter/setter
 my %stops = ( 'oneword', 1 );
@@ -59,7 +63,7 @@ test_assert_equal( $stopwords[0], 'oneword' );
 $w->load_stopwords();
 
 # Make sure that stopwords got to disk
-test_assert_equal( $w->add_stopword( 'bigword' ), 1 );
+test_assert_equal( $w->add_stopword( 'bigword', 'English' ), 1 );
 open WORDS, "<stopwords";
 my $found = 0;
 while (<WORDS>) {
@@ -70,10 +74,10 @@ while (<WORDS>) {
 }
 close WORDS;
 test_assert( $found );
-test_assert_equal( $w->remove_stopword( 'bigword' ), 1 );
+test_assert_equal( $w->remove_stopword( 'bigword', 'English' ), 1 );
 
 # Make sure that stopping and starting reloads the stopwords
-test_assert_equal( $w->add_stopword( 'anotherbigword' ), 1 );
+test_assert_equal( $w->add_stopword( 'anotherbigword', 'English' ), 1 );
 my $w2 = new Classifier::WordMangle;
 my @stopwords = $w2->stopwords();
 test_assert_equal( $#stopwords, 0 );

@@ -146,6 +146,7 @@ sub mangle
 # Adds or removes a stop word
 #
 # $stopword    The word to add or remove
+# $lang        The current language
 #
 # Returns 1 if successful, or 0 for a bad stop word
 # ---------------------------------------------------------------------------------------------

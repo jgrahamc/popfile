@@ -219,8 +219,15 @@ sub initialize
     $self->config_( 'archive_classes', 0 );
 
     # This setting defines what is displayed in the word matrix: 'freq' for frequencies,
-    # 'prob' for probabilities, 'score' for logarithmic scores.
-    $self->config_( 'wordtable_format', 'prob' );
+    # 'prob' for probabilities, 'score' for logarithmic scores, if blank then the word
+    # table is not shown
+
+    $self->config_( 'wordtable_format', '' );
+
+    # This setting determines whether when viewing an individual message we show the word
+    # table or not
+
+    $self->config_( 'show_wordtable', 0 );
 
     # Load skins
 
@@ -282,9 +289,9 @@ sub start
 
     # Set the classifier option wmformat__ according to our wordtable_format
     # option.
-  
+
     $self->{classifier__}->wmformat( $self->config_( 'wordtable_format' ) );
-  
+
     return $self->SUPER::start();
 }
 
@@ -1354,115 +1361,49 @@ sub advanced_page
     my $firstRow = 1;
     my @words = $self->{classifier__}->get_stopword_list();
 
-    # In Japanese mode, disable locale.
-    # Sorting Japanese with "use locale" is memory and time consuming,
-    # and may cause perl crash.
-
-    if ( $self->config_( 'language' ) eq 'Nihongo' ) {
-        no locale;
-        for my $word (sort @words) {
-
-            # First character of stop word is EUC-JP in Japanese mode
-
-            $word =~ /^($euc_jp)/;
-
-            if ( $1 ne $last )  {
-                if ( !$firstRow ) {
-                    $body .= "</td></tr>\n";
-                } else {
-                    $firstRow = 0;
-                }
-                $body .= "<tr><th scope=\"row\" class=\"advancedAlphabet";
-                if ( $groupCounter == $groupSize ) {
-                    $body .= "GroupSpacing";
-                }
-                $body .= "\"><b>$1</b></th>\n";
-                $body .= "<td class=\"advancedWords";
-                if ( $groupCounter == $groupSize ) {
-                    $body .= "GroupSpacing";
-                    $groupCounter = 0;
-                }
-                $body .= "\">";
-                $last = $1;
-                $need_comma = 0;
-                $groupCounter += 1;
-            }
-            if ( $need_comma == 1 ) {
-                $body .= ", $word";
-            } else {
-                $body .= $word;
-                $need_comma = 1;
+    for my $word (sort @words) {
+        my $c;
+        if ( $self->config_( 'language' ) =~ /^Korean$/ ) {
+            no locale;
+            $word =~ /^(.)/;
+            $c = $1;
+	} else {
+    	    if ( $self->config_( 'language' ) =~ /^Nihongo$/ ) {
+               no locale;
+               $word =~ /^($euc_jp)/;
+               $c = $1;
+	    } else {
+               $word =~ /^(.)/;
+               $c = $1;
             }
         }
-    } else {
-        if ( $self->config_( 'language' ) eq 'Korean' ) {
-    	    # don't use locale in Korean mode. Every other code is same
-    	    no locale;
-            for my $word (sort @words) {
-                $word =~ /^(.)/;
 
-                if ( $1 ne $last )  {
-                    if (! $firstRow) {
-                        $body .= "</td></tr>\n";
-                    } else {
-                        $firstRow = 0;
-                    }
-                    $body .= "<tr><th scope=\"row\" class=\"advancedAlphabet";
-                    if ($groupCounter == $groupSize) {
-                        $body .= "GroupSpacing";
-                    }
-                    $body .= "\"><b>$1</b></th>\n";
-                    $body .= "<td class=\"advancedWords";
-                    if ($groupCounter == $groupSize) {
-                        $body .= "GroupSpacing";
-                        $groupCounter = 0;
-                    }
-                    $body .= "\">";
-
-                    $last = $1;
-                    $need_comma = 0;
-                    $groupCounter += 1;
-                }
-                if ( $need_comma == 1 ) {
-                    $body .= ", $word";
-                } else {
-                    $body .= $word;
-                    $need_comma = 1;
-                }
+        if ( $c ne $last ) {
+            if ( !$firstRow ) {
+                $body .= "</td></tr>\n";
+            } else {
+                $firstRow = 0;
             }
+            $body .= "<tr><th scope=\"row\" class=\"advancedAlphabet";
+            if ( $groupCounter == $groupSize ) {
+                $body .= "GroupSpacing";
+            }
+            $body .= "\"><b>$c</b></th>\n";
+            $body .= "<td class=\"advancedWords";
+            if ( $groupCounter == $groupSize ) {
+                $body .= "GroupSpacing";
+                $groupCounter = 0;
+            }
+            $body .= "\">";
+            $last = $c;
+            $need_comma = 0;
+            $groupCounter += 1;
+        }
+        if ( $need_comma == 1 ) {
+            $body .= ", $word";
         } else {
-            for my $word (sort @words) {
-                $word =~ /^(.)/;
-
-                if ( $1 ne $last )  {
-                    if (! $firstRow) {
-                        $body .= "</td></tr>\n";
-                    } else {
-                        $firstRow = 0;
-                    }
-                    $body .= "<tr><th scope=\"row\" class=\"advancedAlphabet";
-                    if ($groupCounter == $groupSize) {
-                        $body .= "GroupSpacing";
-                    }
-                    $body .= "\"><b>$1</b></th>\n";
-                    $body .= "<td class=\"advancedWords";
-                    if ($groupCounter == $groupSize) {
-                        $body .= "GroupSpacing";
-                        $groupCounter = 0;
-                    }
-                    $body .= "\">";
-
-                    $last = $1;
-                    $need_comma = 0;
-                    $groupCounter += 1;
-                }
-                if ( $need_comma == 1 ) {
-                    $body .= ", $word";
-                } else {
-                    $body .= $word;
-                    $need_comma = 1;
-                }
-            }
+            $body .= $word;
+            $need_comma = 1;
         }
     }
 
@@ -2674,28 +2615,31 @@ sub new_history_file__
 
     if ( open MAIL, '<'. $self->global_config_( 'msgdir' ) . $file ) {
         while ( <MAIL> )  {
-            last          if ( /^(\r\n|\r|\n)/ );
+            last if ( /^(\r\n|\r|\n)/ );
 
             # Support long header that has more than 2 lines
 
-            if(/^[\t ]+(=\?[\w-]+\?[BQ]\?.*\?=.*)/){
-                if($long_header eq 'from'){
+            if ( /^[\t ]+(=\?[\w-]+\?[BQ]\?.*\?=.*)/ ) {
+                if ( $long_header eq 'from' ) {
                     $from .= $1;
                     next;
                 }
-                if($long_header eq 'subject'){
+
+                if ( $long_header eq 'subject' ) {
                     $subject .= $1;
                     next;
                 }
-            }else{
-                if(/^From: *(.*)/i){
+            } else {
+                if ( /^From: *(.*)/i ) {
                     $long_header = 'from';
                     $from = $1;
                     next;
-                }elsif (/^Subject: *(.*)/i){
-                    $long_header = 'subject';
-                    $subject = $1;
-                    next;
+                } else {
+                    if ( /^Subject: *(.*)/i ) {
+                        $long_header = 'subject';
+                        $subject = $1;
+                        next;
+		    }
                 }
                 $long_header = '';
             }
@@ -2730,7 +2674,7 @@ sub new_history_file__
 
         # Do not truncate at 39 if the last char is the first byte of DBCS char(pair of two bytes).
         # Truncate it 1 byte shorter.
-        if (( $self->config_( 'language' ) eq 'Korean' ) || ( $self->config_( 'language' ) eq 'Nihongo' )) {
+        if ( $self->config_( 'language' ) =~ /^Korean|Nihongo$/ ) {
             $short_subject = $1;
             $short_subject =~ s/(([\x80-\xff].)*)[\x80-\xff]?$/$1/;
             $short_subject .= "...";
@@ -3444,19 +3388,16 @@ sub view_page
     $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
     $self->{form_}{search} = '' if ( !defined( $self->{form_}{search} ) );
     $self->{form_}{filter} = '' if ( !defined( $self->{form_}{filter} ) );
-    $self->{form_}{format} = '' if ( !defined( $self->{form_}{format} ) );
-  
+    $self->{form_}{format} = $self->config_( 'wordtable_format' ) if ( !defined( $self->{form_}{format} ) );
+
     # If a format change was requested for the word matrix, record it in the
     # configuration and in the classifier options.
-  
-    if ( $self->{form_}{format} ne '' ) {
-        $self->config_( 'wordtable_format', $self->{form_}{format} );
-        $self->{classifier__}->wmformat( $self->{form_}{format} );
-    }
+
+    $self->{classifier__}->wmformat( $self->{form_}{format} );
 
     my $index = -1;
 
-   foreach my $i ( 0 .. $self->history_size()-1 ) {
+    foreach my $i ( 0 .. $self->history_size()-1 ) {
         if ( $self->{history_keys__}[$i] eq $mail_file ) {
             use integer;
             $index         = $i;
@@ -3552,37 +3493,41 @@ sub view_page
         # by the link.  (There's probably a better way.)
 
         my $view = $self->{language__}{View_WordProbabilities};
-        if ( $self->config_( 'wordtable_format' ) eq 'freq' ) {
+        if ( $self->{form_}{format} eq 'freq' ) {
             $view = $self->{language__}{View_WordFrequencies};
 	}
-        if ( $self->config_( 'wordtable_format' ) eq 'score' ) {
+        if ( $self->{form_}{format} eq 'score' ) {
             $view = $self->{language__}{View_WordScores};
 	}
 
-        $fmtlinks = "<table width=\"100%\">\n<td class=\"top20\" align=\"left\"><b>$self->{language__}{View_WordMatrix} ($view)</b></td>\n<td class=\"historyNavigatorTop\">\n";
-        if ($self->config_( 'wordtable_format' ) ne 'freq' ) {
+        if ( $self->{form_}{format} ne '' ) {
+            $fmtlinks = "<table width=\"100%\">\n<td class=\"top20\" align=\"left\"><b>$self->{language__}{View_WordMatrix} ($view)</b></td>\n<td class=\"historyNavigatorTop\">\n";
+	}
+        if ($self->{form_}{format} ne 'freq' ) {
             $fmtlinks .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index ];
             $fmtlinks .= "&start_message=". ((( $index ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' )));
             $fmtlinks .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "&format=freq#scores\"> ";
             $fmtlinks .= $self->{language__}{View_ShowFrequencies};
             $fmtlinks .= "</a> &nbsp;\n";
         }
-        if ($self->config_( 'wordtable_format' ) ne 'prob' ) {
+        if ($self->{form_}{format} ne 'prob' ) {
             $fmtlinks .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index ];
             $fmtlinks .= "&start_message=". ((( $index ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' )));
             $fmtlinks .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "&format=prob#scores\"> ";
             $fmtlinks .= $self->{language__}{View_ShowProbabilities};
             $fmtlinks .= "</a> &nbsp;\n";
         }
-        if ($self->config_( 'wordtable_format' ) ne 'score' ) {
+        if ($self->{form_}{format} ne 'score' ) {
             $fmtlinks .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index ];
             $fmtlinks .= "&start_message=". ((( $index ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' )));
             $fmtlinks .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "&format=score#scores\"> ";
             $fmtlinks .= $self->{language__}{View_ShowScores};
             $fmtlinks .= "</a> \n";
         }
-        $fmtlinks .= "</a></td></table>";
-  
+        if ( $self->{form_}{format} ne '' ) {
+            $fmtlinks .= "</a></td></table>";
+	}
+
         # Enable saving of word-scores
 
         $self->{classifier__}->wordscores( 1 );
@@ -3639,15 +3584,15 @@ sub view_page
     $body .= "<tr><td class=\"top20\" valign=\"top\">\n";
 
     if ($self->{history__}{$mail_file}{magnet} eq '') {
-        my $score_text = $self->{classifier__}->scores();
-        $score_text =~ s/\<\!--format--\>/$fmtlinks/;
-        $body .= $score_text;
-        $self->{classifier__}->scores('');
+         my $score_text = $self->{classifier__}->scores();
+         $score_text =~ s/\<\!--format--\>/$fmtlinks/;
+         $body .= $score_text;
+         $self->{classifier__}->scores('');
     } else {
-        $body .= sprintf(   $self->{language__}{History_MagnetBecause},                                # PROFILE BLOCK START
-                            $color, $bucket,
-                            Classifier::MailParse::splitline($self->{history__}{$mail_file}{magnet},0)
-                            );                                                                         # PROFILE BLOCK STOP
+        $body .= sprintf( $self->{language__}{History_MagnetBecause},                                # PROFILE BLOCK START
+                          $color, $bucket,
+                          Classifier::MailParse::splitline($self->{history__}{$mail_file}{magnet},0)
+                          );                                                                         # PROFILE BLOCK STOP
     }
 
     # Close button

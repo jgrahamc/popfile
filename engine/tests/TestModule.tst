@@ -54,6 +54,7 @@ test_assert_equal( $m->global_config_( 'gparameter' ), 'gvalue' );
 
 # Call the null methods
 $m->prefork();
+$m->postfork();
 $m->stop();
 $m->reaper();
 $m->forked();
