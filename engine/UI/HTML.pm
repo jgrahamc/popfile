@@ -2735,20 +2735,16 @@ sub history_page
 
             $from =~ s/</&lt;/g;
             $from =~ s/>/&gt;/g;
-            $from =~ s/&/&amp;/g;
-            
+
             $short_from =~ s/</&lt;/g;
             $short_from =~ s/>/&gt;/g;
-            $short_from =~ s/&/&amp;/g;
-            
+
             $subject =~ s/</&lt;/g;
             $subject =~ s/>/&gt;/g;
-            $subject =~ s/&/&amp;/g;
-            
+
             $short_subject =~ s/</&lt;/g;
             $short_subject =~ s/>/&gt;/g;
-            $short_subject =~ s/&/&amp;/g;
-            
+
             $body .= "<tr";
             if ( ( ( defined($self->{form}{view}) ) && ( $self->{form}{view} eq $mail_file ) ) || ( ( defined($self->{form}{file}) && ( $self->{form}{file} eq $mail_file ) ) ) || ( $highlight_message eq $mail_file ) ) {
                 $body .= " class=\"rowHighlighted\"";
