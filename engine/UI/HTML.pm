@@ -2716,7 +2716,7 @@ sub history_page
 
         # History page main form
 
-        $body .= "<form id=\"HistoryMainForm\" action=\"/history\" method=\"get\">\n";
+        $body .= "<form id=\"HistoryMainForm\" action=\"/history\" method=\"POST\">\n";
         $body .= "<input type=\"hidden\" name=\"search\" value=\"$self->{form__}{search}\" />\n";
         $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form__}{sort}\" />\n";
         $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n";
