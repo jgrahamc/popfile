@@ -108,7 +108,7 @@ sub CORE_loader_init
     $self->{forker__} = sub { $self->CORE_forker(@_) };
     $self->{reaper__} = sub { $self->CORE_reaper(@_) };
 
-    print "\nPOPFile Engine $self->{version_string__} loading\n" if $self->{debug__};
+    print "\nPOPFile Engine loading\n" if $self->{debug__};
 }
 
 #---------------------------------------------------------------------------------------------
@@ -565,6 +565,9 @@ sub CORE_start
         }
         print '} ' if $self->{debug__};
     }
+
+    print "\n\nPOPFile Engine ", $self->version(), " running\n" if $self->{debug__};
+    flush STDOUT;
 }
 
 #---------------------------------------------------------------------------------------------
@@ -574,14 +577,14 @@ sub CORE_start
 # This is POPFile. Loops across POPFile's modules and executes their service subroutines then
 # sleeps briefly
 #
+# $nowait            If 1 then don't sleep and don't loop
 #
 #---------------------------------------------------------------------------------------------
 sub CORE_service
 {
-    my ( $self ) = @_;
+    my ( $self, $nowait ) = @_;
 
-    print "\n\nPOPFile Engine $self->{version_string__} running\n" if $self->{debug__};
-    flush STDOUT;
+    $nowait = 0 if ( !defined( $nowait ) );
 
     # MAIN LOOP - Call each module's service() method to all it to
     #             handle its own requests
@@ -599,7 +602,7 @@ sub CORE_service
         # Sleep for 0.05 of a second to ensure that POPFile does not hog the machine's
         # CPU
 
-        select(undef, undef, undef, 0.05);
+        select(undef, undef, undef, 0.05) if !$nowait;
 
         # If we are on Windows then reap children here
 
@@ -610,7 +613,11 @@ sub CORE_service
                 }
             }
         }
+
+        last if $nowait;
     }
+
+    return $self->{alive__};
 }
 
 #---------------------------------------------------------------------------------------------
@@ -741,7 +748,14 @@ sub remove_module
     delete($self->{components__}{$type}{$name});
 }
 
-# SETTER
+# GETTER/SETTER
+
+sub version
+{
+    my ( $self ) = @_;
+
+    return $self->{version_string__};
+}
 
 sub debug
 {

@@ -46,13 +46,13 @@ macosx: ; @$(MAKE) -C ../macosx
 
 winexe: popfile.exe popfileb.exe
 
-TRAY_OPTIONS = --exe $@ --force --clean --dependent --xclude --icon ../windows/POPFileIcon/popfile.ico --script popfile.pl --info CompanyName="The POPFile Project" --info LegalCopyright="Copyright (c) 2003 John Graham-Cumming" --info ProductName=POPFile --info ProductVersion=$(POPFILE_VERSION).0 --info FileDescription=POPFile --info FileVersion=$(POPFILE_VERSION).0
+TRAY_OPTIONS = --exe $@ --force --clean --dependent --xclude --icon ../windows/POPFileIcon/popfile.ico --script $< --info CompanyName="The POPFile Project" --info LegalCopyright="Copyright (c) 2003 John Graham-Cumming" --info ProductName=POPFile --info ProductVersion=$(POPFILE_VERSION).0 --info FileDescription=POPFile --info FileVersion=$(POPFILE_VERSION).0
 
-popfile.exe: popfile.pl
-	perltray $(TRAY_OPTIONS)
-
-popfileb.exe: popfile.pl
+popfile.exe: popfilew.pl POPFile/Loader.pm
 	perltray --nogui $(TRAY_OPTIONS)
+
+popfileb.exe: popfilew.pl POPFile/Loader.pm
+	perltray $(TRAY_OPTIONS)
 
 # windows builds the Windows installer
 
