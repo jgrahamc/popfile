@@ -29,18 +29,38 @@
 # Conditional compilation is used to select the appropriate entries for a particular script
 # (to avoid unnecessary compiler warnings).
 #
-# The following symbols are used to indicate the required subset:
+# The following symbols are used to construct the expressions defining the required subset:
 #
 # (1) ADDUSER          defined in adduser.nsi ('Add POPFile User' wizard)
-# (2) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
-# (3) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
-# (4) TRANSLATOR       defined in translator.nsi (main installer translations test program)
-# (5) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
+# (2) INSTALLER        defined in installer.nsi (the main installer program, setup.exe)
+# (3) MSGCAPTURE       defined in msgcapture.nsi (used to capture POPFile's console messages)
+# (4) PFIDIAG          defined in test\pfidiag.nsi (helps diagnose installer-related problems)
+# (5) RUNPOPFILE       defined in runpopfile.nsi (simple front-end for popfile.exe)
+# (6) STOP_POPFILE     define in stop_popfile.nsi (the 'POPFile Silent Shutdown' utility)
+# (7) TRANSLATOR       defined in translator.nsi (main installer translations test program)
+# (8) TRANSLATOR_AUW   defined in transAUW.nsi ('Add POPFile User' translations test program)
 #--------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
   !verbose 3
 !endif
+
+#--------------------------------------------------------------------------
+# Universal POPFile Constant: the URL used to access the User Interface (UI)
+#--------------------------------------------------------------------------
+#
+# Starting with the 0.22.0 release, the system tray icon will use "localhost"
+# to access the User Interface (UI) instead of "127.0.0.1". The installer and
+# PFI utilities will follow suit by using the ${C_UI_URL} universal constant
+# when accessing the UI instead of hard-coded references to "127.0.0.1".
+#
+# Using a universal constant makes it easy to revert to "127.0.0.1" since
+# every NSIS script used to access the UI has been updated to use this
+# universal constant and the constant is only defined in this file.
+#--------------------------------------------------------------------------
+
+  !define C_UI_URL    "localhost"
+##  !define C_UI_URL    "127.0.0.1"
 
 #--------------------------------------------------------------------------
 #
@@ -201,8 +221,9 @@
       IfFileExists "${FOLDER}\*.*" 0 skip_${PFI_UNIQUE_ID}
       Delete "${FOLDER}\*.css"
       Delete "${FOLDER}\*.gif"
+      Delete "${FOLDER}\*.png"
       Delete "${FOLDER}\*.thtml"
-      RmDir  "${FOLDER}"
+      RMDir  "${FOLDER}"
 
     skip_${PFI_UNIQUE_ID}:
 
@@ -222,7 +243,7 @@
 #==============================================================================================
 
 
-!ifndef ADDUSER & MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifdef INSTALLER | PFIDIAG
     #--------------------------------------------------------------------------
     # Installer Function: GetIEVersion
     #
@@ -652,13 +673,25 @@ FunctionEnd
 #    Installer Function:   GetLocalTime
 #    Uninstaller Function: un.GetLocalTime
 #
+#    Macro:                GetMessagesPath
+#    Installer Function:   GetMessagesPath
+#    Uninstaller Function: un.GetMessagesPath
+#
 #    Macro:                GetParent
 #    Installer Function:   GetParent
 #    Uninstaller Function: un.GetParent
 #
+#    Macro:                GetSQLdbPathName
+#    Installer Function:   GetSQLdbPathName
+#    Uninstaller Function: un.GetSQLdbPathName
+#
 #    Macro:                GetTimeStamp
 #    Installer Function:   GetTimeStamp
 #    Uninstaller Function: un.GetTimeStamp
+#
+#    Macro:                RequestPFIUtilsShutdown
+#    Installer Function:   RequestPFIUtilsShutdown
+#    Uninstaller Function: un.RequestPFIUtilsShutdown
 #
 #    Macro:                ServiceCall
 #    Installer Function:   ServiceCall
@@ -761,7 +794,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Installer Function: CheckIfLocked
     #
@@ -771,7 +804,7 @@ FunctionEnd
     !insertmacro CheckIfLocked ""
 !endif
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.CheckIfLocked
     #
@@ -875,7 +908,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Installer Function: FindLockedPFE
     #
@@ -885,7 +918,7 @@ FunctionEnd
     !insertmacro FindLockedPFE ""
 !endif
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.FindLockedPFE
     #
@@ -1191,13 +1224,15 @@ FunctionEnd
     !insertmacro GetDataPath ""
 !endif
 
-#--------------------------------------------------------------------------
-# Uninstaller Function: un.GetDataPath
-#
-# This function is used during the uninstall process
-#--------------------------------------------------------------------------
+!ifdef ADDUSER
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.GetDataPath
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
 
-;!insertmacro GetDataPath "un."
+    !insertmacro GetDataPath "un."
+!endif
 
 
 #--------------------------------------------------------------------------
@@ -1468,7 +1503,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | MSGCAPTURE | TRANSLATOR_AUW
+!ifdef ADDUSER | MSGCAPTURE | PFIDIAG | TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetDateTimeStamp
     #
@@ -1556,7 +1591,7 @@ FunctionEnd
     FunctionEnd
 !macroend
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifdef ADDUSER | INSTALLER | STOP_POPFILE
     #--------------------------------------------------------------------------
     # Installer Function: GetFileSize
     #
@@ -1566,7 +1601,7 @@ FunctionEnd
     !insertmacro GetFileSize ""
 !endif
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.GetFileSize
     #
@@ -1665,7 +1700,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER | MSGCAPTURE | TRANSLATOR_AUW
+!ifdef ADDUSER | MSGCAPTURE | PFIDIAG | TRANSLATOR_AUW
     #--------------------------------------------------------------------------
     # Installer Function: GetLocalTime
     #
@@ -1683,6 +1718,166 @@ FunctionEnd
     #--------------------------------------------------------------------------
 
     !insertmacro GetLocalTime "un."
+!endif
+
+
+#--------------------------------------------------------------------------
+# Macro: GetMessagesPath
+#
+# The installation process and the uninstall process may need a function which finds the full
+# path for the folder used to store the message history if a copy of 'popfile.cfg' is found in
+# the installation folder. This macro makes maintenance easier by ensuring that both processes
+# use identical functions, with the only difference being their names.
+#
+# Note that this function is only concerned with the location of the folder used to hold the
+# temporary copies of recently classified messages; it has nothing to do with the optional
+# message archives which POPFile can maintain.
+#
+# The 'popfile.cfg' file is used to determine the full path of the folder where the message
+# files are stored. By default the message history is stored in the '$G_USERDIR\messages'
+# folder but the 'popfile.cfg' file can define a different location, using a variety of paths
+# (eg relative, absolute, local or even remote). This function returns a path which does not
+# end with a trailing slash, even if the path specified in 'popfile.cfg' ends with one.
+#
+# If 'popfile.cfg' is found in the specified folder, we use the relevant parameter (if present)
+# otherwise we assume the default location is to be used (the sub-folder called 'messages').
+#
+# NOTE:
+# The !insertmacro GetMessagesPath "" and !insertmacro GetMessagesPath "un." commands are
+# included in this file so the NSIS script can use 'Call GetMessagesPath' and
+# 'Call un.GetMessagesPath' without additional preparation.
+#
+# Inputs:
+#         (top of stack)          - the path where 'popfile.cfg' is to be found
+#
+# Outputs:
+#         (top of stack)          - the full (unambiguous) path to the message history data
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push $G_USERDIR
+#         Call un.GetMessagesPath
+#         Pop $R0
+#
+#         ($R0 will be "C:\Program Files\POPFile\messages" if this is an upgraded installation
+#          which used the default location)
+#--------------------------------------------------------------------------
+
+!macro GetMessagesPath UN
+  Function ${UN}GetMessagesPath
+
+    !define L_FILE_HANDLE   $R9
+    !define L_MSG_HISTORY   $R8
+    !define L_RESULT        $R7
+    !define L_SOURCE        $R6
+    !define L_TEMP          $R5
+    !define L_TEXTEND       $R4   ; helps ensure correct handling of lines over 1023 chars long
+
+    Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
+    Push ${L_RESULT}
+    Exch
+    Push ${L_FILE_HANDLE}
+    Push ${L_MSG_HISTORY}
+    Push ${L_TEMP}
+    Push ${L_TEXTEND}
+
+    StrCpy ${L_MSG_HISTORY} ""
+
+    IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default_locn
+
+    FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
+
+  found_eol:
+    StrCpy ${L_TEXTEND} "<eol>"
+
+  loop:
+    FileRead ${L_FILE_HANDLE} ${L_TEMP}
+    StrCmp ${L_TEMP} "" cfg_file_done
+    StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
+    StrCmp ${L_TEMP} "$\n" loop
+
+    StrCpy ${L_RESULT} ${L_TEMP} 7
+    StrCmp ${L_RESULT} "msgdir " got_old_msgdir
+    StrCpy ${L_RESULT} ${L_TEMP} 14
+    StrCmp ${L_RESULT} "GLOBAL_msgdir " got_new_msgdir
+    Goto check_eol
+
+  got_old_msgdir:
+    StrCpy ${L_MSG_HISTORY} ${L_TEMP} "" 7
+    Goto check_eol
+
+  got_new_msgdir:
+    StrCpy ${L_MSG_HISTORY} ${L_TEMP} "" 14
+
+    ; Now read file until we get to end of the current line
+    ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+  check_eol:
+    StrCpy ${L_TEXTEND} ${L_TEMP} 1 -1
+    StrCmp ${L_TEXTEND} "$\n" found_eol
+    StrCmp ${L_TEXTEND} "$\r" found_eol loop
+
+  cfg_file_done:
+    FileClose ${L_FILE_HANDLE}
+    Push ${L_MSG_HISTORY}
+    Call ${UN}TrimNewlines
+    Pop ${L_MSG_HISTORY}
+    StrCmp ${L_MSG_HISTORY} "" use_default_locn use_cfg_data
+
+  use_default_locn:
+    StrCpy ${L_RESULT} ${L_SOURCE}\messages
+    Goto got_result
+
+  use_cfg_data:
+    StrCpy ${L_TEMP} ${L_MSG_HISTORY} 1 -1
+    StrCmp ${L_TEMP} "/" strip_slash no_trailing_slash
+    StrCmp ${L_TEMP} "\" 0 no_trailing_slash
+
+  strip_slash:
+    StrCpy ${L_MSG_HISTORY} ${L_MSG_HISTORY} -1
+
+  no_trailing_slash:
+    Push ${L_SOURCE}
+    Push ${L_MSG_HISTORY}
+    Call ${UN}GetDataPath
+    Pop ${L_RESULT}
+
+  got_result:
+    Pop ${L_TEXTEND}
+    Pop ${L_TEMP}
+    Pop ${L_MSG_HISTORY}
+    Pop ${L_FILE_HANDLE}
+    Pop ${L_SOURCE}
+    Exch ${L_RESULT}  ; place full path of 'messages' folder on top of the stack
+
+    !undef L_FILE_HANDLE
+    !undef L_MSG_HISTORY
+    !undef L_RESULT
+    !undef L_SOURCE
+    !undef L_TEMP
+    !undef L_TEXTEND
+
+  FunctionEnd
+!macroend
+
+!ifdef ADDUSER
+    #--------------------------------------------------------------------------
+    # Installer Function: GetMessagesPath
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+
+    !insertmacro GetMessagesPath ""
+!endif
+
+!ifdef ADDUSER
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.GetMessagesPath
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
+
+    !insertmacro GetMessagesPath "un."
 !endif
 
 
@@ -1753,13 +1948,179 @@ FunctionEnd
     !insertmacro GetParent ""
 !endif
 
+!ifdef ADDUSER
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.GetParent
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
+
+    !insertmacro GetParent "un."
+!endif
+
+
 #--------------------------------------------------------------------------
-# Uninstaller Function: un.GetParent
+# Macro: GetSQLdbPathName
+#
+# The installation process and the uninstall process may both need a function which finds the
+# full path (including the filename) for the SQLite database file. This macro makes maintenance
+# easier by ensuring that both processes use identical functions, with the only difference being
+# their names.
+#
+# By default the database file is called 'popfile.db' and it is stored in the same folder as the
+# 'popfile.cfg' file.
+#
+# If 'popfile.cfg' specifies a SQL database other than SQLite, this function returns the result
+# "Not SQLite"
+#
+# NOTE:
+# The !insertmacro GetSQLdbPathName "" and !insertmacro GetSQLdbPathName "un." commands
+# are included in this file so the NSIS script can use 'Call GetSQLdbPathName' and
+# 'Call un.GetSQLdbPathName' without additional preparation.
+#
+# Inputs:
+#         (top of stack)          - the path where 'popfile.cfg' is to be found
+#
+# Outputs:
+#         (top of stack)          - string with the full (unambiguous) path to SQLite database
+#                                   or "Not SQLite" if the SQL database does not use SQLite
+#                                   or "" if the SQLite database is not specified or not found
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push $G_USERDIR
+#         Call un.GetSQLdbPathName
+#         Pop $R0
+#
+#         ($R0 will be "C:\Program Files\POPFile\popfile.db" if this is an upgraded version of
+#          a pre-0.21.0 installation using the default location)
+#--------------------------------------------------------------------------
+
+!macro GetSQLdbPathName UN
+  Function ${UN}GetSQLdbPathName
+
+    !define L_FILE_HANDLE   $R9
+    !define L_RESULT        $R8
+    !define L_SOURCE        $R7
+    !define L_SQL_CONNECT   $R6
+    !define L_SQL_CORPUS    $R5
+    !define L_TEMP          $R4
+    !define L_TEXTEND       $R3   ; helps ensure correct handling of lines over 1023 chars long
+
+    Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
+    Push ${L_RESULT}
+    Exch
+    Push ${L_FILE_HANDLE}
+    Push ${L_SQL_CONNECT}
+    Push ${L_SQL_CORPUS}
+    Push ${L_TEMP}
+    Push ${L_TEXTEND}
+
+    StrCpy ${L_SQL_CORPUS} ""
+
+    IfFileExists "${L_SOURCE}\popfile.cfg" 0 no_sql_set
+
+    FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
+
+  found_eol:
+    StrCpy ${L_TEXTEND} "<eol>"
+
+  loop:
+    FileRead ${L_FILE_HANDLE} ${L_TEMP}
+    StrCmp ${L_TEMP} "" cfg_file_done
+    StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
+    StrCmp ${L_TEMP} "$\n" loop
+
+    StrCpy ${L_RESULT} ${L_TEMP} 15
+    StrCmp ${L_RESULT} "bayes_database " got_sql_corpus
+    StrCpy ${L_RESULT} ${L_TEMP} 16
+    StrCmp ${L_RESULT} "bayes_dbconnect " got_sql_connect
+    Goto check_eol
+
+  got_sql_corpus:
+    StrCpy ${L_SQL_CORPUS} ${L_TEMP} "" 15
+    Goto check_eol
+
+  got_sql_connect:
+    StrCpy ${L_SQL_CONNECT} ${L_TEMP} "" 16
+
+    ; Now read file until we get to end of the current line
+    ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+  check_eol:
+    StrCpy ${L_TEXTEND} ${L_TEMP} 1 -1
+    StrCmp ${L_TEXTEND} "$\n" found_eol
+    StrCmp ${L_TEXTEND} "$\r" found_eol loop
+
+  cfg_file_done:
+    FileClose ${L_FILE_HANDLE}
+
+    ; If a SQL setting other than the default SQLite one is found, assume existing system
+    ; is using an alternative SQL database (such as MySQL) so there is no SQLite database
+
+    Push ${L_SQL_CONNECT}
+    Call ${UN}TrimNewlines
+    Pop ${L_SQL_CONNECT}
+    StrCmp ${L_SQL_CONNECT} "" no_sql_set
+    StrCpy ${L_SQL_CONNECT} ${L_SQL_CONNECT} 11
+    StrCmp ${L_SQL_CONNECT} "dbi:SQLite:" 0 not_sqlite
+
+    Push ${L_SQL_CORPUS}
+    Call ${UN}TrimNewlines
+    Pop ${L_SQL_CORPUS}
+    StrCmp ${L_SQL_CORPUS} "" no_sql_set use_cfg_data
+
+  not_sqlite:
+    StrCpy ${L_RESULT} "Not SQLite"
+    Goto got_result
+
+  no_sql_set:
+    StrCpy ${L_RESULT} ""
+    Goto got_result
+
+  use_cfg_data:
+    Push ${L_SOURCE}
+    Push ${L_SQL_CORPUS}
+    Call ${UN}GetDataPath
+    Pop ${L_RESULT}
+
+  got_result:
+    Pop ${L_TEXTEND}
+    Pop ${L_TEMP}
+    Pop ${L_SQL_CORPUS}
+    Pop ${L_SQL_CONNECT}
+    Pop ${L_FILE_HANDLE}
+    Pop ${L_SOURCE}
+    Exch ${L_RESULT}
+
+    !undef L_FILE_HANDLE
+    !undef L_RESULT
+    !undef L_SOURCE
+    !undef L_SQL_CONNECT
+    !undef L_SQL_CORPUS
+    !undef L_TEMP
+    !undef L_TEXTEND
+
+  FunctionEnd
+!macroend
+
+!ifdef ADDUSER
+    #--------------------------------------------------------------------------
+    # Installer Function: GetSQLdbPathName
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+
+    !insertmacro GetSQLdbPathName ""
+!endif
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetSQLdbPathName
 #
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-;!insertmacro GetParent "un."
+;!insertmacro GetSQLdbPathName "un."
 
 
 #--------------------------------------------------------------------------
@@ -1850,6 +2211,152 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 ;!insertmacro GetTimeStamp "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: RequestPFIUtilsShutdown
+#
+# The installation process and the uninstall process may both need a function which checks if
+# any of the POPFile Installer (PFI) utilities is in use and asks the user to shut them down.
+# This macro makes maintenance easier by ensuring that both processes use identical functions,
+# with the only difference being their names.
+#
+# NOTE:
+# The !insertmacro RequestPFIUtilsShutdown "" and !insertmacro RequestPFIUtilsShutdown "un."
+# commands are included in this file so the NSIS script can use 'Call RequestPFIUtilsShutdown'
+# and 'Call un.RequestPFIUtilsShutdown' without additional preparation.
+#
+# Inputs:
+#         (top of stack)   - the path where the PFI Utilities can be found
+#
+# Outputs:
+#         (none)
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push "C:\Program Files\POPFile"
+#         Call RequestPFIUtilsShutdown
+#
+#--------------------------------------------------------------------------
+
+!macro RequestPFIUtilsShutdown UN
+  Function ${UN}RequestPFIUtilsShutdown
+    !define L_PATH          $R9    ; full path to the PFI utilities which are to be checked
+    !define L_RESULT        $R8    ; either the full path to a locked file or an empty string
+
+    ;-----------------------------------------------------------
+    ; If the user clicks 'OK' too soon after shutting down the utility, an Abort/Retry/Ignore
+    ; message appears when the installer tries to overwrite the utility's EXE file)
+
+    ; Delay (in milliseconds) used to give the PFI utility time to shut down
+
+    !ifndef C_PFI_UTIL_SHUTDOWN_DELAY
+      !define C_PFI_UTIL_SHUTDOWN_DELAY    1000
+    !endif
+    ;-----------------------------------------------------------
+
+    Exch ${L_PATH}
+    Push ${L_RESULT}
+
+    DetailPrint "Checking '${L_PATH}\pfimsgcapture.exe' ..."
+    Push "${L_PATH}\pfimsgcapture.exe"
+    Call ${UN}CheckIfLocked
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "" pfi_util_a
+    StrCpy $G_PLS_FIELD_1 "POPFile Message Capture Utility"
+    DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
+    MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
+        $\r$\n$\r$\n\
+        $(PFI_LANG_MBMANSHUT_2)\
+        $\r$\n$\r$\n\
+        $(PFI_LANG_MBMANSHUT_3)"
+
+    ; Assume user has managed to shutdown the POPFile Message Capture Utility (runpopfile)
+
+    Sleep ${C_PFI_UTIL_SHUTDOWN_DELAY}
+
+  pfi_util_a:
+    DetailPrint "Checking '${L_PATH}\msgcapture.exe' ..."
+    Push "${L_PATH}\msgcapture.exe"
+    Call ${UN}CheckIfLocked
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "" pfi_util_b
+    StrCpy $G_PLS_FIELD_1 "POPFile Message Capture Utility"
+    DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
+    MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
+        $\r$\n$\r$\n\
+        $(PFI_LANG_MBMANSHUT_2)\
+        $\r$\n$\r$\n\
+        $(PFI_LANG_MBMANSHUT_3)"
+
+    ; Assume user has managed to shutdown the POPFile Message Capture Utility (standard)
+
+    Sleep ${C_PFI_UTIL_SHUTDOWN_DELAY}
+
+  pfi_util_b:
+    DetailPrint "Checking '${L_PATH}\stop_pf.exe' ..."
+    Push "${L_PATH}\stop_pf.exe"
+    Call ${UN}CheckIfLocked
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "" pfi_util_c
+    StrCpy $G_PLS_FIELD_1 "POPFile Silent Shutdown Utility"
+    DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
+    MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
+        $\r$\n$\r$\n\
+        $(PFI_LANG_MBMANSHUT_2)\
+        $\r$\n$\r$\n\
+        $(PFI_LANG_MBMANSHUT_3)"
+
+    ; Assume user has managed to shutdown the POPFile Message Capture Utility (standard)
+
+    Sleep ${C_PFI_UTIL_SHUTDOWN_DELAY}
+
+  pfi_util_c:
+    DetailPrint "Checking '${L_PATH}\pfidiag.exe' ..."
+    Push "${L_PATH}\pfidiag.exe"
+    Call ${UN}CheckIfLocked
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "" exit
+    StrCpy $G_PLS_FIELD_1 "PFI Diagnostic Utility"
+    DetailPrint "Unable to shutdown $G_PLS_FIELD_1 automatically - manual intervention requested"
+    MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
+        $\r$\n$\r$\n\
+        $(PFI_LANG_MBMANSHUT_2)\
+        $\r$\n$\r$\n\
+        $(PFI_LANG_MBMANSHUT_3)"
+
+    ; Assume user has managed to shutdown the POPFile Message Capture Utility (standard)
+
+    Sleep ${C_PFI_UTIL_SHUTDOWN_DELAY}
+
+   exit:
+    Pop ${L_RESULT}
+    Pop ${L_PATH}
+
+    !undef L_PATH
+    !undef L_RESULT
+  FunctionEnd
+!macroend
+
+!ifdef INSTALLER
+    #--------------------------------------------------------------------------
+    # Installer Function: RequestPFIUtilsShutdown
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+
+    !insertmacro RequestPFIUtilsShutdown ""
+!endif
+
+!ifdef INSTALLER
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.RequestPFIUtilsShutdown
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
+
+    !insertmacro RequestPFIUtilsShutdown "un."
+!endif
 
 
 #--------------------------------------------------------------------------
@@ -2003,22 +2510,22 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Installer Function: ServiceCall
-  #
-  # This function is used during the installation process
-  #--------------------------------------------------------------------------
+!ifdef ADDUSER | INSTALLER
+    #--------------------------------------------------------------------------
+    # Installer Function: ServiceCall
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
 
-  !insertmacro ServiceCall ""
+    !insertmacro ServiceCall ""
 
-  #--------------------------------------------------------------------------
-  # Uninstaller Function: un.ServiceCall
-  #
-  # This function is used during the uninstall process
-  #--------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.ServiceCall
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
 
-  !insertmacro ServiceCall "un."
+    !insertmacro ServiceCall "un."
 !endif
 
 
@@ -2078,22 +2585,22 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
-  #--------------------------------------------------------------------------
-  # Installer Function: ServiceRunning
-  #
-  # This function is used during the installation process
-  #--------------------------------------------------------------------------
+!ifdef ADDUSER | INSTALLER
+    #--------------------------------------------------------------------------
+    # Installer Function: ServiceRunning
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
 
-  !insertmacro ServiceRunning ""
+    !insertmacro ServiceRunning ""
 
-  #--------------------------------------------------------------------------
-  # Uninstaller Function: un.ServiceRunning
-  #
-  # This function is used during the uninstall process
-  #--------------------------------------------------------------------------
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.ServiceRunning
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
 
-  !insertmacro ServiceRunning "un."
+    !insertmacro ServiceRunning "un."
 !endif
 
 
@@ -2239,7 +2746,7 @@ FunctionEnd
     Goto exit
 
   port_ok:
-    NSISdl::download_quiet ${C_SVU_DLTIMEOUT} http://127.0.0.1:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_1.htm"
+    NSISdl::download_quiet ${C_SVU_DLTIMEOUT} http://${C_UI_URL}:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_1.htm"
     Pop ${L_RESULT}
     StrCmp ${L_RESULT} "success" try_again
     StrCpy ${L_RESULT} "failure"
@@ -2247,7 +2754,7 @@ FunctionEnd
 
   try_again:
     Sleep ${C_SVU_DLGAP}
-    NSISdl::download_quiet ${C_SVU_DLTIMEOUT} http://127.0.0.1:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_2.htm"
+    NSISdl::download_quiet ${C_SVU_DLTIMEOUT} http://${C_UI_URL}:${L_UIPORT}/shutdown "$PLUGINSDIR\shutdown_2.htm"
     Pop ${L_RESULT}
     StrCmp ${L_RESULT} "success" 0 shutdown_ok
     Push "$PLUGINSDIR\shutdown_2.htm"
@@ -2273,7 +2780,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Installer Function: ShutdownViaUI
     #
@@ -2360,13 +2867,15 @@ FunctionEnd
     !insertmacro StrBackSlash ""
 !endif
 
-#--------------------------------------------------------------------------
-# Uninstaller Function: un.StrBackSlash
-#
-# This function is used during the uninstall process
-#--------------------------------------------------------------------------
+!ifdef ADDUSER
+    #--------------------------------------------------------------------------
+    # Uninstaller Function: un.StrBackSlash
+    #
+    # This function is used during the uninstall process
+    #--------------------------------------------------------------------------
 
-;!insertmacro StrBackSlash "un."
+    !insertmacro StrBackSlash "un."
+!endif
 
 
 #--------------------------------------------------------------------------
@@ -2445,7 +2954,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef RUNPOPFILE & TRANSLATOR
+!ifndef PFIDIAG & RUNPOPFILE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: StrCheckDecimal
     #
@@ -2455,7 +2964,7 @@ FunctionEnd
     !insertmacro StrCheckDecimal ""
 !endif
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.StrCheckDecimal
     #
@@ -2528,7 +3037,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef MSGCAPTURE & TRANSLATOR
+!ifndef MSGCAPTURE & STOP_POPFILE & TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: StrStr
     #
@@ -2538,7 +3047,7 @@ FunctionEnd
     !insertmacro StrStr ""
 !endif
 
-!ifndef ADDUSER & MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.StrStr
     #
@@ -2599,7 +3108,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR_AUW
+!ifdef ADDUSER | INSTALLER | TRANSLATOR
     #--------------------------------------------------------------------------
     # Installer Function: TrimNewlines
     #
@@ -2609,7 +3118,7 @@ FunctionEnd
     !insertmacro TrimNewlines ""
 !endif
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.TrimNewlines
     #
@@ -2698,7 +3207,7 @@ FunctionEnd
   FunctionEnd
 !macroend
 
-!ifndef MSGCAPTURE & RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+!ifdef ADDUSER | INSTALLER
     #--------------------------------------------------------------------------
     # Installer Function: WaitUntilUnlocked
     #
