@@ -1,4 +1,4 @@
-#000000 8
+#000000 7
 #000080 3
 #0000ff 1
 #00ffff 10
@@ -103,7 +103,8 @@ html:backcolor#000000 4
 html:backcolor#000080 2
 html:backcolor#FFFFFF 2
 html:colordistance0 13
-html:fontcolor#000000 4
+html:emptypair 1
+html:fontcolor#000000 3
 html:fontcolor#000080 1
 html:fontcolor#0000FF 1
 html:fontcolor#00FFFF 10
@@ -113,7 +114,7 @@ html:fontcolor#FF0000 2
 html:fontcolor#FFFF99 2
 html:fontcolor#FFFFFF 15
 html:fontcolor#ffffff 2
-html:fontsize1 2
+html:fontsize1 1
 html:fontsize2 2
 html:fontsize3 2
 html:fontsize4 10

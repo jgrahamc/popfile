@@ -170,15 +170,17 @@ for my $parse_test (@parse_tests) {
 
     open WORDS, "<$words";
     while ( <WORDS> ) {
-        if ( /(.+) (\d+)/ ) {
-            test_assert_equal( $cl->{words__}{$1}, $2, "$words $1 $2" );
-            delete $cl->{words__}{$1};
+        if ( /^(.+) (\d+)/ ) {
+            my ( $word, $value ) = ( $1, $2 );
+            test_assert_equal( $cl->{words__}{$word}, $value, "$words $word $value" );
+            delete $cl->{words__}{$word};
         }
     }
     close WORDS;
 
     foreach my $missed (keys %{$cl->{words__}}) {
         test_assert( 0, "$missed $cl->{words__}{$missed} missing in $words" );
+        delete $cl->{words__}{$missed};
     }
 }
 

@@ -387,15 +387,15 @@ $sp->stop();
 $mq->service();
 my @messages = $r->read();
 test_assert_equal( $#messages, 2 );
-test_assert_equal( $messages[0][0], 'LOGIN' );
-test_assert_equal( $messages[0][1], 'username' );
+test_assert_equal( $messages[0][0], 'CLASS' );
+test_assert_equal( $messages[0][1], 'classification' );
 test_assert_equal( $messages[0][2], '' );
-test_assert_equal( $messages[1][0], 'NEWFL' );
-test_assert_equal( $messages[1][1], 'newfile' );
+test_assert_equal( $messages[1][0], 'LOGIN' );
+test_assert_equal( $messages[1][1], 'username' );
 test_assert_equal( $messages[1][2], '' );
-test_assert_equal( $messages[2][0], 'CLASS' );
-test_assert_equal( $messages[2][1], 'classification' );
-test_assert_equal( $messages[3][2], '' );
+test_assert_equal( $messages[2][0], 'NEWFL' );
+test_assert_equal( $messages[2][1], 'newfile' );
+test_assert_equal( $messages[2][2], '' );
 
 # Make sure that stop will close off the child pipes
 

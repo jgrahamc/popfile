@@ -619,7 +619,7 @@ close TEMP;
 
 unlink( 'temp.tmp' );
 open MAIL, "<messages/one.msg";
-$b->echo_to_dot_( \*MAIL, undef, 'temp.tmp' );
+$b->echo_to_dot_( \*MAIL, undef, '>temp.tmp' );
 test_assert( eof( MAIL ) );
 close MAIL;
 
@@ -643,7 +643,7 @@ close TEMP;
 unlink( 'temp.tmp' );
 open TEMP2, ">temp2.tmp";
 open MAIL, "<messages/one.msg";
-$b->echo_to_dot_( \*MAIL, \*TEMP2, 'temp.tmp' );
+$b->echo_to_dot_( \*MAIL, \*TEMP2, '>temp.tmp' );
 test_assert( eof( MAIL ) );
 close MAIL;
 close TEMP2;
@@ -670,7 +670,7 @@ close TEMP2;
 
 unlink( 'temp.tmp' );
 open MAIL, "<messages/one.msg";
-$b->echo_to_dot_( \*MAIL, undef, 'temp.tmp', "before\n" );
+$b->echo_to_dot_( \*MAIL, undef, '>temp.tmp', "before\n" );
 test_assert( eof( MAIL ) );
 close MAIL;
 

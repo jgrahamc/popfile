@@ -147,11 +147,11 @@ sub add_stopword
 {
     my ( $self, $stopword ) = @_;
 
-    $stopword = $self->mangle( $stopword, 0, 1 );
-
     if ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) {
         return 0;
     }
+
+    $stopword = $self->mangle( $stopword, 0, 1 );
 
     if ( $stopword ne '' ) {
         $self->{stop__}{$stopword} = 1;
@@ -167,11 +167,11 @@ sub remove_stopword
 {
     my ( $self, $stopword ) = @_;
 
-    $stopword = $self->mangle( $stopword, 0, 1 );
-
     if ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) {
         return 0;
     }
+
+    $stopword = $self->mangle( $stopword, 0, 1 );
 
     if ( $stopword ne '' ) {
         delete $self->{stop__}{$stopword};
