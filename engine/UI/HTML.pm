@@ -1907,13 +1907,15 @@ sub get_history_navigator
     return $body;
 }
 
+# ---------------------------------------------------------------------------------------------
+#
 # history_write_class - write the class file for a message.
 #
 # $filename     The name of the message to write the class for
 # $reclassified Boolean, true if the message has been reclassified
 # $bucket       the name of the bucket the message is in
 # $usedtobe     the name of the bucket the messages used to be in
-# $magnet:      the magnet, if any, used to reclassify the message
+# $magnet       the magnet, if any, used to reclassify the message
 #
 # ---------------------------------------------------------------------------------------------
 sub history_write_class {
@@ -1936,7 +1938,6 @@ sub history_write_class {
         print CLASS "$bucket$eol";
     }
 }
-
 
 # ---------------------------------------------------------------------------------------------
 #

@@ -252,25 +252,6 @@ sub add_line
                 update_word($self, "$1", $encoded, '', '', $prefix);
             }
 
-            # One common spam trick is to use accented characters incorrectly such as fàntástïc
-            # which to an English speaker reads as fantastic.  To work around this we remove all
-            # accents from characters, this is the accent equivalent of lower casing all the
-            # letters
-
-            $line =~ s/[\xaaàáâäãå]/a/g;
-            $line =~ s/[éèêë]/e/g;
-            $line =~ s/[ìíîï]/i/g;
-            $line =~ s/[\xbağòóôõö]/o/g;
-            $line =~ s/[ùúûüµ]/u/g;
-            $line =~ s/[ıÿ]/y/g;
-            $line =~ s/ç/c/g;
-            $line =~ s/\x9e/z/g;
-            $line =~ s/\x9a/s/g;
-            $line =~ s/\x9c/oe/g;
-            $line =~ s/\xe6/ae/g;
-            $line =~ s/\x83/f/g;
-            $line =~ s/ñ/n/g;    
-
             # Deal with runs of alternating spaces and letters
             # TODO: find a way to make this (and other similar stuff) highlight
             #       without using the encoded content printer or modifying $self->{ut}
