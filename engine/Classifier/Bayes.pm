@@ -741,7 +741,7 @@ sub classify_and_modify
     $classification = ($class ne '')?$class:$self->classify_file($temp_file);
 
     # Add the Subject line modification or the original line back again
-    if ( $self->{configuration}->{configuration}{subject} && ( $msg_subject ne '' ) ) {
+    if ( $self->{configuration}->{configuration}{subject} ) {
         # Don't add the classification unless it is not present
         if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $self->{parameters}{$classification}{subject} == 1 ) )  {
             $msg_head_before .= "Subject: [$classification]$msg_subject$eol";
