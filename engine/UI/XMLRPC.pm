@@ -33,7 +33,7 @@ require XMLRPC::Transport::HTTP;
 sub new
 {
     my $type = shift;
-    my $self = UI::HTTP->new();
+    my $self = POPFile::Module->new();
 
     bless $self, $type;;
 
