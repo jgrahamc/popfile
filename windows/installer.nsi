@@ -58,7 +58,7 @@
 # (d) the Release Candidate number  (supplied as /DC_POPFILE_RC=RCx)
 #
 # Note that if a production build is required (i.e. not a Release Candidate), /DC_POPFILE_RC
-# can be used instead of /DC_POPFILE_RC=RCx
+# or /DC_POPFILE_RC= or /DC_POPFILE_RC="" can be used instead of /DC_POPFILE_RC=RCx
 #
 # For example, to build the installer for POPFile 0.20.1 the following command-line could be
 # used:
