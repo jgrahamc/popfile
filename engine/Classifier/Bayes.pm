@@ -713,7 +713,6 @@ sub db_update_cache__
 
     $self->{db_get_buckets__}->execute( $userid );
     while ( my $row = $self->{db_get_buckets__}->fetchrow_arrayref ) {
-        $self->log_( "Read bucket $row->[0] with id $row->[1]" );
         $self->{db_bucketid__}{$userid}{$row->[0]}{id} = $row->[1];
         $self->{db_bucketid__}{$userid}{$row->[0]}{pseudo} = $row->[2];
         $self->{db_bucketcount__}{$userid}{$row->[0]} = 0;

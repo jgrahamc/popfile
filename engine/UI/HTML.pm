@@ -534,7 +534,7 @@ sub url_handler__
     }
 
     if ( $url =~ /(popfile.*\.log)/ ) {
-        $self->http_file_( $client, $self->get_user_path_( $self->module_config_( 'logger', 'logdir' ) . $1 ), 'text/plain' );
+        $self->http_file_( $client, $self->logger()->debug_filename(), 'text/plain' );
         return 1;
     }
 
@@ -1085,7 +1085,7 @@ sub configuration_page
     $body .= "</form>\n";
 
     if ( $self->global_config_( 'debug' ) & 1 ) {
-        $body .= "<p><a href=\"" . $self->logger()->debug_filename() . "?session=$self->{session_key__}\">$self->{language__}{Configuration_CurrentLogFile}</a>";
+        $body .= "<p><a href=\"popfile_current_log.log?session=$self->{session_key__}\">$self->{language__}{Configuration_CurrentLogFile}</a>";
     }
 
     if ( $self->global_config_( 'debug' ) != 0 ) {
@@ -4022,7 +4022,7 @@ sub print_form_fields_
             }
         unless ( !defined($self->{form_}{$field}) || ( $self->{form_}{$field} eq '' ) ) {
             $formstring .= "$amp" if ($count > 0);
-            $formstring .= "$field=$self->{form_}{$field}";
+            $formstring .= "$field=". $self->url_encode_($self->{form_}{$field});  
             $count++;
         }
     }

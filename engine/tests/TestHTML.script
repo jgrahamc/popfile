@@ -65,10 +65,6 @@ GET /
 
 MATCH <title>POPFile Control Center</title>
 MATCH <html lang="en">
-MATCH <meta http-equiv="Pragma" content="no-cache">
-MATCH <meta http-equiv="Expires" content="0">
-MATCH <meta http-equiv="Cache-Control" content="no-cache">
-MATCH <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 MATCH <link rel="stylesheet" type="text/css" href="skins/SimplyBlue.css" title="SimplyBlue">
 MATCH <link rel="icon" href="favicon.ico">
 
@@ -430,8 +426,8 @@ NOTMATCH Testing Refresh
 
 MATCH test for various HTML parts
 MATCH Enlarge your package Doctor ApprovedNHOB
-SETINPUT remove_7 on
-SETINPUT remove_8 on
+SETINPUT remove_9 on
+SETINPUT remove_10 on
 CLICK deletemessage
 NOTMATCH test for various HTML parts
 NOTMATCH Enlarge your package Doctor ApprovedNHOB

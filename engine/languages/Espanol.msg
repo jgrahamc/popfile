@@ -99,6 +99,9 @@ Configuration_SMTPPort                  Puerto de escucha SMTP
 Configuration_SMTPUpdate                Puerto SMTP actualizado a %s; este cambio será efectivo en el siguiente arranque de POPFile
 Configuration_NNTPPort                  Puerto de escucha NNTP
 Configuration_NNTPUpdate                Puerto NNTP actualizado a %s; este cambio será efectivo en el siguiente arranque de POPFile
+Configuration_POPFork                   Permitir conexiones concurrentes POP3
+Configuration_SMTPFork                  Permitir conexiones concurrentes SMTP
+Configuration_NNTPFork                  Permitir conexiones concurrentes NNTP
 Configuration_POP3Separator             POP3 host:puerto:usuario caracter separador
 Configuration_NNTPSeparator             NNTP host:puerto:usuario caracter separador
 Configuration_POP3SepUpdate             Separador POP3 actualizado a %s
@@ -120,9 +123,9 @@ Configuration_TCPTimeout                Temporización de la conexión TCP
 Configuration_TCPTimeoutSecs            Temporización en segundos
 Configuration_TCPTimeoutUpdate          Temporización de la conexión TCP establecida en %s
 Configuration_ClassificationInsertion   Inserción de texto en E-Mail
-Configuration_SubjectLine               Modificar la línea de asunto
-Configuration_XTCInsertion              Insertar Clasificación-X-Text
-Configuration_XPLInsertion              Insertar enlace-X-POPFile
+Configuration_SubjectLine               Modificar la línea de<br>asunto
+Configuration_XTCInsertion              Insertar la<br>cabecera X-Text-Classification
+Configuration_XPLInsertion              Insertar la <br>cabecera X-POPFile-Link
 Configuration_Logging                   Registro
 Configuration_None                      Nada
 Configuration_ToScreen                  A Pantalla
@@ -143,6 +146,10 @@ Advanced_StopWords                      Palabras Ignoradas
 Advanced_Message1                       POPFile ignora las siguientes palabras de uso frecuente:
 Advanced_AddWord                        Añadir palabra
 Advanced_RemoveWord                     Quitar palabra
+Advanced_AllParameters                  Todos los Parametros de POPFile
+Advanced_Parameter                      Parametro
+Advanced_Value                          Valor
+Advanced_Warning                        Esta es la lista completa de los parametros de POPFile.  Solo para usuarios avanzados: puedes cambiar cualquiera y pinchar en Actualizar; no hay comprobacion para validarlos.
 
 History_Filter                          &nbsp;(mostrando sólo la categoría <font color="%s">%s</font>)
 History_FilterBy                        Filtrar Por
@@ -181,7 +188,7 @@ Security_ExplainStats                   Con esto activado POPFile envia una vez 
 Security_ExplainUpdate                  Con esto activado POPFile envia una vez al día los tres valores siguientes a un script en www.usethesource.com: <b>ma</b> (el nº de versión de tu POPFile), <b>mi</b> (el nº de revisión de tu POPFile) y <b>bn</b> (el nº de compilación de tu POPFile).  Si existe una nueva versión, POPFile recibe una respuesta en forma de gráfico que se muestra en la parte superior de la página.  Mi servidor web mantiene sus archivos log unos 5 días y luego se borran; Yo no guardo ninguna relación entre las comprobaciones de actualización y sus direcciones IP individuales.
 Security_PasswordTitle                  Contraseña del Interface de Usuario
 Security_Password                       Contraseña
-Security_PasswordUpdate                 Contraseña actualizada a %s
+Security_PasswordUpdate                 Contraseña actualizada
 Security_AUTHTitle                      Autentificación por Contraseña Segura/AUTH
 Security_SecureServer                   Servidor seguro
 Security_SecureServerUpdate             Actualizado el servidor seguro a %s; este cambio será efectivo en el siguiente reinicio de POPFile
@@ -219,13 +226,13 @@ Bucket_Error3                           Categoría %s creada
 Bucket_Error4                           Ponga por favor una palabra no-vacía
 Bucket_Error5                           Categoría %s renombrada a %s
 Bucket_Error6                           Categoría %s borrada
-Bucket_Title                            Sumario
-Bucket_BucketName                       Nombre de Categoría
+Bucket_Title                            Configuracion de la Categoria
+Bucket_BucketName                       Nombre de<br>Categoría
 Bucket_WordCount                        Contador de Palabras
 Bucket_WordCounts                       Nº de palabras
-Bucket_UniqueWords                      Palabras únicas
-Bucket_SubjectModification              Modificación del asunto
-Bucket_ChangeColor                      Cambiar Color
+Bucket_UniqueWords                      Palabras<br>únicas
+Bucket_SubjectModification              Modificación del<br>asunto
+Bucket_ChangeColor                      Cambiar<br>Color
 Bucket_NotEnoughData                    No hay bastantes datos
 Bucket_ClassificationAccuracy           Exactitud de la Clasificación
 Bucket_EmailsClassified                 correos clasificados
@@ -250,7 +257,7 @@ Bucket_LookupMostLikely                 <b>%s</b> en su mayoría aparece en <font
 Bucket_DoesNotAppear                    <p><b>%s</b> no aparece en ninguna de las categorías
 Bucket_DisabledGlobally                 Desactivado globalmente
 Bucket_To                               a
-Bucket_Quarantine                       Cuarentena
+Bucket_Quarantine                       Mensaje en<br>Cuarentena
 
 SingleBucket_Title                      Detalle de %s
 SingleBucket_WordCount                  Categoría nº de palabras
@@ -265,6 +272,17 @@ Session_Title                           Terminada la Sesión POPFile
 Session_Error                           Ha expirado tu sesión en POPFile, y puede ser debido a arrancar y parar POPFile dejando tu navegador abierto.  Por favor, pincha uno de los enlaces de arriba para seguir con POPFile.
 
 View_Title                              Vista de un solo mensaje
+View_ShowFrequencies                    Mostrar la frecuencia de las palabras
+View_ShowProbabilities                  Mostrar las probabilidades de las palabras
+View_ShowScores                         Mostrar las puntuaciones de las palabras
+View_WordMatrix                         Matriz de palabras
+View_WordProbabilities                  mostrando probabilidades de la palabra
+View_WordFrequencies                    mostrando frecuencia de la palabra
+View_WordScores                         mostrando puntuaciones de la palabra
+
+Windows_TrayIcon                        Mostrar el icono de POPFile en la bandeja del sistema?
+Windows_Console                         Hacer funcionar POPFile en una ventana de comandos?
+Windows_NextTime                        <p><font color="red">Este cambio sera efectivo la proxima vez que arranques POPFile</font>
 
 Header_MenuSummary                      Esta tabla es el menú de navegación que le permite acceder a cada una de las páginas del centro de control.
 History_MainTableSummary                Esta tabla muestra el remitente y asunto de los mensajes recibidos recientemente y permite que sean revisados y reclasificados.  Pinchando en la línea de asunto se mostrará el texto completo del mensaje, junto con información acerca del porqué se clasificó así.  La columna 'Debería ser' le permite especificar a qué categoría pertenece el mensaje, o deshacer el cambio.  La columna 'Borrar' le permite borrar mensajes específicos del historial si usted ya no los necesita.
