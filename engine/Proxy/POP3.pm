@@ -426,11 +426,15 @@ sub child
 
         # The CAPA command
         if ( $command =~ /CAPA/i ) {
-            if ( $mail = verify_connected( $self, $mail, $client, $self->{configuration}->{configuration}{server}, $self->{configuration}->{configuration}{sport} ) )  {
-                echo_to_dot( $self, $mail, $client ) if ( echo_response( $self, $mail, $client, "CAPA" ) );
-            } else {
+            if ( $self->{configuration}->{configuration}{server} ne '' )  {
+				if ( $mail = verify_connected( $self, $mail, $client, $self->{configuration}->{configuration}{server}, $self->{configuration}->{configuration}{sport} ) )  {
+					echo_to_dot( $self, $mail, $client ) if ( echo_response( $self, $mail, $client, "CAPA" ) );
+				} else {
+					last;
+				}
+			} else {
                 tee( $self,  $client, "-ERR No secure server specified$eol" );
-            }
+			}
 
             flush_extra( $self, $mail, $client, 0 );
             next;
