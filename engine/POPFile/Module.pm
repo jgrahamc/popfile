@@ -480,8 +480,6 @@ sub slurp_
     while ( ( $self->{slurp_buffer__}{"$handle"} !~ /[\012\015]/ ) &&
             ( sysread( $handle, $c, 160 ) > 0 ) ) {
         $self->{slurp_buffer__}{"$handle"} .= $c;
-
-        $self->log_( "slurp_ buffer for $handle now contains [" . $self->{slurp_buffer__}{"$handle"} . "]" );
     }
 
     # The acceptable line endings are CR, CRLF or LF.  So we look for
@@ -490,21 +488,18 @@ sub slurp_
     # Look for LF
 
     if ( $self->{slurp_buffer__}{"$handle"} =~ s/^([^\015\012]*\012)// ) {
-        $self->log_( "slurp_ returning [$1] because LF found" );
         return $1;
     }	
 
     # Look for CRLF
 
     if ( $self->{slurp_buffer__}{"$handle"} =~ s/^([^\015\012]*\015\012)// ) {
-        $self->log_( "slurp_ returning [$1] because CRLF found" );
         return $1;
     }
 
     # Look for CR
 
     if ( $self->{slurp_buffer__}{"$handle"} =~ s/^([^\015\012]*\015)// ) {
-        $self->log_( "slurp_ returning [$1] because CR found" );
         return $1;
     }
 
@@ -519,7 +514,6 @@ sub slurp_
         return undef;
     } else {
         return $remaining;
-        $self->log_( "slurp_ returning [$remaining] at end of data" );
     }
 }
 
