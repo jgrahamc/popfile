@@ -318,12 +318,16 @@ sub parse_stream
                 }
             }
 
+            # Remove HTML comments
+            
+            $line =~ s/<!--.*?-->//g;
+
             # Remove HTML tags completely
 
             if ( $content_type =~ /html/ ) 
             {
-                $line =~ s/<[\/!]?[A-Za-z-]+[^>]*?>/ /g;
-                $line =~ s/<[\/!]?[A-Za-z-]+[^>]*?$/ /;
+                $line =~ s/<[\/]?[A-Za-z]+[^>]*?>/ /g;
+                $line =~ s/<[\/]?[A-Za-z]+[^>]*?$/ /;
                 $line =~ s/^[^>]*?>/ /;
             }
 
