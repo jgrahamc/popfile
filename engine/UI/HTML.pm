@@ -337,8 +337,8 @@ sub url_handler__
 				  
 	my $filename = $1;
 
-	my $root = 'skins/' . $self->user_config_( 1, 'skin' ) . '/';
-	my $template_root = $root;
+	my $template_root = 'skins/' . $self->user_config_( 1, 'skin' ) . '/';
+
 	my $file = $self->get_root_path_( "$template_root$filename" );
 	if ( !( -e $file ) ) {
 		$template_root = 'skins/default/';
@@ -359,7 +359,7 @@ sub url_handler__
 		$mime = $mime_extensions{$1} if ( defined( $1 ) )
 	}
 	
-	$self->http_file_( $client, $self->get_root_path_( $file ), $mime );
+	$self->http_file_( $client, $file, $mime );
         return 1;	
     }
     
