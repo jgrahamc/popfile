@@ -2527,7 +2527,14 @@ sub history_page
     # Handle the jump to page functionality
 
     if ( defined( $self->{form_}{gopage} ) ) {
-        return $self->http_redirect_( $client, "/history?start_message=" . ( ( $self->{form_}{jumptopage} - 1 ) * $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' ) ) . '&' . $self->print_form_fields_(1,0,('filter','search','sort','session','negate') ), $session );
+        my $destination = ( $self->{form_}{jumptopage} - 1 ) * 
+                     $self->user_config_( $self->{sessions__}{$session}{user}, 'page_size' );
+        my $maximum = $self->history_()->get_query_size( $self->{q__} );
+        
+        if ( $destination <= $maximum && $destination > 0 ) {
+            return $self->http_redirect_( $client, "/history?start_message=$destination&" 
+                 . $self->print_form_fields_(1,0,('filter','search','sort','session','negate') ), $session );
+        }
     }
 
     $templ = $self->handle_configuration_bar__( $client, $templ, $template,
