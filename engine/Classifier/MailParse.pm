@@ -1108,7 +1108,7 @@ sub parse_header
 
     print "Header ($header) ($argument)\n" if ($self->{debug});
 
-    if ($self->{color__} {
+    if ($self->{color__}) {
         # Remove over-reading
         $self->{ut__} = '';  
         
