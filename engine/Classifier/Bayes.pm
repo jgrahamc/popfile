@@ -392,10 +392,29 @@ sub load_bucket
     if ( open MAGNETS, "<$self->{corpus}/$bucket/magnets" ) {
         while ( <MAGNETS> )  {
             s/[\r\n]//g;
+            
+            # Because of a bug in v0.17.9 and earlier of POPFile the text of
+            # some magnets was getting mangled by certain characters having
+            # a \ prepended.  Code here removes the \ in these cases to make
+            # an upgrade smooth.
+            
             if ( /^([^ ]+) (.+)$/ )  {
-                $self->{magnets}{$bucket}{$1}{$2} = 1;
+            	my $type  = $1;
+            	my $value = $2;
+            	
+            	$value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
+                $self->{magnets}{$bucket}{$type}{$value} = 1;
             } else {
-                $self->{magnets}{$bucket}{from}{$1} = 1 if ( /^(.+)$/ );
+            
+            	# This branch is used to catch the original magnets in an
+            	# old version of POPFile that were just there for from
+            	# addresses only 
+            
+            	if ( /^(.+)$/ ) {
+					my $value = $1;
+					$value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
+	                $self->{magnets}{$bucket}{from}{$1} = 1;
+	            }
             }
         }
         close MAGNETS;
