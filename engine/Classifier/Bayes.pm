@@ -720,7 +720,7 @@ sub db_connect__
         $self->log_( 0, "Substituting DBD::SQLite2 for DBD::SQLite 1.05" );        
         $self->log_( 0, "Please install DBD::SQLite2 and set dbconnect to use DBD::SQLite2" );
         
-        $dbconnect =~ s/SQLite/SQLite2/;
+        $dbconnect =~ s/SQLite:/SQLite2/;
         
         undef $self->{db__};
 #         $self->db_disconnect__();
