@@ -61,8 +61,21 @@
 
 !define PFI_LANG  "FRENCH"
 
-!define IO_NL     "\r\n"
-!define MB_NL     "$\r$\n"
+#--------------------------------------------------------------------------
+# Symbols used to avoid confusion over where the line breaks occur.
+# (normally these symbols will be defined before this file is 'included')
+#
+# ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+# ${MB_NL} is used for MessageBox-style 'new line' sequences.
+#--------------------------------------------------------------------------
+
+!ifndef IO_NL
+  !define IO_NL     "\r\n"
+!endif
+
+!ifndef MB_NL
+  !define MB_NL     "$\r$\n"
+!endif
 
 #==========================================================================
 # Customised versions of strings used on standard MUI pages
@@ -619,8 +632,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_3         "Cliquez 'Non' pour ignorer ces erreurs et tout supprimer"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_4         "Cliquez 'Oui' pour conserver ces données (et permettre une nouvelle tentative ultérieurement)"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Voulez-vous supprimer tous les fichiers de votre répertoire de POPFile ?${MB_NL}${MB_NL}(S'il contient quoi que ce soit que vous avez créé et désirez conserver, cliquez 'Non')"
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Voulez-vous supprimer tous les fichiers de votre répertoire 'Données Utilisateur' de POPFile ?${MB_NL}${MB_NL}(S'il contient quoi que ce soit que vous avez créé et désirez conserver, cliquez 'Non')"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Voulez-vous supprimer tous les fichiers de votre répertoire de POPFile ?${MB_NL}${MB_NL}$G_ROOTDIR${MB_NL}${MB_NL}(S'il contient quoi que ce soit que vous avez créé et désirez conserver, cliquez 'Non')"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_2        "Voulez-vous supprimer tous les fichiers de votre répertoire 'Données Utilisateur' de POPFile ?${MB_NL}${MB_NL}$G_USERDIR${MB_NL}${MB_NL}(S'il contient quoi que ce soit que vous avez créé et désirez conserver, cliquez 'Non')"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBDELMSGS_1       "Voulez-vous supprimer tous les fichiers de votre répertoire 'Messages récents' ?"
 
@@ -630,9 +643,6 @@
 #--------------------------------------------------------------------------
 # Mark the end of the language data
 #--------------------------------------------------------------------------
-
-!undef IO_NL
-!undef MB_NL
 
 !undef PFI_LANG
 
