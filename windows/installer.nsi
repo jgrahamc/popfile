@@ -1006,6 +1006,7 @@ install_schema:
   File "..\engine\POPFile\Loader.pm"
   File "..\engine\POPFile\Logger.pm"
   File "..\engine\POPFile\Module.pm"
+  File "..\engine\POPFile\Mutex.pm"
   File "..\engine\POPFile\Configuration.pm"
   File "..\engine\POPFile\popfile_version"
 
