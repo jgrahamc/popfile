@@ -1,4 +1,4 @@
 subject bar
 to baz@baz.com
 from foo
-from oldstyle
+oldstyle

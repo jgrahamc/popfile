@@ -187,8 +187,7 @@ sub deliver
     my ( $self, $type, $message, $parameter ) = @_;
 
     if ( $type eq 'CLASS' ) {
-        $self->set_bucket_parameter( $message, 'count',
-        $self->get_bucket_parameter( $message, 'count' ) + 1 );
+        $self->set_bucket_parameter( $message, 'count', $self->get_bucket_parameter( $message, 'count' ) + 1 );
         $self->write_parameters();
     }
 }
@@ -380,16 +379,12 @@ sub load_word_matrix_
         $self->{full_total__} += $self->{total__}{$bucket};
 
         if ( $color eq '' )  {
-            if ( $c <= $#{$self->{possible_colors__}} ) {
-                $self->{colors__}{$bucket} = $self->{possible_colors__}[$c];
-            } else {
-                $self->{colors__}{$bucket} = 'black';
-            }
+            $self->{colors__}{$bucket} = $self->{possible_colors__}[$c];
         } else {
             $self->{colors__}{$bucket} = $color;
         }
 
-        $c += 1;
+        $c = ($c+1) % $#{$self->{possible_colors__}};
     }
 
     $self->update_constants_();
@@ -491,13 +486,13 @@ sub load_bucket_
 
     if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
         my $first = <WORDS>;
-        if ( $first =~ s/^__CORPUS__ __VERSION__ (\d+)// ) {
+        if ( defined( $first ) && ( $first =~ s/^__CORPUS__ __VERSION__ (\d+)// ) ) {
             if ( $1 != $self->{corpus_version__} )  {
-                print "Incompatible corpus version in $bucket\n";
-                return;
+                print STDERR "Incompatible corpus version in $bucket\n";
+                return 0;
             }
         } else {
-            return;
+            return 0;
         }
 
         while ( <WORDS> ) {
@@ -521,6 +516,8 @@ sub load_bucket_
     }
 
     $self->calculate_magnet_count__();
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -881,14 +878,16 @@ sub history_write_class
 
     if ( defined( $magnet ) && ( $magnet ne '' ) ) {
         print CLASS "$bucket MAGNET $magnet\n";
-    } elsif (defined $reclassified && $reclassified == 1) {
-        print CLASS "RECLASSIFIED\n";
-        print CLASS "$bucket\n";
-        if ( defined( $usedtobe ) && ( $usedtobe ne '' ) ) {
-            print CLASS "$usedtobe\n";
-        }
     } else {
-        print CLASS "$bucket\n";
+        if ( defined( $reclassified ) && ( $reclassified == 1 ) ) {
+            print CLASS "RECLASSIFIED\n";
+            print CLASS "$bucket\n";
+            if ( defined( $usedtobe ) && ( $usedtobe ne '' ) ) {
+               print CLASS "$usedtobe\n";
+            }
+        } else {
+            print CLASS "$bucket\n";
+        }
     }
 
     close CLASS;
@@ -896,7 +895,7 @@ sub history_write_class
 
 # ---------------------------------------------------------------------------------------------
 #
-# history_load_class - load the class file for a message.
+# history_read_class - load the class file for a message.
 #
 # returns: ( reclassified, bucket, usedtobe, magnet )
 #   values:
@@ -908,7 +907,7 @@ sub history_write_class
 # $filename     The name of the message to load the class for
 #
 # ---------------------------------------------------------------------------------------------
-sub history_load_class
+sub history_read_class
 {
     my ( $self, $filename ) = @_;
 
@@ -937,6 +936,8 @@ sub history_load_class
         $bucket =~ s/[\r\n]//g;
     } else {
         $self->log_( "Error: " . $self->global_config_( 'msgdir' ) . "$filename: $!" );
+
+        return ( undef, undef, undef, undef );
     }
     return ( $reclassified, $bucket, $usedtobe, $magnet );
 }
@@ -1864,6 +1865,7 @@ sub clear_magnets
     my ( $self ) = @_;
 
     delete $self->{magnets__};
+    $self->calculate_magnet_count__();
 }
 
 # ---------------------------------------------------------------------------------------------

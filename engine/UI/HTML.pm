@@ -2587,10 +2587,10 @@ sub new_history_file__
 {
     my ( $self, $file, $index ) = @_;
 
-    # Find the class information for this file using the history_load_class helper
+    # Find the class information for this file using the history_read_class helper
     # function, and then parse the MSG file for the From and Subject information
 
-    my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->{classifier__}->history_load_class( $file );
+    my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->{classifier__}->history_read_class( $file );
     my $from    = '';
     my $subject = '';
 
@@ -2840,7 +2840,7 @@ sub history_reclassify
 
             # Get the current classification for this message
 
-            my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_load_class( $mail_file );
+            my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_read_class( $mail_file );
 
             # Only reclassify messages that haven't been reclassified before
 
@@ -2912,7 +2912,7 @@ sub history_undo
 
             # Load the class file
 
-            my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->{classifier__}->history_load_class( $mail_file );
+            my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->{classifier__}->history_read_class( $mail_file );
 
             # Only undo if the message has been classified...
 
@@ -3756,7 +3756,7 @@ sub history_delete_file
 
         mkdir( $path );
 
-        my ($reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_load_class( $mail_file );
+        my ($reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_read_class( $mail_file );
 
         if ( ( $bucket ne 'unclassified' ) && ( $bucket ne 'unknown class' ) ) {
             $path .= "\/" . $bucket;

@@ -44,6 +44,16 @@ $b->logger( $l );
 $b->initialize();
 test_assert( $b->start() );
 
+# Test the unclassifier_probability parameter
+
+test_assert_equal( $b->{unclassified__}, log(0.5) );
+$b->config_( 'unclassified_probability', 0.42 );
+test_assert( $b->start() );
+test_assert_equal( $b->{unclassified__}, log(0.42) );
+$b->config_( 'unclassified_probability', 0.5 );
+test_assert( $b->start() );
+test_assert_equal( $b->{unclassified__}, log(0.5) );
+
 # test the API functions
 
 # get_buckets
@@ -283,6 +293,25 @@ $line = <FILE>;
 test_assert_regexp( $line, 'Incompatible corpus version in zeotrope' );
 close FILE;
 
+open STDERR, ">temp.tmp";
+test_assert( !$b->load_bucket_( 'zeotrope' ) );
+close STDERR;
+open FILE, "<temp.tmp";
+$line = <FILE>;
+test_assert_regexp( $line, 'Incompatible corpus version in zeotrope' );
+close FILE;
+
+open FILE, ">corpus/zeotrope/table";
+close FILE;
+
+open STDERR, ">temp.tmp";
+test_assert( !$b->load_bucket_( 'zeotrope' ) );
+close STDERR;
+open FILE, "<temp.tmp";
+$line = <FILE>;
+test_assert( !defined( $line ) );
+close FILE;
+
 # create_magnet
 
 test_assert_equal( $b->magnet_count(), 4 );
@@ -344,16 +373,30 @@ test_assert_equal( $b->magnet_count(), 4 );
 test_assert_equal( $#mags, 0 );
 test_assert_equal( $mags[0], 'personal' );
 
+# send a message through the mq
+
+test_assert_equal( $b->get_bucket_parameter( 'zeotrope', 'count' ), 0 );
+$b->mq_post_( 'CLASS', 'zeotrope' );
+$mq->service();
+test_assert_equal( $b->get_bucket_parameter( 'zeotrope', 'count' ), 1 );
+
 # clear_bucket
 
 $b->clear_bucket( 'zeotrope' );
 test_assert( !( -e 'corpus/zeotrope/table' ) );
 test_assert_equal( $b->get_bucket_word_count('zeotrope'), 0 );
 
+# classify a message using a magnet
+
+$b->create_magnet( 'zeotrope', 'from', 'cxcse231@yahoo.com' );
+test_assert_equal( $b->classify( 'TestMailParse021.msg' ), 'zeotrope' );
+test_assert_equal( $b->{magnet_detail__}, 'from: cxcse231@yahoo.com' );
+test_assert( $b->{magnet_used__} );
+
 # clear_magnets
 
 $b->clear_magnets();
-test_assert_equal( $b->magnet_count(), 4 );
+test_assert_equal( $b->magnet_count(), 0 );
 @mags = $b->get_buckets_with_magnets();
 test_assert_equal( $#mags, -1 );
 
@@ -373,12 +416,15 @@ test_assert_equal( $buckets[2], 'spam' );
 # getting and setting values
 
 test_assert_equal( $b->get_value_( 'personal', 'foo' ), log(1/103) );
+test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), log(1/103) );
 $b->{total__}{personal} = 100;
 $b->set_value_( 'personal', 'foo', 100 );
 test_assert_equal( $b->get_value_( 'personal', 'foo' ), 0 );
+test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), $b->{not_likely__} );
 $b->{total__}{personal} = 1000;
 $b->set_value_( 'personal', 'foo', 100 );
 test_assert_equal( $b->get_value_( 'personal', 'foo' ), -log(10) );
+test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), -log(10) );
 
 # glob the tests directory for files called TestMailParse\d+.msg which consist of messages
 # to be parsed with the resulting classification in TestMailParse.cls
@@ -473,7 +519,37 @@ test_assert_equal( $#stopwords, 1 );
 test_assert_equal( $stopwords[0], 'notthis' );
 test_assert_equal( $stopwords[1], 'andnotthat' );
 
+# Test history class file reading and writing
+
+unlink( 'messages/*' );
+
+$b->history_write_class( 'one.msg', 0, 'zeotrope' );
+my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'one.msg' );
+test_assert( !$reclassified );
+test_assert_equal( $bucket, 'zeotrope' );
+test_assert( !defined( $usedtobe ) );
+test_assert_equal( $magnet, '' );
+
+$b->history_write_class( 'one.msg', 1, 'zeotrope', 'spam' );
+my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'one.msg' );
+test_assert( $reclassified );
+test_assert_equal( $bucket, 'zeotrope' );
+test_assert_equal( $usedtobe, 'spam' );
+test_assert_equal( $magnet, '' );
+
+$b->history_write_class( 'one.msg', 0, 'zeotrope', undef, 'from: margit' );
+my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'one.msg' );
+test_assert( !$reclassified );
+test_assert_equal( $bucket, 'zeotrope' );
+test_assert( !defined( $usedtobe ) );
+test_assert_equal( $magnet, 'from: margit' );
+
+my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'two.msg' );
+test_assert( !defined( $reclassified ) );
+test_assert( !defined( $bucket ) );
+test_assert( !defined( $usedtobe ) );
+test_assert( !defined( $magnet ) );
+
 # TODO test that stop writes the parameters to disk
 
 $b->stop();
-
