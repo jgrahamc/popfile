@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # pipe.pl --- Read a message in on STDIN and write out the modified version on STDOUT
 #
@@ -21,7 +21,7 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 use strict;
 use lib defined($ENV{POPFILE_ROOT})?$ENV{POPFILE_ROOT}:'./';

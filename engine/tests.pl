@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # tests.pl  - Unit tests for POPFile
 #
@@ -21,7 +21,7 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 use strict;
 
@@ -83,7 +83,7 @@ sub spin
     $last_spin = "  " . $msg;
 }
 
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # test_report   -        Report whether a test passed or not
 #
@@ -93,7 +93,7 @@ sub spin
 # $line                 The line in the $file where the test can be found
 # $context              (Optional) String containing extra context information
 #
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 sub test_report
 {
@@ -117,7 +117,7 @@ sub test_report
         flush STDOUT;
 }
 
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # test_assert   -        Perform a test and assert that its result must be true
 #
@@ -129,7 +129,7 @@ sub test_report
 # Example: test_assert( 'function(parameter) == 1' ) YOU DO NOT NEED TO GIVE THE
 # $file and $line parameters as this script supplies them automatically
 #
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 sub test_assert
 {
@@ -141,7 +141,7 @@ sub test_assert
     return $result;
 }
 
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # test_assert_equal     -        Perform a test and assert that its result is equal an expected result
 #
@@ -156,7 +156,7 @@ sub test_assert
 #
 # YOU DO NOT NEED TO GIVE THE $file and $line parameters as this script supplies them
 # automatically
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 sub test_assert_equal
 {
@@ -187,7 +187,7 @@ sub test_assert_equal
    return $result;
 }
 
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
 # test_assert_regexp    -  Perform a test and assert that its result matches a regexp
 # test_assert_not_regexp - Perform a test and assert that the regexp does not match
@@ -203,7 +203,7 @@ sub test_assert_equal
 #
 # YOU DO NOT NEED TO GIVE THE $file and $line parameters as this script supplies them
 # automatically
-# ---------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 
 sub test_assert_regexp
 {
