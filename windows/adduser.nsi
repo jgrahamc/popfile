@@ -157,7 +157,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.12"
+  !define C_PFI_VERSION  "0.2.13"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -1016,8 +1016,8 @@ skip_rel_notes:
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
 
-  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" NORMAL
-  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" \
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" NORMAL
+  WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" \
               "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" NORMAL
