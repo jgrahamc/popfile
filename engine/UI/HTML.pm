@@ -267,6 +267,8 @@ sub stop
 {
     my ( $self ) = @_;
 
+    $self->copy_pre_cache__();
+
     $self->save_disk_cache__();
 }
 
@@ -3105,12 +3107,7 @@ sub history_page
         }
     }
 
-    # Copy the history pre-cache over AFTER any possibly index-based remove operations are complete
-    foreach my $file ( keys( %{$self->{history_pre_cache__}} ) ) {
-        $self->{history__}{$file} = $self->{history_pre_cache__}{$file};
-        delete $self->{history_pre_cache__}{$file};        
-    }
-    $self->{history_pre_cache__} = {};
+    $self->copy_pre_cache__();
 
     # If the history cache is invalid then we need to reload it and then if
     # any of the sort, search or filter options have changed they must be
@@ -3662,6 +3659,24 @@ sub load_language
         }
         close LANG;
     }
+}
+
+# ---------------------------------------------------------------------------------------------
+# copy_pre_cache__
+#
+# Copies the history_pre_cache into the history
+#
+# ---------------------------------------------------------------------------------------------
+sub copy_pre_cache__
+{
+    my ($self) = @_;
+
+    # Copy the history pre-cache over AFTER any possibly index-based remove operations are complete
+    foreach my $file ( keys( %{$self->{history_pre_cache__}} ) ) {
+        $self->{history__}{$file} = \%{$self->{history_pre_cache__}{$file}};
+        delete $self->{history_pre_cache__}{$file};
+    }
+    $self->{history_pre_cache__} = {};
 }
 
 # ---------------------------------------------------------------------------------------------
