@@ -104,9 +104,9 @@ sub start
 
     foreach my $dir (@temp) {
         if ( $dir =~ /pdk\-.+\-(\d+)$/ ) {
-   	        if ( $$ != $1 ) {
+            if ( $$ != $1 ) {
                 rmdir $dir;
-	        }
+            }
         }
     }
 
