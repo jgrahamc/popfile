@@ -1,0 +1,9 @@
+Return-Path: <sdqrqlrcc@yahoo.com>
+Received: from smtp8.libero.it (193.70.192.92) by ims10a.libero.it (7.0.024)
+            id 4013D7B00094CB52 for foo.bar@inwind.it; Sun, 22 Feb 2004 04:10:52 +0100
+Sender: sdqrqlrcc@yahoo.com (derived from envelope by postmaster@libero.it)
+Date: Sun, 22 Feb 2004 04:10:52 +0100 (added by postmaster@libero.it)
+Received: from h24-85-91-39.vc.shawcable.net (24.85.91.39) by smtp8.libero.it (7.0.020-DD01)
+            id 3FD9B5E909B60A72 for foo.bar@inwind.it; Sun, 22 Feb 2004 04:10:52 +0100
+Received: from 67.172.52.188 by 24.85.91.39; Sun, 22 Feb 2004 04:03:40 +0100
+Message-ID: <H[20
