@@ -1349,6 +1349,18 @@ flat_bucket:
   Push "${L_CORPUS_PATH}\${L_BUCKET_NAME}\table"
   Call GetFileSize
   Pop ${L_TEMP}
+  IntCmp ${L_TEMP} 3 valid_size 0 valid_size
+  
+  ; Very early versions of POPFile used an empty 'table' file to represent an empty bucket
+  ; so we replace these files with an updated flat file version of an empty bucket to avoid
+  ; problems when this flat file corpus is converted to the new SQL database format
+
+  FileOpen ${L_TEMP} "${L_CORPUS_PATH}\${L_BUCKET_NAME}\table" w
+  FileWrite ${L_TEMP} "__CORPUS__ __VERSION__ 1$\r$\n"
+  FileClose ${L_TEMP}
+  StrCpy ${L_TEMP} 26
+ 
+valid_size:
   IntOp ${L_CORPUS_SIZE} ${L_CORPUS_SIZE} + ${L_TEMP}
   WriteINIStr "$PLUGINSDIR\corpus.ini" "Bucket-${L_BUCKET_COUNT}" "File_Size" "${L_TEMP}"
   WriteINIStr "$PLUGINSDIR\corpus.ini" "Bucket-${L_BUCKET_COUNT}" "Stop_Time" "0"
@@ -1936,17 +1948,18 @@ skip_${PFI_UNIQUE_ID}:
 
 Function MinPerlRestructure
 
-  IfFileExists "$G_MPLIBDIR\*.*" exit
+  IfFileExists "$G_MPLIBDIR\*.pm" exit
 
   CreateDirectory $G_MPLIBDIR
 
-  CopyFiles /SILENT /FILESONLY "$INSTDIR\*.pm" "$G_MPLIBDIR\*.pm"
+  CopyFiles /SILENT /FILESONLY "$INSTDIR\*.pm" "$G_MPLIBDIR\"
   Delete "$INSTDIR\*.pm"
 
   !insertmacro MinPerlMove "auto"
   !insertmacro MinPerlMove "Carp"
   !insertmacro MinPerlMove "DBD"
   !insertmacro MinPerlMove "Digest"
+  !insertmacro MinPerlMove "Encode"
   !insertmacro MinPerlMove "Exporter"
   !insertmacro MinPerlMove "File"
   !insertmacro MinPerlMove "Getopt"
