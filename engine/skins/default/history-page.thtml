@@ -3,14 +3,14 @@
 
 <TMPL_IF NAME="If_Show_Bucket_Help">
 
-<div>
+<div class="helpMessage">
     <p>
-        <form method="post" action="/history">
-            <TMPL_VAR NAME="Localize_Help_Bucket_Setup">
-            <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-            <input type="submit" name="nomore_bucket_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
-        </form>
+        <TMPL_VAR NAME="Localize_Help_Bucket_Setup">
     </p>
+    <form method="post" action="/history">
+        <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+        <input type="submit" name="nomore_bucket_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
+    </form>
 </div>
 
 </TMPL_IF>
