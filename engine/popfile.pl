@@ -932,12 +932,12 @@ sub pretty_number
 # ---------------------------------------------------------------------------------------------
 sub bucket_page 
 {
-    my $body = "<h2>Detail for <font color=$classifier->{colors}{$form{bucket}}>$form{bucket}</a></h2><p><table><tr><td><b>Bucket word count</b><td>&nbsp;<td align=right>". pretty_number($classifier->{total}{$form{bucket}});
+    my $body = "<h2>Detail for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</a></h2><p><table><tr><td><b>Bucket word count</b><td>&nbsp;<td align=right>". pretty_number($classifier->{total}{$form{showbucket}});
     $body .= "<tr><td><b>Total word count</b><td>&nbsp;<td align=right>" . pretty_number($classifier->{full_total});
     my $percent = "0%";
     if ( $classifier->{full_total} > 0 ) 
     {
-        $percent = int( 10000 * $classifier->{total}{$form{bucket}} / $classifier->{full_total} ) / 100;
+        $percent = int( 10000 * $classifier->{total}{$form{showbucket}} / $classifier->{full_total} ) / 100;
         $percent = "$percent%";
     }
     $body .= "<tr><td><hr><b>Percentage of total</b><td>&nbsp;<td align=right><hr>$percent</table>";
@@ -952,7 +952,7 @@ sub bucket_page
 # ---------------------------------------------------------------------------------------------
 sub corpus_page
 {
-    if ( $form{bucket} ne '' ) 
+    if ( $form{showbucket} ne '' ) 
     {
         return bucket_page();
     }
@@ -1081,7 +1081,7 @@ sub corpus_page
             $body .= " bgcolor=$stripe_color";
         }
         $stripe = 1 - $stripe;
-        $body .= "><td><a href=/buckets?session=$session_key&bucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td align=right>$number<td>&nbsp;<td align=left bgcolor=$main_color><table cellpadding=0 cellspacing=1><tr>";
+        $body .= "><td><a href=/buckets?session=$session_key&showbucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td align=right>$number<td>&nbsp;<td align=left bgcolor=$main_color><table cellpadding=0 cellspacing=1><tr>";
         my $color = $classifier->{colors}{$bucket};
         $body .= "<td width=10 bgcolor=$color><img border=0 alt='$bucket current color is $color' src=pix.gif width=10 height=20><td>&nbsp;";
         for my $i ( 0 .. $#{$classifier->{possible_colors}} )
