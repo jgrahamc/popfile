@@ -529,7 +529,7 @@ sub db_connect__
     if ( !$dbpresent ) {
         if ( !$self->insert_schema__( $sqlite ) ) {
             return 0;
-	}
+        }
     }
 
     # Now check for a need to upgrade the database because the schema has been
@@ -574,7 +574,7 @@ sub db_connect__
             next if ( $table eq 'popfile' );
             if ( $sqlite && ( $table =~ /^sqlite_/ ) ) {
                 next;
-	    }
+            }
             if ( $i > 99 ) {
                 print "\n";
             }
@@ -584,57 +584,57 @@ sub db_connect__
             $t->execute;
             $i = 0;
             while ( 1 ) {
-   	        if ( ( ++$i % 100 ) == 0 ) {
-	            print "[$i]";
+                if ( ( ++$i % 100 ) == 0 ) {
+                    print "[$i]";
                     flush STDOUT;
-	        }
+                }
                 my @rows = $t->fetchrow_array;
 
                 last if ( $#rows == -1 );
 
                 print INSERT "INSERT INTO $table (";
                 for my $i (0..$t->{NUM_OF_FIELDS}-1) {
-		    if ( $i != 0 ) {
+                    if ( $i != 0 ) {
                         print INSERT ',';
-		    }
+                    }
                     print INSERT $t->{NAME}->[$i];
-		}
+                }
                 print INSERT ') VALUES (';
                 for my $i (0..$t->{NUM_OF_FIELDS}-1) {
-		    if ( $i != 0 ) {
+                    if ( $i != 0 ) {
                         print INSERT ',';
-		    }
+                    }
                     my $val = $rows[$i];
                     if ( $t->{TYPE}->[$i] !~ /^int/i ) {
                         $val = '' if ( !defined( $val ) );
                         $val = $self->{db__}->quote( $val );
-		    } else {
+                    } else {
                         $val = 'NULL' if ( !defined( $val ) );
                     }
                     print INSERT $val;
-    	        }
+                }
                 print INSERT ");\n";
-	    }
-	}
+            }
+        }
 
         close INSERT;
 
         if ( $i > 99 ) {
             print "\n";
-	}
+        }
 
         foreach my $table (@tables) {
             if ( $sqlite && ( $table =~ /^sqlite_/ ) ) {
                 next;
-	    }
+            }
             print "    Dropping old table $table\n";
             $self->{db__}->do( "DROP TABLE $table;" );
-	}
+        }
 
         print "    Inserting new database schema\n";
         if ( !$self->insert_schema__( $sqlite ) ) {
             return 0;
-	}
+        }
 
         print "    Restoring old data\n    ";
 
@@ -642,13 +642,13 @@ sub db_connect__
         open INSERT, '<' . $self->get_user_path_( 'insert.sql' );
         $i = 0;
         while ( <INSERT> ) {
-	    if ( ( ++$i % 100 ) == 0 ) {
-	       print "[$i]";
+            if ( ( ++$i % 100 ) == 0 ) {
+               print "[$i]";
                flush STDOUT;
-	    }
+            }
             s/[\r\n]//g;
             $self->{db__}->do( $_ );
-	}
+        }
         close INSERT;
         $self->{db__}->commit;
 
@@ -664,11 +664,11 @@ sub db_connect__
     # parameter
 
     $self->{db_get_buckets__} = $self->{db__}->prepare(                                 # PROFILE BLOCK START
-   	     'select name, id, pseudo from buckets
+             'select name, id, pseudo from buckets
                   where buckets.userid = ?;' );                                         # PROFILE BLOCK STOP
 
     $self->{db_get_wordid__} = $self->{db__}->prepare(                                  # PROFILE BLOCK START
-	     'select id from words
+             'select id from words
                   where words.word = ? limit 1;' );                                     # PROFILE BLOCK STOP
 
     $self->{db_get_userid__} = $self->{db__}->prepare(                                  # PROFILE BLOCK START
@@ -676,32 +676,32 @@ sub db_connect__
                                      and password = ? limit 1;' );                      # PROFILE BLOCK STOP
 
     $self->{db_get_word_count__} = $self->{db__}->prepare(                              # PROFILE BLOCK START
-	     'select matrix.times from matrix
+             'select matrix.times from matrix
                   where matrix.bucketid = ? and
                         matrix.wordid = ? limit 1;' );                                  # PROFILE BLOCK STOP
 
     $self->{db_put_word_count__} = $self->{db__}->prepare(                              # PROFILE BLOCK START
-	   'replace into matrix ( bucketid, wordid, times ) values ( ?, ?, ? );' );     # PROFILE BLOCK STOP
+           'replace into matrix ( bucketid, wordid, times ) values ( ?, ?, ? );' );     # PROFILE BLOCK STOP
 
     $self->{db_get_bucket_unique_counts__} = $self->{db__}->prepare(                    # PROFILE BLOCK START
-	     'select count(matrix.wordid), buckets.name from matrix, buckets
+             'select count(matrix.wordid), buckets.name from matrix, buckets
                   where buckets.userid = ?
                     and matrix.bucketid = buckets.id
                   group by buckets.name;' );                                            # PROFILE BLOCK STOP
 
     $self->{db_get_bucket_word_counts__} = $self->{db__}->prepare(                      # PROFILE BLOCK START
-	     'select sum(matrix.times), buckets.name from matrix, buckets
+             'select sum(matrix.times), buckets.name from matrix, buckets
                   where matrix.bucketid = buckets.id
                     and buckets.userid = ?
                     group by buckets.name;' );                                          # PROFILE BLOCK STOP
 
     $self->{db_get_unique_word_count__} = $self->{db__}->prepare(                       # PROFILE BLOCK START
-	     'select count(matrix.wordid) from matrix, buckets
+             'select count(matrix.wordid) from matrix, buckets
                   where matrix.bucketid = buckets.id and
                         buckets.userid = ?;' );                                         # PROFILE BLOCK STOP
 
     $self->{db_get_full_total__} = $self->{db__}->prepare(                              # PROFILE BLOCK START
-	     'select sum(matrix.times) from matrix, buckets
+             'select sum(matrix.times) from matrix, buckets
                   where buckets.userid = ? and
                         matrix.bucketid = buckets.id;' );                               # PROFILE BLOCK STOP
 
@@ -711,7 +711,7 @@ sub db_connect__
                         bucket_params.btid = ?;' );                                     # PROFILE BLOCK STOP
 
     $self->{db_set_bucket_parameter__} = $self->{db__}->prepare(                        # PROFILE BLOCK START
-	   'replace into bucket_params ( bucketid, btid, val ) values ( ?, ?, ? );' );  # PROFILE BLOCK STOP
+           'replace into bucket_params ( bucketid, btid, val ) values ( ?, ?, ? );' );  # PROFILE BLOCK STOP
 
     $self->{db_get_bucket_parameter_default__} = $self->{db__}->prepare(                # PROFILE BLOCK START
              'select bucket_template.def from bucket_template
@@ -775,8 +775,8 @@ sub insert_schema__
             if ( ( /end;/ ) || ( /\);/ ) ) {
                 $self->{db__}->do( $schema );
                 $schema = '';
-	    }
-	}
+            }
+        }
         close SCHEMA;
         return 1;
     } else {
@@ -1116,40 +1116,40 @@ sub upgrade_bucket__
                     $self->{db__}->rollback;
                     return 0;
                 } else {
-   	            $self->log_( 0, "Upgrading bucket $bucket..." );
+                    $self->log_( 0, "Upgrading bucket $bucket..." );
 
                     while ( <WORDS> ) {
-		        if ( $wc % 100 == 0 ) {
+                        if ( $wc % 100 == 0 ) {
                             $self->log_( 0, "$wc" );
-		        }
+                        }
                         $wc += 1;
                         s/[\r\n]//g;
 
                         if ( /^([^\s]+) (\d+)$/ ) {
-  			    if ( $2 != 0 ) {
+                            if ( $2 != 0 ) {
                                 $self->db_put_word_count__( $session, $bucket, $1, $2 );
-			    }
+                            }
                         } else {
                             $self->log_( 0, "Found entry in corpus for $bucket that looks wrong: \"$_\" (ignoring)" );
                         }
-		    }
+                    }
                 }
 
                 if ( $wc > 1 ) {
                     $wc -= 1;
                     $self->log_( 0, "(completed $wc words)" );
-		}
+                }
                 close WORDS;
             } else {
                 close WORDS;
                 $self->{db__}->rollback;
                 unlink $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" );
                 return 0;
-	    }
+            }
 
             $self->{db__}->commit;
             unlink $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" );
-	}
+        }
     }
 
     # Now check to see if there's a BerkeleyDB-style table
@@ -1170,17 +1170,17 @@ sub upgrade_bucket__
         my $wc = 1;
 
         for my $word (keys %h) {
-	    if ( $wc % 100 == 0 ) {
+            if ( $wc % 100 == 0 ) {
                 $self->log_( 0, "$wc" );
             }
 
             next if ( $word =~ /__POPFILE__(LOG__TOTAL|TOTAL|UNIQUE)__/ );
 
-	    $wc += 1;
+            $wc += 1;
             if ( $h{$word} != 0 ) {
                 $self->db_put_word_count__( $session, $bucket, $word, $h{$word} );
-	    }
-	}
+            }
+        }
 
         $wc -= 1;
         $self->log_( 0, "(completed $wc words)" );
@@ -1361,15 +1361,15 @@ sub add_words_to_bucket__
         if ( defined( $wordmap{$word} ) && defined( $counts{$wordmap{$word}} ) ) {
             $self->{db_put_word_count__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id},               # PROFILE BLOCK START
                 $wordmap{$word}, $counts{$wordmap{$word}} + $subtract * $self->{parser__}->{words__}{$word} ); # PROFILE BLOCK STOP
-	} else {
+        } else {
 
             # If the word is not in the database and we are trying to subtract then
             # we do nothing because negative values are meaningless
 
             if ( $subtract == 1 ) {
                 $self->db_put_word_count__( $session, $bucket, $word, $self->{parser__}->{words__}{$word} );
-	    }
-	}
+            }
+        }
     }
 
     # If we were doing a subtract operation it's possible that some of the words
@@ -1663,7 +1663,7 @@ sub get_top_bucket__
         if ( $probability > $best_probability ) {
             $best_probability = $probability;
             $top_bucket       = $bucket;
-	}
+        }
     }
 
     return $top_bucket;
@@ -1711,7 +1711,7 @@ sub classify
 
     for my $bucket ($self->get_buckets_with_magnets( $session ))  {
         for my $type ($self->get_magnet_types_in_bucket( $session, $bucket )) {
-	    if ( $self->magnet_match__( $session, $self->{parser__}->get_header($type), $bucket, $type ) ) {
+            if ( $self->magnet_match__( $session, $self->{parser__}->get_header($type), $bucket, $type ) ) {
                 return $bucket;
             }
         }
@@ -1739,7 +1739,7 @@ sub classify
             $score{$bucket} = $self->{bucket_start__}{$userid}{$bucket};
             $matchcount{$bucket} = 0;
             push @ok_buckets, ( $bucket );
-	}
+        }
     }
 
     @buckets = @ok_buckets;
@@ -1842,7 +1842,7 @@ sub classify
 
             if ( defined($$matrix{$id}{$bucket}) && ( $$matrix{$id}{$bucket} > 0 ) ) {
                 $probability = log( $$matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket} );
-	    }
+            }
 
             $matchcount{$bucket} += $self->{parser__}{words__}{$$idmap{$id}} if ($probability != 0);
             $probability = $self->{not_likely__}{$userid} if ( $probability == 0 );
@@ -2005,7 +2005,7 @@ sub classify
                         foreach my $bucket (@ranking) {
                             $wordprobs{$bucket,$id} = $wval{$bucket} / $sumfreq;
                         }
-		    }
+                    }
                 }
             }
 
@@ -2039,7 +2039,7 @@ sub classify
                     my $base_probability = 0;
                     if ( defined($$matrix{$id}{$ranking[0]}) && ( $$matrix{$id}{$ranking[0]} > 0 ) ) {
                         $base_probability = log( $$matrix{$id}{$ranking[0]} / $self->{db_bucketcount__}{$userid}{$ranking[0]} );
-	            }
+                    }
 
                     my @per_bucket;
                     foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
@@ -2048,7 +2048,7 @@ sub classify
                         my $probability = 0;
                         if ( defined($$matrix{$id}{$bucket}) && ( $$matrix{$id}{$bucket} > 0 ) ) {
                             $probability = log( $$matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket} );
-	                }
+                        }
                         my $color = 'black';
 
                         if ( $probability >= $base_probability || $base_probability == 0 ) {
@@ -2075,8 +2075,8 @@ sub classify
                     $row_data{View_Score_Loop_Per_Bucket} = \@per_bucket;
 
                     push ( @word_data, \%row_data );
-	        }
-	    }
+                }
+            }
             $templ->param( 'View_Score_Loop_Words' => \@word_data );
         }
     }
@@ -2448,7 +2448,7 @@ sub get_buckets
     for my $b (sort keys %{$self->{db_bucketid__}{$userid}}) {
         if ( $self->{db_bucketid__}{$userid}{$b}{pseudo} == 0 ) {
             push @buckets, ($b);
-	}
+        }
     }
 
     return @buckets;
@@ -2495,7 +2495,7 @@ sub get_pseudo_buckets
     for my $b (sort keys %{$self->{db_bucketid__}{$userid}}) {
         if ( $self->{db_bucketid__}{$userid}{$b}{pseudo} == 1 ) {
             push @buckets, ($b);
-	}
+        }
     }
 
     return @buckets;
