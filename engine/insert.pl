@@ -1,65 +1,132 @@
 # ---------------------------------------------------------------------------------------------
 #
-# insert.pl --- Inserts a mail message into a specific class
-#
-# Copyright (c) 2002 John Graham-Cumming
+# insert.pl --- Inserts a mail message into a specific bucket
 #
 # ---------------------------------------------------------------------------------------------
 
 use strict;
 
-if ( $#ARGV >= 1 )
+my %words;
+
+# ---------------------------------------------------------------------------------------------
+#
+# load_word_table
+#
+# $bucket    The name of the bucket we are loading words for
+#
+# Fills the words hash with the word frequencies for word loaded from the appropriate bucket
+#
+# ---------------------------------------------------------------------------------------------
+
+sub load_word_table
 {
-    my $class    = $ARGV[0];
+    my ($bucket) = @_;
     
-    # Make sure that the extract directory exists
-    print "1. Creating extraction directory\n";
-    mkdir( 'corpus' );
-    
-    # Create the appropriate class directory
-    print "2. Creating $class directory\n";
-    mkdir( "corpus/$class" );
-    
-    my $pattern = $ARGV[1];
-    my @files   = glob $pattern;
+    # Make sure that the bucket mentioned exists, if it doesn't the create an empty
+    # directory and word table
 
-    foreach my $file (@files)
+    mkdir("corpus");
+    mkdir("corpus/$bucket");
+    
+    print "Loading word table for bucket '$bucket'...\n";
+    
+    open WORDS, "<corpus/$bucket/table";
+    
+    # Each line in the word table is a word and a count
+    
+    while (<WORDS>)
     {
-        # Parse the mailfile and remove junk that isn't useful
-        print "3. Parsing $file\n";
-
-        open MAILFILE, "<$file";
-        open EXTRACTED, ">>corpus/$class/sample";
-
-        while ( <MAILFILE> )
+        if ( /(.+) (.+)/ )
         {
-            if ( /[^ ]+: / ) 
-            {
-                if ( ( /From: (.*)/ ) || ( /Subject: (.*)/ ) || ( /Cc: (.*)/i ) || ( /To: (.*)/ ) ) 
-                {
-                    print EXTRACTED "$1\r\n";
-                }
-
-                next;
-            }
-
-            if ( ( ! /^[^ ]+: / ) && ( ! /^[^ ]{50}/ ) && ( ! /^\t/ ) )
-            {
-                print EXTRACTED $_;
-
-                next;
-            }
+            $words{$1} = $2;
         }
-
-        close EXTRACTED;
-        close MAILFILE;
     }
     
-    # Done
-    print "4. Done\n";
+    close WORDS;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# save_word_table
+#
+# $bucket    The name of the bucket we are loading words for
+#
+# Writes the words hash out to a bucket
+#
+# ---------------------------------------------------------------------------------------------
+
+sub save_word_table
+{
+    my ($bucket) = @_;
+
+    print "Saving word table for bucket '$bucket'...\n";
+    
+    open WORDS, ">corpus/$bucket/table";
+    
+    # Each line in the word table is a word and a count
+    
+    foreach my $word (keys %words)
+    {
+        print WORDS "$word $words{$word}\n";
+    }
+    
+    close WORDS;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# split_mail_message
+#
+# $message    The name of the file containing the mail message
+#
+# Splits the mail message into valid words and updated the words hash
+#
+# ---------------------------------------------------------------------------------------------
+
+sub split_mail_message
+{
+    my ($message) = @_;
+
+    print "Parsing message '$message'...\n";
+
+    open MSG, "<$message";
+    
+    # Read each line and find each "word" which we define as a sequence of alpha
+    # characters
+    
+    while (<MSG>)
+    {
+        my $line = $_;
+        
+        while ( $line =~ s/([A-Za-z]{3,})// )
+        {
+            $words{$1} += 1;
+        }
+    }
+    
+    close MSG;
+}
+
+# main
+
+if ( $#ARGV == 1 ) 
+{
+    load_word_table($ARGV[0]);
+
+    my @files   = glob $ARGV[1];
+    foreach my $file (@files)
+    {
+        split_mail_message($file);
+    }
+    
+    save_word_table($ARGV[0]);
+    
+    print "done.\n";
 }
 else
 {
-    print "Error: wrong number of command line arguments\n\n";
-    print "insert class mailfile - parses mailfile and classifies it as 'class'\n\n";
+    print "insert.pl - insert mail messages into a specific bucket\n\n";
+    print "Usage: insert.pl <bucket> <messages>\n";
+    print "       <bucket>           The name of the bucket\n";
+    print "       <messages>         Filename of message(s) to insert\n";
 }

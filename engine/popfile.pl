@@ -12,15 +12,12 @@
 
 use strict;
 
-# We need the Win32 GUI module to put an icon in the system tray
-use Win32::GUI;
-
-# We need to be able to start subprocesses
-use Win32::Process;
+# Use the Naive Bayes classifier
+use Classifier::Bayes;
 
 # This version number
 my $major_version = 0;
-my $minor_version = 7;
+my $minor_version = 8;
 
 # A list of the messages currently on the server, each entry in this list
 # is a hash containing the following items
@@ -28,7 +25,6 @@ my $minor_version = 7;
 # server_number  The number of this message on the server
 # size           The size of this messag
 # deleted        Whether this message has been deleted
-# nag        Whether this message is a special nag message
 my @messages;
 
 # A mapping between the message numbers that we will provide and message
@@ -60,14 +56,6 @@ my $eol = "\015\012";
 # messages  Count of the number of messages optimized
 my %configuration;
 
-# Boolean to determine whether we have checked registration
-# And flag to see whether we are registered or not
-my $registration_checked = 0;
-my $registered           = 0;
-
-# The nag message
-my $nag_message;
-
 # A handy boolean that tells us whether we are alive or not.  When this is set to 1 then the
 # proxy works normally, when set to 0 (typically by the aborting() function called from a signal)
 # then we will terminate gracefully
@@ -77,14 +65,9 @@ my $alive = 1;
 # we are acting as a simple proxy
 my $mail;
 
-# Handle to the rainbow process
-my $rainbow_process;
+# The classifier object
+my $classifier;
 
-# All used for the systray icon
-my $main;
-my $ni;
-my $icon;
-    
 # ---------------------------------------------------------------------------------------------
 #
 # load_configuration -  Loads the current configuration of popfile into the %configuration
@@ -106,56 +89,6 @@ sub load_configuration
         
         close CONFIG;
     }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# unregistered_version
-#
-# Determines whether the user is using an unregistered version of the software.  Returns 1
-# if the software is not registered
-#
-# ---------------------------------------------------------------------------------------------
-sub unregistered_version
-{
-    # If we've already checked then just return the flag
-    if ( $registration_checked == 0 )
-    {
-        $registered = 0;
-        
-        # Open the license file and check its validity
-        if ( open LICENSE, "<popfile.lic" )
-        {
-            my $key      = <LICENSE>;
-            $key =~ s/\s//go;
-            close LICENSE;
-
-            if ( length($key) == 12 )
-            {
-                my $odds;
-                my $evens;
-                my $product;
-                
-                $odds  = substr($key,0,1) + substr($key,2,1) + substr($key,4,1) + substr($key,6,1) + substr($key,8,1) + substr($key,10,1);
-                $evens = substr($key,1,1) + substr($key,3,1) + substr($key,5,1) + substr($key,7,1) + substr($key,9,1);
-                
-                $product = ($odds * 3 + $evens) % 10;
-                
-                if ( $product == substr($key,11,1) )
-                {
-                    $registered = 1;
-                }
-            }
-        }
-        else
-        {
-            $registered = 1;
-        }
-        
-        $registration_checked = 1;
-    }
-    
-    return $registered;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -330,31 +263,26 @@ sub echo_to_dot
 #
 # $number       The message number from the remote server
 # $size         The size of the message
-# $nag          1 if this is the nag message, 0 for a normail message
 #
 # ---------------------------------------------------------------------------------------------
 sub add_mail_message
 {
-    my ( $number, $size, $nag ) = @_;
+    my ( $number, $size ) = @_;
     
     $message_count   += 1;
     $total_size      += $size;
     $highest_message += 1;
 
     $messages[$message_count]{'server_number'} = $number;
-    $messages[$message_count]{'size'}          = $size + 90; 
+    $messages[$message_count]{'size'}          = $size; 
     $messages[$message_count]{'deleted'}       = 0;
-    $messages[$message_count]{'nag'}           = $nag;
-    $messages[$message_count]{'uidl'}          = "popfile-uidl";
     $message_map[$message_count]               = $message_count;
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # verify_have_list - Called to check that we have downloaded the list of messages from the mail
-#          server and done the sort on them.  In addition if we are using an 
-#          unregistered version of the software then we insert a nag message into the
-#          list of messages
+#          server and done the sort on them.  
 #
 # $mail        The handle of the real mail server
 # $client      The mail client talking to us
@@ -392,29 +320,9 @@ sub verify_have_list
             }
 
             
-            # When we find the . on its own then we are at the end of the list and so we check
-            # to see whether we need to be adding the nag message so that people buy the software
-            # and exit the loop
+            # When we find the . on its own then we are at the end of the list
             if ( /^\./ )
             {   
-                # If we are running and unregistered version then add the magic nag message
-                if ( unregistered_version() )
-                {
-                    # If unregistered then we keep track of how many messages we've optimized so that the user
-                    # is impressed when we send them an email outlining how much they've used the software.  That's
-                    # the $nag_message
-                    $configuration{'messages'} += $message_count;
-                    
-                    # Only nag the user if they've got mail otherwise they'll go insane
-                    # with too many messages.
-                    if ( $message_count > 0 )
-                    {
-                        $nag_message      = "From: popfile\@jgc.org$eol" . "Subject: POPFile used $configuration{'used'} times$eol$eol" . "Please consider registering POPFile.  POPFile has optimized $configuration{'messages'} messages.$eol$eol.$eol";
-                        
-                        add_mail_message( 0, length $nag_message, 1 );
-                    }
-                }
-                
                 last;
             }
             
@@ -422,7 +330,7 @@ sub verify_have_list
             # length and so we add it to the list of messages and continue
             if ( /(\d+) (\d+)/ )
             {
-                add_mail_message( $1, $2, 0 );
+                add_mail_message( $1, $2 );
             }
         }
         
@@ -536,8 +444,6 @@ sub verify_connected
     {
         if ( $mail->connected ) 
         {
-            start_rainbow();
-            
             # Read the response from the real server and say OK
             my $line = <$mail>;
             return 1;
@@ -583,28 +489,6 @@ sub flush_extra
     }
 }
 
-sub start_rainbow
-{
-    if ( !$rainbow_process )
-    {
-        Win32::Process::Create($rainbow_process,
-                                        "rainbow.exe",
-                                        "rainbow -d model --verbosity=0 --skip-html --query-server=2408",
-                                        CREATE_NO_WINDOW,
-                                        NORMAL_PRIORITY_CLASS,
-                                    ".");
-    }
-}
-
-sub stop_rainbow
-{
-    if ( $rainbow_process )
-    {
-        $rainbow_process->Kill( 0 );
-        undef $rainbow_process;
-    }
-}
-
 # ---------------------------------------------------------------------------------------------
 #
 # run_popfile - a POP3 proxy server 
@@ -636,10 +520,6 @@ sub run_popfile
     # are still allowed to operate
     while ( $alive )
     {
-        # Let Windows do event processing on us.  We need to do this for the system tray icon so that
-        # it can receive events
-        Win32::GUI::DoEvents();
-        
         # See if there's a connection waiting on the $server by getting the list of handles with data to
         # read, if the handle is the server then we're off.  Note the 0.1 second delay here when waiting
         # around.  This means that we don't hog the processor while waiting for connections.
@@ -709,12 +589,6 @@ sub run_popfile
                         # Pass through the USER command with the actual user name for this server,
                         # and send the reply straight to the client
                         echo_response( $mail, $client, "USER $4" );
-
-                        # Keep a count of the number of times used when we are unregistered
-                        if ( unregistered_version() )
-                        {
-                            $configuration{'used'} += 1;
-                        }
                     }
 
                     flush_extra( $mail, $client );
@@ -729,12 +603,6 @@ sub run_popfile
                         # Pass through the USER command with the actual user name for this server,
                         # and send the reply straight to the client
                         echo_response( $mail, $client, "APOP $4 $5" );
-
-                        # Keep a count of the number of times used when we are unregistered
-                        if ( unregistered_version() )
-                        {
-                            $configuration{'used'} += 1;
-                        }
                     }
 
                     flush_extra( $mail, $client );
@@ -888,35 +756,24 @@ sub run_popfile
                     next;
                 }
 
-                # The client is requesting a specific message.  It could be the nag message, in which case we return it
-                # or a geniune message in which case we make the mapping to the actual message number and then echo that
-                # message from the remote mail server.
+                # The client is requesting a specific message.  
                 if ( $command =~ /TOP (.*) (.*)/i )
                 {
                     if ( verify_have_list( $mail, $client ) )
                     {
-                        # Check to see if we are being asked for the nag message, if so then return it
-                        if ( $messages[$message_map[$1]]{'nag'} )
-                        {
-                            tee( $client, "+OK $messages[$message_map[$1]]{'size'}$eol" );
-                            print $client $nag_message;
-                        }
-                        else
-                        {
-                            # Get the message from the remote server, if there's an error then we're done, but if not then
-                            # we echo each line of the message until we hit the . at the end
-                            if ( echo_response( $mail, $client, "TOP $messages[$message_map[$1]]{'server_number'} $2" ) )
-                            { 
-                                while ( <$mail> )
+                        # Get the message from the remote server, if there's an error then we're done, but if not then
+                        # we echo each line of the message until we hit the . at the end
+                        if ( echo_response( $mail, $client, "TOP $messages[$message_map[$1]]{'server_number'} $2" ) )
+                        { 
+                            while ( <$mail> )
+                            {
+                                print $client $_;
+
+                                # The termination of a message is a line consisting of exactly .CRLF so we detect that
+                                # here exactly
+                                if ( $_ =~  /^\.\r\n$/ )
                                 {
-                                    print $client $_;
-                                    
-                                    # The termination of a message is a line consisting of exactly .CRLF so we detect that
-                                    # here exactly
-                                    if ( $_ =~  /^\.\r\n$/ )
-                                    {
-                                        last;
-                                    }
+                                    last;
                                 }
                             }
                         }
@@ -931,15 +788,7 @@ sub run_popfile
                 {
                     if ( verify_have_list( $mail, $client ) )
                     {
-                        # Check to see if we are being asked for the nag message, if so then return it
-                        if ( $messages[$message_map[$1]]{'nag'} )
-                        {
-                            tee( $client, "+OK <popfile\@jgc.org>$eol" );
-                        }
-                        else
-                        {
-                            echo_response( $mail, $client, "XSENDER $messages[$message_map[$1]]{'server_number'}" );
-                        }
+                        echo_response( $mail, $client, "XSENDER $messages[$message_map[$1]]{'server_number'}" );
                     }
                     
                     flush_extra( $mail, $client );
@@ -962,176 +811,139 @@ sub run_popfile
                     next;
                 }                
 
-                # The client is requesting a specific message.  It could be the nag message, in which case we return it
-                # or a geniune message in which case we make the mapping to the actual message number and then echo that
-                # message from the remote mail server.
+                # The client is requesting a specific message.  
                 if ( $command =~ /RETR (.*)/i )
                 {
                     if ( verify_have_list( $mail, $client ) )
                     {
-                        # Check to see if we are being asked for the nag message, if so then return it
-                        if ( $messages[$message_map[$1]]{'nag'} )
-                        {
-                            tee( $client, "+OK $messages[$message_map[$1]]{'size'}$eol" );
-                            print $client $nag_message;
-                        }
-                        else
-                        {
-                            # Get the message from the remote server, if there's an error then we're done, but if not then
-                            # we echo each line of the message until we hit the . at the end
-                            if ( echo_response( $mail, $client, "RETR $messages[$message_map[$1]]{'server_number'}" ) )
-                            { 
-                                my $msg_subject;        # The message subject
-                                my $msg_headers;        # Store the message headers here (will add X-Spam to end)
-                                my $msg_body;           # Store the message body here
-                                my $got_full_body = 0;  # Did we get the full body
+                        # Get the message from the remote server, if there's an error then we're done, but if not then
+                        # we echo each line of the message until we hit the . at the end
+                        if ( echo_response( $mail, $client, "RETR $messages[$message_map[$1]]{'server_number'}" ) )
+                        { 
+                            my $msg_subject;        # The message subject
+                            my $msg_headers;        # Store the message headers here (will add X-Spam to end)
+                            my $msg_body;           # Store the message body here
+                            my $got_full_body = 0;  # Did we get the full body
 
-                                my $rainbow = IO::Socket::INET->new( Proto     => 'tcp',
-                                                                    PeerPort => 2408,
-                                                                    PeerAddr => 'localhost' );
-                                
-                                my $getting_headers = 1;
-                                
-                                while ( <$mail> )
-                                {   
-                                    my $line;
-                                    
-                                    $line = $_;
-                                    
-                                    # Check for an abort
-                                    if ( $alive == 0 )
+                            my $getting_headers = 1;
+
+
+                            open TEMP, ">temp.tmp";
+                            
+                            while ( <$mail> )
+                            {   
+                                my $line;
+
+                                $line = $_;
+
+                                # Check for an abort
+                                if ( $alive == 0 )
+                                {
+                                    last;
+                                }
+
+                                # The termination of a message is a line consisting of exactly .CRLF so we detect that
+                                # here exactly
+                                if ( $line =~ /^\.\r\n$/ )
+                                {
+                                    $got_full_body = 1;
+                                    last;
+                                }
+
+                                if ( $getting_headers ) 
+                                {
+                                    if ( $line =~ /[A-Z0-9]/i ) 
                                     {
-                                        last;
-                                    }
+                                        print TEMP "$line$eol";
 
-                                    Win32::GUI::DoEvents();
-
-                                    # The termination of a message is a line consisting of exactly .CRLF so we detect that
-                                    # here exactly
-                                    if ( $line =~ /^\.\r\n$/ )
-                                    {
-                                        print $rainbow "$eol.$eol";
-                                        $got_full_body = 1;
-                                        last;
-                                    }
-
-                                    if ( $getting_headers ) 
-                                    {
-                                        if ( $line =~ /[A-Z0-9]/i ) 
+                                        if ( $line =~ /Subject: (.*)/ ) 
                                         {
-                                            print $rainbow "$line$eol";
-                                         
-                                            if ( $line =~ /Subject: (.*)/ ) 
+                                            $msg_subject = $1;
+                                            $msg_subject =~ s/(\012|\015)//g;
+                                        } 
+                                        else 
+                                        {
+                                            # Strip out the X-Text-Classification header that is in an incoming message
+                                            
+                                            if ( $line =~ /X-Text-Classification: / == 0 )
                                             {
-                                                $msg_subject = $1;
-                                                $msg_subject =~ s/(\012|\015)//g;
-                                            } 
-                                            else 
-                                            {
-                                                if ( $line =~ /X-Text-Classification: / == 0 )
-                                                {
-                                                    $msg_headers .= $line;
-                                                }
+                                                $msg_headers .= $line;
                                             }
-                                        }
-                                        else
-                                        {
-                                            $getting_headers = 0;
                                         }
                                     }
                                     else
                                     {
-                                        # If this is a base64 encoded message line then don't send it to rainbow
-                                        # since it doesn't help.  Also filter out additional headers
-                                        if ( ( !( $line =~ /^[^ ]+: / ) ) && ( !( $line =~ /^[^ ]{70}/ ) ) )
-                                        {
-                                            print $rainbow $line;
-                                        }
-
-                                        $msg_body .= $line;
-
-                                        # If we hit a base64 line then stop downloading and classify
-                                        if ( $line =~ /^[^ ]{70}/ ) 
-                                        {
-                                            print $rainbow "$eol.$eol";
-                                            last;
-                                        }
+                                        $getting_headers = 0;
                                     }
                                 }
-                               
-                                # Do the text classification and parse the result
-                                my $classification = '';
-                                if ( $rainbow->connected )
+                                else
                                 {
-                                    while ( $classification eq '' ) {
-                                        $classification .= <$rainbow>;
-                                        debug( $classification );
+                                    # If this is a base64 encoded message line then don't send it to classifier
+                                    # since it doesn't help.  Also filter out additional headers
+                                    if ( ( !( $line =~ /^[^ ]+: / ) ) && ( !( $line =~ /^[^ ]{70}/ ) ) )
+                                    {
+                                        print TEMP $line;
                                     }
-                                    
-                                    $classification =~ s/[0-9\012\015\. ]//g;
-                                }
-                                else
-                                {
-                                    $classification = 'failed';
-                                }
 
-                                debug ("Classification: $classification" );
-                                undef $rainbow;
+                                    $msg_body .= $line;
 
-                                debug("Subject modification is $configuration{subject}");                    
-                                # Add the spam header
-                                if ( $configuration{subject} ) 
-                                {
-                                    $msg_headers .= "Subject: [$classification] $msg_subject$eol";
+                                    # If we hit a base64 line then stop downloading and classify
+                                    if ( $line =~ /^[^ ]{70}/ ) 
+                                    {
+                                        last;
+                                    }
                                 }
-                                else
-                                {
-                                    $msg_headers .= "Subject: $msg_subject$eol";
-                                }
-                                    
-                                $msg_headers .= "X-Text-Classification: $classification";
-                                $msg_headers .= "$eol$eol";
+                            }
 
-                                # Echo the text of the message to the client
-                                print $client $msg_headers;
-                                print $client $msg_body;
-                                
-                                # Retrieve any more of the body
-                                if ( !$got_full_body )
-                                {
-                                    debug( "Echoing rest of message" );
-                                    echo_to_dot( $mail, $client );
-                                }
-                                else
-                                {
-                                    debug( "Full message was received" );
-                                    print $client ".$eol";
-                                }
-                            } 
-                        }
+                            close TEMP;
+
+                            # Do the text classification and parse the result
+                            my $classification = $classifier->classify_file("temp.tmp");
+
+                            debug ("Classification: $classification" );
+                            debug("Subject modification is $configuration{subject}");                    
+                            
+                            # Add the spam header
+                            if ( $configuration{subject} ) 
+                            {
+                                $msg_headers .= "Subject: [$classification] $msg_subject$eol";
+                            }
+                            else
+                            {
+                                $msg_headers .= "Subject: $msg_subject$eol";
+                            }
+
+                            $msg_headers .= "X-Text-Classification: $classification";
+                            $msg_headers .= "$eol$eol";
+
+                            # Echo the text of the message to the client
+                            print $client $msg_headers;
+                            print $client $msg_body;
+
+                            # Retrieve any more of the body
+                            if ( !$got_full_body )
+                            {
+                                debug( "Echoing rest of message" );
+                                echo_to_dot( $mail, $client );
+                            }
+                            else
+                            {
+                                debug( "Full message was received" );
+                                print $client ".$eol";
+                            }
 
                         flush_extra( $mail, $client );
                         next;
+                        }
                     }
                 }
 
-                # Handle the deletion of a message, if it's the nag message then we pretend we've deleted it.  If it is not
-                # then we pass the delete on to the remote server and see if it works.  If it does work then we mark the
-                # message as deleted.  Throughout we ensure that $total_size and $message_count are kept accurate
+                # Handle the deletion of a message, pass the delete on to the remote server and see if it works.  
+                # If it does work then we mark the message as deleted.  Throughout we ensure that $total_size and 
+                # $message_count are kept accurate
                 if ( $command =~ /DELE (.*)/i )
                 {
-                if ( verify_have_list( $mail, $client ) )
-                {
-                    # Check to see if we are deleting the nag message
-                    if ( $messages[$message_map[$1]]{'nag'} )
-                    {
-                        # Just say that we've deleted it and mark it as deleted.  
-                        tee( $client, "+OK message deleted$eol" );
-                        $messages[$message_map[$1]]{'deleted'}  = 1;
-                        $total_size              -= $messages[$message_map[$1]]{'size'};
-                        $message_count           -= 1;
-                    }
-                    else
+                    if ( verify_have_list( $mail, $client ) )
                     {
                         # Try the delete on the real server and if it successful then mark it as deleted
                         # locally
@@ -1144,11 +956,10 @@ sub run_popfile
                                 $message_count           -= 1;
                             }
                         }
-                    }
 
-                    flush_extra( $mail, $client );
-                    next;
-                }
+                        flush_extra( $mail, $client );
+                        next;
+                    }
                 }
 
                 # The mail client wants to stop using the server, so send that message through to the
@@ -1165,8 +976,6 @@ sub run_popfile
                     {
                         tee( $client, "+OK goodbye" );
                     }
-                    
-                    stop_rainbow();
                     last;
                 }
 
@@ -1217,7 +1026,6 @@ sub run_popfile
         $#message_map    = 0;
         $done_uidl       = 0;
 
-        stop_rainbow();
         save_configuration();
        }
     }
@@ -1235,24 +1043,6 @@ sub aborting
 {
     debug("Forced to abort via signal");
     $alive = 0;
-}
-
-sub Main_Terminate 
-{
-        -1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# NI_RightClick Called when someone right clicks on the tray icon.  When this happens we
-#               display the menu that contains the single option "Exit"
-#
-# ---------------------------------------------------------------------------------------------
-
-sub NI_RightClick 
-{
-    $alive = 0;
-    1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1274,21 +1064,12 @@ $configuration{sport}    = $ARGV[2];
 # Load the current configuration from disk
 load_configuration();
 
-# Try to locate the model folder and check for the file format-version
-open MODEL, "<model/format-version" or die "POPFile Error\n\nCan't find the email model.  \n\nPlease create model first.  Run bucket.exe";
-close MODEL;
-
-# Set up the system tray icon
-$main = Win32::GUI::Window->new(-name => 'traywindow', -text => 'Perl',-width => 200, -height => 200 );
-$icon = new Win32::GUI::Icon('popfile.ico');
-$ni = $main->AddNotifyIcon(-name => "NI", -id => 1, -icon => $icon, -tip => "POPFile running; right click icon to terminate");
+# Get the classifier
+$classifier = new Classifier::Bayes;
+$classifier->load_word_matrix();
 
 # Run the POP server and handle requests
 run_popfile($ARGV[0] || $configuration{port}, $configuration{server}, $configuration{sport});
-
-# Remove the tray icon
-$main->NI->Delete(-id => 1);
-Win32::GUI::DoEvents();
 
 # Write the final configuration to disk
 save_configuration();
