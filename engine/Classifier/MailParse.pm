@@ -180,6 +180,7 @@ sub parse_stream
     }
 
     open MSG, "<$file";
+    binmode MSG;
     
     # Read each line and find each "word" which we define as a sequence of alpha
     # characters
