@@ -272,6 +272,10 @@ Session_Title                           POPFile Session Expired
 Session_Error                           Your POPFile session has expired.  This could have been caused by starting and stopping POPFile but leaving your web browser open.  Please click one of the links above to continue using POPFile.
 
 View_Title                              Single Message View
+View_ShowFrequencies                    Show word frequencies
+View_ShowProbabilities                  Show word probabilities
+View_ShowScores                         Show word scores
+View_WordMatrix                         Word matrix
 
 Windows_TrayIcon                        Show POPFile icon in Windows system tray?
 Windows_Console                         Output POPFile message in a console window?

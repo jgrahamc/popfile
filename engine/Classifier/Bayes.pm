@@ -62,6 +62,9 @@ sub new
     # Set this to 1 to get scores for individual words in message detail
     $self->{wordscores__}        = 0;
 
+    # Choice for the format of the "word matrix" display.
+    $self->{wmformat__}          = 'prob';
+
     # Just our hostname
     $self->{hostname__}        = '';
 
@@ -845,19 +848,36 @@ sub classify
 
     my $word_count = 0;
 
+    # The correction value is used to generate score displays in the scores__
+    # variable which are consistent with the word scores shown by the GUI's
+    # word lookup feature.  It is computed to make the contribution of a word
+    # which is unrepresented in a bucket zero.  This correction affects only
+    # the values displayed in scores__; it has no effect on the classification
+    # process.
+  
+    my $correction = 0;
+
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
         $word_count += 2;
+        my $wmax = -10000;
 
         foreach my $bucket (@buckets) {
             my $probability = $self->get_value_( $bucket, $word );
 
             $matchcount{$bucket} += $self->{parser__}{words__}{$word} if ($probability != 0);
             $probability = $self->{not_likely__} if ( $probability == 0 );
+            $wmax = $probability if ( $wmax < $probability );
 
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
             # and we multiply by the number of times that the word occurs
 
             $score{$bucket} += ( $probability * $self->{parser__}{words__}{$word} );
+        }
+  
+        if ($wmax > $self->{not_likely__}) {
+            $correction += $self->{not_likely__} * $self->{parser__}{words__}{$word};
+        } else {
+            $correction += $wmax * $self->{parser__}{words__}{$word};
         }
     }
 
@@ -865,26 +885,51 @@ sub classify
 
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
 
+    my %raw_score;
+    my $base_score = $score{$ranking[0]};
+    my $total = 0;
+
     foreach my $bucket (@buckets) {
         $chi{$bucket} = chi2( $score{$bucket}, $word_count, -int($score{$ranking[0]}/log(10)) * log(10) );
     }
 
-    # If no bucket has a probability better than 0.5, call the message "unclassified".
+    # If the first and second bucket are too close in their probabilities, call the message
+    # unclassified.  Also if there are fewer than 2 buckets.
     my $class = 'unclassified';
 
-    if ( $score{$ranking[0]} > ( $score{$ranking[1]} + $self->{unclassified__} ) ) {
+    if ( @buckets > 1 && $score{$ranking[0]} > ( $score{$ranking[1]} + $self->{unclassified__} ) ) {
         $class = $ranking[0];
     }
 
     # Now take a look at the top two chi tests, if they are close to each other then
-    # we are unsure
+    # we are unsure.  If there are fewer than two buckets, the message is unclassified,
+    # and there is no point to looking at the chi result.
 
+    my $certainty;
+    if (@buckets > 1) {
     my $c0 = 1.0 - $chi{$ranking[0]};
     my $c1 = 1.0 - $chi{$ranking[1]};
+        $certainty = ($c1-$c0 + 1) / 2;
+    } else {
+        $certainty = 1.0;
+    }
 
-    my $certainty = ($c1-$c0 + 1) / 2;
 
     $class = 'unsure' if ( $certainty < 0.4 );
+
+
+    # Compute the total of all the scores to generate the normalized scores and probability
+    # estimate.  $total is always 1 after the first loop iteration, so any additional term
+    # less than 2 ** -54 is insignificant, and need not be computed.
+
+    my $ln2p_54 = -54 * log(2);
+
+    foreach my $b (@ranking) {
+        $raw_score{$b} = $score{$b};
+        $score{$b} -= $base_score;
+
+        $total += exp($score{$b}) if ($score{$b} > $ln2p_54 );
+    }
 
     if ($self->{wordscores__} && defined($ui) ) {
         my %qm = %{$self->{parser__}->quickmagnets()};
@@ -929,24 +974,55 @@ sub classify
             $self->{scores__} .= "<tr><td></td><td><input type=\"submit\" class=\"submit\" name=\"create\" value=\"$language{Create}\" /></td></tr></table></form>";
         }
 
-        $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<b>Verdict: <font color=\"$self->{colors__}{$class}\">$class ($certainty  $chi{$ranking[0]} $chi{$ranking[1]})</font></b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
+        $self->{scores__} .= "<a name=\"scores\">";
+        
+        # If there are fewer than 2 buckets, there is no "verdict " to mention.
+        if (@buckets > 1) {
+            $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<b>Verdict: <font color=\"$self->{colors__}{$class}\">$class ($certainty  $chi{$ranking[0]} $chi{$ranking[1]})</font></b><p>\n";
+        } else {
+            $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n";
+        }
+        $self->{scores__} .= "<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
+        if ($self->{wmformat__} eq 'score') {
+            $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\" align=\"center\">$language{Score}</th><th scope=\"col\">$language{Probability}</th></tr>\n";
+        } else {
         $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\">$language{Probability}</th></tr>\n";
+        }
+
+        my $log10 = log(10.0);
 
         foreach my $b (@ranking) {
+             my $prob = exp($score{$b})/$total;
+             my $probstr;
+             my $rawstr;
 
-            # Take a score value (which is log of the probability) and write it out as 0.000000 lots 00000001234, to do this we
-            # calculate the number of 0 between the . and the first significant digit and output the number of zeroes and
-            # then the significant digits
+             # If the computed probability would display as 1, display it as .999999 instead.
+             # We don't want to give the impression that POPFile is ever completely sure of its
+             # classification.
 
-            my $zero_count  = -int($score{$b}/log(10));
-            my $significant = sprintf( "%.6f", exp($score{$b} + $zero_count * log(10)) );
-            $significant =~ s/^0\.//;
-            my $probstr     = sprintf( "0. [%d zeroes] %s", $zero_count, $significant );
+             if ($prob >= .999999) {
+                 $probstr = sprintf("%12.6f", 0.999999);
+             } elsif ($prob >= 0.1 || $prob == 0.0) {
+                 $probstr = sprintf("%12.6f", $prob);
+             } else {
+                $probstr = sprintf("%17.6e", $prob);
+             }
 
+             if ($self->{wmformat__}  eq 'score') {
+                $rawstr = sprintf("%12.6f", ($raw_score{$b} - $correction)/$log10);
+                $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td align=right>$rawstr&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
+             } else {
             $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
+        }
         }
 
         $self->{scores__} .= "</table><hr>";
+ 
+        # We want a link to change the format here.  But only the UI knows how to build
+        # that link.  So we just insert a comment which can be replaced by the UI.  There's
+        # probably a better way.
+   
+        $self->{scores__} .= "<!--format--><p>";
         $self->{scores__} .= "<table class=\"top20Words\">\n";
         $self->{scores__} .= "<tr>\n<th scope=\"col\">$language{Word}</th><th>&nbsp;</th><th scope=\"col\">$language{Count}</th><th>&nbsp;</th>\n";
 
@@ -958,7 +1034,31 @@ sub classify
 
         $self->{scores__} .= "</tr>";
 
-        my @ranked_words = sort {$self->get_sort_value_( $ranking[0], $b ) <=> $self->get_sort_value_( $ranking[0], $a )} keys %{$self->{parser__}->{words__}};
+        my %wordprobs;
+  
+        # If the word matrix is supposed to show probabilities, compute them,
+        # saving the results in %wordprobs.
+  
+        if ( $self->{wmformat__} eq 'prob') {
+            foreach my $word (keys %{$self->{parser__}->{words__}}) {
+                my $sumfreq = 0;
+                my %wval;
+                foreach my $bucket (@ranking) {
+                    $wval{$bucket} = exp(get_sort_value_( $self, $bucket, $word ));
+                    $sumfreq += $wval{$bucket};
+                }
+                foreach my $bucket (@ranking) {
+                    $wordprobs{$bucket,$word} = $wval{$bucket} / $sumfreq;
+                }
+            }
+        }
+   
+        my @ranked_words;
+        if ($self->{wmformat__} eq 'prob') {
+            @ranked_words = sort {$wordprobs{$ranking[0],$b} <=> $wordprobs{$ranking[0],$a}} keys %{$self->{parser__}->{words__}};
+        } else {
+            @ranked_words = sort {$self->get_sort_value_( $ranking[0], $b ) <=> $self->get_sort_value_( $ranking[0], $a )} keys %{$self->{parser__}->{words__}};
+        }
 
         foreach my $word (@ranked_words) {
             my $known = 0;
@@ -988,7 +1088,14 @@ sub classify
                     }
 
                     if ( $probability != 0 ) {
-                        my $wordprobstr  = sprintf("%12.4f", exp($probability) );
+                        my $wordprobstr;
+                        if ($self->{wmformat__} eq 'score') {
+                            $wordprobstr  = sprintf("%12.4f", ($probability - $self->{not_likely__})/$log10 );
+                        } elsif ($self->{wmformat__} eq 'prob') {
+                            $wordprobstr  = sprintf("%12.4f", $wordprobs{$bucket,$word});
+                        } else {
+                            $wordprobstr  = sprintf("%13.5f", exp($probability) );
+                        }
 
                         $self->{scores__} .= "<td><font color=\"$color\">$wordprobstr</font></td>\n<td>&nbsp;</td>\n";
                     } else {
@@ -1761,6 +1868,8 @@ sub add_messages_to_bucket
         }
     }
 
+    $self->load_word_matrix_();
+
     return 1;
 }
 
@@ -2093,6 +2202,14 @@ sub magnet_count
     my ( $self ) = @_;
 
     return $self->{magnet_count__};
+}
+   
+sub wmformat
+{
+    my ( $self, $value ) = @_;
+ 
+    $self->{wmformat__} = $value if (defined $value);
+    return $self->{wmformat__};
 }
 
 1;

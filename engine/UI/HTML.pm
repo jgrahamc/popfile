@@ -203,6 +203,10 @@ sub initialize
 
     $self->config_( 'archive_classes', 0 );
 
+    # This setting defines what is displayed in the word matrix: 'freq' for frequencies,
+    # 'prob' for probabilities, 'score' for logarithmic scores.
+    $self->config_( 'wordtable_format', 'prob' );
+  
     # Load skins
 
     load_skins($self);
@@ -261,6 +265,11 @@ sub start
     $self->load_disk_cache__();
     $self->load_history_cache__();
 
+    # Set the classifier option wmformat__ according to our wordtable_format
+    # option.
+  
+    $self->{classifier__}->wmformat( $self->config_( 'wordtable_format' ) );
+  
     return $self->SUPER::start();
 }
 
@@ -2214,7 +2223,7 @@ sub corpus_page
                 if ( $self->{classifier__}->get_value_( $bucket, $word ) != 0 ) {
                     my $prob    = exp( $self->{classifier__}->get_value_( $bucket, $word ) );
                     my $n       = ($total > 0)?$prob / $total:0;
-                    my $score   = ($#buckets >= 0)?log($n)/log(@buckets)+1:0;
+                    my $score   = ($#buckets >= 0)?(log($prob)-$self->{classifier__}->{not_likely__})/log(10.0):0;
                     my $normal  = sprintf("%.10f", $n);
                     $score      = sprintf("%.10f", $score);
                     my $probf   = sprintf("%.10f", $prob);
@@ -3293,6 +3302,15 @@ sub view_page
     $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
     $self->{form_}{search} = '' if ( !defined( $self->{form_}{search} ) );
     $self->{form_}{filter} = '' if ( !defined( $self->{form_}{filter} ) );
+    $self->{form_}{format} = '' if ( !defined( $self->{form_}{format} ) );
+  
+    # If a format change was requested for the word matrix, record it in the
+    # configuration and in the classifier options.
+  
+    if ( $self->{form_}{format} ne '' ) {
+        $self->config_( 'wordtable_format', $self->{form_}{format} );
+        $self->{classifier__}->wmformat( $self->{form_}{format} );
+    }
 
     my $index = -1;
 
@@ -3382,9 +3400,39 @@ sub view_page
     # Message body
     $body .= "<tr>\n<td class=\"openMessageBody\"><hr><p>";
 
+    my $fmtlinks;
+
     if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
         $body .= $self->{classifier__}->get_html_colored_message($self->global_config_( 'msgdir' ) . $mail_file);
 
+        # We want to insert a link to change the output format at the start of the word
+        # matrix.  The classifier puts a comment in the right place, which we can replace
+        # by the link.  (There's probably a better way.)
+  
+        $fmtlinks = "<table width=\"100%\">\n<td class=\"top20\" align=\"left\"><b>$self->{language__}{View_WordMatrix}</b></td>\n<td class=\"historyNavigatorTop\">\n";
+        if ($self->config_( 'wordtable_format' ) ne 'freq' ) {
+            $fmtlinks .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index ];
+            $fmtlinks .= "&start_message=". ((( $index ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' )));
+            $fmtlinks .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "&format=freq#scores\"> ";
+            $fmtlinks .= $self->{language__}{View_ShowFrequencies};
+            $fmtlinks .= "</a> &nbsp;\n";
+        }
+        if ($self->config_( 'wordtable_format' ) ne 'prob' ) {
+            $fmtlinks .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index ];
+            $fmtlinks .= "&start_message=". ((( $index ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' )));
+            $fmtlinks .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "&format=prob#scores\"> ";
+            $fmtlinks .= $self->{language__}{View_ShowProbabilities};
+            $fmtlinks .= "</a> &nbsp;\n";
+        }
+        if ($self->config_( 'wordtable_format' ) ne 'score' ) {
+            $fmtlinks .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index ];
+            $fmtlinks .= "&start_message=". ((( $index ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' )));
+            $fmtlinks .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "&format=score#scores\"> ";
+            $fmtlinks .= $self->{language__}{View_ShowScores};
+            $fmtlinks .= "</a> \n";
+        }
+        $fmtlinks .= "</a></td></table>";
+  
         # Enable saving of word-scores
 
         $self->{classifier__}->wordscores( 1 );
@@ -3441,7 +3489,9 @@ sub view_page
     $body .= "<tr><td class=\"top20\" valign=\"top\">\n";
 
     if ($self->{history__}{$mail_file}{magnet} eq '') {
-        $body .= $self->{classifier__}->scores();
+        my $score_text = $self->{classifier__}->scores();
+        $score_text =~ s/\<\!--format--\>/$fmtlinks/;
+        $body .= $score_text;
         $self->{classifier__}->scores('');
     } else {
         $body .= sprintf(   $self->{language__}{History_MagnetBecause},                                # PROFILE BLOCK START
