@@ -1549,7 +1549,7 @@ sub bucket_page
 
 	    for my $word (sort { $temp{$b} <=> $temp{$a} } keys %temp) {
 	      $body .= "</tr><tr valign=\"top\">" if ( ( $count % 6 ) ==  0 );
-	      $body .= "<td><a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key__}\&amp;lookup=Lookup\&amp;word=$word#Lookup\"><b>$word</b><\/a></td><td>$temp{$word}</td><td>&nbsp;</td>";
+	      $body .= "<td><a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key__}\&amp;lookup=Lookup\&amp;word=". $self->url_encode_( $word ) . "#Lookup\"><b>$word</b><\/a></td><td>$temp{$word}</td><td>&nbsp;</td>";
 	      $count += 1;
 	    }
 
@@ -1558,7 +1558,7 @@ sub bucket_page
 	  } else {
 	    $j = '';
 
-	    $body .= "<a href=/buckets?session=$self->{session_key__}\&amp;showbucket=$self->{form_}{showbucket}\&amp;showletter=$first><b>$first</b></a>\n";
+	    $body .= "<a href=/buckets?session=$self->{session_key__}\&amp;showbucket=$self->{form_}{showbucket}\&amp;showletter=" . $self->url_encode_($first) . "><b>$first</b></a>\n";
 	  }
         }
       }
