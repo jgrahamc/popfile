@@ -25,8 +25,7 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #-------------------------------------------------------------------------------------------
 #
-#  This version was tested using NSIS 2.0b4 released 19 November 2003
-#  with the NSIS CVS snapshot of 22 December 2003 (08:44) applied.
+#  This version was tested using "NSIS 2 Release Candidate 1" released 27 December 2003
 #
 #-------------------------------------------------------------------------------------------
 # Compile-time command-line switches (used by 'makensis.exe')
@@ -90,7 +89,7 @@
   Name    "POPFile Wrapper Utility"
   Caption "POPFile Wrapper Utility"
 
-  !define VERSION   "0.2.0"     ; see 'VIProductVersion' comment below for format details
+  !define VERSION   "0.2.1"     ; see 'VIProductVersion' comment below for format details
 
   !ifdef BACKGROUND
           OutFile wrapperb.exe
@@ -235,10 +234,10 @@ root_set_ok:
 user_set_ok:
   !ifdef BACKGROUND
             SetOutPath "${L_POPFILE_ROOT}"
-            Exec '"${L_POPFILE_ROOT}\wperl.exe" popfile.pl'
+            Exec '"${L_POPFILE_ROOT}\wperl.exe" "${L_POPFILE_ROOT}\popfile.pl"'
   !else ifdef FOREGROUND
             SetOutPath "${L_POPFILE_ROOT}"
-            Exec '"${L_POPFILE_ROOT}\perl.exe" popfile.pl'
+            Exec '"${L_POPFILE_ROOT}\perl.exe" "${L_POPFILE_ROOT}\popfile.pl"'
   !else
             StrCpy ${L_CONSOLE} "1"
             StrCpy ${L_DATA} ${L_POPFILE_USER}
@@ -264,12 +263,12 @@ user_set_ok:
             FileClose ${L_CFG}
             StrCmp ${L_CONSOLE} "0" background
             SetOutPath "${L_POPFILE_ROOT}"
-            Exec '"${L_POPFILE_ROOT}\perl.exe" popfile.pl'
+            Exec '"${L_POPFILE_ROOT}\perl.exe" "${L_POPFILE_ROOT}\popfile.pl"'
             Goto Exit
 
       background:
             SetOutPath "${L_POPFILE_ROOT}"
-            Exec '"${L_POPFILE_ROOT}\wperl.exe" popfile.pl'
+            Exec '"${L_POPFILE_ROOT}\wperl.exe" "${L_POPFILE_ROOT}\popfile.pl"'
 
       exit:
   !endif
