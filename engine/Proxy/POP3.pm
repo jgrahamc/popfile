@@ -848,7 +848,7 @@ sub flush_extra
             my $max_length = 8192;
 
             while( 1 ) {
-                last unless () = $selector->can_read(0.1);
+                last unless () = $selector->can_read(0.01);
                 last unless ( my $n = sysread( $mail, $buf, $max_length, length $buf ) );
 
                 tee( $self,  $client, $buf ) if ( $discard != 1 );
