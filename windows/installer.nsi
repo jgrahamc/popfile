@@ -314,6 +314,8 @@ Section "POPFile" SecPOPFile
 readme_ok:
   File "..\engine\popfile.pl"
   File "..\engine\insert.pl"
+  File "..\engine\bayes.pl"
+  File "..\engine\pipe.pl"
   File "..\engine\pix.gif"
   File "..\engine\black.gif"
   File "..\engine\otto.gif"
