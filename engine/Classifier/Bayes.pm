@@ -406,11 +406,12 @@ sub backup_database__
 #
 # $tweak    The tweak to apply (a bit in the sqlite_tweaks mask)
 # $state    1 to enable the tweak, 0 to disable
+# $db       The db handle to tweak
 #
 #----------------------------------------------------------------------------
 sub tweak_sqlite
 {
-    my ( $self, $tweak, $state ) = @_;
+    my ( $self, $tweak, $state, $db ) = @_;
 
     if ( $self->{db_is_sqlite__} && 
          ( $self->config_( 'sqlite_tweaks' ) & $tweak ) ) {
@@ -419,7 +420,7 @@ sub tweak_sqlite
 
         if ( $tweak == 1 ) {
             my $sync = $state?'off':'normal';
-            $self->{db__}->do( "pragma synchronous=$sync;" );
+            $db->do( "pragma synchronous=$sync;" );
         }    
     }
 }
