@@ -16,7 +16,6 @@ use Classifier::WordMangle;
 #
 # Class new() function
 #----------------------------------------------------------------------------
-
 sub new 
 {
     my $type = shift;
@@ -64,7 +63,6 @@ sub new
 # $line     A line of base64 encoded data
 #
 # ---------------------------------------------------------------------------------------------
-
 sub un_base64 
 {
     my ($self, $line) = @_;
@@ -87,7 +85,6 @@ sub un_base64
 # Updates the word frequency for a word 
 #
 # ---------------------------------------------------------------------------------------------
-
 sub update_word 
 {
     my ($self, $word, $encoded, $before, $after) = @_;
@@ -124,7 +121,6 @@ sub update_word
 # $encoded      1 if the line was found in encoded text (base64)
 #
 # ---------------------------------------------------------------------------------------------
-
 sub add_line 
 {
     my ($self, $bigline, $encoded) = @_;
@@ -176,7 +172,6 @@ sub add_line
 # $arg     The arguments
 #
 # ---------------------------------------------------------------------------------------------
-
 sub update_tag 
 {
     my ($self, $tag, $arg) = @_;
@@ -208,7 +203,6 @@ sub update_tag
 # $file     The file to open and parse
 #
 # ---------------------------------------------------------------------------------------------
-
 sub parse_stream 
 {
     my ($self, $file) = @_;

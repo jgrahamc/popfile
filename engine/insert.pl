@@ -20,7 +20,6 @@ my %words;
 # Fills the words hash with the word frequencies for word loaded from the appropriate bucket
 #
 # ---------------------------------------------------------------------------------------------
-
 sub load_word_table
 {
     my ($bucket) = @_;
@@ -37,12 +36,9 @@ sub load_word_table
     
     # Each line in the word table is a word and a count
     
-    while (<WORDS>)
-    {
-        if ( /__CORPUS__ __VERSION__ (\d+)/ )
-        {
-            if ( $1 != 1 ) 
-            {
+    while (<WORDS>) {
+        if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
+            if ( $1 != 1 ) {
                 print "Incompatible corpus version in $bucket\n";
                 return;
             }
@@ -50,8 +46,7 @@ sub load_word_table
             next;
         }
             
-        if ( /(.+) (.+)/ )
-        {
+        if ( /(.+) (.+)/ ) {
             $words{$1} = $2;
         }
     }
@@ -80,8 +75,7 @@ sub save_word_table
     
     # Each line in the word table is a word and a count
     
-    foreach my $word (keys %words)
-    {
+    foreach my $word (keys %words) {
         print WORDS "$word $words{$word}\n";
     }
     
@@ -106,11 +100,9 @@ sub split_mail_message
 
     print "Parsing message '$message'...\n";
 
-#    $parser->{debug} = 1;
     $parser->parse_stream($message);
     
-    foreach $word (keys %{$parser->{words}})
-    {
+    foreach $word (keys %{$parser->{words}}) {
         $words{$word} += $parser->{words}{$word};
     }
 }
@@ -123,26 +115,20 @@ if ( $#ARGV >= 1 )
 
     my @files;
 
-    if ($^O =~ /linux/)
-    {
+    if ($^O =~ /linux/) {
         @files = @ARGV[1 .. $#ARGV];
-    }
-    else
-    {
+    } else {
         @files   = map { glob } @ARGV[1 .. $#ARGV];
     }
     
-    foreach my $file (@files)
-    {
+    foreach my $file (@files) {
         split_mail_message($file);
     }
     
     save_word_table($ARGV[0]);
     
     print "done.\n";
-}
-else
-{
+} else {
     print "insert.pl - insert mail messages into a specific bucket\n\n";
     print "Usage: insert.pl <bucket> <messages>\n";
     print "       <bucket>           The name of the bucket\n";
