@@ -833,13 +833,16 @@ sub classify_file
 # $dcount   - the unique download/session count for this message
 # $mcount   - the message count for this message
 # $ext      - the extension for this message (defaults to .msg)
+# $path     - 1 to return the path configuration info, 0 to return just the filename (default 0)
 #
 # ---------------------------------------------------------------------------------------------
 sub history_filename
 {
-    my ( $self, $dcount, $mcount, $ext) = @_;
+    my ( $self, $dcount, $mcount, $ext, $path) = @_;
+    
+    $path = 0 if (!defined($path));
 
-    return $self->global_config_( 'msgdir' ) . "popfile$dcount" . "=$mcount" . (defined $ext?$ext:'.msg');
+    return ($path?$self->global_config_( 'msgdir' ):'') . "popfile$dcount" . "=$mcount" . (defined $ext?$ext:'.msg');
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -978,8 +981,10 @@ sub classify_and_modify
     # Whether we are currently reading the mail headers or not
     my $getting_headers = 1;
 
-    my $temp_file  = $self->history_filename($dcount,$mcount, ".msg");
-    my $class_file = $self->history_filename($dcount,$mcount, ".cls");
+    my $temp_file  = $self->history_filename($dcount,$mcount, ".msg",1);
+    
+    # Get the class-file info without the path, since we'd just need to strip it
+    my $class_file = $self->history_filename($dcount,$mcount, ".cls",0);
 
     open TEMP, ">$temp_file";
 
@@ -1089,10 +1094,6 @@ sub classify_and_modify
     $msg_head_before .= 'Subject:' . $msg_subject;
     $msg_head_before .= $eol;
 
-    if ( $nosave ) {
-        unlink( $temp_file );
-    }
-
     # Add the XTC header
     $msg_head_after .= "X-Text-Classification: $classification$eol" if ( ( $self->global_config_( 'xtc' ) ) &&
                                                                          ( $self->{parameters__}{$classification}{quarantine} == 0 ) );
@@ -1172,8 +1173,11 @@ sub classify_and_modify
         print $client "$eol.$eol" if ( $echo );
     }
 
+    if ( $nosave ) {
+        unlink( $temp_file );
+    }
+
     if ( !$nosave ) {
-        $class_file =~ s/^([^\/])*\///;
         $self->history_write_class($class_file, undef, $classification, undef, ($self->{magnet_used__}?$self->{magnet_detail__}:undef))
     }
 
