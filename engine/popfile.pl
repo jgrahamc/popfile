@@ -809,7 +809,7 @@ sub corpus_page
         $classifier->calculate_top10();
     }
     
-    if ( $form{create} eq 'Create' )
+    if ( ( $form{create} eq 'Create' ) && ( $form{name} ne '' ) )
     {
         $form{name} = lc($form{name});
         if ( $classifier->{total}{$form{name}} > 0 ) 
@@ -1181,15 +1181,16 @@ sub history_page
             $subject = "&lt;no subject line&gt;";
         }
         
-        if ( length($from)>64 ) 
+        if ( length($from)>40 ) 
         {
-            $from =~ /(.{64})/;
+            $from =~ /(.{40})/;
             $from = "$1...";
         }
         
-        if ( length($subject)>64 ) 
+        if ( length($subject)>40 ) 
         {
-            $subject =~ /(.{64})/;
+            $subject =~ s/=20/ /g;
+            $subject =~ /(.{40})/;
             $subject = "$1...";
         }
         
