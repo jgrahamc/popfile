@@ -2301,7 +2301,7 @@ sub get_history_navigator
     if ( $start_message != 0 )  {
         $body .= "[<a href=\"/history?start_message=";
         $body .= $start_message - $self->config_( 'page_size' );
-        $body .= "&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">< $self->{language__}{Previous}</a>] ";
+        $body .= $self->print_form_fields_(0,1,('session','filter','search','sort')) . "\">< $self->{language__}{Previous}</a>] ";
     }
     my $i = 0;
     while ( $i < $self->history_size() ) {
@@ -2309,7 +2309,7 @@ sub get_history_navigator
             $body .= "<b>";
             $body .= $i+1 . "</b>";
         } else {
-            $body .= "[<a href=\"/history?start_message=$i&amp;session=$self->{session_key__}&amp;search=$self->{form_}{search}&amp;sort=$self->{form_}{sort}&amp;filter=$self->{form_}{filter}\">";
+            $body .= "[<a href=\"/history?start_message=$i" . $self->print_form_fields_(0,1,('session','filter','search','sort')). "\">";
             $body .= $i+1 . "</a>]";
         }
 
@@ -2319,7 +2319,7 @@ sub get_history_navigator
     if ( $start_message < ( $self->history_size() - $self->config_( 'page_size' ) ) )  {
         $body .= "[<a href=\"/history?start_message=";
         $body .= $start_message + $self->config_( 'page_size' );
-        $body .= "&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">$self->{language__}{Next} ></a>]";
+        $body .= $self->print_form_fields_(0,1,('session','filter','search','sort')) . "\">$self->{language__}{Next} ></a>]";
     }
 
     return $body;
@@ -2715,6 +2715,16 @@ sub history_page
                                                             ( defined( $self->{form_}{deletemessage} ) ) ||
                                                             ( defined( $self->{form_}{clearall}      ) ) ||
                                                             ( defined( $self->{form_}{clearpage}     ) ) );
+
+    # Redirect somewhere safe if non-idempotent action has been taken
+
+    if ( defined( $self->{form_}{deletemessage}  ) ||
+         defined( $self->{form_}{clearpage}      ) ||
+         defined( $self->{form_}{undo}           ) ||
+         defined( $self->{form_}{reclassify}     ) ) {
+        return $self->http_redirect_( $client, "/history?" . $self->print_form_fields_(1,0,('start_message','filter','search','sort','session') ) );
+    }                                                            
+
     my $body = '';
 
     if ( !$self->history_cache_empty() )  {
@@ -2722,6 +2732,7 @@ sub history_page
         my $start_message = 0;
 
         $start_message = $self->{form_}{start_message} if ( ( defined($self->{form_}{start_message}) ) && ($self->{form_}{start_message} > 0 ) );
+        $self->{form_}{start_message} = $start_message;
         my $stop_message  = $start_message + $self->config_( 'page_size' ) - 1;
         $stop_message = $self->history_size() - 1 if ( $stop_message >= $self->history_size() );
 
@@ -2772,7 +2783,7 @@ sub history_page
 
         foreach my $header ('', 'from', 'subject', 'bucket') {
             $body .= "<th class=\"historyLabel\" scope=\"col\">\n";
-            $body .= "<a href=\"/history?session=$self->{session_key__}&amp;filter=$self->{form_}{filter}&amp;setsort=" . ($self->{form_}{sort} eq "$header"?"-":"");
+            $body .= "<a href=\"/history?" . $self->print_form_fields_(1,1,('filter','session','search')) . "&amp;setsort=" . ($self->{form_}{sort} eq "$header"?"-":"");
             $body .= "$header\">";
 
             my $label = '';
@@ -2821,7 +2832,7 @@ sub history_page
             $body .= $index . "</td>\n<td>";
             $mail_file =~ /popfile\d+=(\d+)\.msg$/;
             $body .= "<a title=\"$from\">$short_from</a></td>\n";
-            $body .= "<td><a class=\"messageLink\" title=\"$subject\" href=\"/view?view=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;filter=$self->{form_}{filter}&amp;search=$self->{form_}{search}\">";
+            $body .= "<td><a class=\"messageLink\" title=\"$subject\" href=\"/view?view=$mail_file" . $self->print_form_fields_(0,1,('start_message','session','filter','search','sort')) . "\">";
             $body .= "$short_subject</a></td>\n<td>";
             if ( $reclassified )  {
                 $body .= "<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font></td>\n<td>";
@@ -2932,7 +2943,7 @@ sub view_page
     if ( $index > 0 ) {
         $body .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index - 1 ];
         $body .= "&start_message=". ((( $index - 1 ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' )));
-        $body .= "&session=$self->{session_key__}&sort=$self->{form_}{sort}&filter=$self->{form_}{filter}&search=$self->{form_}{search}\">&lt;&lt;";
+        $body .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "\">&lt;&lt;";
         $body .= $self->{language__}{Previous};
         $body .= "</a> ";
     }
@@ -2940,7 +2951,7 @@ sub view_page
     if ( $index < ( $self->history_size() - 1 ) ) {
         $body .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index + 1 ];
         $body .= "&start_message=". ((( $index + 1 ) < ( $start_message + $self->config_( 'page_size' ) ) )?$start_message:($start_message + $self->config_( 'page_size' )));
-        $body .= "&session=$self->{session_key__}&sort=$self->{form_}{sort}&filter=$self->{form_}{filter}&search=$self->{form_}{search}\"> ";
+        $body .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "\"> ";
         $body .= $self->{language__}{Next};
         $body .= "&gt;&gt;</a>";
     }
@@ -2948,7 +2959,7 @@ sub view_page
     $body .= "</td>\n";
     
     $body .= "<td class=\"openMessageCloser\">";
-    $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">\n";
+    $body .= "<a class=\"messageLink\" href=\"/history?" . $self->print_form_fields_(1,1,('start_message','filter','session','search','sort')) . "\">\n";
     $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
     $body .= "</td>\n</tr>\n</table>\n";
 
@@ -3067,7 +3078,7 @@ sub view_page
     # Close button
 
     $body .= "<tr>\n<td class=\"openMessageCloser\">";
-    $body .= "<a class=\"messageLink\" href=\"/history?start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;search=$self->{form_}{search}&amp;filter=$self->{form_}{filter}\">\n";
+    $body .= "<a class=\"messageLink\" href=\"/history?" . $self->print_form_fields_(1,1,('start_message','filter','session','search','sort')). "\">\n";
     $body .= "<span class=\"historyLabel\">$self->{language__}{Close}</span>\n</a>\n";
     $body .= "</td>\n</tr>\n";
 
@@ -3327,6 +3338,48 @@ sub history_copy_file
         close FROM;
     }
 }
+
+# ---------------------------------------------------------------------------------------------
+#
+# print_form_fields_ - Returns a form string containing any presently defined form fields
+#
+# $first        - 1 if the form field is at the beginning of a query, 0 otherwise
+# $in_href      - 1 if the form field is printing in a href, 0 otherwise (eg, for a 302 redirect)
+# $include      - a list of fields to return
+#
+# ---------------------------------------------------------------------------------------------
+sub print_form_fields_
+{
+    my ($self, $first, $in_href, @include) = @_;
+
+    my $amp;
+    if ($in_href) {
+        $amp = '&amp;';
+    } else {
+        $amp = '&';
+    }
+
+    my $count = 0;
+    my $formstring = '';
+
+    $formstring = "$amp" if (!$first);
+
+    foreach my $field ( @include ) {        
+        unless ( !defined($self->{form_}{$field}) || ( $self->{form_}{$field} eq '' ) ) {
+            $formstring .= "$amp" if ($count > 0);
+            if ($field eq 'session') {
+                $formstring .= "session=$self->{session_key__}";
+            } else {
+                $formstring .= "$field=$self->{form_}{$field}";
+            }
+            $count++;
+        }        
+    }
+
+    return $formstring if ($count > 0);
+    return '';
+}
+
 
 # ---------------------------------------------------------------------------------------------
 # register_configuration_item
