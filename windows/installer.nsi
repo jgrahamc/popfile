@@ -18,6 +18,8 @@
   !define GUI     $R1
   !define STARTUP $R2
   !define CFG     $R3
+  !define LNE     $R4
+  !define CMPRE   $R5
   
   ;Language
   !insertmacro MUI_LANGUAGE "English"
@@ -56,6 +58,41 @@
 
 Function .onInit
 
+  ; See if we can get the current pop3 and gui port
+  ; from an existing configuration
+  FileOpen  ${CFG} $INSTDIR\popfile.cfg r
+
+loop:
+  FileRead   ${CFG} ${LNE}
+  IfErrors done
+
+  StrCpy ${CMPRE} ${LNE} 5
+  StrCmp ${CMPRE} "port " got_port not_port   
+got_port:
+  StrCpy ${POP3} ${LNE} 5 5
+  goto loop
+  
+not_port:
+  StrCpy ${CMPRE} ${LNE} 8
+  StrCmp ${CMPRE} "ui_port " got_ui_port loop   
+got_ui_port:
+  StrCpy ${GUI} ${LNE} 5 8
+  
+  goto loop
+
+done:  
+  FileClose ${CFG}
+
+  ; If the POP3 port is undefined then default it to 110
+  StrCmp ${POP3} "" 0 skip_pop3_set 
+  StrCpy ${POP3} "110"
+skip_pop3_set:
+
+  ; If the GUI port is undefined then default it to 8080
+  StrCmp ${GUI} "" 0 skip_gui_set 
+  StrCpy ${GUI} "8080"
+skip_gui_set:
+
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioA.ini"
   
 FunctionEnd
@@ -75,16 +112,6 @@ Section "POPFile" SecPOPFile
   !insertmacro MUI_INSTALLOPTIONS_READ ${POP3}    "ioA.ini" "Field 2" "State"
   !insertmacro MUI_INSTALLOPTIONS_READ ${GUI}     "ioA.ini" "Field 4" "State"
   !insertmacro MUI_INSTALLOPTIONS_READ ${STARTUP} "ioA.ini" "Field 5" "State"
-
-  ; If the POP3 port is undefined then default it to 110
-  StrCmp ${POP3} "" 0 skip_pop3_set 
-      StrCpy ${POP3} "110"
-skip_pop3_set:
-
-  ; If the GUI port is undefined then default it to 8080
-  StrCmp ${GUI} "" 0 skip_gui_set 
-    StrCpy ${GUI} "8080"
-skip_gui_set:
 
   WriteRegStr HKLM SOFTWARE\POPFile InstallLocation $INSTDIR
 
@@ -145,63 +172,69 @@ SectionEnd
 Section "Minimal Perl" SecPerl
 
   SetOutPath $INSTDIR
-  File "C:\Perl\bin\perl.exe"
-  File "C:\Perl\bin\wperl.exe"
-  File "C:\Perl\bin\perl56.dll"
-  File "C:\Perl\lib\AutoLoader.pm"
-  File "C:\Perl\lib\Carp.pm"
-  File "C:\Perl\lib\Config.pm"
-  File "C:\Perl\lib\DynaLoader.pm"
-  File "C:\Perl\lib\Errno.pm"
-  File "C:\Perl\lib\Exporter.pm"
-  File "C:\Perl\lib\IO.pm"
-  File "C:\Perl\lib\locale.pm"
-  File "C:\Perl\lib\SelectSaver.pm"
-  File "C:\Perl\lib\Socket.pm"
-  File "C:\Perl\lib\strict.pm"
-  File "C:\Perl\lib\Symbol.pm"
-  File "C:\Perl\lib\vars.pm"
-  File "C:\Perl\lib\warnings.pm"
-  File "C:\Perl\lib\XSLoader.pm"
+  File "C:\Perl58\bin\perl.exe"
+  File "C:\Perl58\bin\wperl.exe"
+  File "C:\Perl58\bin\perl58.dll"
+  File "C:\Perl58\lib\AutoLoader.pm"
+  File "C:\Perl58\lib\Carp.pm"
+  File "C:\Perl58\lib\Config.pm"
+  File "C:\Perl58\lib\DynaLoader.pm"
+  File "C:\Perl58\lib\Errno.pm"
+  File "C:\Perl58\lib\Exporter.pm"
+  File "C:\Perl58\lib\IO.pm"
+  File "C:\Perl58\lib\locale.pm"
+  File "C:\Perl58\lib\SelectSaver.pm"
+  File "C:\Perl58\lib\Socket.pm"
+  File "C:\Perl58\lib\strict.pm"
+  File "C:\Perl58\lib\Symbol.pm"
+  File "C:\Perl58\lib\vars.pm"
+  File "C:\Perl58\lib\warnings.pm"
+  File "C:\Perl58\lib\XSLoader.pm"
 
   SetOutPath $INSTDIR\Carp
-  File "C:\Perl\lib\Carp\*"
+  File "C:\Perl58\lib\Carp\*"
 
   SetOutPath $INSTDIR\Exporter
-  File "C:\Perl\lib\Exporter\*"
+  File "C:\Perl58\lib\Exporter\*"
+
+  SetOutPath $INSTDIR\MIME
+  File "C:\Perl58\lib\MIME\*"
 
   SetOutPath $INSTDIR\IO
-  File "C:\Perl\lib\IO\*"
+  File "C:\Perl58\lib\IO\*"
 
   SetOutPath $INSTDIR\Sys
-  File "C:\Perl\lib\Sys\*"
+  File "C:\Perl58\lib\Sys\*"
 
   SetOutPath $INSTDIR\Text
-  File "C:\Perl\lib\Text\ParseWords.pm"
+  File "C:\Perl58\lib\Text\ParseWords.pm"
 
   SetOutPath $INSTDIR\IO\Socket
-  File "C:\Perl\lib\IO\Socket\*"
+  File "C:\Perl58\lib\IO\Socket\*"
 
   SetOutPath $INSTDIR\auto\DynaLoader
-  File "C:\Perl\lib\auto\DynaLoader\*"
+  File "C:\Perl58\lib\auto\DynaLoader\*"
   
   SetOutPath $INSTDIR\auto\File\Glob
-  File "C:\Perl\lib\auto\File\Glob\*"
+  File "C:\Perl58\lib\auto\File\Glob\*"
+
+  SetOutPath $INSTDIR\auto\MIME\Base64
+  File "C:\Perl58\lib\auto\MIME\Base64\*"
 
   SetOutPath $INSTDIR\auto\IO
-  File "C:\Perl\lib\auto\IO\*"
+  File "C:\Perl58\lib\auto\IO\*"
 
   SetOutPath $INSTDIR\auto\Socket
-  File "C:\Perl\lib\auto\Socket\*"
+  File "C:\Perl58\lib\auto\Socket\*"
 
   SetOutPath $INSTDIR\auto\Sys\Hostname
-  File "C:\Perl\lib\auto\Sys\Hostname\*"
+  File "C:\Perl58\lib\auto\Sys\Hostname\*"
 
   SetOutPath $INSTDIR\File
-  File "C:\Perl\lib\File\Glob.pm"
+  File "C:\Perl58\lib\File\Glob.pm"
 
   SetOutPath $INSTDIR\warnings
-  File "C:\Perl\lib\warnings\register.pm"
+  File "C:\Perl58\lib\warnings\register.pm"
 
 SectionEnd
 
@@ -237,7 +270,15 @@ SectionEnd
 
 Function SetOptionsPage
   !insertmacro MUI_HEADER_TEXT "POPFile Installation Options" "Leave these options unchanged unless you need to change them"
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioA.ini"
+  !insertmacro MUI_INSTALLOPTIONS_READ $R5 "ioA.ini" "Field 2" "ListItems"
+  StrCpy $R5 $R5|${POP3}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioA.ini" "Field 2" "ListItems" $R5
+  !insertmacro MUI_INSTALLOPTIONS_READ $R5 "ioA.ini" "Field 4" "ListItems"
+  StrCpy $R5 $R5|${GUI}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioA.ini" "Field 4" "ListItems" $R5
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioA.ini" "Field 2" "State" ${POP3}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioA.ini" "Field 4" "State" ${GUI}
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY  "ioA.ini"
 FunctionEnd
 
 ;--------------------------------
@@ -277,6 +318,7 @@ skip_confirmation:
   Delete $INSTDIR\languages\*.msg
   RMDir $INSTDIR\languages
 
+  Delete $INSTDIR\MIME\*.*
   Delete $INSTDIR\IO\*.*
   Delete $INSTDIR\IO\Socket\*.*
   RMDir /r $INSTDIR\IO
@@ -289,6 +331,7 @@ skip_confirmation:
   RMDir /r $INSTDIR\Text
   Delete $INSTDIR\auto\DynaLoader\*.*
   Delete $INSTDIR\auto\File\Glob\*.*
+  Delete $INSTDIR\auto\MIME\Base64\*.*
   Delete $INSTDIR\auto\IO\*.*
   Delete $INSTDIR\auto\Socket\*.*
   Delete $INSTDIR\auto\Sys\*.*
