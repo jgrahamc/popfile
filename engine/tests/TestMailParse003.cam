@@ -12,14 +12,11 @@ Content-Type: multipart/alternative;
     boundary="=gs6mlah1knva3tk5nbs4422k3570q7m3k=="
 Content-Transfer-Encoding: 7bit
 Return-Path: j239o114@earthlink.net
-X-OriginalArrivalTime: 13 Jan 2003 00:49:31.0608 (UTC) FILETIME=[A257A580:01C2BA9D]
-X-Text-Classification: spam
-X-POPFile-Link: <http://127.0.0.1:8080/jump_to_message?view=popfile0=0.msg>
-
+X-OriginalArrivalTime: 13 Jan 2003 00:49:31.0608 (UTC)
+FILETIME=[A257A580:01C2BA9D]
 --=gs6mlah1knva3tk5nbs4422k3570q7m3k==
 Content-Transfer-Encoding: base64
 Content-Type: text/html; charset="US-ASCII"
-
 PGh0bWw+DQo8YSBocmVmPSJodHRwOi8vJTc3JTc3dy5wJTYxJTczJTczNCU2NiU3MmUlNjUlMkVuZXQvcGIzLyIgVDhJPjxGT05UIFNJWkU9NT48Qj4mIzg3
 OyYjOTc7PCFLND50PCE0YTQ1PmMmIzEwNDs8IVBKMHV1PiAmIzY4OzwhT1UxMGRRPm88IWgzMj5nPCFOWDc4PnM8IUY0NzZ0PiAmIzExNTsmIzEwODs8IXkw
 eDY+dSYjMTE0OzwhV1ZRPnAmIzMyOzwhMW0+eTwhS1NrUD5vPCFvMzVBZT51JiMxMTA7JiMxMDM7PCE0N2ViVTM+ICYjMTAzOyYjMTA1OyYjMTE0OyYjMTA4
@@ -32,3 +29,6 @@ PjxCUj48QlI+PEJSPiYjMTM7JiMxMDsmIzY5OyYjMTA5OyYjOTc7JiMxMDU7PCF5MjU+bCYjMzI7PCE4
 Mk1PZHZjTT4NCm5vIG1vcmUgPGEgaHJlZj0iaHR0cDovL3JlbW92ZSUyRSU2RGUlNzMlNzNhJTY3JTY1bSU2NW4lNkYlNzcuJTZFZXQvIiBSZnBOUD5DbGlj
 ayBIZXJlPC9hPjxCUj4NCjxCUj48L2h0bWw+DQoNCmFQcTgyTU9kICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjTUo=
 --=gs6mlah1knva3tk5nbs4422k3570q7m3k==--
+X-Text-Classification: spam
+X-POPFile-Link: <http://127.0.0.1:8080/jump_to_message?view=popfile0=0.msg>
+

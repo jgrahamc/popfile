@@ -67,7 +67,6 @@ my @modify_tests = sort glob 'tests/TestMailParse*.msg';
 
 for my $modify_file (@modify_tests) {
     if ( ( open MSG, "<$modify_file" ) && ( open OUTPUT, ">tests/temp.out" ) ) {
-		binmode OUTPUT;
 	    $b->classify_and_modify( \*MSG, \*OUTPUT, 0, 0, 0, '' );
 	    close MSG;
 		close OUTPUT;
@@ -89,7 +88,6 @@ for my $modify_file (@modify_tests) {
 		close OUTPUT;
 		unlink( 'tests/popfile0=0.msg' );
 		unlink( 'tests/popfile0=0.cls' );
-#		rename( 'tests/temp.out', $output_file);
 		unlink( 'tests/temp.out' );
     }
 }

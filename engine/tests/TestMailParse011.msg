@@ -3,7 +3,7 @@ Delivered-To: myrealemailaddress@domain
 Received: (qmail 26261 invoked by uid 609); 18 Jan 2003 06:22:49 -0000
 Delivered-To: spam-address-ccbill@domain
 Received: (qmail 26258 invoked by uid 421); 18 Jan 2003 06:22:49 -0000 blah blah
- by ekardia with Microsoft SMTPSVC(5.0.2122.2262);
+by ekardia with Microsoft SMTPSVC(5.0.2122.2262);
 Sat, 18 Jan 2003 15:26:39 +0900
 Date: Sat, 18 Jan 2003 06:25:35 GMT
 From: "Acaynya"<hornydarla3553qqoe1@free.fr>
@@ -15,7 +15,7 @@ Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Message-ID: <EKARDIAX6Mmasdf78970016@ekardia>
 X-OriginalArrivalTime: 18 Jan 2003 06:26:40.0656 (UTC)
- FILETIME=[8FDC2900:01BAAAABA]
+FILETIME=[8FDC2900:01BAAAABA]
 
 I think you answered my ad longtime ago if it was not you I am sorry.
 If it was I could not answer
