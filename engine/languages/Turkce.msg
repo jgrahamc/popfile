@@ -208,7 +208,7 @@ History_Remove                          Geçmiþteki girdileri kaldýrmak için týkl
 History_SearchMessage                   Kimden/Konu Ara
 History_NoMessages                      Mesaj yok
 History_ShowMagnet                      mýknatýslanmýþ
-History_ShowNoMagnet                    mýknatýslanmamýþ
+History_Negate_Search                   Aramayý/filtreyi ters çevir
 History_Magnet                          &nbsp;(þu an mýknatýs ile sýnýflandýrýlmýþ mesajlar görüntüleniyor)
 History_NoMagnet                        &nbsp;(þu an mýknatýs ile sýnýflandýrýlmamýþ mesajlar görüntüleniyor)
 History_ResetSearch                     Aramayý Sýfýrla
