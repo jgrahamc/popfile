@@ -1180,6 +1180,29 @@ install_schema:
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.exp"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.lib"
 
+  ;--------------------------------------------------------------------------
+  ; The Kakasi package (v2.3.4) is not "thread safe" so we use semaphores to avoid
+  ; problems when forking is enabled (i.e. when concurrent POP3 connections are enabled)
+  ; Future releases may require semaphores elsewhere, so semaphore support is always installed
+  ; (instead of just installing it when the Kakasi package is installed).
+  ;--------------------------------------------------------------------------
+
+  SetOutPath "$G_MPLIBDIR"
+  File "${C_PERL_DIR}\lib\attributes.pm"
+  File "${C_PERL_DIR}\lib\threads.pm"
+
+  SetOutPath "$G_MPLIBDIR\auto\threads"
+  File "${C_PERL_DIR}\lib\auto\threads\*"
+
+  SetOutPath "$G_MPLIBDIR\auto\threads\shared"
+  File "${C_PERL_DIR}\lib\auto\threads\shared\*"
+
+  SetOutPath "$G_MPLIBDIR\Thread"
+  File "${C_PERL_DIR}\lib\Thread\Semaphore.pm"
+
+  SetOutPath "$G_MPLIBDIR\threads"
+  File "${C_PERL_DIR}\lib\threads\shared.pm"
+
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
 
@@ -3151,6 +3174,11 @@ Section "un.Minimal Perl" UnSecMinPerl
   RMDir /r "$G_MPLIBDIR\XMLRPC"
 
 skip_XMLRPC_support:
+  IfFileExists "$G_MPLIBDIR\Thread\*.*" 0 skip_semaphore_support
+  RMDir /r "$G_MPLIBDIR\Thread"
+  RMDir /r "$G_MPLIBDIR\threads"
+
+skip_semaphore_support:
   RMDir /r "$G_MPLIBDIR\auto"
   RMDir /r "$G_MPLIBDIR\Carp"
   RMDir /r "$G_MPLIBDIR\Date"
