@@ -231,10 +231,6 @@
 
 Function .onInit
 
-  !define L_RESULT  $R0
-
-  Push ${L_RESULT}
-
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioA.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioB.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioC.ini"
@@ -252,9 +248,6 @@ use_file_association:
   ExecShell "open" "$PLUGINSDIR\release.txt"
 
 exit:
-  Pop ${L_RESULT}
-
-  !undef L_RESULT
 FunctionEnd
 
 #--------------------------------------------------------------------------
