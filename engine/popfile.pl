@@ -80,7 +80,7 @@ my $highlight_color = '#cccc99';
 
 # These two variables are used to create the HTML UI for POPFile
 my $header = "<html><head><title>POPFile Maintenance</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style></head>\
-<body bgcolor=#ffffff><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=$main_color>&nbsp;&nbsp;<font size=+3>POPFile Maintenance</font><tr height=3 bgcolor=$stab_color><td height=3 bgcolor=$stab_color></td></tr></table><p>\
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=$main_color>&nbsp;&nbsp;<font size=+3>POPFile Maintenance</font><tr height=3 bgcolor=$stab_color><td height=3 bgcolor=$stab_color></td></tr></table><p>\
 <table width=100% cellspacing=0><tr>\
 <td align=center bgcolor=TAB2 width=10%><font size=+1><b>&nbsp;<a href=/history>History</a></b></font></td><td width=2></td>\
 <td align=center bgcolor=TAB1 width=10%><font size=+1><b>&nbsp;<a href=/buckets>Buckets</a></b></font></td><td width=2></td>\
