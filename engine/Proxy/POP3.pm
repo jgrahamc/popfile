@@ -89,6 +89,9 @@ sub initialize
     # Only accept connections from the local machine for POP3
     $self->{configuration}->{configuration}{localpop}  = 1;
 
+    # Whether to do classification on TOP as well
+    $self->{configuration}->{configuration}{toptoo}    = 0;
+
     # Start with no messages downloaded and no error
     $self->{configuration}->{configuration}{mcount}    = 0;
     $self->{configuration}->{configuration}{ecount}    = 0;
@@ -349,7 +352,16 @@ sub child
         # is done so that fetchmail can be used with POPFile.  
         if ( $command =~ /TOP (.*) (.*)/i ) {
             if ( $2 ne '99999999' )  {                    
-                echo_to_dot( $self, $mail, $client ) if ( echo_response( $self, $mail, $client, $command ) );
+                if ( $self->{configuration}->{configuration}{toptoo} ) {
+                    if ( echo_response( $self, $mail, $client, "RETR $1" ) ) {
+                        my $class = classify_and_modify( $self, $mail, $client, $download_count, $count, 1, '' );
+                        if ( echo_response( $self, $mail, $client, $command ) ) {
+                            classify_and_modify( $self, $mail, $client, $download_count, $count, 0, $class );
+                        }
+                    }
+                } else {
+                    echo_to_dot( $self, $mail, $client ) if ( echo_response( $self, $mail, $client, $command ) );
+                }
                 flush_extra( $self, $mail, $client, 0 );
                 next;
             }
@@ -398,7 +410,7 @@ sub child
             # we echo each line of the message until we hit the . at the end
             if ( echo_response( $self, $mail, $client, $command ) ) {
                 $count += 1;
-                classify_and_modify( $self, $mail, $client, $download_count, $count );
+                classify_and_modify( $self, $mail, $client, $download_count, $count, 0, '' );
                 flush_extra( $self, $mail, $client, 0 );
                 next;
             }
@@ -443,11 +455,13 @@ sub child
 # $client   - an open stream to write the modified email to
 # $dcount   - the unique download count for this message
 # $mcount   - the message count for this message
+# $nosave   - indicates that the message downloaded should not be saved in the history
+# $class    - if we already know the classification
 #
 # ---------------------------------------------------------------------------------------------
 sub classify_and_modify
 {
-    my ( $self, $mail, $client, $dcount, $mcount ) = @_;
+    my ( $self, $mail, $client, $dcount, $mcount, $nosave, $class ) = @_;
     
     my $msg_subject     = '';     # The message subject
     my $msg_head_before = '';     # Store the message headers that come before Subject here
@@ -474,8 +488,8 @@ sub classify_and_modify
 
     my $temp_file  = "messages/popfile$dcount" . "_$mcount.msg";
     my $class_file = "messages/popfile$dcount" . "_$mcount.cls";
-    $self->{configuration}->{configuration}{mcount}     += 1;
-    $self->{ui}->{history_invalid}                       = 1;
+    $self->{configuration}->{configuration}{mcount}     += 1 if ( !$nosave );
+    $self->{ui}->{history_invalid}                       = 1 if ( !$nosave );
 
     open TEMP, ">$temp_file";
     binmode TEMP;
@@ -528,7 +542,7 @@ sub classify_and_modify
 
         # Check to see if too much time has passed and we need to keep the mail client happy
         if ( time > ( $last_timeout + 2 ) ) {
-            print $client "X-POPFile-TimeoutPrevention: $timeout_count$eol";
+            print $client "X-POPFile-TimeoutPrevention: $timeout_count$eol" if ( !$nosave );
             $timeout_count += 1;
             $last_timeout = time;
         }
@@ -540,17 +554,23 @@ sub classify_and_modify
 
     # Do the text classification and update the counter for that bucket that we just downloaded
     # an email of that type
-    $classification = $self->{classifier}->classify_file($temp_file);
-    $self->{classifier}->{parameters}{$classification}{count} += 1 if ( $classification ne 'unclassified' );
+    $classification = ($class ne '')?$class:$self->{classifier}->classify_file($temp_file);
+    if ( !$nosave ) {
+        $self->{classifier}->{parameters}{$classification}{count} += 1 if ( $classification ne 'unclassified' );
+    }
 
     # Add the Subject line modification or the original line back again
-    if ( $self->{configuration}->{configuration}{subject} ) {
+    if ( $self->{configuration}->{configuration}{subject} && ( $msg_subject ne '' ) ) {
         # Don't add the classification unless it is not present
         if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $self->{classifier}->{parameters}{$classification}{subject} == 1 ) )  {
             $msg_head_before .= "Subject: [$classification]$msg_subject$eol";
         } else {
             $msg_head_before .= "Subject:$msg_subject$eol";
         }
+    }
+
+    if ( $nosave ) {
+        unlink( $temp_file );
     }
 
     # Add the XTC header
@@ -568,23 +588,27 @@ sub classify_and_modify
     $msg_head_after .= "$eol";
 
     # Echo the text of the message to the client
-    print $client $msg_head_before;
-    print $client $msg_head_after;
-    print $client $msg_body;
-
+    if ( !$nosave ) {
+        print $client $msg_head_before;
+        print $client $msg_head_after;
+        print $client $msg_body;
+    }
+    
     if ( $got_full_body == 0 )    {   
-        echo_to_dot( $self, $mail, $client );   
+        echo_to_dot( $self, $mail, $client ) if ( !$nosave );   
     } else {   
-        print $client ".$eol";    
+        print $client ".$eol" if ( !$nosave );    
     } 
 
-    open CLASS, ">$class_file";
-    if ( $self->{classifier}->{magnet_used} == 0 )  {
-        print CLASS "$classification$eol";
-    } else {
-        print CLASS "$classification MAGNET $self->{classifier}->{magnet_detail}$eol";
+    if ( !$nosave ) {
+        open CLASS, ">$class_file";
+        if ( $self->{classifier}->{magnet_used} == 0 )  {
+            print CLASS "$classification$eol";
+        } else {
+            print CLASS "$classification MAGNET $self->{classifier}->{magnet_detail}$eol";
+        }
+        close CLASS;
     }
-    close CLASS;
 }
 
 # ---------------------------------------------------------------------------------------------
