@@ -76,25 +76,25 @@ sub initialize
     # Tell the user interface module that we having a configuration
     # item that needs a UI component
 
-    $self->register_configuration_item_( 'configuration',
+    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
                                          'pop3_port',
-                                         $self );
+                                         $self );                      # PROFILE BLOCK STOP
 
-    $self->register_configuration_item_( 'configuration',
+    $self->register_configuration_item_( 'configuration',              # PROFILE BLOCK START
                                          'pop3_separator',
-                                         $self );
+                                         $self );                      # PROFILE BLOCK STOP
 
-    $self->register_configuration_item_( 'security',
+    $self->register_configuration_item_( 'security',                   # PROFILE BLOCK START
                                          'pop3_local',
-                                         $self );
+                                         $self );                      # PROFILE BLOCK STOP
 
-    $self->register_configuration_item_( 'chain',
+    $self->register_configuration_item_( 'chain',                      # PROFILE BLOCK START
                                          'pop3_secure_server',
-                                         $self );
+                                         $self );                      # PROFILE BLOCK STOP
 
-    $self->register_configuration_item_( 'chain',
+    $self->register_configuration_item_( 'chain',                      # PROFILE BLOCK START
                                          'pop3_secure_server_port',
-                                         $self );
+                                         $self );                      # PROFILE BLOCK STOP
 
     return 1;
 }
@@ -114,25 +114,27 @@ sub child__
     my ( $self, $client, $download_count, $pipe ) = @_;
 
     # Hash of indexes of downloaded messages
+
     my %downloaded;
 
-    # Number of messages downloaded in this session
-    #my $count = 0;
-
     # The handle to the real mail server gets stored here
+
     my $mail;
 
     # Tell the client that we are ready for commands and identify our version number
+
     $self->tee_( $client, "+OK " . $self->config_( 'welcome_string' ) . "$eol" );
 
     # Retrieve commands from the client and process them until the client disconnects or
     # we get a specific QUIT command
+
     while  ( <$client> ) {
         my $command;
 
         $command = $_;
 
         # Clean up the command so that it has a nice clean $eol at the end
+
         $command =~ s/(\015|\012)//g;
 
         $self->log_( "Command: --$command--" );
@@ -143,13 +145,16 @@ sub child__
         # pass through to that server and represents the account on the remote machine that we
         # will pull email from.  Doing this means we can act as a proxy for multiple mail clients
         # and mail accounts
+
         my $user_command = 'USER (.+?)(:(\d+))?' . $self->config_( 'separator' ) . '(.+)';
         if ( $command =~ /$user_command/i ) {
             if ( $1 ne '' )  {
                 print $pipe "LOGIN:$4$eol";
                 if ( $mail = $self->verify_connected_( $mail, $client, $1, $3 || 110 ) )  {
+
                     # Pass through the USER command with the actual user name for this server,
                     # and send the reply straight to the client
+
                     $self->echo_response_($mail, $client, 'USER ' . $4 );
                 } else {
 
@@ -168,10 +173,13 @@ sub child__
         }
 
         # User is issuing the APOP command to start a session with the remote server
+
         if ( $command =~ /APOP (.*):((.*):)?(.*) (.*)/i ) {
             if ( $mail = $self->verify_connected_( $mail, $client,  $1, $3 || 110 ) )  {
+
                 # Pass through the USER command with the actual user name for this server,
                 # and send the reply straight to the client
+
                 $self->echo_response_($mail, $client, "APOP $4 $5" );
             } else {
                 last;
@@ -182,15 +190,20 @@ sub child__
         }
 
         # Secure authentication
+
         if ( $command =~ /AUTH ([^ ]+)/ ) {
             if ( $self->config_( 'secure_server' ) ne '' )  {
                 if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
+
                     # Loop until we get -ERR or +OK
+
                     my $response;
                     $response = $self->get_response_( $mail, $client, $command );
 
                     while ( ( ! ( $response =~ /\+OK/ ) ) && ( ! ( $response =~ /-ERR/ ) ) ) {
+
                         # Check for an abort
+
                         if ( $self->{alive} == 0 ) {
                             last;
                         }
@@ -231,8 +244,9 @@ sub child__
         }
 
         # The client is requesting a LIST/UIDL of the messages
-        if ( ( $command =~ /LIST ?(.*)?/i ) ||
-             ( $command =~ /UIDL ?(.*)?/i ) ) {
+
+        if ( ( $command =~ /LIST ?(.*)?/i ) ||                            # PROFILE BLOCK START
+             ( $command =~ /UIDL ?(.*)?/i ) ) {                           # PROFILE BLOCK STOP
             if ( $self->echo_response_($mail, $client, $command ) ) {
                 $self->echo_to_dot_( $mail, $client ) if ( $1 eq '' );
             }
@@ -299,6 +313,7 @@ sub child__
                             $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, 0, 1, $class, 1 );
 
                             # Tell the parent that we just handled a mail
+
                             print $pipe "CLASS:$class$eol";
                             print $pipe "NEWFL:$history_file$eol";
                         }
@@ -315,6 +330,7 @@ sub child__
         }
 
         # The CAPA command
+
         if ( $command =~ /CAPA/i ) {
             if ( $self->config_( 'secure_server' ) ne '' )  {
                 if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
@@ -332,6 +348,7 @@ sub child__
 
         # The HELO command results in a very simple response from us.  We just echo that
         # we are ready for commands
+
         if ( $command =~ /HELO/i ) {
             $self->tee_(  $client, "+OK HELO POPFile Server Ready$eol" );
             next;
@@ -339,12 +356,13 @@ sub child__
 
         # In the case of PASS, NOOP, XSENDER, STAT, DELE and RSET commands we simply pass it through to
         # the real mail server for processing and echo the response back to the client
-        if ( ( $command =~ /PASS (.*)/i )    ||
+
+        if ( ( $command =~ /PASS (.*)/i )    ||                  # PROFILE BLOCK START
              ( $command =~ /NOOP/i )         ||
              ( $command =~ /STAT/i )         ||
              ( $command =~ /XSENDER (.*)/i ) ||
              ( $command =~ /DELE (.*)/i )    ||
-             ( $command =~ /RSET/i ) ) {
+             ( $command =~ /RSET/i ) ) {                         # PROFILE BLOCK STOP
             $self->echo_response_($mail, $client, $command );
             $self->flush_extra_( $mail, $client, 0 );
             next;
@@ -353,6 +371,7 @@ sub child__
         # The client is requesting a specific message.
         # Note the horrible hack here where we detect a command of the form TOP x 99999999 this
         # is done so that fetchmail can be used with POPFile.
+
         if ( ( $command =~ /RETR (.*)/i ) || ( $command =~ /TOP (.*) 99999999/i ) )  {
             my $count = $1;
             my $class;
@@ -381,10 +400,12 @@ sub child__
                 my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_load_class($short_file);
 
                 if ($bucket ne 'unknown class') {
+
                     # echo file, inserting known classification, without saving
 
                     $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, 0, 1, $bucket );
                 } else {
+
                     # If the class wasn't saved properly, classify from disk normally
 
                     $class = $self->{classifier__}->classify_and_modify( \*RETRFILE, $client, $download_count, 0, 1, '' );
@@ -396,19 +417,23 @@ sub child__
                 print $client ".$eol";
                 next;
             } else {
+
                 # Retrieve file directly from the server
 
                 # Get the message from the remote server, if there's an error then we're done, but if not then
                 # we echo each line of the message until we hit the . at the end
+
                 if ( $self->echo_response_($mail, $client, $command ) ) {
                     my $history_file;
                     ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '' );
 
                     # Tell the parent that we just handled a mail
+
                     print $pipe "NEWFL:$history_file$eol";
                     print $pipe "CLASS:$class$eol";
 
                     # Note locally that file has been retrieved
+
                     $downloaded{$count} = 1;
 
                     $self->flush_extra_( $mail, $client, 0 );
@@ -420,6 +445,7 @@ sub child__
         # The mail client wants to stop using the server, so send that message through to the
         # real mail server, echo the response back up to the client and exit the while.  We will
         # close the connection immediately
+
         if ( $command =~ /QUIT/i ) {
             if ( $mail )  {
                 $self->echo_response_( $mail, $client, $command );
@@ -431,6 +457,7 @@ sub child__
         }
 
         # Don't know what this is so let's just pass it through and hope for the best
+
         if ( $mail && $mail->connected )  {
             $self->echo_response_($mail, $client, $command );
             $self->flush_extra_( $mail, $client, 0 );
