@@ -1212,12 +1212,12 @@ sub history_page
         # Check to see if we want to view a message
         if ( $form{view} eq $mail_file )
         {
-            $body .= "<tr><td><td colspan=3 bgcolor=$highlight_color>";
+            $body .= "<tr><td><td colspan=3><table border=3 bordercolor=$stab_color cellspacing=0 cellpadding=6><tr><td>";
             $classifier->{parser}->{color} = 1;
             $classifier->{parser}->{bayes} = $classifier;
             $body .= $classifier->{parser}->parse_stream($form{view});
             $classifier->{parser}->{color} = 0;
-            $body .= "<p align=right><a href=/history?start_message=$start_message><b>Close</b></a><td valign=top><b>Color Key</b><p>";
+            $body .= "<p align=right><a href=/history?start_message=$start_message><b>Close</b></a></table><td valign=top><b>Color Key</b><p>";
             
             foreach my $bucket (@buckets)
             {
