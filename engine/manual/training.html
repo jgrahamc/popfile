@@ -1,0 +1,78 @@
+<html><head><title>POPFile Documentation</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile Documentation</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>First Time Setup:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>Step 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installing</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Step 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Bucket Setup</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Step 3<br><font size=+1><b>&nbsp;<a href="email.html">Email Programs</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%>Step 4<br><font size=+1><b>&nbsp;<a href="training.html">Training</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>Using POPFile with:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Passwords</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Virus Scanners</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Many Addresses</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+<h2>Training POPFile</h2>
+
+<p>Straight out of the box, POPFile is stupid. It doesn't know what spam is, what e-mail is, or what any of the buckets you specified mean. It's going to take a little time to train it.</p>
+
+<h3>When POPFile Makes A Mistake (...and it will!)</h3>
+
+<p>POPFile's classification system needs to be trained for a while before it becomes effective - the more it's trained, the more effective it becomes. In fact, it won't even classify mail the first time you use it - it'll leave it as "unclassified".</p>
+
+<p>Whenever POPFile misclassifies an email, or doesn't classify it, head to the <a href="http://127.0.0.1:8080">web interface</a> and take a look at the 'History' tab (it loads by default). There, you'll see the last twenty or so emails you received, along with how POPFile classified them. (If you want to see why POPFile classified an email how it did, click on the subject line.) For each email that was wrong, correct POPFile by selecting the correct classification in the right-hand column.</p>
+
+<p>(These emails are already stored - you can happily move them around or delete them in your email program without affecting what POPFile thinks about them! POPFile only learns when you reclassify an email - it works under the theory of 'if it ain't broke, don't fix it'.)</p>
+
+<p>POPFile counts the first hundred emails it classifies as 'training'. After that, the statistics counter will start to work, and you can see how well it's doing.</p>
+
+<p><b>Give POPFile time.</b> The more you train it, the better it gets.</p>
+
+<h3>Importing Existing Email</h3>
+
+<p>If you already have a large database of email - or, even better, a large database of junk mail and regular email - you can accelerate the training process by importing it from your current mail program. If you use Eudora, you can just head to the Buckets tab of the web interface and select 'upload file into bucket' - pick the bucket, and click the '...' button to browse to the mailbox you want to upload: POPFile supports Eudora format (the BSD mailbox format) natively.
+
+<p>If you're uploading a mailbox from Outlook or Outlook Express, you'll first need to export your messages to Eudora format. Find your program's Export function, export the messages, and upload them from there.
+
+<p><b>Learning from existing mailboxes isn't always a good idea</b>: if you only save some of your messages and delete a lot of others, it can throw POPFile off the scent. Also, if just a few messages are in the wrong folder, it can <i>really</i> hurt POPFile's accuracy. POPFile will work just fine without it - think carefully before uploading existing mail.
+
+<h3>You're done!
+
+<p>And that's the end of the First Time Setup! POPFile is now ready to rock. Give it a little time, and it'll disappear into the background - and make your life a lot easier.</p>
+
+<p align=center>POPFile v0.17.3 Manual - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a></td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Web Links:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Home Page</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forums</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Bug Database</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>
