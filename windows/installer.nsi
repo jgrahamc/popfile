@@ -290,15 +290,15 @@
 
   !ifndef ENGLISH_MODE
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build"        "Multi-Language with XMLRPC & IMAP (with Kakasi)"
+      VIAddVersionKey "Build"        "Multi-Language IMAP NNTP SMTP XMLRPC (with Kakasi)"
     !else
-      VIAddVersionKey "Build"        "Multi-Language with XMLRPC & IMAP (without Kakasi)"
+      VIAddVersionKey "Build"        "Multi-Language IMAP NNTP SMTP XMLRPC (without Kakasi)"
     !endif
   !else
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build"        "English-Mode with XMLRPC & IMAP (with Kakasi)"
+      VIAddVersionKey "Build"        "English-Mode IMAP NNTP SMTP XMLRPC (with Kakasi)"
     !else
-      VIAddVersionKey "Build"        "English-Mode with XMLRPC & IMAP (with Kakasi)"
+      VIAddVersionKey "Build"        "English-Mode IMAP NNTP SMTP XMLRPC (without Kakasi)"
     !endif
   !endif
 
@@ -544,7 +544,6 @@
 #--------------------------------------------------------------------------
 
   ; Specify NSIS output filename
-
   OutFile "setup.exe"
 
   ; Ensure CRC checking cannot be turned off using the /NCRC command-line switch
@@ -1507,6 +1506,32 @@ SectionEnd
 SubSection "Optional modules" SubSecOptional
 
 #--------------------------------------------------------------------------
+# Installer Section: (optional) POPFile NNTP proxy (default = not selected)
+#
+# If this component is selected, the installer installs the POPFile NNTP proxy module
+#--------------------------------------------------------------------------
+
+Section /o "NNTP proxy" SecNNTP
+
+  SetOutPath "$G_ROOTDIR\Proxy"
+  File "..\engine\Proxy\NNTP.pm"
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Installer Section: (optional) POPFile SMTP proxy (default = not selected)
+#
+# If this component is selected, the installer installs the POPFile SMTP proxy module
+#--------------------------------------------------------------------------
+
+Section /o "SMTP proxy" SecSMTP
+
+  SetOutPath "$G_ROOTDIR\Proxy"
+  File "..\engine\Proxy\SMTP.pm"
+
+SectionEnd
+
+#--------------------------------------------------------------------------
 # Installer Section: (optional) POPFile XMLRPC component (default = not selected)
 #
 # If this component is selected, the installer installs the POPFile XMLRPC support
@@ -1616,6 +1641,8 @@ SubSectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}   $(DESC_SecSkins)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}   $(DESC_SecLangs)
     !insertmacro MUI_DESCRIPTION_TEXT ${SubSecOptional} "Extra POPFile components (for advanced users)"
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecNNTP}    "POPFile NNTP proxy"
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSMTP}    "POPFile SMTP proxy"
     !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}  $(DESC_SecXMLRPC)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}  \
         "Installs POPFile's experimental IMAP module"
@@ -2671,6 +2698,10 @@ SectionEnd
 
 Section "un.Start Menu Entries" UnSecStartMenu
 
+  !define L_TEMP  $R9
+
+  Push ${L_TEMP}
+
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROG_SHORT)"
   SetDetailsPrint listonly
@@ -2680,6 +2711,12 @@ Section "un.Start Menu Entries" UnSecStartMenu
   SetShellVarContext current
 
 menucleanup:
+  IfFileExists "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" 0 delete_menu_entries
+  ReadINIStr ${L_TEMP} "$SMPROGRAMS\${C_PFI_PRODUCT}\QuickStart Guide.url" \
+      "InternetShortcut" "URL"
+  StrCmp ${L_TEMP} "file://$G_ROOTDIR/manual/en/manual.html" delete_menu_entries exit
+
+delete_menu_entries:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (simple).lnk"
@@ -2702,6 +2739,8 @@ menucleanup:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk"
   RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
 
+exit:
+
   ; Restore the default NSIS context
 
   SetShellVarContext current
@@ -2709,6 +2748,10 @@ menucleanup:
   SetDetailsPrint textonly
   DetailPrint " "
   SetDetailsPrint listonly
+
+  Pop ${L_TEMP}
+
+  !undef L_TEMP
 
 SectionEnd
 
