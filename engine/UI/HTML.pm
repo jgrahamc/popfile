@@ -640,7 +640,7 @@ sub html_common_top
         $result .= "<link rel=\"stylesheet\" type=\"text/css\" ";
         $result .= "href=\"skins/" . $self->config_( 'skin' ) . ".css\" title=\"" . $self->config_( 'skin' ) . "\">\n";
 	$result .= "<link rel=\"shortcut icon\" type=\"image/x-icon\" ";
-	$result .= "href=\"favicon.ico\"" . "\">\n";
+	$result .= "href=\"favicon.ico\">\n";
     }
 
     $result .= "<link rel=\"icon\" href=\"popfile.ico\" type=\"image/ico\">\n";
