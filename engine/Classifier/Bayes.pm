@@ -263,11 +263,14 @@ sub get_value
 sub set_value 
 {
     my ($self, $bucket, $word, $value) = @_;
-    $word =~ /^(.)/;
-    my $i = ord($1);
+    
+    if ( $word ne '' ) {
+		$word =~ /^(.)/;
+		my $i = ord($1);
 
-    $self->{matrix}{$bucket}[$i] = '' if ( !defined($self->{matrix}{$bucket}[$i]) );
-    $self->{matrix}{$bucket}[$i] .= "|$word $value|" if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 );
+		$self->{matrix}{$bucket}[$i] = '' if ( !defined($self->{matrix}{$bucket}[$i]) );
+		$self->{matrix}{$bucket}[$i] .= "|$word $value|" if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 );
+	}
 }
 
 # ---------------------------------------------------------------------------------------------
