@@ -2270,7 +2270,7 @@ sub corpus_page
     if ( ( defined($self->{form_}{lookup}) ) || ( defined($self->{form_}{word}) ) ) {
         my $word = $self->{form_}{word};
 
-        if ( !( $word =~ /^header:/ ) ) {
+        if ( !( $word =~ /^[A-Za-z0-9\-_]+:/ ) ) {
            $word = $self->{classifier__}->{mangler__}->mangle($word, 1);
         }
 
