@@ -338,8 +338,8 @@ sub echo_to_dot_
         # Check for an abort
         last if ( $self->{alive_} == 0 );
 
-        print $client $_;
-        #$self->tee_($client, $_);
+        #print $client $_;
+        $self->tee_($client, $_);
         
         # The termination has to be a single line with exactly a dot on it and nothing
         # else other than line termination characters.  This is vital so that we do
@@ -419,7 +419,7 @@ sub get_response_
     # Retrieve a single string containing the response
     if ( $mail->connected ) {
         my $selector = new IO::Select( $mail );
-        my ($ready) = $selector->can_read( (!$null_resp,$self->global_config_( 'timeout' ),.5) );
+        my ($ready) = $selector->can_read( (!$null_resp?$self->global_config_( 'timeout' ):.5) );
 
         if ( ( defined( $ready ) ) && ( $ready == $mail ) ) {
             $response = <$mail>;
