@@ -104,7 +104,7 @@ test_assert_equal( $cl->{words}{hello},     1 );
 test_assert_equal( $cl->{words}{visible},   1 );
 test_assert_equal( defined( $cl->{words}{invisible} ), '' );
 
-# glob the tests directory for files called TestMailParse\d+.tst which consist of messages 
+# glob the tests directory for files called TestMailParse\d+.msg which consist of messages 
 # to be parsed with the resulting values for the words hash in TestMailParse\d+.wrd
 
 my @parse_tests = sort glob 'tests/TestMailParse*.msg';

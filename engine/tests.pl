@@ -14,6 +14,7 @@
 
 my $test_count    = 0;
 my $test_failures = 0;
+my $fail_messages = '';
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -34,9 +35,9 @@ sub test_report
  	$test_count += 1;
  	
  	if ( !$ok ) {
- 		print "\nTest $test_count failed: $test at line $line of $file";
+ 		$fail_messages .= "\n    $file:$line failed '$test'";
  		if ( defined( $context ) ) {
- 			print " ($context)";
+ 			$fail_messages .= " ($context)";
  		}
  		$test_failures += 1;
  	}
@@ -60,7 +61,7 @@ sub test_assert
 {
 	my ( $file, $line,  $test, $context ) = @_;
 	
-	test_report( eval( $test ), $test, $file, $line );
+	test_report( eval( $test ), $test, $file, $line, $context );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -95,7 +96,7 @@ sub test_assert_equal
 		$result = ( $test eq $expected );
 	}
 
-	test_report( $result, "expecting $expected and got $test", $file, $line );
+	test_report( $result, "expecting $expected and got $test", $file, $line, $context );
 }
 
 # MAIN
@@ -108,8 +109,11 @@ foreach my $test (@tests) {
 	# and then changing calls to test_assert_equal so that they include 
 	# the line number and the file they are from, then the $suite is 
 	# evaluated
+	my $current_test_count  = $test_count;
+	my $current_error_count = $test_failures;
 	
-	print "\nRunning $test...";
+	print "\nRunning $test... ";
+	$fail_messages = '';
 	my $suite;
 	my $ln   = 0;
 	open SUITE, "<$test";
@@ -122,6 +126,13 @@ foreach my $test (@tests) {
 	}
 	close SUITE;
 	eval $suite;
+	
+	if ( $test_failures > $current_error_count ) {
+		print "failed (" . ( $test_count - $current_test_count ) . " ok, " . ( $test_failures - $current_error_count ) . " failed)\n";
+		print $fail_messages . "\n";
+	} else {
+		print "ok (" . ( $test_count - $current_test_count ) . " ok)";
+	}
 }
 
-print "\n$test_count tests, $test_failures failed\n\n";
+print "\n\n$test_count tests, " . ( $test_count - $test_failures ) . " ok, $test_failures failed\n\n";

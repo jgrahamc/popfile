@@ -323,7 +323,7 @@ sub load_word_matrix
     $self->{magnets}    = {};
     $self->{full_total} = 0;
     
-    print "Loading the corpus...\n" if $self->{debug};
+    print "Loading the corpus ($self->{configuration}->{configuration}{corpus})...\n" if $self->{debug};
     
     my @buckets = glob "$self->{configuration}->{configuration}{corpus}/*";
     
