@@ -2937,6 +2937,8 @@ continue:
   Delete "$G_ROOTDIR\*.change"
   Delete "$G_ROOTDIR\*.change.txt"
 
+  Delete "$G_ROOTDIR\pfi-data.ini"
+
   Delete "$G_ROOTDIR\popfile.pl"
   Delete "$G_ROOTDIR\*.pm"
 
