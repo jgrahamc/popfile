@@ -58,10 +58,9 @@
 
 <TMPL_IF NAME="Bucket_If_Has_Words">
 
-<h2 class="buckets"><TMPL_VAR NAME="Bucket_Sub_Title"></h2>
-<TMPL_VAR NAME="Localize_SingleBucket_Message1">
-<br />
-<br />
+<p>
+    <TMPL_VAR NAME="Localize_SingleBucket_Message1">
+</p>
 <table summary="<TMPL_VAR NAME="Localize_Bucket_WordListTableSummary">">
     <tr>
         <td colspan="2">
@@ -70,139 +69,80 @@
 
             <TMPL_IF NAME="Bucket_If_Show_Letter">
 
-            <p />
-
-            <TMPL_VAR NAME="Bucket_Word_Table_Title">
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            &nbsp;
-        </td>
-    </tr>
-    <tr>
-        <td valign="top">
-            <b><span class="bucketLetterSelected"><TMPL_VAR NAME="Bucket_Letter"></span></b>
-        </td>
-        <td valign="top">
-        <table>
-            <tr valign="top">
-
-                <TMPL_LOOP NAME="Bucket_Loop_Loop_Word_Row">
-
-                <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_0" ESCAPE=URL>#Lookup">
-                        <b>
-                            <TMPL_VAR NAME="Bucket_Word_0">
-                        </b>
-                    </a>
-                </td>
-                <td>
-                    <TMPL_VAR NAME="Bucket_Word_Count_0">
-                </td>
-                <td>
-                    &nbsp;
-                </td>
-                <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_1" ESCAPE=URL>#Lookup">
-                        <b>
-                            <TMPL_VAR NAME="Bucket_Word_1">
-                        </b>
-                    </a>
-                </td>
-                <td>
-                    <TMPL_VAR NAME="Bucket_Word_Count_1">
-                </td>
-                <td>
-                    &nbsp;
-                </td>
-                <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_2" ESCAPE=URL>#Lookup">
-                        <b>
-                            <TMPL_VAR NAME="Bucket_Word_2">
-                        </b>
-                    </a>
-                </td>
-                <td>
-                    <TMPL_VAR NAME="Bucket_Word_Count_2">
-                </td>
-                <td>
-                    &nbsp;
-                </td>
-                <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_3" ESCAPE=URL>#Lookup">
-                        <b>
-                            <TMPL_VAR NAME="Bucket_Word_3">
-                        </b>
-                    </a>
-                </td>
-                <td>
-                    <TMPL_VAR NAME="Bucket_Word_Count_3">
-                </td>
-                <td>
-                    &nbsp;
-                </td>
-                <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_4" ESCAPE=URL>#Lookup">
-                        <b>
-                            <TMPL_VAR NAME="Bucket_Word_4">
-                        </b>
-                    </a>
-                </td>
-                <td>
-                    <TMPL_VAR NAME="Bucket_Word_Count_4">
-                </td>
-                <td>
-                    &nbsp;
-                </td>
-                <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_5" ESCAPE=URL>#Lookup">
-                        <b>
-                            <TMPL_VAR NAME="Bucket_Word_5">
-                        </b>
-                    </a>
-                </td>
-                <td>
-                    <TMPL_VAR NAME="Bucket_Word_Count_5">
-                </td>
-                <td>
-                    &nbsp;
-                </td>
-            </tr>
-            <tr valign="top">
-
-                </TMPL_LOOP> <!-- End of loop Bucket_Loop_Loop_Word_Row -->
-
-            </tr>
-        </table>
-
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2">
-            &nbsp;
-        </td>
-    </tr>
-    <tr>
-        <td colspan="2">
+            <b>
+                <span class="bucketLetterSelected">
+                   - <TMPL_VAR NAME="Bucket_Letter"> -
+                </span>
+            </b>
 
             <TMPL_ELSE>
 
             <a class="bucketLetter" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;showbucket=<TMPL_VAR NAME="Bucket_Bucket">&amp;showletter=<TMPL_VAR NAME="Bucket_Letter" ESCAPE=URL>">
                 <b>
-                    <TMPL_VAR NAME="Bucket_Letter">
+                   <TMPL_VAR NAME="Bucket_Letter" ESCAPE=HTML>
                 </b>
             </a>
 
             </TMPL_IF>
 
-            </TMPL_LOOP> <!-- End of loop Bucket_Loop_Letters -->
+            </TMPL_LOOP>
 
         </td>
     </tr>
 
-</TMPL_IF>
+    <TMPL_IF NAME="Bucket_If_Show_Letter">
+
+    <tr>
+        <td colspan="2">
+            <TMPL_VAR NAME="Bucket_Word_Table_Title">
+        </td>
+    </tr>
+    <tr>
+        <td valign="top">
+            <b>
+                <span class="bucketLetterSelected">
+                    <TMPL_VAR NAME="Bucket_Letter" ESCAPE=HTML>
+                </span>
+            </b>
+        </td>
+        <td valign="top">
+        <table>
+
+            <TMPL_LOOP NAME="Bucket_Loop_Row">
+
+            <tr>
+
+                <TMPL_LOOP NAME="Bucket_Loop_Column">
+
+                <td>
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word">#Lookup">
+                        <b>
+                            <TMPL_VAR NAME="Bucket_Word">
+                        </b>
+                    </a>
+                </td>
+                <td>
+                    <TMPL_VAR NAME="Bucket_Word_Count">
+                </td>
+                <td>
+                    &nbsp;
+                </td>
+
+                </TMPL_LOOP>
+
+            </tr>
+
+            </TMPL_LOOP> <!-- End of loop Bucket_Loop_Row -->
+
+        </table>
+
+        </td>
+    </tr>
+
+    </TMPL_IF>
 
 </table>
+
+</TMPL_IF>
 
 <TMPL_INCLUDE NAME="common-bottom.thtml">

@@ -1505,17 +1505,18 @@ sub magnet_page
 sub bucket_page
 {
     my ( $self, $client, $templ ) = @_;
+    my $bucket = $self->{form_}{showbucket};
 
     $templ = $self->load_template__( 'bucket-page.thtml' );
 
-    my $color = $self->{c__}->get_bucket_color( $self->{api_session__}, $self->{form_}{showbucket} );
-    $templ->param( 'Bucket_Main_Title' => sprintf( $self->{language__}{SingleBucket_Title}, "<font color=\"$color\">$self->{form_}{showbucket}</font>" ) );
+    my $color = $self->{c__}->get_bucket_color( $self->{api_session__}, $bucket );
+    $templ->param( 'Bucket_Main_Title' => sprintf( $self->{language__}{SingleBucket_Title}, "<font color=\"$color\">$bucket</font>" ) );
 
-    my $bucket_count = $self->{c__}->get_bucket_word_count( $self->{api_session__}, $self->{form_}{showbucket} );
+    my $bucket_count = $self->{c__}->get_bucket_word_count( $self->{api_session__}, $bucket );
     $templ->param( 'Bucket_Word_Count'   => $self->pretty_number( $bucket_count ) );
-    $templ->param( 'Bucket_Unique_Count' => sprintf( $self->{language__}{SingleBucket_Unique}, $self->pretty_number( $self->{c__}->get_bucket_unique_count( $self->{api_session__}, $self->{form_}{showbucket} ) ) ) );
+    $templ->param( 'Bucket_Unique_Count' => sprintf( $self->{language__}{SingleBucket_Unique}, $self->pretty_number( $self->{c__}->get_bucket_unique_count( $self->{api_session__}, $bucket ) ) ) );
     $templ->param( 'Bucket_Total_Word_Count' => $self->pretty_number( $self->{c__}->get_word_count( $self->{api_session__} ) ) );
-    $templ->param( 'Bucket_Bucket' => $self->{form_}{showbucket} );
+    $templ->param( 'Bucket_Bucket' => $bucket );
 
     my $percent = '0%';
     if ( $self->{c__}->get_word_count( $self->{api_session__} ) > 0 )  {
@@ -1523,53 +1524,56 @@ sub bucket_page
     }
     $templ->param( 'Bucket_Percentage' => $percent );
 
-    if ( $self->{c__}->get_bucket_word_count( $self->{api_session__}, $self->{form_}{showbucket} ) > 0 ) {
+    if ( $self->{c__}->get_bucket_word_count( $self->{api_session__}, $bucket ) > 0 ) {
         $templ->param( 'Bucket_If_Has_Words' => 1 );
         my @letter_data;
-        for my $i ($self->{c__}->get_bucket_word_prefixes( $self->{api_session__}, $self->{form_}{showbucket} )) {
+        for my $i ($self->{c__}->get_bucket_word_prefixes( $self->{api_session__}, $bucket )) {
             my %row_data;
             $row_data{Bucket_Letter} = $i;
-            $row_data{Bucket_Bucket} = $self->{form_}{showbucket};
+            $row_data{Bucket_Bucket} = $bucket;
             $row_data{Session_Key}   = $self->{session_key__};
             if ( defined( $self->{form_}{showletter} ) && ( $i eq $self->{form_}{showletter} ) ) {
                 $row_data{Bucket_If_Show_Letter} = 1;
-                $row_data{Bucket_Word_Table_Title} = sprintf( $self->{language__}{SingleBucket_WordTable}, $self->{form_}{showbucket} );
-                my %temp;
-
-                for my $j ( $self->{c__}->get_bucket_word_list( $self->{api_session__}, $self->{form_}{showbucket}, $i ) ) {
-                    $temp{$j} = $self->{c__}->get_count_for_word( $self->{api_session__}, $self->{form_}{showbucket}, $j );
                 }
-
-                my $count = 0;
-                my @word_data;
-                my %word_row;
-                for my $word (sort { $temp{$b} <=> $temp{$a} } keys %temp) {
-                    if ( ( $count % 6 ) == 0 ) {
-                        my %temp_row = %word_row;
-                        push ( @word_data, \%temp_row );
-                        $count = 0;
-                    }
-                    $word_row{"Bucket_Word_$count"} = $word;
-                    $word_row{"Bucket_Word_Count_$count"} = $temp{$word};
-                    $word_row{"Session_Key"} = $self->{session_key__};
-                    $count++;
-                }
-                if ( $count != 0 ) {
-                    for my $i ( $count..5) {
-                        $word_row{"Bucket_Word_$i"} = '';
-                        $word_row{"Bucket_Word_Count_$i"} = '';
-                    }
-                    push ( @word_data, \%word_row );
-                }
-                $row_data{Bucket_Loop_Loop_Word_Row} = \@word_data;
-
-            } else {
-                $row_data{Bucket_If_Show_Letter} = 0;
-            }
             push ( @letter_data, \%row_data );
-       }
+                    }
+        $templ->param( 'Bucket_Loop_Letters' => \@letter_data );
 
-       $templ->param( 'Bucket_Loop_Letters' => \@letter_data );
+        if ( defined( $self->{form_}{showletter} ) ) {
+            my $letter = $self->{form_}{showletter};
+
+            $templ->param( 'Bucket_If_Show_Letter'   => 1 );
+            $templ->param( 'Bucket_Word_Table_Title' => sprintf( $self->{language__}{SingleBucket_WordTable}, $bucket ) );
+            $templ->param( 'Bucket_Letter'           => $letter );
+
+            my %word_count;
+
+            for my $j ( $self->{c__}->get_bucket_word_list( $self->{api_session__}, $bucket, $letter ) ) {
+                $word_count{$j} = $self->{c__}->get_count_for_word( $self->{api_session__}, $bucket, $j );
+                }
+
+            my @words = sort { $word_count{$b} <=> $word_count{$a} || $a cmp $b } keys %word_count;
+
+            my @rows;
+            while ( @words ) {
+                my %row_data;
+                my @cols;
+                for ( 1 .. 6 ) {
+                    my %cell_data;
+                    my $word = shift @words;
+
+                    $cell_data{'Bucket_Word'}       = $word;
+                    $cell_data{'Bucket_Word_Count'} = $word_count{$word};
+                    $cell_data{'Session_Key'}       = $self->{session_key__};
+
+                    push @cols, \%cell_data;
+                    last unless @words;
+                }
+                $row_data{'Bucket_Loop_Column'} = \@cols;
+                push @rows, \%row_data;
+            }
+            $templ->param( 'Bucket_Loop_Row' => \@rows );
+       }
     }
 
     $self->http_ok( $client, $templ, 1 );
