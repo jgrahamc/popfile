@@ -1,0 +1,139 @@
+=============================================================================
+NOTES ON HOW THE CUSTOMISED UI FILES FOR THE POPFILE INSTALLER WERE CREATED
+=============================================================================
+
+Last updated: 22 September 2003 (11:50 GMT)
+
+=============================================================================
+INTRODUCTION
+=============================================================================
+
+The NSIS "Modern User Interface" (MUI) provides a range of general purpose
+User Interface (UI) files offering a variety of interface formats. Soon after
+work started on modifying the POPFile installer to work with languages other
+than English, it was found that these default UI files did not provide enough
+room for some of the non-English language strings.
+
+To solve this problem, the following customised UI files have been created:
+
+(1) pfi_modern.exe     based upon ${NSISDIR}\Contrib\UIs\modern.exe
+(2) pfi_headerbmp.exe  based upon ${NSISDIR}\Contrib\UIs\modern_headerbmp.exe
+(3) pfi_headerbmpr.exe based upon ${NSISDIR}\Contrib\UIs\modern_headerbmpr.exe
+
+The current versions of these customised UI files are based upon the UI files
+provided in the NSIS CVS snapshot of 27 August 2003 (19:44 GMT).
+
+Future updates to the NSIS compiler may not be compatible with these customised
+UI files. These notes describe in detail how these files were created, to make
+it easier to create updated versions to suit newer NSIS compilers.
+
+'Resource Hacker' (http://www.users.on.net/johnson/resourcehacker/) was used to
+create these customised versions of the NSIS MUI UI files.
+
+=============================================================================
+'PFI_MODERN.EXE' NOTES
+=============================================================================
+
+This UI file contains the resource used to display the banner which appears
+when POPFile is being started by the installer and also when an uninstall is
+performed during an upgrade installation. The banner's icon has been moved to
+the left to allow the width of the two text areas to be increased.
+
+'pfi_modern.exe' v1.1 was created by modifying 'modern.exe', NSIS CVS v1.33
+(dated 05-Aug-2003), as follows:
+
+[1] Dialog 111, Control 103 (the icon image)
+
+       Left/Top/Width/Height changed from "10, 10, 21, 20"
+                                       to " 7, 10, 21, 20"
+
+       (i.e. image moved 3 units to the left)
+
+[2] Dialog 111, Control 76 (the upper text area)
+
+       Left/Top/Width/Height changed from "40, 10, 120, 10"
+                                       to "35, 10, 125, 10"
+
+       (i.e left edge moved 5 units to left, width increased by 5 units)
+
+[3] Dialog 111, Control 1030 (the lower text area}
+
+       Left/Top/Width/Height changed from "40, 25, 120, 10"
+                                       to "35, 25, 125, 10"
+
+       (i.e left edge moved 5 units to left, width increased by 5 units)
+
+=============================================================================
+'PFI_HEADERBMP.EXE' AND 'PFI_HEADERBMPR.EXE' NOTES
+=============================================================================
+
+The standard NSIS "Modern User Interface" (MUI) supports 150 x 57 pixel
+bitmaps, placed at the left of the header area (using 'modern_headerbmp.exe')
+or at the right (using 'modern_headerbmpr.exe').
+
+The POPFile installer uses a small 'hdr-common.bmp' bitmap logo which is only
+90 x 57 pixels. This means more space can be made available in the header area
+for the Title and SubTitle text.
+
+The default 150 pixel width is equivalent to 100 dialog units, so a 90 pixel
+width is assumed to be 60 dialog units. The bitmap width is reduced to 60
+units, leaving 40 units available to increase the width of the two text areas.
+
+=============================================================================
+'PFI_HEADERBMP.EXE' CHANGES (bitmap appears at the left of the header area)
+=============================================================================
+
+'pfi_headerbmp.exe' v1.1 was created by modifying 'modern_headerbmp.exe',
+NSIS CVS v1.5 (dated 05-Aug-2003), as follows:
+
+[1] Dialog 105, Control 1037 (the TITLE text area)
+
+       Left/Top/Width/Height changed from "105, 5, 215, 10"
+                                       to  "65, 5, 255, 10"
+
+       (i.e. left edge moved 40 units to left, width increased by 40 units)
+
+[2] Dialog 105, Control 1038 (the SUBTITLE text area)
+
+       Left/Top/Width/Height changed from "110, 17, 210, 16"
+                                       to  "70, 17, 250, 16"
+
+       (i.e. left edge moved 40 units to left, width increased by 40 units)
+
+[3] Dialog 105, Control 1046 (the bitmap at the left of the header area)
+
+       Left/Top/Width/Height changed from "0, 0, 100, 35"
+                                       to "0, 0,  60, 35"
+
+       (i.e. width reduced by 40 units)
+
+=============================================================================
+'PFI_HEADERBMPR.EXE' CHANGES (bitmap appears at the right of the header area)
+=============================================================================
+
+'pfi_headerbmpr.exe' v1.1 was created by modifying 'modern_headerbmpr.exe',
+NSIS CVS v1.5 (dated 05-Aug-2003), as follows:
+
+[1] Dialog 105, Control 1037 (the TITLE text area)
+
+       Left/Top/Width/Height changed from "10, 5, 215, 10"
+                                       to "10, 5, 255, 10"
+
+       (i.e. width increased by 40 units)
+
+[2] Dialog 105, Control 1038 (the SUB-TITLE text area)
+
+       Left/Top/Width/Height changed from "15, 17, 210, 16"
+                                       to "15, 17, 250, 16"
+
+       (i.e. width increased by 40 units)
+
+[3] Dialog 105, Control 1046 (the bitmap at the right of the header area)
+
+       Left/Top/Width/Height changed from "231, 0, 100, 35"
+                                       to "271, 0,  60, 35"
+
+       (i.e. left edge moved 40 units to right, width reduced by 40 units)
+
+=============================================================================
+(end)
