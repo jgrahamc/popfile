@@ -792,8 +792,9 @@ Function SetOutlookOrOutlookExpressPage
   !define L_IDENTITY    $R5   ; plain text form of OE Identity name
   !define L_OEDATA      $R4   ; some data (it varies) for current OE account
   !define L_OEPATH      $R3   ; holds part of the path used to access OE account data
-  !define L_SEPARATOR   $R2   ; char used to separate the pop3 server from the username
-  !define L_TEMP        $R1
+  !define L_ORDINALS    $R2   ; "Identity Ordinals" flag (1 = found, 0 = not found) 
+  !define L_SEPARATOR   $R1   ; char used to separate the pop3 server from the username
+  !define L_TEMP        $R0
 
   Push ${L_ACCOUNT}
   Push ${L_ACCT_INDEX}
@@ -802,6 +803,7 @@ Function SetOutlookOrOutlookExpressPage
   Push ${L_IDENTITY}
   Push ${L_OEDATA}
   Push ${L_OEPATH}
+  Push ${L_ORDINALS}
   Push ${L_SEPARATOR}
   Push ${L_TEMP}
   
@@ -819,26 +821,32 @@ get_guid:
   StrCmp ${L_GUID} "" finished_oe_config
 
   ; Check if this is the GUID for the first "Main Identity" created by OE as the account data
-  ; for that identity is stored separately from the account data for the other OE identities. 
+  ; for that identity is stored separately from the account data for the other OE identities.
+  ; If no "Identity Ordinal" value found, use the first "Main Identity" created by OE.
 
-  ReadRegDWORD ${L_TEMP} HKCU "Identities\${L_GUID}" "Identity Ordinal"
-  IntCmp ${L_TEMP} 1 firstID otherID otherID
+  StrCpy ${L_ORDINALS} "1"
   
-firstID:
+  ReadRegDWORD ${L_TEMP} HKCU "Identities\${L_GUID}" "Identity Ordinal"
+  IntCmp ${L_TEMP} 1 firstOrdinal noOrdinals otherOrdinal
+  
+firstOrdinal:
+  StrCpy ${L_OEPATH} ""
+  goto check_accounts
+
+noOrdinals:
+  StrCpy ${L_ORDINALS} "0"
   StrCpy ${L_OEPATH} ""
   goto check_accounts
   
-otherID:
+otherOrdinal:
   StrCpy ${L_OEPATH} "Identities\${L_GUID}\"
 
 check_accounts:
 
-  ; Now check all of the accounts for this particular identity
+  ; Now check all of the accounts for the current OE Identity
 
   StrCpy ${L_ACCT_INDEX} 0
   
-  ; Get the next set of OE account data for the current OE Identity
-
 next_acct:
   EnumRegKey ${L_ACCOUNT} \
              HKCU "${L_OEPATH}Software\Microsoft\Internet Account Manager\Accounts" \
@@ -855,7 +863,7 @@ next_acct:
   StrCmp ${L_OEDATA} "" try_next_account
   StrCmp ${L_OEDATA} "127.0.0.1" try_next_account
   
-  ; If 'POP3 Server' contains the separator character, we cannot configure this account
+  ; If 'POP3 Server' data contains the separator character, we cannot configure this account
   
   Push ${L_OEDATA}
   Push ${L_SEPARATOR}
@@ -879,7 +887,7 @@ next_acct:
   
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
   
-  ; If 'POP3 User Name' contains the separator character, we cannot configure this account
+  ; If 'POP3 User Name' data contains the separator character, we cannot configure this account
   
   Push ${L_OEDATA}
   Push ${L_SEPARATOR}
@@ -943,7 +951,9 @@ try_next_account:
 
 finished_this_guid:
 
-  ; Now move on to the next identity
+  ; If no "Identity Ordinal" values were found then exit otherwise move on to the next identity
+  
+  StrCmp ${L_ORDINALS} "0" finished_oe_config
   
   IntOp ${L_GUID_INDEX} ${L_GUID_INDEX} + 1
   goto get_guid
@@ -952,6 +962,7 @@ finished_oe_config:
 
   Pop ${L_TEMP}
   Pop ${L_SEPARATOR}
+  Pop ${L_ORDINALS}
   Pop ${L_OEPATH}
   Pop ${L_OEDATA}
   Pop ${L_IDENTITY}
@@ -967,6 +978,7 @@ finished_oe_config:
   !undef L_IDENTITY
   !undef L_OEDATA
   !undef L_OEPATH
+  !undef L_ORDINALS
   !undef L_SEPARATOR
   !undef L_TEMP
 
