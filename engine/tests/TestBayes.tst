@@ -483,6 +483,7 @@ test_assert_equal( $b->get_sort_value_( $session, 'personal', 'foo' ), log(1/103
 test_assert_equal( $b->set_value_( $session, 'personal', 'foo', 0 ), 1 );
 test_assert_equal( $b->get_value_( $session, 'personal', 'foo' ), 0 );
 test_assert_equal( $b->get_sort_value_( $session, 'personal', 'foo' ), $b->{not_likely__}{1} );
+test_assert_equal( $b->get_not_likely_( $session ), $b->{not_likely__}{1} );
 
 $b->set_value_( $session, 'personal', 'foo', 100 );
 $b->db_update_cache__( $session );

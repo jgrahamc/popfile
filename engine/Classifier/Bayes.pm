@@ -336,7 +336,7 @@ sub get_not_likely_
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    return $self->{not_likely_}{$userid};
+    return $self->{not_likely__}{$userid};
 }
 
 # ---------------------------------------------------------------------------------------------
