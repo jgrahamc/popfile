@@ -443,6 +443,13 @@ sub load_bucket
                 my $type  = $1;
                 my $value = $2;
 
+                # Some people were accidently creating magnets with trailing whitespace
+                # which really confused them later when their magnet did not match (see
+                # comment in UI::HTML::magnet for more detail)
+
+                $value =~ s/^[ \t]+//g;
+                $value =~ s/[ \t]+$//g;
+
                 $value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
                 $self->{magnets}{$bucket}{$type}{$value} = 1;
             } else {

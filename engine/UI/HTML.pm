@@ -1351,6 +1351,15 @@ sub magnet_page
         }
 
         if ( $found == 0 ) {
+        
+            # It is possible to type leading or trailing white space in a magnet definition
+            # which can later cause mysterious failures because the whitespace is eaten by
+            # the browser when the magnet is displayed but is matched in the regular expression
+            # that does the magnet matching and will cause failures... so strip off the whitespace
+            
+            $self->{form}{text} =~ s/^[ \t]+//;
+            $self->{form}{text} =~ s/[ \t]+$//;
+        
             $self->{classifier}->{magnets}{$self->{form}{bucket}}{$self->{form}{type}}{$self->{form}{text}} = 1;
             $magnet_message = "<blockquote>" . sprintf( $self->{language}{Magnet_Error3}, "$self->{form}{type}: $self->{form}{text}", $self->{form}{bucket} ) . "</blockquote>";
             $self->{classifier}->save_magnets();
