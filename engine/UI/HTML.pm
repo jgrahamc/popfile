@@ -290,6 +290,7 @@ sub url_handler__
         }
 
         # Reset any filters
+
         $self->{form_}{filter}    = '';
         $self->{form_}{search}    = '';
         $self->{form_}{setsearch} = 1;
@@ -300,7 +301,7 @@ sub url_handler__
 
         $self->invalidate_history_cache() if ( !$found );
         if ( -e ( $self->global_config_( 'msgdir' ) . $file ) ) {
-            $self->http_redirect_( $client, "/view?session=$self->{session_key__}&view=$self->{form_}{view}&start_message=$self->{form_}{start_message}" );
+            $self->http_redirect_( $client, "/view?session=$self->{session_key__}&view=$self->{form_}{view}" );
 	} else {
             $self->http_redirect_( $client, "/history" );
         }
@@ -3072,12 +3073,31 @@ sub view_page
     $self->{form_}{search} = '' if ( !defined( $self->{form_}{search} ) );
     $self->{form_}{filter} = '' if ( !defined( $self->{form_}{filter} ) );
 
-    my $index;
+    my $index = -1;
     foreach my $i ( $start_message  .. $start_message + $self->config_( 'page_size' ) - 1) {
         if ( $self->{history_keys__}[$i] eq $mail_file ) {
             $index = $i;
             last;
         }
+    }
+
+    # If we fail to find the index of the message we are looking for then
+    # do a full search of the history for it
+
+    if ( $index == -1 ) {
+       foreach my $i ( 0 .. $self->history_size()-1 ) {
+            if ( $self->{history_keys__}[$i] eq $mail_file ) {
+                $index         = $i;
+                $start_message = $i;
+                last;
+            }
+        }
+    }
+
+    # If we still can't find the message then return to the history page
+
+    if ( $index == -1 ) {
+        return $self->http_redirect( $client, '/history' );
     }
 
     my $body = "<table width=\"100%\" summary=\"\">\n<tr>\n<td align=\"left\">\n";
