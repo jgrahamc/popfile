@@ -80,6 +80,7 @@ sub server
 {
     my ( $client ) = @_;
     my @messages = sort glob 'TestMailParse*.msg';
+    my $goslow = 0;
 
     print $client "+OK Ready$eol";
 
@@ -90,8 +91,9 @@ sub server
         $command =~ s/(\015|\012)//g;
 
         if ( $command =~ /^USER (.*)/i ) {
-	    if ( $1 =~ /(gooduser)/ ) {
+	    if ( $1 =~ /(gooduser|goslow)/ ) {
                  print $client "+OK Welcome $1$eol";
+                 $goslow = ( $1 =~ /goslow/ );
 	    } else {
                  print $client "-ERR Unknown user $1$eol";
             }
@@ -178,6 +180,9 @@ sub server
                  binmode FILE;
                  while ( <FILE> ) {
                      print $client $_;
+                     if ( $goslow ) {
+                         select( undef, undef, undef, 3 );
+		     }
 		 }
                  close FILE;
 
@@ -901,6 +906,56 @@ if ( $pid == 0 ) {
 	}
         close FILE;
 
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+
+        print $client "QUIT$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Bye$eol" );
+
+        close $client;
+
+        # Check insertion of the X-POPFile-Timeout headers
+
+        my $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        my $result = <$client>;
+        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "USER 127.0.0.1:8110:goslow$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Welcome goslow$eol" );
+
+        print $client "RETR 1$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK " . ( -s $messages[0] ) . "$eol" );
+        my $cam = $messages[0];
+        $cam =~ s/msg$/cam/;
+
+        test_assert( open FILE, "<$cam" );
+        binmode FILE;
+        $line = <$client>;
+        test_assert_equal( $line, "X-POPFile-TimeoutPrevention: 0$eol" );
+        $line = <$client>;
+        test_assert_equal( $line, "X-POPFile-TimeoutPrevention: 1$eol" );
+        $line = <$client>;
+        test_assert_equal( $line, "X-POPFile-TimeoutPrevention: 2$eol" );
+        while ( <FILE> ) {
+            my $line = $_;
+            $result = <$client>;
+            $result =~ s/popfile3=1/popfile0=0/;
+            test_assert_equal( $result, $line );
+	}
+        close FILE;
+
+        $result = <$client>;
+        test_assert_equal( $result, "$eol" );
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
 
