@@ -11,6 +11,11 @@
 
 # This version of 'CBP.nsh' was tested using NSIS 2.0b4 (CVS)
 
+!ifdef CBP.nsh_included
+  !error "$\r$\n$\r$\nFatal error: CBP.nsh has been included more than once!$\r$\n"
+!else
+!define CBP.nsh_included
+
 #//////////////////////////////////////////////////////////////////////////////////////////////
 #
 #                           External interface - starts here
@@ -430,7 +435,8 @@ Function CBP_MakePOPFileBuckets
   ; Now we create the buckets selected by the user. At present this code is only executed
   ; for a "fresh" install, one where there are no corpus files, so we can simply create a
   ; bucket by creating a corpus directory with the same name as the bucket and putting
-  ; a file called "table" there.  The "table" file just has a "$\r$\n" sequence in it.
+  ; a file called "table" there.  The "table" file is empty apart from the bucket header
+  ; (this mimics the behaviour of Bayes.pm version 1.152)
 
   ; Process only the "used" entries in the bucket list
 
@@ -454,7 +460,7 @@ ok_to_create_bucket:
   ClearErrors
   CreateDirectory ${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}
   FileOpen ${CBP_L_FILE_HANDLE} ${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}\table w
-  FileWrite ${CBP_L_FILE_HANDLE} "$\r$\n"
+  FileWrite ${CBP_L_FILE_HANDLE} "__CORPUS__ __VERSION__ 1$\r$\n"
   FileClose ${CBP_L_FILE_HANDLE}
   StrCmp ${CBP_L_UNC} "\\" ignore_errors
   IfErrors  incrm_ptr
@@ -2104,6 +2110,7 @@ FunctionEnd
   !undef CBP_C_MAX_BN_TEXT_PLUS_ONE
   !undef CBP_MAX_BN_CBOX_PLUS_ONE
 
+!endif
 #==============================================================================================
 # End of CBP.nsh
 #==============================================================================================
