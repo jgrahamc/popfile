@@ -25,15 +25,9 @@
 #
 #----------------------------------------------------------------------------------------------
 #
-# WARNING:
+# This version of the script has been tested with the "NSIS 2 Release Candidate 3" compiler,
+# released 26 January 2004, with no patches applied.
 #
-# This script requires a version of NSIS 2.0b4 (CVS) which meets the following requirements:
-#
-# (1) '{NSIS}\makensis.exe' dated 8 July 2003 @ 18:44 (NSIS CVS version 1.203) or later
-#     This is required to ensure 'language' strings can be combined with other strings.
-#
-# (2) '{NSIS}\makensis.exe' dated 21 July 2003 @ 06:44 (NSIS CVS version 1.214) or later
-#     This is required to avoid spurious error messages when creating buckets with UNC paths.
 #----------------------------------------------------------------------------------------------
 
 !ifndef PFI_VERBOSE
@@ -51,8 +45,7 @@
 #
 #//////////////////////////////////////////////////////////////////////////////////////////////
 
-
-  ; To use the CBP package, only two changes need to be made to "installer.nsi":
+  ; To use the CBP package, only three changes need to be made to "installer.nsi":
   ;
   ;   (1) Ensure the CBP package gets compiled, by inserting this block of code near the start:
   ;
@@ -83,13 +76,22 @@
   ;
   ;   <end of code block>
   ;
-  ;   (2) Add the "Create POPFile Buckets" page to the list of installer pages:
+  ;   (2) Ensure global user variable G_CFGDIR contains the path to the relevant 'popfile.cfg'
+  ;       configuration file. For example, if installer.nsi is using $INSTDIR\data\popfile.cfg
+  ;      then installer.nsi should ensure a statement equivalent to
+  ;
+  ;         StrCpy $G_CFGDIR  "$INSTDIR\data"
+  ;
+  ;      is executed before the "Create POPFile Buckets" custom page function is executed
+  ;      (i.e. before the code inserted by the CBP_PAGECOMMAND_SELECTBUCKETS macro is executed).
+  ;
+  ;   (3) Add the "Create POPFile Buckets" page to the list of installer pages:
   ;
   ;         !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS
   ;
-  ; These two changes will use the default settings in the CBP package. There are three default
-  ; settings which can be overridden by un-commenting the appropriate lines in the inserted code
-  ; block.
+  ; These changes will use the default settings in the CBP package. There are three default
+  ; settings which can be overridden by un-commenting the appropriate lines in the inserted
+  ; code block.
   ;
   ; Default setting 1:
   ; -----------------
@@ -147,8 +149,8 @@
   ; (3) Similarly, 'defines' are used for constants
   ;
   ; (4) Naming conventions: local registers are give names starting with 'CBP_L_' and
-  ;     constants are given names starting with 'CBP_C_'. If global registers are introduced,
-  ;     they should use names beginning with 'CBP_G_'.
+  ;     constants are given names starting with 'CBP_C_'. If global registers unique to the CBP
+  ;     package are introduced, they should use names beginning with 'CBP_G_'.
   ;
   ; (5) All functions preserve register values using the stack (with the sole exception of the
   ;     'leave' function for the custom page - it shares the same registers as the custom page
@@ -176,27 +178,47 @@
 #==============================================================================================
 # Function CBP_CheckCorpusStatus
 #==============================================================================================
-#
 # This function is used to determine the type of POPFile installation we are performing.
 # The CBP package is only used to create POPFile buckets when the installer is used to install
 # POPFile in a folder which does not contain any corpus files from a previous installation.
 #
 # For flexibility, the folder to be searched is passed on the stack instead of being hard-coded.
-# If 'popfile.cfg' is found in the specified folder, we use the corpus parameter (if present)
-# otherwise we look for corpus files in the sub-folder called 'corpus'.
+# If 'popfile.cfg' is found in the specified folder, we use the corpus parameters (if present)
+# otherwise we look for the default SQL database in the folder passed on the stack and then for
+# a flat file or BerkeleyDB corpus files in the sub-folder called 'corpus'.
 #
 # The full path used when searching for a corpus is stored in the CBP package's INI file
-# for use when creating the buckets.
+# for later use (by the 'CBP_MakePOPFileBuckets' function) when creating the buckets.
+#
+# There are three types of POPFile corpus:
+#
+# (1) flat files       - used by all versions prior to POPFile 0.20.0. For each bucket in the
+#                        corpus there is a sub-folder (below the main corpus one) and in each
+#                        bucket sub-folder there is a file called 'table' holding the words for
+#                        that bucket.
+#
+# (2) BerkeleyDB files - first used by POPFile 0.20.0. Uses the same folder structure as the
+#                        flat file case but with 'table.db' files instead of 'table' files.
+#
+# (3) SQL database     - first used by POPFile 0.21.0. Unlike all previous versions, the corpus
+#                        is a single file. The default database is created by the SQLite package
+#                        (installed by the installer), using the name 'popfile.db' and stored
+#                        in the folder which contains 'popfile.cfg'.
 #----------------------------------------------------------------------------------------------
 # Inputs:
-#   (top of stack)                - the path where 'popfile.cfg' or the corpus is expected to be
-#                                   (normally this will be the same as $INSTDIR)
+#   (top of stack)                - the path where 'popfile.cfg' (or the corpus) should be found
 #----------------------------------------------------------------------------------------------
 # Outputs:
 #   (top of stack)                - string containing one of three possible result codes:
-#                                       "clean" (corpus directory not found),
-#                                       "empty" (corpus directory exists but is empty), or
-#                                       "dirty" (corpus directory is not empty)
+#
+#                                   "clean" = SQL database not found AND no flat file
+#                                             (or BerkeleyDB) corpus folder found,
+#
+#                                   "empty" = SQL database not found AND an empty (no files)
+#                                             flat file (or BerkeleyDB) corpus folder found,
+#
+#                                   "dirty" = SQL database found OR a flat file (or BerkeleyDB)
+#                                             corpus folder found with files in it
 #----------------------------------------------------------------------------------------------
 # Global Registers Destroyed:
 #   (none)
@@ -208,6 +230,7 @@
 #   CBP_C_INIFILE                 - name of the INI file used to create the custom page
 #----------------------------------------------------------------------------------------------
 # CBP Functions Called:
+#   CBP_GetDataPath               - converts popfile.cfg corpus parameter to full path name
 #   CBP_GetParent                 - used when converting relative path to absolute path
 #   CBP_StrBackSlash              - converts all slashes in a string into backslashes
 #   CBP_TrimNewlines              - strips trailing Carriage Returns and/or Newlines from string
@@ -217,20 +240,23 @@
 #----------------------------------------------------------------------------------------------
 #  Usage Example:
 #
-#         Push $INSTDIR
+#         Push $G_CFGDIR
 #         Call CBP_CheckCorpusStatus
 #         Pop $R0
 #
 #         ($R0 will be "clean", "empty" or "dirty" at this point)
+#
 #==============================================================================================
 
 Function CBP_CheckCorpusStatus
 
-  !define CBP_L_CORPUS        $R9
-  !define CBP_L_FILE_HANDLE   $R8
-  !define CBP_L_RESULT        $R7
-  !define CBP_L_SOURCE        $R6
+  !define CBP_L_CORPUS        $R9   ; path to the corpus
+  !define CBP_L_FILE_HANDLE   $R8   ; handle used to access the 'popfile.cfg' file
+  !define CBP_L_RESULT        $R7   ; result returned by this function
+  !define CBP_L_SOURCE        $R6   ; folder where 'popfile.cfg' is expected to be found
   !define CBP_L_TEMP          $R5
+  !define CBP_L_NONSQL_CORPUS $R4   ; flat file or BerkeleyDB corpus path (from popfile.cfg)
+  !define CBP_L_SQL_CORPUS    $R3   ; SQL database corpus path (from popfile.cfg)
 
   Exch ${CBP_L_SOURCE}          ; where we are supposed to look for the corpus data
   Push ${CBP_L_RESULT}
@@ -238,9 +264,18 @@ Function CBP_CheckCorpusStatus
   Push ${CBP_L_CORPUS}
   Push ${CBP_L_FILE_HANDLE}
   Push ${CBP_L_TEMP}
+  Push ${CBP_L_NONSQL_CORPUS}
+  Push ${CBP_L_SQL_CORPUS}
 
   StrCpy ${CBP_L_CORPUS} ""
+  StrCpy ${CBP_L_NONSQL_CORPUS} ""
+  StrCpy ${CBP_L_SQL_CORPUS} ""
 
+  StrCpy ${CBP_L_TEMP} ${CBP_L_SOURCE} 1 -1
+  StrCmp ${CBP_L_TEMP} '\' 0 no_trailing_slash
+  StrCpy ${CBP_L_SOURCE} ${CBP_L_SOURCE} -1
+
+no_trailing_slash:
   IfFileExists ${CBP_L_SOURCE}\popfile.cfg 0 check_default_corpus_locn
 
   ClearErrors
@@ -250,87 +285,63 @@ loop:
   FileRead ${CBP_L_FILE_HANDLE} ${CBP_L_TEMP}
   IfErrors cfg_file_done
   StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 7
-  StrCmp ${CBP_L_RESULT} "corpus " got_old_corpus
+  StrCmp ${CBP_L_RESULT} "corpus " got_flat_corpus
   StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 13
-  StrCmp ${CBP_L_RESULT} "bayes_corpus " got_new_corpus
+  StrCmp ${CBP_L_RESULT} "bayes_corpus " got_bdb_corpus
+  StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 15
+  StrCmp ${CBP_L_RESULT} "bayes_database " got_sql_corpus
   Goto loop
 
-got_old_corpus:
-  StrCpy ${CBP_L_CORPUS} ${CBP_L_TEMP} "" 7
+got_flat_corpus:
+  StrCpy ${CBP_L_NONSQL_CORPUS} ${CBP_L_TEMP} "" 7
   Goto loop
 
-got_new_corpus:
-  StrCpy ${CBP_L_CORPUS} ${CBP_L_TEMP} "" 13
+got_bdb_corpus:
+  StrCpy ${CBP_L_NONSQL_CORPUS} ${CBP_L_TEMP} "" 13
+  Goto loop
+
+got_sql_corpus:
+  StrCpy ${CBP_L_SQL_CORPUS} ${CBP_L_TEMP} "" 15
   Goto loop
 
 cfg_file_done:
   FileClose ${CBP_L_FILE_HANDLE}
 
-  Push ${CBP_L_CORPUS}
+  Push ${CBP_L_NONSQL_CORPUS}
   Call CBP_TrimNewlines
+  Pop ${CBP_L_NONSQL_CORPUS}
+
+  Push ${CBP_L_SQL_CORPUS}
+  Call CBP_TrimNewlines
+  Pop ${CBP_L_SQL_CORPUS}
+
+  StrCmp ${CBP_L_SQL_CORPUS} "" check_non_sql_corpus
+  Push ${CBP_L_SOURCE}
+  Push ${CBP_L_SQL_CORPUS}
+  Call CBP_GetDataPath
+  Pop ${CBP_L_CORPUS}
+  StrCmp ${CBP_L_CORPUS} "" check_non_sql_corpus
+  IfFileExists "${CBP_L_CORPUS}" dirty_install
+
+check_non_sql_corpus:
+  StrCmp ${CBP_L_NONSQL_CORPUS} "" check_default_corpus_locn
+  Push ${CBP_L_SOURCE}
+  Push ${CBP_L_NONSQL_CORPUS}
+  Call CBP_GetDataPath
   Pop ${CBP_L_CORPUS}
   StrCmp ${CBP_L_CORPUS} "" check_default_corpus_locn
-
-  ; A non-null corpus parameter has been found in 'popfile.cfg'
-  ; Strip leading/trailing quotes, if any
-
-  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 1
-  StrCmp ${CBP_L_TEMP} '"' 0 slashconversion
-  StrCpy ${CBP_L_CORPUS} ${CBP_L_CORPUS} "" 1
-  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 1 -1
-  StrCmp ${CBP_L_TEMP} '"' 0 slashconversion
-  StrCpy ${CBP_L_CORPUS} ${CBP_L_CORPUS} -1
-
-slashconversion:
-  Push ${CBP_L_CORPUS}
-  Call CBP_StrBackSlash            ; ensure corpus path uses backslashes
-  Pop ${CBP_L_CORPUS}
-
-  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 2
-  StrCmp ${CBP_L_TEMP} ".\" sub_folder
-  StrCmp ${CBP_L_TEMP} "\\" look_for_corpus_files
-
-  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 3
-  StrCmp ${CBP_L_TEMP} "..\" relative_folder
-
-  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 1
-  StrCmp ${CBP_L_TEMP} "\" instdir_drive
-
-  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 1 1
-  StrCmp ${CBP_L_TEMP} ":" look_for_corpus_files
-
-  ; Assume path can be safely added to $INSTDIR
-
-  StrCpy ${CBP_L_CORPUS} $INSTDIR\${CBP_L_CORPUS}
-  Goto look_for_corpus_files
-
-sub_folder:
-  StrCpy ${CBP_L_CORPUS} ${CBP_L_CORPUS} "" 2
-  StrCpy ${CBP_L_CORPUS} $INSTDIR\${CBP_L_CORPUS}
-  Goto look_for_corpus_files
-
-relative_folder:
-  StrCpy ${CBP_L_RESULT} $INSTDIR
-
-relative_again:
-  StrCpy ${CBP_L_CORPUS} ${CBP_L_CORPUS} "" 3
-  Push ${CBP_L_RESULT}
-  Call CBP_GetParent
-  Pop ${CBP_L_RESULT}
-  StrCpy ${CBP_L_TEMP} ${CBP_L_CORPUS} 3
-  StrCmp ${CBP_L_TEMP} "..\" relative_again
-  StrCpy ${CBP_L_CORPUS} ${CBP_L_RESULT}\${CBP_L_CORPUS}
-  Goto look_for_corpus_files
-
-instdir_drive:
-  StrCpy ${CBP_L_TEMP} $INSTDIR 2
-  StrCpy ${CBP_L_CORPUS} ${CBP_L_TEMP}${CBP_L_CORPUS}
   Goto look_for_corpus_files
 
 check_default_corpus_locn:
-  StrCpy ${CBP_L_CORPUS} ${CBP_L_SOURCE}\corpus
+
+  ; No 'popfile.cfg file' found or it does not contain any corpus parameters
+  ; so we look for an existing corpus using the default corpus locations
+
+  IfFileExists "${CBP_L_SOURCE}\popfile.db" dirty_install
+  StrCpy ${CBP_L_CORPUS} "${CBP_L_SOURCE}\corpus"
 
 look_for_corpus_files:
+
   ; Save path in INI file for later use by 'CBP_MakePOPFileBucket'
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" \
@@ -353,6 +364,8 @@ corpus_check:
   StrCmp ${CBP_L_RESULT} ".." corpus_check
   StrCmp ${CBP_L_RESULT} "" empty_install
 
+dirty_install:
+
   ; Have found something in the "corpus" directory so this is not a "clean" install
 
   StrCpy ${CBP_L_RESULT} "dirty"
@@ -368,6 +381,8 @@ clean_install:
 return_result:
   FindClose ${CBP_L_FILE_HANDLE}
 
+  Pop ${CBP_L_SQL_CORPUS}
+  Pop ${CBP_L_NONSQL_CORPUS}
   Pop ${CBP_L_TEMP}
   Pop ${CBP_L_FILE_HANDLE}
   Pop ${CBP_L_CORPUS}
@@ -379,17 +394,24 @@ return_result:
   !undef CBP_L_RESULT
   !undef CBP_L_SOURCE
   !undef CBP_L_TEMP
+  !undef CBP_L_NONSQL_CORPUS
+  !undef CBP_L_SQL_CORPUS
 
 FunctionEnd
 
 #==============================================================================================
 # Function CBP_MakePOPFileBuckets
 #==============================================================================================
-#
 # This function creates the buckets which are to be used by this installation of POPFile.
 # The names of the buckets to be created are extracted from the INI file used to create the
 # custom page used by the CBP package. It is assumed that the bucket names are found in
 # consecutive fields in the INI file.
+#
+# This function creates empty "flat file" format buckets (i.e. buckets containing no words)
+# and leaves POPFile to convert these buckets into the current corpus format. POPFile will
+# automatically convert flat file format corpus data when it is first run. (The flat file format
+# was used for all versions of POPFile prior to 0.20.0.) This automatic conversion feature helps
+# reduce the work required to update the installer to cope with a new corpus format.
 #
 # The INI file also holds the full path to the folder where the buckets are to be created
 # (this path is determined by 'CBP_CheckCorpusStatus' because the location is not hard-coded).
@@ -398,7 +420,6 @@ FunctionEnd
 #
 # At present a simple result code is returned. This could be replaced by a list of the names
 # of the buckets which were not created (as a "|" separated list ?)
-#
 #----------------------------------------------------------------------------------------------
 # Inputs:
 #   (top of stack)                - the number of buckets to be created (in range 2 to 8)
@@ -420,7 +441,8 @@ FunctionEnd
 #   (none)
 #----------------------------------------------------------------------------------------------
 # Called By:
-#   CBP_CreateBucketsPage         - the function which "controls" the "Create Buckets" page
+#   CBP_HandleUserInput           - the "leave" function for the custom page created by the
+#                                  'CBP_CreateBucketsPage' function
 #----------------------------------------------------------------------------------------------
 #  Usage Example:
 #
@@ -428,6 +450,7 @@ FunctionEnd
 #       Push $R2                      ; number of buckets to be created (range 2 to 8)
 #       Call CBP_MakePOPFileBuckets
 #       Pop $R1                       ; number of buckets not created (range 0 to 8)
+#
 #==============================================================================================
 
 Function CBP_MakePOPFileBuckets
@@ -475,7 +498,7 @@ next_bucket:
 
   ; Double-check that the bucket we are about to create does not exist
 
-  FindFirst ${CBP_L_FILE_HANDLE} ${CBP_L_NAME} ${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}\*.*
+  FindFirst ${CBP_L_FILE_HANDLE} ${CBP_L_NAME} "${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}\*.*"
   StrCmp ${CBP_L_FILE_HANDLE} "" ok_to_create_bucket
   FindClose ${CBP_L_FILE_HANDLE}
   goto incrm_ptr
@@ -483,8 +506,8 @@ next_bucket:
 ok_to_create_bucket:
   FindClose ${CBP_L_FILE_HANDLE}
   ClearErrors
-  CreateDirectory ${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}
-  FileOpen ${CBP_L_FILE_HANDLE} ${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}\table w
+  CreateDirectory "${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}"
+  FileOpen ${CBP_L_FILE_HANDLE} "${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}\table" w
   FileWrite ${CBP_L_FILE_HANDLE} "__CORPUS__ __VERSION__ 1$\r$\n"
   FileClose ${CBP_L_FILE_HANDLE}
   IfErrors  incrm_ptr
@@ -521,6 +544,145 @@ FunctionEnd
 #                     NO "USER SERVICEABLE" PARTS BEYOND THIS POINT                           #
 #                                                                                             #
 #//////////////////////////////////////////////////////////////////////////////////////////////
+
+#==============================================================================================
+# Function CBP_GetDataPath
+#==============================================================================================
+# This function converts a 'base directory' and a 'data folder' parameter (usually relative to
+# the 'base directory') into a single, absolute path. For example, it will convert the base
+# directory 'C:\Program Files\POPFile' and the data folder 'corpus' into the resulting path
+# 'C:\Program Files\POPFile\corpus'.
+#
+# It is assumed that the 'base directory' is in standard Windows format with no trailing slash.
+#
+# The 'data folder' may be supplied in a variety of different formats, for example:
+# corpus, ./corpus, "..\..\corpus", Z:/Data/corpus or even "\\server\share\corpus".
+#----------------------------------------------------------------------------------------------
+# Inputs:
+#         (top of stack)          - the 'data folder' parameter (eg "../../corpus")
+#         (top of stack - 1)      - the 'base directory' parameter
+#----------------------------------------------------------------------------------------------
+# Outputs:
+#         (top of stack)          - string containing the full (unambiguous) path to the data
+#                                   (the string "" is returned if input data was null)
+#----------------------------------------------------------------------------------------------
+# Global Registers Destroyed:
+#   (none)
+#
+# Local Registers Destroyed:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# Global CBP Constants Used:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# CBP Functions Called:
+#   (none)
+#----------------------------------------------------------------------------------------------
+# Called By:
+#   CBP_CheckCorpusStatus         - used to check for an existing POPFile corpus
+#                                   (flat file, BerkeleyDB or SQL database format)
+#----------------------------------------------------------------------------------------------
+#  Usage example:
+#
+#         Push $INSTDIR\lib
+#         Push "../../../corpus"
+#         Call CBP_GetDataPath
+#         Pop $R0
+#
+#         ($R0 will be "C:\corpus", assuming $INSTDIR was "C:\Program Files\POPFile")
+#
+#==============================================================================================
+
+Function CBP_GetDataPath
+
+  !define CBP_L_BASEDIR     $R9
+  !define CBP_L_DATA        $R8
+  !define CBP_L_RESULT      $R7
+  !define CBP_L_TEMP        $R6
+
+  Exch ${CBP_L_DATA}        ; the 'data folder' parameter (often a relative path)
+  Exch
+  Exch ${CBP_L_BASEDIR}      ; the 'base directory' used for cases where 'data folder' is relative
+  Push ${CBP_L_RESULT}
+  Push ${CBP_L_TEMP}
+
+  StrCmp ${CBP_L_DATA} "" 0 strip_quotes
+  StrCpy ${CBP_L_DATA} ${CBP_L_BASEDIR}
+  Goto got_path
+
+strip_quotes:
+
+  ; Strip leading/trailing quotes, if any
+
+  StrCpy ${CBP_L_TEMP} ${CBP_L_DATA} 1
+  StrCmp ${CBP_L_TEMP} '"' 0 slashconversion
+  StrCpy ${CBP_L_DATA} ${CBP_L_DATA} "" 1
+  StrCpy ${CBP_L_TEMP} ${CBP_L_DATA} 1 -1
+  StrCmp ${CBP_L_TEMP} '"' 0 slashconversion
+  StrCpy ${CBP_L_DATA} ${CBP_L_DATA} -1
+
+slashconversion:
+  StrCmp ${CBP_L_DATA} "." source_folder
+  Push ${CBP_L_DATA}
+  Call CBP_StrBackSlash            ; ensure parameter uses backslashes
+  Pop ${CBP_L_DATA}
+
+  StrCpy ${CBP_L_TEMP} ${CBP_L_DATA} 2
+  StrCmp ${CBP_L_TEMP} ".\" sub_folder
+  StrCmp ${CBP_L_TEMP} "\\" got_path
+
+  StrCpy ${CBP_L_TEMP} ${CBP_L_DATA} 3
+  StrCmp ${CBP_L_TEMP} "..\" relative_folder
+
+  StrCpy ${CBP_L_TEMP} ${CBP_L_DATA} 1
+  StrCmp ${CBP_L_TEMP} "\" basedir_drive
+
+  StrCpy ${CBP_L_TEMP} ${CBP_L_DATA} 1 1
+  StrCmp ${CBP_L_TEMP} ":" got_path
+
+  ; Assume path can be safely added to 'base directory'
+
+  StrCpy ${CBP_L_DATA} ${CBP_L_BASEDIR}\${CBP_L_DATA}
+  Goto got_path
+
+source_folder:
+  StrCpy ${CBP_L_DATA} ${CBP_L_BASEDIR}
+  Goto got_path
+
+sub_folder:
+  StrCpy ${CBP_L_DATA} ${CBP_L_DATA} "" 2
+  StrCpy ${CBP_L_DATA} ${CBP_L_BASEDIR}\${CBP_L_DATA}
+  Goto got_path
+
+relative_folder:
+  StrCpy ${CBP_L_RESULT} ${CBP_L_BASEDIR}
+
+relative_again:
+  StrCpy ${CBP_L_DATA} ${CBP_L_DATA} "" 3
+  Push ${CBP_L_RESULT}
+  Call CBP_GetParent
+  Pop ${CBP_L_RESULT}
+  StrCpy ${CBP_L_TEMP} ${CBP_L_DATA} 3
+  StrCmp ${CBP_L_TEMP} "..\" relative_again
+  StrCpy ${CBP_L_DATA} ${CBP_L_RESULT}\${CBP_L_DATA}
+  Goto got_path
+
+basedir_drive:
+  StrCpy ${CBP_L_TEMP} ${CBP_L_BASEDIR} 2
+  StrCpy ${CBP_L_DATA} ${CBP_L_TEMP}${CBP_L_DATA}
+
+got_path:
+  Pop ${CBP_L_TEMP}
+  Pop ${CBP_L_RESULT}
+  Pop ${CBP_L_BASEDIR}
+  Exch ${CBP_L_DATA}  ; place full path to the data directory on top of the stack
+
+  !undef CBP_L_BASEDIR
+  !undef CBP_L_DATA
+  !undef CBP_L_RESULT
+  !undef CBP_L_TEMP
+
+FunctionEnd
 
 ###############################################################################################
 #
@@ -687,7 +849,7 @@ FunctionEnd
   ;--------------------------------------------------------------------------------------
   ; Macros used by 'CBP_CreateINIfile' (outside the function to simplify coverage tests)
   ;--------------------------------------------------------------------------------------
-  
+
   ; Basic macro used to create the INI file
 
   !macro CBP_WRITE_INI SECTION KEY VALUE
@@ -957,7 +1119,6 @@ FunctionEnd
 #==============================================================================================
 # Function CBP_CreateBucketsPage
 #==============================================================================================
-#
 # This function "generates" the POPFile Bucket Selection page.
 #
 # The Bucket Selection page shows a list of up to 8 buckets which have been selected for
@@ -1002,12 +1163,16 @@ FunctionEnd
 #   CBP_CheckCorpusStatus         - used to determine if this is a "clean" install
 #   CBP_SetDefaultBuckets         - initialises the bucket list when page first shown
 #   CBP_UpdateAddBucketList       - update list of suggested names seen in "Create" combobox
+#
+#   (CBP_HandleUserInput          - the "leave" function for the custom page created here)
 #----------------------------------------------------------------------------------------------
 # Called By:
 #   'installer.nsi'               - via the CBP_PAGECOMMAND_SELECTBUCKETS macro
 #----------------------------------------------------------------------------------------------
 #  Usage Example:
+#
 #       !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS
+#
 #==============================================================================================
 
   ;------------------------------------------------------------------------------------------
@@ -1038,7 +1203,7 @@ FunctionEnd
     !undef CBP_L_RESULT
     !undef CBP_L_TEMP
   !macroend
-  
+
 Function CBP_CreateBucketsPage
 
   !insertmacro CBP_HUI_SharedDefs
@@ -1058,7 +1223,10 @@ use_INI_file:
 
   ; We only offer to create POPFile buckets if we are not upgrading an existing POPFile system
 
-  Push $INSTDIR
+  ; Global user variable G_CFGDIR contains full path to folder where popfile.cfg can be found
+  ; (value set up by installer.nsi before this function is called)
+
+  Push $G_CFGDIR
   Call CBP_CheckCorpusStatus
   Pop ${CBP_L_RESULT}
   StrCmp ${CBP_L_RESULT} "dirty" finished_now
@@ -1152,7 +1320,6 @@ FunctionEnd
 #==============================================================================================
 # Function CBP_HandleUserInput
 #==============================================================================================
-#
 # This is the "leave" function for the custom page created by 'CBP_CreateBucketsPage'.
 #
 # Note that 'CBP_HandleUserInput' is treated as an extension of 'CBP_CreateBucketsPage' so it
@@ -1194,7 +1361,9 @@ FunctionEnd
 #   CBP_StrCheckName              - used to validate name entered via "Create" combobox
 #----------------------------------------------------------------------------------------------
 # Called By:
+#
 #   (this is the "leave" function for the custom page created by "CBP_CreateBucketsPage")
+#
 #==============================================================================================
 
 Function CBP_HandleUserInput
@@ -2144,20 +2313,20 @@ Function CBP_GetParent
   Push $R1
   Push $R2
   Push $R3
-   
+
   StrCpy $R1 0
   StrLen $R2 $R0
- 
+
 loop:
   IntOp $R1 $R1 + 1
   IntCmp $R1 $R2 get 0 get
   StrCpy $R3 $R0 1 -$R1
   StrCmp $R3 "\" get
   Goto loop
- 
+
 get:
   StrCpy $R0 $R0 -$R1
-   
+
   Pop $R3
   Pop $R2
   Pop $R1
