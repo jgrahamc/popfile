@@ -113,10 +113,15 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define MUI_PRODUCT   "POPFile"
-  !define MUI_VERSION   "0.20.1"
+  ReadEnvStr C_POPFILE_MAJOR_VERSION "POPFILE_MAJOR_VERSION"
+  ReadEnvStr C_POPFILE_MINOR_VERSION "POPFILE_MINOR_VERSION"
+  ReadEnvStr C_POPFILE_REVISION      "POPFILE_REVISION" 
+  ReadEnvStr C_POPFILE_RC            "RC" 
 
-  !define C_README        "v0.20.1.change"
+  !define MUI_PRODUCT   "POPFile"
+  !define MUI_VERSION   "${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}${RC}"
+
+  !define C_README        "v${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
 
   ;----------------------------------------------------------------------
@@ -183,7 +188,7 @@
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion "0.20.1.0"
+  VIProductVersion "${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}.0"
 
   VIAddVersionKey "ProductName" "${MUI_PRODUCT}"
   VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sourceforge.net"

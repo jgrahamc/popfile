@@ -77,9 +77,9 @@ sub new
     # POPFile's version number as individual numbers and as
     # string
 
-    $self->{major_version__}  = '';
-    $self->{minor_version__}  = '';
-    $self->{build_version__}  = '';
+    $self->{major_version__}  = '?';
+    $self->{minor_version__}  = '?';
+    $self->{build_version__}  = '?';
     $self->{version_string__} = '';
 
     bless $self, $type;
@@ -107,6 +107,20 @@ sub CORE_loader_init
     $self->{pipeready__} = sub { $self->pipeready(@_) };
     $self->{forker__} = sub { $self->CORE_forker(@_) };
     $self->{reaper__} = sub { $self->CORE_reaper(@_) };
+
+    # See if there's a file named popfile_version that contains the
+    # POPFile version number
+
+    my $version_file = 'POPFile/popfile_version';
+
+    if ( -e $version_file ) {
+        open VER, "<$version_file";
+        my $major = int(<VER>);
+        my $minor = int(<VER>);
+        my $rev   = int(<VER>);
+        close VER;
+        $self->CORE_version( $major, $minor, $rev );
+    }
 
     print "\nPOPFile Engine loading\n" if $self->{debug__};
 }
@@ -666,7 +680,7 @@ sub CORE_stop
 #---------------------------------------------------------------------------------------------
 sub CORE_version
 {
-    my ($self,$major_version, $minor_version, $build_version) = @_;
+    my ( $self, $major_version, $minor_version, $build_version ) = @_;
 
     if (!defined($major_version)) {
         if (wantarray) {

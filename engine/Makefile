@@ -58,16 +58,16 @@ endif
 popfile.exe: popfile-windows.pl
 	perlapp --gui $(TRAY_OPTIONS)
 
-popfileif.exe: popfile-tray.pl POPFile/Loader.pm
+popfileif.exe: popfile-tray.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
 	perltray --nogui $(TRAY_OPTIONS)
 
-popfileib.exe: popfile-tray.pl POPFile/Loader.pm
+popfileib.exe: popfile-tray.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
 	perltray $(TRAY_OPTIONS)
 
-popfilef.exe: popfile.pl POPFile/Loader.pm
+popfilef.exe: popfile.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
 	perlapp $(TRAY_OPTIONS)
 
-popfileb.exe: popfile.pl POPFile/Loader.pm
+popfileb.exe: popfile.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
 	perlapp --gui $(TRAY_OPTIONS)
 
 # windows builds the Windows installer
@@ -78,9 +78,9 @@ windows: winexe; @$(MAKE) -C ../windows
 
 BUILD_ZIP=wzzip -P $(POPFILE_ZIP) -a $^
 xplat: $(POPFILE_ZIP)
-$(POPFILE_ZIP): core manual skins
+$(POPFILE_ZIP): core manual skins POPFile/popfile_version
 
-core: popfile.pl otto.gif pix.gif black.gif bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/POP3.pm Proxy/Proxy.pm UI/HT??.pm v$(POPFILE_VERSION).change license stopwords favicon.ico
+core: popfile.pl otto.gif pix.gif black.gif bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/POP3.pm Proxy/Proxy.pm UI/HT??.pm v$(POPFILE_VERSION).change license stopwords favicon.ico $(POPFILE_VERSION_FILE)
 	rm -f $(POPFILE_ZIP)
 	$(BUILD_ZIP)
 
@@ -103,3 +103,10 @@ rc:
 	chmod go+r $(RELEASE_FILES)
 	scp -p $(RELEASE_FILES) jgrahamc@popfile.sourceforge.net:/home/groups/p/po/popfile/htdocs
 
+# The POPFile version number is stored in a file called POPFile/popfile_version 
+# which we always write if vars.mak has changed
+
+$(POPFILE_VERSION_FILE): vars.mak
+	@echo $(POPFILE_MAJOR_VERSION) > $@
+	@echo $(POPFILE_MINOR_VERSION) >> $@
+	@echo $(POPFILE_REVISION) >> $@
