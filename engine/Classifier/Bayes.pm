@@ -160,10 +160,7 @@ sub get_value
     
     if ( defined($self->{matrix}{$bucket}[$i]) )
     {
-        if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E L([\-\.\d]+)\|/ ) != 0 ) 
-        {
-            return $1;
-        } 
+        return $1 if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E L([\-\.\d]+)\|/ ) != 0 );
     }
     
     if ( defined($self->{matrix}{$bucket}[$i]) )
@@ -185,15 +182,8 @@ sub set_value
     $word =~ /^(.)/;
     my $i = ord($1);
 
-    if ( !defined($self->{matrix}{$bucket}[$i]) ) 
-    {
-        $self->{matrix}{$bucket}[$i] = '';
-    }
-
-    if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 ) 
-    {
-        $self->{matrix}{$bucket}[$i] .= "|$word $value|";
-    }
+    $self->{matrix}{$bucket}[$i] = '' if ( !defined($self->{matrix}{$bucket}[$i]) );
+    $self->{matrix}{$bucket}[$i] .= "|$word $value|" if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|\Q$word\E (L?[\-\.\d]+)\|/\|$word $value\|/ ) == 0 );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -337,10 +327,7 @@ sub load_bucket
             } 
             else 
             {
-                if ( /^(.+)$/ ) 
-                {
-                    $self->{magnets}{$bucket}{from}{$1} = 1;
-                }
+                $self->{magnets}{$bucket}{from}{$1} = 1 if ( /^(.+)$/ );
             }
         }
         close MAGNETS;
@@ -460,10 +447,8 @@ sub classify_file
         }
     }
 
-    if ( $#buckets == -1 ) 
-    {
-        return "unclassified";
-    }
+    # If the user has not defined any buckets then we escape here return unclassified
+    return "unclassified " if ( $#buckets == -1 );
 
     # The score hash will contain the likelihood that the given message is in each
     # bucket, the buckets are the keys for score
@@ -484,10 +469,7 @@ sub classify_file
     # P(word|bucket) ^ word count and multiply to the score
     
     my $logbuck = 1;
-    if ( $#buckets > 0 )
-    {
-       $logbuck = log( $#buckets + 1 );
-    }
+    $logbuck = log( $#buckets + 1 ) if ( $#buckets > 0 );
 
     # Ideally, the "raw score" in the score display would reflect the sum of the
     # scores for the individual words, as shown by the lookup GUI.  Actually
@@ -505,7 +487,8 @@ sub classify_file
     foreach my $word (keys %{$self->{parser}->{words}})
     {
         my $wmax = -10000;
-        if ($self->{wordscores}) {
+        if ($self->{wordscores}) 
+        {
             $wtprob{$word} = 0;
             $wbprob{$word} = {};
         }
@@ -514,21 +497,15 @@ sub classify_file
         {
             my $probability = get_value( $self, $bucket, $word );
 
-            if ( $probability == 0 )
-            {
-                $probability = $self->{not_likely};
-            }
-
-            if ( $wmax < $probability )
-            {
-               $wmax = $probability;
-            }
+            $probability = $self->{not_likely} if ( $probability == 0 );
+            $wmax = $probability if ( $wmax < $probability );
 
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
             # and we multiply by the number of times that the word occurs
 
             $score{$bucket} += ( $probability * $self->{parser}{words}{$word} );
-            if ($self->{wordscores}) {
+            if ($self->{wordscores}) 
+            {
                 $wtprob{$word} += exp($probability);
                 $wbprob{$word}{$bucket} = exp($probability);
             }
@@ -566,10 +543,7 @@ sub classify_file
     {
         $raw_score{$b} = $score{$b};
         $score{$b} -= $base_score;
-        if ($score{$b} > 54 * log(0.5))
-        {
-           $total += exp($score{$b});
-        }
+        $total += exp($score{$b}) if ($score{$b} > 54 * log(0.5));
     }
 
     $self->{scores} = "<b>Scores</b><p><table><tr><td>Bucket<td>&nbsp;<td>Probability";

@@ -268,6 +268,9 @@ sub save_stop_words
 # Mangles a word into either the empty string to indicate that the word should be ignored
 # or the canonical form
 #
+# $word     The word to either mangle into a nice form, or return empty string if this word
+#           is to be ignored
+#
 # ---------------------------------------------------------------------------------------------
 
 sub mangle
@@ -275,30 +278,19 @@ sub mangle
     my ($self, $word) = @_;
 
     # all words are treated as lowercase
-    
     $word = lc($word);
 
     # stop words are ignored
-    
-    if ( $self->{stop}{$word} ) 
-    {
-        return '';
-    }
+    return '' if ( $self->{stop}{$word} );
 
     # Remove characters that would mess up a Perl regexp and replace with .
     $word =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\./g;
 
     # Long words are ignored also
-    if ( length($word) > 45 ) 
-    {
-        return "";
-    }
+    return '' if ( length($word) > 45 );
 
     # Ditch long hex numbers
-    if ( $word =~ /^[A-F0-9]{8,}$/i )
-    {
-        return '';
-    }
+    return '' if ( $word =~ /^[A-F0-9]{8,}$/i );
     
     return $word;
 }
