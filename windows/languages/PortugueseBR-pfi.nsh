@@ -177,7 +177,7 @@
 # Message displayed when 'Add User' does not seem to be part of the current version
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_COMPAT_NOTFOUND      "Error: Compatible version of ${C_PFI_PRODUCT} not found !"
+!insertmacro PFI_LANG_STRING PFI_LANG_COMPAT_NOTFOUND      "Erro: Não foi encontrada uma versão compatível de ${C_PFI_PRODUCT}!"
 
 #--------------------------------------------------------------------------
 # Message displayed when installer exits because another copy is running
