@@ -8,6 +8,7 @@ package Classifier::WordMangle;
 
 use strict;
 use warnings;
+use locale;
 
 #----------------------------------------------------------------------------
 # new
@@ -218,7 +219,46 @@ sub new
           'would', 1,
          };
 
+    load_stop_words($self);
+
     return bless $self, $type;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# load_stop_words, save_stop_words - load and save the stop word list in the stopwords file
+#
+# ---------------------------------------------------------------------------------------------
+sub load_stop_words
+{
+    my ($self) = @_;
+    
+    if ( open STOPS, "<stopwords" )
+    {
+        delete $self->{stop};
+        while ( <STOPS> )
+        {
+            s/[\r\n]//g;
+            $self->{stop}{$_} = 1;
+        }
+        
+        close STOPS;
+    }
+}
+
+sub save_stop_words
+{
+    my ($self) = @_;
+    
+    if ( open STOPS, ">stopwords" )
+    {
+        for my $word (keys %{$self->{stop}})
+        {
+            print STOPS "$word\n";
+        }
+        
+        close STOPS;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------

@@ -8,6 +8,7 @@ package Classifier::Bayes;
 
 use strict;
 use warnings;
+use locale;
 use Classifier::MailParse;
 use Classifier::WordMangle;
 
@@ -240,7 +241,7 @@ sub load_word_matrix
         }
         
         load_bucket( $self, $bucket );
-        $bucket =~ /([A-Za-z0-9-_]+)$/;
+        $bucket =~ /([[:alpha:]0-9-_]+)$/;
         $bucket =  $1;
         $self->{full_total} += $self->{total}{$bucket};
         
@@ -282,7 +283,7 @@ sub load_bucket
 
     print "Loading $bucket..." if $self->{debug};
 
-    $bucket =~ /([A-Za-z0-9-_]+)$/;
+    $bucket =~ /([[:alpha:]0-9-_]+)$/;
     $bucket =  $1;
     $self->{parameters}{$bucket}{subject} = 1;
     $self->{total}{$bucket}  = 0;
@@ -296,7 +297,7 @@ sub load_bucket
         while ( <PARAMS> ) 
         {
             s/[\r\n]//g;
-            if ( /^([a-z]+) ([^ ]+)$/ ) 
+            if ( /^([[:lower:]]+) ([^ ]+)$/ ) 
             {
                 $self->{parameters}{$bucket}{$1} = $2;
             }

@@ -5,6 +5,7 @@
 # ---------------------------------------------------------------------------------------------
 
 use strict;
+use locale;
 use Classifier::Bayes;
 
 # main
@@ -22,7 +23,7 @@ if ( $#ARGV == -1 )
 
     foreach my $test (@tests)
     {
-        $test =~ /([A-Za-z0-9-_]+)$/;
+        $test =~ /([[:alpha:]0-9-_]+)$/;
         my $class = $1;
         my @files = glob "$test/*";
         

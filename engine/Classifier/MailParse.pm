@@ -8,6 +8,7 @@ package Classifier::MailParse;
 
 use strict;
 use warnings;
+use locale;
 use Classifier::WordMangle;
 
 #----------------------------------------------------------------------------
@@ -66,9 +67,10 @@ sub un_base64
     my $result;
     
     $line =~ s/=+$//; 
+    $line =~ s/[\r\n]//g; 
     $line =~ tr|A-Za-z0-9+/| -_|;
 
-    $result = join'', map( unpack("u", chr(32 + length($_)*3/4) . $_), $line =~ /(.{1,60})/gs);
+    $result = join'', map( unpack("u", chr(32 + length($_)*3/4) . $_), $line =~ /(.{1,196})/gs);
     $result =~ s/\x00//g;
     
     return $result;
@@ -84,7 +86,7 @@ sub un_base64
 
 sub update_word
 {
-    my ($self, $word, $encoded) = @_;
+    my ($self, $word, $encoded, $before, $after) = @_;
     
     my $mword = $self->{mangle}->mangle($word);
     
@@ -95,7 +97,7 @@ sub update_word
             my $color = $self->{bayes}->get_color($mword);
             if ( $encoded == 0 ) 
             {
-                $self->{ut} =~ s/($word)/<b><font color=$color>$1<\/font><\/b>/g;
+                $self->{ut} =~ s/($before)\Q$word\E($after)/$1<b><font color=$color>$word<\/font><\/b>$2/;
             }
             else
             {
@@ -133,34 +135,34 @@ sub add_line
         
         # Pull out any email addresses in the line that are marked with <> and have an @ in them
 
-        while ( $line =~ s/<([A-Za-z0-9\-_]+?@[A-Za-z0-9\-_\.]+?)>// ) 
+        while ( $line =~ s/<([[:alpha:]0-9\-_]+?@[[:alpha:]0-9\-_\.]+?)>// ) 
         {
-            update_word($self, $1, $encoded);
+            update_word($self, $1, $encoded, '<', '>');
         }
 
         # Grab domain names
 
-        while ( $line =~ s/(([A-Za-z][A-Za-z0-9\-_]+\.){2,})([A-Za-z0-9\-_]+)([^A-Za-z0-9\-_]|$)/$4/ ) 
+        while ( $line =~ s/(([[:alpha:]][[:alpha:]0-9\-_]+\.){2,})([[:alpha:]0-9\-_]+)([^[:alpha:]0-9\-_]|$)/$4/ ) 
         {
-            update_word($self, "$1$3", $encoded);
+            update_word($self, "$1$3", $encoded, '', '');
         }
 
         # Grab IP addresses
 
         while ( $line =~ s/(([12]?\d{1,2}\.){3}[12]?\d{1,2})// ) 
         {
-            update_word($self, "$1", $encoded);
+            update_word($self, "$1", $encoded, '', '');
         }
 
         # Only care about words between 3 and 45 characters since short words like
         # an, or, if are too common and the longest word in English (according to
         # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
 
-        while ( $line =~ s/([A-Za-z][A-Za-z\']{0,44})[-,\.\"\'\)\?!:;\/]{0,5}([ \t\n\r]|$)/ / )
+        while ( $line =~ s/([[:alpha:]][[:alpha:]\']{0,44})[-,\.\"\'\)\?!:;\/]{0,5}([ \t\n\r]|$)/ / )
         {
             if (length $1 >= 3)        
             {
-                update_word($self,$1, $encoded);
+                update_word($self,$1, $encoded, '', '[ \t\n\r]');
             }
         }
         
@@ -219,7 +221,12 @@ sub parse_stream
         while ( $read =~ s/(.*?[\r\n]+)// ) 
         {
             my $line = $1;
-             
+
+            if ( !defined($line) ) 
+            {
+                next;
+            }
+            
             print ">>> $line" if $self->{debug};
 
             if ( $self->{color} ) 
@@ -253,11 +260,12 @@ sub parse_stream
             {
                 my $decoded = '';
                 $self->{ut} = '' if $self->{color};
-                while ( ( $line =~ /^([A-Za-z0-9+\/]{4}){1,48}[\n\r]*?$/ ) || ( $line =~ /^[A-Za-z0-9+\/]+=+?[\n\r]*?$/ ) )
+                print "ba> [$line]" if $self->{debug};
+                while ( ( $line =~ /^([A-Za-z0-9+\/]{4}){1,48}[\n\r]*/ ) || ( $line =~ /^[A-Za-z0-9+\/]+=+?[\n\r]*/ ) )
                 {
                     print "64> $line" if $self->{debug};
                     $decoded    .= un_base64( $self, $line );
-                    if ( $decoded =~ /[^A-Za-z\-\.]$/ ) 
+                    if ( $decoded =~ /[^[:alpha:]\-\.]$/ ) 
                     {
                         if ( $self->{color} )
                         {
@@ -276,10 +284,18 @@ sub parse_stream
                             }
                         }
                     }
-                    $line = <MSG>;
+                    if ( !($line = <MSG>) )
+                    {
+                        last;
+                    }
                 }
 
                 add_line( $self, $decoded, 1 );
+            }
+
+            if ( !defined($line) ) 
+            {
+                next;
             }
 
             if ( $line =~ /<html>/i ) 
@@ -329,9 +345,9 @@ sub parse_stream
                         $self->{from} = $argument;
                     }
                     
-                    while ( $argument =~ s/<([A-Za-z0-9\-_]+?@[A-Za-z0-9\-_\.]+?)>// ) 
+                    while ( $argument =~ s/<([[:alpha:]0-9\-_]+?@[[:alpha:]0-9\-_\.]+?)>// ) 
                     {
-                        update_word($self, $1, 0);
+                        update_word($self, $1, 0, '<', '>');
                     }
 
 

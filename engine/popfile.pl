@@ -13,6 +13,7 @@
 
 use strict;
 use warnings;
+use locale;
 
 # Use the Naive Bayes classifier
 use Classifier::Bayes;
@@ -83,20 +84,27 @@ my $highlight_color = '#cccc99';
 
 # These two variables are used to create the HTML UI for POPFile
 my $header = "<html><head><title>POPFile Control Center</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>\
+<link rel=stylesheet type=text/css href='CURRENT_SKIN' title=main></link> \
 <META HTTP-EQUIV=Pragma CONTENT=no-cache>\
 <META HTTP-EQUIV=Expires CONTENT=0>\
 <META HTTP-EQUIV=Cache-Control CONTENT=no-cache></head>\
-<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=$main_color>&nbsp;&nbsp;<font size=+3>POPFile Control Center</font><td bgcolor=$main_color align=right><a href=/shutdown?session=SESSKEY>Shutdown</a>&nbsp;<tr height=3 bgcolor=$stab_color><td colspan=2 height=3 bgcolor=$stab_color></td></tr></table><p>\
-<table width=100% cellspacing=0><tr>\
-<td align=center bgcolor=TAB2 width=10%><font size=+1><b>&nbsp;<a href=/history?session=SESSKEY>History</a></b></font></td><td width=2></td>\
-<td align=center bgcolor=TAB1 width=10%><font size=+1><b>&nbsp;<a href=/buckets?session=SESSKEY>Buckets</a></b></font></td><td width=2></td>\
-<td align=center bgcolor=TAB4 width=10%><font size=+1><b>&nbsp;<a href=/magnets?session=SESSKEY>Magnets</a></b></font></td><td width=2></td>\
-<td bgcolor=TAB0 width=10% align=center><font size=+1><b>&nbsp;<a href=/configuration?session=SESSKEY>Configuration</a></b></font></td><td width=2></td>\
-<td bgcolor=TAB3 width=10% align=center><font size=+1><b>&nbsp;<a href=/security?session=SESSKEY>Security</a></b></font></td>\
-<td width=50%>&nbsp;</td></tr>\
+<body><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr> \
+<td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>\
+<table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;POPFile Control Center<td align=right><a href=/shutdown?session=SESSKEY>Shutdown</a>&nbsp;<tr height=3><td colspan=2></td></tr></table>\
+</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td> \
+</tr></table>\
+<p>\
+<table class=menu cellspacing=0><tr>\
+<td class=TAB2 align=center><a href=/history?session=SESSKEY>History</a></td><td class=menu_spacer></td>\
+<td class=TAB1 align=center><a href=/buckets?session=SESSKEY>Buckets</a></td><td class=menu_spacer></td>\
+<td class=TAB4 align=center><a href=/magnets?session=SESSKEY>Magnets</a></td><td class=menu_spacer></td>\
+<td class=TAB0 align=center><a href=/configuration?session=SESSKEY>Configuration</a></td><td class=menu_spacer></td>\
+<td class=TAB3 align=center><a href=/security?session=SESSKEY>Security</a></td><td class=menu_spacer></td>\
+<td class=TAB5 align=center><a href=/advanced?session=SESSKEY>Advanced</a></td></tr>\
 </table>\
-<table width=100% cellpadding=12 cellspacing=0 bordercolor=$stab_color border=2><tr><td width=100% valign=top bgcolor=$main_color>";
-my $footer = "</tr></table><p align=center>POPFile VERSION - <a href=http://popfile.sourceforge.net/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a> - (TIME)</body></html>";
+<table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr> \
+<td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>";
+my $footer = "</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center><table class=footer><tr><td>POPFile VERSION - <a href=http://popfile.sourceforge.net/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a> - (TIME)</td></tr></table></body></html>";
 
 # Hash used to store form parameters
 my %form = ();
@@ -109,6 +117,9 @@ my $session_key = '';
 
 # The start of today in seconds
 my $today;
+
+# The available skins
+my @skins;
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -150,6 +161,22 @@ sub parse_command_line
                 last;
             }
         }
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# load_skins
+#
+# ---------------------------------------------------------------------------------------------
+
+sub load_skins
+{
+    @skins = glob 'skins/*';
+    
+    for my $i (0..$#skins)
+    {
+        $skins[$i] =~ s/.*\/(.+)\.css/$1/;
     }
 }
 
@@ -482,8 +509,10 @@ sub verify_have_list
             # If we get a -ERR then we stop right here since something has gone wrong
             if ( /\-ERR/i )
             {
-                print $client $_;
-                return 0;
+                # If we get an error on a list command then we treat it as meaning that there 
+                # are no messages and return
+                print $client "+OK POPFile has no messages (LIST returned error)$eol";
+                last;
             }
 
             
@@ -697,8 +726,8 @@ sub http_redirect
 sub http_ok
 {
     my ( $text, $selected ) = @_;
-    my @tab = ( $tab_color, $tab_color, $tab_color, $tab_color, $tab_color );
-    $tab[$selected] = $stab_color;
+    my @tab = ( 'menu_standard', 'menu_standard', 'menu_standard', 'menu_standard', 'menu_standard', 'menu_standard' );
+    $tab[$selected] = 'menu_selected';
     
     $text = $header . $text . $footer;
     
@@ -707,6 +736,8 @@ sub http_ok
     $text =~ s/TAB2/$tab[2]/;
     $text =~ s/TAB3/$tab[3]/;
     $text =~ s/TAB4/$tab[4]/;
+    $text =~ s/TAB5/$tab[5]/;
+    $text =~ s/CURRENT_SKIN/skins\/$configuration{skin}\.css/;
     my $time = localtime;
     $text =~ s/TIME/$time/;
     
@@ -725,7 +756,7 @@ sub http_ok
 # ---------------------------------------------------------------------------------------------
 sub http_file
 {
-    my ($file) = @_;
+    my ($file, $type) = @_;
     my $contents = '';
     if ( open FILE, "<$file" )
     {
@@ -735,7 +766,7 @@ sub http_file
         }
         close FILE;
 
-        my $header = "HTTP/1.0 200 OK\r\nContent-Type: image/gif\r\nContent-Length: ";
+        my $header = "HTTP/1.0 200 OK\r\nContent-Type: $type\r\nContent-Length: ";
         $header .= length($contents);
         $header .= "$eol$eol";
         return $header . $contents;
@@ -771,6 +802,11 @@ sub popfile_homepage
     my $page_size_error = '';
     my $timeout_error = '';
     my $separator_error = '';
+
+    if ( defined($form{skin}) )
+    {
+        $configuration{skin} = $form{skin};
+    }
 
     if ( ( defined($form{debug}) ) && ( ( $form{debug} >= 1 ) && ( $form{debug} <= 4 ) ) )
     {
@@ -855,6 +891,17 @@ sub popfile_homepage
     $body .= "Updated user interface web port to $configuration{ui_port}; this change will not take affect until you restart POPFile" if ( defined($form{ui_port}) );
     $body .= "<p><hr><h2>History View</h2><p><form action=/configuration><b>Number of emails per page:</b> <br><input name=page_size type=text value=$configuration{page_size}><input type=submit name=update_page_size value=Apply><input type=hidden name=session value=$session_key></form>$page_size_error";    
     $body .= "Updated number of emails per page to $configuration{page_size}" if ( defined($form{page_size}) );
+    $body .= "<p><hr><h2>Skins</h2><p><form action=/configuration><b>Choose skin:</b> <br><input type=hidden name=session value=$session_key><select name=skin>";
+    for my $i (0..$#skins)
+    {
+        $body .= "<option value=$skins[$i]";
+        if ( $skins[$i] eq $configuration{skin} ) 
+        {
+            $body .= " selected";
+        }
+        $body .= ">$skins[$i]</option>";
+    }
+    $body .= "</select><input type=submit value=Apply name=change_skin></form>";
     $body .= "<p><hr><h2>TCP Connection Timeout</h2><p><form action=/configuration><b>TCP connection timeout in seconds:</b> <br><input name=timeout type=text value=$configuration{timeout}><input type=submit name=update_timeout value=Apply><input type=hidden name=session value=$session_key></form>$timeout_error";    
     $body .= "Updated TCP connection timeout to $configuration{timeout}" if ( defined($form{timeout}) );
     $body .= "<p><hr><h2>Classification Insertion</h2><p><b>Subject line modification:</b><br>";    
@@ -971,15 +1018,118 @@ sub pretty_number
 
 # ---------------------------------------------------------------------------------------------
 #
+# advanced_page - very advanced configuration options
+#
+# ---------------------------------------------------------------------------------------------
+sub advanced_page 
+{
+    my $add_message = '';
+    my $delete_message = '';
+    if ( defined($form{newword}) )
+    {
+        $form{newword} = lc($form{newword});
+        if ( defined($classifier->{parser}->{mangle}->{stop}{$form{newword}}) )
+        {
+            $add_message = "<blockquote><font color=red><b>'$form{newword}' already in the stop word list</b></font></blockquote>";
+        }
+        else
+        {
+            if ( $form{newword} =~ /[^[:alpha:]]/ )
+            {
+                $add_message = "<blockquote><font color=red><b>Stop words can only contains alphabetic characters</b></font></blockquote>";
+            }
+            else
+            {
+                $classifier->{parser}->{mangle}->{stop}{$form{newword}} = 1;
+                $classifier->{parser}->{mangle}->save_stop_words();
+                $add_message = "<blockquote>'$form{newword}' added to the stop word list</blockquote>";
+            }
+        }
+    }
+
+    if ( defined($form{word}) )
+    {
+        $form{word} = lc($form{word});
+        if ( !defined($classifier->{parser}->{mangle}->{stop}{$form{word}}) )
+        {
+            $delete_message = "<blockquote><font color=red><b>'$form{word}' is not in the stop word list</b></font></blockquote>";
+        }
+        else
+        {
+            delete $classifier->{parser}->{mangle}->{stop}{$form{word}};
+            $classifier->{parser}->{mangle}->save_stop_words();
+            $delete_message = "<blockquote>'$form{word}' removed from the stop word list</blockquote>";
+        }
+    }
+
+    my $body = '<h2>Stop Words</h2><p>The following words are ignored from all classifications as they occur very frequently.<p><table>';
+    my $last = '';
+    my $need_comma = 0;
+    for my $word (sort keys %{$classifier->{parser}->{mangle}->{stop}})
+    {
+        $word =~ /^(.)/;
+        if ( $1 ne $last ) 
+        {
+            $body .= "<tr><td><b>$1</b><td>";
+            $last = $1;
+            $need_comma = 0;
+        }
+        if ( $need_comma == 1 )
+        {
+            $body .= ", $word";
+        }
+        else
+        {
+            $body .= $word;
+            $need_comma = 1;
+        }
+    }
+    $body .= "</table><p><form action=/advanced><b>Add word:</b><br><input type=hidden name=session value=$session_key><input type=text name=newword> <input type=submit name=add value=Add></form>$add_message";
+    $body .= "<p><form action=/advanced><b>Delete word:</b><br><input type=hidden name=session value=$session_key><input type=text name=word> <input type=submit name=remove value=Delete></form>$delete_message";
+    return http_ok($body,5);
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # magnet_page - the list of bucket magnets
 #
 # ---------------------------------------------------------------------------------------------
 sub magnet_page 
 {
+    my $magnet_message = '';
     if ( ( defined($form{from}) ) && ( $form{bucket} ne '' ) )
     {
-        $classifier->{magnets}{$form{bucket}}{from}{$form{from}} = 1;
-        $classifier->save_magnets();
+        my $found = 0;
+        for my $bucket (keys %{$classifier->{magnets}})
+        {
+            if ( defined($classifier->{magnets}{$bucket}{from}{$form{from}}) )
+            {
+                $found  = 1;
+                $magnet_message = "<blockquote><font color=red><b>Magnet '$form{from}' already exists in bucket '$bucket'</b></font></blockquote>";
+            }
+        }
+
+        if ( $found == 0 ) 
+        {
+            for my $bucket (keys %{$classifier->{magnets}})
+            {
+                for my $from (keys %{$classifier->{magnets}{$bucket}{from}}) 
+                {
+                    if ( ( $form{from} =~ /\Q$from\E/ ) || ( $from =~ /\Q$form{from}\E/ ) ) 
+                    {
+                        $found = 1;
+                        $magnet_message = "<blockquote><font color=red><b>New magnet '$form{from}' clashes with magnet '$from' in bucket '$bucket' and could cause ambiguous results.  New magnet was not added.</b></font></blockquote>";
+                    }
+                }
+            }
+        }
+        
+        if ( $found == 0 )
+        {
+            $classifier->{magnets}{$form{bucket}}{from}{$form{from}} = 1;
+            $classifier->save_magnets();
+            $magnet_message = "<blockquote>Create new magnet '$form{from}' in bucket '$form{bucket}'</blockquote>";
+        }
     }
 
     if ( defined($form{dfrom}) ) 
@@ -999,7 +1149,11 @@ sub magnet_page
             $body .= "<tr "; 
             if ( $stripe ) 
             {
-                $body .= " bgcolor=$stripe_color"; 
+                $body .= " class=row_even"; 
+            }
+            else
+            {
+                $body .= " class=row_odd"; 
             }
             $body .= "><td>$from<td><font color=$classifier->{colors}{$bucket}>$bucket</font><td><a href=/magnets?bucket=$bucket&dfrom=$from&session=$session_key>[Delete]</a>";
             $stripe = 1 - $stripe;
@@ -1013,7 +1167,7 @@ sub magnet_page
     {
         $body .= "<option value=$bucket>$bucket</option>";
     }
-    $body .= "</select> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>";
+    $body .= "</select> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$magnet_message";
     return http_ok($body,4);
 }
 
@@ -1063,6 +1217,13 @@ sub bucket_page
 # ---------------------------------------------------------------------------------------------
 sub corpus_page
 {
+    if ( defined($form{reset_stats}) )
+    {
+        $configuration{mcount} = 0;
+        $configuration{ecount} = 0;
+        save_configuration();
+    }
+    
     if ( defined($form{showbucket}) ) 
     {
         return bucket_page();
@@ -1089,7 +1250,7 @@ sub corpus_page
     
     if ( defined($form{cname}) )
     {
-        if ( $form{cname} =~ /[^a-z\-_]/ ) 
+        if ( $form{cname} =~ /[^[:lower:]\-_]/ ) 
         {
             $create_message = "<blockquote><font color=red size=+1>Bucket names can only contain the letters a to z in lower case plus - and _</font></blockquote>";
         }
@@ -1125,7 +1286,7 @@ sub corpus_page
     
     if ( ( defined($form{newname}) ) && ( $form{oname} ne '' ) )
     {
-        if ( $form{newname} =~ /[^a-z\-_]/ ) 
+        if ( $form{newname} =~ /[^[:lower:]\-_]/ ) 
         {
             $rename_message = "<blockquote><font color=red size=+1>Bucket names can only contain the letters a to z in lower case plus - and _</font></blockquote>";
         }
@@ -1151,7 +1312,11 @@ sub corpus_page
         $body .= "<tr";
         if ( $stripe == 1 ) 
         {
-            $body .= " bgcolor=$stripe_color";
+            $body .= " class=row_even";
+        }
+        else
+        {
+            $body .= " class=row_odd";
         }
         $stripe = 1 - $stripe;
         $body .= "><td><a href=/buckets?session=$session_key&showbucket=$bucket><font color=$classifier->{colors}{$bucket}>$bucket</font></a><td width=10>&nbsp;<td align=right>$number<td width=10>&nbsp;<td align=right>$unique<td width=10>&nbsp;";
@@ -1171,7 +1336,7 @@ sub corpus_page
         {
             $body .= "<td align=center>Disabled globally";
         }
-        $body .= "<td>&nbsp;<td align=left bgcolor=$main_color><table cellpadding=0 cellspacing=1><tr>";
+        $body .= "<td>&nbsp;<td align=left><table cellpadding=0 cellspacing=1><tr>";
         my $color = $classifier->{colors}{$bucket};
         $body .= "<td width=10 bgcolor=$color><img border=0 alt='$bucket current color is $color' src=pix.gif width=10 height=20><td>&nbsp;";
         for my $i ( 0 .. $#{$classifier->{possible_colors}} )
@@ -1222,7 +1387,7 @@ sub corpus_page
         }
         $body .= "<tr><td colspan=25 align=left><font size=1>0%<td colspan=25 align=right><font size=1>100%</table>";
     }
-    $body .= "</table><p><hr><h2>Maintenance</h2><p><form action=/buckets><b>Create bucket with name:</b> <br><input name=cname type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
+    $body .= "</table><form action=/buckets><input type=hidden name=session value=$session_key><input type=submit name=reset_stats value='Reset Statistics'></form><p><hr><h2>Maintenance</h2><p><form action=/buckets><b>Create bucket with name:</b> <br><input name=cname type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
     
     $body .= "<p><form action=/buckets><b>Delete bucket named:</b> <br><select name=name><option value=></option>";
     foreach my $bucket (@buckets)
@@ -1603,7 +1768,11 @@ sub history_page
         {
             if ( $stripe ) 
             {
-                $body .= " bgcolor=$stripe_color"; 
+                $body .= " class=row_even"; 
+            }
+            else
+            {
+                $body .= " class=row_odd"; 
             }
         }
 
@@ -1807,6 +1976,11 @@ sub handle_url
         return magnet_page();
     }
 
+    if ( $url eq '/advanced' )
+    {
+        return advanced_page();
+    }
+
     if ( ( $url eq '/history' ) || ( $url eq '/' ) )
     {
         return history_page();
@@ -1818,14 +1992,14 @@ sub handle_url
         return http_ok("POPFile shutdown", 0);
     }
 
-    if ( $url =~ /(pix\.gif)/ )
+    if ( $url =~ /(.+\.gif)/ )
     {
-        return http_file( $1 );
+        return http_file( $1, 'image/gif' );
     }
 
-    if ( $url =~ /(black\.gif)/ )
+    if ( $url =~ /(skins\/.+\.css)/ )
     {
-        return http_file( $1 );
+        return http_file( $1, 'text/css' );
     }
 
     return http_error(404);
@@ -2010,42 +2184,58 @@ sub run_popfile
                 # Secure authentication
                 if ( $command =~ /AUTH ([^ ]+)/ )
                 {
-                    if ( verify_connected( $client,  $connect_server, $connect_port ) ) 
+                    if ( $connect_server ne '' ) 
                     {
-                        # Loop until we get -ERR or +OK
-                        my $response;
-                        $response = get_response( $mail, $client, $command );
-                        
-                        while ( ( ! ( $response =~ /\+OK/ ) ) && ( ! ( $response =~ /-ERR/ ) ) )
+                        if ( verify_connected( $client,  $connect_server, $connect_port ) ) 
                         {
-                            # Check for an abort
-                            if ( $alive == 0 )
+                            # Loop until we get -ERR or +OK
+                            my $response;
+                            $response = get_response( $mail, $client, $command );
+
+                            while ( ( ! ( $response =~ /\+OK/ ) ) && ( ! ( $response =~ /-ERR/ ) ) )
                             {
-                                last;
+                                # Check for an abort
+                                if ( $alive == 0 )
+                                {
+                                    last;
+                                }
+
+                                my $auth;
+                                $auth = <$client>;
+                                $auth =~ s/(\015|\012)$//g;
+                                $response = get_response( $mail, $client, $auth );
                             }
-                                
-                            my $auth;
-                            $auth = <$client>;
-                            $auth =~ s/(\015|\012)$//g;
-                            $response = get_response( $mail, $client, $auth );
                         }
+
+                        flush_extra( $mail, $client );
+                    }
+                    else
+                    {
+                        tee( $client, "-ERR No secure server specified$eol" );
                     }
                     
-                    flush_extra( $mail, $client );
                     next;
                 }
 
                 if ( $command =~ /AUTH/ )
                 {
-                    if ( verify_connected( $client,  $connect_server, $connect_port ) ) 
+                    if ( $connect_server ne '' ) 
                     {
-                        if ( echo_response( $mail, $client, "AUTH" ) )
+                        if ( verify_connected( $client,  $connect_server, $connect_port ) ) 
                         {
-                            echo_to_dot( $mail, $client );
+                            if ( echo_response( $mail, $client, "AUTH" ) )
+                            {
+                                echo_to_dot( $mail, $client );
+                            }
                         }
+
+                        flush_extra( $mail, $client );
                     }
-                    
-                    flush_extra( $mail, $client );
+                    else
+                    {
+                        tee( $client, "-ERR No secure server specified$eol" );
+                    }
+
                     next;
                 }
 
@@ -2501,6 +2691,10 @@ $configuration{localui}   = 1;
 $configuration{mcount}    = 0;
 $configuration{ecount}    = 0;
 $configuration{separator} = ':';
+$configuration{skin}      = 'default';
+
+# Load skins
+load_skins();
 
 # Calculate a session key
 $session_key = '';
