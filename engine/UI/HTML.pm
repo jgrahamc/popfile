@@ -3070,13 +3070,15 @@ sub view_page
     my $reclassified  = $self->{history__}{$mail_file}{reclassified};
     my $bucket        = $self->{history__}{$mail_file}{bucket};
     my $color         = $self->{classifier__}->get_bucket_color($bucket);
+    
+    my $page_size     = $self->config_( 'page_size' );    
 
     $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
     $self->{form_}{search} = '' if ( !defined( $self->{form_}{search} ) );
     $self->{form_}{filter} = '' if ( !defined( $self->{form_}{filter} ) );
 
     my $index = -1;
-    foreach my $i ( $start_message  .. $start_message + $self->config_( 'page_size' ) - 1) {
+    foreach my $i ( $start_message  .. $start_message + $page_size - 1) {
         if ( $self->{history_keys__}[$i] eq $mail_file ) {
             $index = $i;
             last;
@@ -3089,8 +3091,10 @@ sub view_page
     if ( $index == -1 ) {
        foreach my $i ( 0 .. $self->history_size()-1 ) {
             if ( $self->{history_keys__}[$i] eq $mail_file ) {
+                use integer;
                 $index         = $i;
-                $start_message = $i;
+                $start_message = ($i / $page_size ) * $page_size;
+                $self->{form_}{start_message} = $start_message;
                 last;
             }
         }
@@ -3112,7 +3116,7 @@ sub view_page
 
     if ( $index > 0 ) {
         $body .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index - 1 ];
-        $body .= "&start_message=". ((( $index - 1 ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' )));
+        $body .= "&start_message=". ((( $index - 1 ) >= $start_message )?$start_message:($start_message - $page_size));
         $body .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "\">&lt; ";
         $body .= $self->{language__}{Previous};
         $body .= "</a> ";
@@ -3120,7 +3124,7 @@ sub view_page
 
     if ( $index < ( $self->history_size() - 1 ) ) {
         $body .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index + 1 ];
-        $body .= "&start_message=". ((( $index + 1 ) < ( $start_message + $self->config_( 'page_size' ) ) )?$start_message:($start_message + $self->config_( 'page_size' )));
+        $body .= "&start_message=". ((( $index + 1 ) < ( $start_message + $page_size ) )?$start_message:($start_message + $page_size));
         $body .= $self->print_form_fields_(0,1,('filter','session','search','sort')) . "\"> ";
         $body .= $self->{language__}{Next};
         $body .= " &gt;</a>";
