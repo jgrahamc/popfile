@@ -684,6 +684,57 @@ FunctionEnd
 #
 #==============================================================================================
 
+  ;--------------------------------------------------------------------------------------
+  ; Macros used by 'CBP_CreateINIfile' (outside the function to simplify coverage tests)
+  ;--------------------------------------------------------------------------------------
+  
+  ; Basic macro used to create the INI file
+
+  !macro CBP_WRITE_INI SECTION KEY VALUE
+    WriteINIStr "$PLUGINSDIR\${CBP_C_INIFILE}" "${SECTION}" "${KEY}" "${VALUE}"
+  !macroend
+
+  ; Macro used to define a standard control for the custom page
+  ; (used for ComboBoxes, the GroupBox and the info Labels)
+
+  !macro CBP_DEFINE_CONTROL FIELD TYPE TEXT LEFT RIGHT TOP BOTTOM
+    !insertmacro CBP_WRITE_INI "${FIELD}" "Type" "${TYPE}"
+
+    StrCmp "${TYPE}" "ComboBox" 0 +3
+    ; ComboBox control
+    !insertmacro CBP_WRITE_INI "${FIELD}" "ListItems" "${TEXT}"
+    goto +2
+
+    ; GroupBox or Label control
+    !insertmacro CBP_WRITE_INI "${FIELD}" "Text" "${TEXT}"
+
+    ; Remainder is common to "ComboBox", "GroupBox" and "Label" controls
+    !insertmacro CBP_WRITE_INI "${FIELD}" "Left" "${LEFT}"
+    !insertmacro CBP_WRITE_INI "${FIELD}" "Right" "${RIGHT}"
+    !insertmacro CBP_WRITE_INI "${FIELD}" "Top" "${TOP}"
+    !insertmacro CBP_WRITE_INI "${FIELD}" "Bottom" "${BOTTOM}"
+  !macroend
+
+  ; Macro used to define a label which holds one of the 8 bucket names
+
+  !macro CBP_DEFINE_BN_TEXT FIELD TEXT ROW
+    !insertmacro CBP_DEFINE_CONTROL "${FIELD}" \
+      "Label" \
+      "${TEXT}" \
+      "${CBP_BN_NAME_LEFT}" "${CBP_BN_NAME_RIGHT}"  \
+      "${CBP_BN_${ROW}_TOP}" "${CBP_BN_${ROW}_BOTTOM}"
+  !macroend
+
+  ; Macro used to define a checkbox for marking a bucket name for deletion
+
+  !macro CBP_DEFINE_BN_REMOVE FIELD ROW
+    !insertmacro CBP_DEFINE_CONTROL "${FIELD}" \
+      "CheckBox" \
+      "$(PFI_LANG_CBP_IO_REMOVE)" \
+      "${CBP_BN_REMOVE_LEFT}" "${CBP_BN_REMOVE_RIGHT}" \
+      "${CBP_BN_${ROW}_TOP}" "${CBP_BN_${ROW}_BOTTOM}"
+  !macroend
+
 Function CBP_CreateINIfile
 
   ;--------------------------------------------------------------------------------------------
@@ -758,53 +809,6 @@ Function CBP_CreateINIfile
 
   !define CBP_BN_ROW_8_TOP        110
   !define CBP_BN_ROW_8_BOTTOM     118
-
-  ; Basic macro used to create the INI file
-
-  !macro CBP_WRITE_INI SECTION KEY VALUE
-    WriteINIStr "$PLUGINSDIR\${CBP_C_INIFILE}" "${SECTION}" "${KEY}" "${VALUE}"
-  !macroend
-
-  ; Macro used to define a standard control for the custom page
-  ; (used for ComboBoxes, the GroupBox and the info Labels)
-
-  !macro CBP_DEFINE_CONTROL FIELD TYPE TEXT LEFT RIGHT TOP BOTTOM
-    !insertmacro CBP_WRITE_INI "${FIELD}" "Type" "${TYPE}"
-
-    StrCmp "${TYPE}" "ComboBox" 0 +3
-    ; ComboBox control
-    !insertmacro CBP_WRITE_INI "${FIELD}" "ListItems" "${TEXT}"
-    goto +2
-
-    ; GroupBox or Label control
-    !insertmacro CBP_WRITE_INI "${FIELD}" "Text" "${TEXT}"
-
-    ; Remainder is common to "ComboBox", "GroupBox" and "Label" controls
-    !insertmacro CBP_WRITE_INI "${FIELD}" "Left" "${LEFT}"
-    !insertmacro CBP_WRITE_INI "${FIELD}" "Right" "${RIGHT}"
-    !insertmacro CBP_WRITE_INI "${FIELD}" "Top" "${TOP}"
-    !insertmacro CBP_WRITE_INI "${FIELD}" "Bottom" "${BOTTOM}"
-  !macroend
-
-  ; Macro used to define a label which holds one of the 8 bucket names
-
-  !macro CBP_DEFINE_BN_TEXT FIELD TEXT ROW
-    !insertmacro CBP_DEFINE_CONTROL "${FIELD}" \
-      "Label" \
-      "${TEXT}" \
-      "${CBP_BN_NAME_LEFT}" "${CBP_BN_NAME_RIGHT}"  \
-      "${CBP_BN_${ROW}_TOP}" "${CBP_BN_${ROW}_BOTTOM}"
-  !macroend
-
-  ; Macro used to define a checkbox for marking a bucket name for deletion
-
-  !macro CBP_DEFINE_BN_REMOVE FIELD ROW
-    !insertmacro CBP_DEFINE_CONTROL "${FIELD}" \
-      "CheckBox" \
-      "$(PFI_LANG_CBP_IO_REMOVE)" \
-      "${CBP_BN_REMOVE_LEFT}" "${CBP_BN_REMOVE_RIGHT}" \
-      "${CBP_BN_${ROW}_TOP}" "${CBP_BN_${ROW}_BOTTOM}"
-  !macroend
 
 #----------------------------------------------------------------------------------------------
 # Now create the INI file for the "Create Buckets" custom page
@@ -1005,7 +1009,9 @@ FunctionEnd
 #       !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS
 #==============================================================================================
 
-Function CBP_CreateBucketsPage
+  ;------------------------------------------------------------------------------------------
+  ; Macros used by 'CBP_CreateBucketsPage' (outside the function to simplify coverage tests)
+  ;------------------------------------------------------------------------------------------
 
   ; The CBP_CreateBucketsPage function creates a custom page which uses the CBP_HandleUserInput
   ; function as a "leave" function. The CBP package treats CBP_HandleUserInput as an extension
@@ -1031,6 +1037,8 @@ Function CBP_CreateBucketsPage
     !undef CBP_L_RESULT
     !undef CBP_L_TEMP
   !macroend
+  
+Function CBP_CreateBucketsPage
 
   !insertmacro CBP_HUI_SharedDefs
 
@@ -1190,7 +1198,7 @@ FunctionEnd
 
 Function CBP_HandleUserInput
 
-  !insertmacro CBP_HUI_SharedDefs   ; this macro is defined in CBP_CreateBucketsPage
+  !insertmacro CBP_HUI_SharedDefs   ; defined just before the 'CBP_CreateBucketsPage' function
 
   ; Check the user input... starting with the "Remove" check boxes as deletion has higher
   ; priority (we allow user to "Delete an existing bucket" and "Create a new bucket" when the
@@ -1339,7 +1347,7 @@ finished_now:
   StrCpy ${CBP_L_RESULT} "completed"
   Return
 
-  !insertmacro CBP_HUI_SharedUnDefs   ; this macro is defined in CBP_CreateBucketsPage
+  !insertmacro CBP_HUI_SharedUnDefs   ; defined just before the 'CBP_CreateBucketsPage' function
 
 FunctionEnd
 
