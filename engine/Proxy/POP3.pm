@@ -560,14 +560,10 @@ sub child__
 
                 my $response = $self->echo_response_($mail, $client, $command );
 
-                $self->log_("slurp data size in bytes: " . $self->slurp_data_size__($mail) );
-
                 last if ( $response == 2 );
                 if ( $response == 0 ) {
                     my $history_file;
                     ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, $download_count, $count, 0, '' );
-
-                    $self->log_("slurp data size in bytes: " . $self->slurp_data_size__($mail) );
 
                     # Tell the parent that we just handled a mail
 
