@@ -112,12 +112,12 @@ sub remove_debug_files
 {
     my ( $self ) = @_;
     
-    my @debug_files = glob "popfile*.log";
-
     my $yesterday = defined($self->{today})?$self->{today}:0;
     calculate_today( $self );
 
     if ( $self->{today} > $yesterday ) {    
+        my @debug_files = glob "popfile*.log";
+
         foreach my $debug_file (@debug_files) {
             # Extract the epoch information from the popfile log file name
             if ( $debug_file =~ /popfile([0-9]+)\.log/ )  {
