@@ -452,6 +452,10 @@
 
 Function .onInit
 
+  !define L_INPUT_FILE_HANDLE   $R9
+  !define L_OUTPUT_FILE_HANDLE  $R8
+  !define L_LINE                $R7
+  
   ; Conditional compilation: if ENGLISH_ONLY is defined, support only 'English'
 
   !ifndef ENGLISH_ONLY
@@ -462,8 +466,32 @@ Function .onInit
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioB.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioC.ini"
 
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "${C_RELEASE_NOTES}" "release.txt"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "${C_RELEASE_NOTES}" "${C_README}"
 
+  ; Ensure the release notes are in a format which the standard Windows NOTEPAD.EXE can use.
+  ; When the "POPFile" section is processed, the converted release notes will be copied to the
+  ; installation directory to ensure user has a copy which can be read by NOTEPAD.EXE later.
+  
+  FileOpen ${L_INPUT_FILE_HANDLE}  "$PLUGINSDIR\${C_README}" r
+  FileOpen ${L_OUTPUT_FILE_HANDLE} "$PLUGINSDIR\${C_README}.txt" w
+  ClearErrors
+
+loop:
+  FileRead ${L_INPUT_FILE_HANDLE} ${L_LINE}
+  IfErrors close_files
+  Push ${L_LINE}
+  Call TrimNewlines
+  Pop ${L_LINE}
+  FileWrite ${L_OUTPUT_FILE_HANDLE} ${L_LINE}$\r$\n
+  Goto loop
+  
+close_files:
+  FileClose ${L_INPUT_FILE_HANDLE}
+  FileClose ${L_OUTPUT_FILE_HANDLE}
+  
+  !undef L_INPUT_FILE_HANDLE
+  !undef L_OUTPUT_FILE_HANDLE
+  !undef L_LINE
 FunctionEnd
 
 #--------------------------------------------------------------------------
@@ -483,11 +511,11 @@ Function PFIGUIInit
       $\r$\n$\r$\n\
       $(PFI_LANG_MBRELNOTES_2)" IDNO exit
   StrCmp $G_NOTEPAD "" use_file_association
-  ExecWait 'notepad.exe "$PLUGINSDIR\release.txt"'
+  ExecWait 'notepad.exe "$PLUGINSDIR\${C_README}.txt"'
   GoTo exit
 
 use_file_association:
-  ExecShell "open" "$PLUGINSDIR\release.txt"
+  ExecShell "open" "$PLUGINSDIR\${C_README}.txt"
 
 exit:
 
@@ -541,10 +569,7 @@ Section "POPFile" SecPOPFile
 
   File "..\engine\license"
   File "${C_RELEASE_NOTES}"
-  StrCmp $G_NOTEPAD "" 0 readme_ok
-  File /oname=${C_README}.txt "${C_RELEASE_NOTES}"
-
-readme_ok:
+  CopyFiles /SILENT /FILESONLY "$PLUGINSDIR\${C_README}.txt" "$INSTDIR\${C_README}.txt"
   File "..\engine\popfile.pl"
   File "..\engine\insert.pl"
   File "..\engine\bayes.pl"
@@ -1848,7 +1873,7 @@ FunctionEnd
 Function ShowReadMe
 
   StrCmp $G_NOTEPAD "" use_file_association
-  Exec 'notepad.exe "$INSTDIR\${C_README}"'
+  Exec 'notepad.exe "$INSTDIR\${C_README}.txt"'
   goto exit
 
 use_file_association:
