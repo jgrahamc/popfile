@@ -142,10 +142,10 @@
 
 ; Text strings used for status messages under the bucket list
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_1        "There is no need to add more buckets"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_2        "You must define AT LEAST TWO buckets"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_3        "At least one more bucket is required"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_4        "Installer cannot create more than"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_1        "\r\nThere is no need to add more buckets"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_2        "\r\nYou must define AT LEAST TWO buckets"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_3        "\r\nAt least one more bucket is required"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_4        "\r\nInstaller cannot create more than"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_IO_MSG_5        "buckets"
 
 ; Message box text strings
