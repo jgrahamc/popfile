@@ -326,7 +326,7 @@ if ( $pid == 0 ) {
                 open FILE, ">$file";
                 my ( $bucket, $magnet );
                 if ( $1 == 1 ) {
-                    print FILE <<EOM;              
+                    print FILE <<EOM;
 From: John
 Subject: Testing Refresh
 
@@ -392,7 +392,9 @@ EOM
     my $ua = new LWP::UserAgent;
     my $line_number = 0;
 
-    my $in = new String::Interpolate { sk => \$sk, port => \$port, version => \$version };
+    my %h = ( sk => \$sk , port => \$port, version => \$version);
+
+    my $in = new String::Interpolate %h;
 
     # Wait for the UI to become available
 
@@ -403,7 +405,7 @@ EOM
         if ( $response->code == 200 ) {
             last;
         }
-    } 
+    }
 
     our $url;
     our $content;
@@ -472,7 +474,7 @@ EOM
             print $dwriter "__GETCONFIG $option\n";
             my $reply = <$ureader>;
             if ( $reply =~ /^OK ([^\r\n]+)/ ) {
-                $reply = $1; 
+                $reply = $1;
             } else {
                 $reply = '';
             }
