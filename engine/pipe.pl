@@ -52,7 +52,7 @@ if ( $#ARGV == -1 ) {
     # then they'll be discarded when the configuration is loaded, and since
     # we are not loading the UI, they are not defined at this point
 
-    my $c = $POPFile->{components__}{core}{config};
+    my $c = $POPFile->get_module('POPFile::Config');
     $c->module_config_( 'html', 'local', 1 );
     $c->module_config_( 'html', 'port',  8080 );
 
@@ -60,12 +60,14 @@ if ( $#ARGV == -1 ) {
 
         # Prevent the tool from finding another copy of POPFile running
 
-        my $c = $POPFile->{components__}{core}{config};
         $c->config_( 'piddir', $c->config_( 'piddir' ) . 'pipe.pl.' );
+
+        # TODO: interface violation
+        $c->{save_needed__} = 0;
 
         $POPFile->CORE_start();
 
-        my $b = $POPFile->{components__}{classifier}{bayes};
+        my $b = $POPFile->get_module('Classifier::Bayes');
         my $session = $b->get_session_key( 'admin', '' );
 
         $b->classify_and_modify( $session, \*STDIN, \*STDOUT, 1, '', 1, "\n" );

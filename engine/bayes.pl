@@ -60,12 +60,15 @@ if ( $#ARGV >= 0 ) {
 
         # Prevent the tool from finding another copy of POPFile running
 
-        my $c = $POPFile->{components__}{core}{config};
+        my $c = $POPFile->get_module('POPFile::Config');
         $c->config_( 'piddir', $c->config_( 'piddir' ) . 'bayes.pl.' );
+
+        # TODO: interface violation
+        $c->{save_needed__} = 0;
 
         $POPFile->CORE_start();
 
-        my $b = $POPFile->{components__}{classifier}{bayes};
+        my $b = $POPFile->get_module('Classifier::Bayes');
         my $session = $b->get_session_key( 'admin', '' );
 
         foreach my $file (@files) {
