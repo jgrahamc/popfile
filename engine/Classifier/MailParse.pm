@@ -1170,13 +1170,12 @@ sub parse_header
 {
     my ($self, $header, $argument, $mime, $encoding) = @_;
 
-    print "Header ($header) ($argument)\n";# if ($self->{debug});
+    print "Header ($header) ($argument)\n" if ($self->{debug});
 
     if ( $self->{color__} ) {
         my $color     = $self->{bayes__}->get_color( "header:$header" );
 
-        $self->{ut__} =  "<b><font color=\"$color\">$header</font></b>: $argument\015\012";
-print $self->{ut__};
+        $self->{ut__} =  "<b><font color=\"$color\">$header</font></b>: " . splitline( $argument . "\015\012", $encoding );        
     }
 
     # After a discussion with Tim Peters and some looking at emails
