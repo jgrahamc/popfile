@@ -495,6 +495,13 @@
   !insertmacro MUI_PAGE_DIRECTORY
 
   ;---------------------------------------------------
+  ; Installer Page - Show user what we are about to do and get permission to proceed
+  ; (this is the last page shown before the installation starts)
+  ;---------------------------------------------------
+
+  Page custom GetPermissionToInstall
+
+  ;---------------------------------------------------
   ; Installer Page - Install POPFile PROGRAM files
   ;---------------------------------------------------
 
@@ -608,6 +615,7 @@
   ReserveFile "${NSISDIR}\Plugins\Banner.dll"
   ReserveFile "${NSISDIR}\Plugins\NSISdl.dll"
   ReserveFile "${NSISDIR}\Plugins\System.dll"
+  ReserveFile "${NSISDIR}\Plugins\untgz.dll"
   ReserveFile "${NSISDIR}\Plugins\UserInfo.dll"
   ReserveFile "ioG.ini"
   ReserveFile "${C_RELEASE_NOTES}"
@@ -1586,7 +1594,7 @@ SectionEnd
     continue:
 
       ;--------------------------------------------------------------------------
-      ; Install Perl modules: base.pm, bytes.pm the Encode collection and Text::Kakasi
+      ; Install Perl modules: base.pm, bytes.pm, the Encode collection and Text::Kakasi
       ;--------------------------------------------------------------------------
 
       SetOutPath "$G_MPLIBDIR"
@@ -1613,7 +1621,7 @@ SectionEnd
     SectionEnd
 !endif
 
-SubSection "Optional modules" SubSecOptional
+SubSection /e "Optional modules" SubSecOptional
 
 #--------------------------------------------------------------------------
 # Installer Section: (optional) POPFile NNTP proxy (default = not selected)
@@ -1748,6 +1756,26 @@ Section /o "SOCKS" SecSOCKS
 
 SectionEnd
 
+#--------------------------------------------------------------------------
+# Installer Section: (optional) SSL Support for POPFile (default = not selected)
+#
+# If this component is selected, the installer downloads and installs the extra
+# Perl modules and the necessary OpenSSL libraries required to support SSL access
+# access to mail servers. The installer waits until all of these extra files have
+# been downloaded before installing any of them. If the download attempt fails, the
+# installation will continue (since SSL support is an optional feature). A later
+# attempt can be made by running the stand-alone 'SSL Setup' wizard to download
+# and install only these extra SSL support files.
+#
+# Note: The 'getssl.nsh' file includes more than just the 'Section' code.
+#
+# The 'getssl.nsh' file is used by the 'SSL Setup' wizard to ensure it
+# handles the downloading and installation of the SSL support files in the
+# same way as the main POPFile installer.
+#--------------------------------------------------------------------------
+
+  !include "getssl.nsh"
+
 SubSectionEnd
 
 #--------------------------------------------------------------------------
@@ -1767,6 +1795,7 @@ SubSectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}      $(DESC_SecXMLRPC)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}        $(DESC_SecIMAP)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSOCKS}       $(DESC_SecSOCKS)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecSSL}         $(DESC_SecSSL)
     !ifndef NO_KAKASI
       !insertmacro MUI_DESCRIPTION_TEXT ${SecKakasi} "Kakasi (used to process Japanese email)"
     !endif
@@ -1812,15 +1841,13 @@ SubSectionEnd
 Function CheckPerlRequirementsPage
 
   !define L_TEMP      $R9
-  !define L_VERSION   $R8
 
   Push ${L_TEMP}
-  Push ${L_VERSION}
 
   Call GetIEVersion
-  Pop ${L_VERSION}
+  Pop $G_PLS_FIELD_1
 
-  StrCpy ${L_TEMP} ${L_VERSION} 1
+  StrCpy ${L_TEMP} $G_PLS_FIELD_1 1
   StrCmp ${L_TEMP} '?' not_good
   IntCmp ${L_TEMP} 5 exit not_good exit
 
@@ -1831,26 +1858,151 @@ not_good:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioG.ini" "Settings" "RTL" "$(^RTL)"
 
   !insertmacro PFI_IO_TEXT "ioG.ini" "1" \
-      "$(PFI_LANG_PERLREQ_IO_TEXT_1)\
-       $(PFI_LANG_PERLREQ_IO_TEXT_2)\
-       $(PFI_LANG_PERLREQ_IO_TEXT_3)\
-       $(PFI_LANG_PERLREQ_IO_TEXT_4)"
+      "$(PFI_LANG_PERLREQ_IO_TEXT_A)\
+       $(PFI_LANG_PERLREQ_IO_TEXT_B)\
+       $(PFI_LANG_PERLREQ_IO_TEXT_C)\
+       $(PFI_LANG_PERLREQ_IO_TEXT_D)"
 
   !insertmacro PFI_IO_TEXT "ioG.ini" "2" \
-      "$(PFI_LANG_PERLREQ_IO_TEXT_5) ${L_VERSION}${IO_NL}${IO_NL}\
-       $(PFI_LANG_PERLREQ_IO_TEXT_6)\
-       $(PFI_LANG_PERLREQ_IO_TEXT_7)"
+      "$(PFI_LANG_PERLREQ_IO_TEXT_E)\
+       $(PFI_LANG_PERLREQ_IO_TEXT_F)\
+       $(PFI_LANG_PERLREQ_IO_TEXT_G)"
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_PERLREQ_TITLE)" " "
 
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioG.ini"
 
 exit:
-  Pop ${L_VERSION}
   Pop ${L_TEMP}
 
   !undef L_TEMP
-  !undef L_VERSION
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: GetPermissionToInstall
+# (this is the last page shown before the installation starts)
+#
+# Display the information collected from the user to show what we are about to do.
+# The 'Back' button can be used to navigate to earlier pages if the user wishes to
+# change this information (i.e. select/deselect a component or change the install folder)
+#--------------------------------------------------------------------------
+
+Function GetPermissionToInstall
+
+  !define L_TEMP   $R9
+
+  Push ${L_TEMP}
+
+  ; This is a very simple custom page so we create the INI file here
+
+  ; Ensure custom page matches the selected language (left-to-right or right-to-left order)
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioData.ini" "Settings" "RTL" "$(^RTL)"
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioData.ini" "Settings" "NumFields" "1"
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioData.ini" "Field 1"  "Type"   "text"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioData.ini" "Field 1"  "Left"   "0"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioData.ini" "Field 1"  "Right"  "300"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioData.ini" "Field 1"  "Top"    "0"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioData.ini" "Field 1"  "Bottom" "140"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioData.ini" "Field 1"  "Flags"  "MULTILINE|HSCROLL|VSCROLL|READONLY"
+
+  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_SUMMARY_TITLE)" "$(PFI_LANG_SUMMARY_SUBTITLE)"
+
+  ; The entires in the "Basic" and "Optional" component lists are indented a little
+
+  !define C_NLT     "${IO_NL}\t"
+
+  IfFileExists "$G_ROOTDIR\popfile.pl" upgrade
+  StrCpy ${L_TEMP} "$(PFI_LANG_SUMMARY_NEWLOCN)"
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(^InstallBtn)"
+  Goto start_summary
+
+upgrade:
+  StrCpy ${L_TEMP} "$(PFI_LANG_SUMMARY_UPGRADELOCN)"
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_INST_BTN_UPGRADE)"
+
+start_summary:
+  StrCpy $G_PLS_FIELD_1 "${L_TEMP}${IO_NL}${IO_NL}\
+      $(PFI_LANG_SUMMARY_BASICLIST)${IO_NL}${C_NLT}\
+          $(PFI_LANG_SUMMARY_POPFILECORE)${C_NLT}\
+          $(PFI_LANG_SUMMARY_MINPERL)${C_NLT}\
+          $(PFI_LANG_SUMMARY_DEFAULTSKIN)${C_NLT}\
+          $(PFI_LANG_SUMMARY_DEFAULTLANG)"
+
+  ; Now use the current component selections to update the data we will display,
+
+  !insertmacro SectionNotSelected ${SecSkins} check_langs
+  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}$(PFI_LANG_SUMMARY_EXTRASKINS)"
+
+check_langs:
+  !insertmacro SectionNotSelected ${SecLangs} check_kakasi
+  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}$(PFI_LANG_SUMMARY_EXTRALANGS)"
+
+check_kakasi:
+  !ifndef NO_KAKASI
+      !insertmacro SectionNotSelected ${SecKakasi} end_basic
+      StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}$(PFI_LANG_SUMMARY_KAKASI)"
+
+    end_basic:
+  !endif
+  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${IO_NL}${IO_NL}\
+      $(PFI_LANG_SUMMARY_OPTIONLIST)${IO_NL}"
+
+  ; Check the optional components in alphabetic order
+
+  StrCpy ${L_TEMP} "${C_NLT}$(PFI_LANG_SUMMARY_NONE)"
+
+  !insertmacro SectionNotSelected ${SecIMAP} check_nntp
+  StrCpy ${L_TEMP} ""
+  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}$(PFI_LANG_SUMMARY_IMAP)"
+
+check_nntp:
+  !insertmacro SectionNotSelected ${SecNNTP} check_smtp
+  StrCpy ${L_TEMP} ""
+  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}$(PFI_LANG_SUMMARY_NNTP)"
+
+check_smtp:
+  !insertmacro SectionNotSelected ${SecSMTP} check_socks
+  StrCpy ${L_TEMP} ""
+  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}$(PFI_LANG_SUMMARY_SMTP)"
+
+check_socks:
+  !insertmacro SectionNotSelected ${SecSOCKS} check_ssl
+  StrCpy ${L_TEMP} ""
+  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}$(PFI_LANG_SUMMARY_SOCKS)"
+
+check_ssl:
+  !insertmacro SectionNotSelected ${SecSSL} check_xmlrpc
+  StrCpy ${L_TEMP} ""
+  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}$(PFI_LANG_SUMMARY_SSL)"
+
+check_xmlrpc:
+  !insertmacro SectionNotSelected ${SecXMLRPC} end_optional
+  StrCpy ${L_TEMP} ""
+  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${C_NLT}$(PFI_LANG_SUMMARY_XMLRPC)"
+
+end_optional:
+  StrCpy $G_PLS_FIELD_1 "$G_PLS_FIELD_1${L_TEMP}${IO_NL}${IO_NL}\
+      $(PFI_LANG_SUMMARY_BACKBUTTON)"
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioData.ini" "Field 1" "State" $G_PLS_FIELD_1
+  
+  ; Set focus to the button labelled "Install" or "Upgrade" (instead of the "Summary" data)
+
+  !insertmacro MUI_INSTALLOPTIONS_INITDIALOG "ioData.ini"
+  Pop ${L_TEMP}
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1
+  SendMessage $HWNDPARENT ${WM_NEXTDLGCTL} $G_DLGITEM 1
+  !insertmacro MUI_INSTALLOPTIONS_SHOW
+
+  Pop ${L_TEMP}
+
+  !undef L_TEMP
 
 FunctionEnd
 
@@ -3323,13 +3475,13 @@ Section "un.Uninstall End" UnSecEnd
   IfFileExists "$G_ROOTDIR\uninstalluser.exe" exit
 
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_1)" IDNO exit
-  DetailPrint "$(PFI_LANG_UN_LOG_DELUSERDIR)"
+  DetailPrint "$(PFI_LANG_UN_LOG_DELROOTDIR)"
   Delete "$G_ROOTDIR\*.*"
   RMDir /r $G_ROOTDIR
   IfFileExists "$G_ROOTDIR\*.*" 0 exit
-  DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
-  MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_UN_MBREMERR_1): $G_ROOTDIR $(PFI_LANG_UN_MBREMERR_2)"
+  DetailPrint "$(PFI_LANG_UN_LOG_DELROOTERR)"
+  StrCpy $G_PLS_FIELD_1 $G_ROOTDIR
+  MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_UN_MBREMERR_A)"
 
 exit:
   SetDetailsPrint both
