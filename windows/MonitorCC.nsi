@@ -26,6 +26,7 @@
 
 ; This version of the script has been tested with the "NSIS 2 Release Candidate 4" compiler,
 ; released 2 February 2004, with no patches applied.
+;
 ; Expect 3 compiler warnings, all related to standard NSIS language files which are out-of-date.
 
 #--------------------------------------------------------------------------
@@ -77,7 +78,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.2"
+  !define C_PFI_VERSION  "0.1.3"
 
   ; Mention the version number in the window title
 
@@ -182,7 +183,8 @@
 
   !define MUI_LANGDLL_WINDOWTITLE "Language Selection"
 
-  ; Use same language setting as the installer
+  ; Use same language setting as the POPFile installer (if this registry entry
+  ; is not found, the user will be asked to select the language to be used)
 
   !define MUI_LANGDLL_REGISTRY_ROOT "HKLM"
   !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\POPFile"
@@ -315,6 +317,7 @@
   ; Ensure CRC checking cannot be turned off using the /NCRC command-line switch
 
   CRCcheck Force
+
 
 #--------------------------------------------------------------------------
 # Reserve the files required by the utility (to improve performance)
@@ -475,15 +478,96 @@ FunctionEnd
 
 
 #--------------------------------------------------------------------------
-# Installer Section: ConvertCorpus
+# NOTE: Special plugin handling is used for the 'GetLocalTimeAsMin100' function
+# and the 'ConvertCorpus' section which immediately follows it in this script.
+#
+# The LangDLL.dll used by '.onInit' (above) is not affected therefore it
+# does not need to be manually unloaded before we exit from this utility.
+#
+# The 'System' plugin calls in 'PFIGUIInit' (above) are also not affected.
+#
+# The 'GetLocalTimeAsMin100' function and the 'ConvertCorpus' section make extensive use
+# of the 'System' plugin, so we follow the recommendation of the plugin's author and tell
+# NSIS not to bother unloading it after every call. Before we exit from the utility, we must
+# ensure the plugin is manually unloaded, otherwise NSIS will not be able to delete the
+# $PLUGINSDIR (the directory used for the plugins).
+#
+# The 'System' plugin is manually unloaded immediately after the 'exit' label in the
+# 'ConvertCorpus' section (the normal exit from this utility)
+#
+# If other plugins are used in the future, they may also need to be manually unloaded
+# before the utility exits (depending upon where they are used in this script).
 #--------------------------------------------------------------------------
 
-  ; This 'Section' makes extensive use of the 'System' plugin, so we follow the recommendation
-  ; of the plugin's author and tell NSIS not to bother unloading it after every call. At the
-  ; end of the section we must ensure that we manually unload the DLL otherwise NSIS will not
-  ; be able to delete the $PLUGINSDIR (see the code immediately before the 'SectionEnd' line).
-
   SetPluginUnload alwaysoff
+
+
+#--------------------------------------------------------------------------
+# Installer Function: GetLocalTimeAsMin100
+#
+# Returns on the stack Int64 of the current local time in 0.01 minute units
+# (derived from the FILETIME Structure of current local time)
+#
+# Inputs:
+#         (none)
+# Outputs:
+#         (top of stack)     - current local time in 0.01 minute units (Int64)
+#
+# Usage:
+#
+#         Call GetLocalTimeAsMin100
+#         Pop $R0
+#
+#         ($R0 at this point is '21198050952', for example)
+#
+#--------------------------------------------------------------------------
+
+Function GetLocalTimeAsMin100
+
+  Push $0
+  Push $1
+  Push $2
+  Push $3
+
+  System::Call '*(&i2, &i2, &i2, &i2, &i2, &i2, &i2, &i2) i .r1'
+  System::Call '*(i, i) l .r0'
+  System::Call 'kernel32::GetLocalTime(i) i(r1)'
+  System::Call 'kernel32::SystemTimeToFileTime(i, l) l(r1, r0)'
+  System::Call '*$0(i .r1, i .r2)'
+
+  ; $1 contains the low  order Int32
+  ; $2 contains the high order Int32
+
+  ; Adjust low order Int32 if it is negative
+
+  StrCpy $3 $1 1
+  StrCmp $3 "-" 0 low_order_ok
+  System::Int64Op  $1 + 4294967296
+  Pop $1
+
+low_order_ok:
+  System::Int64Op  $2 * 4294967296
+  pop $3
+  System::Int64Op  $3 + $1
+  pop $3
+  System::Int64Op  $3 / 6000000
+
+  Exch 4
+  Exch 3
+  Exch 2
+  Exch
+
+  Pop $3
+  Pop $2
+  Pop $1
+  Pop $0
+
+FunctionEnd
+
+
+#--------------------------------------------------------------------------
+# Installer Section: ConvertCorpus
+#--------------------------------------------------------------------------
 
 Section ConvertCorpus
 
@@ -720,6 +804,12 @@ all_converted:
   FlushINI "$G_INIFILE_PATH"
 
 exit:
+
+  ; We must now unload the system.dll (this allows NSIS to delete the DLL from $PLUGINSDIR)
+
+  SetPluginUnload manual
+  System::Free 0
+
   Pop ${L_TIME_LEFT}
   Pop ${L_TEMP}
   Pop ${L_START_TIME}
@@ -744,11 +834,6 @@ exit:
   !undef L_START_TIME
   !undef L_TEMP
   !undef L_TIME_LEFT
-
-  ; We can now unload the system.dll (this allows NSIS to delete the DLL from $PLUGINSDIR)
-
-  SetPluginUnload manual
-  System::Free 0
 
 SectionEnd
 
@@ -808,69 +893,6 @@ get:
   Pop $R2
   Pop $R1
   Exch $R0
-
-FunctionEnd
-
-
-#--------------------------------------------------------------------------
-# Installer Function: GetLocalTimeAsMin100
-#
-# Returns on the stack Int64 of the current local time in 0.01 minute units
-# (derived from the FILETIME Structure of current local time)
-#
-# Inputs:
-#         (none)
-# Outputs:
-#         (top of stack)     - current local time in 0.01 minute units (Int64)
-#
-# Usage:
-#
-#         Call GetLocalTimeAsMin100
-#         Pop $R0
-#
-#         ($R0 at this point is '21198050952', for example)
-#
-#--------------------------------------------------------------------------
-
-Function GetLocalTimeAsMin100
-
-  Push $0
-  Push $1
-  Push $2
-  Push $3
-
-  System::Call '*(&i2, &i2, &i2, &i2, &i2, &i2, &i2, &i2) i .r1'
-  System::Call '*(i, i) l .r0'
-  System::Call 'kernel32::GetLocalTime(i) i(r1)'
-  System::Call 'kernel32::SystemTimeToFileTime(i, l) l(r1, r0)'
-  System::Call '*$0(i .r1, i .r2)'
-
-  ; $1 contains the low  order Int32
-  ; $2 contains the high order Int32
-
-  ; Adjust low order Int32 if it is negative
-
-  StrCpy $3 $1 1
-  StrCmp $3 "-" 0 low_order_ok
-  System::Int64Op  $1 + 4294967296
-  Pop $1
-
-low_order_ok:
-  System::Int64Op  $2 * 4294967296
-  pop $3
-  System::Int64Op  $3 + $1
-  pop $3
-  System::Int64Op  $3 / 6000000
-
-  Exch 4
-  Exch 3
-  Exch 2
-  Exch
-
-  Pop $3
-  Pop $2
-  Pop $1
-  Pop $0
 
 FunctionEnd
 
