@@ -24,14 +24,21 @@
         <input type="submit" class="submit" name="nomore_training_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
     </form>
 </div>
-
+<br />
 </TMPL_IF>
 
-<div class="bucketsTable">
-    <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_Title"></h2>
+<table class="settingsTable" width="100%" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Bucket_MaintenanceTableSummary">">
+ <tr>
+   <td class="settingsPanel" valign="top" width="33%" align="center">
+
     <form class="bucketsSwitch" action="/buckets" method="post">
         <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-        <table width="100%" cellspacing="0" cellpadding="0" summary="<TMPL_VAR NAME="Localize_Bucket_MaintenanceTableSummary">">
+        <table width="100%" summary="<TMPL_VAR NAME="Localize_Bucket_MaintenanceTableSummary">">
+            <tr>
+                <th colspan="13" align="left">
+                    <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_Title"></h2>
+                </th>
+            </tr>
             <tr>
                 <th class="bucketsLabel" scope="col">
                     <TMPL_VAR NAME="Localize_Bucket_BucketName">
@@ -202,7 +209,9 @@
             </tr>
         </table>
     </form>
-</div>
+</td>
+</tr>
+</table>
 <br />
 <table class="settingsTable" width="100%" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Bucket_StatisticsTableSummary">">
     <tr>
