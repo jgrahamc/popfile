@@ -44,7 +44,7 @@ select, input {
   padding: 0;
   height: 22px;
   width: 99px;
-  background-image: url(sleetImages/button.gif);
+  background-image: url(button.gif);
   cursor: pointer;
 }
 
@@ -75,7 +75,7 @@ select, input {
   padding: 0;
   margin: 0;
   border: none;
-  background-image: url(sleetImages/top.gif);
+  background-image: url(top.gif);
   background-repeat: repeat-x;
 }
 
@@ -85,7 +85,7 @@ select, input {
   padding: 0;
   margin: 0;
   border: none;
-  background-image: url(sleetImages/topLeft.gif);
+  background-image: url(topLeft.gif);
   background-repeat: no-repeat;
 }
 
@@ -95,7 +95,7 @@ select, input {
   padding: 0;
   margin: 0;
   border: none;
-  background-image: url(sleetImages/topRight.gif);
+  background-image: url(topRight.gif);
   background-repeat: no-repeat;
 }
 
@@ -104,7 +104,7 @@ select, input {
   padding: 0;
   margin: 0;
   border: none;
-  background-image: url(sleetImages/left.gif);
+  background-image: url(left.gif);
   background-repeat: repeat-y;
 }
 
@@ -113,7 +113,7 @@ select, input {
   padding: 0;
   margin: 0;
   border: none;
-  background-image: url(sleetImages/right.gif);
+  background-image: url(right.gif);
   background-repeat: repeat-y;
 }
 
@@ -122,7 +122,7 @@ select, input {
   padding: 0;
   margin: 0;
   border: none;
-  background-image: url(sleetImages/bottom.gif);
+  background-image: url(bottom.gif);
   background-repeat: repeat-x;
 }
 
@@ -132,7 +132,7 @@ select, input {
   padding: 0;
   margin: 0;
   border: none;
-  background-image: url(sleetImages/bottomLeft.gif);
+  background-image: url(bottomLeft.gif);
   background-repeat: no-repeat;
 }
 
@@ -142,7 +142,7 @@ select, input {
   padding: 0;
   margin: 0;
   border: none;
-  background-image: url(sleetImages/bottomRight.gif);
+  background-image: url(bottomRight.gif);
   background-repeat: no-repeat;
 }
 
@@ -219,14 +219,14 @@ td.head {
 
 
 .menu {
-  background-image: url(sleetImages/menu.gif);
+  background-image: url(menu.gif);
   font-weight: normal;
   font-size: 1.25em;
   width: 100%;
 }
 
 .menuStandard {
-  background-image: url(sleetImages/menuButton.gif);
+  background-image: url(menuButton.gif);
   width: 109px;
   height: 21px;
   background-repeat: no-repeat;
@@ -234,7 +234,7 @@ td.head {
 }
 
 .menuSelected {
-  background-image: url(sleetImages/menuButton.gif);
+  background-image: url(menuButton.gif);
   width: 109px;
   height: 21px;
   background-repeat: no-repeat;
@@ -369,7 +369,7 @@ span.graphFont {
 }
 
 .footer {
-  background-image: url(sleetImages/menu.gif);
+  background-image: url(menu.gif);
   margin-top: 10px;
   margin-left: 10%;
   margin-right: 10%;

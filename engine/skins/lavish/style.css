@@ -27,7 +27,7 @@ body {
 
 .shellTopCenter {
 
-  background-image: url(lavishImages/top.gif);
+  background-image: url(top.gif);
   background-repeat: repeat-x;
   height: 20px;
 
@@ -37,7 +37,7 @@ body {
 
   padding-right: 0px;
   padding-left: 0px;
-  background-image: url(lavishImages/topLeft.gif);
+  background-image: url(topLeft.gif);
   padding-bottom: 0px;
   margin: 0px;
   width: 20px;
@@ -55,7 +55,7 @@ body {
 
   padding-right: 0px;
   padding-left: 0px;
-  background-image: url(lavishImages/topRight.gif);
+  background-image: url(topRight.gif);
   padding-bottom: 0px;
   margin: 0px;
   width: 22px;
@@ -73,7 +73,7 @@ body {
 
   padding-right: 0px;
   padding-left: 0px;
-  background-image: url(lavishImages/left.gif);
+  background-image: url(left.gif);
   padding-bottom: 0px;
   margin: 0px;
   width: 20px;
@@ -90,7 +90,7 @@ body {
 
   padding-right: 0px;
   padding-left: 0px;
-  background-image: url(lavishImages/right.gif);
+  background-image: url(right.gif);
   padding-bottom: 0px;
   margin: 0px;
   width: 22px;
@@ -107,7 +107,7 @@ body {
 
   padding-right: 0px;
   padding-left: 0px;
-  background-image: url(lavishImages/bottom.gif);
+  background-image: url(bottom.gif);
   padding-bottom: 0px;
   margin: 0px;
   border-top-style: none;
@@ -124,7 +124,7 @@ body {
 
   padding-right: 0px;
   padding-left: 0px;
-  background-image: url(lavishImages/bottomleft.gif);
+  background-image: url(bottomleft.gif);
   padding-bottom: 0px;
   margin: 0px;
   width: 22px;
@@ -142,7 +142,7 @@ body {
 
   padding-right: 0px;
   padding-left: 0px;
-  background-image: url(lavishImages/bottomright.gif);
+  background-image: url(bottomright.gif);
   padding-bottom: 0px;
   margin: 0px;
   width: 69px;
@@ -176,14 +176,14 @@ td.head {
 
   font-weight: normal;
   font-size: 10pt;
-  background-image: url(lavishImages/menu.gif);
+  background-image: url(menu.gif);
   width: 100%;
 
 }
 
 .menuSelected {
 
-  background-image: url(lavishImages/buttonSelected.gif);
+  background-image: url(buttonSelected.gif);
   width: 124px;
   color: #000000;
   background-color: transparent;
@@ -193,7 +193,7 @@ td.head {
 
 .menuStandard {
 
-  background-image: url(lavishImages/buttonUnselected.gif);
+  background-image: url(buttonUnselected.gif);
   width: 124px;
   color: #000000;
   background-color: transparent;

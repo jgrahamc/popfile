@@ -395,6 +395,8 @@ sub url_handler__
 {
     my ( $self, $client, $url, $command, $content ) = @_;
 
+$self->log_( "url_handler__ $url" );
+
     # Check to see if we obtained the session key yet
     if ( $self->{api_session__} eq '' ) {
         $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
@@ -680,7 +682,11 @@ sub configuration_page
 {
     my ( $self, $client, $templ ) = @_;
 
-    $self->config_( 'skin', $self->{form_}{skin} )      if ( defined($self->{form_}{skin}) );
+    if ( defined($self->{form_}{skin}) ) {
+        $self->config_( 'skin', $self->{form_}{skin} );
+        $templ = $self->load_template__( 'configuration-page.thtml' );
+    }
+
     $self->global_config_( 'debug', $self->{form_}{debug}-1 )   if ( ( defined($self->{form_}{debug}) ) && ( ( $self->{form_}{debug} >= 1 ) && ( $self->{form_}{debug} <= 4 ) ) );
 
     if ( defined($self->{form_}{language}) ) {
@@ -1282,7 +1288,7 @@ sub magnet_page
     $templ->param( 'Magnet_Loop_Magnets' => \@magnet_loop );
     $templ->param( 'Magnet_Count_Magnet' => $i );
 
-    $self->http_ok( $client, $templ, 4 );
+    $self->http_ok( $client, $templ, 2 );
 }
 
 # ---------------------------------------------------------------------------------------------
