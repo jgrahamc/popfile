@@ -338,7 +338,7 @@
     #         Call un.DeleteEnvStr
     #
     #--------------------------------------------------------------------------
-    
+
     Function un.DeleteEnvStr
       Exch $0       ; $0 now has the name of the variable
       Push $1
@@ -346,37 +346,37 @@
       Push $3
       Push $4
       Push $5
-    
+
       Call un.IsNT
       Pop $1
       StrCmp $1 1 DeleteEnvStr_NT
-    
+
       ; On Win9x system, so we have to update AUTOEXEC.BAT
-    
+
       StrCpy $1 $WINDIR 2
       FileOpen $1 "$1\autoexec.bat" r
       GetTempFileName $4
       FileOpen $2 $4 w
       StrCpy $0 "SET $0="
       SetRebootFlag true
-    
+
     DeleteEnvStr_dosLoop:
       FileRead $1 $3
       StrLen $5 $0
       StrCpy $5 $3 $5
       StrCmp $5 $0 0 no_match
-    
+
       ; Have found the line which defines the environment variable, so we do not copy it
       ; and we also ignore the following line if it is just a CRLF sequence
-    
+
       FileRead $1 $3
       StrCmp $3 "$\r$\n" DeleteEnvStr_dosLoop
-    
+
     no_match:
       StrCmp $5 "" DeleteEnvStr_dosLoopEnd
       FileWrite $2 $3
       Goto DeleteEnvStr_dosLoop
-    
+
     DeleteEnvStr_dosLoopEnd:
       FileClose $2
       FileClose $1
@@ -385,14 +385,14 @@
       CopyFiles /SILENT $4 "$1\autoexec.bat"
       Delete $4
       Goto DeleteEnvStr_done
-    
+
       ; More modern OS case (AUTOEXEC.BAT not relevant)
-    
+
     DeleteEnvStr_NT:
       DeleteRegValue HKCU "Environment" $0
       SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} \
           0 "STR:Environment" /TIMEOUT=5000
-    
+
     DeleteEnvStr_done:
       Pop $5
       Pop $4
@@ -401,8 +401,8 @@
       Pop $1
       Pop $0
     FunctionEnd
-    
-    
+
+
     #--------------------------------------------------------------------------
     # Uninstaller Function: un.DeleteEnvStrNTAU
     #
@@ -420,7 +420,7 @@
     #         Call un.DeleteEnvStrNTAU
     #
     #--------------------------------------------------------------------------
-    
+
     Function un.DeleteEnvStrNTAU
       Exch $0       ; $0 now has the name of the variable
       Push $1
@@ -428,37 +428,37 @@
       Push $3
       Push $4
       Push $5
-    
+
       Call un.IsNT
       Pop $1
       StrCmp $1 1 DeleteEnvStr_NT
-    
+
       ; On Win9x system, so we have to update AUTOEXEC.BAT
-    
+
       StrCpy $1 $WINDIR 2
       FileOpen $1 "$1\autoexec.bat" r
       GetTempFileName $4
       FileOpen $2 $4 w
       StrCpy $0 "SET $0="
       SetRebootFlag true
-    
+
     DeleteEnvStr_dosLoop:
       FileRead $1 $3
       StrLen $5 $0
       StrCpy $5 $3 $5
       StrCmp $5 $0 0 no_match
-    
+
       ; Have found the line which defines the environment variable, so we do not copy it
       ; and we also ignore the following line if it is just a CRLF sequence
-    
+
       FileRead $1 $3
       StrCmp $3 "$\r$\n" DeleteEnvStr_dosLoop
-    
+
     no_match:
       StrCmp $5 "" DeleteEnvStr_dosLoopEnd
       FileWrite $2 $3
       Goto DeleteEnvStr_dosLoop
-    
+
     DeleteEnvStr_dosLoopEnd:
       FileClose $2
       FileClose $1
@@ -467,14 +467,14 @@
       CopyFiles /SILENT $4 "$1\autoexec.bat"
       Delete $4
       Goto DeleteEnvStr_done
-    
+
       ; More modern OS case (AUTOEXEC.BAT not relevant)
-    
+
     DeleteEnvStr_NT:
       DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" $0
       SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} \
           0 "STR:Environment" /TIMEOUT=5000
-    
+
     DeleteEnvStr_done:
       Pop $5
       Pop $4
@@ -544,9 +544,7 @@
 # This function is used during the installation process
 #--------------------------------------------------------------------------
 
-!ifndef NO_KAKASI
-  !insertmacro IsNT ""
-!endif
+!insertmacro IsNT ""
 
 #--------------------------------------------------------------------------
 # Uninstaller Function: un.IsNT
