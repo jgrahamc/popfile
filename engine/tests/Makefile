@@ -13,3 +13,4 @@ runtest:
 ifdef DEBUGARGS
 	@perl ../coverage.pl
 endif
+	@rm -rf corpus
