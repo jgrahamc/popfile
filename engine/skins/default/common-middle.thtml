@@ -38,10 +38,6 @@
             <td class="<TMPL_VAR NAME="Common_Middle_Tab2">" align="center">
                 <a class="menuLink" href="/magnets?session=<TMPL_VAR NAME="Session_Key">&amp;start_magnet=0"><TMPL_VAR NAME="Localize_Header_Magnets"></a>
             </td>
-            <td class="menuSpacer"></td>
-            <td class="<TMPL_VAR NAME="Common_Middle_Tab3">" align="center">
-                <a class="menuLink" href="/configuration?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Configuration"></a>
-            </td>
             <TMPL_IF NAME="Common_Middle_If_CanAdmin">
                 <td class="menuSpacer"></td>
                 <td class="<TMPL_VAR NAME="Common_Middle_Tab4">" align="center">

@@ -2,7 +2,7 @@
 
 <TMPL_IF NAME="IMAP_if_mailboxes">
 
-<form action="/configuration" method="post">
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
 
     <TMPL_LOOP NAME="IMAP_loop_buckets">
 

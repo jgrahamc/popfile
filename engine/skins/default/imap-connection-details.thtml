@@ -1,6 +1,6 @@
 <!--  This is the output of template imap-connection-details.thtml -->
 
-<form action="/configuration" method="post">
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
     <label class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_Server">
     </label>

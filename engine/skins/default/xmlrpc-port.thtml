@@ -1,4 +1,4 @@
-<form action="/configuration" method="post">
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
     <label class="configurationLabel" for="configPopPort">
         <TMPL_VAR NAME="Localize_Configuration_XMLRPCPort">:

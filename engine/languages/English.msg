@@ -294,6 +294,7 @@ Bucket_ClassificationFP                 False Positives
 Bucket_ClassificationFN                 False Negatives
 Bucket_ResetStatistics                  Reset Statistics
 Bucket_LastReset                        Last Reset
+Bucket_MessagesPerDay                   Average Messages Per Day
 Bucket_CurrentColor                     %s current color is %s
 Bucket_SetColorTo                       Set %s color to %s
 Bucket_Maintenance                      Maintenance

@@ -3,10 +3,10 @@
 
 <table class="settingsTable" cellpadding="10%" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Security_MainTableSummary">">
     <tr>
-        <td class="settingsPanel" width="50%" valign="top">
+        <td class="settingsPanel" width="33%" valign="top">
             <div class="securityServerWidget">
                  <h2 class="security"><TMPL_VAR NAME="Localize_Security_Stealth"></h2>
-                        <form class="securitySwitch" action="/security" method="post">
+                        <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                             <div class="securityLabel">
                                 <TMPL_VAR NAME="Localize_Security_UI">:
                             </div>
@@ -41,31 +41,10 @@
                 <TMPL_VAR NAME="Security_Dynamic_Chain">
             </div>
         </td>
-        <td class="settingsPanel" width="50%" valign="top">
-            <div class="securityPassWidget">
-                <h2 class="security"><TMPL_VAR NAME="Localize_Security_PasswordTitle"></h2>
-                <form action="/security" method="post">
-                    <label class="securityLabel" for="securityPassword">
-                        <TMPL_VAR NAME="Localize_Security_Password">:
-                    </label>
-                    <br />
-                    <input type="password" id="securityPassword" name="password" value="<TMPL_VAR NAME="Security_Password">" />
-                    <input type="submit" class="submit" name="update_server" value="<TMPL_VAR NAME="Localize_Apply">" />
-                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-                </form>
-
-                <TMPL_IF NAME="Security_If_Password_Updated">
-
-                <TMPL_VAR NAME="Localize_Security_PasswordUpdate">
-
-                </TMPL_IF>
-
-                <hr />
-            </div>
-
+        <td class="settingsPanel" width="33%" valign="top">
             <div class="securityUpdateWidget">
                  <h2 class="security"><TMPL_VAR NAME="Localize_Security_UpdateTitle"></h2>
-                        <form class="securitySwitch" action="/security" method="post">
+                        <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                             <div class="securityLabel">
                                 <TMPL_VAR NAME="Localize_Security_Update">:
                             </div>
@@ -88,15 +67,12 @@
                             </TMPL_IF>
 
                         </form>
-                 <div class="securityExplanation">
-                     <TMPL_VAR NAME="Localize_Security_ExplainUpdate">
-                 </div>
                  <hr />
             </div>
 
             <div class="securityStatsWidget">
                  <h2 class="security"><TMPL_VAR NAME="Localize_Security_StatsTitle"></h2>
-                        <form class="securitySwitch" action="/security" method="post">
+                        <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                             <div class="securityLabel">
                                 <TMPL_VAR NAME="Localize_Security_Stats">:
                             </div>
@@ -121,11 +97,93 @@
                             </TMPL_IF>
 
                         </form>
-                 <div class="securityExplanation">
-                     <TMPL_VAR NAME="Localize_Security_ExplainStats">
-                 </div>
+                <hr />
             </div>
+
+            <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_TCPTimeout"></h2>
+            <form action="/administration" method="post">
+                <label class="configurationLabel" for="configTCPTimeout">
+                    <TMPL_VAR NAME="Localize_Configuration_TCPTimeoutSecs">:
+                </label>
+                <br />
+                <input name="timeout" type="text" id="configTCPTimeout" value="<TMPL_VAR NAME="Configuration_TCP_Timeout">" />
+                <input type="submit" class="submit" name="update_timeout" value="<TMPL_VAR NAME="Localize_Apply">" />
+                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+            </form>
+
+            <TMPL_IF NAME="Configuration_If_TCP_Timeout_Error">
+
+            <blockquote>
+                <div class="error01">
+                    <TMPL_VAR NAME="Localize_Configuration_Error6">
+                </div>
+            </blockquote>
+
+            </TMPL_IF>
+
+            <TMPL_VAR NAME="Configuration_TCP_Timeout_Updated">
+                <hr />
+
+            <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_Logging"></h2>
+            <form action="/administration" method="post">
+                <label class="configurationLabel" for="configLogging">
+                    <TMPL_VAR NAME="Localize_Configuration_LoggerOutput">:
+                </label>
+                <input type="hidden" value="<TMPL_VAR NAME="Session_Key">" name="session" />
+                <select name="debug" id="configLogging">
+                    <option value="1" <TMPL_VAR NAME="Configuration_Debug_1_Selected">>
+                        <TMPL_VAR NAME="Localize_Configuration_None">
+                    </option>
+                    <option value="2" <TMPL_VAR NAME="Configuration_Debug_2_Selected">>
+                        <TMPL_VAR NAME="Localize_Configuration_ToFile">
+                    </option>
+                    <option value="3" <TMPL_VAR NAME="Configuration_Debug_3_Selected">>
+                        <TMPL_VAR NAME="Localize_Configuration_ToScreen">
+                    </option>
+                    <option value="4" <TMPL_VAR NAME="Configuration_Debug_4_Selected">>
+                        <TMPL_VAR NAME="Localize_Configuration_ToScreenFile">
+                    </option>
+                </select>
+                <input type="submit" class="submit" name="submit_debug" value="<TMPL_VAR NAME="Localize_Apply">" />
+            </form>
+
+            <TMPL_IF NAME="Configuration_If_Show_Log">
+
+            <p>
+                <a href="popfile_current_log.log?session=<TMPL_VAR NAME="Session_Key">" class="downloadLogLink"><TMPL_VAR NAME="Localize_Configuration_CurrentLogFile"></a>
+            </p>
+
+            </TMPL_IF>
+
+        </td>
+        <td class="settingsPanel" width="33%" valign="top" rowspan="2">
+            <h2 class="configuration"><TMPL_VAR NAME="Localize_Configuration_ListenPorts"></h2>
+            <form action="/administration" method="post">
+                <label class="configurationLabel" for="configUIPort">
+                    <TMPL_VAR NAME="Localize_Configuration_UI">:
+                </label>
+                <br />
+                <input name="ui_port" id="configUIPort" type="text" value="<TMPL_VAR NAME="Configuration_UI_Port">" />
+                <input type="submit" class="submit" name="update_ui_port" value="<TMPL_VAR NAME="Localize_Apply">" />
+                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+            </form>
+
+            <TMPL_IF NAME="Configuration_If_UI_Port_Error">
+
+            <blockquote>
+                <div class="error01">
+                    <TMPL_VAR NAME="Localize_Configuration_Error2">
+                </div>
+            </blockquote>
+
+            </TMPL_IF>
+
+            <TMPL_VAR NAME="Configuration_UI_Port_Updated">
+            <TMPL_VAR NAME="Configuration_Dynamic">
         </td>
     </tr>
 </table>
+<TMPL_INCLUDE NAME="common-before-configuration.thtml">
+<br />
+<TMPL_INCLUDE NAME="configuration-bar.thtml">
 <TMPL_INCLUDE NAME="common-bottom.thtml">

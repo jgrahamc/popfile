@@ -1,4 +1,4 @@
-            <form class="securitySwitch" action="/security" method="post">
+            <form class="securitySwitch" action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                 <div class="securityLabel">
                     <TMPL_VAR NAME="Localize_Security_NNTP">:
                 </div>

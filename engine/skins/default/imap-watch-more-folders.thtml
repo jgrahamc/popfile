@@ -2,7 +2,7 @@
 
 <TMPL_IF NAME="IMAP_if_mailboxes">
 
-<form action="/configuration" method="post">
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
     <input type="submit" class="submit" name="imap_2_watch_more_folders" value="<TMPL_VAR NAME="Localize_Add">" />
     <label class="configurationLabel">
         <TMPL_VAR NAME="Localize_Imap_WatchMore">

@@ -37,6 +37,7 @@ use IO::Select;
 use Digest::MD5 qw( md5_hex );
 use HTML::Template;
 use Date::Format;
+use Date::Parse;
 
 # A handy variable containing the value of an EOL for the network
 
@@ -67,9 +68,7 @@ my %headers_table = ( 'from',    'From',            # PROFILE BLOCK START
                       'date',    'Date',
                       'inserted', 'Arrived',
                       'size',    'Size',
-                      'bucket',  'Classification',
-                      'id',      'ID',
-                      'reclassify', 'Reclassify'); # PROFILE BLOCK STOP
+                      'bucket',  'Classification'); # PROFILE BLOCK STOP
 
 
 #----------------------------------------------------------------------------
@@ -371,7 +370,7 @@ sub url_handler__
     }
 
     if ( $url =~ /(popfile.*\.log)/ ) {
-        $self->http_file_( $client, $self->logger_()->debug_filename(),
+        $self->http_file_( $client, $self->logger()->debug_filename(),
             'text/plain' );
         return 1;
     }
@@ -428,7 +427,6 @@ sub url_handler__
     # handle them and the related template
 
     my %page_table = ( 'administration' => [ \&administration_page,      'administration-page.thtml'      ],       # PROFILE BLOCK START
-                       'configuration'  => [ \&configuration_page, 'configuration-page.thtml' ],
                        'buckets'        => [ \&corpus_page,        'corpus-page.thtml'        ],
                        'magnets'        => [ \&magnet_page,        'magnet-page.thtml'        ],
                        'advanced'       => [ \&advanced_page,      'advanced-page.thtml'      ],
@@ -436,7 +434,6 @@ sub url_handler__
                        'view'           => [ \&view_page,          'view-page.thtml'          ] );     # PROFILE BLOCK STOP
 
     my %url_table = ( '/administration' => 'administration', # PROFILE BLOCK START
-                      '/configuration'  => 'configuration',
                       '/buckets'        => 'buckets',
                       '/magnets'        => 'magnets',
                       '/advanced'       => 'advanced',
@@ -463,7 +460,8 @@ sub url_handler__
             return;
         }
 
-        &{$method}( $self, $client, $self->load_template__( $template ) );
+        &{$method}( $self, $client, $self->load_template__( $template, $url ),
+                        $template, $url );
         return 1;
     }
 
@@ -551,8 +549,7 @@ sub http_ok
 
     # Check to see if we've checked for updates today.  If we have not
     # then insert a reference to an image that is generated through a
-    # CGI on UseTheSource.  Also send stats to the same site if that
-    # is allowed
+    # CGI.  Also send stats to the same site if that is allowed.
 
     if ( $self->{today__} ne $self->user_config_( 1, 'last_update_check' ) ) {
         $self->calculate_today();
@@ -602,74 +599,16 @@ sub http_ok
 
 #----------------------------------------------------------------------------
 #
-# configuration_page - get the configuration options
+# handle_history_bar__ - handle the bar at the bottom of the page
+# that allows selection of the history configuration items
 #
 # $client     The web browser to send the results to
+# $templ      The loaded page template
 #
 #----------------------------------------------------------------------------
-sub configuration_page
+sub handle_history_bar__
 {
-    my ( $self, $client, $templ ) = @_;
-
-    if ( defined($self->{form_}{skin}) ) {
-        $self->user_config_( 1, 'skin', $self->{form_}{skin} );
-        $templ = $self->load_template__( 'configuration-page.thtml' );
-    }
-
-   if ( ( defined($self->{form_}{debug}) ) &&
-        ( ( $self->{form_}{debug} >= 1 ) &&
-        ( $self->{form_}{debug} <= 4 ) ) ) {
-       $self->global_config_( 'debug', $self->{form_}{debug}-1 );
-   }
-
-    if ( defined($self->{form_}{language}) ) {
-        if ( $self->user_config_( 1, 'language' ) ne $self->{form_}{language} ) {
-            $self->user_config_( 1, 'language', $self->{form_}{language} );
-            if ( $self->user_config_( 1, 'language' ) ne 'English' ) {
-                $self->load_language( 'English' );
-            }
-            $self->load_language( $self->user_config_( 1, 'language' ) );
-
-            # Force a template relocalization because the language has been
-            # changed which changes the localization of the template
-
-            $self->localize_template__( $templ );
-        }
-    }
-
-    # Load all of the templates that are needed for the dynamic parts of
-    # the configuration page, and for each one call its validation interface
-    # so that any error messages or informational messages are fixed up
-    # first
-
-    my %dynamic_templates;
-
-    for my $name (keys %{$self->{dynamic_ui__}{configuration}}) {
-        $dynamic_templates{$name} = $self->load_template__(
-            $self->{dynamic_ui__}{configuration}{$name}{template} );
-        $self->{dynamic_ui__}{configuration}{$name}{object}->validate_item(
-            $name,
-            $dynamic_templates{$name},
-            \%{$self->{language__}},
-            \%{$self->{form_}} );
-    }
-
-    if ( defined($self->{form_}{ui_port}) ) {
-        if ( ( $self->{form_}{ui_port} >= 1 ) &&
-             ( $self->{form_}{ui_port} < 65536 ) ) {
-            $self->config_( 'port', $self->{form_}{ui_port} );
-        } else {
-            $templ->param( 'Configuration_If_UI_Port_Error' => 1 );
-            delete $self->{form_}{ui_port};
-        }
-    }
-
-    if ( defined($self->{form_}{ui_port} ) ) {
-        $templ->param( 'Configuration_UI_Port_Updated' =>
-            sprintf( $self->{language__}{Configuration_UIUpdate},
-                $self->config_( 'port' ) ) );
-    }
-    $templ->param( 'Configuration_UI_Port' => $self->config_( 'port' ) );
+    my ( $self, $client, $templ, $template, $page ) = @_;
 
     if ( defined($self->{form_}{page_size}) ) {
         if ( ( $self->{form_}{page_size} >= 1 ) &&
@@ -681,11 +620,6 @@ sub configuration_page
         }
     }
 
-    if ( defined($self->{form_}{page_size} ) ) {
-        $templ->param( 'Configuration_Page_Size_Updated' =>
-            sprintf( $self->{language__}{Configuration_HistoryUpdate},
-                $self->user_config_( 1, 'page_size' ) ) )
-    }
     $templ->param( 'Configuration_Page_Size' =>
         $self->user_config_( 1, 'page_size' ) );
 
@@ -704,71 +638,73 @@ sub configuration_page
         }
     }
 
-    $templ->param( 'Configuration_History_Days_Updated' => sprintf( $self->{language__}{Configuration_DaysUpdate}, $self->user_module_config_( 1, 'history', 'history_days' ) ) ) if ( defined($self->{form_}{history_days} ) );
     $templ->param( 'Configuration_History_Days' => $self->user_module_config_( 1, 'history', 'history_days' ) );
-
-    if ( defined($self->{form_}{timeout}) ) {
-        if ( ( $self->{form_}{timeout} >= 10 ) && ( $self->{form_}{timeout} <= 300 ) ) {
-            $self->global_config_( 'timeout', $self->{form_}{timeout} );
-        } else {
-            $templ->param( 'Configuration_If_TCP_Timeout_Error' => 1 );
-            delete $self->{form_}{timeout};
-        }
-    }
-
-    $templ->param( 'Configuration_TCP_Timeout_Updated' => sprintf( $self->{language__}{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) ) if ( defined($self->{form_}{timeout} ) );
-    $templ->param( 'Configuration_TCP_Timeout' => $self->global_config_( 'timeout' ) );
-
     if ( defined( $self->{form_}{update_fields} ) ) {
         my @columns = split(',', $self->user_config_( 1, 'columns' ));
-        my $new_columns = '';        
-        my $down_col = '';        
-        my $up_col = '';
-        my $last_col = '';
-        my $this_col = '';
-        
-        $up_col = $1 if $self->{form_}{updown} =~ /(.*?)_up/;        
-        $down_col = $1 if $self->{form_}{updown} =~ /(.*?)_down/;
-
+        my $new_columns = '';
         foreach my $column (@columns) {
             $column =~ s/^(\+|\-)//;
             if ( defined($self->{form_}{$column})) {
-                $this_col = '+' . $column;
+                $new_columns .= '+';
             } else {
-                $this_col = '-' . $column;                
-            }           
-
-            
-            if ( $up_col ne '' && $up_col eq $column ) {
-                # If the column is moving up, add it, and let the last column
-                # fall through          
-                $new_columns .= $this_col . ',';                
-                $up_col = $this_col;
-                $self->log_(3, "moved $column up");
-            } elsif ( $down_col eq $column ) {                
-                $new_columns .= $last_col . ',' if ( $last_col ne '');
-                # If the column is moving down, save it (along with +-)
-                $last_col = $this_col;
-                $down_col = $this_col;
-                $self->log_(3, "moving $column down");
-            } else  {
-                if ( $down_col ne '' && $last_col eq $down_col ) {
-                    # If the previous column was moving down, print current column
-                    # then last column
-                    $new_columns .= $this_col . ',';
-                    $new_columns .= $last_col . ',';
-                    $last_col = '';
-                    $self->log_(3, "moved $down_col down");
-                } else {
-                    $new_columns .= $last_col . ',' if ( $last_col ne '');
-                    $self->log_(3, "printed $last_col");
-                    $last_col = $this_col;                    
-                }                
+                $new_columns .= '-';
             }
+            $new_columns .= $column;
+            $new_columns .= ',';
         }
-
-        $new_columns .= $last_col if ($last_col ne '');
         $self->user_config_( 1, 'columns', $new_columns );
+    }
+
+    my @columns = split(',', $self->user_config_( 1, 'columns' ));
+    my @column_data;
+    foreach my $column (@columns) {
+        my %row;
+        $column =~ /(\+|\-)/;
+        my $selected = ($1 eq '+')?'checked':'';
+        $column =~ s/^.//;
+        $row{Configuration_Field_Name} = $column;
+        $row{Configuration_Localized_Field_Name} =
+            $self->{language__}{$headers_table{$column}};
+        $row{Configuration_Field_Value} = $selected;
+        push ( @column_data, \%row );
+    }
+    $templ->param( 'Configuration_Loop_History_Columns' => \@column_data );
+}
+
+#----------------------------------------------------------------------------
+#
+# handle_configuration_bar__ - handle the bar at the bottom of the page
+# that allows selection of the skin and language
+#
+# $client     The web browser to send the results to
+# $templ      The loaded page template
+#
+# Return the template
+#
+#----------------------------------------------------------------------------
+sub handle_configuration_bar__
+{
+    my ( $self, $client, $templ, $template, $page ) = @_;
+
+    if ( defined($self->{form_}{skin}) ) {
+        $self->user_config_( 1, 'skin', $self->{form_}{skin} );
+        $templ = $self->load_template__( $template, $page );
+    }
+
+    if ( defined($self->{form_}{language}) ) {
+        if ( $self->user_config_( 1, 'language' ) ne
+                 $self->{form_}{language} ) {
+            $self->user_config_( 1, 'language', $self->{form_}{language} );
+            if ( $self->user_config_( 1, 'language' ) ne 'English' ) {
+                $self->load_language( 'English' );
+            }
+            $self->load_language( $self->user_config_( 1, 'language' ) );
+
+            # Force a template relocalization because the language has been
+            # changed which changes the localization of the template
+
+            $self->localize_template__( $templ );
+        }
     }
 
     my ( @general_skins, @small_skins, @tiny_skins );
@@ -809,58 +745,7 @@ sub configuration_page
     }
     $templ->param( 'Configuration_Loop_Languages' => \@language_loop );
 
-    my @columns = split(',', $self->user_config_( 1, 'columns' ));
-    my @column_data;
-    my $colcount = 0;
-    foreach my $column (@columns) {
-        $colcount++;
-        my %row;
-        $column =~ /(\+|\-)/;
-        my $selected = ($1 eq '+')?'checked':'';
-        $column =~ s/^.//;
-        $row{Configuration_Field_Name} = $column;
-        $row{Configuration_Localized_Field_Name} =
-            $self->{language__}{$headers_table{$column}};
-        $row{Configuration_Field_Value} = $selected;
-        
-        $row{Configuration_Required_Field} = 1 if ($column eq 'id' || $column eq 'reclassify');
-        
-        $row{Configuration_Localized_Up} = $self->{language__}{'Up'};
-        $row{Configuration_Localized_Down} = $self->{language__}{'Down'};
-        $row{Configuration_Move_Up_Disabled} = 1 if ($colcount == 1);
-        $row{Configuration_Move_Down_Disabled} = 1 if ($colcount > $#columns);
-        
-        push ( @column_data, \%row );
-    }
-    $templ->param( 'Configuration_Loop_History_Columns' => \@column_data );
-
-    # Insert all the items that are dynamically created from the
-    # modules that are loaded
-
-    my $configuration_html = '';
-    my $last_module = '';
-    for my $name (sort keys %{$self->{dynamic_ui__}{configuration}}) {
-        $name =~ /^([^_]+)_/;
-        my $module = $1;
-        if ( $last_module ne $module ) {
-            $last_module = $module;
-            $configuration_html .= "<hr>\n<h2 class=\"configuration\">";
-            $configuration_html .= uc($module);
-            $configuration_html .= "</h2>\n";
-        }
-        $self->{dynamic_ui__}{configuration}{$name}{object}->configure_item(
-            $name, $dynamic_templates{$name}, \%{$self->{language__}} );
-        $configuration_html .= $dynamic_templates{$name}->output;
-    }
-
-    $templ->param( 'Configuration_Dynamic' => $configuration_html );
-    $templ->param( 'Configuration_Debug_' . ( $self->global_config_( 'debug' ) + 1 ) . '_Selected' => 'selected' );
-
-    if ( $self->global_config_( 'debug' ) & 1 ) {
-        $templ->param( 'Configuration_If_Show_Log' => 1 );
-    }
-
-    $self->http_ok( $client, $templ, 3 );
+    return $templ;
 }
 
 #----------------------------------------------------------------------------
@@ -872,7 +757,10 @@ sub configuration_page
 #----------------------------------------------------------------------------
 sub administration_page
 {
-    my ( $self, $client, $templ ) = @_;
+    my ( $self, $client, $templ, $template, $page ) = @_;
+
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
+                                                    $page );
 
     my $server_error = '';
     my $port_error   = '';
@@ -924,6 +812,84 @@ sub administration_page
 
     $templ->param( 'Security_Dynamic_Security' => $security_html );
     $templ->param( 'Security_Dynamic_Chain'    => $chain_html    );
+
+   if ( ( defined($self->{form_}{debug}) ) &&
+        ( ( $self->{form_}{debug} >= 1 ) &&
+        ( $self->{form_}{debug} <= 4 ) ) ) {
+       $self->global_config_( 'debug', $self->{form_}{debug}-1 );
+   }
+
+    # Load all of the templates that are needed for the dynamic parts of
+    # the configuration page, and for each one call its validation interface
+    # so that any error messages or informational messages are fixed up
+    # first
+
+    my %dynamic_templates;
+
+    for my $name (keys %{$self->{dynamic_ui__}{configuration}}) {
+        $dynamic_templates{$name} = $self->load_template__(
+            $self->{dynamic_ui__}{configuration}{$name}{template} );
+        $self->{dynamic_ui__}{configuration}{$name}{object}->validate_item(
+            $name,
+            $dynamic_templates{$name},
+            \%{$self->{language__}},
+            \%{$self->{form_}} );
+    }
+
+    if ( defined($self->{form_}{ui_port}) ) {
+        if ( ( $self->{form_}{ui_port} >= 1 ) &&
+             ( $self->{form_}{ui_port} < 65536 ) ) {
+            $self->config_( 'port', $self->{form_}{ui_port} );
+        } else {
+            $templ->param( 'Configuration_If_UI_Port_Error' => 1 );
+            delete $self->{form_}{ui_port};
+        }
+    }
+
+    if ( defined($self->{form_}{ui_port} ) ) {
+        $templ->param( 'Configuration_UI_Port_Updated' =>
+            sprintf( $self->{language__}{Configuration_UIUpdate},
+                $self->config_( 'port' ) ) );
+    }
+    $templ->param( 'Configuration_UI_Port' => $self->config_( 'port' ) );
+
+    if ( defined($self->{form_}{timeout}) ) {
+        if ( ( $self->{form_}{timeout} >= 10 ) && ( $self->{form_}{timeout} <= 300 ) ) {
+            $self->global_config_( 'timeout', $self->{form_}{timeout} );
+        } else {
+            $templ->param( 'Configuration_If_TCP_Timeout_Error' => 1 );
+            delete $self->{form_}{timeout};
+        }
+    }
+
+    $templ->param( 'Configuration_TCP_Timeout_Updated' => sprintf( $self->{language__}{Configuration_TCPTimeoutUpdate}, $self->global_config_( 'timeout' ) ) ) if ( defined($self->{form_}{timeout} ) );
+    $templ->param( 'Configuration_TCP_Timeout' => $self->global_config_( 'timeout' ) );
+
+    # Insert all the items that are dynamically created from the
+    # modules that are loaded
+
+    my $configuration_html = '';
+    my $last_module = '';
+    for my $name (sort keys %{$self->{dynamic_ui__}{configuration}}) {
+        $name =~ /^([^_]+)_/;
+        my $module = $1;
+        if ( $last_module ne $module ) {
+            $last_module = $module;
+            $configuration_html .= "<hr>\n<h2 class=\"configuration\">";
+            $configuration_html .= uc($module);
+            $configuration_html .= "</h2>\n";
+        }
+        $self->{dynamic_ui__}{configuration}{$name}{object}->configure_item(
+            $name, $dynamic_templates{$name}, \%{$self->{language__}} );
+        $configuration_html .= $dynamic_templates{$name}->output;
+    }
+
+    $templ->param( 'Configuration_Dynamic' => $configuration_html );
+    $templ->param( 'Configuration_Debug_' . ( $self->global_config_( 'debug' ) + 1 ) . '_Selected' => 'selected' );
+
+    if ( $self->global_config_( 'debug' ) & 1 ) {
+        $templ->param( 'Configuration_If_Show_Log' => 1 );
+    }
 
     $self->http_ok( $client,$templ, 4 );
 }
@@ -994,7 +960,10 @@ sub pretty_date__
 #----------------------------------------------------------------------------
 sub advanced_page
 {
-    my ( $self, $client, $templ ) = @_;
+    my ( $self, $client, $templ, $template, $page ) = @_;
+
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
+                                                    $page );
 
     # Handle updating the parameter table
 
@@ -1141,7 +1110,10 @@ sub max
 #----------------------------------------------------------------------------
 sub magnet_page
 {
-    my ( $self, $client, $templ ) = @_;
+    my ( $self, $client, $templ, $template, $page ) = @_;
+
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
+                                                    $page );
 
     my $magnet_message = '';
 
@@ -1401,10 +1373,13 @@ sub magnet_page
 #----------------------------------------------------------------------------
 sub bucket_page
 {
-    my ( $self, $client, $templ ) = @_;
+    my ( $self, $client, $templ, $template, $page ) = @_;
     my $bucket = $self->{form_}{showbucket};
 
-    $templ = $self->load_template__( 'bucket-page.thtml' );
+    $templ = $self->load_template__( 'bucket-page.thtml', $page );
+
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
+                                                    $page );
 
     my $color = $self->classifier_()->get_bucket_color( $self->{api_session__}, $bucket );
     $templ->param( 'Bucket_Main_Title' => sprintf( $self->{language__}{SingleBucket_Title}, "<font color=\"$color\">$bucket</font>" ) );
@@ -1584,7 +1559,10 @@ sub bar_chart_100
 #----------------------------------------------------------------------------
 sub corpus_page
 {
-    my ( $self, $client, $templ ) = @_;
+    my ( $self, $client, $templ, $template, $page ) = @_;
+
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
+                                                    $page );
 
     if ( defined( $self->{form_}{clearbucket} ) ) {
         $self->classifier_()->clear_bucket( $self->{api_session__}, $self->{form_}{showbucket} );
@@ -1762,6 +1740,15 @@ sub corpus_page
     $templ->param( 'Corpus_Accuracy' => $accuracy );
     $templ->param( 'Corpus_If_Last_Reset' => 1 );
     $templ->param( 'Corpus_Last_Reset' => $self->user_config_( 1, 'last_reset' ) );
+    my $days = ( str2time( localtime ) - str2time( $self->user_config_( 1, 'last_reset' ) ) ) / ( 60 * 60 * 24 );
+
+print ctime( str2time( $self->user_config_( 1, 'last_reset' ) ) ), "\n";
+
+    if ( ( $self->mcount__() > 0 ) && ( $days > 0 ) ) {
+        $templ->param( 'Corpus_PerDay_Count' => int( $self->mcount__() / $days ) );
+    } else {
+        $templ->param( 'Corpus_PerDay_Count' => 'N/A' );
+    }
 
     if ( ( defined($self->{form_}{lookup}) ) || ( defined($self->{form_}{word}) ) ) {
         $templ->param( 'Corpus_If_Looked_Up' => 1 );
@@ -2072,7 +2059,11 @@ sub history_undo
 #----------------------------------------------------------------------------
 sub history_page
 {
-    my ( $self, $client, $templ ) = @_;
+    my ( $self, $client, $templ, $template, $page ) = @_;
+
+    $self->handle_history_bar__( $client, $templ, $template, $page );
+    $templ = $self->handle_configuration_bar__( $client, $templ, $template,
+                                                    $page );
 
     # Set up default values for various form elements that have been passed
     # in or not so that we don't have to worry about undefined values later
@@ -2287,34 +2278,23 @@ sub history_page
         # Work out which columns to show by splitting the columns
         # parameter at commas keeping all the items that start with a
         # +, and then strip the +
-        # ORDER IS SIGNIFICANT
 
         my @columns = split( ',', $self->user_config_( 1, 'columns' ) );
         my @header_data;
-        my $colspan = -1;
+        my $colspan = 1;
         my $length = 90;
-        
-        
-        # Populate header information (sort, label)
         foreach my $header (@columns) {
-            my %col_data;
+            my %row_data;
             $header =~ /^(.)/;
             next if ( $1 eq '-' );
             $colspan++;
-            $header =~ s/^.//;            
-            
-            $col_data{"History_If_$header"} = 1;
-            
-            $col_data{Localize_Reclassify} = $self->{language__}{Reclassify};
-            
-            $col_data{History_Fields} =
+            $header =~ s/^.//;
+            $row_data{History_Fields} =
                 $self->print_form_fields_(1,1,
                     ('filter','session','search','negate'));
-            
-            # Negate the search direction here, this will be prepended to the header name
-            $col_data{History_Sort}   =
+            $row_data{History_Sort}   =
                 ( $self->{form_}{sort} eq $header )?'-':'';
-            $col_data{History_Header} = $header;
+            $row_data{History_Header} = $header;
 
             my $label = '';
             if ( defined $self->{language__}{ $headers_table{$header} }) {
@@ -2322,17 +2302,14 @@ sub history_page
             } else {
                 $label = $headers_table{$header};
             }
-            $col_data{History_Label} = $label;
-            $col_data{History_If_Sorted} =
+            $row_data{History_Label} = $label;
+            $row_data{History_If_Sorted} =
                 ( $self->{form_}{sort} =~ /^\-?\Q$header\E$/ );
-            $col_data{History_If_Sorted_Ascending} =
+            $row_data{History_If_Sorted_Ascending} =
                 ( $self->{form_}{sort} !~ /^-/ );
-            push ( @header_data, \%col_data );
+            push ( @header_data, \%row_data );
             $length -= 10;
         }
-        
-        $colspan = 1 if ($colspan < 1);
-        
         $templ->param( 'History_Loop_Headers' => \@header_data );
         $templ->param( 'History_Colspan' => $colspan );
 
@@ -2361,135 +2338,70 @@ sub history_page
             }
             $self->user_config_( 1, 'column_characters', $length );
         }
-        
         foreach my $row (@rows) {
             my %row_data;
-            my $mail_file = $$row[0];
-            
-            # this is a little messy. 2d array, row, then column, column in
-            # configured specific order (as with headers)
-            
-            my $col_data;
-            
-            my @columns = split( ',', $self->user_config_( 1,  'columns' ) );
+            my $mail_file = $row_data{History_Mail_File} = $$row[0];
             foreach my $header (@columns) {
-                $col_data = {};
-                
-                # label the column for the template
                 $header =~ /(.)(.+)/;
-                $$col_data{"History_If_$2"} = ( $1 eq '+')?1:0;
-                
-                $header =~ s/^(.)//;
-                
-                # This does breach the HTML::Template advice on TEMPL_IF's and perl if's
-                # but the alternative is to repeat all of this data for every cell
-                
-                if ($header eq 'id') {
-                    $$col_data{History_I1}            = $$row[0];
-                    next;
-                }
-                    
-                
-                if ($header eq 'inserted') {
-                    $$col_data{History_Arrived}       = $self->pretty_date__( $$row[7] );                    
-                    next;
-                }
-                
-                if ($header eq 'from') {
-                    $$col_data{History_From}          = $$row[1];
-                    $$col_data{History_Short_From}    = $self->shorten__( $$row[1], $length );
-                    next;                
-                }
-                
-                if ($header eq 'to') {
-                    $$col_data{History_To}            = $$row[2];
-                    $$col_data{History_Short_To}      = $self->shorten__( $$row[2], $length );
-                    next;                
-                }
-                
-                if ($header eq 'cc') {
-                    $$col_data{History_Cc}            = $$row[3];
-                    $$col_data{History_Short_Cc}      = $self->shorten__( $$row[3], $length );
-                    next;                
-                }                
-                
-                if ($header eq 'subject') {
-                    $$col_data{History_Subject}       = $$row[4];                
-                    $$col_data{History_Short_Subject} = $self->shorten__( $$row[4], $length );
-                    $$col_data{History_Mail_File}     = $$row[0];
-                    $$col_data{History_Fields}        = $self->print_form_fields_(0,1,('start_message','session','filter','search','sort','negate' ) );
-                    next;                
-                }
-                
-                if ($header eq 'date') {
-                    $$col_data{History_Date}          = $self->pretty_date__( $$row[5] );
-                    next;                
-                }
-                
-                if ($header eq 'size') {
-                    my $size = $$row[12];
-                    if ( defined $size ) {
-                        if ( $size >= 1024 * 1024 ) {
-                            $$col_data{History_Size} = sprintf $self->{language__}{History_Size_MegaBytes}, $size / ( 1024 * 1024 );
-                        }
-                        elsif ( $size >= 1024 ) {
-                            $$col_data{History_Size} = sprintf $self->{language__}{History_Size_KiloBytes}, $size / 1024;
-                        }
-                        else {
-                            $$col_data{History_Size} = sprintf $self->{language__}{History_Size_Bytes}, $size;
-                        }
-                    }
-                    else {
-                        $$col_data{History_Size} = "?";
-                    }
-                    next;                
-                }
-                
-                if ($header eq 'bucket') {
-                    my $bucket = $$col_data{History_Bucket} = $$row[8];
-                    $$col_data{History_If_Magnetized} = ($$row[11] ne '');
-                    $$col_data{History_If_Not_Pseudo} = !$self->classifier_()->is_pseudo_bucket( $self->{api_session__},
-                                                                                $bucket );
-                    $$col_data{Session_Key} = $self->{session_key__};                    
-                    $$col_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $self->{api_session__},
-                                                                                $bucket,
-                                                                                'color' );
-                    next;                
-                }
-                
-                if ($header eq 'reclassify') {
-                    my $bucket = $$col_data{History_Bucket} = $$row[8];
-                    $$col_data{History_If_Magnetized} = ($$row[11] ne '');
-                    $$col_data{History_If_Reclassified} = ( $$row[9] != 0 );
-                    $$col_data{Localize_History_Reclassified} = $self->{language__}{History_Reclassified};
-                    $$col_data{History_I}             = $$row[0];
-                    $$col_data{History_Magnet}        = $$row[11];
-                    $$col_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $self->{api_session__},
-                                                                                $bucket,
-                                                                                'color' );
-                    $$col_data{Localize_Undo} = $self->{language__}{Undo};
-                    $$col_data{History_Loop_Loop_Buckets} = \@bucket_data;    
-                    next;                
-                }
-            } continue {
-                push(@{$row_data{History_Loop_Message_Columns}}, \%{$col_data});
+                $row_data{"History_If_$2"} = ( $1 eq '+')?1:0;
             }
-            $last = $$row[7];
-            
-            if ( ( $last != -1 ) && ( $self->{form_}{sort} =~ /inserted/ ) && ( $self->user_config_( 1,  'session_dividers' ) ) ) {
-                $row_data{History_If_Session} = ( abs( $$row[7] - $last ) > 300 );
-                $row_data{History_Colspan} = $colspan+1;
+            $row_data{History_Arrived}       = $self->pretty_date__( $$row[7] );
+            $row_data{History_From}          = $$row[1];
+            $row_data{History_To}            = $$row[2];
+            $row_data{History_Cc}            = $$row[3];
+            $row_data{History_Date}          = $self->pretty_date__( $$row[5] );
+            $row_data{History_Subject}       = $$row[4];
+            $row_data{History_Short_From}    = $self->shorten__( $$row[1], $length );
+            $row_data{History_Short_To}      = $self->shorten__( $$row[2], $length );
+            $row_data{History_Short_Cc}      = $self->shorten__( $$row[3], $length );
+            $row_data{History_Short_Subject} = $self->shorten__( $$row[4], $length );
+            my $bucket = $row_data{History_Bucket} = $$row[8];
+            $row_data{History_Bucket_Color}  = $self->classifier_()->get_bucket_parameter( $self->{api_session__},
+                                                                          $bucket,
+                                                                          'color' );
+            $row_data{History_If_Reclassified} = ( $$row[9] != 0 );
+            $row_data{History_I}             = $$row[0];
+            $row_data{History_I1}            = $$row[0];
+            $row_data{History_Fields}        = $self->print_form_fields_(0,1,('start_message','session','filter','search','sort','negate' ) );
+            $row_data{History_If_Not_Pseudo} = !$self->classifier_()->is_pseudo_bucket( $self->{api_session__},
+                                                                           $bucket );
+            $row_data{History_If_Magnetized} = ($$row[11] ne '');
+            $row_data{History_Magnet}        = $$row[11];
+            my $size = $$row[12];
+            if ( defined $size ) {
+                if ( $size >= 1024 * 1024 ) {
+                    $row_data{History_Size} = sprintf $self->{language__}{History_Size_MegaBytes}, $size / ( 1024 * 1024 );
+                }
+                elsif ( $size >= 1024 ) {
+                    $row_data{History_Size} = sprintf $self->{language__}{History_Size_KiloBytes}, $size / 1024;
+                }
+                else {
+                    $row_data{History_Size} = sprintf $self->{language__}{History_Size_Bytes}, $size;
+                }
             }
-            
+            else {
+                $row_data{History_Size} = "?";
+            }
+            $row_data{History_Loop_Loop_Buckets} = \@bucket_data;
             if ( defined $self->{feedback}{$mail_file} ) {
                 $row_data{History_If_Feedback} = 1;
                 $row_data{History_Feedback} = $self->{feedback}{$mail_file};
                 delete $self->{feedback}{$mail_file};
             }
-            
-            push ( @history_data, \%row_data );                
+            $row_data{Session_Key} = $self->{session_key__};
+
+            if ( ( $last != -1 ) && ( $self->{form_}{sort} =~ /inserted/ ) && ( $self->user_config_( 1, 'session_dividers' ) ) ) {
+                $row_data{History_If_Session} = ( abs( $$row[7] - $last ) > 300 );
+                $row_data{History_Colspan} = $colspan+1;
+            }
+
+            $last = $$row[7];
+
+            $row_data{Localize_History_Reclassified} = $self->{language__}{History_Reclassified};
+            $row_data{Localize_Undo} = $self->{language__}{Undo};
+            push ( @history_data, \%row_data );
         }
-        $templ->param( 'History_Loop_Messages_Rows' => \@history_data );
+        $templ->param( 'History_Loop_Messages' => \@history_data );
     }
 
     $self->http_ok( $client, $templ, 0 );
@@ -2755,11 +2667,12 @@ sub session_page
 # Loads the named template and returns a new HTML::Template object
 #
 # $template          The name of the template to load from the current skin
+# $page              Name of the page we are loading
 #
 #----------------------------------------------------------------------------
 sub load_template__
 {
-    my ( $self, $template ) = @_;
+    my ( $self, $template, $page ) = @_;
 
     # First see if that template exists in the currently selected
     # skin, if it does not then load the template from the default.
@@ -2801,7 +2714,9 @@ sub load_template__
                    'Common_Bottom_Version'   => $self->version(),
                    'If_Show_Bucket_Help'     => $self->user_config_( 1, 'show_bucket_help' ),
                    'If_Show_Training_Help'   => $self->user_config_( 1, 'show_training_help' ),
-                   'Common_Middle_If_CanAdmin' => $self->user_global_config_( 1, 'can_admin' ) );
+                   'Common_Middle_If_CanAdmin' => $self->user_global_config_( 1, 'can_admin' ),
+                   'Configuration_Action'      => $page );
+
 
     foreach my $fixup (keys %fixups) {
         if ( $templ->query( name => $fixup ) ) {

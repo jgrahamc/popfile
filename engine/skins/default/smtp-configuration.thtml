@@ -5,7 +5,7 @@
 <table border="0" cellpadding="0" cellspacing="0" summary="">
     <tr>
         <td nowrap="nowrap">
-            <form action="/configuration" method="post">
+            <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
             
                 <TMPL_IF NAME="smtp_force_fork_on">
@@ -37,7 +37,7 @@
 <table border="0" cellpadding="0" cellspacing="0" summary="">
     <tr>
         <td>
-            <form action="/configuration" method="post">
+            <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
                 <input name="smtp_port" type="text" id="configPopPort" value="<TMPL_VAR NAME="smtp_port">" />
                 <input type="submit" class="submit" name="update_smtp_port" value="<TMPL_VAR NAME="Localize_Apply">" />
                 <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />

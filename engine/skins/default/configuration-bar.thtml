@@ -1,0 +1,71 @@
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
+<table width="100%" class="settingsTable" cellpadding="10%" cellspacing="0">
+    <tr>
+        <td valign="top" align="center">
+                <label class="configurationLabel" for="configSkin">
+                    <TMPL_VAR NAME="Localize_Configuration_SkinsChoose">:
+                </label>
+
+                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+                <select name="skin" id="configSkin">
+                    <optgroup label="<TMPL_VAR NAME="Localize_Configuration_GeneralSkins">">
+
+                        <TMPL_LOOP NAME="Configuration_Loop_General_Skins">
+
+                        <option value="<TMPL_VAR NAME="Configuration_General_Skin">" <TMPL_VAR NAME="Configuration_General_Selected">>
+                            <TMPL_VAR NAME="Configuration_General_Skin">
+                        </option>
+
+                        </TMPL_LOOP>
+
+                    </optgroup>
+
+                    <optgroup label="<TMPL_VAR NAME="Localize_Configuration_SmallSkins">">
+
+                        <TMPL_LOOP NAME="Configuration_Loop_Small_Skins">
+
+                        <option value="<TMPL_VAR NAME="Configuration_Small_Skin">" <TMPL_VAR NAME="Configuration_Small_Selected">>
+                            <TMPL_VAR NAME="Configuration_Small_Skin">
+                        </option>
+
+                        </TMPL_LOOP>
+
+                    </optgroup>
+                    <optgroup label="<TMPL_VAR NAME="Localize_Configuration_TinySkins">">
+
+                        <TMPL_LOOP NAME="Configuration_Loop_Tiny_Skins">
+
+                        <option value="<TMPL_VAR NAME="Configuration_Tiny_Skin">" <TMPL_VAR NAME="Configuration_Tiny_Selected">>
+                            <TMPL_VAR NAME="Configuration_Tiny_Skin">
+                        </option>
+
+                        </TMPL_LOOP>
+
+                    </optgroup>
+                </select>
+                <input type="submit" class="submit" name="change_skin" value="<TMPL_VAR NAME="Localize_Apply">" />
+
+            </td>
+            <td valign="top" align="center">
+
+                <label class="configurationLabel" for="configLanguage">
+                    <TMPL_VAR NAME="Localize_Configuration_LanguageChoose">:
+                </label>
+
+                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+                <select name="language" id="configLanguage">
+
+                    <TMPL_LOOP NAME="Configuration_Loop_Languages">
+
+                    <option value="<TMPL_VAR NAME="Configuration_Language">" <TMPL_VAR NAME="Configuration_Selected_Language">>
+                        <TMPL_VAR NAME="Configuration_Language">
+                    </option>
+
+                    </TMPL_LOOP>
+
+                </select>
+                <input type="submit" class="submit" name="change_language" value="<TMPL_VAR NAME="Localize_Apply">" />
+        </td>
+    </tr>
+</table>
+</form>

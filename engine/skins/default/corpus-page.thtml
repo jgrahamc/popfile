@@ -292,7 +292,7 @@
     <tr>
         <td class="settingsPanel" valign="top" width="33%" align="center">
             <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_ClassificationAccuracy"></h2>
-            <table summary="">
+            <table summary="" width="100%">
                 <tr>
                     <th scope="row" align="left">
                         <TMPL_VAR NAME="Localize_Bucket_EmailsClassified">:
@@ -309,6 +309,20 @@
                         <TMPL_VAR NAME="Corpus_Error_Count">
                     </td>
                 </tr>
+
+                <TMPL_IF NAME="Corpus_If_Last_Reset">
+
+                <tr>
+                    <th scope="row" align="left">
+                        <TMPL_VAR NAME="Localize_Bucket_MessagesPerDay">:
+                    </th>
+                    <td align="right">
+                        <TMPL_VAR NAME="Corpus_PerDay_Count">
+                    </td>
+                </tr>
+
+                </TMPL_IF>
+
                 <tr>
                     <td colspan="2">
                         <hr />
@@ -347,7 +361,7 @@
         </td>
         <td class="settingsPanel" valign="top" width="33%" align="center">
             <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_EmailsClassifiedUpper"></h2>
-            <table summary="">
+            <table summary="" width="100%">
                 <tr>
                     <th class="bucketsLabel" scope="col" align="left">
                         <TMPL_VAR NAME="Localize_Bucket">
@@ -370,7 +384,7 @@
         </td>
         <td class="settingsPanel" width="34%" valign="top" align="center">
             <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_WordCounts"></h2>
-            <table summary="">
+            <table summary="" width="100%">
                 <tr>
                     <th class="bucketsLabel" scope="col" align="left">
                         <TMPL_VAR NAME="Localize_Bucket">
@@ -642,5 +656,8 @@
     </tr>
 </table>
 
+<TMPL_INCLUDE NAME="common-before-configuration.thtml">
+<br />
+<TMPL_INCLUDE NAME="configuration-bar.thtml">
 <TMPL_INCLUDE NAME="common-bottom.thtml">
 

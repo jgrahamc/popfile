@@ -1,4 +1,4 @@
--- POPFILE SCHEMA 5
+-- POPFILE SCHEMA 4
 -- ---------------------------------------------------------------------------
 --
 -- popfile.schema - POPFile's database schema
@@ -478,7 +478,6 @@ insert into user_template ( name, def, form ) values ( 'history_history_days', 2
 insert into user_template ( name, def, form ) values ( 'html_update_check', 0, '%d' );
 
 -- Sending of statistics is off
-
 insert into user_template ( name, def, form ) values ( 'html_send_stats', 0, '%d' );
 
 -- The size of a history page
@@ -510,7 +509,7 @@ insert into user_template ( name, def, form ) values ( 'html_wordtable_format', 
 -- The default columns to show in the History page.  The order here
 -- is important, as is the presence of a + (show this column) or -
 -- (hide this column) in the value.  By default we show everything
-insert into user_template ( name, def, form ) values ( 'html_columns', '+id,+inserted,+from,+to,-cc,+subject,-date,-size,+bucket,+reclassify,', '%s' );
+insert into user_template ( name, def, form ) values ( 'html_columns', '+inserted,+from,+to,-cc,+subject,-date,-size,+bucket,', '%s' );
 
 -- An overriden date format set by the user, if empty then the
 -- Locale_Date from the language file is used (see pretty_date__)

@@ -1,0 +1,62 @@
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
+<table width="100%" class="settingsTable" cellpadding="10%" cellspacing="0">
+    <tr>
+        <td valign="top" align="center">
+                <label class="configurationLabel" for="configPageSize">
+                    <TMPL_VAR NAME="Localize_Configuration_History">:
+                </label>
+                <input name="page_size" id="configPageSize" type="text" value="<TMPL_VAR NAME="Configuration_Page_Size">" />
+                <input type="submit" class="submit" name="update_page_size" value="<TMPL_VAR NAME="Localize_Apply">" />
+                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+
+            <TMPL_IF NAME="Configuration_If_Page_Size_Error">
+
+            <blockquote>
+                <div class="error01">
+                    <TMPL_VAR NAME="Localize_Configuration_Error4">
+                </div>
+            </blockquote>
+
+            </TMPL_IF>
+        </td>
+        <td valign="top" align="center">
+
+                <label class="configurationLabel" for="configHistoryDays">
+                    <TMPL_VAR NAME="Localize_Configuration_Days">:
+                </label>
+
+                <input name="history_days" id="configHistoryDays" type="text" value="<TMPL_VAR NAME="Configuration_History_Days">" />
+
+                <input type="checkbox" class="checkbox" name="purge_history" value="<TMPL_VAR NAME="Localize_History_Purge">" />
+                <TMPL_VAR NAME="Localize_History_Purge">
+                <input type="submit" class="submit" name="update_history_days" value="<TMPL_VAR NAME="Localize_Apply">" />
+                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+
+            <TMPL_IF NAME="Configuration_If_History_Days_Error">
+
+            <blockquote>
+                <div class="error01">
+                    <TMPL_VAR NAME="Localize_Configuration_Error5">
+                </div>
+            </blockquote>
+
+            </TMPL_IF>
+        </td>
+   </tr>
+   <tr>
+        <td valign="top" align="center" colspan="2">
+                <label class="configurationLabel" for="configUIPort">
+                    <TMPL_VAR NAME="Localize_Configuration_Fields">:
+                </label>
+
+                <TMPL_LOOP NAME="Configuration_Loop_History_Columns">
+
+                <input type="checkbox" id="<TMPL_VAR NAME="Configuration_Field_Name">" class="checkbox" name="<TMPL_VAR NAME="Configuration_Field_Name">" <TMPL_VAR NAME="Configuration_Field_Value">>&nbsp;<TMPL_VAR NAME="Configuration_Localized_Field_Name">
+
+                </TMPL_LOOP>
+                <input type="submit" class="submit" name="update_fields" value="<TMPL_VAR NAME="Localize_Apply">" />
+                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+        </td>
+    </tr>
+</table>
+</form>

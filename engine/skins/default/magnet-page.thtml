@@ -163,4 +163,7 @@
     <br />
 </div>
 
+<TMPL_INCLUDE NAME="common-before-configuration.thtml">
+<br />
+<TMPL_INCLUDE NAME="configuration-bar.thtml">
 <TMPL_INCLUDE NAME="common-bottom.thtml">

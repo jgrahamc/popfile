@@ -1,6 +1,6 @@
 <!--  This is the output of template imap-options.thtml -->
 
-<form action="/configuration" method="post">
+<form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
 
     <input type="checkbox" class="checkbox" name="imap_options_expunge" value="1" <TMPL_VAR NAME="IMAP_expunge_is_checked"> />
     <label class="configurationLabel">
