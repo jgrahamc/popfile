@@ -635,7 +635,7 @@ Function CBP_CreateINIfile
       "Label" \
       "After installation, POPFile makes it easy to change the number of buckets \
       (and their names) to suit your needs.\r\n\r\nBucket names must be single words, \
-      containing lowercase letters, hyphens and underscores." \
+      using lowercase letters, digits 0 to 9, hyphens and underscores." \
       "${INFO_LEFT_MARGIN}" "${INFO_RIGHT_MARGIN}" "0" "60"
 
   ; Label for the "Create Bucket" ComboBox
@@ -980,8 +980,8 @@ too_many:
 
 bad_name:
   MessageBox MB_OK "The name $\"${CBP_L_CREATE_NAME}$\" is not a valid name for a bucket.\
-      $\n$\nBucket names can only contain lowercase letters, hyphens and \
-      underscores.$\n$\nPlease choose a different name for the new bucket."
+      $\n$\nBucket names can only contain lowercase letters, the digits 0 to 9, \
+      hyphens and underscores.$\n$\nPlease choose a different name for the new bucket."
   goto get_next_bucket_cmd
 
 no_user_input:
@@ -1210,9 +1210,9 @@ FunctionEnd
 #==============================================================================================
 # Function CBP_StrCheckName
 #==============================================================================================
-# Converts a string containing a bucket name to lowercase and ensures it only contains the
-# characters 'a' to 'z' plus '-' and '_' characters. If any invalid characters are found,
-# this function returns "" instead of the converted name.
+# Converts a string containing a bucket name to lowercase and ensures it only contains
+# characters in the ranges 'a' to 'z' and '0' to '9', plus the '-' and '_' characters.
+# If any invalid characters are found, this function returns "" instead of the converted name.
 #----------------------------------------------------------------------------------------------
 # Inputs:
 #   (top of stack)                - string containing a bucket name (may be an invalid name)
@@ -1250,9 +1250,9 @@ FunctionEnd
 
 Function CBP_StrCheckName
 
-  ; Bucket names can contain only lowercase letters, underscores (_) and hyphens (-)
+  ; Bucket names can contain only lowercase letters, digits (0-9), underscores (_) & hyphens (-)
 
-  !define CBP_VALIDCHARS    "abcdefghijklmnopqrstuvwxyz_-"
+  !define CBP_VALIDCHARS    "abcdefghijklmnopqrstuvwxyz_-0123456789"
   
   Exch $0   ; The input string
   Push $1   ; Number of characters in ${CBP_VALIDCHARS}
@@ -1268,7 +1268,7 @@ Function CBP_StrCheckName
 next_input_char:
   StrCpy $3 $0 1              ; Get next character from the input string
   StrCmp $3 "" done
-  StrCpy $6 ${CBP_VALIDCHARS}$3   ; Add character to end of "validity check" to guarantee a match
+  StrCpy $6 ${CBP_VALIDCHARS}$3  ; Add character to end of "validity check" to guarantee a match
   StrCpy $0 $0 "" 1
   StrCpy $4 -1
   
