@@ -2,25 +2,25 @@
 #
 # installer.nsi --- This is the NSIS script used to create the
 #                   Windows installer for POPFile. This script uses
-#                   two custom pages whose layouts are defined
-#                   in the files "ioA.ini" and "ioB.ini".
+#                   three custom pages whose layouts are defined
+#                   in the files "ioA.ini", "ioB.ini" and "ioC.ini".
 #
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
 #--------------------------------------------------------------------------
 
-; Modified to work with NSIS 2.0b4 (CVS) [ dated 25 May 2003 ] or later
+; Modified to work with NSIS 2.0b4 (CVS) or later
 
 ; WARNING:
 ;    This script requires "NSIS Modern User Interface" version 1.65 (or later)
-;    because it uses the new (simplified) page configuration system
+;    because it uses the new (simplified) page configuration system.
 
 #--------------------------------------------------------------------------
 
   !define MUI_PRODUCT "POPFile"
-  !define MUI_VERSION "0.19.0RC4"
+  !define MUI_VERSION "0.19.0 (CVS)"
   !define RELEASE_NOTES "..\engine\v0.19.0.change"
-  
+
   !include "MUI.nsh"
 
 #----------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@
 #--------------------------------------------------------------------------
 
   ; Installer Pages
-  
+
   !insertmacro MUI_PAGE_WELCOME
   !insertmacro MUI_PAGE_LICENSE
   !insertmacro MUI_PAGE_COMPONENTS
@@ -60,10 +60,11 @@
   !insertmacro MUI_PAGE_INSTFILES
   !insertmacro CBP_PAGE_SELECTBUCKETS
   Page custom SetOutlookOrOutlookExpressPage
+  Page custom StartPOPFilePage "CheckLaunchOptions"
   !insertmacro MUI_PAGE_FINISH
-  
+
   ; Uninstaller Pages
-  
+
   !insertmacro MUI_UNPAGE_CONFIRM
   !insertmacro MUI_UNPAGE_INSTFILES
 
@@ -75,16 +76,16 @@
   ;-----------------------------------------
 
   ; Select either "accept/do not accept" radio buttons or "accept" checkbox for the license page
-  
+
 #  !define MUI_LICENSEPAGE_RADIOBUTTONS
   !define MUI_LICENSEPAGE_CHECKBOX
 
   ;-----------------------------------------
   ; General Settings - Other Settings
   ;-----------------------------------------
-  
+
   ; Show a message box with a warning when the user closes the installation
-  
+
   !define MUI_ABORTWARNING
 
   ;-----------------------------------------
@@ -93,7 +94,7 @@
 
   ; The "Special" bitmap appears on the "Welcome" and "Finish" pages,
   ; the "Header" bitmap appears on the other pages of the installer.
-  
+
   !define MUI_SPECIALBITMAP "special.bmp"
   !define MUI_HEADERBITMAP "hdr-right.bmp"
   !define MUI_HEADERBITMAP_RIGHT
@@ -101,16 +102,16 @@
   ; The icon files for the installer and uninstaller must have the same structure. For example,
   ; if one icon file contains a 32x32 16-colour image and a 16x16 16-colour image then the other
   ; file cannot just contain a 32x32 16-colour image, it must also have a 16x16 16-colour image.
-  
+
   !define MUI_ICON    "POPFileIcon\popfile.ico"
-  !define MUI_UNICON  "remove.ico" 
+  !define MUI_UNICON  "remove.ico"
 
   ;-----------------------------------------
   ; Custom Functions added to MUI pages
   ;-----------------------------------------
 
   ; Use a "leave" function to look for 'popfile.cfg' in the directory selected for this install
-  
+
   !define MUI_CUSTOMFUNCTION_DIRECTORY_LEAVE CheckExistingConfig
 
 #--------------------------------------------------------------------------
@@ -120,7 +121,7 @@
   ; NSIS provides 20 general purpose user registers:
   ; (a) $0 to $9 are used as global registers
   ; (b) $R0 to $R9 are used as local registers
-  
+
   ; Local registers referred to by 'defines' use names starting with 'L_' (eg L_LNE, L_OLDUI)
   ; and the scope of these 'defines' is limited to the "routine" where they are used.
 
@@ -128,7 +129,7 @@
   !define GUI      $1   ; GUI port (1-65535)
   !define STARTUP  $2   ; automatic startup flag (1 = yes, 0 = no)
   !define CFG      $3   ; general purpose file handle
-  
+
 #--------------------------------------------------------------------------
 # Language
 #--------------------------------------------------------------------------
@@ -146,11 +147,10 @@
   ; Specify NSIS output filename
 
   OutFile "setup.exe"
-
   ; Ensure CRC checking cannot be turned off using the command-line switch
 
   CRCcheck Force
-  
+
   ; Data file for license page
 
   LicenseData "..\engine\license"
@@ -192,6 +192,7 @@
   !insertmacro MUI_RESERVEFILE_WELCOMEFINISHPAGE
   ReserveFile "ioA.ini"
   ReserveFile "ioB.ini"
+  ReserveFile "ioC.ini"
 
 #--------------------------------------------------------------------------
 # Initialise the installer
@@ -200,11 +201,12 @@
 Function .onInit
 
   !define L_RESULT  $R0
-  
+
   Push ${L_RESULT}
 
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioA.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioB.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioC.ini"
 
   File /oname=$PLUGINSDIR\release.txt "${RELEASE_NOTES}"
   MessageBox MB_YESNO "Display POPFile Release Notes ?$\r$\n$\r$\n\
@@ -216,10 +218,10 @@ Function .onInit
 
 use_file_association:
   ExecShell "open" "$PLUGINSDIR\release.txt"
-  
+
 exit:
   Pop ${L_RESULT}
-  
+
   !undef L_RESULT
 FunctionEnd
 
@@ -233,6 +235,10 @@ Section "POPFile" SecPOPFile
 
   SectionIn RO
 
+  ; If we are installing over a previous version, (try to) ensure that version is not running
+
+  Call MakeItSafe
+
   ; Retrieve the POP3 and GUI ports from the ini and get whether we install the
   ; POPFile run in the Startup group
 
@@ -245,7 +251,7 @@ Section "POPFile" SecPOPFile
   ; Install the POPFile Core files
 
   SetOutPath $INSTDIR
-   
+
   File "..\engine\license"
   File "${RELEASE_NOTES}"
   File "..\engine\popfile.pl"
@@ -253,7 +259,7 @@ Section "POPFile" SecPOPFile
   File "..\engine\pix.gif"
   File "..\engine\black.gif"
   File "..\engine\otto.gif"
-  
+
   IfFileExists "$INSTDIR\stopwords" stopwords_found
   File "..\engine\stopwords"
   Goto stopwords_done
@@ -264,7 +270,7 @@ stopwords_found:
       $\r$\nOK to overwrite this file?$\r$\n$\r$\n\
       Click 'Yes' to overwrite, click 'No' to skip updating this file" IDNO stopwords_done
   SetFileAttributes stopwords.default NORMAL
-      
+
 use_other_name:
   File /oname=stopwords.default "..\engine\stopwords"
 
@@ -283,7 +289,7 @@ stopwords_done:
 
 make_cfg_backup:
   CopyFiles $INSTDIR\popfile.cfg $INSTDIR\popfile.cfg.bak
-      
+
 update_config:
   CopyFiles $PLUGINSDIR\popfile.cfg $INSTDIR\
 
@@ -398,7 +404,7 @@ update_config:
 
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
-  
+
   SetOutPath $INSTDIR
   Delete $INSTDIR\uninstall.exe
   WriteUninstaller $INSTDIR\uninstall.exe
@@ -436,7 +442,7 @@ update_config:
                      "$INSTDIR\wperl.exe" popfile.pl \
                      "$INSTDIR\Platform\POPFileIcon.dll"
 skip_autostart_set:
-  
+
   ; Create entry in the Control Panel's "Add/Remove Programs" list
 
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" \
@@ -488,6 +494,54 @@ SectionEnd
   !insertmacro MUI_FUNCTIONS_DESCRIPTION_END
 
 #--------------------------------------------------------------------------
+# Installer Function: MakeItSafe
+#
+# If we are installing on top of a previous installation, we try to shut it down
+# (to allow the files to be overwritten without requiring a reboot)
+#--------------------------------------------------------------------------
+
+Function MakeItSafe
+
+  !define L_NEW_GUI  $R9
+  !define L_OLD_GUI  $R8
+  !define L_RESULT   $R7
+
+  Push ${L_NEW_GUI}
+  Push ${L_OLD_GUI}
+  Push ${L_RESULT}
+
+  !insertmacro MUI_INSTALLOPTIONS_READ "${L_NEW_GUI}" "ioA.ini" "UI Port" "NewStyle"
+  !insertmacro MUI_INSTALLOPTIONS_READ "${L_OLD_GUI}" "ioA.ini" "UI Port" "OldStyle"
+
+  Push ${L_OLD_GUI}
+  Call StrCheckDecimal
+  Pop ${L_OLD_GUI}
+  StrCmp ${L_OLD_GUI} "" try_other_port
+
+  NSISdl::download_quiet http://127.0.0.1:${L_OLD_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "success" exit_now
+
+try_other_port:
+  Push ${L_NEW_GUI}
+  Call StrCheckDecimal
+  Pop ${L_NEW_GUI}
+  StrCmp ${L_NEW_GUI} "" exit_now
+
+  NSISdl::download_quiet http://127.0.0.1:${L_NEW_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  Pop ${L_RESULT} ; Ignore the result
+
+exit_now:
+  Pop ${L_RESULT}
+  Pop ${L_OLD_GUI}
+  Pop ${L_NEW_GUI}
+
+  !undef L_NEW_GUI
+  !undef L_OLD_GUI
+  !undef L_RESULT
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Installer Function: CheckExistingConfig
 # (the "leave" function for the DIRECTORY selection page)
 #
@@ -506,12 +560,12 @@ Function CheckExistingConfig
   !define L_CMPRE     $R8     ; config param name
   !define L_LNE       $R7     ; a line from popfile.cfg
   !define L_OLDUI     $R6     ; used to hold old-style of GUI port
-  
+
   Push ${L_CLEANCFG}
   Push ${L_CMPRE}
   Push ${L_LNE}
   Push ${L_OLDUI}
-  
+
   StrCpy ${POP3} ""
   StrCpy ${GUI} ""
   StrCpy ${L_OLDUI} ""
@@ -521,7 +575,7 @@ Function CheckExistingConfig
   ; (but give priority to any "html_port" entry).
 
   ClearErrors
-  
+
   FileOpen  ${CFG} $INSTDIR\popfile.cfg r
   FileOpen  ${L_CLEANCFG} $PLUGINSDIR\popfile.cfg w
 
@@ -538,10 +592,10 @@ loop:
 
   StrCpy ${L_CMPRE} ${L_LNE} 8
   StrCmp ${L_CMPRE} "ui_port " got_ui_port
-  
+
   FileWrite  ${L_CLEANCFG} ${L_LNE}
   Goto loop
-  
+
 got_port:
   StrCpy ${POP3} ${L_LNE} 5 5
   Goto loop
@@ -561,19 +615,36 @@ got_html_port:
 done:
   FileClose ${CFG}
   FileClose ${L_CLEANCFG}
-  
+
+  Push ${POP3}
+  Call TrimNewlines
+  Pop ${POP3}
+
+  Push ${GUI}
+  Call TrimNewlines
+  Pop ${GUI}
+
+  Push ${L_OLDUI}
+  Call TrimNewlines
+  Pop ${L_OLDUI}
+
+  ; Save the UI port settings found in popfile.cfg for later use by the 'MakeItSafe' function
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "UI Port" "NewStyle" "${GUI}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "UI Port" "OldStyle" "${L_OLDUI}"
+
   ; The 'port' and 'pop3_port' settings are treated as equals so we use the last entry found.
   ; If 'ui_port' and 'html_port' settings were found, we use the last 'html_port' we found.
-  
+
   StrCmp ${GUI} "" 0 validity_checks
   StrCpy ${GUI} ${L_OLDUI}
 
 validity_checks:
-  
+
   ; check port values (config file may have no port data or invalid port data)
 
   StrCmp ${POP3} ${GUI} 0 ports_differ
-  
+
   ; Config file has no port data or same port used for POP3 and GUI
   ; (i.e. the data is not valid), so use POPFile defaults
 
@@ -582,14 +653,6 @@ validity_checks:
   Goto ports_ok
 
 ports_differ:
-  Push ${POP3}
-  Call TrimNewlines
-  Pop ${POP3}
-
-  Push ${GUI}
-  Call TrimNewlines
-  Pop ${GUI}
-  
   StrCmp ${POP3} "" default_pop3
   Push ${POP3}
   Call StrCheckDecimal
@@ -645,7 +708,7 @@ Function SetOptionsPage
 
   !define L_PORTLIST  $R9   ; combo box ports list
   !define L_RESULT    $R8
-  
+
   Push ${L_PORTLIST}
   Push ${L_RESULT}
 
@@ -697,7 +760,7 @@ show_defaults:
   ; Now display the custom page and wait for the user to make their selections.
   ; The function "CheckPortOptions" will check the validity of the selections
   ; and refuse to proceed until suitable ports have been chosen.
-  
+
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioA.ini"
 
   Pop ${L_RESULT}
@@ -719,7 +782,7 @@ FunctionEnd
 Function CheckPortOptions
 
   !define L_RESULT    $R9
-  
+
   Push ${L_RESULT}
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${POP3} "ioA.ini" "Field 2" "State"
@@ -763,13 +826,13 @@ bad_exit:
 
   Pop ${L_RESULT}
   Abort
-  
+
 good_exit:
 
   ; Allow next page in the installation sequence to be shown
-  
+
   Pop ${L_RESULT}
-  
+
   !undef L_RESULT
 
 FunctionEnd
@@ -782,15 +845,15 @@ FunctionEnd
 
 Function SetOutlookOrOutlookExpressPage
 
-  ; More than one "identity" can be created in OE. Each of these identities is 
+  ; More than one "identity" can be created in OE. Each of these identities is
   ; given a GUID and these GUIDs are stored in HKEY_CURRENT_USER\Identities.
-  
+
   ; Each identity can have several email accounts and the details for these
   ; accounts are grouped according to the GUID which "owns" the accounts.
 
   ; We step through every identity defined in HKEY_CURRENT_USER\Identities and
   ; for each one found check its OE email account data.
-  
+
   ; When OE is installed, it (usually) creates an initial identity which stores its
   ; email account data in a fixed registry location. If an identity with an "Identity Ordinal"
   ; value of 1 is found, we need to look for its OE email account data in
@@ -814,7 +877,7 @@ Function SetOutlookOrOutlookExpressPage
   !define L_IDENTITY    $R5   ; plain text form of OE Identity name
   !define L_OEDATA      $R4   ; some data (it varies) for current OE account
   !define L_OEPATH      $R3   ; holds part of the path used to access OE account data
-  !define L_ORDINALS    $R2   ; "Identity Ordinals" flag (1 = found, 0 = not found) 
+  !define L_ORDINALS    $R2   ; "Identity Ordinals" flag (1 = found, 0 = not found)
   !define L_SEPARATOR   $R1   ; char used to separate the pop3 server from the username
   !define L_TEMP        $R0
 
@@ -828,17 +891,17 @@ Function SetOutlookOrOutlookExpressPage
   Push ${L_ORDINALS}
   Push ${L_SEPARATOR}
   Push ${L_TEMP}
-  
+
   ; Determine the separator character to be used when configuring an email account for POPFile
-  
+
   Call GetSeparator
   Pop ${L_SEPARATOR}
 
   StrCpy ${L_GUID_INDEX} 0
-  
+
   ; Get the next identity from the registry
 
-get_guid:  
+get_guid:
   EnumRegKey ${L_GUID} HKCU "Identities" ${L_GUID_INDEX}
   StrCmp ${L_GUID} "" finished_oe_config
 
@@ -847,10 +910,10 @@ get_guid:
   ; If no "Identity Ordinal" value found, use the first "Main Identity" created by OE.
 
   StrCpy ${L_ORDINALS} "1"
-  
+
   ReadRegDWORD ${L_TEMP} HKCU "Identities\${L_GUID}" "Identity Ordinal"
   IntCmp ${L_TEMP} 1 firstOrdinal noOrdinals otherOrdinal
-  
+
 firstOrdinal:
   StrCpy ${L_OEPATH} ""
   goto check_accounts
@@ -859,7 +922,7 @@ noOrdinals:
   StrCpy ${L_ORDINALS} "0"
   StrCpy ${L_OEPATH} ""
   goto check_accounts
-  
+
 otherOrdinal:
   StrCpy ${L_OEPATH} "Identities\${L_GUID}\"
 
@@ -868,7 +931,7 @@ check_accounts:
   ; Now check all of the accounts for the current OE Identity
 
   StrCpy ${L_ACCT_INDEX} 0
-  
+
 next_acct:
   EnumRegKey ${L_ACCOUNT} \
              HKCU "${L_OEPATH}Software\Microsoft\Internet Account Manager\Accounts" \
@@ -884,9 +947,9 @@ next_acct:
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 Server"
   StrCmp ${L_OEDATA} "" try_next_account
   StrCmp ${L_OEDATA} "127.0.0.1" try_next_account
-  
+
   ; If 'POP3 Server' data contains the separator character, we cannot configure this account
-  
+
   Push ${L_OEDATA}
   Push ${L_SEPARATOR}
   Call StrStr
@@ -895,22 +958,22 @@ next_acct:
 
   !insertmacro MUI_HEADER_TEXT "Reconfigure Outlook Express" \
       "POPFile can reconfigure Outlook Express for you"
-      
+
   ; Ensure the 'configure this account' check box is NOT ticked
-  
+
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 2" "State" "0"
-  
+
   ; Prepare to display the 'POP3 Server' data
-  
+
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 8" "Text" ${L_OEDATA}
 
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "SMTP Email Address"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 7" "Text" ${L_OEDATA}
-  
+
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
-  
+
   ; If 'POP3 User Name' data contains the separator character, we cannot configure this account
-  
+
   Push ${L_OEDATA}
   Push ${L_SEPARATOR}
   Call StrStr
@@ -918,7 +981,7 @@ next_acct:
   StrCmp ${L_TEMP} "" 0 try_next_account
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" ${L_OEDATA}
-  
+
   ; Find the Username used by OE for this identity and the OE Account Name
   ; (so we can unambiguously report which email account we are offering to reconfigure).
 
@@ -928,43 +991,43 @@ next_acct:
   StrCpy ${L_OEDATA} $\"${L_OEDATA}$\"
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 10" "Text" \
       "${L_OEDATA} account for the ${L_IDENTITY} identity"
-  
+
   ; Display the OE account data and offer to configure this account to work with POPFile
-  
+
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY_RETURN "ioB.ini"
   Pop ${L_TEMP}
-  
+
   StrCmp ${L_TEMP} "cancel" finished_this_guid
   StrCmp ${L_TEMP} "back" finished_this_guid
 
   ; Has the user ticked the 'configure this account' check box ?
-  
+
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Field 2" "State"
   StrCmp ${L_TEMP} "1" change_oe try_next_account
 
 change_oe:
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
   ReadRegStr ${L_TEMP} HKCU ${L_ACCOUNT} "POP3 Server"
-  
+
   ; To be able to restore the registry to previous settings when we uninstall we
-  ; write a special file called popfile.reg containing the registry settings 
+  ; write a special file called popfile.reg containing the registry settings
   ; prior to modification in the form of lines consisting of
   ;
   ; the\key
   ; thesubkey
   ; the\value
-  
+
   FileOpen  ${CFG} $INSTDIR\popfile.reg a
   FileSeek  ${CFG} 0 END
   FileWrite ${CFG} "${L_ACCOUNT}$\n"
   FileWrite ${CFG} "POP3 User Name$\n"
-  FileWrite ${CFG} "${L_OEDATA}$\n"     
+  FileWrite ${CFG} "${L_OEDATA}$\n"
   FileWrite ${CFG} "${L_ACCOUNT}$\n"
   FileWrite ${CFG} "POP3 Server$\n"
-  FileWrite ${CFG} "${L_TEMP}$\n"    
+  FileWrite ${CFG} "${L_TEMP}$\n"
   FileClose ${CFG}
-  
-  WriteRegStr HKCU ${L_ACCOUNT} "POP3 User Name" "${L_TEMP}${L_SEPARATOR}${L_OEDATA}" 
+
+  WriteRegStr HKCU ${L_ACCOUNT} "POP3 User Name" "${L_TEMP}${L_SEPARATOR}${L_OEDATA}"
   WriteRegStr HKCU ${L_ACCOUNT} "POP3 Server" "127.0.0.1"
 
 try_next_account:
@@ -974,9 +1037,9 @@ try_next_account:
 finished_this_guid:
 
   ; If no "Identity Ordinal" values were found then exit otherwise move on to the next identity
-  
+
   StrCmp ${L_ORDINALS} "0" finished_oe_config
-  
+
   IntOp ${L_GUID_INDEX} ${L_GUID_INDEX} + 1
   goto get_guid
 
@@ -1002,6 +1065,124 @@ finished_oe_config:
   !undef L_OEPATH
   !undef L_ORDINALS
   !undef L_SEPARATOR
+  !undef L_TEMP
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: StartPOPFilePage (generates a custom page)
+#
+# This function offers to start the newly installed POPFile and also offers to display the
+# POPFile User Interface.
+#
+# A "leave" function (CheckLaunchOptions) is used to validate and act upon the selections
+# made by the user.
+#--------------------------------------------------------------------------
+
+Function StartPOPFilePage
+
+  !insertmacro MUI_HEADER_TEXT "POPFile is now ready for use" \
+                               "POPFile and its User Interface can be started now, if required"
+
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioC.ini"
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckLaunchOptions
+# (the "leave" function for the custom page created by "StartPOPFilePage")
+#
+# This function is used to validate the start POPFile options selected by the user.
+# If the selections are not valid, user is asked to make an alternative selection,
+# otherwise this function will perform the selected actions.
+#--------------------------------------------------------------------------
+
+Function CheckLaunchOptions
+
+  !define L_RESULT      $R9
+  !define L_SHOWUI      $R8
+  !define L_TEMP        $R7
+
+  Push ${L_RESULT}
+  Push ${L_SHOWUI}
+  Push ${L_TEMP}
+
+  ; Field 2 = 'Do not run POPFile' radio button, field 5 = 'Display UI' checkbox
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_SHOWUI} "ioC.ini" "Field 5" "State"
+
+  StrCmp ${L_SHOWUI} "0" selection_ok
+  StrCmp ${L_TEMP} "0" selection_ok
+
+  MessageBox MB_OK "Sorry, the POPFile User Interface only works when POPFile is running !\
+      $\r$\n$\r$\n\
+      If you wish to display the User Interface, you must also select one of the 'Run POPFile'\
+      options."
+
+  ; Stay with the custom page created by "StartPOPFilePage"
+
+  Pop ${L_TEMP}
+  Pop ${L_SHOWUI}
+  Pop ${L_RESULT}
+  Abort
+
+selection_ok:
+
+  ; If user does not want to start POPFIle now, there is nothing left to do here
+
+  StrCmp ${L_TEMP} "1" exit_now
+
+  ; Before starting the newly installed POPFile, ensure that no other version of POPFile
+  ; is running on the same UI port as the newly installed version.
+
+  NSISdl::download_quiet http://127.0.0.1:${GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  Pop ${L_RESULT}    ; Get the return value (and ignore it)
+
+  ; Field 4 = 'Run POPFile in background' radio button
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 4" "State"
+  StrCmp ${L_TEMP} "1" run_in_background
+
+  ; Run POPFile in a DOS box
+
+  ExecShell "open" "$SMPROGRAMS\POPFile\Run POPFile.lnk"
+  goto display_ui
+
+run_in_background:
+
+  ; Run POPFile without a DOS box
+
+  ExecShell "open" "$SMPROGRAMS\POPFile\Run POPFile in background.lnk"
+
+display_ui:
+  StrCmp ${L_SHOWUI} "0" exit_now
+
+  ; Wait until POPFile is ready to display the UI (may take a second or so)
+
+  StrCpy ${L_TEMP} 10   ; Timeout limit to avoid an infinite loop
+
+check_if_ready:
+  NSISdl::download_quiet http://127.0.0.1:${GUI} "$PLUGINSDIR\ui.htm"
+  Pop ${L_RESULT}                        ; Did POPFile return an HTML page?
+  StrCmp ${L_RESULT} "success" launch_browser
+  Sleep 250   ; milliseconds
+  IntOp ${L_TEMP} ${L_TEMP} - 1
+  IntCmp ${L_TEMP} 0 launch_browser launch_browser check_if_ready
+
+launch_browser:
+  ExecShell "open" "http://127.0.0.1:${GUI}/"
+
+exit_now:
+
+  ; Allow next page in the installation sequence to be shown
+
+  Pop ${L_TEMP}
+  Pop ${L_SHOWUI}
+  Pop ${L_RESULT}
+
+  !undef L_RESULT
+  !undef L_SHOWUI
   !undef L_TEMP
 
 FunctionEnd
@@ -1034,11 +1215,11 @@ Function GetSeparator
   Push ${L_SEPARATOR}
   Push ${L_LNE}
   Push ${L_PARAM}
-  
+
   StrCpy ${L_SEPARATOR} ""
-  
+
   ClearErrors
-  
+
   FileOpen  ${CFG} $INSTDIR\popfile.cfg r
 
 loop:
@@ -1050,7 +1231,7 @@ loop:
   StrCpy ${L_PARAM} ${L_LNE} 15
   StrCmp ${L_PARAM} "pop3_separator " new_separator
   Goto loop
-  
+
 old_separator:
   StrCpy ${L_SEPARATOR} ${L_LNE} 1 10
   Goto loop
@@ -1063,9 +1244,9 @@ separator_done:
   Push ${L_SEPARATOR}
   Call TrimNewlines
   Pop ${L_SEPARATOR}
-  
+
   ; Use separator character from popfile.cfg (if present) otherwise use a semicolon
-  
+
   StrCmp ${L_SEPARATOR} "" 0 exit
   StrCpy ${L_SEPARATOR} ":"
 
@@ -1153,7 +1334,7 @@ FunctionEnd
 Function StrCheckDecimal
 
   !define DECIMAL_DIGIT    "0123456789"
-  
+
   Exch $0   ; The input string
   Push $1   ; Holds the result: either "" (if input is invalid) or the input string (if valid)
   Push $2   ; A character from the input string
@@ -1162,14 +1343,14 @@ Function StrCheckDecimal
   Push $5   ; Holds the current "validity check" string
 
   StrCpy $1 ""
-  
+
 next_input_char:
   StrCpy $2 $0 1                ; Get the next character from the input string
   StrCmp $2 "" done
   StrCpy $5 ${DECIMAL_DIGIT}$2  ; Add it to end of "validity check" to guarantee a match
   StrCpy $0 $0 "" 1
   StrCpy $3 -1
-  
+
 next_valid_char:
   IntOp $3 $3 + 1
   StrCpy $4 $5 1 $3             ; Extract next "valid" character (from "validity check" string)
@@ -1177,10 +1358,10 @@ next_valid_char:
   IntCmp $3 10 invalid 0 invalid  ; If match is with the char we added, input string is bad
   StrCpy $1 $1$4                ; Add "valid" character to the result
   goto next_input_char
-  
+
 invalid:
   StrCpy $1 ""
-  
+
 done:
   StrCpy $0 $1      ; Result is either a string of decimal digits or ""
   Pop $5
@@ -1189,7 +1370,7 @@ done:
   Pop $2
   Pop $1
   Exch $0           ; place result on top of the stack
-  
+
   !undef DECIMAL_DIGIT
 
 FunctionEnd
@@ -1223,7 +1404,7 @@ FunctionEnd
     IntOp $R1 $R1 + 1
     IntCmp $R1 0 no_trim_needed
     StrCpy $R0 $R0 $R1
-    
+
   no_trim_needed:
     Pop $R2
     Pop $R1
