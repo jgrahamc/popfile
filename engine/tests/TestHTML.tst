@@ -383,8 +383,10 @@ if ( $pid == 0 ) {
         $line = "$in";
 
         if ( $line =~ /^GET +(.+)$/ ) {
-            $url = url( "http://127.0.0.1:$port$1" );
-            $content = get($url);
+            $request = HTTP::Request->new('GET', "http://127.0.0.1:$port$1" );
+            $response = $ua->request($request);
+            test_assert( $response->code, 200 );
+            $content = $response->content;
             @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
             next;
 	}
