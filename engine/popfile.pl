@@ -1155,7 +1155,7 @@ sub corpus_page
         $accuracy .= "%";
     } 
 
-    $body .= "<tr><td><hr><b>Total</b><td align=right><hr><b>$number</b><td><td></table><td width=25% valign=top><h2>Statistics</h2><table width=100% cellspacing=0 cellpadding=0><tr><td>Messages classified:<td>$pmcount<tr><td>Classification errors:<td>$pecount<tr><td><hr>Accuracy:<td align=rate><hr>$accuracy<td></table></table>";
+    $body .= "<tr><td><hr><b>Total</b><td align=right><hr><b>$number</b><td><td></table><td width=25% valign=top><h2>Statistics</h2><table width=100% cellspacing=0 cellpadding=0><tr><td>Messages classified:<td align=right>$pmcount<tr><td>Classification errors:<td align=right>$pecount<tr><td><hr>Accuracy:<td align=right><hr>$accuracy<td></table></table>";
 
     $body .= "<p><hr><h2>Maintenance</h2>";
     $body .= "<p><form action=/buckets><b>Create bucket with name:</b> <br><input name=name type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
@@ -1372,8 +1372,6 @@ sub history_page
             $classifier->{total}{$form{shouldbe}} += $classifier->{parser}->{words}{$word};
             $classifier->{full_total}             += $classifier->{parser}->{words}{$word};
             $classifier->set_value(     $form{shouldbe}, $word, $words{$word} );
-            
-            print "$word, $form{shouldbe}, $classifier->{parser}->{words}{$word}, $classifier->{total}{$form{shouldbe}}\n"; 
         }
         
         open WORDS, ">corpus/$form{shouldbe}/table";
