@@ -14,6 +14,7 @@ use Classifier::WordMangle;
 
 use MIME::Base64;
 use MIME::QuotedPrint;
+require Encode::MIME::Header;
 
 # HTML entity mapping to character codes, this maps things like &amp; to their corresponding
 # character code
@@ -1052,18 +1053,22 @@ sub decode_string
     # the original string with it later. Thus, this subroutine returns the real decoded result.
 
     my ( $self, $mystring ) = @_;
-    my $decode_it = '';
+    
+    $mystring = Encode::MIME::Header::decode($Encode::Encoding{'MIME-Header'},$mystring);
+    
+    #my $decode_it = '';
 
-    if ( $mystring =~ /=\?[\w-]+\?B\?(.*)\?=/i ) {
-        $decode_it = decode_base64( $1 );
-        $mystring =~ s/=\?[\w-]+\?B\?(.*)\?=/$decode_it/i;
-    } else {
-		if ( $mystring =~ /=\?[\w-]+\?Q\?(.*)\?=/i ) {
-			$decode_it = decode_qp( $1 );
-			$mystring =~ s/=\?[\w-]+\?Q\?(.*)\?=/$decode_it/i;
-		}
-	}
-	
+    #while ( $mystring =~ /=\?[\w-]+\?B\?(.*)\?=/ig ) {
+    #    $decode_it = decode_base64( $1 );
+    #    $mystring =~ s/=\?[\w-]+\?B\?(.*)\?=/$decode_it/i;
+    #} 
+    #while ( $mystring =~ /=\?[\w-]+\?Q\?(.*)\?=/ig ) {
+    #       $decode_it = $1;
+    #       $decode_it =~ s/\_/=20/g;
+#            $decode_it = decode_qp( $decode_it );
+#            $mystring =~ s/=\?[\w-]+\?Q\?(.*)\?=/$decode_it/i;
+#    }
+    	
 	return $mystring;
 }
 
@@ -1111,6 +1116,12 @@ sub parse_header
 
     $self->update_pseudoword( 'header', $header );
 
+    # Check the encoding type in all RFC 2047 encoded headers
+    
+    if ( $argument =~ /=\?(.{1,40})\?(Q|B)/i ) {
+            update_word( $self, $1, 0, '', '', 'charset' );
+    }
+
     # Handle the From, To and Cc headers and extract email addresses
     # from them and treat them as words
     
@@ -1125,24 +1136,32 @@ sub parse_header
 
     my $prefix = '';
 
-    if ( $header =~ /^(From|To|Cc|Reply\-To)/i ) {
+    if ( $header =~ /^(From|To|Cc|Reply\-To)$/i ) {
+
+        # These headers at least can be decoded
+
+        $argument = $self->decode_string( $argument );
 
         if ( $argument =~ /=\?(.{1,40})\?/ ) {
             update_word( $self, $1, 0, '', '', 'charset' );
         }
 
-        if ( $header =~ /^From/i )  {
+        if ( $header =~ /^From$/i )  {
             $encoding     = '';
-            $self->{content_type__} = '';
-            $self->{from__} = $self->decode_string( $argument ) if ( $self->{from__} eq '' ) ;
+            $self->{content_type__} = '';            
+            $self->{from__} = $argument if ( $self->{from__} eq '' ) ;
             $prefix = 'from';
         }
 
-        $prefix = 'to' if ( $header =~ /^To/i );
-        $self->{to__} = $self->decode_string( $argument ) if ( ( $header =~ /^To/i ) && ( $self->{to__} eq '' ) );
+        if ( $header =~ /^To$/i ) {
+            $prefix = 'to';
+            $self->{to__} = $argument if ( $self->{to__} eq '' );
+        }
 
-        $prefix = 'cc' if ( $header =~ /^Cc/i );
-        $self->{cc__} = $self->decode_string( $argument ) if ( ( $header =~ /^Cc/i ) && ( $self->{cc__} eq '' ) );
+        if ( $header =~ /^Cc$/i ) {
+            $prefix = 'cc';
+            $self->{cc__} = $argument if ( $self->{cc__} eq '' );
+        }
 
         while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))>// )  {
             update_word($self, $1, 0, ';', '&',$prefix);
@@ -1158,17 +1177,17 @@ sub parse_header
         return ($mime, $encoding);
     }
 
-    $self->{subject__} = $self->decode_string( $argument ) if ( ( $header =~ /^Subject/i ) && ( $self->{subject__} eq '' ) );
-
-    if ( $header =~ /^Subject/i ) {
+    if ( $header =~ /^Subject$/i ) {
         $prefix = 'subject';
+        $argument = $self->decode_string( $argument );
+        $self->{subject__} = $argument if ( ( $self->{subject__} eq '' ) );
     }
 
     $self->{date__} = $argument if ( $header =~ /^Date/i );
 
     # Look for MIME
 
-    if ( $header =~ /^Content-Type/i ) {
+    if ( $header =~ /^Content-Type$/i ) {
         
         if ( $argument =~ /charset=\"?([^\"]{1,40})\"?/ ) {
             update_word( $self, $1, 0, '' , '', 'charset' );
@@ -1206,7 +1225,7 @@ sub parse_header
     # Look for the different encodings in a MIME document, when we hit base64 we will
     # do a special parse here since words might be broken across the boundaries
 
-    if ( $header =~ /^Content-Transfer-Encoding/i ) {
+    if ( $header =~ /^Content-Transfer-Encoding$/i ) {
         $encoding = $argument;
         print "Setting encoding to $encoding\n" if $self->{debug};
         my $compact_encoding = $encoding;
@@ -1217,8 +1236,12 @@ sub parse_header
 
     # Some headers to discard
 
-    return ($mime, $encoding) if ( $header =~ /^(Thread-Index|X-UIDL|Message-ID|X-Text-Classification|X-Mime-Key)/i );
-
+    return ($mime, $encoding) if ( $header =~ /^(Thread-Index|X-UIDL|Message-ID|X-Text-Classification|X-Mime-Key)$/i );
+    
+    # Some headers should never be RFC 2047 decoded
+    
+    $argument = $self->decode_string($argument) unless ($header =~ /^(Revceived|Content\-Type|Content\-Disposition)$/i);
+        
     add_line( $self, $argument, 0, $prefix );
 
     return ($mime, $encoding);
