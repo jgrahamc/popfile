@@ -644,7 +644,7 @@ FunctionEnd
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-;!insertmacro GetLocalTime "un."
+!insertmacro GetLocalTime "un."
 
 
 #--------------------------------------------------------------------------
@@ -914,7 +914,7 @@ FunctionEnd
     Push ${L_MINUTES}
     Push ${L_SECONDS}
 
-    Call ${UN}GetLocalTIme
+    Call ${UN}GetLocalTime
     Pop ${L_YEAR}
     Pop ${L_MONTH}
     Pop ${L_DAY}              ; ignore day of week
@@ -1019,7 +1019,7 @@ FunctionEnd
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-;!insertmacro GetDateTimeStamp "un."
+!insertmacro GetDateTimeStamp "un."
 
 
 #--------------------------------------------------------------------------
