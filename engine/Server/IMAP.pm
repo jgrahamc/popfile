@@ -30,8 +30,8 @@ use POPFile::Module;
 #   Patches by              David Lang (davidlang@users.sourceforge.net)
 #   Moved location by       John Graham-Cumming (jgrahamc@users.sf.net)
 #
-#   A proposed roadmap for this module is available at
-#   http://popfile.sf.net/cgi-bin/wiki.pl?ExperimentalModules/ImapRoadmap
+#   The documentation for this module can be found on
+#   http://popfile.sf.net/cgi-bin/wiki.pl?ExperimentalModules/Imap
 #
 # ---------------------------------------------------------------------------------------------
 
