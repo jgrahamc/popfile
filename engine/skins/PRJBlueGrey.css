@@ -1,0 +1,161 @@
+body {
+background-color : #ccccdd; 
+color : #000009; 
+border-bottom : 0 none #aaaaaa; 
+border-left : 0 none #eeeeee; 
+border-right : 0 none #aaaaaa; 
+border-top : 0 none #eeeeee; 
+font-family : "new century schoolbook", times, serif; 
+margin-bottom : 20px; 
+margin-left : 20px; 
+margin-right : 20px; 
+margin-top : 10px; 
+}
+hr {
+border-bottom: 5px solid #aaaaaa;
+border-top: 5px solid #eeeeee;
+width : 95%;
+}
+.head {
+font-weight : bold; 
+font-family : "bookman old style", "new century schoolbook", times, serif; 
+font-size : 175%; 
+} 
+.shell {
+border-bottom : 3px solid #aaaaaa; 
+border-left : 3px solid #eeeeee; 
+border-right : 3px solid #aaaaaa; 
+border-top : 3px solid #eeeeee; 
+font-family : "new century schoolbook", times, serif; 
+color : #000009; 
+background-color : #ccccff; 
+} 
+a:link {
+border-bottom : 1px solid ; 
+color : blue;
+text-decoration : none; 
+} 
+a:visited {
+border-bottom : 1px dashed ; 
+color : #000088;
+text-decoration : none; 
+} 
+a:hover {
+border-bottom : 1px solid ; 
+text-decoration : none; 
+} 
+a.dash:link {
+border-bottom : 1px solid ; 
+} 
+a.dash:visited {
+border-bottom : 1px dashed ; 
+color : #000088;
+} 
+a.dash:hover {
+border-bottom : 3px solid ; 
+} 
+h1 , h2 {
+font-family : "new century schoolbook", times, serif; 
+} 
+h3 , h4 , h5 , h6 {
+font-family : "new century schoolbook", times, serif; 
+} 
+.head a {
+font-family : "new century schoolbook", times, serif; 
+font-size : 100%; 
+} 
+.menu {
+font-weight : bold; 
+font-size : 140%; 
+} 
+.main {
+font-size : 12px; 
+} 
+.content {
+font-size : 80%; 
+font-weight : normal; 
+} 
+.content th {
+font-size : 80%; 
+font-weight : bold; 
+} 
+.row_even {
+	background-color : #dddddd;
+	color : #000009; 
+}
+
+.row_odd {
+	background-color: #eeeeee;
+	color : #000009; 
+}
+
+.menu {
+	font-weight: bold;
+	font-size: 140%
+}
+.menu_selected {
+	border-bottom: #eeeeee 3px solid; 
+	border-left: #aaaaaa 3px solid; 
+	border-right: #eeeeee 3px solid; 
+	border-top: #aaaaaa 3px solid; 
+	width: 17%; 
+	background-color: #ccccff;
+}
+.menu_standard {
+	border-bottom: #aaaaaa 3px solid; 
+	border-left: #eeeeee 3px solid; 
+	border-right: #aaaaaa 3px solid; 
+	border-top: #eeeeee 3px solid; 
+	width: 17%; 
+	background-color: #ccccff
+}
+.menu_spacer {
+	width: 1px; 
+}
+.footer {
+border-bottom : 3px solid #eeeeee; 
+border-left : 3px solid #aaaaaa; 
+border-right : 3px solid #eeeeee; 
+border-top : 3px solid #aaaaaa; 
+color : #000009; 
+background-color : #ccccff; 
+} 
+submit {
+margin-left : 3px; 
+margin-right : 3px; 
+color : #0000ff; 
+background-color : #dddddd; 
+border-bottom : 3px solid #aaaaaa; 
+border-left : 3px solid #eeeeee; 
+border-right : 3px solid #aaaaaa; 
+border-top : 3px solid #eeeeee; 
+font-size : 100%; 
+font-weight : bold; 
+font-family : Arial, "Lucinda Sans", sans-serif; 
+} 
+select {
+margin-left : 3px; 
+margin-right : 3px; 
+color : #0000ff; 
+background-color : #dddddd; 
+border-bottom : 3px solid #aaaaaa; 
+border-left : 3px solid #eeeeee; 
+border-right : 3px solid #aaaaaa; 
+border-top : 3px solid #eeeeee; 
+font-size : 100%; 
+font-weight : bold; 
+font-family : Arial, "Lucinda Sans", sans-serif; 
+} 
+input {
+margin-left : 3px; 
+margin-right : 3px; 
+color : #000009; 
+background-color : #dddddd; 
+border-bottom : 3px solid #aaaaaa; 
+border-left : 3px solid #eeeeee; 
+border-right : 3px solid #aaaaaa; 
+border-top : 3px solid #eeeeee; 
+font-size : 100%; 
+font-family : courier, monospace; 
+} 
+
