@@ -87,6 +87,20 @@ if ($process != 0) {
     exit(0);
 }
 
+   select(undef, undef, undef, 4 * $c->{pid_delay__});
+
+if ($process != 0) {
+    #parent loop
+    select(undef, undef, undef, $c->{pid_delay__});
+    $c->service();
+} elsif ($process == 0) {
+    #child loop
+    test_assert_equal(  $c->start(), 0);
+    test_assert( !defined( $c->live_check_() ) );
+
+    exit(0);
+}
+
 close STDERR;
 $c->stop();
 
