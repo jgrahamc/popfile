@@ -252,8 +252,10 @@ if ( $pid == 0 ) {
 
         $line = interpolate( $line );
 
-        if ( $line =~ /^URL +(.+)$/ ) {
-            $url = url( $1 );
+        if ( $line =~ /^GET +(.+)$/ ) {
+            $url = url( "http://127.0.0.1:$port$1" );
+            $content = get($url);
+            @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
             next;
 	}
 
@@ -285,12 +287,6 @@ if ( $pid == 0 ) {
                 $content = $response->content;
                 @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
 	    }
-            next;
-	}
-
-        if ( $line =~ /^GET$/ ) {
-            $content = get($url);
-            @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
             next;
 	}
 

@@ -29,8 +29,7 @@
 #
 # The commands are as follows
 #
-# URL <url>         Set the URL that is to be fetched
-# GET               Gets the last set URL
+# GET <url>         Get the URL (note the host and port will be added for you)
 # MATCH <data>      Match the return from last URL fetch against the data
 # MATCH/ENDMATCH    Encloses a block of test to find in the return from the last URL fetch
 # CODE/ENDCODE      Arbitrary code that should be executed
@@ -53,8 +52,7 @@
 # Look for elements that should appear at the TOP and BOTTOM
 # of every page
 
-URL http://127.0.0.1:$port
-GET
+GET /
 
 # Common TOP parts
 
@@ -92,43 +90,37 @@ MATCH <br>$version<br>
 # the tab bar and hence the simplest level of page serving is working
 # correctly
 
-URL http://127.0.0.1:$port/history
-GET
+GET /history
 MATCH
 <td class="menuSelected" align="center">
 <a class="menuLink" href="/history?session=$sk&amp;setfilter=">
 ENDMATCH
 
-URL http://127.0.0.1:$port/buckets
-GET
+GET /buckets
 MATCH
 <td class="menuSelected" align="center">
 <a class="menuLink" href="/buckets?session=$sk">
 ENDMATCH
 
-URL http://127.0.0.1:$port/magnets
-GET
+GET /magnets
 MATCH
 <td class="menuSelected" align="center">
 <a class="menuLink" href="/magnets?session=$sk&amp;start_magnet=0">
 ENDMATCH
 
-URL http://127.0.0.1:$port/configuration
-GET
+GET /configuration
 MATCH
 <td class="menuSelected" align="center">
 <a class="menuLink" href="/configuration?session=$sk">
 ENDMATCH
 
-URL http://127.0.0.1:$port/security
-GET
+GET /security
 MATCH 
 <td class="menuSelected" align="center">
 <a class="menuLink" href="/security?session=$sk">
 ENDMATCH
 
-URL http://127.0.0.1:$port/advanced
-GET
+GET /advanced
 MATCH
 <td class="menuSelected" align="center">
 <a class="menuLink" href="/advanced?session=$sk">
@@ -179,8 +171,7 @@ ENDMATCH
 
 # Configuration Page
 
-URL http://127.0.0.1:$port/configuration
-GET
+GET /configuration
 
 # Check skin change
 
@@ -278,12 +269,10 @@ SETSUBMIT subject 1
 INPUTIS subject 2
 CONFIGIS GLOBAL_subject 0
 
-URL http://127.0.0.1:$port/buckets
-GET
+GET /buckets
 MATCH Disabled globally
 
-URL http://127.0.0.1:$port/configuration
-GET
+GET /configuration
 SETSUBMIT subject 2
 INPUTIS subject 1
 CONFIGIS GLOBAL_subject 1
@@ -337,7 +326,7 @@ INPUTIS   ui_port 8081
 # TODO Check POP3 AUTH options
 # TODO Check SMTP chain options
 # TODO Check autoupdate
-# TODO Check stastitics sending
+# TODO Check statistics sending
 # TODO Check password
 
 # TODO Advanced Page
