@@ -265,7 +265,6 @@ sub start
     $self->invalidate_history_cache();
     $self->load_disk_cache__();
     $self->load_history_cache__();
-    $self->sort_filter_history( '', '', '' );
 
     $self->remove_mail_files();
 
@@ -2543,37 +2542,43 @@ sub load_history_cache__
     # through them looking for existing entries in the history which must be marked
     # for non-culling and new entries that need to be added to the end
 
-    my @history_files = sort compare_mf glob( $self->global_config_( 'msgdir' ) . "popfile*=*.msg" );
+    opendir MESSAGES, $self->global_config_( 'msgdir' );
+
+    my @history_files;
+
+    while ( my $entry = readdir MESSAGES ) {
+        if ( $entry =~ /(popfile(\d+)=\d+\.msg)$/ ) {
+            $entry = $1;
+
+            if ( $2 > $max ) {
+                $max = $2;
+            }
+
+            if ( defined( $self->{history__}{$entry} ) ) {
+                $self->{history__}{$entry}{cull} = 0;
+	    } else {
+                push @history_files, ($entry);
+            }
+        }
+    }
+
+    closedir MESSAGES;
 
     foreach my $i ( 0 .. $#history_files ) {
-
-        # Strip any directory portion of the name in the current file so that we
-        # just get the base name of the file that we are dealing with
-
-        $history_files[$i] =~ /(popfile(\d+)=\d+\.msg)$/;
-        $history_files[$i] = $1;
-
-        if ( $2 > $max ) {
-            $max = $2;
-        }
-
-        # If this file already exists in the history cache then just mark it not
-        # to be culled and move on.
-
-        if ( defined( $self->{history__}{$history_files[$i]} ) ) {
-            $self->{history__}{$history_files[$i]}{cull}  = 0;
-            $self->{history__}{$history_files[$i]}{index} = $i;
-        } else {
-            $self->new_history_file__( $history_files[$i], $i );
-        }
+        $self->new_history_file__( $history_files[$i] );
     }
 
     # Remove any entries from the history that have been removed from disk, see the big
     # comment at the start of this function for more detail
 
-    foreach my $key (keys %{$self->{history__}}) {
+    my $index = 0;
+
+    foreach my $key (sort compare_mf keys %{$self->{history__}}) {
         if ( $self->{history__}{$key}{cull} == 1 ) {
             delete $self->{history__}{$key};
+        } else {
+            $self->{history__}{$key}{index} = $index;
+            $index += 1;
         }
     }
 
@@ -3719,19 +3724,23 @@ sub remove_mail_files
 {
     my ( $self ) = @_;
 
-    my @mail_files = glob( $self->global_config_( 'msgdir' ) . "popfile*=*.msg" );
+    opendir MESSAGES, $self->global_config_( 'msgdir' );
 
-    foreach my $mail_file (@mail_files) {
-        my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat($mail_file);
+    while ( my $mail_file = readdir MESSAGES ) {
+        if ( $mail_file =~ /popfile\d+=\d+\.msg$/ ) {
+            my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,$blksize,$blocks) = stat( $self->global_config_( 'msgdir' ) . $mail_file);
 
-        if ( $ctime < (time - $self->config_( 'history_days' ) * $seconds_per_day) )  {
-            $self->history_delete_file( $mail_file, $self->config_( 'archive' ) );
+            if ( $ctime < (time - $self->config_( 'history_days' ) * $seconds_per_day) )  {
+                $self->history_delete_file( $mail_file, $self->config_( 'archive' ) );
+            }
         }
     }
 
+    closedir MESSAGES;
+
     # Clean up old style msg/cls files
 
-    @mail_files = glob( $self->global_config_( 'msgdir' ) . "popfile*_*.???" );
+    my @mail_files = glob( $self->global_config_( 'msgdir' ) . "popfile*_*.???" );
 
     foreach my $mail_file (@mail_files) {
         unlink($mail_file);
