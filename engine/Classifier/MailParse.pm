@@ -60,6 +60,27 @@ my %entityhash = ('aacute'  => 225,     'Aacute'  => 193,     'Acirc'   => 194, 
                   'uuml'    => 252,     'Yacute'  => 221,     'yacute'  => 253,     'yen'     => 165,
                   'yuml'    => 255 ); # PROFILE BLOCK STOP
 
+# All known HTML tags divided into two groups: tags that generate
+# whitespace as in 'foo<br></br>bar' and tags that don't such as
+# 'foo<b></b>bar'.  The first case shouldn't count as an empty pair
+# because it breaks the line.  The second case doesn't have any visual
+# impact and it treated as 'foobar' with an empty pair.
+
+my $spacing_tags = "address|applet|area|base|basefont" . # PROFILE BLOCK START
+    "|bdo|bgsound|blockquote|body|br|button|caption" .
+    "|center|col|colgroup|dd|dir|div|dl|dt|embed" .
+    "|fieldset|form|frame|frameset|h1|h2|h3|h4|h5|h6" .
+    "|head|hr|html|iframe|ilayer|input|isindex|label" .
+    "|legend|li|link|listing|map|menu|meta|multicol" .
+    "|nobr|noembed|noframes|nolayer|noscript|object" .
+    "|ol|optgroup|option|p|param|plaintext|pre|script" .
+    "|select|spacer|style|table|tbody|td|textarea" .
+    "|tfoot|th|thead|title|tr|ul|wbr|xmp"; # PROFILE BLOCK STOP
+
+my $non_spacing_tags = "a|abbr|acronym|b|big|blink" . # PROFILE BLOCK START
+    "|cite|code|del|dfn|em|font|i|img|ins|kbd|q|s" .
+    "|samp|small|span|strike|strong|sub|sup|tt|u|var"; # PROFILE BLOCK STOP
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -911,6 +932,30 @@ sub parse_html
     while ( $line =~ s/(<!.*?>)// ) {
         $self->update_pseudoword( 'html', 'comment', $encoded, $1 );
         print "$line\n" if $self->{debug__};
+    }
+
+    # Remove invalid tags.  This finds tags of the form [a-z0-9]+ with
+    # optional attributes and removes them if the tag isn't
+    # recognized.
+
+    # FIXME: This also removes tags in plain text emails so a sentence
+    # such as 'To run the program type "program <filename>".' is also
+    # effected.  The correct fix seams to be to look at the
+    # Content-Type header and only process mails of type text/html.
+
+    while ( $line =~ s/(<\/?(?!(?:$spacing_tags|$non_spacing_tags)\W)[a-z0-9]+(?:\s+.*?)?\/?>)//i ) {
+        $self->update_pseudoword( 'html', 'invalidtag', $encoded, $1 );
+        print "html:invalidtag: $1\n" if $self->{debug};
+    }
+
+    # Remove pairs of non-spacing tags without content such as <b></b>
+    # and also <b><i></i></b>.
+    
+    # FIXME: What about combined open and close tags such as <b />?
+
+    while ( $line =~s/(<($non_spacing_tags)(?:\s+[^>]*?)?><\/\2>)//i ) {
+        $self->update_pseudoword( 'html', 'emptypair', $encoded, $1 );
+        print "html:emptypair: $1\n" if $self->{debug};
     }
 
     while ( $found && ( $line ne '' ) ) {
