@@ -339,6 +339,15 @@ sub load_word_matrix_
     # actually a bucket
 
     $self->{colors__}{unclassified} = 'black';
+
+    # SLM for unclassified "bucket" will always match the global setting
+
+    $self->{parameters__}{unclassified}{subject} = $self->global_config_('subject');
+
+    # Quarantine for unclassified will be off:
+
+    $self->{parameters__}{unclassified}{quarantine} = 0;
+
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -374,6 +383,8 @@ sub load_bucket_
             }
         }
         close PARAMS;
+    } else {
+        $self->write_parameters();        
     }
 
     # See if there are magnets defined
