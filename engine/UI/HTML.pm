@@ -215,10 +215,11 @@ sub initialize
     $self->config_( 'column_characters', 0 );
 
     # Two variables that tell us whether to show help items
-    # concerning bucket setup and training. Both items are
-    # displayed by default
+    # concerning bucket setup and training. The bucket item
+    # is displayed by default, when it is turned off, the
+    # training item is shown.
 
-    $self->config_( 'show_training_help', 1 );
+    $self->config_( 'show_training_help', 0 );
     $self->config_( 'show_bucket_help', 1 );
 
     # Load skins
@@ -549,8 +550,14 @@ sub url_handler__
         return 0;
     }
 
+    # Watch out for clicks on the "Don't show me this again." buttons.
+    # If that button is clicked for the bucket-setup item, we turn on
+    # the training help item. And if this one is clicked away, both
+    # will no longer be shown.
+
     if ( exists $self->{form_}{nomore_bucket_help} && $self->{form_}{nomore_bucket_help} ) {
         $self->config_( 'show_bucket_help', 0 );
+        $self->config_( 'show_training_help', 1 );
     }
 
     if ( exists $self->{form_}{nomore_training_help} && $self->{form_}{nomore_training_help} ) {
