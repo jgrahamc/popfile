@@ -78,7 +78,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.9"
+  !define C_PFI_VERSION  "0.1.10"
 
   ; Mention the version number in the window title
 
@@ -291,6 +291,7 @@
   ; in the 'Support for Japanese text processing' section of the header comment at the
   ; start of the 'installer.nsi' file]
 
+  !insertmacro PFI_LANG_LOAD "Arabic"
   !insertmacro PFI_LANG_LOAD "Bulgarian"
   !insertmacro PFI_LANG_LOAD "SimpChinese"
   !insertmacro PFI_LANG_LOAD "TradChinese"

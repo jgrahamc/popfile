@@ -131,7 +131,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.11"
+  !define C_PFI_VERSION  "0.1.12"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -548,6 +548,7 @@
         ; in the 'Support for Japanese text processing' section of the header comment at the
         ; start of the 'installer.nsi' file]
 
+        !insertmacro PFI_LANG_LOAD "Arabic"
         !insertmacro PFI_LANG_LOAD "Bulgarian"
         !insertmacro PFI_LANG_LOAD "SimpChinese"
         !insertmacro PFI_LANG_LOAD "TradChinese"
@@ -1270,7 +1271,6 @@ Section "-Languages" SecLangs
   StrCmp ${L_LANG} "?" use_installer_lang
 
 use_inherited_lang:
-  StrCmp ${L_LANG} "Arabic" special_case
   StrCmp ${L_LANG} "English-UK" special_case
   StrCmp ${L_LANG} "Hebrew"  0 use_installer_lang
 
@@ -1288,6 +1288,7 @@ use_installer_lang:
         ; UI_LANG_CONFIG parameters: "NSIS Language name"  "POPFile UI language name"
 
         !insertmacro UI_LANG_CONFIG "ENGLISH" "English"
+        !insertmacro UI_LANG_CONFIG "ARABIC" "Arabic"
         !insertmacro UI_LANG_CONFIG "BULGARIAN" "Bulgarian"
         !insertmacro UI_LANG_CONFIG "SIMPCHINESE" "Chinese-Simplified"
         !insertmacro UI_LANG_CONFIG "TRADCHINESE" "Chinese-Traditional"
