@@ -38,6 +38,17 @@ if ( ( $#ARGV == 0 ) || ( $#ARGV == -1 ) )
 
         while (<WORDS>)
         {
+            if ( /__CORPUS__ __VERSION__ (\d+)/ )
+            {
+                if ( $1 != 1 ) 
+                {
+                    print "Incompatible corpus version in $file\n";
+                    return;
+                }
+                
+                next;
+            }
+            
             if ( /(.+) (.+)/ )
             {
                 my $word = $m->mangle($1);

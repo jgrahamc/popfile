@@ -56,6 +56,9 @@ sub new
 
     # A very unlikely word
     $self->{not_likely}        = 0;
+
+    # The expected corpus version
+    $self->{corpus_version}    = 1;
     
     return bless $self, $type;
 }
@@ -237,6 +240,17 @@ sub load_word_matrix
     
         while (<WORDS>)
         {
+            if ( /__CORPUS__ __VERSION__ (\d+)/ )
+            {
+                if ( $1 != $self->{corpus_version} ) 
+                {
+                    print "Incompatible corpus version in $bucket\n";
+                    return;
+                }
+                
+                next;
+            }
+            
             if ( /(.+) (.+)/ )
             {
                 my $word = $self->{mangler}->mangle($1);

@@ -37,6 +37,17 @@ sub load_word_table
     
     while (<WORDS>)
     {
+        if ( /__CORPUS__ __VERSION__ (\d+)/ )
+        {
+            if ( $1 != 1 ) 
+            {
+                print "Incompatible corpus version in $file\n";
+                return;
+            }
+            
+            next;
+        }
+            
         if ( /(.+) (.+)/ )
         {
             $words{$1} = $2;
@@ -63,6 +74,7 @@ sub save_word_table
     print "Saving word table for bucket '$bucket'...\n";
     
     open WORDS, ">corpus/$bucket/table";
+    print WORDS "__CORPUS__ __VERSION__ 1\n";
     
     # Each line in the word table is a word and a count
     

@@ -838,6 +838,17 @@ sub corpus_page
         open WORDS, "<corpus/$form{name}/table";
         while (<WORDS>)
         {
+            if ( /__CORPUS__ __VERSION__ (\d+)/ )
+            {
+                if ( $1 != 1 ) 
+                {
+                    print "Incompatible corpus version in $form{name}\n";
+                    return;
+                }
+                
+                next;
+            }
+            
             if ( /(.+) (.+)/ )
             {
                 $words{$1} = $2;
@@ -853,6 +864,7 @@ sub corpus_page
         }
         
         open WORDS, ">corpus/$form{name}/table";
+        print WORDS "__CORPUS__ __VERSION__ 1\n";
         foreach my $word (keys %words)
         {
             print WORDS "$word $words{$word}\n";
@@ -1044,6 +1056,17 @@ sub history_page
         open WORDS, "<corpus/$form{shouldbe}/table";
         while (<WORDS>)
         {
+            if ( /__CORPUS__ __VERSION__ (\d+)/ )
+            {
+                if ( $1 != 1 ) 
+                {
+                    print "Incompatible corpus version in $form{shouldbe}\n";
+                    return;
+                }
+                
+                next;
+            }
+            
             if ( /(.+) (.+)/ )
             {
                 $words{$1} = $2;
@@ -1063,6 +1086,7 @@ sub history_page
         }
         
         open WORDS, ">corpus/$form{shouldbe}/table";
+        print WORDS "__CORPUS__ __VERSION__ 1\n";
         foreach my $word (keys %words)
         {
             print WORDS "$word $words{$word}\n";
