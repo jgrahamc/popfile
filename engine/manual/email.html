@@ -139,14 +139,14 @@ Just choose your email program and follow the column down. While these instructi
 <ul>
 <li>In Outlook select the Tools->Rules Wizard...
 <li>The Rules Wizard appears.  Click New... and select Start from a blank rule.
-<li>Outlook cannot use the <code>X-Text-Classification</code> header, which would allow mail filtering to occur completely in the background. So instead, click Next and select <i>with specific words in the subject</i>.
-<li>Now click the grey highlighted <i>specific words</i> link and enter the name of one of your buckets, surrounded by [square brackets], in the box that appears and hit Add, then OK.
+<li>Outlook can use the <code>X-Text-Classification</code> header, which allows mail filtering to occur completely in the background. Click Next and select <i>with specific words in the message header</i>.
+<li>Now click the grey highlighted <i>specific words</i> link and enter "X-Text-Classification: " followed by the name of one of your buckets in the box that appears and hit Add, then OK.
 <li>Click Next and select <i>move it to the specified folder</i>.
 <li>Click the grey highlighted word <i>specified</i> and a list of folders appears.  Select whichever folder you want to move messages from that bucket to and hit OK.
 <li>Hit OK, then Finish.
 <li>Repeat the process for each of your buckets, then OK out.
 <li>You're done!
-<li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>on</b>.
+<li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>off</b>.
 </ul>
 
 </td><td width=34% bgcolor="#CCFFCC" valign="top">
@@ -156,7 +156,7 @@ Just choose your email program and follow the column down. While these instructi
 <ul>
 <li>In Outlook Express select the Tools->Message Rules->Mail...
 <li>The New Mail Rule window appears.
-<li>cannot use the <code>X-Text-Classification</code> header, which would allow mail filtering to occur completely in the background. So instead, click <i>Where the Subject line contains specific words</i> and also click
+<li>Outlook Express cannot use the <code>X-Text-Classification</code> header, which would allow mail filtering to occur completely in the background. So instead, click <i>Where the Subject line contains specific words</i> and also click
 <i>Move it to the specified folder</i>
 <li>Now click the blue highlighted <i>contains specific words</i> link and the Type Specific Words dialog appears
 <li>Enter the name of one of your buckets, surrounded by [square brackets], then hit OK.  Now click the blue highlighted <i>specified</i> word and the Move dialog appears.  Click the folder you want to move messages from that bucket to and hit OK.
