@@ -36,12 +36,14 @@ use Classifier::Bayes;
 use POPFile::Configuration;
 use POPFile::MQ;
 use POPFile::Logger;
+use Classifier::WordMangle;
 
 # Load the test corpus
 my $c = new POPFile::Configuration;
 my $mq = new POPFile::MQ;
 my $l = new POPFile::Logger;
 my $b = new Classifier::Bayes;
+my $w = new Classifier::WordMangle;
 
 $c->configuration( $c );
 $c->mq( $mq );
@@ -53,6 +55,12 @@ $l->logger( $l );
 
 $l->initialize();
 
+$w->configuration( $c );
+$w->mq( $mq );
+$w->logger( $l );
+
+$w->start();
+
 $mq->configuration( $c );
 $mq->mq( $mq );
 $mq->logger( $l );
@@ -62,7 +70,7 @@ $b->mq( $mq );
 $b->logger( $l );
 
 $b->module_config_( 'html', 'language', 'English' );
-
+$b->{parser__}->mangle( $w );
 $b->initialize();
 
 # Hide the upgrading messages

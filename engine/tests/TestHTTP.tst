@@ -184,7 +184,7 @@ test_assert( !defined( $line ) );
 close FILE;
 
 open FILE, ">send.tmp";
-print FILE "somechars\n";
+print FILE "somechars$eol";
 close FILE;
 
 open FILE, ">temp.tmp";

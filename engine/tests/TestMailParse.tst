@@ -31,6 +31,7 @@ test_assert( `cp stopwords.base stopwords` == 0 );
 
 use Classifier::MailParse;
 use Classifier::Bayes;
+use Classifier::WordMangle;
 use POPFile::Configuration;
 use POPFile::MQ;
 use POPFile::Logger;
@@ -40,6 +41,7 @@ my $c = new POPFile::Configuration;
 my $mq = new POPFile::MQ;
 my $l = new POPFile::Logger;
 my $b = new Classifier::Bayes;
+my $w = new Classifier::WordMangle;
 
 $c->configuration( $c );
 $c->mq( $mq );
@@ -51,6 +53,12 @@ $l->logger( $l );
 
 $l->initialize();
 
+$w->configuration( $c );
+$w->mq( $mq );
+$w->logger( $l );
+
+$w->start();
+
 $mq->configuration( $c );
 $mq->mq( $mq );
 $mq->logger( $l );
@@ -59,11 +67,13 @@ $b->configuration( $c );
 $b->mq( $mq );
 $b->logger( $l );
 
+$b->{parser__}->mangle( $w );
 $b->initialize();
 test_assert( $b->start() );
 
 my $cl = new Classifier::MailParse;
 
+$cl->mangle( $w );
 # map_color()
 test_assert_equal( $cl->map_color( 'red' ),     'ff0000' );
 test_assert_equal( $cl->map_color( 'ff0000' ),  'ff0000' );

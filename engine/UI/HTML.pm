@@ -398,27 +398,27 @@ sub url_handler__
     }
 
     if ( $url =~ /\/(.+\.gif)/ ) {
-        $self->http_file_( $client, $1, 'image/gif' );
+        $self->http_file_( $client, $self->get_root_path_( $1 ), 'image/gif' );
         return 1;
     }
 
     if ( $url =~ /\/(.+\.png)/ ) {
-        $self->http_file_( $client, $1, 'image/png' );
+        $self->http_file_( $client, $self->get_root_path_( $1 ), 'image/png' );
         return 1;
     }
 
     if ( $url =~ /\/(.+\.ico)/ ) {
-        $self->http_file_( $client, $1, 'image/x-icon' );
+        $self->http_file_( $client, $self->get_root_path_( $1 ), 'image/x-icon' );
         return 1;
     }
 
     if ( $url =~ /(skins\/.+\.css)/ ) {
-        $self->http_file_( $client, $1, 'text/css' );
+        $self->http_file_( $client, $self->get_root_path_( $1 ), 'text/css' );
         return 1;
     }
 
     if ( $url =~ /(manual\/.+\.html)/ ) {
-        $self->http_file_( $client, $1, 'text/html' );
+        $self->http_file_( $client, $self->get_root_path_( $1 ), 'text/html' );
         return 1;
     }
 
@@ -644,7 +644,7 @@ sub html_common_top
 
     if ( $selected == -1 ) {
         $result .= "<style type=\"text/css\">\n";
-        if ( open FILE, '<skins/' . $self->config_( 'skin' ) . '.css' ) {
+        if ( open FILE, '<' . $self->get_root_path_( 'skins/' . $self->config_( 'skin' ) . '.css' ) ) {
             while (<FILE>) {
                 $result .= $_;
             }
@@ -1891,7 +1891,7 @@ sub corpus_page
     my $rename_message = '';
 
     if ( ( defined($self->{form_}{color}) ) && ( defined($self->{form_}{bucket}) ) ) {
-        open COLOR, '>' . $self->module_config_( 'bayes', 'corpus' ) . "/$self->{form_}{bucket}/color";
+        open COLOR, '>' . $self->get_user_path_( $self->module_config_( 'bayes', 'corpus' ) . "/$self->{form_}{bucket}/color" );
         print COLOR "$self->{form_}{color}\n";
         close COLOR;
         $self->{classifier__}->set_bucket_color($self->{form_}{bucket}, $self->{form_}{color});
@@ -2439,7 +2439,7 @@ sub load_disk_cache__
 {
     my ( $self ) = @_;
 
-    my $cache_file = $self->global_config_( 'msgdir' ) . 'history_cache';
+    my $cache_file = $self->get_user_path_( $self->global_config_( 'msgdir' ) . 'history_cache' );
     if ( !(-e $cache_file) ) {
         return;
     }
@@ -2497,7 +2497,7 @@ sub save_disk_cache__
         return;
     }
 
-    open CACHE, '>' . $self->global_config_( 'msgdir' ) . 'history_cache';
+    open CACHE, '>' . $self->get_user_path_( $self->global_config_( 'msgdir' ) . 'history_cache' );
     print CACHE "___HISTORY__ __ VERSION__ 1\n";
     foreach my $key (keys %{$self->{history__}}) {
         print CACHE "__HISTORY__ __BOUNDARY__\n";
@@ -2549,7 +2549,7 @@ sub load_history_cache__
     # through them looking for existing entries in the history which must be marked
     # for non-culling and new entries that need to be added to the end
 
-    opendir MESSAGES, $self->global_config_( 'msgdir' );
+    opendir MESSAGES, $self->get_user_path_( $self->global_config_( 'msgdir' ) );
 
     my @history_files;
 
@@ -2619,7 +2619,7 @@ sub new_history_file__
     my $subject = '';
     my $long_header = '';
 
-    if ( open MAIL, '<'. $self->global_config_( 'msgdir' ) . $file ) {
+    if ( open MAIL, '<'. $self->get_user_path_( $self->global_config_( 'msgdir' ) . $file ) ) {
         while ( <MAIL> )  {
             last if ( /^(\r\n|\r|\n)/ );
 
@@ -3492,7 +3492,7 @@ sub view_page
     my $fmtlinks;
 
     if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
-        $body .= $self->{classifier__}->get_html_colored_message($self->global_config_( 'msgdir' ) . $mail_file);
+        $body .= $self->{classifier__}->get_html_colored_message( $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ) );
 
         # We want to insert a link to change the output format at the start of the word
         # matrix.  The classifier puts a comment in the right place, which we can replace
@@ -3552,7 +3552,7 @@ sub view_page
         my $text   = $2;
         $body .= "<tt>";
 
-        open MESSAGE, '<' . $self->global_config_( 'msgdir' ) . $mail_file;
+        open MESSAGE, '<' . $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file );
         my $line;
         # process each line of the message
         while ($line = <MESSAGE>) {
@@ -3662,7 +3662,7 @@ sub load_skins
 {
     my ( $self ) = @_;
 
-    @{$self->{skins__}} = glob 'skins/*.css';
+    @{$self->{skins__}} = glob $self->get_root_path_( 'skins/*.css' );
 
     for my $i (0..$#{$self->{skins__}}) {
         $self->{skins__}[$i] =~ s/.*\/(.+)\.css/$1/;
@@ -3680,7 +3680,7 @@ sub load_languages
 {
     my ( $self ) = @_;
 
-    @{$self->{languages__}} = glob 'languages/*.msg';
+    @{$self->{languages__}} = glob $self->get_root_path_( 'languages/*.msg' );
 
     for my $i (0..$#{$self->{languages__}}) {
         $self->{languages__}[$i] =~ s/.*\/(.+)\.msg$/$1/;
@@ -3739,7 +3739,7 @@ sub load_language
 {
     my ( $self, $lang ) = @_;
 
-    if ( open LANG, "<languages/$lang.msg" ) {
+    if ( open LANG, '<' . $self->get_root_path_( "languages/$lang.msg" ) ) {
         while ( <LANG> ) {
             next if ( /[ \t]*#/ );
 
@@ -3795,7 +3795,7 @@ sub remove_mail_files
 {
     my ( $self ) = @_;
 
-    opendir MESSAGES, $self->global_config_( 'msgdir' );
+    opendir MESSAGES, $self->get_user_path_( $self->global_config_( 'msgdir' ) );
 
     while ( my $mail_file = readdir MESSAGES ) {
         if ( $mail_file =~ /popfile(\d+)=\d+\.msg$/ ) {

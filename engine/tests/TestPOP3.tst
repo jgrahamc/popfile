@@ -27,6 +27,7 @@ use POPFile::MQ;
 use POPFile::Logger;
 use Proxy::POP3;
 use Classifier::Bayes;
+use Classifier::WordMangle;
 use IO::Handle;
 use IO::Socket;
 
@@ -240,6 +241,7 @@ my $c = new POPFile::Configuration;
 my $mq = new POPFile::MQ;
 my $l = new POPFile::Logger;
 my $b = new Classifier::Bayes;
+my $w = new Classifier::WordMangle;
 
 sub forker
 {
@@ -280,6 +282,12 @@ $l->logger( $l );
 
 $l->initialize();
 
+$w->configuration( $c );
+$w->mq( $mq );
+$w->logger( $l );
+
+$w->start();
+
 $mq->configuration( $c );
 $mq->mq( $mq );
 $mq->logger( $l );
@@ -292,6 +300,7 @@ $b->initialize();
 $b->module_config_( 'html', 'port', 8080 );
 $b->module_config_( 'html', 'language', 'English' );
 $b->config_( 'hostname', '127.0.0.1' );
+$b->{parser__}->mangle( $w );
 $b->start();
 
 # some tests require this directory to be present

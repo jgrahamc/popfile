@@ -1,4 +1,8 @@
+# POPFILE LOADABLE MODULE
 package Classifier::WordMangle;
+
+use POPFile::Module;
+@ISA = ("POPFile::Module");
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -44,15 +48,24 @@ my $euc_jp = "(?:$ascii|$two_bytes_euc_jp|$three_bytes_euc_jp)"; # EUC-JP chars
 sub new
 {
     my $type = shift;
-    my $self;
+    my $self = POPFile::Module->new();
 
     $self->{stop__} = {};
 
     bless $self, $type;
 
-    $self->load_stopwords();
+    $self->name( 'wordmangle' );
 
     return $self;
+}
+
+sub start
+{
+    my ( $self ) = @_;
+
+    $self->load_stopwords();
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -64,7 +77,7 @@ sub load_stopwords
 {
     my ($self) = @_;
 
-    if ( open STOPS, "<stopwords" ) {
+    if ( open STOPS, '<' . $self->get_user_path_( 'stopwords' ) ) {
         delete $self->{stop__};
         while ( <STOPS> ) {
             s/[\r\n]//g;
@@ -79,7 +92,7 @@ sub save_stopwords
 {
     my ($self) = @_;
 
-    if ( open STOPS, ">stopwords" ) {
+    if ( open STOPS, '>' . $self->get_user_path_( 'stopwords' ) ) {
         for my $word (keys %{$self->{stop__}}) {
             print STOPS "$word\n";
         }

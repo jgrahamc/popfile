@@ -23,10 +23,41 @@
 # ---------------------------------------------------------------------------------------------
 
 use Classifier::WordMangle;
+use POPFile::Configuration;
+use POPFile::MQ;
+use POPFile::Logger;
+
+# Load the test corpus
+my $c = new POPFile::Configuration;
+my $mq = new POPFile::MQ;
+my $l = new POPFile::Logger;
+my $w = new Classifier::WordMangle;
+
+$c->configuration( $c );
+$c->mq( $mq );
+$c->logger( $l );
+
+$c->initialize();
+
+$l->configuration( $c );
+$l->mq( $mq );
+$l->logger( $l );
+
+$l->initialize();
+
+$mq->configuration( $c );
+$mq->mq( $mq );
+$mq->logger( $l );
+
+$w->configuration( $c );
+$w->mq( $mq );
+$w->logger( $l );
+
+$w->initialize();
 
 unlink 'stopwords';
 
-my $w = new Classifier::WordMangle;
+$w->start();
 
 # Test basic mangling functions
 
@@ -78,7 +109,10 @@ test_assert_equal( $w->remove_stopword( 'bigword', 'English' ), 1 );
 
 # Make sure that stopping and starting reloads the stopwords
 test_assert_equal( $w->add_stopword( 'anotherbigword', 'English' ), 1 );
-my $w2 = new Classifier::WordMangle;
-my @stopwords = $w2->stopwords();
+
+$w->stop();
+
+$w->start();
+my @stopwords = $w->stopwords();
 test_assert_equal( $#stopwords, 0 );
 test_assert_equal( $stopwords[0], 'anotherbigword' );

@@ -68,6 +68,14 @@ sub new
 
     $self->{save_needed__} = 0;
 
+    # The location where POPFile is installed
+    
+    $self->{popfile_root__} = './';
+
+    # Where the current user's configuration is
+
+    $self->{popfile_user__} = './';
+
     bless $self, $type;
 
     $self->name( 'config' );
@@ -126,6 +134,14 @@ sub initialize
 
     $self->global_config_( 'msgdir', 'messages/' );
 
+    # Read the POPFILE_ROOT and POPFILE_USER variables into
+    # the local store, set up defaults if they are not defined
+
+    my ( $root, $user ) = ( $ENV{POPFILE_ROOT}, $ENV{POPFILE_USER} );
+
+    $self->{popfile_root__} = $root if defined( $root );
+    $self->{popfile_user__} = $user if defined( $user );
+
     return 1;
 }
 
@@ -143,7 +159,7 @@ sub start
     # Check to see if the PID file is present, if it is then another POPFile
     # may be running, warn the user and terminate
 
-    $self->{pid_file__} = $self->config_( 'piddir' ) . 'popfile.pid';
+    $self->{pid_file__} = $self->get_user_path( $self->config_( 'piddir' ) . 'popfile.pid' );
 
     if (defined($self->live_check_())) {
         return 0;
@@ -440,7 +456,7 @@ sub load_configuration
 {
     my ( $self ) = @_;
 
-    if ( open CONFIG, "<popfile.cfg" ) {
+    if ( open CONFIG, '<' . $self->get_user_path( 'popfile.cfg' ) ) {
         while ( <CONFIG> ) {
             s/(\015|\012)//g;
             if ( /(\S+) (.+)/ ) {
@@ -474,7 +490,7 @@ sub save_configuration
         return;
     }
 
-    if ( open CONFIG, ">popfile.cfg" ) {
+    if ( open CONFIG, '>' . $self->get_user_path( 'popfile.cfg' ) ) {
         $self->{save_needed__} = 0;
 
         foreach my $key (sort keys %{$self->{configuration_parameters__}}) {
@@ -507,6 +523,106 @@ sub parameter
   }
 
   return $self->{configuration_parameters__}{$name};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_root_path
+#
+# The POPFILE_ROOT environment variable is converted by the configuration
+# module into an internal variable.  This method take a relative or absolute
+# path and returns the same path relative to the POPFILE_ROOT.  Hence if the
+# passed in path is absolute it simply returns it, if relative then it returns
+# the full path consisting of the concatenation of the POPFILE_ROOT and the
+# passed in path
+#
+# $path                 The path to convert
+#
+# ---------------------------------------------------------------------------------------------
+sub get_root_path
+{
+    my ( $self, $path ) = @_;
+
+    if ( $self->is_absolute_path__( $path ) ) {
+        return $path;
+    } else {
+        return $self->path_join__( $self->{popfile_root__}, $path );
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_user_path
+#
+# The POPFILE_USER environment variable is converted by the configuration
+# module into an internal variable.  This method take a relative or absolute
+# path and returns the same path relative to the POPFILE_USER.  Hence if the
+# passed in path is absolute it simply returns it, if relative then it returns
+# the full path consisting of the concatenation of the POPFILE_USER and the
+# passed in path
+#
+# $path                 The path to convert
+#
+# ---------------------------------------------------------------------------------------------
+sub get_user_path
+{
+    my ( $self, $path ) = @_;
+
+    if ( $self->is_absolute_path__( $path ) ) {
+        return $path;
+    } else {
+        return $self->path_join__( $self->{popfile_user__}, $path );
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# is_absolute_path__
+#
+# Returns 1 is the path is absolute (i.e. start with / or a drive letter followed by /)
+#
+# $path                 Path to check
+#
+# ---------------------------------------------------------------------------------------------
+sub is_absolute_path__
+{
+    my ( $self, $path ) = @_;
+
+    if ( $path =~ /^\// ) {
+        return 1;
+    }
+
+    if ( $path =~ /^[A-Z]:[\/\\]/i ) {
+        return 1;
+    }
+
+    return 0;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# path_join__
+#
+# Joins two paths together making sure that the appropriate path separator is inserted
+#
+# $left             First part of path
+# $right            Second part of path
+#
+# ---------------------------------------------------------------------------------------------
+sub path_join__
+{
+    my ( $self, $left, $right ) = @_;
+
+    $left  =~ s/[\/\\]$//;
+    $right =~ s/^[\/\\]//;
+
+    my $path = "$left/$right";
+
+    # Strip any amount of leading ./
+
+    $path =~ s/^(\.\/)+//;
+
+    return $path;
 }
 
 # GETTER

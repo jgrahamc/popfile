@@ -34,7 +34,6 @@ use strict;
 use warnings;
 use locale;
 use Classifier::MailParse;
-use Classifier::WordMangle;
 use IO::Handle;
 
 # This is used to get the hostname of the current machine
@@ -86,9 +85,6 @@ sub new
 
     # Total number of words in all buckets
     $self->{full_total__}        = 0;
-
-    # Used to mangle the corpus when loaded
-    $self->{mangler__}           = new Classifier::WordMangle;
 
     # Used to parse mail messages
     $self->{parser__}            = new Classifier::MailParse;
@@ -296,7 +292,7 @@ sub write_parameters
     my ($self) = @_;
 
     for my $bucket (keys %{$self->{matrix__}})  {
-        open PARAMS, '>' . $self->config_( 'corpus' ) . "/$bucket/params";
+        open PARAMS, '>' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/params" );
         for my $param (keys %{$self->{parameters__}{$bucket}}) {
             print PARAMS "$param $self->{parameters__}{$bucket}{$param}\n";
         }
@@ -499,7 +495,7 @@ sub load_word_matrix_
     $self->{magnets__}      = {};
     $self->{full_total__}   = 0;
 
-    my @buckets = glob $self->config_( 'corpus' ) . '/*';
+    my @buckets = glob $self->get_user_path_( $self->config_( 'corpus' ) . '/*' );
 
     foreach my $bucket (@buckets) {
 
@@ -584,7 +580,7 @@ sub tie_bucket__
 
     $self->{db__}{$bucket} = tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",              # PROFILE BLOCK START
                                  -Cachesize => $self->config_( 'db_cache_size' ),
-                                 -Filename  => $self->config_( 'corpus' ) . "/$bucket/table.db",
+                                 -Filename  => $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table.db" ),
                                  -Flags     => DB_CREATE;                                        # PROFILE BLOCK STOP
 
     # Check to see if the tie worked, if it failed then POPFile is about to fail
@@ -647,7 +643,7 @@ sub load_bucket_
     $self->{magnets__}{$bucket} = {};
 
     # See if there's a color file specified
-    if ( open PARAMS, '<' . $self->config_( 'corpus' ) . "/$bucket/params" ) {
+    if ( open PARAMS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/params" ) ) {
         while ( <PARAMS> )  {
             s/[\r\n]//g;
             if ( /^([[:lower:]]+) ([^\r\n\t ]+)$/ )  {
@@ -660,7 +656,7 @@ sub load_bucket_
     }
 
     # See if there are magnets defined
-    if ( open MAGNETS, '<' . $self->config_( 'corpus' ) . "/$bucket/magnets" ) {
+    if ( open MAGNETS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/magnets" ) ) {
         while ( <MAGNETS> )  {
             s/[\r\n]//g;
 
@@ -709,12 +705,12 @@ sub load_bucket_
 
     $self->tie_bucket__( $bucket );
 
-    if ( -e $self->config_( 'corpus' ) . "/$bucket/table" ) {
+    if ( -e $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) ) {
         $self->log_( "Performing automatic upgrade of $bucket corpus from flat file to BerkeleyDB" );
 
         my $ft = $self->{full_total__};
 
-        if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
+        if ( open WORDS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) )  {
 
             my $wc = 1;
 
@@ -757,7 +753,7 @@ sub load_bucket_
         $self->untie_bucket__( $bucket );
         $self->tie_bucket__( $bucket );
 
-        if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
+        if ( open WORDS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) )  {
             my $wc = 1;
             my $bucket_total   = 0;
             my $bucket_unique  = 0;
@@ -868,7 +864,7 @@ sub save_magnets__
     my ($self) = @_;
 
     for my $bucket (keys %{$self->{matrix__}}) {
-        open MAGNET, '>' . $self->config_( 'corpus' ). "/$bucket/magnets";
+        open MAGNET, '>' . $self->get_user_path_( $self->config_( 'corpus' ). "/$bucket/magnets" );
 
         for my $type (keys %{$self->{magnets__}{$bucket}})  {
             for my $from (keys %{$self->{magnets__}{$bucket}{$type}})  {
@@ -1270,7 +1266,7 @@ sub history_filename
 
     $path = 0 if (!defined($path));
 
-    return ($path?$self->global_config_( 'msgdir' ):'') . "popfile$dcount" . "=$mcount" . (defined $ext?$ext:'.msg');
+    return ($path?$self->get_user_path_( $self->global_config_( 'msgdir' ) ):'') . "popfile$dcount" . "=$mcount" . (defined $ext?$ext:'.msg');
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1290,7 +1286,7 @@ sub history_write_class
 
     $filename =~ s/msg$/cls/;
 
-    open CLASS, '>' . $self->global_config_( 'msgdir' ) . $filename;
+    open CLASS, '>' . $self->get_user_path_( $self->global_config_( 'msgdir' ) . $filename );
 
     if ( defined( $magnet ) && ( $magnet ne '' ) ) {
         print CLASS "$bucket MAGNET $magnet\n";
@@ -1334,7 +1330,7 @@ sub history_read_class
     my $usedtobe;
     my $magnet = '';
 
-    if ( open CLASS, '<' . $self->global_config_( 'msgdir' ) . $filename ) {
+    if ( open CLASS, '<' . $self->get_user_path_( $self->global_config_( 'msgdir' ) . $filename ) ) {
         $bucket = <CLASS>;
         if ( $bucket =~ /([^ ]+) MAGNET ([^\r\n]+)/ ) {
             $bucket = $1;
@@ -1992,7 +1988,7 @@ sub delete_bucket
 sub delete_bucket_files__
 {
     my ( $self, $bucket ) = @_;
-    my $bucket_directory = $self->config_( 'corpus' ) . "/$bucket";
+    my $bucket_directory = $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket" );
 
     unlink( "$bucket_directory/table.db" );
     unlink( "$bucket_directory/table" );
