@@ -16,10 +16,14 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
+
 .PHONY: all build
 
 include ..\engine\vars.mak
 
+MAKENSIS_VERSION_STRING:=/DC_POPFILE_MAJOR_VERSION=$(POPFILE_MAJOR_VERSION) /DC_POPFILE_MINOR_VERSION=$(POPFILE_MINOR_VERSION) /DC_POPFILE_REVISION=$(POPFILE_REVISION) /DC_POPFILE_RC=$(RC)
+
+MAKENSIS=../NSIS/makensis.exe $(MAKENSIS_VERSION_STRING) /V4 $<
 BUILD_ZIP=../engine/wzzip -P $(POPFILE_WINDOWS_ZIP) -a $^
 
 all: build
@@ -31,7 +35,7 @@ $(POPFILE_WINDOWS_ZIP): setup.exe
 setup.exe: ../engine/*.pl ../engine/Classifier/*.pm ../engine/skins/*.css ../engine/skins/*.gif ../engine/v$(POPFILE_VERSION).change
 setup.exe: stop_pf.exe ../engine/popfile.exe ../engine/popfileb.exe ../engine/popfileib.exe ../engine/popfilef.exe ../engine/popfileif.exe
 setup.exe: installer.nsi ioA.ini ioB.ini CBP.nsh
-	@../NSIS/makensis.exe /V4 $<
+	@$(MAKENSIS)
 
 stop_pf.exe: stop_popfile.nsi
-	@../NSIS/makensis.exe /V4 $<
+	@$(MAKENSIS)
