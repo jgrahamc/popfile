@@ -182,6 +182,7 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1   "이전 버전의 POPFile(팝파일)이 설치된 것이 감지되었습니다."
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2   "Do you want to upgrade it ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_3   "Previous configuration data found at"
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes

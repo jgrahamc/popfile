@@ -182,6 +182,7 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1   "次の場所に以前にインストールされた POPFile が見つかりました:"
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2   "アップグレードしますか？"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_3   "Previous configuration data found at"
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
