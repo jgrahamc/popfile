@@ -929,8 +929,30 @@ Section "Languages" SecLangs
   SetOutPath $INSTDIR\languages
   File "..\engine\languages\*.msg"
 
+  ; There are several special cases: some UI languages are not yet supported by the
+  ; installer, so if we are upgrading a system which was using one of these UI languages,
+  ; we re-select it, provided the UI language file still exists.
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_LANG} "ioC.ini" "Inherited" "html_language"
+  StrCmp ${L_LANG} "?" 0 use_inherited_lang
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_LANG} "ioC.ini" "Inherited" "language"
+  StrCmp ${L_LANG} "?" use_installer_lang
+
+use_inherited_lang:
+  StrCmp ${L_LANG} "English-UK" special_case
+  StrCmp ${L_LANG} "Hebrew" special_case
+  StrCmp ${L_LANG} "Norsk" special_case
+  StrCmp ${L_LANG} "H4x0r" 0 use_installer_lang
+
+special_case:
+  IfFileExists "$INSTDIR\languages\${L_LANG}.msg" lang_save
+  Goto lang_done
+
+use_installer_lang:
+
   ; Conditional compilation: if ENGLISH_MODE is defined, installer supports only 'English'
-  ; so there is no need to select a language for the POPFile UI
+  ; so we use whatever UI language was defined in the existing 'popfile.cfg' file (if none
+  ; found then we let POPFile use the default UI language)
 
   !ifndef ENGLISH_MODE
 
@@ -961,18 +983,17 @@ Section "Languages" SecLangs
 
         ; at this point, no match was found so we use the default POPFile UI language
         ; (and leave it to POPFile to determine which language to use)
-
-        goto lang_done
-
-      lang_save:
-        FileOpen  ${L_CFG} $INSTDIR\popfile.cfg a
-        FileSeek  ${L_CFG} 0 END
-        FileWrite ${L_CFG} "html_language ${L_LANG}$\r$\n"
-        FileClose ${L_CFG}
-
-      lang_done:
   !endif
 
+  goto lang_done
+
+lang_save:
+  FileOpen  ${L_CFG} $INSTDIR\popfile.cfg a
+  FileSeek  ${L_CFG} 0 END
+  FileWrite ${L_CFG} "html_language ${L_LANG}$\r$\n"
+  FileClose ${L_CFG}
+
+lang_done:
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
@@ -1181,10 +1202,11 @@ FunctionEnd
 # If the user has selected the optional 'Languages' component then this function also strips
 # out the POPFile UI language setting to allow the installer to easily preset the UI language
 # to match the language selected for use by the installer. (See the code which handles the
-# 'Languages' component for further details).
+# 'Languages' component for further details). A copy of any settings found is kept in 'ioC.ini'
+# for later use in the 'Languages' section.
 #
 # This function also ensures that only copy of the tray icon and console settings is present,
-# and saves any values found in 'ioC.ini' for use when the user is offered the chance to start
+# and saves (in 'ioC.ini') any values found for use when the user is offered the chance to start
 # POPFile from the installer. If no setting is found, we save '?' in 'ioC.ini'. These settings
 # are used by the 'StartPOPFilePage' and 'CheckLaunchOptions' functions.
 #--------------------------------------------------------------------------
@@ -1199,6 +1221,8 @@ Function CheckExistingConfig
   !define L_STRIPLANG $R4
   !define L_TRAYICON  $R3     ; a config parameter used by popfile.exe
   !define L_CONSOLE   $R2     ; a config parameter used by popfile.exe
+  !define L_LANG_NEW  $R1     ; new style UI lang parameter
+  !define L_LANG_OLD  $R0     ; old style UI lang parameter
 
   Push ${L_CFG}
   Push ${L_CLEANCFG}
@@ -1208,6 +1232,8 @@ Function CheckExistingConfig
   Push ${L_STRIPLANG}
   Push ${L_TRAYICON}
   Push ${L_CONSOLE}
+  Push ${L_LANG_NEW}
+  Push ${L_LANG_OLD}
 
   ; If the 'Languages' component is being installed, installer is allowed to preset UI language
 
@@ -1227,6 +1253,9 @@ init_port_vars:
 
   StrCpy ${L_TRAYICON} ""
   StrCpy ${L_CONSOLE} ""
+
+  StrCpy ${L_LANG_NEW} ""
+  StrCpy ${L_LANG_OLD} ""
 
   ; See if we can get the current pop3 and gui port from an existing configuration.
   ; There may be more than one entry for these ports in the file - use the last one found
@@ -1261,9 +1290,9 @@ loop:
   ; do not transfer any UI language settings to the copy of popfile.cfg
 
   StrCpy ${L_CMPRE} ${L_LNE} 9
-  StrCmp ${L_CMPRE} "language " loop
+  StrCmp ${L_CMPRE} "language " got_lang_old
   StrCpy ${L_CMPRE} ${L_LNE} 14
-  StrCmp ${L_CMPRE} "html_language " loop
+  StrCmp ${L_CMPRE} "html_language " got_lang_new
 
 transfer:
   FileWrite  ${L_CLEANCFG} ${L_LNE}
@@ -1291,6 +1320,14 @@ got_trayicon:
 
 got_console:
   StrCpy ${L_CONSOLE} ${L_LNE} 1 16
+  Goto loop
+
+got_lang_new:
+  StrCpy ${L_LANG_NEW} ${L_LNE} "" 14
+  Goto loop
+
+got_lang_old:
+  StrCpy ${L_LANG_OLD} ${L_LNE} "" 9
   Goto loop
 
 done:
@@ -1322,6 +1359,27 @@ found_trayicon:
 
 close_cleancopy:
   FileClose ${L_CLEANCFG}
+
+  ; We save the UI language settings for later use when the 'Languages' section is processed
+  ; (if no settings were found, we save '?'). If 'Languages' component is not selected, these
+  ; saved settings will not be used (any existing settings were copied to the new 'popfile.cfg')
+
+  Push ${L_LANG_NEW}
+  Call TrimNewlines
+  Pop ${L_LANG_NEW}
+  StrCmp ${L_LANG_NEW} "" 0 check_lang_old
+  StrCpy ${L_LANG_NEW} "?"
+
+check_lang_old:
+  Push ${L_LANG_OLD}
+  Call TrimNewlines
+  Pop ${L_LANG_OLD}
+  StrCmp ${L_LANG_OLD} "" 0 save_langs
+  StrCpy ${L_LANG_OLD} "?"
+
+save_langs:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "html_language" "${L_LANG_NEW}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "language" "${L_LANG_OLD}"
 
   Push $G_POP3
   Call TrimNewlines
@@ -1388,6 +1446,8 @@ default_gui:
   StrCpy $G_GUI "8081"
 
 ports_ok:
+  Pop ${L_LANG_OLD}
+  Pop ${L_LANG_NEW}
   Pop ${L_CONSOLE}
   Pop ${L_TRAYICON}
   Pop ${L_STRIPLANG}
@@ -1405,6 +1465,8 @@ ports_ok:
   !undef L_STRIPLANG
   !undef L_TRAYICON
   !undef L_CONSOLE
+  !undef L_LANG_NEW
+  !undef L_LANG_OLD
 
 FunctionEnd
 
