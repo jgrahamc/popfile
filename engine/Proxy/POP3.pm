@@ -134,7 +134,7 @@ sub start
                                     Reuse     => 1 );
                                     
     if ( !defined( $self->{server} ) ) {
-    	print <<EOM;
+        print <<EOM;
 
 \nCouldn't start the POP3 proxy because POPFile could not bind to the 
 POP3 listen port $self->{configuration}->{configuration}{port}. This could be because there is another service 
@@ -144,7 +144,7 @@ and the port you specified is less than 1024).
 
 EOM
 
-	return 0;
+    return 0;
     }
 
     # This is used to perform select calls on the $server socket so that we can decide when there is 
@@ -233,7 +233,7 @@ sub flush_child_data
     }
     
     if ( $stats_changed ) {
-		$self->{ui}->invalidate_history_cache();
+        $self->{ui}->invalidate_history_cache();
         $self->{configuration}->save_configuration();
         $self->{classifier}->write_parameters();
     }
@@ -489,8 +489,37 @@ sub child
             next;
         }
 
-        # Note the horrible hack here where we detect a command of the form TOP x 99999999 this
-        # is done so that fetchmail can be used with POPFile.  
+        # TOP handling is rather special because we have three cases that we handle
+        #
+        # 1. If the client sends TOP x 99999999 then it is most likely to be 
+        #    fetchmail and the intent of fetchmail is to actually get the message
+        #    but for its own reasons it does not use RETR.  We use RETR as the clue
+        #    to place a message in the history, so we have a hack.  If the client 
+        #    looks like fetchmail then TOP x 99999999 is actually implemented 
+        #    using RETR
+        #
+        # 2. The toptoo configuration controls whether email downloaded using the
+        #    TOP command is classified or not (note that it is *never* placed in
+        #    the history; with the expection of (1) above).  There are two cases:
+        #
+        # 2a If toptoo is 0 then POPFile will pass a TOP from the client through
+        #    as a TOP and do no classification on the message.
+        #
+        # 2b If toptoo is 1 then POPFile first does a RETR on the message without
+        #    saving it in the history so that it can get the classification on the
+        #    message which is stores in $class.  Then it gets the message again
+        #    by sending the TOP command and passing the result through 
+        #    classify_and_modify passing in the $class determined above.  This means
+        #    that the message gets the right classification and the client only
+        #    gets the headers requested plus so many lines of body, but they will
+        #    get subject modification, and the XTC and XPL headers add.  Note that
+        #    TOP always returns the full headers and then n lines of the body so
+        #    we are guaranteed to be able to do our header modifications.
+        #
+        #    NOTE using toptoo=1 on a slow link could cause performance problems,
+        #    it is only intended for use where there is high bandwidth between
+        #    POPFile and the POP3 server.
+
         if ( $command =~ /TOP (.*) (.*)/i ) {
             if ( $2 ne '99999999' )  {                    
                 if ( $self->{configuration}->{configuration}{toptoo} ) {
