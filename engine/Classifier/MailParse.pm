@@ -87,7 +87,7 @@ sub update_word
     {
         if ( $self->{color} )
         {
-            my $color   = $self->{bayes}->get_color($mword);
+            my $color = $self->{bayes}->get_color($mword);
             if ( ( $self->{ut} =~ s/($word)/<b><font color=$color>\1<\/font><\/b>/g ) == 0 )
             {
                 $self->{ut} .= "Found in encoded data <font color=$color>$word<\/font>\r\n";
