@@ -9,7 +9,7 @@
 
 use strict;
 
-require IO::handle;
+require IO::Handle;
 
 # Look for all the TST files in the tests/ subfolder and run
 # each of them by including them in this file with the use statement
