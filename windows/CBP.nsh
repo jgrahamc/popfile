@@ -8,8 +8,14 @@
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
 #----------------------------------------------------------------------------------------------
-
-# This version of 'CBP.nsh' was tested using NSIS 2.0b4 (CVS)
+#
+# WARNING:
+#
+# This script requires a version of NSIS 2.0b4 (CVS) which meets the following requirement:
+#
+#   '{NSIS}\makensis.exe' dated 8 July 2003 @ 18:44 (NSIS CVS version 1.203) or later
+#   This is required to ensure 'language' strings can be combined with other strings.
+#----------------------------------------------------------------------------------------------
 
 !ifdef CBP.nsh_included
   !error "$\r$\n$\r$\nFatal error: CBP.nsh has been included more than once!$\r$\n"
@@ -1028,11 +1034,8 @@ just_one:
   goto update_lists
 
 at_the_limit:
-  StrCpy ${CBP_L_RESULT} "$(PFI_LANG_CBP_IO_MSG_4)"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_IO_MSG_5)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_C_MAX_BNCOUNT} ${CBP_L_TEMP}"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_C_MESSAGE}" \
-      "Text" "${CBP_L_RESULT}"
+      "Text" "$(PFI_LANG_CBP_IO_MSG_4) ${CBP_C_MAX_BNCOUNT} $(PFI_LANG_CBP_IO_MSG_5)"
 
 update_lists:
 
@@ -1217,58 +1220,41 @@ does_not_exist:
   goto get_next_bucket_cmd
 
 name_exists:
-  StrCpy ${CBP_L_RESULT} "$(PFI_LANG_CBP_MBDUPERR_1)"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBDUPERR_2)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} $\"${CBP_L_CREATE_NAME}$\" ${CBP_L_TEMP}"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBDUPERR_3)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}"
-  MessageBox MB_OK|MB_ICONEXCLAMATION "${CBP_L_RESULT}"
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_CBP_MBDUPERR_1) $\"${CBP_L_CREATE_NAME}$\" $(PFI_LANG_CBP_MBDUPERR_2)$\n$\n\
+      $(PFI_LANG_CBP_MBDUPERR_3)"
   goto get_next_bucket_cmd
 
 too_many:
-  StrCpy ${CBP_L_RESULT} "$(PFI_LANG_CBP_MBMAXERR_1)"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAXERR_2)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_C_MAX_BNCOUNT} ${CBP_L_TEMP}"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAXERR_3)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP} ${CBP_C_MAX_BNCOUNT}"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAXERR_2)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}"
-  MessageBox MB_OK|MB_ICONEXCLAMATION "${CBP_L_RESULT}"
+  MessageBox MB_OK|MB_ICONINFORMATION \
+      "$(PFI_LANG_CBP_MBMAXERR_1) ${CBP_C_MAX_BNCOUNT} $(PFI_LANG_CBP_MBMAXERR_2)$\n$\n\
+      $(PFI_LANG_CBP_MBMAXERR_3) ${CBP_C_MAX_BNCOUNT} $(PFI_LANG_CBP_MBMAXERR_2)"
   goto get_next_bucket_cmd
 
 bad_name:
-  StrCpy ${CBP_L_RESULT} "$(PFI_LANG_CBP_MBNAMERR_1)"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBNAMERR_2)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} $\"${CBP_L_CREATE_NAME}$\" ${CBP_L_TEMP}"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBNAMERR_3)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}$\n$\n"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBNAMERR_4)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}"
-  MessageBox MB_OK|MB_ICONEXCLAMATION "${CBP_L_RESULT}"
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_CBP_MBNAMERR_1) $\"${CBP_L_CREATE_NAME}$\" $(PFI_LANG_CBP_MBNAMERR_2)$\n$\n\
+      $(PFI_LANG_CBP_MBNAMERR_3)$\n$\n\
+      $(PFI_LANG_CBP_MBNAMERR_4)"
   goto get_next_bucket_cmd
 
 no_user_input:
   IntCmp ${CBP_L_COUNT} 0 need_buckets
   IntCmp ${CBP_L_COUNT} 1 too_few
-  StrCpy ${CBP_L_RESULT} "${CBP_L_COUNT}"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBDONE_1)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBDONE_2)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBDONE_3)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}"
-  MessageBox MB_YESNO|MB_ICONQUESTION "${CBP_L_RESULT}" IDYES finished_buckets
+  MessageBox MB_YESNO|MB_ICONQUESTION \
+      "${CBP_L_COUNT} $(PFI_LANG_CBP_MBDONE_1)$\n$\n\
+      $(PFI_LANG_CBP_MBDONE_2)$\n$\n\
+      $(PFI_LANG_CBP_MBDONE_3)" IDYES finished_buckets
   goto get_next_bucket_cmd
 
 need_buckets:
-  StrCpy ${CBP_L_RESULT} "$(PFI_LANG_CBP_MBCONTERR_1)"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBCONTERR_2)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}"
-  MessageBox MB_OK|MB_ICONEXCLAMATION "${CBP_L_RESULT}"
+  MessageBox MB_OK|MB_ICONINFORMATION \
+      "$(PFI_LANG_CBP_MBCONTERR_1)$\n$\n\
+      $(PFI_LANG_CBP_MBCONTERR_2)"
   goto get_next_bucket_cmd
 
 too_few:
-  MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_CBP_MBCONTERR_3)"
+  MessageBox MB_OK|MB_ICONINFORMATION "$(PFI_LANG_CBP_MBCONTERR_3)"
   goto get_next_bucket_cmd
 
 get_next_bucket_cmd:
@@ -1281,15 +1267,9 @@ finished_buckets:
   Call CBP_MakePOPFileBuckets
   Pop ${CBP_L_RESULT}
   StrCmp ${CBP_L_RESULT} "0" finished_now
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAKERR_1)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_TEMP} ${CBP_L_RESULT}"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAKERR_2)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP} ${CBP_L_COUNT}"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAKERR_3)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}$\n$\n"
-  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAKERR_4)"
-  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}"
-  MessageBox MB_OK|MB_ICONEXCLAMATION "${CBP_L_RESULT}"
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "$(PFI_LANG_CBP_MBMAKERR_1) ${CBP_L_RESULT} $(PFI_LANG_CBP_MBMAKERR_2) ${CBP_L_COUNT} \
+      $(PFI_LANG_CBP_MBMAKERR_3)$\n$\n$(PFI_LANG_CBP_MBMAKERR_4)"
 
 finished_now:
   StrCpy ${CBP_L_RESULT} "completed"
