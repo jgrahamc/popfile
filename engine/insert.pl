@@ -5,6 +5,7 @@
 # ---------------------------------------------------------------------------------------------
 
 use strict;
+use Classifier::WordMangle;
 
 my %words;
 
@@ -86,6 +87,7 @@ sub save_word_table
 sub split_mail_message
 {
     my ($message) = @_;
+    my $mangler   = new Classifier::WordMangle;
 
     print "Parsing message '$message'...\n";
 
@@ -100,7 +102,12 @@ sub split_mail_message
         
         while ( $line =~ s/([A-Za-z]{3,})// )
         {
-            $words{$1} += 1;
+            my $word = $mangler->$mangle($1);
+            
+            if ( $word ne '' ) 
+            {
+                $words{$1} += 1;
+            }
         }
     }
     
