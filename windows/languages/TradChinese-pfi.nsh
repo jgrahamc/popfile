@@ -53,10 +53,10 @@
 ; Text strings displayed on the custom page
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_POP3     "Choose the default port number for POP3 connections (110 recommended)"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI      "Choose the default port number for 'User Interface' connections (8080 recommended)"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP  "Run POPFile automatically when Windows starts (runs in background, no window seen)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI      "Choose the default port for 'User Interface' connections (8080 recommended)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP  "Run POPFile automatically when Windows starts (runs in background)"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_WARNING  "IMPORTANT WARNING"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE  "IF UPGRADING POPFILE --- INSTALLER WILL SHUTDOWN THE EXISTING VERSION"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE  "IF UPGRADING POPFILE --- INSTALLER WILL SHUTDOWN EXISTING VERSION"
 
 ; Message Boxes used when validating user's selections
 
@@ -191,7 +191,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO        "No (the 'User Interface' cannot be used if POPFile is not started)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX    "Run POPFile (in a window)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND   "Run POPFile in background (no window displayed)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1    "Once POPFile has been started, you can display the POPFile 'User Interface' by"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1    "Once POPFile has been started, you can display the 'User Interface' by"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2    "(a) double-clicking the POPFile icon in the system tray,   OR"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3    "(b) using Start --> Programs --> POPFile --> POPFile User Interface."
 
