@@ -56,7 +56,7 @@
 # (by using this constant in the executable's "Version Information" data).
 #--------------------------------------------------------------------------
 
-  !define C_PFI_LIBRARY_VERSION     "0.1.0"
+  !define C_PFI_LIBRARY_VERSION     "0.1.1"
 
 #--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
@@ -764,6 +764,10 @@
 #    Installer Function:   FindLockedPFE
 #    Uninstaller Function: un.FindLockedPFE
 #
+#    Macro:                GetCompleteFPN
+#    Installer Function:   GetCompleteFPN
+#    Uninstaller Function: un.GetCompleteFPN
+#
 #    Macro:                GetCorpusPath
 #    Installer Function:   GetCorpusPath
 #    Uninstaller Function: un.GetCorpusPath
@@ -1058,6 +1062,76 @@
 
     !insertmacro FindLockedPFE "un."
 !endif
+
+
+#--------------------------------------------------------------------------
+# Macro: GetCompleteFPN
+#
+# The installation process and the uninstall process may need a function which converts a path
+# into the full/long version (e.g. which converts 'C:\PROGRA~1' into 'C:\Program Files'). There
+# is a built-in NSIS command for this (GetFullPathName) but it only converts part of the path,
+# eg. it converts 'C:\PROGRA~1\PRE-RE~1' into 'C:\PPROGRA~1\Pre-release POPFile' instead of the
+# expected 'C:\Program Files\Pre-release POPFile' string. This macro makes maintenance easier
+# by ensuring that both processes use identical functions, with the only difference being their
+# names.
+#
+# If the specified path does not exist, an empty string is returned
+#
+# NOTE:
+# The !insertmacro GetCompleteFPN "" and !insertmacro GetCompleteFPN "un." commands are
+# included in this file so the NSIS script and/or other library functions in 'pfi-library.nsh'
+# can use 'Call GetCompleteFPN' and 'Call un.GetCompleteFPN' without additional preparation.
+#
+# Inputs:
+#         (top of stack)     - path to be converted to long filename format
+# Outputs:
+#         (top of stack)     - full (long) path name or an empty string if path was not found
+#                              (the OS function we use only works with paths which exist)
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push "c:\progra~1"
+#         Call GetCompleteFPN
+#         Pop $R0
+#
+#         ($R0 now holds 'C:\Program Files')
+#
+#--------------------------------------------------------------------------
+
+!macro GetCompleteFPN UN
+    Function ${UN}GetCompleteFPN
+
+      Exch $0   ; the input path
+      Push $1   ; the result string (will be empty if the input path does not exist)
+      Exch
+
+      ; Convert the input path ($0) into a long path ($1) if possible
+
+      System::Call "Kernel32::GetLongPathNameA(t '$0', &t .r1, i ${NSIS_MAX_STRLEN})"
+
+      Pop $0
+      Exch $1
+
+    FunctionEnd
+!macroend
+
+!ifdef ADDUSER | INSTALLER
+    #--------------------------------------------------------------------------
+    # Installer Function: GetCompleteFPN
+    #
+    # This function is used during the installation process
+    #--------------------------------------------------------------------------
+
+    !insertmacro GetCompleteFPN ""
+!endif
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetCompleteFPN
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetCompleteFPN "un."
 
 
 #--------------------------------------------------------------------------
