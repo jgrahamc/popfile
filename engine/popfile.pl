@@ -208,6 +208,13 @@ sub get_response
 {
     my ( $mail, $client, $command ) = @_;
     
+    unless ( $mail )
+    {
+       # $mail is undefined - return an error intead of crashing
+       tee( $client, "-ERR error communicating with mail server" );
+       return 0;
+    }
+
     # Send the command (followed by the appropriate EOL) to the mail server
     tee( $mail, "$command$eol" );
     
@@ -226,7 +233,7 @@ sub get_response
         else
         {
             # An error has occurred reading from the mail server
-            tee( $client, "-ERR error communicating with mail server" );
+            tee( $client, "-ERR no response from mail server" );
             return 0;
         }
     }
@@ -472,11 +479,12 @@ sub verify_connected
 
     # Check that the connect succeeded for the remote server
     if ( $mail )
-    {
+    {                 
         if ( $mail->connected ) 
         {
             # Read the response from the real server and say OK
             my $line = <$mail>;
+            debug( $line );
             return 1;
         }
     }
@@ -1062,7 +1070,7 @@ sub run_popfile
 # ---------------------------------------------------------------------------------------------
 sub aborting
 {
-    debug("Forced to abort via signal");
+    debug("Forced to abort via signal\n");
     $alive = 0;
 }
 
