@@ -98,6 +98,7 @@ sub new
     $self->{db_set_bucket_parameter__} = 0;
     $self->{db_get_bucket_parameter_default__} = 0;
     $self->{db_get_buckets_with_magnets__} = 0;
+    $self->{db_delete_zero_words__} = 0;
 
     # Caches the name of each bucket and relates it to both the bucket ID in the
     # database and whether it is pseudo or not
@@ -577,7 +578,6 @@ sub db_connect__
     # word
     # parameter
 
-
     $self->{db_get_buckets__} = $self->{db__}->prepare(
    	     'select name, id, pseudo from buckets
                   where buckets.userid = ?;' );
@@ -634,6 +634,11 @@ sub db_connect__
                   where buckets.userid = ? and
                         magnets.bucketid = buckets.id group by buckets.name order by buckets.name;' );
 
+    $self->{db_delete_zero_words__} = $self->{db__}->prepare(
+             'delete from matrix
+                  where matrix.times = 0  
+                    and matrix.bucketid = ?;' );
+
     # Get the mapping from parameter names to ids into a local hash
 
     my $h = $self->{db__}->prepare( "select name, id from bucket_template;" );
@@ -670,6 +675,7 @@ sub db_disconnect__
     $self->{db_set_bucket_parameter__}->finish;
     $self->{db_get_bucket_parameter_default__}->finish;
     $self->{db_get_buckets_with_magnets__}->finish;
+    $self->{db_delete_zero_words__}->finish;
 
     if ( defined( $self->{db__} ) ) {
         $self->{db__}->disconnect;
@@ -783,6 +789,11 @@ sub db_put_word_count__
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
 
     $self->{db_put_word_count__}->execute( $bucketid, $wordid, $count );
+
+    # If we set the word count to zero then clean it up by deleting the 
+    # entry
+
+    $self->{db_delete_zero_words__}->execute( $bucketid );
 
     return 1;
 }
@@ -1230,6 +1241,14 @@ sub add_words_to_bucket__
 	    }
 	}
     }
+
+    # If we were doing a subtract operation it's possible that some of the words
+    # in the bucket now have a zero count and should be removed
+
+    if ( $subtract == -1 ) {
+        $self->{db_delete_zero_words__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id} );
+    }
+
     $self->{db__}->commit;
 }
 

@@ -295,6 +295,7 @@ test_assert( $b->remove_message_from_bucket( $session, 'zeotrope', 'TestMailPars
 test_assert( $b->remove_message_from_bucket( $session, 'zeotrope', 'TestMailParse021.msg' ) );
 
 test_assert_equal( $b->get_bucket_word_count( $session, 'zeotrope' ), 0 );
+test_assert_equal( $b->get_bucket_unique_count( $session, 'zeotrope' ), 0 );
 
 # add_messages_to_bucket
 
@@ -466,7 +467,7 @@ test_assert_equal( $buckets[2], 'spam' );
 test_assert_equal( $b->get_value_( $session, 'personal', 'foo' ), log(1/103) );
 test_assert_equal( $b->get_sort_value_( $session, 'personal', 'foo' ), log(1/103) );
 
-$b->set_value_( $session, 'personal', 'foo', 0 );
+test_assert_equal( $b->set_value_( $session, 'personal', 'foo', 0 ), 1 );
 test_assert_equal( $b->get_value_( $session, 'personal', 'foo' ), 0 );
 test_assert_equal( $b->get_sort_value_( $session, 'personal', 'foo' ), $b->{not_likely__}{1} );
 
