@@ -1,24 +1,28 @@
 <form action="/configuration" method="post">
     <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-    <label class="configurationLabel" for="configPopPort"><TMPL_VAR NAME="Localize_Configuration_XMLRPCPort">:</label><br />
+    <label class="configurationLabel" for="configPopPort">
+        <TMPL_VAR NAME="Localize_Configuration_XMLRPCPort">:
+    </label>
+    <br />
     <input name="xmlrpc_port" type="text" id="configPopPort" value="<TMPL_VAR NAME="XMLRPC_Port">" />
-
-
-    <blockquote>
 
         <TMPL_IF NAME="XMLRPC_port_if_error">
 
-        <div class="error01">
-            <TMPL_VAR NAME="Localize_Configuration_Error7">
-        </div>
-
-        <TMPL_ELSE>
-
-        <TMPL_VAR NAME="XMLRPC_port_updated">
+        <blockquote>
+            <div class="error01">
+                <TMPL_VAR NAME="Localize_Configuration_Error7">
+            </div>
+        </blockquote>
 
         </TMPL_IF>
 
-    </blockquote>
+        <TMPL_IF NAME="XMLRPC_port_updated">
+
+        <blockquote>
+            <TMPL_VAR NAME="XMLRPC_port_updated">
+        </blockquote>
+
+        </TMPL_IF>
 
     <input type="submit" class="submit" name="update_xmlrpc_port" value="<TMPL_VAR NAME="Localize_Apply">" />
 </form>
