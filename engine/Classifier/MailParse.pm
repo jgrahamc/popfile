@@ -943,7 +943,7 @@ sub parse_html
     # effected.  The correct fix seams to be to look at the
     # Content-Type header and only process mails of type text/html.
 
-    while ( $line =~ s/(<\/?(?!(?:$spacing_tags|$non_spacing_tags)\W)[a-z0-9]+(?:\s+.*?)?\/?>)//i ) {
+    while ( $line =~ s/(<\/?(?!(?:$spacing_tags|$non_spacing_tags)\W)[a-z0-9]+(?:\s+.*?)?\/?>)//io ) {
         $self->update_pseudoword( 'html', 'invalidtag', $encoded, $1 );
         print "html:invalidtag: $1\n" if $self->{debug};
     }
@@ -953,7 +953,7 @@ sub parse_html
     
     # FIXME: What about combined open and close tags such as <b />?
 
-    while ( $line =~s/(<($non_spacing_tags)(?:\s+[^>]*?)?><\/\2>)//i ) {
+    while ( $line =~s/(<($non_spacing_tags)(?:\s+[^>]*?)?><\/\2>)//io ) {
         $self->update_pseudoword( 'html', 'emptypair', $encoded, $1 );
         print "html:emptypair: $1\n" if $self->{debug};
     }
