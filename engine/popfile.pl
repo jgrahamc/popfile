@@ -1115,11 +1115,12 @@ sub compare_mf
 # Reloads the history cache filtering based on the passed in filter
 #
 # $filter       Name of bucket to filter on
+# $search       Subject line to search for
 #
 # ---------------------------------------------------------------------------------------------
 sub load_history_cache
 {
-    my ($filter) = @_;
+    my ($filter, $search) = @_;
     
     my @history          = sort compare_mf glob "messages/popfile*.msg";
     $#history_cache      = -1;
@@ -1164,16 +1165,48 @@ sub load_history_cache
         
         if ( ( $filter eq '' ) || ( $bucket eq $filter ) ) 
         {
-            $history_cache[$j]      = $history[$i];
-            $bucket_cache[$j]       = $bucket;
-            $reclassified_cache[$j] = $reclassified;
-            $magnet_cache[$j]       = $magnet;
+            my $found = 1;
             
-            $j += 1;
+            if ( $search ne '' )
+            {
+                $found = 0;
+                
+                open MAIL, "<messages/$history[$i]";
+                while (<MAIL>) 
+                {
+                    if ( /[A-Z0-9]/i ) 
+                    {
+                        if ( /^Subject:(.*)/i )
+                        {
+                            my $subject = $1;
+                            if ( $subject =~ /\Q$search\E/i ) 
+                            {
+                                $found = 1;
+                                last;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        last;
+                    }
+                }
+                close MAIL;
+            }
+            
+            if ( $found == 1 )
+            {
+                $history_cache[$j]      = $history[$i];
+                $bucket_cache[$j]       = $bucket;
+                $reclassified_cache[$j] = $reclassified;
+                $magnet_cache[$j]       = $magnet;
+
+                $j += 1;
+            }
         }
     }
 
-    debug( "Reloaded history cache from disk" );
+    debug( "Reloaded history cache from disk" )
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1200,8 +1233,12 @@ sub history_page
         }
     }
 
-    my $body = "<h2>Recent Messages$filtered</h2>"; 
+    if ( defined($form{search}) )
+    {
+        $filtered .= " (search for subject $form{search})";
+    }
 
+    my $body = "<h2>Recent Messages$filtered</h2>"; 
 
     # Handle undo
     if ( defined($form{undo}) )
@@ -1272,7 +1309,7 @@ sub history_page
         # If the history cache is empty then we need to reload it now
         if ( $#history_cache < 0 ) 
         {
-            load_history_cache($form{filter});
+            load_history_cache($form{filter}, '');
         }
 
         foreach my $mail_file (@history_cache)
@@ -1294,7 +1331,7 @@ sub history_page
         # If the history cache is empty then we need to reload it now
         if ( $#history_cache < 0 ) 
         {
-            load_history_cache($form{filter});
+            load_history_cache($form{filter}, '');
         }
         
         foreach my $i ( $form{start_message} .. $form{start_message} + $configuration{page_size} - 1 )
@@ -1321,7 +1358,7 @@ sub history_page
     # or the history is empty then reload the history
     if ( ( remove_mail_files() ) || ( $downloaded_mail ) || ( $#history_cache < 0 ) || ( defined($form{setfilter}) ) )
     {
-        load_history_cache($form{filter});
+        load_history_cache($form{filter}, '');
     }
 
     # Handle the reinsertion of a message file
@@ -1382,51 +1419,15 @@ sub history_page
 
         $classifier->load_bucket("$configuration{corpus}/$form{shouldbe}");
         $classifier->update_constants();    
-        load_history_cache($form{filter});
+        load_history_cache($form{filter},'');
     }
 
-    my $search_message = "<blockquote><font color=red>Search term not found in History</font></blockquote>";
     my $highlight_message = '';
 
     if ( ( defined($form{search}) ) && ( $form{search} ne '' ) )
     {
-        for my $i ( 0..$#history_cache )
-        {
-            my $mail_file;
-            my $subject = '';
-            $mail_file = $history_cache[$i];
-
-            open MAIL, "<messages/$mail_file";
-            while (<MAIL>) 
-            {
-                if ( /^Subject:(.*)/i )
-                {
-                    $subject = $1;
-                    $subject =~ s/<(.*)>/&lt;$1&gt;/g;
-                    $subject =~ s/\"(.*)\"/$1/g;
-                    
-                    if ( $subject =~ /\Q$form{search}\E/i ) 
-                    {
-                        $search_message = '';
-                        $form{start_message} = $i;
-                        $form{stop_message}  = $i;
-                        $highlight_message = $mail_file;
-                        last;
-                    }
-                }
-            }
-            close MAIL;
-            
-            if ( $highlight_message ne '' ) 
-            {
-                last;
-            }
-        }
+        load_history_cache($form{filter}, $form{search});
     } 
-    else 
-    {
-        $search_message = '';
-    }
     
     if ( $#history_cache >= 0 ) 
     {
@@ -1718,7 +1719,7 @@ sub history_page
         }
 
         $body .= "</table><form action=/history><input type=hidden name=filter value=$form{filter}><b>To remove entries in the history click: <input type=submit class=submit name=clear value='Remove All'>";
-        $body .= "<input type=submit class=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=filter value=$form{filter}><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit class=submit name=searchbutton Value=Find></form>$search_message";
+        $body .= "<input type=submit class=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=filter value=$form{filter}><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit class=submit name=searchbutton Value=Find></form>";
 
         if ( $configuration{page_size} <= $#history_cache )
         {
@@ -1757,7 +1758,7 @@ sub history_page
     }
     else
     {
-        $body .= "<b>No messages in history.</b><p><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all>&lt;Show All&gt;</option>";
+        $body .= "<b>No messages.</b><p><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all>&lt;Show All&gt;</option>";
         
         my @buckets = sort keys %{$classifier->{total}};
         foreach my $abucket (@buckets)
