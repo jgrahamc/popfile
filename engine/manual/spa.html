@@ -21,11 +21,11 @@
 <td width=2></td>
 <td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#cccc99 width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Passwords</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Password Authentication</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Virus Scanners</a></b></font><br></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Other Proxies</a></b></font><br></td>
 <td width=2></td>
-<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Many Addresses</a></b></font></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Multiple Email Accounts</a></b></font></td>
 </tr>
 
 </table>
@@ -34,11 +34,35 @@
 
 <h2>Using POPFile with Secure Password Authentication</h2>
 
-<p>Head to the <a href="http://127.0.0.1:8080">web interface</a>'s Security tab, and enter the server name and port of your Secure Password Authentication-protected server. Once done, you simply need to change the server name in your mail program to 127.0.0.1 - you don't need to change the username.</p>
+<p>Head to the web interface's Security tab, and enter the server name and port of your Secure Password Authentication-protected server. Once done, you simply need to change the server name in your mail program to 127.0.0.1 - you don't need to change the username.</p>
 
-<p>Unfortunately, you can currently only have one simultaneous SPA account through each installation of POPFile.</p>
+<p>Unfortunately, you can currently only have one SPA account through each installation of POPFile.</p>
 
-<p align=center>POPFile v0.17.3 Manual - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a></td></tr></table>
+<h2>A note about MSN Secure Password Authentication</h2>
+
+<ol>
+<li> You have to start popfile with the following command
+(type it in exactly)
+<blockquote><b>perl popfile.pl -port 110 -server pop3.email.msn.com -sport
+110</b></blockquote>
+
+<li> On your accounts, server page, make sure you have the
+following information:
+<p>
+Incoming mail server: 127.0.0.1<br>
+Account name: YOUR_MSN_ACCOUNT_NAME_ONLY
+<p>
+Make sure that "Log on using Secure Password
+authentication" is checked
+<p>
+On the Advanced tab, make sure that your incoming mail
+port is set to 110 and the "This server requires a secure
+connection (SSL)" is UNCHECKED.
+<p>
+<li> You should be able to check your mail now by clicking
+on the account name in the "Mail Icon drop down".
+</ol>
+</td></tr></table>
 <br>
 <table width=100% cellspacing=0><tr>
 <td width=15% align=center><font size=+1><b>Web Links:</b></font></td>

@@ -21,20 +21,20 @@
 <td width=2></td>
 <td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Firewalls</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Passwords</a></b></font></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Secure Password Authentication</a></b></font></td>
 <td width=2></td>
-<td bgcolor=#cccc99 width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Virus Scanners</a></b></font><br></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Other Proxies</a></b></font><br></td>
 <td width=2></td>
-<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Many Addresses</a></b></font></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Multiple Email Accounts</a></b></font></td>
 </tr>
 
 </table>
 <table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
 
 
-<h2>Using POPFile with Virus Scanners</h2>
+<h2>Using POPFile with other proxies such as virus scanners</h2>
 
-<p>If you use an email scanning proxy like Norton Antivirus, then POPFile won't work straight off the bat: the email proxy will grab them instead. You need to configure POPFile to talk to the email scanner.</p>
+<p>If you use an email scanning proxy that has changed your email setting like some versions of Norton Antivirus, then POPFile won't work straight off the bat: the email proxy will grab them instead. You need to configure POPFile to talk to the email scanner. (If your virus scanner didn't change your email POP3 server setting then there is no need to follow these instructions).</p>
 
 <p>(So, basically, emails get downloaded by the scanner, passed to POPFile, and then - finally - passed to your email program.)</p>
 
@@ -51,7 +51,7 @@
 
 <h3>Change POPFile's port</h3>
 
-<p>Head to the <a href="http://127.0.0.1:8080">Web Interface</a>'s Configuration tab, and change your <b>POP3 Listen Port</b> to any similar number - we recommend 123. Click Apply.</p>
+<p>Head to the Web Interface's Configuration tab, and change your <b>POP3 Listen Port</b> to any similar number - we recommend 123. Click Apply.</p>
 
 <h3>Change your email program's port</h3>
 
@@ -112,7 +112,7 @@ Just choose your email program and follow the column down. While these instructi
 
 Reactivate your scanner (consult your scanner's manual) and it should automatcally set everything up for you. Mail should now be scanned and sorted.
 
-<p align=center>POPFile v0.17.3 Manual - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a></td></tr></table>
+</td></tr></table>
 <br>
 <table width=100% cellspacing=0><tr>
 <td width=15% align=center><font size=+1><b>Web Links:</b></font></td>
