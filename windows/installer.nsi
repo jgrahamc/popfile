@@ -3,7 +3,7 @@
 ;
 ; Modified to work with NSIS v2.0b1
 !define MUI_PRODUCT "POPFile" 
-!define MUI_VERSION "0.18.1 RC2"
+!define MUI_VERSION "0.18.1"
 !include "MUI.nsh"
 ;--------------------------------
 ;Configuration
@@ -32,6 +32,8 @@
   !define ID       $7
   !define OEIDENT  $8
   !define ACCTID   $9
+
+  !insertmacro MUI_SYSTEM
   
   ;Language
   !insertmacro MUI_LANGUAGEFILE_STRING MUI_TEXT_WELCOME_INFO_TEXT "This wizard will guide you through the installation of ${MUI_PRODUCT}.\r\n\r\nIt is recommended that you close all other applications before starting Setup.\r\n\r\n"
@@ -116,11 +118,6 @@ skip_gui_set:
   File /oname=$PLUGINSDIR\ioB.ini ioB.ini
 
 FunctionEnd
-
-;--------------------------------
-;Modern UI System
-
-!insertmacro MUI_SYSTEM
 
 ;--------------------------------
 ;Installer Sections
