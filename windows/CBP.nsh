@@ -710,8 +710,8 @@ Function CBP_CreateINIfile
 
   ; Constants used to position the "Remove" boxes
 
-  !define CBP_BN_REMOVE_LEFT      -42
-  !define CBP_BN_REMOVE_RIGHT     -1
+  !define CBP_BN_REMOVE_LEFT      255
+  !define CBP_BN_REMOVE_RIGHT     300
 
   ; Constants used to define the position of the 8 rows in the bucket list
 
@@ -781,7 +781,7 @@ Function CBP_CreateINIfile
   !macro CBP_DEFINE_BN_REMOVE FIELD ROW
     !insertmacro CBP_DEFINE_CONTROL "${FIELD}" \
       "CheckBox" \
-      "Remove" \
+      "$(PFI_LANG_CBP_IO_REMOVE)" \
       "${CBP_BN_REMOVE_LEFT}" "${CBP_BN_REMOVE_RIGHT}" \
       "${CBP_BN_${ROW}_TOP}" "${CBP_BN_${ROW}_BOTTOM}"
   !macroend
@@ -793,7 +793,7 @@ Function CBP_CreateINIfile
   ; The INI file header (all fields made visible)
 
   !insertmacro CBP_WRITE_INI "Settings" "NumFields" "22"
-  !insertmacro CBP_WRITE_INI "Settings" "NextButtonText" "Continue"
+  !insertmacro CBP_WRITE_INI "Settings" "NextButtonText" "$(PFI_LANG_CBP_IO_CONTINUE)"
   !insertmacro CBP_WRITE_INI "Settings" "BackEnabled" "0"
   !insertmacro CBP_WRITE_INI "Settings" "CancelEnabled" "0"
 
@@ -801,17 +801,14 @@ Function CBP_CreateINIfile
 
   !insertmacro CBP_DEFINE_CONTROL "Field 1" \
       "Label" \
-      "After installation, POPFile makes it easy to change the number of buckets \
-      (and their names) to suit your needs.\r\n\r\nBucket names must be single words, \
-      using lowercase letters, digits 0 to 9, hyphens and underscores." \
+      "$(PFI_LANG_CBP_IO_INTRO)" \
       "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "0" "60"
 
   ; Label for the "Create Bucket" ComboBox
 
   !insertmacro CBP_DEFINE_CONTROL "Field 2" \
       "Label" \
-      "Create a new bucket by either selecting a name from the list below or \
-      typing a name of your own choice in the box below." \
+      "$(PFI_LANG_CBP_IO_CREATE)" \
       "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "63" "87"
 
   ; ComboBox used to create a new bucket
@@ -825,8 +822,7 @@ Function CBP_CreateINIfile
 
   !insertmacro CBP_DEFINE_CONTROL "Field 4" \
       "Label" \
-      "To delete one or more buckets from the list, tick the relevant 'Remove' box(es) \
-      then click the 'Continue' button." \
+      "$(PFI_LANG_CBP_IO_DELETE)" \
       "${CBP_INFO_LEFT_MARGIN}" "${CBP_INFO_RIGHT_MARGIN}" "110" "190"
 
   ; Label used to display progress reports
@@ -840,7 +836,7 @@ Function CBP_CreateINIfile
 
   !insertmacro CBP_DEFINE_CONTROL "Field 6" \
       "GroupBox" \
-      "Buckets to be used by POPFile" \
+      "$(PFI_LANG_CBP_IO_LISTHDR)" \
       "150" "300" "0" "130"
 
   ; Text for GroupBox lines 1 to 8
@@ -999,8 +995,7 @@ use_INI_file:
 
   ; The corpus directory does not exist or is empty
 
-  !insertmacro MUI_HEADER_TEXT "POPFile Classification Bucket Creation" \
-      "POPFile needs AT LEAST TWO buckets$\nin order to be able to classify your email"
+  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_CBP_TITLE)" "$(PFI_LANG_CBP_SUBTITLE)"
 
   ; Reset the bucket list to the default settings
 
@@ -1019,22 +1014,25 @@ input_loop:
   IntCmp ${CBP_L_COUNT} ${CBP_C_MAX_BNCOUNT} at_the_limit
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_C_MESSAGE}" \
-      "Text" "There is no need to add more buckets"
+      "Text" "$(PFI_LANG_CBP_IO_MSG_1)"
   goto update_lists
 
 zero_so_far:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_C_MESSAGE}" \
-      "Text" "You must define AT LEAST TWO buckets"
+      "Text" "$(PFI_LANG_CBP_IO_MSG_2)"
   goto update_lists
 
 just_one:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_C_MESSAGE}" \
-      "Text" "At least one more bucket is required"
+      "Text" "$(PFI_LANG_CBP_IO_MSG_3)"
   goto update_lists
 
 at_the_limit:
+  StrCpy ${CBP_L_RESULT} "$(PFI_LANG_CBP_IO_MSG_4)"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_IO_MSG_5)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_C_MAX_BNCOUNT} ${CBP_L_TEMP}"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "Field ${CBP_C_MESSAGE}" \
-      "Text" "Installer cannot create more than ${CBP_C_MAX_BNCOUNT} buckets"
+      "Text" "${CBP_L_RESULT}"
 
 update_lists:
 
@@ -1219,39 +1217,58 @@ does_not_exist:
   goto get_next_bucket_cmd
 
 name_exists:
-  MessageBox MB_OK "Sorry! A bucket called $\"${CBP_L_CREATE_NAME}$\" has already been \
-      defined.$\n$\nPlease choose a different name for the new bucket."
+  StrCpy ${CBP_L_RESULT} "$(PFI_LANG_CBP_MBDUPERR_1)"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBDUPERR_2)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} $\"${CBP_L_CREATE_NAME}$\" ${CBP_L_TEMP}"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBDUPERR_3)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}"
+  MessageBox MB_OK "${CBP_L_RESULT}"
   goto get_next_bucket_cmd
 
 too_many:
-  MessageBox MB_OK "Sorry! The installer can only create up to ${CBP_C_MAX_BNCOUNT} buckets.\
-      $\n$\nOnce POPFile has been installed you can create more than ${CBP_C_MAX_BNCOUNT} \
-      buckets."
+  StrCpy ${CBP_L_RESULT} "$(PFI_LANG_CBP_MBMAXERR_1)"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAXERR_2)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_C_MAX_BNCOUNT} ${CBP_L_TEMP}"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAXERR_3)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP} ${CBP_C_MAX_BNCOUNT}"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAXERR_2)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}"
+  MessageBox MB_OK "${CBP_L_RESULT}"
   goto get_next_bucket_cmd
 
 bad_name:
-  MessageBox MB_OK "The name $\"${CBP_L_CREATE_NAME}$\" is not a valid name for a bucket.\
-      $\n$\nBucket names can only contain lowercase letters, the digits 0 to 9, \
-      hyphens and underscores.$\n$\nPlease choose a different name for the new bucket."
+  StrCpy ${CBP_L_RESULT} "$(PFI_LANG_CBP_MBNAMERR_1)"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBNAMERR_2)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} $\"${CBP_L_CREATE_NAME}$\" ${CBP_L_TEMP}"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBNAMERR_3)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}$\n$\n"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBNAMERR_4)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}"
+  MessageBox MB_OK "${CBP_L_RESULT}"
   goto get_next_bucket_cmd
 
 no_user_input:
   IntCmp ${CBP_L_COUNT} 0 need_buckets
   IntCmp ${CBP_L_COUNT} 1 too_few
-  MessageBox MB_YESNO "${CBP_L_COUNT} buckets have been defined for use by POPFile.$\n$\n\
-      Do you want to configure POPFile to use these buckets?$\n$\nClick 'No' if you wish \
-      to change your bucket selections." IDYES finished_buckets
+  StrCpy ${CBP_L_RESULT} "${CBP_L_COUNT}"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBDONE_1)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBDONE_2)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBDONE_3)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}"
+  MessageBox MB_YESNO "${CBP_L_RESULT}" IDYES finished_buckets
   goto get_next_bucket_cmd
 
 need_buckets:
-  MessageBox MB_OK "POPFile requires AT LEAST TWO buckets before it can classify your email.\
-      $\n$\nPlease enter the name of a bucket to be created, either by picking a suggested\
-      $\n$\nname from the drop-down list or by typing in a name of your own choice."
+  StrCpy ${CBP_L_RESULT} "$(PFI_LANG_CBP_MBCONTERR_1)"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBCONTERR_2)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT}$\n$\n${CBP_L_TEMP}"
+  MessageBox MB_OK "${CBP_L_RESULT}"
   goto get_next_bucket_cmd
 
 too_few:
-  MessageBox MB_OK "Sorry! You must define AT LEAST TWO buckets$\n$\n\
-      before continuing with the installation of POPFile."
+  MessageBox MB_OK "$(PFI_LANG_CBP_MBCONTERR_3)"
   goto get_next_bucket_cmd
 
 get_next_bucket_cmd:
@@ -1264,9 +1281,15 @@ finished_buckets:
   Call CBP_MakePOPFileBuckets
   Pop ${CBP_L_RESULT}
   StrCmp ${CBP_L_RESULT} "0" finished_now
-  MessageBox MB_OK "Sorry! The installer was unable to create ${CBP_L_RESULT} of the \
-      ${CBP_L_COUNT} buckets you selected.$\n$\nOnce POPFile has been installed you can use \
-      its 'User Interface'$\n$\ncontrol panel to create the missing bucket(s)."
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAKERR_1)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_TEMP} ${CBP_L_RESULT}"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAKERR_2)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP} ${CBP_L_COUNT}"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAKERR_3)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}$\n$\n"
+  StrCpy ${CBP_L_TEMP} "$(PFI_LANG_CBP_MBMAKERR_4)"
+  StrCpy ${CBP_L_RESULT} "${CBP_L_RESULT} ${CBP_L_TEMP}"
+  MessageBox MB_OK "${CBP_L_RESULT}"
 
 finished_now:
   StrCpy ${CBP_L_RESULT} "completed"
