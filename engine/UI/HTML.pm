@@ -2911,7 +2911,6 @@ sub view_page
     }
 
     if ($self->{history__}{$mail_file}{magnet} ne '') {
-        print $self->{history__}{$mail_file}{magnet}, "\n";
         $templ->param( 'View_Magnet_Reason' => sprintf( $self->{language__}{History_MagnetBecause},  # PROFILE BLOCK START
                           $color, $bucket,
                           Classifier::MailParse::splitline($self->{history__}{$mail_file}{magnet},0)
