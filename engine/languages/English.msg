@@ -1,5 +1,6 @@
 # This is used to get the appropriate subdirectory for the manual
 LanguageCode                            en
+LanguageCharset                         ISO-8859-1
 
 # Common words that are used on their own all over the interface
 Apply                                   Apply
@@ -12,7 +13,7 @@ Remove                                  Remove
 Previous                                Previous
 Next                                    Next
 From                                    From
-Subject                                 Subject
+Subject                                 Subject 
 Classification                          Classification
 Reclassify                              Reclassify
 Undo                                    Undo

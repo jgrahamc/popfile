@@ -1,6 +1,7 @@
 # This is used to get the appropriate subdirectory for the manual
 LanguageCode                            br
-
+LanguageCharset                         ISO-8859-1
+ 
 # Common words that are used on their own all over the interface
 Apply                                   Aplicar
 On                                      Ligado

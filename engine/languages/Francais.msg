@@ -1,5 +1,6 @@
 # This is used to get the appropriate subdirectory for the manual
 LanguageCode                            fr
+LanguageCharset                         ISO-8859-1
 
 # Common words that are used on their own all over the interface
 Apply                                   Appliquer

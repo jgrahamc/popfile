@@ -360,7 +360,7 @@ sub html_common_top
     $result .= "<meta http-equiv=\"Expires\" content=\"0\">\n" ;
     
     $result .= "<meta http-equiv=\"Cache-Control\" content=\"no-cache\">\n" ;
-    $result .= "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=ISO-8859-1\">\n</head>\n" ;
+    $result .= "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=$self->{language}{LanguageCharset}\">\n</head>\n" ;
 
     return $result ;
 }

@@ -1,4 +1,5 @@
 LanguageCode                            en
+LanguageCharset                         ISO-8859-1
 Apply                                   4pply
 On                                      0n
 Off                                     0ff

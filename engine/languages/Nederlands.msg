@@ -1,7 +1,6 @@
-MIME-Version: 1.0
-
 LanguageCode                            en
-
+LanguageCharset                         ISO-8859-1
+ 
 # Common words that are used on their own all over the interface
 Apply                                   Doorvoeren
 On                                      Aan
@@ -12,7 +11,7 @@ Add                                     Voeg toe
 Remove                                  Verwijder
 Previous                                Vorige
 Next                                    Volgende
->From                                    Van
+From                                    Van
 Subject                                 Onderwerp
 Classification                          Classificatie
 Reclassify                              Herclasseren
