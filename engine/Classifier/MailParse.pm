@@ -201,6 +201,7 @@ sub parse_stream
     $self->{words}     = {};
     $self->{msg_total} = 0;
     $self->{from}      = '';
+    $self->{ut}        = '';
 
     if ( $self->{color} )
     {
@@ -308,8 +309,13 @@ sub parse_stream
 
             if ( $encoding =~ /quoted\-printable/ )
             {
-                $line =~ s/=20/ /g;
-                $line =~ s/=3D/=/g;
+                while ( ( $line =~ /=([0-9A-F][0-9A-F])/i ) != 0 )
+                {
+                    my $from = "=$1";
+                    my $to   = chr(hex("0x$1"));
+                    $to =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
+                    $line =~ s/$from/$to/g;
+                }
             }
 
             # Remove HTML tags completely
