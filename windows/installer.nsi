@@ -2042,18 +2042,18 @@ SectionEnd
 #--------------------------------------------------------------------------
 # Installer Section: (optional) POPFile XMLRPC component (default = not selected)
 #
-# If this component is selected, the installer installs the POPFile XML-RPC module
-# and the extra Perl modules required to support it. The XML-RPC module exposes the
+# If this component is selected, the installer installs the POPFile XMLRPC module
+# and the extra Perl modules required to support it. The XMLRPC module exposes the
 # POPFile API to allow access to many POPFile functions.
 #--------------------------------------------------------------------------
 
 Section /o "XMLRPC" SecXMLRPC
 
   SetDetailsPrint textonly
-  DetailPrint "Installing XML-RPC support"
+  DetailPrint "$(PFI_LANG_INST_PROG_XMLRPC)"
   SetDetailsPrint listonly
 
-  ; Experimental POPFile component
+  ; POPFile XMLRPC component
 
   SetOutPath $G_ROOTDIR\UI
   File "..\engine\UI\XMLRPC.pm"
@@ -2087,7 +2087,7 @@ Section /o "XMLRPC" SecXMLRPC
   File /r "${C_PERL_DIR}\site\lib\XMLRPC\*"
 
   SetDetailsPrint textonly
-  DetailPrint "XMLRPC support installed"
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
   SetDetailsPrint listonly
 
 SectionEnd

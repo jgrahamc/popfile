@@ -264,6 +264,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORPUS     "corpus(コーパス、単語ファイル)のバックアップを作成中。しばらくお待ち下さい..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      "POPFile のスキンファイルをインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "POPFile UI 言語ファイルをインストール中..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Installing POPFile XMLRPC files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "「次へ」をクリックして続行して下さい。"
 
 ; Installation Log Messages

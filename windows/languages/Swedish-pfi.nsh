@@ -264,6 +264,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORPUS     "Making corpus backup. This may take a few seconds..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      "Installing POPFile skin files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "Installing POPFile UI language files..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Installing POPFile XMLRPC files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "Klicka Nästa för att fortsätta"
 
 ; Installation Log Messages

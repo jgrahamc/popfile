@@ -263,6 +263,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORPUS     "⁄„· ‰”Œ… ≈Õ Ì«ÿÌ… „‰ «·„œÊ¯‰…. ”ÌÕ «Ã Â–« ·»÷⁄ ÀÊ«‰Ú..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      " ‰’Ì» „·›«  «·”„«  «·≈÷«›Ì…..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      " ‰’Ì» „·›«  «··€«  ≈÷«›Ì…..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Installing POPFile XMLRPC files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "≈÷€ÿ «· «·Ì ··„ «»⁄…"
 
 ; Installation Log Messages

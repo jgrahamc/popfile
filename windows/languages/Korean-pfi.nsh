@@ -264,6 +264,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORPUS     "Making corpus backup. This may take a few seconds..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS      "POPFile 스킨 파일 설치 중..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS      "POPFile UI 언어 파일 설치 중..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_XMLRPC     "Installing POPFile XMLRPC files..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC     "계속 진행하기 위해 '다음'을 누르십시오."
 
 ; Installation Log Messages
