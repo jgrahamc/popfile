@@ -77,11 +77,14 @@ sub get_color
     
     for my $bucket (keys %{$self->{total}})
     {
-        my $prob  = get_value( $self, $bucket, $word);
+        my $prob = get_value( $self, $bucket, $word);
         
         if ( $prob != 0 ) 
         {
-            $prob = 1 / ( -$prob );
+            $prob     = exp($prob);
+            $prob    *= $self->{total}{$bucket};
+            $prob    /= $self->{full_total};
+        
             if ( $prob > $max ) 
             {
                 $max   = $prob;
