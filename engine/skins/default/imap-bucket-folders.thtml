@@ -1,0 +1,46 @@
+<!--  This is the output of template imap-bucket-folders.thtml -->
+
+<TMPL_IF NAME="IMAP_if_mailboxes">
+
+<form action="/configuration" method="post">
+
+    <TMPL_LOOP NAME="IMAP_loop_buckets">
+
+    <label class="configurationLabel"><!-- localize -->Mail for bucket <TMPL_VAR NAME="IMAP_bucket"> goes to folder</label><br />
+    <select name="imap_folder_for_<TMPL_VAR NAME="IMAP_bucket">">
+
+    <TMPL_UNLESS NAME="IMAP_mailbox_defined">
+        <option selected="selected"></option>
+    </TMPL_UNLESS>
+
+    <TMPL_LOOP NAME="IMAP_loop_mailboxes">
+
+        <option value="<TMPL_VAR NAME="IMAP_mailbox">" <TMPL_VAR NAME="IMAP_selected">>
+            <TMPL_VAR NAME="IMAP_mailbox">
+        </option>
+
+    </TMPL_LOOP>
+
+    </select><br />
+
+    </TMPL_LOOP>
+    
+    <TMPL_IF NAME="IMAP_buckets_to_folders_if_error">
+       <blockquote>
+        <div class="error01">
+            <!-- localize -->You cannot map more than one bucket to a single folder!
+        </div>
+    </blockquote>
+    </TMPL_IF>
+
+    <input type="submit" class="submit" name="imap_3_bucket_folders" value="<TMPL_VAR NAME="Localize_Apply">" />
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+
+<TMPL_ELSE>
+
+    <!-- Nothing to do for imap-bucket-folders.thtml -->
+
+</TMPL_IF>
+
+<!-- End of template imap-bucket-folders.thtml -->

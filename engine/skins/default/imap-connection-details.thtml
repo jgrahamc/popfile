@@ -1,0 +1,52 @@
+<!--  This is the output of template imap-connection-details.thtml -->
+
+<form action="/configuration" method="post">
+    <label class="configurationLabel"><!-- localize -->IMAP server hostname:</label><br />
+    <input name="imap_hostname" type="text" value="<TMPL_VAR NAME="IMAP_hostname">" /> <br />
+
+    <TMPL_IF NAME="IMAP_connection_if_hostname_error">
+    <blockquote>
+      <div class="error01">
+        <!-- localize -->Please enter the server's hostname!
+      </div>
+    </blockquote>
+    </TMPL_IF>
+
+    <label class="configurationLabel"><!-- localize -->IMAP Server port:</label><br />
+    <input name="imap_port" type="text" value="<TMPL_VAR NAME="IMAP_port">" /><br />
+
+    <TMPL_IF NAME="IMAP_connection_if_port_error">
+    <blockquote>
+      <div class="error01">
+        <!-- localize -->Please enter a valid port number!
+      </div>
+    </blockquote>
+    </TMPL_IF>
+    
+    <label class="configurationLabel"><!-- localize -->IMAP account login:</label><br />
+    <input name="imap_login" type="text" value="<TMPL_VAR NAME="IMAP_login">" /><br />
+
+    <TMPL_IF NAME="IMAP_connection_if_login_error">
+    <blockquote>
+      <div class="error01">
+        <!-- localize -->Please enter a user/login name!
+      </div>
+    </blockquote>
+    </TMPL_IF>
+
+    <label class="configurationLabel"><!-- localize -->Password for IMAP account:</label><br />
+    <input type="password" name="imap_password" value="<TMPL_VAR NAME="IMAP_password">" /><br />
+
+    <TMPL_IF NAME="IMAP_connection_if_password_error">
+    <blockquote>
+      <div class="error01">
+        <!-- localize -->Please enter a password for the server!
+      </div>
+    </blockquote>
+    </TMPL_IF>
+
+    <input type="submit" class="submit" name="update_imap_0_connection_details" value="<TMPL_VAR NAME="Localize_Apply">" />
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+
+<!-- End of template imap-connection-details.thtml -->

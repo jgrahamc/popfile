@@ -1,0 +1,31 @@
+<!--  This is the output of template imap-update-mailbox-list.thtml -->
+
+<TMPL_IF NAME="IMAP_if_connection_configured">
+
+<form action="/configuration" method="post">
+    <label class="configurationLabel"><!-- localize -->Refresh list of folders </label>
+    
+    <TMPL_IF NAME="IMAP_update_list_failed">
+    
+    <blockquote>
+        <div class="error01">
+            <TMPL_VAR NAME="IMAP_update_list_failed">
+        </div>
+    </blockquote>
+    
+    </TMPL_IF>
+    
+    <input type="submit" class="submit" name="do_imap_4_update_mailbox_list" value="now!" />
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+
+<TMPL_ELSE>
+
+    <p>
+        <!-- localize -->Please configure the connection details first. After you have
+        done that, more options will be available on this page.
+    </p>
+
+</TMPL_IF>
+
+<!-- End of template imap-update-mailbox-list.thtml -->

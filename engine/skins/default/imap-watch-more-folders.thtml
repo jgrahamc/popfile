@@ -1,0 +1,17 @@
+<!--  This is the output of template imap-watch-more-folders.thtml -->
+
+<TMPL_IF NAME="IMAP_if_mailboxes">
+
+<form action="/configuration" method="post">
+    <input type="submit" class="submit" name="imap_2_watch_more_folders" value="<TMPL_VAR NAME="Localize_Add">" />
+    <label class="configurationLabel"> <!-- localize --> a folder to list of watched folders</label><br />
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+
+<TMPL_ELSE>
+
+    <!-- Nothing to do for imap-watch-more-folders.thtml -->
+
+</TMPL_IF>
+
+<!-- End of template imap-watch-more-folders.thtml -->

@@ -169,20 +169,51 @@ sub start
         return 2;
     }
 
-    $self->register_configuration_item_( 'configuration', 'imap_0_connection_details', $self );
-    $self->register_configuration_item_( 'configuration', 'imap_1_watch_folders', $self );
-    $self->register_configuration_item_( 'configuration', 'imap_2_watch_more_folders', $self );
-    $self->register_configuration_item_( 'configuration', 'imap_3_bucket_folders', $self );
-    $self->register_configuration_item_( 'configuration', 'imap_4_update_mailbox_list', $self );
-    $self->register_configuration_item_( 'configuration', 'imap_5_update_interval', $self );
-    $self->register_configuration_item_( 'configuration', 'imap_6_byte_limit', $self );
-    $self->register_configuration_item_( 'configuration', 'imap_7_debug_level', $self );
+    $self->register_configuration_item_( 'configuration',
+                                         'imap_0_connection_details',
+                                         'imap-connection-details.thtml',
+                                         $self );
 
-    $self->{imap__} = $self->connect();
+    $self->register_configuration_item_( 'configuration',
+                                         'imap_1_watch_folders',
+                                         'imap-watch-folders.thtml',
+                                         $self );
+
+    $self->register_configuration_item_( 'configuration',
+                                         'imap_2_watch_more_folders',
+                                         'imap-watch-more-folders.thtml',
+                                         $self );
+
+    $self->register_configuration_item_( 'configuration',
+                                         'imap_3_bucket_folders',
+                                         'imap-bucket-folders.thtml',
+                                         $self );
+
+    $self->register_configuration_item_( 'configuration',
+                                         'imap_4_update_mailbox_list',
+                                         'imap-update-mailbox-list.thtml',
+                                         $self );
+
+    $self->register_configuration_item_( 'configuration',
+                                         'imap_5_update_interval',
+                                         'imap-update-interval.thtml',
+                                         $self );
+
+    $self->register_configuration_item_( 'configuration',
+                                         'imap_6_byte_limit',
+                                         'imap-byte-limit.thtml',
+                                         $self );
+
+    $self->register_configuration_item_( 'configuration',
+                                         'imap_7_debug_level',
+                                         'imap-debug-level.thtml',
+                                         $self );
 
     # Read the class files for all messages in history
     # and retrieve hashes and classifications
     $self->read_cls_files();
+
+    $self->{imap__} = $self->connect();
 
     if ( defined $self->{imap__} ) {
         if ( $self->login( $self->{imap__} ) ) {
@@ -242,7 +273,7 @@ sub service
         if ( $self->{api_session__} eq '' ) {
             $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
         }
-        
+
         # Update the cached debug_level value
         $self->{debug__} = $self->config_( 'debug_level' );
 
@@ -260,16 +291,16 @@ sub service
             }
         }
         # Since say() as well as get_response() can throw an exception, i.e. die if
-        # they detect a lost connection, we eval the following code to be able 
+        # they detect a lost connection, we eval the following code to be able
         # to catch the exception
         eval {
             local $SIG{'__DIE__'};
             # Do the real job now that we have a connection
             if ( $self->{imap__} ne '' ) {
-    
+
                 # First classfiy messages found in one of our watched folders
                 $self->check_for_new_messages( $self->{imap__} );
-    
+
                 # Now check for messages that might have to be reclassified.
                 $self->reclassify_on_move( $self->{imap__} );
             }
@@ -852,7 +883,7 @@ sub get_response
         # If we aren't counting octets (anymore), we look for out tag
         # followed by BAD, NO, or OK
         if ( $count_octets == 0 ) {
-            if ( $buf =~ /^$actualTag (OK|BAD|ERR)/ ) {
+            if ( $buf =~ /^$actualTag (OK|BAD|NO)/ ) {
                 last;
             }
         }
@@ -866,20 +897,24 @@ sub get_response
         $self->{last_response__} = $response;
 
         # Log the result
-        my $re;
-        if ( $self->{debug__} == 1 ) {
-            $re = '\d (OK|BAD|NO)';
-        }
-        elsif ( $self->{debug__} == 2 ) {
-            $re = '(\d (OK|BAD|NO))|(^*)';
-        }
-        elsif ( $self->{debug__} == 3 ) {
-            $re = '';
-        }
 
-        foreach ( split /$eol/, $response ) {
-            if ( $self->{debug__} ) {
-                $self->log_( ">> $_" ) if ( /$re/ ) ;
+        if ( $self->{debug__} ) {
+
+            # RegExp that determines what to log according to the debug level
+            my $re = '';
+
+            if ( $self->{debug__} == 1 ) {
+                $re = '\d (OK|BAD|NO)';
+            }
+            elsif ( $self->{debug__} == 2 ) {
+                $re = '(\d (OK|BAD|NO))|(^*)';
+            }
+            elsif ( $self->{debug__} == 3 ) {
+                $re = '';
+            }
+
+            foreach ( split /$eol/, $response ) {
+                $self->log_( ">> $_" ) if /$re/;
             }
         }
 
@@ -1222,7 +1257,12 @@ sub folder_for_bucket
     }
     # get
     else {
-        return $mapping{$bucket}
+        if ( exists $mapping{$bucket} ) {
+            return $mapping{$bucket};
+        }
+        else {
+            return;
+        }
     }
 }
 
@@ -1673,25 +1713,16 @@ sub get_msg_file
 
 sub configure_item
 {
-    my ( $self,$name, $language, $session_key ) = @_;
+    my ( $self, $name, $template ) = @_;
 
     my $body;
 
     # conection details
     if ( $name eq 'imap_0_connection_details' ) {
-        $body .= "<form action=\"/configuration\">\n";
-        $body .= "<label class=\"configurationLabel\">IMAP server hostname:</label><br />\n";
-        $body .= "<input name=\"imap_hostname\" type=\"text\" value=\"" . $self->config_( 'hostname' ) . "\" /><br />\n";
-        $body .= "<label class=\"configurationLabel\">IMAP Server port:</label><br />\n";
-        $body .= "<input name=\"imap_port\" type=\"text\" value=\"" . $self->config_( 'port' ) . "\" /><br />\n";
-        $body .= "<label class=\"configurationLabel\">IMAP account login:</label><br />\n";
-        $body .= "<input name=\"imap_login\" type=\"text\" value=\"" . $self->config_( 'login' ) . "\" /><br />\n";
-        $body .= "<label class=\"configurationLabel\">Password for IMAP account:</label><br />\n";
-        $body .= "<input type=\"password\" name=\"imap_password\" value=\"" . $self->config_( 'password' ) . "\" /><br />\n";
-
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_imap_0_connection_details\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-
+        $template->param( 'IMAP_hostname', $self->config_( 'hostname' ) );
+        $template->param( 'IMAP_port',     $self->config_( 'port' ) );
+        $template->param( 'IMAP_login',    $self->config_( 'login' ) );
+        $template->param( 'IMAP_password', $self->config_( 'password' ) );
     }
 
     # Which mailboxes/folders should we be watching?
@@ -1699,41 +1730,66 @@ sub configure_item
 
         # We can only configure this when we have a list of mailboxes available on the server
         if ( @{$self->{mailboxes__}} < 1 || ( ! $self->watched_folders() ) ) {
-            $body .= '';
+            $template->param( IMAP_if_mailboxes => 0 );
         }
         else {
-            $body .= "<form action=\"configuration\">\n";
-            my $i = 1;
+            $template->param( IMAP_if_mailboxes => 1 );
+
+            # the following code will fill a loop containing another loop
+            # The outer loop iterates over our watched folders,
+            # the inner loop over all our mailboxes to fill the select form
+
+            # Data for the outer loop, the inner loops data will be contained
+            # in those data structures:
+
+            my @loop_watched_folders = ();
+
+            my $i = 0;
+
+            # Loop over watched folder slot. One select form per watched folder
+            # will be generated
             foreach my $folder ( $self->watched_folders() ) {
-                $body .= "<label class=\"configurationLabel\">Watched folder #$i</label><br />\n";
-                $body .= "<select name=\"imap_folder_$i\">";
-                foreach my $box ( @{$self->{mailboxes__}} ) {
-                    if ( $folder eq $box ) {
-                        $body .= "<option value=\"$box\" selected=\"selected\">$box</option>\n";
+                $i++;
+                my %data_watched_folders = ();
+
+                # inner loop data
+                my @loop_mailboxes = ();
+
+                # loop over IMAP mailboxes and generate a select element for reach one
+                foreach my $mailbox ( @{$self->{mailboxes__}} ) {
+
+                    # Populate inner loop entries:
+                    my %data_mailboxes = ();
+
+                    $data_mailboxes{IMAP_mailbox} = $mailbox;
+
+                    # Is it currently selected?
+                    if ( $folder eq $mailbox ) {
+                        $data_mailboxes{IMAP_selected} = 'selected="selected"';
                     }
                     else {
-                        $body .= "<option value=\"$box\">$box</option>\n";
+                        $data_mailboxes{IMAP_selected} = '';
                     }
+
+                    push @loop_mailboxes, \%data_mailboxes;
                 }
-                $body .= "</select><br />\n";
-                $i++;
+
+                $data_watched_folders{IMAP_loop_mailboxes} = \@loop_mailboxes;
+                $data_watched_folders{IMAP_loop_counter} = $i;
+                push @loop_watched_folders, \%data_watched_folders;
             }
-            $body .= "<input type=\"submit\" class=\"submit\" name=\"update_$name\" value=\"$$language{Apply}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+
+            $template->param( IMAP_loop_watched_folders => \@loop_watched_folders );
         }
     }
 
     # Give me another watched folder.
     if ( $name eq 'imap_2_watch_more_folders' ) {
         if ( @{$self->{mailboxes__}} < 1 ) {
-            $body .= '';
+            $template->param( IMAP_if_mailboxes => 0 );
         }
         else {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<input type=\"submit\" class=\"submit\" name=\"imap_2_watch_more_folders\" value=\"Add\" />\n";
-            $body .= "<label class=\"configurationLabel\"> a folder to list of watched folders</label><br />\n";
-
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+            $template->param( IMAP_if_mailboxes => 1 );
         }
     }
 
@@ -1741,105 +1797,84 @@ sub configure_item
     # Which folder corresponds to which bucket?
     if ( $name eq 'imap_3_bucket_folders' ) {
         if ( @{$self->{mailboxes__}} < 1 ) {
-            $body .= '';
+            $template->param( IMAP_if_mailboxes => 0 );
         }
         else {
+            $template->param( IMAP_if_mailboxes => 1 );
+
+            # What is happening here is basically the same thing that is happening
+            # above for imap_1_watch_folders
+            # Just eplace "watched folders" with "buckets".
 
             my @buckets = $self->{classifier__}->get_all_buckets( $self->{api_session__} );
 
-            $body .= "<form action=\"/configuration\">\n";
+            my @outer_loop = ();
 
             foreach my $bucket ( @buckets ) {
+                my %outer_data = ();
                 my $output = $self->folder_for_bucket( $bucket );
-                $body .= "<label class=\"configurationLabel\">Mail for bucket $bucket goes to folder</label><br />\n";
-                $body .= "<select name=\"imap_folder_for_$bucket\">\n";
 
-                # default to an empty selection
-                if ( ! defined $output ) {
-                    $body .= "<option selected=\"selected\"></option>";
-                }
+                $outer_data{IMAP_mailbox_defined} = (defined $output) ? 1 : 0;
+
+                my @inner_loop = ();
                 foreach my $mailbox ( @{$self->{mailboxes__}} ) {
+                    my %inner_data = ();
+
+                    $inner_data{IMAP_mailbox} = $mailbox;
+
                     if ( defined $output && $output eq $mailbox ) {
-                        $body .= "<option value=\"$mailbox\" selected=\"selected\">$mailbox</option>\n";
+                        $inner_data{IMAP_selected} = 'selected="selected"';
                     }
                     else {
-                        $body .= "<option value=\"$mailbox\">$mailbox</option>\n";
+                        $inner_data{IMAP_selected} = '';
                     }
+
+                    push @inner_loop, \%inner_data;
                 }
-                $body .= "</select><br />\n";
+                $outer_data{IMAP_loop_mailboxes} = \@inner_loop;
+                $outer_data{IMAP_bucket} = $bucket;
+                push @outer_loop, \%outer_data;
             }
-            $body .= "<input type=\"submit\" class=\"submit\" name=\"imap_3_bucket_folders\" value=\"$$language{Apply}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+            $template->param( IMAP_loop_buckets => \@outer_loop );
         }
     }
+
+
 
     # Read the list of mailboxes from the server. Now!
     if ( $name eq 'imap_4_update_mailbox_list' ) {
         if ( $self->config_( 'hostname' ) eq '' ) {
-            $body .= 'Please configure the connection details first. After you have done that, more options will be available on this page.';
+            $template->param( IMAP_if_connection_configured => 0 );
         }
         else {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<label class=\"configurationLabel\">Refresh list of folders </label>\n";
-            $body .= "<input type=\"submit\" class=\"submit\" name=\"do_imap_4_update_mailbox_list\" value=\"now!\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+            $template->param( IMAP_if_connection_configured => 1 );
         }
     }
 
 
     # update interval in seconds
     if ( $name eq 'imap_5_update_interval' ) {
-        if ( @{$self->{mailboxes__}} < 1 ) {
-            $body .= '';
-        }
-        else {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<label class=\"configurationLabel\">Update interval in seconds:</label><br />\n";
-            $body .= "<input type=\"text\" name=\"imap_5_update_interval\" value=\"" . $self->config_( 'update_interval' ) . "\" />\n";
-            $body .= "<input type=\"submit\" class=\"submit\" name=\"update_imap_5_update_interval\" value=\"$$language{Apply}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        }
+        $template->param( IMAP_interval => $self->config_( 'update_interval' ) );
     }
 
 
     # How many bytes/octets do we use for the classification?
     if ( $name eq 'imap_6_byte_limit' ) {
-        if ( @{$self->{mailboxes__}} < 1 ) {
-            $body .= '';
-        }
-        else {
-            $body .= "<form action=\"/configuration\">\n";
-            $body .= "<label class=\"configurationLabel\">Bytes per message to use for classification. Enter 0 (Null) for the complete message:</label><br />\n";
-            $body .= "<input name=\"imap_6_byte_limit\" type=\"text\" value=\"" . $self->config_( 'byte_limit' ) . "\" />\n";
-            $body .= "<input type=\"submit\" class=\"submit\" name=\"update_imap_6_byte_limit\" value=\"$$language{Apply}\" />\n";
-            $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
-        }
+        $template->param( IMAP_byte_limit => $self->config_( 'byte_limit' ) );
     }
-    
+
     # How noisy should the log file be?
     if ( $name eq 'imap_7_debug_level' ) {
-        $body .= "<form action=\"configuration\">\n";
-        $body .= "<label class=\"configurationLabel\">Debug level:</label><br />\n";
-        $body .= "<select name=\"imap_debug_level\">";
-        
+        my @loop = ();
         for my $i ( 0 .. 3 ) {
-            if ( $i == $self->{debug__} ) {
-                $body .= "<option value=\"$i\" selected=\"selected\">$i</option>\n";
-            }
-            else {
-                $body .= "<option value=\"$i\">$i</option>\n";
-            }
+            my %data = ();
+
+            $data{IMAP_selected} = ( $i == $self->{debug__} ) ? 'selected="selected"' : '';
+            $data{IMAP_level} = $i;
+            push @loop, \%data;
         }
-        $body .= "</select><br />\n";
-        
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"update_$name\" value=\"$$language{Apply}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
+        $template->param( IMAP_debug_levels => \@loop );
     }
-         
-   
-
-
-    return $body;
 }
 
 
@@ -1850,44 +1885,49 @@ sub configure_item
 #
 #    $name            The name of the item being configured, was passed in by the call
 #                     to register_configuration_item
-#    $language        Reference to the hash holding the current language
+#    $template        The loaded template
+#    $language        The language currently in use
 #    $form            Hash containing all form items
-#
-#  Must return the HTML for this item
 #
 # ---------------------------------------------------------------------------------------------
 
 sub validate_item
 {
-    my ( $self, $name, $language, $form ) = @_;
-
+    my ( $self, $name, $template, $language, $form ) = @_;
 
     # connection details
     if ( $name eq 'imap_0_connection_details' ) {
         if ( defined $$form{update_imap_0_connection_details} ) {
             if ( $$form{imap_hostname} ne '' ) {
+                $template->param( IMAP_connection_if_hostname_error => 0 );
                 $self->config_( 'hostname', $$form{imap_hostname} );
             }
             else {
-                return "<blockquote><div class=\"error01\">Please enter the server's hostname!</div></blockquote>";
+                $template->param( IMAP_connection_if_hostname_error => 1 );
             }
+
             if ( $$form{imap_port} >= 1 && $$form{imap_port} < 65536 ) {
                 $self->config_( 'port', $$form{imap_port} );
+                $template->param( IMAP_connection_if_port_error => 0 );
             }
             else {
-                return "<blockquote><div class=\"error01\">Please enter a valid port number!</div></blockquote>";
+                $template->param( IMAP_connection_if_port_error => 1 );
             }
+
             if ( $$form{imap_login} ne '' ) {
                 $self->config_( 'login', $$form{imap_login} );
+                $template->param( IMAP_connection_if_login_error => 0 );
             }
             else {
-                return "<blockquote><div class=\"error01\">Please enter a user/login name!</div></blockquote>";
+                $template->param( IMAP_connection_if_login_error => 1 );
             }
+
             if ( $$form{imap_password} ne '' ) {
                 $self->config_( 'password', $$form{imap_password} );
+                $template->param( IMAP_connection_if_password_error => 0 );
             }
             else {
-                return "<blockquote><div class=\"error01\">Please enter a password for the server!</div></blockquote>";
+                $template->param( IMAP_connection_if_password_error => 1 );
             }
         }
     }
@@ -1945,6 +1985,7 @@ sub validate_item
 
             my $bad = 0;
             while ( my ( $bucket, $folder ) = each %bucket2folder ) {
+
                 if ( exists $folders{$folder} && $folders{ $folder } > 1 ) {
                     $bad = 1;
                 }
@@ -1952,17 +1993,17 @@ sub validate_item
                     $self->folder_for_bucket( $bucket, $folder );
                 }
             }
-            if ( $bad ) {
-                return "<blockquote><div class=\"error01\">You cannot map more than one bucket to a single folder!</div></blockquote>";
-            }
+            $template->param( IMAP_buckets_to_folders_if_error => $bad );
         }
     }
 
     # update the list of mailboxes
     if ( $name eq 'imap_4_update_mailbox_list' ) {
         if ( defined $$form{do_imap_4_update_mailbox_list} ) {
-            if ( $self->config_( 'hostname' ) && $self->config_( 'login' )
-                && $self->config_( 'login' ) && $self->config_( 'port' )
+            if ( $self->config_( 'hostname' )
+                && $self->config_( 'login' )
+                && $self->config_( 'login' )
+                && $self->config_( 'port' )
                 && $self->config_( 'password' ) ) {
 
                     my $imap = $self->connect();
@@ -1971,17 +2012,18 @@ sub validate_item
                             $self->get_mailbox_list( $imap );
                             $self->say( $imap, 'LOGOUT' );
                             $self->get_response( $imap );
+                            $template->param( IMAP_update_list_failed => '' );
                         }
                         else {
-                            return "<blockquote><div class=\"error01\">Could not login. Verify your login name and password, please.</div></blockquote>";
+                            $template->param( IMAP_update_list_failed => 'Could not login. Verify your login name and password, please.' );
                         }
                     }
                     else {
-                        return "<blockquote><div class=\"error01\">Failed to connect to server. Please check the host name and port and make sure you are online.</div></blockquote>";
+                        $template->param( IMAP_update_list_failed => 'Failed to connect to server. Please check the host name and port and make sure you are online.' );
                     }
             }
             else {
-                return "<blockquote><div class=\"error01\">Please configure the connection details first.</div></blockquote>";
+                $template->param( IMAP_update_list_failed => 'Please configure the connection details first.' );
             }
         }
     }
@@ -1991,9 +2033,10 @@ sub validate_item
         if ( defined $$form{update_imap_5_update_interval} ) {
            if ( $$form{imap_5_update_interval} > 10 && $$form{imap_5_update_interval} < 60*60 ) {
                 $self->config_( 'update_interval', $$form{imap_5_update_interval} );
+                $template->param ( IMAP_if_interval_error => 0 );
             }
             else {
-                return "<blockquote><div class=\"error01\">Please enter an interval between 10 and 3600 seconds.</div></blockquote>";
+                $template->param ( IMAP_if_interval_error => 1 );
             }
         }
     }
@@ -2001,8 +2044,7 @@ sub validate_item
     # byte limit for message download
     if ( $name eq 'imap_6_byte_limit' ) {
         if ( defined $$form{imap_6_byte_limit} ) {
-            my $byte_limit = $$form{imap_6_byte_limit};
-            $self->config_( 'byte_limit', $byte_limit );
+            $self->config_( 'byte_limit', $$form{imap_6_byte_limit} );
         }
     }
 

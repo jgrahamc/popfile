@@ -1,0 +1,12 @@
+<!--  This is the output of template imap-byte-limit.thtml -->
+
+
+<form action="/configuration" method="post">
+
+    <label class="configurationLabel"><!-- localize -->Bytes per message to use for classification. Enter 0 (Null) for the complete message:</label><br />
+    <input name="imap_6_byte_limit" type="text" value="<TMPL_VAR NAME="IMAP_byte_limit">" />
+    <input type="submit" class="submit" name="update_imap_6_byte_limit" value="<TMPL_VAR NAME="Localize_Apply">" />
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+</form>
+
+<!-- End of template imap-byte-limit.thtml -->
