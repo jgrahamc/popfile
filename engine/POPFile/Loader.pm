@@ -498,7 +498,7 @@ sub CORE_load
     if ( !$noserver ) {
         $self->CORE_load_directory_modules( 'UI',         'interface' );
         $self->CORE_load_directory_modules( 'Proxy',      'proxy'     );
-        $self->CORE_load_directory_modules( 'Server',     'server'    );
+        $self->CORE_load_directory_modules( 'Services',   'services'    );
     }
 }
 
@@ -541,9 +541,9 @@ sub CORE_link_components
         $self->{components__}{proxy}{$name}->history(    $self->{components__}{core}{history} );
     }
 
-    foreach my $name (sort keys %{$self->{components__}{server}}) {
-        $self->{components__}{server}{$name}->classifier( $self->{components__}{classifier}{bayes} );
-        $self->{components__}{server}{$name}->history(    $self->{components__}{core}{history} );
+    foreach my $name (sort keys %{$self->{components__}{services}}) {
+        $self->{components__}{services}{$name}->classifier( $self->{components__}{classifier}{bayes} );
+        $self->{components__}{services}{$name}->history(    $self->{components__}{core}{history} );
     }
 
     # Classifier::Bayes and POPFile::History are friends and are aware
