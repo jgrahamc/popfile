@@ -33,6 +33,7 @@ use IO::Handle;
 use IO::Socket;
 use IO::Select;
 use IO::Socket::Socks;
+use IO::Socket::SSL;
 
 # A handy variable containing the value of an EOL for networks
 my $eol = "\015\012";
@@ -634,6 +635,7 @@ sub echo_response_
 # $client      The handle to the mail client
 # $hostname    The host name of the remote server
 # $port        The port
+# $ssl         If set to 1 then the connection to the remote is established using SSL
 #
 # Check that we are connected to $hostname on port $port putting the open handle in $mail.
 # Any messages need to be sent to $client
@@ -641,7 +643,9 @@ sub echo_response_
 # ---------------------------------------------------------------------------------------------
 sub verify_connected_
 {
-    my ( $self, $mail, $client, $hostname, $port ) = @_;
+    my ( $self, $mail, $client, $hostname, $port, $ssl ) = @_;
+
+    $ssl = 0 if ( !defined( $ssl ) );
 
     # Check to see if we are already connected
     return $mail if ( $mail && $mail->connected );
@@ -656,10 +660,17 @@ sub verify_connected_
                     ConnectAddr  => $hostname,
                     ConnectPort  => $port ); # PROFILE BLOCK STOP
     } else {
-        $mail = IO::Socket::INET->new( # PROFILE BLOCK START
-                    Proto    => "tcp",
-                    PeerAddr => $hostname,
-                    PeerPort => $port ); # PROFILE BLOCK STOP
+        if ( $ssl ) {
+            $mail = IO::Socket::SSL->new( # PROFILE BLOCK START
+                        Proto    => "tcp",
+                        PeerAddr => $hostname,
+                        PeerPort => $port ); # PROFILE BLOCK STOP
+	} else {
+            $mail = IO::Socket::INET->new( # PROFILE BLOCK START
+                        Proto    => "tcp",
+                        PeerAddr => $hostname,
+                        PeerPort => $port ); # PROFILE BLOCK STOP
+        }
     }
 
     # Check that the connect succeeded for the remote server
@@ -671,7 +682,9 @@ sub verify_connected_
             # Set binmode on the socket so that no translation of CRLF
             # occurs
 
-            binmode( $mail );
+            if ( !$ssl ) {
+                binmode( $mail );
+	    }
 
             # Wait 10 seconds for a response from the remote server and if
             # there isn't one then give up trying to connect

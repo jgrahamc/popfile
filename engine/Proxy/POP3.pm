@@ -196,7 +196,6 @@ sub child__
     # Compile some configurable regexp's once
 
     my $user_command = 'USER ([^:]+)(:(\d+))?' . $self->config_( 'separator' ) . '([^:]+)(:([^:]+))?';
-
     my $apop_command = 'APOP ([^:]+)(:(\d+))?' . $self->config_( 'separator' ) . '([^:]+) (.*?)';
 
     # Retrieve commands from the client and process them until the client disconnects or
@@ -219,21 +218,29 @@ sub child__
         # pass through to that server and represents the account on the remote machine that we
         # will pull email from.  Doing this means we can act as a proxy for multiple mail clients
         # and mail accounts
+        #
         # When the client issues the command "USER host:username:apop" POPFile must acknowledge
         # the command and be prepared to compute the md5 digest of the user's password and the
         # real pop server's banner upon receipt of a PASS command.
+        #
+        # When the client issues the command "USER host:username:ssl" POPFile will use SSL for
+        # the connection to the remote, note that the user can say host:username:ssl,apop if both
+        # are needed
 
         if ( $command =~ /$user_command/io ) {
             if ( $1 ne '' )  {
-                my ($host, $port, $user, $is_apop_user) = ($1, $3, $4, $6);
+                my ( $host, $port, $user, $options ) = ($1, $3, $4, $6);
 
                 print $pipe "LOGIN:$user$eol";
                 flush $pipe;
                 $self->yield_( $ppipe, $pid );
 
-                if ( $mail = $self->verify_connected_( $mail, $client, $host, $port || 110 ) )  {
+                my $ssl = defined( $options ) && ( $options =~ /ssl/i );
+                $port = 110 if ( !defined( $port ) );
 
-                    if ( defined($is_apop_user) && $is_apop_user =~ /apop/i ) {
+                if ( $mail = $self->verify_connected_( $mail, $client, $host, $port, $ssl ) )  {
+
+                    if ( defined( $options ) && ( $options =~ /apop/i ) ) {
 
                         # We want to make sure the server sent a real APOP banner, containing <>'s
 
@@ -246,10 +253,14 @@ sub child__
                             $self->{use_apop__} = 1; #
                             $self->log_( "auth APOP" );
                             $self->{apop_user__} = $user;
+
                             # tell the client that username was accepted
+			    # don't flush_extra, we didn't send anything to the real server
+
                             $self->tee_( $client, "+OK hello $user$eol" );
-                            next; # don't flush_extra, we didn't send anything to the real server
+                            next;
                         } else {
+
                             # If the client asked for APOP, and the server doesn't have the correct
                             # banner, give a meaningful error instead of whatever error the server
                             # might have if we try to make up a hash
@@ -259,8 +270,10 @@ sub child__
                             next;
                         }
                     } else {
+
                         # Pass through the USER command with the actual user name for this server,
                         # and send the reply straight to the client
+
                         $self->log_( "auth plaintext" );
                         $self->{use_apop__} = 0;         # signifies a non-apop connection
                         last if ($self->echo_response_( $mail, $client, 'USER ' . $user ) == 2 );
