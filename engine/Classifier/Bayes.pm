@@ -549,7 +549,7 @@ sub classify_file
         foreach my $bucket (@buckets) {
             my $probability = get_value( $self, $bucket, $word );
 
-            $probability = $self->{not_likely} if ( $probability <= 0 );
+            $probability = $self->{not_likely} if ( $probability == 0 );
             $wmax = $probability if ( $wmax < $probability );
 
 			# Because people treat spam as a very special case of email we need to be extra
