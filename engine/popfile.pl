@@ -1539,6 +1539,9 @@ sub history_page
 
     @mail_files = sort compare_mf @mail_files;
 
+    my $search_message = "<blockquote><font color=red>Search term not found in History</font></blockquote>";
+    my $highlight_message = '';
+
     if ( $form{search} ne '' ) 
     {
         for my $i ( 0..$#mail_files )
@@ -1552,16 +1555,31 @@ sub history_page
             {
                 if ( /^Subject:(.*)/i )
                 {
-                    if ( $subject eq '' ) 
+                    $subject = $1;
+                    $subject =~ s/<(.*)>/&lt;$1&gt;/g;
+                    $subject =~ s/\"(.*)\"/$1/g;
+                    
+                    if ( $subject =~ /\Q$form{search}\E/i ) 
                     {
-                        $subject = $1;
-                        $subject =~ s/<(.*)>/&lt;$1&gt;/g;
-                        $subject =~ s/\"(.*)\"/$1/g;
+                        $search_message = '';
+                        $form{start_message} = $i;
+                        $form{stop_message}  = $i;
+                        $highlight_message = $mail_file;
+                        last;
                     }
                 }
             }
             close MAIL;
+            
+            if ( $highlight_message ne '' ) 
+            {
+                last;
+            }
         }
+    } 
+    else 
+    {
+        $search_message = '';
     }
     
     if ( $#mail_files >= 0 ) 
@@ -1648,7 +1666,7 @@ sub history_page
             }
             $body .= "<a name=$mail_file>";
             $body .= "<tr";
-            if ( ( ( defined($form{view}) ) && ( $form{view} eq $mail_file ) ) || ( ( defined($form{file}) && ( $form{file} eq $mail_file ) ) ) )
+            if ( ( ( defined($form{view}) ) && ( $form{view} eq $mail_file ) ) || ( ( defined($form{file}) && ( $form{file} eq $mail_file ) ) ) || ( $highlight_message eq $mail_file ) )
             {
                 $body .= " bgcolor=$highlight_color";
             }
@@ -1757,7 +1775,7 @@ sub history_page
         }
 
         $body .= "</table><form action=/history><b>To remove entries in the history click: <input type=submit name=clear value='Remove All'>";
-        $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit name=search Value=Find></form>";
+        $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit name=search Value=Find></form>$search_message";
 
         if ( $configuration{page_size} <= $#mail_files )
         {
@@ -2337,7 +2355,9 @@ sub run_popfile
                             }
                         }
 
-                        $msg_headers .= "X-Text-Classification: $classification";
+                        $msg_headers .= "X-Text-Classification: $classification$eol";
+                        $temp_file =~ s/messages\/(.*)/\1/;
+                        $msg_headers .= "X-POPFile-Link: http://127.0.0.1:8080/history?jump_to_message=$temp_file";
                         $msg_headers .= "$eol$eol";
 
                         # Echo the text of the message to the client
