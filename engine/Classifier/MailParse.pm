@@ -31,7 +31,6 @@ use MIME::Base64;
 use MIME::QuotedPrint;
 
 use HTML::Tagset;
-use Date::Parse;
 
 # Korean characters definition
 
@@ -218,10 +217,6 @@ sub new
     $self->{lang__} = '';
 
     $self->{first20__}      = '';
-
-    # We need to remember the first received line of each message to
-    # compute the message age:
-    $self->{first_received_line__} = '';
 
 
     return bless $self, $type;
@@ -1486,10 +1481,6 @@ sub start_parse
 
     $self->{colorized__} = '';
     $self->{colorized__} .= "<tt>" if ( $self->{color__} ne '' );
-
-    # We need to remember the first received line of each message to
-    # compute the message age:
-    $self->{first_received_line__} = '';
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1932,48 +1923,7 @@ sub parse_header
         }
     }
 
-    # We need to store the first received line to be able to compute the
-    # age of the message later on as soon as we find the Date: line
-
-    if ( ( $header =~ m/^Received$/i ) && ( $self->{first_received_line__} eq '' ) ) {
-        $self->{first_received_line__} = $argument;
-    }
-
-    # Looking at the Date and the first Received line gives us a chance
-    # to compute the 'age' of a message, i.e. the time it supposedly took
-    # the message from the sender to the last receiving mail server.
-
-    if ( $header =~ /^Date$/i ) {
-        $self->{date__} = $argument;
-
-        # The contents of the Date line is checked against a regexp
-        # that looks for a date-time specification as described in RFC 2822
-
-        #                   day mon  yr   hr min sec  timezone offset
-        if ( $argument =~ /(\d+ \w+ \d+ (\d+:\d+:\d+ ([-+]\d+)))/ ) {
-
-            my $age_result  = $self->compute_message_age__( $1 );
-            $self->update_pseudoword( 'messageage', $age_result, 0, $argument ) if ( $age_result );
-        }
-
-        # AOL is having a difficult time to come up with a compliant Date line.
-        # They will simply omit the timezone offset, ignore the user's location and simply
-        # slap in an 'EDT' or 'EST'. At least they mind the time of year.
-
-        elsif ( $argument =~ /(\d+ \w+ \d+ (\d+:\d+:\d+)) (E[SD]T)/ ) {
-
-            my $time_zone   = ( $3 eq 'EST' ) ? '-0500' : '-0400';
-            my $age_result  = $self->compute_message_age__( "$1 $time_zone" );
-
-            $self->update_pseudoword( 'messageage', $age_result, 0, $argument ) if ( $age_result );
-        }
-
-        # if the date field does not comply to the RFC, we have an invalid
-        # format and set the messageage pseudoword accordingly:
-        else {
-            $self->update_pseudoword( 'messageage','invalid', 0, $argument );
-        }
-    }
+    $self->{date__} = $argument if ( $header =~ /^Date$/i );
 
     if ( $header =~ /^X-Spam-Status$/i) {
 
@@ -2449,79 +2399,6 @@ sub parse_line_with_kakasi
     Text::Kakasi::close_kanwadict();
 
     return $line;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# compute_message_age__
-#
-# This function compares the time stamps in the first received line of a message
-# and in the date line. The first received line is stored away in $self->{first_received_line__},
-# which happens in parse_header().
-# Both dates are transformed to UTC, the difference is computed and we
-# return a string that we can use a a value for the "messageage:" pseudo-word
-#
-# $string     The contents of the Date-Header field.
-# ---------------------------------------------------------------------------------------------
-
-sub compute_message_age__
-{
-    my ( $self, $string ) = @_;
-
-    my $return_value = "";
-
-    # Get the date/time from the Date-header in Perl terms:
-    my $msg_time = str2time( $string );
-    
-    if ( !defined $msg_time ) {
-        $return_value = "invalid";
-    }
-    else {
-        # Get the time from the first received line in Perl terms:
-        # If this fails for some reason, we will not tag the message
-        # because this could be something that happens in every message
-        # that is coming in through a given ISP.
-
-        my $received_time;
-
-        if ( $self->{first_received_line__} =~ m/(\d+ \w+ \d+ (\d+:\d+:\d+ ([-+]\d+)))/ ) {
-            $received_time = str2time( $1 );
-        }
-
-        if ( !defined $received_time ) {
-            $return_value = "";
-        }
-        else {
-            # At this point we can be sure that we have valid values
-            # for both Date-time and Received-time.
-
-            # Compute the age of the message (in seconds).
-
-            my $age = $received_time - $msg_time;
-
-            # We will allow for some inaccuracy of the clocks involved (1.5 hours):
-
-            my $benefit = 5400;
-
-            # A negative age marks a message from the future:
-
-            my $past_or_future = "_in_past";
-
-            if ( $age < 0 ) {
-                $past_or_future = "_in_future";
-                $age *= -1;
-            }
-
-            if ( ($age > $benefit) && ($age <= 86400 ) ) {
-                $return_value = "hours" . $past_or_future;
-            }
-            if ( $age > 86400 ) {
-                $return_value = "days" . $past_or_future;
-            }
-        }
-    }
-
-    return $return_value;
 }
 
 

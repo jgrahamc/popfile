@@ -502,37 +502,6 @@ $cl->parse_file( 'temp.tmp' );
 test_assert_equal( $cl->{words__}{'html:imgwidth42'}, 1 );
 test_assert_equal( $cl->{words__}{'html:imgheight41'}, 1 );
 
-
-# Test computation of message age
-
-$cl->start_parse();
-$cl->{first_received_line__} = 'by somehost by some.other.host with some software; Fri, 14 Nov 2003 15:50:38 +0100';
-test_assert_equal( $cl->compute_message_age__( 'Fri, 14 Nov 2003 15:50:38 +0100' ), '' );
-test_assert_equal( $cl->compute_message_age__( 'Fri, 14 Nov 2003 15:50:38 +0000' ), '' );
-test_assert_equal( $cl->compute_message_age__( 'Fri, 14 Nov 2003 14:50:38 +0100' ), '' );
-test_assert_equal( $cl->compute_message_age__( 'Fri, 14 Nov 2003 13:50:38 +0100' ), 'hours_in_past' );
-test_assert_equal( $cl->compute_message_age__( 'Fri, 14 Nov 2003 13:50:38 -0300' ), 'hours_in_future' );
-test_assert_equal( $cl->compute_message_age__( 'Wed, 12 Nov 2003 13:50:38 +0100' ), 'days_in_past' );
-test_assert_equal( $cl->compute_message_age__( 'Sat, 15 Nov 2003 13:50:38 -0300' ), 'days_in_future' );
-test_assert_equal( $cl->compute_message_age__( 'Mon, 15 11 2004 13:50:38 -0300' ), 'invalid' );
-
-$cl->start_parse();
-test_assert_equal( $cl->compute_message_age__( 'Mon, 15 Nov 2004 13:50:38 -0300' ), '' );
-
-$cl->start_parse();
-$cl->parse_header( 'Received', 'by something from someone; Fri, 14 Nov 2003 15:50:38 +0100' );
-$cl->parse_header( 'Date', 'Mon, 15 Nov 2004 13:50:38 -0300' );
-test_assert_equal( $cl->{words__}{'messageage:days_in_future'}, 1 );
-
-$cl->parse_header( 'Date', 'invalid crap. Sorry.' );
-test_assert_equal( $cl->{words__}{'messageage:invalid'}, 1 );
-
-$cl->parse_header( 'Date', 'Fri, 14 Nov 2003 15:50:38 EDT' );
-test_assert_equal( $cl->{words__}{'messageage:hours_in_future'}, 1 );
-
-$cl->parse_header( 'Date', 'Fri, 14 Nov 2003 00:50:38 EST' );
-test_assert_equal( $cl->{words__}{'messageage:hours_in_past'}, 1 );
-
-
 $b->stop();
+
 1;
