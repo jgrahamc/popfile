@@ -1972,6 +1972,7 @@ sub configure_item
                 $data_watched_folders{IMAP_loop_counter} = $i;
                 $data_watched_folders{IMAP_WatchedFolder_Msg} = $$language{Imap_WatchedFolder};
                 $data_watched_folders{Localize_Remove} = $$language{Remove};
+                $data_watched_folders{IMAP_ifnot_first_folder} = ( $i == 1 ) ? 0 : 1;
 
                 push @loop_watched_folders, \%data_watched_folders;
             }
