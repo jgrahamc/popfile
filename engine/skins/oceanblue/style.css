@@ -7,6 +7,8 @@ Some useful sites other skinners may want to visit:
     http://www.ryanbrill.com/floats.htm
   Workaround ie bug when using floats:
     http://www.positioniseverything.net/explorer/peekaboo.html
+  Hack to fix ie float bug:
+    http://www.positioniseverything.net/articles/hollyhack.html#haslayout
 */
 
 body {
@@ -14,7 +16,6 @@ body {
   font-family: 'Trebuchet MS', Verdana, Helvetica, Arial, sans-serif;
   margin: 0;
   padding: 0;
-  kborder: 2px solid darkblue;
   font-size: 0.8em;
   width: auto;
   color: white;
@@ -39,7 +40,6 @@ html {
   padding: 0.5em;
   margin: 0;
   margin-left: 8.6em;
-//margin-left: 9.1em;
   width: auto;
 }
 
@@ -223,6 +223,11 @@ h2 {
   background-color: #5ba3e0;
 }
 
+.rowEven td a, .rowOdd td a {
+  display: block;
+  width: 100%;
+}
+
 .footer {
   font-size: 0.9em;
   background-color: lightblue;
@@ -360,3 +365,7 @@ a:link:hover, a:visited:hover {
 .footer li {
   display: inline;
 }
+
+/* Hide Tan Hack from IE5-mac \*/
+* html .shell  {height: 1%;}
+/* End hide from IE5-mac */
