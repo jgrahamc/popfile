@@ -581,7 +581,7 @@ sub tie_bucket__
     $self->{db__}{$bucket} = tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",              # PROFILE BLOCK START
                                  -Cachesize => $self->config_( 'db_cache_size' ),
                                  -Filename  => $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table.db" ),
-                                 -Flags     => DB_CREATE | DB_INIT_LOCK;                                        # PROFILE BLOCK STOP
+                                 -Flags     => DB_CREATE;                                        # PROFILE BLOCK STOP
 
     # Check to see if the tie worked, if it failed then POPFile is about to fail
     # badly
