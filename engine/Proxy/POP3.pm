@@ -5,6 +5,7 @@
 # ---------------------------------------------------------------------------------------------
 package Proxy::POP3;
 
+use IO::Handle;
 use IO::Socket;
 use IO::Select;
 
@@ -168,16 +169,19 @@ sub service
     my @pipes;
     
     if ( $#{$self->{children}} >= 0 ) {
-        debug( $self, "There are $#{$self->{children}}+1 children running$eol" );
+        debug( $self, $#{$self->{children}}+1 . " children running" );
         @pipes = @{$self->{children}};
     }
     $self->{children} = ();
     
     for my $pipe (@pipes) {
-        my $class = <$pipe>;
+        my $selector = new IO::Select( $pipe );
+        my ($ready)  = $selector->can_read(0); 
+        if ( defined( $ready ) ) {
+            my $class = <$pipe>;
         
-        while ( defined( $class ) ) {
             $class =~ s/[\r\n]//g;
+            debug( $self, "Read $class from $pipe" );
 
             if ( $class eq '__popfile__pipe__done__' ) {
                 debug( $self, "Closing $pipe$eol" );
@@ -185,13 +189,11 @@ sub service
                 $pipe = undef;
                 last;
             }            
-            
+
             $self->{classifier}->{parameters}{$class}{count} += 1;
             $self->{configuration}->{configuration}{mcount}  += 1;
 
             debug( $self, "Incrementing $class$eol" );
-
-            $class = <$pipe>;
         }
         
         # If the pipe is still open when we reach here then we need to keep it
