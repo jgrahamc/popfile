@@ -380,9 +380,9 @@ sub map_color
         print "$r $g $b\n" if $self->{debug_};
 
         # left-trim very long triplets to 4 bytes
-        $r =~ s/(.{8})$/$1/;
-        $g =~ s/(.{8})$/$1/;
-        $b =~ s/(.{8})$/$1/;
+        $r =~ s/.*(.{8})$/$1/;
+        $g =~ s/.*(.{8})$/$1/;
+        $b =~ s/.*(.{8})$/$1/;
 
         # right-trim long triplets to get the first two bytes
         $r =~ s/(..).*/$1/;
@@ -740,7 +740,7 @@ sub update_tag
             $self->compute_html_color_distance();
         }
 
-        if ( $tag =~ /^$self->{cssbackcolortag__}$/i ) {
+        if ( lc( $tag ) eq $self->{cssbackcolortag__} ) {
             $self->{htmlbackcolor__} = $self->{htmlbodycolor__};
             $self->{cssbackcolortag__} = '';
 
@@ -749,7 +749,7 @@ sub update_tag
             print "CSS back color reset to $self->{htmlbackcolor__} (tag closed: $tag)\n" if ( $self->{debug__} );
         }
 
-        if ( $tag =~ /^$self->{cssfontcolortag__}$/i ) {
+        if ( lc( $tag ) eq $self->{cssfontcolortag__} ) {
             $self->{htmlfontcolor__} = map_color( $self, 'black' );
             $self->{cssfontcolortag__} = '';
 
