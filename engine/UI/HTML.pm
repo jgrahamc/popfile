@@ -3355,6 +3355,7 @@ sub history_copy_file
     if ( open( FROM, "<$from") ) {
       if ( open( TO, ">$to_dir\/$to_name") ) {
             binmode FROM;
+            binmode TO;
             while (<FROM>) {
                 print TO $_;
             }
