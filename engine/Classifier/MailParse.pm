@@ -1400,7 +1400,7 @@ sub parse_line
 
             if ( $self->{encoding__} =~ /quoted\-printable/i ) {
                 $line       = decode_qp( $line );
-                $line       =~ s/[\r\n]+$//g;
+                $line       =~ s/[\r\n]+$/ /g;
                 $self->{ut__} = decode_qp( $self->{ut__} ) if ( $self->{color__} );
             }
 

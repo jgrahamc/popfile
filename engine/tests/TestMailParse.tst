@@ -286,4 +286,13 @@ test_assert_equal( $cl->first20(), ' Take Control of Your Computer With This Top
 test_assert_equal( $cl->splitline( '=3Chtml=3E', 'quoted-Printable' ), '&lt;html&gt;' );
 test_assert_equal( $cl->splitline( '=3Chtml=3E', '' ), '=3Chtml=3E' );
 
+# Test the CRLF is preserved in QP encoding
+
+open FILE, ">temp.tmp";
+print FILE "From: John\n\n<img width=42\nheight=41>\n";
+close FILE;
+$cl->parse_file( 'temp.tmp' );
+test_assert_equal( $cl->{words__}{'html:imgwidth42'}, 1 );
+test_assert_equal( $cl->{words__}{'html:imgheight41'}, 1 );
+
 $b->stop();
