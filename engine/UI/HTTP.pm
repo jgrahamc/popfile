@@ -358,7 +358,6 @@ sub http_file_
         my $header = "HTTP/1.0 200 OK$eol" . "Content-Type: $type$eol" . "Expires: $expires$eol" . "Content-Length: ";
         $header .= length($contents);
         $header .= "$eol$eol";
-        $self->log_( $header );
         print $client $header . $contents;
     } else {
         http_error_( $self, $client, 404 );
