@@ -1,0 +1,125 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>تعليمات POPFile</TITLE>
+<STYLE type=text/css>H1,H2,H3,P,TD {font-family: tahoma;}</STYLE>
+
+<META http-equiv=Content-Type content="text/html; charset=utf-8">
+<META content="MSHTML 6.00.2800.1400" name=GENERATOR></HEAD>
+<BODY dir=rtl bgColor=#fcfcfc>
+<TABLE cellSpacing=0 cellPadding=0 width="100%">
+  <TBODY>
+  <TR>
+    <TD bgColor=#ededca>&nbsp;&nbsp;<FONT size=+3>تعليمات POPFile</FONT> 
+    <TD align=right bgColor=#ededca>
+  <TR bgColor=#cccc99 height=3>
+    <TD bgColor=#cccc99 colSpan=2 height=3></TD></TR></TBODY></TABLE>
+<P>
+<TABLE cellSpacing=0 width="100%">
+  <TBODY>
+  <TR>
+    <TD align=middle width="15%"><FONT size=+1><B>تنصيب<BR>للمرة الأولى:</B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca>خطوة 1 <BR><FONT size=+1><B><A href="installing.html">تنصيب</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca>خطوة 2<BR><FONT size=+1><B><A href="firsttime.html">إعداد دلو</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca>خطوة 3<BR><FONT size=+1><B><A href="email.html">برامج البريد</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca>خطوة 4<BR><FONT size=+1><B><A href="training.html">تدريب</A></B></FONT></TD>
+    <TD width="25%">&nbsp;</TD></TR>
+  <TR height=1>
+    <TD bgColor=#cccccc colSpan=10></TD></TR>
+  <TR height=1>
+    <TD colSpan=10></TD></TR></TBODY></TABLE>
+<TABLE cellSpacing=0 width="100%">
+  <TBODY>
+  <TR>
+    <TD align=right width="40%"><FONT size=+1><B>إستعمال POPFile مع:</B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca><FONT size=+1><B><A href="firewalls.html">جدار النار</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca><FONT size=+1><B>&nbsp;<A href="spa.html">مصادقة كلمة مرور آمنة</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#cccc99><FONT size=+1><B>&nbsp;<A href="proxies.html">ملقمات أخرى</A></B></FONT><BR></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca><FONT size=+1><B>&nbsp;<A href="multiple.html">حسابات بريد متعددة</A></B></FONT></TD></TR></TBODY></TABLE>
+
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2>
+<tr><td width=100% valign=top bgcolor=#ededca>
+
+<h2>إستعمال POPFile مع ملقمات أخرى مثل متفحصات الفايروس</h2>
+<p>إذا كنت تستعمل ملقم تفحص بريد وقام بتعديل إعدادات البريد مثل بعض إصدارات Norton Antivirus، فإن POPFile لن يعمل مباشرة: ملقم البريد سيقوم بأخذ الرسائل بدلاً منه. ستحتاج على إعداد POPFile ليتكلم مع متفحص البريد. (إذا لم يقم متفحص الفيروسات بتغيير إعدادات خادم  POP3 فإنه لا توجد الحاجة لتتبع التعليمات التالية).</p>
+
+<p>(حسناً، بكل بساطة، سيتم تنزيل البريد بالمتفحص، مروراً بـِ POPFile، وبعد ذلك، يذهب إلى برنامج البريد.)</p>
+<p>الآن، وبما أن الأنواع المختلفة من متفحصات الفيروس تعمل بشكا مختلف، سنعمل التالي:
+<ol>
+<li>قم بتعطيل ميزة فحص البريد وإرجاع الإعدادات على ما كانت عليه.
+<li>جهّز POPFile لينتظر إتصالات على منفذ مختلف.
+<li>جهّز برنامج البريد ليتصل مع POPFile على المنفذ المعد في الخطوة السابقة.
+<li>قم بتشغيل ميزة فحص البريد بالإعدادات الجديدة.
+</ol></p>
+
+<h3>تعطيل متفحّص البريد</h3>
+<p>إتبع التعليمات من مصنّع البرنامج.</p>
+
+<h3>تغيير منفذ إتصال  POPFile</h3>
+<p>توجه الى لسان الإعدادات في واجهة POPFile، وقم بتغيير <b>بوابة إتصال POP3</b> لأية رقم متشابه - نقترح استعمال 123. اظغط على تطبيق.</p>
+
+<h3>تغيير منفذ برنامج البريد</h3>
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+<td colspan=3 align="center">أختر برنامج البريد المستعمل وأتبع العمود للأسفلأختر برنامج البريد وأتبع العمود للأسفل. بالرغم من أن هذه التلعيمات ممكن أن تبدو معقدة، إلا أنها تأخذ حوالي دقيقتين - ومن الصعب أن تخطئ. (فقط للطوارئ، قم بحفظ الإعدادات الأصلية إذا إحتجت أن تعود لها.) </td>
+</tr>
+<tr><td width=33% bgcolor="#FFCCCC" valign="top">
+<h3 align=center>Outlook</h3>
+<ul>
+<li>إختر القائمة أدوات -> حسابات البريد الإلكتروني.
+<li>إضغط على عرض حسابات البريد الإلكتروني الموجودة أو تغيرها ثم إضغط التالي.
+<li>إختر الحساب المراد تعديله ليعمل مع POPFile وإضغط تغيير.
+<li>إضغط على مزيد من الإعدادات.
+<li>إضغط على لسان خيارات متقدمة.
+<li>بجانب ملقم البريد الوارد (POP3)، أدخل نفس رقم المنفذ المختار سابقا (يفضّل 123).
+<li>إضغط موافق، وأعد العملية لكل من الحسابات المراد إستعمالها مع POPFile.
+</ul></td>
+
+<td width=34% bgcolor="#CCFFCC" valign="top">
+<h3 align=center>Outlook Express</h3>
+<ul>
+<li>إذهب إلى قائمة أدوات <nobr>-></nobr> حسابات.
+<li>إختر الحساب وإضغط خصائص.
+<li>أختر لسان خيارات متقدمة.
+<li>بجانب البريد الوارد (POP3)، أدخل نفس رقم المنفذ المختار سابقا (يفضّل 123).
+<li>إضغط موافق، وأعد العملية لكل من الحسابات المراد إستعمالها مع POPFile.
+</ul></td>
+
+<td width=33% bgcolor="#CCCCFF" valign="top">
+<h3 align=center>Eudora</h3>
+<ul>
+<li>Eudora's port setting is in its hidden, 'esoteric' settings.
+<li>Go to 'My Computer' and navigate to the directory that Eudora is installed in - it's usually C:\Program Files\Qualcomm\Eudora
+<li>Click on the 'extrastuff' folder.
+<li>Select the 'esoteric.epi' file, and copy it using the Edit > Copy menu.
+<li>Go back to the main Eudora folder, and paste it using Edit > Paste.
+<li>Start Eudora.<li>Go to the Tools -> Options menu.
+<li>Scroll to the bottom of the list of option menus and choose 'Ports & Protocols'.
+<li>Next to 'POP3', enter the same number as you chose earlier (we recommended 123).
+<li>Click OK. You're done.</ul>
+
+</td></tr></table>
+
+<h3>تشغيل ميزة فحص البريد</h3>
+قم بتشغيل ميزة فحص البريد (راجع دليل البرنامج) ومن المفروض أن يقوم بعمل التعديلات بشكا تلقائي. البريد الان مفحوص ومصنّف.</td></tr></table><br>
+
+<TABLE cellSpacing=0 width="100%">
+  <TBODY>
+  <TR>
+    <TD align=middle width="15%"><FONT size=+1><B>روابط على الشبكة:</B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#cccc99><FONT size=+1><B><A href="http://popfile.sourceforge.net">الصفحة الرئيسة</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca><FONT size=+1><B><A href="http://sourceforge.net/forum/?group_id=63137">المنتدى</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca><FONT size=+1><B><A href="http://sourceforge.net/tracker/?group_id=63137&amp;atid=502956">قاعدة بيانات الأخطاء</A></B></FONT></TD>
+    <TD width="55%">&nbsp;</TD></TR>
+  <TR height=1>
+    <TD bgColor=#cccccc colSpan=10></TD></TR>
+  <TR height=1>
+    <TD colSpan=10></TD></TR></TBODY></TABLE></P></BODY></HTML>

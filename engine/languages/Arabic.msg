@@ -23,7 +23,7 @@ LanguageCharset                         utf-8
 LanguageDirection                       rtl
 
 # This is used to get the appropriate subdirectory for the manual
-ManualLanguage                          en
+ManualLanguage                          ar
 
 # Common words that are used on their own all over the interface
 Apply                                   تطبيق

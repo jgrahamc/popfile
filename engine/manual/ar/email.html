@@ -1,0 +1,357 @@
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML><HEAD><TITLE>تعليمات POPFile</TITLE>
+<STYLE type=text/css>H1,H2,H3,P,TD {font-family: tahoma;}</STYLE>
+
+<META http-equiv=Content-Type content="text/html; charset=utf-8">
+<META content="MSHTML 6.00.2800.1400" name=GENERATOR></HEAD>
+<BODY dir=rtl bgColor=#fcfcfc>
+<TABLE cellSpacing=0 cellPadding=0 width="100%">
+  <TBODY>
+  <TR>
+    <TD bgColor=#ededca>&nbsp;&nbsp;<FONT size=+3>تعليمات POPFile</FONT>
+    <TD align=right bgColor=#ededca>
+  <TR bgColor=#cccc99 height=3>
+    <TD bgColor=#cccc99 colSpan=2 height=3></TD></TR></TBODY></TABLE>
+<P>
+<TABLE cellSpacing=0 width="100%">
+  <TBODY>
+  <TR>
+    <TD align=middle width="15%"><FONT size=+1><B>تنصيب<BR>للمرة الأولى:</B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca>خطوة 1 <BR><FONT size=+1><B><A href="installing.html">تنصيب</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca>خطوة 2<BR><FONT size=+1><B><A href="firsttime.html">إعداد دلو</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#cccc99>خطوة 3<BR><FONT size=+1><B><A href="email.html">برامج البريد</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca>خطوة 4<BR><FONT size=+1><B><A href="training.html">تدريب</A></B></FONT></TD>
+    <TD width="25%">&nbsp;</TD></TR>
+  <TR height=1>
+    <TD bgColor=#cccccc colSpan=10></TD></TR>
+  <TR height=1>
+    <TD colSpan=10></TD></TR></TBODY></TABLE>
+<TABLE cellSpacing=0 width="100%">
+  <TBODY>
+  <TR>
+    <TD align=right width="40%"><FONT size=+1><B>إستعمال POPFile مع:</B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca><FONT size=+1><B><A href="firewalls.html">جدار النار</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca><FONT size=+1><B>&nbsp;<A href="spa.html">مصادقة كلمة مرور آمنة</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca><FONT size=+1><B>&nbsp;<A href="proxies.html">ملقمات أخرى</A></B></FONT><BR></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca><FONT size=+1><B>&nbsp;<A href="multiple.html">حسابات بريد متعددة</A></B></FONT></TD></TR></TBODY></TABLE>
+
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+<h2>جعل برنامج البريد يتكلم مع POPFile</h2>
+
+<p>يعمل POPFile كـ<i>ملقم وكيل (بروكسي)</i>. برنامج البريد يتكلم مع POPFile، الذي بدوره يتكلم مع خادم البريد نيابة عن برنامج البريد. بدلاً من أن يستلم برنامج البريد الرسائل مباشرة، يستلمها أولاً POPFile، ويقوم بتفحصها ويقرر في أي دلو المفروض أن تدخل.</p>
+
+<p>بعد أن يتم القرار - الذي يأخذ خزء من الثانية فقط - يقوم POPFile بأحد الأمرين التاليين: يستطيع إضافة بطاقة مثل [this] على بداية سطر الموضوع؛ الذي يعني أن برامج الترتيب البسيطة مثل ميكروسوفت Outlook Express تستطيع إيضال البريد إلى المكان المفروض - أو، لبرامج متقدمة مثل Eudora، يستطيع إضافة رأسية جديدة على الرسالة مثل هذه:</p>
+
+<p><b>X-Text-Classification: personal</b></p>
+
+<p>- الذي يستعملها برنامج البريد للترتيب.</p>
+
+<p>على أية حال، يحتاج برنامج البريد لأمرين ليتكلم مع POPFile:
+
+<ol><li>تعديل إعدادات البرنامج لجعله يتكلم مع POPFile، و</li>
+
+<li>إعداد قواعد بريدية لجعل الأمور تسير حسب الازم.</li>
+</ol>
+</p>
+
+<p>لنقم بإعدادات البريد أولاً. سنقوم بإعداد القواعد لاحقاً.</p>
+
+<p>ستجد في الأسفل التعليمات لإعداد برامج البريد الشائعة الإستعمال. لبرامج أخرى - أو لمستخدمين محترفين - هذه هي التعليمات العامة:</p>
+
+<p>
+<ul>
+<li>تعديل خادم POP3 في برنامج البريد إلى 127.0.0.1، وليس إلى الخادم الأصلي.</li>
+
+<li>تعديل إسم مستخدم POP3 إلى [إسم خادم POP3 الأصلي]:[إسم المستخدم]</li>
+
+<li>أترك كلمة المرور كما هي</li>
+</ul>
+</p>
+
+<p>للحسابات التي تستعمل مصادقة كلمة مرور آمنة (Secure Password Authentication), راجع <a href=spa.html>إستعمال POPFile مع: مصادقة كلمة مرور آمنة (Secure Password Authentication)</a>.</p>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=3 align="center">
+أختر برنامج البريد وأتبع العمود للأسفل. بالرغم من أن هذه التلعيمات ممكن أن تبدو معقدة، إلا أنها تأخذ حوالي دقيقتين - ومن الصعب أن تخطئ. (فقط للطوارئ، قم بحفظ الإعدادات الأصلية إذا إحتجت أن تعود لها.)
+</td></tr><tr>
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Outlook</h3>
+
+<ul>
+
+<li>في Outlook إختر من القائمة أدوات->حسابات البريد الإلكتروني... .  سيظهر مربع حوار حسابات البريد الإلكتروني. <a href=o_popfile1.gif>[لقطة]</a>
+
+<li>إضغط على عرض حسابات البريد الإلكتروني الموجودة أو تغيرها ثم إضغط التالي.إختر الحساب المراد تعديله ليعمل مع POPFile وإضغط تغيير...
+
+قم بتسجيل إسم ملقم البريد الوارد (POP3) واسم الحساب.<a href=o_popfile2.gif>[لقطة]</a>
+
+<li>قم بتغيير ملقم البريد الوارد (POP3) إلى <b>127.0.0.1</b> واسم الحساب إلى دمج اسم ملقم البريد الوارد (POP3) الأصلي واسم الحساب بفاصل بينهما هو النقطتان ":". <a href=o_popfile3.gif>[لقطة]</a>
+
+<li>مثلاً، إذا كان اسم الملقم الأصلي <b>my.mail.com</b> واسم الحساب <b>jdoe</b>، فإن اسم الحساب الجديد سيصبح <b>my.mail.com:jdoe</b>
+
+<li>ليس هناك حاجة لتغيير كلمة المرور.
+
+<li>إضغط التالي ومن ثم إنهاء.
+
+<li>تأكد من ان POPFile قيد التنفيذ وسيتم تسليم كل البريد مروراً بـِ POPFile!
+
+<li>يجب أن تتأكد من أن POPFile يحمّل كلما أعيد تشغيل ويندوز. إذا كنت تستعمل إصدارة التنصيب السهل للنوافذ، يمكن سحب وإفلات إختصار 'Start POPFile in Background' من مجموعة POPFile إلى مجموعة <b>تسغيل تلقائي</b> في قائمة ابدأ. الأن سيتم تنفيذ POPFile في كل تشغيل للنوافذ.
+
+<li>ملاحظة مهمة! إذا لم يكن POPFile محمّل، فإن البريد لن يمر - وبرنامج البريد لن يستطيع الإتصال مع ملقم البريد!
+
+</ul>
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>Outlook Express</h3>
+
+<ul>
+
+<li>في Outlook Express إختر من القائمة أدوات<nobr>-></nobr>حسابات... سيظهر مربع حوار حسابات إنترنيت. <a href=oe_popfile1.gif>[لقطة]</a>
+
+<li>إختر الحساب المراد تعديله ليعمل مع POPFile وإضغط خصائص. <a href=oe_popfile2.gif>[لقطة]</a>
+
+<li>إختر لسان ملقمات. قم بتسجيل إسم ملقم البريد الوارد (POP3) واسم الحساب. <a href=oe_popfile3.gif>[لقطة]</a>
+
+<li>قم بتغيير ملقم البريد الوارد (POP3) إلى <b>127.0.0.1</b> واسم الحساب إلى دمج اسم ملقم البريد الوارد (POP3) الأصلي واسم الحساب بفاصل بينهما هو النقطتان ":". <a href=oe_popfile4.gif>[لقطة]</a>
+
+<li>مثلاً، إذا كان اسم الملقم الأصلي <b>my.mail.com</b> واسم الحساب <b>jdoe</b>، فإن اسم الحساب الجديد سيصبح <b>my.mail.com:jdoe</b>
+
+<li>ليس هناك حاجة لتغيير كلمة المرور.
+
+<li>إضغط موافق ومن ثم أغلق النافذة.
+
+<li>تأكد من ان POPFile قيد التنفيذ وسيتم تسليم كل البريد مروراً بـِ POPFile!
+
+<li>يجب أن تتأكد من أن POPFile يحمّل كلما أعيد تشغيل ويندوز. إذا كنت تستعمل إصدارة التنصيب السهل للنوافذ، يمكن سحب وإفلات إختصار 'Start POPFile in Background' من مجموعة POPFile إلى مجموعة <b>تسغيل تلقائي</b> في قائمة ابدأ. الأن سيتم تنفيذ POPFile في كل تشغيل للنوافذ.
+
+<li>ملاحظة مهمة! إذا لم يكن POPFile محمّل، فإن البريد لن يمر - وبرنامج البريد لن يستطيع الإتصال مع ملقم البريد!
+
+</ul>
+
+</td><td width=25% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<ul>
+
+<li>In Eudora select the Tools->Options... menu option.  The Options dialog will appear. <a href=../e_popfile1.gif>[screenshot]</a>
+
+<li>Make a note of the Mail Server (incoming) server name and the Login Name. <a href=../e_popfile2.gif>[screenshot]</a>
+
+<li>Change the Mail Server (incoming) server name to <b>127.0.0.1</b> and change the Login Name to the combination of the original
+
+Mail Server (incoming) server name and the original Login Name separated by a colon.  <a href=../e_popfile3.gif>[screenshot]</a>
+
+<li>So, if the original Mail Server (incoming) server name was <b>my.mail.com</b> and your username was <b>jdoe</b>, your new username would be <b>my.mail.com:jdoe</b>
+
+<li>You don't need to change the password.
+
+<li>Hit OK.
+
+<li>Ensure that POPFile is running and all mail will be delivered through POPFile.
+
+<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <b>Startup</b> group. Now, Windows will load POPFile each time.
+
+<li>Important! If POPFile isn't loaded, the mail will not get through - and your email program won't connect!
+
+</ul>
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Pegasus</h3>
+
+<ul>
+
+<li>   In Pegasus select the Tools->Internet Options... Receiving (POP3) tab. The POP3 account setup page will appear.
+
+<li>   Under General settings for receiving mail using POP3, select the POP3 Host dialog box. Make a note of the current POP3 host.
+
+<li>   Change the POP3 Host to <b>127.0.0.1</b>
+
+<li>   Under General settings for receiving mail using POP3, select the User name dialog box. Make a note of the current User name.
+
+<li>   Change the User name to the combination of the original POP3 Host name and the original User name separated by a colon.
+
+<li>   So, if the original POP3 host was <b>my.mail.com</b> and your User name was <b>jdoe</b>, your new User name would be <b>my.mail.com:jdoe</b>
+
+<li>   You don't need to change the password.
+
+<li>   Click the OK Button to save the changes.
+
+<li>   Ensure that POPFile is running and all mail will be delivered through POPFile!
+
+<li>   You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version of POPFile, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the Start -> Programs -> Startup group. Now, Windows will load POPFile each time.
+
+</ul>
+
+</td></tr></table>
+
+<p>حسناً. بعد الإنتهاء من إعداد الحساب، حان الوقت لإعداد قواعد الرسائل، حتى بعد أن يعمل POPFile عمله، يكمل برنامج البريد العمل ويضع الرسائل في المكان الصحيح.</p>
+
+<p>للمستخدمين المحترفين، هناك الإمكانية لتغيير سطر الموضوع بإضافة جملة [classification] أو عدم إضافتها. هذا الخيار موجود بشكل مستقل لكل دلو في صفحة الإعدادات في واجهة المستخدم. مهما تغيّرت، ستبقى رأسية <b>X-Text-Classification</b> موجودة.</p>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=3 align="center">
+
+أختر برنامج البريد وأتبع العمود للأسفل. بالرغم من أن هذه التلعيمات ممكن أن تبدو معقدة، إلا أنها تأخذ حوالي دقيقتين - ومن الصعب أن تخطئ. (فقط للطوارئ، قم بحفظ الإعدادات الأصلية إذا إحتجت أن تعود لها.)
+
+</td></tr><tr>
+
+<td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Outlook</h3>
+
+<ul>
+
+<li>في Outlook إختر القائمة إدوات->قواعد وتنبيهات... <a href=o_filter1.gif>[لقطة]</a>
+
+<li>سيظهر مربع حوار إعداد القواعد. إضعط قاعجة جديدة... وثم إختر البدء من قاعدة فارغة.  <a href=o_filter2.gif>[لقطة]</a>
+
+<li>يستطيع Outlook التعامل مع الرأسية <b>X-Text-Classification</b>، التي تسمح للبريد أن يصنف كلياً في الخلفية. إضغط التالي وإختر  <i>مع كلمات معينة في رأس الرسالة</i>.  <a href=o_filter3.gif>[لقطة]</a>
+
+<li>الآن إضغط الرابط المعلم <i>كلمات معينة</i> وأدخل "X-Text-Classification: " متبوعاً بإسم أحد الدلاء وإضغط أضف، ثم موافق.  <a href=o_filter4.gif>[لقطة]</a>
+
+<li>إضغط التالي وإختر <i>نقل الى المجلد معين</i>.  <a href=o_filter5.gif>[لقطة]</a>
+
+<li>إضغط على الوصلة <i>معين</i>المعلمة وستظهر قائمة بالمجلدات. إختر المجلد المراد نقل الرسالة إليه وإضغط موافق.  <a href=o_filter6.gif>[لقطة]</a>
+
+<li>إضغط موافق، ثم إنهاء.
+
+<li>أعد العملية لكل من الدلاء، وثم أغلق النافذة.
+
+<li>لقد إنتهينا!
+
+<li>ملاحظة صغيرة: في <a href="http://127.0.0.1:8080">واجهة إستخدام POPFile</a>، تحت لسان الإعدادات، تأكد من أن خيار تعديل سطر الموضوع <b>غير نشط</b>.
+
+</ul>
+
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>Outlook Express</h3>
+
+<ul>
+
+<li>في Outlook Express إختر أدوات<nobr>-></nobr>قواعد الرسالة<nobr>-></nobr>بريد... <a href=oe_filter1.gif>[لقطة]</a>
+
+<li>سيظهر مربع حوار قاعدة بريد جديدة.  <a href=oe_filter2.gif>[لقطة]</a>
+
+<li>لا يستطيع Outlook Express إستعمال رأسية <b>X-Text-Classification</b>، والتي تسمح لعملية الترتيب تتم كلياً في الخفية. بدلاً منها، إختر <i>حيث يحتوي السطر "الموضوع" على كلمات معينة</i> وأيضاً إختر <i>نقله إلى المجلد المحدد</i>  <a href=oe_filter3.gif>[لقطة]</a>
+
+<li>الآن إضغط على الوصلة <i>على كلمات معينة</i> الموضّحة باللون الأزرق وسيظهر مربع حوار كتابة كلمات جديدة  <a href=oe_filter4.gif>[لقطة]</a>
+
+<li>أدخل إسم أحد الدلاء، [محاطاً بالأقواس المربعة]، ومن ثم إضغط موافق. الآن إضغط على الوصلة <i>المحدد</i> الموضّحة باللون الأزرق وسيظهر مربع حوار نقل. إضغط على المجلد المطلوب نقل رسائل ذلك الدلو إليه وإضغط موافق. <a href=oe_filter5.gif>[لقطة]</a>
+
+<li>إضغط موافق.
+
+<li>أعد العملية لكل من الدلاء، وثم أغلق النافذة.
+
+<li>لقد إنتهينا!
+
+<li>ملاحظة صغيرة: في <a href="http://127.0.0.1:8080">واجهة إستخدام POPFile</a>، تحت لسان الإعدادات، تأكد من أن خيار تعديل سطر الموضوع <b>نشط</b>.
+
+</ul>
+
+</td><td width=25% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<p>Eudora allows filtering based on any mail header, which is great - everything can be done completely in the background, without changing the subject line!</p>
+
+<ul>
+
+<li>Select the Tools->Filters menu.  <a href=../e_filter1.gif>[screenshot]</a>
+
+<li>The Filters window appears.  Click New to create a new filter.  <a href=../e_filter2.gif>[screenshot]</a>
+
+<li>In the Header box type <b>X-Text-Classification</b> and in the box next to contains type the name of one of your buckets. <b>Don't</b> add square brackets around it.  <a href=../e_filter3.gif>[screenshot]</a>
+
+<li>The select <b>Transfer To</b> in the first Action box and select the mailbox you want to file message from this bucket into.  <a href=../e_filter4.gif>[screenshot]</a>
+
+<li>Repeat this for each of your buckets.
+
+<li>Close the Filters windows and say Yes when asked to save changes.
+
+<li>You're done!
+
+<li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>off</b>.
+
+</ul>
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Pegasus</h3>
+
+<ul>
+
+<li>   In Pegasus select the Tools->Mail Filtering Rules ->Edit New Mail Filtering Rules ->Rules Applied When Folder is Opened.
+
+<li>   The New Mail Filtering Rules window appears.
+
+<li>   Click the New Rule button. The Create a New Filtering Rule window appears.
+
+<li>   Click on the Expression button.  Note that using the Expression filter will work even if the POPFile Subject Line Modification option is turned off. If you use the Header filter, the POPFile Subject Line Modification option must be turned on.
+
+<li>   Select the If this regular expression dialog box
+
+<li>   Enter the name of one of your buckets, preceded <b>X-Text-Classification:</b>, for example: <b>X-Text-Classification: spam</b>
+
+<li>   Select the Headers or body radio button
+
+<li>   Select the desired action from the Action drop down list. For example Move
+
+<li>   If an action such as Move or Forward has been chosen, click the Set button.
+
+<li>   Select the destination folder or enter the forward to address as appropriate for the Action selected.
+
+<li>   Click the OK button to add the rule to the rule list.
+
+<li>   Repeat the process for each rule you need.
+
+<li>   The order in which the filter rules are applied can be adjusted using the red / blue (up / down) arrows in the New Mail Filter Rules window.
+
+<li>   Select the Save button to save the rules set changes.
+
+<li>   Select the OK button.
+
+<li>   You're done!
+
+</ul>
+
+</td></tr></table>
+
+<h2>هذا هو كل شيء! ... ولكن...</h2>
+
+حتى مع كل هذا، فإن POPFile لن يقوم بتصنيف وترتيب البريد الآن. لما لا؟ <i>إنه لا يعرف معنى أي من الدلاء المعرّفة.</i> ليس لديه أية فكرة عن ماذا يعني 'spam' أو 'normal'، أو ما هو 'work' أو 'personal'. حتى إنه لا يعرف بأية لغة مكتوب البريد - وهذا لا يهمه. تحتاج إلى تدريبه للتمييز بين البريد العادي والبريد الخردة، أو بين مشروع وآخر. يتم عمل هذا بـِ<b>التدريب</b> - و <a href="training.html">سيتم مناقشته في القسم التالي</a>.
+
+</td></tr></table>
+
+<br>
+
+<TABLE cellSpacing=0 width="100%">
+  <TBODY>
+  <TR>
+    <TD align=middle width="15%"><FONT size=+1><B>روابط على الشبكة:</B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#cccc99><FONT size=+1><B><A href="http://popfile.sourceforge.net">الصفحة الرئيسة</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca><FONT size=+1><B><A href="http://sourceforge.net/forum/?group_id=63137">المنتدى</A></B></FONT></TD>
+    <TD width=2></TD>
+    <TD align=middle width="15%" bgColor=#ededca><FONT size=+1><B><A href="http://sourceforge.net/tracker/?group_id=63137&amp;atid=502956">قاعدة بيانات الأخطاء</A></B></FONT></TD>
+    <TD width="55%">&nbsp;</TD></TR>
+  <TR height=1>
+    <TD bgColor=#cccccc colSpan=10></TD></TR>
+  <TR height=1>
+    <TD colSpan=10></TD></TR></TBODY></TABLE></P></BODY></HTML>
