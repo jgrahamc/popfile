@@ -563,7 +563,14 @@ test_assert_equal( $magnet, 'from: margit' );
 
 my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'two.msg' );
 test_assert( !defined( $reclassified ) );
-test_assert( !defined( $bucket ) );
+test_assert_equal( $bucket, 'unknown class' );
+test_assert( !defined( $usedtobe ) );
+test_assert( !defined( $magnet ) );
+
+`touch messages/two.cls`;
+my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'two.msg' );
+test_assert( !defined( $reclassified ) );
+test_assert_equal( $bucket, 'unknown class' );
 test_assert( !defined( $usedtobe ) );
 test_assert( !defined( $magnet ) );
 

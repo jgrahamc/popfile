@@ -930,7 +930,7 @@ sub history_read_class
     $filename =~ s/msg$/cls/;
 
     my $reclassified = 0;
-    my $bucket = "unknown class";
+    my $bucket = 'unknown class';
     my $usedtobe;
     my $magnet = '';
 
@@ -953,8 +953,11 @@ sub history_read_class
     } else {
         $self->log_( "Error: " . $self->global_config_( 'msgdir' ) . "$filename: $!" );
 
-        return ( undef, undef, undef, undef );
+        return ( undef, $bucket, undef, undef );
     }
+
+    $bucket = 'unknown class' if ( !defined( $bucket ) );
+
     return ( $reclassified, $bucket, $usedtobe, $magnet );
 }
 
