@@ -63,6 +63,31 @@ test_assert_equal( $#last_ten, 1 );
 test_assert_regexp( $last_ten[0], 'test1' );
 test_assert_regexp( $last_ten[1], 'test2' );
 
+# test size limiting on last ten
+$l->debug( 'test3' );
+$l->debug( 'test4' );
+$l->debug( 'test5' );
+$l->debug( 'test6' );
+$l->debug( 'test7' );
+$l->debug( 'test8' );
+$l->debug( 'test9' );
+$l->debug( 'test10' );
+$l->debug( 'test11' );
+
+@last_ten = $l->last_ten();
+
+test_assert_equal( $#last_ten, 9 );
+test_assert_regexp( $last_ten[0], 'test2' );
+test_assert_regexp( $last_ten[1], 'test3' );
+test_assert_regexp( $last_ten[2], 'test4' );
+test_assert_regexp( $last_ten[3], 'test5' );
+test_assert_regexp( $last_ten[4], 'test6' );
+test_assert_regexp( $last_ten[5], 'test7' );
+test_assert_regexp( $last_ten[6], 'test8' );
+test_assert_regexp( $last_ten[7], 'test9' );
+test_assert_regexp( $last_ten[8], 'test10' );
+test_assert_regexp( $last_ten[9], 'test11' );
+
 # Check the time function is working to generate times to the nearest day
 test_assert_equal( $l->{today__},  int( time / 86400 ) * 86400 );
 
@@ -84,11 +109,11 @@ test_assert( defined( $mq->{queue__}{TICKD}[0][1] ), "checking TICKD message" );
 # Move the date ahead three days and check that the debug
 # file gets deleted, this relies on the GNU date program
 my $file = $l->debug_filename();
-`date --set='2 days'`; 
+`date --set='2 days'`;
 $l->service();
 my $exists = ( -e $file );
 test_assert( $exists, "checking that debug file was deleted" );
-`date --set='1 day'`; 
+`date --set='1 day'`;
 $l->service();
 $exists = ( -e $file );
 test_assert( !$exists, "checking that debug file was deleted" );
