@@ -476,7 +476,7 @@ sub update_tag
         }
 
 	# If we hit a table tag then any font information is lost
-	
+
 	if ( $tag =~ /^(table|td|tr|th)$/i ) {
 	    $self->{htmlfontcolor__} = map_color( $self, 'black' );
 	    $self->{htmlbackcolor__} = $self->{htmlbodycolor__};
@@ -1295,15 +1295,16 @@ sub decode_string
 
     my $decode_it = '';
 
-    while ( $mystring =~ /=\?[\w-]+\?(B|Q)\?(.*)\?=/ig ) {
+    while ( $mystring =~ /=\?[\w-]+\?(B|Q)\?(.*?)\?=/ig ) {
         if ($1 eq "B") {
+            print $2;
             $decode_it = decode_base64( $2 );
-            $mystring =~ s/=\?[\w-]+\?B\?(.*)\?=/$decode_it/i;
+            $mystring =~ s/=\?[\w-]+\?B\?(.*?)\?=/$decode_it/i;
         } elsif ($1 eq "Q") {
            $decode_it = $2;
            $decode_it =~ s/\_/=20/g;
            $decode_it = decode_qp( $decode_it );
-           $mystring =~ s/=\?[\w-]+\?Q\?(.*)\?=/$decode_it/i;
+           $mystring =~ s/=\?[\w-]+\?Q\?(.*?)\?=/$decode_it/i;
         }
     }
 
