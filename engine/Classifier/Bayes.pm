@@ -1656,7 +1656,13 @@ sub classify
     #        and hence constitute a fixed scaling factor on all the buckets which
     #        is irrelevant in deciding which the winning bucket is.
 
-    my $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
+    my $words;
+    if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
+        no locale;
+        $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
+    } else {
+        $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
+    }
 
     $self->{get_wordids__} = $self->{db__}->prepare(  # PROFILE BLOCK START
              "select id, word
