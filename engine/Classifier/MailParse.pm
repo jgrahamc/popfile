@@ -333,7 +333,7 @@ sub add_line
             $p += 1024;
         }
     } else {
-        if ( $bigline ne '' ) {
+        if ( $bigline =~ /[^ \t]/ ) {
             $self->update_pseudoword( 'trick', 'invisibleink', $encoded, $bigline );
 	}
     }
