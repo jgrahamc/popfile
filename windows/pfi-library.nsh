@@ -56,7 +56,7 @@
 # (by using this constant in the executable's "Version Information" data).
 #--------------------------------------------------------------------------
 
-  !define C_PFI_LIBRARY_VERSION     "0.1.1"
+  !define C_PFI_LIBRARY_VERSION     "0.1.2"
 
 #--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
@@ -1070,7 +1070,7 @@
 # The installation process and the uninstall process may need a function which converts a path
 # into the full/long version (e.g. which converts 'C:\PROGRA~1' into 'C:\Program Files'). There
 # is a built-in NSIS command for this (GetFullPathName) but it only converts part of the path,
-# eg. it converts 'C:\PROGRA~1\PRE-RE~1' into 'C:\PPROGRA~1\Pre-release POPFile' instead of the
+# eg. it converts 'C:\PROGRA~1\PRE-RE~1' into 'C:\PROGRA~1\Pre-release POPFile' instead of the
 # expected 'C:\Program Files\Pre-release POPFile' string. This macro makes maintenance easier
 # by ensuring that both processes use identical functions, with the only difference being their
 # names.
@@ -1086,7 +1086,6 @@
 #         (top of stack)     - path to be converted to long filename format
 # Outputs:
 #         (top of stack)     - full (long) path name or an empty string if path was not found
-#                              (the OS function we use only works with paths which exist)
 #
 # Usage (after macro has been 'inserted'):
 #
@@ -1104,11 +1103,61 @@
       Exch $0   ; the input path
       Push $1   ; the result string (will be empty if the input path does not exist)
       Exch
+      Push $2
+
+      ; 'GetLongPathNameA' is not available in Windows 95 systems (but it is in Windows 98)
+
+      ClearErrors
+      ReadRegStr $1 HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion" CurrentVersion
+      IfErrors 0 use_system_plugin
+      ReadRegStr $1 HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion" VersionNumber
+      StrCpy $2 $1 1
+      StrCmp $2 '4' 0 use_NSIS_code
+      StrCpy $2 $1 3
+      StrCmp $2 '4.0' use_NSIS_code use_system_plugin
+
+    use_NSIS_code:
+      Push $3
+
+      StrCpy $1 ""                ; used to hold the long filename format result
+      StrCpy $2 ""                ; holds a component part of the long filename
+
+      ; Convert the input path ($0) into a long path ($1) if possible
+
+    loop:
+      GetFullPathName $3 $0       ; Converts the last part of the path to long filename format
+      StrCmp $3 "" done           ; An empty string here means the path doesn't exist
+      StrCpy $2 $3 1 -1
+      StrCmp $2 '.' finished_unc  ; If last char of result is '.' then the path was a UNC one
+      StrCpy $0 $3                ; Set path we are working on to the 'GetFullPathName' result
+      Push $0
+      Call ${UN}GetParent
+      Pop $2
+      StrLen $3 $2
+      StrCpy $3 $0 "" $3          ; Get the last part of the path, including the leading '\'
+      StrCpy $1 "$3$1"            ; Update the long filename result
+      StrCpy $0 $2                ; Now prepare to convert the next part of the path
+      StrCpy $3 $2 1 -1
+      StrCmp $3 ':' done loop     ; We're done if all that is left is the drive letter part
+
+    finished_unc:
+      StrCpy $2 $0                ; $0 holds the '\\server\share' part of the UNC path
+
+    done:
+      StrCpy $1 "$2$1"            ; Assemble the last component of the long filename result
+
+      Pop $3
+      Goto exit
+
+    use_system_plugin:
+      StrCpy $1 ""
 
       ; Convert the input path ($0) into a long path ($1) if possible
 
       System::Call "Kernel32::GetLongPathNameA(t '$0', &t .r1, i ${NSIS_MAX_STRLEN})"
 
+    exit:
+      Pop $2
       Pop $0
       Exch $1
 
@@ -2273,7 +2322,7 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDSSL | ADDUSER | BACKUP | RESTORE | RUNPOPFILE
+!ifdef ADDSSL | ADDUSER | BACKUP | INSTALLER | RESTORE | RUNPOPFILE
     #--------------------------------------------------------------------------
     # Installer Function: GetParent
     #
