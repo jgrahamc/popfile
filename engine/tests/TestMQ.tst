@@ -41,6 +41,7 @@ my $r = new Test::MQReceiver;
 
 # Register three different message types
 
+$mq->register( 'MESG1', $r );
 $mq->register( 'MSG1', $r );
 $mq->register( 'MSG2', $r );
 $mq->register( 'MSG3', $r );
@@ -49,13 +50,13 @@ $mq->register( 'MSG3', $r );
 
 # First send a single message and check that it is
 # received
-$mq->post( 'MSG1', 'message1', 'param1' );
+$mq->post( 'MESG1', 'Message1', 'Param1' );
 $mq->service();
 my @messages = $r->read();
 test_assert_equal( $#messages, 0 );
-test_assert_equal( $messages[0][0], 'MSG1' );
-test_assert_equal( $messages[0][1], 'message1' );
-test_assert_equal( $messages[0][2], 'param1' );
+test_assert_equal( $messages[0][0], 'MESG1' );
+test_assert_equal( $messages[0][1], 'Message1' );
+test_assert_equal( $messages[0][2], 'Param1' );
 
 # Now send three messages and check that they are
 # received
