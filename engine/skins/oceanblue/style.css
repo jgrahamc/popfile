@@ -74,6 +74,10 @@ input, select, textarea, .submit {
   background-color: #2175bc;
 }
 
+input:hover, select:hover, textarea:hover, .submit:hover {
+  background-color: #1165ac;
+}
+
 input {
   font-size: 1em;
 }
