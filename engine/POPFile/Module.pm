@@ -155,6 +155,11 @@ sub new
 
     $self->{forker_}         = 0;
 
+    # This is a timeout value for selecting before sysreads in our socket IO code
+    # This value (60) is a default.
+
+    $self->{slurp_timeout__} = 60;
+
     return bless $self, $type;
 }
 
@@ -195,6 +200,8 @@ sub initialize
 sub start
 {
     my ( $self ) = @_;
+
+    $self->{slurp_timeout__} = $self->global_config_( 'timeout' );
 
     return 1;
 }
@@ -506,8 +513,8 @@ sub flush_slurp_data__
             # a non-socket stream under Win32
 
             if ( ( ( $handle !~ /socket/i ) && ( $^O eq 'MSWin32' ) ) ||        # PROFILE BLOCK START
-                 defined( $slurp_data__{"$handle"}{select}->can_read(0.1) ) ) { # PROFILE BLOCK STOP
-                                                                               
+                 defined( $slurp_data__{"$handle"}{select}->can_read( $self->{slurp_timeout__} ) ) ) { # PROFILE BLOCK STOP
+
                 my $c;
                 my $retcode = sysread( $handle, $c, 1 );
                 if ( $retcode == 1 ) {
@@ -691,7 +698,7 @@ sub flush_extra_
     if (($^O eq 'MSWin32') && !($mail =~ /socket/i) ) {
         # select only works reliably on IO::Sockets in Win32, so we always read files
         # on MSWin32 (sysread returns 0 for eof)
-                          
+
         $always_read = 1; # PROFILE PLATFORM START MSWin32
                           # PROFILE PLATFORM STOP
     } else {
