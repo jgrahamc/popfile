@@ -1779,6 +1779,7 @@ Section "Uninstall"
   !define L_UPGRADE     $R3   ; "yes" if this is an upgrade, "no" if we are just uninstalling
   !define L_CORPUS      $R2   ; holds full path to the POPFile corpus data
   !define L_SUBFOLDER   $R1   ; "yes" if corpus is in a subfolder of $INSTDIR, otherwise "no"
+  !define L_OLDUI       $R0   ; holds old-style UI port (if previous POPFile is an old version)
 
   ; When a normal uninstall is performed, the uninstaller is copied to a uniquely named
   ; temporary file and it is that temporary file which is executed (this is how the uninstaller
@@ -1817,9 +1818,6 @@ skip_confirmation:
 
 check_if_running:
 
-  ; If the POPFile we are about to uninstall is still running,
-  ; then one of the EXE files will be 'locked'
-
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_1)"
   SetDetailsPrint listonly
@@ -1827,6 +1825,8 @@ check_if_running:
   ; A quick test ignoring fact that popfile.cfg may specify a non-default location for PID file
 
   IfFileExists "$INSTDIR\popfile.pid" attempt_shutdown
+
+  ; If the POPFile we are to uninstall is still running, one of the EXE files will be 'locked'
 
   IfFileExists "$INSTDIR\wperl.exe" 0 other_perl
   SetFileAttributes "$INSTDIR\wperl.exe" NORMAL
@@ -1836,43 +1836,66 @@ check_if_running:
   IfErrors attempt_shutdown
 
 other_perl:
-  IfFileExists "$INSTDIR\perl.exe" 0 skip_shutdown
+  IfFileExists "$INSTDIR\perl.exe" 0 remove_shortcuts
   SetFileAttributes "$INSTDIR\perl.exe" NORMAL
   ClearErrors
   FileOpen ${L_CFG} "$INSTDIR\perl.exe" a
   FileClose ${L_CFG}
-  IfErrors 0 skip_shutdown
+  IfErrors 0 remove_shortcuts
 
 attempt_shutdown:
+  StrCpy ${G_GUI} ""
+  StrCpy ${L_OLDUI} ""
+  
   ClearErrors
   FileOpen ${L_CFG} $INSTDIR\popfile.cfg r
 
 loop:
   FileRead ${L_CFG} ${L_LNE}
-  IfErrors done
+  IfErrors ui_port_done
 
   StrCpy ${L_TEMP} ${L_LNE} 10
   StrCmp ${L_TEMP} "html_port " got_html_port
+  
+  StrCpy ${L_TEMP} ${L_LNE} 8
+  StrCmp ${L_TEMP} "ui_port " got_ui_port
   Goto loop
 
 got_html_port:
   StrCpy ${G_GUI} ${L_LNE} 5 10
   Goto loop
 
-done:
+got_ui_port:
+  StrCpy ${L_OLDUI} ${L_LNE} 5 8
+  Goto loop
+  
+ui_port_done:
   FileClose ${L_CFG}
-
+  
+  StrCmp ${G_GUI} "" use_other_port
   Push ${G_GUI}
   Call un.TrimNewlines
   Call un.StrCheckDecimal
   Pop ${G_GUI}
-  StrCmp ${G_GUI} "" skip_shutdown
+  StrCmp ${G_GUI} "" use_other_port
   DetailPrint "$(un.PFI_LANG_LOG_1) ${G_GUI}"
   NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_TEMP}
   Sleep 250 ; milliseconds
+  Goto remove_shortcuts
+  
+use_other_port:
+  Push ${L_OLDUI}
+  Call un.TrimNewlines
+  Call un.StrCheckDecimal
+  Pop ${L_OLDUI}
+  StrCmp ${L_OLDUI} "" remove_shortcuts
+  DetailPrint "$(un.PFI_LANG_LOG_1) ${L_OLDUI}"
+  NSISdl::download_quiet http://127.0.0.1:${L_OLDUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  Pop ${L_TEMP}
+  Sleep 250 ; milliseconds
 
-skip_shutdown:
+remove_shortcuts:
 
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_2)"
@@ -2042,6 +2065,7 @@ Removed:
   !undef L_UPGRADE
   !undef L_CORPUS
   !undef L_SUBFOLDER
+  !undef L_OLDUI
 SectionEnd
 
 #--------------------------------------------------------------------------
