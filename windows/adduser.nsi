@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.54"
+  !define C_PFI_VERSION  "0.2.55"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -2031,6 +2031,12 @@ FunctionEnd
 # and saves (in 'pfi-cfg.ini') any values found for use when the user is offered the chance
 # to start POPFile from the installer. If no setting is found, we save '?' in 'pfi-cfg.ini'.
 # These settings are used by the 'StartPOPFilePage' and 'CheckLaunchOptions' functions.
+#
+# The 0.22.0 release introduced a new template-based skin system. Although the new system
+# uses the same skin names as in earlier releases, these names are now in lowercase. The UI
+# is case-sensitive so we have to convert the skin name to lowercase otherwise the current
+# skin will not be shown in the Configuration page of the UI (the UI will show the first entry
+# in the list ("blue") instead of the skin currently in use).
 #--------------------------------------------------------------------------
 
 Function CheckExistingConfigData
@@ -2045,6 +2051,7 @@ Function CheckExistingConfigData
   !define L_LANG_NEW  $R2     ; new style UI lang parameter
   !define L_LANG_OLD  $R1     ; old style UI lang parameter
   !define L_TEXTEND   $R0     ; used to ensure correct handling of lines longer than 1023 chars
+  !define L_SKIN      $9      ; current skin setting
 
   Push ${L_CFG}
   Push ${L_CLEANCFG}
@@ -2056,6 +2063,7 @@ Function CheckExistingConfigData
   Push ${L_LANG_NEW}
   Push ${L_LANG_OLD}
   Push ${L_TEXTEND}
+  Push ${L_SKIN}
 
   StrCpy $G_POP3 ""
   StrCpy $G_GUI ""
@@ -2085,10 +2093,12 @@ loop:
 
   StrCpy ${L_CMPRE} ${L_LNE} 5
   StrCmp ${L_CMPRE} "port " got_port
+  StrCmp ${L_CMPRE} "skin " got_skin_old
 
   StrCpy ${L_CMPRE} ${L_LNE} 10
   StrCmp ${L_CMPRE} "pop3_port " got_pop3_port
   StrCmp ${L_CMPRE} "html_port " got_html_port
+  StrCmp ${L_CMPRE} "html_skin " got_skin_new
 
   StrCpy ${L_CMPRE} ${L_LNE} 8
   StrCmp ${L_CMPRE} "ui_port " got_ui_port
@@ -2136,6 +2146,36 @@ got_lang_new:
 got_lang_old:
   StrCpy ${L_LANG_OLD} ${L_LNE} "" 9
   Goto loop
+
+got_skin_old:
+  StrCpy ${L_SKIN} ${L_LNE} "" 5
+  Goto got_skin
+
+got_skin_new:
+  StrCpy ${L_SKIN} ${L_LNE} "" 10
+
+got_skin:
+  Push ${L_SKIN}
+  Call TrimNewlines
+  Pop ${L_SKIN}
+
+  !insertmacro SkinCaseChange "CoolBlue"       "coolblue"
+  !insertmacro SkinCaseChange "CoolBrown"      "coolbrown"
+  !insertmacro SkinCaseChange "CoolGreen"      "coolgreen"
+  !insertmacro SkinCaseChange "CoolOrange"     "coolorange"
+  !insertmacro SkinCaseChange "CoolYellow"     "coolyellow"
+  !insertmacro SkinCaseChange "Lavish"         "lavish"
+  !insertmacro SkinCaseChange "LRCLaptop"      "lrclaptop"
+  !insertmacro SkinCaseChange "orangeCream"    "orangecream"
+  !insertmacro SkinCaseChange "PRJBlueGrey"    "prjbluegrey"
+  !insertmacro SkinCaseChange "PRJSteelBeach"  "prjsteelbeach"
+  !insertmacro SkinCaseChange "SimplyBlue"     "simplyblue"
+  !insertmacro SkinCaseChange "Sleet"          "sleet"
+  !insertmacro SkinCaseChange "Sleet-RTL"      "sleet-rtl"
+  !insertmacro SkinCaseChange "StrawberryRose" "strawberryrose"
+
+save_skin_setting:
+  StrCpy ${L_LNE} "${L_CMPRE}${L_SKIN}${MB_NL}"
 
 copy_lne:
   FileWrite ${L_CLEANCFG} ${L_LNE}
@@ -2270,6 +2310,7 @@ default_gui:
   StrCpy $G_GUI "8081"
 
 ports_ok:
+  Pop ${L_SKIN}
   Pop ${L_TEXTEND}
   Pop ${L_LANG_OLD}
   Pop ${L_LANG_NEW}
@@ -2291,6 +2332,7 @@ ports_ok:
   !undef L_LANG_NEW
   !undef L_LANG_OLD
   !undef L_TEXTEND
+  !undef L_SKIN
 
 FunctionEnd
 

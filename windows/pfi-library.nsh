@@ -250,6 +250,24 @@
 
 #--------------------------------------------------------------------------
 #
+# Macro used by 'adduser.nsi' to ensure current skin selection uses lowercase
+#
+#--------------------------------------------------------------------------
+
+  !macro SkinCaseChange OLDNAME NEWNAME
+
+      !insertmacro PFI_UNIQUE_ID
+
+      StrCmp ${L_SKIN} "${OLDNAME}" 0 skip_${PFI_UNIQUE_ID}
+      StrCpy ${L_SKIN} "${NEWNAME}"
+      Goto save_skin_setting
+
+    skip_${PFI_UNIQUE_ID}:
+
+  !macroend
+
+#--------------------------------------------------------------------------
+#
 # Macro used to preserve up to 3 backup copies of a file
 #
 # (Note: input file will be "removed" by renaming it)
