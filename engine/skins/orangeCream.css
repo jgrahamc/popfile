@@ -120,14 +120,12 @@ td.openMessageBody {
     text-align: left;
 }
 
-td.footerBody { 
+td.footerBody {
     text-align: center;
-    padding-left: 20%;
-    padding-right: 20%;
     padding-top: 0.8em;
     font-size: 75%;
+    margin: auto;
 }
-
 
 td.naked {
     padding: 0px; 
