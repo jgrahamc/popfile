@@ -55,7 +55,7 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION             "0.0.51"
+  !define C_VERSION             "0.0.52"
 
   ; The default timeout is 30 seconds
 
@@ -113,6 +113,7 @@
 
   ; This script uses 'User Variables' (with names starting with 'G_') to hold GLOBAL data.
 
+  Var G_MODE_FLAG         ; "" = normal mode, "PFI" = called from the installer
   Var G_TIMEOUT           ; timeout value in seconds (can be supplied on command-line)
                           ; (two special cases are supported: 0 and PFI)
 
@@ -214,6 +215,8 @@
 
   !insertmacro PFI_MSGCAP_TEXT "PFI_LANG_MSGCAP_RIGHTCLICK"     "Right-click in the window below to copy the report to the clipboard"
 
+  !insertmacro PFI_MSGCAP_TEXT "PFI_LANG_MSGCAP_CLICKCLOSE"     "Please click 'Close' to continue with the installation"
+
 #--------------------------------------------------------------------------
 # General settings
 #--------------------------------------------------------------------------
@@ -244,19 +247,26 @@ Function .onInit
 
   Push ${L_TEMP}
 
+  StrCpy $G_MODE_FLAG ""      ; select 'normal' mode by default
+
   Call GetParameters
   Pop $G_TIMEOUT
   StrCmp $G_TIMEOUT "" default
   StrCpy ${L_TEMP} $G_TIMEOUT 9
   StrCmp ${L_TEMP} "/timeout=" 0 default
   StrCpy $G_TIMEOUT $G_TIMEOUT "" 9
-  StrCmp $G_TIMEOUT "PFI" exit
+  StrCmp $G_TIMEOUT "PFI" installer_mode
   Push $G_TIMEOUT
   Call StrCheckDecimal
   Pop $G_TIMEOUT
   StrCmp $G_TIMEOUT "" default
   StrCmp $G_TIMEOUT "0" exit
   IntCmp $G_TIMEOUT 99 exit exit default
+
+installer_mode:
+  StrCpy $G_MODE_FLAG "PFI"
+  StrCpy $G_TIMEOUT ${C_INSTALLER_TIMEOUT}
+  Goto exit
 
 default:
   StrCpy $G_TIMEOUT ${C_DEFAULT_TIMEOUT}
@@ -277,14 +287,13 @@ Function UpdateHeader
 
   ; Override the standard "Installing..." header with text appropriate to the /TIMEOUT value
 
+  StrCmp $G_MODE_FLAG "PFI" installer_mode
   StrCmp $G_TIMEOUT "0" no_timeout
-  StrCmp $G_TIMEOUT "PFI" installer
 
   !insertmacro MUI_HEADER_TEXT $(PFI_LANG_MSGCAP_STD_HDR) $(PFI_LANG_MSGCAP_STD_SUBHDR)
   Goto exit
 
-installer:
-  StrCpy $G_TIMEOUT ${C_INSTALLER_TIMEOUT}
+installer_mode:
   !insertmacro MUI_HEADER_TEXT $(PFI_LANG_MSGCAP_PFI_HDR) $(PFI_LANG_MSGCAP_PFI_SUBHDR)
   Goto exit
 
@@ -301,7 +310,7 @@ FunctionEnd
 Section default
 
   !define L_PFI_ROOT      $R9   ; path to the POPFile program (popfile.pl, and other files)
-  !define L_PFI_USER      $R8   ; path to user's 'popfile.cfg' file
+  !define L_PFI_USER      $R8  ; path to user's 'popfile.cfg' file
   !define L_RESULT        $R7
   !define L_TEMP          $R6
   !define L_TRAYICON      $R5   ; system tray icon enabled ("i" ) or disabled ("") flag
@@ -392,6 +401,15 @@ display_status:
   DetailPrint "------------------------------------------------------------"
   DetailPrint "(report finished ${L_TEMP})"
   DetailPrint "------------------------------------------------------------"
+  StrCmp $G_MODE_FLAG "" exit
+  DetailPrint ""
+  DetailPrint "############################################################"
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_MSGCAP_CLICKCLOSE)"
+  DetailPrint ""
+  DetailPrint "############################################################"
+
+exit:
   SetDetailsPrint none
 
   !undef L_PFI_ROOT
