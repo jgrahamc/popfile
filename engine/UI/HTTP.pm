@@ -129,7 +129,18 @@ sub service
 
                     while ( <$client> )  {
                         $content_length = $1 if ( /Content-Length: (\d+)/i );
-                        last                 if ( !/[A-Z]/i );
+
+                        # Discovered that Norton Internet Security was adding
+                        # HTTP headers of the form
+                        #
+                        # ~~~~~~~~~~~~~~: ~~~~~~~~~~~~~
+                        #
+                        # which we were not recognizing as valid (surprise,
+                        # surprise) and this was messing about our handling
+                        # of POST data.  Changed the end of header identification
+                        # to any line that does not contain a :
+
+                        last                 if ( !/:/i );
                     }
 
                     if ( $content_length > 0 ) {
