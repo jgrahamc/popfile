@@ -533,8 +533,8 @@ FunctionEnd
     copy_lne:
       FileWrite ${L_NEW_CFG} ${L_LNE}
 
-      ; Now read file until we get to end of the current line
-      ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+    ; Now read file until we get to end of the current line
+    ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
 
       StrCpy ${L_TEXTEND} ${L_LNE} 1 -1
       StrCmp ${L_TEXTEND} "$\n" found_eol
@@ -658,6 +658,18 @@ FunctionEnd
 #    Macro:                GetTimeStamp
 #    Installer Function:   GetTimeStamp
 #    Uninstaller Function: un.GetTimeStamp
+#
+#    Macro:                ServiceCall
+#    Installer Function:   ServiceCall
+#    Uninstaller Function: un.ServiceCall
+#
+#    Macro:                ServiceRunning
+#    Installer Function:   ServiceRunning
+#    Uninstaller Function: un.ServiceRunning
+#
+#    Macro:                ServiceStatus
+#    Installer Function:   ServiceStatus
+#    Uninstaller Function: un.ServiceStatus
 #
 #    Macro:                ShutdownViaUI
 #    Installer Function:   ShutdownViaUI
@@ -1837,6 +1849,319 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 ;!insertmacro GetTimeStamp "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: ServiceCall
+#
+# The installation process and the uninstall process may both need a function which interfaces
+# with the Windows Service Control Manager (SCM).  This macro makes maintenance easier by
+# ensuring that both processes use identical functions, with the only difference being their
+# names.
+#
+# NOTE: This version only supports a subset of the available Service Control Manager actions.
+#
+# NOTE:
+# The !insertmacro ServiceCall "" and !insertmacro ServiceCall "un." commands are included
+# in this file so the NSIS script can use 'Call ServiceCall' and 'Call un.ServiceCall'
+# without additional preparation.
+#
+# Inputs:
+#         (top of stack)       - action required (only the following action is supported):
+#                                   status     - returns status of the named service
+#
+#         (top of stack - 1)   - service name (normally 'POPFile')
+#
+# Outputs:
+#         (top of stack)       - string containing a result code. Result codes depend upon the
+#                                value of the 'action required' input parameter:
+#
+#                                'status' action result codes:
+#                                   scmerror          - unable to open service database (Win9x?)
+#                                   openerror         - unable to get a handle to the service
+#
+#                                   running           - service is running
+#                                   stopped           - service is stopped
+#                                   start_pending     - the service is starting
+#                                   stop_pending      - the service is stopping
+#                                   continue_pending  - the service continue is pending
+#                                   pause_pending     - the service pause is pending
+#                                   paused            - the service is paused
+#
+#                                   unknown           - (the response didn't match any of above)
+#
+#                                result code for all other action requests:
+#                                   unsupportedaction - an unsupported action was requested
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push "status"
+#         Push "POPFile"
+#         Call un.ServiceCall
+#         Pop $R0
+#
+#         (if $R0 at this point is "running" then POPFile is running as a Windows service)
+#
+#--------------------------------------------------------------------------
+
+!macro ServiceCall UN
+
+  !ifndef PFI_SERVICE_DEFINES
+      !define PFI_SERVICE_DEFINES
+
+      !define SC_MANAGER_ALL_ACCESS    0x3F
+      !define SERVICE_ALL_ACCESS    0xF01FF
+
+      !define SERVICE_STOPPED           0x1
+      !define SERVICE_START_PENDING     0x2
+      !define SERVICE_STOP_PENDING      0x3
+      !define SERVICE_RUNNING           0x4
+      !define SERVICE_CONTINUE_PENDING  0x5
+      !define SERVICE_PAUSE_PENDING     0x6
+      !define SERVICE_PAUSED            0x7
+  !endif
+
+  Function ${UN}ServiceCall
+
+    Push $0   ; used to return the result
+    Push $2
+    Push $3
+    Push $4   ; OpenSCManager handle
+    Push $5   ; OpenService handle
+    Push $6
+    Push $7
+    Exch 7
+    Pop $2    ; service name
+    Exch 7
+    Pop $3    ; action required
+
+    StrCmp $3 "status" 0 unsupported_action
+
+    System::Call 'advapi32::OpenSCManagerA(n, n, i ${SC_MANAGER_ALL_ACCESS}) i.r4'
+    IntCmp $4 0 scm_error
+
+    StrCpy $0 "openerr"
+    System::Call 'advapi32::OpenServiceA(i r4, t r2, i ${SERVICE_ALL_ACCESS}) i.r5'
+    IntCmp $5 0 close_OpenSCM_handle
+
+#  action_status:
+    Push $R1
+    System::Call '*(i,i,i,i,i,i,i) i.R1'
+    System::Call 'advapi32::QueryServiceStatus(i r5, i $R1) i'
+    System::Call '*$R1(i, i .r6)'
+    System::Free $R1
+    Pop $R1
+    IntFmt $6 "0x%X" $6
+    StrCpy $0 "running"
+    IntCmp $6 ${SERVICE_RUNNING} closehandles
+    StrCpy $0 "stopped"
+    IntCmp $6 ${SERVICE_STOPPED} closehandles
+    StrCpy $0 "start_pending"
+    IntCmp $6 ${SERVICE_START_PENDING} closehandles
+    StrCpy $0 "stop_pending"
+    IntCmp $6 ${SERVICE_STOP_PENDING} closehandles
+    StrCpy $0 "continue_pending"
+    IntCmp $6 ${SERVICE_CONTINUE_PENDING} closehandles
+    StrCpy $0 "pause_pending"
+    IntCmp $6 ${SERVICE_PAUSE_PENDING} closehandles
+    StrCpy $0 "paused"
+    IntCmp $6 ${SERVICE_PAUSED} closehandles
+    StrCpy $0 "unknown"
+    Goto closehandles
+
+  unsupported_action:
+    StrCpy $0 "unsupportedaction"
+    DetailPrint "'ServiceCall' unsupported action ($3)"
+    Goto return_result
+
+  scm_error:
+    StrCpy $0 "scmerror"
+    DetailPrint "'ServiceCall' failed (Win9x system?)"
+    Goto return_result
+
+  closehandles:
+    IntCmp $5 0 close_OpenSCM_handle
+    System::Call 'advapi32::CloseServiceHandle(i r5) n'
+
+  close_OpenSCM_handle:
+    IntCmp $4 0 display_result
+    System::Call 'advapi32::CloseServiceHandle(i r4) n'
+
+  display_result:
+    DetailPrint "$2 'ServiceCall' response: $0"
+
+  return_result:
+    Pop $5
+    Pop $4
+    Pop $3
+    Pop $2
+    Exch 2
+    Pop $6
+    Pop $7
+    Exch $0           ; stack = result code string
+  FunctionEnd
+!macroend
+
+!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Installer Function: ServiceCall
+  #
+  # This function is used during the installation process
+  #--------------------------------------------------------------------------
+
+  !insertmacro ServiceCall ""
+
+  #--------------------------------------------------------------------------
+  # Uninstaller Function: un.ServiceCall
+  #
+  # This function is used during the uninstall process
+  #--------------------------------------------------------------------------
+
+  !insertmacro ServiceCall "un."
+!endif
+
+
+#--------------------------------------------------------------------------
+# Macro: ServiceRunning
+#
+# The installation process and the uninstall process may both need a function which checks
+# if a particular Windows service is running. This macro makes maintenance easier by ensuring
+# that both processes use identical functions, with the only difference being their names.
+#
+# NOTE:
+# The !insertmacro ServiceRunning "" and !insertmacro ServiceRunning "un." commands are included
+# in this file so the NSIS script can use 'Call ServiceRunning' and 'Call un.ServiceRunning'
+# without additional preparation.
+#
+# Inputs:
+#         (top of stack)       - name of the Windows Service to be checked (normally "POPFile")
+#
+# Outputs:
+#         (top of stack)       - string containing one of the following result codes:
+#                                   true           - service is running
+#                                   false          - service is not running
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push "POPFile"
+#         Call ServiceRunning
+#         Pop $R0
+#
+#         (if $R0 at this point is "true" then POPFile is running as a Windows service)
+#
+#--------------------------------------------------------------------------
+
+!macro ServiceRunning UN
+  Function ${UN}ServiceRunning
+
+    !define L_RESULT    $R9
+
+    Push ${L_RESULT}
+    Exch
+    Push "status"
+    Exch
+    Call ${UN}ServiceCall     ; uses 2 parameters from top of stack (top = servicename, action)
+    Pop ${L_RESULT}
+    StrCmp ${L_RESULT} "running" 0 not_running
+    StrCpy ${L_RESULT} "true"
+    Goto exit
+
+  not_running:
+    StrCpy ${L_RESULT} "false"
+
+  exit:
+    Exch ${L_RESULT}          ; return "true" or "false" on top of stack
+
+    !undef L_RESULT
+
+  FunctionEnd
+!macroend
+
+!ifndef RUNPOPFILE & TRANSLATOR & TRANSLATOR_AUW
+  #--------------------------------------------------------------------------
+  # Installer Function: ServiceRunning
+  #
+  # This function is used during the installation process
+  #--------------------------------------------------------------------------
+
+  !insertmacro ServiceRunning ""
+
+  #--------------------------------------------------------------------------
+  # Uninstaller Function: un.ServiceRunning
+  #
+  # This function is used during the uninstall process
+  #--------------------------------------------------------------------------
+
+  !insertmacro ServiceRunning "un."
+!endif
+
+
+#--------------------------------------------------------------------------
+# Macro: ServiceStatus
+#
+# The installation process and the uninstall process may both need a function which checks
+# the status of a particular Windows Service. This macro makes maintenance easier by ensuring
+# that both processes use identical functions, with the only difference being their names.
+#
+# NOTE:
+# The !insertmacro ServiceStatus "" and !insertmacro ServiceStatus "un." commands are included
+# in this file so the NSIS script can use 'Call ServiceStatus' and 'Call un.ServiceStatus'
+# without additional preparation.
+#
+# Inputs:
+#         (top of stack)       - name of the Windows Service to be checked (normally "POPFile")
+#
+# Outputs:
+#         (top of stack)       - string containing one of the following result codes:
+#
+#                                   scmerror          - unable to open service database (Win9x?)
+#                                   openerror         - unable to get a handle to the service
+#
+#                                   running           - service is running
+#                                   stopped           - service is stopped
+#                                   start_pending     - the service is starting
+#                                   stop_pending      - the service is stopping
+#                                   continue_pending  - the service continue is pending
+#                                   pause_pending     - the service pause is pending
+#                                   paused            - the service is paused
+#
+#                                   unknown           - (the response didn't match any of above)
+#
+# Usage (after macro has been 'inserted'):
+#
+#         Push "POPFile"
+#         Call ServiceStatus
+#         Pop $R0
+#
+#         (if $R0 at this point is "running" then POPFile is running as a Windows service)
+#
+#--------------------------------------------------------------------------
+
+!macro ServiceStatus UN
+  Function ${UN}ServiceStatus
+
+    Push "status"            ; action required
+    Exch                     ; top of stack = servicename, action required
+    Call ${UN}ServiceCall
+
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: ServiceStatus
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+;!insertmacro ServiceStatus ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.ServiceStatus
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro ServiceStatus "un."
 
 
 #--------------------------------------------------------------------------

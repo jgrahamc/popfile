@@ -278,15 +278,15 @@
 
   !ifndef ENGLISH_MODE
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build"        "Multi-Language (with Kakasi) multi-user multi-section"
+      VIAddVersionKey "Build"        "Multi-Language experimental IMAP (with Kakasi)"
     !else
-      VIAddVersionKey "Build"        "Multi-Language (without Kakasi) multi-user multi-section"
+      VIAddVersionKey "Build"        "Multi-Language experimental IMAP (without Kakasi)"
     !endif
   !else
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build"        "English-Mode (with Kakasi) multi-user multi-section"
+      VIAddVersionKey "Build"        "English-Mode experimental IMAP (with Kakasi)"
     !else
-      VIAddVersionKey "Build"        "English-Mode (without Kakasi) multi-user multi-section"
+      VIAddVersionKey "Build"        "English-Mode experimental IMAP (without Kakasi)"
     !endif
   !endif
 
@@ -1508,7 +1508,7 @@ SubSectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}   $(DESC_SecSkins)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}   $(DESC_SecLangs)
     !insertmacro MUI_DESCRIPTION_TEXT ${SubSecOptional} "Extra POPFile components (for advanced users)"
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}  $(DESC_SecXMLRPC)
+   !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}  $(DESC_SecXMLRPC)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecIMAP}  \
         "Installs POPFile's experimental IMAP module"
     !ifndef NO_KAKASI
@@ -1696,6 +1696,14 @@ Function MakeRootDirSafe
   Push ${L_RESULT}
   Push ${L_TEXTEND}
 
+  ; Starting with POPfile 0.21.0 an experimental version of 'popfile-service.exe' was included
+  ; to allow POPFile to be run as a Windows service.
+
+  Push "POPFile"
+  Call ServiceRunning
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "true" manual_shutdown
+
   ; If we are about to overwrite an existing version which is still running,
   ; then one of the EXE files will be 'locked' which means we have to shutdown POPFile.
   ;
@@ -1703,10 +1711,6 @@ Function MakeRootDirSafe
   ; 'popfileif.exe', 'perl.exe' or 'wperl.exe'.
   ;
   ; Earlier versions of POPFile use only 'perl.exe' or 'wperl.exe'.
-  ;
-  ; Starting with POPfile 0.21.0 an experimental version of 'popfile-service.exe' was included
-  ; to allow POPFile to be run as a Windows service. So we also need to check if POPFile is
-  ; running as a service. [NB: Service detection/shutdown is _not_ implemented in this build]
 
   Push $G_ROOTDIR
   Call FindLockedPFE
@@ -2347,11 +2351,15 @@ Section "un.Shutdown POPFile" UnSecShutdown
   DetailPrint "$(PFI_LANG_UN_PROG_SHUTDOWN)"
   SetDetailsPrint listonly
 
-  ; If the POPFile we are to uninstall is still running, one of the EXE files will be 'locked'
-
   ; Starting with POPfile 0.21.0 an experimental version of 'popfile-service.exe' was included
-  ; to allow POPFile to be run as a Windows service. So we also need to check if POPFile is
-  ; running as a service. [NB: Service detection/shutdown is _not_ implemented in this build]
+  ; to allow POPFile to be run as a Windows service.
+
+  Push "POPFile"
+  Call un.ServiceRunning
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "true" manual_shutdown
+
+  ; If the POPFile we are to uninstall is still running, one of the EXE files will be 'locked'
 
   Push $G_ROOTDIR
   Call un.FindLockedPFE

@@ -157,7 +157,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.15"
+  !define C_PFI_VERSION  "0.2.16"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -361,7 +361,7 @@
 
   ; Debug aid: Hide the installation log but let user display it (using "Show details" button)
 
-##  !define MUI_FINISHPAGE_NOAUTOCLOSE
+  !define MUI_FINISHPAGE_NOAUTOCLOSE
 
   ;----------------------------------------------------------------
   ;  Interface Settings - Abort Warning Settings
@@ -2167,6 +2167,14 @@ Function MakeUserDirSafe
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_UPGRADE)"
   SetDetailsPrint listonly
+
+  ; Starting with POPfile 0.21.0 an experimental version of 'popfile-service.exe' was included
+  ; to allow POPFile to be run as a Windows service.
+
+  Push "POPFile"
+  Call ServiceRunning
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "true" manual_shutdown
 
   ; Using 'FindLockedPFE' is a temporary solution (until popfile.pid's location is "inherited")
   ; (could check popfile.db instead but we currently assume the default location for it too)
@@ -4852,6 +4860,14 @@ Section "un.Shutdown POPFile" UnSecShutdown
   Push ${L_LNE}
   Push ${L_TEMP}
   Push ${L_TEXTEND}
+
+  ; Starting with POPfile 0.21.0 an experimental version of 'popfile-service.exe' was included
+  ; to allow POPFile to be run as a Windows service.
+
+  Push "POPFile"
+  Call un.ServiceRunning
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "true" manual_shutdown
 
   Push $G_ROOTDIR
   Call un.FindLockedPFE
