@@ -1104,6 +1104,15 @@ sub history_page
             $subject = "$1...";
         }
         
+        # If the user has more than 4 buckets then we'll present a drop down list of buckets, otherwise we present simple
+        # links
+        my @buckets = keys %{$classifier->{total}};
+        my $drop_down = ( $#buckets > 4 );
+
+        if ( $drop_down ) 
+        {
+            $body .= "<form action=/history>";
+        }
         $body .= "<a name=$mail_file>";
         $body .= "<tr";
         $body .= " bgcolor=$highlight_color" if ($form{view} eq $mail_file) || ($form{file} eq $mail_file);
@@ -1136,17 +1145,43 @@ sub history_page
         } 
         else
         {
-            $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Reclassify as: ";
+            $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>";
+            
+            if ( $drop_down )
+            {
+                $body .= " <input type=submit name=change value=Reclassify> <select name=shouldbe>";
+            }
+            else
+            {
+                $body .= "Reclassify as: ";
+            }
             
             foreach my $abucket (keys %{$classifier->{total}})
             {
                 if ( $abucket ne $bucket ) 
                 {
-                    $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message><font color=$classifier->{colors}{$abucket}>$abucket</font></a> ";
+                    if ( $drop_down ) 
+                    {
+                        $body .= "<option value=$abucket>$abucket</option>"
+                    }
+                    else
+                    {
+                        $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message><font color=$classifier->{colors}{$abucket}>$abucket</font></a> ";
+                    }
                 }
+            }
+            
+            if ( $drop_down )
+            {
+                $body .= "</select><input type=hidden name=file value=$mail_file><input type=hidden name=start_message value=$start_message>";
             }
         }
         $body .= "</td>";
+        
+        if ( $drop_down ) 
+        {
+            $body .= "</form>";
+        }
         
         # Check to see if we want to view a message
         if ( $form{view} eq $mail_file )
@@ -1165,7 +1200,7 @@ sub history_page
         }
     }
 
-    $body .= "</table><form><b>To remove all entries in the history click here: <input type=submit name=clear value='Remove All'></form>";
+    $body .= "</table><form action=/history><b>To remove all entries in the history click here: <input type=submit name=clear value='Remove All'></form>";
     
     
     if ( $configuration{page_size} < $#mail_files )
