@@ -213,6 +213,12 @@ sub initialize
 
     $self->config_( 'dbconnect', 'dbi:SQLite:dbname=$dbname' );
     $self->config_( 'dbuser', '' ); $self->config_( 'dbauth', '' );
+    
+    # SQLite 1.05+ have some problems we are resolving. 
+    # This lets us give a nice message and then disable
+    # the version checking later
+    
+    $self->config_( 'bad_sqlite_version', '1.05' );
 
     # No default unclassified weight is the number of times more sure POPFile
     # must be of the top class vs the second class, default is 100 times more
@@ -270,7 +276,7 @@ sub deliver
     }
     
     if ( $type eq 'RELSE' ) {
-        $self->release_session_key( $message[0] );
+        $self->release_session_key_private__( $message[0] );
     }    
 }
 
@@ -600,9 +606,38 @@ sub db_connect__
     my $dbpresent;
     my $sqlite = ( $dbconnect =~ /sqlite/i );
 
-    if ( $sqlite ) {
+    if ( $sqlite ) {        
         $dbname = $self->get_user_path_( $self->config_( 'database' ) );
         $dbpresent = ( -e $dbname ) || 0;
+        
+        # We check to make sure we're not using DBD::SQLite 1.05 or greater
+        # If so, we'll use DBD::SQLite2, which is still compatible with old
+        # databases
+        
+        my ($scheme, $driver, $attr_string, $attr_hash, $driver_dsn) = DBI->parse_dsn($dbconnect);        
+        
+        if ($driver eq 'SQLite') {
+        
+            my %db_versions = %{DBI->installed_versions};
+            
+            if ($db_versions{'DBD::SQLite'} >= $self->config_( 'bad_sqlite_version' )) {
+                # We don't work with this version.
+                # Check for SQLite2, which we do work with                
+                if (defined( $db_versions{'DBD::SQLite2'} ) )
+                {
+                    $self->log_(0, "Substituting DBD::SQLite2 for DBD::SQLite >1.05");
+                    $self->log_(0, "It is recommended to change dbconnect to DBD::SQLite2");
+                    $dbconnect = $scheme . ":SQLite2:" . ((defined($attr_string))?"$attr_string:":'') . $driver_dsn;
+                } else {
+                    # Die here, since the errors on 1.05, using an old .db
+                    # file are very difficult to understand, and DBD::SQLite2
+                    # isn't available
+                    $self->log_(0, "Please install DBD::SQLite2, and change the dbconnect configuration parameter");
+                    return( 0 );
+                }
+            }
+        }        
+        
     } else {
         $dbname = $self->config_( 'database' );
         $dbpresent = 1;
@@ -1634,6 +1669,29 @@ sub generate_unique_session_key__
 
 #----------------------------------------------------------------------------
 #
+# release_session_key_private__
+#
+# $session        A session key previously returned by get_session_key
+#
+# Releases and invalidates the session key. Worker function that does the work
+# of release_session_key. 
+#                   ****DO NOT CALL DIRECTLY****
+# unless you want your session key released immediately, possibly preventing
+# asynchronous tasks from completing
+#
+#----------------------------------------------------------------------------
+sub release_session_key_private__
+{
+    my ( $self, $session ) = @_;
+    
+    if ( defined( $self->{api_sessions__}{$session} ) ) {
+        $self->log_( 1, "release_session_key releasing key $session for user $self->{api_sessions__}{$session}" );
+        delete $self->{api_sessions__}{$session};
+    }
+}
+
+#----------------------------------------------------------------------------
+#
 # valid_session_key__
 #
 # $session                Session key returned by call to get_session_key
@@ -1746,12 +1804,10 @@ sub get_session_key
 sub release_session_key
 {
     my ( $self, $session ) = @_;
-
-    if ( defined( $self->{api_sessions__}{$session} ) ) {
-        $self->log_( 1, "release_session_key releasing key $session for user $self->{api_sessions__}{$session}" );
-        delete $self->{api_sessions__}{$session};
-    }
+    
+    $self->mq_post_( "RELSE", $session );
 }
+
 
 #----------------------------------------------------------------------------
 #

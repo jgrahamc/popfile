@@ -32,11 +32,7 @@ sub new
     # This will store a reference to the classifier object
 
     $self->{c} = 0;
-    
-    # and a mq object
-    
-    $self->{m} = 0;
-
+        
     bless $self, $type;
     return $self;
 }
@@ -74,7 +70,7 @@ sub new
 #    omit it.
 
 sub get_session_key            { shift->{c}->get_session_key( @_ ); }
-sub release_session_key        { shift->{m}->mq_post_( "RELSE", join( ':',@_ )); }
+sub release_session_key        { shift->{c}->release_session_key( @_ ); }
 sub classify                   { shift->{c}->classify( @_ ); }
 sub is_pseudo_bucket           { shift->{c}->is_pseudo_bucket( @_ ); }
 sub is_bucket                  { shift->{c}->is_bucket( @_ ); }
@@ -138,7 +134,7 @@ sub handle_message
     open OUT, ">$out" or return undef;
 
     my @result = $self->{c}->classify_and_modify(
-        $session, \*IN, \*OUT, 0 );
+        $session, \*IN, \*OUT, undef );
 
     close OUT;
     close IN;

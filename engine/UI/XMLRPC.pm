@@ -143,9 +143,10 @@ your system (On Unix systems this can happen if you are not root
 and the port you specified is less than 1024).
 
 EOM
-
+                    #' # fix some syntax highlighting editors
         return 0;
     }
+
 
     # All requests will get dispatched to the main Classifier::Bayes object, for example
     # the get_bucket_color interface is accessed with the method name.  The actual
@@ -154,7 +155,6 @@ EOM
     #     POPFile/API.get_bucket_color
 
     $self->{api__}->{c} = $self->{classifier__};
-    $self->{api__}->{m} = $self->{mq__};
     $self->{server__}->dispatch_to( $self->{api__} );
 
     # DANGER WILL ROBINSON!  In order to make a polling XML-RPC server I am using
