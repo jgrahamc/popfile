@@ -138,7 +138,7 @@ while ( $alive == 1 ) {
     
     # Sleep for 0.1 of a second to ensure that POPFile does not hog the machine's
     # CPU
-    sleep(0.1);
+    select(undef, undef, undef, 0.1);
 }
 
 # Shutdown all the modules
