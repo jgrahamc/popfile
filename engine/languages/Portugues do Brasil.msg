@@ -72,6 +72,7 @@ FAQ                                     FAQ
 ID                                      ID
 Date                                    Data
 Arrived                                 Chegada
+Size                                    Tamanho
 
 # This is a regular expression pattern that is used to convert
 # a number into a friendly looking number (for the US and UK this
@@ -106,6 +107,7 @@ Footer_Forums                           Forums
 Footer_FeedMe                           Contribua
 Footer_RequestFeature                   Pedir uma Característica
 Footer_MailingList                      Lista de Email
+Footer_Wiki                             Documentação Adicional
 
 Configuration_Error1                    O caracter separador deve ser um único caracter
 Configuration_Error2                    O porta da interface de usuário deve ser um número entre 1 e 65535
@@ -202,7 +204,7 @@ History_Remove                          Para remover entradas do histórico cliqu
 History_SearchMessage                   Procurar Remetente/Assunto
 History_NoMessages                      Nenhuma mensagem
 History_ShowMagnet                      magnetizado
-History_ShowNoMagnet                    desmagnetizado
+History_Negate_Search                   Negar procura/filtro
 History_Magnet                          &nbsp;(mostrando apenas mensagens classificadas por ímã)
 History_NoMagnet                        &nbsp;(mostrando apenas mensagens não classificadas por ímã)
 History_ResetSearch                     Limpar
@@ -213,6 +215,9 @@ History_Decrease                        Decrementar
 History_Column_Characters               Alterar a largura das colunas De, Para, Cc e Assunto
 History_Automatic                       Automático
 History_Reclassified                    Reclassificado
+History_Size_Bytes                      %d&nbsp;B
+History_Size_KiloBytes                  %.1f&nbsp;KB
+History_Size_MegaBytes                  %.1f&nbsp;MB
 
 Password_Title                          Senha
 Password_Enter                          Digite a senha
@@ -313,11 +318,12 @@ Session_Error                           A sua sessão do POPFile expirou.  Isto p
 View_Title                              Visão de Única Mensagem
 View_ShowFrequencies                    Exibir freqüência das palavras
 View_ShowProbabilities                  Exibir probabilidade das palavras
-View_ShowScores                         Exibir pontuação das palavras
+View_ShowScores                         Exibir pontuação das palavras e gráfico de decisão
 View_WordMatrix                         Matriz de palavras
 View_WordProbabilities                  exibindo probabilidade das palavras
 View_WordFrequencies                    exibindo freqüência das palavras
 View_WordScores                         exibindo pontuação das palavras
+View_Chart                              Gráfico de Decisão
 
 Windows_TrayIcon                        Exibir o ícone do POPFile na bandeja do sistema?
 Windows_Console                         Executar o POPFile em uma janela de console?
@@ -361,4 +367,10 @@ Imap_UpdateError2                       Falha na conexão ao servidor. Por favor 
 Imap_UpdateError3                       Por favor configure os detalhes da conexão primeiro.
 Imap_NoConnectionMessage                Por favor configure os detalhes da conexão primeiro. Depois disto, mais opções estarão disponíveis nesta página.
 Imap_WatchMore                          uma pasta para lista de pastas em observação
-Imap_WatchedFolder                      Pasta em observação #
+Imap_WatchedFolder                      Pasta em observação nº
+
+Shutdown_Message                        O POPFile foi desligado
+
+Help_Training                           Quando você usa o POPFile pela primeira vez, ele ainda não sabe nada e precisa de treinamento. O POPFile requer treinamento nas mensagens para cada balde, e o treinamento acontece quando você reclassifica para o balde correto uma mensagem que o POPFile classificou incorretamente. Você deve também configurar seu cliente de email para filtrar mensagens baseado na classificação do POPFile. Informação para configurar os filtros no seu cliente de email pode ser encontrado no <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">Projeto de Documentação do POPFile</a>.
+Help_Bucket_Setup                       O POPFile requer pelo menos dois baldes além do pseudo-balde unclassified. O que torna o POPFile único é que ele pode classificar email, mais do que isso, você pode ter qualquer número de baldes. Uma configuração simples poderia ser um balde "spam", "pessoal", e um balde "trabalho".
+Help_No_More                            Não me mostre isto novamente

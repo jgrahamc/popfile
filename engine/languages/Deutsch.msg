@@ -105,6 +105,7 @@ Footer_Forums                           Foren
 Footer_FeedMe                           Spenden
 Footer_RequestFeature                   Funktionalität vorschlagen
 Footer_MailingList                      Mailing Liste
+Footer_Wiki                             Zusätzliche Dokumentation
 
 Configuration_Error1                    Das Trennzeichen muß ein einzelnes Zeichen sein.
 Configuration_Error2                    Der Port für das Kontrollzentrum muß zwischen 1 und 65535 liegen.
@@ -367,3 +368,7 @@ Imap_WatchMore                          : einen weiteren zu überwachenden Ordner
 Imap_WatchedFolder                      Überwachter Ordner Nr.
 
 Shutdown_Message                        POPFile wurde beendet
+
+Help_Training                           POPFile weiss zunächst einmal nichts über Ihre Nachrichten und muss deshalb erst trainiert werden. Für jede Kategorie muss mindestens eine Nachricht neu eingestuft worden sein, damit POPFile selber eine Einstufung vornehmen kann. Außerdem müssen Sie Ihr Mail-Programm so konfigurieren, dass es aufgrund der POPFile-Einstufung Ihre Emails filtert. Informationen über die Konfiguration verschiedener Mail-Programme finden Sie (auf English) im <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">POPFile Documentation Project</a>.
+Help_Bucket_Setup                       POPFile braucht mindestens zwei Kategorien zusätzlich zu der "unclassified" Pseudo-Kategorie. POPFile zeichnet sich durch die Fähigkeit aus, Emails in eine unbgrenzte Zahl von Kategorien einsortieren zu können. Eine einfache Konfiguration könnte zum Beispiel die Kategorien "spam", "beruflich" und "privat" enthalten.
+Help_No_More                            Diesen Hinweis nicht mehr zeigen
