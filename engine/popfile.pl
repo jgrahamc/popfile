@@ -1435,13 +1435,19 @@ sub history_page
         {
             if ( /^From: (.*)/i )
             {
-                $from = $1;
-                $from =~ s/<(.*)>/&lt;\1&gt;/g;
-                $from =~ s/\"(.*)\"/\1/g;
+                if ( $from eq '' ) 
+                {
+                    $from = $1;
+                    $from =~ s/<(.*)>/&lt;\1&gt;/g;
+                    $from =~ s/\"(.*)\"/\1/g;
+                }
             }
             if ( /^Subject: (.*)/i )
             {
-                $subject = $1;
+                if ( $subject eq '' ) 
+                {
+                    $subject = $1;
+                }
             }
             if (( $from ne '' ) && ( $subject ne '' ) ) 
             {
