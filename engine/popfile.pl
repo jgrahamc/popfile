@@ -748,6 +748,11 @@ sub popfile_homepage
         $configuration{sport} = $form{sport};
     }
 
+    if ( $form{update_page_size} eq 'Apply' )
+    {
+        $configuration{page_size} = $form{page_size};
+    }
+
     $body .= "<h2>Listen Ports</h2><p><form action=/configuration><b>POP3 listen port:</b><br><input name=port type=text value=$configuration{port}><input type=submit name=update_port value=Apply></form>";    
     $body .= "Updated port to $configuration{port}; this change will not take affect until you restart POPFile" if ( $form{update_port} eq 'Apply' );
     $body .= "<p><form action=/configuration><b>User interface web port:</b><br><input name=ui_port type=text value=$configuration{ui_port}><input type=submit name=update_ui_port value=Apply></form>";    
@@ -756,6 +761,10 @@ sub popfile_homepage
     $body .= "Updated secure server to $configuration{server}; this change will not take affect until you restart POPFile" if ( $form{update_server} eq 'Apply' );
     $body .= "<p><form action=/><b>Secure port:</b> <br><input name=sport type=text value=$configuration{sport}><input type=submit name=update_sport value=Apply></form>";    
     $body .= "Updated port to $configuration{sport}; this change will not take affect until you restart POPFile" if ( $form{update_sport} eq 'Apply' );
+
+    $body .= "<p><hr><h2>History View</h2><p><form action=/configuration><b>Number of emails per page:</b> <br><input name=page_size type=text value=$configuration{page_size}><input type=submit name=update_page_size value=Apply></form>";    
+    $body .= "Updated number of emails per page to $configuration{page_size}" if ( $form{update_page_size} eq 'Apply' );
+
     $body .= "<p><hr><h2>Classification Insertion</h2><p><b>Subject line modification:</b><br>";    
     $body .= "<b>" if ( $configuration{subject} == 0 );
     $body .= "<a href=/configuration?subject=1><font color=blue>Off</font></a> ";
@@ -1288,11 +1297,11 @@ sub history_page
     $body .= "</table><form action=/history><b>To remove entries in the history click: <input type=submit name=clear value='Remove All'>";
     $body .= "<input type=submit name=clear value='Remove Page'><input type=hidden name=start_message value=$start_message></form>";
     
-    if ( $configuration{page_size} < $#mail_files )
+    if ( $configuration{page_size} <= $#mail_files )
     {
         $body .= "<p><center>Jump to message: ";
         my $i = 0;
-        while ( $i < $#mail_files )
+        while ( $i <= $#mail_files )
         {
             if ( $i == $start_message ) 
             {
