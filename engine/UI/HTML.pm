@@ -660,9 +660,9 @@ sub configuration_page
     # User Interface panel
     $body .= "<table class=\"stabColor01\" width=\"100%\" cellpadding=\"10\" cellspacing=\"0\" >\n" ;
     $body .= "<tr>\n<td class=\"stabColor01\" width=\"33%\" valign=\"top\">\n" ;
-    $body .= "<h2>$self->{language}{Configuration_UserInterface}</h2>\n" ;
+    $body .= "<h2 class=\"configuration\">$self->{language}{Configuration_UserInterface}</h2>\n" ;
     $body .= "<p>\n<form action=\"/configuration\">\n" ;
-    $body .= "<b>$self->{language}{Configuration_SkinsChoose}:</b> <br>\n" ;
+    $body .= "<span class=\"configurationLabel\">$self->{language}{Configuration_SkinsChoose}:</span> <br>\n" ;
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n<select name=\"skin\">\n" ;
 
     for my $i (0..$#{$self->{skins}}) {
