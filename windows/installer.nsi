@@ -656,7 +656,7 @@ notes_ignored:
 
   StrCpy $G_STARTUP "banner displayed"
 
-  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
+  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_BE_PATIENT)" "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
 
 continue:
 
@@ -842,6 +842,7 @@ save_HKCU_root_sfn:
   File "stop_pf.exe"
   File "sqlite.exe"
   File "adduser.exe"
+  File /nonfatal "test\pfidiag.exe"
 
   ; Add 'stop_pf.exe' to 'App Paths' to allow it to be run using Start -> Run -> stop.pf params
 
@@ -1079,6 +1080,12 @@ create_shortcuts:
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
                  "$INSTDIR\runpopfile.exe"
 
+  IfFileExists "$G_ROOTDIR\pfidiag.exe" 0 uninst_shortcut
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk" NORMAL
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk" \
+                 "$G_ROOTDIR\pfidiag.exe"
+
+uninst_shortcut:
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" \
                  "$INSTDIR\uninstall.exe"
@@ -1679,8 +1686,8 @@ done:
   Pop ${L_OLD_GUI}
 
   StrCmp ${L_NEW_GUI} "" try_old_style
-  DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_NEW_GUI} [new style port]"
-  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
+  DetailPrint "$(PFI_LANG_INST_LOG_SHUTDOWN) ${L_NEW_GUI} [new style port]"
+  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
   Push ${L_NEW_GUI}
   Call ShutdownViaUI
   Pop ${L_RESULT}
@@ -1689,8 +1696,8 @@ done:
 
 try_old_style:
   StrCmp ${L_OLD_GUI} "" manual_shutdown
-  DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_OLD_GUI} [old style port]"
-  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
+  DetailPrint "$(PFI_LANG_INST_LOG_SHUTDOWN) ${L_OLD_GUI} [old style port]"
+  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
   Push ${L_OLD_GUI}
   Call ShutdownViaUI
   Pop ${L_RESULT}
@@ -1755,6 +1762,8 @@ FunctionEnd
 Function MinPerlRestructure
 
   IfFileExists "$G_MPLIBDIR\*.pm" exit
+
+  IfFileExists "$INSTDIR\*.pm" 0 exit
 
   CreateDirectory $G_MPLIBDIR
 
@@ -2040,7 +2049,7 @@ look_for_uninstalluser:
 
 uninstall_popfile:
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_1)"
+  DetailPrint "$(PFI_LANG_UN_PROG_SHUTDOWN)"
   SetDetailsPrint listonly
 
   ; If the POPFile we are to uninstall is still running, one of the EXE files will be 'locked'
@@ -2082,8 +2091,8 @@ ui_port_done:
   Call un.StrCheckDecimal
   Pop $G_GUI
   StrCmp $G_GUI "" manual_shutdown
-  DetailPrint "$(PFI_LANG_UN_LOG_1) $G_GUI"
-  DetailPrint "$(PFI_LANG_OPTIONS_BANNER_2)"
+  DetailPrint "$(PFI_LANG_UN_LOG_SHUTDOWN) $G_GUI"
+  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
   Push $G_GUI
   Call un.ShutdownViaUI
   Pop ${L_TEMP}
@@ -2099,7 +2108,7 @@ manual_shutdown:
 
 remove_shortcuts:
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_2)"
+  DetailPrint "$(PFI_LANG_UN_PROG_SHORT)"
   SetDetailsPrint listonly
 
   SetShellVarContext all
@@ -2113,6 +2122,7 @@ menucleanup:
 
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile in background.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk"
 
@@ -2127,7 +2137,7 @@ menucleanup:
   SetShellVarContext current
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_3)"
+  DetailPrint "$(PFI_LANG_UN_PROG_CORE)"
   SetDetailsPrint listonly
 
   Delete $INSTDIR\wrapper.exe
@@ -2138,6 +2148,7 @@ menucleanup:
   Delete $G_ROOTDIR\runpopfile.exe
   Delete $G_ROOTDIR\adduser.exe
   Delete $G_ROOTDIR\sqlite.exe
+  Delete $G_ROOTDIR\pfidiag.exe
 
   Delete $G_ROOTDIR\*.gif
   Delete $G_ROOTDIR\*.change
@@ -2178,10 +2189,10 @@ menucleanup:
   RMDir $G_ROOTDIR\UI
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_5)"
+  DetailPrint "$(PFI_LANG_UN_PROG_SKINS)"
   SetDetailsPrint listonly
 
-  Delete $$G_ROOTDIR\perl*.dll
+  Delete $G_ROOTDIR\perl*.dll
   Delete $G_ROOTDIR\perl.exe
   Delete $G_ROOTDIR\wperl.exe
 
@@ -2226,7 +2237,7 @@ menucleanup:
 
 skip_kakasi:
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_UN_PROGRESS_6)"
+  DetailPrint "$(PFI_LANG_UN_PROG_PERL)"
   SetDetailsPrint listonly
 
   IfFileExists "$G_MPLIBDIR\HTTP\*.*" 0 skip_XMLRPC_support
@@ -2300,11 +2311,11 @@ final_check:
   IfFileExists "$G_ROOTDIR\uninstalluser.exe" exit
 
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_1)" IDNO exit
-  DetailPrint "$(PFI_LANG_UN_LOG_5)"
+  DetailPrint "$(PFI_LANG_UN_LOG_DELUSERDIR)"
   Delete "$INSTDIR\*.*"
   RMDir /r $INSTDIR
   IfFileExists "$INSTDIR\*.*" 0 exit
-  DetailPrint "$(PFI_LANG_UN_LOG_6)"
+  DetailPrint "$(PFI_LANG_UN_LOG_DELUSERERR)"
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "$(PFI_LANG_UN_MBREMERR_1): $INSTDIR $(PFI_LANG_UN_MBREMERR_2)"
 
