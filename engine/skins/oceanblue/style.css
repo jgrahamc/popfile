@@ -1,0 +1,362 @@
+/*  OceanBlue by Joseph Connors (texasfett)
+
+Some useful sites other skinners may want to visit:
+  Menu as list items (design and colors for this skin are based one of the examples):
+    http://www.alistapart.com/articles/taminglists/
+  Float layout from:
+    http://www.ryanbrill.com/floats.htm
+  Workaround ie bug when using floats:
+    http://www.positioniseverything.net/explorer/peekaboo.html
+*/
+
+body {
+  background-color: darkblue;
+  font-family: 'Trebuchet MS', Verdana, Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  kborder: 2px solid darkblue;
+  font-size: 0.8em;
+  width: auto;
+  color: white;
+}
+
+html {
+  /* color the scroll bars in IE -- I can't stand this feature but it was requested */
+  scrollbar-face-color:#2175bc;
+  scrollbar-arrow-color:white;
+  scrollbar-track-color:#1958b7;
+  scrollbar-shadow-color:#2175bc;
+  scrollbar-highlight-color:#2175bc;
+  scrollbar-3dlight-color:white;
+  scrollbar-darkshadow-Color:white;
+}
+
+.shell {
+  font-size: 1em;
+  border: 1px solid #90bade;
+  background-color: #508fc4;
+  text-align: left;
+  padding: 0.5em;
+  margin: 0;
+  margin-left: 8.6em;
+//margin-left: 9.1em;
+  width: auto;
+}
+
+.shellTop {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-collapse: collapse;
+  margin-bottom: 0.25em;
+}
+
+.shellLeft, .shellRight,
+.shellTopRow, .shellTopLeft, .shellTopCenter, .shellTopRight,
+.shellBottomRow, .shellBottomLeft, .shellBottomRight {
+  display: none;
+}
+
+.naked {
+  font-size: 1em;
+  color: white;
+  background-color: transparent;
+  font-weight: normal;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+input, select, textarea, .submit {
+  border: 1px solid white;
+  color: white;
+  background-color: #2175bc;
+}
+
+input {
+  font-size: 1em;
+}
+
+.checkbox {
+  background: transparent;
+  border: 0;
+}
+
+.head {
+  color: white;
+  font-weight: bold;
+  background-color: #2175bc;
+  border: 1px solid #90bade;
+  margin: 0;
+  padding: 0;
+  height: 1em;
+  width: 100%;
+}
+
+.settingsTable {
+  border: 1px solid #2175bc;
+  border-right: 0;  /* trick to get single line border in between Panels */
+  margin: 0;
+  padding: 0;
+}
+
+.settingsPanel {
+  color: white;
+  border: 0;
+  border-right: 1px solid #2175bc;
+  padding: 5px;
+  margin: 0;
+}
+
+hr {
+  color: #2175bc;
+  background-color: #2175bc;
+  height: 1px;
+  border: 0;
+}
+
+.headShutdown {
+  text-align: right;
+  font-size: 0.8em;
+  font-weight: normal;
+}
+
+.headShutdown a:link, .headShutdown a:visited {
+  text-decoration: none;
+  color: white;
+}
+
+.headShutdown a:hover {
+  color: red;
+  text-decoration: none;
+}
+
+.menu {
+  font-size: 1em;
+  font-weight: normal;
+  color: #333;
+  background-color: #90bade;
+  border: 1px solid #90bade;
+  border-bottom: 0;
+  padding: 0;
+  margin: 0;
+  width: 8.3em;
+//width: 6.3em;
+  float:left;
+}
+
+.menu ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.menu li {
+  border-bottom: 1px solid #90bade;
+  margin: 0;
+}
+
+.menu li a {
+  display: block;
+  padding: 5px 5px 5px 0.5em;
+  border-left: 10px solid #1958b7;
+  border-right: 10px solid #508fc4;
+  background-color: #2175bc;
+  color: #fff;
+  text-decoration: none;
+  width: 100%;
+}
+
+html>body .menu li a {
+  width: auto;
+}
+
+.menu li a:hover {
+  border-left: 10px solid #1c64d1;
+  border-right: 10px solid #5ba3e0;
+  background-color: #2586d7;
+  color: #fff;
+}
+
+.menuSpacer {
+  display: none;
+}
+
+.menuIndent {
+  display: none;
+}
+
+.menuStandard a:hover, .menuSelected a:hover {
+  text-decoration: none;
+  color: white;
+}
+
+.menuStandard a:visited, .menuSelected a:visited {
+  text-decoration: none;
+  color: white;
+}
+
+h2 {
+  color: white;
+  font-weight: bold;
+  font-size: 1.2em;
+}
+
+.rowEven {
+  color: white;
+  background-color: transparent;
+}
+
+.rowOdd {
+  color: white;
+  background-color: #2586d7;
+}
+
+.rowHighlighted {
+  color: white;
+  background-color: #5ba3e0;
+}
+
+.rowOdd:hover, .rowEven:hover {
+  background-color: #5ba3e0;
+}
+
+.footer {
+  font-size: 0.9em;
+  background-color: lightblue;
+  font-weight: normal;
+  margin-top: 1em;
+  width:100%;
+  text-align: center;
+  clear: both;
+  padding: 0;
+}
+
+.footerBody {
+  color: black;
+  text-align: center;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.footer br {
+  display: none;
+}
+
+.helpMessage a:link, .helpMessage a:visited,
+.footer a:link, .footer a:visited {
+  color: darkblue;
+}
+
+.bottomLink {
+  padding-left: 0.8em;
+  padding-right: 0.8em;
+}
+
+.bottomLink img {
+  display: none;
+}
+
+.historyNavigatorTop {
+  text-align: right;
+  padding-right: 0.5em;
+}
+
+.historyNavigatorBottom {
+  text-align: right;
+  padding-right: 0.5em;
+  padding-bottom: 1em; 
+}
+
+.historyWidgetsTop {
+  border-top: none;
+  border-bottom: none;
+  width: 100%;
+}
+
+.historyTable {
+  border-top: none;
+  border-bottom: none;
+  width: 100%;
+}
+
+.historyLabel a:link, .historyLabel a:visited {
+  color: white;
+}
+
+.historyLabelSort a:link, .historyLabelSort a:visited {
+  color: white;
+  text-decoration: none;
+}
+
+.openMessageTable, .lookupResultsTable {
+  border: 0;
+}
+
+.openMessageCloser {
+  text-align: right;
+  font-size: larger;
+  font-weight: bold;
+}
+
+.openMessageBody {
+  color: black;
+  font-size: 1em;
+  text-align: left;
+}
+
+div.error01 {
+  color: red;
+  font-size: larger;
+}
+
+div.error02 {
+  color: red;
+}
+
+div.securityExplanation {
+  margin: 0.8em;
+  margin-top: 0;
+  font-size: 95%;
+}
+
+div.helpMessage {
+  color: black;
+  background-color: lightblue;
+  border: 1px solid black;
+  padding: 0.4em;
+  padding-bottom: 0;
+}
+
+span.graphFont {
+  font-size: 95%;
+}
+
+.rowBoundary {
+  background-color: #2175bc;
+}
+
+.bucketsWidgetStateOn, .configWidgetStateOn, .securityWidgetStateOn {
+  font-weight: bold;
+}
+
+a:link, a:visited {
+  color: #EEEEFF;
+  text-decoration: none;
+}
+
+a:link:hover, a:visited:hover {
+  text-decoration: underline;
+}
+
+.footer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0.4em;
+}
+
+.footer li {
+  display: inline;
+}

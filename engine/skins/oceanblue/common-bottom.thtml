@@ -1,0 +1,51 @@
+            </div>
+            <span class="shellRight"></span>
+        </div>
+        <div class="shellBottomRow">
+            <span class="shellBottomLeft"></span>
+            <span class="shellBottomCenter"></span>
+            <span class="shellBottomRight"></span>
+        </div>
+    </div>
+
+    <div class="footer">
+    <ul>
+        <li class="footerBody">
+            <a class="bottomLink" href="http://popfile.sourceforge.net/"><TMPL_VAR NAME="Localize_Footer_HomePage"></a>
+        </li>
+        <li class="footerBody">
+            <a class="bottomLink" href="http://popfile.sourceforge.net/manual/<TMPL_VAR NAME="Localize_ManualLanguage">/manual.html">
+                <TMPL_VAR NAME="Localize_Footer_Manual"></a>
+        </li>
+        <li class="footerBody">
+            <a class="bottomLink" href="http://popfile.sourceforge.net/cgi-bin/wiki.pl">
+                <TMPL_VAR NAME="Localize_Footer_Wiki"></a>
+        </li>
+        <li class="footerBody">
+            <a class="bottomLink" href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions"><TMPL_VAR NAME="Localize_FAQ"></a>
+        </li>
+        <li class="footerBody">
+            <a>&nbsp;</a>
+        </li>
+        <li class="footerBody">
+            <TMPL_VAR NAME="Common_Bottom_Version">
+        </li>
+        <li class="footerBody">
+            (<TMPL_VAR NAME="Common_Bottom_Date"> - <TMPL_VAR NAME="Common_Bottom_LastLogin">)
+        </li>
+        <li class="footerBody">
+            &nbsp;
+        </li>
+        <li class="footerBody">
+            <a class="bottomLink" href="http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959"><TMPL_VAR NAME="Localize_Footer_RequestFeature"></a>
+        </li>
+        <li class="footerBody">
+            <a class="bottomLink" href="http://lists.sourceforge.net/lists/listinfo/popfile-announce"><TMPL_VAR NAME="Localize_Footer_MailingList"></a>
+        </li>
+        <li class="footerBody">
+            <a class="bottomLink" href="http://sourceforge.net/forum/forum.php?forum_id=213876"><TMPL_VAR NAME="Localize_Footer_FeedMe"></a>
+        </li>
+    </ul>
+    </div>
+</body>
+</html>
