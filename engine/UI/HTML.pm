@@ -2671,15 +2671,15 @@ sub new_history_file__
     if ( length($short_subject)>40 )  {
         $short_subject =~ s/=20/ /g;
         $short_subject =~ /(.{40})/;
+        $short_subject = $1;
 
         # Do not truncate at 39 if the last char is the first byte of DBCS char(pair of two bytes).
         # Truncate it 1 byte shorter.
         if ( $self->config_( 'language' ) =~ /^Korean|Nihongo$/ ) {
-            $short_subject = $1;
             $short_subject =~ s/(([\x80-\xff].)*)[\x80-\xff]?$/$1/;
             $short_subject .= "...";
         } else {
-            $short_subject = "$1...";
+            $short_subject .= "...";
         }
     }
 

@@ -869,19 +869,38 @@ sub magnet_match__
 {
     my ( $self, $noattype, $bucket, $type ) = @_;
 
-    for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
-        my $regex;
+    if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
+        no locale;
+        for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
+            my $regex;
 
-        $regex = $magnet;
-        $regex =~ s/@/__POPFILE_AT__/g;
-        $regex =~ s/\$/__POPFILE_DOLLAR__/g;
+            $regex = $magnet;
+            $regex =~ s/@/__POPFILE_AT__/g;
+            $regex =~ s/\$/__POPFILE_DOLLAR__/g;
 
-        if ( $noattype =~ m/\Q$regex\E/i ) {
-            $self->{scores__}        = '';
-            $self->{magnet_used__}   = 1;
-            $self->{magnet_detail__} = "$type: $magnet";
+            if ( $noattype =~ m/\Q$regex\E/i ) {
+                $self->{scores__}        = '';
+                $self->{magnet_used__}   = 1;
+                $self->{magnet_detail__} = "$type: $magnet";
 
-            return 1;
+                return 1;
+            }
+        }
+    }else{
+        for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
+            my $regex;
+
+            $regex = $magnet;
+            $regex =~ s/@/__POPFILE_AT__/g;
+            $regex =~ s/\$/__POPFILE_DOLLAR__/g;
+
+            if ( $noattype =~ m/\Q$regex\E/i ) {
+                $self->{scores__}        = '';
+                $self->{magnet_used__}   = 1;
+                $self->{magnet_detail__} = "$type: $magnet";
+
+                return 1;
+            }
         }
     }
 
@@ -939,12 +958,7 @@ sub classify
 
             # Disable the locale in Korean mode, too.
 
-            if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
-                no locale;
-                return $bucket if ( $self->magnet_match__( $noattype, $bucket, $type ) );
-            } else {
-                return $bucket if ( $self->magnet_match__( $noattype, $bucket, $type ) );
-            }
+            return $bucket if ( $self->magnet_match__( $noattype, $bucket, $type ) );
         }
     }
 
