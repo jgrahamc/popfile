@@ -94,7 +94,7 @@ Locale_Decimal                         .
 # <<format> | <format> The first format is used for dates less than
 #                     7 days from now, the second for all other dates
 
-Locale_Date                            %a %m/%d %TT%z | %A %Y/%m/%d %TT%z
+Locale_Date                            %a %m/%d %T %z | %A %Y/%m/%d %T %z
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile ¿ØÖÆÖÐÐÄ
