@@ -160,7 +160,7 @@ EOM
     # Tell the UI about the SOCKS parameters
 
     $self->register_configuration_item_( 'configuration',  # PROFILE BLOCK START
-                                         $name . '-socks-configuration',
+                                         $name . '_socks_configuration',
                                          'socks-widget.thtml',
                                          $self );          # PROFILE BLOCK STOP
 
