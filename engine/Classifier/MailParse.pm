@@ -741,6 +741,11 @@ sub parse_stream
     # Contains the encoding for the current block in a mime message
 
     my $encoding = '';
+    
+    # Variables to save header information to while parsing headers
+    
+    my $header;    
+    my $argument;
 
     # Clear the word hash
 
@@ -814,7 +819,11 @@ sub parse_stream
                     $splitline =~ s/=3E/&gt;/g;
                 }
 
+                    # Parse the last header
+                    
+                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);
                 $splitline =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
+                    
                 $self->{ut__} .= $splitline;
             }
 
@@ -825,148 +834,28 @@ sub parse_stream
                 if ( $line =~ /^(\r\n|\r|\n)/) {
                     $self->{in_headers__} = 0;
                     print "Header parsing complete.\n" if $self->{debug};
-                }
+                }                
 
                 # If we have an email header then just keep the part after the :
 
                 if ( $line =~ /^([A-Za-z-]+):[ \t]*([^\n\r]*)/ )  {
-                    my $header   = $1;
-                    my $argument = $2;
-
-                    print "Header ($header) ($argument)\n" if ($self->{debug});
-
-                    # Handle the From, To and Cc headers and extract email addresses
-                    # from them and treat them as words
-
-                    # For certain headers we are going to mark them specially in the corpus
-                    # by tagging them with where they were found to help the classifier
-                    # do a better job.  So if you have
-                    #
-                    # From: foo@bar.com
-                    #
-                    # then we'll add from:foo@bar.com to the corpus and not just foo@bar.com
-
-                    my $prefix = '';
-
-                    if ( $header =~ /^(From|To|Cc|Reply\-To)/i ) {
-
-                        # Concatenate multi-line fields (To, CC)
-
-                        if ( ( $header =~ /^To/i ) || ( $header =~ /^Cc/i ) ) {
-                            my $currpos = tell MSG;
-                            my $tempread = <MSG>;
-                            while ( $tempread =~ s/^[ \t]+(.*?)[\r\n]+// )  {
-                                if ( $1 ne '' ) {
-                                    $argument .= $1;
-                                    $currpos = tell MSG;
-                                    $tempread = <MSG>;
-                                } else {
-                                    last;
-                                }
-                            }
-                            seek MSG, $currpos, 0;
-                            print "\n$header: [[$argument]]\n" if $self->{debug};
-                        }
-
-                        if ( $argument =~ /=\?(.{1,40})\?/ ) {
-                            update_word( $self, $1, 0, '', '', 'charset' );
-                        }
-
-                        if ( $header =~ /^From/i )  {
-                            $encoding     = '';
-                            $self->{content_type__} = '';
-                            $self->{from__} = $self->decode_string( $argument ) if ( $self->{from__} eq '' ) ;
-                            $prefix = 'from';
-                        }
-
-                        $prefix = 'to' if ( $header =~ /^To/i );
-                        $self->{to__} = $self->decode_string( $argument ) if ( ( $header =~ /^To/i ) && ( $self->{to__} eq '' ) );
-
-                        $prefix = 'cc' if ( $header =~ /^Cc/i );
-                        $self->{cc__} = $self->decode_string( $argument ) if ( ( $header =~ /^Cc/i ) && ( $self->{cc__} eq '' ) );
-
-                        while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))>// )  {
-                            update_word($self, $1, 0, ';', '&',$prefix);
-                            add_url($self, $2, 0, '@', '[&<]',$prefix);
-                        }
-
-                        while ( $argument =~ s/([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+))// )  {
-                            update_word($self, $1, 0, '', '',$prefix);
-                            add_url($self, $2, 0, '@', '',$prefix);
-                        }
-
-                        add_line( $self, $argument, 0, $prefix );
-                        next;
-                    }
-
-                    $self->{subject__} = $self->decode_string( $argument ) if ( ( $header =~ /^Subject/i ) && ( $self->{subject__} eq '' ) );
-
-                    if ( $header =~ /^Subject/i ) {
-                        $prefix = 'subject';
-                    }
-
-                    $self->{date__} = $argument if ( $header =~ /^Date/i );
-
-                    # Look for MIME
-
-                    if ( $header =~ /^Content-Type/i ) {
-                        if ( $argument =~ /multipart\//i ) {
-                            my $boundary = $argument;
-
-                            if ( !( $argument =~ /boundary=(\"([A-Z0-9\'\(\)\+\_\,\-\.\/\:\=\?][A-Z0-9\'\(\)\+_,\-\.\/:=\? ]{0,69})\"|([^\(\)\<\>\@\,\;\:\\\"\/\[\]\?\=]{1,70}))/i )) {
-                                $boundary = <MSG>;
-                            }
-
-                            if ( $boundary =~ /boundary=(\"([A-Z0-9\'\(\)\+\_\,\-\.\/\:\=\?][A-Z0-9\'\(\)\+_,\-\.\/:=\? ]{0,69})\"|([^\(\)\<\>\@\,\;\:\\\"\/\[\]\?\=]{1,70}))/i ) {
-
-                                $boundary = ($2 || $3);
-
-                                $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
-
-                                if ($mime ne '') {
-
-                                    # Fortunately the pipe character isn't a valid mime boundary character!
-
-                                    $mime = join('|', $mime, $boundary);
-                                } else {
-                                    $mime = $boundary;
-                                }
-                                print "Set mime boundary to " . $mime . "\n" if $self->{debug};
-                                next;
-                            }
-                        }
-
-                        if ( $argument =~ /charset=\"?([^\"]{1,40})\"?/ ) {
-                            update_word( $self, $1, 0, '' , '', 'charset' );
-                        }
-
-                        if ( $argument =~ /^(.*?)(;$)/ ) {
-                            print "Set content type to $1\n" if $self->{debug};
-                            $self->{content_type__} = $1;
-                        }
-                        next;
-                    }
-
-                    # Look for the different encodings in a MIME document, when we hit base64 we will
-                    # do a special parse here since words might be broken across the boundaries
-
-                    if ( $header =~ /^Content-Transfer-Encoding/i ) {
-                        $encoding = $argument;
-                        print "Setting encoding to $encoding\n" if $self->{debug};
-                        my $compact_encoding = $encoding;
-                        $compact_encoding =~ s/[^A-Za-z0-9]//g;
-                        increment_word( $self, "encoding:$compact_encoding" );
-                        next;
-                    }
-
-                    # Some headers to discard
-
-                    next if ( $header =~ /^(Thread-Index|X-UIDL|Message-ID|X-Text-Classification|X-Mime-Key)/i );
-
-                    add_line( $self, $argument, 0, $prefix );
-
-                    next;
+                    
+                    # Parse the last header
+                    
+                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);
+                    
+                    # Save the new information for the current header
+                    
+                    $header   = $1;
+                    $argument = $2;                
                 }
+                
+                # Append to argument if the next line begins with whitespace (isn't a new header)
+                
+                if ( $line =~ /^[\t ](.*?)(\r\n|\r|\n)/ ) {                    
+                    $argument .= $1;
+                }
+                next;
             }
 
             # If we are in a mime document then spot the boundaries
@@ -990,7 +879,7 @@ sub parse_stream
 
                     # escape to match escaped boundary characters
 
-                    $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
+                    $boundary =~ s/(.*)/\Q$1\E/g;
 
                     my $temp_mime;
 
@@ -1165,6 +1054,136 @@ sub get_header
 
     return $self->{$header . '__'};
 }
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# parse_header - Performs parsing operations on a message header
+#
+# $header       Name of header being processed
+# $argument     Value of header being processed
+# $mime         The presently saved mime boundaries list
+# $encoding     Current message encoding
+#
+# ---------------------------------------------------------------------------------------------
+sub parse_header
+{
+    my ($self, $header, $argument, $mime, $encoding ) = @_;
+
+    print "Header ($header) ($argument)\n" if ($self->{debug});
+
+    # Handle the From, To and Cc headers and extract email addresses
+    # from them and treat them as words
+
+    # For certain headers we are going to mark them specially in the corpus
+    # by tagging them with where they were found to help the classifier
+    # do a better job.  So if you have
+    #
+    # From: foo@bar.com
+    #
+    # then we'll add from:foo@bar.com to the corpus and not just foo@bar.com
+
+    my $prefix = '';
+
+    if ( $header =~ /^(From|To|Cc|Reply\-To)/i ) {
+
+        if ( $argument =~ /=\?(.{1,40})\?/ ) {
+            update_word( $self, $1, 0, '', '', 'charset' );
+        }
+
+        if ( $header =~ /^From/i )  {
+            $encoding     = '';
+            $self->{content_type__} = '';
+            $self->{from__} = $self->decode_string( $argument ) if ( $self->{from__} eq '' ) ;
+            $prefix = 'from';
+        }
+
+        $prefix = 'to' if ( $header =~ /^To/i );
+        $self->{to__} = $self->decode_string( $argument ) if ( ( $header =~ /^To/i ) && ( $self->{to__} eq '' ) );
+
+        $prefix = 'cc' if ( $header =~ /^Cc/i );
+        $self->{cc__} = $self->decode_string( $argument ) if ( ( $header =~ /^Cc/i ) && ( $self->{cc__} eq '' ) );
+
+        while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))>// )  {
+            update_word($self, $1, 0, ';', '&',$prefix);
+            add_url($self, $2, 0, '@', '[&<]',$prefix);
+        }
+
+        while ( $argument =~ s/([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+))// )  {
+            update_word($self, $1, 0, '', '',$prefix);
+            add_url($self, $2, 0, '@', '',$prefix);
+        }
+
+        add_line( $self, $argument, 0, $prefix );
+        return ($mime, $encoding);
+    }
+
+    $self->{subject__} = $self->decode_string( $argument ) if ( ( $header =~ /^Subject/i ) && ( $self->{subject__} eq '' ) );
+
+    if ( $header =~ /^Subject/i ) {
+        $prefix = 'subject';
+    }
+
+    $self->{date__} = $argument if ( $header =~ /^Date/i );
+
+    # Look for MIME
+
+    if ( $header =~ /^Content-Type/i ) {
+        
+        if ( $argument =~ /charset=\"?([^\"]{1,40})\"?/ ) {
+            update_word( $self, $1, 0, '' , '', 'charset' );
+        }
+
+        if ( $argument =~ /^(.*?)(;)/ ) {
+            print "Set content type to $1\n" if $self->{debug};
+            $self->{content_type__} = $1;
+        }
+        
+        if ( $argument =~ /multipart\//i ) {            
+            my $boundary = $argument;
+
+            if ( $boundary =~ /boundary= ?(\"([A-Z0-9\'\(\)\+\_\,\-\.\/\:\=\?][A-Z0-9\'\(\)\+_,\-\.\/:=\? ]{0,69})\"|([^\(\)\<\>\@\,\;\:\\\"\/\[\]\?\=]{1,70}))/i ) {
+
+                $boundary = ($2 || $3);
+
+                $boundary =~ s/(.*)/\Q$1\E/g;
+
+                if ($mime ne '') {
+
+                    # Fortunately the pipe character isn't a valid mime boundary character!
+
+                    $mime = join('|', $mime, $boundary);
+                } else {
+                    $mime = $boundary;
+                }
+                print "Set mime boundary to " . $mime . "\n" if $self->{debug};
+                return ($mime, $encoding);
+            }
+        }
+        return ($mime, $encoding);
+    }
+
+    # Look for the different encodings in a MIME document, when we hit base64 we will
+    # do a special parse here since words might be broken across the boundaries
+
+    if ( $header =~ /^Content-Transfer-Encoding/i ) {
+        $encoding = $argument;
+        print "Setting encoding to $encoding\n" if $self->{debug};
+        my $compact_encoding = $encoding;
+        $compact_encoding =~ s/[^A-Za-z0-9]//g;
+        increment_word( $self, "encoding:$compact_encoding" );
+        return ($mime, $encoding);
+    }
+
+    # Some headers to discard
+
+    return ($mime, $encoding) if ( $header =~ /^(Thread-Index|X-UIDL|Message-ID|X-Text-Classification|X-Mime-Key)/i );
+
+    add_line( $self, $argument, 0, $prefix );
+
+    return ($mime, $encoding);
+}
+                
 
 # GETTERS/SETTERS
 
