@@ -44,6 +44,8 @@ sub new
 
     # Precomputed top 10 words in each bucket
     $self->{top10}             = {};
+    $self->{top10value}        = {};
+    $self->{top10html}         = {};
     
     return bless $self, $type;
 }
@@ -63,9 +65,9 @@ sub get_color
     my $max   = 0;
     my $color = 'black';
     
-    for my $bucket (keys %{$self->{matrix}})
+    for my $bucket (keys %{$self->{total}})
     {
-        my $prob  = ( $self->{matrix}{$bucket}{$word} / $self->{total}{$bucket} );
+        my $prob  = get_value( $self, $bucket, $word ) / $self->{total}{$bucket};
         
         if ( $prob > $max ) 
         {
@@ -75,6 +77,72 @@ sub get_color
     }
     
     return $color;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# Perl hashes are a memory hog.  The original implementation was a Perl hash for the word
+# matrix, but instead we use a a set of nested array and some regexps magic.
+#
+# The word paradise in the bucket spam will be found in the array element
+#   matrix{spam}[p] with an entry of the form "|paradise 1234|".
+# ---------------------------------------------------------------------------------------------
+
+sub get_value
+{
+    my ($self, $bucket, $word) = @_;
+    $word =~ /^(.)/;
+    my $i = ord($1);
+    if ( ( $self->{matrix}{$bucket}[$i] =~ /\|$word (\d+)\|/ ) != 0 ) 
+    {
+        return $1;
+    } 
+    else
+    {
+        return 0;
+    }
+}
+
+sub set_value
+{
+    my ($self, $bucket, $word, $value) = @_;
+    $word =~ /^(.)/;
+    my $i = ord($1);
+    if ( ( $self->{matrix}{$bucket}[$i] =~ s/\|$word (\d+)\|/\|$word $value\|/ ) == 0 ) 
+    {
+        $self->{matrix}{$bucket}[$i] .= "|$word $value|";
+    }
+}
+
+sub compute_top10
+{
+    my ($self, $bucket, $word, $value) = @_;
+    my @values = keys %{$self->{top10value}{$bucket}};
+
+    if ( $#values == 9 ) 
+    {
+        for my $i ( 0 .. 9 )
+        {
+            my $j = 9 - $i;
+            if ( $self->{top10value}{$bucket}{$j} < $value )
+            {
+                $self->{top10value}{$bucket}{$j} = $value;
+                $self->{top10}{$bucket}{$j}      = $word;
+                last;
+            }
+        }
+    }
+    else
+    {
+        my $i = 0;
+        if ( $#values >= 0 ) 
+        {
+            $i = $#values+1;
+        }
+        $self->{top10value}{$bucket}{$i} = $value;
+        $self->{top10}{$bucket}{$i}      = $word;
+        
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -132,43 +200,43 @@ sub load_word_matrix
 
         # Each line in the word table is a word and a count
         $self->{total}{$bucket} = 0;
+        $self->{top10bottom}{$bucket} = 0;
     
         while (<WORDS>)
         {
             if ( /(.+) (.+)/ )
             {
                 my $word = $self->{mangler}->mangle($1);
-                $self->{matrix}{$bucket}{$word} = $2;
+                set_value( $self, $bucket, $word, $2 );
                 $self->{total}{$bucket}        += $2;
                 $self->{full_total}            += $2;
+                compute_top10( $self, $bucket, $word, $2 );
             }
         }
 
         close WORDS;
 
-        # Now adjust the values in the table so that they are probabilities
-        
-        for my $word (keys %{$self->{matrix}{$bucket}})
-        {
-            $self->{matrix}{$bucket}{$word} /= $self->{total}{$bucket};
-        }
-
-        $self->{top10}{$bucket} = "<tr><td><font color=$self->{colors}{$bucket}>$bucket</font><td>$self->{total}{$bucket}<td><table cellpadding=0 cellspacing=0><tr>";
+        my $number = $self->{total}{$bucket};
+        $number = reverse $number;
+        $number =~ s/(\d{3})/\1,/g;
+        $number = reverse $number;
+        $number =~ s/^,(.*)/\1/;
+        $self->{top10html}{$bucket} = "<tr><td><font color=$self->{colors}{$bucket}>$bucket</font><td align=right>$number<td>&nbsp;<td align=center><table cellpadding=0 cellspacing=0><tr>";
         for $color (@colors)
         {
-            $self->{top10}{$bucket} .= "<td width=20 bgcolor=$color><a href=/corpus?color=$color&bucket=$bucket><img border=0 alt='Set $bucket color to $color' src=http://www.usethesource.com/images/pix.gif width=20 height=20></a></font>";
+            $self->{top10html}{$bucket} .= "<td width=20 bgcolor=$color><a href=/buckets?color=$color&bucket=$bucket><img border=0 alt='Set $bucket color to $color' src=http://www.usethesource.com/images/pix.gif width=20 height=20></a></font>";
         }
-        $self->{top10}{$bucket} .= "</table></td><td><td>";
-        my @ranking = sort {$self->{matrix}{$bucket}{$b} <=> $self->{matrix}{$bucket}{$a}} keys %{$self->{matrix}{$bucket}};
-        for my $i ( 0.. 9 )
+        $self->{top10html}{$bucket} .= "</table></td><td><td>";
+
+        for my $i ( 0 .. 9 )
         {
-            if ( $ranking[$i] ne '' ) 
+            if ( $self->{top10}{$bucket}{$i} ne '' ) 
             {
-                $self->{top10}{$bucket} .= "$ranking[$i]";
+                $self->{top10html}{$bucket} .= $self->{top10}{$bucket}{$i};
 
                 if ( $i != 9 ) 
                 {
-                    $self->{top10}{$bucket} .= ', ';
+                    $self->{top10html}{$bucket} .= ', ';
                 }
             }
         }
@@ -230,7 +298,7 @@ sub classify_file
     {
         foreach my $bucket (@buckets)
         {
-            my $probability  = $self->{matrix}{$bucket}{$word};
+            my $probability  = get_value( $self, $bucket, $word ) / $self->{total}{$bucket};
             
             if ( $probability == 0 ) 
             {
