@@ -7,7 +7,7 @@
 #
 # These strings are grouped according to the page/window where they are used
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -267,6 +267,15 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1   "Mail clients marked (*) can be reconfigured automatically, assuming simple accounts are used.\r\n\r\nIt is strongly recommended that accounts which require authentication are configured manually."
 !insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2   "IMPORTANT: PLEASE SHUT DOWN THE RECONFIGURABLE EMAIL CLIENTS NOW\r\n\r\nThis feature is still under development (e.g. some Outlook accounts may not be detected).\r\n\r\nPlease check that the reconfiguration was successful (before using the email client)."
 
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_CANCEL   "Email client reconfiguration cancelled by user"
+
+#--------------------------------------------------------------------------
+# Text used on buttons to skip configuration of email clients
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPALL  "Skip All"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPONE  "Skip Client"
+
 #--------------------------------------------------------------------------
 # Message box warnings that an email client is still running
 #--------------------------------------------------------------------------
@@ -437,6 +446,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_4             "닫힘"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_5             "POPFile 디렉토리의 모든 파일을 제거 중."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_6             "참고: POPFile 디렉토리로부터 모든 파일을 제거할 수 없습니다."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_7             "Data problems"
 
 ; Message Box text strings
 
@@ -444,6 +454,18 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "그래도 계속하시겠습니까?(권장하지 않음)"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_ABORT_1           "사용자에 의해 언인스톨이 취소됨"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_1        "'Outlook Express' problem !"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_2        "'Outlook' problem !"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_3        "'Eudora' problem !"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBEMAIL_1         "Unable to restore some original settings"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBEMAIL_2         "Display the error report ?"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_1         "Some email client settings have not been restored !"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_2         "(Details can be found in $INSTDIR folder)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_3         "Click 'No' to ignore these errors and delete everything"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_4         "Click 'Yes' to keep this data (to allow another attempt later)"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "POPFile 디렉토리의 모든 파일을 제거하시겠습니까?$\r$\n$\r$\n(직접 생성하신 파일이 있고, 보존하고 싶으시면 '아니오'를 클릭하십시오"
 

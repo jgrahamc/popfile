@@ -267,6 +267,15 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1   "Clientes de email marcados (*) podem ser reconfigurados automaticamente, assumindo que contas simples sejam usadas.\r\n\r\nÉ altamente recomendado que contas que requeiram autenticação sejam configuradas manualmente."
 !insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2   "IMPORTANTE: POR FAVOR FECHE OS CLIENTES DE EMAIL RECONFIGURÁVEIS AGORA\r\n\r\nEsta característica ainda está em desenvolvimento (algumas contas do Outlook podem não serem detectadas).\r\n\r\nPor favor verifique se a reconfiguração foi bem sucedida (antes de usar o cliente de email)."
 
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_CANCEL   "Email client reconfiguration cancelled by user"
+
+#--------------------------------------------------------------------------
+# Text used on buttons to skip configuration of email clients
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPALL  "Skip All"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_SKIPONE  "Skip Client"
+
 #--------------------------------------------------------------------------
 # Message box warnings that an email client is still running
 #--------------------------------------------------------------------------
@@ -437,6 +446,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_4             "Fechado"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_5             "Removendo todos os arquivos da pasta do POPFile"
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_6             "Nota: impossível remover todos os arquivos da pasta do POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_LOG_7             "Data problems"
 
 ; Message Box text strings
 
@@ -444,6 +454,18 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBNOTFOUND_2      "Continuar mesmo assim (não recomendado) ?"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_ABORT_1           "Desinstalação cancelada pelo usuário"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_1        "'Outlook Express' problem !"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_2        "'Outlook' problem !"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBCLIENT_3        "'Eudora' problem !"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBEMAIL_1         "Unable to restore some original settings"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBEMAIL_2         "Display the error report ?"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_1         "Some email client settings have not been restored !"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_2         "(Details can be found in $INSTDIR folder)"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_3         "Click 'No' to ignore these errors and delete everything"
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_MBRERUN_4         "Click 'Yes' to keep this data (to allow another attempt later)"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_MBREMDIR_1        "Você quer remover todos os arquivos da sua pasta do POPFile ?$\r$\n$\r$\n(Se você tiver qualquer coisa que você criou e quer manter, clique Não)"
 
