@@ -152,10 +152,10 @@ MATCH <a href="/history?session=$sk&amp;setsort=from">From</a>
 
 # Check the page navigator
 
-MATCH Jump to message: <b>1</b> [<a href="/history?start_message=20&amp;session=$sk">21</a>] [<a href="/history?start_message=20&amp;session=$sk">Next ></a>]
+MATCH Jump to page: <b>1</b> [<a href="/history?start_message=20&amp;session=$sk">2</a>] [<a href="/history?start_message=20&amp;session=$sk">Next ></a>]
 NOTMATCH XoSeXyGoDdEsSm\@hotmail.com
 GET /history?start_message=20&amp;session=$sk
-MATCH Jump to message: [<a href="/history?start_message=0&amp;session=$sk">< Previous</a>] [<a href="/history?start_message=0&amp;session=$sk">1</a>] <b>21</b>
+MATCH Jump to page: [<a href="/history?start_message=0&amp;session=$sk">< Previous</a>] [<a href="/history?start_message=0&amp;session=$sk">1</a>] <b>2</b>
 MATCH XoSeXyGoDdEsSm\@hotmail.com
 MATCH from: Leandro
 NOTMATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
@@ -223,34 +223,34 @@ MATCH <font color="green">foo</font>
 SETSUBMIT search isnotpresent
 MATCH searched for from/subject isnotpresent
 MATCH No messages.
-NOTMATCH Jump to message
+NOTMATCH Jump to page
 CLICK reset_filter_search
 NOTMATCH searched for from/subject
 NOTMATCH No messages.
 MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
-MATCH Jump to message
+MATCH Jump to page
 
 SETSUBMIT search test.com
 MATCH searched for from/subject test.com
 MATCH test\@test.com
 NOTMATCH Enlarge your package Doctor ApprovedNHOB...
-NOTMATCH Jump to message
+NOTMATCH Jump to page
 CLICK reset_filter_search
 NOTMATCH searched for from/subject
 NOTMATCH No messages.
 MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
-MATCH Jump to message
+MATCH Jump to page
 
 SETSUBMIT search Doctor
 MATCH searched for from/subject Doctor
 NOTMATCH test\@test.com
 MATCH Enlarge your package Doctor ApprovedNHOB...
-NOTMATCH Jump to message
+NOTMATCH Jump to page
 CLICK reset_filter_search
 NOTMATCH searched for from/subject
 NOTMATCH No messages.
 MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
-MATCH Jump to message
+MATCH Jump to page
 
 # Check filter
 
@@ -265,7 +265,7 @@ CLICK setfilter
 MATCH (just showing bucket <font color="blue">spam</font>)
 MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 NOTMATCH Testing Refresh
-MATCH Jump to message: <b>1</b> [<a href="/history?start_message=20&amp;session=$sk&amp;filter=spam">21</a>] [<a href="/history?start_message=20&amp;session=$sk&amp;filter=spam">Next ></a>]
+MATCH Jump to page: <b>1</b> [<a href="/history?start_message=20&amp;session=$sk&amp;filter=spam">2</a>] [<a href="/history?start_message=20&amp;session=$sk&amp;filter=spam">Next ></a>]
 GET /history?start_message=20&amp;session=$sk&amp;filter=spam
 NOTMATCH Testing Refresh
 SETINPUT filter other 

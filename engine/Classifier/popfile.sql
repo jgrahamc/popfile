@@ -379,5 +379,10 @@ insert into magnet_types ( 'type', 'header' ) values ( 'to',      'To'      );
 insert into magnet_types ( 'type', 'header' ) values ( 'subject', 'Subject' );
 insert into magnet_types ( 'type', 'header' ) values ( 'cc',      'Cc'      );
 
+-- There's always a bucket called 'unclassified' which is where POPFile puts
+-- messages that it isn't sure about.
+
+insert into buckets ( 'name', 'pseudo', 'userid' ) values ( 'unclassified', 1, 1 );
+
 -- END
 

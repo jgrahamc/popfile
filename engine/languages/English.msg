@@ -123,9 +123,9 @@ Configuration_TCPTimeout                Connection Timeout
 Configuration_TCPTimeoutSecs            Connection timeout in seconds
 Configuration_TCPTimeoutUpdate          Updated connection timeout to %s
 Configuration_ClassificationInsertion   Message Text Insertion
-Configuration_SubjectLine               Subject line modification
-Configuration_XTCInsertion              X-Text-Classification Header
-Configuration_XPLInsertion              X-POPFile-Link Header
+Configuration_SubjectLine               Subject line<br>modification
+Configuration_XTCInsertion              X-Text-Classification<br>Header
+Configuration_XPLInsertion              X-POPFile-Link<br>Header
 Configuration_Logging                   Logging
 Configuration_None                      None
 Configuration_ToScreen                  To Screen
@@ -155,7 +155,7 @@ History_Filter                          &nbsp;(just showing bucket <font color="
 History_FilterBy                        Filter By
 History_Search                          &nbsp;(searched for from/subject %s)
 History_Title                           Recent Messages
-History_Jump                            Jump to message
+History_Jump                            Jump to page
 History_ShowAll                         Show All
 History_ShouldBe                        Should be
 History_NoFrom                          no from line
@@ -188,7 +188,7 @@ Security_ExplainStats                   (With this turned on POPFile sends once 
 Security_ExplainUpdate                  (With this turned on POPFile sends once per day the following three values to a script on www.usethesource.com: ma (the major version number of your installed POPFile), mi (the minor version number of your installed POPFile) and bn (the build number of your installed POPFile).  POPFile receives a response in the form of a graphic that appears at the top of the page if a new version is available.  My web server keeps its log files for about 5 days and then they get deleted; I am not storing any connection between the update checks and individual IP addresses.)
 Security_PasswordTitle                  User Interface Password
 Security_Password                       Password
-Security_PasswordUpdate                 Updated password to %s
+Security_PasswordUpdate                 Updated password
 Security_AUTHTitle                      Remote Servers
 Security_SecureServer                   POP3 SPA/AUTH server
 Security_SecureServerUpdate             Updated POP3 SPA/AUTH secure server to %s; this change will not take affect until you restart POPFile
@@ -226,13 +226,13 @@ Bucket_Error3                           Created bucket named %s
 Bucket_Error4                           Please enter a non-blank word
 Bucket_Error5                           Renamed bucket %s to %s
 Bucket_Error6                           Deleted bucket %s
-Bucket_Title                            Summary
-Bucket_BucketName                       Bucket Name
+Bucket_Title                            Bucket Configuration
+Bucket_BucketName                       Bucket<br>Name
 Bucket_WordCount                        Word Count
 Bucket_WordCounts                       Word Counts
-Bucket_UniqueWords                      Unique Words
-Bucket_SubjectModification              Subject Modification
-Bucket_ChangeColor                      Change Color
+Bucket_UniqueWords                      Distinct<br>Words
+Bucket_SubjectModification              Subject Header<br>Modification
+Bucket_ChangeColor                      Bucket<br>Color
 Bucket_NotEnoughData                    Not enough data
 Bucket_ClassificationAccuracy           Classification Accuracy
 Bucket_EmailsClassified                 Messages classified
@@ -257,7 +257,7 @@ Bucket_LookupMostLikely                 <b>%s</b> is most likely to appear in <f
 Bucket_DoesNotAppear                    <p><b>%s</b> does not appear in any of the buckets
 Bucket_DisabledGlobally                 Disabled globally
 Bucket_To                               to
-Bucket_Quarantine                       Quarantine
+Bucket_Quarantine                       Quarantine<br>Message
 
 SingleBucket_Title                      Detail for %s
 SingleBucket_WordCount                  Bucket word count
@@ -265,7 +265,7 @@ SingleBucket_TotalWordCount             Total word count
 SingleBucket_Percentage                 Percentage of total
 SingleBucket_WordTable                  Word Table for %s
 SingleBucket_Message1                   Click a letter in the index to see the list of words that start with that letter.  Click any word to lookup its probability for all buckets.
-SingleBucket_Unique                     %s unique
+SingleBucket_Unique                     %s distinct
 SingleBucket_ClearBucket                Remove All Words
 
 Session_Title                           POPFile Session Expired

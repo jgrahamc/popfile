@@ -850,9 +850,6 @@ sub configuration_page
 
     $self->config_( 'skin', $self->{form_}{skin} )      if ( defined($self->{form_}{skin}) );
     $self->global_config_( 'debug', $self->{form_}{debug}-1 )   if ( ( defined($self->{form_}{debug}) ) && ( ( $self->{form_}{debug} >= 1 ) && ( $self->{form_}{debug} <= 4 ) ) );
-    $self->global_config_( 'subject', $self->{form_}{subject}-1 ) if ( ( defined($self->{form_}{subject}) ) && ( ( $self->{form_}{subject} >= 1 ) && ( $self->{form_}{subject} <= 2 ) ) );
-    $self->global_config_( 'xtc', $self->{form_}{xtc}-1 )     if ( ( defined($self->{form_}{xtc}) ) && ( ( $self->{form_}{xtc} >= 1 ) && ( $self->{form_}{xtc} <= 2 ) ) );
-    $self->global_config_( 'xpl', $self->{form_}{xpl}-1 )     if ( ( defined($self->{form_}{xpl}) ) && ( ( $self->{form_}{xpl} >= 1 ) && ( $self->{form_}{xpl} <= 2 ) ) );
 
     for my $name (keys %{$self->{dynamic_ui__}{configuration}}) {
         $body .= $self->{dynamic_ui__}{configuration}{$name}->validate_item( $name,
@@ -989,83 +986,10 @@ sub configuration_page
     $body .= "</form>\n$history_days_error\n";
     $body .= sprintf( $self->{language__}{Configuration_DaysUpdate}, $self->config_( 'history_days' ) ) if ( defined($self->{form_}{history_days}) );
 
-    # Classification Insertion panel
-
-    $body .= "</td>\n<td class=\"settingsPanel\" width=\"33%\" valign=\"top\">\n";
-    $body .= "<h2 class=\"configuration\">$self->{language__}{Configuration_ClassificationInsertion}</h2>\n";
-
-    # Subject line modification widget
-
-    $body .= "<table width=\"100%\" summary=\"$self->{language__}{Configuration_InsertionTableSummary}\">\n<tr>\n";
-    $body .= "<th valign=\"baseline\" scope=\"row\">\n<span class=\"configurationLabel\">$self->{language__}{Configuration_SubjectLine}:</span>\n</th>\n";
-    if ( $self->global_config_( 'subject' ) == 1 ) {
-        $body .= "<td valign=\"baseline\" align=\"right\">\n";
-        $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
-        $body .= "<span class=\"configWidgetStateOn\">$self->{language__}{On}</span>\n";
-        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"configSubjectOff\" name=\"toggle\" value=\"$self->{language__}{TurnOff}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"subject\" value=\"1\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n</td>\n";
-    } else {
-        $body .= "<td valign=\"baseline\" align=\"right\">\n";
-        $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
-        $body .= "<span class=\"configWidgetStateOff\">$self->{language__}{Off}</span>\n";
-        $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"configSubjectOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"subject\" value=\"2\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n</td>\n";
-    }
-
-    # X-Text-Classification insertion widget
-
-    $body .= "</tr>\n<tr>\n<th valign=\"baseline\" scope=\"row\">\n<span class=\"configurationLabel\">$self->{language__}{Configuration_XTCInsertion}:</span></th>\n";
-    if ( $self->global_config_( 'xtc' ) == 1 ) {
-        $body .= "<td valign=\"baseline\" align=\"right\">\n";
-        $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
-        $body .= "<span class=\"configWidgetStateOn\">$self->{language__}{On}</span>\n";
-        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"configXTCOff\" name=\"toggle\" value=\"$self->{language__}{TurnOff}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"xtc\" value=\"1\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n</td>\n";
-    } else {
-        $body .= "<td valign=\"baseline\" align=\"right\">\n";
-        $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
-        $body .= "<span class=\"configWidgetStateOff\">$self->{language__}{Off}</span>\n";
-        $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"configXTCOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"xtc\" value=\"2\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n</td>\n";
-    }
-
-    # X-POPFile-Link insertion widget
-
-    $body .= "</tr>\n<tr>\n<th valign=\"baseline\" scope=\"row\">\n<span class=\"configurationLabel\">$self->{language__}{Configuration_XPLInsertion}:</span></th>\n";
-    if ( $self->global_config_( 'xpl' ) == 1 ) {
-        $body .= "<td valign=\"baseline\" align=\"right\">\n";
-        $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
-        $body .= "<span class=\"configWidgetStateOn\">$self->{language__}{On}</span>\n";
-        $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"configXPLOff\" name=\"toggle\" value=\"$self->{language__}{TurnOff}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"xpl\" value=\"1\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n</td>\n";
-    } else {
-        $body .= "<td valign=\"baseline\" align=\"right\">\n";
-        $body .= "<form class=\"configSwitch\" style=\"margin: 0\" action=\"/configuration\">\n";
-        $body .= "<span class=\"configWidgetStateOff\">$self->{language__}{Off}</span>\n";
-        $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"configXPLOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"xpl\" value=\"2\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n</td>\n";
-    }
-    $body .= "</tr>\n</table>\n<br />\n";
-
     # Listen Ports panel
 
-    $body .= "</td>\n</tr>\n<tr>\n<td class=\"settingsPanel\" width=\"33%\" valign=\"top\">\n";
+    $body .= "<td class=\"settingsPanel\" width=\"33%\" valign=\"top\" rowspan=\"2\">\n";
     $body .= "<h2 class=\"configuration\">$self->{language__}{Configuration_ListenPorts}</h2>\n";
-
-    # Insert all the items that are dynamically created from the modules that are loaded
-
-    for my $name (sort keys %{$self->{dynamic_ui__}{configuration}}) {
-        $body .= $self->{dynamic_ui__}{configuration}{$name}->configure_item( $name,                    # PROFILE BLOCK START
-                                                                              \%{$self->{language__}},
-                                                                              $self->{session_key__} ); # PROFILE BLOCK STOP
-    }
-
 
     # User Interface Port widget
 
@@ -1075,12 +999,29 @@ sub configuration_page
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_ui_port\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$ui_port_error";
     $body .= sprintf( $self->{language__}{Configuration_UIUpdate}, $self->config_( 'port' ) ) if ( defined($self->{form_}{ui_port}) );
-    $body .= "<br />\n</td>\n";
+    $body .= "\n";
+
+    # Insert all the items that are dynamically created from the modules that are loaded
+
+    my $last_module = '';
+    for my $name (sort keys %{$self->{dynamic_ui__}{configuration}}) {
+        $name =~ /^([^_]+)_/;
+        my $module = $1;
+        if ( $last_module ne $module ) {
+            $last_module = $module;
+            $body .= "<hr>\n<h2 class=\"configuration\">";
+            $body .= uc($module);
+            $body .= "</h2>\n";
+	}
+        $body .= $self->{dynamic_ui__}{configuration}{$name}->configure_item( $name,                    # PROFILE BLOCK START
+                                                                              \%{$self->{language__}},
+                                                                              $self->{session_key__} ); # PROFILE BLOCK STOP
+    }
 
     # TCP Connection Timeout panel
 
-    $body .= "<td class=\"settingsPanel\" width=\"33%\" valign=\"top\">\n";
-    $body .= "<h2 class=\"configuration\">$self->{language__}{Configuration_TCPTimeout}</h2>\n";
+    $body .= "<tr>\n<td class=\"settingsPanel\" width=\"33%\" valign=\"top\">\n";
+    $body .= "<h3 class=\"configuration\">$self->{language__}{Configuration_TCPTimeout}</h3>\n";
 
     # TCP Conn TO widget
 
@@ -1233,7 +1174,7 @@ sub security_page
     $body .= "<input type=\"password\" id=\"securityPassword\" name=\"password\" value=\"" . $self->config_( 'password' ) . "\" />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_server\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n";
-    $body .= sprintf( $self->{language__}{Security_PasswordUpdate}, $self->config_( 'password' ) ) if ( defined($self->{form_}{password}) );
+    $body .= $self->{language__}{Security_PasswordUpdate} if ( defined($self->{form_}{password}) );
 
    # end optional widget placement
    $body .= "</div>\n";
@@ -1829,7 +1770,7 @@ sub bar_chart_100
         $body .= "\n</tr>\n";
     }
 
-    my $colspan = 3;
+    my $colspan = 3 + $#series;
 
     $body .= "<tr>\n<td colspan=\"$colspan\">&nbsp;</td>\n</tr>\n<tr>\n<td colspan=\"$colspan\">\n";
 
@@ -1876,7 +1817,6 @@ sub corpus_page
             $self->{classifier__}->set_bucket_parameter( $bucket, 'fpcount', 0 );
             $self->{classifier__}->set_bucket_parameter( $bucket, 'fncount', 0 );
         }
-        $self->{classifier__}->write_parameters();
         my $lasttime = localtime;
         $self->config_( 'last_reset', $lasttime );
         $self->{configuration__}->save_configuration();
@@ -1901,6 +1841,14 @@ sub corpus_page
 
     if ( ( defined($self->{form_}{bucket}) ) && ( defined($self->{form_}{subject}) ) && ( $self->{form_}{subject} > 0 ) ) {
         $self->{classifier__}->set_bucket_parameter( $self->{form_}{bucket}, 'subject', $self->{form_}{subject} - 1 );
+    }
+
+    if ( ( defined($self->{form_}{bucket}) ) && ( defined($self->{form_}{xtc}) ) && ( $self->{form_}{xtc} > 0 ) ) {
+        $self->{classifier__}->set_bucket_parameter( $self->{form_}{bucket}, 'xtc', $self->{form_}{xtc} - 1 );
+    }
+
+    if ( ( defined($self->{form_}{bucket}) ) && ( defined($self->{form_}{xpl}) ) && ( $self->{form_}{xpl} > 0 ) ) {
+        $self->{classifier__}->set_bucket_parameter( $self->{form_}{bucket}, 'xpl', $self->{form_}{xpl} - 1 );
     }
 
     if ( ( defined($self->{form_}{bucket}) ) &&  ( defined($self->{form_}{quarantine}) ) && ( $self->{form_}{quarantine} > 0 ) ) {
@@ -1948,9 +1896,10 @@ sub corpus_page
     # column headings
     $body .= "<table class=\"bucketsTable\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" summary=\"$self->{language__}{Bucket_MaintenanceTableSummary}\">\n<tr>\n";
     $body .= "<th class=\"bucketsLabel\" scope=\"col\">$self->{language__}{Bucket_BucketName}</th>\n";
-    $body .= "<th width=\"1%\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language__}{Bucket_WordCount}</th>\n";
     $body .= "<th width=\"1%\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language__}{Bucket_UniqueWords}</th>\n";
     $body .= "<th width=\"1%\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"center\">$self->{language__}{Bucket_SubjectModification}</th>\n";
+    $body .= "<th width=\"1%\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"center\">$self->{language__}{Configuration_XTCInsertion}</th>\n";
+    $body .= "<th width=\"1%\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"center\">$self->{language__}{Configuration_XPLInsertion}</th>\n";
     $body .= "<th width=\"1%\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"center\">$self->{language__}{Bucket_Quarantine}</th>\n";
     $body .= "<th width=\"2%\">&nbsp;</th>\n<th class=\"bucketsLabel\" scope=\"col\" align=\"left\">$self->{language__}{Bucket_ChangeColor}</th>\n</tr>\n";
 
@@ -1962,8 +1911,10 @@ sub corpus_page
         $total_count += $self->{classifier__}->get_bucket_parameter( $bucket, 'count' );
     }
 
+    my @pseudos = $self->{classifier__}->get_pseudo_buckets();
+    push @buckets, @pseudos;
+
     foreach my $bucket (@buckets) {
-        my $number  = pretty_number( $self,  $self->{classifier__}->get_bucket_word_count($bucket) );
         my $unique  = pretty_number( $self,  $self->{classifier__}->get_bucket_unique_count($bucket) );
 
         $body .= "<tr";
@@ -1974,38 +1925,75 @@ sub corpus_page
         }
         $stripe = 1 - $stripe;
         $body .= '><td>';
-        if ( $bucket ne 'unclassified' ) {
+        if ( !$self->{classifier__}->is_pseudo_bucket( $bucket ) ) {
             $body .= "<a href=\"/buckets?session=$self->{session_key__}&amp;showbucket=$bucket\">\n";
 	}
         $body .= "<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font>";
-        if ( $bucket ne 'unclassified' ) {
+        if ( !$self->{classifier__}->is_pseudo_bucket( $bucket ) ) {
             $body .= '</a>';
 	}
-        $body .= "</td>\n<td width=\"1%\">&nbsp;</td><td align=\"right\">$number</td><td width=\"1%\">&nbsp;</td>\n";
-        $body .= "<td align=\"right\">$unique</td><td width=\"1%\">&nbsp;</td>";
+        $body .= "</td>\n<td width=\"1%\">&nbsp;</td>\n";
+        if ( !$self->{classifier__}->is_pseudo_bucket( $bucket ) ) {
+            $body .= "<td align=\"right\">$unique</td><td width=\"1%\">&nbsp;</td>";
+	} else {
+            $body .= "<td align=\"right\">&nbsp;</td><td width=\"1%\">&nbsp;</td>";
+	}
 
-        if ( $self->global_config_( 'subject' ) == 1 )  {
+        # Subject Modification on/off widget
 
-            # Subject Modification on/off widget
-
-            $body .= "<td align=\"center\">\n";
-            if ( $self->{classifier__}->get_bucket_parameter( $bucket, 'subject' ) == 0 ) {
-                $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
-                $body .= "<span class=\"bucketsWidgetStateOff\">$self->{language__}{Off} </span>\n";
-                $body .= "<input type=\"submit\" class=\"toggleOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
-                $body .= "<input type=\"hidden\" name=\"subject\" value=\"2\" />\n";
-                $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
-                $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" /></form></td>\n";
-            } else {
-                $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
-                $body .= "<span class=\"bucketsWidgetStateOn\">$self->{language__}{On} </span>\n";
-                $body .= "<input type=\"submit\" class=\"toggleOff\" name=\"toggle\" value=\"$self->{language__}{TurnOff}\" />\n";
-                $body .= "<input type=\"hidden\" name=\"subject\" value=\"1\" />\n";
-                $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
-                $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" /></form></td>\n";
-            }
+        $body .= "<td align=\"center\">\n";
+        if ( $self->{classifier__}->get_bucket_parameter( $bucket, 'subject' ) == 0 ) {
+            $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
+            $body .= "<span class=\"bucketsWidgetStateOff\">$self->{language__}{Off} </span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"subject\" value=\"2\" />\n";
+            $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" /></form></td>\n";
         } else {
-            $body .= "<td align=\"center\">\n$self->{language__}{Bucket_DisabledGlobally}\n</td>\n";
+            $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
+            $body .= "<span class=\"bucketsWidgetStateOn\">$self->{language__}{On} </span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOff\" name=\"toggle\" value=\"$self->{language__}{TurnOff}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"subject\" value=\"1\" />\n";
+            $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" /></form></td>\n";
+        }
+
+        # XTC on/off widget
+
+        $body .= "<td width=\"1%\">&nbsp;</td><td align=\"center\">\n";
+        if ( $self->{classifier__}->get_bucket_parameter( $bucket, 'xtc' ) == 0 ) {
+            $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
+            $body .= "<span class=\"bucketsWidgetStateOff\">$self->{language__}{Off} </span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"xtc\" value=\"2\" />\n";
+            $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" /></form></td>\n";
+        } else {
+            $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
+            $body .= "<span class=\"bucketsWidgetStateOn\">$self->{language__}{On} </span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOff\" name=\"toggle\" value=\"$self->{language__}{TurnOff}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"xtc\" value=\"1\" />\n";
+            $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" /></form></td>\n";
+        }
+
+        # XPL on/off widget
+
+        $body .= "<td width=\"1%\">&nbsp;</td><td align=\"center\">\n";
+        if ( $self->{classifier__}->get_bucket_parameter( $bucket, 'xpl' ) == 0 ) {
+            $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
+            $body .= "<span class=\"bucketsWidgetStateOff\">$self->{language__}{Off} </span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOn\" name=\"toggle\" value=\"$self->{language__}{TurnOn}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"xpl\" value=\"2\" />\n";
+            $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" /></form></td>\n";
+        } else {
+            $body .= "<form class=\"bucketsSwitch\" style=\"margin: 0\" action=\"/buckets\">\n";
+            $body .= "<span class=\"bucketsWidgetStateOn\">$self->{language__}{On} </span>\n";
+            $body .= "<input type=\"submit\" class=\"toggleOff\" name=\"toggle\" value=\"$self->{language__}{TurnOff}\" />\n";
+            $body .= "<input type=\"hidden\" name=\"xpl\" value=\"1\" />\n";
+            $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$bucket\" />\n";
+            $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" /></form></td>\n";
         }
 
         # Quarantine on/off widget
@@ -2029,26 +2017,31 @@ sub corpus_page
 
         # Change Color widget
 
-        $body .= "<td>&nbsp;</td>\n<td align=\"left\">\n<table class=\"colorChooserTable\" cellpadding=\"0\" cellspacing=\"1\" summary=\"\">\n<tr>\n";
-        my $color = $self->{classifier__}->get_bucket_color($bucket);
-        $body .= "<td bgcolor=\"$color\" title='" . sprintf( $self->{language__}{Bucket_CurrentColor}, $bucket, $color ) . "'>\n<img class=\"colorChooserImg\" border=\"0\" alt='" . sprintf( $self->{language__}{Bucket_CurrentColor}, $bucket, $color ) . "' src=\"pix.gif\" width=\"10\" height=\"20\" /></td>\n<td>&nbsp;</td>\n";
-        for my $i ( 0 .. $#{$self->{classifier__}->{possible_colors__}} ) {
-            my $color = $self->{classifier__}->{possible_colors__}[$i];
-            if ( $color ne $self->{classifier__}->get_bucket_color($bucket) )  {
-                $body .= "<td bgcolor=\"$color\" title=\"". sprintf( $self->{language__}{Bucket_SetColorTo}, $bucket, $color ) . "\">\n";
-                $body .= "<a class=\"colorChooserLink\" href=\"/buckets?color=$color&amp;bucket=$bucket&amp;session=$self->{session_key__}\">\n";
-                $body .= "<img class=\"colorChooserImg\" border=\"0\" alt=\"". sprintf( $self->{language__}{Bucket_SetColorTo}, $bucket, $color ) . "\" src=\"pix.gif\" width=\"10\" height=\"20\" /></a>\n";
-                $body .= "</td>\n";
+        if ( !$self->{classifier__}->is_pseudo_bucket( $bucket ) ) {
+            $body .= "<td>&nbsp;</td>\n<td align=\"left\">\n<table class=\"colorChooserTable\" cellpadding=\"0\" cellspacing=\"1\" summary=\"\">\n<tr>\n";
+            my $color = $self->{classifier__}->get_bucket_color($bucket);
+            $body .= "<td bgcolor=\"$color\" title='" . sprintf( $self->{language__}{Bucket_CurrentColor}, $bucket, $color ) . "'>\n<img class=\"colorChooserImg\" border=\"0\" alt='" . sprintf( $self->{language__}{Bucket_CurrentColor}, $bucket, $color ) . "' src=\"pix.gif\" width=\"10\" height=\"20\" /></td>\n<td>&nbsp;</td>\n";
+            for my $i ( 0 .. $#{$self->{classifier__}->{possible_colors__}} ) {
+                my $color = $self->{classifier__}->{possible_colors__}[$i];
+                if ( $color ne $self->{classifier__}->get_bucket_color($bucket) )  {
+                    $body .= "<td bgcolor=\"$color\" title=\"". sprintf( $self->{language__}{Bucket_SetColorTo}, $bucket, $color ) . "\">\n";
+                    $body .= "<a class=\"colorChooserLink\" href=\"/buckets?color=$color&amp;bucket=$bucket&amp;session=$self->{session_key__}\">\n";
+                    $body .= "<img class=\"colorChooserImg\" border=\"0\" alt=\"". sprintf( $self->{language__}{Bucket_SetColorTo}, $bucket, $color ) . "\" src=\"pix.gif\" width=\"10\" height=\"20\" /></a>\n";
+                    $body .= "</td>\n";
+                }
             }
-        }
-        $body .= "</tr></table></td>\n";
+            $body .= "</tr></table></td>\n";
+	} else {
+            $body .= "<td>&nbsp;</td>\n<td>&nbsp;</td>";
+	}
+
         # Close odd/even row
         $body .= "</tr>\n";
     }
 
     # figure some performance numbers
 
-    my $number = pretty_number( $self,  $self->{classifier__}->get_word_count() );
+    my $number = pretty_number( $self,  $self->{classifier__}->get_unique_word_count() );
     my $pmcount = pretty_number( $self,  $self->mcount__() );
     my $pecount = pretty_number( $self,  $self->ecount__() );
     my $accuracy = $self->{language__}{Bucket_NotEnoughData};
@@ -2133,7 +2126,6 @@ sub corpus_page
     $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language__}{Bucket_ClassificationFP}</th>\n";
     $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language__}{Bucket_ClassificationFN}</th>\n</tr>\n";
 
-
     my %bar_values;
     for my $bucket (@buckets)  {
         $bar_values{$bucket}{0} = $self->{classifier__}->get_bucket_parameter( $bucket, 'count' );
@@ -2148,6 +2140,10 @@ sub corpus_page
     $body .= "<h2 class=\"buckets\">$self->{language__}{Bucket_WordCounts}</h2>\n<table summary=\"\">\n<tr>\n";
     $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"left\">$self->{language__}{Bucket}</th>\n<th>&nbsp;</th>\n";
     $body .= "<th class=\"bucketsLabel\" scope=\"col\" align=\"right\">$self->{language__}{Bucket_WordCount}</th>\n</tr>\n";
+
+    @buckets = $self->{classifier__}->get_buckets();
+
+    delete $bar_values{unclassified};
 
     for my $bucket (@buckets)  {
         $bar_values{$bucket}{0} = $self->{classifier__}->get_bucket_word_count($bucket);
@@ -2791,18 +2787,36 @@ sub get_history_navigator
         $body .= $start_message - $self->config_( 'page_size' );
         $body .= $self->print_form_fields_(0,1,('session','filter','search','sort')) . "\">< $self->{language__}{Previous}</a>] ";
     }
-    my $i = 0;
-    while ( $i < $self->history_size() ) {
-        if ( $i == $start_message )  {
-            $body .= "<b>";
-            $body .= $i+1 . "</b>";
-        } else {
-            $body .= "[<a href=\"/history?start_message=$i" . $self->print_form_fields_(0,1,('session','filter','search','sort')). "\">";
-            $body .= $i+1 . "</a>]";
-        }
 
-        $body .= " ";
+    # Only show two pages either side of the current page, the first page and the last page
+    #
+    # e.g. [1] ... [4] [5] [6] [7] [8] ... [24]
+
+    my $i = 0;
+    my $p = 1;
+    my $dots = 0;
+    while ( $i < $self->history_size() ) {
+        if ( ( $i == 0 ) || 
+             ( ( $i + $self->config_( 'page_size' ) ) >= $self->history_size() ) ||
+             ( ( ( $i - 2 * $self->config_( 'page_size' ) ) <= $start_message ) &&
+               ( ( $i + 2 * $self->config_( 'page_size' ) ) >= $start_message ) ) ) {  
+            if ( $i == $start_message ) {
+                $body .= "<b>";
+                $body .= $p . "</b>";
+            } else {
+                $body .= "[<a href=\"/history?start_message=$i" . $self->print_form_fields_(0,1,('session','filter','search','sort')). "\">";
+                $body .= $p . "</a>]";
+            } 
+
+            $body .= " ";
+            $dots = 1;
+	} else {
+            $body .= " ... " if $dots;
+            $dots = 0;
+	}
+
         $i += $self->config_( 'page_size' );
+        $p++;
     }
     if ( $start_message < ( $self->history_size() - $self->config_( 'page_size' ) ) )  {
         $body .= "[<a href=\"/history?start_message=";
@@ -2872,6 +2886,8 @@ sub history_reclassify
     my ( $self ) = @_;
 
     if ( defined( $self->{form_}{change} ) ) {
+
+        $self->{save_cache__} = 1;
 
         # This hash will map filenames of MSG files in the history to the
         # new classification that they should be, it is built by iterating
@@ -2980,6 +2996,8 @@ sub history_undo
 
             if ( defined( $usedtobe ) ) {
                 $self->{classifier__}->remove_message_from_bucket( $bucket, $self->global_config_( 'msgdir' ) . $mail_file);
+
+                $self->{save_cache__} = 1;
 
                 $self->log_( "Undoing $mail_file from $bucket to $usedtobe" );
 

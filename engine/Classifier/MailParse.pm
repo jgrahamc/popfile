@@ -1118,16 +1118,21 @@ sub parse_html
 #
 # $file     The file to open and parse
 # $lang     Pass in the current interface language for language specific parsing
+# $max_size The maximum size of message to parse, or 0 for unlimited
 #
 # ---------------------------------------------------------------------------------------------
 sub parse_file
 {
     # $lang is used for switching on/off language specific functionality
 
-    my ( $self, $file, $lang ) = @_;
-    $self->{lang__} = $lang;
+    my ( $self, $file, $lang, $max_size ) = @_;
 
+    $max_size = 0 if ( !defined( $max_size ) );
+
+    $self->{lang__} = $lang;
     $self->start_parse();
+
+    my $size_read = 0;
 
     open MSG, "<$file";
     binmode MSG;
@@ -1136,7 +1141,12 @@ sub parse_file
     # characters
 
     while (<MSG>) {
+        $size_read += length($_);
         $self->parse_line( $_ );
+        if ( ( $max_size > 0 ) && 
+             ( $size_read > $max_size ) ) {
+            last;
+	}
     }
 
     close MSG;

@@ -86,14 +86,39 @@ sub new
     # To save time we also 'prepare' some commonly used SQL statements and cache
     # them here, see the function db_connect__ for details
 
-    $self->{db_get_word_count__} = 0;
+    $self->{db_get_buckets__} = 0; 
+    $self->{db_get_wordid__} = 0; 
+    $self->{db_get_word_count__} = 0; 
+    $self->{db_put_word_count__} = 0; 
+    $self->{db_get_bucket_unique_count__} = 0; 
+    $self->{db_get_unique_word_count__} = 0; 
+    $self->{db_get_bucket_word_count__} = 0; 
+    $self->{db_get_full_total__} = 0; 
+    $self->{db_get_bucket_parameter__} = 0;
+    $self->{db_set_bucket_parameter__} = 0; 
+    $self->{db_get_bucket_parameter_default__} = 0;
+    $self->{db_get_buckets_with_magnets__} = 0;
 
     # To save more time we keep a record of the user id for admin, and a hash of the
-    # bucketid for that user
+    # bucket ids for that user, this minimizes the complexity of the database joins
+    # we have to do, and since there is a small amount of this data that is (mostly)
+    # fixed its a good optimization to cache it in memory.
 
     $self->{db_userid__}         = 0;
+
+    # Caches the name of each bucket and relates it to both the bucket ID in the
+    # database and whether it is pseudo or not
+    #
+    # Subkeys used are:
+    #
+    # id     The bucket ID in the database
+    # pseudo 1 if this is a pseudo bucket
+
     $self->{db_bucketid__}       = {};
-    $self->{db_buckettotal__}    = {};
+
+    # Caches the IDs that map to parameter types
+
+    $self->{db_parameterid__}    = {};
 
     # Used to parse mail messages
     $self->{parser__}            = new Classifier::MailParse;
@@ -112,6 +137,9 @@ sub new
     $self->{not_likely__}        = 0;
 
     # The expected corpus version
+    #
+    # DEPRECATED  This is only used when upgrading old flat file corpus files
+    #             to the database
     $self->{corpus_version__}    = 1;
 
     # The unclassified cutoff this value means that the top probabilily must be n times greater than the
@@ -460,23 +488,6 @@ sub upgrade_predatabase_data__
 
     $self->db_update_cache__();
 
-    # POPFile has a 'pseudobucket' called unclassified which you are not meant
-    # to reclassify into, but is treated a bit like a bucket in terms of 
-    # parameters.
-
-    # unclassified will always have the color black, note that unclassified is not
-    # actually a bucket
-
-    # TODO $self->{colors__}{unclassified} = 'black';
-
-    # SLM for unclassified "bucket" will always match the global setting
-
-    # TODO $self->{parameters__}{unclassified}{subject} = $self->global_config_('subject');
-
-    # Quarantine for unclassified will be off:
-
-    # TODO $self->{parameters__}{unclassified}{quarantine} = 0;
-
     return 1;
 }
 
@@ -667,7 +678,7 @@ sub magnet_match_helper__
 
     my @magnets;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
     my $h = $self->{db__}->prepare(
         "select magnets.value from magnets, users, buckets, magnet_types
              where buckets.id = $bucketid and
@@ -744,7 +755,9 @@ sub classify
     $self->{magnet_detail__} = '';
 
     if ( defined( $file ) ) {
-        $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
+        $self->{parser__}->parse_file( $file, 
+                                       $self->module_config_( 'html', 'language' ),
+                                       $self->global_config_( 'message_cutoff'   ) );
     }
 
     # Check to see if this email should be classified based on a magnet
@@ -861,7 +874,7 @@ sub classify
             $self->{scores__} .= "<input type=\"hidden\" name=\"count\" value=\"" . ($mlen + 1) . "\" />";
             $self->{scores__} .= "<hr><b>$language{QuickMagnets}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Magnet}</th>\n<th>$language{Magnet_Always}</th>\n";
 
-            my %types = get_magnet_types();
+            my %types = $self->get_magnet_types();
 
             foreach my $type ( keys %types ) {
 
@@ -921,11 +934,13 @@ sub classify
                  }
              }
 
+             my $color = $self->get_bucket_color( $b );
+
              if ($self->{wmformat__} eq 'score') {
                 $rawstr = sprintf("%12.6f", ($raw_score{$b} - $correction)/$log10);
-                $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td align=right>$rawstr&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
+                $self->{scores__} .= "<tr>\n<td><font color=\"$color\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td align=right>$rawstr&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
              } else {
-                $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
+                $self->{scores__} .= "<tr>\n<td><font color=\"$color\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
              }
         }
 
@@ -1325,7 +1340,7 @@ sub classify_and_modify
             $last_timeout = time;
         }
 
-        last if ( ( $message_size > 100000 ) && ( $getting_headers == 0 ) );
+        last if ( ( $message_size > $self->global_config_( 'message_cutoff' ) ) && ( $getting_headers == 0 ) );
     }
 
     close TEMP unless $nosave;
@@ -1349,26 +1364,27 @@ sub classify_and_modify
         $classification = ($class ne '')?$class:$self->classify(undef);
     }
 
+    my $subject_modification = $self->get_bucket_parameter( $classification, 'subject'    );
+    my $xtc_insertion        = $self->get_bucket_parameter( $classification, 'xtc'        );
+    my $xpl_insertion        = $self->get_bucket_parameter( $classification, 'xpl'        );
+    my $quarantine           = $self->get_bucket_parameter( $classification, 'quarantine' );
+
     my $modification = $self->config_( 'subject_mod_left' ) . $classification . $self->config_( 'subject_mod_right' );
 
     # Add the Subject line modification or the original line back again
-    if ( $classification ne 'unclassified' ) {
-        if ( $self->global_config_( 'subject' ) ) {
-            # Don't add the classification unless it is not present
-            if ( !( $msg_subject =~ /\Q$modification\E/ ) &&                        # PROFILE BLOCK START
-                 ( $self->get_bucket_parameter( $classification, 'subject' ) == 1 ) &&
-                 ( $self->get_bucket_parameter( $classification, 'quarantine' ) == 0 ) )  {   # PROFILE BLOCK STOP
-                $msg_subject = " $modification$msg_subject";
-            }
-        }
+    # Don't add the classification unless it is not present
+    if ( !( $msg_subject =~ /\Q$modification\E/ ) &&                        # PROFILE BLOCK START
+          ( $subject_modification == 1 ) &&
+          ( $quarantine == 0 ) )  {                                          # PROFILE BLOCK STOP
+         $msg_subject = " $modification$msg_subject";
     }
-
+ 
     $msg_head_before .= 'Subject:' . $msg_subject;
     $msg_head_before .= $crlf;
 
     # Add the XTC header
-    $msg_head_after .= "X-Text-Classification: $classification$crlf" if ( ( $self->global_config_( 'xtc' ) ) && # PROFILE BLOCK START
-                                                                         ( $self->get_bucket_parameter( $classification, 'quarantine' ) == 0 ) ); # PROFILE BLOCK STOP
+    $msg_head_after .= "X-Text-Classification: $classification$crlf" if ( ( $xtc_insertion   ) && # PROFILE BLOCK START
+                                                                          ( $quarantine == 0 ) ); # PROFILE BLOCK STOP
 
     # Add the XPL header
     my $xpl = '';
@@ -1377,7 +1393,7 @@ sub classify_and_modify
     $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->config_( 'hostname' );
     $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$nopath_temp_file$crlf";
 
-    if ( $self->global_config_( 'xpl' ) && ( $self->get_bucket_parameter( $classification, 'quarantine' ) == 0 ) ) {
+    if ( $xpl_insertion && ( $quarantine == 0 ) ) {
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
     }
 
@@ -1390,39 +1406,35 @@ sub classify_and_modify
         # If the bucket is quarantined then we'll treat it specially by changing the message header to contain
         # information from POPFile and wrapping the original message in a MIME encoding
 
-        if ( $classification ne 'unclassified' ) {
-            if ( $self->get_bucket_parameter( $classification, 'quarantine' ) == 1 ) {
-                print $client "From: " . $self->{parser__}->get_header( 'from' ) . "$crlf";
-                print $client "To: " . $self->{parser__}->get_header( 'to' ) . "$crlf";
-                print $client "Date: " . $self->{parser__}->get_header( 'date' ) . "$crlf";
-                if ( $self->global_config_( 'subject' ) ) {
-                    # Don't add the classification unless it is not present
-                    if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&             # PROFILE BLOCK START
-                         ( $self->get_bucket_parameter( $classification, 'subject' ) == 1 ) ) {  # PROFILE BLOCK STOP
-                        $msg_subject = " $modification$msg_subject";
-                    }
-                }
-                print $client "Subject:$msg_subject$crlf";
-                print $client "X-Text-Classification: $classification$crlf" if ( $self->global_config_( 'xtc' ) );
-                print $client 'X-POPFile-Link: ' . $xpl if ( $self->global_config_( 'xpl' ) );
-                print $client "MIME-Version: 1.0$crlf";
-                print $client "Content-Type: multipart/report; boundary=\"$nopath_temp_file\"$crlf$crlf--$nopath_temp_file$crlf";
-                print $client "Content-Type: text/plain$crlf$crlf";
-                print $client "POPFile has quarantined a message.  It is attached to this email.$crlf$crlf";
-                print $client "Quarantined Message Detail$crlf$crlf";
-                print $client "Original From: " . $self->{parser__}->get_header('from') . "$crlf";
-                print $client "Original To: " . $self->{parser__}->get_header('to') . "$crlf";
-                print $client "Original Subject: " . $self->{parser__}->get_header('subject') . "$crlf";
-                print $client "To examine the email open the attachment. ";
-                print $client "To change this mail's classification go to $xpl";
-                print $client "$crlf";
-                print $client "The first 20 words found in the email are:$crlf$crlf";
-                print $client $self->{parser__}->first20();
-                print $client "$crlf--$nopath_temp_file$crlf";
-                print $client "Content-Type: message/rfc822$crlf$crlf";
-            }
+       if ( $quarantine == 1 ) {
+           print $client "From: " . $self->{parser__}->get_header( 'from' ) . "$crlf";
+           print $client "To: " . $self->{parser__}->get_header( 'to' ) . "$crlf";
+           print $client "Date: " . $self->{parser__}->get_header( 'date' ) . "$crlf";
+           # Don't add the classification unless it is not present
+           if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&             # PROFILE BLOCK START
+                 ( $subject_modification == 1 ) ) {                           # PROFILE BLOCK STOP
+               $msg_subject = " $modification$msg_subject";
+           }
+           print $client "Subject:$msg_subject$crlf";
+           print $client "X-Text-Classification: $classification$crlf" if ( $xtc_insertion );
+           print $client 'X-POPFile-Link: ' . $xpl if ( $xpl_insertion );
+           print $client "MIME-Version: 1.0$crlf";
+           print $client "Content-Type: multipart/report; boundary=\"$nopath_temp_file\"$crlf$crlf--$nopath_temp_file$crlf";
+           print $client "Content-Type: text/plain$crlf$crlf";
+           print $client "POPFile has quarantined a message.  It is attached to this email.$crlf$crlf";
+           print $client "Quarantined Message Detail$crlf$crlf";
+           print $client "Original From: " . $self->{parser__}->get_header('from') . "$crlf";
+           print $client "Original To: " . $self->{parser__}->get_header('to') . "$crlf";
+           print $client "Original Subject: " . $self->{parser__}->get_header('subject') . "$crlf";
+           print $client "To examine the email open the attachment. ";
+           print $client "To change this mail's classification go to $xpl";
+           print $client "$crlf";
+           print $client "The first 20 words found in the email are:$crlf$crlf";
+           print $client $self->{parser__}->first20();
+           print $client "$crlf--$nopath_temp_file$crlf";
+           print $client "Content-Type: message/rfc822$crlf$crlf";
         }
-
+ 
         print $client $msg_head_before;
         print $client $msg_head_after;
         print $client $msg_body;
@@ -1430,12 +1442,10 @@ sub classify_and_modify
 
     my $before_dot = '';
 
-    if ( $classification ne 'unclassified' ) {
-        if ( ( $self->get_bucket_parameter( $classification, 'quarantine' ) == 1 ) && $echo ) {
-            $before_dot = "$crlf--$nopath_temp_file--$crlf";
-        }
+    if ( $quarantine && $echo ) {
+        $before_dot = "$crlf--$nopath_temp_file--$crlf";
     }
-
+ 
     my $need_dot = 0;
 
     if ( $got_full_body ) {
@@ -1472,14 +1482,60 @@ sub classify_and_modify
 #
 # get_buckets
 #
-# Returns a list containing all the bucket names sorted into alphabetic order
+# Returns a list containing all the real bucket names sorted into alphabetic order
 #
 # ---------------------------------------------------------------------------------------------
 sub get_buckets
 {
     my ( $self ) = @_;
 
-    return sort keys %{$self->{db_bucketid__}};
+    # Note that get_buckets does not return pseudo buckets
+
+    my @buckets;
+
+    for my $b (sort keys %{$self->{db_bucketid__}}) {
+        if ( $self->{db_bucketid__}{$b}{pseudo} == 0 ) {
+            push @buckets, ($b);
+	}
+    }
+
+    return @buckets;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_pseudo_buckets
+#
+# Returns a list containing all the pseudo bucket names sorted into alphabetic order
+#
+# ---------------------------------------------------------------------------------------------
+sub get_pseudo_buckets
+{
+    my ( $self ) = @_;
+
+    my @buckets;
+
+    for my $b (sort keys %{$self->{db_bucketid__}}) {
+        if ( $self->{db_bucketid__}{$b}{pseudo} == 1 ) {
+            push @buckets, ($b);
+	}
+    }
+
+    return @buckets;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# is_pseudo_bucket
+#
+# Returns 1 if the named bucket is pseudo
+#
+# ---------------------------------------------------------------------------------------------
+sub is_pseudo_bucket
+{
+    my ( $self, $bucket ) = @_;
+
+    return $self->{db_bucketid__}{$bucket}{pseudo};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1512,7 +1568,7 @@ sub get_bucket_word_list
 {
     my ( $self, $bucket, $prefix ) = @_;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
     my $result = $self->{db__}->selectcol_arrayref(
         "select words.word from matrix, words
          where matrix.wordid  = words.id and
@@ -1537,7 +1593,7 @@ sub get_bucket_word_prefixes
 
     my $prev = '';
 
-    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
     my $result = $self->{db__}->selectcol_arrayref(
         "select words.word from matrix, words
          where matrix.wordid  = words.id and
@@ -1641,8 +1697,23 @@ sub get_bucket_unique_count
 {
     my ( $self, $bucket ) = @_;
 
-    $self->{db_get_bucket_unique_count__}->execute( $self->{db_bucketid__}{$bucket} );
+    $self->{db_get_bucket_unique_count__}->execute( $self->{db_bucketid__}{$bucket}{id} );
     return $self->{db_get_bucket_unique_count__}->fetchrow_arrayref->[0];
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_unique_word_count
+#
+# Returns the unique word count (excluding duplicates) for the passed all buckets
+#
+# ---------------------------------------------------------------------------------------------
+sub get_unique_word_count
+{
+    my ( $self, $bucket ) = @_;
+
+    $self->{db_get_unique_word_count__}->execute( $self->{db_userid__} );
+    return $self->{db_get_unique_word_count__}->fetchrow_arrayref->[0];
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1692,14 +1763,16 @@ sub get_bucket_parameter
 {
     my ( $self, $bucket, $parameter ) = @_;
 
-    $self->{db_get_bucket_parameter__}->execute( $self->{db_bucketid__}{$bucket}, $parameter );
+    $self->{db_get_bucket_parameter__}->execute( $self->{db_bucketid__}{$bucket}{id}, 
+                                                 $self->{db_parameterid__}{$parameter} );
     my $result = $self->{db_get_bucket_parameter__}->fetchrow_arrayref;
 
     # If this parameter has not been defined for this specific bucket then
     # get the default value
 
     if ( !defined( $result ) ) {
-        $self->{db_get_bucket_parameter_default__}->execute( $parameter );
+        $self->{db_get_bucket_parameter_default__}->execute( 
+            $self->{db_parameterid__}{$parameter} );
         $result = $self->{db_get_bucket_parameter_default__}->fetchrow_arrayref;
     }
 
@@ -1725,11 +1798,8 @@ sub set_bucket_parameter
 {
     my ( $self, $bucket, $parameter, $value ) = @_;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket};
-
-    my $result = $self->{db__}->selectrow_arrayref("select bucket_template.id from bucket_template 
-                                                        where bucket_template.name = '$parameter';" );
-    my $btid = $result->[0];
+    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
+    my $btid     = $self->{db_parameterid__}{$parameter};
 
     $self->{db_set_bucket_parameter__}->execute( $bucketid, $btid, $value );
 
@@ -1755,7 +1825,9 @@ sub get_html_colored_message
 
     # Pass language parameter to parse_file()
 
-    my $result = $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
+    my $result = $self->{parser__}->parse_file( $file, 
+                                                $self->module_config_( 'html', 'language' ),
+                                                $self->global_config_( 'message_cutoff'   ) );
 
     $self->{parser__}->{color__} = 0;
 
@@ -1847,8 +1919,6 @@ sub add_words_to_bucket__
         $self->set_value_( $bucket, $word, $subtract * $self->{parser__}->{words__}{$word} + # PROFILE BLOCK START
             $self->get_base_value_( $bucket, $word ) );                                      # PROFILE BLOCK STOP
     }
-
-    $self->db_update_cache__();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1865,12 +1935,19 @@ sub add_messages_to_bucket
 {
     my ( $self, $bucket, @files ) = @_;
 
+    $self->{db__}->begin_work;
+
     # Pass language parameter to parse_file()
 
     foreach my $file (@files) {
-        $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
+        $self->{parser__}->parse_file( $file, 
+                                       $self->module_config_( 'html', 'language' ),
+                                       $self->global_config_( 'message_cutoff'   ) );
         $self->add_words_to_bucket__( $bucket, 1 );
     }
+
+    $self->{db__}->commit;
+    $self->db_update_cache__();
 
     return 1;
 }
@@ -1908,8 +1985,15 @@ sub remove_message_from_bucket
 
     # Pass language parameter to parse_file()
 
-    $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
+    $self->{db__}->begin_work;
+
+    $self->{parser__}->parse_file( $file, 
+                                   $self->module_config_( 'html', 'language' ),
+                                   $self->global_config_( 'message_cutoff'   ) );
     $self->add_words_to_bucket__( $bucket, -1 );
+
+    $self->{db__}->commit;
+    $self->db_update_cache__();
 
     return 1;
 }
@@ -2010,7 +2094,7 @@ sub get_magnet_types_in_bucket
 
     my @result;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
     my $h = $self->{db__}->prepare( "select magnet_types.type from magnet_types, magnets, buckets
         where magnet_types.id = magnets.mtid and
               magnets.bucketid = buckets.id and
@@ -2040,9 +2124,10 @@ sub clear_bucket
 {
     my ( $self, $bucket ) = @_;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
 
     $self->{db__}->do( "delete from matrix where matrix.bucketid = $bucketid;" );
+    $self->db_update_cache__();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2057,7 +2142,7 @@ sub clear_magnets
     my ( $self ) = @_;
 
     for my $bucket (keys %{$self->{db_bucketid__}}) {
-        my $bucketid = $self->{db_bucketid__}{$bucket};
+        my $bucketid = $self->{db_bucketid__}{$bucket}{id};
         $self->{db__}->do( "delete from magnets where magnets.bucketid = $bucketid" );
     }
 }
@@ -2078,7 +2163,7 @@ sub get_magnets
 
     my @result;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
     my $h = $self->{db__}->prepare( "select magnets.value from magnets, magnet_types
         where magnets.bucketid = $bucketid and
               magnet_types.id = magnets.mtid and
@@ -2108,7 +2193,7 @@ sub create_magnet
 {
     my ( $self, $bucket, $type, $text ) = @_;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
 
     my $result = $self->{db__}->selectrow_arrayref("select magnet_types.id from magnet_types
                                                         where magnet_types.type = '$type';" );
@@ -2158,7 +2243,7 @@ sub delete_magnet
 {
     my ( $self, $bucket, $type, $text ) = @_;
 
-    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
 
     my $result = $self->{db__}->selectrow_arrayref("select magnet_types.id from magnet_types
                                                         where magnet_types.type = '$type';" );
@@ -2363,9 +2448,8 @@ sub db_connect__
     # parameter
 
     $self->{db_get_buckets__} = $self->{db__}->prepare( 
-   	     'select buckets.name, buckets.id from buckets 
-                  where buckets.pseudo = 0 and        
-                        buckets.userid = ?;' );
+   	     'select name, id, pseudo from buckets 
+                  where buckets.userid = ?;' );
 
     $self->{db_get_wordid__} = $self->{db__}->prepare( 
 	     'select id from words 
@@ -2387,28 +2471,40 @@ sub db_connect__
 	     'select sum(matrix.count) from matrix
                   where matrix.bucketid = ?;' );
 
+    $self->{db_get_unique_word_count__} = $self->{db__}->prepare( 
+	     'select count(matrix.wordid) from matrix, buckets
+                  where matrix.bucketid = buckets.id and
+                        buckets.userid = ?;' );
+
     $self->{db_get_full_total__} = $self->{db__}->prepare( 
 	     'select sum(matrix.count) from matrix, buckets 
                   where buckets.userid = ? and     
                         matrix.bucketid = buckets.id;' ); 
 
     $self->{db_get_bucket_parameter__} = $self->{db__}->prepare(
-             'select bucket_params.value from bucket_params, bucket_template, buckets
-                  where buckets.id = ? and 
-                        bucket_template.name = ? and         
-                        buckets.id = bucket_params.bucketid and  
-                        bucket_params.btid = bucket_template.id;' );
+             'select bucket_params.value from bucket_params
+                  where bucket_params.bucketid = ?and  
+                        bucket_params.btid = ?;' );
 
     $self->{db_set_bucket_parameter__} = $self->{db__}->prepare( 
 	   'insert or replace into bucket_params ( bucketid, btid, value ) values ( ?, ?, ? );' );
 
     $self->{db_get_bucket_parameter_default__} = $self->{db__}->prepare(
              'select bucket_template.def from bucket_template
-                  where bucket_template.name = ?;' );
+                  where bucket_template.id = ?;' );
     $self->{db_get_buckets_with_magnets__} = $self->{db__}->prepare(
              'select buckets.name from buckets, magnets
                   where buckets.userid = ? and
                         magnets.bucketid = buckets.id group by buckets.name order by buckets.name;' );
+
+    # Get the mapping from parameter names to ids into a local hash
+
+    my $h = $self->{db__}->prepare( "select name, id from bucket_template;" );
+    $h->execute;
+    while ( my $row = $h->fetchrow_arrayref ) {
+        $self->{db_parameterid__}{$row->[0]} = $row->[1];
+    }
+    $h->finish;
 
     $self->db_update_cache__();
 
@@ -2427,15 +2523,17 @@ sub db_disconnect__
     my ( $self ) = @_;
 
     $self->{db_get_buckets__}->finish; 
+    $self->{db_get_wordid__}->finish; 
     $self->{db_get_word_count__}->finish; 
     $self->{db_put_word_count__}->finish; 
     $self->{db_get_bucket_unique_count__}->finish; 
     $self->{db_get_bucket_word_count__}->finish; 
+    $self->{db_get_unique_word_count__}->finish; 
     $self->{db_get_full_total__}->finish; 
     $self->{db_get_bucket_parameter__}->finish;
     $self->{db_set_bucket_parameter__}->finish; 
     $self->{db_get_bucket_parameter_default__}->finish;
-    $self->{db_get_buckets_with_magnets__}->finish; 
+    $self->{db_get_buckets_with_magnets__}->finish;
 
     $self->{db__}->disconnect;
     undef $self->{db__};
@@ -2457,11 +2555,12 @@ sub db_update_cache__
     delete $self->{db_bucketid__};
     $self->{db_get_buckets__}->execute( $self->{db_userid__} );
     while ( my $row = $self->{db_get_buckets__}->fetchrow_arrayref ) {
-        $self->{db_bucketid__}{$row->[0]} = $row->[1];
+        $self->{db_bucketid__}{$row->[0]}{id} = $row->[1];
+        $self->{db_bucketid__}{$row->[0]}{pseudo} = $row->[2];
     }
 
     for my $bucket (keys %{$self->{db_bucketid__}}) {
-        $self->{db_get_bucket_word_count__}->execute( $self->{db_bucketid__}{$bucket} );
+        $self->{db_get_bucket_word_count__}->execute( $self->{db_bucketid__}{$bucket}{id} );
         my $row = $self->{db_get_bucket_word_count__}->fetchrow_arrayref;
         $self->{db_bucketcount__}{$bucket} = $row->[0];
     }
@@ -2511,7 +2610,7 @@ sub db_get_word_count__
 
     my $wordid = $result->[0];
 
-    $self->{db_get_word_count__}->execute( $self->{db_bucketid__}{$bucket}, $wordid );
+    $self->{db_get_word_count__}->execute( $self->{db_bucketid__}{$bucket}{id}, $wordid );
     $result = $self->{db_get_word_count__}->fetchrow_arrayref;
     if ( defined( $result ) ) {
          return $result->[0];
@@ -2552,7 +2651,7 @@ sub db_put_word_count__
     }
 
     my $wordid = $result->[0];
-    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $bucketid = $self->{db_bucketid__}{$bucket}{id};
 
     $self->{db_put_word_count__}->execute( $bucketid, $wordid, $count );
 

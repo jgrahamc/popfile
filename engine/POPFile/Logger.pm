@@ -81,6 +81,10 @@ sub initialize
 
     $self->config_( 'logdir', './' );
 
+    # The output format for log files, can be default, tabbed or csv
+
+    $self->config_( 'format', 'default' );
+
     $self->{last_tickd__} = time;
 
     $self->mq_register_( 'TICKD', $self );
@@ -195,8 +199,12 @@ sub debug
         $min  = "0$min"  if ( $min  < 10 );
         $hour = "0$hour" if ( $hour < 10 );
         $sec  = "0$sec"  if ( $sec  < 10 );
+   
+        my $delim = ' ';
+        $delim = '\t' if ( $self->config_( 'format' ) eq 'tabbed' );
+        $delim = ',' if ( $self->config_( 'format' ) eq 'csv' );
 
-        my $msg = "$year/$mon/$mday $hour:$min:$sec $$: $message";
+        my $msg = "$year/$mon/$mday$delim$hour:$min:$sec$delim$$:$delim$message";
 
         if ( $self->global_config_( 'debug' ) & 1 )  {
   	    if ( open DEBUG, ">>$self->{debug_filename__}" ) {

@@ -125,21 +125,14 @@ sub initialize
 
     $self->global_config_( 'timeout', 60 );
 
-    # Subject modification (global setting is on)
-
-    $self->global_config_( 'subject', 1 );
-
-    # Adding the X-Text-Classification on
-
-    $self->global_config_( 'xtc', 1 );
-
-    # Adding the X-POPFile-Link is on
-
-    $self->global_config_( 'xpl', 1 );
-
     # The default location for the message files
 
     $self->global_config_( 'msgdir', 'messages/' );
+
+    # The maximum number of characters to consider in a message during
+    # classification, display or reclassification
+
+    $self->global_config_( 'message_cutoff', 100000 );
 
     return 1;
 }
@@ -492,9 +485,10 @@ sub load_configuration
     if ( open CONFIG, '<' . $self->get_user_path( 'popfile.cfg' ) ) {
         while ( <CONFIG> ) {
             s/(\015|\012)//g;
-            if ( /(\S+) (.+)/ ) {
+            if ( /(\S+) (.+)?/ ) {
                 my $parameter = $1;
                 my $value     = $2;
+                $value = '' if !defined( $value );
 
                 $parameter = $self->upgrade_parameter__($parameter);
 
