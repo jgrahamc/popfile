@@ -611,10 +611,23 @@ sub parse_stream
             
             if ( !$self->{in_headers} ) {
                 # If we are in a mime document then spot the boundaries
-                if ( ( $mime ne '' ) && ( $line =~ /^\-\-$mime/ ) ) {
-                    print "Hit mime boundary\n" if $self->{debug};
-                    $encoding = '';
-                    $self->{in_headers} = 1;
+                if ( ( $mime ne '' ) && ( $line =~ /^\-\-($mime)(\-\-)?/ ) ) {
+                    if (!defined $2) {
+                        print "Hit MIME boundary --$1\n" if $self->{debug};
+                        $encoding = '';
+                        $self->{in_headers} = 1;
+                    } else {
+                        my $boundary = $1;
+                        
+                        print "Hit MIME boundary terminator --$1--\n" if $self->{debug};
+                        
+                        #double-escape to match escape stuff.. gross                        
+                        $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
+                        $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
+                        
+                        $mime =~ s/(\|$boundary|$boundary\||$boundary)//;
+                        print "MIME boundary list now $mime\n" if $self->{debug};
+                    }
                     next;
                 }
                 
@@ -748,28 +761,41 @@ sub parse_stream
                     }
     
                     $self->{subject} = $argument if ( ( $header =~ /Subject/ ) && ( $self->{subject} eq '' ) );
-    
-                    # Look for MIME
-    
-                    if ( $header =~ /Content-Type/i )  {
-                        if ( $argument =~ /multipart\//i ) {
-                            my $boundary = $argument;
-                            
-                            #TODO: add boundary to self->{ut}
-                            $boundary = <MSG> if ( !( $argument =~ /boundary=\"(.*)\"/ )); 
-    
-                            if ( $boundary =~ /boundary=\"(.*)\"/ )  {
-                                print "Set mime boundary to $1\n" if $self->{debug};
-    
-                                $mime = $1;
-                                $mime =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
+
+                    # Look for MIME 
+                    
+                    if ( $header =~ /Content-Type/i ) { 
+                        if ( $argument =~ /multipart\//i ) { 
+                            my $boundary = $argument; 
+                                                        
+                            if ( !( $argument =~ /boundary=(\"([A-Z0-9\'\(\)\+\_\,\-\.\/\:\=\?][A-Z0-9\'\(\)\+_,\-\.\/:=\? ]{0,69})\"|([^\(\)\<\>\@\,\;\:\\\"\/\[\]\?\=]{1,70}))/i )) {
+                                # Store the file-handle's position
+                                my $pos = tell MSG;                                
+                                if ( $pos != -1 ) {
+                                    $boundary = <MSG>;
+                                    seek MSG, $pos, 0;
+                                }
                             }
-                        }
-    
-                        $self->{content_type} = $argument;
-                        next;
+                            
+                            if ( $boundary =~ /boundary=(\"([A-Z0-9\'\(\)\+\_\,\-\.\/\:\=\?][A-Z0-9\'\(\)\+_,\-\.\/:=\? ]{0,69})\"|([^\(\)\<\>\@\,\;\:\\\"\/\[\]\?\=]{1,70}))/i ) { 
+                                                                
+                                $boundary = ($2 || $3);
+                                
+                                $boundary =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;                                 
+                                
+                                if ($mime ne '') {
+                                    $mime = "$mime\|$boundary";
+                                } else {
+                                    $mime = $boundary;
+                                }
+                                print "Set mime boundary to " . $mime . "\n" if $self->{debug};
+                            } 
+                        } 
+                        
+                        $self->{content_type} = $argument; 
+                        next; 
                     }
-    
+                        
                     # Look for the different encodings in a MIME document, when we hit base64 we will
                     # do a special parse here since words might be broken across the boundaries
     
