@@ -138,7 +138,7 @@ sub http_ok
 {
     my ( $client, $text, $selected ) = @_;
     my @tab = ( 'menu_standard', 'menu_standard', 'menu_standard', 'menu_standard', 'menu_standard', 'menu_standard' );
-    $tab[$selected] = 'menu_selected';
+    $tab[$selected] = 'menu_selected' if ( $selected <= $#tab );
     my $time = localtime;
     my $update_check = ''; 
 
@@ -154,7 +154,7 @@ sub http_ok
         }
     }
     
-    $text = "<html><head><title>POPFile Control Center</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style><link rel=stylesheet type=text/css href='skins/$configuration{skin}.css' title=main></link><META HTTP-EQUIV=Pragma CONTENT=no-cache><META HTTP-EQUIV=Expires CONTENT=0><META HTTP-EQUIV=Cache-Control CONTENT=no-cache><META HTTP-EQUIV=Refresh CONTENT=600></head><body><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'><table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;POPFile Control Center<td align=right valign=middle><a href=/shutdown?session=SESSKEY>Shutdown</a>&nbsp;<tr height=3><td colspan=3></td></tr></table></td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center>$update_check<table class=menu cellspacing=0><tr><td class=$tab[2] align=center><a href=/history?session=$session_key&setfilter=Filter&filter=>History</a></td><td class=menu_spacer></td><td class=$tab[1] align=center><a href=/buckets?session=$session_key>Buckets</a></td><td class=menu_spacer></td><td class=$tab[4] align=center><a href=/magnets?session=$session_key>Magnets</a></td><td class=menu_spacer></td><td class=$tab[0] align=center><a href=/configuration?session=$session_key>Configuration</a></td><td class=menu_spacer></td><td class=$tab[3] align=center><a href=/security?session=$session_key>Security</a></td><td class=menu_spacer></td><td class=$tab[5] align=center><a href=/advanced?session=$session_key>Advanced</a></td></tr></table><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>" . $text . "</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center><table class=footer><tr><td>POPFile $major_version.$minor_version.$build_version - <a href=http://popfile.sourceforge.net/manual/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a> - ($time) - ($lastuser)</td></tr></table></body></html>";
+    $text = "<html><head><title>POPFile Control Center</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style><link rel=stylesheet type=text/css href='skins/$configuration{skin}.css' title=main></link><META HTTP-EQUIV=Pragma CONTENT=no-cache><META HTTP-EQUIV=Expires CONTENT=0><META HTTP-EQUIV=Cache-Control CONTENT=no-cache><META HTTP-EQUIV=Refresh CONTENT=600></head><body><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'><table class=head cellspacing=0 width=100%><tr><td>&nbsp;&nbsp;POPFile Control Center<td align=right valign=middle><a href=/shutdown>Shutdown</a>&nbsp;<tr height=3><td colspan=3></td></tr></table></td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center>$update_check<table class=menu cellspacing=0><tr><td class=$tab[2] align=center><a href=/history?session=$session_key&setfilter=Filter&filter=>History</a></td><td class=menu_spacer></td><td class=$tab[1] align=center><a href=/buckets?session=$session_key>Buckets</a></td><td class=menu_spacer></td><td class=$tab[4] align=center><a href=/magnets?session=$session_key>Magnets</a></td><td class=menu_spacer></td><td class=$tab[0] align=center><a href=/configuration?session=$session_key>Configuration</a></td><td class=menu_spacer></td><td class=$tab[3] align=center><a href=/security?session=$session_key>Security</a></td><td class=menu_spacer></td><td class=$tab[5] align=center><a href=/advanced?session=$session_key>Advanced</a></td></tr></table><table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr><td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>" . $text . "</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center><table class=footer><tr><td>POPFile $major_version.$minor_version.$build_version - <a href=http://popfile.sourceforge.net/manual/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a> - ($time) - ($lastuser)</td></tr></table></body></html>";
     
     my $http_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
     $http_header .= length($text);
@@ -420,6 +420,11 @@ sub security_page
     my $body;
     my $server_error = '';
     my $port_error   = '';
+
+    if ( defined($form{password}) )
+    {
+        $configuration{password} = $form{password};
+    }
     
     if ( defined($form{server}) )
     {
@@ -482,6 +487,9 @@ sub security_page
     {
         $body .= "<b>No</b> <a href=/security?update_check=2&session=$session_key><font color=blue>[Change to Yes]</font></a> ";
     } 
+
+    $body .= "<p><hr><h2>User Interface Password</h2><p><form action=/security><b>Password:</b> <br><input name=password type=text value=$configuration{password}> <input type=submit name=update_server value=Apply> <input type=hidden name=session value=$session_key></form>";    
+    $body .= "Updated password to $configuration{password}" if ( defined($form{password}) );
     
     $body .= "<p><hr><h2>Secure Password Authentication/AUTH</h2><p><form action=/security><b>Secure server:</b> <br><input name=server type=text value=$configuration{server}><input type=submit name=update_server value=Apply><input type=hidden name=session value=$session_key></form>";    
     $body .= "Updated secure server to $configuration{server}; this change will not take affect until you restart POPFile" if ( defined($form{server}) );
@@ -1784,6 +1792,26 @@ sub history_page
 
 # ---------------------------------------------------------------------------------------------
 #
+# password_page - Simple page asking for the POPFile password
+#
+# $client     The web browser to send the results to
+#
+# ---------------------------------------------------------------------------------------------
+sub password_page
+{
+    my ($client, $error) = @_;
+    my $session_temp = $session_key;
+    
+    # Show a page asking for the password with no session key information on it
+    $session_key = '';
+    my $body = "<h2>Password</h2><form action=/password><b>Enter password:</b> <input type=password name=password> <input type=submit name=submit value=Go!></form>";
+    $body .= "<blockquote><font color=red>Incorrect password</font></blockquote>" if ( $error == 1 );
+    http_ok($client, $body, 99);
+    $session_key = $session_temp;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # handle_url - Handle a URL request
 #
 # $client     The web browser to send the results to
@@ -1838,6 +1866,41 @@ sub handle_url
         $url = '/history';
     }
 
+    if ( $url =~ /\/(.+\.gif)/ )
+    {
+        http_file( $client, $1, 'image/gif' );
+        return;
+    }
+
+    if ( $url =~ /(skins\/.+\.css)/ )
+    {
+        http_file( $client, $1, 'text/css' );
+        return;
+    }
+
+    # Check the password 
+    if ( $url eq '/password' ) 
+    {
+        if ( $form{password} eq $configuration{password} ) 
+        {
+            $form{session} = $session_key;
+            $url = '/';
+        }
+        else
+        {
+            password_page($client, 1);
+            return;
+        }
+    }
+
+    # If there's a password defined then check to see if the user already knows the
+    # session key, if they don't then drop to the password screen
+    if ( ( (!defined($form{session})) || ( $form{session} ne $session_key ) ) && ( $configuration{password} ne '' ) )
+    {
+        password_page($client, 0);
+        return;
+    }
+
     if ( ( $url eq '/' ) || (!defined($form{session})) || ( $form{session} ne $session_key ) )
     {
         %form = ();
@@ -1863,18 +1926,6 @@ sub handle_url
     {
         $alive = 0;
         http_ok($client, "POPFile shutdown", 0);
-        return;
-    }
-
-    if ( $url =~ /\/(.+\.gif)/ )
-    {
-        http_file( $client, $1, 'image/gif' );
-        return;
-    }
-
-    if ( $url =~ /(skins\/.+\.css)/ )
-    {
-        http_file( $client, $1, 'text/css' );
         return;
     }
 
@@ -2455,7 +2506,7 @@ sub run_popfile
         if  ( ( $configuration{localpop} == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) )
         {
             # Tell the client that we are ready for commands and identify our version number
-            tee( $client, "+OK POP3 popfile (v$major_version.$minor_version.$build_version) server ready$eol" );
+            tee( $client, "+OK POP3 POPFile (v$major_version.$minor_version.$build_version) server ready$eol" );
             
             my $current_count = $configuration{mail_count};
 
@@ -2482,7 +2533,7 @@ sub run_popfile
                 # we are ready for commands
                 if ( $command =~ /HELO/i )
                 {
-                    tee( $client, "+OK HELO popfile Server Ready$eol" );
+                    tee( $client, "+OK HELO POPFile Server Ready$eol" );
                     next;
                 }
 
@@ -2969,27 +3020,28 @@ calculate_today();
 
 # Set up reasonable defaults for the configuration parameters.  These may be 
 # overwritten immediately when we read the configuration file
-$configuration{debug}        = 1;
-$configuration{port}         = 110;
-$configuration{ui_port}      = 8080;
-$configuration{subject}      = 1;
-$configuration{xtc}          = 1;
-$configuration{xpl}          = 1;
-$configuration{update_check} = 1;
-$configuration{server}       = '';
-$configuration{sport}        = 110;
-$configuration{page_size}    = 20;
-$configuration{timeout}      = 60;
-$configuration{localpop}     = 1;
-$configuration{localui}      = 1;
-$configuration{mcount}       = 0;
-$configuration{ecount}       = 0;
-$configuration{separator}    = ':';
-$configuration{skin}         = 'default';
-$configuration{history_days} = 2;
-$configuration{corpus}       = 'corpus';
-$configuration{unclassified_probability} = 0;
-$configuration{last_update_check} = 0;
+$configuration{debug}                       = 1;
+$configuration{port}                        = 110;
+$configuration{ui_port}                     = 8080;
+$configuration{subject}                     = 1;
+$configuration{xtc}                         = 1;
+$configuration{xpl}                         = 1;
+$configuration{update_check}                = 1;
+$configuration{server}                      = '';
+$configuration{sport}                       = 110;
+$configuration{page_size}                   = 20;
+$configuration{timeout}                     = 60;
+$configuration{localpop}                    = 1;
+$configuration{localui}                     = 1;
+$configuration{mcount}                      = 0;
+$configuration{ecount}                      = 0;
+$configuration{separator}                   = ':';
+$configuration{skin}                        = 'default';
+$configuration{history_days}                = 2;
+$configuration{corpus}                      = 'corpus';
+$configuration{unclassified_probability}    = 0;
+$configuration{last_update_check}           = 0;
+$configuration{password}                    = '';
 
 # Load skins
 load_skins();
