@@ -73,12 +73,15 @@ $h->configuration( $c );
 $h->mq( $mq );
 $h->logger( $l );
 
+$c->initialize();
 $h->initialize();
 
 my $port = 9000 + int(rand(1000));
 $h->config_( 'port', $port );
 $h->config_( 'local', 1 );
-test_assert( $h->start() );
+test_assert_equal( $h->config_( 'port' ),  $port );
+test_assert_equal( $h->config_( 'local' ), 1 );
+test_assert_equal( $h->start(), 1 );
 
 my $eol = "\015\012";
 
