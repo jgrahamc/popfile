@@ -31,8 +31,6 @@ use POPFile::Module;
 #
 # ---------------------------------------------------------------------------------------------
 
-use Time::HiRes qw( usleep ualarm gettimeofday tv_interval );
-
 use strict;
 use warnings;
 use locale;
@@ -94,7 +92,7 @@ sub new
     $self->{db_put_word_count__} = 0;
     $self->{db_get_bucket_unique_count__} = 0;
     $self->{db_get_unique_word_count__} = 0;
-    $self->{db_get_bucket_word_count__} = 0;
+    $self->{db_get_bucket_word_counts__} = 0;
     $self->{db_get_full_total__} = 0;
     $self->{db_get_bucket_parameter__} = 0;
     $self->{db_set_bucket_parameter__} = 0;
@@ -477,7 +475,7 @@ sub parse_with_kakasi__
     # This is used to parse Japanese
     require Text::Kakasi;
 
-    my $temp_file  = $self->global_config_( 'msgdir' ) . "kakasi$dcount" . "=$mcount.msg";
+    my $temp_file  = $self->get_user_path_( $self->global_config_( 'msgdir' ) . "kakasi$dcount" . "=$mcount.msg" );
 
     # Split Japanese email body into words using Kakasi Wakachigaki
     # mode(-w is passed to Kakasi as argument). The most common charset of
@@ -604,9 +602,11 @@ sub db_connect__
 	     'select count(*) from matrix
                   where matrix.bucketid = ?;' );
 
-    $self->{db_get_bucket_word_count__} = $self->{db__}->prepare(
-	     'select sum(matrix.times) from matrix
-                  where matrix.bucketid = ?;' );
+    $self->{db_get_bucket_word_counts__} = $self->{db__}->prepare(
+	     'select sum(matrix.times), buckets.name from matrix, buckets
+                  where matrix.bucketid = buckets.id
+                    and buckets.userid = ?
+                    group by buckets.name;' );
 
     $self->{db_get_unique_word_count__} = $self->{db__}->prepare(
 	     'select count(matrix.wordid) from matrix, buckets
@@ -663,7 +663,7 @@ sub db_disconnect__
     $self->{db_get_word_count__}->finish;
     $self->{db_put_word_count__}->finish;
     $self->{db_get_bucket_unique_count__}->finish;
-    $self->{db_get_bucket_word_count__}->finish;
+    $self->{db_get_bucket_word_counts__}->finish;
     $self->{db_get_unique_word_count__}->finish;
     $self->{db_get_full_total__}->finish;
     $self->{db_get_bucket_parameter__}->finish;
@@ -696,13 +696,14 @@ sub db_update_cache__
     while ( my $row = $self->{db_get_buckets__}->fetchrow_arrayref ) {
         $self->{db_bucketid__}{$userid}{$row->[0]}{id} = $row->[1];
         $self->{db_bucketid__}{$userid}{$row->[0]}{pseudo} = $row->[2];
+        $self->{db_bucketcount__}{$userid}{$row->[0]} = 0;
     }
 
-    for my $bucket (keys %{$self->{db_bucketid__}{$userid}}) {
-        $self->{db_get_bucket_word_count__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id} );
-        my $row = $self->{db_get_bucket_word_count__}->fetchrow_arrayref;
-        $self->{db_bucketcount__}{$userid}{$bucket} = $row->[0];
-     }
+    $self->{db_get_bucket_word_counts__}->execute( $userid );
+
+    while ( my $row = $self->{db_get_bucket_word_counts__}->fetchrow_arrayref ) {
+        $self->{db_bucketcount__}{$userid}{$row->[1]} = $row->[0];
+    }
 
     $self->update_constants__( $session );
 }
@@ -1150,7 +1151,7 @@ sub write_line__
 
 # ---------------------------------------------------------------------------------------------
 #
-# add_words_to_bucket
+# add_words_to_bucket__
 #
 # Takes words previously parsed by the mail parser and adds/subtracts them to/from a bucket,
 # this is a helper used by add_messages_to_bucket, remove_message_from_bucket
@@ -1164,10 +1165,70 @@ sub add_words_to_bucket__
 {
     my ( $self, $session, $bucket, $subtract ) = @_;
 
-    foreach my $word (keys %{$self->{parser__}->{words__}}) {
-        $self->set_value_( $session, $bucket, $word, $subtract * $self->{parser__}->{words__}{$word} + # PROFILE BLOCK START
-            $self->get_base_value_( $session, $bucket, $word ) );                                      # PROFILE BLOCK STOP
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    # Map the list of words to a list of counts currently in the database
+    # then update those counts and write them back to the database.  
+
+    my $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
+
+    $self->{get_wordids__} = $self->{db__}->prepare(
+             "select id, word 
+                  from words
+                  where word in ( $words );" );
+    $self->{get_wordids__}->execute;
+
+    my @id_list;
+    my %wordmap;
+  
+    while ( my $row = $self->{get_wordids__}->fetchrow_arrayref ) {
+        push @id_list, ($row->[0]);
+        $wordmap{$row->[1]} = $row->[0]; 
     }
+     
+    $self->{get_wordids__}->finish;           
+
+    my $ids = join( ',', @id_list );
+
+    $self->{db_getwords__} = $self->{db__}->prepare( 
+             "select matrix.times, matrix.wordid 
+                  from matrix
+                  where matrix.wordid in ( $ids )
+                    and matrix.bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};" );
+
+    $self->{db_getwords__}->execute;
+
+    my %counts;
+
+    while ( my $row = $self->{db_getwords__}->fetchrow_arrayref ) {
+        $counts{$row->[1]} = $row->[0];
+    }
+
+    $self->{db_getwords__}->finish;
+
+    $self->{db__}->begin_work;
+    foreach my $word (keys %{$self->{parser__}->{words__}}) {
+
+        # If there's already a count then it means that the word is already 
+        # in the database and we have its id in $wordmap{$word} so for speed we
+        # execute the db_put_word_count__ query here rather than going through
+        # set_value_ which would need to look up the wordid again
+
+        if ( defined( $wordmap{$word} ) && defined( $counts{$wordmap{$word}} ) ) {
+            $self->{db_put_word_count__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id},
+                $wordmap{$word}, $counts{$wordmap{$word}} + $subtract * $self->{parser__}->{words__}{$word} );
+	} else {
+
+            # If the word is not in the database and we are trying to subtract then
+            # we do nothing because negative values are meaningless 
+
+            if ( $subtract == 1 ) {
+                $self->set_value_( $session, $bucket, $word, $self->{parser__}->{words__}{$word} );
+	    }
+	}
+    }
+    $self->{db__}->commit;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1419,6 +1480,45 @@ sub release_session_key
 
 # ---------------------------------------------------------------------------------------------
 #
+# get_top_bucket__
+#
+# Helper function used by classify to get the bucket with the highest score from data
+# stored in a matrix of information (see definition of %matrix in classify for details)
+# and a list of potential buckets
+#
+# $userid         User ID for database access
+# $id             ID of a word in $matrix
+# $matrix         Reference to the %matrix hash in classify
+# $buckets        Reference to a list of buckets
+#
+# Returns the bucket in $buckets with the highest score
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_top_bucket__
+{
+    my ( $self, $userid, $id, $matrix, $buckets ) = @_;
+
+    my $best_probability = 0;
+    my $top_bucket       = '';
+
+    for my $bucket (@$buckets) {
+        my $probability = 0;
+        if ( defined($$matrix{$id}{$bucket}) && ( $$matrix{$id}{$bucket} > 0 ) ) {
+            $probability = $$matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket};
+        }
+
+        if ( $probability > $best_probability ) {
+            $best_probability = $probability;
+            $top_bucket       = $bucket;
+	}
+    }
+
+    return $top_bucket;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # classify
 #
 # $session   A valid session key returned by a call to get_session_key
@@ -1445,16 +1545,10 @@ sub classify
     $self->{magnet_used__}   = 0;
     $self->{magnet_detail__} = '';
 
-    my $t0 = [gettimeofday];
-    my $elapsed;
-
     if ( defined( $file ) ) {
         $self->{parser__}->parse_file( $file,
                                        $self->module_config_( 'html', 'language' ),
                                        $self->global_config_( 'message_cutoff'   ) );
-        $elapsed = tv_interval ( $t0, [gettimeofday]);
-        print "Time for parse $elapsed\n";
-        $t0 = [gettimeofday];
     }
 
     # Check to see if this email should be classified based on a magnet
@@ -1470,11 +1564,8 @@ sub classify
         }
     }
 
-    $elapsed = tv_interval ( $t0, [gettimeofday]);
-    print "Time for magnet check $elapsed\n";
-    $t0 = [gettimeofday];
-
     # If the user has not defined any buckets then we escape here return unclassified
+
     return "unclassified" if ( $#buckets == -1 );
 
     # The score hash will contain the likelihood that the given message is in each
@@ -1541,7 +1632,7 @@ sub classify
 
     my @id_list;
     my %idmap;
-  
+
     while ( my $row = $self->{get_wordids__}->fetchrow_arrayref ) {
         push @id_list, ($row->[0]);
         $idmap{$row->[0]} = $row->[1]; 
@@ -1559,6 +1650,9 @@ sub classify
                     and buckets.userid = $userid;" );
 
     $self->{db_classify__}->execute;
+
+    # %matrix maps wordids and bucket names to counts
+    # $matrix{$wordid}{$bucket} == $count
 
     my %matrix;
 
@@ -1591,10 +1685,6 @@ sub classify
             $correction += $wmax * $self->{parser__}{words__}{$idmap{$id}};
         }
     }
-
-    $elapsed = tv_interval ( $t0, [gettimeofday]);
-    print "Time for classification $elapsed\n";
-    $t0 = [gettimeofday];
 
     # Now sort the scores to find the highest and return that bucket as the classification
 
@@ -1734,47 +1824,53 @@ sub classify
             # saving the results in %wordprobs.
 
             if ( $self->{wmformat__} eq 'prob') {
-                foreach my $word (keys %{$self->{parser__}->{words__}}) {
+                foreach my $id (@id_list) {
                     my $sumfreq = 0;
                     my %wval;
                     foreach my $bucket (@ranking) {
-                        $wval{$bucket} = exp( $self->get_sort_value_( $session, $bucket, $word ));
+                        $wval{$bucket} = $matrix{$id}{$bucket} || 0;
                         $sumfreq += $wval{$bucket};
                     }
                     foreach my $bucket (@ranking) {
-                        $wordprobs{$bucket,$word} = $wval{$bucket} / $sumfreq;
+                        $wordprobs{$bucket,$id} = $wval{$bucket} / $sumfreq;
                     }
                 }
             }
 
-            my @ranked_words;
+            my @ranked_ids;
             if ($self->{wmformat__} eq 'prob') {
-                @ranked_words = sort {$wordprobs{$ranking[0],$b} <=> $wordprobs{$ranking[0],$a}} keys %{$self->{parser__}->{words__}};
+                @ranked_ids = sort {$wordprobs{$ranking[0],$b} <=> $wordprobs{$ranking[0],$a}} @id_list;
             } else {
-                @ranked_words = sort {$self->get_sort_value_( $session, $ranking[0], $b ) <=> $self->get_sort_value_( $session, $ranking[0], $a )} keys %{$self->{parser__}->{words__}};
+                @ranked_ids = sort {($matrix{$b}{$ranking[0]}||0) <=> ($matrix{$a}{$ranking[0]}||0)} @id_list;
             }
 
-            foreach my $word (@ranked_words) {
+            foreach my $id (@ranked_ids) {
                 my $known = 0;
 
                 foreach my $bucket (@ranking) {
-                    if ( $self->get_base_value_( $session, $bucket, $word ) != 0 ) {
+                    if ( defined( $matrix{$id}{$bucket} ) ) {
                         $known = 1;
                         last;
                     }
                 }
 
                 if ( $known == 1 ) {
-                    my $wordcolor = $self->get_color( $session, $word );
-                    my $count     = $self->{parser__}->{words__}{$word};
+                    my $wordcolor = $self->get_bucket_color( $session, $self->get_top_bucket__( $userid, $id, \%matrix, \@ranking ) );
+                    my $count = $self->{parser__}->{words__}{$idmap{$id}};
 
-                    $self->{scores__} .= "<tr>\n<td><font color=\"$wordcolor\">$word</font></td><td>&nbsp;</td><td>$count</td><td>&nbsp;</td>\n";
+                    $self->{scores__} .= "<tr>\n<td><font color=\"$wordcolor\">$idmap{$id}</font></td><td>&nbsp;</td><td>$count</td><td>&nbsp;</td>\n";
 
-                    my $base_probability = $self->get_value_( $session, $ranking[0], $word );
+                    my $base_probability = 0;
+                    if ( defined($matrix{$id}{$ranking[0]}) && ( $matrix{$id}{$ranking[0]} > 0 ) ) {
+                        $base_probability = log( $matrix{$id}{$ranking[0]} / $self->{db_bucketcount__}{$userid}{$ranking[0]} );
+	            }
 
                     foreach my $ix (0..($#buckets > 7? 7: $#buckets)) {
                         my $bucket = $ranking[$ix];
-                        my $probability  = $self->get_value_( $session, $bucket, $word );
+                        my $probability = 0;
+                        if ( defined($matrix{$id}{$bucket}) && ( $matrix{$id}{$bucket} > 0 ) ) {
+                            $probability = log( $matrix{$id}{$bucket} / $self->{db_bucketcount__}{$userid}{$bucket} );
+	                }
                         my $color        = 'black';
 
                         if ( $probability >= $base_probability || $base_probability == 0 ) {
@@ -1787,7 +1883,7 @@ sub classify
                                 $wordprobstr  = sprintf("%12.4f", ($probability - $self->{not_likely__}{$userid})/$log10 );
                             } else {
                                 if ($self->{wmformat__} eq 'prob') {
-                                    $wordprobstr  = sprintf("%12.4f", $wordprobs{$bucket,$word});
+                                    $wordprobstr  = sprintf("%12.4f", $wordprobs{$bucket,$id});
                                 } else {
                                     $wordprobstr  = sprintf("%13.5f", exp($probability) );
                                 }
@@ -1806,9 +1902,6 @@ sub classify
             $self->{scores__} .= "</table></p>";
         }
     }
-
-    $elapsed = tv_interval ( $t0, [gettimeofday]);
-    print "Time for rest $elapsed\n";
 
     return $class;
 }
@@ -1913,7 +2006,7 @@ sub history_read_class
         close CLASS;
         $bucket =~ s/[\r\n]//g;
     } else {
-        $self->log_( "Error: " . $self->global_config_( 'msgdir' ) . "$filename: $!" );
+        $self->log_( "Error: " . $self->get_user_path_( $self->global_config_( 'msgdir' ) . "$filename: $!" ) );
 
         return ( undef, $bucket, undef, undef );
     }
@@ -2404,7 +2497,9 @@ sub get_bucket_word_count
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    return $self->{db_bucketcount__}{$userid}{$bucket};
+    my $c = $self->{db_bucketcount__}{$userid}{$bucket};
+
+    return defined($c)?$c:0;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2809,18 +2904,22 @@ sub add_messages_to_bucket
         return 0;
     }
 
-    $self->{db__}->begin_work;
-
     # Pass language parameter to parse_file()
+
+    # This is done to clear out the word list because in the loop
+    # below we are going to not reset the word list on each parse
+
+    $self->{parser__}->start_parse();
+    $self->{parser__}->stop_parse();
 
     foreach my $file (@files) {
         $self->{parser__}->parse_file( $file,
                                        $self->module_config_( 'html', 'language' ),
-                                       $self->global_config_( 'message_cutoff'   ) );
-        $self->add_words_to_bucket__( $session, $bucket, 1 );
+                                       $self->global_config_( 'message_cutoff'   ),
+                                       0 );  # Do not reset word list
     }
 
-    $self->{db__}->commit;
+    $self->add_words_to_bucket__( $session, $bucket, 1 );
     $self->db_update_cache__( $session );
 
     return 1;
@@ -2867,14 +2966,11 @@ sub remove_message_from_bucket
 
     # Pass language parameter to parse_file()
 
-    $self->{db__}->begin_work;
-
     $self->{parser__}->parse_file( $file,
                                    $self->module_config_( 'html', 'language' ),
                                    $self->global_config_( 'message_cutoff'   ) );
     $self->add_words_to_bucket__( $session, $bucket, -1 );
 
-    $self->{db__}->commit;
     $self->db_update_cache__( $session );
 
     return 1;

@@ -3546,6 +3546,20 @@ sub view_page
     my $fmtlinks;
 
     if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
+
+        # Enable saving of word-scores
+
+        $self->{classifier__}->wordscores( 1 );
+
+        # Build the scores by classifying the message, since get_html_colored_message has parsed the message
+        # for us we do not need to parse it again and hence we pass in undef for the filename
+
+        $self->{classifier__}->classify( $self->{api_session__}, undef, $self );
+
+        # Disable, print, and clear saved word-scores
+
+        $self->{classifier__}->wordscores( 0 );
+
         $body .= $self->{classifier__}->get_html_colored_message( $self->{api_session__}, $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ) );
 
         # We want to insert a link to change the output format at the start of the word
@@ -3587,19 +3601,6 @@ sub view_page
         if ( $self->{form_}{format} ne '' ) {
             $fmtlinks .= "</a></td></table>";
 	}
-
-        # Enable saving of word-scores
-
-        $self->{classifier__}->wordscores( 1 );
-
-        # Build the scores by classifying the message, since get_html_colored_message has parsed the message
-        # for us we do not need to parse it again and hence we pass in undef for the filename
-
-        $self->{classifier__}->classify( $self->{api_session__}, undef, $self );
-
-        # Disable, print, and clear saved word-scores
-
-        $self->{classifier__}->wordscores( 0 );
     } else {
         $self->{history__}{$mail_file}{magnet} =~ /(.+): ([^\r\n]+)/;
         my $header = $1;

@@ -1120,18 +1120,22 @@ sub parse_html
 # $file     The file to open and parse
 # $lang     Pass in the current interface language for language specific parsing
 # $max_size The maximum size of message to parse, or 0 for unlimited
+# $reset    If set to 0 then the list of words from a previous parse is not reset, this
+#           can be used to do multiple parses and build a single word list.  By default
+#           this is set to 1 and the word list is reset
 #
 # ---------------------------------------------------------------------------------------------
 sub parse_file
 {
     # $lang is used for switching on/off language specific functionality
 
-    my ( $self, $file, $lang, $max_size ) = @_;
+    my ( $self, $file, $lang, $max_size, $reset ) = @_;
 
+    $reset    = 1 if ( !defined( $reset    ) );
     $max_size = 0 if ( !defined( $max_size ) );
 
     $self->{lang__} = $lang;
-    $self->start_parse();
+    $self->start_parse( $reset );
 
     my $size_read = 0;
 
@@ -1175,10 +1179,16 @@ sub parse_file
 # Called to reset internal variables before parsing.  This is automatically called when using
 # the parse_file API, and must be called before the first call to parse_line.
 #
+# $reset    If set to 0 then the list of words from a previous parse is not reset, this
+#           can be used to do multiple parses and build a single word list.  By default
+#           this is set to 1 and the word list is reset
+#
 # ---------------------------------------------------------------------------------------------
 sub start_parse
 {
-    my ( $self ) = @_;
+    my ( $self, $reset ) = @_;
+
+    $reset = 1 if ( !defined( $reset ) );
 
     # This will contain the mime boundary information in a mime message
 
@@ -1210,7 +1220,10 @@ sub start_parse
     $self->{html_tag__}    = '';
     $self->{html_arg__}    = '';
 
-    $self->{words__}        = {};
+    if ( $reset ) {
+        $self->{words__} = {};
+    }
+
     $self->{msg_total__}    = 0;
     $self->{from__}         = '';
     $self->{to__}           = '';
