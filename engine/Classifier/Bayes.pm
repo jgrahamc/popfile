@@ -17,7 +17,6 @@ use Classifier::WordMangle;
 #
 #   Class new() function
 #----------------------------------------------------------------------------
-
 sub new 
 {
     my $type = shift;
@@ -85,12 +84,79 @@ sub new
 
 # ---------------------------------------------------------------------------------------------
 #
+# initialize
+#
+# Called to set up the Bayes module's parameters
+#
+# ---------------------------------------------------------------------------------------------
+sub initialize
+{
+    my ( $self ) = @_;
+    
+    # No default unclassified probability
+    $self->{configuration}->{configuration}{unclassified_probability} = 0;
+
+    # The corpus is kept in the 'corpus' subfolder of POPFile
+    $self->{configuration}->{configuration}{corpus}                   = 'corpus';
+    
+    return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# start
+#
+# Called to start the Bayes module running
+#
+# ---------------------------------------------------------------------------------------------
+sub start
+{
+    my ( $self ) = @_;
+    
+    print "    Loading buckets...\n";
+
+    if ( $self->{configuration}->{configuration}{unclassified_probability} != 0 )  {
+        $self->{unclassified} = $self->{configuration}->{configuration}{unclassified_probability};
+    }
+    
+    load_word_matrix( $self );
+    
+    return 1; 
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# stop
+#
+# Called when POPFile is terminating
+#
+# ---------------------------------------------------------------------------------------------
+sub stop
+{
+    my ( $self ) = @_;
+    
+    write_parameters( $self );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# service
+#
+# ---------------------------------------------------------------------------------------------
+sub service
+{
+    my ( $self ) = @_;
+    
+    return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # write_parameters
 #
 # Save the parameters hash
 #
 # ---------------------------------------------------------------------------------------------
-
 sub write_parameters 
 {
     my ($self) = @_;
@@ -113,7 +179,6 @@ sub write_parameters
 # $word     Word to get the color of
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_color 
 {
     my ($self, $word) = @_;
@@ -146,7 +211,6 @@ sub get_color
 # TODO: replace the word matrix hash with Berkeley DB tie
 #
 # ---------------------------------------------------------------------------------------------
-
 sub get_value 
 {
     my ($self, $bucket, $word) = @_;
@@ -185,7 +249,6 @@ sub set_value
 # Updates not_likely and bucket_start
 #
 # ---------------------------------------------------------------------------------------------
-
 sub update_constants 
 {
     my ($self) = @_;
@@ -210,7 +273,6 @@ sub update_constants
 # Fills the matrix with the word frequencies from all buckets and builds the bucket total
 #
 # ---------------------------------------------------------------------------------------------
-
 sub load_word_matrix 
 {
     my ($self) = @_;
@@ -344,7 +406,6 @@ sub load_bucket
 # Save all the magnet definitions
 #
 # ---------------------------------------------------------------------------------------------
-
 sub save_magnets 
 {
     my ($self) = @_;
@@ -372,7 +433,6 @@ sub save_magnets
 # which bucket it belongs in.  Returns the bucket name
 #
 # ---------------------------------------------------------------------------------------------
-
 sub classify_file 
 {
     my ($self, $file) = @_;
