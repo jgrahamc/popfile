@@ -381,7 +381,7 @@ sub url_handler__
         return 1;
     }
 
-    http_error_($self, $client, 404);
+    $self->http_error_($client, 404);
     return 1;
 }
 

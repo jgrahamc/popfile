@@ -106,13 +106,24 @@ sub service
 
     # Handle HTTP requests for the UI
     if ( ( defined( $ready ) ) && ( $ready == $self->{server_} ) ) {
+
+        $self->log_( "Connection pending on HTTP socket" );
+
         if ( my $client = $self->{server_}->accept() ) {
+
+            $self->log_( "Accepted connection on HTTP socket" );
+
             # Check that this is a connection from the local machine, if it's not then we drop it immediately
             # without any further processing.  We don't want to allow remote users to admin POPFile
+
             my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
+
+            $self->log_( "Got a connection from " . inet_ntoa( $remote_host ) . " on port $remote_port" );
 
             if ( ( $self->config_( 'local' ) == 0 ) ||
                  ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
+
+                 $self->log_( "Ready to receive HTTP command" );
 
                 # Read the request line (GET or POST) from the client and if we manage to do that
                 # then read the rest of the HTTP headers grabbing the Content-Length and using
@@ -122,10 +133,14 @@ sub service
                     my $content_length = 0;
                     my $content;
 
+                    $self->log_( "Received HTTP command $request" );
+
                     while ( <$client> )  {
                         $content_length = $1 if ( /Content-Length: (\d+)/i );
                         last                 if ( !/[A-Z]/i );
                     }
+
+                    $self->log_( "Content length $content_length" );
 
                     if ( $content_length > 0 ) {
                         $content = '';

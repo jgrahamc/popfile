@@ -863,7 +863,7 @@ sub parse_stream
     $self->{cc__}           = '';
     $self->{subject__}      = '';
     $self->{ut__}           = '';
-    $self->{quickmagnets__} = ();
+    $self->{quickmagnets__} = {};
 
     $self->{htmlbackcolor__} = map_color( $self, 'white' );
     $self->{htmlfontcolor__} = map_color( $self, 'black' );
@@ -920,7 +920,7 @@ sub parse_stream
                     $header   = '';
                     $argument = '';
 
-                    $self->{ut__} .= splitline("\015\012", 0);
+                    $self->{ut__} .= splitline( "\015\012", 0 );
 
                     $self->{in_headers__} = 0;
                     print "Header parsing complete.\n" if $self->{debug};
