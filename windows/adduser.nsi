@@ -158,7 +158,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.33"
+  !define C_PFI_VERSION  "0.2.34"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -249,10 +249,11 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
 
 #--------------------------------------------------------------------------
-# Use the "Modern User Interface"
+# Use the "Modern User Interface" and the standard NSIS list of common Windows Messages
 #--------------------------------------------------------------------------
 
   !include "MUI.nsh"
+  !include "WinMessages.nsh"
 
 #--------------------------------------------------------------------------
 # Version Information settings (for the installer EXE and uninstaller EXE)
@@ -1771,6 +1772,11 @@ Function CheckUserDirStatus
   StrCmp $G_PFISETUP "/installreboot" 0 exit
 
 upgrade_install:
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1037
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_USERDIR_TITLE)"
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1038
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_USERDIR_SUBTITLE)"
+
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_3)\
       $\r$\n$\r$\n\
       $G_USERDIR\
