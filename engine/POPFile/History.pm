@@ -400,7 +400,7 @@ sub commit_history__
                     last;
                 }
 
-                if ( /^([^ \t]+):[ \t]*(.+)$/ ) {
+                if ( /^([^ \t]+):[ \t]*(.*)$/ ) {
                     $last = lc $1;
                     push @{$header{$last}}, $2;
 
