@@ -19,7 +19,7 @@ MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="isboundary"
 X-POPFile-Link: http://127.0.0.1:8080/jump_to_message?view=popfile1043193600_48.msg
 X-Text-Classification: spam
-X-POPFile-Link: <http://127.0.0.1:8080/jump_to_message?view=popfile0=0.msg>
+X-POPFile-Link: http://127.0.0.1:8080/jump_to_message?view=popfile0=0.msg
 
 --isboundary
 Content-Type: text/html; charset=us-ascii

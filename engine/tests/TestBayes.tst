@@ -71,7 +71,7 @@ for my $class_test (@class_tests) {
     	close CLASS;
     }
     
-    test_assert_equal( $b->classify_file( $class_test ), $class, $class_test );
+    test_assert_equal( $b->classify( $class_test ), $class, $class_test );
 }
 
 # glob the tests directory for files called TestMailParse\d+.msg which consist of messages 

@@ -128,19 +128,19 @@ for my $parse_test (@parse_tests) {
 }
 
 # Check that from, to and subject get set correctly when parsing a message
-$cl->parse_stream( 'tests/TestMailParse013.msg' );
+$cl->parse_file( 'tests/TestMailParse013.msg' );
 test_assert_equal( $cl->{from__},    'RN <rrr@nnnnnnnnn.com>'                        );
 test_assert_equal( $cl->{to__},      '"Armlet Forum" <armlet-forum@news.palmos.com>' );
 test_assert_equal( $cl->{subject__}, '(Archive Copy) RE: CW v9 and armlets...'       );
-$cl->parse_stream( 'tests/TestMailParse018.msg' );
+$cl->parse_file( 'tests/TestMailParse018.msg' );
 $cl->{to__} =~ /(\Qbugtracker\E@\Qrelativity.com\E)/;
 test_assert_equal( $1, 'bugtracker@relativity.com' );
-$cl->parse_stream( 'tests/TestMailParse019.msg' );
+$cl->parse_file( 'tests/TestMailParse019.msg' );
 $cl->{to__} =~ /(\Qbugtracker\E@\Qrelativity.com\E)/;
 test_assert_equal( $1, 'bugtracker@relativity.com' );
 
 # Check that multi-line To: and CC: headers get handled properly
-$cl->parse_stream( 'tests/TestMailParse021.msg' );
+$cl->parse_file( 'tests/TestMailParse021.msg' );
 $cl->{to__} =~ s/[\r\n]//g;
 test_assert_equal( $cl->{to__},      'dsmith@ctaz.com, dsmith@dol.net, dsmith@dirtur.com, dsmith@dialpoint.net, dsmith@crosscountybank.com, 	<dsmith@cybersurf.net>, <dsmith@dotnet.com>, <dsmith@db.com>, <dsmith@cs.com>	, <dsmith@crossville.com>, 	<dsmith@dreamscape.com>, <dsmith@cvnc.net>, <dsmith@dmrtc.net>, <dsmith@datarecall.net>, 	<dsmith@dasia.net>' );
 $cl->{cc__} =~ s/[\r\n]//g;
