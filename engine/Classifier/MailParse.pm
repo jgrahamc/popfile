@@ -158,6 +158,8 @@ sub parse_stream
 
     # Clear the word hash
 
+    my $content_type = '';
+
     $self->{words}     = {};
     $self->{msg_total} = 0;
 
@@ -236,12 +238,23 @@ sub parse_stream
             add_line( $self, $decoded );
         }
 
-        # Remove HTML tags completely
+        if ( $line =~ /<html>/i ) 
+        {
+            $content_type = 'text/html';
+        }
+
+        # Transform some escape characters
         
-        if ( $encoding =~ /quoted\-printable/ ) 
+        if ( $encoding =~ /quoted\-printable/ )
         {
             $line =~ s/=20/ /g;
             $line =~ s/=3D/=/g;
+        }
+        
+        # Remove HTML tags completely
+        
+        if ( $content_type =~ /html/ ) 
+        {
             $line =~ s/<[\/!]?[A-Za-z]+[^>]*?>/ /g;
             $line =~ s/<[\/!]?[A-Za-z]+[^>]*?$/ /;
             $line =~ s/^[^>]*?>/ /;
@@ -259,6 +272,7 @@ sub parse_stream
             if ( $header =~ /From/ ) 
             {
                 $encoding = '';
+                $content_type = '';
             }
             
             # Handle the From, To and Cc headers and extract email addresses
@@ -295,7 +309,8 @@ sub parse_stream
                         $mime =~ s/(\+|\/|\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\\1/g;
                     }
                 }
-
+                
+                $content_type = $argument;
                 next;
             }
             
