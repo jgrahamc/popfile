@@ -19,13 +19,13 @@ h2 {
   font-family: verdana, arial, sans-serif;
   font-size: 1.2em;
   font-weight: bold;
-  color: #000000;
+  color: white;
   background-color: transparent;
 }
 
 hr {
-  color: black;
-  background-color: black;
+  color: #CC1133;
+  background-color: #CC1133;
 }
 
 th {
@@ -45,7 +45,7 @@ td.naked {
 }
 
 /* Text input and drop-down selections */
-input, select {
+input, select, textarea {
   color: #000000;
   background-color: #F2F0F0;
   border: 1px #000000 solid;
@@ -115,6 +115,16 @@ input, select {
   border: 2px gray inset;
 }
 
+/* Remove Messages buttons */
+.removeButton {
+  background-color: #2C0074;
+  border: 2px gray outset;
+}
+
+.removeButton:active {
+  border: 2px gray inset;
+}
+
 /* Undo buttons */
 .undoButton {
   background-color: #2C0074;
@@ -134,37 +144,15 @@ input, select {
   border: 2px gray inset;
 }
 
-
-/* *** Button Fixes *** */
-
-/* Fix width of security toggle buttons for IE */
-.securitySwitch .toggleOn {
-  width: 9em;
-}
-.securitySwitch .toggleOff {
-  width: 9em;
-}
-
-/* Reverse the color for these specific buttons */
-#securityAcceptPOP3Off {
-  color: #FFFFFF;
-  background-color: green;
-  width: 17em;
-}
-#securityAcceptPOP3On {
+/* Reverse the color for Stealth Mode/Server Operation buttons */
+.securityServerWidget input.toggleOn {
   color: #FFFFFF;
   background-color: rgb(223,32,32);
 }
-#securityAcceptHTTPOff {
+.securityServerWidget input.toggleOff {
   color: #FFFFFF;
   background-color: green;
-  width: 17em;
 }
-#securityAcceptHTTPOn {
-  color: #FFFFFF;
-  background-color: rgb(223,32,32);
-}
-
 
 /*********************************************************/
 /* Global link rules */
@@ -239,6 +227,7 @@ td.historyNavigatorTop :visited, td.historyNavigatorBottom :visited {
   color: rgb(99, 6, 1);
   background-color: rgb(220, 90, 110);
 }
+
 td.historyNavigatorTop :link:hover, td.historyNavigatorBottom :link:hover,
 td.historyNavigatorTop :visited:hover, td.historyNavigatorBottom :visited:hover {
   color: rgb(99, 6, 1);
@@ -248,6 +237,13 @@ td.historyNavigatorTop :visited:hover, td.historyNavigatorBottom :visited:hover 
 /* For viewing messages on the History page */
 .messageLink {
   text-decoration: underline;
+}
+
+/* For the download log file link on the Configuration Page */
+.downloadLogLink{
+  text-decoration: underline;
+  color: rgb(99, 6, 1);
+  background-color: rgb(220, 90, 110);
 }
 
 /* To prevent the background color from overriding the color in the color picker table */
@@ -473,7 +469,7 @@ tr.rowEven {
   background-color: #A4CA4A;
 }
 
-/* Accuracy statistics bar colors*/
+/* Accuracy statistics bar colors */
 .accuracy0to49 {
   color: black;
   background-color: red;
