@@ -800,27 +800,6 @@ sub db_put_word_count__
 
 # ---------------------------------------------------------------------------------------------
 #
-# db_delete_word__
-#
-# Delete a word from the database from a specific bucket, returns 1 if successful and 0
-# otherwise
-#
-# $bucket           bucket word is in
-# $word             word to delete
-#
-# ---------------------------------------------------------------------------------------------
-sub db_delete_word__
-{
-    my ( $self, $bucket, $word ) = @_;
-
-    $word = $self->{db__}->quote($word);
-
-    return defined( $self->{db__}->do(
-        "delete from corpus where bucket = '$bucket' and word = $word ;" ) );
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # upgrade_predatabase_data__
 #
 # Looks for old POPFile data (in flat files or BerkeleyDB tables) and upgrades it to the
