@@ -93,7 +93,7 @@ sub start
     if ( !defined( $self->{server__} ) ) {
         my $port = $self->config_( 'port' );
         my $name = $self->name();
-        print <<EOM;
+        print STDERR <<EOM;
 
 \nCouldn't start the $name proxy because POPFile could not bind to the
 listen port $port. This could be because there is another service
@@ -103,7 +103,7 @@ and the port you specified is less than 1024).
 
 EOM
 
-    return 0;
+        return 0;
     }
 
     # This is used to perform select calls on the $server socket so that we can decide when there is
