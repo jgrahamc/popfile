@@ -379,13 +379,6 @@ sub url_handler__
 {
     my ( $self, $client, $url, $command, $content ) = @_;
 
-    $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
-
-    if ( !defined( $self->{api_session__} ) ) {
-        $self->http_error_( $client, 500 );
-        return;
-    }
-
     # See if there are any form parameters and if there are parse them into the %form hash
 
     delete $self->{form_};
@@ -416,31 +409,26 @@ sub url_handler__
 
     if ( $url =~ /\/(.+\.gif)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'image/gif' );
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     if ( $url =~ /\/(.+\.png)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'image/png' );
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     if ( $url =~ /\/(.+\.ico)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'image/x-icon' );
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     if ( $url =~ /(skins\/.+\.css)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'text/css' );
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     if ( $url =~ /(manual\/.+\.html)/ ) {
         $self->http_file_( $client, $self->get_root_path_( $1 ), 'text/html' );
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
@@ -459,7 +447,6 @@ sub url_handler__
             }
         } else {
             $self->password_page( $client, 1, '/' );
-            $self->{classifier__}->release_session_key( $self->{api_session__} );
             return 1;
         }
     }
@@ -501,7 +488,6 @@ sub url_handler__
         $redirect_url =~ s/&$//;
 
         $self->password_page( $client, 0, $redirect_url );
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
 
         return 1;
     }
@@ -531,19 +517,16 @@ sub url_handler__
             $self->http_redirect_( $client, "/history" );
         }
 
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     if ( $url =~ /(popfile.*\.log)/ ) {
         $self->http_file_( $client, $self->get_user_path_( $self->module_config_( 'logger', 'logdir' ) . $1 ), 'text/plain' );
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     if ( ( defined($self->{form_}{session}) ) && ( $self->{form_}{session} ne $self->{session_key__} ) ) {
         $self->session_page( $client, 0, $url );
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
@@ -553,7 +536,6 @@ sub url_handler__
 
     if ( $url eq '/shutdown' )  {
         $self->http_ok( $client, "POPFile shutdown", -1 );
-        $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 0;
     }
 
@@ -570,13 +552,19 @@ sub url_handler__
     # files on disk
 
     if ( defined($url_table{$url}) )  {
+        $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
+
+        if ( !defined( $self->{api_session__} ) ) {
+            $self->http_error_( $client, 500 );
+            return;
+        }
+
         &{$url_table{$url}}($self, $client);
         $self->{classifier__}->release_session_key( $self->{api_session__} );
         return 1;
     }
 
     $self->http_error_( $client, 404 );
-    $self->{classifier__}->release_session_key( $self->{api_session__} );
     return 1;
 }
 
