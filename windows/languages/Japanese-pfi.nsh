@@ -118,7 +118,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_CORE      "POPFile のコアファイルをインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_PERL      "最小バージョンの Perl をインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SHORT     "POPFile のショートカットを作成中..."
-!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FFCBACK   "Making corpus backup. This may take a few seconds..."
+!insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_FFCBACK   "corpus(コーパス、単語ファイル)のバックアップを作成中。しばらくお待ち下さい..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_SKINS     "POPFile のスキンファイルをインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_LANGS     "POPFile UI 言語ファイルをインストール中..."
 !insertmacro PFI_LANG_STRING PFI_LANG_INST_PROG_ENDSEC    "「次へ」をクリックして続行して下さい。"
@@ -131,8 +131,8 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_1          "以前にインストールされたファイルを検出しました。"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_2          "アップデートしてもよろしいですか？"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3          "アップデートするには「Yes」をクリックして下さい。古いファイルは次の名前で保存されます:"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4          "古いファイルを残すには「No」をクリックして下さい。新しいファイルは次の名前で保存されます:"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_3          "アップデートするには「Yes」をクリックして下さい。(古いファイルは次の名前で保存されます:"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBSTPWDS_4          "古いファイルを残すには「No」をクリックして下さい。(新しいファイルは次の名前で保存されます:"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_1           "次のファイルのバックアップ:"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_2           "は既に存在します。"
@@ -146,7 +146,7 @@
 ; Page Title and Sub-title displayed in the page header
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_TITLE           "POPFile の分類用のバケツ作成"
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_SUBTITLE        "POPFile は、電子メールを分類するのに最低二つのバケツを必要とします。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_SUBTITLE        "POPFile はメールを分類するのに最低二つのバケツを必要とします。"
 
 ; Text strings displayed on the custom page
 
@@ -180,7 +180,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_3      "バケツの名前には a から z の小文字、0 から 9 の数字、- または _ を使用して下さい。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_4      "新しいバケツには違う名前を選んで下さい。"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_1     "POPFile は電子メールを分類するのに最低二つのバケツを必要とします"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_1     "POPFile はメールを分類するのに最低二つのバケツを必要とします。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_2     "作成するバケツの名前を入力して下さい。$\r$\n$\r$\nドロップダウンリストの例より選択するか、$\r$\n$\r$\n適当な名前を入力して下さい。"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_3     "POPFile のインストールを続行するには、最低二つのバケツを作成しなければなりません。"
 
