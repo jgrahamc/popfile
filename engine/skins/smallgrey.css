@@ -302,3 +302,12 @@ span.configWidgetState {
 span.securityWidgetState {
 	font-weight: bold;
 }
+
+.historyLabel {
+	font-weight: normal;
+}
+
+.historyLabel em {
+	font-weight: bold;
+	font-style: normal;
+}

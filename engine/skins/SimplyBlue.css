@@ -155,7 +155,7 @@ span.graphFont {
 	font-size: x-small;
 }		
 
-span.historyLabel {
+.historyLabel {
 	font-weight: bold;
 }
 
@@ -227,3 +227,9 @@ span.configWidgetState {
 span.securityWidgetState {
 	font-weight: bold;
 }
+
+.historyLabel em {
+
+	font-style: normal;
+}
+
