@@ -150,20 +150,22 @@ sub validate_item
 {
     my ( $self, $name, $templ, $language, $form ) = @_;
 
+    my ( $status_message );
+
     if ( $name eq 'windows_trayicon_and_console' ) {
 
         if ( defined($$form{windows_trayicon}) ) {
             $self->config_( 'trayicon', $$form{windows_trayicon} );
-            $templ->param( 'trayicon_feedback' => 1 );
+            $status_message = $$language{Windows_NextTime};
         }
 
         if ( defined($$form{windows_console}) ) {
             $self->config_( 'console', $$form{windows_console} );
-            $templ->param( 'console_feedback' => 1 );
+            $status_message = $$language{Windows_NextTime};
         }
     }
 
-   return '';
+   return ( $status_message, undef );
 }
 
 1;

@@ -361,7 +361,7 @@ View_Chart                              Decision Chart
 
 Windows_TrayIcon                        Show POPFile icon in Windows system tray?
 Windows_Console                         Run POPFile in a console window?
-Windows_NextTime                        <p><font color="red">This change will not take effect until the next time you start POPFile</font>
+Windows_NextTime                        This change will not take effect until the next time you start POPFile
 
 Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.
 History_MainTableSummary                This table shows the sender and subject of recently received messages and allows them to be reviewed and reclassified.  Clicking on the subject line will show the full message text, along with information about why it was classified as it was.  The 'Should be' column allows you to specify which bucket the message belongs in, or to undo that change.  The 'Delete' column allows you to delete specific messages from the history if you don't need them anymore.
