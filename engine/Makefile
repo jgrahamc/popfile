@@ -98,7 +98,8 @@ package: $(POPFILE_ZIP) windows
 # Used to convert the ZIP files to RC ZIP files and 
 # upload to SourceForge
 
-rc: RELEASE_FILES := $(POPFILE_ZIP) $(POPFILE_WINDOWS_ZIP) 
+rc: RELEASE_FILES := $(POPFILE_ZIP) ../windows/$(POPFILE_WINDOWS_ZIP) 
 rc: 
 	chmod go+r $(RELEASE_FILES)
-	scp -p $(RELEASE_ZIP) jgrahamc@popfile.sourceforge.net:/home/groups/p/po/popfile/htdocs
+	scp -p $(RELEASE_FILES) jgrahamc@popfile.sourceforge.net:/home/groups/p/po/popfile/htdocs
+

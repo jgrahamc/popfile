@@ -120,11 +120,11 @@ sub service
 
     $self->calculate_today__();
 
-    # We send out a TICKD message every 6 hours so that other modules
+    # We send out a TICKD message every hour so that other modules
     # can do clean up tasks that need to be done regularly but not
     # often
 
-    if ( time > ( $self->{last_tickd__} + 6 * 60 * 60 ) ) {
+    if ( time > ( $self->{last_tickd__} + 60 * 60 ) ) {
         $self->mq_post_( 'TICKD', '', '' );
         $self->{last_tickd__} = time;
     }
