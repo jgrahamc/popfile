@@ -2094,11 +2094,7 @@ sub sort_filter_history
 			}
 		}
 	} else {
-
-		# Here's a quick shortcut so that we don't have to iterate
-		# if there's no work for us to do
-	
-		@{$self->{history_keys_}} = sort compare_mf keys %{$self->{history_}};
+		@{$self->{history_keys_}} = keys %{$self->{history_}};
 	}
 
 	# If a sort is specified then use it to sort the history items by an a subkey
@@ -2115,7 +2111,12 @@ sub sort_filter_history
         								  	$b1 =~ s/[^A-Z0-9]//ig; 
         								  	return ( $a1 cmp $b1 ); 
         								  } @{$self->{history_keys_}};
-    }
+    } else {
+		# Here's a quick shortcut so that we don't have to iterate
+		# if there's no work for us to do
+	
+		@{$self->{history_keys_}} = sort compare_mf @{$self->{history_keys_}};
+	}    
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2151,7 +2152,7 @@ sub load_history_cache
     my @history_files = sort compare_mf glob "$self->{configuration}->{configuration}{msgdir}popfile*=*.msg";
 
     foreach my $i ( 0 .. $#history_files ) {
-    
+
     	# Strip any directory portion of the name in the current file so that we
     	# just get the base name of the file that we are dealing with
     
@@ -2237,6 +2238,7 @@ sub load_history_cache
     }
 
     $self->{history_invalid_} = 0;
+    $self->sort_filter_history( '', '', '' );
 }
 
 # ---------------------------------------------------------------------------------------------

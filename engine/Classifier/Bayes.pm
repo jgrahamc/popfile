@@ -883,8 +883,7 @@ sub classify_and_modify
 				if ( $self->{configuration}->{configuration}{subject} ) {
 					# Don't add the classification unless it is not present
 					if ( !( $msg_subject =~ /\[$classification\]/ ) && 
-						 ( $self->{parameters}{$classification}{subject} == 1 ) &&
-						 ( $self->{parameters}{$classification}{quarantine} == 0 ) )  {
+						 ( $self->{parameters}{$classification}{subject} == 1 ) ) {
 						$msg_subject = " [$classification]$msg_subject";
 					}
 				}
