@@ -65,7 +65,7 @@ GET /
 
 MATCH <title>POPFile Control Center</title>
 MATCH <html lang="en">
-MATCH <link rel="stylesheet" type="text/css" href="skins/SimplyBlue.css" title="SimplyBlue">
+MATCH <link rel="stylesheet" type="text/css" href="skins/default/style.css" title="POPFile-Style">
 MATCH <link rel="icon" href="favicon.ico">
 
 # Common MIDDLE parts (i.e. the tabs)
@@ -85,8 +85,8 @@ MATCH Advanced</a>
 
 # Common BOTTOM parts
 
-MATCH <a class="bottomLink" href="manual/en/manual.html">
-MATCH <br>$version<br>
+MATCH <a class="bottomLink" href="http://popfile.sourceforge.net/manual/en/manual.html">
+MATCH $version
 
 # Verify that each of the pages highlights the correct item on
 # the tab bar and hence the simplest level of page serving is working
@@ -95,37 +95,37 @@ MATCH <br>$version<br>
 GET /history
 MATCH
 <td class="menuSelected" align="center">
-<a class="menuLink" href="/history?session=$sk">
+                <a class="menuLink" href="/history?session=$sk">
 ENDMATCH
 
 GET /buckets
 MATCH
 <td class="menuSelected" align="center">
-<a class="menuLink" href="/buckets?session=$sk">
+                <a class="menuLink" href="/buckets?session=$sk">
 ENDMATCH
 
 GET /magnets
 MATCH
 <td class="menuSelected" align="center">
-<a class="menuLink" href="/magnets?session=$sk&amp;start_magnet=0">
+                <a class="menuLink" href="/magnets?session=$sk&amp;start_magnet=0">
 ENDMATCH
 
 GET /configuration
 MATCH
 <td class="menuSelected" align="center">
-<a class="menuLink" href="/configuration?session=$sk">
+                <a class="menuLink" href="/configuration?session=$sk">
 ENDMATCH
 
 GET /security
 MATCH
 <td class="menuSelected" align="center">
-<a class="menuLink" href="/security?session=$sk">
+                <a class="menuLink" href="/security?session=$sk">
 ENDMATCH
 
 GET /advanced
 MATCH
 <td class="menuSelected" align="center">
-<a class="menuLink" href="/advanced?session=$sk">
+                <a class="menuLink" href="/advanced?session=$sk">
 ENDMATCH
 
 # History Page
@@ -136,46 +136,54 @@ GET /history
 # are links from the bucket names, check that the basic
 # sort options are present
 
-MATCH &lt;no subject line&gt;
-MATCH <a title="test\@test.com">test\@test.com</a>
-MATCH Enlarge your package Doctor ApprovedNHOB...
-MATCH &lt;no from line&gt;
-MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
-MATCH VI ID: 24052  Status: Open  Sev: 2
-MATCH <a href="buckets?session=$sk&amp;showbucket=spam"><font color="blue">spam</font></a>
-MATCH &gt;ID
-MATCH <a href="/history?session=$sk&amp;setsort=from">From</a>
+MATCH &lt;subject header missing&gt;
+MATCH from: Leandro
+MATCH jI775QsT823y17g\@aol.com
+MATCH Re: screename change again lol
+MATCH &lt;from header missing&gt;
+MATCH &lt;to header missing&gt;
+MATCH <a href="/buckets?session=$sk&amp;showbucket=spam">
+MATCH
+<span style="color:blue">
+spam
+</span>
+ENDMATCH
+MATCH &lt;&nbsp;Arrived
+MATCH
+<a href="/history?session=$sk&amp;setsort=from">
+From
+</a>
+ENDMATCH
 
 # Check the page navigator
 
-MATCH Jump to page: <b>1</b> [<a href="/history?start_message=20&amp;session=$sk">2</a>] [<a href="/history?start_message=20&amp;session=$sk">Next ></a>]
-NOTMATCH XoSeXyGoDdEsSm\@hotmail.com
-GET /history?start_message=20&amp;session=$sk
-MATCH Jump to page: [<a href="/history?start_message=0&amp;session=$sk">< Previous</a>] [<a href="/history?start_message=0&amp;session=$sk">1</a>] <b>2</b>
+MATCH
+Jump to page: 
+<b>1</b>
+[<a href="/history?start_message=20&amp;session=$sk&amp;sort=-inserted">2</a>]
+[<a href="/history?start_message=20&amp;session=$sk&amp;sort=-inserted">Next &gt;</a>]
+ENDMATCH
+MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH XoSeXyGoDdEsSm\@hotmail.com
 MATCH from: Leandro
+GET /history?start_message=20&amp;session=$sk&amp;sort=-inserted
+MATCH
+Jump to page:
+[<a href="/history?start_message=0&amp;session=$sk&amp;sort=-inserted">&lt; Previous</a>]
+[<a href="/history?start_message=0&amp;session=$sk&amp;sort=-inserted">1</a>]
+<b>2</b>
+ENDMATCH
+NOTMATCH XoSeXyGoDdEsSm\@hotmail.com
+NOTMATCH from: Leandro
 NOTMATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 GET /history
 
 # Check refresh
 
 NOTMATCH Testing Refresh
-MATCH (<a class="history" href="/history?session=$sk&amp;setfilter=">Refresh</a>)
-CODE
-open NEWMSG, ">messages/popfile10000=1.msg";
-print NEWMSG <<EOM;
-From: John
-Subject: Testing Refresh
-
-Body would go here
-
-EOM
-close NEWMSG;
-open NEWCLS, ">messages/popfile10000=1.cls";
-print NEWCLS "personal\n";
-close NEWCLS;
-ENDCODE
-SENDMSG NEWFL popfile10000=1.msg
+MATCH (<a class="history" href="/history?session=$sk">Refresh</a>)
+NEWMSG 1
+STOP
 GET /history?session=$sk&amp;setfilter=
 MATCH John
 MATCH Testing Refresh
@@ -185,21 +193,8 @@ MATCH popfile10000=1
 # Check magnet classified mails
 
 NOTMATCH Magnetic Attraction for Ferrous Females
-MATCH (<a class="history" href="/history?session=$sk&amp;setfilter=">Refresh</a>)
-CODE
-open NEWMSG, ">messages/popfile10002=1.msg";
-print NEWMSG <<EOM;
-From: foo-magnet\@magnetmania.com
-Subject: Magnetic Attraction for Ferrous Females
-
-Align your pole to magnetic north
-EOM
-close NEWMSG;
-open NEWCLS, ">messages/popfile10002=1.cls";
-print NEWCLS "personal MAGNET from: foo\n";
-close NEWCLS;
-ENDCODE
-SENDMSG NEWFL popfile10002=1.msg
+MATCH (<a class="history" href="/history?session=$sk">Refresh</a>)
+NEWMSG 2
 GET /history?session=$sk&amp;setfilter=
 MATCH foo-magnet\@magnetmania.com
 MATCH Magnetic Attraction for Ferrous Females
@@ -217,7 +212,6 @@ MATCH <font color="green">foo</font>
 # Check search
 
 SETSUBMIT search isnotpresent
-MATCH searched for from/subject isnotpresent
 MATCH No messages.
 NOTMATCH Jump to page
 CLICK reset_filter_search
@@ -227,7 +221,6 @@ MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH Jump to page
 
 SETSUBMIT search test.com
-MATCH searched for from/subject test.com
 MATCH test\@test.com
 NOTMATCH Enlarge your package Doctor ApprovedNHOB...
 NOTMATCH Jump to page
@@ -238,12 +231,10 @@ MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH Jump to page
 
 SETSUBMIT search Doctor
-MATCH searched for from/subject Doctor
 NOTMATCH test\@test.com
 MATCH Enlarge your package Doctor ApprovedNHOB...
 NOTMATCH Jump to page
 CLICK reset_filter_search
-NOTMATCH searched for from/subject
 NOTMATCH No messages.
 MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 MATCH Jump to page
@@ -258,7 +249,6 @@ MATCH Testing Refresh
 CLICK reset_filter_search
 SETINPUT filter spam
 CLICK setfilter
-MATCH (just showing bucket <font color="blue">spam</font>)
 MATCH Douglas Arnold &lt;0noy8\@worldnet.att.net&gt;
 NOTMATCH Testing Refresh
 MATCH Jump to page: <b>1</b> [<a href="/history?start_message=20&amp;session=$sk&amp;filter=spam">2</a>] [<a href="/history?start_message=20&amp;session=$sk&amp;filter=spam">Next ></a>]
@@ -266,16 +256,13 @@ GET /history?start_message=20&amp;session=$sk&amp;filter=spam
 NOTMATCH Testing Refresh
 SETINPUT filter other 
 CLICK setfilter
-MATCH (just showing bucket <font color="red">other</font>)
 MATCH No messages.
 SETINPUT filter __filter__magnet
 CLICK setfilter
-MATCH (just showing magnet classified messages)
 MATCH Magnetic Attraction for Ferrous Females
 NOTMATCH Testing Refresh
 SETINPUT filter __filter__no__magnet
 CLICK setfilter
-MATCH (just showing non-magnet classified messages)
 NOTMATCH Magnetic Attraction for Ferrous Females
 MATCH Testing Refresh
 CLICK reset_filter_search

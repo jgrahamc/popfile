@@ -618,9 +618,10 @@ sub bmp_file__
     my ( $self, $client, $color ) = @_;
 
     $color = lc($color);
-    
-    #TODO: this is dirty something higher up (HTTP) should be decoding the URL
-    $color =~ s/^%23//; # if we have an prefixed hex color value, 
+
+    # TODO: this is dirty something higher up (HTTP) should be decoding the URL
+
+    $color =~ s/^%23//; # if we have an prefixed hex color value,
                         # just dump the encoded hash-mark (#)
 
     # If the color contains something other than hex then do a map
@@ -2313,7 +2314,7 @@ sub history_page
 
         my $start_message = 0;
         $start_message = $self->{form_}{start_message} if ( ( defined($self->{form_}{start_message}) ) && ($self->{form_}{start_message} > 0 ) );
-        if ( $start_message > ( $c - $self->config_( 'page_size' ) ) ) {
+        if ( $start_message >= $c ) {
             $start_message -= $self->config_( 'page_size' );
         }
         if ( $start_message < 0 ) {

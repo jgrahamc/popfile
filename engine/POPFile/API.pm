@@ -42,18 +42,18 @@ sub new
 # API in Classifier::Bayes I'm going to do something really odd looking for the
 # sake of readability here.
 #
-# Take for example the get_session_key wrapper for get_session_key.  It contains
-# the line:
+# Take for example the get_session_key wrapper for get_session_key.
+# It contains the line:
 #
 #    shift->{c}->get_session_key( @_ )
 #
 # What this does is the following:
 #
-# 1. The parameters for get_session_key are as usual in @_.  The first parameter
-#    (since this is an object) is a reference to this object.
+# 1. The parameters for get_session_key are as usual in @_.  The first
+#    parameter (since this is an object) is a reference to this object.
 #
-# 2. We use 'shift' to get the reference to us (in all other places I would call
-#    this $self).
+# 2. We use 'shift' to get the reference to us (in all other places I
+#    would call this $self).
 #
 # 3. We have a object variable called 'c' that contains a reference to the
 #    Classifier::Bayes object we need to make the real call in.

@@ -260,7 +260,8 @@ sub parse_form_
 
         $self->{form_}{$arg} =~ s/%([0-9A-F][0-9A-F])/chr hex $1/gie;
 
-        # Push the value onto an array to allow for multiple values of the same name
+        # Push the value onto an array to allow for multiple values of
+        # the same name
 
         if ( $need_array ) {
             push( @{ $self->{form_}{$arg . "_array"} }, $self->{form_}{$arg} );

@@ -116,7 +116,7 @@ sub form_input
 
 sub pipeready
 {
-    my ( $pipe ) = @_;
+    my ( $self, $pipe ) = @_;
 
     if ( !defined( $pipe ) ) {
         return 0;
@@ -168,11 +168,11 @@ $l->mq( $mq );
 $l->logger( $l );
 
 $l->initialize();
-
+$l->config_( 'level', 2 );
 $mq->configuration( $c );
 $mq->mq( $mq );
 $mq->logger( $l );
-
+$mq->pipeready( \&pipeready );
 $w->initialize();
 $w->start();
 
@@ -201,6 +201,7 @@ $hi->classifier( $b );
 $hi->initialize();
 test_assert( $b->start() );
 test_assert( $hi->start() );
+$hi->service();
 
 our $h = new UI::HTML;
 
@@ -208,6 +209,7 @@ test_assert(1);
 
 $h->classifier( $b );
 $h->configuration( $c );
+$h->history( $hi );
 $h->mq( $mq );
 $h->logger( $l );
 test_assert(1);
@@ -230,15 +232,45 @@ test_assert_equal( $h->url_encode_( '[' ), '%5b' );
 test_assert_equal( $h->url_encode_( '[]' ), '%5b%5d' );
 test_assert_equal( $h->url_encode_( '[foo]' ), '%5bfoo%5d' );
 
+sub forker
+{
+    pipe my $reader, my $writer;
+    $b->prefork();
+    $mq->prefork();
+    my $pid = fork();
+
+    if ( !defined( $pid ) ) {
+        close $reader;
+        close $writer;
+        return (undef, undef);
+    }
+
+    if ( $pid == 0 ) {
+        $b->forked( $writer );
+        $mq->forked( $writer );
+        $hi->forked( $writer );
+        close $reader;
+
+        use IO::Handle;
+        $writer->autoflush(1);
+
+        return (0, $writer);
+    }
+
+    $b->postfork( $pid, $reader );
+    $mq->postfork( $pid, $reader );
+    close $writer;
+    return ($pid, $reader);
+}
+
+my $session = $b->get_session_key( 'admin', '' );
+
 our $port = 9001 + int(rand(1000));
 pipe my $dreader, my $dwriter;
 pipe my $ureader, my $uwriter;
-$b->prefork();
-my $pid = fork();
+my ( $pid, $pipe ) = forker();
 
 if ( $pid == 0 ) {
-
-    $b->postfork();
 
     # CHILD THAT WILL RUN THE HTML INTERFACE
 
@@ -256,50 +288,11 @@ if ( $pid == 0 ) {
     while ( 1 ) {
         $h->service();
 
-        if ( pipeready( $dreader ) ) {
+        if ( pipeready( 0, $dreader ) ) {
             my $command = <$dreader>;
 
             if ( $command =~ /^__QUIT/ ) {
                 $h->stop();
-
-                # Test the history disk caching function
-
-                open TEMP, ">messages/popfile1=1.msg";
-                print TEMP "From: John\n\nBody\n";
-                close TEMP;
-
-                $h->start();
-                $h->stop();
-
-                $h->start();
-                $h->stop();
-
-                unlink( 'messages/popfile1=1.msg' );
-
-                $h->start();
-                $h->stop();
-
-                open TEMP, ">messages/popfile1=1.msg";
-                print TEMP "From: John\n\nBody\n";
-                close TEMP;
-                open TEMP, ">messages/popfile1=1.cls";
-                print TEMP "spam\n";
-                close TEMP;
-                open TEMP, ">messages/popfile1_1.msg";
-                print TEMP "From: John\n\nBody\n";
-                close TEMP;
-
-                $h->config_( 'archive', 1 );
-                $h->config_( 'archive_dir', 'archive' );
-                $h->config_( 'archive_classes', 1 );
-
-                `date --set='3 days'`;  # todo: make tool independent
-                $h->remove_mail_files();
-                `date --set='3 days ago'`;  # todo: make tool independent
-                test_assert( !( -e 'messages/popfile1=1.msg' ) );
-                test_assert( !( -e 'messages/popfile1_1.msg' ) );
-                test_assert( -e 'archive/spam/0/popfile1=1.msg' );
-
                 print $uwriter "OK\n";
                 last;
             }
@@ -317,22 +310,51 @@ if ( $pid == 0 ) {
             }
 
             if ( $command =~ /^__GETPARAMETER ([^ ]+) (.+)/ ) {
-                my $session = $b->get_session_key( 'admin', '' );
                 my $value = $b->get_bucket_parameter( $session, $1, $2 );
-                $b->release_session_key( $session );
                 print $uwriter "OK $value\n";
                 next;
             }
 
             if ( $command =~ /^__SENDMESSAGE ([^ ]+) (.+)/ ) {
                 $b->mq_post_( $1, $2, '' );
-                $mq->service();
+                print $uwriter "OK\n";
+                next;
+            }
+
+            if ( $command =~ /^__NEWMESSAGE (\d+)/ ) {
+                my ( $slot, $file ) = $hi->reserve_slot();
+                open FILE, ">$file";
+                my ( $bucket, $magnet );
+                if ( $1 == 1 ) {
+                    print FILE <<EOM;              
+From: John
+Subject: Testing Refresh
+
+Body would go here
+
+EOM
+                    $bucket = 'personal';
+                    $magnet = 0;
+                }
+
+                if ( $1 == 2 ) {
+                    print FILE <<EOM;
+From: foo-magnet\@magnetmania.com
+Subject: Magnetic Attraction for Ferrous Females
+
+Align your pole to magnetic north
+EOM
+                    $bucket = 'personal';
+                    $magnet = 3;
+                }
+                close FILE;
+
+                $hi->commit_slot( $session, $slot, $bucket, $magnet );
                 print $uwriter "OK\n";
                 next;
             }
 
             if ( $command =~ /^__CHECKMAGNET ([^ ]+) ([^ ]+) ([^\r\n]+)/ ) {
-                my $session = $b->get_session_key( 'admin', '' );
                 my $found = 0;
                 for my $magnet ($b->get_magnets( $session, $1, $2 ) ) {
                     if ( $magnet eq $3 ) {
@@ -342,7 +364,6 @@ if ( $pid == 0 ) {
                     }
                 }
 
-                $b->release_session_key( $session );
                 print $uwriter "ERR\n" if ( !$found );
                 next;
             }
@@ -356,8 +377,6 @@ if ( $pid == 0 ) {
 
     exit(0);
 } else {
-
-    $b->postfork();
 
     # PARENT THAT WILL SEND COMMANDS TO THE WEB INTERFACE
 
@@ -374,6 +393,17 @@ if ( $pid == 0 ) {
     my $line_number = 0;
 
     my $in = new String::Interpolate { sk => \$sk, port => \$port, version => \$version };
+
+    # Wait for the UI to become available
+
+    my $now = time;
+    while ( time < ( $now + 5 ) ) {
+        my $request = HTTP::Request->new('GET', "http://127.0.0.1:$port/" );
+        my $response = $ua->request($request);
+        if ( $response->code == 200 ) {
+            last;
+        }
+    } 
 
     our $url;
     our $content;
@@ -396,8 +426,12 @@ if ( $pid == 0 ) {
         if ( $line =~ /^GET +(.+)$/ ) {
             my $request = HTTP::Request->new('GET', "http://127.0.0.1:$port$1" );
             my $response = $ua->request($request);
-            test_assert( $response->code, 200 );
+            test_assert_equal( $response->code, 200 );
             $content = $response->content;
+            $content =~ s/^[\t ]+//gm;
+            $content =~ s/[\t ]+$//gm;
+            while ( ( $content =~ s/\n\n/\n/gs ) > 0 ) {
+            }
             @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
             next;
         }
@@ -466,6 +500,7 @@ if ( $pid == 0 ) {
             if ( !( $reply =~ /^OK/ ) ) {
                 test_assert( 0, "From script line $line_number" );
             }
+            $mq->service();
             next;
         }
 
@@ -566,11 +601,29 @@ if ( $pid == 0 ) {
             next;
         }
 
+        if ( $line =~ /^STOP$/ ) {
+            last;
+        }
+
+        if ( $line =~ /^NEWMSG (\d+)$/ ) {
+            my ( $msg ) = ( $1 );
+            print $dwriter "__NEWMESSAGE $msg\n";
+            my $reply = <$ureader>;
+
+            if ( !( $reply =~ /^OK/ ) ) {
+                test_assert( 0, "From script line $line_number" );
+            }
+            $mq->service();
+            $hi->service();
+
+            next;
+        }
+
         if ( $line =~ /[^ \t\r\n]/ ) {
             test_assert( 0, "Don't understand line $line_number" );
         }
     }
-
+skip:
     close SCRIPT;
 
     # TODO Validate every page in the interface against the W3C HTML 4.01
@@ -584,11 +637,16 @@ if ( $pid == 0 ) {
 
     $p->stop();
 
+print "PID: $pid\n";
+
     while ( waitpid( $pid, &WNOHANG ) != $pid ) {
     }
 
-    $b->stop();
+    $mq->reaper();
+    $mq->stop();
     $hi->stop();
+    $b->release_session_key( $session );
+    $b->stop();
 }
 
 1;

@@ -176,7 +176,6 @@ sub yield_
 }
 
 #----------------------------------------------------------------------------
-
 #
 # forked
 #
@@ -325,6 +324,8 @@ sub flush_child_data_
 {
     my ( $self, $handle ) = @_;
 
+    $self->log_( 2, "flush_child_data_ $handle" );
+
     my $stats_changed = 0;
     my $message;
 
@@ -377,9 +378,11 @@ sub post
     # otherwise write it up the pipe.
 
     if ( $$ == $self->{pid__} ) {
+        $self->log_( 2, "queuing post $type ($flat)" );
         push @{$self->{queue__}{$type}}, \@message;
     } else {
         my $pipe = $self->{writer__};
+        $self->log_( 2, "sending post $type ($flat) to parent" );
         print $pipe "$type:$flat\n";
     }
 }
