@@ -408,9 +408,11 @@ update_config:
   SetOutPath $SMPROGRAMS\POPFile
   SetOutPath $INSTDIR
   CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile.lnk" \
-                 "$INSTDIR\perl.exe" popfile.pl
+                 "$INSTDIR\perl.exe" popfile.pl \
+                 "$INSTDIR\Platform\POPFileIcon.dll"
   CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile in background.lnk" \
-                 "$INSTDIR\wperl.exe" popfile.pl
+                 "$INSTDIR\wperl.exe" popfile.pl \
+                 "$INSTDIR\Platform\POPFileIcon.dll"
   CreateShortCut "$SMPROGRAMS\POPFile\Uninstall POPFile.lnk" \
                  "$INSTDIR\uninstall.exe"
   SetOutPath $SMPROGRAMS\POPFile
@@ -431,7 +433,8 @@ update_config:
       SetOutPath $SMSTARTUP
       SetOutPath $INSTDIR
       CreateShortCut "$SMSTARTUP\Run POPFile in background.lnk" \
-                     "$INSTDIR\wperl.exe" popfile.pl
+                     "$INSTDIR\wperl.exe" popfile.pl \
+                     "$INSTDIR\Platform\POPFileIcon.dll"
 skip_autostart_set:
   
   ; Create entry in the Control Panel's "Add/Remove Programs" list
