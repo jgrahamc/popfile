@@ -283,6 +283,9 @@ $b->module_config_( 'html', 'port', 8080 );
 $b->config_( 'hostname', '127.0.0.1' );
 $b->start();
 
+# some tests require this directory to be present
+mkdir( 'messages' );
+
 my $pid = fork();
 
 if ( $pid == 0 ) {
