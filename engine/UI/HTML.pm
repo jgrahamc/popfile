@@ -224,11 +224,6 @@ sub initialize
 
     $self->config_( 'wordtable_format', '' );
 
-    # This setting determines whether when viewing an individual message we show the word
-    # table or not
-
-    $self->config_( 'show_wordtable', 0 );
-
     # Load skins
 
     load_skins($self);

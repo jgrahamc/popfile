@@ -115,7 +115,7 @@ test_assert_regexp( $line, 'test2' );
 close DEBUG;
 
 # Check that we get a tick when a day passes
-$l->{today__} -= 86400;
+$l->{last_tickd__} -= 86400;
 $l->service();
 
 test_assert( defined( $mq->{queue__}{TICKD}[0][0] ), "checking TICKD message" );
@@ -126,10 +126,12 @@ test_assert( defined( $mq->{queue__}{TICKD}[0][1] ), "checking TICKD message" );
 my $file = $l->debug_filename();
 `date --set='2 days'`;
 $l->service();
+$mq->service();
 my $exists = ( -e $file );
 test_assert( $exists, "checking that debug file was deleted" );
 `date --set='1 day'`;
 $l->service();
+$mq->service();
 $exists = ( -e $file );
 test_assert( !$exists, "checking that debug file was deleted" );
 `date --set='3 days ago'`;

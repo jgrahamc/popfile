@@ -87,6 +87,7 @@ test_assert_equal( $messages[0][2], $c );
 # Check that the logger function works
 
 my $l = new POPFile::Logger;
+$l->mq( $mq );
 $m->logger( $l );
 $l->configuration( $c );
 $l->initialize();

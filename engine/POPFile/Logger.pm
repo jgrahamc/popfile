@@ -41,7 +41,7 @@ my $seconds_per_day = 60 * 60 * 24;
 #
 #   Class new() function
 #----------------------------------------------------------------------------
-sub new 
+sub new
 {
     my $proto = shift;
     my $class = ref($proto) || $proto;
@@ -74,61 +74,62 @@ sub initialize
     my ( $self ) = @_;
 
     # Start with debugging to file
+
     $self->global_config_( 'debug', 1 );
 
     # The default location for log files
+
     $self->config_( 'logdir', './' );
 
-    calculate_today__( $self );
+    $self->{last_tickd__} = time;
+
+    $self->mq_register_( 'TICKD', $self );
+    $self->calculate_today__();
 
     return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# deliver
+#
+# Called by the message queue to deliver a message
+#
+# There is no return value from this method
+#
+# ---------------------------------------------------------------------------------------------
+sub deliver
+{
+    my ( $self, $type, $message, $parameter ) = @_;
+
+    # If a day has passed then clean up log files
+
+    if ( $type eq 'TICKD' ) {
+        $self->remove_debug_files();
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # service
 #
-#
 # ---------------------------------------------------------------------------------------------
 sub service
 {
     my ( $self ) = @_;
 
-    remove_debug_files( $self );
+    $self->calculate_today__();
+
+    # We send out a TICKD message every 6 hours so that other modules
+    # can do clean up tasks that need to be done regularly but not
+    # often
+
+    if ( time > ( $self->{last_tickd__} + 6 * 60 * 60 ) ) {
+        $self->mq_post_( 'TICKD', '', '' );
+        $self->{last_tickd__} = time;
+    }
 
     return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# remove_debug_files
-#
-# Removes popfile log files that are older than 3 days
-#
-# ---------------------------------------------------------------------------------------------
-sub remove_debug_files
-{
-    my ( $self ) = @_;
-
-    my $yesterday = defined($self->{today__})?$self->{today__}:0;
-    calculate_today__( $self );
-
-    if ( $self->{today__} > $yesterday ) {
-
-        # Inform other modules that a day has passed
-
-        $self->mq_post_( 'TICKD', '', '' );
-
-        my @debug_files = glob( $self->config_( 'logdir' ) . 'popfile*.log' );
-
-        foreach my $debug_file (@debug_files) {
-            # Extract the epoch information from the popfile log file name
-            if ( $debug_file =~ /popfile([0-9]+)\.log/ )  {
-                # If older than now - 3 days then delete
-                unlink($debug_file) if ( $1 < (time - 3 * $seconds_per_day) );
-            }
-        }
-    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -143,6 +144,28 @@ sub calculate_today__
     # Create the name of the debug file for the debug() function
     $self->{today__} = int( time / $seconds_per_day ) * $seconds_per_day;
     $self->{debug_filename__} = $self->config_( 'logdir' ) . "popfile$self->{today__}.log";
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# remove_debug_files
+#
+# Removes popfile log files that are older than 3 days
+#
+# ---------------------------------------------------------------------------------------------
+sub remove_debug_files
+{
+    my ( $self ) = @_;
+
+    my @debug_files = glob( $self->config_( 'logdir' ) . 'popfile*.log' );
+
+    foreach my $debug_file (@debug_files) {
+        # Extract the epoch information from the popfile log file name
+        if ( $debug_file =~ /popfile([0-9]+)\.log/ )  {
+            # If older than now - 3 days then delete
+            unlink($debug_file) if ( $1 < (time - 3 * $seconds_per_day) );
+        }
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -176,10 +199,13 @@ sub debug
         my $msg = "$year/$mon/$mday $hour:$min:$sec $$: $message";
 
         if ( $self->global_config_( 'debug' ) & 1 )  {
-            open DEBUG, ">>$self->{debug_filename__}";
-            binmode DEBUG;
-            print DEBUG $msg;
-            close DEBUG;
+  	    if ( open DEBUG, ">>$self->{debug_filename__}" ) {
+                binmode DEBUG;
+                print DEBUG $msg;
+                close DEBUG;
+            } else {
+                print "Can't write to log file $self->{debug_filename__}\n";
+            }
         }
 
         print $msg if ( $self->global_config_( 'debug' ) & 2 );
