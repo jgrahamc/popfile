@@ -215,9 +215,9 @@ sub read_pipe_
 
         my $message;
 
-        if ( ( $self->{pipe_cache__} eq '' ) && &{ $self->{pipeready_} }($handle) ) {
+        if ( &{ $self->{pipeready_} }($handle) ) {
 
-            # refill the cache when it is empty
+            # add data to the pipe cache whenever the pipe is ready
 
             sysread($handle, my $string, -s $handle);
 
