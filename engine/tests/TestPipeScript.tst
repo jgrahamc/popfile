@@ -35,11 +35,17 @@ my $pipe = 'perl -I ../ ../pipe.pl';
 
 # Should have no command line options
 
-$code = system( "$pipe foo bar baz > temp.tmp" );
+# grab STDOUT into @stdout
+my @stdout  = `$pipe foo bar baz`;
+
+# our return code is recoverable here
+$code = ($? >> 8);
+
 test_assert( $code != 0 );
-open TEMP, "<temp.tmp";
-my $line = <TEMP>;
-close TEMP;
+
+# pretend we are <>'s across STDOUT
+my $line = shift @stdout;
+
 test_assert_regexp( $line, 'reads a message on STDIN, classifies it, outputs the modified version on STDOUT' );
 
 # Try classifying a message
@@ -60,7 +66,7 @@ while ( <TEMP> ) {
     next if ( $output_line =~ /X\-POPFile\-Timeout\-Prevention/ );
     test_assert_equal( $output_line, $cam_line, $modify_file );
 }
-		
+
 close CAM;
 close TEMP;
 
