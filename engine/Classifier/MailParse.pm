@@ -531,9 +531,9 @@ sub update_tag
 
         # Tags with src attributes
 
-        if ( ( $attribute =~ /^src$/i ) &&
+        if ( ( $attribute =~ /^src$/i ) && # PROFILE BLOCK START
              ( ( $tag =~ /^img|frame|iframe$/i )
-               || ( $tag =~ /^script$/i && $parse_script_uri ) ) ) {
+               || ( $tag =~ /^script$/i && $parse_script_uri ) ) ) { # PROFILE BLOCK STOP
 
             # "CID:" links refer to an origin-controlled attachment to a html email.
             # Adding strings from these, even if they appear to be hostnames, may or
@@ -742,65 +742,94 @@ sub add_url
     if ( $url =~ s/^(([[:alpha:]0-9\-_]+\.)+)(com|edu|gov|int|mil|net|org|aero|biz|coop|info|museum|name|pro|[[:alpha:]]{2})([^[:alpha:]0-9\-_\.]|$)/$4/i ) {
         $host = "$1$3";
         $hostform = "name";
-    } elsif ( $url =~ /(([^:\/])+)/ ) {
+    } else {
+        if ( $url =~ /(([^:\/])+)/ ) {
 
-        # Some other hostname format found, maybe
-        # Read here for reference: http://www.pc-help.org/obscure.htm
-        # Go here for comparison: http://www.samspade.org/t/url
+            # Some other hostname format found, maybe
+            # Read here for reference: http://www.pc-help.org/obscure.htm
+            # Go here for comparison: http://www.samspade.org/t/url
 
-        my $host_candidate = $1;    # save the possible hostname
+            # save the possible hostname
 
-        my %quads;                  # stores discovered IP address
+            my $host_candidate = $1;
 
-        # temporary values
-        my $quad = 1;
-        my $number;
+            # stores discovered IP address
 
-        #iterate through the possible hostname, build dotted quad format
-        while ($host_candidate =~ s/\G^((0x)[0-9A-Fa-f]+|0[0-7]+|[0-9]+)(\.)?//) {
+            my %quads;
 
-            my $hex = $2;
-            my $quad_candidate = $1; # possible IP quad(s)
-            my $more_dots = $3;
+            # temporary values
 
-            if (defined $hex) {
-                # hex number
-                # trim arbitrary octets that are greater than most significant bit
-                $quad_candidate =~ s/.*(([0-9A-F][0-9A-F]){4})$/$1/i;
-                $number = hex( $quad_candidate );
-            } elsif ( $quad_candidate =~ /^0([0-7]+)/ )  {
-                # octal number
-                $number = oct($1);
-            } else {
-                # assume decimal number
-                $number = int($quad_candidate);
-                # deviates from the obscure.htm document here, no current browsers overflow
-            }
+            my $quad = 1;
+            my $number;
 
-            # No more IP dots?
-            if (!defined $more_dots) {
+            # iterate through the possible hostname, build dotted quad format
 
-                # Expand final decimal/octal/hex to extra quads
-                while ($quad <= 4) {
-                    my $shift = ((4 - $quad) * 8);
-                    $quads{$quad} = ($number & (hex("0xFF") << $shift) ) >> $shift;
-                    $quad++;
+            while ($host_candidate =~ s/\G^((0x)[0-9A-Fa-f]+|0[0-7]+|[0-9]+)(\.)?//) {
+                my $hex = $2;
+
+                # possible IP quad(s)
+
+                my $quad_candidate = $1;
+                my $more_dots      = $3;
+
+                if (defined $hex) {
+
+                    # hex number
+                    # trim arbitrary octets that are greater than most significant bit
+
+                    $quad_candidate =~ s/.*(([0-9A-F][0-9A-F]){4})$/$1/i;
+                    $number = hex( $quad_candidate );
+                } else {
+                    if ( $quad_candidate =~ /^0([0-7]+)/ )  {
+
+                        # octal number
+
+                        $number = oct($1);
+                    } else {
+
+                        # assume decimal number
+                        # deviates from the obscure.htm document here, no current browsers overflow
+
+                        $number = int($quad_candidate);
+                    }
                 }
-            } else {
-                # Just plug the quad in, no overflow allowed
-                $quads{$quad} = $number if ($number < 256);
-                $quad++;
+
+                # No more IP dots?
+
+                if ( !defined( $more_dots ) ) {
+
+                    # Expand final decimal/octal/hex to extra quads
+
+                    while ( $quad <= 4 ) {
+                        my $shift = ((4 - $quad) * 8);
+                        $quads{$quad} = ($number & (hex("0xFF") << $shift) ) >> $shift;
+                        $quad += 1;
+                    }
+                } else {
+
+                    # Just plug the quad in, no overflow allowed
+
+                    $quads{$quad} = $number if ($number < 256);
+                    $quad += 1;
+                }
+
+                last if ( $quad > 4 );
             }
 
-            last if ($quad > 4);
+            $host_candidate =~ s/\r|\n|$//g;
+            if ( ( $host_candidate eq '' ) && # PROFILE BLOCK START
+                 defined( $quads{1} )      &&
+                 defined( $quads{2} )      &&
+                 defined( $quads{3} )      &&
+                 defined( $quads{4} )      &&
+                 !defined( $quads{5} ) ) {    # PROFILE BLOCK STOP
 
-        }
-        $host_candidate =~ s/\r|\n|$//g;
-        if ( $host_candidate eq '' && defined $quads{1} && defined $quads{2} && defined $quads{3} && defined $quads{4} && !defined $quads{5} ) {
-            #we did actually find an IP address, and not some fake
-            $hostform = "ip";
-            $host = "$quads{1}.$quads{2}.$quads{3}.$quads{4}";
-            $url =~ s/(([^:\/])+)//;
+                # we did actually find an IP address, and not some fake
+
+                $hostform = "ip";
+                $host = "$quads{1}.$quads{2}.$quads{3}.$quads{4}";
+                $url =~ s/(([^:\/])+)//;
+            }
         }
     }
 
@@ -1301,11 +1330,13 @@ sub decode_string
         if ($1 eq "B") {
             $decode_it = decode_base64( $2 );
             $mystring =~ s/=\?[\w-]+\?B\?(.*?)\?=/$decode_it/i;
-        } elsif ($1 eq "Q") {
-           $decode_it = $2;
-           $decode_it =~ s/\_/=20/g;
-           $decode_it = decode_qp( $decode_it );
-           $mystring =~ s/=\?[\w-]+\?Q\?(.*?)\?=/$decode_it/i;
+        } else {
+            if ($1 eq "Q") {
+                $decode_it = $2;
+                $decode_it =~ s/\_/=20/g;
+                $decode_it = decode_qp( $decode_it );
+                $mystring =~ s/=\?[\w-]+\?Q\?(.*?)\?=/$decode_it/i;
+	    }
         }
     }
 
