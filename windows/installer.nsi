@@ -24,6 +24,26 @@
 
   !include "MUI.nsh"
 
+#--------------------------------------------------------------------------
+# Version Information settings (for the installer EXE and uninstaller EXE)
+#--------------------------------------------------------------------------
+
+  ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
+  ; representing the following values: Major.Minor.Release.Build
+
+  VIProductVersion "0.19.0.0"
+  
+  VIAddVersionKey "ProductName" "POPFile"
+  VIAddVersionKey "Comments" "POPFile Homepage: http:// popfile.sourceforge.net"
+  VIAddVersionKey "CompanyName" "POPFile Team"
+#  VIAddVersionKey "LegalTrademarks" "POPFile"
+  VIAddVersionKey "LegalCopyright" "© 2001-2003  John Graham-Cumming"
+  VIAddVersionKey "FileDescription" "POPFile Automatic email classification"
+  VIAddVersionKey "FileVersion" "${MUI_VERSION}"
+  
+  VIAddVersionKey "Build Type" "CVS Build (Experimental)"
+  VIAddVersionKey "Build Date" "${__DATE__} @ ${__TIME__}"
+
 #----------------------------------------------------------------------------------------
 # CBP Configuration Data (to override defaults, un-comment the lines below and modify them)
 #----------------------------------------------------------------------------------------
@@ -1296,9 +1316,6 @@ FunctionEnd
 #--------------------------------------------------------------------------
 
 Function ShowReadMe
-  !define L_TEMP  $R9
-  Push ${L_TEMP}
-  
   StrCmp ${NOTEPAD} "" use_file_association
   Exec 'notepad.exe "$INSTDIR\${README}"'
   goto exit
@@ -1307,9 +1324,6 @@ use_file_association:
   ExecShell "open" "$INSTDIR\${README}.txt"
   
 exit:
-  Pop ${L_TEMP}
-  
-  !undef L_TEMP
 FunctionEnd
 
 #--------------------------------------------------------------------------
