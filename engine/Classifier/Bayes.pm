@@ -234,6 +234,21 @@ sub get_value_
     return 0;
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# get_sort_value_ behaves the same as get_value_, except that it returns not_likely__ rather
+# than 0 if the word is not found.  This makes its result more suitable as a sort key for bucket
+# ranking.
+#
+# ---------------------------------------------------------------------------------------------
+sub get_sort_value_
+{
+    my ($self, $bucket, $word) = @_;
+    my $v = get_value_($self, $bucket, $word);
+    return $self->{not_likely__} if $v == 0;
+    return $v;
+}
+
 sub set_value_
 {
     my ($self, $bucket, $word, $value) = @_;
@@ -544,9 +559,11 @@ sub classify_file
     # Set up the initial score as P(bucket)
 
     my %score;
+    my %matchcount;
 
     for my $bucket (@buckets) {
         $score{$bucket} = $self->{bucket_start__}{$bucket};
+        $matchcount{$bucket} = 0;
     }
 
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
@@ -574,6 +591,7 @@ sub classify_file
         foreach my $bucket (@buckets) {
             my $probability = get_value_( $self, $bucket, $word );
 
+            $matchcount{$bucket} += $self->{parser__}{words__}{$word} if ($probability != 0);
             $probability = $self->{not_likely__} if ( $probability == 0 );
             $wmax = $probability if ( $wmax < $probability );
 
@@ -645,7 +663,7 @@ sub classify_file
 	}
 
         $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
-        $self->{scores__} .= "<th scope=\"col\">$language{Probability}</th></tr>\n";
+        $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\">$language{Probability}</th></tr>\n";
 
         foreach my $b (@ranking) {
              my $prob = exp($score{$b})/$total;
@@ -657,26 +675,27 @@ sub classify_file
                 $probstr = sprintf("%17.6e", $prob);
              }
 
-             $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
+             $self->{scores__} .= "<tr>\n<td><font color=\"$self->{colors__}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td align=\"right\">$matchcount{$b}&nbsp;&nbsp;&nbsp;&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
         }
 
         $self->{scores__} .= "</table><hr>";
         $self->{scores__} .= "<table class=\"top20Words\">\n";
         $self->{scores__} .= "<tr>\n<th scope=\"col\">$language{Word}</th><th>&nbsp;</th><th scope=\"col\">$language{Count}</th><th>&nbsp;</th>\n";
 
-        foreach my $bucket (@buckets) {
+        foreach my $ix (0..(@buckets > 7? 7: @buckets)) {
+            my $bucket = $ranking[$ix];
             my $bucketcolor  = $self->get_bucket_color( $bucket );
             $self->{scores__} .= "<th><font color=\"$bucketcolor\">$bucket</font></th><th>&nbsp;</th>";
         }
 
         $self->{scores__} .= "</tr>";
 
-        my @ranked_words = sort {$self->get_value_( $ranking[0], $b ) <=> $self->get_value_( $ranking[0], $a )} keys %{$self->{parser__}->{words__}};
+        my @ranked_words = sort {$self->get_sort_value_( $ranking[0], $b ) <=> $self->get_sort_value_( $ranking[0], $a )} keys %{$self->{parser__}->{words__}};
 
         foreach my $word (@ranked_words) {
             my $known = 0;
 
-            foreach my $bucket (@buckets) {
+            foreach my $bucket (@ranking) {
                 if ( $self->get_value_( $bucket, $word ) != 0 ) {
                    $known = 1;
                    last;
@@ -691,11 +710,12 @@ sub classify_file
 
                 my $base_probability = $self->get_value_( $ranking[0], $word );
 
-                    foreach my $bucket (@buckets) {
+                foreach my $ix (0..(@buckets > 7? 7: @buckets)) {
+                    my $bucket = $ranking[$ix];
                     my $probability  = get_value_( $self, $bucket, $word );
                     my $color        = 'black';
 
-                    if ( $probability >= $base_probability ) {
+                    if ( $probability >= $base_probability || $base_probability == 0 ) {
                         $color = $self->get_bucket_color( $bucket );
                     }
 
