@@ -1,0 +1,130 @@
+INTRODUCTION
+
+v0.20.1 is a minor update on v0.20.0 to address the performance problems that some 
+people were seeing with the introduction of the BerkeleyDB for storage of the corpus.  
+v0.20.1 sets the BerkeleyDB cache size (i.e. the amount of the corpus that is kept 
+in memory) to 64KB and it can be controlled through the bayes_db_cache_size 
+parameter if needed.  The default should work for everyone, you can set this to a 
+higher value to keep more of the database in memory at the cost of using more 
+memory.
+
+There are also a number of bug fixes in v0.20.1:
+
+1. If you set a password and used X-POPFile-Link you were unable to get past
+   the password screen when clicking on an XPL. (bug #831472)
+
+2. In some instances when the connection between the POP3 proxy and the mail
+   server was lost it was possible to get in a deadlock where POPFile was 
+   waiting for a command from the client and the client was waiting for a 
+   response from POPFile. (bug #829947)
+
+3. It was not possible to add pseudowords (e.g. header:From) as ignored words,
+   now it is. (bug #827785)
+
+4. Magnets that included $ or @ could be incorrectly matched when the @ or $ 
+   was followed by __. (bug #826765)
+
+
+ESSENTIAL READING IF YOU ARE UPGRADING TO v0.20.1
+
+1. BACK UP YOUR OLD INSTALLATION: POPFile makes this really easy, just copy
+   the entire POPFile directory somewhere.  You can then safely install
+   POPFile v0.20.1 on top of your current installation; I just think a back up
+   is a sensible precaution.
+
+2. IF YOU ARE RUNNING WINDOWS: Please read the section below I AM RUNNING
+   WINDOWS AND NEED TO CHECK MULTIPLE EMAIL ACCOUNTS SIMULTANEOUSLY
+
+3. ON WINDOWS POPFILE IS NOW AN EXE.  Windows users will now be able to see
+   POPFile running in the Task Manager with an executable called popfileXX.exe
+   where the XX is one of f, if, b, ib depending on configuration.  POPFile
+   is started by running popfile.exe which chooses the appropriate popfileXX.exe
+
+   This might cause your firewall to ask about giving popfileXX.exe permissions, 
+   in addition if you had allowed Perl permissions in your firewall they are
+   NO LONGER needed.
+
+4. The installer will cause POPFile to run in the foreground if the database
+   upgrade is required so that the upgrade process is evident to the user. 
+   Once upgraded you can switch to background my going to the Configuration
+   tab and changing "Run POPFile in a console window?" to No.
+
+
+I AM RUNNING WINDOWS AND NEED TO CHECK MULTIPLE EMAIL ACCOUNTS SIMULTANEOUSLY
+
+Because the time taken to start a new process on Windows is long under Perl
+there is an optimization for Windows that is present by default: when a new
+connection is made between your email program and POPFile, POPFile handles it
+in the 'parent' process.  This means that the connect happens fast and mail
+starts downloading very quickly, but is means that you can only downloaded
+messages from one server at a time (up to 6 other connections will be queued
+up and dealt with in the order they arrive) and the UI is unavaiable while
+downloading email.
+
+You can turn this behavior off (and get simultaneous UI/email access and as
+many email connections as you like) by going to the Configuration panel in
+the UI and making sure that "Allow concurrent POP3 connections:" is set to
+Yes, or by specifying -pop3_force_fork 1 on the command line.
+
+
+I AM USING THE CROSS PLATFORM VERSION
+
+POPFile requires a number of Perl modules that are available from CPAN.  New
+in v0.20.x are the need for the following:
+
+ BerkeleyDB
+ Text::Kakasi (if you want Japanese language support)
+ Encode       (if you want Japanese language support)
+
+
+I LIKE TO LIVE DANGEROUSLY
+
+In a future version POPFile will add official support for message classification
+through the SMTP and NNTP (Usenet news) protocols.  There are currently proxy
+modules for these protocols that work with v0.20.1, but they have not been 
+fully tested.  If you are interested in getting them get them here:
+
+http://cvs.sourceforge.net/viewcvs.py/*checkout*/popfile/engine/Proxy/SMTP.pm?rev=1.22
+http://cvs.sourceforge.net/viewcvs.py/*checkout*/popfile/engine/Proxy/NNTP.pm?rev=1.21
+
+and place them in POPFile's Proxy/ directory.  
+
+
+DOWNLOADING
+
+You can obtain the latest releases of POPFile by visiting
+
+    http://sourceforge.net/project/showfiles.php?group_id=63137
+
+
+UPGRADING
+
+Just install POPFile on top of the currently installed version.  But did you
+read the ESSENTIAL READING above first.
+
+
+INTERNATIONALIZATION
+
+This minor update includes localization into Turkish.
+
+
+DONATIONS
+
+Thank you to everyone who has clicked the Donate! button and donated their
+hard earned cash to me in support of POPFile.  Thank you also to the people
+who have contributed patches, feature requests, bug reports and translations.
+
+	http://sourceforge.net/forum/forum.php?forum_id=213876
+
+
+CONCLUSION
+	
+Keep the ideas and bug reports coming.  If you are interested in knowing 
+more about what's planned for future POPFile versions (or just learning
+about POPFile's history) visit the POPFile Roadmap:
+
+http://sourceforge.net/docman/display_doc.php?docid=17906&group_id=63137
+
+John.
+
+
