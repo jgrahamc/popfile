@@ -96,6 +96,7 @@ sub delete_magnet              { shift->{c}->delete_magnet( @_ ); }
 sub magnet_count               { shift->{c}->magnet_count( @_ ); }
 sub add_stopword               { shift->{c}->add_stopword( @_ ); }
 sub remove_stopword            { shift->{c}->remove_stopword( @_ ); }
+sub get_html_colored_message   { shift->{c}->get_html_colored_message( @_); }
 
 # These APIs return lists and need to be altered to arrays before returning
 # them through XMLRPC otherwise you get the wrong result.
