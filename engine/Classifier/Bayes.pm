@@ -26,6 +26,8 @@ use POPFile::Module;
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
+#   Modified by     Sam Schinke (sschinke@users.sourceforge.net)
+#
 # ---------------------------------------------------------------------------------------------
 
 use strict;
@@ -1505,7 +1507,14 @@ sub classify_and_modify
 
                     next if ( $line =~ /^X-Text-Classification:/i );
 
-                    if ( $line =~ /(^[ \t])|([:])/ ) {
+                    # Store any lines that appear as though they may be non-header content
+                    # Lines that are headers begin with whitespace or Alphanumerics and "-"
+                    # followed by a colon.
+                    # This prevents wierd things like HTML before the headers terminate from
+                    # causing the XPL and XTC headers to be inserted in places some clients
+                    # can't detect
+
+                    if ( $line =~ /^(([ \t])|(([a-zA-Z\-])+:))/ ) {
                         if ( $msg_subject eq '' )  {
                             $msg_head_before .= $msg_head_q . $line;
                         } else {
@@ -1513,7 +1522,8 @@ sub classify_and_modify
                         }
                         $msg_head_q = '';
                     } else {
-                        # Gather up any lines that are questionable
+
+                        # Gather up any header lines that are questionable
 
                         $msg_head_q .= $line;
                     }
