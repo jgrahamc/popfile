@@ -1922,6 +1922,7 @@ sub history_page
         foreach my $i ($start_message ..  $stop_message) {
             my $mail_file;
             my $from          = '';
+            my $short_from    = '';
             my $subject       = '';
             my $short_subject = '';
             $mail_file = $self->{history}{$i}{file};
@@ -1953,11 +1954,12 @@ sub history_page
                 $from    = "&lt;$self->{language}{History_NoFrom}&gt;" if ( $from eq '' );
                 $subject = "&lt;$self->{language}{History_NoSubject}&gt;" if ( !( $subject =~ /[^ \t\r\n]/ ) );
 
+                $short_from    = $from;
                 $short_subject = $subject;
 
-                if ( length($from)>40 )  {
-                    $from =~ /(.{40})/;
-                    $from = "$1...";
+                if ( length($short_from)>40 )  {
+                    $short_from =~ /(.{40})/;
+                    $short_from = "$1...";
                 }
 
                 if ( length($short_subject)>40 )  {
@@ -1969,6 +1971,9 @@ sub history_page
                 $from =~ s/</&lt;/g;
                 $from =~ s/>/&gt;/g;
 
+                $short_from =~ s/</&lt;/g;
+                $short_from =~ s/>/&gt;/g;
+
                 $subject =~ s/</&lt;/g;
                 $subject =~ s/>/&gt;/g;
 
@@ -1977,10 +1982,12 @@ sub history_page
                 
                 $self->{history}{$i}{from}          = $from;
                 $self->{history}{$i}{subject}       = $subject;
+                $self->{history}{$i}{short_from} = $short_from;
                 $self->{history}{$i}{short_subject} = $short_subject;
             } else {
                 $from          = $self->{history}{$i}{from};
                 $subject       = $self->{history}{$i}{subject}; 
+                $short_from    = $self->{history}{$i}{short_from}; 
                 $short_subject = $self->{history}{$i}{short_subject}; 
             }
             
@@ -2006,7 +2013,7 @@ sub history_page
             my $bucket       = $self->{history}{$i}{bucket};
             my $reclassified = $self->{history}{$i}{reclassified}; 
             $mail_file =~ /popfile\d+=(\d+)\.msg/;
-            $body .= $from;
+            $body .= "<a title=\"$from\">$short_from</a>";
             $body .= "<td>\n<a title=\"$subject\" href=\"/history?view=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}#$mail_file\">\n" ;
             $body .= "$short_subject</a><td>";
             if ( $reclassified )  {
