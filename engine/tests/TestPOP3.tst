@@ -31,6 +31,8 @@ use Classifier::WordMangle;
 use IO::Handle;
 use IO::Socket;
 
+unlink 'popfile.db';
+
 use POSIX ":sys_wait_h";
 
 my $eol = "\015\012";

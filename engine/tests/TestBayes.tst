@@ -27,6 +27,7 @@ test_assert( `rm -rf corpus` == 0 );
 test_assert( `cp -R corpus.base corpus` == 0 );
 test_assert( `rm -rf corpus/CVS` == 0 );
 
+unlink 'popfile.db';
 unlink 'stopwords';
 test_assert( `cp stopwords.base stopwords` == 0 );
 
@@ -75,13 +76,9 @@ $b->module_config_( 'html', 'language', 'English' );
 $b->{parser__}->mangle( $w );
 $b->initialize();
 
-# Hide the upgrading messages by setting a special
-# value
-$b->{no_upgrade_message__} = 1;
-
 test_assert( $b->start() );
 
-# Test the unclassifier_probability parameter
+# Test the unclassified_probability parameter
 
 test_assert_equal( $b->{unclassified__}, log(100) );
 $b->config_( 'unclassified_weight', 9 );
@@ -155,27 +152,16 @@ test_assert_equal( $b->get_bucket_color($buckets[0]), 'red' );
 
 # get_bucket_parameter
 
-test_assert_equal( $b->get_bucket_parameter( $buckets[0], 'dummy' ), 0 );
+test_assert( !defined( $b->get_bucket_parameter( $buckets[0], 'dummy' ) ) );
 test_assert_equal( $b->get_bucket_parameter( $buckets[0], 'quarantine' ), 0 );
 test_assert_equal( $b->get_bucket_parameter( $buckets[0], 'subject' ), 1 );
 
 # set_bucket_parameter
 
-test_assert_equal( $b->get_bucket_parameter( $buckets[0], 'dummy2' ), 0 );
-$b->set_bucket_parameter( $buckets[0], 'dummy2', 'value' );
-test_assert_equal( $b->get_bucket_parameter( $buckets[0], 'dummy2' ), 'value' );
-my $found = 0;
-open FILE, "<corpus/$buckets[0]/params";
-while( <FILE> ) {
-    if ( /dummy2 value/ ) {
-        $found = 1;
-        last;
-    }
-}
-close FILE;
-test_assert( $found );
-$b->set_bucket_parameter( $buckets[0], 'dummy2', 0 );
-test_assert_equal( $b->get_bucket_parameter( $buckets[0], 'dummy2' ), 0 );
+test_assert_equal( $b->get_bucket_parameter( $buckets[0], 'quarantine' ), 0 );
+test_assert( $b->set_bucket_parameter( $buckets[0], 'quarantine', 1 ) );
+test_assert_equal( $b->get_bucket_parameter( $buckets[0], 'quarantine' ), 1 );
+test_assert( $b->set_bucket_parameter( $buckets[0], 'quarantine', 0 ) );
 
 # get_html_colored_message
 
@@ -215,12 +201,8 @@ test_assert_equal( $b->get_bucket_unique_count( 'zebra' ), 0 );
 
 test_assert_equal( $b->get_word_count(), 14002 );
 
-test_assert( -e 'corpus/zebra' );
-test_assert( -e 'corpus/zebra/table.db' );
-
 # rename_bucket
 
-test_assert( !$b->rename_bucket( 'none', 'some' ) );
 test_assert( $b->rename_bucket( 'zebra', 'zeotrope' ) );
 
 @buckets = $b->get_buckets();
@@ -239,9 +221,6 @@ test_assert_equal( $b->get_bucket_unique_count( 'zeotrope' ), 0 );
 
 test_assert_equal( $b->get_word_count(), 14002 );
 
-test_assert( -e 'corpus/zeotrope' );
-test_assert( -e 'corpus/zeotrope/table.db' );
-
 # add_message_to_bucket
 
 my %words;
@@ -254,7 +233,6 @@ while ( <WORDS> ) {
 }
 close WORDS;
 
-test_assert( !$b->add_message_to_bucket( 'none', 'TestMailParse021.msg' ) );
 test_assert( $b->add_message_to_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
 
 foreach my $word (keys %words) {
@@ -269,7 +247,6 @@ foreach my $word (keys %words) {
 
 # remove_message_from_bucket
 
-test_assert( !$b->remove_message_from_bucket( 'none', 'TestMailParse021.msg' ) );
 test_assert( $b->remove_message_from_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
 test_assert( $b->remove_message_from_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
 
@@ -283,41 +260,30 @@ foreach my $word (keys %words) {
     test_assert_equal( $b->get_base_value_( 'zeotrope', $word ), $words{$word}*2, "zeotrope: $word $words{$word}" );
 }
 
-# Make sure that fork functions keep the database open
-
-$b->prefork();
-test_assert( !defined( $b->{matrix__}{zeotrope} ) );
-$b->forked();
-test_assert( defined( $b->{matrix__}{zeotrope} ) );
-$b->prefork();
-test_assert( !defined( $b->{matrix__}{zeotrope} ) );
-$b->postfork();
-test_assert( defined( $b->{matrix__}{zeotrope} ) );
-
 # Test corrupting the corpus
 
-open FILE, ">corpus/zeotrope/table";
-print FILE "__CORPUS__ __VERSION__ 2\n";
-close FILE;
+#open FILE, ">corpus/zeotrope/table";
+#print FILE "__CORPUS__ __VERSION__ 2\n";
+#close FILE;
 
-open STDERR, ">temp.tmp";
-test_assert( !$b->load_bucket_( 'zeotrope' ) );
-close STDERR;
-open FILE, "<temp.tmp";
-my $line = <FILE>;
-test_assert_regexp( $line, 'Incompatible corpus version in zeotrope' );
-close FILE;
+#open STDERR, ">temp.tmp";
+#test_assert( !$b->load_bucket_( 'zeotrope' ) );
+#close STDERR;
+#open FILE, "<temp.tmp";
+#my $line = <FILE>;
+#test_assert_regexp( $line, 'Incompatible corpus version in zeotrope' );
+#close FILE;
 
-open FILE, ">corpus/zeotrope/table";
-close FILE;
+#open FILE, ">corpus/zeotrope/table";
+#close FILE;
 
-open STDERR, ">temp.tmp";
-test_assert( !$b->load_bucket_( 'zeotrope' ) );
-close STDERR;
-open FILE, "<temp.tmp";
-$line = <FILE>;
-test_assert( !defined( $line ) );
-close FILE;
+#open STDERR, ">temp.tmp";
+#test_assert( !$b->load_bucket_( 'zeotrope' ) );
+#close STDERR;
+#open FILE, "<temp.tmp";
+#$line = <FILE>;
+#test_assert( !defined( $line ) );
+#close FILE;
 
 # create_magnet
 
@@ -425,7 +391,6 @@ test_assert_equal( $b->get_bucket_parameter( 'zeotrope', 'count' ), 1 );
 # clear_bucket
 
 $b->clear_bucket( 'zeotrope' );
-test_assert( -e 'corpus/zeotrope/table.db' );
 test_assert_equal( $b->get_bucket_word_count('zeotrope'), 0 );
 
 # classify a message using a magnet
@@ -444,10 +409,7 @@ test_assert_equal( $#mags, -1 );
 
 # delete_bucket
 
-test_assert( !$b->delete_bucket( 'zebrazerba' ) );
 test_assert( $b->delete_bucket( 'zeotrope' ) );
-test_assert( !( -e 'corpus/zeotrope/table.db' ) );
-test_assert( !( -e 'corpus/zeotrope' ) );
 
 @buckets = $b->get_buckets();
 test_assert_equal( $#buckets, 2 );
@@ -459,15 +421,16 @@ test_assert_equal( $buckets[2], 'spam' );
 
 test_assert_equal( $b->get_value_( 'personal', 'foo' ), log(1/103) );
 test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), log(1/103) );
-$b->set_value_( 'personal', 'foo', 100 );
-$b->{matrix__}{personal}{__POPFILE__TOTAL__} = 100;
+
+$b->set_value_( 'personal', 'foo', 0 );
 test_assert_equal( $b->get_value_( 'personal', 'foo' ), 0 );
 test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), $b->{not_likely__} );
+
 $b->set_value_( 'personal', 'foo', 100 );
-$b->{matrix__}{personal}{__POPFILE__TOTAL__} = 1000;
+$b->db_update_cache__();
 test_assert_equal( $b->get_base_value_( 'personal', 'foo' ), 100 );
-test_assert_equal( $b->get_value_( 'personal', 'foo' ), -log(10) );
-test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), -log(10) );
+test_assert_equal( $b->get_value_( 'personal', 'foo' ), log(100/202) );
+test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), log(100/202) );
 
 # glob the tests directory for files called TestMailParse\d+.msg which consist of messages
 # to be parsed with the resulting classification in TestMailParse.cls

@@ -29,7 +29,7 @@ export POPFILE_ROOT=../
 export POPFILE_USER=../tests/
 
 runtest:
-	@perl -I ../ $(DEBUGARGS) ../tests.pl $(TESTARGS)
+	@perl -I ../ $(DEBUGARGS) -d:DProf ../tests.pl $(TESTARGS)
 ifdef DEBUGARGS
 	@perl ../coverage.pl
 endif

@@ -58,8 +58,8 @@
 --      |   +----------+  |     |  | bucketid  |--+     +--------------+
 --      |   |   id     |  |     |  |   mtid    |--------|      id      |
 --      +---| userid   |  |     |  |  value    |        |     type     |
---          |  frm     |  |     |  +-----------+        |    header    |
---          |   to     |  |     |                       +--------------+
+--          |  frm     |  |     |  |   seq     |        |    header    |
+--          |   to     |  |     |  +-----------+        +--------------+
 --          |   cc     |  |     |
 --          | subject  |  |     |
 --          | bucketid |--+     |
@@ -122,6 +122,8 @@ create table words(   id integer primary key, -- unique ID for this word
                       unique (word)           -- each word is unique
                   );
 
+create index words_index on words (word);
+
 -- ---------------------------------------------------------------------------------------------
 --
 -- matrix - the corpus that consists of buckets filled with words.  Each word
@@ -138,6 +140,8 @@ create table matrix( id integer primary key,   -- unique ID for this entry
                                                -- or written
                      unique (wordid, bucketid) -- each word appears once in a bucket 
                    );
+
+create index matrix_index on matrix (wordid, bucketid);
 
 -- ---------------------------------------------------------------------------------------------
 --
@@ -233,7 +237,8 @@ create table magnet_types( id integer primary key,  -- unique ID for this entry
 create table magnets( id integer primary key,    -- unique ID for this entry
                       bucketid integer,          -- a bucket
                       mtid integer,              -- the magnet type
-                      value varchar(255)         -- value for the magnet
+                      value varchar(255),        -- value for the magnet
+                      seq int                    -- used to set the order of magnets
                     );
 
 -- ---------------------------------------------------------------------------------------------

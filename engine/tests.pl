@@ -35,18 +35,19 @@ require IO::Handle;
 my $test_count    = 0;
 my $test_failures = 0;
 my $fail_messages = '';
-my $spin          = 0;
-my $spin_pos      = '.*';
+my $last_spin     = '';
 
 sub spin
 {
-    if ( $spin == length($spin_pos) ) {
-        $spin = 0;
+    my ( $msg ) = @_;
+
+    for my $i (1..length($last_spin)) {
+        print "\b";
     }
 
-    print "\b" . substr( $spin_pos, $spin, 1 );
+    print $msg;
 
-    $spin++;
+    $last_spin = $msg;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -65,7 +66,7 @@ sub test_report
 {
         my ( $ok, $test, $file, $line, $context ) = @_;
 
-        spin();
+        spin( $line );
 
         $test_count += 1;
 
@@ -209,7 +210,7 @@ foreach my $test (@tests) {
         my $current_test_count  = $test_count;
         my $current_error_count = $test_failures;
 
-        print "\nRunning $test... *";
+        print "\nRunning $test... at line: ";
         flush STDOUT;
         $fail_messages = '';
         my $suite;

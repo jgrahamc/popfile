@@ -26,7 +26,8 @@ use POPFile::Module;
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-#   Modified by     Sam Schinke (sschinke@users.sourceforge.net)
+#   Modified by              Sam Schinke    (sschinke@users.sourceforge.net)
+#   Merged with db code from Scott Leighton (helphand@users.sourceforge.net) 
 #
 # ---------------------------------------------------------------------------------------------
 
@@ -35,6 +36,8 @@ use warnings;
 use locale;
 use Classifier::MailParse;
 use IO::Handle;
+use DBI;
+use String::Interpolate qw(interpolate);
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -44,12 +47,6 @@ use Sys::Hostname;
 # A handy variable containing the value of an EOL for networks
 
 my $eol = "\015\012";
-
-# The corpus is stored in BerkeleyDB hashes called table.db in each
-# of the corpus/* subdirectories.  The db files are tied to Perl
-# hashes for simple access
-
-use BerkeleyDB;
 
 # Korean characters definition
 
@@ -71,26 +68,35 @@ sub new
     my $self = POPFile::Module->new();
 
     # Set this to 1 to get scores for individual words in message detail
+
     $self->{wordscores__}        = 0;
 
     # Choice for the format of the "word matrix" display.
+
     $self->{wmformat__}          = '';
 
     # Just our hostname
+
     $self->{hostname__}        = '';
 
-    # Matrix of buckets, words and the word counts
-    $self->{matrix__}            = {};
+    # File Handle for DBI database
+
     $self->{db__}                = {};
 
-    # Total number of words in all buckets
-    $self->{full_total__}        = 0;
+    # To save time we also 'prepare' some commonly used SQL statements and cache
+    # them here, see the function db_connect__ for details
+
+    $self->{db_get_word_count__} = 0;
+
+    # To save more time we keep a record of the user id for admin, and a hash of the
+    # bucketid for that user
+
+    $self->{db_userid__}         = 0;
+    $self->{db_bucketid__}       = {};
+    $self->{db_buckettotal__}    = {};
 
     # Used to parse mail messages
     $self->{parser__}            = new Classifier::MailParse;
-
-    # Colors assigned to each bucket
-    $self->{colors__}            = {};
 
     # The possible colors for buckets
     $self->{possible_colors__} = [ 'red',       'green',      'blue',       'brown', # PROFILE BLOCK START
@@ -107,13 +113,6 @@ sub new
 
     # The expected corpus version
     $self->{corpus_version__}    = 1;
-
-    # Per bucket parameters
-    $self->{parameters__}        = {};
-
-    # The magnets that cause attraction to certain buckets
-    $self->{magnets__}           = {};
-    $self->{magnet_count__}      = 0;
 
     # The unclassified cutoff this value means that the top probabilily must be n times greater than the
     # second probability, default is 100 times more likely
@@ -135,49 +134,17 @@ sub new
 
 # ---------------------------------------------------------------------------------------------
 #
-# prefork
-#
-# POPFile is about to fork, because the BerkeleyDB interface doesn't support multiple
-# threads accessing the database we will get a nasty failure if the database is tied to
-# the hashes when the fork occurs (actually when the child exits).  So here we untie from
-# the database
-#
-# ---------------------------------------------------------------------------------------------
-sub prefork
-{
-    my ( $self ) = @_;
-
-    $self->close_database__();
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # forked
 #
 # This is called inside a child process that has just forked, since the child needs access
-# to the database we reopen it
+# to the database we open it
 #
 # ---------------------------------------------------------------------------------------------
 sub forked
 {
     my ( $self ) = @_;
 
-    $self->load_word_matrix_( 1 );
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# postfork
-#
-# This is called inside the parent process that has just forked, since the parent needs access
-# to the database we reopen it
-#
-# ---------------------------------------------------------------------------------------------
-sub postfork
-{
-    my ( $self ) = @_;
-
-    $self->load_word_matrix_( 0 );
+    $self->db_connect__();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -191,12 +158,32 @@ sub initialize
 {
     my ( $self ) = @_;
 
+    # This is the name for the database
+
+    $self->config_( 'database', 'popfile.db' );
+
+    # This is the 'connect' string used by DBI to connect to the database, if
+    # you decide to change from using SQLite to some other database (e.g. MySQL,
+    # Oracle, ... ) this *should* be all you need to change.  The additional
+    # parameters user and auth are needed for some databases.   
+    #
+    # Note that the dbconnect string will be interpolated before being passed
+    # to DBI and the variable $dbname can be used within it and it resolves to
+    # the full path to the database named in the database parameter above.
+
+    $self->config_( 'dbconnect', 'dbi:SQLite:dbname=$dbname' );
+    $self->config_( 'dbuser',   '' );
+    $self->config_( 'dbauth',   '' );
+
     # No default unclassified weight is the number of times more sure POPFile
     # must be of the top class vs the second class, default is 100 times more
 
     $self->config_( 'unclassified_weight', 100 );
 
     # The corpus is kept in the 'corpus' subfolder of POPFile
+    #
+    # DEPRECATED This is only used to find an old corpus that might need to
+    # be upgraded
 
     $self->config_( 'corpus', 'corpus' );
 
@@ -213,37 +200,12 @@ sub initialize
 
     $self->config_( 'hostname', $self->{hostname__} );
 
-    # The default size for the BerkeleyDB cache
-
-    $self->config_( 'db_cache_size', 65536 );
-
     # We want to hear about classification events so that we can
     # update statistics
 
     $self->mq_register_( 'CLASS', $self );
 
     return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# open_db_env__
-#
-# Helper function that opens the BerkeleyDB environment and returns the handle to it
-#
-# $flags            Additional BerkeleyDB environment flags
-#
-# ---------------------------------------------------------------------------------------------
-sub open_db_env__
-{
-    my ( $self, $flags ) = @_;
-
-    return new BerkeleyDB::Env
-                           -Cachesize => $self->config_( 'db_cache_size' ),
-   	                   -Home      => $self->get_user_path_( $self->config_( 'corpus' ) ),
-                           -Verbose   => 1,
- 	                   -Flags     => DB_INIT_LOG | 
-   			                 DB_INIT_LOCK | DB_INIT_MPOOL | $flags;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -262,17 +224,13 @@ sub start
     $self->{parser__}->{lang__}  = $self->module_config_( 'html', 'language' );
     $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
 
-    # When starting clean up a previous BerkeleyDB environment
-
-    unlink glob( $self->get_user_path_( $self->config_( 'corpus' ) . '/__db.*' ) );
-
-    $self->{dbenv__} = $self->open_db_env__( DB_CREATE );
-
-    if ( !defined( $self->{dbenv__} ) ) {
+    if ( !$self->db_connect__() ) {
         return 0;
     }
 
-    return $self->load_word_matrix_( 0 );
+    $self->upgrade_predatabase_data__();
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -286,11 +244,7 @@ sub stop
 {
     my ( $self ) = @_;
 
-    $self->write_parameters();
-    $self->close_database__();
-
-    undef $self->{dbenv__};
-    delete $self->{dbenv__};
+    $self->db_disconnect__();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -308,47 +262,7 @@ sub deliver
 
     if ( $type eq 'CLASS' ) {
         $self->set_bucket_parameter( $message, 'count', $self->get_bucket_parameter( $message, 'count' ) + 1 );
-        $self->write_parameters();
     }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# write_parameters
-#
-# Save the parameters hash
-#
-# ---------------------------------------------------------------------------------------------
-sub write_parameters
-{
-    my ($self) = @_;
-
-    for my $bucket (keys %{$self->{matrix__}})  {
-        open PARAMS, '>' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/params" );
-        for my $param (keys %{$self->{parameters__}{$bucket}}) {
-            print PARAMS "$param $self->{parameters__}{$bucket}{$param}\n";
-        }
-        close PARAMS;
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# close_database__
-#
-# Close all the database connections
-#
-# ---------------------------------------------------------------------------------------------
-sub close_database__
-{
-    my ( $self ) = @_;
-
-    for my $bucket (keys %{$self->{matrix__}})  {
-        $self->untie_bucket__( $bucket );
-    }
-
-    undef $self->{process_dbenv__};
-    delete $self->{process_dbenv__};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -367,13 +281,13 @@ sub get_color
     my $max   = -10000;
     my $color = 'black';
 
-    for my $bucket (keys %{$self->{matrix__}}) {
+    for my $bucket ($self->get_buckets()) {
         my $prob = get_value_( $self, $bucket, $word );
 
         if ( $prob != 0 )  {
             if ( $prob > $max )  {
                 $max   = $prob;
-                $color = $self->{colors__}{$bucket};
+                $color = $self->get_bucket_parameter( $bucket, 'color' );
             }
         }
     }
@@ -394,9 +308,9 @@ sub get_value_
 {
     my ( $self, $bucket, $word ) = @_;
 
-    my $value = $self->{matrix__}{$bucket}{$word};
+    my $value = $self->db_get_word_count__( $bucket, $word );
 
-    if ( defined( $value ) ) {
+    if ( defined( $value ) && ( $value > 0 ) ) {
 
         # Profiling notes:
         #
@@ -404,7 +318,7 @@ sub get_value_
         # log( $value ) - $cached and this turned out to be
         # much slower than this single log with a division in it
 
-        return log( $value / $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} );
+        return log( $value / $self->get_bucket_word_count( $bucket ) );
     } else {
         return 0;
     }
@@ -414,7 +328,7 @@ sub get_base_value_
 {
     my ( $self, $bucket, $word ) = @_;
 
-    my $value = $self->{matrix__}{$bucket}{$word};
+    my $value = $self->db_get_word_count__( $bucket, $word );
 
     if ( defined( $value ) ) {
         return $value;
@@ -435,45 +349,7 @@ sub set_value_
 {
     my ( $self, $bucket, $word, $value ) = @_;
 
-    if ( !defined( $value ) ) {
-        $self->log_( "set_value_ called with undefined value for word $word in bucket $bucket" );
-        return;
-    }
-
-    # If there's an existing value then remove it and keep the total up to date
-    # then add the new value, this is a little complicated but by keeping the
-    # total in a value in the database it avoids us doing any sort of query
-    # or full table scan
-
-    my $oldvalue = $self->{matrix__}{$bucket}{$word};
-
-    if ( !defined( $oldvalue ) ) {
-        $oldvalue = 0;
-        $self->{matrix__}{$bucket}{$word} = $oldvalue;
-        if ( defined( $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} ) ) {
-            $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} += 1;
-	} else {
-            $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} = 1;
-        }
-    }
-
-    my $total = $self->get_bucket_word_count( $bucket );
-
-    $total                                              -= $oldvalue;
-    $self->{full_total__}                               -= $oldvalue;
-    $self->{matrix__}{$bucket}{$word}                    = $value;
-    $total                                              += $value;
-    $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}       = $total;
-    $self->{full_total__}                               += $value;
-
-    if ( !defined( $self->{matrix__}{$bucket}{$word} ) ) {
-        $self->log_( "set_value_ new word value is undefined for word $word in bucket $bucket (\$value=$value, \$total=$total, \$oldvalue=$oldvalue, full_total=$self->{full_total__})" );
-    }
-
-    if ( $self->{matrix__}{$bucket}{$word} <= 0 ) {
-        $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} -= 1;
-        delete $self->{matrix__}{$bucket}{$word};
-    }
+    $self->db_put_word_count__( $bucket, $word, $value );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -498,23 +374,25 @@ sub get_sort_value_
 
 # ---------------------------------------------------------------------------------------------
 #
-# update_constants_
+# update_constants__
 #
 # Updates not_likely and bucket_start
 #
 # ---------------------------------------------------------------------------------------------
-sub update_constants_
+sub update_constants__
 {
     my ($self) = @_;
 
-    if ( $self->{full_total__} > 0 )  {
-        $self->{not_likely__} = -log( 10 * $self->{full_total__} );
+    my $wc = $self->get_word_count();
 
-        foreach my $bucket (keys %{$self->{matrix__}}) {
+    if ( $wc > 0 )  {
+        $self->{not_likely__} = -log( 10 * $wc );
+
+        foreach my $bucket ($self->get_buckets()) {
             my $total = $self->get_bucket_word_count( $bucket );
 
             if ( $total != 0 ) {
-                $self->{bucket_start__}{$bucket} = log( $total / $self->{full_total__} );
+                $self->{bucket_start__}{$bucket} = log( $total / $wc );
             } else {
                 $self->{bucket_start__}{$bucket} = 0;
             }
@@ -524,28 +402,16 @@ sub update_constants_
 
 # ---------------------------------------------------------------------------------------------
 #
-# load_word_matrix_
+# upgrade_predatabase_data__
 #
-# Fills the matrix with the word frequencies from all buckets and builds the bucket total
-#
-# $child           Set to 1 if this is happening in a child process
+# Looks for old POPFile data (in flat files or BerkeleyDB tables) and upgrades it to the
+# SQL database.   Data upgraded is removed.
 #
 # ---------------------------------------------------------------------------------------------
-sub load_word_matrix_
+sub upgrade_predatabase_data__
 {
-    my ( $self, $child ) = @_;
+    my ( $self ) = @_;
     my $c      = 0;
-
-    $self->close_database__();
-
-    $self->{process_dbenv__} = $self->open_db_env__(0);
-
-    if ( !defined( $self->{process_dbenv__} ) ) {
-        return 0;
-    }
-
-    $self->{magnets__}      = {};
-    $self->{full_total__}   = 0;
 
     my @buckets = glob $self->get_user_path_( $self->config_( 'corpus' ) . '/*' );
 
@@ -558,14 +424,9 @@ sub load_word_matrix_
         # A bucket directory must be a directory
 
         next unless ( -d $bucket );
-
-        # Look for the delete file that indicates that this bucket
-        # is no longer needed
-
-        if ( -e "$bucket/delete" ) {
-            $self->delete_bucket_files__( $bucket );
-            next;
-	}
+        next unless ( ( -e "$bucket/table" ) || ( -e "$bucket/table.db" ) );
+     
+        return 0 if ( !$self->upgrade_bucket__( $bucket ) );
 
         my $color = '';
 
@@ -573,7 +434,7 @@ sub load_word_matrix_
         if ( open COLOR, '<' . "$bucket/color" ) {
             $color = <COLOR>;
 
-            # Someone (who shall remain nameless) went in an manually created
+            # Someone (who shall remain nameless) went in and manually created
             # empty color files in their corpus directories which would cause
             # $color at this point to be undefined and hence you'd get warnings
             # about undefined variables below.  So this little test is to deal
@@ -586,132 +447,70 @@ sub load_word_matrix_
                 $color =~ s/[\r\n]//g;
             }
             close COLOR;
+            unlink "$bucket/color";
         }
-
-        return 0 if ( !$self->load_bucket_( $bucket, $child ) );
 
         $bucket =~ /([[:alpha:]0-9-_]+)$/;
         $bucket =  $1;
 
-        if ( $color eq '' )  {
-            $self->{colors__}{$bucket} = $self->{possible_colors__}[$c];
-        } else {
-            $self->{colors__}{$bucket} = $color;
-        }
+        $self->set_bucket_color( $bucket, ($color eq '')?$self->{possible_colors__}[$c]:$color );
 
         $c = ($c+1) % ($#{$self->{possible_colors__}}+1);
     }
 
-    $self->update_constants_();
+    $self->db_update_cache__();
+
+    # POPFile has a 'pseudobucket' called unclassified which you are not meant
+    # to reclassify into, but is treated a bit like a bucket in terms of 
+    # parameters.
 
     # unclassified will always have the color black, note that unclassified is not
     # actually a bucket
 
-    $self->{colors__}{unclassified} = 'black';
+    # TODO $self->{colors__}{unclassified} = 'black';
 
     # SLM for unclassified "bucket" will always match the global setting
 
-    $self->{parameters__}{unclassified}{subject} = $self->global_config_('subject');
+    # TODO $self->{parameters__}{unclassified}{subject} = $self->global_config_('subject');
 
     # Quarantine for unclassified will be off:
 
-    $self->{parameters__}{unclassified}{quarantine} = 0;
+    # TODO $self->{parameters__}{unclassified}{quarantine} = 0;
 
     return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
 #
-# tie_bucket__
-#
-# Ties an individual bucket (creating it if necessary to a BerkeleyDB file called
-# table.db.  This function has the side effect of creating entries in $self->{db__}
-# and $self->{matrix__} for the bucket.
-#
-# $bucket            The bucket name
-# $rdonly            Whether to be read only
-#
-# ---------------------------------------------------------------------------------------------
-sub tie_bucket__
-{
-    my ( $self, $bucket, $rdonly ) = @_;
-
-    $self->{db__}{$bucket} = tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",              # PROFILE BLOCK START
-                                 -Filename  => "$bucket/table.db",
-                                 -Flags     => $rdonly?DB_RDONLY:DB_CREATE,
-                                 -Env       => $self->{process_dbenv__};                         # PROFILE BLOCK STOP
-
-    # Check to see if the tie worked, if it failed then POPFile is about to fail
-    # badly
-
-    if ( !defined( $self->{db__}{$bucket} ) ) {
-        $self->log_( "Failed to tie database hash for bucket $bucket" . $BerkeleyDB::Error );
-        die "Database tie failed for $bucket [$!]";
-    }
-
-    if ( !defined( $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} ) ) {
-        $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}      = 0;
-        $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__}     = 0;
-    }
-
-    if ( !defined( $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} ) ) {
-        $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__}     = 0;
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# untie_bucket__
-#
-# Unties the matrix__ hash from the BerkeleyDB
-#
-# $bucket            The bucket name
-#
-# ---------------------------------------------------------------------------------------------
-sub untie_bucket__
-{
-    my ( $self, $bucket ) = @_;
-
-    undef $self->{db__}{$bucket};
-    delete $self->{db__}{$bucket};
-    untie %{$self->{matrix__}{$bucket}};
-    delete $self->{matrix__}{$bucket};
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# load_bucket_
+# upgrade_bucket__
 #
 # Loads an individual bucket
 #
 # $bucket            The bucket name
-# $child             1 if happening in a child process
 #
 # ---------------------------------------------------------------------------------------------
-sub load_bucket_
+sub upgrade_bucket__
 {
-    my ( $self, $bucket, $child ) = @_;
+    my ( $self, $bucket ) = @_;
 
     $bucket =~ /([[:alpha:]0-9-_]+)$/;
     $bucket =  $1;
 
-    $self->{parameters__}{$bucket}{subject}    = 1;
-    $self->{parameters__}{$bucket}{count}      = 0;
-    $self->{parameters__}{$bucket}{quarantine} = 0;
+    $self->create_bucket( $bucket );
 
-    $self->{magnets__}{$bucket} = {};
+    $self->set_bucket_parameter( $bucket, 'subject',    1 );
+    $self->set_bucket_parameter( $bucket, 'count',      0 );
+    $self->set_bucket_parameter( $bucket, 'quarantine', 0 );
 
-    # See if there's a color file specified
     if ( open PARAMS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/params" ) ) {
         while ( <PARAMS> )  {
             s/[\r\n]//g;
             if ( /^([[:lower:]]+) ([^\r\n\t ]+)$/ )  {
-                $self->{parameters__}{$bucket}{$1} = $2;
+                $self->set_bucket_parameter( $bucket, $1, $2 );
             }
         }
         close PARAMS;
-    } else {
-        $self->write_parameters();
+        unlink $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/params" );
     }
 
     # See if there are magnets defined
@@ -736,7 +535,7 @@ sub load_bucket_
                 $value =~ s/[ \t]+$//g;
 
                 $value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
-                $self->{magnets__}{$bucket}{$type}{$value} = 1;
+                $self->create_magnet( $bucket, $type, $value );
             } else {
 
                 # This branch is used to catch the original magnets in an
@@ -746,28 +545,22 @@ sub load_bucket_
                 if ( /^(.+)$/ ) {
                     my $value = $1;
                     $value =~ s/\\(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/$1/g;
-                    $self->{magnets__}{$bucket}{from}{$1} = 1;
+                    $self->create_magnet( $bucket, 'from', $value );
                 }
             }
         }
         close MAGNETS;
+        unlink $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/magnets" );
     }
 
-    # This code performs two tasks:
-    #
-    # If there is an existing table.db in the bucket directory then simply
-    # tie it to the appropriate hash.
-    #
     # If there is no existing table but there is a table file (the old style
     # flat file used by POPFile for corpus storage) then create the new
-    # tied hash from it thus performing an automatic upgrade.
-
-    $self->tie_bucket__( $bucket, $child );
+    # database from it thus performing an automatic upgrade.
 
     if ( -e $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) ) {
-        $self->log_( "Performing automatic upgrade of $bucket corpus from flat file to BerkeleyDB" );
+        $self->log_( "Performing automatic upgrade of $bucket corpus from flat file to DBI" );
 
-        my $ft = $self->{full_total__};
+        $self->{db__}->begin_work;
 
         if ( open WORDS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) )  {
 
@@ -778,6 +571,7 @@ sub load_bucket_
                 if ( $1 != $self->{corpus_version__} )  {
                     print STDERR "Incompatible corpus version in $bucket\n";
                     close WORDS;
+                    $self->{db__}->rollback;
                     return 0;
                 } else {
    	            $self->log_( "Upgrading bucket $bucket..." );
@@ -803,132 +597,50 @@ sub load_bucket_
                 close WORDS;
             } else {
                 close WORDS;
+                $self->{db__}->rollback;
                 return 0;
 	    }
+
+            $self->{db__}->commit;
+            unlink $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" );
 	}
-
-        $self->untie_bucket__( $bucket );
-        $self->tie_bucket__( $bucket, $child );
-
-        if ( open WORDS, '<' . $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table" ) )  {
-            my $wc = 1;
-            my $bucket_total   = 0;
-            my $bucket_unique  = 0;
-            my $upgrade_failed = 0;
-
-            my $first = <WORDS>;
-            if ( defined( $first ) && ( $first =~ s/^__CORPUS__ __VERSION__ (\d+)// ) ) {
-                if ( $1 != $self->{corpus_version__} )  {
-                    print STDERR "Incompatible corpus version in $bucket\n";
-                    close WORDS;
-                    return 0;
-                } else {
-   	            $self->log_( "Verifying successful bucket upgrade of $bucket..." );
-
-                    while ( <WORDS> ) {
-		        if ( $wc % 100 == 0 ) {
-                            $self->log_( "$wc" );
-		        }
-                        $wc += 1;
-                        s/[\r\n]//g;
-
-                        if ( /^([^\s]+) (\d+)$/ ) {
-  			    if ( $2 != 0 ) {
-    			        if ( $self->get_base_value_( $bucket, $1 ) != $2 ) {
-                                    print STDERR "\nUpgrade error for word $1 in bucket $bucket.\nShutdown POPFile and rerun.\n";
-                                    $upgrade_failed = 1;
-                                    last;
-			        }
-                                $bucket_total  += $2;
-                                $bucket_unique += 1;
-			    }
-                        } else {
-                            $self->log_( "Found entry in corpus for $bucket that looks wrong: \"$_\" (ignoring)" );
-                        }
-		    }
-                }
-
-                close WORDS;
-
-                if ( $bucket_total != $self->get_bucket_word_count( $bucket ) ) {
-                    print STDERR "\nUpgrade error bucket $bucket word count is incorrect.\nShutdown POPFile and rerun.\n";
-                    $upgrade_failed = 1;
-		}
-                if ( $bucket_unique != $self->get_bucket_unique_count( $bucket ) ) {
-                    print STDERR "\nUpgrade error bucket $bucket unique count is incorrect.\nShutdown POPFile and rerun.\n";
-                    $upgrade_failed = 1;
-		}
-
-                if ( $upgrade_failed ) {
-                    $self->untie_bucket__( $bucket );
-                    unlink( $self->config_( 'corpus' ) . "/$bucket/table.db" );
-                    return 0;
-		}
-
-                $self->log_( "(successfully verified ", $wc-1, " words)" );
-            } else {
-                close WORDS;
-                return 0;
-	    }
-	}
-
-        unlink( $self->config_( 'corpus' ) . "/$bucket/table" );
-
-        $self->{full_total__} = $ft;
     }
 
-    $self->{full_total__} += $self->get_bucket_word_count( $bucket );
+    # Now check to see if there's a BerkeleyDB-style table
 
-    $self->calculate_magnet_count__();
+    my $bdb_file = $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket/table.db" );
+
+    if ( -e $bdb_file ) {
+        $self->log_( "Performing automatic upgrade of $bucket corpus from BerkeleyDB to DBI" );
+
+        require BerkeleyDB;
+
+        my %h;
+        tie %h, "BerkeleyDB::Hash", -Filename => $bdb_file;
+
+        $self->log_( "Upgrading bucket $bucket..." );
+        $self->{db__}->begin_work;
+
+        my $wc = 1;
+
+        for my $word (keys %h) {
+	    if ( $wc % 100 == 0 ) {
+                $self->log_( "$wc" );
+            }
+
+            next if ( $word =~ /^__POPFILE__(LOG__TOTAL|TOTAL|USER)__$/ );             
+
+	    $wc += 1;
+            $self->set_value_( $bucket, $word, $h{$word} );
+	}
+        
+        $self->log_( "(completed ", $wc-1, " words)" );
+        $self->{db__}->commit;
+        untie %h;
+        unlink $bdb_file;
+    }
 
     return 1;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# calculate_magnet_count__
-#
-# Count the number of magnets currently defined and store in the magnet_count__
-# variable for retrievable through magnet_count()
-#
-# ---------------------------------------------------------------------------------------------
-sub calculate_magnet_count__
-{
-    my ($self) = @_;
-
-    $self->{magnet_count__} = 0;
-
-    for my $bucket (keys %{$self->{matrix__}}) {
-        for my $type (keys %{$self->{magnets__}{$bucket}})  {
-            for my $from (keys %{$self->{magnets__}{$bucket}{$type}})  {
-                $self->{magnet_count__} += 1;
-            }
-        }
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
-# save_magnets__
-#
-# Save all the magnet definitions
-#
-# ---------------------------------------------------------------------------------------------
-sub save_magnets__
-{
-    my ($self) = @_;
-
-    for my $bucket (keys %{$self->{matrix__}}) {
-        open MAGNET, '>' . $self->get_user_path_( $self->config_( 'corpus' ). "/$bucket/magnets" );
-
-        for my $type (keys %{$self->{magnets__}{$bucket}})  {
-            for my $from (keys %{$self->{magnets__}{$bucket}{$type}})  {
-                print MAGNET "$type $from\n";
-            }
-        }
-
-        close MAGNET;
-    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -943,7 +655,6 @@ sub save_magnets__
 # $type            The magnet type to check
 #
 # ---------------------------------------------------------------------------------------------
-
 sub magnet_match_helper__
 {
     my ( $self, $match, $bucket, $type ) = @_;
@@ -955,12 +666,21 @@ sub magnet_match_helper__
     # and may cause perl crash.
 
     my @magnets;
-    if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
-        no locale;
-        @magnets = sort keys %{$self->{magnets__}{$bucket}{$type}};
-    } else {
-        @magnets = sort keys %{$self->{magnets__}{$bucket}{$type}};
+
+    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $h = $self->{db__}->prepare(
+        "select magnets.value from magnets, users, buckets, magnet_types
+             where buckets.id = $bucketid and
+                   users.id = buckets.userid and
+                   magnets.bucketid = buckets.id and
+                   magnet_types.type = '$type' and
+                   magnets.mtid = magnet_types.id order by magnets.value;" );
+
+    $h->execute;
+    while ( my $row = $h->fetchrow_arrayref ) {
+        push @magnets, ($row->[0]);
     }
+    $h->finish;
 
     for my $magnet (@magnets) {
         $magnet = lc($magnet);
@@ -990,7 +710,6 @@ sub magnet_match_helper__
 # $type            The magnet type to check
 #
 # ---------------------------------------------------------------------------------------------
-
 sub magnet_match__
 {
     my ( $self, $match, $bucket, $type ) = @_;
@@ -1015,6 +734,8 @@ sub classify
     my ( $self, $file, $ui ) = @_;
     my $msg_total = 0;
 
+    $self->log_( "Begin classification at " . time );
+
     $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
 
     # Pass language parameter to parse_file()
@@ -1029,10 +750,10 @@ sub classify
     # Check to see if this email should be classified based on a magnet
     # Get the list of buckets
 
-    my @buckets = keys %{$self->{matrix__}};
+    my @buckets = $self->get_buckets();
 
-    for my $bucket (sort keys %{$self->{magnets__}})  {
-        for my $type (sort keys %{$self->{magnets__}{$bucket}}) {
+    for my $bucket ($self->get_buckets_with_magnets())  {
+        for my $type ($self->get_magnet_types_in_bucket( $bucket )) {
 	    if ( $self->magnet_match__( $self->{parser__}->get_header($type), $bucket, $type ) ) {
                 return $bucket;
             }
@@ -1041,6 +762,8 @@ sub classify
 
     # If the user has not defined any buckets then we escape here return unclassified
     return "unclassified" if ( $#buckets == -1 );
+
+    $self->log_( "Done with bucket check at " . time );
 
     # The score hash will contain the likelihood that the given message is in each
     # bucket, the buckets are the keys for score
@@ -1092,6 +815,8 @@ sub classify
             $correction += $wmax * $self->{parser__}{words__}{$word};
         }
     }
+
+    $self->log_( "Done with Bayes rule at " . time );
 
     # Now sort the scores to find the highest and return that bucket as the classification
 
@@ -1301,6 +1026,8 @@ sub classify
             $self->{scores__} .= "</table></p>";
         }
     }
+
+    $self->log_( "Done classification at " . time );
 
     return $class;
 }
@@ -1615,7 +1342,7 @@ sub classify_and_modify
 
         # Parse Japanese mail message with Kakasi
 
-        parse_with_kakasi( $self, $temp_file, $dcount, $mcount );
+        $self->parse_with_kakasi__( $temp_file, $dcount, $mcount );
 
         $classification = ($class ne '')?$class:$self->classify($temp_file);
     } else {
@@ -1629,8 +1356,8 @@ sub classify_and_modify
         if ( $self->global_config_( 'subject' ) ) {
             # Don't add the classification unless it is not present
             if ( !( $msg_subject =~ /\Q$modification\E/ ) &&                        # PROFILE BLOCK START
-                 ( $self->{parameters__}{$classification}{subject} == 1 ) &&
-                 ( $self->{parameters__}{$classification}{quarantine} == 0 ) )  {   # PROFILE BLOCK STOP
+                 ( $self->get_bucket_parameter( $classification, 'subject' ) == 1 ) &&
+                 ( $self->get_bucket_parameter( $classification, 'quarantine' ) == 0 ) )  {   # PROFILE BLOCK STOP
                 $msg_subject = " $modification$msg_subject";
             }
         }
@@ -1641,7 +1368,7 @@ sub classify_and_modify
 
     # Add the XTC header
     $msg_head_after .= "X-Text-Classification: $classification$crlf" if ( ( $self->global_config_( 'xtc' ) ) && # PROFILE BLOCK START
-                                                                         ( $self->{parameters__}{$classification}{quarantine} == 0 ) ); # PROFILE BLOCK STOP
+                                                                         ( $self->get_bucket_parameter( $classification, 'quarantine' ) == 0 ) ); # PROFILE BLOCK STOP
 
     # Add the XPL header
     my $xpl = '';
@@ -1650,7 +1377,7 @@ sub classify_and_modify
     $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->config_( 'hostname' );
     $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$nopath_temp_file$crlf";
 
-    if ( $self->global_config_( 'xpl' ) && ( $self->{parameters__}{$classification}{quarantine} == 0 ) ) {
+    if ( $self->global_config_( 'xpl' ) && ( $self->get_bucket_parameter( $classification, 'quarantine' ) == 0 ) ) {
         $msg_head_after .= 'X-POPFile-Link: ' . $xpl;
     }
 
@@ -1664,14 +1391,14 @@ sub classify_and_modify
         # information from POPFile and wrapping the original message in a MIME encoding
 
         if ( $classification ne 'unclassified' ) {
-            if ( $self->{parameters__}{$classification}{quarantine} == 1 ) {
+            if ( $self->get_bucket_parameter( $classification, 'quarantine' ) == 1 ) {
                 print $client "From: " . $self->{parser__}->get_header( 'from' ) . "$crlf";
                 print $client "To: " . $self->{parser__}->get_header( 'to' ) . "$crlf";
                 print $client "Date: " . $self->{parser__}->get_header( 'date' ) . "$crlf";
                 if ( $self->global_config_( 'subject' ) ) {
                     # Don't add the classification unless it is not present
                     if ( !( $msg_subject =~ /\[\Q$classification\E\]/ ) &&             # PROFILE BLOCK START
-                         ( $self->{parameters__}{$classification}{subject} == 1 ) ) {  # PROFILE BLOCK STOP
+                         ( $self->get_bucket_parameter( $classification, 'subject' ) == 1 ) ) {  # PROFILE BLOCK STOP
                         $msg_subject = " $modification$msg_subject";
                     }
                 }
@@ -1704,7 +1431,7 @@ sub classify_and_modify
     my $before_dot = '';
 
     if ( $classification ne 'unclassified' ) {
-        if ( ( $self->{parameters__}{$classification}{quarantine} == 1 ) && $echo ) {
+        if ( ( $self->get_bucket_parameter( $classification, 'quarantine' ) == 1 ) && $echo ) {
             $before_dot = "$crlf--$nopath_temp_file--$crlf";
         }
     }
@@ -1752,7 +1479,7 @@ sub get_buckets
 {
     my ( $self ) = @_;
 
-    return sort keys %{$self->{matrix__}};
+    return sort keys %{$self->{db_bucketid__}};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1768,9 +1495,7 @@ sub get_bucket_word_count
 {
     my ( $self, $bucket ) = @_;
 
-    my $total = $self->{matrix__}{$bucket}{__POPFILE__TOTAL__};
-
-    return defined( $total )?$total:0;
+    return $self->{db_bucketcount__}{$bucket};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1787,7 +1512,14 @@ sub get_bucket_word_list
 {
     my ( $self, $bucket, $prefix ) = @_;
 
-    return grep {/^$prefix/} grep {!/^__POPFILE__/} keys %{$self->{matrix__}{$bucket}};
+    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $result = $self->{db__}->selectcol_arrayref(
+        "select words.word from matrix, words
+         where matrix.wordid  = words.id and
+               matrix.bucketid = $bucketid and
+               substr( words.word, 1, 1 ) = '$prefix';");
+
+    return @{$result};
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1805,6 +1537,12 @@ sub get_bucket_word_prefixes
 
     my $prev = '';
 
+    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $result = $self->{db__}->selectcol_arrayref(
+        "select words.word from matrix, words
+         where matrix.wordid  = words.id and
+               matrix.bucketid = $bucketid;");
+
     # In Japanese mode, disable locale and use substr_euc, the substr function
     # which supports EUC Japanese charset.
     # Sorting Japanese with "use locale" is memory and time consuming,
@@ -1812,13 +1550,13 @@ sub get_bucket_word_prefixes
 
     if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
         no locale;
-        return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc($_,0,1)} grep {!/^__POPFILE__/} keys %{$self->{matrix__}{$bucket}};
+        return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc($_,0,1)} @{$result};
     } else {
         if  ( $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
     	    no locale;
-            return grep {$_ ne $prev && ($prev = $_, 1)} sort map {$_ =~ /([\x20-\x80]|$eksc)/} grep {!/^__POPFILE__/} keys %{$self->{matrix__}{$bucket}};
+            return grep {$_ ne $prev && ($prev = $_, 1)} sort map {$_ =~ /([\x20-\x80]|$eksc)/} @{$result};
         } else {
-            return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)} grep {!/^__POPFILE__/} keys %{$self->{matrix__}{$bucket}};
+            return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)}  @{$result};
         }
     }
 }
@@ -1833,19 +1571,28 @@ sub get_bucket_word_prefixes
 # $len      Word length
 #
 # ---------------------------------------------------------------------------------------------
-sub substr_euc {
-    my ($str, $pos, $len) = @_;
+sub substr_euc 
+{
+    my ( $str, $pos, $len ) = @_;
     my $result_str;
     my $char;
-    my $count=0;
-    if(!$pos) { $pos=0; }
-    if(!$len) { $len=length($str); }
-    for ($pos = 0; $count<$len; $pos++) {
-        $char = substr($str, $pos, 1);
-        if ($char =~ /[\x80-\xff]/) { $char = substr($str, $pos++, 2); }
+    my $count = 0;
+    if ( !$pos ) { 
+        $pos = 0; 
+    }
+    if ( !$len ) { 
+        $len = length( $str ); 
+    }
+    
+    for ( $pos = 0; $count < $len; $pos++ ) {
+        $char = substr( $str, $pos, 1 );
+        if ( $char =~ /[\x80-\xff]/ ) { 
+            $char = substr( $str, $pos++, 2 ); 
+        }
         $result_str .= $char;
         $count++;
     }
+
     return $result_str;
 }
 
@@ -1860,7 +1607,8 @@ sub get_word_count
 {
     my ( $self ) = @_;
 
-    return $self->{full_total__};
+    $self->{db_get_full_total__}->execute( $self->{db_userid__} );
+    return $self->{db_get_full_total__}->fetchrow_arrayref->[0];
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1893,7 +1641,8 @@ sub get_bucket_unique_count
 {
     my ( $self, $bucket ) = @_;
 
-    return $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__};
+    $self->{db_get_bucket_unique_count__}->execute( $self->{db_bucketid__}{$bucket} );
+    return $self->{db_get_bucket_unique_count__}->fetchrow_arrayref->[0];
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1909,9 +1658,7 @@ sub get_bucket_color
 {
     my ( $self, $bucket ) = @_;
 
-    my $color = $self->{colors__}{$bucket};
-
-    return defined( $color )?$color:'black';
+    return $self->get_bucket_parameter( $bucket, 'color' );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1928,7 +1675,7 @@ sub set_bucket_color
 {
     my ( $self, $bucket, $color ) = @_;
 
-    $self->{colors__}{$bucket} = $color;
+    $self->set_bucket_parameter( $bucket, 'color', $color );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1945,13 +1692,22 @@ sub get_bucket_parameter
 {
     my ( $self, $bucket, $parameter ) = @_;
 
-    my $param = $self->{parameters__}{$bucket}{$parameter};
+    $self->{db_get_bucket_parameter__}->execute( $self->{db_bucketid__}{$bucket}, $parameter );
+    my $result = $self->{db_get_bucket_parameter__}->fetchrow_arrayref;
 
-    if ( !defined( $param ) ) {
-        $param = 0;
+    # If this parameter has not been defined for this specific bucket then
+    # get the default value
+
+    if ( !defined( $result ) ) {
+        $self->{db_get_bucket_parameter_default__}->execute( $parameter );
+        $result = $self->{db_get_bucket_parameter_default__}->fetchrow_arrayref;
     }
 
-    return $param;
+    if ( defined( $result ) ) {
+        return $result->[0];
+    } else {
+        return undef;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1969,8 +1725,15 @@ sub set_bucket_parameter
 {
     my ( $self, $bucket, $parameter, $value ) = @_;
 
-    $self->{parameters__}{$bucket}{$parameter} = $value;
-    $self->write_parameters();
+    my $bucketid = $self->{db_bucketid__}{$bucket};
+
+    my $result = $self->{db__}->selectrow_arrayref("select bucket_template.id from bucket_template 
+                                                        where bucket_template.name = '$parameter';" );
+    my $btid = $result->[0];
+
+    $self->{db_set_bucket_parameter__}->execute( $bucketid, $btid, $value );
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2003,7 +1766,7 @@ sub get_html_colored_message
 #
 # create_bucket
 #
-# Creates a new bucket
+# Creates a new bucket, returns 1 if the creation succeeded
 #
 # $bucket          Name for the new bucket
 #
@@ -2012,19 +1775,17 @@ sub create_bucket
 {
     my ( $self, $bucket ) = @_;
 
-    mkdir( $self->config_( 'corpus' ) );
-    mkdir( $self->config_( 'corpus' ) . "/$bucket" );
-
-    $self->tie_bucket__( $bucket, 0 );
-    $self->untie_bucket__( $bucket );
-    $self->load_word_matrix_( 0 );
+    my $userid = $self->{db_userid__};
+    $self->{db__}->do( 
+        "insert or ignore into buckets ( 'userid', 'name', 'pseudo' ) values ( $userid, '$bucket', 0 );" ); 
+    $self->db_update_cache__();
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # delete_bucket
 #
-# Deletes a bucket
+# Deletes a bucket, returns 1 if the delete succeeded
 #
 # $bucket          Name of the bucket to delete
 #
@@ -2033,56 +1794,19 @@ sub delete_bucket
 {
     my ( $self, $bucket ) = @_;
 
-    if ( !defined( $self->{matrix__}{$bucket} ) ) {
-        return 0;
-    }
-
-    $self->close_database__();
-    $self->delete_bucket_files__( $bucket );
-    $self->load_word_matrix_( 0 );
+    my $userid = $self->{db_userid__};
+    $self->{db__}->do( 
+        "delete from buckets where buckets.userid = $userid and buckets.name = '$bucket';" ); 
+    $self->db_update_cache__();
 
     return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
 #
-# delete_bucket_files__
-#
-# Helper that removes the files associated with a bucket
-#
-# $bucket          The bucket to tidy up
-#
-# ---------------------------------------------------------------------------------------------
-sub delete_bucket_files__
-{
-    my ( $self, $bucket ) = @_;
-    my $bucket_directory = $self->get_user_path_( $self->config_( 'corpus' ) . "/$bucket" );
-
-    unlink( "$bucket_directory/table.db" );
-    unlink( "$bucket_directory/table" );
-    unlink( "$bucket_directory/color" );
-    unlink( "$bucket_directory/params" );
-    unlink( "$bucket_directory/magnets" );
-    unlink( "$bucket_directory/delete" );
-    rmdir( $bucket_directory );
-
-    # If the bucket directory still exists then it indicates that the
-    # table was open in another process.  We create a special file
-    # called 'delete' which if present will cause the loader to try
-    # to delete the bucket
-
-    if ( -e $bucket_directory ) {
-        open DELETER, ">$bucket_directory/delete";
-        print DELETER "Special file used by POPFile to indicate that this bucket is to be deleted\n";
-        close DELETER;
-    }
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # rename_bucket
 #
-# Renames a bucket
+# Renames a bucket, returns 1 if the rename succeeded
 #
 # $old_bucket          The old name of the bucket
 # $new_bucket          The new name of the bucket
@@ -2092,17 +1816,16 @@ sub rename_bucket
 {
     my ( $self, $old_bucket, $new_bucket ) = @_;
 
-    if ( !defined( $self->{matrix__}{$old_bucket} ) ) {
+    my $userid = $self->{db_userid__};
+    my $result = $self->{db__}->do( 
+        "update buckets set name = '$new_bucket' where buckets.userid = $userid and buckets.name = '$old_bucket';" ); 
+
+    if ( !defined( $result ) || ( $result == -1 ) ) {
         return 0;
+    } else {
+        $self->db_update_cache__();
+        return 1;
     }
-
-    $self->close_database__();
-
-    rename($self->config_( 'corpus' ) . "/$old_bucket" , $self->config_( 'corpus' ) . "/$new_bucket");
-
-    $self->load_word_matrix_( 0 );
-
-    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2124,6 +1847,8 @@ sub add_words_to_bucket__
         $self->set_value_( $bucket, $word, $subtract * $self->{parser__}->{words__}{$word} + # PROFILE BLOCK START
             $self->get_base_value_( $bucket, $word ) );                                      # PROFILE BLOCK STOP
     }
+
+    $self->db_update_cache__();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2140,13 +1865,6 @@ sub add_messages_to_bucket
 {
     my ( $self, $bucket, @files ) = @_;
 
-    # Verify that the bucket exists.  You must call create_bucket before this
-    # when making a new bucket.
-
-    if ( !defined( $self->{matrix__}{$bucket} ) ) {
-        return 0;
-    }
-
     # Pass language parameter to parse_file()
 
     foreach my $file (@files) {
@@ -2154,7 +1872,7 @@ sub add_messages_to_bucket
         $self->add_words_to_bucket__( $bucket, 1 );
     }
 
-    return $self->load_word_matrix_( 0 );
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2188,19 +1906,12 @@ sub remove_message_from_bucket
 {
     my ( $self, $bucket, $file ) = @_;
 
-    # Verify that the bucket exists.  You must call create_bucket before this
-    # when making a new bucket.
-
-    if ( !defined( $self->{matrix__}{$bucket} ) ) {
-        return 0;
-    }
-
     # Pass language parameter to parse_file()
 
     $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
-
     $self->add_words_to_bucket__( $bucket, -1 );
-    return $self->load_word_matrix_( 0 );
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2274,24 +1985,21 @@ sub get_buckets_with_magnets
 {
     my ( $self ) = @_;
 
-    my @buckets;
+    my @result;
 
-    foreach my $b (sort keys %{$self->{magnets__}}) {
-        my @keys = keys %{$self->{magnets__}{$b}};
-
-        if ( $#keys >= 0 ) {
-            push @buckets, ($b);
-        }
+    $self->{db_get_buckets_with_magnets__}->execute( $self->{db_userid__} );
+    while ( my $row = $self->{db_get_buckets_with_magnets__}->fetchrow_arrayref ) {
+        push @result, ($row->[0]);
     }
 
-    return @buckets;
+    return @result;
 }
 
 # ---------------------------------------------------------------------------------------------
 #
 # get_magnet_types_in_bucket
 #
-# Returns the types of the magnetsd in a specific bucket
+# Returns the types of the magnets in a specific bucket
 #
 # $bucket          The bucket to search for magnets
 #
@@ -2300,7 +2008,23 @@ sub get_magnet_types_in_bucket
 {
     my ( $self, $bucket ) = @_;
 
-    return sort keys %{$self->{magnets__}{$bucket}};
+    my @result;
+
+    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $h = $self->{db__}->prepare( "select magnet_types.type from magnet_types, magnets, buckets
+        where magnet_types.id = magnets.mtid and
+              magnets.bucketid = buckets.id and
+              buckets.id = $bucketid 
+              group by magnet_types.type
+              order by magnet_types.type;" );
+
+    $h->execute;
+    while ( my $row = $h->fetchrow_arrayref ) {
+        push @result, ($row->[0]);
+    }
+    $h->finish;
+
+    return @result;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2316,14 +2040,9 @@ sub clear_bucket
 {
     my ( $self, $bucket ) = @_;
 
-    foreach my $word (keys %{$self->{matrix__}{$bucket}}) {
-        delete $self->{matrix__}{$bucket}{$word};
-    }
+    my $bucketid = $self->{db_bucketid__}{$bucket};
 
-    $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}      = 0;
-    $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__}     = 0;
-
-    return $self->load_word_matrix_( 0 );
+    $self->{db__}->do( "delete from matrix where matrix.bucketid = $bucketid;" );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2337,8 +2056,10 @@ sub clear_magnets
 {
     my ( $self ) = @_;
 
-    delete $self->{magnets__};
-    $self->calculate_magnet_count__();
+    for my $bucket (keys %{$self->{db_bucketid__}}) {
+        my $bucketid = $self->{db_bucketid__}{$bucket};
+        $self->{db__}->do( "delete from magnets where magnets.bucketid = $bucketid" );
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2355,18 +2076,21 @@ sub get_magnets
 {
     my ( $self, $bucket, $type ) = @_;
 
-    # In Japanese mode, disable locale.
-    # Sorting Japanese with "use locale" is memory and time consuming,
-    # and may cause perl crash.
+    my @result;
 
-    # Disable the locale in Korean mode, too.
+    my $bucketid = $self->{db_bucketid__}{$bucket};
+    my $h = $self->{db__}->prepare( "select magnets.value from magnets, magnet_types
+        where magnets.bucketid = $bucketid and
+              magnet_types.id = magnets.mtid and
+              magnet_types.type = '$type' order by magnets.value;" );
 
-    if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
-        no locale;
-        return sort keys %{$self->{magnets__}{$bucket}{$type}};
-    } else {
-        return sort keys %{$self->{magnets__}{$bucket}{$type}};
+    $h->execute;
+    while ( my $row = $h->fetchrow_arrayref ) {
+        push @result, ($row->[0]);
     }
+    $h->finish;
+
+    return @result;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2384,9 +2108,15 @@ sub create_magnet
 {
     my ( $self, $bucket, $type, $text ) = @_;
 
-    $self->{magnets__}{$bucket}{$type}{$text} = 1;
-    $self->save_magnets__();
-    $self->calculate_magnet_count__();
+    my $bucketid = $self->{db_bucketid__}{$bucket};
+
+    my $result = $self->{db__}->selectrow_arrayref("select magnet_types.id from magnet_types
+                                                        where magnet_types.type = '$type';" );
+
+    my $mtid = $result->[0];
+
+    $self->{db__}->do( "insert into magnets ( bucketid, mtid, value ) 
+                                     values ( $bucketid, $mtid, '$text' );" );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2398,10 +2128,19 @@ sub create_magnet
 # ---------------------------------------------------------------------------------------------
 sub get_magnet_types
 {
-    return ( 'from'    => 'From',  # PROFILE BLOCK START
-             'to'      => 'To',
-             'subject' => 'Subject',
-             'cc'      => 'Cc' );  # PROFILE BLOCK STOP
+    my ( $self ) = @_;
+
+    my %result;
+
+    my $h = $self->{db__}->prepare( "select magnet_types.type, magnet_types.header from magnet_types;" );
+
+    $h->execute;
+    while ( my $row = $h->fetchrow_arrayref ) {
+        $result{$row->[0]} = $row->[1];
+    }
+    $h->finish;
+
+    return %result;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2419,25 +2158,17 @@ sub delete_magnet
 {
     my ( $self, $bucket, $type, $text ) = @_;
 
-    delete $self->{magnets__}{$bucket}{$type}{$text};
+    my $bucketid = $self->{db_bucketid__}{$bucket};
 
-    # Now check to see if there are any magnets left of that type
+    my $result = $self->{db__}->selectrow_arrayref("select magnet_types.id from magnet_types
+                                                        where magnet_types.type = '$type';" );
 
-    my @keys = keys %{$self->{magnets__}{$bucket}{$type}};
-    if ( $#keys == -1 ) {
-        delete $self->{magnets__}{$bucket}{$type};
+    my $mtid = $result->[0];
 
-        # Now check to see if this bucket has any magnets
-
-        @keys = keys %{$self->{magnets__}{$bucket}};
-
-        if ( $#keys == -1 ) {
-            delete $self->{magnets__}{$bucket};
-	}
-    }
-
-    $self->save_magnets__();
-    $self->calculate_magnet_count__();
+    $self->{db__}->do( "delete from magnets 
+                            where magnets.bucketid = $bucketid and
+                                  magnets.mtid = $mtid and
+                                  magnets.value = '$text';" );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2452,6 +2183,29 @@ sub get_stopword_list
     my ( $self ) = @_;
 
     return $self->{parser__}->{mangle__}->stopwords();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# magnet_count
+#
+# Gets the number of magnets that are defined
+#
+# ---------------------------------------------------------------------------------------------
+sub magnet_count
+{
+    my ( $self ) = @_;
+
+    my $userid = $self->{db_userid__};
+    my $result = $self->{db__}->selectrow_arrayref( "select count(*) from magnets, buckets
+        where buckets.userid = $userid and
+              magnets.bucketid = buckets.id;" );
+
+    if ( defined( $result ) ) {
+        return $result->[0];
+    } else {
+        return 0;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2483,34 +2237,9 @@ sub remove_stopword
     return $self->{parser__}->{mangle__}->remove_stopword( $stopword, $self->module_config_( 'html', 'language' ) );
 }
 
-# GETTERS/SETTERS
-
-sub wordscores
-{
-    my ( $self, $value ) = @_;
-
-    $self->{wordscores__} = $value if (defined $value);
-    return $self->{wordscores__};
-}
-
-sub scores
-{
-    my ( $self, $value ) = @_;
-
-    $self->{scores__} = $value if (defined $value);
-    return $self->{scores__};
-}
-
-sub magnet_count
-{
-    my ( $self ) = @_;
-
-    return $self->{magnet_count__};
-}
-
 # ---------------------------------------------------------------------------------------------
 #
-# parse_with_kakasi
+# parse_with_kakasi__
 #
 # Parse Japanese mail message with Kakasi
 #
@@ -2521,7 +2250,7 @@ sub magnet_count
 # $file           The file to parse
 #
 # ---------------------------------------------------------------------------------------------
-sub parse_with_kakasi
+sub parse_with_kakasi__
 {
     my ( $self, $file, $dcount, $mcount ) = @_;
 
@@ -2561,6 +2290,312 @@ sub parse_with_kakasi
     Text::Kakasi::close_kanwadict();
     unlink( $file );
     rename( $temp_file, $file );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_connect__
+#
+# Connects to the POPFile database and returns 1 if successful
+#
+# ---------------------------------------------------------------------------------------------
+sub db_connect__
+{
+    my ( $self ) = @_;
+
+    # Connect to the database, note that the database must exist for this to work,
+    # to make this easy for people POPFile we will create the database automatically
+    # here using the file 'popfile.sql' which should be located in the same directory
+    # the Classifier/Bayes.pm module
+
+    my $dbname = $self->get_user_path_( $self->config_( 'database' ) );
+    my $dbpresent = ( -e $dbname ) || 0;
+
+    # Now perform the connect, note that this is database independent at this point, the
+    # actual database that we connect to is defined by the dbconnect parameter.
+
+    my $dbconnect = interpolate( $self->config_( 'dbconnect' ) );
+
+    $self->log_( "Attempting to connect to $dbconnect ($dbpresent)" );
+
+    $self->{db__} = DBI->connect( $dbconnect,
+                                  $self->config_( 'dbuser' ),
+                                  $self->config_( 'dbauth' ) );
+
+    if ( !defined( $self->{db__} ) ) {
+        $self->log_( "Failed to connect to database and got error DBI:errstr" );
+        return 0;
+    }
+   
+    if ( !$dbpresent ) {
+        if ( -e $self->get_root_path_( 'Classifier/popfile.sql' ) ) {
+            my $schema = '';
+
+            $self->log_( "Creating database schema" );
+
+            open SCHEMA, '<' . $self->get_root_path_( 'Classifier/popfile.sql' );
+            while ( <SCHEMA> ) {
+                next if ( /^--/ );
+                next if ( !/[a-z;]/ );
+                s/--.*$//;
+
+                $schema .= $_;
+
+                if ( ( /end;/ ) || ( /\);/ ) ) {
+                    $self->log_( "Performing SQL command: $schema" );
+                    $self->{db__}->do( $schema );
+                    $schema = '';
+		}
+	    }
+            close SCHEMA;
+	} else {
+            $self->log_( "Can't find the database schema" );
+            return 0;
+	}
+    }
+
+    # Now prepare common SQL statements for use, as a matter of convention the 
+    # parameters to each statement always appear in the following order:
+    #
+    # user
+    # bucket
+    # word
+    # parameter
+
+    $self->{db_get_buckets__} = $self->{db__}->prepare( 
+   	     'select buckets.name, buckets.id from buckets 
+                  where buckets.pseudo = 0 and        
+                        buckets.userid = ?;' );
+
+    $self->{db_get_wordid__} = $self->{db__}->prepare( 
+	     'select id from words 
+                  where words.word = ? limit 1;' );
+
+    $self->{db_get_word_count__} = $self->{db__}->prepare( 
+	     'select matrix.count from matrix
+                  where matrix.bucketid = ? and 
+                        matrix.wordid = ? limit 1;' );
+
+    $self->{db_put_word_count__} = $self->{db__}->prepare( 
+	   'insert or replace into matrix ( bucketid, wordid, count ) values ( ?, ?, ? );' );
+
+    $self->{db_get_bucket_unique_count__} = $self->{db__}->prepare( 
+	     'select count(*) from matrix 
+                  where matrix.bucketid = ?;' );
+
+    $self->{db_get_bucket_word_count__} = $self->{db__}->prepare( 
+	     'select sum(matrix.count) from matrix
+                  where matrix.bucketid = ?;' );
+
+    $self->{db_get_full_total__} = $self->{db__}->prepare( 
+	     'select sum(matrix.count) from matrix, buckets 
+                  where buckets.userid = ? and     
+                        matrix.bucketid = buckets.id;' ); 
+
+    $self->{db_get_bucket_parameter__} = $self->{db__}->prepare(
+             'select bucket_params.value from bucket_params, bucket_template, buckets
+                  where buckets.id = ? and 
+                        bucket_template.name = ? and         
+                        buckets.id = bucket_params.bucketid and  
+                        bucket_params.btid = bucket_template.id;' );
+
+    $self->{db_set_bucket_parameter__} = $self->{db__}->prepare( 
+	   'insert or replace into bucket_params ( bucketid, btid, value ) values ( ?, ?, ? );' );
+
+    $self->{db_get_bucket_parameter_default__} = $self->{db__}->prepare(
+             'select bucket_template.def from bucket_template
+                  where bucket_template.name = ?;' );
+    $self->{db_get_buckets_with_magnets__} = $self->{db__}->prepare(
+             'select buckets.name from buckets, magnets
+                  where buckets.userid = ? and
+                        magnets.bucketid = buckets.id group by buckets.name order by buckets.name;' );
+
+    $self->db_update_cache__();
+
+    return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_disconnect__
+#
+# Disconnect from the POPFile database
+#
+# ---------------------------------------------------------------------------------------------
+sub db_disconnect__
+{
+    my ( $self ) = @_;
+
+    $self->{db_get_buckets__}->finish; 
+    $self->{db_get_word_count__}->finish; 
+    $self->{db_put_word_count__}->finish; 
+    $self->{db_get_bucket_unique_count__}->finish; 
+    $self->{db_get_bucket_word_count__}->finish; 
+    $self->{db_get_full_total__}->finish; 
+    $self->{db_get_bucket_parameter__}->finish;
+    $self->{db_set_bucket_parameter__}->finish; 
+    $self->{db_get_bucket_parameter_default__}->finish;
+    $self->{db_get_buckets_with_magnets__}->finish; 
+
+    $self->{db__}->disconnect;
+    undef $self->{db__};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_update_cache__
+#
+# Updates our local cache of user and bucket ids.
+#
+# ---------------------------------------------------------------------------------------------
+sub db_update_cache__
+{
+    my ( $self ) = @_;
+
+    $self->{db_userid__} = $self->db_get_user_id__( 'admin' );
+
+    delete $self->{db_bucketid__};
+    $self->{db_get_buckets__}->execute( $self->{db_userid__} );
+    while ( my $row = $self->{db_get_buckets__}->fetchrow_arrayref ) {
+        $self->{db_bucketid__}{$row->[0]} = $row->[1];
+    }
+
+    for my $bucket (keys %{$self->{db_bucketid__}}) {
+        $self->{db_get_bucket_word_count__}->execute( $self->{db_bucketid__}{$bucket} );
+        my $row = $self->{db_get_bucket_word_count__}->fetchrow_arrayref;
+        $self->{db_bucketcount__}{$bucket} = $row->[0];
+    }
+
+    $self->update_constants__();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_get_user_id__
+#
+# Returns the unique ID for a named user
+#
+# $name         Name of user to look up
+#
+# ---------------------------------------------------------------------------------------------
+sub db_get_user_id__
+{
+    my ( $self, $name ) = @_;
+
+    my $result = $self->{db__}->selectrow_arrayref( "select users.id from users where 
+                                                         users.name = '$name';" );
+
+    return $result->[0];
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_get_word_count__
+#
+# Return the 'count' value for a word in a bucket.  If the word is not found in that
+# bucket then returns undef.
+#
+# $bucket           bucket word is in
+# $word             word to lookup
+#
+# ---------------------------------------------------------------------------------------------
+sub db_get_word_count__ 
+{
+    my ( $self, $bucket, $word ) = @_;
+    
+    $self->{db_get_wordid__}->execute( $word );
+    my $result = $self->{db_get_wordid__}->fetchrow_arrayref;
+    if ( !defined( $result ) ) {
+        return undef;
+    }
+
+    my $wordid = $result->[0];
+
+    $self->{db_get_word_count__}->execute( $self->{db_bucketid__}{$bucket}, $wordid );
+    $result = $self->{db_get_word_count__}->fetchrow_arrayref;
+    if ( defined( $result ) ) {
+         return $result->[0];
+    } else {
+         return undef;
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_put_word_count__
+#
+# Update 'count' value for a word in a bucket, if the update fails then returns 0
+# otherwise is returns 1
+#
+# $bucket           bucket word is in
+# $word             word to update
+# $count            new count value 
+#
+# ---------------------------------------------------------------------------------------------
+sub db_put_word_count__ 
+{
+    my ( $self, $bucket, $word, $count ) = @_;
+
+    # We need to have two things before we can start, the id of the word in the words
+    # table (if there's none then we need to add the word), the bucket id in the buckets
+    # table (which must exist)
+
+    $word = $self->{db__}->quote($word);
+
+    my $result = $self->{db__}->selectrow_arrayref("select words.id from words 
+                                                        where words.word = $word limit 1;");
+
+    if ( !defined( $result ) ) {
+        $self->{db__}->do( "insert into words ( word ) values ( $word );" );
+        $result = $self->{db__}->selectrow_arrayref("select words.id from words 
+                                                         where words.word = $word limit 1;");
+    }
+
+    my $wordid = $result->[0];
+    my $bucketid = $self->{db_bucketid__}{$bucket};
+
+    $self->{db_put_word_count__}->execute( $bucketid, $wordid, $count );
+
+    return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# db_delete_word__
+#
+# Delete a word from the database from a specific bucket, returns 1 if successful and 0
+# otherwise
+#
+# $bucket           bucket word is in
+# $word             word to delete
+#
+# ---------------------------------------------------------------------------------------------
+sub db_delete_word__ 
+{
+    my ( $self, $bucket, $word ) = @_;
+
+    $word = $self->{db__}->quote($word);
+
+    return defined( $self->{db__}->do(
+        "delete from corpus where bucket = '$bucket' and word = $word ;" ) );
+}
+
+# GETTERS/SETTERS
+
+sub wordscores
+{
+    my ( $self, $value ) = @_;
+
+    $self->{wordscores__} = $value if (defined $value);
+    return $self->{wordscores__};
+}
+
+sub scores
+{
+    my ( $self, $value ) = @_;
+
+    $self->{scores__} = $value if (defined $value);
+    return $self->{scores__};
 }
 
 sub wmformat

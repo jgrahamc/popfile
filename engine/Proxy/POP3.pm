@@ -509,6 +509,7 @@ sub child__
                     # Note locally that file has been retrieved
 
                     $downloaded{$count} = 1;
+                    $self->log_( "message retrieve complete" );
                 }
             }
 
