@@ -102,6 +102,40 @@
 
 #--------------------------------------------------------------------------
 #
+# Macros used when writing log files during Outlook Express account processing
+#
+#--------------------------------------------------------------------------
+
+  !macro OECONFIG_LOG_ENTRY LOGTYPE VALUE WIDTH
+
+    !insertmacro PFI_UNIQUE_ID
+
+    Push $R9
+    Push $R8
+
+    StrCpy $R9 "${VALUE}"
+    StrLen $R8 $R9
+    IntCmp $R8 ${WIDTH} copy_${PFI_UNIQUE_ID} 0 copy_${PFI_UNIQUE_ID}
+    StrCpy $R9 "$R9                              " ${WIDTH}
+
+  copy_${PFI_UNIQUE_ID}:
+    FileWrite $G_${LOGTYPE}_HANDLE "$R9  "
+
+    Pop $R8
+    Pop $R9
+
+  !macroend
+
+  !macro OOECONFIG_BEFORE_LOG VALUE WIDTH
+    !insertmacro OECONFIG_LOG_ENTRY "OOECONFIG" "${VALUE}" "${WIDTH}"
+  !macroend
+
+  !macro OOECONFIG_CHANGES_LOG VALUE WIDTH
+    !insertmacro OECONFIG_LOG_ENTRY "OOECHANGES" "${VALUE}" "${WIDTH}"
+  !macroend
+
+#--------------------------------------------------------------------------
+#
 # Macro used by the uninstaller
 # (guards against unexpectedly removing the corpus or message history)
 #
@@ -142,6 +176,7 @@ Label_C_${PFI_UNIQUE_ID}:
 # Functions used only by the installer
 #
 #==============================================================================================
+
 
 #--------------------------------------------------------------------------
 # Installer Function: GetSeparator
@@ -339,11 +374,652 @@ done:
 FunctionEnd
 
 
+#--------------------------------------------------------------------------
+# Installer Function: GetIEVersion
+#
+# Uses the registry to determine which version of Internet Explorer is installed.
+#
+# Inputs:
+#         (none)
+# Outputs:
+#         (top of stack)     - string containing the Internet Explorer version
+#                              (1.x, 2.x, 3.x, 4.x, 5.0, 5.5, 6.0). If Internet Explorer
+#                              is not installed properly or at all, '?.?' is returned.
+#
+# Usage:
+#         Call GetIEVersion
+#         Pop $R0
+#
+#         ($R0 at this point is "5.0", for example)
+#
+#--------------------------------------------------------------------------
+
+Function GetIEVersion
+
+  !define L_REGDATA   $R9
+  !define L_TEMP      $R8
+
+  Push ${L_REGDATA}
+  Push ${L_TEMP}
+
+  ClearErrors
+  ReadRegStr ${L_REGDATA} HKLM "Software\Microsoft\Internet Explorer" "Version"
+  IfErrors ie_123
+
+  ; Internet Explorer 4.0 or later is installed. The 'Version' value is a string with the
+  ; following format: major-version.minor-version.build-number.sub-build-number
+
+  ; According to MSDN, the 'Version' string under 'HKLM\Software\Microsoft\Internet Explorer'
+  ; can have the following values:
+  ;
+  ; Internet Explorer Version     'Version' string
+  ;    4.0                          4.71.1712.6
+  ;    4.01                         4.72.2106.8
+	;    4.01 SP1                     4.72.3110.3
+	;    5                  	        5.00.2014.0216
+	;    5.5                          5.50.4134.0100
+	;    6.0 Public Preview           6.0.2462.0000
+	;    6.0 Public Preview Refresh   6.0.2479.0006
+	;    6.0 RTM                    	6.0.2600.0000
+
+  StrCpy ${L_TEMP} ${L_REGDATA} 1
+  StrCmp ${L_TEMP} "4" ie_4
+  StrCpy ${L_REGDATA} ${L_REGDATA} 3
+  Goto done
+
+ie_4:
+  StrCpy ${L_REGDATA} "4.x"
+  Goto done
+
+ie_123:
+
+  ; Older versions of Internet Explorer use the 'IVer' string under the same registry key
+  ; (HKLM\Software\Microsoft\Internet Explorer). The 'IVer' string is used as follows:
+  ;
+  ; Internet Explorer 1.0 for Windows 95 (included with Microsoft Plus! for Windows 95)
+  ; uses the value '100'
+  ;
+  ; Internet Explorer 2.0 for Windows 95 uses the value '102'
+  ;
+  ; Versions of Internet Explorer that are included with Windows NT 4.0 use the value '101'
+  ;
+  ; Internet Explorer 3.x updates the 'IVer' string value to '103'
+
+  ClearErrors
+  ReadRegStr ${L_REGDATA} HKLM "Software\Microsoft\Internet Explorer" "IVer"
+  IfErrors error
+
+  StrCpy ${L_REGDATA} ${L_REGDATA} 3
+  StrCmp ${L_REGDATA} '100' ie1
+  StrCmp ${L_REGDATA} '101' ie2
+  StrCmp ${L_REGDATA} '102' ie2
+
+  StrCpy ${L_REGDATA} '3.x'       ; default to ie3 if not 100, 101, or 102.
+  Goto done
+
+ie1:
+  StrCpy ${L_REGDATA} '1.x'
+  Goto done
+
+ie2:
+  StrCpy ${L_REGDATA} '2.x'
+  Goto done
+
+error:
+  StrCpy ${L_REGDATA} '?.?'
+
+done:
+  Pop ${L_TEMP}
+  Exch ${L_REGDATA}
+
+  !undef L_REGDATA
+  !undef L_TEMP
+
+FunctionEnd
+
+
+#==============================================================================================
+# Function StrLower
+#==============================================================================================
+# The current CVS code only works properly if the short-filename path uses lowercase
+#
+#  Usage Example:
+#
+#    Push "C:\PROGRA~1\SQLPFILE"
+#    Call StrLower
+#    Pop $R0
+#
+#   ($R0 at this point is "c:\progra~1\sqlpfile")
+#
+#==============================================================================================
+
+Function StrLower
+
+  !define C_LOWERCASE    "abcdefghijklmnopqrstuvwxyz"
+
+  Exch $0   ; The input string
+  Push $2   ; Holds the result
+  Push $3   ; A character from the input string
+  Push $4   ; The offset to a character in the "validity check" string
+  Push $5   ; A character from the "validity check" string
+  Push $6   ; Holds the current "validity check" string
+
+  StrCpy $2 ""
+
+next_input_char:
+  StrCpy $3 $0 1              ; Get next character from the input string
+  StrCmp $3 "" done
+  StrCpy $6 ${C_LOWERCASE}$3  ; Add character to end of "validity check" to guarantee a match
+  StrCpy $0 $0 "" 1
+  StrCpy $4 -1
+
+next_valid_char:
+  IntOp $4 $4 + 1
+  StrCpy $5 $6 1 $4   ; Extract next "valid" character (from "validity check" string)
+  StrCmp $3 $5 0 next_valid_char  ; we will ALWAYS find a match in the "validity check" string
+  StrCpy $2 $2$5      ; Use "valid" character to ensure we store lowercase letters in the result
+  goto next_input_char
+
+done:
+  StrCpy $0 $2      ; Result is a string with no uppercase letters
+  Pop $6
+  Pop $5
+  Pop $4
+  Pop $3
+  Pop $2
+  Exch $0           ; place result on top of the stack
+
+  !undef C_LOWERCASE
+
+FunctionEnd
+
+
 #==============================================================================================
 #
 # Macro-based Functions used by the installer and by the uninstaller
 #
 #==============================================================================================
+
+
+#--------------------------------------------------------------------------
+# Macro: GetLocalTime
+#
+# The installation process and the uninstall process may need a function which gets the
+# local time from Windows (to generate data and/or time stamps, etc). This macro makes
+# maintenance easier by ensuring that both processes use identical functions, with
+# the only difference being their names.
+#
+# Normally this function will be used by a higher level one which returns a suitable string.
+#
+# NOTE:
+# The !insertmacro GetLocalTime "" and !insertmacro GetLocalTime "un." commands are included
+# in this file so 'installer.nsi' and/or other library functions in 'pfi-library.nsh' can use
+# 'Call GetLocalTime' and 'Call un.GetLocalTime' without additional preparation.
+#
+# Inputs:
+#         (none)
+# Outputs:
+#         (top of stack)     - year         (4-digits)
+#         (top of stack - 1) - month        (1 to 12)
+#         (top of stack - 2) - day of week  (0 = Sunday, 6 = Saturday)
+#         (top of stack - 3) - day          (1 - 31)
+#         (top of stack - 4) - hours        (0 - 23)
+#         (top of stack - 5) - minutes      (0 - 59)
+#         (top of stack - 6) - seconds      (0 - 59)
+#         (top of stack - 7) - milliseconds (0 - 999)
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Call GetLocalTime
+#         Pop $Year
+#         Pop $Month
+#         Pop $DayOfWeek
+#         Pop $Day
+#         Pop $Hours
+#         Pop $Minutes
+#         Pop $Seconds
+#         Pop $Milliseconds
+#--------------------------------------------------------------------------
+
+!macro GetLocalTime UN
+  Function ${UN}GetLocalTime
+
+    # Preparing Variables
+
+    Push $1
+    Push $2
+    Push $3
+    Push $4
+    Push $5
+    Push $6
+    Push $7
+    Push $8
+
+    # Calling the Function GetLocalTime from Kernel32.dll
+
+    System::Call '*(&i2, &i2, &i2, &i2, &i2, &i2, &i2, &i2) i .r1'
+    System::Call 'kernel32::GetLocalTime(i) i(r1)'
+    System::Call '*$1(&i2, &i2, &i2, &i2, &i2, &i2, &i2, &i2)(.r8, .r7, .r6, .r5, .r4, .r3, .r2, .r1)'
+
+    # Returning to User
+
+    Exch $8
+    Exch
+    Exch $7
+    Exch
+    Exch 2
+    Exch $6
+    Exch 2
+    Exch 3
+    Exch $5
+    Exch 3
+    Exch 4
+    Exch $4
+    Exch 4
+    Exch 5
+    Exch $3
+    Exch 5
+    Exch 6
+    Exch $2
+    Exch 6
+    Exch 7
+    Exch $1
+    Exch 7
+
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: GetLocalTime
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro GetLocalTime ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetLocalTime
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetLocalTime "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: GetDateStamp
+#
+# The installation process and the uninstall process may need a function which uses the
+# local time from Windows to generate a date stamp (eg '08-Dec-2003'). This macro makes
+# maintenance easier by ensuring that both processes use identical functions, with
+# the only difference being their names.
+#
+# NOTE:
+# The !insertmacro GetDateStamp "" and !insertmacro GetDateStamp "un." commands are included
+# in this file so 'installer.nsi' and/or other library functions in 'pfi-library.nsh' can use
+# 'Call GetDateStamp' and 'Call un.GetDateStamp' without additional preparation.
+#
+# Inputs:
+#         (none)
+# Outputs:
+#         (top of stack)     - string holding current date (eg '07-Dec-2003')
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Call un.GetDateStamp
+#         Pop $R9
+#
+#         ($R9 now holds a string like '07-Dec-2003')
+#--------------------------------------------------------------------------
+
+!macro GetDateStamp UN
+  Function ${UN}GetDateStamp
+
+    !define L_DATESTAMP   $R9
+    !define L_DAY         $R8
+    !define L_MONTH       $R7
+    !define L_YEAR        $R6
+
+    Push ${L_DATESTAMP}
+    Push ${L_DAY}
+    Push ${L_MONTH}
+    Push ${L_YEAR}
+
+    Call ${UN}GetLocalTime
+    Pop ${L_YEAR}
+    Pop ${L_MONTH}
+    Pop ${L_DAY}          ; ignore day of week
+    Pop ${L_DAY}
+    Pop ${L_DATESTAMP}    ; ignore hours
+    Pop ${L_DATESTAMP}    ; ignore minutes
+    Pop ${L_DATESTAMP}    ; ignore seconds
+    Pop ${L_DATESTAMP}    ; ignore milliseconds
+
+    IntCmp ${L_DAY} 10 +2 0 +2
+    StrCpy ${L_DAY} "0${L_DAY}"
+
+    StrCmp ${L_MONTH} 1 0 +3
+    StrCpy ${L_MONTH} Jan
+    Goto AssembleStamp
+
+    StrCmp ${L_MONTH} 2 0 +3
+    StrCpy ${L_MONTH} Feb
+    Goto AssembleStamp
+
+    StrCmp ${L_MONTH} 3 0 +3
+    StrCpy ${L_MONTH} Mar
+    Goto AssembleStamp
+
+    StrCmp ${L_MONTH} 4 0 +3
+    StrCpy ${L_MONTH} Apr
+    Goto AssembleStamp
+
+    StrCmp ${L_MONTH} 5 0 +3
+    StrCpy ${L_MONTH} May
+    Goto AssembleStamp
+
+    StrCmp ${L_MONTH} 6 0 +3
+    StrCpy ${L_MONTH} Jun
+    Goto AssembleStamp
+
+    StrCmp ${L_MONTH} 7 0 +3
+    StrCpy ${L_MONTH} Jul
+    Goto AssembleStamp
+
+    StrCmp ${L_MONTH} 8 0 +3
+    StrCpy ${L_MONTH} Aug
+    Goto AssembleStamp
+
+    StrCmp ${L_MONTH} 9 0 +3
+    StrCpy ${L_MONTH} Sep
+    Goto AssembleStamp
+
+    StrCmp ${L_MONTH} 10 0 +3
+    StrCpy ${L_MONTH} Oct
+    Goto AssembleStamp
+
+    StrCmp ${L_MONTH} 11 0 +3
+    StrCpy ${L_MONTH} Nov
+    Goto AssembleStamp
+
+    StrCmp ${L_MONTH} 12 0 +2
+    StrCpy ${L_MONTH} Dec
+
+  AssembleStamp:
+    StrCpy ${L_DATESTAMP} "${L_DAY}-${L_MONTH}-${L_YEAR}"
+
+    Pop ${L_YEAR}
+    Pop ${L_MONTH}
+    Pop ${L_DAY}
+    Exch ${L_DATESTAMP}
+
+    !undef L_DATESTAMP
+    !undef L_DAY
+    !undef L_MONTH
+    !undef L_YEAR
+
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: GetDateStamp
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetDateStamp ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetDateStamp
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetDateStamp "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: GetTimeStamp
+#
+# The installation process and the uninstall process may need a function which uses the
+# local time from Windows to generate a time stamp (eg '01:23:45'). This macro makes
+# maintenance easier by ensuring that both processes use identical functions, with
+# the only difference being their names.
+#
+# NOTE:
+# The !insertmacro GetTimeStamp "" and !insertmacro GetTimeStamp "un." commands are included
+# in this file so 'installer.nsi' and/or other library functions in 'pfi-library.nsh' can use
+# 'Call GetTimeStamp' and 'Call un.GetTimeStamp' without additional preparation.
+#
+# Inputs:
+#         (none)
+# Outputs:
+#         (top of stack)     - string holding current time (eg '23:01:59')
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Call GetTimeStamp
+#         Pop $R9
+#
+#         ($R9 now holds a string like '23:01:59')
+#--------------------------------------------------------------------------
+
+!macro GetTimeStamp UN
+  Function ${UN}GetTimeStamp
+
+    !define L_TIMESTAMP   $R9
+    !define L_HOURS       $R8
+    !define L_MINUTES     $R7
+    !define L_SECONDS     $R6
+
+    Push ${L_TIMESTAMP}
+    Push ${L_HOURS}
+    Push ${L_MINUTES}
+    Push ${L_SECONDS}
+
+    Call ${UN}GetLocalTIme
+    Pop ${L_TIMESTAMP}    ; ignore year
+    Pop ${L_TIMESTAMP}    ; ignore month
+    Pop ${L_TIMESTAMP}    ; ignore day of week
+    Pop ${L_TIMESTAMP}    ; ignore day
+    Pop ${L_HOURS}
+    Pop ${L_MINUTES}
+    Pop ${L_SECONDS}
+    Pop ${L_TIMESTAMP}    ; ignore milliseconds
+
+    IntCmp ${L_HOURS} 10 +2 0 +2
+    StrCpy ${L_HOURS} "0${L_HOURS}"
+
+    IntCmp ${L_MINUTES} 10 +2 0 +2
+    StrCpy ${L_MINUTES} "0${L_MINUTES}"
+
+    IntCmp ${L_SECONDS} 10 +2 0 +2
+    StrCpy ${L_SECONDS} "0${L_SECONDS}"
+
+    StrCpy ${L_TIMESTAMP} "${L_HOURS}:${L_MINUTES}:${L_SECONDS}"
+
+    Pop ${L_SECONDS}
+    Pop ${L_MINUTES}
+    Pop ${L_HOURS}
+    Exch ${L_TIMESTAMP}
+
+    !undef L_TIMESTAMP
+    !undef L_HOURS
+    !undef L_MINUTES
+    !undef L_SECONDS
+
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: GetTimeStamp
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetTimeStamp ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetTimeStamp
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetTimeStamp "un."
+
+
+#--------------------------------------------------------------------------
+# Macro: GetDateTimeStamp
+#
+# The installation process and the uninstall process may need a function which returns a
+# string with the current date and time (using the current time from Windows). This macro
+# makes maintenance easier by ensuring that both processes use identical functions, with
+# the only difference being their names.
+#
+# NOTE:
+# The !insertmacro GetDateTimeStamp "" and !insertmacro GetDateTimeStamp "un." commands are
+# included in this file so 'installer.nsi' and/or other library functions in 'pfi-library.nsh'
+# can use 'Call GetDateTimeStamp' & 'Call un.GetDateTimeStamp' without additional preparation.
+#
+# Inputs:
+#         (none)
+# Outputs:
+#         (top of stack)     - string with current date and time (eg '08-Dec-2003 @ 23:01:59')
+#
+#  Usage (after macro has been 'inserted'):
+#
+#         Call GetDateTimeStamp
+#         Pop $R9
+#
+#         ($R9 now holds a string like '08-Dec-2003 @ 23:01:59')
+#--------------------------------------------------------------------------
+
+!macro GetDateTimeStamp UN
+  Function ${UN}GetDateTimeStamp
+
+    !define L_DATETIMESTAMP   $R9
+    !define L_DAY             $R8
+    !define L_MONTH           $R7
+    !define L_YEAR            $R6
+    !define L_HOURS           $R5
+    !define L_MINUTES         $R4
+    !define L_SECONDS         $R3
+
+    Push ${L_DATETIMESTAMP}
+    Push ${L_DAY}
+    Push ${L_MONTH}
+    Push ${L_YEAR}
+    Push ${L_HOURS}
+    Push ${L_MINUTES}
+    Push ${L_SECONDS}
+
+    Call ${UN}GetLocalTIme
+    Pop ${L_YEAR}
+    Pop ${L_MONTH}
+    Pop ${L_DAY}              ; ignore day of week
+    Pop ${L_DAY}
+    Pop ${L_HOURS}
+    Pop ${L_MINUTES}
+    Pop ${L_SECONDS}
+    Pop ${L_DATETIMESTAMP}    ; ignore milliseconds
+
+    IntCmp ${L_DAY} 10 +2 0 +2
+    StrCpy ${L_DAY} "0${L_DAY}"
+
+    StrCmp ${L_MONTH} 1 0 +3
+    StrCpy ${L_MONTH} Jan
+    Goto DoubleDigitTime
+
+    StrCmp ${L_MONTH} 2 0 +3
+    StrCpy ${L_MONTH} Feb
+    Goto DoubleDigitTime
+
+    StrCmp ${L_MONTH} 3 0 +3
+    StrCpy ${L_MONTH} Mar
+    Goto DoubleDigitTime
+
+    StrCmp ${L_MONTH} 4 0 +3
+    StrCpy ${L_MONTH} Apr
+    Goto DoubleDigitTime
+
+    StrCmp ${L_MONTH} 5 0 +3
+    StrCpy ${L_MONTH} May
+    Goto DoubleDigitTime
+
+    StrCmp ${L_MONTH} 6 0 +3
+    StrCpy ${L_MONTH} Jun
+    Goto DoubleDigitTime
+
+    StrCmp ${L_MONTH} 7 0 +3
+    StrCpy ${L_MONTH} Jul
+    Goto DoubleDigitTime
+
+    StrCmp ${L_MONTH} 8 0 +3
+    StrCpy ${L_MONTH} Aug
+    Goto DoubleDigitTime
+
+    StrCmp ${L_MONTH} 9 0 +3
+    StrCpy ${L_MONTH} Sep
+    Goto DoubleDigitTime
+
+    StrCmp ${L_MONTH} 10 0 +3
+    StrCpy ${L_MONTH} Oct
+    Goto DoubleDigitTime
+
+    StrCmp ${L_MONTH} 11 0 +3
+    StrCpy ${L_MONTH} Nov
+    Goto DoubleDigitTime
+
+    StrCmp ${L_MONTH} 12 0 +2
+    StrCpy ${L_MONTH} Dec
+
+  DoubleDigitTime:
+    IntCmp ${L_HOURS} 10 +2 0 +2
+    StrCpy ${L_HOURS} "0${L_HOURS}"
+
+    IntCmp ${L_MINUTES} 10 +2 0 +2
+    StrCpy ${L_MINUTES} "0${L_MINUTES}"
+
+    IntCmp ${L_SECONDS} 10 +2 0 +2
+    StrCpy ${L_SECONDS} "0${L_SECONDS}"
+
+    StrCpy ${L_DATETIMESTAMP} "${L_DAY}-${L_MONTH}-${L_YEAR} @ ${L_HOURS}:${L_MINUTES}:${L_SECONDS}"
+
+    Pop ${L_SECONDS}
+    Pop ${L_MINUTES}
+    Pop ${L_HOURS}
+    Pop ${L_YEAR}
+    Pop ${L_MONTH}
+    Pop ${L_DAY}
+    Exch ${L_DATETIMESTAMP}
+
+    !undef L_DATETIMESTAMP
+    !undef L_DAY
+    !undef L_MONTH
+    !undef L_YEAR
+    !undef L_HOURS
+    !undef L_MINUTES
+    !undef L_SECONDS
+
+  FunctionEnd
+!macroend
+
+#--------------------------------------------------------------------------
+# Installer Function: GetDateTimeStamp
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
+
+!insertmacro GetDateTimeStamp ""
+
+#--------------------------------------------------------------------------
+# Uninstaller Function: un.GetDateTimeStamp
+#
+# This function is used during the uninstall process
+#--------------------------------------------------------------------------
+
+;!insertmacro GetDateTimeStamp "un."
+
 
 #--------------------------------------------------------------------------
 # Macro: GetCorpusPath
@@ -734,26 +1410,28 @@ FunctionEnd
 
 !macro GetParent UN
   Function ${UN}GetParent
-    Exch $R0              ; old $R0 is on top of stack
+    Exch $R0
     Push $R1
     Push $R2
     Push $R3
-    StrLen $R3 $R0
+
     StrCpy $R1 0
+    StrLen $R2 $R0
 
   loop:
-    IntOp $R1 $R1 - 1
-    IntCmp $R1 -$R3 exit exit
-    StrCpy $R2 $R0 1 $R1
-    StrCmp $R2 "\" exit
+    IntOp $R1 $R1 + 1
+    IntCmp $R1 $R2 get 0 get
+    StrCpy $R3 $R0 1 -$R1
+    StrCmp $R3 "\" get
     Goto loop
 
-  exit:
-    StrCpy $R0 $R0 $R1
+  get:
+    StrCpy $R0 $R0 -$R1
+
     Pop $R3
     Pop $R2
     Pop $R1
-    Exch $R0              ; put $R0 on top of stack, restore $R0 to original value
+    Exch $R0
   FunctionEnd
 !macroend
 
