@@ -330,9 +330,7 @@ sub http_error_
 
     $self->log_( 0, "HTTP error $error returned" );
 
-    if ( $client->connected ) {
-        print $client "HTTP/1.0 $error Error$eol$eol";
-    }
+    print $client "HTTP/1.0 $error Error$eol$eol";
 }
 
 # ---------------------------------------------------------------------------------------------
