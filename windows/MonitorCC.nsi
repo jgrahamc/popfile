@@ -24,8 +24,8 @@
 #
 #--------------------------------------------------------------------------
 
-; This version of the script has been tested with the "NSIS 2 Release Candidate 3" compiler,
-; released 26 January 2004, with no patches applied.
+; This version of the script has been tested with the "NSIS 2 Release Candidate 4" compiler,
+; released 2 February 2004, with no patches applied.
 ; Expect 3 compiler warnings, all related to standard NSIS language files which are out-of-date.
 
 #--------------------------------------------------------------------------
@@ -51,6 +51,10 @@
 #    ITAIJIDICTPATH=full path to the 'itaijidict' file (created by installer if KReboot=yes)
 #    KANWADICTPATH=full path to the 'kanwadict' file (created by installer if KReboot=yes)
 #
+#  [FolderList]
+#    MaxNum=number of bucket folders found by installer (each has a Path-n entry in the section)
+#    Path-n=full path to a bucket folder (created and used by installer)
+#
 #  [BucketList]
 #    FileCount=number of bucket files found by the installer (each has a [Bucket-n] section)
 #    TotalSize=total size (in bytes) of all bucket files found by the installer
@@ -73,7 +77,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.1"
+  !define C_PFI_VERSION  "0.1.2"
 
   ; Mention the version number in the window title
 
@@ -474,6 +478,13 @@ FunctionEnd
 # Installer Section: ConvertCorpus
 #--------------------------------------------------------------------------
 
+  ; This 'Section' makes extensive use of the 'System' plugin, so we follow the recommendation
+  ; of the plugin's author and tell NSIS not to bother unloading it after every call. At the
+  ; end of the section we must ensure that we manually unload the DLL otherwise NSIS will not
+  ; be able to delete the $PLUGINSDIR (see the code immediately before the 'SectionEnd' line).
+
+  SetPluginUnload alwaysoff
+
 Section ConvertCorpus
 
   !define C_LOOP_DELAY    5000    ; delay (in milliseconds) used after each pass through list
@@ -734,6 +745,11 @@ exit:
   !undef L_TEMP
   !undef L_TIME_LEFT
 
+  ; We can now unload the system.dll (this allows NSIS to delete the DLL from $PLUGINSDIR)
+
+  SetPluginUnload manual
+  System::Free 0
+
 SectionEnd
 
 
@@ -752,7 +768,7 @@ SectionEnd
 #         Call GetParameters
 #         Pop $R0
 #
-#        ($R0 will hold everything found on the command-line after the 'monitorcc.exe' part)
+#         ($R0 will hold everything found on the command-line after the 'monitorcc.exe' part)
 #
 #--------------------------------------------------------------------------
 
@@ -823,7 +839,7 @@ Function GetLocalTimeAsMin100
   Push $2
   Push $3
 
-  System::Call '*(stSYSTEMTIME) i .r1'
+  System::Call '*(&i2, &i2, &i2, &i2, &i2, &i2, &i2, &i2) i .r1'
   System::Call '*(i, i) l .r0'
   System::Call 'kernel32::GetLocalTime(i) i(r1)'
   System::Call 'kernel32::SystemTimeToFileTime(i, l) l(r1, r0)'
@@ -870,13 +886,13 @@ FunctionEnd
 # Outputs:
 #         (top of stack)          - output string
 #
-# Usage:
+#  Usage:
 #
-#         Push "C:\PROGRA~1\SQLPFILE"
-#         Call StrLower
-#         Pop $R0
+#    Push "C:\PROGRA~1\SQLPFILE"
+#    Call StrLower
+#    Pop $R0
 #
-#         ($R0 at this point is "c:\progra~1\sqlpfile")
+#   ($R0 at this point is "c:\progra~1\sqlpfile")
 #
 #--------------------------------------------------------------------------
 
