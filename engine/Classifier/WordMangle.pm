@@ -233,11 +233,9 @@ sub load_stop_words
 {
     my ($self) = @_;
     
-    if ( open STOPS, "<stopwords" )
-    {
+    if ( open STOPS, "<stopwords" ) {
         delete $self->{stop};
-        while ( <STOPS> )
-        {
+        while ( <STOPS> ) {
             s/[\r\n]//g;
             $self->{stop}{$_} = 1;
         }
@@ -250,10 +248,8 @@ sub save_stop_words
 {
     my ($self) = @_;
     
-    if ( open STOPS, ">stopwords" )
-    {
-        for my $word (keys %{$self->{stop}})
-        {
+    if ( open STOPS, ">stopwords" ) {
+        for my $word (keys %{$self->{stop}}) {
             print STOPS "$word\n";
         }
         

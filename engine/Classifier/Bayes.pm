@@ -18,7 +18,7 @@ use Classifier::WordMangle;
 #   Class new() function
 #----------------------------------------------------------------------------
 
-sub new
+sub new 
 {
     my $type = shift;
     my $self;
@@ -91,15 +91,13 @@ sub new
 #
 # ---------------------------------------------------------------------------------------------
 
-sub write_parameters
+sub write_parameters 
 {
     my ($self) = @_;
     
-    for my $bucket (keys %{$self->{total}}) 
-    {
+    for my $bucket (keys %{$self->{total}})  {
         open PARAMS, ">$self->{corpus}/$bucket/params";
-        for my $param (keys %{$self->{parameters}{$bucket}})
-        {
+        for my $param (keys %{$self->{parameters}{$bucket}}) {
             print PARAMS "$param $self->{parameters}{$bucket}{$param}\n";
         }
         close PARAMS;
@@ -116,21 +114,18 @@ sub write_parameters
 #
 # ---------------------------------------------------------------------------------------------
 
-sub get_color
+sub get_color 
 {
     my ($self, $word) = @_;
     
     my $max   = -10000;
     my $color = 'black';
     
-    for my $bucket (keys %{$self->{total}})
-    {
+    for my $bucket (keys %{$self->{total}}) {
         my $prob = get_value( $self, $bucket, $word);
         
-        if ( $prob != 0 ) 
-        {
-            if ( $prob > $max ) 
-            {
+        if ( $prob != 0 )  {
+            if ( $prob > $max )  {
                 $max   = $prob;
                 $color = $self->{colors}{$bucket};
             }
@@ -152,21 +147,18 @@ sub get_color
 #
 # ---------------------------------------------------------------------------------------------
 
-sub get_value
+sub get_value 
 {
     my ($self, $bucket, $word) = @_;
     $word =~ /^(.)/;
     my $i = ord($1);
     
-    if ( defined($self->{matrix}{$bucket}[$i]) )
-    {
+    if ( defined($self->{matrix}{$bucket}[$i]) ) {
         return $1 if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E L([\-\.\d]+)\|/ ) != 0 );
     }
     
-    if ( defined($self->{matrix}{$bucket}[$i]) )
-    {
-        if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E (\d+)\|/ ) != 0 ) 
-        {
+    if ( defined($self->{matrix}{$bucket}[$i]) ) {
+        if ( ( $self->{matrix}{$bucket}[$i] =~ /\|\Q$word\E (\d+)\|/ ) != 0 )  {
             my $newvalue = log($1 / $self->{total}{$bucket});
             set_value( $self, $bucket, $word, "L$newvalue" );
             return $newvalue;
@@ -176,7 +168,7 @@ sub get_value
     return 0;
 }
 
-sub set_value
+sub set_value 
 {
     my ($self, $bucket, $word, $value) = @_;
     $word =~ /^(.)/;
@@ -194,22 +186,17 @@ sub set_value
 #
 # ---------------------------------------------------------------------------------------------
 
-sub update_constants
+sub update_constants 
 {
     my ($self) = @_;
     
-    if ( $self->{full_total} > 0 ) 
-    {
+    if ( $self->{full_total} > 0 )  {
         $self->{not_likely} = log( 1 / ( 10 * $self->{full_total} ) );
     
-        foreach my $bucket (keys %{$self->{total}})
-        {
-            if ( $self->{total}{$bucket} != 0 )
-            {
+        foreach my $bucket (keys %{$self->{total}}) {
+            if ( $self->{total}{$bucket} != 0 ) {
                 $self->{bucket_start}{$bucket} = log($self->{total}{$bucket} / $self->{full_total});
-            }
-            else
-            {
+            } else {
                 $self->{bucket_start}{$bucket} = 0;
             }
         }
@@ -224,7 +211,7 @@ sub update_constants
 #
 # ---------------------------------------------------------------------------------------------
 
-sub load_word_matrix
+sub load_word_matrix 
 {
     my ($self) = @_;
     my $c      = 0;
@@ -237,13 +224,11 @@ sub load_word_matrix
     
     my @buckets = glob "$self->{corpus}/*";
     
-    foreach my $bucket (@buckets)
-    {
+    foreach my $bucket (@buckets) {
         my $color = '';
 
         # See if there's a color file specified
-        if ( open COLOR, "<$bucket/color" )
-        {
+        if ( open COLOR, "<$bucket/color" ) {
             $color = <COLOR>;
             $color =~ s/[\r\n]//g;
             close COLOR;
@@ -254,19 +239,13 @@ sub load_word_matrix
         $bucket =  $1;
         $self->{full_total} += $self->{total}{$bucket};
         
-        if ( $color eq '' ) 
-        {
-            if ( $c < $#{$self->{possible_colors}} )
-            {
+        if ( $color eq '' )  {
+            if ( $c < $#{$self->{possible_colors}} ) {
                 $self->{colors}{$bucket} = $self->{possible_colors}[$c];
-            } 
-            else 
-            {
+            } else {
                 $self->{colors}{$bucket} = 'black';
             }
-        }
-        else 
-        {
+        } else {
             $self->{colors}{$bucket} = $color;
         }
 
@@ -286,7 +265,7 @@ sub load_word_matrix
 #
 # ---------------------------------------------------------------------------------------------
 
-sub load_bucket
+sub load_bucket 
 {
     my ($self, $bucket) = @_;
 
@@ -302,13 +281,10 @@ sub load_bucket
     $self->{magnets}{$bucket} = {};
 
     # See if there's a color file specified
-    if ( open PARAMS, "<$self->{corpus}/$bucket/params" )
-    {
-        while ( <PARAMS> ) 
-        {
+    if ( open PARAMS, "<$self->{corpus}/$bucket/params" ) {
+        while ( <PARAMS> )  {
             s/[\r\n]//g;
-            if ( /^([[:lower:]]+) ([^ ]+)$/ ) 
-            {
+            if ( /^([[:lower:]]+) ([^ ]+)$/ )  {
                 $self->{parameters}{$bucket}{$1} = $2;
             }
         }
@@ -316,17 +292,12 @@ sub load_bucket
     }
 
     # See if there are magnets defined
-    if ( open MAGNETS, "<$self->{corpus}/$bucket/magnets" )
-    {
-        while ( <MAGNETS> ) 
-        {
+    if ( open MAGNETS, "<$self->{corpus}/$bucket/magnets" ) {
+        while ( <MAGNETS> )  {
             s/[\r\n]//g;
-            if ( /^([^ ]+) (.+)$/ ) 
-            {
+            if ( /^([^ ]+) (.+)$/ )  {
                 $self->{magnets}{$bucket}{$1}{$2} = 1;
-            } 
-            else 
-            {
+            } else {
                 $self->{magnets}{$bucket}{from}{$1} = 1 if ( /^(.+)$/ );
             }
         }
@@ -336,14 +307,10 @@ sub load_bucket
     # Each line in the word table is a word and a count
     $self->{total}{$bucket} = 0;
 
-    if ( open WORDS, "<$self->{corpus}/$bucket/table" ) 
-    {
-        while (<WORDS>)
-        {
-            if ( /__CORPUS__ __VERSION__ (\d+)/ )
-            {
-                if ( $1 != $self->{corpus_version} ) 
-                {
+    if ( open WORDS, "<$self->{corpus}/$bucket/table" )  {
+        while (<WORDS>) {
+            if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
+                if ( $1 != $self->{corpus_version} )  {
                     print "Incompatible corpus version in $bucket\n";
                     return;
                 }
@@ -351,13 +318,11 @@ sub load_bucket
                 next;
             }
 
-            if ( /(.+) (.+)/ )
-            {
+            if ( /(.+) (.+)/ ) {
                 my $word = $self->{mangler}->mangle($1);
                 my $value = $2;
                 $value =~ s/[\r\n]//g;
-                if ( $value > 0 ) 
-                {
+                if ( $value > 0 )  {
                     $self->{total}{$bucket}        += $value;
                     $self->{unique}{$bucket}       += 1;
                     set_value( $self, $bucket, $word, $value );
@@ -379,18 +344,15 @@ sub load_bucket
 #
 # ---------------------------------------------------------------------------------------------
 
-sub save_magnets
+sub save_magnets 
 {
     my ($self) = @_;
     
-    for my $bucket (keys %{$self->{total}})
-    {
+    for my $bucket (keys %{$self->{total}}) {
         open MAGNET, ">$self->{corpus}/$bucket/magnets";
         
-        for my $type (keys %{$self->{magnets}{$bucket}}) 
-        {        
-            for my $from (keys %{$self->{magnets}{$bucket}{$type}}) 
-            {
+        for my $type (keys %{$self->{magnets}{$bucket}})  {        
+            for my $from (keys %{$self->{magnets}{$bucket}{$type}})  {
                 print MAGNET "$type $from\n";
             }
         }
@@ -410,7 +372,7 @@ sub save_magnets
 #
 # ---------------------------------------------------------------------------------------------
 
-sub classify_file
+sub classify_file 
 {
     my ($self, $file) = @_;
     my $msg_total = 0;
@@ -429,14 +391,10 @@ sub classify_file
     
     my @buckets = keys %{$self->{total}};
 
-    for my $bucket (sort keys %{$self->{magnets}}) 
-    {
-        for my $type (sort keys %{$self->{magnets}{$bucket}})
-        {
-            for my $magnet (sort keys %{$self->{magnets}{$bucket}{$type}})
-            {
-                if ( $self->{parser}->{$type} =~ /\Q$magnet\E/i )
-                {
+    for my $bucket (sort keys %{$self->{magnets}})  {
+        for my $type (sort keys %{$self->{magnets}{$bucket}}) {
+            for my $magnet (sort keys %{$self->{magnets}{$bucket}{$type}}) {
+                if ( $self->{parser}->{$type} =~ /\Q$magnet\E/i ) {
                     $self->{scores}        = "<b>Magnet Used</b><p>Classified to <font color=$self->{colors}{$bucket}>$bucket</font> because of magnet $type: $magnet";
                     $self->{magnet_used}   = 1;
                     $self->{magnet_detail} = "$type: $magnet";
@@ -460,8 +418,7 @@ sub classify_file
     my %wtprob;
     my %wbprob;
     
-    for my $bucket (@buckets)
-    {
+    for my $bucket (@buckets) {
         $score{$bucket} = $self->{bucket_start}{$bucket};
     }
     
@@ -484,17 +441,14 @@ sub classify_file
 
     # Switching from using *= to += and using the log of every probability instead
 
-    foreach my $word (keys %{$self->{parser}->{words}})
-    {
+    foreach my $word (keys %{$self->{parser}->{words}}) {
         my $wmax = -10000;
-        if ($self->{wordscores}) 
-        {
+        if ($self->{wordscores})  {
             $wtprob{$word} = 0;
             $wbprob{$word} = {};
         }
         
-        foreach my $bucket (@buckets)
-        {
+        foreach my $bucket (@buckets) {
             my $probability = get_value( $self, $bucket, $word );
 
             $probability = $self->{not_likely} if ( $probability == 0 );
@@ -504,19 +458,15 @@ sub classify_file
             # and we multiply by the number of times that the word occurs
 
             $score{$bucket} += ( $probability * $self->{parser}{words}{$word} );
-            if ($self->{wordscores}) 
-            {
+            if ($self->{wordscores})  {
                 $wtprob{$word} += exp($probability);
                 $wbprob{$word}{$bucket} = exp($probability);
             }
         }
         
-        if ($wmax > $self->{not_likely})
-        {
+        if ($wmax > $self->{not_likely}) {
             $correction += ($wmax - $logbuck) * $self->{parser}{words}{$word};
-        }
-        else
-        {
+        } else {
             $correction += $wmax * $self->{parser}{words}{$word};
         }
         $wordprob{$word} = exp($wmax);
@@ -526,8 +476,7 @@ sub classify_file
 
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
     my @wordrank;
-    if ($self->{wordscores})
-    {
+    if ($self->{wordscores}) {
         @wordrank = sort {($wordprob{$b} / $wtprob{$b}) <=> ($wordprob{$a} / $wtprob{$a})} keys %wordprob;
     }
 
@@ -539,8 +488,7 @@ sub classify_file
     # estimate.  $total is always 1 after the first loop iteration, so any additional term
     # less than 2 ** -54 is insignificant, and need not be computed.
 
-    foreach my $b (@ranking)
-    {
+    foreach my $b (@ranking) {
         $raw_score{$b} = $score{$b};
         $score{$b} -= $base_score;
         $total += exp($score{$b}) if ($score{$b} > 54 * log(0.5));
@@ -548,16 +496,12 @@ sub classify_file
 
     $self->{scores} = "<b>Scores</b><p><table><tr><td>Bucket<td>&nbsp;<td>Probability";
     print "Bucket              Raw score      Normalized     Estimated prob\n\n" if $self->{debug};
-    foreach my $b (@ranking)
-    {
+    foreach my $b (@ranking) {
          my $prob = exp($score{$b})/$total;
          my $probstr;
-         if ($prob >= 0.1 || $prob == 0.0)
-         {
+         if ($prob >= 0.1 || $prob == 0.0) {
              $probstr = sprintf("%12.6f", $prob);
-         }
-         else
-         {
+         } else {
              $probstr = sprintf("%17.6e", $prob);
          }
          $self->{scores} .= "<tr><td><font color=$self->{colors}{$b}><b>$b</b></font><td>&nbsp;<td>$probstr";
@@ -565,16 +509,13 @@ sub classify_file
     }
     $self->{scores} .= "</table>";
 
-    if ($self->{wordscores})
-    {
+    if ($self->{wordscores}) {
         $self->{scores} .= "<table><tr><td colspan=4>&nbsp;</td></tr><tr><td><b>Word</b></td><td><b>Prob</b></td><td>&nbsp;</td><td><font color=$self->{colors}{$ranking[0]}><b>$ranking[0]</b></font></td></tr>";
         my $wi = 0;
-        foreach my $word (@wordrank)
-        {
+        foreach my $word (@wordrank) {
             if ( $wi < 20 && $wordprob{$word} / $wtprob{$word} >= 0.25 ) {
                 my $wordstr = $word;
-                if ( length($wordstr)>14 ) 
-                {
+                if ( length($wordstr)>14 )  {
                     $wordstr =~ /(.{12})/;
                     $wordstr = "$1...";
                 }
@@ -593,12 +534,9 @@ sub classify_file
 
     # If no bucket has a probability better than 0.5, call the message "unclassified".
 
-    if ( ( $total == 0 ) || ( $score{$ranking[0]} <= log($self->{unclassified} * $total) ) )
-    {
+    if ( ( $total == 0 ) || ( $score{$ranking[0]} <= log($self->{unclassified} * $total) ) ) {
         return "unclassified";
-    }
-    else
-    {
+    } else {
         return $ranking[0];
     }
 }
