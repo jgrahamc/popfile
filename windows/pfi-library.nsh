@@ -926,7 +926,7 @@ FunctionEnd
    exit_now:
     Pop ${L_TIMEOUT}
     Pop ${L_FILE_HANDLE}
-    Exch ${L_EXE}
+    Pop ${L_EXE}
     
     !undef L_EXE
     !undef L_FILE_HANDLE
