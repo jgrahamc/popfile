@@ -980,7 +980,7 @@ sub history_page
     my $body = "<h2>Recent Messages</h2><table width=100%><tr><td></td><td><b>From</b><td><b>Subject</b><td><b>Classification</b><td><b>Should be</b>";
 
     # Handle clearing the history files
-    if ( $form{clear} eq 'Clear+All' )
+    if ( $form{clear} eq 'Remove+All' )
     {
         my @mail_files = glob "popfile*.msg";
 
