@@ -1238,7 +1238,7 @@ sub history_page
         $filtered .= " (search for subject $form{search})";
     }
 
-    my $body = "<h2>Recent Messages$filtered</h2>"; 
+    my $body = ''; 
 
     # Handle undo
     if ( defined($form{undo}) )
@@ -1433,21 +1433,6 @@ sub history_page
     
     if ( $#history_cache >= 0 ) 
     {
-        $body .= "<table width=100%><tr valign=bottom><td></td><td><b>From</b><td><b>Subject</b><td><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all>&lt;Show All&gt;</option>";
-        
-        my @buckets = sort keys %{$classifier->{total}};
-        foreach my $abucket (@buckets)
-        {
-            $body .= "<option value=$abucket";
-            
-            if ( ( defined($form{filter}) ) && ( $form{filter} eq $abucket ) )
-            {
-                $body .= " selected";
-            }
-            
-            $body .= ">$abucket</option>";
-        }
-        $body .= "</select><input type=submit class=submit name=setfilter value=Filter></form><b>Classification</b><td><b>Should be</b>";            
         my $start_message = 0;
         $start_message = $form{start_message} if ( ( defined($form{start_message}) ) && ($form{start_message} > 0 ) );
         my $stop_message  = $start_message + $configuration{page_size} - 1;
@@ -1481,6 +1466,57 @@ sub history_page
         }
         
         $stop_message  = $#history_cache if ( $stop_message >= $#history_cache );
+
+        if ( $configuration{page_size} <= $#history_cache )
+        {
+            $body .= "<table width=100%><tr><td align=left><h2>Recent Messages$filtered</h2><td align=right>Jump to message: ";
+            if ( $start_message != 0 ) 
+            {
+                $body .= "<a href=/history?start_message=";
+                $body .= $start_message - $configuration{page_size};
+                $body .= "&session=$session_key&filter=$form{filter}>< Previous</a> ";
+            }
+            my $i = 0;
+            while ( $i <= $#history_cache )
+            {
+                if ( $i == $start_message ) 
+                {
+                    $body .= "<b>";
+                    $body .= $i+1 . "</b>";
+                }
+                else 
+                {
+                    $body .= "<a href=/history?start_message=$i&session=$session_key&filter=$form{filter}>";
+                    $body .= $i+1 . "</a>";
+                }
+
+                $body .= " ";
+                $i += $configuration{page_size};
+            }
+            if ( $start_message < ( $#history_cache - $configuration{page_size} ) ) 
+            {
+                $body .= "<a href=/history?start_message=";
+                $body .= $start_message + $configuration{page_size};
+                $body .= "&session=$session_key&filter=$form{filter}>Next ></a>";
+            }
+            $body .= "</table>";
+        }
+        
+        $body .= "<table width=100%><tr valign=bottom><td></td><td><b>From</b><td><b>Subject</b><td><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all>&lt;Show All&gt;</option>";
+        
+        my @buckets = sort keys %{$classifier->{total}};
+        foreach my $abucket (@buckets)
+        {
+            $body .= "<option value=$abucket";
+            
+            if ( ( defined($form{filter}) ) && ( $form{filter} eq $abucket ) )
+            {
+                $body .= " selected";
+            }
+            
+            $body .= ">$abucket</option>";
+        }
+        $body .= "</select><input type=submit class=submit name=setfilter value=Filter></form><b>Classification</b><td><b>Should be</b>";            
 
         my $stripe = 0;
 
@@ -1722,45 +1758,10 @@ sub history_page
 
         $body .= "</table><form action=/history><input type=hidden name=filter value=$form{filter}><b>To remove entries in the history click: <input type=submit class=submit name=clear value='Remove All'>";
         $body .= "<input type=submit class=submit name=clear value='Remove Page'><input type=hidden name=session value=$session_key><input type=hidden name=start_message value=$start_message></form><form action=/history><input type=hidden name=filter value=$form{filter}><input type=hidden name=session value=$session_key>Search Subject: <input type=text name=search> <input type=submit class=submit name=searchbutton Value=Find></form>";
-
-        if ( $configuration{page_size} <= $#history_cache )
-        {
-            $body .= "<p><center>Jump to message: ";
-            if ( $start_message != 0 ) 
-            {
-                $body .= "<a href=/history?start_message=";
-                $body .= $start_message - $configuration{page_size};
-                $body .= "&session=$session_key&filter=$form{filter}>< Previous</a> ";
-            }
-            my $i = 0;
-            while ( $i <= $#history_cache )
-            {
-                if ( $i == $start_message ) 
-                {
-                    $body .= "<b>";
-                    $body .= $i+1 . "</b>";
-                }
-                else 
-                {
-                    $body .= "<a href=/history?start_message=$i&session=$session_key&filter=$form{filter}>";
-                    $body .= $i+1 . "</a>";
-                }
-
-                $body .= " ";
-                $i += $configuration{page_size};
-            }
-            if ( $start_message < ( $#history_cache - $configuration{page_size} ) ) 
-            {
-                $body .= "<a href=/history?start_message=";
-                $body .= $start_message + $configuration{page_size};
-                $body .= "&session=$session_key&filter=$form{filter}>Next ></a>";
-            }
-            $body .= "</center>";
-        }
     }
     else
     {
-        $body .= "<b>No messages.</b><p><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all>&lt;Show All&gt;</option>";
+        $body .= "<h2>Recent Messages$filtered</h2><p><b>No messages.</b><p><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all>&lt;Show All&gt;</option>";
         
         my @buckets = sort keys %{$classifier->{total}};
         foreach my $abucket (@buckets)
