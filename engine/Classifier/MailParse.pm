@@ -977,6 +977,7 @@ sub parse_html
     my ( $self, $line, $encoded ) = @_;
 
     my $found = 1;
+    my $non_html = '';
 
     $line =~ s/[\r\n]+//gm;
 
@@ -993,7 +994,7 @@ sub parse_html
     # optional attributes and removes them if the tag isn't
     # recognized.
 
-    # FIXME: This also removes tags in plain text emails so a sentence
+    # TODO: This also removes tags in plain text emails so a sentence
     # such as 'To run the program type "program <filename>".' is also
     # effected.  The correct fix seams to be to look at the
     # Content-Type header and only process mails of type text/html.
@@ -1005,8 +1006,8 @@ sub parse_html
 
     # Remove pairs of non-spacing tags without content such as <b></b>
     # and also <b><i></i></b>.
-    
-    # FIXME: What about combined open and close tags such as <b />?
+
+    # TODO: What about combined open and close tags such as <b />?
 
     while ( $line =~s/(<($non_spacing_tags)(?:\s+[^>]*?)?><\/\2>)//io ) {
         $self->update_pseudoword( 'html', 'emptypair', $encoded, $1 );
@@ -1032,6 +1033,7 @@ sub parse_html
                 next;
             } else {
                 $self->{html_arg__} .= $line;
+                $self->add_line( $non_html, $encoded, '' );
                 return 1;
             }
         }
@@ -1054,6 +1056,7 @@ sub parse_html
             $self->{html_tag__}    = $2;
             $self->{html_arg__}    = $3;
             $self->{in_html_tag__} = 1;
+            $self->add_line( $non_html, $encoded, '' );
             return 1;
         }
 
@@ -1063,9 +1066,11 @@ sub parse_html
 
         if ( $line =~ s/^([^<]+)(<|$)/$2/ ) {
             $found = 1;
-            add_line( $self, $1, $encoded, '' );
+            $non_html .= $1;
         }
     }
+
+    $self->add_line( $non_html, $encoded, '' );
 
     return 0;
 }
