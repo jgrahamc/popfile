@@ -104,7 +104,7 @@ my $header = "<html><head><title>POPFile Control Center</title><style type=text/
 </table>\
 <table class=shell align=center width=100%><tr class=top><td class=border_topLeft></td><td class=border_top></td><td class=border_topRight></td></tr><tr> \
 <td class=border_left></td><td style='padding:0px; margin: 0px; border:none'>";
-my $footer = "</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center><table class=footer><tr><td>POPFile VERSION - <a href=http://popfile.sourceforge.net/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a> - (TIME)</td></tr></table></body></html>";
+my $footer = "</td><td class=border_right></td></tr><tr class=bottom><td class=border_bottomLeft></td><td class=border_bottom></td><td class=border_bottomRight></td></tr></table><p align=center><table class=footer><tr><td>POPFile VERSION - <a href=http://popfile.sourceforge.net/manual.html>Manual</a> - <a href=http://popfile.sourceforge.net/>POPFile Home Page</a> - <a href=http://sourceforge.net/forum/forum.php?forum_id=213876>Feed Me!</a> - <a href=http://lists.sourceforge.net/lists/listinfo/popfile-announce>Mailing List</a> - (TIME) - (LASTUSER)</td></tr></table></body></html>";
 
 # Hash used to store form parameters
 my %form = ();
@@ -120,6 +120,9 @@ my $today;
 
 # The available skins
 my @skins;
+
+# The name of the last user to pass through POPFile
+my $lastuser = 'none';
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -584,7 +587,7 @@ sub verify_have_uidl
             # This gets the UIDL for a message            
             if ( /(\d+) ([^\r\n]+)/ )
             {
-                for ( my $i = 0; $i <= $highest_message; $i++ )
+                for ( my $i = 1; $i <= $highest_message; $i++ )
                 {
                     if ( $messages[$message_map[$i]]{'server_number'} == $1 )
                     {
@@ -740,6 +743,7 @@ sub http_ok
     $text =~ s/CURRENT_SKIN/skins\/$configuration{skin}\.css/;
     my $time = localtime;
     $text =~ s/TIME/$time/;
+    $text =~ s/LASTUSER/$lastuser/;
     
     my $http_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
     $http_header .= length($text);
@@ -1494,13 +1498,19 @@ sub compare_mf
     my $an;
     my $bn;
     
-    $a =~ /popfile(.*)_(.*)\.msg/;
-    $an = $2;
-    $b =~ /popfile(.*)_(.*)\.msg/;
-    $bn = $2;
+    if ( $a =~ /popfile(.*)_(.*)\.msg/ ) 
+    {
+        $an = $2;
+        
+        if ( $b =~ /popfile(.*)_(.*)\.msg/ )
+        {
+            $bn = $2;
     
-    return ( $bn <=> $an );
+            return ( $bn <=> $an );
+        }
+    }
     
+    return 0;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2170,6 +2180,8 @@ sub run_popfile
                 {
                     if ( verify_connected( $client, $1, $3 || 110 ) ) 
                     {
+                        $lastuser = $4;
+                        
                         # Pass through the USER command with the actual user name for this server,
                         # and send the reply straight to the client
                         echo_response( $mail, $client, "USER $4" );
@@ -2188,6 +2200,8 @@ sub run_popfile
                 {
                     if ( verify_connected( $client,  $1, $3 || 110 ) ) 
                     {
+                        $lastuser = $4;
+                        
                         # Pass through the USER command with the actual user name for this server,
                         # and send the reply straight to the client
                         echo_response( $mail, $client, "APOP $4 $5" );
