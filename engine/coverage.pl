@@ -42,14 +42,14 @@ foreach my $file (sort @line_files) {
     while ( <SOURCE_FILE> ) {
         $current_line += 1;
 
-   	my $state = <LINE_DATA>;
+        my $state = <LINE_DATA>;
 
         if ( $state =~ /1/ ) {
             $count{$module}{executed}{$current_line} = 1;
         } elsif ( $state =~ /0/ ) {
-	    if ( $count{$module}{executed}{$current_line} != 1 ) {
+            if ( $count{$module}{executed}{$current_line} != 1 ) {
                 $count{$module}{executed}{$current_line} = 0;
-	    }
+            }
         }
     }
 
@@ -67,7 +67,7 @@ foreach my $module ( keys( %count ) )
     foreach my $line ( keys %{$count{$module}{executed}} ) {
         if ($count{$module}{executed}{$line} == 1) {
             $total_executed += 1;
-	} else {
+        } else {
             $total_not_executed += 1;
         }
     }
@@ -110,7 +110,7 @@ foreach my $file (sort {$files{$b} <=> $files{$a}} keys %files) {
         while ( $length > 0 ) {
              print HTML " ";
              $length -= 1;
-	}
+        }
         print HTML "$line </font>";
         print HTML "<span style=\"background: $block\">&nbsp;</span><font color=$color>$_</font>";
     }

@@ -296,7 +296,7 @@ sub update_word
             if ( $encoded == 0 )  {
                 $after = '&' if ( $after eq '>' );
                 if ( !( $self->{ut__} =~ s/($before)\Q$word\E($after)/$1<b><font color=\"$color\">$word<\/font><\/b>$2/ ) ) {
-                	print "Could not find $word for colorization\n" if ( $self->{debug__} );
+                    print "Could not find $word for colorization\n" if ( $self->{debug__} );
                 }
             } else {
                 $self->{ut__} .= "<font color=\"$color\">$word<\/font> ";
@@ -344,7 +344,7 @@ sub add_line
         $self->compute_html_color_distance();
         if ( $self->{htmlcolordistance__} < 100 ) {
             $self->update_pseudoword( 'html', "colordistance$self->{htmlcolordistance__}", $encoded, '' );
-	}
+        }
 
         while ( $p < length($bigline) ) {
             my $line = substr($bigline, $p, 1024);
@@ -440,7 +440,7 @@ sub add_line
     } else {
         if ( $bigline =~ /[^ \t]/ ) {
             $self->update_pseudoword( 'trick', 'invisibleink', $encoded, $bigline );
-	}
+        }
     }
 }
 
@@ -475,13 +475,13 @@ sub update_tag
             $self->compute_html_color_distance();
         }
 
-	# If we hit a table tag then any font information is lost
+        # If we hit a table tag then any font information is lost
 
-	if ( $tag =~ /^(table|td|tr|th)$/i ) {
-	    $self->{htmlfontcolor__} = map_color( $self, 'black' );
-	    $self->{htmlbackcolor__} = $self->{htmlbodycolor__};
+        if ( $tag =~ /^(table|td|tr|th)$/i ) {
+            $self->{htmlfontcolor__} = map_color( $self, 'black' );
+            $self->{htmlbackcolor__} = $self->{htmlbodycolor__};
             $self->compute_html_color_distance();
-	}
+        }
 
         return;
     }
@@ -551,9 +551,9 @@ sub update_tag
                 # an off machine image
 
                 if ( ( $host ne '' ) && ( $tag =~ /^img$/i ) ) {
-        	    if ( $host ne 'localhost' ) {
+                    if ( $host ne 'localhost' ) {
                         $self->update_pseudoword( 'html', 'imgremotesrc', $encoded, $original );
-        	    }
+                    }
                 }
 
                 next;
@@ -613,7 +613,7 @@ sub update_tag
             $self->update_pseudoword( 'html', "fontcolor$value", $encoded, $original );
             $self->{htmlfontcolor__} = map_color($self, $value);
             $self->compute_html_color_distance();
-			print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug__} );
+            print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug__} );
         }
 
         if ( ( $attribute =~ /^text$/i ) && ( $tag =~ /^body$/i ) ) {
@@ -621,7 +621,7 @@ sub update_tag
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
             $self->{htmlfontcolor__} = map_color($self, $value);
             $self->compute_html_color_distance();
-			print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug__} );
+            print "Set html font color to $self->{htmlfontcolor__}\n" if ( $self->{debug__} );
         }
 
         # The width and height of images
@@ -643,7 +643,7 @@ sub update_tag
             update_word( $self, $value, $encoded, $quote, $end_quote, '' );
             $self->update_pseudoword( 'html', "backcolor$value" );
             $self->{htmlbackcolor__} = map_color($self, $value);
-			print "Set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug__} );
+            print "Set html back color to $self->{htmlbackcolor__}\n" if ( $self->{debug__} );
 
             $self->{htmlbodycolor__} = $self->{htmlbackcolor__} if ( $tag =~ /^body$/i );
             $self->compute_html_color_distance();
@@ -1336,7 +1336,7 @@ sub decode_string
                 $decode_it =~ s/\_/=20/g;
                 $decode_it = decode_qp( $decode_it );
                 $mystring =~ s/=\?[\w-]+\?Q\?(.*?)\?=/$decode_it/i;
-	    }
+            }
         }
     }
 

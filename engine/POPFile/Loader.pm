@@ -609,7 +609,7 @@ sub CORE_stop
         print "\n         {$type:" if $self->{debug__};
         foreach my $name (keys %{$self->{components__}{$type}}) {
             print " $name" if $self->{debug__};
-	    flush STDOUT;
+            flush STDOUT;
             $self->{components__}{$type}{$name}->alive(0);
             $self->{components__}{$type}{$name}->stop();
         }

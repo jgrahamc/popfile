@@ -174,9 +174,9 @@ sub debug
 
         push @{$self->{last_ten__}}, ($msg);
 
-	if ( $#{$self->{last_ten__}} > 9 ) {
+        if ( $#{$self->{last_ten__}} > 9 ) {
             shift @{$self->{last_ten__}};
-	}
+        }
     }
 }
 

@@ -203,15 +203,15 @@ sub flush_child_data_
                 # a message with a specific classification
 
                 $self->mq_post_( 'CLASS', $1, '' );
-	    }
+            }
 
             if ( $message =~ /NEWFL:(.*)/ ) {
                 $self->mq_post_( 'NEWFL', $1, '' );
-	    }
+            }
 
             if ( $message =~ /LOGIN:(.*)/ ) {
                 $self->mq_post_( 'LOGIN', $1, '' );
-	    }
+            }
         } else {
             # This is here so that we get in errorneous position where the pipeready
             # function is returning that there's data, but there is none, in fact the
@@ -418,7 +418,7 @@ sub flush_extra_
 
         if ( $n > 0 ) {
             $self->tee_( $client, $buf ) if ( $discard != 1 );
-	}
+        }
     }
 
    return $buf;

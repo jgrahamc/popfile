@@ -418,20 +418,20 @@ sub url_handler__
             # Skip the session key since we are in the process of
             # assigning a new one through the password page
 
-	    if ( $k ne 'session' ) {
+            if ( $k ne 'session' ) {
 
                 # If we are dealing with an array of values (see parse_form__
                 # for details) then we need to unpack it into separate entries),
                 # we ignore non-array values since all values have an array equivalent
 
-	        if ( $k =~ /^(.+)_array$/ ) {
+                if ( $k =~ /^(.+)_array$/ ) {
                     my $field = $1;
 
                     foreach my $v (@{$self->{form_}{$k}}) {
                         $redirect_url .= "$field=$v&"
-		    }
-	        }
-	    }
+                    }
+                }
+            }
         }
 
         $redirect_url =~ s/&$//;
@@ -467,7 +467,7 @@ sub url_handler__
         $self->invalidate_history_cache() if ( !$found );
         if ( -e ( $self->global_config_( 'msgdir' ) . $file ) ) {
             $self->http_redirect_( $client, "/view?session=$self->{session_key__}&view=$self->{form_}{view}" );
-	} else {
+        } else {
             $self->http_redirect_( $client, "/history" );
         }
         return 1;
@@ -1101,7 +1101,7 @@ sub configuration_page
                  $line = "$1...";
 
                  $body .= "<a title=\"$full_line\">$line</a><br>";
-   	    }
+            }
 
             $body .= '</tt>';
         }
@@ -1301,7 +1301,7 @@ sub advanced_page
         foreach my $param (sort keys %{$self->{form_}}) {
             if ( $param =~ /parameter_(.*)/ ) {
                 $self->{configuration__}->parameter( $1, $self->{form_}{$param} );
-    	    }
+            }
         }
 
         $self->{configuration__}->save_configuration();
@@ -1437,13 +1437,13 @@ sub magnet_page
 
     if ( defined( $self->{form_}{delete} ) ) {
         for my $i ( 1 .. $self->{form_}{count} ) {
-  	    if ( defined( $self->{form_}{"remove$i"} ) && ( $self->{form_}{"remove$i"} ) ) {
+            if ( defined( $self->{form_}{"remove$i"} ) && ( $self->{form_}{"remove$i"} ) ) {
                 my $mtype   = $self->{form_}{"type$i"};
                 my $mtext   = $self->{form_}{"text$i"};
                 my $mbucket = $self->{form_}{"bucket$i"};
 
                 $self->{classifier__}->delete_magnet( $mbucket, $mtype, $mtext );
-	    }
+            }
         }
     }
 
@@ -1459,7 +1459,7 @@ sub magnet_page
                 my $obucket = $self->{form_}{"obucket$i"};
 
                 $self->{classifier__}->delete_magnet( $obucket, $otype, $otext );
-	    }
+            }
 
             if ( ( defined($mbucket) ) && ( $mbucket ne '' ) && ( $mtext ne '' ) ) {
                 my $found = 0;
@@ -1490,7 +1490,7 @@ sub magnet_page
                             }
                         }
                     }
-		}
+                }
 
                 if ( $found == 0 ) {
 
@@ -1506,7 +1506,7 @@ sub magnet_page
                     if ( !defined( $self->{form_}{update} ) ) {
                         $magnet_message .= "<blockquote>" . sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $mtext", $mbucket ) . "</blockquote>";
                     }
-		}
+                }
             }
         }
     }
@@ -1555,9 +1555,9 @@ sub magnet_page
         for my $type ($self->{classifier__}->get_magnet_types_in_bucket($bucket)) {
             for my $magnet ($self->{classifier__}->get_magnets( $bucket, $type))  {
                 $count += 1;
-   	        if ( ( $count < $start_magnet ) || ( $count > $stop_magnet ) ) {
+                if ( ( $count < $start_magnet ) || ( $count > $stop_magnet ) ) {
                     next;
-		}
+                }
 
                 $i += 1;
                 $body .= "<tr ";
@@ -1584,10 +1584,10 @@ sub magnet_page
 
                 $body .= ">\n<td><select name=\"type$i\" id=\"magnetsAddType\">\n";
 
-		for my $mtype (keys %magnet_types) {
+                for my $mtype (keys %magnet_types) {
                     my $selected = ( $mtype eq $type )?"selected":"";
                     $body .= "<option value=\"$mtype\" $selected>\n$self->{language__}{$magnet_types{$mtype}}</option>\n";
-		}
+                }
                 $body .= "</select>: <input type=\"text\" name=\"text$i\" value=\"$validatingMagnet\" size=\"" . max(length($magnet),50) . "\" /></td>\n";
                 $body .= "<td><select name=\"bucket$i\" id=\"magnetsAddBucket\">\n";
 
@@ -1710,37 +1710,37 @@ sub bucket_page
     if ( $self->{classifier__}->get_bucket_word_count( $self->{form_}{showbucket} ) > 0 ) {
       for my $i (@{$self->{classifier__}->get_bucket_word_list($self->{form_}{showbucket})}) {
         if ( defined($i) ) {
-	  my $j = $i;
-	  $j =~ /^\|(.)/;
-	  my $first = $1;
+          my $j = $i;
+          $j =~ /^\|(.)/;
+          my $first = $1;
 
-	  if ( defined( $self->{form_}{showletter} ) && ( $first eq $self->{form_}{showletter} ) ) {
-	    # Split the entries on the double bars
+          if ( defined( $self->{form_}{showletter} ) && ( $first eq $self->{form_}{showletter} ) ) {
+            # Split the entries on the double bars
 
-	    my %temp;
+            my %temp;
 
-	    while ( $j =~ m/\G\|(.*?) L?\-?[\.\d]+\|/g ) {
-	      my $word = $1;
-	      $temp{$word} = $self->{classifier__}->get_count_for_word( $self->{form_}{showbucket}, $word );
-	    }
+            while ( $j =~ m/\G\|(.*?) L?\-?[\.\d]+\|/g ) {
+              my $word = $1;
+              $temp{$word} = $self->{classifier__}->get_count_for_word( $self->{form_}{showbucket}, $word );
+            }
 
-	    $body .= "</td></tr><tr><td colspan=2>&nbsp;</td></tr><tr>\n<td valign=\"top\">\n<b>$first</b>\n</td>\n<td valign=\"top\">\n<table><tr valign=\"top\">";
+            $body .= "</td></tr><tr><td colspan=2>&nbsp;</td></tr><tr>\n<td valign=\"top\">\n<b>$first</b>\n</td>\n<td valign=\"top\">\n<table><tr valign=\"top\">";
 
-	    my $count = 0;
+            my $count = 0;
 
-	    for my $word (sort { $temp{$b} <=> $temp{$a} } keys %temp) {
-	      $body .= "</tr><tr valign=\"top\">" if ( ( $count % 6 ) ==  0 );
-	      $body .= "<td><a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key__}\&amp;lookup=Lookup\&amp;word=". $self->url_encode_( $word ) . "#Lookup\"><b>$word</b><\/a></td><td>$temp{$word}</td><td>&nbsp;</td>";
-	      $count += 1;
-	    }
+            for my $word (sort { $temp{$b} <=> $temp{$a} } keys %temp) {
+              $body .= "</tr><tr valign=\"top\">" if ( ( $count % 6 ) ==  0 );
+              $body .= "<td><a class=\"wordListLink\" href=\"\/buckets\?session=$self->{session_key__}\&amp;lookup=Lookup\&amp;word=". $self->url_encode_( $word ) . "#Lookup\"><b>$word</b><\/a></td><td>$temp{$word}</td><td>&nbsp;</td>";
+              $count += 1;
+            }
 
-	    $body .= "</tr></table></td>\n</tr>\n<tr><td colspan=2>&nbsp;</td></tr><tr><td colspan=2>";
+            $body .= "</tr></table></td>\n</tr>\n<tr><td colspan=2>&nbsp;</td></tr><tr><td colspan=2>";
 
-	  } else {
-	    $j = '';
+          } else {
+            $j = '';
 
-	    $body .= "<a href=/buckets?session=$self->{session_key__}\&amp;showbucket=$self->{form_}{showbucket}\&amp;showletter=" . $self->url_encode_($first) . "><b>$first</b></a>\n";
-	  }
+            $body .= "<a href=/buckets?session=$self->{session_key__}\&amp;showbucket=$self->{form_}{showbucket}\&amp;showletter=" . $self->url_encode_($first) . "><b>$first</b></a>\n";
+          }
         }
       }
     }
@@ -1789,10 +1789,10 @@ sub bar_chart_100
                 } else {
                    $percent = sprintf( ' (%.2f%%)', int( $value * 10000 / $total_count ) / 100 );
                 }
-	    }
+            }
 
             $body .= "\n<td align=\"right\">$count$percent</td>";
-	}
+        }
         $body .= "\n</tr>\n";
     }
 
@@ -2221,7 +2221,7 @@ sub corpus_page
                         $total += 0.1 / $self->{classifier__}->get_word_count();
                     }
                 }
-	    }
+            }
 
             foreach my $bucket (@buckets) {
                 if ( $self->{classifier__}->get_value_( $bucket, $word ) != 0 ) {
@@ -2542,7 +2542,7 @@ sub load_history_cache__
 
         if ( $2 > $max ) {
             $max = $2;
-	}
+        }
 
         # If this file already exists in the history cache then just mark it not
         # to be culled and move on.
@@ -2930,7 +2930,7 @@ sub history_undo
                     $count = 0 if ( $count < 0 );
                     $self->{classifier__}->set_bucket_parameter( $bucket, 'count', $count );
 
-		    $count = $self->{classifier__}->get_bucket_parameter( $usedtobe, 'count' ) + 1;
+                    $count = $self->{classifier__}->get_bucket_parameter( $usedtobe, 'count' ) + 1;
                     $self->{classifier__}->set_bucket_parameter( $usedtobe, 'count', $count );
 
                     my $fncount = $self->{classifier__}->get_bucket_parameter( $bucket, 'fncount' ) - 1;
@@ -2940,7 +2940,7 @@ sub history_undo
                     my $fpcount = $self->{classifier__}->get_bucket_parameter( $usedtobe, 'fpcount' ) - 1;
                     $fpcount = 0 if ( $fpcount < 0 );
                     $self->{classifier__}->set_bucket_parameter( $usedtobe, 'fpcount', $fpcount );
-		}
+                }
 
                 # Since we have just changed the classification of this file and it has
                 # not been reclassified and has a new bucket name then we need to update the
@@ -3430,17 +3430,17 @@ sub view_page
         $body .= " <input type=\"submit\" class=\"undoButton\" name=\"undo_$index\" value=\"$self->{language__}{Undo}\">\n";
     } else {
         if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
-        	$body .= "\n$self->{language__}{History_ShouldBe}: <select name=\"$index\">\n";
+                $body .= "\n$self->{language__}{History_ShouldBe}: <select name=\"$index\">\n";
 
-        	# Show a blank bucket field
-        	$body .= "<option selected=\"selected\"></option>\n";
+                # Show a blank bucket field
+                $body .= "<option selected=\"selected\"></option>\n";
 
-        	foreach my $abucket ($self->{classifier__}->get_buckets()) {
-        	    $body .= "<option value=\"$abucket\">$abucket</option>\n";
-        	}
-        	$body .= "</select>\n<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />";
+                foreach my $abucket ($self->{classifier__}->get_buckets()) {
+                    $body .= "<option value=\"$abucket\">$abucket</option>\n";
+                }
+                $body .= "</select>\n<input type=\"submit\" class=\"reclassifyButton\" name=\"change\" value=\"$self->{language__}{Reclassify}\" />";
         } else {
-	        $body .= " ($self->{language__}{History_MagnetUsed}: " . splitline( $self->{history__}{$mail_file}{magnet} , 0) . ")";
+                $body .= " ($self->{language__}{History_MagnetUsed}: " . splitline( $self->{history__}{$mail_file}{magnet} , 0) . ")";
         }
     }
 
@@ -3638,7 +3638,7 @@ sub change_session_key
 
         if ( rand(1) < rand(1) ) {
             $random = lc($random);
-	}
+        }
 
         $self->{session_key__} .= $random;
     }

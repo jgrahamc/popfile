@@ -93,8 +93,8 @@ sub service
                 my $parameter = @$ref[1];
 
                 $waiter->deliver( $type, $message, $parameter );
-	    }
-	}
+            }
+        }
     }
 
     return 1;

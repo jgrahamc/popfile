@@ -236,7 +236,7 @@ sub parse_form__
 
         if ( $need_array ) {
             push( @{ $self->{form_}{$arg . "_array"} }, $self->{form_}{$arg} );
-	}
+        }
     }
 }
 
@@ -333,8 +333,8 @@ sub http_file_
         my ( $sec, $min, $hour, $mday, $mon, $year, $wday ) = gmtime( $zulu );
 
         my $expires = sprintf( "%s, %02d %s %04d %02d:%02d:%02d GMT",
-	                       $day[$wday], $mday, $month[$mon], $year+1900,
-	                       $hour, $min, $sec);
+                               $day[$wday], $mday, $month[$mon], $year+1900,
+                               $hour, $min, $sec);
 
         my $header = "HTTP/1.0 200 OK\r\nContent-Type: $type\r\nExpires: $expires\r\nContent-Length: ";
         $header .= length($contents);

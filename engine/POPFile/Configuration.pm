@@ -303,7 +303,7 @@ sub parse_command_line
             # A command line argument must start with a -
 
             if ( $ARGV[$i] =~ /^-(.+)$/ ) {
-	        my $parameter = $self->upgrade_parameter__($1);
+                my $parameter = $self->upgrade_parameter__($1);
 
                 if ( defined($self->{configuration_parameters__}{$parameter}) ) {
                     if ( $i < $#ARGV ) {
@@ -346,54 +346,54 @@ sub upgrade_parameter__
 
     my %upgrades = ( # PROFILE BLOCK START
 
-		     # Parameters that are now handled by Classifier::Bayes
+                     # Parameters that are now handled by Classifier::Bayes
 
-		     'corpus',                   'bayes_corpus',
-		     'unclassified_probability', 'bayes_unclassified_probability',
+                     'corpus',                   'bayes_corpus',
+                     'unclassified_probability', 'bayes_unclassified_probability',
 
-		     # Parameters that are now handled by POPFile::Configuration
+                     # Parameters that are now handled by POPFile::Configuration
 
-		     'piddir',                   'config_piddir',
+                     'piddir',                   'config_piddir',
 
-		     # Parameters that are now global to POPFile
+                     # Parameters that are now global to POPFile
 
-		     'debug',                    'GLOBAL_debug',
-		     'msgdir',                   'GLOBAL_msgdir',
-		     'subject',                  'GLOBAL_subject',
-		     'timeout',                  'GLOBAL_timeout',
-		     'xpl',                      'GLOBAL_xpl',
-		     'xtc',                      'GLOBAL_xtc',
-		     'download_count',           'GLOBAL_download_count',
+                     'debug',                    'GLOBAL_debug',
+                     'msgdir',                   'GLOBAL_msgdir',
+                     'subject',                  'GLOBAL_subject',
+                     'timeout',                  'GLOBAL_timeout',
+                     'xpl',                      'GLOBAL_xpl',
+                     'xtc',                      'GLOBAL_xtc',
+                     'download_count',           'GLOBAL_download_count',
 
-		     # Parameters that are now handled by POPFile::Logger
+                     # Parameters that are now handled by POPFile::Logger
 
-		     'logdir',                   'logger_logdir',
+                     'logdir',                   'logger_logdir',
 
-		     # Parameters that are now handled by Proxy::POP3
+                     # Parameters that are now handled by Proxy::POP3
 
-		     'localpop',                 'pop3_local',
-		     'port',                     'pop3_port',
-		     'sport',                    'pop3_secure_port',
-		     'server',                   'pop3_secure_server',
-		     'separator',                'pop3_separator',
-		     'toptoo',                   'pop3_toptoo',
+                     'localpop',                 'pop3_local',
+                     'port',                     'pop3_port',
+                     'sport',                    'pop3_secure_port',
+                     'server',                   'pop3_secure_server',
+                     'separator',                'pop3_separator',
+                     'toptoo',                   'pop3_toptoo',
 
-		     # Parameters that are now handled by UI::HTML
+                     # Parameters that are now handled by UI::HTML
 
-		     'archive',                  'html_archive',
-		     'archive_classes',          'html_archive_classes',
-		     'archive_dir',              'html_archive_dir',
-		     'history_days',             'html_history_days',
-		     'language',                 'html_language',
-		     'last_reset',               'html_last_reset',
-		     'last_update_check',        'html_last_update_check',
-		     'localui',                  'html_local',
-		     'page_size',                'html_page_size',
-		     'password',                 'html_password',
-		     'send_stats',               'html_send_stats',
-		     'skin',                     'html_skin',
-		     'test_language',            'html_test_language',
-		     'update_check',             'html_update_check',
+                     'archive',                  'html_archive',
+                     'archive_classes',          'html_archive_classes',
+                     'archive_dir',              'html_archive_dir',
+                     'history_days',             'html_history_days',
+                     'language',                 'html_language',
+                     'last_reset',               'html_last_reset',
+                     'last_update_check',        'html_last_update_check',
+                     'localui',                  'html_local',
+                     'page_size',                'html_page_size',
+                     'password',                 'html_password',
+                     'send_stats',               'html_send_stats',
+                     'skin',                     'html_skin',
+                     'test_language',            'html_test_language',
+                     'update_check',             'html_update_check',
                      'ui_port',                  'html_port',
     ); # PROFILE BLOCK STOP
 
@@ -420,10 +420,10 @@ sub load_configuration
         while ( <CONFIG> ) {
             s/(\015|\012)//g;
             if ( /(\S+) (.+)/ ) {
-	        my $parameter = $1;
-		my $value     = $2;
+                my $parameter = $1;
+                my $value     = $2;
 
-		$parameter = $self->upgrade_parameter__($parameter);
+                $parameter = $self->upgrade_parameter__($parameter);
 
                 $self->{configuration_parameters__}{$parameter} = $value;
             }

@@ -109,7 +109,7 @@ sub service_server
         while ( $self->{send__} =~ s/^([^\r\n]+)[\r\n]+// ) {
             $self->tee_( $handle, "$1$eol" );
             select( undef, undef, undef, 0.1 );
-	}
+        }
 
         # If there's data available to read then read it into the received
 
@@ -117,8 +117,8 @@ sub service_server
             my $line = <$handle>;
             if ( defined( $line ) ) {
                 $self->{received__} .= $line;
-	    }
-	}
+            }
+        }
     } else {
         $self->log_( "service_server: remote client is not connected" );
 
@@ -130,8 +130,8 @@ sub service_server
                 $self->tee_( $handle, "Welcome" );
                 $self->tee_( $handle, "To The Jungle$eol" );
 
-	    }
-	}
+            }
+        }
     }
 }
 
@@ -172,9 +172,9 @@ sub child__
         if ( defined( $remote_selector->can_read(0) ) ) {
             my $line = <$remote>;
             if ( defined( $line ) ) {
-	        last if ( $line =~ /__POPFILE__ABORT__CHILD__/ );
+                last if ( $line =~ /__POPFILE__ABORT__CHILD__/ );
                 print $client $line;
-	    } else {
+            } else {
                 last;
             }
         }
