@@ -1002,28 +1002,28 @@ sub corpus_page
         $classifier->write_parameters();
     }
     
-    if ( ( $form{name} ne '' ) && ( $form{create} eq 'Create' ) )
+    if ( $form{cname} ne '' )
     {
-        if ( $form{name} =~ /[^a-z\-_]/ ) 
+        if ( $form{cname} =~ /[^a-z\-_]/ ) 
         {
             $create_message = "<blockquote><font color=red size=+1>Bucket names can only contain the letters a to z in lower case plus - and _</font></blockquote>";
         }
         else
         {
-            if ( $classifier->{total}{$form{name}} > 0 ) 
+            if ( $classifier->{total}{$form{cname}} > 0 ) 
             {
-                $create_message = "<blockquote><b>Bucket named $form{name} already exists</b></blockquote>";
+                $create_message = "<blockquote><b>Bucket named $form{cname} already exists</b></blockquote>";
             } 
             else 
             {
                 mkdir( 'corpus' );
-                mkdir( "corpus/$form{name}" );
-                open NEW, ">corpus/$form{name}/table";
+                mkdir( "corpus/$form{cname}" );
+                open NEW, ">corpus/$form{cname}/table";
                 print NEW "\n";
                 close NEW;
                 $classifier->load_word_matrix();
 
-                $create_message = "<blockquote><b>Created bucket named $form{name}</b></blockquote>";
+                $create_message = "<blockquote><b>Created bucket named $form{cname}</b></blockquote>";
             }
        }
     }
@@ -1090,10 +1090,10 @@ sub corpus_page
         }
         else
         {
-            $form{name} = lc($form{name});
+            $form{oname} = lc($form{oname});
             $form{newname} = lc($form{newname});
-            rename("corpus/$form{name}" , "corpus/$form{newname}");
-            $rename_message = "<blockquote><b>Rename bucket $form{name} to $form{newname}</b></blockquote>";
+            rename("corpus/$form{oname}" , "corpus/$form{newname}");
+            $rename_message = "<blockquote><b>Rename bucket $form{oname} to $form{newname}</b></blockquote>";
             $classifier->load_word_matrix();
         }
     }    
@@ -1158,7 +1158,7 @@ sub corpus_page
     $body .= "<tr><td><hr><b>Total</b><td width=10><hr>&nbsp;<td align=right><hr><b>$number</b><td><td></table><p><hr><h2>Statistics</h2><table cellspacing=0 cellpadding=0><tr><td>Messages classified:<td align=right>$pmcount<tr><td>Classification errors:<td align=right>$pecount<tr><td><hr>Accuracy:<td align=right><hr>$accuracy<td></table>";
 
     $body .= "<p><hr><h2>Maintenance</h2>";
-    $body .= "<p><form action=/buckets><b>Create bucket with name:</b> <br><input name=name type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
+    $body .= "<p><form action=/buckets><b>Create bucket with name:</b> <br><input name=cname type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
     
     $body .= "<p><form action=/buckets><b>Delete bucket named:</b> <br><select name=name>";
     foreach my $bucket (@buckets)
@@ -1167,7 +1167,7 @@ sub corpus_page
     }
     $body .= "</select> <input type=submit name=delete value=Delete><input type=hidden name=session value=$session_key></form>$delete_message";
 
-    $body .= "<p><form action=/buckets><b>Rename bucket named:</b> <br><select name=name>";
+    $body .= "<p><form action=/buckets><b>Rename bucket named:</b> <br><select name=oname>";
     foreach my $bucket (@buckets)
     {
         $body .= "<option value=$bucket>$bucket</option>";
