@@ -41,6 +41,7 @@ our %Config;
 
 $Config{ServiceName} = 'POPFile';
 $Config{DisplayName} = 'POPFile Automatic Email Classifier';
+$Config{UserName} = 'LocalSystem';
 
 # POPFile is actually loaded by the POPFile::Loader object which does all
 # the work
