@@ -1097,10 +1097,12 @@ sub classify
 
              if ($prob >= .999999) {
                  $probstr = sprintf("%12.6f", 0.999999);
-             } elsif ($prob >= 0.1 || $prob == 0.0) {
-                 $probstr = sprintf("%12.6f", $prob);
              } else {
-                $probstr = sprintf("%17.6e", $prob);
+                 if ($prob >= 0.1 || $prob == 0.0) {
+                     $probstr = sprintf("%12.6f", $prob);
+                 } else {
+                    $probstr = sprintf("%17.6e", $prob);
+                 }
              }
 
              if ($self->{wmformat__} eq 'score') {
@@ -1187,10 +1189,12 @@ sub classify
                             my $wordprobstr;
                             if ($self->{wmformat__} eq 'score') {
                                 $wordprobstr  = sprintf("%12.4f", ($probability - $self->{not_likely__})/$log10 );
-                            } elsif ($self->{wmformat__} eq 'prob') {
-                                $wordprobstr  = sprintf("%12.4f", $wordprobs{$bucket,$word});
                             } else {
-                                $wordprobstr  = sprintf("%13.5f", exp($probability) );
+                                if ($self->{wmformat__} eq 'prob') {
+                                    $wordprobstr  = sprintf("%12.4f", $wordprobs{$bucket,$word});
+                                } else {
+                                    $wordprobstr  = sprintf("%13.5f", exp($probability) );
+                                }
                             }
 
                             $self->{scores__} .= "<td><font color=\"$color\">$wordprobstr</font></td>\n<td>&nbsp;</td>\n";
@@ -2002,8 +2006,8 @@ sub add_words_to_bucket__
     my ( $self, $bucket, $subtract ) = @_;
 
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
-        $self->set_value_( $bucket, $word, $subtract * $self->{parser__}->{words__}{$word} +
-            $self->get_base_value_( $bucket, $word ) );
+        $self->set_value_( $bucket, $word, $subtract * $self->{parser__}->{words__}{$word} + # PROFILE BLOCK START
+            $self->get_base_value_( $bucket, $word ) );                                      # PROFILE BLOCK STOP
     }
 }
 

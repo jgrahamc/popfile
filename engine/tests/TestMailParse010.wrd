@@ -61,14 +61,13 @@ revision 2
 header:Content-Transfer-Encoding 1
 header:Subject 1
 header:X-Auth-No 1
-instanthomeif 1
+instanthome 1
 smtp-send.myrealbox.com 1
 nims 1
-ofyour 1
 charset:windows-1252 1
 header:Content-Type 1
-simplygo 1
+simply 1
 header:Received 2
-anyfurther 1
+further 1
 header:From 1
 novell 3

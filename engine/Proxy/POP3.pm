@@ -328,7 +328,7 @@ sub child__
             my $count = $1;
 
             if ( $2 ne '99999999' )  {
-                if ( $self->config_( 'toptoo' ) ) {
+                if ( $self->config_( 'toptoo' ) == 1 ) {
                     my $response = $self->echo_response_($mail, $client, "RETR $count" );
                     last if ( $response == 2 );
                     if ( $response == 0 ) {

@@ -1011,7 +1011,7 @@ sub parse_html
 
     my $found = 1;
 
-    $line =~ s/[\r\n]+//gm;
+    $line =~ s/[\r\n]+/ /gm;
 
     print "parse_html: [$line] " . $self->{in_html_tag__} . "\n" if $self->{debug__};
 
