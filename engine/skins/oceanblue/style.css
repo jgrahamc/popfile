@@ -223,11 +223,6 @@ h2 {
   background-color: #5ba3e0;
 }
 
-.rowEven td a, .rowOdd td a {
-  display: block;
-  width: 100%;
-}
-
 .footer {
   font-size: 0.9em;
   background-color: lightblue;
