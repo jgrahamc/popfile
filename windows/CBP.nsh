@@ -1,9 +1,9 @@
 #----------------------------------------------------------------------------------------------
 #
-# CBP.nsh --- This file is used by 'installer.nsi', the NSIS script used to create the
+# CBP.nsh --- This file is used by 'adduser.nsi', one of the NSIS scripts used to create the
 #             Windows installer for POPFile. The CBP package allows the user to select several
 #             buckets for use with a "clean" install of POPFile. Three built-in default values
-#             can be overridden by creating suitable "!define" statements in 'installer.nsi'.
+#             can be overridden by creating suitable "!define" statements in 'adduser.nsi'.
 #
 # Copyright (c) 2001-2004 John Graham-Cumming
 #
@@ -25,8 +25,8 @@
 #
 #----------------------------------------------------------------------------------------------
 #
-# This version of the script has been tested with the "NSIS 2 Release Candidate 3" compiler,
-# released 26 January 2004, with no patches applied.
+# This version of the script has been tested with the "NSIS 2" compiler (final),
+# released 7 February 2004, with no "official" NSIS patches/CVS updates applied.
 #
 #----------------------------------------------------------------------------------------------
 
@@ -45,7 +45,7 @@
 #
 #//////////////////////////////////////////////////////////////////////////////////////////////
 
-  ; To use the CBP package, only three changes need to be made to "installer.nsi":
+  ; To use the CBP package, only three changes need to be made to "adduser.nsi":
   ;
   ;   (1) Ensure the CBP package gets compiled, by inserting this block of code near the start:
   ;
@@ -77,8 +77,8 @@
   ;   <end of code block>
   ;
   ;   (2) Ensure global user variable G_USERDIR contains the path to the relevant 'popfile.cfg'
-  ;       configuration file. For example, if installer.nsi is using $INSTDIR\data\popfile.cfg
-  ;      then installer.nsi should ensure a statement equivalent to
+  ;       configuration file. For example, if adduser.nsi is using $INSTDIR\data\popfile.cfg
+  ;      then adduser.nsi should ensure a statement equivalent to
   ;
   ;         StrCpy $G_USERDIR  "$INSTDIR\data"
   ;
@@ -167,12 +167,12 @@
 
   !define CBP_C_INIFILE   CBP_PAGE.INI
 
-  ; However, if 'installer.nsi' is modified to ensure that an INI file with this name is
+  ; However, if 'adduser.nsi' is modified to ensure that an INI file with this name is
   ; provided in the $PLUGINSDIR directory then the CBP package will use this INI file instead
   ; of calling 'CBP_CreateINIfile' to create one. It is up to the user to ensure that any INI
   ; file provided in this way meets the strict requirements of the CBP package otherwise chaos
   ; may well ensue! See the header comments in 'CBP_CreateINIfile' for further details.
-  ; It is strongly recommended that any INI file provided by 'installer.nsi' is created by
+  ; It is strongly recommended that any INI file provided by 'adduser.nsi' is created by
   ; modifying a copy of the INI file created by the CBP_CreateINIfile function.
 
 #==============================================================================================
@@ -413,6 +413,10 @@ FunctionEnd
 # was used for all versions of POPFile prior to 0.20.0.) This automatic conversion feature helps
 # reduce the work required to update the installer to cope with a new corpus format.
 #
+# POPFile no longer allocates colors when creating buckets (all new buckets use 'black'), so
+# we use the original default colour scheme when creating the empty buckets. The first eight
+# colors in the default scheme were: red, green, blue, brown, orange, purple, magenta and gray
+#
 # The INI file also holds the full path to the folder where the buckets are to be created
 # (this path is determined by 'CBP_CheckCorpusStatus' because the location is not hard-coded).
 #
@@ -438,7 +442,7 @@ FunctionEnd
 #   CBP_C_INIFILE                 - name of the INI file used to create the custom page
 #----------------------------------------------------------------------------------------------
 # CBP Functions Called:
-#   (none)
+#   CBP_ExtractBN                 - extracts a bucket color from a "|" separated list
 #----------------------------------------------------------------------------------------------
 # Called By:
 #   CBP_HandleUserInput           - the "leave" function for the custom page created by the
@@ -455,20 +459,24 @@ FunctionEnd
 
 Function CBP_MakePOPFileBuckets
 
-  !define CBP_L_CORPUS        $R9    ; holds the full path for the 'corpus' folder
-  !define CBP_L_COUNT         $R8    ; holds number of buckets not yet created
-  !define CBP_L_CREATE_NAME   $R7    ; name of bucket to be created
-  !define CBP_L_FILE_HANDLE   $R6
-  !define CBP_L_FIRST_FIELD   $R5    ; holds field number where first bucket name is stored
-  !define CBP_L_FOLDER_COUNT  $R4    ; used to record number of bucket files created
-  !define CBP_L_LOOP_LIMIT    $R3    ; used to terminate the processing loop
-  !define CBP_L_NAME          $R2    ; used when checking the corpus directory
-  !define CBP_L_PTR           $R1    ; used to access the names in the bucket list
+  !define CBP_L_COLOR         $R9    ; holds color for next bucket
+  !define CBP_L_COLORLIST     $R8    ; holds list of unused bucket colors
+  !define CBP_L_CORPUS        $R7    ; holds the full path for the 'corpus' folder
+  !define CBP_L_COUNT         $R6    ; holds number of buckets not yet created
+  !define CBP_L_CREATE_NAME   $R5    ; name of bucket to be created
+  !define CBP_L_FILE_HANDLE   $R4
+  !define CBP_L_FIRST_FIELD   $R3    ; holds field number where first bucket name is stored
+  !define CBP_L_FOLDER_COUNT  $R2    ; used to record number of bucket files created
+  !define CBP_L_LOOP_LIMIT    $R1    ; used to terminate the processing loop
+  !define CBP_L_NAME          $R0    ; used when checking the corpus directory
+  !define CBP_L_PTR           $9     ; used to access the names in the bucket list
 
   Exch ${CBP_L_COUNT}         ; get number of buckets to be created
   Exch
   Exch ${CBP_L_FIRST_FIELD}   ; get number of the field containing the first bucket name
 
+  Push ${CBP_L_COLOR}
+  Push ${CBP_L_COLORLIST}
   Push ${CBP_L_CORPUS}
   Push ${CBP_L_CREATE_NAME}
   Push ${CBP_L_FILE_HANDLE}
@@ -476,6 +484,10 @@ Function CBP_MakePOPFileBuckets
   Push ${CBP_L_LOOP_LIMIT}
   Push ${CBP_L_NAME}
   Push ${CBP_L_PTR}
+
+  ; Initialise the list of bucket colors used for buckets 1 to 8 (left-to-right order)
+
+  StrCpy ${CBP_L_COLORLIST} "red|green|blue|brown|orange|purple|magenta|gray"
 
   ; Retrieve the corpus path (as determined by CBP_CheckCorpusStatus)
 
@@ -489,7 +501,7 @@ Function CBP_MakePOPFileBuckets
   ; (this mimics the behaviour of Bayes.pm version 1.152)
 
   StrCpy ${CBP_L_FOLDER_COUNT} 0
-  
+
   ; Process only the "used" entries in the bucket list
 
   StrCpy ${CBP_L_PTR} ${CBP_L_FIRST_FIELD}
@@ -516,15 +528,28 @@ ok_to_create_bucket:
   FileClose ${CBP_L_FILE_HANDLE}
   IfErrors  incrm_ptr
   IntOp ${CBP_L_COUNT} ${CBP_L_COUNT} - 1
-  
+
   ; Record the bucket location so the installer can remove it after POPFile has converted it
   ; from the flat file corpus format to the current corpus format
-  
+
   IntOp ${CBP_L_FOLDER_COUNT} ${CBP_L_FOLDER_COUNT} + 1
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "FolderList" \
       "MaxNum" ${CBP_L_FOLDER_COUNT}
   !insertmacro MUI_INSTALLOPTIONS_WRITE "${CBP_C_INIFILE}" "FolderList" \
       "Path-${CBP_L_FOLDER_COUNT}" "${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}"
+
+  ; Select a color for this bucket (to avoid all buckets ending up as 'black')
+
+  StrCmp ${CBP_L_COLORLIST} "" incrm_ptr
+  Push ${CBP_L_COLORLIST}
+  Call CBP_ExtractBN
+  Pop ${CBP_L_COLORLIST}
+  Pop ${CBP_L_COLOR}
+  StrCmp ${CBP_L_COLOR} "" incrm_ptr
+
+  FileOpen ${CBP_L_FILE_HANDLE} "${CBP_L_CORPUS}\${CBP_L_CREATE_NAME}\color" w
+  FileWrite ${CBP_L_FILE_HANDLE} "${CBP_L_COLOR}$\r$\n"
+  FileClose ${CBP_L_FILE_HANDLE}
 
 incrm_ptr:
   IntOp ${CBP_L_PTR} ${CBP_L_PTR} + 1
@@ -538,10 +563,14 @@ finished_now:
   Pop ${CBP_L_FILE_HANDLE}
   Pop ${CBP_L_CREATE_NAME}
   Pop ${CBP_L_CORPUS}
+  Pop ${CBP_L_COLORLIST}
+  Pop ${CBP_L_COLOR}
   Pop ${CBP_L_FIRST_FIELD}
 
   Exch ${CBP_L_COUNT}       ; top of stack now has number of buckets we were unable to create
 
+  !undef CBP_L_COLOR
+  !undef CBP_L_COLORLIST
   !undef CBP_L_CORPUS
   !undef CBP_L_COUNT
   !undef CBP_L_CREATE_NAME
@@ -710,7 +739,7 @@ FunctionEnd
 #==============================================================================================
 
   ; NB: CBP_DEFAULT_LIST, CBP_SUGGESTION_LIST and CBP_MAX_BUCKETS may be defined
-  ;     in 'installer.nsi' to override the CBP default settings.
+  ;     in 'adduser.nsi' to override the CBP default settings.
 
   ; CBP_MAX_BUCKETS defines the maximum number of buckets handled by the CBP package,
   ; and must be a number in the range 2 to 8 inclusive. If a number outside this range is
@@ -1182,7 +1211,7 @@ FunctionEnd
 #   (CBP_HandleUserInput          - the "leave" function for the custom page created here)
 #----------------------------------------------------------------------------------------------
 # Called By:
-#   'installer.nsi'               - via the CBP_PAGECOMMAND_SELECTBUCKETS macro
+#   'adduser.nsi'                 - via the CBP_PAGECOMMAND_SELECTBUCKETS macro
 #----------------------------------------------------------------------------------------------
 #  Usage Example:
 #
@@ -1239,7 +1268,7 @@ use_INI_file:
   ; We only offer to create POPFile buckets if we are not upgrading an existing POPFile system
 
   ; Global user variable G_USERDIR contains full path to folder where popfile.cfg can be found
-  ; (value set up by installer.nsi before this function is called)
+  ; (value set up by adduser.nsi before this function is called)
 
   Push $G_USERDIR
   Call CBP_CheckCorpusStatus
@@ -1838,6 +1867,7 @@ FunctionEnd
 #   (none)
 #----------------------------------------------------------------------------------------------
 # Called By:
+#   CBP_MakePOPFileBuckets        - creates the buckets which POPFile will use (extracts colors)
 #   CBP_SetDefaultBuckets         - sets up default buckets (if any)
 #   CBP_UpdateAddBucketList       - updates the list of names in "Create Bucket" combobox
 #----------------------------------------------------------------------------------------------
