@@ -2425,13 +2425,13 @@ sub history_page
             my $size = $$row[12];
             if ( defined $size ) {
                 if ( $size >= 1024 * 1024 ) {
-                    $row_data{History_Size} = sprintf "%.1f&nbsp;MB", $size / ( 1024 * 1024 );
+                    $row_data{History_Size} = sprintf $self->{language__}{History_Size_MegaBytes}, $size / ( 1024 * 1024 );
                 }
                 elsif ( $size >= 1024 ) {
-                    $row_data{History_Size} = sprintf "%.1f&nbsp;KB", $size / 1024;
+                    $row_data{History_Size} = sprintf $self->{language__}{History_Size_KiloBytes}, $size / 1024;
                 }
                 else {
-                    $row_data{History_Size} = "$size&nbsp;B";
+                    $row_data{History_Size} = sprintf $self->{language__}{History_Size_Bytes}, $size;
                 }
             }
             else {

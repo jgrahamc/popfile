@@ -212,6 +212,9 @@ History_Decrease                        kleiner
 History_Column_Characters               Größe der Spalten für From, To, Cc und Subject
 History_Automatic                       automatisch
 History_Reclassified                    Neu eingestuft
+History_Size_Bytes                      %d&nbsp;B
+History_Size_KiloBytes                  %.1f&nbsp;KB
+History_Size_MegaBytes                  %.1f&nbsp;MB
 
 Password_Title                          Paßwort
 Password_Enter                          Paßwort eingeben

@@ -213,6 +213,9 @@ History_Decrease                        Decrease
 History_Column_Characters               Change width of From, To, Cc and Subject columns
 History_Automatic                       Automatic
 History_Reclassified                    Reclassified
+History_Size_Bytes                      %d&nbsp;B
+History_Size_KiloBytes                  %.1f&nbsp;KB
+History_Size_MegaBytes                  %.1f&nbsp;MB
 
 Password_Title                          Password
 Password_Enter                          Enter password
