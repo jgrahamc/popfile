@@ -153,6 +153,7 @@ sub update_pseudoword
 {
     my ( $self, $prefix, $word ) = @_;
 
+    print "update_pseudoword:$prefix:$word\n";
     $self->increment_word( "$prefix:$word" );
 }
 
@@ -318,7 +319,9 @@ sub add_line
             $p += 1024;
         }
     } else {
-    	$self->increment_word( 'trick:invisibleink' );
+        if ( $bigline ne '' ) {
+    	    $self->increment_word( 'trick:invisibleink' );
+	}
     }
 }
 
@@ -721,8 +724,7 @@ sub parse_html
 
     my $found = 1;
 
-	$line =~ s/[\r\n]+/ /g;
-    $line =~ s/[\t ]+$//;
+    $line =~ s/[\r\n]+//gm;
 
     print "parse_html: [$line] " . $self->{in_html_tag__} . "\n" if $self->{debug};
 
@@ -736,14 +738,12 @@ sub parse_html
     while ( $found && ( $line ne '' ) ) {
         $found = 0;
 
-        $line =~ s/^[\t ]+//;
-
         # If we are in an HTML tag then look for the close of the tag, if we get it then
         # handle the tag, if we don't then keep building up the arguments of the tag
 
         if ( $self->{in_html_tag__} )  {
             if ( $line =~ s/^(.*?)>// ) {
-                $self->{html_arg__} .= ' ' . $1;
+                $self->{html_arg__} .= $1;
                 $self->{in_html_tag__} = 0;
                 $self->{html_tag__} =~ s/=\n ?//g;
                 $self->{html_arg__} =~ s/=\n ?//g;
@@ -753,7 +753,7 @@ sub parse_html
                 $found = 1;
                 next;
             } else {
-                $self->{html_arg__} .= ' ' . $line;
+                $self->{html_arg__} .= $line;
                 return 1;
             }
         }
@@ -1011,6 +1011,7 @@ sub parse_stream
 
             if ( $encoding =~ /quoted\-printable/i ) {
                 $line       = decode_qp( $line );
+                $line       =~ s/[\r\n]+$//g;
                 $self->{ut__} = decode_qp( $self->{ut__} ) if ( $self->{color__} );
             }
 
