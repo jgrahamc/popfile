@@ -305,7 +305,7 @@ no_trailing_slash:
 
 found_eol:
   StrCpy ${CBP_L_TEXTEND} "<eol>"
-  
+
 loop:
   FileRead ${CBP_L_FILE_HANDLE} ${CBP_L_TEMP}
   StrCmp ${CBP_L_TEMP} "" cfg_file_done
@@ -347,7 +347,7 @@ check_eol:
 
 cfg_file_done:
   FileClose ${CBP_L_FILE_HANDLE}
-  
+
   ; If a SQL setting other than the default SQLite one is found, assume existing system is using
   ; an alternative SQL database (such as MySQL) so there is no need to create any buckets
 
@@ -355,8 +355,8 @@ cfg_file_done:
   Call CBP_TrimNewlines
   Pop ${CBP_L_SQL_CONNECT}
   StrCmp ${CBP_L_SQL_CONNECT} "" check_corpus_params
-  StrCpy ${CBP_L_SQL_CONNECT} ${CBP_L_SQL_CONNECT} 11
-  StrCmp ${CBP_L_SQL_CONNECT} "dbi:SQLite:" 0 dirty_install
+  StrCpy ${CBP_L_SQL_CONNECT} ${CBP_L_SQL_CONNECT} 10
+  StrCmp ${CBP_L_SQL_CONNECT} "dbi:SQLite" 0 dirty_install
 
 check_corpus_params:
   Push ${CBP_L_NONSQL_CORPUS}
@@ -731,7 +731,7 @@ slashconversion:
   Pop ${CBP_L_DATA}
 
   ; Strip trailing slash (so we always return a result without a trailing slash)
-  
+
   StrCpy ${CBP_L_TEMP} ${CBP_L_DATA} 1 -1
   StrCmp ${CBP_L_TEMP} '\' 0 analyse_data
   StrCpy ${CBP_L_DATA} ${CBP_L_DATA} -1
