@@ -2281,13 +2281,15 @@ sub history_page
         load_history_cache( $self, $self->{form}{filter}, '', $self->{form}{sort}) if ( history_cache_empty( $self ) );
         
         foreach my $i ( $self->{form}{start_message} .. $self->{form}{start_message} + $self->{configuration}->{configuration}{page_size} - 1 ) {
-            $i = $self->{history_keys}[$i];
-            if ( $i <= history_size( $self ) )  {
-                my $class_file = $self->{history}{$i}{file};
-                $class_file =~ s/msg$/cls/;
-                if ( $class_file ne '' )  {
-                    unlink("$self->{configuration}->{configuration}{msgdir}$self->{history}{$i}{file}");
-                    unlink("$self->{configuration}->{configuration}{msgdir}$class_file");
+            if ( defined $self->{history_keys}[$i]) {
+                $i = $self->{history_keys}[$i];
+                if ( $i <= history_size( $self ) )  {
+                    my $class_file = $self->{history}{$i}{file};
+                    $class_file =~ s/msg$/cls/;
+                    if ( $class_file ne '' )  {
+                        unlink("$self->{configuration}->{configuration}{msgdir}$self->{history}{$i}{file}");
+                        unlink("$self->{configuration}->{configuration}{msgdir}$class_file");
+                    }
                 }
             }
         }
