@@ -15,8 +15,7 @@
 <table width="100%" summary="">
     <tr>
         <td align="left">
-            <h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"> (<TMPL_VAR NAME="History_Count"> <input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" />
-)</h2>
+            <h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"> (<TMPL_VAR NAME="History_Count">) <br><input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" /></h2>
         </td>
         <td class="historyNavigatorTop">
 
@@ -29,8 +28,7 @@
 
 <TMPL_ELSE>
 
-<h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"> (<TMPL_VAR NAME="History_Count"> <input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" />
-)</h2>
+<h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"> (<TMPL_VAR NAME="History_Count">) <br><input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" /></h2>
 
 </TMPL_IF>
 
@@ -69,11 +67,11 @@
 
                         <TMPL_IF NAME="History_If_Sorted_Ascending">
 
-                        &gt;
+                        &gt;&nbsp;
 
                         <TMPL_ELSE>
 
-                        &lt;
+                        &lt;&nbsp;
 
                         </TMPL_IF>
 
@@ -146,6 +144,12 @@
             <TMPL_IF NAME="History_If_bucket">
             <td>
 
+                <TMPL_IF NAME="History_If_Magnetized">
+
+                    <img title="<TMPL_VAR NAME="History_Magnet">" src="/skins/default/magnet.png">
+
+                </TMPL_IF>
+
                 <TMPL_IF NAME="History_If_Not_Pseudo">
 
                 <a href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;showbucket=<TMPL_VAR NAME="History_Bucket">">
@@ -167,17 +171,12 @@
             <td>
 
                 <TMPL_IF NAME="History_If_Reclassified">
-
-                <font color="<TMPL_VAR NAME="History_Bucket_Color">">
-                    <TMPL_VAR NAME="History_Bucket">
-                </font>
+                <TMPL_VAR NAME="Localize_History_Reclassified">
                 <input type="submit" class="undoButton" name="undo_<TMPL_VAR NAME="History_I">" value="<TMPL_VAR NAME="Localize_Undo">" />
 
                 <TMPL_ELSE>
 
                 <TMPL_IF NAME="History_If_Magnetized">
-
-                (<TMPL_VAR NAME="Localize_History_MagnetUsed">: <TMPL_VAR NAME="History_Magnet">)
 
                 <TMPL_ELSE>
 
@@ -206,7 +205,7 @@
             <td>
                 &nbsp;
             </td>
-            <td>
+            <td colspan="<TMPL_VAR NAME="History_Colspan">">
                 <TMPL_VAR NAME="History_Feedback">
             </td>
         </tr>

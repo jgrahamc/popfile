@@ -91,15 +91,16 @@ sub new
 
     $self->{skins__}           = ();
 
-    # A hash containing a mapping between alphanumeric identifiers and appropriate strings used
-    # for localization.  The string may contain sprintf patterns for use in creating grammatically
+    # A hash containing a mapping between alphanumeric identifiers and
+    # appropriate strings used for localization.  The string may
+    # contain sprintf patterns for use in creating grammatically
     # correct strings, or simply be a string
 
     $self->{language__}        = {};
 
     # This is the list of available languages
 
-    $self->{languages__}       = ();
+    $self->{languages__} = ();
 
     # The last user to login via a proxy
 
@@ -109,7 +110,8 @@ sub new
 
     $self->{save_cache__}      = 0;
 
-    # Stores a Classifier::Bayes session and is set up on the first UI connection
+    # Stores a Classifier::Bayes session and is set up on the first UI
+    # connection
 
     $self->{api_session__}     = '';
 
@@ -124,13 +126,13 @@ sub new
     return $self;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # initialize
 #
 # Called to initialize the interface
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub initialize
 {
     my ( $self ) = @_;
@@ -175,14 +177,15 @@ sub initialize
 
     $self->config_( 'language', 'English' );
 
-    # If this is 1 then when the language is loaded we will use the language string identifier as the
-    # string shown in the UI.  This is used to test whether which identifiers are used where.
+    # If this is 1 then when the language is loaded we will use the
+    # language string identifier as the string shown in the UI.  This
+    # is used to test whether which identifiers are used where.
 
     $self->config_( 'test_language', 0 );
 
-    # This setting defines what is displayed in the word matrix: 'freq' for frequencies,
-    # 'prob' for probabilities, 'score' for logarithmic scores, if blank then the word
-    # table is not shown
+    # This setting defines what is displayed in the word matrix:
+    # 'freq' for frequencies, 'prob' for probabilities, 'score' for
+    # logarithmic scores, if blank then the word table is not shown
 
     $self->config_( 'wordtable_format', '' );
 
@@ -190,14 +193,15 @@ sub initialize
 
     $self->config_( 'cache_templates', 0 );
 
-    # The default columns to show in the History page.  The order here is important, as is
-    # the presence of a + (show this column) or - (hide this column) in the value.  By default
-    # we show everything
+    # The default columns to show in the History page.  The order here
+    # is important, as is the presence of a + (show this column) or -
+    # (hide this column) in the value.  By default we show everything
 
-    $self->config_( 'columns', '-inserted,+from,+to,+cc,+subject,+date,+bucket' );
+    $self->config_( 'columns', 
+        '+inserted,+from,+to,-cc,+subject,-date,+bucket' );
 
-    # An overriden date format set by the user, if empty then the Locale_Date from the language
-    # file is used (see pretty_date__)
+    # An overriden date format set by the user, if empty then the
+    # Locale_Date from the language file is used (see pretty_date__)
 
     $self->config_( 'date_format', '' );
 
@@ -236,22 +240,24 @@ sub initialize
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # start
 #
 # Called to start the HTML interface running
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub start
 {
     my ( $self ) = @_;
 
-    # In pre v0.21.0 POPFile the UI password was stored in plaintext in the configuration
-    # data.  Check to see if the password is not a hash and upgrade it automatically here.
+    # In pre v0.21.0 POPFile the UI password was stored in plaintext
+    # in the configuration data.  Check to see if the password is not
+    # a hash and upgrade it automatically here.
 
     if ( length( $self->config_( 'password' ) ) != 32 ) {
-        $self->config_( 'password', md5_hex( '__popfile__' . $self->config_( 'password' ) ) );
+        $self->config_( 'password', 
+             md5_hex( '__popfile__' . $self->config_( 'password' ) ) );
     }
 
     # Get a query session with the History object
@@ -260,7 +266,8 @@ sub start
 
     # Ensure that the messages subdirectory exists
 
-    if ( !$self->{history__}->make_directory__( $self->get_user_path_( $self->global_config_( 'msgdir' ) ) ) ) {
+    if ( !$self->{history__}->make_directory__( 
+        $self->get_user_path_( $self->global_config_( 'msgdir' ) ) ) ) {
         print STDERR "Failed to create the messages subdirectory\n";
         return 0;
     }
@@ -271,7 +278,9 @@ sub start
     # been translated will still appear
 
     $self->load_language( 'English' );
-    $self->load_language( $self->config_( 'language' ) ) if ( $self->config_( 'language' ) ne 'English' );
+    if ( $self->config_( 'language' ) ne 'English' ) {
+        $self->load_language( $self->config_( 'language' ) );
+    }
 
     # Set the classifier option wmformat__ according to our wordtable_format
     # option.
@@ -281,13 +290,13 @@ sub start
     return $self->SUPER::start();
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # start
 #
 # Called to stop the HTML interface running
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub stop
 {
     my ( $self ) = @_;
@@ -301,7 +310,7 @@ sub stop
     $self->SUPER::stop();
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # deliver
 #
@@ -309,7 +318,7 @@ sub stop
 #
 # There is no return value from this method
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub deliver
 {
     my ( $self, $type, $message, $parameter ) = @_;
@@ -327,7 +336,7 @@ sub deliver
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # url_handler__ - Handle a URL request
 #
@@ -336,22 +345,24 @@ sub deliver
 # $command    The HTTP command used (GET or POST)
 # $content    Any non-header data in the HTTP command
 #
-# Checks the session
-# key and refuses access unless it matches.  Serves up a small set of specific urls that are
-# the main UI pages and then any GIF file in the POPFile directory and CSS files in the skins
+# Checks the session key and refuses access unless it matches.  Serves
+# up a small set of specific urls that are the main UI pages and then
+# any GIF file in the POPFile directory and CSS files in the skins
 # subdirectory
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub url_handler__
 {
     my ( $self, $client, $url, $command, $content ) = @_;
 
     # Check to see if we obtained the session key yet
     if ( $self->{api_session__} eq '' ) {
-        $self->{api_session__} = $self->{classifier__}->get_session_key( 'admin', '' );
+        $self->{api_session__} = $self->{classifier__}->get_session_key( 
+            'admin', '' );
     }
 
-    # See if there are any form parameters and if there are parse them into the %form hash
+    # See if there are any form parameters and if there are parse them
+    # into the %form hash
 
     delete $self->{form_};
 
@@ -359,10 +370,11 @@ sub url_handler__
 
     $url =~ s/#.*//;
 
-    # If the URL was passed in through a GET then it may contain form arguments
-    # separated by & signs, which we parse out into the $self->{form_} where the
-    # key is the argument name and the value the argument value, for example if
-    # you have foo=bar in the URL then $self->{form_}{foo} is bar.
+    # If the URL was passed in through a GET then it may contain form
+    # arguments separated by & signs, which we parse out into the
+    # $self->{form_} where the key is the argument name and the value
+    # the argument value, for example if you have foo=bar in the URL
+    # then $self->{form_}{foo} is bar.
 
     if ( $command =~ /GET/i ) {
         if ( $url =~ s/\?(.*)// )  {
@@ -390,7 +402,8 @@ sub url_handler__
     }
 
     if ( $url =~ /\/(.+\.ico)/ ) {
-        $self->http_file_( $client, $self->get_root_path_( $1 ), 'image/x-icon' );
+        $self->http_file_( $client, $self->get_root_path_( $1 ),
+             'image/x-icon' );
         return 1;
     }
 
@@ -407,7 +420,8 @@ sub url_handler__
     # Check the password
 
     if ( $url eq '/password' )  {
-        if ( md5_hex( '__popfile__' . $self->{form_}{password} ) eq $self->config_( 'password' ) )  {
+        if ( md5_hex( '__popfile__' . $self->{form_}{password} ) eq 
+             $self->config_( 'password' ) )  {
             $self->change_session_key__( $self );
             delete $self->{form_}{password};
             $self->{form_}{session} = $self->{session_key__};
@@ -423,15 +437,21 @@ sub url_handler__
         }
     }
 
-    # If there's a password defined then check to see if the user already knows the
-    # session key, if they don't then drop to the password screen
+    # If there's a password defined then check to see if the user
+    # already knows the session key, if they don't then drop to the
+    # password screen
 
-    if ( ( (!defined($self->{form_}{session})) || ($self->{form_}{session} eq '' ) || ( $self->{form_}{session} ne $self->{session_key__} ) ) && ( $self->config_( 'password' ) ne md5_hex( '__popfile__' ) ) ) {
+    if ( ( (!defined($self->{form_}{session})) || 
+           ($self->{form_}{session} eq '' ) || 
+           ( $self->{form_}{session} ne $self->{session_key__} ) ) && 
+           ( $self->config_( 'password' ) ne md5_hex( '__popfile__' ) ) ) {
 
-        # Since the URL that has caused us to hit the password page might have information stored in the
-        # form hash we need to extract it out (except for the session key) and package it up so that
-        # the password page can redirect to the right place if the correct password is entered. This
-        # is especially important for the XPL functionality.
+        # Since the URL that has caused us to hit the password page
+        # might have information stored in the form hash we need to
+        # extract it out (except for the session key) and package it
+        # up so that the password page can redirect to the right place
+        # if the correct password is entered. This is especially
+        # important for the XPL functionality.
 
         my $redirect_url = $url . '?';
 
@@ -442,8 +462,9 @@ sub url_handler__
 
             if ( $k ne 'session' ) {
 
-                # If we are dealing with an array of values (see parse_form_
-                # for details) then we need to unpack it into separate entries),
+                # If we are dealing with an array of values (see
+                # parse_form_ for details) then we need to unpack it
+                # into separate entries)
 
                 if ( $k =~ /^(.+)_array$/ ) {
                     my $field = $1;
@@ -475,10 +496,12 @@ sub url_handler__
 
         # TODO Make this work
 
-        my $slot = $self->{history__}->get_slot_from_hash( $self->{form_}{view} );
+        my $slot = $self->{history__}->get_slot_from_hash(
+            $self->{form_}{view} );
 
         if ( $slot ne '' ) {
-            $self->http_redirect_( $client, "/view?session=$self->{session_key__}&view=$slot" );
+            $self->http_redirect_( $client, 
+                 "/view?session=$self->{session_key__}&view=$slot" );
         } else {
             $self->http_redirect_( $client, "/history" );
         }
@@ -487,11 +510,13 @@ sub url_handler__
     }
 
     if ( $url =~ /(popfile.*\.log)/ ) {
-        $self->http_file_( $client, $self->logger()->debug_filename(), 'text/plain' );
+        $self->http_file_( $client, $self->logger()->debug_filename(),
+            'text/plain' );
         return 1;
     }
 
-    if ( ( defined($self->{form_}{session}) ) && ( $self->{form_}{session} ne $self->{session_key__} ) ) {
+    if ( ( defined($self->{form_}{session}) ) && 
+         ( $self->{form_}{session} ne $self->{session_key__} ) ) {
         $self->session_page( $client, 0, $url );
         return 1;
     }
@@ -519,9 +544,9 @@ sub url_handler__
         return 0;
     }
 
-    # The url table maps URLs that we might receive to pages that we display, the
-    # page table maps the pages to the functions that handle them and the related
-    # template
+    # The url table maps URLs that we might receive to pages that we
+    # display, the page table maps the pages to the functions that
+    # handle them and the related template
 
     my %page_table = ( 'security'      => [ \&security_page,      'security-page.thtml'      ],       # PROFILE BLOCK START
                        'configuration' => [ \&configuration_page, 'configuration-page.thtml' ],
@@ -540,8 +565,8 @@ sub url_handler__
                       '/history'       => 'history',
                       '/'              => 'history' );      # PROFILE BLOCK STOP
 
-    # Any of the standard pages can be found in the url_table, the other pages are probably
-    # files on disk
+    # Any of the standard pages can be found in the url_table, the
+    # other pages are probably files on disk
 
     if ( defined($url_table{$url}) )  {
         my ( $method, $template ) = @{$page_table{$url_table{$url}}};
@@ -559,15 +584,16 @@ sub url_handler__
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
-# http_ok - Output a standard HTTP 200 message with a body of data from a template
+# http_ok - Output a standard HTTP 200 message with a body of data
+# from a template
 #
 # $client    The web browser to send result to
 # $templ     The template for the page to return
 # $selected  Which tab is to be selected
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub http_ok
 {
     my ( $self, $client, $templ, $selected ) = @_;
@@ -583,8 +609,10 @@ sub http_ok
 
     my $update_check = '';
 
-    # Check to see if we've checked for updates today.  If we have not then insert a reference to an image
-    # that is generated through a CGI on UseTheSource.  Also send stats to the same site if that is allowed
+    # Check to see if we've checked for updates today.  If we have not
+    # then insert a reference to an image that is generated through a
+    # CGI on UseTheSource.  Also send stats to the same site if that
+    # is allowed
 
     if ( $self->{today__} ne $self->config_( 'last_update_check' ) ) {
         $self->calculate_today();
@@ -599,7 +627,8 @@ sub http_ok
 
         if ( $self->config_( 'send_stats' ) ) {
             $templ->param( 'Common_Middle_If_SendStats' => 1 );
-            my @buckets = $self->{classifier__}->get_buckets( $self->{api_session__} );
+            my @buckets = $self->{classifier__}->get_buckets( 
+                $self->{api_session__} );
             my $bc      = $#buckets + 1;
             $templ->param( 'Common_Middle_Buckets'  => $bc );
             $templ->param( 'Common_Middle_Messages' => $self->mcount__() );
@@ -628,13 +657,13 @@ sub http_ok
     print $client $http_header . $text;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # configuration_page - get the configuration options
 #
 # $client     The web browser to send the results to
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub configuration_page
 {
     my ( $self, $client, $templ ) = @_;
@@ -661,15 +690,18 @@ sub configuration_page
     my %dynamic_templates;
 
     for my $name (keys %{$self->{dynamic_ui__}{configuration}}) {
-        $dynamic_templates{$name} = $self->load_template__( $self->{dynamic_ui__}{configuration}{$name}{template} );
-        $self->{dynamic_ui__}{configuration}{$name}{object}->validate_item( $name,
-                                                                            $dynamic_templates{$name},
-                                                                             \%{$self->{language__}},
-                                                                             \%{$self->{form_}} );
+        $dynamic_templates{$name} = $self->load_template__(
+            $self->{dynamic_ui__}{configuration}{$name}{template} );
+        $self->{dynamic_ui__}{configuration}{$name}{object}->validate_item( 
+            $name,
+            $dynamic_templates{$name},
+            \%{$self->{language__}},
+            \%{$self->{form_}} );
     }
 
     if ( defined($self->{form_}{ui_port}) ) {
-        if ( ( $self->{form_}{ui_port} >= 1 ) && ( $self->{form_}{ui_port} < 65536 ) ) {
+        if ( ( $self->{form_}{ui_port} >= 1 ) &&
+             ( $self->{form_}{ui_port} < 65536 ) ) {
             $self->config_( 'port', $self->{form_}{ui_port} );
         } else {
             $templ->param( 'Configuration_If_UI_Port_Error' => 1 );
@@ -677,11 +709,16 @@ sub configuration_page
         }
     }
 
-    $templ->param( 'Configuration_UI_Port_Updated' => sprintf( $self->{language__}{Configuration_UIUpdate}, $self->config_( 'port' ) ) ) if ( defined($self->{form_}{ui_port} ) );
+    if ( defined($self->{form_}{ui_port} ) ) {
+        $templ->param( 'Configuration_UI_Port_Updated' => 
+            sprintf( $self->{language__}{Configuration_UIUpdate},
+                $self->config_( 'port' ) ) );
+    }
     $templ->param( 'Configuration_UI_Port' => $self->config_( 'port' ) );
 
     if ( defined($self->{form_}{page_size}) ) {
-        if ( ( $self->{form_}{page_size} >= 1 ) && ( $self->{form_}{page_size} <= 1000 ) ) {
+        if ( ( $self->{form_}{page_size} >= 1 ) &&
+             ( $self->{form_}{page_size} <= 1000 ) ) {
             $self->config_( 'page_size', $self->{form_}{page_size} );
         } else {
             $templ->param( 'Configuration_If_Page_Size_Error' => 1 );
@@ -702,7 +739,7 @@ sub configuration_page
 
         if ( defined( $self->{form_}{purge_history} ) ) {
              $self->{history__}->cleanup_history();
-	}
+        }
     }
 
     $templ->param( 'Configuration_History_Days_Updated' => sprintf( $self->{language__}{Configuration_DaysUpdate}, $self->module_config_( 'history', 'history_days' ) ) ) if ( defined($self->{form_}{history_days} ) );
@@ -727,12 +764,12 @@ sub configuration_page
             $column =~ s/^(\+|\-)//;
             if ( defined($self->{form_}{$column})) {
                 $new_columns .= '+';
-	    } else {
+            } else {
                 $new_columns .= '-';
             }
             $new_columns .= $column;
             $new_columns .= ',';
-	}
+        }
         $self->config_( 'columns', $new_columns );
     }
 
@@ -749,11 +786,11 @@ sub configuration_page
         if ( $name =~ /tiny/ ) {
             $type = 'Tiny';
             $list = \@tiny_skins;
-	} else {
-	    if ( $name =~ /small/ ) {
+        } else {
+            if ( $name =~ /small/ ) {
                 $type = 'Small';
                 $list = \@small_skins;
-	    }
+            }
         }
 
         $row_data{"Configuration_$type" . '_Skin'}     = $name;
@@ -816,13 +853,13 @@ sub configuration_page
     $self->http_ok( $client, $templ, 3 );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # security_page - get the security configuration page
 #
 # $client     The web browser to send the results to
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub security_page
 {
     my ( $self, $client, $templ ) = @_;
@@ -886,13 +923,13 @@ sub security_page
     $self->http_ok( $client,$templ, 4 );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # pretty_number - format a number with ,s every 1000
 #
 # $number       The number to format
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub pretty_number
 {
     my ( $self, $number ) = @_;
@@ -909,13 +946,13 @@ sub pretty_number
     return $number;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # pretty_date__ - format a date as the user wants to see it
 #
 # $date           Epoch seconds
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub pretty_date__
 {
     my ( $self, $date ) = @_;
@@ -929,13 +966,13 @@ sub pretty_date__
     return time2str( $format, $date );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # advanced_page - very advanced configuration options
 #
 # $client     The web browser to send the results to
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub advanced_page
 {
     my ( $self, $client, $templ ) = @_;
@@ -1067,13 +1104,13 @@ sub max
     return ( $a > $b )?$a:$b;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # magnet_page - the list of bucket magnets
 #
 # $client     The web browser to send the results to
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub magnet_page
 {
     my ( $self, $client, $templ ) = @_;
@@ -1110,16 +1147,22 @@ sub magnet_page
 
             if ( ( defined($mbucket) ) && ( $mbucket ne '' ) && ( $mtext ne '' ) ) {
 
-                # Support for feature request 77646 - import function.  goal is a method of creating multiple
-                # magnets all with the same target bucket quickly.
+                # Support for feature request 77646 - import function.
+                # goal is a method of creating multiple magnets all
+                # with the same target bucket quickly.
                 #
-                # If we have multiple lines in $mtext, each line will actually be used to create a new magnet
-                # all with the same target.  We loop through all of the requested magnets, check to make sure
-                # they are all valid (not already existing, etc...) and then loop through them again to create 
-                # them.  this way, if even one isn't valid, none will be created.
+                # If we have multiple lines in $mtext, each line will
+                # actually be used to create a new magnet all with the
+                # same target.  We loop through all of the requested
+                # magnets, check to make sure they are all valid (not
+                # already existing, etc...) and then loop through them
+                # again to create them.  this way, if even one isn't
+                # valid, none will be created.
                 #
-                # We also get rid of an \r's that may have been passed in.  We also and ignore lines containing, 
-                # only white space and if a line is repeated we add just one bucket for it.
+                # We also get rid of an \r's that may have been passed
+                # in.  We also and ignore lines containing, only white
+                # space and if a line is repeated we add just one
+                # bucket for it.
 
                 $mtext =~ s/\r\n/\n/g;
 
@@ -1136,10 +1179,10 @@ sub magnet_page
 
                         if ( exists( $magnets{$current_mtext} ) ) {
                             $found  = 1;
-                            $magnet_message .= sprintf( $self->{language__}{Magnet_Error1}, "$mtype: $current_mtext", $bucket );
+                            $magnet_message .= sprintf( $self->{language__}{Magnet_Error1}, "$mtype: $current_mtext", $bucket ) . '<br>';
                             last;
                         }
-		    }
+                    }
 
                     if ( $found == 0 )  {
                         for my $bucket ($self->{classifier__}->get_buckets_with_magnets( $self->{api_session__} )) {
@@ -1149,13 +1192,13 @@ sub magnet_page
                             for my $from (keys %magnets)  {
                                 if ( ( $mtext =~ /\Q$from\E/ ) || ( $from =~ /\Q$mtext\E/ ) )  {
                                     $found = 1;
-                                    $magnet_message .= sprintf( $self->{language__}{Magnet_Error2}, "$mtype: $current_mtext", "$mtype: $from", $bucket );
+                                    $magnet_message .= sprintf( $self->{language__}{Magnet_Error2}, "$mtype: $current_mtext", "$mtype: $from", $bucket ) . '<br>';
                                     last;
                                 }
                             }
                         }
                     }
-		}
+                }
 
                 if ( $found == 0 ) {
                     foreach my $current_mtext (@mtexts) {
@@ -1166,17 +1209,21 @@ sub magnet_page
                         next;
                     }
 
-                    # It is possible to type leading or trailing white space in a magnet definition
-                    # which can later cause mysterious failures because the whitespace is eaten by
-                    # the browser when the magnet is displayed but is matched in the regular expression
-                    # that does the magnet matching and will cause failures... so strip off the whitespace
+                    # It is possible to type leading or trailing white
+                    # space in a magnet definition which can later
+                    # cause mysterious failures because the whitespace
+                    # is eaten by the browser when the magnet is
+                    # displayed but is matched in the regular
+                    # expression that does the magnet matching and
+                    # will cause failures... so strip off the
+                    # whitespace
 
                     $current_mtext =~ s/^[ \t]+//;
                     $current_mtext =~ s/[ \t]+$//;
 
                     $self->{classifier__}->create_magnet( $self->{api_session__}, $mbucket, $mtype, $current_mtext );
                     if ( !defined( $self->{form_}{update} ) ) {
-                        $magnet_message .= sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $current_mtext", $mbucket );
+                        $magnet_message .= sprintf( $self->{language__}{Magnet_Error3}, "$mtype: $current_mtext", $mbucket )  . '<br>';
                     }
                 }
             }
@@ -1248,19 +1295,21 @@ sub magnet_page
 
                 $i += 1;
 
-                # to validate, must replace & with &amp;
-                # stan todo note: come up with a smarter regex, this one's a bludgeon
-                # another todo: Move this stuff into a function to make text
-                # safe for inclusion in a form field
+                # to validate, must replace & with &amp; stan todo
+                # note: come up with a smarter regex, this one's a
+                # bludgeon another todo: Move this stuff into a
+                # function to make text safe for inclusion in a form
+                # field
 
                 my $validatingMagnet = $magnet;
                 $validatingMagnet =~ s/&/&amp;/g;
                 $validatingMagnet =~ s/</&lt;/g;
                 $validatingMagnet =~ s/>/&gt;/g;
 
-                # escape quotation characters to avoid orphan data within tags
-                # todo: function to make arbitrary data safe for inclusion within
-                # a html tag attribute (inside double-quotes)
+                # escape quotation characters to avoid orphan data
+                # within tags todo: function to make arbitrary data
+                # safe for inclusion within a html tag attribute
+                # (inside double-quotes)
 
                 $validatingMagnet =~ s/\"/\&quot\;/g;
 
@@ -1305,13 +1354,13 @@ sub magnet_page
     $self->http_ok( $client, $templ, 2 );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # bucket_page - information about a specific bucket
 #
 # $client     The web browser to send the results to
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub bucket_page
 {
     my ( $self, $client, $templ ) = @_;
@@ -1356,19 +1405,19 @@ sub bucket_page
                         my %temp_row = %word_row;
                         push ( @word_data, \%temp_row );
                         $count = 0;
-		    }
+                    }
                     $word_row{"Bucket_Word_$count"} = $word;
                     $word_row{"Bucket_Word_Count_$count"} = $temp{$word};
                     $word_row{"Session_Key"} = $self->{session_key__};
                     $count++;
                 }
                 if ( $count != 0 ) {
-		    for my $i ( $count..5) {
+                    for my $i ( $count..5) {
                         $word_row{"Bucket_Word_$i"} = '';
                         $word_row{"Bucket_Word_Count_$i"} = '';
-		    }
+                    }
                     push ( @word_data, \%word_row );
-		}
+                }
                 $row_data{Bucket_Loop_Loop_Word_Row} = \@word_data;
 
             } else {
@@ -1383,13 +1432,13 @@ sub bucket_page
     $self->http_ok( $client, $templ, 1 );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # bar_chart_100 - Output an HTML bar chart
 #
 # %values       A hash of bucket names with values in series 0, 1, 2, ...
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub bar_chart_100
 {
     my ( $self, %values ) = @_;
@@ -1466,13 +1515,13 @@ sub bar_chart_100
     return $body;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # corpus_page - the corpus management page
 #
 # $client     The web browser to send the results to
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub corpus_page
 {
     my ( $self, $client, $templ ) = @_;
@@ -1604,7 +1653,7 @@ sub corpus_page
             $color_row{Corpus_Available_Color} = $color;
             $color_row{Corpus_Color_Selected}  = ( $row_data{Corpus_Bucket_Color} eq $color )?'selected':'';
             push ( @color_data, \%color_row );
-	}
+        }
         $row_data{Localize_Apply}          = $self->{language__}{Apply};
         $row_data{Session_Key}             = $self->{session_key__};
         $row_data{Corpus_Loop_Loop_Colors} = \@color_data;
@@ -1658,51 +1707,52 @@ sub corpus_page
         my $word = $self->{form_}{word};
 
         if ( !( $word =~ /^[A-Za-z0-9\-_]+:/ ) ) {
-	    $word = $self->{classifier__}->{parser__}->{mangle__}->mangle($word, 1);
+            $word = $self->{classifier__}->{parser__}->{mangle__}->mangle($word, 1);
         }
 
         if ( $self->{form_}{word} ne '' ) {
-	    my $max = 0;
-    	    my $max_bucket = '';
-	    my $total = 0;
-	    foreach my $bucket (@buckets) {
-	        my $val = $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word );
-	        if ( $val != 0 ) {
-	            my $prob = exp( $val );
-	            $total += $prob;
-	            if ( $prob > $max ) {
-	                $max = $prob;
-	                $max_bucket = $bucket;
-	            }
-	        } else {
+            my $max = 0;
+                my $max_bucket = '';
+            my $total = 0;
+            foreach my $bucket (@buckets) {
+                my $val = $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word );
+                if ( $val != 0 ) {
+                    my $prob = exp( $val );
+                    $total += $prob;
+                    if ( $prob > $max ) {
+                        $max = $prob;
+                        $max_bucket = $bucket;
+                    }
+                } else {
 
-	            # Take into account the probability the Bayes calculation applies
-	            # for the buckets in which the word is not found.
+                    # Take into account the probability the Bayes
+                    # calculation applies for the buckets in which the
+                    # word is not found.
 
-	            $total += exp( $self->{classifier__}->get_not_likely_( $self->{api_session__} ) );
-	        }
-	    }
+                    $total += exp( $self->{classifier__}->get_not_likely_( $self->{api_session__} ) );
+                }
+            }
 
             my @lookup_data;
-	    foreach my $bucket (@buckets) {
-	        my $val = $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word );
+            foreach my $bucket (@buckets) {
+                my $val = $self->{classifier__}->get_value_( $self->{api_session__}, $bucket, $word );
 
-	        if ( $val != 0 ) {
+                if ( $val != 0 ) {
                     my %row_data;
-	            my $prob    = exp( $val );
-  	            my $n       = ($total > 0)?$prob / $total:0;
-	            my $score   = ($#buckets >= 0)?($val - $self->{classifier__}->get_not_likely_( $self->{api_session__} ) )/log(10.0):0;
+                    my $prob    = exp( $val );
+                      my $n       = ($total > 0)?$prob / $total:0;
+                    my $score   = ($#buckets >= 0)?($val - $self->{classifier__}->get_not_likely_( $self->{api_session__} ) )/log(10.0):0;
                     my $d = $self->{language__}{Locale_Decimal};
-	            my $normal  = sprintf("%.10f", $n);
+                    my $normal  = sprintf("%.10f", $n);
                     $normal =~ s/\./$d/;
-	            $score      = sprintf("%.10f", $score);
+                    $score      = sprintf("%.10f", $score);
                     $score =~ s/\./$d/;
-	            my $probf   = sprintf("%.10f", $prob);
+                    my $probf   = sprintf("%.10f", $prob);
                     $probf =~ s/\./$d/;
-	            my $bold    = '';
-	            my $endbold = '';
-	            if ( $score =~ /^[^\-]/ ) {
-	                $score = "&nbsp;$score";
+                    my $bold    = '';
+                    my $endbold = '';
+                    if ( $score =~ /^[^\-]/ ) {
+                        $score = "&nbsp;$score";
                     }
                     $row_data{Corpus_If_Most_Likely} = ( $max == $prob );
                     $row_data{Corpus_Bucket}         = $bucket;
@@ -1726,11 +1776,11 @@ sub corpus_page
     $self->http_ok( $client, $templ, 1 );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # compare_mf - Compares two mailfiles, used for sorting mail into order
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub compare_mf
 {
     $a =~ /popfile(\d+)=(\d+)\.msg/;
@@ -1746,7 +1796,7 @@ sub compare_mf
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # set_history_navigator__
 #
@@ -1756,7 +1806,7 @@ sub compare_mf
 # $start_message        - The number of the first message displayed
 # $stop_message         - The number of the last message displayed
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub set_history_navigator__
 {
     my ( $self, $templ, $start_message, $stop_message ) = @_;
@@ -1768,7 +1818,8 @@ sub set_history_navigator__
         $templ->param( 'History_Navigator_Previous'    => $start_message - $self->config_( 'page_size' ) );
     }
 
-    # Only show two pages either side of the current page, the first page and the last page
+    # Only show two pages either side of the current page, the first
+    # page and the last page
     #
     # e.g. [1] ... [4] [5] [6] [7] [8] ... [24]
 
@@ -1793,9 +1844,9 @@ sub set_history_navigator__
             $dots = 1;
         } else {
             $row_data{History_Navigator_If_Spacer} = 1;
-	    if ( $dots ) {
+            if ( $dots ) {
                 $row_data{History_Navigator_If_Dots} = 1;
-	    }
+            }
             $dots = 0;
         }
 
@@ -1811,7 +1862,7 @@ sub set_history_navigator__
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # set_magnet_navigator__
 #
@@ -1822,7 +1873,7 @@ sub set_history_navigator__
 # $stop_magnet   - The number of the last magnet
 # $magnet_count  - Total number of magnets
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub set_magnet_navigator__
 {
     my ( $self, $templ, $start_magnet, $stop_magnet, $magnet_count ) = @_;
@@ -1860,176 +1911,103 @@ sub set_magnet_navigator__
 }
 
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
-# history_reclassify - handle the reclassification of messages on the history page
+# history_reclassify - handle the reclassification of messages on the
+# history page
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub history_reclassify
 {
     my ( $self ) = @_;
 
     if ( defined( $self->{form_}{change} ) ) {
 
-        $self->{save_cache__} = 1;
+        # Look for all entries in the form of the form
+        # reclassify_X and see if they have values, those
+        # that have values indicate a reclassification
 
-        # This hash will map filenames of MSG files in the history to the
-        # new classification that they should be, it is built by iterating
-        # through the $self->{form_} looking for entries with the message number
-        # of each message that is displayed and then creating an entry in
-        # %messages if there is a corresponding entry in $self->{form_} for
-        # that message number
+        # Set up %messages to map a slot ID to the new
+        # bucket
 
         my %messages;
 
-        foreach my $i ( $self->{form_}{start_message}  .. $self->{form_}{start_message} + $self->config_( 'page_size' ) - 1) {
-            my $mail_file = $self->{history_keys__}[$i];
-
-            # The first check makes sure we didn't run off the end of the history table
-            # the second that there is something defined for this message number and the
-            # third that this message number has a value (i.e. a bucket name)
-
-            if ( defined( $mail_file ) && defined( $self->{form_}{$i} ) && ( $self->{form_}{$i} ne '' ) ) {
-                $messages{$mail_file} = $self->{form_}{$i};
-            }
-        }
-
-        # At this point %messages maps that files that need reclassifying to their
-        # new bucket classification
-
-        # This hash maps buckets to list of files to place in those buckets
+        foreach my $key (keys %{$self->{form_}}) {
+            if ( $key =~ /^reclassify_([0-9]+)$/ ) {
+  	        if ( defined( $self->{form_}{$key} ) &&
+                     ( $self->{form_}{$key} ne '' ) ) {
+                    $messages{$1} = $self->{form_}{$key};
+		}
+	    }
+	}
 
         my %work;
 
-        while ( my ($mail_file, $newbucket) = each %messages ) {
-
-            # Get the current classification for this message
-
-            my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_read_class( $mail_file );
-
-            # Only reclassify messages that haven't been reclassified before
-
-            if ( !$reclassified ) {
-                push @{$work{$newbucket}}, $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file );
-
-                $self->log_( 1, "Reclassifying $mail_file from $bucket to $newbucket" );
-
-                if ( $bucket ne $newbucket ) {
-                    my $count = $self->get_bucket_parameter__( $newbucket, 'count' );
-                    $self->set_bucket_parameter__( $newbucket, 'count', $count+1 );
-
-                    $count = $self->get_bucket_parameter__( $bucket, 'count' );
-                    $count -= 1;
-                    $count = 0 if ( $count < 0 ) ;
-                    $self->set_bucket_parameter__( $bucket, 'count', $count );
-
-                    my $fncount = $self->get_bucket_parameter__( $newbucket, 'fncount' );
-                    $self->set_bucket_parameter__( $newbucket, 'fncount', $fncount+1 );
-
-                    my $fpcount = $self->get_bucket_parameter__( $bucket, 'fpcount' );
-                    $self->set_bucket_parameter__( $bucket, 'fpcount', $fpcount+1 );
-                }
-
-                # Update the class file
-
-                $self->{classifier__}->history_write_class( $mail_file, 1, $newbucket, ( $bucket || "unclassified" ) , '');
-
-                # Since we have just changed the classification of this file and it has
-                # now been reclassified and has a new bucket name then we need to update the
-                # history cache to reflect that
-
-                $self->{history__}{$mail_file}{reclassified} = 1;
-                $self->{history__}{$mail_file}{bucket}       = $newbucket;
-
-                # Add message feedback
-
-                $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, $self->{classifier__}->get_bucket_color( $self->{api_session__}, $newbucket ), $newbucket );
-
-                $self->{configuration__}->save_configuration();
-            }
+        while ( my ( $slot, $newbucket ) = each %messages ) {
+            push @{$work{$newbucket}},
+                $self->{history__}->get_slot_file( $slot );
+            my @fields = $self->{history__}->get_slot_fields( $slot);
+            my $bucket = $fields[8];
+            $self->{classifier__}->reclassified(
+                $self->{api_session__}, $bucket, $newbucket, 0 );
+            $self->{history__}->change_slot_classification(
+                 $slot, $newbucket, $self->{api_session__}, 0);
+            $self->{feedback}{$slot} = sprintf(
+                 $self->{language__}{History_ChangedTo},
+                 $self->{classifier__}->get_bucket_color(
+                     $self->{api_session__}, $newbucket ), $newbucket );
         }
 
-        # At this point the work hash maps the buckets to lists of files to reclassify, so run through
-        # them doing bulk updates
+        # At this point the work hash maps the buckets to lists of
+        # files to reclassify, so run through them doing bulk updates
 
         foreach my $newbucket (keys %work) {
-            $self->{classifier__}->add_messages_to_bucket( $self->{api_session__}, $newbucket, @{$work{$newbucket}} );
+            $self->{classifier__}->add_messages_to_bucket(
+                $self->{api_session__}, $newbucket, @{$work{$newbucket}} );
         }
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
-# history_undo - handle undoing of reclassifications of messages on the history page
+# history_undo - handle undoing of reclassifications of messages on
+# the history page
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub history_undo
 {
     my( $self ) = @_;
 
+    # Look for all entries in the form of the form
+    # undo_X and see if they have values, those
+    # that have values indicate a reclassification
+
     foreach my $key (keys %{$self->{form_}}) {
         if ( $key =~ /^undo_([0-9]+)$/ ) {
-            my $mail_file = $self->{history_keys__}[$1];
-            my %temp_corpus;
-
-            # Load the class file
-
-            my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->{classifier__}->history_read_class( $mail_file );
-
-            # Only undo if the message has been classified...
-
-            if ( defined( $usedtobe ) ) {
-                $self->{classifier__}->remove_message_from_bucket( $self->{api_session__}, $bucket, $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ) );
-
-                $self->{save_cache__} = 1;
-
-                $self->log_( 1, "Undoing $mail_file from $bucket to $usedtobe" );
-
-                if ( $bucket ne $usedtobe ) {
-                    my $count = $self->get_bucket_parameter__( $bucket, 'count' ) - 1;
-                    $count = 0 if ( $count < 0 );
-                    $self->set_bucket_parameter__( $bucket, 'count', $count );
-
-                    $count = $self->get_bucket_parameter__( $usedtobe, 'count' ) + 1;
-                    $self->set_bucket_parameter__( $usedtobe, 'count', $count );
-
-                    my $fncount = $self->get_bucket_parameter__( $bucket, 'fncount' ) - 1;
-                    $fncount = 0 if ( $fncount < 0 );
-                    $self->set_bucket_parameter__( $bucket, 'fncount', $fncount );
-
-                    my $fpcount = $self->get_bucket_parameter__( $usedtobe, 'fpcount' ) - 1;
-                    $fpcount = 0 if ( $fpcount < 0 );
-                    $self->set_bucket_parameter__( $usedtobe, 'fpcount', $fpcount );
-                }
-
-                # Since we have just changed the classification of this file and it has
-                # not been reclassified and has a new bucket name then we need to update the
-                # history cache to reflect that
-
-                $self->{history__}{$mail_file}{reclassified} = 0;
-                $self->{history__}{$mail_file}{bucket}       = $usedtobe;
-
-                # Update the class file
-
-                $self->{classifier__}->history_write_class( $mail_file, 0, ( $usedtobe || "unclassified" ), '', '');
-
-                # Add message feedback
-
-                $self->{feedback}{$mail_file} = sprintf( $self->{language__}{History_ChangedTo}, ($self->{classifier__}->get_bucket_color( $self->{api_session__}, $usedtobe ) || ''), $usedtobe );
-
-                $self->{configuration__}->save_configuration();
-            }
+            my $slot = $1;
+            my @fields = $self->{history__}->get_slot_fields( $slot );
+            my $bucket = $fields[8];
+            my $newbucket = $self->{classifier__}->get_bucket_name(
+                                $self->{api_session__},
+                                $fields[9] );
+            $self->{classifier__}->reclassified(
+                $self->{api_session__}, $newbucket, $bucket, 1 );
+            $self->{history__}->change_slot_classification(
+                 $slot, $newbucket, $self->{api_session__}, 1 );
+            $self->{classifier__}->remove_message_from_bucket(
+                $self->{api_session__}, $bucket,
+                $self->{history__}->get_slot_file( $slot ) );
         }
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # history_page - get the message classification history page
 #
 # $client     The web browser to send the results to
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub history_page
 {
     my ( $self, $client, $templ ) = @_;
@@ -2043,19 +2021,20 @@ sub history_page
     $self->{form_}{filter} = (!defined($self->{form_}{setfilter})?$self->{old_filter__}:'') || '' if ( !defined( $self->{form_}{filter} ) );
 
     # If the user is asking for a new sort option then it needs to get
-    # stored in the sort form variable so that it can be used for subsequent
-    # page views of the History to keep the sort in place
+    # stored in the sort form variable so that it can be used for
+    # subsequent page views of the History to keep the sort in place
 
     $self->{form_}{sort} = $self->{form_}{setsort} if ( defined( $self->{form_}{setsort} ) );
 
-    # Cache some values to keep interface widgets updated if history is re-accessed without parameters
+    # Cache some values to keep interface widgets updated if history
+    # is re-accessed without parameters
 
     $self->{old_sort__} = $self->{form_}{sort};
 
-    # If the user hits the Reset button on a search then we need to clear
-    # the search value but make it look as though they hit the search button
-    # so that sort_filter_history will get called below to get the right values
-    # in history_keys
+    # If the user hits the Reset button on a search then we need to
+    # clear the search value but make it look as though they hit the
+    # search button so that sort_filter_history will get called below
+    # to get the right values in history_keys
 
     if ( defined( $self->{form_}{reset_filter_search} ) ) {
         $self->{form_}{filter}    = '';
@@ -2063,9 +2042,9 @@ sub history_page
         $self->{form_}{setsearch} = 1;
     }
 
-    # Information from submit buttons isn't always preserved if the buttons aren't
-    # pressed. This compares values in some fields and sets the button-values as
-    # though they had been pressed
+    # Information from submit buttons isn't always preserved if the
+    # buttons aren't pressed. This compares values in some fields and
+    # sets the button-values as though they had been pressed
 
     # Set setsearch if search changed and setsearch is undefined
     $self->{form_}{setsearch} = 'on' if ( ( ( !defined($self->{old_search__}) && ($self->{form_}{search} ne '') ) || ( defined($self->{old_search__}) && ( $self->{old_search__} ne $self->{form_}{search} ) ) ) && !defined($self->{form_}{setsearch} ) );
@@ -2100,14 +2079,16 @@ sub history_page
     $self->history_reclassify();
     $self->history_undo();
 
-    # Handle removal of one or more items from the history page, the remove_array form, if defined,
-    # will contain all the indexes into history_keys that need to be deleted. If undefined, the remove
-    # form element will contain the single index to be deleted. We pass each file that needs
-    # deleting into the 
+    # Handle removal of one or more items from the history page, the
+    # remove_array form, if defined, will contain all the indexes into
+    # history_keys that need to be deleted. If undefined, the remove
+    # form element will contain the single index to be deleted. We
+    # pass each file that needs deleting into the
 
     if ( defined( $self->{form_}{clearchecked} ) ) {
 
-        # Remove the list of marked messages using the array of "remove" checkboxes
+        # Remove the list of marked messages using the array of
+        # "remove" checkboxes
 
         for my $i ( keys %{$self->{form_}} ) {
             if ( $i =~ /^remove_(\d+)$/ ) {
@@ -2116,8 +2097,8 @@ sub history_page
         }
     }
 
-    # Handle clearing the history files, there are two options here, clear the current page
-    # or clear all the files in the cache
+    # Handle clearing the history files, there are two options here,
+    # clear the current page or clear all the files in the cache
 
     if ( defined( $self->{form_}{clearall} ) ) {
         $self->{history__}->delete_query( $self->{q__} );
@@ -2187,8 +2168,9 @@ sub history_page
 
         $self->set_history_navigator__( $templ, $start_message, $stop_message );
 
-        # Work out which columns to show by splitting the columns parameter at commas
-        # keeping all the items that start with a +, and then strip the +
+        # Work out which columns to show by splitting the columns
+        # parameter at commas keeping all the items that start with a
+        # +, and then strip the +
 
         my @columns = split( ',', $self->config_( 'columns' ) );
         my @header_data;
@@ -2232,7 +2214,7 @@ sub history_page
         }
         if ( $self->config_( 'column_characters' ) != 0 ) {
             $length = $self->config_( 'column_characters' );
-	}
+        }
         if ( defined($self->{form_}{increase}) ) {
             $length++;
             $self->config_( 'column_characters', $length );
@@ -2247,7 +2229,7 @@ sub history_page
             foreach my $header (@columns) {
                 $header =~ /(.)(.+)/;
                 $row_data{"History_If_$2"} = ( $1 eq '+')?1:0;
-	    }
+            }
             $row_data{History_Arrived}       = $self->pretty_date__( $$row[7] );
             $row_data{History_From}          = $$row[1];
             $row_data{History_To}            = $$row[2];
@@ -2262,14 +2244,14 @@ sub history_page
             $row_data{History_Bucket_Color}  = $self->{classifier__}->get_bucket_parameter( $self->{api_session__},
                                                                           $bucket,
                                                                           'color' );
-            $row_data{History_If_Reclassified} = 0;
+            $row_data{History_If_Reclassified} = ( $$row[9] != 0 );
             $row_data{History_I}             = $$row[0];
             $row_data{History_I1}            = $$row[0];
             $row_data{History_Fields}        = $self->print_form_fields_(0,1,('start_message','session','filter','search','sort' ) );
             $row_data{History_If_Not_Pseudo} = !$self->{classifier__}->is_pseudo_bucket( $self->{api_session__},
                                                                            $bucket );
-            $row_data{History_If_Magnetized} = 0;
-            $row_data{History_Magnet}        = '';
+            $row_data{History_If_Magnetized} = ($$row[11] ne '');
+            $row_data{History_Magnet}        = $$row[11];
             $row_data{History_Loop_Loop_Buckets} = \@bucket_data;
             if ( defined $self->{feedback}{$mail_file} ) {
                 $row_data{History_If_Feedback} = 1;
@@ -2281,10 +2263,12 @@ sub history_page
             if ( ( $last != -1 ) && ( $self->{form_}{sort} =~ /inserted/ ) && ( $self->config_( 'session_dividers' ) ) ) {
                 $row_data{History_If_Session} = ( abs( $$row[7] - $last ) > 300 );
                 $row_data{History_Colspan} = $colspan+1;
-	    }
+            }
 
             $last = $$row[7];
 
+            $row_data{Localize_History_Reclassified} = $self->{language__}{History_Reclassified};
+            $row_data{Localize_Undo} = $self->{language__}{Undo};
             push ( @history_data, \%row_data );
         }
         $templ->param( 'History_Loop_Messages' => \@history_data );
@@ -2305,13 +2289,13 @@ sub shorten__
     return $string;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # view_page - Shows a single email
 #
 # $client     The web browser to send the results to
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub view_page
 {
     my ( $self, $client, $templ ) = @_;
@@ -2373,7 +2357,7 @@ sub view_page
                 $row_data{View_Bucket_Color} = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $abucket );
                 $row_data{View_Bucket} = $abucket;
                 push ( @bucket_data, \%row_data );
-	    }
+            }
             $templ->param( 'View_Loop_Buckets' => \@bucket_data );
         } else {
             $templ->param( 'View_Magnet' => $magnet );
@@ -2388,13 +2372,15 @@ sub view_page
 
         $self->{classifier__}->wordscores( 1 );
 
-        # Build the scores by classifying the message, since get_html_colored_message has parsed the message
-        # for us we do not need to parse it again and hence we pass in undef for the filename
+        # Build the scores by classifying the message, since
+        # get_html_colored_message has parsed the message for us we do
+        # not need to parse it again and hence we pass in undef for
+        # the filename
 
         my $current_class = $self->{classifier__}->classify( $self->{api_session__}, $mail_file, $templ, \%matrix, \%idmap );
 
-        # Check whether the original classfication is still valid.
-        # If not, add a note at the top of the page:
+        # Check whether the original classfication is still valid.  If
+        # not, add a note at the top of the page:
 
         if ( $current_class ne $bucket ) {
             my $new_color = $self->{classifier__}->get_bucket_color( $self->{api_session__}, $current_class );
@@ -2410,9 +2396,10 @@ sub view_page
         $templ->param( 'View_Message' => $self->{classifier__}->fast_get_html_colored_message(
             $self->{api_session__}, $mail_file, \%matrix, \%idmap ) );
 
-        # We want to insert a link to change the output format at the start of the word
-        # matrix.  The classifier puts a comment in the right place, which we can replace
-        # by the link.  (There's probably a better way.)
+        # We want to insert a link to change the output format at the
+        # start of the word matrix.  The classifier puts a comment in
+        # the right place, which we can replace by the link.  (There's
+        # probably a better way.)
 
         my $view = $self->{language__}{View_WordProbabilities};
         if ( $self->{form_}{format} eq 'freq' ) {
@@ -2485,7 +2472,7 @@ sub view_page
     $self->http_ok( $client, $templ, 0 );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # password_page - Simple page asking for the POPFile password
 #
@@ -2493,13 +2480,14 @@ sub view_page
 # $error      1 if the user previously typed the password incorrectly
 # $redirect   The page to go to on a correct password
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub password_page
 {
     my ( $self, $client, $error, $redirect ) = @_;
     my $session_temp = $self->{session_key__};
 
-    # Show a page asking for the password with no session key information on it
+    # Show a page asking for the password with no session key
+    # information on it
 
     $self->{session_key__} = '';
     my $templ = $self->load_template__( 'password-page.thtml' );
@@ -2516,13 +2504,13 @@ sub password_page
     $self->http_ok( $client, $templ );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # session_page - Simple page information the user of a bad session key
 #
 # $client     The web browser to send the results to
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub session_page
 {
     my ( $self, $client ) = @_;
@@ -2531,7 +2519,7 @@ sub session_page
     $self->http_ok( $client, $templ );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # load_template__
 #
@@ -2539,14 +2527,15 @@ sub session_page
 #
 # $template          The name of the template to load from the current skin
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub load_template__
 {
     my ( $self, $template ) = @_;
 
-    # First see if that template exists in the currently selected skin, if it does not
-    # then load the template from the default.  This allows a skin author to change
-    # just a single part of POPFile with duplicating that entire set of templates
+    # First see if that template exists in the currently selected
+    # skin, if it does not then load the template from the default.
+    # This allows a skin author to change just a single part of
+    # POPFile with duplicating that entire set of templates
 
     my $root = 'skins/' . $self->config_( 'skin' ) . '/';
     my $template_root = $root;
@@ -2567,8 +2556,8 @@ sub load_template__
         loop_context_vars => 1,
         cache             => $self->config_( 'cache_templates' ) );
 
-    # Set a variety of common elements that are used repeatedly throughout
-    # POPFile's pages
+    # Set a variety of common elements that are used repeatedly
+    # throughout POPFile's pages
 
     my $now = time;
     my %fixups = ( 'Skin_Root'               => $root,
@@ -2605,14 +2594,14 @@ sub load_template__
     return $templ;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # load_skins__
 #
-# Gets the names of all the directory in the skins subdirectory and loads them into the skins
-# array.
+# Gets the names of all the directory in the skins subdirectory and
+# loads them into the skins array.
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub load_skins__
 {
     my ( $self ) = @_;
@@ -2625,13 +2614,13 @@ sub load_skins__
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # load_languages__
 #
 # Get the names of the available languages for the user interface
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub load_languages__
 {
     my ( $self ) = @_;
@@ -2643,20 +2632,21 @@ sub load_languages__
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # change_session_key__
 #
-# Changes the session key, the session key is a randomly chosen 6 to 10 character key that
-# protects and identifies sessions with the POPFile user interface.  At the current time
-# it is primarily used for two purposes: to prevent a malicious user telling the browser to
-# hit a specific URL causing POPFile to do something undesirable (like shutdown) and to
-# handle the password mechanism: if the session key is wrong the password challenge is
-# made.
+# Changes the session key, the session key is a randomly chosen 6 to
+# 10 character key that protects and identifies sessions with the
+# POPFile user interface.  At the current time it is primarily used
+# for two purposes: to prevent a malicious user telling the browser to
+# hit a specific URL causing POPFile to do something undesirable (like
+# shutdown) and to handle the password mechanism: if the session key
+# is wrong the password challenge is made.
 #
 # The characters valid in the session key are A-Z, a-z and 0-9
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub change_session_key__
 {
     my ( $self ) = @_;
@@ -2682,15 +2672,16 @@ sub change_session_key__
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # load_language
 #
-# Fill the language hash with the language strings that are from the named language file
+# Fill the language hash with the language strings that are from the
+# named language file
 #
 # $lang    - The language to load (no .msg extension)
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub load_language
 {
     my ( $self, $lang ) = @_;
@@ -2711,11 +2702,12 @@ sub load_language
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
-# calculate_today - set the global $self->{today__} variable to the current day in seconds
+# calculate_today - set the global $self->{today__} variable to the
+# current day in seconds
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub calculate_today
 {
     my ( $self ) = @_;
@@ -2723,15 +2715,19 @@ sub calculate_today
     $self->{today__} = int( time / $seconds_per_day ) * $seconds_per_day;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
-# print_form_fields_ - Returns a form string containing any presently defined form fields
+# print_form_fields_ - Returns a form string containing any presently
+# defined form fields
 #
-# $first        - 1 if the form field is at the beginning of a query, 0 otherwise
-# $in_href      - 1 if the form field is printing in a href, 0 otherwise (eg, for a 302 redirect)
-# $include      - a list of fields to return
+# $first - 1 if the form field is at the beginning of a query, 0
+#     otherwise
+# $in_href - 1 if the form field is printing in a href, 0
+#     otherwise (eg, for a 302 redirect)
+# $include - a list of fields to
+#     return
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub print_form_fields_
 {
     my ($self, $first, $in_href, @include) = @_;
@@ -2765,7 +2761,7 @@ sub print_form_fields_
     return ($count>0)?$formstring:'';
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 # register_configuration_item__
 #
 #     $type            The type of item (configuration, security or chain)
@@ -2773,53 +2769,62 @@ sub print_form_fields_
 #     $template        The name of the template to load
 #     $object          Reference to the object calling this method
 #
-# This seemingly innocent method disguises a lot.  It is called by modules that wish to
-# register that they have specific elements of UI that need to be dynamically added to the
-# Configuration and Security screens of POPFile.  This is done so that the HTML module does
-# not need to know about the modules that are loaded, their individual configuration elements
-# or how to do validation
+# This seemingly innocent method disguises a lot.  It is called by
+# modules that wish to register that they have specific elements of UI
+# that need to be dynamically added to the Configuration and Security
+# screens of POPFile.  This is done so that the HTML module does not
+# need to know about the modules that are loaded, their individual
+# configuration elements or how to do validation
 #
-# A module calls this method for each separate UI element (normally an HTML form that handles
-# a single configuration option stored in a template) and passes in four pieces of information:
+# A module calls this method for each separate UI element (normally an
+# HTML form that handles a single configuration option stored in a
+# template) and passes in four pieces of information:
 #
-# The type is the position in the UI where the element is to be displayed. configuration means
-# on the Configuration screen under "Module Options"; security means on the Security page
-# and is used exclusively for stealth mode operation right now; chain is also on the security
-# page and is used for identifying chain servers (in the case of SMTP the chained server and
-# for POP3 the SPA server)
+# The type is the position in the UI where the element is to be
+# displayed. configuration means on the Configuration screen under
+# "Module Options"; security means on the Security page and is used
+# exclusively for stealth mode operation right now; chain is also on
+# the security page and is used for identifying chain servers (in the
+# case of SMTP the chained server and for POP3 the SPA server)
 #
 # A unique name for this configuration item
 #
-# The template (this is the name of a template file and must be unique for each call to this
-# method)
+# The template (this is the name of a template file and must be unique
+# for each call to this method)
 #
 # A reference to itself.
 #
-# When this module needs to display an element of UI it will call the object's configure_item
-# public method passing in the name of the element required, a reference to the loaded template
-# and configure_item must set whatever variables are required in the template.
+# When this module needs to display an element of UI it will call the
+# object's configure_item public method passing in the name of the
+# element required, a reference to the loaded template and
+# configure_item must set whatever variables are required in the
+# template.
 #
-# When the module needs to validate it will call the object's validate_item interface passing
-# in the name of the element, a reference to the template and a reference to the form
-# hash which has been parsed.
+# When the module needs to validate it will call the object's
+# validate_item interface passing in the name of the element, a
+# reference to the template and a reference to the form hash which has
+# been parsed.
 #
-# Example the module foo has a configuration item called bar which it needs a UI for, and
-# so it calls
+# Example the module foo has a configuration item called bar which it
+# needs a UI for, and so it calls
 #
-#    register_configuration_item( 'configuration', 'foo', 'foo-bar.thtml', $self )
+#    register_configuration_item( 'configuration', 'foo', 'foo-bar.thtml',
+#        $self )
 #
 # later it will receive a call to its
 #
 #    configure_item( 'foo', loaded foo-bar.thtml )
 #
-# and needs to fill the template variables.  Then it will may receive a call to its
+# and needs to fill the template variables.  Then it will receive
+# a call to its
 #
 #    validate_item( 'foo', loaded foo-bar.thtml, language hash, form hash )
 #
-# and needs to check the form for information from any form it created and returned from the
-# call to configure_item and update its own state.
+# and needs to check the form for information from any form it created
+# and returned from the call to configure_item and update its own
+# state.
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub register_configuration_item__
 {
    my ( $self, $type, $name, $templ, $object ) = @_;
@@ -2828,11 +2833,11 @@ sub register_configuration_item__
    $self->{dynamic_ui__}{$type}{$name}{template} = $templ;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # mcount__, ecount__ get the total message count, or the total error count
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 
 sub mcount__
 {
@@ -2864,18 +2869,19 @@ sub ecount__
     return $count;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_bucket_parameter__/set_bucket_parameter__
 #
-# Wrapper for Classifier::Bayes::get_bucket_parameter__ the eliminates the need for all
-# our calls to mention $self->{api_session__}
+# Wrapper for Classifier::Bayes::get_bucket_parameter__ the eliminates
+# the need for all our calls to mention $self->{api_session__}
 #
-# See Classifier::Bayes::get_bucket_parameter for parameters and return values.
+# See Classifier::Bayes::get_bucket_parameter for parameters and
+# return values.
 #
 # (same thing for set_bucket_parameter__)
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_bucket_parameter__
 {
 

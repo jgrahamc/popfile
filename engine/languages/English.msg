@@ -77,7 +77,7 @@ Arrived                                 Arrived
 
 Locale_Thousands                       ,
 Locale_Decimal                         .
-Locale_Date                            %D %T
+Locale_Date                            %D %R
 
 # The header and footer that appear on every UI page
 Header_Title                            POPFile Control Center
@@ -148,7 +148,7 @@ Configuration_LoggerOutput              Logger output
 Configuration_GeneralSkins              Skins
 Configuration_SmallSkins                Small Skins
 Configuration_TinySkins                 Tiny Skins
-Configuration_CurrentLogFile            &lt;current log file&gt;
+Configuration_CurrentLogFile            &lt;Download current log file&gt;
 Configuration_SOCKSServer               SOCKS V proxy host
 Configuration_SOCKSPort                 SOCKS V proxy port
 Configuration_SOCKSPortUpdate           Updated SOCKS V proxy port to %s
@@ -201,6 +201,7 @@ History_Increase			Increase
 History_Decrease			Decrease
 History_Column_Characters		Change width of From, To, Cc and Subject columns
 History_Automatic			Automatic
+History_Reclassified                    Reclassified
 
 Password_Title                          Password
 Password_Enter                          Enter password
@@ -243,7 +244,7 @@ Magnet_Message1                         The following magnets cause mail to alwa
 Magnet_CreateNew                        Create New Magnet
 Magnet_Explanation                      These types of magnets are available:</b> <ul><li><b>From address or name:</b> For example: john@company.com to match a specific address, <br />company.com to match everyone who sends from company.com, <br />John Doe to match a specific person, John to match all Johns</li><li><b>To/Cc address or name:</b> Like a From: magnet but for the To:/Cc: address in a message</li> <li><b>Subject words:</b> For example: hello to match all messages with hello in the subject</li></ul>
 Magnet_MagnetType                       Magnet type
-Magnet_Value                            Value
+Magnet_Value                            Values
 Magnet_Always                           Always goes to bucket
 Magnet_Jump                             Jump to magnet page
 

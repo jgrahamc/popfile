@@ -4,7 +4,7 @@ package Classifier::Bayes;
 use POPFile::Module;
 @ISA = ("POPFile::Module");
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # Bayes.pm --- Naive Bayes text classifier
 #
@@ -29,7 +29,7 @@ use POPFile::Module;
 #   Modified by              Sam Schinke    (sschinke@users.sourceforge.net)
 #   Merged with db code from Scott Leighton (helphand@users.sourceforge.net)
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 
 use strict;
 use warnings;
@@ -85,8 +85,8 @@ sub new
 
     $self->{history__}        = 0;
 
-    # To save time we also 'prepare' some commonly used SQL statements and cache
-    # them here, see the function db_connect__ for details
+    # To save time we also 'prepare' some commonly used SQL statements
+    # and cache them here, see the function db_connect__ for details
 
     $self->{db_get_buckets__} = 0;
     $self->{db_get_wordid__} = 0;
@@ -102,8 +102,8 @@ sub new
     $self->{db_get_buckets_with_magnets__} = 0;
     $self->{db_delete_zero_words__} = 0;
 
-    # Caches the name of each bucket and relates it to both the bucket ID in the
-    # database and whether it is pseudo or not
+    # Caches the name of each bucket and relates it to both the bucket
+    # ID in the database and whether it is pseudo or not
     #
     # Subkeys used are:
     #
@@ -143,18 +143,20 @@ sub new
     #             to the database
     $self->{corpus_version__}    = 1;
 
-    # The unclassified cutoff this value means that the top probabilily must be n times greater than the
-    # second probability, default is 100 times more likely
+    # The unclassified cutoff this value means that the top
+    # probabilily must be n times greater than the second probability,
+    # default is 100 times more likely
     $self->{unclassified__}      = log(100);
 
     # Used to tell the caller whether a magnet was used in the last
     # mail classification
     $self->{magnet_used__}       = 0;
-    $self->{magnet_detail__}     = '';
+    $self->{magnet_detail__}     = 0;
 
-    # This maps session keys (long strings) to user ids.  If there's an entry here then the session key
-    # is valid and can be used in the POPFile API.   See the methods get_session_key and release_session_key
-    # for details
+    # This maps session keys (long strings) to user ids.  If there's
+    # an entry here then the session key is valid and can be used in
+    # the POPFile API.  See the methods get_session_key and
+    # release_session_key for details
 
     $self->{api_sessions__}      = {};
 
@@ -167,14 +169,14 @@ sub new
     return $self;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # forked
 #
-# This is called inside a child process that has just forked, since the child needs access
-# to the database we open it
+# This is called inside a child process that has just forked, since
+# the child needs access to the database we open it
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub forked
 {
     my ( $self ) = @_;
@@ -182,13 +184,13 @@ sub forked
     $self->db_connect__();
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # initialize
 #
 # Called to set up the Bayes module's parameters
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub initialize
 {
     my ( $self ) = @_;
@@ -197,18 +199,19 @@ sub initialize
 
     $self->config_( 'database', 'popfile.db' );
 
-    # This is the 'connect' string used by DBI to connect to the database, if
-    # you decide to change from using SQLite to some other database (e.g. MySQL,
-    # Oracle, ... ) this *should* be all you need to change.  The additional
-    # parameters user and auth are needed for some databases.
+    # This is the 'connect' string used by DBI to connect to the
+    # database, if you decide to change from using SQLite to some
+    # other database (e.g. MySQL, Oracle, ... ) this *should* be all
+    # you need to change.  The additional parameters user and auth are
+    # needed for some databases.
     #
-    # Note that the dbconnect string will be interpolated before being passed
-    # to DBI and the variable $dbname can be used within it and it resolves to
-    # the full path to the database named in the database parameter above.
+    # Note that the dbconnect string will be interpolated before being
+    # passed to DBI and the variable $dbname can be used within it and
+    # it resolves to the full path to the database named in the
+    # database parameter above.
 
     $self->config_( 'dbconnect', 'dbi:SQLite:dbname=$dbname' );
-    $self->config_( 'dbuser',   '' );
-    $self->config_( 'dbauth',   '' );
+    $self->config_( 'dbuser', '' ); $self->config_( 'dbauth', '' );
 
     # No default unclassified weight is the number of times more sure POPFile
     # must be of the top class vs the second class, default is 100 times more
@@ -217,8 +220,8 @@ sub initialize
 
     # The corpus is kept in the 'corpus' subfolder of POPFile
     #
-    # DEPRECATED This is only used to find an old corpus that might need to
-    # be upgraded
+    # DEPRECATED This is only used to find an old corpus that might
+    # need to be upgraded
 
     $self->config_( 'corpus', 'corpus' );
 
@@ -238,21 +241,22 @@ sub initialize
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # start
 #
 # Called to start the Bayes module running
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub start
 {
     my ( $self ) = @_;
 
-    # In Japanese mode, explicitly set LC_COLLATE to C.
-    # This is to avoid Perl crash on Windows because default LC_COLLATE of Japanese Win
-    # is Japanese_Japan.932(Shift_JIS), which is different from the charset POPFile uses
-    # for Japanese characters(EUC-JP).
+    # In Japanese mode, explicitly set LC_COLLATE to C.  This is to
+    # avoid Perl crash on Windows because default LC_COLLATE of
+    # Japanese Win is Japanese_Japan.932(Shift_JIS), which is
+    # different from the charset POPFile uses for Japanese
+    # characters(EUC-JP).
 
     if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
         use POSIX qw( locale_h );
@@ -273,13 +277,13 @@ sub start
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # stop
 #
 # Called when POPFile is terminating
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub stop
 {
     my ( $self ) = @_;
@@ -287,7 +291,7 @@ sub stop
     $self->db_disconnect__();
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # classified
 #
@@ -295,7 +299,7 @@ sub stop
 #
 # There is no return value from this method
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub classified
 {
     my ( $self, $session, $class ) = @_;
@@ -304,7 +308,53 @@ sub classified
         $self->get_bucket_parameter( $session, $class, 'count' ) + 1 ); # PROFILE BLOCK STOP
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+#
+# reclassified
+#
+# Called to inform the module about a reclassification from one bucket
+# to another
+#
+# session            Valid API session
+# bucket             The old bucket name
+# newbucket          The new bucket name
+# undo               1 if this is an undo operation
+#
+# There is no return value from this method
+#
+#----------------------------------------------------------------------------
+sub reclassified
+{
+    my ( $self, $session, $bucket, $newbucket, $undo ) = @_;
+
+    $self->log_( 0, "Reclassification from $bucket to $newbucket" );
+
+    my $c = $undo?-1:1;
+
+    if ( $bucket ne $newbucket ) {
+        my $count = $self->get_bucket_parameter(
+                        $session, $newbucket, 'count' );
+        $self->set_bucket_parameter(
+            $session, $newbucket, 'count', $count + $c );
+
+        $count = $self->get_bucket_parameter(
+                     $session, $bucket, 'count' );
+        $self->set_bucket_parameter(
+            $session, $bucket, 'count', $count - $c );
+
+        my $fncount = $self->get_bucket_parameter(
+                          $session, $newbucket, 'fncount' );
+        $self->set_bucket_parameter(
+            $session, $newbucket, 'fncount', $fncount + $c );
+
+        my $fpcount = $self->get_bucket_parameter(
+                          $session, $bucket, 'fpcount' );
+        $self->set_bucket_parameter(
+            $session, $bucket, 'fpcount', $fpcount + $c );
+    }
+}
+
+#----------------------------------------------------------------------------
 #
 # get_color
 #
@@ -313,7 +363,7 @@ sub classified
 # $session  Session key returned by get_session_key
 # $word     Word to get the color of
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_color
 {
     my ( $self, $session, $word ) = @_;
@@ -335,13 +385,13 @@ sub get_color
     return $color;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_not_likely_
 #
 # Returns the probability of a word that doesn't appear
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_not_likely_
 {
     my ( $self, $session ) = @_;
@@ -352,15 +402,15 @@ sub get_not_likely_
     return $self->{not_likely__}{$userid};
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_value_
 #
-# Returns the value for a specific word in a bucket.  The word is converted to the log value
-# of the probability before return to get the raw value just hit the hash directly or call
-# get_base_value_
+# Returns the value for a specific word in a bucket.  The word is
+# converted to the log value of the probability before return to get
+# the raw value just hit the hash directly or call get_base_value_
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_value_
 {
     my ( $self, $session, $bucket, $word ) = @_;
@@ -394,14 +444,14 @@ sub get_base_value_
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # set_value_
 #
-# Sets the value for a word in a bucket and updates the total word counts for the bucket
-# and globally
+# Sets the value for a word in a bucket and updates the total word
+# counts for the bucket and globally
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub set_value_
 {
     my ( $self, $session, $bucket, $word, $value ) = @_;
@@ -421,13 +471,13 @@ sub set_value_
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
-# get_sort_value_ behaves the same as get_value_, except that it returns not_likely__ rather
-# than 0 if the word is not found.  This makes its result more suitable as a sort key for bucket
-# ranking.
+# get_sort_value_ behaves the same as get_value_, except that it
+# returns not_likely__ rather than 0 if the word is not found.  This
+# makes its result more suitable as a sort key for bucket ranking.
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_sort_value_
 {
     my ( $self, $session, $bucket, $word ) = @_;
@@ -445,13 +495,13 @@ sub get_sort_value_
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # update_constants__
 #
 # Updates not_likely and bucket_start
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub update_constants__
 {
     my ( $self, $session ) = @_;
@@ -478,24 +528,26 @@ sub update_constants__
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # db_connect__
 #
 # Connects to the POPFile database and returns 1 if successful
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub db_connect__
 {
     my ( $self ) = @_;
 
-    # Connect to the database, note that the database must exist for this to work,
-    # to make this easy for people POPFile we will create the database automatically
-    # here using the file 'popfile.sql' which should be located in the same directory
-    # the Classifier/Bayes.pm module
+    # Connect to the database, note that the database must exist for
+    # this to work, to make this easy for people POPFile we will
+    # create the database automatically here using the file
+    # 'popfile.sql' which should be located in the same directory the
+    # Classifier/Bayes.pm module
 
-    # If we are using SQLite then the dbname is actually the name of a file, and
-    # hence we treat it like one, otherwise we leave it alone
+    # If we are using SQLite then the dbname is actually the name of a
+    # file, and hence we treat it like one, otherwise we leave it
+    # alone
 
     my $dbname;
     my $dbconnect = $self->config_( 'dbconnect' );
@@ -510,8 +562,9 @@ sub db_connect__
         $dbpresent = 1;
     }
 
-    # Now perform the connect, note that this is database independent at this point, the
-    # actual database that we connect to is defined by the dbconnect parameter.
+    # Now perform the connect, note that this is database independent
+    # at this point, the actual database that we connect to is defined
+    # by the dbconnect parameter.
 
     $dbconnect =~ s/\$dbname/$dbname/g;
 
@@ -532,10 +585,11 @@ sub db_connect__
         }
     }
 
-    # Now check for a need to upgrade the database because the schema has been
-    # changed.   From POPFile v0.22.0 there's a special 'popfile' table inside
-    # the database that contains the schema version number.  If the version number
-    # doesn't match or is missing then do the upgrade.
+    # Now check for a need to upgrade the database because the schema
+    # has been changed.  From POPFile v0.22.0 there's a special
+    # 'popfile' table inside the database that contains the schema
+    # version number.  If the version number doesn't match or is
+    # missing then do the upgrade.
 
     open SCHEMA, '<' . $self->get_root_path_( 'Classifier/popfile.sql' );
     <SCHEMA> =~ /-- POPFILE SCHEMA (\d+)/;
@@ -560,7 +614,6 @@ sub db_connect__
     if ( $need_upgrade ) {
 
         print "\n\nDatabase schema is outdated, performing automatic upgrade\n";
-
         # The database needs upgrading, so we are going to dump out
         # all the data in the database as INSERT statements in a
         # temporary file, then DROP all the tables in the database,
@@ -720,6 +773,7 @@ sub db_connect__
     $self->{db_get_buckets_with_magnets__} = $self->{db__}->prepare(                    # PROFILE BLOCK START
              'select buckets.name from buckets, magnets
                   where buckets.userid = ? and
+                        magnets.id != 0 and
                         magnets.bucketid = buckets.id group by buckets.name order by buckets.name;' );
                                                                                         # PROFILE BLOCK STOP
     $self->{db_delete_zero_words__} = $self->{db__}->prepare(                           # PROFILE BLOCK START
@@ -739,7 +793,7 @@ sub db_connect__
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # insert_schema__
 #
@@ -747,7 +801,7 @@ sub db_connect__
 #
 # $sqlite          Set to 1 if this is a SQLite database
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub insert_schema__
 {
     my ( $self, $sqlite ) = @_;
@@ -785,13 +839,13 @@ sub insert_schema__
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # db_disconnect__
 #
 # Disconnect from the POPFile database
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub db_disconnect__
 {
     my ( $self ) = @_;
@@ -817,7 +871,7 @@ sub db_disconnect__
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # db_update_cache__
 #
@@ -825,7 +879,7 @@ sub db_disconnect__
 #
 # $session           Must be a valid session
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub db_update_cache__
 {
     my ( $self, $session ) = @_;
@@ -862,18 +916,18 @@ sub db_update_cache__
     $self->update_constants__( $session );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # db_get_word_count__
 #
-# Return the 'count' value for a word in a bucket.  If the word is not found in that
-# bucket then returns undef.
+# Return the 'count' value for a word in a bucket.  If the word is not
+# found in that bucket then returns undef.
 #
 # $session          Valid session ID from get_session_key
 # $bucket           bucket word is in
 # $word             word to lookup
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub db_get_word_count__
 {
     my ( $self, $session, $bucket, $word ) = @_;
@@ -898,19 +952,19 @@ sub db_get_word_count__
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # db_put_word_count__
 #
-# Update 'count' value for a word in a bucket, if the update fails then returns 0
-# otherwise is returns 1
+# Update 'count' value for a word in a bucket, if the update fails
+# then returns 0 otherwise is returns 1
 #
 # $session          Valid session ID from get_session_key
 # $bucket           bucket word is in
 # $word             word to update
 # $count            new count value
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub db_put_word_count__
 {
     my ( $self, $session, $bucket, $word, $count ) = @_;
@@ -918,9 +972,9 @@ sub db_put_word_count__
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    # We need to have two things before we can start, the id of the word in the words
-    # table (if there's none then we need to add the word), the bucket id in the buckets
-    # table (which must exist)
+    # We need to have two things before we can start, the id of the
+    # word in the words table (if there's none then we need to add the
+    # word), the bucket id in the buckets table (which must exist)
 
     $word = $self->{db__}->quote($word);
 
@@ -941,22 +995,22 @@ sub db_put_word_count__
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # upgrade_predatabase_data__
 #
-# Looks for old POPFile data (in flat files or BerkeleyDB tables) and upgrades it to the
-# SQL database.   Data upgraded is removed.
+# Looks for old POPFile data (in flat files or BerkeleyDB tables) and
+# upgrades it to the SQL database.  Data upgraded is removed.
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub upgrade_predatabase_data__
 {
     my ( $self ) = @_;
     my $c      = 0;
 
-    # There's an assumption here that this is the single user version of POPFile
-    # and hence what we do is cheat and get a session key assuming that the user
-    # name is admin with password ''
+    # There's an assumption here that this is the single user version
+    # of POPFile and hence what we do is cheat and get a session key
+    # assuming that the user name is admin with password ''
 
     my $session = $self->get_session_key( 'admin', '' );
 
@@ -1011,7 +1065,7 @@ sub upgrade_predatabase_data__
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # upgrade_bucket__
 #
@@ -1020,7 +1074,7 @@ sub upgrade_predatabase_data__
 # $session           Valid session key from get_session_key
 # $bucket            The bucket name
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub upgrade_bucket__
 {
     my ( $self, $session, $bucket ) = @_;
@@ -1069,9 +1123,10 @@ sub upgrade_bucket__
                 my $type  = $1;
                 my $value = $2;
 
-                # Some people were accidently creating magnets with trailing whitespace
-                # which really confused them later when their magnet did not match (see
-                # comment in UI::HTML::magnet for more detail)
+                # Some people were accidently creating magnets with
+                # trailing whitespace which really confused them later
+                # when their magnet did not match (see comment in
+                # UI::HTML::magnet for more detail)
 
                 $value =~ s/^[ \t]+//g;
                 $value =~ s/[ \t]+$//g;
@@ -1192,19 +1247,19 @@ sub upgrade_bucket__
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # magnet_match_helper__
 #
-# Helper the determines if a specific string matches a certain magnet type in a bucket, used
-# by magnet_match_
+# Helper the determines if a specific string matches a certain magnet
+# type in a bucket, used by magnet_match_
 #
 # $session         Valid session from get_session_key
 # $match           The string to match
 # $bucket          The bucket to check
 # $type            The magnet type to check
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub magnet_match_helper__
 {
     my ( $self, $session, $match, $bucket, $type ) = @_;
@@ -1214,16 +1269,17 @@ sub magnet_match_helper__
 
     $match = lc($match);
 
-    # In Japanese and Korean mode, disable locale.
-    # Sorting Japanese and Korean with "use locale" is memory and time consuming,
-    # and may cause perl crash.
+    # In Japanese and Korean mode, disable locale.  Sorting Japanese
+    # and Korean with "use locale" is memory and time consuming, and
+    # may cause perl crash.
 
     my @magnets;
 
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $h = $self->{db__}->prepare(                                           # PROFILE BLOCK START
-        "select magnets.val from magnets, users, buckets, magnet_types
+        "select magnets.val, magnets.id from magnets, users, buckets, magnet_types
              where buckets.id = $bucketid and
+                   magnets.id != 0 and
                    users.id = buckets.userid and
                    magnets.bucketid = buckets.id and
                    magnet_types.mtype = '$type' and
@@ -1231,17 +1287,18 @@ sub magnet_match_helper__
 
     $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {
-        push @magnets, ($row->[0]);
+        push @magnets, [$row->[0], $row->[1]];
     }
     $h->finish;
 
-    for my $magnet (@magnets) {
+    foreach my $m (@magnets) {
+        my ( $magnet, $id ) = @{$m};
         $magnet = lc($magnet);
 
         for my $i (0..(length($match)-length($magnet))) {
             if ( substr( $match, $i, length($magnet)) eq $magnet ) {
                 $self->{magnet_used__}   = 1;
-                $self->{magnet_detail__} = "$type: $magnet";
+                $self->{magnet_detail__} = $id;
 
                 return 1;
             }
@@ -1251,18 +1308,19 @@ sub magnet_match_helper__
     return 0;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # magnet_match__
 #
-# Helper the determines if a specific string matches a certain magnet type in a bucket
+# Helper the determines if a specific string matches a certain magnet
+# type in a bucket
 #
 # $session         Valid session from get_session_key
 # $match           The string to match
 # $bucket          The bucket to check
 # $type            The magnet type to check
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub magnet_match__
 {
     my ( $self, $session, $match, $bucket, $type ) = @_;
@@ -1270,17 +1328,18 @@ sub magnet_match__
     return $self->magnet_match_helper__( $session, $match, $bucket, $type );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # write_line__
 #
-# Writes a line to a file and parses it unless the classification is already known
+# Writes a line to a file and parses it unless the classification is
+# already known
 #
 # $file         File handle for file to write line to
 # $line         The line to write
 # $class        (optional) The current classification
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub write_line__
 {
     my ( $self, $file, $line, $class ) = @_;
@@ -1292,18 +1351,19 @@ sub write_line__
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # add_words_to_bucket__
 #
-# Takes words previously parsed by the mail parser and adds/subtracts them to/from a bucket,
-# this is a helper used by add_messages_to_bucket, remove_message_from_bucket
+# Takes words previously parsed by the mail parser and adds/subtracts
+# them to/from a bucket, this is a helper used by
+# add_messages_to_bucket, remove_message_from_bucket
 #
 # $session        Valid session from get_session_key
 # $bucket         Bucket to add to
 # $subtract       Set to -1 means subtract the words, set to 1 means add
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub add_words_to_bucket__
 {
     my ( $self, $session, $bucket, $subtract ) = @_;
@@ -1353,9 +1413,10 @@ sub add_words_to_bucket__
     $self->{db__}->begin_work;
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
 
-        # If there's already a count then it means that the word is already
-        # in the database and we have its id in $wordmap{$word} so for speed we
-        # execute the db_put_word_count__ query here rather than going through
+        # If there's already a count then it means that the word is
+        # already in the database and we have its id in
+        # $wordmap{$word} so for speed we execute the
+        # db_put_word_count__ query here rather than going through
         # set_value_ which would need to look up the wordid again
 
         if ( defined( $wordmap{$word} ) && defined( $counts{$wordmap{$word}} ) ) {
@@ -1363,8 +1424,9 @@ sub add_words_to_bucket__
                 $wordmap{$word}, $counts{$wordmap{$word}} + $subtract * $self->{parser__}->{words__}{$word} ); # PROFILE BLOCK STOP
         } else {
 
-            # If the word is not in the database and we are trying to subtract then
-            # we do nothing because negative values are meaningless
+            # If the word is not in the database and we are trying to
+            # subtract then we do nothing because negative values are
+            # meaningless
 
             if ( $subtract == 1 ) {
                 $self->db_put_word_count__( $session, $bucket, $word, $self->{parser__}->{words__}{$word} );
@@ -1372,8 +1434,9 @@ sub add_words_to_bucket__
         }
     }
 
-    # If we were doing a subtract operation it's possible that some of the words
-    # in the bucket now have a zero count and should be removed
+    # If we were doing a subtract operation it's possible that some of
+    # the words in the bucket now have a zero count and should be
+    # removed
 
     if ( $subtract == -1 ) {
         $self->{db_delete_zero_words__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id} );
@@ -1382,22 +1445,26 @@ sub add_words_to_bucket__
     $self->{db__}->commit;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # echo_to_dot_
 #
-# $mail     The stream (created with IO::) to send the message to (the remote mail server)
-# $client   (optional) The local mail client (created with IO::) that needs the response
-# $file     (optional) A file to print the response to, caller specifies open style
-# $before   (optional) String to send to client before the dot is sent
+# $mail The stream (created with IO::) to send the message to (the
+# remote mail server)
+# $client (optional) The local mail client (created with IO::) that
+# needs the response
+# $file (optional) A file to print the response to, caller specifies
+# open style
+# $before (optional) String to send to client before the dot is sent
 #
-# echo all information from the $mail server until a single line with a . is seen
+# echo all information from the $mail server until a single line with
+# a . is seen
 #
 # NOTE Also echoes the line with . to $client but not to $file
 #
 # Returns 1 if there was a . or 0 if reached EOF before we hit the .
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub echo_to_dot_
 {
     my ( $self, $mail, $client, $file, $before ) = @_;
@@ -1413,9 +1480,10 @@ sub echo_to_dot_
 
         last if ( $self->{alive_} == 0 );
 
-        # The termination has to be a single line with exactly a dot on it and nothing
-        # else other than line termination characters.  This is vital so that we do
-        # not mistake a line beginning with . as the end of the block
+        # The termination has to be a single line with exactly a dot
+        # on it and nothing else other than line termination
+        # characters.  This is vital so that we do not mistake a line
+        # beginning with . as the end of the block
 
         if ( $line =~ /^\.(\r\n|\r|\n)$/ ) {
             $hit_dot = 1;
@@ -1425,9 +1493,9 @@ sub echo_to_dot_
                 print FILE    $before if ( defined( $isopen ) );
             }
 
-            # Note that there is no print FILE here.  This is correct because we
-            # do no want the network terminator . to appear in the file version
-            # of any message
+            # Note that there is no print FILE here.  This is correct
+            # because we do no want the network terminator . to appear
+            # in the file version of any message
 
             print $client $line if ( defined( $client ) );
             last;
@@ -1443,7 +1511,7 @@ sub echo_to_dot_
     return $hit_dot;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # substr_euc__
 #
@@ -1452,7 +1520,7 @@ sub echo_to_dot_
 # $pos      Start position
 # $len      Word length
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub substr_euc__
 {
     my ( $str, $pos, $len ) = @_;
@@ -1478,13 +1546,14 @@ sub substr_euc__
     return $result_str;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # generate_unique_session_key__
 #
-# Returns a unique string based session key that can be used as a key in the api_sessions__
+# Returns a unique string based session key that can be used as a key
+# in the api_sessions__
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub generate_unique_session_key__
 {
     my ( $self ) = @_;
@@ -1515,31 +1584,34 @@ sub generate_unique_session_key__
     return $session;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # valid_session_key__
 #
 # $session                Session key returned by call to get_session_key
 #
-# Returns undef is the session key is not valid, or returns the user ID associated
-# with the session key which can be used in database accesses
+# Returns undef is the session key is not valid, or returns the user
+# ID associated with the session key which can be used in database
+# accesses
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub valid_session_key__
 {
     my ( $self, $session ) = @_;
 
-    # This provides protection against someone using the XML-RPC interface and calling
-    # this API directly to fish for session keys, this must be called from within this
-    # module
+    # This provides protection against someone using the XML-RPC
+    # interface and calling this API directly to fish for session
+    # keys, this must be called from within this module
 
     return undef if ( caller ne 'Classifier::Bayes' );
 
-    # If the session key is invalid then wait 1 second.  This is done to prevent
-    # people from calling a POPFile API such as get_bucket_count with random session
-    # keys fishing for a valid key.  The XML-RPC API is single threaded and hence this
-    # will delay all use of that API by one second.  Of course in normal use when the
-    # user knows the username/password or session key then there is no delay
+    # If the session key is invalid then wait 1 second.  This is done
+    # to prevent people from calling a POPFile API such as
+    # get_bucket_count with random session keys fishing for a valid
+    # key.  The XML-RPC API is single threaded and hence this will
+    # delay all use of that API by one second.  Of course in normal
+    # use when the user knows the username/password or session key
+    # then there is no delay
 
     if ( !defined( $self->{api_sessions__}{$session} ) ) {
         my ( $package, $filename, $line, $subroutine ) = caller;
@@ -1550,41 +1622,43 @@ sub valid_session_key__
     return $self->{api_sessions__}{$session};
 }
 
-# ---------------------------------------------------------------------------------------------
-# ---------------------------------------------------------------------------------------------
-#       _____   _____   _____  _______ _____        _______     _______  _____  _____
-#      |_____] |     | |_____] |______   |   |      |______     |_____| |_____]   |
-#      |       |_____| |       |       __|__ |_____ |______     |     | |       __|__
+#----------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+# _____   _____   _____  _______ _____        _______   _______  _____  _____
+#|_____] |     | |_____] |______   |   |      |______   |_____| |_____]   |
+#|       |_____| |       |       __|__ |_____ |______   |     | |       __|__
 #
-# The method below are public and may be accessed by other modules.  All of them may be
-# accessed remotely through the XMLRPC.pm module using the XML-RPC protocol
+# The method below are public and may be accessed by other modules.
+# All of them may be accessed remotely through the XMLRPC.pm module
+# using the XML-RPC protocol
 #
-# Note that every API function expects to be passed a $session which is obtained by first
-# calling get_session_key with a valid username and password.   Once done call the method
-# release_session_key.
+# Note that every API function expects to be passed a $session which
+# is obtained by first calling get_session_key with a valid username
+# and password.  Once done call the method release_session_key.
 #
 # See POPFile::API for more details
 #
-# ---------------------------------------------------------------------------------------------
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_session_key
 #
 # $user           The name of an existing user
 # $pwd            The user's password
 #
-# Returns a string based session key if the username and password match, or undef if not
+# Returns a string based session key if the username and password
+# match, or undef if not
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_session_key
 {
     my ( $self, $user, $pwd ) = @_;
 
-    # The password is stored in the database as an MD5 hash of the username and
-    # password concatenated and separated by the string __popfile__, so compute
-    # the hash here
+    # The password is stored in the database as an MD5 hash of the
+    # username and password concatenated and separated by the string
+    # __popfile__, so compute the hash here
 
     my $hash = md5_hex( $user . '__popfile__' . $pwd );
 
@@ -1612,7 +1686,7 @@ sub get_session_key
     return $session;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # release_session_key
 #
@@ -1620,7 +1694,7 @@ sub get_session_key
 #
 # Releases and invalidates the session key
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub release_session_key
 {
     my ( $self, $session ) = @_;
@@ -1631,13 +1705,13 @@ sub release_session_key
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_top_bucket__
 #
-# Helper function used by classify to get the bucket with the highest score from data
-# stored in a matrix of information (see definition of %matrix in classify for details)
-# and a list of potential buckets
+# Helper function used by classify to get the bucket with the highest
+# score from data stored in a matrix of information (see definition of
+# %matrix in classify for details) and a list of potential buckets
 #
 # $userid         User ID for database access
 # $id             ID of a word in $matrix
@@ -1646,7 +1720,7 @@ sub release_session_key
 #
 # Returns the bucket in $buckets with the highest score
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_top_bucket__
 {
     my ( $self, $userid, $id, $matrix, $buckets ) = @_;
@@ -1669,23 +1743,24 @@ sub get_top_bucket__
     return $top_bucket;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # classify
 #
 # $session   A valid session key returned by a call to get_session_key
-# $file      The name of the file containing the text to classify (or undef to use
-#            the data already in the parser)
+# $file The name of the file containing the text to classify (or undef
+# to use the data already in the parser)
 # $templ     Reference to the UI template used for word score display
-# $matrix    (optional) Reference to a hash that will be filled with the word matrix
-#            used in classification
-# $idmap     (optional) Reference to a hash that will map word ids in the $matrix to
-#            actual words
+# $matrix (optional) Reference to a hash that will be filled with the
+# word matrix used in classification
+# $idmap (optional) Reference to a hash that will map word ids in the
+# $matrix to actual words
 #
-# Splits the mail message into valid words, then runs the Bayes algorithm to figure out
-# which bucket it belongs in.  Returns the bucket name
+# Splits the mail message into valid words, then runs the Bayes
+# algorithm to figure out which bucket it belongs in.  Returns the
+# bucket name
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub classify
 {
     my ( $self, $session, $file, $templ, $matrix, $idmap ) = @_;
@@ -1697,7 +1772,7 @@ sub classify
     $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
 
     $self->{magnet_used__}   = 0;
-    $self->{magnet_detail__} = '';
+    $self->{magnet_detail__} = 0;
 
     if ( defined( $file ) ) {
         $self->{parser__}->parse_file( $file,                                           # PROFILE BLOCK START
@@ -1717,20 +1792,21 @@ sub classify
         }
     }
 
-    # If the user has not defined any buckets then we escape here return unclassified
+    # If the user has not defined any buckets then we escape here
+    # return unclassified
 
     return "unclassified" if ( $#buckets == -1 );
 
-    # The score hash will contain the likelihood that the given message is in each
-    # bucket, the buckets are the keys for score
+    # The score hash will contain the likelihood that the given
+    # message is in each bucket, the buckets are the keys for score
 
     # Set up the initial score as P(bucket)
 
     my %score;
     my %matchcount;
 
-    # Build up a list of the buckets that are OK to use for classification (i.e.
-    # that have at least one word in them).
+    # Build up a list of the buckets that are OK to use for
+    # classification (i.e.  that have at least one word in them).
 
     my @ok_buckets;
 
@@ -1744,45 +1820,49 @@ sub classify
 
     @buckets = @ok_buckets;
 
-    # For each word go through the buckets and calculate P(word|bucket) and then calculate
-    # P(word|bucket) ^ word count and multiply to the score
+    # For each word go through the buckets and calculate
+    # P(word|bucket) and then calculate P(word|bucket) ^ word count
+    # and multiply to the score
 
     my $word_count = 0;
 
-    # The correction value is used to generate score displays
-    # variable which are consistent with the word scores shown by the GUI's
-    # word lookup feature.  It is computed to make the contribution of a word
-    # which is unrepresented in a bucket zero.  This correction affects only
-    # the values displayed in the display; it has no effect on the classification
-    # process.
+    # The correction value is used to generate score displays variable
+    # which are consistent with the word scores shown by the GUI's
+    # word lookup feature.  It is computed to make the contribution of
+    # a word which is unrepresented in a bucket zero.  This correction
+    # affects only the values displayed in the display; it has no
+    # effect on the classification process.
 
     my $correction = 0;
 
-    # Classification against the database works in a sequence of steps to get
-    # the fastest time possible.  The steps are as follows:
+    # Classification against the database works in a sequence of steps
+    # to get the fastest time possible.  The steps are as follows:
     #
-    # 1. Convert the list of words returned by the parser into a list of unique
-    #    word ids that can be used in the database.  This requires a select
-    #    against the database to get the word ids (and associated words) which
-    #    is then converted into two things: @id_list which is just the sorted
-    #    list of word ids and %idmap which maps a word to its id.
+    # 1. Convert the list of words returned by the parser into a list
+    #    of unique word ids that can be used in the database.  This
+    #    requires a select against the database to get the word ids
+    #    (and associated words) which is then converted into two
+    #    things: @id_list which is just the sorted list of word ids
+    #    and %idmap which maps a word to its id.
     #
-    # 2. Then run a second select that get the triplet (count, id, bucket) for
-    #    each word id and each bucket.  The triplet contains the word count from
-    #    the database for each bucket and each id, where there is an entry. That
-    #    data gets loaded into the sparse matrix %matrix.
+    # 2. Then run a second select that get the triplet (count, id,
+    #    bucket) for each word id and each bucket.  The triplet
+    #    contains the word count from the database for each bucket and
+    #    each id, where there is an entry. That data gets loaded into
+    #    the sparse matrix %matrix.
     #
-    # 3. Do the normal classification loop as before running against the @id_list
-    #    for the words and for each bucket.   If there's an entry in %matrix for
-    #    the id/bucket combination then calculate the probability, otherwise use
-    #    the not_likely probability.
+    # 3. Do the normal classification loop as before running against
+    # the @id_list for the words and for each bucket.  If there's an
+    # entry in %matrix for the id/bucket combination then calculate
+    # the probability, otherwise use the not_likely probability.
     #
-    # NOTE.  Since there is a single not_likely probability we do not worry about
-    #        the fact that the select in 1 might return a shorter list of words
-    #        than was found in the message (because some words are not in the
-    #        database) since the missing words will be the same for all buckets
-    #        and hence constitute a fixed scaling factor on all the buckets which
-    #        is irrelevant in deciding which the winning bucket is.
+    # NOTE.  Since there is a single not_likely probability we do not
+    # worry about the fact that the select in 1 might return a shorter
+    # list of words than was found in the message (because some words
+    # are not in the database) since the missing words will be the
+    # same for all buckets and hence constitute a fixed scaling factor
+    # on all the buckets which is irrelevant in deciding which the
+    # winning bucket is.
 
     my $words;
     $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
@@ -1857,7 +1937,8 @@ sub classify
         }
     }
 
-    # Now sort the scores to find the highest and return that bucket as the classification
+    # Now sort the scores to find the highest and return that bucket
+    # as the classification
 
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
 
@@ -1865,17 +1946,20 @@ sub classify
     my $base_score = $score{$ranking[0]};
     my $total = 0;
 
-    # If the first and second bucket are too close in their probabilities, call the message
-    # unclassified.  Also if there are fewer than 2 buckets.
+    # If the first and second bucket are too close in their
+    # probabilities, call the message unclassified.  Also if there are
+    # fewer than 2 buckets.
+
     my $class = 'unclassified';
 
     if ( @buckets > 1 && $score{$ranking[0]} > ( $score{$ranking[1]} + $self->{unclassified__} ) ) {
         $class = $ranking[0];
     }
 
-    # Compute the total of all the scores to generate the normalized scores and probability
-    # estimate.  $total is always 1 after the first loop iteration, so any additional term
-    # less than 2 ** -54 is insignificant, and need not be computed.
+    # Compute the total of all the scores to generate the normalized
+    # scores and probability estimate.  $total is always 1 after the
+    # first loop iteration, so any additional term less than 2 ** -54
+    # is insignificant, and need not be computed.
 
     my $ln2p_54 = -54 * log(2);
 
@@ -1940,8 +2024,9 @@ sub classify
              my $probstr;
              my $rawstr;
 
-             # If the computed probability would display as 1, display it as .999999 instead.
-             # We don't want to give the impression that POPFile is ever completely sure of its
+             # If the computed probability would display as 1, display
+             # it as .999999 instead.  We don't want to give the
+             # impression that POPFile is ever completely sure of its
              # classification.
 
              if ($prob >= .999999) {
@@ -1986,8 +2071,8 @@ sub classify
 
             my %wordprobs;
 
-            # If the word matrix is supposed to show probabilities, compute them,
-            # saving the results in %wordprobs.
+            # If the word matrix is supposed to show probabilities,
+            # compute them, saving the results in %wordprobs.
 
             if ( $self->{wmformat__} eq 'prob') {
                 foreach my $id (@id_list) {
@@ -1998,8 +2083,9 @@ sub classify
                         $sumfreq += $wval{$bucket};
                     }
 
-                    # If $sumfreq is still zero then this word didn't appear in any buckets
-                    # so we shouldn't create wordprobs entries for it
+                    # If $sumfreq is still zero then this word didn't
+                    # appear in any buckets so we shouldn't create
+                    # wordprobs entries for it
 
                     if ( $sumfreq != 0 ) {
                         foreach my $bucket (@ranking) {
@@ -2084,31 +2170,33 @@ sub classify
     return $class;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # classify_and_modify
 #
-# This method reads an email terminated by . on a line by itself (or the end of stream)
-# from a handle and creates an entry in the history, outputting the same email on another
-# handle with the appropriate header modifications and insertions
+# This method reads an email terminated by . on a line by itself (or
+# the end of stream) from a handle and creates an entry in the
+# history, outputting the same email on another handle with the
+# appropriate header modifications and insertions
 #
 # $session   A valid session key returned by a call to get_session_key
 # $mail     - an open stream to read the email from
-# $client   - an open stream to write the modified email to
-# $nosave   - indicates that the message downloaded should not be saved in the history
+# $client - an open stream to write the modified email to $nosave -
+# indicates that the message downloaded should not be saved in the
+# history
 # $class    - if we already know the classification
 # $echo     - 1 to echo to the client, 0 to supress, defaults to 1
-# $crlf     - The sequence to use at the end of a line in the output, normally
-#             this is left undefined and this method uses $eol (the normal network end
-#             of line), but if this method is being used with real files you may wish
-#             to pass in \n instead
+# $crlf - The sequence to use at the end of a line in the output,
+# normally this is left undefined and this method uses $eol (the
+# normal network end of line), but if this method is being used with
+# real files you may wish to pass in \n instead
 #
-# Returns a classification if it worked and the slot ID of the history item related
-# to this classification
+# Returns a classification if it worked and the slot ID of the history
+# item related to this classification
 #
 # IMPORTANT NOTE: $mail and $client should be binmode
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub classify_and_modify
 {
     my ( $self, $session, $mail, $client, $nosave, $class, $echo, $crlf ) = @_;
@@ -2117,32 +2205,41 @@ sub classify_and_modify
     $crlf = $eol unless (defined $crlf);
 
     my $msg_subject;              # The message subject
-    my $msg_head_before = '';     # Store the message headers that come before Subject here
-    my $msg_head_after  = '';     # Store the message headers that come after Subject here
+    my $msg_head_before = '';     # Store the message headers that
+                                  # come before Subject here
+    my $msg_head_after = '';	  # Store the message headers that
+                                  # come after Subject here
     my $msg_head_q      = '';     # Store questionable header lines here
     my $msg_body        = '';     # Store the message body here
 
-    # These two variables are used to control the insertion of the X-POPFile-TimeoutPrevention
-    # header when downloading long or slow emails
+    # These two variables are used to control the insertion of the
+    # X-POPFile-TimeoutPrevention header when downloading long or slow
+    # emails
+
     my $last_timeout   = time;
     my $timeout_count  = 0;
 
-    # Indicates whether the first time through the receive loop we got the full body, this
-    # will happen on small emails
+    # Indicates whether the first time through the receive loop we got
+    # the full body, this will happen on small emails
+
     my $got_full_body  = 0;
 
     # The size of the message downloaded so far.
+
     my $message_size   = 0;
 
     # The classification for this message
+
     my $classification = '';
 
     # Whether we are currently reading the mail headers or not
+
     my $getting_headers = 1;
 
     my ( $slot, $msg_file ) = $self->{history__}->reserve_slot();
 
     # If we don't yet know the classification then start the parser
+
     if ( $class eq '' ) {
         $self->{parser__}->start_parse();
     }
@@ -2156,9 +2253,10 @@ sub classify_and_modify
     while ( my $line = $self->slurp_( $mail ) ) {
         my $fileline;
 
-        # This is done so that we remove the network style end of line CR LF
-        # and allow Perl to decide on the local system EOL which it will expand
-        # out of \n when this gets written to the temp file
+        # This is done so that we remove the network style end of line
+        # CR LF and allow Perl to decide on the local system EOL which
+        # it will expand out of \n when this gets written to the temp
+        # file
 
         $fileline = $line;
         $fileline =~ s/[\r\n]//g;
@@ -2168,8 +2266,8 @@ sub classify_and_modify
 
         last if ( $self->{alive_} == 0 );
 
-        # The termination of a message is a line consisting of exactly .CRLF so we detect that
-        # here exactly
+        # The termination of a message is a line consisting of exactly
+        # .CRLF so we detect that here exactly
 
         if ( $line =~ /^\.(\r\n|\r|\n)$/ ) {
             $got_full_body = 1;
@@ -2186,7 +2284,8 @@ sub classify_and_modify
                 $message_size += length $line;
                 $self->write_line__( $nosave?undef:\*MSG, $fileline, $class );
 
-                # If there is no echoing occuring, it doesn't matter what we do to these
+                # If there is no echoing occuring, it doesn't matter
+                # what we do to these
 
                 if ( $echo ) {
                     if ( $line =~ /^Subject:(.*)/i )  {
@@ -2195,17 +2294,20 @@ sub classify_and_modify
                         next;
                     }
 
-                    # Strip out the X-Text-Classification header that is in an incoming message
+                    # Strip out the X-Text-Classification header that
+                    # is in an incoming message
 
                     next if ( $line =~ /^X-Text-Classification:/i );
                     next if ( $line =~ /^X-POPFile-Link:/i );
 
-                    # Store any lines that appear as though they may be non-header content
-                    # Lines that are headers begin with whitespace or Alphanumerics and "-"
+                    # Store any lines that appear as though they may
+                    # be non-header content Lines that are headers
+                    # begin with whitespace or Alphanumerics and "-"
                     # followed by a colon.
                     #
-                    # This prevents weird things like HTML before the headers terminate from
-                    # causing the XPL and XTC headers to be inserted in places some clients
+                    # This prevents weird things like HTML before the
+                    # headers terminate from causing the XPL and XTC
+                    # headers to be inserted in places some clients
                     # can't detect
 
                     if ( $line =~ /^([ \t]|([A-Z0-9\-_]+:))/i ) {
@@ -2234,7 +2336,9 @@ sub classify_and_modify
             $self->write_line__( $nosave?undef:\*MSG, $fileline, $class );
         }
 
-        # Check to see if too much time has passed and we need to keep the mail client happy
+        # Check to see if too much time has passed and we need to keep
+        # the mail client happy
+
         if ( time > ( $last_timeout + 2 ) ) {
             print $client "X-POPFile-TimeoutPrevention: $timeout_count$crlf" if ( $echo );
             $timeout_count += 1;
@@ -2251,8 +2355,8 @@ sub classify_and_modify
         $self->{parser__}->stop_parse();
     }
 
-    # Do the text classification and update the counter for that bucket that we just downloaded
-    # an email of that type
+    # Do the text classification and update the counter for that
+    # bucket that we just downloaded an email of that type
 
     $classification = ($class ne '')?$class:$self->classify( $session, undef);
 
@@ -2265,6 +2369,7 @@ sub classify_and_modify
 
     # Add the Subject line modification or the original line back again
     # Don't add the classification unless it is not present
+
     if (  ( defined( $msg_subject ) && ( $msg_subject !~ /\Q$modification\E/ ) ) && # PROFILE BLOCK START
           ( $subject_modification == 1 ) &&
           ( $quarantine == 0 ) )  {                                                 # PROFILE BLOCK STOP
@@ -2303,8 +2408,9 @@ sub classify_and_modify
 
     if ( $echo ) {
 
-        # If the bucket is quarantined then we'll treat it specially by changing the message header to contain
-        # information from POPFile and wrapping the original message in a MIME encoding
+        # If the bucket is quarantined then we'll treat it specially
+        # by changing the message header to contain information from
+        # POPFile and wrapping the original message in a MIME encoding
 
        if ( $quarantine == 1 ) {
            print $client "From: " . $self->{parser__}->get_header( 'from' ) . "$crlf";
@@ -2359,19 +2465,23 @@ sub classify_and_modify
         print $client ".$crlf"    if ( $echo );
     }
 
-    # In some cases it's possible (and totally illegal) to get a . in the middle of the message,
-    # to cope with the we call flush_extra_ here to remove any extra stuff the POP3 server is sending
-    # Make sure to supress output if we are not echoing, and to save to file if not echoing and saving
+    # In some cases it's possible (and totally illegal) to get a . in
+    # the middle of the message, to cope with the we call flush_extra_
+    # here to remove any extra stuff the POP3 server is sending Make
+    # sure to supress output if we are not echoing, and to save to
+    # file if not echoing and saving
 
     if ( !($nosave || $echo) ) {
 
-        # if we're saving (not nosave) and not echoing, we can safely unload this into the temp file
+        # if we're saving (not nosave) and not echoing, we can safely
+        # unload this into the temp file
 
         if (open FLUSH, ">$msg_file.flush") {
             binmode FLUSH;
 
-            # TODO: Do this in a faster way (without flushing to one file then copying to another)
-            # (perhaps a select on $mail to predict if there is flushable data)
+            # TODO: Do this in a faster way (without flushing to one
+            # file then copying to another) (perhaps a select on $mail
+            # to predict if there is flushable data)
 
             $self->flush_extra_( $mail, \*FLUSH, 0);
             close FLUSH;
@@ -2383,14 +2493,16 @@ sub classify_and_modify
                 if ( open TEMP, ">>$msg_file" ) {
                     binmode TEMP;
 
-                    # The only time we get data here is if it is after a CRLF.CRLF
-                    # We have to re-create it to avoid data-loss
+                    # The only time we get data here is if it is after
+                    # a CRLF.CRLF We have to re-create it to avoid
+                    # data-loss
 
                     print TEMP ".$crlf";
 
                     print TEMP $_ while (<FLUSH>);
 
-                    # NOTE: The last line flushed MAY be a CRLF.CRLF, which isn't actually part of the message body
+                    # NOTE: The last line flushed MAY be a CRLF.CRLF,
+                    # which isn't actually part of the message body
 
                     close TEMP;
                 }
@@ -2400,8 +2512,9 @@ sub classify_and_modify
         }
     } else {
 
-        # if we are echoing, the client can make sure we have no data loss
-        # otherwise, the data can be discarded (not saved and not echoed)
+        # if we are echoing, the client can make sure we have no data
+        # loss otherwise, the data can be discarded (not saved and not
+        # echoed)
 
         $self->flush_extra_( $mail, $client, $echo?0:1);
     }
@@ -2409,14 +2522,11 @@ sub classify_and_modify
     if ( $nosave ) {
         $self->{history__}->release_slot( $slot );
     } else {
-
-        # TODO Make magnet classifications work with database
-
-        $self->{history__}->commit_slot( $slot, $classification, 0 );
+        $self->{history__}->commit_slot( $slot, $classification, $self->{magnet_detail__} );
     }
 
-    # If we are saving to the history and we didn't previously know the
-    # classification of a new file
+    # If we are saving to the history and we didn't previously know
+    # the classification of a new file
 
     if ( !$nosave && ( $class eq '' ) ) {
         $self->classified( $session, $classification );
@@ -2425,15 +2535,16 @@ sub classify_and_modify
     return ( $classification, $slot, $self->{magnet_used__} );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_buckets
 #
-# Returns a list containing all the real bucket names sorted into alphabetic order
+# Returns a list containing all the real bucket names sorted into
+# alphabetic order
 #
 # $session   A valid session key returned by a call to get_session_key
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_buckets
 {
     my ( $self, $session ) = @_;
@@ -2454,7 +2565,7 @@ sub get_buckets
     return @buckets;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_bucket_id
 #
@@ -2463,7 +2574,7 @@ sub get_buckets
 # $session   A valid session key returned by a call to get_session_key
 # $bucket    The bucket name
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_bucket_id
 {
     my ( $self, $session, $bucket ) = @_;
@@ -2474,15 +2585,42 @@ sub get_bucket_id
     return $self->{db_bucketid__}{$userid}{$bucket}{id};
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+#
+# get_bucket_name
+#
+# Returns the name of a bucket from an internal ID
+#
+# $session   A valid session key returned by a call to get_session_key
+# $id        The bucket id
+#
+#----------------------------------------------------------------------------
+sub get_bucket_name
+{
+    my ( $self, $session, $id ) = @_;
+
+    my $userid = $self->valid_session_key__( $session );
+    return undef if ( !defined( $userid ) );
+
+    foreach $b (keys %{$self->{db_bucketid__}{$userid}}) {
+        if ( $id == $self->{db_bucketid__}{$userid}{$b}{id} ) {
+            return $b;
+        }
+    }
+
+    return '';
+}
+
+#----------------------------------------------------------------------------
 #
 # get_pseudo_buckets
 #
-# Returns a list containing all the pseudo bucket names sorted into alphabetic order
+# Returns a list containing all the pseudo bucket names sorted into
+# alphabetic order
 #
 # $session   A valid session key returned by a call to get_session_key
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_pseudo_buckets
 {
     my ( $self, $session ) = @_;
@@ -2501,15 +2639,16 @@ sub get_pseudo_buckets
     return @buckets;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_all_buckets
 #
-# Returns a list containing all the bucket names sorted into alphabetic order
+# Returns a list containing all the bucket names sorted into
+# alphabetic order
 #
 # $session   A valid session key returned by a call to get_session_key
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_all_buckets
 {
     my ( $self, $session ) = @_;
@@ -2526,7 +2665,7 @@ sub get_all_buckets
     return @buckets;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # is_pseudo_bucket
 #
@@ -2535,7 +2674,7 @@ sub get_all_buckets
 # $session   A valid session key returned by a call to get_session_key
 # $bucket    The bucket to check
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub is_pseudo_bucket
 {
     my ( $self, $session, $bucket ) = @_;
@@ -2547,7 +2686,7 @@ sub is_pseudo_bucket
           && $self->{db_bucketid__}{$userid}{$bucket}{pseudo} ); # PROFILE BLOCK STOP
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # is_bucket
 #
@@ -2556,7 +2695,7 @@ sub is_pseudo_bucket
 # $session   A valid session key returned by a call to get_session_key
 # $bucket    The bucket to check
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub is_bucket
 {
     my ( $self, $session, $bucket ) = @_;
@@ -2568,7 +2707,7 @@ sub is_bucket
              ( !$self->{db_bucketid__}{$userid}{$bucket}{pseudo} ) );    # PROFILE BLOCK STOP
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_bucket_word_count
 #
@@ -2577,7 +2716,7 @@ sub is_bucket
 # $session     A valid session key returned by a call to get_session_key
 # $bucket      The name of the bucket for which the word count is desired
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_bucket_word_count
 {
     my ( $self, $session, $bucket ) = @_;
@@ -2590,7 +2729,7 @@ sub get_bucket_word_count
     return defined($c)?$c:0;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_bucket_word_list
 #
@@ -2600,7 +2739,7 @@ sub get_bucket_word_count
 # $bucket      The name of the bucket for which the word count is desired
 # $prefix      The first character of the words
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_bucket_word_list
 {
     my ( $self, $session, $bucket, $prefix ) = @_;
@@ -2618,7 +2757,7 @@ sub get_bucket_word_list
     return @{$result};
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_bucket_word_prefixes
 #
@@ -2627,7 +2766,7 @@ sub get_bucket_word_list
 # $session     A valid session key returned by a call to get_session_key
 # $bucket      The name of the bucket for which the word count is desired
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_bucket_word_prefixes
 {
     my ( $self, $session, $bucket ) = @_;
@@ -2643,10 +2782,10 @@ sub get_bucket_word_prefixes
          where matrix.wordid  = words.id and
                matrix.bucketid = $bucketid;");        # PROFILE BLOCK STOP
 
-    # In Japanese mode, disable locale and use substr_euc, the substr function
-    # which supports EUC Japanese charset.
-    # Sorting Japanese with "use locale" is memory and time consuming,
-    # and may cause perl crash.
+    # In Japanese mode, disable locale and use substr_euc, the substr
+    # function which supports EUC Japanese charset.  Sorting Japanese
+    # with "use locale" is memory and time consuming, and may cause
+    # perl crash.
 
     if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
         return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc__($_,0,1)} @{$result};
@@ -2659,7 +2798,7 @@ sub get_bucket_word_prefixes
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_word_count
 #
@@ -2667,7 +2806,7 @@ sub get_bucket_word_prefixes
 #
 # $session   A valid session key returned by a call to get_session_key
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_word_count
 {
     my ( $self, $session ) = @_;
@@ -2679,7 +2818,7 @@ sub get_word_count
     return $self->{db_get_full_total__}->fetchrow_arrayref->[0];
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_count_for_word
 #
@@ -2689,7 +2828,7 @@ sub get_word_count
 # $bucket          The bucket we are asking about
 # $word            The word we are asking about
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_count_for_word
 {
     my ( $self, $session, $bucket, $word ) = @_;
@@ -2700,16 +2839,17 @@ sub get_count_for_word
     return $self->get_base_value_( $session, $bucket, $word );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_bucket_unique_count
 #
-# Returns the unique word count (excluding duplicates) for the passed in bucket
+# Returns the unique word count (excluding duplicates) for the passed
+# in bucket
 #
 # $session     A valid session key returned by a call to get_session_key
 # $bucket      The name of the bucket for which the word count is desired
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_bucket_unique_count
 {
     my ( $self, $session, $bucket ) = @_;
@@ -2722,7 +2862,7 @@ sub get_bucket_unique_count
     return defined($c)?$c:0;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_unique_word_count
 #
@@ -2730,7 +2870,7 @@ sub get_bucket_unique_count
 #
 # $session   A valid session key returned by a call to get_session_key
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_unique_word_count
 {
     my ( $self, $session ) = @_;
@@ -2742,7 +2882,7 @@ sub get_unique_word_count
     return $self->{db_get_unique_word_count__}->fetchrow_arrayref->[0];
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_bucket_color
 #
@@ -2753,7 +2893,7 @@ sub get_unique_word_count
 #
 # NOTE  This API is DEPRECATED in favor of calling get_bucket_parameter for
 #       the parameter named 'color'
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_bucket_color
 {
     my ( $self, $session, $bucket ) = @_;
@@ -2761,7 +2901,7 @@ sub get_bucket_color
     return $self->get_bucket_parameter( $session, $bucket, 'color' );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # set_bucket_color
 #
@@ -2773,7 +2913,7 @@ sub get_bucket_color
 #
 # NOTE  This API is DEPRECATED in favor of calling set_bucket_parameter for
 #       the parameter named 'color'
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub set_bucket_color
 {
     my ( $self, $session, $bucket, $color ) = @_;
@@ -2781,7 +2921,7 @@ sub set_bucket_color
     return $self->set_bucket_parameter( $session, $bucket, 'color', $color );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_bucket_parameter
 #
@@ -2791,7 +2931,7 @@ sub set_bucket_color
 # $bucket      The name of the bucket
 # $parameter   The name of the parameter
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_bucket_parameter
 {
     my ( $self, $session, $bucket, $parameter ) = @_;
@@ -2833,7 +2973,7 @@ sub get_bucket_parameter
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # set_bucket_parameter
 #
@@ -2844,7 +2984,7 @@ sub get_bucket_parameter
 # $parameter   The name of the parameter
 # $value       The new value
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub set_bucket_parameter
 {
     my ( $self, $session, $bucket, $parameter, $value ) = @_;
@@ -2872,17 +3012,17 @@ sub set_bucket_parameter
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_html_colored_message
 #
-# Parser a mail message stored in a file and returns HTML representing the message
-# with coloring of the words
+# Parser a mail message stored in a file and returns HTML representing
+# the message with coloring of the words
 #
 # $session        A valid session key returned by a call to get_session_key
 # $file           The file to parse
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_html_colored_message
 {
     my ( $self, $session, $file ) = @_;
@@ -2904,7 +3044,7 @@ sub get_html_colored_message
     return $result;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # fast_get_html_colored_message
 #
@@ -2916,7 +3056,7 @@ sub get_html_colored_message
 # $matrix         Reference to the matrix hash from a call to classify
 # $idmap          Reference to the idmap hash from a call to classify
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub fast_get_html_colored_message
 {
     my ( $self, $session, $file, $matrix, $idmap ) = @_;
@@ -2938,7 +3078,7 @@ sub fast_get_html_colored_message
     return $result;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # create_bucket
 #
@@ -2947,7 +3087,7 @@ sub fast_get_html_colored_message
 # $session     A valid session key returned by a call to get_session_key
 # $bucket      Name for the new bucket
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub create_bucket
 {
     my ( $self, $session, $bucket ) = @_;
@@ -2969,7 +3109,7 @@ sub create_bucket
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # delete_bucket
 #
@@ -2978,7 +3118,7 @@ sub create_bucket
 # $session     A valid session key returned by a call to get_session_key
 # $bucket      Name of the bucket to delete
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub delete_bucket
 {
     my ( $self, $session, $bucket ) = @_;
@@ -2999,7 +3139,7 @@ sub delete_bucket
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # rename_bucket
 #
@@ -3009,7 +3149,7 @@ sub delete_bucket
 # $old_bucket          The old name of the bucket
 # $new_bucket          The new name of the bucket
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub rename_bucket
 {
     my ( $self, $session, $old_bucket, $new_bucket ) = @_;
@@ -3039,7 +3179,7 @@ sub rename_bucket
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # add_messages_to_bucket
 #
@@ -3049,7 +3189,7 @@ sub rename_bucket
 # $bucket          Name of the bucket to be updated
 # @files           List of file names to parse
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub add_messages_to_bucket
 {
     my ( $self, $session, $bucket, @files ) = @_;
@@ -3079,7 +3219,7 @@ sub add_messages_to_bucket
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # add_message_to_bucket
 #
@@ -3089,7 +3229,7 @@ sub add_messages_to_bucket
 # $bucket          Name of the bucket to be updated
 # $file            Name of file containing mail message to parse
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub add_message_to_bucket
 {
     my ( $self, $session, $bucket, $file ) = @_;
@@ -3100,7 +3240,7 @@ sub add_message_to_bucket
     return $self->add_messages_to_bucket( $session, $bucket, $file );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # remove_message_from_bucket
 #
@@ -3110,7 +3250,7 @@ sub add_message_to_bucket
 # $bucket          Name of the bucket to be updated
 # $file            Name of file containing mail message to parse
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub remove_message_from_bucket
 {
     my ( $self, $session, $bucket, $file ) = @_;
@@ -3127,7 +3267,7 @@ sub remove_message_from_bucket
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_buckets_with_magnets
 #
@@ -3135,7 +3275,7 @@ sub remove_message_from_bucket
 #
 # $session     A valid session key returned by a call to get_session_key
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_buckets_with_magnets
 {
     my ( $self, $session ) = @_;
@@ -3153,7 +3293,7 @@ sub get_buckets_with_magnets
     return @result;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_magnet_types_in_bucket
 #
@@ -3162,7 +3302,7 @@ sub get_buckets_with_magnets
 # $session     A valid session key returned by a call to get_session_key
 # $bucket      The bucket to search for magnets
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_magnet_types_in_bucket
 {
     my ( $self, $session, $bucket ) = @_;
@@ -3189,7 +3329,7 @@ sub get_magnet_types_in_bucket
     return @result;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # clear_bucket
 #
@@ -3198,7 +3338,7 @@ sub get_magnet_types_in_bucket
 # $session        A valid session key returned by a call to get_session_key
 # $bucket         The bucket to clear
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub clear_bucket
 {
     my ( $self, $session, $bucket ) = @_;
@@ -3212,7 +3352,7 @@ sub clear_bucket
     $self->db_update_cache__( $session );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # clear_magnets
 #
@@ -3220,7 +3360,7 @@ sub clear_bucket
 #
 # $session     A valid session key returned by a call to get_session_key
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub clear_magnets
 {
     my ( $self, $session ) = @_;
@@ -3234,7 +3374,7 @@ sub clear_magnets
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_magnets
 #
@@ -3244,7 +3384,7 @@ sub clear_magnets
 # $bucket          The bucket to search for magnets
 # $type            The magnet type (e.g. from, to or subject)
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_magnets
 {
     my ( $self, $session, $bucket, $type ) = @_;
@@ -3257,6 +3397,7 @@ sub get_magnets
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $h = $self->{db__}->prepare( "select magnets.val from magnets, magnet_types
         where magnets.bucketid = $bucketid and
+              magnets.id != 0 and
               magnet_types.id = magnets.mtid and
               magnet_types.mtype = '$type' order by magnets.val;" );
 
@@ -3269,7 +3410,7 @@ sub get_magnets
     return @result;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # create_magnet
 #
@@ -3280,7 +3421,7 @@ sub get_magnets
 # $type            The magnet type (e.g. from, to or subject)
 # $text            The text of the magnet
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub create_magnet
 {
     my ( $self, $session, $bucket, $type, $text ) = @_;
@@ -3300,7 +3441,7 @@ sub create_magnet
                                      values ( $bucketid, $mtid, $text );" );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_magnet_types
 #
@@ -3308,7 +3449,7 @@ sub create_magnet
 #
 # $session     A valid session key returned by a call to get_session_key
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_magnet_types
 {
     my ( $self, $session ) = @_;
@@ -3329,7 +3470,7 @@ sub get_magnet_types
     return %result;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # delete_magnet
 #
@@ -3340,7 +3481,7 @@ sub get_magnet_types
 # $type            The magnet type (e.g. from, to or subject)
 # $text            The text of the magnet
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub delete_magnet
 {
     my ( $self, $session, $bucket, $type, $text ) = @_;
@@ -3360,7 +3501,7 @@ sub delete_magnet
                                   magnets.val  = '$text';" );
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_stopword_list
 #
@@ -3368,7 +3509,7 @@ sub delete_magnet
 #
 # $session     A valid session key returned by a call to get_session_key
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_stopword_list
 {
     my ( $self, $session ) = @_;
@@ -3379,7 +3520,7 @@ sub get_stopword_list
     return $self->{parser__}->{mangle__}->stopwords();
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # magnet_count
 #
@@ -3387,7 +3528,7 @@ sub get_stopword_list
 #
 # $session     A valid session key returned by a call to get_session_key
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub magnet_count
 {
     my ( $self, $session ) = @_;
@@ -3397,6 +3538,7 @@ sub magnet_count
 
     my $result = $self->{db__}->selectrow_arrayref( "select count(*) from magnets, buckets
         where buckets.userid = $userid and
+              magnets.id != 0 and
               magnets.bucketid = buckets.id;" );
 
     if ( defined( $result ) ) {
@@ -3406,7 +3548,7 @@ sub magnet_count
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # add_stopword, remove_stopword
 #
@@ -3417,7 +3559,7 @@ sub magnet_count
 #
 # Return 0 for a bad stop word, and 1 otherwise
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub add_stopword
 {
     my ( $self, $session, $stopword ) = @_;
@@ -3442,14 +3584,14 @@ sub remove_stopword
     return $self->{parser__}->{mangle__}->remove_stopword( $stopword, $self->module_config_( 'html', 'language' ) );
 }
 
-# ---------------------------------------------------------------------------------------------
-# ---------------------------------------------------------------------------------------------
-#       _____   _____   _____  _______ _____        _______     _______  _____  _____
-#      |_____] |     | |_____] |______   |   |      |______     |_____| |_____]   |
-#      |       |_____| |       |       __|__ |_____ |______     |     | |       __|__
+#----------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+# _____   _____   _____  _______ _____        _______   _______  _____  _____
+#|_____] |     | |_____] |______   |   |      |______   |_____| |_____]   |
+#|       |_____| |       |       __|__ |_____ |______   |     | |       __|__
 #
-# ---------------------------------------------------------------------------------------------
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 
 # GETTERS/SETTERS
 

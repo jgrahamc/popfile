@@ -1,15 +1,15 @@
 package POPFile::Loader;
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
-# Loader.pm --- API for loading POPFile loadable modules and encapsulating POPFile application
-#               tasks
+# Loader.pm --- API for loading POPFile loadable modules and
+# encapsulating POPFile application tasks
 #
-# Subroutine names beginning with CORE indicate a subroutine designed for exclusive use of
-# POPFile's core application (popfile.pl).
+# Subroutine names beginning with CORE indicate a subroutine designed
+# for exclusive use of POPFile's core application (popfile.pl).
 #
-# Subroutines not so marked are suitable for use by POPFile-based utilities to assist in loading
-# and executing modules
+# Subroutines not so marked are suitable for use by POPFile-based
+# utilities to assist in loading and executing modules
 #
 # Copyright (c) 2001-2004 John Graham-Cumming
 #
@@ -29,11 +29,11 @@ package POPFile::Loader;
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
-#   Modified by     Sam Schinke (sschinke@users.sourceforge.net)
+#   Created by     Sam Schinke (sschinke@users.sourceforge.net)
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 
-#----------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 # new
 #
 #   Class new() function
@@ -43,16 +43,18 @@ sub new
     my $type = shift;
     my $self;
 
-    # The POPFile classes are stored by reference in the components hash, the top level key is
-    # the type of the component (see CORE_load_directory_modules) and then the name of the
-    # component derived from calls to each loadable modules name() method and which points to
-    # the actual module
+    # The POPFile classes are stored by reference in the components
+    # hash, the top level key is the type of the component (see
+    # CORE_load_directory_modules) and then the name of the component
+    # derived from calls to each loadable modules name() method and
+    # which points to the actual module
 
     $self->{components__} = {};
 
-    # A handy boolean that tells us whether we are alive or not.  When this is set to 1 then the
-    # proxy works normally, when set to 0 (typically by the aborting() function called from a signal)
-    # then we will terminate gracefully
+    # A handy boolean that tells us whether we are alive or not.  When
+    # this is set to 1 then the proxy works normally, when set to 0
+    # (typically by the aborting() function called from a signal) then
+    # we will terminate gracefully
 
     $self->{alive__} = 1;
 
@@ -60,7 +62,8 @@ sub new
 
     $self->{debug__} = 1;
 
-    # This stuff lets us do some things in a way that tolerates some window-isms
+    # This stuff lets us do some things in a way that tolerates some
+    # window-isms
 
     $self->{on_windows__} = 0;
 
@@ -93,13 +96,13 @@ sub new
     return $self;
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_loader_init
 #
 # Initialize things only needed in CORE
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_loader_init
 {
     my ( $self ) = @_;
@@ -135,36 +138,37 @@ sub CORE_loader_init
     print "\nPOPFile Engine loading\n" if $self->{debug__};
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_aborting
 #
-# Called if we are going to be aborted or are being asked to abort our operation. Sets the
-# alive flag to 0 that will cause us to abort at the next convenient moment
+# Called if we are going to be aborted or are being asked to abort our
+# operation. Sets the alive flag to 0 that will cause us to abort at
+# the next convenient moment
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_aborting
 {
     my ( $self ) = @_;
 
     $self->{alive__} = 0;
-    foreach my $type (keys %{$self->{components__}}) {
-        foreach my $name (keys %{$self->{components__}{$type}}) {
+    foreach my $type (sort keys %{$self->{components__}}) {
+        foreach my $name (sort keys %{$self->{components__}{$type}}) {
             $self->{components__}{$type}{$name}->alive(0);
-            $self->{components__}{$type}{$name}->stop();
         }
     }
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # pipeready
 #
-# Returns 1 if there is data available to be read on the passed in pipe handle
+# Returns 1 if there is data available to be read on the passed in
+# pipe handle
 #
 # $pipe        Pipe handle
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub pipeready
 {
     my ( $self, $pipe ) = @_;
@@ -194,19 +198,20 @@ sub pipeready
     }
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_reaper
 #
-# Called if we get SIGCHLD and asks each module to do whatever reaping is needed
+# Called if we get SIGCHLD and asks each module to do whatever reaping
+# is needed
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_reaper
 {
     my ( $self ) = @_;
 
-    foreach my $type (keys %{$self->{components__}}) {
-        foreach my $name (keys %{$self->{components__}{$type}}) {
+    foreach my $type (sort keys %{$self->{components__}}) {
+        foreach my $name (sort keys %{$self->{components__}{$type}}) {
             $self->{components__}{$type}{$name}->reaper();
         }
     }
@@ -214,33 +219,35 @@ sub CORE_reaper
     $SIG{CHLD} = $self->{reaper__};
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_forker
 #
-# Called to fork POPFile.  Calls every module's forked function in the child process to give
-# then a chance to clean up
+# Called to fork POPFile.  Calls every module's forked function in the
+# child process to give then a chance to clean up
 #
-# Returns the return value from fork() and a file handle that form a pipe in the
-# direction child to parent.  There is no need to close the file handles that are unused as
-# would normally be the case with a pipe and fork as forker takes care that in each process
-# only one file handle is open (be it the reader or the writer)
+# Returns the return value from fork() and a file handle that form a
+# pipe in the direction child to parent.  There is no need to close
+# the file handles that are unused as would normally be the case with
+# a pipe and fork as forker takes care that in each process only one
+# file handle is open (be it the reader or the writer)
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_forker
 {
     my ( $self ) = @_;
 
     # Tell all the modules that a fork is about to happen
 
-    foreach my $type (keys %{$self->{components__}}) {
-        foreach my $name (keys %{$self->{components__}{$type}}) {
+    foreach my $type (sort keys %{$self->{components__}}) {
+        foreach my $name (sort keys %{$self->{components__}{$type}}) {
             $self->{components__}{$type}{$name}->prefork();
         }
     }
 
-    # Create the pipe that will be used to send data from the child to the parent process,
-    # $writer will be returned to the child process and $reader to the parent process
+    # Create the pipe that will be used to send data from the child to
+    # the parent process, $writer will be returned to the child
+    # process and $reader to the parent process
 
     pipe my $reader, my $writer;
     my $pid = fork();
@@ -254,21 +261,23 @@ sub CORE_forker
         return (undef, undef);
     }
 
-    # If fork returns a PID of 0 then we are in the child process so close the
-    # reading pipe file handle, inform all modules that are fork has occurred and
-    # then return 0 as the PID so that the caller knows that we are in the child
+    # If fork returns a PID of 0 then we are in the child process so
+    # close the reading pipe file handle, inform all modules that are
+    # fork has occurred and then return 0 as the PID so that the
+    # caller knows that we are in the child
 
     if ( $pid == 0 ) {
-          foreach my $type (keys %{$self->{components__}}) {
-               foreach my $name (keys %{$self->{components__}{$type}}) {
+          foreach my $type (sort keys %{$self->{components__}}) {
+               foreach my $name (sort keys %{$self->{components__}{$type}}) {
                  $self->{components__}{$type}{$name}->forked( $writer );
               }
         }
 
         close $reader;
 
-        # Set autoflush on the write handle so that output goes straight through
-        # to the parent without buffering it until the socket closes
+        # Set autoflush on the write handle so that output goes
+        # straight through to the parent without buffering it until
+        # the socket closes
 
         use IO::Handle;
         $writer->autoflush(1);
@@ -276,12 +285,12 @@ sub CORE_forker
         return (0, $writer);
     }
 
-    # Reach here because we are in the parent process, close out the writer pipe
-    # file handle and return our PID (non-zero) indicating that this is the parent
-    # process
+    # Reach here because we are in the parent process, close out the
+    # writer pipe file handle and return our PID (non-zero) indicating
+    # that this is the parent process
 
-    foreach my $type (keys %{$self->{components__}}) {
-        foreach my $name (keys %{$self->{components__}{$type}}) {
+    foreach my $type (sort keys %{$self->{components__}}) {
+        foreach my $name (sort keys %{$self->{components__}{$type}}) {
             $self->{components__}{$type}{$name}->postfork( $pid, $reader );
         }
     }
@@ -290,30 +299,32 @@ sub CORE_forker
     return ($pid, $reader);
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_load_directory_modules
 #
-# Called to load all the POPFile Loadable Modules (implemented as .pm files with special
-# comment on first line) in a specific subdirectory and loads them into a structured
-# components hash
+# Called to load all the POPFile Loadable Modules (implemented as .pm
+# files with special comment on first line) in a specific subdirectory
+# and loads them into a structured components hash
 #
-# $directory        The directory to search for loadable modules
-# $type             The 'type' of module being loaded (e.g. proxy, core, ui) which is used
-#                   when fixing up references between modules (e.g. proxy modules all need
-#                   access to the classifier module) and for structuring components hash
+# $directory   The directory to search for loadable modules
+# $type        The 'type' of module being loaded (e.g. proxy, core, ui) which
+# is used when fixing up references between modules (e.g. proxy
+# modules all need access to the classifier module) and for
+# structuring components hash
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_load_directory_modules
 {
     my ( $self, $directory, $type ) = @_;
 
     print "\n         {$type:" if $self->{debug__};
 
-    # Look for all the .pm files in named directory and then see which of them
-    # are POPFile modules indicated by the first line of the file being and
-    # comment (# POPFILE LOADABLE MODULE) and load that module into the %{$self->{components__}}
-    # hash getting the name from the module by calling name()
+    # Look for all the .pm files in named directory and then see which
+    # of them are POPFile modules indicated by the first line of the
+    # file being and comment (# POPFILE LOADABLE MODULE) and load that
+    # module into the %{$self->{components__}} hash getting the name
+    # from the module by calling name()
 
     opendir MODULES, $self->root_path__( $directory );
 
@@ -328,19 +339,20 @@ sub CORE_load_directory_modules
     print '} ' if $self->{debug__};
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_load_module
 #
-# Called to load a single POPFile Loadable Module (implemented as .pm files with special
-# comment on first line) and add it to the components hash.
+# Called to load a single POPFile Loadable Module (implemented as .pm
+# files with special comment on first line) and add it to the
+# components hash.
 #
 # Returns a handle to the module
 #
 # $module           The path of the module to load
 # $type             The 'type' of module being loaded (e.g. proxy, core, ui)
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_load_module
 {
     my ( $self, $module, $type ) = @_;
@@ -355,17 +367,18 @@ sub CORE_load_module
     return $mod;
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # load_module_
 #
-# Called to load a single POPFile Loadable Module (implemented as .pm files with special
-# comment on first line. Returns a handle to the module, undef if the module failed to load.
-# No internal side-effects.
+# Called to load a single POPFile Loadable Module (implemented as .pm
+# files with special comment on first line. Returns a handle to the
+# module, undef if the module failed to load.  No internal
+# side-effects.
 #
 # $module           The path of the module to load
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub load_module_
 {
     my ( $self, $module ) = @_;
@@ -388,15 +401,16 @@ sub load_module_
     return $mod;
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_signals
 #
 # Sets signals to ensure that POPFile handles OS and IPC events
 #
-# TODO: Figure out why windows POPFile doesn't seem to get SIGTERM when windows shuts down
+# TODO: Figure out why windows POPFile doesn't seem to get SIGTERM
+# when windows shuts down
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_signals
 {
     my ( $self ) = @_;
@@ -410,34 +424,37 @@ sub CORE_signals
     $SIG{TERM}  = $self->{aborting__};
     $SIG{INT}   = $self->{aborting__};
 
-    # Yuck.  On Windows SIGCHLD isn't calling the reaper under ActiveState 5.8.0
-    # so we detect Windows and ignore SIGCHLD and call the reaper code below
+    # Yuck.  On Windows SIGCHLD isn't calling the reaper under
+    # ActiveState 5.8.0 so we detect Windows and ignore SIGCHLD and
+    # call the reaper code below
 
     $SIG{CHLD}  = $self->{on_windows__}?'IGNORE':$self->{reaper__};
 
-    # I've seen spurious ALRM signals happen on Windows so here we for safety
-    # say that we want to ignore them
+    # I've seen spurious ALRM signals happen on Windows so here we for
+    # safety say that we want to ignore them
 
     $SIG{ALRM}  = 'IGNORE';
 
     return $SIG;
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_platform_
 #
 # Loads POPFile's platform-specific code
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_platform_
 {
     my ( $self ) = @_;
 
-    # Look for a module called Platform::<platform> where <platform> is the value of $^O
-    # and if it exists then load it as a component of POPFile.  IN this way we can have
-    # platform specific code (or not) encapsulated.  Note that such a module needs to be
-    # a POPFile Loadable Module and a subclass of POPFile::Module to operate correctly
+    # Look for a module called Platform::<platform> where <platform>
+    # is the value of $^O and if it exists then load it as a component
+    # of POPFile.  IN this way we can have platform specific code (or
+    # not) encapsulated.  Note that such a module needs to be a
+    # POPFile Loadable Module and a subclass of POPFile::Module to
+    # operate correctly
 
     my $platform = $^O;
 
@@ -450,19 +467,20 @@ sub CORE_platform_
     }
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_load
 #
 # Loads POPFile's modules
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_load
 {
     my ( $self ) = @_;
 
-    # Create the main objects that form the core of POPFile.  Consists of the configuration
-    # modules, the classifier, the UI (currently HTML based), and the POP3 proxy.
+    # Create the main objects that form the core of POPFile.  Consists
+    # of the configuration modules, the classifier, the UI (currently
+    # HTML based), and the POP3 proxy.
 
     print "\n    Loading... " if $self->{debug__};
 
@@ -476,24 +494,26 @@ sub CORE_load
     $self->CORE_load_directory_modules( 'Proxy',      'proxy'      );
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_link_components
 #
-# Links POPFile's modules together to allow them to make use of each-other as objects
+# Links POPFile's modules together to allow them to make use of
+# each-other as objects
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_link_components
 {
     my ( $self ) = @_;
 
     print "\n\nPOPFile Engine $self->{version_string__} starting" if $self->{debug__};
 
-    # Link each of the main objects with the configuration object so that they can set their
-    # default parameters all or them also get access to the logger, version, and message-queue
+    # Link each of the main objects with the configuration object so
+    # that they can set their default parameters all or them also get
+    # access to the logger, version, and message-queue
 
-    foreach my $type (keys %{$self->{components__}}) {
-        foreach my $name (keys %{$self->{components__}{$type}}) {
+    foreach my $type (sort keys %{$self->{components__}}) {
+        foreach my $name (sort keys %{$self->{components__}{$type}}) {
             $self->{components__}{$type}{$name}->version(       scalar($self->CORE_version())                    );
             $self->{components__}{$type}{$name}->configuration( $self->{components__}{core}{config} );
             $self->{components__}{$type}{$name}->logger(        $self->{components__}{core}{logger} ) if ( $name ne 'logger' );
@@ -503,18 +523,18 @@ sub CORE_link_components
 
     # All interface components need access to the classifier and history
 
-    foreach my $name (keys %{$self->{components__}{interface}}) {
+    foreach my $name (sort keys %{$self->{components__}{interface}}) {
         $self->{components__}{interface}{$name}->classifier( $self->{components__}{classifier}{bayes} );
         $self->{components__}{interface}{$name}->history( $self->{components__}{core}{history} );
     }
 
-    foreach my $name (keys %{$self->{components__}{proxy}}) {
+    foreach my $name (sort keys %{$self->{components__}{proxy}}) {
         $self->{components__}{proxy}{$name}->classifier( $self->{components__}{classifier}{bayes} );
         $self->{components__}{proxy}{$name}->history(    $self->{components__}{core}{history} );
     }
 
-    # TODO Clean this up so that the Loader doesn't have to know so much about
-    # Bayes or IMAP.
+    # TODO Clean this up so that the Loader doesn't have to know so
+    # much about Bayes or IMAP.
 
     if ( exists $self->{components__}{core}{imap} ) {
         $self->{components__}{core}{imap}->classifier( $self->{components__}{classifier}{bayes} );
@@ -531,13 +551,13 @@ sub CORE_link_components
         $self->{components__}{classifier}{wordmangle} );
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_initialize
 #
 # Loops across POPFile's modules and initializes them
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_initialize
 {
     my ( $self ) = @_;
@@ -546,9 +566,9 @@ sub CORE_initialize
 
     # Tell each module to initialize itself
 
-    foreach my $type (keys %{$self->{components__}}) {
+    foreach my $type (sort keys %{$self->{components__}}) {
         print "\n         {$type:" if $self->{debug__};
-        foreach my $name (keys %{$self->{components__}{$type}}) {
+        foreach my $name (sort keys %{$self->{components__}{$type}}) {
             print " $name" if $self->{debug__};
             flush STDOUT;
 
@@ -570,13 +590,13 @@ sub CORE_initialize
     print "\n";
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_config
 #
 # Loads POPFile's configuration and command-line settings
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_config
 {
     my ( $self ) = @_;
@@ -588,13 +608,13 @@ sub CORE_config
     return $self->{components__}{core}{config}->parse_command_line();
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_start
 #
 # Loops across POPFile's modules and starts them
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_start
 {
     my ( $self ) = @_;
@@ -603,9 +623,9 @@ sub CORE_start
 
     # Now that the configuration is set tell each module to begin operation
 
-    foreach my $type (keys %{$self->{components__}}) {
+    foreach my $type (sort keys %{$self->{components__}}) {
         print "\n         {$type:" if $self->{debug__};
-        foreach my $name (keys %{$self->{components__}{$type}}) {
+        foreach my $name (sort keys %{$self->{components__}{$type}}) {
             my $code = $self->{components__}{$type}{$name}->start();
 
             if ( $code == 0 ) {
@@ -629,16 +649,16 @@ sub CORE_start
     flush STDOUT;
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_service
 #
-# This is POPFile. Loops across POPFile's modules and executes their service subroutines then
-# sleeps briefly
+# This is POPFile. Loops across POPFile's modules and executes their
+# service subroutines then sleeps briefly
 #
 # $nowait            If 1 then don't sleep and don't loop
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_service
 {
     my ( $self, $nowait ) = @_;
@@ -649,8 +669,8 @@ sub CORE_service
     #             handle its own requests
 
     while ( $self->{alive__} == 1 ) {
-        foreach my $type (keys %{$self->{components__}}) {
-            foreach my $name (keys %{$self->{components__}{$type}}) {
+        foreach my $type (sort keys %{$self->{components__}}) {
+            foreach my $name (sort keys %{$self->{components__}{$type}}) {
                 if ( $self->{components__}{$type}{$name}->service() == 0 ) {
                     $self->{alive__} = 0;
                     last;
@@ -658,16 +678,16 @@ sub CORE_service
             }
         }
 
-        # Sleep for 0.05 of a second to ensure that POPFile does not hog the machine's
-        # CPU
+        # Sleep for 0.05 of a second to ensure that POPFile does not
+        # hog the machine's CPU
 
         select(undef, undef, undef, 0.05) if !$nowait;
 
         # If we are on Windows then reap children here
 
         if ( $self->{on_windows__} ) {
-            foreach my $type (keys %{$self->{components__}}) {
-                foreach my $name (keys %{$self->{components__}{$type}}) {
+            foreach my $type (sort keys %{$self->{components__}}) {
+                foreach my $name (sort keys %{$self->{components__}{$type}}) {
                     $self->{components__}{$type}{$name}->reaper();
                 }
             }
@@ -679,29 +699,41 @@ sub CORE_service
     return $self->{alive__};
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_stop
 #
 # Loops across POPFile's modules and stops them
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_stop
 {
     my ( $self ) = @_;
 
-    print "\n\nPOPFile Engine $self->{version_string__} stopping\n" if $self->{debug__};
-    flush STDOUT;
+    if ( $self->{debug__} ) {
+        print "\n\nPOPFile Engine $self->{version_string__} stopping\n";
+        flush STDOUT;
+        print "\n    Stopping... ";
+    }
 
-    print "\n    Stopping... " if $self->{debug__};
+    # Shutdown the MQ first.  This is done so that it will flush out
+    # any remaining messages and hand them off to the other modules
+    # that might want to deal with them in their stop() routine
+
+    $self->{components__}{core}{mq}->alive(0);
+    $self->{components__}{core}{mq}->stop();
+    $self->{components__}{core}{history}->alive(0);
+    $self->{components__}{core}{history}->stop();
 
     # Shutdown all the modules
 
-    foreach my $type (keys %{$self->{components__}}) {
+    foreach my $type (sort keys %{$self->{components__}}) {
         print "\n         {$type:" if $self->{debug__};
-        foreach my $name (keys %{$self->{components__}{$type}}) {
+        foreach my $name (sort keys %{$self->{components__}{$type}}) {
             print " $name" if $self->{debug__};
             flush STDOUT;
+            next if ( $name eq 'mq' );
+            next if ( $name eq 'history' );
             $self->{components__}{$type}{$name}->alive(0);
             $self->{components__}{$type}{$name}->stop();
         }
@@ -711,18 +743,18 @@ sub CORE_stop
     print "\n\nPOPFile Engine $self->{version_string__} terminated\n" if $self->{debug__};
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # CORE_version
 #
-# Gets and Sets POPFile's version data. Returns string in scalar context, or (major, minor, build)
-# triplet in list context
+# Gets and Sets POPFile's version data. Returns string in scalar
+# context, or (major, minor, build) triplet in list context
 #
 # $major_version        The major version number
 # $minor_version        The minor version number
 # $build_version        The build version number
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub CORE_version
 {
     my ( $self, $major_version, $minor_version, $build_version ) = @_;
@@ -739,7 +771,7 @@ sub CORE_version
     }
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # get_module
 #
@@ -754,7 +786,7 @@ sub CORE_version
 # $name     Name of the module
 # $type     The type of module
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub get_module
 {
     my ( $self, $name, $type ) = @_;
@@ -769,7 +801,7 @@ sub get_module
     return $self->{components__}{$type}{$name};
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # set_module
 #
@@ -779,7 +811,7 @@ sub get_module
 # $type     The type of module
 # $module   A handle to a module
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub set_module
 {
     my ($self, $type, $name, $module) = @_;
@@ -787,7 +819,7 @@ sub set_module
     $self->{components__}{$type}{$name} = $module;
 }
 
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # remove_module
 #
@@ -797,7 +829,7 @@ sub set_module
 # $type     The type of module
 # $module   A handle to a module
 #
-#---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub remove_module
 {
     my ($self, $type, $name) = @_;
@@ -807,7 +839,8 @@ sub remove_module
     delete($self->{components__}{$type}{$name});
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+
 #
 # root_path__
 #
@@ -815,7 +848,8 @@ sub remove_module
 #
 # $path             RHS of path
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+
 sub root_path__
 {
     my ( $self, $path ) = @_;

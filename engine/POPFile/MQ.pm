@@ -101,13 +101,13 @@ sub new
     return $self;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # service
 #
 # Called to handle pending tasks for the module.  Here we flush all queues
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub service
 {
     my ( $self ) = @_;
@@ -137,17 +137,22 @@ sub service
     return 1;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # stop
 #
-# Called when POPFile is closing down, this is the last method that will get called before
-# the object is destroyed.  There is not return value from stop().
+# Called when POPFile is closing down, this is the last method that
+# will get called before the object is destroyed.  There is not return
+# value from stop().
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub stop
 {
     my ( $self ) = @_;
+
+    # Call service() so that any remaining items are flushed and delivered
+
+    $self->service();
 
     for my $kid (keys %{$self->{children__}}) {
         close $self->{children__}{$kid};
@@ -155,14 +160,14 @@ sub stop
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # yield_
 #
-# Called by a child process to allow the parent to do work, this only does anything
-# in the case where we didn't fork for the child process
+# Called by a child process to allow the parent to do work, this only
+# does anything in the case where we didn't fork for the child process
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub yield_
 {
     my ( $self, $pipe, $pid ) = @_;
@@ -172,19 +177,21 @@ sub yield_
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+
 #
 # forked
 #
-# This is called when some module forks POPFile and is within the context of the child
-# process so that this module can close any duplicated file handles that are not needed.
+# This is called when some module forks POPFile and is within the
+# context of the child process so that this module can close any
+# duplicated file handles that are not needed.
 #
 # $writer            The writing end of a pipe that can be used to send up from
 #                    the child
 #
 # There is no return value from this method
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub forked
 {
     my ( $self, $writer ) = @_;
@@ -197,20 +204,20 @@ sub forked
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # postfork
 #
-# This is called when some module has just forked POPFile.  It is called in the parent
-# process.
+# This is called when some module has just forked POPFile.  It is
+# called in the parent process.
 #
 # $pid              The process ID of the new child process
-# $reader           The reading end of a pipe that can be used to read messages from
-#                   the child
+# $reader      The reading end of a pipe that can be used to read messages
+# from the child
 #
 # There is no return value from this method
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub postfork
 {
     my ( $self, $pid, $reader ) = @_;
@@ -218,23 +225,25 @@ sub postfork
     $self->{children__}{"$pid"} = $reader;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # reaper
 #
-# Called when a child process terminates somewhere in POPFile.  The object should check
-# to see if it was one of its children and do any necessary processing by calling waitpid()
-# on any child handles it has
+# Called when a child process terminates somewhere in POPFile.  The
+# object should check to see if it was one of its children and do any
+# necessary processing by calling waitpid() on any child handles it
+# has
 #
 # There is no return value from this method
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub reaper
 {
     my ( $self ) = @_;
 
-    # Look for children that have completed and then flush the data from their
-    # associated pipe and see if any of our children have data ready to read from their pipes,
+    # Look for children that have completed and then flush the data
+    # from their associated pipe and see if any of our children have
+    # data ready to read from their pipes,
 
     my @kids = keys %{$self->{children__}};
 
@@ -251,7 +260,7 @@ sub reaper
     }
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # read_pipe_
 #
@@ -260,7 +269,7 @@ sub reaper
 #
 # $handle   The handle of the pipe to read
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 sub read_pipe_
 {
     my ( $self, $handle ) = @_;
@@ -284,7 +293,8 @@ sub read_pipe_
 
         # pop the oldest message;
 
-        $message = $1 if (defined($self->{pipe_cache__}) && ( $self->{pipe_cache__} =~ s/(.*?\n)// ) );
+        $message = $1 if (defined($self->{pipe_cache__}) &&
+                          ( $self->{pipe_cache__} =~ s/(.*?\n)// ) );
 
         return $message;        # PROFILE PLATFORM STOP
     } else {
@@ -299,18 +309,20 @@ sub read_pipe_
     return undef;
 }
 
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
 #
 # flush_child_data_
 #
-# Called to flush data from the pipe of each child as we go, I did this because there
-# appears to be a problem on Windows where the pipe gets a lot of read data in it and
-# then causes the child not to be terminated even though we are done.  Also this is nice
-# because we deal with the messages on the fly
+# Called to flush data from the pipe of each child as we go, I did
+# this because there appears to be a problem on Windows where the pipe
+# gets a lot of read data in it and then causes the child not to be
+# terminated even though we are done.  Also this is nice because we
+# deal with the messages on the fly
 #
 # $handle   The handle of the child's pipe
 #
-# ---------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------
+
 sub flush_child_data_
 {
     my ( $self, $handle ) = @_;

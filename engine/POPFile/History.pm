@@ -37,7 +37,7 @@ use Date::Parse;
 use Digest::MD5 qw( md5_hex );
 
 my $fields_slot = 'history.id, hdr_from, hdr_to, hdr_cc, hdr_subject,
-hdr_date, hash, inserted, buckets.name, usedtobe';
+hdr_date, hash, inserted, buckets.name, usedtobe, history.bucketid, magnets.val';
 
 #----------------------------------------------------------------------------
 # new
@@ -125,16 +125,44 @@ sub initialize
 
 #----------------------------------------------------------------------------
 #
-# start
+# stop
 #
-# Called to start the history module
+# Called to stop the history module
 #
 #----------------------------------------------------------------------------
-sub start
+sub stop
 {
     my ( $self ) = @_;
 
-    return 1;
+    # Commit any remaining history items.  This is needed because it's
+    # possible that we get called with a stop after things have been
+    # added to the queue and before service() is called
+
+    $self->commit_history__();
+
+    # TODO REMOVE THIS CODE BEFORE RELEASE
+
+    my $h = $self->db__()->prepare( "select id from history where sort_from = '';" );
+    $h->execute;
+    my @work;
+    while ( my @row = $h->fetchrow_array ) {
+        push @work, $row[0];
+    }
+    $self->db__()->begin_work;
+    foreach my $id ( @work ) {
+        my @hdr = $self->db__()->selectrow_array( "select hdr_from, hdr_to, hdr_cc from history where id = $id;" );
+        for my $i (0..2) {
+            $hdr[$i] = lc($hdr[$i]);
+            $hdr[$i] =~ s/[<>\"]//g;
+            $hdr[$i] =~ s/^[ \t]+//;
+            $hdr[$i] = $self->db__()->quote( $hdr[$i] );
+	}
+        $self->db__()->do( "update history set sort_from = $hdr[0],
+                                               sort_to   = $hdr[1],
+                                               sort_cc   = $hdr[2]
+                                           where id = $id;" );
+    }
+    $self->db__()->commit;
 }
 
 #----------------------------------------------------------------------------
@@ -271,18 +299,21 @@ sub reserve_slot
 {
     my ( $self ) = @_;
 
-    # Pick a large random number and try to insert it into the database
-    # if the insert fails then pick another
-
     my $r;
+
     while (1) {
-        $r = int( 2 + rand(4294967294) );
+        $r = rand( 2 + 1000000000 );
 
         # TODO Replace the hardcoded user ID 1 with the looked up
         # user ID from the session key
 
+        # Get the date/time now which will be stored in the database
+        # so that we can sort on the Date: header in the message and
+        # when we received it
+
+        my $now = time;
         my $ok = $self->db__()->do(
-            "insert into history ( userid, committed ) values ( 1, $r );" );
+            "insert into history ( userid, committed, inserted ) values ( 1, $r, $now );" );
         if ( defined( $ok ) ) {
             last;
         }
@@ -341,6 +372,67 @@ sub commit_slot
     $self->mq_post_( 'COMIT', $slot, "$bucket:$magnet" );
 }
 
+#----------------------------------------------------------------------------
+#
+# change_slot_classification
+#
+# Used to 'reclassify' a message by changing its classification in the
+# database.
+#
+# slot         The slot to update
+# class        The new classification
+# session      A valid API session
+# undo         If set to 1 then indicates an undo operation
+#
+#----------------------------------------------------------------------------
+sub change_slot_classification
+{
+    my ( $self, $slot, $class, $session, $undo ) = @_;
+
+    $self->log_( 0, "Change slot classification of $slot to $class" );
+
+    # Get the bucket ID associated with the new classification
+    # then retrieve the current classification for this slot
+    # and update the database
+
+    my $bucketid = $self->{classifier__}->get_bucket_id(
+                           $session, $class );
+
+    my $oldbucketid = 0;
+    if ( !$undo ) {
+        my @fields = $self->get_slot_fields( $slot );
+        $oldbucketid = $fields[10];
+    }
+
+    $self->db__()->do( "update history set bucketid = $bucketid,
+                                           usedtobe = $oldbucketid
+                                       where id = $slot;" );
+    $self->force_requery__();
+}
+
+#----------------------------------------------------------------------------
+#
+# revert_slot_classification
+#
+# Used to undo a 'reclassify' a message by changing its classification
+# in the database.
+#
+# slot         The slot to update
+#
+#----------------------------------------------------------------------------
+sub revert_slot_classification
+{
+    my ( $self, $slot ) = @_;
+
+    my @fields = $self->get_slot_fields( $slot );
+    my $oldbucketid = $fields[9];
+
+    $self->db__()->do( "update history set bucketid = $oldbucketid,
+                                           usedtobe = 0
+                                       where id = $slot;" );
+    $self->force_requery__();
+}
+
 #---------------------------------------------------------------------------
 #
 # get_slot_fields
@@ -356,9 +448,10 @@ sub get_slot_fields
     my ( $self, $slot ) = @_;
 
     return $self->db__()->selectrow_array(
-        "select $fields_slot from history, buckets
+        "select $fields_slot from history, buckets, magnets
              where history.id = $slot and
-                   buckets.id = history.bucketid" );
+                   buckets.id = history.bucketid and
+                   magnets.id = magnetid;" );
 }
 
 #---------------------------------------------------------------------------
@@ -421,6 +514,25 @@ sub commit_history__
                                             ${$header{'received'}}[0] );
         $hash = $self->db__()->quote( $hash );
 
+        # For sorting purposes the From, To and CC headers have special
+        # cleaned up versions of themselves in the database.  The idea
+        # is that case and certain characters should be ignored when
+        # sorting these fields
+        #
+        # "John Graham-Cumming" <spam@jgc.org> maps to
+        #     john graham-cumming <spam@jgc.org>
+
+        my @sortable = ( 'from', 'to', 'cc' );
+        my %sort_headers;
+
+        foreach my $h (@sortable) {
+            $sort_headers{$h} = lc(${header{$h}}[0] || '');
+            $sort_headers{$h} =~ s/[\"<>]//g;
+            $sort_headers{$h} =~ s/^[ \t]+//g;
+            $sort_headers{$h} = $self->db__()->quote(
+                $sort_headers{$h} );
+	}
+
         # Make sure that the headers we are going to insert into
         # the database have been defined and are suitably quoted
 
@@ -428,11 +540,16 @@ sub commit_history__
 
         foreach my $h (@required) {
             if ( !defined ${$header{$h}}[0] ) {
-                ${$header{$h}}[0] = '';
+	        if ( $h ne 'cc' ) {
+                    ${$header{$h}}[0] = "<$h header missing>";
+		} else {
+                    ${$header{$h}}[0] = '';
+                }
             }
 
             ${$header{$h}}[0] = 
-                 $self->{classifier__}->{parser__}->decode_string( ${$header{$h}}[0] );
+                 $self->{classifier__}->{parser__}->decode_string(
+                     ${$header{$h}}[0] );
             ${$header{$h}}[0] = $self->db__()->quote( ${$header{$h}}[0] );
         }
 
@@ -447,12 +564,6 @@ sub commit_history__
             ${$header{date}}[0] = str2time( ${$header{date}}[0] );
         }
 
-        # Get the date/time now which will be stored in the database
-        # so that we can sort on the Date: header in the message and
-        # when we received it
-
-        my $now = time;
-
         # Figure out the ID of the bucket this message has been
         # classified into (and the same for the magnet if it is
         # defined)
@@ -460,21 +571,19 @@ sub commit_history__
         my $bucketid = $self->{classifier__}->get_bucket_id(
                            $session, $bucket );
 
-        # TODO Handle magnets
-
-        my $magnetid = 0;
-
         my $result = $self->db__()->do(
             "update history set hdr_from    = ${$header{from}}[0],
                                 hdr_to      = ${$header{to}}[0],
                                 hdr_date    = ${$header{date}}[0],
                                 hdr_cc      = ${$header{cc}}[0],
                                 hdr_subject = ${$header{subject}}[0],
+                                sort_from   = $sort_headers{from},
+                                sort_to     = $sort_headers{to},
+                                sort_cc     = $sort_headers{cc},
                                 committed   = 1,
                                 bucketid    = $bucketid,
                                 usedtobe    = 0,
-                                magnetid    = $magnetid,
-                                inserted    = $now,
+                                magnetid    = $magnet,
                                 hash        = $hash
                                 where id = $slot;" );
     }
@@ -507,7 +616,7 @@ sub delete_slot
 
         $self->make_directory__( $path );
 
-        my @b = $self->db__()->selectrow_array( 
+        my @b = $self->db__()->selectrow_array(
             "select buckets.name from history, buckets
                  where history.bucketid = buckets.id and
                        history.id = $slot;" );
@@ -529,10 +638,11 @@ sub delete_slot
                 $self->make_directory__( $path );
             }
 
-            # Previous comment about this potentially being unsafe (may have
-            # placed messages in unusual places, or overwritten files) no longer
-            # applies. Files are now placed in the user directory, in the
-            # archive_dir subdirectory
+            # Previous comment about this potentially being unsafe
+            # (may have placed messages in unusual places, or
+            # overwritten files) no longer applies. Files are now
+            # placed in the user directory, in the archive_dir
+            # subdirectory
 
             $self->copy_file__( $file, $path, "popfile$slot.msg" );
         }
@@ -748,15 +858,15 @@ sub set_query
     # so that we know the size of the resulting data without having
     # to retrieve it all
 
-    my $select = 'select COUNT(*) from history, buckets where history.userid = 1
-                                                          and committed = 1';
+    $self->{queries__}{$id}{base} = 'select XXX from
+        history, buckets, magnets where history.userid = 1 and committed = 1';
 
     # If there's a search portion then add the appropriate clause
     # to find the from/subject header
 
     if ( $search ne '' ) {
         $search = $self->db__()->quote( '%' . $search . '%' );
-        $select .= " and ( hdr_from like $search or
+        $self->{queries__}{$id}{base} .= " and ( hdr_from like $search or
                            hdr_to   like $search )";
     }
 
@@ -768,10 +878,11 @@ sub set_query
         my $bucketid = $self->{classifier__}->get_bucket_id(
                            $session, $filter );
         $self->{classifier__}->release_session_key( $session );
-        $select .= " and bucketid = $bucketid";
+        $self->{queries__}{$id}{base} .= " and history.bucketid = $bucketid";
     }
 
-    $select .= ' and bucketid = buckets.id';
+    $self->{queries__}{$id}{base} .= ' and history.bucketid = buckets.id';
+    $self->{queries__}{$id}{base} .= ' and magnets.id = magnetid';
 
     # Add the sort option (if there is one)
 
@@ -781,22 +892,57 @@ sub set_query
         if ( $sort eq 'bucket' ) {
             $sort = 'buckets.name';
         } else {
-            if ( $sort ne 'inserted' ) {
-                $sort = "hdr_$sort";
+	    if ( $sort =~ /from|to|cc/ ) {
+                $sort = "sort_$sort";
+	    } else {
+                if ( $sort ne 'inserted' ) {
+                    $sort = "hdr_$sort";
+                }
             }
         }
-        $select .= " order by $sort $direction;";
+        $self->{queries__}{$id}{base} .= " order by $sort $direction;";
     } else {
-        $select .= ' order by inserted desc;';
+        $self->{queries__}{$id}{base} .= ' order by inserted desc;';
     }
 
-    $self->{queries__}{$id}{count} =
-        $self->db__()->selectrow_arrayref( $select )->[0];
+    my $count = $self->{queries__}{$id}{base};
+    $count =~ s/XXX/COUNT(*)/;
 
-    $select =~ s/COUNT\(\*\)/$fields_slot/;
+    $self->{queries__}{$id}{count} =
+        $self->db__()->selectrow_arrayref( $count )->[0];
+
+    my $select = $self->{queries__}{$id}{base};
+    $select =~ s/XXX/$fields_slot/;
     $self->{queries__}{$id}{query} = $self->db__()->prepare( $select );
     $self->{queries__}{$id}{query}->execute;
     $self->{queries__}{$id}{cache} = ();
+}
+
+#----------------------------------------------------------------------------
+#
+# delete_query
+#
+# Called to delete all the rows returned in a query
+#
+# id            The ID returned by start_query
+#
+#----------------------------------------------------------------------------
+sub delete_query
+{
+    my ( $self, $id ) = @_;
+
+    my $delete = $self->{queries__}{$id}{base};
+    $delete =~ s/XXX/history.id/;
+    my $d = $self->db__()->prepare( $delete );
+    $d->execute;
+    my @row;
+    my @ids;
+    while ( @row = $d->fetchrow_array ) {
+        push ( @ids, $row[0] );
+    }
+    foreach my $id (@ids) {
+        $self->delete_slot( $id, 1 );
+    }
 }
 
 #----------------------------------------------------------------------------
@@ -830,7 +976,8 @@ sub get_query_size
 # Each row contains the fields:
 #
 #    id (0), from (1), to (2), cc (3), subject (4), date (5), hash (6),
-#    inserted date (7), bucket name (8), reclassified id (9)
+#    inserted date (7), bucket name (8), reclassified id (9), bucket id (10),
+#    magnet value (11)
 #----------------------------------------------------------------------------
 sub get_query_rows
 {
@@ -933,7 +1080,8 @@ sub upgrade_history_files__
 
             # NOTE.  We drop the information in $usedtobe, so that
             # reclassified messages will no longer appear reclassified
-            # in upgraded history.
+            # in upgraded history.  Also the $magnet is ignored so
+            # upgraded history will have no magnet information.
 
             my ( $reclassified, $bucket, $usedtobe, $magnet ) =
                 $self->history_read_class__( $msg );
@@ -941,7 +1089,7 @@ sub upgrade_history_files__
             if ( $bucket ne 'unknown_class' ) {
                 my ( $slot, $file ) = $self->reserve_slot();
                 rename $msg, $file;
-                $self->commit_slot( $slot, $bucket, $magnet );
+                $self->commit_slot( $slot, $bucket, 0 );
             }
         }
         $self->db__()->commit;
@@ -957,9 +1105,9 @@ sub upgrade_history_files__
 # returns: ( reclassified, bucket, usedtobe, magnet )
 #   values:
 #       reclassified:   boolean, true if message has been reclassified
-#       bucket:         string, the bucket the message is in presently, 
+#       bucket:         string, the bucket the message is in presently,
 #                       unknown class if an error occurs
-#       usedtobe:       string, the bucket the message used to be in 
+#       usedtobe:       string, the bucket the message used to be in
 #                       (null if not reclassified)
 #       magnet:         string, the magnet
 #
@@ -979,7 +1127,8 @@ sub history_read_class__
 
     if ( open CLASS, "<$filename" ) {
         $bucket = <CLASS>;
-        if ( defined( $bucket ) && ( $bucket =~ /([^ ]+) MAGNET ([^\r\n]+)/ ) ) {
+        if ( defined( $bucket ) &&
+           ( $bucket =~ /([^ ]+) MAGNET ([^\r\n]+)/ ) ) {
             $bucket = $1;
             $magnet = $2;
         }
@@ -1086,6 +1235,5 @@ sub classifier
 
     $self->{classifier__} = $classifier;
 }
-
 
 1;

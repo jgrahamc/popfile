@@ -1,4 +1,4 @@
--- POPFILE SCHEMA 1
+-- POPFILE SCHEMA 2
 -- ---------------------------------------------------------------------------------------------
 --
 -- popfile.schema - POPFile's database schema
@@ -262,7 +262,7 @@ create table magnets( id integer primary key,    -- unique ID for this entry
 create table history( id integer primary key,    -- unique ID for this entry
                       userid integer,            -- which user owns this
                       committed integer,         -- 1 if this item has been committed
-                      hdr_from    varchar(255),  -- The From: header            
+                      hdr_from    varchar(255),  -- The From: header 
                       hdr_to      varchar(255),  -- The To: header            
                       hdr_cc      varchar(255),  -- The Cc: header            
                       hdr_subject varchar(255),  -- The Subject: header
@@ -271,7 +271,10 @@ create table history( id integer primary key,    -- unique ID for this entry
                       inserted    date,          -- When this was added
                       bucketid integer,          -- Current classification
                       usedtobe integer,          -- Previous classification
-                      magnetid integer           -- If classified with magnet
+                      magnetid integer,          -- If classified with magnet
+                      sort_from   varchar(255),  -- The From: header 
+                      sort_to     varchar(255),  -- The To: header            
+                      sort_cc     varchar(255)   -- The Cc: header            
                     );
 
 -- MySQL SPECIFIC 
@@ -369,11 +372,13 @@ create trigger delete_bucket_template delete on bucket_template
 
 -- This is schema version 1
 
-insert into popfile ( version ) values ( 1 );
+insert into popfile ( version ) values ( 2 );
 
 -- There's always a user called 'admin'
 
 insert into users ( name, password ) values ( 'admin', 'e11f180f4a31d8caface8e62994abfaf' );
+
+insert into magnets ( id, bucketid, mtid, val, comment, seq ) values ( 0, 0, 0, '', '', 0 );
 
 -- These are the possible parameters for a bucket
 --

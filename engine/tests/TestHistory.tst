@@ -152,6 +152,8 @@ close FILE;
 
 my $slot1 = $slot;
 
+sleep(2);
+
 ( $slot, $file ) = $h->reserve_slot();
 open FILE, ">$file";
 print FILE <<EOF;
@@ -168,7 +170,6 @@ close FILE;
 $h->commit_slot( $slot, 'spam', 0 );
 $mq->service();
 $h->service();
-sleep(1);
 $h->commit_slot( $slot1, 'personal', 0 );
 $mq->service();
 $h->service();
@@ -187,7 +188,7 @@ test_assert_equal( $slot1, $h->get_slot_from_hash( $hash ) );
 # the database
 
 @result = $h->{db__}->selectrow_array( "select * from history where id = 1;" );
-test_assert_equal( $#result, 12 );
+test_assert_equal( $#result, 15 );
 test_assert_equal( $result[0], 1 ); # id
 test_assert_equal( $result[1], 1 ); # userid
 test_assert_equal( $result[2], 1 ); # committed
@@ -198,9 +199,12 @@ test_assert_equal( $result[6], 'this is the subject line' ); # Subject
 test_assert_equal( $result[7], 1595673992 );
 test_assert_equal( $result[10], 3 ); # bucketid
 test_assert_equal( $result[11], 0 ); # usedtobe
+test_assert_equal( $result[13], 'john graham-cumming nospam@jgc.org' );
+test_assert_equal( $result[14], 'everyone nospam-everyone@jgc.org' ); # To
+test_assert_equal( $result[15], 'people no-spam-people@jgc.org' ); # Cc
 
 @result = $h->{db__}->selectrow_array( "select * from history where id = 2;" );
-test_assert_equal( $#result, 12 );
+test_assert_equal( $#result, 15 );
 test_assert_equal( $result[0], 2 ); # id
 test_assert_equal( $result[1], 1 ); # userid
 test_assert_equal( $result[2], 1 ); # committed
@@ -211,6 +215,26 @@ test_assert_equal( $result[6], 'hot teen mortgage enlargers' ); # Subject
 test_assert_equal( $result[7], 1595587592 );
 test_assert_equal( $result[10], 4 ); # bucketid
 test_assert_equal( $result[11], 0 ); # usedtobe
+test_assert_equal( $result[13], 'evil spammer nospam@jgc.org' ); # From
+test_assert_equal( $result[14], 'someone else nospam-everyone@jgc.org' );
+test_assert_equal( $result[15], '' ); # Cc
+
+# Try a reclassification and undo
+
+my $session = $b->get_session_key( 'admin', '' );
+$h->change_slot_classification( 1, 'spam', $session );
+$b->release_session_key( $session );
+
+my @fields = $h->get_slot_fields( 1 );
+test_assert_equal( $fields[10], 4 );
+test_assert_equal( $fields[9],  3 );
+test_assert_equal( $fields[8],  'spam' );
+
+$h->revert_slot_classification( 1 );
+@fields = $h->get_slot_fields( 1 );
+test_assert_equal( $fields[10], 3 );
+test_assert_equal( $fields[9],  0 );
+test_assert_equal( $fields[8],  'personal' );
 
 # Now that we've got some data in the history test the query
 # interface
@@ -230,8 +254,8 @@ test_assert_equal( $h->get_query_size( $q ), 2 );
 my @rows = $h->get_query_rows( $q, 1, 2 );
 
 test_assert_equal( $#rows, 1 );
-test_assert_equal( $rows[0][1], 'John Graham-Cumming <nospam@jgc.org>' );
-test_assert_equal( $rows[1][1], 'Evil Spammer <nospam@jgc.org>' );
+test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
+test_assert_equal( $rows[1][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
 my @slot_row = $h->get_slot_fields( $rows[0][0] );
 test_assert_equal( join(':',@{$rows[0]}), join(':',@slot_row) );
@@ -293,8 +317,8 @@ $h->set_query( $q, '', 's', '' );
 test_assert_equal( $h->get_query_size( $q ), 2 );
 @rows = $h->get_query_rows( $q, 1, 2 );
 test_assert_equal( $#rows, 1 );
-test_assert_equal( $rows[0][1], 'John Graham-Cumming <nospam@jgc.org>' );
-test_assert_equal( $rows[1][1], 'Evil Spammer <nospam@jgc.org>' );
+test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
+test_assert_equal( $rows[1][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
 # Now try cases that return nothing
 
@@ -379,7 +403,7 @@ test_assert_equal( $rows[1][1], 'John Graham-Cumming <nospam@jgc.org>' );
 $h->stop_query( $q );
 
 $h->config_( 'history_days', 0 );
-$h->cleanup_history__();
+$h->cleanup_history();
 
 my $qq = $h->start_query();
 $h->set_query( $qq, '', '', '' );

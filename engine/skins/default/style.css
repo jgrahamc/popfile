@@ -103,8 +103,8 @@ tr.rowOdd {
 }
 
 tr.rowHighlighted {
-  color: #EEEEEE;
-  background-color: #EDEDCA;
+  color: #000000;
+  background-color: #999999;
 }
 
 tr.rowBoundary { 
