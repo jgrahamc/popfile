@@ -18,7 +18,8 @@ Remove                                  Remove
 Previous                                Previous
 Next                                    Next
 From                                    From
-Subject                                 Subject 
+Subject                                 Subject
+Cc                                      Cc 
 Classification                          Classification
 Reclassify                              Reclassify
 Probability                             Probability

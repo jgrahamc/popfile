@@ -259,9 +259,9 @@ sub update_constants_
     my ($self) = @_;
 
     if ( $self->{full_total__} > 0 )  {
-        
+
         # ln(10) =~ 2.30258509299404568401799145468436
-        
+
         $self->{not_likely__} = -log( $self->{full_total__} ) - 2.30258509299404568401799145468436;
 
         foreach my $bucket (keys %{$self->{total__}}) {
@@ -717,7 +717,7 @@ sub classify_file
 
     # If no bucket has a probability better than 0.5, call the message "unclassified".
     my $class = 'unclassified';
-    
+
     if ( ( $total != 0 ) && ( $score{$ranking[0]} > $self->{unclassified__} + log($total) ) ) {
         $class = $ranking[0];
     }
@@ -805,8 +805,8 @@ sub classify_and_modify
 
             # Kill header lines containing only whitespace (Exim does this)
 
-            next if ( $line =~ /^[ \t]+(\r\n|\r|\n)$/i );            
-            
+            next if ( $line =~ /^[ \t]+(\r\n|\r|\n)$/i );
+
             if ( !( $line =~ /^(\r\n|\r|\n)$/i ) )  {
                 $message_size += length $line;
                 print TEMP $fileline;
@@ -1436,6 +1436,22 @@ sub create_magnet
 
     $self->{magnets__}{$bucket}{$type}{$text} = 1;
     $self->save_magnets__();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# get_magnet_types
+#
+# Get a hash mapping magnet types (e.g. from) to magnet names (e.g. From);
+#
+# ---------------------------------------------------------------------------------------------
+
+sub get_magnet_types
+{
+    return ( 'from'    => 'From',
+             'to'      => 'To',
+             'subject' => 'Subject',
+             'cc'      => 'Cc' );
 }
 
 # ---------------------------------------------------------------------------------------------

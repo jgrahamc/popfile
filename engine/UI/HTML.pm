@@ -1300,7 +1300,7 @@ sub magnet_page
     $body .= "<th class=\"magnetsLabel\" scope=\"col\">$self->{language__}{Bucket}</th>\n";
     $body .= "<th class=\"magnetsLabel\" scope=\"col\">$self->{language__}{Remove}</th>\n</tr>\n";
 
-    my %magnet_types = ( 'from', 'From', 'to', 'To', 'subject', 'Subject' );
+    my %magnet_types = $self->{classifier__}->get_magnet_types();
     my $i = 0;
 
     # magnet listing
@@ -1364,10 +1364,12 @@ sub magnet_page
 
     # Magnet Type widget
     $body .= "<label class=\"magnetsLabel\" for=\"magnetsAddType\">$self->{language__}{Magnet_MagnetType}:</label><br />\n";
-    $body .= "<select name=\"type1\" id=\"magnetsAddType\">\n<option value=\"from\">\n$self->{language__}{From}</option>\n";
-    $body .= "<option value=\"to\">\n$self->{language__}{To}</option>\n";
-    $body .= "<option value=\"subject\">\n$self->{language__}{Subject}</option>\n</select>\n";
-    $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n<br /><br />\n";
+    $body .= "<select name=\"type1\" id=\"magnetsAddType\">\n";
+
+    for my $mtype (keys %magnet_types) {
+        $body .= "<option value=\"$mtype\">\n$self->{language__}{$magnet_types{$mtype}}</option>\n";
+    }
+    $body .= "</select>\n<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n<br /><br />\n";
     $body .= "<input type=\"hidden\" name=\"count\" value=\"1\" />\n";
 
     # Value widget
