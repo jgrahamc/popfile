@@ -163,7 +163,7 @@ sub update_word
                 	print "Could not find $word for colorization\n" if ( $self->{debug} );
                 }
             } else {
-                $self->{ut} .= "Found in encoded data <font color=\"$color\">$word<\/font>\r\n";
+                $self->{ut} .= "<font color=\"$color\">$word<\/font> ";
             }
         } else {
             increment_word( $self, $mword );
@@ -919,11 +919,10 @@ sub parse_stream
             # If we are in a mime document then spot the boundaries
             
             if ( ( $mime ne '' ) && ( $line =~ /^\-\-($mime)(\-\-)?/ ) ) {
-                $colorized .= clear_out_base64( $self );
                 
                 # approach each mime part with fresh eyes
-                $encoding = '';
                 
+                $encoding = '';
                 
                 if (!defined $2) {
                     print "Hit MIME boundary --$1\n" if $self->{debug};
@@ -1048,20 +1047,14 @@ sub clear_out_base64
         $decoded = decode_base64( $self->{base64} );
         parse_html( $self, $decoded, 1 );
 
-        if ( $decoded =~ /[^[:alpha:]\-\.]$/ )  {
-            if ( $self->{color} ) {
-                my $splitline = $self->{base64};    
-                $splitline =~ s/([^\r\n]{120})/$1\r\n/g;
-                $self->{ut} = $splitline;
-            }
+        print "Decoded: " . $decoded . "\n" if ($self->{debug});
 
-            $decoded = '';
+        $self->{ut} = "<b>Found in encoded data:</b> " . $self->{ut} if ( $self->{color} );
 
             if ( $self->{color} )  {
                 if ( $self->{ut} ne '' )  {
                     $colorized  = $self->{ut};
                     $self->{ut} = '';
-                }
             }
         }
     }
