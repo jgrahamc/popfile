@@ -371,7 +371,7 @@ sub url_handler__
     }
 
     if ( $url =~ /(popfile.*\.log)/ ) {
-        $self->http_file_( $client, $self->logger()->debug_filename(),
+        $self->http_file_( $client, $self->logger_()->debug_filename(),
             'text/plain' );
         return 1;
     }
