@@ -108,7 +108,7 @@
 
   Name                   "POPFile SSL Setup"
 
-  !define C_PFI_VERSION  "0.0.13"
+  !define C_PFI_VERSION  "0.0.14"
 
   ; Mention the wizard's version number in the window title
 
@@ -557,7 +557,7 @@ close_log:
   ; Save a log showing what was installed
 
   SetDetailsPrint textonly
-  DetailPrint "$(PSS_LANG_PROG_SAVELOG)"
+  DetailPrint "$(PFI_LANG_PROG_SAVELOG)"
   SetDetailsPrint none
   !insertmacro BACKUP_123 "$G_ROOTDIR" "addssl.log"
   Push "$G_ROOTDIR\addssl.log"
@@ -787,68 +787,6 @@ exit:
 
 nothing_to_check:
 FunctionEnd
-
-
-#--------------------------------------------------------------------------
-# Installer Function: DumpLog
-#
-# This function saves the contents of the install log (from INSTPAGE) in a file.
-# The stack is used to pass the full pathname of the file to be used.
-#--------------------------------------------------------------------------
-
-  !define LVM_GETITEMCOUNT 0x1004
-  !define LVM_GETITEMTEXT 0x102D
-
-Function DumpLog
-  Exch $5
-  Push $0
-  Push $1
-  Push $2
-  Push $3
-  Push $4
-  Push $6
-
-  FindWindow $0 "#32770" "" $HWNDPARENT
-  GetDlgItem $0 $0 1016
-  StrCmp $0 0 error
-  FileOpen $5 $5 "w"
-  StrCmp $5 "" error
-  SendMessage $0 ${LVM_GETITEMCOUNT} 0 0 $6
-  System::Alloc ${NSIS_MAX_STRLEN}
-  Pop $3
-  StrCpy $2 0
-  System::Call "*(i, i, i, i, i, i, i, i, i) i \
-                (0, 0, 0, 0, 0, r3, ${NSIS_MAX_STRLEN}) .r1"
-
-loop:
-  StrCmp $2 $6 done
-  System::Call "User32::SendMessageA(i, i, i, i) i \
-                ($0, ${LVM_GETITEMTEXT}, $2, r1)"
-  System::Call "*$3(&t${NSIS_MAX_STRLEN} .r4)"
-  FileWrite $5 "$4${MB_NL}"
-  IntOp $2 $2 + 1
-  Goto loop
-
-done:
-  FileClose $5
-  System::Free $1
-  System::Free $3
-  Goto exit
-
-error:
-  MessageBox MB_OK|MB_ICONEXCLAMATION "Error: problem detected when saving the log file"
-
-exit:
-  Pop $6
-  Pop $4
-  Pop $3
-  Pop $2
-  Pop $1
-  Pop $0
-  Exch $5
-
-FunctionEnd
-
 
 #--------------------------------------------------------------------------
 # End of 'addssl.nsi'
