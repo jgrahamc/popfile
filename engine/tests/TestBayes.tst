@@ -117,6 +117,7 @@ test_assert_equal( $all_buckets[3], 'unclassified' );
 
 test_assert_equal( $b->is_bucket( $session, 'personal' ),     1 );
 test_assert_equal( $b->is_bucket( $session, 'impersonal' ),   0 );
+test_assert_equal( $b->is_bucket( $session, 'impersonal' ),   0 );
 test_assert_equal( $b->is_bucket( $session, 'unclassified' ), 0 );
 
 # get_pseudo_buckets
@@ -129,6 +130,8 @@ test_assert_equal( $pseudo_buckets[0], 'unclassified' );
 
 test_assert_equal( $b->is_pseudo_bucket( $session, 'personal' ),     0 );
 test_assert_equal( $b->is_pseudo_bucket( $session, 'unclassified' ), 1 );
+test_assert_equal( $b->is_pseudo_bucket( $session, 'impersonal2' ),   0 );
+test_assert_equal( $b->is_pseudo_bucket( $session, 'impersonal2' ),   0 );
 
 # get_buckets
 
@@ -137,6 +140,7 @@ test_assert_equal( $#buckets, 2 );
 test_assert_equal( $buckets[0], 'other' );
 test_assert_equal( $buckets[1], 'personal' );
 test_assert_equal( $buckets[2], 'spam' );
+test_assert_equal( defined($buckets[3]), defined(undef)  );
 
 # get_bucket_word_count
 

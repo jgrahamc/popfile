@@ -711,7 +711,7 @@ sub db_update_cache__
     delete $self->{db_bucketid__}{$userid};
 
     $self->{db_get_buckets__}->execute( $userid );
-    while ( my $row = $self->{db_get_buckets__}->fetchrow_arrayref ) { 
+    while ( my $row = $self->{db_get_buckets__}->fetchrow_arrayref ) {
         $self->log_( "Read bucket $row->[0] with id $row->[1]" );
         $self->{db_bucketid__}{$userid}{$row->[0]}{id} = $row->[1];
         $self->{db_bucketid__}{$userid}{$row->[0]}{pseudo} = $row->[2];
@@ -2512,7 +2512,8 @@ sub is_pseudo_bucket
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    return $self->{db_bucketid__}{$userid}{$bucket}{pseudo};
+    return ( defined($self->{db_bucketid__}{$userid}{$bucket})   # PROFILE BLOCK START
+          && $self->{db_bucketid__}{$userid}{$bucket}{pseudo} ); # PROFILE BLOCK STOP
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2777,7 +2778,7 @@ sub get_bucket_parameter
 
     # Make sure that the bucket passed in actually exists
 
-    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) { 
+    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) {
         return undef;
     }
 
@@ -2824,7 +2825,7 @@ sub set_bucket_parameter
 
     # Make sure that the bucket passed in actually exists
 
-    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) { 
+    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) {
         return undef;
     }
 
@@ -2964,7 +2965,7 @@ sub delete_bucket
 
     # Make sure that the bucket passed in actually exists
 
-    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) { 
+    if ( !defined( $self->{db_bucketid__}{$userid}{$bucket} ) ) {
         return 0;
     }
 
@@ -2995,14 +2996,14 @@ sub rename_bucket
 
     # Make sure that the bucket passed in actually exists
 
-    if ( !defined( $self->{db_bucketid__}{$userid}{$old_bucket} ) ) { 
+    if ( !defined( $self->{db_bucketid__}{$userid}{$old_bucket} ) ) {
         $self->log_( "Bad bucket name $old_bucket to rename_bucket" );
         return 0;
     }
 
     my $id = $self->{db__}->quote( $self->{db_bucketid__}{$userid}{$old_bucket}{id} );
     $new_bucket = $self->{db__}->quote( $new_bucket );
-   
+
     $self->log_( "Rename bucket $old_bucket to $new_bucket" );
 
     my $result = $self->{db__}->do( "update buckets set name = $new_bucket where id = $id;" );
