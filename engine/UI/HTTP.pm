@@ -142,12 +142,12 @@ sub service
 
                 $client->autoflush(1);
 
-                if ( ( defined( $client ) ) && ( my $request = <$client> ) ) {
+                if ( ( defined( $client ) ) && ( my $request = $self->slurp_( $client ) ) ) {
                     my $content_length = 0;
                     my $content;
 
-                    while ( <$client> )  {
-                        $content_length = $1 if ( /Content-Length: (\d+)/i );
+                    while ( my $line = $self->slurp_( $client ) )  {
+                        $content_length = $1 if ( $line =~ /Content-Length: (\d+)/i );
 
                         # Discovered that Norton Internet Security was adding
                         # HTTP headers of the form
@@ -159,12 +159,12 @@ sub service
                         # of POST data.  Changed the end of header identification
                         # to any line that does not contain a :
 
-                        last                 if ( !/:/i );
+                        last                 if ( $line !~ /:/i );
                     }
 
                     if ( $content_length > 0 ) {
                         $content = '';
-                        $client->read( $content, $content_length, length( $content ) );
+                        $client->sysread( $content, $content_length, length( $content ) );
                     }
 
                     if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {
@@ -175,6 +175,7 @@ sub service
                 }
             }
 
+            $self->done_slurp_( $client );
             close $client;
         }
     }
