@@ -42,7 +42,7 @@ my $POPFile = POPFile::Loader->new();
 
 $POPFile->debug(1);
 $POPFile->CORE_loader_init();
-$POPFile->CORE_version(0, 20, 0);
+$POPFile->CORE_version(0, 20, 1);
 
 # Redefine POPFile's signals
 
