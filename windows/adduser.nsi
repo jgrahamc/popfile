@@ -151,7 +151,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.5"
+  !define C_PFI_VERSION  "0.2.6"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -171,18 +171,6 @@
 
   !define C_STD_DEFAULT_USERDATA  "$APPDATA\POPFile"
   !define C_ALT_DEFAULT_USERDATA  "$WINDIR\Application Data\POPFile"
-
-  ;--------------------------------------------------------------------------------
-  ; Constants for the timeout loop used by 'WaitUntilUnlocked' and 'un.WaitUntilUnlocked'
-  ;--------------------------------------------------------------------------------
-
-  ; Timeout loop counter start value (counts down to 0)
-
-  !define C_SHUTDOWN_LIMIT    20
-
-  ; Delay (in milliseconds) used inside the timeout loop
-
-  !define C_SHUTDOWN_DELAY    1000
 
   ;-------------------------------------------------------------------------------
   ; Constants for the timeout loop used after issuing a POPFile 'startup' request
@@ -216,7 +204,6 @@
 
   Var G_ROOTDIR            ; full path to the folder used for the POPFile program files
   Var G_USERDIR            ; full path to the folder containing the 'popfile.cfg' file
-  Var G_MPBINDIR           ; full path to the folder used for the minimal Perl EXE and DLL files
 
   Var G_POP3               ; POP3 port (1-65535)
   Var G_GUI                ; GUI port (1-65535)
@@ -263,23 +250,23 @@
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion "${C_PFI_VERSION}.0"
+  VIProductVersion                   "${C_PFI_VERSION}.0"
 
-  VIAddVersionKey "ProductName" "POPFile User wizard"
-  VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sf.net"
-  VIAddVersionKey "CompanyName" "The POPFile Project"
-  VIAddVersionKey "LegalCopyright" "© 2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription" "Add/Remove POPFile User wizard"
-  VIAddVersionKey "FileVersion" "${C_PFI_VERSION}"
+  VIAddVersionKey "ProductName"      "POPFile User wizard"
+  VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "CompanyName"      "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"   "© 2004  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"  "Add/Remove POPFile User wizard"
+  VIAddVersionKey "FileVersion"       "${C_PFI_VERSION}"
 
   !ifndef ENGLISH_MODE
-    VIAddVersionKey "Build" "Multi-Language"
+    VIAddVersionKey "Build"          "Multi-Language"
   !else
-    VIAddVersionKey "Build" "English-Mode"
+    VIAddVersionKey "Build"          "English-Mode"
   !endif
 
-  VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script" "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
+  VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
 
 #----------------------------------------------------------------------------------------
 # CBP Configuration Data (to override defaults, un-comment the lines below and modify them)
@@ -793,8 +780,6 @@ Section "POPFile" SecPOPFile
   ; For flexibility, several global user variables are used to access installation folders
   ; (1) $G_ROOTDIR is initialized by the 'PFIGUIInit' function
   ; (2) $G_USERDIR is initialized by the 'User Data' DIRECTORY page
-
-  StrCpy $G_MPBINDIR  "$G_ROOTDIR"
 
   ReadRegStr ${L_TEMP_2} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Major Version"
   ReadRegStr ${L_TEMP_3} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Minor Version"
@@ -4569,7 +4554,6 @@ Function un.onInit
   StrCpy $G_USERDIR   $INSTDIR
 
   ReadRegStr $G_ROOTDIR HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
-  StrCpy $G_MPBINDIR  $G_ROOTDIR
 
   ; Email settings are stored on a 'per user' basis therefore we need to know which user is
   ; running the uninstaller so we can check if the email settings can be safely restored
@@ -4661,40 +4645,13 @@ Section "Uninstall"
     Abort "$(PFI_LANG_UN_ABORT_1)"
 
 skip_confirmation:
-
-  ; Shutdown POPFile is it is running, so we can remove the SQLite database and other user data
-
-  Push "$G_ROOTDIR\popfileb.exe"
-  Call un.CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  Push "$G_ROOTDIR\popfileib.exe"
-  Call un.CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  Push "$G_ROOTDIR\popfilef.exe"
-  Call un.CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  Push "$G_ROOTDIR\popfileif.exe"
-  Call un.CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  Push "$G_MPBINDIR\wperl.exe"
-  Call un.CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  Push "$G_MPBINDIR\perl.exe"
-  Call un.CheckIfLocked
+  Push $G_ROOTDIR
+  Call un.FindLockedPFE
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" remove_user_data
 
-attempt_shutdown:
+  ; Need to shutdown POPFile, so we can remove the SQLite database and other user data
+
   StrCpy $G_GUI ""
   StrCpy ${L_OLDUI} ""
 

@@ -207,18 +207,6 @@
 
   !define C_KAKASI_DIR      "kakasi_package"
 
-  ;--------------------------------------------------------------------------------
-  ; Constants for the timeout loop used by 'WaitUntilUnlocked' and 'un.WaitUntilUnlocked'
-  ;--------------------------------------------------------------------------------
-
-  ; Timeout loop counter start value (counts down to 0)
-
-  !define C_SHUTDOWN_LIMIT    20
-
-  ; Delay (in milliseconds) used inside the timeout loop
-
-  !define C_SHUTDOWN_DELAY    1000
-
   ;-------------------------------------------------------------------------------
   ; Constant used to avoid problems with Banner.dll
   ;
@@ -237,7 +225,6 @@
 
   Var G_ROOTDIR            ; full path to the folder used for the POPFile PROGRAM files
   Var G_USERDIR            ; full path to the folder containing the 'popfile.cfg' file
-  Var G_MPBINDIR           ; full path to the folder used for the minimal Perl EXE and DLL files
   Var G_MPLIBDIR           ; full path to the folder used for the rest of the minimal Perl files
 
   Var G_GUI                ; GUI port (1-65535)
@@ -282,29 +269,29 @@
 
   VIProductVersion "${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION}.0"
 
-  VIAddVersionKey "ProductName" "${C_PFI_PRODUCT}"
-  VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sf.net"
-  VIAddVersionKey "CompanyName" "The POPFile Project"
-  VIAddVersionKey "LegalCopyright" "© 2001-2004  John Graham-Cumming"
-  VIAddVersionKey "FileDescription" "POPFile Automatic email classification"
-  VIAddVersionKey "FileVersion" "${C_PFI_VERSION}"
+  VIAddVersionKey "ProductName"      "${C_PFI_PRODUCT}"
+  VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
+  VIAddVersionKey "CompanyName"      "The POPFile Project"
+  VIAddVersionKey "LegalCopyright"   "© 2001-2004  John Graham-Cumming"
+  VIAddVersionKey "FileDescription"  "POPFile Automatic email classification"
+  VIAddVersionKey "FileVersion"      "${C_PFI_VERSION}"
 
   !ifndef ENGLISH_MODE
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build" "Multi-Language (with Kakasi) multi-user seamless"
+      VIAddVersionKey "Build"        "Multi-Language (with Kakasi) multi-user seamless"
     !else
-      VIAddVersionKey "Build" "Multi-Language (without Kakasi) multi-user seamless"
+      VIAddVersionKey "Build"        "Multi-Language (without Kakasi) multi-user seamless"
     !endif
   !else
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build" "English-Mode (with Kakasi) multi-user seamless"
+      VIAddVersionKey "Build"        "English-Mode (with Kakasi) multi-user seamless"
     !else
-      VIAddVersionKey "Build" "English-Mode (without Kakasi) multi-user seamless"
+      VIAddVersionKey "Build"        "English-Mode (without Kakasi) multi-user seamless"
     !endif
   !endif
 
-  VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
-  VIAddVersionKey "Build Script" "${__FILE__}$\r$\n(${__TIMESTAMP__})"
+  VIAddVersionKey "Build Date/Time"  "${__DATE__} @ ${__TIME__}"
+  VIAddVersionKey "Build Script"     "${__FILE__}$\r$\n(${__TIMESTAMP__})"
 
 #--------------------------------------------------------------------------
 # Include private library functions and macro definitions
@@ -777,7 +764,6 @@ Section "POPFile" SecPOPFile
   ; (this makes it easier to change the folder structure used by the installer).
 
   StrCpy $G_ROOTDIR   "$INSTDIR"
-  StrCpy $G_MPBINDIR  "$INSTDIR"
   StrCpy $G_MPLIBDIR  "$INSTDIR\lib"
 
   ; If we are installing over a previous version, ensure that version is not running
@@ -922,7 +908,7 @@ save_HKCU_root_sfn:
   DetailPrint "$(PFI_LANG_INST_PROG_PERL)"
   SetDetailsPrint listonly
 
-  SetOutPath $G_MPBINDIR
+  SetOutPath $G_ROOTDIR
   File "${C_PERL_DIR}\bin\perl.exe"
   File "${C_PERL_DIR}\bin\wperl.exe"
   File "${C_PERL_DIR}\bin\perl58.dll"
@@ -1623,49 +1609,13 @@ Function MakeRootDirSafe
   ; to allow POPFile to be run as a Windows service. So we also need to check if POPFile is
   ; running as a service. [NB: Service detection/shutdown is _not_ implemented in this build]
 
-  DetailPrint "Checking '$G_ROOTDIR\popfileb.exe' ..."
-
-  Push "$G_ROOTDIR\popfileb.exe"
-  Call CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  DetailPrint "Checking '$G_ROOTDIR\popfileib.exe' ..."
-
-  Push "$G_ROOTDIR\popfileib.exe"
-  Call CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  DetailPrint "Checking '$G_ROOTDIR\popfilef.exe' ..."
-
-  Push "$G_ROOTDIR\popfilef.exe"
-  Call CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  DetailPrint "Checking '$G_ROOTDIR\popfileif.exe' ..."
-
-  Push "$G_ROOTDIR\popfileif.exe"
-  Call CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  DetailPrint "Checking '$G_MPBINDIR\wperl.exe' ..."
-
-  Push "$G_MPBINDIR\wperl.exe"
-  Call CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  DetailPrint "Checking '$G_MPBINDIR\perl.exe' ..."
-
-  Push "$G_MPBINDIR\perl.exe"
-  Call CheckIfLocked
+  Push $G_ROOTDIR
+  Call FindLockedPFE
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" exit_now
 
-attempt_shutdown:
+  ; The program files we are about to update are in use so we need to shut POPFile down
+
   DetailPrint "... it is locked."
 
   ; Attempt to discover which POPFile UI port is used by the current user, so we can issue
@@ -1981,7 +1931,6 @@ Function un.onInit
   !insertmacro MUI_UNGETLANGUAGE
 
   StrCpy $G_ROOTDIR   "$INSTDIR"
-  StrCpy $G_MPBINDIR  "$INSTDIR"
   StrCpy $G_MPLIBDIR  "$INSTDIR\lib"
 
   ReadRegStr $G_USERDIR HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath"
@@ -2100,37 +2049,13 @@ uninstall_popfile:
   ; to allow POPFile to be run as a Windows service. So we also need to check if POPFile is
   ; running as a service. [NB: Service detection/shutdown is _not_ implemented in this build]
 
-  Push "$G_ROOTDIR\popfileb.exe"
-  Call un.CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  Push "$G_ROOTDIR\popfileib.exe"
-  Call un.CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  Push "$G_ROOTDIR\popfilef.exe"
-  Call un.CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  Push "$G_ROOTDIR\popfileif.exe"
-  Call un.CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  Push "$G_MPBINDIR\wperl.exe"
-  Call un.CheckIfLocked
-  Pop ${L_EXE}
-  StrCmp ${L_EXE} "" 0 attempt_shutdown
-
-  Push "$G_MPBINDIR\perl.exe"
-  Call un.CheckIfLocked
+  Push $G_ROOTDIR
+  Call un.FindLockedPFE
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" remove_shortcuts
 
-attempt_shutdown:
+  ; The program files we are about to remove are in use so we need to shut POPFile down
+
   StrCpy $G_GUI ""
 
   ClearErrors
@@ -2256,10 +2181,9 @@ menucleanup:
   DetailPrint "$(PFI_LANG_UN_PROGRESS_5)"
   SetDetailsPrint listonly
 
-  Delete $G_MPBINDIR\*.dll
-  Delete $G_MPBINDIR\perl.exe
-  Delete $G_MPBINDIR\wperl.exe
-  RMDir $G_MPBINDIR
+  Delete $$G_ROOTDIR\perl*.dll
+  Delete $G_ROOTDIR\perl.exe
+  Delete $G_ROOTDIR\wperl.exe
 
   Delete $G_ROOTDIR\skins\*.css
   Delete $G_ROOTDIR\skins\*.gif
