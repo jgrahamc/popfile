@@ -3305,7 +3305,7 @@ sub history_page
             $body .= "<a title=\"$from\">$short_from</a></td>\n";
             $body .= "<td><a class=\"messageLink\" title=\"$subject\" href=\"/view?view=$mail_file" . $self->print_form_fields_(0,1,('start_message','session','filter','search','sort')) . "\">";
             $body .= "$short_subject</a></td>\n<td>";
-            my $sbs = ($bucket ne 'unclassified')?"<a href=\"buckets?session=$self->{session_key__}&showbucket=$bucket\">":'';
+            my $sbs = ($bucket ne 'unclassified')?"<a href=\"buckets?session=$self->{session_key__}&amp;showbucket=$bucket\">":'';
             my $sbe = ($bucket ne 'unclassified')?'</a>':'';
             if ( $reclassified )  {
                 $body .= "$sbs<font color=\"" . $self->{classifier__}->get_bucket_color($bucket) . "\">$bucket</font>$sbe</td>\n<td>";
