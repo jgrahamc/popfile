@@ -27,7 +27,6 @@ sub new
           'are', 1, 
           'ask', 1, 
           'but', 1, 
-          'by', 1, 
           'can', 1, 
           'com', 1, 
           'did', 1, 
