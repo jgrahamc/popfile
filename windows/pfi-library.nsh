@@ -1927,15 +1927,13 @@
   FunctionEnd
 !macroend
 
-!ifdef ADDUSER
-    #--------------------------------------------------------------------------
-    # Installer Function: GetMessagesPath
-    #
-    # This function is used during the installation process
-    #--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+# Installer Function: GetMessagesPath
+#
+# This function is used during the installation process
+#--------------------------------------------------------------------------
 
-    !insertmacro GetMessagesPath ""
-!endif
+;!insertmacro GetMessagesPath ""
 
 !ifdef ADDUSER
     #--------------------------------------------------------------------------
