@@ -1523,7 +1523,7 @@ sub get_top_bucket__
     my ( $self, $userid, $id, $matrix, $buckets ) = @_;
 
     my $best_probability = 0;
-    my $top_bucket       = '';
+    my $top_bucket       = 'unclassified';
 
     for my $bucket (@$buckets) {
         my $probability = 0;
