@@ -292,10 +292,11 @@ foreach my $type (keys %components) {
 	}
 }
 
-# All proxies need access to the classifier
+# All proxies need access to the classifier and the UI
 
 foreach my $name (keys %{$components{proxy}}) {
 	$components{proxy}{$name}->{classifier} = $components{classifier}{classifier};
+	$components{proxy}{$name}->{ui}         = $components{ui}{html};
 }
 
 # All UI components need access to the classifier

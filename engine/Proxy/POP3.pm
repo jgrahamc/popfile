@@ -216,6 +216,7 @@ sub flush_child_data
         if ( defined( $class ) ) {
             $class =~ s/[\r\n]//g;
 
+	        $self->{ui}->{history_invalid}                    = 1;
             $self->{classifier}->{parameters}{$class}{count} += 1;
             $self->{configuration}->{configuration}{mcount}  += 1;
             $stats_changed                                    = 1;

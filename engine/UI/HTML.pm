@@ -483,7 +483,7 @@ sub html_common_middle
 
     # History menu item
     $result .= "<td class=\"$tab[2]\" align=\"center\">\n" ;
-    $result .= "<a class=\"menuLink\" href=\"/history?setfilter=&amp;session=$self->{session_key}&amp;filter=\">" ;
+    $result .= "<a class=\"menuLink\" href=\"/history?session=$self->{session_key}\">" ;
     $result .= "\n$self->{language}{Header_History}</a>\n" ;
     $result .= "</td>\n<td class=\"menuSpacer\"></td>\n" ;
 
