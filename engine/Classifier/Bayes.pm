@@ -12,6 +12,10 @@ use locale;
 use Classifier::MailParse;
 use Classifier::WordMangle;
 
+# This is used to get the hostname of the current machine
+# in a cross platform way
+use Sys::Hostname;
+
 # A handy variable containing the value of an EOL for Unix systems
 my $eol = "\015\012";
 
@@ -30,7 +34,10 @@ sub new
     
     # Set this to 1 to get scores for individual words in message detail
     $self->{wordscores}        = 1;
-    
+
+    # Just our hostname
+    $self->{hostname}        = '';
+
     # Matrix of buckets, words and the word counts
     $self->{matrix}            = {};         
     
@@ -102,6 +109,9 @@ sub initialize
     # The corpus is kept in the 'corpus' subfolder of POPFile
     $self->{configuration}->{configuration}{corpus}                   = 'corpus';
     
+    # Get the hostname for use in the X-POPFile-Link header
+    $self->{hostname} = hostname;
+
     return 1;
 }
 

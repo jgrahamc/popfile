@@ -12,10 +12,6 @@ use strict;
 use warnings;
 use locale;
 
-# This is used to get the hostname of the current machine
-# in a cross platform way
-use Sys::Hostname;
-
 # A handy variable containing the value of an EOL for Unix systems
 my $eol = "\015\012";
 
@@ -44,9 +40,6 @@ sub new
     # Used to tell any loops to terminate
     $self->{alive}          = 1;
     
-    # Just our hostname
-    $self->{hostname}        = '';
-
     # List of file handles to read from active children
     $self->{children}        = (undef);
     
@@ -122,9 +115,6 @@ sub start
     
     # Ensure that the messages subdirectory exists
     mkdir( 'messages' );
-
-    # Get the hostname for use in the X-POPFile-Link header
-    $self->{hostname} = hostname;
 
     # Open the socket used to receive request for POP3 service
     $self->{server} = IO::Socket::INET->new( Proto     => 'tcp',
