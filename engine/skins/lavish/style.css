@@ -118,6 +118,7 @@ td.head {
   color: #000000;
   background-color: transparent;
   background-repeat: no-repeat;
+  text-indent: 8px;
 }
 
 .menuStandard {
@@ -126,6 +127,7 @@ td.head {
   color: #000000;
   background-color: transparent;
   background-repeat: no-repeat;
+  text-indent: 8px;
 }
 
 .menuIndent {
@@ -135,13 +137,13 @@ td.head {
 }
 
 tr.rowEven {
-  font-size: 8pt;
+  font-size:  0.9em ;
   color: #FFFFFF;
   background-color: transparent;
 }
 
 tr.rowOdd {
-  font-size: 8pt;
+  font-size:  0.9em ;
   color: #FFFFFF;
   background-color: #101010;
 }
