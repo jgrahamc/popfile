@@ -35,6 +35,19 @@ require IO::Handle;
 my $test_count    = 0;
 my $test_failures = 0;
 my $fail_messages = '';
+my $spin          = 0;
+my $spin_pos      = '.*';
+
+sub spin
+{
+    if ( $spin == length($spin_pos) ) {
+        $spin = 0;
+    }
+
+    print "\b" . substr( $spin_pos, $spin, 1 );
+
+    $spin++;
+}
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -52,6 +65,8 @@ sub test_report
 {
         my ( $ok, $test, $file, $line, $context ) = @_;
 
+        spin();
+
         $test_count += 1;
 
         if ( !$ok ) {
@@ -60,10 +75,10 @@ sub test_report
                         $fail_messages .= " ($context)";
                 }
                 $test_failures += 1;
-#            print "Test fail at $file:$line ($context)\n";
+#            print "Test fail at $file:$line ($test) ($context)\n";
         } else {
-#            print "Test pass at $file:$line ($context)\n";
-        }
+#            print "Test pass at $file:$line ($test) ($context)\n";
+       }
 
         flush STDOUT;
 }
@@ -194,7 +209,7 @@ foreach my $test (@tests) {
         my $current_test_count  = $test_count;
         my $current_error_count = $test_failures;
 
-        print "\nRunning $test... ";
+        print "\nRunning $test... *";
         flush STDOUT;
         $fail_messages = '';
         my $suite;
@@ -212,6 +227,8 @@ foreach my $test (@tests) {
         close SUITE;
 
         my $ran = eval( $suite );
+
+        print "\b";
 
         if ( !defined( $ran ) ) {
             print "Error in $test: $@";

@@ -438,7 +438,10 @@ sub child__
             my $file = $self->{classifier__}->history_filename($download_count, $count, undef, 1);
 
             my $short_file = $file;
-            $short_file =~ s/^[^\/]*\///;
+            $file =~ /^.*\/([^\/]*)$/;
+            $short_file = $1;
+
+            $self->log_( "Class file $file shortens to $short_file" );
 
             if (defined($downloaded{$count}) && open( RETRFILE, "<$file" ) ) {
 
@@ -452,15 +455,11 @@ sub child__
 
                 # Give the client an +OK:
 
-                print $client "+OK " . ( -s $file ) . " bytes from POPFile cache$eol";
+                $self->tee_( $client, "+OK " . ( -s $file ) . " bytes from POPFile cache$eol" );
 
                 # Load the last classification
 
                 my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_read_class($short_file);
-
-                $self->log_( "Message is: long($file) short($short_file)");
-
-                $self->log_( "Message is: reclassified($reclassified) bucket($bucket) usedtobe($usedtobe) magnet($magnet)" );
 
                 if ($bucket ne 'unknown class') {
 
@@ -482,10 +481,10 @@ sub child__
                     print $pipe "CLASS:$class$eol";
                     flush $pipe;
                     $self->yield_( $ppipe, $pid );
+                    $self->log_( "done printing and classifying" );
                 }
 
                 close RETRFILE;
-                print $client ".$eol";
                 $self->log_( "message complete" );
             } else {
 

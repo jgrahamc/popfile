@@ -58,6 +58,7 @@ sub server
     my ( $client ) = @_;
     my @messages = sort glob 'TestMailParse*.msg';
     my $goslow = 0;
+    my $hang   = 0;
 
     print $client "+OK Ready$eol";
 
@@ -68,9 +69,10 @@ sub server
         $command =~ s/(\015|\012)//g;
 
         if ( $command =~ /^USER (.*)/i ) {
-	    if ( $1 =~ /(gooduser|goslow)/ ) {
+	    if ( $1 =~ /(gooduser|goslow|hang)/ ) {
                  print $client "+OK Welcome $1$eol";
                  $goslow = ( $1 =~ /goslow/ );
+                 $hang   = ( $1 =~ /hang/   );
 	    } else {
                  print $client "-ERR Unknown user $1$eol";
             }
@@ -161,6 +163,9 @@ sub server
                      if ( $goslow ) {
                          select( undef, undef, undef, 3 );
 		     }
+                     if ( $hang ) {
+                         select( undef, undef, undef, 30 );
+                     }
 		 }
                  close FILE;
 
@@ -336,6 +341,7 @@ if ( $pid == 0 ) {
         }
     }
 
+    close $server;
     exit(0);
 } else {
 
@@ -581,10 +587,8 @@ if ( $pid == 0 ) {
         close FILE;
 
         $result = <$client>;
-        test_assert_equal( $result, "$eol" );
-        $result = <$client>;
         test_assert_equal( $result, ".$eol" );
-
+ 
         # This delay is here because Windows was having a little trouble
         # with the files created by the RETR not existing and I have a little
         # rest here while Windows wakes from its afternoon nap and writes
@@ -612,6 +616,64 @@ if ( $pid == 0 ) {
         close HIST;
 
         my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile1=1.msg' );
+        test_assert( !$reclassified );
+        test_assert_equal( $bucket, 'spam' );
+        test_assert( !defined( $usedtobe ) );
+        test_assert_equal( $magnet, '' );
+
+       # Now get a message that has an illegal embedded CRLF.CRLF
+
+        unlink( 'messages/popfile1=28.msg' );
+        unlink( 'messages/popfile1=28.cls' );
+
+        print $client "RETR 28$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK " . ( -s $messages[27] ) . "$eol" );
+        my $cam = $messages[27];
+        $cam =~ s/msg$/cam/;
+
+        test_assert( open FILE, "<$cam" );
+        binmode FILE;
+        while ( <FILE> ) {
+            my $line = $_;
+            $result = <$client>;
+            $result =~ s/popfile1=28/popfile0=0/;
+            $result =~ s/\r|\n//g;
+            $line   =~ s/\r|\n//g;
+            test_assert_equal( $result, $line );
+	}
+        close FILE;
+
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+ 
+        # This delay is here because Windows was having a little trouble
+        # with the files created by the RETR not existing and I have a little
+        # rest here while Windows wakes from its afternoon nap and writes
+        # the files to disk
+
+        select( undef, undef, undef, 0.1 );
+
+        # TODO check for NEWFL and CLASS messages
+
+        test_assert( -e 'messages/popfile1=28.msg' );
+        test_assert( -e 'messages/popfile1=28.cls' );
+
+        test_assert( open FILE, "<$messages[27]" );
+        binmode FILE;
+        test_assert( open HIST, "<messages/popfile1=28.msg" );
+        binmode HIST;
+        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+            $fl =~ s/[\r\n]//g;
+            $ml =~ s/[\r\n]//g;
+            test_assert_equal( $fl, $ml );
+	}
+        test_assert( !eof(FILE) );
+        test_assert( eof(HIST) );
+        close FILE;
+        close HIST;
+
+        my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile1=28.msg' );
         test_assert( !$reclassified );
         test_assert_equal( $bucket, 'spam' );
         test_assert( !defined( $usedtobe ) );
@@ -710,8 +772,6 @@ if ( $pid == 0 ) {
         close FILE;
 
         $result = <$client>;
-        test_assert_equal( $result, "$eol" );
-        $result = <$client>;
         test_assert_equal( $result, ".$eol" );
 
         # This delay is here because Windows was having a little trouble
@@ -799,8 +859,6 @@ if ( $pid == 0 ) {
         close FILE;
 
         $result = <$client>;
-        test_assert_equal( $result, "$eol" );
-        $result = <$client>;
         test_assert_equal( $result, ".$eol" );
 
         test_assert( -e 'messages/popfile2=8.msg' );
@@ -867,8 +925,6 @@ if ( $pid == 0 ) {
 	}
         close FILE;
 
-        $result = <$client>;
-        test_assert_equal( $result, "$eol" );
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
 
@@ -996,8 +1052,6 @@ if ( $pid == 0 ) {
 	}
         close FILE;
 
-        $result = <$client>;
-        test_assert_equal( $result, "$eol" );
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
 

@@ -29,9 +29,18 @@ export POPFILE_ROOT=../
 export POPFILE_USER=../tests/
 
 runtest:
-	perl -I ../ $(DEBUGARGS) ../tests.pl $(TESTARGS)
+	@perl -I ../ $(DEBUGARGS) ../tests.pl $(TESTARGS)
 ifdef DEBUGARGS
-	perl ../coverage.pl
+	@perl ../coverage.pl
 endif
 	@rm -rf corpus
 	@rm -rf messages
+
+TEST_FILES := $(wildcard *.tst)
+
+eachtest:
+	@for mod in $(TEST_FILES); do \
+		$(MAKE) runtest TESTARGS=$$mod; \
+	done;
+
+

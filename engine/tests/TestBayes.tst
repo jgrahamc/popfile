@@ -75,7 +75,9 @@ $b->module_config_( 'html', 'language', 'English' );
 $b->{parser__}->mangle( $w );
 $b->initialize();
 
-# Hide the upgrading messages
+# Hide the upgrading messages by setting a special
+# value
+$b->{no_upgrade_message__} = 1;
 
 test_assert( $b->start() );
 
@@ -613,7 +615,7 @@ close FILE;
 # neither
 
 open MAIL, "<messages/one.msg";
-$b->echo_to_dot_( \*MAIL );
+test_assert( $b->echo_to_dot_( \*MAIL ) );
 test_assert( eof( MAIL ) );
 close MAIL;
 
@@ -621,7 +623,7 @@ close MAIL;
 
 open TEMP, ">temp.tmp";
 open MAIL, "<messages/one.msg";
-$b->echo_to_dot_( \*MAIL, \*TEMP );
+test_assert( $b->echo_to_dot_( \*MAIL, \*TEMP ) );
 test_assert( eof( MAIL ) );
 close MAIL;
 close TEMP;
@@ -638,11 +640,11 @@ test_assert( eof( TEMP ) );
 close MAIL;
 close TEMP;
 
-# to a file (no dot)
+# to a file
 
 unlink( 'temp.tmp' );
 open MAIL, "<messages/one.msg";
-$b->echo_to_dot_( \*MAIL, undef, '>temp.tmp' );
+test_assert( $b->echo_to_dot_( \*MAIL, undef, '>temp.tmp' ) );
 test_assert( eof( MAIL ) );
 close MAIL;
 
@@ -666,7 +668,7 @@ close TEMP;
 unlink( 'temp.tmp' );
 open TEMP2, ">temp2.tmp";
 open MAIL, "<messages/one.msg";
-$b->echo_to_dot_( \*MAIL, \*TEMP2, '>temp.tmp' );
+test_assert( $b->echo_to_dot_( \*MAIL, \*TEMP2, '>temp.tmp' ) );
 test_assert( eof( MAIL ) );
 close MAIL;
 close TEMP2;
@@ -689,11 +691,11 @@ close MAIL;
 close TEMP;
 close TEMP2;
 
-# to a file (no dot) with before string
+# to a file with before string
 
 unlink( 'temp.tmp' );
 open MAIL, "<messages/one.msg";
-$b->echo_to_dot_( \*MAIL, undef, '>temp.tmp', "before\n" );
+test_assert( $b->echo_to_dot_( \*MAIL, undef, '>temp.tmp', "before\n" ) );
 test_assert( eof( MAIL ) );
 close MAIL;
 
@@ -712,6 +714,116 @@ test_assert( eof( MAIL ) );
 test_assert( eof( TEMP ) );
 close MAIL;
 close TEMP;
+
+# echo_to_dot_ with no dot at the end
+
+open FILE, ">messages/one.msg";
+print FILE "From: test\@test.com\n";
+print FILE "Subject: Your attention please\n\n";
+print FILE "This is the body www.supersizewebhosting.com www.gamelink.com\n";
+close FILE;
+
+# Four possibilities for echo_to_dot_ depending on whether we give
+# it a client handle, a file handle, both or neither
+
+# neither
+
+open MAIL, "<messages/one.msg";
+test_assert( !$b->echo_to_dot_( \*MAIL ) );
+test_assert( eof( MAIL ) );
+close MAIL;
+
+# to a handle
+
+open TEMP, ">temp.tmp";
+open MAIL, "<messages/one.msg";
+test_assert( !$b->echo_to_dot_( \*MAIL, \*TEMP ) );
+test_assert( eof( MAIL ) );
+close MAIL;
+close TEMP;
+
+open TEMP, "<temp.tmp";
+open MAIL, "<messages/one.msg";
+while ( !eof( MAIL ) && !eof( TEMP ) ) {
+    my $temp = <TEMP>;
+    my $mail = <MAIL>;
+    test_assert_regexp( $temp, $mail );
+}
+test_assert( eof( MAIL ) );
+test_assert( eof( TEMP ) );
+close MAIL;
+close TEMP;
+
+# to a file
+
+unlink( 'temp.tmp' );
+open MAIL, "<messages/one.msg";
+test_assert( !$b->echo_to_dot_( \*MAIL, undef, '>temp.tmp' ) );
+test_assert( eof( MAIL ) );
+close MAIL;
+
+open TEMP, "<temp.tmp";
+open MAIL, "<messages/one.msg";
+while ( !eof( MAIL ) && !eof( TEMP ) ) {
+    my $temp = <TEMP>;
+    my $mail = <MAIL>;
+    if ( $mail =~ /^\./ ) {
+        last;
+    }
+    test_assert_regexp( $temp, $mail );
+}
+test_assert( eof( MAIL ) );
+test_assert( eof( TEMP ) );
+close MAIL;
+close TEMP;
+
+# both
+
+unlink( 'temp.tmp' );
+open TEMP2, ">temp2.tmp";
+open MAIL, "<messages/one.msg";
+test_assert( !$b->echo_to_dot_( \*MAIL, \*TEMP2, '>temp.tmp' ) );
+test_assert( eof( MAIL ) );
+close MAIL;
+close TEMP2;
+
+open TEMP, "<temp.tmp";
+open TEMP2, "<temp2.tmp";
+open MAIL, "<messages/one.msg";
+while ( !eof( MAIL ) && !eof( TEMP ) && !eof( TEMP2 ) ) {
+    my $temp = <TEMP>;
+    my $temp2 = <TEMP2>;
+    my $mail = <MAIL>;
+    test_assert_regexp( $temp2, $mail );
+    test_assert_regexp( $temp, $mail );
+}
+test_assert( eof( MAIL ) );
+test_assert( eof( TEMP ) );
+test_assert( eof( TEMP2 ) );
+close MAIL;
+close TEMP;
+close TEMP2;
+
+# to a file with before string
+
+unlink( 'temp.tmp' );
+open MAIL, "<messages/one.msg";
+test_assert( !$b->echo_to_dot_( \*MAIL, undef, '>temp.tmp', "before\n" ) );
+test_assert( eof( MAIL ) );
+close MAIL;
+
+open TEMP, "<temp.tmp";
+open MAIL, "<messages/one.msg";
+while ( !eof( MAIL ) && !eof( TEMP ) ) {
+    my $temp = <TEMP>;
+    my $mail = <MAIL>;
+    test_assert_regexp( $temp, $mail );
+}
+test_assert( eof( MAIL ) );
+test_assert( eof( TEMP ) );
+close MAIL;
+close TEMP;
+
 
 # test quarantining of a message
 

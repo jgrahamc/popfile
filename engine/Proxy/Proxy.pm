@@ -501,42 +501,6 @@ sub echo_to_dot_
 
 # ---------------------------------------------------------------------------------------------
 #
-# flush_extra_ - Read extra data from the mail server and send to client, this is to handle
-#               POP servers that just send data when they shouldn't.  I've seen one that sends
-#               debug messages!
-#
-#               Returns the extra data flushed
-#
-# $mail        The handle of the real mail server
-# $client      The mail client talking to us
-# $discard     If 1 then the extra output is discarded
-#
-# ---------------------------------------------------------------------------------------------
-sub flush_extra_
-{
-    my ( $self, $mail, $client, $discard ) = @_;
-
-    $discard = 0 if ( !defined( $discard ) );
-
-    my $selector   = new IO::Select( $mail );
-    my $buf        = '';
-    my $max_length = 8192;
-
-    my ( $ready ) = $selector->can_read(0.01);
-
-    if ( $ready == $mail ) {
-       my $n = sysread( $mail, $buf, $max_length, length $buf );
-
-        if ( $n > 0 ) {
-            $self->tee_( $client, $buf ) if ( $discard != 1 );
-        }
-    }
-
-   return $buf;
-}
-
-# ---------------------------------------------------------------------------------------------
-#
 # get_response_
 #
 # $mail     The stream (created with IO::) to send the message to (the remote mail server)

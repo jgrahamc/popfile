@@ -159,7 +159,7 @@ sub service
                         # of POST data.  Changed the end of header identification
                         # to any line that does not contain a :
 
-                        last                 if ( $line !~ /:/i );
+                        last                 if ( $line !~ /:/ );
                     }
 
                     if ( $content_length > 0 ) {

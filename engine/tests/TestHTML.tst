@@ -32,6 +32,8 @@ test_assert( `rm -rf corpus/other/CVS` == 0 );
 test_assert( `rm -rf corpus/spam/CVS` == 0 );
 test_assert( `rm -rf corpus/personal/CVS` == 0 );
 test_assert( `rm -rf messages` == 0 );
+`rm -f __db.*`; 
+unlink 'popfile.cfg';
 
 unlink( 'stopwords' );
 test_assert( `cp stopwords.base stopwords` == 0 );
@@ -227,7 +229,7 @@ my $pid = fork();
 
 if ( $pid == 0 ) {
 
-    $b->forked();
+    $b->postfork();
 
     # CHILD THAT WILL RUN THE HTML INTERFACE
 
@@ -558,11 +560,12 @@ if ( $pid == 0 ) {
     close $dwriter;
     close $ureader;
 
+    $p->stop();
+
     while ( waitpid( $pid, &WNOHANG ) != $pid ) {
     }
-}
 
-$b->stop();
-$p->stop();
+    $b->stop();
+}
 
 1;

@@ -241,7 +241,6 @@ sub open_db_env__
     return new BerkeleyDB::Env
                            -Cachesize => $self->config_( 'db_cache_size' ),
    	                   -Home      => $self->get_user_path_( $self->config_( 'corpus' ) ),
- 	                   -ErrFile   => $self->get_user_path_( "bdb_error$$" ),
                            -Verbose   => 1,
  	                   -Flags     => DB_INIT_LOG | 
    			                 DB_INIT_LOCK | DB_INIT_MPOOL | $flags;
@@ -436,6 +435,11 @@ sub set_value_
 {
     my ( $self, $bucket, $word, $value ) = @_;
 
+    if ( !defined( $value ) ) {
+        $self->log_( "set_value_ called with undefined value for word $word in bucket $bucket" );
+        return;
+    }
+
     # If there's an existing value then remove it and keep the total up to date
     # then add the new value, this is a little complicated but by keeping the
     # total in a value in the database it avoids us doing any sort of query
@@ -460,7 +464,11 @@ sub set_value_
     $self->{matrix__}{$bucket}{$word}                    = $value;
     $total                                              += $value;
     $self->{matrix__}{$bucket}{__POPFILE__TOTAL__}       = $total;
-    $self->{full_total__}                          += $value;
+    $self->{full_total__}                               += $value;
+
+    if ( !defined( $self->{matrix__}{$bucket}{$word} ) ) {
+        $self->log_( "set_value_ new word value is undefined for word $word in bucket $bucket (\$value=$value, \$total=$total, \$oldvalue=$oldvalue, full_total=$self->{full_total__})" );
+    }
 
     if ( $self->{matrix__}{$bucket}{$word} <= 0 ) {
         $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} -= 1;
@@ -600,17 +608,14 @@ sub load_word_matrix_
     # actually a bucket
 
     $self->{colors__}{unclassified} = 'black';
-    $self->{colors__}{unsure}       = 'black';
 
     # SLM for unclassified "bucket" will always match the global setting
 
     $self->{parameters__}{unclassified}{subject} = $self->global_config_('subject');
-    $self->{parameters__}{unsure}{subject}       = $self->global_config_('subject');
 
     # Quarantine for unclassified will be off:
 
     $self->{parameters__}{unclassified}{quarantine} = 0;
-    $self->{parameters__}{unsure}{quarantine}       = 0;
 
     return 1;
 }
@@ -775,13 +780,11 @@ sub load_bucket_
                     close WORDS;
                     return 0;
                 } else {
-   	            print "\nUpgrading bucket $bucket...";
-                    flush STDOUT;
+   	            $self->log_( "Upgrading bucket $bucket..." );
 
                     while ( <WORDS> ) {
 		        if ( $wc % 100 == 0 ) {
-                            print "$wc ";
-                            flush STDOUT;
+                            $self->log_( "$wc" );
 		        }
                         $wc += 1;
                         s/[\r\n]//g;
@@ -796,7 +799,7 @@ sub load_bucket_
 		    }
                 }
 
-                print "(completed ", $wc-1, " words)";
+                $self->log_( "(completed ", $wc-1, " words)" );
                 close WORDS;
             } else {
                 close WORDS;
@@ -820,13 +823,11 @@ sub load_bucket_
                     close WORDS;
                     return 0;
                 } else {
-   	            print "\nVerifying successful bucket upgrade of $bucket...";
-                    flush STDOUT;
+   	            $self->log_( "Verifying successful bucket upgrade of $bucket..." );
 
                     while ( <WORDS> ) {
 		        if ( $wc % 100 == 0 ) {
-                            print "$wc ";
-                            flush STDOUT;
+                            $self->log_( "$wc" );
 		        }
                         $wc += 1;
                         s/[\r\n]//g;
@@ -834,7 +835,7 @@ sub load_bucket_
                         if ( /^([^\s]+) (\d+)$/ ) {
   			    if ( $2 != 0 ) {
     			        if ( $self->get_base_value_( $bucket, $1 ) != $2 ) {
-                                    print "\nUpgrade error for word $1 in bucket $bucket.\nShutdown POPFile and rerun.\n";
+                                    print STDERR "\nUpgrade error for word $1 in bucket $bucket.\nShutdown POPFile and rerun.\n";
                                     $upgrade_failed = 1;
                                     last;
 			        }
@@ -850,11 +851,11 @@ sub load_bucket_
                 close WORDS;
 
                 if ( $bucket_total != $self->get_bucket_word_count( $bucket ) ) {
-                    print "\nUpgrade error bucket $bucket word count is incorrect.\nShutdown POPFile and rerun.\n";
+                    print STDERR "\nUpgrade error bucket $bucket word count is incorrect.\nShutdown POPFile and rerun.\n";
                     $upgrade_failed = 1;
 		}
                 if ( $bucket_unique != $self->get_bucket_unique_count( $bucket ) ) {
-                    print "\nUpgrade error bucket $bucket unique count is incorrect.\nShutdown POPFile and rerun.\n";
+                    print STDERR "\nUpgrade error bucket $bucket unique count is incorrect.\nShutdown POPFile and rerun.\n";
                     $upgrade_failed = 1;
 		}
 
@@ -864,7 +865,7 @@ sub load_bucket_
                     return 0;
 		}
 
-                print "(successfully verified ", $wc-1, " words)";
+                $self->log_( "(successfully verified ", $wc-1, " words)" );
             } else {
                 close WORDS;
                 return 0;
@@ -1146,7 +1147,7 @@ sub classify
                     $self->{scores__} .= "<select name=\"text$i\" id=\"\">\n";
 
                     foreach my $magnet ( @{$qm{$type}} ) {
-                        $self->{scores__} .= "<option>$magnet</option>\n";
+                        $self->{scores__} .= "<option value=\"$magnet\">$magnet</option>\n";
                     }
                     $self->{scores__} .= "</select>\n";
                     $self->{scores__} .= "</td><td>";
@@ -1556,6 +1557,7 @@ sub classify_and_modify
                     # Strip out the X-Text-Classification header that is in an incoming message
 
                     next if ( $line =~ /^X-Text-Classification:/i );
+                    next if ( $line =~ /^X-POPFile-Link:/i );
 
                     # Store any lines that appear as though they may be non-header content
                     # Lines that are headers begin with whitespace or Alphanumerics and "-"
@@ -1623,7 +1625,7 @@ sub classify_and_modify
     my $modification = $self->config_( 'subject_mod_left' ) . $classification . $self->config_( 'subject_mod_right' );
 
     # Add the Subject line modification or the original line back again
-    if ( ( $classification ne 'unclassified' ) && ( $classification ne 'unsure' ) ) {
+    if ( $classification ne 'unclassified' ) {
         if ( $self->global_config_( 'subject' ) ) {
             # Don't add the classification unless it is not present
             if ( !( $msg_subject =~ /\Q$modification\E/ ) &&                        # PROFILE BLOCK START
@@ -1661,7 +1663,7 @@ sub classify_and_modify
         # If the bucket is quarantined then we'll treat it specially by changing the message header to contain
         # information from POPFile and wrapping the original message in a MIME encoding
 
-        if ( ( $classification ne 'unclassified' ) && ( $classification ne 'unsure' ) ) {
+        if ( $classification ne 'unclassified' ) {
             if ( $self->{parameters__}{$classification}{quarantine} == 1 ) {
                 print $client "From: " . $self->{parser__}->get_header( 'from' ) . "$crlf";
                 print $client "To: " . $self->{parser__}->get_header( 'to' ) . "$crlf";
@@ -1701,21 +1703,29 @@ sub classify_and_modify
 
     my $before_dot = '';
 
-    if ( ( $classification ne 'unclassified' ) && ( $classification ne 'unsure' ) ) {
+    if ( $classification ne 'unclassified' ) {
         if ( ( $self->{parameters__}{$classification}{quarantine} == 1 ) && $echo ) {
             $before_dot = "$crlf--$nopath_temp_file--$crlf";
         }
     }
 
-    if ( !$got_full_body ) {
-        $self->echo_to_dot_( $mail, $echo?$client:undef, $nosave?undef:'>>' . $temp_file, $before_dot );
+    my $need_dot = 0;
+
+    if ( $got_full_body ) {
+        $need_dot = 1;
     } else {
-        print $client $before_dot if ( $before_dot ne '' );
+        $need_dot = !$self->echo_to_dot_( $mail, $echo?$client:undef, $nosave?undef:'>>' . $temp_file, $before_dot );
     }
 
-    if ( $echo && $got_full_body ) {
-        print $client "$crlf.$crlf";
+    if ( $need_dot ) {
+        print $client $before_dot if ( $before_dot ne '' );
+        print $client ".$crlf"    if ( $echo );
     }
+
+    # In some cases it's possible (and totally illegal to get a . in the middle of the message,
+    # to cope with the we call flush_extra_ here to remove an extra stuff the POP3 server is sending
+    
+    $self->flush_extra_( $mail, $client );
 
     if ( !$nosave ) {
         $self->history_write_class($class_file, undef, $classification, undef, ($self->{magnet_used__}?$self->{magnet_detail__}:undef));
@@ -2206,10 +2216,14 @@ sub remove_message_from_bucket
 #
 # NOTE Also echoes the line with . to $client but not to $file
 #
+# Returns 1 if there was a . or 0 if reached EOF before we hit the .
+#
 # ---------------------------------------------------------------------------------------------
 sub echo_to_dot_
 {
     my ( $self, $mail, $client, $file, $before ) = @_;
+ 
+    my $hit_dot = 0;
 
     my $isopen = open FILE, "$file" if ( defined( $file ) );
 
@@ -2224,6 +2238,8 @@ sub echo_to_dot_
         # not mistake a line beginning with . as the end of the block
 
         if ( $line =~ /^\.(\r\n|\r|\n)$/ ) {
+            $hit_dot = 1;
+
             if ( defined( $before ) && ( $before ne '' ) ) {
                 print $client $before if ( defined( $client ) );
                 print FILE    $before if ( defined( $isopen ) );
@@ -2243,6 +2259,8 @@ sub echo_to_dot_
     }
 
     close FILE if ( $isopen );
+
+    return $hit_dot;
 }
 
 # ---------------------------------------------------------------------------------------------

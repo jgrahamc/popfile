@@ -24,6 +24,8 @@
 
 package POPFile::Module;
 
+use IO::Select;
+
 # ---------------------------------------------------------------------------------------------
 #
 # This module implements the base class for all POPFile Loadable Modules and
@@ -515,13 +517,55 @@ sub slurp_
     }
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# done_slurp_
+#
+# Call this when have finished calling slurp_ on a handle and need to clean up temporary
+# buffer space used by slurp_
+#
+# ---------------------------------------------------------------------------------------------
+
 sub done_slurp_
 {
     my ( $self, $handle ) = @_;
 
-    $self->log_( "Done slurping from $handle" );
-
     undef $self->{slurp_buffer__}{"$handle"};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# flush_extra_ - Read extra data from the mail server and send to client, this is to handle
+#               POP servers that just send data when they shouldn't.  I've seen one that sends
+#               debug messages!
+#
+#               Returns the extra data flushed
+#
+# $mail        The handle of the real mail server
+# $client      The mail client talking to us
+# $discard     If 1 then the extra output is discarded
+#
+# ---------------------------------------------------------------------------------------------
+sub flush_extra_
+{
+    my ( $self, $mail, $client, $discard ) = @_;
+
+    $discard = 0 if ( !defined( $discard ) );
+
+    my $selector   = new IO::Select( $mail );
+    my $buf        = '';
+    my $max_length = 8192;
+
+    my ( $ready ) = $selector->can_read(0.01);
+    if ( $ready == $mail ) {
+        my $n = sysread( $mail, $buf, $max_length, length $buf );
+
+        if ( $n > 0 ) {
+            print $client $buf if ( $discard != 1 );
+        }
+    }
+
+   return $buf;
 }
 
 # GETTER/SETTER methods.  Note that I do not expect documentation of these unless they

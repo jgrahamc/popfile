@@ -148,13 +148,18 @@ $line = <FILE>;
 close FILE;
 
 # Now add a parameter and reload the configuration
+# testparam2 gets defined so is kept, testparam3
+# is not defined and is discarded on load
 
 open FILE, ">>popfile.cfg";
 print FILE "testparam2 testvalue2\n";
+print FILE "testparam3 testvalue3\n";
 close FILE;
 
+$c->parameter( 'testparam2', 'wrong' );
 $c->load_configuration();
 test_assert_equal( $c->parameter( 'testparam2' ), 'testvalue2' );
+test_assert_equal( $c->parameter( 'testparam3' ), '' );
 
 # Check that parameter upgrading works
 

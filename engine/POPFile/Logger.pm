@@ -143,7 +143,7 @@ sub calculate_today__
 
     # Create the name of the debug file for the debug() function
     $self->{today__} = int( time / $seconds_per_day ) * $seconds_per_day;
-    $self->{debug_filename__} = $self->config_( 'logdir' ) . "popfile$self->{today__}.log";
+    $self->{debug_filename__} = $self->get_user_path_( $self->config_( 'logdir' ) . "popfile$self->{today__}.log" );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -157,7 +157,7 @@ sub remove_debug_files
 {
     my ( $self ) = @_;
 
-    my @debug_files = glob( $self->config_( 'logdir' ) . 'popfile*.log' );
+    my @debug_files = glob( $self->get_user_path_( $self->config_( 'logdir' ) . 'popfile*.log' ) );
 
     foreach my $debug_file (@debug_files) {
         # Extract the epoch information from the popfile log file name

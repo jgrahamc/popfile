@@ -14,6 +14,7 @@ error:
 	@echo 
 	@echo "coverage - Run POPFile test suite with coverage information"
 	@echo "test     - Run POPFile test suite"
+	@echo "eachtest - Run POPFile tests one by one"
 	@echo "           (test and coverage pass the TESTARGS variable to the test suite)"
 	@echo
 	@echo "windows  - Build Windows executables and installer" 
@@ -41,6 +42,10 @@ ifdef TESTARGS
 	@echo with arguments '$(TESTARGS)'
 endif
 	@$(MAKE) --no-print-directory -C tests runtest TESTARGS=$(TESTARGS) DEBUGARGS=
+
+eachtest:     
+	@echo Running test suite
+	@$(MAKE) --no-print-directory -C tests eachtest DEBUGARGS=
 
 # Mac OS X is built in the Mac OS X directory
 
@@ -110,3 +115,6 @@ $(POPFILE_VERSION_FILE): vars.mak
 	@echo $(POPFILE_MAJOR_VERSION) > $@
 	@echo $(POPFILE_MINOR_VERSION) >> $@
 	@echo $(POPFILE_REVISION) >> $@
+
+killperls:
+	@kill `ps -C perl -o pid=`

@@ -512,7 +512,7 @@ sub url_handler__
     }
 
     if ( $url =~ /(popfile.*\.log)/ ) {
-        $self->http_file_( $client, $1, 'text/plain' );
+        $self->http_file_( $client, $self->get_user_path_( $self->module_config_( 'logger', 'logdir' ) . $1 ), 'text/plain' );
         return 1;
     }
 
@@ -600,7 +600,7 @@ sub http_ok
         . html_common_bottom($self);                                                                    # PROFILE BLOCK STOP
 
     # Build an HTTP header for standard HTML
-    my $http_header = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nContent-Length: ";
+    my $http_header = "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: text/html\r\nContent-Length: ";
     $http_header .= length($text);
     $http_header .= "$eol$eol";
 
