@@ -295,7 +295,7 @@ sub deliver
     my ( $self, $type, $message, $parameter ) = @_;
 
     if ( $type eq 'CLASS' ) {
-        $self->set_bucket_parameter( $message, 'count', 
+        $self->set_bucket_parameter( $message, 'count',
             $self->get_bucket_parameter( $message, 'count' ) + 1 );
     }
 }
@@ -570,7 +570,7 @@ sub db_connect__
                   where words.word = ? limit 1;' );
 
     $self->{db_get_userid__} = $self->{db__}->prepare(
-             'select id from users where name = ? 
+             'select id from users where name = ?
                                      and password = ? limit 1;' );
 
     $self->{db_get_word_count__} = $self->{db__}->prepare(
@@ -1269,7 +1269,7 @@ sub generate_unique_session_key__
             if ( rand(1) < rand(1) ) {
                 $random = lc($random);
             }
-  
+
             $session .= $random;
         }
     } while ( defined( $self->{api_sessions__}{$session} ) );
@@ -1314,12 +1314,12 @@ sub valid_session_key__
 # ---------------------------------------------------------------------------------------------
 # ---------------------------------------------------------------------------------------------
 #       _____   _____   _____  _______ _____        _______     _______  _____  _____
-#      |_____] |     | |_____] |______   |   |      |______     |_____| |_____]   |  
+#      |_____] |     | |_____] |______   |   |      |______     |_____| |_____]   |
 #      |       |_____| |       |       __|__ |_____ |______     |     | |       __|__
-#                                                     
+#
 # The method below are public and may be accessed by other modules.  All of them may be
 # accessed remotely through the XMLRPC.pm module using the XML-RPC protocol
-# 
+#
 # Note that every API function expects to be passed a $session which is obtained by first
 # calling get_session_key with a valid username and password.   Once done call the method
 # release_session_key.
@@ -1379,7 +1379,7 @@ sub get_session_key
 sub release_session_key
 {
     my ( $self, $session ) = @_;
-   
+
     if ( defined( $self->{api_sessions__}{$session} ) ) {
         delete $self->{api_sessions__}{$session};
     }
@@ -2094,10 +2094,52 @@ sub classify_and_modify
         print $client ".$crlf"    if ( $echo );
     }
 
-    # In some cases it's possible (and totally illegal to get a . in the middle of the message,
+    # In some cases it's possible (and totally illegal) to get a . in the middle of the message,
     # to cope with the we call flush_extra_ here to remove an extra stuff the POP3 server is sending
+    # Make sure to supress output if we are not echoing, and to save to file if not echoing and saving
 
-    $self->flush_extra_( $mail, $client );
+    if ( !($nosave || $echo) ) {
+
+        # if we're saving (not nosave) and not echoing, we can safely unload this into the temp file
+
+        if (open FLUSH, ">>$temp_file.flush") {
+            binmode FLUSH;
+
+            #TODO: Do this in a faster way (without flushing to one file then copying to another)
+            # (perhaps a select on $mail to predict if there is flushable data)
+
+            $self->flush_extra_( $mail, \*FLUSH, 0);
+            close FLUSH;
+
+            # append any data we got to the actual temp file
+
+            if ((-s "$temp_file.flush" > 0) && open FLUSH, "<$temp_file.flush") {
+                binmode FLUSH;
+                if (open TEMP, ">>$temp_file") {
+                    binmode TEMP;
+
+                    # The only time we get data here is if it is after a CRLF.CRLF
+                    # We have to re-create it to avoid data-loss
+
+                    print TEMP ".$crlf";
+
+                    print TEMP $_ while (<FLUSH>);
+
+                    #NOTE: The last line flushed MAY be a CRLF.CRLF, which isn't actually part of the message body
+
+                    close TEMP;
+                }
+                close FLUSH;
+            }
+            unlink("$temp_file.flush");
+        }
+    } else {
+
+        # if we are echoing, the client can make sure we have no data loss
+        # otherwise, the data can be discarded (not saved and not echoed)
+
+        $self->flush_extra_( $mail, $client, $echo?0:1);
+    }
 
     if ( !$nosave ) {
         $self->history_write_class($class_file, undef, $classification, undef, ($self->{magnet_used__}?$self->{magnet_detail__}:undef));
