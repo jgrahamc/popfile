@@ -41,8 +41,9 @@
   VIAddVersionKey "FileDescription" "POPFile Automatic email classification"
   VIAddVersionKey "FileVersion" "${MUI_VERSION}"
   
-  VIAddVersionKey "Build Type" "CVS Build (Experimental)"
-  VIAddVersionKey "Build Date" "${__DATE__} @ ${__TIME__}"
+  VIAddVersionKey "Build" "CVS Build (Experimental)"
+  VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
+  VIAddVersionKey "Build Script" "${__FILE__} (${__TIMESTAMP__})"
 
 #----------------------------------------------------------------------------------------
 # CBP Configuration Data (to override defaults, un-comment the lines below and modify them)
@@ -117,7 +118,7 @@
   !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
   !define MUI_FINISHPAGE_SHOWREADME_FUNCTION "ShowReadMe"
 
-  ; Allow user to check the log file (by clicking "Show Details" button on the "Install" page)
+  ; Debug aid: Allow log file checking (by clicking "Show Details" button on the "Install" page)
 
 #  !define MUI_FINISHPAGE_NOAUTOCLOSE
 
@@ -279,6 +280,10 @@ Section "POPFile" SecPOPFile
   ; Make this section mandatory (i.e. it is always installed)
 
   SectionIn RO
+  
+  SetDetailsPrint textonly
+  DetailPrint "Checking for existing version of POPFile..."
+  SetDetailsPrint listonly
 
   ; If we are installing over a previous version, (try to) ensure that version is not running
 
@@ -294,6 +299,10 @@ Section "POPFile" SecPOPFile
   WriteRegStr HKLM SOFTWARE\POPFile InstallLocation $INSTDIR
 
   ; Install the POPFile Core files
+  
+  SetDetailsPrint textonly
+  DetailPrint "Installing POPFile core files..."
+  SetDetailsPrint listonly
 
   SetOutPath $INSTDIR
 
@@ -371,6 +380,10 @@ update_config:
   File "..\engine\languages\English.msg"
 
   ; Install the Minimal Perl files
+  
+  SetDetailsPrint textonly
+  DetailPrint "Installing minimal Perl files..."
+  SetDetailsPrint listonly
 
   SetOutPath $INSTDIR
   File "C:\Perl\bin\perl.exe"
@@ -461,6 +474,10 @@ update_config:
   WriteUninstaller $INSTDIR\uninstall.exe
 
   ; Create the START MENU entries
+  
+  SetDetailsPrint textonly
+  DetailPrint "Creating POPFile shortcuts..."
+  SetDetailsPrint listonly
 
   SetOutPath $SMPROGRAMS\POPFile
   SetOutPath $INSTDIR
@@ -504,6 +521,10 @@ skip_autostart_set:
               "NoModify" "1"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" \
               "NoRepair" "1"
+  
+  SetDetailsPrint textonly
+  DetailPrint ""
+  SetDetailsPrint listonly
 
 SectionEnd
 
@@ -512,6 +533,10 @@ SectionEnd
 #--------------------------------------------------------------------------
 
 Section "Skins" SecSkins
+  
+  SetDetailsPrint textonly
+  DetailPrint "Installing POPFile skin files..."
+  SetDetailsPrint listonly
 
   SetOutPath $INSTDIR\skins
   File "..\engine\skins\*.css"
@@ -520,6 +545,10 @@ Section "Skins" SecSkins
   File "..\engine\skins\lavishImages\*.gif"
   SetOutPath $INSTDIR\skins\sleetImages
   File "..\engine\skins\sleetImages\*.gif"
+  
+  SetDetailsPrint textonly
+  DetailPrint ""
+  SetDetailsPrint listonly
 
 SectionEnd
 
@@ -528,9 +557,17 @@ SectionEnd
 #--------------------------------------------------------------------------
 
 Section "Languages" SecLangs
+  
+  SetDetailsPrint textonly
+  DetailPrint "Installing POPFile UI language files..."
+  SetDetailsPrint listonly
 
   SetOutPath $INSTDIR\languages
   File "..\engine\languages\*.msg"
+  
+  SetDetailsPrint textonly
+  DetailPrint ""
+  SetDetailsPrint listonly
 
 SectionEnd
 
@@ -1609,6 +1646,10 @@ skip_confirmation:
 
   ; If the POPFile we are about to uninstall is still running,
   ; then one of the EXE files will be 'locked'
+  
+  SetDetailsPrint textonly
+  DetailPrint "Shutting down POPFile..."
+  SetDetailsPrint listonly
 
   IfFileExists "$INSTDIR\wperl.exe" 0 other_perl
   SetFileAttributes "$INSTDIR\wperl.exe" NORMAL
@@ -1654,6 +1695,11 @@ done:
   Pop ${L_TEMP}
 
 skip_shutdown:
+  
+  SetDetailsPrint textonly
+  DetailPrint "Deleting 'Start Menu' entries for POPFile..."
+  SetDetailsPrint listonly
+
   Delete $SMPROGRAMS\POPFile\Support\*.url
   RMDir $SMPROGRAMS\POPFile\Support
 
@@ -1661,6 +1707,10 @@ skip_shutdown:
   Delete $SMPROGRAMS\POPFile\*.url
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
   RMDir $SMPROGRAMS\POPFile
+  
+  SetDetailsPrint textonly
+  DetailPrint "Deleting POPFile core files..."
+  SetDetailsPrint listonly
 
   Delete $INSTDIR\*.log
   Delete $INSTDIR\*.pl
@@ -1674,6 +1724,10 @@ skip_shutdown:
   Delete $INSTDIR\popfile.cfg
 
   IfFileExists "$INSTDIR\popfile.reg" 0 no_reg_file
+  
+  SetDetailsPrint textonly
+  DetailPrint "Restoring Outlook Express settings..."
+  SetDetailsPrint listonly
   
   ; Read the registry settings found in popfile.reg and restore them
   ; it there are any.   All are assumed to be in HKCU
@@ -1722,6 +1776,11 @@ no_reg_file:
   RMDir $INSTDIR\Classifier
   Delete $INSTDIR\Exporter\*.*
   RMDir $INSTDIR\Exporter
+  
+  SetDetailsPrint textonly
+  DetailPrint "Deleting POPFile skins files..."
+  SetDetailsPrint listonly
+
   Delete $INSTDIR\skins\*.css
   Delete $INSTDIR\skins\*.gif
   Delete $INSTDIR\skins\lavishImages\*.gif
@@ -1738,6 +1797,10 @@ no_reg_file:
   RMDir /r $INSTDIR\corpus
   Delete $INSTDIR\stopwords
   RMDir /r $INSTDIR\messages
+  
+  SetDetailsPrint textonly
+  DetailPrint "Deleting minimal Perl files..."
+  SetDetailsPrint listonly
 
   Delete $INSTDIR\Win32\API\*
   RmDir /r $INSTDIR\Win32\API
@@ -1791,6 +1854,8 @@ no_reg_file:
       MessageBox MB_OK|MB_ICONEXCLAMATION \
                  "Note: $INSTDIR could not be removed."
 Removed:
+  
+  SetDetailsPrint both
 
   !undef L_LNE
   !undef L_REG_KEY
