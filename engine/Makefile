@@ -84,6 +84,7 @@ popfilef.exe: popfile.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
 popfileb.exe: popfile.pl POPFile/Loader.pm $(POPFILE_VERSION_FILE)
 	perlapp --gui $(TRAY_OPTIONS)
 
+
 # Builds a Windows service version of POPFile using PerlSvc
 
 SVC_OPTIONS = $(COMMON_EXE_OPTIONS) --lib c:/cygwin/home/Administrator/engine
@@ -96,6 +97,8 @@ popfile-service.exe: popfile-service.pl
 windows: winexe; @$(MAKE) -C ../windows
 
 # build a ZIPped up package of POPFile
+
+LANGUAGES := $(wildcard languages/*.msg)
 
 BUILD_ZIP=wzzip -P $(POPFILE_ZIP) -a $^
 xplat: $(POPFILE_ZIP)
@@ -134,3 +137,6 @@ $(POPFILE_VERSION_FILE): vars.mak
 
 killperls:
 	@kill `ps -C perl -o pid=`
+
+print-%:
+	@echo $*=$($*)
