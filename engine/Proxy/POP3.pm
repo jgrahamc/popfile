@@ -152,7 +152,11 @@ sub child__
                     # and send the reply straight to the client
                     $self->echo_response_($mail, $client, 'USER ' . $4 );
                 } else {
-                    last;
+
+                    # If the login fails then we want to continue in the unlogged in state
+                    # so that clients can send us the QUIT command
+
+                    next;
                 }
             } else {
                 $self->tee_(  $client, "-ERR server name not specified in USER command$eol" );
