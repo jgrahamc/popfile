@@ -894,9 +894,9 @@ sub classify_and_modify
     if ( !$nosave ) {
         open CLASS, ">$class_file";
         if ( $self->{magnet_used} == 0 )  {
-            print CLASS "$classification$eol";
+            print CLASS "$classification\n";
         } else {
-            print CLASS "$classification MAGNET $self->{magnet_detail}$eol";
+            print CLASS "$classification MAGNET $self->{magnet_detail}\n";
         }
         close CLASS;
     }

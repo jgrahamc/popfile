@@ -122,9 +122,11 @@ sub start
     my ( $self ) = @_;
     
     # Ensure that the messages subdirectory exists
+    
     mkdir( 'messages' );
 
     # Open the socket used to receive request for POP3 service
+    
     $self->{server} = IO::Socket::INET->new( Proto     => 'tcp',
                                     $self->{configuration}->{configuration}{localpop} == 1 ? (LocalAddr => 'localhost') : (), 
                                     LocalPort => $self->{configuration}->{configuration}{port},
@@ -133,6 +135,7 @@ sub start
 
     # This is used to perform select calls on the $server socket so that we can decide when there is 
     # a call waiting an accept it without having to block
+    
     $self->{selector} = new IO::Select( $self->{server} );
     
     return 1;
@@ -151,6 +154,7 @@ sub stop
 
     # Need to close all the duplicated file handles, this include the POP3 listener
     # and all the reading ends of pipes to active children
+    
     close $self->{server} if ( defined( $self->{server} ) );
     
     for my $kid (keys %{$self->{children}}) {
@@ -181,43 +185,43 @@ sub name
 # then causes the child not to be terminated even though we are done.  Also this is nice
 # because we deal with the statistics as we go
 #
-# $kid		PID of a child of POP3.pm
+# $kid      PID of a child of POP3.pm
 #
 # ---------------------------------------------------------------------------------------------
 sub flush_child_data
 {
-	my ( $self, $kid ) = @_;
-	
-	my $stats_changed = 0;
-	my $handle        = $self->{children}{$kid};
+    my ( $self, $kid ) = @_;
+    
+    my $stats_changed = 0;
+    my $handle        = $self->{children}{$kid};
 
-	while ( &{$self->{pipeready}}($handle) )
-	{
-		my $class = <$handle>;
-		
-		if ( defined( $class ) ) {
-			$class =~ s/[\r\n]//g;
+    while ( &{$self->{pipeready}}($handle) )
+    {
+        my $class = <$handle>;
+        
+        if ( defined( $class ) ) {
+            $class =~ s/[\r\n]//g;
 
-			$self->{classifier}->{parameters}{$class}{count} += 1;
-			$self->{configuration}->{configuration}{mcount}  += 1;
-			$stats_changed                                    = 1;
+            $self->{classifier}->{parameters}{$class}{count} += 1;
+            $self->{configuration}->{configuration}{mcount}  += 1;
+            $stats_changed                                    = 1;
 
-			debug( $self, "Incrementing $class for $kid" );
-		} else {
-		
-			# This is here so that we get in errorneous position where the pipready
-			# function is returning that there's data, but there is none, in fact the
-			# pipe is dead then we break the cycle here.  This was happening to me when
-			# I tested POPFile running under cygwin.
-			
-			last;
-		}
-	}
-	
-	if ( $stats_changed ) {
-		$self->{configuration}->save_configuration();
-		$self->{classifier}->write_parameters();
-	}
+            debug( $self, "Incrementing $class for $kid" );
+        } else {
+        
+            # This is here so that we get in errorneous position where the pipready
+            # function is returning that there's data, but there is none, in fact the
+            # pipe is dead then we break the cycle here.  This was happening to me when
+            # I tested POPFile running under cygwin.
+            
+            last;
+        }
+    }
+    
+    if ( $stats_changed ) {
+        $self->{configuration}->save_configuration();
+        $self->{classifier}->write_parameters();
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -241,10 +245,10 @@ sub reaper
     if ( $#kids >= 0 ) {
         for my $kid (@kids) {
             if ( waitpid( $kid, &WNOHANG ) == $kid ) {
-				$self->flush_child_data( $kid );
+                $self->flush_child_data( $kid );
                 close $self->{children}{$kid};
                 delete $self->{children}{$kid};
-				
+                
                 debug( $self, "Done with $kid" ); 
             }
         }
@@ -262,12 +266,12 @@ sub service
 {
     my ( $self ) = @_;
 
-	# See if any of the children have passed up statistics data through their
-	# pipes and deal with it now
-	
-	for my $kid (keys %{$self->{children}}) {
-		$self->flush_child_data( $kid );
-	}
+    # See if any of the children have passed up statistics data through their
+    # pipes and deal with it now
+    
+    for my $kid (keys %{$self->{children}}) {
+        $self->flush_child_data( $kid );
+    }
 
     # Accept a connection from a client trying to use us as the mail server.  We service one client at a time
     # and all others get queued up to be dealt with later.  We check the alive boolean here to make sure we
@@ -276,21 +280,29 @@ sub service
     
     if ( ( defined( $self->{selector}->can_read(0) ) ) && ( $self->{alive} ) ) {        
         if ( my $client = $self->{server}->accept() ) {
+        
             # Check that this is a connection from the local machine, if it's not then we drop it immediately
             # without any further processing.  We don't want to act as a proxy for just anyone's email
+            
             my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
 
             if  ( ( $self->{configuration}->{configuration}{localpop} == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
+            
                 # Now that we have a good connection to the client fork a subprocess to handle the communication
+                # and set the socket to binmode so that no CRLF translation goes on
+                
                 $self->{configuration}->{configuration}{download_count} += 1;
                 my ($pid,$pipe) = &{$self->{forker}};
+                binmode( $client );
 
                 # If we are in the parent process then push the pipe handle onto the children list
+                
                 if ( ( defined( $pid ) ) && ( $pid != 0 ) ) {
                     $self->{children}{$pid} = $pipe;
                 }
 
                 # If we fail to fork, or are in the child process then process this request
+                
                 if ( !defined( $pid ) || ( $pid == 0 ) ) {
                     child( $self, $client, $self->{configuration}->{configuration}{download_count}, $pipe );
                     exit(0) if ( defined( $pid ) );
@@ -490,14 +502,14 @@ sub child
         # The CAPA command
         if ( $command =~ /CAPA/i ) {
             if ( $self->{configuration}->{configuration}{server} ne '' )  {
-				if ( $mail = verify_connected( $self, $mail, $client, $self->{configuration}->{configuration}{server}, $self->{configuration}->{configuration}{sport} ) )  {
-					echo_to_dot( $self, $mail, $client ) if ( echo_response( $self, $mail, $client, "CAPA" ) );
-				} else {
-					last;
-				}
-			} else {
+                if ( $mail = verify_connected( $self, $mail, $client, $self->{configuration}->{configuration}{server}, $self->{configuration}->{configuration}{sport} ) )  {
+                    echo_to_dot( $self, $mail, $client ) if ( echo_response( $self, $mail, $client, "CAPA" ) );
+                } else {
+                    last;
+                }
+            } else {
                 tee( $self,  $client, "-ERR No secure server specified$eol" );
-			}
+            }
 
             flush_extra( $self, $mail, $client, 0 );
             next;
@@ -734,12 +746,20 @@ sub verify_connected
     # Check that the connect succeeded for the remote server
     if ( $mail ) {                 
         if ( $mail->connected )  {
+        
+            # Set binmode on the socket so that no translation of CRLF 
+            # occurs
+            
+            binmode( $mail );
+        
             # Wait 10 seconds for a response from the remote server and if 
             # there isn't one then give up trying to connect
+            
             my $selector = new IO::Select( $mail );
             return undef unless () = $selector->can_read($self->{configuration}->{configuration}{timeout});
             
             # Read the response from the real server and say OK
+            
             my $buf        = '';
             my $max_length = 8192;
             my $n          = sysread( $mail, $buf, $max_length, length $buf );           

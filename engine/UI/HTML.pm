@@ -2042,15 +2042,15 @@ sub history_write_class {
     open CLASS, ">$self->{configuration}->{configuration}{msgdir}$filename";
 
     if ( defined $magnet && $magnet ne '' ) {
-        print CLASS "$bucket MAGNET $magnet$eol";
+        print CLASS "$bucket MAGNET $magnet\n";
     } elsif (defined $reclassified && $reclassified == 1) {
-        print CLASS "RECLASSIFIED$eol";
-        print CLASS "$bucket$eol";
+        print CLASS "RECLASSIFIED\n";
+        print CLASS "$bucket\n";
         if (defined $usedtobe && $usedtobe ne '') {
-            print CLASS "$usedtobe$eol";
+            print CLASS "$usedtobe\n";
         }
     } else {
-        print CLASS "$bucket$eol";
+        print CLASS "$bucket\n";
     }
 }
 
