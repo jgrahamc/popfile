@@ -20,7 +20,7 @@ if ( $#ARGV == 0 )
         die "Failed to start while initializing the classifier module";
     }
     
-    $b->{debug} = 0; 
+    $b->{debug} = 1; 
     $b->{parser}->{debug} = 0;
     $b->load_word_matrix();
 
