@@ -107,6 +107,8 @@ sub write_parameters
 #
 # Retrieves the color for a specific word, color is the most likely bucket
 #
+# $word     Word to get the color of
+#
 # ---------------------------------------------------------------------------------------------
 
 sub get_color
@@ -140,6 +142,9 @@ sub get_color
 #
 # The word paradise in the bucket spam will be found in the array element
 #   matrix{spam}[p] with an entry of the form "|paradise 1234|".
+#
+# TODO: replace the word matrix hash with Berkeley DB tie
+#
 # ---------------------------------------------------------------------------------------------
 
 sub get_value
@@ -320,7 +325,7 @@ sub load_bucket
         while ( <MAGNETS> ) 
         {
             s/[\r\n]//g;
-            if ( /^(.+) (.+)$/ ) 
+            if ( /^([^ ]+) (.+)$/ ) 
             {
                 $self->{magnets}{$bucket}{$1}{$2} = 1;
             } 
@@ -389,9 +394,12 @@ sub save_magnets
     {
         open MAGNET, ">$self->{corpus}/$bucket/magnets";
         
-        for my $from (keys %{$self->{magnets}{$bucket}{from}}) 
-        {
-            print MAGNET "from $from\n";
+        for my $type (keys %{$self->{magnets}{$bucket}}) 
+        {        
+            for my $from (keys %{$self->{magnets}{$bucket}{$type}}) 
+            {
+                print MAGNET "$type $from\n";
+            }
         }
         
         close MAGNET;
@@ -427,12 +435,15 @@ sub classify_file
 
     for my $bucket (keys %{$self->{magnets}}) 
     {
-        for my $from (keys %{$self->{magnets}{$bucket}{from}})
+        for my $type (keys %{$self->{magnets}{$bucket}})
         {
-            if ( $self->{parser}->{from} =~ /\Q$from\E/ )
+            for my $magnet (keys %{$self->{magnets}{$bucket}{$type}})
             {
-                $self->{scores} = "<b>Magnet Used</b><p>Classified to <font color=$self->{colors}{$bucket}>$bucket</font> because of magnet $from";
-                return $bucket;
+                if ( $self->{parser}->{$type} =~ /\Q$magnet\E/i )
+                {
+                    $self->{scores} = "<b>Magnet Used</b><p>Classified to <font color=$self->{colors}{$bucket}>$bucket</font> because of magnet $type: $magnet";
+                    return $bucket;
+                }
             }
         }
     }
