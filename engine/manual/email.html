@@ -39,7 +39,7 @@
 
 <p>Once it's decided - which takes only a fraction of a second - POPFile does one of two things: it can add a tag like [this] to the start of the subject line; which means that simple filtering programs like Microsoft Outlook Express can deliver your mail where it's supposed to - or, for more advanced email programs like Eudora, it can add a new email header like this:</p>
 
-<p><code>X-Text-Classification: personal</code></p>
+<p><b>X-Text-Classification: personal</b></p>
 
 <p>- which your email program can use as a filter.</p>
 
@@ -66,63 +66,80 @@ Just choose your email program and follow the column down. While these instructi
 
 </td></tr><tr>
 
-<td width=33% bgcolor="#FFCCCC" valign="top">
+<td width=25% bgcolor="#FFCCCC" valign="top">
 
 <h3 align=center>Outlook</h3>
 
 <ul>
-<li>In Outlook select the Tools->Email Accounts... menu option.  The E-mail Accounts dialog will appear.
+<li>In Outlook select the Tools->Email Accounts... menu option.  The E-mail Accounts dialog will appear. <a href=o_popfile1.gif>[screenshot]</a>
 <li>Click View or change existing e-mail accounts and click Next.  Choose the account you want to use POPFile with and click Change...
-Make a note of the Incoming mail server (POP3) server name and the User Name.
+Make a note of the Incoming mail server (POP3) server name and the User Name. <a href=o_popfile2.gif>[screenshot]</a>
 <li>Change the Incoming mail server (POP3) server name to <b>127.0.0.1</b> and change the User Name to the combination of the original
-Incoming mail server (POP3) server name and the original User Name separated by a colon.
+Incoming mail server (POP3) server name and the original User Name separated by a colon. <a href=o_popfile3.gif>[screenshot]</a>
 <li>So, if the original Incoming mail server (POP3) name was <b>my.mail.com</b> and your username was <b>jdoe</b>, your new username would be <b>my.mail.com:jdoe</b>
 <li>You don't need to change the password.
 <li>Hit Next and then Finish.
 <li>Ensure that POPFile is running and all mail will be delivered through POPFile!
-<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <code>Startup</code> group. Now, Windows will load POPFile each time.
+<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <b>Startup</b> group. Now, Windows will load POPFile each time.
 <li>Important! If POPFile isn't loaded, the mail will not get through - and your email program won't connect!
 </ul>
 
-</td><td width=34% bgcolor="#CCFFCC" valign="top">
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
 
 <h3 align=center>Outlook Express</h3>
 
 <ul>
-<li>In Outlook Express select the Tools->Accounts... menu option.  The Internet Accounts dialog will appear.
-<li>Select the account you wish to modify to use POPFile and click on Properties.
-<li>Choose the Servers tab.  Make a note of the Incoming Mail (POP3) server name and the Incoming Mail Server Account Name.
-<li>Change the Incoming Mail (POP3) server name to <b>127.0.0.1</b> and change the Incoming Mail Server Account Name to the combination of the original Incoming Mail (POP3) server name and the original Incoming Mail Server Account Name separated by a colon.
+<li>In Outlook Express select the Tools->Accounts... menu option.  The Internet Accounts dialog will appear. <a href=oe_popfile1.gif>[screenshot]</a>
+<li>Select the account you wish to modify to use POPFile and click on Properties. <a href=oe_popfile2.gif>[screenshot]</a>
+<li>Choose the Servers tab.  Make a note of the Incoming Mail (POP3) server name and the Incoming Mail Server Account Name. <a href=oe_popfile3.gif>[screenshot]</a>
+<li>Change the Incoming Mail (POP3) server name to <b>127.0.0.1</b> and change the Incoming Mail Server Account Name to the combination of the original Incoming Mail (POP3) server name and the original Incoming Mail Server Account Name separated by a colon. <a href=oe_popfile4.gif>[screenshot]</a>
 <li>So, if the original Incoming Mail server name was <b>my.mail.com</b> and your username was <b>jdoe</b>, your new username would be <b>my.mail.com:jdoe</b>
 <li>You don't need to change the password.
 <li>Hit OK and then Close.
 <li>Ensure that POPFile is running and all mail will be delivered through POPFile!
-<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <code>Startup</code> group. Now, Windows will load POPFile each time.
+<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <b>Startup</b> group. Now, Windows will load POPFile each time.
 <li>Important! If POPFile isn't loaded, the mail will not get through - and your email program won't connect!
 </ul>
 
-</td><td width=33% bgcolor="#CCCCFF" valign="top">
+</td><td width=25% bgcolor="#CCCCFF" valign="top">
 
 <h3 align=center>Eudora</h3>
 
 <ul>
-<li>In Eudora select the Tools->Options... menu option.  The Options dialog will appear.
-<li>Make a note of the Mail Server (incoming) server name and the Login Name.
+<li>In Eudora select the Tools->Options... menu option.  The Options dialog will appear. <a href=e_popfile1.gif>[screenshot]</a>
+<li>Make a note of the Mail Server (incoming) server name and the Login Name. <a href=e_popfile2.gif>[screenshot]</a>
 <li>Change the Mail Server (incoming) server name to <b>127.0.0.1</b> and change the Login Name to the combination of the original
-Mail Server (incoming) server name and the original Login Name separated by a colon.
+Mail Server (incoming) server name and the original Login Name separated by a colon.  <a href=e_popfile3.gif>[screenshot]</a>
 <li>So, if the original Mail Server (incoming) server name was <b>my.mail.com</b> and your username was <b>jdoe</b>, your new username would be <b>my.mail.com:jdoe</b>
 <li>You don't need to change the password.
 <li>Hit OK.
 <li>Ensure that POPFile is running and all mail will be delivered through POPFile.
-<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <code>Startup</code> group. Now, Windows will load POPFile each time.
+<li>You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the <b>Startup</b> group. Now, Windows will load POPFile each time.
 <li>Important! If POPFile isn't loaded, the mail will not get through - and your email program won't connect!
+</ul>
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Pegasus</h3>
+
+<ul>
+<li>   In Pegasus select the Tools->Internet Options... Receiving (POP3) tab. The POP3 account setup page will appear.
+<li>   Under General settings for receiving mail using POP3, select the POP3 Host dialog box. Make a note of the current POP3 host.
+<li>   Change the POP3 Host to <b>127.0.0.1</b>
+<li>   Under General settings for receiving mail using POP3, select the User name dialog box. Make a note of the current User name.
+<li>   Change the User name to the combination of the original POP3 Host name and the original User name separated by a colon.
+<li>   So, if the original POP3 host was <b>my.mail.com</b> and your User name was <b>jdoe</b>, your new User name would be <b>my.mail.com:jdoe</b>
+<li>   You don't need to change the password.
+<li>   Click the OK Button to save the changes.
+<li>   Ensure that POPFile is running and all mail will be delivered through POPFile!
+<li>   You'll need to make sure POPFile starts whenever Windows does. If you're using the Windows installer version of POPFile, you can drag the 'Start POPFile in Background' link from the POPFile group in the Start menu to the Start -> Programs -> Startup group. Now, Windows will load POPFile each time.
 </ul>
 
 </td></tr></table>
 
 <p>Okay. Now we've done that, it's time to set up your mail filters, so that once POPFile has done its work, your email program can take that and put everything in the right folder.</p>
 
-<p>For advanced users, you have the option to modify the subject line to add a [classification] tag or not. It's near the bottom of the Configure tab in the web UI. No matter which option you choose, the <code>X-Text-Classification</code> header is still added.</p>
+<p>For advanced users, you have the option to modify the subject line to add a [classification] tag or not. It's near the bottom of the Configure tab in the web UI. No matter which option you choose, the <b>X-Text-Classification</b> header is still added.</p>
 
 <table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
 
@@ -132,14 +149,14 @@ Just choose your email program and follow the column down. While these instructi
 
 </td></tr><tr>
 
-<td width=33% bgcolor="#FFCCCC" valign="top">
+<td width=25% bgcolor="#FFCCCC" valign="top">
 
 <h3 align=center>Outlook</h3>
 
 <ul>
-<li>In Outlook select the Tools->Rules Wizard...
-<li>The Rules Wizard appears.  Click New... and select Start from a blank rule.
-<li>Outlook can use the <code>X-Text-Classification</code> header, which allows mail filtering to occur completely in the background. Click Next and select <i>with specific words in the message header</i>.
+<li>In Outlook select the Tools->Rules Wizard... <a href=o_filter1.gif>[screenshot]</a>
+<li>The Rules Wizard appears.  Click New... and select Start from a blank rule.  <a href=o_filter2.gif>[screenshot]</a>
+<li>Outlook can use the <b>X-Text-Classification</b> header, which allows mail filtering to occur completely in the background. Click Next and select <i>with specific words in the message header</i>.
 <li>Now click the grey highlighted <i>specific words</i> link and enter "X-Text-Classification: " followed by the name of one of your buckets in the box that appears and hit Add, then OK.
 <li>Click Next and select <i>move it to the specified folder</i>.
 <li>Click the grey highlighted word <i>specified</i> and a list of folders appears.  Select whichever folder you want to move messages from that bucket to and hit OK.
@@ -149,38 +166,61 @@ Just choose your email program and follow the column down. While these instructi
 <li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>off</b>.
 </ul>
 
-</td><td width=34% bgcolor="#CCFFCC" valign="top">
+</td><td width=25% bgcolor="#CCFFCC" valign="top">
 
 <h3 align=center>Outlook Express</h3>
 
 <ul>
-<li>In Outlook Express select the Tools->Message Rules->Mail...
-<li>The New Mail Rule window appears.
-<li>Outlook Express cannot use the <code>X-Text-Classification</code> header, which would allow mail filtering to occur completely in the background. So instead, click <i>Where the Subject line contains specific words</i> and also click
-<i>Move it to the specified folder</i>
-<li>Now click the blue highlighted <i>contains specific words</i> link and the Type Specific Words dialog appears
-<li>Enter the name of one of your buckets, surrounded by [square brackets], then hit OK.  Now click the blue highlighted <i>specified</i> word and the Move dialog appears.  Click the folder you want to move messages from that bucket to and hit OK.
+<li>In Outlook Express select the Tools->Message Rules->Mail... <a href=oe_filter1.gif>[screenshot]</a>
+<li>The New Mail Rule window appears.  <a href=oe_filter2.gif>[screenshot]</a>
+<li>Outlook Express cannot use the <b>X-Text-Classification</b> header, which would allow mail filtering to occur completely in the background. So instead, click <i>Where the Subject line contains specific words</i> and also click
+<i>Move it to the specified folder</i>  <a href=oe_filter3.gif>[screenshot]</a>
+<li>Now click the blue highlighted <i>contains specific words</i> link and the Type Specific Words dialog appears  <a href=oe_filter4.gif>[screenshot]</a>
+<li>Enter the name of one of your buckets, surrounded by [square brackets], then hit OK.  Now click the blue highlighted <i>specified</i> word and the Move dialog appears.  Click the folder you want to move messages from that bucket to and hit OK.  <a href=oe_filter5.gif>[screenshot]</a>
 <li>Hit OK.
 <li>Repeat the process for each of your buckets, and then OK out.
 <li>You're done!
 <li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>on</b>.
 </ul>
 
-</td><td width=33% bgcolor="#CCCCFF" valign="top">
+</td><td width=25% bgcolor="#CCCCFF" valign="top">
 
 <h3 align=center>Eudora</h3>
 
 <p>Eudora allows filtering based on any mail header, which is great - everything can be done completely in the background, without changing the subject lin!</p>
 
 <ul>
-<li>Select the Tools->Filters menu.
-<li>The Filters window appears.  Click New to create a new filter.
-<li>In the Header box type <code>X-Text-Classification</code> and in the box next to contains type the name of one of your buckets. <b>Don't</b> add square brackets around it.
-<li>The select <code>Transfer To</code>> in the first Action box and select the mailbox you want to file message from this bucket into.
+<li>Select the Tools->Filters menu.  <a href=e_filter1.gif>[screenshot]</a>
+<li>The Filters window appears.  Click New to create a new filter.  <a href=e_filter2.gif>[screenshot]</a>
+<li>In the Header box type <b>X-Text-Classification</b> and in the box next to contains type the name of one of your buckets. <b>Don't</b> add square brackets around it.  <a href=e_filter3.gif>[screenshot]</a>
+<li>The select <b>Transfer To</b> in the first Action box and select the mailbox you want to file message from this bucket into.  <a href=e_filter4.gif>[screenshot]</a>
 <li>Repeat this for each of your buckets.
 <li>Close the Filters windows and say Yes when asked to save changes.
 <li>You're done!
 <li>One minor note: in the <a href="http://127.0.0.1:8080">POPFile web interface</a>, under the Configuration tab, check that the Subject Line Modification option is turned <b>off</b>.
+</ul>
+
+</td><td width=25% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Pegasus</h3>
+
+<ul>
+<li>   In Pegasus select the Tools->Mail Filtering Rules ->Edit New Mail Filtering Rules ->Rules Applied When Folder is Opened….
+<li>   The New Mail Filtering Rules window appears.
+<li>   Click the New Rule button. The Create a New Filtering Rule window appears.
+<li>   Click on the Expression button.  Note that using the Expression filter will work even if the POPFile Subject Line Modification option is turned off. If you use the Header filter, the POPFile Subject Line Modification option must be turned on.
+<li>   Select the If this regular expression dialog box
+<li>   Enter the name of one of your buckets, preceded <b>X-Text-Classification:</b>, for example: <b>X-Text-Classification: spam</b>
+<li>   Select the Headers or body radio button
+<li>   Select the desired action from the Action drop down list. For example Move
+<li>   If an action such as Move or Forward has been chosen, click the Set button.
+<li>   Select the destination folder or enter the forward to address as appropriate for the Action selected.
+<li>   Click the OK button to add the rule to the rule list.
+<li>   Repeat the process for each rule you need.
+<li>   The order in which the filter rules are applied can be adjusted using the red / blue (up / down) arrows in the New Mail Filter Rules window.
+<li>   Select the Save button to save the rules set changes.
+<li>   Select the OK button.
+<li>   You're done!
 </ul>
 
 </td></tr></table>
@@ -190,8 +230,8 @@ Just choose your email program and follow the column down. While these instructi
 <ol>
 <li> You have to start popfile with the following command
 (type it in exactly)
-<blockquote><tt>perl popfile.pl -port 110 -server pop3.email.msn.com -sport
-110</tt></blockquote>
+<blockquote><b>perl popfile.pl -port 110 -server pop3.email.msn.com -sport
+110</b></blockquote>
 
 <li> On your accounts, server page, make sure you have the
 following information:
