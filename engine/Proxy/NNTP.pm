@@ -235,7 +235,7 @@ sub child__
 
             # Commands expecting a code + text response
 
-            if ( $command =~ /^ *(LIST|HEAD|BODY|NEWSGROUPS|NEWNEWS|LISTGROUP|XGTITLE|XINDEX|XHDR|XOVER|XPAT|XROVER|XTHREAD)/i ) {
+            if ( $command =~ /^ *(LIST|HEAD|BODY|NEWGROUPS|NEWNEWS|LISTGROUP|XGTITLE|XINDEX|XHDR|XOVER|XPAT|XROVER|XTHREAD)/i ) {
                 my $response = $self->get_response_( $news, $client, $command);
 
                 # 2xx (200) series response indicates multi-line text follows to .crlf
