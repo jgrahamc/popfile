@@ -51,12 +51,14 @@ select, input {
 #securityAcceptPOP3Off {
   width: 17em;
   background-image: none;
+  color: #FFFFFF;
   background-color: #545B7E;
   border: 1px outset #000000;
 }
 #securityAcceptHTTPOff {
   width: 17em;
   background-image: none;
+  color: #FFFFFF;
   background-color: #545B7E;
   border: 1px outset #000000;
 }
@@ -154,6 +156,7 @@ select, input {
 :link, :visited {
   font-size: 1em;
   text-decoration: underline;
+  border: 0;
 }
 :link:focus, :visited:focus {
   color: #FFFFFF;
@@ -182,8 +185,8 @@ select, input {
   font-weight: bold;
 }
 
-.menuLink:hover {
-  border: none;
+.menuLink:link:hover, .menuLink:visited:hover {
+  border: 0;
   cursor: pointer;
 }
 
@@ -227,6 +230,7 @@ td.head {
   width: 109px;
   height: 21px;
   background-repeat: no-repeat;
+  text-align: center;
 }
 
 .menuSelected {
@@ -234,6 +238,7 @@ td.head {
   width: 109px;
   height: 21px;
   background-repeat: no-repeat;
+  text-align: center;
 }
 
 .menuIndent {
