@@ -1045,19 +1045,13 @@ Section "POPFile" SecPOPFile
   WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile RevStatus" "${C_POPFILE_RC}"
   WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath" "$INSTDIR"
   WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "setup.exe"
-  Push $INSTDIR
-  Call StrLower
-  Pop ${L_TEMP}
-  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "${L_TEMP}"
+  WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "$INSTDIR"
   StrCmp $G_SFN_DISABLED "0" find_HKLM_root_sfn
   StrCpy ${L_TEMP} "Not supported"
   Goto save_HKLM_root_sfn
 
 find_HKLM_root_sfn:
   GetFullPathName /SHORT ${L_TEMP} $INSTDIR
-  Push ${L_TEMP}
-  Call StrLower
-  Pop ${L_TEMP}
 
 save_HKLM_root_sfn:
   WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP}"
@@ -1070,19 +1064,13 @@ user_specific:
   WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath" "$INSTDIR"
   WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "setup.exe"
   WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "Owner" "$G_WINUSERNAME"
-  Push $INSTDIR
-  Call StrLower
-  Pop ${L_TEMP}
-  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "${L_TEMP}"
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "$INSTDIR"
   StrCmp $G_SFN_DISABLED "0" find_root_sfn
   StrCpy ${L_TEMP} "Not supported"
   Goto save_root_sfn
 
 find_root_sfn:
   GetFullPathName /SHORT ${L_TEMP} "$INSTDIR"
-  Push ${L_TEMP}
-  Call StrLower
-  Pop ${L_TEMP}
 
 save_root_sfn:
   WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP}"
@@ -1101,19 +1089,13 @@ userdir_exists:
   WriteINIStr "$G_USERDIR\install.ini" "Settings" "LastU" "setup.exe"
 
   WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath" "$G_USERDIR"
-  Push $G_USERDIR
-  Call StrLower
-  Pop ${L_TEMP}
-  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN" "${L_TEMP}"
+  WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN" "$G_USERDIR"
   StrCmp $G_SFN_DISABLED "0" find_user_sfn
   StrCpy ${L_TEMP} "Not supported"
   Goto save_user_sfn
 
 find_user_sfn:
   GetFullPathName /SHORT ${L_TEMP} "$G_USERDIR"
-  Push ${L_TEMP}
-  Call StrLower
-  Pop ${L_TEMP}
 
 save_user_sfn:
   WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN" "${L_TEMP}"

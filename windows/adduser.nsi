@@ -131,7 +131,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.10"
+  !define C_PFI_VERSION  "0.1.11"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -775,20 +775,13 @@ Section "POPFile" SecPOPFile
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile RevStatus" "${L_TEMP_5}"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "adduser.exe"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Owner" "$G_WINUSERNAME"
-
-  Push $G_ROOTDIR
-  Call StrLower
-  Pop ${L_TEMP}
-  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "${L_TEMP}"
+  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "$G_ROOTDIR"
   StrCmp $G_SFN_DISABLED "0" find_root_sfn
   StrCpy ${L_TEMP_2} "Not supported"
   Goto save_root_sfn
 
 find_root_sfn:
   GetFullPathName /SHORT ${L_TEMP_2} $G_ROOTDIR
-  Push ${L_TEMP_2}
-  Call StrLower
-  Pop ${L_TEMP_2}
 
 save_root_sfn:
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP_2}"
@@ -807,19 +800,13 @@ userdir_exists:
   WriteINIStr "$G_USERDIR\install.ini" "Settings" "LastU" "adduser.exe"
 
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath" "$G_USERDIR"
-  Push $G_USERDIR
-  Call StrLower
-  Pop ${L_TEMP}
-  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN" "${L_TEMP}"
+  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN" "$G_USERDIR"
   StrCmp $G_SFN_DISABLED "0" find_user_sfn
   StrCpy ${L_TEMP_2} "Not supported"
   Goto save_user_sfn
 
 find_user_sfn:
   GetFullPathName /SHORT ${L_TEMP_2} $G_USERDIR
-  Push ${L_TEMP_2}
-  Call StrLower
-  Pop ${L_TEMP_2}
 
 save_user_sfn:
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN" "${L_TEMP_2}"
@@ -1428,7 +1415,7 @@ FunctionEnd
 # are used by the 'StartPOPFilePage' and 'CheckLaunchOptions' functions.
 #
 # POPFile currently does not support paths containing spaces in POPFILE_ROOT and POPFILE_USER
-# so we use lowercase short file name format for these two environment variables. However some
+# so we use the short file name format for these two environment variables. However some
 # NTFS-based systems have disabled the creation of short file names - so we have to reject any
 # path which contains spaces.
 #--------------------------------------------------------------------------

@@ -236,6 +236,7 @@ Label_C_${PFI_UNIQUE_ID}:
   FunctionEnd
 !endif
 
+
 #--------------------------------------------------------------------------
 # Installer Function: GetSeparator
 #
@@ -488,6 +489,7 @@ exit:
 
 FunctionEnd
 
+
 !ifndef ADDUSER
     #--------------------------------------------------------------------------
     # Installer Function: GetIEVersion
@@ -592,67 +594,6 @@ FunctionEnd
     
     FunctionEnd
 !endif
-
-#--------------------------------------------------------------------------
-# Function StrLower
-#
-# Converts uppercase letters in a string into lowercase letters. Other characters unchanged.
-#
-# Inputs:
-#         (top of stack)          - input string
-#
-# Outputs:
-#         (top of stack)          - output string
-#
-#  Usage Example:
-#
-#    Push "C:\PROGRA~1\SQLPFILE"
-#    Call StrLower
-#    Pop $R0
-#
-#   ($R0 at this point is "c:\progra~1\sqlpfile")
-#
-#--------------------------------------------------------------------------
-
-Function StrLower
-
-  !define C_LOWERCASE    "abcdefghijklmnopqrstuvwxyz"
-
-  Exch $0   ; The input string
-  Push $2   ; Holds the result
-  Push $3   ; A character from the input string
-  Push $4   ; The offset to a character in the "validity check" string
-  Push $5   ; A character from the "validity check" string
-  Push $6   ; Holds the current "validity check" string
-
-  StrCpy $2 ""
-
-next_input_char:
-  StrCpy $3 $0 1              ; Get next character from the input string
-  StrCmp $3 "" done
-  StrCpy $6 ${C_LOWERCASE}$3  ; Add character to end of "validity check" to guarantee a match
-  StrCpy $0 $0 "" 1
-  StrCpy $4 -1
-
-next_valid_char:
-  IntOp $4 $4 + 1
-  StrCpy $5 $6 1 $4               ; Extract next from "validity check" string
-  StrCmp $3 $5 0 next_valid_char  ; We will ALWAYS find a match in the "validity check" string
-  StrCpy $2 $2$5                  ; Use "validity check" char to ensure result uses lowercase
-  goto next_input_char
-
-done:
-  StrCpy $0 $2                ; Result is a string with no uppercase letters
-  Pop $6
-  Pop $5
-  Pop $4
-  Pop $3
-  Pop $2
-  Exch $0                     ; place result on top of the stack
-
-  !undef C_LOWERCASE
-
-FunctionEnd
 
 
 #==============================================================================================
@@ -1653,6 +1594,7 @@ FunctionEnd
       
        !insertmacro StrStr "un."
 !endif
+
 
 #--------------------------------------------------------------------------
 # Macro: StrCheckDecimal
