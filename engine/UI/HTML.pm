@@ -50,7 +50,7 @@ my $seconds_per_day = 60 * 60 * 24;
 my $ascii = '[\x00-\x7F]';
 
 # EUC-JP 2 byte characters
-my $two_bytes_euc_jp = '(?:[\x8E\xA1-\xFE][\xA1-\xFE])'; 
+my $two_bytes_euc_jp = '(?:[\x8E\xA1-\xFE][\xA1-\xFE])';
 
 # EUC-JP 3 byte characters
 my $three_bytes_euc_jp = '(?:\x8F[\xA1-\xFE][\xA1-\xFE])';
@@ -138,7 +138,7 @@ sub new
     $self->{save_cache__}      = 0;
 
     # Stores a Classifier::Bayes session and is set up on the first UI connection
- 
+
     $self->{api_session__}     = '';
 
     # Must call bless before attempting to call any methods
@@ -1200,7 +1200,7 @@ sub security_page
 
     # Password widget
     $body .= "<form action=\"/security\" method=\"post\">\n";
-    $body .= "<label class=\"securityLabel\" for=\"securityPassword\">$self->{language__}{Security_Password}:</label> <br />\n"; 
+    $body .= "<label class=\"securityLabel\" for=\"securityPassword\">$self->{language__}{Security_Password}:</label> <br />\n";
     if ( $self->config_( 'password' ) eq md5_hex( '__popfile__' ) ) {
         $body .= "<input type=\"password\" id=\"securityPassword\" name=\"password\" value=\"\" />\n";
     } else {
@@ -2834,17 +2834,17 @@ sub get_history_navigator
     my $p = 1;
     my $dots = 0;
     while ( $i < $self->history_size() ) {
-        if ( ( $i == 0 ) || 
+        if ( ( $i == 0 ) ||
              ( ( $i + $self->config_( 'page_size' ) ) >= $self->history_size() ) ||
              ( ( ( $i - 2 * $self->config_( 'page_size' ) ) <= $start_message ) &&
-               ( ( $i + 2 * $self->config_( 'page_size' ) ) >= $start_message ) ) ) {  
+               ( ( $i + 2 * $self->config_( 'page_size' ) ) >= $start_message ) ) ) {
             if ( $i == $start_message ) {
                 $body .= "<b>";
                 $body .= $p . "</b>";
             } else {
                 $body .= "[<a href=\"/history?start_message=$i" . $self->print_form_fields_(0,1,('session','filter','search','sort')). "\">";
                 $body .= $p . "</a>]";
-            } 
+            }
 
             $body .= " ";
             $dots = 1;
@@ -3563,7 +3563,7 @@ sub view_page
 
         $self->{classifier__}->wordscores( 0 );
 
-        $body .= $self->{classifier__}->fast_get_html_colored_message( 
+        $body .= $self->{classifier__}->fast_get_html_colored_message(
             $self->{api_session__}, $self->get_user_path_( $self->global_config_( 'msgdir' ) . $mail_file ), \%matrix, \%idmap );
 
         # We want to insert a link to change the output format at the start of the word
@@ -3862,6 +3862,7 @@ sub remove_mail_files
 
             if ( $ctime < (time - $self->config_( 'history_days' ) * $seconds_per_day) )  {
                 $self->history_delete_file( $mail_file, $self->config_( 'archive' ) );
+                $self->{need_resort__} = 1;
             }
         }
     }
@@ -3907,7 +3908,7 @@ sub history_delete_file
     $self->log_( "delete: $mail_file" );
 
     if ( $archive ) {
-        my $path = $self->config_( 'archive_dir' );
+        my $path = $self->get_user_path_( $self->config_( 'archive_dir' ) );
 
         mkdir( $path );
 
@@ -3924,8 +3925,9 @@ sub history_delete_file
                 mkdir( $path );
             }
 
-            # TODO This may be UNSAFE, please write a better comment that explains
-            # why this might be unsafe.  What does unsafe mean in this context?
+            # Previous comment about this potentially being unsafe (may have placed messages in
+            # unusual places, or overwritten files) no longer applies
+            # Files are now placed in the user directory, in the archive_dir subdirectory
 
             $self->history_copy_file( $self->get_user_path_( $self->global_config_( 'msgdir' ) . "$mail_file" ), $path, $mail_file );
         }
