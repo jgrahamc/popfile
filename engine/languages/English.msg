@@ -189,7 +189,7 @@ Magnet_Error3                           Create new magnet '%s' in bucket '%s'
 Magnet_CurrentMagnets                   Current Magnets
 Magnet_Message1                         The following magnets cause mail to always be classified into the specified bucket.
 Magnet_CreateNew                        Create New Magnet
-Magnet_Explanation                      Three types of magnets are available:</b> <ul><li><b>From address or name:</b> For example: john@company.com to match a specific address, <br />company.com to match everyone who sends from company.com, <br />John Doe to match a specific person, John to match all Johns</li><li><b>To address or name:</b> Like a From: magnet but for the To: address in a message</li> <li><b>Subject words:</b> For example: hello to match all messages with hello in the subject</li></ul>
+Magnet_Explanation                      These types of magnets are available:</b> <ul><li><b>From address or name:</b> For example: john@company.com to match a specific address, <br />company.com to match everyone who sends from company.com, <br />John Doe to match a specific person, John to match all Johns</li><li><b>To/Cc address or name:</b> Like a From: magnet but for the To:/Cc: address in a message</li> <li><b>Subject words:</b> For example: hello to match all messages with hello in the subject</li></ul>
 Magnet_MagnetType                       Magnet type
 Magnet_Value                            Value
 Magnet_Always                           Always goes to bucket
