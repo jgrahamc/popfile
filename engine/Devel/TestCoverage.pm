@@ -58,12 +58,13 @@ sub DB
 END
 {
         # Print out information for each file
-        for my $file (keys %count)      
+
+        for my $file (keys %count)
         {
             if ( ( $file =~ /^[^\/]/ ) && ( $file ne '../tests.pl' ) && !( $file =~ /^..\/\/Test\// ) ) {
                 my $current_line   = 0;
                 my $block_executed = 0;
-                
+
                 open SOURCE_FILE, "<$file";
                 my $clean = $file;
                 $clean =~ s/^\.\.\/\///;
@@ -74,24 +75,31 @@ END
                 # it was executed or not using a new couple of keys in the 
                 # %count hash for each file: total_lines, total_executable_lines 
                 # and total_executed
+
                 while (<SOURCE_FILE>)
                 {
                         # Keep count of the total number of lines in this file
+
                         $current_line              += 1;
-                        
+
                         # We do not count lines that are blank or exclusively 
                         # comments or just have braces on them or
                         # just an else or just a subroutine definition
+
                         if ( ( ( /^\s*\#/                   == 0 ) &&
                                ( /^\s*$/                    == 0 ) &&
                                ( /^\s*(\{|\}|else|\s)+\s*$/ == 0 ) &&
                                ( /^\s*sub \w+( \{)?\s*$/    == 0 ) &&
                                ( /^\s*package /             == 0 ) ) || ( $block_executed ) ) {
                             $count{$file}{total_executable_lines} += 1;
-                                
+
                             # If this line was executed then keep count of
                             # that fact
-                                
+
+                            if ( /\# PROFILE PLATFORM START ([^\r\n]+)/ ) {
+                                $block_executed = ( $1 ne $^O );
+		            }
+
                             if ( ( $count{$file}{$current_line} > 0 ) || ( $block_executed ) ) {
                                 print LINE_DATA "1\n";
 
@@ -106,6 +114,10 @@ END
                                 if ( /\# PROFILE BLOCK STOP/ ) {
                                     $block_executed = 0;
                                 }
+
+                                if ( /\# PROFILE PLATFORM STOP/ ) {
+                                    $block_executed = 0;
+                                }
                             } else {
                                 print LINE_DATA "0\n";
                             }
@@ -113,14 +125,14 @@ END
                              print LINE_DATA "\n";
                         }
                 }
-                
+
                 close SOURCE_FILE;
                 close LINE_DATA;
 
                 # Check for an unterminated PROFILE BLOCK and warn the user
 
                 if ( $block_executed ) {
-                    print "WARNING: unterminated PROFILE BLOCK detected; did you forget a PROFILE BLOCK STOP in $file?\n";
+                    print "WARNING: unterminated PROFILE BLOCK/PLATFORM detected; did you forget a PROFILE BLOCK/PLATFORM STOP in $file?\n";
                 }
           }
      }
