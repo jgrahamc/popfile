@@ -359,7 +359,7 @@ sub configure_item
         } else {
             $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
             $body .= "<span class=\"securityWidgetStateOn\">$$language{Yes}</span>\n";
-            $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptPOP3Off\" name=\"toggle\" value=\"$$language{ChangeToNo} (Stealth Mode)\" />\n";
+            $body .= "<input type=\"submit\" class=\"toggleOff\" id=\"securityAcceptPOP3Off\" name=\"toggle\" value=\"$$language{ChangeToNo} $$language{Security_StealthMode}\" />\n";
             $body .= "<input type=\"hidden\" name=\"smtp_local\" value=\"2\" />\n";
             $body .= "<input type=\"hidden\" name=\"session\" value=\"$session_key\" />\n</form>\n";
         }
