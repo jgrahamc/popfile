@@ -63,7 +63,7 @@ sub new
 sub initialize
 {
     my ( $self ) = @_;
-    
+
     # Start with debugging to file
     $self->{configuration}->{configuration}{debug}     = 1;
     
@@ -183,7 +183,10 @@ sub service
             if  ( ( $self->{configuration}->{configuration}{localpop} == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
                 # Now that we have a good connection to the client fork a subprocess to handle the communication
                 $self->{configuration}->{configuration}{download_count} += 1;
-                child( $self, $client, $self->{configuration}->{configuration}{download_count} ) if (fork() == 0);
+                if ( fork() == 0 ) {
+                    close $self->{server};  # Not needed in the child process
+                    child( $self, $client, $self->{configuration}->{configuration}{download_count} );
+                }
             }
 
             close $client;
@@ -417,7 +420,7 @@ sub child
     }
 
     close $mail if ( $mail );
-    
+
     exit(0);
 }
 
@@ -545,7 +548,6 @@ sub classify_and_modify
 
     # Add the XTC header
     $msg_head_after .= "X-Text-Classification: $classification$eol" if ( $self->{configuration}->{configuration}{xtc} );
-
 
     # Add the XPL header
     $temp_file =~ s/messages\/(.*)/$1/;
