@@ -2631,6 +2631,43 @@ sub history_undo
 
 # ---------------------------------------------------------------------------------------------
 #
+# get_search_filter_widget
+#
+# Returns the form that contains the fields for searching and filtering the history
+# page
+#
+# ---------------------------------------------------------------------------------------------
+sub get_search_filter_widget
+{
+	my ( $self ) = @_;
+	
+	my $body = "<form action=\"/history\">\n";
+	$body .= "<label class=\"historyLabel\" for=\"historySearch\">$self->{language}{History_SearchMessage}:</label>\n";
+	$body .= "<input type=\"text\" id=\"historySearch\" name=\"search\" ";
+	$body .= "value=\"$self->{form}{search}\"" if (defined $self->{form}{search});
+	$body .= " />\n";
+	$body .= "<input type=\"submit\" class=\"submit\" name=\"setsearch\" value=\"$self->{language}{Find}\" />\n";
+	$body .= "&nbsp;&nbsp;<label class=\"historyLabel\" for=\"historyFilter\">$self->{language}{History_FilterBy}:</label>\n";
+	$body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form}{sort}\" />\n";
+	$body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n";
+	$body .= "<select name=\"filter\" id=\"historyFilter\">\n<option value=\"\"></option>";
+	my @buckets = sort keys %{$self->{classifier}->{total}};
+	foreach my $abucket (@buckets) {
+		$body .= "<option value=\"$abucket\"";
+		$body .= " selected" if ( ( defined($self->{form}{filter}) ) && ( $self->{form}{filter} eq $abucket ) );
+		$body .= ">$abucket</option>\n";
+	}
+	$body .= "<option value=\"__filter__magnet\"" . ($self->{form}{filter} eq '__filter__magnet'?' selected':'') . ">&lt;$self->{language}{History_ShowMagnet}&gt;</option>\n";
+	$body .= "<option value=\"unclassified\"" . ($self->{form}{filter} eq 'unclassified'?' selected':'') . ">&lt;unclassified&gt;</option>\n";
+	$body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\" />\n";
+	$body .= "<input type=\"submit\" class=\"submit\" name=\"reset_filter_search\" value=\"$self->{language}{History_ResetSearch}\" />\n";
+	$body .= "</form>\n";
+	
+	return $body;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # history_page - get the message classification history page
 #
 # $client     The web browser to send the results to
@@ -2789,28 +2826,9 @@ sub history_page
         $body .= "<table class=\"historyWidgetsTop\" summary=\"\">\n<tr>\n";
 
         # Search From/Subject widget
+		my @buckets = sort keys %{$self->{classifier}->{total}};
         $body .= "<td colspan=\"5\" valign=middle>\n";
-        $body .= "<form action=\"/history\">\n";
-        $body .= "<label class=\"historyLabel\" for=\"historySearch\">$self->{language}{History_SearchMessage}:</label>\n";
-        $body .= "<input type=\"text\" id=\"historySearch\" name=\"search\" ";
-        $body .= "value=\"$self->{form}{search}\"" if (defined $self->{form}{search});
-        $body .= " />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"setsearch\" value=\"$self->{language}{Find}\" />\n";
-        $body .= "&nbsp;&nbsp;<label class=\"historyLabel\" for=\"historyFilter\">$self->{language}{History_FilterBy}:</label>\n";
-        $body .= "<input type=\"hidden\" name=\"sort\" value=\"$self->{form}{sort}\" />\n";
-        $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\" />\n";
-        $body .= "<select name=\"filter\" id=\"historyFilter\">\n<option value=\"\"></option>";
-        my @buckets = sort keys %{$self->{classifier}->{total}};
-        foreach my $abucket (@buckets) {
-            $body .= "<option value=\"$abucket\"";
-            $body .= " selected" if ( ( defined($self->{form}{filter}) ) && ( $self->{form}{filter} eq $abucket ) );
-            $body .= ">$abucket</option>\n";
-        }
-        $body .= "<option value=\"__filter__magnet\"" . ($self->{form}{filter} eq '__filter__magnet'?' selected':'') . ">&lt;$self->{language}{History_ShowMagnet}&gt;</option>\n";
-        $body .= "<option value=\"unclassified\"" . ($self->{form}{filter} eq 'unclassified'?' selected':'') . ">&lt;unclassified&gt;</option>\n";
-        $body .= "</select>\n<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"reset_filter_search\" value=\"$self->{language}{History_ResetSearch}\" />\n";
-        $body .= "</form>\n";
+        $body .= $self->get_search_filter_widget();
         $body .= "</td>\n</tr>\n</table>\n";
 
         # History page main form
@@ -3029,20 +3047,8 @@ sub history_page
         $body .= get_history_navigator( $self, $start_message, $stop_message ) if ( $self->{configuration}->{configuration}{page_size} <= $self->history_size() );
         $body .= "\n</td>\n</tr>\n</table>\n";
     } else {
-        $body .= "<h2 class=\"history\">$self->{language}{History_Title}$filtered</h2><br /><br /><span class=\"bucketsLabel\">$self->{language}{History_NoMessages}.</span><br /><br /><form action=\"/history\"><input type=hidden name=session value=\"$self->{session_key}\"><input type=hidden name=sort value=\"$self->{form}{sort}\"><select name=filter><option value=\"\"></option>";
-
-        foreach my $abucket (sort keys %{$self->{classifier}->{total}}) {
-            $body .= "<option value=\"$abucket\"";
-            $body .= " selected" if ( ( defined($self->{form}{filter}) ) && ( $self->{form}{filter} eq $abucket ) );
-            $body .= ">$abucket</option>";
-        }
-
-        $body .= "<option value=__filter__magnet>\n&lt;$self->{language}{History_ShowMagnet}&gt;\n";
-        $body .= "</option>\n";
-        $body .= "<option value=\"unclassified\"" . (($self->{form}{filter} eq 'unclassified')?' selected':'') . ">&lt;unclassified&gt;</option>\n";
-        $body .= "</select>\n";
-        $body .="<input type=\"submit\" class=\"submit\" name=\"setfilter\" value=\"$self->{language}{Filter}\" />\n";
-        $body .= "<input type=\"submit\" class=\"submit\" name=\"reset_filter_search\" value=\"$self->{language}{History_ResetSearch}\" />\n</form>\n";
+        $body .= "<h2 class=\"history\">$self->{language}{History_Title}$filtered</h2><br /><br /><span class=\"bucketsLabel\">$self->{language}{History_NoMessages}.</span><br /><br />";
+        $body .= $self->get_search_filter_widget();
     }
 
     http_ok($self, $client,$body,2);
