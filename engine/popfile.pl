@@ -2152,7 +2152,7 @@ sub verify_connected
             {
                 for my $i ( 0..4 )
                 {
-                    flush_extra( $mail, $client );
+                    flush_extra( $mail, $client, 1 );
                 }
             }
             return 1;
@@ -2173,11 +2173,12 @@ sub verify_connected
 #
 # $mail        The handle of the real mail server
 # $client      The mail client talking to us
+# $discard     If 1 then the extra output is discarded
 #
 # ---------------------------------------------------------------------------------------------
 sub flush_extra
 {
-    my ($mail, $client) = @_;
+    my ($mail, $client, $discard) = @_;
     
     if ( $mail )
     {
@@ -2194,8 +2195,11 @@ sub flush_extra
                 {
                     last;
                 }
-                
-                tee( $client, $buf );
+
+                if ( $discard != 1 )
+                {
+                    tee( $client, $buf );
+                }
             }
         }
     }
@@ -2378,7 +2382,7 @@ sub run_popfile
                         last;
                     }
 
-                    flush_extra( $mail, $client );
+                    flush_extra( $mail, $client, 0 );
                     next;
                 }
 
@@ -2398,7 +2402,7 @@ sub run_popfile
                         last;
                     }
 
-                    flush_extra( $mail, $client );
+                    flush_extra( $mail, $client, 0 );
                     next;
                 }
 
@@ -2432,7 +2436,7 @@ sub run_popfile
                             last;
                         }
 
-                        flush_extra( $mail, $client );
+                        flush_extra( $mail, $client, 0 );
                     }
                     else
                     {
@@ -2458,7 +2462,7 @@ sub run_popfile
                             last;
                         }
 
-                        flush_extra( $mail, $client );
+                        flush_extra( $mail, $client, 0 );
                     }
                     else
                     {
@@ -2472,7 +2476,7 @@ sub run_popfile
                 if ( $command =~ /STAT/i )
                 {
                     echo_response( $mail, $client, $command );
-                    flush_extra( $mail, $client );
+                    flush_extra( $mail, $client, 0 );
                     next;
                 }
 
@@ -2487,7 +2491,7 @@ sub run_popfile
                         }
                     }
 
-                    flush_extra( $mail, $client );
+                    flush_extra( $mail, $client, 0 );
                     next;
                 }
 
@@ -2502,7 +2506,7 @@ sub run_popfile
                         }
                     }
 
-                    flush_extra( $mail, $client );
+                    flush_extra( $mail, $client, 0 );
                     next;
                 }
 
@@ -2514,7 +2518,7 @@ sub run_popfile
                         echo_to_dot( $mail, $client );
                     }
 
-                    flush_extra( $mail, $client );
+                    flush_extra( $mail, $client, 0 );
                     next;
                 }
 
@@ -2522,7 +2526,7 @@ sub run_popfile
                 if ( $command =~ /XSENDER (.*)/i )
                 {
                     echo_response( $mail, $client, $command );
-                    flush_extra( $mail, $client );
+                    flush_extra( $mail, $client, 0 );
                     next;
                 }
                 
@@ -2538,7 +2542,7 @@ sub run_popfile
                         }
                     }
                     
-                    flush_extra( $mail, $client );
+                    flush_extra( $mail, $client, 0 );
                     next;
                 }                
 
@@ -2689,7 +2693,7 @@ sub run_popfile
 
                         $configuration{last_count} = $current_count;
 
-                    flush_extra( $mail, $client );
+                    flush_extra( $mail, $client, 0 );
                     next;
                     }
                 }
@@ -2699,7 +2703,7 @@ sub run_popfile
                 {
                     # Try the delete on the real server and if it successful then mark it as deleted
                     echo_response( $mail, $client, $command );
-                    flush_extra( $mail, $client );
+                    flush_extra( $mail, $client, 0 );
                     next;
                 }
 
@@ -2725,7 +2729,7 @@ sub run_popfile
                 if ( $command =~ /RSET/i )
                 {
                     echo_response( $mail, $client, $command );
-                    flush_extra( $mail, $client );
+                    flush_extra( $mail, $client, 0 );
                     next;
                 }
 
@@ -2735,7 +2739,7 @@ sub run_popfile
                 {
                     if ( echo_response( $mail, $client, $command ) )
                     {
-                        flush_extra( $mail, $client );
+                        flush_extra( $mail, $client, 0 );
                         next;
                     }
                 } 
