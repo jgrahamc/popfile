@@ -285,9 +285,8 @@
   !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
   !define MUI_FINISHPAGE_SHOWREADME_FUNCTION "ShowReadMe"
 
-  ; Debug aid: Display the log during the installation and wait for user to click 'Next' at end
+  ; Debug aid: Hide the installation log but let user display it (using "Show details" button)
 
-  ShowInstDetails show
   !define MUI_FINISHPAGE_NOAUTOCLOSE
 
   ;-----------------------------------------
