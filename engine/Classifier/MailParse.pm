@@ -161,7 +161,7 @@ sub add_line
         #deal with runs of alternating spaces and letters
         #TODO: find a way to make this (and other similar stuff) highlight
         #       without using the encoded content printer or modifying $self->{ut}
-        while ( $line =~ /(([ \xA0]|[^\w]|^)([\w][\xA0 ]){3,42}([\w][^ \xA0\w])?)/i ) {
+        while ( $line =~ m/\G(([ \xA0]|[^\w]|^)([\w][\xA0 ]){3,42}([\w][^ \xA0\w])?)/ig ) {
             my $from = $1;            
             $from =~ s/^([\xA0 ])?(.*)([\xA0 \r\n])?$/$2/g;
             my $to = $from;            
