@@ -392,3 +392,14 @@ span.graphFont {
   border: 0;
 }
 
+table.footer br { 
+display: none; 
+} 
+
+.bottomLink { 
+margin: 1em; 
+} 
+
+.bottomLink img { 
+display: none; 
+} 
