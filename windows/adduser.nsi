@@ -73,6 +73,12 @@
 # the main installer quits before calling the wizard, it is up to the wizard to force the reboot
 # if one is required.
 #
+# /restore="absolute path to the restored 'User Data' folder"
+#
+# This command-line switch is used when this wizard is called by the POPFile 'User Data' Restore
+# utility to complete the restoration of the 'User Data'. The path provided via this switch will
+# be used to update the registry, environment variables and Start Menu entries.
+# NOTE: The path should be enclosed in quotes (eg /restore="C:\Program Files\POPFile")
 #--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
@@ -158,7 +164,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.34"
+  !define C_PFI_VERSION  "0.2.37"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -204,6 +210,7 @@
   ; This script uses 'User Variables' (with names starting with 'G_') to hold GLOBAL data.
 
   Var G_PFISETUP           ; parameter passed from main installer (setup.exe)
+                           ; or the 'User Data' Restore utility (pfi-restore (<username>).exe)
 
   Var G_ROOTDIR            ; full path to the folder used for the POPFile program files
   Var G_USERDIR            ; full path to the folder containing the 'popfile.cfg' file
@@ -627,6 +634,8 @@ Function .onInit
 
   Call GetParameters
   Pop $G_PFISETUP
+  StrCpy $G_PFIFLAG $G_PFISETUP 9
+  StrCmp $G_PFIFLAG "/restore=" special_case
   StrCmp $G_PFISETUP "/install" special_case
   StrCmp $G_PFISETUP "/installreboot" 0 normal_startup
   SetRebootFlag true
@@ -944,6 +953,13 @@ continue:
 stopwords:
   IfFileExists "$G_ROOTDIR\pfi-stopwords.default" 0 update_config_ports
 
+  ; If we are processing data newly restored by the POPFile 'User Data' Restore utility,
+  ; do not touch the 'stopwords' file in case it has just been restored (but we still
+  ; update the default 'stopwords' file to the one distributed with 'our' version of POPFile)
+
+  StrCpy ${L_TEMP} $G_PFISETUP 9
+  StrCmp ${L_TEMP} "/restore=" copy_default_stopwords
+
   IfFileExists "$G_USERDIR\stopwords" 0 copy_stopwords
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "POPFile 'stopwords' $(PFI_LANG_MBSTPWDS_1)\
@@ -971,22 +987,7 @@ update_config_ports:
   FileWrite ${L_CFG} "pop3_port $G_POP3$\r$\n"
   FileWrite ${L_CFG} "html_port $G_GUI$\r$\n"
   FileClose ${L_CFG}
-  IfFileExists "$G_USERDIR\popfile.cfg" 0 update_config
-  IfFileExists "$G_USERDIR\popfile.cfg.bk1" 0 the_first
-  IfFileExists "$G_USERDIR\popfile.cfg.bk2" 0 the_second
-  IfFileExists "$G_USERDIR\popfile.cfg.bk3" 0 the_third
-  Delete "$G_USERDIR\popfile.cfg.bk3"
-
-the_third:
-  Rename "$G_USERDIR\popfile.cfg.bk2" "$G_USERDIR\popfile.cfg.bk3"
-
-the_second:
-  Rename "$G_USERDIR\popfile.cfg.bk1" "$G_USERDIR\popfile.cfg.bk2"
-
-the_first:
-  Rename "$G_USERDIR\popfile.cfg" "$G_USERDIR\popfile.cfg.bk1"
-
-update_config:
+  !insertmacro BACKUP_123_DP "$G_USERDIR" "popfile.cfg"
   CopyFiles /SILENT /FILESONLY "$PLUGINSDIR\popfile.cfg" "$G_USERDIR\"
 
   ; Create the uninstall program BEFORE creating the shortcut to it
@@ -1767,6 +1768,11 @@ Function CheckUserDirStatus
 
   !define L_RESULT    $R9
 
+  Push ${L_RESULT}
+  StrCpy ${L_RESULT} $G_PFISETUP 9
+  StrCmp ${L_RESULT} "/restore=" restore_install
+  Pop ${L_RESULT}
+
   IfFileExists "$G_USERDIR\popfile.cfg" 0 exit
   StrCmp $G_PFISETUP "/install" upgrade_install
   StrCmp $G_PFISETUP "/installreboot" 0 exit
@@ -1784,6 +1790,37 @@ upgrade_install:
       $(PFI_LANG_DIRSELECT_MBWARN_2)" IDNO offer_default
   Call CheckExistingConfigData
   Abort
+
+restore_install:
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1037
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_USERDIR_TITLE)"
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1038
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_USERDIR_SUBTITLE)"
+  StrCpy $G_USERDIR $G_PFISETUP "" 9
+  StrCpy ${L_RESULT} $G_USERDIR 1
+  StrCmp ${L_RESULT} '"' 0 no_quotes
+  StrCpy $G_USERDIR $G_USERDIR "" 1
+  StrCpy $G_USERDIR $G_USERDIR -1
+
+no_quotes:
+  StrCpy ${L_RESULT} $G_USERDIR 1 -1
+  StrCmp ${L_RESULT} "\" 0 check_config
+  StrCpy $G_USERDIR $G_USERDIR -1
+
+check_config:
+  Pop ${L_RESULT}
+
+  MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_4)\
+      $\r$\n$\r$\n\
+      ($G_USERDIR)\
+      $\r$\n$\r$\n$\r$\n\
+      $(PFI_LANG_DIRSELECT_MBWARN_5)" IDNO quit_wizard
+
+  Call CheckExistingConfigData
+  Abort
+
+quit_wizard:
+  Quit
 
 offer_default:
   StrCmp $APPDATA "" 0 appdata_valid
@@ -2255,12 +2292,21 @@ show_defaults:
   CreateFont $G_FONT "MS Shell Dlg" 10 700      ; use larger & bolder version of the font in use
   SendMessage $G_DLGITEM ${WM_SETFONT} $G_FONT 0
 
-  ; If we are about to upgrade an existing installation, remind the user by changing the
-  ; text on the "Install" button to "Upgrade"
+  ; If we are about to upgrade an existing installation or reset POPFile to use newly restored
+  ; 'User Data', remind the user by changing the text on the "Install" button to "Upgrade" or
+  ; "Restore" as appropriate
+
+  StrCpy ${L_RESULT} $G_PFISETUP 9
+  StrCmp ${L_RESULT} "/restore=" restore
 
   IfFileExists "$G_USERDIR\popfile.cfg" upgrade
   GetDlgItem $G_DLGITEM $HWNDPARENT 1
   SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(^InstallBtn)"
+  Goto showpage
+
+restore:
+  GetDlgItem $G_DLGITEM $HWNDPARENT 1
+  SendMessage $G_DLGITEM ${WM_SETTEXT} 0 "STR:$(PFI_LANG_INST_BTN_RESTORE)"
   Goto showpage
 
 upgrade:
@@ -3153,19 +3199,9 @@ not_server:
 end_of_file:
   FileClose ${L_CFG}
 
-  IfFileExists "$G_USERDIR\${L_REG_FILE}.bk1" 0 the_first
-  IfFileExists "$G_USERDIR\${L_REG_FILE}.bk2" 0 the_second
-  IfFileExists "$G_USERDIR\${L_REG_FILE}.bk3" 0 the_third
-  Delete "$G_USERDIR\${L_REG_FILE}.bk3"
+  ; Now "remove" the old-style 'undo' file by renaming it
 
-the_third:
-  Rename "$G_USERDIR\${L_REG_FILE}.bk2" "$G_USERDIR\${L_REG_FILE}.bk3"
-
-the_second:
-  Rename "$G_USERDIR\${L_REG_FILE}.bk1" "$G_USERDIR\${L_REG_FILE}.bk2"
-
-the_first:
-  Rename "$G_USERDIR\${L_REG_FILE}" "$G_USERDIR\${L_REG_FILE}.bk1"
+  !insertmacro BACKUP_123_DP "$G_USERDIR" "${L_REG_FILE}"
 
   Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
@@ -5421,6 +5457,8 @@ Section "un.ShortCuts" UnSecShortcuts
 
   Delete "$G_USERDIR\Run SQLite utility.lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\User Data ($G_WINUSERNAME).lnk"
+  RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
   RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
 
   SetDetailsPrint textonly
