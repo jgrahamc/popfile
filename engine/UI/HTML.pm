@@ -2192,7 +2192,7 @@ sub history_page
 
         my @rows = $self->{history__}->get_query_rows( $self->{q__},
                                                        $start_message+1,
-                                                       $stop_message - $start_message );
+                                                       $stop_message - $start_message + 1 );
 
         my @history_data;
         my $i = $start_message;

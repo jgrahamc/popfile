@@ -36,7 +36,7 @@ use locale;
 use Date::Parse;
 use Digest::MD5 qw( md5_hex );
 
-my $slot_fields = 'history.id, hdr_from, hdr_to, hdr_cc, hdr_subject,
+my $fields_slot = 'history.id, hdr_from, hdr_to, hdr_cc, hdr_subject,
 hdr_date, hash, inserted, buckets.name, usedtobe';
 
 #----------------------------------------------------------------------------
@@ -354,7 +354,7 @@ sub get_slot_fields
     my ( $self, $slot ) = @_;
 
     return $self->db__()->selectrow_array(
-        "select $slot_fields from history, buckets
+        "select $fields_slot from history, buckets
              where history.id = $slot and
                    buckets.id = history.bucketid" );
 }
@@ -783,7 +783,7 @@ sub set_query
     $self->{queries__}{$id}{count} =
         $self->db__()->selectrow_arrayref( $select )->[0];
 
-    $select =~ s/COUNT\(\*\)/$slot_fields/;
+    $select =~ s/COUNT\(\*\)/$fields_slot/;
     $self->{queries__}{$id}{query} = $self->db__()->prepare( $select );
     $self->{queries__}{$id}{query}->execute;
     $self->{queries__}{$id}{cache} = ();
