@@ -1671,7 +1671,7 @@ sub corpus_page
     my $pecount = pretty_number( $self,  $self->global_config_( 'ecount' ) );
     my $accuracy = $self->{language__}{Bucket_NotEnoughData};
     my $percent = 0;
-    if ( $self->global_config_( 'mcount' ) > 0 )  {
+    if ( $self->global_config_( 'mcount' ) > $self->global_config_( 'ecount' ) )  {
         $percent = int( 10000 * ( $self->global_config_( 'mcount' ) - $self->global_config_( 'ecount' ) ) / $self->global_config_( 'mcount' ) ) / 100;
         $accuracy = "$percent%";
     }
