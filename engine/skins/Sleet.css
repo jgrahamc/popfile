@@ -1,344 +1,345 @@
-BODY {
-	MARGIN: 1%;
-	COLOR: #ffffff;
-	FONT-FAMILY: sans-serif;
-	BACKGROUND-COLOR: #7988A5;
-	TEXT-ALIGN: center;
+body {
+  margin: 1%;
+  color: #FFFFFF;
+  font-family: sans-serif;
+  background-color: #7988A5;
+  text-align: center;
 }
 
-.shell {
-    background-color: #424D63;
-    color: #ffffff;
-    border-collapse: collapse;
+.shell, .shellTop {
+  background-color: #424d63;
+  color: #FFFFFF;
+  border-collapse: collapse;
 }
 
 .naked {
-    FONT-SIZE: 8pt;
-    FONT-FAMILY: sans-serif;
-    padding: 5px;
+  font-size: 8pt;
+  font-family: sans-serif;
+  padding: 5px;
 }
 
-TABLE.head {
-	WIDTH: 100%;
-	FONT-FAMILY: sans;
-	TEXT-ALIGN: left;
+table.head {
+  width: 100%;
+  font-family: sans-serif;
+  text-align: left;
 }
 
-TD.head {
-	FONT-WEIGHT: bold;
-	FONT-SIZE: 12pt;
-	FONT-FAMILY: arial;
+td.head {
+  font-weight: bold;
+  font-size: 12pt;
+  font-family: arial, sans-serif;
 }
 
 select, input {
-    border: 1px outset #000000; 
-    background-color: #BAB8C6;
-    color: black;
-    font-size: 8pt;
-    font-weight: normal; 
-    margin: 0px 0px 0px 0px; 
-    padding: 0px 0px 0px 0px;
+  border: 1px outset #000000;
+  background-color: #BAB8C6;
+  color: black;
+  font-size: 8pt;
+  font-weight: normal;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
 }
 
 .submit {
-    border: none; 
-    background-color: transparent;
-    height: 22px;
-    width: 99px;
-    font-size: 8pt;
-    font-weight: bold; 
-    color: #ffffff;
-    margin: 0px 0px 0px 0px; 
-    padding: 0px 0px 0px 0px;
-    BACKGROUND-IMAGE: url(sleetImages/button.gif);
-    cursor: pointer;
+  border: none;
+  background-color: transparent;
+  height: 22px;
+  width: 99px;
+  font-size: 8pt;
+  font-weight: bold;
+  color: #FFFFFF;
+  margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+  background-image: url(sleetImages/button.gif);
+  cursor: pointer;
 }
 
-.borderTop {
-	BACKGROUND-IMAGE: url(sleetImages/top.gif);
-	BACKGROUND-REPEAT: repeat-x;
-        height: 21px;
-        padding: 0px;
-        margin: 0px;
-        border: none;
+.shellTopCenter {
+  background-image: url(sleetImages/top.gif);
+  background-repeat: repeat-x;
+  height: 21px;
+  padding: 0px;
+  margin: 0px;
+  border: none;
 }
 
-.borderTopLeft {
-        height: 21px;
-	WIDTH: 27px;
-        padding: 0px;
-        margin: 0px;
-        border: none;
-	BACKGROUND-IMAGE: url(sleetImages/topLeft.gif);
-	BACKGROUND-REPEAT: no-repeat;
+.shellTopLeft {
+  height: 21px;
+  width: 27px;
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  background-image: url(sleetImages/topLeft.gif);
+  background-repeat: no-repeat;
 }
 
-.borderTopRight {
-        height: 21px;
-	WIDTH: 25px;
-        padding: 0px;
-        margin: 0px;
-        border: none;
-	BACKGROUND-IMAGE: url(sleetImages/topRight.gif);
-	BACKGROUND-REPEAT: no-repeat;
+.shellTopRight {
+  height: 21px;
+  width: 25px;
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  background-image: url(sleetImages/topRight.gif);
+  background-repeat: no-repeat;
 }
 
-.borderLeft {
-        padding: 0px;
-        margin: 0px;
-        border: none;
-	WIDTH: 27px;
-	BACKGROUND-IMAGE: url(sleetImages/left.gif);
-	BACKGROUND-REPEAT: repeat-y;
+.shellLeft {
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  width: 27px;
+  background-image: url(sleetImages/left.gif);
+  background-repeat: repeat-y;
 }
 
-.borderRight {
-        padding: 0px;
-        margin: 0px;
-        border: none;
-	BACKGROUND-IMAGE: url(sleetImages/right.gif);
-	WIDTH: 25px;
-	BACKGROUND-REPEAT: repeat-y;
+.shellRight {
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  background-image: url(sleetImages/right.gif);
+  width: 25px;
+  background-repeat: repeat-y;
 }
 
-.borderBottom {
-        padding: 0px;
-        margin: 0px;
-        border: none;
-	BACKGROUND-IMAGE: url(sleetImages/bottom.gif);
-	BACKGROUND-REPEAT: repeat-x;
-	HEIGHT: 22px;
+.shellBottomCenter {
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  background-image: url(sleetImages/bottom.gif);
+  background-repeat: repeat-x;
+  height: 22px;
 }
 
-.borderBottomLeft {
-        padding: 0px;
-        margin: 0px;
-        border: none;
-	BACKGROUND-IMAGE: url(sleetImages/bottomLeft.gif);
-	WIDTH: 27px;
-	HEIGHT: 22px;
-	BACKGROUND-REPEAT: no-repeat;
+.shellBottomLeft {
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  background-image: url(sleetImages/bottomLeft.gif);
+  width: 27px;
+  height: 22px;
+  background-repeat: no-repeat;
 }
 
-.borderBottomRight {
-        padding: 0px;
-        margin: 0px;
-        border: none;
-	BACKGROUND-IMAGE: url(sleetImages/bottomRight.gif);
-	WIDTH: 25px;
-	BACKGROUND-REPEAT: no-repeat;
-	HEIGHT: 22px;
+.shellBottomRight {
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  background-image: url(sleetImages/bottomRight.gif);
+  width: 25px;
+  background-repeat: no-repeat;
+  height: 22px;
 }
 
 .menu {
-	BACKGROUND-IMAGE: url(sleetImages/menu.gif);
-	FONT-WEIGHT: normal;
-	FONT-SIZE: 10pt;
-        width: 100%;
+  background-image: url(sleetImages/menu.gif);
+  font-weight: normal;
+  font-size: 10pt;
+  width: 100%;
 }
 
-.menu A {
-	color: #ffffff;
-        background-color: transparent;
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 8pt;
+.menuLink {
+  color: #ffffff;
+  background-color: transparent;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 8pt;
 }
 
-.menu A:hover {
-    border: none;
-    cursor: pointer;   
+.menuLink:hover {
+  border: none;
+  cursor: pointer;
 }
 
 
 .menuSelected {
-	BACKGROUND-IMAGE: url(sleetImages/menuButton.gif);
-	WIDTH: 109px;
-        height: 21px;
-	BACKGROUND-REPEAT: no-repeat;
+  background-image: url(sleetImages/menuButton.gif);
+  width: 109px;
+  height: 21px;
+  background-repeat: no-repeat;
 }
 
 .menuStandard {
-	BACKGROUND-IMAGE: url(sleetImages/menuButton.gif);
-	WIDTH: 109px;
-        height: 21px;
-	BACKGROUND-REPEAT: no-repeat;
+  background-image: url(sleetImages/menuButton.gif);
+  width: 109px;
+  height: 21px;
+  background-repeat: no-repeat;
 
 }
 
 .menuIndent {
-	background-image: none;
-        color: #ffffff;
-        background-color: #7988A5;
-	PADDING: 0px;
-        MARGIN: 0px;
-	WIDTH: 0px;
+  background-image: none;
+  color: #FFFFFF;
+  background-color: #7988a5;
+  padding: 0px;
+  margin: 0px;
+  width: 0px;
 }
 
-.rowEven, .rowEven A {
-	FONT-SIZE: 8pt;
-	COLOR: #ffffff;
-        background-color: transparent;
-}
-
-
-.rowOdd A {
-	COLOR: #aaaaaa;
-        background-color: transparent;
-}
-
-.rowOdd A {
-    font-size: 8pt;
-    color: #aaaaaa;
-    background-color: transparent;
+.rowEven, .rowEven a {
+  font-size: 8pt;
+  color: #FFFFFF;
+  background-color: transparent;
 }
 
 .rowOdd {
-        color: #ffffff;
-        background-color: #545F74;
+  color: #AAAAAA;
+  background-color: #545F74;
 }
 
-.rowOdd TD {
-	COLOR: #aaaaaa;
-        border-top: 1px #888888 solid;
-        border-bottom: 1px #888888 solid;
+.rowOdd a {
+  font-size: 8pt;
+  color: #AAAAAA;
+  background-color: transparent;
 }
 
-TR.rowHighlighted {
-	COLOR: #eeeeee;
-        background-color: #545F74;
+.rowOdd td {
+  border-top: 1px #888888 solid;
+  border-bottom: 1px #888888 solid;
 }
 
-TD.openMessageCloser {
-	TEXT-ALIGN: right;
+tr.rowHighlighted {
+  color: #EEEEEE;
+  background-color: #545f74;
 }
 
-TD.openMessageBody {
-	TEXT-ALIGN: left;
+td.openMessageCloser {
+  text-align: right;
 }
 
-TD.accuracy0to49 {
-	COLOR: black;
-	BACKGROUND-COLOR: red
+td.openMessageBody {
+  text-align: left;
 }
 
-TD.accuracy50to93 {
-	COLOR: black;
-	BACKGROUND-COLOR: yellow
+td.accuracy0to49 {
+  color: black;
+  background-color: red;
 }
 
-TD.accuracy94to100 {
-	COLOR: black;
-	BACKGROUND-COLOR: green
+td.accuracy50to93 {
+  color: black;
+  background-color: yellow;
 }
 
-DIV.error01 {
-	FONT-SIZE: larger;
-	COLOR: red;
-	BACKGROUND-COLOR: transparent
+td.accuracy94to100 {
+  color: black;
+  background-color: green;
 }
 
-DIV.error02 {
-	COLOR: red;
-	BACKGROUND-COLOR: transparent
+div.error01 {
+  font-size: larger;
+  color: red;
+  background-color: transparent;
 }
 
-SPAN.graphFont {
-	FONT-SIZE: x-small
+div.error02 {
+  color: red;
+  background-color: transparent;
 }
 
-H2 {
-	FONT-WEIGHT: bold;
-        font-size: 12pt;
+span.graphfont {
+  font-size: x-small;
 }
 
-SPAN.bucketsLabel {
-	FONT-WEIGHT: bold;
+h2 {
+  font-weight: bold;
+  font-size: 12pt;
 }
 
-SPAN.magnetsLabel {
-	FONT-WEIGHT: bold;
+.historyLabel {
+  font-weight: normal;
 }
 
-SPAN.securityLabel {
-	FONT-WEIGHT: bold;
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
 }
 
-SPAN.configurationLabel {
-	FONT-WEIGHT: bold;
+.bucketsLabel {
+  font-weight: bold;
 }
 
-SPAN.advancedLabel {
-	FONT-WEIGHT: bold;
+.magnetsLabel {
+  font-weight: bold;
 }
 
-SPAN.passwordLabel {
-	FONT-WEIGHT: bold;
+.securityLabel {
+  font-weight: bold;
 }
 
-SPAN.sessionLabel {
-	FONT-WEIGHT: bold;
+.configurationLabel {
+  font-weight: bold;
 }
 
-TD.logo2menuSpace {
-	HEIGHT: 1.0em;
+.advancedLabel {
+  font-weight: bold;
 }
 
-A {
-	FONT-SIZE: 10pt;
-	COLOR: #ffffff;
-        text-decoration: underline;
-        background-color: transparent;
-
+.passwordLabel {
+  font-weight: bold;
 }
 
-A:hover {
-        border: 1px #ffffff solid;
+.sessionLabel {
+  font-weight: bold;
 }
 
-HR {
-	COLOR: #888888;
-        background-color: transparent;
-        height: 1px;
+td.logo2menuspace {
+  height: 1.0em;
+}
+
+a {
+  font-size: 10pt;
+  color: #FFFFFF;
+  text-decoration: underline;
+  background-color: transparent;
+}
+
+a:hover {
+  border: 1px #FFFFFF solid;
+}
+
+hr {
+  color: #888888;
+  background-color: transparent;
+  height: 1px;
 }
 
 .menuSpacer {
-	PADDING-RIGHT: 0px;
-	PADDING-LEFT: 0px;
-	PADDING-BOTTOM: 0px;
-	MARGIN: 0px;
-	WIDTH: 0px;
-	PADDING-TOP: 0px
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  margin: 0px;
+  width: 0px;
+  padding-top: 0px
 }
 
 
-.stabColor01 {
-    border: 1px solid #888888;
-    color: #ffffff;
-    background-color: #545F74;
-
+.settingsTable, .settingsPanel {
+  border: 1px solid #888888;
+  color: #FFFFFF;
+  background-color: #545F74;
 }
 
-.stabColor03 {
-    border: 1px solid #888888;
-    color: #ffffff;
-    background-color: #545F74;
+.openMessageTable, .lookupResultsTable {
+  border: 1px solid #888888;
+  color: #FFFFFF;
+  background-color: #545F74;
 }
 
 .footer {
-    BACKGROUND-IMAGE: url(sleetImages/menu.gif);
-    margin-top: 10px;
-    margin-left: 10%;
-    margin-right: 10%;
-    height: 22px;
-    width: 80%;
-    font-size: 8pt;
-    background-color: transparent;
-    color: #000000;
+  background-image: url(sleetImages/menu.gif);
+  margin-top: 10px;
+  margin-left: 10%;
+  margin-right: 10%;
+  height: 22px;
+  width: 80%;
+  font-size: 8pt;
+  background-color: transparent;
+  color: #000000;
 }
 
-.footer A {
-    font-size: 8pt;
-    color: #000000;
-    background-color: transparent;
+.bottomLink {
+  font-size: 8pt;
+  color: #000000;
+  background-color: transparent;
 }
+
