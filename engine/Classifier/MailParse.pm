@@ -30,7 +30,7 @@ sub new
     $self->{msg_total} = 0;
     
     # Debug messages?
-    $self->{debug}     = 1;
+    $self->{debug}     = 0;
     
     return bless $self, $type;
 }
