@@ -114,9 +114,9 @@
   ;--------------------------------------------------------------------------
 
   !define MUI_PRODUCT   "POPFile"
-  !define MUI_VERSION   "0.20.0"
+  !define MUI_VERSION   "0.20.1"
 
-  !define C_README        "v0.20.0.change"
+  !define C_README        "v0.20.1.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
 
   ;----------------------------------------------------------------------
@@ -183,7 +183,7 @@
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion "0.20.0.0"
+  VIProductVersion "0.20.1.0"
 
   VIAddVersionKey "ProductName" "${MUI_PRODUCT}"
   VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sourceforge.net"
