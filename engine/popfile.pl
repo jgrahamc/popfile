@@ -2162,6 +2162,10 @@ sub run_popfile
                         # and send the reply straight to the client
                         echo_response( $mail, $client, "USER $4" );
                     }
+                    else
+                    {
+                        last;
+                    }
 
                     flush_extra( $mail, $client );
                     next;
@@ -2175,6 +2179,10 @@ sub run_popfile
                         # Pass through the USER command with the actual user name for this server,
                         # and send the reply straight to the client
                         echo_response( $mail, $client, "APOP $4 $5" );
+                    }
+                    else
+                    {
+                        last;
                     }
 
                     flush_extra( $mail, $client );
@@ -2206,6 +2214,10 @@ sub run_popfile
                                 $response = get_response( $mail, $client, $auth );
                             }
                         }
+                        else
+                        {
+                            last;
+                        }
 
                         flush_extra( $mail, $client );
                     }
@@ -2227,6 +2239,10 @@ sub run_popfile
                             {
                                 echo_to_dot( $mail, $client );
                             }
+                        }
+                        else
+                        {
+                            last;
                         }
 
                         flush_extra( $mail, $client );
