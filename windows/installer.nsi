@@ -1242,6 +1242,9 @@ update_config:
   SetOutPath $G_MPLIBDIR\Getopt
   File "${C_PERL_DIR}\lib\Getopt\Long.pm"
 
+  SetOutPath $G_MPLIBDIR\HTML
+  File "${C_PERL_DIR}\site\lib\HTML\Tagset.pm"
+
   SetOutPath $G_MPLIBDIR\IO
   File "${C_PERL_DIR}\lib\IO\*"
 
@@ -1861,11 +1864,12 @@ SectionEnd
     continue:
 
       ;--------------------------------------------------------------------------
-      ; Install Perl modules: base.pm, the Encode collection and Text::Kakasi
+      ; Install Perl modules: base.pm, bytes.pm the Encode collection and Text::Kakasi
       ;--------------------------------------------------------------------------
 
       SetOutPath $G_MPLIBDIR
       File "${C_PERL_DIR}\lib\base.pm"
+      File "${C_PERL_DIR}\lib\bytes.pm"
       File "${C_PERL_DIR}\lib\Encode.pm"
 
       SetOutPath $G_MPLIBDIR\Encode
@@ -5624,6 +5628,7 @@ skip_Encode:
   RMDir /r "$G_MPLIBDIR\Exporter"
   RMDir /r "$G_MPLIBDIR\File"
   RMDir /r "$G_MPLIBDIR\Getopt"
+  RMDir /r "$G_MPLIBDIR\HTML"
   RMDir /r "$G_MPLIBDIR\IO"
   RMDir /r "$G_MPLIBDIR\MIME"
   RMDir /r "$G_MPLIBDIR\String"
