@@ -1019,6 +1019,11 @@ loop:
 
   StrCpy ${L_CMPRE} ${L_LNE} 8
   StrCmp ${L_CMPRE} "ui_port " got_ui_port
+  
+  ; Remove old POP3 server string to ensure the new installation identifies itself properly
+  
+  StrCpy ${L_CMPRE} ${L_LNE} 20
+  StrCmp ${L_CMPRE} "pop3_welcome_string " loop
 
   StrCmp ${L_STRIPLANG} "" transfer
 
