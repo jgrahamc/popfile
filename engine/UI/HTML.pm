@@ -2917,7 +2917,7 @@ sub history_undo
             # Only undo if the message has been classified...
 
             if ( defined( $usedtobe ) ) {
-                $self->{classifier__}->remove_message_from_bucket($self->global_config_( 'msgdir' ) . $mail_file, $bucket);
+                $self->{classifier__}->remove_message_from_bucket( $bucket, $self->global_config_( 'msgdir' ) . $mail_file);
 
                 $self->log_( "Undoing $mail_file from $bucket to $usedtobe" );
 

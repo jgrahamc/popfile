@@ -1282,11 +1282,19 @@ sub get_bucket_word_list
 {
     my ( $self, $bucket ) = @_;
 
+    my @result;
+
     if ( $self->get_bucket_word_count( $bucket ) > 0 ) {
-        return $self->{matrix__}{$bucket};
-    } else {
-        return ();
+        my @entries = @{$self->{matrix__}{$bucket}};
+
+        for my $i (0..$#entries) {
+            if ( defined( $entries[$i] ) && ( $entries[$i] ne '' ) ) {
+                push @result, ($entries[$i]);
+            }
+        }
     }
+
+    return @result;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1536,7 +1544,7 @@ sub add_messages_to_bucket
     # when making a new bucket.
 
     if ( !defined( $self->{total__}{$bucket} ) ) {
-        return;
+        return 0;
     }
 
     my %words;
@@ -1545,8 +1553,9 @@ sub add_messages_to_bucket
         while (<WORDS>) {
             if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
                 if ( $1 != $self->{corpus_version__} )  {
-                    print "Incompatible corpus version in $bucket\n";
-                    return;
+                    print STDERR "Incompatible corpus version in $bucket\n";
+                    close WORDS;
+                    return 0;
                 }
 
                 next;
@@ -1577,12 +1586,16 @@ sub add_messages_to_bucket
     if ( open WORDS, '>' . $self->config_( 'corpus' ) . "/$bucket/table" ) {
         print WORDS "__CORPUS__ __VERSION__ 1\n";
         foreach my $word (sort keys %words) {
-            print WORDS "$word $words{$word}\n";
+            if ( $words{$word} != 0 ) {
+                print WORDS "$word $words{$word}\n";
+            }
         }
         close WORDS;
     }
 
     $self->load_word_matrix_();
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1591,15 +1604,15 @@ sub add_messages_to_bucket
 #
 # Parses a mail message and updates the statistics in the specified bucket
 #
-# $file            Name of file containing mail message to parse
 # $bucket          Name of the bucket to be updated
+# $file            Name of file containing mail message to parse
 #
 # ---------------------------------------------------------------------------------------------
 sub add_message_to_bucket
 {
-    my ( $self, $file, $bucket ) = @_;
+    my ( $self, $bucket, $file ) = @_;
 
-    $self->add_messages_to_bucket( $bucket, $file );
+    return $self->add_messages_to_bucket( $bucket, $file );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1608,19 +1621,19 @@ sub add_message_to_bucket
 #
 # Parses a mail message and updates the statistics in the specified bucket
 #
-# $file            Name of file containing mail message to parse
 # $bucket          Name of the bucket to be updated
+# $file            Name of file containing mail message to parse
 #
 # ---------------------------------------------------------------------------------------------
 sub remove_message_from_bucket
 {
-    my ( $self, $file, $bucket ) = @_;
+    my ( $self, $bucket, $file ) = @_;
 
     # Verify that the bucket exists.  You must call create_bucket before this
     # when making a new bucket.
 
     if ( !defined( $self->{total__}{$bucket} ) ) {
-        return;
+        return 0;
     }
 
     my %words;
@@ -1629,8 +1642,9 @@ sub remove_message_from_bucket
         while (<WORDS>) {
             if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
                 if ( $1 != $self->{corpus_version__} )  {
-                    print "Incompatible corpus version in $bucket\n";
-                    return;
+                    print STDERR "Incompatible corpus version in $bucket\n";
+                    close WORDS;
+                    return 0;
                 }
 
                 next;
@@ -1659,12 +1673,16 @@ sub remove_message_from_bucket
     if ( open WORDS, '>' . $self->config_( 'corpus' ) . "/$bucket/table" ) {
         print WORDS "__CORPUS__ __VERSION__ 1\n";
         foreach my $word (sort keys %words) {
-            print WORDS "$word $words{$word}\n";
+            if ( $words{$word} != 0 ) {
+                print WORDS "$word $words{$word}\n";
+            }
         }
         close WORDS;
     }
 
     $self->load_word_matrix_();
+
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------

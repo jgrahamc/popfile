@@ -56,7 +56,10 @@ test_assert_equal( $b->get_bucket_word_count($buckets[2]), 12114 );
 
 # get_bucket_word_list
 
-# TODO
+my @words = $b->get_bucket_word_list( 'personal' );
+test_assert_equal( $#words, 1 );
+test_assert_equal( $words[0], '|bar 2||baz 100|' );
+test_assert_equal( $words[1], '|foo 1|' );
 
 # get_word_count
 
@@ -185,13 +188,94 @@ test_assert( -e 'corpus/zeotrope/table' );
 open FILE, "<corpus/zeotrope/table";
 $line = <FILE>;
 test_assert_regexp( $line, '__CORPUS__ __VERSION__ 1' );
+$line = <FILE>;
+test_assert( !defined( $line ) );
 close FILE;
 
 # add_message_to_bucket
 
+my %words;
+
+open WORDS, "<TestMailParse021.wrd";
+while ( <WORDS> ) {
+    if ( /(.+) (\d+)/ ) {
+        $words{$1} = $2;
+    }
+}
+close WORDS;
+
+test_assert( !$b->add_message_to_bucket( 'none', 'TestMailParse021.msg' ) );
+test_assert( $b->add_message_to_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
+open FILE, "<corpus/zeotrope/table";
+$line = <FILE>;
+test_assert_regexp( $line, '__CORPUS__ __VERSION__ 1' );
+while ( <FILE> ) {
+    if ( /(.+) (\d+)/ ) {
+        test_assert_equal( $words{$1}, $2, "zeotrope: $1 $2 $words{$1}" );
+    }
+}
+close FILE;
+
+test_assert( $b->add_message_to_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
+
+open FILE, "<corpus/zeotrope/table";
+$line = <FILE>;
+test_assert_regexp( $line, '__CORPUS__ __VERSION__ 1' );
+while ( <FILE> ) {
+    if ( /(.+) (\d+)/ ) {
+        test_assert_equal( ($words{$1}*2), $2, "zeotrope: $1 $2 $words{$1}" );
+    }
+}
+close FILE;
+
 # remove_message_from_bucket
 
+test_assert( !$b->remove_message_from_bucket( 'none', 'TestMailParse021.msg' ) );
+test_assert( $b->remove_message_from_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
+test_assert( $b->remove_message_from_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
+
+open FILE, "<corpus/zeotrope/table";
+$line = <FILE>;
+test_assert_regexp( $line, '__CORPUS__ __VERSION__ 1' );
+$line = <FILE>;
+test_assert( !defined( $line ) );
+close FILE;
+
 # add_messages_to_bucket
+
+test_assert( $b->add_message_to_bucket( 'zeotrope', [ 'TestMailParse021.msg', 'TestMailParse021.msg' ] ) );
+
+open FILE, "<corpus/zeotrope/table";
+$line = <FILE>;
+test_assert_regexp( $line, '__CORPUS__ __VERSION__ 1' );
+while ( <FILE> ) {
+    if ( /(.+) (\d+)/ ) {
+        test_assert_equal( ($words{$1}*2), $2, "zeotrope: $1 $2 $words{$1}" );
+    }
+}
+close FILE;
+
+# Test corrupting the corpus
+
+open FILE, ">corpus/zeotrope/table";
+print FILE "__CORPUS__ __VERSION__ 2\n";
+close FILE;
+
+open STDERR, ">temp.tmp";
+test_assert( !$b->add_message_to_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
+close STDERR;
+open FILE, "<temp.tmp";
+$line = <FILE>;
+test_assert_regexp( $line, 'Incompatible corpus version in zeotrope' );
+close FILE;
+
+open STDERR, ">temp.tmp";
+test_assert( !$b->remove_message_from_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
+close STDERR;
+open FILE, "<temp.tmp";
+$line = <FILE>;
+test_assert_regexp( $line, 'Incompatible corpus version in zeotrope' );
+close FILE;
 
 # delete_bucket
 
@@ -209,6 +293,7 @@ test_assert_equal( $buckets[2], 'spam' );
 
 
 # getting and setting values
+
 test_assert_equal( $b->get_value_( 'personal', 'foo' ), log(1/103) );
 $b->{total__}{personal} = 100;
 $b->set_value_( 'personal', 'foo', 100 );
