@@ -51,7 +51,7 @@
 #--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
-# Optional run-time command-line switch (used by 'adduser.exe')
+# Optional run-time command-line switches (used by 'adduser.exe')
 #--------------------------------------------------------------------------
 #
 # /install
@@ -59,6 +59,13 @@
 # This command-line switch is used when this wizard is called by the main installer program
 # (setup.exe) and makes the wizard skip the language selection dialog and WELCOME page.
 #
+# /installreboot
+#
+# This command-line switch behaves like /install but also makes the wizard set the reboot flag
+# to force a reboot. When the Kakasi package is installed on a Win9x system, a reboot is usually
+# required in order to create the system-wide environment variables used by the package. Since
+# the main installer quits before calling the wizard, it is up to the wizard to force the reboot
+# if one is required.
 #--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
@@ -144,7 +151,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.3"
+  !define C_PFI_VERSION  "0.2.4"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -4852,12 +4859,13 @@ skip_messages:
     $\r$\n$\r$\n\
     $(PFI_LANG_UN_MBRERUN_3)\
     $\r$\n$\r$\n\
-    $(PFI_LANG_UN_MBRERUN_4)" IDYES removed
+    $(PFI_LANG_UN_MBRERUN_4)" IDYES exit
 
 complete_uninstall:
   Delete $G_USERDIR\install.ini
   Delete "$G_USERDIR\uninstalluser.exe"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile Data ($G_WINUSERNAME).lnk"
+  RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
 
   RMDir $G_USERDIR
 
@@ -4892,16 +4900,16 @@ cleanup_registry:
 
   ; if $G_USERDIR was removed, skip these next ones
 
-  IfFileExists "$G_USERDIR\*.*" 0 removed
+  IfFileExists "$G_USERDIR\*.*" 0 exit
 
     ; Check if the user data was stored in same folder as the POPFile program files
 
-    IfFileExists "$G_USERDIR\popfile.pl" removed
-    IfFileExists "$G_USERDIR\perl.exe" removed
+    IfFileExists "$G_USERDIR\popfile.pl" exit
+    IfFileExists "$G_USERDIR\perl.exe" exit
 
     ; Assume it is safe to offer to remove everything now
 
-    MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_2)" IDNO removed
+    MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_2)" IDNO exit
     DetailPrint "$(PFI_LANG_UN_LOG_8)"
     Delete $G_USERDIR\*.* ; this would be skipped if the user hits no
     RMDir /r $G_USERDIR
@@ -4913,12 +4921,12 @@ cleanup_registry:
     RMDir "${C_STD_DEFAULT_USERDATA}"
 
   check_removal:
-    IfFileExists $G_USERDIR 0 removed
+    IfFileExists $G_USERDIR 0 exit
       DetailPrint "$(PFI_LANG_UN_LOG_9)"
       MessageBox MB_OK|MB_ICONEXCLAMATION \
           "$(PFI_LANG_UN_MBREMERR_1): $G_USERDIR $(PFI_LANG_UN_MBREMERR_2)"
-removed:
 
+exit:
   SetDetailsPrint both
 
   !undef L_CFG
