@@ -30,23 +30,23 @@ Apply                                   تطبيق
 On                                      نشط
 Off                                     مقفل
 TurnOn                                  نشّط
-TurnOff                                 اقفل
+TurnOff                                 إقفل
 Add                                     أضف
 Remove                                  إحذف
 Previous                                السابق
 Next                                    التالي
-From                                    مرسل
+From                                    مُرسل
 Subject                                 موضوع
-Cc                                      نسخة كربونية (Cc)
+Cc                                      نسخة خفية (Cc)
 Classification                          تصنيف
-Reclassify                              اعد تصنيف
+Reclassify                              أعد التصنيف
 Probability                             إحتمالية
 Scores                                  نتائج
 QuickMagnets                            مغناطيس سريع
 Undo                                    تراجع
 Close                                   أغلق
 Find                                    إبحث
-Filter                                  صنف
+Filter                                  صنّف
 Yes                                     نعم
 No                                      لا
 ChangeToYes                             غيّر الى نعم
@@ -78,7 +78,7 @@ Header_Security                         الأمان
 Header_Magnets                          مغناطيس
 
 Footer_HomePage                         صفحة البداية
-Footer_Manual                           كتيّب
+Footer_Manual                           تعليمات
 Footer_Forums                           منتدى
 Footer_FeedMe                           تبرّع
 Footer_RequestFeature                   أطلب ميزة
@@ -102,8 +102,8 @@ Configuration_NNTPUpdate                لقد تم تعديل بوابة إتص
 Configuration_POPFork                   إسمح لعدة اتصالات POP3 بشكل متزامن
 Configuration_SMTPFork                  إسمح لعدة اتصالات SMTP بشكل متزامن
 Configuration_NNTPFork                  إسمح لعدة اتصالات NNTP بشكل متزامن
-Configuration_POP3Separator             حرف فصل POP3 host:port:user
-Configuration_NNTPSeparator             حرف فصل NNTP host:port:user
+Configuration_POP3Separator             حرف فصل POP3 بين host:port:user
+Configuration_NNTPSeparator             حرف فصل NNTP  بين host:port:user
 Configuration_POP3SepUpdate             تم تعديل حرف فصل POP3 إلى %s
 Configuration_NNTPSepUpdate             تم تعديل حرف فصل NNTP إلى %s
 Configuration_UI                        بوابة الإتصال لواجهة المستخدم
@@ -117,15 +117,15 @@ Configuration_Skins                     سمة الواجهة
 Configuration_SkinsChoose               إختر سمة الواجهة
 Configuration_Language                  لغة
 Configuration_LanguageChoose            إختر اللغة
-Configuration_ListenPorts               اختيارات البريمج
+Configuration_ListenPorts               اختيارات البُريمج
 Configuration_HistoryView               عرض المحفوظات
 Configuration_TCPTimeout                زمن إنهاء الإتصال
 Configuration_TCPTimeoutSecs            زمن إنهاء الإتصال (ثوان)
 Configuration_TCPTimeoutUpdate          تم تعديل زمن إنهاء الإتصال إلى %s
 Configuration_ClassificationInsertion   إضافة إلى نص رسالة
 Configuration_SubjectLine               تعديل<br>سطر الموضوع
-Configuration_XTCInsertion              ترويسة<br>X-Text-Classification
-Configuration_XPLInsertion              ترويسة<br>X-POPFile-Link
+Configuration_XTCInsertion              رأسية<br>X-Text-Classification
+Configuration_XPLInsertion              رأسية<br>X-POPFile-Link
 Configuration_Logging                   سجلات
 Configuration_None                      بلا
 Configuration_ToScreen                  إلى الشاشة
@@ -154,21 +154,21 @@ Advanced_ConfigFile                     ملف الإعدادات:
 
 History_Filter                          &nbsp;(عرض الدلو <font color="%s">%s</font>)
 History_FilterBy                        صنّف على
-History_Search                          &nbsp;(جرى البحث عن مرسل/موضوع %s)
+History_Search                          &nbsp;(جرى البحث عن مُرسل/موضوع %s)
 History_Title                           رسائل حديثة
 History_Jump                            إذهب الى صفحة
 History_ShowAll                         إعرض الكل
 History_ShouldBe                        يفضّل أن يكون
 History_NoFrom                          لا يوجد سطر "from"
 History_NoSubject                       لا يوجد سطر "subject"
-History_ClassifyAs                      صنف مثل
+History_ClassifyAs                      صنّف مثل
 History_MagnetUsed                      مغناطيس مستعمل
 History_MagnetBecause                   <b>مغناطيس مستعمل</b><p>صنف إلى <font color="%s">%s</font> بسبب المغناطيس %s </p>
 History_ChangedTo                       تم تغيره إلى <font color="%s">%s</font>
 History_Already                         أعيد تصنيفه إلى <font color="%s">%s</font>
 History_RemoveAll                       إحذف الكل
 History_RemovePage                      إحذف الصفحة
-History_Remove                          لحذف مدخلات من التاريخ إضغط
+History_Remove                          لحذف مدخلات من المحفوظات إضغط
 History_SearchMessage                   إبحث مرسل/موضوع
 History_NoMessages                      لا توجد رسائل
 History_ShowMagnet                      ممغنط
@@ -185,8 +185,8 @@ Password_Error1                         كلمة المرور خاطئة
 Security_Error1                         البوابة يجب أن تكون رقماً بين 1 و 65535
 Security_Stealth                        نظام الإخفاء/عمليات الخادم
 Security_NoStealthMode                  لا (نظام الإخفاء)
-Security_ExplainStats                   (عندما يكون فعالاً يقوم POPFile بإرسال مرة واحدة في اليوم القيم الثلاث التالية إلى www.usethesource.com: bc (إجمالي عدد الدلاء التي عندك), mc (إجمالي عدد الرسائل التي صنفها POPFile) و ec (إجمالي عدد أخطاء التصنيف). هذه القيم تخزن في ملف ومن ثم يتم إستعمالها لنشر إحصاءات عن كيفية استعمال الناس لـ POPFile ومدى نجاهة. الخادم الأساسي يقوم بحفظ السجلات لمدة 5 أيام ومن ثم يتم حذفها؛ ليس هناك سجلات تربط بين الإحصاءات وعناوين IP الفردية).
-Security_ExplainUpdate                  (عندما يكون فعالاً يقوم POPFile بإرسال مرة واحدة في اليوم القيم الثلاث التالية إلى www.usethesource.com: ma (رقم الإصدار الأعلى لنسخة POPFile المركبة), mi (رقم الإصدار الأدنى لنسخة POPFile المركبة) و bn (رقم البنية لنسخة POPFile المركبة). POPFile يحصل على جواب على شكل صورة تظهر في أعلى الصفحة إذا ما كان هناك تحديث. الخادم الأساسي يقوم بحفظ السجلات لمدة 5 أيام ومن ثم يتم حذفها؛ ليس هناك سجلات تربط بين تفحص التحديثات وعناوين IP الفردية).
+Security_ExplainStats                   (عندما يكون فعالاً يقوم POPFile بإرسال القيم الثلاث التالية إلى www.usethesource.com مرة واحدة في اليوم: bc (إجمالي عدد الدلاء التي عندك)، mc (إجمالي عدد الرسائل التي صنفها POPFile) و ec (إجمالي عدد أخطاء التصنيف). هذه القيم تخزن في ملف ومن ثم يتم إستعمالها لنشر إحصاءات عن كيفية استعمال الناس لـ POPFile ومدى نجاهة. الخادم الأساسي يقوم بحفظ السجلات لمدة 5 أيام ومن ثم يتم حذفها؛ ليس هناك سجلات تربط بين الإحصاءات وعناوين IP الفردية).
+Security_ExplainUpdate                  (عندما يكون فعالاً يقوم POPFile بإرسال القيم الثلاث التالية إلى www.usethesource.com مرة واحدة في اليوم: ma (رقم الإصدار الأعلى لنسخة POPFile المركبة)، mi (رقم الإصدار الأدنى لنسخة POPFile المركبة) و bn (رقم البنية لنسخة POPFile المركبة). POPFile يحصل على جواب على شكل صورة تظهر في أعلى الصفحة إذا ما كان هناك تحديث. الخادم الأساسي يقوم بحفظ السجلات لمدة 5 أيام ومن ثم يتم حذفها؛ ليس هناك سجلات تربط بين تفحص التحديثات وعناوين IP الفردية).
 Security_PasswordTitle                  كلمة المرور لواجهة المستخدم
 Security_Password                       كلمة المرور
 Security_PasswordUpdate                 تم تعديل كلمة المرور
@@ -227,7 +227,7 @@ Bucket_Error3                           تم صنع دلو بإسم %s
 Bucket_Error4                           الرجاء إدخال كلمة غير فارغة
 Bucket_Error5                           أعد تسمية الدلو %s إلى %s
 Bucket_Error6                           تم حذف الدلو %s
-Bucket_Title                            إعدادات الدلو
+Bucket_Title                            إعدادات الدلاء
 Bucket_BucketName                       إسم<br>الدلو
 Bucket_WordCount                        عدد الكلمات
 Bucket_WordCounts                       أعداد الكلمات
@@ -243,7 +243,7 @@ Bucket_Accuracy                         دقّة
 Bucket_ClassificationCount              عدد التصنيفات
 Bucket_ClassificationFP                 خطأ إيجابي
 Bucket_ClassificationFN                 خطأ سلبي
-Bucket_ResetStatistics                  تصفير الإحصائيات
+Bucket_ResetStatistics                  تصفير الإحصاءات
 Bucket_LastReset                        آخر تصفير
 Bucket_CurrentColor                     %s حالياً له لون %s
 Bucket_SetColorTo                       غيّر لون %s إلى %s
