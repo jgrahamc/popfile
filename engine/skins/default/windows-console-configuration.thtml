@@ -14,7 +14,7 @@
                 <span class="securityWidgetStateOn">
                     <TMPL_VAR NAME="Localize_Yes">
                 </span>
-                <input type="submit" class="toggleOn" id="windowConsoleOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
+                <input type="submit" class="toggleOff" id="windowConsoleOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
                 <input type="hidden" name="windows_console" value="0" />
 
                 <TMPL_ELSE>
