@@ -17,7 +17,7 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 #   Italian translation thanks to Roberto Inzerillo <robicd_at_gmx_dot_net>
-#
+#   Additional Italian contribution (sep-2004) by Paolo De Felice
 
 # Identify the language and character set used for the interface
 LanguageCode                            it
@@ -26,6 +26,9 @@ LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
 ManualLanguage                          en
+
+# This is where to find the FAQ on the Wiki
+FAQLink                                 FrequentlyAskedQuestions
 
 # Common words that are used on their own all over the interface
 Apply                                   Applica
@@ -38,8 +41,8 @@ Remove                                  Rimuovi
 Previous                                Precedente
 Next                                    Successivo
 From                                    Mittente
-Subject                                 Oggetto 
-Cc                                      Cc 
+Subject                                 Oggetto
+Cc                                      Cc
 Classification                          Classificazione
 Reclassify                              Riclassifica
 Probability                             Probabilit&agrave;
@@ -68,8 +71,30 @@ Word                                    Parola
 Count                                   Conteggio
 Update                                  Aggiorna
 Refresh                                 Ricarica
+Arrived                                 Ricevuto
+FAQ                                     FAQ
+ID                                      ID
+Date                                    Data
+Size                                    Dimensione
 
-# The header and footer that appear on every UI page 
+# This is a regular expression pattern that is used to convert
+# a number into a friendly looking number (for the US and UK this
+# means comma separated at the thousands)
+
+Locale_Thousands                       .
+Locale_Decimal                         ,
+
+# The Locale_Date uses the format strings in Perl's Date::Format
+# module to set the date format for the UI.  There are two possible
+# ways to specify it.
+#
+# <format>            Just one simple format used for all dates
+# <<format> | <format> The first format is used for dates less than
+#                     7 days from now, the second for all other dates
+
+Locale_Date                            %a %R | %D %R
+
+# The header and footer that appear on every UI page
 Header_Title                            Centro di Controllo di POPFile
 Header_Shutdown                         Spegni POPFile
 Header_History                          Storico
@@ -85,6 +110,7 @@ Footer_Forums                           Forum di discussione
 Footer_FeedMe                           Donazioni
 Footer_RequestFeature                   Richiedi nuove caratteristiche
 Footer_MailingList                      Mailing List
+Footer_Wiki                             Documentazione
 
 Configuration_Error1                    Il carattere di separazione deve essere un solo carattere
 Configuration_Error2                    La porta per l'interfaccia utente deve essere un numero compreso tra 1 e 65535
@@ -93,6 +119,7 @@ Configuration_Error4                    La dimensione della pagina deve essere u
 Configuration_Error5                    Il numero di giorni nello storico deve essere un numero tra 1 e 366
 Configuration_Error6                    Il timeout TCP deve essere un numero tra 10 e 300
 Configuration_Error7                    La porta per l'XML-RPC deve essere un numero compreso tra 1 e 65535
+Configuration_Error8                    La porta proxy SOCKS V deve essere un numero compreso tra 1 e 65535
 Configuration_POP3Port                  Porta POP3
 Configuration_POP3Update                Porta POP3 impostata a %s; questo cambiamento avr&agrave; effetto dopo il riavvio POPFile
 Configuration_XMLRPCUpdate              Porta XML-RPC impostata a %s; questo cambiamento avr&agrave; effetto dopo il riavvio POPFile
@@ -104,8 +131,8 @@ Configuration_NNTPUpdate                Porta NNTP impostata a %s; questo cambia
 Configuration_POPFork                   Abilita connessioni POP3 contemporanee
 Configuration_SMTPFork                  Abilita connessioni SMTP contemporanee
 Configuration_NNTPFork                  Abilita connessioni NNTP contemporanee
-Configuration_POP3Separator             Carattere di separazione per POP3 host:porta:utente 
-Configuration_NNTPSeparator             Carattere di separazione per NNTP host:porta:utente 
+Configuration_POP3Separator             Carattere di separazione per POP3 host:porta:utente
+Configuration_NNTPSeparator             Carattere di separazione per NNTP host:porta:utente
 Configuration_POP3SepUpdate             Separatore di POP3 impostatato a %s
 Configuration_NNTPSepUpdate             Separatore di NNTP impostatato a %s
 Configuration_UI                        Porta dell'interfaccia utente web
@@ -119,13 +146,13 @@ Configuration_Skins                     Aspetto
 Configuration_SkinsChoose               Scegli l'aspetto
 Configuration_Language                  Lingua
 Configuration_LanguageChoose            Scegli la lingua
-Configuration_ListenPorts               Ascolta sulle porte
+Configuration_ListenPorts               Opzioni di modulo
 Configuration_HistoryView               Vedi lo storico
 Configuration_TCPTimeout                Timeout della connessione TCP
 Configuration_TCPTimeoutSecs            Timeout della connessione TCP in secondi
 Configuration_TCPTimeoutUpdate          Timeout della connessione TCP impostato a %s
 Configuration_ClassificationInsertion   Inserimento di testo nell'E-Mail
-Configuration_SubjectLine               Manipolazione dell'Oggetto
+Configuration_SubjectLine               Aggiungi classificazione all'Oggetto
 Configuration_XTCInsertion              X-Text-Classification Header
 Configuration_XPLInsertion              X-POPFile-Link Header
 Configuration_Logging                   Logging
@@ -138,6 +165,11 @@ Configuration_GeneralSkins              Skin
 Configuration_SmallSkins                Skin piccoli
 Configuration_TinySkins                 Skin minuscoli
 Configuration_CurrentLogFile            &lt;log file corrente&gt;
+Configuration_SOCKSServer               Host proxy SOCKS V
+Configuration_SOCKSPort                 Porta proxy SOCKS V
+Configuration_SOCKSPortUpdate           Porta proxy SOCKS V impostata a %s
+Configuration_SOCKSServerUpdate         Host proxy SOCKS V impostato a %s
+Configuration_Fields                    Colonne dello storico
 
 Advanced_Error1                         '%s' &egrave; gi&agrave; nella lista delle parole ignorate
 Advanced_Error2                         Le parole da ignorare possono contenere solo caratteri alfanumerici, ., _, -, o il carattere @
@@ -152,6 +184,7 @@ Advanced_AllParameters                  Tutti i parametri di POPFile
 Advanced_Parameter                      Parametri
 Advanced_Value                          Valore
 Advanced_Warning                        Questa &egrave; la lista completa dei parametri di POPFile.  Solo per utenti esperti: puoi modificarli tutti e cliccare su Aggiorna; non c'&egrave; alcun controllo sulla loro validit&agrave;.
+Advanced_ConfigFile                     file di configurazione:
 
 History_Filter                          &nbsp;(mostro solo il cesto <font color="%s">%s</font>)
 History_FilterBy                        Filtra per
@@ -173,10 +206,21 @@ History_Remove                          Per rimuovere le voci nello storico clic
 History_SearchMessage                   cerca Mittente/Oggetto
 History_NoMessages                      Nessun messaggio
 History_ShowMagnet                      magnetizza
-History_ShowNoMagnet                    smagnetizza
 History_Magnet                          &nbsp;(mostro solo i messaggi classificati per magnetismo)
 History_NoMagnet                        &nbsp;(mostro solo i messaggi non classificati per magnetismo)
 History_ResetSearch                     Resetta
+History_Automatic                       Automatico
+History_ChangedClass                    Sar&agrave; riclassificato come
+History_Column_Characters               Cambia larghezza delle colonne Da, A, Cc e Oggetto
+History_Increase                        Incrementa
+History_Decrease                        Decrementa
+History_Negate_Search                   Inverti cerca/filtro
+History_Purge                           Elimina ora
+History_Reclassified                    Riclassificato
+History_RemoveChecked                   Rimuovi attivato
+History_Size_Bytes                      %d&nbsp;B
+History_Size_KiloBytes                  %.1f&nbsp;KB
+History_Size_MegaBytes                  %.1f&nbsp;MB
 
 Password_Title                          Password
 Password_Enter                          Inserisci la password
@@ -186,6 +230,7 @@ Password_Error1                         Password non corretta
 Security_Error1                         La porta sicura deve essere un numero tra 1 e 65535
 Security_Stealth                        Modalit&agrave; stealth/Server Operation
 Security_NoStealthMode                  No (Modalit&agrave; Stealth)
+Security_StealthMode                    (Modalit&agrave; Stealth)
 Security_ExplainStats                   (Attivando questo flag POPFile spedisce una volta al giorno i seguenti tre valori ad uno script su www.usethesource.com: bc (il numero totale di cesti che hai), mc (il numero totale di messaggi che POPFile ha classificato) ed ec (il numero totale di errori di classificazione).  Questi valori vengono conservati in un file e ne far&ograve; uso per pubblicare delle statistiche su come la gente usa POPFile e su come funziona.  Il mio server web conserva questi file di log per circa 5 giorni e poi vengono cancellati; non traccio alcuna connessione tra le statistiche e gli IP individuali.)
 Security_ExplainUpdate                  (Attivando questo flag POPFile spedisce una volta al giorno i seguenti tre valori ad uno script su www.usethesource.com: ma (il major version number del POPFile che hai installato), mi (il minor version number del POPFile che hai installato) e bn (il build number del POPFile che hai installato).  POPFile ne ottiene una risposta nella forma di un grafico che appare nella parte alta della pagina allorquando una nuova versione si renda disponibile.  Il mio server web conserva questi file di log per circa 5 giorni e poi vengono cancellati; non conservo alcun dato sulla connessione tra i controlli di aggiornamenti e gli IP individuali.)
 Security_PasswordTitle                  Password dell'Interfaccia Utente
@@ -196,13 +241,13 @@ Security_SecureServer                   Server sicuro
 Security_SecureServerUpdate             Server sicuro impostato a %s; questo cambiamento avr&agrave; effetto dopo il riavvio POPFile
 Security_SecurePort                     Porta sicura
 Security_SecurePortUpdate               Porta impostata a %s; questo cambiamento avr&agrave; effetto solo dopo aver riavviato POPFile
-Security_SMTPServer                     SMTP chain server
-Security_SMTPServerUpdate               Updated SMTP chain server to %s; this change will not take affect until you restart POPFile
-Security_SMTPPort                       SMTP chain port
-Security_SMTPPortUpdate                 Updated SMTP chain port to %s; this change will not take affect until you restart POPFile
+Security_SMTPServer                     Server SMTP concatenato
+Security_SMTPServerUpdate               Server SMTP concatenato impostato a %s; questo cambiamento avr&agrave; effetto solo dopo aver riavviato POPFile
+Security_SMTPPort                       porta SMTP concatenata
+Security_SMTPPortUpdate                 porta SMTP concatenata impostata a %s; questo cambiamento avr&agrave; effetto solo dopo aver riavviato POPFile
 Security_POP3                           Accetta connessioni POP3 da computer remoti (&egrave; necessario riavviare POPFile)
-Security_SMTP                           Accept SMTP connections from remote machines (requires POPFile restart)
-Security_NNTP                           Accept NNTP connections from remote machines (requires POPFile restart)
+Security_SMTP                           Accetta connessioni SMTP da computer remoti (&egrave; necessario riavviare POPFile)
+Security_NNTP                           Accetta connessioni NNTP da computer remoti (&egrave; necessario riavviare POPFile)
 Security_UI                             Accetta connessioni HTTP (Interfaccia Utente) da computer remoti (&egrave; necessario riavviare POPFile)
 Security_XMLRPC                         Accetta connessioni XML-RPC da computer remoti (&egrave; necessario riavviare POPFile)
 Security_UpdateTitle                    Verifica automatica degli aggiornamenti
@@ -233,12 +278,12 @@ Bucket_BucketName                       Nome del cesto
 Bucket_WordCount                        Numero di parole
 Bucket_WordCounts                       Conteggio delle parole
 Bucket_UniqueWords                      Parole uniche
-Bucket_SubjectModification              Manipolazione dell'Oggetto
+Bucket_SubjectModification              Aggiungi classificazione all'Oggetto
 Bucket_ChangeColor                      Cambia il colore
 Bucket_NotEnoughData                    Dati non sufficienti
 Bucket_ClassificationAccuracy           Accuratezza della classificazione
 Bucket_EmailsClassified                 Email classificate
-Bucket_EmailsClassifiedUpper            Email classificate
+Bucket_EmailsClassifiedUpper            Email Classificate
 Bucket_ClassificationErrors             Errori di classificazione
 Bucket_Accuracy                         Accuratezza
 Bucket_ClassificationCount              Conteggio della classificazione
@@ -278,6 +323,10 @@ View_ShowFrequencies                    Mostra la frequenza della parola
 View_ShowProbabilities                  Mostra le probabilit&agrave; della parola
 View_ShowScores                         Mostra i punteggi della parola
 View_WordMatrix                         Matrice delle parole
+View_WordProbabilities                  mostro le probabilit&agrave; della parola
+View_WordFrequencies                    mostro le frequenze della parola
+View_WordScores                         mostro i punteggi della parola
+View_Chart                              Diagramma delle decisioni
 
 Windows_TrayIcon                        Mostrare l'icona di POPFile nel system tray di Windows?
 Windows_Console                         Eseguire POPFile in console?
@@ -299,3 +348,32 @@ Configuration_InsertionTableSummary     Questa tabella contiene dei bottoni per 
 Security_MainTableSummary               Questa tabella rende disponibile un set di controlli che influiscono sulla sicurezza di tutta la configurazione di POPFile, per stabilire se si vuole verificare automaticamente la presenza di aggiornamenti al programma e se si vogliono spedire le statistiche sulle performance di POPFile al centro dati dell'autore del programma come informazioni generali.
 Advanced_MainTableSummary               Questa tabella fornisce un elenco di parole che POPFile ignora al momento della classificazione delle email a causa della loro frequenza relativa nelle email in generale.  Sono organizzate per righe in base alla prima lettera di ciascuna parola.
 
+Imap_Bucket2Folder                      Mail per il cesto <b>%s</b> va alla cartella
+Imap_MapError                           Non puoi mappare pi&ugrave; di un cesto ad una singola cartella!
+Imap_Server                             hostname del server IMAP:
+Imap_ServerNameError                    Inserisci l'hostname del server!
+Imap_Port                               Porta del server IMAP:
+Imap_PortError                          Inserisci un numero di porta valido!
+Imap_Login                              Login dell'account IMAP:
+Imap_LoginError                         Inserisci uno username per il logim!
+Imap_Password                           Password per l'account IMAP:
+Imap_PasswordError                      Inserisci una password per il server!
+Imap_Expunge                            Elimina messaggi contrassegnati per la cancellazione dalle cartelle sotto controllo.
+Imap_Interval                           Intervallo di aggiornamento in secondi:
+Imap_IntervalError                      Inserisci un intervallo tra 10 e 3600 secondi.
+Imap_Bytelimit                          Byte per messaggio da usare per la classificazione. Inserisci 0 (Null) per il messaggio completo:
+Imap_BytelimitError                     Inserisci un numero.
+Imap_RefreshFolders                     Aggiorna lista delle cartelle
+Imap_Now                                ora!
+Imap_UpdateError1                       Login non riuscito. Verifica il nome per il login e la password.
+Imap_UpdateError2                       Connessione al server fallita. Controlla il nome dell'host e la porta ed assicurati di essere online.
+Imap_UpdateError3                       Configura prima i dettagli di connessione.
+Imap_NoConnectionMessage                Configura prima i dettagli di connessione. Fatto ci&ograve;, questa pagina mostrerà altre opzioni.
+Imap_WatchMore                          una cartella ad una lista di cartelle sotto controllo
+Imap_WatchedFolder                      Sotto controllo cartella numero
+
+Shutdown_Message                        POPFile &egrave; stato disattivato
+
+Help_Training                           Quando usi POPFile per la prima volta, non sa niente e necessita di addestramento. POPFile ha bisogno di essere 'allenato' sui messaggi nei vari cesti, l'allenamento si ha quando riclassifichi nel cesto appropriato un messaggio che POPFile ha classificato male. Devi anche settare il tuo client di posta elettronica in modo che filtri i messaggi secondo la classificazione fatta da POPFile. Trovi informazioni su come settare il tuo programma di posta elettronica all'indirizzo <a href="http://popfile.sourceforge.net/cgi-bin/wiki.pl?FrequentlyAskedQuestions/EmailSorting">POPFile Documentation Project</a>.
+Help_Bucket_Setup                       POPFile richiede che ci siano almeno due cesti oltre allo pseudo-cesto 'unclassified'. Quel che rende POPFile unico &egrave; che pu&ograve; classificare email distribuendole in un numero qualunque di cesti. Un setup semplice pu&ograve; prevedere i cesti "spam", "personale", and a "lavoro" bucket.
+Help_No_More                            Non mostrare pi&ugrave;
