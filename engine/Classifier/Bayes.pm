@@ -71,9 +71,10 @@ sub load_word_matrix
             {
                 if ( $2 >= 5 ) 
                 {
-                    $self->{matrix}{$bucket}{$1} = $2;
-                    $self->{total}{$bucket}     += $2;
-                    $self->{full_total}         += $2;
+                    my $word = $self->{mangler}->mangle($1);
+                    $self->{matrix}{$bucket}{$word} = $2;
+                    $self->{total}{$bucket}        += $2;
+                    $self->{full_total}            += $2;
                 }
             }
         }

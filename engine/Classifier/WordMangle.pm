@@ -508,6 +508,12 @@ sub mangle
         return '';
     }
 
+    # Long words are ignored also
+    if ( length($word) > 45 ) 
+    {
+        return "";
+    }
+
     return $word;
 }
 

@@ -99,8 +99,20 @@ sub split_mail_message
     while (<MSG>)
     {
         my $line = $_;
+    
+        # If we hit a line that says we are handling base64 content then give up
+        # since we've hit an attachment
         
-        while ( $line =~ s/([A-Za-z]{3,})// )
+        if ( $line =~ /Content-Transfer-Encoding: base64/i ) 
+        {
+            last;
+        }
+    
+        # Only care about words between 3 and 45 characters since short words like
+        # an, or, if are too common and the longest word in English (according to
+        # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
+    
+        while ( $line =~ s/([A-Za-z]{3,45})// )
         {
             my $word = $mangler->mangle($1);
             
