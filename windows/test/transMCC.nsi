@@ -62,7 +62,7 @@
   !define C_PFI_PRODUCT      "Corpus Conversion Testbed"
   Name                       "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION      "0.1.2"
+  !define C_PFI_VERSION      "0.1.3"
 
   ; Mention the version number in the window title
 
@@ -387,9 +387,6 @@ show_fatal_errors:
   Abort
 
 continue:
-  DetailPrint "Exec '$INSTDIR\bin\wperl.exe $INSTDIR\lib\popfile.pl'"
-  !insertmacro DELETE_LAST_ENTRY
-
   StrCpy $G_BUCKET_COUNT 2
   StrCpy $G_STILL_TO_DO 2
 
