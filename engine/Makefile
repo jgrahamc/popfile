@@ -16,7 +16,7 @@ error:
 	@echo "test     - Run POPFile test suite"
 	@echo "           (test and coverage pass the TESTARGS variable to the test suite)"
 	@echo
-	@echo "windows  - Build Windows installer" 
+	@echo "windows  - Build Windows executables and installer" 
 	@echo "macosx   - Build Mac OS X package installer"
 	@echo "package  - Build Windows installer, and create"
 	@echo "           ZIP files for Windows and cross-platform"
@@ -42,9 +42,21 @@ endif
 
 macosx: ; @$(MAKE) -C ../macosx
 
+# Builds the tray application using PerlTray
+
+winexe: popfile.exe popfileb.exe
+
+TRAY_OPTIONS = --exe $@ --force --clean --dependent --xclude --icon ../windows/POPFileIcon/popfile.ico --script popfile.pl --info CompanyName="The POPFile Project" --info LegalCopyright="Copyright (c) 2003 John Graham-Cumming" --info ProductName=POPFile --info ProductVersion=$(POPFILE_VERSION).0 --info FileDescription=POPFile --info FileVersion=$(POPFILE_VERSION).0
+
+popfile.exe: popfile.pl
+	perltray $(TRAY_OPTIONS)
+
+popfileb.exe: popfile.pl
+	perltray --nogui $(TRAY_OPTIONS)
+
 # windows builds the Windows installer
 
-windows: ; @$(MAKE) -C ../windows
+windows: winexe; @$(MAKE) -C ../windows
 
 # build a ZIPped up package of POPFile
 

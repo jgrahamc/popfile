@@ -5,6 +5,6 @@
 #
 # Copyright (c) 2003 John Graham-Cumming
 
-export POPFILE_VERSION=0.19.0
+export POPFILE_VERSION=0.20.0
 
 
