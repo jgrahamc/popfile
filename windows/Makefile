@@ -1,5 +1,9 @@
 .PHONY: all build
 
+ifndef POPFILE_VERSION
+    $(error POPFILE_VERSION must be defined, run 'make windows' in the engine directory)
+endif
+
 POPFILE_WINDOWS_ZIP := popfile-$(POPFILE_VERSION)-windows.zip
 BUILD_ZIP=../engine/wzzip -P $(POPFILE_WINDOWS_ZIP) -a $^
 
