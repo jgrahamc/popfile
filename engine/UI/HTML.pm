@@ -220,7 +220,7 @@ sub initialize
     # This setting defines what is displayed in the word matrix: 'freq' for frequencies,
     # 'prob' for probabilities, 'score' for logarithmic scores.
     $self->config_( 'wordtable_format', 'prob' );
-  
+
     # Load skins
 
     load_skins($self);
@@ -2633,7 +2633,7 @@ sub new_history_file__
         while ( <MAIL> )  {
             last          if ( /^(\r\n|\r|\n)/ );
 
-            # Support long header that has more than 2 lines by JI
+            # Support long header that has more than 2 lines
 
             if(/^[\t ]+(=\?[\w-]+\?[BQ]\?.*\?=.*)/){
                 if($long_header eq 'from'){
@@ -2669,9 +2669,10 @@ sub new_history_file__
     $subject =~ s/\"(.*)\"/$1/g;
 
     # TODO Interface violation here, need to clean up
+    # Pass language parameter to decode_string()
 
-    $from    = $self->{classifier__}->{parser__}->decode_string( $from );
-    $subject = $self->{classifier__}->{parser__}->decode_string( $subject );
+    $from    = $self->{classifier__}->{parser__}->decode_string( $from, $self->config_( 'language' ) );
+    $subject = $self->{classifier__}->{parser__}->decode_string( $from, $self->config_( 'language' ) );
 
     my ( $short_from, $short_subject ) = ( $from, $subject );
 

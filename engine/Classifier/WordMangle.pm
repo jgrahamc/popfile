@@ -28,6 +28,13 @@ use strict;
 use warnings;
 use locale;
 
+# These are used for Japanese support
+
+my $ascii = '[\x00-\x7F]'; # ASCII chars
+my $two_bytes_euc_jp = '(?:[\x8E\xA1-\xFE][\xA1-\xFE])'; # 2bytes EUC-JP chars
+my $three_bytes_euc_jp = '(?:\x8F[\xA1-\xFE][\xA1-\xFE])'; # 3bytes EUC-JP chars
+my $euc_jp = "(?:$ascii|$two_bytes_euc_jp|$three_bytes_euc_jp)"; # EUC-JP chars
+
 #----------------------------------------------------------------------------
 # new
 #
@@ -145,10 +152,18 @@ sub mangle
 
 sub add_stopword
 {
-    my ( $self, $stopword ) = @_;
+    my ( $self, $stopword, $lang ) = @_;
 
-    if ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) {
-        return 0;
+    # In Japanese mode, reject non EUC Japanese characters.
+
+    if ( $lang eq 'Nihongo') {
+        if ( $stopword !~ /$euc_jp/i ) {
+            return 0;
+        }
+    } else {
+        if ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) {
+            return 0;
+        }
     }
 
     $stopword = $self->mangle( $stopword, 0, 1 );
@@ -165,10 +180,18 @@ sub add_stopword
 
 sub remove_stopword
 {
-    my ( $self, $stopword ) = @_;
+    my ( $self, $stopword, $lang ) = @_;
 
-    if ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) {
-        return 0;
+    # In Japanese mode, reject non EUC Japanese characters.
+
+    if ( $lang eq 'Nihongo') {
+        if ( $stopword !~ /$euc_jp/i ) {
+            return 0;
+        }
+    } else {
+        if ( $stopword =~ /[^[:lower:]\-_\.\@0-9]/i ) {
+            return 0;
+        }
     }
 
     $stopword = $self->mangle( $stopword, 0, 1 );

@@ -33,7 +33,6 @@ use MIME::QuotedPrint;
 
 # These are used for Japanese support
 
-use Encode;
 my $ascii = '[\x00-\x7F]'; # ASCII chars
 my $two_bytes_euc_jp = '(?:[\x8E\xA1-\xFE][\xA1-\xFE])'; # 2bytes EUC-JP chars
 my $three_bytes_euc_jp = '(?:\x8F[\xA1-\xFE][\xA1-\xFE])'; # 3bytes EUC-JP chars
@@ -1428,6 +1427,7 @@ sub clear_out_base64
 #
 # =?charset?[BQ]?text?=
 #
+# $lang     Pass in the current interface language for language specific encoding conversion
 # A B indicates base64 encoding, a Q indicates quoted printable encoding
 # ---------------------------------------------------------------------------------------------
 sub decode_string
@@ -1437,7 +1437,7 @@ sub decode_string
     # Therefore, it will be better to store the decoded text in a temporary variable and substitute
     # the original string with it later. Thus, this subroutine returns the real decoded result.
 
-    my ( $self, $mystring ) = @_;
+    my ( $self, $mystring, $lang ) = @_;
 
     my $decode_it = '';
 
@@ -1446,8 +1446,8 @@ sub decode_string
             $decode_it = decode_base64( $3 );
 
             # for Japanese header
-            if (uc($1) eq "ISO-2022-JP") {
-                Encode::from_to($decode_it, "iso-2022-jp", "euc-jp");
+            if ((uc($1) eq "ISO-2022-JP") && ( $lang eq 'Nihongo' )) {
+                $decode_it = convert_encoding($decode_it, "iso-2022-jp", "euc-jp");
             }
 
             $mystring =~ s/=\?[\w-]+\?B\?(.*?)\?=/$decode_it/i;
@@ -1458,8 +1458,8 @@ sub decode_string
                 $decode_it = decode_qp( $decode_it );
 
                 # for Japanese header
-                if (uc($1) eq "ISO-2022-JP") {
-                    Encode::from_to($decode_it, "iso-2022-jp", "euc-jp");
+                if ((uc($1) eq "ISO-2022-JP") && ( $lang eq 'Nihongo' )) {
+                    $decode_it = convert_encoding($decode_it, "iso-2022-jp", "euc-jp");
                 }
 
                 $mystring =~ s/=\?[\w-]+\?Q\?(.*?)\?=/$decode_it/i;
@@ -1780,6 +1780,24 @@ sub quickmagnets
    return $self->{quickmagnets__};
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# convert_encoding
+#
+# Convert string from one encoding to another
+#
+# $string       The string to be converted
+# $from         Original encoding
+# $to           The encoding which the string is converted to
+# ---------------------------------------------------------------------------------------------
+sub convert_encoding
+{
+    my ( $string, $from, $to ) = @_;
+    require Encode;
+
+    Encode::from_to($string, $from, $to);
+
+    return $string;
+}
+
 1;
-
-

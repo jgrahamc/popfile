@@ -1559,7 +1559,44 @@ sub get_bucket_word_prefixes
     my ( $self, $bucket ) = @_;
 
     my $prev = '';
-    return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
+
+    # In Japanese mode, disable locale and use substr_euc, the substr function
+    # which supports EUC Japanese charset.
+    # Sorting Japanese with "use locale" is memory and time consuming,
+    # and may cause perl crash.
+
+    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+        no locale;
+        return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc($_,0,1)} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
+    } else {
+        return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)} grep {!/__POPFILE__(UNIQUE|TOTAL)__/} keys %{$self->{matrix__}{$bucket}};
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# substr_euc
+#
+# "substr" function which supports EUC Japanese charset
+#
+# $pos      Start position
+# $len      Word length
+#
+# ---------------------------------------------------------------------------------------------
+sub substr_euc {
+    my ($str, $pos, $len) = @_;
+    my $result_str;
+    my $char;
+    my $count=0;
+    if(!$pos) { $pos=0; }
+    if(!$len) { $len=length($str); }
+    for ($pos = 0; $count<$len; $pos++) {
+        $char = substr($str, $pos, 1);
+        if ($char =~ /[\x80-\xff]/) { $char = substr($str, $pos++, 2); }
+        $result_str .= $char;
+        $count++;
+    }
+    return $result_str;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2185,14 +2222,18 @@ sub add_stopword
 {
     my ( $self, $stopword ) = @_;
 
-    return $self->{parser__}->{mangle__}->add_stopword( $stopword );
+    # Pass language parameter to add_stopword()
+
+    return $self->{parser__}->{mangle__}->add_stopword( $stopword, $self->module_config_( 'html', 'language' ) );
 }
 
 sub remove_stopword
 {
     my ( $self, $stopword ) = @_;
 
-    return $self->{parser__}->{mangle__}->remove_stopword( $stopword );
+    # Pass language parameter to remove_stopword()
+
+    return $self->{parser__}->{mangle__}->remove_stopword( $stopword, $self->module_config_( 'html', 'language' ) );
 }
 
 # GETTERS/SETTERS

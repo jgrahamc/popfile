@@ -18,6 +18,7 @@ error:
 	@echo
 	@echo "windows  - Build Windows executables and installer" 
 	@echo "macosx   - Build Mac OS X package installer"
+	@echo "xplat    - Build the cross-platform ZIP"
 	@echo "package  - Build Windows installer, and create"
 	@echo "           ZIP files for Windows and cross-platform"
 	@echo "           version"
@@ -74,9 +75,10 @@ windows: winexe; @$(MAKE) -C ../windows
 
 POPFILE_ZIP := popfile-$(POPFILE_VERSION).zip
 BUILD_ZIP=wzzip -P $(POPFILE_ZIP) -a $^
+xplat: $(POPFILE_ZIP)
 $(POPFILE_ZIP): core manual skins
 
-core: popfile.pl otto.gif pix.gif black.gif bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/POP3.pm Proxy/Proxy.pm UI/HT??.pm *.change license stopwords favicon.ico
+core: popfile.pl otto.gif pix.gif black.gif bayes.pl pipe.pl insert.pl Classifier/*.pm POPFile/*.pm Proxy/POP3.pm Proxy/Proxy.pm UI/HT??.pm v$(POPFILE_VERSION).change license stopwords favicon.ico
 	rm -f $(POPFILE_ZIP)
 	$(BUILD_ZIP)
 

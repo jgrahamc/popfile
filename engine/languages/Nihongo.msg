@@ -20,9 +20,10 @@
 # Identify the language and character set used for the interface
 LanguageCode                            jp
 LanguageCharset                         EUC-JP
+LanguageDirection                       ltr
 
 # This is used to get the appropriate subdirectory for the manual
-ManualLanguage                          en
+ManualLanguage                          jp
 
 # Common words that are used on their own all over the interface
 Apply                                   適用
@@ -39,7 +40,7 @@ Subject                                 件名
 Cc                                      Cc 
 Classification                          分類
 Reclassify                              再分類
-Probability                             可能性
+Probability                             確率
 Scores                                  得点
 QuickMagnets                            クイックマグネット
 Undo                                    やり直し
@@ -58,7 +59,7 @@ To                                      宛て先
 Total                                   合計
 Rename                                  名前変更
 Frequency                               頻度
-Probability                             可能性
+Probability                             確率
 Score                                   得点
 Lookup                                  検査
 Word                                    単語
@@ -72,7 +73,7 @@ Header_Shutdown                         POPFile の停止
 Header_History                          履歴
 Header_Buckets                          バケツ
 Header_Configuration                    設定
-Header_Advanced                         拡張機能
+Header_Advanced                         詳細設定
 Header_Security                         セキュリティ
 Header_Magnets                          マグネット
 
@@ -99,6 +100,9 @@ Configuration_SMTPPort                  SMTP ポート番号
 Configuration_SMTPUpdate                SMTP ポート番号を %s に変更しました。この変更は POPFile を再起動するまで有効になりません。
 Configuration_NNTPPort                  NNTP ポート番号
 Configuration_NNTPUpdate                NNTP ポート番号を %s に変更しました。この変更は POPFile を再起動するまで有効になりません。
+Configuration_POPFork                   POP3 同時接続の許可
+Configuration_SMTPFork                  SMTP 同時接続の許可
+Configuration_NNTPFork                  NNTP 同時接続の許可
 Configuration_POP3Separator             POP3 host:port:user 区切り文字
 Configuration_NNTPSeparator             NNTP host:port:user 区切り文字
 Configuration_POP3SepUpdate             POP3 区切り文字を %s に変更しました。
@@ -135,7 +139,7 @@ Configuration_TinySkins                 最小スキン
 Configuration_CurrentLogFile            &lt;現在のログファイル&gt;
 
 Advanced_Error1                         '%s' は既に無視する単語のリストに含まれています。
-Advanced_Error2                         無視する単語はアルファベットか数字、.(ピリオド)、_(アンダースコア)、-(ハイフン)、または @ のみ含むようにしてください。
+Advanced_Error2                         無効な文字が使われています。再度入力して下さい。
 Advanced_Error3                         '%s' を無視する単語のリストに追加しました。
 Advanced_Error4                         '%s' は無視する単語のリストに含まれていません。
 Advanced_Error5                         '%s' を無視する単語のリストから削除しました。
@@ -143,6 +147,10 @@ Advanced_StopWords                      無視する単語
 Advanced_Message1                       POPFile は以下の頻繁に使われる単語を無視します。
 Advanced_AddWord                        単語追加
 Advanced_RemoveWord                     単語削除
+Advanced_AllParameters                  POPFile 全パラメーター
+Advanced_Parameter                      パラメーター
+Advanced_Value                          値
+Advanced_Warning                        以下は POPFile の全てのパラメーターのリストです。アドバンスド・ユーザーに限り、必要時、値を変更して更新ボタンをクリックして下さい。バリディティー（妥当性）チェックは行いません。
 
 History_Filter                          &nbsp;(<font color="%s">%s </font>バケットのみを表示)
 History_FilterBy                        フィルタリング
@@ -233,8 +241,8 @@ Bucket_EmailsClassifiedUpper            分類されたメール数
 Bucket_ClassificationErrors             分類エラーの数
 Bucket_Accuracy                         精度
 Bucket_ClassificationCount              分類数
-Bucket_ClassificationFP                 False Positives
-Bucket_ClassificationFN                 False Negatives
+Bucket_ClassificationFP                 誤検出
+Bucket_ClassificationFN                 見逃し
 Bucket_ResetStatistics                  リセット
 Bucket_LastReset                        最後のリセット
 Bucket_CurrentColor                     %s 現在の色は %s
@@ -255,9 +263,9 @@ Bucket_Quarantine                       隔離
 SingleBucket_Title                      %s の詳細
 SingleBucket_WordCount                  バケツ内単語数
 SingleBucket_TotalWordCount             総単語数
-SingleBucket_Percentage                 総数に対するパーセンテージ
+SingleBucket_Percentage                 総数に対する割合
 SingleBucket_WordTable                  %s の単語表
-SingleBucket_Message1                   アスタリスク (*) が付いた単語は現在の POPFile セッション中の分類に使われました。すべてのバケツに対する可能性を検査するには単語をクリックして下さい。
+SingleBucket_Message1                   アスタリスク (*) が付いた単語は現在の POPFile セッション中の分類に使われました。すべてのバケツに対する確率を検査するには単語をクリックして下さい。
 SingleBucket_Unique                     固有単語数 %s
 SingleBucket_ClearBucket                全ての単語を削除
 
@@ -265,6 +273,14 @@ Session_Title                           POPFile セッションは終了しました。
 Session_Error                           POPFile セッションは終了しました。これは、POPFile を起動したり終了したのに、ブラウザーを開いたままにしていると起こる可能性があります。POPFile を引き続き使用するには、上に表示されているリンクの内の一つをクリックして下さい。
 
 View_Title                              シングルメッセージビュー
+View_ShowFrequencies                    単語の頻度を表示
+View_ShowProbabilities                  単語の確率を表示
+View_ShowScores                         単語の得点を表示
+View_WordMatrix                         単語マトリクス
+
+Windows_TrayIcon                        POPFile のアイコンを Windows システムトレイに表示しますか？
+Windows_Console                         POPFile のメッセージをコンソールウィンドウに出力しますか？
+Windows_NextTime                        <p><font color="red">この変更は POPFile を次回起動するまで有効になりません。</font>
 
 Header_MenuSummary                      This table is the navigation menu which allows access to each of the different pages of the control center.
 History_MainTableSummary                This table shows the sender and subject of recently received messages and allows them to be reviewed and reclassified.  Clicking on the subject line will show the full message text, along with information about why it was classified as it was.  The 'Should be' column allows you to specify which bucket the message belongs in, or to undo that change.  The 'Delete' column allows you to delete specific messages from the history if you don't need them anymore.
