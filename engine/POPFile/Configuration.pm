@@ -381,7 +381,7 @@ sub parse_command_line
 
                 if ( defined($self->{configuration_parameters__}{$parameter}) ) {
                     if ( $i < $#options ) {
-                        $self->{configuration_parameters__}{$parameter} = $options[$i+1];
+                        $self->parameter( $parameter, $options[$i+1] );
                         $i += 2;
                     } else {
                         print STDERR "\nMissing argument for $options[$i]\n";
