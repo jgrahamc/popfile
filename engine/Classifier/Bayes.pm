@@ -123,6 +123,9 @@ sub initialize
     # Get the hostname for use in the X-POPFile-Link header
     $self->{hostname__} = hostname;
 
+    # Allow the user to override the hostname
+    $self->config_( 'hostname', $self->{hostname__} );
+
     return 1;
 }
 
@@ -963,7 +966,7 @@ sub classify_and_modify
     my $xpl = '';
 
     $xpl .= "<http://";
-    $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->{hostname__};
+    $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->config_( 'hostname' );
     $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$temp_file>$eol";
 
     if ( $self->global_config_( 'xpl' ) && ( $self->{parameters__}{$classification}{quarantine} == 0 ) ) {
