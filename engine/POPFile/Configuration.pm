@@ -81,6 +81,9 @@ sub initialize
     $self->global_config_( 'mcount', 0 );
     $self->global_config_( 'ecount', 0 );
 
+    # The default timeout in seconds for POP3 commands
+    $self->global_config_( 'timeout', 60 );
+
     # Subject modification (global setting is on)
     $self->global_config_( 'subject', 1 );
 

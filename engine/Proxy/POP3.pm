@@ -61,18 +61,11 @@ sub initialize
     $self->config_( 'secure_server', '' );
     $self->config_( 'secure_port', 110 );
 
-    # The default timeout in seconds for POP3 commands
-    $self->global_config_( 'timeout', 60 );
-
     # Only accept connections from the local machine for POP3
     $self->config_( 'local', 1 );
 
     # Whether to do classification on TOP as well
     $self->config_( 'toptoo', 0 );
-
-    # Start with no messages downloaded and no error
-    $self->global_config_( 'mcount', 0 );
-    $self->global_config_( 'ecount', 0 );
 
     # The separator within the POP3 username is :
     $self->config_( 'separator', ':' );
