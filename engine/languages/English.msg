@@ -189,6 +189,7 @@ Bucket_LookupMessage2                   Lookup result for
 Bucket_LookupMostLikely                 <b>%s</b> is most likely to appear in <font color=%s>%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> does not appear in any of the buckets
 Bucket_DisabledGlobally                 Disabled globally
+Bucket_To                               to
 
 SingleBucket_Title                      Detail for %s
 SingleBucket_WordCount                  Bucket word count

@@ -376,6 +376,8 @@ Bucket_DoesNotAppear                    <p><b>%s</b> komt niet voor in een van d
 
 Bucket_DisabledGlobally                 Globaal uitgeschakelt
 
+Bucket_To                               naar
+
 
 
 SingleBucket_Title                      Details voor %s

@@ -1014,7 +1014,13 @@ sub corpus_page
         $body .= "<tr><td colspan=25 align=left><font size=1>0%<td colspan=25 align=right><font size=1>100%</table>";
     }
     
-    $body .= "</table><form action=/buckets><input type=hidden name=session value=$self->{session_key}><input type=submit class=submit name=reset_stats value='$self->{language}{Bucket_ResetStatistics}'><br>($self->{language}{Bucket_LastReset}: $self->{configuration}->{configuration}{last_reset})</form><td valign=top width=33% align=center><h2>$self->{language}{Bucket_EmailsClassifiedUpper}</h2><p><table><tr><td><b>$self->{language}{Bucket}</b><td>&nbsp;<td><b>$self->{language}{Bucket_ClassificationCount}</b>";
+    $body .= "</table><form action=/buckets><input type=hidden name=session value=$self->{session_key}><input type=submit class=submit name=reset_stats value='$self->{language}{Bucket_ResetStatistics}'>";
+    
+    if ( $self->{configuration}{last_reset} ne '' ) {
+        $body .= "<br>($self->{language}{Bucket_LastReset}: $self->{configuration}->{configuration}{last_reset})";
+    }
+    
+    $body .= "</form><td valign=top width=33% align=center><h2>$self->{language}{Bucket_EmailsClassifiedUpper}</h2><p><table><tr><td><b>$self->{language}{Bucket}</b><td>&nbsp;<td><b>$self->{language}{Bucket_ClassificationCount}</b>";
 
     my %bar_values;
     for my $bucket (@buckets)  {
@@ -1042,7 +1048,7 @@ sub corpus_page
     foreach my $bucket (@buckets) {
         $body .= "<option value=$bucket>$bucket</option>";
     }
-    $body .= "</select> <b>to</b> <input type=text name=newname> <input type=submit class=submit name=rename value='$self->{language}{Rename}'><input type=hidden name=session value=$self->{session_key}></form>$rename_message";
+    $body .= "</select> <b>$self->{language}{Bucket_To}</b> <input type=text name=newname> <input type=submit class=submit name=rename value='$self->{language}{Rename}'><input type=hidden name=session value=$self->{session_key}></form>$rename_message";
 
     $body .= "<td valign=top width=50%><a name=Lookup><h2>$self->{language}{Bucket_Lookup}</h2><form action=/buckets#Lookup><p><b>$self->{language}{Bucket_LookupMessage}: </b><br><input name=word type=text> <input type=submit class=submit name=lookup value='$self->{language}{Lookup}'><input type=hidden name=session value=$self->{session_key}></form>";
 
