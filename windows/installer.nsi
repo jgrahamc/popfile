@@ -137,6 +137,7 @@ Section "POPFile" SecPOPFile
   ; Install the POPFile Core files
 
   SetOutPath $INSTDIR
+  File "..\engine\license"
   File "..\engine\v0.18.1.change"
   File "..\engine\*.pl"
   File "..\engine\pix.gif"

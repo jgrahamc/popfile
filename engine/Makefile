@@ -23,7 +23,7 @@ windows: ; @$(MAKE) -C ../windows
 BUILD_ZIP=wzzip -P popfile.zip -a $^
 popfile.zip: core manual skins
 
-core: popfile.pl pix.gif black.gif insert.pl Classifier/*.pm POPFile/Configuration.pm POPFile/Logger.pm Proxy/POP3.pm UI/HTML.pm *.change 
+core: popfile.pl pix.gif black.gif insert.pl Classifier/*.pm POPFile/Configuration.pm POPFile/Logger.pm Proxy/POP3.pm UI/HTML.pm *.change license
 	rm -f popfile.zip
 	$(BUILD_ZIP)
 
@@ -32,14 +32,8 @@ manual: manual/*.gif manual/en/*.html languages/*.msg
 
 skins: skins/*.css skins/*.gif  skins/*/*.gif
 	$(BUILD_ZIP)
-	
+
 # package builds a zip file containing the POPFile package and the windows
 # installer
 
 package: popfile.zip windows
-
-	
-	
-
-	
-	
