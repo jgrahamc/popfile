@@ -174,6 +174,54 @@ sub name
 
 # ---------------------------------------------------------------------------------------------
 #
+# flush_child_data
+#
+# Called to flush data from the pipe of each child as we go, I did this because there
+# appears to be a problem on Windows where the pipe gets a lot of read data in it and 
+# then causes the child not to be terminated even though we are done.  Also this is nice
+# because we deal with the statistics as we go
+#
+# $kid		PID of a child of POP3.pm
+#
+# ---------------------------------------------------------------------------------------------
+sub flush_child_data
+{
+	my ( $self, $kid ) = @_;
+	
+	my $stats_changed = 0;
+	my $handle        = $self->{children}{$kid};
+
+	while ( &{$self->{pipeready}}($handle) )
+	{
+		my $class = <$handle>;
+		
+		if ( defined( $class ) ) {
+			$class =~ s/[\r\n]//g;
+
+			$self->{classifier}->{parameters}{$class}{count} += 1;
+			$self->{configuration}->{configuration}{mcount}  += 1;
+			$stats_changed                                    = 1;
+
+			debug( $self, "Incrementing $class for $kid" );
+		} else {
+		
+			# This is here so that we get in errorneous position where the pipready
+			# function is returning that there's data, but there is none, in fact the
+			# pipe is dead then we break the cycle here.  This was happening to me when
+			# I tested POPFile running under cygwin.
+			
+			last;
+		}
+	}
+	
+	if ( $stats_changed ) {
+		$self->{configuration}->save_configuration();
+		$self->{classifier}->write_parameters();
+	}
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # reaper
 #
 # Called to reap our dead POP3 proxy children
@@ -191,33 +239,14 @@ sub reaper
     my @kids = keys %{$self->{children}};
     
     if ( $#kids >= 0 ) {
-    	my $stats_changed = 0;
-    	
         for my $kid (@kids) {
             if ( waitpid( $kid, &WNOHANG ) == $kid ) {
-                my $handle = $self->{children}{$kid};
-                
-                while ( <$handle> ) {
-                    my $class = $_;
-                    $class =~ s/[\r\n]//g;
-
-                    $self->{classifier}->{parameters}{$class}{count} += 1;
-                    $self->{configuration}->{configuration}{mcount}  += 1;
-					$stats_changed                                    = 1;
-
-                    debug( $self, "Incrementing $_" );
-                }
-                
-                debug( $self, "Done with $kid handle $handle" ); 
-                
+				$self->flush_child_data( $kid );
                 close $self->{children}{$kid};
                 delete $self->{children}{$kid};
+				
+                debug( $self, "Done with $kid" ); 
             }
-        }
-        
-        if ( $stats_changed ) {
-        	$self->{configuration}->save_configuration();
-        	$self->{classifier}->write_parameters();
         }
     }
 }
@@ -232,6 +261,13 @@ sub reaper
 sub service
 {
     my ( $self ) = @_;
+
+	# See if any of the children have passed up statistics data through their
+	# pipes and deal with it now
+	
+	for my $kid (keys %{$self->{children}}) {
+		$self->flush_child_data( $kid );
+	}
 
     # Accept a connection from a client trying to use us as the mail server.  We service one client at a time
     # and all others get queued up to be dealt with later.  We check the alive boolean here to make sure we

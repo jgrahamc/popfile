@@ -36,6 +36,9 @@ use locale;
 #				 through the %components hash.  The name returned here will be the name
 #                used as the key for this module in %components
 #
+# pipeready    - This is a reference to the pipeready() function in this file that it used
+#                to determine if a pipe if ready for reading
+#
 # alive        - Gets set to 1 when the parent wants to kill all the running sub modules
 #
 # forker       - This is a reference to a function (forker) in this file that performs a fork
@@ -83,6 +86,40 @@ sub aborting
 		}
     }
 }
+
+# ---------------------------------------------------------------------------------------------
+#
+# pipeready
+#
+# Returns 1 if there is data available to be read on the passed in pipe handle
+#
+# $pipe		Pipe handle
+#
+# ---------------------------------------------------------------------------------------------
+sub pipeready
+{
+	my ( $pipe ) = @_;
+
+	if ( $on_windows ) {
+		
+		# I am NOT doing a select() here because that does not work 
+		# on Perl running on Windows.  -s returns the "size" of the file
+		# (in this case a pipe) and will be non-zero if there is data to read
+		
+		return ( ( -s $pipe ) > 0 );
+	} else {
+		
+		# Here I do a select because we are not running on Windows where
+		# you can't select() on a pipe
+
+		my $rin = '';
+		vec( $rin, fileno( $pipe ), 1 ) = 1;
+		my $ready = select( $rin, undef, undef, 0.01 );
+		return ( $ready > 0 );
+	}
+}
+
+
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -144,6 +181,13 @@ sub forker
         }
         
         close $reader;
+        
+        # Set autoflush on the write handle so that output goes straight through
+        # to the parent without buffering it until the socket closes
+        
+        use IO::Handle;
+        $writer->autoflush(1);
+        
         return (0, $writer);
     }
     
@@ -272,7 +316,8 @@ foreach my $type (keys %components) {
 		}
 
 		$components{$type}{$name}->{alive}  = 1;
-		$components{$type}{$name}->{forker} = \&forker;
+		$components{$type}{$name}->{forker}    = \&forker;
+		$components{$type}{$name}->{pipeready} = \&pipeready;
 	}
 }
 
