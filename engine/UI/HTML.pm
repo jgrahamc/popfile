@@ -1042,7 +1042,7 @@ sub pretty_number
 {
     my ( $self, $number ) = @_;
 
-    my $c = $self->{language__}{Locale_Thousands};
+    my $c = reverse $self->{language__}{Locale_Thousands};
 
     $number = reverse $number;
     $number =~ s/(\d{3})/$1$c/g;
