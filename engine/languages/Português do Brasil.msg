@@ -29,7 +29,7 @@ Yes                                     Sim
 No                                      Não
 ChangeToYes                             Trocar para Sim
 ChangeToNo                              Trocar para Não
-Bucket                                  Bucket
+Bucket                                  Balde
 Magnet                                  Ímã
 Delete                                  Excluir
 Create                                  Criar
@@ -45,7 +45,7 @@ Lookup                                  Procurar
 Header_Title                            Centro de Controle do POPFile
 Header_Shutdown                         Desligar
 Header_History                          Histórico
-Header_Buckets                          Buckets
+Header_Buckets                          Baldes
 Header_Configuration                    Configuração
 Header_Advanced                         Avançado
 Header_Security                         Segurança
@@ -108,7 +108,7 @@ Advanced_Message1                       As seguintes palavras são ignoradas de t
 Advanced_AddWord                        Adicionar palavra
 Advanced_RemoveWord                     Remover palavra
 
-History_Filter                          &nbsp;(apenas mostrando o bucket <font color="%s">%s</font>)
+History_Filter                          &nbsp;(apenas mostrando o balde <font color="%s">%s</font>)
 History_FilterBy                        Filter By
 History_Search                          &nbsp;(procurado pelo assunto %s)
 History_Title                           Mensagens Recentes
@@ -137,7 +137,7 @@ Password_Error1                         Senha incorreta
 Security_Error1                         A porta segura deve ser um número entre 1 e 65535
 Security_Stealth                        Modo Stealth/Operação Servidor
 Security_NoStealthMode                  Não (Modo Stealth)
-Security_ExplainStats                   (Com isto ligado o POPFile envia uma vez por dia os seguintes três valores para um script em www.usethesource.com: bc (o número total de buckets que você tem), mc (o número total de mensagens que o POPFile classificou) e ec (o número total de erros de classificação).  Isto fica guardado em um arquivo e eu vou usar para publicar algumas estatísticas sobre como as pessoas usam o POPFile e o quão bem ele funciona.  Meu servidor web mantém seus arquivos de log por mais ou menos 5 dias e então os deleta; eu não estou guardando nenhuma conexão entre as estatístcas e os endereços IP de cada um.)
+Security_ExplainStats                   (Com isto ligado o POPFile envia uma vez por dia os seguintes três valores para um script em www.usethesource.com: bc (o número total de baldes que você tem), mc (o número total de mensagens que o POPFile classificou) e ec (o número total de erros de classificação).  Isto fica guardado em um arquivo e eu vou usar para publicar algumas estatísticas sobre como as pessoas usam o POPFile e o quão bem ele funciona.  Meu servidor web mantém seus arquivos de log por mais ou menos 5 dias e então os deleta; eu não estou guardando nenhuma conexão entre as estatístcas e os endereços IP de cada um.)
 Security_ExplainUpdate                  (Com isto ligado o POPFile envia uma vez por dia os seguintes três valores para um script em www.usethesource.com: ma (o número maior da versão do seu POPFile), mi (o número menor da versão do seu POPFile) e bn (o número do build da sua versão do POPFile). O POPFile recebe uma resposta na forma de um gráfico que aparece no topo da página se uma nova versão estiver disponível.  Meu servidor web mantém seus arquivos de log por mais ou menos 5 dias e então os deleta; eu não estou guardando nenhuma conexão entre as verificações de versão e os endereços IP de cada um.)
 Security_PasswordTitle                  Senha da Interface de Usuário
 Security_Password                       Senha
@@ -154,25 +154,25 @@ Security_Update                         Verificar diariamente atualizações para 
 Security_StatsTitle                     Reportar Estatísticas
 Security_Stats                          Enviar estatísticas para o John diariamente
 
-Magnet_Error1                           Ímã '%s' já existe no bucket '%s'
-Magnet_Error2                           O novo ímã '%s' conflita com o ímã '%s' no bucket '%s' e pode causar resultados ambíguos.  O novo ímã não foi adicionado.
-Magnet_Error3                           Criar novo ímã '%s' no bucket '%s'
+Magnet_Error1                           Ímã '%s' já existe no balde '%s'
+Magnet_Error2                           O novo ímã '%s' conflita com o ímã '%s' no balde '%s' e pode causar resultados ambíguos.  O novo ímã não foi adicionado.
+Magnet_Error3                           Criar novo ímã '%s' no balde '%s'
 Magnet_CurrentMagnets                   Ímãs Atuais
-Magnet_Message1                         Os seguintes ímãs fazem os emails serem sempre classificados no bucket especificado.
+Magnet_Message1                         Os seguintes ímãs fazem os emails serem sempre classificados no balde especificado.
 Magnet_CreateNew                        Criar Novo Ímã
 Magnet_Explanation                      Três tipos de ímã estão disponíveis: <ul><li>De um endereço ou nome:</b> Por exemplo: adriano@companhia.com para pegar um endereço específico, <br />companhia.com para pegar todo mundo que manda email de companhia.com, <br />Adriano Gomes para pegar uma pessoa específica, Adriano para pegar todos os Adrianos.</li><li><b>Para um endereço ou nome:</b> Como um ímã De: mas para o endereço Para: de um email.</li><li><b>Palavras no assunto:</b> Por exemplo: olá para pegar todas as mensagens com olá no assunto.</li></ul>
 Magnet_MagnetType                       Tipo do ímã
 Magnet_Value                            Valor
-Magnet_Always                           Sempre vai para o bucket
+Magnet_Always                           Sempre vai para o balde
 
-Bucket_Error1                           Nomes de buckets somente podem conter as letras de a até z minúsculas mais - e _
-Bucket_Error2                           O bucket %s já existe
-Bucket_Error3                           Criado o bucket %s
+Bucket_Error1                           Nomes de balde somente podem conter as letras de a até z minúsculas mais - e _
+Bucket_Error2                           O balde %s já existe
+Bucket_Error3                           Criado o balde %s
 Bucket_Error4                           Por favor digite uma palavra que não seja em branco
-Bucket_Error5                           Renomeado o bucket %s para %s
-Bucket_Error6                           Deletado o bucket %s
+Bucket_Error5                           Renomeado o balde %s para %s
+Bucket_Error6                           Excluído o balde %s
 Bucket_Title                            Sumário
-Bucket_BucketName                       Nome do Bucket
+Bucket_BucketName                       Nome do Balde
 Bucket_WordCount                        Contagem de Palavras
 Bucket_WordCounts                       Contagens de Palavras
 Bucket_UniqueWords                      Palavras Únicas
@@ -190,20 +190,20 @@ Bucket_LastReset                        Último Reinício
 Bucket_CurrentColor                     A cor atual de %s é %s
 Bucket_SetColorTo                       Ajustar a cor de %s para %s
 Bucket_Maintenance                      Manutenção
-Bucket_CreateBucket                     Criar bucket com o nome
-Bucket_DeleteBucket                     Excluir o bucket chamado
-Bucket_RenameBucket                     Renomear o bucket chamado
+Bucket_CreateBucket                     Criar balde com o nome
+Bucket_DeleteBucket                     Excluir o balde chamado
+Bucket_RenameBucket                     Renomear o balde chamado
 Bucket_Lookup                           Procurar
-Bucket_LookupMessage                    Procurar por palavra nos buckets
+Bucket_LookupMessage                    Procurar por palavra nos baldes
 Bucket_LookupMessage2                   Procurar no resultado por
 Bucket_LookupMostLikely                 <b>%s</b> é mais provável de aparecer em <font color="%s">%s</font>
-Bucket_DoesNotAppear                    <p><b>%s</b> não aparece em nenhum dos buckets
+Bucket_DoesNotAppear                    <p><b>%s</b> não aparece em nenhum dos baldes
 Bucket_DisabledGlobally                 Desabilitado globalmente
 Bucket_To                               para
 Bucket_Quarantine                       Quarentena
 
 SingleBucket_Title                      Detalhes para %s
-SingleBucket_WordCount                  Contagem de palavras do bucket
+SingleBucket_WordCount                  Contagem de palavras do balde
 SingleBucket_TotalWordCount             Contagem total de palavras
 SingleBucket_Percentage                 Percentual do total
 SingleBucket_WordTable                  Tabela de Palavras para %s
@@ -211,16 +211,16 @@ SingleBucket_Message1                   Palavras com asterico (*) foram usadas p
 SingleBucket_Unique                     %s únicas
 
 Header_MenuSummary                      Esta tabela é o menu de navegação que possibilita acesso a cada uma das diferentes páginas do centro de controle.
-History_MainTableSummary                Esta tabela mostra o remetente e o assunto das mensagens recebidas recentemente e permite que elas sejam revisadas e reclassificadas.  Clicar na linha de assunto vai mostrar o texto inteiro da mensagem, juntamente com informação sobre por que ela foi classificada como o foi.  A coluna 'Deveria ser' permite que você especifique a que bucket a mensagem pertence, ou desfazer esta mudança.  A coluna 'Remover' permite que você exclua mensagens específicas do histórico se você não precisar mais delas.
-History_OpenMessageSummary              Esta tabela contém o texto integral de uma mensagem, com as palavras que são usadas para classificação destacadas de acordo com o bucket que foi mais relevante para elas. 
-Bucket_MainTableSummary                 Esta tabela fornece uma visão geral dos buckets de classificação.  Cada linha mostra o nome do bucket, a contagem total de palavras para aquele bucket, o número real de palavras individuais em cada bucket, se o assunto do email vai ser modificado quando ele for classificado para aquele bucket, se as mensagens recebidas naquele bucket devem ficar em quarentena, e uma tabela para escolher a cor usada para mostrar qualquer coisa relacionada àquele bucket no centro de controle.
-Bucket_StatisticsTableSummary           Esta tabela fornece três conjuntos de estatísticas sobre o desempenho geral do PopFile.  A primeira é a exatidão da classificação, a segunda é quantos emails foram classificados, e para quais buckets, e a terceira é quantas palavras existem em cada bucket, e as suas porcentagens relativas.
-Bucket_MaintenanceTableSummary          Esta tabela contém formulários que permitem que você crie, exclua ou renomeie buckets, e para procurar uma palavra em todos os buckets e ver as suas probabilidades relativas.
+History_MainTableSummary                Esta tabela mostra o remetente e o assunto das mensagens recebidas recentemente e permite que elas sejam revisadas e reclassificadas.  Clicar na linha de assunto vai mostrar o texto inteiro da mensagem, juntamente com informação sobre por que ela foi classificada como o foi.  A coluna 'Deveria ser' permite que você especifique a que balde a mensagem pertence, ou desfazer esta mudança.  A coluna 'Remover' permite que você exclua mensagens específicas do histórico se você não precisar mais delas.
+History_OpenMessageSummary              Esta tabela contém o texto integral de uma mensagem, com as palavras que são usadas para classificação destacadas de acordo com o balde que foi mais relevante para elas. 
+Bucket_MainTableSummary                 Esta tabela fornece uma visão geral dos baldes de classificação.  Cada linha mostra o nome do balde, a contagem total de palavras para aquele balde, o número real de palavras individuais em cada balde, se o assunto do email vai ser modificado quando ele for classificado para aquele balde, se as mensagens recebidas naquele balde devem ficar em quarentena, e uma tabela para escolher a cor usada para mostrar qualquer coisa relacionada àquele balde no centro de controle.
+Bucket_StatisticsTableSummary           Esta tabela fornece três conjuntos de estatísticas sobre o desempenho geral do PopFile.  A primeira é a exatidão da classificação, a segunda é quantos emails foram classificados, e para quais baldes, e a terceira é quantas palavras existem em cada balde, e as suas porcentagens relativas.
+Bucket_MaintenanceTableSummary          Esta tabela contém formulários que permitem que você crie, exclua ou renomeie baldes, e para procurar uma palavra em todos os baldes e ver as suas probabilidades relativas.
 Bucket_AccuracyChartSummary             Esta tabela representa graficamente a exatidão da classificação de email.
-Bucket_BarChartSummary                  Esta tabela representa graficamente a uma alocação porcentual para cada um dos diferentes buckets.  Ela é usada tanto para o número de emails classificados como para o número total de palavras.
-Bucket_LookupResultsSummary             Esta tabela mostra as probabilidades associadas com qualquer palavra específica do corpus.  Para cada bucket, ela mostra a freqüência com que aquela palavra ocorre, a probabilidade de que ela ocorra naquele bucket, e o efeito geral na pontuação do bucket se aquela palavra existir em um email.
-Bucket_WordListTableSummary             Esta tabela fornece uma relação de todas as palavras para um bucket específico, organizada pela primeira letra comum para cada linha.
-Magnet_MainTableSummary                 Esta tabela mostra a lista de ímãs que são usados para classificar automaticamente mensagens de acordo com regras fixas.  Cada linha mostra como o ímã está definido, para qual bucket ele foi concebido, e um botão para excluir aquele ímã.
+Bucket_BarChartSummary                  Esta tabela representa graficamente a uma alocação porcentual para cada um dos diferentes baldes.  Ela é usada tanto para o número de emails classificados como para o número total de palavras.
+Bucket_LookupResultsSummary             Esta tabela mostra as probabilidades associadas com qualquer palavra específica do corpus.  Para cada balde, ela mostra a freqüência com que aquela palavra ocorre, a probabilidade de que ela ocorra naquele balde, e o efeito geral na pontuação do balde se aquela palavra existir em um email.
+Bucket_WordListTableSummary             Esta tabela fornece uma relação de todas as palavras para um balde específico, organizada pela primeira letra comum para cada linha.
+Magnet_MainTableSummary                 Esta tabela mostra a lista de ímãs que são usados para classificar automaticamente mensagens de acordo com regras fixas.  Cada linha mostra como o ímã está definido, para qual balde ele foi concebido, e um botão para excluir aquele ímã.
 Configuration_MainTableSummary          Esta tabela contém alguns formulários que permitem que você controle a configuração do PopFile.
 Configuration_InsertionTableSummary     Esta tabela contém botões para determinar se certas modificações são feitas no cabeçalho ou no assunto da mensagem antes que ela seja encaminhada para o programa cliente de email.
 Security_MainTableSummary               Esta tabela fornece conjuntos de controles que afetam a segurança da configuração geral do PopFile, se ele deve procurar automaticamente por atualizações do programa, e se estatísticas sobre o desempenho do PopFile devem ser enviadas ao banco de dados central do autor do programa para informação geral.

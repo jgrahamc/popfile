@@ -5,18 +5,20 @@ with your color scheme.  It looks best by far in Mozilla 1.3 on any OS.  IE 6
 is ok but doesn't show the full effect, IE 5 is ugly but usable.  Opera 7.10
 and KDE Konqueror 3.04 are pretty good.  Konqueror 2, and Mac OS9 IE 5 are not
 bad.  Its does well on OS X's Safari 1.0 beta Opera, and IE 5.  It seems on
-most all Mac browsers the "title bar" is not working correctly due to the way
+most Mac browsers the "title bar" is not working correctly due to the way
 they handle system colors.
  
 Original design by Joseph Connors (TexasFett) <wincss@texas.mailshell.com>,
 but wouldn't look nearly as good without Dan Martin (Kraelen).  Thanks Dan.
 
 CSS2 sytle comments are below the line they apply to.  CSS1 style comments are
-hacks to make the skin look better on certain browsers that ignore CSS1
+hacks to make the skin look better on IE and Konqueror since they ignore CSS1
 commenting.  But that means its not fully valid CSS2.
 
-Last Major Update: 3-29-03
-Minor IE 6 Update: 4-19-03
+03-29-03: Last Major Update
+04-19-03: Fix menu visited color on IE 6 - version accepted into POPFile 0.19
+05-03-03: Center footer better and add "icon" in Mozilla, maybe Opera head fix
+05-05-03: Changed a lot of head stuff, got rid of abs positioning
 */
 
 body {
@@ -39,9 +41,46 @@ body {
 }
 
 .shellTop {
-/* Was really getting in our way, got around it with absolute positioning. */
+ width: 100%;
  padding: 0;
  margin: 0;
+ border: 0;
+}
+
+.shellBottom {
+ display: none;
+}
+
+.shellLeft {
+ display: none;
+}
+
+.shellRight {
+ display: none;
+}
+
+.shellTopRow {
+ display: none;
+}
+
+.shellTopLeft {
+ display: none;
+}
+
+.shellTopCenter {
+ display: none;
+}
+
+.shellTopRight {
+ display: none;
+}
+
+.shellBottomLeft {
+ display: none;
+}
+
+.shellBottomRight {
+ display: none;
 }
 
 .naked {
@@ -76,49 +115,48 @@ submit {
 }
 
 table.head {
- top: 0;
- position: absolute;
-/* fixes shellTop "border" around head on Moz but causes problems with Opera */
-// position: relative;
-/* this hack fixes the head on IE and Konq, they ignore CSS1 style comments */
- margin: 1%;
- width: 98%;
+ width: 100%;
  color: ButtonText;
  background-color: ActiveCaption;
  border: 2px outset ActiveBorder;
+ margin: 0;
 }
 
 td.settingsPanel {
  border: 2px groove ActiveBorder;
  padding: 5px;
-/* want about 5px hoizontal betwen boxes on bucket page but doens't work */
-}
-
-td.head {
- font-weight: bold;
- color: CaptionText;
- width: 50%;
-/* fix for Opera as long as the window is wide enough */
+/* want about 5px hoizontal between boxes on bucket page but doesn't work */
 }
 
 .head {
- margin: 0px;
+ font-weight: bold;
+ color: CaptionText;
+ margin: 0;
 }
 
 .head a {
  text-decoration: none;
  color: ActiveCaption;
 // color: CaptionText;
-/* hack that fixes head on IE and Konq, they ignore CSS1 style comments */
+/* hack that fixes head on IE and Konq */
  vertical-align: middle;
 }
 
 .head a:after {
+/* Close button in Mozilla */
  content:" X ";
  font-weight: bold;
  border: 1px outset ActiveBorder;
  color: ButtonText;
  background-color: ButtonFace;
+}
+
+td.head:before {
+/* POPFile "icon" for Mozilla */
+ content:"@ ";
+ font-weight: bold;
+ color: red;
+ background-color: transparent;
 }
 
 .head a:hover {
@@ -239,12 +277,14 @@ tr.rowOdd:hover {
 
 .footer {
  color: InfoText;
- margin-top: 1em;
  border: 1px solid black;
  background-color: InfoBackground;
- margin-left: 20%;
- margin-right: 20%;
  font-weight: normal;
+ margin: auto;
+/* this gives actual table centering in some browsers */
+ margin-top: 1em;
+ text-align: center;
+/* this seems to work in IE */
 }
 
 td.footerBody {
