@@ -234,30 +234,11 @@ sub configuration_page
     my $timeout_error = '';
     my $separator_error = '';
 
-    if ( defined($form{skin}) )
-    {
-        $configuration{skin} = $form{skin};
-    }
-
-    if ( ( defined($form{debug}) ) && ( ( $form{debug} >= 1 ) && ( $form{debug} <= 4 ) ) )
-    {
-        $configuration{debug} = $form{debug}-1;
-    }
-
-    if ( ( defined($form{subject}) ) && ( ( $form{subject} >= 1 ) && ( $form{subject} <= 2 ) ) )
-    {
-        $configuration{subject} = $form{subject}-1;
-    }
-
-    if ( ( defined($form{xtc}) ) && ( ( $form{xtc} >= 1 ) && ( $form{xtc} <= 2 ) ) )
-    {
-        $configuration{xtc} = $form{xtc}-1;
-    }
-
-    if ( ( defined($form{xpl}) ) && ( ( $form{xpl} >= 1 ) && ( $form{xpl} <= 2 ) ) )
-    {
-        $configuration{xpl} = $form{xpl}-1;
-    }
+    $configuration{skin}    = $form{skin}      if ( defined($form{skin}) );
+    $configuration{debug}   = $form{debug}-1   if ( ( defined($form{debug}) ) && ( ( $form{debug} >= 1 ) && ( $form{debug} <= 4 ) ) );
+    $configuration{subject} = $form{subject}-1 if ( ( defined($form{subject}) ) && ( ( $form{subject} >= 1 ) && ( $form{subject} <= 2 ) ) );
+    $configuration{xtc}     = $form{xtc}-1     if ( ( defined($form{xtc}) ) && ( ( $form{xtc} >= 1 ) && ( $form{xtc} <= 2 ) ) );
+    $configuration{xpl}     = $form{xpl}-1     if ( ( defined($form{xpl}) ) && ( ( $form{xpl} >= 1 ) && ( $form{xpl} <= 2 ) ) );
 
     if ( defined($form{separator}) )
     {
@@ -421,15 +402,12 @@ sub security_page
     my $server_error = '';
     my $port_error   = '';
 
-    if ( defined($form{password}) )
-    {
-        $configuration{password} = $form{password};
-    }
     
-    if ( defined($form{server}) )
-    {
-        $configuration{server} = $form{server};
-    }
+    $configuration{password}     = $form{password}         if ( defined($form{password}) );
+    $configuration{server}       = $form{server}           if ( defined($form{server}) );
+    $configuration{localpop}     = $form{localpop} - 1     if ( defined($form{localpop}) );
+    $configuration{localui}      = $form{localui} - 1      if ( defined($form{localui}) );
+    $configuration{update_check} = $form{update_check} - 1 if ( defined($form{update_check}) );
 
     if ( defined($form{sport}) )
     {
@@ -442,21 +420,6 @@ sub security_page
             $port_error = "<blockquote><font color=red size=+1>The secure port must be a number between 1 and 65535</font></blockquote>";
             delete $form{sport};
         }
-    }
-
-    if ( defined($form{localpop}) )
-    {
-        $configuration{localpop} = $form{localpop} - 1;
-    }
-
-    if ( defined($form{localui}) )
-    {
-        $configuration{localui} = $form{localui} - 1;
-    }
-
-    if ( defined($form{update_check}) )
-    {
-        $configuration{update_check} = $form{update_check} - 1;
     }
 
     $body .= "<p><h2>Stealth Mode/Server Operation</h2><p><b>Accept POP3 connections from remote machines:</b><br>";
@@ -757,13 +720,14 @@ sub bar_chart_100
     my (%values) = @_;
     my $body = '';
     my $total_count = 0;
+    my @xaxis = sort keys %values;
 
-    for my $bucket (sort keys %values) 
+    for my $bucket (@xaxis) 
     {
         $total_count += $values{$bucket};
     }
     
-    for my $bucket (sort keys %values) 
+    for my $bucket (@xaxis) 
     {
         my $count   = pretty_number( $values{$bucket} );
         my $percent;
@@ -784,7 +748,7 @@ sub bar_chart_100
 
     if ( $total_count != 0 )
     {
-        foreach my $bucket (sort keys %values)
+        foreach my $bucket (@xaxis)
         {
             my $percent = int( $values{$bucket} * 10000 / $total_count ) / 100; 
             if ( $percent != 0 ) 
@@ -1150,7 +1114,7 @@ sub compare_mf
 #
 # Reloads the history cache filtering based on the passed in filter
 #
-# $filter       Number of bucket to filter on
+# $filter       Name of bucket to filter on
 #
 # ---------------------------------------------------------------------------------------------
 sub load_history_cache
@@ -2723,7 +2687,8 @@ sub run_popfile
                     if ( echo_response( $mail, $client, $command ) )
                     { 
                         my $msg_subject;        # The message subject
-                        my $msg_headers;        # Store the message headers here (will add X-Spam to end)
+                        my $msg_head_before;    # Store the message headers that come before Subject here
+                        my $msg_head_after;     # Store the message headers that come after Subject here
                         my $msg_body;           # Store the message body here
                         my $last_timeout   = time;
                         my $timeout_count  = 0;
@@ -2779,10 +2744,16 @@ sub run_popfile
                                     }
 
                                     # Strip out the X-Text-Classification header that is in an incoming message
-
                                     if ( ( $line =~ /X-Text-Classification: /i ) == 0 )
                                     {
-                                        $msg_headers .= $line;
+                                        if ( $msg_subject eq '' ) 
+                                        {
+                                            $msg_head_before .= $line;
+                                        }
+                                        else
+                                        {
+                                            $msg_head_after  .= $line;
+                                        }
                                     }
                                 }
                                 else
@@ -2801,7 +2772,6 @@ sub run_popfile
                             if ( time > ( $last_timeout + 2 ) )
                             {
                                 print $client "X-POPFile-TimeoutPrevention: $timeout_count$eol";
-                                debug( "Sending timeout prevention header" );
                                 $timeout_count += 1;
                                 $last_timeout = time;
                             }
@@ -2830,28 +2800,29 @@ sub run_popfile
                             # Don't add the classification unless it is not present
                             if ( !( $msg_subject =~ /\[$classification\]/ ) && ( $classifier->{parameters}{$classification}{subject} == 1 ) ) 
                             {
-                                $msg_headers .= "Subject: [$classification]$msg_subject$eol";
+                                $msg_head_before .= "Subject: [$classification]$msg_subject$eol";
                             } 
                             else
                             {
-                                $msg_headers .= "Subject:$msg_subject$eol";
+                                $msg_head_before .= "Subject:$msg_subject$eol";
                             }
                         }
 
-                        $msg_headers .= "X-Text-Classification: $classification$eol" if ( $configuration{xtc} );
+                        $msg_head_after .= "X-Text-Classification: $classification$eol" if ( $configuration{xtc} );
                         $temp_file =~ s/messages\/(.*)/$1/;
                         
                         if ( $configuration{xpl} )
                         {
-                            $msg_headers .= "X-POPFile-Link: http://";
-                            $msg_headers .= $configuration{localpop}?"127.0.0.1":$hostname;
-                            $msg_headers .= ":$configuration{ui_port}/jump_to_message?view=$temp_file$eol";
+                            $msg_head_after .= "X-POPFile-Link: http://";
+                            $msg_head_after .= $configuration{localpop}?"127.0.0.1":$hostname;
+                            $msg_head_after .= ":$configuration{ui_port}/jump_to_message?view=$temp_file$eol";
                         }
                         
-                        $msg_headers .= "$eol";
+                        $msg_head_after .= "$eol";
 
                         # Echo the text of the message to the client
-                        print $client $msg_headers;
+                        print $client $msg_head_before;
+                        print $client $msg_head_after;
                         print $client $msg_body;
 
                         if ( $got_full_body == 0 )   
