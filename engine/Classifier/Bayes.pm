@@ -1196,14 +1196,18 @@ sub classify_and_modify
         print $client $msg_body;
     }
 
-    if ( !$got_full_body ) {
-        $self->echo_to_dot_( $mail, $echo?$client:undef, '>>' . $temp_file );
-    }
+    my $before_dot = '';
 
     if ( $classification ne 'unclassified' ) {
         if ( ( $self->{parameters__}{$classification}{quarantine} == 1 ) && $echo ) {
-            print $client "$eol--$temp_file--$eol";
+            $before_dot = "$eol--$temp_file--$eol";
         }
+    }
+
+    if ( !$got_full_body ) {
+        $self->echo_to_dot_( $mail, $echo?$client:undef, '>>' . $temp_file, $before_dot );
+    } else {
+        print $client $before_dot if ( $before_dot ne '' );
     }
 
     if ( $echo ) {
@@ -1654,13 +1658,14 @@ sub remove_message_from_bucket
 # $mail     The stream (created with IO::) to send the message to (the remote mail server)
 # $client   The local mail client (created with IO::) that needs the response
 # $file     a file to print the response to
+# $before   Optional string to send to client before the dot is sent
 #
 # echo all information from the $mail server until a single line with a . is seen
 #
 # ---------------------------------------------------------------------------------------------
 sub echo_to_dot_
 {
-    my ( $self, $mail, $client, $file ) = @_;
+    my ( $self, $mail, $client, $file, $before ) = @_;
 
     # These if statements are repetitive to keep the inner loops efficient
 
@@ -1672,13 +1677,25 @@ sub echo_to_dot_
             # Check for an abort
             last if ( $self->{alive_} == 0 );
 
-            print $client $_;
-            print FILE $_;
-
             # The termination has to be a single line with exactly a dot on it and nothing
             # else other than line termination characters.  This is vital so that we do
             # not mistake a line beginning with . as the end of the block
-            last if ( /^\.(\r\n|\r|\n)$/ );
+
+            if ( /^\.(\r\n|\r|\n)$/ ) {
+	        if ( $before ne '' ) {
+                    print $client $before;
+                    print FILE    $before;
+		}
+
+                print $client $_;
+                print FILE    $_;
+
+                last;
+	    }
+
+            print $client $_;
+            print FILE    $_;
+
         }
         close FILE;
     } elsif (defined($client)) {
@@ -1688,12 +1705,21 @@ sub echo_to_dot_
             # Check for an abort
             last if ( $self->{alive_} == 0 );
 
-            print $client $_;
-
             # The termination has to be a single line with exactly a dot on it and nothing
             # else other than line termination characters.  This is vital so that we do
             # not mistake a line beginning with . as the end of the block
-            last if ( /^\.(\r\n|\r|\n)$/ );
+
+            if ( /^\.(\r\n|\r|\n)$/ ) {
+	        if ( $before ne '' ) {
+                    print $client $before;
+		}
+
+                print $client $_;
+
+                last;
+	    }
+
+            print $client $_;
         }
     } elsif (defined($file)) {
         # Echo only to file
@@ -1703,12 +1729,21 @@ sub echo_to_dot_
             # Check for an abort
             last if ( $self->{alive_} == 0 );
 
-            print FILE $_;
-
             # The termination has to be a single line with exactly a dot on it and nothing
             # else other than line termination characters.  This is vital so that we do
             # not mistake a line beginning with . as the end of the block
-            last if ( /^\.(\r\n|\r|\n)$/ );
+
+            if ( /^\.(\r\n|\r|\n)$/ ) {
+	        if ( $before ne '' ) {
+                    print FILE $before;
+		}
+
+                print FILE $_;
+
+                last;
+	    }
+
+            print FILE $_;
         }
         close FILE;
     } else {
