@@ -71,6 +71,7 @@ sub aborting
     $alive = 0;
     for my $c (keys %components) {
         $components{$c}->{alive} = 0;
+	    $components{$c}->stop();
     }
 }
 
@@ -133,6 +134,8 @@ sub forker
 
 $SIG{QUIT}  = \&aborting;
 $SIG{ABRT}  = \&aborting;
+$SIG{KILL}  = \&aborting;
+$SIG{STOP}  = \&aborting;
 $SIG{TERM}  = \&aborting;
 $SIG{INT}   = \&aborting;
 $SIG{CHLD}  = 'IGNORE';
