@@ -1490,14 +1490,6 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Installer Function: SetOptionsPage (generates a custom page)
 #
-# If this is an "upgrade" installation, the user is offered the chance to uninstall the old
-# version before continuing with the upgrade. If an uninstall is selected, the 'uninstall.exe'
-# from THIS installer is used instead of the one from the POPFile which is being upgraded. This
-# is done to ensure that a special "upgrade" uninstall is performed instead of a "normal" one.
-# The "upgrade" uninstall ensures that the corpus and some other files are not removed. After
-# an "upgrade" uninstall, the "SHUTDOWN" warning message is removed from the custom page
-# (POPFile is automatically shutdown during the "upgrade" uninstall).
-#
 # This function is used to configure the POP3 and UI ports, and
 # whether or not POPFile should be started automatically when Windows starts.
 #
@@ -1512,40 +1504,6 @@ Function SetOptionsPage
 
   Push ${L_PORTLIST}
   Push ${L_RESULT}
-
-  ; Ensure custom page shows the "Shutdown" warning message box.
-
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Settings" "NumFields" "7"
-
-  ; If the installation folder contains 'popfile.pl' we assume we are upgrading an old version
-  ; of POPFile (up to and  including v0.19.1) and if it contains 'popfile.exe' we assume we are
-  ; upgrading v0.20.0 or later.
-
-  IfFileExists "$INSTDIR\popfile.pl" upgrade_uninstall
-  IfFileExists "$INSTDIR\popfile.exe" 0 continue
-
-upgrade_uninstall:
-  MessageBox MB_YESNO|MB_ICONEXCLAMATION|MB_DEFBUTTON2  \
-      "$(PFI_LANG_OPTIONS_MBUNINST_1) '$INSTDIR'\
-      $\r$\n$\r$\n\
-      $(PFI_LANG_OPTIONS_MBUNINST_2)\
-      $\r$\n$\r$\n\
-      ($(PFI_LANG_OPTIONS_MBUNINST_3))" IDNO continue
-
-  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
-  WriteUninstaller $INSTDIR\uninstall.exe
-  ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
-  IfFileExists "$INSTDIR\popfile.pl" skip_msg_delete
-  IfFileExists "$INSTDIR\popfile.exe" skip_msg_delete
-
-  ; No need to display the warning about shutting down POPFile as it has just been uninstalled
-
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Settings" "NumFields" "5"
-
-skip_msg_delete:
-  Banner::destroy
-
-continue:
 
   ; The function "CheckExistingConfig" loads $G_POP3 and $G_GUI with the settings found in
   ; a previously installed "popfile.cfg" file or if no such file is found, it loads the
@@ -2295,46 +2253,21 @@ FunctionEnd
 
 #--------------------------------------------------------------------------
 # Uninstaller Section
-#
-# There are two types of uninstall:
-#
-# (1) normal uninstall, performed when user wishes to completely remove POPFile from the system
-#
-# (2) an uninstall performed as part of an upgrade installation. In this case some files are
-#     preserved (eg the existing corpus).
 #--------------------------------------------------------------------------
 
 Section "Uninstall"
 
   !define L_CFG         $R9   ; used as file handle
-  !define L_LNE         $R8   ; a line from popfile.cfg
-  !define L_REG_KEY     $R7   ; L_REG_* registers are used to  restore Outlook Express settings
-  !define L_REG_SUBKEY  $R6
-  !define L_REG_VALUE   $R5
-  !define L_TEMP        $R4
-  !define L_UPGRADE     $R3   ; "yes" if this is an upgrade, "no" if we are just uninstalling
-  !define L_CORPUS      $R2   ; holds full path to the POPFile corpus data
-  !define L_SUBCORPUS   $R1   ; "yes" if corpus is in a subfolder of $INSTDIR, otherwise "no"
-  !define L_OLDUI       $R0   ; holds old-style UI port (if previous POPFile is an old version)
-  !define L_HISTORY     $9    ; holds full path to the message history data
-  !define L_SUBHISTORY  $8    ; "yes" if history data in subfolder of $INSTDIR, otherwise "no"
-  !define L_EXE         $7    ; full path of the EXE to be monitored
+  !define L_CORPUS      $R8   ; holds full path to the POPFile corpus data
+  !define L_EXE         $R7   ; full path of the EXE to be monitored
+  !define L_HISTORY     $R6   ; holds full path to the message history data
+  !define L_LNE         $R5   ; a line from popfile.cfg
+  !define L_OLDUI       $R4   ; holds old-style UI port (if previous POPFile is an old version)
+  !define L_REG_KEY     $R3   ; L_REG_* registers are used to  restore Outlook Express settings
+  !define L_REG_SUBKEY  $R2
+  !define L_REG_VALUE   $R1
+  !define L_TEMP        $R0
 
-  ; When a normal uninstall is performed, the uninstaller is copied to a uniquely named
-  ; temporary file and it is that temporary file which is executed (this is how the uninstaller
-  ; removes itself). If we are performing an uninstall as part of an upgrade installation then
-  ; no temporary file is created, we execute the 'real' file ($INSTDIR\uninstall.exe) instead.
-
-  StrCpy ${L_UPGRADE} "no"
-
-  Push $CMDLINE
-  Push "$INSTDIR\uninstall.exe"
-  Call un.StrStr
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" confirmation
-  StrCpy ${L_UPGRADE} "yes"
-
-confirmation:
   IfFileExists $INSTDIR\popfile.pl skip_confirmation
   IfFileExists $INSTDIR\popfile.exe skip_confirmation
     MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
@@ -2344,34 +2277,14 @@ confirmation:
     Abort "$(un.PFI_LANG_ABORT_1)"
 
 skip_confirmation:
-
-  StrCpy ${L_SUBCORPUS} "yes"
-
   Push $INSTDIR
   Call un.GetCorpusPath
   Pop ${L_CORPUS}
-  Push ${L_CORPUS}
-  Push $INSTDIR
-  Call un.StrStr
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" 0 check_msg_folder
-  StrCpy ${L_SUBCORPUS} "no"
-
-check_msg_folder:
-  StrCpy ${L_SUBHISTORY} "yes"
 
   Push $INSTDIR
   Call un.GetHistoryPath
   Pop ${L_HISTORY}
-  Push ${L_HISTORY}
-  Push $INSTDIR
-  Call un.StrStr
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" 0 check_if_running
-  StrCpy ${L_SUBHISTORY} "no"
-
-check_if_running:
-
+  
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_1)"
   SetDetailsPrint listonly
@@ -2488,21 +2401,13 @@ remove_shortcuts:
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_3)"
   SetDetailsPrint listonly
-
-  ; popfile.pl deleted to indicate an uninstall has occurred (file is checked during 'upgrade')
-  ; popfile.exe deleted to indicate an uninstall has occurred (file is checked during 'upgrade')
-
+  
   Delete $INSTDIR\popfile.pl
   Delete $INSTDIR\popfile.exe
   Delete $INSTDIR\popfile.cfg.bak
   Delete $INSTDIR\*.pm
   Delete $INSTDIR\*.dll
   Delete $INSTDIR\wperl.exe
-
-  ; For "upgrade" uninstalls, we leave most files in $INSTDIR
-  ; and do not restore Outlook Express settings
-
-  StrCmp ${L_UPGRADE} "yes" no_reg_file
 
   Delete $INSTDIR\*.gif
   Delete $INSTDIR\*.log
@@ -2599,10 +2504,9 @@ no_reg_file:
   Delete $INSTDIR\languages\*.msg
   RMDir $INSTDIR\languages
 
-  StrCmp ${L_UPGRADE} "yes" skip_corpus
   RMDir /r "${L_CORPUS}"
-
-skip_corpus:
+  RMDir /r "${L_HISTORY}"
+  
   Delete $INSTDIR\stopwords
   Delete $INSTDIR\stopwords.bak
   Delete $INSTDIR\stopwords.default
@@ -2623,28 +2527,22 @@ skip_corpus:
   ;----------------------------------
   ; Delete Kakasi - end
   ;----------------------------------
-
-  StrCmp ${L_UPGRADE} "yes" remove_perl
-  RMDir /r "${L_HISTORY}"
-
-remove_perl:
+  
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_6)"
   SetDetailsPrint listonly
 
-  !insertmacro SafeRecursiveRMDir  "$INSTDIR\auto"
-  !insertmacro SafeRecursiveRMDir  "$INSTDIR\Carp"
-  !insertmacro SafeRecursiveRMDir  "$INSTDIR\Encode"
-  !insertmacro SafeRecursiveRMDir  "$INSTDIR\Exporter"
-  !insertmacro SafeRecursiveRMDir  "$INSTDIR\File"
-  !insertmacro SafeRecursiveRMDir  "$INSTDIR\IO"
-  !insertmacro SafeRecursiveRMDir  "$INSTDIR\MIME"
-  !insertmacro SafeRecursiveRMDir  "$INSTDIR\Sys"
-  !insertmacro SafeRecursiveRMDir  "$INSTDIR\Text"
-  !insertmacro SafeRecursiveRMDir  "$INSTDIR\warnings"
-  !insertmacro SafeRecursiveRMDir  "$INSTDIR\Win32"
-
-  StrCmp ${L_UPGRADE} "yes" Removed
+  RMDir /r "$INSTDIR\auto"
+  RMDir /r "$INSTDIR\Carp"
+  RMDir /r "$INSTDIR\Encode"
+  RMDir /r "$INSTDIR\Exporter"
+  RMDir /r "$INSTDIR\File"
+  RMDir /r "$INSTDIR\IO"
+  RMDir /r "$INSTDIR\MIME"
+  RMDir /r "$INSTDIR\Sys"
+  RMDir /r "$INSTDIR\Text"
+  RMDir /r "$INSTDIR\warnings"
+  RMDir /r "$INSTDIR\Win32"
 
   Delete "$INSTDIR\Uninstall.exe"
 
@@ -2669,18 +2567,15 @@ Removed:
   SetDetailsPrint both
 
   !undef L_CFG
+  !undef L_CORPUS
+  !undef L_EXE
+  !undef L_HISTORY
   !undef L_LNE
+  !undef L_OLDUI
   !undef L_REG_KEY
   !undef L_REG_SUBKEY
   !undef L_REG_VALUE
   !undef L_TEMP
-  !undef L_UPGRADE
-  !undef L_CORPUS
-  !undef L_SUBCORPUS
-  !undef L_OLDUI
-  !undef L_HISTORY
-  !undef L_SUBHISTORY
-  !undef L_EXE
 SectionEnd
 
 #--------------------------------------------------------------------------

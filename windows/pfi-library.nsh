@@ -853,7 +853,7 @@ FunctionEnd
 # This function is used during the uninstall process
 #--------------------------------------------------------------------------
 
-!insertmacro StrStr "un."
+;!insertmacro StrStr "un."    ; Temporarily disabled (to avoid a compiler warning) [03-Oct-03]
 
 
 #--------------------------------------------------------------------------
