@@ -2682,7 +2682,7 @@ sub history_reclassify
 
                 # Update the class file
 
-                $self->{classifier__}->history_load_class( $mail_file, 1, $newbucket, ( $bucket || "unclassified" ) , '');
+                $self->{classifier__}->history_write_class( $mail_file, 1, $newbucket, ( $bucket || "unclassified" ) , '');
 
                 # Since we have just changed the classification of this file and it has
                 # now been reclassified and has a new bucket name then we need to update the
@@ -2756,7 +2756,7 @@ sub history_undo
 
                 # Update the class file
 
-                $self->{classifier__}->history_load_class( $mail_file, 0, ( $usedtobe || "unclassified" ), '', '');
+                $self->{classifier__}->history_write_class( $mail_file, 0, ( $usedtobe || "unclassified" ), '', '');
 
                 # Add message feedback
 
