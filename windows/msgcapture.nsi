@@ -30,6 +30,30 @@
 ; released 7 February 2004, with no "official" NSIS patches/CVS updates applied.
 
 #--------------------------------------------------------------------------
+# Support provided for this utility by the Windows installer
+#--------------------------------------------------------------------------
+#
+# Starting with POPFile 0.22.0 the Windows version of POPFile installs this utility in the
+# main POPFile program folder where it can be used to start POPFile (instead of the normal
+# Start Menu shortcuts). This provides a simple way to run POPFile in console mode without
+# changing the POPFile configuration file (e.g. if some debugging is required).
+#
+# If required, the Windows version of POPFile can be configured to run this utility whenever
+# 'console mode' is selected. This means the UI can be used to enable/disable this utility
+# (by enabling/disabling 'console mode').
+#
+# To activate this feature, simply rename the file 'msgcapture.exe' as 'pfimsgcapture.exe'
+# (or make a copy of it and call the copy 'pfimsgcapture.exe') then start POPFile using a
+# shortcut created by the installer or by running 'runpopfile.exe' (found in the main POPFile
+# program folder).
+#
+# To return to using a DOS-box when console mode is selected, rename the 'pfimsgcapture.exe'
+# program as 'msgcapture.exe' (or delete 'pfimsgcapture.exe' if you created it by renaming a
+# copy of 'msgcapture.exe').
+#
+#--------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------
 # Optional run-time command-line switch (used by 'msgcapture.exe')
 #--------------------------------------------------------------------------
 #
@@ -53,7 +77,11 @@
 #--------------------------------------------------------------------------
 
   ;--------------------------------------------------------------------------
-  ; String constants used to avoid confusion when inserting "newline" sequences
+  ; Symbols used to avoid confusion over where the line breaks occur.
+  ;
+  ; ${IO_NL} is used for InstallOptions-style 'new line' sequences.
+  ; ${MB_NL} is used for MessageBox-style 'new line' sequences.
+  ;
   ; (these two constants do not follow the 'C_' naming convention described below)
   ;--------------------------------------------------------------------------
 
@@ -65,7 +93,7 @@
   ; (two commonly used exceptions to this rule are 'IO_NL' and 'MB_NL')
   ;--------------------------------------------------------------------------
 
-  !define C_VERSION             "0.0.55"
+  !define C_VERSION             "0.0.56"
 
   !define C_OUTFILE             "msgcapture.exe"
 
@@ -124,7 +152,7 @@
 
   Var G_MODE_FLAG         ; "" = normal mode, "PFI" = called from the installer
   Var G_TIMEOUT           ; timeout value in seconds (can be supplied on command-line)
-                          ; (two special cases are supported: 0 and PFI)
+                          ; Two special 'timeout' cases are supported: 0 and PFI
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages
@@ -227,6 +255,8 @@
   !insertmacro PFI_MSGCAP_TEXT "PFI_LANG_MSGCAP_CLICKCLOSE"     "Please click 'Close' to continue with the installation"
   !insertmacro PFI_MSGCAP_TEXT "PFI_LANG_MSGCAP_CLICKCANCEL"    "Please click 'Cancel' to continue with the installation"
 
+  !insertmacro PFI_MSGCAP_TEXT "PFI_LANG_MSGCAP_MBOPTIONERROR"  "'$G_TIMEOUT' is not a valid option for this utility${MB_NL}${MB_NL}Usage: $R1 /TIMEOUT=x${MB_NL}where x is in the range 0 to 99 and specifies the timeout in seconds${MB_NL}${MB_NL}(use 0 to make the utility wait for POPFile to exit)"
+
 #--------------------------------------------------------------------------
 # General settings
 #--------------------------------------------------------------------------
@@ -248,13 +278,12 @@
 # The special timeout value "PFI" is used to indicate that the utility has been called by the
 # installer to monitor the conversion of an old SQL database.
 #
-# If an invalid option is supplied, the default setting is used
-# (i.e. the utility waits until POPFile terminates).
+# If an invalid option is supplied, an error message is displayed.
 #--------------------------------------------------------------------------
 
 Function .onInit
 
-  !define L_TEMP  $R9
+  !define L_TEMP    $R9
 
   Push ${L_TEMP}
 
@@ -264,25 +293,40 @@ Function .onInit
   Pop $G_TIMEOUT
   StrCmp $G_TIMEOUT "" default
   StrCpy ${L_TEMP} $G_TIMEOUT 9
-  StrCmp ${L_TEMP} "/timeout=" 0 default
-  StrCpy $G_TIMEOUT $G_TIMEOUT "" 9
-  StrCmp $G_TIMEOUT "PFI" installer_mode
-  Push $G_TIMEOUT
+  StrCmp ${L_TEMP} "/timeout=" 0 usage_error
+  StrCpy ${L_TEMP} $G_TIMEOUT "" 9
+  StrCmp ${L_TEMP} "PFI" installer_mode
+  Push ${L_TEMP}
   Call StrCheckDecimal
-  Pop $G_TIMEOUT
-  StrCmp $G_TIMEOUT "" default
-  StrCmp $G_TIMEOUT "0" exit
-  IntCmp $G_TIMEOUT 99 exit exit default
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" usage_error
+  StrCmp ${L_TEMP} "0" exit
+  IntCmp ${L_TEMP} 99 exit exit usage_error
+
+usage_error:
+
+  ; This utility is sometimes renamed as 'pfimsgcapture.exe' so we need
+  ; to ensure we use the correct name in the 'usage' message. The first
+  ; system call gets the full pathname (returned in $R0) and the second call
+  ; extracts the filename (and possibly the extension) part (returned in $R1)
+
+  ; No need to worry about corrupting $R0 and $R1 (we abort after displaying the message)
+
+  System::Call 'kernel32::GetModuleFileNameA(i 0, t .R0, i 1024)'
+  System::Call 'comdlg32::GetFileTitleA(t R0, t .R1, i 1024)'
+  MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_MSGCAP_MBOPTIONERROR)"
+  Abort
 
 installer_mode:
   StrCpy $G_MODE_FLAG "PFI"
-  StrCpy $G_TIMEOUT ${C_INSTALLER_TIMEOUT}
+  StrCpy ${L_TEMP} ${C_INSTALLER_TIMEOUT}
   Goto exit
 
 default:
-  StrCpy $G_TIMEOUT "0"
+  StrCpy ${L_TEMP} "0"
 
 exit:
+  StrCpy $G_TIMEOUT ${L_TEMP}
   Pop ${L_TEMP}
 
   !undef L_TEMP
