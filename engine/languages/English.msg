@@ -103,7 +103,7 @@ Advanced_AddWord                        Add word
 Advanced_RemoveWord                     Remove word
 
 History_Filter                          &nbsp;(just showing bucket <font color="%s">%s</font>)
-History_Search                          &nbsp;(searched for subject %s)
+History_Search                          &nbsp;(searched for from/subject %s)
 History_Title                           Recent Messages
 History_Jump                            Jump to message
 History_ShowAll                         Show All
