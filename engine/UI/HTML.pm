@@ -2306,7 +2306,7 @@ sub view_page
 
     $self->{classifier__}->wmformat( $self->{form_}{format} );
 
-    my $index = -1;
+    my $index = $self->{form_}{view};
 
     $templ->param( 'View_Fields'           => $self->print_form_fields_(0,1,('filter','session','search','sort')) );
     $templ->param( 'View_All_Fields'       => $self->print_form_fields_(1,1,('start_message','filter','session','search','sort')));
@@ -2326,8 +2326,8 @@ sub view_page
     $templ->param( 'View_Bucket'           => $bucket );
     $templ->param( 'View_Bucket_Color'     => $color );
 
-    $templ->param( 'View_Index'            => $index ); # TODO
-    $templ->param( 'View_This'             => $index ); # TODO
+    $templ->param( 'View_Index'            => $index );
+    $templ->param( 'View_This'             => $index );
     $templ->param( 'View_This_Page'        => (( $index ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' ))); # TODO
 
     $templ->param( 'View_If_Reclassified'  => $reclassified );
