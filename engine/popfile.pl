@@ -1217,7 +1217,12 @@ sub history_page
             $classifier->{parser}->{bayes} = $classifier;
             $body .= $classifier->{parser}->parse_stream($form{view});
             $classifier->{parser}->{color} = 0;
-            $body .= "<p align=right><a href=/history?start_message=$start_message><b>Close</b></a><td>";
+            $body .= "<p align=right><a href=/history?start_message=$start_message><b>Close</b></a><td valign=top><b>Color Key</b><p>";
+            
+            foreach my $bucket (@buckets)
+            {
+                $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><br>";
+            }
         }
         
         if ( $form{file} eq $mail_file )
