@@ -7,7 +7,7 @@
 #
 # These strings are grouped according to the page/window where they are used
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -73,7 +73,7 @@
 "Este assistente te guiará durante a instalação do POPFile.\r\n\r\nÉ recomendado que você feche todas as outras aplicações antes de iniciar a Instalação.\r\n\r\n$_CLICK"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_ADMIN_TEXT \
-"IMPORTANT NOTICE:\r\n\r\nThe current user does NOT have 'Administrator' rights.\r\n\r\nIf multi-user support is required, it is recommended that you cancel this installation and use an 'Administrator' account to install POPFile."
+"NOTA IMPORTANTE:\r\n\r\nO usuário corrente NÃO tem direitos de 'Administrador'.\r\n\r\nSe suporte a multi-usuário é requerido, é recomendado que você cancele esta instalação e use uma conta de 'Administrador' para instalar o POPFile."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish
@@ -100,7 +100,7 @@
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1  "Instalação anterior encontrada em"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2  "Do you want to upgrade it ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2  "Você quer atualizá-la?"
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
@@ -115,14 +115,14 @@
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_TITLE       "Out-of-date System Components Detected"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_SUBTITLE    "The version of Perl used by POPFile may not work properly on this system"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_TITLE       "Detectados Componentes do Sistema Desatualizados"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_SUBTITLE    "A versão do Perl usada pelo POPFile pode não funcionar corretamente neste sistema"
 
 ; Text strings displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1   "When POPFile displays its User Interface, the current default browser will be used.\r\n\r\nPOPFile does not require a specific browser, it will work with almost any browser.\r\n\r\nPOPFile is written in Perl so a minimal version of Perl is installed which uses some components distributed with Internet Explorer."
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2   "The installer has detected that this system has Internet Explorer"
-!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3   "The version of Perl supplied with POPFile requires Internet Explorer 5.5 (or later).\r\n\r\nIt is recommended that this system is upgraded to use Internet Explorer 5.5 or a later version."
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1   "Quando o POPFile exibir sua Interface de Usuário, o browser default corrente será usado.\r\n\r\nO POPFile não requer um browser específico, ele funcionará com praticamente qualquer browser.\r\n\r\nO POPFile é escrito em Perl, assim uma versão mínima do Perl é instalada, a qual usa alguns componentes distribuidos com o Internet Explorer."
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2   "O instalador detectou que este sistema tem o Internet Explorer"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3   "A versão de Perl fornecida com o POPFile requer o Internet Explorer 5.5 (ou mais atual).\r\n\r\nÉ recomendado que este sistema seja atualizado para usar o Internet Explorer 5.5 ou uma versão mais atual."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Choose Components
@@ -259,29 +259,29 @@
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_TITLE       "Email Client Configuration"
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_SUBTITLE    "POPFile can reconfigure several email clients for you"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_TITLE       "Configuração do Cliente de Email"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_SUBTITLE    "O POPFile pode reconfigurar vários clientes de email para você"
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1   "Mail clients marked (*) can be reconfigured automatically, assuming simple accounts are used.\r\n\r\nIt is strongly recommended that accounts which require authentication are configured manually."
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2   "IMPORTANT: PLEASE SHUT DOWN THE RECONFIGURABLE EMAIL CLIENTS NOW\r\n\r\nThis feature is still under development (e.g. some Outlook accounts may not be detected).\r\n\r\nPlease check that the reconfiguration was successful (before using the email client)."
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1   "Clientes de email marcados (*) podem ser reconfigurados automaticamente, assumindo que contas simples sejam usadas.\r\n\r\nÉ altamente recomendado que contas que requeiram autenticação sejam configuradas manualmente."
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2   "IMPORTANTE: POR FAVOR FECHE OS CLIENTES DE EMAIL RECONFIGURÁVEIS AGORA\r\n\r\nEsta característica ainda está em desenvolvimento (algumas contas do Outlook podem não serem detectadas).\r\n\r\nPor favor verifique se a reconfiguração foi bem sucedida (antes de usar o cliente de email)."
 
 #--------------------------------------------------------------------------
 # Message box warnings that an email client is still running
 #--------------------------------------------------------------------------
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EXP        "WARNING: Outlook Express appears to be running !"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_OUT        "WARNING: Outlook appears to be running !"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EUD        "WARNING: Eudora appears to be running !"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EXP        "AVISO: o Outlook Express parece estar rodando!"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_OUT        "AVISO: o Outlook parece estar rodando!"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EUD        "AVISO: o Eudora parece estar rodando!"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_1     "Please SHUT DOWN the email program then click 'Retry' to reconfigure it"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_2     "(You can click 'Ignore' to reconfigure it, but this is not recommended)"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_3     "Click 'Abort' to skip the reconfiguration of this email program"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_1     "Por favor FECHE o programa de email e clique 'Repetir' para reconfigurá-lo"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_2     "(Você pode clicar 'Ignorar' para reconfigurá-lo, mas isto não é recomendado)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_3     "Clique 'Abortar' para pular a reconfiguração deste programa de email"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_4     "Please SHUT DOWN the email program then click 'Retry' to restore the settings"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_5     "(You can click 'Ignore' to restore the settings, but this is not recommended)"
-!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_6     "Click 'Abort' to skip the restoring of the original settings"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_4     "Por favor FECHE o programa de email e clique 'Repetir' para restaurar a configuração"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_5     "(Você pode clicar 'Ignorar' para restaurar a configuração, mas isto não é recomendado)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_6     "Clique 'Abortar' para pular a restauração da configuração original"
 
 #--------------------------------------------------------------------------
 # Custom Page - Reconfigure Outlook/Outlook Express
@@ -297,54 +297,54 @@
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_IO_CANCELLED  "Outlook Express reconfiguration cancelled by user"
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_IO_CANCELLED  "Outlook reconfiguration cancelled by user"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_IO_CANCELLED  "Reconfiguração do Outlook Express cancelada pelo usuário"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_IO_CANCELLED  "Reconfiguração do Outlook cancelada pelo usuário"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_BOXHDR     "accounts"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_ACCOUNTHDR "Account"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_EMAILHDR   "Email address"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_SERVERHDR  "Server"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_USRNAMEHDR "Username"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_FOOTNOTE   "Tick box(es) to reconfigure account(s).\r\nIf you uninstall POPFile the original settings will be restored."
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_BOXHDR     "contas"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_ACCOUNTHDR "Conta"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_EMAILHDR   "Endereço de Email"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_SERVERHDR  "Servidor"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_USRNAMEHDR "Nome do Usuário"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_FOOTNOTE   "Marque a(s) caixa(s) para reconfigurar a(s) conta(s).\r\nSe você desinstalar o POPFile as configurações originais serão restauradas."
 
 ; Message Box to confirm changes to Outlook/Outlook Express account configuration
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_MBIDENTITY    "Outlook Express Identity :"
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_MBACCOUNT     "Outlook Express Account :"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_MBIDENTITY    "Identidade Outlook Express:"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_MBACCOUNT     "Conta Outlook Express:"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_MBIDENTITY    "Outlook User :"
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_MBACCOUNT     "Outlook Account :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_MBIDENTITY    "Usuário Outlook:"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_MBACCOUNT     "Conta Outlook:"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBEMAIL       "Email address :"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBSERVER      "POP3 server :"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBUSERNAME    "POP3 username :"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBOEPORT      "POP3 port :"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBOLDVALUE    "currently"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBQUESTION    "Reconfigure this account to work with POPFile ?"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBEMAIL       "Endereço de email:"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBSERVER      "Servidor POP3:"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBUSERNAME    "Nome de usuário POP3:"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBOEPORT      "Porta POP3:"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBOLDVALUE    "correntemente"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBQUESTION    "Reconfigurar esta conta para funcionar com o POPFile ?"
 
 ; Title and Column headings for report/log files
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_BEFORE    "Outlook Express Settings before any changes were made"
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_AFTER     "Changes made to Outlook Express Settings"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_BEFORE    "Configuração do Outlook Express antes de qualquer alteração ser feita"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_AFTER     "Alterações feitas na Configuração do Outlook Express"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_BEFORE    "Outlook Settings before any changes were made"
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_AFTER     "Changes made to Outlook Settings"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_BEFORE    "Configuração do Outlook antes de qualquer alteração ser feita"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_AFTER     "Alterações feitas na Configuração do Outlook"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_END       "(end)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_END       "(fim)"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_IDENTITY  "'IDENTITY'"
-!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_IDENTITY  "'OUTLOOK USER'"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_IDENTITY  "'IDENTIDADE'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_IDENTITY  "'USUÁRIO OUTLOOK'"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_ACCOUNT   "'ACCOUNT'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_ACCOUNT   "'CONTA'"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_EMAIL     "'EMAIL ADDRESS'"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_SERVER    "'POP3 SERVER'"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_USER      "'POP3 USERNAME'"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_PORT      "'POP3 PORT'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_EMAIL     "'ENDEREÇO DE EMAIL'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_SERVER    "'SERVIDOR POP3'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_USER      "'NOME DE USUÁRIO POP3'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_PORT      "'PORTA POP3'"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWSERVER "'NEW POP3 SERVER'"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWUSER   "'NEW POP3 USERNAME'"
-!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWPORT   "'NEW POP3 PORT'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWSERVER "'NOVO SERVIDOR POP3'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWUSER   "'NOVO NOME DE USUÁRIO POP3'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWPORT   "'NOVA PORTA POP3'"
 
 #--------------------------------------------------------------------------
 # Custom Page - Reconfigure Eudora
@@ -357,13 +357,13 @@
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CANCELLED  "Eudora reconfiguration cancelled by user"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CANCELLED  "Reconfiguração do Eudora cancelada pelo usuário"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_1    "POPFile has detected the following Eudora personality"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_2    " and can automatically configure it to work with POPFile"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CHECKBOX   "Reconfigure this personality to work with POPFile"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_DOMINANT   "<Dominant> personality"
-!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_PERSONA    "personality"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_1    "O POPFile detectou a seguinte personalidade do Eudora"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_2    " e pode automaticamente configurá-la para funcionar com o POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CHECKBOX   "Reconfigurar esta personalidade para funcionar com o POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_DOMINANT   "Personalidade <dominante>"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_PERSONA    "personalidade"
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_EMAIL      "Endereço de email:"
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_SERVER     "Servidor POP3:"
 !insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_USERNAME   "Nome de usuário POP3:"
@@ -426,8 +426,8 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_4        "Restaurando configurações do Outlook Express..."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_5        "Deletando arquivos de skins do POPFile..."
 !insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_6        "Deletando arquivos mínimos do Perl..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_7        "Restoring Outlook settings..."
-!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_8        "Restoring Eudora settings..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_7        "Restaurando configurações do Outlook..."
+!insertmacro PFI_LANG_STRING PFI_LANG_UN_PROGRESS_8        "Restaurando configurações do Eudora..."
 
 ; Uninstall Log Messages
 
