@@ -158,7 +158,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.17"
+  !define C_PFI_VERSION  "0.2.18"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -692,7 +692,7 @@ Function PFIGUIInit
   IfFileExists "$G_ROOTDIR\popfile.pl" compatible
 
 try_registry:
-  ReadRegStr $G_ROOTDIR HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath"
+  ReadRegStr $G_ROOTDIR HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
   StrCmp $G_ROOTDIR "" 0 compatible
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_COMPAT_NOTFOUND)"
   Abort
@@ -784,6 +784,36 @@ Section "POPFile" SecPOPFile
   Push ${L_TEMP_4}
   Push ${L_TEMP_5}
 
+  ; If the wizard is in the same folder as POPFile, check the HKLM data is still valid
+
+  IfFileExists "$EXEDIR\popfile.pl" 0 update_HKCU_data
+
+  ; If user has 'Admin' rights and this wizard is in a different folder from that specified
+  ; for POPFile in HKLM, make the HKLM data point to the wizard's folder. (This will make the
+  ; wizard use the version of POPFile in the wizard's folder when adding a new POPFile user.)
+
+  StrCmp $G_WINUSERTYPE "Admin" 0 update_HKCU_data
+  ReadRegStr ${L_TEMP} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
+  StrCmp ${L_TEMP} "$G_ROOTDIR" update_HKCU_data
+  WriteRegStr HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "$G_ROOTDIR"
+  StrCmp $G_SFN_DISABLED "0" find_HKLM_root_sfn
+  StrCpy ${L_TEMP_2} "Not supported"
+  Goto save_HKLM_root_sfn
+
+find_HKLM_root_sfn:
+  GetFullPathName /SHORT ${L_TEMP_2} "$G_ROOTDIR"
+
+save_HKLM_root_sfn:
+  WriteRegStr HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP_2}"
+
+  IfFileExists "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" 0 update_HKCU_data
+  IfFileExists "$G_ROOTDIR\uninstall.exe" 0 update_HKCU_data
+  SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" NORMAL
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" \
+                 "$G_ROOTDIR\uninstall.exe"
+
+update_HKCU_data:
+
   ; For this build, each user is expected to have a separate user data folder. The wizard uses
   ; the $G_USERDIR variable to hold the full path to this folder. By default each folder will
   ; contain popfile.cfg, stopwords, stopwords.default, popfile.db, the messages folder, etc.
@@ -806,6 +836,7 @@ Section "POPFile" SecPOPFile
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Author" "adduser.exe"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "Owner" "$G_WINUSERNAME"
 
+  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "InstallPath" "$G_ROOTDIR"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "$G_ROOTDIR"
   StrCmp $G_SFN_DISABLED "0" find_root_sfn
   StrCpy ${L_TEMP_2} "Not supported"
@@ -830,7 +861,7 @@ userdir_exists:
   WriteINIStr "$G_USERDIR\install.ini" "Settings" "Class" "$G_WINUSERTYPE"
   WriteINIStr "$G_USERDIR\install.ini" "Settings" "LastU" "adduser.exe"
 
-  WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath" "$G_USERDIR"
+  DeleteRegValue HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath"
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN" "$G_USERDIR"
   StrCmp $G_SFN_DISABLED "0" find_user_sfn
   StrCpy ${L_TEMP_2} "Not supported"
@@ -1491,7 +1522,7 @@ Function ChooseDefaultDataDir
 
   ; Starting with the 0.21.0 release, user-specific data is stored in the registry
 
-  ReadRegStr $G_USERDIR HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath"
+  ReadRegStr $G_USERDIR HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN"
   StrCmp $G_USERDIR "" look_elsewhere
   IfFileExists "$G_USERDIR\*.*" exit
 
