@@ -167,7 +167,7 @@ Advanced_RemoveWord                     Remove word
 Advanced_AllParameters                  All POPFile Parameters
 Advanced_Parameter                      Parameter
 Advanced_Value                          Value
-Advanced_Warning                        This is the complete list of POPFile parameters.  Advanced users only: you may change any and click Update; there is no validity checking.
+Advanced_Warning                        This is the complete list of POPFile parameters.  Advanced users only: you may change any and click Update; there is no validity checking.  Items shown in bold have been changed from the default setting.
 Advanced_ConfigFile                     Configuration file:
 
 History_Filter                          &nbsp;(just showing bucket <font color="%s">%s</font>)

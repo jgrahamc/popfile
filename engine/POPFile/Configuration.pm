@@ -47,11 +47,11 @@ sub new
     my $type = shift;
     my $self = POPFile::Module->new();
 
-    # All the current configuration parameters are stored in this hash which
-    # is intended to be globally accessed by modules that make use of this module,
-    # to register a configuration default entries are made in this hash in the form
+    # This hash has indexed by parameter name and has two fields:
     #
-    # $self->{configuration_parameters__}{parameter}
+    # value         The current value
+    # default       The default value
+
     $self->{configuration_parameters__} = {};
 
     # Name of the PID file that we created
@@ -69,6 +69,12 @@ sub new
     # Used to tell whether we need to save the configuration
 
     $self->{save_needed__} = 0;
+
+    # We track when out start() is called so that we know when the modules
+    # are done setting the default values so that we know which have default
+    # and which do not
+
+    $self->{started__} = 0;
 
     # Local copies of POPFILE_ROOT and POPFILE_USER
 
@@ -136,6 +142,8 @@ sub initialize
 sub start
 {
     my ( $self ) = @_;
+
+    $self->{started__} = 1;
 
     # Check to see if the PID file is present, if it is then another POPFile
     # may be running, warn the user and terminate
@@ -339,7 +347,7 @@ sub parse_command_line
     #
     # So its possible to do
     #
-    # --set bayes_param=value --set=-bayes_parem=value --set -bayes_parem=value -- -bayes_parem value
+    # --set bayes_param=value --set=-bayes_param=value --set -bayes_param=value -- -bayes_param value
 
     if ( !GetOptions( "set=s" => \@set_options ) ) {
         return 0;
@@ -494,6 +502,8 @@ sub load_configuration
 {
     my ( $self ) = @_;
 
+    $self->{started__} = 1;
+
     if ( open CONFIG, '<' . $self->get_user_path( 'popfile.cfg' ) ) {
         while ( <CONFIG> ) {
             s/(\015|\012)//g;
@@ -505,9 +515,9 @@ sub load_configuration
                 $parameter = $self->upgrade_parameter__($parameter);
 
                 if ( defined( $self->{configuration_parameters__}{$parameter} ) ) {
-                    $self->{configuration_parameters__}{$parameter} = $value;
+                    $self->{configuration_parameters__}{$parameter}{value} = $value;
 	        } else {
-                    $self->log_( 0, "Discarded unknown parameter '$parameter' from popfile.cfg" );
+                    $self->log_( 0, "Discarded unknown or outdated parameter '$parameter' from popfile.cfg" );
                     $self->{deprecated_parameters__}{$parameter} = $value;
                 }
             }
@@ -538,7 +548,7 @@ sub save_configuration
         $self->{save_needed__} = 0;
 
         foreach my $key (sort keys %{$self->{configuration_parameters__}}) {
-            print CONFIG "$key $self->{configuration_parameters__}{$key}\n";
+            print CONFIG "$key $self->{configuration_parameters__}{$key}{value}\n";
         }
 
         close CONFIG;
@@ -608,14 +618,36 @@ sub path_join__
 # ---------------------------------------------------------------------------------------------
 sub parameter
 {
-  my ( $self, $name, $value ) = @_;
+    my ( $self, $name, $value ) = @_;
 
-  if ( defined( $value ) ) {
-    $self->{save_needed__} = 1;
-    $self->{configuration_parameters__}{$name} = $value;
-  }
+    if ( defined( $value ) ) {
+        $self->{save_needed__} = 1;
+        $self->{configuration_parameters__}{$name}{value} = $value;
+        if ( $self->{started__} == 0 ) {
+            $self->{configuration_parameters__}{$name}{default} = $value;
+        }
+    }
 
-  return $self->{configuration_parameters__}{$name};
+    return $self->{configuration_parameters__}{$name}{value};
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# is_default
+#
+# Returns whether the parameter has the default value or not
+#
+# $name          Name of the parameter
+#
+# Returns 1 if the parameter still has its default value
+#
+# ---------------------------------------------------------------------------------------------
+sub is_default
+{
+    my ( $self, $name ) = @_;
+
+    return ( $self->{configuration_parameters__}{$name}{value} eq
+             $self->{configuration_parameters__}{$name}{default} );
 }
 
 # GETTERS

@@ -84,7 +84,13 @@
 
                     <tr>
                         <td>
+                            <TMPL_IF NAME="Advanced_If_Changed">
+                                <b>
+                            </TMPL_IF>
                             <TMPL_VAR NAME="Advanced_Parameter">
+                            <TMPL_IF NAME="Advanced_If_Changed">
+                                </b>
+                            </TMPL_IF>
                         </td>
                         <td>
                             <input type="text" name="parameter_<TMPL_VAR NAME="Advanced_Parameter">" value="<TMPL_VAR NAME="Advanced_Value">">
