@@ -104,9 +104,9 @@
   ;--------------------------------------------------------------------------
 
   !define MUI_PRODUCT   "POPFile"
-  !define MUI_VERSION   "0.20.0 (CVS BerkeleyDB)"
+  !define MUI_VERSION   "0.20.0 (CVS DB-EXE)"
 
-  !define C_README        "v0.19.1.change"
+  !define C_README        "v0.20.0.change"
   !define C_RELEASE_NOTES "..\engine\${C_README}"
 
   ;----------------------------------------------------------------------
@@ -163,15 +163,15 @@
 
   VIAddVersionKey "ProductName" "${MUI_PRODUCT}"
   VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sourceforge.net"
-  VIAddVersionKey "CompanyName" "POPFile Team"
+  VIAddVersionKey "CompanyName" "The POPFile Project"
   VIAddVersionKey "LegalCopyright" "© 2001-2003  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "POPFile Automatic email classification"
   VIAddVersionKey "FileVersion" "${MUI_VERSION}"
 
   !ifndef ENGLISH_ONLY
-    VIAddVersionKey "Build" "Multi-Language (CVS BerkeleyDB)"
+    VIAddVersionKey "Build" "Multi-Language (CVS DB-EXE)"
   !else
-    VIAddVersionKey "Build" "English-Only (CVS BerkeleyDB)"
+    VIAddVersionKey "Build" "English-Only (CVS DB-EXE)"
   !endif
 
   VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
@@ -276,12 +276,18 @@
   ; Interface Settings
   ;-----------------------------------------
 
+  ; The banner provided by the default 'modern.exe' UI does not provide much room for the
+  ; two lines of text, e.g. the German version is truncated, so we use a custom UI which
+  ; provides slightly wider text areas. Each area is still limited to a single line of text.
+
+  !define MUI_UI "UI\pfi_modern.exe"
+
   ; The 'hdr-common.bmp' logo is only 90 x 57 pixels, much smaller than the 150 x 57 pixel
   ; space provided by the default 'modern_headerbmpr.exe' UI, so we use a custom UI which
   ; leaves more room for the TITLE and SUBTITLE text.
-  
+
   !define MUI_UI_HEADERBITMAP_RIGHT "UI\pfi_headerbmpr.exe"
-  
+
   ; The "Special" bitmap appears on the "Welcome" and "Finish" pages,
   ; the "Header" bitmap appears on the other pages of the installer.
 
@@ -318,19 +324,19 @@
 #--------------------------------------------------------------------------
 
   ; This script uses 'User Variables' (with names starting with 'G_') to hold GLOBAL data.
-  
+
   Var   G_POP3        ; POP3 port (1-65535)
   Var   G_GUI         ; GUI port (1-65535)
   Var   G_STARTUP     ; automatic startup flag (1 = yes, 0 = no)
   Var   G_NOTEPAD     ; path to notepad.exe ("" = not found in search path)
-  
+
   ; NSIS provides 20 general purpose user registers:
   ; (a) $R0 to $R9   are used as local registers
   ; (b) $0 to $9     are used as additional local registers
 
   ; Local registers referred to by 'defines' use names starting with 'L_' (eg L_LNE, L_OLDUI)
   ; and the scope of these 'defines' is limited to the "routine" where they are used.
-  
+
   ; In earlier versions of the NSIS compiler, 'User Variables' did not exist, and the convention
   ; was to use $R0 to $R9 as 'local' registers and $0 to $9 as 'global' ones. This is why this
   ; script uses registers $R0 to $R9 in preference to registers $0 to $9.
@@ -451,11 +457,11 @@ Function .onInit
   !define L_INPUT_FILE_HANDLE   $R9
   !define L_OUTPUT_FILE_HANDLE  $R8
   !define L_LINE                $R7
-  
+
   Push ${L_INPUT_FILE_HANDLE}
   Push ${L_OUTPUT_FILE_HANDLE}
   Push ${L_LINE}
-  
+
   ; Conditional compilation: if ENGLISH_ONLY is defined, support only 'English'
 
   !ifndef ENGLISH_ONLY
@@ -471,7 +477,7 @@ Function .onInit
   ; Ensure the release notes are in a format which the standard Windows NOTEPAD.EXE can use.
   ; When the "POPFile" section is processed, the converted release notes will be copied to the
   ; installation directory to ensure user has a copy which can be read by NOTEPAD.EXE later.
-  
+
   FileOpen ${L_INPUT_FILE_HANDLE}  "$PLUGINSDIR\${C_README}" r
   FileOpen ${L_OUTPUT_FILE_HANDLE} "$PLUGINSDIR\${C_README}.txt" w
   ClearErrors
@@ -484,15 +490,15 @@ loop:
   Pop ${L_LINE}
   FileWrite ${L_OUTPUT_FILE_HANDLE} ${L_LINE}$\r$\n
   Goto loop
-  
+
 close_files:
   FileClose ${L_INPUT_FILE_HANDLE}
   FileClose ${L_OUTPUT_FILE_HANDLE}
-  
+
   Pop ${L_LINE}
   Pop ${L_OUTPUT_FILE_HANDLE}
   Pop ${L_INPUT_FILE_HANDLE}
-  
+
   !undef L_INPUT_FILE_HANDLE
   !undef L_OUTPUT_FILE_HANDLE
   !undef L_LINE
@@ -510,10 +516,20 @@ FunctionEnd
 Function PFIGUIInit
 
   SearchPath $G_NOTEPAD notepad.exe
-  MessageBox MB_YESNO|MB_ICONQUESTION \
-      "$(PFI_LANG_MBRELNOTES_1)\
-      $\r$\n$\r$\n\
-      $(PFI_LANG_MBRELNOTES_2)" IDNO exit
+
+;;;  ; POPFile 0.20.0 introduces some significant changes:
+;;;  ; (1) BerkeleyDB is used for the corpus instead of simple text files
+;;;  ; (2) POPFile is started by running 'popfile.exe' without any parameters
+;;;  ;     (instead of 'perl.exe popfile.pl' or 'wperl.exe popfile.pl')
+;;;  ;
+;;;  ; As a temporary measure, the "Release Notes" are _ALWAYS_ displayed in the hope that
+;;;  ; users will read about these changes _BEFORE_ installing POPFile.
+;;;
+;;;  MessageBox MB_YESNO|MB_ICONQUESTION \
+;;;      "$(PFI_LANG_MBRELNOTES_1)\
+;;;      $\r$\n$\r$\n\
+;;;      $(PFI_LANG_MBRELNOTES_2)" IDNO exit
+
   StrCmp $G_NOTEPAD "" use_file_association
   ExecWait 'notepad.exe "$PLUGINSDIR\${C_README}.txt"'
   GoTo exit
@@ -550,7 +566,7 @@ Section "POPFile" SecPOPFile
   DetailPrint "$(PFI_LANG_INST_PROG_UPGRADE)"
   SetDetailsPrint listonly
 
-  ; If we are installing over a previous version, (try to) ensure that version is not running
+  ; If we are installing over a previous version, ensure that version is not running
 
   Call MakeItSafe
 
@@ -574,15 +590,23 @@ Section "POPFile" SecPOPFile
   File "..\engine\license"
   File "${C_RELEASE_NOTES}"
   CopyFiles /SILENT /FILESONLY "$PLUGINSDIR\${C_README}.txt" "$INSTDIR\${C_README}.txt"
+
+  File "..\engine\popfile.exe"
+  File "..\engine\popfilef.exe"
+  File "..\engine\popfileb.exe"
+  File "..\engine\popfileif.exe"
+  File "..\engine\popfileib.exe"
+  File "stop_pf.exe"
+
   File "..\engine\popfile.pl"
   File "..\engine\insert.pl"
   File "..\engine\bayes.pl"
   File "..\engine\pipe.pl"
+
   File "..\engine\pix.gif"
   File "..\engine\favicon.ico"
   File "..\engine\black.gif"
   File "..\engine\otto.gif"
-  File "stop_pf.exe"
 
   IfFileExists "$INSTDIR\stopwords" 0 copy_stopwords
   MessageBox MB_YESNO|MB_ICONQUESTION \
@@ -630,18 +654,21 @@ update_config:
   File "..\engine\Classifier\Bayes.pm"
   File "..\engine\Classifier\WordMangle.pm"
   File "..\engine\Classifier\MailParse.pm"
+
+  SetOutPath $INSTDIR\Platform
+  File "..\engine\Platform\MSWin32.pm"
+
   SetOutPath $INSTDIR\POPFile
   File "..\engine\POPFile\MQ.pm"
   File "..\engine\POPFile\Loader.pm"
   File "..\engine\POPFile\Logger.pm"
   File "..\engine\POPFile\Module.pm"
   File "..\engine\POPFile\Configuration.pm"
+
   SetOutPath $INSTDIR\Proxy
   File "..\engine\Proxy\Proxy.pm"
   File "..\engine\Proxy\POP3.pm"
-  SetOutPath $INSTDIR\Platform
-  File "..\engine\Platform\MSWin32.pm"
-  File "..\engine\Platform\POPFileIcon.dll"
+
   SetOutPath $INSTDIR\UI
   File "..\engine\UI\HTML.pm"
   File "..\engine\UI\HTTP.pm"
@@ -662,12 +689,13 @@ update_config:
 
   SetOutPath $INSTDIR
   File "${C_PERL_DIR}\bin\perl.exe"
-  File "${C_PERL_DIR}\bin\wperl.exe"
   File "${C_PERL_DIR}\bin\perl58.dll"
   File "${C_PERL_DIR}\lib\AutoLoader.pm"
+  File "${C_PERL_DIR}\lib\base.pm"
   File "${C_PERL_DIR}\lib\Carp.pm"
   File "${C_PERL_DIR}\lib\Config.pm"
   File "${C_PERL_DIR}\lib\DynaLoader.pm"
+  File "${C_PERL_DIR}\lib\Encode.pm"
   File "${C_PERL_DIR}\lib\Errno.pm"
   File "${C_PERL_DIR}\lib\Exporter.pm"
   File "${C_PERL_DIR}\lib\IO.pm"
@@ -685,23 +713,25 @@ update_config:
   SetOutPath $INSTDIR\Carp
   File "${C_PERL_DIR}\lib\Carp\*"
 
+  SetOutPath $INSTDIR\Encode
+  File "${C_PERL_DIR}\lib\Encode\Alias.pm"
+  File "${C_PERL_DIR}\lib\Encode\Config.pm"
+  File "${C_PERL_DIR}\lib\Encode\Encoding.pm"
+
   SetOutPath $INSTDIR\Exporter
   File "${C_PERL_DIR}\lib\Exporter\*"
 
-  SetOutPath $INSTDIR\MIME
-  File "${C_PERL_DIR}\lib\MIME\*"
-
-  SetOutPath $INSTDIR\Win32
-  File "${C_PERL_DIR}\site\lib\Win32\API.pm"
-
-  SetOutPath $INSTDIR\Win32\API
-  File "${C_PERL_DIR}\site\lib\Win32\API\*.pm"
-
-  SetOutPath $INSTDIR\auto\Win32\API
-  File "${C_PERL_DIR}\site\lib\auto\Win32\API\*"
+  SetOutPath $INSTDIR\File
+  File "${C_PERL_DIR}\lib\File\Glob.pm"
 
   SetOutPath $INSTDIR\IO
   File "${C_PERL_DIR}\lib\IO\*"
+
+  SetOutPath $INSTDIR\IO\Socket
+  File "${C_PERL_DIR}\lib\IO\Socket\*"
+
+  SetOutPath $INSTDIR\MIME
+  File "${C_PERL_DIR}\lib\MIME\*"
 
   SetOutPath $INSTDIR\Sys
   File "${C_PERL_DIR}\lib\Sys\*"
@@ -709,20 +739,34 @@ update_config:
   SetOutPath $INSTDIR\Text
   File "${C_PERL_DIR}\lib\Text\ParseWords.pm"
 
-  SetOutPath $INSTDIR\IO\Socket
-  File "${C_PERL_DIR}\lib\IO\Socket\*"
+  SetOutPath $INSTDIR\warnings
+  File "${C_PERL_DIR}\lib\warnings\register.pm"
+
+  SetOutPath $INSTDIR\Win32
+  File "${C_PERL_DIR}\site\lib\Win32\API.pm"
+
+  SetOutPath $INSTDIR\Win32\API
+  File "${C_PERL_DIR}\site\lib\Win32\API\*.pm"
 
   SetOutPath $INSTDIR\auto\DynaLoader
   File "${C_PERL_DIR}\lib\auto\DynaLoader\*"
 
+  SetOutPath $INSTDIR\auto\Encode
+  File "${C_PERL_DIR}\lib\auto\Encode\*"
+
   SetOutPath $INSTDIR\auto\File\Glob
   File "${C_PERL_DIR}\lib\auto\File\Glob\*"
+
+  SetOutPath $INSTDIR\auto\IO
+  File "${C_PERL_DIR}\lib\auto\IO\*"
 
   SetOutPath $INSTDIR\auto\MIME\Base64
   File "${C_PERL_DIR}\lib\auto\MIME\Base64\*"
 
-  SetOutPath $INSTDIR\auto\IO
-  File "${C_PERL_DIR}\lib\auto\IO\*"
+  SetOutPath $INSTDIR\auto\POSIX
+  File "${C_PERL_DIR}\lib\auto\POSIX\POSIX.dll"
+  File "${C_PERL_DIR}\lib\auto\POSIX\autosplit.ix"
+  File "${C_PERL_DIR}\lib\auto\POSIX\load_imports.al"
 
   SetOutPath $INSTDIR\auto\Socket
   File "${C_PERL_DIR}\lib\auto\Socket\*"
@@ -730,23 +774,15 @@ update_config:
   SetOutPath $INSTDIR\auto\Sys\Hostname
   File "${C_PERL_DIR}\lib\auto\Sys\Hostname\*"
 
-  SetOutPath $INSTDIR\auto\POSIX
-  File "${C_PERL_DIR}\lib\auto\POSIX\POSIX.dll"
-  File "${C_PERL_DIR}\lib\auto\POSIX\autosplit.ix"
-  File "${C_PERL_DIR}\lib\auto\POSIX\load_imports.al"
+  SetOutPath $INSTDIR\auto\Win32\API
+  File "${C_PERL_DIR}\site\lib\auto\Win32\API\*"
 
-  SetOutPath $INSTDIR\File
-  File "${C_PERL_DIR}\lib\File\Glob.pm"
+  ; Install Perl modules and library files for BerkeleyDB support
 
-  SetOutPath $INSTDIR\warnings
-  File "${C_PERL_DIR}\lib\warnings\register.pm"
-  
-  ; Install BerkeleyDB Perl modules and libraries
-  
   SetOutPath $INSTDIR
   File "${C_PERL_DIR}\site\lib\BerkeleyDB.pm"
   File "${C_PERL_DIR}\lib\UNIVERSAL.pm"
-  
+
   SetOutPath $INSTDIR\auto\BerkeleyDB
   File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\autosplit.ix"
   File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\BerkeleyDB.bs"
@@ -773,13 +809,10 @@ update_config:
   SetOutPath "$SMPROGRAMS\${MUI_PRODUCT}"
   SetOutPath $INSTDIR
   CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile.lnk" \
-                 "$INSTDIR\perl.exe" popfile.pl \
-                 "$INSTDIR\Platform\POPFileIcon.dll"
-  CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile in background.lnk" \
-                 "$INSTDIR\wperl.exe" popfile.pl \
-                 "$INSTDIR\Platform\POPFileIcon.dll"
+                 "$INSTDIR\popfile.exe"
   CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\Uninstall POPFile.lnk" \
                  "$INSTDIR\uninstall.exe"
+
   SetOutPath "$SMPROGRAMS\${MUI_PRODUCT}"
   WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\POPFile User Interface.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/"
@@ -790,9 +823,11 @@ update_config:
   WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\FAQ.url" \
               "InternetShortcut" "URL" \
               "http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137"
+
   SetOutPath "$SMPROGRAMS\${MUI_PRODUCT}\Support"
   WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
+
   SetOutPath $INSTDIR
   CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\Shutdown POPFile silently.lnk" \
                  "$INSTDIR\stop_pf.exe" "/showerrors $G_GUI"
@@ -800,10 +835,10 @@ update_config:
   StrCmp $G_STARTUP "1" 0 skip_autostart_set
       SetOutPath $SMSTARTUP
       SetOutPath $INSTDIR
-      CreateShortCut "$SMSTARTUP\Run POPFile in background.lnk" \
-                     "$INSTDIR\wperl.exe" popfile.pl \
-                     "$INSTDIR\Platform\POPFileIcon.dll"
+      CreateShortCut "$SMSTARTUP\Run POPFile.lnk" \
+                     "$INSTDIR\popfile.exe"
 skip_autostart_set:
+  Delete "$SMSTARTUP\Run POPFile in background.lnk"
 
   ; Create entry in the Control Panel's "Add/Remove Programs" list
 
@@ -971,24 +1006,39 @@ Function MakeItSafe
   Push ${L_RESULT}
 
   ; If we are about to overwrite an existing version which is still running,
-  ; then one of the EXE files will be 'locked' which means we have to shutdown POPFile
+  ; then one of the EXE files will be 'locked' which means we have to shutdown POPFile.
+  ; POPFile v0.20.0 and later may be using one of four popfile*.exe files.
+  ; Earlier versions of POPFile (up to and including 0.19.1) may be using wperl.exe or perl.exe.
 
-  StrCpy ${L_EXE} "$INSTDIR\wperl.exe"
-  IfFileExists "${L_EXE}" 0 other_perl
-  SetFileAttributes "${L_EXE}" NORMAL
-  ClearErrors
-  FileOpen ${L_CFG} "${L_EXE}" a
-  FileClose ${L_CFG}
-  IfErrors attempt_shutdown
+  Push "$INSTDIR\popfileb.exe"
+  Call CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" 0 attempt_shutdown
 
-other_perl:
-  StrCpy ${L_EXE} "$INSTDIR\perl.exe"
-  IfFileExists "${L_EXE}" 0 exit_now
-  SetFileAttributes "${L_EXE}" NORMAL
-  ClearErrors
-  FileOpen ${L_CFG} "${L_EXE}" a
-  FileClose ${L_CFG}
-  IfErrors 0 exit_now
+  Push "$INSTDIR\popfileib.exe"
+  Call CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" 0 attempt_shutdown
+
+  Push "$INSTDIR\popfilef.exe"
+  Call CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" 0 attempt_shutdown
+
+  Push "$INSTDIR\popfileif.exe"
+  Call CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" 0 attempt_shutdown
+
+  Push "$INSTDIR\wperl.exe"
+  Call CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" 0 attempt_shutdown
+
+  Push "$INSTDIR\perl.exe"
+  Call CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" exit_now
 
 attempt_shutdown:
   !insertmacro MUI_INSTALLOPTIONS_READ "${L_NEW_GUI}" "ioA.ini" "UI Port" "NewStyle"
@@ -1048,6 +1098,11 @@ FunctionEnd
 # out the POPFile UI language setting to allow the installer to easily preset the UI language
 # to match the language selected for use by the installer. (See the code which handles the
 # 'Languages' component for further details).
+#
+# This function also ensures that only copy of the tray icon and console settings is present,
+# and saves any values found in 'ioC.ini' for use when the user is offered the chance to start
+# POPFile from the installer. If no setting is found, we save '?' in 'ioC.ini'. These settings
+# are used by the 'StartPOPFilePage' and 'CheckLaunchOptions' functions.
 #--------------------------------------------------------------------------
 
 Function CheckExistingConfig
@@ -1058,6 +1113,8 @@ Function CheckExistingConfig
   !define L_LNE       $R6     ; a line from popfile.cfg
   !define L_OLDUI     $R5     ; used to hold old-style of GUI port
   !define L_STRIPLANG $R4
+  !define L_TRAYICON  $R3     ; a config parameter used by popfile.exe
+  !define L_CONSOLE   $R2     ; a config parameter used by popfile.exe
 
   Push ${L_CFG}
   Push ${L_CLEANCFG}
@@ -1065,6 +1122,8 @@ Function CheckExistingConfig
   Push ${L_LNE}
   Push ${L_OLDUI}
   Push ${L_STRIPLANG}
+  Push ${L_TRAYICON}
+  Push ${L_CONSOLE}
 
   ; If the 'Languages' component is being installed, installer is allowed to preset UI language
 
@@ -1081,6 +1140,9 @@ init_port_vars:
   StrCpy $G_POP3 ""
   StrCpy $G_GUI ""
   StrCpy ${L_OLDUI} ""
+
+  StrCpy ${L_TRAYICON} ""
+  StrCpy ${L_CONSOLE} ""
 
   ; See if we can get the current pop3 and gui port from an existing configuration.
   ; There may be more than one entry for these ports in the file - use the last one found
@@ -1104,6 +1166,11 @@ loop:
 
   StrCpy ${L_CMPRE} ${L_LNE} 8
   StrCmp ${L_CMPRE} "ui_port " got_ui_port
+
+  StrCpy ${L_CMPRE} ${L_LNE} 17
+  StrCmp ${L_CMPRE} "windows_trayicon " got_trayicon
+  StrCpy ${L_CMPRE} ${L_LNE} 16
+  StrCmp ${L_CMPRE} "windows_console " got_console
 
   StrCmp ${L_STRIPLANG} "" transfer
 
@@ -1134,8 +1201,42 @@ got_html_port:
   StrCpy $G_GUI ${L_LNE} 5 10
   Goto loop
 
+got_trayicon:
+  StrCpy ${L_TRAYICON} ${L_LNE} 1 17
+  Goto loop
+
+got_console:
+  StrCpy ${L_CONSOLE} ${L_LNE} 1 16
+  Goto loop
+
 done:
   FileClose ${L_CFG}
+
+  ; Before closing the clean copy of 'popfile.cfg' we add the most recent settings for the
+  ; system tray icon and console mode, if valid values were found. If no valid values were
+  ; found, we add nothing to the clean copy. A record of our findings is stored in 'ioC.ini'
+  ; for use by 'StartPOPFilePage' and 'CheckLaunchOptions'.
+
+  StrCmp ${L_CONSOLE} "0" found_console
+  StrCmp ${L_CONSOLE} "1" found_console
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "?"
+  Goto check_trayicon
+
+found_console:
+  FileWrite ${L_CLEANCFG} "windows_console ${L_CONSOLE}$\r$\n"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "${L_CONSOLE}"
+
+check_trayicon:
+  StrCmp ${L_TRAYICON} "0" found_trayicon
+  StrCmp ${L_TRAYICON} "1" found_trayicon
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "TrayIcon" "?"
+  Goto close_cleancopy
+
+found_trayicon:
+  FileWrite ${L_CLEANCFG} "windows_trayicon ${L_TRAYICON}$\r$\n"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "TrayIcon" "${L_TRAYICON}"
+
+close_cleancopy:
   FileClose ${L_CLEANCFG}
 
   Push $G_POP3
@@ -1203,6 +1304,8 @@ default_gui:
   StrCpy $G_GUI "8081"
 
 ports_ok:
+  Pop ${L_CONSOLE}
+  Pop ${L_TRAYICON}
   Pop ${L_STRIPLANG}
   Pop ${L_OLDUI}
   Pop ${L_LNE}
@@ -1216,6 +1319,8 @@ ports_ok:
   !undef L_LNE
   !undef L_OLDUI
   !undef L_STRIPLANG
+  !undef L_TRAYICON
+  !undef L_CONSOLE
 
 FunctionEnd
 
@@ -1266,8 +1371,14 @@ Function SetOptionsPage
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Settings" "NumFields" "7"
 
-  IfFileExists "$INSTDIR\popfile.pl" 0 continue
+  ; If the installation folder contains 'popfile.pl' we assume we are upgrading an old version
+  ; of POPFile (up to and  including v0.19.1) and if it contains 'popfile.exe' we assume we are
+  ; upgrading v0.20.0 or later.
 
+  IfFileExists "$INSTDIR\popfile.pl" upgrade_uninstall
+  IfFileExists "$INSTDIR\popfile.exe" 0 continue
+
+upgrade_uninstall:
   MessageBox MB_YESNO|MB_ICONEXCLAMATION \
       "$(PFI_LANG_OPTIONS_MBUNINST_1) '$INSTDIR'\
       $\r$\n$\r$\n\
@@ -1279,6 +1390,7 @@ Function SetOptionsPage
   WriteUninstaller $INSTDIR\uninstall.exe
   ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
   IfFileExists "$INSTDIR\popfile.pl" skip_msg_delete
+  IfFileExists "$INSTDIR\popfile.exe" skip_msg_delete
 
   ; No need to display the warning about shutting down POPFile as it has just been uninstalled
 
@@ -1338,9 +1450,9 @@ show_defaults:
   ; and refuse to proceed until suitable ports have been chosen.
 
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioA.ini"
-  
+
   ; Store validated data (for use when the "POPFile" section is processed)
-  
+
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "State" $G_POP3
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "State" $G_GUI
 
@@ -1370,14 +1482,14 @@ Function CheckPortOptions
   !insertmacro MUI_INSTALLOPTIONS_READ $G_GUI "ioA.ini" "Field 4" "State"
 
   ; strip leading zeroes and spaces from user input
-  
+
   Push $G_POP3
   Call StrStripLZS
   Pop $G_POP3
   Push $G_GUI
   Call StrStripLZS
   Pop $G_GUI
-  
+
   StrCmp $G_POP3 $G_GUI ports_must_differ
   Push $G_POP3
   Call StrCheckDecimal
@@ -1496,7 +1608,7 @@ Function SetOutlookExpressPage
   !define L_OEPATH      $R2   ; holds part of the path used to access OE account data
   !define L_ORDINALS    $R1   ; "Identity Ordinals" flag (1 = found, 0 = not found)
   !define L_SEPARATOR   $R0   ; char used to separate the pop3 server from the username
-  !define L_TEMP        $9 
+  !define L_TEMP        $9
 
   Push ${L_ACCOUNT}
   Push ${L_ACCT_INDEX}
@@ -1714,13 +1826,81 @@ FunctionEnd
 # This function offers to start the newly installed POPFile.
 #
 # A "leave" function (CheckLaunchOptions) is used to act upon the selection made by the user.
+#
+# The user is allowed to change their selection by returning to this page (by clicking 'Back'
+# on the 'Finish' page).
+#
+# The [Inherited] section in 'ioC.ini' has information on the system tray icon and console mode
+# settings found in 'popfile.cfg'. Valid values are 0 (disabled), 1 (enabled) and ? (undefined).
+# If any settings are undefined, this function adds the default settings to 'popfile.cfg'
+# (i.e. console mode disabled, system tray icon enabled)
 #--------------------------------------------------------------------------
 
 Function StartPOPFilePage
 
+  !define L_CFG    $R9
+  !define L_TEMP   $R8
+
+  Push ${L_CFG}
+  Push ${L_TEMP}
+
+  ; Ensure 'popfile.cfg' has valid settings for system tray icon and console mode
+  ; (if necessary, add the default settings to the file and update the [Inherited] copies)
+
+  FileOpen  ${L_CFG} "$INSTDIR\popfile.cfg" a
+  FileSeek  ${L_CFG} 0 END
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Inherited" "Console"
+  StrCmp ${L_TEMP} "?" 0 check_trayicon
+  FileWrite ${L_CFG} "windows_console 0$\r$\n"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "Console" "0"
+
+check_trayicon:
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Inherited" "TrayIcon"
+  StrCmp ${L_TEMP} "?" 0 close_file
+  FileWrite ${L_CFG} "windows_trayicon 1$\r$\n"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Inherited" "TrayIcon" "1"
+
+close_file:
+  FileClose ${L_CFG}
+
+  ; clear all three radio buttons ('do not start', 'use console', 'run in background')
+
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "State" "0"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "State" "0"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "State" "0"
+
+  ; If we have returned to this page from the 'Finish' page then we can use the [LastAction]
+  ; data to select the appropriate radio button, otherwise we use the [Inherited] data.
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
+  StrCmp ${L_TEMP} "" use_inherited_data
+  StrCmp ${L_TEMP} "console" console
+  StrCmp ${L_TEMP} "background" background
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 2" "State" "1"
+  Goto display_the_page
+
+use_inherited_data:
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Inherited" "Console"
+  StrCmp ${L_TEMP} "0" background
+
+console:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 3" "State" "1"
+  Goto display_the_page
+
+background:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Field 4" "State" "1"
+
+display_the_page:
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_LAUNCH_TITLE)" "$(PFI_LANG_LAUNCH_SUBTITLE)"
 
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioC.ini"
+
+  Pop ${L_TEMP}
+  Pop ${L_CFG}
+
+  !undef L_CFG
+  !undef L_TEMP
 
 FunctionEnd
 
@@ -1738,10 +1918,21 @@ Function CheckLaunchOptions
   !define L_CFG         $R9   ; file handle
   !define L_EXE         $R8   ; full path of perl EXE to be monitored
   !define L_TEMP        $R7
+  !define L_TRAY        $R6   ; set to 'i' if system tray enabled, otherwise set to ""
+  !define L_CONSOLE     $R5   ; new console mode: 0 = disabled, 1 = enabled
 
   Push ${L_CFG}
   Push ${L_EXE}
   Push ${L_TEMP}
+  Push ${L_TRAY}
+  Push ${L_CONSOLE}
+
+  StrCpy ${L_TRAY} "i"    ; the default is to enable the system tray icon
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Inherited" "TrayIcon"
+  StrCmp ${L_TEMP} "1" check_radio_buttons
+  StrCpy ${L_TRAY} ""
+
+check_radio_buttons:
 
   ; Field 2 = 'Do not run POPFile' radio button
 
@@ -1751,12 +1942,15 @@ Function CheckLaunchOptions
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "" exit_without_banner
   StrCmp ${L_TEMP} "no" exit_without_banner
+
+  ; Selection has been changed from 'use console' or 'run in background' to 'do not run POPFile'
+
   StrCmp ${L_TEMP} "background" background_to_no
-  StrCpy ${L_EXE} "$INSTDIR\perl.exe"
+  StrCpy ${L_EXE} "$INSTDIR\popfile${L_TRAY}f.exe"
   Goto lastaction_no
 
 background_to_no:
-  StrCpy ${L_EXE} "$INSTDIR\wperl.exe"
+  StrCpy ${L_EXE} "$INSTDIR\popfile${L_TRAY}b.exe"
 
 lastaction_no:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "no"
@@ -1780,40 +1974,29 @@ run_popfile:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 4" "State"
   StrCmp ${L_TEMP} "1" run_in_background
 
-  ; Run POPFile in a DOS box
+  ; Run POPFile using console window
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
-  StrCmp ${L_TEMP} "DOS-box" exit_without_banner
-  StrCmp ${L_TEMP} "no" lastaction_DOS_box
-  StrCpy ${L_EXE} "$INSTDIR\wperl.exe"
+  StrCmp ${L_TEMP} "console" exit_without_banner
+  StrCmp ${L_TEMP} "no" lastaction_console
+  StrCpy ${L_EXE} "$INSTDIR\popfile${L_TRAY}b.exe"
 
-lastaction_DOS_box:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "DOS-box"
-
-  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_LAUNCH_BANNER_1)" "$(PFI_LANG_LAUNCH_BANNER_2)"
-
-  ; Before starting the newly installed POPFile, ensure that no other version of POPFile
-  ; is running on the same UI port as the newly installed version.
-
-  NSISdl::download_quiet http://127.0.0.1:$G_GUI/shutdown "$PLUGINSDIR\shutdown.htm"
-  Pop ${L_TEMP}    ; Get the return value (and ignore it)
-  Push ${L_EXE}
-  Call WaitUntilUnlocked
-  ExecShell "open" "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile.lnk"
-  goto wait_for_popfile
+lastaction_console:
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "console"
+  StrCpy ${L_CONSOLE} "1"
+  Goto display_banner
 
 run_in_background:
-
-  ; Run POPFile without a DOS box
-
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
   StrCmp ${L_TEMP} "background" exit_without_banner
   StrCmp ${L_TEMP} "no" lastaction_background
-  StrCpy ${L_EXE} "$INSTDIR\perl.exe"
+  StrCpy ${L_EXE} "$INSTDIR\popfile${L_TRAY}f.exe"
 
 lastaction_background:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "background"
+  StrCpy ${L_CONSOLE} "0"
 
+display_banner:
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_LAUNCH_BANNER_1)" "$(PFI_LANG_LAUNCH_BANNER_2)"
 
   ; Before starting the newly installed POPFile, ensure that no other version of POPFile
@@ -1823,9 +2006,9 @@ lastaction_background:
   Pop ${L_TEMP}    ; Get the return value (and ignore it)
   Push ${L_EXE}
   Call WaitUntilUnlocked
-  ExecShell "open" "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile in background.lnk"
-
-wait_for_popfile:
+  Push ${L_CONSOLE}
+  Call SetConsoleMode
+  ExecShell "open" "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile.lnk"
 
   ; Wait until POPFile is ready to display the UI (may take a second or so)
 
@@ -1844,6 +2027,8 @@ remove_banner:
 
 exit_without_banner:
 
+  Pop ${L_CONSOLE}
+  Pop ${L_TRAY}
   Pop ${L_TEMP}
   Pop ${L_EXE}
   Pop ${L_CFG}
@@ -1851,6 +2036,8 @@ exit_without_banner:
   !undef L_CFG
   !undef L_EXE
   !undef L_TEMP
+  !undef L_TRAY
+  !undef L_CONSOLE
 
 FunctionEnd
 
@@ -1862,6 +2049,8 @@ FunctionEnd
 # starts the POPFile User Interface and one to control whether or not the 'ReadMe' file is
 # displayed. The User Interface only works when POPFile is running, so we must ensure its
 # CheckBox can only be ticked if the installer has started POPFile.
+#
+# NB: User can switch back and forth between the 'Start POPFile' page and the 'Finish' page
 #--------------------------------------------------------------------------
 
 Function CheckRunStatus
@@ -1870,11 +2059,11 @@ Function CheckRunStatus
 
   Push ${L_TEMP}
 
-  ; Field 4 is the 'Run' CheckBox on the 'Finish' page
+  ; Enable the 'Run' CheckBox on the 'Finish' page (it may have been disabled on our last visit)
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "Flags" ""
 
-  ; Get the status of the 'Do not run POPFile' radio button on the previous page of installer
+  ; Get the status of the 'Do not run POPFile' radio button on the 'Start POPFile' page
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "State"
   StrCmp ${L_TEMP} "0" selection_ok
@@ -1974,6 +2163,7 @@ Section "Uninstall"
 
 confirmation:
   IfFileExists $INSTDIR\popfile.pl skip_confirmation
+  IfFileExists $INSTDIR\popfile.exe skip_confirmation
     MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
         "$(un.PFI_LANG_MBNOTFOUND_1) '$INSTDIR'.\
         $\r$\n$\r$\n\
@@ -2015,22 +2205,35 @@ check_if_running:
 
   ; If the POPFile we are to uninstall is still running, one of the EXE files will be 'locked'
 
-  StrCpy ${L_EXE} "$INSTDIR\wperl.exe"
-  IfFileExists "${L_EXE}" 0 other_perl
-  SetFileAttributes "${L_EXE}" NORMAL
-  ClearErrors
-  FileOpen ${L_CFG} "${L_EXE}" a
-  FileClose ${L_CFG}
-  IfErrors attempt_shutdown
+  Push "$INSTDIR\popfileb.exe"
+  Call un.CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" 0 attempt_shutdown
 
-other_perl:
-  StrCpy ${L_EXE} "$INSTDIR\perl.exe"
-  IfFileExists "${L_EXE}" 0 remove_shortcuts
-  SetFileAttributes "${L_EXE}" NORMAL
-  ClearErrors
-  FileOpen ${L_CFG} "${L_EXE}" a
-  FileClose ${L_CFG}
-  IfErrors 0 remove_shortcuts
+  Push "$INSTDIR\popfileib.exe"
+  Call un.CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" 0 attempt_shutdown
+
+  Push "$INSTDIR\popfilef.exe"
+  Call un.CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" 0 attempt_shutdown
+
+  Push "$INSTDIR\popfileif.exe"
+  Call un.CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" 0 attempt_shutdown
+
+  Push "$INSTDIR\wperl.exe"
+  Call un.CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" 0 attempt_shutdown
+
+  Push "$INSTDIR\perl.exe"
+  Call un.CheckIfLocked
+  Pop ${L_EXE}
+  StrCmp ${L_EXE} "" remove_shortcuts
 
 attempt_shutdown:
   StrCpy $G_GUI ""
@@ -2091,37 +2294,58 @@ remove_shortcuts:
   DetailPrint "$(un.PFI_LANG_PROGRESS_2)"
   SetDetailsPrint listonly
 
-  Delete "$SMPROGRAMS\${MUI_PRODUCT}\Support\*.url"
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\Support\POPFile Home Page.url"
   RMDir "$SMPROGRAMS\${MUI_PRODUCT}\Support"
 
-  Delete "$SMPROGRAMS\${MUI_PRODUCT}\*.lnk"
-  Delete "$SMPROGRAMS\${MUI_PRODUCT}\*.url"
-  Delete "$SMSTARTUP\Run POPFile in background.lnk"
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile.lnk"
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile in background.lnk"
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\Shutdown POPFile silently.lnk"
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\Uninstall POPFile.lnk"
+
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\FAQ.url"
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\Manual.url"
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\POPFile User Interface.url"
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\Shutdown POPFile.url"
   RMDir "$SMPROGRAMS\${MUI_PRODUCT}"
+
+  Delete "$SMSTARTUP\Run POPFile in background.lnk"
+  Delete "$SMSTARTUP\Run POPFile.lnk"
 
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_3)"
   SetDetailsPrint listonly
 
   ; popfile.pl deleted to indicate an uninstall has occurred (file is checked during 'upgrade')
+  ; popfile.exe deleted to indicate an uninstall has occurred (file is checked during 'upgrade')
 
   Delete $INSTDIR\popfile.pl
+  Delete $INSTDIR\popfile.exe
   Delete $INSTDIR\popfile.cfg.bak
   Delete $INSTDIR\*.pm
   Delete $INSTDIR\*.dll
+  Delete $INSTDIR\wperl.exe
 
   ; For "upgrade" uninstalls, we leave most files in $INSTDIR
   ; and do not restore Outlook Express settings
 
   StrCmp ${L_UPGRADE} "yes" no_reg_file
 
-  Delete $INSTDIR\*.log
-  Delete $INSTDIR\*.pl
   Delete $INSTDIR\*.gif
-  Delete $INSTDIR\favicon.ico
-  Delete $INSTDIR\*.exe
+  Delete $INSTDIR\*.log
   Delete $INSTDIR\*.change
   Delete $INSTDIR\*.change.txt
+
+  Delete $INSTDIR\bayes.pl
+  Delete $INSTDIR\insert.pl
+  Delete $INSTDIR\pipe.pl
+  Delete $INSTDIR\favicon.ico
+  Delete $INSTDIR\perl.exe
+  Delete $INSTDIR\popfile.exe
+  Delete $INSTDIR\popfilef.exe
+  Delete $INSTDIR\popfileb.exe
+  Delete $INSTDIR\popfileif.exe
+  Delete $INSTDIR\popfileib.exe
+  Delete $INSTDIR\stop_pf.exe
   Delete $INSTDIR\license
   Delete $INSTDIR\popfile.cfg
 
@@ -2165,19 +2389,21 @@ skip_registry_restore:
   Delete $INSTDIR\popfile.reg
 
 no_reg_file:
+  Delete $INSTDIR\Classifier\*.pm
+  RMDir $INSTDIR\Classifier
+
   Delete $INSTDIR\Platform\*.pm
   Delete $INSTDIR\Platform\*.dll
   RMDir $INSTDIR\Platform
-  Delete $INSTDIR\Proxy\*.pm
-  RMDir $INSTDIR\Proxy
-  Delete $INSTDIR\UI\*.pm
-  RMDir $INSTDIR\UI
+
   Delete $INSTDIR\POPFile\*.pm
   RMDir $INSTDIR\POPFile
-  Delete $INSTDIR\Classifier\*.pm
-  RMDir $INSTDIR\Classifier
-  Delete $INSTDIR\Exporter\*.*
-  RMDir $INSTDIR\Exporter
+
+  Delete $INSTDIR\Proxy\*.pm
+  RMDir $INSTDIR\Proxy
+
+  Delete $INSTDIR\UI\*.pm
+  RMDir $INSTDIR\UI
 
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_5)"
@@ -2190,10 +2416,12 @@ no_reg_file:
   RMDir $INSTDIR\skins\sleetImages
   RMDir $INSTDIR\skins\lavishImages
   RMDir $INSTDIR\skins
+
   Delete $INSTDIR\manual\en\*.html
   RMDir $INSTDIR\manual\en
   Delete $INSTDIR\manual\*.gif
   RMDir $INSTDIR\manual
+
   Delete $INSTDIR\languages\*.msg
   RMDir $INSTDIR\languages
 
@@ -2215,6 +2443,8 @@ remove_perl:
 
   !insertmacro SafeRecursiveRMDir  "$INSTDIR\auto"
   !insertmacro SafeRecursiveRMDir  "$INSTDIR\Carp"
+  !insertmacro SafeRecursiveRMDir  "$INSTDIR\Encode"
+  !insertmacro SafeRecursiveRMDir  "$INSTDIR\Exporter"
   !insertmacro SafeRecursiveRMDir  "$INSTDIR\File"
   !insertmacro SafeRecursiveRMDir  "$INSTDIR\IO"
   !insertmacro SafeRecursiveRMDir  "$INSTDIR\MIME"
