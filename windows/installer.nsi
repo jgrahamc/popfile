@@ -15,6 +15,7 @@
   !define MUI_FINISHPAGE
   
   !define MUI_UNINSTALLER
+  !define MUI_UNCONFIRMPAGE
   
   !define MUI_CUSTOMPAGECOMMANDS
   ; Support for 20 user variables is provided by NSIS. They recommend using
@@ -139,6 +140,7 @@ Section "POPFile" SecPOPFile
   ; Install the POPFile Core files
 
   SetOutPath $INSTDIR
+  File "..\engine\v0.18.1.change"
   File "..\engine\*.pl"
   File "..\engine\pix.gif"
   File "..\engine\black.gif"
@@ -508,6 +510,7 @@ skip_confirmation:
   Delete $INSTDIR\*.pm
   Delete $INSTDIR\*.exe
   Delete $INSTDIR\*.dll
+  Delete $INSTDIR\*.change
   Delete $INSTDIR\popfile.cfg
   
   ; Read the registry settings found in popfile.reg and restore them
