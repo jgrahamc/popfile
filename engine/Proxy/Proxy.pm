@@ -32,8 +32,6 @@ use POPFile::Module;
 use IO::Handle;
 use IO::Socket;
 use IO::Select;
-use IO::Socket::Socks;
-use IO::Socket::SSL;
 
 # A handy variable containing the value of an EOL for networks
 my $eol = "\015\012";
@@ -654,6 +652,7 @@ sub verify_connected_
     # SOCKS then go through the proxy server
 
     if ( $self->config_( 'socks_server' ) ne '' ) {
+        require IO::Socket::Socks;
         $mail = IO::Socket::Socks->new( # PROFILE BLOCK START
                     ProxyAddr => $self->config_( 'socks_server' ),
                     ProxyPort => $self->config_( 'socks_port' ),
@@ -661,6 +660,7 @@ sub verify_connected_
                     ConnectPort  => $port ); # PROFILE BLOCK STOP
     } else {
         if ( $ssl ) {
+            require IO::Socket::SSL;
             $mail = IO::Socket::SSL->new( # PROFILE BLOCK START
                         Proto    => "tcp",
                         PeerAddr => $hostname,
