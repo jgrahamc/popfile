@@ -2376,7 +2376,7 @@ sub classify_and_modify
         rename $temp_file, $msg_file;
     }
 
-    return ( $classification, $nopath_temp_file );
+    return ( $classification, $nopath_temp_file, $self->{magnet_used__} );
 }
 
 # ---------------------------------------------------------------------------------------------
