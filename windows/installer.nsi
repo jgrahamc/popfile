@@ -95,7 +95,9 @@
 # 'Languages' component to allow the installer to select the appropriate UI language.
 #--------------------------------------------------------------------------
 
+  ;--------------------------------------------------------------------------
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
+  ;--------------------------------------------------------------------------
 
   !define MUI_PRODUCT   "POPFile"
 
@@ -162,7 +164,7 @@
 
   VIProductVersion "0.20.0.0"
 
-  VIAddVersionKey "ProductName" "POPFile"
+  VIAddVersionKey "ProductName" "${MUI_PRODUCT}"
   VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sourceforge.net"
   VIAddVersionKey "CompanyName" "POPFile Team"
   VIAddVersionKey "LegalCopyright" "© 2001-2003  John Graham-Cumming"
@@ -279,7 +281,7 @@
 
   ; The 'hdr-common.bmp' icon is only 90 x 57 pixels, much smaller than the 150 x 57 pixel
   ; space provided by the default 'modern_headerbmpr.exe' UI, so we use a custom UI which
-  ; leaves more room for the TITLE and SUB-TITLE text.
+  ; leaves more room for the TITLE and SUBTITLE text.
   
   !define MUI_UI_HEADERBITMAP_RIGHT "UI\pfi_headerbmpr.exe"
   
@@ -356,7 +358,7 @@
   ; (uninstaller also uses this setting to determine which language is to be used)
 
   !define MUI_LANGDLL_REGISTRY_ROOT "HKLM"
-  !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\POPFile"
+  !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\${MUI_PRODUCT}"
   !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
 
   ;-----------------------------------------
@@ -418,7 +420,7 @@
 #--------------------------------------------------------------------------
 
   InstallDir "$PROGRAMFILES\${MUI_PRODUCT}"
-  InstallDirRegKey HKLM SOFTWARE\POPFile InstallLocation
+  InstallDirRegKey HKLM "SOFTWARE\${MUI_PRODUCT}" InstallLocation
 
 #--------------------------------------------------------------------------
 # Reserve the files required by the installer (to improve performance)
@@ -519,7 +521,7 @@ Section "POPFile" SecPOPFile
   !insertmacro MUI_INSTALLOPTIONS_READ ${G_GUI}     "ioA.ini" "Field 4" "State"
   !insertmacro MUI_INSTALLOPTIONS_READ ${G_STARTUP} "ioA.ini" "Field 5" "State"
 
-  WriteRegStr HKLM SOFTWARE\POPFile InstallLocation $INSTDIR
+  WriteRegStr HKLM "SOFTWARE\${MUI_PRODUCT}" InstallLocation $INSTDIR
 
   ; Install the POPFile Core files
 
@@ -716,28 +718,28 @@ update_config:
   ; 'CreateShortCut' uses '$OUTDIR' as the working directory for the shortcut
   ; ('SetOutPath' is one way to change the value of $OUTDIR)
 
-  SetOutPath $SMPROGRAMS\POPFile
+  SetOutPath "$SMPROGRAMS\${MUI_PRODUCT}"
   SetOutPath $INSTDIR
-  CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile.lnk" \
+  CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile.lnk" \
                  "$INSTDIR\perl.exe" popfile.pl \
                  "$INSTDIR\Platform\POPFileIcon.dll"
-  CreateShortCut "$SMPROGRAMS\POPFile\Run POPFile in background.lnk" \
+  CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile in background.lnk" \
                  "$INSTDIR\wperl.exe" popfile.pl \
                  "$INSTDIR\Platform\POPFileIcon.dll"
-  CreateShortCut "$SMPROGRAMS\POPFile\Uninstall POPFile.lnk" \
+  CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\Uninstall POPFile.lnk" \
                  "$INSTDIR\uninstall.exe"
-  SetOutPath $SMPROGRAMS\POPFile
-  WriteINIStr "$SMPROGRAMS\POPFile\POPFile User Interface.url" \
+  SetOutPath "$SMPROGRAMS\${MUI_PRODUCT}"
+  WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\POPFile User Interface.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:${G_GUI}/"
-  WriteINIStr "$SMPROGRAMS\POPFile\Shutdown POPFile.url" \
+  WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\Shutdown POPFile.url" \
               "InternetShortcut" "URL" "http://127.0.0.1:${G_GUI}/shutdown"
-  WriteINIStr "$SMPROGRAMS\POPFile\Manual.url" \
+  WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\Manual.url" \
               "InternetShortcut" "URL" "file://$INSTDIR/manual/en/manual.html"
-  WriteINIStr "$SMPROGRAMS\POPFile\FAQ.url" \
+  WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\FAQ.url" \
               "InternetShortcut" "URL" \
               "http://sourceforge.net/docman/display_doc.php?docid=14421&group_id=63137"
-  SetOutPath $SMPROGRAMS\POPFile\Support
-  WriteINIStr "$SMPROGRAMS\POPFile\Support\POPFile Home Page.url" \
+  SetOutPath "$SMPROGRAMS\${MUI_PRODUCT}\Support"
+  WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
 
   StrCmp ${G_STARTUP} "1" 0 skip_autostart_set
@@ -1727,7 +1729,7 @@ lastaction_DOS_box:
   Pop ${L_TEMP}    ; Get the return value (and ignore it)
   Push ${L_EXE}
   Call WaitUntilUnlocked
-  ExecShell "open" "$SMPROGRAMS\POPFile\Run POPFile.lnk"
+  ExecShell "open" "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile.lnk"
   goto wait_for_popfile
 
 run_in_background:
@@ -1751,7 +1753,7 @@ lastaction_background:
   Pop ${L_TEMP}    ; Get the return value (and ignore it)
   Push ${L_EXE}
   Call WaitUntilUnlocked
-  ExecShell "open" "$SMPROGRAMS\POPFile\Run POPFile in background.lnk"
+  ExecShell "open" "$SMPROGRAMS\${MUI_PRODUCT}\Run POPFile in background.lnk"
 
 wait_for_popfile:
 
@@ -2019,13 +2021,13 @@ remove_shortcuts:
   DetailPrint "$(un.PFI_LANG_PROGRESS_2)"
   SetDetailsPrint listonly
 
-  Delete $SMPROGRAMS\POPFile\Support\*.url
-  RMDir $SMPROGRAMS\POPFile\Support
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\Support\*.url"
+  RMDir "$SMPROGRAMS\${MUI_PRODUCT}\Support"
 
-  Delete $SMPROGRAMS\POPFile\*.lnk
-  Delete $SMPROGRAMS\POPFile\*.url
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\*.lnk"
+  Delete "$SMPROGRAMS\${MUI_PRODUCT}\*.url"
   Delete "$SMSTARTUP\Run POPFile in background.lnk"
-  RMDir $SMPROGRAMS\POPFile
+  RMDir "$SMPROGRAMS\${MUI_PRODUCT}"
 
   SetDetailsPrint textonly
   DetailPrint "$(un.PFI_LANG_PROGRESS_3)"
@@ -2157,7 +2159,7 @@ remove_perl:
   RMDir $INSTDIR
 
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}"
-  DeleteRegKey HKLM SOFTWARE\POPFile
+  DeleteRegKey HKLM "SOFTWARE\${MUI_PRODUCT}"
 
   ; if $INSTDIR was removed, skip these next ones
 
