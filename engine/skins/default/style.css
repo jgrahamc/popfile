@@ -107,6 +107,11 @@ tr.rowHighlighted {
   background-color: #EDEDCA;
 }
 
+tr.rowBoundary { 
+  color: #000000;
+  background-color: #AFAF7F;
+}
+
 .lookupResultsTable {
   border: 3px solid #CCCC99;
 }

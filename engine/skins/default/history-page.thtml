@@ -87,15 +87,15 @@
 
         <TMPL_LOOP NAME="History_Loop_Messages">
 
-        <TMPL_IF NAME="__odd__">
+            <TMPL_IF NAME="History_If_Session">
+            <tr class="rowBoundary"><td colspan="<TMPL_VAR NAME="History_Colspan">"></td></tr>
+            </TMPL_IF>
 
-        <tr class="rowOdd">
-
-        <TMPL_ELSE>
-
-        <tr class="rowEven">
-
-        </TMPL_IF>
+            <TMPL_IF NAME="__odd__">
+            <tr class="rowOdd">
+            <TMPL_ELSE>
+            <tr class="rowEven">
+            </TMPL_IF>
 
             <td>
                 <input type="checkbox" id="remove_<TMPL_VAR NAME="History_I1">" class="checkbox" name="remove_<TMPL_VAR NAME="History_I1">"/>

@@ -2222,6 +2222,7 @@ sub history_page
         my @history_data;
         my $i = $start_message;
         @columns = split( ',', $self->config_( 'columns' ) );
+        my $last = -1;
         foreach my $row (@rows) {
             my %row_data;
             my $mail_file = $row_data{History_Mail_File} = $$row[0];
@@ -2258,6 +2259,13 @@ sub history_page
                 delete $self->{feedback}{$mail_file};
             }
             $row_data{Session_Key} = $self->{session_key__};
+
+            if ( ( $last != -1 ) && ( $self->{form_}{sort} =~ /inserted/ ) ) {
+                $row_data{History_If_Session} = ( abs( $$row[7] - $last ) > 300 );
+                $row_data{History_Colspan} = $colspan+1;
+	    }
+
+            $last = $$row[7];
 
             push ( @history_data, \%row_data );
         }
