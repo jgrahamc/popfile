@@ -3015,6 +3015,10 @@ sub shutdown_page__
     # Replace the link to the style sheet with the style sheet itself
     $text =~ s/\Q<link rel="stylesheet" type="text\/css" href="${root}style.css" title="POPFile-Style">\E/$css/;
 
+    # Remove the session key from the menu links:
+
+    $text =~ s/href="(.+?)\?session=.+?"/href="$1"/g;
+
     return $text;
 }
 
