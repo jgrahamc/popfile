@@ -425,10 +425,10 @@ sub classify_and_modify
 {
     my ( $self, $mail, $client ) = @_;
     
-    my $msg_subject;        # The message subject
-    my $msg_head_before;    # Store the message headers that come before Subject here
-    my $msg_head_after;     # Store the message headers that come after Subject here
-    my $msg_body;           # Store the message body here
+    my $msg_subject     = '';     # The message subject
+    my $msg_head_before = '';     # Store the message headers that come before Subject here
+    my $msg_head_after  = '';     # Store the message headers that come after Subject here
+    my $msg_body        = '';     # Store the message body here
 
     # These two variables are used to control the insertion of the X-POPFile-TimeoutPrevention
     # header when downloading long or slow emails
@@ -485,7 +485,7 @@ sub classify_and_modify
                 }
 
                 # Strip out the X-Text-Classification header that is in an incoming message
-                if ( ( $line =~ /X-Text-Classification: /i ) == 0 ) {
+                if ( ( $line =~ /X-Text-Classification:/i ) == 0 ) {
                     if ( $msg_subject eq '' )  {
                         $msg_head_before .= $line;
                     } else {
