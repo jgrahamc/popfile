@@ -262,8 +262,8 @@ create table history( id integer primary key, -- unique ID for this entry
                       message blob            -- the entire message
                     );
 
-create table bucket_action_types
-create table bucket_actions
+-- TODO create table bucket_action_types
+-- TODO create table bucket_actions
 
 -- TRIGGERS
 
