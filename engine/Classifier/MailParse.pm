@@ -407,17 +407,30 @@ sub update_tag
         if ( ( $attribute =~ /^src$/i ) &&
              ( ( $tag =~ /^img|frame|iframe$/i )
                || ( $tag =~ /^script$/i && $parse_script_uri ) ) ) {
-            my $host = add_url( $self, $value, $encoded, $quote, $end_quote, '' );
+                
+            # "CID:" links refer to an origin-controlled attachment to a html email.
+            # Adding strings from these, even if they appear to be hostnames, may or
+            # may not be beneficial
 
-	    # If the host name is not blank (i.e. there was a hostname in the url
-	    # and it was an image, then if the host was not this host then report
-	    # an off machine image
+            if ($value =~ /^cid\:/i )
+            {
+                # TODO: Decide what to do here, ignoring CID's for now
+                
+            } else {
 
-            if ( ( $host ne '' ) && ( $tag =~ /^img$/i ) ) {
-	        if ( $host ne 'localhost' ) {
-                    $self->update_pseudoword( 'html', 'imgremotesrc' );
-	        }
-	    }
+                my $host = add_url( $self, $value, $encoded, $quote, $end_quote, '' );
+
+                # If the host name is not blank (i.e. there was a hostname in the url
+                # and it was an image, then if the host was not this host then report
+                # an off machine image
+
+                if ( ( $host ne '' ) && ( $tag =~ /^img$/i ) ) {
+        	        if ( $host ne 'localhost' ) {
+                        $self->update_pseudoword( 'html', 'imgremotesrc' );
+        	        }
+                }
+            }
+            
 
             next;
         }
@@ -484,7 +497,7 @@ sub update_tag
         if ( ( $attribute =~ /^(width|height)$/i ) && ( $tag =~ /^img$/i ) ) {
             $attribute = lc( $attribute );
             $self->update_pseudoword( 'html', "img$attribute$value" );
-	}
+        }
 
         # Font sizes
 
