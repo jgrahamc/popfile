@@ -1340,6 +1340,8 @@ SectionEnd
     SectionEnd
 !endif
 
+SubSection "Optional modules" SubSecOptional
+
 #--------------------------------------------------------------------------
 # Installer Section: (optional) POPFile XMLRPC component (default = not selected)
 #
@@ -1401,6 +1403,8 @@ Section /o "XMLRPC" SecXMLRPC
 
 SectionEnd
 
+SubSectionEnd
+
 #--------------------------------------------------------------------------
 # Component-selection page descriptions
 #
@@ -1412,6 +1416,7 @@ SectionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile} $(DESC_SecPOPFile)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}   $(DESC_SecSkins)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}   $(DESC_SecLangs)
+    !insertmacro MUI_DESCRIPTION_TEXT ${SubSecOptional} "Extra POPFile components (for advanced users)"
     !insertmacro MUI_DESCRIPTION_TEXT ${SecXMLRPC}  $(DESC_SecXMLRPC)
     !ifndef NO_KAKASI
       !insertmacro MUI_DESCRIPTION_TEXT ${SecKakasi} "Kakasi (used to process Japanese email)"
@@ -1890,8 +1895,8 @@ Function InstallUserData
   StrCmp $G_STARTUP "/nouser" continue
 
   ; For this build we skip our own FINISH page and disable the wizard's language selection
-  ; dialog and WELCOME page to make the wizard appear as an extension of the main 'setup.exe'
-  ; installer. [Future builds may pass more than just a command-line switch to the wizard]
+  ; dialog to make the wizard appear as an extension of the main 'setup.exe' installer.
+  ; [Future builds may pass more than just a command-line switch to the wizard]
 
   IfRebootFlag special_case
   Exec '"$G_ROOTDIR\adduser.exe" /install'
@@ -2238,7 +2243,7 @@ menucleanup:
   RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
 
   ; Restore the default NSIS context
-  
+
   SetShellVarContext current
 
   SetDetailsPrint textonly
@@ -2392,7 +2397,7 @@ Section "un.Kakasi" UnSecKakasi
   Push ${L_TEMP}
 
   IfFileExists "$INSTDIR\kakasi\*.*" 0 section_exit
-  
+
   SetDetailsPrint textonly
   DetailPrint " "
   SetDetailsPrint listonly
