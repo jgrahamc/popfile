@@ -683,30 +683,34 @@ sub handle_history_bar__
     if ( defined( $self->{form_}{moveleft} ) ) {
         my $col = '+' . $self->{form_}{moveleft};
         my @cols = split( ',', $self->user_config_( 1, 'columns' ) );
+        my @disabled = grep( /^\-/, @cols );
+        my @enabled  = grep( /^\+/, @cols );
 
-        for my $i (1..$#cols) {
-            if ( $cols[$i] eq $col ) {
-                my $t = $cols[$i];
-                $cols[$i] = $cols[$i-1];
-                $cols[$i-1] = $t;
+        for my $i (1..$#enabled) {
+            if ( $enabled[$i] eq $col ) {
+                my $t = $enabled[$i];
+                $enabled[$i] = $enabled[$i-1];
+                $enabled[$i-1] = $t;
                 last;
             }
         }
-        $self->user_config_( 1, 'columns', join( ',', @cols ) );
+        $self->user_config_( 1, 'columns', join( ',',( @enabled, @disabled ) ) );
     }
     if ( defined( $self->{form_}{moveright} ) ) {
         my $col = '+' . $self->{form_}{moveright};
         my @cols = split( ',', $self->user_config_( 1, 'columns' ) );
+        my @disabled = grep( /^\-/, @cols );
+        my @enabled  = grep( /^\+/, @cols );
 
-        for my $i (0..$#cols-1) {
-            if ( $cols[$i] eq $col ) {
-                my $t = $cols[$i];
-                $cols[$i] = $cols[$i+1];
-                $cols[$i+1] = $t;
+        for my $i (0..$#enabled-1) {
+            if ( $enabled[$i] eq $col ) {
+                my $t = $enabled[$i];
+                $enabled[$i] = $enabled[$i+1];
+                $enabled[$i+1] = $t;
                 last;
             }
         }
-        $self->user_config_( 1, 'columns', join( ',', @cols ) );
+        $self->user_config_( 1, 'columns', join( ',',( @enabled, @disabled ) ) );
     }
 }
 
@@ -2321,16 +2325,16 @@ sub history_page
         # +, and then strip the +
 
         my @columns = split( ',', $self->user_config_( 1, 'columns' ) );
+        my @enabled = grep( /^\+/, @columns );
         my @header_data;
         my $colspan = 1;
         my $length = 90;
 
-        foreach my $header (@columns) {
+        foreach my $header (@enabled) {
             my %row_data;
-            $header =~ /^(.)/;
-            next if ( $1 eq '-' );
             $colspan++;
             $header =~ s/^.//;
+
             $row_data{History_Fields} =
                 $self->print_form_fields_(1,1,
                     ('filter','session','search','negate'));
@@ -2350,8 +2354,8 @@ sub history_page
             $row_data{History_If_Sorted_Ascending} =
                 ( $self->{form_}{sort} !~ /^-/ );
             $row_data{Session_Key} = $self->{session_key__};
-            $row_data{History_If_MoveLeft} = ( $header ne $columns[0] );
-            $row_data{History_If_MoveRight} = ( $header ne $columns[$#columns] );
+            $row_data{History_If_MoveLeft} = ( $header ne $enabled[0] );
+            $row_data{History_If_MoveRight} = ( $header ne $enabled[$#enabled] );
             $row_data{Localize_History_RemoveColumn} = $self->{language__}{History_RemoveColumn};
             $row_data{Localize_History_Click_To_Sort} = $self->{language__}{History_Click_To_Sort};
             $row_data{Localize_History_MoveLeft} = $self->{language__}{History_MoveLeft};
