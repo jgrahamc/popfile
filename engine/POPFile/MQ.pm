@@ -88,16 +88,12 @@ sub service
 
     for my $type (keys %{$self->{queue__}}) {
          while ( my $ref = shift @{$self->{queue__}{$type}} ) {
-  	    if ( defined( $ref ) ) {
-	        for my $waiter (@{$self->{waiters__}{$type}}) {
-                    my $message   = @$ref[0];
-                    my $parameter = @$ref[1];
+             for my $waiter (@{$self->{waiters__}{$type}}) {
+                my $message   = @$ref[0];
+                my $parameter = @$ref[1];
 
-                    $waiter->deliver( $type, $message, $parameter );
-		}
-	    } else {
-                last;
-            }
+                $waiter->deliver( $type, $message, $parameter );
+	    }
 	}
     }
 

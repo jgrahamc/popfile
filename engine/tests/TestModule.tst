@@ -36,6 +36,13 @@ test_assert_equal( $m->module_config_( 'module', 'mparameter' ), 'mvalue' );
 $m->global_config_( 'gparameter', 'gvalue' );
 test_assert_equal( $m->global_config_( 'gparameter' ), 'gvalue' );
 
+# Call the null methods
+$m->prefork();
+$m->stop();
+$m->reaper();
+$m->forked();
+$m->deliver();
+
 # Check that the MQ interface functions work
 
 my $mq = new POPFile::MQ;

@@ -62,7 +62,11 @@ END
 			# We do not count lines that are blank or exclusively 
 			# comments or just have braces on them or
 			# just an else or just a subroutine definition
-			if ( ( /^\s*\#/ == 0 ) && ( /^\s*$/ == 0 ) && ( /^\s*(\{|\}|else|\s)+\s*$/ == 0 ) && ( /^\s*sub \w+( \{)?\s*$/ == 0 ) )
+			if ( ( /^\s*\#/                   == 0 ) &&
+                             ( /^\s*$/                    == 0 ) &&
+                             ( /^\s*(\{|\}|else|\s)+\s*$/ == 0 ) &&
+                             ( /^\s*sub \w+( \{)?\s*$/    == 0 ) &&
+                             ( /^\s*package /             == 0 ) )
 			{
 				$count{$file}{total_executable_lines} += 1;
 				
@@ -70,7 +74,9 @@ END
 				# that fact
 				if ( $count{$file}{$current_line} > 0 ) {
 					$count{$file}{total_executed} += 1;
-				}
+				} else {
+print "$file $_\n" if ( $file =~/Module/);
+}
 			}
 		}
 		
