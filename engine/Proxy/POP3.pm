@@ -178,7 +178,7 @@ sub service
     	my $stats_changed = 0;
     	
         for my $kid (@kids) {
-            if ( waitpid( $kid, WNOHANG) == $kid ) {
+            if ( waitpid( $kid, &WNOHANG ) == $kid ) {
                 my $handle = $self->{children}{$kid};
                 
                 while ( <$handle> ) {
@@ -192,7 +192,7 @@ sub service
                     debug( $self, "Incrementing $_" );
                 }
                 
-                debug( $self, "Killing $kid handle $handle" ); 
+                debug( $self, "Done with $kid handle $handle" ); 
                 
                 close $self->{children}{$kid};
                 delete $self->{children}{$kid};
