@@ -102,7 +102,7 @@ Advanced_Message1                       POPFile ignores the following frequently
 Advanced_AddWord                        Add word
 Advanced_RemoveWord                     Remove word
 
-History_Filter                          &nbsp;(just showing bucket <font color=%s>%s</font>)
+History_Filter                          &nbsp;(just showing bucket <font color="%s">%s</font>)
 History_Search                          &nbsp;(searched for subject %s)
 History_Title                           Recent Messages
 History_Jump                            Jump to message
@@ -113,7 +113,7 @@ History_NoSubject                       no subject line
 History_ClassifyAs                      Classify as
 History_MagnetUsed                      Magnet used
 History_ChangedTo                       Changed to <font color=%s>%s
-History_Already                         Already reclassified as <font color=%s>%s</font>
+History_Already                         Already reclassified as <font color="%s">%s</font>
 History_RemoveAll                       Remove All
 History_RemovePage                      Remove Page
 History_Remove                          To remove entries in the history click
@@ -154,7 +154,7 @@ Magnet_Error3                           Create new magnet '%s' in bucket '%s'
 Magnet_CurrentMagnets                   Current Magnets
 Magnet_Message1                         The following magnets cause mail to always be classified into the specified bucket.
 Magnet_CreateNew                        Create New Magnet
-Magnet_Explanation                      Three types of magnets are available:</b> <ul><li><b>From address or name:</b> For example: john@company.com to match a specific address, <br>company.com to match everyone who sends from company.com, <br>John Doe to match a specific person, John to match all Johns<li><b>To address or name:</b> Like a From: magnet but for the To: address in an email<li><b>Subject words:</b> For example: hello to match all messages with hello in the subject</ul>
+Magnet_Explanation                      Three types of magnets are available:</b> <ul><li><b>From address or name:</b> For example: john@company.com to match a specific address, <br />company.com to match everyone who sends from company.com, <br />John Doe to match a specific person, John to match all Johns</li><li><b>To address or name:</b> Like a From: magnet but for the To: address in an email</li> <li><b>Subject words:</b> For example: hello to match all messages with hello in the subject</li></ul>
 Magnet_MagnetType                       Magnet type
 Magnet_Value                            Value
 Magnet_Always                           Always goes to bucket
@@ -190,7 +190,7 @@ Bucket_RenameBucket                     Rename bucket named
 Bucket_Lookup                           Lookup
 Bucket_LookupMessage                    Lookup word in buckets
 Bucket_LookupMessage2                   Lookup result for
-Bucket_LookupMostLikely                 <b>%s</b> is most likely to appear in <font color=%s>%s</font>
+Bucket_LookupMostLikely                 <b>%s</b> is most likely to appear in <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> does not appear in any of the buckets
 Bucket_DisabledGlobally                 Disabled globally
 Bucket_To                               to

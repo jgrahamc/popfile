@@ -159,11 +159,11 @@ sub update_word
             my $color = $self->{bayes}->get_color($mword);
             if ( $encoded == 0 )  {
                 $after = '&' if ( $after eq '>' );
-                if ( !( $self->{ut} =~ s/($before)\Q$word\E($after)/$1<b><font color=$color>$word<\/font><\/b>$2/ ) ) {
+                if ( !( $self->{ut} =~ s/($before)\Q$word\E($after)/$1<b><font color=\"$color\">$word<\/font><\/b>$2/ ) ) {
                 	print "Could not find $word for colorization\n" if ( $self->{debug} );
                 }
             } else {
-                $self->{ut} .= "Found in encoded data <font color=$color>$word<\/font>\r\n";
+                $self->{ut} .= "Found in encoded data <font color=\"$color\">$word<\/font>\r\n";
             }
         } else {
             increment_word( $self, $mword );
@@ -1011,7 +1011,7 @@ sub parse_stream
         $colorized .= "</tt>";
         $colorized =~ s/(\r\n\r\n|\r\r|\n\n)/__BREAK____BREAK__/g;
         $colorized =~ s/[\r\n]+/__BREAK__/g;
-        $colorized =~ s/__BREAK__/<br>/g;
+        $colorized =~ s/__BREAK__/<br \/>/g;
         
         return $colorized;
     }

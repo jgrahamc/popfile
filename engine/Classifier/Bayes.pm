@@ -533,7 +533,7 @@ sub classify_file
             	$regex =~ s/[@\$]/\./g;
             	
                 if ( $noattype =~ m/\Q$regex\E/i ) {
-                    $self->{scores}        = "<b>Magnet Used</b><p>Classified to <font color=$self->{colors}{$bucket}>$bucket</font> because of magnet $type: $magnet";
+                    $self->{scores}        = "<b>Magnet Used</b><p>Classified to <font color=\"$self->{colors}{$bucket}\">$bucket</font> because of magnet $type: $magnet</p>";
                     $self->{magnet_used}   = 1;
                     $self->{magnet_detail} = "$type: $magnet";
                     
@@ -632,7 +632,7 @@ sub classify_file
         $total += exp($score{$b}) if ($score{$b} > 54 * log(0.5));
     }
 
-    $self->{scores} = "<b>Scores</b><p><table><tr><td>Bucket<td>&nbsp;<td>Probability";
+    $self->{scores} = "<b>Scores</b><p><table><tr><td>Bucket</td>\n<td>&nbsp;</td>\n<td>Probability</td></tr>\n";
     print "Bucket              Raw score      Normalized     Estimated prob\n\n" if $self->{debug};
     foreach my $b (@ranking) {
          my $prob = exp($score{$b})/$total;
@@ -642,13 +642,13 @@ sub classify_file
          } else {
              $probstr = sprintf("%17.6e", $prob);
          }
-         $self->{scores} .= "<tr><td><font color=$self->{colors}{$b}><b>$b</b></font><td>&nbsp;<td>$probstr";
+         $self->{scores} .= "<tr>\n<td><font color=\"$self->{colors}{$b}\"><b>$b</b></font></td>\n<td>&nbsp;</td>\n<td>$probstr</td>\n</tr>\n";
          printf("%-15s%15.6f%15.6f %s\n", $b, ($raw_score{$b} - $correction)/$logbuck, ($score{$b} - log($total))/$logbuck + 1, $probstr) if $self->{debug};
     }
     $self->{scores} .= "</table>";
 
     if ($self->{wordscores}) {
-        $self->{scores} .= "<table><tr><td colspan=4>&nbsp;</td></tr><tr><td><b>Word</b></td><td><b>Prob</b></td><td>&nbsp;</td><td><font color=$self->{colors}{$ranking[0]}><b>$ranking[0]</b></font></td></tr>";
+        $self->{scores} .= "<table>\n<tr><td colspan=\"4\">&nbsp;</td></tr>\n<tr><td><b>Word</b></td><td><b>Prob</b></td><td>&nbsp;</td><td><font color=\"$self->{colors}{$ranking[0]}\"><b>$ranking[0]</b></font></td></tr>\n";
         my $wi = 0;
         foreach my $word (@wordrank) {
             if ( $wi < 20 && $wordprob{$word} / $wtprob{$word} >= 0.25 ) {
@@ -661,14 +661,14 @@ sub classify_file
                 my $wordcolor = get_color($self, $word);
                 my $wordprobstr = sprintf("%12.4f", $wordprob{$word} / $wtprob{$word});
                 my $otherprobstr = sprintf("%12.4f", $wbprob{$word}{$ranking[0]} / $wtprob{$word});
-                $self->{scores} .= "<tr><td><font color=$wordcolor><a title=\"$long\">$wordstr</a></font></td>";
-                $self->{scores} .= "<td><font color=$wordcolor>$wordprobstr</font></td><td>&nbsp;</td>";
-                $self->{scores} .= "<td><font color=$self->{colors}{$ranking[0]}>$otherprobstr</font></td></tr>";
+                $self->{scores} .= "<tr>\n<td><font color=\"$wordcolor\"><a title=\"$long\">$wordstr</a></font></td>\n";
+                $self->{scores} .= "<td><font color=\"$wordcolor\">$wordprobstr</font></td>\n<td>&nbsp;</td>\n";
+                $self->{scores} .= "<td><font color=\"$self->{colors}{$ranking[0]}\">$otherprobstr</font></td>\n</tr>\n";
             }
             $wi += 1;
         }
 
-        $self->{scores} .= "</table><p>";
+        $self->{scores} .= "</table></p>";
     }
 
     # If no bucket has a probability better than 0.5, call the message "unclassified".
@@ -679,7 +679,7 @@ sub classify_file
     }
 
     if ( $self->{wordscores} ) {
-        $self->{scores} .= "(<b>$class</b>)<p>";
+        $self->{scores} .= "<p>(<b>$class</b>)</p>";
     }
     
     return $class;
