@@ -17,7 +17,7 @@ use Classifier::Bayes;
 
 # This version number
 my $major_version = 0;
-my $minor_version = 8;
+my $minor_version = 9;
 
 # A list of the messages currently on the server, each entry in this list
 # is a hash containing the following items
@@ -43,6 +43,9 @@ my $highest_message = 0;
 # 1 if we want debug messages
 my $debug = 1;
 
+# The name of the debug file
+my $debug_filename;
+
 # Whether we have sent the UIDL command
 my $done_uidl = 0;
 
@@ -67,6 +70,8 @@ my $mail;
 
 # The classifier object
 my $classifier;
+
+my $seconds_per_day = 60 * 60 * 24;
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -112,6 +117,32 @@ sub save_configuration
 
 # ---------------------------------------------------------------------------------------------
 #
+# remove_debug_files - Remove old popfile log files
+#
+# Removes popfile log files that are older than 3 days
+#
+# ---------------------------------------------------------------------------------------------
+sub remove_debug_files
+{
+    my @debug_files = glob "popfile*.log";
+    
+    foreach my $debug_file (@debug_files)
+    {
+        # Extract the epoch information from the popfile log file name
+        
+        if ( $debug_file =~ /popfile([0-9]*)\.log/ ) 
+        {
+            # If older than now - 3 days then delete
+            if ( $1 < ( time - 3 * $seconds_per_day ) ) 
+            {
+                unlink($debug_file);
+            }
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # debug - print debug messages
 #
 # $_    A string containing a debug message that may or may not be printed
@@ -132,7 +163,7 @@ sub debug
             $message = "$1 XXXXXX\n";
         }
         
-        open DEBUG, ">>popfile.log";
+        open DEBUG, ">>$debug_filename";
         binmode DEBUG;
         my $now = localtime;
         print DEBUG $now;
@@ -515,6 +546,8 @@ sub run_popfile
     # a call waiting an accept it without having to block
     my $selector         = new IO::Select( $server  );
     
+    print "POPFile ready\n";
+    
     # Accept a connection from a client trying to use us as the mail server.  We service one client at a time
     # and all others get queued up to be dealt with later.  We check the alive boolean here to make sure we
     # are still allowed to operate
@@ -865,7 +898,7 @@ sub run_popfile
                                         {
                                             # Strip out the X-Text-Classification header that is in an incoming message
                                             
-                                            if ( $line =~ /X-Text-Classification: / == 0 )
+                                            if ( ( $line =~ /X-Text-Classification: / ) == 0 )
                                             {
                                                 $msg_headers .= $line;
                                             }
@@ -878,20 +911,8 @@ sub run_popfile
                                 }
                                 else
                                 {
-                                    # If this is a base64 encoded message line then don't send it to classifier
-                                    # since it doesn't help.  Also filter out additional headers
-                                    if ( ( !( $line =~ /^[^ ]+: / ) ) && ( !( $line =~ /^[^ ]{70}/ ) ) )
-                                    {
-                                        print TEMP $line;
-                                    }
-
+                                    print TEMP $line;
                                     $msg_body .= $line;
-
-                                    # If we hit a base64 line then stop downloading and classify
-                                    if ( $line =~ /^[^ ]{70}/ ) 
-                                    {
-                                        last;
-                                    }
                                 }
                             }
 
@@ -900,8 +921,10 @@ sub run_popfile
                             # Do the text classification and parse the result
                             my $classification = $classifier->classify_file("temp.tmp");
 
-                            debug ("Classification: $classification" );
-                            debug("Subject modification is $configuration{subject}");                    
+                            # Remove the temporary file
+                            unlink("temp.tmp");
+
+                            debug ("Classification: $classification\n" );
                             
                             # Add the spam header
                             if ( $configuration{subject} ) 
@@ -923,12 +946,12 @@ sub run_popfile
                             # Retrieve any more of the body
                             if ( !$got_full_body )
                             {
-                                debug( "Echoing rest of message" );
+                                debug( "Echoing rest of message\n" );
                                 echo_to_dot( $mail, $client );
                             }
                             else
                             {
-                                debug( "Full message was received" );
+                                debug( "Full message was received\n" );
                                 print $client ".$eol";
                             }
 
@@ -1025,8 +1048,6 @@ sub run_popfile
         $#messages       = 0;
         $#message_map    = 0;
         $done_uidl       = 0;
-
-        save_configuration();
        }
     }
     }
@@ -1047,10 +1068,16 @@ sub aborting
 
 # ---------------------------------------------------------------------------------------------
 
+print "POPFile Engine v$major_version.$minor_version starting\n";
+
 $SIG{BREAK} = \&aborting;
 $SIG{ABRT}  = \&aborting;
 $SIG{TERM}  = \&aborting;
 $SIG{INT}   = \&aborting;
+
+# Create the name of the debug file for the debug() function
+my $today = int( time / $seconds_per_day ) * $seconds_per_day;
+$debug_filename = "popfile$today.log";
 
 # Set up reasonable defaults for the configuration parameters.  These may be 
 # overwritten immediately when we read the configuration file
@@ -1061,8 +1088,17 @@ $configuration{subject}  = 1;
 $configuration{server}   = $ARGV[1];
 $configuration{sport}    = $ARGV[2];
 
+print "    Loading configuration\n";
+
 # Load the current configuration from disk
 load_configuration();
+
+print "    Cleaning stale log files\n";
+
+# Remove old log files
+remove_debug_files();
+
+print "    Loading corpus\n";
 
 # Get the classifier
 $classifier = new Classifier::Bayes;
@@ -1071,7 +1107,11 @@ $classifier->load_word_matrix();
 # Run the POP server and handle requests
 run_popfile($ARGV[0] || $configuration{port}, $configuration{server}, $configuration{sport});
 
+print "    Saving configuration\n";
+
 # Write the final configuration to disk
 save_configuration();
+
+print "POPFile terminating\n";
 
 # ---------------------------------------------------------------------------------------------
