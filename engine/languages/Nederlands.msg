@@ -24,7 +24,7 @@ Previous                                Vorige
 
 Next                                    Volgende
 
->From                                    Van
+From                                    Van
 
 Subject                                 Onderwerp
 
