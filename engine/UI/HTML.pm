@@ -618,6 +618,10 @@ sub bmp_file__
     my ( $self, $client, $color ) = @_;
 
     $color = lc($color);
+    
+    #TODO: this is dirty something higher up (HTTP) should be decoding the URL
+    $color =~ s/^%23//; # if we have an prefixed hex color value, 
+                        # just dump the encoded hash-mark (#)
 
     # If the color contains something other than hex then do a map
     # on it first and then get the hex color, from the hex color
@@ -626,6 +630,7 @@ sub bmp_file__
     if ( $color !~ /^[0-9a-f]{6}$/ ) {
         $color = $self->{c__}->{parser__}->map_color( $color );
     }
+
 
     if ( $color =~ /^([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/ ) {
         my $bmp = '424d3a0000000000000036000000280000000100000001000000010018000000000004000000eb0a0000eb0a00000000000000000000' . "$3$2$1" . '00';
@@ -2717,7 +2722,11 @@ sub load_template__
         filename          => $file,
         case_sensitive    => 1,
         loop_context_vars => 1,
-        cache             => $self->config_( 'cache_templates' ) );
+        cache             => $self->config_( 'cache_templates' ),
+        search_path_on_include => 1,
+        path => [$self->get_root_path_( "$template_root" ),
+                 $self->get_root_path_( 'skins/default' ) ]
+                                   );
 
     # Set a variety of common elements that are used repeatedly
     # throughout POPFile's pages
