@@ -1109,7 +1109,7 @@ sub corpus_page
        }
     }
 
-    if ( defined($form{delete}) )
+    if ( ( defined($form{delete}) ) && ( $form{name} ne '' ) )
     {
         $form{name} = lc($form{name});
         unlink( "corpus/$form{name}/table" );
@@ -1119,51 +1119,7 @@ sub corpus_page
         $classifier->load_word_matrix();
     }
     
-    if ( defined($form{upload}) )
-    {
-        debug( "Told to upload $form{file} into $form{name}" );
-        my %words;
-        
-        open WORDS, "<corpus/$form{name}/table";
-        while (<WORDS>)
-        {
-            if ( /__CORPUS__ __VERSION__ (\d+)/ )
-            {
-                if ( $1 != 1 ) 
-                {
-                    print "Incompatible corpus version in $form{name}\n";
-                    return;
-                }
-                
-                next;
-            }
-            
-            if ( /(.+) (.+)/ )
-            {
-                $words{$1} = $2;
-            }
-        }
-        close WORDS;
-
-        $classifier->{parser}->parse_stream($form{file});
-
-        foreach my $word (keys %{$classifier->{parser}->{words}})
-        {
-            $words{$word} += $classifier->{parser}->{words}{$word};
-        }
-        
-        open WORDS, ">corpus/$form{name}/table";
-        print WORDS "__CORPUS__ __VERSION__ 1\n";
-        foreach my $word (keys %words)
-        {
-            print WORDS "$word $words{$word}\n";
-        }
-        close WORDS;
-        
-        $classifier->load_word_matrix();
-    }
-
-    if ( defined($form{newname}) )
+    if ( ( defined($form{newname}) ) && ( $form{oname} ne '' ) )
     {
         if ( $form{newname} =~ /[^a-z\-_]/ ) 
         {
@@ -1264,14 +1220,14 @@ sub corpus_page
     }
     $body .= "</table><p><hr><h2>Maintenance</h2><p><form action=/buckets><b>Create bucket with name:</b> <br><input name=cname type=text> <input type=submit name=create value=Create><input type=hidden name=session value=$session_key></form>$create_message";
     
-    $body .= "<p><form action=/buckets><b>Delete bucket named:</b> <br><select name=name>";
+    $body .= "<p><form action=/buckets><b>Delete bucket named:</b> <br><select name=name><option value=></option>";
     foreach my $bucket (@buckets)
     {
         $body .= "<option value=$bucket>$bucket</option>";
     }
     $body .= "</select> <input type=submit name=delete value=Delete><input type=hidden name=session value=$session_key></form>$delete_message";
 
-    $body .= "<p><form action=/buckets><b>Rename bucket named:</b> <br><select name=oname>";
+    $body .= "<p><form action=/buckets><b>Rename bucket named:</b> <br><select name=oname><option value=></option>";
     foreach my $bucket (@buckets)
     {
         $body .= "<option value=$bucket>$bucket</option>";
@@ -1355,15 +1311,6 @@ sub corpus_page
 
         $body .= "</blockquote>";
     }
-
-    $body .= "<p><hr><h2>Learn</h2>";
-    $body .= "<h3>Upload file into a bucket</h3><form action=/buckets><b>Bucket: </b><select name=name>";
-    foreach my $bucket (@buckets)
-    {
-        $body .= "<option value=$bucket>$bucket</option>";
-    }
-    
-    $body .= "</select> <b>File:</b> <input type=file name=file> <input type=submit name=upload value=Upload><input type=hidden name=session value=$session_key></form>";
 
     return http_ok($body,1);
 }
