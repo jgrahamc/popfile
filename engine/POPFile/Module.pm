@@ -24,6 +24,7 @@
 
 package POPFile::Module;
 
+use strict;
 use IO::Select;
 
 # ---------------------------------------------------------------------------------------------
@@ -452,8 +453,72 @@ sub get_root_path_
 
 # ---------------------------------------------------------------------------------------------
 #
-# slurp_
+# flush_slurp_data__
 #
+# Helper function for slurp_ that returns an empty string if the slurp buffer doesn't
+# contain a complete line, or returns a complete line.
+#
+# $handle            Handle to read from, which should be in binmode
+#
+# ---------------------------------------------------------------------------------------------
+sub flush_slurp_data__
+{
+    my ( $self, $handle ) = @_;
+
+    # The acceptable line endings are CR, CRLF or LF.  So we look for
+    # them using these regexps.
+
+    # Look for LF
+
+    if ( $self->{slurp_data__}{"$handle"}{data} =~ s/^([^\015\012]*\012)// ) {
+        return $1;
+    }	
+
+    # Look for CRLF
+
+    if ( $self->{slurp_data__}{"$handle"}{data} =~ s/^([^\015\012]*\015\012)// ) {
+        return $1;
+    }
+
+    # Look for CR, here we have to be careful because of the fact that the current
+    # total buffer could be ending with CR and there could actually be an LF to
+    # read, so we check for that situation if we find CR
+
+    if ( $self->{slurp_data__}{"$handle"}{data} =~ s/^([^\015\012]*\015)// ) {
+        my $cr = $1;
+
+        # If we have removed everything from the buffer then see if there's 
+        # another character available to read, if there is then get it and check
+        # to see if it is LF (in which case this is a line ending CRLF), otherwise
+        # just save it
+
+        if ( $self->{slurp_data__}{"$handle"}{data} eq '' ) {
+            $self->log_( "flush_slurp_data__ hit CR/LF check on $cr" );
+            if ( defined( $self->{slurp_data__}{"$handle"}{select}->can_read(0) ) ) {
+                $self->log_( "Data is available to read" );
+                my $c;
+                if ( sysread( $handle, $c, 1 ) == 1 ) {
+                    $self->log_( "Read [" . ord($c) . "]" );
+                    if ( $c eq "\012" ) {
+                        $cr .= $c;
+                    } else {
+                        $self->{slurp_data__}{"$handle"}{data} = $c;
+		    }
+		}
+	    }
+	}
+
+        $self->log_( "Returning [$cr]" );
+        return $cr;
+    }
+
+    return '';
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# slurp_
+#t
 # A replacement for Perl's <> operator on a handle that reads a line until CR, CRLF or LF
 # is encountered.  Returns the line if read (with the CRs and LFs), or undef if at the EOF,
 # blocks waiting for something to read.
@@ -470,60 +535,35 @@ sub slurp_
 {
     my ( $self, $handle ) = @_;
 
+    if ( !defined( $self->{slurp_data__}{"$handle"}{data} ) ) {
+        $self->{slurp_data__}{"$handle"}{select} = new IO::Select( $handle );
+        $self->{slurp_data__}{"$handle"}{data}   = '';
+    }
+
+    my $result = $self->flush_slurp_data__( $handle );
+
+    if ( $result ne '' ) {
+        return $result;
+    }
+
     my $c;
 
-    # Read until we either run out of data to read or we hit a suitable line
-    # ending character which is not right at the end of the data otherwise we
-    # could accidentally split CRLF into two lines (one ending CR and one LF
-    # if they appeared right at the 160 character boundary).
+    while ( sysread( $handle, $c, 160 ) > 0 ) {
+        $self->{slurp_data__}{"$handle"}{data} .= $c;
+ 
+        $result = $self->flush_slurp_data__( $handle );
 
-    while ( ( $self->{slurp_buffer__}{"$handle"}{data} !~ /[\012\015]/ ) &&
-            ( sysread( $handle, $c, 160 ) > 0 ) ) {
-        $self->{slurp_buffer__}{"$handle"}{data} .= $c;
-    }
-
-    # If the last character is CR then try to read one more character in
-    # case there's an LF after it
-
-    if ( $self->{slurp_buffer__}{"$handle"}{data} =~ /\015$/ ) {
-        if ( !defined( $self->{slurp_bufer__}{"$handle"}{select} ) ) {
-            $self->{slurp_buffer__}{"$handle"}{select} = new IO::Select( $handle );
-	}
-
-        if ( defined( $self->{slurp_buffer__}{"$handle"}{select}->can_read(0) ) ) {
-            if ( sysread( $handle, $c, 1 ) == 1 ) {
-                $self->{slurp_buffer__}{"$handle"}{data} .= $c;
-	    }
-	}
-    }
-
-    # The acceptable line endings are CR, CRLF or LF.  So we look for
-    # them using these regexps.
-
-    # Look for LF
-
-    if ( $self->{slurp_buffer__}{"$handle"}{data} =~ s/^([^\015\012]*\012)// ) {
-        return $1;
-    }	
-
-    # Look for CRLF
-
-    if ( $self->{slurp_buffer__}{"$handle"}{data} =~ s/^([^\015\012]*\015\012)// ) {
-        return $1;
-    }
-
-    # Look for CR
-
-    if ( $self->{slurp_buffer__}{"$handle"}{data} =~ s/^([^\015\012]*\015)// ) {
-        return $1;
+        if ( $result ne '' ) {
+            return $result;
+        }
     }
 
     # If we get here with something in line then the file ends without any
     # CRLF so return the line, otherwise we are reading at the end of the
     # stream/file so return undef
 
-    my $remaining = $self->{slurp_buffer__}{"$handle"}{data}; 
-    delete( $self->{slurp_buffer__}{"$handle"} );
+    my $remaining = $self->{slurp_data__}{"$handle"}{data}; 
+    $self->done_slurp_( $handle );
 
     if ( $remaining eq '' ) {
         return undef;
@@ -545,7 +585,9 @@ sub done_slurp_
 {
     my ( $self, $handle ) = @_;
 
-    undef $self->{slurp_buffer__}{"$handle"};
+    delete $self->{slurp_data__}{"$handle"}{select};
+    delete $self->{slurp_data__}{"$handle"}{data};
+    delete $self->{slurp_data__}{"$handle"};
 }
 
 # ---------------------------------------------------------------------------------------------
