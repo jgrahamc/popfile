@@ -91,7 +91,7 @@
                 <TMPL_LOOP NAME="Bucket_Loop_Loop_Word_Row">
 
                 <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_0">#Lookup">
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_0" ESCAPE=URL>#Lookup">
                         <b>
                             <TMPL_VAR NAME="Bucket_Word_0">
                         </b>
@@ -104,7 +104,7 @@
                     &nbsp;
                 </td>
                 <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_1">#Lookup">
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_1" ESCAPE=URL>#Lookup">
                         <b>
                             <TMPL_VAR NAME="Bucket_Word_1">
                         </b>
@@ -117,7 +117,7 @@
                     &nbsp;
                 </td>
                 <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_2">#Lookup">
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_2" ESCAPE=URL>#Lookup">
                         <b>
                             <TMPL_VAR NAME="Bucket_Word_2">
                         </b>
@@ -130,7 +130,7 @@
                     &nbsp;
                 </td>
                 <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_3">#Lookup">
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_3" ESCAPE=URL>#Lookup">
                         <b>
                             <TMPL_VAR NAME="Bucket_Word_3">
                         </b>
@@ -143,7 +143,7 @@
                     &nbsp;
                 </td>
                 <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_4">#Lookup">
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_4" ESCAPE=URL>#Lookup">
                         <b>
                             <TMPL_VAR NAME="Bucket_Word_4">
                         </b>
@@ -156,7 +156,7 @@
                     &nbsp;
                 </td>
                 <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_5">#Lookup">
+                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word_5" ESCAPE=URL>#Lookup">
                         <b>
                             <TMPL_VAR NAME="Bucket_Word_5">
                         </b>
@@ -188,7 +188,7 @@
 
             <TMPL_ELSE>
 
-            <a class="bucketLetter" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;showbucket=<TMPL_VAR NAME="Bucket_Bucket">&amp;showletter=<TMPL_VAR NAME="Bucket_Letter">">
+            <a class="bucketLetter" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;showbucket=<TMPL_VAR NAME="Bucket_Bucket">&amp;showletter=<TMPL_VAR NAME="Bucket_Letter" ESCAPE=URL>">
                 <b>
                     <TMPL_VAR NAME="Bucket_Letter">
                 </b>
