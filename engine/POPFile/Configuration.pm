@@ -210,7 +210,7 @@ sub upgrade_parameter__
     # The old piddir parameter is now config_piddir and is accessed through either config_
     # if accessed from the config module or through module_config_ from outside
 
-    my %upgrades = ( 
+    my %upgrades = (
 
 		     # Parameters that are now handled by Classifier::Bayes
 
