@@ -213,6 +213,52 @@ exit:
 
 FunctionEnd
 
+#--------------------------------------------------------------------------
+# Installer Function: StrStripLZS
+#
+# Strips any combination of leading zeroes and spaces from a string.
+#
+# Inputs:
+#         (top of stack)     - string to be processed
+# Outputs:
+#         (top of stack)     - processed string (with no leading zeroes or spaces)
+#
+# Usage:
+#         Push "  123"        ; the strings "000123" or " 0 0 0123" will give same result
+#         Call StrStripLZS
+#         Pop $R0
+#
+#         ($R0 at this point is "123")
+#
+#--------------------------------------------------------------------------
+
+Function StrStripLZS
+
+  !define L_CHAR      $R9
+  !define L_STRING    $R8
+
+  Exch ${L_STRING}
+  Push ${L_CHAR}
+
+loop:
+  StrCpy ${L_CHAR} ${L_STRING} 1
+  StrCmp ${L_CHAR} "" done
+  StrCmp ${L_CHAR} " " strip_char
+  StrCmp ${L_CHAR} "0" strip_char
+  Goto done
+
+strip_char:
+  StrCpy ${L_STRING} ${L_STRING} "" 1
+  Goto loop
+
+done:
+  Pop ${L_CHAR}
+  Exch ${L_STRING}
+
+  !undef L_CHAR
+  !undef L_STRING
+
+FunctionEnd
 
 #==============================================================================================
 #
