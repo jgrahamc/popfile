@@ -411,35 +411,47 @@ FunctionEnd
       !define L_LNE         $R8   ; a line from the popfile.cfg file
       !define L_PARAM       $R7
       !define L_SEPARATOR   $R6   ; character used to separate the pop3 server from the username
+      !define L_TEXTEND     $R5   ; helps ensure correct handling of lines over 1023 chars long
 
       Push ${L_SEPARATOR}
       Push ${L_CFG}
       Push ${L_LNE}
       Push ${L_PARAM}
+      Push ${L_TEXTEND}
 
       StrCpy ${L_SEPARATOR} ""
 
-      ClearErrors
-
       FileOpen  ${L_CFG} "$G_USERDIR\popfile.cfg" r
 
+    found_eol:
+      StrCpy ${L_TEXTEND} "<eol>"
+
     loop:
-      FileRead   ${L_CFG} ${L_LNE}
-      IfErrors separator_done
+      FileRead ${L_CFG} ${L_LNE}
+      StrCmp ${L_LNE} "" separator_done
+      StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
+      StrCmp ${L_LNE} "$\n" loop
 
       StrCpy ${L_PARAM} ${L_LNE} 10
       StrCmp ${L_PARAM} "separator " old_separator
       StrCpy ${L_PARAM} ${L_LNE} 15
       StrCmp ${L_PARAM} "pop3_separator " new_separator
-      Goto loop
+      Goto check_eol
 
     old_separator:
       StrCpy ${L_SEPARATOR} ${L_LNE} 1 10
-      Goto loop
+      Goto check_eol
 
     new_separator:
       StrCpy ${L_SEPARATOR} ${L_LNE} 1 15
-      Goto loop
+
+      ; Now read file until we get to end of the current line
+      ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+    check_eol:
+      StrCpy ${L_TEXTEND} ${L_LNE} 1 -1
+      StrCmp ${L_TEXTEND} "$\n" found_eol
+      StrCmp ${L_TEXTEND} "$\r" found_eol loop
 
     separator_done:
       FileClose ${L_CFG}
@@ -451,6 +463,7 @@ FunctionEnd
       StrCpy ${L_SEPARATOR} ":"
 
     exit:
+      Pop ${L_TEXTEND}
       Pop ${L_PARAM}
       Pop ${L_LNE}
       Pop ${L_CFG}
@@ -460,6 +473,7 @@ FunctionEnd
       !undef L_LNE
       !undef L_PARAM
       !undef L_SEPARATOR
+      !undef L_TEXTEND
 
     FunctionEnd
 !endif
@@ -490,37 +504,50 @@ FunctionEnd
       !define L_LNE         $R7   ; a line from the popfile.cfg file
       !define L_MODE        $R6   ; new console mode
       !define L_PARAM       $R5
+      !define L_TEXTEND     $R4   ; helps ensure correct handling of lines over 1023 chars long
 
       Exch ${L_MODE}
       Push ${L_NEW_CFG}
       Push ${L_OLD_CFG}
       Push ${L_LNE}
       Push ${L_PARAM}
+      Push ${L_TEXTEND}
 
-      ClearErrors
       FileOpen  ${L_OLD_CFG} "$G_USERDIR\popfile.cfg" r
       FileOpen  ${L_NEW_CFG} "$PLUGINSDIR\new.cfg" w
 
+    found_eol:
+      StrCpy ${L_TEXTEND} "<eol>"
+
     loop:
-      FileRead   ${L_OLD_CFG} ${L_LNE}
-      IfErrors copy_done
+      FileRead ${L_OLD_CFG} ${L_LNE}
+      StrCmp ${L_LNE} "" copy_done
+      StrCmp ${L_TEXTEND} "<eol>" 0 copy_lne
+      StrCmp ${L_LNE} "$\n" copy_lne
 
       StrCpy ${L_PARAM} ${L_LNE} 16
-      StrCmp ${L_PARAM} "windows_console " got_console
-      FileWrite ${L_NEW_CFG} ${L_LNE}
-      Goto loop
-
-    got_console:
+      StrCmp ${L_PARAM} "windows_console " 0 copy_lne
       FileWrite ${L_NEW_CFG} "windows_console ${L_MODE}$\r$\n"
       Goto loop
 
-    copy_done:
+    copy_lne:
+      FileWrite ${L_NEW_CFG} ${L_LNE}
+
+      ; Now read file until we get to end of the current line
+      ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+      StrCpy ${L_TEXTEND} ${L_LNE} 1 -1
+      StrCmp ${L_TEXTEND} "$\n" found_eol
+      StrCmp ${L_TEXTEND} "$\r" found_eol loop
+
+   copy_done:
       FileClose ${L_OLD_CFG}
       FileClose ${L_NEW_CFG}
 
       Delete "$G_USERDIR\popfile.cfg"
       Rename "$PLUGINSDIR\new.cfg" "$G_USERDIR\popfile.cfg"
 
+      Pop ${L_TEXTEND}
       Pop ${L_PARAM}
       Pop ${L_LNE}
       Pop ${L_OLD_CFG}
@@ -532,6 +559,7 @@ FunctionEnd
       !undef L_LNE
       !undef L_MODE
       !undef L_PARAM
+      !undef L_TEXTEND
 
     FunctionEnd
 !endif
@@ -901,6 +929,7 @@ FunctionEnd
     !define L_RESULT        $R7
     !define L_SOURCE        $R6
     !define L_TEMP          $R5
+    !define L_TEXTEND       $R4   ; helps ensure correct handling of lines over 1023 chars long
 
     Exch ${L_SOURCE}          ; where we are supposed to look for the 'popfile.cfg' file
     Push ${L_RESULT}
@@ -908,29 +937,43 @@ FunctionEnd
     Push ${L_CORPUS}
     Push ${L_FILE_HANDLE}
     Push ${L_TEMP}
+    Push ${L_TEXTEND}
 
     StrCpy ${L_CORPUS} ""
 
     IfFileExists "${L_SOURCE}\popfile.cfg" 0 use_default_locn
-    ClearErrors
+
     FileOpen ${L_FILE_HANDLE} "${L_SOURCE}\popfile.cfg" r
+
+  found_eol:
+    StrCpy ${L_TEXTEND} "<eol>"
 
   loop:
     FileRead ${L_FILE_HANDLE} ${L_TEMP}
-    IfErrors cfg_file_done
+    StrCmp ${L_TEMP} "" cfg_file_done
+    StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
+    StrCmp ${L_TEMP} "$\n" loop
+
     StrCpy ${L_RESULT} ${L_TEMP} 7
     StrCmp ${L_RESULT} "corpus " got_old_corpus
     StrCpy ${L_RESULT} ${L_TEMP} 13
     StrCmp ${L_RESULT} "bayes_corpus " got_new_corpus
-    Goto loop
+    Goto check_eol
 
   got_old_corpus:
     StrCpy ${L_CORPUS} ${L_TEMP} "" 7
-    Goto loop
+    Goto check_eol
 
   got_new_corpus:
     StrCpy ${L_CORPUS} ${L_TEMP} "" 13
-    Goto loop
+
+    ; Now read file until we get to end of the current line
+    ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+  check_eol:
+    StrCpy ${L_TEXTEND} ${L_TEMP} 1 -1
+    StrCmp ${L_TEXTEND} "$\n" found_eol
+    StrCmp ${L_TEXTEND} "$\r" found_eol loop
 
   cfg_file_done:
     FileClose ${L_FILE_HANDLE}
@@ -958,6 +1001,7 @@ FunctionEnd
     Pop ${L_RESULT}
 
   got_result:
+    Pop ${L_TEXTEND}
     Pop ${L_TEMP}
     Pop ${L_FILE_HANDLE}
     Pop ${L_CORPUS}
@@ -969,6 +1013,7 @@ FunctionEnd
     !undef L_RESULT
     !undef L_SOURCE
     !undef L_TEMP
+    !undef L_TEXTEND
 
   FunctionEnd
 !macroend

@@ -1685,6 +1685,7 @@ Function MakeRootDirSafe
   !define L_OLD_GUI  $R5
   !define L_PARAM    $R4
   !define L_RESULT   $R3
+  !define L_TEXTEND  $R2    ; used to ensure correct handling of lines longer than 1023 chars
 
   Push ${L_CFG}
   Push ${L_EXE}
@@ -1693,6 +1694,7 @@ Function MakeRootDirSafe
   Push ${L_OLD_GUI}
   Push ${L_PARAM}
   Push ${L_RESULT}
+  Push ${L_TEXTEND}
 
   ; If we are about to overwrite an existing version which is still running,
   ; then one of the EXE files will be 'locked' which means we have to shutdown POPFile.
@@ -1742,27 +1744,38 @@ check_cfg_file:
   ; There may be more than one entry for this port in the file - use the last one found
   ; (but give priority to any "html_port" entry).
 
-  ClearErrors
   FileOpen  ${L_CFG} "${L_CFG}\popfile.cfg" r
 
+found_eol:
+  StrCpy ${L_TEXTEND} "<eol>"
+
 loop:
-  FileRead   ${L_CFG} ${L_LINE}
-  IfErrors done
+  FileRead ${L_CFG} ${L_LINE}
+  StrCmp ${L_LINE} "" done
+  StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
+  StrCmp ${L_LINE} "$\n" loop
 
   StrCpy ${L_PARAM} ${L_LINE} 10
   StrCmp ${L_PARAM} "html_port " got_html_port
 
   StrCpy ${L_PARAM} ${L_LINE} 8
   StrCmp ${L_PARAM} "ui_port " got_ui_port
-  Goto loop
+  Goto check_eol
 
 got_ui_port:
   StrCpy ${L_OLD_GUI} ${L_LINE} 5 8
-  Goto loop
+  Goto check_eol
 
 got_html_port:
   StrCpy ${L_NEW_GUI} ${L_LINE} 5 10
-  Goto loop
+
+  ; Now read file until we get to end of the current line
+  ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+check_eol:
+  StrCpy ${L_TEXTEND} ${L_LINE} 1 -1
+  StrCmp ${L_TEXTEND} "$\n" found_eol
+  StrCmp ${L_TEXTEND} "$\r" found_eol loop
 
 done:
   FileClose ${L_CFG}
@@ -1818,6 +1831,7 @@ unlocked_exit:
   DetailPrint "File is now unlocked"
 
 exit_now:
+  Pop ${L_TEXTEND}
   Pop ${L_RESULT}
   Pop ${L_PARAM}
   Pop ${L_OLD_GUI}
@@ -1833,6 +1847,7 @@ exit_now:
   !undef L_OLD_GUI
   !undef L_PARAM
   !undef L_RESULT
+  !undef L_TEXTEND
 
 nothing_to_check:
 FunctionEnd
@@ -2320,11 +2335,13 @@ Section "un.Shutdown POPFile" UnSecShutdown
   !define L_EXE         $R8   ; full path of the EXE to be monitored
   !define L_LNE         $R7   ; a line from popfile.cfg
   !define L_TEMP        $R6
+  !define L_TEXTEND     $R5   ; used to ensure correct handling of lines longer than 1023 chars
 
   Push ${L_CFG}
   Push ${L_EXE}
   Push ${L_LNE}
   Push ${L_TEMP}
+  Push ${L_TEXTEND}
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROG_SHUTDOWN)"
@@ -2349,20 +2366,28 @@ Section "un.Shutdown POPFile" UnSecShutdown
 
   StrCpy $G_GUI ""
 
-  ClearErrors
   FileOpen ${L_CFG} "$G_USERDIR\popfile.cfg" r
+
+found_eol:
+  StrCpy ${L_TEXTEND} "<eol>"
 
 loop:
   FileRead ${L_CFG} ${L_LNE}
-  IfErrors ui_port_done
+  StrCmp ${L_LNE} "" ui_port_done
+  StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
+  StrCmp ${L_LNE} "$\n" loop
 
   StrCpy ${L_TEMP} ${L_LNE} 10
-  StrCmp ${L_TEMP} "html_port " got_html_port
-  Goto loop
-
-got_html_port:
+  StrCmp ${L_TEMP} "html_port " 0 check_eol
   StrCpy $G_GUI ${L_LNE} 5 10
-  Goto loop
+
+  ; Now read file until we get to end of the current line
+  ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+check_eol:
+  StrCpy ${L_TEXTEND} ${L_LNE} 1 -1
+  StrCmp ${L_TEXTEND} "$\n" found_eol
+  StrCmp ${L_TEXTEND} "$\r" found_eol loop
 
 ui_port_done:
   FileClose ${L_CFG}
@@ -2395,6 +2420,7 @@ section_exit:
   DetailPrint " "
   SetDetailsPrint listonly
 
+  Pop ${L_TEXTEND}
   Pop ${L_TEMP}
   Pop ${L_LNE}
   Pop ${L_EXE}
@@ -2404,6 +2430,7 @@ section_exit:
   !undef L_EXE
   !undef L_LNE
   !undef L_TEMP
+  !undef L_TEXTEND
 
 SectionEnd
 
@@ -2548,6 +2575,12 @@ Section "un.Skins" UnSecSkins
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\outlook"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\prjbluegrey"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\prjsteelbeach"
+
+  ; 'SimplyBlue' is no longer in CVS (22 May 2004) but it was the default skin in earlier
+  ; releases so it is treated like the other standard skins which are still in CVS
+
+  !insertmacro DeleteSkin "$G_ROOTDIR\skins\simplyblue"
+
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\sleet"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\sleet-rtl"
   !insertmacro DeleteSkin "$G_ROOTDIR\skins\smalldefault"

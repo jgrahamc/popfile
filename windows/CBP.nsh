@@ -257,6 +257,7 @@ Function CBP_CheckCorpusStatus
   !define CBP_L_TEMP          $R5
   !define CBP_L_NONSQL_CORPUS $R4   ; flat file or BerkeleyDB corpus path (from popfile.cfg)
   !define CBP_L_SQL_CORPUS    $R3   ; SQL database corpus path (from popfile.cfg)
+  !define CBP_L_TEXTEND       $R2   ; used to ensure we can handle lines longer than 1023 chars
 
   Exch ${CBP_L_SOURCE}          ; where we are supposed to look for the corpus data
   Push ${CBP_L_RESULT}
@@ -266,6 +267,7 @@ Function CBP_CheckCorpusStatus
   Push ${CBP_L_TEMP}
   Push ${CBP_L_NONSQL_CORPUS}
   Push ${CBP_L_SQL_CORPUS}
+  Push ${CBP_L_TEXTEND}
 
   StrCpy ${CBP_L_CORPUS} ""
   StrCpy ${CBP_L_NONSQL_CORPUS} ""
@@ -281,28 +283,41 @@ no_trailing_slash:
   ClearErrors
   FileOpen ${CBP_L_FILE_HANDLE} ${CBP_L_SOURCE}\popfile.cfg r
 
+found_eol:
+  StrCpy ${CBP_L_TEXTEND} "<eol>"
+  
 loop:
   FileRead ${CBP_L_FILE_HANDLE} ${CBP_L_TEMP}
-  IfErrors cfg_file_done
+  StrCmp ${CBP_L_TEMP} "" cfg_file_done
+  StrCmp ${CBP_L_TEXTEND} "<eol>" 0 check_eol
+  StrCmp ${CBP_L_TEMP} "$\n" loop
+
   StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 7
   StrCmp ${CBP_L_RESULT} "corpus " got_flat_corpus
   StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 13
   StrCmp ${CBP_L_RESULT} "bayes_corpus " got_bdb_corpus
   StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 15
   StrCmp ${CBP_L_RESULT} "bayes_database " got_sql_corpus
-  Goto loop
+  Goto check_eol
 
 got_flat_corpus:
   StrCpy ${CBP_L_NONSQL_CORPUS} ${CBP_L_TEMP} "" 7
-  Goto loop
+  Goto check_eol
 
 got_bdb_corpus:
   StrCpy ${CBP_L_NONSQL_CORPUS} ${CBP_L_TEMP} "" 13
-  Goto loop
+  Goto check_eol
 
 got_sql_corpus:
   StrCpy ${CBP_L_SQL_CORPUS} ${CBP_L_TEMP} "" 15
-  Goto loop
+
+  ; Now read file until we get to end of the current line
+  ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+check_eol:
+  StrCpy ${CBP_L_TEXTEND} ${CBP_L_TEMP} 1 -1
+  StrCmp ${CBP_L_TEXTEND} "$\n" found_eol
+  StrCmp ${CBP_L_TEXTEND} "$\r" found_eol loop
 
 cfg_file_done:
   FileClose ${CBP_L_FILE_HANDLE}
@@ -381,6 +396,7 @@ clean_install:
 return_result:
   FindClose ${CBP_L_FILE_HANDLE}
 
+  Pop ${CBP_L_TEXTEND}
   Pop ${CBP_L_SQL_CORPUS}
   Pop ${CBP_L_NONSQL_CORPUS}
   Pop ${CBP_L_TEMP}
@@ -396,6 +412,7 @@ return_result:
   !undef CBP_L_TEMP
   !undef CBP_L_NONSQL_CORPUS
   !undef CBP_L_SQL_CORPUS
+  !undef CBP_L_TEXTEND
 
 FunctionEnd
 

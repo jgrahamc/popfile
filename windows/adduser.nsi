@@ -157,7 +157,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.14"
+  !define C_PFI_VERSION  "0.2.15"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -1694,6 +1694,7 @@ Function CheckExistingConfigData
   !define L_CONSOLE   $R3     ; a config parameter used by popfile.exe
   !define L_LANG_NEW  $R2     ; new style UI lang parameter
   !define L_LANG_OLD  $R1     ; old style UI lang parameter
+  !define L_TEXTEND   $R0     ; used to ensure correct handling of lines longer than 1023 chars
 
   Push ${L_CFG}
   Push ${L_CLEANCFG}
@@ -1704,6 +1705,7 @@ Function CheckExistingConfigData
   Push ${L_CONSOLE}
   Push ${L_LANG_NEW}
   Push ${L_LANG_OLD}
+  Push ${L_TEXTEND}
 
   StrCpy $G_POP3 ""
   StrCpy $G_GUI ""
@@ -1719,14 +1721,17 @@ Function CheckExistingConfigData
   ; There may be more than one entry for these ports in the file - use the last one found
   ; (but give priority to any "html_port" entry).
 
-  ClearErrors
-
   FileOpen  ${L_CFG} "$G_USERDIR\popfile.cfg" r
   FileOpen  ${L_CLEANCFG} "$PLUGINSDIR\popfile.cfg" w
 
+found_eol:
+  StrCpy ${L_TEXTEND} "<eol>"
+
 loop:
-  FileRead   ${L_CFG} ${L_LNE}
-  IfErrors done
+  FileRead ${L_CFG} ${L_LNE}
+  StrCmp ${L_LNE} "" done
+  StrCmp ${L_TEXTEND} "<eol>" 0 copy_lne
+  StrCmp ${L_LNE} "$\n" copy_lne
 
   StrCpy ${L_CMPRE} ${L_LNE} 5
   StrCmp ${L_CMPRE} "port " got_port
@@ -1748,10 +1753,7 @@ loop:
   StrCpy ${L_CMPRE} ${L_LNE} 9
   StrCmp ${L_CMPRE} "language " got_lang_old
   StrCpy ${L_CMPRE} ${L_LNE} 14
-  StrCmp ${L_CMPRE} "html_language " got_lang_new
-
-  FileWrite  ${L_CLEANCFG} ${L_LNE}
-  Goto loop
+  StrCmp ${L_CMPRE} "html_language " got_lang_new copy_lne
 
 got_port:
   StrCpy $G_POP3 ${L_LNE} 5 5
@@ -1784,6 +1786,16 @@ got_lang_new:
 got_lang_old:
   StrCpy ${L_LANG_OLD} ${L_LNE} "" 9
   Goto loop
+
+copy_lne:
+  FileWrite ${L_CLEANCFG} ${L_LNE}
+
+  ; Now read file until we get to end of the current line
+  ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+  StrCpy ${L_TEXTEND} ${L_LNE} 1 -1
+  StrCmp ${L_TEXTEND} "$\n" found_eol
+  StrCmp ${L_TEXTEND} "$\r" found_eol loop
 
 done:
   FileClose ${L_CFG}
@@ -1901,6 +1913,7 @@ default_gui:
   StrCpy $G_GUI "8081"
 
 ports_ok:
+  Pop ${L_TEXTEND}
   Pop ${L_LANG_OLD}
   Pop ${L_LANG_NEW}
   Pop ${L_CONSOLE}
@@ -1920,6 +1933,7 @@ ports_ok:
   !undef L_CONSOLE
   !undef L_LANG_NEW
   !undef L_LANG_OLD
+  !undef L_TEXTEND
 
 FunctionEnd
 
@@ -4823,14 +4837,14 @@ Section "un.Shutdown POPFile" UnSecShutdown
   !define L_CFG         $R9   ; used as file handle
   !define L_EXE         $R8   ; full path of the EXE to be monitored
   !define L_LNE         $R7   ; a line from popfile.cfg
-  !define L_OLDUI       $R6   ; holds old-style UI port (if previous POPFile is an old version)
-  !define L_TEMP        $R5
+  !define L_TEMP        $R6
+  !define L_TEXTEND     $R5   ; used to ensure correct handling of lines longer than 1023 chars
 
   Push ${L_CFG}
   Push ${L_EXE}
   Push ${L_LNE}
-  Push ${L_OLDUI}
   Push ${L_TEMP}
+  Push ${L_TEXTEND}
 
   Push $G_ROOTDIR
   Call un.FindLockedPFE
@@ -4840,59 +4854,45 @@ Section "un.Shutdown POPFile" UnSecShutdown
   ; Need to shutdown POPFile, so we can remove the SQLite database and other user data
 
   StrCpy $G_GUI ""
-  StrCpy ${L_OLDUI} ""
 
-  ClearErrors
   FileOpen ${L_CFG} "$G_USERDIR\popfile.cfg" r
+
+found_eol:
+  StrCpy ${L_TEXTEND} "<eol>"
 
 loop:
   FileRead ${L_CFG} ${L_LNE}
-  IfErrors ui_port_done
+  StrCmp ${L_LNE} "" ui_port_done
+  StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
+  StrCmp ${L_LNE} "$\n" loop
 
   StrCpy ${L_TEMP} ${L_LNE} 10
-  StrCmp ${L_TEMP} "html_port " got_html_port
-
-  StrCpy ${L_TEMP} ${L_LNE} 8
-  StrCmp ${L_TEMP} "ui_port " got_ui_port
-  Goto loop
-
-got_html_port:
+  StrCmp ${L_TEMP} "html_port " 0 check_eol
   StrCpy $G_GUI ${L_LNE} 5 10
-  Goto loop
 
-got_ui_port:
-  StrCpy ${L_OLDUI} ${L_LNE} 5 8
-  Goto loop
+  ; Now read file until we get to end of the current line
+  ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
+
+check_eol:
+  StrCpy ${L_TEXTEND} ${L_LNE} 1 -1
+  StrCmp ${L_TEXTEND} "$\n" found_eol
+  StrCmp ${L_TEXTEND} "$\r" found_eol loop
 
 ui_port_done:
   FileClose ${L_CFG}
 
-  StrCmp $G_GUI "" use_other_port
+  StrCmp $G_GUI "" manual_shutdown
   Push $G_GUI
   Call un.TrimNewlines
   Call un.StrCheckDecimal
   Pop $G_GUI
-  StrCmp $G_GUI "" use_other_port
+  StrCmp $G_GUI "" manual_shutdown
   DetailPrint "$(PFI_LANG_UN_LOG_SHUTDOWN) $G_GUI"
   DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
   Push $G_GUI
   Call un.ShutdownViaUI
   Pop ${L_TEMP}
-  Goto check_shutdown
 
-use_other_port:
-  Push ${L_OLDUI}
-  Call un.TrimNewlines
-  Call un.StrCheckDecimal
-  Pop ${L_OLDUI}
-  StrCmp ${L_OLDUI} "" remove_user_data
-  DetailPrint "$(PFI_LANG_UN_LOG_SHUTDOWN) ${L_OLDUI}"
-  DetailPrint "$(PFI_LANG_TAKE_A_FEW_SECONDS)"
-  Push ${L_OLDUI}
-  Call un.ShutdownViaUI
-  Pop ${L_TEMP}
-
-check_shutdown:
   Push ${L_EXE}
   Call un.WaitUntilUnlocked
   Push ${L_EXE}
@@ -4900,6 +4900,7 @@ check_shutdown:
   Pop ${L_EXE}
   StrCmp ${L_EXE} "" remove_user_data
 
+manual_shutdown:
   DetailPrint "Unable to shutdown automatically - manual intervention requested"
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "$(PFI_LANG_MBMANSHUT_1)\
       $\r$\n$\r$\n\
@@ -4908,8 +4909,8 @@ check_shutdown:
       $(PFI_LANG_MBMANSHUT_3)"
 
 remove_user_data:
+  Pop ${L_TEXTEND}
   Pop ${L_TEMP}
-  Pop ${L_OLDUI}
   Pop ${L_LNE}
   Pop ${L_EXE}
   Pop ${L_CFG}
@@ -4917,8 +4918,9 @@ remove_user_data:
   !undef L_CFG
   !undef L_EXE
   !undef L_LNE
-  !undef L_OLDUI
   !undef L_TEMP
+  !undef L_TEXTEND
+
 SectionEnd
 
 #--------------------------------------------------------------------------
