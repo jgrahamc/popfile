@@ -7,7 +7,7 @@
 # server using POP3.  Inserts an extra header X-Text-Classification: into the mail header to 
 # tell the client whether the mail is spam or not based on a text classification algorithm
 #
-# Copyright (c) 2001-2002 John Graham-Cumming
+# Originally created by John Graham-Cumming starting in 2001
 #
 # ---------------------------------------------------------------------------------------------
 
@@ -289,7 +289,7 @@ sub debug
         # account information
         if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ ) 
         {
-            $message = "$`$1$3 XXXXXX$4";
+#            $message = "$`$1$3 XXXXXX$4";
         }
         
         chomp $message;
@@ -2068,18 +2068,26 @@ sub run_popfile
                 # pass through to that server and represents the account on the remote machine that we
                 # will pull email from.  Doing this means we can act as a proxy for multiple mail clients
                 # and mail accounts
-                if ( $command =~ /USER (.+)(:(\d+))?$configuration{separator}(.*)/i )
+                if ( $command =~ /USER (.+)(:(\d+))?$configuration{separator}(.+)/i )
                 {
-                    if ( verify_connected( $client, $1, $3 || 110 ) ) 
+                    if ( $1 ne '' ) 
                     {
-                        $lastuser = $4;
-                        
-                        # Pass through the USER command with the actual user name for this server,
-                        # and send the reply straight to the client
-                        echo_response( $mail, $client, "USER $4" );
+                        if ( verify_connected( $client, $1, $3 || 110 ) ) 
+                        {
+                            $lastuser = $4;
+
+                            # Pass through the USER command with the actual user name for this server,
+                            # and send the reply straight to the client
+                            echo_response( $mail, $client, "USER $4" );
+                        }
+                        else
+                        {
+                            last;
+                        }
                     }
                     else
                     {
+                        tee( $client, "-ERR server name not specified in USER command$eol" );
                         last;
                     }
 
@@ -2424,10 +2432,18 @@ sub run_popfile
 
                 # Don't know what this is so let's just pass it through and hope for the best
                 # Perform a LIST command on the remote server
-                if ( echo_response( $mail, $client, $command ) )
+                if ( $mail && $mail->connected ) 
                 {
-                    flush_extra( $mail, $client );
-                    next;
+                    if ( echo_response( $mail, $client, $command ) )
+                    {
+                        flush_extra( $mail, $client );
+                        next;
+                    }
+                } 
+                else
+                {
+                    tee( $client, "-ERR unknown command or bad syntax$eol" );
+                    last;
                 }
             }
         }
