@@ -3,7 +3,7 @@
 ;
 
 !define MUI_PRODUCT "POPFile" 
-!define MUI_VERSION "0.18.0"
+!define MUI_VERSION "0.18.1"
 
 !include "${NSISDIR}\Contrib\Modern UI\System.nsh"
 
@@ -24,6 +24,8 @@
   !define CFG     $3
   !define LNE     $4
   !define CMPRE   $5
+  !define OEID    $6
+  !define ID      $7
   
   ;Language
   !insertmacro MUI_LANGUAGE "English"
@@ -41,6 +43,7 @@
   !insertmacro MUI_PAGECOMMAND_COMPONENTS
   !insertmacro MUI_PAGECOMMAND_DIRECTORY
   Page custom SetOptionsPage  "Options"
+  Page custom SetOutlookExpressPage  "Configure Outlook Express"
   !insertmacro MUI_PAGECOMMAND_INSTFILES
 
   ;Component-selection page
@@ -48,7 +51,7 @@
     LangString DESC_SecPOPFile ${LANG_ENGLISH} "Installs the core files needed by POPFile."
     LangString DESC_SecPerl    ${LANG_ENGLISH} "Installs minimal Perl needed by POPFile."
     LangString DESC_SecSkins   ${LANG_ENGLISH} "Installs POPFile skins that allow you to change the look and feel of the POPFile user interface."
-    LangString DESC_SecLangs   ${LANG_ENGLISH} "Installs non-English language translations of the POPFile UI and manual."
+    LangString DESC_SecLangs   ${LANG_ENGLISH} "Installs non-English language versions of the POPFile UI."
 
   ;Folder-selection page
   InstallDir "$PROGRAMFILES\${MUI_PRODUCT}"
@@ -57,8 +60,10 @@
   ;Things that need to be extracted on startup (keep these lines before any File command!)
   ;Only useful for BZIP2 compression
   ;Use ReserveFile for your own Install Options ini files too!
+
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
   ReserveFile "ioA.ini"
+  ReserveFile "ioB.ini"
 
 Function .onInit
 
@@ -97,8 +102,10 @@ skip_pop3_set:
   StrCpy ${GUI} "8080"
 skip_gui_set:
 
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioA.ini"
-  
+  InitPluginsDir
+  File /oname=$PLUGINSDIR\ioA.ini ioA.ini
+  File /oname=$PLUGINSDIR\ioB.ini ioB.ini
+
 FunctionEnd
 
 ;--------------------------------
@@ -273,16 +280,6 @@ Section "Languages" SecLangs
   SetOutPath $INSTDIR\languages
   File "..\engine\languages\*.msg"
 
-  SetOutPath $INSTDIR\manual\br
-  File "..\engine\manual\br\*.html"
-  SetOutPath $INSTDIR\manual\de
-  File "..\engine\manual\de\*.html"
-  File "..\engine\manual\de\*.gif"
-  SetOutPath $INSTDIR\manual\no
-  File "..\engine\manual\no\*.html"
-  SetOutPath $INSTDIR\manual\fr
-  File "..\engine\manual\fr\*.html"
-
 SectionEnd
 
 !insertmacro MUI_SECTIONS_FINISHHEADER ;Insert this macro after the sections
@@ -310,7 +307,66 @@ Function SetOptionsPage
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioA.ini" "Field 4" "ListItems" $R5
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioA.ini" "Field 2" "State" ${POP3}
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioA.ini" "Field 4" "State" ${GUI}
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY  "ioA.ini"
+
+  Push $R0
+  InstallOptions::dialog $PLUGINSDIR\ioA.ini
+  Pop $R0
+FunctionEnd
+
+; This function is used to reconfigure Outlook Express accounts
+
+Function SetOutlookExpressPage
+
+  ; Run through all the identities that are in HKEY_CURRENT_USER\Identities and for
+  ; each one that has a Software\Microsoft\Internet Account Manager\Accounts\00000001 entry
+  ; display the reconfiguration option if the account has not yet been reconfigured
+  ; which we detect by pop3 server name != 127.0.0.1
+  
+  IntOp ${OEID} ${OEID} * 0		; Weird way of making sure that ${OEID} is 0
+  
+  ; Get the next identity from the registry
+
+next_id:  
+  EnumRegKey ${ID} HKCU "Identities" ${OEID}
+  StrCmp ${ID} "" finished_oe
+
+  ; Now extract the POP3 Server, if this does not exist then this ID is
+  ; not configured for mail so move on
+  
+  StrCpy $R5 "Identities\${ID}\Software\Microsoft\Internet Account Manager\Accounts\00000001"
+  ReadRegStr $R6 HKCU $R5 "POP3 Server"
+  StrCmp $R6 "" next_id_increment
+  StrCmp $R6 "127.0.0.1" next_id_increment
+
+  !insertmacro MUI_HEADER_TEXT "Reconfigure Outlook Express" "POPFile can reconfigure Outlook Express for you"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 2" "State" "0"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 8" "Text" $R6
+  ReadRegStr $R6 HKCU $R5 "SMTP Email Address"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 7" "Text" $R6
+  ReadRegStr $R6 HKCU $R5 "POP3 User Name"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" $R6
+  Push $R0
+  InstallOptions::dialog $PLUGINSDIR\ioB.ini
+  Pop $R0
+  
+  StrCmp $R0 "cancel" finished_oe
+  StrCmp $R0 "back" finished_oe
+
+  !insertmacro MUI_INSTALLOPTIONS_READ $R5 "ioB.ini" "Field 2" "State"
+  StrCmp $R5 "1" change_oe next_id_increment
+
+change_oe:
+  StrCpy $R5 "Identities\${ID}\Software\Microsoft\Internet Account Manager\Accounts\00000001"
+  ReadRegStr $R6 HKCU $R5 "POP3 User Name"
+  ReadRegStr $R7 HKCU $R5 "POP3 Server"
+  WriteRegStr HKCU $R5 "POP3 User Name" "$R7:$R6" 
+  WriteRegStr HKCU $R5 "POP3 Server" "127.0.0.1"
+
+next_id_increment:
+  IntOp ${OEID} ${OEID} + 1
+  goto next_id
+
+finished_oe:
 FunctionEnd
 
 ;--------------------------------
@@ -353,16 +409,7 @@ skip_confirmation:
   Delete $INSTDIR\skins\*.gif
   RMDir $INSTDIR\skins
   Delete $INSTDIR\manual\en\*.html
-  Delete $INSTDIR\manual\br\*.html
-  Delete $INSTDIR\manual\no\*.html
-  Delete $INSTDIR\manual\fr\*.html
-  Delete $INSTDIR\manual\de\*.html
-  Delete $INSTDIR\manual\de\*.gif
   RMDir $INSTDIR\manual\en
-  RMDir $INSTDIR\manual\br
-  RMDir $INSTDIR\manual\no
-  RMDir $INSTDIR\manual\fr
-  RMDir $INSTDIR\manual\de
   Delete $INSTDIR\manual\*.gif
   RMDir $INSTDIR\manual
   Delete $INSTDIR\languages\*.msg
