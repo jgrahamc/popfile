@@ -155,6 +155,7 @@
   !define GUI      $1   ; GUI port (1-65535)
   !define STARTUP  $2   ; automatic startup flag (1 = yes, 0 = no)
   !define CFG      $3   ; general purpose file handle
+  !define NOTEPAD  $4   ; path to notepad.exe ("" = not found in search path)
 
 #--------------------------------------------------------------------------
 # Language
@@ -242,8 +243,8 @@ Function .onInit
   
   MessageBox MB_YESNO "Display POPFile Release Notes ?$\r$\n$\r$\n\
       'Yes' recommended if you are upgrading." IDNO exit
-  SearchPath ${L_RESULT} notepad.exe
-  StrCmp ${L_RESULT} "" use_file_association
+  SearchPath ${NOTEPAD} notepad.exe
+  StrCmp ${NOTEPAD} "" use_file_association
   ExecWait 'notepad.exe "$PLUGINSDIR\release.txt"'
   GoTo exit
 
@@ -285,8 +286,7 @@ Section "POPFile" SecPOPFile
 
   File "..\engine\license"
   File "${RELEASE_NOTES}"
-  SearchPath ${CFG} notepad.exe
-  StrCmp ${CFG} "" 0 readme_ok
+  StrCmp ${NOTEPAD} "" 0 readme_ok
   File /oname=${README}.txt "${RELEASE_NOTES}"
 
 readme_ok:
@@ -1306,8 +1306,7 @@ Function ShowReadMe
   !define L_TEMP  $R9
   Push ${L_TEMP}
   
-  SearchPath ${L_TEMP} notepad.exe
-  StrCmp ${L_TEMP} "" use_file_association
+  StrCmp ${NOTEPAD} "" use_file_association
   Exec 'notepad.exe "$INSTDIR\${README}"'
   goto exit
   
