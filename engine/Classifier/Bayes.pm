@@ -1491,12 +1491,6 @@ sub valid_session_key__
 {
     my ( $self, $session ) = @_;
 
-    # This provides protection against someone using the XML-RPC
-    # interface and calling this API directly to fish for session
-    # keys, this must be called from within this module
-
-    return undef if ( caller ne 'Classifier::Bayes' );
-
     # If the session key is invalid then wait 1 second.  This is done
     # to prevent people from calling a POPFile API such as
     # get_bucket_count with random session keys fishing for a valid
