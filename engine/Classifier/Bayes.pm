@@ -866,6 +866,41 @@ sub save_magnets__
     }
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# magnet_match_helper__
+#
+# Helper the determines if a specific string matches a certain magnet type in a bucket, used
+# by magnet_match_
+#
+# $match           The string to match
+# $bucket          The bucket to check
+# $type            The magnet type to check
+#
+# ---------------------------------------------------------------------------------------------
+
+sub magnet_match_helper__
+{
+    my ( $self, $match, $bucket, $type ) = @_;
+
+    $match = lc($match);
+
+    for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
+        $magnet = lc($magnet);
+
+        for my $i (0..(length($match)-length($magnet))) {
+            if ( substr( $match, $i, length($magnet)) eq $magnet ) {
+                $self->{scores__}        = '';
+                $self->{magnet_used__}   = 1;
+                $self->{magnet_detail__} = "$type: $magnet";
+
+                return 1;
+	    }
+        }
+    }
+
+    return 0;
+}
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -881,44 +916,14 @@ sub save_magnets__
 
 sub magnet_match__
 {
-    my ( $self, $noattype, $bucket, $type ) = @_;
+    my ( $self, $match, $bucket, $type ) = @_;
 
     if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
         no locale;
-        for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
-            my $regex;
-
-            $regex = $magnet;
-            $regex =~ s/@/__POPFILE_AT__/g;
-            $regex =~ s/\$/__POPFILE_DOLLAR__/g;
-
-            if ( $noattype =~ m/\Q$regex\E/i ) {
-                $self->{scores__}        = '';
-                $self->{magnet_used__}   = 1;
-                $self->{magnet_detail__} = "$type: $magnet";
-
-                return 1;
-            }
-        }
-    }else{
-        for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
-            my $regex;
-
-            $regex = $magnet;
-            $regex =~ s/@/__POPFILE_AT__/g;
-            $regex =~ s/\$/__POPFILE_DOLLAR__/g;
-
-            if ( $noattype =~ m/\Q$regex\E/i ) {
-                $self->{scores__}        = '';
-                $self->{magnet_used__}   = 1;
-                $self->{magnet_detail__} = "$type: $magnet";
-
-                return 1;
-            }
-        }
+        return $self->magnet_match_helper__( $match, $bucket, $type );
+    } else {
+        return $self->magnet_match_helper__( $match, $bucket, $type );
     }
-
-    return 0;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -954,25 +959,9 @@ sub classify
 
     for my $bucket (sort keys %{$self->{magnets__}})  {
         for my $type (sort keys %{$self->{magnets__}{$bucket}}) {
-
-        # You cannot use @ or $ inside a \Q\E regular expression and hence
-        # we have to change the $magnet and the text we are comparing against
-        # by changing the $ and @ signs to special forms which I hope
-        # never really appear
-
-            my $noattype;
-
-            $noattype = $self->{parser__}->get_header($type);
-            $noattype =~ s/@/__POPFILE_AT__/g;
-            $noattype =~ s/\$/__POPFILE_DOLLAR__/g;
-
-            # In Japanese mode, disable locale.
-            # Sorting Japanese with "use locale" is memory and time consuming,
-            # and may cause perl crash.
-
-            # Disable the locale in Korean mode, too.
-
-            return $bucket if ( $self->magnet_match__( $noattype, $bucket, $type ) );
+	    if ( $self->magnet_match__( $self->{parser__}->get_header($type), $bucket, $type ) ) {
+                return $bucket;
+            }
         }
     }
 
