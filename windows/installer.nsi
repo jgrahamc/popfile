@@ -6054,6 +6054,7 @@ skip_kakasi:
   IfFileExists "$G_MPLIBDIR\HTTP\*.*" 0 skip_XMLRPC_support
   RMDir /r "$G_MPLIBDIR\HTTP"
   RMDir /r "$G_MPLIBDIR\LWP"
+  RMDir /r "$G_MPLIBDIR\Net"
   RMDir /r "$G_MPLIBDIR\SOAP"
   RMDir /r "$G_MPLIBDIR\Time"
   RMDir /r "$G_MPLIBDIR\URI"
