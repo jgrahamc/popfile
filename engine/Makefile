@@ -11,6 +11,12 @@ include vars.mak
 
 error:
 	@echo Must specify one of test, package or windows
+	@echo 
+	@echo "test    - Run POPFile test suite"
+	@echo "windows - Build Windows installer" 
+	@echo "package - Build Windows installer, and create"
+	@echo "          ZIP files for Windows and cross-platform"
+	@echo "          version"
 
 # test runs the POPFile unit test suite
 
