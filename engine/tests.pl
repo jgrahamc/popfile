@@ -33,28 +33,30 @@ use File::Path;
 sub rec_cp
 {
     my ( $from, $to ) = @_;
+
     my $ok = 1;
 
-    my $subref = 
-        sub { 
-            my $f = $_; 
-            my $t = $f; 
-            $t =~ s/^$from/$to/; 
-            if ( -d $f ) {
-                mkdir $t ;
-            }
-            else {
-                copy( $f, $t) or $ok = 0; 
+    my $subref =
+        sub {
+            my $f = $_;
+            my $t = $f;
+            $t =~ s/^$from/$to/;
+            if ( $t !~ /CVS/ ) {
+                if ( -d $f ) {
+                    mkdir $t;
+                } else {
+                    copy( $f, $t ) or $ok = 0;
+                }
             }
         };
     my %optref = ( wanted => $subref, no_chdir => 1 );
-    find ( \%optref , $from );
-    
+    find( \%optref , $from );
+
     return $ok;
 }
 
-# Look for all the TST files in the tests/ subfolder and run
-# each of them by including them in this file with the use statement
+# Look for all the TST files in the tests/ subfolder and run each of
+# them by including them in this file with the use statement
 
 # This is the total number of tests executed and the total failures
 
