@@ -4,7 +4,7 @@ body {
 	color: #000000;
 }
 
-.shell {
+.shell, .shellTop {
 	background-color: #ededca;
 	border: 3px #cccc99 solid;
 	 color: #000000;
@@ -60,11 +60,11 @@ table.footer {
 	width: 100%;
 }
 
-table.stabColor01 {
+.settingsTable {
 	border: 1px solid #cccc99;
 }
 
-table.stabColor03 {
+.openMessageTable, .lookupResultsTable {
 	border: 3px solid #cccc99;
 }
 
@@ -76,13 +76,13 @@ td.openMessageBody {
 	text-align: left;
 }
 
-td.stabColor01 {
+.settingsPanel {
 	border: 1px solid #cccc99;
 }
 
 td.naked {
-	padding: 0px; 
-	margin: 0px; 
+	padding: 0px;
+	margin: 0px;
 	border: none
 }
 
@@ -100,7 +100,7 @@ td.accuracy50to93 {
 	background-color: yellow;
 	color: black;
 }
-	
+
 td.accuracy94to100 {
 	background-color: green;
 	color: black;
@@ -111,7 +111,7 @@ div.error01 {
 	color: red;
 	font-size: larger;
 }
-	
+
 div.error02 {
 	background-color: transparent;
 	color: red;
@@ -119,49 +119,49 @@ div.error02 {
 
 span.graphFont {
 	font-size: x-small;
-}		
+}
 
-span.historyLabel {
+.historyLabel {
 	font-weight: bold;
 }
 
-span.bucketsLabel {
+.bucketsLabel {
 	font-weight: bold;
 }
 
-span.magnetsLabel {
+.magnetsLabel {
 	font-weight: bold;
 }
 
-span.securityLabel {
+.securityLabel {
 	font-weight: bold;
 }
 
-span.configurationLabel {
+.configurationLabel {
 	font-weight: bold;
 }
 
-		
-span.advancedLabel {
-	font-weight: bold;
-}
-		
-span.passwordLabel {
+
+.advancedLabel {
 	font-weight: bold;
 }
 
-span.sessionLabel {
+.passwordLabel {
 	font-weight: bold;
 }
 
-td.logo2menuSpace { 
+.sessionLabel {
+	font-weight: bold;
+}
+
+td.logo2menuSpace {
 	height: 0.8em;
 }
 
-td.footerBody { 
+td.footerBody {
 	text-align: center;
 	}
-	
+
 table.historyWidgetsTop {
 	width: 100%;
 	margin-left: 1.5em;
@@ -169,7 +169,7 @@ table.historyWidgetsTop {
 	margin-bottom: 1.0em;
 }
 
-table.historyButtonsBottom {
+table.historyWidgetsBottom {
 	width: 100%;
 	margin-top: 0.6em;
 }
@@ -180,6 +180,15 @@ td.historyNavigatorTop {
 
 td.historyNavigatorBottom {
 	text-align: right;
+}
+
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+.magnetsTable caption {
+  text-align: left;
 }
 
 span.bucketsWidgetState {
