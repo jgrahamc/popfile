@@ -3,8 +3,6 @@
                     <TMPL_VAR NAME="Localize_Security_NNTP">:
                 </div>
 
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-
                 <TMPL_IF NAME="nntp_if_local">
 
                 <span class="securityWidgetStateOff">

@@ -51,7 +51,6 @@
 </table>
 
 <form action="/buckets" method="post">
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
     <input type="hidden" name="showbucket" value="<TMPL_VAR NAME="Bucket_Bucket">" />
     <input type="submit" name="clearbucket" class="submit" value="<TMPL_VAR NAME="Localize_SingleBucket_ClearBucket">" />
 </form>
@@ -77,7 +76,7 @@
 
             <TMPL_ELSE>
 
-            <a class="bucketLetter" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;showbucket=<TMPL_VAR NAME="Bucket_Bucket">&amp;showletter=<TMPL_VAR NAME="Bucket_Letter" ESCAPE=URL>">
+            <a class="bucketLetter" href="/buckets?showbucket=<TMPL_VAR NAME="Bucket_Bucket">&amp;showletter=<TMPL_VAR NAME="Bucket_Letter" ESCAPE=URL>">
                 <b>
                    <TMPL_VAR NAME="Bucket_Letter" ESCAPE=HTML>
                 </b>
@@ -115,7 +114,7 @@
                 <TMPL_LOOP NAME="Bucket_Loop_Column">
 
                 <td>
-                    <a class="wordListLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word">#Lookup">
+                    <a class="wordListLink" href="/buckets?lookup=Lookup&amp;word=<TMPL_VAR NAME="Bucket_Word">#Lookup">
                         <b>
                             <TMPL_VAR NAME="Bucket_Word">
                         </b>

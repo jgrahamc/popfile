@@ -5,7 +5,6 @@
     <br />
     <input name="nntp_separator" id="configSeparator" type="text" value="<TMPL_VAR NAME="nntp_separator">" />
     <input type="submit" class="submit" name="update_nntp_separator" value="<TMPL_VAR NAME="Localize_Apply">" />
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
     <TMPL_IF NAME="nntp_separator_feedback">
 

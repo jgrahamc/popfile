@@ -3,8 +3,6 @@
                     <TMPL_VAR NAME="Localize_Security_POP3">:
                 </div>
 
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-
                 <TMPL_IF NAME="POP3_Security_Local">
 
                 <span class="securityWidgetStateOff">

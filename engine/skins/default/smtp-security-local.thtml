@@ -3,8 +3,6 @@
                     <TMPL_VAR NAME="Localize_Security_SMTP">:
                 </div>
 
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-                
                 <TMPL_IF NAME="smtp_local_on">
 
                 <span class="securityWidgetStateOff">

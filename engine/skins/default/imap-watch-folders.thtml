@@ -29,7 +29,6 @@
     </TMPL_LOOP>
 
     <input type="submit" class="submit" name="update_imap_1_watch_folders" value="<TMPL_VAR NAME="Localize_Apply">" />
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 </form>
 
 <TMPL_ELSE>

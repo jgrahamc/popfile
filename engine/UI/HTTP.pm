@@ -34,6 +34,11 @@ use locale;
 use IO::Socket::INET qw(:DEFAULT :crlf);
 use IO::Select;
 
+# We use crypto to secure the contents of POPFile's cookies
+
+use Crypt::CBC;
+use MIME::Base64;
+
 # A handy variable containing the value of an EOL for the network
 
 my $eol = "\015\012";
@@ -47,6 +52,10 @@ sub new
 {
     my $type = shift;
     my $self = POPFile::Module->new();
+
+    # Crypto object used to encode/decode cookies
+
+    $self->{crypto__} = '';
 
     bless $self;
 
@@ -88,6 +97,15 @@ EOM
     }
 
     $self->{selector_} = new IO::Select( $self->{server_} );
+
+    # Think of an encryption key for encrypting cookies using
+
+    my $key = Crypt::Random::makerandom_octet( Length => 56, Strength => 1 );
+    $self->{crypto__} = new Crypt::CBC( { 'key'            => $key,
+                                          'cipher'         => 'Blowfish',
+                                          'padding'        => 'standard',
+                                          'prepend_iv'     => 0,
+                                          'regenerate_key' => 0 } );
 
     return 1;
 }
@@ -153,12 +171,13 @@ sub service
                      ( my $request = $self->slurp_( $client ) ) ) {
                     my $content_length = 0;
                     my $content;
+                    my $cookie = '';
 
                     $self->log_( 2, $request );
 
                     while ( my $line = $self->slurp_( $client ) )  {
+                        $cookie = $1 if ( $line =~ /Cookie: (.+)/ );
                         $content_length = $1 if ( $line =~ /Content-Length: (\d+)/i );
-
                         # Discovered that Norton Internet Security was
                         # adding HTTP headers of the form
                         #
@@ -179,8 +198,13 @@ sub service
                         $self->log_( 2, $content );
                     }
 
+                    # Handle decryption of a cookie header
+
+                    $cookie = $self->decrypt_cookie__( $cookie );
+
                     if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {
-                        $code = $self->handle_url( $client, $2, $1, $content );
+                        $code = $self->handle_url( $client, $2, $1,
+                                    $content, $cookie );
                         $self->log_( 2,
                             "HTTP handle_url returned code $code\n" );
                     } else {
@@ -222,13 +246,51 @@ sub forked
 # $url        URL to process
 # $command    The HTTP command used (GET or POST)
 # $content    Any non-header data in the HTTP command
+# $cookie     Decrypted cookie value (or null)
 #
 # ----------------------------------------------------------------------------
 sub handle_url
 {
-    my ( $self, $client, $url, $command, $content ) = @_;
+    my ( $self, $client, $url, $command, $content, $cookie ) = @_;
 
-    return $self->{url_handler_}( $self, $client, $url, $command, $content );
+    return $self->{url_handler_}( $self, $client, $url, $command,
+                                  $content, $cookie );
+}
+
+# ----------------------------------------------------------------------------
+#
+# decrypt_cookie__
+#
+# $cookie            The cookie value to decrypt
+#
+# ----------------------------------------------------------------------------
+sub decrypt_cookie__
+{
+    my ( $self, $cookie ) = @_;
+
+    $self->log_( 2, "Decrypt cookie: $cookie" );
+
+    $cookie =~ /popfile=([^\r\n]+)/;
+    if ( defined( $1 ) ) {
+        return $self->{crypto__}->decrypt( decode_base64( $1 ) );
+    } else {
+        return '';
+    }
+}
+
+# ----------------------------------------------------------------------------
+#
+# encrypt_cookie_
+#
+# $cookie            The cookie value to encrypt
+#
+# ----------------------------------------------------------------------------
+sub encrypt_cookie_
+{
+    my ( $self, $cookie ) = @_;
+
+    $self->log_( 2, "Encrypting cookie $cookie" );
+    return encode_base64( $self->{crypto__}->encrypt( $cookie ), '' );
 }
 
 # ----------------------------------------------------------------------------
@@ -300,26 +362,6 @@ sub url_encode_
 
 # ----------------------------------------------------------------------------
 #
-# http_redirect_ - tell the browser to redirect to a url
-#
-# $client   The web browser to send redirect to
-# $url      Where to go
-#
-# Return a valid HTTP/1.0 header containing a 302 redirect message to the passed in URL
-#
-# ----------------------------------------------------------------------------
-sub http_redirect_
-{
-    my ( $self, $client, $url ) = @_;
-
-    my $header = "HTTP/1.0 302 Found$eol" . 'Location: ';
-    $header .= $url;
-    $header .= "$eol$eol";
-    print $client $header;
-}
-
-# ----------------------------------------------------------------------------
-#
 # http_error_ - Output a standard HTTP error message
 #
 # $client     The web browser to send the results to
@@ -345,8 +387,8 @@ sub http_error_
 # $file       The file to read (always assumed to be a GIF right now)
 # $type       Set this to the HTTP return type (e.g. text/html or image/gif)
 #
-# Returns the contents of a file formatted into an HTTP 200 message or an HTTP 404 if the
-# file does not exist
+# Returns the contents of a file formatted into an HTTP 200 message or
+# an HTTP 404 if the file does not exist
 #
 # ----------------------------------------------------------------------------
 sub http_file_
@@ -367,16 +409,7 @@ sub http_file_
         # plus 1 hour to give the browser cache 1 hour to keep things
         # like graphics and style sheets in cache.
 
-        my @day   = ( 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' );
-        my @month = ( 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' );
-        my $zulu = time;
-        $zulu += 60 * 60; # 1 hour
-        my ( $sec, $min, $hour, $mday, $mon, $year, $wday ) = gmtime( $zulu );
-
-        my $expires = sprintf( "%s, %02d %s %04d %02d:%02d:%02d GMT",          # PROFILE BLOCK START
-                               $day[$wday], $mday, $month[$mon], $year+1900,
-                               $hour, 59, 0);                                  # PROFILE BLOCK STOP
-
+        my $expires = $self->zulu_offset_( 0, 1 );
         my $header = "HTTP/1.0 200 OK$eol" . "Content-Type: $type$eol" . "Expires: $expires$eol" . "Content-Length: ";
         $header .= length($contents);
         $header .= "$eol$eol";
@@ -384,6 +417,34 @@ sub http_file_
     } else {
         http_error_( $self, $client, 404 );
     }
+}
+
+# ----------------------------------------------------------------------------
+#
+# zulu_offset_
+#
+# $days       Number of days to move forward
+# $hours      Number of hours to move forward
+#
+# Returns the current time in Zulu as a string suitable for passing to
+# a web browser shifted forward $days or $hours.
+#
+# ----------------------------------------------------------------------------
+sub zulu_offset_
+{
+    my ( $self, $days, $hours ) = @_;
+
+    my @day   = ( 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' );
+    my @month = ( 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+                  'Sep', 'Oct', 'Nov', 'Dec' );
+    my $zulu = time;
+    $zulu += 60 * 60 * $hours;
+    $zulu += 24 * 60 * 60 * $days;
+    my ( $sec, $min, $hour, $mday, $mon, $year, $wday ) = gmtime( $zulu );
+
+    return sprintf( "%s, %02d %s %04d %02d:%02d:%02d GMT",# PROFILE BLOCK START
+               $day[$wday], $mday, $month[$mon], $year+1900,
+               $hour, 59, 0);                             # PROFILE BLOCK STOP
 }
 
 sub history

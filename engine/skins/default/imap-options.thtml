@@ -27,7 +27,6 @@
     <p />
 
     <input type="submit" class="submit" name="update_imap_5_options" value="<TMPL_VAR NAME="Localize_Apply">" />
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
     <hr width="60%" align="center" />
 </form>
 

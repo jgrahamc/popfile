@@ -5,7 +5,6 @@
     <br />
     <input type="text" name="server" id="securitySecureServer" value="<TMPL_VAR NAME="POP3_Chain_Secure_Server">" />
     <input type="submit" class="submit" name="update_server" value="<TMPL_VAR NAME="Localize_Apply">" />
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 </form>
 
 <TMPL_IF NAME="POP3_Chain_If_Server_Updated">
@@ -23,7 +22,6 @@
     <br />
     <input type="text" name="sport" id="securitySecurePort" value="<TMPL_VAR NAME="POP3_Chain_Secure_Port">" />
     <input type="submit" class="submit" name="update_sport" value="<TMPL_VAR NAME="Localize_Apply">" />
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 </form>
 
 <TMPL_IF NAME="POP3_Chain_If_Port_Error">

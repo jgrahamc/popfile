@@ -6,7 +6,6 @@
                         <TMPL_VAR NAME="Localize_Configuration_SkinsChoose">:
                     </label>
 
-                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                     <input type="hidden" name="start_message" value="<TMPL_VAR NAME="History_Start_Message">" />
                     <select name="skin" id="configSkin">
                         <optgroup label="<TMPL_VAR NAME="Localize_Configuration_GeneralSkins">">

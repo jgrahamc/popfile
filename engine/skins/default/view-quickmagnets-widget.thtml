@@ -2,7 +2,6 @@
 <TMPL_IF NAME="View_QuickMagnets_If">
 
 <form action="/magnets" method="post">
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
     <input type="hidden" name="count" value="<TMPL_VAR NAME="View_QuickMagnets_Count">" />
     <hr />
     <b>

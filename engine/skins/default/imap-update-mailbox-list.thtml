@@ -18,7 +18,6 @@
     </TMPL_IF>
     
     <input type="submit" class="submit" name="do_imap_4_update_mailbox_list" value="<TMPL_VAR NAME="Localize_Imap_Now">" />
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 </form>
 
 <TMPL_ELSE>

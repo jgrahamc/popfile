@@ -1,3 +1,5 @@
+<TMPL_IF NAME="Header_If_Password">
+<TMPL_ELSE>
     <table class="footer" summary="">
     <tr>
         <td class="footerBody">
@@ -29,5 +31,6 @@
         </td>
     </tr>
     </table>
+</TMPL_IF>
 </body>
 </html>

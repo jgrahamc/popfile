@@ -38,7 +38,10 @@ use Classifier::MailParse;
 use IO::Handle;
 use DBI;
 use Digest::MD5 qw( md5_hex );
+use Digest::SHA qw( sha256_hex );
 use MIME::Base64;
+
+use Crypt::Random::Generator;
 
 # This is used to get the hostname of the current machine
 # in a cross platform way
@@ -1437,30 +1440,13 @@ sub generate_unique_session_key__
 {
     my ( $self ) = @_;
 
-    my @chars = ( 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',   # PROFILE BLOCK START
-                  'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'U', 'V', 'W', 'X', 'Y',
-                  'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A' ); # PROFILE BLOCK STOP
+    # Generate a long random number, hash it and the time together to
+    # get a random session key in hex
 
-    my $session;
-
-    do {
-        $session = '';
-        my $length = int( 16 + rand(4) );
-
-        for my $i (0 .. $length) {
-            my $random = $chars[int( rand(36) )];
-
-            # Just to add spice to things we sometimes lowercase the value
-
-            if ( rand(1) < rand(1) ) {
-                $random = lc($random);
-            }
-
-            $session .= $random;
-        }
-    } while ( defined( $self->{api_sessions__}{$session} ) );
-
-    return $session;
+    my $r = new Crypt::Random::Generator;
+    my $random = $r->makerandom_octet( Length => 128, Strength => 1 );
+    my $now = time;
+    return sha256_hex( "$random$now" );
 }
 
 #----------------------------------------------------------------------------

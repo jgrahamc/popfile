@@ -6,7 +6,6 @@
 <div class="helpMessage">
     <form method="post" action="/buckets">
         <TMPL_VAR NAME="Localize_Help_Bucket_Setup">
-        <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
         <p />
         <input type="submit" class="submit" name="nomore_bucket_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
     </form>
@@ -19,7 +18,6 @@
 <div class="helpMessage">
     <form method="post" action="/buckets">
         <TMPL_VAR NAME="Localize_Help_Training">
-        <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
         <p />
         <input type="submit" class="submit" name="nomore_training_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
     </form>
@@ -42,7 +40,7 @@
             <!-- end of history-navigator-widget.thtml content -->
         </TMPL_IF>
 
- (<a class="history" href="/history?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Refresh"></a>)
+ (<a class="history" href="/history"><TMPL_VAR NAME="Localize_Refresh"></a>)
 
         </td>
     </tr>
@@ -59,7 +57,6 @@
     <input type="hidden" name="search" value="<TMPL_VAR ESCAPE=HTML NAME="History_Field_Search">" />
     <input type="hidden" name="sort" value="<TMPL_VAR NAME="History_Field_Sort">" />
     <input type="hidden" name="negate" value="<TMPL_VAR NAME="History_Field_Not">" />
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
     <input type="hidden" name="start_message" value="<TMPL_VAR NAME="History_Start_Message">" />
     <input type="hidden" name="filter" value="<TMPL_VAR NAME="History_Field_Filter">" />
 
@@ -75,7 +72,7 @@
                 <table width="100%" cellspacing="0">
                 <tr>
                 <td width="10px" align="left" style="white-space:nowrap; vertical-align: top;">
-                    <a style="display: block; width:100%; height: 1em;" class="columnRemove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;removecolumn=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_RemoveColumn">" src="skins/x.gif" border="0" alt=""></a>
+                    <a style="display: block; width:100%; height: 1em;" class="columnRemove" href="/history?removecolumn=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_RemoveColumn">" src="skins/x.gif" border="0" alt=""></a>
                 </td>
                 <th style="text-align: left;">
               <a href="/history?<TMPL_VAR NAME="History_Fields">&amp;setsort=<TMPL_VAR NAME="History_Sort"><TMPL_VAR NAME="History_Header">" title="<TMPL_VAR NAME="Localize_History_Click_To_Sort">">
@@ -108,12 +105,12 @@
 
                 <TMPL_IF NAME="History_If_MoveLeft">
                    <td width="10px" style="vertical-align: top;">
-                    <a style="display: block; width:100%; height: 1em;" class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveleft=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/leftarrow.gif" border="0" alt=""></a>
+                    <a style="display: block; width:100%; height: 1em;" class="columnMove" href="/history?moveleft=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/leftarrow.gif" border="0" alt=""></a>
                    </td>
                 </TMPL_IF>
                 <TMPL_IF NAME="History_If_MoveRight">
                    <td width="10px" style="vertical-align: top;">
-                    <a style="display: block; width:100%; height: 1em;" class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveright=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/rightarrow.gif" border="0" alt=""></a>
+                    <a style="display: block; width:100%; height: 1em;" class="columnMove" href="/history?moveright=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/rightarrow.gif" border="0" alt=""></a>
                    </td>
                 </TMPL_IF>
 
@@ -157,7 +154,7 @@
 
                 <TMPL_IF NAME="History_If_Not_Pseudo">
 
-                <a href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;showbucket=<TMPL_VAR NAME="History_Bucket">">
+                <a href="/buckets?showbucket=<TMPL_VAR NAME="History_Bucket">">
 
                 </TMPL_IF>
 
@@ -279,7 +276,7 @@
             <!-- end of history-navigator-widget.thtml content -->
         </TMPL_IF>
 
- (<a class="history" href="/history?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Refresh"></a>)
+ (<a class="history" href="/history"><TMPL_VAR NAME="Localize_Refresh"></a>)
 
         </td>
     </tr>
@@ -315,7 +312,6 @@
      <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
         <div class="toggleConfigBar">
            <input type="submit" class="submit" name="show_configbar" value="<TMPL_VAR NAME="Localize_Configuration_Show_Bar">" />
-           <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
            <input type="hidden" name="start_message" value="<TMPL_VAR NAME="History_Start_Message">" />
         </div>
      </form>

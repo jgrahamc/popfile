@@ -6,8 +6,6 @@
     <tr>
         <td nowrap="nowrap">
             <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-
                 <TMPL_IF NAME="windows_console_on">
 
                 <span class="securityWidgetStateOn">
@@ -45,7 +43,6 @@
     <tr>
         <td nowrap="nowrap">
             <form action="<TMPL_VAR NAME="Configuration_Action">" method="post">
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
                 <TMPL_IF NAME="windows_icon_on">
 

@@ -5,7 +5,6 @@
     <br />
     <input type="text" name="smtp_chain_server" id="securitySecureServer" value="<TMPL_VAR NAME="smtp_chain_server">" />
     <input type="submit" class="submit" name="update_smtp_server" value="<TMPL_VAR NAME="Localize_Apply">" />
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
     <TMPL_IF NAME="smtp_server_feedback">
 

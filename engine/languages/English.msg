@@ -250,10 +250,11 @@ History_Size_KiloBytes                  %.1f&nbsp;KB
 History_Size_MegaBytes                  %.1f&nbsp;MB
 History_Click_To_Sort                   Click to sort on this column
 
-Password_Title                          Password
-Password_Enter                          Enter password
-Password_Go                             Go!
-Password_Error1                         Incorrect password
+Password_Title                          Login
+Password_Password                       Password
+Password_Username                       User name
+Password_Go                             Login
+Password_Error1                         Incorrect user name or password
 
 Security_Error1                         The port must be a number between 1 and 65535
 Security_Stealth                        Stealth Mode/Server Operation

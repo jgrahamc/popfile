@@ -80,7 +80,6 @@
             </td>
         </tr>
     </table>
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
     <input type="hidden" name="start_magnet" value="<TMPL_VAR NAME="Magnet_Start_Magnet">" />
     <input type="hidden" name="count" value="<TMPL_VAR NAME="Magnet_Count_Magnet">" />
 </form>
@@ -115,7 +114,6 @@
             </TMPL_LOOP>
 
         </select>
-        <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
         <br />
         <br />
         <input type="hidden" name="count" value="1" />
@@ -144,7 +142,6 @@
         </select>
         <input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" />
         <input type="hidden" name="start_magnet" value="<TMPL_VAR NAME="Magnet_Start_Magnet">" />
-        <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
     </form>
 
     <TMPL_IF NAME="Magnet_If_Message">

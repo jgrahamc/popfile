@@ -27,7 +27,6 @@
             <div class="advancedWidgets">
                 <form action="/advanced" method="post">
                     <label class="advancedLabel" for="advancedAddWordText"><TMPL_VAR NAME="Localize_Advanced_AddWord">:</label><br />
-                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                     <input type="text" id="advancedAddWordText" name="newword" />
                     <input type="submit" class="submit" name="add" value="<TMPL_VAR NAME="Localize_Add">" />
                 </form>
@@ -42,7 +41,7 @@
 
                 <form action="/advanced" method="post">
                     <label class="advancedLabel" for="advancedRemoveWordText"><TMPL_VAR NAME="Localize_Advanced_RemoveWord">:</label><br />
-                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+
                     <input type="text" id="advancedRemoveWordText" name="word" />
                     <input type="submit" class="submit" name="remove" value="<TMPL_VAR NAME="Localize_Remove">" />
                 </form>
@@ -104,7 +103,7 @@
 
                 </table>
                 <p>
-                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+
                     <input type="submit" class="submit" value="<TMPL_VAR NAME="Localize_Update">" name="update_params">
             </form>
         </td>

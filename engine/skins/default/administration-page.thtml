@@ -11,8 +11,6 @@
                                 <TMPL_VAR NAME="Localize_Security_UI">:
                             </div>
 
-                            <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-
                             <TMPL_IF NAME="Security_If_Local">
 
                             <span class="securityWidgetStateOff">
@@ -48,7 +46,6 @@
                             <div class="securityLabel">
                                 <TMPL_VAR NAME="Localize_Security_Update">:
                             </div>
-                            <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
                             <TMPL_IF NAME="Security_If_Update_Check">
 
@@ -76,7 +73,6 @@
                             <div class="securityLabel">
                                 <TMPL_VAR NAME="Localize_Security_Stats">:
                             </div>
-                            <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
                             <TMPL_IF NAME="Security_If_Send_Stats">
 
@@ -108,7 +104,6 @@
                 <br />
                 <input name="timeout" type="text" id="configTCPTimeout" value="<TMPL_VAR NAME="Configuration_TCP_Timeout">" />
                 <input type="submit" class="submit" name="update_timeout" value="<TMPL_VAR NAME="Localize_Apply">" />
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
             </form>
 
             <TMPL_IF NAME="Configuration_If_TCP_Timeout_Error">
@@ -129,7 +124,7 @@
                 <label class="configurationLabel" for="configLogging">
                     <TMPL_VAR NAME="Localize_Configuration_LoggerOutput">:
                 </label>
-                <input type="hidden" value="<TMPL_VAR NAME="Session_Key">" name="session" />
+
                 <select name="debug" id="configLogging">
                     <option value="1" <TMPL_VAR NAME="Configuration_Debug_1_Selected">>
                         <TMPL_VAR NAME="Localize_Configuration_None">
@@ -150,7 +145,7 @@
             <TMPL_IF NAME="Configuration_If_Show_Log">
 
             <p>
-                <a href="popfile_current_log.log?session=<TMPL_VAR NAME="Session_Key">" class="downloadLogLink"><TMPL_VAR NAME="Localize_Configuration_CurrentLogFile"></a>
+                <a href="popfile_current_log.log" class="downloadLogLink"><TMPL_VAR NAME="Localize_Configuration_CurrentLogFile"></a>
             </p>
 
             </TMPL_IF>
@@ -165,7 +160,7 @@
                 <br />
                 <input name="ui_port" id="configUIPort" type="text" value="<TMPL_VAR NAME="Configuration_UI_Port">" />
                 <input type="submit" class="submit" name="update_ui_port" value="<TMPL_VAR NAME="Localize_Apply">" />
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+
             </form>
 
             <TMPL_IF NAME="Configuration_If_UI_Port_Error">

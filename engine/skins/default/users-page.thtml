@@ -7,7 +7,6 @@
             <h3 class="users"><TMPL_VAR NAME="Localize_Users_Create"></h3>
 
             <form action="/users" method="post">
-            <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
            <TMPL_VAR NAME="Localize_Users_CreateUser">:
             <input type="text" id="usersCreateUser" name="newuser" />
             <br />
@@ -27,7 +26,6 @@
                 <h3 class="users"><TMPL_VAR NAME="Localize_Users_Remove"></h3>
 
                 <form action="/users" method="post">
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                 <TMPL_VAR NAME="Localize_Users_RemoveUser">:
                 <select name="toremove">
                 <option></option>
@@ -44,7 +42,6 @@
             <h3 class="users"><TMPL_VAR NAME="Localize_Users_Edit"></h3>
 
             <form action="/users" method="post">
-            <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
             <TMPL_VAR NAME="Localize_Users_EditUser">:
             <select name="editname">
             <option></option>
@@ -99,7 +96,6 @@
                 </TMPL_LOOP>
                 </table>
                 <br />
-                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                     <input type="hidden" name="editname" value="<TMPL_VAR NAME="Users_Edit_User_Name">" />
                     <input type="hidden" name="edituser" value="<TMPL_VAR NAME="Users_Edit_User_Name">" />
                     <input type="submit" class="submit" value="<TMPL_VAR NAME="Localize_Update">" name="update_params">

@@ -8,7 +8,6 @@
         <TMPL_VAR NAME="Localize_Imap_WatchMore">
     </label>
     <br />
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 </form>
 
 <TMPL_ELSE>

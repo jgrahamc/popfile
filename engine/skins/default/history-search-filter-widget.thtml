@@ -15,7 +15,6 @@
         <TMPL_VAR NAME="Localize_History_FilterBy">:
     </label>
     <input type="hidden" name="sort" value="<TMPL_VAR NAME="History_Field_Sort">" />
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
     <select name="filter" id="historyFilter">
         <option value=""></option>
 

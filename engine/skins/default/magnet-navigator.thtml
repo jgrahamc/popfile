@@ -4,7 +4,7 @@
 
 <TMPL_IF NAME="Magnet_Navigator_If_Previous">
 
-[<a href="/magnets?start_magnet=<TMPL_VAR NAME="Magnet_Navigator_Previous">&amp;session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Previous"></a>]
+[<a href="/magnets?start_magnet=<TMPL_VAR NAME="Magnet_Navigator_Previous">"><TMPL_VAR NAME="Localize_Previous"></a>]
 
 </TMPL_IF>
 
@@ -16,14 +16,14 @@
 
 <TMPL_ELSE>
 
-[<a href="/magnets?start_magnet=<TMPL_VAR NAME="Magnet_Navigator_Start_Magnet">&amp;session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Magnet_Navigator_Count"></a>]
+[<a href="/magnets?start_magnet=<TMPL_VAR NAME="Magnet_Navigator_Start_Magnet">"><TMPL_VAR NAME="Magnet_Navigator_Count"></a>]
 
 </TMPL_IF>
 
 </TMPL_LOOP>
 
 <TMPL_IF NAME="Magnet_Navigator_If_Next">
-[<a href="/magnets?start_magnet=<TMPL_VAR NAME="Magnet_Navigator_Next">&amp;session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Next"></a>]
+[<a href="/magnets?start_magnet=<TMPL_VAR NAME="Magnet_Navigator_Next">"><TMPL_VAR NAME="Localize_Next"></a>]
 </TMPL_IF>
 
 </TMPL_IF>

@@ -6,7 +6,6 @@
 <div class="helpMessage">
     <form method="post" action="/buckets">
         <TMPL_VAR NAME="Localize_Help_Bucket_Setup">
-        <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
         <p />
         <input type="submit" class="submit" name="nomore_bucket_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
     </form>
@@ -19,7 +18,6 @@
 <div class="helpMessage">
     <form method="post" action="/buckets">
         <TMPL_VAR NAME="Localize_Help_Training">
-        <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
         <p />
         <input type="submit" class="submit" name="nomore_training_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
     </form>
@@ -32,7 +30,6 @@
    <td class="settingsPanel" valign="top" width="33%" align="center">
 
     <form class="bucketsSwitch" action="/buckets" method="post">
-        <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
         <table width="100%" summary="<TMPL_VAR NAME="Localize_Bucket_MaintenanceTableSummary">">
             <tr>
                 <th colspan="7" align="left">
@@ -85,7 +82,7 @@
         
                     <TMPL_IF NAME="Corpus_If_Bucket_Not_Pseudo">
         
-                    <a href="/buckets?session=<TMPL_VAR NAME="Session_Key">&amp;showbucket=<TMPL_VAR NAME="Corpus_Bucket">">
+                    <a href="/buckets?showbucket=<TMPL_VAR NAME="Corpus_Bucket">">
         
                     </TMPL_IF>
         
@@ -241,7 +238,6 @@
                 <tr>
                     <td colspan="2" align="center">
                         <form action="/buckets" method="post">
-                            <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                             <input type="submit" class="submit" name="reset_stats" value="<TMPL_VAR NAME="Localize_Bucket_ResetStatistics">" />
 
                             <TMPL_IF NAME="Corpus_If_Last_Reset">
@@ -311,7 +307,6 @@
                     <br />
                     <input name="cname" id="bucketsCreateBucket" type="text" />
                     <input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" />
-                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                 </form>
 
                 <TMPL_IF NAME="Corpus_If_Create_Message">
@@ -352,7 +347,6 @@
 
                     </select>
                     <input type="submit" class="submit" name="delete" value="<TMPL_VAR NAME="Localize_Delete">" />
-                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                 </form>
 
                 <TMPL_IF NAME="Corpus_If_Delete_Message">
@@ -387,7 +381,6 @@
                     </label>
                     <input type="text" id="bucketsRenameBucketTo" name="newname" />
                     <input type="submit" class="submit" name="rename" value="<TMPL_VAR NAME="Localize_Rename">" />
-                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                 </form>
 
                 <TMPL_IF NAME="Corpus_If_Rename_Message">
@@ -424,7 +417,6 @@
                     <br />
                     <input name="word" id="bucketsLookup" type="text" />
                     <input type="submit" class="submit" name="lookup" value="<TMPL_VAR NAME="Localize_Lookup">" />
-                    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                 </form>
                 <br />
             </div>

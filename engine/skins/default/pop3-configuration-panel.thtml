@@ -5,7 +5,6 @@
     <br />
     <input name="pop3_port" type="text" id="configPopPort" value="<TMPL_VAR NAME="POP3_Configuration_Port">" />
     <input type="submit" class="submit" name="update_pop3_port" value="<TMPL_VAR NAME="Localize_Apply">" />
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 </form>
 
 <TMPL_IF NAME="POP3_Configuration_If_Port_Error">
@@ -33,7 +32,6 @@
     <br />
     <input name="pop3_separator" id="configSeparator" type="text" value="<TMPL_VAR NAME="POP3_Configuration_Separator">" />
     <input type="submit" class="submit" name="update_pop3_separator" value="<TMPL_VAR NAME="Localize_Apply">" />
-    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 </form>
 
 <TMPL_IF NAME="POP3_Configuration_If_Sep_Error">
@@ -70,7 +68,6 @@
                 </span>
                 <input type="submit" class="submit toggleOn" id="windowTrayIconOn" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToYes">" />
                 <input type="hidden" name="pop3_force_fork" value="1" />
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
             </form>
 
             <TMPL_ELSE>
@@ -81,7 +78,6 @@
                 </span>
                 <input type="submit" class="submit toggleOff" id="windowTrayIconOff" name="toggle" value="<TMPL_VAR NAME="Localize_ChangeToNo">" />
                 <input type="hidden" name="pop3_force_fork" value="0" />
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
             </form>
 
             </TMPL_IF>

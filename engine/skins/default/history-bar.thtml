@@ -30,7 +30,6 @@
 
                 </TMPL_LOOP>
                 <input type="submit" class="submit" name="update_fields" value="<TMPL_VAR NAME="Localize_Apply">" />
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
                 <input type="hidden" name="start_message" value="<TMPL_VAR NAME="History_Start_Message">" />
         </div>
 
@@ -40,7 +39,6 @@
                 </label>
                 <input name="page_size" id="configPageSize" type="text" size="4" maxlength="4" value="<TMPL_VAR NAME="Configuration_Page_Size">" />
                 <input type="submit" class="submit" name="update_page_size" value="<TMPL_VAR NAME="Localize_Apply">" />
-                <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
 
         </div>
         <div class="configBarOption">

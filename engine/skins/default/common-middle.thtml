@@ -11,7 +11,7 @@
                 <table class="head" cellspacing="0" summary="">
                     <tr>
                         <td class="head"><TMPL_VAR NAME="Localize_Header_Title"></td>
-                        <td class="headShutdown" align="right" valign="bottom"><a class="shutdownLink" href="/shutdown"><TMPL_VAR NAME="Localize_Header_Shutdown"></a>&nbsp;</td>
+                        <td class="headShutdown" align="right" valign="bottom"><TMPL_IF NAME="Header_If_Password"><TMPL_ELSE><TMPL_IF NAME="Common_Middle_If_CanAdmin"><a class="shutdownLink" href="/shutdown"><TMPL_VAR NAME="Localize_Header_Shutdown"></a></TMPL_IF></TMPL_IF>&nbsp;</td>
                     </tr>
                 </table>
             </td>
@@ -32,37 +32,40 @@
     <table class="shellErrorMessage" width="100%"><tr class="shellErrorRow"><td><TMPL_VAR NAME="Header_Error"></td></tr></table>
     <br />
     </TMPL_IF>
+    <TMPL_IF NAME="Header_If_Password">
+    <TMPL_ELSE>
     <table class="menu" cellspacing="0" summary="<TMPL_VAR NAME="Localize_Header_MenuSummary>">
         <tr>
             <td class="menuIndent">&nbsp;</td>
             <td class="<TMPL_VAR NAME="Common_Middle_Tab0">" align="center">
-                <a class="menuLink" href="/history?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_History"></a>
+                <a class="menuLink" href="/history"><TMPL_VAR NAME="Localize_Header_History"></a>
             </td>
             <td class="menuSpacer"></td>
             <td class="<TMPL_VAR NAME="Common_Middle_Tab1">" align="center">
-                <a class="menuLink" href="/buckets?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Buckets"></a>
+                <a class="menuLink" href="/buckets"><TMPL_VAR NAME="Localize_Header_Buckets"></a>
             </td>
             <td class="menuSpacer"></td>
             <td class="<TMPL_VAR NAME="Common_Middle_Tab2">" align="center">
-                <a class="menuLink" href="/magnets?session=<TMPL_VAR NAME="Session_Key">&amp;start_magnet=0"><TMPL_VAR NAME="Localize_Header_Magnets"></a>
+                <a class="menuLink" href="/magnets?start_magnet=0"><TMPL_VAR NAME="Localize_Header_Magnets"></a>
             </td>
             <TMPL_IF NAME="Common_Middle_If_CanAdmin">
                 <td class="menuSpacer"></td>
                 <td class="<TMPL_VAR NAME="Common_Middle_Tab4">" align="center">
-                    <a class="menuLink" href="/administration?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Administration"></a>
+                    <a class="menuLink" href="/administration"><TMPL_VAR NAME="Localize_Header_Administration"></a>
                 </td>
                 <td class="menuSpacer"></td>
                 <td class="<TMPL_VAR NAME="Common_Middle_Tab5">" align="center">
-                    <a class="menuLink" href="/users?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Users"></a>
+                    <a class="menuLink" href="/users"><TMPL_VAR NAME="Localize_Header_Users"></a>
                 </td>
                 <td class="menuSpacer"></td>
                 <td class="<TMPL_VAR NAME="Common_Middle_Tab6">" align="center">
-                    <a class="menuLink" href="/advanced?session=<TMPL_VAR NAME="Session_Key">"><TMPL_VAR NAME="Localize_Header_Advanced"></a>
+                    <a class="menuLink" href="/advanced"><TMPL_VAR NAME="Localize_Header_Advanced"></a>
                 </td>
             </TMPL_IF>
             <td class="menuIndent">&nbsp;</td>
         </tr>
     </table>
+    </TMPL_IF>    
     <table class="shell" align="center" width="100%" summary="">
         <tr class="shellTopRow">
             <td class="shellTopLeft"></td>
