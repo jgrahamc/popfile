@@ -25,20 +25,24 @@
 #
 #--------------------------------------------------------------------------
 
-; This script requires a version of NSIS 2.0b4 (CVS) which meets the following requirements:
+; As of 9 August 2003, the latest release of the NSIS compiler is 2.0b3. Since its release in
+; March 2003, the compiler has been greatly improved. This script uses many of the improvements
+; introduced since then. Although the NSIS compiler has been updated to 2.0b4 (CVS), the only
+; way to obtain this version is to install the 2.0b3 release and then apply some CVS updates.
 ;
-; (1) "NSIS Modern User Interface" version 1.65 (17 June 2003 or later)
-;     This script uses the new (simplified) page configuration system and other improvements.
+; There are two ways to apply these CVS updates:
 ;
-; (2) '{NSIS}\makensis.exe' dated 08 July 2003 (NSIS CVS version 1.203) or later
-;     This is required to ensure that out-of-date NLF files do not result in blank messages
-;     and to ensure that language strings can be combined with other strings.
+; (a) use the 'NSIS Update' feature provided by the 'NSIS Menu', or
 ;
-; (3) '{NSIS}\NSIS\Contrib\UIs\modern.exe' dated 09 July 2003 (NSIS CVS v1.31) or later
-;     This is required to ensure the installer works properly when 'Japanese' is selected.
+;(b) obtain a NSIS 'Nightly' CVS update and use it to upgrade the 2.0b3 installation.
 ;
-; NSIS CVS snapshot dated 09 July 2003 @ 13:44 contains suitable versions of these NSIS files
-; (the 09 July 2003 @ 07:44 snapshot is NOT suitable).
+; The 'NSIS Update' feature does not work reliably at the moment, due to SourceForge.net's
+; current CVS server problems, so the quickest way to update NSIS to 2.0b4 (CVS) is by means
+; of the snapshot which is a ZIP file created several times a day from data on the 'real' CVS
+; servers (so it is NOT subject to the same problems as the 'NSIS Update' feature).
+;
+; This version of the script has been tested with NSIS 2.0b4 (CVS) after updating it by using
+; the 4 August 2003 (07:44 GMT) version of the NSIS CVS snapshot.
 
 #--------------------------------------------------------------------------
 # LANGUAGE SUPPORT:
@@ -320,19 +324,23 @@
 # User Registers (Global)
 #--------------------------------------------------------------------------
 
+  ; This script uses 'User Variables' (with names starting with 'G_') to hold GLOBAL data.
+  
+  Var   G_POP3        ; POP3 port (1-65535)
+  Var   G_GUI         ; GUI port (1-65535)
+  Var   G_STARTUP     ; automatic startup flag (1 = yes, 0 = no)
+  Var   G_NOTEPAD     ; path to notepad.exe ("" = not found in search path)
+  
   ; NSIS provides 20 general purpose user registers:
-  ; (a) $0 to $9 are used as global registers
-  ; (b) $R0 to $R9 are used as local registers
-
-  ; Global registers referred to by 'defines' use names starting with 'G_'
-
-  !define G_POP3     $0   ; POP3 port (1-65535)
-  !define G_GUI      $1   ; GUI port (1-65535)
-  !define G_STARTUP  $2   ; automatic startup flag (1 = yes, 0 = no)
-  !define G_NOTEPAD  $3   ; path to notepad.exe ("" = not found in search path)
+  ; (a) $R0 to $R9   are used as local registers
+  ; (b) $0 to $9     are used as additional local registers
 
   ; Local registers referred to by 'defines' use names starting with 'L_' (eg L_LNE, L_OLDUI)
   ; and the scope of these 'defines' is limited to the "routine" where they are used.
+  
+  ; In earlier versions of the NSIS compiler, 'User Variables' did not exist, and the convention
+  ; was to use $R0 to $R9 as 'local' registers and $0 to $9 as 'global' ones. This is why this
+  ; script uses registers $R0 to $R9 in preference to registers $0 to $9.
 
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
 
@@ -385,19 +393,19 @@
         !insertmacro PFI_LANG_LOAD "TradChinese"
         !insertmacro PFI_LANG_LOAD "Czech"
         !insertmacro PFI_LANG_LOAD "Danish"       ; 'New style' license msgs missing (27-Jun-03)
-        !insertmacro PFI_LANG_LOAD "Dutch"
-        !insertmacro PFI_LANG_LOAD "Finnish"      ; 'New style' license msgs missing (27-Jun-03)
-        !insertmacro PFI_LANG_LOAD "French"
         !insertmacro PFI_LANG_LOAD "German"
-        !insertmacro PFI_LANG_LOAD "Hungarian"
+        !insertmacro PFI_LANG_LOAD "Spanish"
+        !insertmacro PFI_LANG_LOAD "French"
         !insertmacro PFI_LANG_LOAD "Japanese"
         !insertmacro PFI_LANG_LOAD "Korean"
+        !insertmacro PFI_LANG_LOAD "Hungarian"
+        !insertmacro PFI_LANG_LOAD "Dutch"
         !insertmacro PFI_LANG_LOAD "Polish"
         !insertmacro PFI_LANG_LOAD "Portuguese"
         !insertmacro PFI_LANG_LOAD "PortugueseBR"
         !insertmacro PFI_LANG_LOAD "Russian"
         !insertmacro PFI_LANG_LOAD "Slovak"
-        !insertmacro PFI_LANG_LOAD "Spanish"
+        !insertmacro PFI_LANG_LOAD "Finnish"      ; 'New style' license msgs missing (27-Jun-03)
         !insertmacro PFI_LANG_LOAD "Swedish"
         !insertmacro PFI_LANG_LOAD "Ukrainian"
 
@@ -469,12 +477,12 @@ FunctionEnd
 
 Function PFIGUIInit
 
-  SearchPath ${G_NOTEPAD} notepad.exe
+  SearchPath $G_NOTEPAD notepad.exe
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "$(PFI_LANG_MBRELNOTES_1)\
       $\r$\n$\r$\n\
       $(PFI_LANG_MBRELNOTES_2)" IDNO exit
-  StrCmp ${G_NOTEPAD} "" use_file_association
+  StrCmp $G_NOTEPAD "" use_file_association
   ExecWait 'notepad.exe "$PLUGINSDIR\release.txt"'
   GoTo exit
 
@@ -517,9 +525,9 @@ Section "POPFile" SecPOPFile
   ; Retrieve the POP3 and GUI ports from the ini and get whether we install the
   ; POPFile run in the Startup group
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${G_POP3}    "ioA.ini" "Field 2" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${G_GUI}     "ioA.ini" "Field 4" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${G_STARTUP} "ioA.ini" "Field 5" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $G_POP3    "ioA.ini" "Field 2" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $G_GUI     "ioA.ini" "Field 4" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $G_STARTUP "ioA.ini" "Field 5" "State"
 
   WriteRegStr HKLM "SOFTWARE\${MUI_PRODUCT}" InstallLocation $INSTDIR
 
@@ -533,7 +541,7 @@ Section "POPFile" SecPOPFile
 
   File "..\engine\license"
   File "${C_RELEASE_NOTES}"
-  StrCmp ${G_NOTEPAD} "" 0 readme_ok
+  StrCmp $G_NOTEPAD "" 0 readme_ok
   File /oname=${C_README}.txt "${C_RELEASE_NOTES}"
 
 readme_ok:
@@ -567,8 +575,8 @@ copy_default_stopwords:
   File /oname=stopwords.default "..\engine\stopwords"
   FileOpen  ${L_CFG} $PLUGINSDIR\popfile.cfg a
   FileSeek  ${L_CFG} 0 END
-  FileWrite ${L_CFG} "pop3_port ${G_POP3}$\r$\n"
-  FileWrite ${L_CFG} "html_port ${G_GUI}$\r$\n"
+  FileWrite ${L_CFG} "pop3_port $G_POP3$\r$\n"
+  FileWrite ${L_CFG} "html_port $G_GUI$\r$\n"
   FileClose ${L_CFG}
   IfFileExists "$INSTDIR\popfile.cfg" 0 update_config
   SetFileAttributes "$INSTDIR\popfile.cfg" NORMAL
@@ -730,9 +738,9 @@ update_config:
                  "$INSTDIR\uninstall.exe"
   SetOutPath "$SMPROGRAMS\${MUI_PRODUCT}"
   WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\POPFile User Interface.url" \
-              "InternetShortcut" "URL" "http://127.0.0.1:${G_GUI}/"
+              "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/"
   WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\Shutdown POPFile.url" \
-              "InternetShortcut" "URL" "http://127.0.0.1:${G_GUI}/shutdown"
+              "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
   WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\Manual.url" \
               "InternetShortcut" "URL" "file://$INSTDIR/manual/en/manual.html"
   WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\FAQ.url" \
@@ -742,7 +750,7 @@ update_config:
   WriteINIStr "$SMPROGRAMS\${MUI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
 
-  StrCmp ${G_STARTUP} "1" 0 skip_autostart_set
+  StrCmp $G_STARTUP "1" 0 skip_autostart_set
       SetOutPath $SMSTARTUP
       SetOutPath $INSTDIR
       CreateShortCut "$SMSTARTUP\Run POPFile in background.lnk" \
@@ -841,19 +849,19 @@ Section "Languages" SecLangs
         !insertmacro UI_LANG_CONFIG "TRADCHINESE" "Chinese-Traditional"
         !insertmacro UI_LANG_CONFIG "CZECH" "Czech"
         !insertmacro UI_LANG_CONFIG "DANISH" "Dansk"
-        !insertmacro UI_LANG_CONFIG "DUTCH" "Nederlands"
-        !insertmacro UI_LANG_CONFIG "FINNISH" "Suomi"
-        !insertmacro UI_LANG_CONFIG "FRENCH" "Francais"
         !insertmacro UI_LANG_CONFIG "GERMAN" "Deutsch"
-        !insertmacro UI_LANG_CONFIG "HUNGARIAN" "Hungarian"
+        !insertmacro UI_LANG_CONFIG "SPANISH" "Español"
+        !insertmacro UI_LANG_CONFIG "FRENCH" "Francais"
         !insertmacro UI_LANG_CONFIG "JAPANESE" "Nihongo"
         !insertmacro UI_LANG_CONFIG "KOREAN" "Korean"
+        !insertmacro UI_LANG_CONFIG "HUNGARIAN" "Hungarian"
+        !insertmacro UI_LANG_CONFIG "DUTCH" "Nederlands"
         !insertmacro UI_LANG_CONFIG "POLISH" "Polish"
         !insertmacro UI_LANG_CONFIG "PORTUGUESE" "Português"
         !insertmacro UI_LANG_CONFIG "PORTUGUESEBR" "Português do Brasil"
         !insertmacro UI_LANG_CONFIG "RUSSIAN" "Russian"
         !insertmacro UI_LANG_CONFIG "SLOVAK" "Slovak"
-        !insertmacro UI_LANG_CONFIG "SPANISH" "Español"
+        !insertmacro UI_LANG_CONFIG "FINNISH" "Suomi"
         !insertmacro UI_LANG_CONFIG "SWEDISH" "Svenska"
         !insertmacro UI_LANG_CONFIG "UKRAINIAN" "Ukrainian"
 
@@ -1022,8 +1030,8 @@ nostrip:
   StrCpy ${L_STRIPLANG} ""
 
 init_port_vars:
-  StrCpy ${G_POP3} ""
-  StrCpy ${G_GUI} ""
+  StrCpy $G_POP3 ""
+  StrCpy $G_GUI ""
   StrCpy ${L_OLDUI} ""
 
   ; See if we can get the current pop3 and gui port from an existing configuration.
@@ -1063,11 +1071,11 @@ transfer:
   Goto loop
 
 got_port:
-  StrCpy ${G_POP3} ${L_LNE} 5 5
+  StrCpy $G_POP3 ${L_LNE} 5 5
   Goto loop
 
 got_pop3_port:
-  StrCpy ${G_POP3} ${L_LNE} 5 10
+  StrCpy $G_POP3 ${L_LNE} 5 10
   Goto loop
 
 got_ui_port:
@@ -1075,20 +1083,20 @@ got_ui_port:
   Goto loop
 
 got_html_port:
-  StrCpy ${G_GUI} ${L_LNE} 5 10
+  StrCpy $G_GUI ${L_LNE} 5 10
   Goto loop
 
 done:
   FileClose ${L_CFG}
   FileClose ${L_CLEANCFG}
 
-  Push ${G_POP3}
+  Push $G_POP3
   Call TrimNewlines
-  Pop ${G_POP3}
+  Pop $G_POP3
 
-  Push ${G_GUI}
+  Push $G_GUI
   Call TrimNewlines
-  Pop ${G_GUI}
+  Pop $G_GUI
 
   Push ${L_OLDUI}
   Call TrimNewlines
@@ -1096,55 +1104,55 @@ done:
 
   ; Save the UI port settings (from popfile.cfg) for later use by the 'MakeItSafe' function
 
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "UI Port" "NewStyle" "${G_GUI}"
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "UI Port" "NewStyle" "$G_GUI"
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "UI Port" "OldStyle" "${L_OLDUI}"
 
   ; The 'port' and 'pop3_port' settings are treated as equals so we use the last entry found.
   ; If 'ui_port' and 'html_port' settings were found, we use the last 'html_port' we found.
 
-  StrCmp ${G_GUI} "" 0 validity_checks
-  StrCpy ${G_GUI} ${L_OLDUI}
+  StrCmp $G_GUI "" 0 validity_checks
+  StrCpy $G_GUI ${L_OLDUI}
 
 validity_checks:
 
   ; check port values (config file may have no port data or invalid port data)
 
-  StrCmp ${G_POP3} ${G_GUI} 0 ports_differ
+  StrCmp $G_POP3 $G_GUI 0 ports_differ
 
   ; Config file has no port data or same port used for POP3 and GUI
   ; (i.e. the data is not valid), so use POPFile defaults
 
-  StrCpy ${G_POP3} "110"
-  StrCpy ${G_GUI} "8080"
+  StrCpy $G_POP3 "110"
+  StrCpy $G_GUI "8080"
   Goto ports_ok
 
 ports_differ:
-  StrCmp ${G_POP3} "" default_pop3
-  Push ${G_POP3}
+  StrCmp $G_POP3 "" default_pop3
+  Push $G_POP3
   Call StrCheckDecimal
-  Pop ${G_POP3}
-  StrCmp ${G_POP3} "" default_pop3
-  IntCmp ${G_POP3} 1 pop3_ok default_pop3
-  IntCmp ${G_POP3} 65535 pop3_ok pop3_ok
+  Pop $G_POP3
+  StrCmp $G_POP3 "" default_pop3
+  IntCmp $G_POP3 1 pop3_ok default_pop3
+  IntCmp $G_POP3 65535 pop3_ok pop3_ok
 
 default_pop3:
-  StrCpy ${G_POP3} "110"
-  StrCmp ${G_POP3} ${G_GUI} 0 pop3_ok
-  StrCpy ${G_POP3} "111"
+  StrCpy $G_POP3 "110"
+  StrCmp $G_POP3 $G_GUI 0 pop3_ok
+  StrCpy $G_POP3 "111"
 
 pop3_ok:
-  StrCmp ${G_GUI} "" default_gui
-  Push ${G_GUI}
+  StrCmp $G_GUI "" default_gui
+  Push $G_GUI
   Call StrCheckDecimal
-  Pop ${G_GUI}
-  StrCmp ${G_GUI} "" default_gui
-  IntCmp ${G_GUI} 1 ports_ok default_gui
-  IntCmp ${G_GUI} 65535 ports_ok ports_ok
+  Pop $G_GUI
+  StrCmp $G_GUI "" default_gui
+  IntCmp $G_GUI 1 ports_ok default_gui
+  IntCmp $G_GUI 65535 ports_ok ports_ok
 
 default_gui:
-  StrCpy ${G_GUI} "8080"
-  StrCmp ${G_POP3} ${G_GUI} 0 ports_ok
-  StrCpy ${G_GUI} "8081"
+  StrCpy $G_GUI "8080"
+  StrCmp $G_POP3 $G_GUI 0 ports_ok
+  StrCpy $G_GUI "8081"
 
 ports_ok:
   Pop ${L_STRIPLANG}
@@ -1233,13 +1241,13 @@ skip_msg_delete:
 
 continue:
 
-  ; The function "CheckExistingConfig" loads ${G_POP3} and ${G_GUI} with the settings found in
+  ; The function "CheckExistingConfig" loads $G_POP3 and $G_GUI with the settings found in
   ; a previously installed "popfile.cfg" file or if no such file is found, it loads the
   ; POPFile default values. Now we display these settings and allow the user to change them.
 
   ; The POP3 and GUI port numbers must be in the range 1 to 65535 inclusive, and they
   ; must be different. This function assumes that the values "CheckExistingConfig" has loaded
-  ; into ${G_POP3} and ${G_GUI} are valid.
+  ; into $G_POP3 and $G_GUI are valid.
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_OPTIONS_TITLE)" "$(PFI_LANG_OPTIONS_SUBTITLE)"
 
@@ -1248,21 +1256,21 @@ continue:
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_PORTLIST} "ioA.ini" "Field 2" "ListItems"
   Push |${L_PORTLIST}|
-  Push |${G_POP3}|
+  Push |$G_POP3|
   Call StrStr
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" 0 POP3_is_in_list
-  StrCpy ${L_PORTLIST} ${L_PORTLIST}|${G_POP3}
+  StrCpy ${L_PORTLIST} ${L_PORTLIST}|$G_POP3
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "ListItems" ${L_PORTLIST}
 
 POP3_is_in_list:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_PORTLIST} "ioA.ini" "Field 4" "ListItems"
   Push |${L_PORTLIST}|
-  Push |${G_GUI}|
+  Push |$G_GUI|
   Call StrStr
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" 0 GUI_is_in_list
-  StrCpy ${L_PORTLIST} ${L_PORTLIST}|${G_GUI}
+  StrCpy ${L_PORTLIST} ${L_PORTLIST}|$G_GUI
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "ListItems" ${L_PORTLIST}
 
 GUI_is_in_list:
@@ -1274,8 +1282,8 @@ GUI_is_in_list:
     !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 5" "State" 1
 
 show_defaults:
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "State" ${G_POP3}
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "State" ${G_GUI}
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "State" $G_POP3
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "State" $G_GUI
 
   ; Now display the custom page and wait for the user to make their selections.
   ; The function "CheckPortOptions" will check the validity of the selections
@@ -1305,20 +1313,20 @@ Function CheckPortOptions
 
   Push ${L_RESULT}
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${G_POP3} "ioA.ini" "Field 2" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ ${G_GUI} "ioA.ini" "Field 4" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $G_POP3 "ioA.ini" "Field 2" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $G_GUI "ioA.ini" "Field 4" "State"
 
-  StrCmp ${G_POP3} ${G_GUI} ports_must_differ
-  Push ${G_POP3}
+  StrCmp $G_POP3 $G_GUI ports_must_differ
+  Push $G_POP3
   Call StrCheckDecimal
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" bad_pop3
-  IntCmp ${G_POP3} 1 pop3_ok bad_pop3
-  IntCmp ${G_POP3} 65535 pop3_ok pop3_ok
+  IntCmp $G_POP3 1 pop3_ok bad_pop3
+  IntCmp $G_POP3 65535 pop3_ok pop3_ok
 
 bad_pop3:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_OPTIONS_MBPOP3_1) $\"${G_POP3}$\"'.\
+      "$(PFI_LANG_OPTIONS_MBPOP3_1) $\"$G_POP3$\"'.\
       $\r$\n$\r$\n\
       $(PFI_LANG_OPTIONS_MBPOP3_2)\
       $\r$\n$\r$\n\
@@ -1326,16 +1334,16 @@ bad_pop3:
   Goto bad_exit
 
 pop3_ok:
-  Push ${G_GUI}
+  Push $G_GUI
   Call StrCheckDecimal
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" bad_gui
-  IntCmp ${G_GUI} 1 good_exit bad_gui
-  IntCmp ${G_GUI} 65535 good_exit good_exit
+  IntCmp $G_GUI 1 good_exit bad_gui
+  IntCmp $G_GUI 65535 good_exit good_exit
 
 bad_gui:
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_OPTIONS_MBGUI_1) $\"${G_GUI}$\".\
+      "$(PFI_LANG_OPTIONS_MBGUI_1) $\"$G_GUI$\".\
       $\r$\n$\r$\n\
       $(PFI_LANG_OPTIONS_MBGUI_2)\
       $\r$\n$\r$\n\
@@ -1426,7 +1434,7 @@ Function SetOutlookExpressPage
   !define L_OEPATH      $R2   ; holds part of the path used to access OE account data
   !define L_ORDINALS    $R1   ; "Identity Ordinals" flag (1 = found, 0 = not found)
   !define L_SEPARATOR   $R0   ; char used to separate the pop3 server from the username
-  !define LG_TEMP        $9   ; a global register "borrowed" for use locally
+  !define L_TEMP        $9 
 
   Push ${L_ACCOUNT}
   Push ${L_ACCT_INDEX}
@@ -1438,7 +1446,7 @@ Function SetOutlookExpressPage
   Push ${L_OEPATH}
   Push ${L_ORDINALS}
   Push ${L_SEPARATOR}
-  Push ${LG_TEMP}
+  Push ${L_TEMP}
 
   ; Determine the separator character to be used when configuring an email account for POPFile
 
@@ -1459,8 +1467,8 @@ get_guid:
 
   StrCpy ${L_ORDINALS} "1"
 
-  ReadRegDWORD ${LG_TEMP} HKCU "Identities\${L_GUID}" "Identity Ordinal"
-  IntCmp ${LG_TEMP} 1 firstOrdinal noOrdinals otherOrdinal
+  ReadRegDWORD ${L_TEMP} HKCU "Identities\${L_GUID}" "Identity Ordinal"
+  IntCmp ${L_TEMP} 1 firstOrdinal noOrdinals otherOrdinal
 
 firstOrdinal:
   StrCpy ${L_OEPATH} ""
@@ -1501,8 +1509,8 @@ next_acct:
   Push ${L_OEDATA}
   Push ${L_SEPARATOR}
   Call StrStr
-  Pop ${LG_TEMP}
-  StrCmp ${LG_TEMP} "" 0 try_next_account
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" 0 try_next_account
 
   !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_OECFG_TITLE)" "$(PFI_LANG_OECFG_SUBTITLE)"
 
@@ -1524,8 +1532,8 @@ next_acct:
   Push ${L_OEDATA}
   Push ${L_SEPARATOR}
   Call StrStr
-  Pop ${LG_TEMP}
-  StrCmp ${LG_TEMP} "" 0 try_next_account
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" 0 try_next_account
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Field 9" "Text" ${L_OEDATA}
 
@@ -1542,19 +1550,19 @@ next_acct:
   ; Display the OE account data and offer to configure this account to work with POPFile
 
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY_RETURN "ioB.ini"
-  Pop ${LG_TEMP}
+  Pop ${L_TEMP}
 
-  StrCmp ${LG_TEMP} "cancel" finished_this_guid
-  StrCmp ${LG_TEMP} "back" finished_this_guid
+  StrCmp ${L_TEMP} "cancel" finished_this_guid
+  StrCmp ${L_TEMP} "back" finished_this_guid
 
   ; Has the user ticked the 'configure this account' check box ?
 
-  !insertmacro MUI_INSTALLOPTIONS_READ ${LG_TEMP} "ioB.ini" "Field 2" "State"
-  StrCmp ${LG_TEMP} "1" change_oe try_next_account
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioB.ini" "Field 2" "State"
+  StrCmp ${L_TEMP} "1" change_oe try_next_account
 
 change_oe:
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 User Name"
-  ReadRegStr ${LG_TEMP} HKCU ${L_ACCOUNT} "POP3 Server"
+  ReadRegStr ${L_TEMP} HKCU ${L_ACCOUNT} "POP3 Server"
 
   ; To be able to restore the registry to previous settings when we uninstall we
   ; write a special file called popfile.reg containing the registry settings
@@ -1571,10 +1579,10 @@ change_oe:
   FileWrite ${L_CFG} "${L_OEDATA}$\n"
   FileWrite ${L_CFG} "${L_ACCOUNT}$\n"
   FileWrite ${L_CFG} "POP3 Server$\n"
-  FileWrite ${L_CFG} "${LG_TEMP}$\n"
+  FileWrite ${L_CFG} "${L_TEMP}$\n"
   FileClose ${L_CFG}
 
-  WriteRegStr HKCU ${L_ACCOUNT} "POP3 User Name" "${LG_TEMP}${L_SEPARATOR}${L_OEDATA}"
+  WriteRegStr HKCU ${L_ACCOUNT} "POP3 User Name" "${L_TEMP}${L_SEPARATOR}${L_OEDATA}"
   WriteRegStr HKCU ${L_ACCOUNT} "POP3 Server" "127.0.0.1"
 
 try_next_account:
@@ -1592,7 +1600,7 @@ finished_this_guid:
 
 finished_oe_config:
 
-  Pop ${LG_TEMP}
+  Pop ${L_TEMP}
   Pop ${L_SEPARATOR}
   Pop ${L_ORDINALS}
   Pop ${L_OEPATH}
@@ -1614,7 +1622,7 @@ finished_oe_config:
   !undef L_OEPATH
   !undef L_ORDINALS
   !undef L_SEPARATOR
-  !undef LG_TEMP
+  !undef L_TEMP
 
 FunctionEnd
 
@@ -1693,7 +1701,7 @@ lastaction_no:
 
   ; User has changed their mind: Shutdown the newly installed version of POPFile
 
-  NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  NSISdl::download_quiet http://127.0.0.1:$G_GUI/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_TEMP}    ; Get the return value (and ignore it)
   Push ${L_EXE}
   Call WaitUntilUnlocked
@@ -1725,7 +1733,7 @@ lastaction_DOS_box:
   ; Before starting the newly installed POPFile, ensure that no other version of POPFile
   ; is running on the same UI port as the newly installed version.
 
-  NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  NSISdl::download_quiet http://127.0.0.1:$G_GUI/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_TEMP}    ; Get the return value (and ignore it)
   Push ${L_EXE}
   Call WaitUntilUnlocked
@@ -1749,7 +1757,7 @@ lastaction_background:
   ; Before starting the newly installed POPFile, ensure that no other version of POPFile
   ; is running on the same UI port as the newly installed version.
 
-  NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  NSISdl::download_quiet http://127.0.0.1:$G_GUI/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_TEMP}    ; Get the return value (and ignore it)
   Push ${L_EXE}
   Call WaitUntilUnlocked
@@ -1762,7 +1770,7 @@ wait_for_popfile:
   StrCpy ${L_TEMP} ${C_STARTUP_LIMIT}   ; Timeout limit to avoid an infinite loop
 
 check_if_ready:
-  NSISdl::download_quiet http://127.0.0.1:${G_GUI} "$PLUGINSDIR\ui.htm"
+  NSISdl::download_quiet http://127.0.0.1:$G_GUI "$PLUGINSDIR\ui.htm"
   Pop ${L_TEMP}                        ; Did POPFile return an HTML page?
   StrCmp ${L_TEMP} "success" remove_banner
   Sleep ${C_STARTUP_DELAY}
@@ -1828,7 +1836,7 @@ FunctionEnd
 
 Function RunUI
 
-  ExecShell "open" "http://127.0.0.1:${G_GUI}"
+  ExecShell "open" "http://127.0.0.1:$G_GUI"
 
 FunctionEnd
 
@@ -1839,7 +1847,7 @@ FunctionEnd
 
 Function ShowReadMe
 
-  StrCmp ${G_NOTEPAD} "" use_file_association
+  StrCmp $G_NOTEPAD "" use_file_association
   Exec 'notepad.exe "$INSTDIR\${C_README}"'
   goto exit
 
@@ -1963,7 +1971,7 @@ other_perl:
   IfErrors 0 remove_shortcuts
 
 attempt_shutdown:
-  StrCpy ${G_GUI} ""
+  StrCpy $G_GUI ""
   StrCpy ${L_OLDUI} ""
 
   ClearErrors
@@ -1981,7 +1989,7 @@ loop:
   Goto loop
 
 got_html_port:
-  StrCpy ${G_GUI} ${L_LNE} 5 10
+  StrCpy $G_GUI ${L_LNE} 5 10
   Goto loop
 
 got_ui_port:
@@ -1991,14 +1999,14 @@ got_ui_port:
 ui_port_done:
   FileClose ${L_CFG}
 
-  StrCmp ${G_GUI} "" use_other_port
-  Push ${G_GUI}
+  StrCmp $G_GUI "" use_other_port
+  Push $G_GUI
   Call un.TrimNewlines
   Call un.StrCheckDecimal
-  Pop ${G_GUI}
-  StrCmp ${G_GUI} "" use_other_port
-  DetailPrint "$(un.PFI_LANG_LOG_1) ${G_GUI}"
-  NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  Pop $G_GUI
+  StrCmp $G_GUI "" use_other_port
+  DetailPrint "$(un.PFI_LANG_LOG_1) $G_GUI"
+  NSISdl::download_quiet http://127.0.0.1:$G_GUI/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_TEMP}
   Goto check_shutdown
 
