@@ -159,7 +159,9 @@ sub update_word
             my $color = $self->{bayes}->get_color($mword);
             if ( $encoded == 0 )  {
                 $after = '&' if ( $after eq '>' );
-                $self->{ut} =~ s/($before)\Q$word\E($after)/$1<b><font color=$color>$word<\/font><\/b>$2/;
+                if ( !( $self->{ut} =~ s/($before)\Q$word\E($after)/$1<b><font color=$color>$word<\/font><\/b>$2/ ) ) {
+                	print "Could not find $word for colorization\n" if ( $self->{debug} );
+                }
             } else {
                 $self->{ut} .= "Found in encoded data <font color=$color>$word<\/font>\r\n";
             }
@@ -313,11 +315,12 @@ sub add_line
 # $tag      The tag name
 # $arg      The arguments
 # $end_tag  Whether this is an end tag or not
+# $encoded  1 if this HTML was found inside encoded (base64) text
 #
 # ---------------------------------------------------------------------------------------------
 sub update_tag 
 {
-    my ( $self, $tag, $arg, $end_tag ) = @_;
+    my ( $self, $tag, $arg, $end_tag, $encoded ) = @_;
 
     $tag =~ s/[\r\n]//g;
     $arg =~ s/[\r\n]//g;
@@ -380,7 +383,7 @@ sub update_tag
         if ( ( $attribute =~ /^src$/i ) &&
              ( ( $tag =~ /^img|frame|iframe$/i )
                || ( $tag =~ /^script$/i && $parse_script_uri ) ) ) {
-            add_url( $self, $value, 0, $quote, $end_quote, '' );
+            add_url( $self, $value, $encoded, $quote, $end_quote, '' );
             next;
         }
         
@@ -391,15 +394,15 @@ sub update_tag
             # ftp, http, https
 
             if ( $value =~ /^(ftp|http|https):\/\//i ) {
-                add_url($self, $value, 0, $quote, $end_quote, '');
+                add_url($self, $value, $encoded, $quote, $end_quote, '');
                 next;
             }
     
             # The less common mailto: goes second, and we only care if this is in an anchor
 
             if ( $tag =~ /^a$/ && $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/]|$)/i )  {
-               update_word( $self, $1, 0, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
-               add_url( $self, $2, 0, '@', ($3?'[\\\&\?\:\/]':$end_quote), '' );
+               update_word( $self, $1, $encoded, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
+               add_url( $self, $2, $encoded, '@', ($3?'[\\\&\?\:\/]':$end_quote), '' );
             }
             next;
         }
@@ -407,43 +410,45 @@ sub update_tag
         # Tags with alt attributes
 
         if ( $attribute =~ /^alt$/i && $tag =~ /^img$/i )  {
-            add_line($self, $value, 0, '');
+            add_line($self, $value, $encoded, '');
             next;
          }
          
         # Tags with working background attributes
 
         if ( $attribute =~ /^background$/i && $tag =~ /^(td|table|body)$/i ) {
-            add_url( $self, $value, 0, $quote, $end_quote, '' );
+            add_url( $self, $value, $encoded, $quote, $end_quote, '' );
             next;
         }
         
         # Tags that load sounds
 
         if ( $attribute =~ /^bgsound$/i && $tag =~ /^body$/i ) {
-            add_url( $self, $2, 0, $quote, $end_quote, '' );
+            add_url( $self, $2, $encoded, $quote, $end_quote, '' );
             next;
         }
 
 
         # Tags with colors in them
         if ( ( $attribute =~ /^color$/i ) && ( $tag =~ /^font$/i ) ) {
-            update_word( $self, $value, 0, $quote, $end_quote, '' );
+            update_word( $self, $value, $encoded, $quote, $end_quote, '' );
             $self->{htmlfontcolor} = map_color($self, $value);
+			print "Set html font color to $self->{htmlfontcolor}\n" if ( $self->{debug} );
         }
                 
         # Tags with background colors
 
         if ( ( $attribute =~ /^(bgcolor|back)$/i ) && ( $tag =~ /^(td|table|body|tr|th|font)$/i ) ) {
-            update_word( $self, $value, 0, $quote, $end_quote, '' );
+            update_word( $self, $value, $encoded, $quote, $end_quote, '' );
             $self->{htmlbackcolor} = map_color($self, $value);
+			print "Set html back color to $self->{htmlbackcolor}\n" if ( $self->{debug} );
         }
 
         # Tags with a charset
 
         if ( ( $attribute =~ /^content$/i ) && ( $tag =~ /^meta$/i ) ) {
             if ( $value=~ /charset=(.{1,40})[\"\>]?/ ) {
-                update_word( $self, $1, 0, '', '', '' );
+                update_word( $self, $1, $encoded, '', '', '' );
             }
         }
                 
@@ -452,7 +457,7 @@ sub update_tag
         # not be in a predictable location (search the entire value)
 
         if ( $attribute =~ /^style$/i && $tag =~ /^(body|td|tr|table|span|div|p)$/i ) {            
-            add_url( $self, $1, 0, '[\']', '[\']', '' ) if ( $value =~ /background\-image:[ \t]?url\([ \t]?\'(.*)\'[ \t]?\)/i );
+            add_url( $self, $1, $encoded, '[\']', '[\']', '' ) if ( $value =~ /background\-image:[ \t]?url\([ \t]?\'(.*)\'[ \t]?\)/i );
             next;
         }
         
@@ -460,15 +465,15 @@ sub update_tag
 
         if ( $attribute =~ /^action$/i && $tag =~ /^form$/i )  {
             if ( $value =~ /^(ftp|http|https):\/\//i ) {
-                add_url( $self, $value, 0, $quote, $end_quote, '' );
+                add_url( $self, $value, $encoded, $quote, $end_quote, '' );
                 next;
             }
         
             # mailto forms            
 
             if ( $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/])/i )  {
-               update_word( $self, $1, 0, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
-               add_url( $self, $2, 0, '@', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
+               update_word( $self, $1, $encoded, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
+               add_url( $self, $2, $encoded, '@', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
             }            
             next;
         }        
@@ -646,7 +651,8 @@ sub parse_html
 
     my $found = 1;
 
-    $line =~ s/[\r\n\t ]+$//;
+	$line =~ s/[\r\n]+/ /g;
+    $line =~ s/[\t ]+$//;
 
     print "parse_html: [$line]\n" if $self->{debug};
    
@@ -659,7 +665,7 @@ sub parse_html
     while ( $found && ( $line ne '' ) ) {
         $found = 0;
         
-        $line =~ s/^[\r\n\t ]+//;
+        $line =~ s/^[\t ]+//;
 
         # If we are in an HTML tag then look for the close of the tag, if we get it then
         # handle the tag, if we don't then keep building up the arguments of the tag
@@ -670,7 +676,7 @@ sub parse_html
                 $self->{in_html_tag} = 0;
                 $self->{html_tag} =~ s/=\n ?//g;
                 $self->{html_arg} =~ s/=\n ?//g;
-                update_tag( $self, $self->{html_tag}, $self->{html_arg}, $self->{html_end} );
+                update_tag( $self, $self->{html_tag}, $self->{html_arg}, $self->{html_end}, $encoded );
                 $self->{html_tag} = '';
                 $self->{html_arg} = '';
                 $found = 1;
@@ -685,7 +691,7 @@ sub parse_html
         # > present)?  If so then handle that tag immediately and continue
         
         if ( $line =~ s/^<([\/]?)([A-Za-z]+)([^>]*?)>// )  {
-            update_tag( $self, $2, $3, ( $1 eq '/' ) );
+            update_tag( $self, $2, $3, ( $1 eq '/' ), $encoded );
             $found = 1;
             next;
         }
