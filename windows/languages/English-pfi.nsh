@@ -11,13 +11,21 @@
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
 #--------------------------------------------------------------------------
-# String Formatting (applies to _IO_ text used for custom pages):
+# String Formatting (applies to PFI_LANG_*_MB* text used for message boxes):
+#
+#   (1) The sequence  $\r$\n        inserts a newline
+#   (2) The sequence  $\r$\n$\r\$n  inserts a blank line
+#
+# (the 'PFI_LANG_CBP_MBCONTERR_2' message box string which is listed under the heading
+# 'Custom Page - POPFile Classification Bucket Creation' includes some examples)
+#--------------------------------------------------------------------------
+# String Formatting (applies to PFI_LANG_*_IO_ text used for custom pages):
 #
 #   (1) The sequence  \r\n      inserts a newline
 #   (2) The sequence  \r\n\r\n  inserts a blank line
 #
-# (the 'PFI_LANG_CBP_IO_INTRO' string in 'Custom Page - POPFile Classification Bucket Creation'
-#  shows how the \r\n\r\n sequence is used)
+# (the 'PFI_LANG_CBP_IO_INTRO' custom page string in which is listed under the heading
+# 'Custom Page - POPFile Classification Bucket Creation' includes some examples)
 #--------------------------------------------------------------------------
 
 #--------------------------------------------------------------------------
@@ -143,7 +151,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBNAMERR_4      "Please choose a different name for the new bucket."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_1     "POPFile requires AT LEAST TWO buckets before it can classify your email."
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_2     "Please enter the name of a bucket to be created, either by picking a suggested name from the drop-down list or by typing in a name of your own choice."
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_2     "Please enter the name of a bucket to be created,$\r$\n$\r$\neither by picking a suggested name from the drop-down list$\r$\n$\r$\nor by typing in a name of your own choice."
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBCONTERR_3     "Sorry! You must define AT LEAST TWO buckets before continuing with the installation of POPFile."
 
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBDONE_1        "buckets have been defined for use by POPFile."
