@@ -240,7 +240,6 @@ sub start
 
     $self->{parser__}->{lang__}  = $self->module_config_( 'html', 'language' );
 
-    $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
     return $self->load_word_matrix_();
 }
 
@@ -974,6 +973,8 @@ sub classify
 {
     my ( $self, $file, $ui ) = @_;
     my $msg_total = 0;
+
+    $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
 
     # Pass language parameter to parse_file()
 
