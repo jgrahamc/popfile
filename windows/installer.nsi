@@ -46,6 +46,13 @@
 
   !define MUI_CUSTOMPAGECOMMANDS
 
+  ; The "Special" bitmap appears on the "Welcome" and "Finish" pages,
+  ; the "Header" bitmap appears on the other pages of the installer.
+  
+  !define MUI_SPECIALBITMAP "special.bmp"
+  !define MUI_HEADERBITMAP "hdr-right.bmp"
+  !define mUI_HEADERBITMAP_RIGHT
+
   !define MUI_WELCOMEPAGE
   !define MUI_LICENSEPAGE
   ; Select either "accept/do not accept" radio buttons or "accept" checkbox for the license page
