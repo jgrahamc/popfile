@@ -253,12 +253,7 @@ sub child__
                     
                     $self->get_response_( $news, $client, "$eol" );
                                     
-                    # The client may have some cruft after the .crlf,
-                    # the server will respond, the client may(?) echo something back                
-                    $self->flush_extra_( $news, $client, 0 );
-                    $self->flush_extra_( $client, $news, 0 );
-                    $self->flush_extra_( $news, $client, 0 );
-                    $self->flush_extra_( $client, $news, 0 );
+                    $self->flush_extra_( $news, $client, 0 );                    
                 }
                 
                 next;                
