@@ -201,6 +201,10 @@ sub initialize
 
     $self->config_( 'date_format', '' );
 
+    # If you want session dividers
+
+    $self->config_( 'session_dividers', 1 );
+
     # Load skins
 
     $self->load_skins__();
@@ -1826,6 +1830,7 @@ sub set_magnet_navigator__
         my %row_data;
         $count += 1;
         $row_data{Magnet_Navigator_Count} = $count;
+        $row_data{Session_Key} = $self->{session_key__};
         if ( $i == $start_magnet )  {
             $row_data{Magnet_Navigator_If_This_Page} = 1;
         } else {
@@ -2191,6 +2196,7 @@ sub history_page
         my @columns = split( ',', $self->config_( 'columns' ) );
         my @header_data;
         my $colspan = 1;
+        my $length = 90;
         foreach my $header (@columns) {
             my %row_data;
             $header =~ /^(.)/;
@@ -2211,6 +2217,7 @@ sub history_page
             $row_data{History_If_Sorted} = ( $self->{form_}{sort} =~ /^\-?\Q$header\E$/ );
             $row_data{History_If_Sorted_Ascending} = ( $self->{form_}{sort} !~ /^-/ );
             push ( @header_data, \%row_data );
+            $length -= 10;
         }
         $templ->param( 'History_Loop_Headers' => \@header_data );
         $templ->param( 'History_Colspan' => $colspan );
@@ -2236,10 +2243,10 @@ sub history_page
             $row_data{History_Cc}            = $$row[3];
             $row_data{History_Date}          = $self->pretty_date__( $$row[5] );
             $row_data{History_Subject}       = $$row[4];
-            $row_data{History_Short_From}    = $self->shorten__( $$row[1] );
-            $row_data{History_Short_To}      = $self->shorten__( $$row[2] );
-            $row_data{History_Short_Cc}      = $self->shorten__( $$row[3] );
-            $row_data{History_Short_Subject} = $self->shorten__( $$row[4] );
+            $row_data{History_Short_From}    = $self->shorten__( $$row[1], $length );
+            $row_data{History_Short_To}      = $self->shorten__( $$row[2], $length );
+            $row_data{History_Short_Cc}      = $self->shorten__( $$row[3], $length );
+            $row_data{History_Short_Subject} = $self->shorten__( $$row[4], $length );
             my $bucket = $row_data{History_Bucket} = $$row[8];
             $row_data{History_Bucket_Color}  = $self->{classifier__}->get_bucket_parameter( $self->{api_session__},
                                                                           $bucket,
@@ -2260,7 +2267,7 @@ sub history_page
             }
             $row_data{Session_Key} = $self->{session_key__};
 
-            if ( ( $last != -1 ) && ( $self->{form_}{sort} =~ /inserted/ ) ) {
+            if ( ( $last != -1 ) && ( $self->{form_}{sort} =~ /inserted/ ) && ( $self->config_( 'session_dividers' ) ) ) {
                 $row_data{History_If_Session} = ( abs( $$row[7] - $last ) > 300 );
                 $row_data{History_Colspan} = $colspan+1;
 	    }
@@ -2277,32 +2284,12 @@ sub history_page
 
 sub shorten__
 {
-    my ( $self, $string ) = @_;
+    my ( $self, $string, $length ) = @_;
 
-    if ( length($string)>30 )  {
-
-        my $test = $string;
-        $test =~ s/<.+>//;
-        $test =~ s/^[ \t]+//;
-        $test =~ s/[ \t]+$//;
-
-        if ( $test ne '' ) {
-            $string = $test;
-	} else {
-            $string =~ s/[<>]//;
-        }
-
-        $string =~ s/^[\t ]*\"(.+)\"[ \t]*$/$1/;
-        $string =~ s/^[ \t]+//;
-        $string =~ s/[ \t]+$//;
-
-        if ( length($string)>30) {
-            $string =~ /(.{30})/;
-            $string = "$1...";
-	}
+    if ( length($string)>$length) {
+       $string =~ /(.{$length})/;
+       $string = "$1...";
     }
-
-    $string =~ s/^[\t ]*\"(.+)\"[ \t]*$/$1/;
 
     return $string;
 }
