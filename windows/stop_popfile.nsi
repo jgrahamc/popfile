@@ -2,7 +2,7 @@
 #
 # stop_popfile.nsi --- A simple 'command-line' utility to shutdown POPFile silently.
 #
-# Copyright (c) 2001-2003 John Graham-Cumming
+# Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -20,14 +20,24 @@
 #   along with POPFile; if not, write to the Free Software
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #-------------------------------------------------------------------------------------------
-# Notes:
+# Usage (one mandatory parameter, two optional parameters):
 #
-# One parameter is required: the port number used to access the POPFile User Interface
+#        STOP_PF [REPORT] PORT [PASSWORD]
+#
+# One parameter is required: the PORT number used to access the POPFile User Interface
 # (the UI port number, in range 1 to 65535).
 #
 # Returns error code 0 if shutdown was successful (otherwise returns 1)
 #
-# There is also an optional parameter which selects the reporting mode:
+# If an invalid parameter is given (eg 131072), an error is returned.
+#
+# If no parameters are supplied, or if only '/?' or '/HELP' is supplied, the copyright and
+# usage information is displayed.
+#
+# There are two optional parameters:
+#
+# (a) 'REPORT' is the first optional parameter and selects the reporting mode:
+#
 # /SHOWERRORS, /SHOWALL or /SHOWNONE. (/SHOWNONE is used as the default if no mode is supplied)
 #
 # If '/SHOWERRORS' is specified then a message will be shown if any errors were detected
@@ -38,23 +48,30 @@
 # If '/SHOWNONE' is specified then no messages are displayed.
 #
 # Uppercase or lowercase can be used for this optional parameter.
-# If the optional parameter is used, it must be the first parameter.
+# If this optional parameter is used, it must be the first parameter.
 #
-# If an invalid parameter is given (eg 131072), an error is returned.
+# (b) 'PASSWORD' is the second optional parameter and supplies the POPFile UI password.
 #
-# If no parameters are supplied, or if only '/?' or '/HELP' is supplied, the copyright and
-# usage information is displayed.
+# If the POPFile UI is protected by a password, the correct password must be supplied otherwise
+# the shutdown request will be ignored.
+#
+# The password parameter is case sensitive and must be the last parameter on the command-line.
+#
+# This version of the utility uses spaces to separate parameters so the password cannot include
+# any spaces (quotes cannot be used to enclose a password containing spaces)
+#
 #-------------------------------------------------------------------------------------------
 #
-# An example of a simple batch file to shut down POPFile using the default port (if any errors
-# are detected, a message box will be displayed):
+# An example of a simple batch file to shut down POPFile using the default port using the
+# password 'fred' (if any errors are detected, a message box will be displayed):
 #
-#             STOP_PF.EXE /SHOWERRORS 8080
+#             STOP_PF.EXE /SHOWERRORS 8080 fred
 #
-# A batch file which checks the error code after trying to shutdown POPFile using port 9090:
+# A batch file which checks the error code after trying to shutdown POPFile using port 9090
+# with the UI password set to 'Let_Me_In':
 #
 #           @ECHO OFF
-#           START /W STOP_PF 9090
+#           START /W STOP_PF 9090 Let_Me_In
 #           IF ERRORLEVEL 1 GOTO FAILED
 #           ECHO Shutdown succeeded
 #           GOTO DONE
@@ -64,7 +81,7 @@
 #
 # The '/W' parameter is important, otherwise the 'failed' case will not be detected.
 #-------------------------------------------------------------------------------------------
-#  This version was tested using NSIS 2.0b4 (CVS) with the 27 August 2003 (19:44 GMT) update
+#  This version was tested using "NSIS 2 Release Candidate 2" released 5 January 2004
 #-------------------------------------------------------------------------------------------
 
   ; The default NSIS caption is "Name Setup" so we override it here
@@ -72,7 +89,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define VERSION   "0.4.3"       ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.5.0"       ; see 'VIProductVersion' comment below for format details
 
   ; Specify EXE filename and icon for the 'installer'
 
@@ -89,15 +106,15 @@
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion "${VERSION}.1"
+  VIProductVersion "${C_VERSION}.1"
 
   VIAddVersionKey "ProductName" "POPFile Silent Shutdown Utility - stops POPFile without \
                   opening a browser window."
   VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sourceforge.net"
   VIAddVersionKey "CompanyName" "The POPFile Project"
-  VIAddVersionKey "LegalCopyright" "© 2001-2003  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright" "© 2003-2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "POPFile Silent Shutdown Utility"
-  VIAddVersionKey "FileVersion" "${VERSION}"
+  VIAddVersionKey "FileVersion" "${C_VERSION}"
 
   VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
   VIAddVersionKey "Build Script" "${__FILE__}$\r$\n(${__TIMESTAMP__})"
@@ -111,13 +128,14 @@
 Section Shutdown
   !define L_GUI      $R9   ; holds POPFile User Interface (UI) port number
   !define L_PARAMS   $R8   ; parameter(s) extracted from the command-line
-  !define L_REPORT   $R7   ; 'none' = no msgs, 'errors' = only errors, 'all' = errors & success
-  !define L_RESULT   $R6   ; the status returned from the shutdown request
-  !define L_TEMP     $R5
+  !define L_PASSWORD $R7   ; password to be used for the POPFile UI
+  !define L_REPORT   $R6   ; 'none' = no msgs, 'errors' = only errors, 'all' = errors & success
+  !define L_RESULT   $R5   ; the status returned from the shutdown request
+  !define L_TEMP     $R4
 
   StrCpy ${L_REPORT} "none"        ; default is to display no success or failure messages
 
-  ; It does not matter if the command-line parameters are uppercase or lowercase
+  ; It does not matter if the first command-line parameter uses uppercase or lowercase
 
   Call GetParameters
   Pop ${L_PARAMS}
@@ -147,23 +165,25 @@ Section Shutdown
   Goto option_error
 
 usage:
-  MessageBox MB_OK "POPFile Silent Shutdown Utility v${VERSION}      \
-    Copyright (c) 2001-2003 John Graham-Cumming\
+  MessageBox MB_OK "POPFile Silent Shutdown Utility v${C_VERSION}      \
+    Copyright (c) 2003-2004 John Graham-Cumming\
     $\r$\n$\r$\n\
     This command-line utility shuts POPFile down silently, without opening a browser window.\
     $\r$\n$\r$\n\
-    Usage:    STOP_PF  [ <REPORT> ]  <PORT>\
+    Usage:    STOP_PF  [ <REPORT> ]  <PORT> [ <PASSWORD> ]\
     $\r$\n$\r$\n\
-    where <PORT> is the port number used to access the POPFile User Interface (normally 8080)\
+    where <PORT> is the port number used to access the POPFile User Interface (normally 8080).\
     $\r$\n$\r$\n\
-    and the optional <REPORT> is /SHOWERRORS (only error messages shown), /SHOWALL\
+    The optional <PASSWORD> is the password (no spaces allowed) for the POPFile User Interface.\
+    $\r$\n$\r$\n\
+    The optional <REPORT> is /SHOWERRORS (only error messages shown), /SHOWALL\
     $\r$\n\
     (success or error messages always shown), or /SHOWNONE (no messages - this is the default).\
     $\r$\n$\r$\n\
     A success/fail error code is always returned which can be checked in a batch file:\
     $\r$\n\
     $\r$\n          @ECHO OFF\
-    $\r$\n          START /W STOP_PF 8080\
+    $\r$\n          START /W STOP_PF 8080 Let_Me_In\
     $\r$\n          IF ERRORLEVEL 1 GOTO FAILED\
     $\r$\n          ECHO Shutdown succeeded\
     $\r$\n          GOTO DONE\
@@ -204,31 +224,89 @@ port_checks:
 
   InitPluginsDir
 
+  ; Password is assumed to be a single word without any spaces
+
+  Push ${L_PARAMS}
+  Call GetNextParam
+  Pop ${L_PARAMS}
+  Pop ${L_PASSWORD}             ; the next parameter from the command-line
+
+  StrCmp ${L_PASSWORD} "" no_password_supplied
+
   ; Attempt to shutdown POPFile silently (nothing is displayed, no browser window is opened)
+  ; If first attempt appears to succeed, we must try again to check if POPFile has shutdown
+  ; (we cannot tell the difference between 'shutdown' and 'incorrect password' responses)
+
+  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown.htm"
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "success" try_password_again
+  StrCmp ${L_REPORT} "none" error_exit
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Silent shutdown with password using port '${L_GUI}' failed\
+      $\r$\n\
+      (error: ${L_RESULT})"
+  Goto error_exit
+
+try_password_again:
+  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/password?password=${L_PASSWORD}&redirect=/shutdown? "$PLUGINSDIR\shutdown.htm"
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "success" 0 password_ok
+  StrCmp ${L_REPORT} "none" error_exit
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Silent shutdown with password using port '${L_GUI}' failed\
+      $\r$\n\
+      (error: wrong UI password supplied ?)"
+  Goto error_exit
+
+password_ok:                             ; Return error code 0 (success)
+  StrCmp ${L_REPORT} "none" exit
+  StrCmp ${L_REPORT} "errors" exit
+  MessageBox MB_OK|MB_ICONINFORMATION \
+      "Silent shutdown with password OK\
+      $\r$\n\
+      (port '${L_GUI}' used)"
+  Goto exit
+
+no_password_supplied:
+
+  ; Attempt to shutdown POPFile silently (nothing is displayed, no browser window is opened)
+  ; If first attempt appears to succeed, we must try again to check if POPFile has shutdown
+  ; (we cannot tell the difference between 'shutdown' and 'enter password' responses)
 
   NSISdl::download_quiet http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_RESULT}
-  StrCmp ${L_RESULT} "success" ok
-  StrCmp ${L_REPORT} "none" exit
+  StrCmp ${L_RESULT} "success" try_again
+  StrCmp ${L_REPORT} "none" error_exit
   MessageBox MB_OK|MB_ICONEXCLAMATION \
       "Silent shutdown using port '${L_GUI}' failed\
       $\r$\n\
       (error: ${L_RESULT})"
   Goto error_exit
 
+try_again:
+  NSISdl::download_quiet http://127.0.0.1:${L_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "success" 0 shutdown_ok
+  StrCmp ${L_REPORT} "none" error_exit
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Silent shutdown using port '${L_GUI}' failed\
+      $\r$\n\
+      (error: UI may be password protected ?)"
+  Goto error_exit
+
 no_port_supplied:
-  StrCmp ${L_REPORT} "none" exit
+  StrCmp ${L_REPORT} "none" error_exit
   MessageBox MB_OK|MB_ICONEXCLAMATION "No UI port was supplied"
   Goto error_exit
 
 integer_error:
-  StrCmp ${L_REPORT} "none" exit
+  StrCmp ${L_REPORT} "none" error_exit
   MessageBox MB_OK|MB_ICONEXCLAMATION "Port number '${L_RESULT}' should only contain the \
       digits 0 to 9"
   Goto error_exit
 
 port_error:
-  StrCmp ${L_REPORT} "none" exit
+  StrCmp ${L_REPORT} "none" error_exit
   MessageBox MB_OK|MB_ICONEXCLAMATION "Port number '${L_GUI}' is not in range 1 to 65535"
   Goto error_exit
 
@@ -236,9 +314,9 @@ option_error:
   MessageBox MB_OK|MB_ICONEXCLAMATION "Unknown option supplied$\r$\n(${L_RESULT})"
 
 error_exit:
-  Abort                         ; Return error code 1 (failure)
+  Abort                                  ; Return error code 1 (failure)
 
-ok:                             ; Return error code 0 (success)
+shutdown_ok:                             ; Return error code 0 (success)
   StrCmp ${L_REPORT} "none" exit
   StrCmp ${L_REPORT} "errors" exit
   MessageBox MB_OK|MB_ICONINFORMATION \
