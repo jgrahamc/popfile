@@ -560,7 +560,7 @@ sub classify_file
 			# Halve the likelihood of getting in the spam bucket for each word
 
 			if ( $bucket eq 'spam' ) {
-				$probability += $spam_resistance;
+				$probability -= $spam_resistance;
 			}
 
             # Here we are doing the bayes calculation: P(word|bucket) is in probability
