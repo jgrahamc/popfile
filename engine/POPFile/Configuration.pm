@@ -487,6 +487,7 @@ sub load_configuration
                     $self->{configuration_parameters__}{$parameter} = $value;
 	        } else {
                     $self->log_( "Discarded unknown parameter '$parameter' from popfile.cfg" );
+                    $self->{deprecated_parameters__}{$parameter} = $value;
                 }
             }
         }
@@ -601,6 +602,13 @@ sub configuration_parameters
     my ( $self ) = @_;
 
     return sort keys %{$self->{configuration_parameters__}};
+}
+
+sub deprecated_parameter
+{
+    my ( $self, $name ) = @_;
+
+    return $self->{deprecated_parameters__}{$name};
 }
 
 1;
