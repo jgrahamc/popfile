@@ -72,7 +72,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define VERSION   "0.4.2"       ; see 'VIProductVersion' comment below for format details
+  !define VERSION   "0.4.3"       ; see 'VIProductVersion' comment below for format details
 
   ; Specify EXE filename and icon for the 'installer'
 
