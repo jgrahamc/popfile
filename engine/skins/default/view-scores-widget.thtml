@@ -1,59 +1,198 @@
 <a name="scores">
-<hr><b><TMPL_VAR NAME="Localize_Scores"></b><p>
-<table class="top20Words"><tr><th scope="col"><TMPL_VAR NAME="Localize_Bucket"></th><th>&nbsp;</th>
+    <b>
+        <TMPL_VAR NAME="Localize_Scores">
+    </b>
+</a>
+<hr />
+<table class="top20Words">
+    <tr>
+        <th scope="col">
+            <TMPL_VAR NAME="Localize_Bucket">
+        </th>
+        <th>
+            &nbsp;
+        </th>
 
-<TMPL_IF NAME="View_Score_If_Score">
-<th scope="col"><TMPL_VAR NAME="Localize_Count">&nbsp;&nbsp;</th>
-<th scope="col" align="center"><TMPL_VAR NAME="Localize_Score"></th>
-<th scope="col"><TMPL_VAR NAME="Localize_Probability"></th></tr>
-<TMPL_ELSE>
-<th scope="col"><TMPL_VAR NAME="Localize_Count">&nbsp;&nbsp;</th>
-<th scope="col"><TMPL_VAR NAME="Localize_Probability"></th></tr>
-</TMPL_IF>
-<TMPL_LOOP NAME="View_Score_Loop_Scores">
-<tr>
-<td><font color="<TMPL_VAR NAME="View_Score_Bucket_Color">"><b><TMPL_VAR NAME="View_Score_Bucket"></b></font></td>
-<td>&nbsp;</td><td align="right"><TMPL_VAR NAME="View_Score_MatchCount">&nbsp;&nbsp;&nbsp;&nbsp;</td>
-<TMPL_IF NAME="View_Score_If_Score">
-<td align=right><TMPL_VAR NAME="View_Score_RawStr">&nbsp;&nbsp;&nbsp;</td>
-<td><TMPL_VAR NAME="View_Score_ProbStr"></td></tr>
-<TMPL_ELSE>
-<td><TMPL_VAR NAME="View_Score_ProbStr"></td></tr></TMPL_IF>
-</TMPL_LOOP>
+        <TMPL_IF NAME="View_Score_If_Score">
+        
+        <th scope="col">
+            <TMPL_VAR NAME="Localize_Count">&nbsp;&nbsp;
+        </th>
+        <th scope="col" align="center">
+            <TMPL_VAR NAME="Localize_Score">
+        </th>
+        <th scope="col">
+            <TMPL_VAR NAME="Localize_Probability">
+        </th>
+    </tr>
+    
+        <TMPL_ELSE>
+    
+        <th scope="col">
+            <TMPL_VAR NAME="Localize_Count">&nbsp;&nbsp;
+        </th>
+        <th scope="col">
+            <TMPL_VAR NAME="Localize_Probability">
+        </th>
+    </tr>
+    
+        </TMPL_IF>
+    
+    <TMPL_LOOP NAME="View_Score_Loop_Scores">
+    
+    <tr>
+        <td>
+            <font color="<TMPL_VAR NAME="View_Score_Bucket_Color">">
+                <b>
+                    <TMPL_VAR NAME="View_Score_Bucket">
+                </b>
+            </font>
+        </td>
+        <td>
+            &nbsp;
+        </td>
+        <td align="right">
+            <TMPL_VAR NAME="View_Score_MatchCount">&nbsp;&nbsp;&nbsp;&nbsp;
+        </td>
+        
+        <TMPL_IF NAME="View_Score_If_Score">
+        
+        <td align=right>
+            <TMPL_VAR NAME="View_Score_RawStr">&nbsp;&nbsp;&nbsp;
+        </td>
+        <td>
+            <TMPL_VAR NAME="View_Score_ProbStr">
+        </td>
+    </tr>
+    
+        <TMPL_ELSE>
+    
+        <td>
+            <TMPL_VAR NAME="View_Score_ProbStr">
+        </td>
+    </tr>
+    
+        </TMPL_IF>
+        
+    </TMPL_LOOP>
+
+</table>
+<hr />
+<table width="100%">
+    <tr>
+        <td class="top20" align="left">
+            <b>
+                <TMPL_IF NAME="View_If_Format">
+                
+                <TMPL_VAR NAME="Localize_View_WordMatrix"> (<TMPL_VAR NAME="View_View">)
+                
+                </TMPL_IF>
+            
+            </b>
+        </td>
+        <td class="historyNavigatorTop">
+            
+            <TMPL_IF NAME="View_If_Format_Freq">
+
+            <a href="/view?session=<TMPL_VAR NAME="Session_Key">&amp;view=<TMPL_VAR NAME="View_This">&amp;start_message=<TMPL_VAR NAME="View_This_Page">&amp;format=freq#scores">
+                <TMPL_VAR NAME="Localize_View_ShowFrequencies"></a>
+            
+            </TMPL_IF>
+            
+            <TMPL_IF NAME="View_If_Format_Prob">
+            
+            <a href="/view?session=<TMPL_VAR NAME="Session_Key">&amp;view=<TMPL_VAR NAME="View_This">&amp;start_message=<TMPL_VAR NAME="View_This_Page">&amp;format=prob#scores">
+                <TMPL_VAR NAME="Localize_View_ShowProbabilities"></a>
+            
+            </TMPL_IF>
+            
+            <TMPL_IF NAME="View_If_Format_Score">
+
+            <a href="/view?session=<TMPL_VAR NAME="Session_Key">&amp;view=<TMPL_VAR NAME="View_This">&amp;start_message=<TMPL_VAR NAME="View_This_Page">&amp;format=score#scores">
+                <TMPL_VAR NAME="Localize_View_ShowScores"></a>
+            
+            </TMPL_IF>
+        </td>
+    </tr>
 </table>
 
-<hr>
-
 <TMPL_IF NAME="View_Score_If_Table">
+<br />
 <table class="top20Words">
-<tr>
-<th scope="col"><TMPL_VAR NAME="Localize_Word"></th>
-<th>&nbsp;</th>
-<th scope="col"><TMPL_VAR NAME="Localize_Count"></th>
-<th>&nbsp;</th>
-<TMPL_LOOP NAME="View_Score_Loop_Bucket_Header">
-<th><font color="<TMPL_VAR NAME="View_Score_Bucket_Color">"><TMPL_VAR NAME="View_Score_Bucket"></font></th><th>&nbsp;</th>
-</TMPL_LOOP>
-</tr>
+    <tr>
+        <th scope="col">
+            <TMPL_VAR NAME="Localize_Word">
+        </th>
+        <th>
+            &nbsp;
+        </th>
+        <th scope="col">
+            <TMPL_VAR NAME="Localize_Count">
+        </th>
+        <th>
+            &nbsp;
+        </th>
+        
+        <TMPL_LOOP NAME="View_Score_Loop_Bucket_Header">
+        
+        <th>
+            <font color="<TMPL_VAR NAME="View_Score_Bucket_Color">">
+                <TMPL_VAR NAME="View_Score_Bucket">
+            </font>
+        </th>
+        <th>
+            &nbsp;
+        </th>
+        
+        </TMPL_LOOP>
+        
+    </tr>
 
-<TMPL_LOOP NAME="View_Score_Loop_Words">
-<tr>
-<td><font color="<TMPL_VAR NAME="View_Score_Word_Color">"><TMPL_VAR NAME="View_Score_Word"></font></td>
-<td>&nbsp;</td>
-<td><TMPL_VAR NAME="View_Score_Word_Count"></td>
-<td>&nbsp;</td>
+    <TMPL_LOOP NAME="View_Score_Loop_Words">
 
-<TMPL_LOOP NAME="View_Score_Loop_Per_Bucket">
-<TMPL_IF NAME="View_Score_If_Probability">
-<td><font color="<TMPL_VAR NAME="View_Score_Word_Color">"><TMPL_VAR NAME="View_Score_Probability"></font></td>
-<TMPL_ELSE>
-<td>&nbsp;</td>
+    <tr>
+        <td>
+            <font color="<TMPL_VAR NAME="View_Score_Word_Color">">
+                <TMPL_VAR NAME="View_Score_Word">
+            </font>
+        </td>
+        <td>
+            &nbsp;
+        </td>
+        <td>
+            <TMPL_VAR NAME="View_Score_Word_Count">
+        </td>
+        <td>
+            &nbsp;
+        </td>
+
+        <TMPL_LOOP NAME="View_Score_Loop_Per_Bucket">
+        
+        <TMPL_IF NAME="View_Score_If_Probability">
+        
+        <td>
+            <font color="<TMPL_VAR NAME="View_Score_Word_Color">">
+                <TMPL_VAR NAME="View_Score_Probability">
+            </font>
+        </td>
+
+        <TMPL_ELSE>
+
+        <td>
+            &nbsp;
+        </td>
+
+        </TMPL_IF>
+        
+        <td>
+            &nbsp;
+        </td>
+    
+        </TMPL_LOOP>
+    </tr>
+    
+    </TMPL_LOOP>
+
+</table>
+
 </TMPL_IF>
-<td>&nbsp;</td>
-</TMPL_LOOP>
-</tr>
-</TMPL_LOOP>
-</table></p>
-</TMPL_IF>
-
-<hr>

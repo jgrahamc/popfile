@@ -1,31 +1,66 @@
+
 <TMPL_IF NAME="View_QuickMagnets_If">
+
 <form action="/magnets" method="get">
-<input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
-<input type="hidden" name="count" value="<TMPL_VAR NAME="View_QuickMagnets_Count">" />
-<hr><b><TMPL_VAR NAME="Localize_QuickMagnets"></b><p>
-<table class="top20Words">
-<tr><th scope="col"><TMPL_VAR NAME="Localize_Magnet"></th>
-<th><TMPL_VAR NAME="Localize_Magnet_Always"></th>
+    <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
+    <input type="hidden" name="count" value="<TMPL_VAR NAME="View_QuickMagnets_Count">" />
+    <hr />
+    <b>
+        <TMPL_VAR NAME="Localize_QuickMagnets">
+    </b>
+    <table class="top20Words">
+        <tr>
+            <th scope="col">
+                <TMPL_VAR NAME="Localize_Magnet">
+            </th>
+            <th>
+                <TMPL_VAR NAME="Localize_Magnet_Always">
+            </th>
+        </tr>
 
-<TMPL_LOOP NAME="View_QuickMagnets_Loop">
-<tr><td scope="col"><TMPL_VAR NAME="View_QuickMagnets_Type">: 
-<select name="text<TMPL_VAR NAME="View_QuickMagnets_I">" id="">
-<TMPL_LOOP NAME="View_QuickMagnets_Loop_Magnets">
-<option value="<TMPL_VAR NAME="View_QuickMagnets_Magnet">"><TMPL_VAR NAME="View_QuickMagnets_Magnet"></option>
-</TMPL_LOOP>
-</select>
-</td>
-<td><input type="hidden" name="type<TMPL_VAR NAME="View_QuickMagnets_I">" id="magnetsAddType" value="<TMPL_VAR NAME="View_QuickMagnets_Type">" />
-<select name="bucket<TMPL_VAR NAME="View_QuickMagnets_I">" id="magnetsAddBucket"><option value=""></option>
-<TMPL_LOOP NAME="View_QuickMagnets_Loop_Buckets">
-<option value="<TMPL_VAR NAME="View_QuickMagnets_Bucket">" style="color: <TMPL_VAR NAME="View_QuickMagnets_Bucket_Color">"><TMPL_VAR NAME="View_QuickMagnets_Bucket"></option>
-</TMPL_LOOP>
-</select></td></tr>
-</TMPL_LOOP>
+            <TMPL_LOOP NAME="View_QuickMagnets_Loop">
+            
+        <tr>
+            <td scope="col">
+                <TMPL_VAR NAME="View_QuickMagnets_Type">: 
+                <select name="text<TMPL_VAR NAME="View_QuickMagnets_I">">
+                    
+                    <TMPL_LOOP NAME="View_QuickMagnets_Loop_Magnets">
+                    
+                    <option value="<TMPL_VAR NAME="View_QuickMagnets_Magnet">">
+                        <TMPL_VAR NAME="View_QuickMagnets_Magnet">
+                    </option>
+                    
+                    </TMPL_LOOP>
+                    
+                </select>
+            </td>
+            <td>
+                <input type="hidden" name="type<TMPL_VAR NAME="View_QuickMagnets_I">" class="magnetsAddType" value="<TMPL_VAR NAME="View_QuickMagnets_Type">" />
+                <select name="bucket<TMPL_VAR NAME="View_QuickMagnets_I">" class="magnetsAddBucket">
+                    <option value=""></option>
+                    
+                    <TMPL_LOOP NAME="View_QuickMagnets_Loop_Buckets">
+                    
+                    <option value="<TMPL_VAR NAME="View_QuickMagnets_Bucket">" style="color: <TMPL_VAR NAME="View_QuickMagnets_Bucket_Color">">
+                        <TMPL_VAR NAME="View_QuickMagnets_Bucket">
+                    </option>
+                    
+                    </TMPL_LOOP>
+                </select>
+            </td>
+        </tr>
+    
+        </TMPL_LOOP>
 
-<tr>
-<td></td>
-<td><input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" /></td>
-</tr></table></form>
+        <tr>
+            <td>
+            </td>
+            <td>
+                <input type="submit" class="submit" name="create" value="<TMPL_VAR NAME="Localize_Create">" />
+            </td>
+        </tr>
+    </table>
+</form>
 
 </TMPL_IF>
