@@ -78,7 +78,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.7"
+  !define C_PFI_VERSION  "0.1.8"
 
   ; Mention the version number in the window title
 
@@ -207,6 +207,11 @@
 
   !define MUI_INSTFILESPAGE_FINISHHEADER_TEXT     "$(PFI_LANG_ENDCONVERT_TITLE)"
   !define MUI_INSTFILESPAGE_FINISHHEADER_SUBTEXT  "$(PFI_LANG_ENDCONVERT_SUBTITLE)"
+
+  ; Override the standard "Installation Aborted..." page header
+
+  !define MUI_INSTFILESPAGE_ABORTHEADER_TEXT      "$(PFI_LANG_BADCONVERT_TITLE)"
+  !define MUI_INSTFILESPAGE_ABORTHEADER_SUBTEXT   "$(PFI_LANG_BADCONVERT_SUBTITLE)"
 
   !insertmacro MUI_PAGE_INSTFILES
 
@@ -586,11 +591,12 @@ Section ConvertCorpus
   !define L_CORPUS_SIZE   $R5     ; total number of bytes in all the bucket files in the list
   !define L_LAST_CHANGE   $R4     ; used to detect when a bucket file has been deleted
   !define L_MPBINDIR      $R3     ; folder containing popfileb.exe file
-  !define L_POPFILE_ROOT  $R2     ; environment variable holding path to popfile.pl
-  !define L_POPFILE_USER  $R1     ; environment variable holding path to popfile.cfg
-  !define L_START_TIME    $R0     ; time in Min100 units when we started the corpus conversion
-  !define L_TEMP          $9
-  !define L_TIME_LEFT     $8      ; estimated time remaining (updated when a file is deleted)
+  !define L_NEXT_EXECHECK $R2     ; used to decide when to check POPFile is still running
+  !define L_POPFILE_ROOT  $R1     ; environment variable holding path to popfile.pl
+  !define L_POPFILE_USER  $R0     ; environment variable holding path to popfile.cfg
+  !define L_START_TIME    $9     ; time in Min100 units when we started the corpus conversion
+  !define L_TEMP          $8
+  !define L_TIME_LEFT     $7      ; estimated time remaining (updated when a file is deleted)
 
   !define L_RESERVED      $0      ; used to get result from the System.dll plugin
   Push ${L_RESERVED}
@@ -602,6 +608,7 @@ Section ConvertCorpus
   Push ${L_CORPUS_SIZE}
   Push ${L_LAST_CHANGE}
   Push ${L_MPBINDIR}
+  Push ${L_NEXT_EXECHECK}
   Push ${L_POPFILE_ROOT}
   Push ${L_POPFILE_USER}
   Push ${L_START_TIME}
@@ -646,38 +653,69 @@ Section ConvertCorpus
 
   System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("ITAIJIDICTPATH", "${L_TEMP}").r0'
   StrCmp ${L_RESERVED} 0 0 itaiji_set_ok
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
+  DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (ITAIJIDICTPATH)"
-  Goto exit
+  Abort
 
 itaiji_set_ok:
   System::Call 'Kernel32::SetEnvironmentVariableA(t, t) i("KANWADICTPATH", "$G_STILL_TO_DO").r0'
   StrCmp ${L_RESERVED} 0 0 kakasi_done
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
+  DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_ENVNOTSET) (KANWADICTPATH)"
-  Goto exit
+  Abort
 
 no_perl_path:
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
+  DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOPOPFILE) (popfileb.exe)"
-  Goto exit
+  Abort
 
 no_root_path:
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
+  DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOPOPFILE) (POPFILE_ROOT)"
-  Goto exit
+  Abort
 
 no_user_path:
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
+  DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOPOPFILE) (POPFILE_USER)"
-  Goto exit
+  Abort
 
 no_itaiji_path:
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
+  DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOKAKASI) (ITAIJIDICTPATH)"
-  Goto exit
+  Abort
 
 no_kanwa_path:
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
+  DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP "$(PFI_LANG_CONVERT_NOKAKASI) (KANWADICTPATH)"
-  Goto exit
+  Abort
 
 start_error:
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_STARTERR)"
+  DetailPrint ""
   MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "$(PFI_LANG_CONVERT_STARTERR)"
-  Goto exit
+  Abort
+
+not_running:
+  DetailPrint ""
+  DetailPrint "$(PFI_LANG_CONVERT_FATALERR)"
+  DetailPrint ""
+  MessageBox MB_OK|MB_ICONSTOP|MB_TOPMOST "$(PFI_LANG_CONVERT_FATALERR)"
+  Abort
 
 kakasi_done:
   ReadEnvStr ${L_POPFILE_ROOT} POPFILE_ROOT
@@ -728,6 +766,12 @@ user_set_ok:
 
   ReadINIStr ${L_CORPUS_SIZE} "$G_INIFILE_PATH" "BucketList" "TotalSize"
   StrCpy ${L_BYTES_DONE} 0
+
+  ; If it takes more than one pass to process a particular bucket, we check once a minute that
+  ; POPFile is still running (to avoid an infinite loop if popfileb.exe has crashed or been
+  ; shutdown). The first check is due at 0 minutes elapsed time.
+
+  StrCpy ${L_NEXT_EXECHECK} 0
 
 loop:
   ReadINIStr $G_BUCKET_COUNT "$G_INIFILE_PATH" "BucketList" "FileCount"
@@ -797,6 +841,14 @@ update_display:
   Goto display_progress
 
 same_bucket:
+  IntCmp $G_ELAPSED_TIME ${L_NEXT_EXECHECK} 0 delete_last_entry 0
+  IntOp ${L_NEXT_EXECHECK} ${L_NEXT_EXECHECK} + 1
+  Push "${L_MPBINDIR}\popfileb.exe"
+  Call CheckIfLocked
+  Pop ${L_TEMP}
+  StrCmp ${L_TEMP} "" not_running
+
+delete_last_entry:
   !insertmacro DELETE_LAST_ENTRY
 
 display_progress:
@@ -833,6 +885,7 @@ exit:
   Pop ${L_START_TIME}
   Pop ${L_POPFILE_USER}
   Pop ${L_POPFILE_ROOT}
+  Pop ${L_NEXT_EXECHECK}
   Pop ${L_MPBINDIR}
   Pop ${L_LAST_CHANGE}
   Pop ${L_CORPUS_SIZE}
@@ -851,6 +904,7 @@ exit:
   !undef L_CORPUS_SIZE
   !undef L_LAST_CHANGE
   !undef L_MPBINDIR
+  !undef L_NEXT_EXECHECK
   !undef L_POPFILE_ROOT
   !undef L_POPFILE_USER
   !undef L_START_TIME
@@ -920,7 +974,7 @@ FunctionEnd
 
 
 #--------------------------------------------------------------------------
-# Function StrLower
+# Installer Function: StrLower
 #
 # Converts uppercase letters in a string into lowercase letters. Other characters unchanged.
 #
@@ -978,6 +1032,56 @@ done:
 
   !undef C_LOWERCASE
 
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckIfLocked
+#
+# Checks if a particular file (an EXE file, for example) is being used. If the specified file
+# is no longer in use, this function returns an empty string (otherwise it returns the input
+# parameter unchanged).
+#
+# Inputs:
+#         (top of stack)     - the full pathname of the file to be checked
+#
+# Outputs:
+#         (top of stack)     - if file is no longer in use, an empty string ("") is returned
+#                              otherwise the input string is returned
+#
+#  Usage:
+#
+#         Push "$G_MPBINDIR\wperl.exe"
+#         Call CheckIfLocked
+#         Pop $R0
+#
+#        (if the file is no longer in use, $R0 will be "")
+#        (if the file is still being used, $R0 will be "$G_MPBINDIR\wperl.exe")
+#--------------------------------------------------------------------------
+
+Function CheckIfLocked
+  !define L_EXE           $R9   ; full path to the file (normally an EXE file) to be checked
+  !define L_FILE_HANDLE   $R8
+
+  Exch ${L_EXE}
+  Push ${L_FILE_HANDLE}
+
+  IfFileExists "${L_EXE}" 0 unlocked_exit
+  SetFileAttributes "${L_EXE}" NORMAL
+
+  ClearErrors
+  FileOpen ${L_FILE_HANDLE} "${L_EXE}" a
+  FileClose ${L_FILE_HANDLE}
+  IfErrors exit
+
+unlocked_exit:
+  StrCpy ${L_EXE} ""
+
+ exit:
+  Pop ${L_FILE_HANDLE}
+  Exch ${L_EXE}
+
+  !undef L_EXE
+  !undef L_FILE_HANDLE
 FunctionEnd
 
 #--------------------------------------------------------------------------
