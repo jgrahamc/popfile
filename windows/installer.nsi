@@ -1734,8 +1734,12 @@ FunctionEnd
 # Installer Function: CheckExistingProgDir
 # (the "leave" function for the POPFile PROGRAM DIRECTORY selection page)
 #
-# Now that we are overriding the default InstallDir behaviour, we really need to check
-# that the main 'Program Files' folder has not been selected for the installation.
+# The POPFile PROGRAM DIRECTORY page uses the standard $INSTDIR variable so NSIS
+# automatically strips any trailing backslashes from the path selected by the user.
+#
+# Now that we are overriding the default 'InstallDir' behaviour it is easier for the
+# user to select the main 'Program Files' folder so we check for this case and refuse
+# to accept this path.
 #
 # This function is used to check if a previous POPFile installation exists in the directory
 # chosen for this installation's POPFile PROGRAM files (popfile.pl, etc). If we find one,
@@ -1748,11 +1752,6 @@ Function CheckExistingProgDir
   !define L_RESULT  $R9
 
   Push ${L_RESULT}
-
-  ; Strip trailing slashes (if any) from the path selected by the user
-
-  Push $INSTDIR
-  Pop $INSTDIR
 
   ; We do not permit POPFile to be installed in the target system's 'Program Files' folder
   ; (i.e. we do not allow 'popfile.pl' etc to be stored there)

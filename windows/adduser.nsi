@@ -1998,8 +1998,12 @@ FunctionEnd
 # Installer Function: CheckExistingDataDir
 # (the "leave" function for the DIRECTORY page)
 #
-# Now that we are overriding the default InstallDir behaviour, we really need to check
-# that the main 'Program Files' folder has not been selected for the 'User Data' folder.
+# The DIRECTORY page uses the standard $INSTDIR variable so NSIS automatically strips
+# any trailing backslashes from the path selected by the user.
+#
+# Now that we are overriding the default 'InstallDir' behaviour it is easier for the
+# user to select the main 'Program Files' folder so we check for this case and refuse
+# to accept this path.
 #
 # POPFile currently does not support paths containing spaces in POPFILE_ROOT and POPFILE_USER
 # so we use the short file name format for these two environment variables. However some
@@ -2014,10 +2018,8 @@ Function CheckExistingDataDir
 
   Push ${L_RESULT}
 
-  ; Strip trailing slashes (if any) from the path selected by the user
+  ; Get the 'clean' version of the path selected by the user (no trailing backslashes)
 
-  Push $INSTDIR
-  Pop $INSTDIR
   StrCpy $G_USERDIR "$INSTDIR"
 
   ; We do not permit POPFile 'User Data' to be in the main 'Program Files' folder
