@@ -200,6 +200,7 @@ sub parse_stream
 
     $self->{words}     = {};
     $self->{msg_total} = 0;
+    $self->{from}      = '';
 
     if ( $self->{color} )
     {
@@ -342,7 +343,10 @@ sub parse_stream
                 {
                     if ( $header =~ /From/ ) 
                     {
-                        $self->{from} = $argument;
+                        if ( $self->{from} eq '' ) 
+                        {
+                            $self->{from} = $argument;
+                        }
                     }
                     
                     while ( $argument =~ s/<([[:alpha:]0-9\-_]+?@[[:alpha:]0-9\-_\.]+?)>// ) 
