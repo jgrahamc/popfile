@@ -56,10 +56,10 @@
   !insertmacro MUI_PAGE_LICENSE
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
-  Page custom SetOptionsPage "CheckPortOptions" ": Options"
+  Page custom SetOptionsPage "CheckPortOptions"
   !insertmacro MUI_PAGE_INSTFILES
-  !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS ": Create POPFile Buckets"
-  Page custom SetOutlookOrOutlookExpressPage "" ": Configure Outlook Express"
+  !insertmacro CBP_PAGECOMMAND_SELECTBUCKETS ""
+  Page custom SetOutlookOrOutlookExpressPage ""
   !insertmacro MUI_PAGE_FINISH
   
   ; Uninstaller Pages
