@@ -5315,7 +5315,7 @@ foreign_ooe_undo:
 
 ooe_undo_not_valid:
   WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (data no longer valid)"
-  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (data no longer valid)$\r$\n"
+  FileWrite ${L_ERRORLOG} "Alert : [Undo-${L_INDEX}] (data no longer valid)$\r$\n"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_ooe_undo
 
@@ -5593,7 +5593,7 @@ foreign_eudora_undo:
 
 eudora_undo_not_valid:
   WriteINIStr "$G_USERDIR\${L_UNDOFILE}" "Undo-${L_INDEX}" "Restored" "No (data no longer valid)"
-  FileWrite ${L_ERRORLOG} "Error : [Undo-${L_INDEX}] (data no longer valid)$\r$\n"
+  FileWrite ${L_ERRORLOG} "Alert : [Undo-${L_INDEX}] (data no longer valid)$\r$\n"
   DetailPrint "$(^Skipped)Undo-${L_INDEX}"
   Goto next_eudora_undo
 
