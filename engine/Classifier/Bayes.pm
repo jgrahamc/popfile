@@ -2489,9 +2489,6 @@ sub get_bucket_color
 {
     my ( $self, $session, $bucket ) = @_;
 
-    my $userid = $self->valid_session_key__( $session );
-    return undef if ( !defined( $userid ) );
-
     return $self->get_bucket_parameter( $session, $bucket, 'color' );
 }
 
@@ -2512,10 +2509,7 @@ sub set_bucket_color
 {
     my ( $self, $session, $bucket, $color ) = @_;
 
-    my $userid = $self->valid_session_key__( $session );
-    return undef if ( !defined( $userid ) );
-
-    $self->set_bucket_parameter( $session, $bucket, 'color', $color );
+    return $self->set_bucket_parameter( $session, $bucket, 'color', $color );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2536,8 +2530,9 @@ sub get_bucket_parameter
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $self->{db_get_bucket_parameter__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id},
-                                                 $self->{db_parameterid__}{$parameter} );
+    # If there is a non-default value for this parameter then return it.
+
+    $self->{db_get_bucket_parameter__}->execute( $self->{db_bucketid__}{$userid}{$bucket}{id}, $self->{db_parameterid__}{$parameter} );
     my $result = $self->{db_get_bucket_parameter__}->fetchrow_arrayref;
 
     # If this parameter has not been defined for this specific bucket then
@@ -2578,9 +2573,9 @@ sub set_bucket_parameter
     my $bucketid = $self->{db_bucketid__}{$userid}{$bucket}{id};
     my $btid     = $self->{db_parameterid__}{$parameter};
 
-    $self->{db_set_bucket_parameter__}->execute( $bucketid, $btid, $value );
+    # Exactly one row should be affected by this statement
 
-    return 1;
+    return ( $self->{db_set_bucket_parameter__}->execute( $bucketid, $btid, $value ) == 1 );
 }
 
 # ---------------------------------------------------------------------------------------------

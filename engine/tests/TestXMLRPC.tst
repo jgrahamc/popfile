@@ -24,7 +24,14 @@
 #
 # ---------------------------------------------------------------------------------------------
 
+test_assert( `rm -rf messages` == 0 );
+test_assert( `rm -rf corpus` == 0 );
+test_assert( `cp -R corpus.base corpus` == 0 );
+test_assert( `rm -rf corpus/CVS` == 0 );
+
 unlink 'popfile.db';
+unlink 'stopwords';
+test_assert( `cp stopwords.base stopwords` == 0 );
 
 use Classifier::MailParse;
 use Classifier::Bayes;
@@ -138,6 +145,8 @@ if ($pid == 0) {
     -> proxy("http://127.0.0.1:" . $xport . "/RPC2")
     -> call('Classifier/Bayes.set_bucket_color', $session, 'personal', 'somecolour')
     -> result;
+
+    test_assert_equal( $set_bucket_color, 1 );
 
     select(undef,undef,undef,.2);
 
