@@ -3364,14 +3364,16 @@ sub print_form_fields_
 
     $formstring = "$amp" if (!$first);
 
-    foreach my $field ( @include ) {        
+    foreach my $field ( @include ) {
+        if ($field eq 'session') {
+            $formstring .= "$amp" if ($count > 0);
+            $formstring .= "session=$self->{session_key__}";
+            $count++;
+            next;
+            }
         unless ( !defined($self->{form_}{$field}) || ( $self->{form_}{$field} eq '' ) ) {
             $formstring .= "$amp" if ($count > 0);
-            if ($field eq 'session') {
-                $formstring .= "session=$self->{session_key__}";
-            } else {
-                $formstring .= "$field=$self->{form_}{$field}";
-            }
+            $formstring .= "$field=$self->{form_}{$field}";
             $count++;
         }        
     }
