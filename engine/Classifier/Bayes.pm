@@ -85,6 +85,8 @@ sub load_word_matrix
     }
     
     print "Corpus loaded with $self->{full_total} entries\n" if $self->{debug};
+    
+    print "    ... $self->{full_total} words\n";
 }
 
 # ---------------------------------------------------------------------------------------------

@@ -546,7 +546,7 @@ sub run_popfile
     # a call waiting an accept it without having to block
     my $selector         = new IO::Select( $server  );
     
-    print "POPFile ready\n";
+    print "POPFile Engine v$major_version.$minor_version ready\n";
     
     # Accept a connection from a client trying to use us as the mail server.  We service one client at a time
     # and all others get queued up to be dealt with later.  We check the alive boolean here to make sure we
@@ -1098,7 +1098,7 @@ print "    Cleaning stale log files\n";
 # Remove old log files
 remove_debug_files();
 
-print "    Loading corpus\n";
+print "    Loading corpus...\n";
 
 # Get the classifier
 $classifier = new Classifier::Bayes;
@@ -1112,6 +1112,6 @@ print "    Saving configuration\n";
 # Write the final configuration to disk
 save_configuration();
 
-print "POPFile terminating\n";
+print "POPFile Engine v$major_version.$minor_version terminating\n";
 
 # ---------------------------------------------------------------------------------------------
