@@ -359,5 +359,5 @@ Imap_UpdateError2                       Failed to connect to server. Please chec
 Imap_UpdateError3                       Please configure the connection details first.
 Imap_NoConnectionMessage                Please configure the connection details first. After you have done that, more options will be available on this page.
 Imap_WatchMore                          a folder to list of watched folders
-Imap_WatchedFolder                      Watched folder #
+Imap_WatchedFolder                      Watched folder no 
 
