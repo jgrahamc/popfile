@@ -2,7 +2,7 @@
 #
 # stop_popfile.nsi --- A simple 'command-line' utility to shutdown POPFile silently.
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2003-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -89,7 +89,7 @@
   Name    "POPFile Silent Shutdown Utility"
   Caption "POPFile Silent Shutdown Utility"
 
-  !define C_VERSION   "0.5.5"       ; see 'VIProductVersion' comment below for format details
+  !define C_VERSION   "0.5.6"       ; see 'VIProductVersion' comment below for format details
 
   ; Specify EXE filename and icon for the 'installer'
 
@@ -124,7 +124,7 @@
                                      opening a browser window."
   VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sourceforge.net"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "© 2003-2004  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "POPFile Silent Shutdown Utility"
   VIAddVersionKey "FileVersion"      "${C_VERSION}"
 
@@ -177,8 +177,8 @@ Section Shutdown
   Goto option_error
 
 usage:
-  MessageBox MB_OK "POPFile Silent Shutdown Utility v${C_VERSION}      \
-    Copyright (c) 2003-2004 John Graham-Cumming\
+  MessageBox MB_OK "POPFile Silent Shutdown Utility v${C_VERSION}            \
+    Copyright (c) 2004  John Graham-Cumming\
     $\r$\n$\r$\n\
     This command-line utility shuts POPFile down silently, without opening a browser window.\
     $\r$\n$\r$\n\

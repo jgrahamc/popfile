@@ -5,7 +5,7 @@
 #                  easy to check the various language strings used by the
 #                  real utility.
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -62,7 +62,7 @@
   !define C_PFI_PRODUCT      "Corpus Conversion Testbed"
   Name                       "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION      "0.1.3"
+  !define C_PFI_VERSION      "0.1.4"
 
   ; Mention the version number in the window title
 
@@ -98,7 +98,7 @@
   VIAddVersionKey "ProductName"      "${C_PFI_PRODUCT}"
   VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "© 2004  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "POPFile Corpus Conversion Testbed"
   VIAddVersionKey "FileVersion"      "${C_PFI_VERSION}"
 

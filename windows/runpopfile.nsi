@@ -6,7 +6,7 @@
 #                    is used to define them. If suitable registry data cannot be found,
 #                    the 'Add POPFile User' wizard is launched (if it can be found).
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -69,7 +69,7 @@
 #
 #-------------------------------------------------------------------------------------------
 
-  !define C_PFI_VERSION   0.1.6
+  !define C_PFI_VERSION   0.1.7
 
   Name    "Run POPFile"
   Caption "Run POPFile (enhanced)"
@@ -104,7 +104,7 @@
   VIAddVersionKey "ProductName"     "Run POPFile"
   VIAddVersionKey "Comments"        "POPFile Homepage: http://popfile.sf.net"
   VIAddVersionKey "CompanyName"     "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"  "© 2004  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright"  "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "Enhanced front-end for POPFile starter program"
   VIAddVersionKey "FileVersion"     "${C_PFI_VERSION}"
 

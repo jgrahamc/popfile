@@ -5,7 +5,7 @@
 #                  any POPFile configuration - it only displays the screens and
 #                  messages of the real wizard (to help test the translations).
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -83,7 +83,7 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT      "PFI Testbed"
-  !define C_PFI_VERSION      "0.1.1"
+  !define C_PFI_VERSION      "0.1.2"
 
   !ifndef ENGLISH_MODE
     !define C_PFI_VERSION_ID "${C_PFI_VERSION} (ML)"
@@ -193,7 +193,7 @@
   VIAddVersionKey "ProductName"     "POPFile 'Add/Remove User' Language Testbed"
   VIAddVersionKey "Comments"        "POPFile Homepage: http://popfile.sf.net"
   VIAddVersionKey "CompanyName"     "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"  "© 2001-2004  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright"  "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "POPFile 'Add/Remove User' Testbed"
   VIAddVersionKey "FileVersion"     "${C_PFI_VERSION_ID}"
 

@@ -83,7 +83,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.14"
+  !define C_PFI_VERSION  "0.1.15"
 
   ; Mention the version number in the window title
 
@@ -113,7 +113,7 @@
   VIAddVersionKey "ProductName"      "${C_PFI_PRODUCT}"
   VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "© 2004  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "POPFile Corpus Conversion Monitor"
   VIAddVersionKey "FileVersion"      "${C_PFI_VERSION}"
 

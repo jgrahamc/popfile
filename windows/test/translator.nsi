@@ -10,7 +10,7 @@
 #                    (1) transauw.exe (built using the 'transAUW.nsi' NSIS script)
 #                    (2) transmcc.exe (built using the 'transMCC.nsi' NSIS script)
 #
-# Copyright (c) 2001-2004 John Graham-Cumming
+# Copyright (c) 2004 John Graham-Cumming
 #
 #   This file is part of POPFile
 #
@@ -127,7 +127,7 @@
   ;--------------------------------------------------------------------------
 
   !define C_PFI_PRODUCT       "PFI Testbed"
-  !define C_PFI_VERSION       "0.11.2"
+  !define C_PFI_VERSION       "0.11.3"
 
   Name                        "${C_PFI_PRODUCT}"
   Caption                     "${C_PFI_PRODUCT} ${C_PFI_VERSION} Setup"
@@ -208,7 +208,7 @@
   VIAddVersionKey "ProductName"      "POPFile Installer Language Testbed"
   VIAddVersionKey "Comments"         "POPFile Homepage: http://popfile.sf.net"
   VIAddVersionKey "CompanyName"      "The POPFile Project"
-  VIAddVersionKey "LegalCopyright"   "© 2001-2004  John Graham-Cumming"
+  VIAddVersionKey "LegalCopyright"   "Copyright (c) 2004  John Graham-Cumming"
   VIAddVersionKey "FileDescription"  "POPFile Installer Language Testbed"
   VIAddVersionKey "FileVersion"      "${C_PFI_VERSION_ID}"
 
