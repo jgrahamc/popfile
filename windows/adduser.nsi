@@ -168,7 +168,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.44"
+  !define C_PFI_VERSION  "0.2.45"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -1523,8 +1523,12 @@ Section "-Languages" SecLangs
   StrCmp ${L_LANG} "?" use_installer_lang
 
 use_inherited_lang:
+  StrCmp ${L_LANG} "Chinese-Simplified-GB2312" special_case
+  StrCmp ${L_LANG} "Chinese-Traditional-BIG5" special_case
   StrCmp ${L_LANG} "English-UK" special_case
-  StrCmp ${L_LANG} "Hebrew"  0 use_installer_lang
+  StrCmp ${L_LANG} "Hebrew" special_case
+  StrCmp ${L_LANG} "Klingon" special_case
+  Goto use_installer_lang
 
 special_case:
   IfFileExists "$G_ROOTDIR\languages\${L_LANG}.msg" lang_save
