@@ -51,7 +51,7 @@ Header_Magnets                          Magnets
 Footer_HomePage                         POPFile Home Page
 Footer_Manual                           Manual
 Footer_Forums                           Forums
-Footer_FeedMe                           Feed Me!
+Footer_FeedMe                           Donate
 Footer_RequestFeature                   Request Feature
 Footer_MailingList                      Mailing List
 
@@ -146,7 +146,7 @@ Security_UI                             Accept HTTP (User Interface) connections
 Security_UpdateTitle                    Automatic Update Checking
 Security_Update                         Check daily for updates to POPFile
 Security_StatsTitle                     Reporting Statistics
-Security_Stats                          Send statistics back to John daily
+Security_Stats                          Send statistics daily
 
 Magnet_Error1                           Magnet '%s' already exists in bucket '%s'
 Magnet_Error2                           New magnet '%s' clashes with magnet '%s' in bucket '%s' and could cause ambiguous results.  New magnet was not added.
