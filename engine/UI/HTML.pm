@@ -2105,7 +2105,7 @@ sub history_page
     # form element will contain the single index to be deleted. We pass each file that needs
     # deleting into the 
 
-    if ( defined( $self->{form_}{deletemessage} ) ) {
+    if ( defined( $self->{form_}{clearchecked} ) ) {
 
         # Remove the list of marked messages using the array of "remove" checkboxes
 
