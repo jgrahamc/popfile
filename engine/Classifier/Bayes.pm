@@ -1189,7 +1189,13 @@ sub add_words_to_bucket__
     # Map the list of words to a list of counts currently in the database
     # then update those counts and write them back to the database.
 
-    my $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
+    my $words;
+    if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
+         no locale;
+         $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
+    } else {
+         $words = join( ',', map( $self->{db__}->quote( $_ ), (sort keys %{$self->{parser__}{words__}}) ) );
+    }
 
     $self->{get_wordids__} = $self->{db__}->prepare(        # PROFILE BLOCK START
              "select id, word
