@@ -1,0 +1,258 @@
+/*********************************************************/
+/* Main Body */
+
+body {
+  color: #000000;
+  background-color: #ffffff;
+  font-family: sans-serif;
+  font-size: 100%;
+  margin: 10px 20px 20px 20px;
+}
+
+/*********************************************************/
+/* General element settings */
+
+hr {
+  color: #88b5dd;
+  background-color: transparent;
+}
+
+a:link {
+  color: #000000;
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+a:visited {
+  color: #333333;
+  background-color: transparent;
+  text-decoration: underline;
+}
+
+a:hover {
+  color: #000000;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+/*********************************************************/
+/* Shell structure */
+
+.shell, .shellTop {
+  color: #000000;
+  background-color: #bcd5ea;
+  border: 2px #ffffff groove;
+  margin: 0;
+}
+
+td.naked {
+  padding: 0px;
+  margin: 0px;
+  border: none
+}
+
+table.head {
+  width: 100%;
+}
+
+td.head {
+  font-weight: normal;
+  font-size: 1.8em;
+}
+
+table.footer {
+  width: 100%;
+}
+
+td.footerBody {
+  text-align: center;
+}
+
+td.logo2menuSpace {
+  height: 0.8em;
+}
+
+/*********************************************************/
+/* Menu Settings */
+
+.menu {
+  font-size: 1.2em;
+  font-weight: bold;
+  width: 100%;
+}
+
+.menuSelected {
+  color: #000000;
+  background-color: #88b5dd;
+  width: 14%;
+  border-color: #ffffff;
+  border-style: groove groove none groove;
+  border-width: 2px;
+}
+
+.menuStandard {
+  color: #000000;
+  background-color: #bcd5ea;
+  width: 14%;
+  border-color: #ffffff;
+  border-style: groove groove none groove;
+  border-width: 2px;
+}
+
+.menuIndent {
+  width: 8%;
+}
+
+/*********************************************************/
+/* Table Settings */
+
+table.settingsTable {
+  border: 1px solid #88b5dd;
+}
+
+td.settingsPanel {
+  border: 1px solid #88b5dd;
+}
+
+table.openMessageTable {
+  border: 3px solid #88b5dd;
+}
+
+td.openMessageCloser {
+  text-align: right;
+}
+
+td.openMessageBody {
+  text-align: left;
+}
+
+tr.rowEven {
+  background-color: #bcd5ea;
+  color: #000000;
+}
+
+tr.rowOdd {
+  background-color: #88b5dd;
+  color: #000000;
+}
+
+tr.rowHighlighted {
+  background-color: #29abff;
+  color: #eeeeee;
+}
+
+table.lookupResultsTable {
+  border: 3px solid #88b5dd;
+}
+
+/*********************************************************/
+/* Graphics */
+
+td.accuracy0to49 {
+  background-color: red;
+  color: black;
+}
+
+td.accuracy50to93 {
+  background-color: yellow;
+  color: black;
+}
+
+td.accuracy94to100 {
+  background-color: green;
+  color: black;
+}
+
+span.graphFont {
+  font-size: x-small;
+}
+
+/*********************************************************/
+/* Form Labels */
+
+.historyLabel {
+  font-weight: normal;
+}
+
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+.bucketsLabel {
+  font-weight: bold;
+}
+
+.magnetsLabel {
+  font-weight: bold;
+}
+
+.securityLabel {
+  font-weight: bold;
+}
+
+.configurationLabel {
+  font-weight: bold;
+}
+
+.advancedLabel {
+  font-weight: bold;
+}
+
+.passwordLabel {
+  font-weight: bold;
+}
+
+.sessionLabel {
+  font-weight: bold;
+}
+
+.bucketsWidgetStateOn, .bucketsWidgetStateOff {
+  font-weight: bold;
+}
+
+.configWidgetStateOn, .configWidgetStateOff {
+  font-weight: bold;
+}
+
+.securityWidgetStateOn, .securityWidgetStateOff {
+  font-weight: bold;
+}
+
+/*********************************************************/
+/* Positioning */
+
+table.historyWidgetsTop {
+  width: 100%;
+  margin-left: 1.5em;
+  margin-top: 0.6em;
+  margin-bottom: 1.0em;
+}
+
+table.historyWidgetsBottom {
+  width: 100%;
+  margin-top: 0.6em;
+}
+
+td.historyNavigatorTop {
+  text-align: right;
+}
+
+td.historyNavigatorBottom {
+  text-align: right;
+}
+
+/*********************************************************/
+/* Errors */
+
+div.error01 {
+  background-color: transparent;
+  color: red;
+  font-size: larger;
+}
+
+div.error02 {
+  background-color: transparent;
+  color: red;
+}
+

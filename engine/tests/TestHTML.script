@@ -177,17 +177,76 @@ ENDMATCH
 # TODO Check magnet change bucket
 # TODO Check magnet deletion
 
-# TODO Configuration Page
+# Configuration Page
 
 URL http://127.0.0.1:$port/configuration
 GET
 
-# TODO Check skin change
-# TODO Check language change
-# TODO Check logger change
-# TODO Check history lines change
-# TODO Check history days change
-# TODO Check change timeout
+# Check skin change
+
+MATCH <link rel="stylesheet" type="text/css" href="skins/SimplyBlue.css" title="SimplyBlue">
+CONFIGIS html_skin SimplyBlue
+SETSUBMIT skin default
+MATCH <link rel="stylesheet" type="text/css" href="skins/default.css" title="default">
+CONFIGIS html_skin default
+
+# Check language change
+
+MATCH <html lang="en">
+CONFIGIS html_language English
+SETSUBMIT language Francais
+MATCH <html lang="fr">
+CONFIGIS html_language Francais
+SETSUBMIT language English
+MATCH <html lang="en">
+CONFIGIS html_language English
+
+# Check logger change
+
+INPUTIS   debug 2
+CONFIGIS  GLOBAL_debug 1
+SETSUBMIT debug 3
+INPUTIS   debug 3
+CONFIGIS  GLOBAL_debug 2
+SETSUBMIT debug 4
+INPUTIS   debug 4
+CONFIGIS  GLOBAL_debug 3
+SETSUBMIT debug 1
+INPUTIS   debug 1
+CONFIGIS  GLOBAL_debug 0
+
+# Check history lines change
+
+INPUTIS   page_size 20
+CONFIGIS  html_page_size 20
+SETSUBMIT page_size 30
+INPUTIS   page_size 30
+CONFIGIS  html_page_size 30
+SETSUBMIT page_size 0
+MATCH The page size must be a number between 1 and 1000
+INPUTIS   page_size 30
+
+# Check history days change
+
+INPUTIS   history_days 2
+CONFIGIS  html_history_days 2
+SETSUBMIT history_days 3
+INPUTIS   history_days 3
+CONFIGIS  html_history_days 3
+SETSUBMIT history_days 0
+MATCH The number of days in the history must be a number between 1 and 366
+INPUTIS   history_days 3
+
+# Check change timeout
+
+INPUTIS   timeout 60
+CONFIGIS  GLOBAL_timeout 60
+SETSUBMIT timeout 61
+INPUTIS   timeout 61
+CONFIGIS  GLOBAL_timeout 61
+SETSUBMIT timeout 0
+MATCH The TCP timeout must be a number between 10 and 300
+INPUTIS   timeout 61
 
 # Check change POP3 port
 
@@ -200,15 +259,69 @@ SETSUBMIT pop3_port 0
 MATCH The POP3 listen port must be a number between 1 and 65535
 INPUTIS   pop3_port 111
 
-# TODO Check change separator
-# TODO Check Subject Line Modification
-# TODO Check XTC
-# TODO Check XPL
+# Check change separator
+
+INPUTIS   pop3_separator :
+CONFIGIS  pop3_separator :
+SETSUBMIT pop3_separator ;
+INPUTIS   pop3_separator ;
+CONFIGIS  pop3_separator ;
+SETSUBMIT pop3_separator gg
+MATCH The separator character must be a single character
+INPUTIS   pop3_separator ;
+
+# Check Subject Line Modification
+
+INPUTIS subject 1
+CONFIGIS GLOBAL_subject 1
+SETSUBMIT subject 1
+INPUTIS subject 2
+CONFIGIS GLOBAL_subject 0
+
+URL http://127.0.0.1:$port/buckets
+GET
+MATCH Disabled globally
+
+URL http://127.0.0.1:$port/configuration
+GET
+SETSUBMIT subject 2
+INPUTIS subject 1
+CONFIGIS GLOBAL_subject 1
+
+# Check XTC
+
+INPUTIS xtc 1
+CONFIGIS GLOBAL_xtc 1
+SETSUBMIT xtc 1
+INPUTIS xtc 2
+CONFIGIS GLOBAL_xtc 0
+SETSUBMIT xtc 2
+INPUTIS xtc 1
+CONFIGIS GLOBAL_xtc 1
+
+# Check XPL
+
+INPUTIS xpl 1
+CONFIGIS GLOBAL_xpl 1
+SETSUBMIT xpl 1
+INPUTIS xpl 2
+CONFIGIS GLOBAL_xpl 0
+SETSUBMIT xpl 2
+INPUTIS xpl 1
+CONFIGIS GLOBAL_xpl 1
+
+# Check UI port
+
+INPUTIS   ui_port $port
+CONFIGIS  html_port $port
+SETSUBMIT ui_port 8081
+INPUTIS   ui_port 8081
+CONFIGIS  html_port 8081
+SETSUBMIT ui_port 0
+MATCH The user interface port must be a number between 1 and 65535
+INPUTIS   ui_port 8081
+
 # TODO Check XMLRPC port
-# TODO Check UI port
-
-INPUTIS ui_port $port
-
 # TODO Check SMTP port
 # TODO Check NNTP port
 # TODO Check NNTP separator

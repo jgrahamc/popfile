@@ -149,6 +149,7 @@ $b->mq( $mq );
 $b->logger( $l );
 
 $b->initialize();
+test_assert( $b->start() );
 
 my $p = new Proxy::POP3;
 
@@ -232,6 +233,7 @@ if ( $pid == 0 ) {
     use String::Interpolate 'interpolate';
 
     my $ua = new LWP::UserAgent;
+    my $line_number = 0;
 
     our $url;
     our $content;
@@ -240,6 +242,7 @@ if ( $pid == 0 ) {
     # The commands in this loop are documented in TestHTML.script
 
     while ( my $line = <SCRIPT> ) {
+        $line_number += 1;
         $line =~ s/^[\t ]+//g;
         $line =~ s/[\r\n\t ]+$//g;
 
@@ -258,13 +261,13 @@ if ( $pid == 0 ) {
             my ( $option, $expected ) = ( $1, $2 );
             print $dwriter "__GETCONFIG $option\n";
             my $reply = <$ureader>;
-            test_assert( $reply =~ /OK (.+)/ );
-            test_assert_equal( $1, $expected );
+            $reply =~ /^OK (.+)$/;
+            test_assert_equal( $1, $expected, "From script line $line_number" );
             next;
 	}
 
         if ( $line =~ /^INPUTIS +([^ ]+) (.+)$/ ) {
-            test_assert_equal( form_input( $1 ), $2 );
+            test_assert_equal( form_input( $1 ), $2, "From script line $line_number" );
             next;
 	}
 
@@ -292,7 +295,7 @@ if ( $pid == 0 ) {
 	}
 
         if ( $line =~ /^MATCH +(.+)$/ ) {
-            test_assert_regexp( $content, "\Q$1\E" );
+            test_assert_regexp( $content, "\Q$1\E", "From script line $line_number" );
             next;
         }
 
@@ -300,6 +303,7 @@ if ( $pid == 0 ) {
             my $block;
 
             while ( $line = <SCRIPT> ) {
+                $line_number += 1;
                 $line =~ s/^[\t ]+//g;
                 $line =~ s/[\r\n\t ]+$//g;
 
@@ -313,7 +317,7 @@ if ( $pid == 0 ) {
                 $block .= $line;
 	    }
 
-            test_assert_regexp( $content, "\Q$block\E" );
+            test_assert_regexp( $content, "\Q$block\E", "From script line $line_number" );
             next;
         }
 
@@ -321,6 +325,7 @@ if ( $pid == 0 ) {
             my $block;
 
             while ( $line = <SCRIPT> ) {
+                $line_number += 1;
                 $line =~ s/^[\t ]+//g;
                 $line =~ s/[\r\n\t ]+$//g;
 

@@ -348,8 +348,6 @@ sub url_handler__
 {
     my ( $self, $client, $url, $command, $content ) = @_;
 
-    $self->log_( $url );
-
     # See if there are any form parameters and if there are parse them into the %form hash
 
     delete $self->{form_};
@@ -808,16 +806,6 @@ sub html_common_bottom
     $result .= "<td class=\"footerBody\"><a class=\"bottomLink\" href=\"http://sourceforge.net/tracker/index.php?group_id=63137&amp;atid=502959\">$self->{language__}{Footer_RequestFeature}</a><br>\n";
     $result .= "<a class=\"bottomLink\" href=\"http://lists.sourceforge.net/lists/listinfo/popfile-announce\">$self->{language__}{Footer_MailingList}</a><br>\n";
     $result .= "<a class=\"bottomLink\" href=\"http://sourceforge.net/forum/forum.php?forum_id=213876\">$self->{language__}{Footer_FeedMe}</a>\n";
-
-    # comment out these next 3 lines prior to shipping code
-    # enable them during development to check validation
-    #
-    # TODO: these should not be commented out but they should be enabled
-    # when we are running in developer mode
-    #
-    # my $validationLinks = "Validate: <a href=\"http://validator.w3.org/check/referer\">HTML 4.01</a> - \n";
-    # $validationLinks .= "<a href=\"http://jigsaw.w3.org/css-validator/check/referer\">CSS-1</a>";
-    # $result .= " - $validationLinks\n";
 
     $result .= "</td>\n</tr>\n</table>\n</body>\n</html>\n";
 
