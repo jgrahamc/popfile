@@ -378,11 +378,11 @@ sub html_common_middle
     my $result = "<body>\n<table class=\"shell\" align=\"center\" width=\"100%\">\n" ;
     
     # upper whitespace
-    $result .= "<tr class=\"top\">\n<td class=\"border_topLeft\"></td>\n<td class=\"border_top\"></td>\n" ;
-    $result .= "<td class=\"border_topRight\"></td>\n</tr>\n" ;
+    $result .= "<tr class=\"top\">\n<td class=\"borderTopLeft\"></td>\n<td class=\"borderTop\"></td>\n" ;
+    $result .= "<td class=\"borderTopRight\"></td>\n</tr>\n" ;
     
     # logo 
-    $result .= "<tr>\n<td class=\"border_left\"></td>\n" ;
+    $result .= "<tr>\n<td class=\"borderLeft\"></td>\n" ;
     $result .= "<td class=\"naked\">\n" ;
     $result .= "<table class=\"head\" cellspacing=\"0\">\n<tr>\n" ;
     $result .= "<td class=\"head\">$self->{language}{Header_Title}</td>\n" ;
@@ -394,10 +394,10 @@ sub html_common_middle
     $result .= "</td>\n</tr>\n<tr>\n" ;
     $result .= "<td height=\"3\" colspan=\"3\"></td>\n</tr>\n" ;
     $result .= "</table>\n</td>\n" ; # colspan 2 ?? srk 
-    $result .= "<td class=\"border_right\"></td>\n</tr>\n<tr class=\"bottom\">\n" ;
+    $result .= "<td class=\"borderRight\"></td>\n</tr>\n<tr class=\"bottom\">\n" ;
     
-    $result .= "<td class=\"border_bottomLeft\"></td>\n<td class=\"border_bottom\"></td>\n" ;
-    $result .= "<td class=\"border_bottomRight\"></td>\n</tr>\n</table>\n" ;
+    $result .= "<td class=\"borderBottomLeft\"></td>\n<td class=\"borderBottom\"></td>\n" ;
+    $result .= "<td class=\"borderBottomRight\"></td>\n</tr>\n</table>\n" ;
     
     # update check
     $result .= "<table align=\"center\">\n<tr>\n<td class=\"logo2menuSpace\">$update_check</td></tr></table>" ;
@@ -453,14 +453,14 @@ sub html_common_middle
     
     # main content area
     $result .= "<table class=\"shell\" align=\"center\" width=\"100%\">\n<tr class=\"top\">\n" ;
-    $result .= "<td class=\"border_topLeft\"></td>\n<td class=\"border_top\"></td>\n" ;
-    $result .= "<td class=\"border_topRight\"></td>\n</tr>\n<tr>\n" ;
-    $result .= "<td class=\"border_left\"></td>\n" ;
+    $result .= "<td class=\"borderTopLeft\"></td>\n<td class=\"borderTop\"></td>\n" ;
+    $result .= "<td class=\"borderTopRight\"></td>\n</tr>\n<tr>\n" ;
+    $result .= "<td class=\"borderLeft\"></td>\n" ;
     $result .= "<td align=\"left\" class=\"naked\">\n" . $text . "\n</td>\n" ;
     
-    $result .= "<td class=\"border_right\"></td>\n</tr>\n" ;
-    $result .= "<tr class=\"bottom\">\n<td class=\"border_bottomLeft\"></td>\n" ;
-    $result .= "<td class=\"border_bottom\"></td>\n<td class=\"border_bottomRight\"></td>\n" ;
+    $result .= "<td class=\"borderRight\"></td>\n</tr>\n" ;
+    $result .= "<tr class=\"bottom\">\n<td class=\"borderBottomLeft\"></td>\n" ;
+    $result .= "<td class=\"borderBottom\"></td>\n<td class=\"borderBottomRight\"></td>\n" ;
     $result .= "</tr>\n</table>\n" ;
     
     return $result ;
