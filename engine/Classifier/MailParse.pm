@@ -954,11 +954,9 @@ sub parse_file
         $self->parse_line( $_ );
     }
 
-    $self->{colorized__} .= $self->clear_out_base64();
     close MSG;
 
     $self->stop_parse();
-    $self->{in_html_tag__} = 0;
 
     if ( $self->{color__} )  {
         $self->{colorized__} .= $self->{ut__} if ( $self->{ut__} ne '' );
@@ -1052,6 +1050,8 @@ sub stop_parse
 {
     my ( $self ) = @_;
 
+    $self->{colorized__} .= $self->clear_out_base64();
+
     # If we reach here and discover that we think that we are in an unclosed HTML tag then there
     # has probably been an error (such as a < in the text messing things up) and so we dump
     # whatever is stored in the HTML tag out
@@ -1059,6 +1059,8 @@ sub stop_parse
     if ( $self->{in_html_tag__} ) {
         $self->add_line( $self->{html_tag__} . ' ' . $self->{html_arg__}, 0, '' );
     }
+
+    $self->{in_html_tag__} = 0;
 }
 
 # ---------------------------------------------------------------------------------------------
