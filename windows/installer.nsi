@@ -578,6 +578,7 @@ Section "POPFile" SecPOPFile
   File "..\engine\bayes.pl"
   File "..\engine\pipe.pl"
   File "..\engine\pix.gif"
+  File "..\engine\favicon.ico"
   File "..\engine\black.gif"
   File "..\engine\otto.gif"
 
@@ -2098,6 +2099,7 @@ remove_shortcuts:
   Delete $INSTDIR\*.log
   Delete $INSTDIR\*.pl
   Delete $INSTDIR\*.gif
+  Delete $INSTDIR\favicon.ico
   Delete $INSTDIR\*.exe
   Delete $INSTDIR\*.change
   Delete $INSTDIR\*.change.txt

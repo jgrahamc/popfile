@@ -348,6 +348,8 @@ sub url_handler__
 {
     my ( $self, $client, $url, $command, $content ) = @_;
 
+    $self->log_( $url );
+
     # See if there are any form parameters and if there are parse them into the %form hash
 
     delete $self->{form_};
@@ -383,6 +385,11 @@ sub url_handler__
 
     if ( $url =~ /\/(.+\.png)/ ) {
         $self->http_file_( $client, $1, 'image/png' );
+        return 1;
+    }
+
+    if ( $url =~ /\/(.+\.ico)/ ) {
+        $self->http_file_( $client, $1, 'image/x-icon' );
         return 1;
     }
 
@@ -626,6 +633,8 @@ sub html_common_top
     } else {
         $result .= "<link rel=\"stylesheet\" type=\"text/css\" ";
         $result .= "href=\"skins/" . $self->config_( 'skin' ) . ".css\" title=\"" . $self->config_( 'skin' ) . "\">\n";
+	$result .= "<link rel=\"shortcut icon\" type=\"image/x-icon\" ";
+	$result .= "href=\"favicon.ico\"" . "\">\n";
     }
 
     $result .= "<link rel=\"icon\" href=\"popfile.ico\" type=\"image/ico\">\n";
