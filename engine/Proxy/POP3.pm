@@ -175,6 +175,8 @@ sub service
     my @kids = keys %{$self->{children}};
     
     if ( $#kids >= 0 ) {
+    	my $stats_changed = 0;
+    	
         for my $kid (@kids) {
             if ( waitpid( $kid, WNOHANG) == $kid ) {
                 my $handle = $self->{children}{$kid};
@@ -185,6 +187,7 @@ sub service
 
                     $self->{classifier}->{parameters}{$class}{count} += 1;
                     $self->{configuration}->{configuration}{mcount}  += 1;
+					$stats_changed                                    = 1;
 
                     debug( $self, "Incrementing $_" );
                 }
@@ -194,6 +197,11 @@ sub service
                 close $self->{children}{$kid};
                 delete $self->{children}{$kid};
             }
+        }
+        
+        if ( $stats_changed ) {
+        	$self->{configuration}->save_configuration();
+        	$self->{classifier}->write_parameters();
         }
     }
 

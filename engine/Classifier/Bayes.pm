@@ -378,7 +378,7 @@ sub load_bucket
     if ( open PARAMS, "<$self->{corpus}/$bucket/params" ) {
         while ( <PARAMS> )  {
             s/[\r\n]//g;
-            if ( /^([[:lower:]]+) ([^ ]+)$/ )  {
+            if ( /^([[:lower:]]+) ([^\r\n\t ]+)$/ )  {
                 $self->{parameters}{$bucket}{$1} = $2;
             }
         }
