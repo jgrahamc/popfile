@@ -590,7 +590,7 @@ if ( $pid == 0 ) {
 
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
- 
+
         # This delay is here because Windows was having a little trouble
         # with the files created by the RETR not existing and I have a little
         # rest here while Windows wakes from its afternoon nap and writes
@@ -648,7 +648,7 @@ if ( $pid == 0 ) {
 
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
- 
+
         # This delay is here because Windows was having a little trouble
         # with the files created by the RETR not existing and I have a little
         # rest here while Windows wakes from its afternoon nap and writes
@@ -1000,6 +1000,81 @@ if ( $pid == 0 ) {
 
         $result = <$client>;
         test_assert_equal( $result, ".$eol" );
+
+        # Test TOPTOO and caching with illegal CRLF.CRLF in message
+
+        $countdown = 2;
+        print $client "TOP 28 $countdown$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK " . ( -s $messages[27] ) . "$eol" );
+
+        $cam = $messages[27];
+        $cam =~ s/msg$/cam/;
+        test_assert( open FILE, "<$cam" );
+        binmode FILE;
+        $headers   = 1;
+        while ( ( my $line = <FILE> ) && ( $countdown > 0 ) ) {
+            $result = <$client>;
+            $result =~ s/popfile2=28/popfile0=0/;
+            test_assert_equal( $result, $line, "[$result][$line]" );
+            if ( $headers == 0 ) {
+                $countdown -= 1;
+	    }
+            if ( $line =~ /^[\r\n]+$/ ) {
+                $headers = 0;
+	    }
+	}
+        close FILE;
+
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+
+        test_assert( -e 'messages/popfile2=28.msg' );
+        test_assert( -e 'messages/popfile2=28.cls' );
+
+        test_assert( open FILE, "<$messages[27]" );
+        binmode FILE;
+        test_assert( open HIST, "<messages/popfile2=28.msg" );
+        binmode HIST;
+        while ( ( my $fl = <FILE> ) && ( my $ml = <HIST> ) ) {
+            $fl =~ s/[\r\n]//g;
+            $ml =~ s/[\r\n]//g;
+            test_assert_equal( $fl, $ml );
+	}
+        test_assert( eof(FILE) );
+        test_assert( eof(HIST) );
+        close FILE;
+        close HIST;
+
+        my ( $reclassified, $bucket, $usedtobe, $magnet ) = $b->history_read_class( 'popfile2=28.msg' );
+        test_assert( !$reclassified );
+        test_assert_equal( $bucket, 'spam' );
+        test_assert( !defined( $usedtobe ) );
+        test_assert_equal( $magnet, '' );
+
+        # Test RETR after TOP comes from cache with illegal CRLF.CRLF
+
+        print $client "RETR 28$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK " . ( -s 'messages/popfile2=28.msg' ) . " bytes from POPFile cache$eol" );
+
+        $cam = $messages[27];
+        $cam =~ s/msg$/cam/;
+        test_assert( open FILE, "<$cam" );
+        binmode FILE;
+        $headers   = 1;
+        while ( my $line = <FILE> ) {
+            $line =~ s/[\r\n]//g;
+            $result = <$client>;
+            $result =~ s/[\r\n]//g;
+            $result =~ s/popfile2=28/popfile0=0/;
+            test_assert_equal( $result, $line );
+        }
+        close FILE;
+
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+
 
         print $client "QUIT$eol";
         $result = <$client>;
