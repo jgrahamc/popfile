@@ -6,6 +6,10 @@
 #                    is used to define them. If suitable registry data cannot be found,
 #                    the 'Add POPFile User' wizard is launched (if it can be found).
 #
+#                    To make debugging easier, the utility will use the POPFile Message
+#                    Capture utility (if it is available) whenever the 'windows-console'
+#                    mode is selected in 'popfile.cfg'.
+#
 # Copyright (c) 2004 John Graham-Cumming
 #
 #   This file is part of POPFile
@@ -69,7 +73,7 @@
 #
 #-------------------------------------------------------------------------------------------
 
-  !define C_PFI_VERSION   0.1.7
+  !define C_PFI_VERSION   0.1.11
 
   Name    "Run POPFile"
   Caption "Run POPFile (enhanced)"
@@ -133,13 +137,17 @@
 
 Section default
 
-  !define L_EXEFILE       $R9   ; where we expect to find popfile.exe and (perhaps) adduser.exe
-  !define L_PARAMS        $R8   ; command-line parameters (everything after 'runpopfile' part)
-  !define L_PFI_ROOT      $R7   ; path to the POPFile program (popfile.pl, and other files)
-  !define L_PFI_USER      $R6   ; path to user's popfile.cfg file
-  !define L_TEMP          $R5
-  !define L_WINOS_FLAG    $R4   ; 1 = modern Windows system, 0 = Win9x system
-  !define L_WINUSERNAME   $R3   ; Windows login name used to confirm validity of HKCU data
+  !define L_CFG           $R9   ; file handle used to access 'popfile.cfg'
+  !define L_CONSOLE       $R8   ; 1 = console mode selected, 0 = background mode selected
+  !define L_EXEFILE       $R7   ; where we expect to find popfile.exe and (perhaps) adduser.exe
+  !define L_LINE          $R6   ; a line (or part of line) from 'popfile.cfg'
+  !define L_PARAMS        $R5   ; command-line parameters (everything after 'runpopfile' part)
+  !define L_PFI_ROOT      $R4   ; path to the POPFile program (popfile.pl, and other files)
+  !define L_PFI_USER      $R3   ; path to user's 'popfile.cfg' file
+  !define L_TEMP          $R2
+  !define L_TEXTEND       $R1   ; helps ensure correct handling of lines over 1023 chars long
+  !define L_WINOS_FLAG    $R0   ; 1 = modern Windows system, 0 = Win9x system
+  !define L_WINUSERNAME   $9    ; Windows login name used to confirm validity of HKCU data
 
   !define L_RESERVED      $0    ; used in system.dll calls
 
@@ -340,7 +348,42 @@ set_user_now:
   Goto exit
 
 start_popfile:
+  IfFileExists "${L_EXEFILE}\pfimsgcapture.exe" 0 run_normal_mode
+  IfFileExists "${L_PFI_USER}\popfile.cfg" 0 run_normal_mode
+  StrCpy ${L_CONSOLE} "0"
+  FileOpen ${L_CFG} "${L_PFI_USER}\popfile.cfg" r
+
+found_eol:
+  StrCpy ${L_TEXTEND} "<eol>"
+
+loop:
+  FileRead ${L_CFG} ${L_LINE}
+  StrCmp ${L_LINE} "" options_done
+  StrCmp ${L_TEXTEND} "<eol>" 0 check_eol
+  StrCmp ${L_LINE} "$\n" loop
+
+  StrCpy ${L_TEMP} ${L_LINE} 16
+  StrCmp ${L_TEMP} "windows_console " got_console_option
+  Goto check_eol
+
+got_console_option:
+  StrCpy ${L_CONSOLE} ${L_LINE} 1 16
+
+check_eol:
+  StrCpy ${L_TEXTEND} ${L_LINE} 1 -1
+  StrCmp ${L_TEXTEND} "$\n" found_eol
+  StrCmp ${L_TEXTEND} "$\r" found_eol loop
+
+options_done:
+  FileClose ${L_CFG}
+  StrCmp ${L_CONSOLE} "1" run_debug_mode
+
+run_normal_mode:
   Exec '"${L_EXEFILE}\popfile.exe"'
+  Goto exit
+
+run_debug_mode:
+  Exec '"${L_EXEFILE}\pfimsgcapture.exe" /TIMEOUT=0'
   Goto exit
 
 bad_root_error:
@@ -398,11 +441,15 @@ run_adduser:
 
 exit:
 
+  !undef L_CFG
+  !undef L_CONSOLE
   !undef L_EXEFILE
+  !undef L_LINE
   !undef L_PARAMS
   !undef L_PFI_ROOT
   !undef L_PFI_USER
   !undef L_TEMP
+  !undef L_TEXTEND
   !undef L_WINOS_FLAG
   !undef L_WINUSERNAME
 
