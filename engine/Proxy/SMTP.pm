@@ -164,12 +164,12 @@ sub child__
             if ( $self->smtp_echo_response_( $mail, $client, $command ) ) {
                 $count += 1;
 
-		my $class = $self->{classifier__}->classify_and_modify( $client, $mail, $download_count, $count, 0, '' );
+                my $class = $self->{classifier__}->classify_and_modify( $client, $mail, $download_count, $count, 0, '' );
 
-		# Tell the parent that we just handled a mail
-		print $pipe "$class$eol";
+                # Tell the parent that we just handled a mail
+                print $pipe "$class$eol";
 
-		my $response = <$mail>;
+                my $response = <$mail>;
                 $self->tee_( $client, $response );
                 $self->flush_extra_( $mail, $client, 0 );
                 next;
@@ -226,7 +226,7 @@ sub smtp_echo_response_
     my ($self, $mail, $client, $command) = @_;
     my $response = $self->get_response_( $mail, $client, $command );
 
-    if ( $response =~ /^[23]\d\d-/ ) {
+    if ( $response =~ /^\d\d\d-/ ) {
         $self->echo_to_regexp_($mail, $client, qr/^\d\d\d /, 1);
     }
     return ( $response =~ /$self->{good_response_}/ );
