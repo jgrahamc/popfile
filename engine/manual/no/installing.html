@@ -1,0 +1,119 @@
+<html><head><title>POPFile Dokumentasjon</title><style type=text/css>h1, h2, h3, p, td {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>POPFile 
+  Dokumentasjon</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Første gangs oppsett:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%>Trinn 1<br><font size=+1><b>&nbsp;<a href="installing.html">Installering</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Trinn 2<br><font size=+1><b>&nbsp;<a href="firsttime.html">Bøtteoppsett</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>Trinn 3<br><font size=+1><b>&nbsp;<a href="email.html">E</a></b></font><a href="email.html"><font size="+1"><b>post-programmer</b></font></a></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>Trinn 4<br><font size=+1><b>&nbsp;</b></font><a href="training.html"><font size="+1"><b>Trening</b></font></a></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>Bruke POPFile med:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;</b></font><a href="firewalls.html"><font size="+1"><b>Brannmurer</b></font></a></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Sikker 
+Godkjenning av Passord (SPA)</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;</b></font><a href="proxies.html"><font size="+1"><b>Andre 
+Proxy</b></font></a><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Flere 
+epostkontoer</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+<h2>Installere POPFile</h2>
+
+<p>POPFile kommer i to versjoner - en lettinstallert Windowsversjon, og en 
+versjon som kan brukes på tvers av plattformer/operativsystemer for mer teknisk 
+orienterte brukere. Så snart programmet er installert er de to versjonene 
+identiske.</p>
+
+<h3>Lettinstallert Windowsversjon</h3>
+
+<p>Last ned installasjonsfilen beregnet for Windows 
+<a href=http://popfile.sourceforge.net/>Hjemmesiden til POPFile</a>, og kjør <tt>setup.exe</tt> 
+og følg instruksjonene på skjermen. Deretter kan du kjøre POPFile fra Startmenyen (Start > Programmer > POPFile > Run POPFile in Background), 
+eller start maskinen på nytt og POPFile vil starte automatisk. <b>Viktig:</b> 
+Ingenting vil vises på skjermen din! For å kontrollere om POPFile kjører korrekt 
+se avsnittet "Få tilgang til POPFile - kontrollere at POPfile kjører riktig" 
+lenger ned.</p>
+
+<h4>Systemkrav</h4>
+
+<p>Du trenger flere ting for å komme i gang med POPFile.</p>
+<ol>
+<li>Siste utgave av programmet POPFile.</li>
+<li>En epostkonto som bruker POP3-protokollen (de fleste kontoer gjør det, men 
+vær klar over at POPFile ikke kan brukes med web-basert epost som for eksempel 
+Hotmail eller Yahoo!Mail uten ekstra programvare).</li>
+<li>Omtrent 2 MB ledig diskplass.</li>
+</ol>
+
+<p>Du kan få tak i siste utgave av POPFile som en zip-fil på toppen av listen på <a href="http://sourceforge.net/project/showfiles.php?group_id=63137">POPFile 
+sin nedlastingsside</a>. Windowsbrukere vil ønske filen under avsnittet merket &quot;Windows Only&quot;.</p>
+<p>POPFile i seg selv tar opp bare litt over en megabyte. Ordlisten (kalt 'corpus') 
+som brukes til å klassifisere epost vil ta opp noe ekstra plass etter hvert som 
+du trener opp POPFile, avhengig av hvor mange bøtter du velger å opprette. </p>
+
+<h3>Plattformuavhengig versjon (for avanserte brukere)</h3>
+
+<p>Sørg for å få <a href="http://www.perl.com">Perl</a> opp å gå på maskinen, 
+last så ned POPFile Perl zip-fil fra <a href=http://popfile.sourceforge.net/>
+Hjemmesiden til POPFile</a>, og pakk den ut til en mappe etter eget valg. På Windowsplattformer, 
+kjør POPFile med kommandoen <tt>perl popfile.pl</tt>.
+
+<hr>
+
+<h2>Få tilgang til POPFile - kontrollere at POPfile kjører riktig</h2>
+
+<p>POPFile har ikke et tradisjonelt brukergrensesnitt som de fleste andre 
+programmer - du får tilgang til POPFile gjennom Internettleseren din (f.eks. 
+Internet Explorer eller Netscape). Ingen grunn til bekymring - så lenge du ikke 
+spesielt angir det, så er det ingen &quot;fra utsiden&quot; som kan få tilgang til POPFile 
+på din maskin.</p>
+
+<p>For å få tilgang til POPFile, åpne Internettprogrammet ditt og gå til 
+adressen <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a>, eller (for 
+Windowsversjonen) klikk på 'POPFile Web Interface' i Startmenyen. <b>Viktig</b>: 
+hvis du i løpet av installasjonsprosessen anga en annen port enn 8080 for å 
+snakke med POPFile, bytt ut &quot;8080&quot; med ditt eget valg.</p>
+
+<p>Hvis du får en feilmelding, kontroller at POPFile virkelig kjører, og at du 
+har angitt riktig portnummer (det burde normalt være 8080, men hvis du endret 
+det, må du også endre det i web-adressen du skriver inn i nettleseren din).</p>
+
+<p>Hvis du får opp et POPFile skjermbilde, gratulerer! Nå er det tid for å 
+bestemme hvordan du vil sortere eposten din. <a href="firsttime.html">La oss gå 
+videre til Bøtteoppsettet (Bucket Setup). &gt;&gt;</a></p>
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Weblinker:</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Hjemmeside</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forum</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Bug-Database</a></b></font></td>
+<td width=55%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+
+</body></html>
