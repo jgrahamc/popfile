@@ -981,11 +981,6 @@ sub classify_and_modify
 
     $echo = 1 unless (defined $echo);
 
-    # binmode both our streams incase they're file streams or something odd
-
-    binmode $mail;
-    binmode $client;
-
     my $msg_subject     = '';     # The message subject
     my $msg_head_before = '';     # Store the message headers that come before Subject here
     my $msg_head_after  = '';     # Store the message headers that come after Subject here
