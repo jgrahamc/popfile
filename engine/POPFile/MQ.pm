@@ -11,7 +11,7 @@ use POPFile::Module;
 # send messages without having to know which modules need to receive
 # its messages.
 #
-# Message delivery is asynchronous and guaranteed, as well as guaranteed 
+# Message delivery is asynchronous and guaranteed, as well as guaranteed
 # first in, first out (FIFO) per process.
 #
 # The following public functions are defined:
@@ -37,7 +37,7 @@ use POPFile::Module;
 #     COMIT    Sent when an item is committed to the history through a call
 #              to POPFile::History::commit_slot
 #
-#    RELSE    Sent when a session key is being released by a client
+#     RELSE    Sent when a session key is being released by a client
 #
 # Copyright (c) 2001-2004 John Graham-Cumming
 #

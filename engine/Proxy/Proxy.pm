@@ -213,15 +213,15 @@ sub service
     # of handles with data to read, if the handle is the server then
     # we're off.
 
-    if ( ( defined( $self->{selector__}->can_read(0) ) ) &&
-         ( $self->{alive_} ) ) {
+    if ( ( defined( $self->{selector__}->can_read(0) ) ) && # PROFILE BLOCK START
+         ( $self->{alive_} ) ) {                            # PROFILE BLOCK STOP
         if ( my $client = $self->{server__}->accept() ) {
 
             # Check to see if we have obtained a session key yet
 
             if ( $self->{api_session__} eq '' ) {
-                $self->{api_session__} =
-                    $self->classifier_()->get_session_key( 'admin', '' );
+                $self->{api_session__} =                                    # PROFILE BLOCK START
+                    $self->classifier_()->get_session_key( 'admin', '' );   # PROFILE BLOCK STOP
             }
 
             # Check that this is a connection from the local machine,
@@ -229,11 +229,11 @@ sub service
             # further processing.  We don't want to act as a proxy for
             # just anyone's email
 
-            my ( $remote_port, $remote_host ) = sockaddr_in(
-                                                    $client->peername() );
+            my ( $remote_port, $remote_host ) = sockaddr_in(                # PROFILE BLOCK START
+                                                    $client->peername() );  # PROFILE BLOCK STOP
 
-            if  ( ( ( $self->config_( 'local' ) || 0 ) == 0 ) ||
-                    ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
+            if  ( ( ( $self->config_( 'local' ) || 0 ) == 0 ) ||        # PROFILE BLOCK START
+                    ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {    # PROFILE BLOCK STOP
 
                 # If we have force_fork turned on then we will do a
                 # fork, otherwise we will handle this inline, in the
@@ -249,8 +249,8 @@ sub service
                     # then process this request
 
                     if ( !defined( $pid ) || ( $pid == 0 ) ) {
-                        $self->{child_}( $self, $client,
-                            $self->{api_session__} );
+                        $self->{child_}( $self, $client,        # PROFILE BLOCK START
+                            $self->{api_session__} );           # PROFILE BLOCK STOP
                         if ( defined( $pid ) ) {
                             &{$self->{childexit_}}(0)
                         }
@@ -588,9 +588,14 @@ sub configure_item
 {
     my ( $self, $name, $templ ) = @_;
 
-    $templ->param( 'Socks_Widget_Name' => $self->name() );
-    $templ->param( 'Socks_Server'      => $self->config_( 'socks_server' ) );
-    $templ->param( 'Socks_Port'        => $self->config_( 'socks_port'   ) );
+    my $me = $self->name();
+
+    if ( $name eq $me . "_socks_configuration" ) {
+
+        $templ->param( 'Socks_Widget_Name' => $me );
+        $templ->param( 'Socks_Server'      => $self->config_( 'socks_server' ) );
+        $templ->param( 'Socks_Port'        => $self->config_( 'socks_port'   ) );
+    }
 }
 
 # ----------------------------------------------------------------------------
@@ -612,19 +617,21 @@ sub validate_item
 
     my ($status, $error);
 
-    if ( defined($$form{"$me" . "_socks_port"}) ) {
-        if ( ( $$form{"$me" . "_socks_port"} >= 1 ) && ( $$form{"$me" . "_socks_port"} < 65536 ) ) {
-            $self->config_( 'socks_port', $$form{"$me" . "_socks_port"} );
-            $status = sprintf( $$language{Configuration_SOCKSPortUpdate}, $self->config_( 'socks_port' ) );
-        } else {
-            $error = $$language{Configuration_Error8};
+    if ( $name eq $me . "_socks_configuration" ) {
+        if ( defined($$form{"$me" . "_socks_port"}) ) {
+            if ( ( $$form{"$me" . "_socks_port"} >= 1 ) && ( $$form{"$me" . "_socks_port"} < 65536 ) ) {
+                $self->config_( 'socks_port', $$form{"$me" . "_socks_port"} );
+                $status = sprintf( $$language{Configuration_SOCKSPortUpdate}, $self->config_( 'socks_port' ) );
+            } else {
+                $error = $$language{Configuration_Error8};
+            }
         }
-    }
 
-    if ( defined($$form{"$me" . "_socks_server"}) ) {
-        $self->config_( 'socks_server', $$form{"$me" . "_socks_server"} );
-        $status .= "\n" if (defined $status);
-        $status .= sprintf( $$language{Configuration_SOCKSServerUpdate}, $self->config_( 'socks_server' ) );
+        if ( defined($$form{"$me" . "_socks_server"}) ) {
+            $self->config_( 'socks_server', $$form{"$me" . "_socks_server"} );
+            $status .= "\n" if (defined $status);
+            $status .= sprintf( $$language{Configuration_SOCKSServerUpdate}, $self->config_( 'socks_server' ) );
+        }
     }
 
     return( $status, $error );

@@ -24,8 +24,25 @@
 
 unlink 'popfile.db';
 
-use POPFile::MQ;
-my $mq = new POPFile::MQ;
+use POPFile::Loader;
+my $POPFile = POPFile::Loader->new();
+$POPFile->CORE_loader_init();
+$POPFile->CORE_signals();
+
+my %valid = ( 'POPFile/Module' => 1,
+              'POPFile/Logger' => 1,
+              'POPFile/MQ'     => 1,
+              'POPFile/Configuration' => 1,
+              'POPFile/Database' =>1,
+              'Classifier/Bayes' => 1 );
+
+$POPFile->CORE_load( 0, \%valid );
+$POPFile->CORE_initialize();
+$POPFile->CORE_config( 1 );
+$POPFile->CORE_start();
+
+my $mq = $POPFile->get_module('POPFile::MQ');
+my $l = $POPFile->get_module('POPFile::Logger');
 
 sub forker
 {
@@ -72,50 +89,25 @@ sub pipeready
     }
 }
 
-use Classifier::Bayes;
-use POPFile::Configuration;
-use POPFile::Logger;
 use Proxy::Proxy;
 use IO::Handle;
 use IO::Socket;
 
-my $c = new POPFile::Configuration;
-my $l = new POPFile::Logger;
-my $p = new Proxy::Proxy
-my $b = new Classifier::Bayes;
+my $p = new Proxy::Proxy;
+#my $b = new Classifier::Bayes;
 
-$c->configuration( $c );
-$c->mq( $mq );
-$c->logger( $l );
+#$b->configuration( $c );
+#$b->mq( $mq );
+#$b->logger( $l );
+#
+#$b->initialize();
 
-$c->initialize();
-
-$b->configuration( $c );
-$b->mq( $mq );
-$b->logger( $l );
-
-$b->initialize();
-
-$l->configuration( $c );
-$l->mq( $mq );
-$l->logger( $l );
-
-$l->initialize();
-$l->start();
-
-$mq->configuration( $c );
-$mq->mq( $mq );
-$mq->logger( $l );
-
-$p->configuration( $c );
-$p->mq( $mq );
-$p->logger( $l );
+$p->loader( $POPFile );
 
 $p->initialize();
-$p->classifier( $b );
 
-$b->module_config_( 'html', 'language', 'English' );
-$b->start();
+#$b->module_config_( 'html', 'language', 'English' );
+#$b->start();
 
 test_assert_equal( $p->config_( 'enabled' ), 1 );
 
@@ -126,27 +118,122 @@ test_assert_equal( $p->start(), 1 );
 $p->stop();
 
 # Exercise the classifier setter
-$p->classifier( 'foo' );
-test_assert_equal( $p->{classifier__}, 'foo' );
+#$p->classifier( 'foo' );
+#test_assert_equal( $p->{classifier__}, 'foo' );
+
+# To test Proxy's use of MQ, we need to receive messages
+use Test::MQReceiver;
+
+my $rmq = new Test::MQReceiver;
+
+$mq->register( 'UIREG', $rmq );
 
 # Test the helper methods of Proxy
 use Test::SimpleProxy;
 my $sp = new Test::SimpleProxy;
 
-$sp->configuration( $c );
-$sp->mq( $mq );
-$sp->logger( $l );
+$sp->loader( $POPFile );
 
 $sp->forker( \&forker );
 $mq->pipeready( \&pipeready );
 
-$sp->classifier( $b );
+#$sp->classifier( $b );
 
 $sp->initialize();
+
+$sp->setchildexit( $POPFile->{childexit__} );
+
 $sp->config_( 'port', $port );
 $sp->config_( 'force_fork', 1 );
 test_assert_equal( $sp->start(), 1 );
 test_assert_equal( $sp->start_server(), 1 );
+
+# Test dynamic UI
+
+# $sp->start() should send a UIREG message:
+
+$mq->service();
+my @messages = $rmq->read();
+
+test_assert_equal( $#messages, 0 );
+test_assert_equal( $messages[0][0], 'UIREG' );
+test_assert_equal( $#{$messages[0][1]}, 3 );
+test_assert_equal( $messages[0][1][0], 'configuration' );
+test_assert_equal( $messages[0][1][1], 'simple_socks_configuration' );
+test_assert_equal( $messages[0][1][2], 'socks-widget.thtml' );
+test_assert_equal( ref $messages[0][1][3], 'Test::SimpleProxy' );
+
+# Test configure_item
+
+use Test::SimpleTemplate;
+
+my $templ = new Test::SimpleTemplate;
+
+# nothing happens for unknown configuration item names
+
+$sp->configure_item('foo', $templ);
+my $params = $templ->{params__};
+test_assert_equal( scalar( keys(%{$params}) ), 0);
+
+# the right things have to happen for known configuration item names
+
+$sp->configure_item('simple_socks_configuration', $templ);
+$params = $templ->{params__};
+test_assert_equal( scalar( keys( %{$params} ) ), 3);
+test_assert_equal( $templ->param( 'Socks_Widget_Name' ), 'simple' );
+test_assert_equal( $templ->param( 'Socks_Server' ), $sp->config_( 'socks_server' ) );
+test_assert_equal( $templ->param( 'Socks_Port'   ), $sp->config_( 'socks_port' ) );
+
+# test changing/validating of configuration values
+
+my $form = {};
+my $language= {};
+
+my ($status, $error);
+
+test_assert_equal( $sp->config_( 'socks_port' ), 1080 );
+
+$form->{simple_socks_port} = 10080;
+$language->{Configuration_SOCKSPortUpdate} = "socks port update %s";
+
+($status, $error) = $sp->validate_item( 'simple_socks_configuration', $templ, $language, $form );
+
+test_assert_equal( $status, "socks port update 10080");
+test_assert_equal( defined( $error), defined(undef) );
+test_assert_equal( $sp->config_( 'socks_port' ), 10080 );
+
+$sp->config_( 'socks_port', 1080 );
+
+$form->{simple_socks_port} = 'aaa';
+$language->{Configuration_Error8} = "configuration error 8";
+
+($status, $error) = $sp->validate_item( 'simple_socks_configuration', $templ, $language, $form );
+
+test_assert_equal( $error, "configuration error 8");
+test_assert_equal( defined( $status), defined(undef) );
+test_assert_equal( $sp->config_( 'socks_port' ), 1080 );
+
+$form->{simple_socks_server} = 'example.com';
+$language->{Configuration_SOCKSServerUpdate} = 'socks server update %s';
+delete $form->{simple_socks_port};
+
+($status, $error) = $sp->validate_item( 'simple_socks_configuration', $templ, $language, $form );
+
+test_assert_equal( $status, "socks server update example.com");
+test_assert_equal( defined( $error ), defined(undef) );
+test_assert_equal( $sp->config_( 'socks_server' ), 'example.com' );
+
+$form->{simple_socks_port} = '10081';
+$form->{simple_socks_server} = 'subdomain.example.com';
+
+($status, $error) = $sp->validate_item( 'simple_socks_configuration', $templ, $language, $form );
+
+test_assert_equal( $status, "socks port update 10081\nsocks server update subdomain.example.com");
+test_assert_equal( defined( $error ), defined(undef) );
+test_assert_equal( $sp->config_( 'socks_server' ), 'subdomain.example.com' );
+test_assert_equal( $sp->config_( 'socks_port' ), 10081 );
+
+$sp->config_( 'socks_server', '' );
 
 # Now connect a socket to the proxy through which
 # we can test it
@@ -202,7 +289,7 @@ open TEMP, ">temp.tmp";
 $sp->echo_to_regexp_( $client, \*TEMP, qr/TH/ );
 close TEMP;
 open TEMP, "<temp.tmp";
-my $line = <TEMP>;
+$line = <TEMP>;
 test_assert_regexp( $line, 'before1' );
 $line = <TEMP>;
 test_assert_regexp( $line, 'before2' );
@@ -403,14 +490,9 @@ $line = <TEMP>;
 test_assert_regexp( $line, 'timeout error' );
 close TEMP;
 
-# Check that we receive the messages sent up the pipe
-
-use Test::MQReceiver;
-my $r = new Test::MQReceiver;
-
 # Register three different message types
 
-$mq->register( 'LOGIN', $r );
+$mq->register( 'LOGIN', $rmq );
 
 # Close down the child process
 
@@ -433,7 +515,7 @@ while ( $#kids >= 0 ) {
 $sp->stop();
 
 $mq->service();
-my @messages = $r->read();
+@messages = $rmq->read();
 test_assert_equal( $#messages, 0 );
 test_assert_equal( $messages[0][0], 'LOGIN' );
 test_assert_equal( $messages[0][1][0], 'username' );
@@ -442,16 +524,14 @@ test_assert_equal( $messages[0][1][0], 'username' );
 
 $sp = new Test::SimpleProxy;
 
-$sp->configuration( $c );
-$sp->mq( $mq );
-$sp->logger( $l );
-
+$sp->loader( $POPFile );
 $sp->forker( \&forker );
 
 $sp->initialize();
+$sp->setchildexit( $POPFile->{childexit__} );
 $sp->config_( 'port', $port );
 
-$sp->classifier( $b );
+#$sp->classifier( $b );
 
 test_assert_equal( $sp->start(), 1 );
 test_assert_equal( $sp->start_server(), 1 );
@@ -486,16 +566,14 @@ while ( $#kids >= 0 ) {
 
 $sp = new Test::SimpleProxy;
 
-$sp->configuration( $c );
-$sp->mq( $mq );
-$sp->logger( $l );
-
+$sp->loader( $POPFile );
 $sp->forker( \&forker );
 
 $sp->initialize();
+$sp->setchildexit( $POPFile->{childexit__} );
 $sp->config_( 'port', $port );
 
-$sp->classifier( $b );
+#$sp->classifier( $b );
 
 test_assert_equal( $sp->start(), 1 );
 test_assert_equal( $sp->start_server(), 1 );
@@ -531,16 +609,13 @@ while ( $#kids >= 0 ) {
 
 $sp = new Test::SimpleProxy;
 
-$sp->configuration( $c );
-$sp->mq( $mq );
-$sp->logger( $l );
-
+$sp->loader( $POPFile );
 $sp->forker( \&forker );
 
 $sp->initialize();
 $sp->config_( 'port', $port );
 
-$sp->classifier( $b );
+#$sp->classifier( $b );
 
 $sp->{connection_failed_error_} = 'failed error';
 
@@ -559,16 +634,13 @@ test_assert( $sp->start() );
 
 my $sp2 = new Test::SimpleProxy;
 
-$sp2->configuration( $c );
-$sp2->mq( $mq );
-$sp2->logger( $l );
-
+$sp2->loader( $POPFile );
 $sp2->forker( \&forker );
 
 $sp2->initialize();
 $sp2->config_( 'port', -1 );
 
-$sp2->classifier( $b );
+#$sp2->classifier( $b );
 
 open (STDERR, ">stdout.tmp");
 test_assert( !$sp2->start() );
@@ -583,6 +655,6 @@ close TEMP;
 $sp->stop();
 $sp2->stop();
 
-$b->stop();
+#$b->stop();
 
 1;
