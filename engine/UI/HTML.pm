@@ -1982,14 +1982,18 @@ sub sort_filter_history
     } else {
         @{$self->{history_keys__}} = keys %{$self->{history__}};
     }
-
+    
+    
     # If a sort is specified then use it to sort the history items by an a subkey
     # (from, subject or bucket) otherwise use compare_mf to give the history back
     # in the order the messages were received.  Note that when sorting on a alphanumeric
     # field we ignore all punctuation characters so that "John and 'John and John
     # all sort next to each other
 
-    if ( $sort ne '' ) {
+    if ( $sort ne '' 
+         # If the filter had no messages, this will be undefined
+         # and there are no ways to sort nothing
+         && defined @{$self->{history_keys__}}) {
         @{$self->{history_keys__}} = sort {
                                             my ($a1,$b1) = ($self->{history__}{$a}{$sort},
                                               $self->{history__}{$b}{$sort});
