@@ -96,31 +96,33 @@
     <input type="hidden" name="filter" value="<TMPL_VAR NAME="History_Field_Filter">" />
 
     <table class="historyTable" width="100%" summary="<TMPL_VAR NAME="Localize_History_MainTableSummary">">
-        <tr class="headerRow">
-
-            <th id="removeChecks" scope="col" align="left" valign="bottom"></th>
+        <tr class="rowControls">
+            <th></th>
 
             <TMPL_LOOP NAME="History_Loop_Headers">
 
-            <th class="historyLabel" scope="col" align="left" valign="bottom">
-
-              <div style="padding-bottom: 1em; clear: both;" class="columnControl">
-
-                <a style="float: left; padding: 0 0.2em;" class="columnHide" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;removecolumn=<TMPL_VAR NAME="History_Header">">
+            <th class="historyLabel" align="left" valign="bottom">
+                <a style="float:left; clear:none;" class="columnRemove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;removecolumn=<TMPL_VAR NAME="History_Header">">
                 <img title="<TMPL_VAR NAME="Localize_History_RemoveColumn">" src="skins/x.gif" border="0" alt=""></a>
-
                 <span style="float:right;">
-                    <TMPL_IF NAME="History_If_MoveLeft">
-                       <a style="float:left; padding: 0 0.2em;" class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveleft=<TMPL_VAR NAME="History_Header">">
-                       <img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/leftarrow.gif" border="0" alt=""></a>
-                    </TMPL_IF>
-
-                    <TMPL_IF NAME="History_If_MoveRight">
-                       <a style="float:left; padding: 0 0.2em;" class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveright=<TMPL_VAR NAME="History_Header">">
-                       <img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/rightarrow.gif" border="0" alt=""></a>
-                    </TMPL_IF>
+                     <TMPL_IF NAME="History_If_MoveLeft">
+                         <a style="" class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveleft=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveLeft">" src="skins/leftarrow.gif" border="0" alt=""></a></TMPL_IF><TMPL_IF NAME="History_If_MoveRight"><a class="columnMove" href="/history?session=<TMPL_VAR NAME="Session_Key">&amp;moveright=<TMPL_VAR NAME="History_Header">"><img title="<TMPL_VAR NAME="Localize_History_MoveRight">" src="skins/rightarrow.gif" border="0" alt=""></a>
+                     </TMPL_IF>
                 </span>
-              </div>
+            </th>
+
+            </TMPL_LOOP>
+
+            <th></th>
+        </tr>
+
+        <tr class="rowHeader">
+
+            <th id="removeChecks" scope="col" align="left"></th>
+
+            <TMPL_LOOP NAME="History_Loop_Headers">
+
+            <th class="historyLabel" scope="col" align="left">
 
               <a href="/history?<TMPL_VAR NAME="History_Fields">&amp;setsort=<TMPL_VAR NAME="History_Sort"><TMPL_VAR NAME="History_Header">" title="<TMPL_VAR NAME="Localize_History_Click_To_Sort">">
 
@@ -130,11 +132,11 @@
 
                         <TMPL_IF NAME="History_If_Sorted_Ascending">
 
-                        &gt;&nbsp;<TMPL_VAR NAME="History_Label"></a>
+                        &gt;&nbsp;<TMPL_VAR NAME="History_Label">
 
                         <TMPL_ELSE>
 
-                        &lt;&nbsp;<TMPL_VAR NAME="History_Label"></a>
+                        &lt;&nbsp;<TMPL_VAR NAME="History_Label">
 
                         </TMPL_IF>
 
@@ -142,14 +144,17 @@
 
               <TMPL_ELSE>
 
-              <TMPL_VAR NAME="History_Label"></a>
+              <TMPL_VAR NAME="History_Label">
 
               </TMPL_IF>
+
+              </a>
+
             </th>
 
             </TMPL_LOOP>
 
-            <th scope="col" align="center" valign="bottom">
+            <th scope="col" align="center">
                 <input type="submit" class="reclassifyButton" name="change" value="<TMPL_VAR NAME="Localize_Reclassify">" />
             </th>
         </tr>
