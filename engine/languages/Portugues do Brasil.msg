@@ -208,10 +208,10 @@ History_NoMagnet                        &nbsp;(mostrando apenas mensagens não cl
 History_ResetSearch                     Limpar
 History_ChangedClass                    Deveria classificar agora como
 History_Purge                           Deletar Agora
-History_Increase			Incrementar
-History_Decrease			Decrementar
-History_Column_Characters		Alterar a largura das colunas De, Para, Cc e Assunto
-History_Automatic			Automático
+History_Increase                        Incrementar
+History_Decrease                        Decrementar
+History_Column_Characters               Alterar a largura das colunas De, Para, Cc e Assunto
+History_Automatic                       Automático
 History_Reclassified                    Reclassificado
 
 Password_Title                          Senha
@@ -338,3 +338,27 @@ Configuration_MainTableSummary          Esta tabela contém alguns formulários qu
 Configuration_InsertionTableSummary     Esta tabela contém botões para determinar se certas modificações são feitas no cabeçalho ou no assunto da mensagem antes que ela seja encaminhada para o programa cliente de mensagens.
 Security_MainTableSummary               Esta tabela fornece conjuntos de controles que afetam a segurança da configuração geral do PopFile, se ele deve procurar automaticamente por atualizações do programa, e se estatísticas sobre o desempenho do PopFile devem ser enviadas ao banco de dados central do autor do programa para informação geral.
 Advanced_MainTableSummary               Esta tabela fornece uma lista de palavras que o PopFile ignora quando classifica mensagens por causa da sua freqüência relativa nas mensagens em geral.  Elas são organizadas por linha de acordo com a primeira letra das palavras.
+
+Imap_Bucket2Folder                      Email para o balde <b>%s</b> vai para a pasta
+Imap_MapError                           Você não pode mapear mais de um balde para uma única pasta!
+Imap_Server                             Nome do servidor IMAP:
+Imap_ServerNameError                    Por favor informe o nome do servidor!
+Imap_Port                               Porta do servidor IMAP:
+Imap_PortError                          Por favor informe um número de porta válido!
+Imap_Login                              Conta de login IMAP:
+Imap_LoginError                         Por favor informe um nome de usuário/login!
+Imap_Password                           Senha para a conta IMAP:
+Imap_PasswordError                      Por favor informe uma senha para o servidor!
+Imap_Expunge                            Expurgar mensagens deletadas de pastas em observação.
+Imap_Interval                           Intervalo de atualização em segundos:
+Imap_IntervalError                      Por favor informe um intervalo entre 10 e 3600 segundos.
+Imap_Bytelimit                          Bytes por mensagem para usar para classificação. Informe 0 (Nulo) para usar a mensagem completa:
+Imap_BytelimitError                     Por favor informe um número.
+Imap_RefreshFolders                     Atualizar a lista de pastas
+Imap_Now                                agora!
+Imap_UpdateError1                       Não é possível logar. Verifique seu nome de usuário e senha, por favor.
+Imap_UpdateError2                       Falha na conexão ao servidor. Por favor verifique o nome e porta do servidor e certifique-se que você está online.
+Imap_UpdateError3                       Por favor configure os detalhes da conexão primeiro.
+Imap_NoConnectionMessage                Por favor configure os detalhes da conexão primeiro. Depois disto, mais opções estarão disponíveis nesta página.
+Imap_WatchMore                          uma pasta para lista de pastas em observação
+Imap_WatchedFolder                      Pasta em observação #
