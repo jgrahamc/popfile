@@ -72,6 +72,11 @@ td.logo2menuSpace {
 /*********************************************************/
 /* Table Settings */
 
+.bucketsTable {
+    border: 2px solid #CCCC99;
+    padding: 1%;
+}
+
 .settingsTable {
   border: 1px solid #CCCC99;
 }

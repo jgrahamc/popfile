@@ -32,6 +32,7 @@ FAQLink                                 FrequentlyAskedQuestions
 
 # Common words that are used on their own all over the interface
 Apply                                   Apply
+ApplyChanges                            Apply Changes
 On                                      On
 Off                                     Off
 TurnOn                                  Turn On
