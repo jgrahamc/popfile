@@ -1002,7 +1002,7 @@ sub corpus_page
         $classifier->write_parameters();
     }
     
-    if ( $form{name} ne '' )
+    if ( ( $form{name} ne '' ) && ( $form{create} eq 'Create' ) )
     {
         if ( $form{name} =~ /[^a-z\-_]/ ) 
         {

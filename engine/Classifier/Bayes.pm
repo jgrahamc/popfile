@@ -246,7 +246,6 @@ sub load_word_matrix
             if ( $c < $#{$self->{possible_colors}} )
             {
                 $self->{colors}{$bucket} = $self->{possible_colors}[$c];
-                $c += 1;
             } 
             else 
             {
@@ -257,6 +256,8 @@ sub load_word_matrix
         {
             $self->{colors}{$bucket} = $color;
         }
+
+        $c += 1;
     }
 
     update_constants($self);
