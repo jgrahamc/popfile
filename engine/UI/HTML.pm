@@ -2121,6 +2121,7 @@ sub load_history_cache__
             $self->{history__}{$history_files[$i]}{short_subject} = $short_subject;
             $self->{history__}{$history_files[$i]}{short_from}    = $short_from;
             $self->{history__}{$history_files[$i]}{cull}          = 0;
+            $self->{history__}{$history_files[$i]}{index}         = $i;
         }
     }
 
@@ -2699,6 +2700,7 @@ sub history_page
             my $short_subject = $self->{history__}{$mail_file}{short_subject};
             my $bucket        = $self->{history__}{$mail_file}{bucket};
             my $reclassified  = $self->{history__}{$mail_file}{reclassified};
+            my $index         = $self->{history__}{$mail_file}{index} + 1;
 
             $body .= "<tr";
             if ( ( ( defined($self->{form_}{view}) ) && ( $self->{form_}{view} eq $mail_file ) ) || ( ( defined($self->{form_}{file}) && ( $self->{form_}{file} eq $mail_file ) ) ) || ( $highlight_message eq $mail_file ) ) {
@@ -2712,7 +2714,7 @@ sub history_page
 
             $body .= ">\n<td>";
             $body .= "<a name=\"$mail_file\"></a>";
-            $body .= $i+1 . "</td>\n<td>";
+            $body .= $index . "</td>\n<td>";
             $mail_file =~ /popfile\d+=(\d+)\.msg$/;
             $body .= "<a title=\"$from\">$short_from</a></td>\n";
             $body .= "<td><a class=\"messageLink\" title=\"$subject\" href=\"/history?view=$mail_file&amp;start_message=$start_message&amp;session=$self->{session_key__}&amp;sort=$self->{form_}{sort}&amp;filter=$self->{form_}{filter}&amp;search=$self->{form_}{search}#$mail_file\">";
