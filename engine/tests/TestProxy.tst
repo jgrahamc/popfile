@@ -244,6 +244,39 @@ close TEMP;
 $line = <$client>;
 test_assert_regexp( $line, 'after' );
 
+# Test flush_extra_
+
+$sp->send( 'flush1' );
+$sp->service_server();
+open TEMP, ">temp.tmp";
+test_assert_regexp( $sp->flush_extra_( $client, \*TEMP ), 'flush1' );
+close TEMP;
+open TEMP, "<temp.tmp";
+$line = <TEMP>;
+test_assert_regexp( $line, 'flush1' );
+close TEMP;
+
+$sp->send( 'flush2' );
+$sp->service_server();
+open TEMP, ">temp.tmp";
+test_assert_regexp( $sp->flush_extra_( $client, \*TEMP, 1 ), 'flush2' );
+close TEMP;
+open TEMP, "<temp.tmp";
+$line = <TEMP>;
+test_assert( !defined( $line ) );
+close TEMP;
+
+# Check that we receive the messages sent up the pipe
+
+use Test::MQReceiver;
+my $r = new Test::MQReceiver;
+
+# Register three different message types
+
+$mq->register( 'CLASS', $r );
+$mq->register( 'NEWFL', $r );
+$mq->register( 'LOGIN', $r );
+
 # Close down the child process
 
 $sp->send( '__POPFILE__ABORT__CHILD__' );
@@ -262,6 +295,19 @@ while ( $#kids >= 0 ) {
 }
 
 $sp->stop();
+
+$mq->service();
+my @messages = $r->read();
+test_assert_equal( $#messages, 2 );
+test_assert_equal( $messages[0][0], 'LOGIN' );
+test_assert_equal( $messages[0][1], 'username' );
+test_assert_equal( $messages[0][2], '' );
+test_assert_equal( $messages[1][0], 'NEWFL' );
+test_assert_equal( $messages[1][1], 'newfile' );
+test_assert_equal( $messages[1][2], '' );
+test_assert_equal( $messages[2][0], 'CLASS' );
+test_assert_equal( $messages[2][1], 'classification' );
+test_assert_equal( $messages[3][2], '' );
 
 # Make sure that stop will close off the child pipes
 

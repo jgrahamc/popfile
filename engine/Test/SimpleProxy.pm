@@ -58,7 +58,7 @@ sub stop_server
 
     if ( defined( $self->{remote_server__} ) ) {
         close $self->{remote_server__};
-        close $self->{remote_client__};
+        close $self->{remote_client__} if ( defined( $self->{remote_client__} ) );
         undef $self->{remote_server__};
         undef $self->{remote_selector__};
     }
@@ -149,6 +149,12 @@ sub child__
     my ( $self, $client, $download_count, $pipe ) = @_;
 
     $self->log_( "Child started" );
+
+    # Used to test that we get pipe messages
+
+    print $pipe "CLASS:classification$eol";
+    print $pipe "NEWFL:newfile$eol";
+    print $pipe "LOGIN:username$eol";
 
     # Connect to the simple server that
 
