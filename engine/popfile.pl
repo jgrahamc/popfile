@@ -943,13 +943,15 @@ sub bucket_page
     }
     $body .= "<tr><td><hr><b>Percentage of total</b><td>&nbsp;<td align=right><hr>$percent</table>";
  
-    $body .= "<h2>Word Table for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</font></h2><p><table>";
+    $body .= "<h2>Word Table for <font color=$classifier->{colors}{$form{showbucket}}>$form{showbucket}</font></h2><p>Red words have been used for classification in this POPFile session.<p><table>";
     for my $i (@{$classifier->{matrix}{$form{showbucket}}})
     {
         if ( $i ne '' ) 
         {
             $i =~ s/\|\|/, /g;
             $i =~ s/\|//g;
+            $i =~ s/([^ ]+) (L\-[\.\d]+)/<font color=red>\1 \2<\/font>/g;
+            $i =~ s/L(\-[\.\d]+)/int(exp(eval(\1)))/ge;
             $i =~ /^(.)/;
             $body .= "<tr><td valign=top><b>$1</b><td valign=top>$i";
         }
