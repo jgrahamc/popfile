@@ -101,6 +101,9 @@ Configuration_SMTPPort                  Porta de escuta SMTP
 Configuration_SMTPUpdate                A porta SMTP foi alterada para %s; esta alteração não terá efeito até que você reinicie o POPFile
 Configuration_NNTPPort                  Porta de escuta NNTP
 Configuration_NNTPUpdate                A porta NNTP foi alterada para %s; esta alteração não terá efeito até que você reinicie o POPFile
+Configuration_POPFork                   Permitir conexões POP3 concorrentes
+Configuration_SMTPFork                  Permitir conexões SMTP concorrentes
+Configuration_NNTPFork                  Permitir conexões NNTP concorrentes
 Configuration_POP3Separator             Caracter de separação POP3 servidor:porta:usuário
 Configuration_NNTPSeparator             Caracter de separação NNTP servidor:porta:usuário
 Configuration_POP3SepUpdate             Separador POP3 alterado para %s
@@ -162,7 +165,7 @@ History_NoSubject                       sem linha de assunto
 History_ClassifyAs                      Classificar como
 History_MagnetUsed                      Ímã usado
 History_MagnetBecause                   <b>Ímã Utilizado</b><p>Classificado para <font color="%s">%s</font> por causa do ímã %s </p>
-History_ChangedTo                       Alterado para <font color="%s">%s
+History_ChangedTo                       Alterado para <font color="%s">%s</font>
 History_Already                         Reclassificado como <font color="%s">%s</font>
 History_RemoveAll                       Remover Tudo
 History_RemovePage                      Remover a Página
