@@ -1196,27 +1196,23 @@ sub classify_and_modify
         print $client $msg_body;
     }
 
-    if ( $got_full_body == 0 )    {
-         if ( $echo ) {
-            $self->echo_to_dot_( $mail, $client, ">>" . $temp_file );
-         } else {
-            $self->echo_to_dot_( $mail, undef, ">>" . $temp_file );
-         }
-    } else {
-        if ( $classification ne 'unclassified' ) {
-            if ( ( $self->{parameters__}{$classification}{quarantine} == 1 ) && $echo ) {
-                print $client "$eol--$temp_file--$eol";
-	    }
-        }
+    if ( !$got_full_body ) {
+        $self->echo_to_dot_( $mail, $echo?$client:undef, '>>' . $temp_file );
+    }
 
-        print $client "$eol.$eol" if ( $echo );
+    if ( $classification ne 'unclassified' ) {
+        if ( ( $self->{parameters__}{$classification}{quarantine} == 1 ) && $echo ) {
+            print $client "$eol--$temp_file--$eol";
+        }
+    }
+
+    if ( $echo ) {
+        print $client "$eol.$eol";
     }
 
     if ( $nosave ) {
         unlink( $temp_file );
-    }
-
-    if ( !$nosave ) {
+    } else {
         $self->history_write_class($class_file, undef, $classification, undef, ($self->{magnet_used__}?$self->{magnet_detail__}:undef));
 
         # Now rename the MSG file, since the class file has been written it's safe for the mesg
@@ -1464,6 +1460,10 @@ sub delete_bucket
 {
     my ( $self, $bucket ) = @_;
 
+    if ( !defined( $self->{total__}{$bucket} ) ) {
+        return;
+    }
+
     my $bucket_directory = $self->config_( 'corpus' ) . "/$bucket";
 
     unlink( "$bucket_directory/table" );
@@ -1489,6 +1489,10 @@ sub rename_bucket
 {
     my ( $self, $old_bucket, $new_bucket ) = @_;
 
+    if ( !defined( $self->{total__}{$old_bucket} ) ) {
+        return;
+    }
+
     rename($self->config_( 'corpus' ) . "/$old_bucket" , $self->config_( 'corpus' ) . "/$new_bucket");
 
     $self->load_word_matrix_();
@@ -1507,6 +1511,13 @@ sub rename_bucket
 sub add_messages_to_bucket
 {
     my ( $self, $bucket, @files ) = @_;
+
+    # Verify that the bucket exists.  You must call create_bucket before this
+    # when making a new bucket.
+
+    if ( !defined( $self->{total__}{$bucket} ) ) {
+        return;
+    }
 
     my %words;
 
@@ -1584,6 +1595,13 @@ sub add_message_to_bucket
 sub remove_message_from_bucket
 {
     my ( $self, $file, $bucket ) = @_;
+
+    # Verify that the bucket exists.  You must call create_bucket before this
+    # when making a new bucket.
+
+    if ( !defined( $self->{total__}{$bucket} ) ) {
+        return;
+    }
 
     my %words;
 
