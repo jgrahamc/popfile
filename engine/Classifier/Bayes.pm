@@ -885,7 +885,19 @@ sub magnet_match_helper__
 
     $match = lc($match);
 
-    for my $magnet (sort keys %{$self->{magnets__}{$bucket}{$type}}) {
+    # In Japanese and Korean mode, disable locale.
+    # Sorting Japanese and Korean with "use locale" is memory and time consuming,
+    # and may cause perl crash.
+
+    my @magnets;
+    if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
+        no locale;
+        @magnets = sort keys %{$self->{magnets__}{$bucket}{$type}};
+    } else {
+        @magnets = sort keys %{$self->{magnets__}{$bucket}{$type}};
+    }
+
+    for my $magnet (@magnets) {
         $magnet = lc($magnet);
 
         for my $i (0..(length($match)-length($magnet))) {
@@ -895,7 +907,7 @@ sub magnet_match_helper__
                 $self->{magnet_detail__} = "$type: $magnet";
 
                 return 1;
-	    }
+            }
         }
     }
 
@@ -918,12 +930,7 @@ sub magnet_match__
 {
     my ( $self, $match, $bucket, $type ) = @_;
 
-    if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
-        no locale;
-        return $self->magnet_match_helper__( $match, $bucket, $type );
-    } else {
-        return $self->magnet_match_helper__( $match, $bucket, $type );
-    }
+    return $self->magnet_match_helper__( $match, $bucket, $type );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2058,18 +2065,7 @@ sub add_messages_to_bucket
 
     foreach my $file (@files) {
         $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
-
-        # In Japanese mode, disable locale.
-        # Sorting Japanese with "use locale" is memory and time consuming,
-        # and may cause perl crash.
-
-        # Disable the locale in Korean mode, too.
-        if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
-            no locale;
-            $self->add_words_to_bucket__( $bucket, 1 );
-        } else {
-            $self->add_words_to_bucket__( $bucket, 1 );
-        }
+        $self->add_words_to_bucket__( $bucket, 1 );
     }
 
     $self->load_word_matrix_();
@@ -2119,19 +2115,7 @@ sub remove_message_from_bucket
 
     $self->{parser__}->parse_file( $file, $self->module_config_( 'html', 'language' ) );
 
-    # In Japanese mode, disable locale.
-    # Sorting Japanese with "use locale" is memory and time consuming,
-    # and may cause perl crash.
-
-    # Disable the locale in Korean mode, too.
-
-    if ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ ) {
-        no locale;
-        $self->add_words_to_bucket__( $bucket, -1 );
-    } else {
-        $self->add_words_to_bucket__( $bucket, -1 );
-    }
-
+    $self->add_words_to_bucket__( $bucket, -1 );
     $self->load_word_matrix_();
 
     return 1;
