@@ -793,7 +793,7 @@ sub parse_stream
             
                 # Check for blank line signifying end of headers
                 
-                if ( $line =~ /^\r\n/) {
+                if ( $line =~ /^(\r\n|\r|\n)/) {
                     $self->{in_headers} = 0;
                     print "Header parsing complete.\n" if $self->{debug};
                 }
