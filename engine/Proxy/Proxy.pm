@@ -203,6 +203,10 @@ sub flush_child_data_
                 $self->log_( "Incrementing $1" );
 	    }
 
+            if ( $message =~ /NEWFL:(.*)/ ) {
+                $self->mq_post_( 'NEWFL', $1, '' );
+	    }
+
             if ( $message =~ /LOGIN:(.*)/ ) {
                 $self->mq_post_( 'LOGIN', $1, '' );
 	    }
@@ -346,18 +350,18 @@ sub echo_to_regexp_
         # Check for an abort
 
         last if ( $self->{alive_} == 0 );
-        
+
         if (!defined($suppress) || !( $_ =~ $suppress )) {
             if (!$verbose) {
                 print $client $_;
             } else {
                 # This creates log output
-    
+
                 $self->tee_($client, $_);
             }
-        } else {            
+        } else {
             $self->log_("Suppressed: $_");
-        }        
+        }
 
         last if ( $_ =~ $regexp );
     }

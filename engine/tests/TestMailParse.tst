@@ -116,7 +116,7 @@ for my $parse_test (@parse_tests) {
     # Parse the document and then check the words hash against the words in the
     # wrd file
 
-    $cl->parse_stream( $parse_test );
+    $cl->parse_file( $parse_test );
 
     open WORDS, "<$words";
     while ( <WORDS> ) {

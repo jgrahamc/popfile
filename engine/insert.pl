@@ -102,7 +102,7 @@ sub split_mail_message
 
     print "Parsing message '$message'...\n";
 
-    $parser->parse_stream($message);
+    $parser->parse_file($message);
 
     foreach $word (keys %{$parser->{words__}}) {
         $words{$word} += $parser->{words__}{$word};

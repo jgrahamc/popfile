@@ -90,7 +90,7 @@ sub service
 # Removes popfile log files that are older than 3 days
 #
 # ---------------------------------------------------------------------------------------------
-sub remove_debug_files 
+sub remove_debug_files
 {
     my ( $self ) = @_;
 

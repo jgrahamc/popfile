@@ -49,7 +49,7 @@ if ( $#ARGV == 0 )
     my @files   = glob $ARGV[0];
     foreach my $file (@files)
     {
-        print "$file is '" . $b->classify_file($file) . "'\n";
+        print "$file is '" . $b->classify($file) . "'\n";
     }
 
     foreach my $word (keys %{$b->{parser__}->{words__}}) {

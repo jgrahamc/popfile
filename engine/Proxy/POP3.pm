@@ -284,7 +284,7 @@ sub child__
 
                         # Classify without echoing to client, saving file for later RETR's
 
-                        my $class = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '', 0 );
+                        my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '', 0 );
 
                         $downloaded{$count} = 1;
 
@@ -296,6 +296,7 @@ sub child__
 
                             # Tell the parent that we just handled a mail
                             print $pipe "CLASS:$class$eol";
+                            print $pipe "NEWFL:$history_file$eol";
                         }
                     }
                 } else {
@@ -396,10 +397,12 @@ sub child__
                 # Get the message from the remote server, if there's an error then we're done, but if not then
                 # we echo each line of the message until we hit the . at the end
                 if ( $self->echo_response_($mail, $client, $command ) ) {
-                    $class = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '' );
+                    my $history_file;
+                    ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $mail, $client, $download_count, $count, 0, '' );
 
                     # Tell the parent that we just handled a mail
                     print $pipe "CLASS:$class$eol";
+                    print $pipe "NEWFL:$history_file$eol";
 
                     # Note locally that file has been retrieved
                     $downloaded{$count} = 1;

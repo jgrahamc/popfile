@@ -482,15 +482,17 @@ sub load_bucket_
     $self->{total__}{$bucket} = 0;
 
     if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
-        while (<WORDS>) {
-            if ( /__CORPUS__ __VERSION__ (\d+)/ ) {
-                if ( $1 != $self->{corpus_version__} )  {
-                    print "Incompatible corpus version in $bucket\n";
-                    return;
-                }
-
-                next;
+        my $first = <WORDS>;
+        if ( $first =~ s/^__CORPUS__ __VERSION__ (\d+)// ) {
+            if ( $1 != $self->{corpus_version__} )  {
+                print "Incompatible corpus version in $bucket\n";
+                return;
             }
+        } else {
+            return;
+        }
+
+        while ( <WORDS> ) {
 
             s/[\r\n]//g;
 
@@ -562,24 +564,27 @@ sub save_magnets__
 
 # ---------------------------------------------------------------------------------------------
 #
-# classify_file
+# classify
 #
-# $file      The name of the file containing the text to classify
+# $file      The name of the file containing the text to classify (or undef to use
+#            the data already in the parser)
 # $ui        Reference to the UI used when doing colorization
 #
 # Splits the mail message into valid words, then runs the Bayes algorithm to figure out
 # which bucket it belongs in.  Returns the bucket name
 #
 # ---------------------------------------------------------------------------------------------
-sub classify_file
+sub classify
 {
-    my ($self, $file, $ui) = @_;
+    my ( $self, $file, $ui ) = @_;
     my $msg_total = 0;
 
     $self->{magnet_used__}   = 0;
     $self->{magnet_detail__} = '';
 
-    $self->{parser__}->parse_stream($file);
+    if ( defined( $file ) ) {
+        $self->{parser__}->parse_file( $file );
+    }
 
     # Check to see if this email should be classified based on a magnet
     # Get the list of buckets
@@ -926,6 +931,27 @@ sub history_load_class
     return ( $reclassified, $bucket, $usedtobe, $magnet );
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# write_line__
+#
+# Writes a line to a file and parses it
+#
+# $file         File handle for file to write line to
+# $line         The line to write
+# $class        The current classification
+#
+# ---------------------------------------------------------------------------------------------
+sub write_line__
+{
+    my ( $self, $file, $line, $class ) = @_;
+
+    print $file $line;
+
+    if ( $class eq '' ) {
+        $self->{parser__}->parse_line( $line );
+    }
+}
 
 # ---------------------------------------------------------------------------------------------
 #
@@ -943,7 +969,8 @@ sub history_load_class
 # $class    - if we already know the classification
 # $echo     - 1 to echo to the client, 0 to supress, defaults to 1
 #
-# Returns a classification if it worked, otherwise returns an empty string
+# Returns a classification if it worked and the name of the file where the message
+# was saved
 #
 # ---------------------------------------------------------------------------------------------
 sub classify_and_modify
@@ -987,7 +1014,16 @@ sub classify_and_modify
     # Get the class-file info without the path, since we'd just need to strip it
     my $class_file = $self->history_filename($dcount,$mcount, ".cls",0);
 
-    open TEMP, ">$temp_file";
+    # If we don't yet know the classification then start the parser
+    if ( $class eq '' ) {
+        $self->{parser__}->start_parse();
+    }
+
+    # We append .TMP to the filename for the MSG file so that if we are in
+    # middle of downloading a message and we refresh the history we do not
+    # get class file errors
+
+    open TEMP, ">$temp_file.tmp";
 
     while ( <$mail> ) {
         my $line;
@@ -1023,7 +1059,7 @@ sub classify_and_modify
 
             if ( !( $line =~ /^(\r\n|\r|\n)$/i ) )  {
                 $message_size += length $line;
-                print TEMP $fileline;
+                $self->write_line__( \*TEMP, $fileline, $class );
 
                 # If there is no echoing occuring, it doesn't matter what we do to these
 
@@ -1052,14 +1088,14 @@ sub classify_and_modify
                     }
                 }
             } else {
-                print TEMP "\n";
+                $self->write_line__( \*TEMP, "\n", $class );
                 $message_size += length $eol;
                 $getting_headers = 0;
             }
         } else {
             $message_size += length $line;
             $msg_body     .= $line;
-            print TEMP $fileline;
+            $self->write_line__( \*TEMP, $fileline, $class );
         }
 
         # Check to see if too much time has passed and we need to keep the mail client happy
@@ -1074,10 +1110,15 @@ sub classify_and_modify
 
     close TEMP;
 
+    # If we don't yet know the classification then stop the parser
+    if ( $class eq '' ) {
+        $self->{parser__}->stop_parse();
+    }
+
     # Do the text classification and update the counter for that bucket that we just downloaded
     # an email of that type
 
-    $classification = ($class ne '')?$class:$self->classify_file($temp_file);
+    $classification = ($class ne '')?$class:$self->classify(undef);
     my $modification = $self->config_( 'subject_mod_left' ) . $classification . $self->config_( 'subject_mod_right' );
 
     # Add the Subject line modification or the original line back again
@@ -1176,10 +1217,16 @@ sub classify_and_modify
     }
 
     if ( !$nosave ) {
-        $self->history_write_class($class_file, undef, $classification, undef, ($self->{magnet_used__}?$self->{magnet_detail__}:undef))
+        $self->history_write_class($class_file, undef, $classification, undef, ($self->{magnet_used__}?$self->{magnet_detail__}:undef));
+
+        # Now rename the MSG file, since the class file has been written it's safe for the mesg
+        # file to have the correct name.  If the history cache is reloaded then we wont have a class
+        # file error since it was already written
+
+        rename "$temp_file.tmp", $temp_file;
     }
 
-    return $classification;
+    return ( $classification, $nopath_temp_file );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1373,9 +1420,8 @@ sub get_html_colored_message
 
     $self->{parser__}->{color__} = 1;
     $self->{parser__}->{bayes__} = bless $self;
-    my $result = $self->{parser__}->parse_stream($file);
+    my $result = $self->{parser__}->parse_file( $file );
     $self->{parser__}->{color__} = 0;
-    $self->{parser__}->{words__} = {};
 
     return $result;
 }
@@ -1449,17 +1495,17 @@ sub rename_bucket
 
 # ---------------------------------------------------------------------------------------------
 #
-# add_message_to_bucket
+# add_messages_to_bucket
 #
-# Parses a mail message and updates the statistics in the specified bucket
+# Parses mail messages and updates the statistics in the specified bucket
 #
-# $file            Name of file containing mail message to parse
 # $bucket          Name of the bucket to be updated
+# @files           List of file names to parse
 #
 # ---------------------------------------------------------------------------------------------
-sub add_message_to_bucket
+sub add_messages_to_bucket
 {
-    my ( $self, $file, $bucket ) = @_;
+    my ( $self, $bucket, @files ) = @_;
 
     my %words;
 
@@ -1488,10 +1534,12 @@ sub add_message_to_bucket
         close WORDS;
     }
 
-    $self->{parser__}->parse_stream( $file );
+    foreach my $file (@files) {
+        $self->{parser__}->parse_file( $file );
 
-    foreach my $word (keys %{$self->{parser__}->{words__}}) {
-        $words{$word} += $self->{parser__}->{words__}{$word};
+        foreach my $word (keys %{$self->{parser__}->{words__}}) {
+            $words{$word} += $self->{parser__}->{words__}{$word};
+        }
     }
 
     if ( open WORDS, '>' . $self->config_( 'corpus' ) . "/$bucket/table" ) {
@@ -1503,6 +1551,23 @@ sub add_message_to_bucket
     }
 
     $self->load_word_matrix_();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# add_message_to_bucket
+#
+# Parses a mail message and updates the statistics in the specified bucket
+#
+# $file            Name of file containing mail message to parse
+# $bucket          Name of the bucket to be updated
+#
+# ---------------------------------------------------------------------------------------------
+sub add_message_to_bucket
+{
+    my ( $self, $file, $bucket ) = @_;
+
+    $self->add_messages_to_bucket( $bucket, $file );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1546,7 +1611,7 @@ sub remove_message_from_bucket
         close WORDS;
     }
 
-    $self->{parser__}->parse_stream( $file );
+    $self->{parser__}->parse_file( $file );
 
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
         $words{$word} -= $self->{parser__}->{words__}{$word};

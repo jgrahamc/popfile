@@ -105,6 +105,31 @@ sub test_assert_equal
 	test_report( $result, "expecting $expected and got $test", $file, $line, $context );
 }
 
+# ---------------------------------------------------------------------------------------------
+#
+# test_assert_regexp	-  Perform a test and assert that its result matches a regexp
+#
+# $file			The name of the file invoking the test
+# $line			The line in the $file where the test can be found
+# $test			The result of the test that was just run
+# $expected		The expected result in the form of a regexp
+# $context		(Optional) String containing extra context information
+#
+# Example: test_assert_regexp( function(parameter), '^result' )
+# Example: test_assert_regexp( function(parameter), 3, 'Banana.+subsystem' )
+#
+# YOU DO NOT NEED TO GIVE THE $file and $line parameters as this script supplies them
+# automatically
+# ---------------------------------------------------------------------------------------------
+
+sub test_assert_regexp
+{
+    my ( $file, $line, $test, $expected, $context ) = @_;
+    my $result = ( $test =~ /$expected/ );
+
+    test_report( $result, "expecting to match $expected and got $test", $file, $line, $context );
+}
+
 # MAIN
 
 my @tests = glob 'tests/*.tst';
@@ -116,6 +141,8 @@ my @tests = glob 'tests/*.tst';
 
 my $pattern = '.*';
 $pattern = "$ARGV[0].*" if ( $#ARGV == 0 );
+
+my $code = 0;
 
 foreach my $test (@tests) {
 
@@ -137,6 +164,7 @@ foreach my $test (@tests) {
 	while (<SUITE>) {
 		my $line = $_;
 		$ln += 1;
+		$line =~ s/(test_assert_regexp\()/$1 '$test', $ln,/g;
 		$line =~ s/(test_assert_equal\()/$1 '$test', $ln,/g;
 		$line =~ s/(test_assert\()/$1 '$test', $ln,/g;
 		$suite .= $line;
@@ -147,6 +175,7 @@ foreach my $test (@tests) {
 	if ( $test_failures > $current_error_count ) {
 		print "failed (" . ( $test_count - $current_test_count ) . " ok, " . ( $test_failures - $current_error_count ) . " failed)\n";
 		print $fail_messages . "\n";
+                $code = 1;
 	} else {
 		print "ok (" . ( $test_count - $current_test_count ) . " ok)";
 	}
@@ -154,3 +183,4 @@ foreach my $test (@tests) {
 }
 
 print "\n\n$test_count tests, " . ( $test_count - $test_failures ) . " ok, $test_failures failed\n\n";
+exit $code;

@@ -10,17 +10,32 @@ include vars.mak
 .PHONY: test package windows core manual skins
 
 error:
-	@echo Must specify one of test, package or windows
+	@echo Must specify one of coverage, test, package or windows
 	@echo 
-	@echo "test    - Run POPFile test suite"
-	@echo "windows - Build Windows installer" 
-	@echo "package - Build Windows installer, and create"
-	@echo "          ZIP files for Windows and cross-platform"
-	@echo "          version"
+	@echo "coverage - Run POPFile test suite with coverage information"
+	@echo "test     - Run POPFile test suite"
+	@echo "           (test and coverage pass the TESTARGS variable to the test suite)"
+	@echo
+	@echo "windows  - Build Windows installer" 
+	@echo "package  - Build Windows installer, and create"
+	@echo "           ZIP files for Windows and cross-platform"
+	@echo "           version"
 
 # test runs the POPFile unit test suite
 
-test:    ; @perl tests.pl
+coverage:
+	@echo Running test suite with code coverage
+ifdef TESTARGS
+	@echo with arguments '$(TESTARGS)'
+endif
+	@perl -d:TestCoverage tests.pl $(TESTARGS)
+
+test:     
+	@echo Running test suite
+ifdef TESTARGS
+	@echo with arguments '$(TESTARGS)'
+endif
+	@perl tests.pl $(TESTARGS)
 
 # windows builds the Windows installer
 

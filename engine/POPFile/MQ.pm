@@ -36,6 +36,9 @@ use POPFile::Module;
 #     LOGIN    Occurs when a proxy logs into a remote server, the message
 #              is the username sent
 #
+#     NEWFL    Occurs when a new file has been written to the history
+#              cache on disk.  The message is the filename
+#
 # Copyright (c) 2001-2003 John Graham-Cumming
 #
 #----------------------------------------------------------------------------

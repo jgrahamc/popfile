@@ -258,9 +258,9 @@ sub update_pseudoword
             my $to    = "<b><font color=\"$color\"><a title=\"$mword\">$literal</a></font></b>";
             $self->{ut__} .= $to . ' ';
         }
-    } else {
-        $self->increment_word( $mword );
     }
+
+   $self->increment_word( $mword );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -300,9 +300,9 @@ sub update_word
             } else {
                 $self->{ut__} .= "<font color=\"$color\">$word<\/font> ";
             }
-        } else {
-            increment_word( $self, $mword );
         }
+
+        $self->increment_word( $mword );
     }
 }
 
@@ -929,37 +929,78 @@ sub parse_html
 
 # ---------------------------------------------------------------------------------------------
 #
-# parse_stream
+# parse_file
 #
-# Read messages from a file stream and parse into a list of words and frequencies
+# Read messages from file and parse into a list of words and frequencies, returns a colorized
+# HTML version of message if color__ is set
 #
 # $file     The file to open and parse
 #
 # ---------------------------------------------------------------------------------------------
-sub parse_stream
+sub parse_file
 {
-    my ($self, $file) = @_;
+    my ( $self, $file ) = @_;
+
+    $self->start_parse();
+
+    open MSG, "<$file";
+    binmode MSG;
+
+    # Read each line and find each "word" which we define as a sequence of alpha
+    # characters
+
+    while (<MSG>) {
+        $self->parse_line( $_ );
+    }
+
+    $self->{colorized__} .= $self->clear_out_base64();
+    close MSG;
+
+    $self->stop_parse();
+    $self->{in_html_tag__} = 0;
+
+    if ( $self->{color__} )  {
+        $self->{colorized__} .= $self->{ut__} if ( $self->{ut__} ne '' );
+
+        $self->{colorized__} .= "</tt>";
+        $self->{colorized__} =~ s/(\r\n\r\n|\r\r|\n\n)/__BREAK____BREAK__/g;
+        $self->{colorized__} =~ s/[\r\n]+/__BREAK__/g;
+        $self->{colorized__} =~ s/__BREAK__/<br \/>/g;
+
+        return $self->{colorized__};
+    } else {
+        return '';
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# start_parse
+#
+# Called to reset internal variables before parsing.  This is automatically called when using
+# the parse_file API, and must be called before the first call to parse_line.
+#
+# ---------------------------------------------------------------------------------------------
+sub start_parse
+{
+    my ( $self ) = @_;
 
     # This will contain the mime boundary information in a mime message
 
-    my $mime     = '';
+    $self->{mime__} = '';
 
     # Contains the encoding for the current block in a mime message
 
-    my $encoding = '';
+    $self->{encoding__} = '';
 
     # Variables to save header information to while parsing headers
 
-    my $header = '';
-    my $argument = '';
+    $self->{header__} = '';
+    $self->{argument__} = '';
 
     # Clear the word hash
 
     $self->{content_type__} = '';
-
-    # Used to return a colorize page
-
-    my $colorized = '';
 
     # Base64 attachments are loaded into this as we read them
 
@@ -992,16 +1033,48 @@ sub parse_stream
     $self->{first20__}      = '';
     $self->{first20count__} = 0;
 
-    $colorized .= "<tt>" if ( $self->{color__} );
+    # Used to return a colorize page
 
-    open MSG, "<$file";
-    binmode MSG;
+    $self->{colorized__} = '';
+    $self->{colorized__} .= "<tt>" if ( $self->{color__} );
+}
 
-    # Read each line and find each "word" which we define as a sequence of alpha
-    # characters
+# ---------------------------------------------------------------------------------------------
+#
+# stop_parse
+#
+# Called at the end of a parse job.  Automatically called if parse_file is used, must be
+# called after the last call to parse_line.
+#
+# ---------------------------------------------------------------------------------------------
+sub stop_parse
+{
+    my ( $self ) = @_;
 
-    while (<MSG>) {
-        my $read = $_;
+    # If we reach here and discover that we think that we are in an unclosed HTML tag then there
+    # has probably been an error (such as a < in the text messing things up) and so we dump
+    # whatever is stored in the HTML tag out
+
+    if ( $self->{in_html_tag__} ) {
+        $self->add_line( $self->{html_tag__} . ' ' . $self->{html_arg__}, 0, '' );
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# parse_line
+#
+# Called to parse a single line from a message.  If using this API directly then be sure
+# to call start_parse before the first call to parse_line.
+#
+# $line               Line of file to parse
+#
+# ---------------------------------------------------------------------------------------------
+sub parse_line
+{
+    my ( $self, $read ) = @_;
+
+    if ( $read ne '' ) {
 
         # For the Mac we do further splitting of the line at the CR characters
 
@@ -1015,11 +1088,11 @@ sub parse_stream
             if ($self->{color__}) {
 
                 if (!$self->{in_html_tag__}) {
-                    $colorized .= $self->{ut__};
+                    $self->{colorized__} .= $self->{ut__};
                     $self->{ut__} = '';
                 }
 
-                $self->{ut__} .= splitline($line, $encoding);
+                $self->{ut__} .= splitline($line, $self->{encoding__});
             }
 
             if ($self->{in_headers__}) {
@@ -1033,11 +1106,11 @@ sub parse_stream
                 if ( $line =~ /^(\r\n|\r|\n)/) {
 
                      # Parse the last header
-                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding);
+                    ($self->{mime__},$self->{encoding__}) = $self->parse_header($self->{header__},$self->{argument__},$self->{mime__},$self->{encoding__});
 
                     # Clear the saved headers
-                    $header   = '';
-                    $argument = '';
+                    $self->{header__}   = '';
+                    $self->{argument__} = '';
 
                     $self->{ut__} .= splitline( "\015\012", 0 );
 
@@ -1054,30 +1127,30 @@ sub parse_stream
 
                     # Parse the last header
 
-                    ($mime,$encoding) = $self->parse_header($header,$argument,$mime,$encoding) if ($header ne '');
+                    ($self->{mime__},$self->{encoding__}) = $self->parse_header($self->{header__},$self->{argument__},$self->{mime__},$self->{encoding__}) if ($self->{header__} ne '');
 
                     # Save the new information for the current header
 
-                    $header   = $1;
-                    $argument = $2;
+                    $self->{header__}   = $1;
+                    $self->{argument__} = $2;
                     next;
                 }
 
                 # Append to argument if the next line begins with whitespace (isn't a new header)
 
                 if ( $line =~ /^([\t ].*?)(\r\n|\r|\n)/ ) {
-                    $argument .= "\015\012" . $1;
+                    $self->{argument__} .= "\015\012" . $1;
                 }
                 next;
             }
 
             # If we are in a mime document then spot the boundaries
 
-            if ( ( $mime ne '' ) && ( $line =~ /^\-\-($mime)(\-\-)?/ ) ) {
+            if ( ( $self->{mime__} ne '' ) && ( $line =~ /^\-\-($self->{mime__})(\-\-)?/ ) ) {
 
                 # approach each mime part with fresh eyes
 
-                $encoding = '';
+                $self->{encoding__} = '';
 
                 if (!defined $2) {
                     print "Hit MIME boundary --$1\n" if $self->{debug__};
@@ -1096,7 +1169,7 @@ sub parse_stream
 
                     my $temp_mime;
 
-                    foreach my $aboundary (split(/\|/,$mime)) {
+                    foreach my $aboundary (split(/\|/,$self->{mime__})) {
                         if ($boundary ne $aboundary) {
                             if (defined $temp_mime) {
                                 $temp_mime = join('|', $temp_mime, $aboundary);
@@ -1106,9 +1179,9 @@ sub parse_stream
                         }
                     }
 
-                    $mime = ($temp_mime || '');
+                    $self->{mime__} = ($temp_mime || '');
 
-                    print "MIME boundary list now $mime\n" if $self->{debug__};
+                    print "MIME boundary list now $self->{mime__}\n" if $self->{debug__};
                     $self->{in_headers__} = 0;
                 }
 
@@ -1127,7 +1200,7 @@ sub parse_stream
             # If we are doing base64 decoding then look for suitable lines and remove them
             # for decoding
 
-            if ( $encoding =~ /base64/i ) {
+            if ( $self->{encoding__} =~ /base64/i ) {
                 $line =~ s/[\r\n]//g;
                 $line =~ s/!$//;
                 $self->{base64__} .= $line;
@@ -1145,7 +1218,7 @@ sub parse_stream
 
             # Decode quoted-printable
 
-            if ( $encoding =~ /quoted\-printable/i ) {
+            if ( $self->{encoding__} =~ /quoted\-printable/i ) {
                 $line       = decode_qp( $line );
                 $line       =~ s/[\r\n]+$//g;
                 $self->{ut__} = decode_qp( $self->{ut__} ) if ( $self->{color__} );
@@ -1153,30 +1226,6 @@ sub parse_stream
 
             parse_html( $self, $line, 0 );
         }
-    }
-
-    # If we reach here and disover that we think that we are in an unclosed HTML tag then there
-    # has probably been an error (such as a < in the text messing things up) and so we dump
-    # whatever is stored in the HTML tag out
-
-    if ( $self->{in_html_tag__} ) {
-        add_line( $self, $self->{html_tag__} . ' ' . $self->{html_arg__}, 0, '' );
-    }
-
-    $colorized .= clear_out_base64( $self );
-    close MSG;
-
-    $self->{in_html_tag__} = 0;
-
-    if ( $self->{color__} )  {
-        $colorized .= $self->{ut__} if ( $self->{ut__} ne '' );
-
-        $colorized .= "</tt>";
-        $colorized =~ s/(\r\n\r\n|\r\r|\n\n)/__BREAK____BREAK__/g;
-        $colorized =~ s/[\r\n]+/__BREAK__/g;
-        $colorized =~ s/__BREAK__/<br \/>/g;
-
-        return $colorized;
     }
 }
 
@@ -1203,7 +1252,7 @@ sub clear_out_base64
         print "Base64 data: " . $self->{base64__} . "\n" if ($self->{debug__});
 
         $decoded = decode_base64( $self->{base64__} );
-        parse_html( $self, $decoded, 1 );
+        $self->parse_html( $decoded, 1 );
 
         print "Decoded: " . $decoded . "\n" if ($self->{debug__});
 
@@ -1211,7 +1260,7 @@ sub clear_out_base64
 
             if ( $self->{color__} )  {
                 if ( $self->{ut__} ne '' )  {
-                    $colorized  = $self->{ut__};
+                    $colorized = $self->{ut__};
                     $self->{ut__} = '';
             }
         }

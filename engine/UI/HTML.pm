@@ -76,10 +76,15 @@ sub new
     #
     # history_invalid is set to cause the history cache to be reloaded by a call to
     # load_history_cache__, and is set by a call to invalidate_history_cache
+    #
+    # If new items have been added to the history the set need_resort__ to 1 to ensure
+    # that the next time a history page is being displayed the appropriate sort, search
+    # and filter is applied
 
     $self->{history__}         = {};
     $self->{history_keys__}    = ();
     $self->{history_invalid__} = 0;
+    $self->{need_resort__}     = 0;
 
     # A hash containing a mapping between alphanumeric identifiers and appropriate strings used
     # for localization.  The string may contain sprintf patterns for use in creating grammatically
@@ -198,7 +203,7 @@ sub initialize
 
     # Finally register for the messages that we need to receive
 
-    $self->mq_register_( 'CLASS', $self );
+    $self->mq_register_( 'NEWFL', $self );
     $self->mq_register_( 'UIREG', $self );
     $self->mq_register_( 'TICKD', $self );
     $self->mq_register_( 'LOGIN', $self );
@@ -236,12 +241,27 @@ sub start
     # or History_NoSubject in while loading the cache
 
     $self->invalidate_history_cache();
+    $self->load_disk_cache__();
     $self->load_history_cache__();
     $self->sort_filter_history( '', '', '' );
 
     $self->remove_mail_files();
 
     return $self->SUPER::start();
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# start
+#
+# Called to stop the HTML interface running
+#
+# ---------------------------------------------------------------------------------------------
+sub stop
+{
+    my ( $self ) = @_;
+
+    $self->save_disk_cache__();
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -265,10 +285,11 @@ sub deliver
         $self->register_configuration_item__( $1, $2, $parameter );
     }
 
-    # Invalidate the history cache if a classification occurs
+    # Get the new file in the history
 
-    if ( $type eq 'CLASS' ) {
-        $self->invalidate_history_cache();
+    if ( $type eq 'NEWFL' ) {
+        $self->new_history_file__( $message );
+        $self->{need_resort__} = 1;
     }
 
     # If a day has passed then clean up the history
@@ -2362,6 +2383,93 @@ sub sort_filter_history
     }
 
     @{$self->{history_keys__}} = reverse @{$self->{history_keys__}} if ($descending);
+
+    $self->{need_resort__} = 0;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# load_disk_cache__
+#
+# Preloads the history__ hash with information from the disk which will have been saved
+# the last time we shutdown
+#
+# ---------------------------------------------------------------------------------------------
+sub load_disk_cache__
+{
+    my ( $self ) = @_;
+
+    my $cache_file = $self->global_config_( 'msgdir' ) . 'history_cache';
+    if ( !(-e $cache_file) ) {
+        return;
+    }
+
+    open CACHE, "<$cache_file";
+
+    my $first = <CACHE>;
+
+    if ( $first =~ /___HISTORY__ __ VERSION__ 1/ ) {
+        while ( my $line = <CACHE> ) {
+	    if ( !( $line =~ /__HISTORY__ __BOUNDARY__/ ) ) {
+                $self->log_( "Problem in history_cache file, expecting boundary got $line" );
+                last;
+	    }
+
+            $line = <CACHE>;
+            $line =~ s/[\r\n]//g;
+            my $key = $line;
+            $line = <CACHE>;
+            $line =~ s/[\r\n]//g;
+            $self->{history__}{$key}{bucket} = $line;
+            $line = <CACHE>;
+            $line =~ s/[\r\n]//g;
+            $self->{history__}{$key}{reclassified} = $line;
+            $line = <CACHE>;
+            $line =~ s/[\r\n]//g;
+            $self->{history__}{$key}{magnet} = $line;
+            $line = <CACHE>;
+            $line =~ s/[\r\n]//g;
+            $self->{history__}{$key}{subject} = $line;
+            $line = <CACHE>;
+            $line =~ s/[\r\n]//g;
+            $self->{history__}{$key}{from} = $line;
+            $line = <CACHE>;
+            $line =~ s/[\r\n]//g;
+            $self->{history__}{$key}{short_subject} = $line;
+            $line = <CACHE>;
+            $line =~ s/[\r\n]//g;
+            $self->{history__}{$key}{short_from} = $line;
+            $self->{history__}{$key}{cull}       = 0;
+        }
+    }
+    close CACHE;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# save_disk_cache__
+#
+# Save the current of the history cache so that it can be reloaded next time on startup
+#
+# ---------------------------------------------------------------------------------------------
+sub save_disk_cache__
+{
+    my ( $self ) = @_;
+
+    open CACHE, '>' . $self->global_config_( 'msgdir' ) . 'history_cache';
+    print CACHE "___HISTORY__ __ VERSION__ 1\n";
+    foreach my $key (keys %{$self->{history__}}) {
+        print CACHE "__HISTORY__ __BOUNDARY__\n";
+        print CACHE "$key\n";
+        print CACHE "$self->{history__}{$key}{bucket}\n";
+        print CACHE "$self->{history__}{$key}{reclassified}\n";
+        print CACHE "$self->{history__}{$key}{magnet}\n";
+        print CACHE "$self->{history__}{$key}{subject}\n";
+        print CACHE "$self->{history__}{$key}{from}\n";
+        print CACHE "$self->{history__}{$key}{short_subject}\n";
+        print CACHE "$self->{history__}{$key}{short_from}\n";
+    }
+    close CACHE;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2396,12 +2504,6 @@ sub load_history_cache__
 
     my @history_files = sort compare_mf glob( $self->global_config_( 'msgdir' ) . "popfile*=*.msg" );
 
-    # This will get set the first time we add a new message to the history
-    # cache and is used to control where we place boundaries in the history
-    # to show where a user left off
-
-    my $set_boundary = 0;
-
     foreach my $i ( 0 .. $#history_files ) {
 
         # Strip any directory portion of the name in the current file so that we
@@ -2414,78 +2516,10 @@ sub load_history_cache__
         # to be culled and move on.
 
         if ( defined( $self->{history__}{$history_files[$i]} ) ) {
-            $self->{history__}{$history_files[$i]}{cull} = 0;
-            $self->{history__}{$history_files[$i]}{index}         = $i;
+            $self->{history__}{$history_files[$i]}{cull}  = 0;
+            $self->{history__}{$history_files[$i]}{index} = $i;
         } else {
-
-            # Find the class information for this file using the history_load_class helper
-            # function, and then parse the MSG file for the From and Subject information
-
-            my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->{classifier__}->history_load_class( $history_files[$i] );
-            my $from    = '';
-            my $subject = '';
-
-            if ( open MAIL, '<'. $self->global_config_( 'msgdir' ) . "$history_files[$i]" ) {
-                while ( <MAIL> )  {
-                    last          if ( /^(\r\n|\r|\n)/ );
-                    $from = $1    if ( /^From:(.*)/i );
-                    $subject = $1 if ( /^Subject:(.*)/i );
-                    last if ( ( $from ne '' ) && ( $subject ne '' ) );
-                }
-                close MAIL;
-            }
-
-            $from    = "<$self->{language__}{History_NoFrom}>"    if ( $from eq '' );
-            $subject = "<$self->{language__}{History_NoSubject}>" if ( !( $subject =~ /[^ \t\r\n]/ ) );
-
-            $from    =~ s/\"(.*)\"/$1/g;
-            $subject =~ s/\"(.*)\"/$1/g;
-
-            # TODO Interface violation here, need to clean up
-
-            $from    = $self->{classifier__}->{parser__}->decode_string( $from );
-            $subject = $self->{classifier__}->{parser__}->decode_string( $subject );
-
-            my ( $short_from, $short_subject ) = ( $from, $subject );
-
-            if ( length($short_from)>40 )  {
-                $short_from =~ /(.{40})/;
-                $short_from = "$1...";
-            }
-
-            if ( length($short_subject)>40 )  {
-               $short_subject =~ s/=20/ /g;
-                $short_subject =~ /(.{40})/;
-                $short_subject = "$1...";
-            }
-
-            $from =~ s/&/&amp;/g;
-            $from =~ s/</&lt;/g;
-            $from =~ s/>/&gt;/g;
-
-            $short_from =~ s/&/&amp;/g;
-            $short_from =~ s/</&lt;/g;
-            $short_from =~ s/>/&gt;/g;
-
-            $subject =~ s/&/&amp;/g;
-            $subject =~ s/</&lt;/g;
-            $subject =~ s/>/&gt;/g;
-
-            $short_subject =~ s/&/&amp;/g;
-            $short_subject =~ s/</&lt;/g;
-            $short_subject =~ s/>/&gt;/g;
-
-            $self->{history__}{$history_files[$i]}{bucket}        = $bucket;
-            $self->{history__}{$history_files[$i]}{reclassified}  = $reclassified;
-            $self->{history__}{$history_files[$i]}{magnet}        = $magnet;
-            $self->{history__}{$history_files[$i]}{subject}       = $subject;
-            $self->{history__}{$history_files[$i]}{from}          = $from;
-            $self->{history__}{$history_files[$i]}{short_subject} = $short_subject;
-            $self->{history__}{$history_files[$i]}{short_from}    = $short_from;
-            $self->{history__}{$history_files[$i]}{cull}          = 0;
-            $self->{history__}{$history_files[$i]}{index}         = $i;
-            $self->{history__}{$history_files[$i]}{boundary}      = !$set_boundary;
-            $set_boundary = 1;
+            $self->new_history_file__( $history_files[$i], $i );
         }
     }
 
@@ -2500,6 +2534,90 @@ sub load_history_cache__
 
     $self->{history_invalid__} = 0;
     $self->sort_filter_history( '', '', '' );
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# new_history_file__
+#
+# Adds a new file to the history cache
+#
+# $file                The name of the file added
+# $index               (optional) The history keys index
+#
+# ---------------------------------------------------------------------------------------------
+sub new_history_file__
+{
+    my ( $self, $file, $index ) = @_;
+
+    # Find the class information for this file using the history_load_class helper
+    # function, and then parse the MSG file for the From and Subject information
+
+    my ( $reclassified, $bucket, $usedtobe, $magnet ) = $self->{classifier__}->history_load_class( $file );
+    my $from    = '';
+    my $subject = '';
+
+    if ( open MAIL, '<'. $self->global_config_( 'msgdir' ) . $file ) {
+        while ( <MAIL> )  {
+            last          if ( /^(\r\n|\r|\n)/ );
+            $from = $1    if ( /^From:(.*)/i );
+            $subject = $1 if ( /^Subject:(.*)/i );
+            last if ( ( $from ne '' ) && ( $subject ne '' ) );
+        }
+        close MAIL;
+    }
+
+    $from    = "<$self->{language__}{History_NoFrom}>"    if ( $from eq '' );
+    $subject = "<$self->{language__}{History_NoSubject}>" if ( !( $subject =~ /[^ \t\r\n]/ ) );
+
+    $from    =~ s/\"(.*)\"/$1/g;
+    $subject =~ s/\"(.*)\"/$1/g;
+
+    # TODO Interface violation here, need to clean up
+
+    $from    = $self->{classifier__}->{parser__}->decode_string( $from );
+    $subject = $self->{classifier__}->{parser__}->decode_string( $subject );
+
+    my ( $short_from, $short_subject ) = ( $from, $subject );
+
+    if ( length($short_from)>40 )  {
+        $short_from =~ /(.{40})/;
+        $short_from = "$1...";
+    }
+
+    if ( length($short_subject)>40 )  {
+        $short_subject =~ s/=20/ /g;
+        $short_subject =~ /(.{40})/;
+        $short_subject = "$1...";
+    }
+
+    $from =~ s/&/&amp;/g;
+    $from =~ s/</&lt;/g;
+    $from =~ s/>/&gt;/g;
+
+    $short_from =~ s/&/&amp;/g;
+    $short_from =~ s/</&lt;/g;
+    $short_from =~ s/>/&gt;/g;
+
+    $subject =~ s/&/&amp;/g;
+    $subject =~ s/</&lt;/g;
+    $subject =~ s/>/&gt;/g;
+
+    $short_subject =~ s/&/&amp;/g;
+    $short_subject =~ s/</&lt;/g;
+    $short_subject =~ s/>/&gt;/g;
+
+    $self->{history__}{$file}{bucket}        = $bucket;
+    $self->{history__}{$file}{reclassified}  = $reclassified;
+    $self->{history__}{$file}{magnet}        = $magnet;
+    $self->{history__}{$file}{subject}       = $subject;
+    $self->{history__}{$file}{from}          = $from;
+    $self->{history__}{$file}{short_subject} = $short_subject;
+    $self->{history__}{$file}{short_from}    = $short_from;
+    $self->{history__}{$file}{cull}          = 0;
+
+    $index = $self->history_size() if ( !defined( $index ) );
+    $self->{history__}{$file}{index}         = $index;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -2664,16 +2782,20 @@ sub history_reclassify
         # At this point %messages maps that files that need reclassifying to their
         # new bucket classification
 
+        # This hash maps buckets to list of files to place in those buckets
+
+        my %work;
+
         while ( my ($mail_file, $newbucket) = each %messages ) {
 
             # Get the current classification for this message
 
             my ( $reclassified, $bucket, $usedtobe, $magnet) = $self->{classifier__}->history_load_class( $mail_file );
 
-            # Only reclassify messages that havn't been reclassified before
+            # Only reclassify messages that haven't been reclassified before
 
             if ( !$reclassified ) {
-                $self->{classifier__}->add_message_to_bucket( $self->global_config_( 'msgdir' ) . $mail_file, $newbucket );
+                push @{$work{$newbucket}}, $self->global_config_( 'msgdir' ) . $mail_file;
 
                 $self->log_( "Reclassifying $mail_file from $bucket to $newbucket" );
 
@@ -2714,6 +2836,13 @@ sub history_reclassify
                 $self->{configuration__}->save_configuration();
             }
         }
+
+        # At this point the work hash maps the buckets to lists of files to reclassify, so run through
+        # them doing bulk updates
+
+        foreach my $newbucket (keys %work) {
+            $self->{classifier__}->add_messages_to_bucket( $newbucket, @{$work{$newbucket}} );
+	}
     }
 }
 
@@ -2943,7 +3072,8 @@ sub history_page
                                                             ( defined( $self->{form_}{setsearch}     ) ) ||
                                                             ( defined( $self->{form_}{deletemessage} ) ) ||
                                                             ( defined( $self->{form_}{clearall}      ) ) ||
-                                                            ( defined( $self->{form_}{clearpage}     ) ) );
+                                                            ( defined( $self->{form_}{clearpage}     ) ) ||
+                                                            ( $self->{need_resort__} == 1 )            );
 
     # Redirect somewhere safe if non-idempotent action has been taken
 
@@ -3044,11 +3174,6 @@ sub history_page
             my $bucket        = $self->{history__}{$mail_file}{bucket};
             my $reclassified  = $self->{history__}{$mail_file}{reclassified};
             my $index         = $self->{history__}{$mail_file}{index} + 1;
-            my $boundary      = $self->{history__}{$mail_file}{boundary};
-
-            if ( $boundary && ( $self->{form_}{sort} eq '' ) && ( $i != $start_message ) ) {
-                $body .= "<tr class=\"rowHighlighted\" height=\"2\"><td colspan=\"6\"></td></tr>";
-	    }
 
             $body .= "<tr";
             if ( ( ( defined($self->{form_}{file}) && ( $self->{form_}{file} eq $mail_file ) ) ) || 
@@ -3266,7 +3391,20 @@ sub view_page
     $body .= "<tr>\n<td class=\"openMessageBody\"><hr><p>";
 
     if ( $self->{history__}{$mail_file}{magnet} eq '' ) {
-      $body .= $self->{classifier__}->get_html_colored_message($self->global_config_( 'msgdir' ) . $mail_file);
+        $body .= $self->{classifier__}->get_html_colored_message($self->global_config_( 'msgdir' ) . $mail_file);
+
+        # Enable saving of word-scores
+
+        $self->{classifier__}->wordscores( 1 );
+
+        # Build the scores by classifying the message, since get_html_colored_message has parsed the message
+        # for us we do not need to parse it again and hence we pass in undef for the filename
+
+        $self->{classifier__}->classify( undef, $self );
+
+        # Disable, print, and clear saved word-scores
+
+        $self->{classifier__}->wordscores( 0 );
     } else {
         $self->{history__}{$mail_file}{magnet} =~ /(.+): ([^\r\n]+)/;
         my $header = $1;
@@ -3311,18 +3449,6 @@ sub view_page
     $body .= "<tr><td class=\"top20\" valign=\"top\">\n";
 
     if ($self->{history__}{$mail_file}{magnet} eq '') {
-
-        # Enable saving of word-scores
-
-        $self->{classifier__}->wordscores( 1 );
-
-        # Build the scores by classifying the message
-
-        $self->{classifier__}->classify_file($self->global_config_( 'msgdir' ) . $mail_file, $self);
-
-        # Disable, print, and clear saved word-scores
-
-        $self->{classifier__}->wordscores( 0 );
         $body .= $self->{classifier__}->scores();
         $self->{classifier__}->scores('');
     } else {

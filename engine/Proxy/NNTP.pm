@@ -222,11 +222,12 @@ sub child__
                 if ( $response =~ /^220 (.*) (.*)$/i) {
                     $count += 1;
 
-                    my $class = $self->{classifier__}->classify_and_modify( $news, $client, $download_count, $count, 0, '' );
+                    my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $news, $client, $download_count, $count, 0, '' );
 
                     # Tell the parent that we just handled a mail
 
-                    print $pipe "$class$eol";
+                    print $pipe "CLASS:$class$eol";
+                    print $pipe "NEWFL:$history_file$eol";
                 }
 
                 $self->flush_extra_( $news, $client, 0 );

@@ -186,7 +186,6 @@ sub child__
 
             next;
         }
-        
 
         if ( ( $command =~ /MAIL FROM:/i )    ||
              ( $command =~ /RCPT TO:/i )      ||
@@ -206,10 +205,11 @@ sub child__
             if ( $self->smtp_echo_response_( $mail, $client, $command ) ) {
                 $count += 1;
 
-                my $class = $self->{classifier__}->classify_and_modify( $client, $mail, $download_count, $count, 0, '' );
+                my ( $class, $history_file ) = $self->{classifier__}->classify_and_modify( $client, $mail, $download_count, $count, 0, '' );
 
                 # Tell the parent that we just handled a mail
-                print $pipe "$class$eol";
+                print $pipe "CLASS:$class$eol";
+                print $pipe "NEWFL:$history_file$eol";
 
                 my $response = <$mail>;
                 $self->tee_( $client, $response );
