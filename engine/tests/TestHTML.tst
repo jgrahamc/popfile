@@ -61,6 +61,8 @@ use POSIX ":sys_wait_h";
 use HTML::Form;
 my @forms;
 
+my $hidden = 0;
+
 # Helper function that finds a form in @forms with the
 # named input element, returns the form object and input
 # element if found or undef
@@ -70,9 +72,11 @@ sub find_form
     my ( $name, $nth ) = @_;
 
     foreach my $form (@forms) {
+#        print "Checking form ", $form->dump, "\n";
         my $input = $form->find_input( $name, undef, $nth );
 
-        if ( defined( $input ) ) {
+        if ( defined( $input ) &&
+           ( ( $input->type ne 'hidden' ) || $hidden ) ) {
             return ( $form, $input );
         }
     }
@@ -116,7 +120,7 @@ sub form_input
 
 sub pipeready
 {
-    my ( $self, $pipe ) = @_;
+    my ( $pipe ) = @_;
 
     if ( !defined( $pipe ) ) {
         return 0;
@@ -168,7 +172,8 @@ $l->mq( $mq );
 $l->logger( $l );
 
 $l->initialize();
-$l->config_( 'level', 2 );
+$l->config_( 'level', 0 );
+$l->start();
 $mq->configuration( $c );
 $mq->mq( $mq );
 $mq->logger( $l );
@@ -186,7 +191,6 @@ $p->version( 'vtest.suite.ver' );
 $p->initialize();
 $p->config_( 'port', 9110 );
 $p->config_( 'force_fork', 0 );
-$p->start();
 
 test_assert( $p->config_( 'secure_server' ) eq '' );
 
@@ -224,8 +228,6 @@ our $sk = $h->session_key();
 
 test_assert( defined( $sk ) );
 test_assert( $sk ne '' );
-
-$mq->service();
 
 test_assert_equal( $h->url_encode_( ']' ), '%5d' );
 test_assert_equal( $h->url_encode_( '[' ), '%5b' );
@@ -268,7 +270,7 @@ my $session = $b->get_session_key( 'admin', '' );
 our $port = 9001 + int(rand(1000));
 pipe my $dreader, my $dwriter;
 pipe my $ureader, my $uwriter;
-my ( $pid, $pipe ) = forker();
+my $pid = fork();
 
 if ( $pid == 0 ) {
 
@@ -282,13 +284,18 @@ if ( $pid == 0 ) {
     $h->config_( 'port', $port );
     $h->start();
 
+    $mq->{pid__} = $$;
+
+    $p->start();
+    $mq->service();
+
     my %lang = $h->language();
     test_assert_equal( $lang{LanguageCode}, 'en' );
 
     while ( 1 ) {
         $h->service();
 
-        if ( pipeready( 0, $dreader ) ) {
+        if ( pipeready( $dreader ) ) {
             my $command = <$dreader>;
 
             if ( $command =~ /^__QUIT/ ) {
@@ -350,6 +357,12 @@ EOM
                 close FILE;
 
                 $hi->commit_slot( $session, $slot, $bucket, $magnet );
+                my $cd = 10;
+                while ( $cd-- ) {
+                    select( undef, undef, undef, 0.1 );
+                    $mq->service();
+                    $hi->service();
+                }   
                 print $uwriter "OK\n";
                 next;
             }
@@ -391,7 +404,6 @@ EOM
 
     my $ua = new LWP::UserAgent;
     my $line_number = 0;
-
     my %h = ( sk => \$sk , port => \$port, version => \$version);
 
     my $in = new String::Interpolate %h;
@@ -428,13 +440,12 @@ EOM
         if ( $line =~ /^GET +(.+)$/ ) {
             my $request = HTTP::Request->new('GET', "http://127.0.0.1:$port$1" );
             my $response = $ua->request($request);
-            test_assert_equal( $response->code, 200 );
+            @forms   = HTML::Form->parse( $response );
             $content = $response->content;
             $content =~ s/^[\t ]+//gm;
             $content =~ s/[\t ]+$//gm;
             while ( ( $content =~ s/\n\n/\n/gs ) > 0 ) {
             }
-            @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
             next;
         }
 
@@ -445,13 +456,18 @@ EOM
             $request = $form->click( $name ) if ( defined( $form ) );
             if ( defined( $request ) ) {
                 my $response = $ua->request( $request );
+                @forms = HTML::Form->parse( $response );
                 if ( $response->code == 302 ) {
                     $content = get(url("http://127.0.0.1:$port" . $response->headers->header('Location')));
+                    @forms = HTML::Form->parse( $content, "http://127.0.0.1:port" );
                 } else {
                     test_assert_equal( $response->code, 200, "From script line $line_number" );
                     $content = $response->content;
                 }
-                @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
+                $content =~ s/^[\t ]+//gm;
+                $content =~ s/[\t ]+$//gm;
+                while ( ( $content =~ s/\n\n/\n/gs ) > 0 ) {
+                }
             } else {
                 test_assert( 0, "Failed to create request form at script line $line_number" );
             }
@@ -545,18 +561,32 @@ EOM
             if ( defined( $request ) ) {
                 my $response = $ua->request( $request );
                 $content = $response->content;
-                @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
+                $content =~ s/^[\t ]+//gm;
+                $content =~ s/[\t ]+$//gm;
+                while ( ( $content =~ s/\n\n/\n/gs ) > 0 ) {
+                }
+                @forms   = HTML::Form->parse( $response );
             }
             next;
         }
 
         if ( $line =~ /^MATCH +(.+)$/ ) {
-            test_assert_regexp( $content, "\Q$1\E", "From script line $line_number" );
+            my $result = test_assert_regexp( $content, "\Q$1\E", "From script line $line_number" );
+            if ( !$result ) {
+                open HTML, ">$line_number.html";
+                print HTML $content;
+                close HTML;
+            }
             next;
         }
 
         if ( $line =~ /^NOTMATCH +(.+)$/ ) {
-            test_assert_not_regexp( $content, "\Q$1\E", "From script line $line_number" );
+            my $result = test_assert_not_regexp( $content, "\Q$1\E", "From script line $line_number" );
+            if ( !$result ) {
+                open HTML, ">$line_number.html";
+                print HTML $content;
+                close HTML;
+            }
             next;
         }
 
@@ -579,7 +609,12 @@ EOM
                 $block .= $line;
             }
 
-            test_assert_regexp( $content, "\Q$block\E", "From script line $line_number" );
+            my $result = test_assert_regexp( $content, "\Q$block\E", "From script line $line_number" );
+            if ( !$result ) {
+                open HTML, ">$line_number.html";
+                print HTML $content;
+                close HTML;
+            }
             next;
         }
 
@@ -607,16 +642,27 @@ EOM
             last;
         }
 
+        if ( $line =~ /^HIDDEN (0|1)$/ ) {
+            $hidden = $1;
+            next;
+        }
+
         if ( $line =~ /^NEWMSG (\d+)$/ ) {
+            $h->log_( 2, $line );
             my ( $msg ) = ( $1 );
             print $dwriter "__NEWMESSAGE $msg\n";
             my $reply = <$ureader>;
+            $h->log_( 2, $reply );
 
             if ( !( $reply =~ /^OK/ ) ) {
                 test_assert( 0, "From script line $line_number" );
             }
-            $mq->service();
-            $hi->service();
+            my $cd = 10;
+            while ( $cd-- ) {
+                select( undef, undef, undef, 0.1 );
+                $mq->service();
+                $hi->service();
+            }
 
             next;
         }
@@ -638,8 +684,6 @@ skip:
     close $ureader;
 
     $p->stop();
-
-print "PID: $pid\n";
 
     while ( waitpid( $pid, &WNOHANG ) != $pid ) {
     }

@@ -133,9 +133,12 @@ sub test_report
 
 sub test_assert
 {
-        my ( $file, $line,  $test, $context ) = @_;
+    my ( $file, $line,  $test, $context ) = @_;
 
-        test_report( eval( $test ), $test, $file, $line, $context );
+    my $result = eval( $test );
+    test_report( $result, $test, $file, $line, $context );
+
+    return $result;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -179,8 +182,9 @@ sub test_assert_equal
     $expected =~ s/\r/0x0D/;
     $expected =~ s/\n/0x0A/;
 
-
     test_report( $result, "expecting [$expected] and got [$test]", $file, $line, $context );
+
+   return $result;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -207,6 +211,8 @@ sub test_assert_regexp
     my $result = ( $test =~ /$expected/m );
 
     test_report( $result, "expecting to match [$expected] and got [$test]", $file, $line, $context );
+
+    return $result;
 }
 
 sub test_assert_not_regexp
@@ -215,6 +221,8 @@ sub test_assert_not_regexp
     my $result = !( $test =~ /$expected/m );
 
     test_report( $result, "unexpected match of [$expected]", $file, $line, $context );
+
+    return $result;
 }
 
 # MAIN

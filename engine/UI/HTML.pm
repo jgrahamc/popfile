@@ -1117,7 +1117,7 @@ sub advanced_page
         my $result = $self->{c__}->add_stopword( $self->{api_session__},
                          $self->{form_}{newword} );
         if ( $result == 0 ) {
-            $templ->param( 'Advanced_If_Add_Message' ) = 1;
+            $templ->param( 'Advanced_If_Add_Message' => 1 );
         }
     }
 
@@ -1125,7 +1125,7 @@ sub advanced_page
         my $result = $self->{c__}->remove_stopword( $self->{api_session__},
                          $self->{form_}{word} );
         if ( $result == 0 ) {
-            $templ->param( 'Advanced_If_Delete_Message' ) = 1;
+            $templ->param( 'Advanced_If_Delete_Message' => 1 );
         }
     }
 
@@ -1509,7 +1509,8 @@ sub bucket_page
 
     $templ = $self->load_template__( 'bucket-page.thtml' );
 
-    $templ->param( 'Bucket_Main_Title' => sprintf( $self->{language__}{SingleBucket_Title}, $self->{form_}{showbucket} ) );
+    my $color = $self->{c__}->get_bucket_color( $self->{api_session__}, $self->{form_}{showbucket} );
+    $templ->param( 'Bucket_Main_Title' => sprintf( $self->{language__}{SingleBucket_Title}, "<font color=\"$color\">$self->{form_}{showbucket}</font>" ) );
 
     my $bucket_count = $self->{c__}->get_bucket_word_count( $self->{api_session__}, $self->{form_}{showbucket} );
     $templ->param( 'Bucket_Word_Count'   => $self->pretty_number( $bucket_count ) );
@@ -2631,9 +2632,13 @@ sub view_page
             $templ->param( 'View_If_Format_Score' => 1 );
         }
     } else {
-        $magnet =~ /(.+): ([^\r\n]+)/;
-        my $header = $1;
-        my $text   = $2;
+
+        # TODO: See comment below for details
+
+        # $magnet =~ /(.+): ([^\r\n]+)/;
+        # my $header = $1;
+        # my $text   = $2;
+
         my $body = '<tt>';
 
         open MESSAGE, '<' . $mail_file;
@@ -2647,21 +2652,27 @@ sub view_page
             $line =~ s/([^ \r\n]{150})/$1<br \/>/g;
             $line =~ s/[\r\n]+/<br \/>/g;
 
-            if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ ) {
-                my $head = $1;
-                my $arg  = $2;
+            # TODO: This code is now useless because the magnet itself
+            # doesn't contain the information about which header we are
+            # looking for.  Ultimately, we need to fix this but I decided
+            # for v0.22.0 release to not make further changes and leave this
+            # code as unfixed.
 
-                if ( $head =~ /\Q$header\E/i ) {
+            # if ( $line =~ /^([A-Za-z-]+): ?([^\n\r]*)/ ) {
+            #    my $head = $1;
+            #    my $arg  = $2;
 
-                    $text =~ s/</&lt;/g;
-                    $text =~ s/>/&gt;/g;
+            #    if ( $head =~ /\Q$header\E/i ) {
 
-                    if ( $arg =~ /\Q$text\E/i ) {
-                        my $new_color = $self->{c__}->get_bucket_color( $self->{api_session__}, $bucket );
-                        $line =~ s/(\Q$text\E)/<b><font color=\"$new_color\">$1<\/font><\/b>/;
-                    }
-                }
-            }
+            #        $text =~ s/</&lt;/g;
+            #        $text =~ s/>/&gt;/g;
+
+            #        if ( $arg =~ /\Q$text\E/i ) {
+            #            my $new_color = $self->{c__}->get_bucket_color( $self->{api_session__}, $bucket );
+            #            $line =~ s/(\Q$text\E)/<b><font color=\"$new_color\">$1<\/font><\/b>/;
+            #        }
+            #    }
+            # }
 
             $body .= $line;
         }
@@ -3167,18 +3178,20 @@ sub shutdown_page__
 
     # Figure out what style sheet we are using
     my $root = 'skins/' . $self->config_( 'skin' ) . '/';
-    my $css = $self->get_root_path_( $root . 'style.css' );
-    if ( !( -e $css ) ) {
+    my $css_file = $self->get_root_path_( $root . 'style.css' );
+    if ( !( -e $css_file ) ) {
         $root = 'skins/default/';
+        $css_file = $self->get_root_path_( $root . 'style.css' );
     }
 
     # Now load the style sheet
 
-    $css = '<style type="text/css">';
-    open CSS, "${root}style.css";
+    my $css = '<style type="text/css">';
+    open CSS, $css_file;
     while ( <CSS> ) {
         $css .= $_;
     }
+    close CSS;
     $css .= "</style>";
 
     # Load the template, set the class of the menu tabs, and send the output to $text

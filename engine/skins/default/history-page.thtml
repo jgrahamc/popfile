@@ -288,6 +288,8 @@
     </table>
 </form>
 
+<TMPL_IF "History_If_MultiPage">
+
 <table width="100%" summary="">
     <tr>
         <td class="historyNavigatorBottom">
@@ -296,7 +298,9 @@
     </tr>
 </table>
 
-<TMPL_ELSE> <!-- if multi page -->
+</TMPL_IF>
+
+<TMPL_ELSE> <!-- if some messages -->
 
 <h2 class="history"><TMPL_VAR NAME="Localize_History_Title"></h2>
 <br />

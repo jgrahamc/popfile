@@ -2214,23 +2214,23 @@ sub classify
             if ( $self->{wmformat__} eq 'score' ) {
                 # Draw a chart that shows how the decision between the top
                 # two buckets was made.
-    
+
                 my @words = sort { $chart{$b} <=> $chart{$a} } keys %chart;
-    
+
                 my @chart_data;
                 my $max_chart = $chart{$words[0]};
                 my $min_chart = $chart{$words[$#words]};
                 my $scale = ( $max_chart > $min_chart )?400 / ( $max_chart - $min_chart ):0;
-                my $width = int( 400 / $#words );
+                my $width = int( 400 / ( $#words + 1 ) );
                 if ( $width < 1 ) {
                     $width = 1;
                 }
                 my $color = $self->get_bucket_color( $session, $ranking[0] );
                 foreach my $word (@words) {
                     my %row_data;
-    
+
                     next if ( $chart{$word} == 0 );
-    
+
                     $row_data{View_If_Bar} = ( $chart{$word} > 0 );
                     if ( $chart{$word} > 0 ) {
                         $row_data{View_Height} = int( $chart{$word} * $scale + .5 );
@@ -2245,9 +2245,9 @@ sub classify
                 $color = $self->get_bucket_color( $session, $ranking[1] );
                 foreach my $word (@words) {
                     my %row_data;
-    
+
                     next if ( $chart{$word} == 0 );
-    
+
                     $row_data{View_If_Bar} = ( $chart{$word} < 0 );
                     if ( $chart{$word} < 0 ) {
                         $row_data{View_Height} = - ( int( $chart{$word} * $scale +.5 ) );
@@ -2263,7 +2263,6 @@ sub classify
             else {
                 $templ->param( 'If_chart' => 0 );
             }
-            
         }
     }
 
