@@ -452,6 +452,7 @@
   ; option is only offered if the installer has started POPFile running)
 
   !define MUI_FINISHPAGE_RUN
+  !define MUI_FINISHPAGE_RUN_TEXT     "$(PFI_TEXT_FINISH_RUN)"
   !define MUI_FINISHPAGE_RUN_FUNCTION "RunUI"
 
   ; Provide a checkbox to let user display the Release Notes for this version of POPFile
