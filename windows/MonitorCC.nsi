@@ -78,7 +78,7 @@
   !define C_PFI_PRODUCT  "POPFile Corpus Conversion Monitor"
   Name                   "${C_PFI_PRODUCT}"
 
-  !define C_PFI_VERSION  "0.1.10"
+  !define C_PFI_VERSION  "0.1.11"
 
   ; Mention the version number in the window title
 
@@ -127,10 +127,10 @@
 
   ; The icon file for the utility
 
-  !define MUI_ICON    "POPFileIcon\popfile.ico"
+  !define MUI_ICON                                "POPFileIcon\popfile.ico"
 
   !define MUI_HEADERIMAGE
-  !define MUI_HEADERIMAGE_BITMAP "hdr-common.bmp"
+  !define MUI_HEADERIMAGE_BITMAP                  "hdr-common.bmp"
   !define MUI_HEADERIMAGE_RIGHT
 
   ;----------------------------------------------------------------
@@ -141,13 +141,13 @@
   ; two lines of text, e.g. the German version is truncated, so we use a custom UI which
   ; provides slightly wider text areas. Each area is still limited to a single line of text.
 
-  !define MUI_UI "UI\pfi_modern.exe"
+  !define MUI_UI                                  "UI\pfi_modern.exe"
 
   ; The 'hdr-common.bmp' logo is only 90 x 57 pixels, much smaller than the 150 x 57 pixel
   ; space provided by the default 'modern_headerbmpr.exe' UI, so we use a custom UI which
   ; leaves more room for the TITLE and SUBTITLE text.
 
-  !define MUI_UI_HEADERIMAGE_RIGHT "UI\pfi_headerbmpr.exe"
+  !define MUI_UI_HEADERIMAGE_RIGHT                "UI\pfi_headerbmpr.exe"
 
   ;----------------------------------------------------------------
   ;  Interface Settings - Installer Finish Page Interface Settings
@@ -173,7 +173,7 @@
 
   ; Use a custom '.onGUIInit' function to allow the use of language-specific error messages
 
-  !define MUI_CUSTOMFUNCTION_GUIINIT PFIGUIInit
+  !define MUI_CUSTOMFUNCTION_GUIINIT              PFIGUIInit
 
   ;----------------------------------------------------------------
   ; Language Settings for MUI pages
@@ -181,14 +181,14 @@
 
   ; Override the standard prompt (to match the one used by the main installer)
 
-  !define MUI_LANGDLL_WINDOWTITLE "Language Selection"
+  !define MUI_LANGDLL_WINDOWTITLE                 "Language Selection"
 
   ; Use same language setting as the POPFile installer (if this registry entry
   ; is not found, the user will be asked to select the language to be used)
 
-  !define MUI_LANGDLL_REGISTRY_ROOT "HKCU"
-  !define MUI_LANGDLL_REGISTRY_KEY "Software\POPFile Project\POPFile\MRI"
-  !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
+  !define MUI_LANGDLL_REGISTRY_ROOT               "HKCU"
+  !define MUI_LANGDLL_REGISTRY_KEY                "Software\POPFile Project\POPFile\MRI"
+  !define MUI_LANGDLL_REGISTRY_VALUENAME          "Installer Language"
 
 #--------------------------------------------------------------------------
 # Define the Page order for the utility
@@ -272,7 +272,6 @@
 
   ;-----------------------------------------
   ; Select the languages to be supported by the utility
-  ; Currently a subset of the languages supported by NSIS MUI 1.68 (using the NSIS names)
   ;-----------------------------------------
 
   ; Default language (appears first in the drop-down list)
@@ -281,41 +280,7 @@
 
   ; Additional languages supported by the utility
 
-  ; To remove a language, comment-out the relevant '!insertmacro PFI_LANG_LOAD' line below.
-
-  ; Entries will appear in the drop-down list of languages in the order given below
-  ; (the order used here ensures that the list entries appear in alphabetic order).
-
-  ; NOTE: The order used here assumes that the NSIS MUI 'Japanese.nsh' language file has
-  ; been patched to use 'Nihongo' instead of 'Japanese' [see 'SMALL NSIS PATCH REQUIRED'
-  ; in the 'Support for Japanese text processing' section of the header comment at the
-  ; start of the 'installer.nsi' file]
-
-  !insertmacro PFI_LANG_LOAD "Arabic"
-  !insertmacro PFI_LANG_LOAD "Bulgarian"
-  !insertmacro PFI_LANG_LOAD "SimpChinese"
-  !insertmacro PFI_LANG_LOAD "TradChinese"
-  !insertmacro PFI_LANG_LOAD "Czech"
-  !insertmacro PFI_LANG_LOAD "Danish"
-  !insertmacro PFI_LANG_LOAD "German"
-  !insertmacro PFI_LANG_LOAD "Spanish"
-  !insertmacro PFI_LANG_LOAD "French"
-  !insertmacro PFI_LANG_LOAD "Greek"
-  !insertmacro PFI_LANG_LOAD "Italian"
-  !insertmacro PFI_LANG_LOAD "Korean"
-  !insertmacro PFI_LANG_LOAD "Hungarian"
-  !insertmacro PFI_LANG_LOAD "Dutch"
-  !insertmacro PFI_LANG_LOAD "Japanese"
-  !insertmacro PFI_LANG_LOAD "Norwegian"
-  !insertmacro PFI_LANG_LOAD "Polish"
-  !insertmacro PFI_LANG_LOAD "Portuguese"
-  !insertmacro PFI_LANG_LOAD "PortugueseBR"
-  !insertmacro PFI_LANG_LOAD "Russian"
-  !insertmacro PFI_LANG_LOAD "Slovak"
-  !insertmacro PFI_LANG_LOAD "Finnish"
-  !insertmacro PFI_LANG_LOAD "Swedish"
-  !insertmacro PFI_LANG_LOAD "Turkish"
-  !insertmacro PFI_LANG_LOAD "Ukrainian"
+  !include "pfi-languages.nsh"
 
 #--------------------------------------------------------------------------
 # General settings

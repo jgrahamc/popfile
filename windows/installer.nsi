@@ -41,7 +41,7 @@
 ;
 ; NOTE: The language selection menu order used in this script assumes that the NSIS MUI
 ; 'Japanese.nsh' language file has been patched to use 'Nihongo' instead of 'Japanese'
-; [see 'SMALL NSIS PATCH REQUIRED' in the 'Support for Japanese text processing' section below]
+; [see 'SMALL NSIS PATCH REQUIRED' in the 'pfi-languages.nsh' file]
 
 ; INSTALLER SIZE: The LZMA compression method is used to reduce the size of the 'setup.exe'
 ; file by around 25% compared to the default compression method but at the expense of greatly
@@ -116,40 +116,13 @@
 # If required, the command-line switch /DENGLISH_MODE can be used to build an English-only
 # version. This switch can appear before or after the four POPFile version number parameters.
 #--------------------------------------------------------------------------
-# Removing support for a particular language:
+# The POPFile installer uses several multi-language mode programs built using NSIS. To make
+# maintenance easier, an 'include' file (pfi-languages.nsh) defines the supported languages.
 #
-# To remove any of the additional languages, comment-out the relevant line in the list of
-# languages in the 'Language Support for the installer and uninstaller' block of code.
+# To remove support for a particular language, comment-out the relevant line in the list of
+# languages in the 'pfi-languages.nsh' file.
 #
-# For example, to remove support for the 'Dutch' language, comment-out the line
-#
-#     !insertmacro PFI_LANG_LOAD "Dutch"
-#
-# in the list of languages supported by the installer. Similar changes will be required in the
-# other components used by this script (see the 'adduser.nsi' and 'MonitorCC.nsi' scripts).
-#
-#--------------------------------------------------------------------------
-# Adding support for a particular language (it must be supported by NSIS):
-#
-# The number of languages which can be supported depends upon the availability of:
-#
-# (1) an up-to-date main NSIS language file (${NSISDIR}\Contrib\Language files\*.nlf)
-# and
-# (2) an up-to-date NSIS MUI Language file (${NSISDIR}\Contrib\Modern UI\Language files\*.nsh)
-#
-# To add support for a language which is already supported by the NSIS MUI package, an extra
-# file is required:
-#
-# <NSIS Language NAME>-pfi.nsh  -  holds customised versions of the standard MUI text strings
-#                                  (eg removing the 'reboot' reference from the 'WELCOME' page)
-#                                  plus strings used on the custom pages and elsewhere
-#
-# Once this file has been prepared and placed in the 'windows\languages' directory with the
-# other *-pfi.nsh files, add a new '!insertmacro PFI_LANG_LOAD' line to load this new file.
-#
-# Similar changes will be required in the 'adduser.nsi' and 'MonitorCC.nsi' scripts. If there
-# is a suitable POPFile UI language file for the new language, some changes will be required
-# to the code in 'adduser.nsi' which attempts to select an appropriate UI language.
+# For instructions on how to add support for new languages, see the 'pfi-languages.nsh' file.
 #--------------------------------------------------------------------------
 # Support for Japanese text processing
 #
@@ -165,25 +138,7 @@
 # (assuming that the default compression method is used). If the command-line switch
 # /DNO_KAKASI is used then a smaller installer can be built by omitting the Japanese support.
 #
-# SMALL NSIS PATCH REQUIRED:
-#
-# The POPFile User Interface 'Language' menu uses the name 'Nihongo' to select the Japanese
-# language texts. The NSIS default name used to select the Japanese language texts is 'Japanese'
-# which can cause some confusion.
-#
-# It is an easy matter to make the installer display 'Nihongo' in the list of languages offered.
-# However this requires a small change to one of the NSIS MUI language files:
-#
-# In the file ${NSISDIR}\Contrib\Modern UI\Language files\Japanese.nsh, change the value of the
-# MUI_LANGNAME string from "Japanese" to "Nihongo". For example, using the file supplied with
-# NSIS 2.0, released 7 February 2004, change line 13 from:
-#
-# !define MUI_LANGNAME "Japanese" ;(“ú–{Œê) Use only ASCII characters (if this is not possible, use the English name)
-#
-# to:
-#
-# !define MUI_LANGNAME "Nihongo" ;(“ú–{Œê) Use only ASCII characters (if this is not possible, use the English name)
-#
+# SMALL NSIS PATCH REQUIRED: See 'pfi-languages.nsh' for details.
 #--------------------------------------------------------------------------
 
   ;------------------------------------------------
@@ -354,8 +309,8 @@
 # Include private library functions and macro definitions
 #--------------------------------------------------------------------------
 
-  !include pfi-library.nsh
-  !include WriteEnvStr.nsh
+  !include "pfi-library.nsh"
+  !include "WriteEnvStr.nsh"
 
 #--------------------------------------------------------------------------
 # Configure the MUI pages
@@ -559,7 +514,6 @@
 
   ;-----------------------------------------
   ; Select the languages to be supported by installer/uninstaller.
-  ; Currently a subset of the languages supported by NSIS MUI 1.70 (using the NSIS names)
   ;-----------------------------------------
 
   ; At least one language must be specified for the installer (the default is "English")
@@ -570,44 +524,7 @@
 
   !ifndef ENGLISH_MODE
 
-        ; Additional languages supported by the installer.
-
-        ; To remove a language, comment-out the relevant '!insertmacro PFI_LANG_LOAD' line
-        ; from this list. (To remove all of these languages, use /DENGLISH_MODE on command-line)
-
-        ; Entries will appear in the drop-down list of languages in the order given below
-        ; (the order used here ensures that the list entries appear in alphabetic order).
-
-        ; NOTE: The order used here assumes that the NSIS MUI 'Japanese.nsh' language file has
-        ; been patched to use 'Nihongo' instead of 'Japanese' [see 'SMALL NSIS PATCH REQUIRED'
-        ; in the 'Support for Japanese text processing' section of the header comment at the
-        ; start of the 'installer.nsi' file]
-
-        !insertmacro PFI_LANG_LOAD "Arabic"
-        !insertmacro PFI_LANG_LOAD "Bulgarian"
-        !insertmacro PFI_LANG_LOAD "SimpChinese"
-        !insertmacro PFI_LANG_LOAD "TradChinese"
-        !insertmacro PFI_LANG_LOAD "Czech"
-        !insertmacro PFI_LANG_LOAD "Danish"
-        !insertmacro PFI_LANG_LOAD "German"
-        !insertmacro PFI_LANG_LOAD "Spanish"
-        !insertmacro PFI_LANG_LOAD "French"
-        !insertmacro PFI_LANG_LOAD "Greek"
-        !insertmacro PFI_LANG_LOAD "Italian"
-        !insertmacro PFI_LANG_LOAD "Korean"
-        !insertmacro PFI_LANG_LOAD "Hungarian"
-        !insertmacro PFI_LANG_LOAD "Dutch"
-        !insertmacro PFI_LANG_LOAD "Japanese"
-        !insertmacro PFI_LANG_LOAD "Norwegian"
-        !insertmacro PFI_LANG_LOAD "Polish"
-        !insertmacro PFI_LANG_LOAD "Portuguese"
-        !insertmacro PFI_LANG_LOAD "PortugueseBR"
-        !insertmacro PFI_LANG_LOAD "Russian"
-        !insertmacro PFI_LANG_LOAD "Slovak"
-        !insertmacro PFI_LANG_LOAD "Finnish"
-        !insertmacro PFI_LANG_LOAD "Swedish"
-        !insertmacro PFI_LANG_LOAD "Turkish"
-        !insertmacro PFI_LANG_LOAD "Ukrainian"
+        !include "pfi-languages.nsh"
 
   !endif
 
