@@ -11,7 +11,7 @@
         <input type="submit" class="submit" name="nomore_bucket_help" value="<TMPL_VAR NAME="Localize_Help_No_More">" />
     </form>
 </div>
-
+<br />
 </TMPL_IF>
 
 <TMPL_IF NAME="If_Show_Training_Help">
@@ -35,7 +35,7 @@
         <input type="hidden" name="session" value="<TMPL_VAR NAME="Session_Key">" />
         <table width="100%" summary="<TMPL_VAR NAME="Localize_Bucket_MaintenanceTableSummary">">
             <tr>
-                <th colspan="13" align="left">
+                <th colspan="7" align="left">
                     <h2 class="buckets"><TMPL_VAR NAME="Localize_Bucket_Title"></h2>
                 </th>
             </tr>
@@ -43,40 +43,28 @@
                 <th class="bucketsLabel" scope="col" align="left">
                     <TMPL_VAR NAME="Localize_Bucket_BucketName">
                 </th>
-                <th width="1%">
-                    &nbsp;
-                </th>
+
                 <th class="bucketsLabel" scope="col" align="right">
                     <TMPL_VAR NAME="Localize_Bucket_UniqueWords">
                 </th>
-                <th width="1%">
-                    &nbsp;
-                </th>
+
                 <th class="bucketsLabel" scope="col" align="center">
                     <TMPL_VAR NAME="Localize_Bucket_SubjectModification">
                 </th>
-                <th width="1%">
-                    &nbsp;
-                </th>
+
                 <th class="bucketsLabel" scope="col" align="center">
                     <TMPL_VAR NAME="Localize_Configuration_XTCInsertion">
                 </th>
-                <th width="1%">
-                    &nbsp;
-                </th>
+
                 <th class="bucketsLabel" scope="col" align="center">
                     <TMPL_VAR NAME="Localize_Configuration_XPLInsertion">
                 </th>
-                <th width="1%">
-                    &nbsp;
-                </th>
+
                 <th class="bucketsLabel" scope="col" align="center">
                     <TMPL_VAR NAME="Localize_Bucket_Quarantine">
                 </th>
-                <th width="1%">
-                    &nbsp;
-                </th>
-                <th class="bucketsLabel" scope="col" align="left">
+
+                <th class="bucketsLabel" scope="col" align="center">
                     <TMPL_VAR NAME="Localize_Bucket_ChangeColor">
                 </th>
             </tr>
@@ -112,58 +100,44 @@
                     </TMPL_IF>
         
                 </td>
-                <td width="1%">
-                    &nbsp;
-                </td>
+
         
                 <TMPL_IF NAME="Corpus_If_Bucket_Not_Pseudo">
         
                 <td align="right">
                     <TMPL_VAR NAME="Corpus_Bucket_Unique">
                 </td>
-                <td width="1%">
-                    &nbsp;
-                </td>
+
         
                 <TMPL_ELSE>
         
                 <td align="right">
                     &nbsp;
                 </td>
-                <td width="1%">
-                    &nbsp;
-                </td>
+
         
                 </TMPL_IF>
         
                 <td align="center">
                     <input type="checkbox" class="checkbox" name="<TMPL_VAR NAME="Corpus_Bucket">_subject" <TMPL_IF NAME="Corpus_If_Subject">checked="checked"</TMPL_IF> />
                 </td>
-                <td width="1%">
-                    &nbsp;
-                </td>
+
                 <td align="center">
                     <input type="checkbox" class="checkbox" name="<TMPL_VAR NAME="Corpus_Bucket">_xtc" <TMPL_IF NAME="Corpus_If_XTC">checked="checked"</TMPL_IF> />
                 </td>
-                <td width="1%">
-                    &nbsp;
-                </td>
+
                 <td align="center">
                     <input type="checkbox" class="checkbox" name="<TMPL_VAR NAME="Corpus_Bucket">_xpl" <TMPL_IF NAME="Corpus_If_XPL">checked="checked"</TMPL_IF> />
                 </td>
-                <td width="1%">
-                    &nbsp;
-                </td>
+
                 <td align="center">
                     <input type="checkbox" class="checkbox" name="<TMPL_VAR NAME="Corpus_Bucket">_quarantine" <TMPL_IF NAME="Corpus_If_Quarantine">checked="checked"</TMPL_IF> />
                 </td>
-                <td width="1%">
-                    &nbsp;
-                </td>
+
         
                 <TMPL_IF NAME="Corpus_If_Bucket_Not_Pseudo">
         
-                <td align="left">
+                <td align="center">
                     <select name="<TMPL_VAR NAME="Corpus_Bucket">_color">
         
                         <TMPL_LOOP NAME="Corpus_Loop_Loop_Colors">
@@ -188,7 +162,7 @@
             </TMPL_LOOP> <!-- corpus loop buckets -->
         
             <tr>
-                <td colspan="3">
+                <td colspan="2">
                     <hr />
                 </td>
             </tr>
@@ -196,12 +170,10 @@
                 <th class="bucketsLabel" scope="row">
                     <TMPL_VAR NAME="Localize_Total">
                 </th>
-                <td width="1%">
-                </td>
                 <td align="right">
                     <TMPL_VAR NAME="Corpus_Total_Unique">
                 </td>
-                <td colspan="9">
+                <td colspan="4">
                 </td>
                 <td>
                     <input type="submit" name="bucket_settings" value="<TMPL_VAR NAME="Localize_ApplyChanges">" />
