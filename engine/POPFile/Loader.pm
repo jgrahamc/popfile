@@ -512,7 +512,12 @@ sub CORE_link_components
     }
 
     # TODO Clean this up so that the Loader doesn't have to know so much about
-    # Bayes.
+    # Bayes or IMAP.
+
+    if ( exists $self->{components__}{core}{imap} ) {
+        $self->{components__}{core}{imap}->classifier( $self->{components__}{classifier}{bayes} );
+    }
+
 
     $self->{components__}{classifier}{bayes}->{parser__}->mangle(
         $self->{components__}{classifier}{wordmangle} );
