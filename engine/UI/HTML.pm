@@ -2907,7 +2907,7 @@ sub view_page
     $body .= "<h2 class=\"buckets\">$self->{language__}{View_Title}</h2>\n</td>\n";
 
     # navigator
-    $body .= "<td>\n";
+    $body .= "<td class=\"historyNavigatorTop\">\n";
 
     if ( $index > 0 ) {
         $body .= "<a href=\"/view?view=" . $self->{history_keys__}[ $index - 1 ];
