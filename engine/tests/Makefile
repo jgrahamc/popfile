@@ -25,12 +25,13 @@
 error:
 	$(error This needs to be called by the parent Makefile)
 
-POPFILE_ENV := export POPFILE_ROOT=../ ; export POPFILE_USER=../tests/
+export POPFILE_ROOT=../
+export POPFILE_USER=../tests/
 
 runtest:
-	@$(POPFILE_ENV) ; perl -I ../ $(DEBUGARGS) ../tests.pl $(TESTARGS)
+	perl -I ../ $(DEBUGARGS) ../tests.pl $(TESTARGS)
 ifdef DEBUGARGS
-	@$(POPFILE_ENV) ; perl ../coverage.pl
+	perl ../coverage.pl
 endif
 	@rm -rf corpus
 	@rm -rf messages
