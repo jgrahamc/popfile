@@ -216,21 +216,24 @@ sub server
             next;
         }
 
-        if ( $command =~ /CAPA/i ) {
+        if ( $command =~ /AUTH ([^ ]+)/ ) {
+            print $client "$1$eol";
+            my $echoit = <$client>;
+            print $client "Got $echoit";
+            $echoit = <$client>;
+            print $client "Got $echoit";
+            $echoit = <$client>;
+            print $client "+OK Done$eol";
+            next;
+        }
+
+        if ( $command =~ /CAPA|AUTH/i ) {
             print $client "+OK I can handle$eol" . "AUTH$eol" . "USER$eol" . "APOP$eol.$eol";
             next;
         }
 
         if ( $command =~ /APOP (.*) (.*)/i ) {
             print $client "+OK Welcome APOPer$eol";
-            next;
-        }
-
-        if ( $command =~ /AUTH ([^ ]+)/ ) {
-            next;
-        }
-
-        if ( $command =~ /AUTH/ ) {
             next;
         }
 
@@ -359,8 +362,6 @@ if ( $pid == 0 ) {
             if ( pipeready( $dreader ) ) {
                 my $command = <$dreader>;
 
-print "[$command]\n";
-
                 if ( $command =~ /__QUIT/ ) {
 		    print $uwriter "OK\n";
                     last;
@@ -368,6 +369,20 @@ print "[$command]\n";
 
                 if ( $command =~ /__TOPTOO/ ) {
                     $p->config_( 'toptoo', 1 );
+		    print $uwriter "OK\n";
+                    next;
+		}
+
+                if ( $command =~ /__SECUREBAD/ ) {
+                    $p->config_( 'secure_server', '127.0.0.1' );
+                    $p->config_( 'secure_port', 8111 );
+		    print $uwriter "OK\n";
+                    next;
+		}
+
+                if ( $command =~ /__SECUREOK/ ) {
+                    $p->config_( 'secure_server', '127.0.0.1' );
+                    $p->config_( 'secure_port', 8110 );
 		    print $uwriter "OK\n";
                     next;
 		}
@@ -694,7 +709,6 @@ print "[$command]\n";
         my $line = <$ureader>;
         test_assert_equal( $line, "OK\n" );
 
-
         my $client = IO::Socket::INET->new(
                         Proto    => "tcp",
                         PeerAddr => 'localhost',
@@ -980,7 +994,105 @@ print "[$command]\n";
 
         close $client;
 
-        # TODO SPA/AUTH tests with good, bad servers
+        # Test SPA/AUTH with a bad server
+
+        print $dwriter "__SECUREBAD\n";
+        my $line = <$ureader>;
+        test_assert_equal( $line, "OK\n" );
+
+        my $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        my $result = <$client>;
+        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "CAPA$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "-ERR can't connect to 127.0.0.1:8111$eol" );
+
+        print $client "AUTH$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "-ERR can't connect to 127.0.0.1:8111$eol" );
+
+        print $client "AUTH username$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "-ERR can't connect to 127.0.0.1:8111$eol" );
+
+        print $client "QUIT$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK goodbye$eol" );
+
+        close $client;
+
+        # Test SPA/AUTH tests with good server
+
+        print $dwriter "__SECUREOK\n";
+        my $line = <$ureader>;
+        test_assert_equal( $line, "OK\n" );
+
+        my $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        my $result = <$client>;
+        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "AUTH$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK I can handle$eol" );
+        $result = <$client>;
+        test_assert_equal( $result, "AUTH$eol" );
+        $result = <$client>;
+        test_assert_equal( $result, "USER$eol" );
+        $result = <$client>;
+        test_assert_equal( $result, "APOP$eol" );
+        $result = <$client>;
+        test_assert_equal( $result, ".$eol" );
+
+        print $client "QUIT$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Bye$eol" );
+
+        close $client;
+
+        my $client = IO::Socket::INET->new(
+                        Proto    => "tcp",
+                        PeerAddr => 'localhost',
+                        PeerPort => $port );
+
+        test_assert( defined( $client ) );
+        test_assert( $client->connected );
+
+        my $result = <$client>;
+        test_assert_equal( $result, "+OK POP3 POPFile (test suite) server ready$eol" );
+
+        print $client "AUTH gooduser$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "gooduser$eol" );
+        print $client "repeatthis$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "Got repeatthis$eol" );
+        print $client "repeatthat$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "Got repeatthat$eol" );
+        print $client "done$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Done$eol" );
+
+        print $client "QUIT$eol";
+        $result = <$client>;
+        test_assert_equal( $result, "+OK Bye$eol" );
+
+        close $client;
 
         # Send the remote server a special message that makes it die
 
