@@ -1,0 +1,98 @@
+<html><head><title>Documentation de POPFile</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>Documentation de POPFile</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Première mise en route :</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%>1ère étape<br><font size=+1><b>&nbsp;<a href="installing.html">Installation</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>2ème étape<br><font size=+1><b>&nbsp;<a href="firsttime.html">Configuration des Catégories</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>3ème étape<br><font size=+1><b>&nbsp;<a href="email.html">Client de Messagerie</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>4ème étape<br><font size=+1><b>&nbsp;<a href="training.html">Entraînement</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>Utilisation de POPFile avec :</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Les Pare-Feu</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Authentification par Mot de passe Sécurisé</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Autres Mandataires</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Comptes Courriels Multiples</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+<h2>Installation de POPFile</h2>
+
+<p>POPFile existe en deux versions : une version Windows facile à mettre en place et une version multi-plateforme pour les utilisateurs plus techniques. Une fois installées, les deux versions fonctionnent de manière identique.</p>
+
+<h3>La version Windows facile à mettre en place :</h3>
+
+<p>Téléchargez le logiciel d'installation Windows depuis <a href=http://sourceforge.net/project/showfiles.php?group_id=63137>la Page de Téléchargement de POPFile</a>,exécutez <tt>setup.exe</tt> et suivez les instructions mentionnées. Vous pouvez lancer POPFile à partir du Menu Démarrer (Démarrer > Programmes > POPFile > Run POPFile in background), ou bien redémarrer et il se chargera automatiquement. <b>Nota Bene:</b> rien n'apparaîtra sur votre écran ! Pour vérifier qu'il fonctionne correctement, lisez la section ci-dessous "Comment accéder à POPFile".</p>
+
+<h4>Exigences du système</h4>
+
+<p>Vous aurez besoin de plusieurs éléments pour faire marcher POPFile.</p>
+<ol>
+<li>La version la plus récente de POPFile</li>
+<li>Un compte courriel qui fonctionne avec le protocole POP3 (c'est le cas de la plupart des comptes, cependant vous devez ajouter des logiciels supplémentaires pour faire marcher POPFile avec des services basés sur le web tels que Hotmail et Yahoo!mail)</li>
+<li>Environ 2 méga-octets d'espace disque</li>
+</ol>
+
+<p>Vous pouvez obtenir la version la plus récente de POPFile sous forme de fichier zip en haut de la liste affichée sur <a href="http://sourceforge.net/project/showfiles.php?group_id=63137">la page de téléchargement POPFile</a>. Les utilisateurs de Windows voudront le fichier sous la section étiquetée Windows uniquement.</p>
+
+<p>POPFile occupe un peu plus d'un méga-octet. Les listes de mots (appelées le "corpus") utilisées pour la classification de votre courriel prendront un supplément de place, qui peut varier suivant le nombre de courriels que vous utilisez pour entraîner POPFile et selon le nombre de catégories que vous créez.</p>
+
+<h3>Version Multi-plateforme</h3>
+
+<p>Chargez <a href="http://www.perl.com">Perl</a> en mémoire puis téléchargez le zip Perl de POPFile depuis <a href=http://popfile.sourceforge.net/>la page d'accueil de POPFile</a>, et décompressez-le vers le répertoire de votre choix. Sur la plateforme Windows, lancez-le avec la commande <tt>perl popfile.pl</tt>
+
+<hr>
+
+<h2>Vérifier que POPFile fonctionne correctement</h2>
+
+<p>POPFile n'a pas une interface classique comme la plupart des programmes - vous y accédez grâce à votre navigateur. Ne vous inquiétez pas - personne ne peut y accéder, à moins que vous n'en décidiez autrement.</p>
+
+<p>Pour charger à POPFile, allez à <a href="http://127.0.0.1:8080">http://127.0.0.1:8080</a> , ou (pour la version Windows), cliquez sur le lien "POPFile User Interface" dans le Menu Démarrer. <b>Nota Bene</b>: Si durant l'installation de Windows, vous choisissez un point d'accès différent pour dialoguer avec POPFile, remplacez la partie "8080" avec le port que vous avez choisi.</p>
+
+<p>Si vous recevez un message d'erreur, vérifiez que POPFile s'exécute vraiment et que vous avez le numéro correct du point d'accès (cela devrait être 8080, mais si vous l'avez changé, vous aurez besoin de changer l'adresse web à laquelle vous allez).</p>
+
+<p>Si vous obtenez l'écran POPFile, félicitations ! A présent, il faut personnaliser la manière dont vous voulez trier votre courriel. Passons à la <a href="firsttime.html">Configuration des Catégories. &gt;&gt;</a></p>
+
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td align=center><font size=+1><b>Liens web :</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Page d'accueil</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forums</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Rapports de Bogues</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/project/showfiles.php?group_id=63137">Téléchargement</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net/stats.html">Statistiques</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net/old.html">Ancienne page d'accueil</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://www.extravalent.com/software/donate.html">Faire un Don</a></b></font></td>
+<td width=10%>&nbsp;</td></tr>
+<tr height=1><td colspan=15 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=15></td></tr>
+</table>
+<p>
+<b>Choisir une autre langue : <a href=http://popfile.sourceforge.net/>English</a> <a href=http://popfile.sourceforge.net/manual/no/manual.html>Norsk</a> <a href=http://popfile.sourceforge.net/manual/de/manual.html>Deutsch</a> <a href=http://popfile.sourceforge.net/manual/fr/manual.html>Français</a></b>
+
+</body></html>

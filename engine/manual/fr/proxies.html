@@ -1,0 +1,146 @@
+<html><head><title>Documentation de POPFile</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>Documentation de POPFile</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Première mise en route :</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>1ère étape<br><font size=+1><b>&nbsp;<a href="installing.html">Installation</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>2ème étape<br><font size=+1><b>&nbsp;<a href="firsttime.html">Configuration des Catégories</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>3ème étape<br><font size=+1><b>&nbsp;<a href="email.html">Client de Messagerie</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>4ème étape<br><font size=+1><b>&nbsp;<a href="training.html">Entraînement</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>Utilisation de POPFile avec :</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Les Pare-Feu</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Authentification par Mot de passe Sécurisé</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#cccc99 width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Autres Mandataires</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Comptes Courriels Multiples</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+<h2>Utilisation de POPFile avec d'autres mandataires tels que les anti-virus</h2>
+
+<p>Au cas où vous utiliseriez un mandataire d'analyse de courriel qui a modifié les paramètres de messagerie, comme certaines versions de Norton AntiVirus, POPFile ne marchera pas d'emblée : le mandataire courriel s'en chargera à sa place. Vous devez donc configurer POPFile pour qu'il puisse communiquer avec l'analyseur de courriel. (si votre anti-virus n'a pas modifié les paramètres de votre serveur courriel POP3, il n'est pas nécessaire de suivre ces instructions).</p>
+
+<p>(Pour résumer, votre courriel est téléchargé par l'analyseur, puis il passe à travers POPFile et parvient finalement à votre client de messagerie.)</p>
+
+<p>Puisque les différentes marques d'analyseurs courriels fonctionnent de manières différentes, nous procéderons de la sorte :
+
+<ol>
+<li>Désactivez l'analyseur courriel et rétablissez vos anciens paramètres de messagerie.
+<li>Dites à POPFile de communiquer avec un point d'acces différent.
+<li>Dites à votre client de messagerie de se connecter à POPFile sur ce point d'accès.
+<li>Réactivez votre analyseur courriel avec de nouveaux paramètres.
+
+
+</ol></p>
+
+<h3>Comment désactiver votre analyseur courriel</h3>
+
+<p>Suivez les instructions de votre manuel.</p>
+
+<h3>Changer le point d'accès de POPFile</h3>
+
+<p>Ouvrez l'onglet Configuration de l'Interface Utilisateur et remplacez votre
+ <b>Port d'écoute POP3</b> par un autre nombre - nous recommandons 123. Cliquez sur Appliquer.</p>
+
+<h3>Changer le point d'accès du client de messagerie</h3>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=3 align="center">
+
+Choisissez votre client de messagerie. Ces instructions peuvent paraitre compliquées. En réalité, c'est l'affaire d'une minute et il est difficile de se tromper. (Juste au cas où vous auriez besoin de revenir en arrière, prenez note des paramètres tels qu'ils etaient à l'origine.)
+
+</td></tr><tr>
+
+<td width=33% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Outlook</h3>
+
+<ul>
+<li>Ouvrez le menu 'Tools -> Email Accounts'.
+<li>Cliquez sur 'View or change existing e-mail accounts' puis pressez 'Next'.
+<li>Sélectionnez votre compte courriel, puis cliquez sur 'Change'.
+<li>Cliquez sur le bouton 'More Settings'.
+<li>Cliquez sur l'onglet 'Advanced'.
+<li>Au niveau du 'Incoming mail server (POP3)', entrez le numéro de point d'accès précédemment choisi (123 recommandé).
+<li>Cliquez sur 'OK', et répétez l'opération pour chaque compte que vous souhaitez que POPFile analyse.
+</ul>
+
+</td><td width=34% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>Outlook Express</h3>
+
+<ul>
+<li>Ouvrez le menu 'Tools -> Accounts'.
+<li>Selectionnez votre compte courriel puis cliquez sur 'Properties'.
+<li>Cliquez sur l'onglet 'Advanced'.
+<li>Au niveau du 'Incoming mail server (POP3)', entrez le numéro de point d'accès précédemment choisi (123 recommandé).
+<li>Cliquez sur 'OK', et répétez l'opération pour chaque compte que vous souhaitez que POPFile analyse.
+</ul>
+
+</td><td width=33% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<ul>
+<li>Le paramétrage de point d'accès d'Eudora fait partie de ses paramètres cachés "ésotériques".
+<li>Allez dans 'Poste de travail' and rendez-vous dans le répertoire où Eudora est installé - en général C:\Program Files\Qualcomm\Eudora
+<li>Ouvrez le répertoire 'extrastuff'.
+<li>Selectionnez le fichier 'esoteric.epi', et copiez-le avec la commande 'Edition > Copier'.
+<li>Revenez dans le répertoire d'Eudora et collez le fichier avec la commande 'Edition > Coller'.
+<li>Démarrez Eudora.
+<li>Ouvrez le menu 'Tools -> Options'.
+<li>Déroulez jusqu'en bas la liste de menus d'options et choisissez 'Ports & Protocols'.
+<li>A côté de 'POP3', entrez le numéro de point d'accès précédemment choisi (123 recommandé).
+<li>Cliquez sur 'OK', c'est fini.
+</ul>
+
+</td></tr></table>
+
+<h3>Réactiver l'analyseur de courriel</h3>
+
+Réactiver  votre analyseur (consultez son manuel). Il devrait tout mettre en place pour vous. Votre courriel devrait être à présent contrôlé et trié.
+
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td align=center><font size=+1><b>Liens web :</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Page d'accueil</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forums</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Rapports de Bogues</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/project/showfiles.php?group_id=63137">Téléchargement</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net/stats.html">Statistiques</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net/old.html">Ancienne page d'accueil</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://www.extravalent.com/software/donate.html">Faire un Don</a></b></font></td>
+<td width=10%>&nbsp;</td></tr>
+<tr height=1><td colspan=15 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=15></td></tr>
+</table>
+<p>
+<b>Choisir une autre langue : <a href=http://popfile.sourceforge.net/>English</a> <a href=http://popfile.sourceforge.net/manual/no/manual.html>Norsk</a> <a href=http://popfile.sourceforge.net/manual/de/manual.html>Deutsch</a> <a href=http://popfile.sourceforge.net/manual/fr/manual.html>Français</a></b>
+
+</body></html>

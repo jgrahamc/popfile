@@ -1,0 +1,88 @@
+<html><head><title>Documentation de POPFile</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>Documentation de POPFile</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Première mise en route :</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>1ère étape<br><font size=+1><b>&nbsp;<a href="installing.html">Installation</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>2ème étape<br><font size=+1><b>&nbsp;<a href="firsttime.html">Configuration des Catégories</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>3ème étape<br><font size=+1><b>&nbsp;<a href="email.html">Client de Messagerie</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>4ème étape<br><font size=+1><b>&nbsp;<a href="training.html">Entraînement</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>Utilisation de POPFile avec :</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Les Pare-Feu</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#cccc99 width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Authentification par Mot de passe Sécurisé</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Autres Mandataires</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Comptes Courriels Multiples</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+<h2>Utilisation de POPFile avec l'Authentification par mot de passe sécurisé</h2>
+
+<p>Allez sur l'onglet Sécurité de l'interface web, et saisissez le nom du serveur et le point d'accès de votre serveur protégé par l'Authentification par mot de passe sécurisé. Une fois cela effectué, vous avez besoin de changer en 27.0.0.1 le nom du serveur dans votre client de messagerie - vous n'avez pas besoin de changer votre nom d'utilisateur.</p>
+
+<p>Malheureusement, Vous ne pouvez pour le moment avoir qu'un seul compte SPA à chaque fois que vous personnalisez POPFile.</p>
+
+<h2>Un petit mot au sujet de l'Authentification par mot de passe sécurisé de MSN</h2>
+
+<ol>
+<li> Vous devez démarrer POPFile avec la commande suivante
+(saisissez-la précisément)
+<blockquote><b>perl popfile.pl -port 110 -server pop3.email.msn.com -sport
+110</b></blockquote>
+
+<li> Sur vos comptes, votre page serveur, vérifiez que vous avez les informations suivantes :
+<p>
+serveur Incoming mail: 127.0.0.1<br>
+Nom de compte: YOUR_MSN_ACCOUNT_NAME_ONLY
+<p>
+Vérifier que "S'identifier en utilisant l'authentification par mot de passe sécurisé" est coché.
+<p>
+Sur l'onglet Avancé, vérifiez que le point d'accès de courrier rentrant vaut 110 et que "Ce serveur exige une connexion sécurisée (SSL)" n'est PAS coché. 
+
+<p>
+<li> Vous devriez pouvoir vérifier votre courriel en appuyant sur le nom de compte dans l'"icône courriel déroulante".
+</ol>
+
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td align=center><font size=+1><b>Liens web :</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Page d'accueil</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forums</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Rapports de Bogues</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/project/showfiles.php?group_id=63137">Téléchargement</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net/stats.html">Statistiques</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net/old.html">Ancienne page d'accueil</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://www.extravalent.com/software/donate.html">Faire un Don</a></b></font></td>
+<td width=10%>&nbsp;</td></tr>
+<tr height=1><td colspan=15 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=15></td></tr>
+</table>
+<p>
+<b>Choisir une autre langue : <a href=http://popfile.sourceforge.net/>English</a> <a href=http://popfile.sourceforge.net/manual/no/manual.html>Norsk</a> <a href=http://popfile.sourceforge.net/manual/de/manual.html>Deutsch</a> <a href=http://popfile.sourceforge.net/manual/fr/manual.html>Français</a></b>
+
+</body></html>

@@ -1,0 +1,257 @@
+<html><head><title>Documentation de POPFile</title><style type=text/css>H1,H2,H3,P,TD {font-family: sans-serif;}</style>
+</head>
+<body bgcolor=#fcfcfc><table width=100% cellspacing=0 cellpadding=0><tr><td bgcolor=#ededca>&nbsp;&nbsp;<font size=+3>Documentation de POPFile</font><td bgcolor=#ededca align=right>&nbsp;<tr height=3 bgcolor=#cccc99><td colspan=2 height=3 bgcolor=#cccc99></td></tr></table><p>
+<table width=100% cellspacing=0><tr>
+<td width=15% align=center><font size=+1><b>Première mise en route :</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>1ère étape<br><font size=+1><b>&nbsp;<a href="installing.html">Installation</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center>2ème étape<br><font size=+1><b>&nbsp;<a href="firsttime.html">Configuration des Catégories</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#cccc99 width=15% align=center>3ème étape<br><font size=+1><b>&nbsp;<a href="email.html">Client de Messagerie</a></b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%>4ème étape<br><font size=+1><b>&nbsp;<a href="training.html">Entraînement</a></b></font></td>
+<td width=25%>&nbsp;</td></tr>
+<tr height=1><td colspan=10 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=10></td></tr>
+</table>
+<table width=100% cellspacing=0><tr>
+
+<td width=40% align=right><font size=+1><b>Utilisation de POPFile avec :</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="firewalls.html">Les Pare-Feu</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="spa.html">Authentification par Mot de passe Sécurisé</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca width=15% align=center><font size=+1><b>&nbsp;<a href="proxies.html">Autres Mandataires</a></b></font><br></td>
+<td width=2></td>
+<td align=center bgcolor=#ededca width=15%><font size=+1><b>&nbsp;<a href="multiple.html">Comptes Courriels Multiples</a></b></font></td>
+</tr>
+
+</table>
+<table width=100% cellpadding=12 cellspacing=0 bordercolor=#cccc99 border=2><tr><td width=100% valign=top bgcolor=#ededca>
+
+
+
+<h2>Comment faire marcher votre client de messagerie avec POPFile</h2>
+
+<p>POPFile s'exécute en tant que <i>serveur mandataire</i>. Votre programme courriel communique avec POPFile qui parle à son tour au serveur courriel en son nom. Au lieu que votre programme courriel reçoive les messages directement, POPFile les récupère d'abord, et les analyse pour décider dans quelle catégorie ils doivent se placer.</p>
+
+<p>Une fois que c'est décidé (cela prend une fraction de seconde) soit POPFile ajoute une étiquette comme [ceci] au début du sujet du courriel - ce qui veut dire qu'un simple programme comme Microsoft Outlook Express peut distribuer votre courriel où il est censé aller ; soit POPFile ajoute un nouvel en-tête comme ceci :</p>
+
+<p><b>X-Text-Classification: personnel</b></p>
+
+<p>- qu'un client de messagerie plus avancé, comme Eudora, peut utiliser comme filtre.</p>
+
+<p>Cependant, pour que votre client de messagerie communique avec POPFile, vous devez :
+
+<ol><li>ajuster les paramètres de votre client pour qu'il communique avec POPFile, et
+<li>personnaliser vos filtres courriels pour que le classement se fasse correctement.</ol></p>
+
+<p>Ajustons tout d'abord les paramètres du client de messagerie. Nous personnaliserons les filtres plus tard.
+
+<p>Veuillez trouver ci-dessous quelque uns des clients de messagerie les plus courants. Pour les autres ou pour les utilisateurs plus pointus, voici le mode d'emploi :</p>
+
+<p><ul><li>Changer le nom du serveur POP3 dans votre courriel client en 127.0.0.1 , prenez note de l'adresse d'origine.
+
+<li>Changer le nom de l'utilisateur POP3 par [l'adresse d'origine]:[nom de l'utilisateur]
+<li>Ne touchez pas au mot de passe</ul></p>
+
+<p>Pour les comptes utilisant une authentification par mot de passe sécurisé, allez à <a href=spa.html>Utilisation de POPFile avec Authentication par mot de passe sécurisé</a>.</p>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=2 align="center">
+
+Choisissez votre client de messagerie et suivez le mode d'emploi dans la colonne concernée. Le mode d'emploi peut sembler compliqué de premier abord, mais cela ne vous prendra véritablement qu'une ou deux minutes - et il est difficile de se tromper. (Juste au cas où vous auriez besoin de revenir en arrière, prenez note de vos paramètres d'origine.)
+
+
+</td></tr><tr>
+
+<td width=50% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Outlook</h3>
+
+<ul>
+<li>Dans Outlook, ouvrez le menu 'Tools > E-mail Accounts...' La fenêtre des comptes courriels apparaît. <a href=http://popfile.sourceforge.net/manual/o_popfile1.gif>[capture&nbsp;d'écran]</a>
+<li>Cliquez sur 'View or change existing mail e-accounts' et cliquez sur 'Next'. Choisissez le compte que vous voulez utiliser avec POPFile et cliquez sur 'Change'. Notez le nom du Serveur de mail entrant [Incoming mail server (POP3)] et le Nom d'Utilisateur [User Name]. <a href=http://popfile.sourceforge.net/manual/o_popfile2.gif>[capture&nbsp;d'écran]</a>
+<li>Remplacez le nom du serveur POP3 par <b>127.0.0.1</b> et changez le nom utilisateur [User Name] par la combinaison du nom serveur original et du nom utilisateur original separé par deux-points. <a href=http://popfile.sourceforge.net/manual/o_popfile3.gif>[capture&nbsp;d'écran]</a>
+<li>Donc, si le nom du serveur POP3 original était<b>my.mail.com</b>et que le nom utilisateur était <b>jdoe</b>, votre nouveau nom utilisateur sera <b>my.mail.com:jdoe</b>
+<li>Vous n'avez pas besoin de changer de mot de passe.
+<li>Appuyez sur le bouton 'Next' puis sur 'Finish'.
+<li>Assurez vous que POPFile s'exécute et que tout votre courriel passe par POPFile !
+<li>Vérifiez que POPFile démarre en même temps que Windows. Si vous utilisez la version Windows, vous pouvez faire glisser le lien 'Run POPFile in background' du groupe <b>POPFile</b> dans le Menu Démarrer vers le groupe <b>Démarrage</b>. A présent, Windows chargera POPFile à chaque fois.
+<li>Attention ! si POPFile n'est pas chargé, le courriel ne passera pas du tout - et votre client de messagerie ne connectera pas !
+</ul>
+
+</td><td width=50% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>Outlook Express</h3>
+
+<ul>
+<li>Dans Outlook Express, ouvrez le menu 'Tools > Accounts...'.  La fenêtre des comptes courriels apparaît. <a href=http://popfile.sourceforge.net/manual/oe_popfile1.gif>[capture&nbsp;d'écran]</a>
+<li>Selectionnez le compte vous désirez modifier pour utiliser POPFile et cliquez sur 'Properties'. <a href=http://popfile.sourceforge.net/manual/oe_popfile2.gif>[capture&nbsp;d'écran]</a>
+<li>Ouvrez l'onglet 'Servers'. Prenez note du nom du 'Incoming Mail Server (POP3)' et du 'Incoming Mail Server Account Name'. <a href=http://popfile.sourceforge.net/manual/oe_popfile3.gif>[capture&nbsp;d'écran]</a>
+<li>Remplacez le nom du serveur POP3 par <b>127.0.0.1</b> et changez le Incoming Mail Server Account Name par la combinaison du nom serveur originel et du Account Name originel séparés par deux-points. <a href=http://popfile.sourceforge.net/manual/oe_popfile4.gif>[capture&nbsp;d'écran]</a>
+<li>Donc, si le nom du serveur originel POP3 était <b>my.mail.com</b> et que le nom utilisateur était <b>jdoe</b>, votre nouveau nom utilisateur sera <b>my.mail.com:jdoe</b>
+<li>Vous n'avez pas besoin de changer le mot de passe.
+<li>Appuyer sur 'OK' puis sur 'Close'.
+<li>Assurez-vous que POPFile s'exécute et que le courriel passe par POPFile !
+<li>Il faudra vous assurer que POPFile démarre en même temps que Windows. Si vous utilisez la version Windows, vous pouvez glisser le lien 'Run POPFile in Background' du groupe <b>POPFile</b> vers le groupe <b>Démarrage</b>. A présent, Windows chargera POPFile à chaque fois.
+<li>Attention ! Si POPFile n'est pas chargé, votre courriel ne passera pas - et votre programme courriel ne se connectera pas !
+</ul>
+
+</td></tr><tr><td width=50% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<ul>
+<li>Dans Eudora, ouvrez le menu 'Tools > Options...'.  La fenêtre des options apparaît. <a href=http://popfile.sourceforge.net/manual/e_popfile1.gif>[capture&nbsp;d'écran]</a>
+<li>Prenez note du nom du serveur de courrier rentrant [Mail Server (incoming)] et du nom d'utilisateur [Login Name]. <a href=http://popfile.sourceforge.net/manual/e_popfile2.gif>[capture&nbsp;d'écran]</a>
+<li>Remplacez le nom du serveur de courrier rentrant par <b>127.0.0.1</b> et remplacez le nom d'utilisateur par la combinaison du nom de serveur originel et du nom d'utilisateur originel, séparés par deux-points. <a href=http://popfile.sourceforge.net/manual/e_popfile3.gif>[capture&nbsp;d'écran]</a>
+<li>Ainsi, si le serveur entrant originel était <b>my.mail.com</b> et votre nom d'utilisateur originel était <b>jdoe</b>, votre nouveau nom d'utilisateur sera <b>my.mail.com:jdoe</b>
+<li>Vous n'avez pas besoin de changer de mot de passe.
+<li>Pressez 'OK'.
+<li>Assurez-vous que POPFile s'exécute et que le courriel passe par POPFile !
+<li>Il faudra vous assurer que POPFile démarre en même temps que Windows. Si vous utilisez la version Windows, vous pouvez glisser le lien 'Run POPFile in Background' du groupe <b>POPFile</b> vers le groupe <b>Démarrage</b>. A présent, Windows chargera POPFile à chaque fois.
+<li>Attention ! Si POPFile n'est pas chargé, votre courriel ne passera pas - et votre programme courriel ne se connectera pas !
+</ul>
+
+</td><td width=50% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Pegasus</h3>
+
+<ul>
+<li>Dans Pegasus, ouvrez le menu 'Tools > Internet Options...' puis l'onglet 'Receiving (POP3)'. L'écran des paramètres de compte POP3 apparaît.
+<li>Sous 'General settings for receiving mail using POP3', sélectionnez le champ 'POP3 Host'. Prenez note de l'actuel hôte POP3.
+<li>Changez l'hôte POP3 en <b>127.0.0.1</b>
+<li>Sous 'General settings for receiving mail using POP3', sélectionnez le champ 'User name'. Prenez note de l'actuel nom d'utilisateur.
+<li>Remplacez le nom d'utilisateur par la combinaison de l'hôte POP3 originel et du nom d'utilisateur originel, séparés par deux-points.
+<li>Ainsi, si l'hôte POP3 originel était <b>my.mail.com</b> et le nom d'utilisateur originel était <b>jdoe</b>, votre nouveau nom d'utilisateur sera <b>my.mail.com:jdoe</b>
+<li>Vous n'avez pas besoin de changer de mot de passe.
+<li>Pressez 'OK'.
+<li>Assurez-vous que POPFile s'exécute et que le courriel passe par POPFile !
+<li>Il faudra vous assurer que POPFile démarre en même temps que Windows. Si vous utilisez la version Windows, vous pouvez glisser le lien 'Run POPFile in Background' du groupe <b>POPFile</b> vers le groupe <b>Démarrage</b>. A présent, Windows chargera POPFile à chaque fois.
+<li>Attention ! Si POPFile n'est pas chargé, votre courriel ne passera pas - et votre programme courriel ne se connectera pas !
+</ul>
+
+</td></tr></table>
+
+<p>Très bien. Maintenant que nous avons fait cela, il est temps de personnaliser vos filtres courriels, afin qu'une fois que POPFile a fait son travail, votre client de messagerie puisse distribuer chaque message dans son dossier attitré.</p>
+
+<p>Pour les utilisateurs plus avancés, vous avez le choix entre modifier la ligne de sujet pour y ajouter une étiquette de [classification] ou non. Cela ce trouve dans l'onglet Configuration de l'interface web, cadre 'Informations de Classification'. Vous pouvez également activer ou non l'en-tête <b>X-Text-Classification</b>, qui indique la catégorie reconnue par POPFile, et l'en-tête <b>X-POPFile-Link</b>, qui donne un lien direct vers la page de compte-rendu d'analyse.</p>
+
+<table width=100% bgcolor=#FFFFFF cellspacing=3 border=0><tr>
+
+<td colspan=2 align="center">
+
+Choisissez votre client de messagerie et suivez le mode d'emploi dans la colonne concernée. Le mode d'emploi peut sembler compliqué de premier abord, mais cela ne vous prendra véritablement qu'une ou deux minutes - et il est difficile de se tromper. (Juste au cas où vous auriez besoin de revenir en arrière, prenez note de vos paramètres d'origine.)
+
+
+</td></tr><tr>
+
+<td width=50% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Outlook</h3>
+
+<ul>
+<li>Dans Outlook ouvrez le menu 'Tools > Rules Wizard...' <a href=http://popfile.sourceforge.net/manual/o_filter1.gif>[capture&nbsp;d'écran]</a>
+<li>L'Assistant Règles apparaît. Cliquez sur 'New...' et choisissez 'Start from a blank rule'. <a href=http://popfile.sourceforge.net/manual/o_filter2.gif>[capture&nbsp;d'écran]</a>
+<li>Outlook peut utiliser l'en-tête <b>X-Text-Classification</b>, qui permet un filtrage complètement transparent du courriel. Cliquez sur 'Next' et sélectionnez 'with specific words in the message header'.
+<li>Maintenant cliquez sur le lien surligné en gris 'specific words' et saisissez dans le champ qui apparaît "X-Text-Classification: " suivi du nom de l'une de vos catégories, et pressez les boutons 'Add' puis 'OK'.
+<li>Cliquez sur 'Next' et sélectionnez 'move it to the specified folder'.
+<li>Cliquez sur le mot surligné en gris 'specified' et une liste de dossiers apparaît. Choisissez celui où vous souhaitez que les courriels de cette catégorie soient déposés, puis pressez le bouton 'OK'.
+<li>Pressez les boutons 'OK' puis 'Finish'.
+<li>Répétez l'opération pour chacune de vos catégories, puis 'OK' pour sortir.
+<li>C'est fini !
+<li>Une petite remarque : dans l'<a href="http://127.0.0.1:8080">Interface utilisateur de POPFile</a>, dans l'onglet 'Configuration', vérifiez que l'option 'Modification de la ligne Sujet' est <b>désactivée</b>.
+</ul>
+
+</td><td width=50% bgcolor="#CCFFCC" valign="top">
+
+<h3 align=center>Outlook Express</h3>
+
+<ul>
+<li>Dans Outlook Express, ouvrez le menu 'Tools > Message Rules > Mail...' <a href=http://popfile.sourceforge.net/manual/oe_filter1.gif>[capture&nbsp;d'écran]</a>
+<li>La fenêtre 'New Mail Rule' apparaît.  <a href=http://popfile.sourceforge.net/manual/oe_filter2.gif>[capture&nbsp;d'écran]</a>
+<li>Outlook Express ne peut pas utiliser l'en-tête <b>X-Text-Classification</b>, qui aurait permis un filtrage du courriel complètement invisible. A la place, cliquez 'Where the Subject line contains specific words' ainsi que 'Move it to the specified folder' <a href=http://popfile.sourceforge.net/manual/oe_filter3.gif>[capture&nbsp;d'écran]</a>
+<li>Maintenant cliquez le lien surligné en bleu 'contains specific words' et la fenêtre 'Type Specific Words' apparaît <a href=http://popfile.sourceforge.net/manual/oe_filter4.gif>[capture&nbsp;d'écran]</a>
+<li>Entrez le nom d'une de vos catégories, entouré par des [crochets], puis pressez sur 'OK'. Maintenant cliquez sur le mot surligné en bleu 'specified' et la fenêtre 'Move' apparaît. Choisissez le dossier destination des courriels classés dans cette catégorie, puis pressez le bouton 'OK'. <a href=http://popfile.sourceforge.net/manual/oe_filter5.gif>[capture&nbsp;d'écran]</a>
+<li>Pressez le bouton 'OK'.
+<li>Répétez l'opération pour chacune de vos catégories, puis pressez 'OK' pour terminer.
+<li>C'est fini !
+<li>Une petite remarque : dans l'<a href="http://127.0.0.1:8080">Interface utilisateur de POPFile</a>, dans l'onglet 'Configuration', vérifiez que l'option 'Modification de la ligne Sujet' est <b>activée</b>.
+</ul>
+
+</td></tr><tr><td width=50% bgcolor="#CCCCFF" valign="top">
+
+<h3 align=center>Eudora</h3>
+
+<p>Eudora permet le filtrage à partir de n'importe quel en-tête de mail, ce qui est vraiment bien - tout peut être fait en arrière-plan, sans changer la ligne Sujet !</p>
+
+<ul>
+<li>Ouvrez le menu 'Tools > Filters'. <a href=http://popfile.sourceforge.net/manual/e_filter1.gif>[capture&nbsp;d'écran]</a>
+<li>La fenêtre 'Filters' apparaît. Cliquez sur 'New' pour créer un nouveau filtre.  <a href=http://popfile.sourceforge.net/manual/e_filter2.gif>[capture&nbsp;d'écran]</a>
+<li>Dans le champ 'Header' entrez <b>X-Text-Classification</b> et dans le champ voisin 'contains' entrez le nom d'une de vos catégories. N'ajoutez <b>PAS</b> de crochets autour du nom. <a href=http://popfile.sourceforge.net/manual/e_filter3.gif>[capture&nbsp;d'écran]</a>
+<li>Ensuite sélectionnez 'Transfer To' dans la première zone 'Action' choisissez la boîte dans laquelle placer les courriels de cette catégorie.  <a href=http://popfile.sourceforge.net/manual/e_filter4.gif>[capture&nbsp;d'écran]</a>
+<li>Répétez l'opération pour chacune de vos catégories.
+<li>Fermez les fenêtres de filtre et répondez Oui quand Eudora vous propose de sauvegarder les changements..
+<li>C'est fini !
+<li>Une petite remarque : dans l'<a href="http://127.0.0.1:8080">Interface utilisateur de POPFile</a>, dans l'onglet 'Configuration', vérifiez que l'option 'Modification de la ligne Sujet' est <b>déactivée</b>.
+</ul>
+
+</td><td width=50% bgcolor="#FFCCCC" valign="top">
+
+<h3 align=center>Pegasus</h3>
+
+<ul>
+<li>Dans Pegasus, ouvrez le menu 'Tools > Mail Filtering Rules > Edit New Mail Filtering Rules > Rules Applied When Folder is Opened'.
+<li>La fenêtre de nouvelles règles de filtrage de courrier apparaît.
+<li>Cliquez sur le bouton 'New Rule'. La fenêtre 'Create a New Filtering Rule' apparaît.
+<li>Cliquez sur le bouton 'Expression'. Remarquez que d'utiliser le filtre Expression marchera même si l'option 'Modification de la ligne Sujet' de POPFile est désactivée. Si vous utilisez le filtre 'Header', l'option 'Modification de la ligne Sujet' de POPFile doit être activée.
+<li>Choisissez le champ 'If this regular expression'
+<li>Tapez le nom d'une de vos catégories, précédé de <b>X-Text-Classification:</b>, par exemple: <b>X-Text-Classification: spam</b>
+<li>Cliquez le bouton 'Headers or body'
+<li>Sélectionnez l'action désirée dans la liste des Actions. Par exemple 'Move'.
+<li>Si vous avez choisi une action comme 'Move' ou 'Forward', cliquez ensuite sur le bouton 'Set'.
+<li>Sélectionnez le dossier destination ou entrez l'adresse de renvoi, suivant la nature de l'action.
+<li>Cliquez sur le bouton 'OK' pour ajouter la règle à la liste des règles.
+<li>Répétez l'opération pour chacune de vos catégories.
+<li>L'ordre dans lequel les règles de filtrage sont appliquées peut être modifié en utilisant les flèches rouge/bleu (haut/bas) dans la fenêtre 'New Mail Filter Rules'.
+<li>Cliquez sur le bouton 'Save' pour sauvez les changements effectués.
+<li>Cliquez sur 'OK'.
+<li>C'est fini !
+</ul>
+
+</td></tr></table>
+
+<h2>Ca y est !... mais...</h2>
+
+Malgré tout ce travail, POPFile ne filtera pas votre courriel immédiatement. Pourquoi pas ?<i>Il ne sait pas ce que signifie chacune des catégories</i> Il ne sait pas ce que "pollupostage" et "bon courriel" signifient ou bien ce que veut dire "travail" et "personnel". Il ne sait même pas dans quelle langue votre courriel est écrit, et il s'en fiche. Vous aurez besoin de l'éduquer pour qu'il distingue le pollupostage du courriel normal, ou bien un projet d'un autre. Vous faites cela grâce à l'<b>Entraînement</b> - <a href="training.html">nous allons en parler</a>.
+
+</td></tr></table>
+<br>
+<table width=100% cellspacing=0><tr>
+<td align=center><font size=+1><b>Liens web :</b></font></td>
+<td width=2></td>
+<td align=center bgcolor=#cccc99 width=15%><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net">Page d'accueil</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/forum/?group_id=63137">Forums</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/tracker/?group_id=63137&atid=502956">Rapports de Bogues</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://sourceforge.net/project/showfiles.php?group_id=63137">Téléchargement</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net/stats.html">Statistiques</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://popfile.sourceforge.net/old.html">Ancienne page d'accueil</a></b></font></td>
+<td width=2></td>
+<td bgcolor=#ededca align=center><font size=+1><b>&nbsp;<a href="http://www.extravalent.com/software/donate.html">Faire un Don</a></b></font></td>
+<td width=10%>&nbsp;</td></tr>
+<tr height=1><td colspan=15 bgcolor=#CCCCCC></td></tr>
+<tr height=1><td colspan=15></td></tr>
+</table>
+<p>
+<b>Choisir une autre langue : <a href=http://popfile.sourceforge.net/>English</a> <a href=http://popfile.sourceforge.net/manual/no/manual.html>Norsk</a> <a href=http://popfile.sourceforge.net/manual/de/manual.html>Deutsch</a> <a href=http://popfile.sourceforge.net/manual/fr/manual.html>Français</a></b>
+
+</body></html>
