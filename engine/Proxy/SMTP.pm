@@ -127,7 +127,7 @@ sub child__
 
         $self->log_( "Command: --$command--" );
 
-        if ( $command =~ /HELO|EHLO/i ) {
+        if ( $command =~ /HELO/i ) {
             if ( $self->config_( 'chain_server' ) )  {
                 if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'chain_server' ),  $self->config_( 'chain_port' ) ) )  {
 
@@ -145,6 +145,48 @@ sub child__
 
             next;
         }
+        
+        # Handle EHLO specially so we can control what ESMTP extensions are negotiated
+        
+        if ( $command =~ /EHLO/i ) {
+            if ( $self->config_( 'chain_server' ) )  {
+                if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'chain_server' ),  $self->config_( 'chain_port' ) ) )  {
+
+                    # TODO: Make this user-configurable (-smtp_add_unsupported, -smtp_remove_unsupported)
+
+                    # Stores a list of unsupported ESMTP extensions
+
+                    my $unsupported;
+
+                    
+                    
+                    # RFC 1830, http://www.faqs.org/rfcs/rfc1830.html
+                    # CHUNKING and BINARYMIME both require the support of the "BDAT" command
+                    # support of BDAT requires extensive changes to POPFile's internals and
+                    # will not be implemented at this time
+
+                    $unsupported .= "CHUNKING|BINARYMIME";
+                    
+                    # append unsupported ESMTP extensions to $unsupported here, important to maintain
+                    # format of OPTION|OPTION2|OPTION3
+                    
+                    $unsupported = qr/250\-$unsupported/;
+                                        
+                    $self->smtp_echo_response_( $mail, $client, $command, $unsupported );
+
+
+                } else {
+                    last;
+                }
+
+                $self->flush_extra_( $mail, $client, 0 );
+            } else {
+                $self->tee_(  $client, "421 service not available$eol" );
+            }
+
+            next;
+        }
+        
 
         if ( ( $command =~ /MAIL FROM:/i )    ||
              ( $command =~ /RCPT TO:/i )      ||
@@ -211,6 +253,7 @@ sub child__
 # $mail     The stream (created with IO::) to send the message to (the remote mail server)
 # $client   The local mail client (created with IO::) that needs the response
 # $command  The text of the command to send (we add an EOL)
+# $suppress (OPTIONAL) suppress any lines that match, compile using qr/pattern/
 #
 # Send $command to $mail, receives the response and echoes it to the $client and the debug
 # output.
@@ -223,11 +266,11 @@ sub child__
 # ---------------------------------------------------------------------------------------------
 sub smtp_echo_response_
 {
-    my ($self, $mail, $client, $command) = @_;
+    my ($self, $mail, $client, $command, $suppress) = @_;
     my $response = $self->get_response_( $mail, $client, $command );
 
     if ( $response =~ /^\d\d\d-/ ) {
-        $self->echo_to_regexp_($mail, $client, qr/^\d\d\d /, 1);
+        $self->echo_to_regexp_($mail, $client, qr/^\d\d\d /, 1, $suppress);
     }
     return ( $response =~ /$self->{good_response_}/ );
 }
