@@ -11,20 +11,20 @@ include vars.mak
 
 error:
 	@echo Must specify one of coverage, test, package or windows
-	@echo 
+	@echo
 	@echo "coverage - Run POPFile test suite with coverage information"
 	@echo "test     - Run POPFile test suite"
 	@echo "eachtest - Run POPFile tests one by one"
 	@echo "           (test and coverage pass the TESTARGS variable to the test suite)"
 	@echo
-	@echo "windows  - Build Windows executables and installer" 
+	@echo "windows  - Build Windows executables and installer"
 	@echo "macosx   - Build Mac OS X package installer"
 	@echo "xplat    - Build the cross-platform ZIP"
 	@echo "package  - Build Windows installer, and create"
 	@echo "           ZIP files for Windows and cross-platform"
 	@echo "           version"
 	@echo "rc       - After doing package moves the ZIP files to be RC zip files"
-	@echo "           The RC number is set with the RC parameter so do" 
+	@echo "           The RC number is set with the RC parameter so do"
 	@echo "           make rc RC=RC6 for example."
 
 # test runs the POPFile unit test suite
@@ -36,14 +36,21 @@ ifdef TESTARGS
 endif
 	@$(MAKE) --no-print-directory -C tests runtest TESTARGS=$(TESTARGS) DEBUGARGS=-d:TestCoverage
 
-test:     
+test:
 	@echo Running test suite
 ifdef TESTARGS
 	@echo with arguments '$(TESTARGS)'
 endif
 	@$(MAKE) --no-print-directory -C tests runtest TESTARGS=$(TESTARGS) DEBUGARGS=
 
-eachtest:     
+warn:
+	@echo Running test suite
+ifdef TESTARGS
+	@echo with arguments '$(TESTARGS)'
+endif
+	@$(MAKE) --no-print-directory -C tests runtest TESTARGS=$(TESTARGS) DEBUGARGS=-w
+
+eachtest:
 	@echo Running test suite
 	@$(MAKE) --no-print-directory -C tests eachtest DEBUGARGS=
 
@@ -55,7 +62,7 @@ macosx: ; @$(MAKE) -C ../macosx
 
 winexe: popfile.exe popfileb.exe popfilef.exe popfileib.exe popfileif.exe trayicon.ico ../windows/POPFileIcon/popfile.ico
 
-TRAY_OPTIONS = --exe $@ --force --clean --dependent --xclude --icon ../windows/POPFileIcon/popfile.ico --icon trayicon.ico --script $< --info CompanyName="The POPFile Project" --info LegalCopyright="Copyright (c) 2003 John Graham-Cumming" --info ProductName=POPFile --info ProductVersion=$(POPFILE_VERSION).0 --info FileDescription=POPFile --info FileVersion=$(POPFILE_VERSION).0 
+TRAY_OPTIONS = --exe $@ --force --clean --dependent --xclude --icon ../windows/POPFileIcon/popfile.ico --icon trayicon.ico --script $< --info CompanyName="The POPFile Project" --info LegalCopyright="Copyright (c) 2003 John Graham-Cumming" --info ProductName=POPFile --info ProductVersion=$(POPFILE_VERSION).0 --info FileDescription=POPFile --info FileVersion=$(POPFILE_VERSION).0
 ifeq ($(TRAY_DEBUG),1)
 TRAY_OPTIONS += --debug
 endif
@@ -100,15 +107,15 @@ skins: skins/*.css skins/*.gif  skins/*/*.gif
 
 package: $(POPFILE_ZIP) windows
 
-# Used to convert the ZIP files to RC ZIP files and 
+# Used to convert the ZIP files to RC ZIP files and
 # upload to SourceForge
 
-rc: RELEASE_FILES := $(POPFILE_ZIP) ../windows/$(POPFILE_WINDOWS_ZIP) 
-rc: 
+rc: RELEASE_FILES := $(POPFILE_ZIP) ../windows/$(POPFILE_WINDOWS_ZIP)
+rc:
 	chmod go+r $(RELEASE_FILES)
 	scp -p $(RELEASE_FILES) jgrahamc@popfile.sourceforge.net:/home/groups/p/po/popfile/htdocs
 
-# The POPFile version number is stored in a file called POPFile/popfile_version 
+# The POPFile version number is stored in a file called POPFile/popfile_version
 # which we always write if vars.mak has changed
 
 $(POPFILE_VERSION_FILE): vars.mak
