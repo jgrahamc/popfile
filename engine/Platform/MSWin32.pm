@@ -31,6 +31,7 @@ use POPFile::Module;
 use strict;
 use warnings;
 use locale;
+use Win32;
 
 #----------------------------------------------------------------------------
 # new
@@ -97,7 +98,7 @@ sub start
     # We try to delete everything that is in that form but does not have 
     # our PID
 
-    my @temp = glob $ENV{TEMP} . "/pdk-" . $ENV{USER} . "-*";
+    my @temp = glob $ENV{TEMP} . "/pdk-" . Win32::LoginName() . "-*";
 
     foreach my $dir (@temp) {
         if ( $dir =~ /pdk\-.+\-(\d+)$/ ) {
