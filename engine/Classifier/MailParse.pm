@@ -14,7 +14,7 @@ use Classifier::WordMangle;
 
 use MIME::Base64;
 use MIME::QuotedPrint;
-require Encode::MIME::Header;
+#require Encode::MIME::Header;
 
 # HTML entity mapping to character codes, this maps things like &amp; to their corresponding
 # character code
@@ -404,20 +404,20 @@ sub update_tag
 
         if ( $attribute =~ /^href$/i && $tag =~ /^(a|link|base|area)$/i )  {
 
-            # ftp, http, https
+            # Look for mailto:'s
 
-            if ( $value =~ /^(ftp|http|https):\/\//i ) {
-                add_url($self, $value, $encoded, $quote, $end_quote, '');
-                next;
+            if ($value =~ /^mailto:/i) {
+                if ( $tag =~ /^a$/ && $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/]|$)/i )  {
+                   update_word( $self, $1, $encoded, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
+                   add_url( $self, $2, $encoded, '@', ($3?'[\\\&\?\:\/]':$end_quote), '' );
+                }
+            } else {
+                # Anything that isn't a mailto is probably an URL
+                
+                $self->add_url($value, $encoded, $quote, $end_quote, '');
             }
-
-            # The less common mailto: goes second, and we only care if this is in an anchor
-
-            if ( $tag =~ /^a$/ && $value =~ /^mailto:([[:alpha:]0-9\-_\.]+?@([[:alpha:]0-9\-_\.]+?))([>\&\?\:\/]|$)/i )  {
-               update_word( $self, $1, $encoded, 'mailto:', ($3?'[\\\>\&\?\:\/]':$end_quote), '' );
-               add_url( $self, $2, $encoded, '@', ($3?'[\\\&\?\:\/]':$end_quote), '' );
-            }
-            next;
+            
+            next;            
         }
 
         # Tags with alt attributes
@@ -656,6 +656,7 @@ sub add_url
     }
 
     # $protocol $authinfo $host $port $query $hash may be processed below if desired
+    return 1;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1052,23 +1053,22 @@ sub decode_string
     # Therefore, it will be better to store the decoded text in a temporary variable and substitute
     # the original string with it later. Thus, this subroutine returns the real decoded result.
 
-    my ( $self, $mystring ) = @_;
+    my ( $self, $mystring ) = @_;    
     
-    $mystring = Encode::MIME::Header::decode($Encode::Encoding{'MIME-Header'},$mystring);
-    
-    #my $decode_it = '';
+    my $decode_it = '';
 
-    #while ( $mystring =~ /=\?[\w-]+\?B\?(.*)\?=/ig ) {
-    #    $decode_it = decode_base64( $1 );
-    #    $mystring =~ s/=\?[\w-]+\?B\?(.*)\?=/$decode_it/i;
-    #} 
-    #while ( $mystring =~ /=\?[\w-]+\?Q\?(.*)\?=/ig ) {
-    #       $decode_it = $1;
-    #       $decode_it =~ s/\_/=20/g;
-#            $decode_it = decode_qp( $decode_it );
-#            $mystring =~ s/=\?[\w-]+\?Q\?(.*)\?=/$decode_it/i;
-#    }
-    	
+    while ( $mystring =~ /=\?[\w-]+\?(B|Q)\?(.*)\?=/ig ) {
+        if ($1 eq "B") {
+            $decode_it = decode_base64( $2 );
+            $mystring =~ s/=\?[\w-]+\?B\?(.*)\?=/$decode_it/i;
+        } elsif ($1 eq "Q") {
+           $decode_it = $2;
+           $decode_it =~ s/\_/=20/g;
+           $decode_it = decode_qp( $decode_it );
+           $mystring =~ s/=\?[\w-]+\?Q\?(.*)\?=/$decode_it/i;
+        }
+    }     
+        	
 	return $mystring;
 }
 
