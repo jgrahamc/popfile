@@ -1132,7 +1132,9 @@ selection_ok:
 
   ; If user does not want to start POPFIle now, there is nothing left to do here
 
-  StrCmp ${L_TEMP} "1" exit_now
+  StrCmp ${L_TEMP} "1" exit_without_banner
+  
+  Banner::show /NOUNLOAD /set 76 "Preparing to start POPFile now." "Please be patient..."
 
   ; Before starting the newly installed POPFile, ensure that no other version of POPFile
   ; is running on the same UI port as the newly installed version.
@@ -1175,6 +1177,9 @@ launch_browser:
   ExecShell "open" "http://127.0.0.1:${GUI}/"
 
 exit_now:
+  Banner::destroy
+  
+exit_without_banner:
 
   ; Allow next page in the installation sequence to be shown
 
