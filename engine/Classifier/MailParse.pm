@@ -61,6 +61,8 @@ sub new
 #
 # Decode a line of base64 encoded data
 #
+# $line     A line of base64 encoded data
+#
 # ---------------------------------------------------------------------------------------------
 
 sub un_base64
@@ -99,6 +101,7 @@ sub update_word
             my $color = $self->{bayes}->get_color($mword);
             if ( $encoded == 0 ) 
             {
+                $after = '&' if ( $after eq '>' );
                 $self->{ut} =~ s/($before)\Q$word\E($after)/$1<b><font color=$color>$word<\/font><\/b>$2/;
             }
             else
@@ -111,7 +114,7 @@ sub update_word
             $self->{words}{$mword} += 1;
             $self->{msg_total}     += 1;
 
-            print "--- $word ($self->{words}{$mword})\n" if ($self->{debug});
+            print "--- $word ($self->{words}{$mword}) ($before) ($after)\n" if ($self->{debug});
         }
     }
 }
@@ -121,6 +124,9 @@ sub update_word
 # add_line
 #
 # Parses a single line of text and updates the word frequencies
+#
+# $bigline      The line to split into words and add to the word counts
+# $encoded      1 if the line was found in encoded text (base64)
 #
 # ---------------------------------------------------------------------------------------------
 
@@ -162,10 +168,7 @@ sub add_line
 
         while ( $line =~ s/([[:alpha:]][[:alpha:]\']{0,44})[-,\.\"\'\)\?!:;\/&]{0,5}([ \t\n\r]|$)/ / )
         {
-            if (length $1 >= 3)        
-            {
-                update_word($self,$1, $encoded, '', '[-,\.\"\'\)\?!:;\/ &\t\n\r]');
-            }
+            update_word($self,$1, $encoded, '', '[-,\.\"\'\)\?!:;\/ &\t\n\r]') if (length $1 >= 3);
         }
         
         $p += 1024;
@@ -187,34 +190,24 @@ sub update_tag
 {
     my ($self, $tag, $arg) = @_;
 
+    $tag =~ s/[\r\n]//g;
+    $arg =~ s/[\r\n]//g;
+
     print "HTML tag $tag with argument " . $arg . "\n" if ($self->{debug});
 
-    if ( $tag =~ /^img$/i ) 
+    if ( ( $tag =~ /^img$/i ) || ( $tag =~ /^frame$/i ) )
     {
-        if ( $arg =~ /src=[\"\']?http:\/\/([^ \/\">]+)([ \/\">]|$)/i ) 
-        {
-            my $url   = $1;
-            my $after = $2;
-            if ( $after eq '>' ) 
-            {
-                $after = '&';
-            }
-            update_word( $self, $url, 0, '\/', $after );
-        }
+        update_word( $self, $3, 0, $1, $4 ) if ( $arg =~ /src[ \t]*=[ \t]*[\"\']?http:\/(\/(.+:)?)([^ \/\">]+)([ \/\">]|$)/i );
     }
 
     if ( $tag =~ /^a$/i ) 
     {
-        if ( $arg =~ /href=[\"\']?http:\/\/([^ \/\">]+)([ \/\">]|$)/i ) 
-        {
-            my $url   = $1;
-            my $after = $2;
-            if ( $after eq '>' ) 
-            {
-                $after = '&';
-            }
-            update_word( $self, $url, 0, '\/', $after );
-        }
+        update_word( $self, $3, 0, $1, $4 ) if ( $arg =~ /href[ \t]*=[ \t]*[\"\']?http:\/(\/(.+:)?)([^ \/\">]+)([ \/\">]|$)/i );
+    }
+
+    if ( $tag =~ /^form$/i ) 
+    {
+        update_word( $self, 3, 0, $1, $4 ) if ( $arg =~ /action[ \t]*=[ \t]*([\"\']?(http:\/\/)?)([^ \"]+)([ \/\">]|$)/i );
     }
 }
 
@@ -259,10 +252,7 @@ sub parse_stream
     $self->{subject}   = '';
     $self->{ut}        = '';
 
-    if ( $self->{color} )
-    {
-        $colorized .= "<tt>";
-    }
+    $colorized .= "<tt>" if ( $self->{color} );
 
     open MSG, "<$file";
     binmode MSG;
@@ -280,10 +270,7 @@ sub parse_stream
         {
             my $line = $1;
 
-            if ( !defined($line) ) 
-            {
-                next;
-            }
+            next if ( !defined($line) );
             
             print ">>> $line" if $self->{debug};
 
@@ -295,10 +282,7 @@ sub parse_stream
 
                 if ( !$in_html_tag ) 
                 {
-                    if ( $self->{ut} ne '' ) 
-                    {
-                        $colorized .= $self->{ut};
-                    }
+                    $colorized .= $self->{ut} if ( $self->{ut} ne '' );
                     
                     $self->{ut} = '';
                 }
@@ -349,24 +333,15 @@ sub parse_stream
                             }
                         }
                     }
-                    if ( !($line = <MSG>) )
-                    {
-                        last;
-                    }
+
+                    last if ( !($line = <MSG>) );
                 }
 
                 add_line( $self, $decoded, 1 );
             }
 
-            if ( !defined($line) ) 
-            {
-                next;
-            }
-
-            if ( $line =~ /<html>/i ) 
-            {
-                $content_type = 'text/html';
-            }
+            next if ( !defined($line) );
+            $content_type = 'text/html' if ( $line =~ /<html>/i );
 
             # Transform some escape characters
 
@@ -437,20 +412,10 @@ sub parse_stream
                     {
                         $encoding     = '';
                         $content_type = '';
-                        
-                        if ( $self->{from} eq '' ) 
-                        {
-                            $self->{from} = $argument;
-                        }
+                        $self->{from} = $argument if ( $self->{from} eq '' ) ;
                     }
 
-                    if ( $header =~ /To/ ) 
-                    {
-                        if ( $self->{to} eq '' ) 
-                        {
-                            $self->{to} = $argument;
-                        }
-                    }
+                    $self->{to} = $argument if ( ( $header =~ /To/ ) && ( $self->{to} eq '' ) );
                     
                     while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@[[:alpha:]0-9\-_\.]+?)>// ) 
                     {
@@ -466,13 +431,7 @@ sub parse_stream
                     next;
                 }
 
-                if ( $header =~ /Subject/ ) 
-                {
-                    if ( $self->{subject} eq '' ) 
-                    {
-                        $self->{subject} = $argument;
-                    }
-                }
+                $self->{subject} = $argument if ( ( $header =~ /Subject/ ) && ( $self->{subject} eq '' ) );
 
                 # Look for MIME
 
@@ -481,10 +440,8 @@ sub parse_stream
                     if ( $argument =~ /multipart\//i )
                     {
                         my $boundary = $argument;
-                        if ( !( $argument =~ /boundary=\"(.*)\"/ ))
-                        {
-                            $boundary = <MSG>;
-                        }
+                        
+                        $boundary = <MSG> if ( !( $argument =~ /boundary=\"(.*)\"/ )); 
 
                         if ( $boundary =~ /boundary=\"(.*)\"/ ) 
                         {
@@ -511,10 +468,7 @@ sub parse_stream
 
                 # Some headers to discard
 
-                if ( $header =~ /(Thread-Index|X-UIDL|Message-ID|X-Text-Classification)/i ) 
-                {
-                    next;
-                }
+                next if ( $header =~ /(Thread-Index|X-UIDL|Message-ID|X-Text-Classification|X-Mime-Key)/i );
 
                 add_line( $self, $argument, 0 );
             } else {
@@ -527,10 +481,7 @@ sub parse_stream
     
     if ( $self->{color} ) 
     {
-        if ( $self->{ut} ne '' ) 
-        {
-            $colorized .= $self->{ut};
-        }
+        $colorized .= $self->{ut} if ( $self->{ut} ne '' );
 
         $colorized .= "</tt>";
         $colorized =~ s/[\r\n]+$//;
