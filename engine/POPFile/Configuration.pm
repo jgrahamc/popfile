@@ -145,10 +145,10 @@ sub start
 
     $self->{started__} = 1;
 
-    # Check to see if the PID file is present, if it is then another POPFile
-    # may be running, warn the user and terminate, note the 0 at the end
-    # means that we allow the piddir to be absolute and outside the user
-    # sandbox
+    # Check to see if the PID file is present, if it is then another
+    # POPFile may be running, warn the user and terminate, note the 0
+    # at the end means that we allow the piddir to be absolute and
+    # outside the user sandbox
 
     $self->{pid_file__} = $self->get_user_path( $self->config_( 'piddir' ) . 'popfile.pid', 0 );
 
@@ -165,11 +165,14 @@ sub start
 #
 # service
 #
-# service() is a called periodically to give the module a chance to do housekeeping work.
+# service() is a called periodically to give the module a chance to do
+# housekeeping work.
 #
-# If any problem occurs that requires POPFile to shutdown service() should return 0 and
-# the top level process will gracefully terminate POPFile including calling all stop()
-# methods.  In normal operation return 1.#
+# If any problem occurs that requires POPFile to shutdown service()
+# should return 0 and the top level process will gracefully terminate
+# POPFile including calling all stop() methods.  In normal operation
+# return 1.
+#
 # ----------------------------------------------------------------------------
 sub service
 {
@@ -254,7 +257,7 @@ sub live_check_
             return $pid;
         } else {
             print STDERR "\nThe other POPFile ($oldpid) failed to signal back, starting new copy ($$)\n";
-	}
+    }
     }
     return undef;
 }
@@ -277,7 +280,8 @@ sub check_pid_
 #
 # get_pid_
 #
-# returns the pidfile proccess ID if a pid file is present, undef otherwise (0 might be a valid PID)
+# returns the pidfile proccess ID if a pid file is present, undef
+# otherwise (0 might be a valid PID)
 #
 # ----------------------------------------------------------------------------
 sub get_pid_
@@ -329,9 +333,10 @@ sub delete_pid_
 #
 # parse_command_line - Parse ARGV
 #
-# The arguments are the keys of the configuration hash.  Any argument that is not already
-# defined in the hash generates an error, there must be an even number of ARGV elements because
-# each command argument has to have a value.
+# The arguments are the keys of the configuration hash.  Any argument
+# that is not already defined in the hash generates an error, there
+# must be an even number of ARGV elements because each command
+# argument has to have a value.
 #
 # ----------------------------------------------------------------------------
 sub parse_command_line
@@ -349,7 +354,8 @@ sub parse_command_line
     #
     # So its possible to do
     #
-    # --set bayes_param=value --set=-bayes_param=value --set -bayes_param=value -- -bayes_param value
+    # --set bayes_param=value --set=-bayes_param=value
+    #     --set -bayes_param=value -- -bayes_param value
 
     if ( !GetOptions( "set=s" => \@set_options ) ) {
         return 0;
@@ -364,15 +370,15 @@ sub parse_command_line
     for my $i (0..$#set_options) {
         $set_options[$i] =~ /-?(.+)=(.+)/;
 
-	if ( !defined( $1 ) ) {
+        if ( !defined( $1 ) ) {
             print STDERR "\nBad option: $set_options[$i]\n";
             return 0;
-	}
+        }
 
         push @options, ("-$1");
         if ( defined( $2 ) ) {
             push @options, ($2);
-	}
+        }
     }
 
     push @options, @ARGV;
@@ -386,7 +392,7 @@ sub parse_command_line
             if ( $options[$i] =~ /^-(.+)$/ ) {
                 my $parameter = $self->upgrade_parameter__($1);
 
-                if ( defined($self->{configuration_parameters__}{$parameter}) ) {
+                if (defined($self->{configuration_parameters__}{$parameter})) {
                     if ( $i < $#options ) {
                         $self->parameter( $parameter, $options[$i+1] );
                         $i += 2;
@@ -412,8 +418,9 @@ sub parse_command_line
 #
 # upgrade_parameter__
 #
-# Given a parameter from either command line or from the configuration file return the
-# upgraded version (e.g. the old port parameter becomes pop3_port
+# Given a parameter from either command line or from the configuration
+# file return the upgraded version (e.g. the old port parameter
+# becomes pop3_port
 #
 # ----------------------------------------------------------------------------
 
@@ -431,69 +438,69 @@ sub upgrade_parameter__
 
     my %upgrades = ( # PROFILE BLOCK START
 
-                     # Parameters that are now handled by Classifier::Bayes
+                  # Parameters that are now handled by Classifier::Bayes
 
-                     'corpus',                   'bayes_corpus',
-                     'unclassified_probability', 'bayes_unclassified_probability',
+                  'corpus',                   'bayes_corpus',
+                  'unclassified_probability', 'bayes_unclassified_probability',
 
-                     # Parameters that are now handled by POPFile::Configuration
+                  # Parameters that are now handled by POPFile::Configuration
 
-                     'piddir',                   'config_piddir',
+                  'piddir',                   'config_piddir',
 
-                     # Parameters that are now global to POPFile
+                  # Parameters that are now global to POPFile
 
-                     'debug',                    'GLOBAL_debug',
-                     'msgdir',                   'GLOBAL_msgdir',
-                     'timeout',                  'GLOBAL_timeout',
+                  'debug',                    'GLOBAL_debug',
+                  'msgdir',                   'GLOBAL_msgdir',
+                  'timeout',                  'GLOBAL_timeout',
 
-                     # Parameters that are now handled by POPFile::Logger
+                  # Parameters that are now handled by POPFile::Logger
 
-                     'logdir',                   'logger_logdir',
+                  'logdir',                   'logger_logdir',
 
-                     # Parameters that are now handled by Proxy::POP3
+                  # Parameters that are now handled by Proxy::POP3
 
-                     'localpop',                 'pop3_local',
-                     'port',                     'pop3_port',
-                     'sport',                    'pop3_secure_port',
-                     'server',                   'pop3_secure_server',
-                     'separator',                'pop3_separator',
-                     'toptoo',                   'pop3_toptoo',
+                  'localpop',                 'pop3_local',
+                  'port',                     'pop3_port',
+                  'sport',                    'pop3_secure_port',
+                  'server',                   'pop3_secure_server',
+                  'separator',                'pop3_separator',
+                  'toptoo',                   'pop3_toptoo',
 
-                     # Parameters that are now handled by UI::HTML
+                  # Parameters that are now handled by UI::HTML
 
-                     'language',                 'html_language',
-                     'last_reset',               'html_last_reset',
-                     'last_update_check',        'html_last_update_check',
-                     'localui',                  'html_local',
-                     'page_size',                'html_page_size',
-                     'password',                 'html_password',
-                     'send_stats',               'html_send_stats',
-                     'skin',                     'html_skin',
-                     'test_language',            'html_test_language',
-                     'update_check',             'html_update_check',
-                     'ui_port',                  'html_port',
+                  'language',                 'html_language',
+                  'last_reset',               'html_last_reset',
+                  'last_update_check',        'html_last_update_check',
+                  'localui',                  'html_local',
+                  'page_size',                'html_page_size',
+                  'password',                 'html_password',
+                  'send_stats',               'html_send_stats',
+                  'skin',                     'html_skin',
+                  'test_language',            'html_test_language',
+                  'update_check',             'html_update_check',
+                  'ui_port',                  'html_port',
 
-                     # Parameters that have moved from the UI::HTML to
-                     # POPFile::History
+                  # Parameters that have moved from the UI::HTML to
+                  # POPFile::History
 
-                     'archive',                  'history_archive',
-                     'archive_classes',          'history_archive_classes',
-                     'archive_dir',              'history_archive_dir',
-                     'history_days',             'history_history_days',
-                     'html_archive',             'history_archive',
-                     'html_archive_classes',     'history_archive_classes',
-                     'html_archive_dir',         'history_archive_dir',
-                     'html_history_days',        'history_history_days',
+                  'archive',                  'history_archive',
+                  'archive_classes',          'history_archive_classes',
+                  'archive_dir',              'history_archive_dir',
+                  'history_days',             'history_history_days',
+                  'html_archive',             'history_archive',
+                  'html_archive_classes',     'history_archive_classes',
+                  'html_archive_dir',         'history_archive_dir',
+                  'html_history_days',        'history_history_days',
 
-                     # Parameters that have moved from Classifer::Bayes to
-                     # POPFile::Database
+                  # Parameters that have moved from Classifier::Bayes to
+                  # POPFile::Database
 
-                     'bayes_bad_sqlite_version', 'database_bad_sqlite_version',
-                     'bayes_database',           'database_database',
-                     'bayes_dbauth',             'database_dbauth',
-                     'bayes_dbconnect',          'database_dbconnect',
-                     'bayes_dbuser',             'database_dbuser',
-                     'bayes_sqlite_tweaks',      'database_sqlite_tweaks'
+                  'bayes_bad_sqlite_version', 'database_bad_sqlite_version',
+                  'bayes_database',           'database_database',
+                  'bayes_dbauth',             'database_dbauth',
+                  'bayes_dbconnect',          'database_dbconnect',
+                  'bayes_dbuser',             'database_dbuser',
+                  'bayes_sqlite_tweaks',      'database_sqlite_tweaks'
 
     ); # PROFILE BLOCK STOP
 
@@ -508,8 +515,9 @@ sub upgrade_parameter__
 #
 # load_configuration
 #
-# Loads the current configuration of popfile into the configuration hash from a local file.
-# The format is a very simple set of lines containing a space separated name and value pair
+# Loads the current configuration of popfile into the configuration
+# hash from a local file.  The format is a very simple set of lines
+# containing a space separated name and value pair
 #
 # ----------------------------------------------------------------------------
 sub load_configuration
@@ -528,8 +536,9 @@ sub load_configuration
 
                 $parameter = $self->upgrade_parameter__($parameter);
 
-                if ( defined( $self->{configuration_parameters__}{$parameter} ) ) {
-                    $self->{configuration_parameters__}{$parameter}{value} = $value;
+                if (defined($self->{configuration_parameters__}{$parameter})) {
+                    $self->{configuration_parameters__}{$parameter}{value} =
+                        $value;
                 } else {
                     $self->{deprecated_parameters__}{$parameter} = $value;
                 }
@@ -546,7 +555,8 @@ sub load_configuration
 #
 # save_configuration
 #
-# Saves the current configuration of popfile from the configuration hash to a local file.
+# Saves the current configuration of popfile from the configuration
+# hash to a local file.
 #
 # ----------------------------------------------------------------------------
 sub save_configuration

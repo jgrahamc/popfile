@@ -94,6 +94,9 @@ sub new
     $self->{db_get_bucket_parameter__} = 0;
     $self->{db_set_bucket_parameter__} = 0;
     $self->{db_get_bucket_parameter_default__} = 0;
+    $self->{db_get_user_parameter__} = 0;
+    $self->{db_set_user_parameter__} = 0;
+    $self->{db_get_user_parameter_default__} = 0;
     $self->{db_get_buckets_with_magnets__} = 0;
     $self->{db_delete_zero_words__} = 0;
 
@@ -111,9 +114,17 @@ sub new
 
     $self->{db_parameterid__}    = {};
 
+    # Caches the IDs that map to user parameter types
+
+    $self->{db_user_parameterid__}    = {};
+
     # Caches looked up parameter values on a per bucket basis
 
     $self->{db_parameters__}     = {};
+
+    # Caches looked up user parameter values on a per user basis
+
+    $self->{db_user_parameters__}     = {};
 
     # Used to parse mail messages
 
@@ -182,24 +193,12 @@ sub initialize
 {
     my ( $self ) = @_;
 
-    # No default unclassified weight is the number of times more sure
-    # POPFile must be of the top class vs the second class, default is
-    # 100 times more
-
-    $self->config_( 'unclassified_weight', 100 );
-
     # The corpus is kept in the 'corpus' subfolder of POPFile
     #
     # DEPRECATED This is only used to find an old corpus that might
     # need to be upgraded
 
     $self->config_( 'corpus', 'corpus' );
-
-    # The characters that appear before and after a subject
-    # modification
-
-    $self->config_( 'subject_mod_left',  '[' );
-    $self->config_( 'subject_mod_right', ']' );
 
     # Get the hostname for use in the X-POPFile-Link header
 
@@ -208,12 +207,6 @@ sub initialize
     # Allow the user to override the hostname
 
     $self->config_( 'hostname', $self->{hostname__} );
-
-    # If set to 1 then the X-POPFile-Link will have < > around the URL
-    # (i.e. X-POPFile-Link: <http://foo.bar>) when set to 0 there are
-    # none (i.e. X-POPFile-Link: http://foo.bar)
-
-    $self->config_( 'xpl_angle', 0 );
 
     $self->mq_register_( 'COMIT', $self );
     $self->mq_register_( 'RELSE', $self );
@@ -256,6 +249,8 @@ sub start
 {
     my ( $self ) = @_;
 
+    $self->db_prepare__();
+
     # In Japanese or Korean mode, explicitly set LC_COLLATE to C.
     #
     # This is to avoid Perl crash on Windows because default
@@ -263,18 +258,17 @@ sub start
     # which is different from the charset POPFile uses for Japanese
     # characters(EUC-JP).
 
-    if ( defined( $self->module_config_( 'html', 'language' ) ) &&
-       ( $self->module_config_( 'html', 'language' ) =~ /^Nihongo|Korean$/ )) {
+    if ( defined( $self->user_module_config_( 1, 'html', 'language' ) ) &&
+       ( $self->user_module_config_( 1, 'html', 'language' ) =~ /^Nihongo|Korean$/ )) {
         use POSIX qw( locale_h );
         setlocale( LC_COLLATE, 'C' );
     }
 
     # Pass in the current interface language for language specific parsing
 
-    $self->{parser__}->{lang__}  = $self->module_config_( 'html', 'language' );
-    $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
+    $self->{parser__}->{lang__}  = $self->user_module_config_( 1, 'html', 'language' );
+    $self->{unclassified__} = log( $self->user_config_( 1, 'unclassified_weight' ) );
 
-    $self->db_prepare__();
     $self->upgrade_predatabase_data__();
 
     return 1;
@@ -617,6 +611,18 @@ sub db_prepare__
              'select bucket_template.def from bucket_template
                   where bucket_template.id = ?;' );                                     # PROFILE BLOCK STOP
 
+    $self->{db_get_user_parameter__} = $self->db_()->prepare(                        # PROFILE BLOCK START
+             'select user_params.val from user_params
+                  where user_params.userid = ? and
+                        user_params.utid = ?;' );                                     # PROFILE BLOCK STOP
+
+    $self->{db_set_user_parameter__} = $self->db_()->prepare(                        # PROFILE BLOCK START
+           'replace into user_params ( userid, utid, val ) values ( ?, ?, ? );' );  # PROFILE BLOCK STOP
+
+    $self->{db_get_user_parameter_default__} = $self->db_()->prepare(                # PROFILE BLOCK START
+             'select user_template.def from user_template
+                  where user_template.id = ?;' );                                     # PROFILE BLOCK STOP
+
     $self->{db_get_buckets_with_magnets__} = $self->db_()->prepare(                    # PROFILE BLOCK START
              'select buckets.name from buckets, magnets
                   where buckets.userid = ? and
@@ -634,6 +640,15 @@ sub db_prepare__
     $h->execute;
     while ( my $row = $h->fetchrow_arrayref ) {
         $self->{db_parameterid__}{$row->[0]} = $row->[1];
+    }
+    $h->finish;
+
+    # Get the mapping from user parameter names to ids into a local hash
+
+    $h = $self->db_()->prepare( "select name, id from user_template;" );
+    $h->execute;
+    while ( my $row = $h->fetchrow_arrayref ) {
+        $self->{db_user_parameterid__}{$row->[0]} = $row->[1];
     }
     $h->finish;
 
@@ -663,6 +678,9 @@ sub db_cleanup__
     $self->{db_get_bucket_parameter__}->finish;
     $self->{db_set_bucket_parameter__}->finish;
     $self->{db_get_bucket_parameter_default__}->finish;
+    $self->{db_get_user_parameter__}->finish;
+    $self->{db_set_user_parameter__}->finish;
+    $self->{db_get_user_parameter_default__}->finish;
     $self->{db_get_buckets_with_magnets__}->finish;
     $self->{db_delete_zero_words__}->finish;
 }
@@ -1586,7 +1604,7 @@ sub classify
     my $userid = $self->valid_session_key__( $session );
     return undef if ( !defined( $userid ) );
 
-    $self->{unclassified__} = log( $self->config_( 'unclassified_weight' ) );
+    $self->{unclassified__} = log( $self->user_config_( 1, 'unclassified_weight' ) );
 
     $self->{magnet_used__}   = 0;
     $self->{magnet_detail__} = 0;
@@ -2278,7 +2296,7 @@ sub classify_and_modify
     my $xpl_insertion        = $self->get_bucket_parameter( $session, $classification, 'xpl'        );
     my $quarantine           = $self->get_bucket_parameter( $session, $classification, 'quarantine' );
 
-    my $modification = $self->config_( 'subject_mod_left' ) . $classification . $self->config_( 'subject_mod_right' );
+    my $modification = $self->user_config_( 1, 'subject_mod_left' ) . $classification . $self->user_config_( 1, 'subject_mod_right' );
 
     # Add the Subject line modification or the original line back again
     # Don't add the classification unless it is not present
@@ -2306,13 +2324,13 @@ sub classify_and_modify
 
     # Add the XPL header
 
-    my $xpl = $self->config_( 'xpl_angle' )?'<':'';
+    my $xpl = $self->user_config_( 1, 'xpl_angle' )?'<':'';
 
     $xpl .= "http://";
     $xpl .= $self->module_config_( 'html', 'local' )?"127.0.0.1":$self->config_( 'hostname' );
     $xpl .= ":" . $self->module_config_( 'html', 'port' ) . "/jump_to_message?view=$slot";
 
-    if ( $self->config_( 'xpl_angle' ) ) {
+    if ( $self->user_config_( 1, 'xpl_angle' ) ) {
         $xpl .= '>';
     }
 
@@ -2729,10 +2747,10 @@ sub get_bucket_word_prefixes
     # with "use locale" is memory and time consuming, and may cause
     # perl crash.
 
-    if ( $self->module_config_( 'html', 'language' ) eq 'Nihongo' ) {
+    if ( $self->user_module_config_( 1, 'html', 'language' ) eq 'Nihongo' ) {
         return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr_euc__($_,0,1)} @{$result};
     } else {
-        if  ( $self->module_config_( 'html', 'language' ) eq 'Korean' ) {
+        if  ( $self->user_module_config_( 1, 'html', 'language' ) eq 'Korean' ) {
             return grep {$_ ne $prev && ($prev = $_, 1)} sort map {$_ =~ /([\x20-\x80]|$eksc)/} @{$result};
         } else {
             return grep {$_ ne $prev && ($prev = $_, 1)} sort map {substr($_,0,1)}  @{$result};
@@ -2917,6 +2935,48 @@ sub get_bucket_parameter
 
 #----------------------------------------------------------------------------
 #
+# get_user_parameter_from_id
+#
+# Returns the value of a per user parameter
+#
+# $user        The ID of the user
+# $parameter   The name of the parameter
+#
+#----------------------------------------------------------------------------
+sub get_user_parameter_from_id
+{
+    my ( $self, $user, $parameter ) = @_;
+
+    # See if there's a cached value
+
+    if ( defined( $self->{db_user_parameters__}{$user}{$parameter} ) ) {
+        return $self->{db_user_parameters__}{$user}{$parameter};
+    }
+
+    # If there is a non-default value for this parameter then return it.
+
+    $self->{db_get_user_parameter__}->execute( $user, $self->{db_user_parameterid__}{$parameter} );
+    my $result = $self->{db_get_user_parameter__}->fetchrow_arrayref;
+
+    # If this parameter has not been defined for this specific user then
+    # get the default value
+
+    if ( !defined( $result ) ) {
+        $self->{db_get_user_parameter_default__}->execute(  # PROFILE BLOCK START
+            $self->{db_user_parameterid__}{$parameter} );          # PROFILE BLOCK STOP
+        $result = $self->{db_get_user_parameter_default__}->fetchrow_arrayref;
+    }
+
+    if ( defined( $result ) ) {
+        $self->{db_user_parameters__}{$user}{$parameter} = $result->[0];
+        return $result->[0];
+    } else {
+        return undef;
+    }
+}
+
+#----------------------------------------------------------------------------
+#
 # set_bucket_parameter
 #
 # Sets the value associated with a bucket specific parameter
@@ -2949,6 +3009,34 @@ sub set_bucket_parameter
 
     if ( defined( $self->{db_parameters__}{$userid}{$bucket}{$parameter} ) ) {
         $self->{db_parameters__}{$userid}{$bucket}{$parameter} = $value;
+    }
+
+    return 1;
+}
+
+#----------------------------------------------------------------------------
+#
+# set_user_parameter_from_id
+#
+# Sets the value associated with a user specific parameter
+#
+# $user        The ID of the user
+# $parameter   The name of the parameter
+# $value       The new value
+#
+#----------------------------------------------------------------------------
+sub set_user_parameter_from_id
+{
+    my ( $self, $user, $parameter, $value ) = @_;
+
+    my $utid = $self->{db_user_parameterid__}{$parameter};
+
+    # Exactly one row should be affected by this statement
+
+    $self->{db_set_user_parameter__}->execute( $user, $utid, $value );
+
+    if ( defined( $self->{db_user_parameters__}{$user}{$parameter} ) ) {
+        $self->{db_user_parameters__}{$user}{$parameter} = $value;
     }
 
     return 1;
@@ -3511,7 +3599,7 @@ sub add_stopword
 
     # Pass language parameter to add_stopword()
 
-    return $self->{parser__}->{mangle__}->add_stopword( $stopword, $self->module_config_( 'html', 'language' ) );
+    return $self->{parser__}->{mangle__}->add_stopword( $stopword, $self->user_module_config_( 1, 'html', 'language' ) );
 }
 
 sub remove_stopword
@@ -3523,7 +3611,7 @@ sub remove_stopword
 
     # Pass language parameter to remove_stopword()
 
-    return $self->{parser__}->{mangle__}->remove_stopword( $stopword, $self->module_config_( 'html', 'language' ) );
+    return $self->{parser__}->{mangle__}->remove_stopword( $stopword, $self->user_module_config_( 1, 'html', 'language' ) );
 }
 
 #----------------------------------------------------------------------------

@@ -134,57 +134,13 @@ sub initialize
 {
     my ( $self ) = @_;
 
+    # The default listen port for the UI
+
     $self->config_( 'port', 8080 );
-
-    # Checking for updates if off by default
-
-    $self->config_( 'update_check', 0 );
-
-    # Sending of statistics is off
-
-    $self->config_( 'send_stats', 0 );
-
-    # The size of a history page
-
-    $self->config_( 'page_size', 20 );
 
     # Only accept connections from the local machine for the UI
 
     $self->config_( 'local', 1 );
-
-    # Use the default skin
-
-    $self->config_( 'skin', 'default' );
-
-    # The last time we checked for an update using the local epoch
-
-    $self->config_( 'last_update_check', 0 );
-
-    # The user interface password
-
-    $self->config_( 'password', md5_hex( '__popfile__' ) );
-
-    # The last time (textual) that the statistics were reset
-
-    my $lt = localtime;
-    $self->config_( 'last_reset', $lt );
-
-    # We start by assuming that the user speaks English like the
-    # perfidious Anglo-Saxons that we are... :-)
-
-    $self->config_( 'language', 'English' );
-
-    # If this is 1 then when the language is loaded we will use the
-    # language string identifier as the string shown in the UI.  This
-    # is used to test whether which identifiers are used where.
-
-    $self->config_( 'test_language', 0 );
-
-    # This setting defines what is displayed in the word matrix:
-    # 'freq' for frequencies, 'prob' for probabilities, 'score' for
-    # logarithmic scores, if blank then the word table is not shown
-
-    $self->config_( 'wordtable_format', '' );
 
     # Controls whether to cache templates or not
 
@@ -195,35 +151,6 @@ sub initialize
     # purposes
 
     $self->config_( 'strict_templates', 0 );
-
-    # The default columns to show in the History page.  The order here
-    # is important, as is the presence of a + (show this column) or -
-    # (hide this column) in the value.  By default we show everything
-
-    $self->config_( 'columns',
-        '+inserted,+from,+to,-cc,+subject,-date,-size,+bucket' );
-
-    # An overriden date format set by the user, if empty then the
-    # Locale_Date from the language file is used (see pretty_date__)
-
-    $self->config_( 'date_format', '' );
-
-    # If you want session dividers
-
-    $self->config_( 'session_dividers', 1 );
-
-    # The number of characters to show in each column in the history, if set
-    # to 0 then POPFile tries to do this automatically
-
-    $self->config_( 'column_characters', 0 );
-
-    # Two variables that tell us whether to show help items
-    # concerning bucket setup and training. The bucket item
-    # is displayed by default, when it is turned off, the
-    # training item is shown.
-
-    $self->config_( 'show_training_help', 0 );
-    $self->config_( 'show_bucket_help', 1 );
 
     # Load skins
 
@@ -262,15 +189,6 @@ sub start
 {
     my ( $self ) = @_;
 
-    # In pre v0.21.0 POPFile the UI password was stored in plaintext
-    # in the configuration data.  Check to see if the password is not
-    # a hash and upgrade it automatically here.
-
-    if ( length( $self->config_( 'password' ) ) != 32 ) {
-        $self->config_( 'password',
-             md5_hex( '__popfile__' . $self->config_( 'password' ) ) );
-    }
-
     # Get a query session with the History object
 
     $self->{q__} = $self->history_()->start_query();
@@ -289,14 +207,14 @@ sub start
     # been translated will still appear
 
     $self->load_language( 'English' );
-    if ( $self->config_( 'language' ) ne 'English' ) {
-        $self->load_language( $self->config_( 'language' ) );
+    if ( $self->user_config_( 1, 'language' ) ne 'English' ) {
+        $self->load_language( $self->user_config_( 1, 'language' ) );
     }
 
     # Set the classifier option wmformat__ according to our wordtable_format
     # option.
 
-    $self->classifier_()->wmformat( $self->config_( 'wordtable_format' ) );
+    $self->classifier_()->wmformat( $self->user_config_( 1, 'wordtable_format' ) );
 
     return $self->SUPER::start();
 }
@@ -431,74 +349,6 @@ sub url_handler__
         return 1;
     }
 
-    # Check the password
-
-    if ( $url eq '/password' )  {
-        if ( md5_hex( '__popfile__' . $self->{form_}{password} ) eq
-             $self->config_( 'password' ) )  {
-            $self->change_session_key__( $self );
-            delete $self->{form_}{password};
-            $self->{form_}{session} = $self->{session_key__};
-            if ( defined( $self->{form_}{redirect} ) ) {
-                $url = $self->{form_}{redirect};
-                if ( $url =~ s/\?(.*)// )  {
-                    $self->parse_form_( $1 );
-                }
-            }
-        } else {
-            $self->password_page( $client, 1, '/' );
-            return 1;
-        }
-    }
-
-    # If there's a password defined then check to see if the user
-    # already knows the session key, if they don't then drop to the
-    # password screen
-
-    if ( ( (!defined($self->{form_}{session})) ||
-           ($self->{form_}{session} eq '' ) ||
-           ( $self->{form_}{session} ne $self->{session_key__} ) ) &&
-           ( $self->config_( 'password' ) ne md5_hex( '__popfile__' ) ) ) {
-
-        # Since the URL that has caused us to hit the password page
-        # might have information stored in the form hash we need to
-        # extract it out (except for the session key) and package it
-        # up so that the password page can redirect to the right place
-        # if the correct password is entered. This is especially
-        # important for the XPL functionality.
-
-        my $redirect_url = $url . '?';
-
-        foreach my $k (keys %{$self->{form_}}) {
-
-            # Skip the session key since we are in the process of
-            # assigning a new one through the password page
-
-            if ( $k ne 'session' ) {
-
-                # If we are dealing with an array of values (see
-                # parse_form_ for details) then we need to unpack it
-                # into separate entries)
-
-                if ( $k =~ /^(.+)_array$/ ) {
-                    my $field = $1;
-
-                    foreach my $v (@{$self->{form_}{$k}}) {
-                        $redirect_url .= "$field=$v&"
-                    }
-                } else {
-                    $redirect_url .= "$k=$self->{form_}{$k}&"
-                }
-            }
-        }
-
-        $redirect_url =~ s/&$//;
-
-        $self->password_page( $client, 0, $redirect_url );
-
-        return 1;
-    }
-
     if ( $url eq '/jump_to_message' )  {
         $self->{form_}{filter}    = '';
         $self->{form_}{negate}    = '';
@@ -562,13 +412,13 @@ sub url_handler__
 
     if ( exists $self->{form_}{nomore_bucket_help} &&
          $self->{form_}{nomore_bucket_help} ) {
-        $self->config_( 'show_bucket_help', 0 );
-        $self->config_( 'show_training_help', 1 );
+        $self->user_config_( 1, 'show_bucket_help', 0 );
+        $self->user_config_( 1, 'show_training_help', 1 );
     }
 
     if ( exists $self->{form_}{nomore_training_help} &&
          $self->{form_}{nomore_training_help} ) {
-        $self->config_( 'show_training_help', 0 );
+        $self->user_config_( 1, 'show_training_help', 0 );
     }
 
     # The url table maps URLs that we might receive to pages that we
@@ -694,10 +544,10 @@ sub http_ok
     # CGI on UseTheSource.  Also send stats to the same site if that
     # is allowed
 
-    if ( $self->{today__} ne $self->config_( 'last_update_check' ) ) {
+    if ( $self->{today__} ne $self->user_config_( 1, 'last_update_check' ) ) {
         $self->calculate_today();
 
-        if ( $self->config_( 'update_check' ) ) {
+        if ( $self->user_config_( 1, 'update_check' ) ) {
             my ( $major_version, $minor_version, $build_version ) =
                 $self->version() =~ /^v([^.]*)\.([^.]*)\.(.*)$/;
             $templ->param( 'Common_Middle_If_UpdateCheck' => 1 );
@@ -706,7 +556,7 @@ sub http_ok
             $templ->param( 'Common_Middle_Build_Version' => $build_version );
         }
 
-        if ( $self->config_( 'send_stats' ) ) {
+        if ( $self->user_config_( 1, 'send_stats' ) ) {
             $templ->param( 'Common_Middle_If_SendStats' => 1 );
             my @buckets = $self->classifier_()->get_buckets(
                 $self->{api_session__} );
@@ -716,7 +566,7 @@ sub http_ok
             $templ->param( 'Common_Middle_Errors'   => $self->ecount__() );
         }
 
-        $self->config_( 'last_update_check', $self->{today__}, 1 );
+        $self->user_config_( 1, 'last_update_check', $self->{today__}, 1 );
     }
 
     # Build an HTTP header for standard HTML
@@ -752,7 +602,7 @@ sub configuration_page
     my ( $self, $client, $templ ) = @_;
 
     if ( defined($self->{form_}{skin}) ) {
-        $self->config_( 'skin', $self->{form_}{skin} );
+        $self->user_config_( 1, 'skin', $self->{form_}{skin} );
         $templ = $self->load_template__( 'configuration-page.thtml' );
     }
 
@@ -763,12 +613,12 @@ sub configuration_page
    }
 
     if ( defined($self->{form_}{language}) ) {
-        if ( $self->config_( 'language' ) ne $self->{form_}{language} ) {
-            $self->config_( 'language', $self->{form_}{language} );
-            if ( $self->config_( 'language' ) ne 'English' ) {
+        if ( $self->user_config_( 1, 'language' ) ne $self->{form_}{language} ) {
+            $self->user_config_( 1, 'language', $self->{form_}{language} );
+            if ( $self->user_config_( 1, 'language' ) ne 'English' ) {
                 $self->load_language( 'English' );
             }
-            $self->load_language( $self->config_( 'language' ) );
+            $self->load_language( $self->user_config_( 1, 'language' ) );
 
             # Force a template relocalization because the language has been
             # changed which changes the localization of the template
@@ -814,7 +664,7 @@ sub configuration_page
     if ( defined($self->{form_}{page_size}) ) {
         if ( ( $self->{form_}{page_size} >= 1 ) &&
              ( $self->{form_}{page_size} <= 1000 ) ) {
-            $self->config_( 'page_size', $self->{form_}{page_size} );
+            $self->user_config_( 1, 'page_size', $self->{form_}{page_size} );
         } else {
             $templ->param( 'Configuration_If_Page_Size_Error' => 1 );
             delete $self->{form_}{page_size};
@@ -824,15 +674,15 @@ sub configuration_page
     if ( defined($self->{form_}{page_size} ) ) {
         $templ->param( 'Configuration_Page_Size_Updated' =>
             sprintf( $self->{language__}{Configuration_HistoryUpdate},
-                $self->config_( 'page_size' ) ) )
+                $self->user_config_( 1, 'page_size' ) ) )
     }
     $templ->param( 'Configuration_Page_Size' =>
-        $self->config_( 'page_size' ) );
+        $self->user_config_( 1, 'page_size' ) );
 
     if ( defined($self->{form_}{history_days}) ) {
         if ( ( $self->{form_}{history_days} >= 1 ) &&
              ( $self->{form_}{history_days} <= 366 ) ) {
-            $self->module_config_( 'history', 'history_days',
+            $self->user_module_config_( 1, 'history', 'history_days',
                 $self->{form_}{history_days} );
         } else {
             $templ->param( 'Configuration_If_History_Days_Error' => 1 );
@@ -844,8 +694,8 @@ sub configuration_page
         }
     }
 
-    $templ->param( 'Configuration_History_Days_Updated' => sprintf( $self->{language__}{Configuration_DaysUpdate}, $self->module_config_( 'history', 'history_days' ) ) ) if ( defined($self->{form_}{history_days} ) );
-    $templ->param( 'Configuration_History_Days' => $self->module_config_( 'history', 'history_days' ) );
+    $templ->param( 'Configuration_History_Days_Updated' => sprintf( $self->{language__}{Configuration_DaysUpdate}, $self->user_module_config_( 1, 'history', 'history_days' ) ) ) if ( defined($self->{form_}{history_days} ) );
+    $templ->param( 'Configuration_History_Days' => $self->user_module_config_( 1, 'history', 'history_days' ) );
 
     if ( defined($self->{form_}{timeout}) ) {
         if ( ( $self->{form_}{timeout} >= 10 ) && ( $self->{form_}{timeout} <= 300 ) ) {
@@ -860,7 +710,7 @@ sub configuration_page
     $templ->param( 'Configuration_TCP_Timeout' => $self->global_config_( 'timeout' ) );
 
     if ( defined( $self->{form_}{update_fields} ) ) {
-        my @columns = split(',', $self->config_( 'columns' ));
+        my @columns = split(',', $self->user_config_( 1, 'columns' ));
         my $new_columns = '';
         foreach my $column (@columns) {
             $column =~ s/^(\+|\-)//;
@@ -872,7 +722,7 @@ sub configuration_page
             $new_columns .= $column;
             $new_columns .= ',';
         }
-        $self->config_( 'columns', $new_columns );
+        $self->user_config_( 1, 'columns', $new_columns );
     }
 
     my ( @general_skins, @small_skins, @tiny_skins );
@@ -883,7 +733,7 @@ sub configuration_page
         my $name = $self->{skins__}[$i];
         $name =~ /\/([^\/]+)\/$/;
         $name = $1;
-        my $selected = ( $name eq $self->config_( 'skin' ) )?'selected':'';
+        my $selected = ( $name eq $self->user_config_( 1, 'skin' ) )?'selected':'';
 
         if ( $name =~ /tiny/ ) {
             $type = 'Tiny';
@@ -908,12 +758,12 @@ sub configuration_page
     foreach my $lang (@{$self->{languages__}}) {
         my %row_data;
         $row_data{Configuration_Language} = $lang;
-        $row_data{Configuration_Selected_Language} = ( $lang eq $self->config_( 'language' ) )?'selected':'';
+        $row_data{Configuration_Selected_Language} = ( $lang eq $self->user_config_( 1, 'language' ) )?'selected':'';
         push ( @language_loop, \%row_data );
     }
     $templ->param( 'Configuration_Loop_Languages' => \@language_loop );
 
-    my @columns = split(',', $self->config_( 'columns' ));
+    my @columns = split(',', $self->user_config_( 1, 'columns' ));
     my @column_data;
     foreach my $column (@columns) {
         my %row;
@@ -971,19 +821,14 @@ sub security_page
     my $server_error = '';
     my $port_error   = '';
 
-    if ( ( defined($self->{form_}{password}) ) &&
-         ( $self->{form_}{password} ne $self->config_( 'password' ) ) ) {
-        $self->config_( 'password', md5_hex( '__popfile__' . $self->{form_}{password} ) )
-    }
     $self->config_( 'local', $self->{form_}{localui}-1 )      if ( defined($self->{form_}{localui}) );
-    $self->config_( 'update_check', $self->{form_}{update_check}-1 ) if ( defined($self->{form_}{update_check}) );
-    $self->config_( 'send_stats', $self->{form_}{send_stats}-1 )   if ( defined($self->{form_}{send_stats}) );
+    $self->user_config_( 1, 'update_check', $self->{form_}{update_check}-1 ) if ( defined($self->{form_}{update_check}) );
+    $self->user_config_( 1, 'send_stats', $self->{form_}{send_stats}-1 )   if ( defined($self->{form_}{send_stats}) );
 
     $templ->param( 'Security_If_Local' => ( $self->config_( 'local' ) == 1 ) );
-    $templ->param( 'Security_Password' => ( $self->config_( 'password' ) eq md5_hex( '__popfile__' ) )?'':$self->config_( 'password' ) );
     $templ->param( 'Security_If_Password_Updated' => ( defined($self->{form_}{password} ) ) );
-    $templ->param( 'Security_If_Update_Check' => ( $self->config_( 'update_check' ) == 1 ) );
-    $templ->param( 'Security_If_Send_Stats' => ( $self->config_( 'send_stats' ) == 1 ) );
+    $templ->param( 'Security_If_Update_Check' => ( $self->user_config_( 1, 'update_check' ) == 1 ) );
+    $templ->param( 'Security_If_Send_Stats' => ( $self->user_config_( 1, 'send_stats' ) == 1 ) );
 
     my %security_templates;
 
@@ -1062,7 +907,7 @@ sub pretty_date__
     my ( $self, $date, $long ) = @_;
 
     $long = 0 if ( !defined( $long ) );
-    my $format = $self->config_( 'date_format' );
+    my $format = $self->user_config_( 1, 'date_format' );
 
     if ( $format eq '' ) {
         $format = $self->{language__}{Locale_Date};
@@ -1137,12 +982,12 @@ sub advanced_page
     @words = sort @words;
     push ( @words, ' ' );
     for my $word (@words) {
-        if ( $self->config_( 'language' ) =~ /^Korean$/ ) {
+        if ( $self->user_config_( 1, 'language' ) =~ /^Korean$/ ) {
             no locale;
             $word =~ /^(.)/;
             $c = $1;
         } else {
-                if ( $self->config_( 'language' ) =~ /^Nihongo$/ ) {
+                if ( $self->user_config_( 1, 'language' ) =~ /^Nihongo$/ ) {
                no locale;
                $word =~ /^($euc_jp)/;
                $c = $1;
@@ -1384,10 +1229,10 @@ sub magnet_page
     }
 
     if ( !defined( $stop_magnet ) ) {
-        $stop_magnet = $start_magnet + $self->config_( 'page_size' ) - 1;
+        $stop_magnet = $start_magnet + $self->user_config_( 1, 'page_size' ) - 1;
     }
 
-    if ( $self->config_( 'page_size' ) < $magnet_count ) {
+    if ( $self->user_config_( 1, 'page_size' ) < $magnet_count ) {
         $self->set_magnet_navigator__( $templ, $start_magnet,
             $stop_magnet, $magnet_count );
     }
@@ -1696,7 +1541,7 @@ sub corpus_page
             $self->set_bucket_parameter__( $bucket, 'fncount', 0 );
         }
         my $lasttime = localtime;
-        $self->config_( 'last_reset', $lasttime );
+        $self->user_config_( 1, 'last_reset', $lasttime );
         $self->configuration_()->save_configuration();
     }
 
@@ -1860,7 +1705,7 @@ sub corpus_page
     }
     $templ->param( 'Corpus_Accuracy' => $accuracy );
     $templ->param( 'Corpus_If_Last_Reset' => 1 );
-    $templ->param( 'Corpus_Last_Reset' => $self->config_( 'last_reset' ) );
+    $templ->param( 'Corpus_Last_Reset' => $self->user_config_( 1, 'last_reset' ) );
 
     if ( ( defined($self->{form_}{lookup}) ) || ( defined($self->{form_}{word}) ) ) {
         $templ->param( 'Corpus_If_Looked_Up' => 1 );
@@ -1976,7 +1821,7 @@ sub set_history_navigator__
 
     if ( $start_message != 0 )  {
         $templ->param( 'History_Navigator_If_Previous' => 1 );
-        $templ->param( 'History_Navigator_Previous'    => $start_message - $self->config_( 'page_size' ) );
+        $templ->param( 'History_Navigator_Previous'    => $start_message - $self->user_config_( 1, 'page_size' ) );
     }
 
     # Only show two pages either side of the current page, the first
@@ -1991,9 +1836,9 @@ sub set_history_navigator__
     while ( $i < $self->history_()->get_query_size( $self->{q__} ) ) {
         my %row_data;
         if ( ( $i == 0 ) ||
-             ( ( $i + $self->config_( 'page_size' ) ) >= $self->history_()->get_query_size( $self->{q__} ) ) ||
-             ( ( ( $i - 2 * $self->config_( 'page_size' ) ) <= $start_message ) &&
-               ( ( $i + 2 * $self->config_( 'page_size' ) ) >= $start_message ) ) ) {
+             ( ( $i + $self->user_config_( 1, 'page_size' ) ) >= $self->history_()->get_query_size( $self->{q__} ) ) ||
+             ( ( ( $i - 2 * $self->user_config_( 1, 'page_size' ) ) <= $start_message ) &&
+               ( ( $i + 2 * $self->user_config_( 1, 'page_size' ) ) >= $start_message ) ) ) {
             $row_data{History_Navigator_Page} = $p;
             $row_data{History_Navigator_I} = $i;
             if ( $i == $start_message ) {
@@ -2011,15 +1856,15 @@ sub set_history_navigator__
             $dots = 0;
         }
 
-        $i += $self->config_( 'page_size' );
+        $i += $self->user_config_( 1, 'page_size' );
         $p++;
         push ( @nav_data, \%row_data );
     }
     $templ->param( 'History_Navigator_Loop' => \@nav_data );
 
-    if ( $start_message < ( $self->history_()->get_query_size( $self->{q__} ) - $self->config_( 'page_size' ) ) )  {
+    if ( $start_message < ( $self->history_()->get_query_size( $self->{q__} ) - $self->user_config_( 1, 'page_size' ) ) )  {
         $templ->param( 'History_Navigator_If_Next' => 1 );
-        $templ->param( 'History_Navigator_Next'    => $start_message + $self->config_( 'page_size' ) );
+        $templ->param( 'History_Navigator_Next'    => $start_message + $self->user_config_( 1, 'page_size' ) );
     }
 }
 
@@ -2041,7 +1886,7 @@ sub set_magnet_navigator__
 
     if ( $start_magnet != 0 )  {
         $templ->param( 'Magnet_Navigator_If_Previous' => 1 );
-        $templ->param( 'Magnet_Navigator_Previous'    => $start_magnet - $self->config_( 'page_size' ) );
+        $templ->param( 'Magnet_Navigator_Previous'    => $start_magnet - $self->user_config_( 1, 'page_size' ) );
     }
 
     my $i = 0;
@@ -2060,14 +1905,14 @@ sub set_magnet_navigator__
             $row_data{Magnet_Navigator_Start_Magnet} = $i;
         }
 
-        $i += $self->config_( 'page_size' );
+        $i += $self->user_config_( 1, 'page_size' );
         push ( @page_loop, \%row_data );
     }
     $templ->param( 'Magnet_Navigator_Loop_Pages' => \@page_loop );
 
-    if ( $start_magnet < ( $magnet_count - $self->config_( 'page_size' ) ) )  {
+    if ( $start_magnet < ( $magnet_count - $self->user_config_( 1, 'page_size' ) ) )  {
         $templ->param( 'Magnet_Navigator_If_Next' => 1 );
-        $templ->param( 'Magnet_Navigator_Next'    => $start_magnet + $self->config_( 'page_size' ) );
+        $templ->param( 'Magnet_Navigator_Next'    => $start_magnet + $self->user_config_( 1, 'page_size' ) );
     }
 }
 
@@ -2332,7 +2177,7 @@ sub history_page
     $templ->param( 'History_If_Search'     => defined( $self->{form_}{search} ) );
     $templ->param( 'History_Field_Sort'    => $self->{form_}{sort} );
     $templ->param( 'History_Field_Filter'  => $self->{form_}{filter} );
-    $templ->param( 'History_If_MultiPage'  => $self->config_( 'page_size' ) <= $self->history_()->get_query_size( $self->{q__} ) );
+    $templ->param( 'History_If_MultiPage'  => $self->user_config_( 1, 'page_size' ) <= $self->history_()->get_query_size( $self->{q__} ) );
 
     my @buckets = $self->classifier_()->get_buckets( $self->{api_session__} );
 
@@ -2370,7 +2215,7 @@ sub history_page
         my $start_message = 0;
         $start_message = $self->{form_}{start_message} if ( ( defined($self->{form_}{start_message}) ) && ($self->{form_}{start_message} > 0 ) );
         if ( $start_message >= $c ) {
-            $start_message -= $self->config_( 'page_size' );
+            $start_message -= $self->user_config_( 1, 'page_size' );
         }
         if ( $start_message < 0 ) {
             $start_message = 0;
@@ -2378,7 +2223,7 @@ sub history_page
         $self->{form_}{start_message} = $start_message;
         $templ->param( 'History_Start_Message' => $start_message );
 
-        my $stop_message  = $start_message + $self->config_( 'page_size' ) - 1;
+        my $stop_message  = $start_message + $self->user_config_( 1, 'page_size' ) - 1;
         $stop_message = $self->history_()->get_query_size( $self->{q__} ) - 1 if ( $stop_message >= $self->history_()->get_query_size( $self->{q__} ) );
 
         $self->set_history_navigator__( $templ, $start_message, $stop_message );
@@ -2387,7 +2232,7 @@ sub history_page
         # parameter at commas keeping all the items that start with a
         # +, and then strip the +
 
-        my @columns = split( ',', $self->config_( 'columns' ) );
+        my @columns = split( ',', $self->user_config_( 1, 'columns' ) );
         my @header_data;
         my $colspan = 1;
         my $length = 90;
@@ -2427,24 +2272,24 @@ sub history_page
 
         my @history_data;
         my $i = $start_message;
-        @columns = split( ',', $self->config_( 'columns' ) );
+        @columns = split( ',', $self->user_config_( 1, 'columns' ) );
         my $last = -1;
         if ( defined($self->{form_}{automatic}) ) {
-            $self->config_( 'column_characters', 0 );
+            $self->user_config_( 1, 'column_characters', 0 );
         }
-        if ( $self->config_( 'column_characters' ) != 0 ) {
-            $length = $self->config_( 'column_characters' );
+        if ( $self->user_config_( 1, 'column_characters' ) != 0 ) {
+            $length = $self->user_config_( 1, 'column_characters' );
         }
         if ( defined($self->{form_}{increase}) ) {
             $length++;
-            $self->config_( 'column_characters', $length );
+            $self->user_config_( 1, 'column_characters', $length );
         }
         if ( defined($self->{form_}{decrease}) ) {
             $length--;
             if ( $length < 5 ) {
                 $length = 5;
             }
-            $self->config_( 'column_characters', $length );
+            $self->user_config_( 1, 'column_characters', $length );
         }
         foreach my $row (@rows) {
             my %row_data;
@@ -2498,7 +2343,7 @@ sub history_page
             }
             $row_data{Session_Key} = $self->{session_key__};
 
-            if ( ( $last != -1 ) && ( $self->{form_}{sort} =~ /inserted/ ) && ( $self->config_( 'session_dividers' ) ) ) {
+            if ( ( $last != -1 ) && ( $self->{form_}{sort} =~ /inserted/ ) && ( $self->user_config_( 1, 'session_dividers' ) ) ) {
                 $row_data{History_If_Session} = ( abs( $$row[7] - $last ) > 300 );
                 $row_data{History_Colspan} = $colspan+1;
             }
@@ -2547,13 +2392,13 @@ sub view_page
 
     my $color = $self->classifier_()->get_bucket_color(
                     $self->{api_session__}, $bucket );
-    my $page_size = $self->config_( 'page_size' );
+    my $page_size = $self->user_config_( 1, 'page_size' );
 
     $self->{form_}{sort}   = '' if ( !defined( $self->{form_}{sort}   ) );
     $self->{form_}{search} = '' if ( !defined( $self->{form_}{search} ) );
     $self->{form_}{filter} = '' if ( !defined( $self->{form_}{filter} ) );
     if ( !defined( $self->{form_}{format} ) ) {
-        $self->{form_}{format} = $self->config_( 'wordtable_format' );
+        $self->{form_}{format} = $self->user_config_( 1, 'wordtable_format' );
     }
 
     # If a format change was requested for the word matrix, record it in the
@@ -2579,7 +2424,7 @@ sub view_page
 
     $templ->param( 'View_Index'            => $index );
     $templ->param( 'View_This'             => $index );
-    $templ->param( 'View_This_Page'        => (( $index ) >= $start_message )?$start_message:($start_message - $self->config_( 'page_size' ))); # TODO
+    $templ->param( 'View_This_Page'        => (( $index ) >= $start_message )?$start_message:($start_message - $self->user_config_( 1, 'page_size' ))); # TODO
 
     $templ->param( 'View_If_Reclassified'  => $reclassified );
     if ( $reclassified ) {
@@ -2786,7 +2631,7 @@ sub load_template__
     # This allows a skin author to change just a single part of
     # POPFile with duplicating that entire set of templates
 
-    my $root = 'skins/' . $self->config_( 'skin' ) . '/';
+    my $root = 'skins/' . $self->user_config_( 1, 'skin' ) . '/';
     my $template_root = $root;
     my $file = $self->get_root_path_( "$template_root$template" );
     if ( !( -e $file ) ) {
@@ -2819,8 +2664,8 @@ sub load_template__
                    'Common_Bottom_Date'      => $self->pretty_date__( $now ),
                    'Common_Bottom_LastLogin' => $self->{last_login__},
                    'Common_Bottom_Version'   => $self->version(),
-                   'If_Show_Bucket_Help'     => $self->config_( 'show_bucket_help' ),
-                   'If_Show_Training_Help'   => $self->config_( 'show_training_help' ) );
+                   'If_Show_Bucket_Help'     => $self->user_config_( 1, 'show_bucket_help' ),
+                   'If_Show_Training_Help'   => $self->user_config_( 1, 'show_training_help' ) );
 
     foreach my $fixup (keys %fixups) {
         if ( $templ->query( name => $fixup ) ) {
@@ -2966,7 +2811,7 @@ sub load_language
                 if ( $value =~ /^\"(.+)\"$/ ) {
                     $value = $1;
                 }
-                my $msg = ($self->config_( 'test_language' )) ? $id : $value;
+                my $msg = ($self->user_config_( 1, 'test_language' )) ? $id : $value;
                 $msg =~ s/[\r\n]//g;
 
                 $self->{language__}{$id} = $msg;
@@ -3202,7 +3047,7 @@ sub shutdown_page__
 
     # Figure out what style sheet we are using
 
-    my $root = 'skins/' . $self->config_( 'skin' ) . '/';
+    my $root = 'skins/' . $self->user_config_( 1, 'skin' ) . '/';
     my $css_file = $self->get_root_path_( $root . 'style.css' );
     if ( !( -e $css_file ) ) {
         $root = 'skins/default/';

@@ -72,6 +72,10 @@ use IO::Select;
 # log_() - sends a string to the logger
 #
 # config_() - gets or sets a configuration parameter for this module
+# global_config_() - gets or sets a global configuration parameter
+# module_config_() - gets or sets a configuration parameter for a module
+# All of the above three may be prefixed by user_ and passed a database
+# user ID as the first parameter to get a user specific parameter
 #
 # mq_post_() - post a message to the central message queue
 #
@@ -359,6 +363,28 @@ sub config_
 
 # ----------------------------------------------------------------------------
 #
+# user_config_
+#
+# Called by a subclass to get or set a configuration parameter for a
+# specific user
+#
+# $user              Database user ID
+# $name              The name of the parameter (e.g. 'port')
+# $value             (optional) The value to set
+#
+# If called with just a $name then config_() will return the current value
+# of the configuration parameter.
+#
+# ----------------------------------------------------------------------------
+sub user_config_
+{
+    my ( $self, $user, $name, $value ) = @_;
+
+    return $self->user_module_config_( $user, $self->{name__}, $name, $value );
+}
+
+# ----------------------------------------------------------------------------
+#
 # mq_post_
 #
 # Called by a subclass to post a message to the message queue
@@ -414,6 +440,28 @@ sub global_config_
 
 # ----------------------------------------------------------------------------
 #
+# user_global_config_
+#
+# Called by a subclass to get or set a global (i.e. not module
+# specific) configuration parameter for a specific user
+#
+# $user              Database user ID
+# $name              The name of the parameter (e.g. 'port')
+# $value             (optional) The value to set
+#
+# If called with just a $name then global_config_() will return the
+# current value of the configuration parameter.
+#
+# ----------------------------------------------------------------------------
+sub user_global_config_
+{
+    my ( $self, $user, $name, $value ) = @_;
+
+    return $self->module_config_( $user, 'GLOBAL', $name, $value );
+}
+
+# ----------------------------------------------------------------------------
+#
 # module_config_
 #
 # Called by a subclass to get or set a module specific configuration parameter
@@ -431,6 +479,35 @@ sub module_config_
     my ( $self, $module, $name, $value ) = @_;
 
     return $self->configuration_()->parameter( $module . "_" . $name, $value );
+}
+
+# ----------------------------------------------------------------------------
+#
+# user_module_config_
+#
+# Called by a subclass to get or set a module specific configuration parameter
+# for a specific user
+#
+# $user   Database user ID
+# $module The name of the module that owns the parameter (e.g. 'pop3')
+# $name   The name of the parameter (e.g. 'port') $value (optional) The
+#         value to set
+#
+# If called with just a $module and $name then user_module_config_() will
+# return the current value of the configuration parameter.
+#
+# ----------------------------------------------------------------------------
+sub user_module_config_
+{
+    my ( $self, $user, $module, $name, $value ) = @_;
+
+    if ( defined( $value ) ) {
+        return $self->classifier_()->set_user_parameter_from_id( $user,
+                                        $module . "_" . $name, $value );
+    } else {
+        return $self->classifier_()->get_user_parameter_from_id( $user,
+                                        $module . "_" . $name );
+    }
 }
 
 # ----------------------------------------------------------------------------

@@ -85,10 +85,6 @@ sub initialize
 {
     my ( $self ) = @_;
 
-    # Keep the history for two days
-
-    $self->config_( 'history_days', 2 );
-
     # If 1, Messages are saved to an archive when they are removed or expired
     # from the history cache
 
@@ -1230,7 +1226,7 @@ sub cleanup_history
     my ( $self ) = @_;
 
     my $seconds_per_day = 24 * 60 * 60;
-    my $old = time - $self->config_( 'history_days' ) * $seconds_per_day;
+    my $old = time - $self->user_config_( 1, 'history_days' ) * $seconds_per_day;
     my $d = $self->db_()->prepare( "select id from history
                                          where inserted < $old;" );
     $d->execute;
