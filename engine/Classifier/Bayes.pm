@@ -2202,6 +2202,7 @@ sub classify
                             $bucket_row{View_Score_Probability} = $wordprobstr;
                         }
                         else {
+                            # Scores eq 0 must also be remembered.
                             push @score, 0;
                         }
                         push ( @per_bucket, \%bucket_row );
@@ -2215,7 +2216,7 @@ sub classify
                     # draw a chart
 
                     if ( $self->{wmformat__} eq 'score' ) {
-                        $chart{$$idmap{$id}} = $score[0] - ($score[1]||0);
+                        $chart{$$idmap{$id}} = ( $score[0] || 0 ) - ( $score[1] || 0 );
                     }
 
                     push ( @word_data, \%row_data );
@@ -2223,7 +2224,7 @@ sub classify
             }
             $templ->param( 'View_Score_Loop_Words' => \@word_data );
 
-            if ( $self->{wmformat__} eq 'score' && ( ( keys %chart ) >  0 ) ) {
+            if ( $self->{wmformat__} eq 'score' ) {
                 # Draw a chart that shows how the decision between the top
                 # two buckets was made.
 
@@ -2232,44 +2233,56 @@ sub classify
                 my @chart_data;
                 my $max_chart = $chart{$words[0]};
                 my $min_chart = $chart{$words[$#words]};
-                my $scale = ( $max_chart > $min_chart ) ? ( 400 / ( $max_chart - $min_chart ) ) : 0;
-                my $width = int( 400 / ( $#words + 1 ) );
-                if ( $width < 1 ) {
-                    $width = 1;
-                }
-                my $color = $self->get_bucket_color( $session, $ranking[0] );
-                foreach my $word (@words) {
+                my $scale = ( $max_chart > $min_chart ) ? 400 / ( $max_chart - $min_chart ) : 0;
+
+                my $color_1 = $self->get_bucket_color( $session, $ranking[0] );
+                my $color_2 = $self->get_bucket_color( $session, $ranking[1] );
+
+                $templ->param( 'Bucket_1' => $ranking[0] );
+                $templ->param( 'Bucket_2' => $ranking[1] );
+
+                $templ->param( 'Color_Bucket_1' => $color_1 );
+                $templ->param( 'Color_Bucket_2' => $color_2 );
+
+                $templ->param( 'Score_Bucket_1' => sprintf("%.3f", ($raw_score{$ranking[0]} - $correction)/$log10) );
+                $templ->param( 'Score_Bucket_2' => sprintf("%.3f", ($raw_score{$ranking[1]} - $correction)/$log10) );
+
+                for ( my $i=0; $i <= $#words; $i++ ) {
+                    my $word_1 = $words[$i];
+                    my $word_2 = $words[$#words - $i];
+
+                    my $width_1 = int( $chart{$word_1} * $scale + .5 );
+                    my $width_2 = int( $chart{$word_2} * $scale + .5 ) * -1;
+
+                    last if ( $width_1 <=0 && $width_2 <= 0 );
+                    
                     my %row_data;
 
-                    next if ( $chart{$word} == 0 );
-
-                    $row_data{View_If_Bar} = ( $chart{$word} > 0 );
-                    if ( $chart{$word} > 0 ) {
-                        $row_data{View_Height} = int( $chart{$word} * $scale + .5 );
+                    $row_data{View_Chart_Word_1} = $word_1;
+                    if ( $width_1 > 0 ) {
+                        $row_data{View_If_Bar_1} = 1;
+                        $row_data{View_Width_1}  = $width_1;
+                        $row_data{View_Color_1}  = $color_1;
+                        $row_data{Score_Word_1}  = sprintf "%.3f", $chart{$word_1};
                     }
-                    $row_data{View_Chart_Word} = $word;
-                    $row_data{View_Width} = $width;
-                    $row_data{View_Color} = $color;
+                    else {
+                        $row_data{View_If_Bar_1} = 0;
+                    }
+
+                    $row_data{View_Chart_Word_2} = $word_2;
+                    if ( $width_2 > 0 ) {
+                        $row_data{View_If_Bar_2} = 1;
+                        $row_data{View_Width_2}  = $width_2;
+                        $row_data{View_Color_2}  = $color_2;
+                        $row_data{Score_Word_2}  = sprintf "%.3f", $chart{$word_2};
+                    }
+                    else {
+                        $row_data{View_If_Bar_2} = 0;
+                    }
+
                     push ( @chart_data, \%row_data );
                 }
-                $templ->param( 'View_Loop_Chart1' => \@chart_data );
-                my @chart_data2;
-                $color = $self->get_bucket_color( $session, $ranking[1] );
-                foreach my $word (@words) {
-                    my %row_data;
-
-                    next if ( $chart{$word} == 0 );
-
-                    $row_data{View_If_Bar} = ( $chart{$word} < 0 );
-                    if ( $chart{$word} < 0 ) {
-                        $row_data{View_Height} = - ( int( $chart{$word} * $scale +.5 ) );
-                    }
-                    $row_data{View_Chart_Word} = $word;
-                    $row_data{View_Width} = $width;
-                    $row_data{View_Color} = $color;
-                    push ( @chart_data2, \%row_data );
-                }
-                $templ->param( 'View_Loop_Chart2' => \@chart_data2 );
+                $templ->param( 'View_Loop_Chart' => \@chart_data );
                 $templ->param( 'If_chart' => 1 );
             }
             else {
@@ -2318,7 +2331,7 @@ sub classify_and_modify
     my $msg_subject;              # The message subject
     my $msg_head_before = '';     # Store the message headers that
                                   # come before Subject here
-    my $msg_head_after = '';	  # Store the message headers that
+    my $msg_head_after = '';      # Store the message headers that
                                   # come after Subject here
     my $msg_head_q      = '';     # Store questionable header lines here
     my $msg_body        = '';     # Store the message body here

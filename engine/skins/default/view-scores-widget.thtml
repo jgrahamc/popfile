@@ -198,30 +198,56 @@
     <TMPL_IF NAME="If_chart">
 
     <hr />
-
     <b>
         <TMPL_VAR NAME="Localize_View_Chart">
     </b>
     <p>
     <table>
-    <tr>
-    <TMPL_LOOP NAME="View_Loop_Chart1">
-        <td valign="bottom">
-        <TMPL_IF NAME="View_If_Bar">
-            <img src="autogen_<TMPL_VAR NAME="View_Color" ESCAPE=URL>.bmp" width="<TMPL_VAR NAME="View_Width">" height="<TMPL_VAR NAME="View_Height">" alt="<TMPL_VAR NAME="View_Chart_Word">" title="<TMPL_VAR NAME="View_Chart_Word">">
-        </TMPL_IF>
-        </td>
-    </TMPL_LOOP>
-    </tr>
-    <tr>
-    <TMPL_LOOP NAME="View_Loop_Chart2">
-        <td valign="top">
-        <TMPL_IF NAME="View_If_Bar">
-            <img src="autogen_<TMPL_VAR NAME="View_Color" ESCAPE=URL>.bmp" width="<TMPL_VAR NAME="View_Width">" height="<TMPL_VAR NAME="View_Height">" alt="<TMPL_VAR NAME="View_Chart_Word">" title="<TMPL_VAR NAME="View_Chart_Word">"><br />
-        </TMPL_IF>
-        </td>
-    </TMPL_LOOP>
-    </tr>
+        <tr>
+            <th colspan="2" align="center" style="color: <TMPL_VAR NAME="Color_Bucket_1">;">
+                <TMPL_VAR NAME="Bucket_1"> (<TMPL_VAR NAME="Localize_Score">: <TMPL_VAR NAME="Score_Bucket_1">)
+            </th>
+            <th colspan="2" align="center" style="color: <TMPL_VAR NAME="Color_Bucket_2">;">
+                <TMPL_VAR NAME="Bucket_2"> (<TMPL_VAR NAME="Localize_Score">: <TMPL_VAR NAME="Score_Bucket_2">)
+            </th>
+        </tr>
+
+        <TMPL_LOOP NAME="View_Loop_Chart">
+
+        <tr>
+
+            <TMPL_IF NAME="View_If_Bar_1">
+
+            <td align="left">
+                <TMPL_VAR NAME="View_Chart_Word_1">
+            </td>
+            <td align="right">
+                <img src="autogen_<TMPL_VAR NAME="View_Color_1" ESCAPE=URL>.bmp" width="<TMPL_VAR NAME="View_Width_1">" height="10" alt="<TMPL_VAR NAME="Score_Word_1">" title="<TMPL_VAR NAME="Score_Word_1">">
+            </td>
+
+            <TMPL_ELSE>
+
+            <td colspan="2">
+            </td>
+
+            </TMPL_IF>
+
+            <TMPL_IF NAME="View_If_Bar_2">
+
+            <td align="left">
+                <img src="autogen_<TMPL_VAR NAME="View_Color_2" ESCAPE=URL>.bmp" width="<TMPL_VAR NAME="View_Width_2">" height="10" alt="<TMPL_VAR NAME="Score_Word_2">" title="<TMPL_VAR NAME="Score_Word_1">">
+            </td>
+            <td align="right">
+                <TMPL_VAR NAME="View_Chart_Word_2">
+            </td>
+
+            <TMPL_ELSE>
+            <td colspan="2">
+            </td>
+
+            </TMPL_IF>
+        </tr>
+        </TMPL_LOOP>
     </table>
 
     </TMPL_IF>
