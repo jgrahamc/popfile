@@ -406,15 +406,17 @@ sub load_word_matrix_
     # actually a bucket
 
     $self->{colors__}{unclassified} = 'black';
+    $self->{colors__}{unsure}       = 'black';
 
     # SLM for unclassified "bucket" will always match the global setting
 
     $self->{parameters__}{unclassified}{subject} = $self->global_config_('subject');
+    $self->{parameters__}{unsure}{subject}       = $self->global_config_('subject');
 
     # Quarantine for unclassified will be off:
 
     $self->{parameters__}{unclassified}{quarantine} = 0;
-
+    $self->{parameters__}{unsure}{quarantine}       = 0;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -607,7 +609,7 @@ sub chi2
     my $sum  = exp(-$m);
     my $term = $sum;
 
-    for my $i (1..$free/2) {
+    for my $i (1..($free/2-1)) {
         $term *= $m / $i;
         $sum  += $term;
     }
@@ -696,7 +698,10 @@ sub classify
     # For each word go through the buckets and calculate P(word|bucket) and then calculate
     # P(word|bucket) ^ word count and multiply to the score
 
+    my $word_count = 0;
+
     foreach my $word (keys %{$self->{parser__}->{words__}}) {
+        $word_count += 2;
         my $wmax = -10000;
 
         foreach my $bucket (@buckets) {
@@ -718,7 +723,7 @@ sub classify
     my @ranking = sort {$score{$b} <=> $score{$a}} keys %score;
 
     foreach my $bucket (@buckets) {
-        $chi{$bucket} = chi2( $score{$bucket}, 2 * $matchcount{$bucket}, -int($score{$ranking[0]}/log(10)) * log(10) );
+        $chi{$bucket} = chi2( $score{$bucket}, $word_count, -int($score{$ranking[0]}/log(10)) * log(10) );
     }
 
     # If no bucket has a probability better than 0.5, call the message "unclassified".
@@ -784,7 +789,7 @@ sub classify
             $self->{scores__} .= "<tr><td></td><td><input type=\"submit\" class=\"submit\" name=\"create\" value=\"$language{Create}\" /></td></tr></table></form>";
         }
 
-        $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<b>Verdict: <font color=\"$self->{colors__}{$class}\">$class ($certainty)</font></b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
+        $self->{scores__} .= "<hr><b>$language{Scores}</b><p>\n<b>Verdict: <font color=\"$self->{colors__}{$class}\">$class ($certainty  $chi{$ranking[0]} $chi{$ranking[1]})</font></b><p>\n<table class=\"top20Words\">\n<tr>\n<th scope=\"col\">$language{Bucket}</th>\n<th>&nbsp;</th>\n";
         $self->{scores__} .= "<th scope=\"col\">$language{Count}&nbsp;&nbsp;</th><th scope=\"col\">$language{Probability}</th></tr>\n";
 
         foreach my $b (@ranking) {
@@ -1159,7 +1164,7 @@ sub classify_and_modify
     my $modification = $self->config_( 'subject_mod_left' ) . $classification . $self->config_( 'subject_mod_right' );
 
     # Add the Subject line modification or the original line back again
-    if ( $classification ne 'unclassified' ) {
+    if ( ( $classification ne 'unclassified' ) && ( $classification ne 'unsure' ) ) {
         if ( $self->global_config_( 'subject' ) ) {
             # Don't add the classification unless it is not present
             if ( !( $msg_subject =~ /\Q$modification\E/ ) &&                        # PROFILE BLOCK START
@@ -1197,7 +1202,7 @@ sub classify_and_modify
         # If the bucket is quarantined then we'll treat it specially by changing the message header to contain
         # information from POPFile and wrapping the original message in a MIME encoding
 
-        if ( $classification ne 'unclassified' ) {
+        if ( ( $classification ne 'unclassified' ) && ( $classification ne 'unsure' ) ) {
             if ( $self->{parameters__}{$classification}{quarantine} == 1 ) {
                 print $client "From: " . $self->{parser__}->get_header( 'from' ) . "$eol";
                 print $client "To: " . $self->{parser__}->get_header( 'to' ) . "$eol";
@@ -1235,7 +1240,7 @@ sub classify_and_modify
 
     my $before_dot = '';
 
-    if ( $classification ne 'unclassified' ) {
+    if ( ( $classification ne 'unclassified' ) && ( $classification ne 'unsure' ) ) {
         if ( ( $self->{parameters__}{$classification}{quarantine} == 1 ) && $echo ) {
             $before_dot = "$eol--$nopath_temp_file--$eol";
         }
