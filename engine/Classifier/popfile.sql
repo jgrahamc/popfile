@@ -242,30 +242,6 @@ create table magnets( id integer primary key,    -- unique ID for this entry
                       seq int                    -- used to set the order of magnets
                     );
 
--- ---------------------------------------------------------------------------------------------
---
--- history - the table that maintains copies of messages received through
---           POPFile for review and reclassification
---
--- ---------------------------------------------------------------------------------------------
-
-create table history( id integer primary key, -- unique ID for this entry
-                      userid integer,         -- the associated user
-                      frm varchar(255),       -- the From: address
-                      subject varchar(255),   -- the Subject: line
-                      too varchar(255),       -- the To: line (spelled wrong because to
-                                              -- is a reserved word)
-                      cc varchar(255),        -- the Cc: line
-                      datetime date,          -- the Date: line
-                      bucketid integer,       -- the bucket classified to
-                      usedtobe integer,       -- the bucket it usedtobe in
-                      magnetid integer,       -- the magnet used if applicable
-                      message blob            -- the entire message
-                    );
-
--- TODO create table bucket_action_types
--- TODO create table bucket_actions
-
 -- MySQL SPECIFIC 
 
 -- ---------------------------------------------------------------------------------------------
