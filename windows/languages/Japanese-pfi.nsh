@@ -126,7 +126,7 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TITLE        "'$G_WINUSERNAME' のための POPFile データの保存先"
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_SUBTITLE     "'$G_WINUSERNAME' のための POPFile データを保存するフォルダを選んでください"
-!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "このバージョンの POPFile は各ユーザーごとに異なるデータファイルを使用します。$\r$\n$\r$\nセットアップは次のフォルダを '$G_WINUSERNAME' ユーザー用の POPFile データのために使用します。別のフォルダを使用するには、参照 を押して他のフォルダを選んで下さい。 $_CLICK"
+!insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_TOP     "このバージョンの POPFile は各ユーザーごとに異なるデータファイルを使用します。$\r$\n$\r$\nセットアップは次のフォルダを '$G_WINUSERNAME' ユーザー用の POPFile データのために使用します。別のフォルダを使用するには、[参照] を押して他のフォルダを選んで下さい。 $_CLICK"
 !insertmacro PFI_LANG_STRING PFI_LANG_USERDIR_TEXT_DESTN   "'$G_WINUSERNAME' の POPFile データの保存先"
 
 #--------------------------------------------------------------------------
@@ -182,7 +182,7 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1   "次の場所に以前にインストールされた POPFile が見つかりました:"
 !insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2   "アップグレードしますか？"
-!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_3   "Previous configuration data found at"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_3   "次の場所に以前の設定データが見つかりました:"
 
 #--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
@@ -229,7 +229,7 @@
 ; Text strings displayed on the custom page
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_POP3      "POP3 接続に使用するデフォルトポート番号を選んで下さい。(推奨値:110)"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI       "「ユーザーインターフェース」に使用するデフォルトポート番号を選んで下さい。(推奨値:8080)"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_GUI       "ユーザーインターフェースに使用するポート番号を選んで下さい。(推奨値:8080)"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_STARTUP   "Windows の起動時に POPFile を自動的に起動する。(バックグラウンドで起動)"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_WARNING   "重要な警告"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_IO_MESSAGE   "POPFile のアップグレードの場合 --- インストーラーは現在のバージョンをシャットダウンします。"
@@ -240,11 +240,11 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_2     "ポート番号には 1 から 65535 までの番号を選んで下さい。"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_3     "POP3 ポート番号を変更して下さい。"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_1      "無効な「ユーザーインターフェース」ポート番号:"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_1      "無効なユーザーインターフェースポート番号:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_2      "ポート番号には 1 から 65535 までの番号を選んで下さい。"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_3      "「ユーザーインターフェース」ポート番号を変更して下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBGUI_3      "ユーザーインターフェースのポート番号を変更して下さい。"
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_1     "POP3 ポート番号には「ユーザーインターフェース」ポート番号と異なる番号を選んで下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_1     "POP3 ポート番号にはユーザーインターフェースのポート番号と異なる番号を選んで下さい。"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_2     "ポート番号を変更して下さい。"
 
 #--------------------------------------------------------------------------
@@ -336,7 +336,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_1       "インストーラーは選択されたバケツを全て作成できませんでした。作成に失敗したバケツ:"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_2       "個 / 選択されたバケツ:"
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_3       "個 "
-!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4       "作成できなかったバケツは、POPFile のインストール後に$\r$\n$\r$\n「ユーザーインターフェース」コントロールパネルより作成できます。"
+!insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4       "作成できなかったバケツは、POPFile のインストール後に$\r$\n$\r$\nユーザーインターフェース(コントロールパネル)より作成できます。"
 
 #--------------------------------------------------------------------------
 # Custom Page - Email Client Reconfiguration
@@ -349,8 +349,8 @@
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1    "(*) 印が付いているメールクライアントについては、単純なアカウント設定である限り、設定を自動的に変更することができます。\r\n\r\n認証を必要とするアカウントについては手動で変更することを強く推奨します。"
-!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2    "重要: 自動的に設定変更できるメールクライアントについては、今すぐシャットダウンして下さい。\r\n\r\nこの機能はまだ開発途中の機能です。(例えばいくつかの Outlook アカウントは検出されないかもしれません。\r\n\r\n(メールクライアントを使用する前に)設定変更がうまくいったかどうか確認して下さい。"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1    "(*) 印が付いているメールクライアントについては、単純なアカウント設定である限り、設定を自動的に変更することができます。\r\n認証を必要とするアカウントについては手動で変更することを強く推奨します。"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2    "重要: 自動的に設定変更できるメールクライアントについては、今すぐシャットダウンして下さい。\r\n\r\nこの機能はまだ開発途中の機能です。(例えばいくつかの Outlook アカウントは検出されないかもしれません。\r\nメールクライアントを使用する前に設定変更がうまくいったかどうか確認して下さい。"
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_CANCEL    "メールクライアントの設定変更はキャンセルされました"
 
@@ -476,12 +476,12 @@
 ; Text displayed on the custom page
 
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_INTRO      "POPFile を起動しますか？"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO         "いいえ(「ユーザーインターフェース」は POPFile を起動しないと使えません)"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NO         "いいえ(ユーザーインターフェースは POPFile を起動しないと使えません)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_DOSBOX     "POPFile を起動(コンソール)"
 !insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_BCKGRND    "POPFile をバックグラウンドで起動(コンソールなし)"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "POPFile を起動すれば以下の方法で「ユーザーインターフェース」を使用できます。"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(a) システムトレイ中の POPFile アイコンをダブルクリックするか、"
-!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(b) スタート --> プログラム --> POPFile --> POPFile User Interface を選択します。"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_1     "POPFile を起動すれば以下の方法でユーザーインターフェースを使用できます。"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_2     "(a) システムトレイ中の POPFile アイコンをダブルクリック"
+!insertmacro PFI_LANG_STRING PFI_LANG_LAUNCH_IO_NOTE_3     "(b) スタート --> プログラム --> POPFile --> POPFile User Interface を選択"
 
 ; Banner message displayed whilst waiting for POPFile to start
 
