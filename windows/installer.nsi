@@ -9,12 +9,12 @@
 #
 #--------------------------------------------------------------------------
 
-; Modified to work with NSIS 2.0b3 (CVS) or later
+; Modified to work with NSIS 2.0b4 (CVS) or later
 
 #--------------------------------------------------------------------------
 
   !define MUI_PRODUCT "POPFile"
-  !define MUI_VERSION "0.19.0 RC1"
+  !define MUI_VERSION "0.19.0 RC2"
   !include "MUI.nsh"
 
 #----------------------------------------------------------------------------------------
