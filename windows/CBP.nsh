@@ -252,25 +252,28 @@ Function CBP_CheckCorpusStatus
 
   !define CBP_L_CORPUS        $R9   ; path to the corpus
   !define CBP_L_FILE_HANDLE   $R8   ; handle used to access the 'popfile.cfg' file
-  !define CBP_L_RESULT        $R7   ; result returned by this function
-  !define CBP_L_SOURCE        $R6   ; folder where 'popfile.cfg' is expected to be found
-  !define CBP_L_TEMP          $R5
-  !define CBP_L_NONSQL_CORPUS $R4   ; flat file or BerkeleyDB corpus path (from popfile.cfg)
+  !define CBP_L_NONSQL_CORPUS $R7   ; flat file or BerkeleyDB corpus path (from popfile.cfg)
+  !define CBP_L_RESULT        $R6   ; result returned by this function
+  !define CBP_L_SOURCE        $R5   ; folder where 'popfile.cfg' is expected to be found
+  !define CBP_L_SQL_CONNECT   $R4   ; SQL database connection type (from popfile.cfg)
   !define CBP_L_SQL_CORPUS    $R3   ; SQL database corpus path (from popfile.cfg)
-  !define CBP_L_TEXTEND       $R2   ; used to ensure we can handle lines longer than 1023 chars
+  !define CBP_L_TEMP          $R2
+  !define CBP_L_TEXTEND       $R1   ; used to ensure we can handle lines longer than 1023 chars
 
   Exch ${CBP_L_SOURCE}          ; where we are supposed to look for the corpus data
   Push ${CBP_L_RESULT}
   Exch
   Push ${CBP_L_CORPUS}
   Push ${CBP_L_FILE_HANDLE}
-  Push ${CBP_L_TEMP}
   Push ${CBP_L_NONSQL_CORPUS}
+  Push ${CBP_L_SQL_CONNECT}
   Push ${CBP_L_SQL_CORPUS}
+  Push ${CBP_L_TEMP}
   Push ${CBP_L_TEXTEND}
 
   StrCpy ${CBP_L_CORPUS} ""
   StrCpy ${CBP_L_NONSQL_CORPUS} ""
+  StrCpy ${CBP_L_SQL_CONNECT} ""
   StrCpy ${CBP_L_SQL_CORPUS} ""
 
   StrCpy ${CBP_L_TEMP} ${CBP_L_SOURCE} 1 -1
@@ -285,7 +288,7 @@ no_trailing_slash:
 
 found_eol:
   StrCpy ${CBP_L_TEXTEND} "<eol>"
-  
+
 loop:
   FileRead ${CBP_L_FILE_HANDLE} ${CBP_L_TEMP}
   StrCmp ${CBP_L_TEMP} "" cfg_file_done
@@ -298,6 +301,8 @@ loop:
   StrCmp ${CBP_L_RESULT} "bayes_corpus " got_bdb_corpus
   StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 15
   StrCmp ${CBP_L_RESULT} "bayes_database " got_sql_corpus
+  StrCpy ${CBP_L_RESULT} ${CBP_L_TEMP} 16
+  StrCmp ${CBP_L_RESULT} "bayes_dbconnect " got_sql_connect
   Goto check_eol
 
 got_flat_corpus:
@@ -310,6 +315,10 @@ got_bdb_corpus:
 
 got_sql_corpus:
   StrCpy ${CBP_L_SQL_CORPUS} ${CBP_L_TEMP} "" 15
+  Goto check_eol
+
+got_sql_connect:
+  StrCpy ${CBP_L_SQL_CONNECT} ${CBP_L_TEMP} "" 16
 
   ; Now read file until we get to end of the current line
   ; (i.e. until we find text ending in <CR><LF>, <CR> or <LF>)
@@ -322,6 +331,17 @@ check_eol:
 cfg_file_done:
   FileClose ${CBP_L_FILE_HANDLE}
 
+  ; If a SQL setting other than the default SQLite one is found, assume existing system is using
+  ; an alternative SQL database (such as MySQL) so there is no need to create any buckets
+
+  Push ${CBP_L_SQL_CONNECT}
+  Call CBP_TrimNewlines
+  Pop ${CBP_L_SQL_CONNECT}
+  StrCmp ${CBP_L_SQL_CONNECT} "" check_corpus_params
+  StrCpy ${CBP_L_SQL_CONNECT} ${CBP_L_SQL_CONNECT} 11
+  StrCmp ${CBP_L_SQL_CONNECT} "dbi:SQLite:" 0 dirty_install
+
+check_corpus_params:
   Push ${CBP_L_NONSQL_CORPUS}
   Call CBP_TrimNewlines
   Pop ${CBP_L_NONSQL_CORPUS}
@@ -397,9 +417,10 @@ return_result:
   FindClose ${CBP_L_FILE_HANDLE}
 
   Pop ${CBP_L_TEXTEND}
-  Pop ${CBP_L_SQL_CORPUS}
-  Pop ${CBP_L_NONSQL_CORPUS}
   Pop ${CBP_L_TEMP}
+  Pop ${CBP_L_SQL_CORPUS}
+  Pop ${CBP_L_SQL_CONNECT}
+  Pop ${CBP_L_NONSQL_CORPUS}
   Pop ${CBP_L_FILE_HANDLE}
   Pop ${CBP_L_CORPUS}
   Pop ${CBP_L_SOURCE}
@@ -409,9 +430,10 @@ return_result:
   !undef CBP_L_FILE_HANDLE
   !undef CBP_L_RESULT
   !undef CBP_L_SOURCE
-  !undef CBP_L_TEMP
   !undef CBP_L_NONSQL_CORPUS
+  !undef CBP_L_SQL_CONNECT
   !undef CBP_L_SQL_CORPUS
+  !undef CBP_L_TEMP
   !undef CBP_L_TEXTEND
 
 FunctionEnd
