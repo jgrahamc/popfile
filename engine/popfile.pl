@@ -1362,7 +1362,7 @@ sub history_page
     
     if ( $#history_cache >= 0 ) 
     {
-        $body .= "<table width=100%><tr valign=bottom><td></td><td><b>From</b><td><b>Subject</b><td><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all></option>";
+        $body .= "<table width=100%><tr valign=bottom><td></td><td><b>From</b><td><b>Subject</b><td><form action=/history><input type=hidden name=session value=$session_key><select name=filter><option value=__filter__all>&lt;Show All&gt;</option>";
         
         my @buckets = sort keys %{$classifier->{total}};
         foreach my $abucket (@buckets)
