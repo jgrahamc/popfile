@@ -1317,6 +1317,11 @@ show_defaults:
   ; and refuse to proceed until suitable ports have been chosen.
 
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioA.ini"
+  
+  ; Store validated data (for use when the "POPFile" section is processed)
+  
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 2" "State" $G_POP3
+  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Field 4" "State" $G_GUI
 
   Pop ${L_RESULT}
   Pop ${L_PORTLIST}
@@ -1343,6 +1348,15 @@ Function CheckPortOptions
   !insertmacro MUI_INSTALLOPTIONS_READ $G_POP3 "ioA.ini" "Field 2" "State"
   !insertmacro MUI_INSTALLOPTIONS_READ $G_GUI "ioA.ini" "Field 4" "State"
 
+  ; strip leading zeroes and spaces from user input
+  
+  Push $G_POP3
+  Call StrStripLZS
+  Pop $G_POP3
+  Push $G_GUI
+  Call StrStripLZS
+  Pop $G_GUI
+  
   StrCmp $G_POP3 $G_GUI ports_must_differ
   Push $G_POP3
   Call StrCheckDecimal
