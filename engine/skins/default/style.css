@@ -249,9 +249,9 @@ table.historyWidgetsBottom {
   border: 1px solid #CCCC99;
   margin: 0.3em;
   padding: 0.3em;
-  white-space: nowrap;
   display: inline;
   float: left;
+  min-height: 3em;
 }
 
 .toggleConfigBar {
@@ -261,4 +261,13 @@ table.historyWidgetsBottom {
 
 .checkLabel {
   border: 1px solid #CCCC99;
+  white-space: nowrap;
+}
+
+.configBar input.submit {
+  margin-top: 4px;
+}
+
+.configBar label.configurationLabel {
+  display: block;
 }
