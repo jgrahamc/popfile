@@ -679,9 +679,9 @@ sub parse_stream
                 # TODO: find a way to make this (and other similar stuff) highlight
                 #       without using the encoded content printer or modifying $self->{ut}
                 if ( $self->{content_type} =~ /html/ ) {
-                     while ( $line =~ m/\G(\&([\w]{3,6})\;)/g ) {
-                         my $from = $2;                         
-                         my $to   = $entityhash{$1};
+                      while ( $line =~ m/(\&([\w]{3,6})\;)/g ) { 
+                            my $from = "$1"; 
+                            my $to = $entityhash{$2}; 
                          if ( defined( $to ) ) {
                             $to         = chr($to);
                             $line       =~ s/$from/$to/g;
@@ -689,13 +689,15 @@ sub parse_stream
                             print "$from -> $to\n" if $self->{debug};
                          } 
                      }
-                     while ( $line =~ m/\G(\&\#([\d]{3})\;)/g ) {
-                         if ( ( $1 < 255 ) && ( $1 > 127 ) ) {
+                     while ( $line =~ m/(\&#([\d]{1,3})\;)/g ) { 
+                        # Don't decode odd (nonprintable) characters or < >'s. 
+                        if ( ( $2 < 255 && $2 > 63 ) || $2 == 61 || ($2 < 60 && $2 > 31 ) ) { 
                             my $from = $1;
                             my $to   = chr($2);
                             if ( defined( $to ) &&  ( $to ne '' ) ) {
                                 $line       =~ s/$from/$to/g;
                                 $self->{ut} =~ s/$from/$to/g;
+                                print "$from -> $to\n" if $self->{debug};
                             }
                         }
                     }
