@@ -860,27 +860,26 @@ sub popfile_homepage
     $body .= "<p><hr><h2>Classification Insertion</h2><p><b>Subject line modification:</b><br>";    
     if ( $configuration{subject} == 1 ) 
     {
-        $body .= "<a href=/configuration?subject=1&session=$session_key><font color=blue>Off</font></a> ";
-        $body .= "<b>On</b>";
+        $body .= "<b>On</b> <a href=/configuration?subject=1&session=$session_key><font color=blue>[Turn Off]</font></a> ";
     } 
     else
     {
-        $body .= "<b>Off</b> ";
-        $body .= "<a href=/configuration?subject=2&session=$session_key><font color=blue>On</font></a>";
+        $body .= "<b>Off</b> <a href=/configuration?subject=2&session=$session_key><font color=blue>[Turn On]</font></a>";
     }
-    $body .= "<hr><h2>Logging</h2><b>Logger output:</b><br>";
-    $body .= "<b>" if ( $configuration{debug} == 0 );
-    $body .= "<a href=/configuration?debug=1&session=$session_key><font color=blue>None</font></a> ";
-    $body .= "</b>" if ( $configuration{debug} == 0 );
-    $body .= "<b>" if ( $configuration{debug} == 1 );
-    $body .= "<a href=/configuration?debug=2&session=$session_key><font color=blue>To File</font></a> ";
-    $body .= "</b>" if ( $configuration{debug} == 1 );
-    $body .= "<b>" if ( $configuration{debug} == 2 );
-    $body .= "<a href=/configuration?debug=3&session=$session_key><font color=blue>To Screen</font></a> ";
-    $body .= "</b>" if ( $configuration{debug} == 2 );
-    $body .= "<b>" if ( $configuration{debug} == 3 );
-    $body .= "<a href=/configuration?debug=4&session=$session_key><font color=blue>To Screen and File</font></a>";
-    $body .= "</b>" if ( $configuration{debug} == 3 );
+    $body .= "<hr><h2>Logging</h2><b>Logger output:</b><br><form action=/configuration><input type=hidden value=$session_key name=session><select name=debug>";
+    $body .= "<option value=1";
+    $body .= " selected" if ( $configuration{debug} == 0 );
+    $body .= ">None</option>";
+    $body .= "<option value=2";
+    $body .= " selected" if ( $configuration{debug} == 1 );
+    $body .= ">To File</option>";
+    $body .= "<option value=3";
+    $body .= " selected" if ( $configuration{debug} == 2 );
+    $body .= ">To Screen</option>";
+    $body .= "<option value=4";
+    $body .= " selected" if ( $configuration{debug} == 3 );
+    $body .= ">To Screen and File</option>";
+    $body .= "</select><input type=submit name=submit_debug value=Apply></form>";
     
     return http_ok($body,0); 
 }
@@ -925,19 +924,24 @@ sub security_page
     }
 
     $body .= "<p><h2>Stealth Mode/Server Operation</h2><p><b>Accept POP3 connections from remote machines:</b><br>";
-    $body .= "<b>" if ( $configuration{localpop} == 1 );
-    $body .= "<a href=/security?localpop=2&session=$session_key><font color=blue>No (Stealth Mode)</font></a> ";
-    $body .= "</b>" if ( $configuration{localpop} == 1 );
-    $body .= "<b>" if ( $configuration{localpop} == 0 );
-    $body .= "<a href=/security?localpop=1&session=$session_key><font color=blue>Yes</font></a> ";
-    $body .= "</b>" if ( $configuration{localpop} == 0 );
+    if ( $configuration{localpop} == 1 )
+    {
+        $body .= "<b>No (Stealth Mode)</b> <a href=/security?localpop=1&session=$session_key><font color=blue>[Change to Yes]</font></a> ";
+    } 
+    else
+    {
+        $body .= "<b>Yes</b> <a href=/security?localpop=2&session=$session_key><font color=blue>[Change to No (Stealth Mode)]</font></a> ";
+    } 
+    
     $body .= "<p><b>Accept HTTP (User Interface) connections from remote machines:</b><br>";
-    $body .= "<b>" if ( $configuration{localui} == 1 );
-    $body .= "<a href=/security?localui=2&session=$session_key><font color=blue>No (Stealth Mode)</font></a> ";
-    $body .= "</b>" if ( $configuration{localui} == 1 );
-    $body .= "<b>" if ( $configuration{localui} == 0 );
-    $body .= "<a href=/security?localui=1&session=$session_key><font color=blue>Yes</font></a> ";
-    $body .= "</b>" if ( $configuration{localui} == 0 );
+    if ( $configuration{localui} == 1 )
+    {
+        $body .= "<b>No (Stealth Mode)</b> <a href=/security?localui=1&session=$session_key><font color=blue>[Change to Yes]</font></a> ";
+    } 
+    else
+    {
+        $body .= "<b>Yes</b> <a href=/security?localui=2&session=$session_key><font color=blue>[Change to No (Stealth Mode)]</font></a> ";
+    } 
     $body .= "<p><hr><h2>Secure Password Authentication/AUTH</h2><p><form action=/security><b>Secure server:</b> <br><input name=server type=text value=$configuration{server}><input type=submit name=update_server value=Apply><input type=hidden name=session value=$session_key></form>";    
     $body .= "Updated secure server to $configuration{server}; this change will not take affect until you restart POPFile" if ( defined($form{server}) );
     $body .= "<p><form action=/security><b>Secure port:</b> <br><input name=sport type=text value=$configuration{sport}><input type=submit name=update_sport value=Apply><input type=hidden name=session value=$session_key></form>$port_error";    
@@ -972,7 +976,7 @@ sub pretty_number
 # ---------------------------------------------------------------------------------------------
 sub magnet_page 
 {
-    if ( defined($form{from}) )
+    if ( ( defined($form{from}) ) && ( $form{bucket} ne '' ) )
     {
         $classifier->{magnets}{$form{bucket}}{from}{$form{from}} = 1;
         $classifier->save_magnets();
@@ -997,13 +1001,13 @@ sub magnet_page
             {
                 $body .= " bgcolor=$stripe_color"; 
             }
-            $body .= "><td>$from<td><font color=$classifier->{colors}{$bucket}>$bucket</font><td><a href=/magnets?bucket=$bucket&dfrom=$from&session=$session_key>Delete</a>";
+            $body .= "><td>$from<td><font color=$classifier->{colors}{$bucket}>$bucket</font><td><a href=/magnets?bucket=$bucket&dfrom=$from&session=$session_key>[Delete]</a>";
             $stripe = 1 - $stripe;
         }
     }
     
     $body .= "</table><p><hr><p><h2>Create New Magnet</h2><form action=/magnets><b>From address or name:</b> (for example: john\@company.com to match a specific address, company.com to match everyone who sends from company.com, John Doe to match a specific person, John to match all Johns)<br><input type=text name=from><input type=hidden name=session value=$session_key>";
-    $body .= "<p><b>Always goes to bucket:</b><br><select name=bucket>";
+    $body .= "<p><b>Always goes to bucket:</b><br><select name=bucket><option value=></option>";
     my @buckets = sort keys %{$classifier->{total}};
     foreach my $bucket (@buckets)
     {
@@ -1156,11 +1160,11 @@ sub corpus_page
             $body .= "<td align=center>";
             if ( $classifier->{parameters}{$bucket}{subject} == 0 ) 
             {
-                $body .= "<b>Off</b> <a href=/buckets?session=$session_key&bucket=$bucket&subject=2>On</a>";            
+                $body .= "<b>Off</b> <a href=/buckets?session=$session_key&bucket=$bucket&subject=2>[Turn On]</a>";            
             }
             else
             {
-                $body .= "<a href=/buckets?session=$session_key&bucket=$bucket&subject=1>Off</a> <b>On</a>";
+                $body .= "<b>On</b> <a href=/buckets?session=$session_key&bucket=$bucket&subject=1>[Turn Off]</a> ";
             }
         } 
         else
@@ -1630,7 +1634,7 @@ sub history_page
         $body .= "<td>";
         if ( $reclassified ) 
         {
-            $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified as <font color=$classifier->{colors}{$bucket}>$bucket</font> - <a href=/history?undo=$mail_file&session=$session_key&badbucket=$bucket>Undo</a>";
+            $body .= "<font color=$classifier->{colors}{$bucket}>$bucket</font><td>Already reclassified as <font color=$classifier->{colors}{$bucket}>$bucket</font> - <a href=/history?undo=$mail_file&session=$session_key&badbucket=$bucket>[Undo]</a>";
         } 
         else
         {
@@ -1660,7 +1664,7 @@ sub history_page
                 }
                 else
                 {
-                    $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$session_key&usedtobe=$bucket><font color=$classifier->{colors}{$abucket}>$abucket</font></a> ";
+                    $body .= "<a href=/history?shouldbe=$abucket&file=$mail_file&start_message=$start_message&session=$session_key&usedtobe=$bucket><font color=$classifier->{colors}{$abucket}>[$abucket]</font></a> ";
                 }
             }
             
