@@ -95,6 +95,10 @@
   ; Root directory for the Perl files used to build the installer
 
   !define C_PERL_DIR      "C:\Perl"
+  
+  ; Delay (in milliseconds) used after issuing a POPFile 'shutdown' request
+  
+  !define C_SHUTDOWN_DELAY    1500
 
   ; Define PFI_VERBOSE to get more compiler output
 
@@ -886,7 +890,7 @@ attempt_shutdown:
 
   DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_OLD_GUI}"
   NSISdl::download_quiet http://127.0.0.1:${L_OLD_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
-  Sleep 250 ; milliseconds
+  Sleep ${C_SHUTDOWN_DELAY}
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "success" exit_now
 
@@ -898,7 +902,7 @@ try_other_port:
 
   DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_NEW_GUI}"
   NSISdl::download_quiet http://127.0.0.1:${L_NEW_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
-  Sleep 250 ; milliseconds
+  Sleep ${C_SHUTDOWN_DELAY}
   Pop ${L_RESULT} ; Ignore the result
 
 exit_now:
@@ -1615,7 +1619,7 @@ Function CheckLaunchOptions
 
   NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_RESULT}    ; Get the return value (and ignore it)
-  Sleep 250 ; milliseconds
+  Sleep ${C_SHUTDOWN_DELAY}
   goto exit_without_banner
 
 run_popfile:
@@ -1638,7 +1642,7 @@ run_popfile:
 
   NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_RESULT}    ; Get the return value (and ignore it)
-  Sleep 250 ; milliseconds
+  Sleep ${C_SHUTDOWN_DELAY}
 
   ExecShell "open" "$SMPROGRAMS\POPFile\Run POPFile.lnk"
   goto wait_for_popfile
@@ -1658,7 +1662,7 @@ run_in_background:
 
   NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_RESULT}    ; Get the return value (and ignore it)
-  Sleep 250 ; milliseconds
+  Sleep ${C_SHUTDOWN_DELAY}
 
   ExecShell "open" "$SMPROGRAMS\POPFile\Run POPFile in background.lnk"
 
@@ -1672,7 +1676,7 @@ check_if_ready:
   NSISdl::download_quiet http://127.0.0.1:${G_GUI} "$PLUGINSDIR\ui.htm"
   Pop ${L_RESULT}                        ; Did POPFile return an HTML page?
   StrCmp ${L_RESULT} "success" remove_banner
-  Sleep 250   ; milliseconds
+  Sleep 500   ; milliseconds
   IntOp ${L_TEMP} ${L_TEMP} - 1
   IntCmp ${L_TEMP} 0 remove_banner remove_banner check_if_ready
 
@@ -1890,7 +1894,7 @@ ui_port_done:
   DetailPrint "$(un.PFI_LANG_LOG_1) ${G_GUI}"
   NSISdl::download_quiet http://127.0.0.1:${G_GUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_TEMP}
-  Sleep 250 ; milliseconds
+  Sleep ${C_SHUTDOWN_DELAY}
   Goto remove_shortcuts
   
 use_other_port:
@@ -1902,7 +1906,7 @@ use_other_port:
   DetailPrint "$(un.PFI_LANG_LOG_1) ${L_OLDUI}"
   NSISdl::download_quiet http://127.0.0.1:${L_OLDUI}/shutdown "$PLUGINSDIR\shutdown.htm"
   Pop ${L_TEMP}
-  Sleep 250 ; milliseconds
+  Sleep ${C_SHUTDOWN_DELAY}
 
 remove_shortcuts:
 
