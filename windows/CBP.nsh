@@ -715,7 +715,7 @@ Function CBP_CreateINIfile
 
   ; Constants used to position the bucket names
 
-  !define CBP_BN_NAME_LEFT        157
+  !define CBP_BN_NAME_LEFT        160
   !define CBP_BN_NAME_RIGHT       250
 
   ; Constants used to position the "Remove" boxes
@@ -726,28 +726,28 @@ Function CBP_CreateINIfile
   ; Constants used to define the position of the 8 rows in the bucket list
 
   !define CBP_BN_ROW_1_TOP        12
-  !define CBP_BN_ROW_1_BOTTOM     22
+  !define CBP_BN_ROW_1_BOTTOM     20
 
-  !define CBP_BN_ROW_2_TOP        27
-  !define CBP_BN_ROW_2_BOTTOM     37
+  !define CBP_BN_ROW_2_TOP        26
+  !define CBP_BN_ROW_2_BOTTOM     34
 
-  !define CBP_BN_ROW_3_TOP        42
-  !define CBP_BN_ROW_3_BOTTOM     52
+  !define CBP_BN_ROW_3_TOP        40
+  !define CBP_BN_ROW_3_BOTTOM     48
 
-  !define CBP_BN_ROW_4_TOP        57
-  !define CBP_BN_ROW_4_BOTTOM     67
+  !define CBP_BN_ROW_4_TOP        54
+  !define CBP_BN_ROW_4_BOTTOM     62
 
-  !define CBP_BN_ROW_5_TOP        72
-  !define CBP_BN_ROW_5_BOTTOM     82
+  !define CBP_BN_ROW_5_TOP        68
+  !define CBP_BN_ROW_5_BOTTOM     76
 
-  !define CBP_BN_ROW_6_TOP        87
-  !define CBP_BN_ROW_6_BOTTOM     97
+  !define CBP_BN_ROW_6_TOP        82
+  !define CBP_BN_ROW_6_BOTTOM     90
 
-  !define CBP_BN_ROW_7_TOP        102
-  !define CBP_BN_ROW_7_BOTTOM     112
+  !define CBP_BN_ROW_7_TOP        96
+  !define CBP_BN_ROW_7_BOTTOM     104
 
-  !define CBP_BN_ROW_8_TOP        117
-  !define CBP_BN_ROW_8_BOTTOM     127
+  !define CBP_BN_ROW_8_TOP        110
+  !define CBP_BN_ROW_8_BOTTOM     118
 
   ; Basic macro used to create the INI file
 
@@ -840,14 +840,14 @@ Function CBP_CreateINIfile
   !insertmacro CBP_DEFINE_CONTROL "Field 5" \
       "Label" \
       " " \
-      "154" "300" "132" "140"
+      "157" "300" "124" "140"
 
   ; Box enclosing the list of bucket names defined so far
 
   !insertmacro CBP_DEFINE_CONTROL "Field 6" \
       "GroupBox" \
       "$(PFI_LANG_CBP_IO_LISTHDR)" \
-      "153" "300" "0" "130"
+      "153" "300" "0" "124"
 
   ; Text for GroupBox lines 1 to 8
 
