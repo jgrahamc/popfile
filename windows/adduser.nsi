@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.62"
+  !define C_PFI_VERSION  "0.2.63"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -488,8 +488,6 @@
   !define MUI_PAGE_CUSTOMFUNCTION_LEAVE       "CheckExistingDataDir"
 
   ; This page is used to select the folder for the POPFile USER DATA files
-
-  !define MUI_DIRECTORYPAGE_VARIABLE          $G_USERDIR
 
   !define MUI_PAGE_HEADER_TEXT                "$(PFI_LANG_USERDIR_TITLE)"
   !define MUI_PAGE_HEADER_SUBTEXT             "$(PFI_LANG_USERDIR_SUBTITLE)"
@@ -854,10 +852,6 @@ Section "POPFile" SecPOPFile
   DetailPrint "$(PFI_LANG_INST_PROG_REGSET)"
   SetDetailsPrint listonly
   
-  ; 'CheckExistingDataDir' (the DIRECTORY page's "leave" function) stores LFN path in $INSTDIR
-  
-  StrCpy $G_USERDIR $INSTDIR
-
   IfFileExists "$G_USERDIR\*.*" userdir_exists
   ClearErrors
   CreateDirectory "$G_USERDIR"
@@ -924,7 +918,7 @@ update_HKCU_data:
 
   ; For flexibility, several global user variables are used to access installation folders
   ; (1) $G_ROOTDIR is initialized by the 'PFIGUIInit' function
-  ; (2) $G_USERDIR is initialized by the 'User Data' DIRECTORY page
+  ; (2) $G_USERDIR is normally initialized by the 'User Data' DIRECTORY page
 
   ReadRegStr ${L_TEMP_2} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Major Version"
   ReadRegStr ${L_TEMP_3} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "POPFile Minor Version"
@@ -1824,25 +1818,23 @@ Function ChooseDefaultDataDir
 
   !define  L_RESULT    $R9
 
-  ; This function initialises the $G_USERDIR global user variable for use by the DIRECTORY page
-
   ; Starting with the 0.21.0 release, user-specific data is stored in the registry
 
-  ReadRegStr $G_USERDIR HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN"
-  StrCmp $G_USERDIR "" look_elsewhere
-  IfFileExists "$G_USERDIR\*.*" exit
+  ReadRegStr $INSTDIR HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN"
+  StrCmp $INSTDIR "" look_elsewhere
+  IfFileExists "$INSTDIR\*.*" exit
 
 look_elsewhere:
 
   ; All versions prior to 0.21.0 stored popfile.pl and popfile.cfg in the same folder
 
-  StrCpy $G_USERDIR "$G_ROOTDIR"
-  IfFileExists "$G_USERDIR\popfile.cfg" exit
+  StrCpy $INSTDIR "$G_ROOTDIR"
+  IfFileExists "$INSTDIR\popfile.cfg" exit
 
   ; Check if we are installing over a version which uses an early alternative folder structure
 
-  StrCpy $G_USERDIR "$G_ROOTDIR\user"
-  IfFileExists "$G_USERDIR\popfile.cfg" exit
+  StrCpy $INSTDIR "$G_ROOTDIR\user"
+  IfFileExists "$INSTDIR\popfile.cfg" exit
 
   ;----------------------------------------------------------------------
   ; Default location for POPFile User Data files (popfile.cfg and others)
@@ -1852,19 +1844,19 @@ look_elsewhere:
   ;----------------------------------------------------------------------
 
   StrCmp $APPDATA "" 0 appdata_valid
-  StrCpy $G_USERDIR "${C_ALT_DEFAULT_USERDATA}\$G_WINUSERNAME"
+  StrCpy $INSTDIR "${C_ALT_DEFAULT_USERDATA}\$G_WINUSERNAME"
   Goto exit
 
 appdata_valid:
   Push ${L_RESULT}
 
-  StrCpy $G_USERDIR "${C_STD_DEFAULT_USERDATA}"
-  Push $G_USERDIR
+  StrCpy $INSTDIR "${C_STD_DEFAULT_USERDATA}"
+  Push $INSTDIR
   Push $G_WINUSERNAME
   Call StrStr
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" 0 default_locn_ok
-  StrCpy $G_USERDIR "$G_USERDIR\$G_WINUSERNAME"
+  StrCpy $INSTDIR "$INSTDIR\$G_WINUSERNAME"
 
 default_locn_ok:
   Pop ${L_RESULT}
@@ -1903,7 +1895,7 @@ Function CheckUserDirStatus
   StrCmp ${L_RESULT} "/restore=" restore_install
   Pop ${L_RESULT}
 
-  IfFileExists "$G_USERDIR\popfile.cfg" 0 exit
+  IfFileExists "$INSTDIR\popfile.cfg" 0 exit
   StrCmp $G_PFISETUP "/install" upgrade_install
   StrCmp $G_PFISETUP "/installreboot" 0 exit
 
@@ -1915,9 +1907,10 @@ upgrade_install:
 
   MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_DIRSELECT_MBWARN_3)\
       ${MB_NL}${MB_NL}\
-      $G_USERDIR\
+      $INSTDIR\
       ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_DIRSELECT_MBWARN_2)" IDNO offer_default
+  StrCpy $G_USERDIR $INSTDIR
   Call CheckExistingConfigData
   Abort
 
@@ -1945,7 +1938,6 @@ check_config:
       ($G_USERDIR)\
       ${MB_NL}${MB_NL}${MB_NL}\
       $(PFI_LANG_DIRSELECT_MBWARN_5)" IDNO quit_wizard
-
   Call CheckExistingConfigData
   Abort
 
@@ -1959,19 +1951,19 @@ quit_wizard:
 
 offer_default:
   StrCmp $APPDATA "" 0 appdata_valid
-  StrCpy $G_USERDIR "${C_ALT_DEFAULT_USERDATA}\$G_WINUSERNAME"
+  StrCpy $INSTDIR "${C_ALT_DEFAULT_USERDATA}\$G_WINUSERNAME"
   Goto exit
 
 appdata_valid:
   Push ${L_RESULT}
 
-  StrCpy $G_USERDIR "${C_STD_DEFAULT_USERDATA}"
-  Push $G_USERDIR
+  StrCpy $INSTDIR "${C_STD_DEFAULT_USERDATA}"
+  Push $INSTDIR
   Push $G_WINUSERNAME
   Call StrStr
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" 0 default_locn_ok
-  StrCpy $G_USERDIR "$G_USERDIR\$G_WINUSERNAME"
+  StrCpy $INSTDIR "$INSTDIR\$G_WINUSERNAME"
 
 default_locn_ok:
   Pop ${L_RESULT}
@@ -2006,7 +1998,7 @@ Function CheckExistingDataDir
   
   ; Strip trailing slashes (if any) from the path selected by the user
   
-  Push $G_USERDIR
+  Push $INSTDIR
   Pop $INSTDIR
   StrCpy $G_USERDIR "$INSTDIR"
 
@@ -2045,7 +2037,6 @@ check_locn:
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" got_path
   StrCpy $G_USERDIR ${L_RESULT}
-  StrCpy $INSTDIR $G_USERDIR
 
 got_path:
   Pop ${L_RESULT}
