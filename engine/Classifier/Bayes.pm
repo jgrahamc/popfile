@@ -1119,6 +1119,7 @@ sub get_html_colored_message
     $self->{parser__}->{bayes__} = bless $self;
     my $result = $self->{parser__}->parse_stream($file);
     $self->{parser__}->{color__} = 0;
+    $self->{parser__}->{words__} = {};
 
     return $result;
 }
