@@ -51,7 +51,7 @@ Header_Magnets                          Magnete
 Footer_HomePage                         POPFile Homepage
 Footer_Manual                           Handbuch
 Footer_Forums                           Foren
-Footer_FeedMe                           Fütter mich!
+Footer_FeedMe                           Spenden
 Footer_RequestFeature                   Funktionalität vorschlagen
 Footer_MailingList                      Mailing Liste
 
@@ -92,18 +92,18 @@ Configuration_ToFile                    In eine Datei
 Configuration_ToScreenFile              Bildschirm und Datei
 Configuration_LoggerOutput              Protokoll ausgeben
 
-Advanced_Error1                         '%s' ist bereits in der Liste mit Stop-Wörtern
-Advanced_Error2                         Stop-Wörtern können nur alphanumerische, ., _, -, oder @ Zeichen enthalten
-Advanced_Error3                         '%s' zu den Stop-Wörtern hinzugefügt
-Advanced_Error4                         '%s' ist nicht in der Stop-Wörter-Liste
-Advanced_Error5                         '%s' von der Stop-Wörter-Liste hinzugefügt
-Advanced_StopWords                      Stop-Wörter
-Advanced_Message1                       Die folgenden Wörter werden bei jeder Einstufung ignoriert, da sie sehr häufig auftauchen
+Advanced_Error1                         '%s' ist bereits in der Liste der ignorierten Wörter
+Advanced_Error2                         Ignorierte Wörtern können nur alphanumerische, ., _, -, oder @ Zeichen enthalten
+Advanced_Error3                         '%s' zu den ignorierten Wörtern hinzugefügt
+Advanced_Error4                         '%s' ist nicht in der Liste der ignorierten Wörter
+Advanced_Error5                         '%s' von der Liste der ignorierten Wörter entfernt
+Advanced_StopWords                      Ignorierte Wörter
+Advanced_Message1                       POPFile ignoriert die folgenden, häufig verwendeten Wörter:
 Advanced_AddWord                        Wort hinzufügen
 Advanced_RemoveWord                     Wort löschen
 
 History_Filter                          &nbsp;(zeige nur Kategorie <font color="%s">%s</font>)
-History_Search                          &nbsp;(gesuchter Betreff: %s)
+History_Search                          &nbsp;(gesuchter Absender/Betreff: %s)
 History_Title                           Letzte Nachrichten
 History_Jump                            zu Nachricht gehen
 History_ShowAll                         Alle anzeigen
@@ -117,7 +117,7 @@ History_Already                         Bereits neu eingestuft als <font color="
 History_RemoveAll                       Alle entfernen
 History_RemovePage                      Diese Seite entfernen
 History_Remove                          Um Einträge im Verlauf zu löschen, klicken Sie auf
-History_SearchMessage                   Betreff suchen
+History_SearchMessage                   Nach Absender/Betreff suchen
 History_NoMessages                      keine Nachrichten
 History_ShowMagnet                      Magnetisiert
 History_Magnet                          &nbsp;(zeige nur durch Magnet eingestufte Nachrichten)
@@ -141,12 +141,12 @@ Security_SecureServer                   gesicherter Server
 Security_SecureServerUpdate             Neuer gesicherter Server: %s; Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
 Security_SecurePort                     gesicherter Port
 Security_SecurePortUpdate               Neuer gesicherter Port %s; Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
-Security_POP3                           POP3 Verbindungen von fremden Rechnern erlauben
-Security_UI                             HTTP (Benutzeroberfläche) Verbindungen von fremden Rechnern erlauben
+Security_POP3                           POP3 Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFile)
+Security_UI                             HTTP (Benutzeroberfläche) Verbindungen von fremden Rechnern erlauben (erfordert Neustart von POPFile)
 Security_UpdateTitle                    Automatisch auf Updates prüfen
 Security_Update                         Täglich nach POPFile Updates suchen
 Security_StatsTitle                     Statistik Report
-Security_Stats                          Täglich Statistiken an John senden
+Security_Stats                          Täglich Statistiken senden
 
 Magnet_Error1                           Magnet '%s' existiert bereits in Kategorie '%s'
 Magnet_Error2                           Neuer Magnet '%s' kollidiert mit Magnet '%s' in Kategorie '%s' und könnte unklare Ergebnisse verursachen. Magnet wurde nicht unzugefügt.
