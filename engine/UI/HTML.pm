@@ -1806,7 +1806,7 @@ sub corpus_page
 
         $body .= "<td>&nbsp;</td>\n<td align=\"left\">\n<table class=\"colorChooserTable\" cellpadding=\"0\" cellspacing=\"1\" summary=\"\">\n<tr>\n";
         my $color = $self->{classifier__}->get_bucket_color($bucket);
-        $body .= "<td bgcolor=\"$color\">\n<img class=\"colorChooserImg\" border=\"0\" alt='" . sprintf( $self->{language__}{Bucket_CurrentColor}, $bucket, $color ) . "' src=\"pix.gif\" width=\"10\" height=\"20\" /></td>\n<td>&nbsp;</td>\n";
+        $body .= "<td bgcolor=\"$color\" title='" . sprintf( $self->{language__}{Bucket_CurrentColor}, $bucket, $color ) . "'>\n<img class=\"colorChooserImg\" border=\"0\" alt='" . sprintf( $self->{language__}{Bucket_CurrentColor}, $bucket, $color ) . "' src=\"pix.gif\" width=\"10\" height=\"20\" /></td>\n<td>&nbsp;</td>\n";
         for my $i ( 0 .. $#{$self->{classifier__}->{possible_colors__}} ) {
             my $color = $self->{classifier__}->{possible_colors__}[$i];
             if ( $color ne $self->{classifier__}->get_bucket_color($bucket) )  {
