@@ -28,6 +28,9 @@
 test_assert( `rm -rf corpus` == 0 );
 test_assert( `cp -R corpus.base corpus` == 0 );
 test_assert( `rm -rf corpus/CVS` == 0 );
+test_assert( `rm -rf corpus/other/CVS` == 0 );
+test_assert( `rm -rf corpus/spam/CVS` == 0 );
+test_assert( `rm -rf corpus/personal/CVS` == 0 );
 test_assert( `rm -rf messages` == 0 );
 
 unlink( 'stopwords' );
@@ -216,6 +219,12 @@ if ( $pid == 0 ) {
                 next;
 	    }
 
+            if ( $command =~ /^__GETPARAMETER ([^ ]+) (.+)/ ) {
+                my $value = $b->get_bucket_parameter( $1, $2 );
+                print $uwriter "OK $value\n";
+                next;
+	    }
+
             if ( $command =~ /^__CHECKMAGNET ([^ ]+) ([^ ]+) ([^\r\n]+)/ ) {
                 my $found = 0;
                 for my $magnet ($b->get_magnets( $1, $2 ) ) {
@@ -286,6 +295,16 @@ if ( $pid == 0 ) {
                 $content = $response->content;
                 @forms   = HTML::Form->parse( $content, "http://127.0.0.1:$port" );
 	    }
+            next;
+	}
+
+        if ( $line =~ /^PARAMETERIS +([^ ]+) ([^ ]+) ?(.+)?$/ ) {
+            my ( $bucket, $param, $expected ) = ( $1, $2, $3 );
+            $expected = '' if ( !defined( $expected ) );
+            print $dwriter "__GETPARAMETER $bucket $param\n";
+            my $reply = <$ureader>;
+            $reply =~ /^OK ([^\r\n]+)/;
+            test_assert_equal( $1, $expected, "From script line $line_number" );
             next;
 	}
 

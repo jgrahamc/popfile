@@ -40,6 +40,7 @@
 # SETSUBMIT a b     Just like doing SETINPUT a b followed by SUBMIT a
 # CONFIGIS a b      Verify that config item a has value b
 # MAGNETIS a b c    Checks that magnet c exists in bucket a with type b
+# PARAMETERIS a b c Check that parameter b in bucket a has value c
 # CLICK a           Click the button called a
 #
 # Expect that the following are available to you within the MATCH/ENDMATCH block
@@ -145,23 +146,6 @@ ENDMATCH
 
 # TODO single message view for accuracy
 # TODO reclassify from single message view
-
-# TODO Buckets Page
-
-# TODO Basic bucket test to verify that the buckets in the test corpus
-# are present on the bucket page with the right numbers
-# TODO Check statistics displayed correctly
-# TODO Check operation of Subject Modification
-# TODO Check operation of Quarantine
-# TODO Check operation of color change
-# TODO Check Reset Statistics
-# TODO Check bucket creation
-# TODO Check bucket rename
-# TODO Check bucket delete
-# TODO Check word lookup
-
-# TODO Check individual bucket page for accuracy
-# TODO Check clearing of individual bucket
 
 # Magnets Page
 
@@ -535,6 +519,138 @@ NOTMATCH four11@.-_
 SETSUBMIT parameter_bayes_hostname testhostname
 CONFIGIS bayes_hostname testhostname
 INPUTIS parameter_bayes_hostname testhostname
+
+# Buckets Page
+
+GET /buckets
+
+# Basic bucket test to verify that the buckets in the test corpus
+# are present on the bucket page with the right numbers
+#
+#     Checks bucket names are present and the word and unique word
+#     counts
+
+MATCH spam
+MATCH personal
+MATCH other
+
+MATCH <a href="/buckets?session=$sk&amp;showbucket=spam">
+MATCH <a href="/buckets?session=$sk&amp;showbucket=personal">
+MATCH <a href="/buckets?session=$sk&amp;showbucket=other">
+
+MATCH >1,785<
+MATCH >656<
+MATCH >103<
+MATCH >3<
+MATCH >12,114<
+MATCH >3,353<
+
+MATCH >14,002<
+
+# Check statistics displayed correctly
+
+MATCH >Not enough data<
+MATCH >0 (  0.00%)<
+
+MATCH >1,785 (12.74%)<
+MATCH >103 (0.73%)<
+MATCH >12,114 (86.51%)<
+
+MATCH <td bgcolor="red" title="other (12.74%)" width="12%"><img src="pix.gif" alt="" height="20" width="1" /></td>
+MATCH <td bgcolor="green" title="personal (0.73%)" width="1%"><img src="pix.gif" alt="" height="20" width="1" /></td>
+MATCH <td bgcolor="blue" title="spam (86.51%)" width="86%"><img src="pix.gif" alt="" height="20" width="1" /></td>
+
+# TODO Check Reset Statistics
+
+# Check bucket creation
+
+NOTMATCH newbucket0-_
+SETSUBMIT cname newbucket0-_
+MATCH newbucket0-_
+MATCH Created bucket named newbucket0-_
+MATCH newbucket0-_ current color is red
+
+SETSUBMIT cname bu%cket
+MATCH Bucket names can only contain the letters a to z in lower case
+SETSUBMIT cname BUCKET
+MATCH Bucket names can only contain the letters a to z in lower case
+
+MATCH spam
+MATCH personal
+MATCH other
+
+# Check bucket rename
+
+SETINPUT oname newbucket0-_
+SETSUBMIT newname sens%ible
+MATCH Bucket names can only contain the letters a to z in lower case
+SETINPUT oname newbucket0-_
+SETSUBMIT newname sensible
+MATCH Renamed bucket newbucket0-_ to sensible
+MATCH sensible current color is blue
+
+MATCH spam
+MATCH personal
+MATCH other
+
+# Check bucket delete
+
+SETSUBMIT name sensible
+MATCH Deleted bucket sensible
+
+GET /buckets
+
+NOTMATCH sensible
+MATCH spam
+MATCH personal
+MATCH other
+
+# Check word lookup
+
+SETSUBMIT word xxxxxx
+MATCH <b>xxxxxx</b> does not appear in any of the buckets 
+SETSUBMIT word used
+MATCH <b>used</b> is most likely to appear in <font color="red">other</font>
+MATCH 0.0005602241
+MATCH 0.6873803233
+MATCH 0.6587808605
+MATCH Frequency
+
+# Check operation of Subject Modification
+
+SETSUBMIT name personal
+MATCH Deleted bucket personal
+SETSUBMIT name other
+MATCH Deleted bucket other
+
+INPUTIS subject 1
+PARAMETERIS spam subject 1
+SETSUBMIT subject 1
+INPUTIS subject 2
+PARAMETERIS spam subject 0
+SETSUBMIT subject 2
+INPUTIS subject 1
+PARAMETERIS spam subject 1
+
+# Check operation of Quarantine
+
+INPUTIS quarantine 2
+PARAMETERIS spam quarantine 0
+SETSUBMIT quarantine 2
+INPUTIS quarantine 1
+PARAMETERIS spam quarantine 1
+SETSUBMIT quarantine 1
+INPUTIS quarantine 2
+PARAMETERIS spam quarantine 0
+
+# Check operation of color change
+
+MATCH /buckets?color=feldspar&amp;bucket=spam&amp;session=$sk
+GET /buckets?color=feldspar&amp;bucket=spam&amp;session=$sk
+MATCH spam current color is feldspar
+
+# TODO Check individual bucket page for accuracy
+# TODO Check clearing of individual bucket
 
 # TODO Check shutdown operation
 # TODO Check bad session key
