@@ -31,9 +31,11 @@
 #
 # URL <url>         Set the URL that is to be fetched
 # GET               Gets the last set URL
+# FORM <id>/ENDFORM Set form elements (foo=bar) and submit the form 
 # POST/ENDPOST      Contains a block of data to be POSTed
 # MATCH <data>      Match the return from last URL fetch against the data
 # MATCH/ENDMATCH    Encloses a block of test to find in the return from the last URL fetch
+# CODE/ENDCODE      Arbitrary code that should be executed
 #
 # Expect that the following are available to you within the MATCH/ENDMATCH block
 #
@@ -129,3 +131,88 @@ MATCH
 <a class="menuLink" href="/advanced?session=$sk">
 ENDMATCH
 
+# TODO History Page
+
+# TODO Check for existence of messages
+# TODO Check the page navigator
+# TODO Check refresh
+# TODO Check search
+# TODO Check filter
+# TODO Check reclassification
+# TODO Check delete some messages
+# TODO Check delete page of messages
+# TODO Check delete all messages
+# TODO Check sorting
+# TODO Check click through from bucket name
+
+# TODO single message view for accuracy
+# TODO reclassify from single message view
+
+# TODO Buckets Page
+
+# TODO Basic bucket test to verify that the buckets in the test corpus
+# are present on the bucket page with the right numbers
+# TODO Check statistics displayed correctly
+# TODO Check operation of Subject Modification
+# TODO Check operation of Quarantine
+# TODO Check operation of color change
+# TODO Check Reset Statistics
+# TODO Check bucket creation
+# TODO Check bucket rename
+# TODO Check bucket delete
+# TODO Check word lookup
+
+# TODO Check individual bucket page for accuracy
+# TODO Check clearing of individual bucket
+
+# TODO Magnets Page
+
+# TODO Check that predefined magnets are presetn
+# TODO Check magnet creation
+# TODO Check magnet change value
+# TODO Check magnet change type
+# TODO Check magnet change bucket
+# TODO Check magnet deletion
+
+# TODO Configuration Page
+
+# TODO Check skin change
+# TODO Check language change
+# TODO Check logger change
+# TODO Check history lines change
+# TODO Check history days change
+# TODO Check change timeout
+# TODO Check change POP3 port
+# TODO Check change separator
+# TODO Check Subject Line Modification
+# TODO Check XTC
+# TODO Check XPL
+# TODO Check XMLRPC port
+# TODO Check UI port
+# TODO Check SMTP port
+# TODO Check NNTP port
+# TODO Check NNTP separator
+# TODO Check Windows icon
+
+# TODO Security Page
+
+# TODO Check POP3 stealth
+# TODO Check SMTP stealth
+# TODO Check NNTP stealth
+# TODO Check XMLRPC stealth
+# TODO Check UI stealth
+# TODO Check POP3 AUTH options
+# TODO Check SMTP chain options
+# TODO Check autoupdate
+# TODO Check stastitics sending
+# TODO Check password
+
+# TODO Advanced Page
+
+# TODO Check presence of ignore words
+# TODO Check add ignore word
+# TODO Check remove ignore word
+# TODO Check change arbitrary parameter
+
+# TODO Check shutdown operation
+# TODO Check bad session key
