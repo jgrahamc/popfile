@@ -293,9 +293,12 @@ $b->start();
 # some tests require this directory to be present
 mkdir( 'messages' );
 
+$b->prefork();
 my $pid = fork();
 
 if ( $pid == 0 ) {
+
+    $b->forked();
 
     # CHILD THAT WILL RUN THE POP3 SERVER
 
@@ -319,6 +322,8 @@ if ( $pid == 0 ) {
     exit(0);
 } else {
 
+    $b->postfork();
+
     my $port = 9000 + int(rand(1000));
 
     # This pipe is used to send signals to the child running
@@ -339,9 +344,12 @@ if ( $pid == 0 ) {
 
     pipe my $dreader, my $dwriter;
     pipe my $ureader, my $uwriter;
+    $b->prefork();
     my $pid2 = fork();
 
     if ( $pid2 == 0 ) {
+
+        $b->forked();
 
         # CHILD THAT WILL RUN THE POP3 PROXY
 
@@ -413,6 +421,8 @@ if ( $pid == 0 ) {
 
         exit(0);
     } else {
+
+        $b->postfork();
 
         # PARENT THAT WILL SEND COMMAND TO THE PROXY
 

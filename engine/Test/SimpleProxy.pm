@@ -164,7 +164,7 @@ sub service_server
 # ---------------------------------------------------------------------------------------------
 sub child__
 {
-    my ( $self, $client, $download_count, $pipe ) = @_;
+    my ( $self, $client, $download_count, $pipe, $ppipe, $pid ) = @_;
 
     $self->log_( "Child started" );
 
@@ -173,6 +173,7 @@ sub child__
     print $pipe "CLASS:classification$eol";
     print $pipe "NEWFL:newfile$eol";
     print $pipe "LOGIN:username$eol";
+    $self->yield_( $ppipe, $pid );
 
     # Connect to the simple server that
 

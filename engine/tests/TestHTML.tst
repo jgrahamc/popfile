@@ -140,6 +140,10 @@ my $mq = new POPFile::MQ;
 my $l = new POPFile::Logger;
 my $b = new Classifier::Bayes;
 
+$b->configuration( $c );
+$b->mq( $mq );
+$b->logger( $l );
+
 $c->configuration( $c );
 $c->mq( $mq );
 $c->logger( $l );
@@ -155,28 +159,27 @@ $mq->configuration( $c );
 $mq->mq( $mq );
 $mq->logger( $l );
 
-$b->configuration( $c );
-$b->mq( $mq );
-$b->logger( $l );
-
-$b->initialize();
-test_assert( $b->start() );
-
 my $p = new Proxy::POP3;
 
 $p->configuration( $c );
 $p->mq( $mq );
-$p->logger( $l );
 $p->classifier( $b );
+$p->logger( $l );
 $p->version( 'vtest.suite.ver' );
 $p->initialize();
 
+$b->initialize();
+open STDOUT, ">temp.tmp";
+test_assert( $b->start() );
+close STDOUT;
+unlink 'temp.tmp';
+
 our $h = new UI::HTML;
 
+$h->classifier( $b );
 $h->configuration( $c );
 $h->mq( $mq );
 $h->logger( $l );
-$h->classifier( $b );
 $h->initialize();
 $h->version( 'vtest.suite.ver' );
 test_assert_equal( $h->language(), 'English' );
@@ -191,12 +194,15 @@ test_assert_equal( $h->url_encode_( '[' ), '%5b' );
 test_assert_equal( $h->url_encode_( '[]' ), '%5b%5d' );
 test_assert_equal( $h->url_encode_( '[foo]' ), '%5bfoo%5d' );
 
-our $port = 9000 + int(rand(1000));
+our $port = 9001 + int(rand(1000));
 pipe my $dreader, my $dwriter;
 pipe my $ureader, my $uwriter;
+$b->prefork();
 my $pid = fork();
 
 if ( $pid == 0 ) {
+
+    $b->forked();
 
     # CHILD THAT WILL RUN THE HTML INTERFACE
 
@@ -305,6 +311,8 @@ if ( $pid == 0 ) {
 
     exit(0);
 } else {
+
+    $b->postfork();
 
     # PARENT THAT WILL SEND COMMANDS TO THE WEB INTERFACE
 

@@ -479,6 +479,14 @@ sub load_word_matrix_
 
         next if ( lc($bucket) ne $bucket );
 
+        # Look for the delete file that indicates that this bucket
+        # is no longer needed
+
+        if ( -e "$bucket/delete" ) {
+            $self->delete_bucket_files__( $bucket );
+            next;
+	}
+
         my $color = '';
 
         # See if there's a color file specified
@@ -616,9 +624,9 @@ sub load_bucket_
     # flat file used by POPFile for corpus storage) then create the new
     # tied hash from it thus performing an automatic upgrade.
 
-    $self->{db__}{$bucket} = tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",
+    $self->{db__}{$bucket} = tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",              # PROFILE BLOCK START
                                  -Filename => $self->config_( 'corpus' ) . "/$bucket/table.db",
-                                 -Flags    => DB_CREATE;
+                                 -Flags    => DB_CREATE;                                         # PROFILE BLOCK STOP
 
     if ( !defined( $self->get_bucket_word_count( $bucket ) ) ) {
         $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} = 0;
@@ -631,16 +639,18 @@ sub load_bucket_
 
         if ( open WORDS, '<' . $self->config_( 'corpus' ) . "/$bucket/table" )  {
 
-	    print "\nUpgrading bucket $bucket...";
-            flush STDOUT;
-            my $wc = 0;
+            my $wc = 1;
 
             my $first = <WORDS>;
             if ( defined( $first ) && ( $first =~ s/^__CORPUS__ __VERSION__ (\d+)// ) ) {
                 if ( $1 != $self->{corpus_version__} )  {
                     print STDERR "Incompatible corpus version in $bucket\n";
                     close WORDS;
+                    return 0;
                 } else {
+   	            print "\nUpgrading bucket $bucket...";
+                    flush STDOUT;
+
                     while ( <WORDS> ) {
 		        if ( $wc % 100 == 0 ) {
                             print "$wc ";
@@ -657,10 +667,11 @@ sub load_bucket_
 		    }
                 }
 
-                print "(completed $wc words)";
+                print "(completed ", $wc-1, " words)";
                 close WORDS;
             } else {
                 close WORDS;
+                return 0;
 	    }
 
             unlink( $self->config_( 'corpus' ) . "/$bucket/table" );
@@ -873,9 +884,7 @@ sub classify
 
     my $certainty = ($c1-$c0 + 1) / 2;
 
-    if ( $certainty < 0.4 ) {
-        $class = 'unsure';
-    }
+    $class = 'unsure' if ( $certainty < 0.4 );
 
     if ($self->{wordscores__} && defined($ui) ) {
         my %qm = %{$self->{parser__}->quickmagnets()};
@@ -1430,7 +1439,9 @@ sub get_bucket_word_count
 {
     my ( $self, $bucket ) = @_;
 
-    return $self->{matrix__}{$bucket}{__POPFILE__TOTAL__};
+    my $total = $self->{matrix__}{$bucket}{__POPFILE__TOTAL__};
+
+    return defined( $total )?$total:0;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1527,7 +1538,9 @@ sub get_bucket_color
 {
     my ( $self, $bucket ) = @_;
 
-    return $self->{colors__}{$bucket};
+    my $color = $self->{colors__}{$bucket};
+
+    return defined( $color )?$color:'black';
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1627,9 +1640,9 @@ sub create_bucket
     mkdir( $self->config_( 'corpus' ) );
     mkdir( $self->config_( 'corpus' ) . "/$bucket" );
 
-    tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",
+    tie %{$self->{matrix__}{$bucket}}, "BerkeleyDB::Hash",                 # PROFILE BLOCK START
             -Filename => $self->config_( 'corpus' ) . "/$bucket/table.db",
-            -Flags    => DB_CREATE;
+            -Flags    => DB_CREATE;                                        # PROFILE BLOCK STOP
 
     $self->load_word_matrix_();
 }
@@ -1651,19 +1664,45 @@ sub delete_bucket
         return 0;
     }
 
-    my $bucket_directory = $self->config_( 'corpus' ) . "/$bucket";
-
     $self->close_database__();
-
-    unlink( "$bucket_directory/table.db" );
-    unlink( "$bucket_directory/color" );
-    unlink( "$bucket_directory/params" );
-    unlink( "$bucket_directory/magnets" );
-    rmdir( $bucket_directory );
-
+    $self->delete_bucket_files__( $bucket );
     $self->load_word_matrix_();
 
     return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
+# delete_bucket_files__
+#
+# Helper that removes the files associated with a bucket
+#
+# $bucket          The bucket to tidy up
+#
+# ---------------------------------------------------------------------------------------------
+sub delete_bucket_files__
+{
+    my ( $self, $bucket ) = @_;
+    my $bucket_directory = $self->config_( 'corpus' ) . "/$bucket";
+
+    unlink( "$bucket_directory/table.db" );
+    unlink( "$bucket_directory/table" );
+    unlink( "$bucket_directory/color" );
+    unlink( "$bucket_directory/params" );
+    unlink( "$bucket_directory/magnets" );
+    unlink( "$bucket_directory/delete" );
+    rmdir( $bucket_directory );
+
+    # If the bucket directory still exists then it indicates that the
+    # table was open in another process.  We create a special file
+    # called 'delete' which if present will cause the loader to try
+    # to delete the bucket
+
+    if ( -e $bucket_directory ) {
+        open DELETER, ">$bucket_directory/delete";
+        print DELETER "Special file used by POPFile to indicate that this bucket is to be deleted\n";
+        close DELETER;
+    }
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -1721,8 +1760,6 @@ sub add_messages_to_bucket
             $self->set_value_( $bucket, $word, $self->{parser__}->{words__}{$word} + $self->get_base_value_( $bucket, $word ) );
         }
     }
-
-    $self->load_word_matrix_();
 
     return 1;
 }
@@ -1881,11 +1918,12 @@ sub clear_bucket
 {
     my ( $self, $bucket ) = @_;
 
-    my $bucket_directory = $self->config_( 'corpus' ) . "/$bucket";
+    foreach my $word (keys %{$self->{matrix__}{$bucket}}) {
+        delete $self->{matrix__}{$bucket}{$word};
+    }
 
-    undef $self->{db__}{$bucket};
-    untie %{$self->{matrix__}{$bucket}};
-    unlink( "$bucket_directory/table.db" );
+    $self->{matrix__}{$bucket}{__POPFILE__TOTAL__} = 0;
+    $self->{matrix__}{$bucket}{__POPFILE__UNIQUE__} = 0;
 
     $self->load_word_matrix_();
 }

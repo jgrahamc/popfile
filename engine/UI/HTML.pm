@@ -1699,7 +1699,7 @@ sub bucket_page
     $body .= "<td></td>\n<td align=\"right\">$percent</td>\n<td></td>\n</tr>\n</table>\n";
 
     $body .= "<form action=\"/buckets\"><input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />";
-    $body .= "<input type=\"hidden\" name=\"bucket\" value=\"$self->{form_}{showbucket}\" />";
+    $body .= "<input type=\"hidden\" name=\"showbucket\" value=\"$self->{form_}{showbucket}\" />";
     $body .= "<input type=\"submit\" name=\"clearbucket\" value=\"$self->{language__}{SingleBucket_ClearBucket}\" />";
     $body .= "</form>";
 
@@ -1821,7 +1821,7 @@ sub corpus_page
     my ( $self, $client ) = @_;
 
     if ( defined( $self->{form_}{clearbucket} ) ) {
-        $self->{classifier__}->clear_bucket( $self->{form_}{bucket} );
+        $self->{classifier__}->clear_bucket( $self->{form_}{showbucket} );
     }
 
     if ( defined($self->{form_}{reset_stats}) ) {
@@ -1837,7 +1837,7 @@ sub corpus_page
     }
 
     if ( defined($self->{form_}{showbucket}) )  {
-        bucket_page( $self, $client);
+        $self->bucket_page( $client );
         return;
     }
 

@@ -252,6 +252,8 @@ if ( $pid == 0 ) {
     while ( $h->service() ) {
     }
 
+    $h->stop();
+
     exit(0);
 } else {
 

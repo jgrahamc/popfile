@@ -61,7 +61,13 @@ $b->mq( $mq );
 $b->logger( $l );
 
 $b->initialize();
+
+# Hide the upgrading messages
+
+open STDOUT, ">temp.tmp";
 test_assert( $b->start() );
+close STDOUT;
+unlink 'temp.tmp';
 
 # Test the unclassifier_probability parameter
 
@@ -89,12 +95,21 @@ test_assert_equal( $b->get_bucket_word_count($buckets[0]), 1785 );
 test_assert_equal( $b->get_bucket_word_count($buckets[1]), 103 );
 test_assert_equal( $b->get_bucket_word_count($buckets[2]), 12114 );
 
-# get_bucket_word_list
+# get_bucket_word_list and prefixes
 
-my @words = $b->get_bucket_word_list( 'personal' );
+my @words = $b->get_bucket_word_prefixes( 'personal' );
 test_assert_equal( $#words, 1 );
-test_assert_equal( $words[0], '|bar 2||baz 100|' );
-test_assert_equal( $words[1], '|foo 1|' );
+test_assert_equal( $words[0], 'b' );
+test_assert_equal( $words[1], 'f' );
+
+@words = $b->get_bucket_word_list( 'personal', 'b' );
+test_assert_equal( $#words, 1 );
+test_assert_equal( $words[0], 'bar' );
+test_assert_equal( $words[1], 'baz' );
+
+@words = $b->get_bucket_word_list( 'personal', 'f' );
+test_assert_equal( $#words, 0 );
+test_assert_equal( $words[0], 'foo' );
 
 # get_word_count
 
@@ -189,12 +204,7 @@ test_assert_equal( $b->get_bucket_unique_count( 'zebra' ), 0 );
 test_assert_equal( $b->get_word_count(), 14002 );
 
 test_assert( -e 'corpus/zebra' );
-test_assert( -e 'corpus/zebra/table' );
-
-open FILE, "<corpus/zebra/table";
-my $line = <FILE>;
-test_assert_regexp( $line, '__CORPUS__ __VERSION__ 1' );
-close FILE;
+test_assert( -e 'corpus/zebra/table.db' );
 
 # rename_bucket
 
@@ -218,14 +228,7 @@ test_assert_equal( $b->get_bucket_unique_count( 'zeotrope' ), 0 );
 test_assert_equal( $b->get_word_count(), 14002 );
 
 test_assert( -e 'corpus/zeotrope' );
-test_assert( -e 'corpus/zeotrope/table' );
-
-open FILE, "<corpus/zeotrope/table";
-$line = <FILE>;
-test_assert_regexp( $line, '__CORPUS__ __VERSION__ 1' );
-$line = <FILE>;
-test_assert( !defined( $line ) );
-close FILE;
+test_assert( -e 'corpus/zeotrope/table.db' );
 
 # add_message_to_bucket
 
@@ -241,28 +244,16 @@ close WORDS;
 
 test_assert( !$b->add_message_to_bucket( 'none', 'TestMailParse021.msg' ) );
 test_assert( $b->add_message_to_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
-open FILE, "<corpus/zeotrope/table";
-$line = <FILE>;
-test_assert_regexp( $line, '__CORPUS__ __VERSION__ 1' );
-while ( <FILE> ) {
-    if ( /(.+) (\d+)/ ) {
-        test_assert_equal( $words{$1}, $2, "zeotrope: $1 $2 $words{$1}" );
-    }
+
+foreach my $word (keys %words) {
+    test_assert_equal( $b->get_base_value_( 'zeotrope', $word ), $words{$word}, "zeotrope: $word $words{$word}" );
 }
-close FILE;
-`cp corpus/zeotrope/table temp.wrd`;
 
 test_assert( $b->add_message_to_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
 
-open FILE, "<corpus/zeotrope/table";
-$line = <FILE>;
-test_assert_regexp( $line, '__CORPUS__ __VERSION__ 1' );
-while ( <FILE> ) {
-    if ( /(.+) (\d+)/ ) {
-        test_assert_equal( ($words{$1}*2), $2, "zeotrope: $1 $2 $words{$1}" );
-    }
+foreach my $word (keys %words) {
+    test_assert_equal( $b->get_base_value_( 'zeotrope', $word ), $words{$word}*2, "zeotrope: $word $words{$word}" );
 }
-close FILE;
 
 # remove_message_from_bucket
 
@@ -270,26 +261,26 @@ test_assert( !$b->remove_message_from_bucket( 'none', 'TestMailParse021.msg' ) )
 test_assert( $b->remove_message_from_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
 test_assert( $b->remove_message_from_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
 
-open FILE, "<corpus/zeotrope/table";
-$line = <FILE>;
-test_assert_regexp( $line, '__CORPUS__ __VERSION__ 1' );
-$line = <FILE>;
-test_assert( !defined( $line ) );
-close FILE;
+test_assert_equal( $b->get_bucket_word_count( 'zeotrope' ), 0 );
 
 # add_messages_to_bucket
 
-test_assert( $b->add_message_to_bucket( 'zeotrope', [ 'TestMailParse021.msg', 'TestMailParse021.msg' ] ) );
+test_assert( $b->add_messages_to_bucket( 'zeotrope', ( 'TestMailParse021.msg', 'TestMailParse021.msg' ) ) );
 
-open FILE, "<corpus/zeotrope/table";
-$line = <FILE>;
-test_assert_regexp( $line, '__CORPUS__ __VERSION__ 1' );
-while ( <FILE> ) {
-    if ( /(.+) (\d+)/ ) {
-        test_assert_equal( ($words{$1}*2), $2, "zeotrope: $1 $2 $words{$1}" );
-    }
+foreach my $word (keys %words) {
+    test_assert_equal( $b->get_base_value_( 'zeotrope', $word ), $words{$word}*2, "zeotrope: $word $words{$word}" );
 }
-close FILE;
+
+# Make sure that fork functions keep the database open
+
+$b->prefork();
+test_assert( !defined( $b->{matrix__}{zeotrope} ) );
+$b->forked();
+test_assert( defined( $b->{matrix__}{zeotrope} ) );
+$b->prefork();
+test_assert( !defined( $b->{matrix__}{zeotrope} ) );
+$b->postfork();
+test_assert( defined( $b->{matrix__}{zeotrope} ) );
 
 # Test corrupting the corpus
 
@@ -298,26 +289,10 @@ print FILE "__CORPUS__ __VERSION__ 2\n";
 close FILE;
 
 open STDERR, ">temp.tmp";
-test_assert( !$b->add_message_to_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
-close STDERR;
-open FILE, "<temp.tmp";
-$line = <FILE>;
-test_assert_regexp( $line, 'Incompatible corpus version in zeotrope' );
-close FILE;
-
-open STDERR, ">temp.tmp";
-test_assert( !$b->remove_message_from_bucket( 'zeotrope', 'TestMailParse021.msg' ) );
-close STDERR;
-open FILE, "<temp.tmp";
-$line = <FILE>;
-test_assert_regexp( $line, 'Incompatible corpus version in zeotrope' );
-close FILE;
-
-open STDERR, ">temp.tmp";
 test_assert( !$b->load_bucket_( 'zeotrope' ) );
 close STDERR;
 open FILE, "<temp.tmp";
-$line = <FILE>;
+my $line = <FILE>;
 test_assert_regexp( $line, 'Incompatible corpus version in zeotrope' );
 close FILE;
 
@@ -403,7 +378,7 @@ test_assert_equal( $b->get_bucket_parameter( 'zeotrope', 'count' ), 1 );
 # clear_bucket
 
 $b->clear_bucket( 'zeotrope' );
-test_assert( !( -e 'corpus/zeotrope/table' ) );
+test_assert( -e 'corpus/zeotrope/table.db' );
 test_assert_equal( $b->get_bucket_word_count('zeotrope'), 0 );
 
 # classify a message using a magnet
@@ -424,7 +399,7 @@ test_assert_equal( $#mags, -1 );
 
 test_assert( !$b->delete_bucket( 'zebrazerba' ) );
 test_assert( $b->delete_bucket( 'zeotrope' ) );
-test_assert( !( -e 'corpus/zeotrope/table' ) );
+test_assert( !( -e 'corpus/zeotrope/table.db' ) );
 test_assert( !( -e 'corpus/zeotrope' ) );
 
 @buckets = $b->get_buckets();
@@ -437,12 +412,13 @@ test_assert_equal( $buckets[2], 'spam' );
 
 test_assert_equal( $b->get_value_( 'personal', 'foo' ), log(1/103) );
 test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), log(1/103) );
-$b->{total__}{personal} = 100;
 $b->set_value_( 'personal', 'foo', 100 );
+$b->{matrix__}{personal}{__POPFILE__TOTAL__} = 100;
 test_assert_equal( $b->get_value_( 'personal', 'foo' ), 0 );
 test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), $b->{not_likely__} );
-$b->{total__}{personal} = 1000;
 $b->set_value_( 'personal', 'foo', 100 );
+$b->{matrix__}{personal}{__POPFILE__TOTAL__} = 1000;
+test_assert_equal( $b->get_base_value_( 'personal', 'foo' ), 100 );
 test_assert_equal( $b->get_value_( 'personal', 'foo' ), -log(10) );
 test_assert_equal( $b->get_sort_value_( 'personal', 'foo' ), -log(10) );
 

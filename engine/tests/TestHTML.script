@@ -649,6 +649,16 @@ SETSUBMIT pop3_separator gg
 MATCH The separator character must be a single character
 INPUTIS   pop3_separator ;
 
+# Check fork for POP3
+
+INPUTIS   pop3_force_fork 1
+CONFIGIS  pop3_force_fork 0
+SETSUBMIT pop3_force_fork 0
+INPUTIS   pop3_force_fork 1
+CONFIGIS  pop3_force_fork 0
+SETSUBMIT pop3_force_fork 1
+INPUTIS   pop3_force_fork 0
+
 # Check Subject Line Modification
 
 INPUTIS subject 1
@@ -963,7 +973,7 @@ MATCH <a class="wordListLink" href="/buckets?session=$sk&amp;lookup=Lookup&amp;w
 # Check clearing of individual bucket
 
 CLICK clearbucket
-MATCH <td width="1%">&nbsp;</td><td align="right">0</td><td width="1%">&nbsp;</td>
+MATCH (0 unique)</td>
 
 # Test removal of history files that are out of date (old and new style)
 
