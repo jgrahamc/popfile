@@ -63,19 +63,21 @@ my @last_ten = $l->last_ten();
 test_assert_equal( $#last_ten, 0 );
 test_assert_equal( $last_ten[0], 'log empty' );
 
-$l->debug( 0,  'test1' );
+# Check that control character transformation works
+
+$l->debug( 0, "\rtest1\t\n" );
 
 @last_ten = $l->last_ten();
 
 test_assert_equal( $#last_ten, 0 );
-test_assert_regexp( $last_ten[0], 'test1' );
+test_assert_regexp( $last_ten[0], '\[0d\]test1\[09\]\[0a\]' );
 
 $l->debug( 0,  'test2' );
 
 @last_ten = $l->last_ten();
 
 test_assert_equal( $#last_ten, 1 );
-test_assert_regexp( $last_ten[0], 'test1' );
+test_assert_regexp( $last_ten[0], '\[0d\]test1\[09\]\[0a\]' );
 test_assert_regexp( $last_ten[1], 'test2' );
 
 # test size limiting on last ten, note the test
@@ -121,22 +123,26 @@ close DEBUG;
 $l->{last_tickd__} -= 86400;
 $l->service();
 
-test_assert( defined( $mq->{queue__}{TICKD}[0][0] ), "checking TICKD message" );
-test_assert( defined( $mq->{queue__}{TICKD}[0][1] ), "checking TICKD message" );
+test_assert( defined( $mq->{queue__}{TICKD}[0] ), "checking TICKD message" );
 
 # Move the date ahead three days and check that the debug
 # file gets deleted, this relies on the GNU date program
-my $file = $l->debug_filename();
-`date --set='2 days'`;
-$l->service();
-$mq->service();
-my $exists = ( -e $file );
-test_assert( $exists, "checking that debug file was deleted" );
-`date --set='1 day'`;
-$l->service();
-$mq->service();
-$exists = ( -e $file );
-test_assert( !$exists, "checking that debug file was deleted" );
-`date --set='3 days ago'`;
+
+if ( getlogin() eq 'root' ) {
+    my $file = $l->debug_filename();
+    `date --set='2 days'`;
+    $l->service();
+    $mq->service();
+    my $exists = ( -e $file );
+    test_assert( $exists, "checking that debug file was deleted" );
+    `date --set='1 day'`;
+    $l->service();
+    $mq->service();
+    $exists = ( -e $file );
+    test_assert( !$exists, "checking that debug file was deleted" );
+    `date --set='3 days ago'`;
+} else {
+    print "Warning: skipping clean up tests because you are not root\n";
+}
 
 1;

@@ -306,7 +306,7 @@ sub postfork
 # ---------------------------------------------------------------------------------------------
 sub deliver
 {
-    my ( $self, $type, $message, $parameter ) = @_;
+    my ( $self, $type, @message ) = @_;
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -357,15 +357,14 @@ sub config_
 # Called by a subclass to post a message to the message queue
 #
 # $type              Type of message to send
-# $message           Message to send
-# $parameter         Message parameters
+# @message           Message to send
 #
 # ---------------------------------------------------------------------------------------------
 sub mq_post_
 {
-    my ( $self, $type, $message, $parameter ) = @_;
+    my ( $self, $type, @message ) = @_;
 
-    return $self->{mq__}->post( $type, $message, $parameter );
+    return $self->{mq__}->post( $type, @message );
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -439,7 +438,7 @@ sub register_configuration_item_
 {
     my ( $self, $type, $name, $templ, $object ) = @_;
 
-    return $self->mq_post_( 'UIREG', "$type:$name:$templ", $object );
+    return $self->mq_post_( 'UIREG', $type, $name, $templ, $object );
 }
 
 # ---------------------------------------------------------------------------------------------

@@ -169,9 +169,7 @@ sub child__
 
     # Used to test that we get pipe messages
 
-    $self->mq_post_( 'CLASS', 'classification', '' );
-    $self->mq_post_( 'NEWFL', 'newfile', '' );
-    $self->mq_post_( 'LOGIN', 'username', '' );
+    $self->mq_post_( 'LOGIN', 'username' );
 
     # Connect to the simple server that
 

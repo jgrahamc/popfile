@@ -253,13 +253,11 @@ sub initialize
 #----------------------------------------------------------------------------
 sub deliver
 {
-    my ( $self, $type, $message, $parameter ) = @_;
+    my ( $self, $type, @message ) = @_;
 
     if ( $type eq 'COMIT' ) {
-        $parameter =~ /([^:]*):(.*)/;
-        my $class = $1;
         my $session = $self->get_session_key( 'admin', '' );
-        $self->classified( $session, $class );
+        $self->classified( $session, $message[1] );
         $self->release_session_key( $session );
     }
 }

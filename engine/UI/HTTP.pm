@@ -128,17 +128,20 @@ sub service
 
         if ( my $client = $self->{server_}->accept() ) {
 
-            # Check that this is a connection from the local machine, if it's not then we drop it immediately
-            # without any further processing.  We don't want to allow remote users to admin POPFile
+            # Check that this is a connection from the local machine,
+            # if it's not then we drop it immediately without any
+            # further processing.  We don't want to allow remote users
+            # to admin POPFile
 
             my ( $remote_port, $remote_host ) = sockaddr_in( $client->peername() );
 
             if ( ( $self->config_( 'local' ) == 0 ) ||                # PROFILE BLOCK START
                  ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {     # PROFILE BLOCK STOP
 
-                # Read the request line (GET or POST) from the client and if we manage to do that
-                # then read the rest of the HTTP headers grabbing the Content-Length and using
-                # it to read any form POST content into $content
+                # Read the request line (GET or POST) from the client
+                # and if we manage to do that then read the rest of
+                # the HTTP headers grabbing the Content-Length and
+                # using it to read any form POST content into $content
 
                 $client->autoflush(1);
 
@@ -146,24 +149,29 @@ sub service
                     my $content_length = 0;
                     my $content;
 
+                    $self->log_( 2, $request );
+
                     while ( my $line = $self->slurp_( $client ) )  {
                         $content_length = $1 if ( $line =~ /Content-Length: (\d+)/i );
 
-                        # Discovered that Norton Internet Security was adding
-                        # HTTP headers of the form
+                        # Discovered that Norton Internet Security was
+                        # adding HTTP headers of the form
                         #
                         # ~~~~~~~~~~~~~~: ~~~~~~~~~~~~~
                         #
-                        # which we were not recognizing as valid (surprise,
-                        # surprise) and this was messing about our handling
-                        # of POST data.  Changed the end of header identification
-                        # to any line that does not contain a :
+                        # which we were not recognizing as valid
+                        # (surprise, surprise) and this was messing
+                        # about our handling of POST data.  Changed
+                        # the end of header identification to any line
+                        # that does not contain a :
 
                         last                 if ( $line !~ /:/ );
                     }
 
                     if ( $content_length > 0 ) {
-                        $content = $self->slurp_buffer_( $client, $content_length );
+                        $content = $self->slurp_buffer_( $client,
+                            $content_length );
+                        $self->log_( 2, $content );
                     }
 
                     if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {

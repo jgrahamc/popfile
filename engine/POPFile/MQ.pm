@@ -24,7 +24,7 @@ use POPFile::Module;
 # The current list of types is
 #
 #     UIREG    Register a UI component, message is the component type
-#              and the parameter is a the element and reference to the
+#              and the element and reference to the
 #              object registering (comes from any component)
 #
 #     TICKD    Occurs when an hour has passed since the last TICKD (this
@@ -32,9 +32,6 @@ use POPFile::Module;
 #
 #     LOGIN    Occurs when a proxy logs into a remote server, the message
 #              is the username sent
-#
-#     CMPLT    Occurs when child process finishes.  Sent from the child with
-#              its PID
 #
 #     COMIT    Sent when an item is committed to the history through a call
 #              to POPFile::History::commit_slot
@@ -124,12 +121,13 @@ sub service
     for my $type (sort keys %{$self->{queue__}}) {
          while ( my $ref = shift @{$self->{queue__}{$type}} ) {
              for my $waiter (@{$self->{waiters__}{$type}}) {
-                my $message   = @$ref[0];
-                my $parameter = @$ref[1];
+                my @message   = @$ref;
 
-                $self->log_( 2, "Delivering message $type ($message, $parameter) to " . $waiter->name() );
+                my $flat = join(':', @message);
+                $self->log_( 2, "Delivering message $type ($flat) to " .
+                    $waiter->name() );
 
-                $waiter->deliver( $type, $message, $parameter );
+                $waiter->deliver( $type, @message );
             }
         }
     }
@@ -332,8 +330,9 @@ sub flush_child_data_
 
     while ( ($message = $self->read_pipe_( $handle )) && defined($message) )
     {
-        if ( $message =~ /([^:]*):([^:]*):([^\r\n]*)/ ) {
-            $self->post( $1 || '', $2 || '', $3 || '' );
+        if ( $message =~ /([^:]+):([^\r\n]*)/ ) {
+            my @parameters = split( ':', $2 || '' );
+            $self->post( $1, @parameters );
         }
     }
 }
@@ -364,27 +363,24 @@ sub register
 #   Called to send a message through the message queue
 #
 #   $type        A string identifying the message type
-#   $message     The message
-#   $parameter   Parameters to the message
+#   @message     The message (list of parameters)
 #
 #----------------------------------------------------------------------------
 sub post
 {
-    my ( $self, $type, $message, $parameter ) = @_;
+    my ( $self, $type, @message ) = @_;
 
-    $message = '' if ( !defined( $message ) );
-    $parameter = '' if ( !defined( $parameter ) );
-
-    $self->log_( 2, "post $type, $message, $parameter" );
+    my $flat = join( ':', @message );
+    $self->log_( 2, "post $type ($flat)" );
 
     # If we are in the parent process then just stick this on the queue,
     # otherwise write it up the pipe.
 
     if ( $$ == $self->{pid__} ) {
-        push @{$self->{queue__}{$type}}, [ $message, $parameter ];
+        push @{$self->{queue__}{$type}}, \@message;
     } else {
         my $pipe = $self->{writer__};
-        print $pipe "$type:$message:$parameter\n";
+        print $pipe "$type:$flat\n";
     }
 }
 

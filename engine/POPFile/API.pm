@@ -110,4 +110,35 @@ sub get_stopword_list          { [ shift->{c}->get_stopword_list( @_ ) ]; }
 sub get_bucket_word_list       { [ shift->{c}->get_bucket_word_list( @_ ) ]; }
 sub get_bucket_word_prefixes   { [ shift->{c}->get_bucket_word_prefixes( @_ ) ]; }
 
+# This API is used to add a message to POPFile's history, process the message
+# and do all the things POPFile would have done if it had received the message
+# through its proxies.
+#
+# Pass in the name of file to read and a file to write.  The read file
+# will be processed and the out file created containing the processed
+# message.
+#
+# Returns the same output as classify_and_modify (which contains the
+# slot ID for the newly added message, the classification and magnet
+# ID).  If it fails it returns undef.
+
+sub handle_message
+{
+    my ( $self, $session, $in, $out ) = @_;
+
+    # Convert the two files into streams that can be passed to the
+    # classifier
+
+    open IN, "<$in" or return undef;
+    open OUT, ">$out" or return undef;
+
+    my @result = $self->{c}->classify_and_modify(
+        $session, \*IN, \*OUT, 0 );
+
+    close OUT;
+    close IN;
+
+    return @result;
+}
+
 1;

@@ -116,7 +116,7 @@ sub initialize
 # ---------------------------------------------------------------------------------------------
 sub deliver
 {
-    my ( $self, $type, $message, $parameter ) = @_;
+    my ( $self, $type, @message ) = @_;
 
     # If a day has passed then clean up log files
 
@@ -141,7 +141,7 @@ sub service
     # often
 
     if ( time > ( $self->{last_tickd__} + 3600 ) ) {
-        $self->mq_post_( 'TICKD', '', '' );
+        $self->mq_post_( 'TICKD' );
         $self->{last_tickd__} = time;
     }
 
@@ -208,27 +208,17 @@ sub debug
 
     if ( $self->global_config_( 'debug' ) > 0 ) {
 
-        # Check to see if we are handling the USER/PASS command and if we are then obscure the
-        # account information
+        # Check to see if we are handling the USER/PASS command and if
+        # we are then obscure the account information
 
-        $message = "$`$1$3 XXXXXX$4" if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/i );
-        $message =~ s/[\012\015]+$//g;
-
-        # Since we write to the log file in binmode (so that embedded CR and LF characters
-        # are left untouched) we need to add the correct line ending for the platform
-        # here.
-
-        if ( $^O =~ /MSWin/i ) {
-            $message .= "\015\012";
-        } else {
-            if ( $^O =~ /Mac/i ) {
-                $message .= "\015";
-            } else {
-                $message .= "\012";
-            }
+        if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/i ) {
+            $message = "$`$1$3 XXXXXX$4";
         }
 
-        my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime;
+        $message =~ s/([\x00-\x1f])/sprintf("[%2.2x]", ord($1))/eg;
+
+        my ( $sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst ) =
+            localtime;
         $year += 1900;
         $mon  += 1;
 
@@ -240,11 +230,11 @@ sub debug
         $delim = "\t" if ( $self->config_( 'format' ) eq 'tabbed' );
         $delim = ',' if ( $self->config_( 'format' ) eq 'csv' );
 
-        my $msg = "$year/$mon/$mday$delim$hour:$min:$sec$delim$$:$delim$message";
+        my $msg =
+            "$year/$mon/$mday$delim$hour:$min:$sec$delim$$:$delim$message\n";
 
         if ( $self->global_config_( 'debug' ) & 1 )  {
               if ( open DEBUG, ">>$self->{debug_filename__}" ) {
-                binmode DEBUG;
                 print DEBUG $msg;
                 close DEBUG;
             }

@@ -321,18 +321,16 @@ sub stop
 #----------------------------------------------------------------------------
 sub deliver
 {
-    my ( $self, $type, $message, $parameter ) = @_;
+    my ( $self, $type, @message ) = @_;
 
     # Handle registration of UI components
 
     if ( $type eq 'UIREG' ) {
-        $message =~ /(.*):(.*):(.*)/;
-
-        $self->register_configuration_item__( $1, $2, $3, $parameter );
+        $self->register_configuration_item__( @message );
     }
 
     if ( $type eq 'LOGIN' ) {
-        $self->{last_login__} = $message;
+        $self->{last_login__} = $message[0];
     }
 }
 
@@ -486,21 +484,15 @@ sub url_handler__
     }
 
     if ( $url eq '/jump_to_message' )  {
-        my $found = 0;
-
-        # Reset any filters
-
         $self->{form_}{filter}    = '';
+        $self->{form_}{negate}    = '';
         $self->{form_}{search}    = '';
         $self->{form_}{setsearch} = 1;
 
-        # TODO Make this work
+        my $slot = $self->{form_}{view};
 
-        my $slot = $self->{history__}->get_slot_from_hash(
-            $self->{form_}{view} );
-
-        if ( $slot ne '' ) {
-            $self->http_redirect_( $client, 
+        if ( $self->{history__}->is_valid_slot( $slot ) ) {
+            $self->http_redirect_( $client,
                  "/view?session=$self->{session_key__}&view=$slot" );
         } else {
             $self->http_redirect_( $client, "/history" );
@@ -1820,7 +1812,7 @@ sub set_history_navigator__
 {
     my ( $self, $templ, $start_message, $stop_message ) = @_;
 
-    $templ->param( 'History_Navigator_Fields' => $self->print_form_fields_(0,1,('session','filter','search','sort' ) ) );
+    $templ->param( 'History_Navigator_Fields' => $self->print_form_fields_(0,1,('session','filter','search','sort','negate' ) ) );
 
     if ( $start_message != 0 )  {
         $templ->param( 'History_Navigator_If_Previous' => 1 );
@@ -1847,7 +1839,7 @@ sub set_history_navigator__
             if ( $i == $start_message ) {
                 $row_data{History_Navigator_If_This_Page} = 1;
             } else {
-                $row_data{History_Navigator_Fields} = $self->print_form_fields_(0,1,('session','filter','search','sort'));
+                $row_data{History_Navigator_Fields} = $self->print_form_fields_(0,1,('session','filter','search','sort','negate'));
             }
 
             $dots = 1;
@@ -2040,6 +2032,8 @@ sub history_page
 
     $self->{old_sort__} = $self->{form_}{sort};
 
+    $self->{form_}{negate} = '' if ( !defined( $self->{form_}{negate} ) );
+
     # If the user hits the Reset button on a search then we need to
     # clear the search value but make it look as though they hit the
     # search button so that sort_filter_history will get called below
@@ -2047,6 +2041,7 @@ sub history_page
 
     if ( defined( $self->{form_}{reset_filter_search} ) ) {
         $self->{form_}{filter}    = '';
+        $self->{form_}{negate}    = '';
         $self->{form_}{search}    = '';
         $self->{form_}{setsearch} = 1;
     }
@@ -2067,20 +2062,6 @@ sub history_page
     # indicating the current filter and search settings
 
     my $filter = $self->{form_}{filter};
-    my $filtered = '';
-    if ( !( $filter eq '' ) ) {
-        if ( $filter eq '__filter__magnet' ) {
-            $filtered .= $self->{language__}{History_Magnet};
-        } else {
-            if ( $filter eq '__filter__no__magnet' ) {
-                $filtered .= $self->{language__}{History_NoMagnet};
-            } else {
-                $filtered = sprintf( $self->{language__}{History_Filter}, $self->{classifier__}->get_bucket_color( $self->{api_session__}, $self->{form_}{filter} ), $self->{form_}{filter} ) if ( $self->{form_}{filter} ne '' );
-            }
-        }
-    }
-
-    $filtered .= sprintf( $self->{language__}{History_Search}, $self->{form_}{search} ) if ( $self->{form_}{search} ne '' );
 
     # Handle the reinsertion of a message file or the user hitting the
     # undo button
@@ -2116,7 +2097,8 @@ sub history_page
     $self->{history__}->set_query( $self->{q__},
                                    $self->{form_}{filter},
                                    $self->{form_}{search},
-                                   $self->{form_}{sort} );
+                                   $self->{form_}{sort},
+                                   ( $self->{form_}{negate} ne '' ) );
 
     # Redirect somewhere safe if non-idempotent action has been taken
 
@@ -2124,14 +2106,13 @@ sub history_page
          defined( $self->{form_}{clearpage}      ) ||
          defined( $self->{form_}{undo}           ) ||
          defined( $self->{form_}{reclassify}     ) ) { # PROFILE BLOCK STOP
-        return $self->http_redirect_( $client, "/history?" . $self->print_form_fields_(1,0,('start_message','filter','search','sort','session') ) );
+        return $self->http_redirect_( $client, "/history?" . $self->print_form_fields_(1,0,('start_message','filter','search','sort','session','negate') ) );
     }
 
     $templ->param( 'History_Field_Search'  => $self->{form_}{search} );
     $templ->param( 'History_If_Search'     => defined( $self->{form_}{search} ) );
     $templ->param( 'History_Field_Sort'    => $self->{form_}{sort} );
     $templ->param( 'History_Field_Filter'  => $self->{form_}{filter} );
-    $templ->param( 'History_Filtered'      => $filtered );
     $templ->param( 'History_If_MultiPage'  => $self->config_( 'page_size' ) <= $self->{history__}->get_query_size( $self->{q__} ) );
 
     my @buckets = $self->{classifier__}->get_buckets( $self->{api_session__} );
@@ -2159,8 +2140,8 @@ sub history_page
     $templ->param( 'History_Loop_SF_Buckets' => \@sf_bucket_data );
 
     $templ->param( 'History_Filter_Magnet' => ($self->{form_}{filter} eq '__filter__magnet')?'selected':'' );
-    $templ->param( 'History_Filter_No_Magnet' => ($self->{form_}{filter} eq '__filter__no__magnet')?'selected':'' );
     $templ->param( 'History_Filter_Unclassified' => ($self->{form_}{filter} eq 'unclassified')?'selected':'' );
+    $templ->param( 'History_Field_Not' => ($self->{form_}{negate} ne '')?'checked':'' );
 
     my $c = $self->{history__}->get_query_size( $self->{q__} );
     if ( $c > 0 ) {
@@ -2191,8 +2172,11 @@ sub history_page
             next if ( $1 eq '-' );
             $colspan++;
             $header =~ s/^.//;
-            $row_data{History_Fields} = $self->print_form_fields_(1,1,('filter','session','search'));
-            $row_data{History_Sort}   = ( $self->{form_}{sort} eq $header )?'-':'';
+            $row_data{History_Fields} =
+                $self->print_form_fields_(1,1,
+                    ('filter','session','search','negate'));
+            $row_data{History_Sort}   =
+                ( $self->{form_}{sort} eq $header )?'-':'';
             $row_data{History_Header} = $header;
 
             my $label = '';
@@ -2202,17 +2186,19 @@ sub history_page
                 $label = $headers_table{$header};
             }
             $row_data{History_Label} = $label;
-            $row_data{History_If_Sorted} = ( $self->{form_}{sort} =~ /^\-?\Q$header\E$/ );
-            $row_data{History_If_Sorted_Ascending} = ( $self->{form_}{sort} !~ /^-/ );
+            $row_data{History_If_Sorted} =
+                ( $self->{form_}{sort} =~ /^\-?\Q$header\E$/ );
+            $row_data{History_If_Sorted_Ascending} =
+                ( $self->{form_}{sort} !~ /^-/ );
             push ( @header_data, \%row_data );
             $length -= 10;
         }
         $templ->param( 'History_Loop_Headers' => \@header_data );
         $templ->param( 'History_Colspan' => $colspan );
 
-        my @rows = $self->{history__}->get_query_rows( $self->{q__},
-                                                       $start_message+1,
-                                                       $stop_message - $start_message + 1 );
+        my @rows = $self->{history__}->get_query_rows(
+            $self->{q__}, $start_message+1,
+            $stop_message - $start_message + 1 );
 
         my @history_data;
         my $i = $start_message;
@@ -2256,7 +2242,7 @@ sub history_page
             $row_data{History_If_Reclassified} = ( $$row[9] != 0 );
             $row_data{History_I}             = $$row[0];
             $row_data{History_I1}            = $$row[0];
-            $row_data{History_Fields}        = $self->print_form_fields_(0,1,('start_message','session','filter','search','sort' ) );
+            $row_data{History_Fields}        = $self->print_form_fields_(0,1,('start_message','session','filter','search','sort','negate' ) );
             $row_data{History_If_Not_Pseudo} = !$self->{classifier__}->is_pseudo_bucket( $self->{api_session__},
                                                                            $bucket );
             $row_data{History_If_Magnetized} = ($$row[11] ne '');
@@ -2332,8 +2318,8 @@ sub view_page
 
     my $index = $self->{form_}{view};
 
-    $templ->param( 'View_Fields'           => $self->print_form_fields_(0,1,('filter','session','search','sort')) );
-    $templ->param( 'View_All_Fields'       => $self->print_form_fields_(1,1,('start_message','filter','session','search','sort')));
+    $templ->param( 'View_Fields'           => $self->print_form_fields_(0,1,('filter','session','search','sort','negate')) );
+    $templ->param( 'View_All_Fields'       => $self->print_form_fields_(1,1,('start_message','filter','session','search','sort','negate')));
     $templ->param( 'View_If_Previous'      => ( $index > 0 ) ); # TODO
     $templ->param( 'View_Previous'         => 0 ); # TODO
     $templ->param( 'View_Previous_Message' => (( $index - 1 ) >= $start_message)?$start_message:($start_message - $page_size));

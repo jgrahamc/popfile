@@ -469,7 +469,7 @@ test_assert_equal( $b->get_bucket_word_count( $session, 'zeotrope' ), 0 );
 
 $b->create_magnet( $session, 'zeotrope', 'from', 'cxcse231@yahoo.com' );
 test_assert_equal( $b->classify( $session, 'TestMailParse021.msg' ), 'zeotrope' );
-test_assert_equal( $b->{magnet_detail__}, 'from: cxcse231@yahoo.com' );
+test_assert_equal( $b->{magnet_detail__}, 5 );
 test_assert( $b->{magnet_used__} );
 
 # clear_magnets

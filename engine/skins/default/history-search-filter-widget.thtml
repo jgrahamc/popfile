@@ -1,4 +1,4 @@
-<form action="/history">
+<form action="/history" method="post">
 <label class="historyLabel" for="historySearch"><TMPL_VAR NAME="Localize_History_SearchMessage">:</label>
 
 <TMPL_IF NAME="History_If_Search">
@@ -18,9 +18,10 @@
 </TMPL_LOOP>
 
 <option value="__filter__magnet" <TMPL_VAR NAME="History_Filter_Magnet">>&lt;<TMPL_VAR NAME="Localize_History_ShowMagnet">&gt;</option>
-<option value="__filter__no__magnet" <TMPL_VAR NAME="History_Filter_No_Magnet">>&lt;<TMPL_VAR NAME="Localize_History_ShowNoMagnet">&gt;</option>
 <option value="unclassified" <TMPL_VAR NAME="History_Filter_Unclassified">>&lt;unclassified&gt;</option>
 
 </select><input type="submit" class="submit" name="setfilter" value="<TMPL_VAR NAME="Localize_Filter">" />
+<input type="checkbox" name="negate" class="checkbox" <TMPL_VAR NAME="History_Field_Not"> /><TMPL_VAR NAME="Localize_History_Negate_Search">
 <input type="submit" class="submit" name="reset_filter_search" value="<TMPL_VAR NAME="Localize_History_ResetSearch">" />
+
 </form>

@@ -349,7 +349,7 @@ sub child__
         close $news;
     }
     close $client;
-    $self->mq_post_( 'CMPLT', $$, '' );
+    $self->mq_post_( 'CMPLT', $$ );
     $self->log_( 0, "NNTP proxy done" );
 }
 

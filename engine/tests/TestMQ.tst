@@ -71,8 +71,8 @@ $mq->service();
 my @messages = $r->read();
 test_assert_equal( $#messages, 0 );
 test_assert_equal( $messages[0][0], 'MESG1' );
-test_assert_equal( $messages[0][1], 'Message1' );
-test_assert_equal( $messages[0][2], 'Param1' );
+test_assert_equal( $messages[0][1][0], 'Message1' );
+test_assert_equal( $messages[0][1][1], 'Param1' );
 
 # Now send three messages and check that they are
 # received
@@ -83,14 +83,14 @@ $mq->service();
 my @messages = $r->read();
 test_assert_equal( $#messages, 2 );
 test_assert_equal( $messages[0][0], 'MSG1' );
-test_assert_equal( $messages[0][1], 'message1' );
-test_assert_equal( $messages[0][2], 'param1' );
+test_assert_equal( $messages[0][1][0], 'message1' );
+test_assert_equal( $messages[0][1][1], 'param1' );
 test_assert_equal( $messages[1][0], 'MSG2' );
-test_assert_equal( $messages[1][1], 'message2' );
-test_assert_equal( $messages[1][2], 'param2' );
+test_assert_equal( $messages[1][1][0], 'message2' );
+test_assert_equal( $messages[1][1][1], 'param2' );
 test_assert_equal( $messages[2][0], 'MSG3' );
-test_assert_equal( $messages[2][1], 'message3' );
-test_assert_equal( $messages[2][2], 'param3' );
+test_assert_equal( $messages[2][1][0], 'message3' );
+test_assert_equal( $messages[2][1][1], 'param3' );
 
 # Now send a message that we have not registered
 # and check that we do not receive it
@@ -114,13 +114,13 @@ $mq->service();
 my @messages = $r->read();
 test_assert_equal( $#messages, 2 );
 test_assert_equal( $messages[0][0], 'MSG1' );
-test_assert_equal( $messages[0][1], 'message1' );
-test_assert_equal( $messages[0][2], 'param1' );
+test_assert_equal( $messages[0][1][0], 'message1' );
+test_assert_equal( $messages[0][1][1], 'param1' );
 test_assert_equal( $messages[1][0], 'MSG1' );
-test_assert_equal( $messages[1][1], 'message1' );
-test_assert_equal( $messages[1][2], 'param1' );
+test_assert_equal( $messages[1][1][0], 'message1' );
+test_assert_equal( $messages[1][1][1], 'param1' );
 test_assert_equal( $messages[1][0], 'MSG1' );
-test_assert_equal( $messages[1][1], 'message1' );
-test_assert_equal( $messages[1][2], 'param1' );
+test_assert_equal( $messages[1][1][0], 'message1' );
+test_assert_equal( $messages[1][1][1], 'param1' );
 
 1;

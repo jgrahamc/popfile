@@ -42,14 +42,14 @@ sub new
 #
 # deliver
 #
-# Called to deliver a message from the MQ. 
+# Called to deliver a message from the MQ.
 #
 # ---------------------------------------------------------------------------------------------
-sub deliver 
+sub deliver
 {
-    my ( $self, $type, $message, $parameter ) = @_;
+    my ( $self, $type, @message ) = @_;
 
-    push @{$self->{messages__}}, [ $type, $message, $parameter ];
+    push @{$self->{messages__}}, [ $type, \@message ];
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -68,6 +68,11 @@ sub read
     $self->{messages__} = ();
 
     return @messages;
+}
+
+sub name
+{
+    return 'mqreceiver';
 }
 
 1;

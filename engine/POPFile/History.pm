@@ -221,7 +221,7 @@ sub service
 #----------------------------------------------------------------------------
 sub deliver
 {
-    my ( $self, $type, $message, $parameter ) = @_;
+    my ( $self, $type, @message ) = @_;
 
     # If a day has passed then clean up the history
 
@@ -230,8 +230,7 @@ sub deliver
     }
 
     if ( $type eq 'COMIT' ) {
-        $parameter =~ /([^:]*):(.*)/;
-        push ( @{$self->{commit_list__}}, [ $message, $1, $2 ] );
+        push ( @{$self->{commit_list__}}, \@message );
     }
 }
 
@@ -375,7 +374,7 @@ sub commit_slot
 {
     my ( $self, $slot, $bucket, $magnet ) = @_;
 
-    $self->mq_post_( 'COMIT', $slot, "$bucket:$magnet" );
+    $self->mq_post_( 'COMIT', $slot, $bucket, $magnet );
 }
 
 #----------------------------------------------------------------------------
@@ -458,6 +457,25 @@ sub get_slot_fields
              where history.id = $slot and
                    buckets.id = history.bucketid and
                    magnets.id = magnetid;" );
+}
+
+#---------------------------------------------------------------------------
+#
+# is_valid_slot
+#
+# Returns 1 if the slot ID passed in is valid
+#
+# slot           The slot id
+#
+#---------------------------------------------------------------------------
+sub is_valid_slot
+{
+    my ( $self, $slot ) = @_;
+
+    my @row = $self->db__()->selectrow_array(
+        "select id from history where history.id = $slot;" );
+
+    return ( ( @row ) && ( $row[0] == $slot ) );
 }
 
 #---------------------------------------------------------------------------
@@ -856,21 +874,23 @@ sub stop_query
 # search        From/Subject line to search for
 # sort          The field to sort on (from, subject, to, cc, bucket, date)
 #               (optional leading - for descending sort)
+# not           If set to 1 negates the search
 #
 #----------------------------------------------------------------------------
 sub set_query
 {
-    my ( $self, $id, $filter, $search, $sort ) = @_;
+    my ( $self, $id, $filter, $search, $sort, $not ) = @_;
 
     # If this query has already been done and is in the cache
     # then do no work here
 
     if ( defined( $self->{queries__}{$id}{fields} ) &&
-         ( $self->{queries__}{$id}{fields} eq "$filter:$search:$sort" ) ) {
+         ( $self->{queries__}{$id}{fields} eq
+             "$filter:$search:$sort:$not" ) ) {
         return;
     }
 
-    $self->{queries__}{$id}{fields} = "$filter:$search:$sort";
+    $self->{queries__}{$id}{fields} = "$filter:$search:$sort:$not";
 
     # We do two queries, the first to get the total number of rows that
     # would be returned and then we start the real query.  This is done
@@ -880,28 +900,38 @@ sub set_query
     $self->{queries__}{$id}{base} = 'select XXX from
         history, buckets, magnets where history.userid = 1 and committed = 1';
 
+    $self->{queries__}{$id}{base} .= ' and history.bucketid = buckets.id';
+    $self->{queries__}{$id}{base} .= ' and magnets.id = magnetid';
+
     # If there's a search portion then add the appropriate clause
     # to find the from/subject header
 
+    my $not_word  = $not?'not':'';
+    my $not_equal = $not?'!=':'=';
+    my $equal     = $not?'=':'!=';
+
     if ( $search ne '' ) {
         $search = $self->db__()->quote( '%' . $search . '%' );
-        $self->{queries__}{$id}{base} .= " and ( hdr_from like $search or
-                           hdr_to   like $search )";
+        $self->{queries__}{$id}{base} .= " and $not_word ( hdr_from like $search or hdr_subject like $search )";
     }
 
     # If there's a filter option then we'll need to get the bucket
     # id for the filtered bucket and add the appropriate clause
 
     if ( $filter ne '' ) {
-        my $session = $self->{classifier__}->get_session_key( 'admin', '' );
-        my $bucketid = $self->{classifier__}->get_bucket_id(
-                           $session, $filter );
-        $self->{classifier__}->release_session_key( $session );
-        $self->{queries__}{$id}{base} .= " and history.bucketid = $bucketid";
+        if ( $filter eq '__filter__magnet' ) {
+            $self->{queries__}{$id}{base} .=
+                " and history.magnetid $equal 0";
+        } else {
+            my $session = $self->{classifier__}->get_session_key(
+                              'admin', '' );
+            my $bucketid = $self->{classifier__}->get_bucket_id(
+                               $session, $filter );
+            $self->{classifier__}->release_session_key( $session );
+            $self->{queries__}{$id}{base} .=
+                " and history.bucketid $not_equal $bucketid";
+        }
     }
-
-    $self->{queries__}{$id}{base} .= ' and history.bucketid = buckets.id';
-    $self->{queries__}{$id}{base} .= ' and magnets.id = magnetid';
 
     # Add the sort option (if there is one)
 
@@ -925,6 +955,7 @@ sub set_query
     }
 
     my $count = $self->{queries__}{$id}{base};
+    $self->log_( 2, "Base query is $count" );
     $count =~ s/XXX/COUNT(*)/;
 
     $self->{queries__}{$id}{count} =

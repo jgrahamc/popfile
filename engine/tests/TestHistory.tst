@@ -236,6 +236,11 @@ test_assert_equal( $fields[10], 3 );
 test_assert_equal( $fields[9],  0 );
 test_assert_equal( $fields[8],  'personal' );
 
+# Check is_valid_slot
+
+test_assert( $h->is_valid_slot( 1 ) );
+test_assert( !$h->is_valid_slot( 100 ) );
+
 # Now that we've got some data in the history test the query
 # interface
 
@@ -247,7 +252,7 @@ test_assert( defined( $h->{queries__}{$q} ) );
 
 # Unsorted returns in inserted order
 
-$h->set_query( $q, '', '', '' );
+$h->set_query( $q, '', '', '', 0 );
 
 test_assert_equal( $h->get_query_size( $q ), 2 );
 
@@ -263,27 +268,27 @@ test_assert_equal( join(':',@{$rows[0]}), join(':',@slot_row) );
 # Start with the most basic, give me everything query
 # sorted by from/to address
 
-$h->set_query( $q, '', '', 'from' );
+$h->set_query( $q, '', '', 'from', 0 );
 test_assert_equal( $h->get_query_size( $q ), 2 );
 @rows = $h->get_query_rows( $q, 1, 2 );
 test_assert_equal( $#rows, 1 );
 test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
 test_assert_equal( $rows[1][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
-$h->set_query( $q, '', '', 'to' );
+$h->set_query( $q, '', '', 'to' ,0 );
 @rows = $h->get_query_rows( $q, 1, 2 );
 test_assert_equal( $h->get_query_size( $q ), 2 );
 test_assert_equal( $#rows, 1 );
 test_assert_equal( $rows[0][1], 'John Graham-Cumming <nospam@jgc.org>' );
 test_assert_equal( $rows[1][1], 'Evil Spammer <nospam@jgc.org>' );
 
-$h->set_query( $q, '', '', 'from' );
+$h->set_query( $q, '', '', 'from', 0 );
 test_assert_equal( $h->get_query_size( $q ), 2 );
 @rows = $h->get_query_rows( $q, 1, 1 );
 test_assert_equal( $#rows, 0 );
 test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
 
-$h->set_query( $q, '', '', 'to' );
+$h->set_query( $q, '', '', 'to', 0 );
 test_assert_equal( $h->get_query_size( $q ), 2 );
 @rows = $h->get_query_rows( $q, 2, 1 );
 test_assert_equal( $#rows, 0 );
@@ -291,51 +296,83 @@ test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
 
 # Now try unsorted and filtered on a specific bucket
 
-$h->set_query( $q, 'spam', '', '' );
+$h->set_query( $q, 'spam', '', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 1 );
 @rows = $h->get_query_rows( $q, 1, 1 );
 test_assert_equal( $#rows, 0 );
 test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
 test_assert_equal( $rows[0][8], 'spam' );
 
-$h->set_query( $q, 'personal', '', '' );
+$h->set_query( $q, 'personal', '', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 1 );
 @rows = $h->get_query_rows( $q, 1, 1 );
 test_assert_equal( $#rows, 0 );
 test_assert_equal( $rows[0][1], 'John Graham-Cumming <nospam@jgc.org>' );
 test_assert_equal( $rows[0][8], 'personal' );
 
+# Try a negated bucket filter
+
+$h->set_query( $q, 'personal', '', '', 1 );
+test_assert_equal( $h->get_query_size( $q ), 1 );
+@rows = $h->get_query_rows( $q, 1, 1 );
+test_assert_equal( $#rows, 0 );
+test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
+test_assert_equal( $rows[0][8], 'spam' );
+
 # Now try a search 
 
-$h->set_query( $q, '', 'john', '' );
+$h->set_query( $q, '', 'john', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 1 );
 @rows = $h->get_query_rows( $q, 1, 1 );
 test_assert_equal( $#rows, 0 );
 test_assert_equal( $rows[0][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
-$h->set_query( $q, '', 's', '' );
+$h->set_query( $q, '', 's', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 2 );
 @rows = $h->get_query_rows( $q, 1, 2 );
 test_assert_equal( $#rows, 1 );
 test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
 test_assert_equal( $rows[1][1], 'John Graham-Cumming <nospam@jgc.org>' );
 
+$h->set_query( $q, '', 'subject line', '', 0 );
+test_assert_equal( $h->get_query_size( $q ), 1 );
+@rows = $h->get_query_rows( $q, 1, 1 );
+test_assert_equal( $#rows, 0 );
+test_assert_equal( $rows[0][1], 'John Graham-Cumming <nospam@jgc.org>' );
+
+# Try negated search
+
+$h->set_query( $q, '', 's', '', 1 );
+test_assert_equal( $h->get_query_size( $q ), 0 );
+
+$h->set_query( $q, '', 'john', '', 1 );
+test_assert_equal( $h->get_query_size( $q ), 1 );
+@rows = $h->get_query_rows( $q, 1, 1 );
+test_assert_equal( $#rows, 0 );
+test_assert_equal( $rows[0][1], 'Evil Spammer <nospam@jgc.org>' );
+
 # Now try cases that return nothing
 
-$h->set_query( $q, '', 'zzz', '' );
+$h->set_query( $q, '', 'zzz', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 0 );
 
-$h->set_query( $q, 'other', '', '' );
+$h->set_query( $q, '', 'zzz', '', 1 );
+test_assert_equal( $h->get_query_size( $q ), 2 );
+
+$h->set_query( $q, 'other', '', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 0 );
+
+$h->set_query( $q, 'other', '', '', 1 );
+test_assert_equal( $h->get_query_size( $q ), 2 );
 
 # Make sure that we don't requery unless necessary
 
-$h->set_query( $q, '', 's', '' );
+$h->set_query( $q, '', 's', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 2 );
 @rows = $h->get_query_rows( $q, 1, 2 );
-$h->set_query( $q, '', 's', '' );
+$h->set_query( $q, '', 's', '', 0 );
 test_assert_equal( $#{$h->{queries__}{$q}{cache}}, 1 );
-$h->set_query( $q, '', 't', '' );
+$h->set_query( $q, '', 't', '', 0 );
 test_assert_equal( $#{$h->{queries__}{$q}{cache}}, -1 );
 
 # Make sure that we can upgrade an existing file with a specific
@@ -367,10 +404,10 @@ test_assert( !(-e $h->get_user_path_( $h->global_config_( 'msgdir' ) . 'popfile1
 $mq->service();
 $h->service();
 
-$h->set_query( $q, '', '', '' );
+$h->set_query( $q, '', '', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 3 );
 
-$h->set_query( $q, 'other', '', '' );
+$h->set_query( $q, 'other', '', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 1 );
 
 @rows = $h->get_query_rows( $q, 1, 1 );
@@ -382,7 +419,7 @@ test_assert_equal( $rows[0][5], 964521991 );
 
 # Now check that deletion works
 
-$h->set_query( $q, '', '', '' );
+$h->set_query( $q, '', '', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 3 );
 
 $file = $h->get_slot_file( 2 );
@@ -390,7 +427,7 @@ test_assert( ( -e $file ) );
 $h->delete_slot( 2, 0 );
 test_assert( !( -e $file ) );
 
-$h->set_query( $q, '', '', '' );
+$h->set_query( $q, '', '', '', 0 );
 test_assert_equal( $h->get_query_size( $q ), 2 );
 
 @rows = $h->get_query_rows( $q, 1, 2 );
@@ -406,7 +443,7 @@ $h->config_( 'history_days', 0 );
 $h->cleanup_history();
 
 my $qq = $h->start_query();
-$h->set_query( $qq, '', '', '' );
+$h->set_query( $qq, '', '', '', 0 );
 test_assert_equal( $h->get_query_size( $qq ), 0 );
 $h->stop_query( $qq );
 

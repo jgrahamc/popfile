@@ -213,7 +213,7 @@ sub stop
 # ---------------------------------------------------------------------------------------------
 sub deliver
 {
-    my ( $self, $type, $message, $parameter ) = @_;
+    my ( $self, $type, @message ) = @_;
 
     if ( $type eq 'TICKD' ) {
         $self->save_configuration();
@@ -516,8 +516,7 @@ sub load_configuration
 
                 if ( defined( $self->{configuration_parameters__}{$parameter} ) ) {
                     $self->{configuration_parameters__}{$parameter}{value} = $value;
-	        } else {
-                    $self->log_( 0, "Discarded unknown or outdated parameter '$parameter' from popfile.cfg" );
+                } else {
                     $self->{deprecated_parameters__}{$parameter} = $value;
                 }
             }

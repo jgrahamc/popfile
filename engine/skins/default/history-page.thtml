@@ -15,7 +15,7 @@
 <table width="100%" summary="">
     <tr>
         <td align="left">
-            <h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"> (<TMPL_VAR NAME="History_Count">) <br><input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" /></h2>
+            <h2 class="history"><TMPL_VAR NAME="Localize_History_Title"> (<TMPL_VAR NAME="History_Count">) <br><input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" /></h2>
         </td>
         <td class="historyNavigatorTop">
 
@@ -28,7 +28,7 @@
 
 <TMPL_ELSE>
 
-<h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"> (<TMPL_VAR NAME="History_Count">) <br><input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" /></h2>
+<h2 class="history"><TMPL_VAR NAME="Localize_History_Title"> (<TMPL_VAR NAME="History_Count">) <br><input type="submit" class="submit" name="clearall" value="<TMPL_VAR NAME="Localize_History_RemoveAll">" /></h2>
 
 </TMPL_IF>
 
@@ -245,7 +245,7 @@
 
 <TMPL_ELSE> <!-- if multi page -->
 
-<h2 class="history"><TMPL_VAR NAME="Localize_History_Title"><TMPL_VAR NAME="History_Filtered"></h2>
+<h2 class="history"><TMPL_VAR NAME="Localize_History_Title"></h2>
 <br />
 <br />
 <span class="bucketsLabel">

@@ -105,7 +105,8 @@ sub initialize
     $self->config_( 'separator', ':' );
 
     # The welcome string from the proxy is configurable
-    $self->config_( 'welcome_string', "POP3 POPFile ($self->{version_}) server ready" );
+    $self->config_( 'welcome_string',
+        "POP3 POPFile ($self->{version_}) server ready" );
 
     return $self->SUPER::initialize();;
 }
@@ -177,7 +178,8 @@ sub child__
     $self->{use_apop__} = 0;
     $self->{apop_user__} = '';
 
-    # Tell the client that we are ready for commands and identify our version number
+    # Tell the client that we are ready for commands and identify our
+    # version number
 
     $self->tee_( $client, "+OK " . $self->config_( 'welcome_string' ) . "$eol" );
 
@@ -186,40 +188,45 @@ sub child__
     my $user_command = 'USER ([^:]+)(:(\d+))?' . $self->config_( 'separator' ) . '([^:]+)(:([^:]+))?';
     my $apop_command = 'APOP ([^:]+)(:(\d+))?' . $self->config_( 'separator' ) . '([^:]+) (.*?)';
 
-    # Retrieve commands from the client and process them until the client disconnects or
-    # we get a specific QUIT command
+    # Retrieve commands from the client and process them until the
+    # client disconnects or we get a specific QUIT command
 
     while  ( <$client> ) {
         my $command;
 
         $command = $_;
 
-        # Clean up the command so that it has a nice clean $eol at the end
+        # Clean up the command so that it has a nice clean $eol at the
+        # end
 
         $command =~ s/(\015|\012)//g;
 
         $self->log_( 2, "Command: --$command--" );
 
-        # The USER command is a special case because we modify the syntax of POP3 a little
-        # to expect that the username being passed is actually of the form host:username where
-        # host is the actual remote mail server to contact and username is the username to
-        # pass through to that server and represents the account on the remote machine that we
-        # will pull email from.  Doing this means we can act as a proxy for multiple mail clients
-        # and mail accounts
+        # The USER command is a special case because we modify the
+        # syntax of POP3 a little to expect that the username being
+        # passed is actually of the form host:username where host is
+        # the actual remote mail server to contact and username is the
+        # username to pass through to that server and represents the
+        # account on the remote machine that we will pull email from.
+        # Doing this means we can act as a proxy for multiple mail
+        # clients and mail accounts
         #
-        # When the client issues the command "USER host:username:apop" POPFile must acknowledge
-        # the command and be prepared to compute the md5 digest of the user's password and the
-        # real pop server's banner upon receipt of a PASS command.
+        # When the client issues the command "USER host:username:apop"
+        # POPFile must acknowledge the command and be prepared to
+        # compute the md5 digest of the user's password and the real
+        # pop server's banner upon receipt of a PASS command.
         #
-        # When the client issues the command "USER host:username:ssl" POPFile will use SSL for
-        # the connection to the remote, note that the user can say host:username:ssl,apop if both
-        # are needed
+        # When the client issues the command "USER host:username:ssl"
+        # POPFile will use SSL for the connection to the remote, note
+        # that the user can say host:username:ssl,apop if both are
+        # needed
 
         if ( $command =~ /$user_command/io ) {
             if ( $1 ne '' )  {
                 my ( $host, $port, $user, $options ) = ($1, $3, $4, $6);
 
-                $self->mq_post_( 'LOGIN', $user, '' );
+                $self->mq_post_( 'LOGIN', $user );
 
                 my $ssl = defined( $options ) && ( $options =~ /ssl/i );
                 $port = 110 if ( !defined( $port ) );
@@ -228,7 +235,8 @@ sub child__
 
                     if ( defined( $options ) && ( $options =~ /apop/i ) ) {
 
-                        # We want to make sure the server sent a real APOP banner, containing <>'s
+                        # We want to make sure the server sent a real
+                        # APOP banner, containing <>'s
 
                         $self->{apop_banner__} = $1 if $self->{connect_banner__} =~ /(<[^>]+>)/;
                         $self->log_( 2, "banner=" . $self->{apop_banner__} ) if defined( $self->{apop_banner__} );
@@ -240,16 +248,19 @@ sub child__
                             $self->log_( 2, "auth APOP" );
                             $self->{apop_user__} = $user;
 
-                            # tell the client that username was accepted
-			    # don't flush_extra, we didn't send anything to the real server
+                            # tell the client that username was
+                            # accepted don't flush_extra, we didn't
+                            # send anything to the real server
 
                             $self->tee_( $client, "+OK hello $user$eol" );
                             next;
                         } else {
 
-                            # If the client asked for APOP, and the server doesn't have the correct
-                            # banner, give a meaningful error instead of whatever error the server
-                            # might have if we try to make up a hash
+                            # If the client asked for APOP, and the
+                            # server doesn't have the correct banner,
+                            # give a meaningful error instead of
+                            # whatever error the server might have if
+                            # we try to make up a hash
 
                             $self->{use_apop__} = 0;
                             $self->tee_( $client, "-ERR $host doesn't support APOP, aborting authentication$eol" );
@@ -257,8 +268,9 @@ sub child__
                         }
                     } else {
 
-                        # Pass through the USER command with the actual user name for this server,
-                        # and send the reply straight to the client
+                        # Pass through the USER command with the
+                        # actual user name for this server, and send
+                        # the reply straight to the client
 
                         $self->log_( 2, "auth plaintext" );
                         $self->{use_apop__} = 0;         # signifies a non-apop connection
@@ -267,8 +279,9 @@ sub child__
 
                 } else {
 
-                    # If the login fails then we want to continue in the unlogged in state
-                    # so that clients can send us the QUIT command
+                    # If the login fails then we want to continue in
+                    # the unlogged in state so that clients can send
+                    # us the QUIT command
 
                     next;
                 }
@@ -277,20 +290,29 @@ sub child__
             next;
         }
 
-        # User is issuing the APOP command to start a session with the remote server
+        # User is issuing the APOP command to start a session with the
+        # remote server
 
         if ( ( $command =~ /PASS (.*)/i ) ) {
             if ( $self->{use_apop__} ) {
-                # authenticate with APOP
+
+                # Authenticate with APOP
+
                 my $md5 = Digest::MD5->new;
 
                 $md5->add( $self->{apop_banner__}, $1 );
                 my $md5hex = $md5->hexdigest;
                 $self->log_( 2, "digest='$md5hex'" );
 
-                my ($response, $ok) = $self->get_response_( $mail, $client, "APOP $self->{apop_user__} $md5hex", 0, 1 );
-                if($ok == 1  && $response =~ /$self->{good_response_}/) {
-                    # authentication OK, toss the hello response and return password ok
+                my ($response, $ok) =
+                    $self->get_response_( $mail, $client,
+                        "APOP $self->{apop_user__} $md5hex", 0, 1 );
+                if ( ( $ok == 1 ) &&
+                     ( $response =~ /$self->{good_response_}/ ) ) {
+
+                    # authentication OK, toss the hello response and
+                    # return password ok
+
                     $self->tee_( $client, "+OK password ok$eol" );
                 } else {
                     $self->tee_( $client, "$response" );
@@ -301,12 +323,17 @@ sub child__
              next;
         }
 
-        # User is issuing the APOP command to start a session with the remote server
-        # We'd need a copy of the plaintext password to support this.
-        if ( $command =~ /$apop_command/io ) {
-            $self->tee_( $client, "-ERR APOP not supported between mail client and POPFile.$eol" );
+        # User is issuing the APOP command to start a session with the
+        # remote server We'd need a copy of the plaintext password to
+        # support this.
 
-            # TODO: Consider implementing a host:port:username:secret hash syntax for proxying the APOP command
+        if ( $command =~ /$apop_command/io ) {
+            $self->tee_( $client,
+              "-ERR APOP not supported between mail client and POPFile.$eol" );
+
+            # TODO: Consider implementing a host:port:username:secret
+            # hash syntax for proxying the APOP command
+
             next;
         }
 
@@ -356,8 +383,8 @@ sub child__
 
         # The client is requesting a LIST/UIDL of the messages
 
-        if ( ( $command =~ /LIST ?(.*)?/i ) ||                            # PROFILE BLOCK START
-             ( $command =~ /UIDL ?(.*)?/i ) ) {                           # PROFILE BLOCK STOP
+        if ( ( $command =~ /LIST ?(.*)?/i ) ||       # PROFILE BLOCK START
+             ( $command =~ /UIDL ?(.*)?/i ) ) {      # PROFILE BLOCK STOP
             my $response = $self->echo_response_($mail, $client, $command );
             last if ( $response == 2 );
             if ( $response == 0 ) {
@@ -367,73 +394,92 @@ sub child__
             next;
         }
 
-        # TOP handling is rather special because we have three cases that we handle
+        # TOP handling is rather special because we have three cases
+        # that we handle
         #
-        # 1. If the client sends TOP x 99999999 then it is most likely to be
-        #    fetchmail and the intent of fetchmail is to actually get the message
-        #    but for its own reasons it does not use RETR.  We use RETR as the clue
-        #    to place a message in the history, so we have a hack.  If the client
-        #    looks like fetchmail then TOP x 99999999 is actually implemented
-        #    using RETR
+        # 1. If the client sends TOP x 99999999 then it is most likely
+        #    to be fetchmail and the intent of fetchmail is to
+        #    actually get the message but for its own reasons it does
+        #    not use RETR.  We use RETR as the clue to place a message
+        #    in the history, so we have a hack.  If the client looks
+        #    like fetchmail then TOP x 99999999 is actually
+        #    implemented using RETR
         #
-        # 2. The toptoo configuration controls whether email downloaded using the
-        #    TOP command is classified or not (It may be downloaded and cached for
-        #    bandwidth efficiency, and thus appear in the history).
-        #    There are two cases:
+        # 2. The toptoo configuration controls whether email
+        #    downloaded using the TOP command is classified or not (It
+        #    may be downloaded and cached for bandwidth efficiency, and
+        #    thus appear in the history).  There are two cases:
         #
-        # 2a If toptoo is 0 then POPFile will pass a TOP from the client through
-        #    as a TOP and do no classification on the message.
+        # 2a If toptoo is 0 then POPFile will pass a TOP from the
+        #    client through as a TOP and do no classification on the
+        #    message.
         #
-        # 2b If toptoo is 1 then POPFile first does a RETR on the message and
-        #    saves it in the history so that it can get the classification on the
-        #    message which is stores in $class.  Then it gets the message again
-        #    by sending the TOP command and passing the result through
-        #    classify_and_modify passing in the $class determined above.  This means
-        #    that the message gets the right classification and the client only
-        #    gets the headers requested plus so many lines of body, but they will
-        #    get subject modification, and the XTC and XPL headers add.  Note that
-        #    TOP always returns the full headers and then n lines of the body so
-        #    we are guaranteed to be able to do our header modifications.
+        # 2b If toptoo is 1 then POPFile first does a RETR on the
+        #    message and saves it in the history so that it can get the
+        #    classification on the message which is stores in $class.
+        #    Then it gets the message again by sending the TOP command
+        #    and passing the result through classify_and_modify passing
+        #    in the $class determined above.  This means that the message
+        #    gets the right classification and the client only gets the
+        #    headers requested plus so many lines of body, but they will
+        #    get subject modification, and the XTC and XPL headers add.
+        #    Note that TOP always returns the full headers and then n
+        #    lines of the body so we are guaranteed to be able to do our
+        #    header modifications.
         #
-        #    NOTE messages retrieved using TOPTOO are visible in the history as they
-        #    are "cached" to avoid requiring repeated downloads if the client issues
-        #    a RETR for the message in the same session
+        # NOTE messages retrieved using TOPTOO are visible in the
+        #      history as they are "cached" to avoid requiring repeated
+        #      downloads if the client issues a RETR for the message in
+        #      the same session
         #
-        #    NOTE using toptoo=1 on a slow link could cause performance problems, in
-        #    cases where only the headers, but not classification, is required.
-        #    toptoo=1 is, however, appropriate for normal use via a mail client and
-        #    won't significantly increase bandwidth unless the mail client is selectively
-        #    downloading messages based on non-classification data in the TOP headers.
+        # NOTE using toptoo=1 on a slow link could cause
+        #      performance problems, in cases where only the headers,
+        #      but not classification, is required.  toptoo=1 is,
+        #      however, appropriate for normal use via a mail client and
+        #      won't significantly increase bandwidth unless the mail
+        #      client is selectively downloading messages based on
+        #      non-classification data in the TOP headers.
 
         if ( $command =~ /TOP (.*) (.*)/i ) {
             my $count = $1;
 
             if ( $2 ne '99999999' )  {
                 if ( $self->config_( 'toptoo' ) == 1 ) {
-                    my $response = $self->echo_response_($mail, $client, "RETR $count" );
+                    my $response =
+                        $self->echo_response_( $mail, $client, "RETR $count" );
                     last if ( $response == 2 );
                     if ( $response == 0 ) {
 
-                        # Classify without echoing to client, saving file for later RETR's
+                        # Classify without echoing to client, saving
+                        # file for later RETR's
 
-                        my ( $class, $slot ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, 0, '', 0 );
+                        my ( $class, $slot ) =
+                             $self->{classifier__}->classify_and_modify(
+                                 $session, $mail, $client, 0, '', 0 );
 
                         $downloaded{$count} = $slot;
 
-                        # Note that the 1 here indicates that echo_response_ does not send the response to the
-                        # client.  The +OK has already been sent by the RETR
+                        # Note that the 1 here indicates that
+                        # echo_response_ does not send the response to
+                        # the client.  The +OK has already been sent
+                        # by the RETR
 
-                        $response = $self->echo_response_( $mail, $client, $command, 1 );
+                        $response =
+                            $self->echo_response_( $mail, $client,
+                                $command, 1 );
                         last if ( $response == 2 );
                         if ( $response == 0 ) {
 
-                            # Classify with pre-defined class, without saving, echoing to client
+                            # Classify with pre-defined class, without
+                            # saving, echoing to client
 
-                            $self->{classifier__}->classify_and_modify( $session, $mail, $client, 1, $class, 1 );
+                            $self->{classifier__}->classify_and_modify(
+                                $session, $mail, $client, 1, $class, 1 );
                         }
                     }
                 } else {
-                    my $response = $self->echo_response_($mail, $client, $command );
+                    my $response =
+                        $self->echo_response_( $mail, $client, $command );
                     last if ( $response == 2 );
                     if ( $response == 0 ) {
                         $self->echo_to_dot_( $mail, $client );
@@ -443,8 +489,8 @@ sub child__
                 next;
             }
 
-            # Note the fall through here.  Later down the page we look for TOP x 99999999 and
-            # do a RETR instead
+            # Note the fall through here.  Later down the page we look
+            # for TOP x 99999999 and do a RETR instead
         }
 
         # The CAPA command
@@ -467,16 +513,17 @@ sub child__
             next;
         }
 
-        # The HELO command results in a very simple response from us.  We just echo that
-        # we are ready for commands
+        # The HELO command results in a very simple response from us.
+        # We just echo that we are ready for commands
 
         if ( $command =~ /HELO/i ) {
             $self->tee_(  $client, "+OK HELO POPFile Server Ready$eol" );
             next;
         }
 
-        # In the case of PASS, NOOP, XSENDER, STAT, DELE and RSET commands we simply pass it through to
-        # the real mail server for processing and echo the response back to the client
+        # In the case of PASS, NOOP, XSENDER, STAT, DELE and RSET
+        # commands we simply pass it through to the real mail server
+        # for processing and echo the response back to the client
 
         if ( ( $command =~ /NOOP/i )         ||                 # PROFILE BLOCK START
              ( $command =~ /STAT/i )         ||
@@ -487,9 +534,10 @@ sub child__
             next;
         }
 
-        # The client is requesting a specific message.
-        # Note the horrible hack here where we detect a command of the form TOP x 99999999 this
-        # is done so that fetchmail can be used with POPFile.
+        # The client is requesting a specific message.  Note the
+        # horrible hack here where we detect a command of the form TOP
+        # x 99999999 this is done so that fetchmail can be used with
+        # POPFile.
 
         if ( ( $command =~ /RETR (.*)/i ) || ( $command =~ /TOP (.*) 99999999/i ) )  {
             my $count = $1;
@@ -514,19 +562,22 @@ sub child__
 
                 # Load the last classification
 
-                my ( $id, $from, $to, $cc, $subject, $date, $hash, $inserted, $bucket, $reclassified ) =
+                my ( $id, $from, $to, $cc, $subject,
+                    $date, $hash, $inserted, $bucket, $reclassified ) =
                     $self->{history__}->get_slot_fields( $downloaded{$count} );
 
                 if ( $bucket ne 'unknown class' ) {
 
-                    # echo file, inserting known classification, without saving
+                    # echo file, inserting known classification,
+                    # without saving
 
                     ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, 1, $bucket );
                     print $client ".$eol";
 
                 } else {
 
-                    # If the class wasn't saved properly, classify from disk normally
+                    # If the class wasn't saved properly, classify
+                    # from disk normally
 
                     ($class, undef) = $self->{classifier__}->classify_and_modify( $session, \*RETRFILE, $client, 1, '' );
                     print $client ".$eol";
@@ -537,8 +588,10 @@ sub child__
 
                 # Retrieve file directly from the server
 
-                # Get the message from the remote server, if there's an error then we're done, but if not then
-                # we echo each line of the message until we hit the . at the end
+                # Get the message from the remote server, if there's
+                # an error then we're done, but if not then we echo
+                # each line of the message until we hit the . at the
+                # end
 
                 my $response = $self->echo_response_($mail, $client, $command );
 
@@ -547,8 +600,8 @@ sub child__
                     my $slot;
                     ( $class, $slot ) = $self->{classifier__}->classify_and_modify( $session, $mail, $client, 0, '' );
 
-                    # Note locally that file has been retrieved if the full thing has been saved
-                    # to disk
+                    # Note locally that file has been retrieved if the
+                    # full thing has been saved to disk
 
                     $downloaded{$count} = $slot;
                 }
@@ -557,9 +610,10 @@ sub child__
             next;
         }
 
-        # The mail client wants to stop using the server, so send that message through to the
-        # real mail server, echo the response back up to the client and exit the while.  We will
-        # close the connection immediately
+        # The mail client wants to stop using the server, so send that
+        # message through to the real mail server, echo the response
+        # back up to the client and exit the while.  We will close the
+        # connection immediately
 
         if ( $command =~ /QUIT/i ) {
             if ( $mail )  {
@@ -571,7 +625,8 @@ sub child__
             last;
         }
 
-        # Don't know what this is so let's just pass it through and hope for the best
+        # Don't know what this is so let's just pass it through and
+        # hope for the best
 
         if ( $mail && $mail->connected )  {
             last if ( $self->echo_response_($mail, $client, $command ) == 2 );
@@ -589,7 +644,7 @@ sub child__
     }
 
     close $client;
-    $self->mq_post_( 'CMPLT', $$, '' );
+    $self->mq_post_( 'CMPLT', $$ );
     $self->log_( 0, "POP3 proxy done" );
 }
 
