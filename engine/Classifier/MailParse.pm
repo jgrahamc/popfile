@@ -8,6 +8,7 @@ package Classifier::MailParse;
 
 use strict;
 use Classifier::WordMangle;
+use Classifier::Bayes;
 
 #----------------------------------------------------------------------------
 # new
@@ -36,6 +37,14 @@ sub new
 
     $self->{debug}     = 0;
     
+    # Internal use for keeping track of a line without touching it
+    
+    $self->{ut}        = '';
+    
+    # Specifies the parse mode, 1 means color the output
+    
+    $self->{color}     = 0;
+
     return bless $self, $type;
 }
 
@@ -73,14 +82,22 @@ sub update_word
 {
     my ($self, $word) = @_;
     
-    $word = $self->{mangle}->mangle($word);
+    my $mword = $self->{mangle}->mangle($word);
     
-    if ( $word ne '' ) 
+    if ( $mword ne '' ) 
     {
-        $self->{words}{$word} += 1;
-        $self->{msg_total}    += 1;
-        
-        print "--- $word ($self->{words}{$word})\n" if ($self->{debug});
+        if ( $self->{color} )
+        {
+            my $color   = $self->{bayes}->get_color($mword);
+            $self->{ut} =~ s/($word)/<b><font color=$color>\1<\/font><\/b>/g;
+        }
+        else
+        {
+            $self->{words}{$word} += 1;
+            $self->{msg_total}    += 1;
+
+            print "--- $word ($self->{words}{$word})\n" if ($self->{debug});
+        }
     }
 }
 
@@ -114,7 +131,7 @@ sub add_line
     # an, or, if are too common and the longest word in English (according to
     # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
 
-    while ( $line =~ s/([A-Za-z][A-Za-z\']{2,44})[,\.\"\'\)\?!]{0,2}([ \t\n\r]|$)// )
+    while ( $line =~ s/([A-Za-z][A-Za-z\']{2,44})[,\.\"\'\)\?!:;]{0,2}([ \t\n\r]|$)// )
     {
         update_word($self,$1);
     }
@@ -145,6 +162,18 @@ sub parse_stream
     $self->{words}     = {};
     $self->{msg_total} = 0;
 
+    if ( $self->{color} )
+    {
+        print "<h2>Color Key</h2><table>";
+        for my $bucket (keys %{$self->{bayes}->{matrix}})
+        {
+            print "<tr><td><b><font color=$self->{bayes}->{colors}{$bucket}>$self->{bayes}->{colors}{$bucket}</font></b><td>$bucket";
+        }
+        print "<tr><td><b>black</b><td>unclassified or infrequent</table>";
+        print "<h2>Message</h2>";
+        print "<pre>";
+    }
+
     open MSG, "<$file";
     
     # Read each line and find each "word" which we define as a sequence of alpha
@@ -153,8 +182,20 @@ sub parse_stream
     while (<MSG>)
     {
         my $line = $_;
-    
+
         print ">>> $line" if $self->{debug};
+    
+        if ( $self->{color} ) 
+        {
+            if ( $self->{ut} ne '' ) 
+            {
+                print $self->{ut};
+            }
+    
+            $self->{ut} = $line;
+            $self->{ut} =~ s/</&lt;/g;
+            $self->{ut} =~ s/>/&gt;/g;
+        }
 
         # If we are in a mime document then spot the boundaries
 
@@ -171,14 +212,24 @@ sub parse_stream
         if ( $encoding =~ /base64/i )
         {
             my $decoded = '';
+            $self->{ut} = '' if $self->{color};
             while ( ( $line =~ /^[A-Za-z0-9+\/]{72}[\n\r]?$/ ) || ( $line =~ /^[A-Za-z0-9+\/]+=?[\n\r]?$/ ) )
             {
                 print "64> $line" if $self->{debug};
-                $decoded .= un_base64( $self, $line );
+                $decoded    .= un_base64( $self, $line );
                 if ( $decoded =~ /[^A-Za-z\-\.]$/ ) 
                 {
+                    $self->{ut} = $decoded if $self->{color};
                     add_line( $self, $decoded );
                     $decoded = '';
+                    if ( $self->{color} ) 
+                    {
+                        if ( $self->{ut} ne '' ) 
+                        {
+                            print $self->{ut};
+                            $self->{ut} = '';
+                        }
+                    }
                 }
                 $line = <MSG>;
             }
@@ -191,9 +242,10 @@ sub parse_stream
         if ( $encoding =~ /quoted\-printable/ ) 
         {
             $line =~ s/=20/ /g;
-            $line =~ s/<[\/!]?[A-Za-z]+[^>]*?>//g;
-            $line =~ s/<[\/!]?[A-Za-z]+[^>]*?$//;
-            $line =~ s/^[\/!]?[A-Za-z]+[^>]*?>//;
+            $line =~ s/=3D/=/g;
+            $line =~ s/<[\/!]?[A-Za-z]+[^>]*?>/ /g;
+            $line =~ s/<[\/!]?[A-Za-z]+[^>]*?$/ /;
+            $line =~ s/^[^>]*?>/ /;
         }
         
         # If we have an email header then just keep the part after the :
@@ -267,6 +319,15 @@ sub parse_stream
             add_line( $self, $argument );
         } else {
             add_line( $self, $line );
+        }
+    }
+
+    if ( $self->{color} ) 
+    {
+        if ( $self->{ut} ne '' ) 
+        {
+            print $self->{ut};
+            print "</pre>";
         }
     }
     
