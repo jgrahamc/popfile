@@ -194,11 +194,19 @@
 #--------------------------------------------------------------------------
 
   !macro DeleteSkin FOLDER
+
+      !insertmacro PFI_UNIQUE_ID
+
+      IfFileExists "${FOLDER}\*.*" 0 skip_${PFI_UNIQUE_ID}
       Delete "${FOLDER}\*.css"
       Delete "${FOLDER}\*.gif"
       Delete "${FOLDER}\*.thtml"
       RmDir  "${FOLDER}"
+
+    skip_${PFI_UNIQUE_ID}:
+
   !macroend
+
 
 #==============================================================================================
 #
