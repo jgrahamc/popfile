@@ -102,7 +102,7 @@ Advanced_Message1                       Seuraavia sanoja ei oteta huomioon viest
 Advanced_AddWord                        Lis&auml;&auml; sana
 Advanced_RemoveWord                     Poista sana
 
-History_Filter                          &nbsp;(N&auml;kyviss&auml; vain sangon <font color=%s>%s</font> sis&auml;lt&ouml;)
+History_Filter                          &nbsp;(N&auml;kyviss&auml; vain sangon <font color="%s">%s</font> sis&auml;lt&ouml;)
 History_Search                          &nbsp;(Etsitty aihetta %s)
 History_Title                           Viimeaikaiset viestit
 History_Jump                            Siirry viestiin
@@ -112,8 +112,8 @@ History_NoFrom                          Ei l&auml;hett&auml;j&auml;tietoa
 History_NoSubject                       Ei aihetta
 History_ClassifyAs                      Luokittele
 History_MagnetUsed                      K&auml;ytetty magneettia
-History_ChangedTo                       Luokitukseksi vaihdettu <font color=%s>%s
-History_Already                         Viesti on jo uudelleenluokiteltu sankoon <font color=%s>%s</font>
+History_ChangedTo                       Luokitukseksi vaihdettu <font color="%s">%s
+History_Already                         Viesti on jo uudelleenluokiteltu sankoon <font color="%s">%s</font>
 History_RemoveAll                       Poista kaikki
 History_RemovePage                      Poista sivu
 History_Remove                          Paina t&auml;st&auml; poistaaksesi n&auml;m&auml; viestit viestihistoriasta
@@ -154,7 +154,7 @@ Magnet_Error3                           Uusi magneetti, '%s', luotu sankoon '%s'
 Magnet_CurrentMagnets                   T&auml;m&auml;nhetkiset magneetit
 Magnet_Message1                         Seuraavat magneetit aiheuttavat sen, ett&auml; viestit luokitellaan aina m&auml;&auml;riteltyyn sankoon.
 Magnet_CreateNew                        Luo uusi magneetti
-Magnet_Explanation                      On kolmenlaisia magneetteja:</b> <ul><li><b>L&auml;hett&auml;j&auml;n osoite tai nimi:</b> esimerkiksi &quot;erkki@esimerkki.fi&quot; yksitt&auml;ist&auml; osoitetta varten, <br>&quot;esimerkki.fi&quot; kaikkia niit&auml; varten, joiden osoite p&auml;&auml;ttyy &quot;esimerkki.fi&quot;, <br>&quot;Erkki Esimerkki&quot; yksitt&auml;ist&auml; henkil&ouml;&auml; varten ja &quot;Erkki&quot; kaikkia Erkkej&auml; varten<li><b>Vastaanottajan osoite tai nimi:</b> Samalla tavoin kuin l&auml;hett&auml;j&auml;magneettien kanssa, mutta vastaanottajien osoitteiden kanssa<li><b>Sanat aiheessa:</b> esimerkiksi &quot;heipparallaa&quot; kaikkia sellaisia viestej&auml; varten, joiden aiherivill&auml; on sana &quot;heipparallaa&quot;.</ul>
+Magnet_Explanation                      On kolmenlaisia magneetteja:</b> <ul><li><b>L&auml;hett&auml;j&auml;n osoite tai nimi:</b> esimerkiksi &quot;erkki@esimerkki.fi&quot; yksitt&auml;ist&auml; osoitetta varten, <br />&quot;esimerkki.fi&quot; kaikkia niit&auml; varten, joiden osoite p&auml;&auml;ttyy &quot;esimerkki.fi&quot;, <br />&quot;Erkki Esimerkki&quot; yksitt&auml;ist&auml; henkil&ouml;&auml; varten ja &quot;Erkki&quot; kaikkia Erkkej&auml; varten</li><li><b>Vastaanottajan osoite tai nimi:</b> Samalla tavoin kuin l&auml;hett&auml;j&auml;magneettien kanssa, mutta vastaanottajien osoitteiden kanssa</li><li><b>Sanat aiheessa:</b> esimerkiksi &quot;heipparallaa&quot; kaikkia sellaisia viestej&auml; varten, joiden aiherivill&auml; on sana &quot;heipparallaa&quot;.</li></ul>
 Magnet_MagnetType                       Magneetin tyyppi
 Magnet_Value                            arvo
 Magnet_Always                           laitetaan aina sankoon
@@ -190,7 +190,7 @@ Bucket_RenameBucket                     Muuta sangon
 Bucket_Lookup                           Etsint&auml;
 Bucket_LookupMessage                    Etsi sanaa sangoista
 Bucket_LookupMessage2                   Etsint&auml;tulos sanalle
-Bucket_LookupMostLikely                 Sana <b>%s</b> esiintyy suurimmalla todenn&auml;k&ouml;isyydell&auml; sangossa <font color=%s>%s</font>
+Bucket_LookupMostLikely                 Sana <b>%s</b> esiintyy suurimmalla todenn&auml;k&ouml;isyydell&auml; sangossa <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p>Sana <b>%s</b> ei esiinny miss&auml;&auml;n sangossa
 Bucket_DisabledGlobally                 Poistettu yleisesti k&auml;yt&ouml;st&auml;
 Bucket_To                               nimeksi

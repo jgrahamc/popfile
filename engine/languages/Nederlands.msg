@@ -101,7 +101,7 @@ Advanced_Message1                       De volgende woorden worden genegeerd bij
 Advanced_AddWord                        Voeg woord toe
 Advanced_RemoveWord                     Verwijder woord
 
-History_Filter                          &nbsp;(alleen uit bak <font color=%s>%s</font>)
+History_Filter                          &nbsp;(alleen uit bak <font color="%s">%s</font>)
 History_Search                          &nbsp;(gezocht op onderwerp %s)
 History_Title                           Recente Berichten
 History_Jump                            Spring naar bericht
@@ -111,8 +111,8 @@ History_NoFrom                          geen van regel
 History_NoSubject                       geen onderwerp regel
 History_ClassifyAs                      Classificeer als
 History_MagnetUsed                      Magneet gebruikt
-History_ChangedTo                       Veranderd naar <font color=%s>%s
-History_Already                         Is al gereclassificeerd als <font color=%s>%s</font>
+History_ChangedTo                       Veranderd naar <font color="%s">%s
+History_Already                         Is al gereclassificeerd als <font color="%s">%s</font>
 History_RemoveAll                       Verwijder alles
 History_RemovePage                      Verwijder pagina
 History_Remove                          Om berichten te verwijderen in de geschiedenis klik
@@ -150,7 +150,7 @@ Magnet_Error3                           Maak nieuwe magneet '%s' in bak '%s'
 Magnet_CurrentMagnets                   Huidige magneten
 Magnet_Message1                         De volgende magneten zorgen er altijd voor dat berichten in de gespecificeerde bak vallen.
 Magnet_CreateNew                        Maak Nieuwe Magneet
-Magnet_Explanation                      Er zijn drie type magneten beschikbaar: <ul><li>Van adres of naam:</b> B.v.: john@company.com om een specifiek adres te specificeren, <br>company.com om iedereen te specificeren die berichten sturen vanaf company.com, <br>John Doe om een bepaalde persoon te specificeren, John om alle Johns te specificeren<li><b>Naar adres of naam:</b> Net als een "Van" magneet maar nu voor de geadresseerde<li><b>Onderwerp woorden:</b> B.v.: Hallo om alle berichten met Hallo in het onderwerp te specificeren.</ul>
+Magnet_Explanation                      Er zijn drie type magneten beschikbaar: <ul><li>Van adres of naam:</b> B.v.: john@company.com om een specifiek adres te specificeren, <br />company.com om iedereen te specificeren die berichten sturen vanaf company.com, <br />John Doe om een bepaalde persoon te specificeren, John om alle Johns te specificeren</li><li><b>Naar adres of naam:</b> Net als een "Van" magneet maar nu voor de geadresseerde</li><li><b>Onderwerp woorden:</b> B.v.: Hallo om alle berichten met Hallo in het onderwerp te specificeren.</li></ul>
 Magnet_MagnetType                       Magneet type
 Magnet_Value                            Waarde
 Magnet_Always                           Gaat altijd naar bak
@@ -186,7 +186,7 @@ Bucket_RenameBucket                     Hernoem bak met naam
 Bucket_Lookup                           Bekijk
 Bucket_LookupMessage                    Bekijk woord in bak
 Bucket_LookupMessage2                   Resultaat voor 
-Bucket_LookupMostLikely                 <b>%s</b> komt het meest waarschijnlijk voor in <font color=%s>%s</font>
+Bucket_LookupMostLikely                 <b>%s</b> komt het meest waarschijnlijk voor in <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> komt niet voor in een van de bakken
 Bucket_DisabledGlobally                 Globaal uitgeschakeld
 Bucket_To                               naar

@@ -112,7 +112,7 @@ History_NoFrom                          no from line
 History_NoSubject                       no subject line
 History_ClassifyAs                      Classify as
 History_MagnetUsed                      Magnet used
-History_ChangedTo                       Changed to <font color=%s>%s
+History_ChangedTo                       Changed to <font color="%s">%s
 History_Already                         Already reclassified as <font color="%s">%s</font>
 History_RemoveAll                       Remove All
 History_RemovePage                      Remove Page
@@ -141,8 +141,8 @@ Security_SecureServer                   Secure server
 Security_SecureServerUpdate             Updated secure server to %s; this change will not take affect until you restart POPFile
 Security_SecurePort                     Secure port
 Security_SecurePortUpdate               Updated port to %s; this change will not take affect until you restart POPFile
-Security_POP3                           Accept POP3 connections from remote machines
-Security_UI                             Accept HTTP (User Interface) connections from remote machines
+Security_POP3                           Accept POP3 connections from remote machines (requires POPFile restart)
+Security_UI                             Accept HTTP (User Interface) connections from remote machines  (requires POPFile restart)
 Security_UpdateTitle                    Automatic Update Checking
 Security_Update                         Check daily for updates to POPFile
 Security_StatsTitle                     Reporting Statistics

@@ -102,7 +102,7 @@ Advanced_Message1                       Les mots suivants sont ignorés dans tout
 Advanced_AddWord                        Ajouter un mot
 Advanced_RemoveWord                     Retirer un mot
 
-History_Filter                          &nbsp;(ne montrant que la catégorie <font color=%s>%s</font>)
+History_Filter                          &nbsp;(ne montrant que la catégorie <font color="%s">%s</font>)
 History_Search                          &nbsp;(recherche du sujet %s)
 History_Title                           Messages récents
 History_Jump                            Aller au message
@@ -112,8 +112,8 @@ History_NoFrom                          pas de ligne De
 History_NoSubject                       pas de ligne Sujet
 History_ClassifyAs                      Classifié comme
 History_MagnetUsed                      Aimant utilisé
-History_ChangedTo                       Changé en <font color=%s>%s
-History_Already                         Déjà reclassifié comme <font color=%s>%s</font>
+History_ChangedTo                       Changé en <font color="%s">%s
+History_Already                         Déjà reclassifié comme <font color="%s">%s</font>
 History_RemoveAll                       Supprimer tout
 History_RemovePage                      Supprimer page
 History_Remove                          Pour supprimer des entrées dans l'historique cliquez
@@ -154,7 +154,7 @@ Magnet_Error3                           Nouvel aimant '%s' créé pour la catégori
 Magnet_CurrentMagnets                   Aimants actuels
 Magnet_Message1                         Les aimants suivants entrainent la classification systématique d'un message dans la catégorie spécifiée.
 Magnet_CreateNew                        Créer un nouvel aimant
-Magnet_Explanation                      Trois types d'aimants sont disponibles:</b> <ul><li><b>Adresse ou nom de l'expéditeur:</b> Par exemple: john@company.com pour capter une adresse spécifique, <br>company.com pour capter les messages de tous les expéditeurs de company.com, <br>John Doe pour capter une personne en particulier, John pour capter tous les John<li><b>Adresse ou nom du destinataire:</b> Comme un aimant De: mais pour l'adresse du destinataire du message<li><b>Mots du sujet:</b> Par exemple: bonjour pour capter tous les messages avec bonjour dans le sujet</ul>
+Magnet_Explanation                      Trois types d'aimants sont disponibles:</b> <ul><li><b>Adresse ou nom de l'expéditeur:</b> Par exemple: john@company.com pour capter une adresse spécifique, <br />company.com pour capter les messages de tous les expéditeurs de company.com, <br />John Doe pour capter une personne en particulier, John pour capter tous les John</li><li><b>Adresse ou nom du destinataire:</b> Comme un aimant De: mais pour l'adresse du destinataire du message</li><li><b>Mots du sujet:</b> Par exemple: bonjour pour capter tous les messages avec bonjour dans le sujet</li></ul>
 Magnet_MagnetType                       Type d'aimant
 Magnet_Value                            Valeur
 Magnet_Always                           Toujours envoyer dans la catégorie
@@ -190,7 +190,7 @@ Bucket_RenameBucket                     Renommer la catégorie nommée
 Bucket_Lookup                           Examiner
 Bucket_LookupMessage                    Examiner le mot dans les catégories
 Bucket_LookupMessage2                   Examiner le résultat pour
-Bucket_LookupMostLikely                 <b>%s</b> a le plus de chance d'apparaître dans <font color=%s>%s</font>
+Bucket_LookupMostLikely                 <b>%s</b> a le plus de chance d'apparaître dans <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> n'apparaît dans aucune catégorie
 Bucket_DisabledGlobally                 Désactivé globalement
 Bucket_To                               en

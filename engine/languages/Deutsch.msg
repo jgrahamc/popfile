@@ -102,7 +102,7 @@ Advanced_Message1                       Die folgenden Wörter werden bei jeder Ei
 Advanced_AddWord                        Wort hinzufügen
 Advanced_RemoveWord                     Wort löschen
 
-History_Filter                          &nbsp;(zeige nur Kategorie <font color=%s>%s</font>)
+History_Filter                          &nbsp;(zeige nur Kategorie <font color="%s">%s</font>)
 History_Search                          &nbsp;(gesuchter Betreff: %s)
 History_Title                           Letzte Nachrichten
 History_Jump                            zu Nachricht gehen
@@ -112,8 +112,8 @@ History_NoFrom                          kein Absender angegeben
 History_NoSubject                       kein Betreff
 History_ClassifyAs                      eingestuft als
 History_MagnetUsed                      Magnet benutzt
-History_ChangedTo                       Geändert: <font color=%s>%s
-History_Already                         Bereits neu eingestuft als <font color=%s>%s</font>
+History_ChangedTo                       Geändert: <font color="%s">%s
+History_Already                         Bereits neu eingestuft als <font color="%s">%s</font>
 History_RemoveAll                       Alle entfernen
 History_RemovePage                      Diese Seite entfernen
 History_Remove                          Um Einträge im Verlauf zu löschen, klicken Sie auf
@@ -154,7 +154,7 @@ Magnet_Error3                           Erstelle neuen Magnet '%s' in Kategorie 
 Magnet_CurrentMagnets                   Aktuelle Magnete
 Magnet_Message1                         Die folgenden Magnete ordnen neue Post zwingend in eine angegebene Kategorie ein.
 Magnet_CreateNew                        Neuen Magnet erstellen
-Magnet_Explanation                      Drei Typen von Magneten sind verfügbar: <ul><li>Absenderadresse oder -name:</b> z.B.: hans@firma.de, um eine bestimmte Adresse zu erfassen, <br>firma.de, um jeden zu erfassen, der von firma.de sendet, <br>Hans Mustermann, um eine bestimmte Person zu erfassen; Hans erfaßt jeden Hans<li><b>Empfängeradresse oder -name:</b> Wie beim Absender-Magnet nur für die Empfängeradresse in der Email.<li><b>Wörter im Betreff:</b> z.B.: "Hallo", um alle Nachrichten mit "Hallo" im Betreff zu erfassen</ul>
+Magnet_Explanation                      Drei Typen von Magneten sind verfügbar: <ul><li>Absenderadresse oder -name:</b> z.B.: hans@firma.de, um eine bestimmte Adresse zu erfassen, <br />firma.de, um jeden zu erfassen, der von firma.de sendet, <br />Hans Mustermann, um eine bestimmte Person zu erfassen; Hans erfaßt jeden Hans</li><li><b>Empfängeradresse oder -name:</b> Wie beim Absender-Magnet nur für die Empfängeradresse in der Email.</li><li><b>Wörter im Betreff:</b> z.B.: "Hallo", um alle Nachrichten mit "Hallo" im Betreff zu erfassen</li></ul>
 Magnet_MagnetType                       Typ des Magnets
 Magnet_Value                            Wert
 Magnet_Always                           Immer dieser Kategorie zuordnen
@@ -190,7 +190,7 @@ Bucket_RenameBucket                     Benenne Kategorie um
 Bucket_Lookup                           Nachschlagen
 Bucket_LookupMessage                    Wort in Kategorie nachschlagen
 Bucket_LookupMessage2                   Ergebnis für
-Bucket_LookupMostLikely                 <b>%s</b> erscheint am wahrscheinlichsten in <font color=%s>%s</font>
+Bucket_LookupMostLikely                 <b>%s</b> erscheint am wahrscheinlichsten in <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> erscheint in keiner Kategorie
 Bucket_DisabledGlobally                 Global deaktiviert
 Bucket_To                               in

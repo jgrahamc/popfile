@@ -102,7 +102,7 @@ Advanced_Message1                       De efterfølgene ord er alle ignoret fra 
 Advanced_AddWord                        Tilføj ord
 Advanced_RemoveWord                     fjern ord
 
-History_Filter                          &nbsp;(vis kun spanden <font color=%s>%s</font>)
+History_Filter                          &nbsp;(vis kun spanden <font color="%s">%s</font>)
 History_Search                          &nbsp;(søg emne for %s)
 History_Title                           seneste beskeder
 History_Jump                            Spring til besked
@@ -112,8 +112,8 @@ History_NoFrom                          igen fra linie
 History_NoSubject                       igen Emne linie
 History_ClassifyAs                      klassificeret som
 History_MagnetUsed                      Magnet brugt
-History_ChangedTo                       skilft til <font color=%s>%s
-History_Already                         Allrede genklassificeret som <font color=%s>%s</font>
+History_ChangedTo                       skilft til <font color="%s">%s
+History_Already                         Allrede genklassificeret som <font color="%s">%s</font>
 History_RemoveAll                       Fjern alle
 History_RemovePage                      Fjern side
 History_Remove                          for at fjerne tilføjelser i historien tryk
@@ -151,7 +151,7 @@ Magnet_Error3                           Skabte den nye magnet '%s' i spanden '%s
 Magnet_CurrentMagnets                   Aktuele Magneter
 Magnet_Message1                         The following magnets cause mail to always be classified into the specified bucket.
 Magnet_CreateNew                        Skab Nye Magnet
-Magnet_Explanation                      Tre typer magneter er tilrådige: <ul><li>Fra adressen eller navn:</b> For eksempel: john@firma.dk for at matche en specifik adresse, <br>firma.dk for at matche alle der sender fra firma.dk, <br>John Doe for at matche en specifik person, John for at matche alle Johns<li><b>Til adresse eller navn:</b> Lige som en Fra: Magnet men bare for Til: Adressen i en email<li><b>Emne ord:</b> For eksempel: hej for at matche alle beskeder med ordet hej i emnet</ul>
+Magnet_Explanation                      Tre typer magneter er tilrådige: <ul><li>Fra adressen eller navn:</b> For eksempel: john@firma.dk for at matche en specifik adresse, <br />firma.dk for at matche alle der sender fra firma.dk, <br />John Doe for at matche en specifik person, John for at matche alle Johns</li><li><b>Til adresse eller navn:</b> Lige som en Fra: Magnet men bare for Til: Adressen i en email</li><li><b>Emne ord:</b> For eksempel: hej for at matche alle beskeder med ordet hej i emnet</li></ul>
 Magnet_MagnetType                       Magnet typer
 Magnet_Value                            Værdier
 Magnet_Always                           Tilhøre alttid spanden
@@ -187,7 +187,7 @@ Bucket_RenameBucket                     omdøb spanden med navnet
 Bucket_Lookup                           Slå op
 Bucket_LookupMessage                    Slå ord op i spandene
 Bucket_LookupMessage2                   Opslags resultatet for
-Bucket_LookupMostLikely                 Det er mest sansynlig at <b>%s</b> fremkommer i <font color=%s>%s</font>
+Bucket_LookupMostLikely                 Det er mest sansynlig at <b>%s</b> fremkommer i <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> fremkommer ikke i nogle af spandene
 Bucket_DisabledGlobally                 Deaktiveret globalt
 

@@ -102,7 +102,7 @@ Advanced_Message1                       As seguintes palavras são ignoradas de t
 Advanced_AddWord                        Adicionar palavra
 Advanced_RemoveWord                     Remover palavra
 
-History_Filter                          &nbsp;(apenas mostrando o bucket <font color=%s>%s</font>)
+History_Filter                          &nbsp;(apenas mostrando o bucket <font color="%s">%s</font>)
 History_Search                          &nbsp;(procurado pelo assunto %s)
 History_Title                           Mensagens Recentes
 History_Jump                            Ir para a mensagem
@@ -112,8 +112,8 @@ History_NoFrom                          sem linha de
 History_NoSubject                       sem linha de assunto
 History_ClassifyAs                      Classificar como
 History_MagnetUsed                      Íma usado
-History_ChangedTo                       Alterado para <font color=%s>%s
-History_Already                         Já reclassificado como <font color=%s>%s</font>
+History_ChangedTo                       Alterado para <font color="%s">%s
+History_Already                         Já reclassificado como <font color="%s">%s</font>
 History_RemoveAll                       Remover Tudo
 History_RemovePage                      Remover a Página
 History_Remove                          Para remover entradas do histórico clique
@@ -153,7 +153,7 @@ Magnet_Error3                           Criar novo ímã '%s' no bucket '%s'
 Magnet_CurrentMagnets                   Ímãs Atuais
 Magnet_Message1                         Os seguintes ímãs fazem os emails serem sempre classificados no bucket especificado.
 Magnet_CreateNew                        Criar Novo Ímã
-Magnet_Explanation                      Três tipos de íma estão disponíveis: <ul><li>De um endereço ou nome:</b> Por exemplo: adriano@companhia.com para pegar um endereço específico, <br>companhia.com para pegar todo mundo que manda email de companhia.com, <br>Adriano Gomes para pegar uma pessoa específica, Adriano para pegar todos os Adrianos<li><b>Para um endereço ou nome:</b> Como um ímã De: mas para o endereço Para: de um email<li><b>Palavras no assunto:</b> Por exemplo: olá para pegar todas as mensagens com olá no assunto</ul>
+Magnet_Explanation                      Três tipos de íma estão disponíveis: <ul><li>De um endereço ou nome:</b> Por exemplo: adriano@companhia.com para pegar um endereço específico, <br />companhia.com para pegar todo mundo que manda email de companhia.com, <br />Adriano Gomes para pegar uma pessoa específica, Adriano para pegar todos os Adrianos</li><li><b>Para um endereço ou nome:</b> Como um ímã De: mas para o endereço Para: de um email</li><li><b>Palavras no assunto:</b> Por exemplo: olá para pegar todas as mensagens com olá no assunto</li></ul>
 Magnet_MagnetType                       Tipo do ímã
 Magnet_Value                            Valor
 Magnet_Always                           Sempre vai para o bucket
@@ -189,7 +189,7 @@ Bucket_RenameBucket                     Renomear o bucket chamado
 Bucket_Lookup                           Procurar
 Bucket_LookupMessage                    Procurar por palavra nos buckets
 Bucket_LookupMessage2                   Procurar no resultado por
-Bucket_LookupMostLikely                 <b>%s</b> é mais provável de aparecer em <font color=%s>%s</font>
+Bucket_LookupMostLikely                 <b>%s</b> é mais provável de aparecer em <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> não aparece em nenhum dos buckets
 Bucket_DisabledGlobally                 Desabilitado globalmente
 Bucket_To                               para

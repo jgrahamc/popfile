@@ -102,7 +102,7 @@ Advanced_Message1                       Следните думи се игнорират при класифици
 Advanced_AddWord                        Добави дума
 Advanced_RemoveWord                     Премахни дума
 
-History_Filter                          &nbsp;(показан е само кош <font color=%s>%s</font>)
+History_Filter                          &nbsp;(показан е само кош <font color="%s">%s</font>)
 History_Search                          &nbsp;(търсене за заглавие %s)
 History_Title                           Последни съобщения
 History_Jump                            Преход към съобщение
@@ -112,8 +112,8 @@ History_NoFrom                          Няма подател
 History_NoSubject                       Няма заглавие
 History_ClassifyAs                      Класифицирай като
 History_MagnetUsed                      Според магнит
-History_ChangedTo                       Променено на <font color=%s>%s
-History_Already                         Вече класифицирано като <font color=%s>%s</font>
+History_ChangedTo                       Променено на <font color="%s">%s
+History_Already                         Вече класифицирано като <font color="%s">%s</font>
 History_RemoveAll                       Премахни всички
 History_RemovePage                      Премахни тази страница
 History_Remove                          За премахване на съобщенията натисни:
@@ -154,7 +154,7 @@ Magnet_Error3                           Създай нов магнит '%s' за кош '%s'
 Magnet_CurrentMagnets                   Магнити
 Magnet_Message1                         Следните магнити служат за незабавно класифициране на съобщенията в даден кош.
 Magnet_CreateNew                        Създай нов магнит
-Magnet_Explanation                      Има три вида магнити:</b> <ul><li><b>Адрес или име на подател:</b> Например: john@company.com за конкретен адрес, <br>company.com за всички адреси от company.com, <br>John Doe за конкретен подател, John за всички John-овци<li><b>Адрес или име на получател:</b> Подобно на адреса на подател, но за адреса на получателя на съобщението<li><b>Думи от заглавието:</b> Например: hello за всички съобщения, чието заглавие съдържа hello</ul>
+Magnet_Explanation                      Има три вида магнити:</b> <ul><li><b>Адрес или име на подател:</b> Например: john@company.com за конкретен адрес, <br />company.com за всички адреси от company.com, <br />John Doe за конкретен подател, John за всички John-овци</li><li><b>Адрес или име на получател:</b> Подобно на адреса на подател, но за адреса на получателя на съобщението</li><li><b>Думи от заглавието:</b> Например: hello за всички съобщения, чието заглавие съдържа hello</li></ul>
 Magnet_MagnetType                       Тип на магнита
 Magnet_Value                            Стойност
 Magnet_Always                           Класифицирай винаги в кош
@@ -190,7 +190,7 @@ Bucket_RenameBucket                     Преименувай кош с име
 Bucket_Lookup                           Търсене
 Bucket_LookupMessage                    Търсене на дума по кошовете
 Bucket_LookupMessage2                   Резултати от търсенето
-Bucket_LookupMostLikely                 <b>%s</b> най-често се среща в <font color=%s>%s</font>
+Bucket_LookupMostLikely                 <b>%s</b> най-често се среща в <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> не присъства в никой кош
 Bucket_DisabledGlobally                 Изключено за всички
 Bucket_To                               към

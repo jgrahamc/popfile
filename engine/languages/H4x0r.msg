@@ -98,7 +98,7 @@ Advanced_Message1                       Th3 f0ll0w1ng w0rd5 4r3 1gn0r3d fr0m 4ll
 Advanced_AddWord                        4dd w0rd
 Advanced_RemoveWord                     R3m0v3 w0rd
 
-History_Filter                          &nbsp;(ju5t 5h0w1ng buck3t <font color=%s>%s</font>)
+History_Filter                          &nbsp;(ju5t 5h0w1ng buck3t <font color="%s">%s</font>)
 History_Search                          &nbsp;(534rch3d f0r 5ubj3ct %s)
 History_Title                           R3c3nt M3ss4g35
 History_Jump                            Jump t0 m3s54g3
@@ -108,8 +108,8 @@ History_NoFrom                          n0 fr0m l1n3
 History_NoSubject                       n0 5ubj3ct l1n3
 History_ClassifyAs                      Cl4s51fy 45
 History_MagnetUsed                      M4gn3t u53d
-History_ChangedTo                       Ch4ng3d t0 <font color=%s>%s
-History_Already                         4lr34dy r3cl4s51f13d 45 <font color=%s>%s</font>
+History_ChangedTo                       Ch4ng3d t0 <font color="%s">%s
+History_Already                         4lr34dy r3cl4s51f13d 45 <font color="%s">%s</font>
 History_RemoveAll                       R3m0v3 4ll
 History_RemovePage                      R3m0v3 P4g3
 History_Remove                          T0 r3m0v3 3ntr135 1n th3 h15t0ry cl1ck
@@ -147,7 +147,7 @@ Magnet_Error3                           Cr34t3 n3w m4gn3t '%s' 1n buck3t '%s'
 Magnet_CurrentMagnets                   Curr3nt M4gn3t5
 Magnet_Message1                         Th3 f0ll0w1ng m4gn3t5 c4u53 m41l t0 4lw4y5 b3 cl4s51f13d 1nt0 th3 5p3c1f13d buck3t.
 Magnet_CreateNew                        Cr34t3 N3w M4gn3t
-Magnet_Explanation                      Thr33 typ35 0f m4gn3t5 4r3 4v41l4bl3: </b> <ul><li><b>Fr0m 4ddr3s5 0r n4m3:</b> F0r 3x4mpl3: john\@c0mp4ny.c0m t0 m4tch 4 5p3c1f1c 4ddr3s5, <br>c0mp4ny.c0m t0 m4tch 3v3ry0n3 wh0 s3nd5 fr0m c0mp4ny.c0m, <br>J0hn D03 t0 m4tch 4 5p3c1f1c p3r50n, J0hn t0 m4tch 4ll J0hn5<li><b>T0 4ddr3s5 0r n4m3:</b> L1k3 4 Fr0m: m4gn3t but f0r th3 T0: 4ddr3s5 1n 4n 3m41l<li><b>5ubj3ct w0rd5:</b> F0r 3x4mpl3: h3ll0 t0 m4tch 4ll m3ss4g35 w1th h3ll0 1n th3 5ubj3ct</ul>
+Magnet_Explanation                      Thr33 typ35 0f m4gn3t5 4r3 4v41l4bl3: </b> <ul><li><b>Fr0m 4ddr3s5 0r n4m3:</b> F0r 3x4mpl3: john\@c0mp4ny.c0m t0 m4tch 4 5p3c1f1c 4ddr3s5, <br />c0mp4ny.c0m t0 m4tch 3v3ry0n3 wh0 s3nd5 fr0m c0mp4ny.c0m, <br />J0hn D03 t0 m4tch 4 5p3c1f1c p3r50n, J0hn t0 m4tch 4ll J0hn5</li><li><b>T0 4ddr3s5 0r n4m3:</b> L1k3 4 Fr0m: m4gn3t but f0r th3 T0: 4ddr3s5 1n 4n 3m41l</li><li><b>5ubj3ct w0rd5:</b> F0r 3x4mpl3: h3ll0 t0 m4tch 4ll m3ss4g35 w1th h3ll0 1n th3 5ubj3ct</li></ul>
 Magnet_MagnetType                       M4gn3t typ3
 Magnet_Value                            V4lu3
 Magnet_Always                           4lw4y5 g035 t0 buck3t
@@ -183,7 +183,7 @@ Bucket_RenameBucket                     R3n4m3 buck3t n4m3d
 Bucket_Lookup                           L00kup
 Bucket_LookupMessage                    L00kup w0rd 1n buck3t5
 Bucket_LookupMessage2                   L00kup r35ult f0r
-Bucket_LookupMostLikely                 <b>%s</b> 15 m05t l1k3ly t0 4pp34r 1n <font color=%s>%s</font>
+Bucket_LookupMostLikely                 <b>%s</b> 15 m05t l1k3ly t0 4pp34r 1n <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> d035 n0t 4pp34r 1n 4ny 0f th3 buck3t5
 Bucket_DisabledGlobally                 D154bl3d gl0b4lly
 

@@ -110,7 +110,7 @@ Advanced_Message1                       Эти слова игнорируются при классификации
 Advanced_AddWord                        Добавить слово
 Advanced_RemoveWord                     Удалить слово
 
-History_Filter                          &nbsp;(лежащие в ведре <font color=%s>%s</font>)
+History_Filter                          &nbsp;(лежащие в ведре <font color="%s">%s</font>)
 History_Search                          &nbsp;(найденные по теме &laquo;i<em>%s</em>&raquo;)
 History_Title                           Последние обработанные письма
 History_Jump                            Перейти к письму
@@ -120,8 +120,8 @@ History_NoFrom                          не задан отправитель
 History_NoSubject                       не задана тема
 History_ClassifyAs                      Классифицировать как
 History_MagnetUsed                      Использовался магнит
-History_ChangedTo                       Изменено на <font color=%s>%s
-History_Already                         Уже переклассифицировано как <font color=%s>%s</font>
+History_ChangedTo                       Изменено на <font color="%s">%s
+History_Already                         Уже переклассифицировано как <font color="%s">%s</font>
 History_RemoveAll                       Удалить всю историю
 History_RemovePage                      Удалить эту страницу
 History_Remove                          Чтобы удалить записи из истории нажмите
@@ -161,7 +161,7 @@ Magnet_Error3                           Создан новый магнит '%s' в ведре '%s'
 Magnet_CurrentMagnets                   Существующие магниты
 Magnet_Message1                         Магниты позволяют складывать все подходящие к ним сообщения в указанные ведра.
 Magnet_CreateNew                        Создать новый магнит
-Magnet_Explanation                      Существует три типа магнитов:</b><ul><li><b>Адрес или имя отправителя:</b> например, &quot;john@company.com&quot; сработает для писем, пришедших с указанного адреса, <br>&quot;company.com&quot; сработает для любых писем, пришедших из company.com, <br>&quot;John Doe&quot; сработает если в поле &quot;Отправитель&quot; присутствует указанное имя, в то время как, &quot;John&quot; сработает для любых Джонов, написавших вам письмо<li> <b>Адрес или имя получателя:</b> работает как предыдущий, только оперирует полем &quot;Получатель&quot;<li> <b>Слова в теме письма:</b> например, &quot;hello&quot; сработает на всех письмах с этим приветствием в теме</ul>
+Magnet_Explanation                      Существует три типа магнитов:</b><ul><li><b>Адрес или имя отправителя:</b> например, &quot;john@company.com&quot; сработает для писем, пришедших с указанного адреса, <br />&quot;company.com&quot; сработает для любых писем, пришедших из company.com, <br />&quot;John Doe&quot; сработает если в поле &quot;Отправитель&quot; присутствует указанное имя, в то время как, &quot;John&quot; сработает для любых Джонов, написавших вам письмо</li><li> <b>Адрес или имя получателя:</b> работает как предыдущий, только оперирует полем &quot;Получатель&quot;</li><li> <b>Слова в теме письма:</b> например, &quot;hello&quot; сработает на всех письмах с этим приветствием в теме</li></ul>
 Magnet_MagnetType                       Тип магнита
 Magnet_Value                            Значение
 Magnet_Always                           Всегда складывать в ведро
@@ -197,7 +197,7 @@ Bucket_RenameBucket                     Переименовать ведро
 Bucket_Lookup                           Поиск
 Bucket_LookupMessage                    Искать слово в вёдрах
 Bucket_LookupMessage2                   Результаты поиска
-Bucket_LookupMostLikely                 <b>%s</b> чаще всего встречается в <font color=%s>%s</font>
+Bucket_LookupMostLikely                 <b>%s</b> чаще всего встречается в <font color="%s">%s</font>
 Bucket_DoesNotAppear                    <p><b>%s</b> не встречается ни в одном из вёдер
 Bucket_DisabledGlobally                 Выключено глобально
 Bucket_To                               в
