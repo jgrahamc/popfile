@@ -16,6 +16,10 @@ if ( $#ARGV == 0 )
 {
     my $b = new Classifier::Bayes;
     
+    if ( $b->initialize() == 0 ) {
+        die "Failed to start while initializing the classifier module";
+    }
+    
     $b->{debug} = 0; 
     $b->{parser}->{debug} = 0;
     $b->load_word_matrix();
