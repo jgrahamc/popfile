@@ -96,7 +96,7 @@ width: 100%;
 background-image : url("metalback.gif");
 }
 
-.menustandard {
+.menuStandard {
 background-image : url("metalback.gif");
 border-bottom : #000033 3px solid; 
 border-left : #eeeeee 3px solid; 
@@ -107,7 +107,7 @@ color: black;
 background-color: transparent;
 }
 
-.menuselected {
+.menuSelected {
 background-image : url("metalback.gif");
 border-bottom : #eeeeee 3px solid; 
 border-left : #000033 3px solid; 
@@ -116,7 +116,7 @@ border-top : #000033 3px solid;
 width : 14%; 
 }
 
-.menuspacer {
+.menuSpacer {
 background-color : #ccccdd;
 background-image : url("chipped_obsidian.gif");
 width : 5px; 
@@ -179,15 +179,15 @@ margin-left : 3px;
 margin-right : 3px; 
 } 
 
-table.stabcolor01 {
+table.stabColor01 {
 	border: 1px solid black;
 }
 
-table.stabcolor03 {
+table.stabColor03 {
 	border: 3px solid black;
 }
 
-td.stabcolor01 {
+td.stabColor01 {
 	border: 1px solid black;
 }
 
@@ -197,11 +197,11 @@ td.naked {
 	border: none
 }
 
-td.openmessagecloser {
+td.openMessageCloser {
 	text-align: right;
 }
 
-.menuindent {
+.menuIndent {
 	width: 8%;
 	background-image : url("chipped_obsidian.gif");	
 }
@@ -232,73 +232,73 @@ div.error02 {
 	color: red;
 }
 
-span.graphfont {
+span.graphFont {
 	font-size: x-small;
 }
 
-span.bucketslabel {
+span.bucketsLabel {
 	font-weight: bold;
 }
 
-span.magnetslabel {
+span.magnetsLabel {
 	font-weight: bold;
 }
 
-span.securitylabel {
+span.securityLabel {
 	font-weight: bold;
 }
 
-span.configurationlabel {
+span.configurationLabel {
 	font-weight: bold;
 }
 		
-span.advancedlabel {
+span.advancedLabel {
 	font-weight: bold;
 }
 		
-span.passwordlabel {
+span.passwordLabel {
 	font-weight: bold;
 }
 
-span.sessionlabel {
+span.sessionLabel {
 	font-weight: bold;
 }
 
-table.historywidgetstop {
+table.historyWidgetsTop {
 	width: 100%;
 	margin-left: 1.5em;
 	margin-top: 0.6em;
 	margin-bottom: 1.0em;
 }
 
-table.historybuttonsbottom {
+table.historyButtonsBottom {
 	width: 100%;
 	margin-top: 0.6em;
 }
 
-td.historynavigatortop {
+td.historyNavigatorTop {
 	text-align: right;
 }
 
-td.historynavigatorbottom {
+td.historyNavigatorBottom {
 	text-align: right;
 }
 
-tr.rowhighlighted {
+tr.rowHighlighted {
 	background-color: #000000;
 	color: #eeeeee;
 }
 
-td.logo2menuspace { 
+td.logo2menuSpace { 
 	height: 0.8em;
 }
 
-a.changesettinglink {
+a.changeSettingLink {
 	background-color: transparent ;
 	color: #0000cc ;
 }
 
-td.footerbody { 
+td.footerBody { 
 	text-align: center;
 	padding-left: 5%;
 	padding-right: 5%;

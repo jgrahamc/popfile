@@ -170,3 +170,65 @@ td.logo2menuSpace {
 	height: 0.8em;
 }
 
+tr.rowHighlighted {
+	background-color: #000000;
+	color: #eeeeee;
+}
+
+span.graphFont {
+	font-size: x-small;
+}
+
+span.bucketsLabel {
+	font-weight: bold;
+}
+
+span.magnetsLabel {
+	font-weight: bold;
+}
+
+span.securityLabel {
+	font-weight: bold;
+}
+
+span.configurationLabel {
+	font-weight: bold;
+}
+		
+span.advancedLabel {
+	font-weight: bold;
+}
+		
+span.passwordLabel {
+	font-weight: bold;
+}
+
+span.sessionLabel {
+	font-weight: bold;
+}
+
+div.error01 {
+	background-color: transparent;
+	color: red;
+	font-size: larger;
+}
+
+div.error02 {
+	background-color: transparent;
+	color: red;
+}
+
+td.accuracy0to49 {
+	background-color: red;
+	color: black;
+}
+
+td.accuracy50to93 {
+	background-color: yellow;
+	color: black;
+}
+
+td.accuracy94to100 {
+	background-color: green;
+	color: black;
+}

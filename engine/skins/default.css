@@ -1,69 +1,183 @@
-H1,H2,H3,P,TD {
-  font-family: sans-serif;
-}
-
 body {
-  background-color: #FFFFFF;
-  font-family: sans-serif; 
-  color: #000000;
+	background-color: #FFFFFF;
+	font-family: sans-serif;
+	color: #000000;
 }
 
-.head {
+.shell {
+	background-color: #ededca;
+	border: 3px #cccc99 solid;
+	 color: #000000;
+}
+
+table.head {
+  width: 100%;
+   }
+
+td.head {
   font-weight: normal;
   font-size: 22pt;
 }
 
-.shell {
-    background-color: #ededca;
-    border: 3px #cccc99 solid; 
-    color: #000000;
-}
-
-.head a {
-  font-size: 12pt;
-}
-
 .menu {
-  font-size: 14pt;
-  font-weight: bold;
+	font-size: 14pt;
+	font-weight: bold;
+	width: 100%;
 }
 
 .menuSelected {
-  background-color: #cccc99;
-  width: 150px;
-  color: #000000;
+	background-color: #cccc99;
+	width: 14%;
+	color: #000000;
 }
 
 .menuStandard {
-  background-color: #ededca;
-  width: 150px;
-  color: #000000;
+	background-color: #ededca;
+	width: 14%;
+	color: #000000;
 }
 
-.rowEven {
-    background-color: #ededca;
-     color: #000000;
+.menuIndent {
+	width: 8%;
 }
 
-.rowOdd {
-    background-color: #dfdfaf;
-     color: #000000;
+tr.rowEven {
+	background-color: #ededca;
+	color: #000000;
+}
+
+tr.rowOdd {
+	background-color: #dfdfaf;
+	color: #000000;
+}
+
+tr.rowHighlighted {
+	background-color: #000000;
+	color: #eeeeee;
+}
+
+table.footer {
+	width: 100%;
 }
 
 table.stabColor01 {
-    border: 1px solid #cccc99;
+	border: 1px solid #cccc99;
 }
 
 table.stabColor03 {
-    border: 3px solid #cccc99;
+	border: 3px solid #cccc99;
+}
+
+td.openMessageCloser {
+	text-align: right;
+}
+
+td.openMessageBody {
+	text-align: left;
 }
 
 td.stabColor01 {
-    border: 1px solid #cccc99;
+	border: 1px solid Black;
 }
 
 td.naked {
-    padding: 0px; 
-    margin: 0px; 
-    border: none
+	padding: 0px; 
+	margin: 0px; 
+	border: none
+}
+
+a.changeSettingLink {
+	background-color: transparent;
+	color: blue;
+}
+
+td.accuracy0to49 {
+	background-color: red;
+	color: black;
+}
+
+td.accuracy50to93 {
+	background-color: yellow;
+	color: black;
+}
+	
+td.accuracy94to100 {
+	background-color: green;
+	color: black;
+}
+
+div.error01 {
+	background-color: transparent;
+	color: red;
+	font-size: larger;
+}
+	
+div.error02 {
+	background-color: transparent;
+	color: red;
+}
+
+span.graphFont {
+	font-size: x-small;
+}		
+
+span.historyLabel {
+	font-weight: bold;
+}
+
+span.bucketsLabel {
+	font-weight: bold;
+}
+
+span.magnetsLabel {
+	font-weight: bold;
+}
+
+span.securityLabel {
+	font-weight: bold;
+}
+
+span.configurationLabel {
+	font-weight: bold;
+}
+
+		
+span.advancedLabel {
+	font-weight: bold;
+}
+		
+span.passwordLabel {
+	font-weight: bold;
+}
+
+span.sessionLabel {
+	font-weight: bold;
+}
+
+td.logo2menuSpace { 
+	height: 0.8em;
+}
+
+td.footerBody { 
+	text-align: center;
+	}
+	
+table.historyWidgetsTop {
+	width: 100%;
+	margin-left: 1.5em;
+	margin-top: 0.6em;
+	margin-bottom: 1.0em;
+}
+
+table.historyButtonsBottom {
+	width: 100%;
+	margin-top: 0.6em;
+}
+
+td.historyNavigatorTop {
+	text-align: right;
+}
+
+td.historyNavigatorBottom {
+	text-align: right;
 }
