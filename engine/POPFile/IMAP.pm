@@ -64,7 +64,7 @@ sub new
 
     $self->name( 'imap' );
 
-    $self->{classifier__}     = 0;
+    $self->{classifier__} = 0;
 
     # Here are the variables used by this module:
 
@@ -95,9 +95,8 @@ sub new
     # This variable controls the amount of information that goes
     # to the logfile:
     # 0: basic information, quiet
-    # 1: + commands + OK/BAD/NO responses
-    # 2: + untagged server responses
-    # 3: + each server response
+    # 1: + commands + OK/BAD/NO responses + untagged responses
+    # 2: + each server response
     $self->{debug__} = 0;
 
     # A hash to hold per-folder data (watched and output flag + socket connection)
@@ -105,6 +104,10 @@ sub new
 
     # A flag that tells us that the folder list has changed
     $self->{folder_change_flag__} = 0;
+
+    # A hash containing the hash values of messages that we encountered
+    # during a single run through service().
+    $self->{hash_values__} = ();
 
     return $self;
 }
@@ -207,6 +210,10 @@ sub start
     # and retrieve hashes and classifications
     $self->read_cls_files__();
 
+    # remove this in the next version:
+    if ( $self->config_( 'debug_level' ) == 3 ) {
+        $self->config_( 'debug_level' , 2 );
+    }
 
     return $self->SUPER::start();
 }
@@ -226,6 +233,13 @@ sub stop
 
     if ( $self->{api_session__} ne '' ) {
         $self->{classifier__}->release_session_key( $self->{api_session__} );
+    }
+
+    foreach ( keys %{$self->{folders__}} ) {
+        if ( exists $self->{folders__}{$_}{imap} ) {
+            $self->{folders__}{$_}{imap}->shutdown( 2 );
+            delete $self->{folders__}{$_}{imap};
+        }
     }
 }
 
@@ -255,7 +269,7 @@ sub service
         # Update the cached debug_level value
         $self->{debug__} = $self->config_( 'debug_level' );
 
-        # Since say() as well as get_response() can throw an exception, i.e. die if
+        # Since say__() as well as get_response__() can throw an exception, i.e. die if
         # they detect a lost connection, we eval the following code to be able
         # to catch the exception. We also tell Perl to ignore broken pipes.
 
@@ -283,14 +297,16 @@ sub service
 
                 }
             }
+
+            # Reset the hash containing the hash values we have just seen.
+            $self->{hash_values__} = ();
+
         };
         # if an exception occurred, we try to catch it here
         if ( $@ ) {
-            # say() and get_response() will die with this message:
+            # say__() and get_response__() will die with this message:
             if ( $@ =~ /The connection to the IMAP server was lost/ ) {
-                $self->log_( $@ );
-                # Clear the connection pool
-                $self->{folders__} = ();
+                $self->log_( $@ ); # level 0
             }
             # If we didn't die but somebody else did, we have empathy.
             else {
@@ -330,7 +346,7 @@ sub build_folder_list__
 {
     my ( $self ) = @_;
 
-    $self->log_( "Building list of serviced folders." ) if $self->{debug__};
+    $self->log_( "Building list of serviced folders." ) if $self->{debug__}; # level 1
 
     # At this point, we simply reset the folders hash.
     # This isn't really elegant because it will leave dangling connections
@@ -365,7 +381,6 @@ sub build_folder_list__
 
     # Reset the folder change flag
     $self->{folder_change_flag__} = 0;
-
 }
 
 
@@ -399,53 +414,45 @@ sub connect_folders__
             next;
         }
 
-        $self->log_( "Trying to connect to ". $self->config_( 'hostname' ) . " for folder $folder." );
-        my $folder_imap = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
+        $self->log_( "Trying to connect to ". $self->config_( 'hostname' ) . " for folder $folder." ) if $self->{debug__}; # level 1
+        $self->{folders__}{$folder}{imap} = $self->connect( $self->config_( 'hostname' ), $self->config_( 'port' ) );
+        $self->{folders__}{$folder}{server} = 1;
+        $self->{folders__}{$folder}{tag} = 0;
 
         # Did the connection succeed?
-        if ( defined $folder_imap ) {
+        if ( defined $self->{folders__}{$folder}{imap} ) {
 
-            if ( $self->login( $folder_imap ) ) {
+            if ( $self->login( $folder ) ) {
 
                 # Build a list of IMAP mailboxes if we haven't already got one:
                 unless ( @{$self->{mailboxes__}} ) {
-                    $self->get_mailbox_list( $folder_imap );
+                    $self->get_mailbox_list( $self->{folders__}{$folder}{imap} );
                 }
 
                 # Change to / SELECT the folder
-                $self->say( $folder_imap, "SELECT \"$folder\"" );
-                if ( $self->get_response( $folder_imap ) != 1 ) {
+                $self->say__( $folder, "SELECT \"$folder\"" );
+                if ( $self->get_response__( $folder ) != 1 ) {
 
-                    $self->log_( "Could not SELECT folder $folder." );
-                    $self->say( $folder_imap, "LOGOUT" );
-                    $self->get_response( $folder_imap );
-                    undef $folder_imap;
+                    $self->log_( "Could not SELECT folder $folder." ); # level 0
+                    $self->say__( $folder, "LOGOUT" );
+                    $self->get_response__( $folder );
+                    delete $self->{folders__}{$folder}{imap};
                 }
                 else {
                     # And now check that our UIDs are valid
-                    unless ( $self->folder_uid_status__( $folder_imap, $folder ) ) {
-                        $self->log_( "Changed UIDVALIDITY for folder $folder. Some new messages might have been skipped." );
+                    unless ( $self->folder_uid_status__( $folder ) ) {
+                        $self->log_( "Changed UIDVALIDITY for folder $folder. Some new messages might have been skipped." ); # level 0
                     }
                 }
             }
             else {
-                $self->log_( "Could not LOGIN for folder $folder." );
-                undef $folder_imap;
+                $self->log_( "Could not LOGIN for folder $folder." ); # level 0
+                delete $self->{folders__}{$folder}{imap};
             }
         }
         else {
-            $self->log_( "Could not CONNECT for folder $folder." );
-            undef $folder_imap;
-        }
-
-        # If everything went ok, we now have a defined value for the connection
-        if ( defined $folder_imap ) {
-            $self->{folders__}{$folder}{imap} = $folder_imap;
-        }
-        # If something went wrong, we delete the socket object that might still be in the
-        # folder hash.
-        else {
-            delete $self->{folders__}{$folder}{imap} if exists $self->{folders__}{$folder}{imap};
+            $self->log_( "Could not CONNECT for folder $folder." ); # level 0
+            delete $self->{folders__}{$folder}{imap};
         }
     }
 }
@@ -478,37 +485,48 @@ sub scan_folder
     # make the flags more accessible.
     my $is_watched = ( exists $self->{folders__}{$folder}{watched} ) ? 1 : 0;
     my $is_output = ( exists $self->{folders__}{$folder}{output} ) ? $self->{folders__}{$folder}{output} : '';
-    my $imap = $self->{folders__}{$folder}{imap};
 
-    $self->log_( "Looking for new messages in folder $folder." );
+    $self->log_( "Looking for new messages in folder $folder." ) if $self->{debug__}; # level 1
 
     # Do a NOOP first. Certain implementations won't tell us about
     # new messages while we are connected and selected otherwise:
 
-    $self->say( $imap, "NOOP" );
-    $self->get_response( $imap );
+    $self->say__( $folder, "NOOP" );
+    $self->get_response__( $folder );
 
     my $moved_message = 0;
-    my @uids = $self->get_uids_ge( $imap, $self->uid_next__( $folder ) );
+    my @uids = $self->get_new_message_list( $folder );
 
     # We now have a list of messages with UIDs greater than or equal
     # to our last stored UIDNEXT value (of course, the list might be
     # empty). Let's iterate over that list.
 
     foreach my $msg ( @uids ) {
-        $self->log_( "" );
-        $self->log_( "Found new message in folder $folder (UID: $msg)" );
+        $self->log_( "Found new message in folder $folder (UID: $msg)" ) if $self->{debug__}; # level 1
 
-        my $hash = $self->get_hash( $imap, $msg );
+        my $hash = $self->get_hash( $folder, $msg );
 
         $self->uid_next__( $folder, $self->uid_next__( $folder ) + 1 );
+
+        # Watch our for those pesky duplicate and triplicate spam messages:
+
+        if ( exists $self->{hash_values__}{$hash} ) {
+
+            $self->log_( "Found duplicate hash value: $hash. Ignoring duplicate." );
+
+            next;
+        }
+        else {
+            $self->{hash_values__}{$hash} = 1;
+        }
+
 
         # Find out what we are dealing with here:
 
         if ( $is_watched ) {
             if ( $self->can_classify__( $hash ) ) {
 
-                my $result = $self->classify_message( $imap, $msg, $hash, $folder );
+                my $result = $self->classify_message( $msg, $hash, $folder );
 
                 $moved_message = $result if ( defined $result );
 
@@ -519,22 +537,22 @@ sub scan_folder
         if ( my $bucket = $is_output ) {
             if ( my $old_bucket = $self->can_reclassify__( $hash, $bucket ) ) {
 
-                my $result = $self->reclassify_message( $imap, $msg, $bucket, $old_bucket, $hash );
+                my $result = $self->reclassify_message( $folder, $msg, $old_bucket, $hash );
 
                 next;
             }
         }
 
         # If we get here despite all those next statements, we do nothing and say so
-        $self->log_( "Ignoring message $msg" );
+        $self->log_( "Ignoring message $msg" ) if $self->{debug__}; # level 1
     }
 
     # After we are done with the folder, we issue an EXPUNGE command
     # if we were told to do so.
 
     if ( $moved_message && $self->config_( 'expunge' ) ) {
-        $self->say( $imap, "EXPUNGE" );
-        $self->get_response( $imap );
+        $self->say__( $folder, "EXPUNGE" );
+        $self->get_response__( $folder );
     }
 }
 
@@ -551,7 +569,6 @@ sub scan_folder
 #
 # Arguments:
 #
-#   $imap:   The connection to the server.
 #   $msg:    UID of the message (the IMAP folder must be SELECTed)
 #   $hash:   The hash of the message as computed by get_hash()
 #   $folder: The name of the folder on the server in which this message was found
@@ -566,7 +583,7 @@ sub scan_folder
 
 sub classify_message
 {
-    my ( $self, $imap, $msg, $hash, $folder ) = @_;
+    my ( $self, $msg, $hash, $folder ) = @_;
 
     my $moved_a_msg = 0;
 
@@ -577,8 +594,7 @@ sub classify_message
     # use to read the message in binary, read-write mode:
     my $pseudo_mailer;
     unless ( open $pseudo_mailer, "+>imap.tmp" ) {
-        $self->log_( "Unable to open temporary file. Nothing done to message $msg." );
-        $self->log_( "" );
+        $self->log_( "Unable to open temporary file. Nothing done to message $msg." ); # level 0
 
         return;
     }
@@ -596,11 +612,10 @@ sub classify_message
     PART:
     foreach my $part ( @message_parts ) {
 
-        my @lines = $self->fetch_message_part( $imap, $msg, $part );
+        my ($ok, @lines ) = $self->fetch_message_part__( $folder, $msg, $part );
 
-        unless ( @lines ) {
-            $self->log_( "Could not fetch the $part part of message $msg." );
-            $self->log_( "" );
+        unless ( $ok ) {
+            $self->log_( "Could not fetch the $part part of message $msg." ); # level 0
 
             return;
         }
@@ -619,7 +634,7 @@ sub classify_message
             ( $class, $history_file, $magnet_used ) = $self->{classifier__}->classify_and_modify( $self->{api_session__}, $pseudo_mailer, undef, $self->global_config_( 'download_count' ), $msg, 1, '', 0 );
 
             if ( $magnet_used ) {
-                $self->log_( "Message $history_file was classified as $class using a magnet." );
+                $self->log_( "Message $history_file was classified as $class using a magnet." ); # level 0
                 print $pseudo_mailer "\nThis message was classified based on a magnet.\nThe body of the message was not retrieved from the server.\n";
             }
             else {
@@ -641,12 +656,12 @@ sub classify_message
             my $destination = $self->folder_for_bucket__( $class );
             if ( defined $destination ) {
                 if ( $folder ne $destination ) {
-                    $self->move_message( $imap, $msg, $destination );
+                    $self->move_message( $folder, $msg, $destination );
                     $moved_a_msg = 1;
                 }
             }
             else {
-                $self->log_( "Message cannot be moved because output folder for bucket $class is not defined." );
+                $self->log_( "Message cannot be moved because output folder for bucket $class is not defined." ); #level 0
             }
 
 
@@ -660,8 +675,7 @@ sub classify_message
             # Remember hash of this message in history, etc:
             $self->was_classified__( $hash, $class, $history_file );
 
-            $self->log_( "Message $history_file was classified as $class." );
-            $self->log_( "" );
+            $self->log_( "Message $history_file was classified as $class." ); # level 0
 
             last PART;
         }
@@ -684,11 +698,10 @@ sub classify_message
 #
 # Arguments:
 #
-#   $imap:       The connection to the server.
+#   $folder:     The folder that has received a reclassification request
 #   $msg:        UID of the message (the IMAP folder must be SELECTed)
-#   $new_bucket: The bucket to classify the message to
 #   $old_bucket: The previous classification of the message
-#   $hash:   The hash of the message as computed by get_hash()
+#   $hash:        The hash of the message as computed by get_hash()
 #
 # Return value:
 #
@@ -699,12 +712,13 @@ sub classify_message
 
 sub reclassify_message
 {
-    my ( $self, $imap, $msg, $new_bucket, $old_bucket, $hash ) = @_;
+    my ( $self, $folder, $msg, $old_bucket, $hash ) = @_;
 
-    my @lines = $self->fetch_message_part( $imap, $msg, '' );
+    my $new_bucket = $self->{folders__}{$folder}{output};
+    my ( $ok, @lines ) = $self->fetch_message_part__( $folder, $msg, '' );
 
-    unless ( @lines ) {
-        $self->log_( "Could not fetch message $msg!" );
+    unless ( $ok ) {
+        $self->log_( "Could not fetch message $msg!" ); #level 0
 
         return;
     }
@@ -713,7 +727,7 @@ sub reclassify_message
     # I simply use "imap.tmp" as the file name here.
 
     unless ( open TMP, ">imap.tmp" ) {
-        $self->log_( "Cannot open temp file imap.tmp" );
+        $self->log_( "Cannot open temp file imap.tmp" ); # level 0
 
         return;
     };
@@ -725,8 +739,7 @@ sub reclassify_message
 
     $self->was_reclassified__( $hash, $new_bucket, "imap.tmp" );
 
-    $self->log_( "Reclassified the message with UID $msg from bucket $old_bucket to bucket $new_bucket." );
-    $self->log_( "" );
+    $self->log_( "Reclassified the message with UID $msg from bucket $old_bucket to bucket $new_bucket." ); # level 0
 
     unlink "imap.tmp";
 }
@@ -744,7 +757,6 @@ sub reclassify_message
 #
 # arguments:
 #
-#   $imap:          Connection to the server that we might need for new folders
 #   $folder:        The name of the folder to be inspected.
 #
 # return value:
@@ -754,14 +766,13 @@ sub reclassify_message
 
 sub folder_uid_status__
 {
-    my ( $self, $imap, $folder ) = @_;
+    my ( $self, $folder ) = @_;
 
     # Save old UIDVALIDITY value (if we have one)
     my $old_val = $self->uid_validity__( $folder );
 
-
     # Extract current UIDVALIDITY value from server response
-    my @lines = split /$eol/, $self->{last_response__};
+    my @lines = split /$eol/, $self->{folders__}{$folder}{last_response};
     my $uidvalidity;
     foreach ( @lines ) {
         if ( /^\* OK \[UIDVALIDITY (\d+)\]/ ) {
@@ -773,7 +784,7 @@ sub folder_uid_status__
 
     # if we didn't get the value, we have a problem
     unless ( defined $uidvalidity ) {
-        $self->log_( "Could not extract UIDVALIDITY status from server response!" );
+        $self->log_( "Could not extract UIDVALIDITY status from server response!" ); # level 0
         return;
     }
 
@@ -781,7 +792,7 @@ sub folder_uid_status__
     if ( defined $old_val ) {
         if ( $uidvalidity != $old_val ) {
             $self->uid_validity__( $folder, $uidvalidity );
-            $self->log_( "UIDVALIDITY has changed! Expected $old_val, got $uidvalidity." );
+            $self->log_( "UIDVALIDITY has changed! Expected $old_val, got $uidvalidity." ); # level 0
             return;
         }
     }
@@ -792,12 +803,12 @@ sub folder_uid_status__
     # for UIDNEXT.
     else {
 
-        $self->say( $imap, "STATUS \"$folder\" (UIDNEXT)" );
-        my $response = $self->get_response( $imap );
+        $self->say__( $folder, "STATUS \"$folder\" (UIDNEXT)" );
+        my $response = $self->get_response__( $folder );
 
         if ( $response == 1 ) {
 
-            @lines = split /$eol/, $self->{last_response__};
+            @lines = split /$eol/, $self->{folders__}{$folder}{last_response};
 
             my $uidnext;
 
@@ -811,17 +822,17 @@ sub folder_uid_status__
                 $uidnext = $1;
 
                 unless ( defined $uidnext ) {
-                    $self->log_( "Could not extract UIDNEXT value from server response!!" );
+                    $self->log_( "Could not extract UIDNEXT value from server response!!" ); # level 0
                     return;
                 }
 
                 $self->uid_next__( $folder, $uidnext );
                 $self->uid_validity__( $folder, $uidvalidity );
-                $self->log_( "Updated folder status (UIDVALIDITY and UIDNEXT) for folder $folder." );
+                $self->log_( "Updated folder status (UIDVALIDITY and UIDNEXT) for folder $folder." ) if $self->{debug__}; # level 1
             }
         }
         else {
-            $self->log_( "Could not STATUS folder $folder!!" );
+            $self->log_( "Could not STATUS folder $folder!!" ); # level 0
             return;
         }
     }
@@ -845,7 +856,7 @@ sub connect
 {
     my ( $self, $hostname, $port ) = @_;
 
-    $self->log_( "Connecting to $hostname:$port" );
+    $self->log_( "Connecting to $hostname:$port" ) if $self->{debug__}; # level 1
 
     if ( $hostname ne '' && $port ne '' ) {
 
@@ -861,7 +872,7 @@ sub connect
         # Check that the connect succeeded for the remote server
         if ( $imap ) {
             if ( $imap->connected )  {
-                $self->log_( "Connected to $hostname:$port timeout " . $self->global_config_( 'timeout' ) );
+                $self->log_( "Connected to $hostname:$port timeout " . $self->global_config_( 'timeout' ) ); # level 0
 
                 # Set binmode on the socket so that no translation of CRLF
                 # occurs
@@ -878,13 +889,13 @@ sub connect
 
                 # Read the response from the real server
                 my $buf = $self->slurp_( $imap );
-
+                $self->log_( ">> $buf" ) if $self->{debug__}; # level 1
                 return $imap;
             }
         }
     }
     else {
-        $self->log_( "Invalid port or hostname. Will not connect to server." );
+        $self->log_( "Invalid port or hostname. Will not connect to server." ); # level 0
         return;
     }
 }
@@ -901,7 +912,7 @@ sub connect
 #   log in to the server we are currently connected to.
 #
 # Arguments:
-#   $imap: a valid socket object
+#   $imap: a valid socket object or the name of a folder.
 #
 # Return values:
 #   0 on failure
@@ -913,11 +924,11 @@ sub login
     my ( $self, $imap ) = @_;
     my ( $login, $pass ) = ( $self->config_( 'login' ), $self->config_( 'password' ) );
 
-    $self->log_( "Logging in" );
+    $self->log_( "Logging in" ) if $self->{debug__}; # level 1
 
-    $self->say( $imap, "LOGIN \"$login\" \"$pass\"" );
+    $self->say__( $imap, "LOGIN \"$login\" \"$pass\"" );
 
-    if ( $self->get_response( $imap ) == 1 ) {
+    if ( $self->get_response__( $imap ) == 1 ) {
         return 1;
     }
     else {
@@ -933,7 +944,7 @@ sub login
 #   log out of the the server we are currently connected to.
 #
 # Arguments:
-#   $imap: a valid socket object
+#   $imap_or_folder: a valid socket object or the name of a folder
 #
 # Return values:
 #   0 on failure
@@ -942,13 +953,13 @@ sub login
 
 sub logout
 {
-    my ( $self, $imap ) = @_;
+    my ( $self, $imap_or_folder ) = @_;
 
-    $self->log_( "Logging out" );
+    $self->log_( "Logging out" ) if $self->{debug__}; # level 1
 
-    $self->say( $imap, "LOGOUT" );
+    $self->say__( $imap_or_folder, "LOGOUT" );
 
-    if ( $self->get_response( $imap ) == 1 ) {
+    if ( $self->get_response__( $imap_or_folder ) == 1 ) {
         return 1;
     }
     else {
@@ -956,66 +967,135 @@ sub logout
     }
 }
 
-
-
 # ---------------------------------------------------------------------------------------------
 #
-# say
+# raw_say
 #
-#   Issue a command to the server we are connected to.
+#   The worker function for say__. You should normally not need to call this
+#   function directly.
 #
 # Arguments:
 #
-#   $imap: the valid socket object
-#   $command: What you want to say to the server without the tag, though.
+#   $imap:      A valid socket object
+#   $tag:       A numeric value that will be used to tag the commmand
+#   $command:   What you want to say to the server
 #
-# The tag for the current command comes from $self->{tag__}, which get incremented
-# as soon as the response is in.
+# Return value:
+#   undef on error. True on success.
+#
 # ---------------------------------------------------------------------------------------------
 
-sub say
+sub raw_say
 {
-    my ( $self, $imap, $command ) = @_;
+    my ( $self, $imap, $tag, $command ) = @_;
 
-    my $cmdstr = sprintf "A%05d %s", $self->{tag__}, $command;
+    my $cmdstr = sprintf "A%05d %s", $tag, $command;
 
+    # Talk to the server
     unless( print $imap $cmdstr, $eol ) {
-        die( "The connection to the IMAP server was lost. Could not talk to the server." );
+        $imap->shutdown( 2 );
+        return;
     }
 
     # Log command
     if ( $self->{debug__} ) {
         # Obfuscate login and password for logins:
-        $cmdstr =~ s/^A\d+ LOGIN ".+?" ".+"$/ LOGIN "xxxxx" "xxxxx"/;
-        $self->log_( "<< $cmdstr" );
+        $cmdstr =~ s/^(A\d+) LOGIN ".+?" ".+"$/$1 LOGIN "xxxxx" "xxxxx"/;
+        $self->log_( "<< $cmdstr" ); # level 1
     }
 
-    # Remember commmand so that get_response knows what's going on.
-    $self->{last_command__} = $command;
+    return 1;
+}
+
+
+
+# ---------------------------------------------------------------------------------------------
+#
+# say__
+#
+#   Issue a command to the server we are connected to.
+#
+# Arguments:
+#
+#   $imap_or_folder:
+#       This can be either a valid socket object or the name of a
+#       folder in the $self->{folders__} hash
+#   $command:
+#       What you want to say to the server without the tag, though.
+#
+# Return value:
+#   None. Will die on error, though.
+#
+# ---------------------------------------------------------------------------------------------
+
+sub say__
+{
+    my ( $self, $imap_or_folder, $command ) = @_;
+
+    # Did we get a socket object?
+    if ( ref( $imap_or_folder ) eq 'IO::Socket::INET' ) {
+
+        $self->{last_command__} = $command;
+
+        unless ( $self->raw_say ( $imap_or_folder, $self->{tag__}, $command ) ) {
+            die( "The connection to the IMAP server was lost. Could not talk to the server." );
+        }
+    }
+    # or a folder?
+    else {
+
+        $self->{folders__}{$imap_or_folder}{last_command} = $command;
+
+        # Is there a socket connection in the folders hash?
+
+        unless ( exists $self->{folders__}{$imap_or_folder}{imap} ) {
+            # No! commit suicide.
+            $self->log_( "Got a folder with no attached socket in say!" );
+            die( "The connection to the IMAP server was lost. Could not talk to the server." );
+        }
+
+        unless ( $self->raw_say( $self->{folders__}{$imap_or_folder}{imap},
+                                 $self->{folders__}{$imap_or_folder}{tag},
+                                 $command ) ) {
+            # If we failed to talk to the server, delete socket object, and die.
+            delete $self->{folders__}{$imap_or_folder}{imap};
+            die( "The connection to the IMAP server was lost. Could not talk to the server." );
+        }
+    }
 }
 
 
 # ---------------------------------------------------------------------------------------------
 #
-# get_response
+# raw_get_response
 #
-#   retrieves a response from the passed in socket and then increments the tag counter
-#   The response is placed in $self->{last_response__}.
+#   Get a response from our server. You should normally not need to call this function
+#   directly. Use get_response__ instead.
 #
-#   Return values:
-#   1: Server said OK to our last command
-#   0: Server said NO to our last command
-#  -1: Server said BAD to our last command
-#  -2: Server said something else or reponded to another command
-#  -3: Server didn't say anything
+# Arguments:
+#
+#   $imap:         A valid socket object
+#   $last_command: The command we are issued before.
+#   $tag_ref:      A reference to a scalar that will receive tag value that can be
+#                  used to tag the next command
+#   $response_ref: A reference to a scalar that will receive the servers response.
+#
+# Return value:
+#   undef   lost connection
+#   1       Server answered OK
+#   0       Server answered NO
+#   -1      Server answered BAD
+#   -2      Server gave unexpected tagged answer
+#   -3      Server didn't say anything, but the connection is still valid (I guess this cannot happen)
+#
 # ---------------------------------------------------------------------------------------------
 
-sub get_response
+sub raw_get_response
 {
-    my ( $self, $imap ) = @_;
+    my ( $self, $imap, $last_command, $tag_ref, $response_ref ) = @_;
 
     # What is the actual tag we have to look for?
-    my $actualTag = sprintf "A%05d", $self->{tag__};
+    my $actual_tag = sprintf "A%05d", $$tag_ref;
 
     my $response = '';
     my $count_octets = 0;
@@ -1026,7 +1106,8 @@ sub get_response
 
         # Check for lost connections:
         if ( $response eq '' && ! defined $buf ) {
-            die( "The connection to the IMAP server was lost. Could not listen to the server." );
+            $imap->shutdown( 2 );
+            return;
         }
 
         # If this is the first line of the response and
@@ -1058,7 +1139,7 @@ sub get_response
         # followed by BAD, NO, or OK and we also keep an eye open
         # for untagged responses that the server might send us unsolicited
         if ( $count_octets == 0 ) {
-            if ( $buf =~ /^$actualTag (OK|BAD|NO)/ ) {
+            if ( $buf =~ /^$actual_tag (OK|BAD|NO)/ ) {
                 last;
             }
 
@@ -1072,74 +1153,64 @@ sub get_response
                 # we might get a change of the UIDVALIDITY value while we
                 # are connected
                 if ( $untagged_response =~ /UIDVALIDITY/
-                        && $self->{last_command__} !~ /^SELECT/ ) {
-                    $self->log_( "" );
-                    $self->log_( "Got unsolicited UIDVALIDITY response from server while reading response for $self->{last_command__}." );
-                    $self->log_( "" );
+                        && $last_command !~ /^SELECT/ ) {
+                    $self->log_( "Got unsolicited UIDVALIDITY response from server while reading response for $last_command." ); # level 0
                 }
 
                 # This could happen, but will be caught by the eval in service().
                 # Nevertheless, we look out for unsolicited bye-byes here.
                 if ( $untagged_response =~ /^BYE/
-                        && $self->{last_command__} !~ /^LOGOUT/ ) {
-                    $self->log_( "" );
-                    $self->log_( "Got unsolicited BYE response from server while reading response for $self->{last_command__}." );
-                    $self->log_( "" );
+                        && $last_command !~ /^LOGOUT/ ) {
+                    $self->log_( "Got unsolicited BYE response from server while reading response for $last_command." ); # level 0
                 }
             }
         }
     }
 
-    # Look at what we've got.
-    # Do logging and determine our return value
+    # save result away so we can always have a look later on
+    $$response_ref = $response;
+
+    # Increment tag for the next command/reply sequence:
+    if ( $$tag_ref++ == 10000 ) {
+        $$tag_ref = 0;
+    }
+
+
     if ( $response ) {
 
-        # save result away so we can always have a look later on
-        $self->{last_response__} = $response;
+        # Do logging
+        if ( $response ) {
+            foreach ( split /$eol/, $response ) {
 
-        # Log the result
-
-        # RegExp that determines what to log according to the debug level
-        my $re = '\d (BAD|NO)';
-
-        if ( $self->{debug__} == 1 ) {
-            $re = '\d (OK|BAD|NO)';
-        }
-        elsif ( $self->{debug__} == 2 ) {
-            $re = '(\d (OK|BAD|NO))|(^\*)';
-        }
-        elsif ( $self->{debug__} == 3 ) {
-            $re = '';
+                if ( $self->{debug__} == 0 ) {
+                    $self->log_( ">> $_" ) if /\d (NO|BAD)/;
+                }
+                elsif ( $self->{debug__} == 1 ) {
+                    $self->log_( ">> $_" ) if /(\d (OK|NO|BAD))|(^\*)/;
+                }
+                elsif ( $self->{debug__} == 2 ) {
+                    $self->log_( ">> $_" );
+                }
+            }
         }
 
-        foreach ( split /$eol/, $response ) {
-            $self->log_( ">> $_" ) if /$re/;
-        }
-
-        # Increment tag for the next command/reply sequence:
-        $self->{tag__}++;
-
-        if ( $self->{tag__} == 10000 ) {
-            $self->{tag__} = 0;
-        }
+        # determine our return value
 
         # We got 'OK' and the correct tag.
-        if ( $response =~ /^$actualTag OK/m ) {
+        if ( $response =~ /^$actual_tag OK/m ) {
             return 1;
         }
         # 'NO' plus correct tag
-        elsif ( $response =~ /^$actualTag NO/m ) {
-            $self->log_( "!!! Server said NO !!!" );
+        elsif ( $response =~ /^$actual_tag NO/m ) {
             return 0;
         }
         # 'BAD' and correct tag.
-        elsif ( $response =~ /^$actualTag BAD/m ) {
-            $self->log_( "!!! Server said BAD !!!" );
+        elsif ( $response =~ /^$actual_tag BAD/m ) {
             return -1;
         }
         # Someting else, probably a different tag, but who knows?
         else {
-            $self->log_( "!!! Server said something unexpected !!!" );
+            $self->log_( "!!! Server said something unexpected !!!" ); # level 0
             return -2;
         }
     }
@@ -1148,6 +1219,69 @@ sub get_response
 
 
 
+# ---------------------------------------------------------------------------------------------
+#
+# get_response__
+#
+# Use this function to get a response from the server. The response will be stored in
+# $self->{last_response__} if you pass in a socket object or in
+# $self->{folders}{$folder}{last_response} if you pass in a folder name
+#
+# Arguments:
+#   $imap_or_folder:
+#       Either a valid socket object or the name of a folder that is stored in the
+#       folders hash.
+#
+#   Return values:
+#      1: Server said OK to our last command
+#      0: Server said NO to our last command
+#     -1: Server said BAD to our last command
+#     -2: Server said something else or reponded to another command
+#     -3: Server didn't say anything
+#   Will die on lost connections!
+# ---------------------------------------------------------------------------------------------
+
+sub get_response__
+{
+    my ( $self, $imap_or_folder ) = @_;
+
+    my $result;
+
+    # Are we dealing with a socket object?
+    if ( ref( $imap_or_folder ) eq 'IO::Socket::INET' ) {
+        $result = $self->raw_get_response( $imap_or_folder,
+                                              $self->{last_command__},
+                                              \$self->{tag__},
+                                              \$self->{last_response__} );
+        unless ( defined $result ) {
+            die "The connection to the IMAP server was lost. Could not listen to the server.";
+        }
+    }
+    # Or die we get a folder name?
+    else {
+
+        # Is there a socket object stored in the folders hash?
+        unless ( exists $self->{folders__}{$imap_or_folder}{imap} ) {
+            $self->log_( "Got a folder with no attached socket in get_response!" );
+            die( "The connection to the IMAP server was lost. Could not listen to the server." );
+        }
+
+        $result = $self->raw_get_response ( $self->{folders__}{$imap_or_folder}{imap},
+                                               $self->{folders__}{$imap_or_folder}{last_command},
+                                              \$self->{folders__}{$imap_or_folder}{tag},
+                                              \$self->{folders__}{$imap_or_folder}{last_response} );
+
+        # die if we didn't succeed.
+        unless ( defined $result ) {
+            delete $self->{folders__}{$imap_or_folder}{imap};
+            die "The connection to the IMAP server was lost. Could not listen to the server.";
+        }
+
+    }
+
+    # return what raw_get_response gave us.
+    return $result;
+}
 
 
 
@@ -1159,7 +1293,7 @@ sub get_response
 #   The list is stored away in @{$self->{mailboxes__}} and returned.
 #
 # Arguments:
-#   $imap: as usual, contains a valid connection to our IMAP server.
+#   $imap: contains a valid connection to our IMAP server.
 #
 # Return value:
 #
@@ -1170,10 +1304,10 @@ sub get_mailbox_list
 {
     my ( $self, $imap ) = @_;
 
-    $self->log_( "Getting mailbox list" ) if $self->{debug__};
+    $self->log_( "Getting mailbox list" ) if $self->{debug__}; # level 1
 
-    $self->say( $imap, "LIST \"\" \"*\"" );
-    $self->get_response( $imap );
+    $self->say__( $imap, "LIST \"\" \"*\"" );
+    $self->get_response__( $imap );
 
     my @lines = split /$eol/, $self->{last_response__};
     my @mailboxes;
@@ -1197,47 +1331,48 @@ sub get_mailbox_list
 
 # ---------------------------------------------------------------------------------------------
 #
-# fetch_message_part
+# fetch_message_part__
 #
 #   This function will fetch a specified part of a specified message from
 #   the IMAP server and return the message as a list of lines.
 #   It assumes that a folder is already SELECTed
 #
-# arguments
+# arguments:
 #
-#   $imap: connection to the server
-#   $msg:  UID of the message
-#   $part: The part of the message you want to fetch. Could be 'HEADER' for the
-#       message headers, 'TEXT' for the body (including any attachments), or '' to
-#       fetch the complete message. Other values are also possible, but currently
-#       not used. 'BODYSTRUCTURE' could be interesting.
+#   $folder:    the currently selected folder
+#   $msg:       UID of the message
+#   $part:      The part of the message you want to fetch. Could be 'HEADER' for the
+#               message headers, 'TEXT' for the body (including any attachments), or '' to
+#               fetch the complete message. Other values are also possible, but currently
+#               not used. 'BODYSTRUCTURE' could be interesting.
 #
-# return value:
+# return values:
 #
-#   a list containing the lines of the retrieved message or an empty list on failure.
+#       a boolean value indicating success/fallure and
+#       a list containing the lines of the retrieved message (part).
 #
 # ---------------------------------------------------------------------------------------------
 
-sub fetch_message_part
+sub fetch_message_part__
 {
-    my ( $self, $imap, $msg, $part ) = @_;
+    my ( $self, $folder, $msg, $part ) = @_;
 
     if ( $part ne '' ) {
-        $self->log_( "Fetching $part of message $msg" );
+        $self->log_( "Fetching $part of message $msg" ) if $self->{debug__}; # level 1
     }
     else {
-        $self->log_( "Fetching message $msg" );
+        $self->log_( "Fetching message $msg" ) if $self->{debug__}; # level 1
     }
 
-    $self->say( $imap, "UID FETCH $msg (FLAGS BODY.PEEK[$part])" );
+    $self->say__( $folder, "UID FETCH $msg (FLAGS BODY.PEEK[$part])" );
 
-    my $result = $self->get_response ( $imap );
+    my $result = $self->get_response__( $folder );
 
     if ( $part ne '' ) {
-        $self->log_( "Got $part of message # $msg, result: $result." );
+        $self->log_( "Got $part of message # $msg, result: $result." ) if $self->{debug__}; # level 1
     }
     else {
-        $self->log_( "Got message # $msg, result: $result." );
+        $self->log_( "Got message # $msg, result: $result." ) if $self->{debug__}; # level 1
     }
 
     if ( $result == 1 ) {
@@ -1248,19 +1383,19 @@ sub fetch_message_part
         # or that something changed. E.g. the message we wanted
         # to fetch is no longer there.
 
-        if ( $self->{last_response__} =~ m/\^* \d+ FETCH/ ) {
+        if ( $self->{folders__}{$folder}{last_response} =~ m/\^* \d+ FETCH/ ) {
 
             # The first line should contain the number of octets the server send us
 
-            if ( $self->{last_response__} =~ m/(?!$eol){(\d+)}$eol/ ) {
+            if ( $self->{folders__}{$folder}{last_response} =~ m/(?!$eol){(\d+)}$eol/ ) {
                 my $num_octets = $1;
 
                 # Grab the number of octets reported:
 
-                my $pos = index $self->{last_response__}, "{$num_octets}$eol";
+                my $pos = index $self->{folders__}{$folder}{last_response}, "{$num_octets}$eol";
                 $pos += length "{$num_octets}$eol";
 
-                my $message = substr $self->{last_response__}, $pos, $num_octets;
+                my $message = substr $self->{folders__}{$folder}{last_response}, $pos, $num_octets;
 
                 # Take the large chunk and chop it into single lines
 
@@ -1273,7 +1408,7 @@ sub fetch_message_part
             }
             # No number of octets: fall back, but issue a warning
             else {
-                while ( $self->{last_response__} =~ m/(.*?$eol)/g ) {
+                while ( $self->{folders__}{$folder}{last_response} =~ m/(.*?$eol)/g ) {
                     push @lines, $1;
                 }
 
@@ -1282,17 +1417,17 @@ sub fetch_message_part
                 pop @lines;
                 pop @lines;
 
-                $self->log_( "!!!!! Warning: Could not find octet count in server's response !!!" );
+                $self->log_( "Could not find octet count in server's response!" ); # level 0
             }
         }
         else {
-            $self->log_( "!!!! Unexpected server response to the FETCH command !!!" );
+            $self->log_( "Unexpected server response to the FETCH command!" ); # level 0
         }
 
-        return @lines;
+        return 1, @lines;
     }
     else {
-        return ();
+        return 0;
     }
 }
 
@@ -1316,21 +1451,29 @@ sub fetch_message_part
 
 sub move_message
 {
-    my ( $self, $imap, $msg, $destination ) = @_;
+    my ( $self, $folder, $msg, $destination ) = @_;
 
-    $self->log_( "Moving message $msg to $destination" );
+    $self->log_( "Moving message $msg to $destination" ) if $self->{debug__}; # level 1
 
-    # Copy message to destination
-    $self->say( $imap, "UID COPY $msg \"$destination\"" );
-    my $ok = $self->get_response( $imap );
+    my $ok = 0;
 
-    # If that went well, flag it as deleted
-    if ( $ok == 1 ) {
-        $self->say( $imap, "UID STORE $msg +FLAGS (\\Deleted)" );
-        $ok = $self->get_response( $imap );
+    if ( $self->{folders__}{$folder}{server} == $self->{folders__}{$destination}{server} ) {
+
+        # Copy message to destination
+        $self->say__( $folder, "UID COPY $msg \"$destination\"" );
+        my $ok = $self->get_response__( $folder );
+
+        # If that went well, flag it as deleted
+        if ( $ok == 1 ) {
+            $self->say__( $folder, "UID STORE $msg +FLAGS (\\Deleted)" );
+            $ok = $self->get_response__( $folder );
+        }
+        else {
+            $self->log_( "Could not copy message ($ok)!" ); # level 0
+        }
     }
     else {
-        $self->log_( "!!!! Could not copy message ($ok)." );
+        $self->log_( "We don't yet know how to move messages between servers");
     }
 
     return ( $ok ? 1 : 0 );
@@ -1339,15 +1482,14 @@ sub move_message
 
 # ---------------------------------------------------------------------------------------------
 #
-# get_uids_ge
+# get_new_message_list
 #
 #   Will search for messages on the IMAP server that are not flagged as deleted
-#   that have a UID greater than or equal to the passed in value
+#   that have a UID greater than or equal to the value stored for the passed in folder.
 #
 # arguments:
 #
-#   $imap:      connection to server
-#   $uid:       An UID to compare to
+#   $folder:       Name of the folder we are looking at.
 #
 # return value:
 #
@@ -1355,14 +1497,16 @@ sub move_message
 #
 # ---------------------------------------------------------------------------------------------
 
-sub get_uids_ge
+sub get_new_message_list
 {
-    my ( $self, $imap, $uid ) = @_;
+    my ( $self, $folder ) = @_;
 
-    $self->log_( "Getting uids ge $uid" ) if $self->{debug__};
+    my $uid = $self->uid_next__( $folder );
 
-    $self->say( $imap, "UID SEARCH UID $uid:* UNDELETED" );
-    $self->get_response ( $imap );
+    $self->log_( "Getting uids ge $uid" ) if $self->{debug__}; # level 1
+
+    $self->say__( $folder, "UID SEARCH UID $uid:* UNDELETED" );
+    $self->get_response__( $folder );
 
     # The server will respond with an untagged search reply.
     # This can either be empty ("* SEARCH") or if a
@@ -1373,7 +1517,7 @@ sub get_uids_ge
 
     my @matching = ();
 
-    if ( $self->{last_response__} =~ /\* SEARCH (.+)$eol/ ) {
+    if ( $self->{folders__}{$folder}{last_response} =~ /\* SEARCH (.+)$eol/ ) {
 
         @matching = split / /, $1;
     }
@@ -1393,57 +1537,6 @@ sub get_uids_ge
 
 }
 
-
-# ---------------------------------------------------------------------------------------------
-#
-# search_for_messages
-#
-#   Will search for messages on the IMAP server that are not flagged as deleted
-#   and return a list of message numbers.
-#
-# arguments:
-#
-#   $imap:      connection to server
-#   $what:      A string that tells the server what to search for, e.g. "UNSEEN"
-#   $all:       If this is defined, we will also search for deleted messages
-#
-# return value:
-#
-#   A list (possibly empty) of the numbers of matching messages.
-#
-# ---------------------------------------------------------------------------------------------
-
-sub search_for_messages
-{
-    my ( $self, $imap, $what, $all ) = @_;
-
-    my $undeleted = 'UNDELETED';
-
-    if ( defined $all ) {
-        $undeleted = '';
-        $self->log_( "Searching messages with attribute $what" );
-    }
-    else {
-        $self->log_( "Searching undeleted messages with attribute $what" );
-    }
-
-    $self->say( $imap, "UID SEARCH $what $undeleted" );
-    $self->get_response ( $imap );
-
-    # The server will respond with an untagged search reply.
-    # This can either be empty ("* SEARCH") or if a
-    # message was found it contains the numbers of the matching
-    # messages, e.g. "* SEARCH 2 5 9".
-    # In the latter case, the regexp below will match and
-    # capture the list of messages in $1
-
-    my @matching = ();
-
-    if ( $self->{last_response__} =~ /\* SEARCH (.+)$eol/ ) {
-        @matching = split / /, $1;
-    }
-    return ( sort { $a <=> $b } @matching );
-}
 
 
 # ---------------------------------------------------------------------------------------------
@@ -1501,7 +1594,6 @@ sub folder_for_bucket__
 #
 #---------------------------------------------------------------------------------------------
 
-
 sub watched_folders__
 {
     my ( $self, @folders ) = @_;
@@ -1552,7 +1644,7 @@ sub uid_validity__
             $all .= "$key$cfg_separator$value$cfg_separator";
         }
         $self->config_( 'uidvalidities', $all );
-        $self->log_( "Updated UIDVALIDITY value for folder $folder to $uidval." );
+        $self->log_( "Updated UIDVALIDITY value for folder $folder to $uidval." ) if $self->{debug__}; # level 1
     }
     # get
     else {
@@ -1596,7 +1688,7 @@ sub uid_next__
             $all .= "$key$cfg_separator$value$cfg_separator";
         }
         $self->config_( 'uidnexts', $all );
-        $self->log_( "Updated UIDNEXT value for folder $folder to $uidnext." ) if ( $self->{debug__} > 1 );
+        $self->log_( "Updated UIDNEXT value for folder $folder to $uidnext." ) if $self->{debug__}; # level 1
     }
     # get
     else {
@@ -1692,8 +1784,8 @@ sub read_cls_files__
 #
 # Arguments:
 #
-#   $imap:  the server connection and
-#   $msg:   message UID
+#   $folder:    Name of the folder we are currently servicing.
+#   $msg:       message UID
 #
 # Return value:
 #   A string containing the hash value or undef on error.
@@ -1702,38 +1794,59 @@ sub read_cls_files__
 
 sub get_hash
 {
-    my ( $self, $imap, $msg ) = @_;
+    my ( $self, $folder, $msg ) = @_;
 
-    $self->say( $imap, "UID FETCH $msg (FLAGS BODY.PEEK[HEADER.FIELDS (Message-id Date Subject)])" );
+    my ( $ok, @lines ) = $self->fetch_message_part__( $folder, $msg, "HEADER.FIELDS (Message-id Date Subject Received)" );
 
-    if ( $self->get_response( $imap ) == 1) {
+    if ( $ok ) {
 
         my $date = '';
         my $mid = '';
         my $subject = '';
+        my $received = '';
 
-        foreach my $line ( split /$eol/, $self->{last_response__} ) {
-
-            if ( $line =~ /^Message-id:/i ) {
-                $mid = $line;
-            }
-            elsif ( $line =~ /^Date:/i ) {
-                $date = $line;
-            }
-            elsif ( $line =~ /^Subject:/i ) {
-                $subject = $line;
-            }
+        my $response = '';
+        foreach ( @lines ) {
+            $response .= "$_";
         }
 
-        my $hash = md5_hex( "[$mid][$date][$subject]" );
+        # Remove newlines inside header fields:
+        $response =~ s/$eol\s+/ /sg;
+        # But make sure that the trailing new line is still there:
+        $response .= $eol;
+        
+        if ( $mid eq '' && $response =~ /^(message-id:.*?)$eol/ism ) {
+            $mid = $1;
+        }
 
-        $self->log_( "Hashed message. $subject." );
-        $self->log_( "Message $msg has hash value $hash" ) if $self->{debug__};
+        if ( $date eq '' && $response =~ /^(date:.*?)$eol/ism ) {
+            $date = $1;
+        }
+
+        if ( $received eq '' && $response =~ /^(received:.*?)$eol/ism ) {
+            $received = $1;
+        }
+
+        if ( $subject eq '' && $response =~ /^(subject:.*?)$eol/ism ) {
+            $subject = $1;
+        }
+
+        # remove those log_ calls once we can be sure that the regexes work:
+        $self->log_( "Just for debugging purposes:" );
+        $self->log_( "mid:      $mid" );
+        $self->log_( "date:     $date" );
+        $self->log_( "subject:  $subject" );
+        $self->log_( "received: $received" );
+        
+        my $hash = md5_hex( "[$mid][$date][$subject][$received]" );
+
+        $self->log_( "Hashed message. $subject." ) if $self->{debug__}; # level 1
+        $self->log_( "Message $msg has hash value $hash" ) if $self->{debug__}; # level 1
 
         return $hash;
     }
     else {
-        $self->log_( "Could not FETCH the header fields of message $msg!" );
+        $self->log_( "Could not FETCH the header fields of message $msg!" ); # level 0
         return;
     }
 }
@@ -1757,7 +1870,7 @@ sub can_classify__
     my ( $self, $hash ) = @_;
 
     if ( exists $self->{hash_to_bucket__}{$hash} ) {
-        $self->log_( "Message was already classified." );
+        $self->log_( "Message was already classified." ) if $self->{debug__}; # level 1
         return 0;
     }
     else {
@@ -1794,15 +1907,15 @@ sub can_reclassify__
                 return $self->{hash_to_bucket__}{$hash};
             }
             else {
-                $self->log_( "Will not reclassify to same bucket ($new_bucket)." );
+                $self->log_( "Will not reclassify to same bucket ($new_bucket)." ) if $self->{debug__}; # level 1
             }
         }
         else {
-            $self->log_( "The message was already reclassified." );
+            $self->log_( "The message was already reclassified." ) if $self->{debug__}; # level 1
         }
     }
     else {
-        $self->log_( "Message is unknown and cannot be reclassified." );
+        $self->log_( "Message is unknown and cannot be reclassified." ) if $self->{debug__}; # level 1
     }
 
     return;
@@ -1926,7 +2039,7 @@ sub change_cls_file__
             close CLS;
         }
         else {
-            $self->log_( "Could not open cls file $cls_path." );
+            $self->log_( "Could not open cls file $cls_path." ); # level 0
         }
     }
 
@@ -1940,14 +2053,14 @@ sub change_cls_file__
                 close CLS;
             }
             else {
-                $self->log_( "Could not write to cls file $cls_path." );
+                $self->log_( "Could not write to cls file $cls_path." ); # level 0
             }
         }
         else {
-            $self->log_( "Could not read cls file $cls_path." );
+            $self->log_( "Could not read cls file $cls_path." ); # level 0
         }
 
-        $self->log_( "Updated class file $cls_path. Class: $class. Hash: $hash." );
+        $self->log_( "Updated class file $cls_path. Class: $class. Hash: $hash." ) if $self->{debug__}; # level 1
     }
 }
 
@@ -2148,7 +2261,7 @@ sub configure_item
 
         # Which debug level do we use to feed the logger?
         my @loop = ();
-        for my $i ( 0 .. 3 ) {
+        for my $i ( 0 .. 2 ) {
             my %data = ();
 
             $data{IMAP_selected} = ( $i == $self->{debug__} ) ? 'selected="selected"' : '';
@@ -2365,5 +2478,6 @@ sub validate_item
 
     $self->SUPER::validate_item( $name, $template, $language, $form );
 }
+
 
 1;
