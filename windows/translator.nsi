@@ -43,6 +43,7 @@
 #   windows\ioA.ini
 #   windows\ioB.ini
 #   windows\ioC.ini
+#   windows\ioD.ini
 #   windows\pfi-library.nsh
 #   windows\remove.ico
 #   windows\special.bmp
@@ -51,9 +52,7 @@
 #   windows\translator.htm              (a simple HTML file used to represent the POPFile UI)
 #   windows\translator.nsi              (this file; included to show its relative position)
 #
-#   windows\languages\English-mui.nsh
 #   windows\languages\English-pfi.nsh
-#   windows\languages\*-mui.nsh         (optional - see the 'LANGUAGE SUPPORT' comment below)
 #   windows\languages\*-pfi.nsh         (optional - see the 'LANGUAGE SUPPORT' comment below)
 #
 #   windows\POPFileIcon\popfile.ico
@@ -68,24 +67,12 @@
 #
 #--------------------------------------------------------------------------
 
-; As of 9 August 2003, the latest release of the NSIS compiler is 2.0b3. Since its release in
-; March 2003, the compiler has been greatly improved. This script uses many of the improvements
-; introduced since then. Although the NSIS compiler has been updated to 2.0b4 (CVS), the only
-; way to obtain this version is to install the 2.0b3 release and then apply some CVS updates.
-;
-; There are two ways to apply these CVS updates:
-;
-; (a) use the 'NSIS Update' feature provided by the 'NSIS Menu', or
-;
-;(b) obtain a NSIS 'Nightly' CVS update and use it to upgrade the 2.0b3 installation.
-;
-; The 'NSIS Update' feature does not work reliably at the moment, due to SourceForge.net's
-; current CVS server problems, so the quickest way to update NSIS to 2.0b4 (CVS) is by means
-; of the snapshot which is a ZIP file created several times a day from data on the 'real' CVS
-; servers (so it is NOT subject to the same problems as the 'NSIS Update' feature).
-;
-; This version of the script has been tested with NSIS 2.0b4 (CVS) after updating it by using
-; the 27 August 2003 (19:44 GMT) version of the NSIS CVS snapshot.
+; As of 19 November 2003, the latest release of the NSIS compiler is 2.0b4. This release
+; contains significant changes (especially to the MUI which is used by the POPFile installer)
+; which are not backward-compatible (i.e. this POPFile installer script cannot be built by
+; earlier versions of the NSIS compiler).
+
+; This version of the script has been tested with NSIS 2.0b4 dated 19 November 2003.
 
 #--------------------------------------------------------------------------
 # LANGUAGE SUPPORT:
@@ -95,7 +82,7 @@
 # If required, a command-line switch can be used to build an English-only version.
 #
 # Normal multi-language build command:  makensis.exe translator.nsi
-# To build an English-only version:     makensis.exe  /DENGLISH_ONLY translator.nsi
+# To build an English-only version:     makensis.exe  /DENGLISH_MODE translator.nsi
 #
 #--------------------------------------------------------------------------
 # Removing support for a particular language:
@@ -127,19 +114,18 @@
 # and
 #     (2) an up-to-date NSIS MUI Language file ({NSIS}\Contrib\Modern UI\Language files\*.nsh)
 #
-# To add support for a language which is already supported by the NSIS MUI package, two files
-# are required:
+# To add support for a language which is already supported by the NSIS MUI package, an extra
+# file is required:
 #
-#   <NSIS Language NAME>-mui.nsh  - holds customised versions of the standard MUI text strings
+#   <NSIS Language NAME>-pfi.nsh  - holds customised versions of the standard MUI text strings
 #                                   (eg removing the 'reboot' reference from the 'Welcome' page)
+#                                   plus strings used on the custom pages and elsewhere
 #
-#   <NSIS Language NAME>-pfi.nsh  - holds strings used on the custom pages and elsewhere
-#
-# Once these files have been prepared and placed in the 'windows\languages' directory with the
-# other *-mui.nsh and *-pfi.nsh files, add a new '!insertmacro PFI_LANG_LOAD' line to load these
-# two new files and, if there is a suitable POPFile UI language file for the new language,
-# add a suitable '!insertmacro UI_LANG_CONFIG' line in the section which handles the optional
-# 'Languages' component to allow the installer to select the appropriate UI language.
+# Once this file has been prepared and placed in the 'windows\languages' directory with the
+# other *-pfi.nsh files, add a new '!insertmacro PFI_LANG_LOAD' line to load this new file
+# and, if there is a suitable POPFile UI language file for the new language, add a suitable
+# '!insertmacro UI_LANG_CONFIG' line in the section which handles the optional 'Languages'
+# component to allow the installer to select the appropriate UI language.
 #--------------------------------------------------------------------------
 # NOTE:
 # This source file is a modified version of the 'real thing' so some comments may refer to
@@ -151,12 +137,17 @@
   ; POPFile constants have been given names beginning with 'C_' (eg C_README)
   ;--------------------------------------------------------------------------
 
-  !define MUI_PRODUCT       "PFI Testbed"
+  !define C_PFI_PRODUCT       "PFI Testbed"
+  !define C_PFI_VERSION       "0.8.1"
 
-  !ifndef ENGLISH_ONLY
-    !define MUI_VERSION     "0.6.1 (ML)"
+  Name                        "${C_PFI_PRODUCT}"
+  Caption                     "${C_PFI_PRODUCT} ${C_PFI_VERSION} Setup"
+  UninstallCaption            "${C_PFI_PRODUCT} ${C_PFI_VERSION} Uninstall"
+
+  !ifndef ENGLISH_MODE
+    !define C_PFI_VERSION_ID  "${C_PFI_VERSION} (ML)"
   !else
-    !define MUI_VERSION     "0.6.1 (English)"
+    !define C_PFI_VERSION_ID  "${C_PFI_VERSION} (English)"
   !endif
 
   !define C_README          "translator.change"
@@ -170,6 +161,7 @@
   !define C_INST_PROG_CORE_DELAY      2500
   !define C_INST_PROG_PERL_DELAY      2500
   !define C_INST_PROG_SHORT_DELAY     2500
+  !define C_INST_PROG_FFC_DELAY       2500
   !define C_INST_PROG_SKINS_DELAY     2500
   !define C_INST_PROG_LANGS_DELAY     2500
 
@@ -186,7 +178,7 @@
 # Define PFI_VERBOSE to get more compiler output
 #------------------------------------------------
 
-; !define PFI_VERBOSE
+## !define PFI_VERBOSE
 
 #-----------------------------------------------------------------------------------------
 # "Dummy" constants to avoid NSIS compiler warnings (used by macros in 'pfi-library.nsh')
@@ -211,19 +203,19 @@
   ; 'VIProductVersion' format is X.X.X.X where X is a number in range 0 to 65535
   ; representing the following values: Major.Minor.Release.Build
 
-  VIProductVersion "0.6.1.0"
+  VIProductVersion "${C_PFI_VERSION}.0"
 
   VIAddVersionKey "ProductName" "POPFile Installer Language Testbed"
   VIAddVersionKey "Comments" "POPFile Homepage: http://popfile.sf.net"
   VIAddVersionKey "CompanyName" "The POPFile Project"
   VIAddVersionKey "LegalCopyright" "© 2001-2003  John Graham-Cumming"
   VIAddVersionKey "FileDescription" "POPFile Installer Language Testbed"
-  VIAddVersionKey "FileVersion" "${MUI_VERSION}"
+  VIAddVersionKey "FileVersion" "${C_PFI_VERSION_ID}"
 
   VIAddVersionKey "Build Date/Time" "${__DATE__} @ ${__TIME__}"
   VIAddVersionKey "Build Script" "${__FILE__}$\r$\n(${__TIMESTAMP__})"
 
-  !ifndef ENGLISH_ONLY
+  !ifndef ENGLISH_MODE
     VIAddVersionKey "Build Type" "Multi-Language Testbed"
   !else
     VIAddVersionKey "Build Type" "English-Only Testbed"
@@ -239,6 +231,7 @@
 #   ; Default bucket selection (use "" if no buckets are to be pre-selected)
 #
 #   !define CBP_DEFAULT_LIST "inbox|spam|personal|work"
+  !define CBP_DEFAULT_LIST "spam|personal|work|other"
 #
 #   ; List of suggestions for bucket names (use "" if no suggestions are required)
 #
@@ -259,74 +252,31 @@
   !include pfi-library.nsh
 
 #--------------------------------------------------------------------------
-# Define the Page order for the installer (and the uninstaller)
-#--------------------------------------------------------------------------
-
-  ; Installer Pages
-
-  !insertmacro MUI_PAGE_WELCOME
-  !insertmacro MUI_PAGE_LICENSE
-  !insertmacro MUI_PAGE_COMPONENTS
-  !insertmacro MUI_PAGE_DIRECTORY
-  Page custom SetOptionsPage "CheckPortOptions"
-  !insertmacro MUI_PAGE_INSTFILES
-  !insertmacro CBP_PAGE_SELECTBUCKETS
-  Page custom SetOutlookExpressPage
-  Page custom StartPOPFilePage "CheckLaunchOptions"
-  !insertmacro MUI_PAGE_FINISH
-
-  ; Uninstaller Pages
-
-  !insertmacro MUI_UNPAGE_CONFIRM
-  !insertmacro MUI_UNPAGE_INSTFILES
-
-#--------------------------------------------------------------------------
 # Configure the MUI pages
 #--------------------------------------------------------------------------
-  ;-----------------------------------------
-  ; General Settings - License Page Settings
-  ;-----------------------------------------
 
-  ; Three styles of 'License Agreement' page are available:
-  ; (1) New style with an 'I accept' checkbox below the license window
-  ; (2) New style with 'I accept/I do not accept' radio buttons below the license window
-  ; (3) Classic style with the 'Next' button replaced by an 'Agree' button
-  ;     (to get the 'Classic' style, comment-out the CHECKBOX and the RADIOBUTTONS 'defines')
+  ;----------------------------------------------------------------
+  ; Interface Settings - General Interface Settings
+  ;----------------------------------------------------------------
 
-  !define MUI_LICENSEPAGE_CHECKBOX
-#  !define MUI_LICENSEPAGE_RADIOBUTTONS
+  ; The icon files for the installer and uninstaller must have the same structure. For example,
+  ; if one icon file contains a 32x32 16-colour image and a 16x16 16-colour image then the other
+  ; file cannot just contain a 32x32 16-colour image, it must also have a 16x16 16-colour image.
+  ; The order of the images in each icon file must also be the same.
 
-  ;-----------------------------------------
-  ; General Settings - Finish Page Settings
-  ;-----------------------------------------
+  !define MUI_ICON    "POPFileIcon\popfile.ico"
+  !define MUI_UNICON  "remove.ico"
 
-  ; Offer to display the POPFile User Interface (The 'CheckRunStatus' function ensures this
-  ; option is only offered if the installer has started POPFile running)
+  ; The "Header" bitmap appears on all pages of the installer (except Welcome & Finish pages)
+  ; and on all pages of the uninstaller.
 
-  !define MUI_FINISHPAGE_RUN
-  !define MUI_FINISHPAGE_RUN_FUNCTION "RunUI"
+  !define MUI_HEADERIMAGE
+  !define MUI_HEADERIMAGE_BITMAP "hdr-common.bmp"
+  !define MUI_HEADERIMAGE_RIGHT
 
-  ; Display the Release Notes for this version of POPFile
-
-  !define MUI_FINISHPAGE_SHOWREADME
-  !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
-  !define MUI_FINISHPAGE_SHOWREADME_FUNCTION "ShowReadMe"
-
-  ; Debug aid: Allow log file checking (by clicking "Show Details" button on the "Install" page)
-
-  !define MUI_FINISHPAGE_NOAUTOCLOSE
-
-  ;-----------------------------------------
-  ; General Settings - Other Settings
-  ;-----------------------------------------
-
-  ; Show a message box with a warning when the user closes the installation
-
-  !define MUI_ABORTWARNING
-
-  ;-----------------------------------------
-  ; Interface Settings
-  ;-----------------------------------------
+  ;----------------------------------------------------------------
+  ;  Interface Settings - Interface Resource Settings
+  ;----------------------------------------------------------------
 
   ; The banner provided by the default 'modern.exe' UI does not provide much room for the
   ; two lines of text, e.g. the German version is truncated, so we use a custom UI which
@@ -338,38 +288,181 @@
   ; space provided by the default 'modern_headerbmpr.exe' UI, so we use a custom UI which
   ; leaves more room for the TITLE and SUBTITLE text.
 
-  !define MUI_UI_HEADERBITMAP_RIGHT "UI\pfi_headerbmpr.exe"
+  !define MUI_UI_HEADERIMAGE_RIGHT "UI\pfi_headerbmpr.exe"
 
-  ; The "Special" bitmap appears on the "Welcome" and "Finish" pages,
-  ; the "Header" bitmap appears on the other pages of the installer.
+  ;----------------------------------------------------------------
+  ;  Interface Settings - Welcome/Finish Page Interface Settings
+  ;----------------------------------------------------------------
 
-  !define MUI_SPECIALBITMAP "special.bmp"
-  !define MUI_HEADERBITMAP "hdr-common.bmp"
-  !define MUI_HEADERBITMAP_RIGHT
+  ; The "Special" bitmap appears on the "Welcome" and "Finish" pages
+  
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "special.bmp"
+  
+  ;----------------------------------------------------------------
+  ;  Interface Settings - Installer Finish Page Interface Settings
+  ;----------------------------------------------------------------
 
-  ; The icon files for the installer and uninstaller must have the same structure. For example,
-  ; if one icon file contains a 32x32 16-colour image and a 16x16 16-colour image then the other
-  ; file cannot just contain a 32x32 16-colour image, it must also have a 16x16 16-colour image.
+  ; Let user display the installation log (by clicking the "Show details" button)
 
-  !define MUI_ICON    "POPFileIcon\popfile.ico"
-  !define MUI_UNICON  "remove.ico"
+  !define MUI_FINISHPAGE_NOAUTOCLOSE
 
-  ;-----------------------------------------
-  ; Custom Functions added to MUI pages
-  ;-----------------------------------------
+  ;----------------------------------------------------------------
+  ;  Interface Settings - Abort Warning Settings
+  ;----------------------------------------------------------------
+
+  ; Show a message box with a warning when the user closes the installation
+
+  !define MUI_ABORTWARNING
+
+  ;----------------------------------------------------------------
+  ; Customize MUI - General Custom Function
+  ;----------------------------------------------------------------
 
   ; Use a custom '.onGUIInit' function to add language-specific texts to custom page INI files
 
   !define MUI_CUSTOMFUNCTION_GUIINIT PFIGUIInit
 
+  ;----------------------------------------------------------------
+  ; Language Settings for MUI pages
+  ;----------------------------------------------------------------
+
+  ; Same "Language selection" dialog is used for the installer and the uninstaller
+  ; so we override the standard "Installer Language" title to avoid confusion.
+
+  !define MUI_LANGDLL_WINDOWTITLE "Language Selection"
+
+  ; Always show the language selection dialog, even if a language has been stored in the
+  ; registry (the language stored in the registry will be selected as the default language)
+
+  !define MUI_LANGDLL_ALWAYSSHOW
+
+  ; Remember user's language selection and offer this as the default when re-installing
+  ; (uninstaller also uses this setting to determine which language is to be used)
+
+  !define MUI_LANGDLL_REGISTRY_ROOT "HKLM"
+  !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\${C_PFI_PRODUCT}"
+  !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
+
+#--------------------------------------------------------------------------
+# Define the Page order for the installer (and the uninstaller)
+#--------------------------------------------------------------------------
+
+  ;---------------------------------------------------
+  ; Installer Page - Welcome
+  ;---------------------------------------------------
+
+  ; Use a "pre" function for the 'Welcome' page to ensure the installer window is visible
+  ; (if the "Release Notes" were displayed, another window could have been positioned
+  ; to obscure the installer window)
+
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE "ShowInstaller"
+
+  !define MUI_WELCOMEPAGE_TEXT "$(PFI_TEXT_WELCOME_INFO_TEXT)"
+  
+  !insertmacro MUI_PAGE_WELCOME
+  
+  ;---------------------------------------------------
+  ; Installer Page - License Page (uses English GPL)
+  ;---------------------------------------------------
+
+  ; Three styles of 'License Agreement' page are available:
+  ; (1) New style with an 'I accept' checkbox below the license window
+  ; (2) New style with 'I accept/I do not accept' radio buttons below the license window
+  ; (3) Classic style with the 'Next' button replaced by an 'Agree' button
+  ;     (to get the 'Classic' style, comment-out the CHECKBOX and the RADIOBUTTONS 'defines')
+
+  !define MUI_LICENSEPAGE_CHECKBOX
+##  !define MUI_LICENSEPAGE_RADIOBUTTONS
+
+  !insertmacro MUI_PAGE_LICENSE "..\engine\license"
+
+  ;---------------------------------------------------
+  ; Installer Page - Select Components to be installed
+  ;---------------------------------------------------
+
+  !insertmacro MUI_PAGE_COMPONENTS
+
+  ;---------------------------------------------------
+  ; Installer Page - Select installation Directory
+  ;---------------------------------------------------
+
   ; Use a "leave" function to look for 'popfile.cfg' in the directory selected for this install
 
-  !define MUI_CUSTOMFUNCTION_DIRECTORY_LEAVE "CheckExistingConfig"
+  !define MUI_PAGE_CUSTOMFUNCTION_LEAVE "CheckExistingConfig"
+  
+  !insertmacro MUI_PAGE_DIRECTORY
+  
+  ;---------------------------------------------------
+  ; Installer Page - POP3 and UI Port Options
+  ;---------------------------------------------------
+  
+  Page custom SetOptionsPage "CheckPortOptions"
+  
+  ;---------------------------------------------------
+  ; Installer Page - Install files
+  ;---------------------------------------------------
+
+  !insertmacro MUI_PAGE_INSTFILES
+  
+  ;---------------------------------------------------
+  ; Installer Page - Create Buckets (if necessary)
+  ;---------------------------------------------------
+
+  !insertmacro CBP_PAGE_SELECTBUCKETS
+  
+  ;---------------------------------------------------
+  ; Installer Page - Configure Outlook Express
+  ;---------------------------------------------------
+  
+  Page custom SetOutlookExpressPage
+  
+  ;---------------------------------------------------
+  ; Installer Page - Choose POPFile launch mode
+  ;---------------------------------------------------
+
+  Page custom StartPOPFilePage "CheckLaunchOptions"
+  
+  ;---------------------------------------------------
+  ; Installer Page - Convert Corpus (if necessary)
+  ;---------------------------------------------------
+  
+  Page custom ConvertCorpusPage
+
+  ;---------------------------------------------------
+  ; Installer Page - Finish (may offer to start UI)
+  ;---------------------------------------------------
 
   ; Use a "pre" function for the 'Finish' page to ensure installer only offers to display
   ; POPFile User Interface if user has chosen to start POPFile from the installer.
 
-  !define MUI_CUSTOMFUNCTION_FINISH_PRE "CheckRunStatus"
+  !define MUI_PAGE_CUSTOMFUNCTION_PRE "CheckRunStatus"
+
+  ; Offer to display the POPFile User Interface (The 'CheckRunStatus' function ensures this
+  ; option is only offered if the installer has started POPFile running)
+
+  !define MUI_FINISHPAGE_RUN
+  !define MUI_FINISHPAGE_RUN_TEXT     "$(PFI_TEXT_FINISH_RUN)"
+  !define MUI_FINISHPAGE_RUN_FUNCTION "RunUI"
+
+  ; Provide a checkbox to let user display the Release Notes for this version of POPFile
+
+  !define MUI_FINISHPAGE_SHOWREADME
+  !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+  !define MUI_FINISHPAGE_SHOWREADME_FUNCTION "ShowReadMe"
+  
+  !insertmacro MUI_PAGE_FINISH
+
+  ;---------------------------------------------------
+  ; Uninstaller Page - Confirmation Page
+  ;---------------------------------------------------
+
+  !insertmacro MUI_UNPAGE_CONFIRM
+
+  ;---------------------------------------------------
+  ; Uninstaller Page - Uninstall POPFile
+  ;---------------------------------------------------
+
+  !insertmacro MUI_UNPAGE_INSTFILES
 
 #--------------------------------------------------------------------------
 # User Registers (Global)
@@ -400,67 +493,49 @@
 #--------------------------------------------------------------------------
 
   ;-----------------------------------------
-  ; Language Settings for MUI pages
-  ;-----------------------------------------
-
-  ; Same "Language selection" dialog is used for the installer and the uninstaller
-  ; so we override the standard "Installer Language" title to avoid confusion.
-
-  !define MUI_TEXT_LANGDLL_WINDOWTITLE "Language Selection"
-
-  ; Always show the language selection dialog, even if a language has been stored in the
-  ; registry (the language stored in the registry will be selected as the default language)
-
-  !define MUI_LANGDLL_ALWAYSSHOW
-
-  ; Remember user's language selection and offer this as the default when re-installing
-  ; (uninstaller also uses this setting to determine which language is to be used)
-
-  !define MUI_LANGDLL_REGISTRY_ROOT "HKLM"
-  !define MUI_LANGDLL_REGISTRY_KEY "SOFTWARE\${MUI_PRODUCT}"
-  !define MUI_LANGDLL_REGISTRY_VALUENAME "Installer Language"
-
-  ;-----------------------------------------
   ; Select the languages to be supported by installer/uninstaller.
-  ; Currently a subset of the languages supported by NSIS MUI 1.65 (using the NSIS names)
+  ; Currently a subset of the languages supported by NSIS MUI 1.67 (using the NSIS names)
   ;-----------------------------------------
 
   ; At least one language must be specified for the installer (the default is "English")
 
   !insertmacro PFI_LANG_LOAD "English"
 
-  ; Conditional compilation: if ENGLISH_ONLY is defined, support only 'English'
+  ; Conditional compilation: if ENGLISH_MODE is defined, support only 'English'
 
-  !ifndef ENGLISH_ONLY
+  !ifndef ENGLISH_MODE
 
         ; Additional languages supported by the installer.
 
         ; To remove a language, comment-out the relevant '!insertmacro PFI_LANG_LOAD' line
-        ; from this list. (To remove all of these languages, use /DENGLISH_ONLY on command-line)
+        ; from this list. (To remove all of these languages, use /DENGLISH_MODE on command-line)
 
         ; Entries will appear in the drop-down list of languages in the order given below
         ; (the order used here ensures that the list entries appear in alphabetic order).
 
-        !insertmacro PFI_LANG_LOAD "Bulgarian"    ; 'New style' license msgs missing (27-Jun-03)
+        !insertmacro PFI_LANG_LOAD "Bulgarian"
         !insertmacro PFI_LANG_LOAD "SimpChinese"
         !insertmacro PFI_LANG_LOAD "TradChinese"
         !insertmacro PFI_LANG_LOAD "Czech"
-        !insertmacro PFI_LANG_LOAD "Danish"       ; 'New style' license msgs missing (27-Jun-03)
+        !insertmacro PFI_LANG_LOAD "Danish"
         !insertmacro PFI_LANG_LOAD "German"
         !insertmacro PFI_LANG_LOAD "Spanish"
         !insertmacro PFI_LANG_LOAD "French"
         !insertmacro PFI_LANG_LOAD "Greek"
+        !insertmacro PFI_LANG_LOAD "Italian"
         !insertmacro PFI_LANG_LOAD "Japanese"
         !insertmacro PFI_LANG_LOAD "Korean"
         !insertmacro PFI_LANG_LOAD "Hungarian"
         !insertmacro PFI_LANG_LOAD "Dutch"
+        !insertmacro PFI_LANG_LOAD "Norwegian"
         !insertmacro PFI_LANG_LOAD "Polish"
         !insertmacro PFI_LANG_LOAD "Portuguese"
         !insertmacro PFI_LANG_LOAD "PortugueseBR"
         !insertmacro PFI_LANG_LOAD "Russian"
         !insertmacro PFI_LANG_LOAD "Slovak"
-        !insertmacro PFI_LANG_LOAD "Finnish"      ; 'New style' license msgs missing (27-Jun-03)
+        !insertmacro PFI_LANG_LOAD "Finnish"
         !insertmacro PFI_LANG_LOAD "Swedish"
+        !insertmacro PFI_LANG_LOAD "Turkish"
         !insertmacro PFI_LANG_LOAD "Ukrainian"
 
   !endif
@@ -481,8 +556,8 @@
 # Default Destination Folder
 #--------------------------------------------------------------------------
 
-  InstallDir "$PROGRAMFILES\${MUI_PRODUCT}"
-  InstallDirRegKey HKLM "SOFTWARE\${MUI_PRODUCT}" InstallLocation
+  InstallDir "$PROGRAMFILES\${C_PFI_PRODUCT}"
+  InstallDirRegKey HKLM "SOFTWARE\${C_PFI_PRODUCT}" InstallLocation
 
 #--------------------------------------------------------------------------
 # Reserve the files required by the installer (to improve performance)
@@ -494,10 +569,10 @@
 
   !insertmacro MUI_RESERVEFILE_LANGDLL
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-  !insertmacro MUI_RESERVEFILE_WELCOMEFINISHPAGE
   ReserveFile "ioA.ini"
   ReserveFile "ioB.ini"
   ReserveFile "ioC.ini"
+  ReserveFile "ioD.ini"
   ReserveFile "${C_RELEASE_NOTES}"
 
 #--------------------------------------------------------------------------
@@ -514,15 +589,16 @@ Function .onInit
   Push ${L_OUTPUT_FILE_HANDLE}
   Push ${L_LINE}
 
-  ; Conditional compilation: if ENGLISH_ONLY is defined, support only 'English'
+  ; Conditional compilation: if ENGLISH_MODE is defined, support only 'English'
 
-  !ifndef ENGLISH_ONLY
+  !ifndef ENGLISH_MODE
         !insertmacro MUI_LANGDLL_DISPLAY
   !endif
 
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioA.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioB.ini"
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioC.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "ioD.ini"
 
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT_AS "${C_RELEASE_NOTES}" "${C_README}"
 
@@ -568,18 +644,20 @@ FunctionEnd
 Function PFIGUIInit
 
   SearchPath $G_NOTEPAD notepad.exe
+  
   MessageBox MB_YESNO|MB_ICONQUESTION \
       "$(PFI_LANG_MBRELNOTES_1)\
       $\r$\n$\r$\n\
-      $(PFI_LANG_MBRELNOTES_2)" IDNO exit
+      $(PFI_LANG_MBRELNOTES_2)" IDNO continue
+
   StrCmp $G_NOTEPAD "" use_file_association
   ExecWait 'notepad.exe "$PLUGINSDIR\${C_README}.txt"'
-  GoTo exit
+  GoTo continue
 
 use_file_association:
   ExecShell "open" "$PLUGINSDIR\${C_README}.txt"
 
-exit:
+continue:
 
   ; Insert appropriate language strings into the custom page INI files
   ; (the CBP package creates its own INI file so there is no need for a CBP *Page_Init function)
@@ -587,6 +665,7 @@ exit:
   Call SetOptionsPage_Init
   Call SetOutlookExpressPage_Init
   Call StartPOPFilePage_Init
+  Call ConvertCorpusPage_Init
 
 FunctionEnd
 
@@ -621,7 +700,7 @@ Section "POPFile" SecPOPFile
   !insertmacro MUI_INSTALLOPTIONS_READ $G_GUI     "ioA.ini" "Field 4" "State"
   !insertmacro MUI_INSTALLOPTIONS_READ $G_STARTUP "ioA.ini" "Field 5" "State"
 
-  WriteRegStr HKLM "SOFTWARE\${MUI_PRODUCT}" InstallLocation $INSTDIR
+  WriteRegStr HKLM "SOFTWARE\${C_PFI_PRODUCT}" InstallLocation $INSTDIR
 
   ; Install the POPFile Core files
 
@@ -709,21 +788,21 @@ update_config:
   ; 'CreateShortCut' uses '$OUTDIR' as the working directory for the shortcut
   ; ('SetOutPath' is one way to change the value of $OUTDIR)
 
-  SetOutPath "$SMPROGRAMS\${MUI_PRODUCT}"
+  SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
   SetOutPath $INSTDIR
-  CreateShortCut "$SMPROGRAMS\${MUI_PRODUCT}\Uninstall PFI Testbed.lnk" "$INSTDIR\uninstall.exe"
+  CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall PFI Testbed.lnk" "$INSTDIR\uninstall.exe"
 
   Sleep ${C_INST_PROG_SHORT_DELAY}
 
   ; Create entry in the Control Panel's "Add/Remove Programs" list
 
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" \
-              "DisplayName" "${MUI_PRODUCT} ${MUI_VERSION}"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" \
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
+              "DisplayName" "${C_PFI_PRODUCT} ${C_PFI_VERSION}"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
               "UninstallString" "$INSTDIR\uninstall.exe"
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" \
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
               "NoModify" "1"
-  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}" \
+  WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
               "NoRepair" "1"
 
   SetDetailsPrint textonly
@@ -733,6 +812,34 @@ update_config:
   Pop ${L_CFG}
 
   !undef L_CFG
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Installer Section: Flat File Corpus Backup component (always 'installed')
+#
+# If we are performing an upgrade of a 'flat file' version of POPFile, we make a backup of the
+# flat file corpus structure. Note that if a backup already exists, we do nothing.
+#
+# The backup is created in the '$INSTDIR\backup' folder. Information on the backup is stored
+# in the 'backup.ini' file to assist in restoring the flat file corpus. A copy of 'popfile.cfg'
+# is also placed in the backup folder.
+#--------------------------------------------------------------------------
+
+Section "-FlatFileBackup" SecBackup
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_FFCBACK)"
+  SetDetailsPrint listonly
+  
+  Sleep ${C_INST_PROG_FFC_DELAY}
+
+  DetailPrint "Error detected when making corpus backup"
+  MessageBox MB_OK|MB_ICONEXCLAMATION "$(PFI_LANG_MBFFCERR_1)"
+
+  SetDetailsPrint textonly
+  DetailPrint "$(PFI_LANG_INST_PROG_ENDSEC)"
+  SetDetailsPrint listonly
 
 SectionEnd
 
@@ -787,10 +894,10 @@ Section "Languages" SecLangs
   SetOutPath $INSTDIR\languages
   File "..\engine\languages\*.msg"
 
-  ; Conditional compilation: if ENGLISH_ONLY is defined, installer supports only 'English'
+  ; Conditional compilation: if ENGLISH_MODE is defined, installer supports only 'English'
   ; so there is no need to select a language for the POPFile UI
 
-  !ifndef ENGLISH_ONLY
+  !ifndef ENGLISH_MODE
 
         ; UI_LANG_CONFIG parameters: "NSIS Language name"  "POPFile UI language name"
 
@@ -801,36 +908,38 @@ Section "Languages" SecLangs
         !insertmacro UI_LANG_CONFIG "CZECH" "Czech"
         !insertmacro UI_LANG_CONFIG "DANISH" "Dansk"
         !insertmacro UI_LANG_CONFIG "GERMAN" "Deutsch"
-        !insertmacro UI_LANG_CONFIG "SPANISH" "Español"
+        !insertmacro UI_LANG_CONFIG "SPANISH" "Espanol"
         !insertmacro UI_LANG_CONFIG "FRENCH" "Francais"
         !insertmacro UI_LANG_CONFIG "GREEK" "Hellenic"
+        !insertmacro UI_LANG_CONFIG "ITALIAN" "Italiano"
         !insertmacro UI_LANG_CONFIG "JAPANESE" "Nihongo"
         !insertmacro UI_LANG_CONFIG "KOREAN" "Korean"
         !insertmacro UI_LANG_CONFIG "HUNGARIAN" "Hungarian"
         !insertmacro UI_LANG_CONFIG "DUTCH" "Nederlands"
+        !insertmacro UI_LANG_CONFIG "NORWEGIAN" "Norsk"
         !insertmacro UI_LANG_CONFIG "POLISH" "Polish"
-        !insertmacro UI_LANG_CONFIG "PORTUGUESE" "Português"
-        !insertmacro UI_LANG_CONFIG "PORTUGUESEBR" "Português do Brasil"
+        !insertmacro UI_LANG_CONFIG "PORTUGUESE" "Portugues"
+        !insertmacro UI_LANG_CONFIG "PORTUGUESEBR" "Portugues do Brasil"
         !insertmacro UI_LANG_CONFIG "RUSSIAN" "Russian"
         !insertmacro UI_LANG_CONFIG "SLOVAK" "Slovak"
         !insertmacro UI_LANG_CONFIG "FINNISH" "Suomi"
         !insertmacro UI_LANG_CONFIG "SWEDISH" "Svenska"
+        !insertmacro UI_LANG_CONFIG "TURKISH" "Turkce"
         !insertmacro UI_LANG_CONFIG "UKRAINIAN" "Ukrainian"
 
         ; at this point, no match was found so we use the default POPFile UI language
         ; (and leave it to POPFile to determine which language to use)
-
-        goto lang_done
-
-      lang_save:
-        FileOpen  ${L_CFG} $INSTDIR\popfile.cfg a
-        FileSeek  ${L_CFG} 0 END
-        FileWrite ${L_CFG} "html_language ${L_LANG}$\r$\n"
-        FileClose ${L_CFG}
-
-      lang_done:
   !endif
 
+  goto lang_done
+
+lang_save:
+  FileOpen  ${L_CFG} $INSTDIR\popfile.cfg a
+  FileSeek  ${L_CFG} 0 END
+  FileWrite ${L_CFG} "html_language ${L_LANG}$\r$\n"
+  FileClose ${L_CFG}
+
+lang_done:
   Sleep ${C_INST_PROG_LANGS_DELAY}
 
   SetDetailsPrint textonly
@@ -849,11 +958,22 @@ SectionEnd
 # Component-selection page descriptions
 #--------------------------------------------------------------------------
 
-  !insertmacro MUI_FUNCTIONS_DESCRIPTION_BEGIN
+  !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
     !insertmacro MUI_DESCRIPTION_TEXT ${SecPOPFile} $(DESC_SecPOPFile)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecSkins}   $(DESC_SecSkins)
     !insertmacro MUI_DESCRIPTION_TEXT ${SecLangs}   $(DESC_SecLangs)
-  !insertmacro MUI_FUNCTIONS_DESCRIPTION_END
+  !insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+#--------------------------------------------------------------------------
+# Installer Function: ShowInstaller
+# (the "pre" function for the WELCOME page)
+#
+# Ensure the installer window is not hidden behind any other windows
+#--------------------------------------------------------------------------
+
+Function ShowInstaller
+  BringToFront
+FunctionEnd
 
 #--------------------------------------------------------------------------
 # Installer Function: MakeItSafe
@@ -878,13 +998,28 @@ Function MakeItSafe
   DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_OLD_GUI}"
 
   DetailPrint "$(PFI_LANG_INST_LOG_1) ${L_NEW_GUI}"
+  
+  Goto exit
 
-  ; Insert call to WaitUntilUnlocked to avoid NSIS compiler warnings
+  ; Insert some (inaccessible) calls to avoid NSIS compiler warnings
+
+  StrCpy ${L_EXE} "$INSTDIR\wperl.exe"
+  Push ${L_EXE}
+  Call CheckIfLocked
+  Pop ${L_EXE}
 
   StrCpy ${L_EXE} "$INSTDIR\wperl.exe"
   Push ${L_EXE}
   Call WaitUntilUnlocked
 
+  Push "1"
+  Call SetConsoleMode
+
+  Push $INSTDIR
+  Call GetCorpusPath
+  Pop ${L_EXE}
+
+exit:
   Pop ${L_OLD_GUI}
   Pop ${L_NEW_GUI}
   Pop ${L_EXE}
@@ -1101,14 +1236,6 @@ FunctionEnd
 #--------------------------------------------------------------------------
 # Installer Function: SetOptionsPage (generates a custom page)
 #
-# If this is an "upgrade" installation, the user is offered the chance to uninstall the old
-# version before continuing with the upgrade. If an uninstall is selected, the 'uninstall.exe'
-# from THIS installer is used instead of the one from the POPFile which is being upgraded. This
-# is done to ensure that a special "upgrade" uninstall is performed instead of a "normal" one.
-# The "upgrade" uninstall ensures that the corpus and some other files are not removed. After
-# an "upgrade" uninstall, the "SHUTDOWN" warning message is removed from the custom page
-# (POPFile is automatically shutdown during the "upgrade" uninstall).
-#
 # This function is used to configure the POP3 and UI ports, and
 # whether or not POPFile should be started automatically when Windows starts.
 #
@@ -1123,33 +1250,6 @@ Function SetOptionsPage
 
   Push ${L_PORTLIST}
   Push ${L_RESULT}
-
-  ; Ensure custom page shows the "Shutdown" warning message box.
-
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Settings" "NumFields" "7"
-
-  IfFileExists "$INSTDIR\popfile.pl" 0 continue
-
-  MessageBox MB_YESNO|MB_ICONEXCLAMATION \
-      "$(PFI_LANG_OPTIONS_MBUNINST_1) '$INSTDIR'\
-      $\r$\n$\r$\n\
-      $(PFI_LANG_OPTIONS_MBUNINST_2)\
-      $\r$\n$\r$\n\
-      ($(PFI_LANG_OPTIONS_MBUNINST_3))" IDNO continue
-
-  Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_OPTIONS_BANNER_1)" "$(PFI_LANG_OPTIONS_BANNER_2)"
-  WriteUninstaller $INSTDIR\uninstall.exe
-  ExecWait '"$INSTDIR\uninstall.exe"  _?=$INSTDIR'
-  IfFileExists "$INSTDIR\popfile.pl" skip_msg_delete
-
-  ; No need to display the warning about shutting down POPFile as it has just been uninstalled
-
-  !insertmacro MUI_INSTALLOPTIONS_WRITE "ioA.ini" "Settings" "NumFields" "5"
-
-skip_msg_delete:
-  Banner::destroy
-
-continue:
 
   ; The function "CheckExistingConfig" loads $G_POP3 and $G_GUI with the settings found in
   ; a previously installed "popfile.cfg" file or if no such file is found, it loads the
@@ -1229,7 +1329,7 @@ Function CheckPortOptions
   Push ${L_RESULT}
 
   !insertmacro MUI_INSTALLOPTIONS_READ $G_POP3 "ioA.ini" "Field 2" "State"
-  !insertmacro MUI_INSTALLOPTIONS_READ $G_GUI "ioA.ini" "Field 4" "State"
+  !insertmacro MUI_INSTALLOPTIONS_READ $G_GUI  "ioA.ini" "Field 4" "State"
 
   ; strip leading zeroes and spaces from user input
 
@@ -1678,6 +1778,42 @@ exit_without_banner:
 FunctionEnd
 
 #--------------------------------------------------------------------------
+# Installer Function: ConvertCorpusPage_Init (adds language texts to custom page INI file)
+#
+# This function adds language texts to the INI file used by the "ConvertCorpusPage" function
+# (to make the custom page use the language selected by the user for the installer)
+#--------------------------------------------------------------------------
+
+Function ConvertCorpusPage_Init
+
+  !insertmacro PFI_IO_TEXT "ioD.ini" "1" "$(PFI_LANG_FLATFILE_IO_NOTE_1)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "2" "$(PFI_LANG_FLATFILE_IO_NOTE_2)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "3" "$(PFI_LANG_FLATFILE_IO_NOTE_3)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "4" "$(PFI_LANG_FLATFILE_IO_NOTE_4)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "5" "$(PFI_LANG_FLATFILE_IO_NOTE_5)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "6" "$(PFI_LANG_FLATFILE_IO_NOTE_6)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "7" "$(PFI_LANG_FLATFILE_IO_NOTE_7)"
+  !insertmacro PFI_IO_TEXT "ioD.ini" "8" "$(PFI_LANG_FLATFILE_IO_NOTE_8)"
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: ConvertCorpusPage (generates a custom page)
+#
+# Displays custom page when an existing flat file corpus has to be converted to the new
+# BerkeleyDB format. Conversion may take several minutes during which time the POPFile
+# User Interface will be unresponsive.
+#--------------------------------------------------------------------------
+
+Function ConvertCorpusPage
+
+  !insertmacro MUI_HEADER_TEXT "$(PFI_LANG_FLATFILE_TITLE)" "$(PFI_LANG_FLATFILE_SUBTITLE)"
+
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "ioD.ini"
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
 # Installer Function: CheckRunStatus
 # (the "pre" function for the 'Finish' page)
 #
@@ -1697,7 +1833,7 @@ Function CheckRunStatus
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioSpecial.ini" "Field 4" "Flags" ""
 
-  ; Get the status of the 'Do not run POPFile' radio button on the previous page of installer
+  ; Get the status of the 'Do not run POPFile' radio button on the 'Start POPFile' page
 
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Field 2" "State"
   StrCmp ${L_TEMP} "0" selection_ok
@@ -1756,90 +1892,43 @@ FunctionEnd
 
 #--------------------------------------------------------------------------
 # Uninstaller Section
-#
-# There are two types of uninstall:
-#
-# (1) normal uninstall, performed when user wishes to completely remove POPFile from the system
-#
-# (2) an uninstall performed as part of an upgrade installation. In this case some files are
-#     preserved (eg the existing corpus).
 #--------------------------------------------------------------------------
 
 Section "Uninstall"
 
   !define L_CFG         $R9   ; used as file handle
-  !define L_LNE         $R8   ; a line from popfile.cfg
-  !define L_REG_KEY     $R7   ; L_REG_* registers are used to  restore Outlook Express settings
-  !define L_REG_SUBKEY  $R6
-  !define L_REG_VALUE   $R5
-  !define L_TEMP        $R4
-  !define L_UPGRADE     $R3   ; "yes" if this is an upgrade, "no" if we are just uninstalling
-  !define L_CORPUS      $R2   ; holds full path to the POPFile corpus data
-  !define L_SUBCORPUS   $R1   ; "yes" if corpus is in a subfolder of $INSTDIR, otherwise "no"
-  !define L_OLDUI       $R0   ; holds old-style UI port (if previous POPFile is an old version)
-  !define L_HISTORY     $9    ; holds full path to the message history data
-  !define L_SUBHISTORY  $8    ; "yes" if history data in subfolder of $INSTDIR, otherwise "no"
-  !define L_EXE         $7    ; full path of the EXE to be monitored
+  !define L_EXE         $R7   ; full path of the EXE to be monitored
+  !define L_LNE         $R5   ; a line from popfile.cfg
+  !define L_OLDUI       $R4   ; holds old-style UI port (if previous POPFile is an old version)
+  !define L_REG_KEY     $R3   ; L_REG_* registers are used to  restore Outlook Express settings
+  !define L_REG_SUBKEY  $R2
+  !define L_REG_VALUE   $R1
+  !define L_TEMP        $R0
 
-  ; When a normal uninstall is performed, the uninstaller is copied to a uniquely named
-  ; temporary file and it is that temporary file which is executed (this is how the uninstaller
-  ; removes itself). If we are performing an uninstall as part of an upgrade installation then
-  ; no temporary file is created, we execute the 'real' file ($INSTDIR\uninstall.exe) instead.
-
-  StrCpy ${L_UPGRADE} "no"
-
-  Push $CMDLINE
-  Push "$INSTDIR\uninstall.exe"
-  Call un.StrStr
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" confirmation
-  StrCpy ${L_UPGRADE} "yes"
-
-confirmation:
   IfFileExists $INSTDIR\popfile.pl skip_confirmation
     MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
-        "$(un.PFI_LANG_MBNOTFOUND_1) '$INSTDIR'.\
+        "$(PFI_LANG_UN_MBNOTFOUND_1) '$INSTDIR'.\
         $\r$\n$\r$\n\
-        $(un.PFI_LANG_MBNOTFOUND_2)" IDYES skip_confirmation
-    Abort "$(un.PFI_LANG_ABORT_1)"
+        $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES skip_confirmation
+    Abort "$(PFI_LANG_UN_ABORT_1)"
 
 skip_confirmation:
 
-  StrCpy ${L_SUBCORPUS} "yes"
+  ; Insert some (inaccessible) calls to avoid NSIS compiler warnings
 
-  Push $INSTDIR
-  Call un.GetCorpusPath
-  Pop ${L_CORPUS}
-  Push ${L_CORPUS}
-  Push $INSTDIR
-  Call un.StrStr
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" 0 check_msg_folder
-  StrCpy ${L_SUBCORPUS} "no"
-
-check_msg_folder:
-  StrCpy ${L_SUBHISTORY} "yes"
-
-  Push $INSTDIR
-  Call un.GetHistoryPath
-  Pop ${L_HISTORY}
-  Push ${L_HISTORY}
-  Push $INSTDIR
-  Call un.StrStr
-  Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" 0 check_if_running
-  StrCpy ${L_SUBHISTORY} "no"
-
-check_if_running:
-
-  ; Insert call to un.WaitUntilUnlocked to avoid NSIS compiler warnings
-
+  Goto continue
+  
+  StrCpy ${L_EXE} "$INSTDIR\wperl.exe"
+  Push ${L_EXE}
+  Call un.CheckIfLocked
+  Pop ${L_EXE}
   StrCpy ${L_EXE} "$INSTDIR\wperl.exe"
   Push ${L_EXE}
   Call un.WaitUntilUnlocked
-
+  
+continue:
   SetDetailsPrint textonly
-  DetailPrint "$(un.PFI_LANG_PROGRESS_1)"
+  DetailPrint "$(PFI_LANG_UN_PROGRESS_1)"
   SetDetailsPrint listonly
 
   StrCpy $G_GUI ""
@@ -1876,7 +1965,7 @@ ui_port_done:
   Call un.StrCheckDecimal
   Pop $G_GUI
   StrCmp $G_GUI "" use_other_port
-  DetailPrint "$(un.PFI_LANG_LOG_1) $G_GUI"
+  DetailPrint "$(PFI_LANG_UN_LOG_1) $G_GUI"
   Sleep 250 ; milliseconds
   Goto remove_shortcuts
 
@@ -1886,7 +1975,7 @@ use_other_port:
   Call un.StrCheckDecimal
   Pop ${L_OLDUI}
   StrCmp ${L_OLDUI} "" remove_shortcuts
-  DetailPrint "$(un.PFI_LANG_LOG_1) ${L_OLDUI}"
+  DetailPrint "$(PFI_LANG_UN_LOG_1) ${L_OLDUI}"
   Sleep 250 ; milliseconds
 
 remove_shortcuts:
@@ -1894,16 +1983,16 @@ remove_shortcuts:
   Sleep ${C_UNINST_PROGRESS_1_DELAY}
 
   SetDetailsPrint textonly
-  DetailPrint "$(un.PFI_LANG_PROGRESS_2)"
+  DetailPrint "$(PFI_LANG_UN_PROGRESS_2)"
   SetDetailsPrint listonly
 
-  Delete "$SMPROGRAMS\${MUI_PRODUCT}\*.lnk"
-  RMDir "$SMPROGRAMS\${MUI_PRODUCT}"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall PFI Testbed.lnk"
+  RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
 
   Sleep ${C_UNINST_PROGRESS_2_DELAY}
 
   SetDetailsPrint textonly
-  DetailPrint "$(un.PFI_LANG_PROGRESS_3)"
+  DetailPrint "$(PFI_LANG_UN_PROGRESS_3)"
   SetDetailsPrint listonly
 
   Sleep ${C_UNINST_PROGRESS_3_DELAY}
@@ -1913,17 +2002,10 @@ remove_shortcuts:
   Delete $INSTDIR\popfile.pl
   Delete $INSTDIR\popfile.cfg.bak
 
-  ; For "upgrade" uninstalls, we leave most files in $INSTDIR
-  ; and do not restore Outlook Express settings
-
-  StrCmp ${L_UPGRADE} "yes" no_reg_file
-
   ; Note: 'translator.htm' is not deleted here
-  ; (this ensures the message box showing the 'un.PFI_LANG_MBREMDIR_1' string appears later on)
+  ; (this ensures the message box showing the 'PFI_LANG_UN_MBREMDIR_1' string appears later on)
 
-  Delete $INSTDIR\*.pl
   Delete $INSTDIR\*.gif
-  Delete $INSTDIR\*.exe
   Delete $INSTDIR\*.change
   Delete $INSTDIR\*.change.txt
   Delete $INSTDIR\license
@@ -1932,7 +2014,7 @@ remove_shortcuts:
   IfFileExists "$INSTDIR\popfile.reg.dummy" 0 no_reg_file
 
   SetDetailsPrint textonly
-  DetailPrint "$(un.PFI_LANG_PROGRESS_4)"
+  DetailPrint "$(PFI_LANG_UN_PROGRESS_4)"
   SetDetailsPrint listonly
 
   ; Read the registry settings found in popfile.reg.dummy and restore them
@@ -1943,7 +2025,7 @@ remove_shortcuts:
   IfErrors skip_registry_restore
   Sleep ${C_UNINST_PROGRESS_4_DELAY}
 
-  DetailPrint "$(un.PFI_LANG_LOG_2): popfile.reg.dummy"
+  DetailPrint "$(PFI_LANG_UN_LOG_2): popfile.reg.dummy"
 
 restore_loop:
   FileRead ${L_CFG} ${L_REG_KEY}
@@ -1964,17 +2046,17 @@ restore_loop:
 
   ; Testbed does NOT restore Outlook Express settings (it never changed them during 'install')
 
-  DetailPrint "$(un.PFI_LANG_LOG_3) ${L_REG_SUBKEY}: ${L_REG_VALUE}"
+  DetailPrint "$(PFI_LANG_UN_LOG_3) ${L_REG_SUBKEY}: ${L_REG_VALUE}"
   goto restore_loop
 
 skip_registry_restore:
   FileClose ${L_CFG}
-  DetailPrint "$(un.PFI_LANG_LOG_4): popfile.reg.dummy"
+  DetailPrint "$(PFI_LANG_UN_LOG_4): popfile.reg.dummy"
   Delete $INSTDIR\popfile.reg.dummy
 
 no_reg_file:
   SetDetailsPrint textonly
-  DetailPrint "$(un.PFI_LANG_PROGRESS_5)"
+  DetailPrint "$(PFI_LANG_UN_PROGRESS_5)"
   SetDetailsPrint listonly
 
   Sleep ${C_UNINST_PROGRESS_5_DELAY}
@@ -1982,61 +2064,48 @@ no_reg_file:
   Delete $INSTDIR\languages\*.msg
   RMDir $INSTDIR\languages
 
-  StrCmp ${L_UPGRADE} "yes" skip_corpus
-  RMDir /r "$INSTDIR\corpus"
+  RMDir /r $INSTDIR\corpus
 
-skip_corpus:
   Delete $INSTDIR\stopwords
   Delete $INSTDIR\stopwords.bak
   Delete $INSTDIR\stopwords.default
 
-  StrCmp ${L_UPGRADE} "yes" remove_perl
-  RMDir /r "$INSTDIR\messages"
-
-remove_perl:
   SetDetailsPrint textonly
-  DetailPrint "$(un.PFI_LANG_PROGRESS_6)"
+  DetailPrint "$(PFI_LANG_UN_PROGRESS_6)"
   SetDetailsPrint listonly
 
   Sleep ${C_UNINST_PROGRESS_6_DELAY}
-
-  StrCmp ${L_UPGRADE} "yes" Removed
 
   Delete "$INSTDIR\Uninstall.exe"
 
   RMDir $INSTDIR
 
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${MUI_PRODUCT}"
-  DeleteRegKey HKLM "SOFTWARE\${MUI_PRODUCT}"
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}"
+  DeleteRegKey HKLM "SOFTWARE\${C_PFI_PRODUCT}"
 
   ; if $INSTDIR was removed, skip these next ones
 
   IfFileExists $INSTDIR 0 Removed
-    MessageBox MB_YESNO|MB_ICONQUESTION "$(un.PFI_LANG_MBREMDIR_1)" IDNO Removed
-    DetailPrint "$(un.PFI_LANG_LOG_5)"
+    MessageBox MB_YESNO|MB_ICONQUESTION "$(PFI_LANG_UN_MBREMDIR_1)" IDNO Removed
+    DetailPrint "$(PFI_LANG_UN_LOG_5)"
     Delete $INSTDIR\*.* ; this would be skipped if the user hits no
     RMDir /r $INSTDIR
     IfFileExists $INSTDIR 0 Removed
-      DetailPrint "$(un.PFI_LANG_LOG_6)"
+      DetailPrint "$(PFI_LANG_UN_LOG_6)"
       MessageBox MB_OK|MB_ICONEXCLAMATION \
-          "$(un.PFI_LANG_MBREMERR_1): $INSTDIR $(un.PFI_LANG_MBREMERR_2)"
+          "$(PFI_LANG_UN_MBREMERR_1): $INSTDIR $(PFI_LANG_UN_MBREMERR_2)"
 Removed:
 
   SetDetailsPrint both
 
   !undef L_CFG
+  !undef L_EXE
   !undef L_LNE
+  !undef L_OLDUI
   !undef L_REG_KEY
   !undef L_REG_SUBKEY
   !undef L_REG_VALUE
   !undef L_TEMP
-  !undef L_UPGRADE
-  !undef L_CORPUS
-  !undef L_SUBCORPUS
-  !undef L_OLDUI
-  !undef L_HISTORY
-  !undef L_SUBHISTORY
-  !undef L_EXE
 SectionEnd
 
 #--------------------------------------------------------------------------
