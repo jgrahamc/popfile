@@ -338,8 +338,8 @@ sub echo_to_dot_
         # Check for an abort
         last if ( $self->{alive_} == 0 );
 
-        #print $client $_;
-        $self->tee_($client, $_);
+        print $client $_;
+        #$self->tee_($client, $_);
         
         # The termination has to be a single line with exactly a dot on it and nothing
         # else other than line termination characters.  This is vital so that we do
