@@ -43,6 +43,9 @@ sub initialize
     # Start with debugging to file
     $self->{configuration}->{configuration}{debug} = 1;
 
+    # The default location for log files
+    $self->{configuration}->{configuration}{logdir} = './';
+
     calculate_today( $self );
     
     return 1;
@@ -116,7 +119,7 @@ sub remove_debug_files
     calculate_today( $self );
 
     if ( $self->{today} > $yesterday ) {    
-        my @debug_files = glob "popfile*.log";
+        my @debug_files = glob "$self->{configuration}->{configuration}{logdir}popfile*.log";
 
         foreach my $debug_file (@debug_files) {
             # Extract the epoch information from the popfile log file name
@@ -139,7 +142,7 @@ sub calculate_today
     
     # Create the name of the debug file for the debug() function
     $self->{today} = int( time / $seconds_per_day ) * $seconds_per_day;
-    $self->{debug_filename} = "popfile$self->{today}.log";
+    $self->{debug_filename} = "$self->{configuration}->{configuration}{logdir}popfile$self->{today}.log";
 }
 
 # ---------------------------------------------------------------------------------------------

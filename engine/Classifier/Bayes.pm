@@ -692,8 +692,8 @@ sub classify_and_modify
     # Whether we are currently reading the mail headers or not
     my $getting_headers = 1;
 
-    my $temp_file  = "messages/popfile$dcount" . "=$mcount.msg";
-    my $class_file = "messages/popfile$dcount" . "=$mcount.cls";
+    my $temp_file  = "$self->{configuration}->{configuration}{msgdir}popfile$dcount" . "=$mcount.msg";
+    my $class_file = "$self->{configuration}->{configuration}{msgdir}popfile$dcount" . "=$mcount.cls";
 
     open TEMP, ">$temp_file";
     binmode TEMP;

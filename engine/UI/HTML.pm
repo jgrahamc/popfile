@@ -94,6 +94,9 @@ sub initialize
     # Only accept connections from the local machine for the UI
     $self->{configuration}->{configuration}{localui}           = 1;
 
+    # The default location for the message files
+    $self->{configuration}->{configuration}{msgdir}            = 'messages/';
+
     # Use the default skin
     $self->{configuration}->{configuration}{skin}              = 'default';
 
@@ -1599,7 +1602,7 @@ sub load_history_cache
 {
     my ( $self, $filter, $search ) = @_;
     
-    my @history_files = sort compare_mf glob "messages/popfile*=*.msg";
+    my @history_files = sort compare_mf glob "$self->{configuration}->{configuration}{msgdir}popfile*=*.msg";
     $self->{history}         = {};
     $self->{history_invalid} = 0;
     my $j = 0;
@@ -1618,7 +1621,7 @@ sub load_history_cache
         
         # Something may have happened to the class file, this avoids errors
 
-        if ( open CLASS, "<messages/$class_file" ) {
+        if ( open CLASS, "<$self->{configuration}->{configuration}{msgdir}$class_file" ) {
             $bucket = <CLASS>;
             if ( $bucket =~ /([^ ]+) MAGNET (.+)/ ) {
                 $bucket = $1;
@@ -1648,7 +1651,7 @@ sub load_history_cache
             if ( $search ne '' ) {
                 $found = 0;
                 
-                open MAIL, "<messages/$history_files[$i]";
+                open MAIL, "<$self->{configuration}->{configuration}{msgdir}$history_files[$i]";
                 while (<MAIL>)  {
                     if ( /[A-Z0-9]/i )  {
                         if ( /^From:(.*)/i ) {
@@ -1802,7 +1805,7 @@ sub history_page
         }
         close WORDS;
 
-        $self->{classifier}->{parser}->parse_stream("messages/$self->{form}{undo}");
+        $self->{classifier}->{parser}->parse_stream("$self->{configuration}->{configuration}{msgdir}$self->{form}{undo}");
 
         foreach my $word (keys %{$self->{classifier}->{parser}->{words}}) {
             $self->{classifier}->{full_total} -= $self->{classifier}->{parser}->{words}{$word};
@@ -1821,7 +1824,7 @@ sub history_page
         $self->{classifier}->load_bucket("$self->{configuration}->{configuration}{corpus}/$self->{form}{badbucket}");
         $self->{classifier}->update_constants();
         
-        my $class_file = "messages/$self->{form}{undo}";
+        my $class_file = "$self->{configuration}->{configuration}{msgdir}$self->{form}{undo}";
         $class_file =~ s/msg$/cls/;
         
         # The bucket the message was reclassified to
@@ -1865,8 +1868,8 @@ sub history_page
         my $mail_file = $self->{form}{remove};
         my $class_file = $mail_file;
         $class_file =~ s/msg$/cls/;
-        unlink("messages/$mail_file");
-        unlink("messages/$class_file");
+        unlink("$self->{configuration}->{configuration}{msgdir}$mail_file");
+        unlink("$self->{configuration}->{configuration}{msgdir}$class_file");
         $self->{history_invalid} = 1;        
         http_redirect( $self, $client,"/history?session=$self->{session_key}&amp;filter=$self->{form}{filter}");
         return;
@@ -1884,8 +1887,8 @@ sub history_page
             my $mail_file = $self->{history}{$i}{file};
             my $class_file = $mail_file;
             $class_file =~ s/msg$/cls/;
-            unlink("messages/$mail_file");
-            unlink("messages/$class_file");
+            unlink("$self->{configuration}->{configuration}{msgdir}$mail_file");
+            unlink("$self->{configuration}->{configuration}{msgdir}$class_file");
         }
 
         $self->{history_invalid} = 1;        
@@ -1904,8 +1907,8 @@ sub history_page
                 my $class_file = $self->{history}{$i}{file};
                 $class_file =~ s/msg$/cls/;
                 if ( $class_file ne '' )  {
-                    unlink("messages/$self->{history}{$i}{file}");
-                    unlink("messages/$class_file");
+                    unlink("$self->{configuration}->{configuration}{msgdir}$self->{history}{$i}{file}");
+                    unlink("$self->{configuration}->{configuration}{msgdir}$class_file");
                 }
             }
         }
@@ -1940,7 +1943,7 @@ sub history_page
         }
         close WORDS;
 
-        $self->{classifier}->{parser}->parse_stream("messages/$self->{form}{file}");
+        $self->{classifier}->{parser}->parse_stream("$self->{configuration}->{configuration}{msgdir}$self->{form}{file}");
 
         foreach my $word (keys %{$self->{classifier}->{parser}->{words}}) {
             $self->{classifier}->{full_total} += $self->{classifier}->{parser}->{words}{$word};
@@ -1954,7 +1957,7 @@ sub history_page
         }
         close WORDS;
         
-        my $class_file = "messages/$self->{form}{file}";
+        my $class_file = "$self->{configuration}->{configuration}{msgdir}$self->{form}{file}";
         $class_file =~ s/msg$/cls/;
         open CLASS, ">$class_file";
         print CLASS "RECLASSIFIED$eol$self->{form}{shouldbe}$eol$self->{form}{usedtobe}$eol";
@@ -2046,7 +2049,7 @@ sub history_page
             $mail_file = $self->{history}{$i}{file};
 
             if ( ( $self->{history}{$i}{subject} eq '' ) || ( $self->{history}{$i}{from} eq '' ) )  {
-                open MAIL, "<messages/$mail_file";
+                open MAIL, "<$self->{configuration}->{configuration}{msgdir}$mail_file";
                 while (<MAIL>)  {
                     if ( /[A-Z0-9]/i )  {
                         if ( /^From:(.*)/i ) {
@@ -2184,7 +2187,7 @@ sub history_page
                 if ( $self->{history}{$i}{magnet} eq '' )  {
                     $self->{classifier}->{parser}->{color} = 1;
                     $self->{classifier}->{parser}->{bayes} = $self->{classifier};
-                    $body .= $self->{classifier}->{parser}->parse_stream("messages/$self->{form}{view}");
+                    $body .= $self->{classifier}->{parser}->parse_stream("$self->{configuration}->{configuration}{msgdir}$self->{form}{view}");
                     $self->{classifier}->{parser}->{color} = 0;
                 } else {
                     $self->{history}{$i}{magnet} =~ /(.+): ([^\r\n]+)/;
@@ -2192,7 +2195,7 @@ sub history_page
                     my $text   = $2;
                     $body .= "<tt>";
 
-                    open MESSAGE, "<messages/$self->{form}{view}";
+                    open MESSAGE, "<$self->{configuration}->{configuration}{msgdir}$self->{form}{view}";
                     my $line;
                     while ($line = <MESSAGE>) {
                         $line =~ s/</&lt;/g;
@@ -2219,7 +2222,7 @@ sub history_page
                     $body .= "</tt>";
                 }
                 $body .= "<p align=right><a href=\"/history?start_message=$start_message&amp;session=$self->{session_key}&amp;filter=$self->{form}{filter}\"><b>$self->{language}{Close}</b></a></table><td valign=top>";
-                $self->{classifier}->classify_file("messages/$self->{form}{view}");
+                $self->{classifier}->classify_file("$self->{configuration}->{configuration}{msgdir}$self->{form}{view}");
                 $body .= $self->{classifier}->{scores};
             }
 
@@ -2542,7 +2545,7 @@ sub remove_mail_files
 {
     my ( $self ) = @_;
     
-    my @mail_files = glob "messages/popfile*=*.???";
+    my @mail_files = glob "$self->{configuration}->{configuration}{msgdir}popfile*=*.???";
     my $result = 0;
 
     calculate_today( $self );
@@ -2560,7 +2563,7 @@ sub remove_mail_files
     
      # Clean up old style msg/cls files
     
-    @mail_files = glob "messages/popfile*_*.???";
+    @mail_files = glob "$self->{configuration}->{configuration}{msgdir}popfile*_*.???";
     foreach my $mail_file (@mail_files) {
         unlink($mail_file);
     }
