@@ -368,6 +368,7 @@ sub check_for_new_messages__
 
             $self->log_( "" );
             $self->log_( "Found new message $msg in folder $folder." );
+
             # get hash of this message
             my $hash = $self->get_hash( $imap, $msg );
 
@@ -377,6 +378,9 @@ sub check_for_new_messages__
                 $self->log_( "" );
                 next;
             }
+
+            # Increment the global download count
+            $self->global_config_( 'download_count', $self->global_config_( 'download_count' ) + 1 );
 
             # open a temporary file that the classifier will
             # use to read the message in binary, read-write mode:
@@ -455,8 +459,6 @@ sub check_for_new_messages__
 
                     # Housekeeping:
 
-                    # Inform the rest of POPFile about a new message in history.
-                    $self->mq_post_( 'NEWFL', $history_file , '' );
                     $self->log_( "Message $history_file was classified as $class." );
                     $self->log_( "" );
 
@@ -468,15 +470,12 @@ sub check_for_new_messages__
                     # Remember hash of this message in history, etc:
                     $self->was_classified__( $hash, $class, $history_file );
 
-                    # Update the class_counter var
-                    $self->config_( 'class_counter', $self->config_( 'class_counter' ) + 1 );
-
                     next MESSAGE;
                 }
             }
         }
         if ( $self->config_( 'expunge' ) && $moved_a_msg ) {
-            $self->say( $imap, "CLOSE" );
+            $self->say( $imap, "EXPUNGE" );
             $self->get_response( $imap );
         }
     }
@@ -569,32 +568,14 @@ sub reclassify_on_move__
                 }
                 close TMP;
 
-                # This is copied from html.pm
-                # It (hopefully) keeps our statistics up to date.
-                my $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'count' );
-                $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'count', $count+1 );
-
-                $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $old_bucket, 'count' );
-                $count -= 1;
-                $count = 0 if ( $count < 0 ) ;
-                $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $old_bucket, 'count', $count );
-
-                my $fncount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'fncount' );
-                $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'fncount', $fncount+1 );
-
-                my $fpcount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $old_bucket, 'fpcount' );
-                $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $old_bucket, 'fpcount', $fpcount+1 );
-
-                $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $bucket, "imap.tmp" );
-                $self->{classifier__}->remove_message_from_bucket( $self->{api_session__}, $old_bucket, "imap.tmp" );
-
-                $self->mq_post_( 'NEWFL', $self->get_msg_file__( $hash ), '' );
+                # do all the house keeping
+                $self->was_reclassified__( $hash, $bucket, "imap.tmp" );
 
                 $self->log_( "Reclassified the message with UID $msg in folder $folder from bucket $old_bucket to bucket $bucket." );
                 $self->log_( "" );
+
                 unlink "imap.tmp";
 
-                $self->was_reclassified__( $hash, $bucket );
             }
             else {
                 # Perhaps this message couldn't be reclassified because it is completely
@@ -1637,22 +1618,44 @@ sub can_reclassify__
 # of that message.
 #
 # arguments:
-#   $hash:  The hash value of the message
-#   $bucket: The bucket the message was classified to
+#   $hash:      The hash value of the message
+#   $bucket:    The bucket the message was classified to
+#   $msg_file:  Name of an existing file that contains the message
 # there is no return value
 #----------------------------------------------------------------------------
 
 sub was_reclassified__
 {
-    my ( $self, $hash, $bucket ) = @_;
+    my ( $self, $hash, $bucket, $msg_file ) = @_;
 
-    my $msg_file = $self->{hash_to_history__}{$hash};
+    my $hst_file = $self->{hash_to_history__}{$hash};
     my $old_class = $self->{hash_to_bucket__}{$hash};
 
-    $self->change_cls_file__( $msg_file, $hash, $bucket, $old_class );
+    $self->change_cls_file__( $hst_file, $hash, $bucket, $old_class );
 
     $self->{hash_to_reclassed__}{$hash} = 1;
     $self->{hash_to_bucket__}{$hash} = $bucket;
+
+    # This is copied from html.pm
+    # It (hopefully) keeps our statistics up to date.
+    my $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'count' );
+    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'count', $count+1 );
+
+    $count = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $old_class, 'count' );
+    $count -= 1;
+    $count = 0 if ( $count < 0 ) ;
+    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $old_class, 'count', $count );
+
+    my $fncount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $bucket, 'fncount' );
+    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $bucket, 'fncount', $fncount+1 );
+
+    my $fpcount = $self->{classifier__}->get_bucket_parameter( $self->{api_session__}, $old_class, 'fpcount' );
+    $self->{classifier__}->set_bucket_parameter( $self->{api_session__}, $old_class, 'fpcount', $fpcount+1 );
+
+    $self->{classifier__}->add_message_to_bucket( $self->{api_session__}, $bucket, $msg_file );
+    $self->{classifier__}->remove_message_from_bucket( $self->{api_session__}, $old_class, $msg_file );
+
+    $self->mq_post_( 'NEWFL', $self->get_msg_file__( $hash ), '' );
 }
 
 
@@ -1678,6 +1681,15 @@ sub was_classified__
     $self->change_cls_file__( $msg_file, $hash, $bucket );
     $self->{hash_to_bucket__}{$hash} = $bucket;
     $self->{hash_to_history__}{$hash} = $msg_file;
+
+    # Increment bucket count.
+    $self->{classifier__}->classified( $self->{api_session__}, $bucket );
+
+    # Inform the rest of POPFile about a new message in history.
+    $self->mq_post_( 'NEWFL', $msg_file , '' );
+
+    # Update the class_counter var
+    $self->config_( 'class_counter', $self->config_( 'class_counter' ) + 1 );
 }
 
 
@@ -1713,6 +1725,7 @@ sub change_cls_file__
     if ( defined $oldclass ) {
         if ( open CLS, ">$cls_path" ) {
             print CLS "RECLASSIFIED\n$class\n$oldclass\n$hash\n";
+            close CLS;
         }
         else {
             $self->log_( "Could not open cls file $cls_path." );
