@@ -2823,6 +2823,7 @@ delete_menu_entries:
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Support (Wiki).url"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (simple).lnk"
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\PFI Diagnostic utility (full).lnk"
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\Create 'User Data' shortcut.lnk"
   RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}\Support"
 
   Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk"
