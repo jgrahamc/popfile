@@ -56,7 +56,7 @@
 # (by using this constant in the executable's "Version Information" data).
 #--------------------------------------------------------------------------
 
-  !define C_PFI_LIBRARY_VERSION     "0.1.4"
+  !define C_PFI_LIBRARY_VERSION     "0.1.5"
 
 #--------------------------------------------------------------------------
 # Symbols used to avoid confusion over where the line breaks occur.
@@ -141,7 +141,7 @@
   ; (1) The MUI_LANGUAGE macro loads the standard MUI text strings for a particular language
   ; (2) '*-pfi.nsh' contains the text strings used for pages, progress reports, logs etc
 
-!ifdef TRANSLATOR | TRANSLATOR_AUW
+!ifdef ADDSSL | TRANSLATOR | TRANSLATOR_AUW
         !macro PFI_LANG_LOAD LANG
             !insertmacro MUI_LANGUAGE "${LANG}"
             !include "..\languages\${LANG}-pfi.nsh"
@@ -230,6 +230,8 @@
 #     SkinMove
 #     DeleteSkin
 #     SectionNotSelected
+#
+# Note: The 'translator.nsi' script builds the utility which tests the translations.
 #==============================================================================
 
 !ifdef INSTALLER | TRANSLATOR
@@ -309,6 +311,8 @@
 #     OOECONFIG_CHANGES_LOG
 #     SkinCaseChange
 #     Copy_HKLM_to_HKCU
+#
+# Note: The 'transAUW.nsi' script builds the utility which tests the translations.
 #==============================================================================
 
 !ifdef ADDUSER | TRANSLATOR_AUW
