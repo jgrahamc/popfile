@@ -293,3 +293,15 @@ a.shutdownLink {
 td.logo2menuSpace { 
 	height: 0.8em;
 }
+
+span.bucketsWidgetState {
+	font-weight: bold;
+}
+
+span.configWidgetState {
+	font-weight: bold;
+}
+
+span.securityWidgetState {
+	font-weight: bold;
+}

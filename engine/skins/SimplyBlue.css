@@ -1,7 +1,7 @@
 body {
 	background-color: #FFFFFF;
 	font-family: sans-serif;
-  	margin: 10px 20px 20px 20px; 
+	margin: 10px 20px 20px 20px; 
 	color: #000000;
 }
 
@@ -9,19 +9,19 @@ body {
 	background-color: #bcd5ea;
 	border: 3px #88b5dd solid;
 	border-style: groove; 
-  	border-color: #FFFFFF;
-  	border-width: 2px;
-  	margin: 0px 0px 0px 0px;
+	border-color: #FFFFFF;
+	border-width: 2px;
+	margin: 0px 0px 0px 0px;
 	color: #000000;
 }
 
 table.head {
-  width: 100%;
-   }
+	width: 100%;
+}
 
 td.head {
-  font-weight: normal;
-  font-size: 22pt;
+	font-weight: normal;
+	font-size: 22pt;
 }
 
 .menu {
@@ -33,18 +33,18 @@ td.head {
 .menuSelected {
 	background-color: #88b5dd;
 	width: 14%;
-  	border-color: #ffffff;
-  	border-style: groove groove none groove;
-  	border-width: 2px;
+	border-color: #ffffff;
+	border-style: groove groove none groove;
+	border-width: 2px;
 	color: #000000;
 }
 
 .menuStandard {
 	background-color: #bcd5ea;
 	width: 14%;
-  	border-color: #ffffff;
-  	border-style: groove groove none groove;
-  	border-width: 2px;
+	border-color: #ffffff;
+	border-style: groove groove none groove;
+	border-width: 2px;
 	color: #000000;
 }
 
@@ -53,8 +53,8 @@ td.head {
 }
 
 hr {
-  color: #88b5dd;
-  background-color: transparent; 
+	color: #88b5dd;
+	background-color: transparent; 
 }
 
 a.changeSettingLink {
@@ -63,21 +63,21 @@ a.changeSettingLink {
 }
 
 a:link {
-  color: #000000;
-  background-color: transparent;
-  text-decoration: underline; 
+	color: #000000;
+	background-color: transparent;
+	text-decoration: underline; 
 } 
 
 a:visited { 
-  color: #333333;
-  background-color: transparent;
-  text-decoration: underline; 
+	color: #333333;
+	background-color: transparent;
+	text-decoration: underline; 
 } 
 
 a:hover {
-  color: #000000;
-  background-color: transparent;
-  text-decoration: none; 
+	color: #000000;
+	background-color: transparent;
+	text-decoration: none; 
 } 
 
 tr.rowEven {
@@ -214,4 +214,16 @@ td.historyNavigatorTop {
 
 td.historyNavigatorBottom {
 	text-align: right;
+}
+
+span.bucketsWidgetState {
+	font-weight: bold;
+}
+
+span.configWidgetState {
+	font-weight: bold;
+}
+
+span.securityWidgetState {
+	font-weight: bold;
 }

@@ -228,3 +228,14 @@ a.changeSettingLink {
 	color: #0000cc ;
 }
 
+span.bucketsWidgetState {
+	font-weight: bold;
+}
+
+span.configWidgetState {
+	font-weight: bold;
+}
+
+span.securityWidgetState {
+	font-weight: bold;
+}

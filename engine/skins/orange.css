@@ -186,3 +186,14 @@ table.footer {
   margin-top: 1em;
 }
 
+span.bucketsWidgetState {
+	font-weight: bold;
+}
+
+span.configWidgetState {
+	font-weight: bold;
+}
+
+span.securityWidgetState {
+	font-weight: bold;
+}

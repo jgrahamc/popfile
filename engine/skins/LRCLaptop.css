@@ -251,3 +251,15 @@ td.historyNavigatorTop {
 td.historyNavigatorBottom {
 	text-align: right;
 }
+
+span.bucketsWidgetState {
+	font-weight: bold;
+}
+
+span.configWidgetState {
+	font-weight: bold;
+}
+
+span.securityWidgetState {
+	font-weight: bold;
+}

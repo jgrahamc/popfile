@@ -236,4 +236,17 @@ input, button, select {
 tt {
   font-family: "lucida console", courier, sans-serif;
   font-size: 9pt;
-  font-weight: normal;}
+  font-weight: normal;
+}
+
+span.bucketsWidgetState {
+	font-weight: bold;
+}
+
+span.configWidgetState {
+	font-weight: bold;
+}
+
+span.securityWidgetState {
+	font-weight: bold;
+}

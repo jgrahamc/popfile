@@ -260,3 +260,15 @@ tr.rowHighlighted {
 	background-color: #000000;
 	color: #eeeeee;
 }
+
+span.bucketsWidgetState {
+	font-weight: bold;
+}
+
+span.configWidgetState {
+	font-weight: bold;
+}
+
+span.securityWidgetState {
+	font-weight: bold;
+}

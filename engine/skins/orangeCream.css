@@ -320,10 +320,23 @@ div.magnetsNewWidget {
 	padding-left: 30%;
 }
 
-span.securityBinaryWidgetState {
+span.bucketsWidgetState {
+	color: #222299;
+	background-color: transparent;
+	font-weight: bold;
+}
+
+span.configWidgetState {
+	color: #49aF61;
+	background-color: transparent;
+	font-weight: bold;
+}
+
+span.securityWidgetState {
 	color: #49aF61;
 	background-color: transparent;
 	margin-left: 1em;
+	font-weight: bold;
 }
 
 div.securityPassWidget {
