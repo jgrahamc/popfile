@@ -678,7 +678,7 @@ sub CORE_start
 
             if ( $code == 2 ) {
                 delete $self->{components__}{$type}{$name};
-   	        } else {
+                } else {
                 print " $name" if $self->{debug__};
                 flush STDOUT;
             }
@@ -687,6 +687,7 @@ sub CORE_start
 
     if ( $self->{debug__} ) {
         print "\n\nPOPFile ", $self->{version_string__}, " Running\n";
+        flush STDOUT;
     }
 }
 
