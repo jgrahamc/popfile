@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 # ---------------------------------------------------------------------------------------------
 #
-# popfile.pl --- POP3 mail analyzer and sorter
+# popfile.pl --- Message analyzer and sorter
 #
-# Acts as a POP3 server and client designed to sit between a real mail client and a real mail
-# server using POP3.  Inserts an extra header X-Text-Classification: into the mail header to
-# tell the client whether the mail is spam or not based on a text classification algorithm
+# Acts as a server and client designed to sit between a real mail/news client and a real mail
+# news server using POP3.  Inserts an extra header X-Text-Classification: into the header to
+# tell the client which category the message belongs in.
 #
 # Copyright (c) 2001-2003 John Graham-Cumming
 #

@@ -15,7 +15,7 @@ use strict;
 use warnings;
 use locale;
 
-use IO::Socket;
+use IO::Socket::INET qw(:DEFAULT :crlf);
 use IO::Select;
 
 # A handy variable containing the value of an EOL for the network
@@ -129,6 +129,8 @@ sub service
                 # then read the rest of the HTTP headers grabbing the Content-Length and using
                 # it to read any form POST content into $content
 
+                $client->autoflush(1);
+
                 if ( ( defined( $client ) ) && ( my $request = <$client> ) ) {
                     my $content_length = 0;
                     my $content;
@@ -148,7 +150,6 @@ sub service
                     }
 
                     if ( $request =~ /^(GET|POST) (.*) HTTP\/1\./i ) {
-                        $client->autoflush(1);
                         $code = $self->handle_url( $client, $2, $1, $content );
                     } else {
                         http_error_( $self, $client, 500 );

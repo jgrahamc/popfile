@@ -2284,8 +2284,10 @@ sub load_history_cache__
             $from    =~ s/\"(.*)\"/$1/g;
             $subject =~ s/\"(.*)\"/$1/g;
 
-# TODO            $from    = $self->{classifier__}->{parser}->decode_string( $from );
-# TODO            $subject = $self->{classifier__}->{parser}->decode_string( $subject );
+            # TODO Interface violation here, need to clean up
+
+            $from    = $self->{classifier__}->{parser__}->decode_string( $from );
+            $subject = $self->{classifier__}->{parser__}->decode_string( $subject );
 
             my ( $short_from, $short_subject ) = ( $from, $subject );
 
