@@ -14,16 +14,15 @@
 ; (1) "NSIS Modern User Interface" version 1.65 (17 June 2003 or later)
 ;     This script uses the new (simplified) page configuration system and other improvements.
 ;
-; (2) '{NSIS}\makensis.exe' dated 8 July 2003 @ 18:44 (NSIS CVS version 1.203) or later
+; (2) '{NSIS}\makensis.exe' dated 08 July 2003 (NSIS CVS version 1.203) or later
 ;     This is required to ensure that out-of-date NLF files do not result in blank messages
 ;     and to ensure that language strings can be combined with other strings.
 ;
-; (3) '{NSIS}\NSIS\Contrib\UIs\modern.exe' dated xx July @ xx:xx (NSIS CVS v1.xxx) or later
+; (3) '{NSIS}\NSIS\Contrib\UIs\modern.exe' dated 09 July 2003 (NSIS CVS v1.31) or later
 ;     This is required to ensure the installer works properly when 'Japanese' is selected.
-
-; NSIS CVS snapshot 09 July 2003 @ 07:44 has a partial fix for the 'Japanese' bug - but wordwrap
-; has not been enabled for the enlarged "Space required" field on the components page
-; (applies to all three "Modern UI" EXE files)
+;
+; NSIS CVS snapshot dated 09 July 2003 @ 13:44 contains suitable versions of these NSIS files
+; (the 09 July 2003 @ 07:44 snapshot is NOT suitable).
 
 #--------------------------------------------------------------------------
 # LANGUAGE SUPPORT:
