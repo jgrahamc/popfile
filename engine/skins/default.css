@@ -52,7 +52,7 @@ tr.rowOdd {
 }
 
 tr.rowHighlighted {
-	background-color: #000000;
+	background-color: #cccc99;
 	color: #eeeeee;
 }
 
@@ -77,7 +77,7 @@ td.openMessageBody {
 }
 
 td.stabColor01 {
-	border: 1px solid Black;
+	border: 1px solid #cccc99;
 }
 
 td.naked {

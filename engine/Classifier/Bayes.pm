@@ -495,7 +495,8 @@ sub classify_file
             	# You cannot use @ or $ inside a \Q\E regular expression and hence
             	# we have to change the $magnet so that we get @ and $ outside the
             	# \Q\E strings.
-            	my $regex = $magnet;
+            	my $regex;
+            	$regex = $magnet;
             	$regex =~ s/[@\$]/\./g;
             	
             	print "About to use regex $regex\n" if $self->{debug};
