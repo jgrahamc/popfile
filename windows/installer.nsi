@@ -278,15 +278,15 @@
 
   !ifndef ENGLISH_MODE
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build"        "Multi-Language (with Kakasi) multi-user seamless"
+      VIAddVersionKey "Build"        "Multi-Language (with Kakasi) multi-user multi-section"
     !else
-      VIAddVersionKey "Build"        "Multi-Language (without Kakasi) multi-user seamless"
+      VIAddVersionKey "Build"        "Multi-Language (without Kakasi) multi-user multi-section"
     !endif
   !else
     !ifndef NO_KAKASI
-      VIAddVersionKey "Build"        "English-Mode (with Kakasi) multi-user seamless"
+      VIAddVersionKey "Build"        "English-Mode (with Kakasi) multi-user multi-section"
     !else
-      VIAddVersionKey "Build"        "English-Mode (without Kakasi) multi-user seamless"
+      VIAddVersionKey "Build"        "English-Mode (without Kakasi) multi-user multi-section"
     !endif
   !endif
 
@@ -369,7 +369,7 @@
 
   ; Use a custom '.onGUIInit' function to add language-specific texts to custom page INI files
 
-  !define MUI_CUSTOMFUNCTION_GUIINIT          PFIGUIInit
+  !define MUI_CUSTOMFUNCTION_GUIINIT          "PFIGUIInit"
 
   ;----------------------------------------------------------------
   ; Language Settings for MUI pages
@@ -587,7 +587,7 @@ loop:
   Push ${L_TEMP}
   Call TrimNewlines
   Pop ${L_TEMP}
-  FileWrite ${L_OUTPUT_FILE_HANDLE} ${L_TEMP}$\r$\n
+  FileWrite ${L_OUTPUT_FILE_HANDLE} "${L_TEMP}$\r$\n"
   Goto loop
 
 close_files:
@@ -615,7 +615,7 @@ FunctionEnd
 
 Function PFIGUIInit
 
-  !define L_RESERVED            $1    ; used in the system.dll call
+  !define L_RESERVED      $1    ; used in the system.dll call
 
   Push ${L_RESERVED}
 
@@ -730,7 +730,7 @@ Section "POPFile" SecPOPFile
   Push ${L_RESERVED}
 
   SetDetailsPrint textonly
-  DetailPrint "$(PFI_LANG_INST_PROG_UPGRADE)"
+  DetailPrint "$(PFI_LANG_INST_PROG_UPGRADE) $(PFI_LANG_TAKE_A_FEW_SECONDS)"
   SetDetailsPrint listonly
 
   ; Before POPFile 0.21.0, POPFile and the minimal Perl shared the same folder structure
@@ -789,7 +789,7 @@ Section "POPFile" SecPOPFile
   Goto save_HKLM_root_sfn
 
 find_HKLM_root_sfn:
-  GetFullPathName /SHORT ${L_TEMP} $G_ROOTDIR
+  GetFullPathName /SHORT ${L_TEMP} "$G_ROOTDIR"
 
 save_HKLM_root_sfn:
   WriteRegStr HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP}"
@@ -808,7 +808,7 @@ current_user_root:
   Goto save_HKCU_root_sfn
 
 find_HKCU_root_sfn:
-  GetFullPathName /SHORT ${L_TEMP} $G_ROOTDIR
+  GetFullPathName /SHORT ${L_TEMP} "$G_ROOTDIR"
 
 save_HKCU_root_sfn:
   WriteRegStr HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP}"
@@ -819,13 +819,15 @@ save_HKCU_root_sfn:
   DetailPrint "$(PFI_LANG_INST_PROG_CORE)"
   SetDetailsPrint listonly
 
-  SetOutPath $G_ROOTDIR
+  SetOutPath "$G_ROOTDIR"
 
   ; Remove redundant files (from earlier test versions of the installer)
 
-  Delete $G_ROOTDIR\wrapper.exe
-  Delete $G_ROOTDIR\wrapperf.exe
-  Delete $G_ROOTDIR\wrapperb.exe
+  Delete "$G_ROOTDIR\wrapper.exe"
+  Delete "$G_ROOTDIR\wrapperf.exe"
+  Delete "$G_ROOTDIR\wrapperb.exe"
+
+  ; Install POPFile 'core' files
 
   File "..\engine\license"
   File "${C_RELEASE_NOTES}"
@@ -837,6 +839,7 @@ save_HKCU_root_sfn:
   File "..\engine\popfileif.exe"
   File "..\engine\popfileib.exe"
   File "..\engine\popfile-service.exe"
+  File /nonfatal "/oname=pfi-stopwords.default" "..\engine\stopwords"
 
   File "runpopfile.exe"
   File "stop_pf.exe"
@@ -849,7 +852,7 @@ save_HKCU_root_sfn:
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\stop_pf.exe" \
       "" "$G_ROOTDIR\stop_pf.exe"
 
-  SetOutPath $G_ROOTDIR
+  SetOutPath "$G_ROOTDIR"
 
   File "..\engine\popfile.pl"
   File "..\engine\insert.pl"
@@ -861,17 +864,16 @@ save_HKCU_root_sfn:
   File "..\engine\black.gif"
   File "..\engine\otto.gif"
 
-  SetOutPath $G_ROOTDIR\Classifier
-
+  SetOutPath "$G_ROOTDIR\Classifier"
   File "..\engine\Classifier\Bayes.pm"
   File "..\engine\Classifier\WordMangle.pm"
   File "..\engine\Classifier\MailParse.pm"
   File "..\engine\Classifier\popfile.sql"
 
-  SetOutPath $G_ROOTDIR\Platform
+  SetOutPath "$G_ROOTDIR\Platform"
   File "..\engine\Platform\MSWin32.pm"
 
-  SetOutPath $G_ROOTDIR\POPFile
+  SetOutPath "$G_ROOTDIR\POPFile"
   File "..\engine\POPFile\MQ.pm"
   File "..\engine\POPFile\Loader.pm"
   File "..\engine\POPFile\Logger.pm"
@@ -879,28 +881,28 @@ save_HKCU_root_sfn:
   File "..\engine\POPFile\Configuration.pm"
   File "..\engine\POPFile\popfile_version"
 
-  SetOutPath $G_ROOTDIR\Proxy
+  SetOutPath "$G_ROOTDIR\Proxy"
   File "..\engine\Proxy\Proxy.pm"
   File "..\engine\Proxy\POP3.pm"
 
-  SetOutPath $G_ROOTDIR\UI
+  SetOutPath "$G_ROOTDIR\UI"
   File "..\engine\UI\HTML.pm"
   File "..\engine\UI\HTTP.pm"
 
-  SetOutPath $G_ROOTDIR\manual
+  SetOutPath "$G_ROOTDIR\manual"
   File "..\engine\manual\*.gif"
 
-  SetOutPath $G_ROOTDIR\manual\en
+  SetOutPath "$G_ROOTDIR\manual\en"
   File "..\engine\manual\en\*.html"
 
   ; Default UI language
 
-  SetOutPath $G_ROOTDIR\languages
+  SetOutPath "$G_ROOTDIR\languages"
   File "..\engine\languages\English.msg"
 
   ; Default UI skin (the POPFile UI looks better if a skin is used)
 
-  SetOutPath $G_ROOTDIR\skins
+  SetOutPath "$G_ROOTDIR\skins"
   File "..\engine\skins\SimplyBlue.css"
 
   ; Install the Minimal Perl files
@@ -909,13 +911,12 @@ save_HKCU_root_sfn:
   DetailPrint "$(PFI_LANG_INST_PROG_PERL)"
   SetDetailsPrint listonly
 
-  SetOutPath $G_ROOTDIR
+  SetOutPath "$G_ROOTDIR"
   File "${C_PERL_DIR}\bin\perl.exe"
   File "${C_PERL_DIR}\bin\wperl.exe"
   File "${C_PERL_DIR}\bin\perl58.dll"
 
-  SetOutPath $G_MPLIBDIR
-
+  SetOutPath "$G_MPLIBDIR"
   File "${C_PERL_DIR}\lib\AutoLoader.pm"
   File "${C_PERL_DIR}\lib\Carp.pm"
   File "${C_PERL_DIR}\lib\Config.pm"
@@ -936,77 +937,77 @@ save_HKCU_root_sfn:
   File "${C_PERL_DIR}\lib\warnings.pm"
   File "${C_PERL_DIR}\lib\XSLoader.pm"
 
-  SetOutPath $G_MPLIBDIR\Carp
+  SetOutPath "$G_MPLIBDIR\Carp"
   File "${C_PERL_DIR}\lib\Carp\*"
 
-  SetOutPath $G_MPLIBDIR\Digest
+  SetOutPath "$G_MPLIBDIR\Digest"
   File "${C_PERL_DIR}\lib\Digest\MD5.pm"
 
-  SetOutPath $G_MPLIBDIR\Exporter
+  SetOutPath "$G_MPLIBDIR\Exporter"
   File "${C_PERL_DIR}\lib\Exporter\*"
 
-  SetOutPath $G_MPLIBDIR\File
+  SetOutPath "$G_MPLIBDIR\File"
   File "${C_PERL_DIR}\lib\File\Glob.pm"
 
-  SetOutPath $G_MPLIBDIR\Getopt
+  SetOutPath "$G_MPLIBDIR\Getopt"
   File "${C_PERL_DIR}\lib\Getopt\Long.pm"
 
-  SetOutPath $G_MPLIBDIR\HTML
+  SetOutPath "$G_MPLIBDIR\HTML"
   File "${C_PERL_DIR}\site\lib\HTML\Tagset.pm"
 
-  SetOutPath $G_MPLIBDIR\IO
+  SetOutPath "$G_MPLIBDIR\IO"
   File "${C_PERL_DIR}\lib\IO\*"
 
-  SetOutPath $G_MPLIBDIR\IO\Socket
+  SetOutPath "$G_MPLIBDIR\IO\Socket"
   File "${C_PERL_DIR}\lib\IO\Socket\*"
   File "${C_PERL_DIR}\site\lib\IO\Socket\Socks.pm"
 
-  SetOutPath $G_MPLIBDIR\MIME
+  SetOutPath "$G_MPLIBDIR\MIME"
   File "${C_PERL_DIR}\lib\MIME\*"
 
-  SetOutPath $G_MPLIBDIR\Sys
+  SetOutPath "$G_MPLIBDIR\Sys"
   File "${C_PERL_DIR}\lib\Sys\*"
 
-  SetOutPath $G_MPLIBDIR\Text
+  SetOutPath "$G_MPLIBDIR\Text"
   File "${C_PERL_DIR}\lib\Text\ParseWords.pm"
 
-  SetOutPath $G_MPLIBDIR\warnings
+  SetOutPath "$G_MPLIBDIR\warnings"
   File "${C_PERL_DIR}\lib\warnings\register.pm"
 
-  SetOutPath $G_MPLIBDIR\auto\Digest\MD5
+  SetOutPath "$G_MPLIBDIR\auto\Digest\MD5"
   File "${C_PERL_DIR}\lib\auto\Digest\MD5\*"
 
-  SetOutPath $G_MPLIBDIR\auto\DynaLoader
+  SetOutPath "$G_MPLIBDIR\auto\DynaLoader"
   File "${C_PERL_DIR}\lib\auto\DynaLoader\*"
 
-  SetOutPath $G_MPLIBDIR\auto\File\Glob
+  SetOutPath "$G_MPLIBDIR\auto\File\Glob"
   File "${C_PERL_DIR}\lib\auto\File\Glob\*"
 
-  SetOutPath $G_MPLIBDIR\auto\IO
+  SetOutPath "$G_MPLIBDIR\auto\IO"
   File "${C_PERL_DIR}\lib\auto\IO\*"
 
-  SetOutPath $G_MPLIBDIR\auto\MIME\Base64
+  SetOutPath "$G_MPLIBDIR\auto\MIME\Base64"
   File "${C_PERL_DIR}\lib\auto\MIME\Base64\*"
 
-  SetOutPath $G_MPLIBDIR\auto\POSIX
+  SetOutPath "$G_MPLIBDIR\auto\POSIX"
   File "${C_PERL_DIR}\lib\auto\POSIX\POSIX.dll"
   File "${C_PERL_DIR}\lib\auto\POSIX\autosplit.ix"
   File "${C_PERL_DIR}\lib\auto\POSIX\load_imports.al"
 
-  SetOutPath $G_MPLIBDIR\auto\Socket
+  SetOutPath "$G_MPLIBDIR\auto\Socket"
   File "${C_PERL_DIR}\lib\auto\Socket\*"
 
-  SetOutPath $G_MPLIBDIR\auto\Sys\Hostname
+  SetOutPath "$G_MPLIBDIR\auto\Sys\Hostname"
   File "${C_PERL_DIR}\lib\auto\Sys\Hostname\*"
 
   ; Install Perl modules and library files for BerkeleyDB support
   ; (required in case we have to convert BerkeleyDB corpus files from an earlier version)
 
-  SetOutPath $G_MPLIBDIR
+  SetOutPath "$G_MPLIBDIR"
   File "${C_PERL_DIR}\site\lib\BerkeleyDB.pm"
   File "${C_PERL_DIR}\lib\UNIVERSAL.pm"
 
-  SetOutPath $G_MPLIBDIR\auto\BerkeleyDB
+  SetOutPath "$G_MPLIBDIR\auto\BerkeleyDB"
   File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\autosplit.ix"
   File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\BerkeleyDB.bs"
   File "${C_PERL_DIR}\site\lib\auto\BerkeleyDB\BerkeleyDB.dll"
@@ -1015,21 +1016,21 @@ save_HKCU_root_sfn:
 
   ; Install Perl modules and library files for SQLite support
 
-  SetOutPath $G_MPLIBDIR
+  SetOutPath "$G_MPLIBDIR"
   File "${C_PERL_DIR}\lib\base.pm"
   File "${C_PERL_DIR}\lib\overload.pm"
   File "${C_PERL_DIR}\site\lib\DBI.pm"
 
-  SetOutPath $G_MPLIBDIR\DBD
+  SetOutPath "$G_MPLIBDIR\DBD"
   File "${C_PERL_DIR}\site\lib\DBD\SQLite.pm"
 
-  SetOutPath $G_MPLIBDIR\auto\DBD\SQLite
+  SetOutPath "$G_MPLIBDIR\auto\DBD\SQLite"
   File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.bs"
   File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.dll"
   File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.exp"
   File "${C_PERL_DIR}\site\lib\auto\DBD\SQLite\SQLite.lib"
 
-  SetOutPath $G_MPLIBDIR\auto\DBI
+  SetOutPath "$G_MPLIBDIR\auto\DBI"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.bs"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.dll"
   File "${C_PERL_DIR}\site\lib\auto\DBI\DBI.exp"
@@ -1038,9 +1039,9 @@ save_HKCU_root_sfn:
   ; Create the uninstall program BEFORE creating the shortcut to it
   ; (this ensures that the correct "uninstall" icon appears in the START MENU shortcut)
 
-  SetOutPath $INSTDIR
-  Delete $INSTDIR\uninstall.exe
-  WriteUninstaller $INSTDIR\uninstall.exe
+  SetOutPath "$G_ROOTDIR"
+  Delete "$G_ROOTDIR\uninstall.exe"
+  WriteUninstaller "$G_ROOTDIR\uninstall.exe"
 
   ; Attempt to remove StartUp shortcuts created during previous installations
 
@@ -1074,11 +1075,11 @@ save_HKCU_root_sfn:
 
 create_shortcuts:
   SetOutPath "$SMPROGRAMS\${C_PFI_PRODUCT}"
-  SetOutPath $INSTDIR
+  SetOutPath "$G_ROOTDIR"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Run POPFile.lnk" \
-                 "$INSTDIR\runpopfile.exe"
+                 "$G_ROOTDIR\runpopfile.exe"
 
   IfFileExists "$G_ROOTDIR\pfidiag.exe" 0 uninst_shortcut
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\PFI Diagnostic utility.lnk" NORMAL
@@ -1088,10 +1089,9 @@ create_shortcuts:
 uninst_shortcut:
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk" \
-                 "$INSTDIR\uninstall.exe"
+                 "$G_ROOTDIR\uninstall.exe"
 
-  SetOutPath $G_ROOTDIR
-
+  SetOutPath "$G_ROOTDIR"
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Release Notes.lnk" \
                  "$G_ROOTDIR\${C_README}.txt"
@@ -1137,7 +1137,7 @@ uninst_shortcut:
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Support\POPFile Home Page.url" \
               "InternetShortcut" "URL" "http://popfile.sourceforge.net/"
 
-  SetOutPath $G_ROOTDIR
+  SetOutPath "$G_ROOTDIR"
 
   SetFileAttributes "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" NORMAL
   CreateShortCut "$SMPROGRAMS\${C_PFI_PRODUCT}\Shutdown POPFile silently.lnk" \
@@ -1162,7 +1162,7 @@ uninst_shortcut:
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
               "DisplayName" "${C_PFI_PRODUCT} ${C_PFI_VERSION}"
   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
-              "UninstallString" "$INSTDIR\uninstall.exe"
+              "UninstallString" "$G_ROOTDIR\uninstall.exe"
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
               "NoModify" "1"
   WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
@@ -1173,7 +1173,7 @@ use_HKLM:
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
               "DisplayName" "${C_PFI_PRODUCT} ${C_PFI_VERSION}"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
-              "UninstallString" "$INSTDIR\uninstall.exe"
+              "UninstallString" "$G_ROOTDIR\uninstall.exe"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
               "NoModify" "1"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}" \
@@ -1212,14 +1212,14 @@ Section "Skins" SecSkins
   DetailPrint "$(PFI_LANG_INST_PROG_SKINS)"
   SetDetailsPrint listonly
 
-  SetOutPath $G_ROOTDIR\skins
+  SetOutPath "$G_ROOTDIR\skins"
   File "..\engine\skins\*.css"
   File "..\engine\skins\*.gif"
 
-  SetOutPath $G_ROOTDIR\skins\lavishImages
+  SetOutPath "$G_ROOTDIR\skins\lavishImages"
   File "..\engine\skins\lavishImages\*.gif"
 
-  SetOutPath $G_ROOTDIR\skins\sleetImages
+  SetOutPath "$G_ROOTDIR\skins\sleetImages"
   File "..\engine\skins\sleetImages\*.gif"
 
   SetDetailsPrint textonly
@@ -1238,7 +1238,7 @@ Section "Languages" SecLangs
   DetailPrint "$(PFI_LANG_INST_PROG_LANGS)"
   SetDetailsPrint listonly
 
-  SetOutPath $G_ROOTDIR\languages
+  SetOutPath "$G_ROOTDIR\languages"
   File "..\engine\languages\*.msg"
 
   SetDetailsPrint textonly
@@ -1267,13 +1267,13 @@ SectionEnd
       ; Install Kakasi package
       ;--------------------------------------------------------------------------
 
-      SetOutPath $INSTDIR
+      SetOutPath "$INSTDIR"
       File /r "${C_KAKASI_DIR}\kakasi"
 
       ; Add Environment Variables for Kakasi
 
-      Push ITAIJIDICTPATH
-      Push $INSTDIR\kakasi\share\kakasi\itaijidict
+      Push "ITAIJIDICTPATH"
+      Push "$INSTDIR\kakasi\share\kakasi\itaijidict"
 
       StrCmp $G_WINUSERTYPE "Admin" all_users_1
       Call WriteEnvStr
@@ -1283,8 +1283,8 @@ SectionEnd
       Call WriteEnvStrNTAU
 
     next_var:
-      Push KANWADICTPATH
-      Push $INSTDIR\kakasi\share\kakasi\kanwadict
+      Push "KANWADICTPATH"
+      Push "$INSTDIR\kakasi\share\kakasi\kanwadict"
 
       StrCmp $G_WINUSERTYPE "Admin" all_users_2
       Call WriteEnvStr
@@ -1324,21 +1324,21 @@ SectionEnd
       ; Install Perl modules: base.pm, bytes.pm the Encode collection and Text::Kakasi
       ;--------------------------------------------------------------------------
 
-      SetOutPath $G_MPLIBDIR
+      SetOutPath "$G_MPLIBDIR"
       File "${C_PERL_DIR}\lib\base.pm"
       File "${C_PERL_DIR}\lib\bytes.pm"
       File "${C_PERL_DIR}\lib\Encode.pm"
 
-      SetOutPath $G_MPLIBDIR\Encode
+      SetOutPath "$G_MPLIBDIR\Encode"
       File /r "${C_PERL_DIR}\lib\Encode\*"
 
-      SetOutPath $G_MPLIBDIR\auto\Encode
+      SetOutPath "$G_MPLIBDIR\auto\Encode"
       File /r "${C_PERL_DIR}\lib\auto\Encode\*"
 
-      SetOutPath $G_MPLIBDIR\Text
+      SetOutPath "$G_MPLIBDIR\Text"
       File "${C_PERL_DIR}\site\lib\Text\Kakasi.pm"
 
-      SetOutPath $G_MPLIBDIR\auto\Text\Kakasi
+      SetOutPath "$G_MPLIBDIR\auto\Text\Kakasi"
       File "${C_PERL_DIR}\site\lib\auto\Text\Kakasi\*"
 
       Pop ${L_RESERVED}
@@ -1364,43 +1364,43 @@ Section /o "XMLRPC" SecXMLRPC
 
   ; POPFile XMLRPC component
 
-  SetOutPath $G_ROOTDIR\UI
+  SetOutPath "$G_ROOTDIR\UI"
   File "..\engine\UI\XMLRPC.pm"
 
   ; POPFile API component used by XMLRPC.pm
 
-  SetOutPath $G_ROOTDIR\POPFile
+  SetOutPath "$G_ROOTDIR\POPFile"
   File "..\engine\POPFile\API.pm"
 
   ; Perl modules required to support the POPFile XMLRPC component
 
-  SetOutPath $G_MPLIBDIR
+  SetOutPath "$G_MPLIBDIR"
   File "${C_PERL_DIR}\site\lib\LWP.pm"
   File "${C_PERL_DIR}\lib\re.pm"
   File "${C_PERL_DIR}\site\lib\URI.pm"
 
-  SetOutPath $G_MPLIBDIR\HTTP
+  SetOutPath "$G_MPLIBDIR\HTTP"
   File /r "${C_PERL_DIR}\site\lib\HTTP\*"
 
-  SetOutPath $G_MPLIBDIR\LWP
+  SetOutPath "$G_MPLIBDIR\LWP"
   File /r "${C_PERL_DIR}\site\lib\LWP\*"
 
-  SetOutPath $G_MPLIBDIR\Net
+  SetOutPath "$G_MPLIBDIR\Net"
   File /r "${C_PERL_DIR}\site\lib\Net\*"
 
-  SetOutPath $G_MPLIBDIR\SOAP
+  SetOutPath "$G_MPLIBDIR\SOAP"
   File /r "${C_PERL_DIR}\site\lib\SOAP\*"
 
-  SetOutPath $G_MPLIBDIR\Time
+  SetOutPath "$G_MPLIBDIR\Time"
   File /r "${C_PERL_DIR}\lib\Time\*"
 
-  SetOutPath $G_MPLIBDIR\URI
+  SetOutPath "$G_MPLIBDIR\URI"
   File /r "${C_PERL_DIR}\site\lib\URI\*"
 
-  SetOutPath $G_MPLIBDIR\XML
+  SetOutPath "$G_MPLIBDIR\XML"
   File /r "${C_PERL_DIR}\site\lib\XML\*"
 
-  SetOutPath $G_MPLIBDIR\XMLRPC
+  SetOutPath "$G_MPLIBDIR\XMLRPC"
   File /r "${C_PERL_DIR}\site\lib\XMLRPC\*"
 
   SetDetailsPrint textonly
@@ -1763,12 +1763,12 @@ Function MinPerlRestructure
 
   IfFileExists "$G_MPLIBDIR\*.pm" exit
 
-  IfFileExists "$INSTDIR\*.pm" 0 exit
+  IfFileExists "$G_ROOTDIR\*.pm" 0 exit
 
-  CreateDirectory $G_MPLIBDIR
+  CreateDirectory "$G_MPLIBDIR"
 
-  CopyFiles /SILENT /FILESONLY "$INSTDIR\*.pm" "$G_MPLIBDIR\"
-  Delete "$INSTDIR\*.pm"
+  CopyFiles /SILENT /FILESONLY "$G_ROOTDIR\*.pm" "$G_MPLIBDIR\"
+  Delete "$G_ROOTDIR\*.pm"
 
   !insertmacro MinPerlMove "auto"
   !insertmacro MinPerlMove "Carp"
@@ -1859,7 +1859,7 @@ check_locn:
 
   ; Initialise the global user variable used for the POPFile PROGRAM files location
 
-  StrCpy $G_ROOTDIR $INSTDIR
+  StrCpy $G_ROOTDIR "$INSTDIR"
 
   ; Warn the user if we are about to upgrade an existing installation
   ; and allow user to select a different directory if they wish
@@ -1929,21 +1929,41 @@ use_file_association:
 exit:
 FunctionEnd
 
+
+#####################################################################################
+#                                                                                   #
+#   ##    ##  ##    ##   ##   ##    ##   #####  ########  #####    ##      ##       #
+#   ##    ##  ###   ##   ##   ###   ##  ##   ##    ##    ##   ##   ##      ##       #
+#   ##    ##  ####  ##   ##   ####  ##  ##         ##    ##   ##   ##      ##       #
+#   ##    ##  ## ## ##   ##   ## ## ##   #####     ##    #######   ##      ##       #
+#   ##    ##  ##  ####   ##   ##  ####       ##    ##    ##   ##   ##      ##       #
+#   ##    ##  ##   ###   ##   ##   ###  ##   ##    ##    ##   ##   ##      ##       #
+#    ######   ##    ##   ##   ##    ##   #####     ##    ##   ##   ######  ######   #
+#                                                                                   #
+#####################################################################################
+
+
 #--------------------------------------------------------------------------
 # Initialise the uninstaller
 #--------------------------------------------------------------------------
 
 Function un.onInit
 
-  ; Retrieve the language used when this version was installed, and use it for the uninstaller
+  ; Retrieve the language used when POPFile was installed, and use it for the uninstaller
+  ; (if the language entry is not found in the registry, a 'language selection' dialog is shown)
 
   !insertmacro MUI_UNGETLANGUAGE
 
   StrCpy $G_ROOTDIR   "$INSTDIR"
   StrCpy $G_MPLIBDIR  "$INSTDIR\lib"
 
+  ; Starting with 0.21.0 the registry is used to store the location of the 'User Data'
+  ; (if setup.exe or adduser.exe was used to create/update the 'User Data' for this user)
+
   ReadRegStr $G_USERDIR HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDataPath"
   StrCmp $G_USERDIR "" 0 got_user_path
+
+  ; Pre-release versions of the 0.21.0 installer used a sub-folder for the default user data
 
   StrCpy $G_USERDIR "$INSTDIR\user"
 
@@ -1956,7 +1976,7 @@ Function un.onInit
 got_user_path:
 
   ; Email settings are stored on a 'per user' basis therefore we need to know which user is
-  ; running the uninstaller so we can check if the email settings can be safely restored
+  ; running the uninstaller (e.g. so we can check ownership of any local 'User Data' we find)
 
 	ClearErrors
 	UserInfo::GetName
@@ -1987,20 +2007,95 @@ start_uninstall:
 FunctionEnd
 
 #--------------------------------------------------------------------------
-# Uninstaller Section
+# Uninstaller Sections (this build uses all of these and executes them in the order shown)
 #
-# (a) Run uninstalluser.exe to remove 'User Data' from PROGRAM folder
-# (b) If 'User Data' was not uninstalled, preserve it for another attempt later
-# (c) Shutdown POPFile if necessary
-# (d) Remove Start Menu shortcuts
-# (e) Uninstall POPFile PROGRAM files, skins, UI languages and English manual
-# (f) Uninstall Kakasi package and remove its environment variables
-# (g) Uninstall minimal Perl, including the optional modules
-# (h) Remove the 'Add/Remove Program' data and other registry entries
-# (i) Offer to remove remaining files/folders (if 'User Data' not to be preserved)
+#  (1) un.Uninstall Begin    - requests confirmation if appropriate
+#  (2) un.Local User Data    - looks for and removes 'User Data' from the PROGRAM folder
+#  (3) un.Shutdown POPFile   - shutdown POPFile if necessary (to avoid the need to reboot)
+#  (4) un.Start Menu Entries - remove StartUp shortcuts and Start Menu entries
+#  (5) un.POPFile Core       - uninstall POPFile PROGRAM files
+#  (6) un.Skins              - uninstall POPFile skins
+#  (7) un.Languages          - uninstall POPFile UI languages
+#  (8) un.Manual             - uninstall POPFile English manual
+#  (9) un.Kakasi             - uninstall Kakasi package and remove its environment variables
+# (10) un.Minimal Perl       - uninstall minimal Perl, including all of the optional modules
+# (11) un.Registry Entries   - remove 'Add/Remove Program' data and other registry entries
+# (12) un.Uninstall End      - remove remaining files/folders (if it is safe to do so)
+#
 #--------------------------------------------------------------------------
 
-Section "Uninstall"
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Uninstall Begin' (the first section in the uninstaller)
+#--------------------------------------------------------------------------
+
+Section "un.Uninstall Begin" UnSecBegin
+
+  !define L_TEMP        $R9
+
+  Push ${L_TEMP}
+
+  ReadINIStr ${L_TEMP} "$G_USERDIR\install.ini" "Settings" "Owner"
+  StrCmp ${L_TEMP} "" section_exit
+  StrCmp ${L_TEMP} $G_WINUSERNAME section_exit
+
+  MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
+      "$(PFI_LANG_UN_MBDIFFUSER_1) ('${L_TEMP}') !\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES section_exit
+  Abort "$(PFI_LANG_UN_ABORT_1)"
+
+section_exit:
+  Pop ${L_TEMP}
+
+  !undef L_TEMP
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Local User Data'
+#
+# There may be 'User Data' in the same folder as the PROGRAM files (especially if this is
+# an upgraded installation) so we must run the 'User Data' uninstaller before we uninstall
+# POPFile (to restore any email settings changed by the installer).
+#--------------------------------------------------------------------------
+
+Section "un.Local User Data" UnSecUserData
+
+  IfFileExists "$G_ROOTDIR\popfile.pl" look_for_uninstalluser
+  IfFileExists "$G_ROOTDIR\popfile.exe" look_for_uninstalluser
+    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
+        "$(PFI_LANG_UN_MBNOTFOUND_1) '$G_ROOTDIR'.\
+        $\r$\n$\r$\n\
+        $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES look_for_uninstalluser
+    Abort "$(PFI_LANG_UN_ABORT_1)"
+
+look_for_uninstalluser:
+  IfFileExists "$G_ROOTDIR\uninstalluser.exe" 0 section_exit
+
+  ; Uninstall the 'User Data' in the PROGRAM folder before uninstalling the PROGRAM files
+  ; (note that running 'uninstalluser.exe' with the '_?=dir' option means it will be unable
+  ; to delete itself because the program is NOT automatically relocated to the TEMP folder)
+
+  HideWindow
+  ExecWait '"$G_ROOTDIR\uninstalluser.exe" _?=$G_ROOTDIR'
+  BringToFront
+
+  ; If any email settings have NOT been restored and the user wishes to try again later,
+  ; the relevant INI file will still exist and we should not remove it or uninstalluser.exe
+
+  IfFileExists "$G_ROOTDIR\pfi-outexpress.ini" section_exit
+  IfFileExists "$G_ROOTDIR\pfi-outlook.ini" section_exit
+  IfFileExists "$G_ROOTDIR\pfi-eudora.ini" section_exit
+  Delete "$G_ROOTDIR\uninstalluser.exe"
+
+section_exit:
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Shutdown POPFile'
+#--------------------------------------------------------------------------
+
+Section "un.Shutdown POPFile" UnSecShutdown
 
   !define L_CFG         $R9   ; used as file handle
   !define L_EXE         $R8   ; full path of the EXE to be monitored
@@ -2012,42 +2107,6 @@ Section "Uninstall"
   Push ${L_LNE}
   Push ${L_TEMP}
 
-  ReadINIStr ${L_TEMP} "$G_USERDIR\install.ini" "Settings" "Owner"
-  StrCmp ${L_TEMP} "" look_for_popfile
-  StrCmp ${L_TEMP} $G_WINUSERNAME look_for_popfile
-  MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
-      "$(PFI_LANG_UN_MBDIFFUSER_1) ('${L_TEMP}') !\
-      $\r$\n$\r$\n\
-      $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES look_for_popfile
-  Abort "$(PFI_LANG_UN_ABORT_1)"
-
-look_for_popfile:
-  IfFileExists $G_ROOTDIR\popfile.pl look_for_uninstalluser
-  IfFileExists $G_ROOTDIR\popfile.exe look_for_uninstalluser
-    MessageBox MB_YESNO|MB_ICONSTOP|MB_DEFBUTTON2 \
-        "$(PFI_LANG_UN_MBNOTFOUND_1) '$G_ROOTDIR'.\
-        $\r$\n$\r$\n\
-        $(PFI_LANG_UN_MBNOTFOUND_2)" IDYES look_for_uninstalluser
-    Abort "$(PFI_LANG_UN_ABORT_1)"
-
-look_for_uninstalluser:
-  IfFileExists "$G_ROOTDIR\uninstalluser.exe" 0 uninstall_popfile
-
-  ; Uninstall the 'User Data' in the PROGRAM folder before uninstalling the PROGRAM files
-
-  HideWindow
-  ExecWait '"$G_ROOTDIR\uninstalluser.exe" _?=$G_ROOTDIR'
-  BringToFront
-
-  ; If any email settings have NOT been restored and the user wishes to try again later,
-  ; the relevant INI file will still exist and we should not remove it or uninstalluser.exe
-
-  IfFileExists "$G_ROOTDIR\pfi-outexpress.ini" uninstall_popfile
-  IfFileExists "$G_ROOTDIR\pfi-outlook.ini" uninstall_popfile
-  IfFileExists "$G_ROOTDIR\pfi-eudora.ini" uninstall_popfile
-  Delete "$G_ROOTDIR\uninstalluser.exe"
-
-uninstall_popfile:
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROG_SHUTDOWN)"
   SetDetailsPrint listonly
@@ -2061,9 +2120,13 @@ uninstall_popfile:
   Push $G_ROOTDIR
   Call un.FindLockedPFE
   Pop ${L_EXE}
-  StrCmp ${L_EXE} "" remove_shortcuts
+  StrCmp ${L_EXE} "" section_exit
 
   ; The program files we are about to remove are in use so we need to shut POPFile down
+
+  IfFileExists "$G_USERDIR\popfile.cfg" 0 manual_shutdown
+
+  ; Use the UI port setting in the configuration file to shutdown POPFile
 
   StrCpy $G_GUI ""
 
@@ -2096,7 +2159,7 @@ ui_port_done:
   Push $G_GUI
   Call un.ShutdownViaUI
   Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "success" remove_shortcuts
+  StrCmp ${L_TEMP} "success" section_exit
 
 manual_shutdown:
   DetailPrint "Unable to shutdown automatically - manual intervention requested"
@@ -2106,7 +2169,31 @@ manual_shutdown:
       $\r$\n$\r$\n\
       $(PFI_LANG_MBMANSHUT_3)"
 
-remove_shortcuts:
+  ; Assume user has managed to shutdown POPFile
+
+section_exit:
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+  Pop ${L_TEMP}
+  Pop ${L_LNE}
+  Pop ${L_EXE}
+  Pop ${L_CFG}
+
+  !undef L_CFG
+  !undef L_EXE
+  !undef L_LNE
+  !undef L_TEMP
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Start Menu Entries'
+#--------------------------------------------------------------------------
+
+Section "un.Start Menu Entries" UnSecStartMenu
+
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROG_SHORT)"
   SetDetailsPrint listonly
@@ -2136,90 +2223,165 @@ menucleanup:
 
   SetShellVarContext current
 
+  StrCmp $G_WINUSERTYPE "Admin" 0 tidymenu
+  SetShellVarContext all
+
+tidymenu:
+  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk"
+  RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
+
+  SetShellVarContext current
+
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.POPFile Core'
+#
+# Files are explicitly deleted (instead of just using wilcards or RMDir /r commands)
+# in an attempt to avoid unexpectedly deleting any files create by the user after installation.
+# Current commands only cover most recent versions of POPFile - need to add commands to cover
+# more of the early versions of POPFile.
+#--------------------------------------------------------------------------
+
+Section "un.POPFile Core" UnSecCore
+
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROG_CORE)"
   SetDetailsPrint listonly
 
-  Delete $INSTDIR\wrapper.exe
-  Delete $INSTDIR\wrapperf.exe
-  Delete $INSTDIR\wrapperb.exe
-  Delete $INSTDIR\wrapper.ini
+  Delete "$G_ROOTDIR\wrapper.exe"
+  Delete "$G_ROOTDIR\wrapperf.exe"
+  Delete "$G_ROOTDIR\wrapperb.exe"
+  Delete "$G_ROOTDIR\wrapper.ini"
 
-  Delete $G_ROOTDIR\runpopfile.exe
-  Delete $G_ROOTDIR\adduser.exe
-  Delete $G_ROOTDIR\sqlite.exe
-  Delete $G_ROOTDIR\pfidiag.exe
+  Delete "$G_ROOTDIR\runpopfile.exe"
+  Delete "$G_ROOTDIR\adduser.exe"
+  Delete "$G_ROOTDIR\sqlite.exe"
+  Delete "$G_ROOTDIR\pfidiag.exe"
 
-  Delete $G_ROOTDIR\*.gif
-  Delete $G_ROOTDIR\*.change
-  Delete $G_ROOTDIR\*.change.txt
+  Delete "$G_ROOTDIR\*.gif"
+  Delete "$G_ROOTDIR\*.change"
+  Delete "$G_ROOTDIR\*.change.txt"
 
-  Delete $G_ROOTDIR\popfile.pl
-  Delete $G_ROOTDIR\*.pm
+  Delete "$G_ROOTDIR\popfile.pl"
+  Delete "$G_ROOTDIR\*.pm"
 
-  Delete $G_ROOTDIR\bayes.pl
-  Delete $G_ROOTDIR\insert.pl
-  Delete $G_ROOTDIR\pipe.pl
-  Delete $G_ROOTDIR\favicon.ico
-  Delete $G_ROOTDIR\popfile.exe
-  Delete $G_ROOTDIR\popfilef.exe
-  Delete $G_ROOTDIR\popfileb.exe
-  Delete $G_ROOTDIR\popfileif.exe
-  Delete $G_ROOTDIR\popfileib.exe
-  Delete $G_ROOTDIR\popfile-service.exe
-  Delete $G_ROOTDIR\stop_pf.exe
-  Delete $G_ROOTDIR\license
+  Delete "$G_ROOTDIR\bayes.pl"
+  Delete "$G_ROOTDIR\insert.pl"
+  Delete "$G_ROOTDIR\pipe.pl"
+  Delete "$G_ROOTDIR\favicon.ico"
+  Delete "$G_ROOTDIR\popfile.exe"
+  Delete "$G_ROOTDIR\popfilef.exe"
+  Delete "$G_ROOTDIR\popfileb.exe"
+  Delete "$G_ROOTDIR\popfileif.exe"
+  Delete "$G_ROOTDIR\popfileib.exe"
+  Delete "$G_ROOTDIR\popfile-service.exe"
+  Delete "$G_ROOTDIR\stop_pf.exe"
+  Delete "$G_ROOTDIR\license"
+  Delete "$G_ROOTDIR\pfi-stopwords.default"
 
-  Delete $G_ROOTDIR\Classifier\*.pm
-  Delete $G_ROOTDIR\Classifier\popfile.sql
-  RMDir $G_ROOTDIR\Classifier
+  Delete "$G_ROOTDIR\Classifier\*.pm"
+  Delete "$G_ROOTDIR\Classifier\popfile.sql"
+  RMDir "$G_ROOTDIR\Classifier"
 
-  Delete $G_ROOTDIR\Platform\*.pm
-  Delete $G_ROOTDIR\Platform\*.dll
-  RMDir $G_ROOTDIR\Platform
+  Delete "$G_ROOTDIR\Platform\*.pm"
+  Delete "$G_ROOTDIR\Platform\*.dll"
+  RMDir "$G_ROOTDIR\Platform"
 
-  Delete $G_ROOTDIR\POPFile\*.pm
-  Delete $G_ROOTDIR\POPFile\popfile_version
-  RMDir $G_ROOTDIR\POPFile
+  Delete "$G_ROOTDIR\POPFile\*.pm"
+  Delete "$G_ROOTDIR\POPFile\popfile_version"
+  RMDir "$G_ROOTDIR\POPFile"
 
-  Delete $G_ROOTDIR\Proxy\*.pm
-  RMDir $G_ROOTDIR\Proxy
+  Delete "$G_ROOTDIR\Proxy\*.pm"
+  RMDir "$G_ROOTDIR\Proxy"
 
-  Delete $G_ROOTDIR\UI\*.pm
-  RMDir $G_ROOTDIR\UI
+  Delete "$G_ROOTDIR\UI\*.pm"
+  RMDir "$G_ROOTDIR\UI"
+
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Skins'
+#--------------------------------------------------------------------------
+
+Section "un.Skins" UnSecSkins
 
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROG_SKINS)"
   SetDetailsPrint listonly
 
-  Delete $G_ROOTDIR\perl*.dll
-  Delete $G_ROOTDIR\perl.exe
-  Delete $G_ROOTDIR\wperl.exe
+  Delete "$G_ROOTDIR\skins\*.css"
+  Delete "$G_ROOTDIR\skins\*.gif"
+  Delete "$G_ROOTDIR\skins\lavishImages\*.gif"
+  Delete "$G_ROOTDIR\skins\sleetImages\*.gif"
+  RMDir "$G_ROOTDIR\skins\sleetImages"
+  RMDir "$G_ROOTDIR\skins\lavishImages"
+  RMDir "$G_ROOTDIR\skins"
 
-  Delete $G_ROOTDIR\skins\*.css
-  Delete $G_ROOTDIR\skins\*.gif
-  Delete $G_ROOTDIR\skins\lavishImages\*.gif
-  Delete $G_ROOTDIR\skins\sleetImages\*.gif
-  RMDir $G_ROOTDIR\skins\sleetImages
-  RMDir $G_ROOTDIR\skins\lavishImages
-  RMDir $G_ROOTDIR\skins
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
 
-  Delete $G_ROOTDIR\manual\en\*.html
-  RMDir $G_ROOTDIR\manual\en
-  Delete $G_ROOTDIR\manual\*.gif
-  RMDir $G_ROOTDIR\manual
+SectionEnd
 
-  Delete $G_ROOTDIR\languages\*.msg
-  RMDir $G_ROOTDIR\languages
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Languages'
+#--------------------------------------------------------------------------
 
-  IfFIleExists "$INSTDIR\kakasi\*.*" 0 skip_kakasi
+Section "un.Languages" UnSecLangs
+
+  Delete "$G_ROOTDIR\languages\*.msg"
+  RMDir "$G_ROOTDIR\languages"
+
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Manual'
+#--------------------------------------------------------------------------
+
+Section "un.Manual" UnSecManual
+
+  Delete "$G_ROOTDIR\manual\en\*.html"
+  RMDir "$G_ROOTDIR\manual\en"
+  Delete "$G_ROOTDIR\manual\*.gif"
+  RMDir "$G_ROOTDIR\manual"
+
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Kakasi'
+#--------------------------------------------------------------------------
+
+Section "un.Kakasi" UnSecKakasi
+
+  !define L_TEMP        $R9
+
+  Push ${L_TEMP}
+
+  IfFileExists "$INSTDIR\kakasi\*.*" 0 section_exit
   RMDir /r "$INSTDIR\kakasi"
 
   ;Delete Environment Variables
 
-  Push KANWADICTPATH
+  Push "KANWADICTPATH"
   Call un.DeleteEnvStr
-  Push ITAIJIDICTPATH
+  Push "ITAIJIDICTPATH"
   Call un.DeleteEnvStr
 
   ; If the 'all users' environment variables refer to this installation, remove them too
@@ -2229,16 +2391,39 @@ menucleanup:
   Push $INSTDIR
   Call un.StrStr
   Pop ${L_TEMP}
-  StrCmp ${L_TEMP} "" skip_kakasi
-  Push KANWADICTPATH
+  StrCmp ${L_TEMP} "" section_exit
+  Push "KANWADICTPATH"
   Call un.DeleteEnvStrNTAU
-  Push ITAIJIDICTPATH
+  Push "ITAIJIDICTPATH"
   Call un.DeleteEnvStrNTAU
 
-skip_kakasi:
+section_exit:
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+  Pop ${L_TEMP}
+
+  !undef L_TEMP
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Minimal Perl'
+#--------------------------------------------------------------------------
+
+Section "un.Minimal Perl" UnSecMinPerl
+
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_UN_PROG_PERL)"
   SetDetailsPrint listonly
+
+  Delete "$G_ROOTDIR\perl*.dll"
+  Delete "$G_ROOTDIR\perl.exe"
+  Delete "$G_ROOTDIR\wperl.exe"
+
+  ; Win95 displays an error message if an attempt is made to delete non-existent folders
+  ; (so we check before removing optional Perl components which may not have been installed)
 
   IfFileExists "$G_MPLIBDIR\HTTP\*.*" 0 skip_XMLRPC_support
   RMDir /r "$G_MPLIBDIR\HTTP"
@@ -2274,32 +2459,46 @@ skip_Encode:
 
 skip_Win32:
   Delete "$G_MPLIBDIR\*.pm"
-  RMDIR $G_MPLIBDIR
+  RMDIR "$G_MPLIBDIR"
 
-  StrCmp $G_WINUSERTYPE "Admin" 0 tidymenu
-  SetShellVarContext all
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
 
-tidymenu:
-  Delete "$SMPROGRAMS\${C_PFI_PRODUCT}\Uninstall POPFile.lnk"
-  RMDir "$SMPROGRAMS\${C_PFI_PRODUCT}"
+SectionEnd
 
-  SetShellVarContext current
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Registry Entries'
+#--------------------------------------------------------------------------
 
-  Delete "$INSTDIR\Uninstall.exe"
+Section "un.Registry Entries" UnSecRegistry
 
-  RMDir $G_ROOTDIR
-  RMDir $INSTDIR
-
-  ; Clean up registry data
-
-  StrCmp $G_WINUSERTYPE "Admin" 0 final_check
+  StrCmp $G_WINUSERTYPE "Admin" 0 section_exit
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${C_PFI_PRODUCT}"
   DeleteRegKey HKLM "Software\POPFile Project\${C_PFI_PRODUCT}\MRI"
   DeleteRegKey /ifempty HKLM "Software\POPFile Project\${C_PFI_PRODUCT}"
   DeleteRegKey /ifempty HKLM "Software\POPFile Project"
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\App Paths\stop_pf.exe"
 
-final_check:
+section_exit:
+  SetDetailsPrint textonly
+  DetailPrint " "
+  SetDetailsPrint listonly
+
+SectionEnd
+
+#--------------------------------------------------------------------------
+# Uninstaller Section: 'un.Uninstall End' (this is the final section in the uninstaller)
+#
+# Used to terminate the uninstaller - offers to remove any files/folders left behind.
+# If any 'User Data' is left in the PROGRAM folder then we preserve it to allow the
+# user to make another attempt at restoring the email settings.
+#--------------------------------------------------------------------------
+
+Section "un.Uninstall End" UnSecEnd
+
+  Delete "$G_ROOTDIR\Uninstall.exe"
+  RMDir "$G_ROOTDIR"
 
   ; if $INSTDIR was removed, skip these next ones
 
@@ -2321,17 +2520,6 @@ final_check:
 
 exit:
   SetDetailsPrint both
-
-  Pop ${L_TEMP}
-  Pop ${L_LNE}
-  Pop ${L_EXE}
-  Pop ${L_CFG}
-
-  !undef L_CFG
-  !undef L_EXE
-  !undef L_LNE
-  !undef L_TEMP
-
 SectionEnd
 
 #--------------------------------------------------------------------------
