@@ -46,9 +46,11 @@ sub new
     
     $self->{color}     = 0;
     
-    # This will store the from address from the last parse
+    # This will store the from, to and subject from the last parse
     
     $self->{from}      = '';
+    $self->{to}        = '';
+    $self->{subject}   = '';
 
     return bless $self, $type;
 }
@@ -137,7 +139,7 @@ sub add_line
 
         while ( $line =~ s/<([[:alpha:]0-9\-_\.]+?@[[:alpha:]0-9\-_\.]+?)>// ) 
         {
-            update_word($self, $1, $encoded, '<', '>');
+            update_word($self, $1, $encoded, ';', '&');
         }
 
         # Grab domain names
@@ -158,11 +160,11 @@ sub add_line
         # an, or, if are too common and the longest word in English (according to
         # the OED) is pneumonoultramicroscopicsilicovolcanoconiosis
 
-        while ( $line =~ s/([[:alpha:]][[:alpha:]\']{0,44})[-,\.\"\'\)\?!:;\/]{0,5}([ \t\n\r]|$)/ / )
+        while ( $line =~ s/([[:alpha:]][[:alpha:]\']{0,44})[-,\.\"\'\)\?!:;\/&]{0,5}([ \t\n\r]|$)/ / )
         {
             if (length $1 >= 3)        
             {
-                update_word($self,$1, $encoded, '', '[-,\.\"\'\)\?!:;\/ \t\n\r]');
+                update_word($self,$1, $encoded, '', '[-,\.\"\'\)\?!:;\/ &\t\n\r]');
             }
         }
         
@@ -172,9 +174,45 @@ sub add_line
 
 # ---------------------------------------------------------------------------------------------
 #
+# update_tag
+#
+# Extract domain names from inside tags
+#
+# $tag     The tag name
+# $arg     The arguments
+#
+# ---------------------------------------------------------------------------------------------
+
+sub update_tag
+{
+    my ($self, $tag, $arg) = @_;
+
+    print "HTML tag $tag with argument " . $arg . "\n" if ($self->{debug});
+
+    if ( $tag =~ /^img$/i ) 
+    {
+        if ( $arg =~ /src=[\"\']?http:\/\/([^ \/\"]+)([ \/\"])/i ) 
+        {
+            update_word( $self, $1, 0, '\/', $2 );
+        }
+    }
+
+    if ( $tag =~ /^a$/i ) 
+    {
+        if ( $arg =~ /href=[\"\']?http:\/\/([^ \/\"]+)([ \/\"])/i ) 
+        {
+            update_word( $self, $1, 0, '\/', $2 );
+        }
+    }
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # parse_stream
 #
 # Read messages from a file stream and parse into a list of words and frequencies
+#
+# $file     The file to open and parse
 #
 # ---------------------------------------------------------------------------------------------
 
@@ -199,10 +237,14 @@ sub parse_stream
     my $colorized = '';
 
     my $in_html_tag = 0;
+    my $html_tag    = '';
+    my $html_arg    = '';
 
     $self->{words}     = {};
     $self->{msg_total} = 0;
     $self->{from}      = '';
+    $self->{to}        = '';
+    $self->{subject}   = '';
     $self->{ut}        = '';
 
     if ( $self->{color} )
@@ -235,17 +277,24 @@ sub parse_stream
 
             if ( $self->{color} ) 
             {
-                if ( $self->{ut} ne '' ) 
+                my $splitline = $line;    
+                $splitline =~ s/([^\r\n]{100,150} )/$1\r\n/g;
+                $splitline =~ s/([^ \r\n]{150})/$1\r\n/g;
+
+                if ( !$in_html_tag ) 
                 {
-                    $colorized .= $self->{ut};
+                    if ( $self->{ut} ne '' ) 
+                    {
+                        $colorized .= $self->{ut};
+                    }
+                    
+                    $self->{ut} = '';
                 }
 
-                my $splitline = $line;    
-                $splitline =~ s/([^\r\n]{150})/$1\r\n/g;
-
-                $self->{ut} = $splitline;
-                $self->{ut} =~ s/</&lt;/g;
-                $self->{ut} =~ s/>/&gt;/g;
+                $splitline =~ s/</&lt;/g;
+                $splitline =~ s/>/&gt;/g;
+                $splitline =~ s/\t/&nbsp;&nbsp;&nbsp;&nbsp;/g;
+                $self->{ut} .= $splitline;
             }
 
             # If we are in a mime document then spot the boundaries
@@ -330,9 +379,13 @@ sub parse_stream
             {
                 if ( $in_html_tag ) 
                 {
+                    $html_arg .= " " . $line;
                     if ( $line =~ s/.*?>/ / )
                     {
                         $in_html_tag = 0;
+                        update_tag( $self, $html_tag, $html_arg );
+                        $html_tag = '';
+                        $html_arg = '';
                     }
                     else
                     {
@@ -343,30 +396,13 @@ sub parse_stream
                     
                 while ( $line =~ s/<[\/]?([A-Za-z]+)([^>]*?)>/ / ) 
                 {
-                    my $tag = $1;
-                    my $arg = $2;
-                    
-                    print "HTML tag $tag with argument " . $arg . "\n" if ($self->{debug});
-                    
-                    if ( $tag =~ /^img$/i ) 
-                    {
-                        if ( $arg =~ /src=\"?http:\/\/([^\/]+)\// ) 
-                        {
-                            update_word( $self, $1, 0, '\/', '\/' );
-                        }
-                    }
-
-                    if ( $tag =~ /^a$/i ) 
-                    {
-                        if ( $arg =~ /href=\"?http:\/\/([^\/]+)\// ) 
-                        {
-                            update_word( $self, $1, 0, '\/', '\/' );
-                        }
-                    }
+                    update_tag( $self, $1, $2 );
                 }
                 
-                if ( $line =~ s/<[^>]*$// ) 
+                if ( $line =~ s/<([^ >]+)([^>]*)$// ) 
                 {
+                    $html_tag = $1;
+                    $html_arg = $2;
                     $in_html_tag = 1;
                 }
             }
@@ -380,12 +416,6 @@ sub parse_stream
 
                 print "Header ($header) ($argument)\n" if ($self->{debug});
 
-                if ( $header =~ /From/ ) 
-                {
-                    $encoding = '';
-                    $content_type = '';
-                }
-
                 # Handle the From, To and Cc headers and extract email addresses
                 # from them and treat them as words
 
@@ -393,15 +423,26 @@ sub parse_stream
                 {
                     if ( $header =~ /From/ ) 
                     {
+                        $encoding     = '';
+                        $content_type = '';
+                        
                         if ( $self->{from} eq '' ) 
                         {
                             $self->{from} = $argument;
                         }
                     }
+
+                    if ( $header =~ /To/ ) 
+                    {
+                        if ( $self->{to} eq '' ) 
+                        {
+                            $self->{to} = $argument;
+                        }
+                    }
                     
                     while ( $argument =~ s/<([[:alpha:]0-9\-_\.]+?@[[:alpha:]0-9\-_\.]+?)>// ) 
                     {
-                        update_word($self, $1, 0, '<', '>');
+                        update_word($self, $1, 0, ';', '&');
                     }
 
                     while ( $argument =~ s/([[:alpha:]0-9\-_\.]+?@[[:alpha:]0-9\-_\.]+)// ) 
@@ -411,6 +452,14 @@ sub parse_stream
 
                     add_line( $self, $argument, 0 );
                     next;
+                }
+
+                if ( $header =~ /Subject/ ) 
+                {
+                    if ( $self->{subject} eq '' ) 
+                    {
+                        $self->{subject} = $argument;
+                    }
                 }
 
                 # Look for MIME
