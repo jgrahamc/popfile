@@ -180,7 +180,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.2.61"
+  !define C_PFI_VERSION  "0.2.62"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -853,6 +853,10 @@ Section "POPFile" SecPOPFile
   SetDetailsPrint textonly
   DetailPrint "$(PFI_LANG_INST_PROG_REGSET)"
   SetDetailsPrint listonly
+  
+  ; 'CheckExistingDataDir' (the DIRECTORY page's "leave" function) stores LFN path in $INSTDIR
+  
+  StrCpy $G_USERDIR $INSTDIR
 
   IfFileExists "$G_USERDIR\*.*" userdir_exists
   ClearErrors
@@ -2041,6 +2045,7 @@ check_locn:
   Pop ${L_RESULT}
   StrCmp ${L_RESULT} "" got_path
   StrCpy $G_USERDIR ${L_RESULT}
+  StrCpy $INSTDIR $G_USERDIR
 
 got_path:
   Pop ${L_RESULT}
