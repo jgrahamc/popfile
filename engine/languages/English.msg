@@ -190,8 +190,7 @@ Bucket_LookupMostLikely                 <b>%s</b> is most likely to appear in <f
 Bucket_DoesNotAppear                    <p><b>%s</b> does not appear in any of the buckets
 Bucket_DisabledGlobally                 Disabled globally
 Bucket_To                               to
-Bucket_AboutSpam                        Name your spam bucket <b>spam</b> to enable POPFile's quarantine feature
-Bucket_Quarantine                       (automatic quarantine)
+Bucket_Quarantine                       Quarantine
 
 SingleBucket_Title                      Detail for %s
 SingleBucket_WordCount                  Bucket word count

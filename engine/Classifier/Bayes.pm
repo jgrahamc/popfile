@@ -362,8 +362,11 @@ sub load_bucket
 
     $bucket =~ /([[:alpha:]0-9-_]+)$/;
     $bucket =  $1;
-    $self->{parameters}{$bucket}{subject} = 1;
-    $self->{parameters}{$bucket}{count}   = 0;
+    
+    $self->{parameters}{$bucket}{subject}    = 1;
+    $self->{parameters}{$bucket}{count}      = 0;
+    $self->{parameters}{$bucket}{quarantine} = 0;
+    
     $self->{total}{$bucket}  = 0;
     $self->{unique}{$bucket} = 0;
     $self->{matrix}{$bucket} = ();
@@ -591,7 +594,7 @@ sub classify_file
          } else {
              $probstr = sprintf("%17.6e", $prob);
          }
-         $self->{scores} .= "<tr><td><font color=$self->{colors}{$b}><b>$b</b></font><td>&nbsp;<td>$probstr ($score{$b})";
+         $self->{scores} .= "<tr><td><font color=$self->{colors}{$b}><b>$b</b></font><td>&nbsp;<td>$probstr";
          printf("%-15s%15.6f%15.6f %s\n", $b, ($raw_score{$b} - $correction)/$logbuck, ($score{$b} - log($total))/$logbuck + 1, $probstr) if $self->{debug};
     }
     $self->{scores} .= "</table>";
@@ -718,10 +721,7 @@ sub classify_and_modify
                 if ( $line =~ /Subject:(.*)/i )  {
                     $msg_subject = $1;
                     $msg_subject =~ s/(\012|\015)//g;
-                    
-                    if ( $self->{configuration}->{configuration}{subject} )  {
-                        next;
-                    }
+                    next;
                 }
 
                 # Strip out the X-Text-Classification header that is in an incoming message
@@ -795,18 +795,19 @@ sub classify_and_modify
     
     if ( !$nosave ) {
     
-        # If the bucket is named spam then we'll treat it specially by changing the message header to contain
+        # If the bucket is quarantined then we'll treat it specially by changing the message header to contain
         # information from POPFile and wrapping the original message in a MIME encoding
         
-        if ( $classification eq 'spam' ) {
+        if ( $self->{parameters}{$classification}{quarantine} == 1 ) {
             print $client "From: $self->{parser}->{from}$eol";
+            print $client "To: $self->{parser}->{to}$eol";
             print $client "Date: " . localtime() . $eol;
             print $client "Subject: $msg_subject$eol";
             print $client "X-Text-Classification: $classification$eol" if ( $self->{configuration}->{configuration}{xtc} );            
             print $client 'X-POPFile-Link: ' . $xpl if ( $self->{configuration}->{configuration}{xpl} );
             print $client "Content-Type: multipart/report; boundary=\"$temp_file\"$eol$eol--$temp_file$eol";
             print $client "Content-Type: text/plain$eol$eol";
-            print $client "POPFile has quarantined a message that it believes is spam.  It is attached to this email.$eol$eol";
+            print $client "POPFile has quarantined a message.  It is attached to this email.$eol$eol";
             print $client "Quarantined Message Detail$eol$eol";
             print $client "Original From: $self->{parser}->{from}$eol";
             print $client "Original Subject: $self->{parser}->{subject}$eol";

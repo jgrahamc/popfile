@@ -1198,6 +1198,11 @@ sub corpus_page
         $self->{classifier}->{parameters}{$self->{form}{bucket}}{subject} = $self->{form}{subject} - 1;
         $self->{classifier}->write_parameters();
     }
+
+    if ( ( defined($self->{form}{bucket}) ) && ( $self->{form}{quarantine} > 0 ) ) {
+        $self->{classifier}->{parameters}{$self->{form}{bucket}}{quarantine} = $self->{form}{quarantine} - 1;
+        $self->{classifier}->write_parameters();
+    }
     
     if ( ( defined($self->{form}{cname}) ) && ( $self->{form}{cname} ne '' ) ) {
         if ( $self->{form}{cname} =~ /[^[:lower:]\-_]/ )  {
@@ -1248,6 +1253,7 @@ sub corpus_page
     $body .= "<td width=\"10\">&nbsp;\n<td align=\"right\">\n<b>$self->{language}{Bucket_WordCount}</b>\n" ;
     $body .= "<td width=\"10\">&nbsp;\n<td align=\"right\">\n<b>$self->{language}{Bucket_UniqueWords}</b>\n" ;
     $body .= "<td width=\"10\">&nbsp;\n<td align=\"center\"><b>$self->{language}{Bucket_SubjectModification}</b>\n" ;
+    $body .= "<td width=\"10\">&nbsp;\n<td align=\"center\"><b>$self->{language}{Bucket_Quarantine}</b>\n" ;
     $body .= "<td width=\"20\">&nbsp;\n<td align=\"left\"><b>$self->{language}{Bucket_ChangeColor}</b>\n";
 
     my @buckets = sort keys %{$self->{classifier}->{total}};
@@ -1271,7 +1277,6 @@ sub corpus_page
         $stripe = 1 - $stripe;
         $body .= "><td><a href=\"/buckets?session=$self->{session_key}&amp;showbucket=$bucket\">\n";
         $body .= "<font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font></a>\n";
-        $body .= $self->{language}{Bucket_Quarantine} if ( $bucket eq 'spam' );
         $body .= "<td width=\"10\">&nbsp;<td align=\"right\">$number<td width=\"10\">&nbsp;\n";
         $body .= "<td align=\"right\">$unique<td width=\"10\">&nbsp;";
         
@@ -1288,6 +1293,17 @@ sub corpus_page
             }
         } else {
             $body .= "<td align=\"center\">\n$self->{language}{Bucket_DisabledGlobally}\n";
+        }
+
+        $body .= "<td width=\"10\">&nbsp;<td align=\"center\">\n";
+        if ( $self->{classifier}->{parameters}{$bucket}{quarantine} == 0 )  {
+            $body .= "<b>$self->{language}{Off}</b>\n" ; 
+            $body .= "<a href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;quarantine=2\">\n" ;
+            $body .= "[$self->{language}{TurnOn}]</a>\n" ;
+        } else {
+            $body .= "<b>$self->{language}{On}</b> \n" ;
+            $body .= "<a href=\"/buckets?session=$self->{session_key}&amp;bucket=$bucket&amp;quarantine=1\">\n" ;
+            $body .= "[$self->{language}{TurnOff}]</a>\n ";
         }
         $body .= "<td>&nbsp;\n<td align=\"left\">\n<table cellpadding=\"0\" cellspacing=\"1\">\n<tr>\n";
         my $color = $self->{classifier}->{colors}{$bucket};
@@ -1404,7 +1420,7 @@ sub corpus_page
     $body .= "<input name=\"cname\" type=\"text\">\n" ;
     $body .= "<input type=\"submit\" class=\"submit\" name=\"create\" value=\"$self->{language}{Create}\">\n" ;
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n" ;
-    $body .= "<br>($self->{language}{Bucket_AboutSpam})</form>\n$create_message\n<p>\n";
+    $body .= "</form>\n$create_message\n<p>\n";
     $body .= "<form action=\"/buckets\">\n<b>$self->{language}{Bucket_DeleteBucket}:</b> <br>\n" ;
     $body .= "<select name=\"name\"><option value=\"\">\n</option>\n";
 
