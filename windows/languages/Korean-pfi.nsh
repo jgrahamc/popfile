@@ -72,6 +72,9 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT \
 "이 마법사는 귀하의 컴퓨터에 POPFile(팝파일)을 설치할 것입니다.\r\n\r\n설치를 시작하기 전에 모든 프로그램을 종료시킬 것을 권장합니다.\r\n\r\n$_CLICK"
 
+!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_ADMIN_TEXT \
+"IMPORTANT NOTICE:\r\n\r\nThe current user does NOT have 'Administrator' rights.\r\n\r\nIf multi-user support is required, it is recommended that you cancel this installation and use an 'Administrator' account to install POPFile."
+
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish
 #
@@ -86,11 +89,40 @@
 #==========================================================================
 
 #--------------------------------------------------------------------------
+# General purpose banner text (also suitable for page titles/subtitles)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1    "이전 버전 제거 중"
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2    "몇초 정도 걸릴 수 있습니다..."
+
+#--------------------------------------------------------------------------
+# Message box warning that a previous installation has been found
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1  "이전 버전의 POPFile(팝파일)이 설치된 것이 감지되었습니다."
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2  "Do you want to upgrade it ?"
+
+#--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_1        "POPFile(팝파일) 릴리즈 노트를 표시할까요?"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_2        "POPFile을 업그레이드하시는 것이라면 '예' 를 권장합니다. (설치 전에 POPFile 폴더를 백업하셔야 할 수도 있습니다.)"
+
+#--------------------------------------------------------------------------
+# Custom Page - Check Perl Requirements
+#--------------------------------------------------------------------------
+
+; Page Title and Sub-title displayed in the page header
+
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_TITLE       "Out-of-date System Components Detected"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_SUBTITLE    "The version of Perl used by POPFile may not work properly on this system"
+
+; Text strings displayed on the custom page
+
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1   "When POPFile displays its User Interface, the current default browser will be used.\r\n\r\nPOPFile does not require a specific browser, it will work with almost any browser.\r\n\r\nPOPFile is written in Perl so a minimal version of Perl is installed which uses some components distributed with Internet Explorer."
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2   "The installer has detected that this system has Internet Explorer"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3   "The version of Perl supplied with POPFile requires Internet Explorer 5.5 (or later).\r\n\r\nIt is recommended that this system is upgraded to use Internet Explorer 5.5 or a later version."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Choose Components
@@ -119,10 +151,6 @@
 
 ; Message Boxes used when validating user's selections
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_1    "이전 버전의 POPFile(팝파일)이 설치된 것이 감지되었습니다."
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_2    "언인스톨 하시겠습니까?"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_3    "'예' 가 권장됩니다."
-
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_1    "POP3 포트가 설정될 수 없습니다 - 포트:"
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_2    "포트는 1에서 65535 까지의 숫자여야만 합니다."
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_3    "POP3 포트 선택을 변경하십시오."
@@ -133,11 +161,6 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_1    "POP3 포트는 '사용자 화면' 포트와 반드시 달라야 합니다."
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_2    "포트 선택을 변경하십시오."
-
-; Banner message displayed whilst uninstalling old version
-
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1     "이전 버전 제거 중"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "몇초 정도 걸릴 수 있습니다..."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Installing POPfile
@@ -231,26 +254,117 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4      "POPFile이 설치된 후 '사용자 화면'을 이용하여 버킷을 추가하실 수 있습니다.$\r$\n$\r$\n"
 
 #--------------------------------------------------------------------------
-# Custom Page - Reconfigure Outlook Express
+# Custom Page - Email Client Reconfiguration
 #--------------------------------------------------------------------------
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_TITLE         "아웃룩 익스프레스 설정을 변경하십시오."
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_SUBTITLE      "POPFile은 아웃룩 익스프레스 설정을 변경해드릴 수 있습니다."
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_TITLE       "Email Client Configuration"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_SUBTITLE    "POPFile can reconfigure several email clients for you"
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_INTRO      "다음과 같은 아웃룩 익스프레스 메일 계정이 발견되었습니다. POPFile과 연동되도록 자동으로 설정을 변경할 수 있습니다."
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_CHECKBOX   "이 계정을 POPFile과 연동되도록 설정 변경함"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_EMAIL      "전자 메일 주소:"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_SERVER     "받는 메일(POP3) 서버:"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_USERNAME   "계정 이름:"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_POP3PORT   "POP3 port:"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_RESTORE    "POPFile을 언인스톨 하시면 원래 설정이 복원될 것입니다."
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1   "Mail clients marked (*) can be reconfigured automatically, assuming simple accounts are used.\r\n\r\nIt is strongly recommended that accounts which require authentication are configured manually."
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2   "IMPORTANT: PLEASE SHUT DOWN THE RECONFIGURABLE EMAIL CLIENTS NOW\r\n\r\nThis feature is still under development (e.g. some Outlook accounts may not be detected).\r\n\r\nPlease check that the reconfiguration was successful (before using the email client)."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_LINK_1     "계정 ("
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_LINK_2     ")"
+#--------------------------------------------------------------------------
+# Message box warnings that an email client is still running
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EXP        "WARNING: Outlook Express appears to be running !"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_OUT        "WARNING: Outlook appears to be running !"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EUD        "WARNING: Eudora appears to be running !"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_1     "Please SHUT DOWN the email program then click 'Retry' to reconfigure it"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_2     "(You can click 'Ignore' to reconfigure it, but this is not recommended)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_3     "Click 'Abort' to skip the reconfiguration of this email program"
+
+#--------------------------------------------------------------------------
+# Custom Page - Reconfigure Outlook/Outlook Express
+#--------------------------------------------------------------------------
+
+; Page Title and Sub-title displayed in the page header
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_TITLE         "아웃룩 익스프레스 설정을 변경하십시오."
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_SUBTITLE      "POPFile은 아웃룩 익스프레스 설정을 변경해드릴 수 있습니다."
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_TITLE         "Reconfigure Outlook"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_SUBTITLE      "POPFile can reconfigure Outlook for you"
+
+; Text displayed on the custom page
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_IO_CANCELLED  "Outlook Express reconfiguration cancelled by user"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_IO_CANCELLED  "Outlook reconfiguration cancelled by user"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_BOXHDR     "accounts"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_ACCOUNTHDR "Account"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_EMAILHDR   "Email address"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_SERVERHDR  "Server"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_USRNAMEHDR "Username"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_FOOTNOTE   "Tick box(es) to reconfigure account(s).\r\nIf you uninstall POPFile the original settings will be restored."
+
+; Message Box to confirm changes to Outlook/Outlook Express account configuration
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_MBIDENTITY    "Outlook Express Identity :"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_MBACCOUNT     "Outlook Express Account :"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_MBIDENTITY    "Outlook User :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_MBACCOUNT     "Outlook Account :"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBEMAIL       "Email address :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBSERVER      "POP3 server :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBUSERNAME    "POP3 username :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBOEPORT      "POP3 port :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBOLDVALUE    "currently"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBQUESTION    "Reconfigure this account to work with POPFile ?"
+
+; Title and Column headings for report/log files
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_BEFORE    "Outlook Express Settings before any changes were made"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_AFTER     "Changes made to Outlook Express Settings"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_BEFORE    "Outlook Settings before any changes were made"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_AFTER     "Changes made to Outlook Settings"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_END       "(end)"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_IDENTITY  "'IDENTITY'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_IDENTITY  "'OUTLOOK USER'"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_ACCOUNT   "'ACCOUNT'"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_EMAIL     "'EMAIL ADDRESS'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_SERVER    "'POP3 SERVER'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_USER      "'POP3 USERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_PORT      "'POP3 PORT'"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWSERVER "'NEW POP3 SERVER'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWUSER   "'NEW POP3 USERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWPORT   "'NEW POP3 PORT'"
+
+#--------------------------------------------------------------------------
+# Custom Page - Reconfigure Eudroa
+#--------------------------------------------------------------------------
+
+; Page Title and Sub-title displayed in the page header
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_TITLE         "아웃룩 익스프레스 설정을 변경하십시오."
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_SUBTITLE      "POPFile은 아웃룩 익스프레스 설정을 변경해드릴 수 있습니다."
+
+; Text displayed on the custom page
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CANCELLED  "Eudora reconfiguration cancelled by user"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_1    "POPFile has detected the following Eudora personality"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_2    " and can automatically configure it to work with POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CHECKBOX   "Reconfigure this personality to work with POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_DOMINANT   "<Dominant> personality"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_PERSONA    "personality"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_EMAIL      "전자 메일 주소:"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_SERVER     "받는 메일(POP3) 서버:"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_USERNAME   "계정 이름:"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_POP3PORT   "POP3 port:"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_RESTORE    "POPFile을 언인스톨 하시면 원래 설정이 복원될 것입니다."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile can now be started
@@ -291,7 +405,7 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_2   "THIS PROCESS MAY TAKE SEVERAL MINUTES (if the corpus is large)."
 !insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_3   "WARNING"
 !insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_4   "Do NOT close the POPFile console window!"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_5   "When 'POPFile Engine vX.X.X running' appears in the console window, this means"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_5   "When 'POPFile Engine v${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION} running' appears in the console window, this means"
 !insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_6   "- POPFile is ready for use"
 !insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_7   "- POPFile can be safely shutdown using the Start Menu"
 !insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_8   "Click Next to convert the corpus."

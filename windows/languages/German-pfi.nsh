@@ -26,6 +26,11 @@
 #   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #
 #--------------------------------------------------------------------------
+#
+# Translation created by: Matthias Deege (pfaelzerchen at users.sourceforge.net)
+# Translation updated by: Matthias Deege (pfaelzerchen at users.sourceforge.net)
+#
+#--------------------------------------------------------------------------
 # String Formatting (applies to PFI_LANG_*_MB* text used for message boxes):
 #
 #   (1) The sequence  $\r$\n        inserts a newline
@@ -65,7 +70,10 @@
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_INFO_TEXT \
-"Dieser Assistent wird Sie durch die Installation von POPFile begleiten.\r\n\r\nEs wird empfohlen vor der Installation alle anderen Programme zu schließen.\r\n\r\n$_CLICK"
+"Dieser Assistent wird Sie durch die Installation von POPFile führen.\r\n\r\nEs wird empfohlen vor der Installation alle anderen Programme zu schließen.\r\n\r\n$_CLICK"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_WELCOME_ADMIN_TEXT \
+"IMPORTANT NOTICE:\r\n\r\nThe current user does NOT have 'Administrator' rights.\r\n\r\nIf multi-user support is required, it is recommended that you cancel this installation and use an 'Administrator' account to install POPFile."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Finish
@@ -81,11 +89,40 @@
 #==========================================================================
 
 #--------------------------------------------------------------------------
+# General purpose banner text (also suitable for page titles/subtitles)
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1     "Bitte haben Sie einen Moment Geduld."
+!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "Dies kann einige Sekunden dauern..."
+
+#--------------------------------------------------------------------------
+# Message box warning that a previous installation has been found
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_1  "Vorhandene Installation gefunden:"
+!insertmacro PFI_LANG_STRING PFI_LANG_DIRSELECT_MBWARN_2  "Do you want to upgrade it ?"
+
+#--------------------------------------------------------------------------
 # Startup message box offering to display the Release Notes
 #--------------------------------------------------------------------------
 
 !insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_1        "Hinweise zu dieser POPFile-Version anzeigen?"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBRELNOTES_2        "Falls Sie von einer älteren Version updaten, sollten Sie 'Ja' wählen. (Sie sollten evtl. Backups VOR dem Update anlegen)"
+
+#--------------------------------------------------------------------------
+# Custom Page - Check Perl Requirements
+#--------------------------------------------------------------------------
+
+; Page Title and Sub-title displayed in the page header
+
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_TITLE       "Out-of-date System Components Detected"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_SUBTITLE    "The version of Perl used by POPFile may not work properly on this system"
+
+; Text strings displayed on the custom page
+
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_1   "When POPFile displays its User Interface, the current default browser will be used.\r\n\r\nPOPFile does not require a specific browser, it will work with almost any browser.\r\n\r\nPOPFile is written in Perl so a minimal version of Perl is installed which uses some components distributed with Internet Explorer."
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_2   "The installer has detected that this system has Internet Explorer"
+!insertmacro PFI_LANG_STRING PFI_LANG_PERLREQ_IO_TEXT_3   "The version of Perl supplied with POPFile requires Internet Explorer 5.5 (or later).\r\n\r\nIt is recommended that this system is upgraded to use Internet Explorer 5.5 or a later version."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Choose Components
@@ -114,10 +151,6 @@
 
 ; Message Boxes used when validating user's selections
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_1    "Vorhandene Installation gefunden:"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_2    "Wollen Sie diese Deinstallieren?"
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBUNINST_3    "Es wird empfohlen, dies zu tun."
-
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_1    "Der POP3-Port kann nicht übernommen werden."
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_2    "Der Port muß eine Zahl zwischen 1 und 65535 sein."
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBPOP3_3    "Bitte korrigieren Sie ihre Eingabe für den POP3-Port."
@@ -128,11 +161,6 @@
 
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_1    "POP3-Port und Port für die Benutzeroberfläche dürfen nicht identisch sein."
 !insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_MBDIFF_2    "Bitte ändern Sie ihre Port-Einstellungen."
-
-; Banner message displayed whilst uninstalling old version
-
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_1     "Bitte haben Sie einen Moment Geduld."
-!insertmacro PFI_LANG_STRING PFI_LANG_OPTIONS_BANNER_2     "Dies kann einige Sekunden dauern..."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Installing POPfile
@@ -165,11 +193,11 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_3           "Diese Datei überschreiben?"
 !insertmacro PFI_LANG_STRING PFI_LANG_MBCFGBK_4           "Wählen Sie 'Ja', um diese zu überschreiben, 'Nein', um kein neues Backup anzulegen."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1         "Unable to shutdown POPFile automatically."
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2         "Please shutdown POPFile manually now."
-!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3         "When POPFile has been shutdown, click 'OK' to continue."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_1         "POPFile kann nicht automatisch beendet werden."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_2         "Bitte beenden Sie POPFile jetzt manuell."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBMANSHUT_3         "Klicken Sie bitte auf 'OK', sobald POPFile beendet wurde, um die Installation fortzusetzen."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_MBFFCERR_1          "Error detected when the installer tried to backup the old corpus."
+!insertmacro PFI_LANG_STRING PFI_LANG_MBFFCERR_1          "Beim Erstellen eines Backups der alten Corpus Dateien ist ein Fehler aufgetreten."
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile Classification Bucket Creation
@@ -226,26 +254,117 @@
 !insertmacro PFI_LANG_STRING PFI_LANG_CBP_MBMAKERR_4      "Nach Abschluß der Installation können Sie über die Benutzeroberfläche die fehlende(n) Kategorie(n) nachträglich einrichten."
 
 #--------------------------------------------------------------------------
-# Custom Page - Reconfigure Outlook Express
+# Custom Page - Email Client Reconfiguration
 #--------------------------------------------------------------------------
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_TITLE         "Outlook Express konfigurieren"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_SUBTITLE      "POPFile kann Outlook Express automatisch zur Nutzung mit POPFile konfigurieren"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_TITLE       "Email Client Configuration"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_SUBTITLE    "POPFile can reconfigure several email clients for you"
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_INTRO      "POPFile hat die folgenden Outlook Express Email-Konten erkannt und kann diese automatisch zur Nutzung mit POPFile konfigurieren"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_CHECKBOX   "Account zur Nutzung mit POPFile konfigurieren"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_EMAIL      "Email Adresse:"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_SERVER     "POP3 Server:"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_USERNAME   "POP3 Benutzername:"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_POP3PORT   "POP3 port:"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_RESTORE    "Wenn Sie POPFile deinstallieren, werden die alten Einstellungen wiederhergestellt"
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_1   "Mail clients marked (*) can be reconfigured automatically, assuming simple accounts are used.\r\n\r\nIt is strongly recommended that accounts which require authentication are configured manually."
+!insertmacro PFI_LANG_STRING PFI_LANG_MAILCFG_IO_TEXT_2   "IMPORTANT: PLEASE SHUT DOWN THE RECONFIGURABLE EMAIL CLIENTS NOW\r\n\r\nThis feature is still under development (e.g. some Outlook accounts may not be detected).\r\n\r\nPlease check that the reconfiguration was successful (before using the email client)."
 
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_LINK_1     "Account für die"
-!insertmacro PFI_LANG_STRING PFI_LANG_OECFG_IO_LINK_2     "Identität"
+#--------------------------------------------------------------------------
+# Message box warnings that an email client is still running
+#--------------------------------------------------------------------------
+
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EXP        "WARNING: Outlook Express appears to be running !"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_OUT        "WARNING: Outlook appears to be running !"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_EUD        "WARNING: Eudora appears to be running !"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_1     "Please SHUT DOWN the email program then click 'Retry' to reconfigure it"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_2     "(You can click 'Ignore' to reconfigure it, but this is not recommended)"
+!insertmacro PFI_LANG_STRING PFI_LANG_MBCLIENT_STOP_3     "Click 'Abort' to skip the reconfiguration of this email program"
+
+#--------------------------------------------------------------------------
+# Custom Page - Reconfigure Outlook/Outlook Express
+#--------------------------------------------------------------------------
+
+; Page Title and Sub-title displayed in the page header
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_TITLE         "Outlook Express konfigurieren"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_SUBTITLE      "POPFile kann Outlook Express automatisch zur Nutzung mit POPFile konfigurieren"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_TITLE         "Outlook konfigurieren"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_SUBTITLE      "POPFile kann Outlook automatisch zur Nutzung mit POPFile konfigurieren"
+
+; Text displayed on the custom page
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_IO_CANCELLED  "Outlook Express reconfiguration cancelled by user"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_IO_CANCELLED  "Outlook reconfiguration cancelled by user"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_BOXHDR     "accounts"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_ACCOUNTHDR "Account"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_EMAILHDR   "Email Adresse"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_SERVERHDR  "Server"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_USRNAMEHDR "Benutzername"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_IO_FOOTNOTE   "Tick box(es) to reconfigure account(s).\r\nWenn Sie POPFile deinstallieren, werden die alten Einstellungen wiederhergestellt."
+
+; Message Box to confirm changes to Outlook Express account configuration
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_MBIDENTITY    "Outlook Express Identity :"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_MBACCOUNT     "Outlook Express Account :"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_MBIDENTITY    "Outlook User :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_MBACCOUNT     "Outlook Account :"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBEMAIL       "Email Adresse :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBSERVER      "POP3 server :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBUSERNAME    "POP3 Benutzername :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBOEPORT      "POP3 Port :"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBOLDVALUE    "currently"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_MBQUESTION    "Account zur Nutzung mit POPFile konfigurieren ?"
+
+; Title and Column headings for report/log files
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_BEFORE    "Outlook Express Settings before any changes were made"
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_AFTER     "Changes made to Outlook Express Settings"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_BEFORE    "Outlook Settings before any changes were made"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_AFTER     "Changes made to Outlook Settings"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_END       "(end)"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EXPCFG_LOG_IDENTITY  "'IDENTITY'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OUTCFG_LOG_IDENTITY  "'OUTLOOK USER'"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_ACCOUNT   "'ACCOUNT'"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_EMAIL     "'EMAIL ADDRESS'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_SERVER    "'POP3 SERVER'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_USER      "'POP3 USERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_PORT      "'POP3 PORT'"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWSERVER "'NEW POP3 SERVER'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWUSER   "'NEW POP3 USERNAME'"
+!insertmacro PFI_LANG_STRING PFI_LANG_OOECFG_LOG_NEWPORT   "'NEW POP3 PORT'"
+
+#--------------------------------------------------------------------------
+# Custom Page - Reconfigure Eudora
+#--------------------------------------------------------------------------
+
+; Page Title and Sub-title displayed in the page header
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_TITLE         "Eudora konfigurieren"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_SUBTITLE      "POPFile kann Eudora automatisch zur Nutzung mit POPFile konfigurieren"
+
+; Text displayed on the custom page
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CANCELLED  "Eudora reconfiguration cancelled by user"
+
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_1    "POPFile has detected the following Eudora personality"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_INTRO_2    " and can automatically configure it to work with POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_CHECKBOX   "Reconfigure this personality to work with POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_DOMINANT   "<Dominant> personality"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_PERSONA    "personality"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_EMAIL      "Email Adresse:"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_SERVER     "POP3 Server:"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_USERNAME   "POP3 Benutzername:"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_POP3PORT   "POP3 Port:"
+!insertmacro PFI_LANG_STRING PFI_LANG_EUCFG_IO_RESTORE    "Wenn Sie POPFile deinstallieren, werden die alten Einstellungen wiederhergestellt"
 
 #--------------------------------------------------------------------------
 # Custom Page - POPFile can now be started
@@ -277,19 +396,19 @@
 
 ; Page Title and Sub-title displayed in the page header
 
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_TITLE       "POPFile Corpus Conversion"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_SUBTITLE    "The existing corpus must be converted to work with this version of POPFile"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_TITLE       "POPFile Corpus Konvertierung"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_SUBTITLE    "Der bestehende Corpus muß konvertiert werden, um mit der neuen Version von POPFile verwendet werden zu können."
 
 ; Text displayed on the custom page
 
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_1   "POPFile will now be started in a console window to convert the existing corpus."
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_2   "THIS PROCESS MAY TAKE SEVERAL MINUTES (if the corpus is large)."
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_3   "WARNING"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_4   "Do NOT close the POPFile console window!"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_5   "When 'POPFile Engine vX.X.X running' appears in the console window, this means"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_6   "- POPFile is ready for use"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_7   "- POPFile can be safely shutdown using the Start Menu"
-!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_8   "Click Next to convert the corpus."
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_1   "POPFile wird nun in einem Konsolenfenster gestartet, um den bestehenden Corpus zu konvertieren."
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_2   "DIESER VORGANG KANN EINIGE MINUTEN DAUERN (falls der Corpus sehr groß ist)."
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_3   "WARNUNG"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_4   "Schließen Sie das POPFile Konsolenfenster UNTER KEINEM UMSTÄNDEN!"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_5   "Sollte 'POPFile Engine v${C_POPFILE_MAJOR_VERSION}.${C_POPFILE_MINOR_VERSION}.${C_POPFILE_REVISION} running' im Konsolenfenster erscheinen, bedeutet dies, daß"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_6   "- POPFile einsatzbereit ist"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_7   "- POPFile sicher über den Startmenü-Eintrag  beendet werden kann"
+!insertmacro PFI_LANG_STRING PFI_LANG_FLATFILE_IO_NOTE_8   "Klicken Sie auf 'Weiter', um den Corpus zu konvertieren."
 
 #--------------------------------------------------------------------------
 # Standard MUI Page - Uninstall POPFile
