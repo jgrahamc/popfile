@@ -16,7 +16,7 @@ body {
 .shell {
     background-color: #ededca;
     border: 3px #cccc99 solid;
-	 color: #000000;
+     color: #000000;
 }
 
 .head a {
@@ -42,28 +42,28 @@ body {
 
 .rowEven {
     background-color: #ededca;
-	 color: #000000;
+     color: #000000;
 }
 
 .rowOdd {
     background-color: #dfdfaf;
-	 color: #000000;
+     color: #000000;
 }
 
 table.stabColor01 {
-	border: 1px solid Black;
+    border: 1px solid #cccc99;
 }
 
 table.stabColor03 {
-	border: 3px solid Black;
+    border: 3px solid #cccc99;
 }
 
 td.stabColor01 {
-	border: 1px solid Black;
+    border: 1px solid #cccc99;
 }
 
 td.naked {
-	padding: 0px; 
-	margin: 0px; 
-	border: none
+    padding: 0px; 
+    margin: 0px; 
+    border: none
 }
