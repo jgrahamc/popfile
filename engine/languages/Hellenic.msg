@@ -27,10 +27,10 @@ ManualLanguage                          en
 
 # Common words that are used on their own all over the interface
 Apply                                   Εφαρμογή
-On                                      Ενεργό
+On                                     Ενεργό
 Off                                     Ανενεργό
-TurnOn                                  Ενεργοποίηση
-TurnOff                                 Απενεργοποίηση
+TurnOn                             Ενεργοποίηση
+TurnOff                             Απενεργοποίη
 Add                                     Προσθήκη
 Remove                                  Απαλοιφή
 Previous                                Προηγούμενο
@@ -77,12 +77,12 @@ Header_Advanced                         Προχωρημένες Επιλογές
 Header_Security                         Ασφάλεια
 Header_Magnets                          Μαγνήτες
 
-Footer_HomePage                         Ιστοσελίδα POPFile
-Footer_Manual                           Εγχειρίδιο
-Footer_Forums                           Συζυτήσεις
-Footer_FeedMe                           Οικονομική Συνεισφορά
-Footer_RequestFeature                   Ζητήστε Νέα Χαρακτηριστικά
-Footer_MailingList                      Λιστά ηλ.ταχυδρομείου
+Footer_HomePage                     Ιστοσελίδα POPFile
+Footer_Manual                          Εγχειρίδιο
+Footer_Forums                          Συζυτήσεις
+Footer_FeedMe                         Συνεισφορά
+Footer_RequestFeature           Ζητήστε Βελτιώσεις
+Footer_MailingList                   Ενημερωτικά mail
 
 Configuration_Error1                    Ο διαχωριστικός χαρακτήρας πρέπει να είναι μόνο ένας. 
 Configuration_Error2                    Το  user interface port πρέπει να είναι μεταξύ 1 και 65535
