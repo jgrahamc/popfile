@@ -183,7 +183,15 @@ sub service
             if  ( ( $self->{configuration}->{configuration}{localpop} == 0 ) || ( $remote_host eq inet_aton( "127.0.0.1" ) ) ) {
                 # Now that we have a good connection to the client fork a subprocess to handle the communication
                 $self->{configuration}->{configuration}{download_count} += 1;
-                if ( fork() == 0 ) {
+                my $pid = fork();
+                
+                if ( !defined( $pid ) ) {
+                    debug( "Could not fork!" );
+                    close $client;
+                    return 1;
+                }
+                
+                if ( $pid == 0 ) {
                     close $self->{server};  # Not needed in the child process
                     child( $self, $client, $self->{configuration}->{configuration}{download_count} );
                 }
@@ -421,6 +429,8 @@ sub child
 
     close $mail if ( $mail );
 
+    debug( $self, "Exiting" );
+
     exit(0);
 }
 
@@ -596,7 +606,7 @@ sub debug
     if ( $self->{configuration}->{configuration}{debug} > 0 ) {
         # Check to see if we are handling the USER/PASS command and if we are then obscure the
         # account information
-        # $message = "$`$1$3 XXXXXX$4" if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ );
+        $message = "$`$1$3 XXXXXX$4" if ( $message =~ /((--)?)(USER|PASS)\s+\S*(\1)/ );
         chomp $message;
         $message .= "\n";
 

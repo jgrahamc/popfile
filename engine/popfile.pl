@@ -67,6 +67,7 @@ $SIG{QUIT}  = \&aborting;
 $SIG{ABRT}  = \&aborting;
 $SIG{TERM}  = \&aborting;
 $SIG{INT}   = \&aborting;
+$SIG{CHLD}  = 'IGNORE';
 
 # Create the main objects that form the core of POPFile.  Consists of the configuration
 # modules, the classifier, the UI (currently HTML based), and the POP3 proxy.
