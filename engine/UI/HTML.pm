@@ -1012,6 +1012,8 @@ sub magnet_page
                 
                 my $validatingMagnet = $magnet ;
                 $validatingMagnet =~ s/&/&amp;/g ;
+                $validatingMagnet =~ s/</&lt;/g ;
+                $validatingMagnet =~ s/>/&gt;/g ;
                 
                 $body .= "><td>$type: $validatingMagnet\n" ;
                 $body .= "<td><font color=\"$self->{classifier}->{colors}{$bucket}\">$bucket</font><td>\n" ;
@@ -2270,7 +2272,6 @@ sub handle_url
             while ( ( $self->{form}{$arg} =~ /%([0-9A-F][0-9A-F])/i ) != 0 ) {
                 my $from = "%$1";
                 my $to   = chr(hex("0x$1"));
-                $to =~ s/(\?|\*|\||\(|\)|\[|\]|\{|\}|\^|\$|\.)/\\$1/g;
                 $self->{form}{$arg} =~ s/$from/$to/g;
             }
 
