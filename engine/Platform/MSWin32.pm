@@ -38,6 +38,22 @@ sub new
 
 # ---------------------------------------------------------------------------------------------
 #
+# initialize
+#
+# Called when we are are being set up but before starting
+#
+# ---------------------------------------------------------------------------------------------
+sub initialize
+{
+    my ( $self ) = @_;
+
+    $self->config_( 'trayicon', 1 );
+
+    return 1;
+}
+
+# ---------------------------------------------------------------------------------------------
+#
 # prefork
 #
 # Called when a fork is about to occur
@@ -65,6 +81,10 @@ sub prefork
 sub service
 {
     my ( $self ) = @_;
+
+    if ( !$self->config_( 'trayicon' ) ) {
+        return 1;
+    }
 
     if ( !defined( $self->{getmessage__} ) ) {
         $self->{getmessage__} = Win32::API->new( "Platform/POPFileIcon.dll", "GetMenuMessage", "", "N" );
