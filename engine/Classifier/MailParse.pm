@@ -288,7 +288,7 @@ sub parse_stream
             
             if ( $header =~ /(From|To|Cc)/i )
             {
-                while ( $argument =~ s/<(.+?)>// ) 
+                while ( $argument =~ s/<([A-Za-z0-9\-_]+?@[A-Za-z0-9\-_\.]+?)>// ) 
                 {
                     update_word($self, $1, 0);
                 }
