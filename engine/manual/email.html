@@ -185,6 +185,31 @@ Just choose your email program and follow the column down. While these instructi
 
 </td></tr></table>
 
+<h2>A note about MSN Secure Password Authentication</h2>
+
+<ol>
+<li> You have to start popfile with the following command
+(type it in exactly)
+<blockquote><tt>perl popfile.pl -port 110 -server pop3.email.msn.com -sport
+110</tt></blockquote>
+
+<li> On your accounts, server page, make sure you have the
+following information:
+<p>
+Incoming mail server: 127.0.0.1<br>
+Account name: YOUR_MSN_ACCOUNT_NAME_ONLY
+<p>
+Make sure that "Log on using Secure Password
+authentication" is checked
+<p>
+On the Advanced tab, make sure that your incoming mail
+port is set to 110 and the "This server requires a secure
+connection (SSL)" is UNCHECKED.
+<p>
+<li> You should be able to check your mail now by clicking
+on the account name in the "Mail Icon drop down".
+</ol>
+
 <h2>That's all there it to it!... but...</h2>
 
 Despite all this, POPFile still won't filter mail right now. Why not? <i>It doesn't know what any of the buckets you entered mean.</i> It has no idea what 'spam' and 'genuine' mean, or what 'work' and 'personal' are.  It doesn't even know what language your e-mail is in - and it doesn't care. You need to train it to distinguish spam from regular email, or one project from another. You do this through <b>training</b> - and <a href="training.html">we'll deal with that next</a>.
