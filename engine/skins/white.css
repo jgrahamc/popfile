@@ -4,10 +4,10 @@ body {
   color: Black;
 }
 
-.shell {
+.shell, .shellTop {
     background-color: white;
     border: 3px #778899 solid;
-	 color: Black;
+   color: Black;
 }
 
 .menu {
@@ -36,17 +36,17 @@ body {
 
 tr.rowEven {
     background-color: white;
-	 color: Black;
-	 }
+   color: Black;
+   }
 
 tr.rowOdd { 
-	background-color: #EEEEEE;
-	color: Black;
+  background-color: #EEEEEE;
+  color: Black;
 }
 
-		
+    
 
-	
+  
 
 td.head {
   font-weight: normal;
@@ -64,141 +64,141 @@ table.head {
 
 
 .menuIndent {
-	width: 8%;
+  width: 8%;
 }
 
 table.historyWidgetsTop {
-	width: 100%;
-	margin-left: 1.5em;
-	margin-top: 0.6em;
-	margin-bottom: 1.0em;
+  width: 100%;
+  margin-left: 1.5em;
+  margin-top: 0.6em;
+  margin-bottom: 1.0em;
 }
 
 td.historyNavigatorTop {
-	text-align: right;
-	padding-right: 0.5em;
+  text-align: right;
+  padding-right: 0.5em;
 }
 
 td.historyNavigatorBottom {
-	text-align: right;
-	padding-right: 0.5em;
-	padding-bottom: 1.0em;
+  text-align: right;
+  padding-right: 0.5em;
+  padding-bottom: 1.0em;
 }
 
-table.historyButtonsBottom {
-	width: 100%;
-	margin-left: 0.5em;
-	margin-top: 1.5em;
+table.historyWidgetsBottom {
+  width: 100%;
+  margin-left: 0.5em;
+  margin-top: 1.5em;
 }
 
 td.logo2menuSpace { 
-	height: 0.8em;
+  height: 0.8em;
 }
 
 table.footer {
-	width: 100%;
-	margin-top: 1em;
+  width: 100%;
+  margin-top: 1em;
 }
 
 td.footerBody { 
-	text-align: center;
-	padding-left: 5%;
-	padding-right: 5%;
+  text-align: center;
+  padding-left: 5%;
+  padding-right: 5%;
 }
 
 td.openMessageCloser {
-	text-align: right;
+  text-align: right;
 }
 
 a.changeSettingLink {
-	background-color: transparent ;
-	color: #0000cc ;
+  background-color: transparent ;
+  color: #0000cc ;
 }
 
 tr.rowHighlighted {
-	background-color: #000000;
-	color: #eeeeee;
+  background-color: #000000;
+  color: #eeeeee;
 }
 
-		
-span.advancedLabel {
-	font-weight: bold;
-}
-		
-span.passwordLabel {
-	font-weight: bold;
+.historyLabel {
+  font-weight: normal;
 }
 
-span.sessionLabel {
-	font-weight: bold;
+.historyLabel em {
+  font-weight: bold;
+  font-style: normal;
+}
+
+.advancedLabel {
+  font-weight: bold;
+}
+    
+.passwordLabel {
+  font-weight: bold;
+}
+
+.sessionLabel {
+  font-weight: bold;
 }
 
 
-span.magnetsLabel {
-	font-weight: bold;
+.magnetsLabel {
+  font-weight: bold;
 }
 
-span.securityLabel {
-	font-weight: bold;
+.securityLabel {
+  font-weight: bold;
 }
 
-span.configurationLabel {
-	font-weight: bold;
+.configurationLabel {
+  font-weight: bold;
 }
 
 
 span.graphFont {
-	font-size: x-small;
+  font-size: x-small;
 }
 
-span.bucketsLabel {
-	font-weight: bold;
+.bucketsLabel {
+  font-weight: bold;
 }
 
 
 td.accuracy0to49 {
-	background-color: red;
-	color: black;
+  background-color: red;
+  color: black;
 }
 
 td.accuracy50to93 {
-	background-color: yellow;
-	color: black;
+  background-color: yellow;
+  color: black;
 }
 
 td.accuracy94to100 {
-	background-color: green;
-	color: black;
+  background-color: green;
+  color: black;
 }
 
 div.error01 {
-	background-color: transparent;
-	color: red;
-	font-size: larger;
+  background-color: transparent;
+  color: red;
+  font-size: larger;
 }
 
 div.error02 {
-	background-color: transparent;
-	color: red;
+  background-color: transparent;
+  color: red;
 }
 
 span.bucketsWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.configWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 span.securityWidgetState {
-	font-weight: bold;
+  font-weight: bold;
 }
-
-.historyLabel {
-	font-weight: normal;
-}
-
-.historyLabel em {
-	font-weight: bold;
-	font-style: normal;
-}
+  
