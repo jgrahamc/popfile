@@ -96,11 +96,11 @@ Configuration_POP3Update                Neuer POP3 Port: %s - Diese Änderung wir
 Configuration_XMLRPCUpdate              Neuer XML-RPC Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
 Configuration_XMLRPCPort                XML-RPC Port
 Configuration_SMTPPort                  SMTP Port
-Configuration_SMTPUpdate                Neuer SMPT Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
+Configuration_SMTPUpdate                Neuer SMTP Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
 Configuration_NNTPPort                  NNTP Port
 Configuration_NNTPUpdate                Neuer NNTP Port: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
 Configuration_POPFork                   Simultane POP3-Verbindungen erlauben
-Configuration_SMTPFork                  Simultane SMPT-Verbindungen erlauben
+Configuration_SMTPFork                  Simultane SMTP-Verbindungen erlauben
 Configuration_NNTPFork                  Simultane NNTP-Verbindungen erlauben
 Configuration_POP3Separator             POP3 Server:Port:Benutzer Trennzeichen
 Configuration_NNTPSeparator             NNTP Server:Port:Benutzer Trennzeichen
@@ -150,12 +150,13 @@ Advanced_AllParameters                  POPFile Konfigurationsparameter
 Advanced_Parameter                      Parameter
 Advanced_Value                          Wert
 Advanced_Warning                        Dies ist eine komplette Liste aller Parameter Ihrer POPFile Konfiguration. Nur für fortgeschrittene Anwender: Sie können jeden Wert ändern und durch einen Klick auf "Ändern" bestätigen. Eingaben werden nicht auf Gültigkeit überprüft!
+Advanced_ConfigFile                     Konfigurationsdatei:
 
 History_Filter                          &nbsp;(zeige nur Kategorie <font color="%s">%s</font>)
 History_FilterBy                        Filtern nach
 History_Search                          &nbsp;(gesuchter Absender/Betreff: %s)
 History_Title                           Aktuelle Nachrichten
-History_Jump                            zu Nachricht gehen
+History_Jump                            zu Seite gehen
 History_ShowAll                         Alle anzeigen
 History_ShouldBe                        Sollte sein
 History_NoFrom                          kein Absender angegeben
@@ -188,7 +189,7 @@ Security_ExplainStats                   (Wenn Sie diese Funktion einschalten, se
 Security_ExplainUpdate                  (Wenn Sie diese Funktion einschalten, sendet POPFile täglich die drei folgenden Werte an ein Skript auf www.usethesource.com: ma (die Hauptversionsnummer der POPFile-Installation), mi (die Nebenversionsnummer der POPFile-Installation) und bn (die build-Nummer der POPFile-Installation). POPFile erhält die Antwort in Form einer Grafik, die am Kopf einer Seite erscheint, wenn eine neue Version verfügbar ist. Die Daten werden etwa 5 Tage auf dem Server gespeichert und dann gelöscht. Zuordnungen zwischen IP-Adressen und statistischen Daten werden nicht gespeichert.)
 Security_PasswordTitle                  Paßwort für Benutzeroberfläche
 Security_Password                       Paßwort
-Security_PasswordUpdate                 Neues Paßwort: %s
+Security_PasswordUpdate                 Passwort geändert
 Security_AUTHTitle                      externe Server
 Security_SecureServer                   POP3 SPA/AUTH Server
 Security_SecureServerUpdate             Neuer POP3 SPA/AUTH Server: %s - Diese Änderung wird erst nach einem Neustart von POPFile wirksam.
@@ -226,12 +227,12 @@ Bucket_Error3                           Kategorie %s erstellt
 Bucket_Error4                           Bitte geben Sie ein nicht-leeres Wort ein
 Bucket_Error5                           Kategorie %s in %s umbenannt
 Bucket_Error6                           Kategorie %s gelöscht
-Bucket_Title                            Zusammenfassung
-Bucket_BucketName                       Kategoriename
+Bucket_Title                            Kategorien konfigurieren
+Bucket_BucketName                       Name der Kategorie
 Bucket_WordCount                        Wortanzahl
 Bucket_WordCounts                       Wortanzahl
 Bucket_UniqueWords                      verschiedene Wörter
-Bucket_SubjectModification              Betreff ändern
+Bucket_SubjectModification              Betreffzeile ändern
 Bucket_ChangeColor                      Farbe ändern
 Bucket_NotEnoughData                    Nicht genügend Daten
 Bucket_ClassificationAccuracy           Genauigkeit
@@ -257,7 +258,7 @@ Bucket_LookupMostLikely                 <b>%s</b> erscheint am wahrscheinlichste
 Bucket_DoesNotAppear                    <p><b>%s</b> erscheint in keiner Kategorie
 Bucket_DisabledGlobally                 Global deaktiviert
 Bucket_To                               in
-Bucket_Quarantine                       Quarantäne
+Bucket_Quarantine                       Nachricht in Quarantäne
 
 SingleBucket_Title                      Details für %s
 SingleBucket_WordCount                  Anzahl Worte in dieser Kategorie
