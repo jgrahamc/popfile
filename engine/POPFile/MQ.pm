@@ -36,6 +36,8 @@ use POPFile::Module;
 #     COMIT    Sent when an item is committed to the history through a call
 #              to POPFile::History::commit_slot
 #
+#    RELSE    Sent when a session key is being released by a client
+#
 # Copyright (c) 2001-2004 John Graham-Cumming
 #
 #   This file is part of POPFile
