@@ -128,6 +128,8 @@ sub mangle
 
     my $lcword = lc($word);
 
+    return '' unless $lcword;
+
     # Stop words are ignored
 
     return '' if ( ( ( $self->{stop__}{$lcword} ) ||   # PROFILE BLOCK START
