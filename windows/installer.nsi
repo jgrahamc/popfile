@@ -263,7 +263,7 @@
 
   Var G_SFN_DISABLED       ; 1 = short file names not supported, 0 = short file names available
 
-  Var G_PLS_FIELD_1        ; used to customise translated text strings
+  Var G_PLS_FIELD_1        ; used to customize translated text strings
 
   Var G_DLGITEM            ; HWND of the UI dialog field we are going to modify
 
@@ -786,8 +786,10 @@ Section "POPFile" SecPOPFile
 
   SectionIn RO
 
-  !define L_TEMP          $R9
+  !define L_RESULT        $R9
+  !define L_TEMP          $R8
 
+  Push ${L_RESULT}
   Push ${L_TEMP}
 
   SetDetailsPrint textonly
@@ -957,6 +959,29 @@ app_paths:
   File "..\engine\Classifier\Bayes.pm"
   File "..\engine\Classifier\WordMangle.pm"
   File "..\engine\Classifier\MailParse.pm"
+  IfFileExists "$G_ROOTDIR\Classifier\popfile.sql" update_the_schema
+
+no_previous_version:
+  WriteINIStr "$G_ROOTDIR\pfi-data.ini" "Settings" "Owner" "$G_WINUSERNAME"
+  DeleteINIStr "$G_ROOTDIR\pfi-data.ini" "Settings" "OldSchema"
+  Goto install_schema
+
+update_the_schema:
+  Push "$G_ROOTDIR\Classifier\popfile.sql"
+  Call GetPOPFileSchemaVersion
+  Pop ${L_RESULT}
+  StrCmp ${L_RESULT} "()" assume_early_schema
+  StrCpy ${L_TEMP} ${L_RESULT} 1
+  StrCmp ${L_TEMP} "(" no_previous_version remember_version
+
+assume_early_schema:
+  StrCpy ${L_RESULT} "0"
+
+remember_version:
+  WriteINIStr "$G_ROOTDIR\pfi-data.ini" "Settings" "Owner" "$G_WINUSERNAME"
+  WriteINIStr "$G_ROOTDIR\pfi-data.ini" "Settings" "OldSchema" "${L_RESULT}"
+
+install_schema:
   File "..\engine\Classifier\popfile.sql"
 
   SetOutPath "$G_ROOTDIR\Platform"
@@ -1313,7 +1338,9 @@ end_section:
   SetDetailsPrint listonly
 
   Pop ${L_TEMP}
+  Pop ${L_RESULT}
 
+  !undef L_RESULT
   !undef L_TEMP
 
 SectionEnd
