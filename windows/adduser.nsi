@@ -131,7 +131,7 @@
 
   Name                   "POPFile User"
 
-  !define C_PFI_VERSION  "0.1.8"
+  !define C_PFI_VERSION  "0.1.9"
 
   ; Mention the wizard's version number in the titles of the installer & uninstaller windows
 
@@ -213,6 +213,8 @@
   Var G_WINUSERNAME        ; current Windows user login name
   Var G_WINUSERTYPE        ; user group ('Admin', 'Power', 'User', 'Guest' or 'Unknown')
 
+  Var G_SFN_DISABLED       ; 1 = short file names not supported, 0 = short file names available
+
   ; NSIS provides 20 general purpose user registers:
   ; (a) $R0 to $R9   are used as local registers
   ; (b) $0 to $9     are used as additional local registers
@@ -287,7 +289,7 @@
 
   ; Avoid compiler warnings by disabling the functions and definitions we do not use
 
-  !define ADDUSER "active"
+  !define ADDUSER
 
   !include pfi-library.nsh
   !include WriteEnvStr.nsh
@@ -469,7 +471,7 @@
   ; Installer Page - Configure Eudora personalities
   ;---------------------------------------------------
 
-  Page custom SetEudoraPage
+  Page custom SetEudoraPage "CheckEudoraRequests"
 
   ;---------------------------------------------------
   ; Installer Page - Choose POPFile launch mode
@@ -700,6 +702,19 @@ mutex_ok:
   Call SetEudoraPage_Init
   Call StartPOPFilePage_Init
 
+  ; At present (14 March 2004) POPFile does not work properly if POPFILE_ROOT or POPFILE_USER
+  ; are set to values containing spaces. A simple workaround is to use short file name format
+  ; values for these environment variables. But some systems may not support short file names
+  ; (e.g. using short file names on NTFS volumes can have a significant impact on performance)
+  ; so we need to check if short file names are supported (if they are not, we insist upon paths
+  ; which do not contain spaces).
+
+  StrCpy $G_SFN_DISABLED "1"
+  ReadRegStr ${L_RESERVED} HKLM "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN"
+  StrCmp ${L_RESERVED} "Not supported" exit
+  StrCpy $G_SFN_DISABLED "0"
+
+exit:
   Pop ${L_RESERVED}
 
   !undef L_RESERVED
@@ -765,10 +780,17 @@ Section "POPFile" SecPOPFile
   Call StrLower
   Pop ${L_TEMP}
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN" "${L_TEMP}"
+  StrCmp $G_SFN_DISABLED "0" find_root_sfn
+  StrCpy ${L_TEMP_2} "Not supported"
+  Goto save_root_sfn
+
+find_root_sfn:
   GetFullPathName /SHORT ${L_TEMP_2} $G_ROOTDIR
   Push ${L_TEMP_2}
   Call StrLower
   Pop ${L_TEMP_2}
+
+save_root_sfn:
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN" "${L_TEMP_2}"
 
   IfFileExists "$G_USERDIR\*.*" userdir_exists
@@ -789,10 +811,17 @@ userdir_exists:
   Call StrLower
   Pop ${L_TEMP}
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN" "${L_TEMP}"
+  StrCmp $G_SFN_DISABLED "0" find_user_sfn
+  StrCpy ${L_TEMP_2} "Not supported"
+  Goto save_user_sfn
+
+find_user_sfn:
   GetFullPathName /SHORT ${L_TEMP_2} $G_USERDIR
   Push ${L_TEMP_2}
   Call StrLower
   Pop ${L_TEMP_2}
+
+save_user_sfn:
   WriteRegStr HKCU "SOFTWARE\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN" "${L_TEMP_2}"
 
   ; Now ensure the POPFILE_ROOT and POPFILE_USER environment variables have the correct data
@@ -805,6 +834,10 @@ userdir_exists:
   ; so we can start POPFile from the installer.
 
   ReadRegStr ${L_POPFILE_ROOT} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_SFN"
+  StrCmp ${L_POPFILE_ROOT} "Not supported" 0 check_root_env
+  ReadRegStr ${L_POPFILE_ROOT} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "RootDir_LFN"
+
+check_root_env:
   ReadEnvStr ${L_TEMP} "POPFILE_ROOT"
   StrCmp ${L_POPFILE_ROOT} ${L_TEMP} root_set_ok
   Call IsNT
@@ -820,6 +853,10 @@ set_root_now:
 
 root_set_ok:
   ReadRegStr ${L_POPFILE_USER} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_SFN"
+  StrCmp ${L_POPFILE_USER} "Not supported" 0 check_user_env
+  ReadRegStr ${L_POPFILE_USER} HKCU "Software\POPFile Project\${C_PFI_PRODUCT}\MRI" "UserDir_LFN"
+
+check_user_env:
   ReadEnvStr ${L_TEMP} "POPFILE_USER"
   StrCmp ${L_POPFILE_USER} ${L_TEMP} continue
   Call IsNT
@@ -941,7 +978,7 @@ skip_rel_notes:
               "InternetShortcut" "URL" "http://127.0.0.1:$G_GUI/shutdown"
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\Manual.url" \
               "InternetShortcut" "URL" "file://$G_ROOTDIR/manual/en/manual.html"
-  
+
   StrCmp $LANGUAGE ${LANG_JAPANESE} japanese_faq
   WriteINIStr "$SMPROGRAMS\${C_PFI_PRODUCT}\FAQ.url" \
               "InternetShortcut" "URL" \
@@ -1048,7 +1085,7 @@ Section "-NonSQLCorpusBackup" SecBackup
 
   ; Save installation-specific data for use by the 'Monitor Corpus Conversion' utility
 
-  WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "PERLDIR" "$G_MPBINDIR"
+  WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "CONVERT" "$G_ROOTDIR\popfileb.exe"
   WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "ROOTDIR" "$G_ROOTDIR"
   WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "USERDIR" "$G_USERDIR"
   WriteINIStr "$PLUGINSDIR\corpus.ini" "Settings" "KReboot"  "no"
@@ -1246,6 +1283,7 @@ Section "-Languages" SecLangs
   StrCmp ${L_LANG} "?" use_installer_lang
 
 use_inherited_lang:
+  StrCmp ${L_LANG} "Arabic" special_case
   StrCmp ${L_LANG} "English-UK" special_case
   StrCmp ${L_LANG} "Hebrew"  0 use_installer_lang
 
@@ -1388,6 +1426,11 @@ FunctionEnd
 # and saves (in 'ioC.ini') any values found for use when the user is offered the chance to start
 # POPFile from the installer. If no setting is found, we save '?' in 'ioC.ini'. These settings
 # are used by the 'StartPOPFilePage' and 'CheckLaunchOptions' functions.
+#
+# POPFile currently does not support paths containing spaces in POPFILE_ROOT and POPFILE_USER
+# so we use lowercase short file name format for these two environment variables. However some
+# NTFS-based systems have disabled the creation of short file names - so we have to reject any
+# path which contains spaces.
 #--------------------------------------------------------------------------
 
 Function CheckExistingDataDir
@@ -1401,6 +1444,30 @@ Function CheckExistingDataDir
   !define L_CONSOLE   $R3     ; a config parameter used by popfile.exe
   !define L_LANG_NEW  $R2     ; new style UI lang parameter
   !define L_LANG_OLD  $R1     ; old style UI lang parameter
+
+  ; If short file names are not supported on this system,
+  ; we cannot accept any path containing spaces.
+
+  StrCmp $G_SFN_DISABLED "0" upgrade_check
+
+  Push ${L_CMPRE}
+
+  Push $G_USERDIR
+  Push ' '
+  Call StrStr
+  Pop ${L_CMPRE}
+  StrCmp ${L_CMPRE} "" no_spaces
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "This computer is not configured to support short file names.\
+      $\r$\n$\r$\n\
+      Please select a folder location which does not contain spaces"
+  Pop ${L_CMPRE}
+  Abort
+
+no_spaces:
+  Pop ${L_CMPRE}
+
+upgrade_check:
 
   ; Warn the user if we are about to upgrade an existing installation
   ; and allow user to select a different directory if they wish
@@ -2194,8 +2261,8 @@ next_acct:
         "${L_OEPATH}Software\Microsoft\Internet Account Manager\Accounts\${L_ACCOUNT}"
 
   ; Now extract the POP3 Server data, if this does not exist then this account is
-  ; not configured for mail so move on. If the data is "127.0.0.1" assume the account has
-  ; already been configured for use with POPFile.
+  ; not configured for mail so move on. If the data is "127.0.0.1" or "localhost"
+  ; assume the account has already been configured for use with POPFile.
 
   ReadRegStr ${L_OEDATA} HKCU ${L_ACCOUNT} "POP3 Server"
   StrCmp ${L_OEDATA} "" try_next_account
@@ -2207,7 +2274,10 @@ next_acct:
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Settings" "NumFields" "$G_OOELIST_CBOX"
 
-  StrCmp ${L_OEDATA} "127.0.0.1" 0 check_pop3_server
+  StrCmp ${L_OEDATA} "127.0.0.1" bad_address
+  StrCmp ${L_OEDATA} "localhost" 0 check_pop3_server
+
+bad_address:
   StrCpy ${L_STATUS} "bad IP"
   Goto check_pop3_username
 
@@ -2996,8 +3066,8 @@ next_acct:
   StrCpy ${L_ACCOUNT} "${L_OUTLOOK}\${L_ACCOUNT}"
 
   ; Now extract the POP3 Server data, if this does not exist then this account is
-  ; not configured for mail so move on. If the data is "127.0.0.1" assume the account has
-  ; already been configured for use with POPFile.
+  ; not configured for mail so move on. If the data is "127.0.0.1" or "localhost"
+  ; assume the account has already been configured for use with POPFile.
 
   ReadRegStr ${L_OUTDATA} HKCU ${L_ACCOUNT} "POP3 Server"
   StrCmp ${L_OUTDATA} "" try_next_account
@@ -3009,7 +3079,10 @@ next_acct:
 
   !insertmacro MUI_INSTALLOPTIONS_WRITE    "ioB.ini" "Settings" "NumFields" "$G_OOELIST_CBOX"
 
-  StrCmp ${L_OUTDATA} "127.0.0.1" 0 check_pop3_server
+  StrCmp ${L_OUTDATA} "127.0.0.1" bad_address
+  StrCmp ${L_OUTDATA} "localhost" 0 check_pop3_server
+
+bad_address:
   StrCpy ${L_STATUS} "bad IP"
   Goto check_pop3_username
 
@@ -3579,6 +3652,7 @@ check_account:
 
 check_server:
   StrCmp ${L_SERVER} "127.0.0.1" disable
+  StrCmp ${L_SERVER} "localhost" disable
   StrCmp ${L_SERVER} "" 0 check_username
   StrCpy ${L_SERVER} "N/A"
 
@@ -3748,6 +3822,75 @@ exit:
 
   !undef L_DOMPORT
   !undef L_PREVDOM
+
+FunctionEnd
+
+#--------------------------------------------------------------------------
+# Installer Function: CheckEudoraRequests
+#
+# This function is used to confirm any Eudora personality reconfiguration requests
+#--------------------------------------------------------------------------
+
+Function CheckEudoraRequests
+
+  !define L_EMAIL     $R9
+  !define L_PERSONA   $R8
+  !define L_PORT      $R7
+  !define L_SERVER    $R6
+  !define L_USER      $R5
+
+  Push ${L_EMAIL}
+  Push ${L_PERSONA}
+  Push ${L_PORT}
+  Push ${L_SERVER}
+  Push ${L_USER}
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_PERSONA} "ioE.ini" "Field 2" "State"
+  StrCmp ${L_PERSONA} "0" exit
+
+  ; User has ticked the 'Reconfigure' box so show the changes we are about to make
+
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_PERSONA} "ioE.ini" "Field 4" "Text"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_EMAIL}   "ioE.ini" "Field 9" "Text"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_SERVER}  "ioE.ini" "Field 10" "Text"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_USER}    "ioE.ini" "Field 11" "Text"
+  !insertmacro MUI_INSTALLOPTIONS_READ ${L_PORT}    "ioE.ini" "Field 12" "Text"
+
+  MessageBox MB_YESNO \
+      "${L_PERSONA}\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBEMAIL) ${L_EMAIL}\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBSERVER) 127.0.0.1 \
+                                   ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_SERVER}')\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBUSERNAME) ${L_SERVER}$G_SEPARATOR${L_USER} \
+                                     ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_USER}')\
+      $\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBOEPORT) $G_POP3 \
+                                   ($(PFI_LANG_OOECFG_MBOLDVALUE) '${L_PORT}')\
+      $\r$\n$\r$\n$\r$\n\
+      $(PFI_LANG_OOECFG_MBQUESTION)\
+      " IDYES exit
+  Pop ${L_USER}
+  Pop ${L_SERVER}
+  Pop ${L_PORT}
+  Pop ${L_PERSONA}
+  Pop ${L_EMAIL}
+  Abort
+
+exit:
+  Pop ${L_USER}
+  Pop ${L_SERVER}
+  Pop ${L_PORT}
+  Pop ${L_PERSONA}
+  Pop ${L_EMAIL}
+
+  !undef L_EMAIL
+  !undef L_PERSONA
+  !undef L_PORT
+  !undef L_SERVER
+  !undef L_USER
 
 FunctionEnd
 
@@ -3945,6 +4088,14 @@ run_popfile:
 
   ; Set ${L_EXE} to "" as we do not yet know if we are going to monitor a file in $G_ROOTDIR
 
+  ; If we run POPFile in the background, we display a banner until the UI responds (to provide
+  ; some user feedback since it can take a few seconds for POPFile to start up).
+
+  ; If we run POPFile in a console window, we do not display a banner because on some systems
+  ; the console window might cause the banner DLL to lock up and this in turn locks up the
+  ; installer (on most systems the console window should appear quickly enough to provide the
+  ; necessary user feedback).
+
   StrCpy ${L_EXE} ""
 
   ; Field 4 = 'Run POPFile in background' radio button
@@ -3963,7 +4114,7 @@ run_popfile:
 lastaction_console:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "console"
   StrCpy ${L_CONSOLE} "1"
-  Goto display_banner
+  Goto corpus_conv_check
 
 run_in_background:
   !insertmacro MUI_INSTALLOPTIONS_READ ${L_TEMP} "ioC.ini" "Run Status" "LastAction"
@@ -3976,11 +4127,14 @@ lastaction_background:
   !insertmacro MUI_INSTALLOPTIONS_WRITE "ioC.ini" "Run Status" "LastAction" "background"
   StrCpy ${L_CONSOLE} "0"
 
-display_banner:
+corpus_conv_check:
   ReadINIStr ${L_TEMP} "$G_USERDIR\backup\backup.ini" "NonSQLCorpus" "Status"
   StrCmp ${L_TEMP} "new" exit_without_banner
+  StrCmp ${L_CONSOLE} 1 do_not_show_banner
 
   Banner::show /NOUNLOAD /set 76 "$(PFI_LANG_LAUNCH_BANNER_1)" "$(PFI_LANG_LAUNCH_BANNER_2)"
+
+do_not_show_banner:
 
   ; Before starting the newly installed POPFile, ensure that no other version of POPFile
   ; is running on the same UI port as the newly installed version.
@@ -3995,8 +4149,11 @@ display_banner:
   ClearErrors
   Exec '"$G_ROOTDIR\popfile.exe"'
   IfErrors 0 continue
+  StrCmp ${L_CONSOLE} 1 error_msg
   Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
+
+error_msg:
   MessageBox MB_OK|MB_ICONEXCLAMATION|MB_TOPMOST "An error occurred when the installer tried to start POPFile.\
       $\r$\n$\r$\n\
       Please use 'Start -> Programs -> POPFile -> Run POPFile' now.\
@@ -4019,6 +4176,7 @@ check_if_ready:
   IntCmp ${L_TIMEOUT} 0 remove_banner remove_banner check_if_ready
 
 remove_banner:
+  StrCmp ${L_CONSOLE} 1 exit_without_banner
   Sleep ${C_MIN_BANNER_DISPLAY_TIME}
   Banner::destroy
 
