@@ -12,7 +12,6 @@
 # ---------------------------------------------------------------------------------------------
 
 use strict;
-use warnings;
 use locale;
 
 # Use the Naive Bayes classifier
