@@ -1248,7 +1248,7 @@ sub corpus_page
         $classifier->write_parameters();
     }
     
-    if ( defined($form{cname}) )
+    if ( ( defined($form{cname}) ) && ( $form{cname} ne '' ) )
     {
         if ( $form{cname} =~ /[^[:lower:]\-_]/ ) 
         {
