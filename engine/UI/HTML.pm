@@ -612,7 +612,7 @@ sub configuration_page
     $body .= "<table class=\"stabColor01\" width=\"100%\" cellpadding=\"10\" cellspacing=\"0\" >\n" ;
     $body .= "<tr>\n<td class=\"stabColor01\" width=\"33%\" valign=\"top\">\n" ;
     $body .= "<h2>$self->{language}{Configuration_UserInterface}</h2>\n" ;
-    $body .= "<p>\n<form action=\"/configuration\" method=\"post\">\n" ;
+    $body .= "<p>\n<form action=\"/configuration\">\n" ;
     $body .= "<b>$self->{language}{Configuration_SkinsChoose}:</b> <br>\n" ;
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key}\">\n<select name=\"skin\">\n" ;
 
