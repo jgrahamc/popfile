@@ -992,15 +992,15 @@ sub security_page
     my $port_error   = '';
 
     $self->config_( 'password', $self->{form__}{password} )         if ( defined($self->{form__}{password}) );
-    $self->config_( 'server', $self->{form__}{server} )           if ( defined($self->{form__}{server}) );
-    $self->config_( 'local', $self->{form__}{localpop}-1 )     if ( defined($self->{form__}{localpop}) );
+    $self->module_config_( 'pop3', 'secure_server', $self->{form__}{server} )           if ( defined($self->{form__}{server}) );
+    $self->module_config_( 'pop3', 'local', $self->{form__}{localpop}-1 )     if ( defined($self->{form__}{localpop}) );
     $self->config_( 'local', $self->{form__}{localui}-1 )      if ( defined($self->{form__}{localui}) );
     $self->config_( 'update_check', $self->{form__}{update_check}-1 ) if ( defined($self->{form__}{update_check}) );
     $self->config_( 'send_stats', $self->{form__}{send_stats}-1 )   if ( defined($self->{form__}{send_stats}) );
 
     if ( defined($self->{form__}{sport}) ) {
         if ( ( $self->{form__}{sport} >= 1 ) && ( $self->{form__}{sport} < 65536 ) ) {
-            $self->config_( 'sport', $self->{form__}{sport} );
+            $self->module_config_( 'pop3', 'secure_port', $self->{form__}{sport} );
         } else {
             $port_error = "<blockquote><div class=\"error01\">$self->{language__}{Security_Error1}</div></blockquote>";
             delete $self->{form__}{sport};
@@ -1017,7 +1017,7 @@ sub security_page
     $body .= "<span class=\"securityLabel\">$self->{language__}{Security_POP3}:</span><br />\n";
 
     $body .= "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" summary=\"\"><tr><td nowrap=\"nowrap\">\n";
-    if ( $self->config_( 'localpop' ) == 1 ) {
+    if ( $self->module_config_( 'pop3', 'local' ) == 1 ) {
         $body .= "<form class=\"securitySwitch\" action=\"/security\">\n";
         $body .= "<span class=\"securityWidgetStateOff\">$self->{language__}{Security_NoStealthMode}</span>\n";
         $body .= "<input type=\"submit\" class=\"toggleOn\" id=\"securityAcceptPOP3On\" name=\"toggle\" value=\"$self->{language__}{ChangeToYes}\" />\n";
@@ -1131,18 +1131,18 @@ sub security_page
     # Secure Server widget
     $body .= "<form action=\"/security\">\n";
     $body .= "<label class=\"securityLabel\" for=\"securitySecureServer\">$self->{language__}{Security_SecureServer}:</label><br />\n";
-    $body .= "<input type=\"text\" name=\"server\" id=\"securitySecureServer\" value=\"" . $self->config_( 'server' ) . "\" />\n";
+    $body .= "<input type=\"text\" name=\"server\" id=\"securitySecureServer\" value=\"" . $self->module_config_( 'pop3', 'secure_server' ) . "\" />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_server\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n";
-    $body .= sprintf( $self->{language__}{Security_SecureServerUpdate}, $self->config_( 'server' ) ) if ( defined($self->{form__}{server}) );
+    $body .= sprintf( $self->{language__}{Security_SecureServerUpdate}, $self->module_config_( 'pop3', 'secure_server' ) ) if ( defined($self->{form__}{server}) );
 
     # Secure Port widget
     $body .= "<form action=\"/security\">\n";
     $body .= "<label class=\"securityLabel\" for=\"securitySecurePort\">$self->{language__}{Security_SecurePort}:</label><br />\n";
-    $body .= "<input type=\"text\" name=\"sport\" id=\"securitySecurePort\" value=\"" . $self->config_( 'sport' ) . "\" />\n";
+    $body .= "<input type=\"text\" name=\"sport\" id=\"securitySecurePort\" value=\"" . $self->module_config_( 'pop3', 'secure_port' ) . "\" />\n";
     $body .= "<input type=\"submit\" class=\"submit\" name=\"update_sport\" value=\"$self->{language__}{Apply}\" />\n";
     $body .= "<input type=\"hidden\" name=\"session\" value=\"$self->{session_key__}\" />\n</form>\n$port_error";
-    $body .= sprintf( $self->{language__}{Security_SecurePortUpdate}, $self->config_( 'sport' ) ) if ( defined($self->{form__}{sport}) );
+    $body .= sprintf( $self->{language__}{Security_SecurePortUpdate}, $self->module_config_( 'pop3', 'secure_port' ) ) if ( defined($self->{form__}{sport}) );
 
     # end optional widgets placement
     $body .= "</div>\n</td>\n</tr>\n";

@@ -56,8 +56,8 @@ sub initialize
     $self->config_( 'port', 110 );
 
     # There is no default setting for the secure server
-    $self->config_( 'server', '' );
-    $self->config_( 'sport', 110 );
+    $self->config_( 'secure_server', '' );
+    $self->config_( 'secure_port', 110 );
 
     # The default timeout in seconds for POP3 commands
     $self->global_config_( 'timeout', 60 );
@@ -212,8 +212,8 @@ sub child__
 
         # Secure authentication
         if ( $command =~ /AUTH ([^ ]+)/ ) {
-            if ( $self->config_( 'server' ) ne '' )  {
-                if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'server' ), $self->config_( 'sport' ) ) )  {
+            if ( $self->config_( 'secure_server' ) ne '' )  {
+                if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
                     # Loop until we get -ERR or +OK
                     my $response;
                     $response = get_response( $self, $mail, $client, $command );
@@ -242,8 +242,8 @@ sub child__
         }
 
         if ( $command =~ /AUTH/ ) {
-            if ( $self->config_( 'server' ) ne '' )  {
-                if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'server' ), $self->config_( 'sport' ) ) )  {
+            if ( $self->config_( 'secure_server' ) ne '' )  {
+                if ( $mail = $self->verify_connected_( $mail, $client,  $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
                     if ( $self->echo_response_($mail, $client, "AUTH" ) ) {
                         $self->echo_to_dot_( $mail, $client );
                     }
@@ -326,8 +326,8 @@ sub child__
 
         # The CAPA command
         if ( $command =~ /CAPA/i ) {
-            if ( $self->config_( 'server' ) ne '' )  {
-                if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'server' ), $self->config_( 'sport' ) ) )  {
+            if ( $self->config_( 'secure_server' ) ne '' )  {
+                if ( $mail = $self->verify_connected_( $mail, $client, $self->config_( 'secure_server' ), $self->config_( 'secure_port' ) ) )  {
                     $self->echo_to_dot_( $mail, $client ) if ( $self->echo_response_($mail, $client, "CAPA" ) );
                 } else {
                     last;
